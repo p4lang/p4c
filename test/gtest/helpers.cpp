@@ -150,23 +150,15 @@ P4CTestEnvironment::P4CTestEnvironment() {
 
 namespace Test {
 
-struct FrontEndAnnoPolicy : P4::FrontEndPolicy {
-    P4::ParseAnnotations *parseAnnotations;
-
-    /// Pass given ParseAnnotations instance to frontend. The parameter can be null to indicate to
-    /// use the default.
-    explicit FrontEndAnnoPolicy(P4::ParseAnnotations *parseAnnotations)
-        : parseAnnotations(parseAnnotations) {}
-
-    P4::ParseAnnotations *getParseAnnotations() const override { return parseAnnotations; }
-};
-
 /* static */ std::optional<FrontendTestCase> FrontendTestCase::create(
     const std::string &source,
     CompilerOptions::FrontendVersion langVersion
     /* = CompilerOptions::FrontendVersion::P4_16 */,
-    P4::ParseAnnotations *parseAnnotations
+    P4::FrontEndPolicy *policy
     /* = nullptr */) {
+    if (policy == nullptr) {
+        policy = new P4::FrontEndPolicy();
+    }
     auto *program = P4::parseP4String(source, langVersion);
     if (program == nullptr) {
         std::cerr << "Couldn't parse test case source" << std::endl;
@@ -188,7 +180,7 @@ struct FrontEndAnnoPolicy : P4::FrontEndPolicy {
 
     CompilerOptions options;
     options.langVersion = langVersion;
-    program = P4::FrontEnd(new FrontEndAnnoPolicy(parseAnnotations)).run(options, program);
+    program = P4::FrontEnd(policy).run(options, program);
     if (program == nullptr) {
         std::cerr << "Frontend failed" << std::endl;
         return std::nullopt;
