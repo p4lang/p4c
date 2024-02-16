@@ -216,7 +216,21 @@ TestgenOptions::TestgenOptions()
             }
             return true;
         },
-        "Produced tests must have an output packet.");
+        "Produced tests must have an output packet as outcome.");
+
+    registerOption(
+        "--dropped-packet-only", nullptr,
+        [this](const char *) {
+            droppedPacketOnly = true;
+            if (!selectedBranches.empty()) {
+                ::error(
+                    "--input-branches cannot guarantee --dropped-packet-only."
+                    " Aborting.");
+                return false;
+            }
+            return true;
+        },
+        "Produced tests must have a dropped packet as outcome.");
 
     registerOption(
         "--path-selection", "pathSelectionPolicy",
