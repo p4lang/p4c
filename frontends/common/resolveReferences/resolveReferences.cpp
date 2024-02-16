@@ -314,7 +314,8 @@ const IR::IDeclaration *ResolveReferences::resolvePath(const IR::Path *path, boo
 
 void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
     if (!checkShadow) return;
-    std::map<cstring, const IR::Node *> prev_in_scope;  // check for shadowing within a scope
+    // FIXME: Likely the map is small, can use flat_map or something similar
+    std::unordered_map<cstring, const IR::Node *> prev_in_scope;  // check for shadowing within a scope
     auto decls = getDeclarations(ns);
     for (const auto *decl : decls) {
         const IR::Node *node = decl->getNode();
