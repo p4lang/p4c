@@ -27,6 +27,7 @@ limitations under the License.
 #include <unordered_map>
 
 #include "lib/cstring.h"
+#include "p4RuntimeTypes.h"
 
 namespace p4 {
 namespace config {
@@ -46,9 +47,6 @@ class P4Program;
 class CompilerOptions;
 
 namespace P4 {
-
-/// P4Runtime serialization formats.
-enum class P4RuntimeFormat { BINARY, JSON, TEXT, TEXT_PROTOBUF };
 
 /// A P4 program's control-plane API, represented in terms of P4Runtime's data
 /// structures. Can be inspected or serialized.

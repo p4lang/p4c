@@ -90,6 +90,7 @@ set (CONTROLPLANE_HDRS
   p4RuntimeArchStandard.h
   p4RuntimeSerializer.h
   p4RuntimeSymbolTable.h
+  p4RuntimeTypes.h
   typeSpecConverter.h
   bfruntime.h
   )
