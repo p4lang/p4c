@@ -44,6 +44,7 @@ class FrontEndPolicy {
 
     /// Indicates whether the side-effect-ordering pass should be skipped.
     /// @returns Defaults to false.
+    // TODO: This should probably not be allowed to be skipped at all.
     virtual bool skipSideEffectOrdering() const { return false; }
 
     /// Indicates whether the frontend shoud run some optimizations (inlining, action localization,
