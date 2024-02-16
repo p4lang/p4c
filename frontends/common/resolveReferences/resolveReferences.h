@@ -20,6 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/iterator_range.h"
 #include "referenceMap.h"
 
 namespace P4 {
@@ -89,11 +90,21 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
     const IR::IDeclaration *getDeclaration(const IR::This *, bool notNull = false) const;
 
     /// Returns the set of decls that exist in the given namespace.
-    Util::Enumerator<const IR::IDeclaration *> *getDeclarations(const IR::INamespace *ns) const;
+    auto getDeclarations(const IR::INamespace *ns) const {
+        auto nsIt = namespaceDecls.find(ns);
+        const auto &decls = nsIt != namespaceDecls.end() ? nsIt->second : memoizeDeclarations(ns);
+        return Util::iterator_range(decls);
+    }
 
     /// Returns the set of decls with the given name that exist in the given namespace.
-    Util::Enumerator<const IR::IDeclaration *> *getDeclsByName(const IR::INamespace *ns,
-                                                               cstring name) const;
+    auto getDeclsByName(const IR::INamespace *ns, cstring name) const {
+        auto nsIt = namespaceDeclNames.find(ns);
+        auto &namesToDecls =
+            nsIt != namespaceDeclNames.end() ? nsIt->second : memoizeDeclsByName(ns);
+
+        auto decls = Values(namesToDecls.equal_range(name));
+        return Util::make_range(decls.begin(), decls.end());
+    }
 };
 
 /** Inspector that computes `refMap`: a map from paths to declarations.

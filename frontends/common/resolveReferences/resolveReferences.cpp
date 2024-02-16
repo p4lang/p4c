@@ -28,39 +28,23 @@ const std::vector<const IR::IDeclaration *> &ResolutionContext::memoizeDeclarati
     if (auto nest = ns->to<IR::INestedNamespace>()) {
         for (const auto *nn : nest->getNestedNamespaces()) {
             auto nnDecls = nn->getDeclarations();
-            // FIXME: should just insert insert()
+            // FIXME: should just insert()
             for (const auto *decl : *nnDecls) decls.push_back(decl);
         }
     }
 
     auto *nsDecls = ns->getDeclarations();
-    // FIXME: should just insert insert()
+    // FIXME: should just insert()
     for (const auto *decl : *nsDecls) decls.push_back(decl);
 
     return (namespaceDecls[ns] = std::move(decls));
 }
 
-Util::Enumerator<const IR::IDeclaration *> *ResolutionContext::getDeclarations(
-    const IR::INamespace *ns) const {
-    auto nsIt = namespaceDecls.find(ns);
-    const auto &declVec = nsIt != namespaceDecls.end() ? nsIt->second : memoizeDeclarations(ns);
-    return Util::Enumerator<const IR::IDeclaration *>::createEnumerator(declVec);
-}
-
 std::unordered_multimap<cstring, const IR::IDeclaration *> &ResolutionContext::memoizeDeclsByName(
     const IR::INamespace *ns) const {
     auto &namesToDecls = namespaceDeclNames[ns];
-    for (const auto *d : *getDeclarations(ns)) namesToDecls.emplace(d->getName().name, d);
+    for (const auto *d : getDeclarations(ns)) namesToDecls.emplace(d->getName().name, d);
     return namesToDecls;
-}
-
-Util::Enumerator<const IR::IDeclaration *> *ResolutionContext::getDeclsByName(
-    const IR::INamespace *ns, cstring name) const {
-    auto nsIt = namespaceDeclNames.find(ns);
-    auto &namesToDecls = nsIt != namespaceDeclNames.end() ? nsIt->second : memoizeDeclsByName(ns);
-
-    auto decls = Values(namesToDecls.equal_range(name));
-    return Util::enumerate(decls.begin(), decls.end());
 }
 
 const std::vector<const IR::IDeclaration *> *ResolutionContext::resolve(
@@ -79,7 +63,9 @@ const std::vector<const IR::IDeclaration *> *ResolutionContext::lookup(
     LOG2("Trying to resolve in " << current->toString());
 
     if (auto gen = current->to<IR::IGeneralNamespace>()) {
-        Util::Enumerator<const IR::IDeclaration *> *decls = getDeclsByName(gen, name);
+        // FIXME: implement range filtering without enumerator wrappers
+        auto *decls =
+            Util::Enumerator<const IR::IDeclaration *>::createEnumerator(getDeclsByName(gen, name));
         switch (type) {
             case P4::ResolutionType::Any:
                 break;
@@ -174,9 +160,7 @@ const std::vector<const IR::IDeclaration *> *ResolutionContext::lookup(
         }
         if (decl) {
             LOG3("Resolved in " << dbp(current->getNode()));
-            auto result = new std::vector<const IR::IDeclaration *>();
-            result->push_back(decl);
-            return result;
+            return new std::vector<const IR::IDeclaration *>(1, decl);
         }
     } else {
         BUG_CHECK(current->is<IR::INestedNamespace>(), "Unhandled namespace type %s",
@@ -332,7 +316,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
     if (!checkShadow) return;
     std::map<cstring, const IR::Node *> prev_in_scope;  // check for shadowing within a scope
     auto decls = getDeclarations(ns);
-    for (auto *decl : *decls) {
+    for (const auto *decl : decls) {
         const IR::Node *node = decl->getNode();
         if (node->is<IR::StructField>()) continue;
 
