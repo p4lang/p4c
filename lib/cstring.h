@@ -24,6 +24,8 @@ limitations under the License.
 #include <sstream>
 #include <string>
 
+#include "hash.h"
+
 /**
  * A cstring is a reference to a zero-terminated, immutable, interned string.
  * The cstring object *itself* is not immutable; you can reassign it as
@@ -372,10 +374,19 @@ namespace std {
 template <>
 struct hash<cstring> {
     std::size_t operator()(const cstring &c) const {
-        // This implementation is good for cstring, since the strings are internalized
-        return hash<const void *>()(c.c_str());
+        // cstrings are internalized, therefore their addresses are unique; we
+        // can just use their address to produce hash.
+        return Util::Hash{}(c.c_str());
     }
 };
 }  // namespace std
+
+namespace Util {
+template <>
+struct Hasher<cstring> {
+    size_t operator()(const cstring &c) const { return Util::Hash{}(c.c_str()); }
+};
+
+}  // namespace Util
 
 #endif /* LIB_CSTRING_H_ */
