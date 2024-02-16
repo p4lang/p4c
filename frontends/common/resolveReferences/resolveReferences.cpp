@@ -18,8 +18,6 @@ limitations under the License.
 
 namespace P4 {
 
-static const std::vector<const IR::IDeclaration *> empty;
-
 ResolutionContext::ResolutionContext() { anyOrder = P4CContext::get().options().isv1(); }
 
 const std::vector<const IR::IDeclaration *> &ResolutionContext::memoizeDeclarations(
