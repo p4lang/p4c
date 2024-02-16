@@ -114,9 +114,9 @@ const std::vector<const IR::IDeclaration *> *ResolutionContext::lookup(
         }
 
         auto vector = decls->toVector();
-        if (!vector->empty()) {
+        if (!vector.empty()) {
             LOG3("Resolved in " << dbp(current->getNode()));
-            return vector;
+            return new std::vector<const IR::IDeclaration *>(std::move(vector));
         }
     } else if (auto simple = current->to<IR::ISimpleNamespace>()) {
         auto decl = simple->getDeclByName(name);
@@ -220,17 +220,18 @@ const IR::Vector<IR::Argument> *ResolutionContext::methodArguments(cstring name)
 
 const IR::IDeclaration *ResolutionContext::resolveUnique(IR::ID name, P4::ResolutionType type,
                                                          const IR::INamespace *ns) const {
-    auto decls = ns ? lookup(ns, name, type) : resolve(name, type);
+    auto *decls = ns ? lookup(ns, name, type) : resolve(name, type);
     // Check overloaded symbols.
     const IR::Vector<IR::Argument> *arguments;
     if (decls->size() > 1 && (arguments = methodArguments(name))) {
-        decls = Util::Enumerator<const IR::IDeclaration *>::createEnumerator(*decls)
-                    ->where([arguments](const IR::IDeclaration *d) {
-                        auto func = d->to<IR::IFunctional>();
-                        if (func == nullptr) return true;
-                        return func->callMatches(arguments);
-                    })
-                    ->toVector();
+        decls = new std::vector<const IR::IDeclaration *>(
+            Util::Enumerator<const IR::IDeclaration *>::createEnumerator(*decls)
+                ->where([arguments](const IR::IDeclaration *d) {
+                    auto func = d->to<IR::IFunctional>();
+                    if (func == nullptr) return true;
+                    return func->callMatches(arguments);
+                })
+                ->toVector());
     }
 
     if (decls->empty()) {

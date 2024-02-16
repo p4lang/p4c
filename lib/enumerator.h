@@ -105,7 +105,7 @@ class Enumerator {
     // concatenate all these collections into a single one
     static Enumerator<T> *concatAll(Enumerator<Enumerator<T> *> *inputs);
 
-    std::vector<T> *toVector();
+    std::vector<T> toVector();
     /* Return an enumerator returning all elements that pass the filter */
     Enumerator<T> *where(std::function<bool(const T &)> filter);
     /* Apply specified function to all elements of this enumerator */
@@ -504,9 +504,9 @@ Enumerator<typename Iter::value_type> *Enumerator<T>::createEnumerator(iterator_
 }
 
 template <typename T>
-std::vector<T> *Enumerator<T>::toVector() {
-    auto result = new std::vector<T>();
-    while (moveNext()) result->push_back(getCurrent());
+std::vector<T> Enumerator<T>::toVector() {
+    std::vector<T> result;
+    while (moveNext()) result.push_back(getCurrent());
     return result;
 }
 

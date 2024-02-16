@@ -225,14 +225,13 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Program *program) {
                     }
                     return pathExpr->path->name == decl->name;
                 };
-            const auto *declVector = program->getDeclarations()->where(filter)->toVector();
-            BUG_CHECK(!declVector->empty(), "Not a declaration instance: %1%", pathExpr);
+            auto declVector = program->getDeclarations()->where(filter)->toVector();
+            BUG_CHECK(!declVector.empty(), "Not a declaration instance: %1%", pathExpr);
 
             // Convert the declaration instance into a constructor-call expression.
-            const auto *decl = declVector->at(0)->to<IR::Declaration_Instance>();
-            auto *ctorCall =
-                new IR::ConstructorCallExpression(decl->srcInfo, decl->type, decl->arguments);
-            v.push_back(ctorCall);
+            const auto *decl = declVector[0]->to<IR::Declaration_Instance>();
+            v.push_back(
+                new IR::ConstructorCallExpression(decl->srcInfo, decl->type, decl->arguments));
             continue;
         }
     }

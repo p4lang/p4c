@@ -39,7 +39,7 @@ using P4ReachabilityContext = P4CContextWithOptions<P4ReachabilityOptions>;
 class P4CReachability : public ::testing::Test {};
 
 template <class T>
-std::vector<const IR::IDeclaration *> *getNodeByType(const IR::P4Program *program) {
+std::vector<const IR::IDeclaration *> getNodeByType(const IR::P4Program *program) {
     std::function<bool(const IR::IDeclaration *)> filter = [](const IR::IDeclaration *d) {
         CHECK_NULL(d);
         return d->is<T>();
@@ -83,9 +83,8 @@ ReturnedInfo loadExampleForReachability(const char *curFile) {
 }
 
 template <class T>
-const IR::Node *getSpecificNode(std::vector<const IR::IDeclaration *> *v, cstring name) {
-    CHECK_NULL(v);
-    for (const auto *i : *v) {
+const IR::Node *getSpecificNode(const std::vector<const IR::IDeclaration *> &v, cstring name) {
+    for (const auto *i : v) {
         auto element = i->to<T>();
         if (element->name.name == name) {
             return element;
@@ -109,13 +108,12 @@ TEST_F(P4CReachability, testParserStatesAndAnnotations) {
     const auto *program = std::get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
-    auto *parserVector = getNodeByType<IR::P4Parser>(program);
-    ASSERT_TRUE(parserVector);
+    auto parserVector = getNodeByType<IR::P4Parser>(program);
     const auto *parser = getSpecificNode<IR::P4Parser>(parserVector, "ParserI");
     ASSERT_TRUE(parser);
     // Parser ParserI is reachable.
     ASSERT_TRUE(dcg->isReachable(program, parser));
-    auto *controlsVector = getNodeByType<IR::P4Control>(program);
+    auto controlsVector = getNodeByType<IR::P4Control>(program);
     const auto *ingress = getSpecificNode<IR::P4Control>(controlsVector, "IngressI");
     ASSERT_TRUE(ingress);
     const auto *engress = getSpecificNode<IR::P4Control>(controlsVector, "EgressI");

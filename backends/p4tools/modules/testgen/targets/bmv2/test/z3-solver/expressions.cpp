@@ -87,8 +87,8 @@ class Z3SolverTests : public ::testing::Test {
         }
 
         // Extract the binary operation from the P4Program
-        auto *const declVector = test->getProgram().getDeclsByName("mau")->toVector();
-        const auto *decl = (*declVector)[0];
+        auto declVector = test->getProgram().getDeclsByName("mau")->toVector();
+        const auto *decl = declVector.at(0);
         const auto *control = decl->to<IR::P4Control>();
         for (const auto *st : control->body->components) {
             if (const auto *as = st->to<IR::IfStatement>()) {

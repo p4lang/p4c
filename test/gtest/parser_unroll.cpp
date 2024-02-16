@@ -182,8 +182,8 @@ const IR::P4Parser *getParser(const IR::P4Program *program) {
         CHECK_NULL(d);
         return d->is<IR::P4Parser>();
     };
-    const auto *newDeclVector = program->getDeclarations()->where(filter)->toVector();
-    return (*newDeclVector)[0]->to<IR::P4Parser>();
+    auto newDeclVector = program->getDeclarations()->where(filter)->toVector();
+    return newDeclVector.at(0)->to<IR::P4Parser>();
 }
 
 /// Rewrites parser
