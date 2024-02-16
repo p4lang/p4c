@@ -30,7 +30,7 @@ class iterator_range {
 
  public:
     template <typename Container>
-    iterator_range(Container &&c) : beginIt(c.begin()), endIt(c.end()) {}
+    explicit iterator_range(Container &&c) : beginIt(c.begin()), endIt(c.end()) {}
     iterator_range(Iter beginIt, Iter endIt)
         : beginIt(std::move(beginIt)), endIt(std::move(endIt)) {}
 
