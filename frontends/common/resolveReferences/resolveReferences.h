@@ -50,14 +50,13 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
  protected:
     // Note that all errors have been merged by the parser into
     // a single error { } namespace.
-
-    const std::vector<const IR::IDeclaration *> *lookup(const IR::INamespace *ns, IR::ID name,
-                                                        ResolutionType type) const;
+    std::vector<const IR::IDeclaration *> lookup(const IR::INamespace *ns, const IR::ID &name,
+                                                 ResolutionType type) const;
 
     // match kinds exist in their own special namespace, made from all the match_kind
     // declarations in the global scope.  Unlike errors, we don't merge those scopes in
     // the parser, so we have to find them and scan them here.
-    const std::vector<const IR::IDeclaration *> *lookupMatchKind(IR::ID name) const;
+    std::vector<const IR::IDeclaration *> lookupMatchKind(const IR::ID &name) const;
 
     // P4_14 allows things to be used before their declaration while P4_16 (generally)
     // does not, so we will resolve names to things declared later only when translating
@@ -73,10 +72,10 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
 
  public:
     /// Resolve references for @p name, restricted to @p type declarations.
-    const std::vector<const IR::IDeclaration *> *resolve(IR::ID name, ResolutionType type) const;
+    std::vector<const IR::IDeclaration *> resolve(const IR::ID &name, ResolutionType type) const;
 
     /// Resolve reference for @p name, restricted to @p type declarations, and expect one result.
-    const IR::IDeclaration *resolveUnique(IR::ID name, ResolutionType type,
+    const IR::IDeclaration *resolveUnique(const IR::ID &name, ResolutionType type,
                                           const IR::INamespace * = nullptr) const;
 
     /// Resolve @p path; if @p isType is `true` then resolution will
