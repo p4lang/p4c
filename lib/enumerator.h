@@ -27,6 +27,7 @@ limitations under the License.
 #include <vector>
 
 #include "lib/cstring.h"
+#include "lib/iterator_range.h"
 
 namespace Util {
 enum class EnumeratorState { NotStarted, Valid, PastEnd };
@@ -99,6 +100,8 @@ class Enumerator {
     static Enumerator<T> *emptyEnumerator();  // empty data
     template <typename Iter>
     static Enumerator<typename Iter::value_type> *createEnumerator(Iter begin, Iter end);
+    template <typename Iter>
+    static Enumerator<typename Iter::value_type> *createEnumerator(iterator_range<Iter> range);
     // concatenate all these collections into a single one
     static Enumerator<T> *concatAll(Enumerator<Enumerator<T> *> *inputs);
 
@@ -492,6 +495,12 @@ template <typename T>
 template <typename Iter>
 Enumerator<typename Iter::value_type> *Enumerator<T>::createEnumerator(Iter begin, Iter end) {
     return new GenericEnumerator<Iter>(begin, end, "iterator");
+}
+
+template <typename T>
+template <typename Iter>
+Enumerator<typename Iter::value_type> *Enumerator<T>::createEnumerator(iterator_range<Iter> range) {
+    return new GenericEnumerator<Iter>(range.begin(), range.end(), "range");
 }
 
 template <typename T>
