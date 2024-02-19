@@ -111,4 +111,4 @@ make_relative_link ()
 make_relative_link "${mydir}/.gdbinit" "backends/bmv2/p4c-bm2-psa-gdb.gdb"
 make_relative_link "${mydir}/.gdbinit" "backends/bmv2/p4c-bm2-ss-gdb.gdb"
 make_relative_link "${mydir}/.gdbinit" "backends/dpdk/p4c-dpdk-gdb.gdb"
-make_relative_link "${mydir}/.gdbinit" "backends/dpdk/p4test-gdb.gdb"
+make_relative_link "${mydir}/.gdbinit" "backends/p4test/p4test-gdb.gdb"
