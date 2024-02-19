@@ -49,6 +49,11 @@ class AbstractP4cTool {
             enableInformationLogging();
         }
 
+        // Print the seed if it has been set.
+        if (toolOptions.seed) {
+            printInfo("============ Program seed %1% =============\n", *toolOptions.seed);
+        }
+
         // Run the compiler to get an IR and invoke the tool.
         const auto compilerResult = P4Tools::CompilerTarget::runCompiler();
         if (!compilerResult.has_value()) {
