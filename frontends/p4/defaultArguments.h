@@ -47,6 +47,11 @@ class DoDefaultArguments : public Transform {
     const IR::Node *postorder(IR::MethodCallExpression *expression) override;
     const IR::Node *postorder(IR::Declaration_Instance *inst) override;
     const IR::Node *postorder(IR::ConstructorCallExpression *ccc) override;
+    const IR::Node *preorder(IR::ActionList *al) override {
+        // don't modify the action lists in tables
+        prune();
+        return al;
+    }
 };
 
 class DefaultArguments : public PassManager {

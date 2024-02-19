@@ -1,0 +1,43 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 43577110
+    name: "ingress.c.t"
+    alias: "t"
+  }
+  match_fields {
+    id: 1
+    name: "h.key"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 29022044
+  }
+  const_default_action_id: 29022044
+  size: 1024
+}
+actions {
+  preamble {
+    id: 29022044
+    name: "ingress.c.add"
+    alias: "add"
+  }
+  params {
+    id: 1
+    name: "va"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "vb"
+    bitwidth: 32
+  }
+}
+type_info {
+}
