@@ -165,7 +165,7 @@ TestgenOptions::TestgenOptions()
             }
             return true;
         },
-        "Specify the set of control plane entities where P4Testgen should not generate a "
+        "Specify the set of control plane entities for which P4Testgen should not generate a "
         "configuration for. For example, if a particular table is in the set, P4Testgen will "
         "assume that only the default action or constant entries can be executed. ");
 
