@@ -102,7 +102,7 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
             nsIt != namespaceDeclNames.end() ? nsIt->second : memoizeDeclsByName(ns);
 
         auto decls = Values(namesToDecls.equal_range(name));
-        return Util::make_range(decls.begin(), decls.end());
+        return Util::iterator_range(decls.begin(), decls.end());
     }
 };
 

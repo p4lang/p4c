@@ -168,11 +168,12 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
                   current->node_type_name());
     }
     if (const auto *nested = current->to<IR::INestedNamespace>()) {
-        auto temp = nested->getNestedNamespaces();
-        for (auto it = temp.rbegin(); it != temp.rend(); ++it) {
-            auto rv = lookup(*it, name, type);
+        auto nestedNamespaces = nested->getNestedNamespaces();
+        for (const auto *nn : Util::iterator_range(nestedNamespaces).reverse()) {
+            auto rv = lookup(nn, name, type);
             if (!rv.empty()) return rv;
         }
+
     }
     return {};
 }

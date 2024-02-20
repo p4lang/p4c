@@ -15,6 +15,7 @@ limitations under the License.
 #ifndef LIB_ITERATOR_RANGE_H_
 #define LIB_ITERATOR_RANGE_H_
 
+#include <iterator>
 #include <utility>
 
 namespace Util {
@@ -24,33 +25,31 @@ template <typename Container>
 using IterOfContainer = decltype(std::begin(std::declval<Container &>()));
 }  // namespace Detail
 
-template <typename Iter>
+template <typename Iter, typename Sentinel = Iter>
 class iterator_range {
+    using reverse_iterator = std::reverse_iterator<Iter>;
+
     Iter beginIt, endIt;
 
  public:
     template <typename Container>
     explicit iterator_range(Container &&c) : beginIt(c.begin()), endIt(c.end()) {}
+
     iterator_range(Iter beginIt, Iter endIt)
         : beginIt(std::move(beginIt)), endIt(std::move(endIt)) {}
 
-    Iter begin() const { return beginIt; }
-    Iter end() const { return endIt; }
+    auto reverse() const { return iterator_range<reverse_iterator>(rbegin(), rend()); }
+
+    auto begin() const { return beginIt; }
+    auto end() const { return endIt; }
+    auto rbegin() const { return reverse_iterator{endIt}; }
+    auto rend() const { return reverse_iterator{beginIt}; }
+
     bool empty() const { return beginIt == endIt; }
 };
 
 template <typename Container>
 iterator_range(Container &&) -> iterator_range<typename Detail::IterOfContainer<Container>>;
-
-template <class T>
-iterator_range<T> make_range(T x, T y) {
-    return iterator_range<T>(std::move(x), std::move(y));
-}
-
-template <typename T>
-iterator_range<T> make_range(std::pair<T, T> p) {
-    return iterator_range<T>(std::move(p.first), std::move(p.second));
-}
 
 }  // namespace Util
 
