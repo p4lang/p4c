@@ -54,6 +54,8 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::Type_SerEnum *type) {
 const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Control *cont) {
     auto orig = getOriginal<IR::P4Control>();
     if (!refMap->isUsed(orig)) {
+        if (giveWarning(orig))
+            warn(ErrorType::WARN_UNUSED, "Control %1% is not used; removing", cont);
         LOG3("Removing " << cont << dbp(orig));
         prune();
         return nullptr;
@@ -68,6 +70,8 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Control *cont) {
 const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Parser *parser) {
     auto orig = getOriginal<IR::P4Parser>();
     if (!refMap->isUsed(orig)) {
+        if (giveWarning(orig))
+            warn(ErrorType::WARN_UNUSED, "Parser %1% is not used; removing", parser);
         LOG3("Removing " << parser << dbp(orig));
         prune();
         return nullptr;
