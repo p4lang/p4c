@@ -21,22 +21,21 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Mount bazel cache
-      uses: actions/cache@v2
+    - name: Cache Bazel
+      uses: actions/cache@v4 # v4.0.0
+      env:
+        cache-name: bazel-cache
       with:
-        # See https://docs.bazel.build/versions/master/output_directories.html
-        path: "~/.cache/bazel"
-        # Create cash entry for every run (by using unique key derived from commit hash).
-        # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
-        key: ${{ runner.os }}-build-direct-${{ github.sha }}
+        path: ~/.cache/bazel
+        # formattedTime here is like 2021323 - the year concatenated with the week then
+        # the day of that week.
+        # As this changes every day, we cycle to a new cache once per day, with lookup
+        # across the week (and then the year).
+        # This is the gRPC caching strategy: https://github.com/grpc/grpc/blob/b2b6af691ed7bb923d8288a05167526d946ea1eb/.github/workflows/pr-auto-fix.yaml#L24
+        key: ${{ runner.os }}-${{ steps.current-time-with-day.outputs.formattedTime }}
         restore-keys: |
-          ${{ runner.os }}-build-direct-
-
-    - name: Install bazelisk
-      run: |
-        curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/$BAZEL"
-        chmod +x $BAZEL
-        sudo mv $BAZEL /usr/local/bin/bazel
+          ${{ runner.os }}-${{ steps.current-time.outputs.formattedTime }}
+          ${{ runner.os }}-
 
     - name: First, pass the lint test
       run: bazel run //:buildifier_check
@@ -56,25 +55,24 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Mount bazel cache
-      uses: actions/cache@v2
+    - name: Cache Bazel
+      uses: actions/cache@v4 # v4.0.0
+      env:
+        cache-name: bazel-cache
       with:
-        # See https://docs.bazel.build/versions/master/output_directories.html
-        path: "~/.cache/bazel"
-        # Create cash entry for every run (by using unique key derived from commit hash).
-        # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
-        key: ${{ runner.os }}-build-indirect-${{ github.sha }}
+        path: ~/.cache/bazel
+        # formattedTime here is like 2021323 - the year concatenated with the week then
+        # the day of that week.
+        # As this changes every day, we cycle to a new cache once per day, with lookup
+        # across the week (and then the year).
+        # This is the gRPC caching strategy: https://github.com/grpc/grpc/blob/b2b6af691ed7bb923d8288a05167526d946ea1eb/.github/workflows/pr-auto-fix.yaml#L24
+        key: ${{ runner.os }}-${{ steps.current-time-with-day.outputs.formattedTime }}
         restore-keys: |
-          ${{ runner.os }}-build-indirect-
+          ${{ runner.os }}-${{ steps.current-time.outputs.formattedTime }}
+          ${{ runner.os }}-
 
     - name: First, pass the lint test
       run: bazel run //:buildifier_check
-
-    - name: Install bazelisk
-      run: |
-        curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/$BAZEL"
-        chmod +x $BAZEL
-        sudo mv $BAZEL /usr/local/bin/bazel
 
     - name: Install Flex and Bison
       run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
