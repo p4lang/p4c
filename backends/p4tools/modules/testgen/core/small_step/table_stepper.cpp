@@ -575,7 +575,8 @@ TableStepper::TableStepper(ExprStepper *stepper, const IR::P4Table *table)
 
     // If the table is in the set of entities to skip, we set it immutable.
     // P4Testgen will not add a control plane entry for this table.
-    if (TestgenOptions::get().skippedControlPlaneEntities.count(properties.tableName) != 0U) {
+    auto &skipped = TestgenOptions::get().skippedControlPlaneEntities;
+    if (skipped.find(properties.tableName) != skipped.end()) {
         properties.tableIsImmutable = true;
     }
 }
