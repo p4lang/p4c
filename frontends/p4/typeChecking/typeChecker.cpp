@@ -3430,7 +3430,7 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
     }
     auto method = actionCall->method;
     auto methodType = getType(method);
-    if (!methodType) return actionCall; // error emitted in getType
+    if (!methodType) return actionCall;  // error emitted in getType
     auto baseType = methodType->to<IR::Type_Action>();
     if (!baseType) {
         typeError("%1%: must be an action", method);
