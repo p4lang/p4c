@@ -178,12 +178,12 @@ class MidEnd : public PassManager {
 #endif
 
 const IR::P4Parser *getParser(const IR::P4Program *program) {
+    // FIXME: This certainly should be improved
     std::function<bool(const IR::IDeclaration *)> filter = [](const IR::IDeclaration *d) {
         CHECK_NULL(d);
         return d->is<IR::P4Parser>();
     };
-    auto newDeclVector = program->getDeclarations()->where(filter)->toVector();
-    return newDeclVector.at(0)->to<IR::P4Parser>();
+    return program->getDeclarations()->where(filter)->single()->to<IR::P4Parser>();
 }
 
 /// Rewrites parser

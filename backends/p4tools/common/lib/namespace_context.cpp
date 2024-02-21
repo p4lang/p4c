@@ -37,13 +37,8 @@ const IR::IDeclaration *NamespaceContext::findNestedDecl(
         // Handle case where current namespace is an IGeneralNamespace.
         // If there is no match, we fall through.
         if (const auto *ns = subNamespace->to<IR::IGeneralNamespace>()) {
-            auto decls = ns->getDeclsByName(name)->toVector();
-            if (!decls.empty()) {
-                // TODO: Figure out what to do with multiple results. Maybe return all of them and
-                // let the caller sort it out?
-                BUG_CHECK(decls.size() == 1, "Handling of overloaded names not implemented");
-                return decls.front();
-            }
+            auto *decl = ns->getDeclsByName(name)->singleOrDefault();
+            if (decl != nullptr) return decl;
         }
 
         // As last resort, fall through to a NestedNamespace check.
@@ -82,13 +77,8 @@ const IR::IDeclaration *NamespaceContext::findDecl(const IR::Path *path) const {
     // Handle case where current namespace is an IGeneralNamespace.
     // If there is no match, we fall through.
     if (const auto *ns = curNamespace->to<IR::IGeneralNamespace>()) {
-        auto decls = ns->getDeclsByName(name)->toVector();
-        if (!decls.empty()) {
-            // TODO: Figure out what to do with multiple results. Maybe return all of them and let
-            // the caller sort it out?
-            BUG_CHECK(decls.size() == 1, "Handling of overloaded names not implemented");
-            return decls.front();
-        }
+        auto *decl = ns->getDeclsByName(name)->singleOrDefault();
+        if (decl != nullptr) return decl;
     }
     // As last resort, check if the NestedNamespace contains the declaration.
     if (const auto *ns = curNamespace->to<IR::INestedNamespace>()) {

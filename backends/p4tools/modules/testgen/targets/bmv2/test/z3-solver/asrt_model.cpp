@@ -93,8 +93,7 @@ class Z3SolverTest : public P4ToolsTest {
         }
 
         // Extract the binary operation from the P4Program
-        auto declVector = test->getProgram().getDeclsByName("mau")->toVector();
-        const auto *decl = declVector.at(0);
+        const auto *decl = test->getProgram().getDeclsByName("mau")->single();
         const auto *control = decl->to<IR::P4Control>();
         SymbolicConverter converter;
         for (const auto *st : control->body->components) {

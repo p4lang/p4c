@@ -173,7 +173,6 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
             auto rv = lookup(nn, name, type);
             if (!rv.empty()) return rv;
         }
-
     }
     return {};
 }

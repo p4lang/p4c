@@ -225,11 +225,9 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Program *program) {
                     }
                     return pathExpr->path->name == decl->name;
                 };
-            auto declVector = program->getDeclarations()->where(filter)->toVector();
-            BUG_CHECK(!declVector.empty(), "Not a declaration instance: %1%", pathExpr);
-
             // Convert the declaration instance into a constructor-call expression.
-            const auto *decl = declVector[0]->to<IR::Declaration_Instance>();
+            const auto *decl =
+                program->getDeclarations()->where(filter)->single()->to<IR::Declaration_Instance>();
             v.push_back(
                 new IR::ConstructorCallExpression(decl->srcInfo, decl->type, decl->arguments));
             continue;

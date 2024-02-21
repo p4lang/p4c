@@ -55,14 +55,11 @@ std::optional<const P4ToolsTestCase> createSmallStepExprTest(const std::string &
 template <class T>
 const T *extractExpr(const IR::P4Program &program) {
     // Get the mau declarations in the P4Program.
-    auto decls = program.getDeclsByName("mau")->toVector();
-    if (decls.size() != 1) {
-        return nullptr;
-    }
+    auto *decl = program.getDeclsByName("mau")->single();
 
     // Convert the mau declaration to a control and ensure that
     // there is a single statement in the body.
-    const auto *control = decls.front()->to<IR::P4Control>();
+    const auto *control = decl->checkedTo<IR::P4Control>();
     if (control->body->components.size() != 1) {
         return nullptr;
     }

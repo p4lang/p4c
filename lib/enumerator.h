@@ -122,6 +122,9 @@ class Enumerator {
     bool any();
     // The only next element; throws if the enumerator does not have exactly 1 element
     T single();
+    // The only next element or default value if none exists; throws if the
+    // enumerator does not have exactly 0 or 1 element
+    T singleOrDefault();
     // Next element, or the default value if none exists
     T nextOrDefault();
     // Next element; throws if there are no elements
@@ -535,6 +538,16 @@ template <typename T>
 T Enumerator<T>::single() {
     bool next = moveNext();
     if (!next) throw std::logic_error("There is no element for `single()'");
+    T result = getCurrent();
+    next = moveNext();
+    if (next) throw std::logic_error("There are multiple elements when calling `single()'");
+    return result;
+}
+
+template <typename T>
+T Enumerator<T>::singleOrDefault() {
+    bool next = moveNext();
+    if (!next) return T{};
     T result = getCurrent();
     next = moveNext();
     if (next) throw std::logic_error("There are multiple elements when calling `single()'");
