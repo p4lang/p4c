@@ -20,11 +20,25 @@ limitations under the License.
 
 namespace Util {
 namespace Detail {
-// FIXME: We might have begin() found via ADL, support it as well
+using std::begin;
+
 template <typename Container>
-using IterOfContainer = decltype(std::begin(std::declval<Container &>()));
+using IterOfContainer = decltype(begin(std::declval<Container &>()));
+
+template <typename Range>
+constexpr auto begin_impl(Range &&range) {
+    return begin(std::forward<Range>(range));
+}
+
+template <typename Range>
+constexpr auto end_impl(Range &&range) {
+    return end(std::forward<Range>(range));
+}
+
 }  // namespace Detail
 
+// This is a lightweight alternative for C++20 std::range. Should be replaced
+// with ranges as soon as C++20 would be implemented.
 template <typename Iter, typename Sentinel = Iter>
 class iterator_range {
     using reverse_iterator = std::reverse_iterator<Iter>;
@@ -33,7 +47,8 @@ class iterator_range {
 
  public:
     template <typename Container>
-    explicit iterator_range(Container &&c) : beginIt(c.begin()), endIt(c.end()) {}
+    explicit iterator_range(Container &&c)
+        : beginIt(Detail::begin_impl(c)), endIt(Detail::end_impl(c)) {}
 
     iterator_range(Iter beginIt, Iter endIt)
         : beginIt(std::move(beginIt)), endIt(std::move(endIt)) {}
