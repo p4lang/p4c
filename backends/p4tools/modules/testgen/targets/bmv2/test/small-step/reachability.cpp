@@ -90,7 +90,9 @@ const Node *getSpecificNode(const IR::P4Program *program, cstring name) {
 
         return false;
     };
-    return program->getDeclarations()->where(filter)->singleOrDefault()->template to<Node>();
+    if (auto *node = program->getDeclarations()->where(filter)->singleOrDefault())
+        return node->template to<Node>();
+    return nullptr;
 }
 
 template <class T>
