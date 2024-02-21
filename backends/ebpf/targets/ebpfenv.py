@@ -17,15 +17,16 @@
     Allows the loading and testing of eBPF programs. """
 
 import logging
+import subprocess
 import sys
 from pathlib import Path
-from typing import List
+from typing import Any, List, Optional
 
 # Append tools to the import path.
 FILE_DIR = Path(__file__).resolve().parent
 # Append tools to the import path.
-sys.path.append(str(FILE_DIR.joinpath("../../../tools")))
-import testutils
+sys.path.append(str(FILE_DIR.joinpath("../../..")))
+from tools import testutils  # pylint: disable=wrong-import-position
 
 
 class Bridge:
@@ -60,7 +61,7 @@ class Bridge:
         """Return the command prefix for the namespace of this bridge class."""
         return f"ip netns exec {self.ns_name}"
 
-    def ns_exec(self, cmd_string: str, **extra_args) -> int:
+    def ns_exec(self, cmd_string: str, **extra_args: Any) -> int:
         """Run and execute an isolated command in the namespace."""
         cmd = self.get_ns_prefix() + " " + cmd_string
         # bash -c allows us to run multiple commands at once
@@ -69,15 +70,18 @@ class Bridge:
             testutils.log.error("Failed to run command in namespace %s", self.ns_name)
         return result.returncode
 
-    def ns_proc_open(self) -> testutils.Optional[testutils.subprocess.Popen]:
+    def ns_proc_open(self) -> Optional[subprocess.Popen]:
         """Open a bash process in the namespace and return the handle"""
         cmd = self.get_ns_prefix() + " bash"
         return testutils.open_process(cmd)
 
-    def ns_proc_write(self, proc: testutils.subprocess.Popen, cmd: str) -> int:
+    def ns_proc_write(self, proc: subprocess.Popen, cmd: str) -> int:
         """Allows writing of a command to a given process. The command is NOT
         yet executed."""
         testutils.log.info("Writing %s ", cmd)
+        if proc.stdin is None:
+            testutils.log.error("Process has no open stdin descriptor.")
+            return testutils.FAILURE
         try:
             proc.stdin.write(cmd)
         except IOError as exception:
@@ -85,14 +89,14 @@ class Bridge:
             return testutils.FAILURE
         return testutils.SUCCESS
 
-    def ns_proc_append(self, proc: testutils.subprocess.Popen, cmd: str) -> int:
+    def ns_proc_append(self, proc: subprocess.Popen, cmd: str) -> int:
         """Append a command to an open process."""
         return self.ns_proc_write(proc, " && " + cmd)
 
-    def ns_proc_close(self, proc: testutils.subprocess.Popen, **extra_args) -> int:
+    def ns_proc_close(self, proc: subprocess.Popen, **extra_args: Any) -> int:
         """Close and actually run the process in the namespace. Returns the
         exit code."""
-        testutils.log.info("Executing command: " + str(proc))
+        testutils.log.info("Executing command: %s", proc)
         result = testutils.run_process(proc, timeout=testutils.TIMEOUT, **extra_args)
         if result.returncode != testutils.SUCCESS:
             testutils.log.error(
@@ -166,7 +170,7 @@ class Bridge:
         return self.attach_interfaces(num_ifaces)
 
 
-def main(argv):
+def main() -> None:
     """main"""
     # This is a simple test script which creates/deletes a virtual environment
 
@@ -174,7 +178,7 @@ def main(argv):
     logging.basicConfig(
         filename="ebpfenv.log",
         format="%(levelname)s:%(message)s",
-        level=getattr(logging, logging.INFO),
+        level=logging.INFO,
         filemode="w",
     )
     stderr_log = logging.StreamHandler()
@@ -187,4 +191,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
