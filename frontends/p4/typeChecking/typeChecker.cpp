@@ -3326,8 +3326,10 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
     }
 
     if (auto *apply = type->to<IR::IApply>(); apply && member == IR::IApply::applyMethodName) {
-        auto methodType = apply->getApplyMethodType();
-        methodType = canonicalize(methodType)->to<IR::Type_Method>();
+        auto *methodType = apply->getApplyMethodType();
+        auto *canon = canonicalize(methodType);
+        if (!canon) return expression;
+        methodType = canon->to<IR::Type_Method>();
         if (methodType == nullptr) return expression;
         learn(methodType, this);
         setType(getOriginal(), methodType);
@@ -3428,6 +3430,7 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
     }
     auto method = actionCall->method;
     auto methodType = getType(method);
+    if (!methodType) return actionCall; // error emitted in getType
     auto baseType = methodType->to<IR::Type_Action>();
     if (!baseType) {
         typeError("%1%: must be an action", method);
