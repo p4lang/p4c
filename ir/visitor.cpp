@@ -158,8 +158,9 @@ class Visitor::ChangeTracker {
      * if `start(@n)` has not been invoked.
      */
     const IR::Node *result(const IR::Node *n) const {
-        if (!visited.count(n)) return n;
-        return visited.at(n).result;
+        auto it = visited.find(n);
+        if (it == visited.end()) return n;
+        return it->second.result;
     }
 };
 
@@ -346,21 +347,24 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n && !join_flows(n)) {
         PushContext local(ctxt, n);
-        auto vp = visited->emplace(n, info_t{false, visitDagOnce});
-        if (!vp.second && !vp.first->second.done) {
+        auto [it, inserted] = visited->emplace(n, info_t{false, visitDagOnce});
+        if (!inserted && !it->second.done) {
             n->apply_visitor_loop_revisit(*this);
-        } else if (!vp.second && vp.first->second.visitOnce) {
+        } else if (!inserted && it->second.visitOnce) {
             n->apply_visitor_revisit(*this);
         } else {
-            vp.first->second.done = false;
-            visitCurrentOnce = &vp.first->second.visitOnce;
+            it->second.done = false;
+            visitCurrentOnce = &it->second.visitOnce;
             if (n->apply_visitor_preorder(*this)) {
                 n->visit_children(*this);
-                visitCurrentOnce = &vp.first->second.visitOnce;
+                visitCurrentOnce = &it->second.visitOnce;
                 n->apply_visitor_postorder(*this);
             }
-            if (vp.first != visited->find(n)) BUG("visitor state tracker corrupted");
-            vp.first->second.done = true;
+            // `it` is not valid here as there might be rehash during the insertion,
+            // perform another lookup
+            auto doneIt = visited->find(n);
+            if (doneIt == visited->end()) BUG("visitor state tracker corrupted");
+            doneIt->second.done = true;
         }
         post_join_flows(n, n);
     }
