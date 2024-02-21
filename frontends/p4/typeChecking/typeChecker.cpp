@@ -626,6 +626,7 @@ const IR::Node *TypeInference::postorder(IR::P4Action *action) {
     bool foundDirectionless = false;
     for (auto p : action->parameters->parameters) {
         auto ptype = getType(p);
+        BUG_CHECK(ptype, "%1%: parameter type missing when it was found previously", p);
         if (ptype->is<IR::Type_Extern>())
             typeError("%1%: Action parameters cannot have extern types", p->type);
         if (p->direction == IR::Direction::None)
