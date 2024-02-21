@@ -1,1 +1,7 @@
+call.p4(17): [--Wwarn=unused] warning: Control qp is not used; removing
+control qp()
+        ^^
+call.p4(42): [--Wwarn=unused] warning: Control p is not used; removing
+control p()
+        ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

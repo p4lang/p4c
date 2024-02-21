@@ -4,4 +4,7 @@ shadow3.p4(20): [--Wwarn=shadow] warning: 'p' shadows 'p'
 shadow3.p4(19)
 control MyIngress(inout H p) {
                           ^
+shadow3.p4(19): [--Wwarn=unused] warning: Control MyIngress is not used; removing
+control MyIngress(inout H p) {
+        ^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

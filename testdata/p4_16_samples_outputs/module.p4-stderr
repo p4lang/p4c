@@ -19,4 +19,10 @@ switch1(f()) main2;
 module.p4(44): [--Wwarn=unused] warning: main7: unused instance
 switch4(f2()) main7;
               ^^^^^
+module.p4(23): [--Wwarn=unused] warning: Parser f is not used; removing
+parser f(out bool x)
+       ^
+module.p4(26): [--Wwarn=unused] warning: Parser f2 is not used; removing
+parser f2(out bool x, out bool y)
+       ^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

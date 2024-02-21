@@ -1,0 +1,3 @@
+issue1989-bmv2.p4(38): [--Wwarn=unused] warning: Control ingress_stub is not used; removing
+control ingress_stub(inout headers hdr, inout test_metadata_t meta,
+        ^^^^^^^^^^^^

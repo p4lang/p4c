@@ -1,1 +1,4 @@
+issue1997.p4(23): [--Wwarn=unused] warning: Control c is not used; removing
+control c(in hdr h, inout standard_metadata_t standard_meta) {
+        ^
 [--Wwarn=missing] warning: Program does not contain a `main' module
