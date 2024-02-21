@@ -251,7 +251,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
 }
 
 void IrClass::generateTreeMacro(std::ostream &out) const {
-    for (auto p = this; p != nodeClass(); p = p->getParent()) out << "  ";
+    for (auto p = this; p && p != nodeClass(); p = p->getParent()) out << "  ";
     out << "M(";
     const char *sep = "";
     for (auto p = this; p; p = p->getParent()) {
