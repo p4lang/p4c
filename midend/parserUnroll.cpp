@@ -391,7 +391,7 @@ class ParserSymbolicInterpreter {
             }
 
             if (value == nullptr) value = factory->create(type, true);
-            if (value->is<SymbolicError>()) {
+            if (value && value->is<SymbolicError>()) {
                 ::warning(ErrorType::ERR_EXPRESSION, "%1%: %2%", d,
                           value->to<SymbolicError>()->message());
                 return nullptr;
