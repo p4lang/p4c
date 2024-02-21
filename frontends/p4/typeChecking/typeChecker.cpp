@@ -3074,7 +3074,7 @@ const IR::Node *TypeInference::postorder(IR::Slice *expression) {
     }
 
     auto e1type = getType(expression->e1);
-    if (e1type->is<IR::Type_SerEnum>()) {
+    if (e1type && e1type->is<IR::Type_SerEnum>()) {
         auto ei = EnumInstance::resolve(expression->e1, typeMap);
         CHECK_NULL(ei);
         auto sei = ei->to<SerEnumInstance>();
@@ -3085,7 +3085,7 @@ const IR::Node *TypeInference::postorder(IR::Slice *expression) {
         expression->e1 = sei->value;
     }
     auto e2type = getType(expression->e2);
-    if (e2type->is<IR::Type_SerEnum>()) {
+    if (e2type && e2type->is<IR::Type_SerEnum>()) {
         auto ei = EnumInstance::resolve(expression->e2, typeMap);
         CHECK_NULL(ei);
         auto sei = ei->to<SerEnumInstance>();
