@@ -111,11 +111,11 @@ class Visitor::ChangeTracker {
         }
     }
 
-    /** Return a pointer to the visitOnce flag for node @n so that it can be changed
-     */
-    bool *refVisitOnce(const IR::Node *n) {
-        if (!visited.count(n)) BUG("visitor state tracker corrupted");
-        return &visited.at(n).visitOnce;
+    /** Return a visitOnce flag for node @n */
+    bool shouldVisitOnce(const IR::Node *n) {
+        auto it = visited.find(n);
+        if (it == visited.end()) BUG("visitor state tracker corrupted");
+        return it->second.visitOnce;
     }
 
     /** Forget nodes that have already been visited, allowing them to be visited
@@ -161,6 +161,18 @@ class Visitor::ChangeTracker {
         auto it = visited.find(n);
         if (it == visited.end()) return n;
         return it->second.result;
+    }
+
+    void visitOnce(const IR::Node *n) {
+        auto it = visited.find(n);
+        if (it == visited.end()) BUG("visitor state tracker corrupted");
+        it->second.visitOnce = true;
+    }
+
+    void visitAgain(const IR::Node *n) {
+        auto it = visited.find(n);
+        if (it == visited.end()) BUG("visitor state tracker corrupted");
+        it->second.visitOnce = false;
     }
 };
 
@@ -248,6 +260,22 @@ Visitor::profile_t::~profile_t() {
     }
 }
 
+void Inspector::visitOnce() const {
+    auto it = visited->find(getOriginal());
+    if (it == visited->end()) BUG("visitor state tracker corrupted");
+    it->second.visitOnce = true;
+}
+void Modifier::visitOnce() const { visited->visitOnce(getOriginal()); }
+void Transform::visitOnce() const { visited->visitOnce(getOriginal()); }
+
+void Inspector::visitAgain() const {
+    auto it = visited->find(getOriginal());
+    if (it == visited->end()) BUG("visitor state tracker corrupted");
+    it->second.visitOnce = false;
+}
+void Modifier::visitAgain() const { visited->visitAgain(getOriginal()); }
+void Transform::visitAgain() const { visited->visitAgain(getOriginal()); }
+
 void Visitor::print_context() const {
     std::ostream &out = std::cout;
     out << "Context:" << std::endl;
@@ -327,10 +355,8 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
                 ForwardChildren forward_children(*visited);
                 copy->visit_children(forward_children);
             }
-            visitCurrentOnce = visited->refVisitOnce(n);
             if (copy->apply_visitor_preorder(*this)) {
                 copy->visit_children(*this);
-                visitCurrentOnce = visited->refVisitOnce(n);
                 copy->apply_visitor_postorder(*this);
             }
             if (visited->finish(n, copy)) (n = copy)->validate();
@@ -354,10 +380,8 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
             n->apply_visitor_revisit(*this);
         } else {
             it->second.done = false;
-            visitCurrentOnce = &it->second.visitOnce;
             if (n->apply_visitor_preorder(*this)) {
                 n->visit_children(*this);
-                visitCurrentOnce = &it->second.visitOnce;
                 n->apply_visitor_postorder(*this);
             }
             // `it` is not valid here as there might be rehash during the insertion,
@@ -397,7 +421,6 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
             }
             bool save_prune_flag = prune_flag;
             prune_flag = false;
-            visitCurrentOnce = visited->refVisitOnce(n);
             bool extra_clone = false;
             const IR::Node *preorder_result = copy->apply_visitor_preorder(*this);
             assert(preorder_result != n);  // should never happen
@@ -413,13 +436,12 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
                     prune_flag = true;
                 } else {
                     extra_clone = true;
-                    visited->start(preorder_result, *visitCurrentOnce);
+                    visited->start(preorder_result, visited->shouldVisitOnce(n));
                     local.current.node = copy = preorder_result->clone();
                 }
             }
             if (!prune_flag) {
                 copy->visit_children(*this);
-                visitCurrentOnce = visited->refVisitOnce(n);
                 final_result = copy->apply_visitor_postorder(*this);
             }
             prune_flag = save_prune_flag;

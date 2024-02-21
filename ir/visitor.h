@@ -354,13 +354,13 @@ class Visitor {
     class ChangeTracker;  // used by Modifier and Transform -- private to them
     // This overrides visitDagOnce for a single node -- can only be called from
     // preorder and postorder functions
-    void visitOnce() const { *visitCurrentOnce = true; }
-    void visitAgain() const { *visitCurrentOnce = false; }
+    // FIXME: It would be better named visitCurrentOnce() / visitCurrenAgain()
+    virtual void visitOnce() const { BUG("do not know how to handle request"); }
+    virtual void visitAgain() const { BUG("do not know how to handle request"); }
 
  private:
     virtual void visitor_const_error();
     const Context *ctxt = nullptr;  // should be readonly to subclasses
-    bool *visitCurrentOnce = nullptr;
     friend class Inspector;
     friend class Modifier;
     friend class Transform;
@@ -388,6 +388,8 @@ class Modifier : public virtual Visitor {
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
     bool visit_in_progress(const IR::Node *) const;
+    void visitOnce() const override;
+    void visitAgain() const override;
 };
 
 class Inspector : public virtual Visitor {
@@ -417,6 +419,8 @@ class Inspector : public virtual Visitor {
         if (visited->count(n)) return !visited->at(n).done;
         return false;
     }
+    void visitOnce() const override;
+    void visitAgain() const override;
 };
 
 class Transform : public virtual Visitor {
@@ -441,6 +445,8 @@ class Transform : public virtual Visitor {
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
     bool visit_in_progress(const IR::Node *) const;
+    void visitOnce() const override;
+    void visitAgain() const override;
     // can only be called usefully from a 'preorder' function (directly or indirectly)
     void prune() { prune_flag = true; }
 
