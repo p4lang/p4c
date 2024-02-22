@@ -72,12 +72,23 @@ class ParseAnnotations : public P4::ParseAnnotations {
         : P4::ParseAnnotations("FrontendTest", true, {PARSE("my_anno", StringLiteral)}) {}
 };
 
+struct AnnotationParsingPolicy : P4::FrontEndPolicy {
+    P4::ParseAnnotations *getParseAnnotations() const override { return pars; }
+
+    explicit AnnotationParsingPolicy(P4::ParseAnnotations *parseAnnotations)
+        : pars(parseAnnotations) {}
+
+ private:
+    P4::ParseAnnotations *pars;
+};
+
 std::optional<P4::P4RuntimeAPI> createP4RuntimeTestCase(
     const std::string &source,
     CompilerOptions::FrontendVersion langVersion = FrontendTestCase::defaultVersion,
     const cstring arch = defaultArch,
     P4::ParseAnnotations *parseAnnotations = new P4::ParseAnnotations()) {
-    auto frontendTestCase = FrontendTestCase::create(source, langVersion, parseAnnotations);
+    auto frontendTestCase = FrontendTestCase::create(source, langVersion,
+                                                     new AnnotationParsingPolicy(parseAnnotations));
     if (!frontendTestCase) return std::nullopt;
     return P4::generateP4Runtime(frontendTestCase->program, arch);
 }
@@ -1409,6 +1420,59 @@ TEST_F(P4Runtime, Documentation) {
         const auto *drop = findP4RuntimeAction(*test->p4Info, "ingress.drop");
         ASSERT_TRUE(drop != nullptr);
         EXPECT_FALSE(drop->preamble().has_doc());
+    }
+}
+
+TEST_F(P4Runtime, JsonSerializationPrintOptions) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        struct Headers { }
+        struct Metadata { }
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            action noop() { }
+
+            action drop() { mark_to_drop(sm); }
+
+            table t {
+                key = { sm.ingress_port : exact; }
+                actions = { noop; drop; }
+                default_action = noop;
+            }
+
+            apply {
+                t.apply();
+            }
+        }
+
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0U, ::diagnosticCount());
+
+    {
+        // Default options: expect whitespace
+        std::ostringstream json_output;
+        test->serializeP4InfoTo(&json_output, P4::P4RuntimeFormat::JSON);
+        EXPECT_NE(json_output.str().find(' '), std::string::npos);
+    }
+
+    {
+        // Disable adding whitespace: json should not contain whitespace
+        std::ostringstream json_output;
+        test->jsonPrintOptions.add_whitespace = false;
+        test->serializeP4InfoTo(&json_output, P4::P4RuntimeFormat::JSON);
+        EXPECT_EQ(json_output.str().find(' '), std::string::npos);
     }
 }
 

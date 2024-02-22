@@ -199,11 +199,6 @@ int Testgen::mainImpl(const CompilerResult &compilerResult) {
         ::error("P4Testgen encountered errors during preprocessing.");
         return EXIT_FAILURE;
     }
-    // Get the options and the seed.
-    auto seed = Utils::getCurrentSeed();
-    if (seed) {
-        printFeature("test_info", 4, "============ Prograam seed %1% =============\n", *seed);
-    }
 
     const auto &testgenOptions = TestgenOptions::get();
     return generateAndWriteAbstractTests(testgenOptions, *programInfo);

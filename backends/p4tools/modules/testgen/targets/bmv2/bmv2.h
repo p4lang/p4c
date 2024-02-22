@@ -4,6 +4,7 @@
 #include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/compiler/midend.h"
 #include "backends/p4tools/common/lib/variables.h"
+#include "control-plane/p4RuntimeSerializer.h"
 #include "frontends/common/options.h"
 
 #include "backends/p4tools/modules/testgen/core/compiler_target.h"

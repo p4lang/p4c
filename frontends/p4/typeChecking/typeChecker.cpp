@@ -335,7 +335,7 @@ const IR::Type *TypeInference::canonicalize(const IR::Type *type) {
 
     auto exists = typeMap->getType(type);
     if (exists != nullptr) {
-        if (exists->is<IR::Type_Type>()) return exists->to<IR::Type_Type>()->type;
+        if (auto *tt = exists->to<IR::Type_Type>()) return tt->type;
         return exists;
     }
     if (auto tt = type->to<IR::Type_Type>()) type = tt->type;
@@ -347,10 +347,10 @@ const IR::Type *TypeInference::canonicalize(const IR::Type *type) {
     } else if (type->is<IR::Type_Dontcare>()) {
         return IR::Type_Dontcare::get();
     } else if (type->is<IR::Type_Base>()) {
-        if (!type->is<IR::Type_Bits>())
+        auto *tb = type->to<IR::Type_Bits>();
+        if (!tb)
             // all other base types are singletons
             return type;
-        auto tb = type->to<IR::Type_Bits>();
         auto canon = IR::Type_Bits::get(tb->size, tb->isSigned);
         if (!typeMap->contains(canon)) typeMap->setType(canon, new IR::Type_Type(canon));
         return canon;
@@ -392,9 +392,9 @@ const IR::Type *TypeInference::canonicalize(const IR::Type *type) {
         bool anySet = false;
         bool anyChange = false;
         for (auto t : list->components) {
-            if (t->is<IR::Type_Set>()) {
+            if (auto *set = t->to<IR::Type_Set>()) {
                 anySet = true;
-                t = t->to<IR::Type_Set>()->elementType;
+                t = set->elementType;
             }
             auto t1 = canonicalize(t);
             anyChange = anyChange || t != t1;
@@ -643,9 +643,8 @@ const IR::Node *TypeInference::postorder(IR::Declaration_Variable *decl) {
     auto type = getTypeType(decl->type);
     if (type == nullptr) return decl;
 
-    if (type->is<IR::IMayBeGenericType>()) {
+    if (const IR::IMayBeGenericType *gt = type->to<IR::IMayBeGenericType>()) {
         // Check that there are no unbound type parameters
-        const IR::IMayBeGenericType *gt = type->to<IR::IMayBeGenericType>();
         if (!gt->getTypeParameters()->empty()) {
             typeError("Unspecified type parameters for %1% in %2%", gt, decl);
             return decl;
@@ -685,15 +684,13 @@ bool TypeInference::canCastBetween(const IR::Type *dest, const IR::Type *src) co
     if (src->is<IR::Type_Action>()) return false;
     if (typeMap->equivalent(src, dest)) return true;
 
-    if (dest->is<IR::Type_Newtype>()) {
-        auto dt = getTypeType(dest->to<IR::Type_Newtype>()->type);
+    if (auto *nt = dest->to<IR::Type_Newtype>()) {
+        auto dt = getTypeType(nt->type);
         if (typeMap->equivalent(dt, src)) return true;
     }
 
-    if (src->is<IR::Type_Bits>()) {
-        auto f = src->to<IR::Type_Bits>();
-        if (dest->is<IR::Type_Bits>()) {
-            auto t = dest->to<IR::Type_Bits>();
+    if (auto *f = src->to<IR::Type_Bits>()) {
+        if (auto *t = dest->to<IR::Type_Bits>()) {
             if (f->size == t->size)
                 return true;
             else if (f->isSigned == t->isSigned)
@@ -706,15 +703,14 @@ bool TypeInference::canCastBetween(const IR::Type *dest, const IR::Type *src) co
             return true;
         }
     } else if (src->is<IR::Type_Boolean>()) {
-        if (dest->is<IR::Type_Bits>()) {
-            auto b = dest->to<IR::Type_Bits>();
+        if (auto *b = dest->to<IR::Type_Bits>()) {
             return b->size == 1 && !b->isSigned;
         }
     } else if (src->is<IR::Type_InfInt>()) {
         return dest->is<IR::Type_Bits>() || dest->is<IR::Type_Boolean>() ||
                dest->is<IR::Type_InfInt>();
-    } else if (src->is<IR::Type_Newtype>()) {
-        auto st = getTypeType(src->to<IR::Type_Newtype>()->type);
+    } else if (auto *nt = src->to<IR::Type_Newtype>()) {
+        auto st = getTypeType(nt->type);
         return typeMap->equivalent(dest, st);
     } else if (auto se = src->to<IR::Type_SerEnum>()) {
         auto set = getTypeType(se->type);
@@ -1066,8 +1062,7 @@ bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance *inst,
     }
 
     for (auto d : inst->initializer->components) {
-        if (d->is<IR::Function>()) {
-            auto func = d->to<IR::Function>();
+        if (auto *func = d->to<IR::Function>()) {
             LOG2("Type checking " << func);
             if (func->type->typeParameters->size() != 0) {
                 typeError("%1%: abstract method implementations cannot be generic", func);
@@ -1116,8 +1111,7 @@ const IR::Node *TypeInference::preorder(IR::Declaration_Instance *decl) {
     auto orig = getOriginal<IR::Declaration_Instance>();
 
     auto simpleType = type;
-    if (type->is<IR::Type_SpecializedCanonical>())
-        simpleType = type->to<IR::Type_SpecializedCanonical>()->substituted;
+    if (auto *sc = type->to<IR::Type_SpecializedCanonical>()) simpleType = sc->substituted;
 
     if (auto et = simpleType->to<IR::Type_Extern>()) {
         auto [newType, newArgs] = checkExternConstructor(decl, et, decl->arguments);
@@ -1752,7 +1746,7 @@ const IR::Node *TypeInference::postorder(IR::Type_Header *type) {
 const IR::Node *TypeInference::postorder(IR::Type_Struct *type) {
     auto canon = setTypeType(type);
     auto validator = [this](const IR::Type *t) {
-        while (t->is<IR::Type_Newtype>()) t = getTypeType(t->to<IR::Type_Newtype>()->type);
+        while (auto *nt = t->to<IR::Type_Newtype>()) t = getTypeType(nt->type);
         return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() || t->is<IR::Type_Header>() ||
                t->is<IR::Type_HeaderUnion>() || t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
                t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() || t->is<IR::Type_Varbits>() ||
@@ -1801,8 +1795,7 @@ const IR::Node *TypeInference::postorder(IR::Parameter *param) {
     }
 
     // The parameter type cannot have free type variables
-    if (paramType->is<IR::IMayBeGenericType>()) {
-        auto gen = paramType->to<IR::IMayBeGenericType>();
+    if (auto *gen = paramType->to<IR::IMayBeGenericType>()) {
         auto tp = gen->getTypeParameters();
         if (!tp->empty()) {
             typeError("Type parameters needed for %1%", param->name);
@@ -3235,9 +3228,7 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
     cstring member = expression->member.name;
     if (auto ts = type->to<IR::Type_SpecializedCanonical>()) type = ts->substituted;
 
-    if (type->is<IR::Type_Extern>()) {
-        auto ext = type->to<IR::Type_Extern>();
-
+    if (auto *ext = type->to<IR::Type_Extern>()) {
         auto call = findContext<IR::MethodCallExpression>();
         if (call == nullptr) {
             typeError("%1%: Methods can only be called", expression);
@@ -3333,8 +3324,8 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
         return expression;
     }
 
-    if (type->is<IR::IApply>() && member == IR::IApply::applyMethodName) {
-        auto methodType = type->to<IR::IApply>()->getApplyMethodType();
+    if (auto *apply = type->to<IR::IApply>(); apply && member == IR::IApply::applyMethodName) {
+        auto methodType = apply->getApplyMethodType();
         methodType = canonicalize(methodType)->to<IR::Type_Method>();
         if (methodType == nullptr) return expression;
         learn(methodType, this);
@@ -3343,7 +3334,7 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
         return expression;
     }
 
-    if (type->is<IR::Type_Stack>()) {
+    if (auto *stack = type->to<IR::Type_Stack>()) {
         auto parser = findContext<IR::P4Parser>();
         if (member == IR::Type_Stack::next || member == IR::Type_Stack::last) {
             if (parser == nullptr) {
@@ -3351,7 +3342,6 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
                           expression);
                 return expression;
             }
-            auto stack = type->to<IR::Type_Stack>();
             setType(getOriginal(), stack->elementType);
             setType(expression, stack->elementType);
             if (isLeftValue(expression->expr) && member == IR::Type_Stack::next) {
@@ -3394,8 +3384,8 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
         }
     }
 
-    if (type->is<IR::Type_Type>()) {
-        auto base = type->to<IR::Type_Type>()->type;
+    if (auto *tt = type->to<IR::Type_Type>()) {
+        auto base = tt->type;
         if (base->is<IR::Type_Error>() || base->is<IR::Type_Enum>() ||
             base->is<IR::Type_SerEnum>()) {
             if (isCompileTimeConstant(expression->expr)) {
@@ -3845,24 +3835,20 @@ const IR::Node *TypeInference::postorder(IR::ConstructorCallExpression *expressi
 
     auto simpleType = type;
     CHECK_NULL(simpleType);
-    if (type->is<IR::Type_SpecializedCanonical>())
-        simpleType = type->to<IR::Type_SpecializedCanonical>()->substituted;
+    if (auto *sc = type->to<IR::Type_SpecializedCanonical>()) simpleType = sc->substituted;
 
-    if (simpleType->is<IR::Type_Extern>()) {
-        auto [contType, newArgs] = checkExternConstructor(
-            expression, simpleType->to<IR::Type_Extern>(), expression->arguments);
+    if (auto *e = simpleType->to<IR::Type_Extern>()) {
+        auto [contType, newArgs] = checkExternConstructor(expression, e, expression->arguments);
         if (newArgs == nullptr) return expression;
         expression->arguments = newArgs;
         setType(getOriginal(), contType);
         setType(expression, contType);
-    } else if (simpleType->is<IR::IContainer>()) {
-        auto typeAndArgs = containerInstantiation(expression, expression->arguments,
-                                                  simpleType->to<IR::IContainer>());
+    } else if (auto *c = simpleType->to<IR::IContainer>()) {
+        auto typeAndArgs = containerInstantiation(expression, expression->arguments, c);
         auto contType = typeAndArgs.first;
         auto args = typeAndArgs.second;
         if (contType == nullptr || args == nullptr) return expression;
-        if (type->is<IR::Type_SpecializedCanonical>()) {
-            auto st = type->to<IR::Type_SpecializedCanonical>();
+        if (auto *st = type->to<IR::Type_SpecializedCanonical>()) {
             contType = new IR::Type_SpecializedCanonical(type->srcInfo, st->baseType, st->arguments,
                                                          contType);
         }
@@ -3901,13 +3887,13 @@ const IR::SelectCase *TypeInference::matchCase(const IR::SelectExpression *selec
                                                const IR::Type *caseType) {
     // The selectType is always a tuple
     // If the caseType is a set type, we unify the type of the set elements
-    if (caseType->is<IR::Type_Set>()) caseType = caseType->to<IR::Type_Set>()->elementType;
+    if (auto *set = caseType->to<IR::Type_Set>()) caseType = set->elementType;
     // The caseType may be a simple type, and then we have to unwrap the selectType
     if (caseType->is<IR::Type_Dontcare>()) return selectCase;
 
-    if (caseType->is<IR::Type_StructLike>()) {
+    if (auto *sl = caseType->to<IR::Type_StructLike>()) {
         auto tupleType = new IR::Type_Tuple();
-        convertStructToTuple(caseType->to<IR::Type_StructLike>(), tupleType);
+        convertStructToTuple(sl, tupleType);
         caseType = tupleType;
     }
     const IR::Type *useSelType = selectType;
@@ -3958,8 +3944,7 @@ bool TypeInference::containsHeader(const IR::Type *type) {
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() ||
         type->is<IR::Type_HeaderUnion>())
         return true;
-    if (type->is<IR::Type_Struct>()) {
-        auto st = type->to<IR::Type_Struct>();
+    if (auto *st = type->to<IR::Type_Struct>()) {
         for (auto f : st->fields)
             if (containsHeader(f->type)) return true;
     }

@@ -17,6 +17,12 @@ limitations under the License.
 #ifndef CONTROL_PLANE_P4RUNTIMEARCHHANDLER_H_
 #define CONTROL_PLANE_P4RUNTIMEARCHHANDLER_H_
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include <google/protobuf/util/json_util.h>
+#pragma GCC diagnostic pop
+
 #include <optional>
 #include <set>
 
@@ -184,6 +190,9 @@ class P4RuntimeArchHandlerIface {
                                   const IR::ExternBlock *externBlock) = 0;
     /// called when processing annotations via setPreamble
     virtual bool filterAnnotations(cstring anno) = 0;
+
+    /// Control how JSON is output
+    virtual google::protobuf::util::JsonPrintOptions getJsonPrintOptions() = 0;
 };
 
 /// A functor interface that needs to be implemented for each

@@ -147,7 +147,6 @@ class SetStrictStruct : public NoVisit {
 
 }  // namespace
 
-// TODO: remove skipSideEffectOrdering flag
 const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program *program,
                                    std::ostream *outStream) {
     if (program == nullptr && options.listFrontendPasses == 0) return nullptr;

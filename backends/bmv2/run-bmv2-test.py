@@ -62,6 +62,7 @@ def parse_args():
     )
     parser.add_argument("-pp", dest="pp", help="pass this option to the compiler")
     parser.add_argument("-gdb", "--gdb", action="store_true", help="Run the compiler under gdb.")
+    parser.add_argument("-lldb", "--lldb", action="store_true", help="Run the compiler under lldb.")
     parser.add_argument(
         "-a",
         dest="compiler_options",
@@ -372,6 +373,8 @@ if __name__ == "__main__":
         options.compilerOptions.append(args.pp)
     if args.gdb:
         options.runDebugger = "gdb --args"
+    if args.lldb:
+        options.runDebugger = "lldb --"
     options.observationLog = args.obs_log
     residual_argv = []
     for arg in argv:
