@@ -19,8 +19,8 @@ limitations under the License.
 #include <stdlib.h>
 #include <time.h>
 
+#include "absl/container/flat_hash_map.h"
 #include "ir/ir-generated.h"
-#include "lib/source_file.h"
 
 #if HAVE_LIBGC
 #include <gc/gc.h>
@@ -54,7 +54,7 @@ class Visitor::ChangeTracker {
         bool visitOnce;
         const IR::Node *result;
     };
-    typedef std::unordered_map<const IR::Node *, visit_info_t> visited_t;
+    using visited_t = absl::flat_hash_map<const IR::Node *, visit_info_t>;
     visited_t visited;
 
  public:
@@ -130,7 +130,7 @@ class Visitor::ChangeTracker {
     void revisit_visited() {
         for (auto it = visited.begin(); it != visited.end();) {
             if (!it->second.visit_in_progress)
-                it = visited.erase(it);
+                visited.erase(it++);
             else
                 ++it;
         }
@@ -195,7 +195,7 @@ class Visitor::Tracker {
     struct info_t {
         bool done, visitOnce;
     };
-    typedef std::unordered_map<const IR::Node *, info_t> visited_t;
+    using visited_t = absl::flat_hash_map<const IR::Node *, info_t>;
     visited_t visited;
 
  public:
@@ -204,7 +204,7 @@ class Visitor::Tracker {
     void revisit_visited() {
         for (auto it = visited.begin(); it != visited.end();) {
             if (it->second.done)
-                it = visited.erase(it);
+                visited.erase(it++);
             else
                 ++it;
         }

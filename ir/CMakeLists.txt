@@ -64,6 +64,7 @@ set (BASE_IR_DEF_FILES
 set (IR_DEF_FILES ${IR_DEF_FILES} ${BASE_IR_DEF_FILES} PARENT_SCOPE)
 
 add_library (ir STATIC ${IR_SRCS})
+target_link_libraries(ir absl::flat_hash_map)
 add_dependencies(ir genIR)
 
 
