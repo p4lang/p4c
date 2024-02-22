@@ -93,7 +93,7 @@ This pass outputs the program as a P4 source file.
 class PrettyPrint : public Inspector {
     /// output file
     cstring ppfile;
-    /// The file that is being compiled.  This used
+    /// The file that is being compiled.
     cstring inputfile;
 
  public:
