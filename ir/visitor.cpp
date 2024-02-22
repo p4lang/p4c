@@ -58,6 +58,8 @@ class Visitor::ChangeTracker {
     visited_t visited;
 
  public:
+    ChangeTracker() : visited(16) {}
+
     /** Begin tracking @n during a visiting pass.  Use `finish(@n)` to mark @n as
      * visited once the pass completes.
      *
@@ -199,6 +201,8 @@ class Visitor::Tracker {
     visited_t visited;
 
  public:
+    Tracker() : visited(16) {}
+
     /** Forget nodes that have already been visited, allowing them to be visited
      * again. */
     void revisit_visited() {
