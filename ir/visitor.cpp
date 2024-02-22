@@ -28,7 +28,6 @@ limitations under the License.
 
 #include "dbprint.h"
 #include "ir/id.h"
-#include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
 #include "lib/algorithm.h"
@@ -47,6 +46,8 @@ limitations under the License.
  */
 class Visitor::ChangeTracker {
     struct visit_info_t {
+        // FIXME: We should be able to put these two bools into low 2 bits of
+        // result saving 8 bytes per record
         bool visit_in_progress;
         bool visitOnce;
         const IR::Node *result;
@@ -60,10 +61,8 @@ class Visitor::ChangeTracker {
      */
     void start(const IR::Node *n, bool defaultVisitOnce) {
         // Initialization
-        visited_t::iterator visited_it;
-        bool inserted;
         bool visit_in_progress = true;
-        std::tie(visited_it, inserted) =
+        auto [visited_it, inserted] =
             visited.emplace(n, visit_info_t{visit_in_progress, defaultVisitOnce, n});
 
         // Sanity check for IR loops
@@ -176,6 +175,104 @@ class Visitor::ChangeTracker {
     }
 };
 
+/** @class Visitor::Tracker
+ *  @brief Assists visitors in traversing the IR.
+
+ *  A Tracker object assists visitors traversing the IR by tracking each
+ *  node.  The `start` method begins tracking, and `finish` ends it.  The
+ *  `done` method determines whether the node has been visited.
+ */
+class Visitor::Tracker {
+    // FIXME: We can squeeze these into low 2 bits of key, eliminating the value entirely
+    struct info_t {
+        bool done, visitOnce;
+    };
+    typedef std::unordered_map<const IR::Node *, info_t> visited_t;
+    visited_t visited;
+
+ public:
+    /** Forget nodes that have already been visited, allowing them to be visited
+     * again. */
+    void revisit_visited() {
+        for (auto it = visited.begin(); it != visited.end();) {
+            if (it->second.done)
+                it = visited.erase(it);
+            else
+                ++it;
+        }
+    }
+
+    /** Begin tracking @n during a visiting pass.  Use `finish(@n)` to mark @n as
+     * visited once the pass completes.
+     */
+    void start(const IR::Node *n, bool defaultVisitOnce) {
+        // Initialization
+        auto [it, inserted] = visited.emplace(n, info_t{false, defaultVisitOnce});
+
+        // Sanity check for IR loops
+        if (!inserted && !it->second.done) BUG("IR loop detected ");
+    }
+
+    /** Mark the process of visiting @n as finished, with @final being the
+     * final state of the node, or nullptr if the node was removed from the
+     * tree.  `done(@n)` will return true, and `result(@n)` will return
+     * the resulting node, if any.
+     *
+     * If @final is a new node, that node is marked as finished as well, as if
+     * `start(@final); finish(@final);` were invoked.
+     *
+     * @exception Util::CompilerBug This method fails if `start(@n)` has not
+     * previously been invoked.
+     */
+    void finish(const IR::Node *n) {
+        auto it = visited.find(n);
+        if (it == visited.end()) BUG("visitor state tracker corrupted");
+
+        it->second.done = true;
+    }
+
+    /** Determine whether @n is currently being visited and the visitor has not finished
+     * That is, `start(@n)` has been invoked, and `finish(@n)` has not,
+     *
+     * @return true if @n is being visited and has not finished
+     */
+    bool busy(const IR::Node *n) const {
+        auto it = visited.find(n);
+        return it != visited.end() && !it->second.done;
+    }
+
+    /** Determine whether @n has been visited and the visitor has finished
+     *  and we don't want to visit @n again the next time we see it.
+     * That is, `start(@n)` has been invoked, followed by `finish(@n)`,
+     * and the visitOnce field is true.
+     *
+     * @return true if @n has been visited and the visitor is finished and visitOnce is true
+     */
+    bool done(const IR::Node *n) const {
+        auto it = visited.find(n);
+        return it != visited.end() && it->second.done && it->second.visitOnce;
+    }
+
+    /** Return a visitOnce flag for node @n */
+    bool shouldVisitOnce(const IR::Node *n) {
+        auto it = visited.find(n);
+        if (it == visited.end()) BUG("visitor state tracker corrupted");
+        return it->second.visitOnce;
+    }
+
+    void visitOnce(const IR::Node *n) {
+        auto it = visited.find(n);
+        if (it == visited.end()) BUG("visitor state tracker corrupted");
+        it->second.visitOnce = true;
+    }
+
+    void visitAgain(const IR::Node *n) {
+        auto it = visited.find(n);
+        if (it == visited.end()) BUG("visitor state tracker corrupted");
+        it->second.visitOnce = false;
+    }
+};
+
 // static
 bool Visitor::warning_enabled(const Visitor *visitor, int warning_kind) {
     auto errorString = ErrorCatalog::getCatalog().getName(warning_kind);
@@ -214,7 +311,7 @@ Visitor::profile_t Modifier::init_apply(const IR::Node *root) {
 }
 Visitor::profile_t Inspector::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
-    visited = std::make_shared<visited_t>();
+    visited = std::make_shared<Tracker>();
     return rv;
 }
 Visitor::profile_t Transform::init_apply(const IR::Node *root) {
@@ -260,19 +357,11 @@ Visitor::profile_t::~profile_t() {
     }
 }
 
-void Inspector::visitOnce() const {
-    auto it = visited->find(getOriginal());
-    if (it == visited->end()) BUG("visitor state tracker corrupted");
-    it->second.visitOnce = true;
-}
+void Inspector::visitOnce() const { visited->visitOnce(getOriginal()); }
 void Modifier::visitOnce() const { visited->visitOnce(getOriginal()); }
 void Transform::visitOnce() const { visited->visitOnce(getOriginal()); }
 
-void Inspector::visitAgain() const {
-    auto it = visited->find(getOriginal());
-    if (it == visited->end()) BUG("visitor state tracker corrupted");
-    it->second.visitOnce = false;
-}
+void Inspector::visitAgain() const { visited->visitAgain(getOriginal()); }
 void Modifier::visitAgain() const { visited->visitAgain(getOriginal()); }
 void Transform::visitAgain() const { visited->visitAgain(getOriginal()); }
 
@@ -373,22 +462,17 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n && !join_flows(n)) {
         PushContext local(ctxt, n);
-        auto [it, inserted] = visited->emplace(n, info_t{false, visitDagOnce});
-        if (!inserted && !it->second.done) {
+        if (visited->busy(n)) {
             n->apply_visitor_loop_revisit(*this);
-        } else if (!inserted && it->second.visitOnce) {
+        } else if (visited->done(n)) {
             n->apply_visitor_revisit(*this);
         } else {
-            it->second.done = false;
+            visited->start(n, visitDagOnce);
             if (n->apply_visitor_preorder(*this)) {
                 n->visit_children(*this);
                 n->apply_visitor_postorder(*this);
             }
-            // `it` is not valid here as there might be rehash during the insertion,
-            // perform another lookup
-            auto doneIt = visited->find(n);
-            if (doneIt == visited->end()) BUG("visitor state tracker corrupted");
-            doneIt->second.done = true;
+            visited->finish(n);
         }
         post_join_flows(n, n);
     }
@@ -459,14 +543,8 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
     return n;
 }
 
-void Inspector::revisit_visited() {
-    for (auto it = visited->begin(); it != visited->end();) {
-        if (it->second.done)
-            it = visited->erase(it);
-        else
-            ++it;
-    }
-}
+void Inspector::revisit_visited() { visited->revisit_visited(); }
+bool Inspector::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
 void Modifier::revisit_visited() { visited->revisit_visited(); }
 bool Modifier::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
 void Transform::revisit_visited() { visited->revisit_visited(); }

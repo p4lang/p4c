@@ -351,6 +351,7 @@ class Visitor {
     virtual void post_join_flows(const IR::Node *, const IR::Node *) {}
 
     void visit_children(const IR::Node *, std::function<void()> fn) { fn(); }
+    class Tracker;        // used by Inspector -- private to it
     class ChangeTracker;  // used by Modifier and Transform -- private to them
     // This overrides visitDagOnce for a single node -- can only be called from
     // preorder and postorder functions
@@ -393,11 +394,7 @@ class Modifier : public virtual Visitor {
 };
 
 class Inspector : public virtual Visitor {
-    struct info_t {
-        bool done, visitOnce;
-    };
-    typedef std::unordered_map<const IR::Node *, info_t> visited_t;
-    std::shared_ptr<visited_t> visited;
+    std::shared_ptr<Tracker> visited;
     bool check_clone(const Visitor *) override;
 
  public:
@@ -415,10 +412,7 @@ class Inspector : public virtual Visitor {
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
-    bool visit_in_progress(const IR::Node *n) const {
-        if (visited->count(n)) return !visited->at(n).done;
-        return false;
-    }
+    bool visit_in_progress(const IR::Node *n) const;
     void visitOnce() const override;
     void visitAgain() const override;
 };
