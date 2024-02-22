@@ -65,14 +65,9 @@ struct hdr_md {
 };
 
 
-struct lookup_tbl_val {
-    u32 table[2048];
-};
 REGISTER_START()
 REGISTER_TABLE(hdr_md_cpumap, BPF_MAP_TYPE_PERCPU_ARRAY, u32, struct hdr_md, 2)
 BPF_ANNOTATE_KV_PAIR(hdr_md_cpumap, u32, struct hdr_md)
-REGISTER_TABLE(crc_lookup_tbl, BPF_MAP_TYPE_ARRAY, u32, struct lookup_tbl_val, 1)
-BPF_ANNOTATE_KV_PAIR(crc_lookup_tbl, u32, struct lookup_tbl_val)
 REGISTER_END()
 
 static __always_inline
@@ -98,9 +93,7 @@ static __always_inline u16 crc16_finalize(u16 reg) {
 static __always_inline
 void crc32_update(u32 * reg, const u8 * data, u16 data_size, const u32 poly) {
     u32* current = (u32*) data;
-    struct lookup_tbl_val* lookup_table;
     u32 index = 0;
-    lookup_table = BPF_MAP_LOOKUP_ELEM(crc_lookup_tbl, &index);
     u32 lookup_key = 0;
     u32 lookup_value = 0;
     u32 lookup_value1 = 0;
@@ -112,30 +105,30 @@ void crc32_update(u32 * reg, const u8 * data, u16 data_size, const u32 poly) {
     u32 lookup_value7 = 0;
     u32 lookup_value8 = 0;
     u16 tmp = 0;
-    if (lookup_table != NULL) {
+    if (crc32_table != NULL) {
         for (u16 i = data_size; i >= 8; i -= 8) {
             /* Vars one and two will have swapped byte order if data_size == 8 */
-            if (data_size == 8) current = data + 4;
+            if (data_size == 8) current = (u32 *)(data + 4);
             bpf_trace_message("CRC32: data dword: %x\n", *current);
             u32 one = (data_size == 8 ? __builtin_bswap32(*current--) : *current++) ^ *reg;
             bpf_trace_message("CRC32: data dword: %x\n", *current);
             u32 two = (data_size == 8 ? __builtin_bswap32(*current--) : *current++);
             lookup_key = (one & 0x000000FF);
-            lookup_value8 = lookup_table->table[(u16)(1792 + (u8)lookup_key)];
+            lookup_value8 = crc32_table[(u16)(1792 + (u8)lookup_key)];
             lookup_key = (one >> 8) & 0x000000FF;
-            lookup_value7 = lookup_table->table[(u16)(1536 + (u8)lookup_key)];
+            lookup_value7 = crc32_table[(u16)(1536 + (u8)lookup_key)];
             lookup_key = (one >> 16) & 0x000000FF;
-            lookup_value6 = lookup_table->table[(u16)(1280 + (u8)lookup_key)];
+            lookup_value6 = crc32_table[(u16)(1280 + (u8)lookup_key)];
             lookup_key = one >> 24;
-            lookup_value5 = lookup_table->table[(u16)(1024 + (u8)(lookup_key))];
+            lookup_value5 = crc32_table[(u16)(1024 + (u8)(lookup_key))];
             lookup_key = (two & 0x000000FF);
-            lookup_value4 = lookup_table->table[(u16)(768 + (u8)lookup_key)];
+            lookup_value4 = crc32_table[(u16)(768 + (u8)lookup_key)];
             lookup_key = (two >> 8) & 0x000000FF;
-            lookup_value3 = lookup_table->table[(u16)(512 + (u8)lookup_key)];
+            lookup_value3 = crc32_table[(u16)(512 + (u8)lookup_key)];
             lookup_key = (two >> 16) & 0x000000FF;
-            lookup_value2 = lookup_table->table[(u16)(256 + (u8)lookup_key)];
+            lookup_value2 = crc32_table[(u16)(256 + (u8)lookup_key)];
             lookup_key = two >> 24;
-            lookup_value1 = lookup_table->table[(u8)(lookup_key)];
+            lookup_value1 = crc32_table[(u8)(lookup_key)];
             *reg = lookup_value8 ^ lookup_value7 ^ lookup_value6 ^ lookup_value5 ^
                    lookup_value4 ^ lookup_value3 ^ lookup_value2 ^ lookup_value1;
             tmp += 8;
@@ -148,7 +141,7 @@ void crc32_update(u32 * reg, const u8 * data, u16 data_size, const u32 poly) {
                 bpf_trace_message("CRC32: data byte: %x\n", *currentChar);
                 std_algo_lookup_key = (u32)(((*reg) & 0xFF) ^ *currentChar--);
                 if (std_algo_lookup_key >= 0) {
-                    lookup_value = lookup_table->table[(u8)(std_algo_lookup_key & 255)];
+                    lookup_value = crc32_table[(u8)(std_algo_lookup_key & 255)];
                 }
                 *reg = ((*reg) >> 8) ^ lookup_value;
             }
@@ -159,7 +152,7 @@ void crc32_update(u32 * reg, const u8 * data, u16 data_size, const u32 poly) {
                 bpf_trace_message("CRC32: data byte: %x\n", *currentChar);
                 std_algo_lookup_key = (u32)(((*reg) & 0xFF) ^ *currentChar++);
                 if (std_algo_lookup_key >= 0) {
-                    lookup_value = lookup_table->table[(u8)(std_algo_lookup_key & 255)];
+                    lookup_value = crc32_table[(u8)(std_algo_lookup_key & 255)];
                 }
                 *reg = ((*reg) >> 8) ^ lookup_value;
             }
