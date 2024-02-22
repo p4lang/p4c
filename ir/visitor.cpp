@@ -21,6 +21,7 @@ limitations under the License.
 
 #include "absl/container/flat_hash_map.h"
 #include "ir/ir-generated.h"
+#include "lib/hash.h"
 
 #if HAVE_LIBGC
 #include <gc/gc.h>
@@ -54,7 +55,7 @@ class Visitor::ChangeTracker {
         bool visitOnce;
         const IR::Node *result;
     };
-    using visited_t = absl::flat_hash_map<const IR::Node *, visit_info_t>;
+    using visited_t = absl::flat_hash_map<const IR::Node *, visit_info_t, Util::Hash>;
     visited_t visited;
 
  public:
@@ -197,7 +198,7 @@ class Visitor::Tracker {
     struct info_t {
         bool done, visitOnce;
     };
-    using visited_t = absl::flat_hash_map<const IR::Node *, info_t>;
+    using visited_t = absl::flat_hash_map<const IR::Node *, info_t, Util::Hash>;
     visited_t visited;
 
  public:
