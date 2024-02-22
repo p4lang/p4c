@@ -47,7 +47,7 @@ limitations under the License.
 class Visitor::ChangeTracker {
     struct visit_info_t {
         // FIXME: We should be able to put these two bools into low 2 bits of
-        // result saving 8 bytes per record
+        // `result` saving 8 bytes per record
         bool visit_in_progress;
         bool visitOnce;
         const IR::Node *result;
@@ -59,13 +59,14 @@ class Visitor::ChangeTracker {
     /** Begin tracking @n during a visiting pass.  Use `finish(@n)` to mark @n as
      * visited once the pass completes.
      */
-    void start(const IR::Node *n, bool defaultVisitOnce) {
+    [[nodiscard]] std::pair<bool, bool> start(const IR::Node *n, bool defaultVisitOnce) {
         // Initialization
-        auto [it, inserted] =
-            visited.emplace(n, visit_info_t{true, defaultVisitOnce, n});
+        auto [it, inserted] = visited.emplace(n, visit_info_t{true, defaultVisitOnce, n});
 
-        // Sanity check for IR loops
-        if (!inserted && it->second.visit_in_progress) BUG("IR loop detected ");
+        bool busy = !inserted && it->second.visit_in_progress;
+        bool done = !inserted && !it->second.visit_in_progress && it->second.visitOnce;
+
+        return {busy, done};
     }
 
     /** Mark the process of visiting @orig as finished, with @final being the
@@ -108,7 +109,7 @@ class Visitor::ChangeTracker {
     }
 
     /** Return a visitOnce flag for node @n */
-    bool shouldVisitOnce(const IR::Node *n) {
+    [[nodiscard]] bool shouldVisitOnce(const IR::Node *n) const {
         auto it = visited.find(n);
         if (it == visited.end()) BUG("visitor state tracker corrupted");
         return it->second.visitOnce;
@@ -130,7 +131,7 @@ class Visitor::ChangeTracker {
      *
      * @return true if @n is being visited and has not finished
      */
-    bool busy(const IR::Node *n) const {
+    [[nodiscard]] bool busy(const IR::Node *n) const {
         auto it = visited.find(n);
         return it != visited.end() && it->second.visit_in_progress;
     }
@@ -142,7 +143,7 @@ class Visitor::ChangeTracker {
      *
      * @return true if @n has been visited and the visitor is finished and visitOnce is true
      */
-    bool done(const IR::Node *n) const {
+    [[nodiscard]] bool done(const IR::Node *n) const {
         auto it = visited.find(n);
         return it != visited.end() && !it->second.visit_in_progress && it->second.visitOnce;
     }
@@ -202,12 +203,14 @@ class Visitor::Tracker {
     /** Begin tracking @n during a visiting pass.  Use `finish(@n)` to mark @n as
      * visited once the pass completes.
      */
-    void start(const IR::Node *n, bool defaultVisitOnce) {
+    [[nodiscard]] std::pair<bool, bool> start(const IR::Node *n, bool defaultVisitOnce) {
         // Initialization
         auto [it, inserted] = visited.emplace(n, info_t{false, defaultVisitOnce});
 
-        // Sanity check for IR loops
-        if (!inserted && !it->second.done) BUG("IR loop detected ");
+        bool busy = !inserted && !it->second.done;
+        bool done = !inserted && it->second.done && it->second.visitOnce;
+
+        return {busy, done};
     }
 
     /** Mark the process of visiting @n as finished, with @final being the
@@ -233,7 +236,7 @@ class Visitor::Tracker {
      *
      * @return true if @n is being visited and has not finished
      */
-    bool busy(const IR::Node *n) const {
+    [[nodiscard]] bool busy(const IR::Node *n) const {
         auto it = visited.find(n);
         return it != visited.end() && !it->second.done;
     }
@@ -245,13 +248,13 @@ class Visitor::Tracker {
      *
      * @return true if @n has been visited and the visitor is finished and visitOnce is true
      */
-    bool done(const IR::Node *n) const {
+    [[nodiscard]] bool done(const IR::Node *n) const {
         auto it = visited.find(n);
         return it != visited.end() && it->second.done && it->second.visitOnce;
     }
 
     /** Return a visitOnce flag for node @n */
-    bool shouldVisitOnce(const IR::Node *n) {
+    bool shouldVisitOnce(const IR::Node *n) const {
         auto it = visited.find(n);
         if (it == visited.end()) BUG("visitor state tracker corrupted");
         return it->second.visitOnce;
@@ -426,15 +429,15 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
-        if (visited->busy(n)) {
+        auto [busy, done] = visited->start(n, visitDagOnce);
+        if (busy) {
             n->apply_visitor_loop_revisit(*this);
             // FIXME -- should have a way of updating the node?  Needs to be decided
             // by the visitor somehow, but it is tough
-        } else if (visited->done(n)) {
+        } else if (done) {
             n->apply_visitor_revisit(*this, visited->result(n));
             n = visited->result(n);
         } else {
-            visited->start(n, visitDagOnce);
             IR::Node *copy = n->clone();
             local.current.node = copy;
             if (!dontForwardChildrenBeforePreorder) {
@@ -459,12 +462,12 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n && !join_flows(n)) {
         PushContext local(ctxt, n);
-        if (visited->busy(n)) {
+        auto [busy, done] = visited->start(n, visitDagOnce);
+        if (busy) {
             n->apply_visitor_loop_revisit(*this);
-        } else if (visited->done(n)) {
+        } else if (done) {
             n->apply_visitor_revisit(*this);
         } else {
-            visited->start(n, visitDagOnce);
             if (n->apply_visitor_preorder(*this)) {
                 n->visit_children(*this);
                 n->apply_visitor_postorder(*this);
@@ -485,15 +488,15 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
-        if (visited->busy(n)) {
+        auto [busy, done] = visited->start(n, visitDagOnce);
+        if (busy) {
             n->apply_visitor_loop_revisit(*this);
             // FIXME -- should have a way of updating the node?  Needs to be decided
             // by the visitor somehow, but it is tough
-        } else if (visited->done(n)) {
+        } else if (done) {
             n->apply_visitor_revisit(*this, visited->result(n));
             n = visited->result(n);
         } else {
-            visited->start(n, visitDagOnce);
             auto copy = n->clone();
             local.current.node = copy;
             if (!dontForwardChildrenBeforePreorder) {
@@ -517,7 +520,10 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
                     prune_flag = true;
                 } else {
                     extra_clone = true;
-                    visited->start(preorder_result, visited->shouldVisitOnce(n));
+                    auto [prebusy, predone] =
+                        visited->start(preorder_result, visited->shouldVisitOnce(n));
+                    // Sanity check for IR loops
+                    if (prebusy) BUG("IR loop detected ");
                     local.current.node = copy = preorder_result->clone();
                 }
             }
