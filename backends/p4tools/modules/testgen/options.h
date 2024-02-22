@@ -2,6 +2,7 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_OPTIONS_H_
 
 #include <cstdint>
+#include <filesystem>
 #include <optional>
 #include <set>
 #include <string>
@@ -36,7 +37,7 @@ class TestgenOptions : public AbstractP4cToolOptions {
     static TestgenOptions &get();
 
     /// Directory for generated tests. Defaults to PWD.
-    cstring outputDir = nullptr;
+    std::optional<std::filesystem::path> outputDir = std::nullopt;
 
     /// Fail on unimplemented features instead of trying the next branch
     bool strict = false;
