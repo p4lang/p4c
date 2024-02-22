@@ -61,14 +61,11 @@ class Visitor::ChangeTracker {
      */
     void start(const IR::Node *n, bool defaultVisitOnce) {
         // Initialization
-        bool visit_in_progress = true;
-        auto [visited_it, inserted] =
-            visited.emplace(n, visit_info_t{visit_in_progress, defaultVisitOnce, n});
+        auto [it, inserted] =
+            visited.emplace(n, visit_info_t{true, defaultVisitOnce, n});
 
         // Sanity check for IR loops
-        bool already_present = !inserted;
-        visit_info_t *visit_info = &(visited_it->second);
-        if (already_present && visit_info->visit_in_progress) BUG("IR loop detected ");
+        if (!inserted && it->second.visit_in_progress) BUG("IR loop detected ");
     }
 
     /** Mark the process of visiting @orig as finished, with @final being the
