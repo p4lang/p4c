@@ -7,7 +7,7 @@ struct __attribute__((__packed__)) MainControlImpl_calculate_key {
     u32 keysz;
     u32 maskid;
     u8 field0; /* hdr.p4calc.op */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_CALCULATE_ACT_MAINCONTROLIMPL_OPERATION_ADD 1
 #define MAINCONTROLIMPL_CALCULATE_ACT_MAINCONTROLIMPL_OPERATION_SUB 2
 #define MAINCONTROLIMPL_CALCULATE_ACT_MAINCONTROLIMPL_OPERATION_AND 3

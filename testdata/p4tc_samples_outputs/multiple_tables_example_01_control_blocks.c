@@ -7,7 +7,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
     u32 keysz;
     u32 maskid;
     u32 field0; /* hdr.ipv4.dstAddr */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP 1
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
@@ -28,7 +28,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
     u32 field0; /* hdr.ipv4.dstAddr */
     u32 field1; /* hdr.ipv4.srcAddr */
     u8 field2; /* hdr.ipv4.protocol */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP 1
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 4
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
@@ -49,7 +49,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_3_key {
     u32 field0; /* hdr.ipv4.dstAddr */
     u32 field1; /* hdr.ipv4.srcAddr */
     u8 field2; /* hdr.ipv4.flags */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_3_ACT_MAINCONTROLIMPL_SENDTOPORT 3
 #define MAINCONTROLIMPL_IPV4_TBL_3_ACT_MAINCONTROLIMPL_DROP 4
 #define MAINCONTROLIMPL_IPV4_TBL_3_ACT__NOACTION 0
@@ -71,7 +71,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_4_key {
     u32 field0; /* hdr.ipv4.dstAddr */
     u32 field1; /* hdr.ipv4.srcAddr */
     u16 field2; /* hdr.ipv4.fragOffset */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_4_ACT_MAINCONTROLIMPL_SENDTOPORT 3
 #define MAINCONTROLIMPL_IPV4_TBL_4_ACT_MAINCONTROLIMPL_DROP 4
 #define MAINCONTROLIMPL_IPV4_TBL_4_ACT__NOACTION 0
@@ -91,7 +91,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_5_key {
     u32 keysz;
     u32 maskid;
     u16 field0; /* hdr.ipv4.fragOffset */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_5_ACT__NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_5_value {
     unsigned int action;
@@ -107,7 +107,7 @@ struct __attribute__((__packed__)) MainControlImpl_set_all_options_key {
     u16 field1; /* hdr.tcp.srcPort */
     u16 field2; /* hdr.ipv4.fragOffset */
     u8 field3; /* hdr.ipv4.flags */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_NEXT_HOP 1
 #define MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
 #define MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_TCP_SYN_PACKET 5
@@ -143,11 +143,11 @@ struct __attribute__((__packed__)) MainControlImpl_set_ct_options_key {
     u32 keysz;
     u32 maskid;
     u8 field0; /* hdr.tcp.flags */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAX_MAINCONTROLIMPL_SET_CT_OPTIONS_KEY_MASKS 128
 struct MainControlImpl_set_ct_options_key_mask {
     __u8 mask[sizeof(struct MainControlImpl_set_ct_options_key)];
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_SYN_PACKET 5
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_FIN_OR_RST_PACKET 6
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_OTHER_PACKETS 7

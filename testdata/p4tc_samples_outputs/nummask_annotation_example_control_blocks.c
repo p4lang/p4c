@@ -7,7 +7,7 @@ struct __attribute__((__packed__)) MainControlImpl_set_ct_options_key {
     u32 keysz;
     u32 maskid;
     u8 field0; /* hdr.tcp.flags */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_SYN_PACKET 1
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_FIN_OR_RST_PACKET 2
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_OTHER_PACKETS 3

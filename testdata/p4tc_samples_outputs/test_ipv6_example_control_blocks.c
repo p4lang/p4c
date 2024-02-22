@@ -7,7 +7,7 @@ struct __attribute__((__packed__)) MainControlImpl_tbl_default_key {
     u32 keysz;
     u32 maskid;
     u8 field0[16]; /* hdr.ipv6.srcAddr */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_TBL_DEFAULT_ACT_MAINCONTROLIMPL_SET_DST 1
 #define MAINCONTROLIMPL_TBL_DEFAULT_ACT__NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_tbl_default_value {
