@@ -173,6 +173,17 @@ class Visitor::ChangeTracker {
         return it->second.result;
     }
 
+    /** Produce the final result of visiting @n.
+     *
+     * @return The ultimate result of visiting @n, or @n `finish(@n)` has not
+     * been invoked.
+     */
+    const IR::Node *finalResult(const IR::Node *n) const {
+        auto it = visited.find(n);
+        bool done = it != visited.end() && !it->second.visit_in_progress && it->second.visitOnce;
+        return done ? it->second.result : n;
+    }
+
     void visitOnce(const IR::Node *n) {
         auto it = visited.find(n);
         if (it == visited.end()) BUG("visitor state tracker corrupted");
@@ -440,8 +451,7 @@ namespace {
 class ForwardChildren : public Visitor {
     const ChangeTracker &visited;
     const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) {
-        if (visited.done(n)) return visited.result(n);
-        return n;
+        return visited.finalResult(n);
     }
 
  public:
