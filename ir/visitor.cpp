@@ -36,6 +36,8 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/map.h"
 
+enum class VisitStatus : unsigned { New, Revisit, Busy, Done };
+
 /** @class Visitor::ChangeTracker
  *  @brief Assists visitors in traversing the IR.
 
@@ -58,15 +60,23 @@ class Visitor::ChangeTracker {
  public:
     /** Begin tracking @n during a visiting pass.  Use `finish(@n)` to mark @n as
      * visited once the pass completes.
+     *
+     * @return Status of the node @n wrt visit: whether node is currently being
+     * visited (`VisitStatus::Busy`), or if node was already visited
+     * (`VisitStatus::Done`), node was never seen before (`VisitStatus::New`) or
+     * seen, but should be revisited (`VisitStatus::Revisit`).
      */
-    [[nodiscard]] std::pair<bool, bool> start(const IR::Node *n, bool defaultVisitOnce) {
+    [[nodiscard]] VisitStatus try_start(const IR::Node *n, bool defaultVisitOnce) {
         // Initialization
         auto [it, inserted] = visited.emplace(n, visit_info_t{true, defaultVisitOnce, n});
 
-        bool busy = !inserted && it->second.visit_in_progress;
-        bool done = !inserted && !it->second.visit_in_progress && it->second.visitOnce;
+        if (!inserted) {  // We already seen this node, determine its status
+            if (it->second.visit_in_progress) return VisitStatus::Busy;
+            if (it->second.visitOnce) return VisitStatus::Done;
+            return VisitStatus::Revisit;
+        }
 
-        return {busy, done};
+        return VisitStatus::New;
     }
 
     /** Mark the process of visiting @orig as finished, with @final being the
@@ -202,15 +212,24 @@ class Visitor::Tracker {
 
     /** Begin tracking @n during a visiting pass.  Use `finish(@n)` to mark @n as
      * visited once the pass completes.
+     *
+     * @return Status of the node @n wrt visit: whether node is currently being
+     * visited (`VisitStatus::Busy`), or if node was already visited
+     * (`VisitStatus::Done`), node was never seen before (`VisitStatus::New`) or
+     * seen, but should be revisited (`VisitStatus::Revisit`).
+
      */
-    [[nodiscard]] std::pair<bool, bool> start(const IR::Node *n, bool defaultVisitOnce) {
+    [[nodiscard]] VisitStatus try_start(const IR::Node *n, bool defaultVisitOnce) {
         // Initialization
         auto [it, inserted] = visited.emplace(n, info_t{false, defaultVisitOnce});
 
-        bool busy = !inserted && !it->second.done;
-        bool done = !inserted && it->second.done && it->second.visitOnce;
+        if (!inserted) {  // We already seen this node, determine its status
+            if (!it->second.done) return VisitStatus::Busy;
+            if (it->second.visitOnce) return VisitStatus::Done;
+            return VisitStatus::Revisit;
+        }
 
-        return {busy, done};
+        return VisitStatus::New;
     }
 
     /** Mark the process of visiting @n as finished, with @final being the
@@ -429,26 +448,30 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
-        auto [busy, done] = visited->start(n, visitDagOnce);
-        if (busy) {
-            n->apply_visitor_loop_revisit(*this);
-            // FIXME -- should have a way of updating the node?  Needs to be decided
-            // by the visitor somehow, but it is tough
-        } else if (done) {
-            n->apply_visitor_revisit(*this, visited->result(n));
-            n = visited->result(n);
-        } else {
-            IR::Node *copy = n->clone();
-            local.current.node = copy;
-            if (!dontForwardChildrenBeforePreorder) {
-                ForwardChildren forward_children(*visited);
-                copy->visit_children(forward_children);
+        switch (visited->try_start(n, visitDagOnce)) {
+            case VisitStatus::Busy:
+                n->apply_visitor_loop_revisit(*this);
+                // FIXME -- should have a way of updating the node?  Needs to be decided
+                // by the visitor somehow, but it is tough
+                break;
+            case VisitStatus::Done:
+                n->apply_visitor_revisit(*this, visited->result(n));
+                n = visited->result(n);
+                break;
+            default: {  // New or Revisit
+                IR::Node *copy = n->clone();
+                local.current.node = copy;
+                if (!dontForwardChildrenBeforePreorder) {
+                    ForwardChildren forward_children(*visited);
+                    copy->visit_children(forward_children);
+                }
+                if (copy->apply_visitor_preorder(*this)) {
+                    copy->visit_children(*this);
+                    copy->apply_visitor_postorder(*this);
+                }
+                if (visited->finish(n, copy)) (n = copy)->validate();
+                break;
             }
-            if (copy->apply_visitor_preorder(*this)) {
-                copy->visit_children(*this);
-                copy->apply_visitor_postorder(*this);
-            }
-            if (visited->finish(n, copy)) (n = copy)->validate();
         }
     }
     if (ctxt)
@@ -462,17 +485,19 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n && !join_flows(n)) {
         PushContext local(ctxt, n);
-        auto [busy, done] = visited->start(n, visitDagOnce);
-        if (busy) {
-            n->apply_visitor_loop_revisit(*this);
-        } else if (done) {
-            n->apply_visitor_revisit(*this);
-        } else {
-            if (n->apply_visitor_preorder(*this)) {
-                n->visit_children(*this);
-                n->apply_visitor_postorder(*this);
-            }
-            visited->finish(n);
+        switch (visited->try_start(n, visitDagOnce)) {
+            case VisitStatus::Busy:
+                n->apply_visitor_loop_revisit(*this);
+                break;
+            case VisitStatus::Done:
+                n->apply_visitor_revisit(*this);
+                break;
+            default:  // New or Revisit
+                if (n->apply_visitor_preorder(*this)) {
+                    n->visit_children(*this);
+                    n->apply_visitor_postorder(*this);
+                }
+                visited->finish(n);
         }
         post_join_flows(n, n);
     }
@@ -488,55 +513,60 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
-        auto [busy, done] = visited->start(n, visitDagOnce);
-        if (busy) {
-            n->apply_visitor_loop_revisit(*this);
-            // FIXME -- should have a way of updating the node?  Needs to be decided
-            // by the visitor somehow, but it is tough
-        } else if (done) {
-            n->apply_visitor_revisit(*this, visited->result(n));
-            n = visited->result(n);
-        } else {
-            auto copy = n->clone();
-            local.current.node = copy;
-            if (!dontForwardChildrenBeforePreorder) {
-                ForwardChildren forward_children(*visited);
-                copy->visit_children(forward_children);
-            }
-            bool save_prune_flag = prune_flag;
-            prune_flag = false;
-            bool extra_clone = false;
-            const IR::Node *preorder_result = copy->apply_visitor_preorder(*this);
-            assert(preorder_result != n);  // should never happen
-            const IR::Node *final_result = preorder_result;
-            if (preorder_result != copy) {
-                // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
-                // if (copy->id == IR::Node::currentId - 1)
-                //     --IR::Node::currentId;
-                if (!preorder_result) {
-                    prune_flag = true;
-                } else if (visited->done(preorder_result)) {
-                    final_result = visited->result(preorder_result);
-                    prune_flag = true;
-                } else {
-                    extra_clone = true;
-                    auto [prebusy, predone] =
-                        visited->start(preorder_result, visited->shouldVisitOnce(n));
-                    // Sanity check for IR loops
-                    if (prebusy) BUG("IR loop detected ");
-                    local.current.node = copy = preorder_result->clone();
+        switch (visited->try_start(n, visitDagOnce)) {
+            case VisitStatus::Busy:
+                n->apply_visitor_loop_revisit(*this);
+                // FIXME -- should have a way of updating the node?  Needs to be decided
+                // by the visitor somehow, but it is tough
+                break;
+            case VisitStatus::Done:
+                n->apply_visitor_revisit(*this, visited->result(n));
+                n = visited->result(n);
+                break;
+            default: {  // New or Revisit
+                auto *copy = n->clone();
+                local.current.node = copy;
+                if (!dontForwardChildrenBeforePreorder) {
+                    ForwardChildren forward_children(*visited);
+                    copy->visit_children(forward_children);
                 }
+                bool save_prune_flag = prune_flag;
+                prune_flag = false;
+                bool extra_clone = false;
+                const IR::Node *preorder_result = copy->apply_visitor_preorder(*this);
+                assert(preorder_result != n);  // should never happen
+                const IR::Node *final_result = preorder_result;
+                if (preorder_result != copy) {
+                    // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
+                    // if (copy->id == IR::Node::currentId - 1)
+                    //     --IR::Node::currentId;
+                    if (!preorder_result) {
+                        prune_flag = true;
+                    } else if (visited->done(preorder_result)) {
+                        final_result = visited->result(preorder_result);
+                        prune_flag = true;
+                    } else {
+                        extra_clone = true;
+                        auto status =
+                            visited->try_start(preorder_result, visited->shouldVisitOnce(n));
+                        // Sanity check for IR loops
+                        if (status == VisitStatus::Busy) BUG("IR loop detected ");
+                        local.current.node = copy = preorder_result->clone();
+                    }
+                }
+                if (!prune_flag) {
+                    copy->visit_children(*this);
+                    final_result = copy->apply_visitor_postorder(*this);
+                }
+                prune_flag = save_prune_flag;
+                if (final_result == copy && final_result != preorder_result &&
+                    *final_result == *preorder_result)
+                    final_result = preorder_result;
+                if (visited->finish(n, final_result) && (n = final_result))
+                    final_result->validate();
+                if (extra_clone) visited->finish(preorder_result, final_result);
+                break;
             }
-            if (!prune_flag) {
-                copy->visit_children(*this);
-                final_result = copy->apply_visitor_postorder(*this);
-            }
-            prune_flag = save_prune_flag;
-            if (final_result == copy && final_result != preorder_result &&
-                *final_result == *preorder_result)
-                final_result = preorder_result;
-            if (visited->finish(n, final_result) && (n = final_result)) final_result->validate();
-            if (extra_clone) visited->finish(preorder_result, final_result);
         }
     }
     if (ctxt)
