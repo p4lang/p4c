@@ -48,8 +48,8 @@ struct Visitor_Context {
     // context via getContext/findContext
     const Visitor_Context *parent;
     const IR::Node *node, *original;
-    mutable int child_index;
     mutable const char *child_name;
+    mutable int child_index;
     int depth;
     template <class T>
     inline const T *findContext(const Visitor_Context *&c) const {
