@@ -230,14 +230,10 @@ class hvec_map : hash_vector_base {
             data.emplace_back(std::piecewise_construct_t(), std::forward_as_tuple(std::move(k)),
                               std::forward_as_tuple(std::forward<VV>(v)...));
             new_key = true;
-        } else {
-            if ((new_key = erased[idx])) {
-                erased[idx] = 0;
-                const_cast<KEY &>(data[idx].first) = std::move(k);
-                data[idx].second = VAL(std::forward<VV>(v)...);
-            } else {
-                data[idx].second = VAL(std::forward<VV>(v)...);
-            }
+        } else if ((new_key = erased[idx])) {
+            erased[idx] = 0;
+            const_cast<KEY &>(data[idx].first) = std::move(k);
+            data[idx].second = VAL(std::forward<VV>(v)...);
         }
         return std::make_pair(iterator(*this, idx), new_key);
     }
@@ -248,14 +244,10 @@ class hvec_map : hash_vector_base {
             idx = data.size();
             data.push_back(v);
             new_key = true;
-        } else {
-            if ((new_key = erased[idx])) {
-                erased[idx] = 0;
-                const_cast<KEY &>(data[idx].first) = v.first;
-                data[idx].second = v.second;
-            } else {
-                data[idx].second = v.second;
-            }
+        } else if ((new_key = erased[idx])) {
+            erased[idx] = 0;
+            const_cast<KEY &>(data[idx].first) = v.first;
+            data[idx].second = v.second;
         }
         return std::make_pair(iterator(*this, idx), new_key);
     }
