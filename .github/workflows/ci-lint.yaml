@@ -15,7 +15,7 @@ jobs:
       IMAGE_TYPE: test
       CMAKE_ONLY: ON
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
     - uses: actions/setup-python@v4
