@@ -23,6 +23,8 @@ limitations under the License.
 
 #include <exception>
 
+#include <boost/format.hpp>
+
 #include "lib/error_helper.h"
 
 namespace Util {

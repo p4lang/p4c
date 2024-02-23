@@ -15,13 +15,7 @@ limitations under the License.
 */
 
 #include <cstdio>
-#include <functional>
-#include <list>
 #include <map>
-#include <string>
-#include <vector>
-
-#include <boost/format.hpp>
 
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
@@ -33,8 +27,6 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/error_catalog.h"
-#include "lib/ordered_map.h"
-#include "lib/safe_vector.h"
 #include "lib/source_file.h"
 
 #define SINGLETON_TYPE(NAME)                                               \

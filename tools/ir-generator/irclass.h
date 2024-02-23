@@ -18,6 +18,7 @@ limitations under the License.
 #define TOOLS_IR_GENERATOR_IRCLASS_H_
 
 #include <map>
+#include <set>
 #include <stdexcept>
 #include <vector>
 

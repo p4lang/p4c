@@ -17,6 +17,12 @@ limitations under the License.
 #ifndef LIB_ERROR_REPORTER_H_
 #define LIB_ERROR_REPORTER_H_
 
+#include <ostream>
+#include <set>
+#include <type_traits>
+
+#include <boost/format.hpp>
+
 #include "error_catalog.h"
 #include "error_helper.h"
 #include "exceptions.h"
