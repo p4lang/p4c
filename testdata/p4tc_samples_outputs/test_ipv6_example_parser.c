@@ -40,19 +40,19 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             hdr->ipv6.version = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits)) >> 4) & EBPF_MASK(u8, 4));
             ebpf_packetOffsetInBits += 4;
 
-            hdr->ipv6.trafficClass = (u8)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits)) >> 4) & EBPF_MASK(u8, 8));
+            __builtin_memcpy(&hdr->ipv6.trafficClass, pkt + BYTES(ebpf_packetOffsetInBits), 1);
             ebpf_packetOffsetInBits += 8;
 
             hdr->ipv6.flowLabel = (u32)((load_word_ne(pkt, BYTES(ebpf_packetOffsetInBits)) >> 8) & EBPF_MASK(u32, 20));
             ebpf_packetOffsetInBits += 20;
 
-            hdr->ipv6.payloadLength = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->ipv6.payloadLength, pkt + BYTES(ebpf_packetOffsetInBits), 2);
             ebpf_packetOffsetInBits += 16;
 
-            hdr->ipv6.nextHeader = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->ipv6.nextHeader, pkt + BYTES(ebpf_packetOffsetInBits), 1);
             ebpf_packetOffsetInBits += 8;
 
-            hdr->ipv6.hopLimit = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->ipv6.hopLimit, pkt + BYTES(ebpf_packetOffsetInBits), 1);
             ebpf_packetOffsetInBits += 8;
 
             hdr->ipv6.srcAddr[0] = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0) >> 0));
@@ -103,13 +103,13 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                 goto reject;
             }
 
-            hdr->ethernet.dstAddr = (u64)((load_dword_ne(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
+            __builtin_memcpy(&hdr->ethernet.dstAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = (u64)((load_dword_ne(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
+            __builtin_memcpy(&hdr->ethernet.srcAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.etherType = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->ethernet.etherType, pkt + BYTES(ebpf_packetOffsetInBits), 2);
             ebpf_packetOffsetInBits += 16;
 
             hdr->ethernet.ebpf_valid = 1;

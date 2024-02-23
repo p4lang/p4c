@@ -479,21 +479,15 @@ void CodeGenInspector::convertByteOrder(const IR::Expression *expr, cstring byte
     auto et = EBPFTypeFactory::instance->create(ftype);
     unsigned widthToEmit = dynamic_cast<IHasWidth *>(et)->widthInBits();
     cstring emit = "";
-    unsigned loadSize = 64;
     if (widthToEmit <= 16) {
         emit = byte_order == "HOST" ? "bpf_ntohs" : "bpf_htons";
-        loadSize = 16;
     } else if (widthToEmit <= 32) {
         emit = byte_order == "HOST" ? "bpf_ntohl" : "bpf_htonl";
-        loadSize = 32;
     } else if (widthToEmit <= 64) {
         emit = byte_order == "HOST" ? "ntohll" : "bpf_cpu_to_be64";
-        loadSize = 64;
     }
-    unsigned shift = loadSize - widthToEmit;
     builder->appendFormat("%s(", emit);
     visit(expr);
-    if (shift != 0) builder->appendFormat(" >> %d", shift);
     builder->append(")");
 }
 
@@ -572,9 +566,9 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
     }
     if (right == true) {
         convertByteOrder(rexpr, "HOST");
-    } else {
-        // Todo
-        visit(rexpr);
+    }
+    if (left == true) {
+        convertByteOrder(rexpr, "NETWORK");
     }
     return;
 }

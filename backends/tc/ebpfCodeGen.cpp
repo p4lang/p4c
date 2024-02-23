@@ -525,36 +525,51 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         unsigned loadSize;
 
         const char *helper = nullptr;
-        if (wordsToRead <= 1) {
-            helper = "load_byte";
-            loadSize = 8;
-        } else if (wordsToRead <= 2) {
-            helper = "load_half_ne";
-            loadSize = 16;
-        } else if (wordsToRead <= 4) {
-            helper = "load_word_ne";
-            loadSize = 32;
+        bool memcpy = false;
+        // If the width of field is multiple of 8. compiler copies the value via __builtin_memcpy
+        if (widthToExtract % 8 == 0) {
+            loadSize = widthToExtract;
+            memcpy = true;
         } else {
-            if (wordsToRead > 64) BUG("Unexpected width %d", widthToExtract);
-            helper = "load_dword_ne";
-            loadSize = 64;
+            if (wordsToRead <= 1) {
+                helper = "load_byte";
+                loadSize = 8;
+            } else if (wordsToRead <= 2) {
+                helper = "load_half_ne";
+                loadSize = 16;
+            } else if (wordsToRead <= 4) {
+                helper = "load_word_ne";
+                loadSize = 32;
+            } else {
+                if (wordsToRead > 64) BUG("Unexpected width %d", widthToExtract);
+                helper = "load_dword_ne";
+                loadSize = 64;
+            }
         }
 
         unsigned shift = loadSize - alignment - widthToExtract;
         builder->emitIndent();
-        visit(expr);
-        builder->appendFormat(".%s = (", fieldName);
-        type->emit(builder);
-        builder->appendFormat(")((%s(%s, BYTES(%s))", helper, program->packetStartVar.c_str(),
-                              program->offsetVar.c_str());
-        if (shift != 0) builder->appendFormat(" >> %d", shift);
-        builder->append(")");
-        if (widthToExtract != loadSize) {
-            builder->append(" & EBPF_MASK(");
+        if (memcpy) {
+            builder->appendFormat("__builtin_memcpy(&");
+            visit(expr);
+            builder->appendFormat(".%s, %s + BYTES(%s), %d)", fieldName,
+                                  program->packetStartVar.c_str(), program->offsetVar.c_str(),
+                                  widthToExtract / 8);
+        } else {
+            visit(expr);
+            builder->appendFormat(".%s = (", fieldName);
             type->emit(builder);
-            builder->appendFormat(", %d)", widthToExtract);
+            builder->appendFormat(")((%s(%s, BYTES(%s))", helper, program->packetStartVar.c_str(),
+                                  program->offsetVar.c_str());
+            if (shift != 0) builder->appendFormat(" >> %d", shift);
+            builder->append(")");
+            if (widthToExtract != loadSize) {
+                builder->append(" & EBPF_MASK(");
+                type->emit(builder);
+                builder->appendFormat(", %d)", widthToExtract);
+            }
+            builder->append(")");
         }
-        builder->append(")");
         builder->endOfStatement(true);
     } else {
         if (program->options.arch == "psa" && widthToExtract % 8 != 0) {
@@ -1417,7 +1432,6 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                 unsigned width = scalar->implementationWidthInBits();
                 memcpy = !EBPF::EBPFScalarType::generatesScalar(width);
 
-                // Todo - Issue 23
                 if (isLPMKeyBigEndian) {
                     if (width <= 8) {
                         swap = "";  // single byte, nothing to swap

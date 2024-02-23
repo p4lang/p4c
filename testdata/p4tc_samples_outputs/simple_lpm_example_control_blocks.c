@@ -109,8 +109,8 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                     switch (value->action) {
                         case INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH: 
                             {
-                                hdr->ethernet.srcAddr = value->u.ingress_send_nh.smac;
-                                                                hdr->ethernet.dstAddr = value->u.ingress_send_nh.dmac;
+                                hdr->ethernet.srcAddr = bpf_cpu_to_be64(value->u.ingress_send_nh.smac);
+                                                                hdr->ethernet.dstAddr = bpf_cpu_to_be64(value->u.ingress_send_nh.dmac);
                                 /* send_to_port(value->u.ingress_send_nh.port_id) */
                                 compiler_meta__->drop = false;
                                 send_to_port(value->u.ingress_send_nh.port_id);

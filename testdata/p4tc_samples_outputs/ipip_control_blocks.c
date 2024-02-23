@@ -126,7 +126,7 @@ if (/* hdr->outer.isValid() */
                                 break;
                             case MAIN_FWD_TABLE_ACT_MAIN_SET_NH: 
                                 {
-                                    hdr->ethernet.dstAddr = value->u.Main_set_nh.dmac;
+                                    hdr->ethernet.dstAddr = bpf_cpu_to_be64(value->u.Main_set_nh.dmac);
                                     /* send_to_port(value->u.Main_set_nh.port) */
                                     compiler_meta__->drop = false;
                                     send_to_port(value->u.Main_set_nh.port);
@@ -165,12 +165,12 @@ if (/* hdr->outer.isValid() */
                 hdr_1 = hdr;
                                 meta_1 = meta;
                                 hdr_1->inner = hdr_1->outer;
-                                hdr_1->outer.srcAddr = meta_1->src;
-                                hdr_1->outer.dstAddr = meta_1->dst;
+                                hdr_1->outer.srcAddr = bpf_htonl(meta_1->src);
+                                hdr_1->outer.dstAddr = bpf_htonl(meta_1->dst);
                                 hdr_1->outer.ttl = 64;
                                 hdr_1->outer.protocol = 4;
-                                hdr_1->outer.totalLen = (hdr_1->outer.totalLen + bpf_htons(20));
-                                hdr_1->outer.hdrChecksum = 0;
+                                hdr_1->outer.totalLen = bpf_htons((hdr_1->outer.totalLen + bpf_htons(20)));
+                                hdr_1->outer.hdrChecksum = bpf_htons(0);
                                 hdr = hdr_1;
             }
             ;
