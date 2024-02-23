@@ -48,8 +48,8 @@ struct Visitor_Context {
     // context via getContext/findContext
     const Visitor_Context *parent;
     const IR::Node *node, *original;
-    mutable int child_index;
     mutable const char *child_name;
+    mutable int child_index;
     int depth;
     template <class T>
     inline const T *findContext(const Visitor_Context *&c) const {
@@ -351,16 +351,17 @@ class Visitor {
     virtual void post_join_flows(const IR::Node *, const IR::Node *) {}
 
     void visit_children(const IR::Node *, std::function<void()> fn) { fn(); }
+    class Tracker;        // used by Inspector -- private to it
     class ChangeTracker;  // used by Modifier and Transform -- private to them
     // This overrides visitDagOnce for a single node -- can only be called from
     // preorder and postorder functions
-    void visitOnce() const { *visitCurrentOnce = true; }
-    void visitAgain() const { *visitCurrentOnce = false; }
+    // FIXME: It would be better named visitCurrentOnce() / visitCurrenAgain()
+    virtual void visitOnce() const { BUG("do not know how to handle request"); }
+    virtual void visitAgain() const { BUG("do not know how to handle request"); }
 
  private:
     virtual void visitor_const_error();
     const Context *ctxt = nullptr;  // should be readonly to subclasses
-    bool *visitCurrentOnce = nullptr;
     friend class Inspector;
     friend class Modifier;
     friend class Transform;
@@ -388,14 +389,12 @@ class Modifier : public virtual Visitor {
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
     bool visit_in_progress(const IR::Node *) const;
+    void visitOnce() const override;
+    void visitAgain() const override;
 };
 
 class Inspector : public virtual Visitor {
-    struct info_t {
-        bool done, visitOnce;
-    };
-    typedef std::unordered_map<const IR::Node *, info_t> visited_t;
-    std::shared_ptr<visited_t> visited;
+    std::shared_ptr<Tracker> visited;
     bool check_clone(const Visitor *) override;
 
  public:
@@ -413,10 +412,9 @@ class Inspector : public virtual Visitor {
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
-    bool visit_in_progress(const IR::Node *n) const {
-        if (visited->count(n)) return !visited->at(n).done;
-        return false;
-    }
+    bool visit_in_progress(const IR::Node *n) const;
+    void visitOnce() const override;
+    void visitAgain() const override;
 };
 
 class Transform : public virtual Visitor {
@@ -441,6 +439,8 @@ class Transform : public virtual Visitor {
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
     bool visit_in_progress(const IR::Node *) const;
+    void visitOnce() const override;
+    void visitAgain() const override;
     // can only be called usefully from a 'preorder' function (directly or indirectly)
     void prune() { prune_flag = true; }
 
