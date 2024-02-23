@@ -151,6 +151,7 @@ endif()
 find_package (PythonInterp 3 REQUIRED)
 find_package (FLEX 2.0 REQUIRED)
 find_package (BISON 3.0 REQUIRED)
+find_package (absl REQUIRED)
 include(Protobuf)
 p4c_obtain_protobuf()
 
