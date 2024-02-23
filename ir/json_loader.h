@@ -17,8 +17,6 @@ limitations under the License.
 #ifndef IR_JSON_LOADER_H_
 #define IR_JSON_LOADER_H_
 
-#include <assert.h>
-
 #include <map>
 #include <optional>
 #include <string>
@@ -29,7 +27,6 @@ limitations under the License.
 #include "json_parser.h"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"
-#include "lib/indent.h"
 #include "lib/ltbitmatrix.h"
 #include "lib/match.h"
 #include "lib/ordered_map.h"
