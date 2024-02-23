@@ -169,6 +169,11 @@ class hvec_map : hash_vector_base {
         size_t idx = hash_vector_base::find(&k, &cache);
         return idx ? const_iterator(*this, idx - 1) : end();
     }
+    size_t count(const KEY &k) const {
+        hash_vector_base::lookup_cache cache;
+        size_t idx = hash_vector_base::find(&k, &cache);
+        return idx > 0;
+    }
 
     // FIXME -- how to do this without duplicating the code for lvalue/rvalue?
     VAL &operator[](const KEY &k) {
