@@ -268,15 +268,15 @@ Util::Enumerator<const IDeclaration *> *P4Program::getDeclarations() const {
 const IR::PackageBlock *ToplevelBlock::getMain() const {
     auto program = getProgram();
     auto mainDecls = program->getDeclsByName(IR::P4Program::main)->toVector();
-    if (mainDecls->size() == 0) {
+    if (mainDecls.empty()) {
         ::warning(ErrorType::WARN_MISSING, "Program does not contain a `%s' module",
                   IR::P4Program::main);
         return nullptr;
     }
-    auto main = mainDecls->at(0);
-    if (mainDecls->size() > 1) {
+    auto main = mainDecls[0];
+    if (mainDecls.size() > 1) {
         ::error(ErrorType::ERR_DUPLICATE, "Program has multiple `%s' instances: %1%, %2%",
-                IR::P4Program::main, main->getNode(), mainDecls->at(1)->getNode());
+                IR::P4Program::main, main->getNode(), mainDecls[1]->getNode());
         return nullptr;
     }
     if (!main->is<IR::Declaration_Instance>()) {
