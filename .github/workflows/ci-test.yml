@@ -21,7 +21,7 @@ jobs:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
@@ -54,7 +54,7 @@ jobs:
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ${{ matrix.unity }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
@@ -91,7 +91,7 @@ jobs:
     - name: Install git
       run: dnf install -y -q git
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -122,7 +122,7 @@ jobs:
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
 
