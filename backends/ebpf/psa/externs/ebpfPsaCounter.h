@@ -51,6 +51,8 @@ class EBPFCounterPSA : public EBPFCounterTable {
                            CodeGenInspector *codeGen);
     virtual void emitCounterUpdate(CodeBuilder *builder, cstring target, cstring keyName);
     virtual void emitCounterInitializer(CodeBuilder *builder);
+
+    DECLARE_TYPEINFO(EBPFCounterPSA, EBPFCounterTable);
 };
 
 }  // namespace EBPF

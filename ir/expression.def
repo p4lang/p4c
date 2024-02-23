@@ -240,15 +240,14 @@ class Constant : Literal {
     Constant operator-() const;
 #end
     toString {
-        const IR::Type_Bits* tb = dynamic_cast<const IR::Type_Bits*>(type);
         unsigned width;
         bool sign;
-        if (tb == nullptr) {
+        if (const IR::Type_Bits* tb = type->to<IR::Type_Bits>()) {
+             width = tb->size;
+             sign = tb->isSigned;
+        } else {
             width = 0;
             sign = false;
-        } else {
-            width = tb->size;
-            sign = tb->isSigned;
         }
         return Util::toString(value, width, sign, base);
     }
@@ -402,7 +401,16 @@ class MethodCallExpression : Expression {
     Expression                  method;
     optional Vector<Type>       typeArguments = new Vector<Type>;
     optional Vector<Argument>   arguments = new Vector<Argument>;
-    toString{ return method->toString(); }
+    toString {
+        cstring str = method->toString() + "(";
+        if (!arguments->empty()) {
+            str += arguments->at(0)->toString();
+        }
+        for (unsigned i = 1; i < arguments->size(); i++) {
+            str += ", " + arguments->at(i)->toString();
+        }
+        return str + ")";
+    }
     validate{ typeArguments->check_null(); arguments->check_null(); }
     MethodCallExpression(Util::SourceInfo si, IR::ID m, const std::initializer_list<Argument> &a)
             : Expression(si), method(new PathExpression(m)), arguments(new Vector<Argument>(a)) {}
@@ -436,6 +444,16 @@ class BaseListExpression : Expression {
             return false;
         size_t size = components.size();
         return components.at(size - 1)->is<IR::Dots>();
+    }
+    toString {
+        cstring str = "{";
+        if (!components.empty()) {
+            str += " " + components.at(0)->toString();
+        }
+        for (unsigned i = 1; i < size(); i++) {
+            str += ", " + components.at(i)->toString();
+        }
+        return str + " }";
     }
 #nodbprint
 }
@@ -481,6 +499,18 @@ class StructExpression : Expression {
             return false;
         size_t size = components.size();
         return components.at(size - 1)->is<IR::NamedDots>();
+    }
+    toString {
+        cstring str = "{";
+        if (!components.empty()) {
+            cstring exprStr = components.at(0)->expression->toString();
+            str += " " + components.at(0)->toString() + " = " + exprStr;
+        }
+        for (unsigned i = 1; i < size(); i++) {
+            cstring exprStr = components.at(i)->expression->toString();
+            str += ", " + components.at(i)->toString() + " = " + exprStr;
+        }
+        return str + " }";
     }
 }
 

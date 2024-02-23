@@ -42,6 +42,8 @@ class IJson : public ICastable {
     virtual void serialize(std::ostream &out) const = 0;
     cstring toString() const;
     void dump() const;
+
+    DECLARE_TYPEINFO(IJson);
 };
 
 class JsonValue final : public IJson {
@@ -65,7 +67,7 @@ class JsonValue final : public IJson {
     JsonValue(cstring s) : tag(Kind::String), str(s) {}             // NOLINT
     JsonValue(const std::string &s) : tag(Kind::String), str(s) {}  // NOLINT
     JsonValue(const char *s) : tag(Kind::String), str(s) {}         // NOLINT
-    void serialize(std::ostream &out) const;
+    void serialize(std::ostream &out) const override;
 
     bool operator==(const big_int &v) const;
     // is_integral is true for bool
@@ -104,13 +106,15 @@ class JsonValue final : public IJson {
     const Kind tag;
     const big_int value = 0;
     const cstring str = nullptr;
+
+    DECLARE_TYPEINFO(JsonValue, IJson);
 };
 
 class JsonArray final : public IJson, public std::vector<IJson *> {
     friend class Test::TestJson;
 
  public:
-    void serialize(std::ostream &out) const;
+    void serialize(std::ostream &out) const override;
     JsonArray *clone() const { return new JsonArray(*this); }
     JsonArray *append(IJson *value);
     JsonArray *append(big_int v) {
@@ -149,6 +153,8 @@ class JsonArray final : public IJson, public std::vector<IJson *> {
     JsonArray(std::initializer_list<IJson *> data) : std::vector<IJson *>(data) {}  // NOLINT
     JsonArray() = default;
     JsonArray(std::vector<IJson *> &data) : std::vector<IJson *>(data) {}  // NOLINT
+
+    DECLARE_TYPEINFO(JsonArray, IJson);
 };
 
 class JsonObject final : public IJson, public ordered_map<cstring, IJson *> {
@@ -156,7 +162,7 @@ class JsonObject final : public IJson, public ordered_map<cstring, IJson *> {
 
  public:
     JsonObject() = default;
-    void serialize(std::ostream &out) const;
+    void serialize(std::ostream &out) const override;
     JsonObject *emplace(cstring label, IJson *value);
     JsonObject *emplace_non_null(cstring label, IJson *value);
     JsonObject *emplace(cstring label, big_int v) {
@@ -185,6 +191,8 @@ class JsonObject final : public IJson, public ordered_map<cstring, IJson *> {
         return this;
     }
     IJson *get(cstring label) const { return ::get(*this, label); }
+
+    DECLARE_TYPEINFO(JsonObject, IJson);
 };
 
 }  // namespace Util

@@ -32,9 +32,10 @@ namespace P4Tools::P4Testgen::Pna {
 
 const std::set<std::string> PnaTestBackend::SUPPORTED_BACKENDS = {"METADATA", "PTF"};
 
-PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                               const std::filesystem::path &testPath)
-    : TestBackEnd(programInfo, symbex) {
+PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo,
+                               const TestBackendConfiguration &testBackendConfiguration,
+                               SymbolicExecutor &symbex)
+    : TestBackEnd(programInfo, testBackendConfiguration, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
     if (testBackendString.isNullOrEmpty()) {
         ::error(
@@ -43,11 +44,10 @@ PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo, SymbolicExecutor 
             Utils::containerToString(SUPPORTED_BACKENDS));
         exit(EXIT_FAILURE);
     }
-    auto seed = TestgenOptions::get().seed;
     if (testBackendString == "METADATA") {
-        testWriter = new Metadata(testPath.c_str(), TestgenOptions::get().seed);
+        testWriter = new Metadata(testBackendConfiguration);
     } else if (testBackendString == "PTF") {
-        testWriter = new PTF(testPath.c_str(), seed);
+        testWriter = new PTF(testBackendConfiguration);
     } else {
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",
@@ -83,7 +83,7 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
     // Save the values of all the fields in it and return.
     if (TestgenOptions::get().testBackend == "METADATA") {
         auto *metadataCollection = new MetadataCollection();
-        const auto *pnaProgInfo = programInfo.checkedTo<PnaDpdkProgramInfo>();
+        const auto *pnaProgInfo = getProgramInfo().checkedTo<PnaDpdkProgramInfo>();
         const auto *localMetadataVar = pnaProgInfo->getBlockParam("MainParserT", 2);
         const auto &flatFields = executionState->getFlatFields(localMetadataVar, {});
         for (const auto &fieldRef : flatFields) {

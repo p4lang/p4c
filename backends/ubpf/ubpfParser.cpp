@@ -39,7 +39,7 @@ class UBPFStateTranslationVisitor : public EBPF::CodeGenInspector {
     void emitCheckPacketLength(unsigned width) { emitCheckPacketLength(nullptr, nullptr, width); }
     void emitCheckPacketLength(const char *varname) { emitCheckPacketLength(nullptr, varname, 0); }
 
-    void compileExtractField(const IR::Expression *expr, cstring field, unsigned alignment,
+    void compileExtractField(const IR::Expression *expr, cstring field, unsigned hdrOffsetBits,
                              EBPF::EBPFType *type, bool advanceCursor = true);
     void compileExtract(const IR::Expression *destination);
 
@@ -190,9 +190,10 @@ bool UBPFStateTranslationVisitor::preorder(const IR::Member *expression) {
 }
 
 void UBPFStateTranslationVisitor::compileExtractField(const IR::Expression *expr, cstring field,
-                                                      unsigned alignment, EBPF::EBPFType *type,
+                                                      unsigned hdrOffsetBits, EBPF::EBPFType *type,
                                                       bool advanceCursor) {
-    unsigned widthToExtract = dynamic_cast<EBPF::IHasWidth *>(type)->widthInBits();
+    unsigned alignment = hdrOffsetBits % 8;
+    unsigned widthToExtract = type->as<EBPF::IHasWidth>().widthInBits();
     auto program = state->parser->program;
 
     if (widthToExtract <= 64) {
@@ -294,19 +295,18 @@ void UBPFStateTranslationVisitor::compileExtract(const IR::Expression *destinati
     unsigned width = ht->width_bits();
     emitCheckPacketLength(width);
 
-    unsigned alignment = 0;
+    unsigned hdrOffsetBits = 0;
     for (auto f : ht->fields) {
         auto ftype = state->parser->typeMap->getType(f);
         auto etype = UBPFTypeFactory::instance->create(ftype);
-        auto et = dynamic_cast<EBPF::IHasWidth *>(etype);
+        auto et = etype->to<EBPF::IHasWidth>();
         if (et == nullptr) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "Only headers with fixed widths supported %1%", f);
             return;
         }
-        compileExtractField(destination, f->name, alignment, etype);
-        alignment += et->widthInBits();
-        alignment %= 8;
+        compileExtractField(destination, f->name, hdrOffsetBits, etype);
+        hdrOffsetBits += et->widthInBits();
     }
 
     if (ht->is<IR::Type_Header>()) {
@@ -323,7 +323,7 @@ void UBPFStateTranslationVisitor::compileLookahead(const IR::Expression *destina
     if (type->to<IR::Type_Bits>() == nullptr)
         BUG("lookahead<%1%>(): only bit type is supported yet", type);
 
-    unsigned width = dynamic_cast<EBPF::IHasWidth *>(etype)->widthInBits();
+    unsigned width = etype->as<EBPF::IHasWidth>().widthInBits();
     if (width > 64) BUG("lookahead<%1%>(): more than 64 bits not supported yet", type);
 
     // check packet's length

@@ -27,22 +27,42 @@
 
 namespace P4Tools::P4Testgen {
 
+TestBackEnd::TestBackEnd(const ProgramInfo &programInfo,
+                         const TestBackendConfiguration &testBackendConfiguration,
+                         SymbolicExecutor &symbex)
+    : programInfo(programInfo),
+      testBackendConfiguration(testBackendConfiguration),
+      symbex(symbex),
+      maxTests(TestgenOptions::get().maxTests) {
+    // If we select a specific branch, the number of tests should be 1.
+    if (!TestgenOptions::get().selectedBranches.empty()) {
+        maxTests = 1;
+    }
+}
+
 bool TestBackEnd::run(const FinalState &state) {
     {
         // Evaluate the model and extract the input and output packets.
         const auto *executionState = state.getExecutionState();
         const auto *outputPacketExpr = executionState->getPacketBuffer();
-        const auto *outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
-        const auto &coverableNodes = programInfo.getCoverableNodes();
+        const auto *outputPortExpr = executionState->get(getProgramInfo().getTargetOutputPortVar());
+        const auto &coverableNodes = getProgramInfo().getCoverableNodes();
         const auto *programTraces = state.getTraces();
         const auto &testgenOptions = TestgenOptions::get();
 
         // Don't increase the test count if --output-packet-only is enabled and we don't
         // produce a test with an output packet.
         if (testgenOptions.outputPacketOnly) {
-            auto outputPacketSize = executionState->getPacketBufferSize();
-            bool packetIsDropped = executionState->getProperty<bool>("drop");
-            if (outputPacketSize <= 0 || packetIsDropped) {
+            if (executionState->getPacketBufferSize() <= 0 ||
+                executionState->getProperty<bool>("drop")) {
+                return needsToTerminate(testCount);
+            }
+        }
+
+        // Don't increase the test count if --dropped-packet-only is enabled and we produce a test
+        // with an output packet.
+        if (testgenOptions.droppedPacketOnly) {
+            if (!executionState->getProperty<bool>("drop")) {
                 return needsToTerminate(testCount);
             }
         }
@@ -69,7 +89,7 @@ bool TestBackEnd::run(const FinalState &state) {
         // Execute concolic functions that may occur in the output packet, the output port,
         // or any path conditions.
         auto concolicResolver = ConcolicResolver(state.getFinalModel(), *executionState,
-                                                 *programInfo.getConcolicMethodImpls());
+                                                 *getProgramInfo().getConcolicMethodImpls());
 
         outputPacketExpr->apply(concolicResolver);
         outputPortExpr->apply(concolicResolver);
@@ -91,7 +111,7 @@ bool TestBackEnd::run(const FinalState &state) {
         executionState = replacedState.getExecutionState();
         outputPacketExpr = executionState->getPacketBuffer();
         const auto &finalModel = replacedState.getFinalModel();
-        outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
+        outputPortExpr = executionState->get(getProgramInfo().getTargetOutputPortVar());
 
         auto testInfo = produceTestInfo(executionState, &finalModel, outputPacketExpr,
                                         outputPortExpr, programTraces);
@@ -121,6 +141,7 @@ bool TestBackEnd::run(const FinalState &state) {
             return needsToTerminate(testCount);
         }
 
+        testCount++;
         const P4::Coverage::CoverageSet &visitedNodes = symbex.getVisitedNodes();
         if (!testgenOptions.hasCoverageTracking) {
             printFeature("test_info", 4, "============ Test %1% ============", testCount);
@@ -140,11 +161,19 @@ bool TestBackEnd::run(const FinalState &state) {
 
         // Output the test.
         Util::withTimer("backend", [this, &testSpec, &selectedBranches] {
-            testWriter->outputTest(testSpec, selectedBranches, testCount, coverage);
+            if (testWriter->isInFileMode()) {
+                testWriter->writeTestToFile(testSpec, selectedBranches, testCount, coverage);
+            } else {
+                auto testOpt =
+                    testWriter->produceTest(testSpec, selectedBranches, testCount, coverage);
+                if (!testOpt.has_value()) {
+                    BUG("Failed to produce test.");
+                }
+                tests.push_back(testOpt.value());
+            }
         });
 
         printTraces("============ End Test %1% ============\n", testCount);
-        testCount++;
         P4::Coverage::printCoverageReport(coverableNodes, visitedNodes);
         printPerformanceReport(std::nullopt);
 
@@ -178,7 +207,7 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
     const auto *inputPacket = finalModel->evaluate(inputPacketExpr, true);
     const auto *outputPacket = finalModel->evaluate(outputPacketExpr, true);
     const auto *inputPort =
-        finalModel->evaluate(executionState->get(programInfo.getTargetInputPortVar()), true);
+        finalModel->evaluate(executionState->get(getProgramInfo().getTargetInputPortVar()), true);
 
     const auto *outputPortVar = finalModel->evaluate(outputPortExpr, true);
     // Build the taint mask by dissecting the program packet variable
@@ -246,4 +275,15 @@ int64_t TestBackEnd::getTestCount() const { return testCount; }
 
 float TestBackEnd::getCoverage() const { return coverage; }
 
+const ProgramInfo &TestBackEnd::getProgramInfo() const { return programInfo; }
+
+const TestBackendConfiguration &TestBackEnd::getTestBackendConfiguration() const {
+    return testBackendConfiguration;
+}
+
+bool TestBackEnd::needsToTerminate(int64_t testCount) const {
+    // If maxTests is 0, we never "need" to terminate because we want to produce as many tests as
+    // possible.
+    return maxTests != 0 && testCount >= maxTests;
+}
 }  // namespace P4Tools::P4Testgen

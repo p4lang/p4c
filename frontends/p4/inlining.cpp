@@ -446,6 +446,7 @@ bool DiscoverInlining::preorder(const IR::ParserBlock *block) {
 Visitor::profile_t GeneralInliner::init_apply(const IR::Node *node) {
     ResolveReferences solver(refMap);
     TypeChecking typeChecker(refMap, typeMap);
+    refMap->clear();
     node->apply(solver);
     (void)node->apply(typeChecker);
     return AbstractInliner::init_apply(node);
@@ -905,7 +906,8 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
 
     if (!states->empty()) {
         // Create final state
-        auto newState = new IR::ParserState(name, annotations, current, state->selectExpression);
+        auto newState =
+            new IR::ParserState(srcInfo, name, annotations, current, state->selectExpression);
         states->push_back(newState);
         LOG3("Replacing with " << states->size() << " states");
         prune();

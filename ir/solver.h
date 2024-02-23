@@ -63,13 +63,7 @@ class AbstractSolver : public ICastable {
     /// @returns whether this solver is incremental.
     [[nodiscard]] virtual bool isInIncrementalMode() const = 0;
 
-    /// Cast an abstract solver to its specific sub type.
-    /// Casts involving "const" have to explicit in this case. This is necessary because abstract
-    /// solvers have no straightforward mechanism to support clone operations.
-    template <typename T>
-    T *to() {
-        return dynamic_cast<T *>(this);
-    }
+    DECLARE_TYPEINFO(AbstractSolver);
 };
 
 #endif /* IR_SOLVER_H_ */

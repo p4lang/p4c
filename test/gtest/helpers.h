@@ -17,16 +17,21 @@ limitations under the License.
 #ifndef TEST_GTEST_HELPERS_H_
 #define TEST_GTEST_HELPERS_H_
 
+#include <gtest/gtest.h>
+
 #include <optional>
 #include <string>
 
 #include "frontends/common/options.h"
 #include "frontends/p4/parseAnnotations.h"
-#include "gtest/gtest.h"
 
 namespace IR {
 class P4Program;
 }  // namespace IR
+
+namespace P4 {
+class FrontEndPolicy;
+}  // namespace P4
 
 /// Specifies which standard headers should be included by a GTest.
 enum class P4Headers {
@@ -113,14 +118,15 @@ struct FrontendTestCase {
     static const CompilerOptions::FrontendVersion defaultVersion =
         CompilerOptions::FrontendVersion::P4_16;
 
-    /// Create a test case that only requires the frontend to run.
+    /// Create a test case that only requires the frontend to run. If policy is nullptr the default
+    /// FrontEndPolicy is used.
     static std::optional<FrontendTestCase> create(
         const std::string &source, CompilerOptions::FrontendVersion langVersion = defaultVersion,
-        const P4::ParseAnnotations &parseAnnotations = P4::ParseAnnotations());
+        P4::FrontEndPolicy *policy = nullptr);
 
     static std::optional<FrontendTestCase> create(const std::string &source,
-                                                  const P4::ParseAnnotations &parseAnnotations) {
-        return create(source, defaultVersion, parseAnnotations);
+                                                  P4::FrontEndPolicy *policy) {
+        return create(source, defaultVersion, policy);
     }
 
     /// The output of the frontend.

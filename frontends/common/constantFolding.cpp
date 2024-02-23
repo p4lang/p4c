@@ -87,6 +87,7 @@ const IR::Expression *DoConstantFolding::getConstant(const IR::Expression *expr)
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::PathExpression *e) {
+    if (const auto *r = policy->hook(*this, e)) return r;
     if (refMap == nullptr || assignmentTarget) return e;
     auto decl = refMap->getDeclaration(e->path);
     if (decl == nullptr) return e;
@@ -797,6 +798,9 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
         if (auto arg = expr->to<IR::Constant>()) {
             return cast(arg, arg->base, type);
         } else if (auto arg = expr->to<IR::BoolLiteral>()) {
+            if (type->isSigned || type->size != 1)
+                error(ErrorType::ERR_INVALID, "%1%: Cannot cast %1% directly to %2% (use bit<1>)",
+                      arg, type);
             int v = arg->value ? 1 : 0;
             return new IR::Constant(e->srcInfo, type, v, 10);
         } else if (expr->is<IR::Member>()) {

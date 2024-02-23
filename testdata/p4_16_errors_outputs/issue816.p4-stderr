@@ -1,7 +1,7 @@
-issue816.p4(18): [--Werror=type-error] error: c1.apply: apply cannot be called from actions
+issue816.p4(18): [--Werror=type-error] error: c1.apply(): apply cannot be called from actions
         c1.apply();
         ^^^^^^^^^^
-issue816.p4(20): [--Werror=type-error] error: c2.apply: apply cannot be called from actions
+issue816.p4(20): [--Werror=type-error] error: c2.apply(): apply cannot be called from actions
         c2.apply();
         ^^^^^^^^^^
 issue816.p4(15): [--Werror=type-error] error: c1: parameter cannot have type control C

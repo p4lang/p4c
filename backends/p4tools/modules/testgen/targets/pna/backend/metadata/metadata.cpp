@@ -1,9 +1,7 @@
 #include "backends/p4tools/modules/testgen/targets/pna/backend/metadata/metadata.h"
 
-#include <algorithm>
 #include <functional>
 #include <iomanip>
-#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -20,12 +18,13 @@
 
 #include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
+#include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
 namespace P4Tools::P4Testgen::Pna {
 
-Metadata::Metadata(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
-    : TestFramework(std::move(basePath), seed) {}
+Metadata::Metadata(const TestBackendConfiguration &testBackendConfiguration)
+    : TestFramework(testBackendConfiguration) {}
 
 std::vector<std::pair<size_t, size_t>> Metadata::getIgnoreMasks(const IR::Constant *mask) {
     std::vector<std::pair<size_t, size_t>> ignoreMasks;
@@ -143,10 +142,11 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
-    if (seed) {
-        dataJson["seed"] = *seed;
+    auto optSeed = getTestBackendConfiguration().seed;
+    if (optSeed.has_value()) {
+        dataJson["seed"] = optSeed.value();
     }
-    dataJson["test_name"] = basePath.stem();
+    dataJson["test_name"] = getTestBackendConfiguration().testBaseName;
     dataJson["test_id"] = testId;
     computeTraceData(testSpec, dataJson);
 
@@ -173,16 +173,18 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
 
     LOG5("Metadata back end: emitting testcase:" << std::setw(4) << dataJson);
 
+    auto optBasePath = getTestBackendConfiguration().fileBasePath;
+    BUG_CHECK(optBasePath.has_value(), "Base path is not set.");
+    auto incrementedbasePath = optBasePath.value();
+    incrementedbasePath.concat("_" + std::to_string(testId));
+    incrementedbasePath.replace_extension(".yml");
+    metadataFile = std::ofstream(incrementedbasePath);
     inja::render_to(metadataFile, testCase, dataJson);
     metadataFile.flush();
 }
 
-void Metadata::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                          float currentCoverage) {
-    auto incrementedbasePath = basePath;
-    incrementedbasePath.concat("_" + std::to_string(testId));
-    incrementedbasePath.replace_extension(".yml");
-    metadataFile = std::ofstream(incrementedbasePath);
+void Metadata::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                               float currentCoverage) {
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }

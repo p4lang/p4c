@@ -1,7 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/target.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <vector>
 
 #include "backends/p4tools/common/lib/util.h"
@@ -12,6 +11,7 @@
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 
+#include "backends/p4tools/modules/testgen/core/compiler_target.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -65,13 +65,14 @@ const EBPFProgramInfo *EBPFTestgenTarget::produceProgramInfoImpl(
         testgenOptions.maxPktSize = 12000;
     }
 
-    return new EBPFProgramInfo(compilerResult, programmableBlocks);
+    return new EBPFProgramInfo(*compilerResult.checkedTo<TestgenCompilerResult>(),
+                               programmableBlocks);
 }
 
 EBPFTestBackend *EBPFTestgenTarget::getTestBackendImpl(
-    const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-    const std::filesystem::path &testPath) const {
-    return new EBPFTestBackend(programInfo, symbex, testPath);
+    const ProgramInfo &programInfo, const TestBackendConfiguration &testBackendConfiguration,
+    SymbolicExecutor &symbex) const {
+    return new EBPFTestBackend(programInfo, testBackendConfiguration, symbex);
 }
 
 EBPFCmdStepper *EBPFTestgenTarget::getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,

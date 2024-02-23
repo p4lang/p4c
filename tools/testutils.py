@@ -25,7 +25,9 @@ import socket
 import subprocess
 import threading
 from pathlib import Path
-from typing import NamedTuple, Optional
+from typing import Any, List, NamedTuple, Optional, Union
+
+import scapy.packet
 
 # Set up logging.
 log = logging.getLogger(__name__)
@@ -35,9 +37,6 @@ SUCCESS: int = 0
 FAILURE: int = 1
 # SKIPPED is used to indicate that a test was not executed.
 SKIPPED: int = 999
-
-
-import scapy.packet
 
 
 class LogPipe(threading.Thread):
@@ -148,12 +147,12 @@ def pick_tcp_port(addr: str, default_port: int) -> int:
     return default_port
 
 
-def open_process(args: str, **extra_args) -> Optional[subprocess.Popen]:
+def open_process(args: Union[List[str], str], **extra_args: Any) -> Optional[subprocess.Popen]:
     """Start the given argument string as a subprocess and return the handle to the process.
     @param extra_args is forwarded to the subprocess.communicate command"""
     log.info("Writing %s", args)
     proc = None
-    output_args = {
+    output_args: Any = {
         "stdout": subprocess.PIPE,
         "stdin": subprocess.PIPE,
         "stderr": subprocess.PIPE,
@@ -164,6 +163,9 @@ def open_process(args: str, **extra_args) -> Optional[subprocess.Popen]:
 
     # Only split the arguments if the shell option is not present.
     if not ("shell" in extra_args and extra_args["shell"]):
+        if not isinstance(args, str):
+            log.error("Input must be a string. Received %s.", args)
+            return None
         args = args.split()
         # Sanitize all empty strings.
         args = list(filter(None, args))
@@ -178,7 +180,7 @@ def open_process(args: str, **extra_args) -> Optional[subprocess.Popen]:
     return proc
 
 
-def run_process(proc: subprocess.Popen, **extra_args) -> subprocess.Popen:
+def run_process(proc: subprocess.Popen, **extra_args: Any) -> subprocess.Popen:
     """Wait for the given process to finish. Report failures to stderr. @param extra_args is
     forwarded to the subprocess.communicate command."""
     try:
@@ -199,7 +201,7 @@ def run_process(proc: subprocess.Popen, **extra_args) -> subprocess.Popen:
     return proc
 
 
-def exec_process(args: str, **extra_args) -> ProcessResult:
+def exec_process(args: Union[List[str], str], **extra_args: Any) -> ProcessResult:
     """Run the given argument string as a subprocess. Time out after TIMEOUT
     seconds and report failures to stderr. @param extra_args is forwarded to the subprocess.run
     command."""
@@ -208,11 +210,14 @@ def exec_process(args: str, **extra_args) -> ProcessResult:
         return ProcessResult(f"Input must be a string. Received {args}.", FAILURE)
 
     log.info("Executing command: %s", args)
-    output_args = {"timeout": TIMEOUT, "universal_newlines": True}
+    output_args: Any = {"timeout": TIMEOUT, "universal_newlines": True}
     output_args = {**output_args, **extra_args}
 
     # Only split the arguments if the shell option is not present.
     if not ("shell" in extra_args and extra_args["shell"]):
+        if not isinstance(args, str):
+            log.error("Input must be a string. Received %s.", args)
+            return None
         args = args.split()
         # Sanitize all empty strings.
         args = list(filter(None, args))
@@ -313,7 +318,7 @@ def check_and_create_dir(directory: Path) -> None:
         directory.mkdir(parents=True, exist_ok=True)
 
 
-def del_dir(directory: str) -> None:
+def del_dir(directory: Path) -> None:
     """Delete a directory and all its children.
     TODO: Convert to Path input."""
     try:
@@ -326,7 +331,7 @@ def del_dir(directory: str) -> None:
         )
 
 
-def copy_file(src, dst):
+def copy_file(src: Union[List, Union[Path, str]], dst: Union[Path, str]) -> None:
     """Copy a file or a list of files to a destination."""
     try:
         if isinstance(src, list):

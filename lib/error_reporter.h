@@ -104,7 +104,7 @@ class ErrorReporter {
         typename... Args>
     void diagnose(DiagnosticAction action, const int errorCode, const char *format,
                   const char *suffix, const T *node, Args... args) {
-        if (!error_reported(errorCode, node->getSourceInfo())) {
+        if (node && !error_reported(errorCode, node->getSourceInfo())) {
             const char *name = get_error_name(errorCode);
             auto da = getDiagnosticAction(name, action);
             if (name)
@@ -231,10 +231,12 @@ class ErrorReporter {
     /// @return the action to take for the given diagnostic, falling back to the
     /// default action if it wasn't overridden via the command line or a pragma.
     DiagnosticAction getDiagnosticAction(cstring diagnostic, DiagnosticAction defaultAction) {
+        // Actions for errors can never be overridden.
+        if (defaultAction == DiagnosticAction::Error) return defaultAction;
         auto it = diagnosticActions.find(diagnostic);
         if (it != diagnosticActions.end()) return it->second;
         // if we're dealing with warnings and they have been globally modified
-        // (ingnored or turned into errors), then return the global default
+        // (ignored or turned into errors), then return the global default
         if (defaultAction == DiagnosticAction::Warn &&
             defaultWarningDiagnosticAction != DiagnosticAction::Warn)
             return defaultWarningDiagnosticAction;

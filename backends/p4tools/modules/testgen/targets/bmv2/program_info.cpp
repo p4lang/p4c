@@ -25,18 +25,16 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/options.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/bmv2.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/concolic.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/map_direct_externs.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
 const IR::Type_Bits Bmv2V1ModelProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
 
 Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
-    const CompilerResult &compilerResult,
+    const BMv2V1ModelCompilerResult &compilerResult,
     ordered_map<cstring, const IR::Type_Declaration *> inputBlocks,
     std::map<int, int> declIdToGress)
     : ProgramInfo(compilerResult),
@@ -76,25 +74,10 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
     const IR::Expression *constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
                     IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, minPktSize));
-    // Vector containing pairs of restrictions and nodes to which these restrictions apply.
-    std::vector<std::vector<const IR::Expression *>> restrictionsVec;
-    // Defines all "entry_restriction" and then converts restrictions from string to IR
-    // expressions, and stores them in restrictionsVec to move targetConstraints further.
-    compilerResult.getProgram().apply(AssertsParser::AssertsParser(restrictionsVec));
-    // Defines all "refers_to" and then converts restrictions from string to IR expressions,
-    // and stores them in restrictionsVec to move targetConstraints further.
-    compilerResult.getProgram().apply(RefersToParser::RefersToParser(restrictionsVec));
-    for (const auto &element : restrictionsVec) {
-        for (const auto *restriction : element) {
-            constraint = new IR::LAnd(constraint, restriction);
-        }
+
+    for (const auto &restriction : compilerResult.getP4ConstraintsRestrictions()) {
+        constraint = new IR::LAnd(constraint, restriction);
     }
-    // Try to map all instances of direct externs to the table they are attached to.
-    // Save the map in @var directExternMap.
-    auto directExternMapper = MapDirectExterns();
-    compilerResult.getProgram().apply(directExternMapper);
-    auto mappedDirectExterns = directExternMapper.getdirectExternMap();
-    directExternMap.insert(mappedDirectExterns.begin(), mappedDirectExterns.end());
 
     /// Finally, set the target constraints.
     targetConstraints = constraint;
@@ -102,6 +85,7 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
 
 const IR::P4Table *Bmv2V1ModelProgramInfo::getTableofDirectExtern(
     const IR::IDeclaration *directExternDecl) const {
+    const auto &directExternMap = getCompilerResult().getDirectExternMap();
     auto it = directExternMap.find(directExternDecl);
     if (it == directExternMap.end()) {
         BUG("No table associated with this direct extern %1%. The extern should have been removed.",
@@ -240,6 +224,14 @@ const IR::PathExpression *Bmv2V1ModelProgramInfo::getBlockParam(cstring blockLab
     auto archIndex = archSpec.getBlockIndex(blockLabel);
     auto archRef = archSpec.getParamName(archIndex, paramIndex);
     return new IR::PathExpression(paramType, new IR::Path(archRef));
+}
+
+const BMv2V1ModelCompilerResult &Bmv2V1ModelProgramInfo::getCompilerResult() const {
+    return *ProgramInfo::getCompilerResult().checkedTo<BMv2V1ModelCompilerResult>();
+}
+
+P4::P4RuntimeAPI Bmv2V1ModelProgramInfo::getP4RuntimeAPI() const {
+    return getCompilerResult().getP4RuntimeApi();
 }
 
 const IR::Member *Bmv2V1ModelProgramInfo::getParserParamVar(const IR::P4Parser *parser,

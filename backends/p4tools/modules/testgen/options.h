@@ -2,6 +2,7 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_OPTIONS_H_
 
 #include <cstdint>
+#include <optional>
 #include <set>
 #include <string>
 
@@ -71,6 +72,9 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// Enforces the test generation of tests with mandatory output packet.
     bool outputPacketOnly = false;
 
+    /// Enforces the test generation of tests with mandatory dropped packet.
+    bool droppedPacketOnly = false;
+
     /// Add conditions defined in assert/assume to the path conditions.
     /// Only tests which satisfy these conditions can be generated. This is active by default.
     bool enforceAssumptions = true;
@@ -89,6 +93,10 @@ class TestgenOptions : public AbstractP4cToolOptions {
 
     /// Specifies minimum coverage that needs to be achieved for P4Testgen to exit successfully.
     float minCoverage = 0;
+
+    /// The base name of the tests which are generated.
+    /// Defaults to the name of the input program, if provided.
+    std::optional<cstring> testBaseName;
 
     const char *getIncludePath() override;
 

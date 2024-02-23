@@ -106,6 +106,7 @@ P4::FrontEnd CompilerTarget::mkFrontEnd() const { return {}; }
 MidEnd CompilerTarget::mkMidEnd(const CompilerOptions &options) const {
     MidEnd midEnd(options);
     midEnd.addDefaultPasses();
+    midEnd.setStopOnError(true);
     return midEnd;
 }
 

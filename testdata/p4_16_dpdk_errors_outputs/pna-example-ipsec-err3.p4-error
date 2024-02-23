@@ -1,4 +1,4 @@
-pna-example-ipsec-err3.p4(144): [--Werror=type-error] error: ipsec.set_sa_index
+pna-example-ipsec-err3.p4(144): [--Werror=type-error] error: 'ipsec.set_sa_index(sa_index)'
   ipsec.set_sa_index<bit<32>, bit<8>>(sa_index);
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:

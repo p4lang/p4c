@@ -1,4 +1,4 @@
-not_bound.p4(36): [--Werror=uninitialized] error: action set_nhop: parameter port must be bound
+not_bound.p4(36): [--Werror=uninitialized] error: action set_nhop(): parameter port must be bound
         set_nhop(); // parameter not bound
         ^^^^^^^^^^
 not_bound.p4(32)

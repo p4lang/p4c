@@ -43,7 +43,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           bool first = true;
           if (auto parent = cl->getParent()) {
               if (parent->name == "Node")
-                  buf << "typeid(*this) == typeid(a)";
+                  buf << "this->typeId() == a.typeId()";
               else
                   buf << parent->qualified_name(cl->containedIn)
                       << "::operator==(static_cast<const "
@@ -82,7 +82,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           if (auto parent = cl->getParent()) {
               if (parent->name == "Node") {
                   buf << cl->indent << cl->indent
-                      << "if (typeid(*this) != typeid(a_)) "
+                      << "if (this->typeId() != a_.typeId()) "
                          "return false;\n";
               } else {
                   buf << cl->indent << cl->indent << "if (!"

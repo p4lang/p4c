@@ -135,7 +135,7 @@ namespace std {
 template <>
 struct hash<table_entry> {
     std::size_t operator()(const table_entry &entry) const {
-        return Util::Hash::murmur(entry.string(), entry.length());
+        return Util::hash(entry.string(), entry.length());
     }
 };
 }  // namespace std

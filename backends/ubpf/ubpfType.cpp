@@ -179,7 +179,7 @@ UBPFListType::UBPFListType(const IR::Type_List *lst) : EBPFType(lst) {
     // The first iteration is to compute total width of Type_List.
     for (auto el : lst->components) {
         auto ltype = UBPFTypeFactory::instance->create(el);
-        auto wt = dynamic_cast<IHasWidth *>(ltype);
+        auto wt = ltype->to<EBPF::IHasWidth>();
         if (wt == nullptr) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "UBPF: Unsupported type in Type_List: %s",
                     el->getP4Type());

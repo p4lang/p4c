@@ -181,6 +181,14 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
         },
         "Provides a randomization seed");
 
+    registerOption(
+        "--disable-info-logging", nullptr,
+        [this](const char * /*arg*/) {
+            disableInformationLogging = true;
+            return true;
+        },
+        "Disable printing of information messages to standard output.");
+
     for (const auto &optionSpec : inheritedCompilerOptions) {
         registerOption(
             optionSpec.option, optionSpec.argName,

@@ -1,4 +1,4 @@
-table-entries-lpm.p4(72): [--Werror=type-error] error: Entry
+table-entries-lpm.p4(72): [--Werror=type-error] error: 'Entry'
             (0x1, 0x11 &&& 0xF0): a(); // invalid keyset
             ^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:

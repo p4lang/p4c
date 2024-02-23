@@ -1,0 +1,4 @@
+type-in-expr-lex1.p4(8):syntax error, unexpected ;, expecting (
+        var = buf > H;
+                     ^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

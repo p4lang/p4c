@@ -1,0 +1,12 @@
+type-in-expr.p4(5): [--Werror=type-error] error: H: Type cannot be used here, expecting an expression.
+@foo[bar=4<H]
+           ^
+type-in-expr.p4(5): [--Werror=type-error] error: 4 < H: structured annotation must be compile-time constant values
+@foo[bar=4<H]
+         ^^^
+type-in-expr.p4(5): [--Werror=type-error] error: H: Type cannot be used here, expecting an expression.
+@foo[bar=4<H]
+           ^
+type-in-expr.p4(6): [--Werror=type-error] error: Error while analyzing control p
+control p<H>(in H hdrs, out bool flag)
+        ^

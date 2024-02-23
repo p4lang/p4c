@@ -20,12 +20,13 @@
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/test_framework.h"
+#include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
 namespace P4Tools::P4Testgen::Pna {
 
-PTF::PTF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
-    : TestFramework(std::move(basePath), seed) {}
+PTF::PTF(const TestBackendConfiguration &testBackendConfiguration)
+    : TestFramework(testBackendConfiguration) {}
 
 std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *mask) {
     std::vector<std::pair<size_t, size_t>> ignoreMasks;
@@ -282,9 +283,10 @@ class AbstractTest(bt.P4RuntimeTest):
 )""");
 
     inja::json dataJson;
-    dataJson["test_name"] = basePath.stem();
-    if (seed) {
-        dataJson["seed"] = *seed;
+    dataJson["test_name"] = getTestBackendConfiguration().testBaseName;
+    auto optSeed = getTestBackendConfiguration().seed;
+    if (optSeed.has_value()) {
+        dataJson["seed"] = optSeed.value();
     }
 
     inja::render_to(ptfFileStream, PREAMBLE, dataJson);
@@ -396,19 +398,20 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
 
     LOG5("PTF backend: emitting testcase:" << std::setw(4) << dataJson);
 
-    inja::render_to(ptfFileStream, testCase, dataJson);
-    ptfFileStream.flush();
-}
-
-void PTF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                     float currentCoverage) {
     if (!preambleEmitted) {
-        auto ptfFile = basePath;
+        BUG_CHECK(getTestBackendConfiguration().fileBasePath.has_value(), "Base path is not set.");
+        auto ptfFile = getTestBackendConfiguration().fileBasePath.value();
         ptfFile.replace_extension(".py");
         ptfFileStream = std::ofstream(ptfFile);
         emitPreamble();
         preambleEmitted = true;
     }
+    inja::render_to(ptfFileStream, testCase, dataJson);
+    ptfFileStream.flush();
+}
+
+void PTF::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                          float currentCoverage) {
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }

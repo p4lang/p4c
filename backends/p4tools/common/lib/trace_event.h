@@ -34,6 +34,8 @@ class TraceEvent : public ICastable {
  protected:
     /// Prints this trace event to the given ostream.
     virtual void print(std::ostream &) const = 0;
+
+    DECLARE_TYPEINFO(TraceEvent);
 };
 
 }  // namespace P4Tools

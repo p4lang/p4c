@@ -31,9 +31,10 @@ const big_int EBPFTestBackend::ZERO_PKT_VAL = 0x2000000;
 const big_int EBPFTestBackend::ZERO_PKT_MAX = 0xffffffff;
 const std::vector<std::string> EBPFTestBackend::SUPPORTED_BACKENDS = {"STF"};
 
-EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                 const std::filesystem::path &testPath)
-    : TestBackEnd(programInfo, symbex) {
+EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo,
+                                 const TestBackendConfiguration &testBackendConfiguration,
+                                 SymbolicExecutor &symbex)
+    : TestBackEnd(programInfo, testBackendConfiguration, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
     if (testBackendString.isNullOrEmpty()) {
         ::error(
@@ -44,7 +45,7 @@ EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo, SymbolicExecuto
     }
 
     if (testBackendString == "STF") {
-        testWriter = new STF(testPath.c_str(), TestgenOptions::get().seed);
+        testWriter = new STF(testBackendConfiguration);
     } else {
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",

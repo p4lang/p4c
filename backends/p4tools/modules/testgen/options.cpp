@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <iostream>
 #include <iterator>
 #include <map>
 #include <stdexcept>
@@ -12,7 +11,6 @@
 #include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/options.h"
 #include "lib/error.h"
-#include "lib/exceptions.h"
 
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 
@@ -218,7 +216,21 @@ TestgenOptions::TestgenOptions()
             }
             return true;
         },
-        "Produced tests must have an output packet.");
+        "Produced tests must have an output packet as outcome.");
+
+    registerOption(
+        "--dropped-packet-only", nullptr,
+        [this](const char *) {
+            droppedPacketOnly = true;
+            if (!selectedBranches.empty()) {
+                ::error(
+                    "--input-branches cannot guarantee --dropped-packet-only."
+                    " Aborting.");
+                return false;
+            }
+            return true;
+        },
+        "Produced tests must have a dropped packet as outcome.");
 
     registerOption(
         "--path-selection", "pathSelectionPolicy",
@@ -366,6 +378,14 @@ TestgenOptions::TestgenOptions()
             return true;
         },
         "List of the selected branches which should be chosen for selection.");
+
+    registerOption(
+        "--test-name", "testBaseName",
+        [this](const char *arg) {
+            testBaseName = arg;
+            return true;
+        },
+        "The base name of the tests which are generated.");
 
     registerOption(
         "--disable-assumption-mode", nullptr,

@@ -1,4 +1,4 @@
-constructor3_e.p4(22): [--Werror=type-error] error: e
+constructor3_e.p4(22): [--Werror=type-error] error: 'e'
     E(true) e;
             ^
   ---- Actual error:

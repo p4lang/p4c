@@ -71,7 +71,7 @@ if(NOT ${CLANG_FORMAT_CMD})
     set(CLANG_FORMAT_CMD clang-format)
     add_custom_target(
       clang-format
-      COMMAND xargs -a ${CLANG_FORMAT_TXT_FILE} -r -d '\;' ${CLANG_FORMAT_CMD} --verbose --Werror --dry-run -i --
+      COMMAND xargs -a ${CLANG_FORMAT_TXT_FILE} -r -d '\;' ${CLANG_FORMAT_CMD} --verbose --Werror --dry-run -i -- || (echo ${RED}clang-format failed. Run \"make clang-format-fix-errors\" to fix the complaints.${COLOURRESET} && false)
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Checking files for correct clang-format formatting."
     )
@@ -117,7 +117,7 @@ if(NOT ${BLACK_CMD} OR NOT (NOT ${ISORT_CMD}))
     set(BLACK_CMD black)
     add_custom_target(
       black
-      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${BLACK_CMD} --check --diff --
+      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${BLACK_CMD} --check --diff -- || (echo ${RED}black failed. Run \"make black-fix-errors\" to fix the complaints.${COLOURRESET} && false)
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Checking files for correct black formatting."
     )
@@ -129,7 +129,7 @@ if(NOT ${BLACK_CMD} OR NOT (NOT ${ISORT_CMD}))
     )
     add_custom_target(
       isort
-      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${ISORT_CMD} --check --diff --
+      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${ISORT_CMD} --check --diff -- || (echo ${RED}isort failed. Run \"make isort-fix-errors\" to fix the complaints.${COLOURRESET} && false)
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Checking files for correct isort formatting."
     )

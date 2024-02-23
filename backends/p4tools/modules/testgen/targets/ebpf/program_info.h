@@ -1,8 +1,6 @@
 #ifndef TESTGEN_TARGETS_EBPF_PROGRAM_INFO_H_
 #define TESTGEN_TARGETS_EBPF_PROGRAM_INFO_H_
 
-#include <stddef.h>
-
 #include <vector>
 
 #include "ir/ir.h"
@@ -29,7 +27,7 @@ class EBPFProgramInfo : public ProgramInfo {
                                                           size_t blockIdx) const;
 
  public:
-    EBPFProgramInfo(const CompilerResult &compilerResult,
+    EBPFProgramInfo(const TestgenCompilerResult &compilerResult,
                     ordered_map<cstring, const IR::Type_Declaration *> inputBlocks);
 
     /// @see ProgramInfo::getArchSpec
@@ -49,6 +47,8 @@ class EBPFProgramInfo : public ProgramInfo {
 
     /// @see ProgramInfo::getArchSpec
     static const ArchSpec ARCH_SPEC;
+
+    DECLARE_TYPEINFO(EBPFProgramInfo, ProgramInfo);
 };
 
 }  // namespace P4Tools::P4Testgen::EBPF

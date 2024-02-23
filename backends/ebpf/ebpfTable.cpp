@@ -541,7 +541,7 @@ void EBPFTable::emitAction(CodeBuilder *builder, cstring valueName, cstring acti
         builder->target->emitTraceMessage(builder, msgStr.c_str());
         for (auto param : *(action->parameters)) {
             auto etype = EBPFTypeFactory::instance->create(param->type);
-            unsigned width = dynamic_cast<IHasWidth *>(etype)->widthInBits();
+            unsigned width = etype->as<IHasWidth>().widthInBits();
 
             if (width <= 64) {
                 convStr = Util::printf_format("(unsigned long long) (%s->u.%s.%s)", valueName, name,

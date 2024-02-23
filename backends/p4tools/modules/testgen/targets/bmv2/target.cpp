@@ -15,6 +15,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/bmv2.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/expr_stepper.h"
@@ -65,13 +66,15 @@ const Bmv2V1ModelProgramInfo *Bmv2V1ModelTestgenTarget::produceProgramInfoImpl(
         }
     }
 
-    return new Bmv2V1ModelProgramInfo(compilerResult, programmableBlocks, declIdToGress);
+    return new Bmv2V1ModelProgramInfo(*compilerResult.checkedTo<BMv2V1ModelCompilerResult>(),
+                                      programmableBlocks, declIdToGress);
 }
 
 Bmv2TestBackend *Bmv2V1ModelTestgenTarget::getTestBackendImpl(
-    const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-    const std::filesystem::path &testPath) const {
-    return new Bmv2TestBackend(programInfo, symbex, testPath);
+    const ProgramInfo &programInfo, const TestBackendConfiguration &testBackendConfiguration,
+    SymbolicExecutor &symbex) const {
+    return new Bmv2TestBackend(*programInfo.checkedTo<Bmv2V1ModelProgramInfo>(),
+                               testBackendConfiguration, symbex);
 }
 
 Bmv2V1ModelCmdStepper *Bmv2V1ModelTestgenTarget::getCmdStepperImpl(

@@ -1,6 +1,7 @@
 #include "ir/indexed_vector.h"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+
 #include "ir/ir.h"
 
 namespace Test {

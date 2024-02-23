@@ -18,6 +18,7 @@
 #include "lib/exceptions.h"
 
 #include "backends/p4tools/modules/testgen//lib/exceptions.h"
+#include "backends/p4tools/modules/testgen/core/compiler_target.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
@@ -31,7 +32,7 @@ namespace P4Tools::P4Testgen::EBPF {
 
 const IR::Type_Bits EBPFProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
 
-EBPFProgramInfo::EBPFProgramInfo(const CompilerResult &compilerResult,
+EBPFProgramInfo::EBPFProgramInfo(const TestgenCompilerResult &compilerResult,
                                  ordered_map<cstring, const IR::Type_Declaration *> inputBlocks)
     : ProgramInfo(compilerResult), programmableBlocks(std::move(inputBlocks)) {
     concolicMethodImpls.add(*EBPFConcolic::getEBPFConcolicMethodImpls());

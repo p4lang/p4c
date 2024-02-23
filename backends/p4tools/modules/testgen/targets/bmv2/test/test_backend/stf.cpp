@@ -81,8 +81,9 @@ TEST_F(STFTest, Stf01) {
     auto testSpec = TestSpec(ingressPacket, egressPacket, {});
     testSpec.addTestObject("tables", "SwitchIngress.forward", &fwdConfig);
 
-    auto testWriter = STF("test01", 1);
-    testWriter.outputTest(&testSpec, "", 1, 0);
+    TestBackendConfiguration testBackendConfiguration{"test01", 1, "test01", 1};
+    auto testWriter = STF(testBackendConfiguration);
+    testWriter.writeTestToFile(&testSpec, "", 1, 0);
 }
 
 /// Create a test spec with two Exact matches and print an stf test.
@@ -111,8 +112,9 @@ TEST_F(STFTest, Stf02) {
     testSpec.addTestObject("tables", "SwitchIngress.forward", &fwdConfig);
     testSpec.addTestObject("tables", "SwitchIngress.ipRoute", &ipRouteConfig);
 
-    auto testWriter = STF("test02", 2);
-    testWriter.outputTest(&testSpec, "", 2, 0);
+    TestBackendConfiguration testBackendConfiguration{"test02", 1, "test02", 2};
+    auto testWriter = STF(testBackendConfiguration);
+    testWriter.writeTestToFile(&testSpec, "", 2, 0);
 }
 
 TableConfig STFTest::gettest1TableConfig() {
@@ -155,9 +157,10 @@ TEST_F(STFTest, Stf03) {
     auto testSpec = TestSpec(ingressPacket, egressPacket, {});
     testSpec.addTestObject("tables", "test1", &test1Config);
 
-    auto testWriter = STF("test03", 3);
+    TestBackendConfiguration testBackendConfiguration{"test03", 1, "test03", 3};
+    auto testWriter = STF(testBackendConfiguration);
     try {
-        testWriter.outputTest(&testSpec, "", 3, 0);
+        testWriter.writeTestToFile(&testSpec, "", 3, 0);
     } catch (const Util::CompilerBug &e) {
         EXPECT_THAT(e.what(), HasSubstr("Unimplemented for Ternary FieldMatch"));
     }
@@ -222,9 +225,10 @@ TEST_F(STFTest, Stf04) {
     auto testSpec = TestSpec(ingressPacket, egressPacket, {});
     testSpec.addTestObject("tables", "test1", &test1Config);
 
-    auto testWriter = STF("test04", 4);
+    TestBackendConfiguration testBackendConfiguration{"test04", 1, "test04", 4};
+    auto testWriter = STF(testBackendConfiguration);
     try {
-        testWriter.outputTest(&testSpec, "", 4, 0);
+        testWriter.writeTestToFile(&testSpec, "", 4, 0);
     } catch (const Util::CompilerBug &e) {
         EXPECT_THAT(e.what(), HasSubstr("Unimplemented for Ternary FieldMatch"));
     }

@@ -1,7 +1,7 @@
 issue2021.p4(8): [--Werror=type-error] error: Expression .x cannot be the target of an assignment
         .x = 8w3;
          ^
-issue2021.p4(9): [--Werror=type-error] error: f
+issue2021.p4(9): [--Werror=type-error] error: 'f(8w1)'
         f(.x);
         ^^^^^
   ---- Actual error:

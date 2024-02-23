@@ -33,19 +33,19 @@ bool StackVariable::operator==(const StackVariable &other) const {
 size_t StackVariableHash::operator()(const StackVariable &var) const {
     // hash for path expression.
     if (const auto *path = var.variable->to<IR::PathExpression>()) {
-        return Util::Hash::fnv1a<const cstring>(path->path->name.name);
+        return Util::Hash{}(path->path->name.name);
     }
     const IR::Member *curMember = var.variable->to<IR::Member>();
-    std::vector<size_t> h;
+    uint64_t hash = UINT64_C(0xDEADBEEF);
     while (curMember) {
-        h.push_back(Util::Hash::fnv1a<const cstring>(curMember->member.name));
+        hash = Util::hash_combine(hash, curMember->member.name);
         if (auto *path = curMember->expr->to<IR::PathExpression>()) {
-            h.push_back(Util::Hash::fnv1a<const cstring>(path->path->name));
+            hash = Util::hash_combine(hash, path->path->name.name);
             break;
         }
         curMember = curMember->expr->checkedTo<IR::Member>();
     }
-    return Util::Hash::fnv1a(h.data(), sizeof(size_t) * h.size());
+    return hash;
 }
 
 /// The main class for parsers' states key for visited checking.
@@ -505,7 +505,7 @@ class ParserSymbolicInterpreter {
             }
             std::stringstream errorStr;
             errorStr << errorValue;
-            ::warning(ErrorType::WARN_IGNORE_PROPERTY, "Result of %1% is not defined: %2%", sord,
+            ::warning(ErrorType::WARN_IGNORE_PROPERTY, "Result of '%1%' is not defined: %2%", sord,
                       errorStr.str());
         }
         ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,

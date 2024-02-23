@@ -101,6 +101,8 @@ class EBPFControlPSA : public EBPFControl {
         BUG_CHECK(result != nullptr, "No meter named %1%", name);
         return result;
     }
+
+    DECLARE_TYPEINFO(EBPFControlPSA, EBPFControl);
 };
 
 }  // namespace EBPF

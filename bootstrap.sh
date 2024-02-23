@@ -15,8 +15,14 @@
 
 set -e  # exit on error
 
+if type -p grealpath >/dev/null 2>/dev/null; then
+    realpath=grealpath
+else
+    realpath=realpath
+fi
+
 mydir=`dirname $0`
-mydir=`realpath $mydir`
+mydir=`$realpath $mydir`
 cd $mydir
 
 BuildType=Debug
@@ -99,10 +105,10 @@ make_relative_link ()
     local link_name="${2:?make_relative_link: Argument 2 should be the link name.}"
     local link_name_dir="$(dirname "${link_name}")"
     mkdir -p "${link_name_dir}/"
-    ln -sf "$(realpath --relative-to "${link_name_dir}/" "${target}")" "${link_name}"
+    ln -sf "$($realpath --relative-to "${link_name_dir}/" "${target}")" "${link_name}"
 }
 
 make_relative_link "${mydir}/.gdbinit" "backends/bmv2/p4c-bm2-psa-gdb.gdb"
 make_relative_link "${mydir}/.gdbinit" "backends/bmv2/p4c-bm2-ss-gdb.gdb"
 make_relative_link "${mydir}/.gdbinit" "backends/dpdk/p4c-dpdk-gdb.gdb"
-make_relative_link "${mydir}/.gdbinit" "backends/dpdk/p4test-gdb.gdb"
+make_relative_link "${mydir}/.gdbinit" "backends/p4test/p4test-gdb.gdb"

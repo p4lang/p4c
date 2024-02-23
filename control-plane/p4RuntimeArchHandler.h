@@ -17,6 +17,12 @@ limitations under the License.
 #ifndef CONTROL_PLANE_P4RUNTIMEARCHHANDLER_H_
 #define CONTROL_PLANE_P4RUNTIMEARCHHANDLER_H_
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include <google/protobuf/util/json_util.h>
+#pragma GCC diagnostic pop
+
 #include <optional>
 #include <set>
 
@@ -71,6 +77,10 @@ class P4RuntimeSymbolType {
     }
     static P4RuntimeSymbolType P4RT_CONTROLLER_HEADER() {
         return P4RuntimeSymbolType(::p4::config::v1::P4Ids::CONTROLLER_HEADER);
+    }
+
+    static P4RuntimeSymbolType P4RT_OTHER_EXTERNS_START() {
+        return P4RuntimeSymbolType(::p4::config::v1::P4Ids::OTHER_EXTERNS_START);
     }
 
     bool operator==(const P4RuntimeSymbolType &other) const { return id == other.id; }
@@ -180,6 +190,9 @@ class P4RuntimeArchHandlerIface {
                                   const IR::ExternBlock *externBlock) = 0;
     /// called when processing annotations via setPreamble
     virtual bool filterAnnotations(cstring anno) = 0;
+
+    /// Control how JSON is output
+    virtual google::protobuf::util::JsonPrintOptions getJsonPrintOptions() = 0;
 };
 
 /// A functor interface that needs to be implemented for each

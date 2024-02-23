@@ -8,11 +8,11 @@ struct __attribute__((__packed__)) ingress_nh_table_key {
     u32 maskid;
     u32 field0; /* hdr.ipv4.srcAddr */
     u32 field1; /* hdr.ipv4.dstAddr */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAX_INGRESS_NH_TABLE_KEY_MASKS 128
 struct ingress_nh_table_key_mask {
     __u8 mask[sizeof(struct ingress_nh_table_key)];
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH 1
 #define INGRESS_NH_TABLE_ACT_INGRESS_DROP 2
 struct __attribute__((__packed__)) ingress_nh_table_value {
@@ -31,40 +31,6 @@ struct __attribute__((__packed__)) ingress_nh_table_value {
     } u;
 };
 
-REGISTER_START()
-REGISTER_TABLE(hdr_md_cpumap, BPF_MAP_TYPE_PERCPU_ARRAY, u32, struct hdr_md, 2)
-BPF_ANNOTATE_KV_PAIR(hdr_md_cpumap, u32, struct hdr_md)
-REGISTER_END()
-
-SEC("xdp/xdp-ingress")
-int xdp_func(struct xdp_md *skb) {
-        void *data_end = (void *)(long)skb->data_end;
-    struct ethhdr *eth = (struct ethhdr *)(long)skb->data;
-    if ((void *)((struct ethhdr *) eth + 1) > data_end) {
-        return XDP_ABORTED;
-    }
-    if (eth->h_proto == bpf_htons(0x0800) || eth->h_proto == bpf_htons(0x86DD)) {
-        return XDP_PASS;
-    }
-
-    struct internal_metadata *meta;
-    int ret = bpf_xdp_adjust_meta(skb, -(int)sizeof(*meta));
-    if (ret < 0) {
-        return XDP_ABORTED;
-    }
-    meta = (struct internal_metadata *)(unsigned long)skb->data_meta;
-    eth = (void *)(long)skb->data;
-    data_end = (void *)(long)skb->data_end;
-    if ((void *) ((struct internal_metadata *) meta + 1) > (void *)(long)skb->data)
-        return XDP_ABORTED;
-    if ((void *)((struct ethhdr *) eth + 1) > data_end) {
-        return XDP_ABORTED;
-    }
-    meta->pkt_ether_type = eth->h_proto;
-    eth->h_proto = bpf_htons(0x0800);
-
-    return XDP_PASS;
-}
 static __always_inline int process(struct __sk_buff *skb, struct my_ingress_headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
@@ -72,6 +38,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
     unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
+    u8* hdr_start = pkt;
     void* ebpf_packetEnd = ((void*)(long)skb->data_end);
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
@@ -157,7 +124,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             outHeaderLength += 160;
         }
 ;
-        int outHeaderOffset = BYTES(outHeaderLength) - BYTES(ebpf_packetOffsetInBits);
+        int outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
         if (outHeaderOffset != 0) {
             int returnCode = 0;
             returnCode = bpf_skb_adjust_room(skb, outHeaderOffset, 1, 0);
@@ -287,7 +254,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
     }
     return -1;
 }
-SEC("classifier/tc-ingress")
+SEC("p4tc/main")
 int tc_ingress_func(struct __sk_buff *skb) {
     struct pna_global_metadata *compiler_meta__ = (struct pna_global_metadata *) skb->cb;
     if (compiler_meta__->pass_to_kernel == true) return TC_ACT_OK;

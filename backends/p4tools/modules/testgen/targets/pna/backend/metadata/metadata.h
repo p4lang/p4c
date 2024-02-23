@@ -25,21 +25,17 @@ class Metadata : public TestFramework {
     std::ofstream metadataFile;
 
  public:
-    virtual ~Metadata() = default;
-
+    ~Metadata() override = default;
     Metadata(const Metadata &) = delete;
-
     Metadata(Metadata &&) = delete;
-
     Metadata &operator=(const Metadata &) = delete;
-
     Metadata &operator=(Metadata &&) = delete;
 
-    Metadata(std::filesystem::path basePath, std::optional<unsigned int> seed);
+    explicit Metadata(const TestBackendConfiguration &testBackendConfiguration);
 
     /// Produce a Metadata test.
-    void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
-                    float currentCoverage) override;
+    void writeTestToFile(const TestSpec *spec, cstring selectedBranches, size_t testId,
+                         float currentCoverage) override;
 
  private:
     /// Emits the test preamble. This is only done once for all generated tests.

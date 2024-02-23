@@ -12,6 +12,7 @@
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
+#include "backends/p4tools/modules/testgen/core/compiler_target.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
@@ -22,7 +23,7 @@
 namespace P4Tools::P4Testgen::Pna {
 
 PnaDpdkProgramInfo::PnaDpdkProgramInfo(
-    const CompilerResult &compilerResult,
+    const TestgenCompilerResult &compilerResult,
     ordered_map<cstring, const IR::Type_Declaration *> inputBlocks)
     : SharedPnaProgramInfo(compilerResult, std::move(inputBlocks)) {
     concolicMethodImpls.add(*PnaDpdkConcolic::getPnaDpdkConcolicMethodImpls());

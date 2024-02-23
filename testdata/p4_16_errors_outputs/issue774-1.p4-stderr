@@ -1,4 +1,4 @@
-issue774-1.p4(7): [--Werror=type-error] error: f
+issue774-1.p4(7): [--Werror=type-error] error: 'f(DefaultExpression)'
         f(_);
         ^^^^
   ---- Actual error:

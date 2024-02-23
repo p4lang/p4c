@@ -97,7 +97,7 @@ class NameMap : public Node {
     template <class U>
     const U *get(cstring name) const {
         for (auto it = symbols.find(name); it != symbols.end() && it->first == name; it++)
-            if (auto rv = dynamic_cast<const U *>(it->second)) return rv;
+            if (auto rv = it->second->template to<U>()) return rv;
         return nullptr;
     }
     void add(cstring name, const T *n) {
@@ -133,7 +133,7 @@ class NameMap : public Node {
     bool operator==(const NameMap &a) const { return symbols == a.symbols; }
     bool equiv(const Node &a_) const override {
         if (static_cast<const Node *>(this) == &a_) return true;
-        if (typeid(*this) != typeid(a_)) return false;
+        if (this->typeId() != a_.typeId()) return false;
         auto &a = static_cast<const NameMap<T, MAP, COMP, ALLOC> &>(a_);
         if (size() != a.size()) return false;
         auto it = a.begin();
@@ -157,6 +157,8 @@ class NameMap : public Node {
         std::function<bool(const T *)> filter = [](const T *d) { return d->template is<S>(); };
         return valueEnumerator()->where(filter)->template as<const S *>();
     }
+
+    DECLARE_TYPEINFO(NameMap, Node);
 };
 
 }  // namespace IR

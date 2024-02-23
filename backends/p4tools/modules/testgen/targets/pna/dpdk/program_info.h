@@ -21,7 +21,7 @@ class PnaDpdkProgramInfo : public SharedPnaProgramInfo {
                                                           size_t blockIdx) const;
 
  public:
-    PnaDpdkProgramInfo(const CompilerResult &compilerResult,
+    PnaDpdkProgramInfo(const TestgenCompilerResult &compilerResult,
                        ordered_map<cstring, const IR::Type_Declaration *> inputBlocks);
 
     /// @see ProgramInfo::getArchSpec
@@ -29,6 +29,8 @@ class PnaDpdkProgramInfo : public SharedPnaProgramInfo {
 
     /// @see ProgramInfo::getArchSpec
     static const ArchSpec ARCH_SPEC;
+
+    DECLARE_TYPEINFO(PnaDpdkProgramInfo, SharedPnaProgramInfo);
 };
 
 }  // namespace P4Tools::P4Testgen::Pna

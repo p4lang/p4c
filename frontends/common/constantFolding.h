@@ -23,6 +23,18 @@ limitations under the License.
 
 namespace P4 {
 
+/// A policy for constant folding that allows customization of the folding.
+/// Currently we only have hook for customizing IR::PathExpression, but more can be added.
+/// Each hook takes a visitor and a node and is called from the visitor's preorder function on that
+/// node. If the hook returns a non-null value, so will the preorder. Otherwise the preorder
+/// continues with its normal processing. The hooks can be stateful, they are non-const member
+/// functions.
+class ConstantFoldingPolicy {
+ public:
+    /// The default hook does not modify anything.
+    virtual const IR::Node *hook(Visitor &, IR::PathExpression *) { return nullptr; }
+};
+
 /** @brief statically evaluates many constant expressions.
  *
  * This pass can be invoked either with or without the `refMap` and
@@ -45,6 +57,8 @@ namespace P4 {
  */
 class DoConstantFolding : public Transform {
  protected:
+    ConstantFoldingPolicy *policy;
+
     /// Used to resolve IR nodes to declarations.
     /// If `nullptr`, then `const` values cannot be resolved.
     const ReferenceMap *refMap;
@@ -97,8 +111,14 @@ class DoConstantFolding : public Transform {
     Result setContains(const IR::Expression *keySet, const IR::Expression *constant) const;
 
  public:
-    DoConstantFolding(const ReferenceMap *refMap, const TypeMap *typeMap, bool warnings = true)
+    DoConstantFolding(const ReferenceMap *refMap, const TypeMap *typeMap, bool warnings = true,
+                      ConstantFoldingPolicy *policy = nullptr)
         : refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr), warnings(warnings) {
+        if (policy) {
+            this->policy = policy;
+        } else {
+            this->policy = new ConstantFoldingPolicy();
+        }
         visitDagOnce = true;
         setName("DoConstantFolding");
         assignmentTarget = false;
@@ -149,16 +169,20 @@ class DoConstantFolding : public Transform {
 
 /** Optionally runs @ref TypeChecking if @p typeMap is not
  *  `nullptr`, and then runs @ref DoConstantFolding.
+ * If policy is provided, it can modify behaviour of the constant folder.
  */
 class ConstantFolding : public PassManager {
  public:
+    ConstantFolding(ReferenceMap *refMap, TypeMap *typeMap, ConstantFoldingPolicy *policy)
+        : ConstantFolding(refMap, typeMap, true, nullptr, policy) {}
+
     ConstantFolding(ReferenceMap *refMap, TypeMap *typeMap, bool warnings = true,
-                    TypeChecking *typeChecking = nullptr) {
+                    TypeChecking *typeChecking = nullptr, ConstantFoldingPolicy *policy = nullptr) {
         if (typeMap != nullptr) {
             if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
             passes.push_back(typeChecking);
         }
-        passes.push_back(new DoConstantFolding(refMap, typeMap, warnings));
+        passes.push_back(new DoConstantFolding(refMap, typeMap, warnings, policy));
         if (typeMap != nullptr) passes.push_back(new ClearTypeMap(typeMap));
         setName("ConstantFolding");
     }

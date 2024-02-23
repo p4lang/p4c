@@ -93,7 +93,7 @@ This pass outputs the program as a P4 source file.
 class PrettyPrint : public Inspector {
     /// output file
     cstring ppfile;
-    /// The file that is being compiled.  This used
+    /// The file that is being compiled.
     cstring inputfile;
 
  public:
@@ -147,9 +147,8 @@ class SetStrictStruct : public NoVisit {
 
 }  // namespace
 
-// TODO: remove skipSideEffectOrdering flag
 const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program *program,
-                                   bool skipSideEffectOrdering, std::ostream *outStream) {
+                                   std::ostream *outStream) {
     if (program == nullptr && options.listFrontendPasses == 0) return nullptr;
 
     bool isv1 = options.isv1();
@@ -157,24 +156,29 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     TypeMap typeMap;
     refMap.setIsV1(isv1);
 
+    ParseAnnotations *parseAnnotations = policy->getParseAnnotations();
+    if (!parseAnnotations) parseAnnotations = new ParseAnnotations();
+
+    ConstantFoldingPolicy *constantFoldingPolicy = policy->getConstantFoldingPolicy();
+
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     PassManager passes({
         new P4V1::getV1ModelVersion,
         // Parse annotations
-        new ParseAnnotationBodies(&parseAnnotations, &typeMap),
+        new ParseAnnotationBodies(parseAnnotations, &typeMap),
         new PrettyPrint(options),
         // Simple checks on parsed program
         new ValidateParsedProgram(),
         // Synthesize some built-in constructs
         new CreateBuiltins(),
-        new ResolveReferences(&refMap, true),  // check shadowing
+        new ResolveReferences(&refMap, /* checkShadow */ true),
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
-        new ConstantFolding(&refMap, nullptr),
+        new ConstantFolding(&refMap, nullptr, constantFoldingPolicy),
         // Desugars direct parser and control applications
         // into instantiations followed by application
         new InstantiateDirectCalls(&refMap),
-        new ResolveReferences(&refMap),  // check shadowing
+        new ResolveReferences(&refMap),
         new Deprecated(&refMap),
         new CheckNamedArgs(),
         // Type checking and type inference.  Also inserts
@@ -202,7 +206,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new StructInitializers(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
         new PassRepeated({
-            new ConstantFolding(&refMap, &typeMap),
+            new ConstantFolding(&refMap, &typeMap, constantFoldingPolicy),
             new StrengthReduction(&refMap, &typeMap),
             new Reassociation(),
             new UselessCasts(&refMap, &typeMap),
@@ -216,14 +220,14 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new UniqueNames(&refMap),  // Give each local declaration a unique internal name
         new MoveDeclarations(),    // Move all local declarations to the beginning
         new MoveInitializers(&refMap),
-        new SideEffectOrdering(&refMap, &typeMap, skipSideEffectOrdering),
+        new SideEffectOrdering(&refMap, &typeMap, policy->skipSideEffectOrdering()),
         new SimplifyControlFlow(&refMap, &typeMap),
         new SimplifySwitch(&refMap, &typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new SimplifyDefUse(&refMap, &typeMap),
         new UniqueParameters(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
-        new SpecializeAll(&refMap, &typeMap),
+        new SpecializeAll(&refMap, &typeMap, constantFoldingPolicy),
         new RemoveParserControlFlow(&refMap, &typeMap),
         new RemoveReturns(&refMap),
         new RemoveDontcareArgs(&refMap, &typeMap),
@@ -233,7 +237,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ClearTypeMap(&typeMap),
         evaluator,
     });
-    if (options.optimizationLevel > 0)
+    if (policy->optimize(options))
         passes.addPasses({
             new Inline(&refMap, &typeMap, evaluator, options.optimizeParserInlining),
             new InlineActions(&refMap, &typeMap),
@@ -258,6 +262,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new SimplifyControlFlow(&refMap, &typeMap),
         });
     passes.addPasses({
+        // Check for shadowing after all inlining passes. We disable this
+        // check during inlining since it significantly slows compilation.
+        new ResolveReferences(&refMap, /* checkShadow */ true),
         new HierarchicalNames(),
         new FrontEndLast(),
     });

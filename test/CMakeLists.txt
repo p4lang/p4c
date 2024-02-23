@@ -22,6 +22,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/call_graph_test.cpp
   gtest/complex_bitwise.cpp
   gtest/constant_expr_test.cpp
+  gtest/constant_folding.cpp
   gtest/cstring.cpp
   gtest/diagnostics.cpp
   gtest/dumpjson.cpp
@@ -31,6 +32,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/expr_uses_test.cpp
   gtest/format_test.cpp
   gtest/helpers.cpp
+  gtest/hash.cpp
   gtest/hvec_map.cpp
   gtest/indexed_vector.cpp
   gtest/json_test.cpp
@@ -45,6 +47,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/source_file_test.cpp
   gtest/transforms.cpp
   gtest/stringify.cpp
+  gtest/rtti_test.cpp
 )
 
 # Combine the executable and the non-backend-specific unit tests into a single

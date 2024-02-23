@@ -34,6 +34,8 @@ class Generic : public TraceEvent {
     Generic(Generic &&) = default;
     Generic &operator=(const Generic &) = default;
     Generic &operator=(Generic &&) = default;
+
+    DECLARE_TYPEINFO(Generic, TraceEvent);
 };
 
 /* =============================================================================================
@@ -50,6 +52,8 @@ class GenericDescription : public Generic {
 
  public:
     explicit GenericDescription(cstring label, cstring description);
+
+    DECLARE_TYPEINFO(GenericDescription, Generic);
 };
 
 /* =============================================================================================
@@ -75,6 +79,8 @@ class Expression : public Generic {
 
  protected:
     void print(std::ostream &os) const override;
+
+    DECLARE_TYPEINFO(Expression, Generic);
 };
 
 /* =============================================================================================
@@ -96,6 +102,8 @@ class MethodCall : public TraceEvent {
 
  protected:
     void print(std::ostream &os) const override;
+
+    DECLARE_TYPEINFO(MethodCall, TraceEvent);
 };
 
 /* =============================================================================================
@@ -120,6 +128,8 @@ class IfStatementCondition : public TraceEvent {
 
  protected:
     void print(std::ostream &os) const override;
+
+    DECLARE_TYPEINFO(IfStatementCondition, TraceEvent);
 };
 
 /* =============================================================================================
@@ -141,6 +151,8 @@ class AssignmentStatement : public TraceEvent {
 
  protected:
     void print(std::ostream &os) const override;
+
+    DECLARE_TYPEINFO(AssignmentStatement, TraceEvent);
 };
 
 /* =============================================================================================
@@ -187,6 +199,8 @@ class ExtractSuccess : public TraceEvent {
 
  protected:
     void print(std::ostream &os) const override;
+
+    DECLARE_TYPEINFO(ExtractSuccess, TraceEvent);
 };
 
 /* =============================================================================================
@@ -219,6 +233,8 @@ class ExtractFailure : public TraceEvent {
 
  protected:
     void print(std::ostream &os) const override;
+
+    DECLARE_TYPEINFO(ExtractFailure, TraceEvent);
 };
 
 /* =============================================================================================
@@ -245,6 +261,8 @@ class Emit : public TraceEvent {
 
  protected:
     void print(std::ostream &os) const override;
+
+    DECLARE_TYPEINFO(Emit, TraceEvent);
 };
 
 /* =============================================================================================
@@ -281,6 +299,8 @@ class Packet : public TraceEvent {
 
  protected:
     void print(std::ostream &os) const override;
+
+    DECLARE_TYPEINFO(Packet, TraceEvent);
 };
 
 std::ostream &operator<<(std::ostream &os, const Packet::Direction &direction);
@@ -304,6 +324,8 @@ class ParserStart : public TraceEvent {
 
  protected:
     void print(std::ostream &os) const override;
+
+    DECLARE_TYPEINFO(ParserStart, TraceEvent);
 };
 
 /* =============================================================================================
@@ -328,6 +350,8 @@ class ParserState : public TraceEvent {
 
  protected:
     void print(std::ostream &os) const override;
+
+    DECLARE_TYPEINFO(ParserState, TraceEvent);
 };
 
 }  // namespace P4Tools::TraceEvents

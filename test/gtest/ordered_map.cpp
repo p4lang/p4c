@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "lib/ordered_map.h"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace Test {
 

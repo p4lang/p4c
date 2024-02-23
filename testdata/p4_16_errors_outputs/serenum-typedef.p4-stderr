@@ -25,7 +25,7 @@ serenum-typedef.p4(31): [--Werror=type-error] error: unrepresentable_p: Serializ
 serenum-typedef.p4(28)
 enum bit<4> UnrepresentableBit {
      ^^^^^^
-serenum-typedef.p4(65): [--Werror=type-error] error: (EthTypes)16w0
+serenum-typedef.p4(65): [--Werror=type-error] error: '(EthTypes)16w0'
             h.eth.type = (EthTypes)(bit<16>)0;
                          ^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:

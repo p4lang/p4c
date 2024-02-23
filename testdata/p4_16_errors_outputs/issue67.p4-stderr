@@ -1,4 +1,4 @@
-issue67.p4(1): [--Werror=type-error] error: x
+issue67.p4(1): [--Werror=type-error] error: 'x'
 const bool x = 20; // error
            ^
   ---- Actual error:

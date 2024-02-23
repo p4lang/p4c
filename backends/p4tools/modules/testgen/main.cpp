@@ -3,7 +3,9 @@
 #include <vector>
 
 #include "lib/crash.h"
+#include "lib/timer.h"
 
+#include "backends/p4tools/modules/testgen/lib/logging.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
 std::string updateErrorMsg(std::string errorMsg) {
@@ -26,27 +28,31 @@ int main(int argc, char **argv) {
         args.push_back(argv[i]);
     }
 
+    int result = EXIT_SUCCESS;
     try {
-        return P4Tools::P4Testgen::Testgen().main(args);
+        Util::ScopedTimer timer("P4Testgen Main");
+        result = P4Tools::P4Testgen::Testgen().main(args);
     } catch (const Util::CompilerBug &e) {
         std::cerr << "Internal error: " << updateErrorMsg(e.what()) << "\n";
         std::cerr << "Please submit a bug report with your code."
                   << "\n";
-        return EXIT_FAILURE;
+        result = EXIT_FAILURE;
     } catch (const Util::CompilerUnimplemented &e) {
         std::cerr << updateErrorMsg(e.what()) << "\n";
-        return EXIT_FAILURE;
+        result = EXIT_FAILURE;
     } catch (const Util::CompilationError &e) {
         std::cerr << updateErrorMsg(e.what()) << "\n";
-        return EXIT_FAILURE;
+        result = EXIT_FAILURE;
     } catch (const std::exception &e) {
         std::cerr << "Internal error: " << updateErrorMsg(e.what()) << "\n";
         std::cerr << "Please submit a bug report with your code."
                   << "\n";
-        return EXIT_FAILURE;
+        result = EXIT_FAILURE;
     } catch (...) {
         std::cerr << "Internal error. Please submit a bug report with your code."
                   << "\n";
-        return EXIT_FAILURE;
+        result = EXIT_FAILURE;
     }
+    P4Tools::printPerformanceReport();
+    return result;
 }

@@ -70,7 +70,7 @@ SmallStepEvaluator::SmallStepEvaluator(AbstractSolver &solver, const ProgramInfo
     : programInfo(programInfo), solver(solver) {
     if (!TestgenOptions::get().pattern.empty()) {
         reachabilityEngine =
-            new ReachabilityEngine(*programInfo.dcg, TestgenOptions::get().pattern, true);
+            new ReachabilityEngine(programInfo.getCallGraph(), TestgenOptions::get().pattern, true);
     }
 }
 

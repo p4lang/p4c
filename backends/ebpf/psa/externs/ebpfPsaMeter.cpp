@@ -158,7 +158,7 @@ void EBPFMeterPSA::emitInstance(CodeBuilder *builder) const {
 
 void EBPFMeterPSA::emitExecute(CodeBuilder *builder, const P4::ExternMethod *method,
                                ControlBodyTranslatorPSA *translator) const {
-    auto pipeline = dynamic_cast<const EBPFPipeline *>(program);
+    auto pipeline = program->to<EBPFPipeline>();
     CHECK_NULL(pipeline);
 
     cstring functionNameSuffix;
@@ -202,7 +202,7 @@ void EBPFMeterPSA::emitIndex(CodeBuilder *builder, const P4::ExternMethod *metho
 
 void EBPFMeterPSA::emitDirectExecute(CodeBuilder *builder, const P4::ExternMethod *method,
                                      cstring valuePtr) const {
-    auto pipeline = dynamic_cast<const EBPFPipeline *>(program);
+    auto pipeline = program->to<EBPFPipeline>();
     CHECK_NULL(pipeline);
 
     cstring functionNameSuffix;

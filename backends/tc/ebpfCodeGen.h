@@ -107,6 +107,8 @@ class TCIngressPipelinePNA : public EBPF::TCIngressPipeline {
     void emitLocalVariables(EBPF::CodeBuilder *builder) override;
     void emitGlobalMetadataInitializer(EBPF::CodeBuilder *builder) override;
     void emitTrafficManager(EBPF::CodeBuilder *builder) override;
+
+    DECLARE_TYPEINFO(TCIngressPipelinePNA, EBPF::TCIngressPipeline);
 };
 
 class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
@@ -117,7 +119,7 @@ class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
 
  protected:
     void compileExtractField(const IR::Expression *expr, const IR::StructField *field,
-                             unsigned alignment, EBPF::EBPFType *type) override;
+                             unsigned hdrOffsetBits, EBPF::EBPFType *type) override;
 };
 
 class EBPFPnaParser : public EBPF::EBPFPsaParser {
@@ -125,6 +127,8 @@ class EBPFPnaParser : public EBPF::EBPFPsaParser {
     EBPFPnaParser(const EBPF::EBPFProgram *program, const IR::ParserBlock *block,
                   const P4::TypeMap *typeMap);
     void emit(EBPF::CodeBuilder *builder) override;
+
+    DECLARE_TYPEINFO(EBPFPnaParser, EBPF::EBPFPsaParser);
 };
 
 class EBPFTablePNA : public EBPF::EBPFTablePSA {
@@ -156,6 +160,8 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
     void emitValueActionIDNames(EBPF::CodeBuilder *builder) override;
     void emitDefaultAction(EBPF::CodeBuilder *builder, cstring valueName);
     cstring p4ActionToActionIDName(const IR::P4Action *action) const;
+
+    DECLARE_TYPEINFO(EBPFTablePNA, EBPF::EBPFTablePSA);
 };
 
 class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {
@@ -167,6 +173,8 @@ class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {
     bool build() override;
     void emit(EBPF::CodeBuilder *builder) override;
     void emitPreDeparser(EBPF::CodeBuilder *builder) override;
+
+    DECLARE_TYPEINFO(IngressDeparserPNA, EBPF::EBPFDeparserPSA);
 };
 
 // Similar to class ConvertToEbpfPSA in backends/ebpf/psa/ebpfPsaGen.h
@@ -267,6 +275,7 @@ class ConvertToEBPFControlPNA : public Inspector {
     bool preorder(const IR::Declaration_Variable *) override;
     bool preorder(const IR::Member *m) override;
     bool preorder(const IR::IfStatement *a) override;
+    bool preorder(const IR::ExternBlock *instance) override;
     bool checkPnaTimestampMem(const IR::Member *m);
     EBPF::EBPFControlPSA *getEBPFControl() { return control; }
 };
@@ -301,10 +310,12 @@ class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
     explicit ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
                                       const ConvertToBackendIR *tcIR,
                                       const EBPF::EBPFTablePSA *table);
-    void processFunction(const P4::ExternFunction *function);
-    void processApply(const P4::ApplyMethod *method);
+    void processFunction(const P4::ExternFunction *function) override;
+    void processApply(const P4::ApplyMethod *method) override;
     bool checkPnaPortMem(const IR::Member *m);
     virtual cstring getParamName(const IR::PathExpression *);
+    bool preorder(const IR::AssignmentStatement *a) override;
+    void processMethod(const P4::ExternMethod *method) override;
 };
 
 // Similar to class ActionTranslationVisitorPSA in backends/ebpf/psa/ebpfPsaControl.h
@@ -338,6 +349,57 @@ class DeparserHdrEmitTranslatorPNA : public EBPF::DeparserPrepareBufferTranslato
     void processMethod(const P4::ExternMethod *method) override;
     void emitField(EBPF::CodeBuilder *builder, cstring field, const IR::Expression *hdrExpr,
                    unsigned alignment, EBPF::EBPFType *type);
+};
+
+class CRCChecksumAlgorithmPNA : public EBPF::CRCChecksumAlgorithm {
+ public:
+    CRCChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name, int width)
+        : EBPF::CRCChecksumAlgorithm(program, name, width) {}
+
+    static void emitUpdateMethod(EBPF::CodeBuilder *builder, int crcWidth);
+};
+
+class CRC16ChecksumAlgorithmPNA : public CRCChecksumAlgorithmPNA {
+ public:
+    CRC16ChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name)
+        : CRCChecksumAlgorithmPNA(program, name, 16) {
+        initialValue = "0";
+        // We use a 0x8005 polynomial.
+        // 0xA001 comes from 0x8005 value bits reflection.
+        polynomial = "0xA001";
+        updateMethod = "crc16_update";
+        finalizeMethod = "crc16_finalize";
+    }
+
+    static void emitGlobals(EBPF::CodeBuilder *builder);
+};
+
+class CRC32ChecksumAlgorithmPNA : public CRCChecksumAlgorithmPNA {
+ public:
+    CRC32ChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name)
+        : CRCChecksumAlgorithmPNA(program, name, 32) {
+        initialValue = "0xffffffff";
+        // We use a 0x04C11DB7 polynomial.
+        // 0xEDB88320 comes from 0x04C11DB7 value bits reflection.
+        polynomial = "0xEDB88320";
+        updateMethod = "crc32_update";
+        finalizeMethod = "crc32_finalize";
+    }
+
+    static void emitGlobals(EBPF::CodeBuilder *builder);
+};
+
+class EBPFHashAlgorithmTypeFactoryPNA : public EBPF::EBPFHashAlgorithmTypeFactoryPSA {
+ public:
+    static EBPFHashAlgorithmTypeFactoryPNA *instance() {
+        static EBPFHashAlgorithmTypeFactoryPNA factory;
+        return &factory;
+    }
+    void emitGlobals(EBPF::CodeBuilder *builder) {
+        CRC16ChecksumAlgorithmPNA::emitGlobals(builder);
+        CRC32ChecksumAlgorithmPNA::emitGlobals(builder);
+        EBPF::InternetChecksumAlgorithm::emitGlobals(builder);
+    }
 };
 
 }  // namespace TC

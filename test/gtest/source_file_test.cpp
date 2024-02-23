@@ -16,7 +16,8 @@ limitations under the License.
 
 #include "lib/source_file.h"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"

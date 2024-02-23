@@ -53,7 +53,7 @@ class EBPFProgram : public EBPFObject {
     // Deparser may be NULL if not supported (e.g. ebpfFilter package)
     EBPFDeparser *deparser;
 
-    cstring endLabel, offsetVar, lengthVar;
+    cstring endLabel, offsetVar, lengthVar, headerStartVar;
     cstring zeroKey, functionName, errorVar;
     cstring packetStartVar, packetEndVar, byteVar;
     cstring errorEnum;
@@ -74,12 +74,14 @@ class EBPFProgram : public EBPFObject {
           control(nullptr),
           model(EBPFModel::instance),
           deparser(nullptr) {
+        // NB: offsetVar not used in eBPF backend - uBPF and TC only
         offsetVar = EBPFModel::reserved("packetOffsetInBits");
         zeroKey = EBPFModel::reserved("zero");
         functionName = EBPFModel::reserved("filter");
         errorVar = EBPFModel::reserved("errorCode");
         packetStartVar = EBPFModel::reserved("packetStart");
         packetEndVar = EBPFModel::reserved("packetEnd");
+        headerStartVar = EBPFModel::reserved("headerStart");
         lengthVar = EBPFModel::reserved("pkt_len");
         byteVar = EBPFModel::reserved("byte");
         endLabel = EBPFModel::reserved("end");
@@ -98,6 +100,8 @@ class EBPFProgram : public EBPFObject {
     virtual void emitGeneratedComment(CodeBuilder *builder);
     virtual void emitH(CodeBuilder *builder, cstring headerFile);  // emits C headers
     virtual void emitC(CodeBuilder *builder, cstring headerFile);  // emits C program
+
+    DECLARE_TYPEINFO(EBPFProgram, EBPFObject);
 };
 
 }  // namespace EBPF

@@ -107,6 +107,10 @@ namespace P4 {
 #define PARSE_STRING_LITERAL_LIST(aname) \
     { aname, &P4::ParseAnnotations::parseStringLiteralList }
 
+// Parses a P4Runtime translation which contains both types or expressions.
+#define PARSE_P4RUNTIME_TRANSLATION(aname) \
+    { aname, &P4::ParseAnnotations::parseP4rtTranslationAnnotation }
+
 class ParseAnnotations : public Modifier {
  public:
     using Modifier::postorder;

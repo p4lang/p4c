@@ -19,9 +19,12 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-Bmv2TestFramework::Bmv2TestFramework(std::filesystem::path basePath,
-                                     std::optional<unsigned int> seed)
-    : TestFramework(std::move(basePath), seed) {}
+Bmv2TestFramework::Bmv2TestFramework(const TestBackendConfiguration &testBackendConfiguration)
+    : TestFramework(testBackendConfiguration) {}
+
+std::string Bmv2TestFramework::formatHexExpressionWithSeparators(const IR::Expression &expr) {
+    return insertHexSeparators(formatHexExpr(&expr, {false, true, false}));
+}
 
 inja::json Bmv2TestFramework::getClone(const TestObjectMap &cloneSpecs) const {
     auto cloneSpec = inja::json::object();
@@ -63,6 +66,25 @@ inja::json::array_t Bmv2TestFramework::getMeter(const TestObjectMap &meterValues
     return meterJson;
 }
 
+inja::json Bmv2TestFramework::getControlPlaneTable(const TableConfig &tblConfig) const {
+    inja::json tblJson;
+    tblJson["table_name"] = tblConfig.getTable()->controlPlaneName();
+    const auto *tblRules = tblConfig.getRules();
+    tblJson["rules"] = inja::json::array();
+    for (const auto &tblRule : *tblRules) {
+        inja::json rule;
+        const auto *matches = tblRule.getMatches();
+        const auto *actionCall = tblRule.getActionCall();
+        const auto *actionArgs = actionCall->getArgs();
+        rule["action_name"] = actionCall->getActionName().c_str();
+        auto j = getControlPlaneForTable(*matches, *actionArgs);
+        rule["rules"] = std::move(j);
+        rule["priority"] = tblRule.getPriority();
+        tblJson["rules"].push_back(rule);
+    }
+    return tblJson;
+}
+
 inja::json Bmv2TestFramework::getControlPlane(const TestSpec *testSpec) const {
     auto controlPlaneJson = inja::json::object();
     // Map of actionProfiles and actionSelectors for easy reference.
@@ -73,22 +95,8 @@ inja::json Bmv2TestFramework::getControlPlane(const TestSpec *testSpec) const {
         controlPlaneJson["tables"] = inja::json::array();
     }
     for (const auto &testObject : tables) {
-        inja::json tblJson;
-        tblJson["table_name"] = testObject.first.c_str();
         const auto *const tblConfig = testObject.second->checkedTo<TableConfig>();
-        const auto *tblRules = tblConfig->getRules();
-        tblJson["rules"] = inja::json::array();
-        for (const auto &tblRule : *tblRules) {
-            inja::json rule;
-            const auto *matches = tblRule.getMatches();
-            const auto *actionCall = tblRule.getActionCall();
-            const auto *actionArgs = actionCall->getArgs();
-            rule["action_name"] = actionCall->getActionName().c_str();
-            auto j = getControlPlaneForTable(*matches, *actionArgs);
-            rule["rules"] = std::move(j);
-            rule["priority"] = tblRule.getPriority();
-            tblJson["rules"].push_back(rule);
-        }
+        inja::json tblJson = getControlPlaneTable(*tblConfig);
 
         // Collect action profiles and selectors associated with the table.
         checkForTableActionProfile<Bmv2V1ModelActionProfile, Bmv2V1ModelActionSelector>(

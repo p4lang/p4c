@@ -32,7 +32,7 @@ class StorageFactory;
 class LocationSet;
 
 /// Abstraction for something that is has a left value (variable, parameter)
-class StorageLocation : public IHasDbPrint {
+class StorageLocation : public IHasDbPrint, public ICastable {
     static unsigned crtid;
 
  public:
@@ -42,16 +42,6 @@ class StorageLocation : public IHasDbPrint {
     const cstring name;
     StorageLocation(const IR::Type *type, cstring name) : id(crtid++), type(type), name(name) {
         CHECK_NULL(type);
-    }
-    template <class T>
-    const T *to() const {
-        auto result = dynamic_cast<const T *>(this);
-        return result;
-    }
-    template <class T>
-    bool is() const {
-        auto result = dynamic_cast<const T *>(this);
-        return result != nullptr;
     }
     void dbprint(std::ostream &out) const override { out << id << " " << name; }
     cstring toString() const { return name; }
@@ -65,6 +55,8 @@ class StorageLocation : public IHasDbPrint {
     /// @returns All locations inside that represent the 'lastIndex' of an array.
     const LocationSet *getLastIndexField() const;
     virtual void addLastIndexField(LocationSet *result) const = 0;
+
+    DECLARE_TYPEINFO(StorageLocation);
 };
 
 /** Represents a storage location with a simple type or a tuple type.
@@ -88,6 +80,8 @@ class BaseLocation : public StorageLocation {
     void addValidBits(LocationSet *) const override {}
     void addLastIndexField(LocationSet *) const override {}
     void removeHeaders(LocationSet *result) const override;
+
+    DECLARE_TYPEINFO(BaseLocation, StorageLocation);
 };
 
 /// Base class for location sets that contain fields
@@ -111,6 +105,8 @@ class WithFieldsLocation : public StorageLocation {
     void dbprint(std::ostream &out) const override {
         for (auto f : fieldLocations) out << *f.second << " ";
     }
+
+    DECLARE_TYPEINFO(WithFieldsLocation, StorageLocation);
 };
 
 /** Represents the locations for a struct, header or union */
@@ -126,6 +122,8 @@ class StructLocation : public WithFieldsLocation {
     bool isHeader() const { return type->is<IR::Type_Header>(); }
     bool isHeaderUnion() const { return type->is<IR::Type_HeaderUnion>(); }
     bool isStruct() const { return type->is<IR::Type_Struct>(); }
+
+    DECLARE_TYPEINFO(StructLocation, WithFieldsLocation);
 };
 
 /// Interface for locations that support an index operation
@@ -149,6 +147,8 @@ class IndexedLocation : public StorageLocation {
     void addElement(unsigned index, LocationSet *result) const;
     std::vector<const StorageLocation *>::const_iterator begin() const { return elements.cbegin(); }
     std::vector<const StorageLocation *>::const_iterator end() const { return elements.cend(); }
+
+    DECLARE_TYPEINFO(IndexedLocation, StorageLocation);
 };
 
 /** Represents the locations for a tuple or list */
@@ -159,6 +159,8 @@ class TupleLocation : public IndexedLocation {
     void addValidBits(LocationSet *) const override {}
     void addLastIndexField(LocationSet *) const override {}
     void removeHeaders(LocationSet *result) const override;
+
+    DECLARE_TYPEINFO(TupleLocation, IndexedLocation);
 };
 
 class ArrayLocation : public IndexedLocation {
@@ -174,6 +176,8 @@ class ArrayLocation : public IndexedLocation {
     void addValidBits(LocationSet *result) const override;
     void removeHeaders(LocationSet *) const override {}  // no results added
     void addLastIndexField(LocationSet *result) const override;
+
+    DECLARE_TYPEINFO(ArrayLocation, IndexedLocation);
 };
 
 class StorageFactory {

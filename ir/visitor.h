@@ -48,14 +48,14 @@ struct Visitor_Context {
     // context via getContext/findContext
     const Visitor_Context *parent;
     const IR::Node *node, *original;
-    mutable int child_index;
     mutable const char *child_name;
+    mutable int child_index;
     int depth;
     template <class T>
     inline const T *findContext(const Visitor_Context *&c) const {
         c = this;
         while ((c = c->parent))
-            if (auto *rv = dynamic_cast<const T *>(c->node)) return rv;
+            if (auto *rv = c->node->to<T>()) return rv;
         return nullptr;
     }
     template <class T>
@@ -248,7 +248,7 @@ class Visitor {
         if (!c) c = ctxt;
         if (!c) return nullptr;
         while ((c = c->parent))
-            if (auto *rv = dynamic_cast<const T *>(c->node)) return rv;
+            if (auto *rv = c->node->to<T>()) return rv;
         return nullptr;
     }
     template <class T>
@@ -261,7 +261,7 @@ class Visitor {
         if (!c) c = ctxt;
         if (!c) return nullptr;
         while ((c = c->parent))
-            if (auto *rv = dynamic_cast<const T *>(c->original)) return rv;
+            if (auto *rv = c->original->to<T>()) return rv;
         return nullptr;
     }
     template <class T>
@@ -351,16 +351,17 @@ class Visitor {
     virtual void post_join_flows(const IR::Node *, const IR::Node *) {}
 
     void visit_children(const IR::Node *, std::function<void()> fn) { fn(); }
+    class Tracker;        // used by Inspector -- private to it
     class ChangeTracker;  // used by Modifier and Transform -- private to them
     // This overrides visitDagOnce for a single node -- can only be called from
     // preorder and postorder functions
-    void visitOnce() const { *visitCurrentOnce = true; }
-    void visitAgain() const { *visitCurrentOnce = false; }
+    // FIXME: It would be better named visitCurrentOnce() / visitCurrenAgain()
+    virtual void visitOnce() const { BUG("do not know how to handle request"); }
+    virtual void visitAgain() const { BUG("do not know how to handle request"); }
 
  private:
     virtual void visitor_const_error();
     const Context *ctxt = nullptr;  // should be readonly to subclasses
-    bool *visitCurrentOnce = nullptr;
     friend class Inspector;
     friend class Modifier;
     friend class Transform;
@@ -388,14 +389,12 @@ class Modifier : public virtual Visitor {
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
     bool visit_in_progress(const IR::Node *) const;
+    void visitOnce() const override;
+    void visitAgain() const override;
 };
 
 class Inspector : public virtual Visitor {
-    struct info_t {
-        bool done, visitOnce;
-    };
-    typedef std::unordered_map<const IR::Node *, info_t> visited_t;
-    std::shared_ptr<visited_t> visited;
+    std::shared_ptr<Tracker> visited;
     bool check_clone(const Visitor *) override;
 
  public:
@@ -413,10 +412,9 @@ class Inspector : public virtual Visitor {
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
-    bool visit_in_progress(const IR::Node *n) const {
-        if (visited->count(n)) return !visited->at(n).done;
-        return false;
-    }
+    bool visit_in_progress(const IR::Node *n) const;
+    void visitOnce() const override;
+    void visitAgain() const override;
 };
 
 class Transform : public virtual Visitor {
@@ -441,6 +439,8 @@ class Transform : public virtual Visitor {
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
     bool visit_in_progress(const IR::Node *) const;
+    void visitOnce() const override;
+    void visitAgain() const override;
     // can only be called usefully from a 'preorder' function (directly or indirectly)
     void prune() { prune_flag = true; }
 
@@ -684,25 +684,25 @@ class SplitFlowVisitVector : public SplitFlowVisit_base {
                     i = vec->erase(i);
                 } else if (result[idx] == *i) {
                     ++i;
-                } else if (auto l = dynamic_cast<const IR::Vector<N> *>(result[idx])) {
+                } else if (auto l = result[idx]->template to<IR::Vector<N>>()) {
                     i = vec->erase(i);
                     i = vec->insert(i, l->begin(), l->end());
                     i += l->size();
-                } else if (auto v = dynamic_cast<const IR::VectorBase *>(result[idx])) {
+                } else if (auto v = result[idx]->template to<IR::VectorBase>()) {
                     if (v->empty()) {
                         i = vec->erase(i);
                     } else {
                         i = vec->insert(i, v->size() - 1, nullptr);
                         for (auto el : *v) {
                             CHECK_NULL(el);
-                            if (auto e = dynamic_cast<const N *>(el))
+                            if (auto e = el->template to<N>())
                                 *i++ = e;
                             else
                                 BUG("visitor returned invalid type %s for Vector<%s>",
                                     el->node_type_name(), N::static_type_name());
                         }
                     }
-                } else if (auto e = dynamic_cast<const N *>(result[idx])) {
+                } else if (auto e = result[idx]->template to<N>()) {
                     *i++ = e;
                 } else {
                     CHECK_NULL(result[idx]);
@@ -729,6 +729,8 @@ class Backtrack : public virtual Visitor {
         // must call this from the constructor if a trigger subclass contains pointers
         // or references to GC objects
         void register_for_gc(size_t);
+
+        DECLARE_TYPEINFO(trigger);
     };
     virtual bool backtrack(trigger &trig) = 0;
     virtual bool never_backtracks() { return false; }  // generally not overridden

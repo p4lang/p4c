@@ -24,11 +24,11 @@ namespace P4Tools::P4Testgen::Bmv2 {
 /// Extracts information from the @testSpec to emit a PTF test case.
 class PTF : public Bmv2TestFramework {
  public:
-    explicit PTF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt);
+    explicit PTF(const TestBackendConfiguration &testBackendConfiguration);
 
     /// Produce a PTF test.
-    void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
-                    float currentCoverage) override;
+    void writeTestToFile(const TestSpec *spec, cstring selectedBranches, size_t testId,
+                         float currentCoverage) override;
 
  private:
     /// Has the preamble been generated already?
