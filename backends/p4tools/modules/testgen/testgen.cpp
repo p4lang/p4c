@@ -9,7 +9,6 @@
 
 #include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/core/z3_solver.h"
-#include "backends/p4tools/common/lib/util.h"
 #include "frontends/common/parser_options.h"
 #include "ir/solver.h"
 #include "lib/cstring.h"
@@ -101,22 +100,19 @@ std::optional<AbstractTestList> generateAndCollectAbstractTests(
 
 int generateAndWriteAbstractTests(const TestgenOptions &testgenOptions,
                                   const ProgramInfo &programInfo) {
-    cstring inputFile = P4CContext::get().options().file;
-    if (inputFile == nullptr) {
-        ::error("No input file provided.");
-        return EXIT_FAILURE;
-    }
-
+    std::filesystem::path testPath;
     /// If the test name is not provided, use the steam of the input file name as test name.
-    auto testPath = std::filesystem::path(inputFile.c_str()).stem();
     if (testgenOptions.testBaseName.has_value()) {
-        testPath = testPath.replace_filename(testgenOptions.testBaseName.value().c_str());
+        testPath = testgenOptions.testBaseName.value().c_str();
+    } else if (cstring inputFile = P4CContext::get().options().file) {
+        testPath = std::filesystem::path(inputFile.c_str()).stem();
+    } else {
+        ::error("Neither a file nor test base name was set. Can not infer a test name.");
     }
 
     // Create the directory, if the directory string is valid and if it does not exist.
-    cstring testDirStr = testgenOptions.outputDir;
-    if (!testDirStr.isNullOrEmpty()) {
-        auto testDir = std::filesystem::path(testDirStr.c_str());
+    if (testgenOptions.outputDir.has_value()) {
+        auto testDir = testgenOptions.outputDir.value();
         try {
             std::filesystem::create_directories(testDir);
         } catch (const std::exception &err) {
@@ -146,9 +142,10 @@ int generateAndWriteAbstractTests(const TestgenOptions &testgenOptions,
     return postProcess(testgenOptions, *testBackend);
 }
 
-std::optional<AbstractTestList> generateTestsImpl(const std::string &program,
+std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view> program,
                                                   const CompilerOptions &compilerOptions,
-                                                  const TestgenOptions &testgenOptions) {
+                                                  const TestgenOptions &testgenOptions,
+                                                  bool writeTests) {
     // Register supported compiler targets.
     registerCompilerTargets();
 
@@ -161,11 +158,19 @@ std::optional<AbstractTestList> generateTestsImpl(const std::string &program,
     auto *compileContext = new CompileContext<CompilerOptions>();
     compileContext->options() = compilerOptions;
     AutoCompileContext autoContext(compileContext);
-    // Run the compiler to get an IR and invoke the tool.
-    const auto compilerResultOpt = P4Tools::CompilerTarget::runCompiler(program);
-    if (!compilerResultOpt.has_value()) {
-        return std::nullopt;
+    CompilerResultOrError compilerResultOpt;
+    if (program.has_value()) {
+        // Run the compiler to get an IR and invoke the tool.
+        compilerResultOpt = P4Tools::CompilerTarget::runCompiler(std::string(program.value()));
+    } else {
+        if (!compilerOptions.file.isNullOrEmpty()) {
+            ::error("Expected a file input.");
+            return std::nullopt;
+        }
+        // Run the compiler to get an IR and invoke the tool.
+        compilerResultOpt = P4Tools::CompilerTarget::runCompiler();
     }
+
     const auto *testgenCompilerResult =
         compilerResultOpt.value().get().checkedTo<TestgenCompilerResult>();
 
@@ -175,6 +180,13 @@ std::optional<AbstractTestList> generateTestsImpl(const std::string &program,
         return std::nullopt;
     }
 
+    if (writeTests) {
+        int result = generateAndWriteAbstractTests(testgenOptions, *programInfo);
+        if (result != EXIT_SUCCESS) {
+            return std::nullopt;
+        }
+        return {};
+    }
     return generateAndCollectAbstractTests(testgenOptions, *programInfo);
 }
 
@@ -199,16 +211,14 @@ int Testgen::mainImpl(const CompilerResult &compilerResult) {
         ::error("P4Testgen encountered errors during preprocessing.");
         return EXIT_FAILURE;
     }
-
-    const auto &testgenOptions = TestgenOptions::get();
-    return generateAndWriteAbstractTests(testgenOptions, *programInfo);
+    return generateAndWriteAbstractTests(TestgenOptions::get(), *programInfo);
 }
 
-std::optional<AbstractTestList> Testgen::generateTests(const std::string &program,
+std::optional<AbstractTestList> Testgen::generateTests(std::string_view program,
                                                        const CompilerOptions &compilerOptions,
                                                        const TestgenOptions &testgenOptions) {
     try {
-        return generateTestsImpl(program, compilerOptions, testgenOptions);
+        return generateTestsImpl(program, compilerOptions, testgenOptions, false);
     } catch (const std::exception &e) {
         std::cerr << "Internal error: " << e.what() << "\n";
         return std::nullopt;
@@ -216,6 +226,49 @@ std::optional<AbstractTestList> Testgen::generateTests(const std::string &progra
         return std::nullopt;
     }
     return std::nullopt;
+}
+
+std::optional<AbstractTestList> Testgen::generateTests(const CompilerOptions &compilerOptions,
+                                                       const TestgenOptions &testgenOptions) {
+    try {
+        return generateTestsImpl(std::nullopt, compilerOptions, testgenOptions, false);
+    } catch (const std::exception &e) {
+        std::cerr << "Internal error: " << e.what() << "\n";
+        return std::nullopt;
+    } catch (...) {
+        return std::nullopt;
+    }
+    return std::nullopt;
+}
+
+int Testgen::writeTests(std::string_view program, const CompilerOptions &compilerOptions,
+                        const TestgenOptions &testgenOptions) {
+    try {
+        if (generateTestsImpl(program, compilerOptions, testgenOptions, true).has_value()) {
+            return EXIT_SUCCESS;
+        }
+    } catch (const std::exception &e) {
+        std::cerr << "Internal error: " << e.what() << "\n";
+        return EXIT_FAILURE;
+    } catch (...) {
+        return EXIT_FAILURE;
+    }
+    return EXIT_FAILURE;
+}
+
+int Testgen::writeTests(const CompilerOptions &compilerOptions,
+                        const TestgenOptions &testgenOptions) {
+    try {
+        if (generateTestsImpl(std::nullopt, compilerOptions, testgenOptions, true).has_value()) {
+            return EXIT_SUCCESS;
+        }
+    } catch (const std::exception &e) {
+        std::cerr << "Internal error: " << e.what() << "\n";
+        return EXIT_FAILURE;
+    } catch (...) {
+        return EXIT_FAILURE;
+    }
+    return EXIT_FAILURE;
 }
 
 }  // namespace P4Tools::P4Testgen
