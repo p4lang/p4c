@@ -23,6 +23,10 @@ macro(p4c_obtain_abseil)
     set(P4C_ABSEIL_VERSION "20240116.1")
     message("Fetching Abseil version ${P4C_ABSEIL_VERSION} for P4C...")
 
+    # Unity builds do not work for Abseil...
+    set(CMAKE_UNITY_BUILD_PREV ${CMAKE_UNITY_BUILD})
+    set(CMAKE_UNITY_BUILD OFF)
+
     # Print out download state while setting up Abseil.
     set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
     set(FETCHCONTENT_QUIET OFF)
@@ -44,6 +48,7 @@ macro(p4c_obtain_abseil)
     fetchcontent_makeavailable_but_exclude_install(abseil)
 
     # Reset temporary variable modifications.
+    set(CMAKE_UNITY_BUILD ${CMAKE_UNITY_BUILD_PREV})
     set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
   endif()
 
