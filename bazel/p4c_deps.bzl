@@ -72,6 +72,13 @@ filegroup(
             strip_prefix = "googletest-1.13.0",
             sha256 = "ad7fdba11ea011c1d925b3289cf4af2c66a352e18d4c7264392fead75e919363",
         )
+    if not native.existing_rule("com_google_absl"):
+        http_archive(
+            name = "com_google_absl",
+            url = "https://github.com/abseil/abseil-cpp/releases/download/20240116.1/abseil-cpp-20240116.1.tar.gz",
+            strip_prefix = "abseil-cpp-20240116.1",
+            sha256 = "3c743204df78366ad2eaf236d6631d83f6bc928d1705dd0000b872e53b73dc6a",
+        )
     if not native.existing_rule("com_google_protobuf"):
         http_archive(
             name = "com_google_protobuf",
