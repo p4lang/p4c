@@ -258,8 +258,8 @@ void ProgramPoints::add(const ProgramPoints *from) {
 }
 
 const ProgramPoints *ProgramPoints::merge(const ProgramPoints *with) const {
-    auto result = new ProgramPoints(points);
-    for (auto p : with->points) result->points.emplace(p);
+    auto *result = new ProgramPoints(points);
+    result->points.insert(with->points.begin(), with->points.end());
     return result;
 }
 
