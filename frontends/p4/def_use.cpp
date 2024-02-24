@@ -253,6 +253,10 @@ bool LocationSet::overlaps(const LocationSet *other) const {
     return false;
 }
 
+void ProgramPoints::add(const ProgramPoints *from) {
+    points.insert(from->points.begin(), from->points.end());
+}
+
 const ProgramPoints *ProgramPoints::merge(const ProgramPoints *with) const {
     auto result = new ProgramPoints(points);
     for (auto p : with->points) result->points.emplace(p);
@@ -329,10 +333,10 @@ void Definitions::removeLocation(const StorageLocation *location) {
 }
 
 const ProgramPoints *Definitions::getPoints(const LocationSet *locations) const {
-    const ProgramPoints *result = new ProgramPoints();
-    for (auto sl : *locations->canonicalize()) {
-        auto points = getPoints(sl->to<BaseLocation>());
-        result = result->merge(points);
+    ProgramPoints *result = new ProgramPoints();
+    for (const auto *sl : *locations->canonicalize()) {
+        const auto *points = getPoints(sl->to<BaseLocation>());
+        result->add(points);
     }
     return result;
 }

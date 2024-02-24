@@ -17,15 +17,15 @@ limitations under the License.
 #ifndef FRONTENDS_P4_DEF_USE_H_
 #define FRONTENDS_P4_DEF_USE_H_
 
-#include <typeindex>  // IWYU pragma: keep
-
 #include "absl/container/flat_hash_set.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
+#include "absl/container/inlined_vector.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 #include "lib/alloc_trace.h"
 #include "lib/hash.h"
 #include "lib/hvec_map.h"
 #include "lib/ordered_set.h"
+#include "typeMap.h"
 
 namespace P4 {
 
@@ -130,7 +130,7 @@ class StructLocation : public WithFieldsLocation {
 /// Interface for locations that support an index operation
 class IndexedLocation : public StorageLocation {
  protected:
-    std::vector<const StorageLocation *> elements;
+    absl::InlinedVector<const StorageLocation *, 8> elements;
     friend class StorageFactory;
 
     void createElement(unsigned index, StorageLocation *element) {
@@ -146,8 +146,8 @@ class IndexedLocation : public StorageLocation {
         elements.resize(it->getSize());
     }
     void addElement(unsigned index, LocationSet *result) const;
-    std::vector<const StorageLocation *>::const_iterator begin() const { return elements.cbegin(); }
-    std::vector<const StorageLocation *>::const_iterator end() const { return elements.cend(); }
+    auto begin() const { return elements.cbegin(); }
+    auto end() const { return elements.cend(); }
 
     DECLARE_TYPEINFO(IndexedLocation, StorageLocation);
 };
@@ -279,7 +279,7 @@ class ProgramPoint : public IHasDbPrint {
     /// the previous context.  E.g., a stack [Function] is the context before
     /// the function, while [Function, nullptr] is the context after the
     /// function terminates.
-    std::vector<const IR::Node *> stack;
+    absl::InlinedVector<const IR::Node *, 8> stack;  // Has inline space for 8 nodes
 
  public:
     ProgramPoint() = default;
@@ -319,8 +319,8 @@ class ProgramPoint : public IHasDbPrint {
     void clear() { stack.clear(); }
     const IR::Node *last() const { return stack.empty() ? nullptr : stack.back(); }
     bool isBeforeStart() const { return stack.empty(); }
-    std::vector<const IR::Node *>::const_iterator begin() const { return stack.begin(); }
-    std::vector<const IR::Node *>::const_iterator end() const { return stack.end(); }
+    auto begin() const { return stack.begin(); }
+    auto end() const { return stack.end(); }
     ProgramPoint &operator=(const ProgramPoint &) = default;
     ProgramPoint &operator=(ProgramPoint &&) = default;
 };
@@ -353,6 +353,7 @@ class ProgramPoints : public IHasDbPrint {
     ProgramPoints() = default;
     explicit ProgramPoints(ProgramPoint point) { points.emplace(point); }
     void add(ProgramPoint point) { points.emplace(point); }
+    void add(const ProgramPoints *from);
     const ProgramPoints *merge(const ProgramPoints *with) const;
     bool operator==(const ProgramPoints &other) const;
     void dbprint(std::ostream &out) const override {
