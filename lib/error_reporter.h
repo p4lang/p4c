@@ -20,6 +20,7 @@ limitations under the License.
 #include <ostream>
 #include <set>
 #include <type_traits>
+#include <unordered_map>
 
 #include <boost/format.hpp>
 
