@@ -435,6 +435,13 @@ std::vector<Token> combineTokensToTableKeys(std::vector<Token> input, cstring ta
             continue;
         }
 
+        substr = str.substr(0, str.find("::value"));
+        if (substr != str) {
+            cstring cstr = tableName + "_key_" + substr;
+            result.emplace_back(Token::Kind::Text, cstr, cstr.size());
+            continue;
+        }
+
         cstring cstr = tableName + "_key_" + str;
         result.emplace_back(Token::Kind::Text, cstr, cstr.size());
     }
