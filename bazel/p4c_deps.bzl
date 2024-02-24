@@ -75,9 +75,9 @@ filegroup(
     if not native.existing_rule("com_google_protobuf"):
         http_archive(
             name = "com_google_protobuf",
-            url = "https://github.com/protocolbuffers/protobuf/releases/download/v21.10/protobuf-all-21.10.tar.gz",
-            strip_prefix = "protobuf-21.10",
-            sha256 = "6fc9b6efc18acb2fd5fb3bcf981572539c3432600042b662a162c1226b362426",
+            url = "https://github.com/protocolbuffers/protobuf/releases/download/v25.3/protobuf-25.3.tar.gz",
+            strip_prefix = "protobuf-25.3",
+            sha256 = "d19643d265b978383352b3143f04c0641eea75a75235c111cc01a1350173180e",
         )
     if not native.existing_rule("rules_foreign_cc"):
         http_archive(
