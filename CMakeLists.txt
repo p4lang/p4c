@@ -23,6 +23,10 @@ endif()
 
 project (P4C)
 
+# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++17 rather than -std=gnu++17
+set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 set (P4C_RUNTIME_OUTPUT_DIRECTORY bin)
 set (P4C_LIBRARY_OUTPUT_DIRECTORY lib)
@@ -151,7 +155,13 @@ endif()
 find_package (PythonInterp 3 REQUIRED)
 find_package (FLEX 2.0 REQUIRED)
 find_package (BISON 3.0 REQUIRED)
-find_package (absl REQUIRED)
+# If we enable GTest, install GoogleTest with the appropriate options.
+if (ENABLE_GTESTS)
+  include(GoogleTest)
+  p4c_obtain_googletest()
+endif ()
+include(Abseil)
+p4c_obtain_abseil()
 include(Protobuf)
 p4c_obtain_protobuf()
 
@@ -242,10 +252,6 @@ enable_testing ()
 # if (__P4C_VERSION_RC)
 #   set (CPACK_PACKAGE_VERSION_PATCH ${CPACK_PACKAGE_VERSION_PATCH}-${__P4C_VERSION_RC})
 # endif ()
-
-# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++17 rather than -std=gnu++17
-set (CMAKE_CXX_STANDARD 17)
-set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_cxx_compiler_option ("-Wall")
 add_cxx_compiler_option ("-Wextra")
@@ -358,12 +364,6 @@ set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
 
 # Component libraries: must be defined before being used in the back end executables.
 set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
-
-# If we enable GTest, install GoogleTest with the appropriate options.
-if (ENABLE_GTESTS)
-  include(GoogleTest)
-  p4c_obtain_googletest()
-endif ()
 
 # The order of adding subdirectories matters because of target dependencies.
 add_subdirectory (tools/driver)
