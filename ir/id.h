@@ -18,7 +18,6 @@ limitations under the License.
 #define IR_ID_H_
 
 #include "lib/cstring.h"
-#include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/source_file.h"
 

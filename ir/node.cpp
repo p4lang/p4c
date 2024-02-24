@@ -19,7 +19,6 @@ limitations under the License.
 
 #include "node.h"
 
-#include <memory>
 #include <ostream>
 // use in combination with "raise" below
 // #include <csignal>
@@ -28,7 +27,6 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/json_generator.h"
 #include "ir/json_loader.h"
-#include "ir/visitor.h"
 #include "lib/indent.h"
 #include "lib/json.h"
 #include "lib/log.h"

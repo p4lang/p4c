@@ -15,14 +15,6 @@ limitations under the License.
 */
 
 #include <ostream>
-#include <vector>
-
-#include <boost/core/enable_if.hpp>
-#include <boost/format.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
-#include <boost/multiprecision/detail/et_ops.hpp>
-#include <boost/multiprecision/number.hpp>
-#include <boost/multiprecision/traits/explicit_conversion.hpp>
 
 #include "ir/id.h"
 #include "ir/indexed_vector.h"

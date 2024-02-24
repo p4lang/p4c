@@ -19,9 +19,6 @@ limitations under the License.
 #include <algorithm>
 #include <set>
 
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
-
 #include "converters.h"
 #include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"

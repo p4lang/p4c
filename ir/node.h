@@ -18,7 +18,6 @@ limitations under the License.
 #define IR_NODE_H_
 
 #include <iosfwd>
-#include <typeinfo>
 
 #include "ir-tree-macros.h"
 #include "ir/gen-tree-macro.h"

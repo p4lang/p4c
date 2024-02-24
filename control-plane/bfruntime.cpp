@@ -14,6 +14,11 @@ limitations under the License.
 */
 #include "bfruntime.h"
 
+#include <regex>
+
+#include "lib/error.h"
+#include "lib/null.h"
+
 namespace P4 {
 
 namespace BFRT {

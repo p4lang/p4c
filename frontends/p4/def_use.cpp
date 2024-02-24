@@ -16,8 +16,6 @@ limitations under the License.
 
 #include "def_use.h"
 
-#include <boost/functional/hash.hpp>
-
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
 #include "lib/ordered_set.h"
@@ -273,11 +271,7 @@ bool ProgramPoint::operator==(const ProgramPoint &other) const {
     return true;
 }
 
-std::size_t ProgramPoint::hash() const {
-    std::size_t result = 0;
-    boost::hash_range(result, stack.begin(), stack.end());
-    return result;
-}
+std::size_t ProgramPoint::hash() const { return Util::hash_range(stack.begin(), stack.end()); }
 
 bool ProgramPoints::operator==(const ProgramPoints &other) const {
     if (points.size() != other.points.size()) return false;

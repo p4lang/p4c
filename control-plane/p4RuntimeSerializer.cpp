@@ -38,9 +38,6 @@ limitations under the License.
 #include "p4/v1/p4runtime.pb.h"
 #pragma GCC diagnostic pop
 
-#include <boost/algorithm/string.hpp>
-#include <boost/range/adaptor/reversed.hpp>
-
 // TODO(antonin): this include should go away when we cleanup getMatchFields
 // and tableNeedsPriority implementations.
 #include "control-plane/bytestrings.h"

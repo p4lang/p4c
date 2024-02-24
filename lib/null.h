@@ -19,7 +19,7 @@ limitations under the License.
 #ifndef LIB_NULL_H_
 #define LIB_NULL_H_
 
-#include "error.h"  // for BUG macro
+#include "exceptions.h"  // for BUG macro
 
 // Typical C contortions to transform something into a string
 #define LIB_STRINGIFY(x) #x
