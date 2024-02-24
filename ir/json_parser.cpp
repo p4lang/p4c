@@ -17,7 +17,6 @@ limitations under the License.
 #include "ir/json_parser.h"
 
 #include <cctype>
-
 #include <iostream>
 #include <list>
 #include <utility>
