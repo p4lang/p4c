@@ -203,15 +203,17 @@ endif()
 # we require -pthread to make std::call_once work, even if we're not using threads...
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${CMAKE_THREAD_LIBS_INIT}")
+list (APPEND P4C_LIB_DEPS ${CMAKE_THREAD_LIBS_INIT})
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 include_directories(SYSTEM ${PROTOBUF_INCLUDE_DIRS})
 include_directories(SYSTEM ${LIBGC_INCLUDE_DIR})
 set (HAVE_LIBBOOST_IOSTREAMS 1)
-set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES}")
+list (APPEND P4C_LIB_DEPS ${Boost_LIBRARIES})
 if (ENABLE_GC)
-  set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${LIBGC_LIBRARIES}")
+  list (APPEND P4C_LIB_DEPS ${LIBGC_LIBRARIES})
 endif ()
+set (P4C_ABSL_LIBRARIES absl::flat_hash_map absl::flat_hash_set)
+list (APPEND P4C_LIB_DEPS ${P4C_ABSL_LIBRARIES})
 
 # other required libraries
 p4c_add_library (rt clock_gettime HAVE_CLOCK_GETTIME)
@@ -507,6 +509,7 @@ add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
 add_dependencies(ir-generated ir genIR)
+target_link_libraries(ir-generated ${P4C_LIB_DEPS})
 
 ######################################## IR Generation End ########################################
 

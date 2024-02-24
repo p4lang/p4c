@@ -83,7 +83,7 @@ set (BMV2_BACKEND_COMMON_HDRS
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)
 
 add_library(bmv2backend STATIC ${BMV2_BACKEND_COMMON_SRCS})
-add_dependencies(bmv2backend ir-generated frontend)
+target_link_libraries(bmv2backend ir-generated frontend)
 
 add_executable(p4c-bm2-ss ${BMV2_SIMPLE_SWITCH_SRCS})
 target_link_libraries (p4c-bm2-ss bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})

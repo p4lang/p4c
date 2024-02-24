@@ -259,4 +259,6 @@ if (FLEX_INCLUDE_DIRS)
 endif ()
 add_library (frontend STATIC ${FRONTEND_SOURCES})
 add_dependencies (frontend frontend-parser-gen)
-target_link_libraries (frontend frontend-parser-gen)
+target_link_libraries (frontend frontend-parser-gen
+  absl::flat_hash_set
+  absl::flat_hash_map)
