@@ -18,11 +18,12 @@ limitations under the License.
 #define FRONTENDS_P4_DEF_USE_H_
 
 #include <typeindex>  // IWYU pragma: keep
-#include <unordered_set>
 
+#include "absl/container/flat_hash_set.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 #include "lib/alloc_trace.h"
+#include "lib/hash.h"
 #include "lib/hvec_map.h"
 #include "lib/ordered_set.h"
 
@@ -285,7 +286,7 @@ class ProgramPoint : public IHasDbPrint {
     ProgramPoint(const ProgramPoint &other) : stack(other.stack) {}
     explicit ProgramPoint(const IR::Node *node) {
         CHECK_NULL(node);
-        stack.push_back(node);
+        assign(node);
     }
     ProgramPoint(const ProgramPoint &context, const IR::Node *node);
     /// A point logically before the function/control/action start.
@@ -313,6 +314,9 @@ class ProgramPoint : public IHasDbPrint {
                 out << "[[" << l << "]]";
         }
     }
+    void assign(const ProgramPoint &context, const IR::Node *node);
+    void assign(const IR::Node *node) { stack.assign({node}); }
+    void clear() { stack.clear(); }
     const IR::Node *last() const { return stack.empty() ? nullptr : stack.back(); }
     bool isBeforeStart() const { return stack.empty(); }
     std::vector<const IR::Node *>::const_iterator begin() const { return stack.begin(); }
@@ -332,9 +336,16 @@ struct hash<P4::ProgramPoint> {
 };
 }  // namespace std
 
+namespace Util {
+template <>
+struct Hasher<P4::ProgramPoint> {
+    size_t operator()(const P4::ProgramPoint &p) const { return p.hash(); }
+};
+}  // namespace Util
+
 namespace P4 {
 class ProgramPoints : public IHasDbPrint {
-    typedef std::unordered_set<ProgramPoint> Points;
+    typedef absl::flat_hash_set<ProgramPoint, Util::Hash> Points;
     Points points;
     explicit ProgramPoints(const Points &points) : points(points) {}
 

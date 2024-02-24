@@ -23,6 +23,8 @@ limitations under the License.
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/ternaryBool.h"
 
+#include <absl/container/flat_hash_set.h>
+
 namespace P4 {
 
 namespace {
@@ -394,7 +396,7 @@ class FindUninitialized : public Inspector {
         readLocations.emplace(expression, loc);
     }
     bool setCurrent(const IR::Statement *statement) {
-        currentPoint = ProgramPoint(context, statement);
+        currentPoint.assign(context, statement);
         return false;
     }
     profile_t init_apply(const IR::Node *root) override {
@@ -434,11 +436,11 @@ class FindUninitialized : public Inspector {
 
     bool preorder(const IR::ParserState *state) override {
         LOG3("FU Visiting state " << state->name);
-        context = ProgramPoint(state);
-        currentPoint = ProgramPoint(state);  // point before the first statement
+        context.assign(state);
+        currentPoint.assign(state);  // point before the first statement
         visit(state->components, "components");
         if (state->selectExpression != nullptr) visit(state->selectExpression);
-        context = ProgramPoint();
+        context.clear();
         return false;
     }
 
@@ -490,7 +492,7 @@ class FindUninitialized : public Inspector {
     bool preorder(const IR::P4Control *control) override {
         LOG3("FU Visiting control " << control->name << "[" << control->id << "]");
         BUG_CHECK(context.isBeforeStart(), "non-empty context in FindUnitialized::P4Control");
-        currentPoint = ProgramPoint(control);
+        currentPoint.assign(control);
         headerDefs->clear();
         initHeaderParams(control->getApplyMethodType()->parameters);
         visitVirtualMethods(control->controlLocals);
@@ -513,7 +515,7 @@ class FindUninitialized : public Inspector {
         }
         LOG3("FU Visiting function " << dbp(func) << " called by " << context);
         LOG5(func);
-        auto point = ProgramPoint(context, func);
+        ProgramPoint point(context, func);
         currentPoint = point;
         initHeaderParams(func->type->parameters);
         visit(func->body);
@@ -561,7 +563,7 @@ class FindUninitialized : public Inspector {
 
     bool preorder(const IR::P4Parser *parser) override {
         LOG3("FU Visiting parser " << parser->name << "[" << parser->id << "]");
-        currentPoint = ProgramPoint(parser);
+        currentPoint.assign(parser);
         headerDefs->clear();
         initHeaderParams(parser->getApplyMethodType()->parameters);
         visitVirtualMethods(parser->parserLocals);
@@ -623,9 +625,9 @@ class FindUninitialized : public Inspector {
 
         headerDefs = inputHeaderDefs[acceptState];
         unreachable = false;
-        auto accept = ProgramPoint(parser->getDeclByName(IR::ParserState::accept)->getNode());
+        ProgramPoint accept(parser->getDeclByName(IR::ParserState::accept)->getNode());
         auto acceptdefs = definitions->getDefinitions(accept, true);
-        auto reject = ProgramPoint(parser->getDeclByName(IR::ParserState::reject)->getNode());
+        ProgramPoint reject(parser->getDeclByName(IR::ParserState::reject)->getNode());
         auto rejectdefs = definitions->getDefinitions(reject, true);
 
         auto outputDefs = acceptdefs->joinDefinitions(rejectdefs);
@@ -884,7 +886,7 @@ class FindUninitialized : public Inspector {
             auto saveHeaderDefsBeforeCondition = headerDefs->clone();
             visit(statement->condition);
             auto saveHeaderDefsAfterCondition = headerDefs->clone();
-            currentPoint = ProgramPoint(context, statement->condition);
+            currentPoint.assign(context, statement->condition);
             auto saveCurrent = currentPoint;
             auto saveUnreachable = unreachable;
             visit(statement->ifTrue);
@@ -914,7 +916,7 @@ class FindUninitialized : public Inspector {
             visit(statement->expression);
             auto saveHeaderDefsAfterExpr = headerDefs->clone();
             HeaderDefinitions *finalHeaderDefs = nullptr;
-            currentPoint = ProgramPoint(context, statement->expression);
+            currentPoint.assign(context, statement->expression);
             auto saveCurrent = currentPoint;
             auto saveUnreachable = unreachable;
             for (auto c : statement->cases) {
@@ -1115,7 +1117,7 @@ class FindUninitialized : public Inspector {
         BUG_CHECK(findContext<IR::P4Program>() == nullptr, "Unexpected action");
         LOG3("FU Visiting action " << action);
         unreachable = false;
-        currentPoint = ProgramPoint(context, action);
+        currentPoint.assign(context, action);
         visit(action->body);
         checkOutParameters(action, action->parameters, getCurrentDefinitions());
         LOG3("FU Returning from " << action);
@@ -1124,7 +1126,7 @@ class FindUninitialized : public Inspector {
 
     bool preorder(const IR::P4Table *table) override {
         LOG3("FU Visiting " << table->name);
-        auto savePoint = ProgramPoint(context, table);
+        ProgramPoint savePoint(context, table);
         currentPoint = savePoint;
         auto saveHeaderDefsBeforeKey = headerDefs->clone();
         auto key = table->getKey();

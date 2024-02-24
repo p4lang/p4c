@@ -260,7 +260,11 @@ const ProgramPoints *ProgramPoints::merge(const ProgramPoints *with) const {
 }
 
 ProgramPoint::ProgramPoint(const ProgramPoint &context, const IR::Node *node) {
-    for (auto e : context.stack) stack.push_back(e);
+    assign(context, node);
+}
+
+void ProgramPoint::assign(const ProgramPoint &context, const IR::Node *node) {
+    stack.assign(context.stack.begin(), context.stack.end());
     stack.push_back(node);
 }
 
