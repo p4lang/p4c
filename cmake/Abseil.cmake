@@ -1,7 +1,7 @@
 macro(p4c_obtain_abseil)
   option(
     P4C_USE_PREINSTALLED_ABSEIL
-    "Look for a preinstalled version of Protobuf in the system instead of installing a prebuilt binary using FetchContent."
+    "Look for a preinstalled version of Abseil in the system instead of installing the library using FetchContent."
     OFF
   )
 
@@ -11,10 +11,9 @@ macro(p4c_obtain_abseil)
       set(SAVED_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
       set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
     endif()
-    find_package(absl CONFIG)
-    if(NOT absl_FOUND)
-      find_package(absl REQUIRED)
-    endif()
+
+    set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
+    find_package(absl REQUIRED)
 
     if(ENABLE_ABSEIL_STATIC)
       set(CMAKE_FIND_LIBRARY_SUFFIXES ${SAVED_CMAKE_FIND_LIBRARY_SUFFIXES})
