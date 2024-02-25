@@ -100,9 +100,6 @@ class JsonValue final : public IJson {
             throw std::logic_error("Incorrect constructor called");
     }
 
-    static big_int makeValue(long long v);
-    static big_int makeValue(unsigned long long v);
-
     const Kind tag;
     const big_int value = 0;
     const cstring str = nullptr;
