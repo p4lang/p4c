@@ -151,6 +151,16 @@ if(BUILD_STATIC_RELEASE_SANS_GLIBC)
   add_definitions(-DP4C_STATIC_BUILD)
 endif()
 
+# Ensure we enable sanitizers before fetching dependencies so the correct flags
+# are propagated below
+if (ENABLE_SANITIZERS)
+  append("-fsanitize=undefined,address" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
+endif ()
+
+if (BUILD_AUTO_VAR_INIT_PATTERN)
+  add_cxx_compiler_option  ("-ftrivial-auto-var-init=pattern")
+endif ()
+
 # Required tools and libraries.
 find_package (PythonInterp 3 REQUIRED)
 find_package (FLEX 2.0 REQUIRED)
@@ -268,14 +278,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Ap
   # FIXME: with C++20 we would be able to use standard __VA_OPT__
   add_cxx_compiler_option ("-Wno-gnu-zero-variadic-macro-arguments")
 endif()
-
-if (ENABLE_SANITIZERS)
-  append("-fsanitize=undefined,address" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
-endif ()
-
-if (BUILD_AUTO_VAR_INIT_PATTERN)
-  add_cxx_compiler_option  ("-ftrivial-auto-var-init=pattern")
-endif ()
 
 if (ENABLE_WERROR)
   add_cxx_compiler_option  ("-Werror")
