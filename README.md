@@ -159,7 +159,7 @@ sudo dpkg -i /path/to/package.deb
     [here](#macos-dependencies).  You can also look at the
     [CI installation script](tools/ci-build.sh).
 
-1.  Build. Building should also take place in a subdirectory named `build`.
+3.  Build. Building should also take place in a subdirectory named `build`.
     ```
     mkdir build
     cd build
@@ -242,7 +242,7 @@ use them, but YMMV.
 
 - GNU Bison and Flex for the parser and lexical analyzer generators.
 
-- Google Protocol Buffers 25.3 or higher for control plane API generation
+- Google Protocol Buffers v3.25.3 or higher for control plane API generation
 
 - C++ boost library
 
