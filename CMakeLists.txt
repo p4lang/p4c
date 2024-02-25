@@ -155,6 +155,9 @@ endif()
 # are propagated below
 if (ENABLE_SANITIZERS)
   append("-fsanitize=undefined,address" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND UNIX AND NOT APPLE)
+    append("--rtlib=compiler-rt --unwindlib=libgcc" CMAKE_EXE_LINKER_FLAGS)
+  endif()
 endif ()
 
 if (BUILD_AUTO_VAR_INIT_PATTERN)
