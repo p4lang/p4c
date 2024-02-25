@@ -30,6 +30,17 @@ set (BMV2_SIMPLE_SWITCH_SRCS
     simple_switch/options.h
     )
 
+    set (BMV2_MULTI_SWITCH_SRCS
+    multi_switch/main.cpp
+    multi_switch/midend.cpp
+    multi_switch/midend.h
+    multi_switch/simpleSwitch.cpp
+    multi_switch/simpleSwitch.h
+    multi_switch/options.h
+    multi_switch/multi.cpp
+    multi_switch/multi.h
+    )
+
 set (BMV2_PSA_SWITCH_SRCS
     psa_switch/main.cpp
     psa_switch/midend.cpp
@@ -84,6 +95,10 @@ set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SC
 
 add_library(bmv2backend ${P4C_STATIC_BUILD} ${BMV2_BACKEND_COMMON_SRCS})
 add_dependencies(bmv2backend ir-generated frontend)
+
+add_executable(p4c-bm2-multi ${BMV2_MULTI_SWITCH_SRCS})
+target_link_libraries (p4c-bm2-multi bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+install(TARGETS p4c-bm2-multi RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
 add_executable(p4c-bm2-ss ${BMV2_SIMPLE_SWITCH_SRCS})
 target_link_libraries (p4c-bm2-ss bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
