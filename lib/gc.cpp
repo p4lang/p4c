@@ -81,6 +81,22 @@ void *operator new(std::size_t size) {
     return rv;
 }
 
+void *operator new(std::size_t size, const std::nothrow_t &) noexcept {
+    TRACE_ALLOC(size)
+
+    maybe_initialize_gc();
+    // FIXME: Call nothrow operator new from libgc with suitable new libgc
+    // versions
+    auto *rv = ::operator new(size, UseGC, 0, 0);
+    if (!rv && emergency_ptr && emergency_ptr + size < emergency_pool + sizeof(emergency_pool)) {
+        rv = emergency_ptr;
+        size += -size & 0xf;  // align to 16 bytes
+        emergency_ptr += size;
+    }
+    if (!rv && !emergency_ptr) emergency_ptr = emergency_pool;
+    return rv;
+}
+
 void *operator new(std::size_t size, std::align_val_t alignment) {
     TRACE_ALLOC(size)
 
@@ -92,6 +108,20 @@ void *operator new(std::size_t size, std::align_val_t alignment) {
     void *rv = nullptr;
     if (GC_posix_memalign(&rv, static_cast<size_t>(alignment), size) != 0)
         throw backtrace_exception<std::bad_alloc>();
+
+    return rv;
+}
+
+void *operator new(std::size_t size, std::align_val_t alignment, const std::nothrow_t &) noexcept {
+    TRACE_ALLOC(size)
+
+    if (static_cast<size_t>(alignment) < sizeof(void *))
+        alignment = std::align_val_t(sizeof(void *));
+
+    maybe_initialize_gc();
+
+    void *rv = nullptr;
+    if (GC_posix_memalign(&rv, static_cast<size_t>(alignment), size) != 0) rv = nullptr;
 
     return rv;
 }
@@ -139,6 +169,14 @@ void *operator new[](std::size_t size) { return ::operator new(size); }
 void *operator new[](std::size_t size, std::align_val_t alignment) {
     return ::operator new(size, alignment);
 }
+void *operator new[](std::size_t size, const std::nothrow_t &tag) noexcept {
+    return ::operator new(size, tag);
+}
+void *operator new[](std::size_t size, std::align_val_t alignment,
+                     const std::nothrow_t &tag) noexcept {
+    return ::operator new(size, alignment, tag);
+}
+
 void operator delete[](void *p) noexcept { ::operator delete(p); }
 void operator delete[](void *p, std::size_t) noexcept { ::operator delete(p); }
 void operator delete[](void *p, std::align_val_t) noexcept { ::operator delete(p); }
