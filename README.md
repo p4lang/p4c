@@ -193,13 +193,15 @@ sudo dpkg -i /path/to/package.deb
        library. Default is ON.
      - `-DENABLE_GTESTS=ON|OFF`. Enable building and running GTest unit tests.
        Default is ON.
-     - `-DP4C_USE_PREINSTALLED_PROTOBUF=ON|OFF`. Try to find a system version of Protobuf instead of a CMake version.
+     - `-DP4C_USE_PREINSTALLED_ABSEIL=ON|OFF`. Try to find a system version of Abseil instead of a fetched one. Default is OFF.
+     - `-DP4C_USE_PREINSTALLED_PROTOBUF=ON|OFF`. Try to find a system version of Protobuf instead of a CMake version. Default is OFF.
+     - `-DENABLE_ABSEIL_STATIC=ON|OFF`. Enable the use of static abseil libraries. Default is ON. Only has an effect when `P4C_USE_PREINSTALLED_ABSEIL` is enabled.
      - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static protobuf libraries. Default is ON.
        Only has an effect when `P4C_USE_PREINSTALLED_PROTOBUF` is enabled.
      - `-DENABLE_MULTITHREAD=ON|OFF`. Use multithreading.  Default is
        OFF.
      - `-DBUILD_LINK_WITH_GOLD=ON|OFF`. Use Gold linker for build if available.
-     - `-DBUILD_LINK_WITH_LLD=ON|OFF`. Use LLD linker for build if available (overrides BUILD_LINK_WITH_GOLD).
+     - `-DBUILD_LINK_WITH_LLD=ON|OFF`. Use LLD linker for build if available (overrides `BUILD_LINK_WITH_GOLD`).
      - `-DENABLE_LTO=ON|OFF`. Use Link Time Optimization (LTO).  Default is OFF.
      - `-DENABLE_WERROR=ON|OFF`. Treat warnings as errors.  Default is OFF.
      - `-DCMAKE_UNITY_BUILD=ON|OFF `. Enable [unity builds](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html) for faster compilation.  Default is OFF.
@@ -240,7 +242,7 @@ use them, but YMMV.
 
 - GNU Bison and Flex for the parser and lexical analyzer generators.
 
-- Google Protocol Buffers 3.0 or higher for control plane API generation
+- Google Protocol Buffers v3.25.3 or higher for control plane API generation
 
 - C++ boost library
 
@@ -274,16 +276,18 @@ For documentation building:
 
 `p4c` also depends on Google Protocol Buffers (Protobuf). `p4c` requires version
 3.0 or higher, so the packaged version provided in Ubuntu 20.04 **should**
-work. However, P4C typically installs its own version of Protobuf using CMake's Fetchcontent module
-(at the moment, 3.21.12). If you are experiencing issues with the Protobuf version shipped with your OS distribution, we recommend that to install Protobuf 3.21.12 from source. You can find instructions
-[here](https://github.com/protocolbuffers/protobuf/blob/v3.21.12/src/README.md).
-After cloning Protobuf and before you build, check-out version 3.21.12:
+work. However, P4C typically installs its own version of Protobuf using CMake's `FetchContent` module
+(at the moment, 3.25.3). If you are experiencing issues with the Protobuf version shipped with your OS distribution, we recommend that to install Protobuf 3.25.3 from source. You can find instructions
+[here](https://github.com/protocolbuffers/protobuf/blob/v3.25.3/src/README.md).
+After cloning Protobuf and before you build, check-out version 3.25.3:
 
-`git checkout v3.21.12`
+`git checkout v3.25.3`
 
 Please note that while all Protobuf versions newer than 3.0 should work for
 `p4c` itself, you may run into trouble with some extensions and other p4lang
-projects unless you install version 3.21.12.
+projects unless you install version 3.25.3.
+
+`p4c` also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's `FetchContent` module (Abseil LTS 20240116.1 at the moment).
 
 ### CMake
 p4c requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using `pip3 install --user cmake==3.16.3`. We have a CI test on Ubuntu 18.04 that uses this option, but there is no guarantee that this will lead to a successful build.
@@ -348,7 +352,7 @@ Installing on macOS:
   ```
   Homebrew offers a `protobuf` formula. It installs version 3.2, which should
   work for p4c itself but may cause problems with some extensions. It's
-  preferable to use the version of Protobuf which is supplied with CMake's fetchcontent (3.21.12).
+  preferable to use the version of Protobuf which is supplied with CMake's fetchcontent (3.25.3).
 
   The `protobuf` formula requires the following CMake variables to be set,
   otherwise CMake does not find the libraries or fails in linking. It is likely

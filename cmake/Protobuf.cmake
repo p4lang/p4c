@@ -29,10 +29,7 @@ macro(p4c_obtain_protobuf)
     # See https://github.com/p4lang/p4c/issues/4316
     set(Protobuf_LIBRARY "protobuf::libprotobuf")
   else()
-    # Google introduced another breaking change with protobuf 22.x by adding abseil as a new
-    # dependency. https://protobuf.dev/news/2022-08-03/#abseil-dep We do not want abseil, so we stay
-    # with 21.x for now.
-    set(P4C_PROTOBUF_VERSION "21.12")
+    set(P4C_PROTOBUF_VERSION "25.3")
     message("Fetching Protobuf version ${P4C_PROTOBUF_VERSION} for P4C...")
 
     # Unity builds do not work for Protobuf...
@@ -49,13 +46,15 @@ macro(p4c_obtain_protobuf)
     set(protobuf_BUILD_PROTOC_BINARIES ON CACHE BOOL "Build libprotoc and protoc compiler.")
     # Only ever build the static library. It is not safe to link with a local dynamic version.
     set(protobuf_BUILD_SHARED_LIBS OFF CACHE BOOL "Build Shared Libraries")
-    # This is necessary to be able to call FindPackage.
-    set(protobuf_INSTALL ON CACHE BOOL "Install Protobuf")
+    set(protobuf_INSTALL OFF CACHE BOOL "Install Protobuf")
+    set(protobuf_ABSL_PROVIDER "package" CACHE STRING "Use system-provided abseil")
+    set(protobuf_BUILD_EXPORT OFF)
+    set(utf8_range_ENABLE_INSTALL OFF)
 
     fetchcontent_declare(
       protobuf
-      URL https://github.com/protocolbuffers/protobuf/releases/download/v${P4C_PROTOBUF_VERSION}/protobuf-cpp-3.${P4C_PROTOBUF_VERSION}.tar.gz
-      URL_HASH SHA256=4eab9b524aa5913c6fffb20b2a8abf5ef7f95a80bc0701f3a6dbb4c607f73460
+      URL https://github.com/protocolbuffers/protobuf/releases/download/v${P4C_PROTOBUF_VERSION}/protobuf-${P4C_PROTOBUF_VERSION}.tar.gz
+      URL_HASH SHA256=d19643d265b978383352b3143f04c0641eea75a75235c111cc01a1350173180e
       USES_TERMINAL_DOWNLOAD TRUE
       GIT_PROGRESS TRUE
     )
