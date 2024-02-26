@@ -65,8 +65,8 @@ git clone --recurse-submodules --depth=1 https://github.com/p4lang/PI
 cd PI
 ./autogen.sh
 ./configure --with-proto
-make
-make install
+make -j$((`nproc`+1))
+make -j$((`nproc`+1)) install
 popd
 
 # Install BMv2 from source
@@ -75,8 +75,8 @@ git clone --depth=1 https://github.com/p4lang/behavioral-model
 cd behavioral-model
 ./autogen.sh
 ./configure --with-pdfixed --with-thrift --with-pi --with-stress-tests --enable-debugger CC="ccache gcc" CXX="ccache g++"
-make
-make install-strip
+make -j$((`nproc`+1))
+make -j$((`nproc`+1)) install-strip
 popd
 
 rm -rf "${tmp_dir}"
