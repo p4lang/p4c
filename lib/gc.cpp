@@ -34,12 +34,6 @@ limitations under the License.
 #include "log.h"
 #include "n4.h"
 
-/* glibc++ requires defining global delete with this exception spec to avoid warnings.
- * If it's not defined, probably not using glibc++ and don't need anything */
-#ifndef _GLIBCXX_USE_NOEXCEPT
-#define _GLIBCXX_USE_NOEXCEPT _NOEXCEPT
-#endif
-
 #if HAVE_LIBGC
 static bool done_init, started_init;
 // emergency pool to allow a few extra allocations after a bad_alloc is thrown so we
@@ -61,28 +55,74 @@ static bool tracing = false;
         tracing = false;                         \
     }
 
-// One can disable the GC, e.g., to run under Valgrind, by editing config.h
-void *operator new(std::size_t size) {
-    /* DANGER -- on OSX, can't safely call the garbage collector allocation
-     * routines from a static global constructor without manually initializing
-     * it first.  Since we have global constructors that want to allocate
-     * memory, we need to force initialization */
+static void maybe_initialize_gc() {
     if (!done_init) {
         started_init = true;
         GC_INIT();
         done_init = true;
     }
+}
+
+// One can disable the GC, e.g., to run under Valgrind, by editing config.h
+void *operator new(std::size_t size) {
     TRACE_ALLOC(size)
+
+    maybe_initialize_gc();
     auto *rv = ::operator new(size, UseGC, 0, 0);
     if (!rv && emergency_ptr && emergency_ptr + size < emergency_pool + sizeof(emergency_pool)) {
         rv = emergency_ptr;
-        size += -size & 0xf;  // align to 16 bytes
+        size = (size + 15) / 16 * 16;  // align to 16 bytes
         emergency_ptr += size;
     }
     if (!rv) {
         if (!emergency_ptr) emergency_ptr = emergency_pool;
         throw backtrace_exception<std::bad_alloc>();
     }
+    return rv;
+}
+
+void *operator new(std::size_t size, const std::nothrow_t &) noexcept {
+    TRACE_ALLOC(size)
+
+    maybe_initialize_gc();
+    // FIXME: Call nothrow operator new from libgc with suitable new libgc
+    // versions
+    auto *rv = ::operator new(size, UseGC, 0, 0);
+    if (!rv && emergency_ptr && emergency_ptr + size < emergency_pool + sizeof(emergency_pool)) {
+        rv = emergency_ptr;
+        size = (size + 15) / 16 * 16;  // align to 16 bytes
+        emergency_ptr += size;
+    }
+    if (!rv && !emergency_ptr) emergency_ptr = emergency_pool;
+    return rv;
+}
+
+void *operator new(std::size_t size, std::align_val_t alignment) {
+    TRACE_ALLOC(size)
+
+    if (static_cast<size_t>(alignment) < sizeof(void *))
+        alignment = std::align_val_t(sizeof(void *));
+
+    maybe_initialize_gc();
+
+    void *rv = nullptr;
+    if (GC_posix_memalign(&rv, static_cast<size_t>(alignment), size) != 0)
+        throw backtrace_exception<std::bad_alloc>();
+
+    return rv;
+}
+
+void *operator new(std::size_t size, std::align_val_t alignment, const std::nothrow_t &) noexcept {
+    TRACE_ALLOC(size)
+
+    if (static_cast<size_t>(alignment) < sizeof(void *))
+        alignment = std::align_val_t(sizeof(void *));
+
+    maybe_initialize_gc();
+
+    void *rv = nullptr;
+    if (GC_posix_memalign(&rv, static_cast<size_t>(alignment), size) != 0) rv = nullptr;
+
     return rv;
 }
 
@@ -100,35 +140,52 @@ alloc_trace_cb_t set_alloc_trace(void (*fn)(void *, void **, size_t), void *arg)
 }
 
 // clang-format off
-void operator delete(void* p) _GLIBCXX_USE_NOEXCEPT {
+void operator delete(void* p) noexcept {
     if (p >= emergency_pool && p < emergency_pool + sizeof(emergency_pool)) {
         return;
     }
     gc::operator delete(p);
 }
 
-void operator delete(void* p, std::size_t /*size*/) _GLIBCXX_USE_NOEXCEPT {
+void operator delete(void* p, std::size_t /*size*/) noexcept {
     if (p >= emergency_pool && p < emergency_pool + sizeof(emergency_pool)) {
         return;
     }
     gc::operator delete(p);
+}
+
+// FIXME: We can get rid of GC_base here with suitable new libgc
+// See https://github.com/ivmai/bdwgc/issues/589 for more info
+void operator delete(void *p, std::align_val_t) noexcept {
+    gc::operator delete(GC_base(p));
+}
+
+void operator delete(void *p, std::size_t, std::align_val_t) noexcept {
+    gc::operator delete(GC_base(p));
 }
 // clang-format on
 
 void *operator new[](std::size_t size) { return ::operator new(size); }
-void operator delete[](void *p) _GLIBCXX_USE_NOEXCEPT { ::operator delete(p); }
-void operator delete[](void *p, std::size_t) _GLIBCXX_USE_NOEXCEPT { ::operator delete(p); }
+void *operator new[](std::size_t size, std::align_val_t alignment) {
+    return ::operator new(size, alignment);
+}
+void *operator new[](std::size_t size, const std::nothrow_t &tag) noexcept {
+    return ::operator new(size, tag);
+}
+void *operator new[](std::size_t size, std::align_val_t alignment,
+                     const std::nothrow_t &tag) noexcept {
+    return ::operator new(size, alignment, tag);
+}
+
+void operator delete[](void *p) noexcept { ::operator delete(p); }
+void operator delete[](void *p, std::size_t) noexcept { ::operator delete(p); }
+void operator delete[](void *p, std::align_val_t) noexcept { ::operator delete(p); }
+void operator delete[](void *p, std::size_t, std::align_val_t) noexcept { ::operator delete(p); }
 
 namespace {
 
 constexpr size_t headerSize = 16;
-// See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56019
-// p4c requires gcc 4.9+, but there is no harm in adding this; maybe it wil help someone.
-#if __GNUC__ == 4 && __GNUC_MINOR__ <= 8
-using max_align_t = ::max_align_t;
-#else
 using max_align_t = std::max_align_t;
-#endif
 static_assert(headerSize >= alignof(max_align_t), "mmap header size not large enough");
 static_assert(headerSize >= sizeof(size_t), "mmap header size not large enough");
 
