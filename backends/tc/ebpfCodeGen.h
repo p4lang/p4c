@@ -21,6 +21,11 @@ and limitations under the License.
 
 namespace TC {
 
+#define BYTE_EXTRACT 8
+#define WORD_EXTRACT 16
+#define DWORD_EXTRACT 32
+#define QWORD_EXTRACT 64
+
 class ConvertToBackendIR;
 class EBPFPnaParser;
 

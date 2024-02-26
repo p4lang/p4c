@@ -522,23 +522,23 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         const char *helper = nullptr;
         bool memcpy = false;
         // If the width of field is multiple of 8. compiler copies the value via __builtin_memcpy
-        if (widthToExtract % 8 == 0) {
+        if (widthToExtract % BYTE_EXTRACT == 0) {
             loadSize = widthToExtract;
             memcpy = true;
         } else {
             if (wordsToRead <= 1) {
                 helper = "load_byte";
-                loadSize = 8;
+                loadSize = BYTE_EXTRACT;
             } else if (wordsToRead <= 2) {
                 helper = "load_half_ne";
-                loadSize = 16;
+                loadSize = WORD_EXTRACT;
             } else if (wordsToRead <= 4) {
                 helper = "load_word_ne";
-                loadSize = 32;
+                loadSize = DWORD_EXTRACT;
             } else {
-                if (wordsToRead > 64) BUG("Unexpected width %d", widthToExtract);
+                if (wordsToRead > QWORD_EXTRACT) BUG("Unexpected width %d", widthToExtract);
                 helper = "load_dword_ne";
-                loadSize = 64;
+                loadSize = QWORD_EXTRACT;
             }
         }
 

@@ -37,8 +37,8 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                 crc16_update(&ingress_h_reg, (u8 *) &(hdr->crc.f3), 4, 0xA001);
                 crc16_update(&ingress_h_reg, (u8 *) &(hdr->crc.f4), 4, 0xA001);
             }
-                        hdr->crc.crc = /* h_0.get_hash({hdr->crc.f1, hdr->crc.f2, hdr->crc.f3, hdr->crc.f4}) */
-crc16_finalize(ingress_h_reg);
+                        hdr->crc.crc = bpf_htons(/* h_0.get_hash({hdr->crc.f1, hdr->crc.f2, hdr->crc.f3, hdr->crc.f4}) */
+crc16_finalize(ingress_h_reg));
         }
     }
     {
@@ -102,7 +102,6 @@ crc16_finalize(ingress_h_reg);
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.etherType = bpf_htons(hdr->ethernet.etherType);
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[1];
@@ -123,7 +122,6 @@ crc16_finalize(ingress_h_reg);
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
-            hdr->crc.f3 = htonl(hdr->crc.f3);
             ebpf_byte = ((char*)(&hdr->crc.f3))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->crc.f3))[1];
@@ -134,7 +132,6 @@ crc16_finalize(ingress_h_reg);
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
-            hdr->crc.f4 = htonl(hdr->crc.f4);
             ebpf_byte = ((char*)(&hdr->crc.f4))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->crc.f4))[1];
@@ -145,7 +142,6 @@ crc16_finalize(ingress_h_reg);
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
-            hdr->crc.crc = bpf_htons(hdr->crc.crc);
             ebpf_byte = ((char*)(&hdr->crc.crc))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->crc.crc))[1];

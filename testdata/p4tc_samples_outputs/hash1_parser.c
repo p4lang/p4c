@@ -39,13 +39,13 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
             hdr->crc.f2 = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))) & EBPF_MASK(u8, 4));
             ebpf_packetOffsetInBits += 4;
 
-            hdr->crc.f3 = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->crc.f3, pkt + BYTES(ebpf_packetOffsetInBits), 4);
             ebpf_packetOffsetInBits += 32;
 
-            hdr->crc.f4 = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->crc.f4, pkt + BYTES(ebpf_packetOffsetInBits), 4);
             ebpf_packetOffsetInBits += 32;
 
-            hdr->crc.crc = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->crc.crc, pkt + BYTES(ebpf_packetOffsetInBits), 2);
             ebpf_packetOffsetInBits += 16;
 
 
@@ -68,7 +68,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
             __builtin_memcpy(&hdr->ethernet.srcAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->ethernet.etherType, pkt + BYTES(ebpf_packetOffsetInBits), 2);
             ebpf_packetOffsetInBits += 16;
 
 
@@ -77,7 +77,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
 
 ;
             u16 select_0;
-            select_0 = hdr->ethernet.etherType;
+            select_0 = bpf_ntohs(hdr->ethernet.etherType);
             if (select_0 == 0x800)goto parse_ipv4;
             if ((select_0 & 0x0) == (0x0 & 0x0))goto reject;
             else goto reject;

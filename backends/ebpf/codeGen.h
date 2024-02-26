@@ -30,10 +30,6 @@ class ReferenceMap;
 
 namespace EBPF {
 
-#define IsSlice(a) (a->is<IR::Slice>())
-#define ToSlice(a) (a->to<IR::Slice>())
-#define IsMem(a) (a->is<IR::Member>())
-#define ToMem(a) (a->to<IR::Member>())
 
 class CodeBuilder : public Util::SourceCodeBuilder {
  public:

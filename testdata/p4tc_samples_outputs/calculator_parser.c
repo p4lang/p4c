@@ -37,25 +37,25 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                     goto reject;
                 }
 
-                tmp_0.p = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_0.p, pkt + BYTES(ebpf_packetOffsetInBits), 1);
                 ebpf_packetOffsetInBits += 8;
 
-                tmp_0.four = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_0.four, pkt + BYTES(ebpf_packetOffsetInBits), 1);
                 ebpf_packetOffsetInBits += 8;
 
-                tmp_0.ver = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_0.ver, pkt + BYTES(ebpf_packetOffsetInBits), 1);
                 ebpf_packetOffsetInBits += 8;
 
-                tmp_0.op = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_0.op, pkt + BYTES(ebpf_packetOffsetInBits), 1);
                 ebpf_packetOffsetInBits += 8;
 
-                tmp_0.operand_a = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_0.operand_a, pkt + BYTES(ebpf_packetOffsetInBits), 4);
                 ebpf_packetOffsetInBits += 32;
 
-                tmp_0.operand_b = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_0.operand_b, pkt + BYTES(ebpf_packetOffsetInBits), 4);
                 ebpf_packetOffsetInBits += 32;
 
-                tmp_0.res = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_0.res, pkt + BYTES(ebpf_packetOffsetInBits), 4);
                 ebpf_packetOffsetInBits += 32;
 
 
@@ -71,25 +71,25 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                     goto reject;
                 }
 
-                tmp_2.p = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_2.p, pkt + BYTES(ebpf_packetOffsetInBits), 1);
                 ebpf_packetOffsetInBits += 8;
 
-                tmp_2.four = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_2.four, pkt + BYTES(ebpf_packetOffsetInBits), 1);
                 ebpf_packetOffsetInBits += 8;
 
-                tmp_2.ver = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_2.ver, pkt + BYTES(ebpf_packetOffsetInBits), 1);
                 ebpf_packetOffsetInBits += 8;
 
-                tmp_2.op = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_2.op, pkt + BYTES(ebpf_packetOffsetInBits), 1);
                 ebpf_packetOffsetInBits += 8;
 
-                tmp_2.operand_a = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_2.operand_a, pkt + BYTES(ebpf_packetOffsetInBits), 4);
                 ebpf_packetOffsetInBits += 32;
 
-                tmp_2.operand_b = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_2.operand_b, pkt + BYTES(ebpf_packetOffsetInBits), 4);
                 ebpf_packetOffsetInBits += 32;
 
-                tmp_2.res = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_2.res, pkt + BYTES(ebpf_packetOffsetInBits), 4);
                 ebpf_packetOffsetInBits += 32;
 
 
@@ -105,25 +105,25 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                     goto reject;
                 }
 
-                tmp_4.p = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_4.p, pkt + BYTES(ebpf_packetOffsetInBits), 1);
                 ebpf_packetOffsetInBits += 8;
 
-                tmp_4.four = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_4.four, pkt + BYTES(ebpf_packetOffsetInBits), 1);
                 ebpf_packetOffsetInBits += 8;
 
-                tmp_4.ver = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_4.ver, pkt + BYTES(ebpf_packetOffsetInBits), 1);
                 ebpf_packetOffsetInBits += 8;
 
-                tmp_4.op = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_4.op, pkt + BYTES(ebpf_packetOffsetInBits), 1);
                 ebpf_packetOffsetInBits += 8;
 
-                tmp_4.operand_a = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_4.operand_a, pkt + BYTES(ebpf_packetOffsetInBits), 4);
                 ebpf_packetOffsetInBits += 32;
 
-                tmp_4.operand_b = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_4.operand_b, pkt + BYTES(ebpf_packetOffsetInBits), 4);
                 ebpf_packetOffsetInBits += 32;
 
-                tmp_4.res = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+                __builtin_memcpy(&tmp_4.res, pkt + BYTES(ebpf_packetOffsetInBits), 4);
                 ebpf_packetOffsetInBits += 32;
 
 
@@ -145,25 +145,25 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                 goto reject;
             }
 
-            hdr->p4calc.p = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->p4calc.p, pkt + BYTES(ebpf_packetOffsetInBits), 1);
             ebpf_packetOffsetInBits += 8;
 
-            hdr->p4calc.four = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->p4calc.four, pkt + BYTES(ebpf_packetOffsetInBits), 1);
             ebpf_packetOffsetInBits += 8;
 
-            hdr->p4calc.ver = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->p4calc.ver, pkt + BYTES(ebpf_packetOffsetInBits), 1);
             ebpf_packetOffsetInBits += 8;
 
-            hdr->p4calc.op = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->p4calc.op, pkt + BYTES(ebpf_packetOffsetInBits), 1);
             ebpf_packetOffsetInBits += 8;
 
-            hdr->p4calc.operand_a = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->p4calc.operand_a, pkt + BYTES(ebpf_packetOffsetInBits), 4);
             ebpf_packetOffsetInBits += 32;
 
-            hdr->p4calc.operand_b = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->p4calc.operand_b, pkt + BYTES(ebpf_packetOffsetInBits), 4);
             ebpf_packetOffsetInBits += 32;
 
-            hdr->p4calc.res = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->p4calc.res, pkt + BYTES(ebpf_packetOffsetInBits), 4);
             ebpf_packetOffsetInBits += 32;
 
 
@@ -180,13 +180,13 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                 goto reject;
             }
 
-            hdr->ethernet.dstAddr = (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
+            __builtin_memcpy(&hdr->ethernet.dstAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
+            __builtin_memcpy(&hdr->ethernet.srcAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            __builtin_memcpy(&hdr->ethernet.etherType, pkt + BYTES(ebpf_packetOffsetInBits), 2);
             ebpf_packetOffsetInBits += 16;
 
 
@@ -195,7 +195,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
 
 ;
             u16 select_1;
-            select_1 = hdr->ethernet.etherType;
+            select_1 = bpf_ntohs(hdr->ethernet.etherType);
             if (select_1 == 0x1234)goto check_p4calc;
             if ((select_1 & 0x0) == (0x0 & 0x0))goto accept;
             else goto reject;

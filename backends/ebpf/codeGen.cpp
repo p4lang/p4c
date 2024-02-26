@@ -508,7 +508,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Expression *lexpr,
         visit(rexpr);
         return;
     }
-    if (left == false) {
+    if (!left) {
         // ConvertLeft
         auto ftype = typeMap->getType(lexpr);
         auto et = EBPFTypeFactory::instance->create(ftype);
@@ -527,7 +527,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Expression *lexpr,
         }
         visit(rexpr);
         return;
-    } else {
+    } else if (!right) {
         // ConvertRight
         auto ftype = typeMap->getType(rexpr);
         auto et = EBPFTypeFactory::instance->create(ftype);
@@ -564,10 +564,10 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
         visit(rexpr);
         return;
     }
-    if (right == true) {
+    if (right) {
         convertByteOrder(rexpr, "HOST");
     }
-    if (left == true) {
+    if (left) {
         convertByteOrder(rexpr, "NETWORK");
     }
     return;
@@ -623,11 +623,11 @@ bool EBPFInitializerUtils::IsTypeHeaderOrUnion(const P4::TypeMap *typemap,
                                                const IR::Expression *exp) {
     if (!exp) return false;
     auto tempexp = ExtractExpFromCast(exp);
-    if (IsSlice(tempexp)) {
-        tempexp = ToSlice(tempexp)->e0;
+    if (tempexp->is<IR::Slice>()) {
+        tempexp = tempexp->to<IR::Slice>()->e0;
     }
     auto memexp = tempexp;
-    if (IsMem(tempexp) && tempexp->type->is<IR::Type_Bits>()) {
+    if (tempexp->is<IR::Member>() && tempexp->type->is<IR::Type_Bits>()) {
         memexp = tempexp->to<IR::Member>()->expr;
     }
     if (memexp->is<IR::ArrayIndex>()) {
