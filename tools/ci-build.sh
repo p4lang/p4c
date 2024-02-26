@@ -252,8 +252,8 @@ cmake ${CMAKE_FLAGS} ..
 
 # If CMAKE_ONLY is active, only run CMake. Do not build.
 if [ "$CMAKE_ONLY" == "OFF" ]; then
-  make
-  sudo make install
+  make -j$((`nproc`+1))
+  sudo make -j$((`nproc`+1)) install
   # Print ccache statistics after building
   ccache -p -s
 fi
