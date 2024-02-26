@@ -155,6 +155,12 @@ endif()
 # are propagated below
 if (ENABLE_SANITIZERS)
   append("-fsanitize=undefined,address" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
+  # ubsan may generate 128-bit multiplication with explicit overflow check. This
+  # is compiled down to _muloti4 libcall that is provided by compiler-rr but not
+  # by libgcc
+  # So, on Linux where clang uses libgcc by default we'd need to switch to
+  # compiler-rt, though we'd pull unwinder from libgcc.
+  # See https://bugs.llvm.org/show_bug.cgi?id=16404 for more information
   if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND UNIX AND NOT APPLE)
     append("--rtlib=compiler-rt --unwindlib=libgcc" CMAKE_EXE_LINKER_FLAGS)
   endif()
