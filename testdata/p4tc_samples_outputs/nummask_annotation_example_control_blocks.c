@@ -49,7 +49,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
 {
         u8 hit;
         {
-if (((u32)istd.input_port == 2 && /* hdr->ipv4.isValid() */
+if (((u32)skb->ifindex == 2 && /* hdr->ipv4.isValid() */
             hdr->ipv4.ebpf_valid) && /* hdr->tcp.isValid() */
             hdr->tcp.ebpf_valid) {
 /* set_ct_options_0.apply() */

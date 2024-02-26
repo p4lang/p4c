@@ -92,7 +92,7 @@ if (/* hdr->p4calc.isValid() */
                                                                         tmp_5 = hdr->ethernet.dstAddr;
                                                                         hdr->ethernet.dstAddr = hdr->ethernet.srcAddr;
                                                                         hdr->ethernet.srcAddr = tmp_5;
-                                    /* send_to_port(istd.input_port) */
+                                    /* send_to_port(skb->ifindex) */
                                     compiler_meta__->drop = false;
                                     send_to_port(skb->ifindex);
                                 }
@@ -103,7 +103,7 @@ if (/* hdr->p4calc.isValid() */
                                                                         tmp_5 = hdr->ethernet.dstAddr;
                                                                         hdr->ethernet.dstAddr = hdr->ethernet.srcAddr;
                                                                         hdr->ethernet.srcAddr = tmp_5;
-                                    /* send_to_port(istd.input_port) */
+                                    /* send_to_port(skb->ifindex) */
                                     compiler_meta__->drop = false;
                                     send_to_port(skb->ifindex);
                                 }
@@ -114,7 +114,7 @@ if (/* hdr->p4calc.isValid() */
                                                                         tmp_5 = hdr->ethernet.dstAddr;
                                                                         hdr->ethernet.dstAddr = hdr->ethernet.srcAddr;
                                                                         hdr->ethernet.srcAddr = tmp_5;
-                                    /* send_to_port(istd.input_port) */
+                                    /* send_to_port(skb->ifindex) */
                                     compiler_meta__->drop = false;
                                     send_to_port(skb->ifindex);
                                 }
@@ -125,7 +125,7 @@ if (/* hdr->p4calc.isValid() */
                                                                         tmp_5 = hdr->ethernet.dstAddr;
                                                                         hdr->ethernet.dstAddr = hdr->ethernet.srcAddr;
                                                                         hdr->ethernet.srcAddr = tmp_5;
-                                    /* send_to_port(istd.input_port) */
+                                    /* send_to_port(skb->ifindex) */
                                     compiler_meta__->drop = false;
                                     send_to_port(skb->ifindex);
                                 }
@@ -136,7 +136,7 @@ if (/* hdr->p4calc.isValid() */
                                                                         tmp_5 = hdr->ethernet.dstAddr;
                                                                         hdr->ethernet.dstAddr = hdr->ethernet.srcAddr;
                                                                         hdr->ethernet.srcAddr = tmp_5;
-                                    /* send_to_port(istd.input_port) */
+                                    /* send_to_port(skb->ifindex) */
                                     compiler_meta__->drop = false;
                                     send_to_port(skb->ifindex);
                                 }
