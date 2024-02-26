@@ -40,9 +40,7 @@ add_custom_command(
 add_dependencies(dpdk_runtime_dir controlplane)
 
 add_library(dpdk_runtime STATIC ${DPDK_P4RUNTIME_INFO_GEN_SRCS})
-target_include_directories(dpdk_runtime
-  SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS}
-)
+target_link_libraries(dpdk_runtime controlplane)
 
 # Silence various warnings as the root issue is out of our control, example https://github.com/protocolbuffers/protobuf/issues/7140
 set_source_files_properties(${DPDK_P4RUNTIME_INFO_GEN_SRCS} {$DPDK_P4RUNTIME_INFO_GEN_HDRS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-error")

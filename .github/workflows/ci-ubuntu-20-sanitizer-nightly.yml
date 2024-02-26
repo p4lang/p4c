@@ -26,7 +26,7 @@ jobs:
       UBSAN_OPTIONS: print_stacktrace=1
       ASAN_OPTIONS: print_stacktrace=1:detect_leaks=0
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 

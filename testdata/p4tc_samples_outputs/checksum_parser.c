@@ -144,6 +144,7 @@ ck_0_state);             goto accept;
             if (ebpf_errorCode == 0) {
                 return TC_ACT_SHOT;
             }
+            compiler_meta__->parser_error = ebpf_errorCode;
             goto accept;
         }
 

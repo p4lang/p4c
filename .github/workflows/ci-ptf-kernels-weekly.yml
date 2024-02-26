@@ -33,12 +33,12 @@ jobs:
     if: ${{ github.repository == 'p4lang/p4c' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Cache P4C docker image
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: p4c_cache
         with:
           path: ${{ env.P4C_IMAGE }}
@@ -59,10 +59,10 @@ jobs:
     env:
       OS_TYPE: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Cache VM image
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: vm_cache
         with:
           path: ${{ env.DISK_IMAGE }}
@@ -96,10 +96,10 @@ jobs:
       OS_TYPE: ubuntu-20.04
       KERNEL_VERSION: ${{ matrix.kernel_version }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Download P4C docker image
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         id: p4c_cache
         with:
           path: ${{ env.P4C_IMAGE }}
@@ -107,7 +107,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Download VM image
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         id: vm_cache
         with:
           path: ${{ env.DISK_IMAGE }}

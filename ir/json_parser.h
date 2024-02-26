@@ -1,7 +1,6 @@
 #ifndef IR_JSON_PARSER_H_
 #define IR_JSON_PARSER_H_
 
-#include <algorithm>
 #include <iosfwd>
 #include <string>
 #include <vector>

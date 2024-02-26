@@ -16,12 +16,7 @@ limitations under the License.
 #ifndef LIB_ERROR_HELPER_H_
 #define LIB_ERROR_HELPER_H_
 
-#include <stdarg.h>
-
-#include <map>
-#include <set>
 #include <type_traits>
-#include <unordered_map>
 
 #include <boost/format.hpp>
 

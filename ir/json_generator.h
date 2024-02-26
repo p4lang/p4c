@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef IR_JSON_GENERATOR_H_
 #define IR_JSON_GENERATOR_H_
 
-#include <cassert>
 #include <optional>
 #include <string>
 #include <unordered_set>

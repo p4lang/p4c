@@ -324,7 +324,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_3_ACT_MAINCONTROLIMPL_SENDTOPORT: 
                                 {
-/* send_to_port(istd.input_port) */
+/* send_to_port(skb->ifindex) */
                                     compiler_meta__->drop = false;
                                     send_to_port(skb->ifindex);
                                 }
@@ -377,7 +377,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_4_ACT_MAINCONTROLIMPL_SENDTOPORT: 
                                 {
-/* send_to_port(istd.input_port) */
+/* send_to_port(skb->ifindex) */
                                     compiler_meta__->drop = false;
                                     send_to_port(skb->ifindex);
                                 }
@@ -539,7 +539,7 @@ if (hdr->ipv4.protocol != 6) {
                                 break;
                             case MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_SENDTOPORT: 
                                 {
-/* send_to_port(istd.input_port) */
+/* send_to_port(skb->ifindex) */
                                     compiler_meta__->drop = false;
                                     send_to_port(skb->ifindex);
                                 }

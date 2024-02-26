@@ -178,12 +178,12 @@ class MidEnd : public PassManager {
 #endif
 
 const IR::P4Parser *getParser(const IR::P4Program *program) {
-    std::function<bool(const IR::IDeclaration *)> filter = [](const IR::IDeclaration *d) {
-        CHECK_NULL(d);
-        return d->is<IR::P4Parser>();
-    };
-    const auto *newDeclVector = program->getDeclarations()->where(filter)->toVector();
-    return (*newDeclVector)[0]->to<IR::P4Parser>();
+    // FIXME: This certainly should be improved, it should be possible to check
+    // and cast at the same time
+    return program->getDeclarations()
+        ->where([](const IR::IDeclaration *d) { return d->is<IR::P4Parser>(); })
+        ->single()
+        ->to<IR::P4Parser>();
 }
 
 /// Rewrites parser

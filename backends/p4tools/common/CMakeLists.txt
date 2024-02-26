@@ -68,5 +68,5 @@ target_include_directories(
   SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS}
 )
 
-add_dependencies(p4tools-control-plane controlplane)
+target_link_libraries(p4tools-control-plane controlplane)
 

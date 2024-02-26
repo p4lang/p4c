@@ -16,13 +16,10 @@ limitations under the License.
 
 #include "ir/json_parser.h"
 
-#include <ctype.h>
-
+#include <cctype>
 #include <iostream>
 #include <list>
 #include <utility>
-
-#include <boost/multiprecision/number.hpp>
 
 int JsonObject::get_id() const {
     auto it = find("Node_ID");

@@ -34,33 +34,9 @@ void IJson::dump() const { std::cout << toString(); }
 
 JsonValue *JsonValue::null = new JsonValue();
 
-big_int JsonValue::makeValue(long long v) {
-    if (v >= 0) {
-        return makeValue(static_cast<unsigned long long>(v));
-    } else {
-        // works for smallest long long value as well, because the bit
-        // representation for -(1 << 63) - as a long long - and for (1 << 63) -
-        // as an unsigned long long - is the same.
-        return -1 * makeValue(static_cast<unsigned long long>(-v));
-    }
-}
+JsonValue::JsonValue(long long v) : tag(Kind::Number), value(v) {}
 
-big_int JsonValue::makeValue(unsigned long long v) {
-    big_int tmp = v;
-    return tmp;
-}
-
-// According to the GMP documentation
-// (https://gmplib.org/manual/C_002b_002b-Interface-Integers.html), mpz_class
-// cannot be constructed from a "long long". This means that on systems where
-// "long" != "long long", we cannot construct the "value" member directly from
-// parameter v. Instead, we use this suggested workaround:
-// https://stackoverflow.com/questions/6598265/convert-uint64-to-gmp-mpir-number
-// Because the "value" member is const, we use a helper (makeValue) to
-// initialize it.
-JsonValue::JsonValue(long long v) : tag(Kind::Number), value(makeValue(v)) {}
-
-JsonValue::JsonValue(unsigned long long v) : tag(Kind::Number), value(makeValue(v)) {}
+JsonValue::JsonValue(unsigned long long v) : tag(Kind::Number), value(v) {}
 
 void JsonValue::serialize(std::ostream &out) const {
     switch (tag) {

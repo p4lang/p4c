@@ -15,13 +15,10 @@ limitations under the License.
 */
 #include "p4RuntimeSymbolTable.h"
 
-#include <iosfwd>
-#include <unordered_map>
-
 #include <boost/algorithm/string/split.hpp>
-#include <boost/range/adaptor/reversed.hpp>
 
 #include "lib/cstring.h"
+#include "lib/iterator_range.h"
 #include "p4RuntimeArchHandler.h"
 #include "typeSpecConverter.h"
 
@@ -305,7 +302,7 @@ cstring P4::ControlPlaneAPI::P4SymbolSuffixSet::shortestUniqueSuffix(const cstri
     // uniquely, so in both cases we only need two components.
     unsigned neededComponents = 0;
     auto *node = suffixesRoot;
-    for (auto &component : boost::adaptors::reverse(components)) {
+    for (auto &component : Util::iterator_range(components).reverse()) {
         if (node->edges.find(component) == node->edges.end()) {
             BUG("Symbol is not in suffix set: %1%", symbol);
         }
@@ -369,7 +366,7 @@ void P4::ControlPlaneAPI::P4SymbolSuffixSet::addSymbol(const cstring &symbol) {
     //                       \-> "d" -> (1) -> "a" -> (1)
     // (Nodes are in parentheses, and edge labels are in quotes.)
     auto *node = suffixesRoot;
-    for (auto &component : boost::adaptors::reverse(components)) {
+    for (auto &component : Util::iterator_range(components).reverse()) {
         if (node->edges.find(component) == node->edges.end()) {
             node->edges[component] = new SuffixNode;
         }

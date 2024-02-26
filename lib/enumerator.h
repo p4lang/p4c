@@ -27,6 +27,7 @@ limitations under the License.
 #include <vector>
 
 #include "lib/cstring.h"
+#include "lib/iterator_range.h"
 
 namespace Util {
 enum class EnumeratorState { NotStarted, Valid, PastEnd };
@@ -99,10 +100,12 @@ class Enumerator {
     static Enumerator<T> *emptyEnumerator();  // empty data
     template <typename Iter>
     static Enumerator<typename Iter::value_type> *createEnumerator(Iter begin, Iter end);
+    template <typename Iter>
+    static Enumerator<typename Iter::value_type> *createEnumerator(iterator_range<Iter> range);
     // concatenate all these collections into a single one
     static Enumerator<T> *concatAll(Enumerator<Enumerator<T> *> *inputs);
 
-    std::vector<T> *toVector();
+    std::vector<T> toVector();
     /* Return an enumerator returning all elements that pass the filter */
     Enumerator<T> *where(std::function<bool(const T &)> filter);
     /* Apply specified function to all elements of this enumerator */
@@ -119,6 +122,9 @@ class Enumerator {
     bool any();
     // The only next element; throws if the enumerator does not have exactly 1 element
     T single();
+    // The only next element or default value if none exists; throws if the
+    // enumerator does not have exactly 0 or 1 element
+    T singleOrDefault();
     // Next element, or the default value if none exists
     T nextOrDefault();
     // Next element; throws if there are no elements
@@ -495,9 +501,15 @@ Enumerator<typename Iter::value_type> *Enumerator<T>::createEnumerator(Iter begi
 }
 
 template <typename T>
-std::vector<T> *Enumerator<T>::toVector() {
-    auto result = new std::vector<T>();
-    while (moveNext()) result->push_back(getCurrent());
+template <typename Iter>
+Enumerator<typename Iter::value_type> *Enumerator<T>::createEnumerator(iterator_range<Iter> range) {
+    return new GenericEnumerator<Iter>(range.begin(), range.end(), "range");
+}
+
+template <typename T>
+std::vector<T> Enumerator<T>::toVector() {
+    std::vector<T> result;
+    while (moveNext()) result.push_back(getCurrent());
     return result;
 }
 
@@ -526,6 +538,16 @@ template <typename T>
 T Enumerator<T>::single() {
     bool next = moveNext();
     if (!next) throw std::logic_error("There is no element for `single()'");
+    T result = getCurrent();
+    next = moveNext();
+    if (next) throw std::logic_error("There are multiple elements when calling `single()'");
+    return result;
+}
+
+template <typename T>
+T Enumerator<T>::singleOrDefault() {
+    bool next = moveNext();
+    if (!next) return T{};
     T result = getCurrent();
     next = moveNext();
     if (next) throw std::logic_error("There are multiple elements when calling `single()'");
