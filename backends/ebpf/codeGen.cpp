@@ -565,9 +565,23 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
         return;
     }
     if (right) {
+        /*
+        If left side of assignment is non-header field and right expression
+        is header field, we need to convert rexp to host order.
+        Example -
+            select_0 = hdr.ipv4.diffserv
+            select_0 = bntoh(hdr.ipv4.diffserv)
+        */
         convertByteOrder(rexpr, "HOST");
     }
     if (left) {
+        /*
+        If left side of assignment is header field, we need to convert
+        right expression to network order.
+        Example -
+            hdr.opv4.diffserv = 0x1;
+            hdr.opv4.diffserv = bhton(0x1)
+        */
         convertByteOrder(rexpr, "NETWORK");
     }
     return;

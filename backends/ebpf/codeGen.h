@@ -30,7 +30,6 @@ class ReferenceMap;
 
 namespace EBPF {
 
-
 class CodeBuilder : public Util::SourceCodeBuilder {
  public:
     const Target *target;

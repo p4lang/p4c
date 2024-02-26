@@ -28,7 +28,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
 {
         u8 hit;
         {
-if ((u32)istd.input_port == 4) {
+if ((u32)skb->ifindex == 4) {
                 hdr->udp.src_port = bpf_htons((hdr->udp.src_port + bpf_htons(1)));            }
 
         }
