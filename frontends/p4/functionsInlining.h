@@ -107,12 +107,12 @@ class InlineFunctions : public PassManager {
     FunctionsInlineList functionsToInline;
 
  public:
-    InlineFunctions(ReferenceMap *refMap, TypeMap *typeMap) {
+    InlineFunctions(ReferenceMap *refMap, TypeMap *typeMap, const RemoveUnusedPolicy &policy) {
         passes.push_back(new PassRepeated(
             {new TypeChecking(refMap, typeMap),
              new DiscoverFunctionsInlining(&functionsToInline, refMap, typeMap),
              new InlineFunctionsDriver(&functionsToInline, new FunctionsInliner(refMap->isV1())),
-             new RemoveAllUnusedDeclarations(refMap)}));
+             new RemoveAllUnusedDeclarations(refMap, policy)}));
         passes.push_back(new CloneVariableDeclarations());
         setName("InlineFunctions");
     }
