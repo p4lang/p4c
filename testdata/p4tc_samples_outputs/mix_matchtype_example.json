@@ -1,7 +1,6 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "mix_matchtype_example",
-  "id" : 1,
   "tables" : [
     {
       "name" : "MainControlImpl/ipv4_tbl_1",

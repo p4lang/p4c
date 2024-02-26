@@ -524,7 +524,6 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
 void ConvertToBackendIR::postorder(const IR::P4Program *p) {
     if (p != nullptr) {
         tcPipeline->setPipelineName(pipelineName);
-        tcPipeline->setPipelineId(TC::DEFAULT_PIPELINE_ID);
         tcPipeline->setNumTables(tableCount);
     }
 }

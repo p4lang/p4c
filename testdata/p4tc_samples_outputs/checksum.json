@@ -1,7 +1,6 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "checksum",
-  "id" : 1,
   "tables" : [
     {
       "name" : "ingress/nh_table",
