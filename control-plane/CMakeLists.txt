@@ -79,7 +79,7 @@ set (CONTROLPLANE_SRCS
   p4RuntimeSymbolTable.cpp
   typeSpecConverter.cpp
   bfruntime.cpp
-  )
+)
 
 set (CONTROLPLANE_HDRS
   addMissingIds.h
@@ -93,22 +93,28 @@ set (CONTROLPLANE_HDRS
   p4RuntimeTypes.h
   typeSpecConverter.h
   bfruntime.h
-  )
+)
 
 add_library(controlplane-gen OBJECT ${P4RUNTIME_GEN_SRCS})
-target_include_directories(controlplane-gen
-  SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS}
+target_include_directories(
+  controlplane-gen SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS} SYSTEM BEFORE
+  PUBLIC ${ABSL_COMMON_INCLUDE_DIRS}
 )
-target_link_libraries (controlplane-gen PUBLIC ${Protobuf_LIBRARY})
+
+target_link_libraries(controlplane-gen PUBLIC ${Protobuf_LIBRARY} PRIVATE absl::log)
 # Needed for the correct import of google/status.pb.cc
 target_include_directories(
-  controlplane-gen PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+  controlplane-gen PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-
-# Silence various warnings as the root issue is out of our control, example https://github.com/protocolbuffers/protobuf/issues/7140
-set_source_files_properties (${P4RUNTIME_GEN_SRCS} {$P4RUNTIME_GEN_HDRS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-error")
+# Silence various warnings as the root issue is out of our control, example
+# https://github.com/protocolbuffers/protobuf/issues/7140
+set_source_files_properties(
+  ${P4RUNTIME_GEN_SRCS} {$P4RUNTIME_GEN_HDRS}
+  PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-error"
+)
 
 add_library(controlplane STATIC ${CONTROLPLANE_SRCS})
-target_link_libraries(controlplane ${CMAKE_THREAD_LIBS_INIT} controlplane-gen)
+target_link_libraries(controlplane PUBLIC ${CMAKE_THREAD_LIBS_INIT} PUBLIC controlplane-gen)
+
 add_dependencies(controlplane mkP4configdir ir-generated controlplane-gen frontend-parser-gen)

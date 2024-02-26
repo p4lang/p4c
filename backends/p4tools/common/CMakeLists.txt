@@ -59,5 +59,4 @@ add_dependencies(p4tools-common ir-generated frontend)
 # Add control-plane-specific extensions.
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/control_plane)
 
-target_link_libraries(p4tools-control-plane controlplane)
 
