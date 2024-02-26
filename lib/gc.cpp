@@ -71,7 +71,7 @@ void *operator new(std::size_t size) {
     auto *rv = ::operator new(size, UseGC, 0, 0);
     if (!rv && emergency_ptr && emergency_ptr + size < emergency_pool + sizeof(emergency_pool)) {
         rv = emergency_ptr;
-        size += -size & 0xf;  // align to 16 bytes
+        size = (size + 15) / 16 * 16;  // align to 16 bytes
         emergency_ptr += size;
     }
     if (!rv) {
@@ -90,7 +90,7 @@ void *operator new(std::size_t size, const std::nothrow_t &) noexcept {
     auto *rv = ::operator new(size, UseGC, 0, 0);
     if (!rv && emergency_ptr && emergency_ptr + size < emergency_pool + sizeof(emergency_pool)) {
         rv = emergency_ptr;
-        size += -size & 0xf;  // align to 16 bytes
+        size = (size + 15) / 16 * 16;  // align to 16 bytes
         emergency_ptr += size;
     }
     if (!rv && !emergency_ptr) emergency_ptr = emergency_pool;
