@@ -271,7 +271,6 @@ const Util::JsonObject *IntrospectionGenerator::genIntrospectionJson() {
     introspec.initIntrospectionInfo(tcPipeline);
     json->emplace("schema_version", introspec.schemaVersion);
     json->emplace("pipeline_name", introspec.pipelineName);
-    json->emplace("id", introspec.pipelineId);
     genTableJson(tablesJson);
     json->emplace("tables", tablesJson);
     return json;

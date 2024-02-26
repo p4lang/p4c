@@ -3,7 +3,7 @@
 set -e
 
 TC="tc"
-$TC p4template create pipeline/multiple_tables_example_02 pipeid 1 numtables 7
+$TC p4template create pipeline/multiple_tables_example_02 numtables 7
 
 $TC p4template create action/multiple_tables_example_02/MainControlImpl/next_hop actid 1 \
 	param vport type bit32

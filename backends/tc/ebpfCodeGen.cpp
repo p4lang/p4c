@@ -54,6 +54,8 @@ void PNAEbpfGenerator::emitCommonPreamble(EBPF::CodeBuilder *builder) const {
 }
 
 void PNAEbpfGenerator::emitInternalStructures(EBPF::CodeBuilder *builder) const {
+    builder->appendLine("struct p4tc_filter_fields p4tc_filter_fields;");
+    builder->newline();
     builder->appendLine(
         "struct internal_metadata {\n"
         "    __u16 pkt_ether_type;\n"
@@ -90,6 +92,37 @@ void PNAEbpfGenerator::emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) con
     // additional field to avoid compiler errors when both headers and user_metadata are empty.
     builder->emitIndent();
     builder->append("__u8 __hook");
+    builder->endOfStatement(true);
+
+    builder->blockEnd(false);
+    builder->endOfStatement(true);
+    builder->newline();
+}
+
+void PNAEbpfGenerator::emitP4TCFilterFields(EBPF::CodeBuilder *builder) const {
+    builder->append("struct p4tc_filter_fields ");
+    builder->blockStart();
+
+    builder->emitIndent();
+    builder->appendFormat("__u32 pipeid");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u32 handle");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u32 classid");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u32 chain");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u32 blockid");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__be16 proto");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u16 prio");
     builder->endOfStatement(true);
 
     builder->blockEnd(false);
@@ -165,6 +198,8 @@ void PNAArchTC::emitParser(EBPF::CodeBuilder *builder) const {
     builder->appendFormat("#include \"%s\"", headerFile);
     builder->newline();
     builder->newline();
+    builder->appendLine("struct p4tc_filter_fields p4tc_filter_fields;");
+    builder->newline();
     pipeline->name = "tc-parse";
     pipeline->sectionName = "p4tc/parse";
     pipeline->functionName = pipeline->name.replace("-", "_") + "_func";
@@ -183,7 +218,7 @@ void PNAArchTC::emitHeader(EBPF::CodeBuilder *builder) const {
     PNAErrorCodesGen errorGen(builder);
     pipeline->program->apply(errorGen);
     emitGlobalHeadersMetadata(builder);
-    builder->newline();
+    emitP4TCFilterFields(builder);
     //  BPF map definitions.
     emitInstances(builder);
     EBPFHashAlgorithmTypeFactoryPNA::instance()->emitGlobals(builder);
@@ -1382,7 +1417,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->appendLine(
                 "struct p4tc_table_entry_create_bpf_params__local update_params = {");
             builder->emitIndent();
-            builder->appendLine("    .pipeid = 1,");
+            builder->appendLine("    .pipeid = p4tc_filter_fields.pipeid,");
             builder->emitIndent();
             auto controlName = control->controlBlock->getName().originalName;
             /* Table instanceName is control_block_name + "_" + original table name.
@@ -1437,7 +1472,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
         builder->emitIndent();
         builder->appendLine("struct p4tc_table_entry_act_bpf_params__local params = {");
         builder->emitIndent();
-        builder->appendLine("    .pipeid = 1,");
+        builder->appendLine("    .pipeid = p4tc_filter_fields.pipeid,");
         builder->emitIndent();
         auto tblId = tcIR->getTableId(method->object->getName().originalName);
         BUG_CHECK(tblId != 0, "Table ID not found");

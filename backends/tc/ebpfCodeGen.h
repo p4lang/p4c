@@ -45,6 +45,7 @@ class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
     void emitTypes(EBPF::CodeBuilder *builder) const override;
     void emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) const override;
     void emitPipelineInstances(EBPF::CodeBuilder *builder) const override;
+    void emitP4TCFilterFields(EBPF::CodeBuilder *builder) const;
     cstring getProgramName() const;
 };
 

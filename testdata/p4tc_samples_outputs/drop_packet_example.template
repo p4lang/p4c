@@ -3,7 +3,7 @@
 set -e
 
 TC="tc"
-$TC p4template create pipeline/drop_packet_example pipeid 1 numtables 1
+$TC p4template create pipeline/drop_packet_example numtables 1
 
 $TC p4template create action/drop_packet_example/MainControlImpl/next_hop actid 1 \
 	param vport type bit32

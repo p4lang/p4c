@@ -1,4 +1,6 @@
 #include "matchtype_parser.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
@@ -119,7 +121,7 @@ if (/* hdr->ipv4.isValid() */
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 1
                     };
                     struct MainControlImpl_ipv4_tbl_1_key key = {};
@@ -166,7 +168,7 @@ if (/* hdr->ipv4.isValid() */
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 2
                     };
                     struct MainControlImpl_ipv4_tbl_2_key key = {};
@@ -215,7 +217,7 @@ if (/* hdr->ipv4.isValid() */
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 3
                     };
                     struct MainControlImpl_ipv4_tbl_3_key key = {};
@@ -262,7 +264,7 @@ if (/* hdr->ipv4.isValid() */
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 4
                     };
                     struct MainControlImpl_ipv4_tbl_4_key key = {};

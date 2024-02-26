@@ -1,4 +1,6 @@
 #include "test_ipv6_example_parser.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
@@ -49,7 +51,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             {
                 /* construct key */
                 struct p4tc_table_entry_act_bpf_params__local params = {
-                    .pipeid = 1,
+                    .pipeid = p4tc_filter_fields.pipeid,
                     .tblid = 1
                 };
                 struct MainControlImpl_tbl_default_key key = {};

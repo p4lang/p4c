@@ -1,5 +1,7 @@
 #include "global_action_example_02_parser.h"
 
+struct p4tc_filter_fields p4tc_filter_fields;
+
 static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
