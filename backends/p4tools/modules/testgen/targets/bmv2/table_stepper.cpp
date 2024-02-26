@@ -91,10 +91,8 @@ const IR::Expression *Bmv2V1ModelTableStepper::computeTargetMatchType(
             maxKey = IR::getConstant(keyExpr->type, IR::getMaxBvVal(keyExpr->type));
             keyExpr = minKey;
         } else {
-            auto symbolicTableRange = Bmv2ControlPlaneState::getTableRange(
+            std::tie(minKey, maxKey) = Bmv2ControlPlaneState::getTableRange(
                 properties.tableName, keyProperties.name, keyExpr->type);
-            minKey = symbolicTableRange.first;
-            maxKey = symbolicTableRange.second;
         }
         matches->emplace(keyProperties.name, new Range(keyProperties.key, minKey, maxKey));
         return new IR::LAnd(hitCondition, new IR::LAnd(new IR::LAnd(new IR::Lss(minKey, maxKey),
