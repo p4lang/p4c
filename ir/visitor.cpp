@@ -179,13 +179,13 @@ class Visitor::ChangeTracker {
 
     /** Produce the final result of visiting @n.
      *
-     * @return The ultimate result of visiting @n, or @n if `finish(@n)` has not
+     * @return The ultimate result of visiting @n, or `nullptr` if `finish(@n)` has not
      * been invoked.
      */
     const IR::Node *finalResult(const IR::Node *n) const {
         auto it = visited.find(n);
         bool done = it != visited.end() && !it->second.visit_in_progress && it->second.visitOnce;
-        return done ? it->second.result : n;
+        return done ? it->second.result : nullptr;
     }
 
     void visitOnce(const IR::Node *n) {
@@ -459,7 +459,8 @@ namespace {
 class ForwardChildren : public Visitor {
     const ChangeTracker &visited;
     const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) {
-        return visited.finalResult(n);
+        if (const auto *result = visited.finalResult(n)) return result;
+        return n;
     }
 
  public:
