@@ -135,6 +135,8 @@ class Visitor::ChangeTracker {
     void revisit_visited() {
         for (auto it = visited.begin(); it != visited.end();) {
             if (!it->second.visit_in_progress)
+                // `visited` is abseil map, therefore erase does not return iterator, use
+                // post-increment
                 visited.erase(it++);
             else
                 ++it;
@@ -224,6 +226,8 @@ class Visitor::Tracker {
     void revisit_visited() {
         for (auto it = visited.begin(); it != visited.end();) {
             if (it->second.done)
+                // `visited` is abseil map, therefore erase does not return iterator, use
+                // post-increment
                 visited.erase(it++);
             else
                 ++it;
