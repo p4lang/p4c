@@ -163,7 +163,7 @@ std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view
         // Run the compiler to get an IR and invoke the tool.
         compilerResultOpt = P4Tools::CompilerTarget::runCompiler(std::string(program.value()));
     } else {
-        if (!compilerOptions.file.isNullOrEmpty()) {
+        if (compilerOptions.file.isNullOrEmpty()) {
             ::error("Expected a file input.");
             return std::nullopt;
         }
