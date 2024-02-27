@@ -531,7 +531,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     msgStr = Util::printf_format("Parser: extracting field %s", fieldName);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
-    if (widthToExtract <= 64) {
+    if (widthToExtract <= QWORD_EXTRACT) {
         unsigned lastBitIndex = widthToExtract + alignment - 1;
         unsigned lastWordIndex = lastBitIndex / 8;
         unsigned wordsToRead = lastWordIndex + 1;
@@ -642,7 +642,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
 
     // eBPF can pass 64 bits of data as one argument passed in 64 bit register,
     // so value of the field is printed only when it fits into that register
-    if (widthToExtract <= 64) {
+    if (widthToExtract <= QWORD_EXTRACT) {
         cstring exprStr = expr->toString();
         if (auto member = expr->to<IR::Member>()) {
             if (auto pathExpr = member->expr->to<IR::PathExpression>()) {
@@ -836,7 +836,7 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
             auto etype = EBPF::EBPFTypeFactory::instance->create(param->type);
             unsigned width = etype->as<EBPF::IHasWidth>().widthInBits();
 
-            if (width <= 64) {
+            if (width <= QWORD_EXTRACT) {
                 convStr = Util::printf_format("(unsigned long long) (%s->u.%s.%s)", valueName, name,
                                               param->toString());
                 msgStr = Util::printf_format("Control: param %s=0x%%llx (%d bits)",
@@ -1467,13 +1467,13 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                 memcpy = !EBPF::EBPFScalarType::generatesScalar(width);
 
                 if (isLPMKeyBigEndian) {
-                    if (width <= 8) {
+                    if (width <= BYTE_EXTRACT) {
                         swap = "";  // single byte, nothing to swap
-                    } else if (width <= 16) {
+                    } else if (width <= WORD_EXTRACT) {
                         swap = "bpf_htons";
-                    } else if (width <= 32) {
+                    } else if (width <= DWORD_EXTRACT) {
                         swap = "bpf_htonl";
-                    } else if (width <= 64) {
+                    } else if (width <= QWORD_EXTRACT) {
                         swap = "bpf_htonll";
                     }
                     /* For width greater than 64 bit, there is no need of conversion.
@@ -1744,7 +1744,7 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
     unsigned emitSize = 0;
     cstring msgStr;
 
-    if (widthToEmit <= 64) {
+    if (widthToEmit <= QWORD_EXTRACT) {
         if (program->options.emitTraceMessages) {
             builder->emitIndent();
             builder->blockStart();
@@ -1763,14 +1763,14 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
         builder->target->emitTraceMessage(builder, msgStr.c_str());
     }
 
-    if (widthToEmit <= 8) {
-        emitSize = 8;
-    } else if (widthToEmit <= 16) {
-        emitSize = 16;
-    } else if (widthToEmit <= 32) {
-        emitSize = 32;
-    } else if (widthToEmit <= 64) {
-        emitSize = 64;
+    if (widthToEmit <= BYTE_EXTRACT) {
+        emitSize = BYTE_EXTRACT;
+    } else if (widthToEmit <= WORD_EXTRACT) {
+        emitSize = WORD_EXTRACT;
+    } else if (widthToEmit <= DWORD_EXTRACT) {
+        emitSize = DWORD_EXTRACT;
+    } else if (widthToEmit <= QWORD_EXTRACT) {
+        emitSize = QWORD_EXTRACT;
     }
 
     unsigned shift;

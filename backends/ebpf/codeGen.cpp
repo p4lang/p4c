@@ -81,15 +81,15 @@ bool CodeGenInspector::preorder(const IR::Operation_Binary *b) {
     if (mask != "") builder->append("(");
     if (useParens) builder->append("(");
     if (builder->target->name == "P4TC") {
-        emitTCBinaryOperation(b->left, b->right, b->getStringOp(), true);
+        emitTCBinaryOperation(b, true);
     } else {
         visit(b->left);
         builder->spc();
         builder->append(b->getStringOp());
         builder->spc();
+        expressionPrecedence = b->getPrecedence() + 1;
         visit(b->right);
     }
-    expressionPrecedence = b->getPrecedence() + 1;
     if (useParens) builder->append(")");
     builder->append(mask);
     expressionPrecedence = prec;
@@ -109,7 +109,7 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation *b) {
         bool useParens = prec > b->getPrecedence();
         if (useParens) builder->append("(");
         if (builder->target->name == "P4TC") {
-            emitTCBinaryOperation(b->left, b->right, b->getStringOp(), scalar);
+            emitTCBinaryOperation(b, scalar);
         } else {
             visit(b->left);
             builder->spc();
@@ -124,7 +124,7 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation *b) {
         unsigned width = et->to<IHasWidth>()->implementationWidthInBits();
         builder->append("memcmp(&");
         if (builder->target->name == "P4TC") {
-            emitTCBinaryOperation(b->left, b->right, b->getStringOp(), scalar);
+            emitTCBinaryOperation(b, scalar);
         } else {
             visit(b->left);
             builder->append(", &");
@@ -474,7 +474,7 @@ void CodeGenInspector::widthCheck(const IR::Node *node) const {
             node, tb->size);
 }
 
-void CodeGenInspector::convertByteOrder(const IR::Expression *expr, cstring byte_order) {
+void CodeGenInspector::emitAndConvertByteOrder(const IR::Expression *expr, cstring byte_order) {
     auto ftype = typeMap->getType(expr);
     auto et = EBPFTypeFactory::instance->create(ftype);
     unsigned widthToEmit = dynamic_cast<IHasWidth *>(et)->widthInBits();
@@ -491,9 +491,13 @@ void CodeGenInspector::convertByteOrder(const IR::Expression *expr, cstring byte
     builder->append(")");
 }
 
-void CodeGenInspector::emitTCBinaryOperation(const IR::Expression *lexpr,
-                                             const IR::Expression *rexpr, cstring stringop,
-                                             bool isScalar) {
+void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool isScalar) {
+    if (b->is<IR::Operation_Binary>()) {
+        b = b->to<IR::Operation_Binary>();
+    }
+    const IR::Expression *lexpr = b->left;
+    const IR::Expression *rexpr = b->right;
+    cstring stringop = b->getStringOp();
     bool left = EBPFInitializerUtils::IsHeaderField(typeMap, lexpr);
     bool right = EBPFInitializerUtils::IsHeaderField(typeMap, rexpr);
     if (left == right) {
@@ -505,6 +509,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Expression *lexpr,
         } else {
             builder->append(", &");
         }
+        expressionPrecedence = b->getPrecedence() + 1;
         visit(rexpr);
         return;
     }
@@ -516,7 +521,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Expression *lexpr,
         if (width <= 8) {
             visit(lexpr);
         } else {
-            convertByteOrder(lexpr, "NETWORK");
+            emitAndConvertByteOrder(lexpr, "NETWORK");
         }
         if (isScalar) {
             builder->spc();
@@ -525,6 +530,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Expression *lexpr,
         } else {
             builder->append(", &");
         }
+        expressionPrecedence = b->getPrecedence() + 1;
         visit(rexpr);
         return;
     } else if (!right) {
@@ -540,10 +546,11 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Expression *lexpr,
         } else {
             builder->append(", &");
         }
+        expressionPrecedence = b->getPrecedence() + 1;
         if (width <= 8) {
             visit(rexpr);
         } else {
-            convertByteOrder(rexpr, "NETWORK");
+            emitAndConvertByteOrder(rexpr, "NETWORK");
         }
     }
     return;
@@ -572,7 +579,7 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
             select_0 = hdr.ipv4.diffserv
             select_0 = bntoh(hdr.ipv4.diffserv)
         */
-        convertByteOrder(rexpr, "HOST");
+        emitAndConvertByteOrder(rexpr, "HOST");
     }
     if (left) {
         /*
@@ -582,7 +589,7 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
             hdr.opv4.diffserv = 0x1;
             hdr.opv4.diffserv = bhton(0x1)
         */
-        convertByteOrder(rexpr, "NETWORK");
+        emitAndConvertByteOrder(rexpr, "NETWORK");
     }
     return;
 }
