@@ -177,7 +177,7 @@ class Visitor::ChangeTracker {
 
     /** Produce the final result of visiting @n.
      *
-     * @return The ultimate result of visiting @n, or @n `finish(@n)` has not
+     * @return The ultimate result of visiting @n, or @n if `finish(@n)` has not
      * been invoked.
      */
     const IR::Node *finalResult(const IR::Node *n) const {
