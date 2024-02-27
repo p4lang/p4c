@@ -16,14 +16,13 @@ limitations under the License.
 
 #include "simplifyDefUse.h"
 
+#include "absl/container/flat_hash_set.h"
 #include "frontends/p4/def_use.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parserCallGraph.h"
 #include "frontends/p4/sideEffects.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/ternaryBool.h"
-
-#include <absl/container/flat_hash_set.h>
 
 namespace P4 {
 
@@ -32,9 +31,10 @@ namespace {
 class HasUses {
     // Set of program points whose left-hand sides are used elsewhere
     // in the program together with their use count
-    std::set<const IR::Node *> used;
+    absl::flat_hash_set<const IR::Node *> used;
 
     class SliceTracker {
+        // FIXME: Can squeeze this bool into lower bit of pointer
         const IR::Slice *trackedSlice = nullptr;
         bool active = false;
         bool overwritesPrevious(const IR::Slice *previous) {
@@ -371,7 +371,7 @@ class FindUninitialized : public Inspector {
     ProgramPoint currentPoint;  // context of the current expression/statement
     /// For some simple expresssions keep here the read location sets.
     /// This does not include location sets read by subexpressions.
-    std::map<const IR::Expression *, const LocationSet *> readLocations;
+    absl::flat_hash_map<const IR::Expression *, const LocationSet *> readLocations;
     HasUses *hasUses;  // output
     /// If true the current statement is unreachable
     bool unreachable = false;
@@ -381,9 +381,10 @@ class FindUninitialized : public Inspector {
     bool reportInvalidHeaders = true;
 
     const LocationSet *getReads(const IR::Expression *expression, bool nonNull = false) const {
-        auto result = ::get(readLocations, expression);
-        if (nonNull) BUG_CHECK(result != nullptr, "no locations known for %1%", dbp(expression));
-        return result;
+        auto it = readLocations.find(expression);
+        if (nonNull)
+            BUG_CHECK(it != readLocations.end(), "no locations known for %1%", dbp(expression));
+        return (it == readLocations.end() ? nullptr : it->second);
     }
     /// 'expression' is reading the 'loc' location set
     void reads(const IR::Expression *expression, const LocationSet *loc) {
@@ -392,8 +393,7 @@ class FindUninitialized : public Inspector {
         LOG3(expression << " reads " << loc);
         CHECK_NULL(expression);
         CHECK_NULL(loc);
-        readLocations.erase(expression);
-        readLocations.emplace(expression, loc);
+        readLocations[expression] = loc;
     }
     bool setCurrent(const IR::Statement *statement) {
         currentPoint.assign(context, statement);
