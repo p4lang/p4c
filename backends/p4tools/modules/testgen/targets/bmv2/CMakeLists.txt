@@ -54,11 +54,7 @@ execute_process(COMMAND ln -sfn ${P4C_SOURCE_DIR}/backends/bmv2/run-bmv2-test.py
 
 set(
   TESTGEN_LIBS ${TESTGEN_LIBS}
+  PRIVATE controlplane
   PARENT_SCOPE
 )
 
-set(
-  TESTGEN_INCLUDES ${TESTGEN_INCLUDES}
-  SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS}
-  PARENT_SCOPE
-)
