@@ -59,7 +59,9 @@ class Visitor::ChangeTracker {
     visited_t visited;
 
  public:
-    ChangeTracker() : visited(16) {}
+    ChangeTracker()
+        : visited(16) {}  // Pre-allocate 16 slots as usually these maps are small, but we do create
+                          // lots of them. This saves quite some time for rehashes
 
     /** Begin tracking @n during a visiting pass.  Use `finish(@n)` to mark @n as
      * visited once the pass completes.
@@ -213,7 +215,9 @@ class Visitor::Tracker {
     visited_t visited;
 
  public:
-    Tracker() : visited(16) {}
+    Tracker()
+        : visited(16) {}  // Pre-allocate 16 slots as usually these maps are small, but we do create
+                          // lots of them. This saves quite some time for rehashes
 
     /** Forget nodes that have already been visited, allowing them to be visited
      * again. */
