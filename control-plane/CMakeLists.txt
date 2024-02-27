@@ -96,6 +96,9 @@ set (CONTROLPLANE_HDRS
 )
 
 add_library(controlplane-gen OBJECT ${P4RUNTIME_GEN_SRCS})
+# TODO(https://github.com/p4lang/p4c/issues/4477):
+# We should not need this, but because of the way managed includes and
+# libraries for Protobuf we need to explicitly add the include directories here.
 target_include_directories(
   controlplane-gen SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS} SYSTEM BEFORE
   PUBLIC ${ABSL_COMMON_INCLUDE_DIRS}
