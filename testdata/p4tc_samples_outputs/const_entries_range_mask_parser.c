@@ -1,5 +1,7 @@
 #include "const_entries_range_mask_parser.h"
 
+struct p4tc_filter_fields p4tc_filter_fields;
+
 static __always_inline int run_parser(struct __sk_buff *skb, struct Header_t *h, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;

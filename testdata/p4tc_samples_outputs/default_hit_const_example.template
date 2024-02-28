@@ -3,7 +3,7 @@
 set -e
 
 TC="tc"
-$TC p4template create pipeline/default_hit_const_example pipeid 1 numtables 1
+$TC p4template create pipeline/default_hit_const_example numtables 1
 
 $TC p4template create action/default_hit_const_example/MainControlImpl/tcp_syn_packet actid 1
 $TC p4template update action/default_hit_const_example/MainControlImpl/tcp_syn_packet state active

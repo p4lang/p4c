@@ -3,7 +3,7 @@
 set -e
 
 TC="tc"
-$TC p4template create pipeline/matchtype pipeid 1 numtables 4
+$TC p4template create pipeline/matchtype numtables 4
 
 $TC p4template create action/matchtype/MainControlImpl/next_hop actid 1 \
 	param vport type bit32

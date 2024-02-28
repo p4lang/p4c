@@ -3,5 +3,5 @@
 set -e
 
 TC="tc"
-$TC p4template create pipeline/hash1 pipeid 1 numtables 0
+$TC p4template create pipeline/hash1 numtables 0
 $TC p4template update pipeline/hash1 state ready

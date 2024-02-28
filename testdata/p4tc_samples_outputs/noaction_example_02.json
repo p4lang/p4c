@@ -1,7 +1,6 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "noaction_example_02",
-  "id" : 1,
   "tables" : [
     {
       "name" : "MainControlImpl/ipv4_tbl_1",

@@ -326,7 +326,6 @@ class TCTable {
 
 class TCPipeline {
     cstring pipelineName;
-    unsigned pipelineId;
     unsigned numTables;
     safe_vector<TCAction> actionDefs;
     safe_vector<TCTable> tableDefs;
@@ -334,9 +333,6 @@ class TCPipeline {
     TCAction postaction;
     void setPipelineName(cstring pName) {
         pipelineName = pName;
-    }
-    void setPipelineId(unsigned p) {
-        pipelineId = p;
     }
     void setNumTables(unsigned n) {
         numTables = n;
@@ -365,8 +361,7 @@ class TCPipeline {
         std::string tcCode = "#!/bin/bash -x\n";
         tcCode += "\nset -e\n";
         tcCode += "\nTC=\"tc\"";
-        tcCode += "\n$TC p4template create pipeline/" + pipelineName + " pipeid ";
-        tcCode += Util::toString(pipelineId);
+        tcCode += "\n$TC p4template create pipeline/" + pipelineName;
         tcCode += " numtables ";
         tcCode += Util::toString(numTables);
         if (!actionDefs.empty()) {

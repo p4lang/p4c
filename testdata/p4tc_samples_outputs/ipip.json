@@ -1,7 +1,6 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "ipip",
-  "id" : 1,
   "tables" : [
     {
       "name" : "Main/fwd_table",
