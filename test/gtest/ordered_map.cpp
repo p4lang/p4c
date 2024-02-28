@@ -18,6 +18,8 @@ limitations under the License.
 
 #include <gtest/gtest.h>
 
+#include "lib/map.h"
+
 namespace Test {
 
 TEST(OrderedMap, MapEqual) {

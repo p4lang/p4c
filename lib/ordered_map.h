@@ -254,40 +254,4 @@ class ordered_map {
     }
 };
 
-template <class K, class T, class V, class Comp, class Alloc>
-inline V get(const ordered_map<K, V, Comp, Alloc> &m, T key, V def = V()) {
-    auto it = m.find(key);
-    if (it != m.end()) return it->second;
-    return def;
-}
-
-template <class K, class T, class V, class Comp, class Alloc>
-inline V *getref(ordered_map<K, V, Comp, Alloc> &m, T key) {
-    auto it = m.find(key);
-    if (it != m.end()) return &it->second;
-    return 0;
-}
-
-template <class K, class T, class V, class Comp, class Alloc>
-inline const V *getref(const ordered_map<K, V, Comp, Alloc> &m, T key) {
-    auto it = m.find(key);
-    if (it != m.end()) return &it->second;
-    return 0;
-}
-
-template <class K, class T, class V, class Comp, class Alloc>
-inline V get(const ordered_map<K, V, Comp, Alloc> *m, T key, V def = V()) {
-    return m ? get(*m, key, def) : def;
-}
-
-template <class K, class T, class V, class Comp, class Alloc>
-inline V *getref(ordered_map<K, V, Comp, Alloc> *m, T key) {
-    return m ? getref(*m, key) : 0;
-}
-
-template <class K, class T, class V, class Comp, class Alloc>
-inline const V *getref(const ordered_map<K, V, Comp, Alloc> *m, T key) {
-    return m ? getref(*m, key) : 0;
-}
-
 #endif /* LIB_ORDERED_MAP_H_ */
