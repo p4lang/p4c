@@ -23,6 +23,7 @@ limitations under the License.
 #include "frontends/p4/sideEffects.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/ternaryBool.h"
+#include "lib/hash.h"
 
 namespace P4 {
 
@@ -31,10 +32,9 @@ namespace {
 class HasUses {
     // Set of program points whose left-hand sides are used elsewhere
     // in the program together with their use count
-    absl::flat_hash_set<const IR::Node *> used;
+    absl::flat_hash_set<const IR::Node *, Util::Hash> used;
 
     class SliceTracker {
-        // FIXME: Can squeeze this bool into lower bit of pointer
         const IR::Slice *trackedSlice = nullptr;
         bool active = false;
         bool overwritesPrevious(const IR::Slice *previous) {
