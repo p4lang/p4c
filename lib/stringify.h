@@ -44,28 +44,28 @@ class HasToString final {
     enum { value = sizeof(func<T>(0)) == sizeof(char) };
 };
 
-template <typename T, typename = decltype(std::to_string((T)0))>
+template <typename T, typename = decltype(std::to_string(std::declval<T>()))>
 cstring toString(T value) {
     return std::to_string(value);
 }
 
 template <typename T>
-auto toString(const T &value) -> typename std::enable_if<HasToString<T>::value, cstring>::type {
+auto toString(const T &value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
     return value.toString();
 }
 
 template <typename T>
-auto toString(T &value) -> typename std::enable_if<HasToString<T>::value, cstring>::type {
+auto toString(T &value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
     return value.toString();
 }
 
 template <typename T>
-auto toString(const T *value) -> typename std::enable_if<HasToString<T>::value, cstring>::type {
+auto toString(const T *value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
     return value->toString();
 }
 
 template <typename T>
-auto toString(T *value) -> typename std::enable_if<HasToString<T>::value, cstring>::type {
+auto toString(T *value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
     return value->toString();
 }
 
