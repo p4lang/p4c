@@ -3,7 +3,6 @@
 # Script to install P4C dependencies on MacOS.
 
 set -e  # Exit on error.
-set -x  # Make command execution verbose
 
 # Installation helper.
 brew_install() {
@@ -15,7 +14,7 @@ brew_install() {
     fi
 }
 
-# Check if brew shellenv command is already in zprofile
+# Check if brew shellenv command is already in zprofile.
 if ! grep -q 'brew shellenv' ~/.zprofile; then
     # Set up Homebrew differently for arm64.
     if [[ $(uname -m) == 'arm64' ]]; then
@@ -29,7 +28,7 @@ fi
 # Source zprofile.
 source ~/.zprofile
 
-# Check if Homebrew is already installed
+# Check if Homebrew is already installed.
 if ! which brew > /dev/null 2>&1; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
@@ -46,12 +45,12 @@ for package in "${REQUIRED_PACKAGES[@]}"; do
   brew_install ${package}
 done
 
-# Check if linking is needed
+# Check if linking is needed.
 if ! brew ls --linked --formula ${BOOST_LIB} > /dev/null 2>&1; then
   brew link ${BOOST_LIB}
 fi
 
-# Check if PATH modification is needed
+# Check if PATH modification is needed.
 if ! grep -q "$(brew --prefix bison)/bin" ~/.bash_profile; then
   echo 'export PATH="$(brew --prefix bison)/bin:$PATH"' >> ~/.bash_profile
 fi
@@ -60,8 +59,5 @@ if ! grep -q "$HOMEBREW_PREFIX/opt/grep/libexec/gnubin" ~/.bash_profile; then
 fi
 source ~/.bash_profile
 
-# Fixes for stuck grpcio installation.
-export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
-export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
 # Install required pip packages
 pip3 install --user -r requirements.txt
