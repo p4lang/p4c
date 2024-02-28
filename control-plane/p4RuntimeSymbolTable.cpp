@@ -15,8 +15,7 @@ limitations under the License.
 */
 #include "p4RuntimeSymbolTable.h"
 
-#include <boost/algorithm/string/split.hpp>
-
+#include "absl/strings/str_split.h"
 #include "lib/cstring.h"
 #include "lib/iterator_range.h"
 #include "p4RuntimeArchHandler.h"
@@ -292,9 +291,8 @@ uint32_t P4::ControlPlaneAPI::P4RuntimeSymbolTable::jenkinsOneAtATimeHash(const 
 
 cstring P4::ControlPlaneAPI::P4SymbolSuffixSet::shortestUniqueSuffix(const cstring &symbol) const {
     BUG_CHECK(!symbol.isNullOrEmpty(), "Null or empty symbol name?");
-    std::vector<cstring> components;
     const char *cSymbol = symbol.c_str();
-    boost::split(components, cSymbol, [](char c) { return c == '.'; });
+    std::vector<cstring> components = absl::StrSplit(cSymbol, '.');
 
     // Determine how many suffix components we need to uniquely identify
     // this symbol. For example, if we have the symbols "d.a.c" and "e.b.c",
@@ -303,11 +301,10 @@ cstring P4::ControlPlaneAPI::P4SymbolSuffixSet::shortestUniqueSuffix(const cstri
     unsigned neededComponents = 0;
     auto *node = suffixesRoot;
     for (auto &component : Util::iterator_range(components).reverse()) {
-        if (node->edges.find(component) == node->edges.end()) {
-            BUG("Symbol is not in suffix set: %1%", symbol);
-        }
+        auto it = node->edges.find(component);
+        BUG_CHECK(it != node->edges.end(), "Symbol is not in suffix set: %1%", symbol);
 
-        node = node->edges[component];
+        node = it->second;
         neededComponents++;
 
         // If there's only one suffix that passes through this node, we have
@@ -323,7 +320,7 @@ cstring P4::ControlPlaneAPI::P4SymbolSuffixSet::shortestUniqueSuffix(const cstri
     BUG_CHECK(neededComponents <= components.size(), "Too many components?");
     std::string uniqueSuffix;
     std::for_each(components.end() - neededComponents, components.end(),
-                  [&](const cstring &component) {
+                  [&](const auto &component) {
                       if (!uniqueSuffix.empty()) {
                           uniqueSuffix.append(".");
                       }
@@ -346,16 +343,15 @@ void P4::ControlPlaneAPI::P4SymbolSuffixSet::addSymbol(const cstring &symbol) {
     // strictly and have tests for them, it's safest to ensure this
     // precondition here.
     {
-        auto result = symbols.insert(symbol);
-        if (!result.second) {
+        auto [_, inserted] = symbols.insert(symbol);
+        if (!inserted) {
             return;  // It was already present.
         }
     }
 
     // Split the symbol name into dot-separated components.
-    std::vector<cstring> components;
     const char *cSymbol = symbol.c_str();
-    boost::split(components, cSymbol, [](char c) { return c == '.'; });
+    std::vector<cstring> components = absl::StrSplit(cSymbol, '.');
 
     // Insert the components into our tree of suffixes. We work
     // right-to-left through the symbol name, since we're concerned with
@@ -367,10 +363,9 @@ void P4::ControlPlaneAPI::P4SymbolSuffixSet::addSymbol(const cstring &symbol) {
     // (Nodes are in parentheses, and edge labels are in quotes.)
     auto *node = suffixesRoot;
     for (auto &component : Util::iterator_range(components).reverse()) {
-        if (node->edges.find(component) == node->edges.end()) {
-            node->edges[component] = new SuffixNode;
-        }
-        node = node->edges[component];
+        auto [it, inserted] = node->edges.emplace(component, nullptr);
+        if (inserted) it->second = new SuffixNode;
+        node = it->second;
         node->instances++;
     }
 }
