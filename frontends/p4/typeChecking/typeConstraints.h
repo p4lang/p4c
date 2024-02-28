@@ -17,15 +17,9 @@ limitations under the License.
 #ifndef TYPECHECKING_TYPECONSTRAINTS_H_
 #define TYPECHECKING_TYPECONSTRAINTS_H_
 
-#include <optional>
-#include <sstream>
-
-#include <boost/algorithm/string.hpp>
-
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/error_helper.h"
-#include "typeConstraints.h"
 #include "typeSubstitution.h"
 #include "typeSubstitutionVisitor.h"
 #include "typeUnification.h"
@@ -66,6 +60,9 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
     cstring errFormat;
     std::vector<const IR::Node *> errArguments;
 
+ private:
+    bool reportErrorImpl(const TypeVariableSubstitution *subst, cstring message) const;
+
  protected:
     /// Constraint which produced this one.  May be nullptr.
     const TypeConstraint *derivedFrom = nullptr;
@@ -80,45 +77,7 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         node->apply(*explainer);
         return explainer->explanation;
     }
-    cstring localError(Explain *explainer) const {
-        if (errFormat.isNullOrEmpty()) return "";
-        std::string message, explanation;
-        boost::format fmt = boost::format(errFormat);
-        switch (errArguments.size()) {
-            case 0:
-                message = boost::str(fmt);
-                break;
-            case 1:
-                explanation += explain(0, explainer);
-                message = ::error_helper(fmt, errArguments.at(0)).toString();
-                break;
-            case 2:
-                explanation += explain(0, explainer);
-                explanation += explain(1, explainer);
-                message = ::error_helper(fmt, errArguments.at(0), errArguments.at(1)).toString();
-                break;
-            case 3:
-                explanation += explain(0, explainer);
-                explanation += explain(1, explainer);
-                explanation += explain(2, explainer);
-                message =
-                    ::error_helper(fmt, errArguments.at(0), errArguments.at(1), errArguments.at(2))
-                        .toString();
-                break;
-            case 4:
-                explanation += explain(0, explainer);
-                explanation += explain(1, explainer);
-                explanation += explain(2, explainer);
-                explanation += explain(3, explainer);
-                message = ::error_helper(fmt, errArguments.at(0), errArguments.at(1),
-                                         errArguments.at(2), errArguments.at(3))
-                              .toString();
-                break;
-            default:
-                BUG("Unexpected argument count for error message");
-        }
-        return cstring(message) + explanation;
-    }
+    std::string localError(Explain *explainer) const;
 
  public:
     void setError(cstring format, std::initializer_list<const IR::Node *> nodes) {
@@ -136,32 +95,7 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         boost::format fmt(format);
         cstring message =
             cstring("  ---- Actual error:\n") + ::error_helper(fmt, args...).toString();
-        auto o = origin;
-        auto constraint = this;
-        Explain explainer(subst);
-        while (constraint) {
-            cstring local = constraint->localError(&explainer);
-            if (!local.isNullOrEmpty()) {
-                message += "---- Originating from:\n";
-                message += local;
-            }
-            o = constraint->origin;
-            constraint = constraint->derivedFrom;
-        }
-        // Indent each string in the message
-        std::string s = message.c_str();
-        std::vector<std::string> lines;
-        boost::split(lines, s, [](char c) { return c == '\n'; });
-        bool lastIsEmpty = lines.at(lines.size() - 1) == "";
-        if (lastIsEmpty)
-            // We don't want to indent an empty line.
-            lines.pop_back();
-        message = cstring::join(lines.begin(), lines.end(), "\n  ");
-        if (lastIsEmpty) message += "\n";
-
-        CHECK_NULL(o);
-        ::errorWithSuffix(ErrorType::ERR_TYPE_ERROR, "'%1%'", message.c_str(), o);
-        return false;
+        return reportErrorImpl(subst, message);
     }
     // Default error message; returns 'false'
     virtual bool reportError(const TypeVariableSubstitution *subst) const = 0;
