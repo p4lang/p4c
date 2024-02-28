@@ -268,6 +268,10 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->newline();
         builder->emitIndent();
         builder->appendFormat("unsigned %s = hdrMd->%s;", offsetVar.c_str(), offsetVar.c_str());
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("%s = %s + BYTES(%s);", headerStartVar.c_str(),
+                              packetStartVar.c_str(), offsetVar.c_str());
     }
     builder->newline();
     emitHeadersFromCPUMAP(builder);
