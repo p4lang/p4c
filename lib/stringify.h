@@ -25,7 +25,6 @@ limitations under the License.
 
 #include "big_int_util.h"
 #include "cstring.h"
-#include "stringref.h"
 
 // convert values to cstrings
 namespace Util {
@@ -74,7 +73,7 @@ cstring toString(bool value);
 cstring toString(std::string value);
 cstring toString(const char *value);
 cstring toString(cstring value);
-cstring toString(StringRef value);
+cstring toString(std::string_view value);
 /// A width of zero indicates that no width should be displayed.
 cstring toString(const big_int value, unsigned width, bool sign, unsigned int base = 10);
 cstring toString(const void *value);

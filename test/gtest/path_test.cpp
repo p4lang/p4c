@@ -18,9 +18,6 @@ limitations under the License.
 
 #include <gtest/gtest.h>
 
-#include "lib/exceptions.h"
-#include "lib/stringref.h"
-
 namespace Util {
 
 TEST(Util, PathName) {
@@ -30,14 +27,14 @@ TEST(Util, PathName) {
 
     {
         PathName path = "/usr/local/bin/file.exe";
-        StringRef ext = path.getExtension();
-        EXPECT_EQ(StringRef("exe"), ext);
+        auto ext = path.getExtension();
+        EXPECT_EQ("exe", ext);
 
         PathName file = path.getFilename();
         EXPECT_EQ("file.exe", file.toString());
 
-        StringRef base = path.getBasename();
-        EXPECT_EQ(StringRef("file"), base);
+        auto base = path.getBasename();
+        EXPECT_EQ("file", base);
 
         PathName folder = path.getFolder();
         EXPECT_EQ("/usr/local/bin", folder.toString());
@@ -45,13 +42,13 @@ TEST(Util, PathName) {
 
     {
         PathName path = "/usr/local/bin/";
-        StringRef ext = path.getExtension();
+        auto ext = path.getExtension();
         EXPECT_EQ("", ext);
 
         PathName file = path.getFilename();
         EXPECT_EQ("", file.toString());
 
-        StringRef base = path.getBasename();
+        auto base = path.getBasename();
         EXPECT_EQ("", base);
 
         PathName folder = path.getFolder();
@@ -60,14 +57,14 @@ TEST(Util, PathName) {
 
     {
         PathName path = "file.exe";
-        StringRef ext = path.getExtension();
-        EXPECT_EQ(StringRef("exe"), ext);
+        auto ext = path.getExtension();
+        EXPECT_EQ("exe", ext);
 
         PathName file = path.getFilename();
         EXPECT_EQ("file.exe", file.toString());
 
-        StringRef base = path.getBasename();
-        EXPECT_EQ(StringRef("file"), base);
+        auto base = path.getBasename();
+        EXPECT_EQ("file", base);
 
         PathName folder = path.getFolder();
         EXPECT_EQ("", folder.toString());

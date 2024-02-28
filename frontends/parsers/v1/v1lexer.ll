@@ -3,7 +3,6 @@
 #include "frontends/parsers/parserDriver.h"
 #include "frontends/parsers/v1/v1lexer_internal.hpp"
 #include "frontends/parsers/v1/v1parser.hpp"
-#include "lib/stringref.h"
 
 using Parser = V1::V1Parser;
 
@@ -69,7 +68,7 @@ using Parser = V1::V1Parser;
 
 "@pragma"[ \t]*[A-Za-z_][A-Za-z0-9_]* {
                   BEGIN((driver.saveState = PRAGMA_LINE));
-                  return Parser::make_PRAGMA(StringRef(yytext+7).trim(), driver.yylloc); }
+                  return Parser::make_PRAGMA(V1Lexer::trim(yytext+7), driver.yylloc); }
 "@pragma"[ \t]* { BEGIN((driver.saveState = PRAGMA_LINE));
                   return Parser::make_PRAGMA("pragma", driver.yylloc); }
 

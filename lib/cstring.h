@@ -103,6 +103,12 @@ class cstring {
         construct_from_shared(string.data(), string.length());
     }
 
+    // construct cstring from std::string_view. Do not use if possible, this is linear
+    // time operation if string not exists in table, because the underlying string must be copied.
+    cstring(std::string_view string) {  // NOLINT(runtime/explicit)
+        construct_from_shared(string.data(), string.length());
+    }
+
     // TODO (DanilLutsenko): Make special case for r-value std::string?
 
     // Just helper function, for lazies, who do not like to write .str()
@@ -278,6 +284,8 @@ class cstring {
 
 inline bool operator==(const char *a, cstring b) { return b == a; }
 inline bool operator!=(const char *a, cstring b) { return b != a; }
+inline bool operator==(const std::string &a, cstring b) { return b == a; }
+inline bool operator!=(const std::string &a, cstring b) { return b != a; }
 
 inline std::string operator+(cstring a, cstring b) {
     std::string rv(a);

@@ -122,7 +122,7 @@ cstring toString(cstring value) {
     return value;
 }
 
-cstring toString(StringRef value) { return value; }
+cstring toString(std::string_view value) { return value; }
 
 cstring printf_format(const char *fmt_str, ...) {
     if (fmt_str == nullptr) throw std::runtime_error("Null format string");
