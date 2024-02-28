@@ -45,6 +45,7 @@ static __always_inline int process(struct __sk_buff *skb, struct Header_t *h, st
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     h = &(hdrMd->cpumap_hdr);
     m = &(hdrMd->cpumap_usermeta);
 {
