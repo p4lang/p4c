@@ -5,7 +5,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 
 #include "frontends/common/constantFolding.h"
@@ -102,7 +101,7 @@ void AbstractParserDriver::onParseError(const Util::SourceInfo &location,
                                         const std::string &message) {
     static const std::string unexpectedIdentifierError = "syntax error, unexpected IDENTIFIER";
     auto &context = BaseCompileContext::get();
-    if (boost::equal(message, unexpectedIdentifierError)) {
+    if (message == unexpectedIdentifierError) {
         context.errorReporter().parser_error(
             location, boost::format("%s \"%s\"") % unexpectedIdentifierError % lastIdentifier);
     } else {
