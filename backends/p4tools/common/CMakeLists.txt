@@ -42,7 +42,6 @@ target_link_libraries(
   p4tools-common
   PUBLIC ${P4TOOLS_Z3_LIB}
   PRIVATE frontend
-  PRIVATE ir-generated
 )
 
 target_include_directories(
