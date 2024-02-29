@@ -105,7 +105,7 @@ class cstring {
 
     // construct cstring from std::string_view. Do not use if possible, this is linear
     // time operation if string not exists in table, because the underlying string must be copied.
-    cstring(std::string_view string) {  // NOLINT(runtime/explicit)
+    explicit cstring(std::string_view string) {  // NOLINT(runtime/explicit)
         construct_from_shared(string.data(), string.length());
     }
 

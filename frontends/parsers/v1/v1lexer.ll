@@ -68,7 +68,7 @@ using Parser = V1::V1Parser;
 
 "@pragma"[ \t]*[A-Za-z_][A-Za-z0-9_]* {
                   BEGIN((driver.saveState = PRAGMA_LINE));
-                  return Parser::make_PRAGMA(V1Lexer::trim(yytext+7), driver.yylloc); }
+                  return Parser::make_PRAGMA(cstring(V1Lexer::trim(yytext+7)), driver.yylloc); }
 "@pragma"[ \t]* { BEGIN((driver.saveState = PRAGMA_LINE));
                   return Parser::make_PRAGMA("pragma", driver.yylloc); }
 
