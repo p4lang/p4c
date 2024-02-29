@@ -128,13 +128,18 @@ jobs:
         key: test-${{ runner.os }}
         max-size: 1000M
 
+    - name: Get brew cache dir
+      id: brew-cache
+      run: |
+        echo "dir=$(brew --prefix)" >> $GITHUB_OUTPUT
+
     - name: Cache Homebrew Packages
       id: cache-homebrew-packages
       uses: actions/cache@v4
       env:
         cache-name: homebrew-packages
       with:
-        path: $(brew --prefix)
+        path: ${{ steps.brew-cache.outputs.dir }}
         key: ${{ runner.os }}-m1-${{ hashFiles('tools/install_mac_deps.sh') }}
 
     - name: Install dependencies (MacOS)
@@ -170,13 +175,18 @@ jobs:
         key: test-${{ runner.os }}
         max-size: 1000M
 
+    - name: Get brew cache dir
+      id: brew-cache
+      run: |
+        echo "dir=$(brew --prefix)" >> $GITHUB_OUTPUT
+
     - name: Cache Homebrew Packages
       id: cache-homebrew-packages
       uses: actions/cache@v4
       env:
         cache-name: homebrew-packages
       with:
-        path: $(brew --prefix)
+        path: ${{ steps.brew-cache.outputs.dir }}
         key: ${{ runner.os }}-${{ hashFiles('tools/install_mac_deps.sh') }}
 
     - name: Install dependencies (MacOS)
