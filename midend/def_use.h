@@ -101,6 +101,7 @@ class ComputeDefUse : public Inspector,
     };
     ordered_map<const IR::IDeclaration *, def_info_t> def_info;
     void add_uses(const loc_t *, def_info_t &);
+    void set_live_from_type(def_info_t &di, const IR::Type *type);
 
     // computed defuse info for all uses and defs in the program
     struct defuse_t {
@@ -162,6 +163,7 @@ class ComputeDefUse : public Inspector,
     }
 
     // for debugging
+    friend std::ostream &operator<<(std::ostream &, const loc_t &);
     friend std::ostream &operator<<(std::ostream &, const defuse_t &);
     friend std::ostream &operator<<(std::ostream &out, const ComputeDefUse &cdu) {
         return out << cdu.defuse;

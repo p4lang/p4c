@@ -225,8 +225,17 @@ bool ComputeDefUse::preorder(const IR::P4Control *c) {
     IndentCtl::TempIndent indent;
     LOG5("ComputeDefUse(P4Control " << c->name << ")" << indent);
     for (auto *p : c->getApplyParameters()->parameters)
-        if (p->direction == IR::Direction::In || p->direction == IR::Direction::InOut)
+        if (p->direction == IR::Direction::In || p->direction == IR::Direction::InOut) {
             def_info[p].defs.insert(getLoc(p));
+            // Assume that all components of input parameters are live: we don't currently
+            // propagate liveness innformation across parser/control block boundaries.
+            if (auto *tn = p->type->to<IR::Type_Name>()) {
+                auto *d = resolveUnique(tn->path->name, P4::ResolutionType::Any);
+                if (auto *type = d->to<IR::Type>()) {
+                    set_live_from_type(def_info[p], type);
+                }
+            }
+        }
     state = NORMAL;
     visit(c->body, "body");  // just visit the body; tables/actions will be visited when applied
     for (auto *p : c->getApplyParameters()->parameters)
@@ -301,6 +310,26 @@ void ComputeDefUse::add_uses(const loc_t *loc, def_info_t &di) {
     }
     for (auto &f : Values(di.fields)) add_uses(loc, f);
     for (auto &sl : Values(di.slices)) add_uses(loc, sl);
+}
+
+void ComputeDefUse::set_live_from_type(def_info_t &di, const IR::Type *type) {
+    if (auto *s = type->to<IR::Type_StructLike>()) {
+        di.live.setrange(0, s->fields.size());
+    } else if (auto *i = type->to<IR::Type_Indexed>()) {
+        di.live.setrange(0, i->getSize());
+    } else if (auto *b = type->to<IR::Type::Bits>()) {
+        di.live.setrange(0, b->width_bits());
+    } else if (auto *b = type->to<IR::Type::Varbits>()) {
+        di.live.setrange(0, b->size);
+    } else if (type->is<IR::Type::Boolean>()) {
+        di.live.setrange(0, 1);
+    } else if (type->is<IR::Type_Enum>() || type->is<IR::Type_Error>()) {
+        di.live.setrange(0, 1);
+    } else if (auto *se = type->to<IR::Type_SerEnum>()) {
+        di.live.setrange(0, se->type->width_bits());
+    } else {
+        BUG("Unexpected type %s in ComputeDefUse::set_live_from_type", type);
+    }
 }
 
 static const IR::Expression *get_primary(const IR::Expression *e, const Visitor::Context *ctxt) {
@@ -407,6 +436,16 @@ const IR::Expression *ComputeDefUse::do_write(def_info_t &di, const IR::Expressi
         } else if (auto *str = m->expr->type->to<IR::Type_StructLike>()) {
             int fi = str->getFieldIndex(m->member.name);
             BUG_CHECK(fi >= 0, "%s: no field %s found", m, m->member.name);
+            // Before updating write information for a particular field,
+            // propagate struct liveness to all of the fields
+            if (di.live[fi]) {
+                for (auto *sf : str->fields) {
+                    if (!di.fields.count(sf->name)) {
+                        set_live_from_type(di.fields[sf->name], sf->type);
+                        di.fields[sf->name].defs = di.defs;
+                    }
+                }
+            }
             e = do_write(di.fields[m->member.name], m, ctxt->parent);
             di.live[fi] = 0;
             if (!di.live) di.defs.clear();
