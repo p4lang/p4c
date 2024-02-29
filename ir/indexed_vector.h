@@ -21,6 +21,7 @@ limitations under the License.
 #include "ir/vector.h"
 #include "lib/enumerator.h"
 #include "lib/error.h"
+#include "lib/map.h"
 #include "lib/null.h"
 #include "lib/ordered_map.h"
 #include "lib/safe_vector.h"

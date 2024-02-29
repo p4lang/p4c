@@ -17,42 +17,64 @@ limitations under the License.
 #ifndef LIB_MAP_H_
 #define LIB_MAP_H_
 
-#include <map>
+#include <optional>
 
-template <class K, class T, class V, class Comp, class Alloc>
-inline V get(const std::map<K, V, Comp, Alloc> &m, T key, V def = V()) {
+/// Given a map and a key, return the value corresponding to the key in the map,
+/// or a given default value if the key doesn't exist in the map.
+template <typename Map, typename Key>
+typename Map::mapped_type get(const Map &m, const Key &key) {
     auto it = m.find(key);
-    if (it != m.end()) return it->second;
-    return def;
+    return it != m.end() ? it->second : typename Map::mapped_type{};
 }
-
-template <class K, class T, class V, class Comp, class Alloc>
-inline V *getref(std::map<K, V, Comp, Alloc> &m, T key) {
+template <class Map, typename Key, typename Value>
+typename Map::mapped_type get(const Map &m, const Key &key, Value &&def) {
+    using M = typename Map::mapped_type;
     auto it = m.find(key);
-    if (it != m.end()) return &it->second;
-    return 0;
+    return it != m.end() ? it->second : static_cast<M>(std::forward<Value>(def));
 }
 
-template <class K, class T, class V, class Comp, class Alloc>
-inline const V *getref(const std::map<K, V, Comp, Alloc> &m, T key) {
+/// Given a map and a key, return the pointer to value corresponding to the key
+/// in the map, or a nullptr if the key doesn't exist in the map.
+template <typename Map, typename Key>
+const typename Map::mapped_type *getref(const Map &m, const Key &key) {
     auto it = m.find(key);
-    if (it != m.end()) return &it->second;
-    return 0;
+    return it != m.end() ? &it->second : nullptr;
 }
 
-template <class K, class T, class V, class Comp, class Alloc>
-inline V get(const std::map<K, V, Comp, Alloc> *m, T key, V def = V()) {
-    return m ? get(*m, key, def) : def;
+template <typename Map, typename Key>
+typename Map::mapped_type *getref(Map &m, const Key &key) {
+    auto it = m.find(key);
+    return it != m.end() ? &it->second : nullptr;
 }
 
-template <class K, class T, class V, class Comp, class Alloc>
-inline V *getref(std::map<K, V, Comp, Alloc> *m, T key) {
-    return m ? getref(*m, key) : 0;
+// Given a map and a key, return a optional<V> if the key exists and None if the
+// key does not exist in the map.
+template <class Map, typename Key>
+std::optional<typename Map::mapped_type> get_optional(const Map &m, const Key &key) {
+    auto it = m.find(key);
+    if (it != m.end()) return std::optional<typename Map::mapped_type>(it->second);
+
+    return {};
 }
 
-template <class K, class T, class V, class Comp, class Alloc>
-inline const V *getref(const std::map<K, V, Comp, Alloc> *m, T key) {
-    return m ? getref(*m, key) : 0;
+template <typename Map, typename Key>
+typename Map::mapped_type get(const Map *m, const Key &key) {
+    return m ? get(*m, key) : typename Map::mapped_type{};
+}
+
+template <class Map, typename Key, typename Value>
+typename Map::mapped_type get(const Map *m, const Key &key, Value &&def) {
+    return m ? get(*m, key, std::forward(def)) : typename Map::mapped_type{};
+}
+
+template <typename Map, typename Key>
+const typename Map::mapped_type *getref(const Map *m, const Key &key) {
+    return m ? getref(*m, key) : nullptr;
+}
+
+template <typename Map, typename Key>
+typename Map::mapped_type *getref(Map *m, const Key &key) {
+    return m ? getref(*m, key) : nullptr;
 }
 
 /* iterate over the keys in a map */
