@@ -26,7 +26,7 @@ typename Map::mapped_type get(const Map &m, const Key &key) {
     auto it = m.find(key);
     return it != m.end() ? it->second : typename Map::mapped_type{};
 }
-template <class Map, typename Key, typename Value = typename Map::mapped_type>
+template <class Map, typename Key, typename Value>
 typename Map::mapped_type get(const Map &m, const Key &key, Value &&def) {
     using M = typename Map::mapped_type;
     auto it = m.find(key);
@@ -49,7 +49,7 @@ typename Map::mapped_type *getref(Map &m, const Key &key) {
 
 // Given a map and a key, return a optional<V> if the key exists and None if the
 // key does not exist in the map.
-template <class Map, typename Key = typename Map::key_type>
+template <class Map, typename Key>
 std::optional<typename Map::mapped_type> get_optional(const Map &m, const Key &key) {
     auto it = m.find(key);
     if (it != m.end()) return std::optional<typename Map::mapped_type>(it->second);
@@ -62,8 +62,7 @@ typename Map::mapped_type get(const Map *m, const Key &key) {
     return m ? get(*m, key) : typename Map::mapped_type{};
 }
 
-template <class Map, typename Key = typename Map::key_type,
-          typename Value = typename Map::mapped_type>
+template <class Map, typename Key, typename Value>
 typename Map::mapped_type get(const Map *m, const Key &key, Value &&def) {
     return m ? get(*m, key, std::forward(def)) : typename Map::mapped_type{};
 }
