@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include "backends/p4tools/common/lib/logging.h"
+#include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 #include "backends/p4tools/modules/testgen/options.h"
@@ -10,11 +11,13 @@
 namespace Test {
 
 TEST(P4TestgenBenchmark, SuccessfullyGenerate1000Tests) {
-    auto compilerOptions = CompilerOptions();
+    auto compilerOptions = P4CContextWithOptions<CompilerOptions>::get().options();
     compilerOptions.target = "bmv2";
     compilerOptions.arch = "v1model";
-    auto fabricFile = std::filesystem::path(__FILE__).replace_filename(
-        "../../../../../../../../testdata/p4_16_samples/fabric_20190420/fabric.p4");
+    auto includePath = P4CTestEnvironment::getProjectRoot() / "p4include";
+    compilerOptions.preprocessor_options = "-I" + includePath.string();
+    auto fabricFile =
+        P4CTestEnvironment::getProjectRoot() / "testdata/p4_16_samples/fabric_20190420/fabric.p4";
     compilerOptions.file = fabricFile.string();
     auto &testgenOptions = P4Tools::P4Testgen::TestgenOptions::get();
     testgenOptions.testBackend = "PROTOBUF_IR";
