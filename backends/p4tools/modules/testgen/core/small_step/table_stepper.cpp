@@ -539,8 +539,6 @@ void TableStepper::evalTargetTable(
 }
 
 bool TableStepper::eval() {
-    // Set the appropriate properties when the table is immutable, meaning it has constant entries.
-    TableUtils::checkTableImmutability(*table, properties);
     // Resolve any non-symbolic table keys. The function returns true when a key needs replacement.
     if (resolveTableKeys()) {
         return false;
@@ -570,6 +568,16 @@ TableStepper::TableStepper(ExprStepper *stepper, const IR::P4Table *table)
     for (size_t index = 0; index < table->getActionList()->size(); index++) {
         const auto *action = table->getActionList()->actionList.at(index);
         properties.actionIdMap.emplace(action->controlPlaneName(), index);
+    }
+
+    // Set the appropriate properties when the table is immutable, meaning it has constant entries.
+    TableUtils::checkTableImmutability(*table, properties);
+
+    // If the table is in the set of entities to skip, we set it immutable.
+    // P4Testgen will not add a control plane entry for this table.
+    auto &skipped = TestgenOptions::get().skippedControlPlaneEntities;
+    if (skipped.find(properties.tableName) != skipped.end()) {
+        properties.tableIsImmutable = true;
     }
 }
 

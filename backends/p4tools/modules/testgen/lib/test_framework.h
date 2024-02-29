@@ -31,6 +31,18 @@ using AbstractTestReference = const AbstractTest *;
 using AbstractTestReferenceOrError = std::optional<AbstractTestReference>;
 using AbstractTestList = std::vector<AbstractTestReference>;
 
+/// Template to convert a list of abstract tests to a list of concretely typed tests.
+/// Only works for subclasses of AbstractTest.
+template <class ConcreteTest,
+          typename = std::enable_if_t<std::is_base_of_v<AbstractTest, ConcreteTest>>>
+std::vector<const ConcreteTest *> convertAbstractTestsToConcreteTests(
+    const P4Tools::P4Testgen::AbstractTestList &testList) {
+    std::vector<const ConcreteTest *> result;
+    std::transform(testList.begin(), testList.end(), std::back_inserter(result),
+                   [](AbstractTestReference test) { return test->checkedTo<ConcreteTest>(); });
+    return result;
+}
+
 /// An file path which may or may not be set. Can influence the execution behavior the test
 /// framework.
 using OptionalFilePath = std::optional<std::filesystem::path>;

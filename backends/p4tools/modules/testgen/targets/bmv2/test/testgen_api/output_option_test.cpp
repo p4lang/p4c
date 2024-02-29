@@ -54,7 +54,7 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
 )p4";
 
     auto source = P4_SOURCE(P4Headers::V1MODEL, streamTest.str().c_str());
-    auto compilerOptions = CompilerOptions();
+    auto compilerOptions = P4CContextWithOptions<CompilerOptions>::get().options();
     compilerOptions.target = "bmv2";
     compilerOptions.arch = "v1model";
     auto &testgenOptions = P4Tools::P4Testgen::TestgenOptions::get();
