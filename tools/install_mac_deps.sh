@@ -34,6 +34,8 @@ if ! which brew > /dev/null 2>&1; then
 fi
 HOMEBREW_PREFIX=$(brew --prefix)
 
+# Fetch the latest formulae
+brew update
 
 BOOST_LIB="boost@1.84"
 REQUIRED_PACKAGES=(
