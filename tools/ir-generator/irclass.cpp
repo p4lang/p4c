@@ -251,10 +251,14 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
 }
 
 void IrClass::generateTreeMacro(std::ostream &out) const {
-    for (auto p = this; p != nodeClass(); p = p->getParent()) out << "  ";
+    auto *p = this;
+    for (; p && p != nodeClass(); p = p->getParent()) {
+        out << "  ";
+    }
+    BUG_CHECK(p != nullptr, "Falled out of the class hierarchy");
     out << "M(";
     const char *sep = "";
-    for (auto p = this; p; p = p->getParent()) {
+    for (p = this; p; p = p->getParent()) {
         out << sep << p->containedIn << p->name;
         sep = *sep ? ") B(" : ", D(";
     }
