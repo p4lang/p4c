@@ -135,7 +135,7 @@ jobs:
         cache-name: homebrew-packages
       with:
         path: $(brew --prefix)
-        key: ${{ runner.os }}-${{ hashFiles('tools/install_mac_deps.sh') }}
+        key: ${{ runner.os }}-m1-${{ hashFiles('tools/install_mac_deps.sh') }}
 
     - name: Install dependencies (MacOS)
       run: |
