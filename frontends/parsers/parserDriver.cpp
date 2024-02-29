@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <iostream>
 #include <sstream>
+#include <string_view>
 
 #include <boost/format.hpp>
 
@@ -99,7 +100,7 @@ void AbstractParserDriver::onReadIdentifier(cstring id) { lastIdentifier = id; }
 
 void AbstractParserDriver::onParseError(const Util::SourceInfo &location,
                                         const std::string &message) {
-    static const std::string unexpectedIdentifierError = "syntax error, unexpected IDENTIFIER";
+    static const std::string_view unexpectedIdentifierError = "syntax error, unexpected IDENTIFIER";
     auto &context = BaseCompileContext::get();
     if (message == unexpectedIdentifierError) {
         context.errorReporter().parser_error(
