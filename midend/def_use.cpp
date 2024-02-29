@@ -189,21 +189,32 @@ void ComputeDefUse::def_info_t::erase_slice(le_bitrange range) {
  * split the slices into [3:0], [7:4], [11:8], and [15:12]
  */
 void ComputeDefUse::def_info_t::split_slice(le_bitrange range) {
-    for (auto it = slices_overlap_begin(range); it != slices.end() && it->first.overlaps(range);) {
-        if (!range.contains(it->first)) {
-            // first, insert the pieces of it->first that do not overlap range
-            if (it->first.lo < range.lo) {
-                bool i = slices.emplace(le_bitrange(it->first.lo, range.lo - 1), it->second).second;
-                BUG_CHECK(i, "inserting already present range?"); }
-            if (it->first.hi > range.hi) {
-                bool i = slices.emplace(le_bitrange(range.hi + 1, it->first.hi), it->second).second;
-                BUG_CHECK(i, "inserting already present range?"); }
-            // then insert the intersecion of range and it->first
-            bool i = slices.emplace(range.intersectWith(it->first), std::move(it->second)).second;
-            BUG_CHECK(i, "inserting already present range?");
-            it = slices.erase(it);
-        } else {
-            ++it;
+    auto it = slices_overlap_begin(range);
+    if (it == slices.end() || !it->first.overlaps(range)) {
+        // range doesn't overlap any existing slices: create a new slice with empty def_use_t
+        slices[range];
+    } else {
+        while (it != slices.end() && it->first.overlaps(range)) {
+            if (!range.contains(it->first)) {
+                // first, insert the pieces of it->first that do not overlap range
+                if (it->first.lo < range.lo) {
+                    bool i =
+                        slices.emplace(le_bitrange(it->first.lo, range.lo - 1), it->second).second;
+                    BUG_CHECK(i, "inserting already present range?");
+                }
+                if (it->first.hi > range.hi) {
+                    bool i =
+                        slices.emplace(le_bitrange(range.hi + 1, it->first.hi), it->second).second;
+                    BUG_CHECK(i, "inserting already present range?");
+                }
+                // then insert the intersecion of range and it->first
+                bool i =
+                    slices.emplace(range.intersectWith(it->first), std::move(it->second)).second;
+                BUG_CHECK(i, "inserting already present range?");
+                it = slices.erase(it);
+            } else {
+                ++it;
+            }
         }
     }
     slices_sanity();
