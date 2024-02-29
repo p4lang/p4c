@@ -1,4 +1,4 @@
-#include "size_param_example_parser.h"
+#include "default_action_with_param_01_parser.h"
 struct p4tc_filter_fields p4tc_filter_fields;
 
 struct internal_metadata {
@@ -9,20 +9,20 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
     u32 keysz;
     u32 maskid;
     u32 field0; /* hdr.ipv4.dstAddr */
+    u32 field1; /* istd.input_port */
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP 1
-#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
+#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP 2
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
     unsigned int action;
     union {
         struct {
         } _NoAction;
-        struct __attribute__((__packed__)) {
-            u32 vport;
+        struct {
         } MainControlImpl_next_hop;
         struct {
-        } MainControlImpl_default_route_drop;
+        } MainControlImpl_dflt_route_drop;
     } u;
 };
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
@@ -30,19 +30,18 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
     u32 maskid;
     u32 field0; /* hdr.ipv4.dstAddr */
     u32 field1; /* hdr.ipv4.srcAddr */
-    u8 field2; /* hdr.ipv4.flags */
+    u8 field2; /* hdr.ipv4.protocol */
 } __attribute__((aligned(8)));
-#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_SENDTOPORT 3
-#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 4
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP 1
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 3
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     unsigned int action;
     union {
         struct {
         } _NoAction;
-        struct __attribute__((__packed__)) {
-            u32 vport;
-        } MainControlImpl_sendtoport;
+        struct {
+        } MainControlImpl_next_hop;
         struct {
         } MainControlImpl_drop;
     } u;
@@ -71,8 +70,10 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     user_meta = &(hdrMd->cpumap_usermeta);
 {
         u8 hit;
+        u32 z_0;
         {
-if (/* hdr->ipv4.isValid() */
+            z_0 = 4;
+            if (/* hdr->ipv4.isValid() */
             hdr->ipv4.ebpf_valid) {
 /* ipv4_tbl.apply() */
                 {
@@ -82,8 +83,9 @@ if (/* hdr->ipv4.isValid() */
                         .tblid = 1
                     };
                     struct MainControlImpl_ipv4_tbl_1_key key = {};
-                    key.keysz = 32;
+                    key.keysz = 64;
                     key.field0 = hdr->ipv4.dstAddr;
+                    key.field1 = skb->ifindex;
                     struct p4tc_table_entry_act_bpf *act_bpf;
                     /* value */
                     struct MainControlImpl_ipv4_tbl_1_value *value = NULL;
@@ -101,12 +103,12 @@ if (/* hdr->ipv4.isValid() */
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
-/* send_to_port(value->u.MainControlImpl_next_hop.vport) */
+/* send_to_port(z_0) */
                                     compiler_meta__->drop = false;
-                                    send_to_port(value->u.MainControlImpl_next_hop.vport);
+                                    send_to_port(z_0);
                                 }
                                 break;
-                            case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
+                            case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP: 
                                 {
 /* drop_packet() */
                                     drop_packet();
@@ -129,10 +131,10 @@ if (/* hdr->ipv4.isValid() */
                         .tblid = 2
                     };
                     struct MainControlImpl_ipv4_tbl_2_key key = {};
-                    key.keysz = 67;
+                    key.keysz = 72;
                     key.field0 = hdr->ipv4.dstAddr;
                     key.field1 = hdr->ipv4.srcAddr;
-                    key.field2 = hdr->ipv4.flags;
+                    key.field2 = hdr->ipv4.protocol;
                     struct p4tc_table_entry_act_bpf *act_bpf;
                     /* value */
                     struct MainControlImpl_ipv4_tbl_2_value *value = NULL;
@@ -148,11 +150,11 @@ if (/* hdr->ipv4.isValid() */
                     if (value != NULL) {
                         /* run action */
                         switch (value->action) {
-                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_SENDTOPORT: 
+                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
-/* send_to_port(value->u.MainControlImpl_sendtoport.vport) */
+/* send_to_port(z_0) */
                                     compiler_meta__->drop = false;
-                                    send_to_port(value->u.MainControlImpl_sendtoport.vport);
+                                    send_to_port(z_0);
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP: 

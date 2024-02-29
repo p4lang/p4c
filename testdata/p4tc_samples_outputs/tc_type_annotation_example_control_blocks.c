@@ -109,8 +109,6 @@ if (/* hdr->ipv4.isValid() */
                                 {
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
                         }
                     } else {
                     }
@@ -145,8 +143,6 @@ if (/* hdr->ipv4.isValid() */
                                 {
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
                         }
                     } else {
                     }

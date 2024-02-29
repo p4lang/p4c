@@ -13,6 +13,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP 1
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
+#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
     unsigned int action;
     union {
@@ -34,6 +35,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP 1
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 3
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     unsigned int action;
     union {
@@ -112,12 +114,12 @@ if (/* hdr->ipv4.isValid() */
                                     drop_packet();
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAINCONTROLIMPL_IPV4_TBL_1_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
-/* drop_packet() */
-                        drop_packet();
                     }
                 }
 ;
@@ -161,12 +163,12 @@ if (/* hdr->ipv4.isValid() */
                                     drop_packet();
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
-/* drop_packet() */
-                        drop_packet();
                     }
                 }
 ;

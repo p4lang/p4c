@@ -12,6 +12,7 @@ struct __attribute__((__packed__)) ingress_nh_table2_key {
 } __attribute__((aligned(8)));
 #define INGRESS_NH_TABLE2_ACT_INGRESS_SEND_NH 2
 #define INGRESS_NH_TABLE2_ACT_INGRESS_DROP 3
+#define INGRESS_NH_TABLE2_ACT_NOACTION 0
 struct __attribute__((__packed__)) ingress_nh_table2_value {
     unsigned int action;
     union {
@@ -33,6 +34,7 @@ struct __attribute__((__packed__)) ingress_nh_table_key {
 } __attribute__((aligned(8)));
 #define INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH 2
 #define INGRESS_NH_TABLE_ACT__DROP 1
+#define INGRESS_NH_TABLE_ACT_NOACTION 0
 struct __attribute__((__packed__)) ingress_nh_table_value {
     unsigned int action;
     union {
@@ -112,12 +114,12 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                                 drop_packet();
                             }
                             break;
-                        default:
-                            return TC_ACT_SHOT;
+                        case INGRESS_NH_TABLE_ACT_NOACTION: 
+                            {
+                            }
+                            break;
                     }
                 } else {
-/* drop_packet() */
-                    drop_packet();
                 }
             }
 ;
@@ -161,12 +163,12 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                                 drop_packet();
                             }
                             break;
-                        default:
-                            return TC_ACT_SHOT;
+                        case INGRESS_NH_TABLE2_ACT_NOACTION: 
+                            {
+                            }
+                            break;
                     }
                 } else {
-/* drop_packet() */
-                    drop_packet();
                 }
             }
 ;

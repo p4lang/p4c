@@ -82,12 +82,8 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
                             {
                             }
                             break;
-                        default:
-                            return TC_ACT_SHOT;
                     }
                 } else {
-                    __builtin_memcpy(&hdr->ipv6.dstAddr, &value->u.MainControlImpl_set_dst.addr6, 16);
-                                        hdr->ipv6.hopLimit = (hdr->ipv6.hopLimit + 255);
                 }
             }
 ;

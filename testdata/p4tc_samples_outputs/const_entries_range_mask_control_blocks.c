@@ -12,6 +12,7 @@ struct __attribute__((__packed__)) MainControlImpl_t_range_key {
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_T_RANGE_ACT_MAINCONTROLIMPL_A 1
 #define MAINCONTROLIMPL_T_RANGE_ACT_MAINCONTROLIMPL_A_WITH_CONTROL_PARAMS 2
+#define MAINCONTROLIMPL_T_RANGE_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_t_range_value {
     unsigned int action;
     union {
@@ -84,11 +85,12 @@ static __always_inline int process(struct __sk_buff *skb, struct Header_t *h, st
                                 h->h.t = value->u.MainControlImpl_a_with_control_params.x;
                             }
                             break;
-                        default:
-                            return TC_ACT_SHOT;
+                        case MAINCONTROLIMPL_T_RANGE_ACT_NOACTION: 
+                            {
+                            }
+                            break;
                     }
                 } else {
-                    h->h.e = 0;
                 }
             }
 ;

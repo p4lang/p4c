@@ -17,6 +17,7 @@ struct ingress_nh_table_key_mask {
 } __attribute__((aligned(8)));
 #define INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH 1
 #define INGRESS_NH_TABLE_ACT_INGRESS_DROP 2
+#define INGRESS_NH_TABLE_ACT_NOACTION 0
 struct __attribute__((__packed__)) ingress_nh_table_value {
     unsigned int action;
     __u32 priority;
@@ -98,12 +99,12 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                                 drop_packet();
                             }
                             break;
-                        default:
-                            return TC_ACT_SHOT;
+                        case INGRESS_NH_TABLE_ACT_NOACTION: 
+                            {
+                            }
+                            break;
                     }
                 } else {
-/* drop_packet() */
-                    drop_packet();
                 }
             }
 ;
