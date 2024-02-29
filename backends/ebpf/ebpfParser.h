@@ -39,7 +39,7 @@ class StateTranslationVisitor : public CodeGenInspector {
     virtual void compileExtractField(const IR::Expression *expr, const IR::StructField *field,
                                      unsigned hdrOffsetBits, EBPFType *type);
     virtual void compileExtract(const IR::Expression *destination);
-    void compileLookahead(const IR::Expression *destination);
+    virtual void compileLookahead(const IR::Expression *destination);
     void compileAdvance(const P4::ExternMethod *ext);
     void compileVerify(const IR::MethodCallExpression *expression);
 

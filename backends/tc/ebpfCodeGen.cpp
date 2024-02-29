@@ -268,6 +268,10 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->newline();
         builder->emitIndent();
         builder->appendFormat("unsigned %s = hdrMd->%s;", offsetVar.c_str(), offsetVar.c_str());
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("%s = %s + BYTES(%s);", headerStartVar.c_str(),
+                              packetStartVar.c_str(), offsetVar.c_str());
     }
     builder->newline();
     emitHeadersFromCPUMAP(builder);
@@ -703,6 +707,34 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     }
 
     builder->newline();
+}
+
+void PnaStateTranslationVisitor::compileLookahead(const IR::Expression *destination) {
+    cstring msgStr = Util::printf_format("Parser: lookahead for %s %s",
+                                         state->parser->typeMap->getType(destination)->toString(),
+                                         destination->toString());
+    builder->target->emitTraceMessage(builder, msgStr.c_str());
+
+    builder->emitIndent();
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("u8* %s_save = %s", state->parser->program->headerStartVar.c_str(),
+                          state->parser->program->headerStartVar.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("unsigned %s_save = %s", state->parser->program->offsetVar.c_str(),
+                          state->parser->program->offsetVar.c_str());
+    builder->endOfStatement(true);
+    compileExtract(destination);
+    builder->emitIndent();
+    builder->appendFormat("%s = %s_save", state->parser->program->headerStartVar.c_str(),
+                          state->parser->program->headerStartVar.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("%s = %s_save", state->parser->program->offsetVar.c_str(),
+                          state->parser->program->offsetVar.c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
 }
 
 // =====================EBPFTablePNA=============================
