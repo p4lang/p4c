@@ -26,12 +26,11 @@ typename Map::mapped_type get(const Map &m, const Key &key) {
     auto it = m.find(key);
     return it != m.end() ? it->second : typename Map::mapped_type{};
 }
-template <class Map, typename Key = typename Map::key_type,
-          typename Value = typename Map::mapped_type>
+template <class Map, typename Key, typename Value = typename Map::mapped_type>
 typename Map::mapped_type get(const Map &m, const Key &key, Value &&def) {
     using M = typename Map::mapped_type;
     auto it = m.find(key);
-    return it != m.end() ? it->second : static_cast<M>(static_cast<Value &&>(def));
+    return it != m.end() ? it->second : static_cast<M>(std::forward<Value>(def));
 }
 
 /// Given a map and a key, return the pointer to value corresponding to the key
