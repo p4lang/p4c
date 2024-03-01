@@ -224,15 +224,18 @@ bool ComputeDefUse::preorder(const IR::P4Control *c) {
     BUG_CHECK(state == SKIPPING, "Nested %s not supported in ComputeDefUse", c);
     IndentCtl::TempIndent indent;
     LOG5("ComputeDefUse(P4Control " << c->name << ")" << indent);
+    bool is_type_declaration = !c->getTypeParameters()->empty();
     for (auto *p : c->getApplyParameters()->parameters)
         if (p->direction == IR::Direction::In || p->direction == IR::Direction::InOut) {
             def_info[p].defs.insert(getLoc(p));
             // Assume that all components of input parameters are live: we don't currently
             // propagate liveness innformation across parser/control block boundaries.
-            if (auto *tn = p->type->to<IR::Type_Name>()) {
-                auto *d = resolveUnique(tn->path->name, P4::ResolutionType::Any);
-                if (auto *type = d->to<IR::Type>()) {
-                    set_live_from_type(def_info[p], type);
+            if (!is_type_declaration) {
+                if (auto *tn = p->type->to<IR::Type_Name>()) {
+                    auto *d = resolveUnique(tn->path->name, P4::ResolutionType::Any);
+                    if (auto *type = d->to<IR::Type>()) {
+                        set_live_from_type(def_info[p], type);
+                    }
                 }
             }
         }
