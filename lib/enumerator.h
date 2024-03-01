@@ -24,6 +24,7 @@ limitations under the License.
 #include <functional>
 #include <list>
 #include <stdexcept>
+#include <type_traits>
 #include <vector>
 
 #include "lib/cstring.h"
@@ -275,6 +276,30 @@ class FilterEnumerator final : public Enumerator<T> {
 /* casts each element */
 template <typename T, typename S>
 class AsEnumerator final : public Enumerator<S> {
+    // See if we can use ICastable interface to cast from T to S. This is only possible if:
+    // - Both T and S are pointer types (let's denote T = From* and S = To*)
+    // - Expression (From*)()->to<To>() is well-formed
+    // Essentially this means the following code is well-formed:
+    // From *current = input->getCurrent(); current->to<To>();
+    template <typename From, typename To, typename = void>
+    static constexpr bool can_be_casted = false;
+
+    template <typename From, typename To>
+    static constexpr bool can_be_casted<
+        From *, To *, std::void_t<decltype(std::declval<From *>()->template to<To>())>> = true;
+
+    template <typename U = S>
+    typename std::enable_if_t<!can_be_casted<T, S>, U> getCurrentImpl() const {
+        T current = input->getCurrent();
+        return dynamic_cast<S>(current);
+    }
+
+    template <typename U = S>
+    typename std::enable_if_t<can_be_casted<T, S>, U> getCurrentImpl() const {
+        T current = input->getCurrent();
+        return current->template to<std::remove_pointer_t<S>>();
+    }
+
  protected:
     Enumerator<T> *input;
 
@@ -285,12 +310,12 @@ class AsEnumerator final : public Enumerator<S> {
         return cstring("AsEnumerator(") + this->input->toString() + "):" + this->stateName();
     }
 
-    void reset() {
+    void reset() override {
         Enumerator<S>::reset();
         this->input->reset();
     }
 
-    bool moveNext() {
+    bool moveNext() override {
         bool result = this->input->moveNext();
         if (result)
             this->state = EnumeratorState::Valid;
@@ -299,10 +324,7 @@ class AsEnumerator final : public Enumerator<S> {
         return result;
     }
 
-    S getCurrent() const {
-        T current = input->getCurrent();
-        return dynamic_cast<S>(current);
-    }
+    S getCurrent() const override { return getCurrentImpl(); }
 };
 
 ///////////////////////////
