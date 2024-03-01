@@ -15,6 +15,7 @@
 set (LIBP4CTOOLKIT_SRCS
     alloc_trace.cpp
     backtrace_exception.cpp
+    bitrange.cpp
     bitvec.cpp
     compile_context.cpp
     crash.cpp
