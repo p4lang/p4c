@@ -18,9 +18,10 @@ and limitations under the License.
 
 namespace TC {
 
-const cstring ParseTCAnnotations::default_hit = "default_hit";
-const cstring ParseTCAnnotations::default_hit_const = "default_hit_const";
+const cstring ParseTCAnnotations::defaultHit = "default_hit";
+const cstring ParseTCAnnotations::defaultHitConst = "default_hit_const";
 const cstring ParseTCAnnotations::tcType = "tc_type";
 const cstring ParseTCAnnotations::numMask = "nummask";
+const cstring ParseTCAnnotations::tcMayOverride = "tc_may_override";
 
 }  // namespace TC
