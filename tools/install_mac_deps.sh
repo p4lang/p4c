@@ -40,7 +40,7 @@ brew update
 BOOST_LIB="boost@1.84"
 REQUIRED_PACKAGES=(
     autoconf automake bdw-gc ccache cmake libtool
-    openssl pkg-config coreutils bison grep
+    openssl pkg-config coreutils bison grep ninja
     ${BOOST_LIB}
 )
 for package in "${REQUIRED_PACKAGES[@]}"; do
