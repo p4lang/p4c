@@ -43,8 +43,7 @@ void ReferenceMap::setDeclaration(const IR::Path *path, const IR::IDeclaration *
     CHECK_NULL(path);
     CHECK_NULL(decl);
     LOG3("Resolved " << dbp(path) << " to " << dbp(decl));
-    auto it = pathToDeclaration.find(path);
-    auto previous = it != pathToDeclaration.end() ? it->second : nullptr;
+    const auto *previous = get(pathToDeclaration, path);
     if (previous != nullptr && previous != decl)
         BUG("%1% already resolved to %2% instead of %3%", dbp(path), dbp(previous),
             dbp(decl->getNode()));
@@ -57,8 +56,7 @@ void ReferenceMap::setDeclaration(const IR::This *pointer, const IR::IDeclaratio
     CHECK_NULL(pointer);
     CHECK_NULL(decl);
     LOG3("Resolved " << dbp(pointer) << " to " << dbp(decl));
-    auto it = thisToDeclaration.find(pointer);
-    auto previous = it != thisToDeclaration.end() ? it->second : nullptr;
+    const auto *previous = get(thisToDeclaration, pointer);
     if (previous != nullptr && previous != decl)
         BUG("%1% already resolved to %2% instead of %3%", dbp(pointer), dbp(previous), dbp(decl));
     thisToDeclaration.emplace(pointer, decl);
@@ -66,8 +64,7 @@ void ReferenceMap::setDeclaration(const IR::This *pointer, const IR::IDeclaratio
 
 const IR::IDeclaration *ReferenceMap::getDeclaration(const IR::This *pointer, bool notNull) const {
     CHECK_NULL(pointer);
-    auto it = thisToDeclaration.find(pointer);
-    auto result = it != thisToDeclaration.end() ? it->second : nullptr;
+    const auto *result = get(thisToDeclaration, pointer);
 
     if (result)
         LOG3("Looking up " << dbp(pointer) << " found " << dbp(result));
@@ -80,8 +77,7 @@ const IR::IDeclaration *ReferenceMap::getDeclaration(const IR::This *pointer, bo
 
 const IR::IDeclaration *ReferenceMap::getDeclaration(const IR::Path *path, bool notNull) const {
     CHECK_NULL(path);
-    auto it = pathToDeclaration.find(path);
-    auto result = it != pathToDeclaration.end() ? it->second : nullptr;
+    const auto *result = get(pathToDeclaration, path);
 
     if (result)
         LOG3("Looking up " << dbp(path) << " found " << dbp(result));

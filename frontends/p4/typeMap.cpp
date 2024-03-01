@@ -112,8 +112,7 @@ void TypeMap::setType(const IR::Node *element, const IR::Type *type) {
 
 const IR::Type *TypeMap::getType(const IR::Node *element, bool notNull) const {
     CHECK_NULL(element);
-    auto it = typeMap.find(element);
-    auto result = it != typeMap.end() ? it->second : nullptr;
+    const auto *result = get(typeMap, element);
     LOG4("Looking up type for " << dbp(element) << " => " << dbp(result));
     if (notNull && result == nullptr)
         BUG_CHECK(errorCount() > 0, "Could not find type for %1%", dbp(element));

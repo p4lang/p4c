@@ -371,7 +371,7 @@ class FindUninitialized : public Inspector {
     ProgramPoint currentPoint;  // context of the current expression/statement
     /// For some simple expresssions keep here the read location sets.
     /// This does not include location sets read by subexpressions.
-    absl::flat_hash_map<const IR::Expression *, const LocationSet *> readLocations;
+    absl::flat_hash_map<const IR::Expression *, const LocationSet *, Util::Hash> readLocations;
     HasUses *hasUses;  // output
     /// If true the current statement is unreachable
     bool unreachable = false;
@@ -381,10 +381,9 @@ class FindUninitialized : public Inspector {
     bool reportInvalidHeaders = true;
 
     const LocationSet *getReads(const IR::Expression *expression, bool nonNull = false) const {
-        auto it = readLocations.find(expression);
-        if (nonNull)
-            BUG_CHECK(it != readLocations.end(), "no locations known for %1%", dbp(expression));
-        return (it == readLocations.end() ? nullptr : it->second);
+        const auto *result = ::get(readLocations, expression);
+        if (nonNull) BUG_CHECK(result != nullptr, "no locations known for %1%", dbp(expression));
+        return result;
     }
     /// 'expression' is reading the 'loc' location set
     void reads(const IR::Expression *expression, const LocationSet *loc) {
