@@ -479,8 +479,7 @@ std::vector<T> Enumerator<T>::emptyVector;
 
 template <typename T>
 Enumerator<T> *Enumerator<T>::createEnumerator(const std::vector<T> &data) {
-    return new GenericEnumerator<typename std::vector<T>::const_iterator>(data.begin(), data.end(),
-                                                                          "vector");
+    return new GenericEnumerator(data.begin(), data.end(), "vector");
 }
 
 template <typename T>
@@ -490,20 +489,19 @@ Enumerator<T> *Enumerator<T>::emptyEnumerator() {
 
 template <typename T>
 Enumerator<T> *Enumerator<T>::createEnumerator(const std::list<T> &data) {
-    return new GenericEnumerator<typename std::list<T>::const_iterator>(data.begin(), data.end(),
-                                                                        "list");
+    return new GenericEnumerator(data.begin(), data.end(), "list");
 }
 
 template <typename T>
 template <typename Iter>
 Enumerator<typename Iter::value_type> *Enumerator<T>::createEnumerator(Iter begin, Iter end) {
-    return new GenericEnumerator<Iter>(begin, end, "iterator");
+    return new GenericEnumerator(begin, end, "iterator");
 }
 
 template <typename T>
 template <typename Iter>
 Enumerator<typename Iter::value_type> *Enumerator<T>::createEnumerator(iterator_range<Iter> range) {
-    return new GenericEnumerator<Iter>(range.begin(), range.end(), "range");
+    return new GenericEnumerator(range.begin(), range.end(), "range");
 }
 
 template <typename T>
