@@ -30,8 +30,6 @@ concurrency:
 
 jobs:
   ptf-linux:
-    strategy:
-      fail-fast: false
     runs-on: ubuntu-20.04
     env:
       CTEST_PARALLEL_LEVEL: 4
