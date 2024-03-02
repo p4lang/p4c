@@ -34,6 +34,8 @@ limitations under the License.
 #include "log.h"
 #include "n4.h"
 
+// One can disable the GC, e.g., to run under Valgrind, by editing config.h or toggling
+// -DENABLE_GC=OFF in CMake.
 #if HAVE_LIBGC
 static bool done_init, started_init;
 // emergency pool to allow a few extra allocations after a bad_alloc is thrown so we
@@ -63,7 +65,6 @@ static void maybe_initialize_gc() {
     }
 }
 
-// One can disable the GC, e.g., to run under Valgrind, by editing config.h
 void *operator new(std::size_t size) {
     TRACE_ALLOC(size)
 
