@@ -148,6 +148,10 @@ P4CTestEnvironment::P4CTestEnvironment() {
     _psaP4 = readHeader(psaPath.c_str(), true);
 }
 
+std::filesystem::path P4CTestEnvironment::getProjectRoot() {
+    return std::filesystem::path(__FILE__).parent_path().parent_path().parent_path();
+}
+
 namespace Test {
 
 /* static */ std::optional<FrontendTestCase> FrontendTestCase::create(
