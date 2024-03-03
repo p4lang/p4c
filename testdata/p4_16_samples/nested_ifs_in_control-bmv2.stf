@@ -1,0 +1,21 @@
+#      DMAC        SMAC          ETYPE
+
+# first if condition in action barc is false, and 2nd one also false.  x=0
+packet 0 010203040506  0708090a0b0c  22f0
+expect 1 010203040506  0708090a0b0c  2200$
+
+# first if condition in action barc is true.  x=0
+packet 0 010203040506  07080a0a0b0c  22f0
+expect 1 010203040506  07f00a0a0b0c  2200$
+
+# first if condition in action barc is false, 2nd is true, 3rd is true.  x=srcAddr.f1
+packet 0 010203040506  f0080b0a0b0c  22f0
+expect 1 010203040506  f0080b0a0b0c  2208$
+
+# first if condition in action barc is false, 2nd is true, 3rd is false, 4th is true.  x=srcAddr.f1
+packet 0 010203040506  e0080b0a0b0c  22f0
+expect 1 010203040506  e0080b0a0b0c  2208$
+
+# first if condition in action barc is false, 2nd is true, 3rd is false, 4th is false.  x=0
+packet 0 010203040506  07080b0a0b0c  22f0
+expect 1 010203040506  07080b0a0b0c  2200$
