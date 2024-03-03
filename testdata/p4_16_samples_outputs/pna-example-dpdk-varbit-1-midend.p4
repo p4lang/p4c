@@ -41,7 +41,7 @@ struct headers_t {
 }
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
-    @name("MainParserImpl.tmp_0") bit<8> tmp_0;
+    bit<8> tmp_2;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -62,8 +62,8 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
         transition accept;
     }
     state parse_ipv4_options {
-        tmp_0 = pkt.lookahead<bit<8>>();
-        transition select(tmp_0) {
+        tmp_2 = pkt.lookahead<bit<8>>();
+        transition select(tmp_2) {
             8w0x44: parse_ipv4_option_timestamp;
             default: accept;
         }
