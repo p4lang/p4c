@@ -1,1 +1,4 @@
+issue3333.p4(2): [--Wwarn=unused] warning: Parser MyParser1 is not used; removing
+parser MyParser1(in myenum a) {
+       ^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

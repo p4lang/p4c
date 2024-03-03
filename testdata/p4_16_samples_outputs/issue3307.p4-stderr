@@ -1,1 +1,4 @@
+issue3307.p4(6): [--Wwarn=unused] warning: Parser MyParser is not used; removing
+parser MyParser(t tt) {
+       ^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

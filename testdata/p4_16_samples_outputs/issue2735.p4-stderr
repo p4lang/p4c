@@ -1,3 +1,6 @@
+issue2735.p4(8): [--Wwarn=unused] warning: Control SnvsIngress is not used; removing
+control SnvsIngress(out Mac_entry b0) {
+        ^^^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module
 [--Wwarn=missing] warning: Program does not contain a main module, so P4Info's 'pkg_info' field will not be set
 [--Wwarn=missing] warning: Program does not contain a `main' module
