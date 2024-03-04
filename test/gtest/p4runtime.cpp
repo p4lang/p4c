@@ -690,7 +690,7 @@ TEST_F(P4Runtime, P416MatchFields) {
     }
 }
 
-TEST_F(P4Runtime, DISABLEDP414MatchFields) {
+TEST_F(P4Runtime, DISABLED_P414MatchFields) {
     using MatchField = p4configv1::MatchField;
 
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::NONE, R"(
