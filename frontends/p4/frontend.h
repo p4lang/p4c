@@ -25,8 +25,8 @@ namespace P4 {
 
 class ConstantFoldingPolicy;  // forward declare to avoid having to include
 
-/// A customization point for frotend. The each tool can provide their own implementation of the
-/// policy that customazes its behaviour, or use instance of this class directly to provide the
+/// A customization point for frontend. The each tool can provide their own implementation of the
+/// policy that customizes its behaviour, or use instance of this class directly to provide the
 /// defaults.
 class FrontEndPolicy {
  public:
@@ -47,7 +47,7 @@ class FrontEndPolicy {
     // TODO: This should probably not be allowed to be skipped at all.
     virtual bool skipSideEffectOrdering() const { return false; }
 
-    /// Indicates whether the frontend shoud run some optimizations (inlining, action localization,
+    /// Indicates whether the frontend should run some optimizations (inlining, action localization,
     /// etc.).
     /// @returns default to enabled optimizations unless -O0 was given in the options (i.e. enabled
     /// unless options.optimizationLevel == 0).
