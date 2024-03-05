@@ -61,7 +61,7 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
     std::vector<const IR::Node *> errArguments;
 
  private:
-    bool reportErrorImpl(const TypeVariableSubstitution *subst, cstring message) const;
+    bool reportErrorImpl(const TypeVariableSubstitution *subst, std::string message) const;
 
  protected:
     /// Constraint which produced this one.  May be nullptr.
@@ -73,7 +73,7 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         : id(crtid++), derivedFrom(derivedFrom) {}
     explicit TypeConstraint(const IR::Node *origin) : id(crtid++), origin(origin) {}
     std::string explain(size_t index, Explain *explainer) const {
-        auto node = errArguments.at(index);
+        const auto *node = errArguments.at(index);
         node->apply(*explainer);
         return explainer->explanation;
     }
@@ -84,18 +84,18 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         errFormat = format;
         errArguments = nodes;
     }
-    template <typename... T>
+    template <typename... Args>
     // Always return false.
-    bool reportError(const TypeVariableSubstitution *subst, const char *format, T... args) const {
-        /// The Constraints actually form a stack and the error message
-        /// is composed in reverse order, from bottom to top.
-        /// The top of the stack has no 'derivedFrom' field,
-        /// and it contains the actual source position where
-        /// the analysis started.
+    bool reportError(const TypeVariableSubstitution *subst, const char *format,
+                     Args &&...args) const {
+        /// The Constraints actually form a stack and the error message is
+        /// composed in reverse order, from bottom to top.  The top of the stack
+        /// has no 'derivedFrom' field, and it contains the actual source
+        /// position where the analysis started.
         boost::format fmt(format);
-        cstring message =
-            cstring("  ---- Actual error:\n") + ::error_helper(fmt, args...).toString();
-        return reportErrorImpl(subst, message);
+        return reportErrorImpl(
+            subst,
+            "  ---- Actual error:\n" + ::error_helper(fmt, std::forward<Args>(args)...).toString());
     }
     // Default error message; returns 'false'
     virtual bool reportError(const TypeVariableSubstitution *subst) const = 0;

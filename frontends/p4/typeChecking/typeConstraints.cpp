@@ -151,16 +151,15 @@ std::string TypeConstraint::localError(Explain *explainer) const {
     return absl::StrCat(message, explanation);
 }
 
-bool TypeConstraint::reportErrorImpl(const TypeVariableSubstitution *subst, cstring m) const {
+bool TypeConstraint::reportErrorImpl(const TypeVariableSubstitution *subst,
+                                     std::string message) const {
     const auto *o = origin;
     const auto *constraint = this;
 
     Explain explainer(subst);
-    std::string message(m);
     while (constraint) {
-        cstring local = constraint->localError(&explainer);
-        if (!local.isNullOrEmpty())
-            absl::StrAppend(&message, "---- Originating from:\n", local.c_str());
+        std::string local = constraint->localError(&explainer);
+        if (!local.empty()) absl::StrAppend(&message, "---- Originating from:\n", local);
         o = constraint->origin;
         constraint = constraint->derivedFrom;
     }
