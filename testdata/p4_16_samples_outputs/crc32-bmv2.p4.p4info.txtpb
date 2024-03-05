@@ -1,0 +1,95 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 35792087
+    name: "MyIngress.calculate"
+    alias: "calculate"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.p4calc.op"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 24785092
+  }
+  action_refs {
+    id: 22867470
+  }
+  action_refs {
+    id: 32601303
+  }
+  action_refs {
+    id: 17405675
+  }
+  action_refs {
+    id: 31935968
+  }
+  action_refs {
+    id: 24997060
+  }
+  action_refs {
+    id: 32121835
+  }
+  const_default_action_id: 32121835
+  size: 1024
+  is_const_table: true
+  has_initial_entries: true
+}
+actions {
+  preamble {
+    id: 24785092
+    name: "MyIngress.operation_add"
+    alias: "operation_add"
+  }
+}
+actions {
+  preamble {
+    id: 22867470
+    name: "MyIngress.operation_sub"
+    alias: "operation_sub"
+  }
+}
+actions {
+  preamble {
+    id: 32601303
+    name: "MyIngress.operation_and"
+    alias: "operation_and"
+  }
+}
+actions {
+  preamble {
+    id: 17405675
+    name: "MyIngress.operation_or"
+    alias: "operation_or"
+  }
+}
+actions {
+  preamble {
+    id: 31935968
+    name: "MyIngress.operation_xor"
+    alias: "operation_xor"
+  }
+}
+actions {
+  preamble {
+    id: 24997060
+    name: "MyIngress.operation_crc"
+    alias: "operation_crc"
+  }
+}
+actions {
+  preamble {
+    id: 32121835
+    name: "MyIngress.operation_drop"
+    alias: "operation_drop"
+  }
+}
+type_info {
+}

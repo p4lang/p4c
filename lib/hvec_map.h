@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef LIB_HVEC_MAP_H_
 #define LIB_HVEC_MAP_H_
 
+#include <initializer_list>
 #include <tuple>
 #include <vector>
 
@@ -52,7 +53,18 @@ class hvec_map : hash_vector_base {
     }
     hvec_map(const hvec_map &) = default;
     hvec_map(hvec_map &&) = default;
-    hvec_map &operator=(const hvec_map &) = default;
+    hvec_map &operator=(const hvec_map &that) {
+        if (this != std::addressof(that)) {
+            clear();
+            hf = that.hf;
+            eql = that.eql;
+
+            data.reserve(that.size());
+            insert(that.begin(), that.end());
+        }
+
+        return *this;
+    }
     hvec_map &operator=(hvec_map &&) = default;
     ~hvec_map() = default;
     template <class ITER>
@@ -157,6 +169,11 @@ class hvec_map : hash_vector_base {
         size_t idx = hash_vector_base::find(&k, &cache);
         return idx ? const_iterator(*this, idx - 1) : end();
     }
+    size_t count(const KEY &k) const {
+        hash_vector_base::lookup_cache cache;
+        size_t idx = hash_vector_base::find(&k, &cache);
+        return idx > 0;
+    }
 
     // FIXME -- how to do this without duplicating the code for lvalue/rvalue?
     VAL &operator[](const KEY &k) {
@@ -218,14 +235,10 @@ class hvec_map : hash_vector_base {
             data.emplace_back(std::piecewise_construct_t(), std::forward_as_tuple(std::move(k)),
                               std::forward_as_tuple(std::forward<VV>(v)...));
             new_key = true;
-        } else {
-            if ((new_key = erased[idx])) {
-                erased[idx] = 0;
-                const_cast<KEY &>(data[idx].first) = std::move(k);
-                data[idx].second = VAL(std::forward<VV>(v)...);
-            } else {
-                data[idx].second = VAL(std::forward<VV>(v)...);
-            }
+        } else if ((new_key = erased[idx])) {
+            erased[idx] = 0;
+            const_cast<KEY &>(data[idx].first) = std::move(k);
+            data[idx].second = VAL(std::forward<VV>(v)...);
         }
         return std::make_pair(iterator(*this, idx), new_key);
     }
@@ -236,17 +249,18 @@ class hvec_map : hash_vector_base {
             idx = data.size();
             data.push_back(v);
             new_key = true;
-        } else {
-            if ((new_key = erased[idx])) {
-                erased[idx] = 0;
-                const_cast<KEY &>(data[idx].first) = v.first;
-                data[idx].second = v.second;
-            } else {
-                data[idx].second = v.second;
-            }
+        } else if ((new_key = erased[idx])) {
+            erased[idx] = 0;
+            const_cast<KEY &>(data[idx].first) = v.first;
+            data[idx].second = v.second;
         }
         return std::make_pair(iterator(*this, idx), new_key);
     }
+    template <typename InputIterator>
+    void insert(InputIterator first, InputIterator last) {
+        for (; first != last; ++first) insert(*first);
+    }
+    void insert(std::initializer_list<value_type> vl) { return insert(vl.begin(), vl.end()); }
     template <class HVM, class VT>
     _iter<HVM, VT> erase(_iter<HVM, VT> it) {
         BUG_CHECK(this == it.self, "incorrect iterator for hvec_map::erase");

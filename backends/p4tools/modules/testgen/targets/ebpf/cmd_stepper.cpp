@@ -35,8 +35,7 @@ const EBPFProgramInfo &EBPFCmdStepper::getProgramInfo() const {
 }
 
 void EBPFCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) const {
-    auto programInfo = getProgramInfo();
-    const auto *archSpec = TestgenTarget::getArchSpec();
+    const auto &programInfo = getProgramInfo();
     const auto &target = TestgenTarget::get();
     const auto *programmableBlocks = programInfo.getProgrammableBlocks();
 
@@ -45,7 +44,7 @@ void EBPFCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) cons
     size_t blockIdx = 0;
     for (const auto &blockTuple : *programmableBlocks) {
         const auto *typeDecl = blockTuple.second;
-        const auto *archMember = archSpec->getArchMember(blockIdx);
+        const auto *archMember = programInfo.getArchSpec().getArchMember(blockIdx);
         nextState.initializeBlockParams(target, typeDecl, &archMember->blockParams);
         blockIdx++;
     }

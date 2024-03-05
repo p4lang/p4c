@@ -1542,6 +1542,39 @@ struct keyInfo *CopyMatchKeysToSingleStruct::getKeyInfo(IR::Key *keys) {
     return oneKey;
 }
 
+cstring CopyMatchKeysToSingleStruct::getTableKeyName(const IR::Expression *e) {
+    cstring keyName;
+    if (auto pe = e->to<IR::PathExpression>()) {
+        keyName = pe->path->name;
+    } else if (auto mem = e->to<IR::Member>()) {
+        /* We expect all nested structures are flattened and only
+         * expected expressions are 'h.<hdrname>.<fieldname> or m.<fieldname> */
+        if (isValidMemberField(mem)) {
+            if (auto mexpr = mem->expr->to<IR::Member>()) {
+                keyName = "h." + mexpr->member + "." + mem->member;
+            } else if (mem->expr->is<IR::PathExpression>()) {
+                keyName = "m." + mem->member;
+            }
+        } else {
+            ::error(ErrorType::ERR_INVALID, "Invalid member expression '%1%' used as table key",
+                    mem);
+        }
+    } else if (auto m = e->to<IR::MethodCallExpression>()) {
+        BUG_CHECK(isValidCall(m),
+                  "Method calls except isValid must be simplified before"
+                  " reaching here, found %1%",
+                  m->method);
+        /* Moving h.<hdr>.isValid() used as table key to Metadata */
+        auto mem = m->method->to<IR::Member>();
+        CHECK_NULL(mem);
+        keyName = "h." + mem->expr->to<IR::Member>()->member + "." + IR::Type_Header::isValid;
+    } else {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Unsupported key expression %1%",
+                e->toString());
+    }
+    return keyName;
+}
+
 const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
     // If any key field is from different structure, put all keys in metadata
     LOG3("Visiting " << keys);
@@ -1570,14 +1603,12 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
             keyTypeStr = keyField->expr->toString();
         } else if (auto m = key->expression->to<IR::MethodCallExpression>()) {
             /* When isValid is present as table key, it should be moved to metadata */
-            auto mi = P4::MethodInstance::resolve(m, refMap, typeMap);
-            if (auto b = mi->to<P4::BuiltInMethod>()) {
-                if (b->name == "isValid") {
-                    copyNeeded = true;
-                    break;
-                }
+            if (isValidCall(m)) {
+                copyNeeded = true;
+                break;
             }
         }
+
         if (firstKeyStr != keyTypeStr) {
             if (firstKeyHdr || keyTypeStr.startsWith("h")) {
                 copyNeeded = true;
@@ -1649,7 +1680,6 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
     }
     return keys;
 }
-
 const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) {
     // If we got here we need to put the key element in metadata.
     LOG3("Extracting key element " << element);
@@ -1665,7 +1695,8 @@ const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) 
         insertions = it->second;
     }
 
-    auto keyName = element->expression->toString();
+    cstring keyName = getTableKeyName(element->expression);
+    if (keyName.isNullOrEmpty()) return element;
     bool isHeader = false;
     /* All header fields are prefixed with "h." and metadata fields are prefixed with "m."
      * Prefix the match field with control and table name */

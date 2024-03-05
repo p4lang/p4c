@@ -1,3 +1,5 @@
+#include <gtest/gtest.h>
+
 #include <optional>
 
 #include <boost/algorithm/string/replace.hpp>
@@ -7,7 +9,6 @@
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
-#include "gtest/gtest.h"
 #include "helpers.h"
 #include "ir/ir.h"
 #include "lib/log.h"

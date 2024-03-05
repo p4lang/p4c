@@ -1,4 +1,4 @@
-push_nonconstant.p4(10): [--Werror=type-error] error: h.push_front
+push_nonconstant.p4(10): [--Werror=type-error] error: 'h.push_front(x)'
         h.push_front(x);
         ^^^^^^^^^^^^^^^
   ---- Actual error:

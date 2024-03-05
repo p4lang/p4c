@@ -1,0 +1,78 @@
+{
+  "schema_version" : "1.0.0",
+  "pipeline_name" : "calculator",
+  "tables" : [
+    {
+      "name" : "MainControlImpl/calculate",
+      "id" : 1,
+      "tentries" : 2048,
+      "nummask" : 8,
+      "keysize" : 8,
+      "keyfields" : [
+        {
+          "id" : 1,
+          "name" : "op",
+          "type" : "bit8",
+          "match_type" : "exact",
+          "bitwidth" : 8
+        }
+      ],
+      "actions" : [
+        {
+          "id" : 1,
+          "name" : "MainControlImpl/operation_add",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : false
+        },
+        {
+          "id" : 2,
+          "name" : "MainControlImpl/operation_sub",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : false
+        },
+        {
+          "id" : 3,
+          "name" : "MainControlImpl/operation_and",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : false
+        },
+        {
+          "id" : 4,
+          "name" : "MainControlImpl/operation_or",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : false
+        },
+        {
+          "id" : 5,
+          "name" : "MainControlImpl/operation_xor",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : false
+        },
+        {
+          "id" : 6,
+          "name" : "MainControlImpl/operation_drop",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : true
+        }
+      ]
+    }
+  ]
+}

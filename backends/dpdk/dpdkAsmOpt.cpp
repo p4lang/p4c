@@ -619,7 +619,7 @@ bool EmitDpdkTableConfig::isAllKeysDefaultExpression(const IR::ListExpression *k
 void EmitDpdkTableConfig::postorder(const IR::DpdkTable *table) {
     auto entriesList = table->getEntries();
     if (entriesList == nullptr) return;
-    dpdkTableConfigFile.open(table->name + ".txt");
+    dpdkTableConfigFile.open(table->name + ".txtpb");
     auto needsPriority = tableNeedsPriority(table, refMap);
     int entryPriority = entriesList->entries.size();
     for (auto e : entriesList->entries) {

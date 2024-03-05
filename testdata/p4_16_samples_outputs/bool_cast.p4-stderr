@@ -1,1 +1,4 @@
+bool_cast.p4(17): [--Wwarn=unused] warning: Control SetAndFwd is not used; removing
+control SetAndFwd()
+        ^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

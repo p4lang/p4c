@@ -6,7 +6,6 @@
 
 #include <cstdlib>
 #include <string>
-#include <vector>
 
 #include <boost/multiprecision/cpp_int.hpp>
 
@@ -43,9 +42,9 @@ class P4TestOptions : public CompilerOptions {
 };
 /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
 using P4TestContext = P4CContextWithOptions<P4TestOptions>;
-using Restrictions = std::vector<std::vector<const IR::Expression *>>;
+using P4Tools::ConstraintsVector;
 
-Restrictions loadExample(const char *curFile, bool flag) {
+ConstraintsVector loadExample(const char *curFile, bool flag) {
     AutoCompileContext autoP4TestContext(new P4TestContext);
     auto &options = P4TestContext::get().options();
     const char *argv = "./gtest-p4testgen";
@@ -75,28 +74,28 @@ Restrictions loadExample(const char *curFile, bool flag) {
     P4::TypeMap typeMap;
     P4Tools::MidEnd midEnd(options);
     program = program->apply(midEnd);
-    Restrictions result;
     if (flag) {
-        program->apply(P4Tools::AssertsParser::AssertsParser(result));
-    } else {
-        program->apply(P4Tools::RefersToParser::RefersToParser(result));
+        P4Tools::ConstraintsVector result;
+        program->apply(P4Tools::P4Testgen::Bmv2::AssertsParser(result));
+        return result;
     }
-    return result;
+    P4Tools::P4Testgen::Bmv2::RefersToParser referstoParser;
+    program->apply(referstoParser);
+    return referstoParser.getRestrictionsVector();
 }
 
 TEST_F(P4AssertsParserTest, RestrictionCount) {
-    Restrictions parsingResult = loadExample(
+    ConstraintsVector parsingResult = loadExample(
         "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_1.p4",
         true);
-    ASSERT_EQ(parsingResult.size(), (unsigned long)1);
-    ASSERT_EQ(parsingResult[0].size(), (unsigned long)3);
+    ASSERT_EQ(parsingResult.size(), (unsigned long)3);
 }
 
 TEST_F(P4AssertsParserTest, Restrictions) {
-    Restrictions parsingResult = loadExample(
+    ConstraintsVector parsingResult = loadExample(
         "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_1.p4",
         true);
-    ASSERT_EQ(parsingResult.size(), (unsigned long)1);
+    ASSERT_EQ(parsingResult.size(), (unsigned long)3);
     {
         const auto &expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
             IR::Type_Bits::get(8), "ingress.ternary_table_mask_h.h.a1");
@@ -106,26 +105,26 @@ TEST_F(P4AssertsParserTest, Restrictions) {
         const auto *const2 = IR::getConstant(IR::Type_Bits::get(8), 64);
         const auto *operation =
             new IR::LAnd(new IR::Neq(expr1, const1), new IR::Neq(expr2, const2));
-        ASSERT_TRUE(parsingResult[0][0]->equiv(*operation));
+        ASSERT_TRUE(parsingResult[0]->equiv(*operation));
     }
     {
         const auto &expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
             IR::Type_Bits::get(8), "ingress.ternary_table_key_h.h.a1");
         const auto *const1 = IR::getConstant(IR::Type_Bits::get(8), 0);
         const auto *operation1 = new IR::Neq(expr1, const1);
-        ASSERT_TRUE(parsingResult[0][1]->equiv(*operation1));
+        ASSERT_TRUE(parsingResult[1]->equiv(*operation1));
     }
     {
         const auto &expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
             IR::Type_Bits::get(8), "ingress.ternary_table_key_h.h.a");
         const auto *const2 = IR::getConstant(IR::Type_Bits::get(8), 255);
         const auto *operation2 = new IR::Neq(expr1, const2);
-        ASSERT_TRUE(parsingResult[0][2]->equiv(*operation2));
+        ASSERT_TRUE(parsingResult[2]->equiv(*operation2));
     }
 }
 
 TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInTable) {
-    Restrictions parsingResult = loadExample(
+    ConstraintsVector parsingResult = loadExample(
         "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_2.p4",
         false);
     ASSERT_EQ(parsingResult.size(), (unsigned long)3);
@@ -134,20 +133,20 @@ TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInTable) {
     const auto &expr2 = P4Tools::ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(8),
                                                                      "ingress.table_2_key_h.h.b");
     const auto *operation = new IR::Equ(expr1, expr2);
-    ASSERT_TRUE(parsingResult[0][0]->equiv(*operation));
+    ASSERT_TRUE(parsingResult[0]->equiv(*operation));
 }
 
 TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInAction) {
-    Restrictions parsingResult = loadExample(
+    ConstraintsVector parsingResult = loadExample(
         "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_2.p4",
         false);
     ASSERT_EQ(parsingResult.size(), (unsigned long)3);
     const auto *expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
-        IR::Type_Bits::get(8), "ingress.table_1_arg_ingress.MyAction10");
+        IR::Type_Bits::get(8), "ingress.table_1_ingress.MyAction1_arg_input_val");
     const auto *expr2 = P4Tools::ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(8),
                                                                      "ingress.table_1_key_h.h.a");
     auto *operation = new IR::Equ(expr1, expr2);
-    ASSERT_TRUE(parsingResult[1][0]->equiv(*operation));
+    ASSERT_TRUE(parsingResult[1]->equiv(*operation));
 }
 
 }  // namespace Test

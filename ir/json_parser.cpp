@@ -16,64 +16,67 @@ limitations under the License.
 
 #include "ir/json_parser.h"
 
-#include <ctype.h>
-
+#include <cctype>
 #include <iostream>
 #include <list>
 #include <utility>
 
-#include <boost/multiprecision/number.hpp>
-
 int JsonObject::get_id() const {
-    if (find("Node_ID") == end())
-        return -1;
-    else
-        return *(find("Node_ID")->second->to<JsonNumber>());
+    auto it = find("Node_ID");
+    if (it == end()) return -1;
+
+    return it->second->as<JsonNumber>();
 }
 
 std::string JsonObject::get_type() const {
-    if (find("Node_Type") == end())
-        return "";
-    else
-        return *(dynamic_cast<JsonString *>(find("Node_Type")->second));
+    auto it = find("Node_Type");
+    if (it == end()) return "";
+
+    return it->second->as<JsonString>();
 }
 
 std::string JsonObject::get_filename() const {
-    if (find("filename") == end())
-        return "";
-    else
-        return *(dynamic_cast<JsonString *>(find("filename")->second));
+    auto it = find("filename");
+
+    if (it == end()) return "";
+
+    return it->second->as<JsonString>();
 }
 
 std::string JsonObject::get_sourceFragment() const {
-    if (find("source_fragment") == end())
-        return "";
-    else
-        return *(dynamic_cast<JsonString *>(find("source_fragment")->second));
+    auto it = find("source_fragment");
+
+    if (it == end()) return "";
+
+    return it->second->as<JsonString>();
 }
 
 int JsonObject::get_line() const {
-    if (find("line") == end())
-        return -1;
-    else
-        return *(find("line")->second->to<JsonNumber>());
+    auto it = find("line");
+
+    if (it == end()) return -1;
+
+    return it->second->as<JsonNumber>();
 }
 
 int JsonObject::get_column() const {
-    if (find("column") == end())
-        return -1;
-    else
-        return *(find("column")->second->to<JsonNumber>());
+    auto it = find("column");
+
+    if (it == end()) return -1;
+
+    return it->second->as<JsonNumber>();
 }
 
 JsonObject JsonObject::get_sourceJson() const {
-    if (find("Source_Info") == end()) {
+    auto it = find("Source_Info");
+
+    if (it == end()) {
         JsonObject obj;
         obj.setSrcInfo(false);
         return obj;
-    } else {
-        return *(dynamic_cast<JsonObject *>(find("Source_Info")->second));
     }
+
+    return it->second->as<JsonObject>();
 }
 
 // Hack to make << operator work multi-threaded
@@ -86,8 +89,7 @@ std::string getIndent(int l) {
 }
 
 std::ostream &operator<<(std::ostream &out, JsonData *json) {
-    if (dynamic_cast<JsonObject *>(json)) {
-        auto obj = dynamic_cast<ordered_map<std::string, JsonData *> *>(json);
+    if (auto *obj = json->to<JsonObject>()) {
         out << "{";
         if (obj->size() > 0) {
             level++;
@@ -97,8 +99,7 @@ std::ostream &operator<<(std::ostream &out, JsonData *json) {
             out << getIndent(--level);
         }
         out << "}";
-    } else if (dynamic_cast<JsonVector *>(json)) {
-        std::vector<JsonData *> *vec = dynamic_cast<std::vector<JsonData *> *>(json);
+    } else if (auto *vec = json->to<JsonVector>()) {
         out << "[";
         if (vec->size() > 0) {
             level++;
@@ -109,18 +110,15 @@ std::ostream &operator<<(std::ostream &out, JsonData *json) {
             out << getIndent(--level);
         }
         out << "]";
-    } else if (dynamic_cast<JsonString *>(json)) {
-        JsonString *s = dynamic_cast<JsonString *>(json);
+    } else if (auto *s = json->to<JsonString>()) {
         out << "\"" << s->c_str() << "\"";
 
-    } else if (dynamic_cast<JsonNumber *>(json)) {
-        JsonNumber *num = dynamic_cast<JsonNumber *>(json);
+    } else if (auto *num = json->to<JsonNumber>()) {
         out << num->val;
 
-    } else if (dynamic_cast<JsonBoolean *>(json)) {
-        JsonBoolean *b = dynamic_cast<JsonBoolean *>(json);
+    } else if (auto *b = json->to<JsonBoolean>()) {
         out << (b->val ? "true" : "false");
-    } else if (dynamic_cast<JsonNull *>(json)) {
+    } else if (json->is<JsonNull>()) {
         out << "null";
     }
     return out;
@@ -140,7 +138,7 @@ std::istream &operator>>(std::istream &in, JsonData *&json) {
 
                     JsonData *key, *val;
                     in >> key >> std::ws >> ch >> std::ws >> val;
-                    obj[*(dynamic_cast<std::string *>(key))] = val;
+                    obj[key->as<JsonString>()] = val;
 
                     in >> std::ws >> ch;
                 } while (in && ch != '}');

@@ -23,6 +23,10 @@ endif()
 
 project (P4C)
 
+# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++17 rather than -std=gnu++17
+set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 set (P4C_RUNTIME_OUTPUT_DIRECTORY bin)
 set (P4C_LIBRARY_OUTPUT_DIRECTORY lib)
@@ -42,12 +46,19 @@ OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
-OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" OFF)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
-option(BUILD_STATIC_RELEASE_SANS_GLIBC
+OPTION (BUILD_STATIC_RELEASE_SANS_GLIBC
        "Build a (mostly) statically linked release binary. Glibc is linked dynamically." OFF
 )
+if (BUILD_STATIC_RELEASE_SANS_GLIBC)
+    # We want to optimize the binary size for a static release binary by default.
+    set (_ENABLE_LTO_DEFAULT ON)
+else()
+    set (_ENABLE_LTO_DEFAULT OFF)
+endif()
+OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" ${_ENABLE_LTO_DEFAULT})
+
 OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during build" OFF)
 OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
 # Support a legacy option. TODO: Remove?
@@ -121,6 +132,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Set the required options for a (mostly) static release build.
 if(BUILD_STATIC_RELEASE_SANS_GLIBC)
   message(STATUS "Building static release binaries")
+  message(WARNING "glibc is linked dynamically in current static builds.")
   set(BUILD_SHARED_LIBS OFF)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
   # Link Boost statically
@@ -139,10 +151,36 @@ if(BUILD_STATIC_RELEASE_SANS_GLIBC)
   add_definitions(-DP4C_STATIC_BUILD)
 endif()
 
+# Ensure we enable sanitizers before fetching dependencies so the correct flags
+# are propagated below
+if (ENABLE_SANITIZERS)
+  append("-fsanitize=undefined,address" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
+  # ubsan may generate 128-bit multiplication with explicit overflow check. This
+  # is compiled down to _muloti4 libcall that is provided by compiler-rr but not
+  # by libgcc
+  # So, on Linux where clang uses libgcc by default we'd need to switch to
+  # compiler-rt, though we'd pull unwinder from libgcc.
+  # See https://bugs.llvm.org/show_bug.cgi?id=16404 for more information
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND UNIX AND NOT APPLE)
+    append("--rtlib=compiler-rt --unwindlib=libgcc" CMAKE_EXE_LINKER_FLAGS)
+  endif()
+endif ()
+
+if (BUILD_AUTO_VAR_INIT_PATTERN)
+  add_cxx_compiler_option  ("-ftrivial-auto-var-init=pattern")
+endif ()
+
 # Required tools and libraries.
 find_package (PythonInterp 3 REQUIRED)
 find_package (FLEX 2.0 REQUIRED)
 find_package (BISON 3.0 REQUIRED)
+# If we enable GTest, install GoogleTest with the appropriate options.
+if (ENABLE_GTESTS)
+  include(GoogleTest)
+  p4c_obtain_googletest()
+endif ()
+include(Abseil)
+p4c_obtain_abseil()
 include(Protobuf)
 p4c_obtain_protobuf()
 
@@ -165,15 +203,17 @@ endif()
 # we require -pthread to make std::call_once work, even if we're not using threads...
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${CMAKE_THREAD_LIBS_INIT}")
+list (APPEND P4C_LIB_DEPS ${CMAKE_THREAD_LIBS_INIT})
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 include_directories(SYSTEM ${PROTOBUF_INCLUDE_DIRS})
 include_directories(SYSTEM ${LIBGC_INCLUDE_DIR})
 set (HAVE_LIBBOOST_IOSTREAMS 1)
-set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES}")
+list (APPEND P4C_LIB_DEPS ${Boost_LIBRARIES})
 if (ENABLE_GC)
-  set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${LIBGC_LIBRARIES}")
+  list (APPEND P4C_LIB_DEPS ${LIBGC_LIBRARIES})
 endif ()
+set (P4C_ABSL_LIBRARIES absl::flat_hash_map absl::flat_hash_set)
+list (APPEND P4C_LIB_DEPS ${P4C_ABSL_LIBRARIES})
 
 # other required libraries
 p4c_add_library (rt clock_gettime HAVE_CLOCK_GETTIME)
@@ -234,10 +274,6 @@ enable_testing ()
 #   set (CPACK_PACKAGE_VERSION_PATCH ${CPACK_PACKAGE_VERSION_PATCH}-${__P4C_VERSION_RC})
 # endif ()
 
-# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++17 rather than -std=gnu++17
-set (CMAKE_CXX_STANDARD 17)
-set (CMAKE_CXX_STANDARD_REQUIRED ON)
-
 add_cxx_compiler_option ("-Wall")
 add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
@@ -253,14 +289,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Ap
   # FIXME: with C++20 we would be able to use standard __VA_OPT__
   add_cxx_compiler_option ("-Wno-gnu-zero-variadic-macro-arguments")
 endif()
-
-if (ENABLE_SANITIZERS)
-  append("-fsanitize=undefined,address" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
-endif ()
-
-if (BUILD_AUTO_VAR_INIT_PATTERN)
-  add_cxx_compiler_option  ("-ftrivial-auto-var-init=pattern")
-endif ()
 
 if (ENABLE_WERROR)
   add_cxx_compiler_option  ("-Werror")
@@ -281,19 +309,10 @@ if (ENABLE_LTO AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     message(WARNING "LLD does not work with GCC's LTO object format, switching to Gold.")
     set(BUILD_LINK_WITH_LLD OFF)
   endif ()
-  add_cxx_compiler_option  ("-flto")
+  add_cxx_compiler_option("-flto")
 endif ()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    # We want to optimize the binary size for a static release binary.
-    # This only works with modern versions of GCC.
-    if (BUILD_STATIC_RELEASE_SANS_GLIBC AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
-        if (BUILD_LINK_WITH_LLD)
-          message(WARNING "LLD does not work with GCC's LTO object format, switching to Gold.")
-          set(BUILD_LINK_WITH_LLD OFF)
-        endif ()
-        add_cxx_compiler_option ("-flto")
-    endif ()
     set(_LD_USED "default system")
     set(_LD_OPT_USED "")
     macro(check_linker BUILD_LINK_WITH_VAR LINKER_OPT LINKER_NAME)
@@ -358,12 +377,6 @@ set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
 
 # Component libraries: must be defined before being used in the back end executables.
 set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
-
-# If we enable GTest, install GoogleTest with the appropriate options.
-if (ENABLE_GTESTS)
-  include(GoogleTest)
-  p4c_obtain_googletest()
-endif ()
 
 # The order of adding subdirectories matters because of target dependencies.
 add_subdirectory (tools/driver)
@@ -496,6 +509,7 @@ add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
 add_dependencies(ir-generated ir genIR)
+target_link_libraries(ir-generated ${P4C_LIB_DEPS})
 
 ######################################## IR Generation End ########################################
 

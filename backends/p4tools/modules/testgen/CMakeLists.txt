@@ -14,6 +14,7 @@ set(
   options.cpp
   testgen.cpp
 
+  core/compiler_target.cpp
   core/externs.cpp
   core/program_info.cpp
   core/small_step/abstract_stepper.cpp
@@ -50,6 +51,7 @@ set(
 
   test/gtest_utils.cpp
   test/lib/format_int.cpp
+  test/lib/p4info_api.cpp
   test/lib/taint.cpp
   test/small-step/util.cpp
   test/z3-solver/constraints.cpp
@@ -70,6 +72,7 @@ fetchcontent_makeavailable_but_exclude_install(inja)
 set(
   TESTGEN_LIBS
   PRIVATE p4tools-common
+  PRIVATE p4tools-control-plane
   PUBLIC inja
 )
 set(TESTGEN_INCLUDES)
@@ -103,7 +106,7 @@ configure_file(register.h.in register.h)
 # The library.
 add_p4tools_library(testgen ${TESTGEN_SOURCES})
 # Make sure the testgen library and anything that links to it see both the Z3 and Inja includes.
-target_link_libraries(testgen PUBLIC p4tools-common inja)
+target_link_libraries(testgen ${TESTGEN_LIBS})
 if (TESTGEN_INCLUDES)
   target_include_directories(testgen ${TESTGEN_INCLUDES})
 endif()

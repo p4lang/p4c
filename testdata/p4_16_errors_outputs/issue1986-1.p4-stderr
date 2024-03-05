@@ -1,4 +1,4 @@
-issue1986-1.p4(22): [--Werror=type-error] error: SelectExpression
+issue1986-1.p4(22): [--Werror=type-error] error: 'SelectExpression'
         transition select(2w0) {
                    ^
   ---- Actual error:

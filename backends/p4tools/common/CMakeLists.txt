@@ -41,6 +41,7 @@ add_p4tools_library(p4tools-common ${P4C_TOOLS_COMMON_SOURCES})
 target_link_libraries(
   p4tools-common
   PUBLIC ${P4TOOLS_Z3_LIB}
+  PRIVATE frontend
 )
 
 target_include_directories(
@@ -54,4 +55,5 @@ target_include_directories(
   PUBLIC "${P4C_BINARY_DIR}"
 )
 
-add_dependencies(p4tools-common ir-generated frontend)
+# Add control-plane-specific extensions.
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/control_plane)

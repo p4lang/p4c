@@ -1,4 +1,4 @@
-issue2036.p4(23): [--Werror=type-error] error: d.apply
+issue2036.p4(23): [--Werror=type-error] error: 'd.apply(a)'
     d.apply(a);
     ^^^^^^^^^^
   ---- Actual error:

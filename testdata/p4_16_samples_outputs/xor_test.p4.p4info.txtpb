@@ -1,0 +1,109 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 37375156
+    name: "MyIngress.ipv4_lpm"
+    alias: "ipv4_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.ingress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 26257079
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+  is_const_table: true
+  has_initial_entries: true
+}
+tables {
+  preamble {
+    id: 36846071
+    name: "MyIngress.debug"
+    alias: "debug"
+  }
+  match_fields {
+    id: 1
+    name: "meta.before1"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "meta.after1"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "meta.before2"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "meta.after2"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 5
+    name: "meta.before3"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 6
+    name: "meta.after3"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 7
+    name: "meta.before4"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 8
+    name: "meta.after4"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 26257079
+    name: "MyIngress.forward_and_do_something"
+    alias: "forward_and_do_something"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 9
+  }
+}
+type_info {
+}

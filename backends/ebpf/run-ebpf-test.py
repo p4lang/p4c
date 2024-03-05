@@ -190,13 +190,25 @@ def run_test(options, argv):
                 result = testutils.SUCCESS
             else:
                 result = run_model(ebpf, testfile)
+        elif options.replace:
+            exp_dir = os.path.dirname(options.p4filename).replace("_errors", "_errors_outputs", 1)
+            exp_file = options.p4filename.replace("_errors/", "_errors_outputs/", 1) + "-stderr"
+            testutils.check_and_create_dir(Path(exp_dir))
+            with open(exp_file, mode="w+", encoding="utf-8") as error_file:
+                error_file.write(out)
         else:  # Expected error, check output matches
             exp_file = options.p4filename.replace("_errors/", "_errors_outputs/", 1) + "-stderr"
-            with open(exp_file, 'r') as f:
+            with open(exp_file, 'r', encoding="utf-8") as f:
                 exp_stderr = f.read().strip()
             # Output will have full path which differs
             out = out.replace(options.p4filename, basename).strip()
-            # Output will have one extra line with make error, trim that
+            # If the user runs tests with `make -jX check`, the `make -f .../runtime.mk`
+            # invocation will emit a 'jobserver unavailable' warning which messes up the
+            # output. There does not seem to be a way to fix this in CMake, so instead we
+            # remove this warning from the start of the output if it's present. See #4328.
+            if out[0:5] == "make[":
+                out = out[out.find("\n") + 1 :]
+            # Output will have one last line with make error, trim that
             out = out[: len(exp_stderr)]
             if exp_stderr != out:
                 testutils.log.error("Error output mismatch!")
@@ -228,6 +240,8 @@ if __name__ == "__main__":
     options.compiler = testutils.check_if_file(args.compiler).as_posix()
     options.p4filename = testutils.check_if_file(args.p4filename).as_posix()
     options.replace = args.replace
+    if "P4TEST_REPLACE" in os.environ:
+        options.replace = True
     options.cleanupTmp = args.nocleanup
     if args.testfile:
         options.testfile = testutils.check_if_file(args.testfile).as_posix()

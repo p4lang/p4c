@@ -5,6 +5,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  merge_group:
+    branches: [ main ]
 
 # Cancel any preceding run on the pull request.
 concurrency:
@@ -14,14 +16,12 @@ concurrency:
 jobs:
   # Build with gcc and test p4c on Ubuntu 22.04.
   test-ubuntu22:
-    strategy:
-      fail-fast: false
     runs-on: ubuntu-22.04
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
@@ -54,7 +54,7 @@ jobs:
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ${{ matrix.unity }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
@@ -77,8 +77,6 @@ jobs:
 
   # Build and test p4c on Fedora.
   test-fedora-linux:
-    strategy:
-      fail-fast: false
     # This job runs in Fedora container that runs in Ubuntu VM.
     runs-on: ubuntu-latest
     container:
@@ -91,7 +89,7 @@ jobs:
     - name: Install git
       run: dnf install -y -q git
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -114,15 +112,13 @@ jobs:
       run: sudo -E ctest --output-on-failure --schedule-random
       working-directory: ./build
 
-  # Build and test p4c on MacOS 12
-  test-mac-os:
-    strategy:
-      fail-fast: false
-    runs-on: macos-12
+  # Build and test p4c on MacOS for M1 Macs.
+  test-mac-os-m1:
+    runs-on: macos-14
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -131,6 +127,20 @@ jobs:
       with:
         key: test-${{ runner.os }}
         max-size: 1000M
+
+    - name: Get brew cache dir
+      id: brew-cache
+      run: |
+        echo "dir=$(brew --prefix)" >> $GITHUB_OUTPUT
+
+    - name: Cache Homebrew Packages
+      id: cache-homebrew-packages
+      uses: actions/cache@v4
+      env:
+        cache-name: homebrew-packages
+      with:
+        path: ${{ steps.brew-cache.outputs.dir }}
+        key: ${{ runner.os }}-m1-${{ hashFiles('tools/install_mac_deps.sh') }}
 
     - name: Install dependencies (MacOS)
       run: |
@@ -141,7 +151,54 @@ jobs:
           source ~/.bash_profile
           ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
               -DCMAKE_UNITY_BUILD=ON
-          make -Cbuild -j2
+          make -Cbuild -j$((`nproc`+1))
+
+    - name: Run tests (MacOS)
+      run: |
+        source ~/.bash_profile
+        ctest --output-on-failure --schedule-random -LE "bpf|ubpf"
+      working-directory: ./build
+
+  # Build and test p4c on MacOS 13 on x86.
+  test-mac-os:
+    runs-on: macos-13
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: test-${{ runner.os }}
+        max-size: 1000M
+
+    - name: Get brew cache dir
+      id: brew-cache
+      run: |
+        echo "dir=$(brew --prefix)" >> $GITHUB_OUTPUT
+
+    - name: Cache Homebrew Packages
+      id: cache-homebrew-packages
+      uses: actions/cache@v4
+      env:
+        cache-name: homebrew-packages
+      with:
+        path: ${{ steps.brew-cache.outputs.dir }}
+        key: ${{ runner.os }}-${{ hashFiles('tools/install_mac_deps.sh') }}
+
+    - name: Install dependencies (MacOS)
+      run: |
+           tools/install_mac_deps.sh
+
+    - name: Build (MacOS)
+      run: |
+          source ~/.bash_profile
+          ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
+              -DCMAKE_UNITY_BUILD=ON
+          make -Cbuild -j$((`nproc`+1))
 
     - name: Run tests (MacOS)
       run: |

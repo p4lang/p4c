@@ -26,11 +26,13 @@ class Bmv2V1ModelTestgenTarget : public TestgenTarget {
     static void make();
 
  protected:
-    const Bmv2V1ModelProgramInfo *initProgramImpl(
-        const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const override;
+    const Bmv2V1ModelProgramInfo *produceProgramInfoImpl(
+        const CompilerResult &compilerResult,
+        const IR::Declaration_Instance *mainDecl) const override;
 
-    Bmv2TestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                        const std::filesystem::path &testPath) const override;
+    Bmv2TestBackend *getTestBackendImpl(const ProgramInfo &programInfo,
+                                        const TestBackendConfiguration &testBackendConfiguration,
+                                        SymbolicExecutor &symbex) const override;
 
     Bmv2V1ModelCmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                              const ProgramInfo &programInfo) const override;
@@ -38,12 +40,8 @@ class Bmv2V1ModelTestgenTarget : public TestgenTarget {
     Bmv2V1ModelExprStepper *getExprStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                                const ProgramInfo &programInfo) const override;
 
-    [[nodiscard]] const ArchSpec *getArchSpecImpl() const override;
-
  private:
     Bmv2V1ModelTestgenTarget();
-
-    static const ArchSpec ARCH_SPEC;
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2

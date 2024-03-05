@@ -1,7 +1,6 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "send_to_port_example",
-  "id" : 1,
   "tables" : [
     {
       "name" : "MainControlImpl/ipv4_tbl",
@@ -42,7 +41,7 @@
             {
               "id" : 1,
               "name" : "vport",
-              "type" : "bit",
+              "type" : "bit32",
               "bitwidth" : 32
             }
           ],

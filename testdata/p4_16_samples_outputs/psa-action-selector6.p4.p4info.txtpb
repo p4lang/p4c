@@ -1,0 +1,129 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 39967501
+    name: "MyIC.tbl"
+    alias: "tbl"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 30030382
+  }
+  action_refs {
+    id: 28661769
+  }
+  implementation_id: 294316857
+  size: 1024
+}
+tables {
+  preamble {
+    id: 42525091
+    name: "MyIC.tbl1"
+    alias: "tbl1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 30030382
+  }
+  action_refs {
+    id: 28661769
+  }
+  implementation_id: 298015716
+  size: 1024
+}
+tables {
+  preamble {
+    id: 49266188
+    name: "MyIC.foo"
+    alias: "foo"
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 49390123
+    name: "MyIC.bar"
+    alias: "bar"
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 30030382
+    name: "a1"
+    alias: "a1"
+  }
+  params {
+    id: 1
+    name: "param"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 28661769
+    name: "a2"
+    alias: "a2"
+  }
+  params {
+    id: 1
+    name: "param"
+    bitwidth: 16
+  }
+}
+action_profiles {
+  preamble {
+    id: 298015716
+    name: "MyIC.ap"
+    alias: "ap"
+  }
+  table_ids: 42525091
+  size: 1024
+}
+action_profiles {
+  preamble {
+    id: 294316857
+    name: "MyIC.as"
+    alias: "as"
+  }
+  table_ids: 39967501
+  with_selector: true
+  size: 1024
+}
+type_info {
+}

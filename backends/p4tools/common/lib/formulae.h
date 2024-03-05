@@ -28,6 +28,8 @@ class AbstractRepCheckedNode : public ICastable {
     explicit AbstractRepCheckedNode(const Node *node, std::string classDesc) : node(*node) {
         BUG_CHECK(Self::repOk(node), "%1%: Not a valid %2%.", node, classDesc);
     }
+
+    DECLARE_TYPEINFO(AbstractRepCheckedNode);
 };
 
 }  // namespace P4Tools

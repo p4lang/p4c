@@ -20,7 +20,7 @@ class SharedPnaProgramInfo : public ProgramInfo {
     static const IR::Type_Bits PARSER_ERR_BITS;
 
  public:
-    SharedPnaProgramInfo(const IR::P4Program *program,
+    SharedPnaProgramInfo(const TestgenCompilerResult &compilerResult,
                          ordered_map<cstring, const IR::Type_Declaration *> inputBlocks);
 
     /// @returns the programmable blocks of the program.
@@ -39,6 +39,8 @@ class SharedPnaProgramInfo : public ProgramInfo {
     /// index. This is the name of the parameter that is used in the P4 program.
     [[nodiscard]] const IR::PathExpression *getBlockParam(cstring blockLabel,
                                                           size_t paramIndex) const;
+
+    DECLARE_TYPEINFO(SharedPnaProgramInfo, ProgramInfo);
 };
 
 }  // namespace P4Tools::P4Testgen::Pna

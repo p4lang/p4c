@@ -1,0 +1,49 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 44370079
+    name: "ingress.t_ternary"
+    alias: "t_ternary"
+  }
+  match_fields {
+    id: 1
+    name: "h.h.t"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 21186165
+  }
+  action_refs {
+    id: 17165658
+  }
+  size: 1024
+  is_const_table: true
+  has_initial_entries: true
+}
+actions {
+  preamble {
+    id: 21186165
+    name: "ingress.a"
+    alias: "a"
+  }
+}
+actions {
+  preamble {
+    id: 17165658
+    name: "ingress.a_with_control_params"
+    alias: "a_with_control_params"
+  }
+  params {
+    id: 1
+    name: "x"
+    bitwidth: 9
+  }
+}
+type_info {
+}

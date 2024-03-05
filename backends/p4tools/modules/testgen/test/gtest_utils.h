@@ -3,10 +3,11 @@
 
 #include <gtest/gtest.h>
 
+#include <functional>
 #include <optional>
 #include <string>
 
-#include "backends/p4tools/common/lib/variables.h"
+#include "backends/p4tools/common/compiler/compiler_target.h"
 #include "frontends/common/options.h"
 #include "ir/ir.h"
 
@@ -30,10 +31,19 @@ class P4ToolsTestCase {
                                                           std::string archName,
                                                           const std::string &source);
 
-    /// The output of the compiler's mid end.
-    const IR::P4Program *program;
+    explicit P4ToolsTestCase(const P4Tools::CompilerResult &compilerResults);
+
+    /// @returns the P4 program associated with this test case.
+    [[nodiscard]] const IR::P4Program &getProgram() const;
+
+    /// @returns the compiler result that was produced by running the compiler on the input P4
+    /// Program.
+    [[nodiscard]] const P4Tools::CompilerResult &getCompilerResult() const;
 
  private:
+    /// The output of the compiler's mid end.
+    std::reference_wrapper<const P4Tools::CompilerResult> compilerResults;
+
     /// Ensures target plug-ins are initialized.
     static void ensureInit();
 };

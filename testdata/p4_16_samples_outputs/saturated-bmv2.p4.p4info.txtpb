@@ -1,0 +1,74 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 34728461
+    name: "ingress.t"
+    alias: "t"
+  }
+  match_fields {
+    id: 1
+    name: "h.h.op"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 20896217
+  }
+  action_refs {
+    id: 28347782
+  }
+  action_refs {
+    id: 30797801
+  }
+  action_refs {
+    id: 18945827
+  }
+  action_refs {
+    id: 33281717
+  }
+  size: 1024
+  is_const_table: true
+  has_initial_entries: true
+}
+actions {
+  preamble {
+    id: 20896217
+    name: "ingress.usat_plus"
+    alias: "usat_plus"
+  }
+}
+actions {
+  preamble {
+    id: 28347782
+    name: "ingress.usat_minus"
+    alias: "usat_minus"
+  }
+}
+actions {
+  preamble {
+    id: 30797801
+    name: "ingress.sat_plus"
+    alias: "sat_plus"
+  }
+}
+actions {
+  preamble {
+    id: 18945827
+    name: "ingress.sat_minus"
+    alias: "sat_minus"
+  }
+}
+actions {
+  preamble {
+    id: 33281717
+    name: "ingress.drop"
+    alias: "drop"
+  }
+}
+type_info {
+}

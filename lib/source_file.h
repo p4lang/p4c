@@ -21,10 +21,10 @@ limitations under the License.
 #ifndef LIB_SOURCE_FILE_H_
 #define LIB_SOURCE_FILE_H_
 
+#include <map>
 #include <vector>
 
 #include "cstring.h"
-#include "map.h"
 #include "stringref.h"
 
 // GTest

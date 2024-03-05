@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <iostream>
 #include <iterator>
 #include <map>
 #include <stdexcept>
@@ -12,7 +11,6 @@
 #include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/options.h"
 #include "lib/error.h"
-#include "lib/exceptions.h"
 
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 
@@ -115,9 +113,8 @@ TestgenOptions::TestgenOptions()
             // Each element is then again split by colon (':').
             std::stringstream argStream(arg);
             while (argStream.good()) {
-                std::string substr;
-                std::getline(argStream, substr, ',');
-                auto rangeStr = std::string(arg);
+                std::string rangeStr;
+                std::getline(argStream, rangeStr, ',');
                 size_t portStr = rangeStr.find_first_of(':');
                 try {
                     auto loPortStr = rangeStr.substr(0, portStr);
@@ -157,6 +154,22 @@ TestgenOptions::TestgenOptions()
         "test back end. Some test back ends may restrict the available port ranges.");
 
     registerOption(
+        "--skip-control-plane-entities", "skippedControlPlaneEntities",
+        [this](const char *arg) {
+            // Convert the input into a StringStream and split by comma (',').
+            std::stringstream argStream(arg);
+            while (argStream.good()) {
+                std::string substr;
+                std::getline(argStream, substr, ',');
+                skippedControlPlaneEntities.emplace(substr);
+            }
+            return true;
+        },
+        "Specify the set of control plane entities for which P4Testgen should not generate a "
+        "configuration for. For example, if a particular table is in the set, P4Testgen will "
+        "assume that only the default action or constant entries can be executed. ");
+
+    registerOption(
         "--out-dir", "outputDir",
         [this](const char *arg) {
             outputDir = arg;
@@ -181,10 +194,10 @@ TestgenOptions::TestgenOptions()
             selectedBranches = arg;
             // These options are mutually exclusive.
             if (trackBranches) {
-                std::cerr << "--input-branches and --track-branches are mutually exclusive. Choose "
-                             "one or the other."
-                          << std::endl;
-                exit(1);
+                ::error(
+                    "--input-branches and --track-branches are mutually exclusive. Choose "
+                    "one or the other.");
+                return false;
             }
             return true;
         },
@@ -196,10 +209,10 @@ TestgenOptions::TestgenOptions()
             trackBranches = true;
             // These options are mutually exclusive.
             if (!selectedBranches.empty()) {
-                std::cerr << "--input-branches and --track-branches are mutually exclusive. Choose "
-                             "one or the other."
-                          << std::endl;
-                exit(1);
+                ::error(
+                    "--input-branches and --track-branches are mutually exclusive. Choose "
+                    "one or the other.");
+                return false;
             }
             return true;
         },
@@ -207,18 +220,32 @@ TestgenOptions::TestgenOptions()
         "used for deterministic replay.");
 
     registerOption(
-        "--with-output-packet", nullptr,
+        "--output-packet-only", nullptr,
         [this](const char *) {
-            withOutputPacket = true;
+            outputPacketOnly = true;
             if (!selectedBranches.empty()) {
-                std::cerr << "--input-branches cannot guarantee --with-output-packet."
-                             " Aborting."
-                          << std::endl;
-                exit(1);
+                ::error(
+                    "--input-branches cannot guarantee --output-packet-only."
+                    " Aborting.");
+                return false;
             }
             return true;
         },
-        "Produced tests must have an output packet.");
+        "Produced tests must have an output packet as outcome.");
+
+    registerOption(
+        "--dropped-packet-only", nullptr,
+        [this](const char *) {
+            droppedPacketOnly = true;
+            if (!selectedBranches.empty()) {
+                ::error(
+                    "--input-branches cannot guarantee --dropped-packet-only."
+                    " Aborting.");
+                return false;
+            }
+            return true;
+        },
+        "Produced tests must have a dropped packet as outcome.");
 
     registerOption(
         "--path-selection", "pathSelectionPolicy",
@@ -255,10 +282,8 @@ TestgenOptions::TestgenOptions()
     registerOption(
         "--track-coverage", "coverageItem",
         [this](const char *arg) {
-            static std::set<cstring> const COVERAGE_OPTIONS = {
-                "STATEMENTS",
-                "TABLE_ENTRIES",
-            };
+            static std::set<cstring> const COVERAGE_OPTIONS = {"STATEMENTS", "TABLE_ENTRIES",
+                                                               "ACTIONS"};
             hasCoverageTracking = true;
             auto selectionString = cstring(arg).toUpper();
             auto it = COVERAGE_OPTIONS.find(selectionString);
@@ -271,6 +296,10 @@ TestgenOptions::TestgenOptions()
                     coverageOptions.coverTableEntries = true;
                     return true;
                 }
+                if (selectionString == "ACTIONS") {
+                    coverageOptions.coverActions = true;
+                    return true;
+                }
             }
             ::error(
                 "Coverage tracking for label %1% not supported. Supported coverage tracking "
@@ -280,7 +309,8 @@ TestgenOptions::TestgenOptions()
             return false;
         },
         "Specifies, which IR nodes to track for coverage in the targeted P4 program. Multiple "
-        "options are possible: Currently supported: STATEMENTS, TABLE_ENTRIES "
+        "options are possible: Currently supported: STATEMENTS, TABLE_ENTRIES (table rules encoded "
+        "in the table entries in P4), ACTIONS (actions invoked, directly or by tables). "
         "Defaults to no coverage.");
 
     registerOption(
@@ -363,6 +393,14 @@ TestgenOptions::TestgenOptions()
             return true;
         },
         "List of the selected branches which should be chosen for selection.");
+
+    registerOption(
+        "--test-name", "testBaseName",
+        [this](const char *arg) {
+            testBaseName = arg;
+            return true;
+        },
+        "The base name of the tests which are generated.");
 
     registerOption(
         "--disable-assumption-mode", nullptr,

@@ -1,3 +1,6 @@
+spec-ex16.p4(26): [--Wwarn=unused] warning: Control Map2 is not used; removing
+control Map2(in bit<8> d) { apply {} }
+        ^^^^
 spec-ex16.p4(32): [--Wwarn=unused] warning: main1: unused instance
                 Map1()) main1;
                         ^^^^^

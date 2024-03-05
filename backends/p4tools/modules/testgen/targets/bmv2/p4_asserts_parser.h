@@ -6,27 +6,34 @@
 #include <string_view>
 #include <vector>
 
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "ir/vector.h"
 #include "ir/visitor.h"
 #include "lib/cstring.h"
 
-namespace P4Tools::AssertsParser {
+namespace P4Tools::P4Testgen::Bmv2 {
+
+/// Maps control plane identifiers to their corresponding IR type.
+/// Once we have resolved the tokens in the annotation, we can then lookup the corresponding type.
+using IdenitifierTypeMap = std::map<cstring, const IR::Type *>;
 
 class AssertsParser : public Transform {
-    std::vector<std::vector<const IR::Expression *>> &restrictionsVec;
+    /// A vector of restrictions imposed on the control-plane.
+    ConstraintsVector &restrictionsVec;
 
  public:
-    explicit AssertsParser(std::vector<std::vector<const IR::Expression *>> &output);
+    explicit AssertsParser(ConstraintsVector &output);
     /// A function that calls the beginning of the transformation of restrictions from a string into
     /// an IR::Expression. Internally calls all other necessary functions, for example
     /// combineTokensToNames and the like, to eventually get an IR expression that meets the string
     /// constraint
-    static std::vector<const IR::Expression *> genIRStructs(
-        cstring tableName, cstring restrictionString,
-        const IR::Vector<IR::KeyElement> &keyElements);
-    const IR::Node *postorder(IR::P4Table *node) override;
+    static std::vector<const IR::Expression *> genIRStructs(cstring tableName,
+                                                            cstring restrictionString,
+                                                            const IdenitifierTypeMap &typeMap);
+    const IR::Node *postorder(IR::P4Action *actionContext) override;
+    const IR::Node *postorder(IR::P4Table *tableContext) override;
 };
 
 class Token {
@@ -112,6 +119,6 @@ class Lexer {
     char prev() noexcept;
     char get() noexcept;
 };
-}  // namespace P4Tools::AssertsParser
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_P4_ASSERTS_PARSER_H_ */

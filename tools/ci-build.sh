@@ -129,15 +129,6 @@ function build_bmv2() {
   fi
   ccache --set-config max_size=1G
 
-
-  # Install add-ons to communicate with simple_switch_grpc via P4Runtime.
-  # These packages are necessary because of a protobuf version mismatch in more recent Ubuntu distributions.
-  if [[ "${DISTRIB_RELEASE}" == "22.04" ]] ; then
-    sudo pip3 install --upgrade protobuf==3.20.1
-    sudo pip3 install --upgrade googleapis-common-protos==1.50.0
-    sudo pip3 install --upgrade grpcio==1.51.1
-  fi
-
   if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
     # To run PTF nanomsg tests. Not available on 18.04.
     sudo pip3 install nnpy
@@ -261,8 +252,8 @@ cmake ${CMAKE_FLAGS} ..
 
 # If CMAKE_ONLY is active, only run CMake. Do not build.
 if [ "$CMAKE_ONLY" == "OFF" ]; then
-  make
-  sudo make install
+  make -j$((`nproc`+1))
+  sudo make -j$((`nproc`+1)) install
   # Print ccache statistics after building
   ccache -p -s
 fi

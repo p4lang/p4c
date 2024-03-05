@@ -1,0 +1,26 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+actions {
+  preamble {
+    id: 20728178
+    name: "ingress.add"
+    alias: "add"
+  }
+}
+counters {
+  preamble {
+    id: 304134966
+    name: "ingress.stats"
+    alias: "stats"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 65536
+}
+type_info {
+}

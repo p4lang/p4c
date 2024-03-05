@@ -10,6 +10,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/number.hpp>
 
+#include "backends/p4tools/common/control_plane/symbolic_variables.h"
 #include "backends/p4tools/common/lib/constants.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
@@ -83,8 +84,8 @@ const IR::Expression *TableStepper::computeTargetMatchType(
     const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
     // Create a new variable constant that corresponds to the key expression.
-    cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-    const auto *ctrlPlaneKey = ToolsVariables::getSymbolicVariable(keyExpr->type, keyName);
+    const auto *ctrlPlaneKey =
+        ControlPlaneState::getTableKey(properties.tableName, keyProperties.name, keyExpr->type);
 
     if (keyProperties.matchType == P4Constants::MATCH_KIND_EXACT) {
         hitCondition = new IR::LAnd(hitCondition, new IR::Equ(keyExpr, ctrlPlaneKey));
@@ -92,14 +93,14 @@ const IR::Expression *TableStepper::computeTargetMatchType(
         return hitCondition;
     }
     if (keyProperties.matchType == P4Constants::MATCH_KIND_TERNARY) {
-        cstring maskName = properties.tableName + "_mask_" + keyProperties.name;
         const IR::Expression *ternaryMask = nullptr;
         // We can recover from taint by inserting a ternary match that is 0.
         if (keyProperties.isTainted) {
             ternaryMask = IR::getConstant(keyExpr->type, 0);
             keyExpr = ternaryMask;
         } else {
-            ternaryMask = ToolsVariables::getSymbolicVariable(keyExpr->type, maskName);
+            ternaryMask = ControlPlaneState::getTableTernaryMask(properties.tableName,
+                                                                 keyProperties.name, keyExpr->type);
         }
         matches->emplace(keyProperties.name,
                          new Ternary(keyProperties.key, ctrlPlaneKey, ternaryMask));
@@ -109,9 +110,8 @@ const IR::Expression *TableStepper::computeTargetMatchType(
     if (keyProperties.matchType == P4Constants::MATCH_KIND_LPM) {
         const auto *keyType = keyExpr->type->checkedTo<IR::Type_Bits>();
         auto keyWidth = keyType->width_bits();
-        cstring maskName = properties.tableName + "_lpm_prefix_" + keyProperties.name;
-        const IR::Expression *maskVar =
-            ToolsVariables::getSymbolicVariable(keyExpr->type, maskName);
+        const IR::Expression *maskVar = ControlPlaneState::getTableMatchLpmPrefix(
+            properties.tableName, keyProperties.name, keyExpr->type);
         // The maxReturn is the maximum vale for the given bit width. This value is shifted by
         // the mask variable to create a mask (and with that, a prefix).
         auto maxReturn = IR::getMaxBvVal(keyWidth);
@@ -149,7 +149,7 @@ const IR::Expression *TableStepper::computeHit(TableMatchMap *matches) {
 const IR::StringLiteral *TableStepper::getTableActionString(
     const IR::MethodCallExpression *actionCall) {
     cstring actionName = actionCall->method->toString();
-    return new IR::StringLiteral(actionName);
+    return new IR::StringLiteral(IR::Type_String::get(), actionName);
 }
 
 const IR::Expression *TableStepper::evalTableConstEntries() {
@@ -254,14 +254,11 @@ void TableStepper::setTableDefaultEntries(
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
-        for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
-            const auto *parameter = parameters->getParameter(argIdx);
+        for (const auto *parameter : *parameters) {
             // Synthesize a variable constant here that corresponds to a control plane argument.
-            // We get the unique name of the table coupled with the unique name of the action.
-            // Getting the unique name is needed to avoid generating duplicate arguments.
-            cstring paramName =
-                properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, paramName);
+            const auto &actionArg = ControlPlaneState::getTableActionArgument(
+                properties.tableName, actionName, parameter->name, parameter->type);
+
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -325,14 +322,10 @@ void TableStepper::evalTableControlEntries(
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
-        for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
-            const auto *parameter = parameters->getParameter(argIdx);
+        for (const auto *parameter : *parameters) {
             // Synthesize a variable constant here that corresponds to a control plane argument.
-            // We get the unique name of the table coupled with the unique name of the action.
-            // Getting the unique name is needed to avoid generating duplicate arguments.
-            cstring paramName =
-                properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, paramName);
+            const auto &actionArg = ControlPlaneState::getTableActionArgument(
+                properties.tableName, actionName, parameter->name, parameter->type);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -546,8 +539,6 @@ void TableStepper::evalTargetTable(
 }
 
 bool TableStepper::eval() {
-    // Set the appropriate properties when the table is immutable, meaning it has constant entries.
-    TableUtils::checkTableImmutability(*table, properties);
     // Resolve any non-symbolic table keys. The function returns true when a key needs replacement.
     if (resolveTableKeys()) {
         return false;
@@ -577,6 +568,16 @@ TableStepper::TableStepper(ExprStepper *stepper, const IR::P4Table *table)
     for (size_t index = 0; index < table->getActionList()->size(); index++) {
         const auto *action = table->getActionList()->actionList.at(index);
         properties.actionIdMap.emplace(action->controlPlaneName(), index);
+    }
+
+    // Set the appropriate properties when the table is immutable, meaning it has constant entries.
+    TableUtils::checkTableImmutability(*table, properties);
+
+    // If the table is in the set of entities to skip, we set it immutable.
+    // P4Testgen will not add a control plane entry for this table.
+    auto &skipped = TestgenOptions::get().skippedControlPlaneEntities;
+    if (skipped.find(properties.tableName) != skipped.end()) {
+        properties.tableIsImmutable = true;
     }
 }
 

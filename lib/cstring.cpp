@@ -17,6 +17,8 @@ limitations under the License.
 #include "cstring.h"
 
 #include <algorithm>
+#include <cctype>
+#include <iomanip>
 #include <ios>
 #include <string>
 #include <unordered_set>
@@ -134,7 +136,7 @@ namespace std {
 template <>
 struct hash<table_entry> {
     std::size_t operator()(const table_entry &entry) const {
-        return Util::Hash::murmur(entry.string(), entry.length());
+        return Util::hash(entry.string(), entry.length());
     }
 };
 }  // namespace std
@@ -277,6 +279,13 @@ cstring cstring::escapeJson() const {
 cstring cstring::toUpper() const {
     std::string st = str;
     std::transform(st.begin(), st.end(), st.begin(), ::toupper);
+    cstring ret = cstring::to_cstring(st);
+    return ret;
+}
+
+cstring cstring::toLower() const {
+    std::string st = str;
+    std::transform(st.begin(), st.end(), st.begin(), ::tolower);
     cstring ret = cstring::to_cstring(st);
     return ret;
 }

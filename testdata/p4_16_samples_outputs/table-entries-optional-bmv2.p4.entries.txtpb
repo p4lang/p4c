@@ -1,0 +1,103 @@
+# proto-file: p4/v1/p4runtime.proto
+# proto-message: p4.v1.WriteRequest
+
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 38131002
+      match {
+        field_id: 1
+        optional {
+          value: "\252"
+        }
+      }
+      match {
+        field_id: 2
+        optional {
+          value: "\021\021"
+        }
+      }
+      action {
+        action {
+          action_id: 17165658
+          params {
+            param_id: 1
+            value: "\000\001"
+          }
+        }
+      }
+      priority: 4
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 38131002
+      match {
+        field_id: 2
+        optional {
+          value: "\021\021"
+        }
+      }
+      action {
+        action {
+          action_id: 17165658
+          params {
+            param_id: 1
+            value: "\000\002"
+          }
+        }
+      }
+      priority: 3
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 38131002
+      match {
+        field_id: 1
+        optional {
+          value: "\252"
+        }
+      }
+      action {
+        action {
+          action_id: 17165658
+          params {
+            param_id: 1
+            value: "\000\003"
+          }
+        }
+      }
+      priority: 2
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 38131002
+      action {
+        action {
+          action_id: 17165658
+          params {
+            param_id: 1
+            value: "\000\004"
+          }
+        }
+      }
+      priority: 1
+      is_const: true
+    }
+  }
+}

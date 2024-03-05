@@ -1,7 +1,6 @@
 #ifndef IR_JSON_PARSER_H_
 #define IR_JSON_PARSER_H_
 
-#include <algorithm>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -19,6 +18,8 @@ class JsonData : public ICastable {
     JsonData &operator=(const JsonData &) & = default;
     JsonData &operator=(JsonData &&) & = default;
     virtual ~JsonData() {}
+
+    DECLARE_TYPEINFO(JsonData);
 };
 
 class JsonNumber : public JsonData {
@@ -26,6 +27,8 @@ class JsonNumber : public JsonData {
     JsonNumber(big_int v) : val(v) {}          // NOLINT(runtime/explicit)
     operator int() const { return int(val); }  // Does not handle overflow
     big_int val;
+
+    DECLARE_TYPEINFO(JsonNumber, JsonData);
 };
 
 class JsonBoolean : public JsonData {
@@ -33,6 +36,8 @@ class JsonBoolean : public JsonData {
     JsonBoolean(bool v) : val(v) {}  // NOLINT(runtime/explicit)
     operator bool() const { return val; }
     bool val;
+
+    DECLARE_TYPEINFO(JsonBoolean, JsonData);
 };
 
 class JsonString : public JsonData, public std::string {
@@ -45,6 +50,8 @@ class JsonString : public JsonData, public std::string {
     JsonString &operator=(const JsonString &) & = default;
     JsonString &operator=(JsonString &&) & = default;
     operator cstring() { return cstring(this->c_str()); }
+
+    DECLARE_TYPEINFO(JsonString, JsonData);
 };
 
 class JsonVector : public JsonData, public std::vector<JsonData *> {
@@ -54,6 +61,8 @@ class JsonVector : public JsonData, public std::vector<JsonData *> {
         : std::vector<JsonData *>(v) {}
     JsonVector &operator=(const JsonVector &) & = default;
     JsonVector &operator=(JsonVector &&) & = default;
+
+    DECLARE_TYPEINFO(JsonVector, JsonData);
 };
 
 class JsonObject : public JsonData, public ordered_map<std::string, JsonData *> {
@@ -74,9 +83,13 @@ class JsonObject : public JsonData, public ordered_map<std::string, JsonData *> 
     JsonObject get_sourceJson() const;
     bool hasSrcInfo() { return _hasSrcInfo; }
     void setSrcInfo(bool value) { _hasSrcInfo = value; }
+
+    DECLARE_TYPEINFO(JsonObject, JsonData);
 };
 
-class JsonNull : public JsonData {};
+class JsonNull : public JsonData {
+    DECLARE_TYPEINFO(JsonNull, JsonData);
+};
 
 std::string getIndent(int l);
 

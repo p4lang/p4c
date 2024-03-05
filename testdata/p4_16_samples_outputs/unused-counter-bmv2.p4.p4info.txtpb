@@ -1,0 +1,44 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 34728461
+    name: "ingress.t"
+    alias: "t"
+  }
+  action_refs {
+    id: 32530319
+  }
+  const_default_action_id: 32530319
+  direct_resource_ids: 330698586
+  size: 1024
+}
+actions {
+  preamble {
+    id: 32530319
+    name: "ingress.my_action"
+    alias: "my_action"
+  }
+  params {
+    id: 1
+    name: "a"
+    bitwidth: 9
+  }
+}
+direct_counters {
+  preamble {
+    id: 330698586
+    name: "ingress.c"
+    alias: "c"
+  }
+  spec {
+    unit: PACKETS
+  }
+  direct_table_id: 34728461
+}
+type_info {
+}

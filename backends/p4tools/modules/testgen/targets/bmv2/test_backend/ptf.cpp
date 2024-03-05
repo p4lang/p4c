@@ -12,20 +12,23 @@
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
 
+#include "backends/p4tools/modules/testgen/options.h"
+
 namespace P4Tools::P4Testgen::Bmv2 {
 
-PTF::PTF(std::filesystem::path basePath, std::optional<unsigned int> seed)
-    : Bmv2TestFramework(std::move(basePath), seed) {}
+PTF::PTF(const TestBackendConfiguration &testBackendConfiguration)
+    : Bmv2TestFramework(testBackendConfiguration) {}
 
 std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *mask) {
     std::vector<std::pair<size_t, size_t>> ignoreMasks;
     if (mask == nullptr) {
         return ignoreMasks;
     }
-    auto maskBinStr = formatBinExpr(mask, false, true, false);
+    auto maskBinStr = formatBinExpr(mask, {false, true, false});
     int countZeroes = 0;
     size_t offset = 0;
     for (; offset < maskBinStr.size(); ++offset) {
@@ -54,7 +57,7 @@ inja::json PTF::getExpectedPacket(const TestSpec *testSpec) const {
         const auto *payloadMask = packet->getEvaluatedPayloadMask();
         verifyData["ignore_masks"] = getIgnoreMasks(payloadMask);
 
-        auto dataStr = formatHexExpr(payload, false, true, false);
+        auto dataStr = formatHexExpr(payload, {false, true, false});
         verifyData["exp_pkt"] = insertHexSeparators(dataStr);
     }
     return verifyData;
@@ -146,9 +149,10 @@ class AbstractTest(bt.P4RuntimeTest):
 )""");
 
     inja::json dataJson;
-    dataJson["test_name"] = basePath.stem();
-    if (seed) {
-        dataJson["seed"] = *seed;
+    dataJson["test_name"] = getTestBackendConfiguration().testBaseName;
+    auto optSeed = getTestBackendConfiguration().seed;
+    if (optSeed.has_value()) {
+        dataJson["seed"] = optSeed.value();
     }
 
     inja::render_to(ptfFileStream, PREAMBLE, dataJson);
@@ -288,19 +292,20 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
 
     LOG5("PTF backend: emitting testcase:" << std::setw(4) << dataJson);
 
-    inja::render_to(ptfFileStream, testCase, dataJson);
-    ptfFileStream.flush();
-}
-
-void PTF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                     float currentCoverage) {
     if (!preambleEmitted) {
-        auto ptfFile = basePath;
+        BUG_CHECK(getTestBackendConfiguration().fileBasePath.has_value(), "Base path is not set.");
+        auto ptfFile = getTestBackendConfiguration().fileBasePath.value();
         ptfFile.replace_extension(".py");
         ptfFileStream = std::ofstream(ptfFile);
         emitPreamble();
         preambleEmitted = true;
     }
+    inja::render_to(ptfFileStream, testCase, dataJson);
+    ptfFileStream.flush();
+}
+
+void PTF::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                          float currentCoverage) {
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }

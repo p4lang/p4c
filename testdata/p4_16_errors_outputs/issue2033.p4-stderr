@@ -1,4 +1,4 @@
-issue2033.p4(9): [--Werror=type-error] error: badtable has no action list, so it cannot invoke 'nop'
+issue2033.p4(9): [--Werror=type-error] error: badtable has no action list, so it cannot invoke 'nop()'
     table badtable {
           ^^^^^^^^
 issue2033.p4(10)

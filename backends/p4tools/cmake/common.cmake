@@ -55,13 +55,37 @@ macro(p4tools_obtain_z3)
     set(P4TOOLS_Z3_VERSION "4.11.2")
     message("Fetching Z3 version ${P4TOOLS_Z3_VERSION} for P4Tools...")
 
+    # Determine platform to fetch pre-built Z3
+    if (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
+      set(Z3_ARCH "x64")
+      if (APPLE)
+        set(Z3_PLATFORM_SUFFIX "osx-10.16")
+        set(Z3_ZIP_HASH "a56b6c40d9251a963aabe1f15731dd88ad1cb801d0e7b16e45f8b232175e165c")
+      elseif (UNIX)
+        set(Z3_PLATFORM_SUFFIX "glibc-2.31")
+        set(Z3_ZIP_HASH "9d0f70e61e82b321f35e6cad1343615d2dead6f2c54337a24293725de2900fb6")
+      else()
+        message(FATAL_ERROR "Unsupported system platform")
+      endif()
+    elseif(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
+      set(Z3_ARCH "arm64")
+      if (APPLE)
+        set(Z3_PLATFORM_SUFFIX "osx-11.0")
+        set(Z3_ZIP_HASH "c021f381fa3169b1f7fb3b4fae81a1d1caf0dd8aa4aa773f4ab9d5e28c6657a4")
+      else()
+        message(FATAL_ERROR "Unsupported system platform")
+      endif()
+    else()
+      message(FATAL_ERROR "Unsupported system processor")
+    endif()
+
     # Print out download state while setting up Z3.
     set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
     set(FETCHCONTENT_QUIET OFF)
     fetchcontent_declare(
       z3
-      URL https://github.com/Z3Prover/z3/releases/download/z3-${P4TOOLS_Z3_VERSION}/z3-${P4TOOLS_Z3_VERSION}-x64-glibc-2.31.zip
-      URL_HASH SHA256=9d0f70e61e82b321f35e6cad1343615d2dead6f2c54337a24293725de2900fb6
+      URL https://github.com/Z3Prover/z3/releases/download/z3-${P4TOOLS_Z3_VERSION}/z3-${P4TOOLS_Z3_VERSION}-${Z3_ARCH}-${Z3_PLATFORM_SUFFIX}.zip
+      URL_HASH SHA256=${Z3_ZIP_HASH}
       USES_TERMINAL_DOWNLOAD TRUE
       GIT_PROGRESS TRUE
     )
@@ -71,7 +95,7 @@ macro(p4tools_obtain_z3)
 
     # Other projects may also pull in Z3.
     # We have to make sure we only include our local version with P4Tools.
-    set(P4TOOLS_Z3_LIB ${z3_SOURCE_DIR}/bin/libz3.a)
+    set(P4TOOLS_Z3_LIB ${z3_SOURCE_DIR}/bin/libz3${CMAKE_STATIC_LIBRARY_SUFFIX})
     set(P4TOOLS_Z3_INCLUDE_DIR ${z3_SOURCE_DIR}/include)
   endif()
 endmacro(p4tools_obtain_z3)

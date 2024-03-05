@@ -1,0 +1,123 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 44010113
+    name: "ingress.tables.prefix|simple_table_1"
+    alias: "prefix|simple_table_1"
+  }
+  match_fields {
+    id: 1
+    name: "dummy_name"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 24698652
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 46184800
+    name: "ingress.tables.@prefix@simple_table_2"
+    alias: "@prefix@simple_table_2"
+  }
+  match_fields {
+    id: 1
+    name: "dummy_name"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 24698652
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 45435893
+    name: "ingress.tables.<>]{]prefix/simple_table_3"
+    alias: "<>]{]prefix/simple_table_3"
+  }
+  match_fields {
+    id: 1
+    name: "dummy_name"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 24698652
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 35450577
+    name: "ingress.tables.!@#$%^&*()_+=-prefix^simple_table_1"
+    alias: "!@#$%^&*()_+=-prefix^simple_table_1"
+  }
+  match_fields {
+    id: 1
+    name: "dummy_name"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 24698652
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41307018
+    name: "ingress.tables.prefix\342\227\225\342\200\277\342\227\225\360\237\230\200\343\203\204simple_table_1"
+    alias: "prefix\342\227\225\342\200\277\342\227\225\360\237\230\200\343\203\204simple_table_1"
+  }
+  match_fields {
+    id: 1
+    name: "dummy_name"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 24698652
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 24698652
+    name: "ingress.tables.increment"
+    alias: "increment"
+  }
+}
+type_info {
+}

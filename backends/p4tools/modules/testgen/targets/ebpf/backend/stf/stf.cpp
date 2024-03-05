@@ -31,8 +31,8 @@
 
 namespace P4Tools::P4Testgen::EBPF {
 
-STF::STF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
-    : TestFramework(std::move(basePath), seed) {}
+STF::STF(const TestBackendConfiguration &testBackendConfiguration)
+    : TestFramework(testBackendConfiguration) {}
 
 inja::json STF::getControlPlane(const TestSpec *testSpec) {
     inja::json controlPlaneJson = inja::json::object();
@@ -98,8 +98,8 @@ inja::json STF::getControlPlaneForTable(const TableMatchMap &matches,
             BUG_CHECK(dataValue->type->width_bits() == maskField->type->width_bits(),
                       "Data value and its mask should have the same bit width.");
             // Using the width from mask - should be same as data
-            auto dataStr = formatBinExpr(dataValue, false, true, false);
-            auto maskStr = formatBinExpr(maskField, false, true, false);
+            auto dataStr = formatBinExpr(dataValue, {false, true, false});
+            auto maskStr = formatBinExpr(maskField, {false, true, false});
             std::string data = "0b";
             for (size_t dataPos = 0; dataPos < dataStr.size(); ++dataPos) {
                 if (maskStr.at(dataPos) == '0') {
@@ -121,8 +121,8 @@ inja::json STF::getControlPlaneForTable(const TableMatchMap &matches,
             BUG_CHECK(dataValue->type->width_bits() == maskField->type->width_bits(),
                       "Data value and its mask should have the same bit width.");
             // Using the width from mask - should be same as data
-            auto dataStr = formatBinExpr(dataValue, false, true, false);
-            auto maskStr = formatBinExpr(maskField, false, true, false);
+            auto dataStr = formatBinExpr(dataValue, {false, true, false});
+            auto maskStr = formatBinExpr(maskField, {false, true, false});
             std::string data = "0b";
             for (size_t dataPos = 0; dataPos < dataStr.size(); ++dataPos) {
                 if (maskStr.at(dataPos) == '0') {
@@ -156,7 +156,7 @@ inja::json STF::getSend(const TestSpec *testSpec) {
     const auto *payload = iPacket->getEvaluatedPayload();
     inja::json sendJson;
     sendJson["ig_port"] = iPacket->getPort();
-    auto dataStr = formatHexExpr(payload, false, true, false);
+    auto dataStr = formatHexExpr(payload, {false, true, false});
     sendJson["pkt"] = dataStr;
     sendJson["pkt_size"] = payload->type->width_bits();
     return sendJson;
@@ -169,11 +169,11 @@ inja::json STF::getVerify(const TestSpec *testSpec) {
         verifyData["eg_port"] = packet.getPort();
         const auto *payload = packet.getEvaluatedPayload();
         const auto *payloadMask = packet.getEvaluatedPayloadMask();
-        auto dataStr = formatHexExpr(payload, false, true, false);
+        auto dataStr = formatHexExpr(payload, {false, true, false});
         if (payloadMask != nullptr) {
             // If a mask is present, construct the packet data  with wildcard `*` where there are
             // non zero nibbles
-            auto maskStr = formatHexExpr(payloadMask, false, true, false);
+            auto maskStr = formatHexExpr(payloadMask, {false, true, false});
             std::string packetData;
             for (size_t dataPos = 0; dataPos < dataStr.size(); ++dataPos) {
                 if (maskStr.at(dataPos) != 'F') {
@@ -228,10 +228,11 @@ void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
-    if (seed) {
-        dataJson["seed"] = *seed;
-    }
 
+    auto optSeed = getTestBackendConfiguration().seed;
+    if (optSeed.has_value()) {
+        dataJson["seed"] = optSeed.value();
+    }
     dataJson["test_id"] = testId;
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
@@ -243,7 +244,9 @@ void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     dataJson["coverage"] = coverageStr.str();
 
     LOG5("STF test back end: emitting testcase:" << std::setw(4) << dataJson);
-    auto incrementedbasePath = basePath;
+    auto optBasePath = getTestBackendConfiguration().fileBasePath;
+    BUG_CHECK(optBasePath.has_value(), "Base path is not set.");
+    auto incrementedbasePath = optBasePath.value();
     incrementedbasePath.concat("_" + std::to_string(testId));
     incrementedbasePath.replace_extension(".stf");
     auto stfFileStream = std::ofstream(incrementedbasePath);
@@ -251,8 +254,8 @@ void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     stfFileStream.flush();
 }
 
-void STF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                     float currentCoverage) {
+void STF::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                          float currentCoverage) {
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }

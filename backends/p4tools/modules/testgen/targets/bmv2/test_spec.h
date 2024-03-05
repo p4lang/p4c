@@ -12,6 +12,7 @@
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
+#include "lib/rtti.h"
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
@@ -55,6 +56,8 @@ class IndexExpression : public TestObject {
                                                   bool doComplete) const override;
 
     [[nodiscard]] cstring getObjectName() const override;
+
+    DECLARE_TYPEINFO(IndexExpression, TestObject);
 };
 
 /* =========================================================================================
@@ -88,6 +91,8 @@ class IndexMap : public TestObject {
 
     /// Return the "writes" to this index map as a
     [[nodiscard]] std::map<big_int, std::pair<int, const IR::Constant *>> unravelMap() const;
+
+    DECLARE_TYPEINFO(IndexMap, TestObject);
 };
 
 /* =========================================================================================
@@ -109,6 +114,8 @@ class Bmv2V1ModelRegisterValue : public IndexMap {
 
     [[nodiscard]] const Bmv2V1ModelRegisterValue *evaluate(const Model &model,
                                                            bool doComplete) const override;
+
+    DECLARE_TYPEINFO(Bmv2V1ModelRegisterValue, IndexMap);
 };
 
 /* =========================================================================================
@@ -130,6 +137,8 @@ class Bmv2V1ModelMeterValue : public IndexMap {
 
     /// @returns whether the meter associated with this meter value object is a direct meter.
     [[nodiscard]] bool isDirectMeter() const;
+
+    DECLARE_TYPEINFO(Bmv2V1ModelMeterValue, IndexMap);
 };
 
 /* =========================================================================================
@@ -162,6 +171,8 @@ class Bmv2V1ModelActionProfile : public TestObject {
 
     [[nodiscard]] const Bmv2V1ModelActionProfile *evaluate(const Model &model,
                                                            bool doComplete) const override;
+
+    DECLARE_TYPEINFO(Bmv2V1ModelActionProfile, TestObject);
 };
 
 /* =========================================================================================
@@ -189,6 +200,8 @@ class Bmv2V1ModelActionSelector : public TestObject {
 
     [[nodiscard]] const Bmv2V1ModelActionSelector *evaluate(const Model &model,
                                                             bool doComplete) const override;
+
+    DECLARE_TYPEINFO(Bmv2V1ModelActionSelector, TestObject);
 };
 
 /* =========================================================================================
@@ -230,6 +243,8 @@ class Bmv2V1ModelCloneInfo : public TestObject {
 
     /// @returns the state that was cloned at the time of generation of this object.
     [[nodiscard]] const ExecutionState &getClonedState() const;
+
+    DECLARE_TYPEINFO(Bmv2V1ModelCloneInfo, TestObject);
 };
 
 /* =========================================================================================
@@ -273,6 +288,8 @@ class Bmv2V1ModelCloneSpec : public TestObject {
     /// @returns the evaluated session id. This means it must be a constant.
     /// The function will throw a bug if this is not the case.
     [[nodiscard]] const IR::Constant *getEvaluatedSessionId() const;
+
+    DECLARE_TYPEINFO(Bmv2V1ModelCloneSpec, TestObject);
 };
 
 /* =========================================================================================
@@ -299,6 +316,8 @@ class MetadataCollection : public TestObject {
 
     /// @returns a metadata field from the collection.
     const IR::Literal *getMetadataField(cstring name);
+
+    DECLARE_TYPEINFO(MetadataCollection, TestObject);
 };
 
 /* =========================================================================================
@@ -326,6 +345,8 @@ class Optional : public TableMatch {
 
     /// @returns whether to add this optional match as an exact match.
     [[nodiscard]] bool addAsExactMatch() const;
+
+    DECLARE_TYPEINFO(Optional, TableMatch);
 };
 
 class Range : public TableMatch {
@@ -351,6 +372,8 @@ class Range : public TableMatch {
     /// @returns the inclusive end of the range. It is expected to be a constant at this point.
     /// A BUG is thrown otherwise.
     [[nodiscard]] const IR::Constant *getEvaluatedHigh() const;
+
+    DECLARE_TYPEINFO(Range, TableMatch);
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2

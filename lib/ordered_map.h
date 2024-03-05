@@ -66,8 +66,8 @@ class ordered_map {
         COMP comp;
         bool operator()(const K *a, const K *b) const { return comp(*a, *b); }
     };
-    using map_alloc =
-        typename ALLOC::template rebind<std::pair<const K *const, list_iterator>>::other;
+    using map_alloc = typename std::allocator_traits<ALLOC>::template rebind_alloc<
+        std::pair<const K *const, list_iterator>>;
     using map_type = std::map<const K *, list_iterator, mapcmp, map_alloc>;
     map_type data_map;
     void init_data_map() {
@@ -253,41 +253,5 @@ class ordered_map {
         data.sort(comp);
     }
 };
-
-template <class K, class T, class V, class Comp, class Alloc>
-inline V get(const ordered_map<K, V, Comp, Alloc> &m, T key, V def = V()) {
-    auto it = m.find(key);
-    if (it != m.end()) return it->second;
-    return def;
-}
-
-template <class K, class T, class V, class Comp, class Alloc>
-inline V *getref(ordered_map<K, V, Comp, Alloc> &m, T key) {
-    auto it = m.find(key);
-    if (it != m.end()) return &it->second;
-    return 0;
-}
-
-template <class K, class T, class V, class Comp, class Alloc>
-inline const V *getref(const ordered_map<K, V, Comp, Alloc> &m, T key) {
-    auto it = m.find(key);
-    if (it != m.end()) return &it->second;
-    return 0;
-}
-
-template <class K, class T, class V, class Comp, class Alloc>
-inline V get(const ordered_map<K, V, Comp, Alloc> *m, T key, V def = V()) {
-    return m ? get(*m, key, def) : def;
-}
-
-template <class K, class T, class V, class Comp, class Alloc>
-inline V *getref(ordered_map<K, V, Comp, Alloc> *m, T key) {
-    return m ? getref(*m, key) : 0;
-}
-
-template <class K, class T, class V, class Comp, class Alloc>
-inline const V *getref(const ordered_map<K, V, Comp, Alloc> *m, T key) {
-    return m ? getref(*m, key) : 0;
-}
 
 #endif /* LIB_ORDERED_MAP_H_ */

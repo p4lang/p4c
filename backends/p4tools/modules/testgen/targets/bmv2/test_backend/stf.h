@@ -2,8 +2,6 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_STF_H_
 
 #include <cstddef>
-#include <filesystem>
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -19,11 +17,11 @@ namespace P4Tools::P4Testgen::Bmv2 {
 /// Extracts information from the @testSpec to emit a STF test case.
 class STF : public Bmv2TestFramework {
  public:
-    explicit STF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt);
+    explicit STF(const TestBackendConfiguration &testBackendConfiguration);
 
     /// Produce an STF test.
-    void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
-                    float currentCoverage) override;
+    void writeTestToFile(const TestSpec *spec, cstring selectedBranches, size_t testId,
+                         float currentCoverage) override;
 
  private:
     /// Emits a test case.

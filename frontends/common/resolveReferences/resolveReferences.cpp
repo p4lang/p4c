@@ -16,35 +16,57 @@ limitations under the License.
 
 #include "resolveReferences.h"
 
-#include <sstream>
-
-#include <boost/range/adaptor/reversed.hpp>
-
-#include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
 
 namespace P4 {
 
-static const std::vector<const IR::IDeclaration *> empty;
-
 ResolutionContext::ResolutionContext() { anyOrder = P4CContext::get().options().isv1(); }
 
-const std::vector<const IR::IDeclaration *> *ResolutionContext::resolve(
-    IR::ID name, P4::ResolutionType type) const {
-    const Context *ctxt = nullptr;
-    while (auto scope = findContext<IR::INamespace>(ctxt)) {
-        auto *rv = lookup(scope, name, type);
-        if (!rv->empty()) return rv;
+const std::vector<const IR::IDeclaration *> &ResolutionContext::memoizeDeclarations(
+    const IR::INamespace *ns) const {
+    std::vector<const IR::IDeclaration *> decls;
+    if (auto nest = ns->to<IR::INestedNamespace>()) {
+        for (const auto *nn : nest->getNestedNamespaces()) {
+            auto nnDecls = nn->getDeclarations();
+            // FIXME: should just insert()
+            for (const auto *decl : *nnDecls) decls.push_back(decl);
+        }
     }
-    if (type == P4::ResolutionType::Any) return lookupMatchKind(name);
-    return &empty;
+
+    auto *nsDecls = ns->getDeclarations();
+    // FIXME: should just insert()
+    for (const auto *decl : *nsDecls) decls.push_back(decl);
+
+    return (namespaceDecls[ns] = std::move(decls));
 }
 
-const std::vector<const IR::IDeclaration *> *ResolutionContext::lookup(
-    const IR::INamespace *current, IR::ID name, P4::ResolutionType type) const {
+std::unordered_multimap<cstring, const IR::IDeclaration *> &ResolutionContext::memoizeDeclsByName(
+    const IR::INamespace *ns) const {
+    auto &namesToDecls = namespaceDeclNames[ns];
+    for (const auto *d : getDeclarations(ns)) namesToDecls.emplace(d->getName().name, d);
+    return namesToDecls;
+}
+
+std::vector<const IR::IDeclaration *> ResolutionContext::resolve(const IR::ID &name,
+                                                                 P4::ResolutionType type) const {
+    const Context *ctxt = nullptr;
+    while (auto scope = findContext<IR::INamespace>(ctxt)) {
+        auto rv = lookup(scope, name, type);
+        if (!rv.empty()) return rv;
+    }
+    if (type == P4::ResolutionType::Any) return lookupMatchKind(name);
+    return {};
+}
+
+std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INamespace *current,
+                                                                const IR::ID &name,
+                                                                P4::ResolutionType type) const {
     LOG2("Trying to resolve in " << current->toString());
 
-    if (auto gen = current->to<IR::IGeneralNamespace>()) {
-        Util::Enumerator<const IR::IDeclaration *> *decls = gen->getDeclsByName(name);
+    if (const auto *gen = current->to<IR::IGeneralNamespace>()) {
+        // FIXME: implement range filtering without enumerator wrappers
+        auto *decls =
+            Util::Enumerator<const IR::IDeclaration *>::createEnumerator(getDeclsByName(gen, name));
         switch (type) {
             case P4::ResolutionType::Any:
                 break;
@@ -93,12 +115,12 @@ const std::vector<const IR::IDeclaration *> *ResolutionContext::lookup(
         }
 
         auto vector = decls->toVector();
-        if (!vector->empty()) {
+        if (!vector.empty()) {
             LOG3("Resolved in " << dbp(current->getNode()));
             return vector;
         }
-    } else if (auto simple = current->to<IR::ISimpleNamespace>()) {
-        auto decl = simple->getDeclByName(name);
+    } else if (const auto *simple = current->to<IR::ISimpleNamespace>()) {
+        const auto *decl = simple->getDeclByName(name);
         if (decl) {
             switch (type) {
                 case P4::ResolutionType::Any:
@@ -139,35 +161,32 @@ const std::vector<const IR::IDeclaration *> *ResolutionContext::lookup(
         }
         if (decl) {
             LOG3("Resolved in " << dbp(current->getNode()));
-            auto result = new std::vector<const IR::IDeclaration *>();
-            result->push_back(decl);
-            return result;
+            return {decl};
         }
     } else {
         BUG_CHECK(current->is<IR::INestedNamespace>(), "Unhandled namespace type %s",
                   current->node_type_name());
     }
-    if (auto nested = current->to<IR::INestedNamespace>()) {
-        // boost bug -- trying to iterate with an adaptor over an unnamed temp crashes
-        auto temp = nested->getNestedNamespaces();
-        for (auto nn : boost::adaptors::reverse(temp)) {
+    if (const auto *nested = current->to<IR::INestedNamespace>()) {
+        auto nestedNamespaces = nested->getNestedNamespaces();
+        for (const auto *nn : Util::iterator_range(nestedNamespaces).reverse()) {
             auto rv = lookup(nn, name, type);
-            if (!rv->empty()) return rv;
+            if (!rv.empty()) return rv;
         }
     }
-    return &empty;
+    return {};
 }
 
-const std::vector<const IR::IDeclaration *> *ResolutionContext::lookupMatchKind(IR::ID name) const {
-    if (auto *global = findContext<IR::P4Program>()) {
-        for (auto *obj : global->objects) {
-            if (auto *match_kind = obj->to<IR::Declaration_MatchKind>()) {
-                auto *rv = lookup(match_kind, name, ResolutionType::Any);
-                if (!rv->empty()) return rv;
+std::vector<const IR::IDeclaration *> ResolutionContext::lookupMatchKind(const IR::ID &name) const {
+    if (const auto *global = findContext<IR::P4Program>()) {
+        for (const auto *obj : global->objects) {
+            if (const auto *match_kind = obj->to<IR::Declaration_MatchKind>()) {
+                auto rv = lookup(match_kind, name, ResolutionType::Any);
+                if (!rv.empty()) return rv;
             }
         }
     }
-    return &empty;
+    return {};
 }
 
 const IR::Vector<IR::Argument> *ResolutionContext::methodArguments(cstring name) const {
@@ -200,13 +219,14 @@ const IR::Vector<IR::Argument> *ResolutionContext::methodArguments(cstring name)
     return nullptr;
 }
 
-const IR::IDeclaration *ResolutionContext::resolveUnique(IR::ID name, P4::ResolutionType type,
+const IR::IDeclaration *ResolutionContext::resolveUnique(const IR::ID &name,
+                                                         P4::ResolutionType type,
                                                          const IR::INamespace *ns) const {
     auto decls = ns ? lookup(ns, name, type) : resolve(name, type);
     // Check overloaded symbols.
     const IR::Vector<IR::Argument> *arguments;
-    if (decls->size() > 1 && (arguments = methodArguments(name))) {
-        decls = Util::Enumerator<const IR::IDeclaration *>::createEnumerator(*decls)
+    if (decls.size() > 1 && (arguments = methodArguments(name))) {
+        decls = Util::Enumerator<const IR::IDeclaration *>::createEnumerator(decls)
                     ->where([arguments](const IR::IDeclaration *d) {
                         auto func = d->to<IR::IFunctional>();
                         if (func == nullptr) return true;
@@ -215,14 +235,14 @@ const IR::IDeclaration *ResolutionContext::resolveUnique(IR::ID name, P4::Resolu
                     ->toVector();
     }
 
-    if (decls->empty()) {
+    if (decls.empty()) {
         ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", name);
         return nullptr;
     }
-    if (decls->size() == 1) return decls->at(0);
+    if (decls.size() == 1) return decls.front();
 
     ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", name);
-    for (auto a : *decls) ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
+    for (const auto *a : decls) ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
     return nullptr;
 }
 
@@ -232,14 +252,14 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
     const Context *ctxt = nullptr;
     if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 2) {
         // looking up a matchType in a key, so need to do a special lookup
-        auto *decls = lookupMatchKind(path->name);
-        if (decls->empty()) {
+        auto decls = lookupMatchKind(path->name);
+        if (decls.empty()) {
             ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", path->name);
-        } else if (decls->size() != 1) {
+        } else if (decls.size() != 1) {
             ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", path->name);
-            for (auto a : *decls) ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
+            for (const auto *a : decls) ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
         } else {
-            result = decls->at(0);
+            result = decls.front();
         }
     } else {
         ResolutionType rtype = ResolutionType::Any;
@@ -296,14 +316,11 @@ const IR::IDeclaration *ResolveReferences::resolvePath(const IR::Path *path, boo
 
 void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
     if (!checkShadow) return;
-    std::map<cstring, const IR::Node *> prev_in_scope;  // check for shadowing within a scope
-    auto decls = ns->getDeclarations();
-    if (auto nest = ns->to<IR::INestedNamespace>()) {
-        // boost bug -- trying to iterate with an adaptor over an unnamed temp crashes
-        auto temp = nest->getNestedNamespaces();
-        for (auto nn : boost::adaptors::reverse(temp)) decls = nn->getDeclarations()->concat(decls);
-    }
-    for (auto *decl : *decls) {
+    // FIXME: Likely the map is small, can use flat_map or something similar
+    std::unordered_map<cstring, const IR::Node *>
+        prev_in_scope;  // check for shadowing within a scope
+    auto decls = getDeclarations(ns);
+    for (const auto *decl : decls) {
         const IR::Node *node = decl->getNode();
         if (node->is<IR::StructField>()) continue;
 
@@ -317,9 +334,9 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
         else if (!node->is<IR::Method>() && !node->is<IR::Function>())
             prev_in_scope[decl->getName()] = node;
         auto prev = resolve(decl->getName(), ResolutionType::Any);
-        if (prev->empty()) continue;
+        if (prev.empty()) continue;
 
-        for (auto p : *prev) {
+        for (const auto *p : prev) {
             const IR::Node *pnode = p->getNode();
             if (pnode == node) continue;
             if ((pnode->is<IR::Method>() || pnode->is<IR::Type_Extern>() ||
@@ -335,8 +352,8 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
 
             // parameter shadowing
             if (node->is<IR::Declaration>() && !node->is<IR::Parameter>()) {
-                auto *decl_node = node->to<IR::Declaration>();
-                if (auto *param = pnode->to<IR::Parameter>())
+                const auto *decl_node = node->to<IR::Declaration>();
+                if (const auto *param = pnode->to<IR::Parameter>())
                     if (decl_node->name.name == param->name.name)
                         ::error(ErrorType::WARN_SHADOWING,
                                 "declaration of '%1%' shadows a parameter '%2%'", node, pnode);
@@ -349,7 +366,8 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
 
 Visitor::profile_t ResolveReferences::init_apply(const IR::Node *node) {
     anyOrder = refMap->isV1();
-    if (!refMap->checkMap(node)) refMap->clear();
+    // Check shadowing even if the program map is up-to-date.
+    if (!refMap->checkMap(node) || checkShadow) refMap->clear();
     return Inspector::init_apply(node);
 }
 
@@ -378,16 +396,16 @@ bool ResolveReferences::preorder(const IR::This *pointer) {
 bool ResolveReferences::preorder(const IR::KeyElement *ke) {
     visit(ke->annotations, "annotations");
     visit(ke->expression, "expression");
-    auto *decls = lookupMatchKind(ke->matchType->path->name);
-    if (decls->empty()) {
+    auto decls = lookupMatchKind(ke->matchType->path->name);
+    if (decls.empty()) {
         ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", ke->matchType->path->name);
         refMap->usedName(ke->matchType->path->name.name);
-    } else if (decls->size() != 1) {
+    } else if (decls.size() != 1) {
         ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations",
                 ke->matchType->path->name);
-        for (auto a : *decls) ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
+        for (const auto *a : decls) ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
     } else {
-        refMap->setDeclaration(ke->matchType->path, decls->at(0));
+        refMap->setDeclaration(ke->matchType->path, decls.front());
     }
     return false;
 }

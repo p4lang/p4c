@@ -25,12 +25,12 @@ namespace P4 {
 const IR::Node *CreateBuiltins::preorder(IR::P4Program *program) {
     auto decls = program->getDeclsByName(P4::P4CoreLibrary::instance().noAction.str());
     auto vec = decls->toVector();
-    if (vec->empty()) return program;
-    if (vec->size() > 1) {
+    if (vec.empty()) return program;
+    if (vec.size() > 1) {
         ::error(ErrorType::ERR_MODEL, "Multiple declarations of %1%: %2% %3%",
-                P4::P4CoreLibrary::instance().noAction.str(), vec->at(0), vec->at(1));
+                P4::P4CoreLibrary::instance().noAction.str(), vec[0], vec[1]);
     }
-    globalNoAction = vec->at(0);
+    globalNoAction = vec[0];
     return program;
 }
 

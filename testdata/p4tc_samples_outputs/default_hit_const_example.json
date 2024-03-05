@@ -1,7 +1,6 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "default_hit_const_example",
-  "id" : 1,
   "tables" : [
     {
       "name" : "MainControlImpl/set_ct_options",

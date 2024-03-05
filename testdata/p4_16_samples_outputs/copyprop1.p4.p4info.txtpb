@@ -1,0 +1,45 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 44659798
+    name: "MyIngress.t1"
+    alias: "t1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.payload.x"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 23754841
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 23754841
+    name: "MyIngress.a1"
+    alias: "a1"
+  }
+}
+type_info {
+}

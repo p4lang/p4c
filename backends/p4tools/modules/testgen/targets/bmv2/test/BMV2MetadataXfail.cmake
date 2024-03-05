@@ -71,6 +71,12 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-metadata"
+  "Unsupported type argument for Value Set"
+  pvs-nested-struct.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-metadata"
   "Computations are not supported in update_checksum"
 )
 

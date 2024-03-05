@@ -3,20 +3,14 @@
 #include <cmath>
 #include <map>
 #include <tuple>
-#include <typeindex>
 #include <vector>
-
-#include <boost/core/enable_if.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
-#include <boost/multiprecision/detail/default_ops.hpp>
-#include <boost/multiprecision/detail/et_ops.hpp>
-#include <boost/multiprecision/number.hpp>
-#include <boost/multiprecision/traits/explicit_conversion.hpp>
 
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
+#include "ir/visitor.h"
 #include "lib/exceptions.h"
+#include "lib/rtti.h"
 
 namespace IR {
 
@@ -46,10 +40,10 @@ const Constant *getConstant(const Type *type, big_int v, const Util::SourceInfo 
         return new Constant(srcInfo, type, v);
     }
     // Constants are interned. Keys in the intern map are pairs of types and values.
-    using key_t = std::tuple<int, std::type_index, bool, big_int>;
+    using key_t = std::tuple<int, RTTI::TypeId, bool, big_int>;
     static std::map<key_t, const Constant *> CONSTANTS;
 
-    auto *&result = CONSTANTS[{tb->width_bits(), typeid(*type), tb->isSigned, v}];
+    auto *&result = CONSTANTS[{tb->width_bits(), type->typeId(), tb->isSigned, v}];
     if (result == nullptr) {
         result = new Constant(srcInfo, tb, v);
     }
@@ -270,6 +264,38 @@ std::vector<const Expression *> flattenListOrStructExpression(const Expression *
     }
     P4C_UNIMPLEMENTED("Unsupported list-like expression %1% of type %2%.", listLikeExpr,
                       listLikeExpr->node_type_name());
+}
+
+template <typename Stmts>
+const IR::Node *inlineBlockImpl(const Transform &t, Stmts &&stmts) {
+    if (stmts.size() == 1) {
+        // it could also be a declaration, and it that case, we need to wrap it in a block anyway
+        if (auto *stmt = (*stmts.begin())->template to<IR::Statement>()) {
+            return stmt;
+        }
+    }
+    if (t.getParent<IR::BlockStatement>()) {
+        return new IR::IndexedVector<IR::StatOrDecl>(std::forward<Stmts>(stmts));
+    }
+    Util::SourceInfo srcInfo;
+    if (stmts.size() > 0) {  // no .empty in initializer_list!
+        srcInfo = (*stmts.begin())->srcInfo;
+    }
+    return new IR::BlockStatement(srcInfo,
+                                  IR::IndexedVector<IR::StatOrDecl>(std::forward<Stmts>(stmts)));
+}
+
+const IR::Node *inlineBlock(const Transform &t,
+                            std::initializer_list<const IR::StatOrDecl *> stmts) {
+    return inlineBlockImpl(t, stmts);
+}
+
+const IR::Node *inlineBlock(const Transform &t, const IR::IndexedVector<IR::StatOrDecl> &stmts) {
+    return inlineBlockImpl(t, stmts);
+}
+
+const IR::Node *inlineBlock(const Transform &t, IR::IndexedVector<IR::StatOrDecl> &&stmts) {
+    return inlineBlockImpl(t, std::move(stmts));
 }
 
 }  // namespace IR

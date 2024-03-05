@@ -2,6 +2,8 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_OPTIONS_H_
 
 #include <cstdint>
+#include <filesystem>
+#include <optional>
 #include <set>
 #include <string>
 
@@ -35,7 +37,7 @@ class TestgenOptions : public AbstractP4cToolOptions {
     static TestgenOptions &get();
 
     /// Directory for generated tests. Defaults to PWD.
-    cstring outputDir = nullptr;
+    std::optional<std::filesystem::path> outputDir = std::nullopt;
 
     /// Fail on unimplemented features instead of trying the next branch
     bool strict = false;
@@ -68,8 +70,14 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// TestGen will consider these when choosing input and output ports.
     std::vector<std::pair<int, int>> permittedPortRanges;
 
+    /// Skip generating a control plane entry for the entities in this list.
+    std::set<cstring> skippedControlPlaneEntities;
+
     /// Enforces the test generation of tests with mandatory output packet.
-    bool withOutputPacket = false;
+    bool outputPacketOnly = false;
+
+    /// Enforces the test generation of tests with mandatory dropped packet.
+    bool droppedPacketOnly = false;
 
     /// Add conditions defined in assert/assume to the path conditions.
     /// Only tests which satisfy these conditions can be generated. This is active by default.
@@ -89,6 +97,10 @@ class TestgenOptions : public AbstractP4cToolOptions {
 
     /// Specifies minimum coverage that needs to be achieved for P4Testgen to exit successfully.
     float minCoverage = 0;
+
+    /// The base name of the tests which are generated.
+    /// Defaults to the name of the input program, if provided.
+    std::optional<cstring> testBaseName;
 
     const char *getIncludePath() override;
 

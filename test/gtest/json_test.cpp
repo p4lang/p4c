@@ -16,9 +16,9 @@ limitations under the License.
 
 #include "lib/json.h"
 
-#include <sstream>
+#include <gtest/gtest.h>
 
-#include "gtest/gtest.h"
+#include <sstream>
 
 namespace Util {
 

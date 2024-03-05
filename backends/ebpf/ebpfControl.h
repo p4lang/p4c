@@ -93,6 +93,8 @@ class EBPFControl : public EBPFObject {
 
  protected:
     void scanConstants();
+
+    DECLARE_TYPEINFO(EBPFControl, EBPFObject);
 };
 
 }  // namespace EBPF

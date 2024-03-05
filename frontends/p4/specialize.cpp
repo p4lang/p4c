@@ -279,11 +279,15 @@ const IR::Node *Specialize::postorder(IR::Declaration_Instance *decl) {
     return instantiate(replacement);
 }
 
-SpecializeAll::SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap) : PassRepeated({}) {
-    passes.emplace_back(new ConstantFolding(refMap, typeMap));
+SpecializeAll::SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap,
+                             ConstantFoldingPolicy *constantFoldingPolicy)
+    : PassRepeated({}) {
+    passes.emplace_back(new ConstantFolding(refMap, typeMap, constantFoldingPolicy));
     passes.emplace_back(new TypeChecking(refMap, typeMap));
     passes.emplace_back(new FindSpecializations(&specMap));
     passes.emplace_back(new Specialize(&specMap));
+    passes.emplace_back(new ResolveReferences(refMap));
+    passes.emplace_back(new TypeInference(refMap, typeMap, false));  // more casts may be needed
     passes.emplace_back(new RemoveAllUnusedDeclarations(refMap));
     specMap.refMap = refMap;
     specMap.typeMap = typeMap;

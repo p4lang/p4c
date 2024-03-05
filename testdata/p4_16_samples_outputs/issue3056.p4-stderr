@@ -1,1 +1,4 @@
+issue3056.p4(6): [--Wwarn=unused] warning: Control compute is not used; removing
+control compute() {
+        ^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

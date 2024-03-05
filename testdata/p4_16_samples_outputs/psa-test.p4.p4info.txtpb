@@ -1,0 +1,19 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+value_sets {
+  preamble {
+    id: 53184931
+    name: "MyIP.pvs"
+    alias: "pvs"
+  }
+  match {
+    id: 1
+    bitwidth: 16
+    match_type: EXACT
+  }
+  size: 4
+}

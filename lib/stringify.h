@@ -83,5 +83,6 @@ cstring toString(const void *value);
 cstring printf_format(const char *fmt_str, ...);
 // vprintf into a string
 cstring vprintf_format(const char *fmt_str, va_list ap);
+char DigitToChar(int digit);
 }  // namespace Util
 #endif /* LIB_STRINGIFY_H_ */

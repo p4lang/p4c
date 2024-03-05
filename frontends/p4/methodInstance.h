@@ -34,6 +34,8 @@ class InstanceBase : public ICastable {
     /// Substitution of the type parameters
     /// This may not be filled in if we resolved with 'incomplete'
     TypeVariableSubstitution typeSubstitution;
+
+    DECLARE_TYPEINFO(InstanceBase);
 };
 
 /**
@@ -113,6 +115,8 @@ class MethodInstance : public InstanceBase {
         return originalMethodType->parameters;
     }
     const IR::ParameterList *getActualParameters() const { return actualMethodType->parameters; }
+
+    DECLARE_TYPEINFO(MethodInstance, InstanceBase);
 };
 
 /** Represents the call of an Apply method on an object that implements IApply:
@@ -130,8 +134,10 @@ class ApplyMethod final : public MethodInstance {
 
  public:
     const IR::IApply *applyObject;
-    bool isApply() const { return true; }
+    bool isApply() const override { return true; }
     bool isTableApply() const { return object->is<IR::P4Table>(); }
+
+    DECLARE_TYPEINFO(ApplyMethod, MethodInstance);
 };
 
 /** Represents a method call on an extern object */
@@ -162,6 +168,8 @@ class ExternMethod final : public MethodInstance {
     // If this method is abstract, will consist of (just) the concrete implementation,
     // otherwise will consist of those methods that are @synchronous with this
     std::vector<const IR::IDeclaration *> mayCall() const;
+
+    DECLARE_TYPEINFO(ExternMethod, MethodInstance);
 };
 
 /** Represents the call of an extern function */
@@ -179,6 +187,8 @@ class ExternFunction final : public MethodInstance {
 
  public:
     const IR::Method *method;
+
+    DECLARE_TYPEINFO(ExternFunction, MethodInstance);
 };
 
 /** Represents the direct call of an action; This also works for
@@ -201,6 +211,8 @@ class ActionCall final : public MethodInstance {
     /// Generate a version of the action where the parameters in the
     /// substitution have been replaced with the arguments.
     const IR::P4Action *specialize(ReferenceMap *refMap) const;
+
+    DECLARE_TYPEINFO(ActionCall, MethodInstance);
 };
 
 /**
@@ -221,6 +233,8 @@ class FunctionCall final : public MethodInstance {
 
  public:
     const IR::Function *function;
+
+    DECLARE_TYPEINFO(FunctionCall, MethodInstance);
 };
 
 /** This class represents the call of a built-in method:
@@ -244,6 +258,8 @@ class BuiltInMethod final : public MethodInstance {
  public:
     const IR::ID name;
     const IR::Expression *appliedTo;  // object is an expression
+
+    DECLARE_TYPEINFO(BuiltInMethod, MethodInstance);
 };
 
 ////////////////////////////////////////////////////
@@ -267,6 +283,7 @@ class ConstructorCall : public InstanceBase {
     const IR::ParameterList *constructorParameters = nullptr;
     static ConstructorCall *resolve(const IR::ConstructorCallExpression *cce,
                                     DeclarationLookup *refMap, TypeMap *typeMap);
+    DECLARE_TYPEINFO(ConstructorCall, InstanceBase);
 };
 
 /** Represents a constructor call that allocates an Extern object */
@@ -282,6 +299,8 @@ class ExternConstructorCall : public ConstructorCall {
  public:
     const IR::Type_Extern *type;    // actual extern declaration in program IR
     const IR::Method *constructor;  // that is being invoked
+
+    DECLARE_TYPEINFO(ExternConstructorCall, ConstructorCall);
 };
 
 /** Represents a constructor call that allocates an object that implements IContainer.
@@ -296,6 +315,8 @@ class ContainerConstructorCall : public ConstructorCall {
 
  public:
     const IR::IContainer *container;  // actual container in program IR
+
+    DECLARE_TYPEINFO(ContainerConstructorCall, ConstructorCall);
 };
 
 /////////////////////////////////////////////
@@ -324,6 +345,8 @@ class Instantiation : public InstanceBase {
 
     static Instantiation *resolve(const IR::Declaration_Instance *instance,
                                   DeclarationLookup *refMap, TypeMap *typeMap);
+
+    DECLARE_TYPEINFO(Instantiation, InstanceBase);
 };
 
 class ExternInstantiation : public Instantiation {
@@ -338,6 +361,8 @@ class ExternInstantiation : public Instantiation {
         substitute();
     }
     const IR::Type_Extern *type;
+
+    DECLARE_TYPEINFO(ExternInstantiation, Instantiation);
 };
 
 class PackageInstantiation : public Instantiation {
@@ -350,6 +375,8 @@ class PackageInstantiation : public Instantiation {
         substitute();
     }
     const IR::Type_Package *package;
+
+    DECLARE_TYPEINFO(PackageInstantiation, Instantiation);
 };
 
 class ParserInstantiation : public Instantiation {
@@ -362,6 +389,8 @@ class ParserInstantiation : public Instantiation {
         substitute();
     }
     const IR::P4Parser *parser;
+
+    DECLARE_TYPEINFO(ParserInstantiation, Instantiation);
 };
 
 class ControlInstantiation : public Instantiation {
@@ -374,6 +403,8 @@ class ControlInstantiation : public Instantiation {
         substitute();
     }
     const IR::P4Control *control;
+
+    DECLARE_TYPEINFO(ControlInstantiation, Instantiation);
 };
 
 }  // namespace P4

@@ -37,6 +37,11 @@ bool FindRedundantParsers::preorder(const IR::P4Parser *parser) {
 }
 
 const IR::Node *EliminateSubparserCalls::postorder(IR::MethodCallStatement *mcs) {
+    // Only remove redundant parser applications in parser states. Parser applications
+    // made in illegal locations (such as control blocks) will be detected by and error
+    // will be reported in later passes (i.e. DiscoverInlining).
+    if (!findContext<IR::ParserState>()) return mcs;
+
     auto mi = MethodInstance::resolve(mcs->methodCall, refMap, typeMap, true);
     if (!mi->isApply()) return mcs;
 

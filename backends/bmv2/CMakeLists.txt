@@ -83,7 +83,7 @@ set (BMV2_BACKEND_COMMON_HDRS
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)
 
 add_library(bmv2backend STATIC ${BMV2_BACKEND_COMMON_SRCS})
-add_dependencies(bmv2backend ir-generated frontend)
+target_link_libraries(bmv2backend ir-generated frontend)
 
 add_executable(p4c-bm2-ss ${BMV2_SIMPLE_SWITCH_SRCS})
 target_link_libraries (p4c-bm2-ss bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
@@ -120,7 +120,6 @@ add_dependencies(p4c_driver linkbmv2)
 
 
 # Tests
-
 set(BMV2_DRIVER ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-test.py)
 set(BMV2_PTF_DRIVER "$([[ $EUID = 0 ]] || echo 'sudo -E') ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-ptf-test.py")
 

@@ -33,16 +33,13 @@ namespace TC {
 struct IntrospectionInfo {
     cstring schemaVersion;
     cstring pipelineName;
-    unsigned int pipelineId;
     IntrospectionInfo() {
         schemaVersion = nullptr;
         pipelineName = nullptr;
-        pipelineId = 0;
     }
     void initIntrospectionInfo(IR::TCPipeline *tcPipeline) {
         schemaVersion = "1.0.0";
         pipelineName = tcPipeline->pipelineName;
-        pipelineId = tcPipeline->pipelineId;
     }
 };
 

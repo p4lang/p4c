@@ -1,8 +1,6 @@
 #ifndef TESTGEN_TARGETS_EBPF_PROGRAM_INFO_H_
 #define TESTGEN_TARGETS_EBPF_PROGRAM_INFO_H_
 
-#include <stddef.h>
-
 #include <vector>
 
 #include "ir/ir.h"
@@ -29,8 +27,11 @@ class EBPFProgramInfo : public ProgramInfo {
                                                           size_t blockIdx) const;
 
  public:
-    EBPFProgramInfo(const IR::P4Program *program,
+    EBPFProgramInfo(const TestgenCompilerResult &compilerResult,
                     ordered_map<cstring, const IR::Type_Declaration *> inputBlocks);
+
+    /// @see ProgramInfo::getArchSpec
+    [[nodiscard]] const ArchSpec &getArchSpec() const override;
 
     /// @returns the programmable blocks of the program. Should be 6.
     [[nodiscard]] const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks()
@@ -43,6 +44,11 @@ class EBPFProgramInfo : public ProgramInfo {
     [[nodiscard]] const IR::Expression *dropIsActive() const override;
 
     [[nodiscard]] const IR::Type_Bits *getParserErrorType() const override;
+
+    /// @see ProgramInfo::getArchSpec
+    static const ArchSpec ARCH_SPEC;
+
+    DECLARE_TYPEINFO(EBPFProgramInfo, ProgramInfo);
 };
 
 }  // namespace P4Tools::P4Testgen::EBPF

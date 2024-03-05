@@ -18,6 +18,7 @@ and limitations under the License.
 #define P4C_PNA_H
 
 #include <stdbool.h>
+#include "crc32.h"
 
 // pna.p4 information
 
@@ -78,6 +79,7 @@ struct pna_global_metadata {
     PortId_t         egress_port;
     enum MirrorType  mirror_type;
     MirrorSlotId_t   mirror_slot_id;
+    ParserError_t    parser_error;
     MirrorSessionId_t mirror_session_id;
     __u8             mark;
     bool             pass_to_kernel; // internal metadata, forces sending packet up to kernel stack

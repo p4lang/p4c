@@ -28,7 +28,7 @@ namespace P4 {
 class SymbolicValueFactory;
 
 // Base class for all abstract values
-class SymbolicValue : public IHasDbPrint {
+class SymbolicValue : public IHasDbPrint, public ICastable {
     static unsigned crtid;
 
  protected:
@@ -38,26 +38,6 @@ class SymbolicValue : public IHasDbPrint {
     const unsigned id;
     const IR::Type *type;
     virtual bool isScalar() const = 0;
-    virtual void dbprint(std::ostream &out) const = 0;
-    template <typename T>
-    T *to() {
-        return dynamic_cast<T *>(this);
-    }
-    template <typename T>
-    T *checkedTo() {
-        auto result = dynamic_cast<T *>(this);
-        CHECK_NULL(result);
-        return result;
-    }
-    template <typename T>
-    const T *to() const {
-        auto result = dynamic_cast<const T *>(this);
-        return result;
-    }
-    template <typename T>
-    bool is() const {
-        return dynamic_cast<const T *>(this) != nullptr;
-    }
     virtual SymbolicValue *clone() const = 0;
     virtual void setAllUnknown() = 0;
     virtual void assign(const SymbolicValue *other) = 0;
@@ -67,6 +47,8 @@ class SymbolicValue : public IHasDbPrint {
     virtual bool equals(const SymbolicValue *other) const = 0;
     // True if some parts of this value are definitely uninitialized
     virtual bool hasUninitializedParts() const = 0;
+
+    DECLARE_TYPEINFO(SymbolicValue);
 };
 
 // Creates values from type declarations
@@ -207,6 +189,8 @@ class SymbolicError : public SymbolicValue {
     }
     virtual cstring message() const = 0;
     bool hasUninitializedParts() const override { return false; }
+
+    DECLARE_TYPEINFO(SymbolicError, SymbolicValue);
 };
 
 class SymbolicException : public SymbolicError {
@@ -222,6 +206,8 @@ class SymbolicException : public SymbolicError {
         return str.str();
     }
     bool equals(const SymbolicValue *other) const override;
+
+    DECLARE_TYPEINFO(SymbolicException, SymbolicError);
 };
 
 class SymbolicStaticError : public SymbolicError {
@@ -233,6 +219,8 @@ class SymbolicStaticError : public SymbolicError {
     void dbprint(std::ostream &out) const override { out << "Error: " << msg; }
     cstring message() const override { return msg; }
     bool equals(const SymbolicValue *other) const override;
+
+    DECLARE_TYPEINFO(SymbolicStaticError, SymbolicError);
 };
 
 class ScalarValue : public SymbolicValue {
@@ -272,6 +260,8 @@ class ScalarValue : public SymbolicValue {
         return ValueState::NotConstant;
     }
     bool hasUninitializedParts() const override { return state == ValueState::Uninitialized; }
+
+    DECLARE_TYPEINFO(ScalarValue, SymbolicValue);
 };
 
 class SymbolicVoid : public SymbolicValue {
@@ -291,6 +281,8 @@ class SymbolicVoid : public SymbolicValue {
     }
     bool equals(const SymbolicValue *other) const override { return other == instance; }
     bool hasUninitializedParts() const override { return false; }
+
+    DECLARE_TYPEINFO(SymbolicVoid, SymbolicValue);
 };
 
 class SymbolicBool final : public ScalarValue {
@@ -321,6 +313,8 @@ class SymbolicBool final : public ScalarValue {
     void assign(const SymbolicValue *other) override;
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
+
+    DECLARE_TYPEINFO(SymbolicBool, ScalarValue);
 };
 
 class SymbolicInteger final : public ScalarValue {
@@ -348,6 +342,8 @@ class SymbolicInteger final : public ScalarValue {
     void assign(const SymbolicValue *other) override;
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
+
+    DECLARE_TYPEINFO(SymbolicInteger, ScalarValue);
 };
 
 class SymbolicVarbit final : public ScalarValue {
@@ -364,6 +360,8 @@ class SymbolicVarbit final : public ScalarValue {
     void assign(const SymbolicValue *other) override;
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
+
+    DECLARE_TYPEINFO(SymbolicVarbit, ScalarValue);
 };
 
 // represents enum, error, and match_kind
@@ -386,6 +384,8 @@ class SymbolicEnum final : public ScalarValue {
     void assign(const SymbolicValue *other) override;
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
+
+    DECLARE_TYPEINFO(SymbolicEnum, ScalarValue);
 };
 
 class SymbolicStruct : public SymbolicValue {
@@ -413,6 +413,8 @@ class SymbolicStruct : public SymbolicValue {
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
     bool hasUninitializedParts() const override;
+
+    DECLARE_TYPEINFO(SymbolicStruct, SymbolicValue);
 };
 
 class SymbolicHeader : public SymbolicStruct {
@@ -429,6 +431,8 @@ class SymbolicHeader : public SymbolicStruct {
     void dbprint(std::ostream &out) const override;
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
+
+    DECLARE_TYPEINFO(SymbolicHeader, SymbolicStruct);
 };
 
 class SymbolicHeaderUnion : public SymbolicStruct {
@@ -444,6 +448,8 @@ class SymbolicHeaderUnion : public SymbolicStruct {
     void dbprint(std::ostream &out) const override;
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
+
+    DECLARE_TYPEINFO(SymbolicHeaderUnion, SymbolicStruct);
 };
 
 class SymbolicArray final : public SymbolicValue {
@@ -480,6 +486,8 @@ class SymbolicArray final : public SymbolicValue {
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
     bool hasUninitializedParts() const override;
+
+    DECLARE_TYPEINFO(SymbolicArray, SymbolicValue);
 };
 
 // Represents any element from a stack
@@ -503,6 +511,8 @@ class AnyElement final : public SymbolicHeader {
     bool equals(const SymbolicValue *other) const override;
     SymbolicValue *collapse() const;
     bool hasUninitializedParts() const override { BUG("Should not be called"); }
+
+    DECLARE_TYPEINFO(AnyElement, SymbolicHeader);
 };
 
 class SymbolicTuple final : public SymbolicValue {
@@ -529,6 +539,8 @@ class SymbolicTuple final : public SymbolicValue {
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
     bool hasUninitializedParts() const override;
+
+    DECLARE_TYPEINFO(SymbolicTuple, SymbolicValue);
 };
 
 // Some extern value of an unknown type
@@ -545,6 +557,8 @@ class SymbolicExtern : public SymbolicValue {
     bool merge(const SymbolicValue *) override { return false; }
     bool equals(const SymbolicValue *other) const override;
     bool hasUninitializedParts() const override { return false; }
+
+    DECLARE_TYPEINFO(SymbolicExtern, SymbolicValue);
 };
 
 // Models an extern of type packet_in
@@ -576,6 +590,8 @@ class SymbolicPacketIn final : public SymbolicExtern {
     void advance(unsigned width) { minimumStreamOffset += width; }
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
+
+    DECLARE_TYPEINFO(SymbolicPacketIn, SymbolicExtern);
 };
 
 }  // namespace P4

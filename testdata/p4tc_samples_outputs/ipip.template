@@ -1,0 +1,30 @@
+#!/bin/bash -x
+
+set -e
+
+TC="tc"
+$TC p4template create pipeline/ipip numtables 1
+
+$TC p4template create action/ipip/Main/set_ipip actid 1 \
+	param src type ipv4 \
+	param dst type ipv4 \
+	param port type dev
+$TC p4template update action/ipip/Main/set_ipip state active
+
+$TC p4template create action/ipip/Main/set_nh actid 2 \
+	param dmac type macaddr \
+	param port type dev
+$TC p4template update action/ipip/Main/set_nh state active
+
+$TC p4template create action/ipip/Main/drop actid 3
+$TC p4template update action/ipip/Main/drop state active
+
+$TC p4template create table/ipip/Main/fwd_table \
+	tblid 1 \
+	type exact \
+	keysz 32 nummasks 8 tentries 2048 \
+	table_acts act name ipip/Main/set_ipip \
+	act name ipip/Main/set_nh \
+	act name ipip/Main/drop
+$TC p4template update table/ipip/Main/fwd_table default_miss_action action ipip/Main/drop
+$TC p4template update pipeline/ipip state ready

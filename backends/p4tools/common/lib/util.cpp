@@ -145,13 +145,8 @@ std::vector<const IR::Type_Declaration *> argumentsToTypeDeclarations(
 
 const IR::IDeclaration *findProgramDecl(const IR::IGeneralNamespace *ns, const IR::Path *path) {
     auto name = path->name.name;
-    const auto *decls = ns->getDeclsByName(name)->toVector();
-    if (!decls->empty()) {
-        // TODO: Figure out what to do with multiple results. Maybe return all of them and
-        // let the caller sort it out?
-        BUG_CHECK(decls->size() == 1, "Handling of overloaded names not implemented");
-        return decls->at(0);
-    }
+    auto *decl = ns->getDeclsByName(name)->singleOrDefault();
+    if (decl != nullptr) return decl;
     BUG("Variable %1% not found in the available namespaces.", path);
 }
 

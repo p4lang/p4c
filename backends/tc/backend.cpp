@@ -271,6 +271,72 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
     }
 }
 
+void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *tabledef) {
+    // Check if there are const entries.
+    auto entriesList = t->getEntries();
+    if (entriesList == nullptr) return;
+    auto keys = t->getKey();
+    if (keys == nullptr) {
+        return;
+    }
+    for (auto e : entriesList->entries) {
+        auto keyset = e->getKeys();
+        if (keyset->components.size() != keys->keyElements.size()) {
+            ::error(ErrorType::ERR_INVALID,
+                    "No of keys in const_entries should be same as no of keys in the table.");
+            return;
+        }
+        ordered_map<cstring, cstring> keyList;
+        for (size_t itr = 0; itr < keyset->components.size(); itr++) {
+            auto keyElement = keys->keyElements.at(itr);
+            auto keyString = keyElement->expression->toString();
+            auto annotations = keyElement->getAnnotations();
+            if (annotations) {
+                if (auto anno = annotations->getSingle("name")) {
+                    keyString = anno->expr.at(0)->to<IR::StringLiteral>()->value;
+                }
+            }
+            auto keySetElement = keyset->components.at(itr);
+            auto key = keySetElement->toString();
+            if (keySetElement->is<IR::DefaultExpression>()) {
+                key = "default";
+            } else if (keySetElement->is<IR::Constant>()) {
+                big_int kValue = keySetElement->to<IR::Constant>()->value;
+                int kBase = keySetElement->to<IR::Constant>()->base;
+                std::stringstream value;
+                std::deque<char> buf;
+                do {
+                    const int digit = static_cast<int>(static_cast<big_int>(kValue % kBase));
+                    kValue = kValue / kBase;
+                    buf.push_front(Util::DigitToChar(digit));
+                } while (kValue > 0);
+                for (auto ch : buf) value << ch;
+                key = value.str().c_str();
+            } else if (keySetElement->is<IR::Range>()) {
+                auto left = keySetElement->to<IR::Range>()->left;
+                auto right = keySetElement->to<IR::Range>()->right;
+                auto operand = keySetElement->to<IR::Range>()->getStringOp();
+                key = left->toString() + operand + right->toString();
+            } else if (keySetElement->is<IR::Mask>()) {
+                auto left = keySetElement->to<IR::Mask>()->left;
+                auto right = keySetElement->to<IR::Mask>()->right;
+                auto operand = keySetElement->to<IR::Mask>()->getStringOp();
+                key = left->toString() + operand + right->toString();
+            }
+            keyList.emplace(keyString, key);
+        }
+        cstring actionName;
+        if (const auto *path = e->action->to<IR::PathExpression>())
+            actionName = path->toString();
+        else if (const auto *mce = e->action->to<IR::MethodCallExpression>())
+            actionName = mce->method->toString();
+        else
+            BUG("Unexpected entry action type.");
+        IR::TCEntry *constEntry = new IR::TCEntry(actionName, keyList);
+        tabledef->addConstEntries(constEntry);
+    }
+}
+
 void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTable *tabledef) {
     auto defaultAction = t->getDefaultAction();
     if (defaultAction == nullptr || !defaultAction->is<IR::MethodCallExpression>()) return;
@@ -287,6 +353,30 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                     t->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
                 if (defaultActionProperty->isConstant) {
                     tabledef->setDefaultMissConst(true);
+                }
+                bool directionParamPresent = false;
+                auto paramList = actionCall->action->getParameters();
+                for (auto param : paramList->parameters) {
+                    if (param->direction != IR::Direction::None) directionParamPresent = true;
+                }
+                if (!directionParamPresent) {
+                    auto i = 0;
+                    for (auto param : paramList->parameters) {
+                        auto defaultParam = new IR::TCDefaultActionParam();
+                        defaultParam->setParamName(param->name.originalName);
+                        auto defaultArg = methodexp->arguments->at(i++);
+                        if (auto constVal = defaultArg->expression->to<IR::Constant>()) {
+                            bool sign;
+                            if (const IR::Type_Bits *tb = constVal->type->to<IR::Type_Bits>()) {
+                                sign = tb->isSigned;
+                            } else {
+                                sign = false;
+                            }
+                            defaultParam->setDefaultValue(
+                                Util::toString(constVal->value, 0, sign, constVal->base));
+                        }
+                        tabledef->defaultMissActionParams.push_back(defaultParam);
+                    }
                 }
             }
         }
@@ -450,6 +540,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         updateDefaultHitAction(t, tableDefinition);
         updateDefaultMissAction(t, tableDefinition);
         updateMatchType(t, tableDefinition);
+        updateConstEntries(t, tableDefinition);
         tcPipeline->addTableDefinition(tableDefinition);
     }
 }
@@ -457,7 +548,6 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
 void ConvertToBackendIR::postorder(const IR::P4Program *p) {
     if (p != nullptr) {
         tcPipeline->setPipelineName(pipelineName);
-        tcPipeline->setPipelineId(TC::DEFAULT_PIPELINE_ID);
         tcPipeline->setNumTables(tableCount);
     }
 }

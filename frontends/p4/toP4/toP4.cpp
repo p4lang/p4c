@@ -589,7 +589,7 @@ bool ToP4::preorder(const IR::Type_Control *t) {
 ///////////////////////
 
 bool ToP4::preorder(const IR::Constant *c) {
-    const IR::Type_Bits *tb = dynamic_cast<const IR::Type_Bits *>(c->type);
+    const IR::Type_Bits *tb = c->type->to<IR::Type_Bits>();
     unsigned width;
     bool sign;
     if (tb == nullptr) {

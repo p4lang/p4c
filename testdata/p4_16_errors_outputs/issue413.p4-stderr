@@ -1,6 +1,6 @@
 issue413.p4(34): [--Wwarn=mismatch] warning: 16w0xcafebabe: value does not fit in 16 bits
     const bit<32> c1d = 32w0xcafebabe;
                         ^^^^^^^^^^^^^
-issue413.p4(41): [--Werror=type-error] error: foo2: Action calls are not allowed within parsers
+issue413.p4(41): [--Werror=type-error] error: foo2(16w0xbabe, b1a): Action calls are not allowed within parsers
         foo2((bit<16>) c1d, b1a);
         ^^^^^^^^^^^^^^^^^^^^^^^^

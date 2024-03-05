@@ -26,11 +26,13 @@ class EBPFTestgenTarget : public TestgenTarget {
     static void make();
 
  protected:
-    const EBPFProgramInfo *initProgramImpl(const IR::P4Program *program,
-                                           const IR::Declaration_Instance *mainDecl) const override;
+    const EBPFProgramInfo *produceProgramInfoImpl(
+        const CompilerResult &compilerResult,
+        const IR::Declaration_Instance *mainDecl) const override;
 
-    EBPFTestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                        const std::filesystem::path &testPath) const override;
+    EBPFTestBackend *getTestBackendImpl(const ProgramInfo &programInfo,
+                                        const TestBackendConfiguration &testBackendConfiguration,
+                                        SymbolicExecutor &symbex) const override;
 
     EBPFCmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                       const ProgramInfo &programInfo) const override;
@@ -38,12 +40,8 @@ class EBPFTestgenTarget : public TestgenTarget {
     EBPFExprStepper *getExprStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                         const ProgramInfo &programInfo) const override;
 
-    const ArchSpec *getArchSpecImpl() const override;
-
  private:
     EBPFTestgenTarget();
-
-    static const ArchSpec archSpec;
 };
 
 }  // namespace P4Tools::P4Testgen::EBPF

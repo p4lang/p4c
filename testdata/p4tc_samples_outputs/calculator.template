@@ -1,0 +1,42 @@
+#!/bin/bash -x
+
+set -e
+
+TC="tc"
+$TC p4template create pipeline/calculator numtables 1
+
+$TC p4template create action/calculator/MainControlImpl/operation_add actid 1
+$TC p4template update action/calculator/MainControlImpl/operation_add state active
+
+$TC p4template create action/calculator/MainControlImpl/operation_sub actid 2
+$TC p4template update action/calculator/MainControlImpl/operation_sub state active
+
+$TC p4template create action/calculator/MainControlImpl/operation_and actid 3
+$TC p4template update action/calculator/MainControlImpl/operation_and state active
+
+$TC p4template create action/calculator/MainControlImpl/operation_or actid 4
+$TC p4template update action/calculator/MainControlImpl/operation_or state active
+
+$TC p4template create action/calculator/MainControlImpl/operation_xor actid 5
+$TC p4template update action/calculator/MainControlImpl/operation_xor state active
+
+$TC p4template create action/calculator/MainControlImpl/operation_drop actid 6
+$TC p4template update action/calculator/MainControlImpl/operation_drop state active
+
+$TC p4template create table/calculator/MainControlImpl/calculate \
+	tblid 1 \
+	type exact \
+	keysz 8 nummasks 8 tentries 2048 \
+	table_acts act name calculator/MainControlImpl/operation_add \
+	act name calculator/MainControlImpl/operation_sub \
+	act name calculator/MainControlImpl/operation_and \
+	act name calculator/MainControlImpl/operation_or \
+	act name calculator/MainControlImpl/operation_xor \
+	act name calculator/MainControlImpl/operation_drop
+$TC p4template update table/calculator/MainControlImpl/calculate default_miss_action permissions 0x1024 action calculator/MainControlImpl/operation_drop
+$TC p4template create table/calculator/MainControlImpl/calculate entry op 2b action calculator/MainControlImpl/operation_add permissions 0x1024
+$TC p4template create table/calculator/MainControlImpl/calculate entry op 2d action calculator/MainControlImpl/operation_sub permissions 0x1024
+$TC p4template create table/calculator/MainControlImpl/calculate entry op 26 action calculator/MainControlImpl/operation_and permissions 0x1024
+$TC p4template create table/calculator/MainControlImpl/calculate entry op 7c action calculator/MainControlImpl/operation_or permissions 0x1024
+$TC p4template create table/calculator/MainControlImpl/calculate entry op 5e action calculator/MainControlImpl/operation_xor permissions 0x1024
+$TC p4template update pipeline/calculator state ready

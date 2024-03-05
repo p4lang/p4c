@@ -37,7 +37,9 @@ std::vector<std::pair<IR::StateVariable, const IR::Expression *>> ExprStepper::s
     ExecutionState &nextState, const std::vector<IR::StateVariable> &flatFields,
     int varBitFieldSize) {
     std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields;
-    for (const auto &fieldRef : flatFields) {
+    // Make a copy of the StateVariable so it can be modified in the varbit case (and it is just a
+    // pointer wrapper anyway).
+    for (IR::StateVariable fieldRef : flatFields) {
         const auto *fieldType = fieldRef->type;
         // If the header had a varbit, the header needs to be updated.
         // We assign @param varbitFeldSize to the varbit field.
@@ -62,15 +64,12 @@ std::vector<std::pair<IR::StateVariable, const IR::Expression *>> ExprStepper::s
         // We need to cast the generated variable to the appropriate type.
         if (fieldType->is<IR::Extracted_Varbits>()) {
             pktVar = new IR::Cast(fieldType, pktVar);
-            // Update the field and add the field to the return list.
-            // TODO: Better way to handle varbits here?
-            auto *newRef = fieldRef->clone();
-            newRef->type = fieldType;
-            nextState.set(fieldRef, pktVar);
-            fields.emplace_back(fieldRef, pktVar);
-            continue;
-        }
-        if (const auto *bits = fieldType->to<IR::Type_Bits>()) {
+            // Rewrite the type of the field so it matches the extracted varbit type.
+            // TODO: is there a better way to do this?
+            auto *newRefExpr = fieldRef->clone();
+            newRefExpr->type = fieldType;
+            fieldRef.ref = newRefExpr;
+        } else if (const auto *bits = fieldType->to<IR::Type_Bits>()) {
             if (bits->isSigned) {
                 pktVar = new IR::Cast(fieldType, pktVar);
             }
@@ -292,10 +291,10 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              const auto *blockRef = args->at(0)->expression->checkedTo<IR::StringLiteral>();
              const auto *block = state.findDecl(new IR::Path(blockRef->value));
-             const auto *archSpec = TestgenTarget::getArchSpec();
              auto blockName = block->getName().name;
              auto &nextState = state.clone();
              auto canonicalName = getProgramInfo().getCanonicalBlockName(blockName);
+             const auto &archSpec = getProgramInfo().getArchSpec();
              const auto *blockApply = block->to<IR::IApply>();
              CHECK_NULL(blockApply);
              const auto *blockParams = blockApply->getApplyParameters();
@@ -306,7 +305,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              nextState.setProperty("inUndefinedState", false);
              for (size_t paramIdx = 0; paramIdx < blockParams->size(); ++paramIdx) {
                  const auto *internalParam = blockParams->getParameter(paramIdx);
-                 auto externalParamName = archSpec->getParamName(canonicalName, paramIdx);
+                 auto externalParamName = archSpec.getParamName(canonicalName, paramIdx);
                  nextState.copyIn(TestgenTarget::get(), internalParam, externalParamName);
              }
              nextState.setProperty("inUndefinedState", currentTaint);
@@ -327,7 +326,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              const auto *blockRef = args->at(0)->expression->checkedTo<IR::StringLiteral>();
              const auto *block = state.findDecl(new IR::Path(blockRef->value));
-             const auto *archSpec = TestgenTarget::getArchSpec();
+             const auto &archSpec = getProgramInfo().getArchSpec();
              auto blockName = block->getName().name;
              auto &nextState = state.clone();
              auto canonicalName = getProgramInfo().getCanonicalBlockName(blockName);
@@ -341,7 +340,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              nextState.setProperty("inUndefinedState", false);
              for (size_t paramIdx = 0; paramIdx < blockParams->size(); ++paramIdx) {
                  const auto *internalParam = blockParams->getParameter(paramIdx);
-                 auto externalParamName = archSpec->getParamName(canonicalName, paramIdx);
+                 auto externalParamName = archSpec.getParamName(canonicalName, paramIdx);
                  nextState.copyOut(internalParam, externalParamName);
              }
              nextState.setProperty("inUndefinedState", currentTaint);

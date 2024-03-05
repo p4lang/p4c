@@ -160,8 +160,7 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
         const auto *applyBlock = typeDecl->checkedTo<IR::P4Control>();
         const auto *params = applyBlock->getApplyParameters();
         auto blockIndex = 2;
-        const auto *archSpec = TestgenTarget::getArchSpec();
-        const auto *archMember = archSpec->getArchMember(blockIndex);
+        const auto *archMember = progInfo->getArchSpec().getArchMember(blockIndex);
         for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
             const auto *param = params->getParameter(paramIdx);
             const auto &archRef = archMember->blockParams.at(paramIdx);
@@ -573,7 +572,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto &externInstance = state.findDecl(externRef);
              // Retrieve the register state from the object store. If it is already present, just
              // cast the object to the correct class and retrieve the current value according to the
-             // index. If the register has not been added had, create a new register object.
+             // index. If the register has not been added yet, create a new register object.
              const auto *registerState =
                  state.getTestObject("registervalues", externInstance->controlPlaneName(), false);
              const Bmv2V1ModelRegisterValue *registerValue = nullptr;

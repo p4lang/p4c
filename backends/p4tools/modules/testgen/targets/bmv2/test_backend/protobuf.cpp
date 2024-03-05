@@ -12,73 +12,27 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <inja/inja.hpp>
 
+#include "backends/p4tools/common/control_plane/p4info_map.h"
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "control-plane/p4RuntimeArchHandler.h"
-#include "ir/declaration.h"
+#include "control-plane/p4RuntimeSerializer.h"
 #include "ir/ir.h"
-#include "ir/vector.h"
-#include "lib/error.h"
-#include "lib/error_catalog.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
-#include "lib/null.h"
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
+#include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-/// Wrapper helper function that automatically inserts separators for hex strings.
-std::string formatHexExprWithSep(const IR::Expression *expr) {
-    return insertHexSeparators(formatHexExpr(expr, false, true, false));
-}
-
-Protobuf::Protobuf(std::filesystem::path basePath, std::optional<unsigned int> seed)
-    : Bmv2TestFramework(std::move(basePath), seed) {}
-
-std::optional<p4rt_id_t> Protobuf::getIdAnnotation(const IR::IAnnotated *node) {
-    const auto *idAnnotation = node->getAnnotation("id");
-    if (idAnnotation == nullptr) {
-        return std::nullopt;
-    }
-    const auto *idConstant = idAnnotation->expr[0]->to<IR::Constant>();
-    CHECK_NULL(idConstant);
-    if (!idConstant->fitsUint()) {
-        ::error(ErrorType::ERR_INVALID, "%1%: @id should be an unsigned integer", node);
-        return std::nullopt;
-    }
-    return static_cast<p4rt_id_t>(idConstant->value);
-}
-
-std::optional<p4rt_id_t> Protobuf::externalId(const P4::ControlPlaneAPI::P4RuntimeSymbolType &type,
-                                              const IR::IDeclaration *declaration) {
-    CHECK_NULL(declaration);
-    if (!declaration->is<IR::IAnnotated>()) {
-        return std::nullopt;  // Assign an id later; see below.
-    }
-
-    // If the user specified an @id annotation, use that.
-    auto idOrNone = getIdAnnotation(declaration->to<IR::IAnnotated>());
-    if (!idOrNone) {
-        return std::nullopt;  // the user didn't assign an id
-    }
-    auto id = *idOrNone;
-
-    // If the id already has an 8-bit type prefix, make sure it is correct for
-    // the resource type; otherwise assign the correct prefix.
-    const auto typePrefix = static_cast<p4rt_id_t>(type) << 24;
-    const auto prefixMask = static_cast<p4rt_id_t>(0xff) << 24;
-    if ((id & prefixMask) != 0 && (id & prefixMask) != typePrefix) {
-        ::error(ErrorType::ERR_INVALID, "%1%: @id has the wrong 8-bit prefix", declaration);
-        return std::nullopt;
-    }
-    id |= typePrefix;
-
-    return id;
-}
+Protobuf::Protobuf(const TestBackendConfiguration &testBackendConfiguration,
+                   P4::P4RuntimeAPI p4RuntimeApi)
+    : Bmv2TestFramework(testBackendConfiguration),
+      p4RuntimeApi(p4RuntimeApi),
+      p4InfoMaps(P4::ControlPlaneAPI::P4InfoMaps(*p4RuntimeApi.p4Info)) {}
 
 inja::json Protobuf::getControlPlane(const TestSpec *testSpec) const {
     inja::json controlPlaneJson = inja::json::object();
@@ -92,14 +46,13 @@ inja::json Protobuf::getControlPlane(const TestSpec *testSpec) const {
     }
     for (auto const &testObject : tables) {
         inja::json tblJson;
-        tblJson["table_name"] = testObject.first.c_str();
+        auto tableName = testObject.first;
+        tblJson["table_name"] = tableName;
         const auto *const tblConfig = testObject.second->checkedTo<TableConfig>();
         const auto *table = tblConfig->getTable();
-
-        auto p4RuntimeId = externalId(SymbolType::P4RT_TABLE(), table);
+        auto p4RuntimeId = p4InfoMaps.lookUpP4RuntimeId(table->controlPlaneName());
         BUG_CHECK(p4RuntimeId, "Id not present for table %1%. Can not generate test.", table);
-        tblJson["id"] = *p4RuntimeId;
-
+        tblJson["id"] = p4RuntimeId.value();
         const auto *tblRules = tblConfig->getRules();
         tblJson["rules"] = inja::json::array();
         for (const auto &tblRule : *tblRules) {
@@ -107,13 +60,15 @@ inja::json Protobuf::getControlPlane(const TestSpec *testSpec) const {
             const auto *matches = tblRule.getMatches();
             const auto *actionCall = tblRule.getActionCall();
             const auto *actionDecl = actionCall->getAction();
+            cstring actionName = actionDecl->controlPlaneName();
             const auto *actionArgs = actionCall->getArgs();
             rule["action_name"] = actionCall->getActionName().c_str();
-            auto p4RuntimeId = externalId(SymbolType::P4RT_ACTION(), actionDecl);
+            auto p4RuntimeId = p4InfoMaps.lookUpP4RuntimeId(actionName);
             BUG_CHECK(p4RuntimeId, "Id not present for action %1%. Can not generate test.",
                       actionDecl);
-            rule["action_id"] = *p4RuntimeId;
-            auto j = getControlPlaneForTable(*matches, *actionArgs);
+            rule["action_id"] = p4RuntimeId.value();
+
+            auto j = getControlPlaneForTable(tableName, actionName, *matches, *actionArgs);
             rule["rules"] = std::move(j);
             rule["priority"] = tblRule.getPriority();
             tblJson["rules"].push_back(rule);
@@ -135,7 +90,8 @@ inja::json Protobuf::getControlPlane(const TestSpec *testSpec) const {
     return controlPlaneJson;
 }
 
-inja::json Protobuf::getControlPlaneForTable(const TableMatchMap &matches,
+inja::json Protobuf::getControlPlaneForTable(cstring tableName, cstring actionName,
+                                             const TableMatchMap &matches,
                                              const std::vector<ActionArg> &args) const {
     inja::json rulesJson;
 
@@ -154,27 +110,29 @@ inja::json Protobuf::getControlPlaneForTable(const TableMatchMap &matches,
 
         inja::json j;
         j["field_name"] = fieldName;
-        auto p4RuntimeId = getIdAnnotation(fieldMatch->getKey());
-        BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
-        j["id"] = *p4RuntimeId;
+        auto combinedFieldName = tableName + "_" + fieldName;
+        auto p4RuntimeId = p4InfoMaps.lookUpP4RuntimeId(combinedFieldName);
+        BUG_CHECK(p4RuntimeId.has_value(), "Id not present for key. Can not generate test.");
+        j["id"] = p4RuntimeId.value();
+
         // Iterate over the match fields and segregate them.
         if (const auto *elem = fieldMatch->to<Exact>()) {
-            j["value"] = formatHexExprWithSep(elem->getEvaluatedValue());
+            j["value"] = formatHexExpressionWithSeparators(*elem->getEvaluatedValue());
             rulesJson["single_exact_matches"].push_back(j);
         } else if (const auto *elem = fieldMatch->to<Range>()) {
-            j["lo"] = formatHexExprWithSep(elem->getEvaluatedLow());
-            j["hi"] = formatHexExprWithSep(elem->getEvaluatedHigh());
+            j["lo"] = formatHexExpressionWithSeparators(*elem->getEvaluatedLow());
+            j["hi"] = formatHexExpressionWithSeparators(*elem->getEvaluatedHigh());
             rulesJson["range_matches"].push_back(j);
             // If the rule has a range match we need to add the priority.
             rulesJson["needs_priority"] = true;
         } else if (const auto *elem = fieldMatch->to<Ternary>()) {
-            j["value"] = formatHexExprWithSep(elem->getEvaluatedValue());
-            j["mask"] = formatHexExprWithSep(elem->getEvaluatedMask());
+            j["value"] = formatHexExpressionWithSeparators(*elem->getEvaluatedValue());
+            j["mask"] = formatHexExpressionWithSeparators(*elem->getEvaluatedMask());
             rulesJson["ternary_matches"].push_back(j);
             // If the rule has a range match we need to add the priority.
             rulesJson["needs_priority"] = true;
         } else if (const auto *elem = fieldMatch->to<LPM>()) {
-            j["value"] = formatHexExprWithSep(elem->getEvaluatedValue());
+            j["value"] = formatHexExpressionWithSeparators(*elem->getEvaluatedValue());
             j["prefix_len"] = elem->getEvaluatedPrefixLength()->value.str();
             rulesJson["lpm_matches"].push_back(j);
         } else if (const auto *elem = fieldMatch->to<Optional>()) {
@@ -190,25 +148,37 @@ inja::json Protobuf::getControlPlaneForTable(const TableMatchMap &matches,
     for (const auto &actArg : args) {
         inja::json j;
         j["param"] = actArg.getActionParamName().c_str();
-        j["value"] = formatHexExprWithSep(actArg.getEvaluatedValue());
-        auto p4RuntimeId = getIdAnnotation(actArg.getActionParam());
-        BUG_CHECK(p4RuntimeId, "Id not present for parameter. Can not generate test.");
-        j["id"] = *p4RuntimeId;
+        j["value"] = formatHexExpressionWithSeparators(*actArg.getEvaluatedValue());
+        auto combinedParamName = actionName + "_" + actArg.getActionParamName();
+        auto p4RuntimeId = p4InfoMaps.lookUpP4RuntimeId(combinedParamName);
+        BUG_CHECK(p4RuntimeId.has_value(), "Id not present for parameter. Can not generate test.");
+        j["id"] = p4RuntimeId.value();
         rulesJson["act_args"].push_back(j);
     }
 
     return rulesJson;
 }
 
+inja::json Protobuf::getSend(const TestSpec *testSpec) const {
+    const auto *iPacket = testSpec->getIngressPacket();
+    const auto *payload = iPacket->getEvaluatedPayload();
+    inja::json sendJson;
+    sendJson["ig_port"] = iPacket->getPort();
+    sendJson["pkt"] = formatHexExpressionWithSeparators(*payload);
+    sendJson["pkt_size"] = payload->type->width_bits();
+    return sendJson;
+}
+
 inja::json Protobuf::getExpectedPacket(const TestSpec *testSpec) const {
     inja::json verifyData = inja::json::object();
-    if (testSpec->getEgressPacket() != std::nullopt) {
-        const auto &packet = **testSpec->getEgressPacket();
-        verifyData["eg_port"] = packet.getPort();
-        const auto *payload = packet.getEvaluatedPayload();
-        const auto *payloadMask = packet.getEvaluatedPayloadMask();
-        verifyData["ignore_mask"] = formatHexExprWithSep(payloadMask);
-        verifyData["exp_pkt"] = formatHexExprWithSep(payload);
+    auto egressPacket = testSpec->getEgressPacket();
+    if (egressPacket.has_value()) {
+        const auto *packet = egressPacket.value();
+        verifyData["eg_port"] = packet->getPort();
+        const auto *payload = packet->getEvaluatedPayload();
+        const auto *mask = packet->getEvaluatedPayloadMask();
+        verifyData["ignore_mask"] = formatHexExpressionWithSeparators(*mask);
+        verifyData["exp_pkt"] = formatHexExpressionWithSeparators(*payload);
     }
     return verifyData;
 }
@@ -340,16 +310,18 @@ entities {
     return TEST_CASE;
 }
 
-void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                            const std::string &testCase, float currentCoverage) {
+inja::json Protobuf::produceTestCase(const TestSpec *testSpec, cstring selectedBranches,
+                                     size_t testId, float currentCoverage) const {
     inja::json dataJson;
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
-    if (seed) {
-        dataJson["seed"] = *seed;
+
+    auto optSeed = getTestBackendConfiguration().seed;
+    if (optSeed.has_value()) {
+        dataJson["seed"] = optSeed.value();
     }
-    dataJson["test_name"] = basePath.stem();
+    dataJson["test_name"] = getTestBackendConfiguration().testBaseName;
     dataJson["test_id"] = testId;
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
@@ -360,19 +332,41 @@ void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     coverageStr << std::setprecision(2) << currentCoverage;
     dataJson["coverage"] = coverageStr.str();
 
+    // Check whether this test has a clone configuration.
+    // These are special because they require additional instrumentation and produce two output
+    // packets.
+    auto cloneSpecs = testSpec->getTestObjectCategory("clone_specs");
+    if (!cloneSpecs.empty()) {
+        dataJson["clone_specs"] = getClone(cloneSpecs);
+    }
+    auto meterValues = testSpec->getTestObjectCategory("meter_values");
+    dataJson["meter_values"] = getMeter(meterValues);
+
+    return dataJson;
+}
+
+void Protobuf::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                               float currentCoverage) {
+    inja::json dataJson = produceTestCase(testSpec, selectedBranches, testId, currentCoverage);
     LOG5("Protobuf test back end: emitting testcase:" << std::setw(4) << dataJson);
-    auto incrementedbasePath = basePath;
+
+    auto optBasePath = getTestBackendConfiguration().fileBasePath;
+    BUG_CHECK(optBasePath.has_value(), "Base path is not set.");
+    auto incrementedbasePath = optBasePath.value();
     incrementedbasePath.concat("_" + std::to_string(testId));
     incrementedbasePath.replace_extension(".txtpb");
     auto protobufFileStream = std::ofstream(incrementedbasePath);
-    inja::render_to(protobufFileStream, testCase, dataJson);
+    inja::render_to(protobufFileStream, getTestCaseTemplate(), dataJson);
     protobufFileStream.flush();
 }
 
-void Protobuf::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                          float currentCoverage) {
-    std::string testCase = getTestCaseTemplate();
-    emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
+AbstractTestReferenceOrError Protobuf::produceTest(const TestSpec *testSpec,
+                                                   cstring selectedBranches, size_t testId,
+                                                   float currentCoverage) {
+    inja::json dataJson = produceTestCase(testSpec, selectedBranches, testId, currentCoverage);
+    LOG5("ProtobufIR test back end: generated testcase:" << std::setw(4) << dataJson);
+
+    return new ProtobufTest(inja::render(getTestCaseTemplate(), dataJson));
 }
 
 }  // namespace P4Tools::P4Testgen::Bmv2

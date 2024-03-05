@@ -1,0 +1,49 @@
+{
+  "schema_version" : "1.0.0",
+  "pipeline_name" : "const_entries_range_mask",
+  "tables" : [
+    {
+      "name" : "MainControlImpl/t_range",
+      "id" : 1,
+      "tentries" : 2048,
+      "nummask" : 8,
+      "keysize" : 8,
+      "keyfields" : [
+        {
+          "id" : 1,
+          "name" : "h.h.r",
+          "type" : "bit8",
+          "match_type" : "range",
+          "bitwidth" : 8
+        }
+      ],
+      "actions" : [
+        {
+          "id" : 1,
+          "name" : "MainControlImpl/a",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : true
+        },
+        {
+          "id" : 2,
+          "name" : "MainControlImpl/a_with_control_params",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "x",
+              "type" : "bit16",
+              "bitwidth" : 16
+            }
+          ],
+          "default_hit_action" : false,
+          "default_miss_action" : false
+        }
+      ]
+    }
+  ]
+}

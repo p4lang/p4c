@@ -1,21 +1,15 @@
-
 #include "simple_lpm_example_parser.h"
-#include <stdbool.h>
-#include <linux/if_ether.h>
-#include "pna.h"
 
-REGISTER_START()
-REGISTER_TABLE(hdr_md_cpumap, BPF_MAP_TYPE_PERCPU_ARRAY, u32, struct hdr_md, 2)
-BPF_ANNOTATE_KV_PAIR(hdr_md_cpumap, u32, struct hdr_md)
-REGISTER_END()
+struct p4tc_filter_fields p4tc_filter_fields;
 
 static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
-    unsigned ebpf_packetOffsetInBits = 0;
+
     unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
+    u8* hdr_start = pkt;
     void* ebpf_packetEnd = ((void*)(long)skb->data_end);
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
@@ -29,13 +23,14 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
         return TC_ACT_SHOT;
     __builtin_memset(hdrMd, 0, sizeof(struct hdr_md));
 
+    unsigned ebpf_packetOffsetInBits = 0;
     hdr = &(hdrMd->cpumap_hdr);
     meta = &(hdrMd->cpumap_usermeta);
     {
         goto start;
         parse_ipv4: {
 /* extract(hdr->ipv4) */
-            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 160 + 0)) {
+            if ((u8*)ebpf_packetEnd < hdr_start + BYTES(160 + 0)) {
                 ebpf_errorCode = PacketTooShort;
                 goto reject;
             }
@@ -76,14 +71,16 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
             __builtin_memcpy(&hdr->ipv4.dstAddr, pkt + BYTES(ebpf_packetOffsetInBits), 4);
             ebpf_packetOffsetInBits += 32;
 
+
             hdr->ipv4.ebpf_valid = 1;
+            hdr_start += BYTES(160);
 
 ;
              goto accept;
         }
         start: {
 /* extract(hdr->ethernet) */
-            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 112 + 0)) {
+            if ((u8*)ebpf_packetEnd < hdr_start + BYTES(112 + 0)) {
                 ebpf_errorCode = PacketTooShort;
                 goto reject;
             }
@@ -97,7 +94,9 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
             hdr->ethernet.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
+
             hdr->ethernet.ebpf_valid = 1;
+            hdr_start += BYTES(112);
 
 ;
             u16 select_0;
@@ -111,6 +110,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
             if (ebpf_errorCode == 0) {
                 return TC_ACT_SHOT;
             }
+            compiler_meta__->parser_error = ebpf_errorCode;
             goto accept;
         }
 
@@ -121,7 +121,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
     return -1;
 }
 
-SEC("classifier/tc-parse")
+SEC("p4tc/parse")
 int tc_parse_func(struct __sk_buff *skb) {
     struct pna_global_metadata *compiler_meta__ = (struct pna_global_metadata *) skb->cb;
     struct hdr_md *hdrMd;

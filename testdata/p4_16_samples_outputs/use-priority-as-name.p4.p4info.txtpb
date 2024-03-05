@@ -1,0 +1,133 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 44029711
+    name: "ingressImpl.ipv4_da_lpm"
+    alias: "ipv4_da_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 23772637
+  }
+  action_refs {
+    id: 32254556
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 43802445
+    name: "ingressImpl.mac_da"
+    alias: "mac_da"
+  }
+  match_fields {
+    id: 1
+    name: "meta.fwd_metadata.l2ptr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 17437768
+  }
+  action_refs {
+    id: 32254556
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 45287883
+    name: "egressImpl.send_frame"
+    alias: "send_frame"
+  }
+  match_fields {
+    id: 1
+    name: "meta.fwd_metadata.out_bd"
+    bitwidth: 24
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22897391
+  }
+  action_refs {
+    id: 27859478
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 32254556
+    name: "ingressImpl.my_drop"
+    alias: "ingressImpl.my_drop"
+  }
+}
+actions {
+  preamble {
+    id: 23772637
+    name: "ingressImpl.set_l2ptr_and_prio"
+    alias: "set_l2ptr_and_prio"
+  }
+  params {
+    id: 1
+    name: "l2ptr"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "priority"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 17437768
+    name: "ingressImpl.set_bd_dmac_intf"
+    alias: "set_bd_dmac_intf"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 24
+  }
+  params {
+    id: 2
+    name: "dmac"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "intf"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 27859478
+    name: "egressImpl.my_drop"
+    alias: "egressImpl.my_drop"
+  }
+}
+actions {
+  preamble {
+    id: 22897391
+    name: "egressImpl.rewrite_mac"
+    alias: "rewrite_mac"
+  }
+  params {
+    id: 1
+    name: "smac"
+    bitwidth: 48
+  }
+}
+type_info {
+}

@@ -28,7 +28,7 @@ add_custom_target (dpdk_runtime_dir
 # placed in the build directory inside `control-plane` directory
 add_custom_command(
     OUTPUT ${DPDK_P4RUNTIME_INFO_GEN_SRCS} ${DPDK_P4RUNTIME_INFO_GEN_HDRS}
-  COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
+  COMMAND ${Protobuf_PROTOC_EXECUTABLE}
     --proto_path ${DPDK_P4RUNTIME_DIR}
     --proto_path ${P4RUNTIME_STD_DIR}
     --cpp_out ${CMAKE_CURRENT_BINARY_DIR}/p4/config
@@ -40,9 +40,7 @@ add_custom_command(
 add_dependencies(dpdk_runtime_dir controlplane)
 
 add_library(dpdk_runtime STATIC ${DPDK_P4RUNTIME_INFO_GEN_SRCS})
-target_include_directories(dpdk_runtime
-  SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIR}
-)
+target_link_libraries(dpdk_runtime PRIVATE controlplane)
 
 # Silence various warnings as the root issue is out of our control, example https://github.com/protocolbuffers/protobuf/issues/7140
 set_source_files_properties(${DPDK_P4RUNTIME_INFO_GEN_SRCS} {$DPDK_P4RUNTIME_INFO_GEN_HDRS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-error")
@@ -63,7 +61,7 @@ set(P4C_DPDK_SOURCES
     options.cpp
     control-plane/bfruntime_ext.cpp
     tdiConf.cpp
-    )
+)
 
 set(P4C_DPDK_HEADERS
     ../bmv2/common/lower.h
@@ -84,7 +82,7 @@ set(P4C_DPDK_HEADERS
     control-plane/bfruntime_ext.h
     control-plane/bfruntime_arch_handler.h
     tdiConf.h
-    )
+)
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/dpdk.def PARENT_SCOPE)
 
@@ -101,8 +99,7 @@ endforeach()
 set(EXTENSION_IR_SOURCES ${EXTENSION_IR_SOURCES} ${QUAL_DPDK_IR_SRCS} PARENT_SCOPE)
 
 add_executable(p4c-dpdk ${P4C_DPDK_SOURCES})
-target_link_libraries (p4c-dpdk dpdk_runtime ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
-add_dependencies(p4c-dpdk dpdk_runtime frontend)
+target_link_libraries (p4c-dpdk dpdk_runtime frontend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 
 install (TARGETS p4c-dpdk
         RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
@@ -128,7 +125,11 @@ set (P4_16_SUITES
 
 #### DPDK-PTF Tests
 # PTF tests for DPDK are only enabled when both infrap4d and dpdk-target are installed.
-set(DPDK_PTF_TEST_SUITES "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-add_on_miss0.p4")
+set(DPDK_PTF_TEST_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-add_on_miss0.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-small_sample.p4"
+)
+
 # Check for infrap4d.
 find_program(INFRAP4D infrap4d PATHS ${IPDK_INSTALL_DIR}/sbin)
 # DPDK_SDK_INSTALL is the path to the dpdk-target install directory

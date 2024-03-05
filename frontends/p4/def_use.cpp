@@ -16,8 +16,6 @@ limitations under the License.
 
 #include "def_use.h"
 
-#include <boost/functional/hash.hpp>
-
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
 #include "lib/ordered_set.h"
@@ -82,8 +80,8 @@ StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) cons
             cstring fieldName = name + "." + f->name;
             auto sl = create(f->type, fieldName);
             if (globalValid != nullptr)
-                dynamic_cast<StructLocation *>(sl)->replaceField(fieldName + "." + validFieldName,
-                                                                 globalValid);
+                sl->as<StructLocation>().replaceField(fieldName + "." + validFieldName,
+                                                      globalValid);
             result->createField(f->name.name, sl);
         }
         if (st->is<IR::Type_Header>()) {
@@ -255,14 +253,22 @@ bool LocationSet::overlaps(const LocationSet *other) const {
     return false;
 }
 
+void ProgramPoints::add(const ProgramPoints *from) {
+    points.insert(from->points.begin(), from->points.end());
+}
+
 const ProgramPoints *ProgramPoints::merge(const ProgramPoints *with) const {
-    auto result = new ProgramPoints(points);
-    for (auto p : with->points) result->points.emplace(p);
+    auto *result = new ProgramPoints(points);
+    result->points.insert(with->points.begin(), with->points.end());
     return result;
 }
 
 ProgramPoint::ProgramPoint(const ProgramPoint &context, const IR::Node *node) {
-    for (auto e : context.stack) stack.push_back(e);
+    assign(context, node);
+}
+
+void ProgramPoint::assign(const ProgramPoint &context, const IR::Node *node) {
+    stack.assign(context.stack.begin(), context.stack.end());
     stack.push_back(node);
 }
 
@@ -273,11 +279,7 @@ bool ProgramPoint::operator==(const ProgramPoint &other) const {
     return true;
 }
 
-std::size_t ProgramPoint::hash() const {
-    std::size_t result = 0;
-    boost::hash_range(result, stack.begin(), stack.end());
-    return result;
-}
+std::size_t ProgramPoint::hash() const { return Util::hash_range(stack.begin(), stack.end()); }
 
 bool ProgramPoints::operator==(const ProgramPoints &other) const {
     if (points.size() != other.points.size()) return false;
@@ -331,10 +333,10 @@ void Definitions::removeLocation(const StorageLocation *location) {
 }
 
 const ProgramPoints *Definitions::getPoints(const LocationSet *locations) const {
-    const ProgramPoints *result = new ProgramPoints();
-    for (auto sl : *locations->canonicalize()) {
-        auto points = getPoints(sl->to<BaseLocation>());
-        result = result->merge(points);
+    ProgramPoints *result = new ProgramPoints();
+    for (const auto *sl : *locations->canonicalize()) {
+        const auto *points = getPoints(sl->to<BaseLocation>());
+        result->add(points);
     }
     return result;
 }

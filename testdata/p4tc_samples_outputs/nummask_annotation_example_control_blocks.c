@@ -1,21 +1,19 @@
-
 #include "nummask_annotation_example_parser.h"
-#include <stdbool.h>
-#include <linux/if_ether.h>
-#include "pna.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
-
 
 struct __attribute__((__packed__)) MainControlImpl_set_ct_options_key {
     u32 keysz;
     u32 maskid;
     u8 field0; /* hdr.tcp.flags */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_SYN_PACKET 1
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_FIN_OR_RST_PACKET 2
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_OTHER_PACKETS 3
+#define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_set_ct_options_value {
     unsigned int action;
     union {
@@ -30,47 +28,14 @@ struct __attribute__((__packed__)) MainControlImpl_set_ct_options_value {
     } u;
 };
 
-REGISTER_START()
-REGISTER_TABLE(hdr_md_cpumap, BPF_MAP_TYPE_PERCPU_ARRAY, u32, struct hdr_md, 2)
-BPF_ANNOTATE_KV_PAIR(hdr_md_cpumap, u32, struct hdr_md)
-REGISTER_END()
-
-SEC("xdp/xdp-ingress")
-int xdp_func(struct xdp_md *skb) {
-        void *data_end = (void *)(long)skb->data_end;
-    struct ethhdr *eth = (struct ethhdr *)(long)skb->data;
-    if ((void *)((struct ethhdr *) eth + 1) > data_end) {
-        return XDP_ABORTED;
-    }
-    if (eth->h_proto == bpf_htons(0x0800) || eth->h_proto == bpf_htons(0x86DD)) {
-        return XDP_PASS;
-    }
-
-    struct internal_metadata *meta;
-    int ret = bpf_xdp_adjust_meta(skb, -(int)sizeof(*meta));
-    if (ret < 0) {
-        return XDP_ABORTED;
-    }
-    meta = (struct internal_metadata *)(unsigned long)skb->data_meta;
-    eth = (void *)(long)skb->data;
-    data_end = (void *)(long)skb->data_end;
-    if ((void *) ((struct internal_metadata *) meta + 1) > (void *)(long)skb->data)
-        return XDP_ABORTED;
-    if ((void *)((struct ethhdr *) eth + 1) > data_end) {
-        return XDP_ABORTED;
-    }
-    meta->pkt_ether_type = eth->h_proto;
-    eth->h_proto = bpf_htons(0x0800);
-
-    return XDP_PASS;
-}
 static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
-    unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+
     unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
+    u8* hdr_start = pkt;
     void* ebpf_packetEnd = ((void*)(long)skb->data_end);
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
@@ -81,19 +46,21 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     hdrMd = BPF_MAP_LOOKUP_ELEM(hdr_md_cpumap, &ebpf_zero);
     if (!hdrMd)
         return TC_ACT_SHOT;
+    unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     hdr = &(hdrMd->cpumap_hdr);
     meta = &(hdrMd->cpumap_usermeta);
 {
         u8 hit;
         {
-if (((u32)istd.input_port == 2 && /* hdr->ipv4.isValid() */
+if (((u32)skb->ifindex == 2 && /* hdr->ipv4.isValid() */
             hdr->ipv4.ebpf_valid) && /* hdr->tcp.isValid() */
             hdr->tcp.ebpf_valid) {
 /* set_ct_options_0.apply() */
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 1
                     };
                     struct MainControlImpl_set_ct_options_key key = {};
@@ -126,12 +93,12 @@ if (((u32)istd.input_port == 2 && /* hdr->ipv4.isValid() */
                                 {
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
-                        return TC_ACT_SHOT;
-;
                     }
                 }
 ;            }
@@ -150,7 +117,16 @@ if (((u32)istd.input_port == 2 && /* hdr->ipv4.isValid() */
         if (hdr->eth.ebpf_valid) {
             outHeaderLength += 112;
         }
-;        pkt = ((void*)(long)skb->data);
+;
+        int outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
+        if (outHeaderOffset != 0) {
+            int returnCode = 0;
+            returnCode = bpf_skb_adjust_room(skb, outHeaderOffset, 1, 0);
+            if (returnCode) {
+                return TC_ACT_SHOT;
+            }
+        }
+        pkt = ((void*)(long)skb->data);
         ebpf_packetEnd = ((void*)(long)skb->data_end);
         ebpf_packetOffsetInBits = 0;
         if (hdr->eth.ebpf_valid) {
@@ -200,7 +176,7 @@ if (((u32)istd.input_port == 2 && /* hdr->ipv4.isValid() */
     }
     return -1;
 }
-SEC("classifier/tc-ingress")
+SEC("p4tc/main")
 int tc_ingress_func(struct __sk_buff *skb) {
     struct pna_global_metadata *compiler_meta__ = (struct pna_global_metadata *) skb->cb;
     if (compiler_meta__->pass_to_kernel == true) return TC_ACT_OK;

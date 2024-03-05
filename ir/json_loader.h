@@ -17,8 +17,6 @@ limitations under the License.
 #ifndef IR_JSON_LOADER_H_
 #define IR_JSON_LOADER_H_
 
-#include <assert.h>
-
 #include <map>
 #include <optional>
 #include <string>
@@ -29,7 +27,6 @@ limitations under the License.
 #include "json_parser.h"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"
-#include "lib/indent.h"
 #include "lib/ltbitmatrix.h"
 #include "lib/match.h"
 #include "lib/ordered_map.h"
@@ -70,21 +67,21 @@ class JSONLoader {
 
     JSONLoader(const JSONLoader &unpacker, const std::string &field)
         : node_refs(unpacker.node_refs), json(nullptr) {
-        if (auto obj = dynamic_cast<JsonObject *>(unpacker.json)) json = get(obj, field);
+        if (auto *obj = unpacker.json->to<JsonObject>()) json = get(obj, field);
     }
 
  private:
     const IR::Node *get_node() {
         if (!json || !json->is<JsonObject>()) return nullptr;  // invalid json exception?
-        int id = json->to<JsonObject>()->get_id();
+        int id = json->as<JsonObject>().get_id();
         if (id >= 0) {
             if (node_refs.find(id) == node_refs.end()) {
-                if (auto fn = get(IR::unpacker_table, json->to<JsonObject>()->get_type())) {
+                if (auto fn = get(IR::unpacker_table, json->as<JsonObject>().get_type())) {
                     node_refs[id] = fn(*this);
                     // Creating JsonObject from source_info read from jsonFile
                     // and setting SourceInfo for each node
                     // when "--fromJSON" flag is used
-                    JsonObject *obj = new JsonObject(json->to<JsonObject>()->get_sourceJson());
+                    JsonObject *obj = new JsonObject(json->as<JsonObject>().get_sourceJson());
                     if (obj->hasSrcInfo() == true) {
                         node_refs[id]->srcInfo =
                             Util::SourceInfo(obj->get_filename(), obj->get_line(),
@@ -102,7 +99,7 @@ class JSONLoader {
     template <typename T>
     void unpack_json(safe_vector<T> &v) {
         T temp;
-        for (auto e : *json->to<JsonVector>()) {
+        for (auto e : json->as<JsonVector>()) {
             load(e, temp);
             v.push_back(temp);
         }
@@ -111,7 +108,7 @@ class JSONLoader {
     template <typename T>
     void unpack_json(std::set<T> &v) {
         T temp;
-        for (auto e : *json->to<JsonVector>()) {
+        for (auto e : json->as<JsonVector>()) {
             load(e, temp);
             v.insert(temp);
         }
@@ -120,7 +117,7 @@ class JSONLoader {
     template <typename T>
     void unpack_json(ordered_set<T> &v) {
         T temp;
-        for (auto e : *json->to<JsonVector>()) {
+        for (auto e : json->as<JsonVector>()) {
             load(e, temp);
             v.insert(temp);
         }
@@ -156,7 +153,7 @@ class JSONLoader {
     template <typename K, typename V>
     void unpack_json(std::map<K, V> &v) {
         std::pair<K, V> temp;
-        for (auto e : *json->to<JsonObject>()) {
+        for (auto e : json->as<JsonObject>()) {
             JsonString *k = new JsonString(e.first);
             load(k, temp.first);
             load(e.second, temp.second);
@@ -166,7 +163,7 @@ class JSONLoader {
     template <typename K, typename V>
     void unpack_json(ordered_map<K, V> &v) {
         std::pair<K, V> temp;
-        for (auto e : *json->to<JsonObject>()) {
+        for (auto e : json->as<JsonObject>()) {
             JsonString *k = new JsonString(e.first);
             load(k, temp.first);
             load(e.second, temp.second);
@@ -176,7 +173,7 @@ class JSONLoader {
     template <typename K, typename V>
     void unpack_json(std::multimap<K, V> &v) {
         std::pair<K, V> temp;
-        for (auto e : *json->to<JsonObject>()) {
+        for (auto e : json->as<JsonObject>()) {
             JsonString *k = new JsonString(e.first);
             load(k, temp.first);
             load(e.second, temp.second);
@@ -187,7 +184,7 @@ class JSONLoader {
     template <typename T>
     void unpack_json(std::vector<T> &v) {
         T temp;
-        for (auto e : *json->to<JsonVector>()) {
+        for (auto e : json->as<JsonVector>()) {
             load(e, temp);
             v.push_back(temp);
         }
@@ -195,14 +192,14 @@ class JSONLoader {
 
     template <typename T, typename U>
     void unpack_json(std::pair<T, U> &v) {
-        const JsonObject *obj = json->to<JsonObject>();
+        const JsonObject *obj = json->checkedTo<JsonObject>();
         load(::get(obj, "first"), v.first);
         load(::get(obj, "second"), v.second);
     }
 
     template <typename T>
     void unpack_json(std::optional<T> &v) {
-        const JsonObject *obj = json->to<JsonObject>();
+        const JsonObject *obj = json->checkedTo<JsonObject>();
         bool isValid = false;
         load(::get(obj, "valid"), isValid);
         if (!isValid) {
@@ -213,15 +210,15 @@ class JSONLoader {
         load(::get(obj, "value"), value), v = std::move(value);
     }
 
-    void unpack_json(bool &v) { v = *json->to<JsonBoolean>(); }
+    void unpack_json(bool &v) { v = json->as<JsonBoolean>(); }
 
     template <typename T>
     typename std::enable_if<std::is_integral<T>::value>::type unpack_json(T &v) {
-        v = *json->to<JsonNumber>();
+        v = json->as<JsonNumber>();
     }
-    void unpack_json(big_int &v) { v = json->to<JsonNumber>()->val; }
+    void unpack_json(big_int &v) { v = json->as<JsonNumber>().val; }
     void unpack_json(cstring &v) {
-        std::string tmp = *json->to<std::string>();
+        std::string tmp = json->as<JsonString>();
         std::string::size_type p = 0;
         while ((p = tmp.find('\\', p)) != std::string::npos) {
             tmp.erase(p, 1);
@@ -241,24 +238,24 @@ class JSONLoader {
         if (!json->is<JsonNull>()) v = tmp;
     }
     void unpack_json(IR::ID &v) {
-        if (!json->is<JsonNull>()) v.name = *json->to<std::string>();
+        if (!json->is<JsonNull>()) v.name = json->as<JsonString>();
     }
 
     void unpack_json(LTBitMatrix &m) {
-        if (auto *s = json->to<std::string>()) s->c_str() >> m;
+        if (auto *s = json->to<JsonString>()) s->c_str() >> m;
     }
 
     void unpack_json(bitvec &v) {
-        if (auto *s = json->to<std::string>()) s->c_str() >> v;
+        if (auto *s = json->to<JsonString>()) s->c_str() >> v;
     }
 
     template <typename T>
     typename std::enable_if<std::is_enum<T>::value>::type unpack_json(T &v) {
-        if (auto *s = json->to<std::string>()) *s >> v;
+        if (auto *s = json->to<JsonString>()) *s >> v;
     }
 
     void unpack_json(match_t &v) {
-        if (auto *s = json->to<std::string>()) s->c_str() >> v;
+        if (auto *s = json->to<JsonString>()) s->c_str() >> v;
     }
 
     void unpack_json(UnparsedConstant *&v) {
@@ -301,11 +298,11 @@ class JSONLoader {
 
     template <typename T>
     typename std::enable_if<std::is_base_of<IR::INode, T>::value>::type unpack_json(T &v) {
-        v = *(get_node()->to<T>());
+        v = get_node()->as<T>();
     }
     template <typename T>
     typename std::enable_if<std::is_base_of<IR::INode, T>::value>::type unpack_json(const T *&v) {
-        v = get_node()->to<T>();
+        v = get_node()->checkedTo<T>();
     }
 
     template <typename T, size_t N>

@@ -18,13 +18,14 @@ limitations under the License.
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <gtest/gtest.h>
+
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <thread>
 
-#include "gtest/gtest.h"
 #include "helpers.h"
 #include "ir/ir.h"
 #include "lib/log.h"

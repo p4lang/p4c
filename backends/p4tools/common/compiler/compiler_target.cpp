@@ -1,11 +1,11 @@
 #include "backends/p4tools/common/compiler/compiler_target.h"
 
+#include <functional>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "backends/p4tools/common/compiler/context.h"
-#include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/compiler/midend.h"
 #include "backends/p4tools/common/core/target.h"
 #include "frontends/common/applyOptionsPragmas.h"
@@ -18,13 +18,17 @@
 
 namespace P4Tools {
 
+const IR::P4Program &CompilerResult::getProgram() const { return program; }
+
+CompilerResult::CompilerResult(const IR::P4Program &program) : program(program) {}
+
 ICompileContext *CompilerTarget::makeContext() { return get().makeContextImpl(); }
 
 std::vector<const char *> *CompilerTarget::initCompiler(int argc, char **argv) {
     return get().initCompilerImpl(argc, argv);
 }
 
-std::optional<const IR::P4Program *> CompilerTarget::runCompiler() {
+CompilerResultOrError CompilerTarget::runCompiler() {
     const auto *program = P4Tools::CompilerTarget::runParser();
     if (program == nullptr) {
         return std::nullopt;
@@ -33,7 +37,7 @@ std::optional<const IR::P4Program *> CompilerTarget::runCompiler() {
     return runCompiler(program);
 }
 
-std::optional<const IR::P4Program *> CompilerTarget::runCompiler(const std::string &source) {
+CompilerResultOrError CompilerTarget::runCompiler(const std::string &source) {
     const auto *program = P4::parseP4String(source, P4CContext::get().options().langVersion);
     if (program == nullptr) {
         return std::nullopt;
@@ -42,12 +46,11 @@ std::optional<const IR::P4Program *> CompilerTarget::runCompiler(const std::stri
     return runCompiler(program);
 }
 
-std::optional<const IR::P4Program *> CompilerTarget::runCompiler(const IR::P4Program *program) {
+CompilerResultOrError CompilerTarget::runCompiler(const IR::P4Program *program) {
     return get().runCompilerImpl(program);
 }
 
-std::optional<const IR::P4Program *> CompilerTarget::runCompilerImpl(
-    const IR::P4Program *program) const {
+CompilerResultOrError CompilerTarget::runCompilerImpl(const IR::P4Program *program) const {
     const auto &self = get();
 
     program = self.runFrontend(program);
@@ -60,7 +63,7 @@ std::optional<const IR::P4Program *> CompilerTarget::runCompilerImpl(
         return std::nullopt;
     }
 
-    return program;
+    return *new CompilerResult(*program);
 }
 
 ICompileContext *CompilerTarget::makeContextImpl() const {
@@ -103,6 +106,7 @@ P4::FrontEnd CompilerTarget::mkFrontEnd() const { return {}; }
 MidEnd CompilerTarget::mkMidEnd(const CompilerOptions &options) const {
     MidEnd midEnd(options);
     midEnd.addDefaultPasses();
+    midEnd.setStopOnError(true);
     return midEnd;
 }
 
@@ -119,5 +123,4 @@ CompilerTarget::CompilerTarget(std::string deviceName, std::string archName)
     : Target("compiler", std::move(deviceName), std::move(archName)) {}
 
 const CompilerTarget &CompilerTarget::get() { return Target::get<CompilerTarget>("compiler"); }
-
 }  // namespace P4Tools

@@ -1,4 +1,4 @@
-issue3221.p4(8): [--Werror=type-error] error: (t1)a
+issue3221.p4(8): [--Werror=type-error] error: '(t1)a'
   return (t1)a;
          ^^^^^
   ---- Actual error:

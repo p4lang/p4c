@@ -183,7 +183,8 @@ Util::JsonObject *IntrospectionGenerator::genActionInfo(struct ActionAttributes 
         paramJson->emplace("name", param->name);
         switch (param->dataType) {
             case TC::BIT_TYPE: {
-                paramJson->emplace("type", "bit");
+                auto paramtype = "bit" + Util::toString(param->bitwidth);
+                paramJson->emplace("type", paramtype);
                 break;
             }
             case TC::DEV_TYPE: {
@@ -270,7 +271,6 @@ const Util::JsonObject *IntrospectionGenerator::genIntrospectionJson() {
     introspec.initIntrospectionInfo(tcPipeline);
     json->emplace("schema_version", introspec.schemaVersion);
     json->emplace("pipeline_name", introspec.pipelineName);
-    json->emplace("id", introspec.pipelineId);
     genTableJson(tablesJson);
     json->emplace("tables", tablesJson);
     return json;

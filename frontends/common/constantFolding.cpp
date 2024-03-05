@@ -87,6 +87,7 @@ const IR::Expression *DoConstantFolding::getConstant(const IR::Expression *expr)
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::PathExpression *e) {
+    if (const auto *r = policy->hook(*this, e)) return r;
     if (refMap == nullptr || assignmentTarget) return e;
     auto decl = refMap->getDeclaration(e->path);
     if (decl == nullptr) return e;
@@ -425,9 +426,9 @@ const IR::Node *DoConstantFolding::compare(const IR::Operation_Binary *e) {
                 auto ri = rlist->components.at(i);
                 const IR::Operation_Binary *tmp;
                 if (eqTest)
-                    tmp = new IR::Equ(li, ri);
+                    tmp = new IR::Equ(IR::Type_Boolean::get(), li, ri);
                 else
-                    tmp = new IR::Neq(li, ri);
+                    tmp = new IR::Neq(IR::Type_Boolean::get(), li, ri);
                 auto cmp = compare(tmp);
                 auto boolLit = cmp->to<IR::BoolLiteral>();
                 if (boolLit == nullptr) return e;
@@ -797,6 +798,9 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
         if (auto arg = expr->to<IR::Constant>()) {
             return cast(arg, arg->base, type);
         } else if (auto arg = expr->to<IR::BoolLiteral>()) {
+            if (type->isSigned || type->size != 1)
+                error(ErrorType::ERR_INVALID, "%1%: Cannot cast %1% directly to %2% (use bit<1>)",
+                      arg, type);
             int v = arg->value ? 1 : 0;
             return new IR::Constant(e->srcInfo, type, v, 10);
         } else if (expr->is<IR::Member>()) {
@@ -807,6 +811,16 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
             }
         } else {
             return e;
+        }
+    } else if (etype->is<IR::Type_InfInt>()) {
+        if (const auto *constant = expr->to<IR::Constant>()) {
+            const auto *ctype = constant->type;
+            if (!ctype->is<IR::Type_Bits>() && !ctype->is<IR::Type_InfInt>()) {
+                ::error(ErrorType::ERR_INVALID, "%1%: Cannot cast %1% to arbitrary presion integer",
+                        ctype);
+                return e;
+            }
+            return new IR::Constant(e->srcInfo, etype, constant->value, constant->base);
         }
     } else if (etype->is<IR::Type_Boolean>()) {
         if (expr->is<IR::BoolLiteral>()) return expr;
@@ -882,6 +896,7 @@ DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression *k
             return Result::No;
         }
         auto sel = getConstant(select);
+        BUG_CHECK(sel, "%1%: expected a constant expression", select);
         // For Enum and SerEnum instances we can just use expression equivalence.
         // This assumes that type checking does not allow us to compare constants to SerEnums.
         if (key->equiv(*sel)) return Result::Yes;
@@ -960,7 +975,8 @@ const IR::Node *DoConstantFolding::postorder(IR::SelectExpression *expression) {
             finished = true;
             if (someUnknown) {
                 if (!c->keyset->is<IR::DefaultExpression>()) changes = true;
-                auto newc = new IR::SelectCase(c->srcInfo, new IR::DefaultExpression(), c->state);
+                auto newc = new IR::SelectCase(
+                    c->srcInfo, new IR::DefaultExpression(expression->select->type), c->state);
                 cases.push_back(newc);
             } else {
                 // This is the result.

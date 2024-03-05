@@ -1,4 +1,4 @@
-action-bind2.p4(21): [--Werror=type-error] error: a: Parameter b must be bound
+action-bind2.p4(21): [--Werror=type-error] error: a(): Parameter b must be bound
         actions = { a; } // error: not enough arguments
                     ^
 action-bind2.p4(17)

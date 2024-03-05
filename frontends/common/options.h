@@ -21,7 +21,7 @@ limitations under the License.
 
 #include "parser_options.h"
 // for p4::P4RuntimeFormat definition
-#include "control-plane/p4RuntimeSerializer.h"
+#include "control-plane/p4RuntimeTypes.h"
 
 class CompilerOptions : public ParserOptions {
  protected:

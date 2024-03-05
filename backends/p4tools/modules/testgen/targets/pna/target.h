@@ -26,11 +26,13 @@ class PnaDpdkTestgenTarget : public TestgenTarget {
     static void make();
 
  protected:
-    const PnaDpdkProgramInfo *initProgramImpl(
-        const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const override;
+    const PnaDpdkProgramInfo *produceProgramInfoImpl(
+        const CompilerResult &compilerResult,
+        const IR::Declaration_Instance *mainDecl) const override;
 
-    PnaTestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                       const std::filesystem::path &testPath) const override;
+    PnaTestBackend *getTestBackendImpl(const ProgramInfo &programInfo,
+                                       const TestBackendConfiguration &testBackendConfiguration,
+                                       SymbolicExecutor &symbex) const override;
 
     PnaDpdkCmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                          const ProgramInfo &programInfo) const override;
@@ -38,12 +40,8 @@ class PnaDpdkTestgenTarget : public TestgenTarget {
     PnaDpdkExprStepper *getExprStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                            const ProgramInfo &programInfo) const override;
 
-    [[nodiscard]] const ArchSpec *getArchSpecImpl() const override;
-
  private:
     PnaDpdkTestgenTarget();
-
-    static const ArchSpec ARCH_SPEC;
 };
 
 }  // namespace P4Tools::P4Testgen::Pna

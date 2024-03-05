@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef IR_VECTOR_H_
 #define IR_VECTOR_H_
 
-#include "ir/dbprint.h"
 #include "ir/node.h"
 #include "lib/enumerator.h"
 #include "lib/null.h"
@@ -47,6 +46,8 @@ class VectorBase : public Node {
 
  protected:
     explicit VectorBase(JSONLoader &json) : Node(json) {}
+
+    DECLARE_TYPEINFO_WITH_TYPEID(VectorBase, NodeKind::VectorBase, Node);
 };
 
 // This class should only be used in the IR.
@@ -183,7 +184,7 @@ class Vector : public VectorBase {
      * than a concrete class, as most of those appear in .def files. */
     bool equiv(const Node &a_) const override {
         if (static_cast<const Node *>(this) == &a_) return true;
-        if (typeid(*this) != typeid(a_)) return false;
+        if (this->typeId() != a_.typeId()) return false;
         auto &a = static_cast<const Vector<T> &>(a_);
         if (size() != a.size()) return false;
         auto it = a.begin();
@@ -206,6 +207,8 @@ class Vector : public VectorBase {
         std::function<bool(const T *)> filter = [](const T *d) { return d->template is<S>(); };
         return getEnumerator()->where(filter)->template as<const S *>();
     }
+
+    DECLARE_TYPEINFO_WITH_DISCRIMINATOR(Vector<T>, NodeDiscriminator::VectorT, T, VectorBase);
 };
 
 }  // namespace IR

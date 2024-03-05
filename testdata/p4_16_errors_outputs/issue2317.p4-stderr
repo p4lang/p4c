@@ -1,4 +1,4 @@
-issue2317.p4(16): [--Werror=type-error] error: f and f cannot be compared
+issue2317.p4(16): [--Werror=type-error] error: f(x) and f(x) cannot be compared
     if (f(x) == f(x)) { }
         ^^^^
 issue2317.p4(16)
