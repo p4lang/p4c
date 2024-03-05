@@ -25,17 +25,15 @@ ResolutionContext::ResolutionContext() { anyOrder = P4CContext::get().options().
 const std::vector<const IR::IDeclaration *> &ResolutionContext::memoizeDeclarations(
     const IR::INamespace *ns) const {
     std::vector<const IR::IDeclaration *> decls;
-    if (auto nest = ns->to<IR::INestedNamespace>()) {
+    if (const auto *nest = ns->to<IR::INestedNamespace>()) {
         for (const auto *nn : nest->getNestedNamespaces()) {
-            auto nnDecls = nn->getDeclarations();
-            // FIXME: should just insert()
-            for (const auto *decl : *nnDecls) decls.push_back(decl);
+            auto *nnDecls = nn->getDeclarations();
+            decls.insert(decls.end(), nnDecls->begin(), nnDecls->end());
         }
     }
 
     auto *nsDecls = ns->getDeclarations();
-    // FIXME: should just insert()
-    for (const auto *decl : *nsDecls) decls.push_back(decl);
+    decls.insert(decls.end(), nsDecls->begin(), nsDecls->end());
 
     return (namespaceDecls[ns] = std::move(decls));
 }

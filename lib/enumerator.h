@@ -22,6 +22,7 @@ limitations under the License.
 
 #include <cstdint>
 #include <functional>
+#include <iterator>
 #include <list>
 #include <stdexcept>
 #include <type_traits>
@@ -39,15 +40,25 @@ class Enumerator;
 // This class provides support for C++-style range for loops
 // Enumerator<T>* e;
 // for (auto a : *e) ...
+// FIXME: It is not a proper iterator (see reference type above) and should be removed
+// in favor of more standard approach. Note that Enumerator<T>::getCurrent() always
+// returns element by value, so more or less suitable only copyable types that are cheap
+// to copy.
 template <typename T>
 class EnumeratorHandle {
  private:
-    Enumerator<T> *enumerator;  // when nullptr it represents end()
+    Enumerator<T> *enumerator = nullptr;  // when nullptr it represents end()
     explicit EnumeratorHandle(Enumerator<T> *enumerator) : enumerator(enumerator) {}
     friend class Enumerator<T>;
 
  public:
-    T operator*() const;
+    using iterator_category = std::input_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = T;
+    using reference = T;
+    using pointer = void;
+
+    reference operator*() const;
     const EnumeratorHandle<T> &operator++();
     bool operator!=(const EnumeratorHandle<T> &other) const;
 };
@@ -66,7 +77,7 @@ class Enumerator {
 
  public:
     Enumerator();
-    virtual ~Enumerator() {}
+    virtual ~Enumerator() = default;
 
     /* move to next element in the collection;
        return false if the next element does not exist */
