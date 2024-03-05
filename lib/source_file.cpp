@@ -311,3 +311,7 @@ cstring SourceFileLine::toString() const {
 }
 
 }  // namespace Util
+
+////////////////////////////////////////////////////////
+
+[[gnu::used]] void dbprint(const IHasDbPrint *o) { o->dbprint(std::cout); }

@@ -18,7 +18,9 @@ limitations under the License.
 
 #include <deque>
 #include <sstream>
+#include <string>
 
+#include "cstring.h"
 #include "exceptions.h"
 
 namespace Util {

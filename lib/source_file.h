@@ -21,7 +21,6 @@ limitations under the License.
 #ifndef LIB_SOURCE_FILE_H_
 #define LIB_SOURCE_FILE_H_
 
-#include <iostream>
 #include <map>
 #include <vector>
 
@@ -40,7 +39,7 @@ class IHasDbPrint {
  public:
     virtual void dbprint(std::ostream &out) const = 0;
     void print() const;  // useful in the debugger
-    virtual ~IHasDbPrint() {}
+    virtual ~IHasDbPrint() = default;
 };
 
 namespace Util {
@@ -319,7 +318,6 @@ class InputSources final {
 
 }  // namespace Util
 
-// FIXME: Do we really need to have this in header? This pulls the whole iostream header
-inline void dbprint(const IHasDbPrint *o) { o->dbprint(std::cout); }
+void dbprint(const IHasDbPrint *o);
 
 #endif /* LIB_SOURCE_FILE_H_ */
