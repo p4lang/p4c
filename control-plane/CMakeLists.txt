@@ -118,6 +118,9 @@ set_source_files_properties(
 )
 
 add_library(controlplane STATIC ${CONTROLPLANE_SRCS})
-target_link_libraries(controlplane PUBLIC ${CMAKE_THREAD_LIBS_INIT} PUBLIC controlplane-gen)
+target_link_libraries(controlplane
+  PUBLIC ${CMAKE_THREAD_LIBS_INIT}
+  PUBLIC controlplane-gen
+  PRIVATE absl::strings)
 
 add_dependencies(controlplane mkP4configdir ir-generated controlplane-gen frontend-parser-gen)
