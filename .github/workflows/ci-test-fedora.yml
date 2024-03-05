@@ -44,7 +44,7 @@ jobs:
     - name: Build p4c (Fedora Linux)
       run: |
         ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_UNITY_BUILD=ON
-        make -j2 -C build
+        make -j$((`nproc`+1)) -C build
 
     - name: Run p4c tests (Fedora Linux)
       # Need to use sudo for the eBPF kernel tests.
