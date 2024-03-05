@@ -314,4 +314,7 @@ cstring SourceFileLine::toString() const {
 
 ////////////////////////////////////////////////////////
 
-[[gnu::used]] void dbprint(const IHasDbPrint *o) { o->dbprint(std::cout); }
+[[gnu::used]]  // ensure linker will not drop function even if unused
+void dbprint(const IHasDbPrint *o) {
+    o->dbprint(std::cout);
+}
