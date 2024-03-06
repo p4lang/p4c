@@ -51,7 +51,10 @@ OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
 OPTION (BUILD_STATIC_RELEASE_SANS_GLIBC
        "Build a (mostly) statically linked release binary. Glibc is linked dynamically." OFF
 )
-if (BUILD_STATIC_RELEASE_SANS_GLIBC)
+OPTION (BUILD_STATIC_RELEASE_SANS_STDLIB
+       "Build a (mostly) statically linked release binary. Glibc and C++ standard library is linked dynamically." OFF
+)
+if (BUILD_STATIC_RELEASE_SANS_GLIBC OR BUILD_STATIC_RELEASE_SANS_STDLIB)
     # We want to optimize the binary size for a static release binary by default.
     set (_ENABLE_LTO_DEFAULT ON)
 else()
@@ -130,9 +133,15 @@ endif ()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Set the required options for a (mostly) static release build.
-if(BUILD_STATIC_RELEASE_SANS_GLIBC)
+if(BUILD_STATIC_RELEASE_SANS_GLIBC OR BUILD_STATIC_RELEASE_SANS_STDLIB)
+  if (BUILD_STATIC_RELEASE_SANS_GLIBC AND BUILD_STATIC_RELEASE_SANS_STDLIB)
+    message(WARNING "Both BUILD_STATIC_SANS_GLIBC and BUILD_STATIC_SANS_STDLIB enabled at once "
+      "using 'SANS_STDLIB' settings (dynamic glibc and c++ standard library).")
+  endif()
   message(STATUS "Building static release binaries")
-  message(WARNING "glibc is linked dynamically in current static builds.")
+  if (NOT BUILD_STATIC_RELEASE_SANS_STDLIB)
+    message(WARNING "glibc is linked dynamically in current static builds.")
+  endif()
   set(BUILD_SHARED_LIBS OFF)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
   # Link Boost statically
@@ -146,8 +155,11 @@ if(BUILD_STATIC_RELEASE_SANS_GLIBC)
   # and see whether static linking improves on Linux.
   # Do not bring in dynamic libstdcc and libgcc
   set(CMAKE_EXE_LINKER_FLAGS
-      "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -Wl,-z,muldefs"
+      "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -Wl,-z,muldefs"
   )
+  if (NOT BUILD_STATIC_RELEASE_SANS_STDLIB)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++")
+  endif()
   add_definitions(-DP4C_STATIC_BUILD)
 endif()
 
