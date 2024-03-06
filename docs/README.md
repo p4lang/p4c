@@ -30,13 +30,13 @@ p4c
 ├── test                      -- test code
 │   └── gtest                 -- unit test code written using gtest
 ├── tools                     -- external programs used in the build/test process
-│   ├── ci-ptf                --
-│   ├── debian-build          -- 
+│   ├── ci-ptf                -- Scripts to install VM and run tests in CI environment
+│   ├── debian-build          -- resouces and scripts for creating Ubuntu (or Debian) packages
 │   ├── driver                -- p4c compiler driver: a script that invokes various compilers
-│   ├── hooks                 -- 
+│   ├── hooks                 -- Contains git hooks
 |   ├── ir-generator          -- code for the IR C++ class hierarchy generator
-│   ├── iwyu_mappings         -- 
-│   ├── ptf                   -- 
+│   ├── iwyu_mappings         -- mappings used by the Include What You Use (IWYU) tool for analyzing #include directives in C and C++ source files
+│   ├── ptf                   -- includes PTF tests used to validate the P4 Runtime implementation on a single-device
 │   └── stf                   -- Python code to parse STF files (used for testing P4 programs)
 └── testdata                  -- test inputs and reference outputs
     ├── p4_16_samples         -- P4_16 input test programs
