@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <gtest/gtest.h>
 
+#include <filesystem>
 #include <optional>
 #include <string>
 
@@ -91,6 +92,9 @@ class P4CTestEnvironment {
 
     /// @return a string containing the "psa.p4" P4 standard header.
     const std::string &psaP4() const { return _psaP4; }
+
+    /// @return the path to the P4C project root.
+    static std::filesystem::path getProjectRoot();
 
  private:
     P4CTestEnvironment();

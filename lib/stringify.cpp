@@ -18,7 +18,9 @@ limitations under the License.
 
 #include <deque>
 #include <sstream>
+#include <string>
 
+#include "cstring.h"
 #include "exceptions.h"
 
 namespace Util {
@@ -122,7 +124,7 @@ cstring toString(cstring value) {
     return value;
 }
 
-cstring toString(StringRef value) { return value; }
+cstring toString(std::string_view value) { return cstring(value); }
 
 cstring printf_format(const char *fmt_str, ...) {
     if (fmt_str == nullptr) throw std::runtime_error("Null format string");

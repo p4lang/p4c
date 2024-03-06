@@ -1,1 +1,7 @@
+spec-ex31.p4(30): [--Wwarn=unused] warning: Parser GenericParser is not used; removing
+parser GenericParser(packet_in b,
+       ^^^^^^^^^^^^^
+spec-ex31.p4(26): [--Wwarn=unused] warning: Parser EthernetParser is not used; removing
+parser EthernetParser(packet_in b,
+       ^^^^^^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

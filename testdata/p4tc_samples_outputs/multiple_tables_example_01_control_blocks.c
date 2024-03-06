@@ -1,4 +1,6 @@
 #include "multiple_tables_example_01_parser.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
@@ -10,6 +12,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP 1
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
+#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
     unsigned int action;
     union {
@@ -31,6 +34,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP 1
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 4
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     unsigned int action;
     union {
@@ -151,6 +155,7 @@ struct MainControlImpl_set_ct_options_key_mask {
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_SYN_PACKET 5
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_FIN_OR_RST_PACKET 6
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_OTHER_PACKETS 7
+#define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_set_ct_options_value {
     unsigned int action;
     __u32 priority;
@@ -185,6 +190,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     hdr = &(hdrMd->cpumap_hdr);
     user_meta = &(hdrMd->cpumap_usermeta);
 {
@@ -196,7 +202,7 @@ if (/* hdr->ipv4.isValid() */
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 1
                     };
                     struct MainControlImpl_ipv4_tbl_1_key key = {};
@@ -232,14 +238,12 @@ if (hdr->ipv4.protocol == 6 && (hdr->tcp.srcPort > 0)) {
 
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAINCONTROLIMPL_IPV4_TBL_1_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
-if (hdr->ipv4.protocol == 6 && (hdr->tcp.srcPort > 0)) {
-/* drop_packet() */
-                            drop_packet();                        }
-
                     }
                 }
 ;
@@ -247,7 +251,7 @@ if (hdr->ipv4.protocol == 6 && (hdr->tcp.srcPort > 0)) {
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 2
                     };
                     struct MainControlImpl_ipv4_tbl_2_key key = {};
@@ -285,14 +289,12 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
 
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
-if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
-/* drop_packet() */
-                            drop_packet();                        }
-
                     }
                 }
 ;
@@ -300,7 +302,7 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 3
                     };
                     struct MainControlImpl_ipv4_tbl_3_key key = {};
@@ -342,8 +344,6 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                                 {
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
                         }
                     } else {
                     }
@@ -353,7 +353,7 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 4
                     };
                     struct MainControlImpl_ipv4_tbl_4_key key = {};
@@ -395,8 +395,6 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                                 {
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
                         }
                     } else {
                     }
@@ -406,7 +404,7 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 5
                     };
                     struct MainControlImpl_ipv4_tbl_5_key key = {};
@@ -431,8 +429,6 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                                 {
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
                         }
                     } else {
                     }
@@ -442,7 +438,7 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 6
                     };
                     struct MainControlImpl_set_ct_options_key key = {};
@@ -475,8 +471,10 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                                 {
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
                     }
@@ -486,7 +484,7 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 7
                     };
                     struct MainControlImpl_set_all_options_key key = {};
@@ -556,14 +554,8 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                                 {
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
                         }
                     } else {
-if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
-/* drop_packet() */
-                            drop_packet();                        }
-
                     }
                 }
 ;

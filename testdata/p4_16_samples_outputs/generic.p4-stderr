@@ -1,4 +1,10 @@
 generic.p4(17): [--Wwarn=unused] warning: 'T' is unused
 extern Crc16<T>
              ^
+generic.p4(27): [--Wwarn=unused] warning: Control q is not used; removing
+control q<S>(in S dt)
+        ^
+generic.p4(41): [--Wwarn=unused] warning: Control z is not used; removing
+control z<D1, T1>(X<D1> x, in D1 v, in T1 t)
+        ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

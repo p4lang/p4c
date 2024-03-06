@@ -3,7 +3,7 @@
 set -e
 
 TC="tc"
-$TC p4template create pipeline/ipip pipeid 1 numtables 1
+$TC p4template create pipeline/ipip numtables 1
 
 $TC p4template create action/ipip/Main/set_ipip actid 1 \
 	param src type ipv4 \

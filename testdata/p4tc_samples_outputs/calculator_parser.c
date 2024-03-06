@@ -1,5 +1,7 @@
 #include "calculator_parser.h"
 
+struct p4tc_filter_fields p4tc_filter_fields;
+
 static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
@@ -32,6 +34,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
         check_p4calc: {
             {
                 u8* hdr_start_save = hdr_start;
+                unsigned ebpf_packetOffsetInBits_save = ebpf_packetOffsetInBits;
                 if ((u8*)ebpf_packetEnd < hdr_start + BYTES(128 + 0)) {
                     ebpf_errorCode = PacketTooShort;
                     goto reject;
@@ -63,9 +66,11 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                 hdr_start += BYTES(128);
 
                 hdr_start = hdr_start_save;
+                ebpf_packetOffsetInBits = ebpf_packetOffsetInBits_save;
             }
             {
                 u8* hdr_start_save = hdr_start;
+                unsigned ebpf_packetOffsetInBits_save = ebpf_packetOffsetInBits;
                 if ((u8*)ebpf_packetEnd < hdr_start + BYTES(128 + 0)) {
                     ebpf_errorCode = PacketTooShort;
                     goto reject;
@@ -97,9 +102,11 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                 hdr_start += BYTES(128);
 
                 hdr_start = hdr_start_save;
+                ebpf_packetOffsetInBits = ebpf_packetOffsetInBits_save;
             }
             {
                 u8* hdr_start_save = hdr_start;
+                unsigned ebpf_packetOffsetInBits_save = ebpf_packetOffsetInBits;
                 if ((u8*)ebpf_packetEnd < hdr_start + BYTES(128 + 0)) {
                     ebpf_errorCode = PacketTooShort;
                     goto reject;
@@ -131,6 +138,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                 hdr_start += BYTES(128);
 
                 hdr_start = hdr_start_save;
+                ebpf_packetOffsetInBits = ebpf_packetOffsetInBits_save;
             }
             u32 select_0;
             select_0 = (((((u32)(((u16)tmp_0.p << 8) | ((u16)tmp_2.four & 0xff)) << 8) & ((1 << 24) - 1)) | (((u32)tmp_4.ver & 0xff) & ((1 << 24) - 1))) & ((1 << 24) - 1));
@@ -205,6 +213,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             if (ebpf_errorCode == 0) {
                 return TC_ACT_SHOT;
             }
+            compiler_meta__->parser_error = ebpf_errorCode;
             goto accept;
         }
 

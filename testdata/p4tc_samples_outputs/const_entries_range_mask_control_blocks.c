@@ -1,4 +1,6 @@
 #include "const_entries_range_mask_parser.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
@@ -10,6 +12,7 @@ struct __attribute__((__packed__)) MainControlImpl_t_range_key {
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_T_RANGE_ACT_MAINCONTROLIMPL_A 1
 #define MAINCONTROLIMPL_T_RANGE_ACT_MAINCONTROLIMPL_A_WITH_CONTROL_PARAMS 2
+#define MAINCONTROLIMPL_T_RANGE_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_t_range_value {
     unsigned int action;
     union {
@@ -42,6 +45,7 @@ static __always_inline int process(struct __sk_buff *skb, struct Header_t *h, st
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     h = &(hdrMd->cpumap_hdr);
     m = &(hdrMd->cpumap_usermeta);
 {
@@ -51,7 +55,7 @@ static __always_inline int process(struct __sk_buff *skb, struct Header_t *h, st
             {
                 /* construct key */
                 struct p4tc_table_entry_act_bpf_params__local params = {
-                    .pipeid = 1,
+                    .pipeid = p4tc_filter_fields.pipeid,
                     .tblid = 1
                 };
                 struct MainControlImpl_t_range_key key = {};
@@ -82,11 +86,12 @@ static __always_inline int process(struct __sk_buff *skb, struct Header_t *h, st
                                 h->h.t = value->u.MainControlImpl_a_with_control_params.x;
                             }
                             break;
-                        default:
-                            return TC_ACT_SHOT;
+                        case MAINCONTROLIMPL_T_RANGE_ACT_NOACTION: 
+                            {
+                            }
+                            break;
                     }
                 } else {
-                    h->h.e = 0;
                 }
             }
 ;

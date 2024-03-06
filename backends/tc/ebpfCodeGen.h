@@ -45,6 +45,7 @@ class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
     void emitTypes(EBPF::CodeBuilder *builder) const override;
     void emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) const override;
     void emitPipelineInstances(EBPF::CodeBuilder *builder) const override;
+    void emitP4TCFilterFields(EBPF::CodeBuilder *builder) const;
     cstring getProgramName() const;
 };
 
@@ -120,6 +121,7 @@ class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
  protected:
     void compileExtractField(const IR::Expression *expr, const IR::StructField *field,
                              unsigned hdrOffsetBits, EBPF::EBPFType *type) override;
+    void compileLookahead(const IR::Expression *destination) override;
 };
 
 class EBPFPnaParser : public EBPF::EBPFPsaParser {
@@ -127,6 +129,7 @@ class EBPFPnaParser : public EBPF::EBPFPsaParser {
     EBPFPnaParser(const EBPF::EBPFProgram *program, const IR::ParserBlock *block,
                   const P4::TypeMap *typeMap);
     void emit(EBPF::CodeBuilder *builder) override;
+    void emitRejectState(EBPF::CodeBuilder *) override;
 
     DECLARE_TYPEINFO(EBPFPnaParser, EBPF::EBPFPsaParser);
 };
@@ -158,7 +161,6 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
     void emitAction(EBPF::CodeBuilder *builder, cstring valueName,
                     cstring actionRunVariable) override;
     void emitValueActionIDNames(EBPF::CodeBuilder *builder) override;
-    void emitDefaultAction(EBPF::CodeBuilder *builder, cstring valueName);
     cstring p4ActionToActionIDName(const IR::P4Action *action) const;
 
     DECLARE_TYPEINFO(EBPFTablePNA, EBPF::EBPFTablePSA);
@@ -316,6 +318,7 @@ class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
     virtual cstring getParamName(const IR::PathExpression *);
     bool preorder(const IR::AssignmentStatement *a) override;
     void processMethod(const P4::ExternMethod *method) override;
+    bool preorder(const IR::Member *) override;
 };
 
 // Similar to class ActionTranslationVisitorPSA in backends/ebpf/psa/ebpfPsaControl.h

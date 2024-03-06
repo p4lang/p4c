@@ -626,6 +626,7 @@ const IR::Node *TypeInference::postorder(IR::P4Action *action) {
     bool foundDirectionless = false;
     for (auto p : action->parameters->parameters) {
         auto ptype = getType(p);
+        BUG_CHECK(ptype, "%1%: parameter type missing when it was found previously", p);
         if (ptype->is<IR::Type_Extern>())
             typeError("%1%: Action parameters cannot have extern types", p->type);
         if (p->direction == IR::Direction::None)
@@ -3073,7 +3074,7 @@ const IR::Node *TypeInference::postorder(IR::Slice *expression) {
     }
 
     auto e1type = getType(expression->e1);
-    if (e1type->is<IR::Type_SerEnum>()) {
+    if (e1type && e1type->is<IR::Type_SerEnum>()) {
         auto ei = EnumInstance::resolve(expression->e1, typeMap);
         CHECK_NULL(ei);
         auto sei = ei->to<SerEnumInstance>();
@@ -3084,7 +3085,7 @@ const IR::Node *TypeInference::postorder(IR::Slice *expression) {
         expression->e1 = sei->value;
     }
     auto e2type = getType(expression->e2);
-    if (e2type->is<IR::Type_SerEnum>()) {
+    if (e2type && e2type->is<IR::Type_SerEnum>()) {
         auto ei = EnumInstance::resolve(expression->e2, typeMap);
         CHECK_NULL(ei);
         auto sei = ei->to<SerEnumInstance>();
@@ -3325,8 +3326,10 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
     }
 
     if (auto *apply = type->to<IR::IApply>(); apply && member == IR::IApply::applyMethodName) {
-        auto methodType = apply->getApplyMethodType();
-        methodType = canonicalize(methodType)->to<IR::Type_Method>();
+        auto *methodType = apply->getApplyMethodType();
+        auto *canon = canonicalize(methodType);
+        if (!canon) return expression;
+        methodType = canon->to<IR::Type_Method>();
         if (methodType == nullptr) return expression;
         learn(methodType, this);
         setType(getOriginal(), methodType);
@@ -3427,6 +3430,7 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
     }
     auto method = actionCall->method;
     auto methodType = getType(method);
+    if (!methodType) return actionCall;  // error emitted in getType
     auto baseType = methodType->to<IR::Type_Action>();
     if (!baseType) {
         typeError("%1%: must be an action", method);

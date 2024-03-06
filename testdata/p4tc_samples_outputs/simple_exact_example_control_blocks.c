@@ -1,4 +1,6 @@
 #include "simple_exact_example_parser.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
@@ -10,6 +12,7 @@ struct __attribute__((__packed__)) ingress_nh_table_key {
 } __attribute__((aligned(8)));
 #define INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH 1
 #define INGRESS_NH_TABLE_ACT_INGRESS_DROP 2
+#define INGRESS_NH_TABLE_ACT_NOACTION 0
 struct __attribute__((__packed__)) ingress_nh_table_value {
     unsigned int action;
     union {
@@ -44,6 +47,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     hdr = &(hdrMd->cpumap_hdr);
     meta = &(hdrMd->cpumap_usermeta);
 {
@@ -53,7 +57,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             {
                 /* construct key */
                 struct p4tc_table_entry_act_bpf_params__local params = {
-                    .pipeid = 1,
+                    .pipeid = p4tc_filter_fields.pipeid,
                     .tblid = 1
                 };
                 struct ingress_nh_table_key key = {};
@@ -89,12 +93,12 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                                 drop_packet();
                             }
                             break;
-                        default:
-                            return TC_ACT_SHOT;
+                        case INGRESS_NH_TABLE_ACT_NOACTION: 
+                            {
+                            }
+                            break;
                     }
                 } else {
-/* drop_packet() */
-                    drop_packet();
                 }
             }
 ;

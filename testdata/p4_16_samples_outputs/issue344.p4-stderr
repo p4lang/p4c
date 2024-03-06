@@ -1,4 +1,7 @@
 issue344.p4(24): [--Wwarn=unused] warning: c: unused instance
 top(C<_>()) c;
             ^
+issue344.p4(17): [--Wwarn=unused] warning: Control C is not used; removing
+control C<H>() {
+        ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -354,6 +354,30 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                 if (defaultActionProperty->isConstant) {
                     tabledef->setDefaultMissConst(true);
                 }
+                bool directionParamPresent = false;
+                auto paramList = actionCall->action->getParameters();
+                for (auto param : paramList->parameters) {
+                    if (param->direction != IR::Direction::None) directionParamPresent = true;
+                }
+                if (!directionParamPresent) {
+                    auto i = 0;
+                    for (auto param : paramList->parameters) {
+                        auto defaultParam = new IR::TCDefaultActionParam();
+                        defaultParam->setParamName(param->name.originalName);
+                        auto defaultArg = methodexp->arguments->at(i++);
+                        if (auto constVal = defaultArg->expression->to<IR::Constant>()) {
+                            bool sign;
+                            if (const IR::Type_Bits *tb = constVal->type->to<IR::Type_Bits>()) {
+                                sign = tb->isSigned;
+                            } else {
+                                sign = false;
+                            }
+                            defaultParam->setDefaultValue(
+                                Util::toString(constVal->value, 0, sign, constVal->base));
+                        }
+                        tabledef->defaultMissActionParams.push_back(defaultParam);
+                    }
+                }
             }
         }
     }
@@ -524,7 +548,6 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
 void ConvertToBackendIR::postorder(const IR::P4Program *p) {
     if (p != nullptr) {
         tcPipeline->setPipelineName(pipelineName);
-        tcPipeline->setPipelineId(TC::DEFAULT_PIPELINE_ID);
         tcPipeline->setNumTables(tableCount);
     }
 }

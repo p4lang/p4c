@@ -1,4 +1,6 @@
 #include "nummask_annotation_example_parser.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
@@ -11,6 +13,7 @@ struct __attribute__((__packed__)) MainControlImpl_set_ct_options_key {
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_SYN_PACKET 1
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_FIN_OR_RST_PACKET 2
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_OTHER_PACKETS 3
+#define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_set_ct_options_value {
     unsigned int action;
     union {
@@ -44,19 +47,20 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     hdr = &(hdrMd->cpumap_hdr);
     meta = &(hdrMd->cpumap_usermeta);
 {
         u8 hit;
         {
-if (((u32)istd.input_port == 2 && /* hdr->ipv4.isValid() */
+if (((u32)skb->ifindex == 2 && /* hdr->ipv4.isValid() */
             hdr->ipv4.ebpf_valid) && /* hdr->tcp.isValid() */
             hdr->tcp.ebpf_valid) {
 /* set_ct_options_0.apply() */
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 1
                     };
                     struct MainControlImpl_set_ct_options_key key = {};
@@ -89,8 +93,10 @@ if (((u32)istd.input_port == 2 && /* hdr->ipv4.isValid() */
                                 {
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
                     }

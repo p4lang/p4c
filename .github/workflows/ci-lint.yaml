@@ -10,8 +10,6 @@ on:
 
 jobs:
   p4c-lint:
-    strategy:
-      fail-fast: false
     runs-on: ubuntu-20.04
     env:
       IMAGE_TYPE: test
@@ -20,7 +18,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
 
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1

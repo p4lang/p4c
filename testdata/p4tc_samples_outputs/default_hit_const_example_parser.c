@@ -1,5 +1,7 @@
 #include "default_hit_const_example_parser.h"
 
+struct p4tc_filter_fields p4tc_filter_fields;
+
 static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
@@ -156,6 +158,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             if (ebpf_errorCode == 0) {
                 return TC_ACT_SHOT;
             }
+            compiler_meta__->parser_error = ebpf_errorCode;
             goto accept;
         }
 

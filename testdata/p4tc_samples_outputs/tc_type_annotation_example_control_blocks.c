@@ -1,4 +1,6 @@
 #include "tc_type_annotation_example_parser.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
@@ -57,6 +59,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     hdr = &(hdrMd->cpumap_hdr);
     user_meta = &(hdrMd->cpumap_usermeta);
 {
@@ -68,7 +71,7 @@ if (/* hdr->ipv4.isValid() */
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 1
                     };
                     struct MainControlImpl_ipv4_tbl_1_key key = {};
@@ -107,8 +110,6 @@ if (/* hdr->ipv4.isValid() */
                                 {
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
                         }
                     } else {
                     }
@@ -118,7 +119,7 @@ if (/* hdr->ipv4.isValid() */
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 2
                     };
                     struct MainControlImpl_ipv4_tbl_2_key key = {};
@@ -143,8 +144,6 @@ if (/* hdr->ipv4.isValid() */
                                 {
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
                         }
                     } else {
                     }

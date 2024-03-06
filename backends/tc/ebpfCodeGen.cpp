@@ -54,6 +54,8 @@ void PNAEbpfGenerator::emitCommonPreamble(EBPF::CodeBuilder *builder) const {
 }
 
 void PNAEbpfGenerator::emitInternalStructures(EBPF::CodeBuilder *builder) const {
+    builder->appendLine("struct p4tc_filter_fields p4tc_filter_fields;");
+    builder->newline();
     builder->appendLine(
         "struct internal_metadata {\n"
         "    __u16 pkt_ether_type;\n"
@@ -90,6 +92,37 @@ void PNAEbpfGenerator::emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) con
     // additional field to avoid compiler errors when both headers and user_metadata are empty.
     builder->emitIndent();
     builder->append("__u8 __hook");
+    builder->endOfStatement(true);
+
+    builder->blockEnd(false);
+    builder->endOfStatement(true);
+    builder->newline();
+}
+
+void PNAEbpfGenerator::emitP4TCFilterFields(EBPF::CodeBuilder *builder) const {
+    builder->append("struct p4tc_filter_fields ");
+    builder->blockStart();
+
+    builder->emitIndent();
+    builder->appendFormat("__u32 pipeid");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u32 handle");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u32 classid");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u32 chain");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u32 blockid");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__be16 proto");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u16 prio");
     builder->endOfStatement(true);
 
     builder->blockEnd(false);
@@ -165,6 +198,8 @@ void PNAArchTC::emitParser(EBPF::CodeBuilder *builder) const {
     builder->appendFormat("#include \"%s\"", headerFile);
     builder->newline();
     builder->newline();
+    builder->appendLine("struct p4tc_filter_fields p4tc_filter_fields;");
+    builder->newline();
     pipeline->name = "tc-parse";
     pipeline->sectionName = "p4tc/parse";
     pipeline->functionName = pipeline->name.replace("-", "_") + "_func";
@@ -183,7 +218,7 @@ void PNAArchTC::emitHeader(EBPF::CodeBuilder *builder) const {
     PNAErrorCodesGen errorGen(builder);
     pipeline->program->apply(errorGen);
     emitGlobalHeadersMetadata(builder);
-    builder->newline();
+    emitP4TCFilterFields(builder);
     //  BPF map definitions.
     emitInstances(builder);
     EBPFHashAlgorithmTypeFactoryPNA::instance()->emitGlobals(builder);
@@ -233,6 +268,10 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->newline();
         builder->emitIndent();
         builder->appendFormat("unsigned %s = hdrMd->%s;", offsetVar.c_str(), offsetVar.c_str());
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("%s = %s + BYTES(%s);", headerStartVar.c_str(),
+                              packetStartVar.c_str(), offsetVar.c_str());
     }
     builder->newline();
     emitHeadersFromCPUMAP(builder);
@@ -497,6 +536,24 @@ void EBPFPnaParser::emit(EBPF::CodeBuilder *builder) {
     builder->blockEnd(true);
 }
 
+void EBPFPnaParser::emitRejectState(EBPF::CodeBuilder *builder) {
+    builder->emitIndent();
+    builder->appendFormat("if (%s == 0) ", program->errorVar.c_str());
+    builder->blockStart();
+    builder->target->emitTraceMessage(
+        builder, "Parser: Explicit transition to reject state, dropping packet..");
+    builder->emitIndent();
+    builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+    builder->emitIndent();
+    builder->appendFormat("compiler_meta__->parser_error = %s", program->errorVar.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("goto %s", IR::ParserState::accept.c_str());
+    builder->endOfStatement(true);
+}
+
 //  This code is similar to compileExtractField function in PsaStateTranslationVisitor.
 //  Handled TC "macaddr" annotation.
 void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
@@ -650,6 +707,34 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     }
 
     builder->newline();
+}
+
+void PnaStateTranslationVisitor::compileLookahead(const IR::Expression *destination) {
+    cstring msgStr = Util::printf_format("Parser: lookahead for %s %s",
+                                         state->parser->typeMap->getType(destination)->toString(),
+                                         destination->toString());
+    builder->target->emitTraceMessage(builder, msgStr.c_str());
+
+    builder->emitIndent();
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("u8* %s_save = %s", state->parser->program->headerStartVar.c_str(),
+                          state->parser->program->headerStartVar.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("unsigned %s_save = %s", state->parser->program->offsetVar.c_str(),
+                          state->parser->program->offsetVar.c_str());
+    builder->endOfStatement(true);
+    compileExtract(destination);
+    builder->emitIndent();
+    builder->appendFormat("%s = %s_save", state->parser->program->headerStartVar.c_str(),
+                          state->parser->program->headerStartVar.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("%s = %s_save", state->parser->program->offsetVar.c_str(),
+                          state->parser->program->offsetVar.c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
 }
 
 // =====================EBPFTablePNA=============================
@@ -807,10 +892,13 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
     builder->emitIndent();
     builder->appendFormat("switch (%s->action) ", valueName.c_str());
     builder->blockStart();
+    bool noActionGenerated = false;
 
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->checkedTo<IR::P4Action>();
+        if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name)
+            noActionGenerated = true;
         cstring name = EBPF::EBPFObject::externalName(action), msgStr, convStr;
         builder->emitIndent();
         cstring actionName = p4ActionToActionIDName(action);
@@ -850,16 +938,22 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
         builder->appendLine("break;");
         builder->decreaseIndent();
     }
-
-    builder->emitIndent();
-    builder->appendLine("default:");
-    builder->increaseIndent();
-    builder->target->emitTraceMessage(builder, "Control: Invalid action type, aborting");
-
-    builder->emitIndent();
-    builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
-    builder->endOfStatement(true);
-    builder->decreaseIndent();
+    if (!noActionGenerated) {
+        cstring noActionName = P4::P4CoreLibrary::instance().noAction.name;
+        cstring tableInstance = dataMapName;
+        cstring actionName =
+            Util::printf_format("%s_ACT_%s", tableInstance.toUpper(), noActionName.toUpper());
+        builder->emitIndent();
+        builder->appendFormat("case %s: ", actionName);
+        builder->newline();
+        builder->increaseIndent();
+        builder->emitIndent();
+        builder->blockStart();
+        builder->blockEnd(true);
+        builder->emitIndent();
+        builder->appendLine("break;");
+        builder->decreaseIndent();
+    }
 
     builder->blockEnd(true);
 
@@ -871,13 +965,8 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
 
     builder->blockEnd(false);
     builder->appendFormat(" else ");
-    if (dropOnNoMatchingEntryFound()) {
-        builder->target->emitTraceMessage(builder, "Control: Entry not found, aborting");
-        emitDefaultAction(builder, valueName);
-    } else {
-        builder->target->emitTraceMessage(builder,
-                                          "Control: Entry not found, executing implicit NoAction");
-    }
+    builder->blockStart();
+    builder->blockEnd(true);
 }
 
 void EBPFTablePNA::emitInitializer(EBPF::CodeBuilder *builder) {
@@ -900,44 +989,28 @@ void EBPFTablePNA::emitDefaultActionStruct(EBPF::CodeBuilder *builder) {
     }
 }
 
-void EBPFTablePNA::emitDefaultAction(EBPF::CodeBuilder *builder, cstring valueName) {
-    const IR::P4Table *t = table->container;
-    const IR::Expression *default_action = t->getDefaultAction();
-    bool visitDefaultAction = false;
-    if (default_action) {
-        if (auto mc = default_action->to<IR::MethodCallExpression>()) {
-            default_action = mc->method;
-        }
-        auto path = default_action->to<IR::PathExpression>();
-        BUG_CHECK(path, "Default action path %1% cannot be found", default_action);
-        if (auto defaultActionDecl =
-                program->refMap->getDeclaration(path->path)->to<IR::P4Action>()) {
-            if (defaultActionDecl->name.originalName != "NoAction") {
-                visitDefaultAction = true;
-                auto visitor = createActionTranslationVisitor(valueName, program);
-                visitor->setBuilder(builder);
-                visitor->copySubstitutions(codeGen);
-                visitor->copyPointerVariables(codeGen);
-                defaultActionDecl->apply(*visitor);
-                builder->newline();
-            }
-        }
-    }
-    if (visitDefaultAction == false) {
-        builder->blockStart();
-        builder->blockEnd(true);
-    }
-}
-
 void EBPFTablePNA::emitValueActionIDNames(EBPF::CodeBuilder *builder) {
     // create type definition for action
     builder->emitIndent();
+    bool noActionGenerated = false;
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->checkedTo<IR::P4Action>();
+        if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name)
+            noActionGenerated = true;
         unsigned int action_idx = tcIR->getActionId(tcIR->externalName(action));
         builder->emitIndent();
         builder->appendFormat("#define %s %d", p4ActionToActionIDName(action), action_idx);
+        builder->newline();
+    }
+    if (!noActionGenerated) {
+        cstring noActionName = P4::P4CoreLibrary::instance().noAction.name;
+        cstring tableInstance = dataMapName;
+        cstring actionName =
+            Util::printf_format("%s_ACT_%s", tableInstance.toUpper(), noActionName.toUpper());
+        unsigned int action_idx = tcIR->getActionId(noActionName);
+        builder->emitIndent();
+        builder->appendFormat("#define %s %d", actionName, action_idx);
         builder->newline();
     }
     builder->emitIndent();
@@ -1306,6 +1379,26 @@ ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *c
       EBPF::ControlBodyTranslator(control),
       tcIR(tcIR) {}
 
+bool ControlBodyTranslatorPNA::preorder(const IR::Member *m) {
+    if ((m->expr != nullptr) && (m->expr->type != nullptr)) {
+        if (auto st = m->expr->type->to<IR::Type_Struct>()) {
+            if (st->name == "pna_main_input_metadata_t") {
+                if (m->member.name == "input_port") {
+                    builder->append("skb->ifindex");
+                    return false;
+                } else if (m->member.name == "parser_error") {
+                    builder->append("compiler_meta__->parser_error");
+                    return false;
+                } else {
+                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                            "%1%: this metadata field is not supported", m);
+                }
+            }
+        }
+    }
+    return CodeGenInspector::preorder(m);
+}
+
 ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
                                                    const ConvertToBackendIR *tcIR,
                                                    const EBPF::EBPFTablePSA *table)
@@ -1316,17 +1409,6 @@ ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *c
 
 cstring ControlBodyTranslatorPNA::getParamName(const IR::PathExpression *expr) {
     return expr->path->name.name;
-}
-
-bool ControlBodyTranslatorPNA::checkPnaPortMem(const IR::Member *m) {
-    if (m->expr != nullptr && m->expr->type != nullptr) {
-        if (auto str_type = m->expr->type->to<IR::Type_Struct>()) {
-            if (str_type->name == "pna_main_input_metadata_t" && m->member.name == "input_port") {
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *function) {
@@ -1343,12 +1425,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         for (auto a : *function->expr->arguments) {
             if (!first) builder->append(", ");
             first = false;
-            if (a->expression->is<IR::Member>() &&
-                checkPnaPortMem(a->expression->to<IR::Member>())) {
-                builder->append("skb->ifindex");
-            } else {
-                visit(a);
-            }
+            visit(a);
         }
         builder->append(")");
         return;
@@ -1360,7 +1437,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->appendLine(
                 "struct p4tc_table_entry_create_bpf_params__local update_params = {");
             builder->emitIndent();
-            builder->appendLine("    .pipeid = 1,");
+            builder->appendLine("    .pipeid = p4tc_filter_fields.pipeid,");
             builder->emitIndent();
             auto controlName = control->controlBlock->getName().originalName;
             /* Table instanceName is control_block_name + "_" + original table name.
@@ -1415,7 +1492,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
         builder->emitIndent();
         builder->appendLine("struct p4tc_table_entry_act_bpf_params__local params = {");
         builder->emitIndent();
-        builder->appendLine("    .pipeid = 1,");
+        builder->appendLine("    .pipeid = p4tc_filter_fields.pipeid,");
         builder->emitIndent();
         auto tblId = tcIR->getTableId(method->object->getName().originalName);
         BUG_CHECK(tblId != 0, "Table ID not found");
@@ -1465,16 +1542,12 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                 }
             }
 
-            auto mem = c->expression->to<IR::Member>();
             builder->emitIndent();
             if (memcpy) {
                 builder->appendFormat("__builtin_memcpy(&(%s.%s[0]), &(", keyname.c_str(),
                                       fieldName.c_str());
                 table->codeGen->visit(c->expression);
                 builder->appendFormat("[0]), %d)", scalar->bytesRequired());
-            } else if (mem && checkPnaPortMem(mem)) {
-                builder->appendFormat("%s.%s = ", keyname.c_str(), fieldName.c_str());
-                builder->append("skb->ifindex");
             } else {
                 builder->appendFormat("%s.%s = ", keyname.c_str(), fieldName.c_str());
                 if (isLPMKeyBigEndian) builder->appendFormat("%s(", swap.c_str());

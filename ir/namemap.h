@@ -24,6 +24,7 @@ limitations under the License.
 #include "lib/enumerator.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
+#include "lib/map.h"
 
 class JSONLoader;
 

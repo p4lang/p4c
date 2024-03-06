@@ -28,6 +28,7 @@ limitations under the License.
 #include "lib/big_int_util.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
+#include "lib/map.h"
 #include "lib/ordered_map.h"
 
 namespace Test {
@@ -99,9 +100,6 @@ class JsonValue final : public IJson {
         if (kind == Kind::String || kind == Kind::Number)
             throw std::logic_error("Incorrect constructor called");
     }
-
-    static big_int makeValue(long long v);
-    static big_int makeValue(unsigned long long v);
 
     const Kind tag;
     const big_int value = 0;

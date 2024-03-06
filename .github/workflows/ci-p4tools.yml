@@ -16,8 +16,6 @@ concurrency:
 jobs:
   # Build and test p4tools on Ubuntu 22.04.
   build-and-test-tools:
-    strategy:
-      fail-fast: false
     runs-on: ubuntu-22.04
     env:
       CTEST_PARALLEL_LEVEL: 4

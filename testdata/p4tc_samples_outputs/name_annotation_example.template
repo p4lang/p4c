@@ -3,7 +3,7 @@
 set -e
 
 TC="tc"
-$TC p4template create pipeline/name_annotation_example pipeid 1 numtables 2
+$TC p4template create pipeline/name_annotation_example numtables 2
 
 $TC p4template create action/name_annotation_example/MainControlImpl/next_hop actid 1 \
 	param vport type bit32

@@ -1,0 +1,3 @@
+issue1914-2.p4(83): [--Wwarn=unused] warning: Control verifyChecksum is not used; removing
+control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
+        ^^^^^^^^^^^^^^

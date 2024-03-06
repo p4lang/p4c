@@ -1,0 +1,6 @@
+issue1304.p4(32): [--Wwarn=unused] warning: Control MyVerifyChecksum is not used; removing
+control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
+        ^^^^^^^^^^^^^^^^
+issue1304.p4(54): [--Wwarn=unused] warning: Control MyComputeChecksum is not used; removing
+control MyComputeChecksum(inout my_packet p, inout my_metadata m) {
+        ^^^^^^^^^^^^^^^^^

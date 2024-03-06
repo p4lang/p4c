@@ -1,4 +1,6 @@
 #include "ipip_parser.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
@@ -11,6 +13,7 @@ struct __attribute__((__packed__)) Main_fwd_table_key {
 #define MAIN_FWD_TABLE_ACT_MAIN_SET_IPIP 1
 #define MAIN_FWD_TABLE_ACT_MAIN_SET_NH 2
 #define MAIN_FWD_TABLE_ACT_MAIN_DROP 3
+#define MAIN_FWD_TABLE_ACT_NOACTION 0
 struct __attribute__((__packed__)) Main_fwd_table_value {
     unsigned int action;
     union {
@@ -49,6 +52,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     hdr = &(hdrMd->cpumap_hdr);
     meta = &(hdrMd->cpumap_usermeta);
 {
@@ -60,7 +64,7 @@ if (/* hdr->outer.isValid() */
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 1
                     };
                     struct Main_fwd_table_key key = {};
@@ -105,12 +109,12 @@ if (/* hdr->outer.isValid() */
                                     drop_packet();
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAIN_FWD_TABLE_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
-/* drop_packet() */
-                        drop_packet();
                     }
                 }
 ;

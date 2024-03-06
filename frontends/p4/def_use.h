@@ -17,14 +17,15 @@ limitations under the License.
 #ifndef FRONTENDS_P4_DEF_USE_H_
 #define FRONTENDS_P4_DEF_USE_H_
 
-#include <typeindex>  // IWYU pragma: keep
-#include <unordered_set>
-
-#include "frontends/p4/typeChecking/typeChecker.h"
+#include "absl/container/flat_hash_set.h"
+#include "absl/container/inlined_vector.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 #include "lib/alloc_trace.h"
+#include "lib/hash.h"
 #include "lib/hvec_map.h"
 #include "lib/ordered_set.h"
+#include "typeMap.h"
 
 namespace P4 {
 
@@ -129,7 +130,7 @@ class StructLocation : public WithFieldsLocation {
 /// Interface for locations that support an index operation
 class IndexedLocation : public StorageLocation {
  protected:
-    std::vector<const StorageLocation *> elements;
+    absl::InlinedVector<const StorageLocation *, 8> elements;
     friend class StorageFactory;
 
     void createElement(unsigned index, StorageLocation *element) {
@@ -145,8 +146,8 @@ class IndexedLocation : public StorageLocation {
         elements.resize(it->getSize());
     }
     void addElement(unsigned index, LocationSet *result) const;
-    std::vector<const StorageLocation *>::const_iterator begin() const { return elements.cbegin(); }
-    std::vector<const StorageLocation *>::const_iterator end() const { return elements.cend(); }
+    auto begin() const { return elements.cbegin(); }
+    auto end() const { return elements.cend(); }
 
     DECLARE_TYPEINFO(IndexedLocation, StorageLocation);
 };
@@ -278,14 +279,14 @@ class ProgramPoint : public IHasDbPrint {
     /// the previous context.  E.g., a stack [Function] is the context before
     /// the function, while [Function, nullptr] is the context after the
     /// function terminates.
-    std::vector<const IR::Node *> stack;
+    absl::InlinedVector<const IR::Node *, 8> stack;  // Has inline space for 8 nodes
 
  public:
     ProgramPoint() = default;
     ProgramPoint(const ProgramPoint &other) : stack(other.stack) {}
     explicit ProgramPoint(const IR::Node *node) {
         CHECK_NULL(node);
-        stack.push_back(node);
+        assign(node);
     }
     ProgramPoint(const ProgramPoint &context, const IR::Node *node);
     /// A point logically before the function/control/action start.
@@ -313,10 +314,13 @@ class ProgramPoint : public IHasDbPrint {
                 out << "[[" << l << "]]";
         }
     }
+    void assign(const ProgramPoint &context, const IR::Node *node);
+    void assign(const IR::Node *node) { stack.assign({node}); }
+    void clear() { stack.clear(); }
     const IR::Node *last() const { return stack.empty() ? nullptr : stack.back(); }
     bool isBeforeStart() const { return stack.empty(); }
-    std::vector<const IR::Node *>::const_iterator begin() const { return stack.begin(); }
-    std::vector<const IR::Node *>::const_iterator end() const { return stack.end(); }
+    auto begin() const { return stack.begin(); }
+    auto end() const { return stack.end(); }
     ProgramPoint &operator=(const ProgramPoint &) = default;
     ProgramPoint &operator=(ProgramPoint &&) = default;
 };
@@ -332,9 +336,16 @@ struct hash<P4::ProgramPoint> {
 };
 }  // namespace std
 
+namespace Util {
+template <>
+struct Hasher<P4::ProgramPoint> {
+    size_t operator()(const P4::ProgramPoint &p) const { return p.hash(); }
+};
+}  // namespace Util
+
 namespace P4 {
 class ProgramPoints : public IHasDbPrint {
-    typedef std::unordered_set<ProgramPoint> Points;
+    typedef absl::flat_hash_set<ProgramPoint, Util::Hash> Points;
     Points points;
     explicit ProgramPoints(const Points &points) : points(points) {}
 
@@ -342,6 +353,7 @@ class ProgramPoints : public IHasDbPrint {
     ProgramPoints() = default;
     explicit ProgramPoints(ProgramPoint point) { points.emplace(point); }
     void add(ProgramPoint point) { points.emplace(point); }
+    void add(const ProgramPoints *from);
     const ProgramPoints *merge(const ProgramPoints *with) const;
     bool operator==(const ProgramPoints &other) const;
     void dbprint(std::ostream &out) const override {

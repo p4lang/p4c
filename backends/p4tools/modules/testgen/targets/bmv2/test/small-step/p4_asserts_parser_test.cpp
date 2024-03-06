@@ -142,7 +142,7 @@ TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInAction) {
         false);
     ASSERT_EQ(parsingResult.size(), (unsigned long)3);
     const auto *expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
-        IR::Type_Bits::get(8), "ingress.table_1_arg_ingress.MyAction10");
+        IR::Type_Bits::get(8), "ingress.table_1_ingress.MyAction1_arg_input_val");
     const auto *expr2 = P4Tools::ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(8),
                                                                      "ingress.table_1_key_h.h.a");
     auto *operation = new IR::Equ(expr1, expr2);

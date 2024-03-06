@@ -1,4 +1,6 @@
 #include "set_entry_timer_example_parser.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
@@ -11,6 +13,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP 1
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
+#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
     unsigned int action;
     union {
@@ -31,6 +34,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP 1
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 3
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     unsigned int action;
     union {
@@ -62,6 +66,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     hdr = &(hdrMd->cpumap_hdr);
     user_meta = &(hdrMd->cpumap_usermeta);
 {
@@ -73,7 +78,7 @@ if (/* hdr->ipv4.isValid() */
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 1
                     };
                     struct MainControlImpl_ipv4_tbl_1_key key = {};
@@ -100,7 +105,7 @@ if (/* hdr->ipv4.isValid() */
 /* set_entry_expire_time(2) */
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
-                                        .pipeid = 1,
+                                        .pipeid = p4tc_filter_fields.pipeid,
                                         .tblid = 1,
                                         .aging_ms = 2
                                     };
@@ -114,12 +119,12 @@ if (/* hdr->ipv4.isValid() */
                                     drop_packet();
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAINCONTROLIMPL_IPV4_TBL_1_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
-/* drop_packet() */
-                        drop_packet();
                     }
                 }
 ;
@@ -127,7 +132,7 @@ if (/* hdr->ipv4.isValid() */
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 2
                     };
                     struct MainControlImpl_ipv4_tbl_2_key key = {};
@@ -155,7 +160,7 @@ if (/* hdr->ipv4.isValid() */
 /* set_entry_expire_time(2) */
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
-                                        .pipeid = 1,
+                                        .pipeid = p4tc_filter_fields.pipeid,
                                         .tblid = 2,
                                         .aging_ms = 2
                                     };
@@ -169,12 +174,12 @@ if (/* hdr->ipv4.isValid() */
                                     drop_packet();
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
-/* drop_packet() */
-                        drop_packet();
                     }
                 }
 ;

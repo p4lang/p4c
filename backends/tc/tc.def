@@ -45,6 +45,29 @@ class TCKernelMetadata {
     dbprint { out << toString(); }
 }
 
+class TCDefaultActionParam {
+    cstring paramName;
+    cstring defaultValue;
+    void setParamName(cstring pN) {
+        paramName = pN;
+    }
+    void setDefaultValue(cstring dV) {
+        defaultValue = dV;
+    }
+    TCDefaultActionParam() {
+        paramName = nullptr;
+        defaultValue = nullptr;
+    }
+    toString {
+        std::string tcActionParam = "";
+        tcActionParam += " param ";
+        tcActionParam += paramName;
+        tcActionParam += " " + defaultValue;
+        return tcActionParam;
+    }
+    dbprint { out << toString(); }
+}
+
 class TCActionParam {
     cstring paramName;
     unsigned dataType;
@@ -176,11 +199,10 @@ class TCTable {
     unsigned tableEntriesCount;
     unsigned numMask;
     unsigned matchType;
-    TCAction preaction;
-    TCAction postaction;
     TCAction defaultHitAction;
     bool isDefaultHitConst;
     TCAction defaultMissAction;
+    optional safe_vector<TCDefaultActionParam> defaultMissActionParams;
     bool isDefaultMissConst;
     ordered_map<TCAction, unsigned> actionList;
     safe_vector<TCEntry> const_entries;
@@ -196,12 +218,6 @@ class TCTable {
     }
     void setMatchType(unsigned m) {
         matchType = m;
-    }
-    void setPreaction(TCAction p) {
-        preaction = p;
-    }
-    void setPostaction(TCAction p) {
-        postaction = p;
     }
     void setDefaultHitAction(TCAction d) {
         defaultHitAction = d;
@@ -245,8 +261,6 @@ class TCTable {
         tableEntriesCount = TC::DEFAULT_TABLE_ENTRIES;
         numMask = TC::DEFAULT_KEY_MASK;
         matchType = TC::EXACT_TYPE;
-        preaction = nullptr;
-        postaction = nullptr;
         defaultHitAction = nullptr;
         defaultMissAction = nullptr;
         isDefaultHitConst = false;
@@ -278,19 +292,6 @@ class TCTable {
                 }
             }
         }
-
-        if (preaction != nullptr) {
-            tcTable += "\n" + preaction->toString();
-            tcTable += "\n$TC p4template update table/" + pipelineName
-                      + "/" + controlName + "/" + tableName
-                      + " preactions action " + preaction->getName();
-        }
-        if (postaction != nullptr) {
-            tcTable += "\n" + postaction->toString();
-            tcTable += "\n$TC p4template update table/" + pipelineName
-                      + "/" + controlName + "/" + tableName
-                      + " postactions action " + postaction->getName();
-        }
         if (defaultHitAction != nullptr) {
             tcTable += "\n$TC p4template update table/" + pipelineName
                       + "/" + controlName + "/" + tableName
@@ -308,6 +309,9 @@ class TCTable {
                 tcTable += " permissions 0x1024";
             }
             tcTable += " action " + defaultMissAction->getName();
+            for (auto param : defaultMissActionParams) {
+                tcTable += param->toString();
+            }
         }
         if (const_entries.size() != 0) {
             for (auto entry : const_entries) {
@@ -326,7 +330,6 @@ class TCTable {
 
 class TCPipeline {
     cstring pipelineName;
-    unsigned pipelineId;
     unsigned numTables;
     safe_vector<TCAction> actionDefs;
     safe_vector<TCTable> tableDefs;
@@ -334,9 +337,6 @@ class TCPipeline {
     TCAction postaction;
     void setPipelineName(cstring pName) {
         pipelineName = pName;
-    }
-    void setPipelineId(unsigned p) {
-        pipelineId = p;
     }
     void setNumTables(unsigned n) {
         numTables = n;
@@ -365,8 +365,7 @@ class TCPipeline {
         std::string tcCode = "#!/bin/bash -x\n";
         tcCode += "\nset -e\n";
         tcCode += "\nTC=\"tc\"";
-        tcCode += "\n$TC p4template create pipeline/" + pipelineName + " pipeid ";
-        tcCode += Util::toString(pipelineId);
+        tcCode += "\n$TC p4template create pipeline/" + pipelineName;
         tcCode += " numtables ";
         tcCode += Util::toString(numTables);
         if (!actionDefs.empty()) {

@@ -50,6 +50,15 @@ struct hdr_md {
     __u8 __hook;
 };
 
+struct p4tc_filter_fields {
+    __u32 pipeid;
+    __u32 handle;
+    __u32 classid;
+    __u32 chain;
+    __u32 blockid;
+    __be16 proto;
+    __u16 prio;
+};
 
 REGISTER_START()
 REGISTER_TABLE(hdr_md_cpumap, BPF_MAP_TYPE_PERCPU_ARRAY, u32, struct hdr_md, 2)

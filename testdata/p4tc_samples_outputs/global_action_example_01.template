@@ -3,7 +3,7 @@
 set -e
 
 TC="tc"
-$TC p4template create pipeline/global_action_example_01 pipeid 1 numtables 2
+$TC p4template create pipeline/global_action_example_01 numtables 2
 
 $TC p4template create action/global_action_example_01/send_nh actid 1 \
 	param port_id type dev \

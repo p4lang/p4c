@@ -35,7 +35,7 @@ void ReferenceMap::clear() {
     program = nullptr;
     used.clear();
     thisToDeclaration.clear();
-    for (auto &reserved : P4::reservedWords) usedNames.insert({reserved, 0});
+    for (auto &reserved : P4::reservedWords) usedNames.emplace(reserved, 0);
     ProgramMap::clear();
 }
 
@@ -43,7 +43,7 @@ void ReferenceMap::setDeclaration(const IR::Path *path, const IR::IDeclaration *
     CHECK_NULL(path);
     CHECK_NULL(decl);
     LOG3("Resolved " << dbp(path) << " to " << dbp(decl));
-    auto previous = get(pathToDeclaration, path);
+    const auto *previous = get(pathToDeclaration, path);
     if (previous != nullptr && previous != decl)
         BUG("%1% already resolved to %2% instead of %3%", dbp(path), dbp(previous),
             dbp(decl->getNode()));
@@ -56,7 +56,7 @@ void ReferenceMap::setDeclaration(const IR::This *pointer, const IR::IDeclaratio
     CHECK_NULL(pointer);
     CHECK_NULL(decl);
     LOG3("Resolved " << dbp(pointer) << " to " << dbp(decl));
-    auto previous = get(thisToDeclaration, pointer);
+    const auto *previous = get(thisToDeclaration, pointer);
     if (previous != nullptr && previous != decl)
         BUG("%1% already resolved to %2% instead of %3%", dbp(pointer), dbp(previous), dbp(decl));
     thisToDeclaration.emplace(pointer, decl);
@@ -64,7 +64,7 @@ void ReferenceMap::setDeclaration(const IR::This *pointer, const IR::IDeclaratio
 
 const IR::IDeclaration *ReferenceMap::getDeclaration(const IR::This *pointer, bool notNull) const {
     CHECK_NULL(pointer);
-    auto result = get(thisToDeclaration, pointer);
+    const auto *result = get(thisToDeclaration, pointer);
 
     if (result)
         LOG3("Looking up " << dbp(pointer) << " found " << dbp(result));
@@ -77,7 +77,7 @@ const IR::IDeclaration *ReferenceMap::getDeclaration(const IR::This *pointer, bo
 
 const IR::IDeclaration *ReferenceMap::getDeclaration(const IR::Path *path, bool notNull) const {
     CHECK_NULL(path);
-    auto result = get(pathToDeclaration, path);
+    const auto *result = get(pathToDeclaration, path);
 
     if (result)
         LOG3("Looking up " << dbp(path) << " found " << dbp(result));
@@ -108,7 +108,7 @@ cstring ReferenceMap::newName(cstring base) {
 
     cstring name = base;
     if (usedNames.count(name)) name = cstring::make_unique(usedNames, name, usedNames[base], '_');
-    usedNames.insert({name, 0});
+    usedNames.emplace(name, 0);
     return name;
 }
 
@@ -127,7 +127,7 @@ cstring MinimalNameGenerator::newName(cstring base) {
 
     cstring name = base;
     if (usedNames.count(name)) name = cstring::make_unique(usedNames, name, usedNames[base], '_');
-    usedNames.insert({name, 0});
+    usedNames.emplace(name, 0);
     return name;
 }
 

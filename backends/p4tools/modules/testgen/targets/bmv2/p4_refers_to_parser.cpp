@@ -2,13 +2,11 @@
 
 #include <cstddef>
 #include <sstream>
-#include <string>
 
+#include "backends/p4tools/common/control_plane/symbolic_variables.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
-#include "ir/indexed_vector.h"
-#include "ir/ir-generated.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
@@ -85,10 +83,8 @@ const IR::SymbolicVariable *RefersToParser::lookUpKeyInTable(const IR::P4Table &
         // Some hidden tables do not have any key name annotations.
         BUG_CHECK(nameAnnot != nullptr, "Refers-to table key without a name annotation");
         if (keyReference == nameAnnot->getName()) {
-            // TODO: Move this assembly into a library.
-            auto referredKeyName = srcTable.controlPlaneName() + "_key_" + keyReference;
-            return ToolsVariables::getSymbolicVariable(keyElement->expression->type,
-                                                       referredKeyName);
+            return ControlPlaneState::getTableKey(srcTable.controlPlaneName(), keyReference,
+                                                  keyElement->expression->type);
         }
     }
     BUG("Did not find a matching key in table %1%. ", srcTable);
@@ -141,10 +137,9 @@ bool RefersToParser::preorder(const IR::P4Table *tableContext) {
                 const auto *nameAnnot = keyElement->getAnnotation("name");
                 BUG_CHECK(nameAnnot != nullptr, "%1% table key without a name annotation",
                           annotation->name.name);
-                // TODO: Move this assembly into a library.
-                auto srcKeyName = tableContext->controlPlaneName() + "_key_" + nameAnnot->getName();
-                const auto *srcKey =
-                    ToolsVariables::getSymbolicVariable(keyElement->expression->type, srcKeyName);
+                const auto *srcKey = ControlPlaneState::getTableKey(
+                    tableContext->controlPlaneName(), nameAnnot->getName(),
+                    keyElement->expression->type);
                 const auto *referredKey = getReferencedKey(*controlContext, *annotation);
                 restrictionsVector.push_back(new IR::Equ(srcKey, referredKey));
             }
@@ -165,18 +160,15 @@ bool RefersToParser::preorder(const IR::P4Table *tableContext) {
         if (params == nullptr) {
             return false;
         }
-        for (size_t idx = 0; idx < params->parameters.size(); ++idx) {
-            const auto *parameter = params->parameters.at(idx);
+        for (const auto *parameter : params->parameters) {
             auto annotations = parameter->annotations->annotations;
             for (const auto *annotation : annotations) {
                 if (annotation->name.name == "refers_to" ||
                     annotation->name.name == "referenced_by") {
                     const auto *referredKey = getReferencedKey(*controlContext, *annotation);
-                    // TODO: Move this assembly into a library.
-                    auto srcParamName = tableContext->controlPlaneName() + "_arg_" +
-                                        actionCall->controlPlaneName() + std::to_string(idx);
-                    const auto *srcKey =
-                        ToolsVariables::getSymbolicVariable(parameter->type, srcParamName);
+                    const auto *srcKey = ControlPlaneState::getTableActionArgument(
+                        tableContext->controlPlaneName(), actionCall->controlPlaneName(),
+                        parameter->name, parameter->type);
                     auto *constraint = new IR::Equ(srcKey, referredKey);
                     restrictionsVector.push_back(constraint);
                 }

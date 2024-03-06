@@ -1,4 +1,6 @@
 #include "no_table_example_parser.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
@@ -23,12 +25,13 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     hdr = &(hdrMd->cpumap_hdr);
     user_meta = &(hdrMd->cpumap_usermeta);
 {
         u8 hit;
         {
-if ((u32)istd.input_port == 4) {
+if ((u32)skb->ifindex == 4) {
                 hdr->udp.src_port = (hdr->udp.src_port + 1);            }
 
         }
