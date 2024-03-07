@@ -526,9 +526,6 @@ bool Enumerator<T>::any() {
 }
 
 template <typename T>
-std::vector<T> Enumerator<T>::emptyVector;
-
-template <typename T>
 template <typename Container>
 Enumerator<typename Container::value_type> *Enumerator<T>::createEnumerator(const Container &data) {
     return new IteratorEnumerator(data.begin(), data.end(), typeid(Container).name());
@@ -536,7 +533,7 @@ Enumerator<typename Container::value_type> *Enumerator<T>::createEnumerator(cons
 
 template <typename T>
 Enumerator<T> *Enumerator<T>::emptyEnumerator() {
-    return Enumerator<T>::createEnumerator(Enumerator<T>::emptyVector);
+    return new EmptyEnumerator<T>();
 }
 
 template <typename T>
