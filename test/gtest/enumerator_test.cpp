@@ -138,10 +138,7 @@ TEST_F(UtilEnumerator, Linq) {
         Enumerator<int> *col1 = Util::enumerate(vec);
         Enumerator<int> *col2 = Util::enumerate(vec);
         Enumerator<int> *col3 = Util::enumerate(vec);
-        std::vector<Enumerator<int> *> all;
-        all.push_back(col1);
-        all.push_back(col2);
-        all.push_back(col3);
+        std::vector<Enumerator<int> *> all{col1, col2, col3};
 
         Enumerator<Enumerator<int> *> *allEnums = Util::enumerate(all);
         Enumerator<int> *concat = Enumerator<int>::concatAll(allEnums);
@@ -152,11 +149,30 @@ TEST_F(UtilEnumerator, Linq) {
         count = concat->count();
         EXPECT_EQ(9u, count);
 
+        concat = Util::concat({col1, col2, col3});
+        concat->reset();
+        count = concat->count();
+        EXPECT_EQ(9u, count);
+
+        concat = Util::concat(col1, col2, col3);
+        concat->reset();
+        count = concat->count();
+        EXPECT_EQ(9u, count);
+
         Enumerator<int> *cc1 = Util::enumerate(vec);
         Enumerator<int> *cc2 = Util::enumerate(vec);
         cc1 = cc1->concat(cc2);
         count = cc1->count();
         EXPECT_EQ(6u, count);
+
+        // cc1 is a ConcatEnumerator. Therefore its ->concat returns the object
+        // itself
+        cc1->reset();
+        auto *cc3 = cc1->concat(col3);
+        EXPECT_EQ(cc1, cc3);
+        cc1->reset();
+        count = cc1->count();
+        EXPECT_EQ(9u, count);
     }
 
     {

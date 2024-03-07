@@ -22,6 +22,7 @@ limitations under the License.
 
 #include <cstdint>
 #include <functional>
+#include <initializer_list>
 #include <iterator>
 #include <stdexcept>
 #include <string>
@@ -75,6 +76,8 @@ class Enumerator {
     friend class EnumeratorHandle;
 
  public:
+    using value_type = T;
+
     Enumerator();
     virtual ~Enumerator() = default;
 
@@ -130,7 +133,7 @@ class Enumerator {
     template <typename S>
     Enumerator<S> *as();
     // append all elements of other after all elements of this
-    Enumerator<T> *concat(Enumerator<T> *other);
+    virtual Enumerator<T> *concat(Enumerator<T> *other);
     /* enumerate all elements and return the count */
     uint64_t count();
     // True if the enumerator has at least one element
@@ -406,49 +409,57 @@ class MapEnumerator final : public Enumerator<S> {
 /* concatenation */
 template <typename T>
 class ConcatEnumerator final : public Enumerator<T> {
- protected:
-    Enumerator<Enumerator<T> *> *inputs;
+    std::vector<Enumerator<T> *> inputs;
     T currentResult;
 
  public:
-    explicit ConcatEnumerator(Enumerator<Enumerator<T> *> *inputs) : inputs(inputs) {}
-    std::string toString() const { return "ConcatEnumerator:" + this->stateName(); }
+    ConcatEnumerator() = default;
+    // We take ownership of the vector
+    explicit ConcatEnumerator(std::vector<Enumerator<T> *> &&inputs) : inputs(std::move(inputs)) {
+        for (auto *currentInput : inputs)
+            if (currentInput == nullptr) throw std::logic_error("Null iterator in concatenation");
+    }
+
+    ConcatEnumerator(std::initializer_list<Enumerator<T> *> inputs) : inputs(inputs) {
+        for (auto *currentInput : inputs)
+            if (currentInput == nullptr) throw std::logic_error("Null iterator in concatenation");
+    }
+    explicit ConcatEnumerator(Enumerator<Enumerator<T> *> *inputs)
+        : ConcatEnumerator(inputs->toVector()) {}
+
+    [[nodiscard]] std::string toString() const { return "ConcatEnumerator:" + this->stateName(); }
 
  private:
     bool advance() {
-        if (this->state == EnumeratorState::NotStarted) {
-            bool start = this->inputs->moveNext();
-            if (!start) goto theend;
-        }
-
         this->state = EnumeratorState::Valid;
-        bool more;
-        do {
-            Enumerator<T> *currentInput = this->inputs->getCurrent();
-            if (currentInput == nullptr) throw std::logic_error("Null iterator in concatenation");
-            bool moreCurrent = currentInput->moveNext();
-            if (moreCurrent) {
+        for (auto *currentInput : inputs) {
+            if (currentInput->moveNext()) {
                 this->currentResult = currentInput->getCurrent();
                 return true;
             }
+        }
 
-            more = this->inputs->moveNext();
-        } while (more);
-
-    theend:
         this->state = EnumeratorState::PastEnd;
         return false;
     }
 
  public:
-    void reset() {
-        this->inputs->reset();
-        while (this->inputs->moveNext()) this->inputs->getCurrent()->reset();
-        this->inputs->reset();
+    Enumerator<T> *concat(Enumerator<T> *other) override {
+        // Too late to add
+        if (this->state == EnumeratorState::PastEnd)
+            throw std::runtime_error("Invalid enumerator state to concatenate");
+
+        inputs.push_back(other);
+
+        return this;
+    }
+
+    void reset() override {
+        for (auto *currentInput : inputs) currentInput->reset();
         Enumerator<T>::reset();
     }
 
-    bool moveNext() {
+    bool moveNext() override {
         switch (this->state) {
             case EnumeratorState::NotStarted:
             case EnumeratorState::Valid:
@@ -459,7 +470,7 @@ class ConcatEnumerator final : public Enumerator<T> {
         throw std::runtime_error("Unexpected enumerator state");
     }
 
-    T getCurrent() const {
+    T getCurrent() const override {
         switch (this->state) {
             case EnumeratorState::NotStarted:
                 throw std::logic_error("You cannot call 'getCurrent' before 'moveNext'");
@@ -554,11 +565,7 @@ Enumerator<T> *Enumerator<T>::concatAll(Enumerator<Enumerator<T> *> *inputs) {
 
 template <typename T>
 Enumerator<T> *Enumerator<T>::concat(Enumerator<T> *other) {
-    std::vector<Enumerator<T> *> *toConcat = new std::vector<Enumerator<T> *>();
-    toConcat->push_back(this);
-    toConcat->push_back(other);
-    Enumerator<Enumerator<T> *> *ce = Enumerator<Enumerator<T> *>::createEnumerator(*toConcat);
-    return Enumerator<T>::concatAll(ce);
+    return new ConcatEnumerator<T>({this, other});
 }
 
 template <typename T>
@@ -631,6 +638,21 @@ Enumerator<typename Container::value_type> *enumerate(const Container &data) {
     using std::begin;
     using std::end;
     return new IteratorEnumerator(begin(data), end(data), typeid(data).name());
+}
+
+// TODO: Flatten ConcatEnumerator's during concatenation
+template <typename T>
+Enumerator<T> *concat(std::initializer_list<Enumerator<T> *> inputs) {
+    return new ConcatEnumerator<T>(inputs);
+}
+
+template <typename... Args>
+auto concat(Args &&...inputs) {
+    using FirstEnumeratorTy =
+        std::remove_pointer_t<std::decay_t<std::tuple_element_t<0, std::tuple<Args...>>>>;
+    std::initializer_list<Enumerator<typename FirstEnumeratorTy::value_type> *> init{
+        std::forward<Args>(inputs)...};
+    return concat(init);
 }
 
 }  // namespace Util
