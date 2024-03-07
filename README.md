@@ -430,8 +430,7 @@ at least 4GB via Docker preferences or you are likely to see "internal compiler
 errors" from gcc which are caused by low memory.
 
 # Bazel
-
-![bazel build](https://github.com/p4lang/p4c/workflows/bazel/badge.svg)
+[![Bazel Build](https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml)
 
 The project can also be build using [Bazel](https://bazel.build):
 ```sh
