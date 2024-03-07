@@ -79,13 +79,10 @@ Util::Enumerator<const IR::IDeclaration *> *IGeneralNamespace::getDeclsByName(cs
 
 Util::Enumerator<const IDeclaration *> *INestedNamespace::getDeclarations() const {
     Util::Enumerator<const IDeclaration *> *rv = nullptr;
-    for (auto nested : getNestedNamespaces()) {
-        if (nested) {
-            if (rv)
-                rv = rv->concat(nested->getDeclarations());
-            else
-                rv = nested->getDeclarations();
-        }
+    for (const auto *nested : getNestedNamespaces()) {
+        if (nested == nullptr) continue;
+
+        rv = (rv ? rv->concat(nested->getDeclarations()) : nested->getDeclarations());
     }
     return rv ? rv : new Util::EmptyEnumerator<const IDeclaration *>;
 }
