@@ -30,8 +30,8 @@ p4c
 ├── test                      -- test code
 │   └── gtest                 -- unit test code written using gtest
 ├── tools                     -- external programs used in the build/test process
-│   ├── ci-ptf                -- Scripts to install VM and run tests in CI environment
-│   ├── debian-build          -- resouces and scripts for creating Ubuntu (or Debian) packages
+│   ├── ci-ptf                -- scripts to run PSA PTF tests
+│   ├── debian-build          -- resources and scripts for creating Ubuntu (or Debian) packages
 │   ├── driver                -- p4c compiler driver: a script that invokes various compilers
 │   ├── hooks                 -- useful git hooks for development
 |   ├── ir-generator          -- code to generate the P4C IR from .def files
