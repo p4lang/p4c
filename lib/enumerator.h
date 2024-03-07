@@ -620,8 +620,20 @@ bool EnumeratorHandle<T>::operator!=(const EnumeratorHandle<T> &other) const {
 }
 
 template <typename Iter>
-auto *enumerate(Iter begin, Iter end) {
-    return Enumerator<typename Iter::value_type>::createEnumerator(begin, end);
+Enumerator<typename Iter::value_type> *enumerate(Iter begin, Iter end) {
+    return new IteratorEnumerator(begin, end, "iterator");
+}
+
+template <typename Iter>
+Enumerator<typename Iter::value_type> *enumerate(iterator_range<Iter> range) {
+    return new IteratorEnumerator(range.begin(), range.end(), "range");
+}
+
+template <typename Container>
+Enumerator<typename Container::value_type> *enumerate(const Container &data) {
+    using std::begin;
+    using std::end;
+    return new IteratorEnumerator(begin(data), end(data), typeid(data).name());
 }
 
 }  // namespace Util
