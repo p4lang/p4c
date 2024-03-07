@@ -154,7 +154,7 @@ class Enumerator {
    C is the container type */
 
 template <typename Iter>
-class GenericEnumerator : public Enumerator<typename Iter::value_type> {
+class IteratorEnumerator : public Enumerator<typename Iter::value_type> {
  protected:
     Iter begin;
     Iter end;
@@ -162,7 +162,7 @@ class GenericEnumerator : public Enumerator<typename Iter::value_type> {
     cstring name;
     friend class Enumerator<typename Iter::value_type>;
 
-    GenericEnumerator(Iter begin, Iter end, cstring name)
+    IteratorEnumerator(Iter begin, Iter end, cstring name)
         : Enumerator<typename Iter::value_type>(),
           begin(begin),
           end(end),
@@ -518,7 +518,7 @@ std::vector<T> Enumerator<T>::emptyVector;
 
 template <typename T>
 Enumerator<T> *Enumerator<T>::createEnumerator(const std::vector<T> &data) {
-    return new GenericEnumerator(data.begin(), data.end(), "vector");
+    return new IteratorEnumerator(data.begin(), data.end(), "vector");
 }
 
 template <typename T>
@@ -528,19 +528,19 @@ Enumerator<T> *Enumerator<T>::emptyEnumerator() {
 
 template <typename T>
 Enumerator<T> *Enumerator<T>::createEnumerator(const std::list<T> &data) {
-    return new GenericEnumerator(data.begin(), data.end(), "list");
+    return new IteratorEnumerator(data.begin(), data.end(), "list");
 }
 
 template <typename T>
 template <typename Iter>
 Enumerator<typename Iter::value_type> *Enumerator<T>::createEnumerator(Iter begin, Iter end) {
-    return new GenericEnumerator(begin, end, "iterator");
+    return new IteratorEnumerator(begin, end, "iterator");
 }
 
 template <typename T>
 template <typename Iter>
 Enumerator<typename Iter::value_type> *Enumerator<T>::createEnumerator(iterator_range<Iter> range) {
-    return new GenericEnumerator(range.begin(), range.end(), "range");
+    return new IteratorEnumerator(range.begin(), range.end(), "range");
 }
 
 template <typename T>
