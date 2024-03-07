@@ -29,7 +29,7 @@ limitations under the License.
 #include <type_traits>
 #include <vector>
 
-#include "lib/iterator_range.h"
+#include "iterator_range.h"
 
 namespace Util {
 enum class EnumeratorState { NotStarted, Valid, PastEnd };
@@ -37,9 +37,9 @@ enum class EnumeratorState { NotStarted, Valid, PastEnd };
 template <typename T>
 class Enumerator;
 
-// This class provides support for C++-style range for loops
-// Enumerator<T>* e;
-// for (auto a : *e) ...
+/// This class provides support for C++-style range for loops
+/// Enumerator<T>* e;
+/// for (auto a : *e) ...
 // FIXME: It is not a proper iterator (see reference type above) and should be removed
 // in favor of more standard approach. Note that Enumerator<T>::getCurrent() always
 // returns element by value, so more or less suitable only copyable types that are cheap
@@ -63,6 +63,7 @@ class EnumeratorHandle {
     bool operator!=(const EnumeratorHandle<T> &other) const;
 };
 
+/// Type-erased Enumerator interface
 template <class T>
 class Enumerator {
  protected:
@@ -78,16 +79,17 @@ class Enumerator {
  public:
     using value_type = T;
 
-    Enumerator();
+    Enumerator() { this->reset(); }
+
     virtual ~Enumerator() = default;
 
-    /* move to next element in the collection;
-       return false if the next element does not exist */
+    /// Move to next element in the collection;
+    /// return false if the next element does not exist
     virtual bool moveNext() = 0;
-    /* get current element in the collection */
+    /// Get current element in the collection
     virtual T getCurrent() const = 0;
-    /* move back to the beginning of the collection */
-    virtual void reset();
+    /// Move back to the beginning of the collection
+    virtual void reset() { this->state = EnumeratorState::NotStarted; }
 
     EnumeratorHandle<T> begin() {
         this->moveNext();
@@ -119,45 +121,80 @@ class Enumerator {
     template <typename Iter>
     [[deprecated("Use Util::enumerate() instead")]] static Enumerator<typename Iter::value_type> *
     createEnumerator(iterator_range<Iter> range);
-    // concatenate all these collections into a single one
-    static Enumerator<T> *concatAll(Enumerator<Enumerator<T> *> *inputs);
 
-    std::vector<T> toVector();
-    /* Return an enumerator returning all elements that pass the filter */
+    /// Return an enumerator returning all elements that pass the filter
     template <typename Filter>
     Enumerator<T> *where(Filter &&filter);
-    /* Apply specified function to all elements of this enumerator */
+    /// Apply specified function to all elements of this enumerator
     template <typename S>
     Enumerator<S> *map(std::function<S(const T &)> map);
-    // cast to an enumerator of S objects
+    /// Cast to an enumerator of S objects
     template <typename S>
     Enumerator<S> *as();
-    // append all elements of other after all elements of this
+    /// Append all elements of other after all elements of this
     virtual Enumerator<T> *concat(Enumerator<T> *other);
-    /* enumerate all elements and return the count */
-    uint64_t count();
-    // True if the enumerator has at least one element
-    bool any();
-    // The only next element; throws if the enumerator does not have exactly 1 element
-    T single();
-    // The only next element or default value if none exists; throws if the
-    // enumerator does not have exactly 0 or 1 element
-    T singleOrDefault();
-    // Next element, or the default value if none exists
-    T nextOrDefault();
-    // Next element; throws if there are no elements
-    T next();
+    /// Concatenate all these collections into a single one
+    static Enumerator<T> *concatAll(Enumerator<Enumerator<T> *> *inputs);
+
+    std::vector<T> toVector() {
+        std::vector<T> result;
+        while (moveNext()) result.push_back(getCurrent());
+        return result;
+    }
+
+    /// Enumerate all elements and return the count
+    uint64_t count() {
+        uint64_t found = 0;
+        while (this->moveNext()) found++;
+        return found;
+    }
+
+    /// True if the enumerator has at least one element
+    bool any() { return this->moveNext(); }
+
+    /// The only next element; throws if the enumerator does not have exactly 1 element
+    T single() {
+        bool next = moveNext();
+        if (!next) throw std::logic_error("There is no element for `single()'");
+        T result = getCurrent();
+        next = moveNext();
+        if (next) throw std::logic_error("There are multiple elements when calling `single()'");
+        return result;
+    }
+
+    /// The only next element or default value if none exists; throws if the
+    /// enumerator does not have exactly 0 or 1 element
+    T singleOrDefault() {
+        bool next = moveNext();
+        if (!next) return T{};
+        T result = getCurrent();
+        next = moveNext();
+        if (next) throw std::logic_error("There are multiple elements when calling `single()'");
+        return result;
+    }
+
+    /// Next element, or the default value if none exists
+    T nextOrDefault() {
+        bool next = moveNext();
+        if (!next) return T{};
+        return getCurrent();
+    }
+
+    /// Next element; throws if there are no elements
+    T next() {
+        bool next = moveNext();
+        if (!next) throw std::logic_error("There is no element for `next()'");
+        return getCurrent();
+    }
 };
 
 ////////////////////////// implementation ///////////////////////////////////////////
 // the implementation must be in the header file due to the templates
 
-/* We have to be careful never to invoke getCurrent more than once on each element of the input
-   iterators, since it could have side-effects*/
+/// We have to be careful never to invoke getCurrent more than once on each
+/// element of the input iterators, since it could have side-effects
 
-/* A generic iterator returning elements of type T
-   C is the container type */
-
+/// A generic iterator returning elements of type T.
 template <typename Iter>
 class IteratorEnumerator : public Enumerator<typename Iter::value_type> {
  protected:
@@ -217,7 +254,7 @@ class IteratorEnumerator : public Enumerator<typename Iter::value_type> {
 
 /////////////////////////////////////////////////////////////////////
 
-/* always returns false */
+/// Always returns false
 template <typename T>
 class EmptyEnumerator : public Enumerator<T> {
  public:
@@ -235,7 +272,6 @@ class EmptyEnumerator : public Enumerator<T> {
 /// enumerator's value type and returns a bool. When traversing the enumerator,
 /// it will call the predicate on each element and skip any where it returns
 /// false.
-
 template <typename T, typename Filter>
 class FilterEnumerator final : public Enumerator<T> {
     Enumerator<T> *input;
@@ -294,7 +330,7 @@ class FilterEnumerator final : public Enumerator<T> {
 
 ///////////////////////////
 
-/* casts each element */
+/// Casts each element
 template <typename T, typename S>
 class AsEnumerator final : public Enumerator<S> {
     // See if we can use ICastable interface to cast from T to S. This is only possible if:
@@ -350,7 +386,7 @@ class AsEnumerator final : public Enumerator<S> {
 
 ///////////////////////////
 
-/* transforms all elements from type T to type S */
+/// Transforms all elements from type T to type S
 template <typename T, typename S>
 class MapEnumerator final : public Enumerator<S> {
  protected:
@@ -406,7 +442,7 @@ class MapEnumerator final : public Enumerator<S> {
 
 /////////////////////////////////////////////////////////////////////
 
-/* concatenation */
+/// Concatenation
 template <typename T>
 class ConcatEnumerator final : public Enumerator<T> {
     std::vector<Enumerator<T> *> inputs;
@@ -486,16 +522,6 @@ class ConcatEnumerator final : public Enumerator<T> {
 ////////////////// Enumerator //////////////
 
 template <typename T>
-Enumerator<T>::Enumerator() {
-    this->reset();
-}
-
-template <typename T>
-void Enumerator<T>::reset() {
-    this->state = EnumeratorState::NotStarted;
-}
-
-template <typename T>
 template <typename S>
 Enumerator<S> *Enumerator<T>::map(std::function<S(const T &)> map) {
     return new MapEnumerator<T, S>(this, map);
@@ -511,18 +537,6 @@ template <typename T>
 template <typename Filter>
 Enumerator<T> *Enumerator<T>::where(Filter &&filter) {
     return new FilterEnumerator(this, std::forward<Filter>(filter));
-}
-
-template <typename T>
-uint64_t Enumerator<T>::count() {
-    uint64_t found = 0;
-    while (this->moveNext()) found++;
-    return found;
-}
-
-template <typename T>
-bool Enumerator<T>::any() {
-    return this->moveNext();
 }
 
 template <typename T>
@@ -549,13 +563,6 @@ Enumerator<typename Iter::value_type> *Enumerator<T>::createEnumerator(iterator_
 }
 
 template <typename T>
-std::vector<T> Enumerator<T>::toVector() {
-    std::vector<T> result;
-    while (moveNext()) result.push_back(getCurrent());
-    return result;
-}
-
-template <typename T>
 Enumerator<T> *Enumerator<T>::concatAll(Enumerator<Enumerator<T> *> *inputs) {
     return new ConcatEnumerator<T>(inputs);
 }
@@ -563,40 +570,6 @@ Enumerator<T> *Enumerator<T>::concatAll(Enumerator<Enumerator<T> *> *inputs) {
 template <typename T>
 Enumerator<T> *Enumerator<T>::concat(Enumerator<T> *other) {
     return new ConcatEnumerator<T>({this, other});
-}
-
-template <typename T>
-T Enumerator<T>::next() {
-    bool next = moveNext();
-    if (!next) throw std::logic_error("There is no element for `next()'");
-    return getCurrent();
-}
-
-template <typename T>
-T Enumerator<T>::single() {
-    bool next = moveNext();
-    if (!next) throw std::logic_error("There is no element for `single()'");
-    T result = getCurrent();
-    next = moveNext();
-    if (next) throw std::logic_error("There are multiple elements when calling `single()'");
-    return result;
-}
-
-template <typename T>
-T Enumerator<T>::singleOrDefault() {
-    bool next = moveNext();
-    if (!next) return T{};
-    T result = getCurrent();
-    next = moveNext();
-    if (next) throw std::logic_error("There are multiple elements when calling `single()'");
-    return result;
-}
-
-template <typename T>
-T Enumerator<T>::nextOrDefault() {
-    bool next = moveNext();
-    if (!next) return T{};
-    return getCurrent();
 }
 
 ///////////////////////////////// EnumeratorHandle ///////////////////
