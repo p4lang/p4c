@@ -69,15 +69,12 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
             case P4::ResolutionType::Any:
                 break;
             case P4::ResolutionType::Type: {
-                std::function<bool(const IR::IDeclaration *)> kindFilter =
-                    [](const IR::IDeclaration *d) { return d->is<IR::Type>(); };
-                decls = decls->where(kindFilter);
+                decls = decls->where([](const IR::IDeclaration *d) { return d->is<IR::Type>(); });
                 break;
             }
             case P4::ResolutionType::TypeVariable: {
-                std::function<bool(const IR::IDeclaration *)> kindFilter =
-                    [](const IR::IDeclaration *d) { return d->is<IR::Type_Var>(); };
-                decls = decls->where(kindFilter);
+                decls =
+                    decls->where([](const IR::IDeclaration *d) { return d->is<IR::Type_Var>(); });
                 break;
             }
             default:
@@ -85,30 +82,29 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
         }
 
         if (!anyOrder && name.srcInfo.isValid()) {
-            std::function<bool(const IR::IDeclaration *)> locationFilter =
-                [this, name, type](const IR::IDeclaration *d) {
-                    if (d->is<IR::Type_Var>() || d->is<IR::ParserState>())
-                        // type vars and parser states may be used before their definitions
-                        return true;
-                    Util::SourceInfo nsi = name.srcInfo;
-                    Util::SourceInfo dsi = d->getNode()->srcInfo;
-                    bool before = dsi <= nsi;
-                    LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+            auto locationFilter = [this, name, type](const IR::IDeclaration *d) {
+                if (d->is<IR::Type_Var>() || d->is<IR::ParserState>())
+                    // type vars and parser states may be used before their definitions
+                    return true;
+                Util::SourceInfo nsi = name.srcInfo;
+                Util::SourceInfo dsi = d->getNode()->srcInfo;
+                bool before = dsi <= nsi;
+                LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
 
-                    if (type == ResolutionType::Type) {
-                        if (auto *type_decl = findContext<IR::Type_Declaration>())
-                            if (type_decl->getNode() == d->getNode()) {
-                                ::error(ErrorType::ERR_UNSUPPORTED,
-                                        "Self-referencing types not supported: '%1%' within '%2%'",
-                                        name, d->getNode());
-                            }
-                    } else if (type == ResolutionType::Any) {
-                        if (auto *decl_ctxt = findContext<IR::Declaration>())
-                            if (decl_ctxt->getNode() == d->getNode()) before = false;
-                    }
+                if (type == ResolutionType::Type) {
+                    if (auto *type_decl = findContext<IR::Type_Declaration>())
+                        if (type_decl->getNode() == d->getNode()) {
+                            ::error(ErrorType::ERR_UNSUPPORTED,
+                                    "Self-referencing types not supported: '%1%' within '%2%'",
+                                    name, d->getNode());
+                        }
+                } else if (type == ResolutionType::Any) {
+                    if (auto *decl_ctxt = findContext<IR::Declaration>())
+                        if (decl_ctxt->getNode() == d->getNode()) before = false;
+                }
 
-                    return before;
-                };
+                return before;
+            };
             decls = decls->where(locationFilter);
         }
 

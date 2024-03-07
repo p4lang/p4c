@@ -204,8 +204,8 @@ class Vector : public VectorBase {
     }
     template <typename S>
     Util::Enumerator<const S *> *only() const {
-        std::function<bool(const T *)> filter = [](const T *d) { return d->template is<S>(); };
-        return getEnumerator()->where(filter)->template as<const S *>();
+        return getEnumerator()->template as<const S *>()->where(
+            [](const T *d) { return d != nullptr; });
     }
 
     DECLARE_TYPEINFO_WITH_DISCRIMINATOR(Vector<T>, NodeDiscriminator::VectorT, T, VectorBase);

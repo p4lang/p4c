@@ -71,11 +71,10 @@ const Type_Method *Type_Package::getConstructorMethodType() const {
 }
 
 Util::Enumerator<const IR::IDeclaration *> *IGeneralNamespace::getDeclsByName(cstring name) const {
-    std::function<bool(const IDeclaration *)> filter = [name](const IDeclaration *d) {
+    return getDeclarations()->where([name](const IDeclaration *d) {
         CHECK_NULL(d);
         return name == d->getName().name;
-    };
-    return getDeclarations()->where(filter);
+    });
 }
 
 Util::Enumerator<const IDeclaration *> *INestedNamespace::getDeclarations() const {

@@ -155,8 +155,8 @@ class NameMap : public Node {
     }
     template <typename S>
     Util::Enumerator<const S *> *only() const {
-        std::function<bool(const T *)> filter = [](const T *d) { return d->template is<S>(); };
-        return valueEnumerator()->where(filter)->template as<const S *>();
+        return valueEnumerator()->template as<const S *>()->where(
+            [](const T *d) { return d != nullptr; });
     }
 
     DECLARE_TYPEINFO(NameMap, Node);

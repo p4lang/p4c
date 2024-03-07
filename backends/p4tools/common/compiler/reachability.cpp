@@ -216,15 +216,12 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Program *program) {
         if (const auto *pathExpr = expr->template to<IR::PathExpression>()) {
             // Look up the path expression in the declaration map, and expect to find a
             // declaration instance.
-            std::function<bool(const IR::IDeclaration *)> filter =
-                [pathExpr](const IR::IDeclaration *d) {
-                    CHECK_NULL(d);
-                    const auto *decl = d->to<IR::Declaration_Instance>();
-                    if (decl == nullptr) {
-                        return false;
-                    }
+            auto filter = [pathExpr](const IR::IDeclaration *d) {
+                CHECK_NULL(d);
+                if (const auto *decl = d->to<IR::Declaration_Instance>())
                     return pathExpr->path->name == decl->name;
-                };
+                return false;
+            };
             // Convert the declaration instance into a constructor-call expression.
             const auto *decl =
                 program->getDeclarations()->where(filter)->single()->to<IR::Declaration_Instance>();
