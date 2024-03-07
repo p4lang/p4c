@@ -10,7 +10,7 @@ p4c
 ├── build                     -- recommended place to build binary
 ├── backends          
 │   ├── bmv2                  -- behavioral model version 2 (switch simulator) back-end
-│   ├── common                -- common back-end code
+│   ├── common                -- code shared by multiple back ends
 │   ├── dpdk                  -- translates the P4-16 programs to DPDK API
 │   ├── ebpf                  -- extended Berkeley Packet Filters back-end
 │   ├── graphs                -- backend that can draw graphiz graphs of P4 programs
