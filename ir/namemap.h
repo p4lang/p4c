@@ -150,8 +150,7 @@ class NameMap : public Node {
     static NameMap<T, MAP, COMP, ALLOC> *fromJSON(JSONLoader &json);
 
     Util::Enumerator<const T *> *valueEnumerator() const {
-        return Util::Enumerator<const T *>::createEnumerator(Values(symbols).begin(),
-                                                             Values(symbols).end());
+        return Util::enumerate(Values(symbols));
     }
     template <typename S>
     Util::Enumerator<const S *> *only() const {

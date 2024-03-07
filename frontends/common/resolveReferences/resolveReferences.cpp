@@ -63,8 +63,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
 
     if (const auto *gen = current->to<IR::IGeneralNamespace>()) {
         // FIXME: implement range filtering without enumerator wrappers
-        auto *decls =
-            Util::Enumerator<const IR::IDeclaration *>::createEnumerator(getDeclsByName(gen, name));
+        auto *decls = Util::enumerate(getDeclsByName(gen, name));
         switch (type) {
             case P4::ResolutionType::Any:
                 break;
@@ -220,7 +219,7 @@ const IR::IDeclaration *ResolutionContext::resolveUnique(const IR::ID &name,
     // Check overloaded symbols.
     const IR::Vector<IR::Argument> *arguments;
     if (decls.size() > 1 && (arguments = methodArguments(name))) {
-        decls = Util::Enumerator<const IR::IDeclaration *>::createEnumerator(decls)
+        decls = Util::enumerate(decls)
                     ->where([arguments](const IR::IDeclaration *d) {
                         auto func = d->to<IR::IFunctional>();
                         if (func == nullptr) return true;

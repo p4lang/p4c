@@ -103,8 +103,7 @@ class IndexedVector : public Vector<T> {
         return it->second->template to<U>();
     }
     Util::Enumerator<const IDeclaration *> *getDeclarations() const {
-        return Util::Enumerator<const IDeclaration *>::createEnumerator(
-            Values(declarations).begin(), Values(declarations).end());
+        return Util::enumerate(Values(declarations));
     }
     iterator erase(iterator i) {
         removeFromMap(*i);

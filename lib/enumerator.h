@@ -162,6 +162,7 @@ class IteratorEnumerator : public Enumerator<typename Iter::value_type> {
     cstring name;
     friend class Enumerator<typename Iter::value_type>;
 
+ public:
     IteratorEnumerator(Iter begin, Iter end, cstring name)
         : Enumerator<typename Iter::value_type>(),
           begin(begin),
@@ -169,7 +170,6 @@ class IteratorEnumerator : public Enumerator<typename Iter::value_type> {
           current(begin),
           name(name) {}
 
- public:
     cstring toString() const { return this->name + ":" + this->stateName(); }
 
     bool moveNext() {
