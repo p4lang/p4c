@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <absl/strings/substitute.h>
 #include <gtest/gtest.h>
 
 #include <optional>
 
-#include "absl/strings/substitute.h"
 #include "frontends/common/applyOptionsPragmas.h"
 #include "test/gtest/helpers.h"
 
