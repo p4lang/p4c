@@ -119,7 +119,8 @@ class Enumerator {
 
     std::vector<T> toVector();
     /* Return an enumerator returning all elements that pass the filter */
-    Enumerator<T> *where(std::function<bool(const T &)> filter);
+    template <typename Filter>
+    Enumerator<T> *where(Filter &&filter);
     /* Apply specified function to all elements of this enumerator */
     template <typename S>
     Enumerator<S> *map(std::function<S(const T &)> map);
@@ -224,17 +225,21 @@ class EmptyEnumerator : public Enumerator<T> {
 
 /////////////////////////////////////////////////////////////////////
 
-/* filters according to a predicate */
-template <typename T>
+/// An enumerator that filters the elements of given inner enumerator.
+/// The filter parameter should be a callable object that accepts the wrapped
+/// enumerator's value type and returns a bool. When traversing the enumerator,
+/// it will call the predicate on each element and skip any where it returns
+/// false.
+
+template <typename T, typename Filter>
 class FilterEnumerator final : public Enumerator<T> {
- protected:
     Enumerator<T> *input;
-    std::function<bool(const T &)> filter;
+    Filter filter;
     T current;  // must prevent repeated evaluation
 
  public:
-    FilterEnumerator(Enumerator<T> *input, std::function<bool(const T &)> filter)
-        : input(input), filter(filter) {}
+    FilterEnumerator(Enumerator<T> *input, Filter filter)
+        : input(input), filter(std::move(filter)) {}
 
  private:
     bool advance() {
@@ -491,8 +496,9 @@ Enumerator<S> *Enumerator<T>::as() {
 }
 
 template <typename T>
-Enumerator<T> *Enumerator<T>::where(std::function<bool(const T &)> filter) {
-    return new FilterEnumerator<T>(this, filter);
+template <typename Filter>
+Enumerator<T> *Enumerator<T>::where(Filter &&filter) {
+    return new FilterEnumerator(this, std::forward<Filter>(filter));
 }
 
 template <typename T>
