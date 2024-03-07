@@ -24,10 +24,10 @@ limitations under the License.
 #include <functional>
 #include <iterator>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
 #include <vector>
 
-#include "lib/cstring.h"
 #include "lib/iterator_range.h"
 
 namespace Util {
@@ -92,7 +92,7 @@ class Enumerator {
     }
     EnumeratorHandle<T> end() { return EnumeratorHandle<T>(nullptr); }
 
-    cstring stateName() const {
+    const char *stateName() const {
         switch (this->state) {
             case EnumeratorState::NotStarted:
                 return "NotStarted";
@@ -101,8 +101,7 @@ class Enumerator {
             case EnumeratorState::PastEnd:
                 return "PastEnd";
         }
-        throw std::logic_error(cstring("Unexpected state ") +
-                               std::to_string(static_cast<int>(this->state)));
+        throw std::logic_error("Unexpected state " + std::to_string(static_cast<int>(this->state)));
     }
 
     ////////////////// factories
@@ -162,18 +161,18 @@ class IteratorEnumerator : public Enumerator<typename Iter::value_type> {
     Iter begin;
     Iter end;
     Iter current;
-    cstring name;
+    const char *name;
     friend class Enumerator<typename Iter::value_type>;
 
  public:
-    IteratorEnumerator(Iter begin, Iter end, cstring name)
+    IteratorEnumerator(Iter begin, Iter end, const char *name)
         : Enumerator<typename Iter::value_type>(),
           begin(begin),
           end(end),
           current(begin),
           name(name) {}
 
-    cstring toString() const { return this->name + ":" + this->stateName(); }
+    [[nodiscard]] std::string toString() const { return this->name + ":" + this->stateName(); }
 
     bool moveNext() {
         switch (this->state) {
@@ -219,7 +218,7 @@ class IteratorEnumerator : public Enumerator<typename Iter::value_type> {
 template <typename T>
 class EmptyEnumerator : public Enumerator<T> {
  public:
-    cstring toString() const { return "EmptyEnumerator"; }
+    [[nodiscard]] std::string toString() const { return "EmptyEnumerator"; }
     bool moveNext() { return false; }
     T getCurrent() const {
         throw std::logic_error("You cannot call 'getCurrent' on an EmptyEnumerator");
@@ -257,8 +256,8 @@ class FilterEnumerator final : public Enumerator<T> {
     }
 
  public:
-    cstring toString() const {
-        return cstring("FilterEnumerator(") + this->input->toString() + "):" + this->stateName();
+    [[nodiscard]] std::string toString() const {
+        return "FilterEnumerator(" + this->input->toString() + "):" + this->stateName();
     }
 
     void reset() {
@@ -325,8 +324,8 @@ class AsEnumerator final : public Enumerator<S> {
  public:
     explicit AsEnumerator(Enumerator<T> *input) : input(input) {}
 
-    cstring toString() const {
-        return cstring("AsEnumerator(") + this->input->toString() + "):" + this->stateName();
+    std::string toString() const {
+        return "AsEnumerator(" + this->input->toString() + "):" + this->stateName();
     }
 
     void reset() override {
@@ -364,8 +363,8 @@ class MapEnumerator final : public Enumerator<S> {
         Enumerator<S>::reset();
     }
 
-    cstring toString() const {
-        return cstring("MapEnumerator(") + this->input->toString() + "):" + this->stateName();
+    [[nodiscard]] std::string toString() const {
+        return "MapEnumerator(" + this->input->toString() + "):" + this->stateName();
     }
 
     bool moveNext() {
@@ -413,10 +412,9 @@ class ConcatEnumerator final : public Enumerator<T> {
 
  public:
     explicit ConcatEnumerator(Enumerator<Enumerator<T> *> *inputs) : inputs(inputs) {}
+    std::string toString() const { return "ConcatEnumerator:" + this->stateName(); }
 
  private:
-    cstring toString() const { return "ConcatEnumerator:" + this->stateName(); }
-
     bool advance() {
         if (this->state == EnumeratorState::NotStarted) {
             bool start = this->inputs->moveNext();
