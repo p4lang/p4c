@@ -23,7 +23,6 @@ limitations under the License.
 #include <cstdint>
 #include <functional>
 #include <iterator>
-#include <list>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
@@ -107,13 +106,17 @@ class Enumerator {
     }
 
     ////////////////// factories
-    static Enumerator<T> *createEnumerator(const std::vector<T> &data);
-    static Enumerator<T> *createEnumerator(const std::list<T> &data);
+    template <typename Container>
+    [[deprecated(
+        "Use Util::enumerate() instead")]] static Enumerator<typename Container::value_type> *
+    createEnumerator(const Container &data);
     static Enumerator<T> *emptyEnumerator();  // empty data
     template <typename Iter>
-    static Enumerator<typename Iter::value_type> *createEnumerator(Iter begin, Iter end);
+    [[deprecated("Use Util::enumerate() instead")]] static Enumerator<typename Iter::value_type> *
+    createEnumerator(Iter begin, Iter end);
     template <typename Iter>
-    static Enumerator<typename Iter::value_type> *createEnumerator(iterator_range<Iter> range);
+    [[deprecated("Use Util::enumerate() instead")]] static Enumerator<typename Iter::value_type> *
+    createEnumerator(iterator_range<Iter> range);
     // concatenate all these collections into a single one
     static Enumerator<T> *concatAll(Enumerator<Enumerator<T> *> *inputs);
 
@@ -517,18 +520,14 @@ template <typename T>
 std::vector<T> Enumerator<T>::emptyVector;
 
 template <typename T>
-Enumerator<T> *Enumerator<T>::createEnumerator(const std::vector<T> &data) {
-    return new IteratorEnumerator(data.begin(), data.end(), "vector");
+template <typename Container>
+Enumerator<typename Container::value_type> *Enumerator<T>::createEnumerator(const Container &data) {
+    return new IteratorEnumerator(data.begin(), data.end(), typeid(Container).name());
 }
 
 template <typename T>
 Enumerator<T> *Enumerator<T>::emptyEnumerator() {
     return Enumerator<T>::createEnumerator(Enumerator<T>::emptyVector);
-}
-
-template <typename T>
-Enumerator<T> *Enumerator<T>::createEnumerator(const std::list<T> &data) {
-    return new IteratorEnumerator(data.begin(), data.end(), "list");
 }
 
 template <typename T>

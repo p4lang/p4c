@@ -40,7 +40,7 @@ class UtilEnumerator : public ::testing::Test {
 };
 
 TEST_F(UtilEnumerator, Simple) {
-    Enumerator<int> *enumerator = Util::Enumerator<int>::createEnumerator(vec);
+    Enumerator<int> *enumerator = Util::enumerate(vec);
 
     bool more = enumerator->moveNext();
     EXPECT_TRUE(more);
@@ -74,7 +74,7 @@ TEST_F(UtilEnumerator, Simple) {
 }
 
 TEST_F(UtilEnumerator, Range) {
-    Enumerator<int> *enumerator = Util::Enumerator<int>::createEnumerator(vec);
+    Enumerator<int> *enumerator = Util::enumerate(vec);
     int sum = 0;
     for (auto a : *enumerator) sum += a;
     EXPECT_EQ(6, sum);
@@ -82,7 +82,7 @@ TEST_F(UtilEnumerator, Range) {
 
 TEST_F(UtilEnumerator, Linq) {
     // where
-    Enumerator<int> *enumerator = Util::Enumerator<int>::createEnumerator(vec);
+    Enumerator<int> *enumerator = Util::enumerate(vec);
 
     auto isEven = [](int x) { return x % 2 == 0; };
     Enumerator<int> *even = enumerator->where(isEven);
@@ -135,16 +135,15 @@ TEST_F(UtilEnumerator, Linq) {
 
     {
         //// concat
-        Enumerator<int> *col1 = Util::Enumerator<int>::createEnumerator(vec);
-        Enumerator<int> *col2 = Util::Enumerator<int>::createEnumerator(vec);
-        Enumerator<int> *col3 = Util::Enumerator<int>::createEnumerator(vec);
+        Enumerator<int> *col1 = Util::enumerate(vec);
+        Enumerator<int> *col2 = Util::enumerate(vec);
+        Enumerator<int> *col3 = Util::enumerate(vec);
         std::vector<Enumerator<int> *> all;
         all.push_back(col1);
         all.push_back(col2);
         all.push_back(col3);
 
-        Enumerator<Enumerator<int> *> *allEnums =
-            Enumerator<Enumerator<int> *>::createEnumerator(all);
+        Enumerator<Enumerator<int> *> *allEnums = Util::enumerate(all);
         Enumerator<int> *concat = Enumerator<int>::concatAll(allEnums);
         uint64_t count = concat->count();
         EXPECT_EQ(9u, count);
@@ -153,8 +152,8 @@ TEST_F(UtilEnumerator, Linq) {
         count = concat->count();
         EXPECT_EQ(9u, count);
 
-        Enumerator<int> *cc1 = Util::Enumerator<int>::createEnumerator(vec);
-        Enumerator<int> *cc2 = Util::Enumerator<int>::createEnumerator(vec);
+        Enumerator<int> *cc1 = Util::enumerate(vec);
+        Enumerator<int> *cc2 = Util::enumerate(vec);
         cc1 = cc1->concat(cc2);
         count = cc1->count();
         EXPECT_EQ(6u, count);
@@ -165,7 +164,7 @@ TEST_F(UtilEnumerator, Linq) {
         std::vector<B *> bs;
         bs.push_back(new B(1));
         bs.push_back(new B(2));
-        Enumerator<B *> *benum = Enumerator<B *>::createEnumerator(bs);
+        Enumerator<B *> *benum = Util::enumerate(bs);
         Enumerator<A *> *aenum = benum->as<A *>();
         more = aenum->moveNext();
         EXPECT_TRUE(more);
@@ -184,7 +183,7 @@ TEST_F(UtilEnumerator, Linq) {
 
     // first & co.
     {
-        Enumerator<int> *vi = Util::Enumerator<int>::createEnumerator(vec);
+        Enumerator<int> *vi = Util::enumerate(vec);
         EXPECT_EQ(1, vi->next());
         EXPECT_EQ(2, vi->nextOrDefault());
         EXPECT_EQ(3, vi->nextOrDefault());
@@ -197,7 +196,7 @@ TEST_F(UtilEnumerator, Linq) {
     {
         std::vector<int> s;
         s.push_back(5);
-        Enumerator<int> *e = Util::Enumerator<int>::createEnumerator(s);
+        Enumerator<int> *e = Util::enumerate(s);
         EXPECT_EQ(5, e->single());
         EXPECT_THROW(e->single(), std::logic_error);
     }
