@@ -14,6 +14,7 @@
 
 set (IR_SRCS
   base.cpp
+  bitrange.cpp
   dbprint.cpp
   dbprint-expression.cpp
   dbprint-stmt.cpp
