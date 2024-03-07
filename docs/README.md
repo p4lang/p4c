@@ -15,9 +15,9 @@ p4c
 │   ├── ebpf                  -- extended Berkeley Packet Filters back-end
 │   ├── graphs                -- backend that can draw graphiz graphs of P4 programs
 │   ├── p4test                -- "fake" back-end for testing
-│   ├── p4tools               -- shared C++ components for the various P4Tools modules
-│   ├── tc                    -- generates files for the P4TC implementation
-│   └── ubpf                  -- translate P4 programs into the uBPF programs
+│   ├── p4tools               -- testing library for different static analysis tools
+│   ├── tc                    -- translates P4 code to Linux TC rules
+│   └── ubpf                  -- translates P4 programs to uBPF code
 ├── control-plane             -- control plane API
 ├── docs                      -- documentation
 │   └── doxygen               -- documentation generation support
