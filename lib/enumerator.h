@@ -42,7 +42,7 @@ class Enumerator;
 /// for (auto a : *e) ...
 // FIXME: It is not a proper iterator (see reference type above) and should be removed
 // in favor of more standard approach. Note that Enumerator<T>::getCurrent() always
-// returns element by value, so more or less suitable only copyable types that are cheap
+// returns element by value, so more or less suitable only for copyable types that are cheap
 // to copy.
 template <typename T>
 class EnumeratorHandle {
