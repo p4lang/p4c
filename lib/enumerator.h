@@ -212,7 +212,9 @@ class IteratorEnumerator : public Enumerator<typename Iter::value_type> {
           current(begin),
           name(name) {}
 
-    [[nodiscard]] std::string toString() const { return this->name + ":" + this->stateName(); }
+    [[nodiscard]] std::string toString() const {
+        return std::string(this->name) + ":" + this->stateName();
+    }
 
     bool moveNext() {
         switch (this->state) {
@@ -330,29 +332,32 @@ class FilterEnumerator final : public Enumerator<T> {
 
 ///////////////////////////
 
+namespace Detail {
+// See if we can use ICastable interface to cast from T to S. This is only possible if:
+// - Both T and S are pointer types (let's denote T = From* and S = To*)
+// - Expression (From*)()->to<To>() is well-formed
+// Essentially this means the following code is well-formed:
+// From *current = input->getCurrent(); current->to<To>();
+template <typename From, typename To, typename = void>
+static constexpr bool can_be_casted = false;
+
+template <typename From, typename To>
+static constexpr bool
+    can_be_casted<From *, To *, std::void_t<decltype(std::declval<From *>()->template to<To>())>> =
+        true;
+}  // namespace Detail
+
 /// Casts each element
 template <typename T, typename S>
 class AsEnumerator final : public Enumerator<S> {
-    // See if we can use ICastable interface to cast from T to S. This is only possible if:
-    // - Both T and S are pointer types (let's denote T = From* and S = To*)
-    // - Expression (From*)()->to<To>() is well-formed
-    // Essentially this means the following code is well-formed:
-    // From *current = input->getCurrent(); current->to<To>();
-    template <typename From, typename To, typename = void>
-    static constexpr bool can_be_casted = false;
-
-    template <typename From, typename To>
-    static constexpr bool can_be_casted<
-        From *, To *, std::void_t<decltype(std::declval<From *>()->template to<To>())>> = true;
-
     template <typename U = S>
-    typename std::enable_if_t<!can_be_casted<T, S>, U> getCurrentImpl() const {
+    typename std::enable_if_t<!Detail::can_be_casted<T, S>, U> getCurrentImpl() const {
         T current = input->getCurrent();
         return dynamic_cast<S>(current);
     }
 
     template <typename U = S>
-    typename std::enable_if_t<can_be_casted<T, S>, U> getCurrentImpl() const {
+    typename std::enable_if_t<Detail::can_be_casted<T, S>, U> getCurrentImpl() const {
         T current = input->getCurrent();
         return current->template to<std::remove_pointer_t<S>>();
     }
