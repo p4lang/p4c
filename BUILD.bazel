@@ -210,10 +210,12 @@ cc_library(
     ],
     copts = [
         # Where p4c should look for p4include at runtime.
-        ("-DCONFIG_PKGDATADIR=\\\"external/%s\\\"" % repository_name()),
         # This will work only if the binary is executed by Bazel. For a general
         # solution, we would need to make p4c aware of Bazel, specifically:
         # https://github.com/bazelbuild/bazel/blob/master/tools/cpp/runfiles/runfiles_src.h
+        ("-DCONFIG_PKGDATADIR=\\\"external/%s\\\"" % repository_name()),
+        # Abseil does not export its includes, we add them manually.
+        "-Iexternal/com_google_absl",
     ],
     textual_hdrs = glob([
         "ir/**/*.h",
