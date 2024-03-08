@@ -130,8 +130,8 @@ bool Bmv2V1ModelMeterValue::isDirectMeter() const { return isDirect; }
  *  Bmv2V1ModelActionProfile
  * ========================================================================================= */
 
-const std::vector<std::pair<cstring, std::vector<ActionArg>>>
-    *Bmv2V1ModelActionProfile::getActions() const {
+const std::vector<std::pair<cstring, std::vector<ActionArg>>> *
+Bmv2V1ModelActionProfile::getActions() const {
     return &actions;
 }
 

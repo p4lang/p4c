@@ -34,8 +34,7 @@ int main(int argc, char **argv) {
         result = P4Tools::P4Testgen::Testgen().main(args);
     } catch (const Util::CompilerBug &e) {
         std::cerr << "Internal error: " << updateErrorMsg(e.what()) << "\n";
-        std::cerr << "Please submit a bug report with your code."
-                  << "\n";
+        std::cerr << "Please submit a bug report with your code." << "\n";
         result = EXIT_FAILURE;
     } catch (const Util::CompilerUnimplemented &e) {
         std::cerr << updateErrorMsg(e.what()) << "\n";
@@ -45,12 +44,10 @@ int main(int argc, char **argv) {
         result = EXIT_FAILURE;
     } catch (const std::exception &e) {
         std::cerr << "Internal error: " << updateErrorMsg(e.what()) << "\n";
-        std::cerr << "Please submit a bug report with your code."
-                  << "\n";
+        std::cerr << "Please submit a bug report with your code." << "\n";
         result = EXIT_FAILURE;
     } catch (...) {
-        std::cerr << "Internal error. Please submit a bug report with your code."
-                  << "\n";
+        std::cerr << "Internal error. Please submit a bug report with your code." << "\n";
         result = EXIT_FAILURE;
     }
     P4Tools::printPerformanceReport();
