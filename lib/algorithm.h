@@ -21,7 +21,7 @@ limitations under the License.
 #include <set>
 
 // Round up x/y, for integers
-#define ROUNDUP(x, y) (((x) + (y)-1) / (y))
+#define ROUNDUP(x, y) (((x) + (y) - 1) / (y))
 // Elements in an array
 #define ELEMENTS(a) (sizeof(a) / sizeof(a[0]))
 

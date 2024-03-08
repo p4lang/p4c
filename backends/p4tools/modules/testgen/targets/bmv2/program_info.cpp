@@ -96,8 +96,8 @@ const IR::P4Table *Bmv2V1ModelProgramInfo::getTableofDirectExtern(
 
 const ArchSpec &Bmv2V1ModelProgramInfo::getArchSpec() const { return ARCH_SPEC; }
 
-const ordered_map<cstring, const IR::Type_Declaration *>
-    *Bmv2V1ModelProgramInfo::getProgrammableBlocks() const {
+const ordered_map<cstring, const IR::Type_Declaration *> *
+Bmv2V1ModelProgramInfo::getProgrammableBlocks() const {
     return &programmableBlocks;
 }
 
