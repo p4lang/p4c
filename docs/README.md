@@ -24,10 +24,10 @@ p4c
 ├── extensions
 │   └── XXXX                  -- symlinks to custom back-ends
 ├── frontends
-│   ├── common                -- common front-end code
+│   ├── common                -- common front end code
 │   ├── parsers               -- parser and lexer code for P4_14 and P4_16
-│   ├── p4-14                 -- P4_14 front-end
-│   └── p4                    -- P4_16 front-end
+│   ├── p4-14                 -- P4_14 front end
+│   └── p4                    -- P4_16 front end
 ├── ir                        -- core internal representation
 ├── lib                       -- common utilities (libp4toolkit.a)
 ├── midend                    -- code that may be useful for writing mid-ends
