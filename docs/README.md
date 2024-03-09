@@ -9,12 +9,12 @@ The code and documentation are hosted in the following repository: https://githu
 p4c
 ├── build                     -- recommended place to build binary
 ├── backends          
-│   ├── bmv2                  -- behavioral model version 2 (switch simulator) back-end
+│   ├── bmv2                  -- behavioral model version 2 (switch simulator) back end
 │   ├── common                -- code shared by multiple back ends
 │   ├── dpdk                  -- translates P4 code to DPDK instructions
-│   ├── ebpf                  -- extended Berkeley Packet Filters back-end
+│   ├── ebpf                  -- extended Berkeley Packet Filters back end
 │   ├── graphs                -- backend that can draw graphiz graphs of P4 programs
-│   ├── p4test                -- "fake" back-end for testing
+│   ├── p4test                -- "fake" back end for testing
 │   ├── p4tools               -- testing library for different static analysis tools
 │   ├── tc                    -- translates P4 code to Linux TC rules
 │   └── ubpf                  -- translates P4 programs to uBPF code
