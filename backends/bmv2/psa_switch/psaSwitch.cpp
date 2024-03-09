@@ -665,8 +665,7 @@ void ExternConverter_Hash::convertExternInstance(ConversionContext *ctxt, const 
 void ExternConverter_Checksum::convertExternInstance(UNUSED ConversionContext *ctxt,
                                                      UNUSED const IR::Declaration *c,
                                                      UNUSED const IR::ExternBlock *eb,
-                                                     UNUSED const bool &emitExterns) { /* TODO */
-}
+                                                     UNUSED const bool &emitExterns) { /* TODO */ }
 
 void ExternConverter_InternetChecksum::convertExternInstance(UNUSED ConversionContext *ctxt,
                                                              UNUSED const IR::Declaration *c,
@@ -972,8 +971,7 @@ void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext *c
 void ExternConverter_Random::convertExternInstance(UNUSED ConversionContext *ctxt,
                                                    UNUSED const IR::Declaration *c,
                                                    UNUSED const IR::ExternBlock *eb,
-                                                   UNUSED const bool &emitExterns) { /* TODO */
-}
+                                                   UNUSED const bool &emitExterns) { /* TODO */ }
 
 void ExternConverter_ActionProfile::convertExternInstance(UNUSED ConversionContext *ctxt,
                                                           UNUSED const IR::Declaration *c,
@@ -1056,7 +1054,6 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
 void ExternConverter_Digest::convertExternInstance(UNUSED ConversionContext *ctxt,
                                                    UNUSED const IR::Declaration *c,
                                                    UNUSED const IR::ExternBlock *eb,
-                                                   UNUSED const bool &emitExterns) { /* TODO */
-}
+                                                   UNUSED const bool &emitExterns) { /* TODO */ }
 
 }  // namespace BMV2

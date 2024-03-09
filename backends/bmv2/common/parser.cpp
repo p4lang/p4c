@@ -413,9 +413,8 @@ unsigned ParserConverter::combine(const IR::Expression *keySet, const IR::ListEx
                 mask_value = Util::mask(width);
             }
             mask = Util::shift_left(mask, w) + mask_value;
-            LOG3("Shifting "
-                 << " into key " << key_value << " &&& " << mask_value << " result is " << value
-                 << " &&& " << mask);
+            LOG3("Shifting " << " into key " << key_value << " &&& " << mask_value << " result is "
+                             << value << " &&& " << mask);
             index++;
         }
 

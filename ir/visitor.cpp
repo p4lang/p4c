@@ -845,8 +845,8 @@ std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_
     out << Brief;
     for (auto &i : info.parents) {
         out << Log::endl
-            << "  " << *i.first << " [" << i.first->id << "] "
-            << "exist=" << i.second.exist << " visited=" << i.second.visited;
+            << "  " << *i.first << " [" << i.first->id << "] " << "exist=" << i.second.exist
+            << " visited=" << i.second.visited;
     }
     dbsetflags(out, flags);
 #endif

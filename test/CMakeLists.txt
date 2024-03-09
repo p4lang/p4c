@@ -18,6 +18,7 @@
 
 set (GTEST_UNITTEST_SOURCES
   gtest/arch_test.cpp
+  gtest/bitrange.cpp
   gtest/bitvec_test.cpp
   gtest/call_graph_test.cpp
   gtest/complex_bitwise.cpp

@@ -220,8 +220,8 @@ const std::vector<std::reference_wrapper<const TraceEvent>> &ExecutionState::get
 
 const Continuation::Body &ExecutionState::getBody() const { return body; }
 
-const std::stack<std::reference_wrapper<const ExecutionState::StackFrame>>
-    &ExecutionState::getStack() const {
+const std::stack<std::reference_wrapper<const ExecutionState::StackFrame>> &
+ExecutionState::getStack() const {
     return stack;
 }
 
