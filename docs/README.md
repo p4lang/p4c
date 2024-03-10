@@ -19,7 +19,7 @@ p4c
 │   ├── tc                    -- translates P4 code to Linux TC rules
 │   └── ubpf                  -- translates P4 programs to uBPF code
 ├── control-plane             -- control plane API
-|   └──google/rpc             -- Defines error model in `google.rpc` package.
+|   └──google/rpc             -- Definitions of Google Protobuf APIs.
 ├── docs                      -- documentation
 │   └── doxygen               -- documentation generation support
 ├── extensions
