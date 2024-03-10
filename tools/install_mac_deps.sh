@@ -37,7 +37,14 @@ HOMEBREW_PREFIX=$(brew --prefix)
 # Fetch the latest formulae
 brew update
 
+
 BOOST_LIB="boost@1.84"
+# Boost1.84 pulls in python@3.12 on Ventura. This can cause conflicts with existing Python 3.11.
+# Only do this if the "CI" variable is set.
+if [[ ! -z "$CI" ]]; then
+  brew link --overwrite python@3.12
+fi
+
 REQUIRED_PACKAGES=(
     autoconf automake bdw-gc ccache cmake libtool
     openssl pkg-config coreutils bison grep
@@ -62,4 +69,5 @@ fi
 source ~/.bash_profile
 
 # Install required pip packages
-pip3 install --user -r requirements.txt
+# TODO: Should we use --break-system-packages or should we set up a venv?
+pip3 install --user --break-system-packages -r requirements.txt
