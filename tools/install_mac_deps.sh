@@ -37,21 +37,16 @@ HOMEBREW_PREFIX=$(brew --prefix)
 # Fetch the latest formulae
 brew update
 
-
 BOOST_LIB="boost@1.84"
-# Boost1.84 pulls in python@3.12 on Ventura. This can cause conflicts with existing Python 3.11.
-# Only do this if the "CI" variable is set.
-if [[ ! -z "$CI" ]]; then
-  brew link --overwrite python@3.12
-fi
-
 REQUIRED_PACKAGES=(
     autoconf automake bdw-gc ccache cmake libtool
     openssl pkg-config coreutils bison grep
     ${BOOST_LIB}
 )
 for package in "${REQUIRED_PACKAGES[@]}"; do
-  brew_install ${package}
+    # FIXME: || true should not be needed but because boost@1.84 pulls in python@3.12, which fails
+    # to install we need to ignore the error.
+  brew_install ${package} || true
 done
 
 # Check if linking is needed.
