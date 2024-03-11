@@ -44,7 +44,7 @@ jobs:
 
     - name: Release
       if: steps.check_tag.outputs.tag_exists == 'false'
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ env.TAG }}
       env:
