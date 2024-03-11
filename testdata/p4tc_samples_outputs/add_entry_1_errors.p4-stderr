@@ -1,0 +1,1 @@
+[--Werror=unexpected] error: add_entry extern can only be applied in default action of the table.

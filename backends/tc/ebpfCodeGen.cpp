@@ -1476,7 +1476,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         auto defaultActionName = table->getActionNameExpression(defaultAction);
         CHECK_NULL(defaultActionName);
         if (defaultActionName->path->name.originalName != act->name.originalName) {
-            ::error(ErrorType::ERR_EXPECTED,
+            ::error(ErrorType::ERR_UNEXPECTED,
                     "add_entry extern can only be applied in default action of the table.");
         }
         BUG_CHECK(function->expr->arguments->size() == 3,
@@ -1500,7 +1500,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
                 if (a->toString() == actionName) {
                     auto annotations = a->getAnnotations();
                     if (annotations && annotations->getSingle("defaultonly")) {
-                        ::error(ErrorType::ERR_EXPECTED,
+                        ::error(ErrorType::ERR_UNEXPECTED,
                                 "add_entry hit action %1% cannot be annotated with defaultonly.",
                                 actionName);
                     }
@@ -1515,7 +1515,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
                         auto paramList = action->getParameters();
                         auto components = param->to<IR::StructExpression>()->components;
                         if (paramList->parameters.size() != components.size()) {
-                            ::error(ErrorType::ERR_EXPECTED,
+                            ::error(ErrorType::ERR_UNEXPECTED,
                                     "Action params in add_entry should be same as no of action "
                                     "parameters. %1%",
                                     action);
@@ -1530,7 +1530,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
                         int index = 0;
                         for (auto param : paramList->parameters) {
                             if (param->direction != IR::Direction::None) {
-                                ::error(ErrorType::ERR_EXPECTED,
+                                ::error(ErrorType::ERR_UNEXPECTED,
                                         "Parameters of action called from add_entry should be "
                                         "directionless. %1%",
                                         actionName);
@@ -1566,7 +1566,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
                 }
             }
             if (actID == 0) {
-                ::error(ErrorType::ERR_EXPECTED,
+                ::error(ErrorType::ERR_UNEXPECTED,
                         "add_entry extern can only be applied for one of the hit action of table "
                         "%1%. %2% is not hit action of table.",
                         table->instanceName, actionName);

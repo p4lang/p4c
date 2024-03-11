@@ -117,6 +117,14 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
 
 void Backend::serialize() const {
     cstring progName = tcIR->getPipelineName();
+    if (ebpf_program == nullptr) return;
+    EBPF::CodeBuilder c(target), p(target), h(target);
+    ebpf_program->emit(&c);
+    ebpf_program->emitParser(&p);
+    ebpf_program->emitHeader(&h);
+    if (::errorCount() > 0) {
+        return;
+    }
     cstring outputFile = progName + ".template";
     if (!options.outputFolder.isNullOrEmpty()) {
         outputFile = options.outputFolder + outputFile;
@@ -154,11 +162,6 @@ void Backend::serialize() const {
         ::error("Unable to open File %1%", headerFile);
         return;
     }
-    if (ebpf_program == nullptr) return;
-    EBPF::CodeBuilder c(target), p(target), h(target);
-    ebpf_program->emit(&c);
-    ebpf_program->emitParser(&p);
-    ebpf_program->emitHeader(&h);
     *cstream << c.toString();
     *pstream << p.toString();
     *hstream << h.toString();
