@@ -826,6 +826,18 @@ void EBPFTablePNA::emitValueStructStructure(EBPF::CodeBuilder *builder) {
     builder->append("unsigned int action;");
     builder->newline();
 
+    builder->emitIndent();
+    builder->append("u32 hit:1,");
+    builder->newline();
+
+    builder->emitIndent();
+    builder->append("   is_default_miss_act:1,");
+    builder->newline();
+
+    builder->emitIndent();
+    builder->append("   is_default_hit_act:1;");
+    builder->newline();
+
     if (isTernaryTable()) {
         builder->emitIndent();
         builder->append("__u32 priority;");

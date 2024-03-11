@@ -20,6 +20,9 @@ struct ingress_nh_table_key_mask {
 #define INGRESS_NH_TABLE_ACT_NOACTION 0
 struct __attribute__((__packed__)) ingress_nh_table_value {
     unsigned int action;
+    u32 hit:1,
+       is_default_miss_act:1,
+       is_default_hit_act:1;
     __u32 priority;
     union {
         struct {

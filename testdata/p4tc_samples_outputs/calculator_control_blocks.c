@@ -19,6 +19,9 @@ struct __attribute__((__packed__)) MainControlImpl_calculate_key {
 #define MAINCONTROLIMPL_CALCULATE_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_calculate_value {
     unsigned int action;
+    u32 hit:1,
+       is_default_miss_act:1,
+       is_default_hit_act:1;
     union {
         struct {
         } _NoAction;

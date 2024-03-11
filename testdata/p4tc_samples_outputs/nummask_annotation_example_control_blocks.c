@@ -16,6 +16,9 @@ struct __attribute__((__packed__)) MainControlImpl_set_ct_options_key {
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_set_ct_options_value {
     unsigned int action;
+    u32 hit:1,
+       is_default_miss_act:1,
+       is_default_hit_act:1;
     union {
         struct {
         } _NoAction;
