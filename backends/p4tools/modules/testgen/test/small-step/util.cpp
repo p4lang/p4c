@@ -1,9 +1,8 @@
-#include "backends/p4tools/modules/testgen/test/small-step/util.h"
+#include "util.h"
 
 #include <string>
 
-#include <boost/algorithm/string/replace.hpp>
-
+#include "absl/strings/substitute.h"
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
@@ -17,7 +16,7 @@ std::optional<const P4ToolsTestCase> createSmallStepExprTest(const std::string &
                                                              const std::string &expr) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header H {
-  %HEADER_FIELDS%
+  $0
 }
 
 struct Headers {
@@ -40,7 +39,7 @@ extern void m<T>(in T data);
 
 control mau(inout Headers hdr, inout Metadata meta, inout standard_metadata_t sm) {
   apply {
-    m(%EXPR%);
+    m($1);
   }
 }
 
@@ -60,10 +59,7 @@ control computeChecksum(inout Headers hdr, inout Metadata meta) {
 
 V1Switch(parse(), verifyChecksum(), mau(), mau(), computeChecksum(), deparse()) main;)");
 
-    boost::replace_first(source, "%HEADER_FIELDS%", hdrFields);
-    boost::replace_first(source, "%EXPR%", expr);
-
-    return P4ToolsTestCase::create_16("bmv2", "v1model", source);
+    return P4ToolsTestCase::create_16("bmv2", "v1model", absl::Substitute(source, hdrFields, expr));
 }
 
 }  // namespace SmallStepUtil

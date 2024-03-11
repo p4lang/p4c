@@ -10,8 +10,6 @@ on:
 
 jobs:
   p4c-lint:
-    strategy:
-      fail-fast: false
     runs-on: ubuntu-20.04
     env:
       IMAGE_TYPE: test

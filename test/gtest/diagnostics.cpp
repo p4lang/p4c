@@ -17,12 +17,9 @@ limitations under the License.
 #include <gtest/gtest.h>
 
 #include <optional>
-#include <vector>
 
-#include <boost/algorithm/string/replace.hpp>
-
+#include "absl/strings/substitute.h"
 #include "frontends/common/applyOptionsPragmas.h"
-#include "ir/ir.h"
 #include "test/gtest/helpers.h"
 
 namespace Test {
@@ -31,7 +28,7 @@ namespace {
 
 std::optional<FrontendTestCase> createP4_16DiagnosticsTestCase(const std::string &pragmaSource) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
-%PRAGMA_SOURCE%
+$0
         struct Headers { bit<8> value; }
         struct Metadata { }
         parser parse(packet_in p, out Headers h, inout Metadata m,
@@ -44,14 +41,12 @@ std::optional<FrontendTestCase> createP4_16DiagnosticsTestCase(const std::string
         V1Switch(parse(), checksum(), mau(), mau(), checksum(), deparse()) main;
     )");
 
-    boost::replace_first(source, "%PRAGMA_SOURCE%", pragmaSource);
-
-    return FrontendTestCase::create(source);
+    return FrontendTestCase::create(absl::Substitute(source, pragmaSource));
 }
 
 std::optional<FrontendTestCase> createP4_14DiagnosticsTestCase(const std::string &pragmaSource) {
     auto source = P4_SOURCE(R"(
-%PRAGMA_SOURCE%
+$0
         header_type headers_t { fields { value : 8; } }
         header headers_t headers;
         parser start {
@@ -61,9 +56,8 @@ std::optional<FrontendTestCase> createP4_14DiagnosticsTestCase(const std::string
         control egress { }
     )");
 
-    boost::replace_first(source, "%PRAGMA_SOURCE%", pragmaSource);
-
-    return FrontendTestCase::create(source, CompilerOptions::FrontendVersion::P4_14);
+    return FrontendTestCase::create(absl::Substitute(source, pragmaSource),
+                                    CompilerOptions::FrontendVersion::P4_14);
 }
 
 }  // namespace

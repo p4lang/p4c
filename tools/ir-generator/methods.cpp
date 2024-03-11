@@ -113,8 +113,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                       buf << f->name << ".equiv(a." << f->name << ")";
                   } else {
                       buf << "(" << f->name << " ? a." << f->name << " ? " << f->name
-                          << "->equiv(*a." << f->name << ")"
-                          << " : false : a." << f->name << " == nullptr)";
+                          << "->equiv(*a." << f->name << ")" << " : false : a." << f->name
+                          << " == nullptr)";
                   }
               }
               if (first) {  // no fields?
@@ -241,8 +241,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               if (!f->isInline && f->nullOK)
                   buf << cl->indent << "if (" << f->name << " != nullptr) ";
               buf << cl->indent << "json << \",\" << std::endl << json.indent << \"\\\"" << f->name
-                  << "\\\" : \" << "
-                  << "this->" << f->name << ";" << std::endl;
+                  << "\\\" : \" << " << "this->" << f->name << ";" << std::endl;
           }
           buf << "}";
           return buf.str();

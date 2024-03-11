@@ -1,5 +1,7 @@
-#ifndef FRONTENDS_V1LEXER_INTERNAL_H_
-#define FRONTENDS_V1LEXER_INTERNAL_H_
+#ifndef FRONTENDS_PARSERS_V1_V1LEXER_INTERNAL_HPP_
+#define FRONTENDS_PARSERS_V1_V1LEXER_INTERNAL_HPP_
+
+#include <string_view>
 
 #include "frontends/common/constantParsing.h"
 #include "frontends/parsers/v1/v1parser.hpp"
@@ -13,7 +15,7 @@ class V1Lexer : public v1FlexLexer {
     typedef V1::V1Parser::symbol_type Token;
 
  public:
-    explicit V1Lexer(std::istream& input) : v1FlexLexer(&input) { }
+    explicit V1Lexer(std::istream &input) : v1FlexLexer(&input) {}
 
     /**
      * Invoked by the parser to advance to the next token in the input stream.
@@ -27,7 +29,21 @@ class V1Lexer : public v1FlexLexer {
      *
      * @return the token that was just read.
      */
-    virtual Token yylex(V1::V1ParserDriver& driver);
+    virtual Token yylex(V1::V1ParserDriver &driver);
+
+    static constexpr std::string_view trim(std::string_view in,
+                                           std::string_view white = " \n\r\t\v") {
+        auto left = in.find_first_not_of(white);
+        if (left == std::string_view::npos) return {};
+
+        in.remove_prefix(left);
+
+        auto right = in.find_last_not_of(white);
+        if (right == std::string_view::npos) return {};
+
+        in.remove_suffix(in.size() - right - 1);
+        return in;
+    }
 
  private:
     int yylex() override { return v1FlexLexer::yylex(); }
@@ -35,4 +51,4 @@ class V1Lexer : public v1FlexLexer {
 
 }  // namespace V1
 
-#endif  /* FRONTENDS_V1LEXER_INTERNAL_H_ */
+#endif /* FRONTENDS_PARSERS_V1_V1LEXER_INTERNAL_HPP_ */

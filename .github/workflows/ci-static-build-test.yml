@@ -16,8 +16,6 @@ concurrency:
 jobs:
   # Build a p4c release on Ubuntu 20.04.
   build-linux:
-    strategy:
-      fail-fast: false
     runs-on: ubuntu-20.04
     env:
       IMAGE_TYPE: test

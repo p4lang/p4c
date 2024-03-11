@@ -14,8 +14,6 @@ jobs:
   test-ubuntu18:
     # Only run on pull requests with the "run-ubuntu18" label.
     if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'run-ubuntu18') }}
-    strategy:
-      fail-fast: false
     runs-on: ubuntu-latest
     env:
       CTEST_PARALLEL_LEVEL: 4

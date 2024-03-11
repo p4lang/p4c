@@ -2,8 +2,7 @@
 
 #include <optional>
 
-#include <boost/algorithm/string/replace.hpp>
-
+#include "absl/strings/substitute.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/toP4/toP4.h"
@@ -11,7 +10,6 @@
 #include "frontends/p4/typeMap.h"
 #include "helpers.h"
 #include "ir/ir.h"
-#include "lib/log.h"
 #include "lib/sourceCodeBuilder.h"
 #include "midend/simplifyBitwise.h"
 
@@ -45,7 +43,7 @@ control verifyChecksum(inout Headers headers, inout Metadata meta) { apply { } }
 control ingress(inout Headers headers, inout Metadata meta,
                 inout standard_metadata_t sm) {
     apply {
-%INGRESS%
+$0
     }
 }
 
@@ -62,8 +60,8 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(),
     computeChecksum(), deparse()) main;
     )");
 
-    boost::replace_first(source, "%INGRESS%", ingressSource);
-    return FrontendTestCase::create(source, CompilerOptions::FrontendVersion::P4_16);
+    return FrontendTestCase::create(absl::Substitute(source, ingressSource),
+                                    CompilerOptions::FrontendVersion::P4_16);
 }
 
 class CountAssignmentStatements : public Inspector {
