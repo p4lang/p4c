@@ -100,32 +100,20 @@ control MainControlImpl(
             send_nh;
             default_route_drop;
         }
-        default_action = default_route_drop;
-    }
-    table ipv4_tbl_2 {
-        key = {
-            hdr.ipv4.dstAddr  : exact;
-            hdr.ipv4.srcAddr  : exact;
-            hdr.ipv4.protocol : exact;
-        }
-        actions = {
-            next_hop;
-            drop;
-        }
-        default_action = drop;
+        default_action = next_hop;
+        add_on_miss = true;
     }
 
     apply {
         if (hdr.ipv4.isValid()) {
             ipv4_tbl_1.apply();
-            ipv4_tbl_2.apply();
         }
     }
 }
 
 control MainDeparserImpl(
     packet_out pkt,
-    in headers_t hdr,                    // from main control
+    inout headers_t hdr,                    // from main control
     in main_metadata_t user_meta,        // from main control
     in pna_main_output_metadata_t ostd)
 {

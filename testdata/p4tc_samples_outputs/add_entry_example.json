@@ -1,7 +1,6 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "add_entry_example",
-  "id" : 1,
   "tables" : [
     {
       "name" : "MainControlImpl/ipv4_tbl_1",
@@ -33,7 +32,7 @@
           "annotations" : [],
           "params" : [],
           "default_hit_action" : false,
-          "default_miss_action" : false
+          "default_miss_action" : true
         },
         {
           "id" : 2,
@@ -42,7 +41,7 @@
           "annotations" : [],
           "params" : [],
           "default_hit_action" : false,
-          "default_miss_action" : true
+          "default_miss_action" : false
         }
       ]
     },
@@ -77,22 +76,22 @@
       ],
       "actions" : [
         {
-          "id" : 1,
-          "name" : "MainControlImpl/next_hop",
-          "action_scope" : "TableAndDefault",
-          "annotations" : [],
-          "params" : [],
-          "default_hit_action" : false,
-          "default_miss_action" : false
-        },
-        {
           "id" : 3,
-          "name" : "MainControlImpl/drop",
+          "name" : "MainControlImpl/next_hop1",
           "action_scope" : "TableAndDefault",
           "annotations" : [],
           "params" : [],
           "default_hit_action" : false,
           "default_miss_action" : true
+        },
+        {
+          "id" : 2,
+          "name" : "MainControlImpl/default_route_drop",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : false
         }
       ]
     }

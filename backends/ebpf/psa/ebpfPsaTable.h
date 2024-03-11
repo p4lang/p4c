@@ -67,8 +67,6 @@ class EBPFTablePSA : public EBPFTable {
     void emitKeysAndValues(CodeBuilder *builder, EntriesGroup_t &sameMaskEntries,
                            std::vector<cstring> &keyNames, std::vector<cstring> &valueNames);
 
-    const IR::PathExpression *getActionNameExpression(const IR::Expression *expr) const;
-
  public:
     // We use vectors to keep an order of Direct Meters or Counters from a P4 program.
     // This order is important from CLI tool point of view.
@@ -95,6 +93,7 @@ class EBPFTablePSA : public EBPFTable {
     void emitCacheInstance(CodeBuilder *builder);
     void emitCacheLookup(CodeBuilder *builder, cstring key, cstring value) override;
     void emitCacheUpdate(CodeBuilder *builder, cstring key, cstring value) override;
+    const IR::PathExpression *getActionNameExpression(const IR::Expression *expr) const;
     bool cacheEnabled() override { return tableCacheEnabled; }
 
     EBPFCounterPSA *getDirectCounter(cstring name) const {

@@ -3,7 +3,7 @@
 set -e
 
 TC="tc"
-$TC p4template create pipeline/add_entry_example pipeid 1 numtables 2
+$TC p4template create pipeline/add_entry_example numtables 2
 
 $TC p4template create action/add_entry_example/MainControlImpl/next_hop actid 1
 $TC p4template update action/add_entry_example/MainControlImpl/next_hop state active
@@ -11,8 +11,8 @@ $TC p4template update action/add_entry_example/MainControlImpl/next_hop state ac
 $TC p4template create action/add_entry_example/MainControlImpl/default_route_drop actid 2
 $TC p4template update action/add_entry_example/MainControlImpl/default_route_drop state active
 
-$TC p4template create action/add_entry_example/MainControlImpl/drop actid 3
-$TC p4template update action/add_entry_example/MainControlImpl/drop state active
+$TC p4template create action/add_entry_example/MainControlImpl/next_hop1 actid 3
+$TC p4template update action/add_entry_example/MainControlImpl/next_hop1 state active
 
 $TC p4template create table/add_entry_example/MainControlImpl/ipv4_tbl_1 \
 	tblid 1 \
@@ -20,13 +20,13 @@ $TC p4template create table/add_entry_example/MainControlImpl/ipv4_tbl_1 \
 	keysz 64 nummasks 8 tentries 2048 \
 	table_acts act name add_entry_example/MainControlImpl/next_hop \
 	act name add_entry_example/MainControlImpl/default_route_drop
-$TC p4template update table/add_entry_example/MainControlImpl/ipv4_tbl_1 default_miss_action action add_entry_example/MainControlImpl/default_route_drop
+$TC p4template update table/add_entry_example/MainControlImpl/ipv4_tbl_1 default_miss_action action add_entry_example/MainControlImpl/next_hop
 
 $TC p4template create table/add_entry_example/MainControlImpl/ipv4_tbl_2 \
 	tblid 2 \
 	type exact \
 	keysz 72 nummasks 8 tentries 2048 \
-	table_acts act name add_entry_example/MainControlImpl/next_hop \
-	act name add_entry_example/MainControlImpl/drop
-$TC p4template update table/add_entry_example/MainControlImpl/ipv4_tbl_2 default_miss_action action add_entry_example/MainControlImpl/drop
+	table_acts act name add_entry_example/MainControlImpl/next_hop1 \
+	act name add_entry_example/MainControlImpl/default_route_drop
+$TC p4template update table/add_entry_example/MainControlImpl/ipv4_tbl_2 default_miss_action action add_entry_example/MainControlImpl/next_hop1
 $TC p4template update pipeline/add_entry_example state ready

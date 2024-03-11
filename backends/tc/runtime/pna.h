@@ -111,7 +111,7 @@ struct __attribute__((__packed__)) p4tc_table_entry_act_bpf {
 struct p4tc_table_entry_create_bpf_params__local {
         u32 pipeid;
         u32 tblid;
-        u64 aging_ms;
+        u32 profile_id;
 };
 extern struct p4tc_table_entry_act_bpf *bpf_p4tc_tbl_read(
     struct __sk_buff *skb, struct p4tc_table_entry_act_bpf_params__local *params, void *key,

@@ -1411,6 +1411,14 @@ cstring ControlBodyTranslatorPNA::getParamName(const IR::PathExpression *expr) {
     return expr->path->name.name;
 }
 
+bool ControlBodyTranslatorPNA::IsTableAddOnMiss(const IR::P4Table *table) {
+    auto property = table->getBooleanProperty("add_on_miss");
+    if (property && property->value) {
+        return true;
+    }
+    return false;
+}
+
 void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *function) {
     if (function->expr->method->toString() == "send_to_port" ||
         function->expr->method->toString() == "drop_packet") {
@@ -1460,12 +1468,24 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
                 "bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf)");
         }
         return;
-    } else if (function->expr->toString() == "add_entry") {
+    } else if (function->expr->method->toString() == "add_entry") {
         auto act = findContext<IR::P4Action>();
         BUG_CHECK(act != nullptr, "%1% add_entry extern can only be used in an action", function);
+        const IR::P4Table *t = table->table->container;
+        const IR::Expression *defaultAction = t->getDefaultAction();
+        auto defaultActionName = table->getActionNameExpression(defaultAction);
+        CHECK_NULL(defaultActionName);
+        if (defaultActionName->path->name.originalName != act->name.originalName) {
+            ::error(ErrorType::ERR_EXPECTED,
+                    "add_entry extern can only be applied in default action of the table.");
+        }
         BUG_CHECK(function->expr->arguments->size() == 3,
                   "%1%: expected 3 arguments in add_entry extern", function);
-
+        if (!IsTableAddOnMiss(t)) {
+            ::warning(ErrorType::WARN_MISSING,
+                      "add_entry extern can only be used in an action"
+                      " of a table with property add_on_miss equals to true.");
+        }
         auto action = function->expr->arguments->at(0);
         auto actionName = action->expression->to<IR::StringLiteral>()->value;
         auto param = function->expr->arguments->at(1)->expression;
@@ -1478,47 +1498,78 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
                 auto adecl = control->program->refMap->getDeclaration(a->getPath(), true);
                 auto action = adecl->getNode()->to<IR::P4Action>();
                 if (a->toString() == actionName) {
+                    auto annotations = a->getAnnotations();
+                    if (annotations && annotations->getSingle("defaultonly")) {
+                        ::error(ErrorType::ERR_EXPECTED,
+                                "add_entry hit action %1% cannot be annotated with defaultonly.",
+                                actionName);
+                    }
                     cstring name = tcIR->externalName(action);
                     actID = tcIR->getActionId(name);
                     BUG_CHECK(actID != 0, "Action ID not found");
+
+                    builder->emitIndent();
+                    builder->appendLine("struct p4tc_table_entry_act_bpf update_act_bpf = {};");
+
+                    if (param->is<IR::StructExpression>()) {
+                        auto paramList = action->getParameters();
+                        auto components = param->to<IR::StructExpression>()->components;
+                        if (paramList->parameters.size() != components.size()) {
+                            ::error(ErrorType::ERR_EXPECTED,
+                                    "Action params in add_entry should be same as no of action "
+                                    "parameters. %1%",
+                                    action);
+                        }
+                        if (components.size() == 0) {
+                            break;
+                        }
+
+                        builder->emitIndent();
+                        builder->appendLine("struct act_param {");
+                        builder->emitIndent();
+                        int index = 0;
+                        for (auto param : paramList->parameters) {
+                            if (param->direction != IR::Direction::None) {
+                                ::error(ErrorType::ERR_EXPECTED,
+                                        "Parameters of action called from add_entry should be "
+                                        "directionless. %1%",
+                                        actionName);
+                            }
+                            auto type = param->type;
+                            auto etype = EBPF::EBPFTypeFactory::instance->create(type);
+                            std::stringstream paramName;
+                            paramName << "param" << index;
+                            builder->append("    ");
+                            etype->declare(builder, paramName.str().c_str(), false);
+                            builder->endOfStatement();
+                            builder->newline();
+                            builder->emitIndent();
+                            index = index + 1;
+                        }
+                        builder->appendLine("};");
+                        builder->emitIndent();
+                        builder->appendLine(
+                            "struct act_param* params = (struct act_param *) "
+                            "update_act_bpf.params;");
+                        // Assign Variables
+                        for (size_t index = 0; index < components.size(); index++) {
+                            std::stringstream paramName;
+                            paramName << "param" << index;
+                            builder->emitIndent();
+                            builder->appendFormat("params->%s = ", paramName.str().c_str());
+                            visit(components.at(index)->expression);
+                            builder->endOfStatement();
+                            builder->newline();
+                        }
+                    }
                     break;
                 }
             }
-
-            builder->emitIndent();
-            builder->appendLine("struct p4tc_table_entry_act_bpf update_act_bpf = {};");
-            if (param->is<IR::StructExpression>()) {
-                if (param->to<IR::StructExpression>()->components.size() != 0) {
-                    builder->emitIndent();
-                    builder->appendLine("struct act_param {");
-                    builder->emitIndent();
-                    auto components = param->to<IR::StructExpression>()->components;
-                    for (size_t index = 0; index < components.size(); index++) {
-                        auto type = components.at(index)->expression->type;
-                        auto etype = EBPF::EBPFTypeFactory::instance->create(type);
-                        std::stringstream paramName;
-                        paramName << "param" << index;
-                        builder->append("    ");
-                        etype->declare(builder, paramName.str().c_str(), false);
-                        builder->endOfStatement();
-                        builder->newline();
-                        builder->emitIndent();
-                    }
-                    builder->appendLine("};");
-                    builder->emitIndent();
-                    builder->appendLine(
-                        "struct act_param* params = (struct act_param *) update_act_bpf.params;");
-                    // Assign Variables
-                    for (size_t index = 0; index < components.size(); index++) {
-                        std::stringstream paramName;
-                        paramName << "param" << index;
-                        builder->emitIndent();
-                        builder->appendFormat("params->%s = ", paramName.str().c_str());
-                        visit(components.at(index)->expression);
-                        builder->endOfStatement();
-                        builder->newline();
-                    }
-                }
+            if (actID == 0) {
+                ::error(ErrorType::ERR_EXPECTED,
+                        "add_entry extern can only be applied for one of the hit action of table "
+                        "%1%. %2% is not hit action of table.",
+                        table->instanceName, actionName);
             }
 
             builder->emitIndent();
@@ -1540,7 +1591,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->appendFormat("    .tblid = %d,", tblId);
             builder->newline();
             builder->emitIndent();
-            builder->append("    .aging_ms = ");
+            builder->append("    .profile_id = ");
             visit(expire_time_profile_id);
             builder->newline();
             builder->emitIndent();

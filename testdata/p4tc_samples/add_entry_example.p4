@@ -46,6 +46,9 @@ struct headers_t {
     ipv4_t     ipv4;
 }
 
+struct default_route_drop_params_t {
+}
+
 const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_NOW    = (ExpireTimeProfileId_t) 2;
 
 parser MainParserImpl(
@@ -94,7 +97,13 @@ control MainControlImpl(
             next_hop;
             default_route_drop;
         }
-        default_action = default_route_drop;
+        default_action = next_hop;
+        add_on_miss = true;
+    }
+    action next_hop1() {
+         add_entry(action_name = "default_route_drop",  // name of action
+                 action_params = (default_route_drop_params_t){}, expire_time_profile_id = EXPIRE_TIME_PROFILE_NOW);
+
     }
     table ipv4_tbl_2 {
         key = {
@@ -103,10 +112,11 @@ control MainControlImpl(
             hdr.ipv4.protocol : exact;
         }
         actions = {
-            next_hop;
-            drop;
+            next_hop1;
+            default_route_drop;
         }
-        default_action = drop;
+        default_action = next_hop1;
+        add_on_miss = true;
     }
 
     apply {
@@ -119,7 +129,7 @@ control MainControlImpl(
 
 control MainDeparserImpl(
     packet_out pkt,
-    in headers_t hdr,                    // from main control
+    inout headers_t hdr,                    // from main control
     in main_metadata_t user_meta,        // from main control
     in pna_main_output_metadata_t ostd)
 {
