@@ -8,21 +8,26 @@ The code and documentation are hosted in the following repository: https://githu
 ```
 p4c
 ├── build                     -- recommended place to build binary
-├── backends
-│   ├── p4test                -- "fake" back-end for testing
-│   ├── ebpf                  -- extended Berkeley Packet Filters back-end
+├── backends          
+│   ├── bmv2                  -- behavioral model version 2 (switch simulator) back end
+│   ├── common                -- code shared by multiple back ends
+│   ├── dpdk                  -- translates P4 code to DPDK instructions
+│   ├── ebpf                  -- extended Berkeley Packet Filters back end
 │   ├── graphs                -- backend that can draw graphiz graphs of P4 programs
-│   └── bmv2                  -- behavioral model version 2 (switch simulator) back-end
+│   ├── p4test                -- "fake" back end for testing
+│   ├── p4tools               -- testing library for different static analysis tools
+│   ├── tc                    -- translates P4 code to Linux TC rules
+│   └── ubpf                  -- translates P4 programs to uBPF code
 ├── control-plane             -- control plane API
 ├── docs                      -- documentation
 │   └── doxygen               -- documentation generation support
 ├── extensions
 │   └── XXXX                  -- symlinks to custom back-ends
 ├── frontends
-│   ├── common                -- common front-end code
+│   ├── common                -- common front end code
 │   ├── parsers               -- parser and lexer code for P4_14 and P4_16
-│   ├── p4-14                 -- P4_14 front-end
-│   └── p4                    -- P4_16 front-end
+│   ├── p4-14                 -- P4_14 front end
+│   └── p4                    -- P4_16 front end
 ├── ir                        -- core internal representation
 ├── lib                       -- common utilities (libp4toolkit.a)
 ├── midend                    -- code that may be useful for writing mid-ends
