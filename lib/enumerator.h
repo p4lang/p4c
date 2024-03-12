@@ -256,11 +256,12 @@ class IteratorEnumerator : public Enumerator<typename Iter::value_type> {
 
 /////////////////////////////////////////////////////////////////////
 
-/// Always returns false
+/// Always empty iterator (equivalent to end())
 template <typename T>
 class EmptyEnumerator : public Enumerator<T> {
  public:
     [[nodiscard]] std::string toString() const { return "EmptyEnumerator"; }
+    /// Always returns false
     bool moveNext() { return false; }
     T getCurrent() const {
         throw std::logic_error("You cannot call 'getCurrent' on an EmptyEnumerator");

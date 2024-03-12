@@ -111,8 +111,8 @@ class IterKeys {
         }
         bool operator==(const iterator &i) const { return it == i.it; }
         bool operator!=(const iterator &i) const { return it != i.it; }
-        auto operator*() const { return it->first; }
-        auto operator->() const { return &it->first; }
+        reference operator*() const { return it->first; }
+        pointer operator->() const { return &it->first; }
     } b, e;
 
  public:

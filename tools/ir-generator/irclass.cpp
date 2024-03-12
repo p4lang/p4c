@@ -528,11 +528,12 @@ bool IrClass::shouldSkip(cstring feature) const {
     // (except for validate)
     if (feature == "validate") return false;
 
-    bool provided =
-        Util::enumerate(elements)
-            ->where([](IrElement *e) { return e->is<IrMethod>(); })
-            ->where([feature](IrElement *e) { return e->to<IrMethod>()->name == feature; })
-            ->any();
+    bool provided = Util::enumerate(elements)
+                        ->where([feature](IrElement *e) {
+                            const auto *m = e->to<IrMethod>();
+                            return m && m->name == feature;
+                        })
+                        ->any();
     return provided;
 }
 
