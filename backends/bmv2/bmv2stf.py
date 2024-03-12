@@ -59,6 +59,7 @@ class Options(object):
         self.preserveTmp = False
         self.observationLog = None
         self.usePsa = False
+        self.usePna = False
 
 
 def ByteToHex(byteStr):
@@ -718,6 +719,10 @@ class RunBMV2(object):
         if self.options.usePsa:
             switch = "psa_switch"
             switch_cli = "psa_switch_CLI"
+        elif self.options.usePna:
+            switch = "pna_nic"
+            switch_cli = "pna_nic_CLI"
+            self.switchLogFile = "nic.log"
         else:
             switch = "simple_switch"
             switch_cli = "simple_switch_CLI"

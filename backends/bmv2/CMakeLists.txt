@@ -13,12 +13,14 @@
 # limitations under the License.
 
 # Makefile for a backend that generates code for the Behavioral Model version 2 (BMv2)
-# compiling for the simple_switch target.
+# compiling for the simple_switch, psa_switch or pna_nic target.
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/simple_switch/version.h.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/simple_switch/version.h" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/psa_switch/version.h.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/psa_switch/version.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/pna_nic/version.h.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/pna_nic/version.h" @ONLY)
 
 # sources for backend executable
 set (BMV2_SIMPLE_SWITCH_SRCS
@@ -40,6 +42,18 @@ set (BMV2_PSA_SWITCH_SRCS
     psa_switch/psaProgramStructure.h
     psa_switch/options.cpp
     psa_switch/options.h
+    )
+
+set (BMV2_PNA_NIC_SRCS
+    pna_nic/main.cpp
+    pna_nic/midend.cpp
+    pna_nic/midend.h
+    pna_nic/pnaNic.cpp
+    pna_nic/pnaNic.h
+    pna_nic/pnaProgramStructure.cpp
+    pna_nic/pnaProgramStructure.h
+    pna_nic/options.cpp
+    pna_nic/options.h
     )
 
 set (BMV2_BACKEND_COMMON_SRCS
@@ -94,6 +108,10 @@ add_executable(p4c-bm2-psa ${BMV2_PSA_SWITCH_SRCS})
 target_link_libraries (p4c-bm2-psa bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 install(TARGETS p4c-bm2-psa RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
+add_executable(p4c-bm2-pna ${BMV2_PNA_NIC_SRCS})
+target_link_libraries (p4c-bm2-pna bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+install(TARGETS p4c-bm2-pna RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
+
 file(RELATIVE_PATH
     CURRENT_BINARY_DIR_PATH_REL
     ${P4C_BINARY_DIR}
@@ -112,6 +130,7 @@ file(RELATIVE_PATH
 add_custom_target(linkbmv2
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-ss ${P4C_BINARY_DIR}/p4c-bm2-ss
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-psa ${P4C_BINARY_DIR}/p4c-bm2-psa
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-pna ${P4C_BINARY_DIR}/p4c-bm2-pna
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
   DEPENDS update_includes
@@ -133,6 +152,7 @@ set (BMV2_V1MODEL_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/fabric_*/fabric.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/omec/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pins/*.p4"
+  # add testdata for pna_nic
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
   ${v1tests}
@@ -147,14 +167,26 @@ set (BMV2_PSA_TEST_SUITES
   ${psa_tests}
 )
 
+# set (PNA_INCLUDE_PATTERNS "include.*pna.p4")
+# set (PNA_EXCLUDE_PATTERNS "include.*v1model.p4")
+# set (P4TESTS_FOR_PNA "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4")
+# p4c_find_tests("${P4TESTS_FOR_PNA}" pna_tests INCLUDE "${PNA_INCLUDE_PATTERNS}" EXCLUDE "${PNA_EXCLUDE_PATTERNS}")
+
+# set (BMV2_PNA_TEST_SUITES
+#   ${pna_tests}
+# )
+
 # Execute PTF tests for these files.
 set (BMV2_PTF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/ternary2-bmv2.p4"
 )
 
 # -p to use psa switch model
+# -n to use pna nic model
 # -a to pass flags to compiler
 set (testExtraFlags "${testExtraFlags} -p -a='--target bmv2 --arch psa'")
+# add pna testcases and corresponding testdata
+# set (testExtraFlags "${testExtraFlags} -n -a='--target bmv2 --arch pna'")
 
 set (XFAIL_TESTS
   # This test defines two lpm keys for a table.
@@ -217,6 +249,12 @@ if (HAVE_PSA_SWITCH)
   p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PSA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlags})
 else()
   MESSAGE(WARNING "BMv2 PSA switch is not available, not adding PSA BMv2 tests")
+endif()
+
+if (HAVE_PNA_NIC)
+  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PNA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlags})
+else()
+  MESSAGE(WARNING "BMv2 PNA nic is not available, not adding PNA BMv2 tests")
 endif()
 
 set (GTEST_BMV2_SOURCES

@@ -58,7 +58,7 @@ class V1ModelProperties {
 
 namespace Standard {
 
-/// We re-use as much code as possible between PSA and v1model. The two
+/// We re-use as much code as possible between PSA, PNA and v1model. The two
 /// architectures have some differences though, in particular regarding naming
 /// (of table properties, extern types, parameter names). We define some
 /// "traits" for each extern type, templatized by the architecture name (using
@@ -66,7 +66,7 @@ namespace Standard {
 /// architecture-specific names in the unified code.
 /// The V1MODEL2020 is the modified v1model.p4 file with a version
 /// >= 20200408
-enum class Arch { V1MODEL, PSA, V1MODEL2020 };
+enum class Arch { V1MODEL, PSA, PNA, V1MODEL2020 };
 
 /// Traits for the action profile extern, must be specialized for v1model and
 /// PSA.
@@ -94,6 +94,14 @@ struct ActionProfileTraits<Arch::PSA> {
     static const cstring sizeParamName() { return "size"; }
 };
 
+template <>
+struct ActionProfileTraits<Arch::PNA> {
+    static const cstring name() { return "action profile"; }
+    static const cstring propertyName() { return "implementation"; }
+    static const cstring typeName() { return "ActionProfile"; }
+    static const cstring sizeParamName() { return "size"; }
+};
+
 /// Traits for the action selector extern, must be specialized for v1model and
 /// PSA. Inherits from ActionProfileTraits because of their similarities.
 template <Arch arch>
@@ -110,6 +118,12 @@ struct ActionSelectorTraits<Arch::V1MODEL2020> : public ActionProfileTraits<Arch
 
 template <>
 struct ActionSelectorTraits<Arch::PSA> : public ActionProfileTraits<Arch::PSA> {
+    static const cstring name() { return "action selector"; }
+    static const cstring typeName() { return "ActionSelector"; }
+};
+
+template <>
+struct ActionSelectorTraits<Arch::PNA> : public ActionProfileTraits<Arch::PNA> {
     static const cstring name() { return "action selector"; }
     static const cstring typeName() { return "ActionSelector"; }
 };
@@ -136,6 +150,17 @@ struct RegisterTraits<Arch::V1MODEL2020> : public RegisterTraits<Arch::V1MODEL> 
 
 template <>
 struct RegisterTraits<Arch::PSA> {
+    static const cstring name() { return "register"; }
+    static const cstring typeName() { return "Register"; }
+    static const cstring sizeParamName() { return "size"; }
+    static size_t dataTypeParamIdx() { return 0; }
+    // the index of the type parameter for the register index, in the type
+    // parameter list of the extern type declaration.
+    static std::optional<size_t> indexTypeParamIdx() { return 1; }
+};
+
+template <>
+struct RegisterTraits<Arch::PNA> {
     static const cstring name() { return "register"; }
     static const cstring typeName() { return "Register"; }
     static const cstring sizeParamName() { return "size"; }
@@ -209,6 +234,19 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PSA>> {
     static std::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
+/// @ref CounterlikeTraits<> specialization for @ref CounterExtern for PNA
+template <>
+struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PNA>> {
+    static const cstring name() { return "counter"; }
+    static const cstring directPropertyName() { return "pna_direct_counter"; }
+    static const cstring typeName() { return "Counter"; }
+    static const cstring directTypeName() { return "DirectCounter"; }
+    static const cstring sizeParamName() { return "n_counters"; }
+    // the index of the type parameter for the counter index, in the type
+    // parameter list of the extern type declaration.
+    static std::optional<size_t> indexTypeParamIdx() { return 1; }
+};
+
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for v1model
 template <>
 struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL>> {
@@ -239,6 +277,19 @@ template <>
 struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA>> {
     static const cstring name() { return "meter"; }
     static const cstring directPropertyName() { return "psa_direct_meter"; }
+    static const cstring typeName() { return "Meter"; }
+    static const cstring directTypeName() { return "DirectMeter"; }
+    static const cstring sizeParamName() { return "n_meters"; }
+    // the index of the type parameter for the meter index, in the type
+    // parameter list of the extern type declaration.
+    static std::optional<size_t> indexTypeParamIdx() { return 0; }
+};
+
+/// @ref CounterlikeTraits<> specialization for @ref MeterExtern for PNA
+template <>
+struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PNA>> {
+    static const cstring name() { return "meter"; }
+    static const cstring directPropertyName() { return "pna_direct_meter"; }
     static const cstring typeName() { return "Meter"; }
     static const cstring directTypeName() { return "DirectMeter"; }
     static const cstring sizeParamName() { return "n_meters"; }

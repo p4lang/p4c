@@ -60,6 +60,9 @@ def parse_args():
     parser.add_argument(
         "-p", "--usePsa", dest="use_psa", action="store_true", help="Use psa switch"
     )
+    parser.add_argument(
+        "-n", "--usePna", dest="use_pna", action="store_true", help="Use pna nic"
+    )
     parser.add_argument("-pp", dest="pp", help="pass this option to the compiler")
     parser.add_argument("-gdb", "--gdb", action="store_true", help="Run the compiler under gdb.")
     parser.add_argument("-lldb", "--lldb", action="store_true", help="Run the compiler under lldb.")
@@ -116,6 +119,7 @@ class Options:
         self.switchTargetSpecificOptions = []
         self.hasBMv2 = False  # Is the behavioral model installed?
         self.usePsa = False  # Use the psa switch behavioral model?
+        self.usePna = False  # Use the pna nic behavioral model?
         self.runDebugger = False
         # Log packets produced by the BMV2 model if path to log is supplied
         self.observationLog = None
@@ -287,6 +291,8 @@ def process_file(options, argv):
 
     if options.usePsa:
         binary = options.compilerBuildDir + "/p4c-bm2-psa"
+    elif options.usePna:
+        binary = options.compilerBuildDir + "/p4c-bm2-pna"
     else:
         binary = options.compilerBuildDir + "/p4c-bm2-ss"
 
@@ -369,6 +375,7 @@ if __name__ == "__main__":
     for init_cmd in args.init_cmds:
         options.initCommands.append(init_cmd)
     options.usePsa = args.use_psa
+    options.usePna = args.use_pna
     if args.pp:
         options.compilerOptions.append(args.pp)
     if args.gdb:
@@ -399,7 +406,7 @@ if __name__ == "__main__":
     stderr_log.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
     logging.getLogger().addHandler(stderr_log)
 
-    options.hasBMv2 = "HAVE_SIMPLE_SWITCH" in config.vars
+    options.hasBMv2 = ("HAVE_SIMPLE_SWITCH" in config.vars) or ("HAVE_PNA_NIC" in config.vars)
     if options.p4filename.startswith(options.compilerBuildDir):
         options.testName = options.p4filename[len(options.compilerBuildDir) :]
         if options.testName.startswith("/"):
