@@ -2,7 +2,7 @@ name: Automated Release
 
 on:
   schedule:
-    - cron: '0 12 1 * *'  # At 12:00 on day-of-month 1
+    - cron: "0 12 1 * *" # At 12:00 on day-of-month 1
 
 jobs:
   build:
