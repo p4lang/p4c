@@ -44,9 +44,7 @@ REQUIRED_PACKAGES=(
     ${BOOST_LIB}
 )
 for package in "${REQUIRED_PACKAGES[@]}"; do
-    # FIXME: || true should not be needed but because boost@1.84 pulls in python@3.12, which fails
-    # to install we need to ignore the error.
-  brew_install ${package} || true
+  brew_install ${package}
 done
 
 # Check if linking is needed.
