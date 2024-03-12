@@ -2,11 +2,11 @@ name: "test-p4c-mac"
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   merge_group:
-    branches: [ main ]
+    branches: [main]
 
 # Cancel any preceding run on the pull request.
 concurrency:
@@ -20,46 +20,46 @@ jobs:
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: ccache
-      uses: hendrikmuhs/ccache-action@v1
-      with:
-        key: test-${{ runner.os }}
-        max-size: 1000M
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: test-${{ runner.os }}
+          max-size: 1000M
 
-    - name: Get brew cache dir
-      id: brew-cache
-      run: |
-        echo "dir=$(brew --prefix)" >> $GITHUB_OUTPUT
+      - name: Get brew cache dir
+        id: brew-cache
+        run: |
+          echo "dir=$(brew --prefix)" >> $GITHUB_OUTPUT
 
-    - name: Cache Homebrew Packages
-      id: cache-homebrew-packages
-      uses: actions/cache@v4
-      env:
-        cache-name: homebrew-packages
-      with:
-        path: ${{ steps.brew-cache.outputs.dir }}
-        key: ${{ runner.os }}-m1-${{ hashFiles('tools/install_mac_deps.sh') }}
+      - name: Cache Homebrew Packages
+        id: cache-homebrew-packages
+        uses: actions/cache@v4
+        env:
+          cache-name: homebrew-packages
+        with:
+          path: ${{ steps.brew-cache.outputs.dir }}
+          key: ${{ runner.os }}-m1-${{ hashFiles('tools/install_mac_deps.sh') }}
 
-    - name: Install dependencies (MacOS)
-      run: |
-           tools/install_mac_deps.sh
+      - name: Install dependencies (MacOS)
+        run: |
+          tools/install_mac_deps.sh
 
-    - name: Build (MacOS)
-      run: |
+      - name: Build (MacOS)
+        run: |
           source ~/.bash_profile
           ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
               -DCMAKE_UNITY_BUILD=ON -DENABLE_TEST_TOOLS=ON
           make -Cbuild -j$((`nproc`+1))
 
-    - name: Run tests (MacOS)
-      run: |
-        source ~/.bash_profile
-        ctest --output-on-failure --schedule-random -LE "bpf|ubpf|testgen"
-      working-directory: ./build
+      - name: Run tests (MacOS)
+        run: |
+          source ~/.bash_profile
+          ctest --output-on-failure --schedule-random -LE "bpf|ubpf|testgen"
+        working-directory: ./build
 
   # Build and test p4c on MacOS 13 on x86.
   test-mac-os:
@@ -67,32 +67,32 @@ jobs:
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: ccache
-      uses: hendrikmuhs/ccache-action@v1
-      with:
-        key: test-${{ runner.os }}
-        max-size: 1000M
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: test-${{ runner.os }}
+          max-size: 1000M
 
-    - name: Get brew cache dir
-      id: brew-cache
-      run: |
-        echo "dir=$(brew --prefix)" >> $GITHUB_OUTPUT
+      - name: Get brew cache dir
+        id: brew-cache
+        run: |
+          echo "dir=$(brew --prefix)" >> $GITHUB_OUTPUT
 
-    - name: Cache Homebrew Packages
-      id: cache-homebrew-packages
-      uses: actions/cache@v4
-      env:
-        cache-name: homebrew-packages
-      with:
-        path: ${{ steps.brew-cache.outputs.dir }}
-        key: ${{ runner.os }}-${{ hashFiles('tools/install_mac_deps.sh') }}
+      - name: Cache Homebrew Packages
+        id: cache-homebrew-packages
+        uses: actions/cache@v4
+        env:
+          cache-name: homebrew-packages
+        with:
+          path: ${{ steps.brew-cache.outputs.dir }}
+          key: ${{ runner.os }}-${{ hashFiles('tools/install_mac_deps.sh') }}
 
-    - name: Install dependencies (MacOS)
-      run: |
+      - name: Install dependencies (MacOS)
+        run: |
           # FIXME: We should not need to do this, but there are currently some complications with Github CI.
           # See https://github.com/actions/runner-images/issues/4020.
           # See https://github.com/actions/runner-images/issues/8838.
@@ -101,15 +101,15 @@ jobs:
           brew pin python@3.12
           tools/install_mac_deps.sh
 
-    - name: Build (MacOS)
-      run: |
+      - name: Build (MacOS)
+        run: |
           source ~/.bash_profile
           ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
               -DCMAKE_UNITY_BUILD=ON -DENABLE_TEST_TOOLS=ON
           make -Cbuild -j$((`nproc`+1))
 
-    - name: Run tests (MacOS)
-      run: |
-        source ~/.bash_profile
-        ctest --output-on-failure --schedule-random -LE "bpf|ubpf|testgen"
-      working-directory: ./build
+      - name: Run tests (MacOS)
+        run: |
+          source ~/.bash_profile
+          ctest --output-on-failure --schedule-random -LE "bpf|ubpf|testgen"
+        working-directory: ./build
