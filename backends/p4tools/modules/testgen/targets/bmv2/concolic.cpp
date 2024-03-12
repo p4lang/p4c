@@ -19,41 +19,28 @@
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/nethash.h"
 
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/contrib/bmv2_hash/calculations.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> &exprList,
-                                      const Model &finalModel, int algo,
-                                      Model::ExpressionMap *resolvedExpressions) {
+static big_int checksum(Bmv2HashAlgorithm algo, const uint8_t *buf, size_t len) {
     // Pick a checksum according to the algorithm value.
-    ChecksumFunction checksumFun = nullptr;
     switch (algo) {
-        case Bmv2HashAlgorithm::csum16: {
-            checksumFun = BMv2Hash::csum16;
-            break;
-        }
-        case Bmv2HashAlgorithm::crc32: {
-            checksumFun = BMv2Hash::crc32;
-            break;
-        }
-        case Bmv2HashAlgorithm::crc16: {
-            checksumFun = BMv2Hash::crc16;
-            break;
-        }
-        case Bmv2HashAlgorithm::identity: {
-            checksumFun = BMv2Hash::identity;
-            break;
-        }
-        case Bmv2HashAlgorithm::xor16: {
-            checksumFun = BMv2Hash::xor16;
-            break;
-        }
+        case Bmv2HashAlgorithm::csum16:
+            return nethash::csum16(buf, len);
+        case Bmv2HashAlgorithm::crc32:
+            return nethash::crc32(buf, len);
+        case Bmv2HashAlgorithm::crc16:
+            return nethash::crc16(buf, len);
+        case Bmv2HashAlgorithm::identity:
+            return nethash::identity(buf, len);
+        case Bmv2HashAlgorithm::xor16:
+            return nethash::xor16(buf, len);
         case Bmv2HashAlgorithm::random: {
             BUG("Random should not be encountered here");
         }
@@ -62,7 +49,11 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> 
         default:
             TESTGEN_UNIMPLEMENTED("Algorithm %1% not implemented for hash.", algo);
     }
+}
 
+big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> &exprList,
+                                      const Model &finalModel, Bmv2HashAlgorithm algo,
+                                      Model::ExpressionMap *resolvedExpressions) {
     std::vector<uint8_t> bytes;
     if (!exprList.empty()) {
         const auto *concatExpr = exprList.at(0);
@@ -87,7 +78,7 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> 
             IR::getBigIntFromLiteral(finalModel.evaluate(concatExpr, true, resolvedExpressions));
         bytes = convertBigIntToBytes(dataInt, concatWidth, true);
     }
-    return checksumFun(bytes.data(), bytes.size());
+    return checksum(algo, bytes.data(), bytes.size());
 }
 
 const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
@@ -118,7 +109,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
                                    checksumVar->node_type_name());
          }
          // Assign arguments to concrete variables and perform type checking.
-         auto algo = args->at(1)->expression->checkedTo<IR::Constant>()->asInt();
+         auto algo = Bmv2HashAlgorithm(args->at(1)->expression->checkedTo<IR::Constant>()->asInt());
          Model::ExpressionMap resolvedExpressions;
          const auto *base =
              finalModel.evaluate(args->at(2)->expression, true, &resolvedExpressions);
@@ -179,7 +170,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          // Assign arguments to concrete variables and perform type checking.
          const auto *args = var->arguments;
          const auto *checksumVar = args->at(0)->expression;
-         auto algo = args->at(1)->expression->checkedTo<IR::Constant>()->asInt();
+         auto algo = Bmv2HashAlgorithm(args->at(1)->expression->checkedTo<IR::Constant>()->asInt());
          const auto *dataExpr = args->at(2)->expression;
          const auto *checksumVarType = checksumVar->type;
          // This is the maximum value this checksum can have.
@@ -227,7 +218,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          // Assign arguments to concrete variables and perform type checking.
          const auto *args = var->arguments;
          const auto *checksumVar = args->at(0)->expression;
-         auto algo = args->at(1)->expression->checkedTo<IR::Constant>()->asInt();
+         auto algo = Bmv2HashAlgorithm(args->at(1)->expression->checkedTo<IR::Constant>()->asInt());
          const auto *dataExpr = args->at(2)->expression;
          const auto *checksumVarType = checksumVar->type;
          Model::ExpressionMap resolvedExpressions;
@@ -276,6 +267,26 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
 
 const ConcolicMethodImpls::ImplList *Bmv2Concolic::getBmv2ConcolicMethodImpls() {
     return &BMV2_CONCOLIC_METHOD_IMPLS;
+}
+
+std::ostream &operator<<(std::ostream &os, Bmv2HashAlgorithm algo) {
+#define ALGO_CASE(A)           \
+    case Bmv2HashAlgorithm::A: \
+        return os << #A << " [" << int(algo) << "]"
+    switch (algo) {
+        ALGO_CASE(crc32);
+        ALGO_CASE(crc32_custom);
+        ALGO_CASE(crc16);
+        ALGO_CASE(crc16_custom);
+        ALGO_CASE(random);
+        ALGO_CASE(identity);
+        ALGO_CASE(csum16);
+        ALGO_CASE(xor16);
+        // no default: let the compiler produce a warning if some defined enum value is not covered
+    }
+#undef ALGO_CASE
+    // for values other then the declared ones
+    return os << "INVALID [" << int(algo) << "]";
 }
 
 }  // namespace P4Tools::P4Testgen::Bmv2

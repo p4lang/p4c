@@ -1,13 +1,30 @@
-#include "backends/p4tools/modules/testgen/targets/bmv2/contrib/bmv2_hash/calculations.h"
+#include "lib/nethash.h"
 
 #include <arpa/inet.h>
 
 #include <algorithm>
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace nethash {
 
-/* generating from my Python script gen_crc_tables inspired from the C code at:
-   http://www.barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code */
+/* This code was adapted from:
+    http://www.barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code */
+
+template <typename T>
+static T reflect(T data, int nBits) {
+    T reflection = static_cast<T>(0x00);
+    int bit = 0;
+
+    // Reflect the data about the center bit.
+    for (bit = 0; bit < nBits; ++bit) {
+        // If the LSB bit is set, set the reflection of it.
+        if (data & 0x01) {
+            reflection |= (static_cast<T>(1) << ((nBits - 1) - bit));
+        }
+        data = (data >> 1);
+    }
+
+    return reflection;
+}
 
 static uint16_t table_crc16[256] = {
     0x0000, 0x8005, 0x800F, 0x000A, 0x801B, 0x001E, 0x0014, 0x8011, 0x8033, 0x0036, 0x003C, 0x8039,
@@ -91,7 +108,7 @@ static uint32_t table_crc32[256] = {
     0x89B8FD09, 0x8D79E0BE, 0x803AC667, 0x84FBDBD0, 0x9ABC8BD5, 0x9E7D9662, 0x933EB0BB, 0x97FFAD0C,
     0xAFB010B1, 0xAB710D06, 0xA6322BDF, 0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4};
 
-uint16_t BMv2Hash::crc16(const uint8_t *buf, size_t len) {
+uint16_t crc16(const uint8_t *buf, size_t len) {
     uint16_t remainder = 0x0000;
     uint16_t final_xor_value = 0x0000;
     for (unsigned int byte = 0; byte < len; byte++) {
@@ -101,7 +118,7 @@ uint16_t BMv2Hash::crc16(const uint8_t *buf, size_t len) {
     return reflect<uint16_t>(remainder, 16) ^ final_xor_value;
 }
 
-uint32_t BMv2Hash::crc32(const uint8_t *buf, size_t len) {
+uint32_t crc32(const uint8_t *buf, size_t len) {
     uint32_t remainder = 0xFFFFFFFF;
     uint32_t final_xor_value = 0xFFFFFFFF;
     for (unsigned int byte = 0; byte < len; byte++) {
@@ -111,7 +128,7 @@ uint32_t BMv2Hash::crc32(const uint8_t *buf, size_t len) {
     return reflect<uint32_t>(remainder, 32) ^ final_xor_value;
 }
 
-uint16_t BMv2Hash::crcCCITT(const uint8_t *buf, size_t len) {
+uint16_t crcCCITT(const uint8_t *buf, size_t len) {
     uint16_t remainder = 0xFFFF;
     uint16_t final_xor_value = 0x0000;
     for (unsigned int byte = 0; byte < len; byte++) {
@@ -121,7 +138,7 @@ uint16_t BMv2Hash::crcCCITT(const uint8_t *buf, size_t len) {
     return remainder ^ final_xor_value;
 }
 
-uint16_t BMv2Hash::csum16(const uint8_t *buf, size_t len) {
+uint16_t csum16(const uint8_t *buf, size_t len) {
     uint64_t sum = 0;
     const uint64_t *b = reinterpret_cast<const uint64_t *>(buf);
     uint32_t t1, t2;
@@ -165,7 +182,7 @@ uint16_t BMv2Hash::csum16(const uint8_t *buf, size_t len) {
     return ntohs(~t3);
 }
 
-uint16_t BMv2Hash::xor16(const uint8_t *buf, size_t len) {
+uint16_t xor16(const uint8_t *buf, size_t len) {
     uint16_t mask = 0x00ff;
     uint16_t final_xor_value = 0x0000;
     unsigned int byte = 0;
@@ -185,7 +202,7 @@ uint16_t BMv2Hash::xor16(const uint8_t *buf, size_t len) {
     return final_xor_value;
 }
 
-uint64_t BMv2Hash::identity(const uint8_t *buf, size_t len) {
+uint64_t identity(const uint8_t *buf, size_t len) {
     uint64_t res = 0ULL;
     for (size_t i = 0; i < std::min(sizeof(res), len); i++) {
         if (i > 0) res <<= 8;
@@ -194,4 +211,4 @@ uint64_t BMv2Hash::identity(const uint8_t *buf, size_t len) {
     return res;
 }
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace nethash

@@ -17,7 +17,6 @@ set(TESTGEN_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/cmd_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/concolic.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/constants.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/contrib/bmv2_hash/calculations.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/expr_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/map_direct_externs.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/p4_asserts_parser.cpp

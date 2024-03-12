@@ -13,29 +13,21 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
+enum class Bmv2HashAlgorithm {
+    crc32,
+    crc32_custom,
+    crc16,
+    crc16_custom,
+    random,
+    identity,
+    csum16,
+    xor16
+};
+
 class Bmv2Concolic : public Concolic {
  private:
-    /// In the behavioral model, checksum functions have the following signature.
-    using ChecksumFunction = std::function<big_int(const uint8_t *buf, size_t len)>;
-
     /// Chunk size is 8 bits, i.e., a byte.
     static constexpr int CHUNK_SIZE = 8;
-
-    /// We are not using an enum class because we directly compare integers. This is because error
-    /// types are converted into integers in our interpreter. If we use an enum class, we have to
-    /// cast every enum access to int.
-    struct Bmv2HashAlgorithm {
-        using Type = enum {
-            crc32,
-            crc32_custom,
-            crc16,
-            crc16_custom,
-            random,
-            identity,
-            csum16,
-            xor16
-        };
-    };
 
     /// This is the list of concolic functions that are implemented in this class.
     static const ConcolicMethodImpls::ImplList BMV2_CONCOLIC_METHOD_IMPLS;
@@ -43,7 +35,7 @@ class Bmv2Concolic : public Concolic {
     /// Call into a behavioral model helper function to compute the appropriate checksum. The
     /// checksum is determined by @param algo.
     static big_int computeChecksum(const std::vector<const IR::Expression *> &exprList,
-                                   const Model &finalModel, int algo,
+                                   const Model &finalModel, Bmv2HashAlgorithm algo,
                                    Model::ExpressionMap *resolvedExpressions);
 
     /// Compute a payload using the provided model and update the resolved concolic variables. Then
