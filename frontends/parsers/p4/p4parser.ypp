@@ -1413,7 +1413,11 @@ initializer
 /**************** Expressions ****************/
 
 functionDeclaration
-    : functionPrototype blockStatement   {
+    : annotations functionPrototype blockStatement   {
+            auto ann = new IR::Annotations(@1, *$1);
+            driver.structure->pop();
+            $$ = new IR::Function($2->srcInfo, $2->name, ann, $2->type, $3); }
+    | functionPrototype blockStatement   {
             driver.structure->pop();
             $$ = new IR::Function($1->srcInfo, $1->name, $1->type, $2); }
     ;
