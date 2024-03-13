@@ -24,6 +24,8 @@ enum class Bmv2HashAlgorithm {
     xor16
 };
 
+std::ostream &operator<<(std::ostream &os, Bmv2HashAlgorithm algo);
+
 class Bmv2Concolic : public Concolic {
  private:
     /// Chunk size is 8 bits, i.e., a byte.
