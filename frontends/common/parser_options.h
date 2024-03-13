@@ -43,6 +43,9 @@ class ParserOptions : public Util::Options {
     // annotation names that are to be ignored by the compiler
     std::set<cstring> disabledAnnotations;
 
+    // used to generate dump file names
+    mutable size_t dump_uid = 0;
+
  protected:
     // Function that is returned by getDebugHook.
     void dumpPass(const char *manager, unsigned seq, const char *pass, const IR::Node *node) const;
