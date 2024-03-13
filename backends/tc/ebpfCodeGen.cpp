@@ -826,6 +826,18 @@ void EBPFTablePNA::emitValueStructStructure(EBPF::CodeBuilder *builder) {
     builder->append("unsigned int action;");
     builder->newline();
 
+    builder->emitIndent();
+    builder->append("u32 hit:1,");
+    builder->newline();
+
+    builder->emitIndent();
+    builder->append("is_default_miss_act:1,");
+    builder->newline();
+
+    builder->emitIndent();
+    builder->append("is_default_hit_act:1;");
+    builder->newline();
+
     if (isTernaryTable()) {
         builder->emitIndent();
         builder->append("__u32 priority;");
@@ -1501,7 +1513,11 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
         builder->emitIndent();
         builder->appendLine("};");
         builder->emitIndent();
-        builder->appendFormat("struct %s %s = {}", table->keyTypeName.c_str(), keyname.c_str());
+        builder->appendFormat("struct %s %s", table->keyTypeName.c_str(), keyname.c_str());
+        builder->endOfStatement(true);
+        builder->emitIndent();
+        builder->appendFormat("__builtin_memset(&%s, 0, sizeof(%s))", keyname.c_str(),
+                              keyname.c_str());
         builder->endOfStatement(true);
         unsigned int keysize = tcIR->getTableKeysize(tblId);
         builder->emitIndent();
@@ -1605,7 +1621,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
     builder->append(" else ");
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("%s = 1", control->hitVariable.c_str());
+    builder->appendFormat("%s = value->hit", control->hitVariable.c_str());
     builder->endOfStatement(true);
     builder->blockEnd(true);
 

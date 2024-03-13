@@ -15,6 +15,9 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
     unsigned int action;
+    u32 hit:1,
+    is_default_miss_act:1,
+    is_default_hit_act:1;
     union {
         struct {
         } _NoAction;
@@ -41,6 +44,9 @@ struct MainControlImpl_ipv4_tbl_2_key_mask {
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     unsigned int action;
+    u32 hit:1,
+    is_default_miss_act:1,
+    is_default_hit_act:1;
     __u32 priority;
     union {
         struct {
@@ -67,6 +73,9 @@ struct MainControlImpl_ipv4_tbl_3_key_mask {
 #define MAINCONTROLIMPL_IPV4_TBL_3_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_3_value {
     unsigned int action;
+    u32 hit:1,
+    is_default_miss_act:1,
+    is_default_hit_act:1;
     __u32 priority;
     union {
         struct {
@@ -90,6 +99,9 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_4_key {
 #define MAINCONTROLIMPL_IPV4_TBL_4_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_4_value {
     unsigned int action;
+    u32 hit:1,
+    is_default_miss_act:1,
+    is_default_hit_act:1;
     union {
         struct {
         } _NoAction;
@@ -135,7 +147,8 @@ if (/* hdr->ipv4.isValid() */
                         .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 1
                     };
-                    struct MainControlImpl_ipv4_tbl_1_key key = {};
+                    struct MainControlImpl_ipv4_tbl_1_key key;
+                    __builtin_memset(&key, 0, sizeof(key));
                     key.keysz = 32;
                     key.field0 = hdr->ipv4.dstAddr;
                     struct p4tc_table_entry_act_bpf *act_bpf;
@@ -148,7 +161,7 @@ if (/* hdr->ipv4.isValid() */
                         /* miss; find default action */
                         hit = 0;
                     } else {
-                        hit = 1;
+                        hit = value->hit;
                     }
                     if (value != NULL) {
                         /* run action */
@@ -182,7 +195,8 @@ if (/* hdr->ipv4.isValid() */
                         .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 2
                     };
-                    struct MainControlImpl_ipv4_tbl_2_key key = {};
+                    struct MainControlImpl_ipv4_tbl_2_key key;
+                    __builtin_memset(&key, 0, sizeof(key));
                     key.keysz = 72;
                     key.field0 = hdr->ipv4.dstAddr;
                     key.field1 = hdr->ipv4.srcAddr;
@@ -197,7 +211,7 @@ if (/* hdr->ipv4.isValid() */
                         /* miss; find default action */
                         hit = 0;
                     } else {
-                        hit = 1;
+                        hit = value->hit;
                     }
                     if (value != NULL) {
                         /* run action */
@@ -231,7 +245,8 @@ if (/* hdr->ipv4.isValid() */
                         .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 3
                     };
-                    struct MainControlImpl_ipv4_tbl_3_key key = {};
+                    struct MainControlImpl_ipv4_tbl_3_key key;
+                    __builtin_memset(&key, 0, sizeof(key));
                     key.keysz = 40;
                     key.field0 = hdr->ipv4.srcAddr;
                     key.field1 = hdr->ipv4.protocol;
@@ -245,7 +260,7 @@ if (/* hdr->ipv4.isValid() */
                         /* miss; find default action */
                         hit = 0;
                     } else {
-                        hit = 1;
+                        hit = value->hit;
                     }
                     if (value != NULL) {
                         /* run action */
@@ -279,7 +294,8 @@ if (/* hdr->ipv4.isValid() */
                         .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 4
                     };
-                    struct MainControlImpl_ipv4_tbl_4_key key = {};
+                    struct MainControlImpl_ipv4_tbl_4_key key;
+                    __builtin_memset(&key, 0, sizeof(key));
                     key.keysz = 72;
                     key.field0 = hdr->ipv4.dstAddr;
                     key.field1 = hdr->ipv4.srcAddr;
@@ -294,7 +310,7 @@ if (/* hdr->ipv4.isValid() */
                         /* miss; find default action */
                         hit = 0;
                     } else {
-                        hit = 1;
+                        hit = value->hit;
                     }
                     if (value != NULL) {
                         /* run action */
