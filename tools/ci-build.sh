@@ -38,6 +38,8 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 : "${ENABLE_SANITIZERS:=OFF}"
 # Only execute the steps necessary to successfully run CMake.
 : "${CMAKE_ONLY:=OFF}"
+# The build generator to use. Defaults to Make.
+: "${BUILD_GENERATOR:="Unix Makefiles"}"
 # Build with -ftrivial-auto-var-init=pattern to catch more bugs caused by
 # uninitialized variables.
 : "${BUILD_AUTO_VAR_INIT_PATTERN:=OFF}"
@@ -62,6 +64,7 @@ P4C_DEPS="bison \
           build-essential \
           ccache \
           flex \
+          ninja-build \
           g++ \
           git \
           lld \
@@ -85,8 +88,14 @@ sudo apt-get update
 sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
 sudo pip3 install --upgrade pip
 sudo pip3 install -r ${P4C_DIR}/requirements.txt
-# ! ------  END CORE -----------------------------------------------
 
+if [ "${BUILD_GENERATOR,,}" == "ninja" ] && [ ! $(command -v ninja) ]
+then
+    echo "Selected ninja as build generator, but ninja could not be found."
+    exit 1
+fi
+
+# ! ------  END CORE -----------------------------------------------
 
 # ! ------  BEGIN BMV2 -----------------------------------------------
 function build_bmv2() {
@@ -166,9 +175,9 @@ function install_ptf_ebpf_test_deps() (
     ./build_libbpf.sh
     mkdir build
     cd build
-    cmake -DCMAKE_BUILD_TYPE=Release ..
-    make "-j$(nproc)"
-    sudo make install
+    cmake -DCMAKE_BUILD_TYPE=Release -G "${BUILD_GENERATOR}" ..
+    cmake --build . -- -j $(nproc)
+    sudo cmake --install .
 
     # install bpftool
     git clone --recurse-submodules --branch v7.3.0 https://github.com/libbpf/bpftool.git /tmp/bpftool
@@ -248,16 +257,15 @@ fi
 if [ -e build ]; then /bin/rm -rf build; fi
 mkdir -p ${P4C_DIR}/build
 cd ${P4C_DIR}/build
-cmake ${CMAKE_FLAGS} ..
+cmake ${CMAKE_FLAGS} -G "${BUILD_GENERATOR}" ..
 
 # If CMAKE_ONLY is active, only run CMake. Do not build.
 if [ "$CMAKE_ONLY" == "OFF" ]; then
-  make -j$((`nproc`+1))
-  sudo make -j$((`nproc`+1)) install
+  cmake --build . -- -j $(nproc)
+  sudo cmake --install .
   # Print ccache statistics after building
   ccache -p -s
 fi
-
 
 if [[ "${IMAGE_TYPE}" == "build" ]] ; then
   cd ~

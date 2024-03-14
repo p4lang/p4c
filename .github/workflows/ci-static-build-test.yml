@@ -22,6 +22,7 @@ jobs:
       CMAKE_UNITY_BUILD: ON
       BUILD_STATIC_RELEASE_SANS_GLIBC: ON
       ENABLE_TEST_TOOLS: ON
+      BUILD_GENERATOR: Ninja
     steps:
       - uses: actions/checkout@v4
         with:

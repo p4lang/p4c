@@ -52,8 +52,8 @@ jobs:
         run: |
           source ~/.bash_profile
           ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
-              -DCMAKE_UNITY_BUILD=ON -DENABLE_TEST_TOOLS=ON
-          make -Cbuild -j$((`nproc`+1))
+              -DCMAKE_UNITY_BUILD=ON -DENABLE_TEST_TOOLS=ON --build-generator "Ninja"
+          cmake --build build -- -j $(nproc)
 
       - name: Run tests (MacOS)
         run: |
@@ -105,8 +105,8 @@ jobs:
         run: |
           source ~/.bash_profile
           ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
-              -DCMAKE_UNITY_BUILD=ON -DENABLE_TEST_TOOLS=ON
-          make -Cbuild -j$((`nproc`+1))
+              -DCMAKE_UNITY_BUILD=ON -DENABLE_TEST_TOOLS=ON --build-generator "Ninja"
+          cmake --build build -- -j $(nproc)
 
       - name: Run tests (MacOS)
         run: |
