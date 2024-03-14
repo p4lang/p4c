@@ -976,6 +976,8 @@ action_profiles {
   with_selector: true
   size: 65536
   max_group_size: 256
+  sum_of_weights {
+  }
 }
 direct_counters {
   preamble {

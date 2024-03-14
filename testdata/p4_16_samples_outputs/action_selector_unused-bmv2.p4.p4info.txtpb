@@ -12,6 +12,8 @@ action_profiles {
   }
   with_selector: true
   size: 1024
+  sum_of_weights {
+  }
 }
 type_info {
 }

@@ -68,6 +68,8 @@ action_profiles {
   }
   table_ids: 39967501
   size: 1024
+  sum_of_weights {
+  }
 }
 type_info {
 }

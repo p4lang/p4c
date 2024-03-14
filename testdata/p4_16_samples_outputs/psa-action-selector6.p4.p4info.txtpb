@@ -114,6 +114,8 @@ action_profiles {
   }
   table_ids: 42525091
   size: 1024
+  sum_of_weights {
+  }
 }
 action_profiles {
   preamble {
@@ -124,6 +126,8 @@ action_profiles {
   table_ids: 39967501
   with_selector: true
   size: 1024
+  sum_of_weights {
+  }
 }
 type_info {
 }
