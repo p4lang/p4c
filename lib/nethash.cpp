@@ -33,14 +33,13 @@ namespace NetHash {
 /// Reflects/reverse n-bit number bit-by-bit.
 template <typename T>
 static T reflect(T data, int nBits) {
-    T reflection = static_cast<T>(0x00);
-    int bit = 0;
+    T reflection = 0;
 
     // Reflect the data about the center bit.
-    for (bit = 0; bit < nBits; ++bit) {
+    for (int bit = 0; bit < nBits; ++bit) {
         // If the LSB bit is set, set the reflection of it.
         if (data & 0x01) {
-            reflection |= (static_cast<T>(1) << ((nBits - 1) - bit));
+            reflection |= (T(1) << ((nBits - 1) - bit));
         }
         data = (data >> 1);
     }
