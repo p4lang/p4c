@@ -1464,6 +1464,7 @@ lvalue
     | lvalue dot_name %prec DOT          { $$ = new IR::Member(@1 + @2, $1, *$2); }
     | lvalue "[" expression "]"          { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
     | lvalue "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
+    | "(" lvalue ")"                     { $$ = $2; }
     ;
 
 expression
