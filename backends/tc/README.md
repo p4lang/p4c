@@ -19,7 +19,7 @@ The backend for TC reuses code from the p4c-ebpf for generating c file.
 
 ## How to use it?
 
-The sample p4 programs are located in the "testdata/p4tc_samples" directory.
+The sample p4 programs are located in the "testdata/p4tc_samples" [directory](../../testdata/p4tc_samples).
 
 To generate the 'template' file, 'c' file and 'json' file:
 
