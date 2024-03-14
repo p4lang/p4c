@@ -29,10 +29,11 @@ class EBPFPnaParser;
 class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
  public:
     EBPF::EBPFPipeline *pipeline;
+    const ConvertToBackendIR *tcIR;
 
     PNAEbpfGenerator(const EbpfOptions &options, std::vector<EBPF::EBPFType *> &ebpfTypes,
-                     EBPF::EBPFPipeline *pipeline)
-        : EBPF::EbpfCodeGenerator(options, ebpfTypes), pipeline(pipeline) {}
+                     EBPF::EBPFPipeline *pipeline, const ConvertToBackendIR *tcIR)
+        : EBPF::EbpfCodeGenerator(options, ebpfTypes), pipeline(pipeline), tcIR(tcIR) {}
 
     virtual void emit(EBPF::CodeBuilder *builder) const = 0;
     virtual void emitInstances(EBPF::CodeBuilder *builder) const = 0;
@@ -46,6 +47,7 @@ class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
     void emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) const override;
     void emitPipelineInstances(EBPF::CodeBuilder *builder) const override;
     void emitP4TCFilterFields(EBPF::CodeBuilder *builder) const;
+    void emitP4TCActionParam(EBPF::CodeBuilder *builder) const;
     cstring getProgramName() const;
 };
 
@@ -89,8 +91,9 @@ class PNAArchTC : public PNAEbpfGenerator {
     EBPF::XDPHelpProgram *xdp;
 
     PNAArchTC(const EbpfOptions &options, std::vector<EBPF::EBPFType *> &ebpfTypes,
-              EBPF::XDPHelpProgram *xdp, EBPF::EBPFPipeline *pipeline)
-        : PNAEbpfGenerator(options, ebpfTypes, pipeline), xdp(xdp) {}
+              EBPF::XDPHelpProgram *xdp, EBPF::EBPFPipeline *pipeline,
+              const ConvertToBackendIR *tcIR)
+        : PNAEbpfGenerator(options, ebpfTypes, pipeline, tcIR), xdp(xdp) {}
 
     void emit(EBPF::CodeBuilder *builder) const override;
     void emitParser(EBPF::CodeBuilder *builder) const override;
