@@ -32,15 +32,15 @@ static big_int checksum(Bmv2HashAlgorithm algo, const uint8_t *buf, size_t len) 
     // Pick a checksum according to the algorithm value.
     switch (algo) {
         case Bmv2HashAlgorithm::csum16:
-            return nethash::csum16(buf, len);
+            return NetHash::csum16(buf, len);
         case Bmv2HashAlgorithm::crc32:
-            return nethash::crc32(buf, len);
+            return NetHash::crc32(buf, len);
         case Bmv2HashAlgorithm::crc16:
-            return nethash::crc16(buf, len);
+            return NetHash::crc16(buf, len);
         case Bmv2HashAlgorithm::identity:
-            return nethash::identity(buf, len);
+            return NetHash::identity(buf, len);
         case Bmv2HashAlgorithm::xor16:
-            return nethash::xor16(buf, len);
+            return NetHash::xor16(buf, len);
         case Bmv2HashAlgorithm::random: {
             BUG("Random should not be encountered here");
         }

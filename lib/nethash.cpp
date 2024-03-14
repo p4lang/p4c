@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-namespace nethash {
+namespace NetHash {
 
 /* This code was adapted from:
     http://www.barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code */
@@ -211,4 +211,4 @@ uint64_t identity(const uint8_t *buf, size_t len) {
     return res;
 }
 
-}  // namespace nethash
+}  // namespace NetHash
