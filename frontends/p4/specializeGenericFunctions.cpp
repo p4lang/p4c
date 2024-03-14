@@ -59,8 +59,9 @@ const IR::Node *SpecializeFunctions::postorder(IR::Function *function) {
             tsv.setCalledBy(this);
             LOG3("Substitution " << ts);
             auto specialized = function->apply(tsv)->to<IR::Function>();
-            auto renamed = new IR::Function(specialized->srcInfo, it.second->name,
-                                            specialized->type, specialized->body);
+            auto renamed =
+                new IR::Function(specialized->srcInfo, it.second->name, specialized->annotations,
+                                 specialized->type, specialized->body);
             it.second->specialized = renamed;
             LOG3("Specializing " << function << " as " << renamed);
         }
