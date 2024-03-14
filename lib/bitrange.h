@@ -23,6 +23,7 @@ limitations under the License.
 #include <optional>
 #include <utility>
 
+#include "absl/numeric/bits.h"
 #include "bitvec.h"
 #include "exceptions.h"
 #include "hash.h"
@@ -71,7 +72,16 @@ namespace Detail {
  * rounds towards zero. For example, `-7 / 8 == 0`, but
  * `divideFloor(-7, 8) == -1`.
  */
-inline int divideFloor(int dividend, int divisor) {
+constexpr inline int divideFloor(int dividend, int divisor) {
+#if defined(__GNUC__) || defined(__clang__)
+    // Code to enable compiler folding when the divisor is a power-of-two compile-time constant
+    // In this case, compiler should fold to a right-shift
+    // FIXME: Replace absl with std after moving to C++20
+    unsigned u_divisor = static_cast<unsigned>(divisor);
+    if (__builtin_constant_p(u_divisor) && absl::has_single_bit(u_divisor))
+        return dividend >> (absl::bit_width(u_divisor) - 1);
+#endif  // defined(__GNUC__) || defined(__clang__)
+
     const int quotient = dividend / divisor;
     const int remainder = dividend % divisor;
     if ((remainder != 0) && ((remainder < 0) != (divisor < 0))) return quotient - 1;
@@ -102,7 +112,15 @@ constexpr int modulo(int dividend, int divisor) {
  *     dividends than for negative dividends.
  * To make this concrete, `-7 % 8 == -7`, but `moduloFloor(-7, 8) == 1`.
  */
-inline int moduloFloor(const int dividend, const int divisor) {
+constexpr inline int moduloFloor(const int dividend, const int divisor) {
+#if defined(__GNUC__) || defined(__clang__)
+    // Code to enable compiler folding when the divisor is a power-of-two compile-time constant
+    // In this case, compiler should fold to a bitwise-and
+    // FIXME: Replace absl with std after moving to C++20
+    if (__builtin_constant_p(divisor) && absl::has_single_bit(static_cast<unsigned>(divisor)))
+        return dividend & (divisor - 1);
+#endif  // defined(__GNUC__) || defined(__clang__)
+
     const int remainder = modulo(dividend, divisor);
     if (remainder == 0 || dividend >= 0) return remainder;
     return divisor - remainder;

@@ -2,11 +2,11 @@ name: "bazel"
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   merge_group:
-    branches: [ main ]
+    branches: [main]
 
 # Cancel any preceding run on the pull request.
 concurrency:
@@ -14,72 +14,72 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  build_direct:  # Build p4c directly.
+  build_direct: # Build p4c directly.
     runs-on: ubuntu-latest
     env:
       BAZEL: bazelisk-linux-amd64
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Mount bazel cache
-      uses: actions/cache@v4
-      with:
-        # See https://docs.bazel.build/versions/master/output_directories.html
-        path: "~/.cache/bazel"
-        # Create cash entry for every run (by using unique key derived from commit hash).
-        # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
-        key: ${{ runner.os }}-build-direct-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-build-direct-
+      - name: Mount bazel cache
+        uses: actions/cache@v4
+        with:
+          # See https://docs.bazel.build/versions/master/output_directories.html
+          path: "~/.cache/bazel"
+          # Create cash entry for every run (by using unique key derived from commit hash).
+          # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
+          key: ${{ runner.os }}-build-direct-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-direct-
 
-    - name: Install bazelisk
-      run: |
-        curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/$BAZEL"
-        chmod +x $BAZEL
-        sudo mv $BAZEL /usr/local/bin/bazel
+      - name: Install bazelisk
+        run: |
+          curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/$BAZEL"
+          chmod +x $BAZEL
+          sudo mv $BAZEL /usr/local/bin/bazel
 
-    - name: First, pass the lint test
-      run: bazel run //:buildifier_check
+      - name: First, pass the lint test
+        run: bazel run //:buildifier_check
 
-    - name: Install Flex and Bison
-      run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
+      - name: Install Flex and Bison
+        run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
 
-    - name: Build p4c
-      run: bazel build //... --verbose_failures
+      - name: Build p4c
+        run: bazel build //... --verbose_failures
 
-  build_indirect:  # Build 3rd party Bazel project depending on p4c as a subproject.
+  build_indirect: # Build 3rd party Bazel project depending on p4c as a subproject.
     runs-on: ubuntu-latest
     env:
       BAZEL: bazelisk-linux-amd64
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Mount bazel cache
-      uses: actions/cache@v4
-      with:
-        # See https://docs.bazel.build/versions/master/output_directories.html
-        path: "~/.cache/bazel"
-        # Create cash entry for every run (by using unique key derived from commit hash).
-        # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
-        key: ${{ runner.os }}-build-indirect-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-build-indirect-
+      - name: Mount bazel cache
+        uses: actions/cache@v4
+        with:
+          # See https://docs.bazel.build/versions/master/output_directories.html
+          path: "~/.cache/bazel"
+          # Create cash entry for every run (by using unique key derived from commit hash).
+          # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
+          key: ${{ runner.os }}-build-indirect-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-indirect-
 
-    - name: First, pass the lint test
-      run: bazel run //:buildifier_check
+      - name: First, pass the lint test
+        run: bazel run //:buildifier_check
 
-    - name: Install bazelisk
-      run: |
-        curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/$BAZEL"
-        chmod +x $BAZEL
-        sudo mv $BAZEL /usr/local/bin/bazel
+      - name: Install bazelisk
+        run: |
+          curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/$BAZEL"
+          chmod +x $BAZEL
+          sudo mv $BAZEL /usr/local/bin/bazel
 
-    - name: Install Flex and Bison
-      run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
+      - name: Install Flex and Bison
+        run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
 
-    - name: Build bazel/example
-      run: cd ./bazel/example && bazel build //... --verbose_failures
+      - name: Build bazel/example
+        run: cd ./bazel/example && bazel build //... --verbose_failures

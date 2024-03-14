@@ -2,11 +2,11 @@ name: "p4c-lint"
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   merge_group:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   p4c-lint:
@@ -15,36 +15,36 @@ jobs:
       IMAGE_TYPE: test
       CMAKE_ONLY: ON
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
-    - uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
 
-    - name: ccache
-      uses: hendrikmuhs/ccache-action@v1
-      with:
-        key: apply-linters-${{ runner.os }}
-        max-size: 1000M
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: apply-linters-${{ runner.os }}
+          max-size: 1000M
 
-    # TODO: This check is disabled because git on the Github serves behaves differently. Unclear why.
-    # - name: Check submodule ref points.
-    #   run: |
-    #     ./tools/check-git-submodules.sh
+      # TODO: This check is disabled because git on the Github serves behaves differently. Unclear why.
+      # - name: Check submodule ref points.
+      #   run: |
+      #     ./tools/check-git-submodules.sh
 
-    - name: Build (Ubuntu 20.04)
-      run: |
-       tools/ci-build.sh
+      - name: Build (Ubuntu 20.04)
+        run: |
+          tools/ci-build.sh
 
-    - name: Run cpplint on C/C++ files.
-      run: make cpplint
-      working-directory: ./build
+      - name: Run cpplint on C/C++ files.
+        run: make cpplint
+        working-directory: ./build
 
-    - name: Run clang-format on C/C++ files.
-      run: make clang-format
-      working-directory: ./build
+      - name: Run clang-format on C/C++ files.
+        run: make clang-format
+        working-directory: ./build
 
-    - name: Run black and isort on Python files.
-      run: |
-        make black
-        make isort
-      working-directory: ./build
+      - name: Run black and isort on Python files.
+        run: |
+          make black
+          make isort
+        working-directory: ./build
