@@ -282,10 +282,10 @@ std::ostream &operator<<(std::ostream &os, Bmv2HashAlgorithm algo) {
         ALGO_CASE(identity);
         ALGO_CASE(csum16);
         ALGO_CASE(xor16);
-        // no default: let the compiler produce a warning if some defined enum value is not covered
+        // No default: let the compiler produce a warning if some defined enum value is not covered.
     }
 #undef ALGO_CASE
-    // for values other then the declared ones
+    // For values other then the declared ones.
     return os << "INVALID [" << int(algo) << "]";
 }
 
