@@ -1,0 +1,3 @@
+p4tc_samples/tc_may_override_example_02.p4(93): [--Wwarn=invalid] warning: @tc_may_override annotation cannot be used with default_action without parameters
+        @tc_may_override default_action = dflt_route_drop();
+        ^

@@ -27,6 +27,7 @@ cd $mydir
 
 BuildType=Debug
 BuildDir=""
+BuildGenerator="Unix Makefiles"
 EXTRA=""
 FORCE=false
 
@@ -38,6 +39,10 @@ while [ $# -gt 0 ]; do
         ;;
     --build-type)
         BuildType="$2"
+        shift
+        ;;
+    --build-generator)
+        BuildGenerator="$2"
         shift
         ;;
     --distcc)
@@ -96,8 +101,8 @@ fi
 mkdir -p p4c/extensions
 mkdir -p "$BuildDir"
 cd "$BuildDir"
-cmake .. -DCMAKE_BUILD_TYPE=$BuildType $EXTRA
-echo "### Configured for building in '$BuildDir' folder"
+cmake .. -DCMAKE_BUILD_TYPE=$BuildType -G "$BuildGenerator" $EXTRA
+echo "### Configured for building with '$BuildGenerator' in '$BuildDir' folder"
 
 make_relative_link ()
 {

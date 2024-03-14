@@ -25,15 +25,17 @@ namespace TC {
 class ParseTCAnnotations : public P4::ParseAnnotations {
  public:
     // TC specific annotations
-    static const cstring default_hit;
-    static const cstring default_hit_const;
+    static const cstring defaultHit;
+    static const cstring defaultHitConst;
     static const cstring tcType;
     static const cstring numMask;
+    static const cstring tcMayOverride;
     ParseTCAnnotations()
-        : P4::ParseAnnotations("TC", true,
-                               {PARSE_EMPTY(default_hit), PARSE_EMPTY(default_hit_const),
-                                PARSE_CONSTANT_OR_STRING_LITERAL(tcType),
-                                PARSE_CONSTANT_OR_STRING_LITERAL(numMask)}) {}
+        : P4::ParseAnnotations(
+              "TC", true,
+              {PARSE_EMPTY(defaultHit), PARSE_EMPTY(defaultHitConst),
+               PARSE_CONSTANT_OR_STRING_LITERAL(tcType), PARSE_CONSTANT_OR_STRING_LITERAL(numMask),
+               PARSE_EMPTY(tcMayOverride)}) {}
 };
 
 }  // namespace TC

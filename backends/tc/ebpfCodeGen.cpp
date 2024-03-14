@@ -124,10 +124,39 @@ void PNAEbpfGenerator::emitP4TCFilterFields(EBPF::CodeBuilder *builder) const {
     builder->emitIndent();
     builder->appendFormat("__u16 prio");
     builder->endOfStatement(true);
-
+    emitP4TCActionParam(builder);
     builder->blockEnd(false);
     builder->endOfStatement(true);
     builder->newline();
+}
+
+void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
+    std::vector<cstring> actionParamList;
+    for (auto table : tcIR->tcPipeline->tableDefs) {
+        if (table->isTcMayOverride) {
+            cstring tblName = table->getTableName();
+            cstring defaultActionName = table->defaultMissAction->getActionName();
+            auto actionNameStr = defaultActionName.c_str();
+            for (long unsigned int i = 0; i < defaultActionName.size(); i++) {
+                if (actionNameStr[i] == '/') {
+                    defaultActionName = defaultActionName.substr(i + 1, defaultActionName.size());
+                    break;
+                }
+            }
+            for (auto param : table->defaultMissActionParams) {
+                cstring paramName = param->paramDetail->getParamName();
+                cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
+                auto itr = find(actionParamList.begin(), actionParamList.end(), placeholder);
+                if (itr == actionParamList.end()) {
+                    actionParamList.push_back(placeholder);
+                    cstring typeName = param->paramDetail->getParamType();
+                    builder->emitIndent();
+                    builder->appendFormat("%s %s", typeName, placeholder);
+                    builder->endOfStatement(true);
+                }
+            }
+        }
+    }
 }
 
 void PNAEbpfGenerator::emitPipelineInstances(EBPF::CodeBuilder *builder) const {
@@ -1162,7 +1191,7 @@ const PNAEbpfGenerator *ConvertToEbpfPNA::build(const IR::ToplevelBlock *tlb) {
     tlb->getProgram()->apply(*pipeline_converter);
     auto tcIngress = pipeline_converter->getEbpfPipeline();
 
-    return new PNAArchTC(options, ebpfTypes, xdp, tcIngress);
+    return new PNAArchTC(options, ebpfTypes, xdp, tcIngress, tcIR);
 }
 
 const IR::Node *ConvertToEbpfPNA::preorder(IR::ToplevelBlock *tlb) {
