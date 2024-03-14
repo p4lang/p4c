@@ -16,6 +16,7 @@
 #include "lib/nethash.h"
 
 #include <arpa/inet.h>
+
 #include <algorithm>
 
 /** \file
@@ -49,7 +50,9 @@ static T reflect(T data, int nBits) {
 
 /// A function with the same signature as reflect, but just returning the data.
 template <typename T>
-static T identity(T data, int) { return data; }
+static T identity(T data, int) {
+    return data;
+}
 
 template <typename T, T remainderInit, T final_xor_value, auto table, auto maybeReflect>
 T crcGeneric(const uint8_t *buf, size_t len) {
