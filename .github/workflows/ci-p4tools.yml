@@ -22,6 +22,7 @@ jobs:
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ON
       ENABLE_TEST_TOOLS: ON
+      BUILD_GENERATOR: Ninja
     steps:
       - uses: actions/checkout@v4
         with:
