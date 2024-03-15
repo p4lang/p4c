@@ -124,10 +124,10 @@ class Enumerator {
 
     /// Return an enumerator returning all elements that pass the filter
     template <typename Filter>
-    Enumerator<T> *where(Filter &&filter);
+    Enumerator<T> *where(Filter filter);
     /// Apply specified function to all elements of this enumerator
-    template <typename S>
-    Enumerator<S> *map(std::function<S(const T &)> map);
+    template <typename Mapper>
+    Enumerator<std::invoke_result_t<Mapper, T>> *map(Mapper map);
     /// Cast to an enumerator of S objects
     template <typename S>
     Enumerator<S> *as();
@@ -393,15 +393,15 @@ class AsEnumerator final : public Enumerator<S> {
 ///////////////////////////
 
 /// Transforms all elements from type T to type S
-template <typename T, typename S>
+template <typename T, typename S, typename Mapper>
 class MapEnumerator final : public Enumerator<S> {
  protected:
     Enumerator<T> *input;
-    std::function<S(const T &)> map;
+    Mapper map;
     S current;
 
  public:
-    MapEnumerator(Enumerator<T> *input, std::function<S(const T &)> map) : input(input), map(map) {}
+    MapEnumerator(Enumerator<T> *input, Mapper map) : input(input), map(std::move(map)) {}
 
     void reset() {
         this->input->reset();
@@ -445,6 +445,10 @@ class MapEnumerator final : public Enumerator<S> {
         throw std::runtime_error("Unexpected enumerator state");
     }
 };
+
+template <typename T, typename Mapper>
+MapEnumerator(Enumerator<T> *, Mapper)
+    -> MapEnumerator<T, typename std::invoke_result_t<Mapper, T>, Mapper>;
 
 /////////////////////////////////////////////////////////////////////
 
@@ -528,9 +532,9 @@ class ConcatEnumerator final : public Enumerator<T> {
 ////////////////// Enumerator //////////////
 
 template <typename T>
-template <typename S>
-Enumerator<S> *Enumerator<T>::map(std::function<S(const T &)> map) {
-    return new MapEnumerator<T, S>(this, map);
+template <typename Mapper>
+Enumerator<std::invoke_result_t<Mapper, T>> *Enumerator<T>::map(Mapper map) {
+    return new MapEnumerator(this, std::move(map));
 }
 
 template <typename T>
@@ -541,8 +545,8 @@ Enumerator<S> *Enumerator<T>::as() {
 
 template <typename T>
 template <typename Filter>
-Enumerator<T> *Enumerator<T>::where(Filter &&filter) {
-    return new FilterEnumerator(this, std::forward<Filter>(filter));
+Enumerator<T> *Enumerator<T>::where(Filter filter) {
+    return new FilterEnumerator(this, std::move(filter));
 }
 
 template <typename T>
