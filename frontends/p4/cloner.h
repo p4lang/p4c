@@ -34,6 +34,14 @@ class ClonePathExpressions : public Transform {
         return path;
     }
 
+    // Clone expressions of the form Member(TypeNameExpression)
+    const IR::Node *postorder(IR::Member* member) override {
+        if (member->expr->is<IR::TypeNameExpression>()) {
+            return new IR::Member(member->expr->clone(), member->member);
+        }
+        return member;
+    }
+
     template <typename T>
     const T *clone(const IR::Node *node) {
         return node->apply(*this)->to<T>();
