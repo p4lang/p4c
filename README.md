@@ -277,15 +277,15 @@ For documentation building:
 `p4c` also depends on Google Protocol Buffers (Protobuf). `p4c` requires version
 3.0 or higher, so the packaged version provided in Ubuntu 20.04 **should**
 work. However, P4C typically installs its own version of Protobuf using CMake's `FetchContent` module
-(at the moment, 3.25.3). If you are experiencing issues with the Protobuf version shipped with your OS distribution, we recommend that to install Protobuf 3.25.3 from source. You can find instructions
+(at the moment, 3.20.2). If you are experiencing issues with the Protobuf version shipped with your OS distribution, we recommend that to install Protobuf 3.20.2 from source. You can find instructions
 [here](https://github.com/protocolbuffers/protobuf/blob/v3.25.3/src/README.md).
-After cloning Protobuf and before you build, check-out version 3.25.3:
+After cloning Protobuf and before you build, check-out version 3.20.2:
 
-`git checkout v3.25.3`
+`git checkout v3.20.2`
 
 Please note that while all Protobuf versions newer than 3.0 should work for
 `p4c` itself, you may run into trouble with some extensions and other p4lang
-projects unless you install version 3.25.3.
+projects unless you install version 3.20.2.
 
 `p4c` also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's `FetchContent` module (Abseil LTS 20240116.1 at the moment).
 
@@ -495,7 +495,7 @@ The p4c CMakeLists.txt will use that name to figure the full path of the files t
 
 clang-format, black, and isort need to be installed before the linter can be used. They can be installed with the following command:
 ```
-pip3 install --user "clang-format==15.0.4" "black==22.3.0" "isort==5.10.0"
+pip3 install --user "clang-format==18.1.0" "black==24.2.0" "isort==5.13.2"
 ```
 clang-format can be checked using the `make clang-format` command. Complaints can be fixed by running `make clang-format-fix-errors`. black and isort can be checked using the `make black` or `make isort` command respectively. Complaints can be fixed by running `make black-fix-errors` or `make isort-fix-errors`.
 
