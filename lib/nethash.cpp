@@ -31,37 +31,46 @@
 
 namespace NetHash {
 
-/// Reflects/reverse n-bit number bit-by-bit.
-template <typename T>
-static T reflect(T data, int nBits) {
-    T reflection = 0;
+/// Reflects/reverse n-bit number bit-by-bit. Note that it also solves as a slicing cast in the main
+/// calculation loop, where it extracts and reflect lowest byte. Written as templated function
+/// inside non-teplated class to allow passing the entire thing into crcGeneric and them templating
+/// it with two different types inside.
+struct Reflect {
+    template <typename T>
+    static T op(T data) {
+        const int nBits = sizeof(T) * 8;
+        T reflection = 0;
 
-    // Reflect the data about the center bit.
-    for (int bit = 0; bit < nBits; ++bit) {
-        // If the LSB bit is set, set the reflection of it.
-        if (data & 0x01) {
-            reflection |= (T(1) << ((nBits - 1) - bit));
+        // Reflect the data about the center bit.
+        for (int bit = 0; bit < nBits; ++bit) {
+            // If the LSB bit is set, set the reflection of it.
+            if (data & 0x01) {
+                reflection |= (T(1) << ((nBits - 1) - bit));
+            }
+            data = (data >> 1);
         }
-        data = (data >> 1);
+
+        return reflection;
     }
+};
 
-    return reflection;
-}
+/// A class with the same signature as reflect, but just returning the data.
+struct Identity {
+    template <typename T>
+    static T op(T data) {
+        return data;
+    }
+};
 
-/// A function with the same signature as reflect, but just returning the data.
-template <typename T>
-static T identity(T data, int) {
-    return data;
-}
-
-template <typename T, T remainderInit, T final_xor_value, auto table, auto maybeReflect>
+template <typename T, T remainderInit, T final_xor_value, auto table, typename MaybeReflect>
 T crcGeneric(const uint8_t *buf, size_t len) {
     T remainder = remainderInit;
     for (unsigned int byte = 0; byte < len; byte++) {
-        auto data = maybeReflect(buf[byte], 8) ^ (remainder >> (sizeof(T) * 8 - 8));
+        auto data =
+            MaybeReflect::template op<uint8_t>(buf[byte]) ^ (remainder >> (sizeof(T) * 8 - 8));
         remainder = table[data] ^ (remainder << 8);
     }
-    return maybeReflect(remainder, sizeof(T) * 8) ^ final_xor_value;
+    return MaybeReflect::template op<T>(remainder) ^ final_xor_value;
 }
 
 static const uint16_t table_crc16[256] = {
@@ -147,15 +156,15 @@ static const uint32_t table_crc32[256] = {
     0xAFB010B1, 0xAB710D06, 0xA6322BDF, 0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4};
 
 uint16_t crc16(const uint8_t *buf, size_t len) {
-    return crcGeneric<uint16_t, 0, 0, table_crc16, reflect<uint16_t>>(buf, len);
+    return crcGeneric<uint16_t, 0, 0, table_crc16, Reflect>(buf, len);
 }
 
 uint32_t crc32(const uint8_t *buf, size_t len) {
-    return crcGeneric<uint32_t, 0xffffffff, 0xffffffff, table_crc32, reflect<uint32_t>>(buf, len);
+    return crcGeneric<uint32_t, 0xffffffff, 0xffffffff, table_crc32, Reflect>(buf, len);
 }
 
 uint16_t crcCCITT(const uint8_t *buf, size_t len) {
-    return crcGeneric<uint16_t, 0xffff, 0, table_crcCCITT, identity<uint8_t>>(buf, len);
+    return crcGeneric<uint16_t, 0xffff, 0, table_crcCCITT, Identity>(buf, len);
 }
 
 uint16_t csum16(const uint8_t *buf, size_t len) {
