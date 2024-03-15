@@ -11,7 +11,7 @@ using namespace NetHash;
 
 template <typename T>
 struct Hex {
-    Hex(T value) : value(value) {}
+    explicit Hex(T value) : value(value) {}
     bool operator==(const Hex &o) const { return value == o.value; }
     friend std::ostream &operator<<(std::ostream &os, Hex val) {
         auto fl = os.flags();
@@ -32,8 +32,8 @@ auto apply(std::initializer_list<uint8_t> data) {
     return Hex(fn(std::data(data), std::size(data)));
 }
 
-Hex<uint32_t> operator""_u32(unsigned long long v) { return v; }
-Hex<uint16_t> operator""_u16(unsigned long long v) { return v; }
+Hex<uint32_t> operator""_u32(unsigned long long v) { return Hex<uint32_t>(v); }
+Hex<uint16_t> operator""_u16(unsigned long long v) { return Hex<uint16_t>(v); }
 
 TEST(NetHash, crc32) {
     EXPECT_EQ(apply<crc32>({}), 0x00000000_u32);
