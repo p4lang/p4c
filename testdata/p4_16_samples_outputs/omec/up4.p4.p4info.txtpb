@@ -626,8 +626,6 @@ action_profiles {
   table_ids: 39015874
   with_selector: true
   size: 1024
-  sum_of_weights {
-  }
 }
 counters {
   preamble {

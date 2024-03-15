@@ -1,6 +1,6 @@
 action_profile_max_group_size_annotation.p4(44): [--Wwarn=ignore] warning: Ignoring annotation @max_group_size on action profile 'ap', which does not have a selector
         implementation = action_profile(32w128);
         ^^^^^^^^^^^^^^
-action_profile_max_group_size_annotation.p4(57): [--Wwarn=ignore] warning: Ignoring annotation @max_member_weight on action profile 'ap_ws', which does not have a selector
+action_profile_max_group_size_annotation.p4(57): [--Wwarn=ignore] warning: Ignoring annotation @max_member_weight on action profile 'ap_ws', which does not use 'sum_of_members' as its SelectorSizeSemantics
         implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
         ^^^^^^^^^^^^^^

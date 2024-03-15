@@ -22,7 +22,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         mark_to_drop(smeta);
     }
     @name("ap") @max_group_size(200) @selector_size_semantics("sum_of_members") @max_member_weight(4000) action_profile(32w128) my_action_profile;
-    @name("ap_ws") @max_group_size(200) @selector_size_semantics("sum_of_weights") @max_member_weight(4000) action_selector(HashAlgorithm.identity, 32w1024, 32w10) my_action_selector;
+    @name("ap_ws") @max_group_size(200) @selector_size_semantics("sum_of_members") @max_member_weight(4000) action_selector(HashAlgorithm.identity, 32w1024, 32w10) my_action_selector;
     table indirect {
         actions = {
             drop();

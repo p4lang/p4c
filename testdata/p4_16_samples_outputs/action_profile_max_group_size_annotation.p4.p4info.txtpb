@@ -59,8 +59,6 @@ action_profiles {
   }
   table_ids: 46872340
   size: 128
-  sum_of_weights {
-  }
 }
 action_profiles {
   preamble {

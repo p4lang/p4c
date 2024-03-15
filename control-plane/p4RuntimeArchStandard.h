@@ -791,7 +791,6 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         }
 
         // By default, an action profile uses the SumOfWeights semantics.
-        profile->mutable_sum_of_weights();
         auto selectorSizeSemanticsAnnotation =
             actionProfile.annotations->getAnnotation("selector_size_semantics");
         if (selectorSizeSemanticsAnnotation) {
@@ -829,7 +828,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                 CHECK_NULL(maxMemberWeightConstant);
                 profile->mutable_sum_of_members()->set_max_member_weight(
                     maxMemberWeightConstant->asInt());
-            } else if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR) {
+            } else if (actionProfile.type != ActionProfileType::INDIRECT_WITH_SELECTOR) {
                 ::warning(ErrorType::WARN_IGNORE,
                           "Ignoring annotation @max_member_weight on action profile "
                           "'%1%', which does not have a selector",
