@@ -20,6 +20,7 @@ set (MIDEND_SRCS
   convertErrors.cpp
   copyStructures.cpp
   coverage.cpp
+  def_use.cpp
   eliminateInvalidHeaders.cpp
   eliminateNewtype.cpp
   eliminateSerEnums.cpp
@@ -71,6 +72,7 @@ set (MIDEND_HDRS
   convertErrors.h
   copyStructures.h
   coverage.h
+  def_use.h
   eliminateInvalidHeaders.h
   eliminateNewtype.h
   eliminateSerEnums.h
