@@ -36,23 +36,20 @@ set(
   lib/variables.cpp
 )
 
-add_p4tools_library(p4tools-common ${P4C_TOOLS_COMMON_SOURCES})
+add_library(p4tools-common OBJECT ${P4C_TOOLS_COMMON_SOURCES})
 
 target_link_libraries(
   p4tools-common
+  # We export Z3' with the common library.
   PUBLIC ${P4TOOLS_Z3_LIB}
+    # For Abseil includes.
   PRIVATE frontend
 )
 
 target_include_directories(
   p4tools-common
+  # We export Z3's includes with the common library.
   SYSTEM BEFORE PUBLIC ${P4TOOLS_Z3_INCLUDE_DIR}
-)
-target_include_directories(
-  p4tools-common
-  PUBLIC "${CMAKE_BINARY_DIR}/common"
-  PUBLIC "${P4C_SOURCE_DIR}"
-  PUBLIC "${P4C_BINARY_DIR}"
 )
 
 # Add control-plane-specific extensions.

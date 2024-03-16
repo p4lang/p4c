@@ -13,23 +13,8 @@ find_package(LibGc 7.2.0 REQUIRED)
 # Helper for defining a p4tools executable target.
 function(add_p4tools_executable target source)
   add_executable(${target} ${source} ${ARGN})
-  target_include_directories(
-    ${target}
-    PUBLIC "${CMAKE_SOURCE_DIR}"
-    PUBLIC "${CMAKE_BINARY_DIR}"
-  )
   install(TARGETS ${target} RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 endfunction(add_p4tools_executable)
-
-# Helper for defining a p4tools library target.
-function(add_p4tools_library target)
-  add_library(${target} ${ARGN})
-  target_include_directories(
-    ${target}
-    PUBLIC "${CMAKE_SOURCE_DIR}"
-    PUBLIC "${CMAKE_BINARY_DIR}"
-  )
-endfunction(add_p4tools_library)
 
 macro(p4tools_obtain_z3)
   option(TOOLS_USE_PREINSTALLED_Z3 "Look for a preinstalled version of Z3 instead of installing a prebuilt binary using FetchContent." OFF)

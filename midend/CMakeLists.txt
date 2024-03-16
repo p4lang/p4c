@@ -116,5 +116,8 @@ set (MIDEND_HDRS
 
 
 add_library (midend STATIC ${MIDEND_SRCS})
-target_link_libraries(midend frontend) # For TypeMap / RefMap
+target_link_libraries(midend
+  # For TypeMap / RefMap
+  PRIVATE frontend
+)
 add_dependencies(midend genIR ir-generated)
