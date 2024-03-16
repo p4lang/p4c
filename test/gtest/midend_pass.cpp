@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2024 Intel Corp.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,21 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "midend.h"
+#include "midend_pass.h"
 
 #include "frontends/common/constantFolding.h"
-#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/common/options.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/strengthReduction.h"
-#include "frontends/p4/toP4/toP4.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/unusedDeclarations.h"
-#include "midend/actionSynthesis.h"
 #include "midend/compileTimeOps.h"
 #include "midend/complexComparison.h"
 #include "midend/copyStructures.h"
@@ -43,14 +38,12 @@ limitations under the License.
 #include "midend/expandLookahead.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
-#include "midend/flattenUnions.h"
-#include "midend/global_copyprop.h"
-#include "midend/hsIndexSimplify.h"
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/nestedStructs.h"
 #include "midend/noMatch.h"
 #include "midend/parserUnroll.h"
+#include "midend/predication.h"
 #include "midend/removeAssertAssume.h"
 #include "midend/removeExits.h"
 #include "midend/removeMiss.h"
@@ -61,18 +54,7 @@ limitations under the License.
 #include "midend/simplifySelectList.h"
 #include "midend/tableHit.h"
 
-namespace P4Test {
-
-class SkipControls : public P4::ActionSynthesisPolicy {
-    const std::set<cstring> *skip;
-
- public:
-    explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
-    bool convert(const Visitor::Context *, const IR::P4Control *control) override {
-        if (skip->find(control->name) != skip->end()) return false;
-        return true;
-    }
-};
+namespace Test {
 
 MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
@@ -81,6 +63,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
     setName("MidEnd");
 
     auto v1controls = new std::set<cstring>();
+    defuse = new P4::ComputeDefUse;
 
     addPasses(
         {options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
@@ -101,7 +84,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::StrengthReduction(&refMap, &typeMap),
          new P4::EliminateTuples(&refMap, &typeMap),
          new P4::SimplifyComparisons(&refMap, &typeMap),
-         new P4::CopyStructures(&refMap, &typeMap, false),
+         new P4::CopyStructures(&refMap, &typeMap),
          new P4::NestedStructs(&refMap, &typeMap),
          new P4::StrengthReduction(&refMap, &typeMap),
          new P4::SimplifySelectList(&refMap, &typeMap),
@@ -110,22 +93,18 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::FlattenInterfaceStructs(&refMap, &typeMap),
          new P4::EliminateTypedef(&refMap, &typeMap),
          new P4::ReplaceSelectRange(&refMap, &typeMap),
+         new P4::Predication(&refMap),
          new P4::MoveDeclarations(),  // more may have been introduced
          new P4::ConstantFolding(&refMap, &typeMap),
-         new P4::GlobalCopyPropagation(&refMap, &typeMap),
-         new PassRepeated({
-             new P4::LocalCopyPropagation(&refMap, &typeMap),
-             new P4::ConstantFolding(&refMap, &typeMap),
-         }),
+         new P4::LocalCopyPropagation(&refMap, &typeMap),
+         new P4::ConstantFolding(&refMap, &typeMap),
          new P4::StrengthReduction(&refMap, &typeMap),
          new P4::MoveDeclarations(),  // more may have been introduced
          new P4::SimplifyControlFlow(&refMap, &typeMap),
          new P4::CompileTimeOperations(),
          new P4::TableHit(&refMap, &typeMap),
          new P4::EliminateSwitch(&refMap, &typeMap),
-         new P4::ResolveReferences(&refMap),
-         new P4::TypeChecking(&refMap, &typeMap, true),  // update types before ComputeDefUse
-         new P4::ComputeDefUse,                          // present for testing
+         defuse,
          evaluator,
          [v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
              auto toplevel = evaluator->getToplevelBlock();
@@ -150,14 +129,11 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
              }
              return root;
          },
-         new P4::HSIndexSimplifier(&refMap, &typeMap),
          new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
          new P4::MoveActionsToTables(&refMap, &typeMap),
          options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
          evaluator,
          [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
-         new P4::FlattenHeaderUnion(&refMap, &typeMap, options.loopsUnrolling),
-         new P4::SimplifyControlFlow(&refMap, &typeMap),
          new P4::MidEndLast()});
     if (options.listMidendPasses) {
         listPasses(*outStream, "\n");
@@ -167,7 +143,12 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
     if (options.excludeMidendPasses) {
         removePasses(options.passesToExcludeMidend);
     }
-    addDebugHooks(hooks, true);
+    toplevel = evaluator->getToplevelBlock();
 }
 
-}  // namespace P4Test
+IR::ToplevelBlock *MidEnd::process(const IR::P4Program *&program) {
+    program = program->apply(*this);
+    return toplevel;
+}
+
+}  // namespace Test
