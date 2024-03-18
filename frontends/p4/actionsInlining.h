@@ -68,11 +68,11 @@ class InlineActions : public PassManager {
     ActionsInlineList actionsToInline;
 
  public:
-    InlineActions(ReferenceMap *refMap, TypeMap *typeMap) {
+    InlineActions(ReferenceMap *refMap, TypeMap *typeMap, const RemoveUnusedPolicy &policy) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DiscoverActionsInlining(&actionsToInline, refMap, typeMap));
         passes.push_back(new InlineActionsDriver(&actionsToInline, new ActionsInliner(refMap)));
-        passes.push_back(new RemoveAllUnusedDeclarations(refMap));
+        passes.push_back(new RemoveAllUnusedDeclarations(refMap, policy));
         setName("InlineActions");
     }
 };

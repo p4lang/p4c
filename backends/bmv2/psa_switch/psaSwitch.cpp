@@ -281,7 +281,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::RemoveComplexExpressions(refMap, typeMap,
                                          new ProcessControls(&structure.pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
-        new P4::RemoveAllUnusedDeclarations(refMap),
+        new P4::RemoveAllUnusedDeclarations(refMap, P4::RemoveUnusedPolicy()),
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.
         new P4::ClonePathExpressions(),
