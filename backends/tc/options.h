@@ -71,7 +71,7 @@ class TCOptions : public CompilerOptions {
             "Select the mode used to pass metadata from XDP to TC "
             "(possible values: meta, head, cpumap).");
         registerOption(
-            "--num-timer-profiles", "No of Timer Profiles",
+            "--num-timer-profiles", "profiles",
             [this](const char *arg) {
                 timerProfiles = std::atoi(arg);
                 return true;

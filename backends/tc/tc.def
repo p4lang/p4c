@@ -329,7 +329,7 @@ class TCTable {
         if (isTableAddOnMiss) {
             tcTable += " permissions 0x3DE6";
             if(timerProfiles > 4) {
-                tcTable += " num_timer_profiles " + timerProfiles;
+                tcTable += " num_timer_profiles " + Util::toString(timerProfiles);
             }
         }
 

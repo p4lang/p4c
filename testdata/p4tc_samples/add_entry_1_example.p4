@@ -79,7 +79,7 @@ control MainControlImpl(
     }
     action next_hop() {
          add_entry(action_name = "send_nh",  // name of action
-                 action_params = {hdr.ethernet.srcAddr, hdr.ethernet.dstAddr}, expire_time_profile_id = EXPIRE_TIME_PROFILE_NOW);
+                 action_params = {hdr.ethernet.dstAddr, hdr.ethernet.srcAddr}, expire_time_profile_id = EXPIRE_TIME_PROFILE_NOW);
 
     }
 
