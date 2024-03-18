@@ -18,6 +18,7 @@
 
 set (GTEST_UNITTEST_SOURCES
   gtest/arch_test.cpp
+  gtest/bitrange.cpp
   gtest/bitvec_test.cpp
   gtest/call_graph_test.cpp
   gtest/complex_bitwise.cpp
@@ -36,6 +37,8 @@ set (GTEST_UNITTEST_SOURCES
   gtest/hvec_map.cpp
   gtest/indexed_vector.cpp
   gtest/json_test.cpp
+  gtest/midend_def_use.cpp
+  gtest/midend_pass.cpp
   gtest/midend_test.cpp
   gtest/frontend_test.cpp
   gtest/opeq_test.cpp

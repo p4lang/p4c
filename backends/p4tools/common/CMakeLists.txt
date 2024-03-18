@@ -36,37 +36,21 @@ set(
   lib/variables.cpp
 )
 
-add_p4tools_library(p4tools-common ${P4C_TOOLS_COMMON_SOURCES})
+add_library(p4tools-common OBJECT ${P4C_TOOLS_COMMON_SOURCES})
 
 target_link_libraries(
   p4tools-common
+  # We export Z3' with the common library.
   PUBLIC ${P4TOOLS_Z3_LIB}
+    # For Abseil includes.
+  PRIVATE frontend
 )
 
 target_include_directories(
   p4tools-common
+  # We export Z3's includes with the common library.
   SYSTEM BEFORE PUBLIC ${P4TOOLS_Z3_INCLUDE_DIR}
 )
-target_include_directories(
-  p4tools-common
-  PUBLIC "${CMAKE_BINARY_DIR}/common"
-  PUBLIC "${P4C_SOURCE_DIR}"
-  PUBLIC "${P4C_BINARY_DIR}"
-)
 
-add_dependencies(p4tools-common ir-generated frontend)
-
-set(
-  P4C_TOOLS_CONTROL_PLANE_SOURCES
-  control_plane/p4info_map.cpp
-)
-
-add_p4tools_library(p4tools-control-plane ${P4C_TOOLS_CONTROL_PLANE_SOURCES})
-
-target_include_directories(
-  p4tools-control-plane
-  SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS}
-)
-
-target_link_libraries(p4tools-control-plane controlplane)
-
+# Add control-plane-specific extensions.
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/control_plane)

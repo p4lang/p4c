@@ -1,1 +1,4 @@
+strength2.p4(17): [--Wwarn=unused] warning: Control strength is not used; removing
+control strength() {
+        ^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

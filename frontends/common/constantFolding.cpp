@@ -308,8 +308,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Add *e) {
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::AddSat *e) {
-    return binary(
-        e, [](big_int a, big_int b) -> big_int { return a + b; }, true);
+    return binary(e, [](big_int a, big_int b) -> big_int { return a + b; }, true);
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Sub *e) {
@@ -317,8 +316,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Sub *e) {
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::SubSat *e) {
-    return binary(
-        e, [](big_int a, big_int b) -> big_int { return a - b; }, true);
+    return binary(e, [](big_int a, big_int b) -> big_int { return a - b; }, true);
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Mul *e) {
@@ -896,6 +894,7 @@ DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression *k
             return Result::No;
         }
         auto sel = getConstant(select);
+        BUG_CHECK(sel, "%1%: expected a constant expression", select);
         // For Enum and SerEnum instances we can just use expression equivalence.
         // This assumes that type checking does not allow us to compare constants to SerEnums.
         if (key->equiv(*sel)) return Result::Yes;

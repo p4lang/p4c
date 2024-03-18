@@ -1,0 +1,52 @@
+name: "test-p4c-fedora"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+    branches: [main]
+
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: test-p4c-fedora-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  # Build and test p4c on Fedora.
+  test-fedora-linux:
+    # This job runs in Fedora container that runs in Ubuntu VM.
+    runs-on: ubuntu-latest
+    container:
+      image: registry.fedoraproject.org/fedora:latest
+      options: --privileged
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+    steps:
+      # We need to install git here because it is not provided out of the box in Fedora container.
+      - name: Install git
+        run: dnf install -y -q git
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies (Fedora Linux)
+        run: tools/install_fedora_deps.sh
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: fedora-test-${{ runner.os }}
+          max-size: 1000M
+
+      - name: Build p4c (Fedora Linux)
+        run: |
+          ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_UNITY_BUILD=ON --build-generator "Ninja"
+          cmake --build build -- -j $(nproc)
+
+      - name: Run p4c tests (Fedora Linux)
+        # Need to use sudo for the eBPF kernel tests.
+        run: sudo -E ctest --output-on-failure --schedule-random
+        working-directory: ./build

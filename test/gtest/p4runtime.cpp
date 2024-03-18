@@ -16,6 +16,7 @@ limitations under the License.
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <absl/strings/substitute.h>
 #include <google/protobuf/util/message_differencer.h>
 #include <gtest/gtest.h>
 
@@ -23,8 +24,6 @@ limitations under the License.
 #include <optional>
 #include <string>
 #include <vector>
-
-#include <boost/algorithm/string/replace.hpp>
 
 #include "control-plane/p4/config/v1/p4types.pb.h"
 #include "control-plane/p4/v1/p4runtime.pb.h"
@@ -690,7 +689,7 @@ TEST_F(P4Runtime, P416MatchFields) {
     }
 }
 
-TEST_F(P4Runtime, DISABLEDP414MatchFields) {
+TEST_F(P4Runtime, DISABLED_P414MatchFields) {
     using MatchField = p4configv1::MatchField;
 
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::NONE, R"(
@@ -1497,12 +1496,11 @@ std::optional<P4::P4RuntimeAPI> P4RuntimePkgInfo::createTestCase(const char *ann
         control deparse(packet_out p, in Headers h) { apply { } }
         control ingress(inout Headers h, inout Metadata m,
                         inout standard_metadata_t sm) { apply { } }
-        %ANNOTATIONS%
+        $0
         V1Switch(parse(), verifyChecksum(), ingress(), egress(),
                  computeChecksum(), deparse()) main;
     )");
-    boost::replace_first(source, "%ANNOTATIONS%", annotations);
-    return createP4RuntimeTestCase(source);
+    return createP4RuntimeTestCase(absl::Substitute(source, annotations));
 }
 
 TEST_F(P4RuntimePkgInfo, NoAnnotations) {

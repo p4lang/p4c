@@ -17,9 +17,10 @@ limitations under the License.
 #ifndef COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
 #define COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
 
+#include <absl/container/flat_hash_map.h>
+
 #include "ir/ir.h"
 #include "lib/cstring.h"
-#include "lib/exceptions.h"
 #include "lib/iterator_range.h"
 #include "referenceMap.h"
 
@@ -41,10 +42,12 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
     std::unordered_multimap<cstring, const IR::IDeclaration *> &memoizeDeclsByName(
         const IR::INamespace *ns) const;
 
-    mutable std::unordered_map<const IR::INamespace *, std::vector<const IR::IDeclaration *>>
+    mutable absl::flat_hash_map<const IR::INamespace *, std::vector<const IR::IDeclaration *>,
+                                Util::Hash>
         namespaceDecls;
-    mutable std::unordered_map<const IR::INamespace *,
-                               std::unordered_multimap<cstring, const IR::IDeclaration *>>
+    mutable absl::flat_hash_map<const IR::INamespace *,
+                                std::unordered_multimap<cstring, const IR::IDeclaration *>,
+                                Util::Hash>
         namespaceDeclNames;
 
  protected:

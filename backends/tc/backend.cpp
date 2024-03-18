@@ -354,6 +354,51 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                 if (defaultActionProperty->isConstant) {
                     tabledef->setDefaultMissConst(true);
                 }
+                bool isTCMayOverride = false;
+                const IR::Annotation *overrideAnno =
+                    defaultActionProperty->getAnnotations()->getSingle(
+                        ParseTCAnnotations::tcMayOverride);
+                if (overrideAnno) {
+                    isTCMayOverride = true;
+                }
+                bool directionParamPresent = false;
+                auto paramList = actionCall->action->getParameters();
+                for (auto param : paramList->parameters) {
+                    if (param->direction != IR::Direction::None) directionParamPresent = true;
+                }
+                if (!directionParamPresent) {
+                    auto i = 0;
+                    if (isTCMayOverride) {
+                        if (paramList->parameters.empty())
+                            ::warning(ErrorType::WARN_INVALID,
+                                      "%1% annotation cannot be used with default_action without "
+                                      "parameters",
+                                      overrideAnno);
+                        else
+                            tabledef->setTcMayOverride();
+                    }
+                    for (auto param : paramList->parameters) {
+                        auto defaultParam = new IR::TCDefaultActionParam();
+                        for (auto actionParam : tcAction->actionParams) {
+                            if (actionParam->paramName == param->name.originalName) {
+                                defaultParam->setParamDetail(actionParam);
+                            }
+                        }
+                        auto defaultArg = methodexp->arguments->at(i++);
+                        if (auto constVal = defaultArg->expression->to<IR::Constant>()) {
+                            if (!isTCMayOverride)
+                                defaultParam->setDefaultValue(
+                                    Util::toString(constVal->value, 0, true, constVal->base));
+                            tabledef->defaultMissActionParams.push_back(defaultParam);
+                        }
+                    }
+                } else {
+                    if (isTCMayOverride)
+                        ::warning(ErrorType::WARN_INVALID,
+                                  "%1% annotation cannot be used with default_action with "
+                                  "directional parameters",
+                                  overrideAnno);
+                }
             }
         }
     }
@@ -374,13 +419,13 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
                 if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                     isTableOnly = true;
                 }
-                if (anno->name == ParseTCAnnotations::default_hit) {
+                if (anno->name == ParseTCAnnotations::defaultHit) {
                     isDefaultHit = true;
                     defaultHit++;
                     auto adecl = refMap->getDeclaration(action->getPath(), true);
                     defaultActionName = externalName(adecl);
                 }
-                if (anno->name == ParseTCAnnotations::default_hit_const) {
+                if (anno->name == ParseTCAnnotations::defaultHitConst) {
                     isDefaultHitConst = true;
                     defaultHitConst++;
                     auto adecl = refMap->getDeclaration(action->getPath(), true);
@@ -524,7 +569,6 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
 void ConvertToBackendIR::postorder(const IR::P4Program *p) {
     if (p != nullptr) {
         tcPipeline->setPipelineName(pipelineName);
-        tcPipeline->setPipelineId(TC::DEFAULT_PIPELINE_ID);
         tcPipeline->setNumTables(tableCount);
     }
 }

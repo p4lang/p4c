@@ -21,11 +21,10 @@ limitations under the License.
 #ifndef LIB_SOURCE_FILE_H_
 #define LIB_SOURCE_FILE_H_
 
+#include <map>
 #include <vector>
 
 #include "cstring.h"
-#include "map.h"
-#include "stringref.h"
 
 // GTest
 #ifdef P4C_GTEST_ENABLED
@@ -40,7 +39,7 @@ class IHasDbPrint {
  public:
     virtual void dbprint(std::ostream &out) const = 0;
     void print() const;  // useful in the debugger
-    virtual ~IHasDbPrint() {}
+    virtual ~IHasDbPrint() = default;
 };
 
 namespace Util {
@@ -302,9 +301,9 @@ class InputSources final {
 
  private:
     /// Append this text to the last line; must not contain newlines
-    void appendToLastLine(StringRef text);
+    void appendToLastLine(std::string_view text);
     /// Append a newline and start a new line
-    void appendNewline(StringRef newline);
+    void appendNewline(std::string_view newline);
 
     /// Input program that is being currently compiled; there can be only one.
     bool sealed;
@@ -319,6 +318,6 @@ class InputSources final {
 
 }  // namespace Util
 
-inline void dbprint(const IHasDbPrint *o) { o->dbprint(std::cout); }
+void dbprint(const IHasDbPrint *o);
 
 #endif /* LIB_SOURCE_FILE_H_ */

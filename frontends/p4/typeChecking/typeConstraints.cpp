@@ -16,6 +16,10 @@ limitations under the License.
 
 #include "typeConstraints.h"
 
+#include <absl/strings/str_cat.h>
+#include <absl/strings/str_join.h>
+#include <absl/strings/str_split.h>
+
 #include "typeUnification.h"
 
 namespace P4 {
@@ -109,6 +113,70 @@ void TypeConstraints::dbprint(std::ostream &out) const {
         out << std::endl << "Constraints: ";
         for (auto c : constraints) out << std::endl << c;
     }
+}
+
+std::string TypeConstraint::localError(Explain *explainer) const {
+    if (errFormat.isNullOrEmpty()) return "";
+
+    std::string message, explanation;
+    boost::format fmt = boost::format(errFormat);
+    switch (errArguments.size()) {
+        case 0:
+            message = boost::str(fmt);
+            break;
+        case 1:
+            absl::StrAppend(&explanation, explain(0, explainer));
+            message = ::error_helper(fmt, errArguments.at(0)).toString();
+            break;
+        case 2:
+            absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer));
+            message = ::error_helper(fmt, errArguments.at(0), errArguments.at(1)).toString();
+            break;
+        case 3:
+            absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer),
+                            explain(2, explainer));
+            message =
+                ::error_helper(fmt, errArguments.at(0), errArguments.at(1), errArguments.at(2))
+                    .toString();
+            break;
+        case 4:
+            absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer),
+                            explain(2, explainer), explain(3, explainer));
+            message = ::error_helper(fmt, errArguments.at(0), errArguments.at(1),
+                                     errArguments.at(2), errArguments.at(3))
+                          .toString();
+            break;
+        default:
+            BUG("Unexpected argument count for error message");
+    }
+    return absl::StrCat(message, explanation);
+}
+
+bool TypeConstraint::reportErrorImpl(const TypeVariableSubstitution *subst,
+                                     std::string message) const {
+    const auto *o = origin;
+    const auto *constraint = this;
+
+    Explain explainer(subst);
+    while (constraint) {
+        std::string local = constraint->localError(&explainer);
+        if (!local.empty()) absl::StrAppend(&message, "---- Originating from:\n", local);
+        o = constraint->origin;
+        constraint = constraint->derivedFrom;
+    }
+
+    // Indent each string in the message
+    std::vector<std::string_view> lines = absl::StrSplit(message, '\n');
+    bool lastIsEmpty = lines.back().empty();
+    if (lastIsEmpty)
+        // We don't want to indent an empty line.
+        lines.pop_back();
+    message = absl::StrJoin(lines, "\n  ");
+    if (lastIsEmpty) message += "\n";
+
+    CHECK_NULL(o);
+    ::errorWithSuffix(ErrorType::ERR_TYPE_ERROR, "'%1%'", message.c_str(), o);
+    return false;
 }
 
 }  // namespace P4

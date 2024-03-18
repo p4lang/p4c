@@ -16,8 +16,6 @@ limitations under the License.
 
 #include "typeMap.h"
 
-#include "lib/map.h"
-
 namespace P4 {
 
 bool TypeMap::typeIsEmpty(const IR::Type *type) const {
@@ -101,8 +99,8 @@ void TypeMap::checkPrecondition(const IR::Node *element, const IR::Type *type) c
 
 void TypeMap::setType(const IR::Node *element, const IR::Type *type) {
     checkPrecondition(element, type);
-    auto it = typeMap.find(element);
-    if (it != typeMap.end()) {
+    auto [it, inserted] = typeMap.emplace(element, type);
+    if (!inserted) {
         const IR::Type *existingType = it->second;
         if (!implicitlyConvertibleTo(type, existingType))
             BUG("Changing type of %1% in type map from %2% to %3%", dbp(element), dbp(existingType),
@@ -110,12 +108,11 @@ void TypeMap::setType(const IR::Node *element, const IR::Type *type) {
         return;
     }
     LOG3("setType " << dbp(element) << " => " << dbp(type));
-    typeMap.emplace(element, type);
 }
 
 const IR::Type *TypeMap::getType(const IR::Node *element, bool notNull) const {
     CHECK_NULL(element);
-    auto result = get(typeMap, element);
+    const auto *result = get(typeMap, element);
     LOG4("Looking up type for " << dbp(element) << " => " << dbp(result));
     if (notNull && result == nullptr)
         BUG_CHECK(errorCount() > 0, "Could not find type for %1%", dbp(element));
@@ -126,8 +123,9 @@ const IR::Type *TypeMap::getType(const IR::Node *element, bool notNull) const {
 const IR::Type *TypeMap::getTypeType(const IR::Node *element, bool notNull) const {
     CHECK_NULL(element);
     auto result = getType(element, notNull);
-    BUG_CHECK(result->is<IR::Type_Type>(), "%1%: expected a TypeType", result);
-    return result->to<IR::Type_Type>()->type;
+    auto typeType = result->to<IR::Type_Type>();
+    BUG_CHECK(typeType, "%1%: expected a TypeType", result);
+    return typeType->type;
 }
 
 void TypeMap::addSubstitutions(const TypeVariableSubstitution *tvs) {

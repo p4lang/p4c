@@ -17,9 +17,11 @@ limitations under the License.
 #ifndef FRONTENDS_P4_TYPEMAP_H_
 #define FRONTENDS_P4_TYPEMAP_H_
 
+#include <absl/container/flat_hash_map.h>
+#include <absl/container/flat_hash_set.h>
+
 #include "frontends/common/programMap.h"
 #include "frontends/p4/typeChecking/typeSubstitution.h"
-#include "lib/ordered_set.h"
 
 namespace P4 {
 /**
@@ -38,7 +40,6 @@ Objects that have a type in the map:
 - type declarations - map name to the actual type
 */
 class TypeMap final : public ProgramMap {
- protected:
     // We want to have the same canonical type for two
     // different tuples, lists, stacks, or p4lists with the same signature.
     std::vector<const IR::Type *> canonicalTuples;
@@ -47,13 +48,13 @@ class TypeMap final : public ProgramMap {
     std::vector<const IR::Type *> canonicalLists;
 
     // Map each node to its canonical type
-    ordered_map<const IR::Node *, const IR::Type *> typeMap;
+    absl::flat_hash_map<const IR::Node *, const IR::Type *, Util::Hash> typeMap;
     // All left-values in the program.
-    ordered_set<const IR::Expression *> leftValues;
+    absl::flat_hash_set<const IR::Expression *, Util::Hash> leftValues;
     // All compile-time constants.  A compile-time constant
     // is not necessarily a constant - it could be a directionless
     // parameter as well.
-    ordered_set<const IR::Expression *> constants;
+    absl::flat_hash_set<const IR::Expression *, Util::Hash> constants;
     // For each type variable in the program the actual
     // type that is substituted for it.
     TypeVariableSubstitution allTypeVariables;

@@ -104,7 +104,6 @@ bool TestBackEnd::run(const FinalState &state) {
         auto concolicOptState = state.computeConcolicState(*resolvedConcolicVariables);
         if (!concolicOptState.has_value()) {
             testCount++;
-            printPerformanceReport(std::nullopt);
             return needsToTerminate(testCount);
         }
         auto replacedState = concolicOptState.value().get();
@@ -125,7 +124,6 @@ bool TestBackEnd::run(const FinalState &state) {
         abort = printTestInfo(executionState, testInfo, outputPortExpr);
         if (abort) {
             testCount++;
-            printPerformanceReport(std::nullopt);
             return needsToTerminate(testCount);
         }
         const auto *testSpec = createTestSpec(executionState, &finalModel, testInfo);
@@ -175,12 +173,14 @@ bool TestBackEnd::run(const FinalState &state) {
 
         printTraces("============ End Test %1% ============\n", testCount);
         P4::Coverage::printCoverageReport(coverableNodes, visitedNodes);
-        printPerformanceReport(std::nullopt);
 
         // If MAX_NODE_COVERAGE is enabled, terminate early if we hit max node coverage already.
         if (testgenOptions.stopMetric == "MAX_NODE_COVERAGE" && coverage == 1.0) {
             return true;
         }
+#ifdef P4TESTGEN_PRINT_PERFORMANCE_PER_TEST
+        printPerformanceReport(std::nullopt);
+#endif
         return needsToTerminate(testCount);
     }
 }

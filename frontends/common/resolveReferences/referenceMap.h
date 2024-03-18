@@ -17,11 +17,13 @@ limitations under the License.
 #ifndef COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
 #define COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
 
+#include <absl/container/flat_hash_map.h>
+#include <absl/container/flat_hash_set.h>
+
 #include "frontends/common/programMap.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
 #include "lib/cstring.h"
-#include "lib/map.h"
 
 namespace P4 {
 
@@ -34,7 +36,7 @@ class NameGenerator {
 class MinimalNameGenerator : public NameGenerator, public Inspector {
     /// All names used in the program. Key is a name, value represents how many times
     /// this name was used as a base for newly generated unique names.
-    std::unordered_map<cstring, int> usedNames;
+    absl::flat_hash_map<cstring, int, Util::Hash> usedNames;
     void postorder(const IR::Path *p) override { usedName(p->name.name); }
     void postorder(const IR::Type_Declaration *t) override { usedName(t->name.name); }
     void postorder(const IR::Declaration *d) override { usedName(d->name.name); }
@@ -67,17 +69,17 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     bool isv1;
 
     /// Maps paths in the program to declarations.
-    ordered_map<const IR::Path *, const IR::IDeclaration *> pathToDeclaration;
+    absl::flat_hash_map<const IR::Path *, const IR::IDeclaration *, Util::Hash> pathToDeclaration;
 
     /// Set containing all declarations in the program.
-    std::set<const IR::IDeclaration *> used;
+    absl::flat_hash_set<const IR::IDeclaration *, Util::Hash> used;
 
     /// Map from `This` to declarations (an experimental feature).
-    std::map<const IR::This *, const IR::IDeclaration *> thisToDeclaration;
+    absl::flat_hash_map<const IR::This *, const IR::IDeclaration *, Util::Hash> thisToDeclaration;
 
     /// All names used in the program. Key is a name, value represents how many times
     /// this name was used as a base for newly generated unique names.
-    std::unordered_map<cstring, int> usedNames;
+    absl::flat_hash_map<cstring, int, Util::Hash> usedNames;
 
  public:
     ReferenceMap();
@@ -116,7 +118,7 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     bool isUsed(const IR::IDeclaration *decl) const { return used.count(decl) > 0; }
 
     /// Indicate that @p name is used in the program.
-    void usedName(cstring name) { usedNames.insert({name, 0}); }
+    void usedName(cstring name) { usedNames.emplace(name, 0); }
 };
 
 }  // namespace P4

@@ -38,7 +38,7 @@ static inline void *memrchr(const char *s, int c, size_t n) {
  * to be used with care.  StringRefs should in general have short lifetimes, and not be
  * stored in other long-lived objects. */
 
-struct StringRef {
+[[deprecated("Use std::string_view instead")]] struct StringRef {
     const char *p;
     size_t len;
     StringRef() : p(0), len(0) {}

@@ -25,7 +25,6 @@ limitations under the License.
 
 #include "big_int_util.h"
 #include "cstring.h"
-#include "stringref.h"
 
 // convert values to cstrings
 namespace Util {
@@ -45,28 +44,28 @@ class HasToString final {
     enum { value = sizeof(func<T>(0)) == sizeof(char) };
 };
 
-template <typename T, typename = decltype(std::to_string((T)0))>
+template <typename T, typename = decltype(std::to_string(std::declval<T>()))>
 cstring toString(T value) {
     return std::to_string(value);
 }
 
 template <typename T>
-auto toString(const T &value) -> typename std::enable_if<HasToString<T>::value, cstring>::type {
+auto toString(const T &value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
     return value.toString();
 }
 
 template <typename T>
-auto toString(T &value) -> typename std::enable_if<HasToString<T>::value, cstring>::type {
+auto toString(T &value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
     return value.toString();
 }
 
 template <typename T>
-auto toString(const T *value) -> typename std::enable_if<HasToString<T>::value, cstring>::type {
+auto toString(const T *value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
     return value->toString();
 }
 
 template <typename T>
-auto toString(T *value) -> typename std::enable_if<HasToString<T>::value, cstring>::type {
+auto toString(T *value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
     return value->toString();
 }
 
@@ -74,7 +73,7 @@ cstring toString(bool value);
 cstring toString(std::string value);
 cstring toString(const char *value);
 cstring toString(cstring value);
-cstring toString(StringRef value);
+cstring toString(std::string_view value);
 /// A width of zero indicates that no width should be displayed.
 cstring toString(const big_int value, unsigned width, bool sign, unsigned int base = 10);
 cstring toString(const void *value);

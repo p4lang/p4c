@@ -79,7 +79,7 @@ set (CONTROLPLANE_SRCS
   p4RuntimeSymbolTable.cpp
   typeSpecConverter.cpp
   bfruntime.cpp
-  )
+)
 
 set (CONTROLPLANE_HDRS
   addMissingIds.h
@@ -93,22 +93,35 @@ set (CONTROLPLANE_HDRS
   p4RuntimeTypes.h
   typeSpecConverter.h
   bfruntime.h
-  )
+)
 
 add_library(controlplane-gen OBJECT ${P4RUNTIME_GEN_SRCS})
+
 target_include_directories(controlplane-gen
+  # TODO(https://github.com/p4lang/p4c/issues/4477):
+  # We should not need this, but because of the way managed includes and
+  # libraries for Protobuf we need to explicitly add the include directories here.
   SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS}
-)
-target_link_libraries (controlplane-gen PUBLIC ${Protobuf_LIBRARY})
-# Needed for the correct import of google/status.pb.cc
-target_include_directories(
-  controlplane-gen PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+  # Needed for the correct import of google/status.pb.cc
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
 )
 
+target_link_libraries(controlplane-gen PUBLIC ${Protobuf_LIBRARY} PRIVATE absl::log)
 
-# Silence various warnings as the root issue is out of our control, example https://github.com/protocolbuffers/protobuf/issues/7140
-set_source_files_properties (${P4RUNTIME_GEN_SRCS} {$P4RUNTIME_GEN_HDRS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-error")
+# Silence various warnings as the root issue is out of our control, example
+# https://github.com/protocolbuffers/protobuf/issues/7140
+set_source_files_properties(
+  ${P4RUNTIME_GEN_SRCS} {$P4RUNTIME_GEN_HDRS}
+  PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-error"
+)
 
 add_library(controlplane STATIC ${CONTROLPLANE_SRCS})
-target_link_libraries(controlplane ${CMAKE_THREAD_LIBS_INIT} controlplane-gen)
-add_dependencies(controlplane mkP4configdir ir-generated controlplane-gen frontend-parser-gen)
+target_link_libraries(controlplane
+  # Export Protobuf includes with controlplane-gen.
+  PUBLIC controlplane-gen
+  # Required for the generated parser and the Abseil includes.
+  PRIVATE frontend
+  PRIVATE absl::strings
+)
+
+add_dependencies(controlplane mkP4configdir)

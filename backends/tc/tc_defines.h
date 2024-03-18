@@ -23,7 +23,6 @@ inline constexpr auto DEFAULT_TABLE_ENTRIES = 2048;
 inline constexpr auto DEFAULT_KEY_MASK = 8;
 inline constexpr auto PORTID_BITWIDTH = 32;
 inline constexpr auto DEFAULT_KEY_ID = 1;
-inline constexpr auto DEFAULT_PIPELINE_ID = 1;
 inline constexpr auto DEFAULT_METADATA_ID = 1;
 inline constexpr auto BITWIDTH = 32;
 

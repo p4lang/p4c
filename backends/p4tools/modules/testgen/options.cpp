@@ -113,9 +113,8 @@ TestgenOptions::TestgenOptions()
             // Each element is then again split by colon (':').
             std::stringstream argStream(arg);
             while (argStream.good()) {
-                std::string substr;
-                std::getline(argStream, substr, ',');
-                auto rangeStr = std::string(arg);
+                std::string rangeStr;
+                std::getline(argStream, rangeStr, ',');
                 size_t portStr = rangeStr.find_first_of(':');
                 try {
                     auto loPortStr = rangeStr.substr(0, portStr);
@@ -153,6 +152,22 @@ TestgenOptions::TestgenOptions()
         "Ranges can overlap, but lo must always be below hi. If the value is too large for the "
         "target-specific port variable, it will overflow. Default behavior is delegated to the "
         "test back end. Some test back ends may restrict the available port ranges.");
+
+    registerOption(
+        "--skip-control-plane-entities", "skippedControlPlaneEntities",
+        [this](const char *arg) {
+            // Convert the input into a StringStream and split by comma (',').
+            std::stringstream argStream(arg);
+            while (argStream.good()) {
+                std::string substr;
+                std::getline(argStream, substr, ',');
+                skippedControlPlaneEntities.emplace(substr);
+            }
+            return true;
+        },
+        "Specify the set of control plane entities for which P4Testgen should not generate a "
+        "configuration for. For example, if a particular table is in the set, P4Testgen will "
+        "assume that only the default action or constant entries can be executed. ");
 
     registerOption(
         "--out-dir", "outputDir",

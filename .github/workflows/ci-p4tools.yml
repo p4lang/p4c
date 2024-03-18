@@ -2,11 +2,11 @@ name: "test-tools"
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   merge_group:
-    branches: [ main ]
+    branches: [main]
 
 # Cancel any preceding run on the pull request.
 concurrency:
@@ -16,30 +16,29 @@ concurrency:
 jobs:
   # Build and test p4tools on Ubuntu 22.04.
   build-and-test-tools:
-    strategy:
-      fail-fast: false
     runs-on: ubuntu-22.04
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ON
       ENABLE_TEST_TOOLS: ON
+      BUILD_GENERATOR: Ninja
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: ccache
-      uses: hendrikmuhs/ccache-action@v1
-      with:
-        key: test-tools-${{ runner.os }}
-        max-size: 1000M
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: test-tools-${{ runner.os }}
+          max-size: 1000M
 
-    - name: Build (Ubuntu 22.04)
-      run: |
-        tools/ci-build.sh
+      - name: Build (Ubuntu 22.04)
+        run: |
+          tools/ci-build.sh
 
-    - name: Run tests (Ubuntu 22.04)
-      # Need to use sudo for the eBPF kernel tests.
-      run: sudo -E ctest -R testgen- --output-on-failure --schedule-random
-      working-directory: ./build
+      - name: Run tests (Ubuntu 22.04)
+        # Need to use sudo for the eBPF kernel tests.
+        run: sudo -E ctest -R testgen- --output-on-failure --schedule-random
+        working-directory: ./build

@@ -19,8 +19,10 @@ limitations under the License.
 #include <stdlib.h>
 #include <time.h>
 
+#include <absl/container/flat_hash_map.h>
+
 #include "ir/ir-generated.h"
-#include "lib/source_file.h"
+#include "lib/hash.h"
 
 #if HAVE_LIBGC
 #include <gc/gc.h>
@@ -54,10 +56,14 @@ class Visitor::ChangeTracker {
         bool visitOnce;
         const IR::Node *result;
     };
-    typedef std::unordered_map<const IR::Node *, visit_info_t> visited_t;
+    using visited_t = absl::flat_hash_map<const IR::Node *, visit_info_t, Util::Hash>;
     visited_t visited;
 
  public:
+    ChangeTracker()
+        : visited(16) {}  // Pre-allocate 16 slots as usually these maps are small, but we do create
+                          // lots of them. This saves quite some time for rehashes
+
     /** Begin tracking @n during a visiting pass.  Use `finish(@n)` to mark @n as
      * visited once the pass completes.
      *
@@ -130,7 +136,9 @@ class Visitor::ChangeTracker {
     void revisit_visited() {
         for (auto it = visited.begin(); it != visited.end();) {
             if (!it->second.visit_in_progress)
-                it = visited.erase(it);
+                // `visited` is abseil map, therefore erase does not return iterator, use
+                // post-increment
+                visited.erase(it++);
             else
                 ++it;
         }
@@ -170,6 +178,17 @@ class Visitor::ChangeTracker {
         return it->second.result;
     }
 
+    /** Produce the final result of visiting @n.
+     *
+     * @return The ultimate result of visiting @n, or `nullptr` if `finish(@n)` has not
+     * been invoked.
+     */
+    const IR::Node *finalResult(const IR::Node *n) const {
+        auto it = visited.find(n);
+        bool done = it != visited.end() && !it->second.visit_in_progress && it->second.visitOnce;
+        return done ? it->second.result : nullptr;
+    }
+
     void visitOnce(const IR::Node *n) {
         auto it = visited.find(n);
         if (it == visited.end()) BUG("visitor state tracker corrupted");
@@ -195,16 +214,22 @@ class Visitor::Tracker {
     struct info_t {
         bool done, visitOnce;
     };
-    typedef std::unordered_map<const IR::Node *, info_t> visited_t;
+    using visited_t = absl::flat_hash_map<const IR::Node *, info_t, Util::Hash>;
     visited_t visited;
 
  public:
+    Tracker()
+        : visited(16) {}  // Pre-allocate 16 slots as usually these maps are small, but we do create
+                          // lots of them. This saves quite some time for rehashes
+
     /** Forget nodes that have already been visited, allowing them to be visited
      * again. */
     void revisit_visited() {
         for (auto it = visited.begin(); it != visited.end();) {
             if (it->second.done)
-                it = visited.erase(it);
+                // `visited` is abseil map, therefore erase does not return iterator, use
+                // post-increment
+                visited.erase(it++);
             else
                 ++it;
         }
@@ -435,7 +460,7 @@ namespace {
 class ForwardChildren : public Visitor {
     const ChangeTracker &visited;
     const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) {
-        if (visited.done(n)) return visited.result(n);
+        if (const auto *result = visited.finalResult(n)) return result;
         return n;
     }
 
@@ -821,8 +846,8 @@ std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_
     out << Brief;
     for (auto &i : info.parents) {
         out << Log::endl
-            << "  " << *i.first << " [" << i.first->id << "] "
-            << "exist=" << i.second.exist << " visited=" << i.second.visited;
+            << "  " << *i.first << " [" << i.first->id << "] " << "exist=" << i.second.exist
+            << " visited=" << i.second.visited;
     }
     dbsetflags(out, flags);
 #endif

@@ -21,6 +21,11 @@ limitations under the License.
 
 namespace P4 {
 
+RemoveUnusedDeclarations *RemoveUnusedPolicy::getRemoveUnusedDeclarationsPass(
+    const ReferenceMap *refMap, bool warn) const {
+    return new RemoveUnusedDeclarations(refMap, warn);
+}
+
 Visitor::profile_t RemoveUnusedDeclarations::init_apply(const IR::Node *node) {
     LOG4("Reference map " << refMap);
     return Transform::init_apply(node);
@@ -54,6 +59,9 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::Type_SerEnum *type) {
 const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Control *cont) {
     auto orig = getOriginal<IR::P4Control>();
     if (!refMap->isUsed(orig)) {
+        if (giveWarning(orig))
+            warn(ErrorType::WARN_UNUSED, "Control %2% is not used; removing", cont,
+                 cont->externalName());
         LOG3("Removing " << cont << dbp(orig));
         prune();
         return nullptr;
@@ -68,6 +76,9 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Control *cont) {
 const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Parser *parser) {
     auto orig = getOriginal<IR::P4Parser>();
     if (!refMap->isUsed(orig)) {
+        if (giveWarning(orig))
+            warn(ErrorType::WARN_UNUSED, "Parser %2% is not used; removing", parser,
+                 parser->externalName());
         LOG3("Removing " << parser << dbp(orig));
         prune();
         return nullptr;

@@ -1,0 +1,15 @@
+diff --git a/absl/base/BUILD.bazel b/absl/base/BUILD.bazel
+index 0eb735da..5dd4aa67 100644
+--- a/absl/base/BUILD.bazel
++++ b/absl/base/BUILD.bazel
+@@ -137,6 +137,10 @@ cc_library(
+         "policy_checks.h",
+     ],
+     copts = ABSL_DEFAULT_COPTS,
++    # This library is the root of the absl dependency tree.
++    # If we add this `includes` path here, then all absl headers
++    # can be included via angle brackets in external projects.
++    includes = ["../.."],
+     linkopts = ABSL_DEFAULT_LINKOPTS,
+ )
+ 

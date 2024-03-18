@@ -572,7 +572,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto &externInstance = state.findDecl(externRef);
              // Retrieve the register state from the object store. If it is already present, just
              // cast the object to the correct class and retrieve the current value according to the
-             // index. If the register has not been added had, create a new register object.
+             // index. If the register has not been added yet, create a new register object.
              const auto *registerState =
                  state.getTestObject("registervalues", externInstance->controlPlaneName(), false);
              const Bmv2V1ModelRegisterValue *registerValue = nullptr;
