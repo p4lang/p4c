@@ -12,7 +12,7 @@
         {
           "id" : 1,
           "name" : "hdr.ipv4.dstAddr",
-          "type" : "bit32",
+          "type" : "ipv4",
           "match_type" : "exact",
           "bitwidth" : 32
         },

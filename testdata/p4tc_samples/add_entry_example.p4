@@ -4,8 +4,8 @@
 typedef bit<48>  EthernetAddress;
 
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
+    @tc_type("macaddr") EthernetAddress dstAddr;
+    @tc_type("macaddr") EthernetAddress srcAddr;
     bit<16>         etherType;
 }
 
@@ -90,7 +90,7 @@ control MainControlImpl(
 
     table ipv4_tbl_1 {
         key = {
-            hdr.ipv4.dstAddr : exact;
+            hdr.ipv4.dstAddr : exact @tc_type ("ipv4");
             istd.input_port : exact;
         }
         actions = {
@@ -116,7 +116,6 @@ control MainControlImpl(
             default_route_drop;
         }
         default_action = next_hop1;
-        add_on_miss = true;
     }
 
     apply {

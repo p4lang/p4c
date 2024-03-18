@@ -1,0 +1,1 @@
+[--Wwarn=missing] warning: add_entry extern can only be used in an action of a table with property add_on_miss equals to true.

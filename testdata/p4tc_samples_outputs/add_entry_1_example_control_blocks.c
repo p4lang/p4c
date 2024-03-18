@@ -13,7 +13,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP 2
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_SEND_NH 1
-#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 3
+#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP 3
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
     unsigned int action;
@@ -27,7 +27,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
             u64 smac;
         } MainControlImpl_send_nh;
         struct {
-        } MainControlImpl_default_route_drop;
+        } MainControlImpl_dflt_route_drop;
     } u;
 };
 
@@ -88,18 +88,14 @@ if (/* hdr->ipv4.isValid() */
                                 {
 /* add_entry(""send_nh"", {hdr->ethernet.srcAddr, hdr->ethernet.dstAddr}, 2) */
                                     struct p4tc_table_entry_act_bpf update_act_bpf = {};
-                                    struct act_param {
-                                        u64 param0;
-                                        u64 param1;
-                                    };
-                                    struct act_param* params = (struct act_param *) update_act_bpf.params;
-                                    params->param0 = hdr->ethernet.srcAddr;
-                                    params->param1 = hdr->ethernet.dstAddr;
-                                    update_act_bpf.act_id = 1;
+                                    struct MainControlImpl_ipv4_tbl_1_value *update_act_bpf_val = (struct MainControlImpl_ipv4_tbl_1_value*) &update_act_bpf;
+                                    update_act_bpf_val->u.MainControlImpl_send_nh.dmac = hdr->ethernet.srcAddr;
+                                    update_act_bpf_val->u.MainControlImpl_send_nh.smac = hdr->ethernet.dstAddr;
+                                    update_act_bpf.action = MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_SEND_NH;
 
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
-                                        .pipeid = 1,
+                                        .pipeid = p4tc_filter_fields.pipeid,
                                         .tblid = 1,
                                         .profile_id = 2
                                     };
@@ -112,7 +108,7 @@ if (/* hdr->ipv4.isValid() */
                                                                         hdr->ethernet.dstAddr = value->u.MainControlImpl_send_nh.dmac;
                                 }
                                 break;
-                            case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
+                            case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP: 
                                 {
 /* drop_packet() */
                                     drop_packet();
@@ -163,7 +159,6 @@ if (/* hdr->ipv4.isValid() */
                 return TC_ACT_SHOT;
             }
             
-            hdr->ethernet.dstAddr = htonll(hdr->ethernet.dstAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
@@ -178,7 +173,6 @@ if (/* hdr->ipv4.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = htonll(hdr->ethernet.srcAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];

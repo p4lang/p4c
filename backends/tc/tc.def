@@ -199,11 +199,13 @@ class TCTable {
     unsigned tableEntriesCount;
     unsigned numMask;
     unsigned matchType;
+    unsigned timerProfiles;
     TCAction defaultHitAction;
     bool isDefaultHitConst;
     TCAction defaultMissAction;
     optional safe_vector<TCDefaultActionParam> defaultMissActionParams;
     bool isDefaultMissConst;
+    bool isTableAddOnMiss;
     ordered_map<TCAction, unsigned> actionList;
     safe_vector<TCEntry> const_entries;
 
@@ -231,11 +233,17 @@ class TCTable {
     void setDefaultMissConst(bool i) {
         isDefaultMissConst = i;
     }
+    void setTableAddOnMiss() {
+        isTableAddOnMiss = true;
+    }
     void addAction(TCAction action, unsigned flag) {
         actionList.emplace(action, flag);
     }
     void addConstEntries(TCEntry entry) {
         const_entries.push_back(entry);
+    }
+    void addTimerProfiles(unsigned tp) {
+        timerProfiles = tp;
     }
     cstring printMatchType(unsigned matchType) const {
         cstring matchTypeString = "";
@@ -258,6 +266,7 @@ class TCTable {
         controlName = cN;
         pipelineName = pN;
         keySize = 0;
+        timerProfiles = 4;
         tableEntriesCount = TC::DEFAULT_TABLE_ENTRIES;
         numMask = TC::DEFAULT_KEY_MASK;
         matchType = TC::EXACT_TYPE;
@@ -265,6 +274,7 @@ class TCTable {
         defaultMissAction = nullptr;
         isDefaultHitConst = false;
         isDefaultMissConst = false;
+        isTableAddOnMiss = false;
     }
     toString {
         std::string tcTable = "";
@@ -275,6 +285,12 @@ class TCTable {
         tcTable += "\n\tkeysz " + Util::toString(keySize);
         tcTable += " nummasks " + Util::toString(numMask);
         tcTable += " tentries " + Util::toString(tableEntriesCount);
+        if (isTableAddOnMiss) {
+            tcTable += " permissions 0x3DE6";
+            if(timerProfiles > 4) {
+                tcTable += " num_timer_profiles " + timerProfiles;
+            }
+        }
 
         if (!actionList.empty()) {
             tcTable += " \\";

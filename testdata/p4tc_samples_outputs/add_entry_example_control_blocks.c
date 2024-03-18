@@ -104,11 +104,11 @@ if (/* hdr->ipv4.isValid() */
                                 {
 /* add_entry(""default_route_drop"", {}, 2) */
                                     struct p4tc_table_entry_act_bpf update_act_bpf = {};
-                                    update_act_bpf.act_id = 2;
+                                    update_act_bpf.action = MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP;
 
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
-                                        .pipeid = 1,
+                                        .pipeid = p4tc_filter_fields.pipeid,
                                         .tblid = 1,
                                         .profile_id = 2
                                     };
@@ -161,11 +161,11 @@ if (/* hdr->ipv4.isValid() */
                                 {
 /* add_entry(""default_route_drop"", {}, 2) */
                                     struct p4tc_table_entry_act_bpf update_act_bpf = {};
-                                    update_act_bpf.act_id = 2;
+                                    update_act_bpf.action = MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP;
 
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
-                                        .pipeid = 1,
+                                        .pipeid = p4tc_filter_fields.pipeid,
                                         .tblid = 2,
                                         .profile_id = 2
                                     };
@@ -223,7 +223,6 @@ if (/* hdr->ipv4.isValid() */
                 return TC_ACT_SHOT;
             }
             
-            hdr->ethernet.dstAddr = htonll(hdr->ethernet.dstAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
@@ -238,7 +237,6 @@ if (/* hdr->ipv4.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = htonll(hdr->ethernet.srcAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];

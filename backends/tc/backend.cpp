@@ -274,6 +274,11 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
     }
 }
 
+void ConvertToBackendIR::updateTimerProfiles(IR::TCTable *tabledef) {
+    if (options.timerProfiles > 4) {
+        tabledef->addTimerProfiles(options.timerProfiles);
+    }
+}
 void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *tabledef) {
     // Check if there are const entries.
     auto entriesList = t->getEntries();
@@ -544,6 +549,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         updateDefaultMissAction(t, tableDefinition);
         updateMatchType(t, tableDefinition);
         updateConstEntries(t, tableDefinition);
+        updateTimerProfiles(tableDefinition);
         tcPipeline->addTableDefinition(tableDefinition);
     }
 }
