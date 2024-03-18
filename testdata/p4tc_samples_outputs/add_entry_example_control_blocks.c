@@ -111,7 +111,7 @@ if (/* hdr->ipv4.isValid() */
                                 {
 /* add_entry(""default_route_drop"", {}, 2) */
                                     struct p4tc_table_entry_act_bpf update_act_bpf = {};
-                                    update_act_bpf.action = MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP;
+                                    update_act_bpf_val->action = MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP;
 
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
@@ -169,7 +169,7 @@ if (/* hdr->ipv4.isValid() */
                                 {
 /* add_entry(""default_route_drop"", {}, 2) */
                                     struct p4tc_table_entry_act_bpf update_act_bpf = {};
-                                    update_act_bpf.action = MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP;
+                                    update_act_bpf_val->action = MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP;
 
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {

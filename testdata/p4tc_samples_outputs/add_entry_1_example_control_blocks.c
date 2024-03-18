@@ -95,7 +95,7 @@ if (/* hdr->ipv4.isValid() */
                                     struct MainControlImpl_ipv4_tbl_1_value *update_act_bpf_val = (struct MainControlImpl_ipv4_tbl_1_value*) &update_act_bpf;
                                     update_act_bpf_val->u.MainControlImpl_send_nh.dmac = hdr->ethernet.dstAddr;
                                     update_act_bpf_val->u.MainControlImpl_send_nh.smac = hdr->ethernet.srcAddr;
-                                    update_act_bpf.action = MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_SEND_NH;
+                                    update_act_bpf_val->action = MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_SEND_NH;
 
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {

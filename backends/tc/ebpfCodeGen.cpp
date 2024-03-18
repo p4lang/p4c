@@ -1613,7 +1613,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
                     }
                 }
                 builder->emitIndent();
-                builder->appendFormat("update_act_bpf.action = %s;",
+                builder->appendFormat("update_act_bpf_val->action = %s;",
                                       table->p4ActionToActionIDName(action));
                 builder->newline();
             } else {
