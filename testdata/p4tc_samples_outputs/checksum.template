@@ -3,7 +3,7 @@
 set -e
 
 TC="tc"
-$TC p4template create pipeline/checksum pipeid 1 numtables 1
+$TC p4template create pipeline/checksum numtables 1
 
 $TC p4template create action/checksum/ingress/send_nh actid 1 \
 	param port_id type dev \

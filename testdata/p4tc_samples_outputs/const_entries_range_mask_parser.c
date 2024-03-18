@@ -1,5 +1,7 @@
 #include "const_entries_range_mask_parser.h"
 
+struct p4tc_filter_fields p4tc_filter_fields;
+
 static __always_inline int run_parser(struct __sk_buff *skb, struct Header_t *h, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
@@ -33,19 +35,19 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct Header_t *h,
                 goto reject;
             }
 
-            __builtin_memcpy(&h->h.e, pkt + BYTES(ebpf_packetOffsetInBits), 1);
+            h->h.e = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 8;
 
-            __builtin_memcpy(&h->h.t, pkt + BYTES(ebpf_packetOffsetInBits), 2);
+            h->h.t = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
-            __builtin_memcpy(&h->h.l, pkt + BYTES(ebpf_packetOffsetInBits), 1);
+            h->h.l = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 8;
 
-            __builtin_memcpy(&h->h.r, pkt + BYTES(ebpf_packetOffsetInBits), 1);
+            h->h.r = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 8;
 
-            __builtin_memcpy(&h->h.v, pkt + BYTES(ebpf_packetOffsetInBits), 1);
+            h->h.v = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 8;
 
 

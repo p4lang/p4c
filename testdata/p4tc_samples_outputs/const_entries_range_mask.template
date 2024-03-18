@@ -3,7 +3,7 @@
 set -e
 
 TC="tc"
-$TC p4template create pipeline/const_entries_range_mask pipeid 1 numtables 1
+$TC p4template create pipeline/const_entries_range_mask numtables 1
 
 $TC p4template create action/const_entries_range_mask/MainControlImpl/a actid 1
 $TC p4template update action/const_entries_range_mask/MainControlImpl/a state active

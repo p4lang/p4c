@@ -1,5 +1,7 @@
 #include "test_ipv6_example_parser.h"
 
+struct p4tc_filter_fields p4tc_filter_fields;
+
 static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
@@ -36,19 +38,19 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             hdr->ipv6.version = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits)) >> 4) & EBPF_MASK(u8, 4));
             ebpf_packetOffsetInBits += 4;
 
-            __builtin_memcpy(&hdr->ipv6.trafficClass, pkt + BYTES(ebpf_packetOffsetInBits), 1);
+            hdr->ipv6.trafficClass = (u8)((load_half(pkt, BYTES(ebpf_packetOffsetInBits)) >> 4) & EBPF_MASK(u8, 8));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->ipv6.flowLabel = (u32)((load_word_ne(pkt, BYTES(ebpf_packetOffsetInBits)) >> 8) & EBPF_MASK(u32, 20));
+            hdr->ipv6.flowLabel = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits)) >> 8) & EBPF_MASK(u32, 20));
             ebpf_packetOffsetInBits += 20;
 
-            __builtin_memcpy(&hdr->ipv6.payloadLength, pkt + BYTES(ebpf_packetOffsetInBits), 2);
+            hdr->ipv6.payloadLength = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
-            __builtin_memcpy(&hdr->ipv6.nextHeader, pkt + BYTES(ebpf_packetOffsetInBits), 1);
+            hdr->ipv6.nextHeader = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 8;
 
-            __builtin_memcpy(&hdr->ipv6.hopLimit, pkt + BYTES(ebpf_packetOffsetInBits), 1);
+            hdr->ipv6.hopLimit = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 8;
 
             hdr->ipv6.srcAddr[0] = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0) >> 0));
@@ -107,7 +109,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             __builtin_memcpy(&hdr->ethernet.srcAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
             ebpf_packetOffsetInBits += 48;
 
-            __builtin_memcpy(&hdr->ethernet.etherType, pkt + BYTES(ebpf_packetOffsetInBits), 2);
+            hdr->ethernet.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
 
@@ -116,7 +118,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
 
 ;
             u16 select_0;
-            select_0 = bpf_ntohs(hdr->ethernet.etherType);
+            select_0 = hdr->ethernet.etherType;
             if (select_0 == 0x86dd)goto parse_ipv6;
             if ((select_0 & 0x0) == (0x0 & 0x0))goto accept;
             else goto reject;

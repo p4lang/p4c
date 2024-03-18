@@ -54,6 +54,8 @@ void PNAEbpfGenerator::emitCommonPreamble(EBPF::CodeBuilder *builder) const {
 }
 
 void PNAEbpfGenerator::emitInternalStructures(EBPF::CodeBuilder *builder) const {
+    builder->appendLine("struct p4tc_filter_fields p4tc_filter_fields;");
+    builder->newline();
     builder->appendLine(
         "struct internal_metadata {\n"
         "    __u16 pkt_ether_type;\n"
@@ -95,6 +97,66 @@ void PNAEbpfGenerator::emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) con
     builder->blockEnd(false);
     builder->endOfStatement(true);
     builder->newline();
+}
+
+void PNAEbpfGenerator::emitP4TCFilterFields(EBPF::CodeBuilder *builder) const {
+    builder->append("struct p4tc_filter_fields ");
+    builder->blockStart();
+
+    builder->emitIndent();
+    builder->appendFormat("__u32 pipeid");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u32 handle");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u32 classid");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u32 chain");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u32 blockid");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__be16 proto");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("__u16 prio");
+    builder->endOfStatement(true);
+    emitP4TCActionParam(builder);
+    builder->blockEnd(false);
+    builder->endOfStatement(true);
+    builder->newline();
+}
+
+void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
+    std::vector<cstring> actionParamList;
+    for (auto table : tcIR->tcPipeline->tableDefs) {
+        if (table->isTcMayOverride) {
+            cstring tblName = table->getTableName();
+            cstring defaultActionName = table->defaultMissAction->getActionName();
+            auto actionNameStr = defaultActionName.c_str();
+            for (long unsigned int i = 0; i < defaultActionName.size(); i++) {
+                if (actionNameStr[i] == '/') {
+                    defaultActionName = defaultActionName.substr(i + 1, defaultActionName.size());
+                    break;
+                }
+            }
+            for (auto param : table->defaultMissActionParams) {
+                cstring paramName = param->paramDetail->getParamName();
+                cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
+                auto itr = find(actionParamList.begin(), actionParamList.end(), placeholder);
+                if (itr == actionParamList.end()) {
+                    actionParamList.push_back(placeholder);
+                    cstring typeName = param->paramDetail->getParamType();
+                    builder->emitIndent();
+                    builder->appendFormat("%s %s", typeName, placeholder);
+                    builder->endOfStatement(true);
+                }
+            }
+        }
+    }
 }
 
 void PNAEbpfGenerator::emitPipelineInstances(EBPF::CodeBuilder *builder) const {
@@ -165,6 +227,8 @@ void PNAArchTC::emitParser(EBPF::CodeBuilder *builder) const {
     builder->appendFormat("#include \"%s\"", headerFile);
     builder->newline();
     builder->newline();
+    builder->appendLine("struct p4tc_filter_fields p4tc_filter_fields;");
+    builder->newline();
     pipeline->name = "tc-parse";
     pipeline->sectionName = "p4tc/parse";
     pipeline->functionName = pipeline->name.replace("-", "_") + "_func";
@@ -183,7 +247,7 @@ void PNAArchTC::emitHeader(EBPF::CodeBuilder *builder) const {
     PNAErrorCodesGen errorGen(builder);
     pipeline->program->apply(errorGen);
     emitGlobalHeadersMetadata(builder);
-    builder->newline();
+    emitP4TCFilterFields(builder);
     //  BPF map definitions.
     emitInstances(builder);
     EBPFHashAlgorithmTypeFactoryPNA::instance()->emitGlobals(builder);
@@ -233,6 +297,10 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->newline();
         builder->emitIndent();
         builder->appendFormat("unsigned %s = hdrMd->%s;", offsetVar.c_str(), offsetVar.c_str());
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("%s = %s + BYTES(%s);", headerStartVar.c_str(),
+                              packetStartVar.c_str(), offsetVar.c_str());
     }
     builder->newline();
     emitHeadersFromCPUMAP(builder);
@@ -528,41 +596,47 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     cstring msgStr;
     cstring fieldName = field->name.name;
 
+    bool noEndiannessConversion = false;
+    auto annolist = field->getAnnotations()->annotations;
+    for (auto anno : annolist) {
+        if (anno->name != ParseTCAnnotations::tcType) continue;
+        auto annoBody = anno->body;
+        for (auto annoVal : annoBody) {
+            if (annoVal->text == "macaddr" || annoVal->text == "ipv4" || annoVal->text == "ipv6") {
+                noEndiannessConversion = true;
+                break;
+            }
+        }
+    }
+
     msgStr = Util::printf_format("Parser: extracting field %s", fieldName);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
-    if (widthToExtract <= QWORD_EXTRACT) {
+    if (widthToExtract <= 64) {
         unsigned lastBitIndex = widthToExtract + alignment - 1;
         unsigned lastWordIndex = lastBitIndex / 8;
         unsigned wordsToRead = lastWordIndex + 1;
         unsigned loadSize;
 
         const char *helper = nullptr;
-        bool memcpy = false;
-        // If the width of field is multiple of 8. compiler copies the value via __builtin_memcpy
-        if (widthToExtract % BYTE_EXTRACT == 0) {
-            loadSize = widthToExtract;
-            memcpy = true;
+        if (wordsToRead <= 1) {
+            helper = "load_byte";
+            loadSize = 8;
+        } else if (wordsToRead <= 2) {
+            helper = "load_half";
+            loadSize = 16;
+        } else if (wordsToRead <= 4) {
+            helper = "load_word";
+            loadSize = 32;
         } else {
-            if (wordsToRead <= 1) {
-                helper = "load_byte";
-                loadSize = BYTE_EXTRACT;
-            } else if (wordsToRead <= 2) {
-                helper = "load_half_ne";
-                loadSize = WORD_EXTRACT;
-            } else if (wordsToRead <= 4) {
-                helper = "load_word_ne";
-                loadSize = DWORD_EXTRACT;
-            } else {
-                if (wordsToRead > QWORD_EXTRACT) BUG("Unexpected width %d", widthToExtract);
-                helper = "load_dword_ne";
-                loadSize = QWORD_EXTRACT;
-            }
+            if (wordsToRead > 64) BUG("Unexpected width %d", widthToExtract);
+            helper = "load_dword";
+            loadSize = 64;
         }
 
         unsigned shift = loadSize - alignment - widthToExtract;
         builder->emitIndent();
-        if (memcpy) {
+        if (noEndiannessConversion) {
             builder->appendFormat("__builtin_memcpy(&");
             visit(expr);
             builder->appendFormat(".%s, %s + BYTES(%s), %d)", fieldName,
@@ -613,7 +687,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         if (shift == 0)
             helper = "load_byte";
         else
-            helper = "load_half_ne";
+            helper = "load_half";
         auto bt = EBPF::EBPFTypeFactory::instance->create(IR::Type_Bits::get(8));
         unsigned bytes = ROUNDUP(widthToExtract, 8);
         for (unsigned i = 0; i < bytes; i++) {
@@ -642,7 +716,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
 
     // eBPF can pass 64 bits of data as one argument passed in 64 bit register,
     // so value of the field is printed only when it fits into that register
-    if (widthToExtract <= QWORD_EXTRACT) {
+    if (widthToExtract <= 64) {
         cstring exprStr = expr->toString();
         if (auto member = expr->to<IR::Member>()) {
             if (auto pathExpr = member->expr->to<IR::PathExpression>()) {
@@ -662,6 +736,34 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     }
 
     builder->newline();
+}
+
+void PnaStateTranslationVisitor::compileLookahead(const IR::Expression *destination) {
+    cstring msgStr = Util::printf_format("Parser: lookahead for %s %s",
+                                         state->parser->typeMap->getType(destination)->toString(),
+                                         destination->toString());
+    builder->target->emitTraceMessage(builder, msgStr.c_str());
+
+    builder->emitIndent();
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("u8* %s_save = %s", state->parser->program->headerStartVar.c_str(),
+                          state->parser->program->headerStartVar.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("unsigned %s_save = %s", state->parser->program->offsetVar.c_str(),
+                          state->parser->program->offsetVar.c_str());
+    builder->endOfStatement(true);
+    compileExtract(destination);
+    builder->emitIndent();
+    builder->appendFormat("%s = %s_save", state->parser->program->headerStartVar.c_str(),
+                          state->parser->program->headerStartVar.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("%s = %s_save", state->parser->program->offsetVar.c_str(),
+                          state->parser->program->offsetVar.c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
 }
 
 // =====================EBPFTablePNA=============================
@@ -753,6 +855,18 @@ void EBPFTablePNA::emitValueStructStructure(EBPF::CodeBuilder *builder) {
     builder->append("unsigned int action;");
     builder->newline();
 
+    builder->emitIndent();
+    builder->append("u32 hit:1,");
+    builder->newline();
+
+    builder->emitIndent();
+    builder->append("is_default_miss_act:1,");
+    builder->newline();
+
+    builder->emitIndent();
+    builder->append("is_default_hit_act:1;");
+    builder->newline();
+
     if (isTernaryTable()) {
         builder->emitIndent();
         builder->append("__u32 priority;");
@@ -819,10 +933,13 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
     builder->emitIndent();
     builder->appendFormat("switch (%s->action) ", valueName.c_str());
     builder->blockStart();
+    bool noActionGenerated = false;
 
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->checkedTo<IR::P4Action>();
+        if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name)
+            noActionGenerated = true;
         cstring name = EBPF::EBPFObject::externalName(action), msgStr, convStr;
         builder->emitIndent();
         cstring actionName = p4ActionToActionIDName(action);
@@ -836,7 +953,7 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
             auto etype = EBPF::EBPFTypeFactory::instance->create(param->type);
             unsigned width = etype->as<EBPF::IHasWidth>().widthInBits();
 
-            if (width <= QWORD_EXTRACT) {
+            if (width <= 64) {
                 convStr = Util::printf_format("(unsigned long long) (%s->u.%s.%s)", valueName, name,
                                               param->toString());
                 msgStr = Util::printf_format("Control: param %s=0x%%llx (%d bits)",
@@ -862,16 +979,22 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
         builder->appendLine("break;");
         builder->decreaseIndent();
     }
-
-    builder->emitIndent();
-    builder->appendLine("default:");
-    builder->increaseIndent();
-    builder->target->emitTraceMessage(builder, "Control: Invalid action type, aborting");
-
-    builder->emitIndent();
-    builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
-    builder->endOfStatement(true);
-    builder->decreaseIndent();
+    if (!noActionGenerated) {
+        cstring noActionName = P4::P4CoreLibrary::instance().noAction.name;
+        cstring tableInstance = dataMapName;
+        cstring actionName =
+            Util::printf_format("%s_ACT_%s", tableInstance.toUpper(), noActionName.toUpper());
+        builder->emitIndent();
+        builder->appendFormat("case %s: ", actionName);
+        builder->newline();
+        builder->increaseIndent();
+        builder->emitIndent();
+        builder->blockStart();
+        builder->blockEnd(true);
+        builder->emitIndent();
+        builder->appendLine("break;");
+        builder->decreaseIndent();
+    }
 
     builder->blockEnd(true);
 
@@ -883,13 +1006,8 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
 
     builder->blockEnd(false);
     builder->appendFormat(" else ");
-    if (dropOnNoMatchingEntryFound()) {
-        builder->target->emitTraceMessage(builder, "Control: Entry not found, aborting");
-        emitDefaultAction(builder, valueName);
-    } else {
-        builder->target->emitTraceMessage(builder,
-                                          "Control: Entry not found, executing implicit NoAction");
-    }
+    builder->blockStart();
+    builder->blockEnd(true);
 }
 
 void EBPFTablePNA::emitInitializer(EBPF::CodeBuilder *builder) {
@@ -912,44 +1030,28 @@ void EBPFTablePNA::emitDefaultActionStruct(EBPF::CodeBuilder *builder) {
     }
 }
 
-void EBPFTablePNA::emitDefaultAction(EBPF::CodeBuilder *builder, cstring valueName) {
-    const IR::P4Table *t = table->container;
-    const IR::Expression *default_action = t->getDefaultAction();
-    bool visitDefaultAction = false;
-    if (default_action) {
-        if (auto mc = default_action->to<IR::MethodCallExpression>()) {
-            default_action = mc->method;
-        }
-        auto path = default_action->to<IR::PathExpression>();
-        BUG_CHECK(path, "Default action path %1% cannot be found", default_action);
-        if (auto defaultActionDecl =
-                program->refMap->getDeclaration(path->path)->to<IR::P4Action>()) {
-            if (defaultActionDecl->name.originalName != "NoAction") {
-                visitDefaultAction = true;
-                auto visitor = createActionTranslationVisitor(valueName, program);
-                visitor->setBuilder(builder);
-                visitor->copySubstitutions(codeGen);
-                visitor->copyPointerVariables(codeGen);
-                defaultActionDecl->apply(*visitor);
-                builder->newline();
-            }
-        }
-    }
-    if (visitDefaultAction == false) {
-        builder->blockStart();
-        builder->blockEnd(true);
-    }
-}
-
 void EBPFTablePNA::emitValueActionIDNames(EBPF::CodeBuilder *builder) {
     // create type definition for action
     builder->emitIndent();
+    bool noActionGenerated = false;
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->checkedTo<IR::P4Action>();
+        if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name)
+            noActionGenerated = true;
         unsigned int action_idx = tcIR->getActionId(tcIR->externalName(action));
         builder->emitIndent();
         builder->appendFormat("#define %s %d", p4ActionToActionIDName(action), action_idx);
+        builder->newline();
+    }
+    if (!noActionGenerated) {
+        cstring noActionName = P4::P4CoreLibrary::instance().noAction.name;
+        cstring tableInstance = dataMapName;
+        cstring actionName =
+            Util::printf_format("%s_ACT_%s", tableInstance.toUpper(), noActionName.toUpper());
+        unsigned int action_idx = tcIR->getActionId(noActionName);
+        builder->emitIndent();
+        builder->appendFormat("#define %s %d", actionName, action_idx);
         builder->newline();
     }
     builder->emitIndent();
@@ -1089,7 +1191,7 @@ const PNAEbpfGenerator *ConvertToEbpfPNA::build(const IR::ToplevelBlock *tlb) {
     tlb->getProgram()->apply(*pipeline_converter);
     auto tcIngress = pipeline_converter->getEbpfPipeline();
 
-    return new PNAArchTC(options, ebpfTypes, xdp, tcIngress);
+    return new PNAArchTC(options, ebpfTypes, xdp, tcIngress, tcIR);
 }
 
 const IR::Node *ConvertToEbpfPNA::preorder(IR::ToplevelBlock *tlb) {
@@ -1376,7 +1478,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->appendLine(
                 "struct p4tc_table_entry_create_bpf_params__local update_params = {");
             builder->emitIndent();
-            builder->appendLine("    .pipeid = 1,");
+            builder->appendLine("    .pipeid = p4tc_filter_fields.pipeid,");
             builder->emitIndent();
             auto controlName = control->controlBlock->getName().originalName;
             /* Table instanceName is control_block_name + "_" + original table name.
@@ -1431,7 +1533,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
         builder->emitIndent();
         builder->appendLine("struct p4tc_table_entry_act_bpf_params__local params = {");
         builder->emitIndent();
-        builder->appendLine("    .pipeid = 1,");
+        builder->appendLine("    .pipeid = p4tc_filter_fields.pipeid,");
         builder->emitIndent();
         auto tblId = tcIR->getTableId(method->object->getName().originalName);
         BUG_CHECK(tblId != 0, "Table ID not found");
@@ -1440,7 +1542,11 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
         builder->emitIndent();
         builder->appendLine("};");
         builder->emitIndent();
-        builder->appendFormat("struct %s %s = {}", table->keyTypeName.c_str(), keyname.c_str());
+        builder->appendFormat("struct %s %s", table->keyTypeName.c_str(), keyname.c_str());
+        builder->endOfStatement(true);
+        builder->emitIndent();
+        builder->appendFormat("__builtin_memset(&%s, 0, sizeof(%s))", keyname.c_str(),
+                              keyname.c_str());
         builder->endOfStatement(true);
         unsigned int keysize = tcIR->getTableKeysize(tblId);
         builder->emitIndent();
@@ -1467,13 +1573,13 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                 memcpy = !EBPF::EBPFScalarType::generatesScalar(width);
 
                 if (isLPMKeyBigEndian) {
-                    if (width <= BYTE_EXTRACT) {
+                    if (width <= 8) {
                         swap = "";  // single byte, nothing to swap
-                    } else if (width <= WORD_EXTRACT) {
+                    } else if (width <= 16) {
                         swap = "bpf_htons";
-                    } else if (width <= DWORD_EXTRACT) {
+                    } else if (width <= 32) {
                         swap = "bpf_htonl";
-                    } else if (width <= QWORD_EXTRACT) {
+                    } else if (width <= 64) {
                         swap = "bpf_htonll";
                     }
                     /* For width greater than 64 bit, there is no need of conversion.
@@ -1544,7 +1650,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
     builder->append(" else ");
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("%s = 1", control->hitVariable.c_str());
+    builder->appendFormat("%s = value->hit", control->hitVariable.c_str());
     builder->endOfStatement(true);
     builder->blockEnd(true);
 
@@ -1718,7 +1824,19 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                             "Only headers with fixed widths supported %1%", f);
                     return;
                 }
-                emitField(builder, f->name, expr, alignment, etype);
+                bool noEndiannessConversion = false;
+                auto annotations = f->getAnnotations()->annotations;
+                for (auto anno : annotations) {
+                    if (anno->name != ParseTCAnnotations::tcType) continue;
+                    for (auto annoVal : anno->body) {
+                        if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
+                            annoVal->text == "ipv6") {
+                            noEndiannessConversion = true;
+                            break;
+                        }
+                    }
+                }
+                emitField(builder, f->name, expr, alignment, etype, noEndiannessConversion);
                 alignment += et->widthInBits();
                 alignment %= 8;
             }
@@ -1731,7 +1849,7 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
 
 void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring field,
                                              const IR::Expression *hdrExpr, unsigned int alignment,
-                                             EBPF::EBPFType *type) {
+                                             EBPF::EBPFType *type, bool noEndiannessConversion) {
     auto program = deparser->program;
 
     auto et = type->to<EBPF::IHasWidth>();
@@ -1742,9 +1860,9 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
     }
     unsigned widthToEmit = et->widthInBits();
     unsigned emitSize = 0;
-    cstring msgStr;
+    cstring swap = "", msgStr;
 
-    if (widthToEmit <= QWORD_EXTRACT) {
+    if (widthToEmit <= 64) {
         if (program->options.emitTraceMessages) {
             builder->emitIndent();
             builder->blockStart();
@@ -1763,17 +1881,31 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
         builder->target->emitTraceMessage(builder, msgStr.c_str());
     }
 
-    if (widthToEmit <= BYTE_EXTRACT) {
-        emitSize = BYTE_EXTRACT;
-    } else if (widthToEmit <= WORD_EXTRACT) {
-        emitSize = WORD_EXTRACT;
-    } else if (widthToEmit <= DWORD_EXTRACT) {
-        emitSize = DWORD_EXTRACT;
-    } else if (widthToEmit <= QWORD_EXTRACT) {
-        emitSize = QWORD_EXTRACT;
+    if (widthToEmit <= 8) {
+        emitSize = 8;
+    } else if (widthToEmit <= 16) {
+        swap = "bpf_htons";
+        emitSize = 16;
+    } else if (widthToEmit <= 32) {
+        swap = "htonl";
+        emitSize = 32;
+    } else if (widthToEmit <= 64) {
+        swap = "htonll";
+        emitSize = 64;
     }
+    unsigned shift =
+        widthToEmit < 8 ? (emitSize - alignment - widthToEmit) : (emitSize - widthToEmit);
 
-    unsigned shift;
+    if (!swap.isNullOrEmpty() && !noEndiannessConversion) {
+        builder->emitIndent();
+        visit(hdrExpr);
+        builder->appendFormat(".%s = %s(", field, swap);
+        visit(hdrExpr);
+        builder->appendFormat(".%s", field);
+        if (shift != 0) builder->appendFormat(" << %d", shift);
+        builder->append(")");
+        builder->endOfStatement(true);
+    }
     unsigned bitsInFirstByte = widthToEmit % 8;
     if (bitsInFirstByte == 0) bitsInFirstByte = 8;
     unsigned bitsInCurrentByte = bitsInFirstByte;

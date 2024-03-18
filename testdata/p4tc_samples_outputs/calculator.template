@@ -3,7 +3,7 @@
 set -e
 
 TC="tc"
-$TC p4template create pipeline/calculator pipeid 1 numtables 1
+$TC p4template create pipeline/calculator numtables 1
 
 $TC p4template create action/calculator/MainControlImpl/operation_add actid 1
 $TC p4template update action/calculator/MainControlImpl/operation_add state active

@@ -9,8 +9,8 @@
  * Standard ethernet header
  */
 header ethernet_t {
-    bit<48> dstAddr;
-    bit<48> srcAddr;
+    @tc_type ("macaddr") bit<48> dstAddr;
+    @tc_type ("macaddr") bit<48> srcAddr;
     bit<16> etherType;
 }
 
@@ -25,8 +25,8 @@ header ipv4_t {
     bit<8>  ttl;
     bit<8>  protocol;
     bit<16> hdrChecksum;
-    bit<32> srcAddr;
-    bit<32> dstAddr;
+    @tc_type ("ipv4") bit<32> srcAddr;
+    @tc_type ("ipv4") bit<32> dstAddr;
 }
 
 struct my_ingress_headers_t {

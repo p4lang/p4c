@@ -1,7 +1,6 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "nummask_annotation_example",
-  "id" : 1,
   "tables" : [
     {
       "name" : "MainControlImpl/set_ct_options",

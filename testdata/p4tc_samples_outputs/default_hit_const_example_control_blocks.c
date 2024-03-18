@@ -1,4 +1,6 @@
 #include "default_hit_const_example_parser.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
@@ -15,8 +17,12 @@ struct MainControlImpl_set_ct_options_key_mask {
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_SYN_PACKET 1
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_FIN_OR_RST_PACKET 2
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_OTHER_PACKETS 3
+#define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_set_ct_options_value {
     unsigned int action;
+    u32 hit:1,
+    is_default_miss_act:1,
+    is_default_hit_act:1;
     __u32 priority;
     union {
         struct {
@@ -49,6 +55,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     hdr = &(hdrMd->cpumap_hdr);
     meta = &(hdrMd->cpumap_usermeta);
 {
@@ -61,10 +68,11 @@ if (/* hdr->ipv4.isValid() */
                 {
                     /* construct key */
                     struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
+                        .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 1
                     };
-                    struct MainControlImpl_set_ct_options_key key = {};
+                    struct MainControlImpl_set_ct_options_key key;
+                    __builtin_memset(&key, 0, sizeof(key));
                     key.keysz = 8;
                     key.field0 = hdr->tcp.flags;
                     struct p4tc_table_entry_act_bpf *act_bpf;
@@ -77,7 +85,7 @@ if (/* hdr->ipv4.isValid() */
                         /* miss; find default action */
                         hit = 0;
                     } else {
-                        hit = 1;
+                        hit = value->hit;
                     }
                     if (value != NULL) {
                         /* run action */
@@ -94,8 +102,10 @@ if (/* hdr->ipv4.isValid() */
                                 {
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
                     }
@@ -133,6 +143,7 @@ if (/* hdr->ipv4.isValid() */
                 return TC_ACT_SHOT;
             }
             
+            hdr->eth.dstAddr = htonll(hdr->eth.dstAddr << 16);
             ebpf_byte = ((char*)(&hdr->eth.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->eth.dstAddr))[1];
@@ -147,6 +158,7 @@ if (/* hdr->ipv4.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
+            hdr->eth.srcAddr = htonll(hdr->eth.srcAddr << 16);
             ebpf_byte = ((char*)(&hdr->eth.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->eth.srcAddr))[1];
@@ -161,6 +173,7 @@ if (/* hdr->ipv4.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
+            hdr->eth.etherType = bpf_htons(hdr->eth.etherType);
             ebpf_byte = ((char*)(&hdr->eth.etherType))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->eth.etherType))[1];

@@ -3,7 +3,7 @@
 set -e
 
 TC="tc"
-$TC p4template create pipeline/nummask_annotation_example pipeid 1 numtables 1
+$TC p4template create pipeline/nummask_annotation_example numtables 1
 
 $TC p4template create action/nummask_annotation_example/MainControlImpl/tcp_syn_packet actid 1
 $TC p4template update action/nummask_annotation_example/MainControlImpl/tcp_syn_packet state active

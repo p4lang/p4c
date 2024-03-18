@@ -1,4 +1,6 @@
 #include "simple_lpm_example_parser.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
@@ -10,8 +12,12 @@ struct __attribute__((__packed__)) ingress_nh_table_key {
 } __attribute__((aligned(8)));
 #define INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH 1
 #define INGRESS_NH_TABLE_ACT_INGRESS_DROP 2
+#define INGRESS_NH_TABLE_ACT_NOACTION 0
 struct __attribute__((__packed__)) ingress_nh_table_value {
     unsigned int action;
+    u32 hit:1,
+    is_default_miss_act:1,
+    is_default_hit_act:1;
     union {
         struct {
         } _NoAction;
@@ -44,6 +50,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     hdr = &(hdrMd->cpumap_hdr);
     meta = &(hdrMd->cpumap_usermeta);
 {
@@ -53,10 +60,11 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             {
                 /* construct key */
                 struct p4tc_table_entry_act_bpf_params__local params = {
-                    .pipeid = 1,
+                    .pipeid = p4tc_filter_fields.pipeid,
                     .tblid = 1
                 };
-                struct ingress_nh_table_key key = {};
+                struct ingress_nh_table_key key;
+                __builtin_memset(&key, 0, sizeof(key));
                 key.keysz = 32;
                 key.field0 = bpf_htonl(hdr->ipv4.srcAddr);
                 struct p4tc_table_entry_act_bpf *act_bpf;
@@ -69,15 +77,15 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                     /* miss; find default action */
                     hit = 0;
                 } else {
-                    hit = 1;
+                    hit = value->hit;
                 }
                 if (value != NULL) {
                     /* run action */
                     switch (value->action) {
                         case INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH: 
                             {
-                                hdr->ethernet.srcAddr = bpf_cpu_to_be64(value->u.ingress_send_nh.smac);
-                                                                hdr->ethernet.dstAddr = bpf_cpu_to_be64(value->u.ingress_send_nh.dmac);
+                                hdr->ethernet.srcAddr = value->u.ingress_send_nh.smac;
+                                                                hdr->ethernet.dstAddr = value->u.ingress_send_nh.dmac;
                                 /* send_to_port(value->u.ingress_send_nh.port_id) */
                                 compiler_meta__->drop = false;
                                 send_to_port(value->u.ingress_send_nh.port_id);
@@ -89,12 +97,12 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                                 drop_packet();
                             }
                             break;
-                        default:
-                            return TC_ACT_SHOT;
+                        case INGRESS_NH_TABLE_ACT_NOACTION: 
+                            {
+                            }
+                            break;
                     }
                 } else {
-/* drop_packet() */
-                    drop_packet();
                 }
             }
 ;
@@ -161,6 +169,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
+            hdr->ethernet.etherType = bpf_htons(hdr->ethernet.etherType);
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[1];
@@ -185,12 +194,14 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
+            hdr->ipv4.totalLen = bpf_htons(hdr->ipv4.totalLen);
             ebpf_byte = ((char*)(&hdr->ipv4.totalLen))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.totalLen))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
+            hdr->ipv4.identification = bpf_htons(hdr->ipv4.identification);
             ebpf_byte = ((char*)(&hdr->ipv4.identification))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.identification))[1];
@@ -201,6 +212,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 3;
 
+            hdr->ipv4.fragOffset = bpf_htons(hdr->ipv4.fragOffset << 3);
             ebpf_byte = ((char*)(&hdr->ipv4.fragOffset))[0];
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 3, 5, (ebpf_byte));
@@ -216,6 +228,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
+            hdr->ipv4.hdrChecksum = bpf_htons(hdr->ipv4.hdrChecksum);
             ebpf_byte = ((char*)(&hdr->ipv4.hdrChecksum))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.hdrChecksum))[1];

@@ -21,11 +21,6 @@ and limitations under the License.
 
 namespace TC {
 
-#define BYTE_EXTRACT 8
-#define WORD_EXTRACT 16
-#define DWORD_EXTRACT 32
-#define QWORD_EXTRACT 64
-
 class ConvertToBackendIR;
 class EBPFPnaParser;
 
@@ -34,10 +29,11 @@ class EBPFPnaParser;
 class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
  public:
     EBPF::EBPFPipeline *pipeline;
+    const ConvertToBackendIR *tcIR;
 
     PNAEbpfGenerator(const EbpfOptions &options, std::vector<EBPF::EBPFType *> &ebpfTypes,
-                     EBPF::EBPFPipeline *pipeline)
-        : EBPF::EbpfCodeGenerator(options, ebpfTypes), pipeline(pipeline) {}
+                     EBPF::EBPFPipeline *pipeline, const ConvertToBackendIR *tcIR)
+        : EBPF::EbpfCodeGenerator(options, ebpfTypes), pipeline(pipeline), tcIR(tcIR) {}
 
     virtual void emit(EBPF::CodeBuilder *builder) const = 0;
     virtual void emitInstances(EBPF::CodeBuilder *builder) const = 0;
@@ -50,6 +46,8 @@ class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
     void emitTypes(EBPF::CodeBuilder *builder) const override;
     void emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) const override;
     void emitPipelineInstances(EBPF::CodeBuilder *builder) const override;
+    void emitP4TCFilterFields(EBPF::CodeBuilder *builder) const;
+    void emitP4TCActionParam(EBPF::CodeBuilder *builder) const;
     cstring getProgramName() const;
 };
 
@@ -93,8 +91,9 @@ class PNAArchTC : public PNAEbpfGenerator {
     EBPF::XDPHelpProgram *xdp;
 
     PNAArchTC(const EbpfOptions &options, std::vector<EBPF::EBPFType *> &ebpfTypes,
-              EBPF::XDPHelpProgram *xdp, EBPF::EBPFPipeline *pipeline)
-        : PNAEbpfGenerator(options, ebpfTypes, pipeline), xdp(xdp) {}
+              EBPF::XDPHelpProgram *xdp, EBPF::EBPFPipeline *pipeline,
+              const ConvertToBackendIR *tcIR)
+        : PNAEbpfGenerator(options, ebpfTypes, pipeline, tcIR), xdp(xdp) {}
 
     void emit(EBPF::CodeBuilder *builder) const override;
     void emitParser(EBPF::CodeBuilder *builder) const override;
@@ -125,6 +124,7 @@ class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
  protected:
     void compileExtractField(const IR::Expression *expr, const IR::StructField *field,
                              unsigned hdrOffsetBits, EBPF::EBPFType *type) override;
+    void compileLookahead(const IR::Expression *destination) override;
 };
 
 class EBPFPnaParser : public EBPF::EBPFPsaParser {
@@ -164,7 +164,6 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
     void emitAction(EBPF::CodeBuilder *builder, cstring valueName,
                     cstring actionRunVariable) override;
     void emitValueActionIDNames(EBPF::CodeBuilder *builder) override;
-    void emitDefaultAction(EBPF::CodeBuilder *builder, cstring valueName);
     cstring p4ActionToActionIDName(const IR::P4Action *action) const;
 
     DECLARE_TYPEINFO(EBPFTablePNA, EBPF::EBPFTablePSA);
@@ -355,7 +354,7 @@ class DeparserHdrEmitTranslatorPNA : public EBPF::DeparserPrepareBufferTranslato
 
     void processMethod(const P4::ExternMethod *method) override;
     void emitField(EBPF::CodeBuilder *builder, cstring field, const IR::Expression *hdrExpr,
-                   unsigned alignment, EBPF::EBPFType *type);
+                   unsigned alignment, EBPF::EBPFType *type, bool isMAC);
 };
 
 class CRCChecksumAlgorithmPNA : public EBPF::CRCChecksumAlgorithm {

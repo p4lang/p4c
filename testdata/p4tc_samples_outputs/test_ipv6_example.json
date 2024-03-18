@@ -1,7 +1,6 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "test_ipv6_example",
-  "id" : 1,
   "tables" : [
     {
       "name" : "MainControlImpl/tbl_default",

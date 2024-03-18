@@ -1,4 +1,6 @@
 #include "test_ipv6_example_parser.h"
+struct p4tc_filter_fields p4tc_filter_fields;
+
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
@@ -12,6 +14,9 @@ struct __attribute__((__packed__)) MainControlImpl_tbl_default_key {
 #define MAINCONTROLIMPL_TBL_DEFAULT_ACT__NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_tbl_default_value {
     unsigned int action;
+    u32 hit:1,
+    is_default_miss_act:1,
+    is_default_hit_act:1;
     union {
         struct {
         } _NoAction;
@@ -40,6 +45,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     hdr = &(hdrMd->cpumap_hdr);
     user_meta = &(hdrMd->cpumap_usermeta);
 {
@@ -49,10 +55,11 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             {
                 /* construct key */
                 struct p4tc_table_entry_act_bpf_params__local params = {
-                    .pipeid = 1,
+                    .pipeid = p4tc_filter_fields.pipeid,
                     .tblid = 1
                 };
-                struct MainControlImpl_tbl_default_key key = {};
+                struct MainControlImpl_tbl_default_key key;
+                __builtin_memset(&key, 0, sizeof(key));
                 key.keysz = 128;
                 __builtin_memcpy(&(key.field0[0]), &(hdr->ipv6.srcAddr[0]), 16);
                 struct p4tc_table_entry_act_bpf *act_bpf;
@@ -65,7 +72,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
                     /* miss; find default action */
                     hit = 0;
                 } else {
-                    hit = 1;
+                    hit = value->hit;
                 }
                 if (value != NULL) {
                     /* run action */
@@ -80,12 +87,8 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
                             {
                             }
                             break;
-                        default:
-                            return TC_ACT_SHOT;
                     }
                 } else {
-                    __builtin_memcpy(&hdr->ipv6.dstAddr, &value->u.MainControlImpl_set_dst.addr6, 16);
-                                        hdr->ipv6.hopLimit = (hdr->ipv6.hopLimit + 255);
                 }
             }
 ;
@@ -152,6 +155,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
+            hdr->ethernet.etherType = bpf_htons(hdr->ethernet.etherType);
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[1];
@@ -173,6 +177,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
+            hdr->ipv6.flowLabel = htonl(hdr->ipv6.flowLabel << 12);
             ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[0];
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 4));
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte));
@@ -183,6 +188,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 2, 4, 0, (ebpf_byte >> 4));
             ebpf_packetOffsetInBits += 20;
 
+            hdr->ipv6.payloadLength = bpf_htons(hdr->ipv6.payloadLength);
             ebpf_byte = ((char*)(&hdr->ipv6.payloadLength))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv6.payloadLength))[1];
