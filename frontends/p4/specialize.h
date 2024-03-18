@@ -24,6 +24,8 @@ limitations under the License.
 
 namespace P4 {
 
+class FrontEndPolicy;  // full definition not needed here
+
 /// Describes how a parser or control is specialized.
 struct SpecializationInfo {
     /// Name to use for specialized object.
@@ -210,8 +212,7 @@ class SpecializeAll : public PassRepeated {
     SpecializationMap specMap;
 
  public:
-    SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap,
-                  ConstantFoldingPolicy *constantFoldingPolicy);
+    SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap, FrontEndPolicy *policy);
 };
 
 }  // namespace P4

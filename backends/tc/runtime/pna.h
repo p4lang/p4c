@@ -105,6 +105,9 @@ struct p4tc_table_entry_act_bpf_params__local {
 
 struct __attribute__((__packed__)) p4tc_table_entry_act_bpf {
         u32 act_id;
+        u32 hit:1,
+        is_default_miss_act:1,
+        is_default_hit_act:1;
         u8 params[124];
 };
 

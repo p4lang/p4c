@@ -4,12 +4,15 @@
 
 ```
 p4tools
- ├─ benchmarks  ── General purpose measurements and plot generation scripts.
- ├─ cmake       ── Common CMake modules
- ├─ common      ── C++ source: common code for the various components P4Tools.
- ├─ modules     ── P4Tools extensions.
- │  └─ testgen  ── C++ source: P4Testgen.
- └─ submodules  ── External dependencies.
+ ├─ cmake            ── common P4Tools CMake modules.
+ ├─ common           ── common code for the various P4Tools modules.
+ │  └─ compiler      ── transformation passes for P4 code.
+ │  └─ control_plane ── code concerning P4Tool's control plane semantics.
+ │  └─ core          ── definitions for core parts of the P4Tools modules.
+ │  └─ lib           ── helper functions and utilities for P4Tools modules.  
+ └─  modules         ── P4Tools extensions.
+    └─ testgen       ── P4Testgen: a test-case generator for P4 programs.
+
 ```
 
 ## P4Tools

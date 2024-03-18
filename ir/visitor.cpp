@@ -19,7 +19,8 @@ limitations under the License.
 #include <stdlib.h>
 #include <time.h>
 
-#include "absl/container/flat_hash_map.h"
+#include <absl/container/flat_hash_map.h>
+
 #include "ir/ir-generated.h"
 #include "lib/hash.h"
 

@@ -69,7 +69,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::ConstantFolding(refMap, typeMap, false),
         new EliminateHeaderCopy(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
-        new P4::RemoveAllUnusedDeclarations(refMap),
+        new P4::RemoveAllUnusedDeclarations(refMap, P4::RemoveUnusedPolicy()),
         new ConvertActionSelectorAndProfile(refMap, typeMap, &structure),
         new CollectTableInfo(&structure),
         new CollectAddOnMissTable(refMap, typeMap, &structure),

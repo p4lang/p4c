@@ -50,15 +50,28 @@ const Expression *Expression::apply(Transform &visitor) const {
 }
 
 const Expression *Expression::evaluate(const Model &model, bool doComplete) const {
-    if (Taint::hasTaint(value)) {
-        return new Expression(&Taint::TAINTED_STRING_LITERAL, label);
+    const IR::Expression *evaluatedValue = nullptr;
+    if (const auto *structExpr = value->to<IR::StructExpression>()) {
+        evaluatedValue = model.evaluateStructExpr(structExpr, doComplete);
+    } else if (const auto *listExpr = value->to<IR::BaseListExpression>()) {
+        evaluatedValue = model.evaluateListExpr(listExpr, doComplete);
+    } else if (Taint::hasTaint(value)) {
+        evaluatedValue = &Taint::TAINTED_STRING_LITERAL;
+    } else {
+        evaluatedValue = model.evaluate(value, doComplete);
     }
-    return new Expression(model.evaluate(value, doComplete), label);
+    return new Expression(evaluatedValue, label);
 }
 
 void Expression::print(std::ostream &os) const {
+    // Convert the assignment to a string and strip any new lines.
+    // TODO: Maybe there is a better way to format newlines?
+    std::stringstream exprStream;
+    value->dbprint(exprStream);
+    auto expString = exprStream.str();
+    expString.erase(std::remove(expString.begin(), expString.end(), '\n'), expString.cend());
     Generic::print(os);
-    os << ": " << formatHexExpr(value, {true});
+    os << ": " << expString;
 }
 
 /* =============================================================================================
@@ -154,9 +167,9 @@ const AssignmentStatement *AssignmentStatement::apply(Transform &visitor) const 
 const AssignmentStatement *AssignmentStatement::evaluate(const Model &model,
                                                          bool doComplete) const {
     const IR::Expression *right = nullptr;
-    if (auto structExpr = stmt.right->to<IR::StructExpression>()) {
+    if (const auto *structExpr = stmt.right->to<IR::StructExpression>()) {
         right = model.evaluateStructExpr(structExpr, doComplete);
-    } else if (auto listExpr = stmt.right->to<IR::BaseListExpression>()) {
+    } else if (const auto *listExpr = stmt.right->to<IR::BaseListExpression>()) {
         right = model.evaluateListExpr(listExpr, doComplete);
     } else if (Taint::hasTaint(stmt.right)) {
         right = &Taint::TAINTED_STRING_LITERAL;

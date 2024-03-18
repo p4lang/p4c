@@ -21,6 +21,11 @@ limitations under the License.
 
 namespace P4 {
 
+RemoveUnusedDeclarations *RemoveUnusedPolicy::getRemoveUnusedDeclarationsPass(
+    const ReferenceMap *refMap, bool warn) const {
+    return new RemoveUnusedDeclarations(refMap, warn);
+}
+
 Visitor::profile_t RemoveUnusedDeclarations::init_apply(const IR::Node *node) {
     LOG4("Reference map " << refMap);
     return Transform::init_apply(node);

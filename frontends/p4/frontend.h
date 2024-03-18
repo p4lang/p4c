@@ -20,6 +20,7 @@ limitations under the License.
 #include "../common/options.h"
 #include "ir/ir.h"
 #include "parseAnnotations.h"
+#include "unusedDeclarations.h"
 
 namespace P4 {
 
@@ -28,7 +29,7 @@ class ConstantFoldingPolicy;  // forward declare to avoid having to include
 /// A customization point for frontend. The each tool can provide their own implementation of the
 /// policy that customizes its behaviour, or use instance of this class directly to provide the
 /// defaults.
-class FrontEndPolicy {
+class FrontEndPolicy : public RemoveUnusedPolicy {
  public:
     virtual ~FrontEndPolicy() = default;
 

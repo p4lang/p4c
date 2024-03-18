@@ -17,8 +17,9 @@ limitations under the License.
 #ifndef FRONTENDS_P4_TYPEMAP_H_
 #define FRONTENDS_P4_TYPEMAP_H_
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
+#include <absl/container/flat_hash_map.h>
+#include <absl/container/flat_hash_set.h>
+
 #include "frontends/common/programMap.h"
 #include "frontends/p4/typeChecking/typeSubstitution.h"
 

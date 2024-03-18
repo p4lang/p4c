@@ -19,7 +19,7 @@ generates the 'spec' file to configure the DPDK pipeline.
 
 ## How to use it?
 
-A sample P4 program can be found in the `examples` directory.  To
+A sample P4 program can be found in the [`examples` directory](./examples).  To
 generate the 'spec' file:
 ```bash
 p4c-dpdk --arch psa vxlan.p4 -o vxlan.spec

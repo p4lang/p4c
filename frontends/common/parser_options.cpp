@@ -483,7 +483,9 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
             exit(1);
         }
         if (match) {
-            cstring suffix = cstring("-") + name;
+            char buf[16];
+            snprintf(buf, sizeof(buf), "-%04zu-", ++dump_uid);
+            cstring suffix = cstring(buf) + name;
             cstring filename = file;
             if (filename == "-") filename = "tmp.p4";
 

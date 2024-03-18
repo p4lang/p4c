@@ -85,7 +85,8 @@ const IR::Node *DoRemoveReturns::preorder(IR::Function *function) {
     if (retvalDecl != nullptr) body->push_back(retvalDecl);
     body->components.append(function->body->components);
     if (returnsVal) body->push_back(new IR::ReturnStatement(new IR::PathExpression(returnedValue)));
-    auto result = new IR::Function(function->srcInfo, function->name, function->type, body);
+    auto result = new IR::Function(function->srcInfo, function->name, function->annotations,
+                                   function->type, body);
     pop();
     BUG_CHECK(stack.empty(), "Non-empty stack");
     prune();

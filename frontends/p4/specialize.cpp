@@ -20,6 +20,7 @@ limitations under the License.
 
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
+#include "frontends/p4/frontend.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/toP4/toP4.h"
@@ -279,16 +280,15 @@ const IR::Node *Specialize::postorder(IR::Declaration_Instance *decl) {
     return instantiate(replacement);
 }
 
-SpecializeAll::SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap,
-                             ConstantFoldingPolicy *constantFoldingPolicy)
+SpecializeAll::SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap, FrontEndPolicy *policy)
     : PassRepeated({}) {
-    passes.emplace_back(new ConstantFolding(refMap, typeMap, constantFoldingPolicy));
+    passes.emplace_back(new ConstantFolding(refMap, typeMap, policy->getConstantFoldingPolicy()));
     passes.emplace_back(new TypeChecking(refMap, typeMap));
     passes.emplace_back(new FindSpecializations(&specMap));
     passes.emplace_back(new Specialize(&specMap));
     passes.emplace_back(new ResolveReferences(refMap));
     passes.emplace_back(new TypeInference(refMap, typeMap, false));  // more casts may be needed
-    passes.emplace_back(new RemoveAllUnusedDeclarations(refMap));
+    passes.emplace_back(new RemoveAllUnusedDeclarations(refMap, *policy));
     specMap.refMap = refMap;
     specMap.typeMap = typeMap;
     setName("SpecializeAll");
