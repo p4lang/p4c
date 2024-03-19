@@ -21,7 +21,10 @@ uint32_t crc32(const uint8_t *buf, size_t len);
 /// 16-bit ones' complement checksum (used in IP, TCP, UDP, ...).
 uint16_t csum16(const uint8_t *buf, size_t len);
 
+/// A 16-bit xor of the values.
 uint16_t xor16(const uint8_t *buf, size_t len);
+
+/// Identity hash -- the first (up to) 64bits of the values (i.e. indexes 0 to 7).
 uint64_t identity(const uint8_t *buf, size_t len);
 
 }  // namespace NetHash
