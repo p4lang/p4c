@@ -430,6 +430,10 @@ bool ToP4::preorder(const IR::Method *m) {
 
 bool ToP4::preorder(const IR::Function *function) {
     dump(1);
+    if (!function->annotations->annotations.empty()) {
+        visit(function->annotations);
+        builder.spc();
+    }
     auto t = function->type;
     BUG_CHECK(t != nullptr, "Function %1% has no type", function);
     if (t->returnType != nullptr) {

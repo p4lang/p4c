@@ -149,8 +149,7 @@ void JsonObject::serialize(std::ostream &out) const {
         if (!first) out << ",";
         first = false;
         out << IndentCtl::endl;
-        out << "\"" << it.first << "\""
-            << " : ";
+        out << "\"" << it.first << "\"" << " : ";
         if (it.second == nullptr)
             out << "null";
         else

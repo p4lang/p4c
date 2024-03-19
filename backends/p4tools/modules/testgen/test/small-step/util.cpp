@@ -1,8 +1,9 @@
 #include "util.h"
 
+#include <absl/strings/substitute.h>
+
 #include <string>
 
-#include "absl/strings/substitute.h"
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"

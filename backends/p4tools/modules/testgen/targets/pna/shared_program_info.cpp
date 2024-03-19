@@ -27,8 +27,8 @@ SharedPnaProgramInfo::SharedPnaProgramInfo(
     concolicMethodImpls.add(*PnaDpdkConcolic::getPnaDpdkConcolicMethodImpls());
 }
 
-const ordered_map<cstring, const IR::Type_Declaration *>
-    *SharedPnaProgramInfo::getProgrammableBlocks() const {
+const ordered_map<cstring, const IR::Type_Declaration *> *
+SharedPnaProgramInfo::getProgrammableBlocks() const {
     return &programmableBlocks;
 }
 

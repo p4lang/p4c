@@ -17,11 +17,11 @@ name: "ptf-ebpf"
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   merge_group:
-    branches: [ main ]
+    branches: [main]
 
 # Cancel any preceding run on the pull request.
 concurrency:
@@ -35,8 +35,8 @@ jobs:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ON
-      MAKEFLAGS: -j8
       INSTALL_PTF_EBPF_DEPENDENCIES: ON
+      BUILD_GENERATOR: Ninja
     steps:
       - uses: actions/checkout@v4
         with:

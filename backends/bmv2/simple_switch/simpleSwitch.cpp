@@ -1169,6 +1169,9 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     simplify.addPasses({
         // Because --fromJSON flag is used, input sources are empty
         // and ParseAnnotations should be skipped
+        // FIXME -- should this refmap clear be in RenameUserMetadata::init_apply instead?
+        // the only test that requires it is gauntlet_action_mux-bmv2.p4
+        [this] { refMap->clear(); },
         new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         new P4::SynthesizeActions(refMap, typeMap,
@@ -1182,7 +1185,7 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         new RemoveComplexExpressions(refMap, typeMap,
                                      new ProcessControls(&structure->pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
-        new P4::RemoveAllUnusedDeclarations(refMap),
+        new P4::RemoveAllUnusedDeclarations(refMap, P4::RemoveUnusedPolicy()),
         new P4::FlattenLogMsg(refMap, typeMap),
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.

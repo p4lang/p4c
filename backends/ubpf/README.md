@@ -55,7 +55,7 @@ However, we introduced some modifications, which are listed below:
 
 ### How to use?
 
-The sample P4 programs are located in `examples/` directory. We have tested them with the [P4rt-OVS](https://github.com/Orange-OpenSource/p4rt-ovs) switch - 
+The sample P4 programs are located in the [`examples/` directory](./examples). We have tested them with the [P4rt-OVS](https://github.com/Orange-OpenSource/p4rt-ovs) switch - 
 the Open vSwitch that can be extended with BPF programs at runtime. See [the detailed tutorial](./docs/EXAMPLES.md) on how to run and test those examples.
 
 In order to generate the C code use the following command:

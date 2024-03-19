@@ -124,10 +124,39 @@ void PNAEbpfGenerator::emitP4TCFilterFields(EBPF::CodeBuilder *builder) const {
     builder->emitIndent();
     builder->appendFormat("__u16 prio");
     builder->endOfStatement(true);
-
+    emitP4TCActionParam(builder);
     builder->blockEnd(false);
     builder->endOfStatement(true);
     builder->newline();
+}
+
+void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
+    std::vector<cstring> actionParamList;
+    for (auto table : tcIR->tcPipeline->tableDefs) {
+        if (table->isTcMayOverride) {
+            cstring tblName = table->getTableName();
+            cstring defaultActionName = table->defaultMissAction->getActionName();
+            auto actionNameStr = defaultActionName.c_str();
+            for (long unsigned int i = 0; i < defaultActionName.size(); i++) {
+                if (actionNameStr[i] == '/') {
+                    defaultActionName = defaultActionName.substr(i + 1, defaultActionName.size());
+                    break;
+                }
+            }
+            for (auto param : table->defaultMissActionParams) {
+                cstring paramName = param->paramDetail->getParamName();
+                cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
+                auto itr = find(actionParamList.begin(), actionParamList.end(), placeholder);
+                if (itr == actionParamList.end()) {
+                    actionParamList.push_back(placeholder);
+                    cstring typeName = param->paramDetail->getParamType();
+                    builder->emitIndent();
+                    builder->appendFormat("%s %s", typeName, placeholder);
+                    builder->endOfStatement(true);
+                }
+            }
+        }
+    }
 }
 
 void PNAEbpfGenerator::emitPipelineInstances(EBPF::CodeBuilder *builder) const {
@@ -826,6 +855,18 @@ void EBPFTablePNA::emitValueStructStructure(EBPF::CodeBuilder *builder) {
     builder->append("unsigned int action;");
     builder->newline();
 
+    builder->emitIndent();
+    builder->append("u32 hit:1,");
+    builder->newline();
+
+    builder->emitIndent();
+    builder->append("is_default_miss_act:1,");
+    builder->newline();
+
+    builder->emitIndent();
+    builder->append("is_default_hit_act:1;");
+    builder->newline();
+
     if (isTernaryTable()) {
         builder->emitIndent();
         builder->append("__u32 priority;");
@@ -1150,7 +1191,7 @@ const PNAEbpfGenerator *ConvertToEbpfPNA::build(const IR::ToplevelBlock *tlb) {
     tlb->getProgram()->apply(*pipeline_converter);
     auto tcIngress = pipeline_converter->getEbpfPipeline();
 
-    return new PNAArchTC(options, ebpfTypes, xdp, tcIngress);
+    return new PNAArchTC(options, ebpfTypes, xdp, tcIngress, tcIR);
 }
 
 const IR::Node *ConvertToEbpfPNA::preorder(IR::ToplevelBlock *tlb) {
@@ -1501,7 +1542,11 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
         builder->emitIndent();
         builder->appendLine("};");
         builder->emitIndent();
-        builder->appendFormat("struct %s %s = {}", table->keyTypeName.c_str(), keyname.c_str());
+        builder->appendFormat("struct %s %s", table->keyTypeName.c_str(), keyname.c_str());
+        builder->endOfStatement(true);
+        builder->emitIndent();
+        builder->appendFormat("__builtin_memset(&%s, 0, sizeof(%s))", keyname.c_str(),
+                              keyname.c_str());
         builder->endOfStatement(true);
         unsigned int keysize = tcIR->getTableKeysize(tblId);
         builder->emitIndent();
@@ -1605,7 +1650,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
     builder->append(" else ");
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("%s = 1", control->hitVariable.c_str());
+    builder->appendFormat("%s = value->hit", control->hitVariable.c_str());
     builder->endOfStatement(true);
     builder->blockEnd(true);
 

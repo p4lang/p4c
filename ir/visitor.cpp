@@ -19,7 +19,8 @@ limitations under the License.
 #include <stdlib.h>
 #include <time.h>
 
-#include "absl/container/flat_hash_map.h"
+#include <absl/container/flat_hash_map.h>
+
 #include "ir/ir-generated.h"
 #include "lib/hash.h"
 
@@ -845,8 +846,8 @@ std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_
     out << Brief;
     for (auto &i : info.parents) {
         out << Log::endl
-            << "  " << *i.first << " [" << i.first->id << "] "
-            << "exist=" << i.second.exist << " visited=" << i.second.visited;
+            << "  " << *i.first << " [" << i.first->id << "] " << "exist=" << i.second.exist
+            << " visited=" << i.second.visited;
     }
     dbsetflags(out, flags);
 #endif

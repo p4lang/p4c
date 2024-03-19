@@ -19,6 +19,9 @@ struct __attribute__((__packed__)) MainControlImpl_calculate_key {
 #define MAINCONTROLIMPL_CALCULATE_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_calculate_value {
     unsigned int action;
+    u32 hit:1,
+    is_default_miss_act:1,
+    is_default_hit_act:1;
     union {
         struct {
         } _NoAction;
@@ -72,7 +75,8 @@ if (/* hdr->p4calc.isValid() */
                         .pipeid = p4tc_filter_fields.pipeid,
                         .tblid = 1
                     };
-                    struct MainControlImpl_calculate_key key = {};
+                    struct MainControlImpl_calculate_key key;
+                    __builtin_memset(&key, 0, sizeof(key));
                     key.keysz = 8;
                     key.field0 = hdr->p4calc.op;
                     struct p4tc_table_entry_act_bpf *act_bpf;
@@ -85,7 +89,7 @@ if (/* hdr->p4calc.isValid() */
                         /* miss; find default action */
                         hit = 0;
                     } else {
-                        hit = 1;
+                        hit = value->hit;
                     }
                     if (value != NULL) {
                         /* run action */

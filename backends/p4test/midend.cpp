@@ -25,12 +25,14 @@ limitations under the License.
 #include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/toP4/toP4.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "midend/actionSynthesis.h"
 #include "midend/compileTimeOps.h"
 #include "midend/complexComparison.h"
 #include "midend/copyStructures.h"
+#include "midend/def_use.h"
 #include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
@@ -121,6 +123,9 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::CompileTimeOperations(),
          new P4::TableHit(&refMap, &typeMap),
          new P4::EliminateSwitch(&refMap, &typeMap),
+         new P4::ResolveReferences(&refMap),
+         new P4::TypeChecking(&refMap, &typeMap, true),  // update types before ComputeDefUse
+         new P4::ComputeDefUse,                          // present for testing
          evaluator,
          [v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
              auto toplevel = evaluator->getToplevelBlock();

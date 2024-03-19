@@ -96,19 +96,17 @@ set (CONTROLPLANE_HDRS
 )
 
 add_library(controlplane-gen OBJECT ${P4RUNTIME_GEN_SRCS})
-# TODO(https://github.com/p4lang/p4c/issues/4477):
-# We should not need this, but because of the way managed includes and
-# libraries for Protobuf we need to explicitly add the include directories here.
-target_include_directories(
-  controlplane-gen SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS} SYSTEM BEFORE
-  PUBLIC ${ABSL_COMMON_INCLUDE_DIRS}
+
+target_include_directories(controlplane-gen
+  # TODO(https://github.com/p4lang/p4c/issues/4477):
+  # We should not need this, but because of the way managed includes and
+  # libraries for Protobuf we need to explicitly add the include directories here.
+  SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS}
+  # Needed for the correct import of google/status.pb.cc
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 target_link_libraries(controlplane-gen PUBLIC ${Protobuf_LIBRARY} PRIVATE absl::log)
-# Needed for the correct import of google/status.pb.cc
-target_include_directories(
-  controlplane-gen PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
-)
 
 # Silence various warnings as the root issue is out of our control, example
 # https://github.com/protocolbuffers/protobuf/issues/7140
@@ -119,8 +117,11 @@ set_source_files_properties(
 
 add_library(controlplane STATIC ${CONTROLPLANE_SRCS})
 target_link_libraries(controlplane
-  PUBLIC ${CMAKE_THREAD_LIBS_INIT}
+  # Export Protobuf includes with controlplane-gen.
   PUBLIC controlplane-gen
-  PRIVATE absl::strings)
+  # Required for the generated parser and the Abseil includes.
+  PRIVATE frontend
+  PRIVATE absl::strings
+)
 
-add_dependencies(controlplane mkP4configdir ir-generated controlplane-gen frontend-parser-gen)
+add_dependencies(controlplane mkP4configdir)

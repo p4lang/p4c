@@ -29,8 +29,8 @@ class UbpfTarget : public EBPF::Target {
  public:
     UbpfTarget() : EBPF::Target("UBPF") {}
 
-    void emitLicense(Util::SourceCodeBuilder *, cstring) const override{};
-    void emitCodeSection(Util::SourceCodeBuilder *, cstring) const override{};
+    void emitLicense(Util::SourceCodeBuilder *, cstring) const override {};
+    void emitCodeSection(Util::SourceCodeBuilder *, cstring) const override {};
     void emitIncludes(Util::SourceCodeBuilder *builder) const override;
     void emitResizeBuffer(Util::SourceCodeBuilder *builder, cstring buffer,
                           cstring offsetVar) const override;
@@ -42,11 +42,11 @@ class UbpfTarget : public EBPF::Target {
     void emitGetFromStandardMetadata(Util::SourceCodeBuilder *builder, cstring stdMetadataVar,
                                      cstring metadataField) const;
     void emitUserTableUpdate(UNUSED Util::SourceCodeBuilder *builder, UNUSED cstring tblName,
-                             UNUSED cstring key, UNUSED cstring value) const override{};
+                             UNUSED cstring key, UNUSED cstring value) const override {};
     void emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName, EBPF::TableKind tableKind,
                        cstring keyType, cstring valueType, unsigned size) const override;
     void emitMain(UNUSED Util::SourceCodeBuilder *builder, UNUSED cstring functionName,
-                  UNUSED cstring argName) const override{};
+                  UNUSED cstring argName) const override {};
     void emitMain(Util::SourceCodeBuilder *builder, cstring functionName, cstring argName,
                   cstring standardMetadata) const;
     void emitUbpfHelpers(EBPF::CodeBuilder *builder) const;

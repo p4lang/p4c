@@ -540,21 +540,17 @@ std::ostream &IR::DpdkAction::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkChecksumAddStatement::toSpec(std::ostream &out) const {
-    out << "ckadd "
-        << "h.cksum_state." << intermediate_value << " " << DPDK::toStr(field);
+    out << "ckadd " << "h.cksum_state." << intermediate_value << " " << DPDK::toStr(field);
     return out;
 }
 
 std::ostream &IR::DpdkChecksumSubStatement::toSpec(std::ostream &out) const {
-    out << "cksub "
-        << "h.cksum_state." << intermediate_value << " " << DPDK::toStr(field);
+    out << "cksub " << "h.cksum_state." << intermediate_value << " " << DPDK::toStr(field);
     return out;
 }
 
 std::ostream &IR::DpdkChecksumClearStatement::toSpec(std::ostream &out) const {
-    out << "mov "
-        << "h.cksum_state." << intermediate_value << " "
-        << "0x0";
+    out << "mov " << "h.cksum_state." << intermediate_value << " " << "0x0";
     return out;
 }
 
@@ -581,8 +577,7 @@ std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkGetChecksumStatement::toSpec(std::ostream &out) const {
-    out << "mov " << DPDK::toStr(dst) << " "
-        << "h.cksum_state." << intermediate_value;
+    out << "mov " << DPDK::toStr(dst) << " " << "h.cksum_state." << intermediate_value;
     return out;
 }
 

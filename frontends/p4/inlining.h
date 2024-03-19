@@ -431,12 +431,12 @@ class InlinePass : public PassManager {
 
  public:
     InlinePass(ReferenceMap *refMap, TypeMap *typeMap, EvaluatorPass *evaluator,
-               bool optimizeParserInlining)
+               const RemoveUnusedPolicy &policy, bool optimizeParserInlining)
         : PassManager({new TypeChecking(refMap, typeMap),
                        new DiscoverInlining(&toInline, refMap, typeMap, evaluator),
                        new InlineDriver<InlineList, InlineSummary>(
                            &toInline, new GeneralInliner(refMap, optimizeParserInlining)),
-                       new RemoveAllUnusedDeclarations(refMap)}) {
+                       new RemoveAllUnusedDeclarations(refMap, policy)}) {
         setName("InlinePass");
     }
 };
@@ -451,8 +451,8 @@ class Inline : public PassRepeated {
 
  public:
     Inline(ReferenceMap *refMap, TypeMap *typeMap, EvaluatorPass *evaluator,
-           bool optimizeParserInlining)
-        : PassManager({new InlinePass(refMap, typeMap, evaluator, optimizeParserInlining),
+           const RemoveUnusedPolicy &policy, bool optimizeParserInlining)
+        : PassManager({new InlinePass(refMap, typeMap, evaluator, policy, optimizeParserInlining),
                        // After inlining the output of the evaluator changes, so
                        // we have to run it again
                        evaluator}) {
