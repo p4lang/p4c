@@ -21,13 +21,13 @@ limitations under the License.
 
 namespace P4 {
 
-/// This transform converts identical PathExpression nodes in a DAG
+/// This transform converts identical PathExpression or Member nodes in a DAG
 /// into distinct nodes.
-class ClonePathExpressions : public Transform {
+class CloneExpressions : public Transform {
  public:
-    ClonePathExpressions() {
+    CloneExpressions() {
         visitDagOnce = false;
-        setName("ClonePathExpressions");
+        setName("CloneExpressions");
     }
     const IR::Node *postorder(IR::PathExpression *path) override {
         path->path = path->path->clone();

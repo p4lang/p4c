@@ -284,7 +284,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::RemoveAllUnusedDeclarations(refMap),
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.
-        new P4::ClonePathExpressions(),
+        new P4::CloneExpressions(),
         new P4::ClearTypeMap(typeMap),
         evaluator,
         [this, evaluator, structure]() { toplevel = evaluator->getToplevelBlock(); },

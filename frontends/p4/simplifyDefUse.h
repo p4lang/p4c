@@ -61,7 +61,7 @@ class RemoveHidden : public Transform {
 };
 
 class SimplifyDefUse : public PassManager {
-    class Cloner : public ClonePathExpressions {
+    class Cloner : public CloneExpressions {
      public:
         Cloner() { setName("Cloner"); }
         const IR::Node *postorder(IR::EmptyStatement *stat) override {
@@ -83,7 +83,7 @@ class SimplifyDefUse : public PassManager {
                 LOG2("Cloning " << getOriginal()->id << " into " << result->id);
                 return result;
             }
-            // Ideally we'd like ClonePathExpressions::postorder(stat),
+            // Ideally we'd like CloneExpressions::postorder(stat),
             // but that doesn't work.
             return Transform::postorder(stat);
         }

@@ -1186,7 +1186,7 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::FlattenLogMsg(refMap, typeMap),
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.
-        new P4::ClonePathExpressions(),
+        new P4::CloneExpressions(),
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap, true),
         evaluator,
