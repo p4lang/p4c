@@ -1611,11 +1611,17 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
                         builder->endOfStatement();
                         builder->newline();
                     }
+                    builder->emitIndent();
+                    builder->appendFormat("update_act_bpf_val->action = %s;",
+                                          table->p4ActionToActionIDName(action));
+                    builder->newline();
+                } else {
+                    builder->emitIndent();
+                    builder->appendFormat("update_act_bpf.act = %s;",
+                                          table->p4ActionToActionIDName(action));
+                    builder->newline();
                 }
-                builder->emitIndent();
-                builder->appendFormat("update_act_bpf_val->action = %s;",
-                                      table->p4ActionToActionIDName(action));
-                builder->newline();
+
             } else {
                 ::error(ErrorType::ERR_UNEXPECTED,
                         "action parameters of add_entry extern should be a structure only. %1%",

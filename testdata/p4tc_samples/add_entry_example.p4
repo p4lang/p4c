@@ -46,7 +46,7 @@ struct headers_t {
     ipv4_t     ipv4;
 }
 
-struct default_route_drop_params_t {
+struct dflt_route_drop_params_t {
 }
 
 const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_NOW    = (ExpireTimeProfileId_t) 2;
@@ -77,11 +77,11 @@ control MainControlImpl(
     inout pna_main_output_metadata_t ostd)
 {
     action next_hop() {
-         add_entry(action_name = "default_route_drop",  // name of action
+         add_entry(action_name = "dflt_route_drop",  // name of action
                  action_params = {}, expire_time_profile_id = EXPIRE_TIME_PROFILE_NOW);
 
     }
-    action default_route_drop() {
+    action dflt_route_drop() {
         drop_packet();
     }
     action drop() {
@@ -95,25 +95,25 @@ control MainControlImpl(
         }
         actions = {
             next_hop;
-            default_route_drop;
+            dflt_route_drop;
         }
         default_action = next_hop;
         add_on_miss = true;
     }
     action next_hop1() {
-         add_entry(action_name = "default_route_drop",  // name of action
-                 action_params = (default_route_drop_params_t){}, expire_time_profile_id = EXPIRE_TIME_PROFILE_NOW);
+         add_entry(action_name = "dflt_route_drop",  // name of action
+                 action_params = (dflt_route_drop_params_t){}, expire_time_profile_id = EXPIRE_TIME_PROFILE_NOW);
 
     }
     table ipv4_tbl_2 {
         key = {
-            hdr.ipv4.dstAddr  : exact;
-            hdr.ipv4.srcAddr  : exact;
+            hdr.ipv4.dstAddr  : exact  @tc_type ("ipv4");
+            hdr.ipv4.srcAddr  : exact  @tc_type ("ipv4");
             hdr.ipv4.protocol : exact;
         }
         actions = {
             next_hop1;
-            default_route_drop;
+            dflt_route_drop;
         }
         default_action = next_hop1;
     }

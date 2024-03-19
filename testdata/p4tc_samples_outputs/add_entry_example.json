@@ -36,7 +36,7 @@
         },
         {
           "id" : 2,
-          "name" : "MainControlImpl/default_route_drop",
+          "name" : "MainControlImpl/dflt_route_drop",
           "action_scope" : "TableAndDefault",
           "annotations" : [],
           "params" : [],
@@ -55,14 +55,14 @@
         {
           "id" : 1,
           "name" : "hdr.ipv4.dstAddr",
-          "type" : "bit32",
+          "type" : "ipv4",
           "match_type" : "exact",
           "bitwidth" : 32
         },
         {
           "id" : 2,
           "name" : "hdr.ipv4.srcAddr",
-          "type" : "bit32",
+          "type" : "ipv4",
           "match_type" : "exact",
           "bitwidth" : 32
         },
@@ -86,7 +86,7 @@
         },
         {
           "id" : 2,
-          "name" : "MainControlImpl/default_route_drop",
+          "name" : "MainControlImpl/dflt_route_drop",
           "action_scope" : "TableAndDefault",
           "annotations" : [],
           "params" : [],

@@ -38,7 +38,7 @@ struct headers_t {
     struct ethernet_t ethernet; /* ethernet_t */
     struct ipv4_t ipv4; /* ipv4_t */
 };
-struct default_route_drop_params_t {
+struct dflt_route_drop_params_t {
 };
 struct tuple_0 {
 };

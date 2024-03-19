@@ -40,8 +40,6 @@ extern cstring PnaMainParserInputMetaFields[TC::MAX_PNA_PARSER_META];
 extern cstring PnaMainInputMetaFields[TC::MAX_PNA_INPUT_META];
 extern cstring PnaMainOutputMetaFields[TC::MAX_PNA_OUTPUT_META];
 
-#define DEFAULT_TIMER_PROFILES 4
-
 class PNAEbpfGenerator;
 
 /**
