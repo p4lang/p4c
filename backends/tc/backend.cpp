@@ -275,7 +275,7 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
 }
 
 void ConvertToBackendIR::updateTimerProfiles(IR::TCTable *tabledef) {
-    if (options.timerProfiles > 4) {
+    if (options.timerProfiles > DEFAULT_TIMER_PROFILES) {
         tabledef->addTimerProfiles(options.timerProfiles);
     }
 }

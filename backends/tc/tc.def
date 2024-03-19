@@ -233,6 +233,7 @@ class TCTable {
     unsigned numMask;
     unsigned matchType;
     unsigned timerProfiles;
+    unsigned defaultTimerProfiles = 4;
     TCAction defaultHitAction;
     bool isDefaultHitConst;
     TCAction defaultMissAction;
@@ -306,7 +307,7 @@ class TCTable {
         controlName = cN;
         pipelineName = pN;
         keySize = 0;
-        timerProfiles = 4;
+        timerProfiles = 0;
         tableEntriesCount = TC::DEFAULT_TABLE_ENTRIES;
         numMask = TC::DEFAULT_KEY_MASK;
         matchType = TC::EXACT_TYPE;
@@ -328,7 +329,7 @@ class TCTable {
         tcTable += " tentries " + Util::toString(tableEntriesCount);
         if (isTableAddOnMiss) {
             tcTable += " permissions 0x3DE6";
-            if(timerProfiles > 4) {
+            if(timerProfiles > defaultTimerProfiles) {
                 tcTable += " num_timer_profiles " + Util::toString(timerProfiles);
             }
         }

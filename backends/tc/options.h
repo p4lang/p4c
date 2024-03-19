@@ -76,7 +76,7 @@ class TCOptions : public CompilerOptions {
                 timerProfiles = std::atoi(arg);
                 return true;
             },
-            "Defines the no of timer profiles. Default is 4.");
+            "Defines the number of timer profiles. Default is 4.");
     }
 };
 
