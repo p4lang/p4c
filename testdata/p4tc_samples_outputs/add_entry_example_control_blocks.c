@@ -1,4 +1,4 @@
-#include "set_entry_timer_example_parser.h"
+#include "add_entry_example_parser.h"
 struct p4tc_filter_fields p4tc_filter_fields;
 
 struct internal_metadata {
@@ -12,7 +12,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
     u32 field1; /* istd.input_port */
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP 1
-#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
+#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP 2
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
     unsigned int action;
@@ -25,7 +25,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
         struct {
         } MainControlImpl_next_hop;
         struct {
-        } MainControlImpl_default_route_drop;
+        } MainControlImpl_dflt_route_drop;
     } u;
 };
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
@@ -35,8 +35,8 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
     u32 field1; /* hdr.ipv4.srcAddr */
     u8 field2; /* hdr.ipv4.protocol */
 } __attribute__((aligned(8)));
-#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP 1
-#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 3
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP1 3
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP 2
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     unsigned int action;
@@ -47,9 +47,9 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
         struct {
         } _NoAction;
         struct {
-        } MainControlImpl_next_hop;
+        } MainControlImpl_next_hop1;
         struct {
-        } MainControlImpl_drop;
+        } MainControlImpl_dflt_route_drop;
     } u;
 };
 
@@ -109,17 +109,20 @@ if (/* hdr->ipv4.isValid() */
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
-/* set_entry_expire_time(2) */
+/* add_entry(""dflt_route_drop"", {}, 2) */
+                                    struct p4tc_table_entry_act_bpf update_act_bpf = {};
+                                    update_act_bpf.act_id = MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP;
+
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
                                         .pipeid = p4tc_filter_fields.pipeid,
                                         .tblid = 1,
-                                        .aging_ms = 2
+                                        .profile_id = 2
                                     };
-                                    bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf);
+                                    bpf_p4tc_entry_create_on_miss(skb, &update_params, &key, sizeof(key), &update_act_bpf);
                                 }
                                 break;
-                            case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
+                            case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP: 
                                 {
 /* drop_packet() */
                                     drop_packet();
@@ -162,19 +165,22 @@ if (/* hdr->ipv4.isValid() */
                     if (value != NULL) {
                         /* run action */
                         switch (value->action) {
-                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP: 
+                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP1: 
                                 {
-/* set_entry_expire_time(2) */
+/* add_entry(""dflt_route_drop"", {}, 2) */
+                                    struct p4tc_table_entry_act_bpf update_act_bpf = {};
+                                    update_act_bpf.act_id = MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP;
+
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
                                         .pipeid = p4tc_filter_fields.pipeid,
                                         .tblid = 2,
-                                        .aging_ms = 2
+                                        .profile_id = 2
                                     };
-                                    bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf);
+                                    bpf_p4tc_entry_create_on_miss(skb, &update_params, &key, sizeof(key), &update_act_bpf);
                                 }
                                 break;
-                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP: 
+                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP: 
                                 {
 /* drop_packet() */
                                     drop_packet();
@@ -225,7 +231,6 @@ if (/* hdr->ipv4.isValid() */
                 return TC_ACT_SHOT;
             }
             
-            hdr->ethernet.dstAddr = htonll(hdr->ethernet.dstAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
@@ -240,7 +245,6 @@ if (/* hdr->ipv4.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = htonll(hdr->ethernet.srcAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];

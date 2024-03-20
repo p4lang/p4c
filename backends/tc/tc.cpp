@@ -91,7 +91,6 @@ int main(int argc, char *const argv[]) {
     }
     TC::Backend backend(toplevel, &midEnd.refMap, &midEnd.typeMap, options);
     if (!backend.process()) return 1;
-
     cstring progName = backend.tcIR->getPipelineName();
     cstring introspecFile = progName + ".json";
     if (!options.outputFolder.isNullOrEmpty()) {
@@ -108,9 +107,10 @@ int main(int argc, char *const argv[]) {
             return 1;
         }
     }
+    backend.serialize();
     if (::errorCount() > 0) {
+        std::remove(introspecFile);
         return 1;
     }
-    backend.serialize();
     return ::errorCount() > 0;
 }
