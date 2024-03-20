@@ -111,9 +111,18 @@ if (/* hdr->ipv4.isValid() */
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
+                                    if (value->is_default_miss_act) 
+                                    {
+/* send_to_port(p4tc_filter_fields.ipv4_tbl_1_next_hop_vport) */
+                                        compiler_meta__->drop = false;
+                                        send_to_port(p4tc_filter_fields.ipv4_tbl_1_next_hop_vport);
+                                    }
+                                    else
+                                    {
 /* send_to_port(value->u.MainControlImpl_next_hop.vport) */
-                                    compiler_meta__->drop = false;
-                                    send_to_port(value->u.MainControlImpl_next_hop.vport);
+                                        compiler_meta__->drop = false;
+                                        send_to_port(value->u.MainControlImpl_next_hop.vport);
+                                    }
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
@@ -161,9 +170,18 @@ if (/* hdr->ipv4.isValid() */
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
+                                    if (value->is_default_miss_act) 
+                                    {
+/* send_to_port(p4tc_filter_fields.ipv4_tbl_2_next_hop_vport) */
+                                        compiler_meta__->drop = false;
+                                        send_to_port(p4tc_filter_fields.ipv4_tbl_2_next_hop_vport);
+                                    }
+                                    else
+                                    {
 /* send_to_port(value->u.MainControlImpl_next_hop.vport) */
-                                    compiler_meta__->drop = false;
-                                    send_to_port(value->u.MainControlImpl_next_hop.vport);
+                                        compiler_meta__->drop = false;
+                                        send_to_port(value->u.MainControlImpl_next_hop.vport);
+                                    }
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP: 

@@ -131,29 +131,20 @@ void PNAEbpfGenerator::emitP4TCFilterFields(EBPF::CodeBuilder *builder) const {
 }
 
 void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
-    std::vector<cstring> actionParamList;
     for (auto table : tcIR->tcPipeline->tableDefs) {
         if (table->isTcMayOverride) {
             cstring tblName = table->getTableName();
             cstring defaultActionName = table->defaultMissAction->getActionName();
-            auto actionNameStr = defaultActionName.c_str();
-            for (long unsigned int i = 0; i < defaultActionName.size(); i++) {
-                if (actionNameStr[i] == '/') {
-                    defaultActionName = defaultActionName.substr(i + 1, defaultActionName.size());
-                    break;
-                }
-            }
+            defaultActionName = defaultActionName.substr(
+                defaultActionName.find('/') - defaultActionName.begin() + 1,
+                defaultActionName.size());
             for (auto param : table->defaultMissActionParams) {
                 cstring paramName = param->paramDetail->getParamName();
                 cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
-                auto itr = find(actionParamList.begin(), actionParamList.end(), placeholder);
-                if (itr == actionParamList.end()) {
-                    actionParamList.push_back(placeholder);
-                    cstring typeName = param->paramDetail->getParamType();
-                    builder->emitIndent();
-                    builder->appendFormat("%s %s", typeName, placeholder);
-                    builder->endOfStatement(true);
-                }
+                cstring typeName = param->paramDetail->getParamType();
+                builder->emitIndent();
+                builder->appendFormat("%s %s", typeName, placeholder);
+                builder->endOfStatement(true);
             }
         }
     }
@@ -965,16 +956,63 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
                 builder->target->emitTraceMessage(builder, msgStr.c_str());
             }
         }
+        bool generateDefaultMissCode = false;
+        for (auto tbl : tcIR->tcPipeline->tableDefs) {
+            if (tbl->getTableName() == table->container->name.originalName) {
+                if (tbl->isTcMayOverride) {
+                    cstring defaultActionName = tbl->defaultMissAction->getActionName();
+                    defaultActionName = defaultActionName.substr(
+                        defaultActionName.find('/') - defaultActionName.begin() + 1,
+                        defaultActionName.size());
+                    if (defaultActionName == action->name.originalName)
+                        generateDefaultMissCode = true;
+                }
+            }
+        }
+        if (generateDefaultMissCode) {
+            builder->emitIndent();
+            builder->appendFormat("{");
+            builder->newline();
+            builder->increaseIndent();
 
-        builder->emitIndent();
+            builder->emitIndent();
+            builder->appendFormat("if (%s->is_default_miss_act) ", valueName.c_str());
+            builder->newline();
 
-        auto visitor = createActionTranslationVisitor(valueName, program);
-        visitor->setBuilder(builder);
-        visitor->copySubstitutions(codeGen);
-        visitor->copyPointerVariables(codeGen);
+            builder->emitIndent();
+            auto defaultVisitor = createActionTranslationVisitor(valueName, program, action, true);
+            defaultVisitor->setBuilder(builder);
+            defaultVisitor->copySubstitutions(codeGen);
+            defaultVisitor->copyPointerVariables(codeGen);
+            action->apply(*defaultVisitor);
+            builder->newline();
 
-        action->apply(*visitor);
-        builder->newline();
+            builder->emitIndent();
+            builder->appendFormat("else");
+            builder->newline();
+
+            builder->emitIndent();
+            auto visitor = createActionTranslationVisitor(valueName, program, action, false);
+            visitor->setBuilder(builder);
+            visitor->copySubstitutions(codeGen);
+            visitor->copyPointerVariables(codeGen);
+            action->apply(*visitor);
+            builder->newline();
+
+            builder->decreaseIndent();
+            builder->emitIndent();
+            builder->appendFormat("}");
+            builder->newline();
+        } else {
+            builder->emitIndent();
+            auto visitor = createActionTranslationVisitor(valueName, program, action, false);
+            visitor->setBuilder(builder);
+            visitor->copySubstitutions(codeGen);
+            visitor->copyPointerVariables(codeGen);
+            action->apply(*visitor);
+            builder->newline();
+        }
+
         builder->emitIndent();
         builder->appendLine("break;");
         builder->decreaseIndent();
@@ -1856,14 +1894,16 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
     return EBPF::CodeGenInspector::preorder(a);
 }
 // =====================ActionTranslationVisitorPNA=============================
-ActionTranslationVisitorPNA::ActionTranslationVisitorPNA(const EBPF::EBPFProgram *program,
-                                                         cstring valueName,
-                                                         const EBPF::EBPFTablePSA *table,
-                                                         const ConvertToBackendIR *tcIR)
+ActionTranslationVisitorPNA::ActionTranslationVisitorPNA(
+    const EBPF::EBPFProgram *program, cstring valueName, const EBPF::EBPFTablePSA *table,
+    const ConvertToBackendIR *tcIR, const IR::P4Action *action, bool isDefaultAction)
     : EBPF::CodeGenInspector(program->refMap, program->typeMap),
       EBPF::ActionTranslationVisitor(valueName, program),
       ControlBodyTranslatorPNA(program->as<EBPF::EBPFPipeline>().control, tcIR, table),
-      table(table) {}
+      table(table),
+      isDefaultAction(isDefaultAction) {
+    action = action;
+}
 
 bool ActionTranslationVisitorPNA::preorder(const IR::PathExpression *pe) {
     if (isActionParameter(pe)) {
@@ -1884,7 +1924,15 @@ bool ActionTranslationVisitorPNA::isActionParameter(const IR::Expression *expres
 cstring ActionTranslationVisitorPNA::getParamInstanceName(const IR::Expression *expression) const {
     if (auto cast = expression->to<IR::Cast>()) expression = cast->expr;
 
-    return EBPF::ActionTranslationVisitor::getParamInstanceName(expression);
+    if (isDefaultAction) {
+        cstring actionName = action->name.originalName;
+        auto paramStr = Util::printf_format("p4tc_filter_fields.%s_%s_%s",
+                                            table->table->container->name.originalName, actionName,
+                                            expression->toString());
+        return paramStr;
+    } else {
+        return EBPF::ActionTranslationVisitor::getParamInstanceName(expression);
+    }
 }
 
 cstring ActionTranslationVisitorPNA::getParamName(const IR::PathExpression *expr) {
@@ -1895,9 +1943,10 @@ cstring ActionTranslationVisitorPNA::getParamName(const IR::PathExpression *expr
 }
 
 EBPF::ActionTranslationVisitor *EBPFTablePNA::createActionTranslationVisitor(
-    cstring valueName, const EBPF::EBPFProgram *program) const {
+    cstring valueName, const EBPF::EBPFProgram *program, const IR::P4Action *action,
+    bool isDefault) const {
     return new ActionTranslationVisitorPNA(program->checkedTo<EBPF::EBPFPipeline>(), valueName,
-                                           this, tcIR);
+                                           this, tcIR, action, isDefault);
 }
 
 void EBPFTablePNA::validateKeys() const {
