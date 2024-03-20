@@ -1,0 +1,3 @@
+stack0.p4(7): [--Werror=type-error] error: Invalid size of header stack header h[0]. The size must be a positive integer.
+        h[SIZE] stack;
+        ^^^^^^^

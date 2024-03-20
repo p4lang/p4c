@@ -5,7 +5,7 @@ header H {
 control c(out bit<32> v) {
     apply {
         bit<32> b;
-        H[0] h;
+        H[1] h;
         v = 32w128;
     }
 }
