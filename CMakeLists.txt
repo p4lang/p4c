@@ -15,6 +15,8 @@
 # This is the CMake version supplied by Ubuntu 20.04.
 cmake_minimum_required (VERSION 3.16.3 FATAL_ERROR)
 
+option(CMAKE_LINT_ONLY "Build only the linting tools without checking for all dependencies" OFF)
+
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
     MESSAGE(STATUS "Enabling ccache")
