@@ -43,7 +43,7 @@ class ComputeDefUse : public Inspector,
                       public ControlFlowVisitor,
                       public P4WriteContext,
                       public P4::ResolutionContext {
-    ComputeDefUse *clone() const { return new ComputeDefUse(*this); }
+    ComputeDefUse *clone() const override { return new ComputeDefUse(*this); }
     void flow_merge(Visitor &) override;
     void flow_copy(ControlFlowVisitor &) override;
     enum { SKIPPING, NORMAL, READ_ONLY, WRITE_ONLY } state = SKIPPING;
