@@ -447,8 +447,8 @@ class MapEnumerator final : public Enumerator<S> {
 };
 
 template <typename T, typename Mapper>
-MapEnumerator(Enumerator<T> *, Mapper)
-    -> MapEnumerator<T, typename std::invoke_result_t<Mapper, T>, Mapper>;
+MapEnumerator(Enumerator<T> *,
+              Mapper) -> MapEnumerator<T, typename std::invoke_result_t<Mapper, T>, Mapper>;
 
 /////////////////////////////////////////////////////////////////////
 
