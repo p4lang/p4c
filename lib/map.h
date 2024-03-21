@@ -148,8 +148,8 @@ class IterValues {
         using iterator_category = typename std::iterator_traits<PairIter>::iterator_category;
         using value_type = typename std::iterator_traits<PairIter>::value_type::second_type;
         using difference_type = typename std::iterator_traits<PairIter>::difference_type;
-        using pointer = value_type *;
-        using reference = value_type &;
+        using pointer = decltype(&it->second);
+        using reference = decltype(*&it->second);
 
         explicit iterator(PairIter i) : it(i) {}
         iterator &operator++() {
@@ -172,8 +172,8 @@ class IterValues {
         }
         bool operator==(const iterator &i) const { return it == i.it; }
         bool operator!=(const iterator &i) const { return it != i.it; }
-        auto operator*() const { return it->second; }
-        auto operator->() const { return &it->second; }
+        reference operator*() const { return it->second; }
+        pointer operator->() const { return &it->second; }
     } b, e;
 
  public:
