@@ -48,6 +48,17 @@ TEST(NetHash, crc32) {
     EXPECT_EQ(apply<crc32>("foobar%142qrs"), 0x95E1D00B_u32);
 }
 
+TEST(NetHash, crc32FCS) {
+    EXPECT_EQ(apply<crc32FCS>({}), 0x00000000_u32);
+    EXPECT_EQ(apply<crc32FCS>({0}), 0xB1F7404B_u32);
+    EXPECT_EQ(apply<crc32FCS>({0, 0, 0, 0, 0}), 0xB8EF4463_u32);
+    EXPECT_EQ(apply<crc32FCS>({0x0b, 0xb8, 0x1f, 0x90}), 0xEDA1EA6D_u32);
+    EXPECT_EQ(apply<crc32FCS>("fooo"), 0xCD961E19_u32);
+    EXPECT_EQ(apply<crc32FCS>("a"), 0x19939B6B_u32);
+    EXPECT_EQ(apply<crc32FCS>("foobar"), 0x52C03DC1_u32);
+    EXPECT_EQ(apply<crc32FCS>("foobar%142qrs"), 0xF3630DE4_u32);
+}
+
 TEST(NetHash, crc16) {
     EXPECT_EQ(apply<crc16>({}), 0x0000_u16);
     EXPECT_EQ(apply<crc16>({0}), 0x0000_u16);
@@ -57,6 +68,17 @@ TEST(NetHash, crc16) {
     EXPECT_EQ(apply<crc16>("a"), 0xE8C1_u16);
     EXPECT_EQ(apply<crc16>("foobar"), 0xB0C8_u16);
     EXPECT_EQ(apply<crc16>("foobar%142qrs"), 0x3DA9_u16);
+}
+
+TEST(NetHash, crc16ANSI) {
+    EXPECT_EQ(apply<crc16ANSI>({}), 0x0000_u16);
+    EXPECT_EQ(apply<crc16ANSI>({0}), 0x0000_u16);
+    EXPECT_EQ(apply<crc16ANSI>({0, 0, 0, 0, 0}), 0x0000_u16);
+    EXPECT_EQ(apply<crc16ANSI>({0x0b, 0xb8, 0x1f, 0x90}), 0xD400_u16);
+    EXPECT_EQ(apply<crc16ANSI>("fooo"), 0x9C3A_u16);
+    EXPECT_EQ(apply<crc16ANSI>("a"), 0x8145_u16);
+    EXPECT_EQ(apply<crc16ANSI>("foobar"), 0x8F5B_u16);
+    EXPECT_EQ(apply<crc16ANSI>("foobar%142qrs"), 0x5A5E_u16);
 }
 
 TEST(NetHash, crcCCITT) {

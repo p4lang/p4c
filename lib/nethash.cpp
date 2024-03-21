@@ -159,8 +159,16 @@ uint16_t crc16(const uint8_t *buf, size_t len) {
     return crcGeneric<uint16_t, 0, 0, table_crc16, Reflect>(buf, len);
 }
 
+uint16_t crc16ANSI(const uint8_t *buf, size_t len) {
+    return crcGeneric<uint16_t, 0, 0, table_crc16, Identity>(buf, len);
+}
+
 uint32_t crc32(const uint8_t *buf, size_t len) {
     return crcGeneric<uint32_t, 0xffffffff, 0xffffffff, table_crc32, Reflect>(buf, len);
+}
+
+uint32_t crc32FCS(const uint8_t *buf, size_t len) {
+    return crcGeneric<uint32_t, 0xffffffff, 0xffffffff, table_crc32, Identity>(buf, len);
 }
 
 uint16_t crcCCITT(const uint8_t *buf, size_t len) {
