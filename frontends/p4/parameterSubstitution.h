@@ -75,7 +75,7 @@ class ParameterSubstitution : public IHasDbPrint {
 
     /// Returns parameters in the order they were added
     Util::Enumerator<const IR::Parameter *> *getParametersInArgumentOrder() const {
-        return Util::Enumerator<const IR::Parameter *>::createEnumerator(parameters);
+        return Util::enumerate(parameters);
     }
 
     /// Returns parameters in the order of the parameter list.

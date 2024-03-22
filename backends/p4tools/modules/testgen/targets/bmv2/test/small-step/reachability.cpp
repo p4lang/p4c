@@ -75,11 +75,10 @@ ReturnedInfo loadExampleForReachability(const char *curFile) {
 
 template <class T>
 auto getNodeByType(const IR::P4Program *program) {
-    auto filter = [](const IR::IDeclaration *d) {
+    return program->getDeclarations()->where([](const IR::IDeclaration *d) {
         CHECK_NULL(d);
         return d->is<T>();
-    };
-    return program->getDeclarations()->where(filter);
+    });
 }
 
 template <class Node>
