@@ -48,7 +48,7 @@ macro(p4c_obtain_abseil)
 
     # Suppress warnings for all Abseil targets.
     get_all_targets(ABSL_BUILD_TARGETS ${absl_SOURCE_DIR})
-    foreach(target in ${ABSL_BUILD_TARGETS})
+    foreach(target ${ABSL_BUILD_TARGETS})
       if(target MATCHES "absl_*")
         # Do not suppress warnings for Abseil library targets that are aliased.
         get_target_property(target_type ${target} TYPE)
