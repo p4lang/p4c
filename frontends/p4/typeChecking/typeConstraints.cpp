@@ -32,6 +32,12 @@ void TypeConstraints::addEqualityConstraint(const IR::Node *source, const IR::Ty
     add(c);
 }
 
+void TypeConstraints::addImplicitCastConstraint(const IR::Node *source, const IR::Type *left,
+                                                const IR::Type *right) {
+    auto c = new CanBeImplicitlyCastConstraint(left, right, source);
+    add(c);
+}
+
 TypeVariableSubstitution *TypeConstraints::solve() {
     LOG3("Solving constraints:\n" << *this);
     currentSubstitution = new TypeVariableSubstitution();

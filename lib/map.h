@@ -80,15 +80,16 @@ typename Map::mapped_type *getref(Map *m, const Key &key) {
 /* iterate over the keys in a map */
 template <class PairIter>
 class IterKeys {
-    class iterator
-        : public std::iterator<typename std::iterator_traits<PairIter>::iterator_category,
-                               typename std::iterator_traits<PairIter>::value_type::first_type,
-                               typename std::iterator_traits<PairIter>::difference_type,
-                               typename std::iterator_traits<PairIter>::value_type::first_type *,
-                               typename std::iterator_traits<PairIter>::value_type::first_type &> {
+    class iterator {
         PairIter it;
 
      public:
+        using iterator_category = typename std::iterator_traits<PairIter>::iterator_category;
+        using value_type = typename std::iterator_traits<PairIter>::value_type::first_type;
+        using difference_type = typename std::iterator_traits<PairIter>::difference_type;
+        using pointer = decltype(&it->first);
+        using reference = decltype(*&it->first);
+
         explicit iterator(PairIter i) : it(i) {}
         iterator &operator++() {
             ++it;
@@ -110,8 +111,8 @@ class IterKeys {
         }
         bool operator==(const iterator &i) const { return it == i.it; }
         bool operator!=(const iterator &i) const { return it != i.it; }
-        decltype(*&it->first) operator*() const { return it->first; }
-        decltype(&it->first) operator->() const { return &it->first; }
+        reference operator*() const { return it->first; }
+        pointer operator->() const { return &it->first; }
     } b, e;
 
  public:
@@ -140,15 +141,16 @@ IterKeys<PairIter> Keys(std::pair<PairIter, PairIter> range) {
 /* iterate over the values in a map */
 template <class PairIter>
 class IterValues {
-    class iterator
-        : public std::iterator<typename std::iterator_traits<PairIter>::iterator_category,
-                               typename std::iterator_traits<PairIter>::value_type::second_type,
-                               typename std::iterator_traits<PairIter>::difference_type,
-                               typename std::iterator_traits<PairIter>::value_type::second_type *,
-                               typename std::iterator_traits<PairIter>::value_type::second_type &> {
+    class iterator {
         PairIter it;
 
      public:
+        using iterator_category = typename std::iterator_traits<PairIter>::iterator_category;
+        using value_type = typename std::iterator_traits<PairIter>::value_type::second_type;
+        using difference_type = typename std::iterator_traits<PairIter>::difference_type;
+        using pointer = decltype(&it->second);
+        using reference = decltype(*&it->second);
+
         explicit iterator(PairIter i) : it(i) {}
         iterator &operator++() {
             ++it;
@@ -170,11 +172,13 @@ class IterValues {
         }
         bool operator==(const iterator &i) const { return it == i.it; }
         bool operator!=(const iterator &i) const { return it != i.it; }
-        decltype(*&it->second) operator*() const { return it->second; }
-        decltype(&it->second) operator->() const { return &it->second; }
+        reference operator*() const { return it->second; }
+        pointer operator->() const { return &it->second; }
     } b, e;
 
  public:
+    using value_type = typename std::iterator_traits<PairIter>::value_type::second_type;
+
     template <class U>
     explicit IterValues(U &map) : b(map.begin()), e(map.end()) {}
     IterValues(PairIter b, PairIter e) : b(b), e(e) {}
@@ -202,12 +206,20 @@ template <class M>
 class MapForKey {
     M &map;
     typename M::key_type key;
-    class iterator : public std::iterator<std::forward_iterator_tag, typename M::value_type> {
+    class iterator {
+        using MapIt = decltype(map.begin);
+
         const MapForKey &self;
-        decltype(map.begin()) it;
+        MapIt it;
 
      public:
-        iterator(const MapForKey &s, decltype(map.begin()) i) : self(s), it(i) {}
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = typename M::value_type;
+        using difference_type = typename std::iterator_traits<MapIt>::difference_type;
+        using pointer = decltype(&it->second);
+        using reference = decltype(*&it->second);
+
+        iterator(const MapForKey &s, MapIt i) : self(s), it(std::move(i)) {}
         iterator &operator++() {
             if (++it != self.map.end() && it->first != self.key) it = self.map.end();
             return *this;
@@ -219,8 +231,8 @@ class MapForKey {
         }
         bool operator==(const iterator &i) const { return it == i.it; }
         bool operator!=(const iterator &i) const { return it != i.it; }
-        decltype(*&it->second) operator*() const { return it->second; }
-        decltype(&it->second) operator->() const { return &it->second; }
+        reference operator*() const { return it->second; }
+        pointer operator->() const { return &it->second; }
     };
 
  public:

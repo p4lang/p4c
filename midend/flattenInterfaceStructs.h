@@ -105,17 +105,13 @@ struct StructTypeReplacement : public IHasDbPrint {
                  const IR::Annotations *annotations, IR::IndexedVector<IR::StructField> *fields,
                  AnnotationSelectionPolicy *policy) {
         // Drop name annotations
-        IR::Annotations::Filter f = [](const IR::Annotation *a) {
-            return a->name != IR::Annotation::nameAnnotation;
-        };
-        annotations = annotations->where(f);
+        annotations = annotations->where(
+            [](const IR::Annotation *a) { return a->name != IR::Annotation::nameAnnotation; });
         if (auto st = type->to<T>()) {
-            std::function<bool(const IR::Annotation *)> selector =
-                [&policy](const IR::Annotation *annot) {
-                    if (!policy) return false;
-                    return policy->keep(annot);
-                };
-            auto sannotations = st->annotations->where(selector);
+            auto sannotations = st->annotations->where([policy](const IR::Annotation *annot) {
+                if (!policy) return false;
+                return policy->keep(annot);
+            });
             structFieldMap.emplace(prefix, st);
             for (auto f : st->fields) {
                 auto na = new IR::Annotations();

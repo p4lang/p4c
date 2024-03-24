@@ -223,7 +223,7 @@ void IR::P4Control::dbprint(std::ostream &out) const {
 }
 
 void IR::V1Program::dbprint(std::ostream &out) const {
-    for (auto &obj : Values(scope)) out << obj << Log::endl;
+    for (const auto &obj : Values(scope)) out << obj << Log::endl;
 }
 
 void IR::P4Program::dbprint(std::ostream &out) const {

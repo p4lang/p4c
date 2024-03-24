@@ -21,6 +21,7 @@ limitations under the License.
 namespace Util {
 namespace Detail {
 using std::begin;
+using std::end;
 
 template <typename Container>
 using IterOfContainer = decltype(begin(std::declval<Container &>()));
