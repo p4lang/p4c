@@ -1,0 +1,6 @@
+serEnumImplCast.p4(16): [--Werror=type-error] error: '2w0': values of type 'bit<2>' cannot be implicitly cast to type 'foo_t'
+        default_action = set_x(2w0); // not allowed to implicitly cast to serenum
+                               ^^^
+serEnumImplCast.p4(3)
+enum bit<2> foo_t { A = 0, B = 1, C = 2, D = 3 }
+            ^^^^^
