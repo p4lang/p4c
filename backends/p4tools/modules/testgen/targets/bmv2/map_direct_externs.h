@@ -11,7 +11,11 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-/// A map of direct extern declarations which are attached to a table.
+/// A mapping of the control plane name of extern declarations which are associated with a table.
+/// Such an extern is referred to as direct extern. There can only be one extern associated with a
+/// table in BMv2.
+/// We are using the cstring name and not an IR::Declaration pointer for the mapping because other
+/// passes may clone or transform the IR::Declaration node, invalidating this mapping.
 using DirectExternMap = std::map<cstring, const IR::P4Table *>;
 
 /// A lightweight visitor, which collects all the declarations in the program then checks whether a

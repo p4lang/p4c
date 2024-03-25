@@ -54,10 +54,9 @@ bool MapDirectExterns::preorder(const IR::P4Table *table) {
         const auto *impl = table->properties->getProperty(tableProperty);
         if (impl != nullptr) {
             auto declInstanceOpt = getExternFromTableImplementation(impl);
-            if (!declInstanceOpt.has_value()) {
-                return false;
+            if (declInstanceOpt.has_value()) {
+                directExternMap.emplace(declInstanceOpt.value()->controlPlaneName(), table);
             }
-            directExternMap.emplace(declInstanceOpt.value()->controlPlaneName(), table);
         }
     }
     return false;
