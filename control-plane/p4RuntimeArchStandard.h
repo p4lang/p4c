@@ -797,13 +797,13 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         if (selectorSizeSemanticsAnnotation) {
             if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR) {
                 auto selectorSizeSemantics =
-                    selectorSizeSemanticsAnnotation->expr[0]->->checkedTo<IR::StringLiteral>();
+                    selectorSizeSemanticsAnnotation->expr[0]->checkedTo<IR::StringLiteral>();
                 CHECK_NULL(selectorSizeSemantics);
                 // The expression may only contain 'sum_of_weights' or 'sum_of_members'
                 // in any case.
-                if (selectorSizeSemantics.toUpper() == "SUM_OF_WEIGHTS") {
+                if (selectorSizeSemantics->value.toUpper() == "SUM_OF_WEIGHTS") {
                     profile->mutable_sum_of_weights();
-                } else if (selectorSizeSemantics.toUpper() == "SUM_OF_MEMBERS") {
+                } else if (selectorSizeSemantics->value.toUpper() == "SUM_OF_MEMBERS") {
                     profile->mutable_sum_of_members();
                 } else {
                     ::error(ErrorType::ERR_INVALID,
