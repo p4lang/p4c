@@ -504,6 +504,28 @@ class SwitchStatement : Statement {
         split.run_visit(); }
 }
 
+class ForStatement : Statement {
+    inline IndexedVector<StatOrDecl>    init;
+    Expression                          condition;
+    inline IndexedVector<StatOrDecl>    updates;
+    Statement                           body;
+    visit_children {
+        v.visit(init, "init");
+        v.visit(condition, "condition");
+        // FIXME -- need visit closure over the body and updates + condition
+        v.visit(body, "body");
+        v.visit(updates, "updates"); }
+}
+
+// FIXME -- should we try to directly convert this to a ForStatement in the parser?
+class ForInStatement : Statement {
+    Declaration_Variable                decl;
+    Expression                          collection;
+    Statement                           body;
+}
+
+/////////////////////////////////////////////////////////////
+
 class Function : Declaration, IFunctional, ISimpleNamespace, INestedNamespace {
     Type_Method    type;
     BlockStatement body;

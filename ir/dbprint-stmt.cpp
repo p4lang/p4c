@@ -87,3 +87,26 @@ void IR::SwitchStatement::dbprint(std::ostream &out) const {
     }
     out << unindent << " }" << setprec(prec);
 }
+
+void IR::ForStatement::dbprint(std::ostream &out) const {
+    int prec = getprec(out);
+    out << Prec_Low << "for (";
+    bool first = true;
+    for (auto *sd : init) {
+        if (!first) out << ", ";
+        out << sd;
+        first = false; }
+    out << "; " << condition << "; ";
+    first = true;
+    for (auto *sd : updates) {
+        if (!first) out << ", ";
+        out << sd;
+        first = false; }
+    out << "{" << indent << Log::endl << body << " }" << unindent << setprec(prec);
+}
+
+void IR::ForInStatement::dbprint(std::ostream &out) const {
+    int prec = getprec(out);
+    out << Prec_Low << "for (" << decl << " in " << collection << ") {" << indent
+        << Log::endl << body << " }" << unindent << setprec(prec);
+}
