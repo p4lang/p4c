@@ -93,6 +93,9 @@ bool P4WriteContext::isRead(bool root_value) {
         }
     }
     if (ctxt->node->is<IR::IndexedVector<IR::StatOrDecl>>()) return false;
-    if (ctxt->node->is<IR::IfStatement>()) return ctxt->child_index == 0;
+    if (ctxt->node->is<IR::IfStatement>())
+        if (ctxt->node->is<IR::IfStatement>() || ctxt->node->is<IR::ForEachStatement>())
+            return ctxt->child_index == 0;
+
     return true;
 }

@@ -234,6 +234,7 @@ class ToP4 : public Inspector {
     bool preorder(const IR::SwitchCase *s) override;
     bool preorder(const IR::SwitchStatement *s) override;
     bool preorder(const IR::IfStatement *s) override;
+    bool preorder(const IR::ForEachStatement *s) override;
 
     // misc
     bool preorder(const IR::NamedExpression *ne) override;

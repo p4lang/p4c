@@ -1192,6 +1192,33 @@ bool ToP4::preorder(const IR::IfStatement *s) {
     return false;
 }
 
+bool ToP4::preorder(const IR::ForEachStatement *s) {
+    dump(2);
+    builder.append("foreach (");
+    auto type = s->index[0]->to<IR::Declaration_Variable>()->type->getP4Type();
+    CHECK_NULL(type);
+    visit(type);
+    builder.spc();
+    builder.append(s->index[0]->name);
+    builder.append(" in ");
+    visit(s->range);
+    builder.append(") ");
+    if (!s->body->is<IR::BlockStatement>()) {
+        builder.append("{");
+        builder.increaseIndent();
+        builder.newline();
+        builder.emitIndent();
+    }
+    visit(s->body);
+    if (!s->body->is<IR::BlockStatement>()) {
+        builder.newline();
+        builder.decreaseIndent();
+        builder.emitIndent();
+        builder.append("}");
+    }
+    return false;
+}
+
 bool ToP4::preorder(const IR::MethodCallStatement *s) {
     dump(3);
     visit(s->methodCall);

@@ -674,6 +674,19 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::SwitchStatement *statement) 
     return rv;
 }
 
+const IR::Node *DoSimplifyExpressions::preorder(IR::ForEachStatement *statement) {
+    IR::Statement *rv = statement;
+    visit(statement->range, "index");
+    if (!statements.empty()) {
+        statements.push_back(statement);
+        rv = new IR::BlockStatement(statements);
+        statements.clear();
+    }
+    visit(statement->body, "body");
+    prune();
+    return rv;
+}
+
 void DoSimplifyExpressions::end_apply(const IR::Node *) {
     BUG_CHECK(toInsert.empty(), "DoSimplifyExpressions::end_apply orphaned declarations");
     BUG_CHECK(statements.empty(), "DoSimplifyExpressions::end_apply orphaned statements");

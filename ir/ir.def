@@ -454,6 +454,42 @@ class IfStatement : Statement {
         SplitFlowVisit<Statement>(v, ifTrue, ifFalse).run_visit(); }
 }
 
+class ForEachStatement : Statement, ISimpleNamespace {
+    // This is hack: index is always of length 1, but we use it to simplify the
+    // construction of the namespace
+    inline IndexedVector<Declaration> index;
+    // Another small hack: use PathExpression to capture reference to index.
+    // This will make it visible to various resolvers and preserve even if
+    // it is not referenced in the loop body.
+    PathExpression                    indexHolder;
+    Expression                        range;
+    Statement                         body;
+    IDeclaration getDeclByName(cstring name) const override {
+        return index.getDeclaration(name); }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return index.getDeclarations(); }
+    ForEachStatement(Util::SourceInfo srcInfo,
+                     const IR::Declaration* idx,
+                     const IR::Expression* range, const IR::Statement* body)
+        : Statement(srcInfo),
+          indexHolder(new PathExpression(ID(idx->getName()))),
+          range(range), body(body) {
+        index.push_back(idx);
+        validate();
+    }
+    ForEachStatement(const IR::Declaration* idx,
+                     const IR::Expression* range, const IR::Statement* body)
+        : indexHolder(new PathExpression(ID(idx->getName()))),
+          range(range), body(body) {
+        index.push_back(idx);
+        validate();
+    }
+
+    validate {
+        BUG_CHECK(index.size() == 1, "index must be a single decl");
+    }
+}
+
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
     optional Annotations                        annotations = Annotations::empty;
     optional inline IndexedVector<StatOrDecl>   components;
