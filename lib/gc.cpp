@@ -262,6 +262,16 @@ void *calloc(size_t size, size_t elsize) {
     if (rv) memset(rv, 0, size);
     return rv;
 }
+int posix_memalign(void **memptr, size_t alignment, size_t size)
+#ifndef __APPLE__
+    noexcept
+#endif
+{
+    maybe_initialize_gc();
+
+    TRACE_ALLOC(size)
+    return GC_posix_memalign(memptr, alignment, size);
+}
 
 #if HAVE_GC_PRINT_STATS
 /* GC_print_stats is not exported as an API symbol and cannot be used on some systems */

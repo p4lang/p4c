@@ -314,11 +314,12 @@ void hash_vector_base::redo_hash() {
         if (erased[i]) continue;
         const void *k = getkey(i);
         if (find(k, &cache)) {
-            if (info->ismulti)
-                while (find_next(k, &cache))
-                    ;
-            else
+            if (info->ismulti) {
+                while (find_next(k, &cache)) {
+                }
+            } else {
                 BUG("dupliacte keys in hash_vector_base::redo_hash");
+            }
         }
         if (j != i) {
             moveentry(j, i);
@@ -336,16 +337,16 @@ size_t hash_vector_base::hv_insert(const void *key, lookup_cache *cache) {
     if (cache) {
 #ifndef NDEBUG
         if (find(key, &local) && info->ismulti)
-            while (find_next(key, &local))
-                ;
+            while (find_next(key, &local)) {
+            }
         BUG_CHECK(local.slot == cache->slot && local.collisions == cache->collisions,
                   "invalid cache in hash_vector_base::hv_insert");
 #endif
     } else {
         cache = &local;
         if (find(key, cache) && info->ismulti)
-            while (find_next(key, cache))
-                ;
+            while (find_next(key, cache)) {
+            }
     }
     if ((collisions += cache->collisions) > hashsize / 2) {
         /* Too many collisions -- redo hash table */
@@ -372,8 +373,8 @@ size_t hash_vector_base::hv_insert(const void *key, lookup_cache *cache) {
         }
         redo_hash();
         if (find(key, cache) && info->ismulti)
-            while (find_next(key, cache))
-                ;
+            while (find_next(key, cache)) {
+            }
     }
     if ((idx = info->gethash(this, cache->slot)) == 0) {
         bool need_redo = false;
@@ -395,8 +396,8 @@ size_t hash_vector_base::hv_insert(const void *key, lookup_cache *cache) {
             allochash();
             redo_hash();
             if (find(key, cache) && info->ismulti)
-                while (find_next(key, cache))
-                    ;
+                while (find_next(key, cache)) {
+                }
         }
         info->sethash(this, cache->slot, limit() + 1);
         inuse++;
@@ -413,8 +414,8 @@ size_t hash_vector_base::remove(const void *key, lookup_cache *cache) {
     if (cache) {
 #ifndef NDEBUG
         if (find(key, &local) && info->ismulti)
-            while (local.slot != cache->slot && find_next(key, cache))
-                ;
+            while (local.slot != cache->slot && find_next(key, cache)) {
+            }
         BUG_CHECK(local.slot == cache->slot && local.collisions == cache->collisions,
                   "invalid cache in hash_vector_base::remove");
 #endif

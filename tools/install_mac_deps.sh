@@ -62,4 +62,5 @@ fi
 source ~/.bash_profile
 
 # Install required pip packages
-pip3 install --user -r requirements.txt
+# TODO: Should we use --break-system-packages or should we set up a venv?
+pip3 install --user --break-system-packages -r requirements.txt

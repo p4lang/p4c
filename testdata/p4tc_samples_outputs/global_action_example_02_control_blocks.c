@@ -15,6 +15,9 @@ struct __attribute__((__packed__)) ingress_nh_table2_key {
 #define INGRESS_NH_TABLE2_ACT_NOACTION 0
 struct __attribute__((__packed__)) ingress_nh_table2_value {
     unsigned int action;
+    u32 hit:1,
+    is_default_miss_act:1,
+    is_default_hit_act:1;
     union {
         struct {
         } _NoAction;
@@ -37,6 +40,9 @@ struct __attribute__((__packed__)) ingress_nh_table_key {
 #define INGRESS_NH_TABLE_ACT_NOACTION 0
 struct __attribute__((__packed__)) ingress_nh_table_value {
     unsigned int action;
+    u32 hit:1,
+    is_default_miss_act:1,
+    is_default_hit_act:1;
     union {
         struct {
         } _NoAction;
@@ -82,7 +88,8 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                     .pipeid = p4tc_filter_fields.pipeid,
                     .tblid = 1
                 };
-                struct ingress_nh_table_key key = {};
+                struct ingress_nh_table_key key;
+                __builtin_memset(&key, 0, sizeof(key));
                 key.keysz = 32;
                 key.field0 = hdr->ipv4.srcAddr;
                 struct p4tc_table_entry_act_bpf *act_bpf;
@@ -95,7 +102,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                     /* miss; find default action */
                     hit = 0;
                 } else {
-                    hit = 1;
+                    hit = value->hit;
                 }
                 if (value != NULL) {
                     /* run action */
@@ -131,7 +138,8 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                     .pipeid = p4tc_filter_fields.pipeid,
                     .tblid = 2
                 };
-                struct ingress_nh_table2_key key = {};
+                struct ingress_nh_table2_key key;
+                __builtin_memset(&key, 0, sizeof(key));
                 key.keysz = 32;
                 key.field0 = hdr->ipv4.srcAddr;
                 struct p4tc_table_entry_act_bpf *act_bpf;
@@ -144,7 +152,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                     /* miss; find default action */
                     hit = 0;
                 } else {
-                    hit = 1;
+                    hit = value->hit;
                 }
                 if (value != NULL) {
                     /* run action */

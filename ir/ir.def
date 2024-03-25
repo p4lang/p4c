@@ -500,7 +500,8 @@ class SwitchStatement : Statement {
         split.run_visit(); }
 }
 
-class Function : Declaration, IFunctional, ISimpleNamespace, INestedNamespace {
+class Function : Declaration, IFunctional, IAnnotated, ISimpleNamespace, INestedNamespace {
+    optional Annotations        annotations = Annotations::empty;
     Type_Method    type;
     BlockStatement body;
     ParameterList getParameters() const override {
@@ -512,6 +513,7 @@ class Function : Declaration, IFunctional, ISimpleNamespace, INestedNamespace {
         return type->parameters->getDeclByName(name); }
     std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters }; }
+    Annotations getAnnotations() const override { return annotations; }
 }
 
 /////////////////////////////////////////////////////////////

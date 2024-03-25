@@ -15,6 +15,7 @@
 set (LIBP4CTOOLKIT_SRCS
     alloc_trace.cpp
     backtrace_exception.cpp
+    bitrange.cpp
     bitvec.cpp
     compile_context.cpp
     crash.cpp
@@ -92,3 +93,4 @@ add_library(p4ctoolkit STATIC ${LIBP4CTOOLKIT_SRCS})
 
 # Disable libcall (realloc, malloc) optimizations which may cause infinite loops.
 set_target_properties(p4ctoolkit PROPERTIES COMPILE_FLAGS -fno-builtin)
+target_link_libraries(p4ctoolkit absl::bits)
