@@ -231,7 +231,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
                    ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
                    INT KEY  LIST SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA PRIORITY RETURN
                    STATE STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
-%token<Token>      FOREACH
+%token<Token>      FOREACH BREAK CONTINUE
 
 %token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
@@ -318,7 +318,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::Expression*> intOrStr
 %type<IR::Declaration*> loopIndexDeclaration
 %type<IR::Expression*> rangeExpression
-%type<IR::Statement*> foreachStatement
+%type<IR::Statement*> foreachStatement breakStatement continueStatement
 
 // %precedence COMMA
 %precedence QUESTION
@@ -562,7 +562,9 @@ annotationToken
     | APPLY            { $$ = $1; }
     | BOOL             { $$ = $1; }
     | BIT              { $$ = $1; }
+    | BREAK            { $$ = $1; }
     | CONST            { $$ = $1; }
+    | CONTINUE         { $$ = $1; }
     | CONTROL          { $$ = $1; }
     | DEFAULT          { $$ = $1; }
     | ELSE             { $$ = $1; }
@@ -1229,6 +1231,14 @@ loopIndexDeclaration
     : typeRef name
                    { $$ = new IR::Declaration_Variable(@1, *$2, $1);
                      driver.structure->declareObject(*$2, $1->toString()); }
+
+breakStatement
+    : BREAK ";" { $$ = new IR::BreakStatement(@1); }
+    ;
+
+continueStatement
+    : CONTINUE ";" { $$ = new IR::ContinueStatement(@1); }
+    ;
 
 foreachStatement
     : FOREACH "("

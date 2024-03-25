@@ -454,6 +454,16 @@ class IfStatement : Statement {
         SplitFlowVisit<Statement>(v, ifTrue, ifFalse).run_visit(); }
 }
 
+class BreakStatement : Statement {
+    toString{ return "break"; }
+    dbprint { out << "break"; }
+}
+
+class ContinueStatement : Statement {
+    toString{ return "continue"; }
+    dbprint { out << "continue"; }
+}
+
 class ForEachStatement : Statement, ISimpleNamespace {
     // This is hack: index is always of length 1, but we use it to simplify the
     // construction of the namespace
