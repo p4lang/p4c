@@ -228,7 +228,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      RANGE ".."
 %token<Token>      TRUE FALSE THIS
 %token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
-                   ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
+                   ELSE ENTRIES ENUM ERROR EXIT EXTERN FOR HEADER HEADER_UNION IF IN INOUT
                    INT KEY  LIST SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA PRIORITY RETURN
                    STATE STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
 
@@ -270,7 +270,9 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::Statement*>       statement emptyStatement returnStatement
                             switchStatement exitStatement
                             assignmentOrMethodCallStatement conditionalStatement
+                            assignmentOrMethodCallStatementWithoutSemicolon
                             directApplication
+                            forStatement
 %type<IR::BlockStatement*>  blockStatement parserBlockStatement controlBody
                             objInitializer
 %type<IR::StatOrDecl*>      statementOrDeclaration parserStatement
@@ -282,7 +284,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::ParserState*>     parserState
 %type<IR::IndexedVector<IR::ParserState>*>  parserStates
 %type<IR::Declaration*>     constantDeclaration actionDeclaration
-                            variableDeclaration instantiation functionDeclaration
+                            variableDeclaration variableDeclarationWithoutSemicolon instantiation functionDeclaration
                             objDeclaration tableDeclaration controlLocalDeclaration
                             parserLocalElement valueSetDeclaration
 %type<IR::Type_Declaration*>  headerTypeDeclaration structTypeDeclaration
@@ -1180,18 +1182,22 @@ typedefDeclaration
 /*************************** STATEMENTS *************************/
 
 assignmentOrMethodCallStatement
+    : assignmentOrMethodCallStatementWithoutSemicolon ";"  { $$ = $1; }
+    ;
+
+assignmentOrMethodCallStatementWithoutSemicolon
     // These rules are overly permissive, but they avoid some conflicts
-    : lvalue "(" argumentList ")" ";"
+    : lvalue "(" argumentList ")"
         { auto mc = new IR::MethodCallExpression(@1 + @4, $1,
                                                  new IR::Vector<IR::Type>(), $3);
           $$ = new IR::MethodCallStatement(@1 + @4, mc); }
 
-    | lvalue l_angle typeArgumentList r_angle "(" argumentList ")" ";"
+    | lvalue l_angle typeArgumentList r_angle "(" argumentList ")"
         { auto mc = new IR::MethodCallExpression(@1 + @7,
                                                  $1, $3, $6);
           $$ = new IR::MethodCallStatement(@1 + @7, mc); }
 
-    | lvalue "=" expression ";"
+    | lvalue "=" expression
         { $$ = new IR::AssignmentStatement(@2, $1, $3); }
 
     ;
@@ -1239,6 +1245,7 @@ statement
     | returnStatement                  { $$ = $1; }
     | exitStatement                    { $$ = $1; }
     | switchStatement                  { $$ = $1; }
+    | forStatement                     { $$ = $1; }
     ;
 
 blockStatement
@@ -1281,6 +1288,49 @@ statementOrDeclaration
       // message if one erroneously attempts to perform an
       // instantiation inside of a block.
     | instantiation            { $$ = $1; }
+    ;
+
+forStatement
+    : FOR "(" forInitStatements ";"
+              expression ";"
+	      forUpdateStatements ")"
+      statement
+    { $$ = $9; }   // TODO: temporary placeholder code to avoid bison warning
+    | FOR "(" typeRef name IN forCollectionExpr ")"
+      statement
+    { $$ = $8; }   // TODO: temporary placeholder code to avoid bison warning
+    ;
+
+forInitStatements
+    : %empty
+    | forInitStatementsNonEmpty
+    ;
+
+forInitStatementsNonEmpty
+    : declOrAssignmentOrMethodCallStatement
+    | declOrAssignmentOrMethodCallStatement "," forInitStatementsNonEmpty
+    ;
+
+declOrAssignmentOrMethodCallStatement
+    : variableDeclarationWithoutSemicolon
+    | assignmentOrMethodCallStatementWithoutSemicolon
+    ;
+
+forUpdateStatements
+    : %empty
+    | forUpdateStatementsNonEmpty
+    ;
+
+forUpdateStatementsNonEmpty
+    : assignmentOrMethodCallStatementWithoutSemicolon
+    | assignmentOrMethodCallStatementWithoutSemicolon ","
+      forUpdateStatementsNonEmpty
+    ;
+
+forCollectionExpr
+    : expression
+    | expression ".." expression
+    | typeRef
     ;
 
 /************************* TABLE *********************************/
@@ -1386,12 +1436,16 @@ actionDeclaration
 /************************* VARIABLES *****************************/
 
 variableDeclaration
-    : annotations typeRef name optInitializer ";"
+    : variableDeclarationWithoutSemicolon ";"    { $$ = $1; }
+    ;
+
+variableDeclarationWithoutSemicolon
+    : annotations typeRef name optInitializer
                                      { auto ann = new IR::Annotations(@1, *$1);
-                                       $$ = new IR::Declaration_Variable(@1+@4, *$3, ann, $2, $4);
+                                       $$ = new IR::Declaration_Variable(@1, *$3, ann, $2, $4);
                                        driver.structure->declareObject(*$3, $2->toString()); }
-    | typeRef name optInitializer ";"
-                                     { $$ = new IR::Declaration_Variable(@1+@4, *$2, $1, $3);
+    | typeRef name optInitializer
+                                     { $$ = new IR::Declaration_Variable(@1, *$2, $1, $3);
                                        driver.structure->declareObject(*$2, $1->toString()); }
     ;
 
