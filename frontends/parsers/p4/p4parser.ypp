@@ -572,6 +572,7 @@ annotationToken
     | EXIT             { $$ = $1; }
     | EXTERN           { $$ = $1; }
     | FALSE            { $$ = $1; }
+    | FOR              { $$ = $1; }
     | HEADER           { $$ = $1; }
     | HEADER_UNION     { $$ = $1; }
     | IF               { $$ = $1; }
