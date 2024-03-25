@@ -13,7 +13,10 @@ macro(p4c_obtain_protobuf)
       set(SAVED_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
       set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
     endif()
-    find_package(Protobuf ${P4C_PROTOC_VERSION} REQUIRED)
+    # We do not set a minimum version here because setting a minimum version seems broken.
+    # We recommend 4.25 as minimum.
+    find_package(Protobuf ${P4C_PROTOC_VERSION} CONFIG REQUIRED)
+    find_package(Protobuf)
     # Protobuf sets the protoc binary to a generator expression, which are problematic. They are
     # problematic because they are only evaluated at build time. However, we may have scripts that
     # depend on the actual build time during the configure phase. Hard code a custom binary instead.

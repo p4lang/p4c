@@ -99,7 +99,8 @@ jobs:
           brew install python@3.12 || true
           brew link --overwrite python@3.12
           brew pin python@3.12
-          brew install protobuf protobuf-c
+          brew install protobuf
+          brew link protobuf
           tools/install_mac_deps.sh
 
       - name: Build (MacOS)
