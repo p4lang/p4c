@@ -135,6 +135,8 @@ using Parser = P4::P4Parser;
                   return makeToken(EXTERN); }
 "false"         { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(FALSE); }
+"for"           { BEGIN(driver.saveState); driver.template_args = false;
+                  return makeToken(FOR); }
 "header"        { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(HEADER); }
 "header_union"  { BEGIN(driver.saveState); driver.template_args = false;
