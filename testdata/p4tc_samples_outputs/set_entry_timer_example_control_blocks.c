@@ -117,7 +117,6 @@ if (/* hdr->ipv4.isValid() */
                                         .aging_ms = 2
                                     };
                                     bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf);
-;
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
@@ -173,7 +172,6 @@ if (/* hdr->ipv4.isValid() */
                                         .aging_ms = 2
                                     };
                                     bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf);
-;
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP: 

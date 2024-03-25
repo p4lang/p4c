@@ -32,6 +32,7 @@ class TCOptions : public CompilerOptions {
     bool emitTraceMessages = false;
     // XDP2TC mode for PSA-eBPF
     enum XDP2TC xdp2tcMode = XDP2TC_META;
+    unsigned timerProfiles = 4;
 
     TCOptions() {
         registerOption(
@@ -69,6 +70,13 @@ class TCOptions : public CompilerOptions {
             },
             "Select the mode used to pass metadata from XDP to TC "
             "(possible values: meta, head, cpumap).");
+        registerOption(
+            "--num-timer-profiles", "profiles",
+            [this](const char *arg) {
+                timerProfiles = std::atoi(arg);
+                return true;
+            },
+            "Defines the number of timer profiles. Default is 4.");
     }
 };
 

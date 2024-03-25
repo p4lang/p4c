@@ -16,9 +16,10 @@ limitations under the License.
 
 #include "typeConstraints.h"
 
-#include "absl/strings/str_cat.h"
-#include "absl/strings/str_join.h"
-#include "absl/strings/str_split.h"
+#include <absl/strings/str_cat.h>
+#include <absl/strings/str_join.h>
+#include <absl/strings/str_split.h>
+
 #include "typeUnification.h"
 
 namespace P4 {
@@ -28,6 +29,12 @@ int TypeConstraint::crtid = 0;
 void TypeConstraints::addEqualityConstraint(const IR::Node *source, const IR::Type *left,
                                             const IR::Type *right) {
     auto c = new EqualityConstraint(left, right, source);
+    add(c);
+}
+
+void TypeConstraints::addImplicitCastConstraint(const IR::Node *source, const IR::Type *left,
+                                                const IR::Type *right) {
+    auto c = new CanBeImplicitlyCastConstraint(left, right, source);
     add(c);
 }
 

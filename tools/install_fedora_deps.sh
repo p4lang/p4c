@@ -45,7 +45,8 @@ sudo dnf install -y -q \
     tcpdump \
     thrift-devel \
     valgrind \
-    zlib-devel
+    zlib-devel \
+    ninja-build
 
 sudo pip3 install ply ptf scapy==2.5.0 wheel
 

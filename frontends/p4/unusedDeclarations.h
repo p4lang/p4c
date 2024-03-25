@@ -23,6 +23,16 @@ limitations under the License.
 
 namespace P4 {
 
+class RemoveUnusedDeclarations;
+
+class RemoveUnusedPolicy {
+ public:
+    /// The policy for removing unused declarations is baked into the pass -- targets can specify
+    /// their own subclass of the pass with a changed policy and return that here
+    virtual RemoveUnusedDeclarations *getRemoveUnusedDeclarationsPass(const ReferenceMap *refMap,
+                                                                      bool warn = false) const;
+};
+
 /** @brief Removes unused declarations.
  *
  * The following kinds of nodes are not removed even if they are unreferenced:
@@ -67,10 +77,9 @@ class RemoveUnusedDeclarations : public Transform {
 
  protected:
     // Prevent direct instantiations of this class.
-    friend class RemoveAllUnusedDeclarations;
-    explicit RemoveUnusedDeclarations(const ReferenceMap *refMap,
-                                      std::set<const IR::Node *> *warned = nullptr)
-        : refMap(refMap), warned(warned) {
+    friend class RemoveUnusedPolicy;
+    RemoveUnusedDeclarations(const ReferenceMap *refMap, bool warn)
+        : refMap(refMap), warned(warn ? new std::set<const IR::Node *> : nullptr) {
         CHECK_NULL(refMap);
         setName("RemoveUnusedDeclarations");
     }
@@ -134,20 +143,16 @@ class RemoveUnusedDeclarations : public Transform {
  * If @warn is true, emit compiler warnings if an unused instance of an
  * IR::P4Table or IR::Declaration_Instance is removed.
  */
-class RemoveAllUnusedDeclarations : public PassManager {
+class RemoveAllUnusedDeclarations : public PassRepeated {
  public:
-    explicit RemoveAllUnusedDeclarations(ReferenceMap *refMap, bool warn = false) {
-        CHECK_NULL(refMap);
-
+    RemoveAllUnusedDeclarations(ReferenceMap *refMap, const RemoveUnusedPolicy &policy,
+                                bool warn = false)
+        : PassManager({new ResolveReferences(refMap),
+                       policy.getRemoveUnusedDeclarationsPass(refMap, warn)}) {
         // Unused extern instances are not removed but may still trigger
         // warnings.  The @warned set keeps track of warnings emitted in
         // previous iterations to avoid emitting duplicate warnings.
-        std::set<const IR::Node *> *warned = nullptr;
-        if (warn) warned = new std::set<const IR::Node *>();
-
-        refMap->clear();
-        passes.emplace_back(new PassRepeated{new ResolveReferences(refMap),
-                                             new RemoveUnusedDeclarations(refMap, warned)});
+        CHECK_NULL(refMap);
         setName("RemoveAllUnusedDeclarations");
         setStopOnError(true);
     }

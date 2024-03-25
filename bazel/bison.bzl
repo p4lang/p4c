@@ -61,5 +61,4 @@ genyacc = rule(
                   "subject to $(location ...) expansion.",
         ),
     },
-    output_to_genfiles = True,
 )

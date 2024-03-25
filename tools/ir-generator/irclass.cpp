@@ -98,9 +98,8 @@ void exit_namespace(std::ostream &out, IrNamespace *ns) {
 ////////////////////////////////////////////////////////////////////////////////////
 
 Util::Enumerator<IrClass *> *IrDefinitions::getClasses() const {
-    return Util::Enumerator<IrElement *>::createEnumerator(elements)
-        ->map<IrClass *>([](IrElement *e) { return dynamic_cast<IrClass *>(e); })
-        ->where([](IrClass *e) { return e != nullptr; });
+    return Util::enumerate(elements)->as<IrClass *>()->where(
+        [](IrClass *e) { return e != nullptr; });
 }
 
 void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &impl) const {
@@ -508,23 +507,20 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
 }
 
 Util::Enumerator<IrField *> *IrClass::getFields() const {
-    return Util::Enumerator<IrElement *>::createEnumerator(elements)
-        ->where([](IrElement *e) { return e->is<IrField>(); })
-        ->map<IrField *>([](IrElement *e) -> IrField * { return e->to<IrField>(); })
-        ->where([](IrField *f) { return !f->isStatic; });
+    return Util::enumerate(elements)->as<IrField *>()->where(
+        [](IrField *f) { return f && !f->isStatic; });
 }
 
 Util::Enumerator<IrMethod *> *IrClass::getUserMethods() const {
-    return Util::Enumerator<IrElement *>::createEnumerator(elements)
-        ->where([](IrElement *e) { return e->is<IrMethod>(); })
-        ->map<IrMethod *>([](IrElement *e) -> IrMethod * { return e->to<IrMethod>(); });
+    return Util::enumerate(elements)->as<IrMethod *>()->where(
+        [](IrElement *e) { return e != nullptr; });
 }
 
 bool IrClass::shouldSkip(cstring feature) const {
     // skip if there is a 'no' directive
-    auto *e = Util::Enumerator<IrElement *>::createEnumerator(elements);
     bool explicitNo =
-        e->where([](IrElement *el) { return el->is<IrNo>(); })
+        Util::enumerate(elements)
+            ->where([](IrElement *el) { return el->is<IrNo>(); })
             ->where([feature](IrElement *el) { return el->to<IrNo>()->text == feature; })
             ->any();
     if (explicitNo) return true;
@@ -532,11 +528,12 @@ bool IrClass::shouldSkip(cstring feature) const {
     // (except for validate)
     if (feature == "validate") return false;
 
-    e = Util::Enumerator<IrElement *>::createEnumerator(elements);
-    bool provided =
-        e->where([](IrElement *e) { return e->is<IrMethod>(); })
-            ->where([feature](IrElement *e) { return e->to<IrMethod>()->name == feature; })
-            ->any();
+    bool provided = Util::enumerate(elements)
+                        ->where([feature](IrElement *e) {
+                            const auto *m = e->to<IrMethod>();
+                            return m && m->name == feature;
+                        })
+                        ->any();
     return provided;
 }
 

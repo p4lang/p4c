@@ -117,6 +117,14 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
 
 void Backend::serialize() const {
     cstring progName = tcIR->getPipelineName();
+    if (ebpf_program == nullptr) return;
+    EBPF::CodeBuilder c(target), p(target), h(target);
+    ebpf_program->emit(&c);
+    ebpf_program->emitParser(&p);
+    ebpf_program->emitHeader(&h);
+    if (::errorCount() > 0) {
+        return;
+    }
     cstring outputFile = progName + ".template";
     if (!options.outputFolder.isNullOrEmpty()) {
         outputFile = options.outputFolder + outputFile;
@@ -154,11 +162,6 @@ void Backend::serialize() const {
         ::error("Unable to open File %1%", headerFile);
         return;
     }
-    if (ebpf_program == nullptr) return;
-    EBPF::CodeBuilder c(target), p(target), h(target);
-    ebpf_program->emit(&c);
-    ebpf_program->emitParser(&p);
-    ebpf_program->emitHeader(&h);
     *cstream << c.toString();
     *pstream << p.toString();
     *hstream << h.toString();
@@ -271,6 +274,11 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
     }
 }
 
+void ConvertToBackendIR::updateTimerProfiles(IR::TCTable *tabledef) {
+    if (options.timerProfiles > DEFAULT_TIMER_PROFILES) {
+        tabledef->addTimerProfiles(options.timerProfiles);
+    }
+}
 void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *tabledef) {
     // Check if there are const entries.
     auto entriesList = t->getEntries();
@@ -304,6 +312,21 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
                 big_int kValue = keySetElement->to<IR::Constant>()->value;
                 int kBase = keySetElement->to<IR::Constant>()->base;
                 std::stringstream value;
+                switch (kBase) {
+                    case 2:
+                        value << "0b";
+                        break;
+                    case 8:
+                        value << "0o";
+                        break;
+                    case 16:
+                        value << "0x";
+                        break;
+                    case 10:
+                        break;
+                    default:
+                        BUG("Unexpected base %1%", kBase);
+                }
                 std::deque<char> buf;
                 do {
                     const int digit = static_cast<int>(static_cast<big_int>(kValue % kBase));
@@ -354,6 +377,13 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                 if (defaultActionProperty->isConstant) {
                     tabledef->setDefaultMissConst(true);
                 }
+                bool isTCMayOverride = false;
+                const IR::Annotation *overrideAnno =
+                    defaultActionProperty->getAnnotations()->getSingle(
+                        ParseTCAnnotations::tcMayOverride);
+                if (overrideAnno) {
+                    isTCMayOverride = true;
+                }
                 bool directionParamPresent = false;
                 auto paramList = actionCall->action->getParameters();
                 for (auto param : paramList->parameters) {
@@ -361,22 +391,36 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                 }
                 if (!directionParamPresent) {
                     auto i = 0;
+                    if (isTCMayOverride) {
+                        if (paramList->parameters.empty())
+                            ::warning(ErrorType::WARN_INVALID,
+                                      "%1% annotation cannot be used with default_action without "
+                                      "parameters",
+                                      overrideAnno);
+                        else
+                            tabledef->setTcMayOverride();
+                    }
                     for (auto param : paramList->parameters) {
                         auto defaultParam = new IR::TCDefaultActionParam();
-                        defaultParam->setParamName(param->name.originalName);
+                        for (auto actionParam : tcAction->actionParams) {
+                            if (actionParam->paramName == param->name.originalName) {
+                                defaultParam->setParamDetail(actionParam);
+                            }
+                        }
                         auto defaultArg = methodexp->arguments->at(i++);
                         if (auto constVal = defaultArg->expression->to<IR::Constant>()) {
-                            bool sign;
-                            if (const IR::Type_Bits *tb = constVal->type->to<IR::Type_Bits>()) {
-                                sign = tb->isSigned;
-                            } else {
-                                sign = false;
-                            }
-                            defaultParam->setDefaultValue(
-                                Util::toString(constVal->value, 0, sign, constVal->base));
+                            if (!isTCMayOverride)
+                                defaultParam->setDefaultValue(
+                                    Util::toString(constVal->value, 0, true, constVal->base));
+                            tabledef->defaultMissActionParams.push_back(defaultParam);
                         }
-                        tabledef->defaultMissActionParams.push_back(defaultParam);
                     }
+                } else {
+                    if (isTCMayOverride)
+                        ::warning(ErrorType::WARN_INVALID,
+                                  "%1% annotation cannot be used with default_action with "
+                                  "directional parameters",
+                                  overrideAnno);
                 }
             }
         }
@@ -398,13 +442,13 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
                 if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                     isTableOnly = true;
                 }
-                if (anno->name == ParseTCAnnotations::default_hit) {
+                if (anno->name == ParseTCAnnotations::defaultHit) {
                     isDefaultHit = true;
                     defaultHit++;
                     auto adecl = refMap->getDeclaration(action->getPath(), true);
                     defaultActionName = externalName(adecl);
                 }
-                if (anno->name == ParseTCAnnotations::default_hit_const) {
+                if (anno->name == ParseTCAnnotations::defaultHitConst) {
                     isDefaultHitConst = true;
                     defaultHitConst++;
                     auto adecl = refMap->getDeclaration(action->getPath(), true);
@@ -541,6 +585,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         updateDefaultMissAction(t, tableDefinition);
         updateMatchType(t, tableDefinition);
         updateConstEntries(t, tableDefinition);
+        updateTimerProfiles(tableDefinition);
         tcPipeline->addTableDefinition(tableDefinition);
     }
 }

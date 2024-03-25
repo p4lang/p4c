@@ -25,6 +25,7 @@ inline constexpr auto PORTID_BITWIDTH = 32;
 inline constexpr auto DEFAULT_KEY_ID = 1;
 inline constexpr auto DEFAULT_METADATA_ID = 1;
 inline constexpr auto BITWIDTH = 32;
+inline constexpr auto DEFAULT_TIMER_PROFILES = 4;
 
 // Supported data types.
 inline constexpr auto BIT_TYPE = 0;

@@ -1,0 +1,3 @@
+p4tc_samples/add_entry_errors.p4(84): [--Werror=unexpected] error: Action params in add_entry should be same as no of action parameters. MainControlImpl.default_route_drop
+    action default_route_drop() {
+           ^^^^^^^^^^^^^^^^^^
