@@ -15,39 +15,36 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
     }
 }
 
+action empty() {
+}
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
-    }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
-    }
-    @name("IngressI.drop") action drop() {
+    action drop() {
         mark_to_drop(smeta);
     }
-    @name("IngressI.drop") action drop_1() {
-        mark_to_drop(smeta);
-    }
-    @name("IngressI.indirect") table indirect_0 {
+    @name("ap") @max_group_size(200) @selector_size_semantics("sum_of_members") @max_member_weight(4000) action_profile(32w128) my_action_profile;
+    @name("ap_ws") @max_group_size(200) @selector_size_semantics("sum_of_members") @max_member_weight(4000) action_selector(HashAlgorithm.identity, 32w1024, 32w10) my_action_selector;
+    table indirect {
         actions = {
             drop();
-            NoAction_1();
+            NoAction();
         }
-        const default_action = NoAction_1();
-        @name("ap") @max_group_size(200) @selector_size_semantics("sum_of_weights") @max_member_weight(4000) implementation = action_profile(32w128);
+        const default_action = NoAction();
+        implementation = my_action_profile;
     }
-    @name("IngressI.indirect_ws") table indirect_ws_0 {
+    table indirect_ws {
         key = {
             meta.hash1: selector @name("meta.hash1");
         }
         actions = {
-            drop_1();
-            NoAction_2();
+            drop();
+            NoAction();
         }
-        const default_action = NoAction_2();
-        @name("ap_ws") @max_group_size(200) @name("ap") @max_group_size(200) @selector_size_semantics("sum_of_weights") @max_member_weight(4000) implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
+        const default_action = NoAction();
+        implementation = my_action_selector;
     }
     apply {
-        indirect_0.apply();
-        indirect_ws_0.apply();
+        indirect.apply();
+        indirect_ws.apply();
     }
 }
 

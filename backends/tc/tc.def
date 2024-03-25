@@ -379,9 +379,9 @@ class TCTable {
                 tcTable += "\n$TC p4template create table/" + pipelineName
                             + "/" + controlName + "/" + tableName
                             + " entry" + entry->toString();
+                tcTable += " permissions 0x1024";
                 tcTable += " action " + pipelineName
                             + "/" + controlName + "/" + entry->getActionName();
-                tcTable += " permissions 0x1024";
             }
         }
         return tcTable;
