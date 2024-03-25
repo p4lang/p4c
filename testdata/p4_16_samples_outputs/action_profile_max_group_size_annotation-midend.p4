@@ -32,7 +32,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
             NoAction_1();
         }
         const default_action = NoAction_1();
-        @name("ap") @max_group_size(200) implementation = action_profile(32w128);
+        @name("ap") @max_group_size(200) @selector_size_semantics("sum_of_weights") @max_member_weight(4000) implementation = action_profile(32w128);
     }
     @name("IngressI.indirect_ws") table indirect_ws_0 {
         key = {
@@ -43,7 +43,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
             NoAction_2();
         }
         const default_action = NoAction_2();
-        @name("ap_ws") @max_group_size(200) implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
+        @name("ap_ws") @max_group_size(200) @name("ap") @max_group_size(200) @selector_size_semantics("sum_of_weights") @max_member_weight(4000) implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
     }
     apply {
         indirect_0.apply();
