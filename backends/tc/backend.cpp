@@ -312,6 +312,21 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
                 big_int kValue = keySetElement->to<IR::Constant>()->value;
                 int kBase = keySetElement->to<IR::Constant>()->base;
                 std::stringstream value;
+                switch (kBase) {
+                    case 2:
+                        value << "0b";
+                        break;
+                    case 8:
+                        value << "0o";
+                        break;
+                    case 16:
+                        value << "0x";
+                        break;
+                    case 10:
+                        break;
+                    default:
+                        BUG("Unexpected base %1%", kBase);
+                }
                 std::deque<char> buf;
                 do {
                     const int digit = static_cast<int>(static_cast<big_int>(kValue % kBase));
