@@ -779,7 +779,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         auto maxGroupSizeAnnotation = actionProfile.annotations->getAnnotation("max_group_size");
         if (maxGroupSizeAnnotation) {
             if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR) {
-                auto maxGroupSizeConstant = maxGroupSizeAnnotation->expr[0]->to<IR::Constant>();
+                auto maxGroupSizeConstant =
+                    maxGroupSizeAnnotation->expr[0]->checkedTo<IR::Constant>();
                 CHECK_NULL(maxGroupSizeConstant);
                 profile->set_max_group_size(maxGroupSizeConstant->asInt());
             } else {
@@ -795,18 +796,19 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             actionProfile.annotations->getAnnotation("selector_size_semantics");
         if (selectorSizeSemanticsAnnotation) {
             if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR) {
-                auto selectorSizeSemantics = selectorSizeSemanticsAnnotation->expr[0]->toString();
+                auto selectorSizeSemantics =
+                    selectorSizeSemanticsAnnotation->expr[0]->->checkedTo<IR::StringLiteral>();
                 CHECK_NULL(selectorSizeSemantics);
                 // The expression may only contain 'sum_of_weights' or 'sum_of_members'
                 // in any case.
-                if (selectorSizeSemantics.toUpper() == "\"SUM_OF_WEIGHTS\"") {
+                if (selectorSizeSemantics.toUpper() == "SUM_OF_WEIGHTS") {
                     profile->mutable_sum_of_weights();
-                } else if (selectorSizeSemantics.toUpper() == "\"SUM_OF_MEMBERS\"") {
+                } else if (selectorSizeSemantics.toUpper() == "SUM_OF_MEMBERS") {
                     profile->mutable_sum_of_members();
                 } else {
                     ::error(ErrorType::ERR_INVALID,
-                            "Expected selector_size_semantics value 'sum_of_weights' or "
-                            "'sum_of_members', but got '%1%'",
+                            "Expected selector_size_semantics value \"sum_of_weights\" or "
+                            "\"sum_of_members\", but got '%1%'",
                             selectorSizeSemantics);
                 }
             } else {
@@ -824,7 +826,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR &&
                 profile->has_sum_of_members()) {
                 auto maxMemberWeightConstant =
-                    maxMemberWeightAnnotation->expr[0]->to<IR::Constant>();
+                    maxMemberWeightAnnotation->expr[0]->checkedTo<IR::Constant>();
                 CHECK_NULL(maxMemberWeightConstant);
                 profile->mutable_sum_of_members()->set_max_member_weight(
                     maxMemberWeightConstant->asInt());
