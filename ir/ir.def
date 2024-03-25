@@ -500,11 +500,15 @@ class SwitchStatement : Statement {
         split.run_visit(); }
 }
 
-class ForStatement : Statement {
+class ForStatement : Statement, ISimpleNamespace {
     inline IndexedVector<StatOrDecl>    init;
     Expression                          condition;
     inline IndexedVector<StatOrDecl>    updates;
     Statement                           body;
+    IDeclaration getDeclByName(cstring name) const override {
+        return init.getDeclaration(name); }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return init.getDeclarations(); }
     visit_children {
         v.visit(init, "init");
         v.visit(condition, "condition");
@@ -514,10 +518,14 @@ class ForStatement : Statement {
 }
 
 // FIXME -- should we try to directly convert this to a ForStatement in the parser?
-class ForInStatement : Statement {
+class ForInStatement : Statement, ISimpleNamespace {
     Declaration_Variable                decl;
     Expression                          collection;
     Statement                           body;
+    IDeclaration getDeclByName(cstring name) const override {
+        return decl->name == name ? decl : nullptr; }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return new Util::SingleEnumerator<const IDeclaration *>(decl); }
 }
 
 /////////////////////////////////////////////////////////////
