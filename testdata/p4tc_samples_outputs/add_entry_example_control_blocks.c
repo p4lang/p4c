@@ -116,6 +116,11 @@ if (/* hdr->ipv4.isValid() */
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
                                         .pipeid = p4tc_filter_fields.pipeid,
+                                        .handle = p4tc_filter_fields.handle,
+                                        .classid = p4tc_filter_fields.classid,
+                                        .chain = p4tc_filter_fields.chain,
+                                        .proto = p4tc_filter_fields.proto,
+                                        .prio = p4tc_filter_fields.prio,
                                         .tblid = 1,
                                         .profile_id = 2
                                     };
@@ -174,6 +179,11 @@ if (/* hdr->ipv4.isValid() */
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
                                         .pipeid = p4tc_filter_fields.pipeid,
+                                        .handle = p4tc_filter_fields.handle,
+                                        .classid = p4tc_filter_fields.classid,
+                                        .chain = p4tc_filter_fields.chain,
+                                        .proto = p4tc_filter_fields.proto,
+                                        .prio = p4tc_filter_fields.prio,
                                         .tblid = 2,
                                         .profile_id = 2
                                     };
