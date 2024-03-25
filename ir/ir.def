@@ -472,23 +472,23 @@ class ForEachStatement : Statement, ISimpleNamespace {
     // This will make it visible to various resolvers and preserve even if
     // it is not referenced in the loop body.
     PathExpression                    indexHolder;
-    Expression                        range;
+    Range                             range;
     Statement                         body;
     IDeclaration getDeclByName(cstring name) const override {
         return index.getDeclaration(name); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return index.getDeclarations(); }
     ForEachStatement(Util::SourceInfo srcInfo,
-                     const IR::Declaration* idx,
-                     const IR::Expression* range, const IR::Statement* body)
+                     const IR::Declaration *idx,
+                     const IR::Range *range, const IR::Statement *body)
         : Statement(srcInfo),
           indexHolder(new PathExpression(ID(idx->getName()))),
           range(range), body(body) {
         index.push_back(idx);
         validate();
     }
-    ForEachStatement(const IR::Declaration* idx,
-                     const IR::Expression* range, const IR::Statement* body)
+    ForEachStatement(const IR::Declaration *idx,
+                     const IR::Range *range, const IR::Statement *body)
         : indexHolder(new PathExpression(ID(idx->getName()))),
           range(range), body(body) {
         index.push_back(idx);

@@ -317,7 +317,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::Vector<IR::Expression>*> strList
 %type<IR::Expression*> intOrStr
 %type<IR::Declaration*> loopIndexDeclaration
-%type<IR::Expression*> rangeExpression
+%type<IR::Range*> rangeExpression
 %type<IR::Statement*> foreachStatement breakStatement continueStatement
 
 // %precedence COMMA
