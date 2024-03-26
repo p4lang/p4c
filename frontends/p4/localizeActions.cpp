@@ -22,7 +22,7 @@ namespace P4 {
 
 namespace {
 
-class ParamCloner : public ClonePathExpressions {
+class ParamCloner : public CloneExpressions {
  public:
     ParamCloner() { setName("ParamCloner"); }
     const IR::Node *postorder(IR::Parameter *param) override {

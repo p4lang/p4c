@@ -477,7 +477,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
 
     visit(mce->method);
 
-    ClonePathExpressions cloner;  // a cheap version of deep copy
+    CloneExpressions cloner;  // a cheap version of deep copy
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);
         if (p->direction == IR::Direction::None) {
