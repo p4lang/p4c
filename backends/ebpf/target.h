@@ -274,10 +274,10 @@ class XdpTarget : public KernelSamplesTarget {
 class BccTarget : public Target {
  public:
     BccTarget() : Target("BCC") {}
-    void emitLicense(Util::SourceCodeBuilder *, cstring) const override{};
+    void emitLicense(Util::SourceCodeBuilder *, cstring) const override {};
     void emitCodeSection(Util::SourceCodeBuilder *, cstring) const override {}
     void emitIncludes(Util::SourceCodeBuilder *builder) const override;
-    void emitResizeBuffer(Util::SourceCodeBuilder *, cstring, cstring) const override{};
+    void emitResizeBuffer(Util::SourceCodeBuilder *, cstring, cstring) const override {};
     void emitTableLookup(Util::SourceCodeBuilder *builder, cstring tblName, cstring key,
                          cstring value) const override;
     void emitTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName, cstring key,
@@ -306,7 +306,7 @@ class TestTarget : public EBPF::KernelSamplesTarget {
  public:
     TestTarget() : KernelSamplesTarget(false, "Userspace Test") {}
 
-    void emitResizeBuffer(Util::SourceCodeBuilder *, cstring, cstring) const override{};
+    void emitResizeBuffer(Util::SourceCodeBuilder *, cstring, cstring) const override {};
     void emitIncludes(Util::SourceCodeBuilder *builder) const override;
     void emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName, TableKind tableKind,
                        cstring keyType, cstring valueType, unsigned size) const override;
