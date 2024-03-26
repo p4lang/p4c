@@ -1636,6 +1636,16 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         builder->emitIndent();
         builder->appendLine("    .pipeid = p4tc_filter_fields.pipeid,");
         builder->emitIndent();
+        builder->appendLine("    .handle = p4tc_filter_fields.handle,");
+        builder->emitIndent();
+        builder->appendLine("    .classid = p4tc_filter_fields.classid,");
+        builder->emitIndent();
+        builder->appendLine("    .chain = p4tc_filter_fields.chain,");
+        builder->emitIndent();
+        builder->appendLine("    .proto = p4tc_filter_fields.proto,");
+        builder->emitIndent();
+        builder->appendLine("    .prio = p4tc_filter_fields.prio,");
+        builder->emitIndent();
         auto tableName = table->instanceName.substr(controlName.size() + 1);
         auto tblId = tcIR->getTableId(tableName);
         BUG_CHECK(tblId != 0, "Table ID not found");
