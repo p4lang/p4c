@@ -1,6 +1,6 @@
 signs.p4(18): [--Werror=type-error] error: 'b'
     int<8> b = 8w0;
-    ^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^
   ---- Actual error:
   Cannot cast implicitly type 'bit<8>' to type 'int<8>'
   ---- Originating from:
