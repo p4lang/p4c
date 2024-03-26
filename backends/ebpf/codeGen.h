@@ -139,11 +139,6 @@ class EBPFInitializerUtils {
 
     // Generate hex string and prepend it with zeroes when shorter than required width
     static cstring genHexStr(const big_int &value, unsigned width, const IR::Expression *expr);
-    static const IR::Expression *ExtractExpFromCast(const IR::Expression *exp);
-    static const IR::Expression *ExtractSliceFromExp(const IR::Expression *exp);
-    static bool IsTypeHeaderOrUnion(const P4::TypeMap *typemap, const IR::Expression *exp);
-    static bool IsTypeArrayHeader(const P4::TypeMap *typemap, const IR::Expression *exp);
-    static bool IsHeaderField(const P4::TypeMap *typemap, const IR::Expression *exp);
 };
 
 }  // namespace EBPF

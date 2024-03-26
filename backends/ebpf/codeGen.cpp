@@ -498,9 +498,18 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
     const IR::Expression *lexpr = b->left;
     const IR::Expression *rexpr = b->right;
     cstring stringop = b->getStringOp();
-    bool left = EBPFInitializerUtils::IsHeaderField(typeMap, lexpr);
-    bool right = EBPFInitializerUtils::IsHeaderField(typeMap, rexpr);
-    if (left == right) {
+
+    auto action = findContext<IR::P4Action>();
+    auto table = findContext<IR::P4Table>();
+    auto tcTarget = dynamic_cast<const P4TCTarget *>(builder->target);
+    bool isLAnnotated = false, isRAnnotated = false;
+    if (lexpr) {
+        isLAnnotated = tcTarget->isNetworkOrder(typeMap, action, table, lexpr);
+    }
+    if (rexpr) {
+        isRAnnotated = tcTarget->isNetworkOrder(typeMap, action, table, rexpr);
+    }
+    if (isLAnnotated == isRAnnotated) {
         visit(lexpr);
         if (isScalar) {
             builder->spc();
@@ -513,7 +522,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
         visit(rexpr);
         return;
     }
-    if (!left) {
+    if (isLAnnotated) {
         // ConvertLeft
         auto ftype = typeMap->getType(lexpr);
         auto et = EBPFTypeFactory::instance->create(ftype);
@@ -533,7 +542,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
         expressionPrecedence = b->getPrecedence() + 1;
         visit(rexpr);
         return;
-    } else if (!right) {
+    } else if (isRAnnotated) {
         // ConvertRight
         auto ftype = typeMap->getType(rexpr);
         auto et = EBPFTypeFactory::instance->create(ftype);
@@ -543,7 +552,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
             builder->spc();
             builder->append(stringop);
             builder->spc();
-        } else {
+        } else {    
             builder->append(", &");
         }
         expressionPrecedence = b->getPrecedence() + 1;
@@ -558,9 +567,17 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
 
 void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression *lexpr,
                                                            const IR::Expression *rexpr) {
-    auto left = EBPFInitializerUtils::IsHeaderField(typeMap, lexpr);
-    auto right = EBPFInitializerUtils::IsHeaderField(typeMap, rexpr);
-    if (left == right) {
+    auto action = findContext<IR::P4Action>();
+    auto table = findContext<IR::P4Table>();
+    auto b = dynamic_cast<const P4TCTarget *>(builder->target);
+    bool isLAnnotated = false, isRAnnotated = false;
+    if(lexpr) {
+        isLAnnotated = b->isNetworkOrder(typeMap, action, table, lexpr);
+    }
+    if (rexpr) {
+        isRAnnotated = b->isNetworkOrder(typeMap, action, table, rexpr);
+    }
+    if (isLAnnotated == isRAnnotated) {
         visit(rexpr);
         return;
     }
@@ -571,19 +588,19 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
         visit(rexpr);
         return;
     }
-    if (right) {
+    if (isRAnnotated) {
         /*
-        If left side of assignment is non-header field and right expression
-        is header field, we need to convert rexp to host order.
+        If left side of assignment is not annotated field i.e host endian and right expression
+        is annotated field i.e network endian, we need to convert rexp to host order.
         Example -
             select_0 = hdr.ipv4.diffserv
             select_0 = bntoh(hdr.ipv4.diffserv)
         */
         emitAndConvertByteOrder(rexpr, "HOST");
     }
-    if (left) {
+    if (isLAnnotated) {
         /*
-        If left side of assignment is header field, we need to convert
+        If left side of assignment is annotated field i.e network endian, we need to convert
         right expression to network order.
         Example -
             hdr.opv4.diffserv = 0x1;
@@ -621,91 +638,6 @@ cstring EBPFInitializerUtils::genHexStr(const big_int &value, unsigned width,
     if (str.size() < nibbles) str = std::string(nibbles - str.size(), '0') + str;
     BUG_CHECK(str.size() == nibbles, "%1%: value size does not match %2% bits", expr, width);
     return str;
-}
-
-const IR::Expression *EBPFInitializerUtils::ExtractExpFromCast(const IR::Expression *exp) {
-    const IR::Expression *castexp = exp;
-    while (castexp->is<IR::Cast>()) {
-        castexp = castexp->to<IR::Cast>()->expr;
-    }
-    return castexp;
-}
-
-const IR::Expression *EBPFInitializerUtils::ExtractSliceFromExp(const IR::Expression *exp) {
-    auto baseexp = exp;
-    if (baseexp->is<IR::Slice>()) {
-        baseexp = baseexp->to<IR::Slice>()->e0;
-    }
-    return baseexp;
-}
-
-// return true if an expression is header or header union
-bool EBPFInitializerUtils::IsTypeHeaderOrUnion(const P4::TypeMap *typemap,
-                                               const IR::Expression *exp) {
-    if (!exp) return false;
-    auto tempexp = ExtractExpFromCast(exp);
-    if (tempexp->is<IR::Slice>()) {
-        tempexp = tempexp->to<IR::Slice>()->e0;
-    }
-    auto memexp = tempexp;
-    if (tempexp->is<IR::Member>() && tempexp->type->is<IR::Type_Bits>()) {
-        memexp = tempexp->to<IR::Member>()->expr;
-    }
-    if (memexp->is<IR::ArrayIndex>()) {
-        memexp = memexp->to<IR::ArrayIndex>()->left;
-    }
-    if (!memexp) return false;
-    if (!memexp->is<IR::Member>()) return false;
-    auto type = typemap->getType(memexp);
-    if (type == nullptr && memexp->type != nullptr) {
-        type = memexp->type;
-    }
-    if (type && type->is<IR::Type_Stack>()) {
-        type = type->to<IR::Type_Stack>()->elementType;
-    }
-    if (type && (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>())) return true;
-    return false;
-}
-
-// return true if an expression is array of header or array of hader union
-// example: hdrs.mpls[] type
-bool EBPFInitializerUtils::IsTypeArrayHeader(const P4::TypeMap *typemap,
-                                             const IR::Expression *exp) {
-    if (!exp) return false;
-    if (!exp->is<IR::Member>()) return false;
-    auto memexp = exp->to<IR::Member>()->expr;
-    if (!memexp) return false;
-    if (!memexp->is<IR::ArrayIndex>()) return false;
-    auto leftexp = memexp->to<IR::ArrayIndex>()->left;
-    auto rightexp = memexp->to<IR::ArrayIndex>()->right;
-    if (!leftexp) return false;
-    if (!leftexp->is<IR::Member>()) return false;
-    if (!rightexp) return false;
-    auto type = typemap->getType(memexp);
-    if (type == nullptr && memexp->type) {
-        type = memexp->type;
-    }
-    if (!type) return false;
-    if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>()) {
-        return true;
-    }
-    return false;
-}
-
-bool EBPFInitializerUtils::IsHeaderField(const P4::TypeMap *typemap, const IR::Expression *exp) {
-    if (exp == nullptr) {
-        return false;
-    }
-    if (exp->is<IR::Constant>()) return false;
-    auto exp1 = exp;
-    // remove cast from the expression IR
-    exp1 = ExtractExpFromCast(exp1);
-    // get slice expression if it is slice
-    exp1 = ExtractSliceFromExp(exp1);
-    if (IsTypeHeaderOrUnion(typemap, exp1) || IsTypeArrayHeader(typemap, exp1)) {
-        return true;
-    }
-    return false;
 }
 
 }  // namespace EBPF
