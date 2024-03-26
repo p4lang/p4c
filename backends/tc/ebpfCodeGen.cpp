@@ -132,7 +132,7 @@ void PNAEbpfGenerator::emitP4TCFilterFields(EBPF::CodeBuilder *builder) const {
 
 void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
     for (auto table : tcIR->tcPipeline->tableDefs) {
-        if (table->isTcMayOverride) {
+        if (table->isTcMayOverrideMiss) {
             cstring tblName = table->getTableName();
             cstring defaultActionName = table->defaultMissAction->getActionName();
             defaultActionName = defaultActionName.substr(
