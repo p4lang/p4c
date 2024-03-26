@@ -529,9 +529,13 @@ class ForStatement : Statement, ISimpleNamespace {
 
 // FIXME -- should we try to directly convert this to a ForStatement in the parser?
 class ForInStatement : Statement, ISimpleNamespace {
-    Declaration_Variable                decl;
+    NullOK Declaration_Variable         decl;
+    // the declaration will be moved to the enclosing block by MoveDeclarations, but
+    // we keep a ref (PathExpression) to it that will be set by the ctor
+    PathExpression                      ref = nullptr;
     Expression                          collection;
     Statement                           body;
+    ForInStatement { ref = new PathExpression(decl->name); }
     IDeclaration getDeclByName(cstring name) const override {
         return decl->name == name ? decl : nullptr; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
