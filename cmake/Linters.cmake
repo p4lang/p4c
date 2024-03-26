@@ -143,3 +143,39 @@ if(NOT ${BLACK_CMD} OR NOT (NOT ${ISORT_CMD}))
 else()
   message(WARNING "black or isort executable not found. Disabling black/isort checks. black/isort can be installed with \"pip3 install --user --upgrade black\" and \"pip3 install --user --upgrade isort\" ")
 endif()
+
+#################### IWYU
+if(ENABLE_IWYU)
+  # Set up IWYU for P4C.
+  message("Enabling IWYU checks.")
+  find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
+  set(iwyu_path
+      ${iwyu_path}
+      -Xiwyu
+      --max_line_length=100
+      -Xiwyu
+      --no_fwd_decls
+      -Xiwyu
+      --cxx17ns
+      -Xiwyu
+      --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/p4c.imp
+  )
+  message("IWYU command: ${iwyu_path}")
+
+
+  get_all_targets(ALL_IWYU_TARGETS ${CMAKE_CURRENT_SOURCE_DIR})
+  # Apply IWYU to all targets.
+  get_all_targets(ALL_IWYU_TARGETS)
+  # Remove generated files from IWYU.
+  list(FILTER ALL_IWYU_TARGETS EXCLUDE REGEX "controlplane-gen")
+  list(FILTER ALL_IWYU_TARGETS EXCLUDE REGEX "dpdk_runtime")
+  list(FILTER ALL_IWYU_TARGETS EXCLUDE REGEX "ir-generated")
+  list(FILTER ALL_IWYU_TARGETS EXCLUDE REGEX "genIR")
+  list(FILTER ALL_IWYU_TARGETS EXCLUDE REGEX "parser-gen")
+  list(FILTER ALL_IWYU_TARGETS EXCLUDE REGEX "gtest")
+  message("Applying IWYU to targets: ${all_targets}")
+  foreach(target ${ALL_IWYU_TARGETS})
+    set_property(TARGET ${target} PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+  endforeach()
+
+endif()
