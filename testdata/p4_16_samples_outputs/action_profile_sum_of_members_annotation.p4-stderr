@@ -1,0 +1,3 @@
+action_profile_sum_of_members_annotation.p4(40): [--Wwarn=ignore] warning: Ignoring annotation @max_group_size on action profile 'IngressI.ap', which does not have a selector
+    action_profile(32w128) my_action_profile;
+                           ^^^^^^^^^^^^^^^^^

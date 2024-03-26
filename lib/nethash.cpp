@@ -1,15 +1,79 @@
-#include "backends/p4tools/modules/testgen/targets/bmv2/contrib/bmv2_hash/calculations.h"
+/* Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "lib/nethash.h"
 
 #include <arpa/inet.h>
 
 #include <algorithm>
 
-namespace P4Tools::P4Testgen::Bmv2 {
+/** \file
+ * \author Antonin Bas (antonin@barefootnetworks.com) (the behavioral-model version)
+ * \author Vladimír Štill (p4c adaptations)
+ *
+ * \brief This code was adapted from:
+ * https://github.com/p4lang/behavioral-model/blob/main/src/bm_sim/calculations.cpp
+ * which was in turn adapted from
+ * http://www.barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code
+ */
 
-/* generating from my Python script gen_crc_tables inspired from the C code at:
-   http://www.barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code */
+namespace NetHash {
 
-static uint16_t table_crc16[256] = {
+/// Reflects/reverse n-bit number bit-by-bit. Note that it also solves as a slicing cast in the main
+/// calculation loop, where it extracts and reflect lowest byte. Written as templated function
+/// inside non-teplated class to allow passing the entire thing into crcGeneric and them templating
+/// it with two different types inside.
+struct Reflect {
+    template <typename T>
+    static T op(T data) {
+        const int nBits = sizeof(T) * 8;
+        T reflection = 0;
+
+        // Reflect the data about the center bit.
+        for (int bit = 0; bit < nBits; ++bit) {
+            // If the LSB bit is set, set the reflection of it.
+            if (data & 0x01) {
+                reflection |= (T(1) << ((nBits - 1) - bit));
+            }
+            data = (data >> 1);
+        }
+
+        return reflection;
+    }
+};
+
+/// A class with the same signature as reflect, but just returning the data.
+struct Identity {
+    template <typename T>
+    static T op(T data) {
+        return data;
+    }
+};
+
+template <typename T, T remainderInit, T final_xor_value, auto table, typename MaybeReflect>
+T crcGeneric(const uint8_t *buf, size_t len) {
+    T remainder = remainderInit;
+    for (unsigned int byte = 0; byte < len; byte++) {
+        auto data =
+            MaybeReflect::template op<uint8_t>(buf[byte]) ^ (remainder >> (sizeof(T) * 8 - 8));
+        remainder = table[data] ^ (remainder << 8);
+    }
+    return MaybeReflect::template op<T>(remainder) ^ final_xor_value;
+}
+
+static const uint16_t table_crc16[256] = {
     0x0000, 0x8005, 0x800F, 0x000A, 0x801B, 0x001E, 0x0014, 0x8011, 0x8033, 0x0036, 0x003C, 0x8039,
     0x0028, 0x802D, 0x8027, 0x0022, 0x8063, 0x0066, 0x006C, 0x8069, 0x0078, 0x807D, 0x8077, 0x0072,
     0x0050, 0x8055, 0x805F, 0x005A, 0x804B, 0x004E, 0x0044, 0x8041, 0x80C3, 0x00C6, 0x00CC, 0x80C9,
@@ -33,7 +97,7 @@ static uint16_t table_crc16[256] = {
     0x0220, 0x8225, 0x822F, 0x022A, 0x823B, 0x023E, 0x0234, 0x8231, 0x8213, 0x0216, 0x021C, 0x8219,
     0x0208, 0x820D, 0x8207, 0x0202};
 
-static uint16_t table_crcCCITT[256] = {
+static const uint16_t table_crcCCITT[256] = {
     0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7, 0x8108, 0x9129, 0xA14A, 0xB16B,
     0xC18C, 0xD1AD, 0xE1CE, 0xF1EF, 0x1231, 0x0210, 0x3273, 0x2252, 0x52B5, 0x4294, 0x72F7, 0x62D6,
     0x9339, 0x8318, 0xB37B, 0xA35A, 0xD3BD, 0xC39C, 0xF3FF, 0xE3DE, 0x2462, 0x3443, 0x0420, 0x1401,
@@ -57,7 +121,7 @@ static uint16_t table_crcCCITT[256] = {
     0xEF1F, 0xFF3E, 0xCF5D, 0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8, 0x6E17, 0x7E36, 0x4E55, 0x5E74,
     0x2E93, 0x3EB2, 0x0ED1, 0x1EF0};
 
-static uint32_t table_crc32[256] = {
+static const uint32_t table_crc32[256] = {
     0x00000000, 0x04C11DB7, 0x09823B6E, 0x0D4326D9, 0x130476DC, 0x17C56B6B, 0x1A864DB2, 0x1E475005,
     0x2608EDB8, 0x22C9F00F, 0x2F8AD6D6, 0x2B4BCB61, 0x350C9B64, 0x31CD86D3, 0x3C8EA00A, 0x384FBDBD,
     0x4C11DB70, 0x48D0C6C7, 0x4593E01E, 0x4152FDA9, 0x5F15ADAC, 0x5BD4B01B, 0x569796C2, 0x52568B75,
@@ -91,37 +155,27 @@ static uint32_t table_crc32[256] = {
     0x89B8FD09, 0x8D79E0BE, 0x803AC667, 0x84FBDBD0, 0x9ABC8BD5, 0x9E7D9662, 0x933EB0BB, 0x97FFAD0C,
     0xAFB010B1, 0xAB710D06, 0xA6322BDF, 0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4};
 
-uint16_t BMv2Hash::crc16(const uint8_t *buf, size_t len) {
-    uint16_t remainder = 0x0000;
-    uint16_t final_xor_value = 0x0000;
-    for (unsigned int byte = 0; byte < len; byte++) {
-        int data = reflect<uint16_t>(buf[byte], 8) ^ (remainder >> 8);
-        remainder = table_crc16[data] ^ (remainder << 8);
-    }
-    return reflect<uint16_t>(remainder, 16) ^ final_xor_value;
+uint16_t crc16(const uint8_t *buf, size_t len) {
+    return crcGeneric<uint16_t, 0, 0, table_crc16, Reflect>(buf, len);
 }
 
-uint32_t BMv2Hash::crc32(const uint8_t *buf, size_t len) {
-    uint32_t remainder = 0xFFFFFFFF;
-    uint32_t final_xor_value = 0xFFFFFFFF;
-    for (unsigned int byte = 0; byte < len; byte++) {
-        int data = reflect<uint32_t>(buf[byte], 8) ^ (remainder >> 24);
-        remainder = table_crc32[data] ^ (remainder << 8);
-    }
-    return reflect<uint32_t>(remainder, 32) ^ final_xor_value;
+uint16_t crc16ANSI(const uint8_t *buf, size_t len) {
+    return crcGeneric<uint16_t, 0, 0, table_crc16, Identity>(buf, len);
 }
 
-uint16_t BMv2Hash::crcCCITT(const uint8_t *buf, size_t len) {
-    uint16_t remainder = 0xFFFF;
-    uint16_t final_xor_value = 0x0000;
-    for (unsigned int byte = 0; byte < len; byte++) {
-        int data = static_cast<uint8_t>(buf[byte]) ^ (remainder >> 8);
-        remainder = table_crcCCITT[data] ^ (remainder << 8);
-    }
-    return remainder ^ final_xor_value;
+uint32_t crc32(const uint8_t *buf, size_t len) {
+    return crcGeneric<uint32_t, 0xffffffff, 0xffffffff, table_crc32, Reflect>(buf, len);
 }
 
-uint16_t BMv2Hash::csum16(const uint8_t *buf, size_t len) {
+uint32_t crc32FCS(const uint8_t *buf, size_t len) {
+    return crcGeneric<uint32_t, 0xffffffff, 0xffffffff, table_crc32, Identity>(buf, len);
+}
+
+uint16_t crcCCITT(const uint8_t *buf, size_t len) {
+    return crcGeneric<uint16_t, 0xffff, 0, table_crcCCITT, Identity>(buf, len);
+}
+
+uint16_t csum16(const uint8_t *buf, size_t len) {
     uint64_t sum = 0;
     const uint64_t *b = reinterpret_cast<const uint64_t *>(buf);
     uint32_t t1, t2;
@@ -165,7 +219,7 @@ uint16_t BMv2Hash::csum16(const uint8_t *buf, size_t len) {
     return ntohs(~t3);
 }
 
-uint16_t BMv2Hash::xor16(const uint8_t *buf, size_t len) {
+uint16_t xor16(const uint8_t *buf, size_t len) {
     uint16_t mask = 0x00ff;
     uint16_t final_xor_value = 0x0000;
     unsigned int byte = 0;
@@ -185,7 +239,7 @@ uint16_t BMv2Hash::xor16(const uint8_t *buf, size_t len) {
     return final_xor_value;
 }
 
-uint64_t BMv2Hash::identity(const uint8_t *buf, size_t len) {
+uint64_t identity(const uint8_t *buf, size_t len) {
     uint64_t res = 0ULL;
     for (size_t i = 0; i < std::min(sizeof(res), len); i++) {
         if (i > 0) res <<= 8;
@@ -194,4 +248,4 @@ uint64_t BMv2Hash::identity(const uint8_t *buf, size_t len) {
     return res;
 }
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace NetHash

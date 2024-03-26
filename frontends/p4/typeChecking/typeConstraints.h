@@ -221,6 +221,8 @@ class TypeConstraints final : public IHasDbPrint {
         constraints.push_back(constraint);
     }
     void addEqualityConstraint(const IR::Node *source, const IR::Type *left, const IR::Type *right);
+    void addImplicitCastConstraint(const IR::Node *source, const IR::Type *left,
+                                   const IR::Type *right);
     /*
      * Solve the specified constraint.
      * @param subst      Variable substitution which is updated with new constraints.

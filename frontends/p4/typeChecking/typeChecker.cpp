@@ -3493,7 +3493,7 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
         if (paramType == nullptr || argType == nullptr)
             // type checking failed before
             return actionCall;
-        constraints.addEqualityConstraint(actionCall, paramType, argType);
+        constraints.addImplicitCastConstraint(actionCall, paramType, argType);
         if (param->direction == IR::Direction::None) {
             if (inActionList) {
                 typeError("%1%: parameter %2% cannot be bound: it is set by the control plane", arg,
@@ -3508,6 +3508,15 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
                 if (!isCompileTimeConstant(arg->expression))
                     typeError("%1%: action argument must be a compile-time constant",
                               arg->expression);
+            }
+            // This is like an assignment; may make additional conversions.
+            newExpr = assignment(arg, param->type, arg->expression);
+            if (readOnly) {
+                // FIXME -- if we're in readonly mode, we should not have introduced any mods
+                // here, but there's a bug in the DPDK backend where it generates a ListExpression
+                // that would be converted to a StructExpression, and other problems where it
+                // can't deal with that StructExpressions, so we hack to avoid breaking those tests
+                newExpr = arg->expression;
             }
         } else if (param->direction == IR::Direction::Out ||
                    param->direction == IR::Direction::InOut) {

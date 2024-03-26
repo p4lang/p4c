@@ -86,7 +86,7 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
 const IR::P4Table *Bmv2V1ModelProgramInfo::getTableofDirectExtern(
     const IR::IDeclaration *directExternDecl) const {
     const auto &directExternMap = getCompilerResult().getDirectExternMap();
-    auto it = directExternMap.find(directExternDecl);
+    auto it = directExternMap.find(directExternDecl->controlPlaneName());
     if (it == directExternMap.end()) {
         BUG("No table associated with this direct extern %1%. The extern should have been removed.",
             directExternDecl);

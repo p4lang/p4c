@@ -322,6 +322,9 @@ class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
     bool preorder(const IR::AssignmentStatement *a) override;
     void processMethod(const P4::ExternMethod *method) override;
     bool preorder(const IR::Member *) override;
+    bool IsTableAddOnMiss(const IR::P4Table *table);
+    const IR::P4Action *GetAddOnMissHitAction(cstring actionName);
+    void ValidateAddOnMissMissAction(const IR::P4Action *act);
 };
 
 // Similar to class ActionTranslationVisitorPSA in backends/ebpf/psa/ebpfPsaControl.h

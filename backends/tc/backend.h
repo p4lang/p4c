@@ -78,6 +78,7 @@ class ConvertToBackendIR : public Inspector {
     void updateDefaultMissAction(const IR::P4Table *t, IR::TCTable *tdef);
     void updateConstEntries(const IR::P4Table *t, IR::TCTable *tdef);
     void updateMatchType(const IR::P4Table *t, IR::TCTable *tabledef);
+    void updateTimerProfiles(IR::TCTable *tabledef);
     bool isPnaParserMeta(const IR::Member *mem);
     bool isPnaMainInputMeta(const IR::Member *mem);
     bool isPnaMainOutputMeta(const IR::Member *mem);
@@ -88,6 +89,13 @@ class ConvertToBackendIR : public Inspector {
     unsigned getActionId(cstring actionName) const;
     unsigned getTableKeysize(unsigned tableId) const;
     cstring externalName(const IR::IDeclaration *declaration) const;
+    void updateAddOnMissTable(cstring tblname) const {
+        for (auto table : tcPipeline->tableDefs) {
+            if (table->tableName == tblname) {
+                ((IR::TCTable *)table)->setTableAddOnMiss();
+            }
+        }
+    }
 };
 
 class Extern {

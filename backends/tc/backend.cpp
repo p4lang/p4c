@@ -117,6 +117,14 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
 
 void Backend::serialize() const {
     cstring progName = tcIR->getPipelineName();
+    if (ebpf_program == nullptr) return;
+    EBPF::CodeBuilder c(target), p(target), h(target);
+    ebpf_program->emit(&c);
+    ebpf_program->emitParser(&p);
+    ebpf_program->emitHeader(&h);
+    if (::errorCount() > 0) {
+        return;
+    }
     cstring outputFile = progName + ".template";
     if (!options.outputFolder.isNullOrEmpty()) {
         outputFile = options.outputFolder + outputFile;
@@ -154,11 +162,6 @@ void Backend::serialize() const {
         ::error("Unable to open File %1%", headerFile);
         return;
     }
-    if (ebpf_program == nullptr) return;
-    EBPF::CodeBuilder c(target), p(target), h(target);
-    ebpf_program->emit(&c);
-    ebpf_program->emitParser(&p);
-    ebpf_program->emitHeader(&h);
     *cstream << c.toString();
     *pstream << p.toString();
     *hstream << h.toString();
@@ -271,6 +274,11 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
     }
 }
 
+void ConvertToBackendIR::updateTimerProfiles(IR::TCTable *tabledef) {
+    if (options.timerProfiles > DEFAULT_TIMER_PROFILES) {
+        tabledef->addTimerProfiles(options.timerProfiles);
+    }
+}
 void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *tabledef) {
     // Check if there are const entries.
     auto entriesList = t->getEntries();
@@ -304,6 +312,21 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
                 big_int kValue = keySetElement->to<IR::Constant>()->value;
                 int kBase = keySetElement->to<IR::Constant>()->base;
                 std::stringstream value;
+                switch (kBase) {
+                    case 2:
+                        value << "0b";
+                        break;
+                    case 8:
+                        value << "0o";
+                        break;
+                    case 16:
+                        value << "0x";
+                        break;
+                    case 10:
+                        break;
+                    default:
+                        BUG("Unexpected base %1%", kBase);
+                }
                 std::deque<char> buf;
                 do {
                     const int digit = static_cast<int>(static_cast<big_int>(kValue % kBase));
@@ -562,6 +585,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         updateDefaultMissAction(t, tableDefinition);
         updateMatchType(t, tableDefinition);
         updateConstEntries(t, tableDefinition);
+        updateTimerProfiles(tableDefinition);
         tcPipeline->addTableDefinition(tableDefinition);
     }
 }

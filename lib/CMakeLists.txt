@@ -32,6 +32,7 @@ set (LIBP4CTOOLKIT_SRCS
     json.cpp
     log.cpp
     match.cpp
+    nethash.cpp
     nullstream.cpp
     options.cpp
     path.cpp
@@ -61,6 +62,7 @@ set (LIBP4CTOOLKIT_HDRS
     gc.h
     big_int_util.h
     hash.h
+    nethash.h
     hashvec.h
     hex.h
     hvec_map.h

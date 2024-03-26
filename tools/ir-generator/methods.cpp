@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "irclass.h"
 #include "lib/algorithm.h"
+#include "lib/enumerator.h"
 
 enum flags {
     // flags that control the creation of auto-created methods
@@ -288,13 +289,13 @@ void IrClass::generateMethods() {
             if (def.second.flags & NOT_DEFAULT) continue;
             if (kind == NodeKind::Nested && !(def.second.flags & INCL_NESTED)) continue;
             if ((def.second.flags & CONCRETE_ONLY) && kind == NodeKind::Abstract) continue;
-            if (Util::Enumerator<IrElement *>::createEnumerator(elements)
+            if (Util::enumerate(elements)
                     ->where([](IrElement *el) { return el->is<IrNo>(); })
                     ->where([&def](IrElement *el) { return el->to<IrNo>()->text == def.first; })
                     ->any())
                 continue;
             IrMethod *exist = dynamic_cast<IrMethod *>(
-                Util::Enumerator<IrElement *>::createEnumerator(elements)
+                Util::enumerate(elements)
                     ->where([](IrElement *el) { return el->is<IrMethod>(); })
                     ->where([&def](IrElement *el) { return el->to<IrMethod>()->name == def.first; })
                     ->nextOrDefault());

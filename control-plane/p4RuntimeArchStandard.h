@@ -768,20 +768,77 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         auto id = symbols.getId(SymbolType::P4RT_ACTION_PROFILE(), actionProfile.name);
         setPreamble(profile->mutable_preamble(), id, actionProfile.name,
                     symbols.getAlias(actionProfile.name), actionProfile.annotations,
-                    // exclude @max_group_size if present
-                    [](cstring name) { return name == "max_group_size"; });
+                    // exclude @max_group_size, @selector_size_semantics, and
+                    // @max_member_weight if present
+                    [](cstring name) {
+                        return name == "max_group_size" || name == "selector_size_semantics" ||
+                               name == "max_member_weight";
+                    });
         profile->set_with_selector(actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR);
         profile->set_size(actionProfile.size);
         auto maxGroupSizeAnnotation = actionProfile.annotations->getAnnotation("max_group_size");
         if (maxGroupSizeAnnotation) {
             if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR) {
-                auto maxGroupSizeConstant = maxGroupSizeAnnotation->expr[0]->to<IR::Constant>();
+                auto maxGroupSizeConstant =
+                    maxGroupSizeAnnotation->expr[0]->checkedTo<IR::Constant>();
                 CHECK_NULL(maxGroupSizeConstant);
                 profile->set_max_group_size(maxGroupSizeConstant->asInt());
             } else {
                 ::warning(ErrorType::WARN_IGNORE,
                           "Ignoring annotation @max_group_size on action profile '%1%', "
                           "which does not have a selector",
+                          actionProfile.annotations);
+            }
+        }
+
+        // By default, an action profile uses the SumOfWeights semantics.
+        auto selectorSizeSemanticsAnnotation =
+            actionProfile.annotations->getAnnotation("selector_size_semantics");
+        if (selectorSizeSemanticsAnnotation) {
+            if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR) {
+                auto selectorSizeSemantics =
+                    selectorSizeSemanticsAnnotation->expr[0]->checkedTo<IR::StringLiteral>();
+                CHECK_NULL(selectorSizeSemantics);
+                // The expression may only contain 'sum_of_weights' or 'sum_of_members'
+                // in any case.
+                if (selectorSizeSemantics->value.toUpper() == "SUM_OF_WEIGHTS") {
+                    profile->mutable_sum_of_weights();
+                } else if (selectorSizeSemantics->value.toUpper() == "SUM_OF_MEMBERS") {
+                    profile->mutable_sum_of_members();
+                } else {
+                    ::error(ErrorType::ERR_INVALID,
+                            "Expected selector_size_semantics value \"sum_of_weights\" or "
+                            "\"sum_of_members\", but got '%1%'",
+                            selectorSizeSemantics);
+                }
+            } else {
+                ::warning(ErrorType::WARN_IGNORE,
+                          "Ignoring annotation @selector_size_semantics on action "
+                          "profile '%1%', which does not have a selector ",
+                          actionProfile.annotations);
+            }
+        }
+
+        // By default, an action profile uses the SumOfWeights semantics.
+        auto maxMemberWeightAnnotation =
+            actionProfile.annotations->getAnnotation("max_member_weight");
+        if (maxMemberWeightAnnotation) {
+            if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR &&
+                profile->has_sum_of_members()) {
+                auto maxMemberWeightConstant =
+                    maxMemberWeightAnnotation->expr[0]->checkedTo<IR::Constant>();
+                CHECK_NULL(maxMemberWeightConstant);
+                profile->mutable_sum_of_members()->set_max_member_weight(
+                    maxMemberWeightConstant->asInt());
+            } else if (actionProfile.type != ActionProfileType::INDIRECT_WITH_SELECTOR) {
+                ::warning(ErrorType::WARN_IGNORE,
+                          "Ignoring annotation @max_member_weight on action profile "
+                          "'%1%', which does not have a selector",
+                          actionProfile.annotations);
+            } else {
+                ::warning(ErrorType::WARN_IGNORE,
+                          "Ignoring annotation @max_member_weight on action profile '%1%', "
+                          "which does not use 'sum_of_members' as its SelectorSizeSemantics",
                           actionProfile.annotations);
             }
         }

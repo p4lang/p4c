@@ -150,13 +150,12 @@ class NameMap : public Node {
     static NameMap<T, MAP, COMP, ALLOC> *fromJSON(JSONLoader &json);
 
     Util::Enumerator<const T *> *valueEnumerator() const {
-        return Util::Enumerator<const T *>::createEnumerator(Values(symbols).begin(),
-                                                             Values(symbols).end());
+        return Util::enumerate(Values(symbols));
     }
     template <typename S>
     Util::Enumerator<const S *> *only() const {
-        std::function<bool(const T *)> filter = [](const T *d) { return d->template is<S>(); };
-        return valueEnumerator()->where(filter)->template as<const S *>();
+        return valueEnumerator()->template as<const S *>()->where(
+            [](const T *d) { return d != nullptr; });
     }
 
     DECLARE_TYPEINFO(NameMap, Node);

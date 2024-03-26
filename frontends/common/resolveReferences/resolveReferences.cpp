@@ -25,17 +25,15 @@ ResolutionContext::ResolutionContext() { anyOrder = P4CContext::get().options().
 const std::vector<const IR::IDeclaration *> &ResolutionContext::memoizeDeclarations(
     const IR::INamespace *ns) const {
     std::vector<const IR::IDeclaration *> decls;
-    if (auto nest = ns->to<IR::INestedNamespace>()) {
+    if (const auto *nest = ns->to<IR::INestedNamespace>()) {
         for (const auto *nn : nest->getNestedNamespaces()) {
-            auto nnDecls = nn->getDeclarations();
-            // FIXME: should just insert()
-            for (const auto *decl : *nnDecls) decls.push_back(decl);
+            auto *nnDecls = nn->getDeclarations();
+            decls.insert(decls.end(), nnDecls->begin(), nnDecls->end());
         }
     }
 
     auto *nsDecls = ns->getDeclarations();
-    // FIXME: should just insert()
-    for (const auto *decl : *nsDecls) decls.push_back(decl);
+    decls.insert(decls.end(), nsDecls->begin(), nsDecls->end());
 
     return (namespaceDecls[ns] = std::move(decls));
 }
@@ -65,21 +63,17 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
 
     if (const auto *gen = current->to<IR::IGeneralNamespace>()) {
         // FIXME: implement range filtering without enumerator wrappers
-        auto *decls =
-            Util::Enumerator<const IR::IDeclaration *>::createEnumerator(getDeclsByName(gen, name));
+        auto *decls = Util::enumerate(getDeclsByName(gen, name));
         switch (type) {
             case P4::ResolutionType::Any:
                 break;
             case P4::ResolutionType::Type: {
-                std::function<bool(const IR::IDeclaration *)> kindFilter =
-                    [](const IR::IDeclaration *d) { return d->is<IR::Type>(); };
-                decls = decls->where(kindFilter);
+                decls = decls->where([](const IR::IDeclaration *d) { return d->is<IR::Type>(); });
                 break;
             }
             case P4::ResolutionType::TypeVariable: {
-                std::function<bool(const IR::IDeclaration *)> kindFilter =
-                    [](const IR::IDeclaration *d) { return d->is<IR::Type_Var>(); };
-                decls = decls->where(kindFilter);
+                decls =
+                    decls->where([](const IR::IDeclaration *d) { return d->is<IR::Type_Var>(); });
                 break;
             }
             default:
@@ -87,30 +81,29 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
         }
 
         if (!anyOrder && name.srcInfo.isValid()) {
-            std::function<bool(const IR::IDeclaration *)> locationFilter =
-                [this, name, type](const IR::IDeclaration *d) {
-                    if (d->is<IR::Type_Var>() || d->is<IR::ParserState>())
-                        // type vars and parser states may be used before their definitions
-                        return true;
-                    Util::SourceInfo nsi = name.srcInfo;
-                    Util::SourceInfo dsi = d->getNode()->srcInfo;
-                    bool before = dsi <= nsi;
-                    LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+            auto locationFilter = [this, name, type](const IR::IDeclaration *d) {
+                if (d->is<IR::Type_Var>() || d->is<IR::ParserState>())
+                    // type vars and parser states may be used before their definitions
+                    return true;
+                Util::SourceInfo nsi = name.srcInfo;
+                Util::SourceInfo dsi = d->getNode()->srcInfo;
+                bool before = dsi <= nsi;
+                LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
 
-                    if (type == ResolutionType::Type) {
-                        if (auto *type_decl = findContext<IR::Type_Declaration>())
-                            if (type_decl->getNode() == d->getNode()) {
-                                ::error(ErrorType::ERR_UNSUPPORTED,
-                                        "Self-referencing types not supported: '%1%' within '%2%'",
-                                        name, d->getNode());
-                            }
-                    } else if (type == ResolutionType::Any) {
-                        if (auto *decl_ctxt = findContext<IR::Declaration>())
-                            if (decl_ctxt->getNode() == d->getNode()) before = false;
-                    }
+                if (type == ResolutionType::Type) {
+                    if (auto *type_decl = findContext<IR::Type_Declaration>())
+                        if (type_decl->getNode() == d->getNode()) {
+                            ::error(ErrorType::ERR_UNSUPPORTED,
+                                    "Self-referencing types not supported: '%1%' within '%2%'",
+                                    name, d->getNode());
+                        }
+                } else if (type == ResolutionType::Any) {
+                    if (auto *decl_ctxt = findContext<IR::Declaration>())
+                        if (decl_ctxt->getNode() == d->getNode()) before = false;
+                }
 
-                    return before;
-                };
+                return before;
+            };
             decls = decls->where(locationFilter);
         }
 
@@ -226,7 +219,7 @@ const IR::IDeclaration *ResolutionContext::resolveUnique(const IR::ID &name,
     // Check overloaded symbols.
     const IR::Vector<IR::Argument> *arguments;
     if (decls.size() > 1 && (arguments = methodArguments(name))) {
-        decls = Util::Enumerator<const IR::IDeclaration *>::createEnumerator(decls)
+        decls = Util::enumerate(decls)
                     ->where([arguments](const IR::IDeclaration *d) {
                         auto func = d->to<IR::IFunctional>();
                         if (func == nullptr) return true;

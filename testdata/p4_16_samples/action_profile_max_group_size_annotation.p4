@@ -36,14 +36,25 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         key = { }
         actions = { drop; NoAction; }
         const default_action = NoAction();
-        @name("ap") @max_group_size(200) implementation = action_profile(32w128);
+        // For an action profile without an action selector, the 
+        // `max_group_size`, `selector_size_semantics`, and `max_member_weight`
+        // annotations are meaningless and should result in a warning.
+        @name("ap") @max_group_size(200) 
+        @selector_size_semantics("sum_of_weights") @max_member_weight(4000)
+        implementation = action_profile(32w128);
     }
 
     table indirect_ws {
         key = { meta.hash1 : selector; }
         actions = { drop; NoAction; }
         const default_action = NoAction();
-        @name("ap_ws") @max_group_size(200) implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
+        @name("ap_ws") @max_group_size(200) 
+        // For an action profile with an action selector using the `sum_of_weights` 
+        // size semantics, the `max_member_weight` annotation is meaningless and
+        // should result in a warning.
+        @name("ap") @max_group_size(200) 
+        @selector_size_semantics("sum_of_weights") @max_member_weight(4000)
+        implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
     }
 
     apply {
