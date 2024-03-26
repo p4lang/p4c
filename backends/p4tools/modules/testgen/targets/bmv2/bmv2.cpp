@@ -113,7 +113,7 @@ CompilerResultOrError Bmv2V1ModelCompilerTarget::runCompilerImpl(
 
     return {*new BMv2V1ModelCompilerResult{
         TestgenCompilerResult(CompilerResult(*program), coverage.getCoverableNodes(), dcg),
-        p4runtimeApi, directExternMapper.getdirectExternMap(), p4ConstraintsRestrictions}};
+        p4runtimeApi, directExternMapper.getDirectExternMap(), p4ConstraintsRestrictions}};
 }
 
 MidEnd Bmv2V1ModelCompilerTarget::mkMidEnd(const CompilerOptions &options) const {
