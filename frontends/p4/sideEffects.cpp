@@ -674,6 +674,36 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::SwitchStatement *statement) 
     return rv;
 }
 
+const IR::Node *DoSimplifyExpressions::preorder(IR::ForStatement *statement) {
+    visit(statement->init, "init");
+    visit(statement->condition, "condition");
+    if (!statements.empty()) {
+        // FIXME -- in theory could deal with this by duplicating statements here and
+        // adding them to both init and updates.
+        error(ErrorType::ERR_INVALID, "%1%Side effects in for condition not supported",
+              statement->condition->srcInfo);
+        statements.clear();
+    }
+    visit(statement->body, "body");
+    visit(statement->updates, "updates");
+    prune();
+    return statement;
+}
+
+const IR::Node *DoSimplifyExpressions::preorder(IR::ForInStatement *statement) {
+    IR::Statement *rv = statement;
+    visit(statement->decl, "decl");
+    visit(statement->collection, "collection");
+    if (!statements.empty()) {
+        statements.push_back(statement);
+        rv = new IR::BlockStatement(statements);
+        statements.clear();
+    }
+    visit(statement->body, "body");
+    prune();
+    return rv;
+}
+
 void DoSimplifyExpressions::end_apply(const IR::Node *) {
     BUG_CHECK(toInsert.empty(), "DoSimplifyExpressions::end_apply orphaned declarations");
     BUG_CHECK(statements.empty(), "DoSimplifyExpressions::end_apply orphaned statements");
