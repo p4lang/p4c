@@ -46,6 +46,18 @@ macro(p4c_obtain_abseil)
     )
     fetchcontent_makeavailable_but_exclude_install(abseil)
 
+    # Suppress warnings for all Abseil targets.
+    get_all_targets(ABSL_BUILD_TARGETS ${absl_SOURCE_DIR})
+    foreach(target in ${ABSL_BUILD_TARGETS})
+      if(target MATCHES "absl_*")
+        # Do not suppress warnings for Abseil library targets that are aliased.
+        get_target_property(target_type ${target} TYPE)
+        if (NOT ${target_type} STREQUAL "INTERFACE_LIBRARY")
+          set_target_properties(${target} PROPERTIES COMPILE_FLAGS "-Wno-error -w")
+        endif()
+      endif()
+    endforeach()
+
     # Reset temporary variable modifications.
     set(CMAKE_UNITY_BUILD ${CMAKE_UNITY_BUILD_PREV})
     set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
