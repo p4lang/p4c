@@ -108,8 +108,8 @@ if (/* hdr->ipv4.isValid() */
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_SEND_NH: 
                                 {
-                                    hdr->ethernet.srcAddr = value->u.MainControlImpl_send_nh.smac;
-                                                                        hdr->ethernet.dstAddr = value->u.MainControlImpl_send_nh.dmac;
+                                    hdr->ethernet.srcAddr = bpf_cpu_to_be64(value->u.MainControlImpl_send_nh.smac);
+                                                                        hdr->ethernet.dstAddr = bpf_cpu_to_be64(value->u.MainControlImpl_send_nh.dmac);
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP: 
