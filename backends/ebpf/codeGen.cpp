@@ -552,7 +552,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
             builder->spc();
             builder->append(stringop);
             builder->spc();
-        } else {    
+        } else {
             builder->append(", &");
         }
         expressionPrecedence = b->getPrecedence() + 1;
@@ -571,7 +571,7 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
     auto table = findContext<IR::P4Table>();
     auto b = dynamic_cast<const P4TCTarget *>(builder->target);
     bool isLAnnotated = false, isRAnnotated = false;
-    if(lexpr) {
+    if (lexpr) {
         isLAnnotated = b->isNetworkOrder(typeMap, action, table, lexpr);
     }
     if (rexpr) {
