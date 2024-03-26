@@ -1459,10 +1459,10 @@ variableDeclaration
 variableDeclarationWithoutSemicolon
     : annotations typeRef name optInitializer
                                      { auto ann = new IR::Annotations(@1, *$1);
-                                       $$ = new IR::Declaration_Variable(@1, *$3, ann, $2, $4);
+                                       $$ = new IR::Declaration_Variable(@1+@4, *$3, ann, $2, $4);
                                        driver.structure->declareObject(*$3, $2->toString()); }
     | typeRef name optInitializer
-                                     { $$ = new IR::Declaration_Variable(@1, *$2, $1, $3);
+                                     { $$ = new IR::Declaration_Variable(@1+@3, *$2, $1, $3);
                                        driver.structure->declareObject(*$2, $1->toString()); }
     ;
 
