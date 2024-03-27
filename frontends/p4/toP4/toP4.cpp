@@ -1206,6 +1206,7 @@ bool ToP4::preorder(const IR::ForStatement *s) {
     builder.append("; ");
     first = true;
     for (auto *e : s->updates) {
+        if (e->is<IR::EmptyStatement>()) continue;
         if (!first) builder.append(", ");
         builder.supressStatementSemi();
         visit(e, "updates");
@@ -1230,8 +1231,12 @@ bool ToP4::preorder(const IR::ForStatement *s) {
 bool ToP4::preorder(const IR::ForInStatement *s) {
     dump(2);
     builder.append("for (");
-    builder.supressStatementSemi();
-    visit(s->decl, "decl");
+    if (s->decl) {
+        builder.supressStatementSemi();
+        visit(s->decl, "decl");
+    } else {
+        visit(s->ref, "ref");
+    }
     builder.append(" in ");
     visit(s->collection);
     builder.append(") ");
