@@ -29,7 +29,7 @@ class NamespaceContext {
                                            const IR::Path *path) const;
 
  public:
-    /// Represents the empty namespace context.
+    // Represents the empty namespace context.
     static const NamespaceContext *Empty;
 
     /// @returns a new namespace context, representing the given namespace @ns pushed onto this

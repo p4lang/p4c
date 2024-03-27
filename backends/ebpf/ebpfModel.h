@@ -60,7 +60,7 @@ struct Filter_Model : public ::Model::Elem {
     ::Model::Elem filter;
 };
 
-// Keep this in sync with ebpf_model.p4 and xdp_model.p4
+/// Keep this in sync with ebpf_model.p4 and xdp_model.p4
 class EBPFModel : public ::Model::Model {
  protected:
     EBPFModel()

@@ -36,7 +36,7 @@ limitations under the License.
 #define DPDK_TABLE_MAX_KEY_SIZE 64 * 8
 
 namespace DPDK {
-// This pass removes label that no jmps jump to
+/// This pass removes label that no jmps jump to
 class RemoveRedundantLabel : public Transform {
  public:
     const IR::IndexedVector<IR::DpdkAsmStatement> *removeRedundantLabel(
@@ -57,12 +57,12 @@ class RemoveRedundantLabel : public Transform {
     }
 };
 
-// This pass removes jmps that jump to a label that is immediately after it.
-// For example,
-// (jmp label1)
-// (label1)
-//
-// jmp label1 will be removed.
+/// This pass removes jmps that jump to a label that is immediately after it.
+/// For example,
+/// (jmp label1)
+/// (label1)
+///
+/// jmp label1 will be removed.
 
 class RemoveConsecutiveJmpAndLabel : public Transform {
  public:
@@ -83,20 +83,23 @@ class RemoveConsecutiveJmpAndLabel : public Transform {
     }
 };
 
-// This pass removes labels whose next instruction is a jmp statement. This pass
-// will update any kinds of jmp(conditional + unconditional) that jump to this
-// label to the label that jmp statement jump to. For example:
-// jeq label1
-// ...
-// ...
-// label1
-// jmp label2
-//
-// will become:
-// jeq label2
-// ...
-// ...
-// jmp label2
+/// This pass removes labels whose next instruction is a jmp statement. This pass
+/// will update any kinds of jmp (conditional + unconditional) that jump to this
+/// label to the label that jmp statement jump to. For example:
+/// 
+/// jeq label1
+/// ...
+/// ...
+/// label1
+/// jmp label2
+/// 
+/// will become:
+/// 
+/// jeq label2
+/// ...
+/// ...
+/// jmp label2
+
 
 class ThreadJumps : public Transform {
  public:
@@ -118,8 +121,8 @@ class ThreadJumps : public Transform {
     }
 };
 
-// This pass removes labels whose next instruction is a label. In addition, it
-// will update any jmp that jump to this label to the label next to it.
+/// This pass removes labels whose next instruction is a label. In addition, it
+/// will update any jmp that jump to this label to the label next to it.
 
 class RemoveLabelAfterLabel : public Transform {
  public:
@@ -141,7 +144,7 @@ class RemoveLabelAfterLabel : public Transform {
     }
 };
 
-// This pass Collects all metadata struct member used in program
+/// This pass Collects all metadata struct member used in program
 class CollectUsedMetadataField : public Inspector {
     ordered_set<cstring> &used_fields;
 
@@ -155,7 +158,7 @@ class CollectUsedMetadataField : public Inspector {
     }
 };
 
-// This pass removes all unused fields from metadata struct
+/// This pass removes all unused fields from metadata struct
 class RemoveUnusedMetadataFields : public Transform {
     ordered_set<cstring> &used_fields;
 
@@ -166,7 +169,7 @@ class RemoveUnusedMetadataFields : public Transform {
     bool isByteSizeField(const IR::Type *field_type);
 };
 
-// This pass shorten the Identifier length
+/// This pass shorten the Identifier length
 class ShortenTokenLength : public Transform {
     ordered_map<cstring, cstring> &newNameMap;
     static size_t count;
@@ -559,7 +562,7 @@ class CollectUseDefInfo : public Inspector {
     bool haveSingleUseDef(cstring str) { return defInfo[str] == 1 && usesInfo[str] == 1; }
 };
 
-// This pass identifies redundant copies/moves and eliminates them.
+/// This pass identifies redundant copies/moves and eliminates them.
 class CopyPropagationAndElimination : public Transform {
     std::unordered_map<cstring, int> newUsesInfo;
     P4::TypeMap *typeMap;
@@ -599,9 +602,9 @@ class CopyPropagationAndElimination : public Transform {
     }
 };
 
-// This Pass emits Table config consumed by dpdk target in a text file if
-// const entries are present in p4 program.
-// Most of the code taken from control-plane/p4RuntimeSerializer.h/.cpp
+/// This Pass emits Table config consumed by dpdk target in a text file if
+/// const entries are present in p4 program.
+/// Most of the code taken from control-plane/p4RuntimeSerializer.h/.cpp
 class EmitDpdkTableConfig : public Inspector {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
@@ -634,8 +637,8 @@ class EmitDpdkTableConfig : public Inspector {
     void postorder(const IR::DpdkTable *table) override;
 };
 
-// Instructions can only appear in actions and apply block of .spec file.
-// All these individual passes work on the actions and apply block of .spec file.
+/// Instructions can only appear in actions and apply block of .spec file.
+/// All these individual passes work on the actions and apply block of .spec file.
 class DpdkAsmOptimization : public PassRepeated {
  private:
  public:

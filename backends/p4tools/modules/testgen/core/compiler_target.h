@@ -10,10 +10,10 @@ namespace P4Tools::P4Testgen {
 /// Extends the CompilerResult with the associated P4RuntimeApi
 class TestgenCompilerResult : public CompilerResult {
  private:
-    /// The coverabled Nodes in the analyzed P4 program.
+    // The coverabled Nodes in the analyzed P4 program.
     P4::Coverage::CoverageSet coverableNodes;
 
-    /// The call graph of the analyzed P4 program, if flag --dcg is set.
+    // The call graph of the analyzed P4 program, if flag --dcg is set.
     const NodesCallGraph *callGraph;
 
  public:

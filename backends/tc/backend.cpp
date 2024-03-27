@@ -582,9 +582,9 @@ void ConvertToBackendIR::postorder(const IR::P4Program *p) {
     }
 }
 
-/**
- * This function is used for checking whether given member is PNA Parser metadata
- */
+
+/// This function is used for checking whether given member is PNA Parser metadata
+ 
 bool ConvertToBackendIR::isPnaParserMeta(const IR::Member *mem) {
     if (mem->expr != nullptr && mem->expr->type != nullptr) {
         if (auto str_type = mem->expr->type->to<IR::Type_Struct>()) {

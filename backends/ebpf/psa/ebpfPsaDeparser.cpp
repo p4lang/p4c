@@ -129,12 +129,12 @@ bool EgressDeparserPSA::build() {
 }
 
 // =====================TCIngressDeparserPSA=============================
-/*
- * PreDeparser for Ingress pipeline implements:
- * - packet cloning (using clone sessions)
- * - early packet drop
- * - resubmission
- */
+
+/// PreDeparser for Ingress pipeline implements:
+/// - packet cloning (using clone sessions)
+/// - early packet drop
+///- resubmission
+
 void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->emitIndent();
 

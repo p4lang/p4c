@@ -63,7 +63,7 @@ void PNAEbpfGenerator::emitInternalStructures(EBPF::CodeBuilder *builder) const 
     builder->newline();
 }
 
-/* Generate headers and structs in p4 prog */
+/// Generate headers and structs in p4 prog 
 void PNAEbpfGenerator::emitTypes(EBPF::CodeBuilder *builder) const {
     pipeline->parser->emitTypes(builder);
     pipeline->control->emitTableTypes(builder);
@@ -583,8 +583,8 @@ void EBPFPnaParser::emitRejectState(EBPF::CodeBuilder *builder) {
     builder->endOfStatement(true);
 }
 
-//  This code is similar to compileExtractField function in PsaStateTranslationVisitor.
-//  Handled TC "macaddr" annotation.
+///  This code is similar to compileExtractField function in PsaStateTranslationVisitor.
+///  Handled TC "macaddr" annotation.
 void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
                                                      const IR::StructField *field,
                                                      unsigned hdrOffsetBits, EBPF::EBPFType *type) {
@@ -1554,16 +1554,16 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         }
         return;
     } else if (function->expr->method->toString() == "add_entry") {
-        /*
-        add_entry() to be called with the following restrictions:
-        * Only from within an action
-        * Only if the action is a default action of a table with property add_on_miss equal to true.
-        * Only with an action name that is one of the hit actions of that same table. This action
-        has parameters that are all directionless.
-        * The type T is a struct containing one member for each directionless parameter of the hit
-          action to be added. The member names must match the hit action parameter names, and their
-          types must be the same as the corresponding hit action parameters.
-        */
+       
+        // add_entry() to be called with the following restrictions:
+        //  Only from within an action
+        //  Only if the action is a default action of a table with property add_on_miss equal to true.
+        //  Only with an action name that is one of the hit actions of that same table. This action
+        // has parameters that are all directionless.
+        //  The type T is a struct containing one member for each directionless parameter of the hit
+        //   action to be added. The member names must match the hit action parameter names, and their
+        //   types must be the same as the corresponding hit action parameters.
+        
         auto act = findContext<IR::P4Action>();
         ValidateAddOnMissMissAction(act);
         BUG_CHECK(function->expr->arguments->size() == 3,
@@ -1733,8 +1733,8 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                     } else if (width <= 64) {
                         swap = "bpf_htonll";
                     }
-                    /* For width greater than 64 bit, there is no need of conversion.
-                        and the value will be copied directly from memory.*/
+                    //  For width greater than 64 bit, there is no need of conversion.
+                    //     and the value will be copied directly from memory.
                 }
             }
 

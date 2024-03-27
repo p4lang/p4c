@@ -37,9 +37,9 @@ class IsDirectionMetadataUsed : public Inspector {
     }
 };
 
-// This pass adds decl instance of Register extern in dpdk pna program which will
-// be used by dpdk backend for initializing the mask for calculating packet direction
-// at beginning of pipeline
+/// This pass adds decl instance of Register extern in dpdk pna program which will
+/// be used by dpdk backend for initializing the mask for calculating packet direction
+/// at beginning of pipeline
 class DirectionToRegRead : public Transform {
     ordered_map<cstring, cstring> dirToDirMapping;
     ordered_map<cstring, cstring> inputToInputPortMapping;
@@ -78,9 +78,9 @@ class DirectionToRegRead : public Transform {
         IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 };
 
-// DPDK implements pass metadata using "recircid" instruction.
-// All occurrences of pass metadata usage should be prepended with recircid instruction to fetch
-// the latest pass_id from the target.
+/// DPDK implements pass metadata using "recircid" instruction.
+/// All occurrences of pass metadata usage should be prepended with recircid instruction to fetch
+/// the latest pass_id from the target.
 class PrependPassRecircId : public Transform {
     IR::IndexedVector<IR::DpdkAsmStatement> newStmts;
 

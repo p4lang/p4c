@@ -1,18 +1,18 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+// Copyright 2013-present Barefoot Networks, Inc.
 
-    http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+//     http://www.apache.org/licenses/LICENSE-2.0
+
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+ 
 
 #ifndef BACKENDS_BMV2_COMMON_BACKEND_H_
 #define BACKENDS_BMV2_COMMON_BACKEND_H_
@@ -55,7 +55,7 @@ enum block_t {
 
 class ExpressionConverter;
 
-// Backend is a the base class for SimpleSwitchBackend and PortableSwitchBackend.
+/// Backend is a the base class for SimpleSwitchBackend and PortableSwitchBackend.
 class Backend {
  public:
     BMV2Options &options;
@@ -81,13 +81,13 @@ class Backend {
     virtual void convert(const IR::ToplevelBlock *block) = 0;
 };
 
-/**
-This class implements a policy suitable for the SynthesizeActions pass.
-The policy is: do not synthesize actions for the controls whose names
-are in the specified set.
-For example, we expect that the code in the deparser will not use any
-tables or actions.
-*/
+
+///This class implements a policy suitable for the SynthesizeActions pass.
+///The policy is: do not synthesize actions for the controls whose names
+///are in the specified set.
+///For example, we expect that the code in the deparser will not use any
+///tables or actions.
+
 class SkipControls : public P4::ActionSynthesisPolicy {
     // set of controls where actions are not synthesized
     const std::set<cstring> *skip;
@@ -100,13 +100,13 @@ class SkipControls : public P4::ActionSynthesisPolicy {
     }
 };
 
-/**
-This class implements a policy suitable for the RemoveComplexExpression pass.
-The policy is: only remove complex expression for the controls whose names
-are in the specified set.
-For example, we expect that the code in ingress and egress will have complex
-expression removed.
-*/
+
+/// This class implements a policy suitable for the RemoveComplexExpression pass.
+/// The policy is: only remove complex expression for the controls whose names
+/// are in the specified set.
+/// For example, we expect that the code in ingress and egress will have complex
+/// expression removed.
+
 class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     const std::set<cstring> *process;
 
@@ -120,12 +120,12 @@ class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     }
 };
 
-/**
-This pass adds @name annotations to all fields of the user metadata
-structure so that they do not clash with fields of the headers
-structure.  This is necessary because both of them become global
-objects in the output json.
-*/
+
+/// This pass adds @name annotations to all fields of the user metadata
+/// structure so that they do not clash with fields of the headers
+/// structure.  This is necessary because both of them become global
+/// objects in the output json.
+
 class RenameUserMetadata : public Transform {
     P4::ReferenceMap *refMap;
     const IR::Type_Struct *userMetaType;

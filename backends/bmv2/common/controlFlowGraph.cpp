@@ -1,18 +1,17 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
+/// Copyright 2013-present Barefoot Networks, Inc.
+///
+/// Licensed under the Apache License, Version 2.0 (the "License");
+/// you may not use this file except in compliance with the License.
+/// You may obtain a copy of the License at
+///
+///    http://www.apache.org/licenses/LICENSE-2.0
+/// 
+/// Unless required by applicable law or agreed to in writing, software
+/// distributed under the License is distributed on an "AS IS" BASIS,
+/// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/// See the License for the specific language governing permissions and
+/// limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 
 #include "controlFlowGraph.h"
 
@@ -121,8 +120,8 @@ bool CFG::EdgeSet::checkSame(const CFG::EdgeSet &other) const {
     return true;
 }
 
-// We check whether a table always jumps to the same destination,
-// even if it appears multiple times in the CFG.
+/// We check whether a table always jumps to the same destination,
+/// even if it appears multiple times in the CFG.
 bool CFG::checkMergeable(std::set<TableNode *> nodes) const {
     TableNode *first = nullptr;
     for (auto tn : nodes) {
@@ -166,7 +165,7 @@ bool CFG::checkImplementable() const {
 namespace {
 class CFGBuilder : public Inspector {
     CFG *cfg;
-    /// predecessors of current CFG node
+    // predecessors of current CFG node
     const CFG::EdgeSet *live;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;

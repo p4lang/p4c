@@ -283,16 +283,16 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 return result;
             }
         } else if (minst->is<P4::BuiltInMethod>()) {
-            /* example result:
-             {
-                "parameters" : [
-                {
-                  "op" : "add_header",
-                  "parameters" : [{"type" : "header", "value" : "ipv4"}]
-                }
-              ],
-              "op" : "primitive"
-            } */
+            // example result:
+            //  {
+            //     "parameters" : [
+            //     {
+            //       "op" : "add_header",
+            //       "parameters" : [{"type" : "header", "value" : "ipv4"}]
+            //     }
+            //   ],
+            //   "op" : "primitive"
+            // } 
             result->emplace("op", "primitive");
 
             auto bi = minst->to<P4::BuiltInMethod>();

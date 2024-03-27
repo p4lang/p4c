@@ -23,11 +23,11 @@ limitations under the License.
 namespace P4 {
 
 namespace {
-/**
-Detect whether a Select expression is too complicated for BMv2.
-Also used to detect complex expressions that are arguments
-to method calls.
-*/
+
+/// Detect whether a Select expression is too complicated for BMv2.
+/// Also used to detect complex expressions that are arguments
+/// to method calls.
+
 class ComplexExpression : public Inspector {
  public:
     bool isComplex = false;

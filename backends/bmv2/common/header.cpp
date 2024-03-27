@@ -1,18 +1,17 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+/// Copyright 2013-present Barefoot Networks, Inc.
+///
+/// Licensed under the Apache License, Version 2.0 (the "License");
+/// you may not use this file except in compliance with the License.
+/// You may obtain a copy of the License at
+///
+///    http://www.apache.org/licenses/LICENSE-2.0
+/// 
+/// Unless required by applicable law or agreed to in writing, software
+/// distributed under the License is distributed on an "AS IS" BASIS,
+/// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/// See the License for the specific language governing permissions and
+/// limitations under the License.
 
 #include "header.h"
 
@@ -34,11 +33,11 @@ HeaderConverter::HeaderConverter(ConversionContext *ctxt, cstring scalarsName)
     CHECK_NULL(ctxt);
 }
 
-/**
- * Create header type and header instance from a IR::StructLike type
- *
- * @param meta this boolean indicates if the struct is a metadata or header.
- */
+
+ /// Create header type and header instance from a IR::StructLike type
+ ///
+ /// @param meta this boolean indicates if the struct is a metadata or header.
+
 void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike *type, bool meta) {
     LOG2("Adding " << type);
     for (auto f : type->fields) {
@@ -316,10 +315,10 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
     }
 }
 
-/**
- * We synthesize a "header_type" for each local which has a struct type
- * and we pack all the scalar-typed locals into a 'scalar' type
- */
+
+ ///  We synthesize a "header_type" for each local which has a struct type
+ ///  and we pack all the scalar-typed locals into a 'scalar' type
+ ///
 Visitor::profile_t HeaderConverter::init_apply(const IR::Node *node) {
     scalarsTypeName = ctxt->refMap->newName("scalars");
     ctxt->json->add_header_type(scalarsTypeName);
@@ -417,26 +416,25 @@ void HeaderConverter::end_apply(const IR::Node *) {
     }
 }
 
-/**
- * Generate ctxt->json for header from IR::Block's constructor parameters
- *
- * The only allowed fields in a struct are: Type_Bits, Type_Bool and Type_Header
- *
- * header H {
- *   bit<32> x;
- * }
- *
- * struct {
- *   bit<32> x;
- *   bool    y;
- *   H       h;
- * }
- *
- * Type_Struct within a Type_Struct, i.e. nested struct, should be flattened apriori.
- *
- * @pre assumes no nested struct in parameters.
- * @post none
- */
+/// Generate ctxt->json for header from IR::Block's constructor parameters
+///
+/// The only allowed fields in a struct are: Type_Bits, Type_Bool and Type_Header
+///
+/// header H {
+///   bit<32> x;
+/// }
+///
+/// struct {
+///   bit<32> x;
+///   bool    y;
+///   H       h;
+/// }
+///
+/// Type_Struct within a Type_Struct, i.e. nested struct, should be flattened apriori.
+///
+/// @pre assumes no nested struct in parameters.
+/// @post none
+
 bool HeaderConverter::preorder(const IR::Parameter *param) {
     LOG3("convert param " << param);
     // keep track of which headers we've already generated in ctxt->json

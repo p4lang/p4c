@@ -45,7 +45,7 @@ class ActionTranslationVisitor : public virtual CodeGenInspector {
     bool isActionParameter(const IR::PathExpression *expression) const;
 };  // ActionTranslationVisitor
 
-// Also used to represent counters
+/// Also used to represent counters
 class EBPFTableBase : public EBPFObject {
  public:
     const EBPFProgram *program;

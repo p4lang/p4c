@@ -24,7 +24,7 @@ namespace TC {
 class ConvertToBackendIR;
 class EBPFPnaParser;
 
-//  Similar to class PSAEbpfGenerator in backends/ebpf/psa/ebpfPsaGen.h
+///  Similar to class PSAEbpfGenerator in backends/ebpf/psa/ebpfPsaGen.h
 
 class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
  public:
@@ -51,7 +51,7 @@ class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
     cstring getProgramName() const;
 };
 
-// Similar to class PSAErrorCodesGen in backends/ebpf/psa/ebpfPsaGen.cpp
+/// Similar to class PSAErrorCodesGen in backends/ebpf/psa/ebpfPsaGen.cpp
 
 class PNAErrorCodesGen : public Inspector {
     EBPF::CodeBuilder *builder;
@@ -84,7 +84,7 @@ class PNAErrorCodesGen : public Inspector {
     }
 };
 
-//  Similar to class PSAArchTC in backends/ebpf/psa/ebpfPsaGen.h
+///  Similar to class PSAArchTC in backends/ebpf/psa/ebpfPsaGen.h
 
 class PNAArchTC : public PNAEbpfGenerator {
  public:
@@ -98,7 +98,7 @@ class PNAArchTC : public PNAEbpfGenerator {
     void emit(EBPF::CodeBuilder *builder) const override;
     void emitParser(EBPF::CodeBuilder *builder) const override;
     void emitHeader(EBPF::CodeBuilder *builder) const override;
-    void emitInstances(EBPF::CodeBuilder *builder) const override;
+   void emitInstances(EBPF::CodeBuilder *builder) const override;
 };
 
 class TCIngressPipelinePNA : public EBPF::TCIngressPipeline {
@@ -182,7 +182,7 @@ class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {
     DECLARE_TYPEINFO(IngressDeparserPNA, EBPF::EBPFDeparserPSA);
 };
 
-// Similar to class ConvertToEbpfPSA in backends/ebpf/psa/ebpfPsaGen.h
+/// Similar to class ConvertToEbpfPSA in backends/ebpf/psa/ebpfPsaGen.h
 
 class ConvertToEbpfPNA : public Transform {
     const EbpfOptions &options;
@@ -201,7 +201,7 @@ class ConvertToEbpfPNA : public Transform {
     const PNAEbpfGenerator *getEBPFProgram() { return ebpf_program; }
 };
 
-// Similar to class ConvertToEbpfPipeline in backends/ebpf/psa/ebpfPsaGen.h
+/// Similar to class ConvertToEbpfPipeline in backends/ebpf/psa/ebpfPsaGen.h
 
 class ConvertToEbpfPipelineTC : public Inspector {
     const cstring name;
@@ -236,7 +236,7 @@ class ConvertToEbpfPipelineTC : public Inspector {
     EBPF::EBPFPipeline *getEbpfPipeline() { return pipeline; }
 };
 
-// Similar to class ConvertToEBPFParserPSA in backends/ebpf/psa/ebpfPsaGen.h
+/// Similar to class ConvertToEBPFParserPSA in backends/ebpf/psa/ebpfPsaGen.h
 
 class ConvertToEBPFParserPNA : public Inspector {
     EBPF::EBPFProgram *program;
@@ -252,7 +252,7 @@ class ConvertToEBPFParserPNA : public Inspector {
     EBPF::EBPFParser *getEBPFParser() { return parser; }
 };
 
-// Similar to class ConvertToEBPFControlPSA in backends/ebpf/psa/ebpfPsaGen.h
+/// Similar to class ConvertToEBPFControlPSA in backends/ebpf/psa/ebpfPsaGen.h
 
 class ConvertToEBPFControlPNA : public Inspector {
     EBPF::EBPFProgram *program;
@@ -285,7 +285,7 @@ class ConvertToEBPFControlPNA : public Inspector {
     EBPF::EBPFControlPSA *getEBPFControl() { return control; }
 };
 
-// Similar to class ConvertToEBPFDeparserPSA in backends/ebpf/psa/ebpfPsaGen.h
+/// Similar to class ConvertToEBPFDeparserPSA in backends/ebpf/psa/ebpfPsaGen.h
 
 class ConvertToEBPFDeparserPNA : public Inspector {
     EBPF::EBPFProgram *program;
@@ -303,7 +303,7 @@ class ConvertToEBPFDeparserPNA : public Inspector {
     EBPF::EBPFDeparserPSA *getEBPFDeparser() { return deparser; }
 };
 
-// Similar to class ControlBodyTranslatorPSA in backends/ebpf/psa/ebpfPsaControl.h
+/// Similar to class ControlBodyTranslatorPSA in backends/ebpf/psa/ebpfPsaControl.h
 
 class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
  public:
@@ -327,7 +327,7 @@ class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
     void ValidateAddOnMissMissAction(const IR::P4Action *act);
 };
 
-// Similar to class ActionTranslationVisitorPSA in backends/ebpf/psa/ebpfPsaControl.h
+/// Similar to class ActionTranslationVisitorPSA in backends/ebpf/psa/ebpfPsaControl.h
 
 class ActionTranslationVisitorPNA : public EBPF::ActionTranslationVisitor,
                                     public ControlBodyTranslatorPNA {
@@ -346,7 +346,7 @@ class ActionTranslationVisitorPNA : public EBPF::ActionTranslationVisitor,
     cstring getParamName(const IR::PathExpression *) override;
 };
 
-// Similar to class DeparserHdrEmitTranslator  in backends/ebpf/ebpfDeparser.h
+/// Similar to class DeparserHdrEmitTranslator  in backends/ebpf/ebpfDeparser.h
 
 class DeparserHdrEmitTranslatorPNA : public EBPF::DeparserPrepareBufferTranslator {
  protected:

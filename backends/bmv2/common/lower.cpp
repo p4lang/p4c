@@ -1,18 +1,17 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+/// Copyright 2013-present Barefoot Networks, Inc.
+///
+/// Licensed under the Apache License, Version 2.0 (the "License");
+/// you may not use this file except in compliance with the License.
+/// You may obtain a copy of the License at
+///
+///    http://www.apache.org/licenses/LICENSE-2.0
+/// 
+/// Unless required by applicable law or agreed to in writing, software
+/// distributed under the License is distributed on an "AS IS" BASIS,
+/// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/// See the License for the specific language governing permissions and
+/// limitations under the License.
 
 #include "lower.h"
 
@@ -23,9 +22,9 @@ limitations under the License.
 
 namespace BMV2 {
 
-// We make an effort to update the typeMap as we proceed
-// since parent expression trees may need the information
-// when processing in post-order.
+/// We make an effort to update the typeMap as we proceed
+/// since parent expression trees may need the information
+/// when processing in post-order.
 
 const IR::Expression *LowerExpressions::shift(const IR::Operation_Binary *expression) const {
     auto rhs = expression->right;

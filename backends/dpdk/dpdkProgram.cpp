@@ -262,12 +262,13 @@ IR::Declaration_Variable *ConvertToDpdkParser::addNewTmpVarToMetadata(cstring na
     return newTmpVar;
 }
 
-/* This is a helper function for handling the transition select statement. It populates the left
-   and right operands of comparison, to be used  in conditional jump instructions. When the keyset
-   of select case is simple expressions, it populates the left and rigt operands with the input
-   expressions. When the keyset is Mask expression "a &&& b", it inserts temporary variables in
-   Metadata structure and populates the left and right operands of comparison with
-   "input & b" and "a & b" */
+/// This is a helper function for handling the transition select statement. It populates the left
+/// and right operands of comparison to be used in conditional jump instructions. When the keyset
+/// of select case is simple expressions, it populates the left and right operands with the input
+/// expressions. When the keyset is Mask expression "a &&& b", it inserts temporary variables in
+/// Metadata structure and populates the left and right operands of comparison with
+/// "input & b" and "a & b".
+
 void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expression *ce,
                                       IR::Expression **leftExpr, IR::Expression **rightExpr) {
     if (sv->is<IR::Constant>() && sv->type->width_bits() > 32) {
@@ -325,7 +326,7 @@ void ConvertToDpdkParser::handleTupleExpression(const IR::ListExpression *cl,
                                                 cstring trueLabel, cstring falseLabel) {
     IR::Expression *left;
     IR::Expression *right;
-    /* Compare each element in the input tuple with the keyset tuple */
+    // Compare each element in the input tuple with the keyset tuple 
     for (auto i = 0; i < inputSize; i++) {
         auto switch_var = input->components.at(i);
         auto caseExpr = cl->components.at(i);
@@ -420,12 +421,12 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                     auto tupleInputExpr = e->select;
                     auto inputSize = tupleInputExpr->components.size();
                     cstring trueLabel, falseLabel;
-                    /* For each select case, emit the block start label and then a series of
-                       jmp instructions. */
+                    //  For each select case, emit the block start label and then a series of
+                    //    jmp instructions. 
                     for (auto sc : caseList) {
                         if (!sc->keyset->is<IR::DefaultExpression>()) {
-                            /* Create label names, falseLabel for next keyset comparison and
-                               trueLabel for the state to jump on match */
+                            //  Create label names, falseLabel for next keyset comparison and
+                            //    trueLabel for the state to jump on match 
                             falseLabel = refmap->newName(state->name);
                             trueLabel = sc->state->path->name;
                             handleTupleExpression(sc->keyset->to<IR::ListExpression>(),
@@ -507,11 +508,11 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
     return false;
 }
 
-/* This function checks if a table satisfies the DPDK limitations mentioned below:
-     - Only one LPM match field allowed per table.
-     - If there is a key field with lpm match kind, the other match fields, if any,
-       must all be exact match.
-*/
+///This function checks if a table satisfies the DPDK limitations mentioned below:
+///     - Only one LPM match field allowed per table.
+///     - If there is a key field with lpm match kind, the other match fields, if any,
+///       must all be exact match.
+
 bool ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
     auto keys = a->getKey();
     auto lpmCount = 0;

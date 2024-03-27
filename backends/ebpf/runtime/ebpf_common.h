@@ -33,10 +33,10 @@ typedef signed long long s64;
 typedef unsigned long long u64;
 
 
-/*
- * Helper function.
- * Print a byte buffer according to the specified length.
- */
+
+/// Helper function.
+///Print a byte buffer according to the specified length.
+
 static inline void print_n_bytes(void *receiveBuffer, int num) {
     for (int i = 0; i < num; i++)
         printf("%02x", ((unsigned char *)receiveBuffer)[i]);

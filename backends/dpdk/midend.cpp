@@ -72,19 +72,18 @@ limitations under the License.
 
 namespace DPDK {
 
-/**
-This class implements a policy suitable for the ConvertEnums pass.
-The policy is: convert all enums to bit<32>
-*/
+/// This class implements a policy suitable for the ConvertEnums pass.
+/// The policy is: convert all enums to bit<32>
+
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum *) const override { return true; }
 
-    /* This function assigns DPDK target compatible values to the enums */
+    //  This function assigns DPDK target compatible values to the enums 
     unsigned encoding(const IR::Type_Enum *type, unsigned n) const override {
         if (type->name == "PSA_MeterColor_t") {
-            /* DPDK target assumes the following values for Meter colors
-               (Green: 0, Yellow: 1, Red: 2)
-               For PSA, the default values are  RED: 0, Green: 1, Yellow: 2 */
+            //  DPDK target assumes the following values for Meter colors
+            //    (Green: 0, Yellow: 1, Red: 2)
+            //    For PSA, the default values are  RED: 0, Green: 1, Yellow: 2 
             return (n + 2) % 3;
         }
         return n;
@@ -96,10 +95,10 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     EnumOn32Bits() {}
 };
 
-/**
-This class implements a policy suitable for the ConvertErrors pass.
-The policy is: convert all errors to specified width
-*/
+
+/// This class implements a policy suitable for the ConvertErrors pass.
+/// The policy is: convert all errors to specified width
+
 class ErrorWidth : public P4::ChooseErrorRepresentation {
     unsigned width;
     bool convert(const IR::Type_Error *) const override { return true; }

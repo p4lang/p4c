@@ -163,17 +163,17 @@ class AssignmentStatement : public TraceEvent {
 /// extracted and the offset it was extracted at.
 class ExtractSuccess : public TraceEvent {
  private:
-    /// The label of the extracted header.
-    /// The type is IR::Expression because we may also have IR::PathExpression as inputs.
+    // The label of the extracted header.
+    // The type is IR::Expression because we may also have IR::PathExpression as inputs.
     const IR::Expression *extractedHeader;
 
-    /// The current parser offset on the input packet.
+    // The current parser offset on the input packet.
     int offset;
 
-    /// The condition that allowed us to extract this header.
+    // The condition that allowed us to extract this header.
     const IR::Expression *condition;
 
-    /// The list of fields and their values of the emitted header.
+    // The list of fields and their values of the emitted header.
     std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields;
 
  public:
@@ -211,14 +211,14 @@ class ExtractSuccess : public TraceEvent {
 /// extracted and the offset it was extracted at.
 class ExtractFailure : public TraceEvent {
  private:
-    /// The label of the extracted header.
-    /// The type is IR::Expression because we may also have IR::PathExpression as inputs.
+    // The label of the extracted header.
+    // The type is IR::Expression because we may also have IR::PathExpression as inputs.
     const IR::Expression *extractedHeader;
 
-    /// The current parser offset on the input packet.
+    // The current parser offset on the input packet.
     int offset;
 
-    /// The condition that forbade us to extract this header.
+    // The condition that forbade us to extract this header.
     const IR::Expression *condition;
 
  public:
@@ -244,7 +244,7 @@ class ExtractFailure : public TraceEvent {
 /// A field being emitted by a deparser.
 class Emit : public TraceEvent {
  private:
-    /// The emitted header structure.
+    // The emitted header structure.
     const IR::HeaderExpression *emitHeader;
 
  public:
@@ -273,10 +273,10 @@ class Emit : public TraceEvent {
 class Packet : public TraceEvent {
  public:
     enum class Direction {
-        /// Marks a packet that is presented to a parser.
+        // Marks a packet that is presented to a parser.
         In,
 
-        /// Marks a packet that is emitted from a deparser.
+        // Marks a packet that is emitted from a deparser.
         Out,
     };
 

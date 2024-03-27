@@ -40,12 +40,12 @@ using CompilerResultOrError = std::optional<std::reference_wrapper<const Compile
 /// Encapsulates the details of invoking the P4 compiler for a target device and architecture.
 class CompilerTarget : public Target {
  public:
-    /// @returns a new compilation context for the compiler.
+    // @returns a new compilation context for the compiler.
     static ICompileContext *makeContext();
 
-    /// Initializes the P4 compiler with the given compiler-specific command-line arguments.
-    ///
-    /// @returns any unprocessed arguments, or nullptr if there was an error.
+    // Initializes the P4 compiler with the given compiler-specific command-line arguments.
+    //
+    // @returns any unprocessed arguments, or nullptr if there was an error.
     static std::vector<const char *> *initCompiler(int argc, char **argv);
 
     /// Runs the P4 compiler to produce an IR and various other kinds of information on the input

@@ -50,10 +50,10 @@ class Target {
     /// changed.
     static bool setArch(std::string archName);
 
-    /// The name of the tool supported by this instance.
+    // The name of the tool supported by this instance.
     std::string toolName;
 
-    /// The device and architecture supported by this instance.
+    // The device and architecture supported by this instance.
     Spec spec;
 
     // A virtual destructor makes this class polymorphic, so that the dynamic cast in get() can
@@ -73,8 +73,8 @@ class Target {
     Target(std::string toolName, std::string deviceName, std::string archName);
 
     /// @returns the target instance for the given tool and active target, as selected by @init.
-    //
-    // Implemented here because of limitations of templates.
+    ///
+    /// Implemented here because of limitations of templates.
     template <class TargetImpl>
     static const TargetImpl &get(const std::string &toolName) {
         if (curTarget == std::nullopt) {

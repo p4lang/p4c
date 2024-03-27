@@ -140,13 +140,13 @@ class Graphs : public Inspector {
     vertex_t add_vertex(const cstring &name, VertexType type);
     vertex_t add_and_connect_vertex(const cstring &name, VertexType type);
     void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name);
-    /**
-     * @brief used to connect subgraphs
-     * @param from node from wich edge will start
-     * @param to node where edge will end
-     * @param name used as edge label
-     * @param cluster_id id of cluster, that will be connected to previous cluster
-     */
+   
+    /// @brief used to connect subgraphs
+    /// @param from node from wich edge will start
+    /// @param to node where edge will end
+    /// @param name used as edge label
+    /// @param cluster_id id of cluster, that will be connected to previous cluster
+    
     void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name,
                   unsigned cluster_id);
 
@@ -215,11 +215,11 @@ class Graphs : public Inspector {
     std::vector<const IR::Statement *> statementsStack{};
 
  private:
-    /**
-     * @brief Limits string size in helper_sstream and resets it
-     * @param[out] sstream stringstream where trimmed string is stored
-     * @param helper_sstream contains string, which will be trimmed
-     */
+   
+    /// @brief Limits string size in helper_sstream and resets it
+    /// @param[out] sstream stringstream where trimmed string is stored
+    /// @param helper_sstream contains string, which will be trimmed
+   
     void limitStringSize(std::stringstream &sstream, std::stringstream &helper_sstream);
 };
 

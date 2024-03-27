@@ -388,7 +388,7 @@ bool CodeGenInspector::preorder(const IR::BlockStatement *s) {
     return false;
 }
 
-// This is correct only after inlining
+/// This is correct only after inlining
 bool CodeGenInspector::preorder(const IR::ExitStatement *) {
     builder->append("return");
     builder->endOfStatement();

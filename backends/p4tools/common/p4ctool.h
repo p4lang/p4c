@@ -13,8 +13,8 @@ namespace P4Tools {
 
 /// Abstract class for all compiler-based tools. Implementations should instantiate this template
 /// on a subclass of AbstractP4cToolOptions.
-//
-// Because of limitations of templates, method implementations must be inlined here.
+///
+/// Because of limitations of templates, method implementations must be inlined here.
 template <class Options,
           typename = std::enable_if_t<std::is_base_of_v<AbstractP4cToolOptions, Options>>>
 class AbstractP4cTool {
