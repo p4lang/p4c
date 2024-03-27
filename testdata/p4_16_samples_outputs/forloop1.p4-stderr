@@ -1,4 +1,9 @@
-forloop1.p4(18): [--Wwarn=unused] warning: Control c is not used; removing
-control c(inout headers_t hdrs) {
-        ^
-[--Wwarn=missing] warning: Program does not contain a `main' module
+forloop1.p4(23): [--Wwarn=uninitialized_use] warning: v may not be completely initialized
+        for (t2 v in hdrs.stack) {
+                ^
+forloop1.p4(24): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header v
+            hdrs.head.f1 = hdrs.head.f1 + v.x;
+                                          ^
+forloop1.p4(24): [--Wwarn=uninitialized_use] warning: v.x may be uninitialized
+            hdrs.head.f1 = hdrs.head.f1 + v.x;
+                                          ^^^

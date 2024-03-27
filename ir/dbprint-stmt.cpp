@@ -99,11 +99,17 @@ void IR::ForStatement::dbprint(std::ostream &out) const {
         if (!first) out << ", ";
         out << sd;
         first = false; }
-    out << "{" << indent << Log::endl << body << " }" << unindent << setprec(prec);
+    out << ") {" << indent << Log::endl << body << " }" << unindent << setprec(prec);
 }
 
 void IR::ForInStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
-    out << Prec_Low << "for (" << decl << " in " << collection << ") {" << indent
-        << Log::endl << body << " }" << unindent << setprec(prec);
+    out << Prec_Low << "for (";
+    if (decl) {
+        out << decl;
+    } else {
+        out << ref;
+    }
+    out << " in " << collection << ") {" << indent << Log::endl
+        << body << " }" << unindent << setprec(prec);
 }

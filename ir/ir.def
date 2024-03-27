@@ -536,10 +536,13 @@ class ForInStatement : Statement, ISimpleNamespace {
     Expression                          collection;
     Statement                           body;
     ForInStatement { ref = new PathExpression(decl->name); }
+    ForInStatement(Util::SourceInfo si, PathExpression pe, Expression c, Statement b)
+        : Statement(si), decl(nullptr), ref(pe), collection(c), body(b) {}
     IDeclaration getDeclByName(cstring name) const override {
-        return decl->name == name ? decl : nullptr; }
+        return decl && decl->name == name ? decl : nullptr; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return new Util::SingleEnumerator<const IDeclaration *>(decl); }
+        if (decl) return new Util::SingleEnumerator<const IDeclaration *>(decl);
+        return new Util::EmptyEnumerator<const IDeclaration *>(); }
 }
 
 /////////////////////////////////////////////////////////////

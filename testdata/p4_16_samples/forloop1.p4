@@ -1,3 +1,6 @@
+#include <core.p4>
+control generic<M>(inout M m);
+package top<M>(generic<M> c);
 
 header t1 {
     bit<32>     f1;
@@ -25,3 +28,5 @@ control c(inout headers_t hdrs) {
         }
     }
 }
+
+top(c()) main;

@@ -1311,9 +1311,10 @@ forStatement
 	      forUpdateStatements ")"
       statement
     { $$ = new IR::ForStatement(@1+@8, *$3, $5, *$7, $9); }
-    | FOR "(" typeRef name IN forCollectionExpr ")"
-      statement
+    | FOR "(" typeRef name IN forCollectionExpr ")" statement
     { $$ = new IR::ForInStatement(@1+@6, new IR::Declaration_Variable(@3+@4, *$4, $3), $6, $8); }
+    | FOR "(" prefixedNonTypeName IN forCollectionExpr ")" statement
+    { $$ = new IR::ForInStatement(@1+@6, new IR::PathExpression(@3, $3), $5, $7); }
     ;
 
 forInitStatements
