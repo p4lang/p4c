@@ -1,4 +1,1 @@
-spec-ex04.p4(24): [--Wwarn=overflow] warning: 8s0b10101010: signed value does not fit in 8 bits
-const int<8> b8 = 8s0b1010_1010
-                  ^^^^^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

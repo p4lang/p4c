@@ -1,6 +1,3 @@
-strength.p4(50): [--Wwarn=overflow] warning: 4s0xf: signed value does not fit in 4 bits
-        w = w - 4s0xF
-                ^^^^^
 strength.p4(38): [--Wwarn=mismatch] warning: 4w16: value does not fit in 4 bits
         y = y * 16;
                 ^^
