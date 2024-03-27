@@ -631,7 +631,8 @@ def main():
         string_to_pass_as___source_file = opts.json_source
 
     if P4_input_or_inputs_specified:
-        assert 1 == len(opts.P4_source_files)
+        if checkInput:
+            assert 1 == len(opts.P4_source_files)
         assert not JSON_input_specified
         string_to_pass_as___source_file = opts.P4_source_files[0]
 
