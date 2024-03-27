@@ -47,6 +47,7 @@ struct ID : Util::IHasSourceInfo {
     }
     bool operator==(const ID &a) const { return name == a.name; }
     bool operator!=(const ID &a) const { return name != a.name; }
+    bool operator<(const ID &a) const { return name < a.name; }
     explicit operator bool() const { return name; }
     operator cstring() const { return name; }
     bool isDontCare() const { return name == "_"; }

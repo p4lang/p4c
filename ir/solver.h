@@ -18,7 +18,7 @@ using Constraint = IR::Expression;
 /// Comparator to compare SymbolicVariable pointers.
 struct SymbolicVarComp {
     bool operator()(const IR::SymbolicVariable *s1, const IR::SymbolicVariable *s2) const {
-        return s1->operator<(*s2);
+        return s1->isSemanticallyLess(*s2);
     }
 };
 

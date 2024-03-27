@@ -142,7 +142,6 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          if (const auto *checksumVarType = checksumVar->type->to<IR::Type_Bits>()) {
              // Overwrite any previous assignment or result.
              (*resolvedConcolicVariables)[*var] = IR::getConstant(checksumVarType, computedResult);
-
          } else {
              TESTGEN_UNIMPLEMENTED("Checksum output %1% of type %2% not supported", checksumVar,
                                    checksumVar->type);
@@ -154,7 +153,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          for (const auto &variable : resolvedExpressions) {
              const auto *varName = variable.first;
              const auto *varExpr = variable.second;
-             (*resolvedConcolicVariables)[varName] = varExpr;
+             (*resolvedConcolicVariables)[*varName] = varExpr;
          }
      }},
     /* ======================================================================================
@@ -206,7 +205,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          for (const auto &variable : resolvedExpressions) {
              const auto *varName = variable.first;
              const auto *varExpr = variable.second;
-             (*resolvedConcolicVariables)[varName] = varExpr;
+             (*resolvedConcolicVariables)[*varName] = varExpr;
          }
      }},
 
@@ -260,7 +259,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          for (const auto &variable : resolvedExpressions) {
              const auto *varName = variable.first;
              const auto *varExpr = variable.second;
-             (*resolvedConcolicVariables)[varName] = varExpr;
+             (*resolvedConcolicVariables)[*varName] = varExpr;
          }
      }},
 };
