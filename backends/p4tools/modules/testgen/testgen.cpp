@@ -171,6 +171,11 @@ std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view
         compilerResultOpt = P4Tools::CompilerTarget::runCompiler();
     }
 
+    if (!compilerResultOpt.has_value()) {
+        ::error("Failed to run the compiler.");
+        return std::nullopt;
+    }
+
     const auto *testgenCompilerResult =
         compilerResultOpt.value().get().checkedTo<TestgenCompilerResult>();
 
