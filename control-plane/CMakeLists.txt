@@ -51,8 +51,10 @@ set (P4RUNTIME_GEN_PYTHON "control-plane")
 add_custom_target (mkP4configdir
   ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/p4/config)
 add_custom_command(OUTPUT ${P4RUNTIME_GEN_SRCS} ${P4RUNTIME_GEN_HDRS}
-  COMMAND ${Protobuf_PROTOC_EXECUTABLE}
-          -I${P4RUNTIME_STD_DIR} -I${CMAKE_CURRENT_SOURCE_DIR} ${PROTOBUF_PROTOC_INCLUDES}
+  COMMAND $<TARGET_FILE:protoc>
+          --proto_path ${Protobuf_INCLUDE_DIR}
+          --proto_path ${CMAKE_CURRENT_SOURCE_DIR}
+          --proto_path ${P4RUNTIME_STD_DIR}
           --cpp_out ${CMAKE_CURRENT_BINARY_DIR}
           --python_out ${CMAKE_CURRENT_BINARY_DIR}
           --experimental_allow_proto3_optional
@@ -98,15 +100,11 @@ set (CONTROLPLANE_HDRS
 add_library(controlplane-gen OBJECT ${P4RUNTIME_GEN_SRCS})
 
 target_include_directories(controlplane-gen
-  # TODO(https://github.com/p4lang/p4c/issues/4477):
-  # We should not need this, but because of the way managed includes and
-  # libraries for Protobuf we need to explicitly add the include directories here.
-  SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS}
-  # Needed for the correct import of google/status.pb.cc
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
+  # Needed for the correct import of the generated Protobuf headers.
+  PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-target_link_libraries(controlplane-gen PUBLIC ${Protobuf_LIBRARY} PRIVATE absl::log)
+target_link_libraries(controlplane-gen PUBLIC protobuf::libprotobuf PRIVATE absl::log)
 
 # Silence various warnings as the root issue is out of our control, example
 # https://github.com/protocolbuffers/protobuf/issues/7140

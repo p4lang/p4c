@@ -99,13 +99,15 @@ jobs:
           brew install python@3.12 || true
           brew link --overwrite python@3.12
           brew pin python@3.12
+          brew install protobuf
+          brew link protobuf
           tools/install_mac_deps.sh
 
       - name: Build (MacOS)
         run: |
           source ~/.bash_profile
           ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
-              -DCMAKE_UNITY_BUILD=ON -DENABLE_TEST_TOOLS=ON --build-generator "Ninja"
+              -DCMAKE_UNITY_BUILD=ON -DENABLE_TEST_TOOLS=ON -DP4C_USE_PREINSTALLED_PROTOBUF=ON --build-generator "Ninja"
           cmake --build build -- -j $(nproc)
 
       - name: Run tests (MacOS)

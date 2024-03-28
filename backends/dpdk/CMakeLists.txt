@@ -27,8 +27,9 @@ add_custom_target (dpdk_runtime_dir
 # Generate source code from .proto using protoc. The output is
 # placed in the build directory inside `control-plane` directory
 add_custom_command(
-    OUTPUT ${DPDK_P4RUNTIME_INFO_GEN_SRCS} ${DPDK_P4RUNTIME_INFO_GEN_HDRS}
-  COMMAND ${Protobuf_PROTOC_EXECUTABLE}
+  OUTPUT ${DPDK_P4RUNTIME_INFO_GEN_SRCS} ${DPDK_P4RUNTIME_INFO_GEN_HDRS}
+  COMMAND $<TARGET_FILE:protoc>
+    --proto_path ${Protobuf_INCLUDE_DIR}
     --proto_path ${DPDK_P4RUNTIME_DIR}
     --proto_path ${P4RUNTIME_STD_DIR}
     --cpp_out ${CMAKE_CURRENT_BINARY_DIR}/p4/config
@@ -36,7 +37,7 @@ add_custom_command(
           ${DPDK_P4RUNTIME_INFO_PROTO}
   DEPENDS ${DPDK_P4RUNTIME_INFO_PROTO} dpdk_runtime_dir
   COMMENT "Generating protobuf files for p4info on target DPDK."
-  )
+)
 add_dependencies(dpdk_runtime_dir controlplane)
 
 add_library(dpdk_runtime STATIC ${DPDK_P4RUNTIME_INFO_GEN_SRCS})
