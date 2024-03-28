@@ -13,11 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include "lib/gc.h"
 
 #include "config.h"
 #if HAVE_LIBGC
-#include <gc/gc_cpp.h>
-#include <gc/gc_mark.h>
+#include <gc.h>
+#include <gc_cpp.h>
+#include <gc_mark.h>
 #endif /* HAVE_LIBGC */
 #include <sys/mman.h>
 #if HAVE_EXECINFO_H
@@ -30,7 +32,6 @@ limitations under the License.
 
 #include "backtrace_exception.h"
 #include "cstring.h"
-#include "gc.h"
 #include "log.h"
 #include "n4.h"
 
@@ -38,6 +39,7 @@ limitations under the License.
 // -DENABLE_GC=OFF in CMake.
 #if HAVE_LIBGC
 static bool done_init, started_init;
+
 // emergency pool to allow a few extra allocations after a bad_alloc is thrown so we
 // can generate reasonable errors, a stack trace, etc
 static char emergency_pool[16 * 1024];
@@ -140,15 +142,14 @@ alloc_trace_cb_t set_alloc_trace(void (*fn)(void *, void **, size_t), void *arg)
     return old;
 }
 
-// clang-format off
-void operator delete(void* p) noexcept {
+void operator delete(void *p) noexcept {
     if (p >= emergency_pool && p < emergency_pool + sizeof(emergency_pool)) {
         return;
     }
     gc::operator delete(p);
 }
 
-void operator delete(void* p, std::size_t /*size*/) noexcept {
+void operator delete(void *p, std::size_t /*size*/) noexcept {
     if (p >= emergency_pool && p < emergency_pool + sizeof(emergency_pool)) {
         return;
     }
@@ -157,14 +158,11 @@ void operator delete(void* p, std::size_t /*size*/) noexcept {
 
 // FIXME: We can get rid of GC_base here with suitable new libgc
 // See https://github.com/ivmai/bdwgc/issues/589 for more info
-void operator delete(void *p, std::align_val_t) noexcept {
-    gc::operator delete(GC_base(p));
-}
+void operator delete(void *p, std::align_val_t) noexcept { gc::operator delete(GC_base(p)); }
 
 void operator delete(void *p, std::size_t, std::align_val_t) noexcept {
     gc::operator delete(GC_base(p));
 }
-// clang-format on
 
 void *operator new[](std::size_t size) { return ::operator new(size); }
 void *operator new[](std::size_t size, std::align_val_t alignment) {

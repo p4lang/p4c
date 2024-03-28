@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "config.h"
 #if HAVE_LIBGC
-#include <gc/gc_cpp.h>
+#include <gc_cpp.h>
 #define NOGC_ARGS (NoGC, 0, 0)
 #else
 #define NOGC_ARGS
