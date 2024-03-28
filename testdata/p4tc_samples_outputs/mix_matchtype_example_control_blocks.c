@@ -299,7 +299,7 @@ if (/* hdr->ipv4.isValid() */
                     key.keysz = 72;
                     key.field0 = hdr->ipv4.dstAddr;
                     key.field1 = hdr->ipv4.srcAddr;
-                    key.field2 = (hdr->ipv4.protocol);
+                    key.field2 = hdr->ipv4.protocol;
                     struct p4tc_table_entry_act_bpf *act_bpf;
                     /* value */
                     struct MainControlImpl_ipv4_tbl_4_value *value = NULL;

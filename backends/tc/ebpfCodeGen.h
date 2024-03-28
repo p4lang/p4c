@@ -341,7 +341,7 @@ class ActionTranslationVisitorPNA : public EBPF::ActionTranslationVisitor,
     const ConvertToBackendIR *tcIR;
     ActionTranslationVisitorPNA(const EBPF::EBPFProgram *program, cstring valueName,
                                 const EBPF::EBPFTablePSA *table, const ConvertToBackendIR *tcIR,
-                                const IR::P4Action *action, bool isDefaultAction);
+                                const IR::P4Action *act, bool isDefaultAction);
     bool preorder(const IR::PathExpression *pe) override;
     bool isActionParameter(const IR::Expression *expression) const;
 

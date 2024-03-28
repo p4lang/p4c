@@ -106,7 +106,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
 ;
             tmp_0 = /* ck_0.get() */
 ((u16) (~ck_0_state));/* verify(hdr->ipv4.hdrChecksum == tmp_0, BadIPv4HeaderChecksum) */
-            if (!(hdr->ipv4.hdrChecksum == tmp_0)) {
+            if (!((hdr->ipv4.hdrChecksum == tmp_0))) {
                 ebpf_errorCode = BadIPv4HeaderChecksum;
                 goto reject;
             }

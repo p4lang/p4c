@@ -8,8 +8,8 @@ struct metadata_t {
 }
 
 header ethernet_t {
-    bit<48> dstAddr;
-    bit<48> srcAddr;
+    @tc_type ("macaddr") bit<48> dstAddr;
+    @tc_type ("macaddr") bit<48> srcAddr;
     bit<16> etherType;
 }
 
