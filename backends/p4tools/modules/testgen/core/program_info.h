@@ -21,24 +21,24 @@ namespace P4Tools::P4Testgen {
 /// Stores target-specific information about a P4 program.
 class ProgramInfo : public ICastable {
  private:
-    /// The program info object stores the results of the compilation, which includes the P4 program
-    /// and any information extracted from the program using static analysis.
+    // The program info object stores the results of the compilation, which includes the P4 program
+    // and any information extracted from the program using static analysis.
     std::reference_wrapper<const TestgenCompilerResult> compilerResult;
 
  protected:
     explicit ProgramInfo(const TestgenCompilerResult &compilerResult);
 
-    /// The list of concolic methods implemented by the target. This list is assembled during
-    /// initialization.
+    // The list of concolic methods implemented by the target. This list is assembled during
+    // initialization.
     ConcolicMethodImpls concolicMethodImpls;
 
-    /// The execution sequence of the P4 program.
+    // The execution sequence of the P4 program.
     std::vector<Continuation::Command> pipelineSequence;
 
-    /// The constraints imposed by the target.
+    // The constraints imposed by the target.
     std::optional<const IR::Expression *> targetConstraints = std::nullopt;
 
-    /// Maps the programmable blocks in the P4 program to their canonical counterpart.
+    // Maps the programmable blocks in the P4 program to their canonical counterpart.
     ordered_map<cstring, cstring> blockMap;
 
  public:
@@ -88,7 +88,7 @@ class ProgramInfo : public ICastable {
     /// @returns the list of implemented concolic methods for this particular program.
     [[nodiscard]] const ConcolicMethodImpls *getConcolicMethodImpls() const;
 
-    // @returns the width of the parser error for this specific target.
+    /// @returns the width of the parser error for this specific target.
     [[nodiscard]] virtual const IR::Type_Bits *getParserErrorType() const = 0;
 
     /// @returns the canonical name of the program block that is passed in.

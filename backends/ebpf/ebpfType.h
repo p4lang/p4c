@@ -25,7 +25,7 @@ limitations under the License.
 
 namespace EBPF {
 
-// Base class for EBPF types
+/// Base class for EBPF types
 class EBPFType : public EBPFObject {
  protected:
     explicit EBPFType(const IR::Type *type) : type(type) {}
@@ -125,7 +125,7 @@ class EBPFScalarType : public EBPFType, public IHasWidth {
     DECLARE_TYPEINFO(EBPFScalarType, EBPFType, IHasWidth);
 };
 
-// This should not always implement IHasWidth, but it may...
+/// This should not always implement IHasWidth, but it may...
 class EBPFTypeName : public EBPFType, public IHasWidth {
     const IR::Type_Name *type;
     EBPFType *canonical;
@@ -149,7 +149,7 @@ class EBPFTypeName : public EBPFType, public IHasWidth {
     DECLARE_TYPEINFO(EBPFTypeName, EBPFType, IHasWidth);
 };
 
-// Also represents headers and unions
+/// Also represents headers and unions
 class EBPFStructType : public EBPFType, public IHasWidth {
     class EBPFField {
      public:

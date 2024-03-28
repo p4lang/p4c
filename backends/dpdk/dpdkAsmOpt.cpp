@@ -19,7 +19,7 @@ limitations under the License.
 #include "dpdkUtils.h"
 
 namespace DPDK {
-// The assumption is compiler can only produce forward jumps.
+/// The assumption is compiler can only produce forward jumps.
 const IR::IndexedVector<IR::DpdkAsmStatement> *RemoveRedundantLabel::removeRedundantLabel(
     const IR::IndexedVector<IR::DpdkAsmStatement> &s) {
     IR::IndexedVector<IR::DpdkAsmStatement> used_labels;

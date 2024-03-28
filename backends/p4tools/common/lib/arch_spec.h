@@ -19,14 +19,14 @@ class ArchSpec {
     };
 
  private:
-    /// The ArchSpec has a name that typically corresponds with the name of the package for main.
+    // The ArchSpec has a name that typically corresponds with the name of the package for main.
     cstring packageName;
 
-    /// The ordered list of members in the architecture specification.
+    // The ordered list of members in the architecture specification.
     std::vector<ArchMember> archVector;
 
-    /// Keeps track of the block indices in the architecture specification.
-    /// This is useful to lookup the index for a particular block label.
+    // Keeps track of the block indices in the architecture specification.
+    // This is useful to lookup the index for a particular block label.
     std::map<cstring, size_t> blockIndices;
 
  public:

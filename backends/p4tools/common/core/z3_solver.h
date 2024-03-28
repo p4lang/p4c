@@ -167,7 +167,7 @@ class Z3Translator : public virtual Inspector {
     /// Translates variables.
     bool preorder(const IR::SymbolicVariable *var) override;
 
-    // Translations for unary operations.
+    /// Translations for unary operations.
     bool preorder(const IR::Neg *op) override;
     bool preorder(const IR::Cmpl *op) override;
     bool preorder(const IR::LNot *op) override;

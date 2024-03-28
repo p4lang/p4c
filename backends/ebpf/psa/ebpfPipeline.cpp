@@ -552,11 +552,11 @@ void TCIngressPipeline::emitTCWorkaroundUsingCPUMAP(CodeBuilder *builder) {
         "    eth->h_proto = *orig_ethtype;\n");
 }
 
-/*
- * The Traffic Manager for Ingress pipeline implements:
- * - Multicast handling
- * - send to port
- */
+
+/// The Traffic Manager for Ingress pipeline implements:
+/// - Multicast handling
+/// - send to port
+
 void TCIngressPipeline::emitTrafficManager(CodeBuilder *builder) {
     cstring mcast_grp =
         Util::printf_format("%s.multicast_group", control->outputStandardMetadata->name.name);

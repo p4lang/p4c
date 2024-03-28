@@ -42,9 +42,9 @@ extern cstring PnaMainOutputMetaFields[TC::MAX_PNA_OUTPUT_META];
 
 class PNAEbpfGenerator;
 
-/**
- * Backend code generation from midend IR
- */
+
+/// Backend code generation from midend IR
+ 
 class ConvertToBackendIR : public Inspector {
  public:
     const IR::ToplevelBlock *tlb;

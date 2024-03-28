@@ -15,7 +15,7 @@ and limitations under the License.
 */
 #include "version.h"
 
-// Return the version string
+/// Return the version string
 std::string version_string() {
     std::string version = std::to_string(MAJORVERSION) + "." + std::to_string(MINORVERSION) + ".";
     version += std::to_string(BUILDVERSION) + "." + std::to_string(FIXVERSION);

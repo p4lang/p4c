@@ -31,23 +31,23 @@ struct KeyProperties {
 
 /// Basic table properties that are set when initializing the TableStepper.
 struct TableProperties {
-    /// Control plane name of the table.
+    // Control plane name of the table.
     cstring tableName;
 
-    /// Whether key expressions of the table contain taint. This makes it difficult to match.
+    // Whether key expressions of the table contain taint. This makes it difficult to match.
     bool tableIsTainted = false;
 
-    /// Whether the table is constant and can not accept control plane entries.
+    // Whether the table is constant and can not accept control plane entries.
     bool tableIsImmutable = false;
 
-    /// Indicates whether the default action can be overridden.
+    // Indicates whether the default action can be overridden.
     bool defaultIsImmutable = false;
 
-    /// Ordered list of key fields with useful properties.
+    // Ordered list of key fields with useful properties.
     std::vector<KeyProperties> resolvedKeys;
 
-    /// Maps an action in the action list to a numerical identifier.
-    /// We do not use IR::MethodCallExpression here because we also look up switch labels.
+    // Maps an action in the action list to a numerical identifier.
+    // We do not use IR::MethodCallExpression here because we also look up switch labels.
     std::map<cstring, int> actionIdMap;
 };
 

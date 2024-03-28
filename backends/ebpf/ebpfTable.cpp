@@ -104,10 +104,10 @@ void EBPFTable::initKey() {
     }
 }
 
-// Performs the following validations:
-// - Validates if LPM key is the last one from match keys in an LPM table (ignores selector fields).
-// - Validates if match fields in ternary tables are sorted by size
-//   in descending order (ignores selector fields).
+/// Performs the following validations:
+/// - Validates if LPM key is the last one from match keys in an LPM table (ignores selector fields).
+/// - Validates if match fields in ternary tables are sorted by size
+///   in descending order (ignores selector fields).
 void EBPFTable::validateKeys() const {
     if (keyGenerator == nullptr) return;
 
@@ -862,8 +862,8 @@ cstring EBPFTable::p4ActionToActionIDName(const IR::P4Action *action) const {
     return Util::printf_format("%s_ACT_%s", tableInstance.toUpper(), actionName.toUpper());
 }
 
-// As ternary has precedence over lpm, this function checks if any
-// field is key field is lpm and none of key fields is of type ternary.
+/// As ternary has precedence over lpm, this function checks if any
+/// field is key field is lpm and none of key fields is of type ternary.
 bool EBPFTable::isLPMTable() const {
     bool isLPM = false;
     if (keyGenerator != nullptr) {

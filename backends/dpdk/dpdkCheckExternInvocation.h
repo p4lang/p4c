@@ -29,10 +29,10 @@ class TypeMap;
 
 namespace DPDK {
 
-/**
- * @brief Class for checking constraints for invocations of PNA architecture extern
- *        methods and functions.
- */
+
+/// @brief Class for checking constraints for invocations of PNA architecture extern
+///        methods and functions.
+
 class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
     DpdkProgramStructure *structure;
 

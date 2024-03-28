@@ -12,22 +12,22 @@ namespace P4Tools {
 
 /// Defines common formatting options.
 struct FormatOptions {
-    /// Insert separators into the produced string.
-    /// The output is formatted in groups of four digits separated by the underscore character.
-    /// If not a multiple of four, the first group will have the remainder
-    ///  digits; for example, "0xBAD_BEEF" for hex or "0b10_1010" for binary.
+    // Insert separators into the produced string.
+    // The output is formatted in groups of four digits separated by the underscore character.
+    // If not a multiple of four, the first group will have the remainder
+    //  digits; for example, "0xBAD_BEEF" for hex or "0b10_1010" for binary.
     bool useSeparator = false;
 
-    /// The output will be padded on the left with zeroes to
-    /// visually represent the full requested width.
+    // The output will be padded on the left with zeroes to
+    // visually represent the full requested width.
     bool padOutput = true;
 
-    /// The string will contain a prefix denoting the numeral system.
-    /// Hexadecimal strings are prefixed with "0x",
-    /// whereas binary strings are prefixed with "0b" and octal strings with "0".
+    // The string will contain a prefix denoting the numeral system.
+    // Hexadecimal strings are prefixed with "0x",
+    // whereas binary strings are prefixed with "0b" and octal strings with "0".
     bool usePrefix = true;
 
-    /// In case of hex strings, use uppercase instead of lowercase letters.
+    // In case of hex strings, use uppercase instead of lowercase letters.
     bool useUpperCaseHex = true;
 };
 

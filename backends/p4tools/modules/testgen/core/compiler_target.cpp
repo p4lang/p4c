@@ -47,7 +47,7 @@ CompilerResultOrError TestgenCompilerTarget::runCompilerImpl(const IR::P4Program
         program->apply(dcgCreator);
     }
 
-    /// Collect coverage information about the program.
+    // Collect coverage information about the program.
     auto coverage = P4::Coverage::CollectNodes(TestgenOptions::get().coverageOptions);
     program->apply(coverage);
 

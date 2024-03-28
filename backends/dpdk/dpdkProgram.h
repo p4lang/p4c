@@ -160,9 +160,9 @@ class ElimUnusedActions : public Transform {
     }
 };
 
-// frontend generates multiple copies of the same action in the localizeActions pass,
-// they are not useful for dpdk datapath. Removed the duplicated actions in
-// this pass.
+/// frontend generates multiple copies of the same action in the localizeActions pass,
+/// they are not useful for dpdk datapath. Removed the duplicated actions in
+/// this pass.
 class EliminateUnusedAction : public PassManager {
     ordered_set<cstring> actions;
 

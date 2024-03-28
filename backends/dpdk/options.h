@@ -101,7 +101,7 @@ class DpdkOptions : public CompilerOptions {
             "the compilation starts with reduced midEnd.");
     }
 
-    /// Process the command line arguments and set options accordingly.
+    // Process the command line arguments and set options accordingly.
     std::vector<const char *> *process(int argc, char *const argv[]) override;
 
     const char *getIncludePath() override;

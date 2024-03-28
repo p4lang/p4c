@@ -126,7 +126,7 @@ bool isDirection(const IR::Member *m) {
            m->member.name == "pna_main_parser_input_metadata_direction";
 }
 
-// Creates Register extern declaration for holding persistent information
+///. Creates Register extern declaration for holding persistent information
 IR::Declaration_Instance *createRegDeclarationInstance(cstring instanceName, int regSize,
                                                        int indexBitWidth, int initValBitWidth) {
     auto typepath = new IR::Path("Register");
@@ -142,7 +142,7 @@ IR::Declaration_Instance *createRegDeclarationInstance(cstring instanceName, int
     return decl;
 }
 
-// Check for reserved names for DPDK target
+/// Check for reserved names for DPDK target
 bool reservedNames(P4::ReferenceMap *refMap, std::vector<cstring> names, cstring &resName) {
     for (auto name : names) {
         auto newname = refMap->newName(name);
@@ -154,7 +154,7 @@ bool reservedNames(P4::ReferenceMap *refMap, std::vector<cstring> names, cstring
     return true;
 }
 
-// Update bitwidth of Metadata fields to 32 or 64 bits if it 8-bit aligned.
+/// Update bitwidth of Metadata fields to 32 or 64 bits if it 8-bit aligned.
 int getMetadataFieldWidth(int width) {
     if (width % 8 != 0) {
         BUG_CHECK(width <= 64, "Metadata bit-width expected to be within 64-bits, found %1%",

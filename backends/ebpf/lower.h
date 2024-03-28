@@ -23,9 +23,9 @@ limitations under the License.
 
 namespace EBPF {
 
-/**
-  This pass rewrites expressions which are not supported natively on EBPF.
-*/
+
+///   This pass rewrites expressions which are not supported natively on EBPF.
+
 class LowerExpressions : public Transform {
     P4::TypeMap *typeMap;
     // Cannot shift with a value larger than 5 bits

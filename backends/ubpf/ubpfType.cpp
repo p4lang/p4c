@@ -246,10 +246,10 @@ void UBPFListType::emitPadding(EBPF::CodeBuilder *builder, UBPF::UBPFListType::P
     builder->appendFormat("uint8_t %s[%u]", pad->name, pad->widthInBytes);
 }
 
-/***
- * This method emits uBPF code for Type_List (tuples). As the implementation of
- * hash() extern requires n-byte aligned structs, this method appends paddings between fields.
- */
+
+/// This method emits uBPF code for Type_List (tuples). As the implementation of
+/// hash() extern requires n-byte aligned structs, this method appends paddings between fields.
+
 void UBPFListType::emit(EBPF::CodeBuilder *builder) {
     for (auto f : elements) {
         builder->emitIndent();

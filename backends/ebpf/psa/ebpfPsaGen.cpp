@@ -113,7 +113,7 @@ void PSAEbpfGenerator::emitInternalStructures(CodeBuilder *builder) const {
     builder->newline();
 }
 
-/* Generate headers and structs in p4 prog */
+/// Generate headers and structs in p4 prog 
 void PSAEbpfGenerator::emitTypes(CodeBuilder *builder) const {
     PSAErrorCodesGen errorGen(builder);
     ingress->program->apply(errorGen);

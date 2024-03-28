@@ -171,7 +171,7 @@ bool InspectPnaProgram::preorder(const IR::Declaration_Variable *dv) {
     return false;
 }
 
-// This visitor only visits the parameter in the statement from architecture.
+/// This visitor only visits the parameter in the statement from architecture.
 bool InspectPnaProgram::preorder(const IR::Parameter *param) {
     auto ft = typeMap->getType(param->getNode(), true);
     LOG3("add param " << ft);
@@ -217,7 +217,7 @@ void InspectPnaProgram::postorder(const IR::P4Control *c) {
 }
 
 bool ParsePnaArchitecture::preorder(const IR::ToplevelBlock *block) {
-    /// Blocks are not in IR tree, use a custom visitor to traverse
+    // Blocks are not in IR tree, use a custom visitor to traverse
     for (auto it : block->constantValue) {
         if (it.second->is<IR::Block>()) visit(it.second->getNode());
     }

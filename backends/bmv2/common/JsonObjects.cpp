@@ -1,18 +1,17 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+/// Copyright 2013-present Barefoot Networks, Inc.
+///
+/// Licensed under the Apache License, Version 2.0 (the "License");
+/// you may not use this file except in compliance with the License.
+/// You may obtain a copy of the License at
+///
+///    http://www.apache.org/licenses/LICENSE-2.0
+/// 
+/// Unless required by applicable law or agreed to in writing, software
+/// distributed under the License is distributed on an "AS IS" BASIS,
+/// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+/// See the License for the specific language governing permissions and
+/// limitations under the License.
 
 #include "JsonObjects.h"
 
@@ -105,14 +104,14 @@ void JsonObjects::add_meta_info() {
     toplevel->emplace("__meta__", meta);
 }
 
-/**
- * Create a header type in json.
- * @param name header name
- * @param type header type
- * @param max_length  maximum length for a header with varbit fields;
- *                    if 0 header does not contain varbit fields
- * @param fields a JsonArray for the fields in the header
- */
+
+ /// Create a header type in json.
+ /// @param name header name
+ /// @param type header type
+ /// @param max_length  maximum length for a header with varbit fields;
+ ///                    if 0 header does not contain varbit fields
+ /// @param fields a JsonArray for the fields in the header
+
 unsigned JsonObjects::add_header_type(const cstring &name, Util::JsonArray *&fields,
                                       unsigned max_length) {
     std::string sname(name, name.size());

@@ -33,7 +33,7 @@ static cstring toString(const IR::Expression *expression) {
     return cstring(ss.str());
 }
 
-// we always have only one subgraph
+/// we always have only one subgraph
 Graph *ParserGraphs::CreateSubGraph(Graph &currentSubgraph, const cstring &name) {
     auto &newSubgraph = currentSubgraph.create_subgraph();
     boost::get_property(newSubgraph, boost::graph_name) = "cluster" + name;

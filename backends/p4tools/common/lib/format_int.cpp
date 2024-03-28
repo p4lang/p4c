@@ -275,7 +275,7 @@ std::string insertHexSeparators(const std::string &dataStr) {
 
 std::vector<uint8_t> convertBigIntToBytes(const big_int &dataInt, int targetWidthBits,
                                           bool padLeft) {
-    /// Chunk size is 8 bits, i.e., a byte.
+    // Chunk size is 8 bits, i.e., a byte.
     constexpr uint8_t chunkSize = 8U;
 
     std::vector<uint8_t> bytes;
@@ -316,7 +316,7 @@ std::optional<std::string> convertToIpv4String(const std::vector<uint8_t> &byteA
 }
 
 std::optional<std::string> convertToIpv6String(const std::vector<uint8_t> &byteArray) {
-    /// Chunk size is 8 bits, i.e., a byte.
+    // Chunk size is 8 bits, i.e., a byte.
     constexpr uint8_t chunkSize = 8U;
     constexpr uint8_t ipv6ByteSize = 16U;
     if (byteArray.size() != ipv6ByteSize) {

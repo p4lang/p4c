@@ -11,23 +11,23 @@ namespace P4Tools {
 /// Represents state of execution after having reached a program point.
 class AbstractExecutionState {
  protected:
-    /// The namespace context in the IR for the current state. The innermost element is the P4
-    /// program, representing the top-level namespace.
+    // The namespace context in the IR for the current state. The innermost element is the P4
+    // program, representing the top-level namespace.
     const NamespaceContext *namespaces;
 
-    /// The symbolic environment. Maps program variables to their symbolic values.
+    // The symbolic environment. Maps program variables to their symbolic values.
     SymbolicEnv env;
 
     /* =========================================================================================
      *  Constructors
      * ========================================================================================= */
-    /// Execution state needs to be explicitly copied using the @ref clone call..
+    // Execution state needs to be explicitly copied using the @ref clone call..
     AbstractExecutionState(const AbstractExecutionState &) = default;
 
-    /// Used for debugging and testing.
+    // Used for debugging and testing.
     AbstractExecutionState();
 
-    /// Do not accidentally copy-assign the execution state.
+    // Do not accidentally copy-assign the execution state.
     AbstractExecutionState &operator=(const AbstractExecutionState &) = default;
 
  public:

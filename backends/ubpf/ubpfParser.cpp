@@ -65,7 +65,7 @@ class UBPFStateTranslationVisitor : public EBPF::CodeGenInspector {
 };
 }  // namespace
 
-// if expr is nullprt, width is used instead
+/// if expr is nullprt, width is used instead
 void UBPFStateTranslationVisitor::emitCheckPacketLength(const IR::Expression *expr,
                                                         const char *varname, unsigned width) {
     auto program = state->parser->program;

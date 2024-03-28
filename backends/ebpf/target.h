@@ -22,8 +22,8 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/sourceCodeBuilder.h"
 
-// We are prepared to support code generation using multiple styles
-// (e.g., using BCC or using CLANG).
+/// We are prepared to support code generation using multiple styles
+/// (e.g., using BCC or using CLANG).
 
 namespace EBPF {
 
@@ -121,8 +121,8 @@ class Target {
     virtual void emitTraceMessage(Util::SourceCodeBuilder *builder, const char *format) const;
 };
 
-// Represents a target that is compiled within the kernel
-// source tree samples folder and which attaches to a socket
+/// Represents a target that is compiled within the kernel
+/// source tree samples folder and which attaches to a socket
 class KernelSamplesTarget : public Target {
  private:
     mutable unsigned int innerMapIndex;
@@ -196,7 +196,7 @@ class KernelSamplesTarget : public Target {
                               cstring valueType) const;
 };
 
-// Target XDP
+/// Target XDP
 class XdpTarget : public KernelSamplesTarget {
  public:
     explicit XdpTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "XDP") {}
@@ -220,7 +220,7 @@ class XdpTarget : public KernelSamplesTarget {
     }
 };
 
-// Represents a target compiled by bcc that uses the TC
+/// Represents a target compiled by bcc that uses the TC
 class BccTarget : public Target {
  public:
     BccTarget() : Target("BCC") {}
@@ -250,8 +250,8 @@ class BccTarget : public Target {
     cstring packetDescriptorType() const override { return "struct __sk_buff"; }
 };
 
-// A userspace test version with functionality equivalent to the kernel
-// Compiles with gcc
+/// A userspace test version with functionality equivalent to the kernel
+/// Compiles with gcc
 class TestTarget : public EBPF::KernelSamplesTarget {
  public:
     TestTarget() : KernelSamplesTarget(false, "Userspace Test") {}
