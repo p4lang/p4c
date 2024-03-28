@@ -253,6 +253,8 @@ To add a new input test with a sample P4 code file (under `testdata/p4_16_sample
 
 * We generally follow the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html). This is partially enforced by `cpplint` and `clang-format` and their respective configuration files. We have customized Google's `cpplint.py` tool for our purposes.  The tool can be invoked with `make cpplint`. To be able to run `clang-format` on Ubuntu 20.04, install it with `pip3 install --user clang-format`. Do not use the Debian package. Both tools run in a git hook and as part of CI.
 
+* Commenting Style is guided by the [following rules](#documentation-comments-style-guide).
+  
 * Watch out for `const`; it is very important.
 
 * Use `override` whenever possible (new gcc versions enforce this).
