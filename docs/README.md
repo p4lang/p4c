@@ -122,7 +122,7 @@ contains the documentation revision history, and 01_overview.md is the
 overview of the compiler goals and architecture.
 
 ## Documentation Comments Style Guide 
-- Use triple slashes `///` for documenting functions and classes in header files.
+- Use triple slashes `///` for documenting functions and classes in files.
 - Double slashes `//` should be used for "internal" comments within functions.
 - For rare occasions such as adding comments to multi-line macros, you may use `/* ... */` style comments.
 
