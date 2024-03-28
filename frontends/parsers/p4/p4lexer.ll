@@ -115,8 +115,12 @@ using Parser = P4::P4Parser;
                   return makeToken(BOOL); }
 "bit"           { BEGIN(driver.saveState); driver.template_args = true;
                   return makeToken(BIT); }
+"break"         { BEGIN(driver.saveState); driver.template_args = false;
+                  return makeToken(BREAK); }
 "const"         { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(CONST); }
+"continue"      { BEGIN(driver.saveState); driver.template_args = false;
+                  return makeToken(CONTINUE); }
 "control"       { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(CONTROL); }
 "default"       { BEGIN(driver.saveState); driver.template_args = false;
@@ -135,6 +139,8 @@ using Parser = P4::P4Parser;
                   return makeToken(EXTERN); }
 "false"         { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(FALSE); }
+"for"           { BEGIN(driver.saveState); driver.template_args = false;
+                  return makeToken(FOR); }
 "header"        { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(HEADER); }
 "header_union"  { BEGIN(driver.saveState); driver.template_args = false;

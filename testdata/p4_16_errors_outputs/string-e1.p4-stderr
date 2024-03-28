@@ -9,7 +9,7 @@ struct S {
        ^
 string-e1.p4(7): [--Werror=type-error] error: v: Cannot declare variables with type string
         string v;
-        ^^^^^^^^^
+        ^^^^^^^^
 string-e1.p4(7)
         string v;
         ^^^^^^

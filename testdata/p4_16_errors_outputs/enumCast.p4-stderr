@@ -1,6 +1,6 @@
 enumCast.p4(26): [--Werror=type-error] error: 'y': values of type 'int' cannot be implicitly cast to type 'X'
         X y = 1; // Error: no implicit cast to enum
-        ^^^^^^^^
+        ^^^^^^^
 enumCast.p4(3)
 enum bit<32> X {
              ^
