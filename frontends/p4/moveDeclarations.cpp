@@ -79,11 +79,13 @@ const IR::Node *MoveDeclarations::postorder(IR::Declaration_Variable *decl) {
         auto varRef = new IR::PathExpression(decl->name);
         auto keep = new IR::AssignmentStatement(decl->srcInfo, varRef, decl->initializer);
         return keep;
-    } else {
+    } else if (!parent->is<IR::ForEachStatement>()) {  // never move loop index decl out of foreach
         LOG1("Moving " << decl);
         addMove(decl);
         return nullptr;
     }
+
+    return decl;
 }
 
 const IR::Node *MoveDeclarations::postorder(IR::Declaration_Constant *decl) {

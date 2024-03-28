@@ -243,6 +243,7 @@ class DoSimplifyExpressions : public Transform, P4WriteContext {
     const IR::Node *postorder(IR::ReturnStatement *statement) override;
     const IR::Node *preorder(IR::SwitchStatement *statement) override;
     const IR::Node *preorder(IR::IfStatement *statement) override;
+    const IR::Node *preorder(IR::ForEachStatement *statement) override;
 
     void end_apply(const IR::Node *) override;
 };
