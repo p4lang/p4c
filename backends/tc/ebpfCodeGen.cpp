@@ -1914,13 +1914,13 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
 // =====================ActionTranslationVisitorPNA=============================
 ActionTranslationVisitorPNA::ActionTranslationVisitorPNA(
     const EBPF::EBPFProgram *program, cstring valueName, const EBPF::EBPFTablePSA *table,
-    const ConvertToBackendIR *tcIR, const IR::P4Action *action, bool isDefaultAction)
+    const ConvertToBackendIR *tcIR, const IR::P4Action *act, bool isDefaultAction)
     : EBPF::CodeGenInspector(program->refMap, program->typeMap),
       EBPF::ActionTranslationVisitor(valueName, program),
       ControlBodyTranslatorPNA(program->as<EBPF::EBPFPipeline>().control, tcIR, table),
       table(table),
       isDefaultAction(isDefaultAction) {
-    action = action;
+    action = act;
 }
 
 bool ActionTranslationVisitorPNA::preorder(const IR::PathExpression *pe) {
