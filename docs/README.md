@@ -121,6 +121,11 @@ XX is a number between 02-99. Currently, 00_revision_history.md
 contains the documentation revision history, and 01_overview.md is the
 overview of the compiler goals and architecture.
 
+## Documentation Comments Style Guide 
+- Use triple slashes `///` for documenting functions and classes in header files.
+- Double slashes `//` should be used for "internal" comments within functions.
+- For rare occasions such as adding comments to multi-line macros, you may use `/* ... */` style comments.
+
 Happy writing! Should you have any questions, please don't hesitate to ask.
 
 ## Git usage
