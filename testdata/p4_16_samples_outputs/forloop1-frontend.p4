@@ -26,7 +26,7 @@ control c(inout headers_t hdrs) {
         for (v_0 in hdrs.stack) {
             hdrs.head.f1 = hdrs.head.f1 + v_0.x;
         }
-        for (v_1 = 8w0, x_0 = 16w1; v_1 < hdrs.head.cnt; ) {
+        for (v_1 = 8w0, x_0 = 16w1; v_1 < hdrs.head.cnt; v_1 = v_1 + 8w1, x_0 = x_0 << 1) {
             hdrs.head.h1 = hdrs.head.h1 + x_0;
         }
     }
