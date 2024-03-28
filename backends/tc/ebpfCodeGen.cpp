@@ -1760,10 +1760,17 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
             EBPF::EBPFScalarType *scalar = nullptr;
             cstring swap;
 
-            bool isLPMKeyBigEndian = false;
-            if (table->isLPMTable()) {
-                if (c->matchType->path->name.name == P4::P4CoreLibrary::instance().lpmMatch.name)
-                    isLPMKeyBigEndian = true;
+            auto tcTarget = dynamic_cast<const EBPF::P4TCTarget *>(builder->target);
+            cstring isKeyBigEndian =
+                tcTarget->getByteOrderFromAnnotation(c->getAnnotations()->annotations);
+            cstring isDefnBigEndian = "HOST";
+            if (auto mem = c->expression->to<IR::Member>()) {
+                auto type = typeMap->getType(mem->expr, true);
+                if (type->is<IR::Type_StructLike>()) {
+                    auto field = type->to<IR::Type_StructLike>()->getField(mem->member);
+                    isDefnBigEndian =
+                        tcTarget->getByteOrderFromAnnotation(field->getAnnotations()->annotations);
+                }
             }
 
             if (ebpfType->is<EBPF::EBPFScalarType>()) {
@@ -1771,7 +1778,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                 unsigned width = scalar->implementationWidthInBits();
                 memcpy = !EBPF::EBPFScalarType::generatesScalar(width);
 
-                if (isLPMKeyBigEndian) {
+                if (isKeyBigEndian == "NETWORK" && isDefnBigEndian == "HOST") {
                     if (width <= 8) {
                         swap = "";  // single byte, nothing to swap
                     } else if (width <= 16) {
@@ -1794,9 +1801,10 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                 builder->appendFormat("[0]), %d)", scalar->bytesRequired());
             } else {
                 builder->appendFormat("%s.%s = ", keyname.c_str(), fieldName.c_str());
-                if (isLPMKeyBigEndian) builder->appendFormat("%s(", swap.c_str());
+                if (isKeyBigEndian == "NETWORK" && isDefnBigEndian == "HOST")
+                    builder->appendFormat("%s(", swap.c_str());
                 table->codeGen->visit(c->expression);
-                if (isLPMKeyBigEndian) builder->append(")");
+                if (isKeyBigEndian == "NETWORK" && isDefnBigEndian == "HOST") builder->append(")");
             }
             builder->endOfStatement(true);
 

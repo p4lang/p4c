@@ -500,16 +500,15 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
     cstring stringop = b->getStringOp();
 
     auto action = findContext<IR::P4Action>();
-    auto table = findContext<IR::P4Table>();
     auto tcTarget = dynamic_cast<const P4TCTarget *>(builder->target);
-    bool isLAnnotated = false, isRAnnotated = false;
+    cstring lByteOrder = "HOST", rByteOrder = "HOST";
     if (lexpr) {
-        isLAnnotated = tcTarget->isNetworkOrder(typeMap, action, table, lexpr);
+        lByteOrder = tcTarget->getByteOrder(typeMap, action, lexpr);
     }
     if (rexpr) {
-        isRAnnotated = tcTarget->isNetworkOrder(typeMap, action, table, rexpr);
+        rByteOrder = tcTarget->getByteOrder(typeMap, action, rexpr);
     }
-    if (isLAnnotated == isRAnnotated) {
+    if (lByteOrder == rByteOrder) {
         visit(lexpr);
         if (isScalar) {
             builder->spc();
@@ -522,7 +521,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
         visit(rexpr);
         return;
     }
-    if (isLAnnotated) {
+    if (lByteOrder == "NETWORK") {
         // ConvertLeft
         auto ftype = typeMap->getType(lexpr);
         auto et = EBPFTypeFactory::instance->create(ftype);
@@ -542,7 +541,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
         expressionPrecedence = b->getPrecedence() + 1;
         visit(rexpr);
         return;
-    } else if (isRAnnotated) {
+    } else if (rByteOrder == "NETWORK") {
         // ConvertRight
         auto ftype = typeMap->getType(rexpr);
         auto et = EBPFTypeFactory::instance->create(ftype);
@@ -568,16 +567,15 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
 void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression *lexpr,
                                                            const IR::Expression *rexpr) {
     auto action = findContext<IR::P4Action>();
-    auto table = findContext<IR::P4Table>();
     auto b = dynamic_cast<const P4TCTarget *>(builder->target);
-    bool isLAnnotated = false, isRAnnotated = false;
+    cstring lByteOrder = "HOST", rByteOrder = "HOST";
     if (lexpr) {
-        isLAnnotated = b->isNetworkOrder(typeMap, action, table, lexpr);
+        lByteOrder = b->getByteOrder(typeMap, action, lexpr);
     }
     if (rexpr) {
-        isRAnnotated = b->isNetworkOrder(typeMap, action, table, rexpr);
+        rByteOrder = b->getByteOrder(typeMap, action, rexpr);
     }
-    if (isLAnnotated == isRAnnotated) {
+    if (lByteOrder == rByteOrder) {
         visit(rexpr);
         return;
     }
@@ -588,7 +586,7 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
         visit(rexpr);
         return;
     }
-    if (isRAnnotated) {
+    if (rByteOrder == "NETWORK") {
         /*
         If left side of assignment is not annotated field i.e host endian and right expression
         is annotated field i.e network endian, we need to convert rexp to host order.
@@ -598,7 +596,7 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
         */
         emitAndConvertByteOrder(rexpr, "HOST");
     }
-    if (isLAnnotated) {
+    if (lByteOrder == "NETWORK") {
         /*
         If left side of assignment is annotated field i.e network endian, we need to convert
         right expression to network order.
