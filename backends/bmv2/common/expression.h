@@ -35,7 +35,6 @@ namespace BMV2 {
 /// P4-16 arithmetic on top of unbounded precision arithmetic.  For example,
 /// in P4-16 adding two 32-bit values should produce a 32-bit value, but using
 /// unbounded arithmetic, as in BMv2, it could produce a 33-bit value.
- 
 class ArithmeticFixup : public Transform {
     P4::TypeMap *typeMap;
 

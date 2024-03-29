@@ -265,13 +265,11 @@ struct ConversionContext {
     const IR::ToplevelBlock *toplevel;
     /// Block currently being converted
     BlockConverted blockConverted;
-   
     ProgramStructure *structure;
     /// expression converter is used in many places.
     ExpressionConverter *conv;
     /// final json output.
     BMV2::JsonObjects *json;
-
     /// for action profile conversion
     Util::JsonArray *action_profiles = nullptr;
 
