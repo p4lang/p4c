@@ -172,7 +172,7 @@ bool InspectPsaProgram::preorder(const IR::Declaration_Variable *dv) {
     return false;
 }
 
-// This visitor only visits the parameter in the statement from architecture.
+/// This visitor only visits the parameter in the statement from architecture.
 bool InspectPsaProgram::preorder(const IR::Parameter *param) {
     auto ft = typeMap->getType(param->getNode(), true);
     LOG3("add param " << ft);

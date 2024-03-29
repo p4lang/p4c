@@ -115,20 +115,18 @@ class CFG final : public IHasDbPrint {
     enum class EdgeType { Unconditional, True, False, Label };
 
  public:
-    /**
-     * A CFG Edge; can be an in-edge or out-edge.
-     */
+    
+    /// A CFG Edge; can be an in-edge or out-edge.
     class Edge final {
      protected:
         EdgeType type;
         Edge(Node *node, EdgeType type, cstring label) : type(type), endpoint(node), label(label) {}
 
      public:
-        /**
-         * The destination node of the edge.  The source node is not known by the edge
-         */
+        
+        /// The destination node of the edge.  The source node is not known by the edge
         Node *endpoint;
-        cstring label;  // only present if type == Label
+        cstring label;  /// only present if type == Label
 
         explicit Edge(Node *node) : type(EdgeType::Unconditional), endpoint(node) {
             CHECK_NULL(node);
@@ -177,7 +175,7 @@ class CFG final : public IHasDbPrint {
         BUG_CHECK(entryPoint == nullptr, "Entry already set");
         entryPoint = entry;
     }
-    void dbprint(std::ostream &out, Node *node, std::set<Node *> &done) const;  // helper
+    void dbprint(std::ostream &out, Node *node, std::set<Node *> &done) const;  /// helper
     void dbprint(std::ostream &out) const;
     void computeSuccessors() {
         for (auto n : allNodes) n->computeSuccessors();

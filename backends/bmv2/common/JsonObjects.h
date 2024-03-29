@@ -58,7 +58,7 @@ class JsonObjects {
     Util::JsonArray *append_array(Util::JsonArray *parent);
     Util::JsonArray *create_parameters(Util::JsonObject *object);
     Util::JsonObject *create_primitive(Util::JsonArray *parent, cstring name);
-    // Given a field list id returns the array of values called "elements"
+    /// Given a field list id returns the array of values called "elements"
     Util::JsonArray *get_field_list_contents(unsigned id) const;
 
     std::map<unsigned, Util::JsonObject *> map_parser;
