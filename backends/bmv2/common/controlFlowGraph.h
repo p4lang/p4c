@@ -123,8 +123,9 @@ class CFG final : public IHasDbPrint {
 
      public:  
         /// The destination node of the edge. The source node is not known by the edge.
+        /// The destination node of the edge.The Source node is not known by the edge.
         Node *endpoint;
-        cstring label;  /// only present if type == Label
+        cstring label;  /// only present if type == Label.
         explicit Edge(Node *node) : type(EdgeType::Unconditional), endpoint(node) {
             CHECK_NULL(node);
         }
@@ -184,10 +185,10 @@ class CFG final : public IHasDbPrint {
  private:
     bool dfs(Node *node, std::set<Node *> &visited, std::set<const IR::P4Table *> &stack) const;
     /// This is a set of table nodes that all represent the same
-    /// table.  Check whether they could logically be merged into
+    /// table. Check whether they could logically be merged into
     /// a single table node from a control-flow point of view.
     /// This requires their successor edgesets to be "compatible" with
-    /// each other.  This is a constraint specific to BMv2.
+    /// each other. This is a constraint specific to BMv2.
     bool checkMergeable(std::set<TableNode *> nodes) const;
 };
 
