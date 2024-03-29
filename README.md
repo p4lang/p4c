@@ -135,7 +135,7 @@ If you cannot use a repository to install p4c, you can download the `.deb` file
 for your release and install it manually. You need to download a new file each
 time you want to upgrade p4c.
 
-1. Go to https://build.opensuse.org/package/show/home:p4lang/p4lang-p4c, click on
+1. Go to [p4lang-p4c package page on OpenSUSE Build Service](https://build.opensuse.org/package/show/home:p4lang/p4lang-p4c), click on
 "Download package" and choose your operating system version.
 
 2. Install p4c, changing the path below to the path where you downloaded the package.
