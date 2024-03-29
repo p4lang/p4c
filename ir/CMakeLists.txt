@@ -25,6 +25,7 @@ set (IR_SRCS
   ir.cpp
   irutils.cpp
   json_parser.cpp
+  loop-visitor.cpp
   node.cpp
   pass_manager.cpp
   pass_utils.cpp

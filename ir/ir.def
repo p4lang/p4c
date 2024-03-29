@@ -519,12 +519,11 @@ class ForStatement : Statement, ISimpleNamespace {
         return init.getDeclaration(name); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return init.getDeclarations(); }
-    visit_children {
-        v.visit(init, "init");
-        v.visit(condition, "condition");
-        // FIXME -- need visit closure over the body and updates + condition
-        v.visit(body, "body");
-        v.visit(updates, "updates"); }
+    visit_children;
+#emit
+    // template single implementation of const vs non-const ForStatement
+    template<class THIS> static void visit_children(THIS *, Visitor &v);
+#end
 }
 
 // FIXME -- should we try to directly convert this to a ForStatement in the parser?
@@ -543,6 +542,11 @@ class ForInStatement : Statement, ISimpleNamespace {
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         if (decl) return new Util::SingleEnumerator<const IDeclaration *>(decl);
         return new Util::EmptyEnumerator<const IDeclaration *>(); }
+    visit_children;
+#emit
+    // template single implementation of const vs non-const ForInStatement
+    template<class THIS> static void visit_children(THIS *, Visitor &v);
+#end
 }
 
 /////////////////////////////////////////////////////////////
