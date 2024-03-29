@@ -32,8 +32,8 @@ limitations under the License.
 namespace BMV2 {
 
 using SelectorInput = std::vector<const IR::Expression *>;
-/// This pass makes sure that when several match tables share a selector, they use the same input for the selection algorithm.
-/// This is because bmv2 considers that the selection key is part of the action_selector while v1model.p4 considers that it belongs to the table match key definition.
+/// This pass ensures that when multiple match tables share a selector, they use the same input for the selection algorithm.
+/// bmv2 considers the selection key as part of the action_selector, while v1model.p4 treats it as part of the table match key definition.
 template <Standard::Arch arch>
 class SharedActionSelectorCheck : public Inspector {
     BMV2::ConversionContext *ctxt;
@@ -57,6 +57,7 @@ class SharedActionSelectorCheck : public Inspector {
         }
         return false;
     }
+    
  public:
     explicit SharedActionSelectorCheck(BMV2::ConversionContext *ctxt) : ctxt(ctxt) {
         refMap = ctxt->refMap;
