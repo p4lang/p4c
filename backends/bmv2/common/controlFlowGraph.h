@@ -120,10 +120,10 @@ class CFG final : public IHasDbPrint {
      protected:
         EdgeType type;
         Edge(Node *node, EdgeType type, cstring label) : type(type), endpoint(node), label(label) {}
-
+        
      public:  
         /**
-        *  The destination node of the edge.  The source node is not known by the edge
+        *  The destination node of the edge.  The source node is not known by the edge.
         */
         Node *endpoint;
         cstring label;  /// only present if type == Label
