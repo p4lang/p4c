@@ -306,7 +306,6 @@ In this document we adopt the following conventions:
 - Constants are written with uppercase characters—e.g., `CPU_PORT`, and
 - Errors and enumerations are written in camel-case— e.g. `PacketTooShort`.
     
-
 ## Compiler Driver
 
 **p4c** is a compiler driver. The goal is to provide a consistent user interface
