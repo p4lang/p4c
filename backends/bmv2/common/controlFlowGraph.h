@@ -115,19 +115,16 @@ class CFG final : public IHasDbPrint {
     enum class EdgeType { Unconditional, True, False, Label };
 
  public:
-    
     /// A CFG Edge; can be an in-edge or out-edge.
     class Edge final {
      protected:
         EdgeType type;
         Edge(Node *node, EdgeType type, cstring label) : type(type), endpoint(node), label(label) {}
 
-     public:
-        
+     public:  
         /// The destination node of the edge.  The source node is not known by the edge
         Node *endpoint;
         cstring label;  /// only present if type == Label
-
         explicit Edge(Node *node) : type(EdgeType::Unconditional), endpoint(node) {
             CHECK_NULL(node);
         }

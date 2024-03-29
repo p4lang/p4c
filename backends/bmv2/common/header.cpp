@@ -36,9 +36,7 @@ HeaderConverter::HeaderConverter(ConversionContext *ctxt, cstring scalarsName)
 
 
 /// Create header type and header instance from a IR::StructLike type
- 
 /// @param meta this boolean indicates if the struct is a metadata or header.
-
 void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike *type, bool meta) {
     LOG2("Adding " << type);
     for (auto f : type->fields) {

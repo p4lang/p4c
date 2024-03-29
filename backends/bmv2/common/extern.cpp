@@ -279,3 +279,4 @@ Util::IJson *ExternConverter_assume::convertExternFunction(
 }
 
 }  // namespace BMV2
+
