@@ -30,12 +30,12 @@ limitations under the License.
 
 namespace BMV2 {
 
-/**
-   Inserts casts and narrowing operations to implement correctly the semantics of
-   P4-16 arithmetic on top of unbounded precision arithmetic.  For example,
-   in P4-16 adding two 32-bit values should produce a 32-bit value, but using
-   unbounded arithmetic, as in BMv2, it could produce a 33-bit value.
- */
+
+/// Inserts casts and narrowing operations to implement correctly the semantics of
+/// P4-16 arithmetic on top of unbounded precision arithmetic.  For example,
+/// in P4-16 adding two 32-bit values should produce a 32-bit value, but using
+/// unbounded arithmetic, as in BMv2, it could produce a 33-bit value.
+ 
 class ArithmeticFixup : public Transform {
     P4::TypeMap *typeMap;
 
@@ -86,11 +86,11 @@ class ExpressionConverter : public Inspector {
     /// Non-null if the expression refers to a parameter from the enclosing control
     const IR::Parameter *enclosingParamReference(const IR::Expression *expression);
 
-    // Each architecture typically has some special parameters that requires
-    // special handling. The examples are standard_metadata in the v1model and
-    // packet path related metadata in PSA. Each target should subclass the
-    // ExpressionConverter and implement this function with target-specific
-    // handling code to deal with the special parameters.
+    /// Each architecture typically has some special parameters that requires
+    /// special handling. The examples are standard_metadata in the v1model and
+    /// packet path related metadata in PSA. Each target should subclass the
+    /// ExpressionConverter and implement this function with target-specific
+    /// handling code to deal with the special parameters.
     virtual Util::IJson *convertParam(const IR::Parameter *param, cstring fieldName) = 0;
 
     Util::IJson *get(const IR::Expression *expression) const;

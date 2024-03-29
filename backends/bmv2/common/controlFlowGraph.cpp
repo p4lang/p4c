@@ -121,8 +121,8 @@ bool CFG::EdgeSet::checkSame(const CFG::EdgeSet &other) const {
     return true;
 }
 
-// We check whether a table always jumps to the same destination,
-// even if it appears multiple times in the CFG.
+/// We check whether a table always jumps to the same destination,
+/// even if it appears multiple times in the CFG.
 bool CFG::checkMergeable(std::set<TableNode *> nodes) const {
     TableNode *first = nullptr;
     for (auto tn : nodes) {

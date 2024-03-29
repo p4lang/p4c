@@ -57,7 +57,7 @@ class ExternConverter {
                                           const IR::MethodCallExpression *mc,
                                           const IR::StatOrDecl *s, const bool emitExterns);
 
-    // helper function for simple switch
+    /// helper function for simple switch
     void modelError(const char *format, const IR::Node *place) const;
     void addToFieldList(ConversionContext *ctxt, const IR::Expression *expr, Util::JsonArray *fl);
     int createFieldList(ConversionContext *ctxt, const IR::Expression *expr, cstring group,
