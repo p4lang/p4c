@@ -80,10 +80,10 @@ class PsaProgramStructure : public ProgramStructure {
         return false;
     }
 
-    /// Checks if a string is of type PSA_CounterType_t returns true
+    /// Checks if a string is of type PSA_CounterType_t returns true.
     /// if it is, false otherwise.
     static bool isCounterMetadata(cstring ptName) { return !strcmp(ptName, "PSA_CounterType_t"); }    
-    /// Checks if a string is a psa metadata returns true
+    /// Checks if a string is a psa metadata returns true.
     /// if it is, false otherwise.
     static bool isStandardMetadata(cstring ptName) {
         return (!strcmp(ptName, "psa_ingress_parser_input_metadata_t") ||
