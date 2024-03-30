@@ -17,12 +17,26 @@ limitations under the License.
 
 template<class THIS>
 void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
-    self->Statement::visit_children(v);
     v.visit(self->init, "init");
-    v.visit(self->condition, "condition");
-    // FIXME -- need visit closure over the body and updates + condition
-    v.visit(self->body, "body");
-    v.visit(self->updates, "updates");
+    if (auto *cfv = v.controlFlowVisitor()) {
+        ControlFlowVisitor::SaveGlobal outer(*cfv, "-BREAK-", "-CONTINUE-");
+        ControlFlowVisitor *top = nullptr;
+        do {
+            top = &cfv->flow_clone();
+            cfv->visit(self->condition, "condition", 1);
+            auto &inloop = cfv->flow_clone();
+            inloop.visit(self->body, "body");
+            inloop.flow_merge_global_from("-CONTINUE-");
+            inloop.visit(self->updates, "updates");
+            cfv->flow_merge(inloop);
+            if (cfv->isUnreachable()) break;
+        } while (*cfv != *top);
+        cfv->flow_merge_global_from("-BREAK-");
+    } else {
+        v.visit(self->condition, "condition");
+        v.visit(self->body, "body");
+        v.visit(self->updates, "updates");
+    }
 }
 
 void IR::ForStatement::visit_children(Visitor &v) { visit_children(this, v); }
@@ -30,13 +44,44 @@ void IR::ForStatement::visit_children(Visitor &v) const { visit_children(this, v
 
 template<class THIS>
 void IR::ForInStatement::visit_children(THIS *self, Visitor &v) {
-    self->Statement::visit_children(v);
-    v.visit(self->decl, "decl");
-    v.visit(self->ref, "ref");
-    v.visit(self->body, "collection");
-    v.visit(self->body, "body");
+    v.visit(self->decl, "decl", 0);
+    v.visit(self->collection, "collection", 2);
+    if (auto *cfv = v.controlFlowVisitor()) {
+        ControlFlowVisitor::SaveGlobal outer(*cfv, "-BREAK-", "-CONTINUE-");
+        ControlFlowVisitor *top = nullptr;
+        do {
+            top = &cfv->flow_clone();
+            cfv->visit(self->ref, "ref", 1);
+            auto &inloop = cfv->flow_clone();
+            inloop.visit(self->body, "body", 3);
+            cfv->flow_merge(inloop);
+            if (cfv->isUnreachable()) break;
+        } while (*cfv != *top);
+        cfv->flow_merge_global_from("-BREAK-");
+    } else {
+        v.visit(self->ref, "ref", 1);
+        v.visit(self->body, "body", 3);
+    }
 }
-
 void IR::ForInStatement::visit_children(Visitor &v) { visit_children(this, v); }
 void IR::ForInStatement::visit_children(Visitor &v) const { visit_children(this, v); }
 
+void IR::BreakStatement::visit_children(Visitor &v) const {
+    if (auto *cfv = v.controlFlowVisitor()) {
+        cfv->flow_merge_global_to("-BREAK-");
+        cfv->setUnreachable();
+    }
+}
+void IR::BreakStatement::visit_children(Visitor &v) {
+    return const_cast<const IR::BreakStatement *>(this)->visit_children(v);
+}
+
+void IR::ContinueStatement::visit_children(Visitor &v) const {
+    if (auto *cfv = v.controlFlowVisitor()) {
+        cfv->flow_merge_global_to("-CONTINUE-");
+        cfv->setUnreachable();
+    }
+}
+void IR::ContinueStatement::visit_children(Visitor &v) {
+    return const_cast<const IR::ContinueStatement *>(this)->visit_children(v);
+}

@@ -457,11 +457,13 @@ class IfStatement : Statement {
 class BreakStatement : Statement {
     toString{ return "break"; }
     dbprint { out << "break"; }
+    visit_children;  // in loop-visitor.cpp
 }
 
 class ContinueStatement : Statement {
     toString{ return "continue"; }
     dbprint { out << "continue"; }
+    visit_children;  // in loop-visitor.cpp
 }
 
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {

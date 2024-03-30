@@ -65,8 +65,8 @@ struct Visitor_Context {
     }
 };
 
+class ControlFlowVisitor;
 class SplitFlowVisit_base;
-
 class Inspector;
 
 class Visitor {
@@ -197,6 +197,7 @@ class Visitor {
     virtual bool check_clone(const Visitor *a) { return typeid(*this) == typeid(*a); }
 
     // Functions for IR visit_children to call for ControlFlowVisitors.
+    virtual ControlFlowVisitor *controlFlowVisitor() { return nullptr; }
     virtual Visitor &flow_clone() { return *this; }
     // all flow_clones share a split_link chain to allow stack walking
     SplitFlowVisit_base *split_link_mem = nullptr, *&split_link;
@@ -206,6 +207,7 @@ class Visitor {
      * control flow graph.  Should update @this and leave the other unchanged.
      */
     virtual void flow_merge(Visitor &) {}
+    virtual bool flow_merge_closure(Visitor &) { BUG("%s pass does not support loops", name()); }
     /** Support methods for non-local ControlFlow computations */
     virtual void flow_merge_global_to(cstring) {}
     virtual void flow_merge_global_from(cstring) {}
@@ -479,6 +481,8 @@ class ControlFlowVisitor : public virtual Visitor {
     friend void dump(const flow_join_points_t &);
     friend void dump(const flow_join_points_t *);
 
+    bool unreachable = false;
+
     flow_join_points_t *flow_join_points = 0;
     class SetupJoinPoints : public Inspector {
      protected:
@@ -518,12 +522,18 @@ class ControlFlowVisitor : public virtual Visitor {
      * edge are never join points.
      */
     virtual bool filter_join_point(const IR::Node *) { return false; }
-    ControlFlowVisitor &flow_clone() override;
-    void flow_merge(Visitor &) override = 0;
-    virtual void flow_copy(ControlFlowVisitor &) = 0;
     ControlFlowVisitor() : globals(*new std::map<cstring, ControlFlowVisitor &>) {}
 
  public:
+    ControlFlowVisitor *controlFlowVisitor() override { return this; }
+    ControlFlowVisitor &flow_clone() override;
+    void flow_merge(Visitor &) override = 0;
+    virtual void flow_copy(ControlFlowVisitor &) = 0;
+    virtual bool operator==(const ControlFlowVisitor &) const {
+        BUG("%s pass does not support loops", name()); }
+    bool operator!=(const ControlFlowVisitor &v) const { return !(*this == v); }
+    void setUnreachable() { unreachable = true; }
+    bool isUnreachable() { return unreachable; }
     void flow_merge_global_to(cstring key) override {
         if (globals.count(key))
             globals.at(key).flow_merge(*this);
@@ -536,6 +546,19 @@ class ControlFlowVisitor : public virtual Visitor {
     void erase_global(cstring key) override { globals.erase(key); }
     bool check_global(cstring key) override { return globals.count(key) != 0; }
     void clear_globals() override { globals.clear(); }
+    std::pair<cstring, ControlFlowVisitor *> save_global(cstring key) {
+        ControlFlowVisitor *cfv = nullptr;
+        if (auto i = globals.find(key); i != globals.end()) {
+            cfv = &i->second;
+            globals.erase(i);
+        }
+        return std::make_pair(key, cfv);
+    }
+    void restore_global(std::pair<cstring, ControlFlowVisitor *> saved) {
+        globals.erase(saved.first);
+        if (saved.second)
+            globals.emplace(saved.first, *saved.second);
+    }
 
     /// RAII class to ensure global key is only used in one place
     class GuardGlobal {
@@ -547,6 +570,23 @@ class ControlFlowVisitor : public virtual Visitor {
             BUG_CHECK(!self.check_global(key), "ControlFlowVisitor global %s in use", key);
         }
         ~GuardGlobal() { self.erase_global(key); }
+    };
+    /// RAII class to save and restore one or more global keys
+    class SaveGlobal {
+        ControlFlowVisitor &self;
+        std::vector<std::pair<cstring, ControlFlowVisitor *>>   saved;
+     public:
+        SaveGlobal(ControlFlowVisitor &self, cstring key) : self(self) {
+            saved.push_back(self.save_global(key));
+        }
+        SaveGlobal(ControlFlowVisitor &self, cstring k1, cstring k2) : self(self) {
+            saved.push_back(self.save_global(k1));
+            saved.push_back(self.save_global(k2));
+        }
+        ~SaveGlobal() {
+            for (auto it = saved.rbegin(); it != saved.rend(); ++it)
+                self.restore_global(*it);
+        }
     };
 
     bool has_flow_joins() const override { return !!flow_join_points; }
