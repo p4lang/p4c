@@ -24,9 +24,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-
 /// This pass rewrites expressions which are not supported natively on BMv2.
-
 class LowerExpressions : public Transform {
     P4::TypeMap *typeMap;
     /// Maximum shift amount, defaults to 8 bits

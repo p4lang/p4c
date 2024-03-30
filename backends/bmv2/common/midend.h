@@ -24,11 +24,9 @@ limitations under the License.
 
 namespace BMV2 {
 
-
 /// This class implements a policy suitable for the ConvertEnums pass.
 /// The policy is: convert all enums that are not part of the v1model.
 /// Use 32-bit values for all enums.
-
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     cstring filename;
 

@@ -63,12 +63,10 @@ limitations under the License.
 
 namespace BMV2 {
 
-
 /// This class implements a policy suitable for the ConvertEnums pass.
 /// The policy is: convert all enums that are not part of the psa.
 /// Use 32-bit values for all enums.
 /// Also convert PSA_PacketPath_t to bit<32>
-
 class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
     cstring filename;
 

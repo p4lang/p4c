@@ -122,7 +122,10 @@ class CFG final : public IHasDbPrint {
         Edge(Node *node, EdgeType type, cstring label) : type(type), endpoint(node), label(label) {}
 
      public:
+<<<<<<< HEAD
         /// The destination node of the edge.  The source node is not known by the edge.
+=======
+>>>>>>> 7fb724f48 (fix the whitespace error)
         Node *endpoint;
         cstring label;  /// only present if type == Label.
         explicit Edge(Node *node) : type(EdgeType::Unconditional), endpoint(node) {
