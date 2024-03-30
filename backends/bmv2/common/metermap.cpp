@@ -18,9 +18,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-
 /// @returns direct meter information from the direct meter map
-
 DirectMeterMap::DirectMeterInfo *DirectMeterMap::createInfo(const IR::IDeclaration *meter) {
     auto prev = ::get(directMeter, meter);
     BUG_CHECK(prev == nullptr, "Already created");
@@ -33,9 +31,7 @@ DirectMeterMap::DirectMeterInfo *DirectMeterMap::getInfo(const IR::IDeclaration 
     return ::get(directMeter, meter);
 }
 
-
 /// Set the table that a direct meter is attached to.
-
 void DirectMeterMap::setTable(const IR::IDeclaration *meter, const IR::P4Table *table) {
     auto info = getInfo(meter);
     if (info == nullptr) {
@@ -52,9 +48,7 @@ void DirectMeterMap::setTable(const IR::IDeclaration *meter, const IR::P4Table *
     info->table = table;
 }
 
-
 /// Helper function to check if two expressions are syntactically identical
-
 static bool checkSame(const IR::Expression *expr0, const IR::Expression *expr1) {
     if (expr0->node_type_name() != expr1->node_type_name()) return false;
     if (auto pe0 = expr0->to<IR::PathExpression>()) {
@@ -67,9 +61,7 @@ static bool checkSame(const IR::Expression *expr0, const IR::Expression *expr1) 
     BUG("%1%: unexpected expression for meter destination", expr0);
 }
 
-
 /// Set the destination that a meter is attached to??
-
 void DirectMeterMap::setDestination(const IR::IDeclaration *meter,
                                     const IR::Expression *destination) {
     auto info = getInfo(meter);
@@ -86,9 +78,7 @@ void DirectMeterMap::setDestination(const IR::IDeclaration *meter,
     }
 }
 
-
 /// Set the size of the table that a meter is attached to.
-
 void DirectMeterMap::setSize(const IR::IDeclaration *meter, unsigned size) {
     auto info = getInfo(meter);
     if (info == nullptr) {

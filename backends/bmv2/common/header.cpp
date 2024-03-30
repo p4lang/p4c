@@ -34,7 +34,6 @@ HeaderConverter::HeaderConverter(ConversionContext *ctxt, cstring scalarsName)
     CHECK_NULL(ctxt);
 }
 
-
 /// Create header type and header instance from a IR::StructLike type
 /// @param meta this boolean indicates if the struct is a metadata or header.
 void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike *type, bool meta) {
@@ -313,7 +312,6 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
         }
     }
 }
-
 
 /// We synthesize a "header_type" for each local which has a struct type
 /// and we pack all the scalar-typed locals into a 'scalar' type

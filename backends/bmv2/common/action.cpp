@@ -40,7 +40,6 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
         // TODO(jafingerhut) - add line/col at all individual cases below,
         // or perhaps it can be done as a common case above or below
         // for all of them?
-
         IR::MethodCallExpression *mce2 = nullptr;
         auto isR = false;
         if (s->is<IR::AssignmentStatement>()) {

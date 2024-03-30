@@ -81,7 +81,6 @@ class Backend {
     virtual void convert(const IR::ToplevelBlock *block) = 0;
 };
 
-
 /// This class implements a policy suitable for the SynthesizeActions pass.
 /// The policy is: do not synthesize actions for the controls whose names
 /// are in the specified set.
@@ -98,7 +97,6 @@ class SkipControls : public P4::ActionSynthesisPolicy {
         return true;
     }
 };
-
 
 /// This class implements a policy suitable for the RemoveComplexExpression pass.
 /// The policy is: only remove complex expression for the controls whose names
@@ -117,7 +115,6 @@ class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
         return false;
     }
 };
-
 
 /// This pass adds @name annotations to all fields of the user metadata
 /// structure so that they do not clash with fields of the headers
