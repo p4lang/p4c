@@ -164,13 +164,11 @@ struct CounterlikeTraits;
 /// any namespace from its enclosing namespace set. Such a declaration may also
 /// be a definition. If the declaration is not a definition, the specialization
 /// may be defined later (7.3.1.2).
-///
 /// gcc reports an error when trying so specialize CounterlikeTraits<> for
 /// Standard::CounterExtern & Standard::MeterExtern outside of the Helpers
 /// namespace, even when qualifying CounterlikeTraits<> with Helpers::. It seems
 /// to be related to this bug:
 /// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56480.
-
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for v1model
 template <>
 struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL>> {
