@@ -87,7 +87,6 @@ class Backend {
 /// are in the specified set.
 /// For example, we expect that the code in the deparser will not use any
 /// tables or actions.
-
 class SkipControls : public P4::ActionSynthesisPolicy {
     /// set of controls where actions are not synthesized
     const std::set<cstring> *skip;
@@ -106,7 +105,6 @@ class SkipControls : public P4::ActionSynthesisPolicy {
 /// are in the specified set.
 /// For example, we expect that the code in ingress and egress will have complex
 /// expression removed.
-
 class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     const std::set<cstring> *process;
 
@@ -125,7 +123,6 @@ class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
 /// structure so that they do not clash with fields of the headers
 /// structure.  This is necessary because both of them become global
 /// objects in the output json.
-
 class RenameUserMetadata : public Transform {
     P4::ReferenceMap *refMap;
     const IR::Type_Struct *userMetaType;
