@@ -121,7 +121,7 @@ class CFG final : public IHasDbPrint {
         EdgeType type;
         Edge(Node *node, EdgeType type, cstring label) : type(type), endpoint(node), label(label) {}
 
-     public:  
+     public:
         Node *endpoint;
         cstring label;  /// only present if type == Label.
         explicit Edge(Node *node) : type(EdgeType::Unconditional), endpoint(node) {
