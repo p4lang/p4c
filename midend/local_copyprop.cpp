@@ -177,6 +177,7 @@ class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
 void DoLocalCopyPropagation::flow_merge(Visitor &a_) {
     auto &a = dynamic_cast<DoLocalCopyPropagation &>(a_);
     BUG_CHECK(working == a.working, "inconsitent DoLocalCopyPropagation state on merge");
+    unreachable &= a.unreachable;
     for (auto &var : available) {
         if (auto merge = ::getref(a.available, var.first)) {
             if (merge->val != var.second.val) var.second.val = nullptr;
@@ -190,11 +191,29 @@ void DoLocalCopyPropagation::flow_merge(Visitor &a_) {
 void DoLocalCopyPropagation::flow_copy(ControlFlowVisitor &a_) {
     auto &a = dynamic_cast<DoLocalCopyPropagation &>(a_);
     BUG_CHECK(working == a.working, "inconsistent DoLocalCopyPropagation state on copy");
+    unreachable = a.unreachable;
     available = a.available;
     need_key_rewrite = a.need_key_rewrite;
     BUG_CHECK(inferForTable == a.inferForTable,
               "inconsistent DoLocalCopyPropagation state on copy");
     BUG_CHECK(inferForFunc == a.inferForFunc, "inconsistent DoLocalCopyPropagation state on copy");
+}
+bool DoLocalCopyPropagation::operator==(const ControlFlowVisitor &a_) const {
+    auto &a = dynamic_cast<const DoLocalCopyPropagation &>(a_);
+    BUG_CHECK(working == a.working, "inconsistent DoLocalCopyPropagation state on ==");
+    if (unreachable != a.unreachable) return false;
+    auto it = a.available.begin();
+    for (auto &var : available) {
+        if (it == a.available.end()) return false;
+        if (var.first != it->first) return false;
+        if (var.second.local != it->second.local) return false;
+        if (var.second.live != it->second.live) return false;
+        if (var.second.val != it->second.val) return false;
+        ++it;
+    }
+    if (it != a.available.end()) return false;
+    if (need_key_rewrite != a.need_key_rewrite) return false;
+    return true;
 }
 
 /// test to see if names denote overlapping locations
