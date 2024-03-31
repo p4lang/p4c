@@ -24,12 +24,25 @@ const ordered_set<const ComputeDefUse::loc_t *> ComputeDefUse::empty = {};
 
 void ComputeDefUse::flow_merge(Visitor &a_) {
     ComputeDefUse &a = dynamic_cast<ComputeDefUse &>(a_);
+    unreachable &= a.unreachable;
     for (auto &di : a.def_info) def_info[di.first].flow_merge(di.second);
 }
 void ComputeDefUse::flow_copy(ControlFlowVisitor &a_) {
     ComputeDefUse &a = dynamic_cast<ComputeDefUse &>(a_);
     BUG_CHECK(state == a.state, "inconsistent state in ComputeDefUse::flow_copy");
+    unreachable = a.unreachable;
     def_info = a.def_info;
+}
+bool ComputeDefUse::operator==(const ControlFlowVisitor &a_) const {
+    auto &a = dynamic_cast<const ComputeDefUse &>(a_);
+    BUG_CHECK(state == a.state, "inconsistent state in ComputeDefUse::==");
+    if (unreachable != a.unreachable) return false;
+    if (def_info.size() != a.def_info.size()) return false;
+    for (auto &[decl, di] : def_info) {
+        if (!a.def_info.count(decl)) return false;
+        if (di != a.def_info.at(decl)) return false;
+    }
+    return true;
 }
 
 ComputeDefUse::def_info_t::def_info_t(const def_info_t &a)
@@ -68,6 +81,33 @@ void ComputeDefUse::def_info_t::flow_merge(def_info_t &a) {
         }
     }
     slices_sanity();
+}
+
+bool ComputeDefUse::def_info_t::operator==(const def_info_t &a) const {
+    if (defs.size() != a.defs.size()) return false;
+    for (auto *l : defs) if (!a.defs.count(l)) return false;
+    if (live != a.live) return false;
+    // Don't check the parent field as it is not set consistently (it is only set in
+    // copy/move ctors above) and nothing appears to depend on it.  Should be removed?
+    if (valid_bit_defs.size() != a.valid_bit_defs.size()) return false;
+    for (auto *l : valid_bit_defs) if (!a.valid_bit_defs.count(l)) return false;
+    if (fields.size() != a.fields.size()) return false;
+    for (auto &[field, info] : fields) {
+        auto it = a.fields.find(field);
+        if (it == a.fields.end())
+            return false;
+        if (info != it->second)
+            return false;
+    }
+    if (slices.size() != a.slices.size()) return false;
+    for (auto &[slice, info] : slices) {
+        auto it = a.slices.find(slice);
+        if (it == a.slices.end())
+            return false;
+        if (info != it->second)
+            return false;
+    }
+    return true;
 }
 
 class ComputeDefUse::SetupJoinPoints : public ControlFlowVisitor::SetupJoinPoints,
