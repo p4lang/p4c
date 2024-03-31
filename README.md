@@ -636,7 +636,7 @@ We welcome and appreciate new contributions. Check out [git usage](https://githu
 * Writing unit test code [Guidelines](https://github.com/p4lang/p4c/tree/main/docs#adding-new-test-data).
 * Write documentation [Guidelines](https://github.com/p4lang/p4c/tree/main/docs#writing-documentation).
 * [Coding conventions](https://github.com/p4lang/p4c/tree/main/docs#coding-conventions).
-* Opening pull requests and writing commit messages [Guidelines](https://github.com/p4lang/p4c/blob/main/docs/CodingStandardPhilosophy.md#Git-commits-and-pull-requests).
+* Write clear, concise, and meaningful commit messages following the [Git Commits and Pull Requests Guidelines](https://github.com/p4lang/p4c/blob/main/docs/CodingStandardPhilosophy.md#Git-commits-and-pull-requests).
 * Code has to be reviewed before it is merged.
 * Make sure all tests pass when you send a pull request.
 * Make sure `make cpplint` produces no errors (`make check` will also run this)
