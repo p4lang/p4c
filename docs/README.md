@@ -86,14 +86,6 @@ p4c
 
 * Check out the [IntelliJ P4 plugin](https://github.com/TakeshiTseng/IntelliJ-P4-Plugin)
 
-# How to contribute
-
-* do write unit test code
-* code has to be reviewed before it is merged
-* make sure all tests pass when you send a pull request
-* make sure `make cpplint` produces no errors (`make check` will also run this)
-* write documentation
-
 # Writing documentation
 
 Documenting the workings of the compiler is a never-ending (many times

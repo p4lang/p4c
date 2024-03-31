@@ -626,3 +626,24 @@ access them from the IR
 * Tables with multiple apply calls
 
 See also [unsupported P4_16 language features](backends/bmv2/README.md#unsupported-p4_16-language-features).
+
+# ⭐ How to contribute
+
+We welcome and appreciate new contributions.
+
+### Guidelines 
+* Writing unit test code guideline.
+* Code has to be reviewed before it is merged.
+* make sure all tests pass when you send a pull request.
+* Make sure `make cpplint` produces no errors (`make check` will also run this)
+* Write documentation
+
+### Finding a task
+- Check out the issues that have specifically been [marked as being friendly to new contributors](https://github.com/p4lang/p4c/issues?q=is%3Aopen+is%3Aissue+label%3Agood-first-issue)
+
+
+#### Communication Channels
+
+- Have a look at this Readme. Can it be improved? Do you see typos? You can open a PR or reach out to us in our [community chat](https://p4-lang.slack.com/). [Joining link](https://join.slack.com/t/p4-lang/shared_invite/zt-a9pe96br-Th73ueaBAwJw1ZbD_z1Rpg) .
+- For general P4-related questions, use the [P4 forum](https://forum.p4.org/).
+- For other communication channels click [here](https://p4.org/join/).
