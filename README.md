@@ -629,18 +629,20 @@ See also [unsupported P4_16 language features](backends/bmv2/README.md#unsupport
 
 # ⭐ How to contribute
 
-We welcome and appreciate new contributions.
+We welcome and appreciate new contributions. Check out [git usage](https://github.com/p4lang/p4c/tree/main/docs#git-usage) to get started.
 
 ### Guidelines 
-* Writing unit test code guideline.
+
+* Writing unit test code [Guidelines](https://github.com/p4lang/p4c/tree/main/docs#adding-new-test-data).
+* Write documentation [Guidelines](https://github.com/p4lang/p4c/tree/main/docs#writing-documentation).
+* [Coding conventions](https://github.com/p4lang/p4c/tree/main/docs#coding-conventions).
+* Opening pull requests and writing commit messages [Guidelines](https://github.com/p4lang/p4c/blob/main/docs/CodingStandardPhilosophy.md#Git-commits-and-pull-requests).
 * Code has to be reviewed before it is merged.
-* make sure all tests pass when you send a pull request.
+* Make sure all tests pass when you send a pull request.
 * Make sure `make cpplint` produces no errors (`make check` will also run this)
-* Write documentation
 
 ### Finding a task
 - Check out the issues that have specifically been [marked as being friendly to new contributors](https://github.com/p4lang/p4c/issues?q=is%3Aopen+is%3Aissue+label%3Agood-first-issue)
-
 
 #### Communication Channels
 
