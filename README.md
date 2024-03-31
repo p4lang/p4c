@@ -643,9 +643,13 @@ We welcome and appreciate new contributions. Check out [git usage](https://githu
 
 ### Finding a task
 - Check out the issues that have specifically been [marked as being friendly to new contributors](https://github.com/p4lang/p4c/issues?q=is%3Aopen+is%3Aissue+label%3Agood-first-issue)
+- Have a look at this Readme. Can it be improved? Do you see typos? You can open a PR.
+  
+## Reporting Issues
+If you encounter any issues or have suggestions for improvement, please [open an issue](https://github.com/p4lang/p4c/issues) with a clear description and, if possible, steps to reproduce.
 
 #### Communication Channels
 
-- Have a look at this Readme. Can it be improved? Do you see typos? You can open a PR or reach out to us in our [community chat](https://p4-lang.slack.com/). [Joining link](https://join.slack.com/t/p4-lang/shared_invite/zt-a9pe96br-Th73ueaBAwJw1ZbD_z1Rpg) .
+- For further assistance or questions regarding contributions, reach out to us in our [community chat](https://p4-lang.slack.com/).  [Joining link](https://join.slack.com/t/p4-lang/shared_invite/zt-a9pe96br-Th73ueaBAwJw1ZbD_z1Rpg) .
 - For general P4-related questions, use the [P4 forum](https://forum.p4.org/).
 - For other communication channels click [here](https://p4.org/join/).
