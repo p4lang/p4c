@@ -109,8 +109,8 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
             if (counter_type->is<IR::Constant>())
                 value = counter_type->to<IR::Constant>()->asUnsigned();
             if (value == 2) {
-                /* For PACKETS_AND_BYTES counter type, two regarray declarations are emitted and
-                   the counter name is suffixed with _packets and _bytes */
+                // For PACKETS_AND_BYTES counter type, two regarray declarations are emitted and
+                //   the counter name is suffixed with _packets and _bytes
                 auto regDecl = new IR::DpdkRegisterDeclStatement(Name() + "_packets", n_counters,
                                                                  new IR::Constant(0));
                 regDecl->toSpec(out) << std::endl << std::endl;
@@ -141,8 +141,8 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
             if (counter_type->is<IR::Constant>())
                 value = counter_type->to<IR::Constant>()->asUnsigned();
             if (value == 2) {
-                /* For PACKETS_AND_BYTES counter type, two regarray declarations are emitted and
-                   the counter name is suffixed with _packets and _bytes */
+                // For PACKETS_AND_BYTES counter type, two regarray declarations are emitted and
+                //   the counter name is suffixed with _packets and _bytes
                 auto regDecl = new IR::DpdkRegisterDeclStatement(Name() + "_packets", n_counters,
                                                                  new IR::Constant(0));
                 regDecl->toSpec(out) << std::endl << std::endl;
@@ -603,9 +603,9 @@ std::ostream &IR::DpdkMeterExecuteStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
-/* DPDK target uses Registers for implementing using Counters, atomic register add instruction
-   is used for incrementing the counter. Packet counters are incremented by packet length
-   specified as parameter and byte counters are incremente by 1 */
+/// DPDK target uses Registers for implementing using Counters, atomic register add instruction
+///   is used for incrementing the counter. Packet counters are incremented by packet length
+///  specified as parameter and byte counters are incremente by 1 */
 std::ostream &IR::DpdkCounterCountStatement::toSpec(std::ostream &out) const {
     add_comment(out, counter);
     out << "regadd " << counter << " " << DPDK::toStr(index) << " ";

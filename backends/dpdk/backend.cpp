@@ -61,7 +61,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
             refMap, typeMap,
             new P4::OrPolicy(new P4::IsValid(refMap, typeMap), new P4::IsLikeLeftValue())),
         new P4::TypeChecking(refMap, typeMap),
-        // TBD: implement dpdk lowering passes instead of reusing bmv2's lowering pass.
+        /// TBD: implement dpdk lowering passes instead of reusing bmv2's lowering pass.
         new PassRepeated({new BMV2::LowerExpressions(typeMap, DPDK_MAX_SHIFT_AMOUNT)}, 2),
         new P4::RemoveComplexExpressions(refMap, typeMap,
                                          new DPDK::ProcessControls(&structure.pipeline_controls)),
@@ -74,7 +74,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new CollectTableInfo(&structure),
         new CollectAddOnMissTable(refMap, typeMap, &structure),
         new ValidateAddOnMissExterns(refMap, typeMap, &structure),
-        new P4::MoveDeclarations(),  // Move all local declarations to the beginning
+        new P4::MoveDeclarations(),  /// Move all local declarations to the beginning
         new CollectProgramStructure(refMap, typeMap, &structure),
         new CollectMetadataHeaderInfo(&structure),
         new ConvertLookahead(refMap, typeMap, &structure),
@@ -114,7 +114,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new TypeWidthValidator(),
         new DpdkArchLast(),
         new VisitFunctor([this, genContextJson] {
-            // Serialize context json object into user specified file
+            /// Serialize context json object into user specified file
             if (!options.ctxtFile.isNullOrEmpty()) {
                 std::ostream *out = openFile(options.ctxtFile, false);
                 if (out != nullptr) {
@@ -124,7 +124,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
             }
         }),
         new ReplaceHdrMetaField(),
-        // convert to assembly program
+        /// convert to assembly program
         convertToDpdk,
     };
     simplify.addDebugHook(hook, true);

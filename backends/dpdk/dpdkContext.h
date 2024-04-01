@@ -28,25 +28,23 @@ limitations under the License.
 #include "p4/config/v1/p4info.pb.h"
 
 namespace p4configv1 = ::p4::config::v1;
-/**
-Passes defined in this file are used for generating Context JSON output for DPDK
-Context JSON is a JSON file used by the control plane software for manipulating tables and
-actions. It contains all relevant information regarding the tables and actions.
-The context JSON is based on the JSON Schema defined in DPDK_context_schema.json.
-*/
+
+/// Passes defined in this file are used for generating Context JSON output for DPDK
+/// Context JSON is a JSON file used by the control plane software for manipulating tables and
+/// actions. It contains all relevant information regarding the tables and actions.
+/// The context JSON is based on the JSON Schema defined in DPDK_context_schema.json.
 
 namespace DPDK {
-
-/* This structure holds table attributes required for context JSON which are not
-    part of P4Table */
+/// This structure holds table attributes required for context JSON which are not
+/// part of P4Table
 struct TableAttributes {
-    // Direction of the table, can be ["ingress","egress"]
+    /// Direction of the table, can be ["ingress","egress"]
     cstring direction;
-    // Unique ID for the table
+    /// Unique ID for the table
     unsigned tableHandle;
-    /* Table type can one of "match", "selection" and "action
-       Match table is a regular P4 table, selection table and action tables are compiler
-       generated tables when psa_implementation is action_selector or action_profile */
+    /// Table type can one of "match", "selection" and "action
+    /// Match table is a regular P4 table, selection table and action tables are compiler
+    /// generated tables when psa_implementation is action_selector or action_profile
     cstring tableType;
     bool is_add_on_miss;
     bool idle_timeout_with_auto_delete;
@@ -55,12 +53,12 @@ struct TableAttributes {
     cstring controlName;
     cstring externalName;
     unsigned default_action_handle;
-    /* Non selector table keys from original P4 program */
+    /// Non selector table keys from original P4 program
     std::vector<std::pair<cstring, cstring>> tableKeys;
 };
 
-/* This structure holds action attributes required for context JSON which are not
-   part of P4Action */
+/// This structure holds action attributes required for context JSON which are not
+/// part of P4Action
 struct actionAttributes {
     bool constant_default_action;
     bool is_compiler_added_action;
@@ -78,7 +76,7 @@ struct externAttributes {
     unsigned table_id;
 };
 
-/* Program level information for context json */
+/// Program level information for context json
 struct TopLevelCtxt {
     cstring progName;
     cstring buildDate;
@@ -99,7 +97,7 @@ struct TopLevelCtxt {
     }
 };
 
-/* Selection table attributes */
+/// Selection table attributes
 struct SelectionTable {
     unsigned max_n_groups;
     unsigned max_n_members_per_group;
@@ -126,7 +124,7 @@ struct SelectionTable {
     }
 };
 
-// This pass generates context JSON into user specified file
+/// This pass generates context JSON into user specified file
 class DpdkContextGenerator : public Inspector {
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;

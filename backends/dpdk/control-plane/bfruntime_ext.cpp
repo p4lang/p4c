@@ -26,7 +26,7 @@ struct BFRuntimeSchemaGenerator::ActionSelector {
     P4Id get_mem_id;
     P4Id action_profile_id;
     int64_t max_group_size;
-    int64_t num_groups;  // aka size of selector
+    int64_t num_groups;  /// aka size of selector
     std::vector<P4Id> tableIds;
     Util::JsonArray *annotations;
 
@@ -89,9 +89,12 @@ void BFRuntimeSchemaGenerator::addActionSelectorGetMemberCommon(
                                     "SelectorGetMember", 1 /* size */, actionSelector.annotations);
 
     auto *keyJson = new Util::JsonArray();
-    addKeyField(keyJson, BF_RT_DATA_SELECTOR_GROUP_ID, "$SELECTOR_GROUP_ID", true /* mandatory */,
-                "Exact", makeType("uint64"));
-    addKeyField(keyJson, BF_RT_DATA_HASH_VALUE, "hash_value", true /* mandatory */, "Exact",
+    addKeyField(keyJson, BF_RT_DATA_SELECTOR_GROUP_ID, "$SELECTOR_GROUP_ID",
+                true  // mandatory,
+                "Exact",
+                makeType("uint64"));
+    addKeyField(keyJson, BF_RT_DATA_HASH_VALUE, "hash_value",
+                true  // mandatory, "Exact",
                 makeType("uint64"));
     tableJson->emplace("key", keyJson);
 

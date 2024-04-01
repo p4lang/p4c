@@ -40,18 +40,17 @@ using UserMeta = std::set<cstring>;
 
 class CollectMetadataHeaderInfo;
 
-/* According to the implementation of DPDK backend, for a control block, there
- * are only two parameters: header and metadata. Therefore, first we need to
- * rewrite the declaration of PSA architecture included in psa.p4 in order to
- * pass the type checking. In addition, this pass changes the definition of
- * P4Control and P4Parser(parameter list) in the P4 program provided by the
- * user.
- *
- * This pass also modifies all metadata references and header reference. For
- * metadata, struct_name.field_name -> m.struct_name_field_name. For header
- * headers.header_name.field_name -> h.header_name.field_name The parameter
- * named for header and metadata are also updated to "h" and "m" respectively.
- */
+/// According to the implementation of DPDK backend, for a control block, there
+/// are only two parameters: header and metadata. Therefore, first we need to
+/// rewrite the declaration of PSA architecture included in psa.p4 in order to
+/// pass the type checking. In addition, this pass changes the definition of
+/// P4Control and P4Parser(parameter list) in the P4 program provided by the
+/// user.
+
+/// This pass also modifies all metadata references and header reference. For
+/// metadata, struct_name.field_name -> m.struct_name_field_name. For header
+/// headers.header_name.field_name -> h.header_name.field_name The parameter
+/// named for header and metadata are also updated to "h" and "m" respectively.
 class ConvertToDpdkArch : public Transform {
     P4::ReferenceMap *refMap;
     DpdkProgramStructure *structure;
@@ -193,10 +192,10 @@ struct ConvertLookahead : public PassManager {
     }
 };
 
-// This Pass collects infomation about the name of all metadata and header
-// And it collects every field of metadata and renames all fields with a prefix
-// according to the metadata struct name. Eventually, the reference of a fields
-// will become m.$(struct_name)_$(field_name).
+/// This Pass collects infomation about the name of all metadata and header
+/// And it collects every field of metadata and renames all fields with a prefix
+/// according to the metadata struct name. Eventually, the reference of a fields
+/// will become m.$(struct_name)_$(field_name).
 class CollectMetadataHeaderInfo : public Inspector {
     DpdkProgramStructure *structure;
 
@@ -209,9 +208,9 @@ class CollectMetadataHeaderInfo : public Inspector {
     bool preorder(const IR::Type_Struct *s) override;
 };
 
-// Previously, we have collected the information about how the single metadata
-// struct looks like in CollectMetadataHeaderInfo. This pass finds a suitable
-// place to inject this struct.
+/// Previously, we have collected the information about how the single metadata
+/// struct looks like in CollectMetadataHeaderInfo. This pass finds a suitable
+/// place to inject this struct.
 class InjectJumboStruct : public Transform {
     DpdkProgramStructure *structure;
 
@@ -220,10 +219,10 @@ class InjectJumboStruct : public Transform {
     const IR::Node *preorder(IR::Type_Struct *s) override;
 };
 
-// This pass injects metadata field which is used as port for 'tx' instruction
-// into the single metadata struct.
-// This pass has to be applied after CollectMetadataHeaderInfo fills
-// local_metadata_type field in DpdkProgramStructure which is passed to the constructor.
+/// This pass injects metadata field which is used as port for 'tx' instruction
+/// into the single metadata struct.
+/// This pass has to be applied after CollectMetadataHeaderInfo fills
+/// local_metadata_type field in DpdkProgramStructure which is passed to the constructor.
 class InjectFixedMetadataField : public Transform {
     DpdkProgramStructure *structure;
 
@@ -260,8 +259,8 @@ struct ByteAlignment : public PassManager {
         passes.push_back(new AlignHdrMetaField(structure));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
-        /* DoRemoveLeftSlices pass converts the slice Member (LHS in assn stm)
-           resulting from above Pass into shift operation */
+        // DoRemoveLeftSlices pass converts the slice Member (LHS in assn stm)
+        // resulting from above Pass into shift operation
         passes.push_back(new P4::DoRemoveLeftSlices(typeMap));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
@@ -278,16 +277,16 @@ struct fieldInfo {
     fieldInfo() { fieldWidth = 0; }
 };
 
-// This class is helpful for StatementUnroll and IfStatementUnroll. Since dpdk
-// asm is not able to process complex expression, e.g., a = b + c * d. We need
-// break it down. Therefore, we need some temporary variables to hold the
-// intermediate values. And this class is helpful to inject the declarations of
-// temporary value into P4Control and P4Parser.
+/// This class is helpful for StatementUnroll and IfStatementUnroll. Since dpdk
+/// asm is not able to process complex expression, e.g., a = b + c * d. We need
+/// break it down. Therefore, we need some temporary variables to hold the
+/// intermediate values. And this class is helpful to inject the declarations of
+/// temporary value into P4Control and P4Parser.
 class DeclarationInjector {
     std::map<const IR::Node *, IR::IndexedVector<IR::Declaration> *> decl_map;
 
  public:
-    // push the declaration to the right code block.
+    /// push the declaration to the right code block.
     void collect(const IR::P4Control *control, const IR::P4Parser *parser,
                  const IR::Declaration *decl) {
         IR::IndexedVector<IR::Declaration> *decls = nullptr;
@@ -329,12 +328,11 @@ class DeclarationInjector {
     }
 };
 
-/* This pass breaks complex expressions down, since dpdk asm cannot describe
- * complex expression. This pass is not complete. MethodCallStatement should be
- * unrolled as well. Note that IfStatement should not be unrolled here, as we
- * have a separate pass for it, because IfStatement does not want to unroll
- * logical expression(dpdk asm has conditional jmp for these cases)
- */
+/// This pass breaks complex expressions down, since dpdk asm cannot describe
+/// complex expression. This pass is not complete. MethodCallStatement should be
+/// unrolled as well. Note that IfStatement should not be unrolled here, as we
+/// have a separate pass for it, because IfStatement does not want to unroll
+/// logical expression(dpdk asm has conditional jmp for these cases)
 class StatementUnroll : public Transform {
  private:
     P4::ReferenceMap *refMap;
@@ -349,15 +347,14 @@ class StatementUnroll : public Transform {
     const IR::Node *postorder(IR::P4Parser *a) override;
 };
 
-/* This pass helps StatementUnroll to unroll expressions inside statements.
- * For example, if an AssignmentStatement looks like this: a = b + c * d
- * StatementUnroll's AssignmentStatement preorder will call ExpressionUnroll
- * twice for BinaryExpression's left(b) and right(c * d). For left, since it is
- * a simple expression, ExpressionUnroll will set root to PathExpression(b) and
- * the decl and stmt is empty. For right, ExpressionUnroll will set root to
- * PathExpression(tmp), decl contains tmp's declaration and stmt contains:
- * tmp = c * d, which will be injected in front of the AssignmentStatement.
- */
+/// This pass helps StatementUnroll to unroll expressions inside statements.
+/// For example, if an AssignmentStatement looks like this: a = b + c * d
+/// StatementUnroll's AssignmentStatement preorder will call ExpressionUnroll
+/// twice for BinaryExpression's left(b) and right(c * d). For left, since it is
+/// a simple expression, ExpressionUnroll will set root to PathExpression(b) and
+/// the decl and stmt is empty. For right, ExpressionUnroll will set root to
+/// PathExpression(tmp), decl contains tmp's declaration and stmt contains:
+/// tmp = c * d, which will be injected in front of the AssignmentStatement.
 class ExpressionUnroll : public Inspector {
     P4::ReferenceMap *refMap;
 
@@ -377,9 +374,9 @@ class ExpressionUnroll : public Inspector {
     bool preorder(const IR::BoolLiteral *a) override;
 };
 
-// This pass is similiar to StatementUnroll pass, the difference is that this
-// pass will call LogicalExpressionUnroll to unroll the expression, which treat
-// logical expression differently.
+/// This pass is similiar to StatementUnroll pass, the difference is that this
+/// pass will call LogicalExpressionUnroll to unroll the expression, which treat
+/// logical expression differently.
 class IfStatementUnroll : public Transform {
  private:
     P4::ReferenceMap *refMap;
@@ -395,10 +392,9 @@ class IfStatementUnroll : public Transform {
     const IR::Node *postorder(IR::P4Parser *a) override;
 };
 
-/* Assume one logical expression looks like this: a && (b + c > d), this pass
- * will unroll the expression to {tmp = b + c; if(a && (tmp > d))}. Logical
- * calculation will be unroll in a dedicated pass.
- */
+/// Assume one logical expression looks like this: a && (b + c > d), this pass
+/// will unroll the expression to {tmp = b + c; if(a && (tmp > d))}. Logical
+/// calculation will be unroll in a dedicated pass.
 class LogicalExpressionUnroll : public Inspector {
     P4::ReferenceMap *refMap;
 
@@ -427,9 +423,9 @@ class LogicalExpressionUnroll : public Inspector {
     bool preorder(const IR::BoolLiteral *a) override;
 };
 
-// According to dpdk spec, Binary Operation will only have two parameters, which
-// looks like: a = a + b. Therefore, this pass transform all AssignStatement
-// that has Binary_Operation to become two-parameter form.
+/// According to dpdk spec, Binary Operation will only have two parameters, which
+/// looks like: a = a + b. Therefore, this pass transform all AssignStatement
+/// that has Binary_Operation to become two-parameter form.
 class ConvertBinaryOperationTo2Params : public Transform {
     DeclarationInjector injector;
     P4::ReferenceMap *refMap;
@@ -441,11 +437,11 @@ class ConvertBinaryOperationTo2Params : public Transform {
     const IR::Node *postorder(IR::P4Parser *a) override;
 };
 
-// Since in dpdk asm, there is no local variable declaration, we need to collect
-// all local variables and inject them into the metadata struct.
-// Local variables which are of header types are injected into headers struct
-// instead of metadata struct, so that they can be instantiated as headers in the
-// resulting dpdk asm file.
+/// Since in dpdk asm, there is no local variable declaration, we need to collect
+/// all local variables and inject them into the metadata struct.
+/// Local variables which are of header types are injected into headers struct
+/// instead of metadata struct, so that they can be instantiated as headers in the
+/// resulting dpdk asm file.
 class CollectLocalVariables : public Transform {
     ordered_map<const IR::Declaration_Variable *, const cstring> localsMap;
     P4::ReferenceMap *refMap;
@@ -476,14 +472,14 @@ class CollectLocalVariables : public Transform {
     const IR::Node *postorder(IR::P4Parser *p) override;
 };
 
-// According to dpdk spec, action parameters should prepend a p. In order to
-// respect this, we need at first make all action parameter lists into separate
-// structs and declare that struct in the P4 program. Then we modify the action
-// parameter list. Eventually, it will only contain one parameter `t`, which is a
-// struct containing all parameters previously defined. Next, we prepend t. in
-// front of action parameters. Please note that it is possible that the user
-// defines a struct paremeter himself or define multiple struct parameters in
-// action parameterlist. Current implementation does not support this.
+/// According to dpdk spec, action parameters should prepend a p. In order to
+/// respect this, we need at first make all action parameter lists into separate
+/// structs and declare that struct in the P4 program. Then we modify the action
+/// parameter list. Eventually, it will only contain one parameter `t`, which is a
+/// struct containing all parameters previously defined. Next, we prepend t. in
+/// front of action parameters. Please note that it is possible that the user
+/// defines a struct paremeter himself or define multiple struct parameters in
+/// action parameterlist. Current implementation does not support this.
 class PrependPDotToActionArgs : public Transform {
     P4::TypeMap *typeMap;
     P4::ReferenceMap *refMap;
@@ -499,12 +495,11 @@ class PrependPDotToActionArgs : public Transform {
     const IR::Node *preorder(IR::MethodCallExpression *) override;
 };
 
-/* This class is used to process the default action
-   and store the parameter list for each table.
-   Later, this infomation is passed and saved in table
-   properties and then used for generating instruction
-   for default action in each table.
-*/
+/// This class is used to process the default action
+/// and store the parameter list for each table.
+/// Later, this infomation is passed and saved in table
+/// properties and then used for generating instruction
+/// for default action in each table.
 class DefActionValue : public Inspector {
     P4::TypeMap *typeMap;
     P4::ReferenceMap *refMap;
@@ -516,9 +511,9 @@ class DefActionValue : public Inspector {
     void postorder(const IR::P4Table *t) override;
 };
 
-// dpdk does not support ternary operator so we need to translate ternary operator
-// to corresponding if else statement
-// Taken from frontend pass DoSimplifyExpressions in sideEffects.h
+/// dpdk does not support ternary operator so we need to translate ternary operator
+/// to corresponding if else statement
+/// Taken from frontend pass DoSimplifyExpressions in sideEffects.h
 class DismantleMuxExpressions : public Transform {
     P4::TypeMap *typeMap;
     P4::ReferenceMap *refMap;
@@ -540,13 +535,13 @@ class DismantleMuxExpressions : public Transform {
     const IR::Node *postorder(IR::AssignmentStatement *statement) override;
 };
 
-// For dpdk asm, there is not object-oriented. Therefore, we cannot define a
-// checksum in dpdk asm. And dpdk asm only provides ckadd(checksum add) and
-// cksub(checksum sub). So we need to define a explicit state for each checksum
-// declaration. Essentially, this state will be declared in header struct and
-// initilized to 0. And for cksum.add(x), it will be translated to ckadd state
-// x. For dst = cksum.get(), it will be translated to mov dst state. This pass
-// collects checksum instances and index them.
+/// For dpdk asm, there is not object-oriented. Therefore, we cannot define a
+/// checksum in dpdk asm. And dpdk asm only provides ckadd(checksum add) and
+/// cksub(checksum sub). So we need to define a explicit state for each checksum
+/// declaration. Essentially, this state will be declared in header struct and
+/// initilized to 0. And for cksum.add(x), it will be translated to ckadd state
+/// x. For dst = cksum.get(), it will be translated to mov dst state. This pass
+/// collects checksum instances and index them.
 class CollectInternetChecksumInstance : public Inspector {
     P4::TypeMap *typeMap;
     DpdkProgramStructure *structure;
@@ -571,9 +566,9 @@ class CollectInternetChecksumInstance : public Inspector {
     }
 };
 
-// This pass will inject checksum states into header. The reason why we inject
-// state into header instead of metadata is due to the implementation of dpdk
-// side(a question related to endianness)
+/// This pass will inject checksum states into header. The reason why we inject
+/// state into header instead of metadata is due to the implementation of dpdk
+/// side(a question related to endianness)
 class InjectInternetChecksumIntermediateValue : public Transform {
     DpdkProgramStructure *structure;
     std::vector<cstring> *csum_vec;
@@ -624,8 +619,8 @@ class ConvertInternetChecksum : public PassManager {
     }
 };
 
-/* This pass collects PSA extern meter, counter and register declaration instances and
-   push them to a vector for emitting to the .spec file later */
+/// This pass collects PSA extern meter, counter and register declaration instances and
+/// push them to a vector for emitting to the .spec file later
 class CollectExternDeclaration : public Inspector {
     DpdkProgramStructure *structure;
 
@@ -658,7 +653,7 @@ class CollectExternDeclaration : public Inspector {
                     ::error(ErrorType::ERR_EXPECTED,
                             "%1%: expected number of meters and type of meter as arguments", d);
                 } else {
-                    /* Check if the meter is of PACKETS (0) type */
+                    // Check if the meter is of PACKETS (0) type
                     if (d->arguments->at(1)->expression->to<IR::Constant>()->asUnsigned() == 0)
                         warn(ErrorType::WARN_UNSUPPORTED,
                              "%1%: Packet metering is not supported."
@@ -695,10 +690,10 @@ class CollectExternDeclaration : public Inspector {
     }
 };
 
-// This pass is preparing logical expression for following branching statement
-// optimization. This pass breaks parenthesis looks liks this: (a && b) && c.
-// After this pass, the expression looks like this: a && b && c. (The AST is
-// different).
+/// This pass is preparing logical expression for following branching statement
+/// optimization. This pass breaks parenthesis looks liks this: (a && b) && c.
+/// After this pass, the expression looks like this: a && b && c. (The AST is
+/// different).
 class BreakLogicalExpressionParenthesis : public Transform {
  public:
     const IR::Node *postorder(IR::LAnd *land) {
@@ -728,10 +723,10 @@ class BreakLogicalExpressionParenthesis : public Transform {
     }
 };
 
-// This pass will swap the simple expression to the front of an logical
-// expression. Note that even for a subexpression of a logical expression, we
-// will swap it as well. For example, a && ((b && c) || d), will become
-// a && (d || (b && c))
+/// This pass will swap the simple expression to the front of an logical
+/// expression. Note that even for a subexpression of a logical expression, we
+/// will swap it as well. For example, a && ((b && c) || d), will become
+/// a && (d || (b && c))
 class SwapSimpleExpressionToFrontOfLogicalExpression : public Transform {
     bool is_simple(const IR::Node *n) {
         if (n->is<IR::Equ>() || n->is<IR::Neq>() || n->is<IR::Lss>() || n->is<IR::Grt>() ||
@@ -774,11 +769,11 @@ class SwapSimpleExpressionToFrontOfLogicalExpression : public Transform {
     }
 };
 
-// This passmanager togethor transform logical expression into a form that
-// the simple expression will go to the front of the expression. And for
-// expression at the same level(the same level is that expressions that are
-// connected directly by && or ||) should be traversed from left to right
-// (a && b) && c is not a valid expression here.
+/// This passmanager togethor transform logical expression into a form that
+/// the simple expression will go to the front of the expression. And for
+/// expression at the same level(the same level is that expressions that are
+/// connected directly by && or ||) should be traversed from left to right
+/// (a && b) && c is not a valid expression here.
 class ConvertLogicalExpression : public PassManager {
  public:
     ConvertLogicalExpression() {
@@ -789,9 +784,9 @@ class ConvertLogicalExpression : public PassManager {
     }
 };
 
-// This Pass collects infomation about the table keys for each table. This information
-// is later used for generating the context JSON output for use by the control plane
-// software.
+/// This Pass collects infomation about the table keys for each table. This information
+/// is later used for generating the context JSON output for use by the control plane
+/// software.
 class CollectTableInfo : public Inspector {
     DpdkProgramStructure *structure;
 
@@ -802,13 +797,13 @@ class CollectTableInfo : public Inspector {
     bool preorder(const IR::Key *key) override;
 };
 
-// This pass transforms the tables such that all the Match keys are part of the same
-// header/metadata struct. If the match keys are from different headers, this pass creates
-// mirror copies of the struct field into the metadata struct and updates the table to use
-// the metadata copy.
-// This pass must be called right before CollectLocalVariables pass as the temporary
-// variables created for holding copy of the table keys are inserted to Metadata by
-// CollectLocalVariables pass.
+/// This pass transforms the tables such that all the Match keys are part of the same
+/// header/metadata struct. If the match keys are from different headers, this pass creates
+/// mirror copies of the struct field into the metadata struct and updates the table to use
+/// the metadata copy.
+/// This pass must be called right before CollectLocalVariables pass as the temporary
+/// variables created for holding copy of the table keys are inserted to Metadata by
+/// CollectLocalVariables pass.
 struct keyElementInfo {
     int offsetInMetadata;
     int size;
@@ -847,13 +842,13 @@ class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
 };
 
 class SwitchHandler {
-    // Map which holds the switch expression variable and constant tuple per switch statement for
-    // each action.
-    // action_name: {<switch_var, constant_value>, <switch_var1, constant_value1>, ...}
+    /// Map which holds the switch expression variable and constant tuple per switch statement for
+    /// each action.
+    /// action_name: {<switch_var, constant_value>, <switch_var1, constant_value1>, ...}
     std::map<cstring, std::vector<std::tuple<cstring, IR::Constant *>>> actionCaseMap;
 
  public:
-    // Fill Switch Action Map
+    /// Fill Switch Action Map
     void addToSwitchMap(cstring actionName, cstring switchExprTmp, IR::Constant *caseLabelValue) {
         actionCaseMap[actionName].push_back(std::make_tuple(switchExprTmp, caseLabelValue));
     }
@@ -877,9 +872,7 @@ class SwitchHandler {
     }
 };
 
-/**
- * Common code between SplitActionSelectorTable and SplitActionProfileTable
- */
+/// Common code between SplitActionSelectorTable and SplitActionProfileTable
 class SplitP4TableCommon : public Transform {
     cstring switchExprTmp;
     DeclarationInjector injector;
@@ -917,12 +910,10 @@ class SplitP4TableCommon : public Transform {
                                                IR::IndexedVector<IR::StatOrDecl> *decls);
 };
 
-/**
- * Split ActionSelector into three tables:
- *   match table that matches on exact/ternary key and generates a group id
- *   group table that matches on group id and generates a member id
- *   member table that runs an action based on member id.
- */
+/// Split ActionSelector into three tables:
+/// match table that matches on exact/ternary key and generates a group id
+/// group table that matches on group id and generates a member id
+/// member table that runs an action based on member id.
 class SplitActionSelectorTable : public SplitP4TableCommon {
  public:
     SplitActionSelectorTable(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
@@ -933,11 +924,9 @@ class SplitActionSelectorTable : public SplitP4TableCommon {
     const IR::Node *postorder(IR::P4Table *tbl) override;
 };
 
-/**
- * Split ActionProfile into two tables:
- *   match table that matches on exact/ternary key and generates a member id
- *   member table that runs an action based on member id.
- */
+/// Split ActionProfile into two tables:
+/// match table that matches on exact/ternary key and generates a member id
+/// member table that runs an action based on member id.
 class SplitActionProfileTable : public SplitP4TableCommon {
  public:
     SplitActionProfileTable(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
@@ -974,8 +963,8 @@ class UpdateActionForSwitch : public Transform {
     explicit UpdateActionForSwitch(SwitchHandler &sw) : sw(sw) { setName("UpdateActionForSwitch"); }
     const IR::Node *postorder(IR::P4Action *action) { return sw.setSwitchVarInAction(action); }
 };
-/**
- * Handle ActionSelector and ActionProfile extern */
+
+/// Handle ActionSelector and ActionProfile extern
 class ConvertActionSelectorAndProfile : public PassManager {
     SwitchHandler sw;
 
@@ -994,18 +983,18 @@ class ConvertActionSelectorAndProfile : public PassManager {
     }
 };
 
-/* Collect size information from the owner table for direct counter and meter extern objects
- * and validate some of the constraints on usage of Direct Meter and Direct Counter extern
- * methods */
+/// Collect size information from the owner table for direct counter and meter extern objects
+/// and validate some of the constraints on usage of Direct Meter and Direct Counter extern
+/// methods
 class CollectDirectCounterMeter : public Inspector {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     DpdkProgramStructure *structure;
-    // To validate presence of specified method call for instancename within given action
+    /// To validate presence of specified method call for instancename within given action
     cstring method;
     cstring instancename;
-    // To validate that same method call for different direct meter/counter instance does not exist
-    // in any action
+    /// To validate that same method call for different direct meter/counter instance does not exist
+    /// in any action
     cstring oneInstance;
     bool methodCallFound;
     int getTableSize(const IR::P4Table *tbl);
@@ -1082,8 +1071,8 @@ class ValidateAddOnMissExterns : public Inspector {
     }
 };
 
-// Dpdk does not allow operations (arithmetic, logical, bitwise, relational etc) on operands
-// greater than 64-bit.
+/// Dpdk does not allow operations (arithmetic, logical, bitwise, relational etc) on operands
+/// greater than 64-bit.
 class ValidateOperandSize : public Inspector {
  public:
     ValidateOperandSize() { setName("ValidateOperandSize"); }
@@ -1102,7 +1091,7 @@ class ValidateOperandSize : public Inspector {
         isValidOperandSize(binop->right);
     }
 
-    // Reject all operations except typecast if the operand size is beyond the supported limit
+    /// Reject all operations except typecast if the operand size is beyond the supported limit
     void postorder(const IR::Operation_Unary *unop) override {
         if (unop->is<IR::Cast>()) return;
         isValidOperandSize(unop->expr);
@@ -1132,30 +1121,27 @@ class CollectErrors : public Inspector {
     }
 };
 
-/**
- * Eliminate temporary copies of header, which generally populated after inlining,
- * if it's not temporary copy then transform direct header copy to element wise copy
- * i.e.
- * case 1) when header copied to temporary
- * eth_0 = hdr.ethernet
- * eth_1 = hdr.outer_ethernet
- * eth_0.srcAddr = eth_1.srcAddr
- * eth_0.dstAddr = eth_1.dstAddr
- * eth_0.etherType = eth_1.etherType
- * hdr.ethernet = eth_0
- * above block will be transformed into
- * hdr.ethernet.srcAddr = hdr.outer_ethernet.srcAddr
- * hdr.ethernet.dstAddr = hdr.outer_ethernet.dstAddr
- * hdr.ethernet.etherType = hdr.outer_ethernet.etherType
- *
- * case 2) when header copied to non temporary
- * hdr.ethernet = hdr.outer_ethernet
- * it will be transformed into below memberwise copy
- * hdr.ethernet.srcAddr = hdr.outer_ethernet.srcAddr
- * hdr.ethernet.dstAddr = hdr.outer_ethernet.dstAddr
- * hdr.ethernet.etherType = hdr.outer_ethernet.etherType
- *
- */
+/// Eliminate temporary copies of header, which generally populated after inlining,
+/// if it's not temporary copy then transform direct header copy to element wise copy
+/// i.e.
+/// case 1) when header copied to temporary
+/// eth_0 = hdr.ethernet
+/// eth_1 = hdr.outer_ethernet
+/// eth_0.srcAddr = eth_1.srcAddr
+/// eth_0.dstAddr = eth_1.dstAddr
+/// eth_0.etherType = eth_1.etherType
+/// hdr.ethernet = eth_0
+/// above block will be transformed into
+/// hdr.ethernet.srcAddr = hdr.outer_ethernet.srcAddr
+/// hdr.ethernet.dstAddr = hdr.outer_ethernet.dstAddr
+/// hdr.ethernet.etherType = hdr.outer_ethernet.etherType
+///
+/// case 2) when header copied to non temporary
+/// hdr.ethernet = hdr.outer_ethernet
+/// it will be transformed into below memberwise copy
+/// hdr.ethernet.srcAddr = hdr.outer_ethernet.srcAddr
+/// hdr.ethernet.dstAddr = hdr.outer_ethernet.dstAddr
+/// hdr.ethernet.etherType = hdr.outer_ethernet.etherType
 class ElimHeaderCopy : public Transform {
     P4::TypeMap *typeMap;
     /// It's for populating replacement map by keeping temporary header name as key
@@ -1188,8 +1174,8 @@ class EliminateHeaderCopy : public PassManager {
 };
 
 /// This pass checks whether an assignment statement has large operands (>64-bit).
-// If one operand is >64-bit and other is <= 64-bit, the smaller operand should be a header field
-// to maintain the endianness for copy. This pass detects if these conditions are satisfied or not.
+/// If one operand is >64-bit and other is <= 64-bit, the smaller operand should be a header field
+/// to maintain the endianness for copy. This pass detects if these conditions are satisfied or not.
 class HaveNonHeaderLargeOperandAssignment : public Inspector {
     bool &is_all_arg_header_fields;
 
@@ -1397,8 +1383,8 @@ class CollectProgramStructure : public PassManager {
     }
 };
 
-// Add collected local struct variable decls as a field in metadata
-// struct
+/// Add collected local struct variable decls as a field in metadata
+/// struct
 class MoveCollectedStructLocalVariableToMetadata : public Transform {
     P4::TypeMap *typeMap;
 
@@ -1410,7 +1396,7 @@ class MoveCollectedStructLocalVariableToMetadata : public Transform {
     const IR::Node *postorder(IR::P4Parser *c) override;
 };
 
-// Collect all local struct variable and metadata struct type
+/// Collect all local struct variable and metadata struct type
 class CollectStructLocalVariables : public Transform {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
@@ -1425,8 +1411,8 @@ class CollectStructLocalVariables : public Transform {
     static IR::Vector<IR::Node> type_tobe_moved_at_top;
 };
 
-// Collect all local struct decls and move it to metadata struct and finally
-// flatten the metadata struct.
+/// Collect all local struct decls and move it to metadata struct and finally
+/// flatten the metadata struct.
 class CollectLocalStructAndFlatten : public PassManager {
  public:
     CollectLocalStructAndFlatten(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
@@ -1444,7 +1430,7 @@ class CollectLocalStructAndFlatten : public PassManager {
     }
 };
 
-/* Helper class to detect use of IPSec accelerator */
+/// Helper class to detect use of IPSec accelerator
 class CollectIPSecInfo : public Inspector {
     bool &is_ipsec_used;
     int &sa_id_width;
@@ -1492,11 +1478,10 @@ class CollectIPSecInfo : public Inspector {
     }
 };
 
-/* DPDK uses some fixed registers to hold the ipsec inbound/outbound input and output ports and a
- * pseudo compiler inserted header which shall be emitted in front of all headers. This class helps
- * insert required registers and a pseudo header for enabling IPSec encryption and decryption. It
- * also handles setting of output port in the deparser.
- */
+/// DPDK uses some fixed registers to hold the ipsec inbound/outbound input and output ports and a
+/// pseudo compiler inserted header which shall be emitted in front of all headers. This class helps
+/// insert required registers and a pseudo header for enabling IPSec encryption and decryption. It
+/// also handles setting of output port in the deparser.
 class InsertReqDeclForIPSec : public Transform {
     P4::ReferenceMap *refMap;
     DpdkProgramStructure *structure;

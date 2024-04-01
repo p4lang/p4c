@@ -23,9 +23,9 @@ limitations under the License.
 #include "ir/visitor.h"
 
 namespace DPDK {
-// this function translates nodes of different subclass of Expression, Type
-// and PropertyValue in desired format. For example, for PathExpression, it returns
-// PathExpression->path->name For Member, it returns toStr(Member->expr).Member->member etc.
+/// this function translates nodes of different subclass of Expression, Type
+/// and PropertyValue in desired format. For example, for PathExpression, it returns
+/// PathExpression->path->name For Member, it returns toStr(Member->expr).Member->member etc.
 cstring toStr(const IR::Node *const);
 
 class ConvertToString : public Inspector {

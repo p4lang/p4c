@@ -14,15 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/**
- * DPDK architecture assume the following control block signature
- *
- * control ingress(header h, metadata m);
- * control egress(header h, metadata m);
- *
- * We need to convert psa control blocks to this form.
- */
-
+/// DPDK architecture assume the following control block signature
+/// control ingress(header h, metadata m);
+/// control egress(header h, metadata m);
+/// We need to convert psa control blocks to this form.
 #include "dpdkArch.h"
 
 #include "dpdkHelpers.h"
@@ -43,9 +38,9 @@ cstring TypeStruct2Name(const cstring s) {
     }
 }
 
-// This function is a sanity to check whether the component of a Expression
-// falls into following classes, if not, it means we haven't implemented a
-// handle for that class.
+/// This function is a sanity to check whether the component of a Expression
+/// falls into following classes, if not, it means we haven't implemented a
+/// handle for that class.
 void expressionUnrollSanityCheck(const IR::Expression *e) {
     if (!e->is<IR::Operation_Unary>() && !e->is<IR::MethodCallExpression>() &&
         !e->is<IR::Member>() && !e->is<IR::PathExpression>() && !e->is<IR::Operation_Binary>() &&
@@ -107,7 +102,7 @@ const IR::Type_Control *ConvertToDpdkArch::rewriteDeparserType(const IR::Type_Co
     return tc;
 }
 
-// translate control block signature in arch.p4
+/// translate control block signature in arch.p4
 const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Control *c) {
     const IR::Type_Control *t = nullptr;
     for (auto kv : structure->pipelines) {
@@ -181,8 +176,8 @@ const IR::Node *ConvertToDpdkArch::preorder(IR::PathExpression *pe) {
 }
 
 const IR::Node *ConvertToDpdkArch::preorder(IR::Member *m) {
-    /* PathExpressions are handled in a separate preorder function
-       Hence do not process them here */
+    /// PathExpressions are handled in a separate preorder function
+    /// Hence do not process them here
     if (!m->expr->is<IR::Member>() && !m->expr->is<IR::ArrayIndex>()) prune();
 
     if (auto p = m->expr->to<IR::PathExpression>()) {
@@ -228,13 +223,10 @@ void ConvertLookahead::Collect::postorder(const IR::AssignmentStatement *stateme
 
     LOG2("Collecting lookahead in statement:" << std::endl << " " << statement);
 
-    /**
-     * Store new header in following format in the map:
-     *
-     * header lookahead_tmp_hdr {
-     *   T f;
-     * }
-     */
+    // Store new header in following format in the map:
+    // header lookahead_tmp_hdr {
+    // T f;
+    // }
     IR::ID newHeaderFieldName("f");
     auto program = findOrigCtxt<IR::P4Program>();
     IR::IndexedVector<IR::StructField> newHeaderFields;
@@ -244,12 +236,9 @@ void ConvertLookahead::Collect::postorder(const IR::AssignmentStatement *stateme
 
     repl->insertHeader(program, newHeader);
 
-    /**
-     * Store following declaration of new local variable which is of
-     * new header type in the map:
-     *
-     * lookahead_tmp_hdr lookahead_tmp;
-     */
+    // Store following declaration of new local variable which is of
+    // new header type in the map:
+    // lookahead_tmp_hdr lookahead_tmp;
     auto parser = findOrigCtxt<IR::P4Parser>();
     IR::ID newLocalVarName(refMap->newName("lookahead_tmp"));
     auto newLocalVarType = new IR::Type_Name(newHeaderName);
@@ -257,16 +246,13 @@ void ConvertLookahead::Collect::postorder(const IR::AssignmentStatement *stateme
 
     repl->insertVar(parser, newLocalVar);
 
-    /**
-     * Replace current statement with 2 new statements:
-     * - assignment statement with lookahead method using
-     *   newly created header definiton
-     * - assignment statement which assigns the field from
-     *   newly created header into the original variable
-     *
-     * lookahead_tmp = pkt.lookahead<lookahead_tmp_hdr>();
-     * var_name = lookahead_tmp.f;
-     */
+    // Replace current statement with 2 new statements:
+    // - assignment statement with lookahead method using
+    // newly created header definiton
+    // - assignment statement which assigns the field from
+    // newly created header into the original variable
+    // lookahead_tmp = pkt.lookahead<lookahead_tmp_hdr>();
+    // var_name = lookahead_tmp.f;
     auto newStatements = new IR::IndexedVector<IR::StatOrDecl>;
     const IR::Expression *newLeft;
     const IR::Expression *newRight;
@@ -566,7 +552,7 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
             field_name_list.clear();
         }
     }
-    /* Throw error if there is non-aligned field present at the end in header */
+    // Throw error if there is non-aligned field present at the end in header
     if (size_sum_so_far != 0) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "8-bit Alignment for Header Structure '%1%' is not possible as no more header"
@@ -603,7 +589,7 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
 */
 const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
     cstring hdrStrName = "";
-    /* Get the member's header structure name */
+    // Get the member's header structure name
     if ((m != nullptr) && (m->expr != nullptr) && (m->expr->type != nullptr) &&
         (m->expr->type->is<IR::Type_Header>())) {
         auto str_type = m->expr->type->to<IR::Type_Header>();
@@ -611,13 +597,13 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
     } else {
         return m;
     }
-    /* Check if the member has been modified due to 8-bit header field aligment
-       and its related information is stored in "hdrFieldInfoList" data structure */
+    // Check if the member has been modified due to 8-bit header field aligment
+    // and its related information is stored in "hdrFieldInfoList" data structure
     auto it = structure->hdrFieldInfoList.find(m->member.name);
     if (it != structure->hdrFieldInfoList.end()) {
         for (auto memVec : structure->hdrFieldInfoList[m->member.name]) {
-            /* header structure name is matched to handle the scenario where
-               two different headers have field with same name */
+            // header structure name is matched to handle the scenario where
+            //   two different headers have field with same name
             if (memVec.headerStr != hdrStrName) continue;
             auto mem = new IR::Member(m->expr, IR::ID(memVec.modifiedName));
             auto sliceMem = new IR::Slice(mem->clone(), memVec.msb, memVec.lsb);
@@ -627,8 +613,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
     return m;
 }
 
-/* This function processes the metadata structure and modify the metadata field width
-   to 32/64 bits if it is not 8-bit aligned */
+/// This function processes the metadata structure and modify the metadata field width
+/// to 32/64 bits if it is not 8-bit aligned
 const IR::Node *ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
     auto fields = new IR::IndexedVector<IR::StructField>;
     if (st->is<IR::Type_Struct>()) {
@@ -651,15 +637,15 @@ const IR::Node *ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
     return st;
 }
 
-// This function collects the match key information of a table. This is later used for
-// generating context JSON.
+/// This function collects the match key information of a table. This is later used for
+/// generating context JSON.
 bool CollectTableInfo::preorder(const IR::Key *keys) {
     std::vector<std::pair<cstring, cstring>> tableKeys;
     if (!keys || keys->keyElements.size() == 0) {
         return false;
     }
-    /* Push all non-selector keys to the key_map for this table.
-       Selector keys become part of the selector table */
+    // Push all non-selector keys to the key_map for this table.
+    //  Selector keys become part of the selector table
     for (auto key : keys->keyElements) {
         cstring keyName = key->expression->toString();
         cstring keyNameAnnon = key->expression->toString();
@@ -913,9 +899,9 @@ const IR::Node *IfStatementUnroll::postorder(IR::P4Parser *a) {
     return injector.inject_parser(parser, a);
 }
 
-// TODO(GordonWuCn): simplify with a postorder visitor if it is a statement,
-// return the expression, else introduce a temporary for the current expression
-// and return the temporary in a pathexpression.
+/// TODO(GordonWuCn): simplify with a postorder visitor if it is a statement,
+/// return the expression, else introduce a temporary for the current expression
+/// and return the temporary in a pathexpression.
 bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
     expressionUnrollSanityCheck(u->expr);
 
@@ -1232,8 +1218,8 @@ const IR::Node *CollectLocalVariables::postorder(IR::P4Parser *p) {
     return p;
 }
 
-/* This function stores the information about parameters of default action
-   for each table */
+/// This function stores the information about parameters of default action
+/// for each table
 void DefActionValue::postorder(const IR::P4Table *t) {
     auto default_action = t->properties->getProperty("default_action");
     if (default_action != nullptr && default_action->value->is<IR::ExpressionValue>()) {
@@ -1547,8 +1533,8 @@ cstring CopyMatchKeysToSingleStruct::getTableKeyName(const IR::Expression *e) {
     if (auto pe = e->to<IR::PathExpression>()) {
         keyName = pe->path->name;
     } else if (auto mem = e->to<IR::Member>()) {
-        /* We expect all nested structures are flattened and only
-         * expected expressions are 'h.<hdrname>.<fieldname> or m.<fieldname> */
+        // We expect all nested structures are flattened and only
+        // expected expressions are 'h.<hdrname>.<fieldname> or m.<fieldname>
         if (isValidMemberField(mem)) {
             if (auto mexpr = mem->expr->to<IR::Member>()) {
                 keyName = "h." + mexpr->member + "." + mem->member;
@@ -1564,7 +1550,7 @@ cstring CopyMatchKeysToSingleStruct::getTableKeyName(const IR::Expression *e) {
                   "Method calls except isValid must be simplified before"
                   " reaching here, found %1%",
                   m->method);
-        /* Moving h.<hdr>.isValid() used as table key to Metadata */
+        // Moving h.<hdr>.isValid() used as table key to Metadata
         auto mem = m->method->to<IR::Member>();
         CHECK_NULL(mem);
         keyName = "h." + mem->expr->to<IR::Member>()->member + "." + IR::Type_Header::isValid;
@@ -1590,19 +1576,19 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
 
     if (auto firstKeyField = keys->keyElements.at(0)->expression->to<IR::Member>()) {
         firstKeyStr = firstKeyField->expr->toString();
-        /* ReplaceMetadataHeaderName pass converts all header fields to the form
-           "h.<header_name>.<field_name> and similarly metadata fields are prefixed with "m.".
-           Check if the match key is part of a header by checking the "h" prefix. */
+        // ReplaceMetadataHeaderName pass converts all header fields to the form
+        // "h.<header_name>.<field_name> and similarly metadata fields are prefixed with "m.".
+        // Check if the match key is part of a header by checking the "h" prefix.
         if (firstKeyStr.startsWith("h")) firstKeyHdr = true;
     }
 
-    /* Key fields should be part of same header/metadata struct */
+    // Key fields should be part of same header/metadata struct
     for (auto key : keys->keyElements) {
         cstring keyTypeStr = "";
         if (auto keyField = key->expression->to<IR::Member>()) {
             keyTypeStr = keyField->expr->toString();
         } else if (auto m = key->expression->to<IR::MethodCallExpression>()) {
-            /* When isValid is present as table key, it should be moved to metadata */
+            // When isValid is present as table key, it should be moved to metadata
             if (isValidCall(m)) {
                 copyNeeded = true;
                 break;
@@ -1656,8 +1642,8 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
         structure->table_type_map.emplace(table->name.name, InternalTableType::WILDCARD);
     }
 
-    /* If copyNeeded is false at this point, it means the keys are from same struct.
-     * Check remaining conditions to see if the copy is needed or not */
+    // If copyNeeded is false at this point, it means the keys are from same struct.
+    // Check remaining conditions to see if the copy is needed or not
     metaCopyNeeded = false;
     if (copyNeeded) contiguous = false;
 
@@ -1698,8 +1684,8 @@ const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) 
     cstring keyName = getTableKeyName(element->expression);
     if (keyName.isNullOrEmpty()) return element;
     bool isHeader = false;
-    /* All header fields are prefixed with "h." and metadata fields are prefixed with "m."
-     * Prefix the match field with control and table name */
+    // All header fields are prefixed with "h." and metadata fields are prefixed with "m."
+    // Prefix the match field with control and table name
     if (keyName.startsWith("h.")) {
         isHeader = true;
         keyName = keyName.replace('.', '_');
@@ -1785,9 +1771,9 @@ std::optional<P4::ExternInstance> getExternInstanceFromProperty(
 
 }  // namespace Helpers
 
-// create P4Table object that represents the matching part of the original P4
-// table. This table sets the internal group_id or member_id which are used
-// for subsequent table lookup.
+/// create P4Table object that represents the matching part of the original P4
+/// table. This table sets the internal group_id or member_id which are used
+/// for subsequent table lookup.
 std::tuple<const IR::P4Table *, cstring, cstring> SplitP4TableCommon::create_match_table(
     const IR::P4Table *tbl) {
     cstring grpActionName = "", memActionName;
@@ -2129,14 +2115,14 @@ const IR::Node *SplitActionProfileTable::postorder(IR::P4Table *tbl) {
     return decls;
 }
 
-// Member_id and/or group_id must be initialized prior to member table apply.
-// An action selector table can either set a group_id which in turns set the member_id or it
-// can directly set a member_id. Member table is always applied in either case.
-// Hence, we initialize member_id with 0 as it will always have a valid value based on the base
-// table match Since the values of member_id and group_id are set during run-time, to make a
-// decision whether to apply the group table or not, we initialize group_id with the maximum
-// possible value (this is 32-bit as per PSA specification) and compare this initial value with the
-// group_id at run-time.
+/// Member_id and/or group_id must be initialized prior to member table apply.
+/// An action selector table can either set a group_id which in turns set the member_id or it
+/// can directly set a member_id. Member table is always applied in either case.
+/// Hence, we initialize member_id with 0 as it will always have a valid value based on the base
+/// table match Since the values of member_id and group_id are set during run-time, to make a
+/// decision whether to apply the group table or not, we initialize group_id with the maximum
+/// possible value (this is 32-bit as per PSA specification) and compare this initial value with the
+/// group_id at run-time.
 IR::Expression *SplitP4TableCommon::initializeMemberAndGroupId(
     cstring tableName, IR::IndexedVector<IR::StatOrDecl> *decls) {
     IR::Expression *group_id_expr = nullptr;
@@ -2185,10 +2171,10 @@ const IR::Node *SplitP4TableCommon::postorder(IR::MethodCallStatement *statement
             return statement;
         }
         // an action selector t.apply() is converted to
-        // if (t0.apply().hit) {  // base table
-        //      if (group_id != initial_groupid)
-        //          t1.apply();  // group table
-        //      t2.apply();  // member table
+        // if (t0.apply().hit) {// base table
+        // if (group_id != initial_groupid)
+        // t1.apply();// group table
+        // t2.apply();// member table
         // }
         auto ifBaseTableHit = new IR::IndexedVector<IR::StatOrDecl>();
         auto memberTable = member_tables.at(tableName);
@@ -2222,7 +2208,7 @@ const IR::Node *SplitP4TableCommon::postorder(IR::MethodCallStatement *statement
     return statement;
 }
 
-// assume the RemoveMiss and SimplifyControlFlow pass is applied
+/// assume the RemoveMiss and SimplifyControlFlow pass is applied
 const IR::Node *SplitP4TableCommon::postorder(IR::IfStatement *statement) {
     auto cond = statement->condition;
     if (!P4::TableApplySolver::isHit(cond, refMap, typeMap)) return statement;
@@ -2299,46 +2285,42 @@ const IR::Node *SplitP4TableCommon::postorder(IR::IfStatement *statement) {
     return statement;
 }
 
-/* For tables using action selector/profile property, the group table and member table should
- * only be applied if the base table is a hit. Hence, we split the switch(tbl.apply().action_run)
- * into an if statement to see if all three tables should be applied or not  and a switch statement
- * which handles the side effect of table.apply(). We assign a number to each action the table can
- * invoke. Each action which can be invoked from the base table updates a common variable with its
- * action number. This common variable is used as switch expression.
- *
- * action a0{...}
- * action a1{...}
- *
- * switch(t.apply().action_run) {
- *    a0: { bar_0.apply();}
- *    a1: { foo_0.apply();}
- * }
- *
- * is converted to
- * action a0{
- *     switchExprTmp = 0;
- *     ...
- * }
- * action a1{
- *     switchExprTmp = 1;
- *     ...
- * }
- *
- * switchExprTmp = 0xFFFFFFFF;
- * if (t0.apply().hit) {
- *    if (group_id != initial_group_id) {
- *        t1.apply();
- *    }
- *    t2.apply();
- * }
- *
- * Action invoked on above table apply will set the switch expression variable
- * switch (switchExprTmp) {
- *    0: { bar_0.apply();}
- *    1: { foo_0.apply();}
- * }
- *
- */
+/// For tables using action selector/profile property, the group table and member table should
+/// only be applied if the base table is a hit. Hence, we split the switch(tbl.apply().action_run)
+/// into an if statement to see if all three tables should be applied or not  and a switch statement
+/// which handles the side effect of table.apply(). We assign a number to each action the table can
+/// invoke. Each action which can be invoked from the base table updates a common variable with its
+/// action number. This common variable is used as switch expression.
+/// action a0{...}
+/// action a1{...}
+///
+/// switch(t.apply().action_run) {
+///   a0: { bar_0.apply();}
+///   a1: { foo_0.apply();}
+/// }
+/// is converted to
+/// action a0{
+///     switchExprTmp = 0;
+///    ...
+/// }
+/// action a1{
+///    switchExprTmp = 1;
+///    ...
+/// }
+///
+/// switchExprTmp = 0xFFFFFFFF;
+/// if (t0.apply().hit) {
+///    if (group_id != initial_group_id) {
+///       t1.apply();
+///   }
+///   t2.apply();
+/// }
+///
+/// Action invoked on above table apply will set the switch expression variable
+/// switch (switchExprTmp) {
+///   0: { bar_0.apply();}
+///   1: { foo_0.apply();}
+/// }
 
 const IR::Node *SplitP4TableCommon::postorder(IR::SwitchStatement *statement) {
     auto expr = statement->expression;
@@ -2441,8 +2423,8 @@ const IR::Node *SplitP4TableCommon::postorder(IR::P4Control *a) {
     return injector.inject_control(control, a);
 }
 
-/* For regular tables, the direct counter array size is same as table size
- * For learner tables, the direct counter/meter array size is 4 times the table size */
+/// For regular tables, the direct counter array size is same as table size
+/// For learner tables, the direct counter/meter array size is 4 times the table size
 int CollectDirectCounterMeter::getTableSize(const IR::P4Table *tbl) {
     int tableSize = dpdk_default_table_size;
     auto size = tbl->getSizeProperty();
@@ -2502,10 +2484,9 @@ bool CollectDirectCounterMeter::ifMethodFound(const IR::P4Action *a, cstring met
     return methodCallFound;
 }
 
-/* ifMethodFound() is called from here to make sure that an action only contains count/dpdk_execute
- * method calls for only one Direct counter/meter instance. The error for the same is emitted
- * in the ifMethodFound function itself and return value is not required to be checked here.
- */
+/// ifMethodFound() is called from here to make sure that an action only contains count/dpdk_execute
+/// method calls for only one Direct counter/meter instance. The error for the same is emitted
+/// in the ifMethodFound function itself and return value is not required to be checked here.
 bool CollectDirectCounterMeter::preorder(const IR::P4Action *a) {
     ifMethodFound(a, "count");
     ifMethodFound(a, "dpdk_execute");
@@ -2664,7 +2645,7 @@ void CollectAddOnMissTable::postorder(const IR::P4Table *t) {
         }
     }
 
-    /* sanity checks */
+    // sanity checks
     auto default_action = t->properties->getProperty("default_action");
     if (use_add_on_miss && default_action == nullptr) {
         ::error(ErrorType::ERR_UNEXPECTED,
@@ -2883,12 +2864,9 @@ const IR::Node *ElimHeaderCopy::preorder(IR::AssignmentStatement *as) {
     return as;
 }
 
-/**
- * Replace method call expression with temporary instances
- * like eth_0.setInvalid()
- * with empty statement as all uses of eth_0 already replaced
- *
- */
+/// Replace method call expression with temporary instances
+/// like eth_0.setInvalid()
+/// with empty statement as all uses of eth_0 already replaced
 const IR::Node *ElimHeaderCopy::preorder(IR::MethodCallStatement *mcs) {
     auto me = mcs->methodCall;
     auto m = me->method->to<IR::Member>();
@@ -2922,7 +2900,7 @@ const IR::Node *DpdkAddPseudoHeaderDecl::preorder(IR::P4Program *program) {
     return program;
 }
 
-// add pseudo header field to the headers struct for it be instantiated
+/// add pseudo header field to the headers struct for it be instantiated
 const IR::Node *DpdkAddPseudoHeaderDecl::preorder(IR::Type_Struct *st) {
     if (is_all_args_header) return st;
     bool header_found = isHeadersStruct(st);
@@ -3226,7 +3204,7 @@ const IR::Node *CollectStructLocalVariables::postorder(IR::P4Parser *p) {
 }
 const IR::Type_Struct *CollectStructLocalVariables::metadataStrct = nullptr;
 
-// create and add register declaration instance to program
+/// create and add register declaration instance to program
 IR::IndexedVector<IR::StatOrDecl> *InsertReqDeclForIPSec::addRegDeclInstance(
     std::vector<cstring> portRegs) {
     auto decls = new IR::IndexedVector<IR::StatOrDecl>;
@@ -3288,7 +3266,7 @@ const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Program *program) {
     return program;
 }
 
-// Create an instance of ipsec_hdr in the header struct
+/// Create an instance of ipsec_hdr in the header struct
 const IR::Node *InsertReqDeclForIPSec::preorder(IR::Type_Struct *s) {
     if (!is_ipsec_used) return s;
     if (s->name.name == structure->header_type) {
@@ -3315,14 +3293,13 @@ const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Control *c) {
         // Register index is always 0 as the ipsec port registers are all single location registers
         regRdArgs->push_back(
             new IR::Argument(new IR::Constant(IR::Type::Bits::get(32), IPSEC_PORT_REG_INDEX)));
-        /*  Set the ipsec output port based on packet direction and emit ipsec_hdr
-            if (ipsec_hdr.isValid())
-                if (direction == NET_TO_HOST)
-                    port_out = ipsec_inbound_port_out.read(0);
-                else
-                    port_out = ipsec_outbound_port_out.read(0);
-                emit(ipsec_hdr);
-        */
+        //  Set the ipsec output port based on packet direction and emit ipsec_hdr
+        //    if (ipsec_hdr.isValid())
+        //        if (direction == NET_TO_HOST)
+        //           port_out = ipsec_inbound_port_out.read(0);
+        //       else
+        //           port_out = ipsec_outbound_port_out.read(0);
+        //      emit(ipsec_hdr);
         auto regRdOutInbound = new IR::MethodCallExpression(
             new IR::Member(new IR::PathExpression(IR::ID("ipsec_port_out_inbound")),
                            IR::ID("read")),

@@ -23,8 +23,8 @@ limitations under the License.
 
 namespace DPDK {
 
-// convert relation comparison statements into the corresponding branching
-// instructions in dpdk.
+/// convert relation comparison statements into the corresponding branching
+/// instructions in dpdk.
 void ConvertStatementToDpdk::process_relation_operation(const IR::Expression *dst,
                                                         const IR::Operation_Relation *op) {
     auto true_label = refmap->newName("label_true");
@@ -42,13 +42,13 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression *ds
     } else if (op->is<IR::Grt>()) {
         add_instr(new IR::DpdkJmpGreaterStatement(true_label, op->left, op->right));
     } else if (op->is<IR::Leq>()) {
-        /* Dpdk target does not support the condition Leq, so negate the condition and jump
-           on false label*/
+        // Dpdk target does not support the condition Leq, so negate the condition and jump
+        //   on false label
         condNegated = true;
         add_instr(new IR::DpdkJmpGreaterStatement(false_label, op->left, op->right));
     } else if (op->is<IR::Geq>()) {
-        /* Dpdk target does not support the condition Geq, so negate the condition and jump
-           on false label*/
+        // Dpdk target does not support the condition Geq, so negate the condition and jump
+        //   on false label
         condNegated = true;
         add_instr(new IR::DpdkJmpLessStatement(false_label, op->left, op->right));
     } else {
@@ -67,22 +67,20 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression *ds
     add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(!condNegated)));
     add_instr(new IR::DpdkLabelStatement(end_label));
 }
-
-/* DPDK target does not support storing result of logical operations such as || and &&.
-   Hence we convert the expression var = a LOP b into if-else statements.
-   var = a || b            ||     var = a && b
-=> if (a){                 ||=>   if (!a)
-       var = true;         ||         var = false;
-   } else {                ||     } else {
-       if (b)              ||         if (!b)
-           var = true;     ||             var = false;
-       else                ||         else
-           var = false;    ||             var = true;
-   }                       ||     }
-
-   This function assumes complex logical operations are converted to simple expressions by
-   ConvertLogicalExpression pass.
-*/
+/// DPDK target does not support storing result of logical operations such as || and &&.
+/// Hence we convert the expression var = a LOP b into if-else statements.
+/// var = a || b            ||     var = a && b
+/// => if (a){              ||=>   if (!a)
+///        var = true;      ||         var = false;
+///    } else {             ||     } else {
+///        if (b)           ||         if (!b)
+///            var = true;  ||             var = false;
+///        else             ||         else
+///            var = false; ||             var = true;
+///    }                    ||     }
+///
+/// This function assumes complex logical operations are converted to simple expressions by
+/// ConvertLogicalExpression pass.
 void ConvertStatementToDpdk::process_logical_operation(const IR::Expression *dst,
                                                        const IR::Operation_Binary *op) {
     if (!op->is<IR::LOr>() && !op->is<IR::LAnd>()) return;
@@ -135,11 +133,10 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 src1Op = src1Member;
             }
         }
-        /* If a constant is present in binary operation and it is not 8-bit
-           aligned and it is signed, then the constant value is sign extended
-           with a width of either 32 bit if its original bit-width is less than
-           32 bit or 64 bit if the bit-width of constant is greater than 32 bit
-        */
+        // If a constant is present in binary operation and it is not 8-bit
+        // aligned and it is signed, then the constant value is sign extended
+        // with a width of either 32 bit if its original bit-width is less than
+        // 32 bit or 64 bit if the bit-width of constant is greater than 32 bit
 
         if (!isEightBitAligned(src2Op)) {
             if (auto tb = src2Op->type->to<IR::Type_Bits>()) {
@@ -153,27 +150,29 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                         consValue = val >> (bitWidth - consOrgBitwidth);
                         src2Op = new IR::Constant(IR::Type_Bits::get(bitWidth), consValue);
                     } else {
-                        /*
-                        Below instructions perform sign-extension of non-constant value as follows:
+                        // Below instructions perform sign-extension of non-constant value as
+                        // follows:
+                        //
+                        // 1. Get the MSB of variable by performing 'and' operation with mask with
+                        //    'msb-bit' set with same bit-length of variable and right shifting with
+                        //    (bit-length - 1).
+                        //
+                        //    For eg:
+                        //         1111 (value) & 1000 (mask) = 1000
+                        //         1000 >> 3 (bit-length - 1) = 1
+                        //
+                        // 2. If MSB is set, calculate the mask for sign extension and perform 'OR'
+                        //    operation with variable.
+                        //
+                        //    For eg, if sign-extension is done from 4 bit to 8 bit, below operation
+                        //    is performed:
+                        //
+                        //    mask1 = (1 << 4) - 1 = 1111
+                        //    mask2 = (1 << 8) - 1 = 11111111
+                        //    Final_Mask_Value = mask1 ^ mask2 = 11111111 ^ 00001111 = 11110000
+                        //
+                        //    value = value(4 bit) | Final_Mask_Value (Sign extended)
 
-                        1. Get the MSB of variable by performing 'and' operation with mask with
-                           'msb-bit' set with same bit-length of variable and right shifting with
-                           (bit-length - 1).
-
-                           For eg :
-                                1111 (value) & 1000 (mask) = 1000
-                                1000 >> 3 (bit-length - 1) = 1
-                        2. If MSB is set, calculate the mask for sign extension and perform 'OR'
-                           operation with variable
-                           For eg , if sign-extension is done from 4 bit to 8 bit, below operation
-                           is performed.
-
-                           mask1 = (1 << 4) - 1 = 1111
-                           mask2 = (1 << 8) - 1 = 11111111
-                           Final_Mask_Value = mask1 ^ mask2 = 11111111 ^ 00001111 = 11110000
-
-                           value = value(4 bit) | Final_Mask_Value (Sign extended)
-                        */
                         auto true_label = refmap->newName("label_true");
                         auto tmp = new IR::Constant(1);
                         auto m1 = (tmp->value << consOrgBitwidth) - 1;
@@ -220,9 +219,9 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         } else {
             BUG("%1% not implemented.", right);
         }
-        /* If there is a binary operation present which involves non 8-bit aligned
-           fields , add BAnd operation with mask value of original bit-width to
-           avoid any result overflow */
+        // If there is a binary operation present which involves non 8-bit aligned
+        //   fields , add BAnd operation with mask value of original bit-width to
+        //   avoid any result overflow
         if (!isEightBitAligned(left) && !isSignExtended) {
             if (right->is<IR::Add>() || right->is<IR::Sub>() || right->is<IR::Shl>() ||
                 right->is<IR::Shr>()) {
@@ -276,15 +275,14 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 */
                 if (e->expr->arguments->size() == 1) {
                     auto field = (*e->expr->arguments)[0];
-                    /* All the Hash parameters should be in contiguous memory for hash
-                       value calculation.
+                    // All the Hash parameters should be in contiguous memory for hash
+                    //   value calculation.
 
-                       Below conditions check if all the parameters
-                       belongs to same header/metadata structure or not and if all the
-                       parameters are contiguous or not in a header/metadata structure.
-                       If not, all the parameters are moved to user metadata to aligned
-                       contiguosly.
-                    */
+                    // Below conditions check if all the parameters
+                    // belongs to same header/metadata structure or not and if all the
+                    // parameters are contiguous or not in a header/metadata structure.
+                    // If not, all the parameters are moved to user metadata to aligned
+                    // contiguosly.
                     if (!checkIfBelongToSameHdrMdStructure(field) ||
                         !checkIfConsecutiveHdrMdfields(field))
                         updateMdStrAndGenInstr(field, components);
@@ -299,9 +297,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     auto field = (*e->expr->arguments)[1];
                     auto max_val = (*e->expr->arguments)[2];
 
-                    /* Checks whether 'base' and 'max' param values are const values or not.
-                       If not, throw an error.
-                    */
+                    // Checks whether 'base' and 'max' param values are const values or not.
+                    //   If not, throw an error.
                     if (auto b = base->expression->to<IR::Expression>()) {
                         if (!b->is<IR::Constant>())
                             ::error(ErrorType::ERR_UNEXPECTED,
@@ -541,7 +538,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 auto true_label = refmap->newName("label_true");
                 auto end_label = refmap->newName("label_end");
 
-                /* Emit jump to block containing assignment for PNA_Direction_t.NET_TO_HOST */
+                // Emit jump to block containing assignment for PNA_Direction_t.NET_TO_HOST
                 add_instr(new IR::DpdkJmpEqualStatement(true_label, dir, new IR::Constant(0)));
                 add_instr(new IR::DpdkMovStatement(left, secondVal));
                 add_instr(new IR::DpdkJmpLabelStatement(end_label));
@@ -553,12 +550,11 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             }
         } else if (auto b = mi->to<P4::BuiltInMethod>()) {
             if (b->name == "isValid") {
-                /* DPDK target does not support isvalid() method call as RHS of assignment
-                   Hence, var = hdr.isValid() is translated as
-                   var = true;
-                   if (!(hdr.isValid()))
-                       var = false;
-                */
+                // DPDK target does not support isvalid() method call as RHS of assignment
+                //   Hence, var = hdr.isValid() is translated as
+                //   var = true;
+                //   if (!(hdr.isValid()))
+                //      var = false;
                 auto end_label = refmap->newName("label_end");
                 add_instr(new IR::DpdkMovStatement(left, new IR::BoolLiteral(true)));
                 add_instr(new IR::DpdkJmpIfValidStatement(end_label, b->appliedTo));
@@ -588,13 +584,12 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             add_instr(new IR::DpdkXorStatement(xor1, xor1, n->expr));
             i = new IR::DpdkMovStatement(left, xor1);
         } else if (auto ln = right->to<IR::LNot>()) {
-            /* DPDK target does not support storing result of logical NOT operation.
-               Hence we convert the expression var = !a into if-else statement.
-               if (a == 0)
-                   var = 1;
-               else
-                   var = 0;
-            */
+            // DPDK target does not support storing result of logical NOT operation.
+            //   Hence we convert the expression var = !a into if-else statement.
+            //   if (a == 0)
+            //       var = 1;
+            //   else
+            //       var = 0;
             auto true_label = refmap->newName("label_true");
             auto end_label = refmap->newName("label_end");
             add_instr(new IR::DpdkJmpEqualStatement(true_label, ln->expr, new IR::Constant(false)));
@@ -618,9 +613,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     return false;
 }
 
-/* This function processes the hash parameters and stores them in
-   "components" which is further used for generating hash instruction
-*/
+/// This function processes the hash parameters and stores them in
+/// "components" which is further used for generating hash instruction
 void ConvertStatementToDpdk::processHashParams(const IR::Argument *field,
                                                IR::Vector<IR::Expression> &components) {
     if (auto exp = field->expression->to<IR::Member>()) {
@@ -652,10 +646,9 @@ void ConvertStatementToDpdk::processHashParams(const IR::Argument *field,
     }
 }
 
-/* This function moves the hash parameter fields to metadata structure if they happen
-   to come from different header/metadata structures or are not consecutively laid in
-   the structure they are coming from
-*/
+/// This function moves the hash parameter fields to metadata structure if they happen
+///   to come from different header/metadata structures or are not consecutively laid in
+///   the structure they are coming from
 void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument *field,
                                                     IR::Vector<IR::Expression> &components) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
@@ -688,7 +681,7 @@ void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument *field,
     }
 }
 
-/* This function returns the header/metadata structure name */
+/// This function returns the header/metadata structure name
 cstring ConvertStatementToDpdk::getHdrMdStrName(const IR::Member *mem) {
     cstring sName = "";
     if ((mem != nullptr) && (mem->expr != nullptr) && (mem->expr->type != nullptr)) {
@@ -701,9 +694,8 @@ cstring ConvertStatementToDpdk::getHdrMdStrName(const IR::Member *mem) {
     return sName;
 }
 
-/* This function processes Hash parameters and checks if all parameters
-   belong to same header/metadata structure.
-*/
+/// This function processes Hash parameters and checks if all parameters
+/// belong to same header/metadata structure.
 bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argument *field) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
         if (s->components.size() == 1) return true;
@@ -786,47 +778,44 @@ bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument *f
     return true;
 }
 
-/* This recursion requires the pass of ConvertLogicalExpression. This pass will
- * transform the logical experssion to a form that this function use as
- * presumption. The presumption of this function is that the left side of
- * the logical expression can be a simple expression(expression that is not
- *  LAnd or LOr) or a nested expression(LAnd or LOr). The right side can be a
- * nested expression or {simple one if left side is simple as well}.
- */
+/// This recursion requires the pass of ConvertLogicalExpression. This pass will
+/// transform the logical experssion to a form that this function use as
+/// presumption. The presumption of this function is that the left side of
+/// the logical expression can be a simple expression(expression that is not
+/// LAnd or LOr) or a nested expression(LAnd or LOr). The right side can be a
+/// nested expression or {simple one if left side is simple as well}.
+
 bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstring true_label,
                                               cstring false_label, bool is_and) {
     if (auto land = expr->to<IR::LAnd>()) {
-        /* First, the left side and right side are both nested expressions. In
-         * this case, we need to introduce another label that represent the half
-         * truth for LAnd(means the left side of LAnd is true).And what will
-         * fall through depends on the return value of recursion for right side.
-         */
+        // First, the left side and right side are both nested expressions. In
+        // this case, we need to introduce another label that represent the half
+        // truth for LAnd(means the left side of LAnd is true).And what will
+        // fall through depends on the return value of recursion for right side.
         if (nested(land->left) && nested(land->right)) {
             generate(land->left, true_label + "half", false_label, true);
             instructions.push_back(new IR::DpdkLabelStatement(true_label + "half"));
             return generate(land->right, true_label, false_label, true);
         } else if (!nested(land->left) && nested(land->right)) {
-            /* Second, left is simple and right is nested. Call recursion for the
-             * left part, true fall through. Note that right now, the truthfulness
-             * of right represents the truthfulness of the whole, because if the
-             * left part is false, it will not ranch to the right part due to
-             * principle of short-circuit. For right side, recursion is called and
-             * what will fall through depends on the return value of this recursion
-             * function. Since the basic case and `left simple right simple` case
-             * have already properly jmp to correct label, there is no need to jmp
-             * to any label.
-             */
+            // Second, left is simple and right is nested. Call recursion for the
+            // left part, true fall through. Note that right now, the truthfulness
+            // of right represents the truthfulness of the whole, because if the
+            // left part is false, it will not ranch to the right part due to
+            // principle of short-circuit. For right side, recursion is called and
+            // what will fall through depends on the return value of this recursion
+            // function. Since the basic case and `left simple right simple` case
+            // have already properly jmp to correct label, there is no need to jmp
+            // to any label.
             generate(land->left, true_label, false_label, true);
             return generate(land->right, true_label, false_label, true);
         } else if (!nested(land->left) && !nested(land->right)) {
-            /* Third, left is simple and right is simple. In this case, call the
-             * recursion and indicating  that this call is from LAnd, the
-             * subfunction will let true fall  through. Therefore, after two
-             * function calls, the control flow  should jump to true label. In
-             * addition, indicate that true condition  fallen through. The reason
-             * why I still need to indicate true fallen  through is because there
-             * is chance to eliminate the jmp instruction  I just added.
-             */
+            // Third, left is simple and right is simple. In this case, call the
+            // recursion and indicating  that this call is from LAnd, the
+            // subfunction will let true fall  through. Therefore, after two
+            // function calls, the control flow  should jump to true label. In
+            // addition, indicate that true condition  fallen through. The reason
+            // why I still need to indicate true fallen  through is because there
+            // is chance to eliminate the jmp instruction  I just added.
             generate(land->left, true_label, false_label, true);
             generate(land->right, true_label, false_label, true);
             instructions.push_back(new IR::DpdkJmpLabelStatement(true_label));
@@ -851,17 +840,16 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
             BUG("Previous simple expression lifting pass failed");
         }
     } else if (auto equ = expr->to<IR::Equ>()) {
-        /* First, I will describe the base case. The base case is handling logical
-         * expression that is not LAnd and LOr. It will conside whether the simple
-         * expression itself is the left or right of a LAnd or a LOr(The
-         * information is provided by is_and). If it is from LAnd, it will use the
-         * opposite branching statement and let true fall through. For example, a
-         * == b becomes jneq a b false. This is because for a LAnd if one of its
-         * statement is true it is not necessary to be true, but if one is false,
-         * it is definitely false. If it is from a LOr, it will let false fall
-         * through. And finally for a base case, it returns what condition it fall
-         * through.
-         */
+        // First, I will describe the base case. The base case is handling logical
+        // expression that is not LAnd and LOr. It will conside whether the simple
+        // expression itself is the left or right of a LAnd or a LOr(The
+        // information is provided by is_and). If it is from LAnd, it will use the
+        // opposite branching statement and let true fall through. For example, a
+        // == b becomes jneq a b false. This is because for a LAnd if one of its
+        // statement is true it is not necessary to be true, but if one is false,
+        // it is definitely false. If it is from a LOr, it will let false fall
+        // through. And finally for a base case, it returns what condition it fall
+        // through.
         if (is_and) {
             instructions.push_back(
                 new IR::DpdkJmpNotEqualStatement(false_label, equ->left, equ->right));
@@ -880,23 +868,23 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
         }
         return is_and;
     } else if (auto lss = expr->to<IR::Lss>()) {
-        /* Dpdk target does not support the negated condition Geq,
-           so always jump on true label*/
+        // Dpdk target does not support the negated condition Geq,
+        //   so always jump on true label
         instructions.push_back(new IR::DpdkJmpLessStatement(true_label, lss->left, lss->right));
         return false;
     } else if (auto grt = expr->to<IR::Grt>()) {
-        /* Dpdk target does not support the negated condition Leq,
-           so always jump on true label*/
+        // Dpdk target does not support the negated condition Leq,
+        // so always jump on true labe
         instructions.push_back(new IR::DpdkJmpGreaterStatement(true_label, grt->left, grt->right));
         return false;
     } else if (auto geq = expr->to<IR::Geq>()) {
-        /* Dpdk target does not support the condition Geq,
-           so always negate the condition and jump on false label*/
+        // Dpdk target does not support the condition Geq,
+        // so always negate the condition and jump on false label
         instructions.push_back(new IR::DpdkJmpLessStatement(false_label, geq->left, geq->right));
         return true;
     } else if (auto leq = expr->to<IR::Leq>()) {
-        /* Dpdk target does not support the condition Leq,
-           so always negate the condition and jump on false label*/
+        // Dpdk target does not support the condition Leq,
+        // so always negate the condition and jump on false label
         instructions.push_back(new IR::DpdkJmpGreaterStatement(false_label, leq->left, leq->right));
         return true;
     } else if (auto mce = expr->to<IR::MethodCallExpression>()) {
@@ -964,10 +952,10 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
     return is_and;
 }
 
-// This function convert IfStatement to dpdk asm. Based on the return value of
-// BranchingInstructionGeneration's recursion function, this function decides
-// whether the true or false code block will go first. This is important because
-// following optimization pass might eliminate some redundant jmps and labels.
+/// This function convert IfStatement to dpdk asm. Based on the return value of
+/// BranchingInstructionGeneration's recursion function, this function decides
+/// whether the true or false code block will go first. This is important because
+/// following optimization pass might eliminate some redundant jmps and labels.
 bool ConvertStatementToDpdk::preorder(const IR::IfStatement *s) {
     auto true_label = refmap->newName("label_true");
     auto false_label = refmap->newName("label_false");

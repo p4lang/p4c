@@ -47,9 +47,9 @@ namespace p4configv1 = ::p4::config::v1;
 
 namespace P4 {
 
-/** \addtogroup control_plane
- *  @{
- */
+/// \addtogroup control_plane
+/// @{
+
 namespace ControlPlaneAPI {
 
 /// Declarations specific to standard architectures (v1model & PSA).
@@ -387,7 +387,7 @@ struct PNAArchHandlerBuilderForDPDK : public P4::ControlPlaneAPI::P4RuntimeArchH
 
 }  // namespace ControlPlaneAPI
 
-/** @} */ /* end group control_plane */
+/// @} */ /* end group control_plane
 }  // namespace P4
 
 #endif /* DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_ */
