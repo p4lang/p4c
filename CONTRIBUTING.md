@@ -31,7 +31,7 @@ If you encounter any issues or have suggestions for improvement, please [open an
 ## Feature Requests
 We welcome feature requests! Please open an issue and provide as much detail as possible about the requested feature and its use case.
 
-## P4 onboarding
+## P4 Compiler Onboarding
 For contributing to P4 Compiler, it’s good to know some P4. Here are some learning materials:
 
 - General hands-on [tutorials](https://github.com/p4lang/tutorials).
