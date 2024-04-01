@@ -627,6 +627,6 @@ access them from the IR
 
 See also [unsupported P4_16 language features](backends/bmv2/README.md#unsupported-p4_16-language-features).
 
-# ⭐ How to contribute
+# How to contribute
 
 We welcome and appreciate new contributions. Please take a moment to review our [Contribution Guidelines](CONTRIBUTING.md) to get started.
