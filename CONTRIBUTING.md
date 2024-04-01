@@ -18,13 +18,14 @@ We welcome and appreciate new contributions. Check out [git usage](https://githu
 * Code has to be reviewed before it is merged.
 * Make sure all tests pass when you send a pull request.
 * Participate in the code review process and address any feedback or comments.
-* Make sure `make cpplint` produces no errors (`make check` will also run this)
+* Make sure `cmake --build . --target clang-format cpplint black isort
+` produces no errors.
 
-### Finding a task
+### Finding a Task
 - Check out the issues that have specifically been [marked as being friendly to new contributors](https://github.com/p4lang/p4c/issues?q=is%3Aopen+is%3Aissue+label%3Agood-first-issue)
-- Have a look at this Readme. Can it be improved? Do you see typos? You can open a PR.
+- Have a look at this README. Can it be improved? Do you see typos? You can open a PR.
 
-## Reporting Issue
+## Reporting Issues
 If you encounter any issues or have suggestions for improvement, please [open an issue](https://github.com/p4lang/p4c/issues) with a clear description and, if possible, steps to reproduce.
 
 ## Feature Requests
