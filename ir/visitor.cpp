@@ -471,7 +471,7 @@ class ForwardChildren : public Visitor {
 }  // namespace
 
 const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
-    if (ctxt) ctxt->child_name = name;
+    if (ctxt && name) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
         switch (visited->try_start(n, visitDagOnce)) {
@@ -508,7 +508,7 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
 }
 
 const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
-    if (ctxt) ctxt->child_name = name;
+    if (ctxt && name) ctxt->child_name = name;
     if (n && !join_flows(n)) {
         PushContext local(ctxt, n);
         switch (visited->try_start(n, visitDagOnce)) {
@@ -536,7 +536,7 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
 }
 
 const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
-    if (ctxt) ctxt->child_name = name;
+    if (ctxt && name) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
         switch (visited->try_start(n, visitDagOnce)) {

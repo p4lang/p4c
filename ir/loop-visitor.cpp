@@ -23,7 +23,7 @@ void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
         ControlFlowVisitor *top = nullptr;
         do {
             top = &cfv->flow_clone();
-            cfv->visit(self->condition, "condition", 1);
+            cfv->visit(self->condition, "condition", 1000);
             auto &inloop = cfv->flow_clone();
             inloop.visit(self->body, "body");
             inloop.flow_merge_global_from("-CONTINUE-");
@@ -33,7 +33,14 @@ void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
         } while (*cfv != *top);
         cfv->flow_merge_global_from("-BREAK-");
     } else {
-        v.visit(self->condition, "condition");
+        /* Since there is a variable number of init statements (0 or more), we
+         * don't know what the child index of subsequent children will be.  So we
+         * arbitrarily set the child index of "condition" to 1000.  As long as there
+         * are fewer than 1000 initializers, they'll be child_index 0-999, condition
+         * will be 1000, body will be 1001, and updates will be 1002+.  This is
+         * only relevant for passes that want to know which child is currently
+         * being visited from the Visitor::Context */
+        v.visit(self->condition, "condition", 100);
         v.visit(self->body, "body");
         v.visit(self->updates, "updates");
     }

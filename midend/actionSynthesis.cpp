@@ -205,11 +205,21 @@ const IR::Statement *DoSynthesizeActions::createAction(const IR::Statement *toAd
 }
 
 const IR::Node *DoSynthesizeActions::preorder(IR::AssignmentStatement *statement) {
+    // don't move stuff from for init/update -- should be part of policy?
+    auto *ctxt = getContext();
+    if (ctxt->node->is<IR::ForStatement>() &&
+        (ctxt->child_name[0] == 'i' || ctxt->child_name[0] == 'u'))
+        return statement;
     if (mustMove(statement)) return createAction(statement);
     return statement;
 }
 
 const IR::Node *DoSynthesizeActions::preorder(IR::MethodCallStatement *statement) {
+    // don't move stuff from for init/update -- should be part of policy?
+    auto *ctxt = getContext();
+    if (ctxt->node->is<IR::ForStatement>() &&
+        (ctxt->child_name[0] == 'i' || ctxt->child_name[0] == 'u'))
+        return statement;
     if (mustMove(statement)) return createAction(statement);
     return statement;
 }
