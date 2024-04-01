@@ -114,7 +114,7 @@ if (/* hdr->ipv4.isValid() */
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_SEND_NH: 
                                 {
                                     hdr->ethernet.srcAddr = bpf_cpu_to_be64(value->u.MainControlImpl_send_nh.smac);
-                                                                        hdr->ethernet.dstAddr = bpf_cpu_to_be64(value->u.MainControlImpl_send_nh.dmac);
+                                                                        hdr->ethernet.dstAddr = ntohll(value->u.MainControlImpl_send_nh.dmac << 16);
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP: 
@@ -168,6 +168,7 @@ if (/* hdr->ipv4.isValid() */
                 return TC_ACT_SHOT;
             }
             
+            hdr->ethernet.dstAddr = htonll(hdr->ethernet.dstAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];

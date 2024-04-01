@@ -479,22 +479,25 @@ void CodeGenInspector::emitAndConvertByteOrder(const IR::Expression *expr, cstri
     auto et = EBPFTypeFactory::instance->create(ftype);
     unsigned widthToEmit = dynamic_cast<IHasWidth *>(et)->widthInBits();
     cstring emit = "";
+    unsigned loadSize = 64;
     if (widthToEmit <= 16) {
         emit = byte_order == "HOST" ? "bpf_ntohs" : "bpf_htons";
+        loadSize = 16;
     } else if (widthToEmit <= 32) {
         emit = byte_order == "HOST" ? "bpf_ntohl" : "bpf_htonl";
+        loadSize = 32;
     } else if (widthToEmit <= 64) {
         emit = byte_order == "HOST" ? "ntohll" : "bpf_cpu_to_be64";
+        loadSize = 64;
     }
+    unsigned shift = loadSize - widthToEmit;
     builder->appendFormat("%s(", emit);
     visit(expr);
+    if (shift != 0 && byte_order == "HOST") builder->appendFormat(" << %d", shift);
     builder->append(")");
 }
 
 void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool isScalar) {
-    if (b->is<IR::Operation_Binary>()) {
-        b = b->to<IR::Operation_Binary>();
-    }
     const IR::Expression *lexpr = b->left;
     const IR::Expression *rexpr = b->right;
     cstring stringop = b->getStringOp();
@@ -517,7 +520,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
         } else {
             builder->append(", &");
         }
-        expressionPrecedence = b->getPrecedence() + 1;
+        if (!b->is<IR::Operation_Relation>()) expressionPrecedence = b->getPrecedence() + 1;
         visit(rexpr);
         return;
     }
@@ -538,7 +541,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
         } else {
             builder->append(", &");
         }
-        expressionPrecedence = b->getPrecedence() + 1;
+        if (!b->is<IR::Operation_Relation>()) expressionPrecedence = b->getPrecedence() + 1;
         visit(rexpr);
         return;
     } else if (rByteOrder == "NETWORK") {
@@ -554,7 +557,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
         } else {
             builder->append(", &");
         }
-        expressionPrecedence = b->getPrecedence() + 1;
+        if (!b->is<IR::Operation_Relation>()) expressionPrecedence = b->getPrecedence() + 1;
         if (width <= 8) {
             visit(rexpr);
         } else {
