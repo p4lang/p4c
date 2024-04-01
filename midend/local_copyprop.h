@@ -83,8 +83,15 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     bool need_key_rewrite = false;
     std::function<bool(const Context *, const IR::Expression *)> policy;
     bool elimUnusedTables = false;
+    int uid = -1;
+    static int uid_ctr;
 
-    DoLocalCopyPropagation *clone() const override { return new DoLocalCopyPropagation(*this); }
+    DoLocalCopyPropagation *clone() const override {
+        auto *rv = new DoLocalCopyPropagation(*this);
+        rv->uid = ++uid_ctr;
+        LOG8("flow_clone(" << uid << ") = " << rv->uid);
+        return rv;
+    }
     void flow_merge(Visitor &) override;
     void flow_copy(ControlFlowVisitor &) override;
     bool operator==(const ControlFlowVisitor &) const override;
@@ -95,6 +102,16 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
         return bool(::hasSideEffects(refMap, typeMap, e));
     }
     bool isHeaderUnionIsValid(const IR::Expression *e);
+
+    class LoopPrepass : public Inspector {
+        DoLocalCopyPropagation  &self;
+        void postorder(const IR::AssignmentStatement *) override;
+        void postorder(const IR::MethodCallExpression *) override;
+        void apply_table(TableInfo *tbl);
+        void apply_function(FuncInfo *tbl);
+     public:
+        explicit LoopPrepass(DoLocalCopyPropagation &s) : self(s) {}
+    };
 
     void visit_local_decl(const IR::Declaration_Variable *);
     const IR::Node *postorder(IR::Declaration_Variable *) override;
@@ -107,6 +124,8 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     IR::AssignmentStatement *preorder(IR::AssignmentStatement *) override;
     IR::AssignmentStatement *postorder(IR::AssignmentStatement *) override;
     IR::IfStatement *postorder(IR::IfStatement *) override;
+    IR::ForStatement *preorder(IR::ForStatement *) override;
+    IR::ForInStatement *preorder(IR::ForInStatement *) override;
     IR::MethodCallExpression *postorder(IR::MethodCallExpression *) override;
     IR::P4Action *preorder(IR::P4Action *) override;
     IR::P4Action *postorder(IR::P4Action *) override;
