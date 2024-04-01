@@ -5,6 +5,40 @@
 [![Validation](https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml)
 [![Docker Container](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml)
 
+
+Table of Contents
+=================
+
+* [p4c](#p4c)
+* [Getting started](#getting-started)
+   * [Installing packaged versions of p4c](#installing-packaged-versions-of-p4c)
+      * [Ubuntu](#ubuntu)
+      * [Debian](#debian)
+   * [Installing p4c from source](#installing-p4c-from-source)
+* [Dependencies](#dependencies)
+   * [Ubuntu dependencies](#ubuntu-dependencies)
+      * [CMake](#cmake)
+   * [Fedora dependencies](#fedora-dependencies)
+   * [macOS dependencies](#macos-dependencies)
+   * [Garbage collector](#garbage-collector)
+   * [Crash dumps](#crash-dumps)
+* [Development tools](#development-tools)
+   * [Git setup](#git-setup)
+* [Docker](#docker)
+* [Bazel](#bazel)
+* [Build system](#build-system)
+   * [Defining new CMake targets](#defining-new-cmake-targets)
+      * [IR definition files](#ir-definition-files)
+      * [Source files](#source-files)
+      * [Target](#target)
+      * [Tests](#tests)
+      * [Installation](#installation)
+* [Known issues](#known-issues)
+   * [Frontend](#frontend)
+      * [P4_14 features not supported in P4_16](#p4_14-features-not-supported-in-p4_16)
+   * [Backends](#backends)
+      * [Bmv2 Backend](#bmv2-backend)
+
 # p4c
 
 p4c is a reference compiler for the P4 programming language.
