@@ -117,13 +117,13 @@ if(NOT ${BLACK_CMD} OR NOT (NOT ${ISORT_CMD}))
     set(BLACK_CMD black)
     add_custom_target(
       black
-      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${BLACK_CMD} --check --diff -- || (echo ${RED}black failed. Run \"make black-fix-errors\" to fix the complaints.${COLOURRESET} && false)
+      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${BLACK_CMD} --config ${P4C_SOURCE_DIR}/pyproject.toml --check --diff -- || (echo ${RED}black failed. Run \"make black-fix-errors\" to fix the complaints.${COLOURRESET} && false)
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Checking files for correct black formatting."
     )
     add_custom_target(
       black-fix-errors
-      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${BLACK_CMD} --
+      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${BLACK_CMD} --config ${P4C_SOURCE_DIR}/pyproject.toml --
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Formatting files using black."
     )
