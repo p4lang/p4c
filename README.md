@@ -1,3 +1,6 @@
+# p4c: A Comprehensive P4 Compiler
+p4c is a reference compiler for the P4 programming language, supporting both P4-14 and P4-16 versions. It is a crucial component in the P4 ecosystem, enabling developers to compile P4 programs into target-specific configurations for efficient network programming and deployment.
+
 [![Main Build](https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml)
 [![Main Build](https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml)
 [![Main Build](https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml)
