@@ -1,4 +1,4 @@
-#include "tc_may_override_example_01_parser.h"
+#include "tc_may_override_example_07_parser.h"
 struct p4tc_filter_fields p4tc_filter_fields;
 
 struct internal_metadata {
@@ -12,7 +12,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
     u32 field1; /* istd.input_port */
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP 1
-#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
+#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP 2
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
     unsigned int action;
@@ -26,7 +26,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
             u32 vport;
         } MainControlImpl_next_hop;
         struct {
-        } MainControlImpl_default_route_drop;
+        } MainControlImpl_dflt_route_drop;
     } u;
 };
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
@@ -37,6 +37,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
     u8 field2; /* hdr.ipv4.protocol */
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP 1
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP 2
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 3
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
@@ -50,6 +51,8 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
         struct __attribute__((__packed__)) {
             u32 vport;
         } MainControlImpl_next_hop;
+        struct {
+        } MainControlImpl_dflt_route_drop;
         struct {
         } MainControlImpl_drop;
     } u;
@@ -125,7 +128,7 @@ if (/* hdr->ipv4.isValid() */
                                     }
                                 }
                                 break;
-                            case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
+                            case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP: 
                                 {
 /* drop_packet() */
                                     drop_packet();
@@ -182,6 +185,12 @@ if (/* hdr->ipv4.isValid() */
                                         compiler_meta__->drop = false;
                                         send_to_port(value->u.MainControlImpl_next_hop.vport);
                                     }
+                                }
+                                break;
+                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP: 
+                                {
+/* drop_packet() */
+                                    drop_packet();
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP: 
