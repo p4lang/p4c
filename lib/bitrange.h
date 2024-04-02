@@ -17,14 +17,13 @@ limitations under the License.
 #ifndef LIB_BITRANGE_H_
 #define LIB_BITRANGE_H_
 
-#include <absl/numeric/bits.h>
-
 #include <algorithm>
 #include <iosfwd>
 #include <limits>
 #include <optional>
 #include <utility>
 
+#include "absl/numeric/bits.h"
 #include "bitvec.h"
 #include "exceptions.h"
 #include "hash.h"
