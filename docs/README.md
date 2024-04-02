@@ -99,8 +99,7 @@ p4c
 Documenting the workings of the compiler is a never-ending (many times
 overlooked) job. We can always write better documentation!
 
-In P4C, documentation is generated using Doxygen
-(http://www.stack.nl/~dimitri/doxygen/index.html). There are two main
+In P4C, documentation is generated using Doxygen. There are two main
 sources from which we generate documentation: comments in the code and
 markup documents in the docs/doxygen directory.
 
