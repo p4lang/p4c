@@ -630,3 +630,25 @@ See also [unsupported P4_16 language features](backends/bmv2/README.md#unsupport
 # How to contribute
 
 We welcome and appreciate new contributions. Please take a moment to review our [Contribution Guidelines](CONTRIBUTING.md) to get started.
+
+# P4 Compiler Onboarding
+For contributing to P4 Compiler, it’s good to know some P4. Here are some learning materials:
+
+- General hands-on [tutorials](https://github.com/p4lang/tutorials).
+- [Technical documentation on P4-related topics](https://github.com/jafingerhut/p4-guide?tab=readme-ov-file#introduction).
+- Motivating P4: [IEEE ICC 2018 // Keynote: Nick McKeown, Programmable Forwarding Planes Are Here To Stay](https://www.youtube.com/watch?v=8ie0FcsN07U)
+- Introducing P4-16 in detail: 
+  - Part 1: [Introduction to P4_16. Part 1](https://www.youtube.com/watch?v=GslseT4hY1w)
+  - Part 2: [Introduction to P4_16. Part 2](https://www.youtube.com/watch?v=yqxpypXIOtQ)
+- Material on the official P4 compiler: 
+  - [Understanding the Open-Soure P416 Compiler - February 15, 2022 - Mihai Budiu](https://www.youtube.com/watch?v=Rx5AQ0IF6eU)
+  - [Understanding P416 Open-Source Compiler, Part 2 - March 1, 2022 - Mihai Budiu](https://www.youtube.com/watch?v=YnPHPaPSmpU)
+  - https://github.com/p4lang/p4c/blob/main/docs/compiler-design.pdf
+- Introduction to P4Runtime: [Next-Gen SDN Tutorial - Session 1: P4 and P4Runtime Basics](https://www.youtube.com/watch?v=KRx92qSLgo4)
+
+# Contact
+We appreciate your contributions and look forward to working with you to improve the P4 Compiler Project (p4c)!
+- For further assistance or questions regarding contributions, reach out to us in our [community chat](https://p4-lang.slack.com/).  [Joining link](https://join.slack.com/t/p4-lang/shared_invite/zt-a9pe96br-Th73ueaBAwJw1ZbD_z1Rpg) .
+- For general P4-related questions, use the [P4 forum](https://forum.p4.org/).
+- For other communication channels click [here](https://p4.org/join/).
+
