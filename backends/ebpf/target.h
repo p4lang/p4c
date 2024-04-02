@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_TARGET_H_
 #define BACKENDS_EBPF_TARGET_H_
 
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
@@ -196,6 +198,45 @@ class KernelSamplesTarget : public Target {
                               cstring valueType) const;
 };
 
+class P4TCTarget : public KernelSamplesTarget {
+ public:
+    explicit P4TCTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "P4TC") {}
+    cstring getByteOrderFromAnnotation(const IR::Vector<IR::Annotation> annotations) const {
+        for (auto anno : annotations) {
+            if (anno->name != "tc_type") continue;
+            for (auto annoVal : anno->body) {
+                if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
+                    annoVal->text == "ipv6" || annoVal->text == "be16" || annoVal->text == "be32" ||
+                    annoVal->text == "be64") {
+                    return "NETWORK";
+                }
+            }
+        }
+        return "HOST";
+    }
+
+    cstring getByteOrder(P4::TypeMap *typeMap, const IR::P4Action *action,
+                         const IR::Expression *exp) const {
+        if (auto mem = exp->to<IR::Member>()) {
+            auto type = typeMap->getType(mem->expr, true);
+            if (type->is<IR::Type_StructLike>()) {
+                auto field = type->to<IR::Type_StructLike>()->getField(mem->member);
+                return getByteOrderFromAnnotation(field->getAnnotations()->annotations);
+            }
+        } else if (action) {
+            auto paramList = action->getParameters();
+            if (paramList != nullptr && !paramList->empty()) {
+                for (auto param : paramList->parameters) {
+                    if (param->name.originalName == exp->toString()) {
+                        return getByteOrderFromAnnotation(param->getAnnotations()->annotations);
+                    }
+                }
+            }
+        }
+        return "HOST";
+    }
+};
+
 // Target XDP
 class XdpTarget : public KernelSamplesTarget {
  public:
@@ -224,10 +265,10 @@ class XdpTarget : public KernelSamplesTarget {
 class BccTarget : public Target {
  public:
     BccTarget() : Target("BCC") {}
-    void emitLicense(Util::SourceCodeBuilder *, cstring) const override {};
+    void emitLicense(Util::SourceCodeBuilder *, cstring) const override {}
     void emitCodeSection(Util::SourceCodeBuilder *, cstring) const override {}
     void emitIncludes(Util::SourceCodeBuilder *builder) const override;
-    void emitResizeBuffer(Util::SourceCodeBuilder *, cstring, cstring) const override {};
+    void emitResizeBuffer(Util::SourceCodeBuilder *, cstring, cstring) const override {}
     void emitTableLookup(Util::SourceCodeBuilder *builder, cstring tblName, cstring key,
                          cstring value) const override;
     void emitTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName, cstring key,
@@ -256,7 +297,7 @@ class TestTarget : public EBPF::KernelSamplesTarget {
  public:
     TestTarget() : KernelSamplesTarget(false, "Userspace Test") {}
 
-    void emitResizeBuffer(Util::SourceCodeBuilder *, cstring, cstring) const override {};
+    void emitResizeBuffer(Util::SourceCodeBuilder *, cstring, cstring) const override {}
     void emitIncludes(Util::SourceCodeBuilder *builder) const override;
     void emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName, TableKind tableKind,
                        cstring keyType, cstring valueType, unsigned size) const override;
