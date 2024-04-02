@@ -57,7 +57,7 @@ bool Backend::process() {
 }
 
 bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF) {
-    target = new EBPF::KernelSamplesTarget(options.emitTraceMessages);
+    target = new EBPF::P4TCTarget(options.emitTraceMessages);
     ebpfOption.xdp2tcMode = options.xdp2tcMode;
     ebpfOption.exe_name = options.exe_name;
     ebpfOption.file = options.file;
