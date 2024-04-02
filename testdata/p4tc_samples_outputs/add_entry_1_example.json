@@ -43,7 +43,7 @@
             {
               "id" : 1,
               "name" : "dmac",
-              "type" : "bit48",
+              "type" : "macaddr",
               "bitwidth" : 48
             },
             {

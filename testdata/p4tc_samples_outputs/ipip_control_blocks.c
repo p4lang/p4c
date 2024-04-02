@@ -91,8 +91,8 @@ if (/* hdr->outer.isValid() */
                         switch (value->action) {
                             case MAIN_FWD_TABLE_ACT_MAIN_SET_IPIP: 
                                 {
-                                    meta->src = value->u.Main_set_ipip.src;
-                                                                        meta->dst = value->u.Main_set_ipip.dst;
+                                    meta->src = bpf_ntohl(value->u.Main_set_ipip.src);
+                                                                        meta->dst = bpf_ntohl(value->u.Main_set_ipip.dst);
                                                                         meta->push = true;
                                     /* send_to_port(value->u.Main_set_ipip.port) */
                                     compiler_meta__->drop = false;
@@ -182,7 +182,6 @@ if (/* hdr->outer.isValid() */
                 return TC_ACT_SHOT;
             }
             
-            hdr->ethernet.dstAddr = htonll(hdr->ethernet.dstAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
@@ -197,7 +196,6 @@ if (/* hdr->outer.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = htonll(hdr->ethernet.srcAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];
