@@ -77,12 +77,6 @@ filegroup(
             name = "com_google_absl",
             url = "https://github.com/abseil/abseil-cpp/releases/download/20240116.1/abseil-cpp-20240116.1.tar.gz",
             strip_prefix = "abseil-cpp-20240116.1",
-            # We patch Abseil to support bracketed system includes.
-            # Patch is sourced from https://github.com/abseil/abseil-cpp/pull/1637.
-            # Discussion around Abseil's lack of support for bracketed system includes:
-            # https://github.com/abseil/abseil-cpp/issues/740
-            patches = ["@com_github_p4lang_p4c//:bazel/abseil.patch"],
-            patch_args = ["-p1"],
             sha256 = "3c743204df78366ad2eaf236d6631d83f6bc928d1705dd0000b872e53b73dc6a",
         )
     if not native.existing_rule("com_google_protobuf"):
