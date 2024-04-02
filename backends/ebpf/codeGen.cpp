@@ -80,12 +80,16 @@ bool CodeGenInspector::preorder(const IR::Operation_Binary *b) {
     bool useParens = getParent<IR::IfStatement>() == nullptr || mask != "";
     if (mask != "") builder->append("(");
     if (useParens) builder->append("(");
-    visit(b->left);
-    builder->spc();
-    builder->append(b->getStringOp());
-    builder->spc();
-    expressionPrecedence = b->getPrecedence() + 1;
-    visit(b->right);
+    if (builder->target->name == "P4TC") {
+        emitTCBinaryOperation(b, true);
+    } else {
+        visit(b->left);
+        builder->spc();
+        builder->append(b->getStringOp());
+        builder->spc();
+        expressionPrecedence = b->getPrecedence() + 1;
+        visit(b->right);
+    }
     if (useParens) builder->append(")");
     builder->append(mask);
     expressionPrecedence = prec;
@@ -104,20 +108,28 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation *b) {
         int prec = expressionPrecedence;
         bool useParens = prec > b->getPrecedence();
         if (useParens) builder->append("(");
-        visit(b->left);
-        builder->spc();
-        builder->append(b->getStringOp());
-        builder->spc();
-        visit(b->right);
+        if (builder->target->name == "P4TC") {
+            emitTCBinaryOperation(b, scalar);
+        } else {
+            visit(b->left);
+            builder->spc();
+            builder->append(b->getStringOp());
+            builder->spc();
+            visit(b->right);
+        }
         if (useParens) builder->append(")");
     } else {
         if (!et->is<IHasWidth>())
             BUG("%1%: Comparisons for type %2% not yet implemented", b->left, type);
         unsigned width = et->to<IHasWidth>()->implementationWidthInBits();
         builder->append("memcmp(&");
-        visit(b->left);
-        builder->append(", &");
-        visit(b->right);
+        if (builder->target->name == "P4TC") {
+            emitTCBinaryOperation(b, scalar);
+        } else {
+            visit(b->left);
+            builder->append(", &");
+            visit(b->right);
+        }
         builder->appendFormat(", %d)", width / 8);
     }
     return false;
@@ -361,7 +373,11 @@ void CodeGenInspector::emitAssignStatement(const IR::Type *ltype, const IR::Expr
             builder->append(lpath);
         }
         builder->append(" = ");
-        visit(rexpr);
+        if (builder->target->name == "P4TC") {
+            emitTCAssignmentEndianessConversion(lexpr, rexpr);
+        } else {
+            visit(rexpr);
+        }
     }
     builder->endOfStatement();
 }
@@ -456,6 +472,144 @@ void CodeGenInspector::widthCheck(const IR::Node *node) const {
     }
     ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Computations on %2% bits not supported",
             node, tb->size);
+}
+
+void CodeGenInspector::emitAndConvertByteOrder(const IR::Expression *expr, cstring byte_order) {
+    auto ftype = typeMap->getType(expr);
+    auto et = EBPFTypeFactory::instance->create(ftype);
+    unsigned widthToEmit = dynamic_cast<IHasWidth *>(et)->widthInBits();
+    cstring emit = "";
+    unsigned loadSize = 64;
+    if (widthToEmit <= 16) {
+        emit = byte_order == "HOST" ? "bpf_ntohs" : "bpf_htons";
+        loadSize = 16;
+    } else if (widthToEmit <= 32) {
+        emit = byte_order == "HOST" ? "bpf_ntohl" : "bpf_htonl";
+        loadSize = 32;
+    } else if (widthToEmit <= 64) {
+        emit = byte_order == "HOST" ? "ntohll" : "bpf_cpu_to_be64";
+        loadSize = 64;
+    }
+    unsigned shift = loadSize - widthToEmit;
+    builder->appendFormat("%s(", emit);
+    visit(expr);
+    if (shift != 0 && byte_order == "HOST") builder->appendFormat(" << %d", shift);
+    builder->append(")");
+}
+
+void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool isScalar) {
+    const IR::Expression *lexpr = b->left;
+    const IR::Expression *rexpr = b->right;
+    cstring stringop = b->getStringOp();
+
+    auto action = findContext<IR::P4Action>();
+    auto tcTarget = dynamic_cast<const P4TCTarget *>(builder->target);
+    cstring lByteOrder = "HOST", rByteOrder = "HOST";
+    if (lexpr) {
+        lByteOrder = tcTarget->getByteOrder(typeMap, action, lexpr);
+    }
+    if (rexpr) {
+        rByteOrder = tcTarget->getByteOrder(typeMap, action, rexpr);
+    }
+    if (lByteOrder == rByteOrder) {
+        visit(lexpr);
+        if (isScalar) {
+            builder->spc();
+            builder->append(stringop);
+            builder->spc();
+        } else {
+            builder->append(", &");
+        }
+        if (!b->is<IR::Operation_Relation>()) expressionPrecedence = b->getPrecedence() + 1;
+        visit(rexpr);
+        return;
+    }
+    if (lByteOrder == "NETWORK") {
+        // ConvertLeft
+        auto ftype = typeMap->getType(lexpr);
+        auto et = EBPFTypeFactory::instance->create(ftype);
+        unsigned width = dynamic_cast<IHasWidth *>(et)->widthInBits();
+        if (width <= 8) {
+            visit(lexpr);
+        } else {
+            emitAndConvertByteOrder(lexpr, "NETWORK");
+        }
+        if (isScalar) {
+            builder->spc();
+            builder->append(stringop);
+            builder->spc();
+        } else {
+            builder->append(", &");
+        }
+        if (!b->is<IR::Operation_Relation>()) expressionPrecedence = b->getPrecedence() + 1;
+        visit(rexpr);
+        return;
+    } else if (rByteOrder == "NETWORK") {
+        // ConvertRight
+        auto ftype = typeMap->getType(rexpr);
+        auto et = EBPFTypeFactory::instance->create(ftype);
+        unsigned width = dynamic_cast<IHasWidth *>(et)->widthInBits();
+        visit(lexpr);
+        if (isScalar) {
+            builder->spc();
+            builder->append(stringop);
+            builder->spc();
+        } else {
+            builder->append(", &");
+        }
+        if (!b->is<IR::Operation_Relation>()) expressionPrecedence = b->getPrecedence() + 1;
+        if (width <= 8) {
+            visit(rexpr);
+        } else {
+            emitAndConvertByteOrder(rexpr, "NETWORK");
+        }
+    }
+    return;
+}
+
+void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression *lexpr,
+                                                           const IR::Expression *rexpr) {
+    auto action = findContext<IR::P4Action>();
+    auto b = dynamic_cast<const P4TCTarget *>(builder->target);
+    cstring lByteOrder = "HOST", rByteOrder = "HOST";
+    if (lexpr) {
+        lByteOrder = b->getByteOrder(typeMap, action, lexpr);
+    }
+    if (rexpr) {
+        rByteOrder = b->getByteOrder(typeMap, action, rexpr);
+    }
+    if (lByteOrder == rByteOrder) {
+        visit(rexpr);
+        return;
+    }
+    auto ftype = typeMap->getType(rexpr);
+    auto et = EBPFTypeFactory::instance->create(ftype);
+    unsigned width = dynamic_cast<IHasWidth *>(et)->widthInBits();
+    if (width <= 8) {
+        visit(rexpr);
+        return;
+    }
+    if (rByteOrder == "NETWORK") {
+        /*
+        If left side of assignment is not annotated field i.e host endian and right expression
+        is annotated field i.e network endian, we need to convert rexp to host order.
+        Example -
+            select_0 = hdr.ipv4.diffserv
+            select_0 = bntoh(hdr.ipv4.diffserv)
+        */
+        emitAndConvertByteOrder(rexpr, "HOST");
+    }
+    if (lByteOrder == "NETWORK") {
+        /*
+        If left side of assignment is annotated field i.e network endian, we need to convert
+        right expression to network order.
+        Example -
+            hdr.opv4.diffserv = 0x1;
+            hdr.opv4.diffserv = bhton(0x1)
+        */
+        emitAndConvertByteOrder(rexpr, "NETWORK");
+    }
+    return;
 }
 
 unsigned EBPFInitializerUtils::ebpfTypeWidth(P4::TypeMap *typeMap, const IR::Expression *expr) {

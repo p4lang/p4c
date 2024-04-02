@@ -6,7 +6,7 @@ TC="tc"
 $TC p4template create pipeline/add_entry_1_example numtables 1
 
 $TC p4template create action/add_entry_1_example/MainControlImpl/send_nh actid 1 \
-	param dmac type bit48 \
+	param dmac type macaddr \
 	param smac type bit48
 $TC p4template update action/add_entry_1_example/MainControlImpl/send_nh state active
 
