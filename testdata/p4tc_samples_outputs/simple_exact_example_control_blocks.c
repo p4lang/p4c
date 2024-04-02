@@ -66,7 +66,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                 struct ingress_nh_table_key key;
                 __builtin_memset(&key, 0, sizeof(key));
                 key.keysz = 32;
-                key.field0 = hdr->ipv4.srcAddr;
+                key.field0 = bpf_htonl(hdr->ipv4.srcAddr);
                 struct p4tc_table_entry_act_bpf *act_bpf;
                 /* value */
                 struct ingress_nh_table_value *value = NULL;
@@ -235,6 +235,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
+            hdr->ipv4.srcAddr = htonl(hdr->ipv4.srcAddr);
             ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[1];
@@ -245,6 +246,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
+            hdr->ipv4.dstAddr = htonl(hdr->ipv4.dstAddr);
             ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[1];
