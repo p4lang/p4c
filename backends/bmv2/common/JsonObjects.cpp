@@ -74,21 +74,18 @@ Util::JsonObject *JsonObjects::find_object_by_name(Util::JsonArray *array, const
     return nullptr;
 }
 
-/// Insert a json array to a parent object under key 'name'.
 Util::JsonArray *JsonObjects::insert_array_field(Util::JsonObject *parent, cstring name) {
     auto result = new Util::JsonArray();
     parent->emplace(name, result);
     return result;
 }
 
-/// Append a json array to a parent json array.
 Util::JsonArray *JsonObjects::append_array(Util::JsonArray *parent) {
     auto result = new Util::JsonArray();
     parent->append(result);
     return result;
 }
 
-/// Insert a json array named 'parameters' in a parent json object.
 Util::JsonArray *JsonObjects::create_parameters(Util::JsonObject *object) {
     return insert_array_field(object, "parameters");
 }
@@ -105,12 +102,15 @@ void JsonObjects::add_meta_info() {
     toplevel->emplace("__meta__", meta);
 }
 
+<<<<<<< HEAD
 /// Create a header type in json.
 /// @param name header name
 /// @param type header type
 /// @param max_length  maximum length for a header with varbit fields;
 /// if 0 header does not contain varbit fields
 /// @param fields a JsonArray for the fields in the header
+=======
+>>>>>>> e86bac6dac799c6b94fcac7e4dd93392ee0b1016
 unsigned JsonObjects::add_header_type(const cstring &name, Util::JsonArray *&fields,
                                       unsigned max_length) {
     std::string sname(name, name.size());
@@ -153,7 +153,6 @@ unsigned JsonObjects::add_union_type(const cstring &name, Util::JsonArray *&fiel
     return id;
 }
 
-/// Create a header type with empty field list.
 unsigned JsonObjects::add_header_type(const cstring &name) {
     std::string sname(name, name.size());
     auto header_type_id_it = header_type_id.find(sname);
@@ -171,8 +170,6 @@ unsigned JsonObjects::add_header_type(const cstring &name) {
     return id;
 }
 
-/// Create a set of fields to an existing header type.
-/// The header type is decribed by the name.
 void JsonObjects::add_header_field(const cstring &name, Util::JsonArray *&field) {
     CHECK_NULL(field);
     Util::JsonObject *headerType = find_object_by_name(header_types, name);
@@ -181,7 +178,6 @@ void JsonObjects::add_header_field(const cstring &name, Util::JsonArray *&field)
     fields->append(field);
 }
 
-/// Create a header instance in json.
 unsigned JsonObjects::add_header(const cstring &type, const cstring &name) {
     auto header = new Util::JsonObject();
     unsigned id = BMV2::nextId("headers");
@@ -195,7 +191,6 @@ unsigned JsonObjects::add_header(const cstring &type, const cstring &name) {
     return id;
 }
 
-/// Create a header_union instance in json.
 unsigned JsonObjects::add_union(const cstring &type, Util::JsonArray *&headers,
                                 const cstring &name) {
     auto u = new Util::JsonObject();
@@ -255,15 +250,12 @@ void JsonObjects::add_header_union_stack(const cstring &type, const cstring &nam
     header_union_stacks->append(stack);
 }
 
-/// Add an error to json.
 void JsonObjects::add_error(const cstring &name, const unsigned type) {
     auto arr = append_array(errors);
     arr->append(name);
     arr->append(type);
 }
 
-/// Add a single enum entry to json.
-/// A enum entry is identified with { enum_name, entry_name, entry_value }
 void JsonObjects::add_enum(const cstring &enum_name, const cstring &entry_name,
                            const unsigned entry_value) {
     // look up enum in json by name
@@ -302,8 +294,6 @@ unsigned JsonObjects::add_parser(const cstring &name) {
     return id;
 }
 
-/// insert parser state into a parser identified by parser_id
-/// return the id of the parser state
 unsigned JsonObjects::add_parser_state(const unsigned parser_id, const cstring &state_name) {
     if (map_parser.find(parser_id) == map_parser.end()) BUG("parser %1% not found.", parser_id);
     auto parser = map_parser[parser_id];
