@@ -2,8 +2,7 @@
 
 The back-end accepts only P4_16 code written for the `ebpf_model.p4` or
 `xdp_model.p4` filter models.  It generates C code that can be afterwards
-compiled into [eBPF (extended Berkeley Packet Filters)](
-https://en.wikipedia.org/wiki/Berkeley_Packet_Filter) using clang/llvm or
+compiled into [eBPF (extended Berkeley Packet Filters)](https://en.wikipedia.org/wiki/Berkeley_Packet_Filter) using clang/llvm or
 [bcc](https://github.com/iovisor/bcc.git).
 
 An older version of this compiler for compiling P4_14 is available [here](https://github.com/iovisor/bcc/tree/master/src/cc/frontends/p4).
@@ -172,8 +171,7 @@ eBPF continue to mature.
 The current version of the P4 to eBPF compiler translates programs
 written in the version P4_16 of the programming language to programs
 written in a restricted subset of C.  The subset of C is chosen such
-that it should be compilable to eBPF using clang and/or [bcc (the BPF
-Compiler Collection)](https://github.com/iovisor/bcc).
+that it should be compilable to eBPF using clang and/or [bcc (the BPF Compiler Collection)](https://github.com/iovisor/bcc).
 
 ```
          --------------              -------
@@ -333,8 +331,7 @@ the tables. The easiest and simplest way is to use the
 the kernel.
 
 An alternative is to use explicit syscalls (an example can be found in
-the [kernel tools
-folder](https://github.com/torvalds/linux/blob/master/tools/lib/bpf/bpf.c).
+the [kernel tools folder](https://github.com/torvalds/linux/blob/master/tools/lib/bpf/bpf.c).
 
 The P4 compiler automatically provides a set of table initializers,
 which may also serve as example, in the header of the generated
