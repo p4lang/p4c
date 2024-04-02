@@ -188,7 +188,7 @@ bool BFRuntimeSchemaGenerator::addActionProfIds(const p4configv1::Table &table,
 }
 
 void BFRuntimeSchemaGenerator::addConstTableAttr(Util::JsonArray *) const {
-    // Intentionally empty function body to skip attribute addition for const entries
+    // Intentionally empty function body to skip attribute addition for const entries.
     return;
 }
 
