@@ -6,6 +6,7 @@ For more info on P4TC, Please refer:
 
 * [What Is P4TC](https://github.com/p4tc-dev/docs/blob/main/why-p4tc.md)
 * [P4TC examples](https://github.com/p4tc-dev/p4tc-v2-examples)
+* [P4TC tutorial](https://github.com/p4tc-dev/p4tc-tutorial-pub)
 
 The p4c-pna-p4tc compiler accepts the P4-16 programs written for the pna.p4 architecture model.
 
