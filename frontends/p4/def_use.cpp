@@ -257,7 +257,8 @@ bool LocationSet::operator==(const LocationSet &other) const {
     auto it = other.begin();
     for (auto s : locations) {
         if (it == other.end() || *it != s) return false;
-        ++it; }
+        ++it;
+    }
     return it == other.end();
 }
 

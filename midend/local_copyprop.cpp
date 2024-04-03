@@ -185,8 +185,8 @@ void DoLocalCopyPropagation::flow_merge(Visitor &a_) {
         if (auto merge = ::getref(a.available, var.first)) {
             if (merge->val != var.second.val) {
                 if (var.second.val) {
-                    LOG4("    dropping " << var.first << " = " << var.second.val <<
-                         " in flow_merge");
+                    LOG4("    dropping " << var.first << " = " << var.second.val
+                                         << " in flow_merge");
                 }
                 var.second.val = nullptr;
             }
@@ -437,8 +437,7 @@ IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStateme
 }
 
 void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::AssignmentStatement *as) {
-    if (auto dest = expr_name(as->left))
-        self.dropValuesUsing(dest);
+    if (auto dest = expr_name(as->left)) self.dropValuesUsing(dest);
 }
 
 IR::IfStatement *DoLocalCopyPropagation::postorder(IR::IfStatement *s) {
@@ -915,7 +914,7 @@ IR::ParserState *DoLocalCopyPropagation::postorder(IR::ParserState *state) {
 // needed for this pass to function correctly when used in a PassRepeated
 Visitor::profile_t DoLocalCopyPropagation::init_apply(const IR::Node *node) {
     auto rv = Transform::init_apply(node);
-    uid = uid_ctr = 0;   // reset uids
+    uid = uid_ctr = 0;  // reset uids
 
     // clear maps
     available.clear();

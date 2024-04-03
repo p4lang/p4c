@@ -87,9 +87,7 @@ class SourceCodeBuilder {
         supressSemi = false;
         if (addNl) newline();
     }
-    void supressStatementSemi() {
-        supressSemi = true;
-    }
+    void supressStatementSemi() { supressSemi = true; }
 
     void blockStart() {
         append("{");

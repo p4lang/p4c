@@ -15,7 +15,7 @@ limitations under the License.
 */
 #include "ir/ir.h"
 
-template<class THIS>
+template <class THIS>
 void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
     v.visit(self->annotations, "annotations");
     v.visit(self->init, "init");
@@ -50,7 +50,7 @@ void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
 void IR::ForStatement::visit_children(Visitor &v) { visit_children(this, v); }
 void IR::ForStatement::visit_children(Visitor &v) const { visit_children(this, v); }
 
-template<class THIS>
+template <class THIS>
 void IR::ForInStatement::visit_children(THIS *self, Visitor &v) {
     v.visit(self->annotations, "annotations");
     v.visit(self->decl, "decl", 0);

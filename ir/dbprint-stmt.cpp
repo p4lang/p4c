@@ -92,13 +92,15 @@ void IR::ForStatement::dbprint(std::ostream &out) const {
     for (auto *sd : init) {
         if (!first) out << ", ";
         out << sd;
-        first = false; }
+        first = false;
+    }
     out << "; " << condition << "; ";
     first = true;
     for (auto *sd : updates) {
         if (!first) out << ", ";
         out << sd;
-        first = false; }
+        first = false;
+    }
     out << ") {" << indent << Log::endl << body << " }" << unindent << setprec(prec);
 }
 

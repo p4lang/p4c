@@ -85,27 +85,25 @@ void ComputeDefUse::def_info_t::flow_merge(def_info_t &a) {
 
 bool ComputeDefUse::def_info_t::operator==(const def_info_t &a) const {
     if (defs.size() != a.defs.size()) return false;
-    for (auto *l : defs) if (!a.defs.count(l)) return false;
+    for (auto *l : defs)
+        if (!a.defs.count(l)) return false;
     if (live != a.live) return false;
     // Don't check the parent field as it is not set consistently (it is only set in
     // copy/move ctors above) and nothing appears to depend on it.  Should be removed?
     if (valid_bit_defs.size() != a.valid_bit_defs.size()) return false;
-    for (auto *l : valid_bit_defs) if (!a.valid_bit_defs.count(l)) return false;
+    for (auto *l : valid_bit_defs)
+        if (!a.valid_bit_defs.count(l)) return false;
     if (fields.size() != a.fields.size()) return false;
     for (auto &[field, info] : fields) {
         auto it = a.fields.find(field);
-        if (it == a.fields.end())
-            return false;
-        if (info != it->second)
-            return false;
+        if (it == a.fields.end()) return false;
+        if (info != it->second) return false;
     }
     if (slices.size() != a.slices.size()) return false;
     for (auto &[slice, info] : slices) {
         auto it = a.slices.find(slice);
-        if (it == a.slices.end())
-            return false;
-        if (info != it->second)
-            return false;
+        if (it == a.slices.end()) return false;
+        if (info != it->second) return false;
     }
     return true;
 }

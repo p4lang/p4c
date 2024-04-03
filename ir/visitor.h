@@ -530,7 +530,8 @@ class ControlFlowVisitor : public virtual Visitor {
     void flow_merge(Visitor &) override = 0;
     virtual void flow_copy(ControlFlowVisitor &) = 0;
     virtual bool operator==(const ControlFlowVisitor &) const {
-        BUG("%s pass does not support loops", name()); }
+        BUG("%s pass does not support loops", name());
+    }
     bool operator!=(const ControlFlowVisitor &v) const { return !(*this == v); }
     void setUnreachable() { unreachable = true; }
     bool isUnreachable() { return unreachable; }
@@ -556,8 +557,7 @@ class ControlFlowVisitor : public virtual Visitor {
     }
     void restore_global(std::pair<cstring, ControlFlowVisitor *> saved) {
         globals.erase(saved.first);
-        if (saved.second)
-            globals.emplace(saved.first, *saved.second);
+        if (saved.second) globals.emplace(saved.first, *saved.second);
     }
 
     /// RAII class to ensure global key is only used in one place
@@ -574,7 +574,8 @@ class ControlFlowVisitor : public virtual Visitor {
     /// RAII class to save and restore one or more global keys
     class SaveGlobal {
         ControlFlowVisitor &self;
-        std::vector<std::pair<cstring, ControlFlowVisitor *>>   saved;
+        std::vector<std::pair<cstring, ControlFlowVisitor *>> saved;
+
      public:
         SaveGlobal(ControlFlowVisitor &self, cstring key) : self(self) {
             saved.push_back(self.save_global(key));
@@ -584,8 +585,7 @@ class ControlFlowVisitor : public virtual Visitor {
             saved.push_back(self.save_global(k2));
         }
         ~SaveGlobal() {
-            for (auto it = saved.rbegin(); it != saved.rend(); ++it)
-                self.restore_global(*it);
+            for (auto it = saved.rbegin(); it != saved.rend(); ++it) self.restore_global(*it);
         }
     };
 

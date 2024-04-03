@@ -1204,7 +1204,8 @@ bool ToP4::preorder(const IR::ForStatement *s) {
         if (!first) builder.append(", ");
         builder.supressStatementSemi();
         visit(d, "init");
-        first = false; }
+        first = false;
+    }
     builder.append("; ");
     visit(s->condition, "condition");
     builder.append("; ");
@@ -1214,7 +1215,8 @@ bool ToP4::preorder(const IR::ForStatement *s) {
         if (!first) builder.append(", ");
         builder.supressStatementSemi();
         visit(e, "updates");
-        first = false; }
+        first = false;
+    }
     builder.append(") ");
     if (!s->body->is<IR::BlockStatement>()) {
         builder.append("{");

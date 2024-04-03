@@ -104,11 +104,12 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     bool isHeaderUnionIsValid(const IR::Expression *e);
 
     class LoopPrepass : public Inspector {
-        DoLocalCopyPropagation  &self;
+        DoLocalCopyPropagation &self;
         void postorder(const IR::AssignmentStatement *) override;
         void postorder(const IR::MethodCallExpression *) override;
         void apply_table(TableInfo *tbl);
         void apply_function(FuncInfo *tbl);
+
      public:
         explicit LoopPrepass(DoLocalCopyPropagation &s) : self(s) {}
     };
