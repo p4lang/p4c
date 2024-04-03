@@ -1,7 +1,7 @@
 # Repository
 
 This folder contains documentation for the P4_16 prototype compiler.
-The code and documentation are hosted in the following repository: https://github.com/p4lang/p4c
+The code and documentation are hosted in the [p4c repository](https://github.com/p4lang/p4c). 
 
 # Compiler source code organization
 
@@ -91,8 +91,7 @@ p4c
 Documenting the workings of the compiler is a never-ending (many times
 overlooked) job. We can always write better documentation!
 
-In P4C, documentation is generated using Doxygen
-(http://www.stack.nl/~dimitri/doxygen/index.html). There are two main
+In P4C, documentation is generated using Doxygen. There are two main
 sources from which we generate documentation: comments in the code and
 markup documents in the docs/doxygen directory.
 
@@ -122,8 +121,7 @@ Happy writing! Should you have any questions, please don't hesitate to ask.
 
 ## Git usage
 
-* To contribute: fork the p4lang/p4c repository on github
-  (see https://help.github.com/articles/fork-a-repo/)
+* To contribute: fork the p4lang/p4c repository on github.  [Detailed instructions on forking a repository](https://help.github.com/articles/fork-a-repo/).
 * To merge a forked repository with the latest changes in the source use:
 
 ```

@@ -4,8 +4,9 @@ TC backend aims to generate files for the P4TC implementation in Linux kernel (f
 
 For more info on P4TC, Please refer:
 
-* https://github.com/p4tc-dev/docs/blob/main/why-p4tc.md
-* https://github.com/p4tc-dev/p4tc-v2-examples
+* [What Is P4TC](https://github.com/p4tc-dev/docs/blob/main/why-p4tc.md)
+* [P4TC examples](https://github.com/p4tc-dev/p4tc-examples-pub)
+* [P4TC tutorial](https://github.com/p4tc-dev/p4tc-tutorial-pub)
 
 The p4c-pna-p4tc compiler accepts the P4-16 programs written for the pna.p4 architecture model.
 
