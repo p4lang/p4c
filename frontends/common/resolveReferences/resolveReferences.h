@@ -17,8 +17,7 @@ limitations under the License.
 #ifndef COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
 #define COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
 
-#include <absl/container/flat_hash_map.h>
-
+#include "absl/container/flat_hash_map.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/iterator_range.h"
