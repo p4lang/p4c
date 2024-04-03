@@ -626,12 +626,12 @@ access them from the IR
 
 See also [unsupported P4_16 language features](backends/bmv2/README.md#unsupported-p4_16-language-features).
 
-# How to contribute
+# How to Contribute
 
 We welcome and appreciate new contributions. Please take a moment to review our [Contribution Guidelines](CONTRIBUTING.md) to get started.
 
 # P4 Compiler Onboarding
-For contributing to P4 Compiler, it’s good to know some P4. Here are some learning materials:
+Educational material on P4: 
 
 - General hands-on [tutorials](https://github.com/p4lang/tutorials).
 - [Technical documentation on P4-related topics](https://github.com/jafingerhut/p4-guide?tab=readme-ov-file#introduction).
@@ -640,8 +640,8 @@ For contributing to P4 Compiler, it’s good to know some P4. Here are some lear
   - Part 1: [Introduction to P4_16. Part 1](https://www.youtube.com/watch?v=GslseT4hY1w)
   - Part 2: [Introduction to P4_16. Part 2](https://www.youtube.com/watch?v=yqxpypXIOtQ)
 - Material on the official P4 compiler: 
-  - [Understanding the Open-Soure P416 Compiler - February 15, 2022 - Mihai Budiu](https://www.youtube.com/watch?v=Rx5AQ0IF6eU)
-  - [Understanding P416 Open-Source Compiler, Part 2 - March 1, 2022 - Mihai Budiu](https://www.youtube.com/watch?v=YnPHPaPSmpU)
+  - [Understanding the Open-Soure P4-16 Compiler - February 15, 2022 - Mihai Budiu](https://www.youtube.com/watch?v=Rx5AQ0IF6eU)
+  - [Understanding P4-16 Open-Source Compiler, Part 2 - March 1, 2022 - Mihai Budiu](https://www.youtube.com/watch?v=YnPHPaPSmpU)
   - https://github.com/p4lang/p4c/blob/main/docs/compiler-design.pdf
 - Introduction to P4Runtime: [Next-Gen SDN Tutorial - Session 1: P4 and P4Runtime Basics](https://www.youtube.com/watch?v=KRx92qSLgo4)
 
