@@ -17,6 +17,7 @@ limitations under the License.
 
 template<class THIS>
 void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
+    v.visit(self->annotations, "annotations");
     v.visit(self->init, "init");
     if (auto *cfv = v.controlFlowVisitor()) {
         ControlFlowVisitor::SaveGlobal outer(*cfv, "-BREAK-", "-CONTINUE-");
@@ -51,6 +52,7 @@ void IR::ForStatement::visit_children(Visitor &v) const { visit_children(this, v
 
 template<class THIS>
 void IR::ForInStatement::visit_children(THIS *self, Visitor &v) {
+    v.visit(self->annotations, "annotations");
     v.visit(self->decl, "decl", 0);
     v.visit(self->collection, "collection", 2);
     if (auto *cfv = v.controlFlowVisitor()) {

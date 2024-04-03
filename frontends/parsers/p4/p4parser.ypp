@@ -1306,15 +1306,16 @@ statementOrDeclaration
     ;
 
 forStatement
-    : FOR "(" forInitStatements ";"
+    : optAnnotations FOR "(" forInitStatements ";"
               expression ";"
 	      forUpdateStatements ")"
       statement
-    { $$ = new IR::ForStatement(@1+@8, *$3, $5, *$7, $9); }
-    | FOR "(" typeRef name IN forCollectionExpr ")" statement
-    { $$ = new IR::ForInStatement(@1+@6, new IR::Declaration_Variable(@3+@4, *$4, $3), $6, $8); }
-    | FOR "(" prefixedNonTypeName IN forCollectionExpr ")" statement
-    { $$ = new IR::ForInStatement(@1+@6, new IR::PathExpression(@3, $3), $5, $7); }
+    { $$ = new IR::ForStatement(@2+@9, *$4, $6, *$8, $10); }
+    | optAnnotations FOR "(" typeRef name IN forCollectionExpr ")" statement
+    { auto decl = new IR::Declaration_Variable(@4+@5, *$5, $4);
+      $$ = new IR::ForInStatement(@2+@7, $1, decl, $7, $9); }
+    | optAnnotations FOR "(" prefixedNonTypeName IN forCollectionExpr ")" statement
+    { $$ = new IR::ForInStatement(@2+@7, $1, new IR::PathExpression(@4, $4), $6, $8); }
     ;
 
 forInitStatements

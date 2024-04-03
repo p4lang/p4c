@@ -1194,6 +1194,10 @@ bool ToP4::preorder(const IR::IfStatement *s) {
 
 bool ToP4::preorder(const IR::ForStatement *s) {
     dump(2);
+    if (!s->annotations->annotations.empty()) {
+        visit(s->annotations);
+        builder.spc();
+    }
     builder.append("for (");
     bool first = true;
     for (auto *d : s->init) {
@@ -1230,6 +1234,10 @@ bool ToP4::preorder(const IR::ForStatement *s) {
 
 bool ToP4::preorder(const IR::ForInStatement *s) {
     dump(2);
+    if (!s->annotations->annotations.empty()) {
+        visit(s->annotations);
+        builder.spc();
+    }
     builder.append("for (");
     if (s->decl) {
         builder.supressStatementSemi();
