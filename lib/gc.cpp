@@ -14,14 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// This include is necessary to prevent this error from happening:
-// "error: 'posix_memalign' is missing exception specification 'noexcept'"
-// This error is possible when compiling with clang and including "mm_malloc.h" after the definition
-// of posix_memalign. This can easily happen in unity builds.
-#if defined(__clang__)
-#include <mm_malloc.h>
-#endif
-
 #include "config.h"
 #if HAVE_LIBGC
 #include <gc/gc_cpp.h>
@@ -271,8 +263,8 @@ void *calloc(size_t size, size_t elsize) {
     return rv;
 }
 int posix_memalign(void **memptr, size_t alignment, size_t size)
-#ifndef __APPLE__
-    noexcept
+#ifdef __GLIBC__
+    __THROW
 #endif
 {
     maybe_initialize_gc();
@@ -329,3 +321,4 @@ size_t gc_mem_inuse(size_t *max) {
     return 0;
 #endif
 }
+#include <mm_malloc.h>
