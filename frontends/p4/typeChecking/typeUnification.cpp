@@ -481,11 +481,19 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
             }
             return true;
         }
-    } else if (dest->is<IR::Type_P4List>() && src->is<IR::Type_P4List>()) {
-        auto dvec = dest->to<IR::Type_P4List>();
-        auto svec = src->to<IR::Type_P4List>();
-        constraints->add(constraint->create(dvec->elementType, svec->elementType));
-        return true;
+    } else if (auto dvec = dest->to<IR::Type_P4List>()) {
+        if (auto svec = src->to<IR::Type_P4List>()) {
+            constraints->add(constraint->create(dvec->elementType, svec->elementType));
+            return true;
+        } else if (auto svec = src->to<IR::Type_List>()) {
+            std::set<const IR::Type *> elTypes;
+            for (auto *t : svec->components) {
+                if (elTypes.count(t)) continue;
+                elTypes.insert(t);
+                constraints->add(constraint->create(dvec->elementType, t));
+            }
+            return true;
+        }
     }
 
     return constraint->reportError(constraints->getCurrentSubstitution());
