@@ -1,3 +1,0 @@
-[submodule "_deps/gtest-src"]
-    path = _deps/gtest-src
-	url = https://github.com/sumit7754/p4c.git
