@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC  -fdiagnostics-color=never  -Wall -Wextra -Wno-overloaded-virtual -Wno-deprecated -Wno-deprecated-declarations -pedantic -g  -Wall -Wextra -Wno-overloaded-virtual -Wno-deprecated -Wno-deprecated-declarations -pedantic  -fuse-ld=lld -shared  -o libextern_func_module.so CMakeFiles/extern_func_module.dir/__/__/testdata/extern_modules/extern-funcs-bmv2.cpp.o 
