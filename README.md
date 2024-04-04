@@ -22,9 +22,8 @@ make adding new backends easy.
 
 The code contains seven sample backends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
-  the BMv2 behavioral model https://github.com/p4lang/behavioral-model,
-* p4c-dpdk: can be used to target the DPDK software switch (SWX) pipeline
-  https://doc.dpdk.org/guides/rel_notes/release_20_11.html,
+  the [BMv2 behavioral model](https://github.com/p4lang/behavioral-model),
+* p4c-dpdk: can be used to target the [DPDK software switch (SWX) pipeline](https://doc.dpdk.org/guides/rel_notes/release_20_11.html),
 * p4c-ebpf: can be used to generate C code which can be compiled to [eBPF](https://en.wikipedia.org/wiki/Berkeley_Packet_Filter)
   and then loaded in the Linux kernel. The eBPF backend currently implements three architecture models:
   [ebpf_model.p4 for packet filtering, xdp_model.p4 for XDP](./backends/ebpf/README.md) and
@@ -136,7 +135,7 @@ If you cannot use a repository to install p4c, you can download the `.deb` file
 for your release and install it manually. You need to download a new file each
 time you want to upgrade p4c.
 
-1. Go to https://build.opensuse.org/package/show/home:p4lang/p4lang-p4c, click on
+1. Go to [p4lang-p4c package page on OpenSUSE Build Service](https://build.opensuse.org/package/show/home:p4lang/p4lang-p4c), click on
 "Download package" and choose your operating system version.
 
 2. Install p4c, changing the path below to the path where you downloaded the package.
@@ -626,3 +625,29 @@ access them from the IR
 * Tables with multiple apply calls
 
 See also [unsupported P4_16 language features](backends/bmv2/README.md#unsupported-p4_16-language-features).
+
+# How to Contribute
+
+We welcome and appreciate new contributions. Please take a moment to review our [Contribution Guidelines](CONTRIBUTING.md) to get started.
+
+# P4 Compiler Onboarding
+Educational material on P4: 
+
+- General hands-on [tutorials](https://github.com/p4lang/tutorials).
+- [Technical documentation on P4-related topics](https://github.com/jafingerhut/p4-guide?tab=readme-ov-file#introduction).
+- Motivating P4: [IEEE ICC 2018 // Keynote: Nick McKeown, Programmable Forwarding Planes Are Here To Stay](https://www.youtube.com/watch?v=8ie0FcsN07U)
+- Introducing P4-16 in detail: 
+  - Part 1: [Introduction to P4_16. Part 1](https://www.youtube.com/watch?v=GslseT4hY1w)
+  - Part 2: [Introduction to P4_16. Part 2](https://www.youtube.com/watch?v=yqxpypXIOtQ)
+- Material on the official P4 compiler: 
+  - [Understanding the Open-Source P4-16 Compiler - February 15, 2022 - Mihai Budiu](https://www.youtube.com/watch?v=Rx5AQ0IF6eU)
+  - [Understanding P4-16 Open-Source Compiler, Part 2 - March 1, 2022 - Mihai Budiu](https://www.youtube.com/watch?v=YnPHPaPSmpU)
+  - [Compiler Design - Implementation Architecture](https://github.com/p4lang/p4c/blob/main/docs/compiler-design.pdf).
+- Introduction to P4Runtime: [Next-Gen SDN Tutorial - Session 1: P4 and P4Runtime Basics](https://www.youtube.com/watch?v=KRx92qSLgo4)
+
+# Contact
+We appreciate your contributions and look forward to working with you to improve the P4 Compiler Project (p4c)!
+- For further assistance or questions regarding contributions, reach out to us in our [community chat](https://p4-lang.slack.com/).  [Joining link](https://join.slack.com/t/p4-lang/shared_invite/zt-a9pe96br-Th73ueaBAwJw1ZbD_z1Rpg) .
+- For general P4-related questions, use the [P4 forum](https://forum.p4.org/).
+- For other communication channels click [here](https://p4.org/join/).
+

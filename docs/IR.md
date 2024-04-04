@@ -46,7 +46,7 @@ object, recursively.
 ## Visitors and Transforms
 
 The compiler is organized as a series of `Visitor` and `Transform`
-passes (https://en.wikipedia.org/wiki/Visitor_pattern).  The `Visitor`
+passes [Wikipedia](https://en.wikipedia.org/wiki/Visitor_pattern).  The `Visitor`
 and `Transform` base classes make defining new passes easy -- a new
 transform need only specify the IR types it is interested in, and can
 ignore others.  A (constant) `Visitor` pass visits every node in the
