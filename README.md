@@ -5,7 +5,31 @@
 [![Validation](https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml)
 [![Docker Container](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml)
 
-# p4c
+
+p4c
+=================
+
+* [Getting started](#getting-started)
+   * [Installing packaged versions of p4c](#installing-packaged-versions-of-p4c)
+   * [Installing p4c from source](#installing-p4c-from-source)
+* [Dependencies](#dependencies)
+   * [Ubuntu dependencies](#ubuntu-dependencies)
+   * [Fedora dependencies](#fedora-dependencies)
+   * [macOS dependencies](#macos-dependencies)
+   * [Garbage collector](#garbage-collector)
+   * [Crash dumps](#crash-dumps)
+* [Development tools](#development-tools)
+   * [Git setup](#git-setup)
+* [Docker](#docker)
+* [Bazel](#bazel)
+* [Build system](#build-system)
+   * [Defining new CMake targets](#defining-new-cmake-targets)
+* [Known issues](#known-issues)
+   * [Frontend](#frontend)
+   * [Backends](#backends)
+* [How to Contribute](#how-to-contribute)
+* [P4 Compiler Onboarding](#p4-compiler-onboarding)
+* [Contact](#contact)
 
 p4c is a reference compiler for the P4 programming language.
 It supports both P4-14 and P4-16; you can find more information about P4
