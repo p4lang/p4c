@@ -6,8 +6,10 @@ set -e  # Exit on error.
 set -x  # Make command execution verbose
 set -u  # Error on unbound variables.
 
+# Usage: has_lib BINARY LIB_PATTERN
+# Does string match, not regex match.
 has_lib() {
-    ldd $1 2>&1 | grep -E $2
+    ldd $1 2>&1 | grep -F $2
 }
 
 is_static() {
@@ -32,8 +34,8 @@ for bin in ${bins[@]}; do
     ! has_lib $bin "glibc"
     ! has_lib $bin "libboost_iostreams"
     if [[ ${STATIC_SANS} = "stdlib" ]]; then
-        has_lib $bin 'libstdc++\.so'
+        has_lib $bin 'libstdc++.so'
     else
-        ! has_lib $bin 'libstdc++\.so'
+        ! has_lib $bin 'libstdc++.so'
     fi
 done
