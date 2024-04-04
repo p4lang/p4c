@@ -1,0 +1,58 @@
+name: "static-sans-stdlib-build-test-p4c"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+    branches: [main]
+
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: static-sans-stdlib-build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  # Build a p4c release on Ubuntu 20.04.
+  build-linux:
+    runs-on: ubuntu-20.04
+    env:
+      IMAGE_TYPE: test
+      CMAKE_UNITY_BUILD: ON
+      BUILD_STATIC_RELEASE_SANS_STDLIB: ON
+      ENABLE_TEST_TOOLS: ON
+      BUILD_GENERATOR: Ninja
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: test-static-${{ runner.os }}
+          max-size: 1000M
+
+      - shell: bash
+        name: Build (Ubuntu 20.04)
+        run: |
+          sudo -E tools/ci-build.sh
+          
+          ldd ./build/p4c-bm2-psa 2>&1  | grep -E "libstdc++[.]so"
+          ldd ./build/p4c-bm2-ss 2>&1  | grep -E "libstdc++[.]so"
+          ldd ./build/p4c-dpdk 2>&1  | grep -E "libstdc++[.]so"
+          ldd ./build/p4c-ebpf 2>&1  | grep -E "libstdc++[.]so"
+          ldd ./build/p4c-pna-p4tc 2>&1  | grep -E "libstdc++[.]so"
+          ldd ./build/p4c-ubpf 2>&1  | grep -E "libstdc++[.]so"
+          ldd ./build/p4test 2>&1  | grep -E "libstdc++[.]so"
+          ldd ./build/p4testgen 2>&1  | grep -E "libstdc++[.]so"
+
+          ! ldd ./build/p4c-bm2-psa 2>&1 | grep -E "libgc|libboost_iostreams"
+          ! ldd ./build/p4c-bm2-ss 2>&1 | grep -E "libgc|libboost_iostreams"
+          ! ldd ./build/p4c-dpdk 2>&1 | grep -E "libgc|libboost_iostreams"
+          ! ldd ./build/p4c-ebpf 2>&1 | grep -E "libgc|libboost_iostreams"
+          ! ldd ./build/p4c-pna-p4tc 2>&1 | grep -E "libgc|libboost_iostreams"
+          ! ldd ./build/p4c-ubpf 2>&1 | grep -E "libgc|libboost_iostreams"
+          ! ldd ./build/p4test 2>&1 | grep -E "libgc|libboost_iostreams"
+          ! ldd ./build/p4testgen 2>&1 | grep -E "libgc|libboost_iostreams"
