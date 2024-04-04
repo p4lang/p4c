@@ -91,11 +91,9 @@ void BFRuntimeSchemaGenerator::addActionSelectorGetMemberCommon(
     auto *keyJson = new Util::JsonArray();
     addKeyField(keyJson, BF_RT_DATA_SELECTOR_GROUP_ID, "$SELECTOR_GROUP_ID", true /* mandatory */,
                 "Exact", makeType("uint64"));
-<<<<<<< HEAD
+
     addKeyField(keyJson, BF_RT_DATA_HASH_VALUE, "hash_value", true /* mandatory */, "Exact",
-=======
     addKeyField(keyJson, BF_RT_DATA_HASH_VALUE, "hash_value", true /* mandatory */, "Exact", ,
->>>>>>> origin/comment-formatting-involved-dpdk
                 makeType("uint64"));
     tableJson->emplace("key", keyJson);
 
