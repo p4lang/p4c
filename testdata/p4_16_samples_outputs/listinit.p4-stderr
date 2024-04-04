@@ -1,0 +1,10 @@
+listinit.p4(10): [--Wwarn=unused] warning: obj: unused instance
+}) obj;
+   ^^^
+listinit.p4(12): [--Wwarn=unused] warning: o2: unused instance
+test<bit<16>, _>({}) o2;
+                     ^^
+listinit.p4(14): [--Wwarn=unused] warning: o3: unused instance
+test<bit<16>, bit<8>>({ { 0, 10}, { 1, 12 }, { 2, 15 } }) o3;
+                                                          ^^
+[--Wwarn=missing] warning: Program does not contain a `main' module
