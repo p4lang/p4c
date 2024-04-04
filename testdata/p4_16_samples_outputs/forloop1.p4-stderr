@@ -1,3 +1,0 @@
-forloop1.p4(24): [--Wwarn=uninitialized_use] warning: v.x may be uninitialized
-            hdrs.head.f1 = hdrs.head.f1 + v.x;
-                                          ^^^

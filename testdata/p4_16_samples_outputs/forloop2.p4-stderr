@@ -1,0 +1,11 @@
+forloop2.p4(17): [--Wwarn=uninitialized_use] warning: v may be uninitialized
+        if (v == 0)
+            ^
+forloop2.p4(20): [--Wwarn=uninitialized_use] warning: v may be uninitialized
+        v = v & (v - 1);
+            ^
+forloop2.p4(20): [--Wwarn=uninitialized_use] warning: v may be uninitialized
+        v = v & (v - 1);
+                 ^
+[--Wwarn=uninitialized_use] warning: retval may be uninitialized
+[--Wwarn=uninitialized_use] warning: retval may be uninitialized
