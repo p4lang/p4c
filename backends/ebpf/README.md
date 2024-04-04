@@ -2,12 +2,10 @@
 
 The back-end accepts only P4_16 code written for the `ebpf_model.p4` or
 `xdp_model.p4` filter models.  It generates C code that can be afterwards
-compiled into eBPF (extended Berkeley Packet Filters
-https://en.wikipedia.org/wiki/Berkeley_Packet_Filter) using clang/llvm or
-bcc (https://github.com/iovisor/bcc.git).
+compiled into [eBPF (extended Berkeley Packet Filters)](https://en.wikipedia.org/wiki/Berkeley_Packet_Filter) using clang/llvm or
+[bcc](https://github.com/iovisor/bcc.git).
 
-An older version of this compiler for compiling P4_14 is available at
-https://github.com/iovisor/bcc/tree/master/src/cc/frontends/p4
+An older version of this compiler for compiling P4_14 is available [here](https://github.com/iovisor/bcc/tree/master/src/cc/frontends/p4).
 
 Identifiers starting with ebpf_ are reserved in P4 programs, including
 for structure field names.
@@ -173,8 +171,7 @@ eBPF continue to mature.
 The current version of the P4 to eBPF compiler translates programs
 written in the version P4_16 of the programming language to programs
 written in a restricted subset of C.  The subset of C is chosen such
-that it should be compilable to eBPF using clang and/or bcc (the BPF
-Compiler Collection -- https://github.com/iovisor/bcc).
+that it should be compilable to eBPF using clang and/or [bcc (the BPF Compiler Collection)](https://github.com/iovisor/bcc).
 
 ```
          --------------              -------
@@ -203,8 +200,8 @@ In addition the following packages and programs are required to run the full tes
 - Clang 3.3 and llvm 3.7.1 or later are required. (Note: In some
   versions of Ubuntu Xenial (16.04.4) CMake crashes when checking for
   llvm. Until the bugfix is committed upstream, workarounds are
-  available in the following issue:
-  https://github.com/p4lang/p4c/issues/1376
+  available in [this issue]( https://github.com/p4lang/p4c/issues/1376):
+ 
 
 - libpcap-dev to parse and generate .pcap files.
 
@@ -324,9 +321,7 @@ eBPF programs can be attached to it using the following command:
 
 `da` implies that tc takes action input directly from the return codes
 provided by the eBPF program. We currently support `TC_ACT_SHOT` and
-`TC_ACT_OK`. For more information, see this link:
-
-http://docs.cilium.io/en/latest/bpf/#tc-traffic-control
+`TC_ACT_OK`. More information avaiable [here](http://docs.cilium.io/en/latest/bpf/#tc-traffic-control).
 
 # How to run the generated eBPF program
 
@@ -336,8 +331,7 @@ the tables. The easiest and simplest way is to use the
 the kernel.
 
 An alternative is to use explicit syscalls (an example can be found in
-the [kernel tools
-folder](https://github.com/torvalds/linux/blob/master/tools/lib/bpf/bpf.c).
+the [kernel tools folder](https://github.com/torvalds/linux/blob/master/tools/lib/bpf/bpf.c).
 
 The P4 compiler automatically provides a set of table initializers,
 which may also serve as example, in the header of the generated
