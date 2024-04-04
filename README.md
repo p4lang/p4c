@@ -31,8 +31,6 @@ p4c
 * [P4 Compiler Onboarding](#p4-compiler-onboarding)
 * [Contact](#contact)
 
-# p4c
-
 p4c is a reference compiler for the P4 programming language.
 It supports both P4-14 and P4-16; you can find more information about P4
 [here](http://p4.org) and the specifications for both versions of the language
