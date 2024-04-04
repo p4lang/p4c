@@ -48,12 +48,14 @@ OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
-OPTION (BUILD_STATIC_RELEASE_SANS_GLIBC
-       "Build a (mostly) statically linked release binary. Glibc is linked dynamically." OFF
-)
-OPTION (BUILD_STATIC_RELEASE_SANS_STDLIB
-       "Build a (mostly) statically linked release binary. Glibc and C++ standard library is linked dynamically." OFF
-)
+OPTION (BUILD_STATIC_RELEASE_SANS_GLIBC "Build a (mostly) statically linked release binary. Glibc \
+is linked dynamically. WARNING: This only works if all dependencies that depend on the C++ \
+standard library can be linked statically, otherwise the build will likely be broken and it will \
+likely depend on the standard libary anyway. If you have some non-static C++ dependencies, use \
+BUILD_STATIC_RELEASE_SANS_STDLIB." OFF)
+OPTION (BUILD_STATIC_RELEASE_SANS_STDLIB "Build a (mostly) statically linked release binary. \
+Glibc and C++ standard library is linked dynamically." OFF)
+
 if (BUILD_STATIC_RELEASE_SANS_GLIBC OR BUILD_STATIC_RELEASE_SANS_STDLIB)
     # We want to optimize the binary size for a static release binary by default.
     set (_ENABLE_LTO_DEFAULT ON)
