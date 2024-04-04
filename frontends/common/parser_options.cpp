@@ -453,8 +453,12 @@ void ParserOptions::closePreprocessedInput(FILE *inputStream) const {
 // From (folder, file.ext, suffix)  returns
 // folder/file-suffix.ext
 static cstring makeFileName(cstring folder, cstring name, cstring baseSuffix) {
+    static int file_serial = 0;
+    char fss[64];
     Util::PathName filename(name);
-    Util::PathName newName(filename.getBasename() + baseSuffix + "." + filename.getExtension());
+    snprintf(&fss[0], sizeof(fss), "%04d", file_serial++);
+    Util::PathName newName(std::string(static_cast<const char *>(&fss[0])) + "." +
+                           filename.getBasename() + baseSuffix + "." + filename.getExtension());
     auto result = Util::PathName(folder).join(newName.toString());
     return result.toString();
 }

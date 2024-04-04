@@ -110,17 +110,17 @@ void dump(std::ostream &out, const Visitor::Context *ctxt) {
     out << indent_t(ctxt->depth - 1);
     if (ctxt->parent) {
         if (ctxt->parent->child_name)
-            out << ctxt->parent->child_name << ": ";
+            out << ctxt->parent->child_name << ":A ";
         else
-            out << ctxt->parent->child_index << ": ";
+            out << ctxt->parent->child_index << ":B ";
     }
     if (ctxt->original != ctxt->node) {
-        out << "<" << static_cast<const void *>(ctxt->original) << ":[" << ctxt->original->id
+        out << "<" << static_cast<const void *>(ctxt->original) << ":C[" << ctxt->original->id
             << "] " << ctxt->original->node_type_name();
         ctxt->original->dump_fields(out);
         out << std::endl << indent_t(ctxt->depth - 1) << ">";
     }
-    out << static_cast<const void *>(ctxt->node) << ":[" << ctxt->node->id << "] "
+    out << static_cast<const void *>(ctxt->node) << ":D[" << ctxt->node->id << "] "
         << ctxt->node->node_type_name();
     ctxt->node->dump_fields(out);
     std::cout << std::endl;
