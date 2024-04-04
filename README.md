@@ -28,6 +28,9 @@ Table of Contents
 * [Known issues](#known-issues)
    * [Frontend](#frontend)
    * [Backends](#backends)
+* [How to Contribute](#how-to-contribute)
+* [P4 Compiler Onboarding](#p4-compiler-onboarding)
+* [Contact](#contact)
 
 # p4c
 
