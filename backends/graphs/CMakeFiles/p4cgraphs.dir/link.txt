@@ -1,0 +1,2 @@
+/usr/bin/ar qc libp4cgraphs.a  CMakeFiles/p4cgraphs.dir/graphs.cpp.o CMakeFiles/p4cgraphs.dir/controls.cpp.o CMakeFiles/p4cgraphs.dir/parsers.cpp.o CMakeFiles/p4cgraphs.dir/graph_visitor.cpp.o ../../CMakeFiles/ir-generated.dir/ir/ir-generated.cpp.o ../../CMakeFiles/ir-generated.dir/backends/dpdk/spec.cpp.o ../../CMakeFiles/ir-generated.dir/backends/dpdk/printUtils.cpp.o ../../CMakeFiles/ir-generated.dir/backends/dpdk/dbprint-dpdk.cpp.o
+/usr/bin/ranlib libp4cgraphs.a

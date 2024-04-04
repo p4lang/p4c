@@ -1,0 +1,2 @@
+/usr/bin/ar qc libdpdk_runtime.a  CMakeFiles/dpdk_runtime.dir/p4/config/p4info.pb.cc.o
+/usr/bin/ranlib libdpdk_runtime.a
