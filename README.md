@@ -6,10 +6,9 @@
 [![Docker Container](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml)
 
 
-Table of Contents
+p4c
 =================
 
-* [p4c](#p4c)
 * [Getting started](#getting-started)
    * [Installing packaged versions of p4c](#installing-packaged-versions-of-p4c)
    * [Installing p4c from source](#installing-p4c-from-source)
