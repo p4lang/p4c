@@ -47,7 +47,7 @@ namespace P4 {
    - names of all parameters are distinct
    - no duplicate declarations in toplevel program
    - Dots are the last field
-   - continue and break statements are only used in the context of a foreach statement
+   - continue and break statements are only used in the context of a for statement
  */
 class ValidateParsedProgram final : public Inspector {
     void container(const IR::IContainer *type);

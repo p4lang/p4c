@@ -251,17 +251,17 @@ void ValidateParsedProgram::postorder(const IR::Dots *dots) {
     }
 }
 
-/// Check that continue and break statements are only used in the context of a foreach statement
+/// Check that continue and break statements are only used in the context of a for statement
 void ValidateParsedProgram::postorder(const IR::BreakStatement *s) {
     if (!findContext<IR::ForStatement>() && !findContext<IR::ForInStatement>())
         ::error(ErrorType::ERR_INVALID,
-                "%1%: break statement must be used in the context of a foreach statement.", s);
+                "%1%: break statement must be used in the context of a for statement.", s);
 }
 
 void ValidateParsedProgram::postorder(const IR::ContinueStatement *s) {
     if (!findContext<IR::ForStatement>() && !findContext<IR::ForInStatement>())
         ::error(ErrorType::ERR_INVALID,
-                "%1%: continue statement must be used in the context of a foreach statement.", s);
+                "%1%: continue statement must be used in the context of a for statement.", s);
 }
 
 }  // namespace P4

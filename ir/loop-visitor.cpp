@@ -41,7 +41,7 @@ void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
          * will be 1000, body will be 1001, and updates will be 1002+.  This is
          * only relevant for passes that want to know which child is currently
          * being visited from the Visitor::Context */
-        v.visit(self->condition, "condition", 100);
+        v.visit(self->condition, "condition", 1000);
         v.visit(self->body, "body");
         v.visit(self->updates, "updates");
     }
