@@ -17,7 +17,7 @@ concurrency:
 jobs:
   # Build a p4c release on Ubuntu 20.04.
   build-linux:
-    # Only run on pull requests with the "run-sanitizer" label.
+    # Only run on pull requests with the "run-static" label.
     if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'run-static') }}
     name: "Sans ${{ matrix.sans }}"
     strategy:
