@@ -46,4 +46,5 @@ jobs:
         name: Build (Ubuntu 20.04)
         run: |
           sudo -E tools/ci-build.sh
-          ./tools/ci-check-static.sh
+          ./tools/ci-check-static.sh ./build/p4c-bm2-ss ./build/p4c-dpdk ./build/p4c-ebpf \
+              ./build/p4c-pna-p4tc ./build/p4c-ubpf ./build/p4test ./build/p4testgen

@@ -2,40 +2,50 @@
 
 # Script for checking static build results.
 
-set -e  # Exit on error.
+# No set -e. Do not exit on error, errors are handled explictly.
 set -x  # Make command execution verbose
 set -u  # Error on unbound variables.
 
-# Usage: has_lib BINARY LIB_PATTERN
+# Usage: check EXPECTED REAL_RET_CODE BINARY MESSAGE
+check() {
+    if [[ $2 = 0 ]]; then
+        expected='true';
+    else
+        expected='false';
+    fi
+    if [[ $1 != $expected ]]; then
+        echo "Binary dynamic dependency check failed for ${3}: ${4}."
+        ldd $3
+        exit 1
+    fi
+}
+
+# Usage: has_lib EXPECTED BINARY LIB_PATTERN
 # Does string match, not regex match.
 has_lib() {
-    ldd $1 2>&1 | grep -F $2
+    ldd $2 2>&1 | grep -F -qi $3
+    check $1 $? $2 "has_lib ${3} expected to be ${1}"
 }
 
+# Usage: is_static EXPECTED BINARY
 is_static() {
-    ldd $1 2>&1 | grep -E -qi "(not a dynamic executable)|(statically linked)"
+    ldd $2 2>&1 | grep -E -qi "(not a dynamic executable)|(statically linked)"
+    check $1 $? $2 "is_static expected to be ${1}"
 }
 
-# The binaries to check.
-bins=(
-./build/p4c-bm2-ss
-./build/p4c-dpdk
-./build/p4c-ebpf
-./build/p4c-pna-p4tc
-./build/p4c-ubpf
-./build/p4test
-./build/p4testgen
-)
+# The binaries to check -- arguments except for $0.
+bins=${@:1}
 
 # Run checks on all the binaries produced by the builds.
 for bin in ${bins[@]}; do
     # Disabling this checks until we find a better way to build a fully static binary.
-    # is_static $bin
-    ! has_lib $bin "glibc"
-    ! has_lib $bin "libboost_iostreams"
+    # is_static true $bin
+    is_static false $bin
+    has_lib true $bin "libc"
+    has_lib false $bin "libboost_iostreams"
     if [[ ${STATIC_SANS} = "stdlib" ]]; then
-        has_lib $bin 'libstdc++.so'
+        has_lib true $bin 'libstdc++'
     else
-        ! has_lib $bin 'libstdc++.so'
+        has_lib false $bin 'libstdc++'
     fi
 done
