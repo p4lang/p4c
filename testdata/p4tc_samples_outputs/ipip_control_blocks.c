@@ -78,7 +78,7 @@ if (/* hdr->outer.isValid() */
                     /* value */
                     struct Main_fwd_table_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
                     value = (struct Main_fwd_table_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
