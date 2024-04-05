@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script for checking static build results.
+# Script for checking semi-static build results.
 
 # No set -e. Do not exit on error, errors are handled explictly.
 set -x  # Make command execution verbose
