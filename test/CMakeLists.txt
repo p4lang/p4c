@@ -37,6 +37,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/hvec_map.cpp
   gtest/indexed_vector.cpp
   gtest/json_test.cpp
+  gtest/map.cpp
   gtest/midend_def_use.cpp
   gtest/midend_pass.cpp
   gtest/midend_test.cpp
