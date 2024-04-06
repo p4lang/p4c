@@ -39,7 +39,7 @@ class HeaderConverter : public Inspector {
     std::set<cstring> visitedHeaders;
 
     const unsigned boolWidth = 1;    // convert booleans to 1-bit integers
-    const unsigned errorWidth = 32;  /// convert errors to 32-bit integers
+    const unsigned errorWidth = 32;  // convert errors to 32-bit integers
     unsigned scalars_width = 0;
 
  protected:
