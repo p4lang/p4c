@@ -124,7 +124,7 @@ class CFG final : public IHasDbPrint {
      public:
         /// The destination node of the edge.  The source node is not known by the edge
         Node *endpoint;
-        cstring label;  /// only present if type == Label
+        cstring label;  // only present if type == Label
 
         explicit Edge(Node *node) : type(EdgeType::Unconditional), endpoint(node) {
             CHECK_NULL(node);
