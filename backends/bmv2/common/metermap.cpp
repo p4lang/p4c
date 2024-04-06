@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-/// @returns direct meter information from the direct meter map
+/// @returns direct meter information from the direct meter map.
 DirectMeterMap::DirectMeterInfo *DirectMeterMap::createInfo(const IR::IDeclaration *meter) {
     auto prev = ::get(directMeter, meter);
     BUG_CHECK(prev == nullptr, "Already created");
