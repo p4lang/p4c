@@ -139,7 +139,7 @@ const IR::Expression *Predication::clone(const IR::Expression *expression) {
     // in the end different code will be generated for the different clones of
     // an expression. This is most obvious if one clone is on the LHS and one
     // on the RHS of an assigment.
-    ClonePathExpressions cloner;
+    CloneExpressions cloner;
     cloner.setCalledBy(this);
     return expression->apply(cloner);
 }
@@ -148,7 +148,7 @@ const IR::Node *Predication::clone(const IR::AssignmentStatement *statement) {
     // Expressions often need to be cloned. This is necessary because
     // in the end different code will be generated for the different clones of
     // an expression.
-    ClonePathExpressions cloner;
+    CloneExpressions cloner;
     cloner.setCalledBy(this);
     return statement->apply(cloner);
 }
