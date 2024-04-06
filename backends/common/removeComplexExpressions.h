@@ -33,7 +33,6 @@ class RemoveComplexExpressionsPolicy {
     virtual bool convert(const IR::P4Control *control) const = 0;
 };
 
-
 /// Lift complex expressions from a select or as arguments to external functions
 /// into temporaries.
 /// Convert a statement like lookahead<T>() into tmp = lookahead<T>();
