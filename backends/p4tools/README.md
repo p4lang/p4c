@@ -53,8 +53,7 @@ for where to find/put what:
 
 P4Tools in general follows the [P4C coding style](https://github.com/p4lang/p4c/blob/main/docs/README.md#coding-conventions). Some deviations from the Style Guide are highlighted below.
 
-* Comments are important. The Style Guide's [section on
-  comments](https://google.github.io/styleguide/cppguide.html#Comments) is
+* Comments are important. The Style Guide's [section on comments](https://google.github.io/styleguide/cppguide.html#Comments) is
   required reading.
     * Classes, methods, and fields are documented with triple-slash
       Doxygen-style comments:
