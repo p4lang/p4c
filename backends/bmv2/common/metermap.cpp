@@ -46,7 +46,7 @@ void DirectMeterMap::setTable(const IR::IDeclaration *meter, const IR::P4Table *
                 table, info->table);
     info->table = table;
 }
-/// Helper function to check if two expressions are syntactically identical
+/// Helper function to check if two expressions are syntactically identical.
 static bool checkSame(const IR::Expression *expr0, const IR::Expression *expr1) {
     if (expr0->node_type_name() != expr1->node_type_name()) return false;
     if (auto pe0 = expr0->to<IR::PathExpression>()) {
