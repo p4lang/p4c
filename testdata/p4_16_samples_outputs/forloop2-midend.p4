@@ -27,6 +27,7 @@ control c(inout headers_t hdrs) {
     @hidden action forloop2l14() {
         hasReturned = false;
         n_0 = 64w0;
+        v_0 = hdrs.t1.v;
     }
     @hidden action forloop2l22() {
         retval = n_0;

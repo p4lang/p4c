@@ -854,6 +854,7 @@ bool ComputeWriteSet::preorder(const IR::ForStatement *statement) {
         visit(statement->body, "body");
         currentDefinitions = currentDefinitions->joinDefinitions(continueDefinitions);
         visit(statement->updates, "updates");
+        currentDefinitions = currentDefinitions->joinDefinitions(startDefs);
     } while (!(*startDefs == *currentDefinitions));
 
     exitDefs = exitDefs->joinDefinitions(breakDefinitions);
@@ -881,12 +882,13 @@ bool ComputeWriteSet::preorder(const IR::ForInStatement *statement) {
         lhs = false;
         auto cond = getWrites(statement->ref);
         auto defs = currentDefinitions->writes(getProgramPoint(), cond);
-        exitDefs = exitDefs->joinDefinitions(defs);
         (void)setDefinitions(defs, statement->ref, true);
         visit(statement->body, "body");
         currentDefinitions = currentDefinitions->joinDefinitions(continueDefinitions);
+        currentDefinitions = currentDefinitions->joinDefinitions(startDefs);
     } while (!(*startDefs == *currentDefinitions));
 
+    exitDefs = exitDefs->joinDefinitions(currentDefinitions);
     exitDefs = exitDefs->joinDefinitions(breakDefinitions);
     breakDefinitions = saveBreak;
     continueDefinitions = saveContinue;

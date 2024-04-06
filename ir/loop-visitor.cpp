@@ -22,16 +22,17 @@ void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
     if (auto *cfv = v.controlFlowVisitor()) {
         ControlFlowVisitor::SaveGlobal outer(*cfv, "-BREAK-", "-CONTINUE-");
         ControlFlowVisitor *top = nullptr;
-        do {
+        while (true) {
             top = &cfv->flow_clone();
             cfv->visit(self->condition, "condition", 1000);
             auto &inloop = cfv->flow_clone();
             inloop.visit(self->body, "body");
             inloop.flow_merge_global_from("-CONTINUE-");
             inloop.visit(self->updates, "updates");
-            cfv->flow_merge(inloop);
-            if (cfv->isUnreachable()) break;
-        } while (*cfv != *top);
+            inloop.flow_merge(*top);
+            if (inloop == *top) break;
+            cfv->flow_copy(inloop);
+        }
         cfv->flow_merge_global_from("-BREAK-");
     } else {
         /* Since there is a variable number of init statements (0 or more), we
@@ -61,10 +62,8 @@ void IR::ForInStatement::visit_children(THIS *self, Visitor &v) {
         do {
             top = &cfv->flow_clone();
             cfv->visit(self->ref, "ref", 1);
-            auto &inloop = cfv->flow_clone();
-            inloop.visit(self->body, "body", 3);
-            cfv->flow_merge(inloop);
-            if (cfv->isUnreachable()) break;
+            cfv->visit(self->body, "body", 3);
+            cfv->flow_merge_global_from("-CONTINUE-");
         } while (*cfv != *top);
         cfv->flow_merge_global_from("-BREAK-");
     } else {
