@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-/// TODO(hanw): remove
+/// TODO(hanw): remove.
 Util::JsonArray *HeaderConverter::pushNewArray(Util::JsonArray *parent) {
     auto result = new Util::JsonArray();
     parent->append(result);
