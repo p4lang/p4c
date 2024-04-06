@@ -23,7 +23,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-// TODO: this is not really specific to BMV2, it should reside somewhere else
+/// TODO: this is not really specific to BMV2, it should reside somewhere else
 namespace BMV2 {
 
 class PsaProgramStructure : public ProgramStructure {
@@ -32,14 +32,14 @@ class PsaProgramStructure : public ProgramStructure {
     P4::TypeMap *typeMap;
 
  public:
-    // We place scalar user metadata fields (i.e., bit<>, bool)
-    // in the scalars map.
+    /// We place scalar user metadata fields (i.e., bit<>, bool)
+    /// in the scalars map.
     ordered_map<cstring, const IR::Declaration_Variable *> scalars;
     unsigned scalars_width = 0;
     unsigned error_width = 32;
     unsigned bool_width = 1;
 
-    // architecture related information
+    /// architecture related information
     ordered_map<const IR::Node *, std::pair<gress_t, block_t>> block_type;
 
     ordered_map<cstring, const IR::Type_Header *> header_types;
@@ -79,17 +79,10 @@ class PsaProgramStructure : public ProgramStructure {
             return header_union_types.count(u->getName());
         return false;
     }
-
-    /**
-     * Checks if a string is of type PSA_CounterType_t returns true
-     * if it is, false otherwise.
-     */
+    /// Checks if a string is of type PSA_CounterType_t. Returns true if it is, false otherwise.
     static bool isCounterMetadata(cstring ptName) { return !strcmp(ptName, "PSA_CounterType_t"); }
 
-    /**
-     * Checks if a string is a psa metadata returns true
-     * if it is, false otherwise.
-     */
+    /// Checks if a string is a PSA metadata. Returns true if it is, false otherwise.
     static bool isStandardMetadata(cstring ptName) {
         return (!strcmp(ptName, "psa_ingress_parser_input_metadata_t") ||
                 !strcmp(ptName, "psa_egress_parser_input_metadata_t") ||

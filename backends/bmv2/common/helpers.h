@@ -123,8 +123,8 @@ struct RegisterTraits<Arch::V1MODEL> {
     static const cstring name() { return "register"; }
     static const cstring typeName() { return P4V1::V1Model::instance.registers.name; }
     static const cstring sizeParamName() { return "size"; }
-    // the index of the type parameter for the data stored in the register, in
-    // the type parameter list of the extern type declaration
+    /// the index of the type parameter for the data stored in the register, in
+    /// the type parameter list of the extern type declaration
     static size_t dataTypeParamIdx() { return 0; }
     static std::optional<size_t> indexTypeParamIdx() { return std::nullopt; }
 };
@@ -140,8 +140,8 @@ struct RegisterTraits<Arch::PSA> {
     static const cstring typeName() { return "Register"; }
     static const cstring sizeParamName() { return "size"; }
     static size_t dataTypeParamIdx() { return 0; }
-    // the index of the type parameter for the register index, in the type
-    // parameter list of the extern type declaration.
+    /// the index of the type parameter for the register index, in the type
+    /// parameter list of the extern type declaration.
     static std::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
@@ -157,20 +157,18 @@ namespace Helpers {
 template <typename Kind>
 struct CounterlikeTraits;
 
-// According to the C++11 standard: An explicit specialization shall be declared
-// in a namespace enclosing the specialized template. An explicit specialization
-// whose declarator-id is not qualified shall be declared in the nearest
-// enclosing namespace of the template, or, if the namespace is inline (7.3.1),
-// any namespace from its enclosing namespace set. Such a declaration may also
-// be a definition. If the declaration is not a definition, the specialization
-// may be defined later (7.3.1.2).
-//
-// gcc reports an error when trying so specialize CounterlikeTraits<> for
-// Standard::CounterExtern & Standard::MeterExtern outside of the Helpers
-// namespace, even when qualifying CounterlikeTraits<> with Helpers::. It seems
-// to be related to this bug:
-// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56480.
-
+/// According to the C++11 standard: An explicit specialization shall be declared
+/// in a namespace enclosing the specialized template. An explicit specialization
+/// whose declarator-id is not qualified shall be declared in the nearest
+/// enclosing namespace of the template, or, if the namespace is inline (7.3.1),
+/// any namespace from its enclosing namespace set. Such a declaration may also
+/// be a definition. If the declaration is not a definition, the specialization
+/// may be defined later (7.3.1.2).
+/// gcc reports an error when trying so specialize CounterlikeTraits<> for
+/// Standard::CounterExtern & Standard::MeterExtern outside of the Helpers
+/// namespace, even when qualifying CounterlikeTraits<> with Helpers::. It seems
+/// to be related to this bug:
+/// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56480.
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for v1model
 template <>
 struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL>> {
@@ -204,8 +202,8 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PSA>> {
     static const cstring typeName() { return "Counter"; }
     static const cstring directTypeName() { return "DirectCounter"; }
     static const cstring sizeParamName() { return "n_counters"; }
-    // the index of the type parameter for the counter index, in the type
-    // parameter list of the extern type declaration.
+    /// the index of the type parameter for the counter index, in the type
+    /// parameter list of the extern type declaration.
     static std::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
@@ -251,28 +249,26 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA>> {
 
 using BlockTypeMap = std::map<const IR::Block *, const IR::Type *>;
 
-// XXX(hanw): This convenience class stores pointers to the data structures
-// that are commonly used during the program translation. Due to the limitation
-// of current IR structure, these data structure are only refreshed by the
-// evaluator pass. In the long term, integrating these data structures as part
-// of the IR tree would simplify this kind of bookkeeping effort.
+/// XXX(hanw): This convenience class stores pointers to the data structures
+/// that are commonly used during the program translation. Due to the limitation
+/// of current IR structure, these data structure are only refreshed by the
+/// evaluator pass. In the long term, integrating these data structures as part
+/// of the IR tree would simplify this kind of bookkeeping effort.
 using SelectorInput = std::vector<const IR::Expression *>;
 
 struct ConversionContext {
-    // context
+    /// context
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     const IR::ToplevelBlock *toplevel;
-    // Block currently being converted
+    /// Block currently being converted
     BlockConverted blockConverted;
-    //
     ProgramStructure *structure;
-    // expression converter is used in many places.
+    /// expression converter is used in many places.
     ExpressionConverter *conv;
-    // final json output.
+    /// final json output.
     BMV2::JsonObjects *json;
-
-    // for action profile conversion
+    /// for action profile conversion
     Util::JsonArray *action_profiles = nullptr;
 
     std::map<const IR::Declaration_Instance *, SelectorInput> selector_input_map;

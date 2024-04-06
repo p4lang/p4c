@@ -14,9 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/**
- * This file implements the simple switch model
- */
+/// This file implements the simple switch model
 
 #include "simpleSwitch.h"
 
@@ -168,7 +166,7 @@ Util::IJson *ExternConverter_clone::convertExternFunction(ConversionContext *ctx
     return primitive;
 }
 
-// Returns the id of the Json field list called "field_list<index>".
+/// Returns the id of the Json field list called "field_list<index>".
 static unsigned getFieldListById(ConversionContext *ctxt, unsigned index) {
     cstring search = cstring("field_list") + Util::toString(index);
     int id = -1;
@@ -1031,10 +1029,10 @@ void SimpleSwitchBackend::createRecirculateFieldsList(ConversionContext *ctxt,
     auto userMetaType = paramType->to<IR::Type_Struct>();
     LOG2("User metadata type is " << userMetaType);
 
-    /// metadata fields may be annotated with e.g.,
-    /// @field_list(0, 1, 4)
-    /// Such a field will be added to fieldLists with indexes 0, 1 and 4.
-    /// These fields lists will be named "field_list0", "field_list1", etc.
+    // metadata fields may be annotated with e.g.,
+    // @field_list(0, 1, 4)
+    // Such a field will be added to fieldLists with indexes 0, 1 and 4.
+    // These fields lists will be named "field_list0", "field_list1", etc.
     std::map<unsigned, Util::JsonObject *> fieldLists;
 
     LOG2("Scanning user metadata fields for annotations");
@@ -1096,8 +1094,8 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     main->apply(*parseV1Arch);
     if (::errorCount() > 0) return;
 
-    /// Declaration which introduces the user metadata.
-    /// We expect this to be a struct type.
+    // Declaration which introduces the user metadata.
+    // We expect this to be a struct type.
     const IR::Type_Struct *userMetaType = nullptr;
     cstring userMetaName = refMap->newName("userMetadata");
 

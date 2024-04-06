@@ -188,7 +188,7 @@ class JsonObjects {
     /// @param name The name of the primitive.
     /// @return A pointer to the newly created primitive JsonObject.
     Util::JsonObject *create_primitive(Util::JsonArray *parent, cstring name);
-
+    /// Given a field list id returns the array of values called "elements"
     /// @brief Retrieves the contents of a field list identified by its ID.
     /// @param id The ID of the field list.
     /// @return A pointer to the JsonArray containing the field list's elements, or nullptr if not

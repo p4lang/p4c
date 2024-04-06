@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-// TODO(hanw): remove
+/// TODO(hanw): remove
 Util::JsonArray *HeaderConverter::pushNewArray(Util::JsonArray *parent) {
     auto result = new Util::JsonArray();
     parent->append(result);
@@ -34,11 +34,8 @@ HeaderConverter::HeaderConverter(ConversionContext *ctxt, cstring scalarsName)
     CHECK_NULL(ctxt);
 }
 
-/**
- * Create header type and header instance from a IR::StructLike type
- *
- * @param meta this boolean indicates if the struct is a metadata or header.
- */
+/// Create header type and header instance from a IR::StructLike type
+/// @param meta this boolean indicates if the struct is a metadata or header.
 void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike *type, bool meta) {
     LOG2("Adding " << type);
     for (auto f : type->fields) {
@@ -316,10 +313,8 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
     }
 }
 
-/**
- * We synthesize a "header_type" for each local which has a struct type
- * and we pack all the scalar-typed locals into a 'scalar' type
- */
+/// We synthesize a "header_type" for each local which has a struct type
+/// and we pack all the scalar-typed locals into a 'scalar' type
 Visitor::profile_t HeaderConverter::init_apply(const IR::Node *node) {
     scalarsTypeName = ctxt->refMap->newName("scalars");
     ctxt->json->add_header_type(scalarsTypeName);
