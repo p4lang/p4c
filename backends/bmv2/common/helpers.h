@@ -269,7 +269,7 @@ struct ConversionContext {
     ProgramStructure *structure;
     /// expression converter is used in many places.
     ExpressionConverter *conv;
-    /// final json output.
+    /// Final json output.
     BMV2::JsonObjects *json;
 
     /// for action profile conversion
