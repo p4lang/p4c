@@ -23,25 +23,20 @@ limitations under the License.
 
 namespace P4 {
 
-/**
-Policy which selects the control blocks where remove
-complex expression is applied.
-*/
+/// Policy which selects the control blocks where remove
+/// complex expression is applied.
 class RemoveComplexExpressionsPolicy {
  public:
     virtual ~RemoveComplexExpressionsPolicy() {}
-    /**
-       If the policy returns true the control block is processed,
-       otherwise it is left unchanged.
-    */
+    /// If the policy returns true the control block is processed,
+    /// otherwise it is left unchanged.
     virtual bool convert(const IR::P4Control *control) const = 0;
 };
 
-/**
-Lift complex expressions from a select or as arguments to external functions
-into temporaries.
-Convert a statement like lookahead<T>() into tmp = lookahead<T>();
-*/
+
+/// Lift complex expressions from a select or as arguments to external functions
+/// into temporaries.
+/// Convert a statement like lookahead<T>() into tmp = lookahead<T>();
 class RemoveComplexExpressions : public Transform {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
