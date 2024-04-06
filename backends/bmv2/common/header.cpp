@@ -314,7 +314,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
 }
 
 /// We synthesize a "header_type" for each local which has a struct type
-/// and we pack all the scalar-typed locals into a 'scalar' type
+/// and we pack all the scalar-typed locals into a 'scalar' type.
 Visitor::profile_t HeaderConverter::init_apply(const IR::Node *node) {
     scalarsTypeName = ctxt->refMap->newName("scalars");
     ctxt->json->add_header_type(scalarsTypeName);
