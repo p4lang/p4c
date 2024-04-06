@@ -32,7 +32,7 @@ class DirectMeterMap final {
     };
 
  private:
-    /// key is declaration of direct meter
+    /// The key is a direct meter declaration.
     std::map<const IR::IDeclaration *, DirectMeterInfo *> directMeter;
     DirectMeterInfo *createInfo(const IR::IDeclaration *meter);
 
