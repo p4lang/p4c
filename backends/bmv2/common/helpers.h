@@ -263,7 +263,7 @@ struct ConversionContext {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     const IR::ToplevelBlock *toplevel;
-    /// Block currently being converted
+    /// Block currently being converted.
     BlockConverted blockConverted;
     ///
     ProgramStructure *structure;
