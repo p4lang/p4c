@@ -124,7 +124,7 @@ struct RegisterTraits<Arch::V1MODEL> {
     static const cstring typeName() { return P4V1::V1Model::instance.registers.name; }
     static const cstring sizeParamName() { return "size"; }
     /// the index of the type parameter for the data stored in the register, in
-    /// the type parameter list of the extern type declaration
+    /// the type parameter list of the extern type declaration.
     static size_t dataTypeParamIdx() { return 0; }
     static std::optional<size_t> indexTypeParamIdx() { return std::nullopt; }
 };
