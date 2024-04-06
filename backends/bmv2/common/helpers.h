@@ -164,11 +164,13 @@ struct CounterlikeTraits;
 /// any namespace from its enclosing namespace set. Such a declaration may also
 /// be a definition. If the declaration is not a definition, the specialization
 /// may be defined later (7.3.1.2).
+///
 /// gcc reports an error when trying so specialize CounterlikeTraits<> for
 /// Standard::CounterExtern & Standard::MeterExtern outside of the Helpers
 /// namespace, even when qualifying CounterlikeTraits<> with Helpers::. It seems
 /// to be related to this bug:
 /// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56480.
+
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for v1model
 template <>
 struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL>> {
@@ -240,8 +242,8 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA>> {
     static const cstring typeName() { return "Meter"; }
     static const cstring directTypeName() { return "DirectMeter"; }
     static const cstring sizeParamName() { return "n_meters"; }
-    // the index of the type parameter for the meter index, in the type
-    // parameter list of the extern type declaration.
+    /// the index of the type parameter for the meter index, in the type
+    /// parameter list of the extern type declaration.
     static std::optional<size_t> indexTypeParamIdx() { return 0; }
 };
 
@@ -263,11 +265,13 @@ struct ConversionContext {
     const IR::ToplevelBlock *toplevel;
     /// Block currently being converted
     BlockConverted blockConverted;
+    ///
     ProgramStructure *structure;
     /// expression converter is used in many places.
     ExpressionConverter *conv;
     /// final json output.
     BMV2::JsonObjects *json;
+
     /// for action profile conversion
     Util::JsonArray *action_profiles = nullptr;
 

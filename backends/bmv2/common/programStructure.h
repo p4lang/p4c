@@ -52,9 +52,9 @@ class ProgramStructure {
     std::vector<const IR::Declaration_Variable *> variables;
     /// All error codes.
     ordered_map<const IR::IDeclaration *, unsigned int> errorCodesMap;
-    // We place scalar user metadata fields (i.e., bit<>, bool)
-    // in the scalarsName metadata object, so we may need to rename
-    // these fields.  This map holds the new names.
+    /// We place scalar user metadata fields (i.e., bit<>, bool)
+    /// in the scalarsName metadata object, so we may need to rename
+    /// these fields.  This map holds the new names.
     std::map<const IR::StructField *, cstring> scalarMetadataFields;
     /// All the direct meters.
     DirectMeterMap directMeterMap;

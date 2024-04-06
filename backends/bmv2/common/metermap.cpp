@@ -30,66 +30,64 @@ DirectMeterMap::DirectMeterInfo *DirectMeterMap::createInfo(const IR::IDeclarati
 DirectMeterMap::DirectMeterInfo *DirectMeterMap::getInfo(const IR::IDeclaration *meter) {
     return ::get(directMeter, meter);
 }
-
-/// Set the table that a direct meter is attached to.
-void DirectMeterMap::setTable(const IR::IDeclaration *meter, const IR::P4Table *table) {
-    auto info = getInfo(meter);
-    if (info == nullptr) {
-        ::error(ErrorType::ERR_INVALID,
-                "%1%: table with direct meter %2% must have"
-                " at least one action with a read method call",
-                table, meter);
-        return;
-    }
-    if (info->table != nullptr)
-        ::error(ErrorType::ERR_INVALID,
-                "%1%: Direct meters cannot be attached to multiple tables %2% and %3%", meter,
-                table, info->table);
-    info->table = table;
-}
-
-/// Helper function to check if two expressions are syntactically identical
-static bool checkSame(const IR::Expression *expr0, const IR::Expression *expr1) {
-    if (expr0->node_type_name() != expr1->node_type_name()) return false;
-    if (auto pe0 = expr0->to<IR::PathExpression>()) {
-        auto pe1 = expr1->to<IR::PathExpression>();
-        return pe0->path->name == pe1->path->name && pe0->path->absolute == pe1->path->absolute;
-    } else if (auto mem0 = expr0->to<IR::Member>()) {
-        auto mem1 = expr1->to<IR::Member>();
-        return checkSame(mem0->expr, mem1->expr) && mem0->member == mem1->member;
-    }
-    BUG("%1%: unexpected expression for meter destination", expr0);
-}
-
-/// Set the destination that a meter is attached to??
-void DirectMeterMap::setDestination(const IR::IDeclaration *meter,
-                                    const IR::Expression *destination) {
-    auto info = getInfo(meter);
-    if (info == nullptr) info = createInfo(meter);
-    if (info->destinationField == nullptr) {
-        info->destinationField = destination;
-    } else {
-        bool same = checkSame(destination, info->destinationField);
-        if (!same)
+    /// Set the table that a direct meter is attached to.
+    void DirectMeterMap::setTable(const IR::IDeclaration *meter, const IR::P4Table *table) {
+        auto info = getInfo(meter);
+        if (info == nullptr) {
             ::error(ErrorType::ERR_INVALID,
-                    "all meter operations must write to the same destination,"
-                    " however %1% and %2% are different",
-                    destination, info->destinationField);
+                    "%1%: table with direct meter %2% must have"
+                    " at least one action with a read method call",
+                    table, meter);
+            return;
+        }
+        if (info->table != nullptr)
+            ::error(ErrorType::ERR_INVALID,
+                    "%1%: Direct meters cannot be attached to multiple tables %2% and %3%", meter,
+                    table, info->table);
+        info->table = table;
     }
-}
+    /// Helper function to check if two expressions are syntactically identical
+    static bool checkSame(const IR::Expression *expr0, const IR::Expression *expr1) {
+        if (expr0->node_type_name() != expr1->node_type_name()) return false;
+        if (auto pe0 = expr0->to<IR::PathExpression>()) {
+            auto pe1 = expr1->to<IR::PathExpression>();
+            return pe0->path->name == pe1->path->name && pe0->path->absolute == pe1->path->absolute;
+        } else if (auto mem0 = expr0->to<IR::Member>()) {
+            auto mem1 = expr1->to<IR::Member>();
+            return checkSame(mem0->expr, mem1->expr) && mem0->member == mem1->member;
+        }
+        BUG("%1%: unexpected expression for meter destination", expr0);
+    }
 
-/// Set the size of the table that a meter is attached to.
-void DirectMeterMap::setSize(const IR::IDeclaration *meter, unsigned size) {
-    auto info = getInfo(meter);
-    if (info == nullptr) {
-        // This case may be reached if a table has a direct_meter
-        // assigned to its 'meters' property, but none of its actions
-        // have a call to the 'read' method of that meter.  An error
-        // message is already printed elsewhere in this case, but we
-        // want to avoid a Compiler Bug.
-        return;
+    /// Set the destination that a meter is attached to??
+    void DirectMeterMap::setDestination(const IR::IDeclaration *meter,
+                                        const IR::Expression *destination) {
+        auto info = getInfo(meter);
+        if (info == nullptr) info = createInfo(meter);
+        if (info->destinationField == nullptr) {
+            info->destinationField = destination;
+        } else {
+            bool same = checkSame(destination, info->destinationField);
+            if (!same)
+                ::error(ErrorType::ERR_INVALID,
+                        "all meter operations must write to the same destination,"
+                        " however %1% and %2% are different",
+                        destination, info->destinationField);
+        }
     }
-    info->tableSize = size;
-}
+
+    /// Set the size of the table that a meter is attached to.
+    void DirectMeterMap::setSize(const IR::IDeclaration *meter, unsigned size) {
+        auto info = getInfo(meter);
+        if (info == nullptr) {
+            // This case may be reached if a table has a direct_meter
+            // assigned to its 'meters' property, but none of its actions
+            // have a call to the 'read' method of that meter.  An error
+            // message is already printed elsewhere in this case, but we
+            // want to avoid a Compiler Bug.
+            return;
+        }
+        info->tableSize = size;
+    }
 
 }  // namespace BMV2

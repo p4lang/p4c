@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 /// This file implements the simple switch model
-
 #include "simpleSwitch.h"
 
 #include <algorithm>
@@ -785,7 +784,7 @@ void ExternConverter_action_profile::convertExternInstance(ConversionContext *ct
     ctxt->action_profiles->append(action_profile);
 }
 
-// action selector conversion is the same as action profile
+/// action selector conversion is the same as action profile
 void ExternConverter_action_selector::convertExternInstance(ConversionContext *ctxt,
                                                             const IR::Declaration *c,
                                                             const IR::ExternBlock *eb,
@@ -1094,8 +1093,8 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     main->apply(*parseV1Arch);
     if (::errorCount() > 0) return;
 
-    // Declaration which introduces the user metadata.
-    // We expect this to be a struct type.
+    /// Declaration which introduces the user metadata.
+    /// We expect this to be a struct type.
     const IR::Type_Struct *userMetaType = nullptr;
     cstring userMetaName = refMap->newName("userMetadata");
 

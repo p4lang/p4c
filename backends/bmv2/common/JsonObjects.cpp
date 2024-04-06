@@ -101,7 +101,6 @@ void JsonObjects::add_meta_info() {
     meta->emplace("compiler", "https://github.com/p4lang/p4c");
     toplevel->emplace("__meta__", meta);
 }
-
 /// Create a header type in json.
 /// @param name header name
 /// @param type header type

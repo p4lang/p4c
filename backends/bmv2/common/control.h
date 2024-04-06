@@ -642,6 +642,7 @@ class ControlConverter : public Inspector {
             action_profile->emplace_non_null("source_info", propv->expression->sourceInfoJsonObj());
             // TODO(jafingerhut) - add line/col here?
             // TBD what about the else if cases below?
+
             auto add_size = [&action_profile, &arguments](size_t arg_index) {
                 auto size_expr = arguments->at(arg_index)->expression;
                 int size;

@@ -82,7 +82,7 @@ class Backend {
 };
 
 /// This class implements a policy suitable for the SynthesizeActions pass.
-/// The policy is: do not synthesize actions for the controls whose names
+// The policy is: do not synthesize actions for the controls whose names
 /// are in the specified set.
 /// For example, we expect that the code in the deparser will not use any
 /// tables or actions.

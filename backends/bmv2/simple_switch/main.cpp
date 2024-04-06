@@ -53,8 +53,7 @@ int main(int argc, char *const argv[]) {
 
     auto hook = options.getDebugHook();
 
-    /
-    / BMV2 is required for compatibility with the previous compiler.
+    // BMV2 is required for compatibility with the previous compiler.
     options.preprocessor_options += " -D__TARGET_BMV2__";
 
     const IR::P4Program *program = nullptr;
