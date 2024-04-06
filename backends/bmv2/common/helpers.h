@@ -267,7 +267,7 @@ struct ConversionContext {
     BlockConverted blockConverted;
     ///
     ProgramStructure *structure;
-    /// expression converter is used in many places.
+    /// Expression converter is used in many places.
     ExpressionConverter *conv;
     /// Final json output.
     BMV2::JsonObjects *json;
