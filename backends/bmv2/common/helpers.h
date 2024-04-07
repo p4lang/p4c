@@ -265,7 +265,7 @@ struct ConversionContext {
     const IR::ToplevelBlock *toplevel;
     /// Block currently being converted.
     BlockConverted blockConverted;
-    ///
+    /// ProgramStructure pointer.
     ProgramStructure *structure;
     /// Expression converter is used in many places.
     ExpressionConverter *conv;
