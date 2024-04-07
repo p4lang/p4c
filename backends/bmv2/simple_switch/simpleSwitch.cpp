@@ -784,7 +784,7 @@ void ExternConverter_action_profile::convertExternInstance(ConversionContext *ct
     ctxt->action_profiles->append(action_profile);
 }
 
-/// action selector conversion is the same as action profile
+/// Action selector conversion is the same as action profile.
 void ExternConverter_action_selector::convertExternInstance(ConversionContext *ctxt,
                                                             const IR::Declaration *c,
                                                             const IR::ExternBlock *eb,
