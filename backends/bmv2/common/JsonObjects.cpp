@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -101,7 +101,12 @@ void JsonObjects::add_meta_info() {
     meta->emplace("compiler", "https://github.com/p4lang/p4c");
     toplevel->emplace("__meta__", meta);
 }
-
+/// Create a header type in json.
+/// @param name header name
+/// @param type header type
+/// @param max_length  maximum length for a header with varbit fields;
+/// if 0 header does not contain varbit fields
+/// @param fields a JsonArray for the fields in the header
 unsigned JsonObjects::add_header_type(const cstring &name, Util::JsonArray *&fields,
                                       unsigned max_length) {
     std::string sname(name, name.size());

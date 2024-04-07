@@ -27,7 +27,7 @@ namespace BMV2 {
 
 class SimpleSwitchMidEnd : public MidEnd {
  public:
-    // If p4c is run with option '--listMidendPasses', outStream is used for printing passes names
+    /// If p4c is run with option '--listMidendPasses', outStream is used for printing passes names.
     explicit SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
 };
 

@@ -762,8 +762,8 @@ bool ExpressionConverter::isArrayIndexRuntime(const IR::Expression *e) {
     return false;
 }
 
-// doFixup = true -> insert masking operations for proper arithmetic implementation
-// see below for wrap
+/// doFixup = true -> insert masking operations for proper arithmetic implementation
+/// see below for wrap.
 Util::IJson *ExpressionConverter::convert(const IR::Expression *e, bool doFixup, bool wrap,
                                           bool convertBool) {
     const IR::Expression *expr = e;
