@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/// This file implements the simple switch model
+/// This file implements the simple switch model.
 #include "simpleSwitch.h"
 
 #include <algorithm>
