@@ -49,7 +49,7 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
 
 class MidEnd : public PassManager {
  public:
-    /// These will be accurate when the mid-end completes evaluation
+    /// These will be accurate when the mid-end completes evaluation.
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
     const IR::ToplevelBlock *toplevel = nullptr;
