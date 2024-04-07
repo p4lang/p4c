@@ -330,7 +330,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
     return result;
 }
 
-/// Operates on a select keyset
+/// Operates on a select keyset.
 void ParserConverter::convertSimpleKey(const IR::Expression *keySet, big_int &value,
                                        big_int &mask) const {
     if (keySet->is<IR::Mask>()) {
