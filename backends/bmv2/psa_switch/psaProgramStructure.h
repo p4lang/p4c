@@ -39,7 +39,7 @@ class PsaProgramStructure : public ProgramStructure {
     unsigned error_width = 32;
     unsigned bool_width = 1;
 
-    /// architecture related information
+    /// Architecture related information.
     ordered_map<const IR::Node *, std::pair<gress_t, block_t>> block_type;
 
     ordered_map<cstring, const IR::Type_Header *> header_types;
