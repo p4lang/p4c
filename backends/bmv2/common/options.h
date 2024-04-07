@@ -25,7 +25,7 @@ namespace BMV2 {
 
 class BMV2Options : public CompilerOptions {
  public:
-    /// Externs generation
+    /// Generate externs.
     bool emitExterns = false;
     /// file to output to
     cstring outputFile = nullptr;
