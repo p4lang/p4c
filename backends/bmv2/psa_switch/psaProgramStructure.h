@@ -23,7 +23,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-/// TODO: this is not really specific to BMV2, it should reside somewhere else
+/// TODO: this is not really specific to BMV2, it should reside somewhere else.
 namespace BMV2 {
 
 class PsaProgramStructure : public ProgramStructure {
