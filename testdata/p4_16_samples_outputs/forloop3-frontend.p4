@@ -15,15 +15,29 @@ control c(inout headers_t hdrs) {
     @name("c.idx") bit<8> idx_0;
     @name("c.i1") bit<8> i1_0;
     @name("c.j") bit<8> j_0;
+    @name("c.idx") bit<8> idx_1;
+    @name("c.i") bit<8> i_0;
+    @name("c.j") bit<8> j_1;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("c.a0") action a0(@name("x") bit<8> x_1, @name("y") bit<8> y) {
-        for (i1_0 in 8w0 .. x_1) {
+    @name("c.a0") action a0(@name("x") bit<8> x_2, @name("y") bit<8> y) {
+        for (i1_0 in 8w0 .. x_2) {
             for (j_0 in i1_0 .. y) {
                 idx_0 = foo<bit<8>>(j_0);
                 if (idx_0 == 8w255) {
-                    
+                    break;
                 }
+            }
+        }
+    }
+    @name("c.a1") action a1(@name("x") bit<8> x_3, @name("y") bit<8> y_2) {
+        for (i_0 in 8w0 .. x_3) {
+            for (j_1 in 8w0 .. y_2) {
+                idx_1 = foo<bit<8>>(j_1);
+                if (idx_1 == 8w255) {
+                    continue;
+                }
+                foo<bit<8>>(i_0);
             }
         }
     }
@@ -33,6 +47,7 @@ control c(inout headers_t hdrs) {
         }
         actions = {
             a0();
+            a1();
             @defaultonly NoAction_1();
         }
         default_action = NoAction_1();

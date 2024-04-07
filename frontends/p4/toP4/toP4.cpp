@@ -1131,6 +1131,20 @@ bool ToP4::preorder(const IR::BlockStatement *s) {
     return false;
 }
 
+bool ToP4::preorder(const IR::BreakStatement *) {
+    dump(1);
+    builder.append("break");
+    builder.endOfStatement();
+    return false;
+}
+
+bool ToP4::preorder(const IR::ContinueStatement *) {
+    dump(1);
+    builder.append("continue");
+    builder.endOfStatement();
+    return false;
+}
+
 bool ToP4::preorder(const IR::ExitStatement *) {
     dump(1);
     builder.append("exit");

@@ -18,8 +18,20 @@ control c(inout headers_t hdrs) {
             for (bit<8> j in i1 .. y) {
                 idx = foo(j);
                 if (idx == 255) {
-                    
+                    break;
                 }
+            }
+        }
+    }
+    action a1(bit<8> x, bit<8> y) {
+        bit<8> idx = 255;
+        for (bit<8> i in 0 .. x) {
+            for (bit<8> j in 0 .. y) {
+                idx = foo(j);
+                if (idx == 255) {
+                    continue;
+                }
+                idx = foo(i);
             }
         }
     }
@@ -29,6 +41,7 @@ control c(inout headers_t hdrs) {
         }
         actions = {
             a0;
+            a1;
         }
     }
     apply {

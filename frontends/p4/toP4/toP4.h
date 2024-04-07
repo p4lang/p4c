@@ -230,6 +230,8 @@ class ToP4 : public Inspector {
     bool preorder(const IR::MethodCallStatement *s) override;
     bool preorder(const IR::EmptyStatement *s) override;
     bool preorder(const IR::ReturnStatement *s) override;
+    bool preorder(const IR::BreakStatement *s) override;
+    bool preorder(const IR::ContinueStatement *s) override;
     bool preorder(const IR::ExitStatement *s) override;
     bool preorder(const IR::SwitchCase *s) override;
     bool preorder(const IR::SwitchStatement *s) override;
