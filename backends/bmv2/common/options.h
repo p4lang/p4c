@@ -27,7 +27,7 @@ class BMV2Options : public CompilerOptions {
  public:
     /// Generate externs.
     bool emitExterns = false;
-    /// file to output to
+    /// File to output to.
     cstring outputFile = nullptr;
     /// read from json
     bool loadIRFromJson = false;
