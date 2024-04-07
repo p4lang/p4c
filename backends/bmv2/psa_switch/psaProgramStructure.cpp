@@ -225,7 +225,7 @@ void InspectPsaProgram::postorder(const IR::P4Control *c) {
 }
 
 bool ParsePsaArchitecture::preorder(const IR::ToplevelBlock *block) {
-    // Blocks are not in IR tree, use a custom visitor to traverse
+    // Blocks are not in IR tree, use a custom visitor to traverse.
     for (auto it : block->constantValue) {
         if (it.second->is<IR::Block>()) visit(it.second->getNode());
     }
