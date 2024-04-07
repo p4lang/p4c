@@ -29,7 +29,7 @@ class BMV2Options : public CompilerOptions {
     bool emitExterns = false;
     /// File to output to.
     cstring outputFile = nullptr;
-    /// read from json
+    /// Read from json.
     bool loadIRFromJson = false;
 
     BMV2Options() {
