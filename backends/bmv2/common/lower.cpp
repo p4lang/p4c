@@ -23,10 +23,9 @@ limitations under the License.
 
 namespace BMV2 {
 
-// We make an effort to update the typeMap as we proceed
-// since parent expression trees may need the information
-// when processing in post-order.
-
+/// We make an effort to update the typeMap as we proceed
+/// since parent expression trees may need the information
+/// when processing in post-order.
 const IR::Expression *LowerExpressions::shift(const IR::Operation_Binary *expression) const {
     auto rhs = expression->right;
     auto rhstype = typeMap->getType(rhs, true);

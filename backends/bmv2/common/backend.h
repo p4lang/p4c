@@ -55,7 +55,7 @@ enum block_t {
 
 class ExpressionConverter;
 
-// Backend is a the base class for SimpleSwitchBackend and PortableSwitchBackend.
+/// Backend is a the base class for SimpleSwitchBackend and PortableSwitchBackend.
 class Backend {
  public:
     BMV2Options &options;
@@ -81,15 +81,13 @@ class Backend {
     virtual void convert(const IR::ToplevelBlock *block) = 0;
 };
 
-/**
-This class implements a policy suitable for the SynthesizeActions pass.
-The policy is: do not synthesize actions for the controls whose names
-are in the specified set.
-For example, we expect that the code in the deparser will not use any
-tables or actions.
-*/
+/// This class implements a policy suitable for the SynthesizeActions pass.
+// The policy is: do not synthesize actions for the controls whose names
+/// are in the specified set.
+/// For example, we expect that the code in the deparser will not use any
+/// tables or actions.
 class SkipControls : public P4::ActionSynthesisPolicy {
-    // set of controls where actions are not synthesized
+    /// set of controls where actions are not synthesized
     const std::set<cstring> *skip;
 
  public:
@@ -100,13 +98,11 @@ class SkipControls : public P4::ActionSynthesisPolicy {
     }
 };
 
-/**
-This class implements a policy suitable for the RemoveComplexExpression pass.
-The policy is: only remove complex expression for the controls whose names
-are in the specified set.
-For example, we expect that the code in ingress and egress will have complex
-expression removed.
-*/
+/// This class implements a policy suitable for the RemoveComplexExpression pass.
+/// The policy is: only remove complex expression for the controls whose names
+/// are in the specified set.
+/// For example, we expect that the code in ingress and egress will have complex
+/// expression removed.
 class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     const std::set<cstring> *process;
 
@@ -120,17 +116,15 @@ class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     }
 };
 
-/**
-This pass adds @name annotations to all fields of the user metadata
-structure so that they do not clash with fields of the headers
-structure.  This is necessary because both of them become global
-objects in the output json.
-*/
+/// This pass adds @name annotations to all fields of the user metadata
+/// structure so that they do not clash with fields of the headers
+/// structure.  This is necessary because both of them become global
+/// objects in the output json.
 class RenameUserMetadata : public Transform {
     P4::ReferenceMap *refMap;
     const IR::Type_Struct *userMetaType;
-    // Used as a prefix for the fields of the userMetadata structure
-    // and also as a name for the userMetadata type clone.
+    /// Used as a prefix for the fields of the userMetadata structure
+    /// and also as a name for the userMetadata type clone.
     cstring namePrefix;
     bool renamed = false;
 
