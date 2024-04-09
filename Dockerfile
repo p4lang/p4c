@@ -19,10 +19,10 @@ ARG CMAKE_UNITY_BUILD=ON
 ARG VALIDATION=OFF
 # This creates a release build that includes link time optimization and links
 # all libraries except for glibc statically.
-ARG BUILD_PREFER_STATIC_DYNAMIC_GLIBC=OFF
+ARG STATIC_BUILD_WITH_DYNAMIC_GLIBC=OFF
 # This creates a release build that includes link time optimization and links
 # all libraries except for glibc and libstdc++ statically.
-ARG BUILD_PREFER_STATIC_DYNAMIC_STDLIB=OFF
+ARG STATIC_BUILD_WITH_DYNAMIC_STDLIB=OFF
 # No questions asked during package installation.
 ARG DEBIAN_FRONTEND=noninteractive
 # Whether to install dependencies required to run PTF-ebpf tests

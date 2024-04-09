@@ -48,15 +48,15 @@ OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
-OPTION (BUILD_PREFER_STATIC_DYNAMIC_GLIBC "Build a (mostly) statically linked release binary. \
+OPTION (STATIC_BUILD_WITH_DYNAMIC_GLIBC "Build a (mostly) statically linked release binary. \
 Glibc is linked dynamically. WARNING: This only works if all dependencies that depend on the C++ \
 standard library can be linked statically, otherwise the build will likely be broken and it will \
 likely depend on the standard libary anyway. If you have some non-static C++ dependencies, use \
-BUILD_PREFER_STATIC_DYNAMIC_STDLIB." OFF)
-OPTION (BUILD_PREFER_STATIC_DYNAMIC_STDLIB "Build a (mostly) statically linked release binary. \
+STATIC_BUILD_WITH_DYNAMIC_STDLIB." OFF)
+OPTION (STATIC_BUILD_WITH_DYNAMIC_STDLIB "Build a (mostly) statically linked release binary. \
 Glibc and C++ standard library is linked dynamically." OFF)
 
-if (BUILD_PREFER_STATIC_DYNAMIC_GLIBC OR BUILD_PREFER_STATIC_DYNAMIC_STDLIB)
+if (STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
     # We want to optimize the binary size for a static release binary by default.
     set (_ENABLE_LTO_DEFAULT ON)
 else()
@@ -135,13 +135,13 @@ endif ()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Set the required options for a (mostly) static release build.
-if(BUILD_PREFER_STATIC_DYNAMIC_GLIBC OR BUILD_PREFER_STATIC_DYNAMIC_STDLIB)
-  if (BUILD_PREFER_STATIC_DYNAMIC_GLIBC AND BUILD_PREFER_STATIC_DYNAMIC_STDLIB)
-    message(WARNING "Both BUILD_PREFER_STATIC_DYNAMIC_GLIBC and BUILD_PREFER_STATIC_DYNAMIC_STDLIB "
+if(STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
+  if (STATIC_BUILD_WITH_DYNAMIC_GLIBC AND STATIC_BUILD_WITH_DYNAMIC_STDLIB)
+    message(WARNING "Both STATIC_BUILD_WITH_DYNAMIC_GLIBC and STATIC_BUILD_WITH_DYNAMIC_STDLIB "
       "enabled at once; using 'DYNAMIC_STDLIB' settings (dynamic glibc and c++ standard library).")
   endif()
   message(STATUS "Building static release binaries")
-  if (NOT BUILD_PREFER_STATIC_DYNAMIC_STDLIB)
+  if (NOT STATIC_BUILD_WITH_DYNAMIC_STDLIB)
     message(WARNING "glibc is linked dynamically in current static builds.")
   endif()
   set(BUILD_SHARED_LIBS OFF)
@@ -159,7 +159,7 @@ if(BUILD_PREFER_STATIC_DYNAMIC_GLIBC OR BUILD_PREFER_STATIC_DYNAMIC_STDLIB)
   set(CMAKE_EXE_LINKER_FLAGS
       "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -Wl,-z,muldefs"
   )
-  if (NOT BUILD_PREFER_STATIC_DYNAMIC_STDLIB)
+  if (NOT STATIC_BUILD_WITH_DYNAMIC_STDLIB)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++")
   endif()
   add_definitions(-DP4C_STATIC_BUILD)

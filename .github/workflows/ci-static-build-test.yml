@@ -30,8 +30,8 @@ jobs:
     env:
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ON
-      BUILD_PREFER_STATIC_DYNAMIC_GLIBC: "${{ matrix.dynamic.glibc }}"
-      BUILD_PREFER_STATIC_DYNAMIC_STDLIB: "${{ matrix.dynamic.stdlib }}"
+      STATIC_BUILD_WITH_DYNAMIC_GLIBC: "${{ matrix.dynamic.glibc }}"
+      STATIC_BUILD_WITH_DYNAMIC_STDLIB: "${{ matrix.dynamic.stdlib }}"
       ENABLE_TEST_TOOLS: ON
       BUILD_GENERATOR: Ninja
     steps:

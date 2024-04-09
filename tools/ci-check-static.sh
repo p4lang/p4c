@@ -43,7 +43,7 @@ for bin in ${bins[@]}; do
     is_static false $bin
     has_lib true $bin "libc"
     has_lib false $bin "libboost_iostreams"
-    if [[ ${BUILD_PREFER_STATIC_DYNAMIC_STDLIB} = "ON" ]]; then
+    if [[ ${STATIC_BUILD_WITH_DYNAMIC_STDLIB} = "ON" ]]; then
         has_lib true $bin 'libstdc++'
     else
         has_lib false $bin 'libstdc++'
