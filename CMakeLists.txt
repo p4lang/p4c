@@ -137,8 +137,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Set the required options for a (mostly) static release build.
 if(BUILD_PREFER_STATIC_DYNAMIC_GLIBC OR BUILD_PREFER_STATIC_DYNAMIC_STDLIB)
   if (BUILD_PREFER_STATIC_DYNAMIC_GLIBC AND BUILD_PREFER_STATIC_DYNAMIC_STDLIB)
-    message(WARNING "Both BUILD_STATIC_SANS_GLIBC and BUILD_STATIC_SANS_STDLIB enabled at once "
-      "using 'SANS_STDLIB' settings (dynamic glibc and c++ standard library).")
+    message(WARNING "Both BUILD_PREFER_STATIC_DYNAMIC_GLIBC and BUILD_PREFER_STATIC_DYNAMIC_STDLIB "
+      "enabled at once; using 'DYNAMIC_STDLIB' settings (dynamic glibc and c++ standard library).")
   endif()
   message(STATUS "Building static release binaries")
   if (NOT BUILD_PREFER_STATIC_DYNAMIC_STDLIB)
