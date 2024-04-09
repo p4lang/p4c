@@ -61,15 +61,6 @@ if [ "$IN_DOCKER" == "TRUE" ]; then
   function sudo() { command "$@"; }
 fi
 
-# Resolve the matrix in the static builds to the right cmake settings.
-if [ "${STATIC_SANS:-}" = "glibc" ]; then
-    BUILD_STATIC_RELEASE_SANS_GLIBC=ON
-    BUILD_STATIC_RELEASE_SANS_STDLIB=OFF
-elif [ "${STATIC_SANS:-}" = "stdlib" ]; then
-    BUILD_STATIC_RELEASE_SANS_GLIBC=OFF
-    BUILD_STATIC_RELEASE_SANS_STDLIB=ON
-fi
-
 
 # ! ------  BEGIN CORE -----------------------------------------------
 P4C_DEPS="bison \

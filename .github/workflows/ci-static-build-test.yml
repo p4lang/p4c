@@ -19,16 +19,19 @@ jobs:
   build-linux:
     # Only run on pull requests with the "run-static" label.
     if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'run-static') }}
-    name: "Sans ${{ matrix.sans }}"
+    # Note: Actions have no real ternary condition operator, but this hack works because non-empty
+    # strings are true.
+    name: "Sans ${{ matrix.sans.glibc == 'ON' && 'glibc' || 'stdlib' }}"
     strategy:
       fail-fast: false
       matrix:
-        sans: ["glibc", "stdlib"]
+        sans: [{glibc: ON, stdlib: OFF}, {glibc: OFF, stdlib: ON}]
     runs-on: ubuntu-20.04
     env:
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ON
-      STATIC_SANS: "${{ matrix.sans }}"
+      BUILD_STATIC_RELEASE_SANS_GLIBC: "${{ matrix.sans.glibc }}"
+      BUILD_STATIC_RELEASE_SANS_STDLIB: "${{ matrix.sans.stdlib }}"
       ENABLE_TEST_TOOLS: ON
       BUILD_GENERATOR: Ninja
     steps:
