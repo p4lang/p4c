@@ -1225,7 +1225,7 @@ const IR::Statement *ProgramStructure::convertPrimitive(const IR::Primitive *pri
 #define OPS_CK(primitive, n) \
     BUG_CHECK((primitive)->operands.size() == n, "Expected " #n " operands for %1%", primitive)
 
-CONVERT_PRIMITIVE(modify_field) {
+CONVERT_PRIMITIVE(modify_field, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     auto args = convertArgs(structure, primitive);
     if (args.size() == 2) {
         return structure->assign(primitive->srcInfo, args[0], args[1],
@@ -1236,7 +1236,7 @@ CONVERT_PRIMITIVE(modify_field) {
     return nullptr;
 }
 
-CONVERT_PRIMITIVE(bit_xor) {
+CONVERT_PRIMITIVE(bit_xor, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
@@ -1245,7 +1245,7 @@ CONVERT_PRIMITIVE(bit_xor) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(min) {
+CONVERT_PRIMITIVE(min, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
@@ -1255,7 +1255,7 @@ CONVERT_PRIMITIVE(min) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(max) {
+CONVERT_PRIMITIVE(max, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
@@ -1265,7 +1265,7 @@ CONVERT_PRIMITIVE(max) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(bit_or) {
+CONVERT_PRIMITIVE(bit_or, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
@@ -1274,7 +1274,7 @@ CONVERT_PRIMITIVE(bit_or) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(bit_xnor) {
+CONVERT_PRIMITIVE(bit_xnor, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
@@ -1283,7 +1283,7 @@ CONVERT_PRIMITIVE(bit_xnor) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(add) {
+CONVERT_PRIMITIVE(add, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     bool isSaturated = false;
@@ -1299,7 +1299,7 @@ CONVERT_PRIMITIVE(add) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(bit_nor) {
+CONVERT_PRIMITIVE(bit_nor, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
@@ -1308,7 +1308,7 @@ CONVERT_PRIMITIVE(bit_nor) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(bit_nand) {
+CONVERT_PRIMITIVE(bit_nand, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
@@ -1317,7 +1317,7 @@ CONVERT_PRIMITIVE(bit_nand) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(bit_orca) {
+CONVERT_PRIMITIVE(bit_orca, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
@@ -1326,7 +1326,7 @@ CONVERT_PRIMITIVE(bit_orca) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(bit_orcb) {
+CONVERT_PRIMITIVE(bit_orcb, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
@@ -1335,7 +1335,7 @@ CONVERT_PRIMITIVE(bit_orcb) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(bit_andca) {
+CONVERT_PRIMITIVE(bit_andca, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
@@ -1344,7 +1344,7 @@ CONVERT_PRIMITIVE(bit_andca) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(bit_andcb) {
+CONVERT_PRIMITIVE(bit_andcb, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
@@ -1353,7 +1353,7 @@ CONVERT_PRIMITIVE(bit_andcb) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(bit_and) {
+CONVERT_PRIMITIVE(bit_and, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
@@ -1362,7 +1362,7 @@ CONVERT_PRIMITIVE(bit_and) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(subtract) {
+CONVERT_PRIMITIVE(subtract, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     bool isSaturated = false;
@@ -1378,34 +1378,34 @@ CONVERT_PRIMITIVE(subtract) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(shift_left) {
+CONVERT_PRIMITIVE(shift_left, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     auto op = new IR::Shl(primitive->srcInfo, args[1], args[2]);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(shift_right) {
+CONVERT_PRIMITIVE(shift_right, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     auto op = new IR::Shr(primitive->srcInfo, args[1], args[2]);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(bit_not) {
+CONVERT_PRIMITIVE(bit_not, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     OPS_CK(primitive, 2);
     auto args = convertArgs(structure, primitive);
     auto op = new IR::Cmpl(primitive->srcInfo, args[1]);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(no_op) {
+CONVERT_PRIMITIVE(no_op, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     (void)structure;
     (void)primitive;
     return new IR::EmptyStatement();
 }
 
-CONVERT_PRIMITIVE(add_to_field) {
+CONVERT_PRIMITIVE(add_to_field, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 2);
     auto left = conv.convert(primitive->operands.at(0));
@@ -1436,7 +1436,7 @@ CONVERT_PRIMITIVE(add_to_field) {
     return structure->assign(primitive->srcInfo, left2, op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(subtract_from_field) {
+CONVERT_PRIMITIVE(subtract_from_field, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 2);
     auto left = conv.convert(primitive->operands.at(0));
@@ -1453,7 +1453,7 @@ CONVERT_PRIMITIVE(subtract_from_field) {
     return structure->assign(primitive->srcInfo, left2, op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(remove_header) {
+CONVERT_PRIMITIVE(remove_header, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 1);
     auto hdr = conv.convert(primitive->operands.at(0));
@@ -1461,7 +1461,7 @@ CONVERT_PRIMITIVE(remove_header) {
     return new IR::MethodCallStatement(primitive->srcInfo, method, {});
 }
 
-CONVERT_PRIMITIVE(add_header) {
+CONVERT_PRIMITIVE(add_header, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 1);
     auto hdr = conv.convert(primitive->operands.at(0));
@@ -1469,7 +1469,7 @@ CONVERT_PRIMITIVE(add_header) {
     return new IR::MethodCallStatement(primitive->srcInfo, method, {});
 }
 
-CONVERT_PRIMITIVE(copy_header) {
+CONVERT_PRIMITIVE(copy_header, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 2);
     auto left = conv.convert(primitive->operands.at(0));
@@ -1477,13 +1477,13 @@ CONVERT_PRIMITIVE(copy_header) {
     return new IR::AssignmentStatement(primitive->srcInfo, left, right);
 }
 
-CONVERT_PRIMITIVE(drop) {
+CONVERT_PRIMITIVE(drop, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     return new IR::MethodCallStatement(
         primitive->srcInfo, structure->v1model.drop.Id(),
         {new IR::Argument(structure->conversionContext->standardMetadata->clone())});
 }
 
-CONVERT_PRIMITIVE(mark_for_drop) {
+CONVERT_PRIMITIVE(mark_for_drop, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     return new IR::MethodCallStatement(
         primitive->srcInfo, structure->v1model.drop.Id(),
         {new IR::Argument(structure->conversionContext->standardMetadata->clone())});
@@ -1510,7 +1510,7 @@ static const IR::Constant *push_pop_size(ExpressionConverter &conv, const IR::Pr
     }
     return cst;
 }
-CONVERT_PRIMITIVE(push) {
+CONVERT_PRIMITIVE(push, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     BUG_CHECK(primitive->operands.size() >= 1 || primitive->operands.size() <= 2,
               "Expected 1 or 2 operands for %1%", primitive);
@@ -1528,7 +1528,7 @@ CONVERT_PRIMITIVE(push) {
     }
     return new IR::BlockStatement(primitive->srcInfo, std::move(block));
 }
-CONVERT_PRIMITIVE(pop) {
+CONVERT_PRIMITIVE(pop, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     BUG_CHECK(primitive->operands.size() >= 1 || primitive->operands.size() <= 2,
               "Expected 1 or 2 operands for %1%", primitive);
@@ -1539,7 +1539,7 @@ CONVERT_PRIMITIVE(pop) {
     return new IR::MethodCallStatement(primitive->srcInfo, method, {new IR::Argument(count)});
 }
 
-CONVERT_PRIMITIVE(count) {
+CONVERT_PRIMITIVE(count, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 2);
     auto ref = primitive->operands.at(0);
@@ -1561,7 +1561,8 @@ CONVERT_PRIMITIVE(count) {
     return new IR::MethodCallStatement(primitive->srcInfo, method, {new IR::Argument(arg)});
 }
 
-CONVERT_PRIMITIVE(modify_field_from_rng) {
+CONVERT_PRIMITIVE(
+    modify_field_from_rng, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     BUG_CHECK(primitive->operands.size() == 2 || primitive->operands.size() == 3,
               "Expected 2 or 3 operands for %1%", primitive);
@@ -1595,7 +1596,8 @@ CONVERT_PRIMITIVE(modify_field_from_rng) {
     return block;
 }
 
-CONVERT_PRIMITIVE(modify_field_rng_uniform) {
+CONVERT_PRIMITIVE(
+    modify_field_rng_uniform, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     BUG_CHECK(primitive->operands.size() == 3, "Expected 3 operands for %1%", primitive);
     auto field = conv.convert(primitive->operands.at(0));
@@ -1613,7 +1615,7 @@ CONVERT_PRIMITIVE(modify_field_rng_uniform) {
     return call;
 }
 
-CONVERT_PRIMITIVE(recirculate) {
+CONVERT_PRIMITIVE(recirculate, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     unsigned opcount = primitive->operands.size();
     BUG_CHECK(opcount == 0 || opcount == 1, "Expected 0 or 1 operands for %1%", primitive);
     auto args = new IR::Vector<IR::Argument>();
@@ -1656,20 +1658,22 @@ static const IR::Statement *convertClone(ProgramStructure *structure,
     return new IR::MethodCallStatement(mc->srcInfo, mc);
 }
 
-CONVERT_PRIMITIVE(clone_egress_pkt_to_egress) {
+CONVERT_PRIMITIVE(
+    clone_egress_pkt_to_egress, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     return convertClone(structure, primitive, structure->v1model.clone.cloneType.e2e);
 }
-CONVERT_PRIMITIVE(clone_e2e) {
+CONVERT_PRIMITIVE(clone_e2e, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     return convertClone(structure, primitive, structure->v1model.clone.cloneType.e2e);
 }
-CONVERT_PRIMITIVE(clone_ingress_pkt_to_egress) {
+CONVERT_PRIMITIVE(
+    clone_ingress_pkt_to_egress, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     return convertClone(structure, primitive, structure->v1model.clone.cloneType.i2e);
 }
-CONVERT_PRIMITIVE(clone_i2e) {
+CONVERT_PRIMITIVE(clone_i2e, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     return convertClone(structure, primitive, structure->v1model.clone.cloneType.i2e);
 }
 
-CONVERT_PRIMITIVE(resubmit) {
+CONVERT_PRIMITIVE(resubmit, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     unsigned opcount = primitive->operands.size();
     BUG_CHECK(opcount <= 1, "Expected 0 or 1 operands for %1%", primitive);
@@ -1689,7 +1693,7 @@ CONVERT_PRIMITIVE(resubmit) {
                                      args));
 }
 
-CONVERT_PRIMITIVE(execute_meter) {
+CONVERT_PRIMITIVE(execute_meter, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     LOG3("convert execute meter" << primitive);
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 3);
@@ -1720,7 +1724,8 @@ CONVERT_PRIMITIVE(execute_meter) {
     return new IR::MethodCallStatement(primitive->srcInfo, mc);
 }
 
-CONVERT_PRIMITIVE(modify_field_with_hash_based_offset) {
+CONVERT_PRIMITIVE(modify_field_with_hash_based_offset, ) {  // NOLINT(whitespace/parens), remove
+                                                            // with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 4);
 
@@ -1754,7 +1759,8 @@ CONVERT_PRIMITIVE(modify_field_with_hash_based_offset) {
     return result;
 }
 
-CONVERT_PRIMITIVE(modify_field_conditionally) {
+CONVERT_PRIMITIVE(
+    modify_field_conditionally, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 3);
     auto dest = conv.convert(primitive->operands.at(0));
@@ -1765,7 +1771,8 @@ CONVERT_PRIMITIVE(modify_field_conditionally) {
     return structure->assign(primitive->srcInfo, dest, src, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(modify_field_with_shift) {
+CONVERT_PRIMITIVE(
+    modify_field_with_shift, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 4);
     auto dest = conv.convert(primitive->operands.at(0));
@@ -1776,7 +1783,7 @@ CONVERT_PRIMITIVE(modify_field_with_shift) {
     return result;
 }
 
-CONVERT_PRIMITIVE(generate_digest) {
+CONVERT_PRIMITIVE(generate_digest, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 2);
     auto args = new IR::Vector<IR::Argument>();
@@ -1799,7 +1806,7 @@ CONVERT_PRIMITIVE(generate_digest) {
     return result;
 }
 
-CONVERT_PRIMITIVE(register_read) {
+CONVERT_PRIMITIVE(register_read, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 3);
     auto left = conv.convert(primitive->operands.at(0));
@@ -1826,7 +1833,7 @@ CONVERT_PRIMITIVE(register_read) {
     return new IR::MethodCallStatement(mc->srcInfo, mc);
 }
 
-CONVERT_PRIMITIVE(register_write) {
+CONVERT_PRIMITIVE(register_write, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 3);
     auto ref = primitive->operands.at(0);
@@ -1862,7 +1869,7 @@ CONVERT_PRIMITIVE(register_write) {
     return new IR::MethodCallStatement(mc->srcInfo, mc);
 }
 
-CONVERT_PRIMITIVE(truncate) {
+CONVERT_PRIMITIVE(truncate, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 1);
     auto len = primitive->operands.at(0);
@@ -1876,13 +1883,13 @@ CONVERT_PRIMITIVE(truncate) {
     return new IR::MethodCallStatement(mc->srcInfo, mc);
 }
 
-CONVERT_PRIMITIVE(exit) {
+CONVERT_PRIMITIVE(exit, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 0);
     return new IR::ExitStatement(primitive->srcInfo);
 }
 
-CONVERT_PRIMITIVE(funnel_shift_right) {
+CONVERT_PRIMITIVE(funnel_shift_right, ) {  // NOLINT(whitespace/parens), remove with C++20 upgrade.
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 4);
     auto dest = conv.convert(primitive->operands.at(0));

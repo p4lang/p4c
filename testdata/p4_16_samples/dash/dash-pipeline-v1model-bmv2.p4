@@ -92,19 +92,27 @@ header ipv6_t {
 
 const bit<16> IPV6_HDR_SIZE = 320 / 8;
 struct headers_t {
-    ethernet_t    ethernet;
-    ipv4_t        ipv4;
-    ipv4options_t ipv4options;
-    ipv6_t        ipv6;
-    udp_t         udp;
-    tcp_t         tcp;
-    vxlan_t       vxlan;
-    nvgre_t       nvgre;
-    ethernet_t    inner_ethernet;
-    ipv4_t        inner_ipv4;
-    ipv6_t        inner_ipv6;
-    udp_t         inner_udp;
-    tcp_t         inner_tcp;
+    ethernet_t    u1_ethernet;
+    ipv4_t        u1_ipv4;
+    ipv4options_t u1_ipv4options;
+    ipv6_t        u1_ipv6;
+    udp_t         u1_udp;
+    tcp_t         u1_tcp;
+    vxlan_t       u1_vxlan;
+    nvgre_t       u1_nvgre;
+    ethernet_t    u0_ethernet;
+    ipv4_t        u0_ipv4;
+    ipv4options_t u0_ipv4options;
+    ipv6_t        u0_ipv6;
+    udp_t         u0_udp;
+    tcp_t         u0_tcp;
+    vxlan_t       u0_vxlan;
+    nvgre_t       u0_nvgre;
+    ethernet_t    customer_ethernet;
+    ipv4_t        customer_ipv4;
+    ipv6_t        customer_ipv6;
+    udp_t         customer_udp;
+    tcp_t         customer_tcp;
 }
 
 enum bit<16> dash_encapsulation_t {
@@ -113,19 +121,11 @@ enum bit<16> dash_encapsulation_t {
     NVGRE = 2
 }
 
-typedef bit<32> tag_map_t;
-struct encap_data_t {
-    bit<24>              vni;
-    bit<24>              dest_vnet_vni;
-    IPv4Address          underlay_sip;
-    IPv4Address          underlay_dip;
-    EthernetAddress      underlay_smac;
-    EthernetAddress      underlay_dmac;
-    EthernetAddress      overlay_dmac;
-    dash_encapsulation_t dash_encapsulation;
-    bit<24>              service_tunnel_key;
-    IPv4Address          original_overlay_sip;
-    IPv4Address          original_overlay_dip;
+enum bit<32> dash_routing_actions_t {
+    NONE = 0,
+    STATIC_ENCAP = 1 << 0,
+    NAT46 = 1 << 1,
+    NAT64 = 1 << 2
 }
 
 enum bit<16> dash_direction_t {
@@ -134,251 +134,327 @@ enum bit<16> dash_direction_t {
     INBOUND = 2
 }
 
+enum bit<16> dash_pipeline_stage_t {
+    INVALID = 0,
+    INBOUND_STAGE_START = 100,
+    OUTBOUND_STAGE_START = 200,
+    OUTBOUND_ROUTING = 200,
+    OUTBOUND_MAPPING = 201,
+    ROUTING_ACTION_APPLY = 300
+}
+
 struct conntrack_data_t {
     bool allow_in;
     bool allow_out;
 }
 
+enum bit<16> dash_tunnel_dscp_mode_t {
+    PRESERVE_MODEL = 0,
+    PIPE_MODEL = 1
+}
+
 struct eni_data_t {
-    bit<32> cps;
-    bit<32> pps;
-    bit<32> flows;
-    bit<1>  admin_state;
+    bit<32>                 cps;
+    bit<32>                 pps;
+    bit<32>                 flows;
+    bit<1>                  admin_state;
+    IPv6Address             pl_sip;
+    IPv6Address             pl_sip_mask;
+    IPv4Address             pl_underlay_sip;
+    bit<6>                  dscp;
+    dash_tunnel_dscp_mode_t dscp_mode;
+}
+
+struct encap_data_t {
+    bit<24>              vni;
+    bit<24>              dest_vnet_vni;
+    IPv4Address          underlay_sip;
+    IPv4Address          underlay_dip;
+    EthernetAddress      underlay_smac;
+    EthernetAddress      underlay_dmac;
+    dash_encapsulation_t dash_encapsulation;
+}
+
+struct overlay_rewrite_data_t {
+    bool            is_ipv6;
+    EthernetAddress dmac;
+    IPv4ORv6Address sip;
+    IPv4ORv6Address dip;
+    IPv6Address     sip_mask;
+    IPv6Address     dip_mask;
 }
 
 struct metadata_t {
-    bool             dropped;
-    dash_direction_t direction;
-    encap_data_t     encap_data;
-    EthernetAddress  eni_addr;
-    bit<16>          vnet_id;
-    bit<16>          dst_vnet_id;
-    bit<16>          eni_id;
-    eni_data_t       eni_data;
-    bit<16>          inbound_vm_id;
-    bit<8>           appliance_id;
-    bit<1>           is_overlay_ip_v6;
-    bit<1>           is_lkup_dst_ip_v6;
-    bit<8>           ip_protocol;
-    IPv4ORv6Address  dst_ip_addr;
-    IPv4ORv6Address  src_ip_addr;
-    IPv4ORv6Address  lkup_dst_ip_addr;
-    conntrack_data_t conntrack_data;
-    bit<16>          src_l4_port;
-    bit<16>          dst_l4_port;
-    bit<16>          stage1_dash_acl_group_id;
-    bit<16>          stage2_dash_acl_group_id;
-    bit<16>          stage3_dash_acl_group_id;
-    bit<16>          stage4_dash_acl_group_id;
-    bit<16>          stage5_dash_acl_group_id;
-    bit<1>           meter_policy_en;
-    bit<1>           mapping_meter_class_override;
-    bit<16>          meter_policy_id;
-    bit<16>          policy_meter_class;
-    bit<16>          route_meter_class;
-    bit<16>          mapping_meter_class;
-    bit<16>          meter_class;
-    bit<32>          meter_bucket_index;
-    tag_map_t        src_tag_map;
-    tag_map_t        dst_tag_map;
+    dash_direction_t       direction;
+    EthernetAddress        eni_addr;
+    bit<16>                vnet_id;
+    bit<16>                dst_vnet_id;
+    bit<16>                eni_id;
+    eni_data_t             eni_data;
+    bit<16>                inbound_vm_id;
+    bit<8>                 appliance_id;
+    bit<1>                 is_overlay_ip_v6;
+    bit<1>                 is_lkup_dst_ip_v6;
+    bit<8>                 ip_protocol;
+    IPv4ORv6Address        dst_ip_addr;
+    IPv4ORv6Address        src_ip_addr;
+    IPv4ORv6Address        lkup_dst_ip_addr;
+    conntrack_data_t       conntrack_data;
+    bit<16>                src_l4_port;
+    bit<16>                dst_l4_port;
+    bit<16>                stage1_dash_acl_group_id;
+    bit<16>                stage2_dash_acl_group_id;
+    bit<16>                stage3_dash_acl_group_id;
+    bit<16>                stage4_dash_acl_group_id;
+    bit<16>                stage5_dash_acl_group_id;
+    bit<1>                 meter_policy_en;
+    bit<1>                 mapping_meter_class_override;
+    bit<16>                meter_policy_id;
+    bit<16>                policy_meter_class;
+    bit<16>                route_meter_class;
+    bit<16>                mapping_meter_class;
+    bit<16>                meter_class;
+    bit<32>                meter_bucket_index;
+    bit<16>                tunnel_pointer;
+    bool                   is_fast_path_icmp_flow_redirection_packet;
+    bit<1>                 fast_path_icmp_flow_redirection_disabled;
+    dash_pipeline_stage_t  target_stage;
+    bit<32>                routing_actions;
+    bool                   dropped;
+    encap_data_t           encap_data;
+    overlay_rewrite_data_t overlay_data;
 }
 
 parser dash_parser(packet_in packet, out headers_t hd, inout metadata_t meta, inout standard_metadata_t standard_meta) {
     state start {
-        packet.extract(hd.ethernet);
-        transition select(hd.ethernet.ether_type) {
-            0x800: parse_ipv4;
-            0x86dd: parse_ipv6;
+        packet.extract(hd.u0_ethernet);
+        transition select(hd.u0_ethernet.ether_type) {
+            0x800: parse_u0_ipv4;
+            0x86dd: parse_u0_ipv6;
             default: accept;
         }
     }
-    state parse_ipv4 {
-        packet.extract(hd.ipv4);
-        verify(hd.ipv4.version == 4w4, error.IPv4IncorrectVersion);
-        verify(hd.ipv4.ihl >= 5, error.InvalidIPv4Header);
-        transition select(hd.ipv4.ihl) {
-            5: dispatch_on_protocol;
-            default: parse_ipv4options;
+    state parse_u0_ipv4 {
+        packet.extract(hd.u0_ipv4);
+        verify(hd.u0_ipv4.version == 4w4, error.IPv4IncorrectVersion);
+        verify(hd.u0_ipv4.ihl >= 5, error.InvalidIPv4Header);
+        transition select(hd.u0_ipv4.ihl) {
+            5: dispatch_on_u0_protocol;
+            default: parse_u0_ipv4options;
         }
     }
-    state parse_ipv4options {
-        packet.extract(hd.ipv4options, (bit<32>)(((bit<16>)hd.ipv4.ihl - 5) * 32));
-        transition dispatch_on_protocol;
+    state parse_u0_ipv4options {
+        packet.extract(hd.u0_ipv4options, (bit<32>)(((bit<16>)hd.u0_ipv4.ihl - 5) * 32));
+        transition dispatch_on_u0_protocol;
     }
-    state dispatch_on_protocol {
-        transition select(hd.ipv4.protocol) {
-            17: parse_udp;
-            6: parse_tcp;
+    state dispatch_on_u0_protocol {
+        transition select(hd.u0_ipv4.protocol) {
+            17: parse_u0_udp;
+            6: parse_u0_tcp;
             default: accept;
         }
     }
-    state parse_ipv6 {
-        packet.extract(hd.ipv6);
-        transition select(hd.ipv6.next_header) {
-            17: parse_udp;
-            6: parse_tcp;
+    state parse_u0_ipv6 {
+        packet.extract(hd.u0_ipv6);
+        transition select(hd.u0_ipv6.next_header) {
+            17: parse_u0_udp;
+            6: parse_u0_tcp;
             default: accept;
         }
     }
-    state parse_udp {
-        packet.extract(hd.udp);
-        transition select(hd.udp.dst_port) {
-            4789: parse_vxlan;
+    state parse_u0_udp {
+        packet.extract(hd.u0_udp);
+        transition select(hd.u0_udp.dst_port) {
+            4789: parse_u0_vxlan;
             default: accept;
         }
     }
-    state parse_tcp {
-        packet.extract(hd.tcp);
+    state parse_u0_tcp {
+        packet.extract(hd.u0_tcp);
         transition accept;
     }
-    state parse_vxlan {
-        packet.extract(hd.vxlan);
-        transition parse_inner_ethernet;
+    state parse_u0_vxlan {
+        packet.extract(hd.u0_vxlan);
+        transition parse_customer_ethernet;
     }
-    state parse_inner_ethernet {
-        packet.extract(hd.inner_ethernet);
-        transition select(hd.inner_ethernet.ether_type) {
-            0x800: parse_inner_ipv4;
-            0x86dd: parse_inner_ipv6;
+    state parse_customer_ethernet {
+        packet.extract(hd.customer_ethernet);
+        transition select(hd.customer_ethernet.ether_type) {
+            0x800: parse_customer_ipv4;
+            0x86dd: parse_customer_ipv6;
             default: accept;
         }
     }
-    state parse_inner_ipv4 {
-        packet.extract(hd.inner_ipv4);
-        verify(hd.inner_ipv4.version == 4w4, error.IPv4IncorrectVersion);
-        verify(hd.inner_ipv4.ihl == 4w5, error.IPv4OptionsNotSupported);
-        transition select(hd.inner_ipv4.protocol) {
-            17: parse_inner_udp;
-            6: parse_inner_tcp;
+    state parse_customer_ipv4 {
+        packet.extract(hd.customer_ipv4);
+        verify(hd.customer_ipv4.version == 4w4, error.IPv4IncorrectVersion);
+        verify(hd.customer_ipv4.ihl == 4w5, error.IPv4OptionsNotSupported);
+        transition select(hd.customer_ipv4.protocol) {
+            17: parse_customer_udp;
+            6: parse_customer_tcp;
             default: accept;
         }
     }
-    state parse_inner_ipv6 {
-        packet.extract(hd.inner_ipv6);
-        transition select(hd.inner_ipv6.next_header) {
-            17: parse_inner_udp;
-            6: parse_inner_tcp;
+    state parse_customer_ipv6 {
+        packet.extract(hd.customer_ipv6);
+        transition select(hd.customer_ipv6.next_header) {
+            17: parse_customer_udp;
+            6: parse_customer_tcp;
             default: accept;
         }
     }
-    state parse_inner_tcp {
-        packet.extract(hd.inner_tcp);
+    state parse_customer_tcp {
+        packet.extract(hd.customer_tcp);
         transition accept;
     }
-    state parse_inner_udp {
-        packet.extract(hd.inner_udp);
+    state parse_customer_udp {
+        packet.extract(hd.customer_udp);
         transition accept;
     }
 }
 
 control dash_deparser(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit(hdr.ethernet);
-        packet.emit(hdr.ipv4);
-        packet.emit(hdr.ipv4options);
-        packet.emit(hdr.ipv6);
-        packet.emit(hdr.udp);
-        packet.emit(hdr.tcp);
-        packet.emit(hdr.vxlan);
-        packet.emit(hdr.nvgre);
-        packet.emit(hdr.inner_ethernet);
-        packet.emit(hdr.inner_ipv4);
-        packet.emit(hdr.inner_ipv6);
-        packet.emit(hdr.inner_tcp);
-        packet.emit(hdr.inner_udp);
+        packet.emit(hdr.u0_ethernet);
+        packet.emit(hdr.u0_ipv4);
+        packet.emit(hdr.u0_ipv4options);
+        packet.emit(hdr.u0_ipv6);
+        packet.emit(hdr.u0_udp);
+        packet.emit(hdr.u0_tcp);
+        packet.emit(hdr.u0_vxlan);
+        packet.emit(hdr.u0_nvgre);
+        packet.emit(hdr.customer_ethernet);
+        packet.emit(hdr.customer_ipv4);
+        packet.emit(hdr.customer_ipv6);
+        packet.emit(hdr.customer_tcp);
+        packet.emit(hdr.customer_udp);
     }
 }
 
-action vxlan_encap(inout headers_t hdr, in EthernetAddress underlay_dmac, in EthernetAddress underlay_smac, in IPv4Address underlay_dip, in IPv4Address underlay_sip, in EthernetAddress overlay_dmac, in bit<24> vni) {
-    hdr.inner_ethernet = hdr.ethernet;
-    hdr.inner_ethernet.dst_addr = overlay_dmac;
-    hdr.ethernet.setInvalid();
-    hdr.inner_ipv4 = hdr.ipv4;
-    hdr.ipv4.setInvalid();
-    hdr.inner_ipv6 = hdr.ipv6;
-    hdr.ipv6.setInvalid();
-    hdr.inner_tcp = hdr.tcp;
-    hdr.tcp.setInvalid();
-    hdr.inner_udp = hdr.udp;
-    hdr.udp.setInvalid();
-    hdr.ethernet.setValid();
-    hdr.ethernet.dst_addr = underlay_dmac;
-    hdr.ethernet.src_addr = underlay_smac;
-    hdr.ethernet.ether_type = 0x800;
-    hdr.ipv4.setValid();
-    hdr.ipv4.version = 4;
-    hdr.ipv4.ihl = 5;
-    hdr.ipv4.diffserv = 0;
-    hdr.ipv4.total_len = hdr.inner_ipv4.total_len * (bit<16>)(bit<1>)hdr.inner_ipv4.isValid() + hdr.inner_ipv6.payload_length * (bit<16>)(bit<1>)hdr.inner_ipv6.isValid() + IPV6_HDR_SIZE * (bit<16>)(bit<1>)hdr.inner_ipv6.isValid() + ETHER_HDR_SIZE + IPV4_HDR_SIZE + UDP_HDR_SIZE + VXLAN_HDR_SIZE;
-    hdr.ipv4.identification = 1;
-    hdr.ipv4.flags = 0;
-    hdr.ipv4.frag_offset = 0;
-    hdr.ipv4.ttl = 64;
-    hdr.ipv4.protocol = 17;
-    hdr.ipv4.dst_addr = underlay_dip;
-    hdr.ipv4.src_addr = underlay_sip;
-    hdr.ipv4.hdr_checksum = 0;
-    hdr.udp.setValid();
-    hdr.udp.src_port = 0;
-    hdr.udp.dst_port = 4789;
-    hdr.udp.length = hdr.inner_ipv4.total_len * (bit<16>)(bit<1>)hdr.inner_ipv4.isValid() + hdr.inner_ipv6.payload_length * (bit<16>)(bit<1>)hdr.inner_ipv6.isValid() + IPV6_HDR_SIZE * (bit<16>)(bit<1>)hdr.inner_ipv6.isValid() + UDP_HDR_SIZE + VXLAN_HDR_SIZE + ETHER_HDR_SIZE;
-    hdr.udp.checksum = 0;
-    hdr.vxlan.setValid();
-    hdr.vxlan.reserved = 0;
-    hdr.vxlan.reserved_2 = 0;
-    hdr.vxlan.flags = 0;
-    hdr.vxlan.vni = vni;
+action push_vxlan_tunnel_u0(inout headers_t hdr, in EthernetAddress overlay_dmac, in EthernetAddress underlay_dmac, in EthernetAddress underlay_smac, in IPv4Address underlay_dip, in IPv4Address underlay_sip, in bit<24> tunnel_key) {
+    hdr.customer_ethernet.dst_addr = (overlay_dmac == 0 ? hdr.customer_ethernet.dst_addr : overlay_dmac);
+    hdr.u0_ethernet.setValid();
+    hdr.u0_ethernet.dst_addr = underlay_dmac;
+    hdr.u0_ethernet.src_addr = underlay_smac;
+    hdr.u0_ethernet.ether_type = 0x800;
+    hdr.u0_ipv4.setValid();
+    hdr.u0_ipv4.total_len = hdr.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr.customer_ipv4.isValid() + hdr.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + IPV6_HDR_SIZE * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + ETHER_HDR_SIZE + IPV4_HDR_SIZE + UDP_HDR_SIZE + VXLAN_HDR_SIZE;
+    hdr.u0_ipv4.version = 4;
+    hdr.u0_ipv4.ihl = 5;
+    hdr.u0_ipv4.diffserv = 0;
+    hdr.u0_ipv4.identification = 1;
+    hdr.u0_ipv4.flags = 0;
+    hdr.u0_ipv4.frag_offset = 0;
+    hdr.u0_ipv4.ttl = 64;
+    hdr.u0_ipv4.protocol = 17;
+    hdr.u0_ipv4.dst_addr = underlay_dip;
+    hdr.u0_ipv4.src_addr = underlay_sip;
+    hdr.u0_ipv4.hdr_checksum = 0;
+    hdr.u0_udp.setValid();
+    hdr.u0_udp.src_port = 0;
+    hdr.u0_udp.dst_port = 4789;
+    hdr.u0_udp.length = hdr.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr.customer_ipv4.isValid() + hdr.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + IPV6_HDR_SIZE * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + UDP_HDR_SIZE + VXLAN_HDR_SIZE + ETHER_HDR_SIZE;
+    hdr.u0_udp.checksum = 0;
+    hdr.u0_vxlan.setValid();
+    hdr.u0_vxlan.reserved = 0;
+    hdr.u0_vxlan.reserved_2 = 0;
+    hdr.u0_vxlan.flags = 0x8;
+    hdr.u0_vxlan.vni = tunnel_key;
 }
-action vxlan_decap(inout headers_t hdr) {
-    hdr.ethernet = hdr.inner_ethernet;
-    hdr.inner_ethernet.setInvalid();
-    hdr.ipv4 = hdr.inner_ipv4;
-    hdr.inner_ipv4.setInvalid();
-    hdr.ipv6 = hdr.inner_ipv6;
-    hdr.inner_ipv6.setInvalid();
-    hdr.vxlan.setInvalid();
-    hdr.udp.setInvalid();
-    hdr.tcp = hdr.inner_tcp;
-    hdr.inner_tcp.setInvalid();
-    hdr.udp = hdr.inner_udp;
-    hdr.inner_udp.setInvalid();
+action push_vxlan_tunnel_u1(inout headers_t hdr, in EthernetAddress overlay_dmac, in EthernetAddress underlay_dmac, in EthernetAddress underlay_smac, in IPv4Address underlay_dip, in IPv4Address underlay_sip, in bit<24> tunnel_key) {
+    hdr.u0_ethernet.dst_addr = (overlay_dmac == 0 ? hdr.u0_ethernet.dst_addr : overlay_dmac);
+    hdr.u1_ethernet.setValid();
+    hdr.u1_ethernet.dst_addr = underlay_dmac;
+    hdr.u1_ethernet.src_addr = underlay_smac;
+    hdr.u1_ethernet.ether_type = 0x800;
+    hdr.u1_ipv4.setValid();
+    hdr.u1_ipv4.total_len = hdr.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + IPV6_HDR_SIZE * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + ETHER_HDR_SIZE + IPV4_HDR_SIZE + UDP_HDR_SIZE + VXLAN_HDR_SIZE;
+    hdr.u1_ipv4.version = 4;
+    hdr.u1_ipv4.ihl = 5;
+    hdr.u1_ipv4.diffserv = 0;
+    hdr.u1_ipv4.identification = 1;
+    hdr.u1_ipv4.flags = 0;
+    hdr.u1_ipv4.frag_offset = 0;
+    hdr.u1_ipv4.ttl = 64;
+    hdr.u1_ipv4.protocol = 17;
+    hdr.u1_ipv4.dst_addr = underlay_dip;
+    hdr.u1_ipv4.src_addr = underlay_sip;
+    hdr.u1_ipv4.hdr_checksum = 0;
+    hdr.u1_udp.setValid();
+    hdr.u1_udp.src_port = 0;
+    hdr.u1_udp.dst_port = 4789;
+    hdr.u1_udp.length = hdr.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + IPV6_HDR_SIZE * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + UDP_HDR_SIZE + VXLAN_HDR_SIZE + ETHER_HDR_SIZE;
+    hdr.u1_udp.checksum = 0;
+    hdr.u1_vxlan.setValid();
+    hdr.u1_vxlan.reserved = 0;
+    hdr.u1_vxlan.reserved_2 = 0;
+    hdr.u1_vxlan.flags = 0x8;
+    hdr.u1_vxlan.vni = tunnel_key;
 }
-action nvgre_encap(inout headers_t hdr, in EthernetAddress underlay_dmac, in EthernetAddress underlay_smac, in IPv4Address underlay_dip, in IPv4Address underlay_sip, in EthernetAddress overlay_dmac, in bit<24> vsid) {
-    hdr.inner_ethernet = hdr.ethernet;
-    hdr.inner_ethernet.dst_addr = overlay_dmac;
-    hdr.ethernet.setInvalid();
-    hdr.inner_ipv4 = hdr.ipv4;
-    hdr.ipv4.setInvalid();
-    hdr.inner_ipv6 = hdr.ipv6;
-    hdr.ipv6.setInvalid();
-    hdr.inner_tcp = hdr.tcp;
-    hdr.tcp.setInvalid();
-    hdr.inner_udp = hdr.udp;
-    hdr.udp.setInvalid();
-    hdr.ethernet.setValid();
-    hdr.ethernet.dst_addr = underlay_dmac;
-    hdr.ethernet.src_addr = underlay_smac;
-    hdr.ethernet.ether_type = 0x800;
-    hdr.ipv4.setValid();
-    hdr.ipv4.version = 4;
-    hdr.ipv4.ihl = 5;
-    hdr.ipv4.diffserv = 0;
-    hdr.ipv4.total_len = hdr.inner_ipv4.total_len * (bit<16>)(bit<1>)hdr.inner_ipv4.isValid() + hdr.inner_ipv6.payload_length * (bit<16>)(bit<1>)hdr.inner_ipv6.isValid() + IPV6_HDR_SIZE * (bit<16>)(bit<1>)hdr.inner_ipv6.isValid() + ETHER_HDR_SIZE + IPV4_HDR_SIZE + NVGRE_HDR_SIZE;
-    hdr.ipv4.identification = 1;
-    hdr.ipv4.flags = 0;
-    hdr.ipv4.frag_offset = 0;
-    hdr.ipv4.ttl = 64;
-    hdr.ipv4.protocol = 0x2f;
-    hdr.ipv4.dst_addr = underlay_dip;
-    hdr.ipv4.src_addr = underlay_sip;
-    hdr.ipv4.hdr_checksum = 0;
-    hdr.nvgre.setValid();
-    hdr.nvgre.flags = 4;
-    hdr.nvgre.reserved = 0;
-    hdr.nvgre.version = 0;
-    hdr.nvgre.protocol_type = 0x6558;
-    hdr.nvgre.vsid = vsid;
-    hdr.nvgre.flow_id = 0;
+action push_nvgre_tunnel_u0(inout headers_t hdr, in EthernetAddress overlay_dmac, in EthernetAddress underlay_dmac, in EthernetAddress underlay_smac, in IPv4Address underlay_dip, in IPv4Address underlay_sip, in bit<24> tunnel_key) {
+    hdr.customer_ethernet.dst_addr = overlay_dmac;
+    hdr.u0_ethernet.setValid();
+    hdr.u0_ethernet.dst_addr = underlay_dmac;
+    hdr.u0_ethernet.src_addr = underlay_smac;
+    hdr.u0_ethernet.ether_type = 0x800;
+    hdr.u0_ipv4.setValid();
+    hdr.u0_ipv4.total_len = hdr.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr.customer_ipv4.isValid() + hdr.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + IPV6_HDR_SIZE * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + ETHER_HDR_SIZE + IPV4_HDR_SIZE + NVGRE_HDR_SIZE;
+    hdr.u0_ipv4.total_len = ETHER_HDR_SIZE + IPV4_HDR_SIZE + NVGRE_HDR_SIZE + hdr.u0_ipv4.total_len;
+    hdr.u0_ipv4.version = 4;
+    hdr.u0_ipv4.ihl = 5;
+    hdr.u0_ipv4.diffserv = 0;
+    hdr.u0_ipv4.identification = 1;
+    hdr.u0_ipv4.flags = 0;
+    hdr.u0_ipv4.frag_offset = 0;
+    hdr.u0_ipv4.ttl = 64;
+    hdr.u0_ipv4.protocol = 0x2f;
+    hdr.u0_ipv4.dst_addr = underlay_dip;
+    hdr.u0_ipv4.src_addr = underlay_sip;
+    hdr.u0_ipv4.hdr_checksum = 0;
+    hdr.u0_nvgre.setValid();
+    hdr.u0_nvgre.flags = 4;
+    hdr.u0_nvgre.reserved = 0;
+    hdr.u0_nvgre.version = 0;
+    hdr.u0_nvgre.protocol_type = 0x6558;
+    hdr.u0_nvgre.vsid = tunnel_key;
+    hdr.u0_nvgre.flow_id = 0;
+}
+action push_nvgre_tunnel_u1(inout headers_t hdr, in EthernetAddress overlay_dmac, in EthernetAddress underlay_dmac, in EthernetAddress underlay_smac, in IPv4Address underlay_dip, in IPv4Address underlay_sip, in bit<24> tunnel_key) {
+    hdr.u0_ethernet.dst_addr = overlay_dmac;
+    hdr.u1_ethernet.setValid();
+    hdr.u1_ethernet.dst_addr = underlay_dmac;
+    hdr.u1_ethernet.src_addr = underlay_smac;
+    hdr.u1_ethernet.ether_type = 0x800;
+    hdr.u1_ipv4.setValid();
+    hdr.u1_ipv4.total_len = hdr.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + IPV6_HDR_SIZE * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + ETHER_HDR_SIZE + IPV4_HDR_SIZE + NVGRE_HDR_SIZE;
+    hdr.u1_ipv4.total_len = ETHER_HDR_SIZE + IPV4_HDR_SIZE + NVGRE_HDR_SIZE + hdr.u1_ipv4.total_len;
+    hdr.u1_ipv4.version = 4;
+    hdr.u1_ipv4.ihl = 5;
+    hdr.u1_ipv4.diffserv = 0;
+    hdr.u1_ipv4.identification = 1;
+    hdr.u1_ipv4.flags = 0;
+    hdr.u1_ipv4.frag_offset = 0;
+    hdr.u1_ipv4.ttl = 64;
+    hdr.u1_ipv4.protocol = 0x2f;
+    hdr.u1_ipv4.dst_addr = underlay_dip;
+    hdr.u1_ipv4.src_addr = underlay_sip;
+    hdr.u1_ipv4.hdr_checksum = 0;
+    hdr.u1_nvgre.setValid();
+    hdr.u1_nvgre.flags = 4;
+    hdr.u1_nvgre.reserved = 0;
+    hdr.u1_nvgre.version = 0;
+    hdr.u1_nvgre.protocol_type = 0x6558;
+    hdr.u1_nvgre.vsid = tunnel_key;
+    hdr.u1_nvgre.flow_id = 0;
+}
+action tunnel_decap(inout headers_t hdr, inout metadata_t meta) {
+    hdr.u0_ethernet.setInvalid();
+    hdr.u0_ipv4.setInvalid();
+    hdr.u0_ipv6.setInvalid();
+    hdr.u0_nvgre.setInvalid();
+    hdr.u0_vxlan.setInvalid();
+    hdr.u0_udp.setInvalid();
+    meta.tunnel_pointer = 0;
 }
 match_kind {
     list,
@@ -397,16 +473,14 @@ control acl(inout headers_t hdr, inout metadata_t meta) {
         meta.dropped = true;
     }
     direct_counter(CounterType.packets_and_bytes) stage1_counter;
-    @name("stage1:dash_acl_rule|dash_acl") table stage1 {
+    @SaiTable[name="dash_acl_rule", stage="acl.stage1", api="dash_acl", order=1, isobject="true"] table stage1 {
         key = {
-            meta.stage1_dash_acl_group_id: exact @name("meta.dash_acl_group_id:dash_acl_group_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"];
-            meta.dst_tag_map             : ternary @name("meta.dst_tag_map:dst_tag");
-            meta.src_tag_map             : ternary @name("meta.src_tag_map:src_tag");
-            meta.dst_ip_addr             : optional @name("meta.dst_ip_addr:dip");
-            meta.src_ip_addr             : optional @name("meta.src_ip_addr:sip");
-            meta.ip_protocol             : optional @name("meta.ip_protocol:protocol");
-            meta.src_l4_port             : optional @name("meta.src_l4_port:src_port");
-            meta.dst_l4_port             : optional @name("meta.dst_l4_port:dst_port");
+            meta.stage1_dash_acl_group_id: exact @SaiVal[name="dash_acl_group_id", type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"];
+            meta.dst_ip_addr             : optional @SaiVal[name="dip", type="sai_ip_prefix_list_t", match_type="list"];
+            meta.src_ip_addr             : optional @SaiVal[name="sip", type="sai_ip_prefix_list_t", match_type="list"];
+            meta.ip_protocol             : optional @SaiVal[name="protocol", type="sai_u8_list_t", match_type="list"];
+            meta.src_l4_port             : optional @SaiVal[name="src_port", type="sai_u16_range_list_t", match_type="range_list"];
+            meta.dst_l4_port             : optional @SaiVal[name="dst_port", type="sai_u16_range_list_t", match_type="range_list"];
         }
         actions = {
             permit;
@@ -418,16 +492,14 @@ control acl(inout headers_t hdr, inout metadata_t meta) {
         counters = stage1_counter;
     }
     direct_counter(CounterType.packets_and_bytes) stage2_counter;
-    @name("stage2:dash_acl_rule|dash_acl") table stage2 {
+    @SaiTable[name="dash_acl_rule", stage="acl.stage2", api="dash_acl", order=1, isobject="true"] table stage2 {
         key = {
-            meta.stage2_dash_acl_group_id: exact @name("meta.dash_acl_group_id:dash_acl_group_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"];
-            meta.dst_tag_map             : ternary @name("meta.dst_tag_map:dst_tag");
-            meta.src_tag_map             : ternary @name("meta.src_tag_map:src_tag");
-            meta.dst_ip_addr             : optional @name("meta.dst_ip_addr:dip");
-            meta.src_ip_addr             : optional @name("meta.src_ip_addr:sip");
-            meta.ip_protocol             : optional @name("meta.ip_protocol:protocol");
-            meta.src_l4_port             : optional @name("meta.src_l4_port:src_port");
-            meta.dst_l4_port             : optional @name("meta.dst_l4_port:dst_port");
+            meta.stage2_dash_acl_group_id: exact @SaiVal[name="dash_acl_group_id", type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"];
+            meta.dst_ip_addr             : optional @SaiVal[name="dip", type="sai_ip_prefix_list_t", match_type="list"];
+            meta.src_ip_addr             : optional @SaiVal[name="sip", type="sai_ip_prefix_list_t", match_type="list"];
+            meta.ip_protocol             : optional @SaiVal[name="protocol", type="sai_u8_list_t", match_type="list"];
+            meta.src_l4_port             : optional @SaiVal[name="src_port", type="sai_u16_range_list_t", match_type="range_list"];
+            meta.dst_l4_port             : optional @SaiVal[name="dst_port", type="sai_u16_range_list_t", match_type="range_list"];
         }
         actions = {
             permit;
@@ -439,16 +511,14 @@ control acl(inout headers_t hdr, inout metadata_t meta) {
         counters = stage2_counter;
     }
     direct_counter(CounterType.packets_and_bytes) stage3_counter;
-    @name("stage3:dash_acl_rule|dash_acl") table stage3 {
+    @SaiTable[name="dash_acl_rule", stage="acl.stage3", api="dash_acl", order=1, isobject="true"] table stage3 {
         key = {
-            meta.stage3_dash_acl_group_id: exact @name("meta.dash_acl_group_id:dash_acl_group_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"];
-            meta.dst_tag_map             : ternary @name("meta.dst_tag_map:dst_tag");
-            meta.src_tag_map             : ternary @name("meta.src_tag_map:src_tag");
-            meta.dst_ip_addr             : optional @name("meta.dst_ip_addr:dip");
-            meta.src_ip_addr             : optional @name("meta.src_ip_addr:sip");
-            meta.ip_protocol             : optional @name("meta.ip_protocol:protocol");
-            meta.src_l4_port             : optional @name("meta.src_l4_port:src_port");
-            meta.dst_l4_port             : optional @name("meta.dst_l4_port:dst_port");
+            meta.stage3_dash_acl_group_id: exact @SaiVal[name="dash_acl_group_id", type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"];
+            meta.dst_ip_addr             : optional @SaiVal[name="dip", type="sai_ip_prefix_list_t", match_type="list"];
+            meta.src_ip_addr             : optional @SaiVal[name="sip", type="sai_ip_prefix_list_t", match_type="list"];
+            meta.ip_protocol             : optional @SaiVal[name="protocol", type="sai_u8_list_t", match_type="list"];
+            meta.src_l4_port             : optional @SaiVal[name="src_port", type="sai_u16_range_list_t", match_type="range_list"];
+            meta.dst_l4_port             : optional @SaiVal[name="dst_port", type="sai_u16_range_list_t", match_type="range_list"];
         }
         actions = {
             permit;
@@ -493,151 +563,446 @@ control acl(inout headers_t hdr, inout metadata_t meta) {
     }
 }
 
-action service_tunnel_encode(inout headers_t hdr, in IPv6Address st_dst, in IPv6Address st_dst_mask, in IPv6Address st_src, in IPv6Address st_src_mask) {
-    hdr.ipv6.setValid();
-    hdr.ipv6.version = 6;
-    hdr.ipv6.traffic_class = 0;
-    hdr.ipv6.flow_label = 0;
-    hdr.ipv6.payload_length = hdr.ipv4.total_len - IPV4_HDR_SIZE;
-    hdr.ipv6.next_header = hdr.ipv4.protocol;
-    hdr.ipv6.hop_limit = hdr.ipv4.ttl;
-    hdr.ipv6.dst_addr = (IPv6Address)hdr.ipv4.dst_addr & ~st_dst_mask | st_dst & st_dst_mask;
-    hdr.ipv6.src_addr = (IPv6Address)hdr.ipv4.src_addr & ~st_src_mask | st_src & st_src_mask;
-    hdr.ipv4.setInvalid();
-    hdr.ethernet.ether_type = 0x86dd;
+action push_action_static_encap(in headers_t hdr, inout metadata_t meta, in dash_encapsulation_t encap=dash_encapsulation_t.VXLAN, in bit<24> vni=0, in IPv4Address underlay_sip=0, in IPv4Address underlay_dip=0, in EthernetAddress underlay_smac=0, in EthernetAddress underlay_dmac=0, in EthernetAddress overlay_dmac=0) {
+    meta.routing_actions = meta.routing_actions | dash_routing_actions_t.STATIC_ENCAP;
+    meta.encap_data.dash_encapsulation = encap;
+    meta.encap_data.vni = (vni == 0 ? meta.encap_data.vni : vni);
+    meta.encap_data.underlay_smac = (underlay_smac == 0 ? meta.encap_data.underlay_smac : underlay_smac);
+    meta.encap_data.underlay_dmac = (underlay_dmac == 0 ? meta.encap_data.underlay_dmac : underlay_dmac);
+    meta.encap_data.underlay_sip = (underlay_sip == 0 ? meta.encap_data.underlay_sip : underlay_sip);
+    meta.encap_data.underlay_dip = (underlay_dip == 0 ? meta.encap_data.underlay_dip : underlay_dip);
+    meta.overlay_data.dmac = (overlay_dmac == 0 ? meta.overlay_data.dmac : overlay_dmac);
 }
-action service_tunnel_decode(inout headers_t hdr, in IPv4Address src, in IPv4Address dst) {
-    hdr.ipv4.setValid();
-    hdr.ipv4.version = 4;
-    hdr.ipv4.ihl = 5;
-    hdr.ipv4.diffserv = 0;
-    hdr.ipv4.total_len = hdr.ipv6.payload_length + IPV4_HDR_SIZE;
-    hdr.ipv4.identification = 1;
-    hdr.ipv4.flags = 0;
-    hdr.ipv4.frag_offset = 0;
-    hdr.ipv4.protocol = hdr.ipv6.next_header;
-    hdr.ipv4.ttl = hdr.ipv6.hop_limit;
-    hdr.ipv4.hdr_checksum = 0;
-    hdr.ipv4.dst_addr = dst;
-    hdr.ipv4.src_addr = src;
-    hdr.ipv6.setInvalid();
-    hdr.ethernet.ether_type = 0x800;
+control do_action_static_encap(inout headers_t hdr, inout metadata_t meta) {
+    apply {
+        if (meta.routing_actions & dash_routing_actions_t.STATIC_ENCAP == 0) {
+            return;
+        }
+        if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
+            if (meta.tunnel_pointer == 0) {
+                push_vxlan_tunnel_u0(hdr, meta.overlay_data.dmac, meta.encap_data.underlay_dmac, meta.encap_data.underlay_smac, meta.encap_data.underlay_dip, meta.encap_data.underlay_sip, meta.encap_data.vni);
+            } else if (meta.tunnel_pointer == 1) {
+                push_vxlan_tunnel_u1(hdr, meta.overlay_data.dmac, meta.encap_data.underlay_dmac, meta.encap_data.underlay_smac, meta.encap_data.underlay_dip, meta.encap_data.underlay_sip, meta.encap_data.vni);
+            }
+        } else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
+            if (meta.tunnel_pointer == 0) {
+                push_vxlan_tunnel_u0(hdr, meta.overlay_data.dmac, meta.encap_data.underlay_dmac, meta.encap_data.underlay_smac, meta.encap_data.underlay_dip, meta.encap_data.underlay_sip, meta.encap_data.vni);
+            } else if (meta.tunnel_pointer == 1) {
+                push_vxlan_tunnel_u1(hdr, meta.overlay_data.dmac, meta.encap_data.underlay_dmac, meta.encap_data.underlay_smac, meta.encap_data.underlay_dip, meta.encap_data.underlay_sip, meta.encap_data.vni);
+            }
+        }
+        meta.tunnel_pointer = meta.tunnel_pointer + 1;
+    }
 }
-control outbound(inout headers_t hdr, inout metadata_t meta) {
-    action set_route_meter_attrs(bit<1> meter_policy_en, bit<16> meter_class) {
-        meta.meter_policy_en = meter_policy_en;
-        meta.route_meter_class = meter_class;
+
+action push_action_nat46(in headers_t hdr, inout metadata_t meta, in IPv6Address sip, in IPv6Address sip_mask, in IPv6Address dip, in IPv6Address dip_mask) {
+    meta.routing_actions = meta.routing_actions | dash_routing_actions_t.NAT46;
+    meta.overlay_data.is_ipv6 = true;
+    meta.overlay_data.sip = sip;
+    meta.overlay_data.sip_mask = sip_mask;
+    meta.overlay_data.dip = dip;
+    meta.overlay_data.dip_mask = dip_mask;
+}
+control do_action_nat46(inout headers_t hdr, in metadata_t meta) {
+    apply {
+        if (meta.routing_actions & dash_routing_actions_t.NAT46 == 0) {
+            return;
+        }
+        assert(meta.overlay_data.is_ipv6 == true);
+        hdr.u0_ipv6.setValid();
+        hdr.u0_ipv6.version = 6;
+        hdr.u0_ipv6.traffic_class = 0;
+        hdr.u0_ipv6.flow_label = 0;
+        hdr.u0_ipv6.payload_length = hdr.u0_ipv4.total_len - IPV4_HDR_SIZE;
+        hdr.u0_ipv6.next_header = hdr.u0_ipv4.protocol;
+        hdr.u0_ipv6.hop_limit = hdr.u0_ipv4.ttl;
+        hdr.u0_ipv6.dst_addr = (IPv6Address)hdr.u0_ipv4.dst_addr & ~meta.overlay_data.dip_mask | meta.overlay_data.dip & meta.overlay_data.dip_mask;
+        hdr.u0_ipv6.src_addr = (IPv6Address)hdr.u0_ipv4.src_addr & ~meta.overlay_data.sip_mask | meta.overlay_data.sip & meta.overlay_data.sip_mask;
+        hdr.u0_ipv4.setInvalid();
+        hdr.u0_ethernet.ether_type = 0x86dd;
     }
-    action route_vnet(bit<16> dst_vnet_id, bit<1> meter_policy_en, bit<16> meter_class) {
-        meta.dst_vnet_id = dst_vnet_id;
-        set_route_meter_attrs(meter_policy_en, meter_class);
+}
+
+action push_action_nat64(in headers_t hdr, inout metadata_t meta, in IPv4Address src, in IPv4Address dst) {
+    meta.routing_actions = meta.routing_actions | dash_routing_actions_t.NAT64;
+    meta.overlay_data.is_ipv6 = false;
+    meta.overlay_data.sip = (IPv4ORv6Address)src;
+    meta.overlay_data.dip = (IPv4ORv6Address)dst;
+}
+control do_action_nat64(inout headers_t hdr, in metadata_t meta) {
+    apply {
+        if (meta.routing_actions & dash_routing_actions_t.NAT64 == 0) {
+            return;
+        }
+        assert(meta.overlay_data.is_ipv6 == false);
+        hdr.u0_ipv4.setValid();
+        hdr.u0_ipv4.version = 4;
+        hdr.u0_ipv4.ihl = 5;
+        hdr.u0_ipv4.diffserv = 0;
+        hdr.u0_ipv4.total_len = hdr.u0_ipv6.payload_length + IPV4_HDR_SIZE;
+        hdr.u0_ipv4.identification = 1;
+        hdr.u0_ipv4.flags = 0;
+        hdr.u0_ipv4.frag_offset = 0;
+        hdr.u0_ipv4.protocol = hdr.u0_ipv6.next_header;
+        hdr.u0_ipv4.ttl = hdr.u0_ipv6.hop_limit;
+        hdr.u0_ipv4.hdr_checksum = 0;
+        hdr.u0_ipv4.dst_addr = (IPv4Address)meta.overlay_data.dip;
+        hdr.u0_ipv4.src_addr = (IPv4Address)meta.overlay_data.sip;
+        hdr.u0_ipv6.setInvalid();
+        hdr.u0_ethernet.ether_type = 0x800;
     }
-    action route_vnet_direct(bit<16> dst_vnet_id, bit<1> is_overlay_ip_v4_or_v6, IPv4ORv6Address overlay_ip, bit<1> meter_policy_en, bit<16> meter_class) {
-        meta.dst_vnet_id = dst_vnet_id;
-        meta.lkup_dst_ip_addr = overlay_ip;
-        meta.is_lkup_dst_ip_v6 = is_overlay_ip_v4_or_v6;
-        set_route_meter_attrs(meter_policy_en, meter_class);
+}
+
+action set_route_meter_attrs(inout metadata_t meta, bit<1> meter_policy_en, bit<16> meter_class) {
+    meta.meter_policy_en = meter_policy_en;
+    meta.route_meter_class = meter_class;
+}
+action set_mapping_meter_attr(inout metadata_t meta, in bit<16> meter_class, in bit<1> meter_class_override) {
+    meta.mapping_meter_class = meter_class;
+    meta.mapping_meter_class_override = meter_class_override;
+}
+action drop(inout metadata_t meta) {
+    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+    meta.dropped = true;
+}
+action route_vnet(inout headers_t hdr, inout metadata_t meta, @SaiVal[type="sai_object_id_t"] bit<16> dst_vnet_id, bit<1> meter_policy_en, bit<16> meter_class) {
+    meta.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
+    meta.dst_vnet_id = dst_vnet_id;
+    set_route_meter_attrs(meta, meter_policy_en, meter_class);
+}
+action route_vnet_direct(inout headers_t hdr, inout metadata_t meta, bit<16> dst_vnet_id, bit<1> overlay_ip_is_v6, @SaiVal[type="sai_ip_address_t"] IPv4ORv6Address overlay_ip, bit<1> meter_policy_en, bit<16> meter_class) {
+    meta.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
+    meta.dst_vnet_id = dst_vnet_id;
+    meta.lkup_dst_ip_addr = overlay_ip;
+    meta.is_lkup_dst_ip_v6 = overlay_ip_is_v6;
+    set_route_meter_attrs(meta, meter_policy_en, meter_class);
+}
+action route_direct(inout headers_t hdr, inout metadata_t meta, bit<1> meter_policy_en, bit<16> meter_class) {
+    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+    set_route_meter_attrs(meta, meter_policy_en, meter_class);
+}
+action route_service_tunnel(inout headers_t hdr, inout metadata_t meta, bit<1> overlay_dip_is_v6, IPv4ORv6Address overlay_dip, bit<1> overlay_dip_mask_is_v6, IPv4ORv6Address overlay_dip_mask, bit<1> overlay_sip_is_v6, IPv4ORv6Address overlay_sip, bit<1> overlay_sip_mask_is_v6, IPv4ORv6Address overlay_sip_mask, bit<1> underlay_dip_is_v6, IPv4ORv6Address underlay_dip, bit<1> underlay_sip_is_v6, IPv4ORv6Address underlay_sip, @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"] dash_encapsulation_t dash_encapsulation, bit<24> tunnel_key, bit<1> meter_policy_en, bit<16> meter_class) {
+    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+    push_action_nat46(hdr = hdr, meta = meta, sip = overlay_sip, sip_mask = overlay_sip_mask, dip = overlay_dip, dip_mask = overlay_dip_mask);
+    push_action_static_encap(hdr = hdr, meta = meta, encap = dash_encapsulation, vni = tunnel_key, underlay_sip = (underlay_sip == 0 ? hdr.u0_ipv4.src_addr : (IPv4Address)underlay_sip), underlay_dip = (underlay_dip == 0 ? hdr.u0_ipv4.dst_addr : (IPv4Address)underlay_dip), overlay_dmac = hdr.u0_ethernet.dst_addr);
+    set_route_meter_attrs(meta, meter_policy_en, meter_class);
+}
+action set_tunnel_mapping(inout headers_t hdr, inout metadata_t meta, @SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip, EthernetAddress overlay_dmac, bit<1> use_dst_vnet_vni, bit<16> meter_class, bit<1> meter_class_override) {
+    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+    if (use_dst_vnet_vni == 1) {
+        meta.vnet_id = meta.dst_vnet_id;
     }
-    action route_direct(bit<1> meter_policy_en, bit<16> meter_class) {
-        set_route_meter_attrs(meter_policy_en, meter_class);
-    }
-    action drop() {
-        meta.dropped = true;
-    }
-    action route_service_tunnel(bit<1> is_overlay_dip_v4_or_v6, IPv4ORv6Address overlay_dip, bit<1> is_overlay_dip_mask_v4_or_v6, IPv4ORv6Address overlay_dip_mask, bit<1> is_overlay_sip_v4_or_v6, IPv4ORv6Address overlay_sip, bit<1> is_overlay_sip_mask_v4_or_v6, IPv4ORv6Address overlay_sip_mask, bit<1> is_underlay_dip_v4_or_v6, IPv4ORv6Address underlay_dip, bit<1> is_underlay_sip_v4_or_v6, IPv4ORv6Address underlay_sip, dash_encapsulation_t dash_encapsulation, bit<24> tunnel_key, bit<1> meter_policy_en, bit<16> meter_class) {
-        meta.encap_data.original_overlay_dip = hdr.ipv4.src_addr;
-        meta.encap_data.original_overlay_sip = hdr.ipv4.dst_addr;
-        service_tunnel_encode(hdr, overlay_dip, overlay_dip_mask, overlay_sip, overlay_sip_mask);
-        meta.encap_data.underlay_dip = (underlay_dip == 0 ? meta.encap_data.original_overlay_dip : (IPv4Address)underlay_dip);
-        meta.encap_data.underlay_sip = (underlay_sip == 0 ? meta.encap_data.original_overlay_sip : (IPv4Address)underlay_sip);
-        meta.encap_data.overlay_dmac = hdr.ethernet.dst_addr;
-        meta.encap_data.dash_encapsulation = dash_encapsulation;
-        meta.encap_data.service_tunnel_key = tunnel_key;
-        set_route_meter_attrs(meter_policy_en, meter_class);
-    }
+    push_action_static_encap(hdr = hdr, meta = meta, underlay_dip = underlay_dip, overlay_dmac = overlay_dmac);
+    set_mapping_meter_attr(meta, meter_class, meter_class_override);
+}
+action set_private_link_mapping(inout headers_t hdr, inout metadata_t meta, @SaiVal[type="sai_ip_address_t"] IPv4Address underlay_dip, IPv6Address overlay_sip, IPv6Address overlay_dip, @SaiVal[type="sai_dash_encapsulation_t"] dash_encapsulation_t dash_encapsulation, bit<24> tunnel_key, bit<16> meter_class, bit<1> meter_class_override) {
+    meta.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+    push_action_static_encap(hdr = hdr, meta = meta, encap = dash_encapsulation, vni = tunnel_key, underlay_sip = meta.eni_data.pl_underlay_sip, underlay_dip = underlay_dip, overlay_dmac = hdr.u0_ethernet.dst_addr);
+    push_action_nat46(hdr = hdr, meta = meta, dip = overlay_dip, dip_mask = 0xffffffffffffffffffffffff, sip = overlay_sip & ~meta.eni_data.pl_sip_mask | meta.eni_data.pl_sip | (IPv6Address)hdr.u0_ipv4.src_addr, sip_mask = 0xffffffffffffffffffffffff);
+    set_mapping_meter_attr(meta, meter_class, meter_class_override);
+}
+control outbound_routing_stage(inout headers_t hdr, inout metadata_t meta) {
     direct_counter(CounterType.packets_and_bytes) routing_counter;
-    @name("outbound_routing|dash_outbound_routing") table routing {
+    @SaiTable[name="outbound_routing", api="dash_outbound_routing"] table routing {
         key = {
-            meta.eni_id          : exact @name("meta.eni_id:eni_id");
-            meta.is_overlay_ip_v6: exact @name("meta.is_overlay_ip_v6:is_destination_v4_or_v6");
-            meta.dst_ip_addr     : lpm @name("meta.dst_ip_addr:destination");
+            meta.eni_id          : exact @SaiVal[type="sai_object_id_t"];
+            meta.is_overlay_ip_v6: exact @SaiVal[name="destination_is_v6"];
+            meta.dst_ip_addr     : lpm @SaiVal[name="destination"];
         }
         actions = {
-            route_vnet;
-            route_vnet_direct;
-            route_direct;
-            route_service_tunnel;
-            drop;
+            route_vnet(hdr, meta);
+            route_vnet_direct(hdr, meta);
+            route_direct(hdr, meta);
+            route_service_tunnel(hdr, meta);
+            drop(meta);
         }
-        const default_action = drop;
+        const default_action = drop(meta);
         counters = routing_counter;
     }
-    action set_tunnel_mapping(IPv4Address underlay_dip, EthernetAddress overlay_dmac, bit<1> use_dst_vnet_vni, bit<16> meter_class, bit<1> meter_class_override) {
-        if (use_dst_vnet_vni == 1) {
-            meta.vnet_id = meta.dst_vnet_id;
+    apply {
+        if (meta.target_stage != dash_pipeline_stage_t.OUTBOUND_ROUTING) {
+            return;
         }
-        meta.encap_data.overlay_dmac = overlay_dmac;
-        meta.encap_data.underlay_dip = underlay_dip;
-        meta.mapping_meter_class = meter_class;
-        meta.mapping_meter_class_override = meter_class_override;
+        routing.apply();
     }
+}
+
+control outbound_mapping_stage(inout headers_t hdr, inout metadata_t meta) {
     direct_counter(CounterType.packets_and_bytes) ca_to_pa_counter;
-    @name("outbound_ca_to_pa|dash_outbound_ca_to_pa") table ca_to_pa {
+    @SaiTable[name="outbound_ca_to_pa", api="dash_outbound_ca_to_pa"] table ca_to_pa {
         key = {
-            meta.dst_vnet_id      : exact @name("meta.dst_vnet_id:dst_vnet_id");
-            meta.is_lkup_dst_ip_v6: exact @name("meta.is_lkup_dst_ip_v6:is_dip_v4_or_v6");
-            meta.lkup_dst_ip_addr : exact @name("meta.lkup_dst_ip_addr:dip");
+            meta.dst_vnet_id      : exact @SaiVal[type="sai_object_id_t"];
+            meta.is_lkup_dst_ip_v6: exact @SaiVal[name="dip_is_v6"];
+            meta.lkup_dst_ip_addr : exact @SaiVal[name="dip"];
         }
         actions = {
-            set_tunnel_mapping;
-            @defaultonly drop;
+            set_tunnel_mapping(hdr, meta);
+            set_private_link_mapping(hdr, meta);
+            @defaultonly drop(meta);
         }
-        const default_action = drop;
+        const default_action = drop(meta);
         counters = ca_to_pa_counter;
     }
     action set_vnet_attrs(bit<24> vni) {
         meta.encap_data.vni = vni;
     }
-    @name("vnet|dash_vnet") table vnet {
+    @SaiTable[name="vnet", api="dash_vnet", isobject="true"] table vnet {
         key = {
-            meta.vnet_id: exact @name("meta.vnet_id:vnet_id");
+            meta.vnet_id: exact @SaiVal[type="sai_object_id_t"];
         }
         actions = {
             set_vnet_attrs;
         }
     }
     apply {
-        if (!meta.conntrack_data.allow_out) {
-            acl.apply(hdr, meta);
+        if (meta.target_stage != dash_pipeline_stage_t.OUTBOUND_MAPPING) {
+            return;
         }
-        meta.lkup_dst_ip_addr = meta.dst_ip_addr;
-        meta.is_lkup_dst_ip_v6 = meta.is_overlay_ip_v6;
-        switch (routing.apply().action_run) {
-            route_vnet_direct:
-            route_vnet: {
-                ca_to_pa.apply();
+        switch (ca_to_pa.apply().action_run) {
+            set_tunnel_mapping: {
                 vnet.apply();
-                vxlan_encap(hdr, meta.encap_data.underlay_dmac, meta.encap_data.underlay_smac, meta.encap_data.underlay_dip, meta.encap_data.underlay_sip, meta.encap_data.overlay_dmac, meta.encap_data.vni);
-            }
-            route_service_tunnel: {
-                if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
-                    vxlan_encap(hdr, meta.encap_data.underlay_dmac, meta.encap_data.underlay_smac, meta.encap_data.underlay_dip, meta.encap_data.underlay_sip, meta.encap_data.overlay_dmac, meta.encap_data.service_tunnel_key);
-                } else if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.NVGRE) {
-                    nvgre_encap(hdr, meta.encap_data.underlay_dmac, meta.encap_data.underlay_smac, meta.encap_data.underlay_dip, meta.encap_data.underlay_sip, meta.encap_data.overlay_dmac, meta.encap_data.service_tunnel_key);
-                } else {
-                    drop();
-                }
             }
         }
     }
 }
 
+control outbound(inout headers_t hdr, inout metadata_t meta) {
+    apply {
+        if (!meta.conntrack_data.allow_out) {
+            acl.apply(hdr, meta);
+        }
+        meta.lkup_dst_ip_addr = meta.dst_ip_addr;
+        meta.is_lkup_dst_ip_v6 = meta.is_overlay_ip_v6;
+        outbound_routing_stage.apply(hdr, meta);
+        outbound_mapping_stage.apply(hdr, meta);
+    }
+}
+
+action service_tunnel_encode(inout headers_t hdr, in IPv6Address st_dst, in IPv6Address st_dst_mask, in IPv6Address st_src, in IPv6Address st_src_mask) {
+    hdr.u0_ipv6.setValid();
+    hdr.u0_ipv6.version = 6;
+    hdr.u0_ipv6.traffic_class = 0;
+    hdr.u0_ipv6.flow_label = 0;
+    hdr.u0_ipv6.payload_length = hdr.u0_ipv4.total_len - IPV4_HDR_SIZE;
+    hdr.u0_ipv6.next_header = hdr.u0_ipv4.protocol;
+    hdr.u0_ipv6.hop_limit = hdr.u0_ipv4.ttl;
+    hdr.u0_ipv6.dst_addr = (IPv6Address)hdr.u0_ipv4.dst_addr & ~st_dst_mask | st_dst & st_dst_mask;
+    hdr.u0_ipv6.src_addr = (IPv6Address)hdr.u0_ipv4.src_addr & ~st_src_mask | st_src & st_src_mask;
+    hdr.u0_ipv4.setInvalid();
+    hdr.u0_ethernet.ether_type = 0x86dd;
+}
+action service_tunnel_decode(inout headers_t hdr, in IPv4Address src, in IPv4Address dst) {
+    hdr.u0_ipv4.setValid();
+    hdr.u0_ipv4.version = 4;
+    hdr.u0_ipv4.ihl = 5;
+    hdr.u0_ipv4.diffserv = 0;
+    hdr.u0_ipv4.total_len = hdr.u0_ipv6.payload_length + IPV4_HDR_SIZE;
+    hdr.u0_ipv4.identification = 1;
+    hdr.u0_ipv4.flags = 0;
+    hdr.u0_ipv4.frag_offset = 0;
+    hdr.u0_ipv4.protocol = hdr.u0_ipv6.next_header;
+    hdr.u0_ipv4.ttl = hdr.u0_ipv6.hop_limit;
+    hdr.u0_ipv4.hdr_checksum = 0;
+    hdr.u0_ipv4.dst_addr = dst;
+    hdr.u0_ipv4.src_addr = src;
+    hdr.u0_ipv6.setInvalid();
+    hdr.u0_ethernet.ether_type = 0x800;
+}
 control inbound(inout headers_t hdr, inout metadata_t meta) {
     apply {
         if (!meta.conntrack_data.allow_in) {
             acl.apply(hdr, meta);
         }
-        vxlan_encap(hdr, meta.encap_data.underlay_dmac, meta.encap_data.underlay_smac, meta.encap_data.underlay_dip, meta.encap_data.underlay_sip, hdr.ethernet.dst_addr, meta.encap_data.vni);
+        {
+            if (dash_encapsulation_t.VXLAN == dash_encapsulation_t.VXLAN) {
+                if (meta.tunnel_pointer == 0) {
+                    push_vxlan_tunnel_u0(hdr, meta.overlay_data.dmac, meta.encap_data.underlay_dmac, meta.encap_data.underlay_smac, meta.encap_data.underlay_dip, meta.encap_data.underlay_sip, meta.encap_data.vni);
+                } else if (meta.tunnel_pointer == 1) {
+                    push_vxlan_tunnel_u1(hdr, meta.overlay_data.dmac, meta.encap_data.underlay_dmac, meta.encap_data.underlay_smac, meta.encap_data.underlay_dip, meta.encap_data.underlay_sip, meta.encap_data.vni);
+                }
+            } else if (dash_encapsulation_t.VXLAN == dash_encapsulation_t.NVGRE) {
+                if (meta.tunnel_pointer == 0) {
+                    push_nvgre_tunnel_u0(hdr, meta.overlay_data.dmac, meta.encap_data.underlay_dmac, meta.encap_data.underlay_smac, meta.encap_data.underlay_dip, meta.encap_data.underlay_sip, meta.encap_data.vni);
+                } else if (meta.tunnel_pointer == 1) {
+                    push_nvgre_tunnel_u1(hdr, meta.overlay_data.dmac, meta.encap_data.underlay_dmac, meta.encap_data.underlay_smac, meta.encap_data.underlay_dip, meta.encap_data.underlay_sip, meta.encap_data.vni);
+                }
+            }
+            meta.tunnel_pointer = meta.tunnel_pointer + 1;
+        }
+        ;
+    }
+}
+
+control direction_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
+    action set_outbound_direction() {
+        meta.direction = dash_direction_t.OUTBOUND;
+    }
+    action set_inbound_direction() {
+        meta.direction = dash_direction_t.INBOUND;
+    }
+    @SaiTable[name="direction_lookup", api="dash_direction_lookup"] table direction_lookup {
+        key = {
+            hdr.u0_vxlan.vni: exact @SaiVal[name="VNI"];
+        }
+        actions = {
+            set_outbound_direction;
+            @defaultonly set_inbound_direction;
+        }
+        const default_action = set_inbound_direction;
+    }
+    apply {
+        direction_lookup.apply();
+    }
+}
+
+control eni_lookup_stage(inout headers_t hdr, inout metadata_t meta) {
+    @SaiCounter[name="lb_fast_path_eni_miss", attr_type="stats"] counter(1, CounterType.packets_and_bytes) port_lb_fast_path_eni_miss_counter;
+    action set_eni(@SaiVal[type="sai_object_id_t"] bit<16> eni_id) {
+        meta.eni_id = eni_id;
+    }
+    action deny() {
+        meta.dropped = true;
+    }
+    @SaiTable[name="eni_ether_address_map", api="dash_eni", order=0] table eni_ether_address_map {
+        key = {
+            meta.eni_addr: exact @SaiVal[name="address", type="sai_mac_t"];
+        }
+        actions = {
+            set_eni;
+            @defaultonly deny;
+        }
+        const default_action = deny;
+    }
+    apply {
+        meta.eni_addr = (meta.direction == dash_direction_t.OUTBOUND ? hdr.customer_ethernet.src_addr : hdr.customer_ethernet.dst_addr);
+        if (!eni_ether_address_map.apply().hit) {
+            if (meta.is_fast_path_icmp_flow_redirection_packet) {
+                port_lb_fast_path_eni_miss_counter.count((bit<32>)0);
+            }
+        }
+    }
+}
+
+control routing_action_apply(inout headers_t hdr, inout metadata_t meta) {
+    apply {
+        do_action_nat46.apply(hdr, meta);
+        do_action_nat64.apply(hdr, meta);
+        do_action_static_encap.apply(hdr, meta);
+    }
+}
+
+control metering_update_stage(inout headers_t hdr, inout metadata_t meta) {
+    action check_ip_addr_family(@SaiVal[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
+        if (ip_addr_family == 0) {
+            if (meta.is_overlay_ip_v6 == 1) {
+                meta.dropped = true;
+            }
+        } else {
+            if (meta.is_overlay_ip_v6 == 0) {
+                meta.dropped = true;
+            }
+        }
+    }
+    @SaiTable[name="meter_policy", api="dash_meter", order=1, isobject="true"] table meter_policy {
+        key = {
+            meta.meter_policy_id: exact;
+        }
+        actions = {
+            check_ip_addr_family;
+        }
+    }
+    action set_policy_meter_class(bit<16> meter_class) {
+        meta.policy_meter_class = meter_class;
+    }
+    @SaiTable[name="meter_rule", api="dash_meter", order=2, isobject="true"] table meter_rule {
+        key = {
+            meta.meter_policy_id: exact @SaiVal[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
+            hdr.u0_ipv4.dst_addr: ternary @SaiVal[name="dip", type="sai_ip_address_t"];
+        }
+        actions = {
+            set_policy_meter_class;
+            @defaultonly NoAction;
+        }
+        const default_action = NoAction();
+    }
+    @SaiCounter[name="outbound", action_names="meter_bucket_action", attr_type="counter_attr"] counter(262144, CounterType.bytes) meter_bucket_outbound;
+    @SaiCounter[name="inbound", action_names="meter_bucket_action", attr_type="counter_attr"] counter(262144, CounterType.bytes) meter_bucket_inbound;
+    action meter_bucket_action(@SaiVal[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
+        meta.meter_bucket_index = meter_bucket_index;
+    }
+    @SaiTable[name="meter_bucket", api="dash_meter", order=0, isobject="true"] table meter_bucket {
+        key = {
+            meta.eni_id     : exact @SaiVal[type="sai_object_id_t"];
+            meta.meter_class: exact;
+        }
+        actions = {
+            meter_bucket_action;
+            @defaultonly NoAction;
+        }
+        const default_action = NoAction();
+    }
+    direct_counter(CounterType.packets_and_bytes) eni_counter;
+    @SaiTable[ignored="true"] table eni_meter {
+        key = {
+            meta.eni_id   : exact @SaiVal[type="sai_object_id_t"];
+            meta.direction: exact;
+            meta.dropped  : exact;
+        }
+        actions = {
+            NoAction;
+        }
+        counters = eni_counter;
+    }
+    apply {
+        if (meta.meter_policy_en == 1) {
+            meter_policy.apply();
+            meter_rule.apply();
+        }
+        {
+            if (meta.meter_policy_en == 1) {
+                meta.meter_class = meta.policy_meter_class;
+            } else {
+                meta.meter_class = meta.route_meter_class;
+            }
+            if (meta.meter_class == 0 || meta.mapping_meter_class_override == 1) {
+                meta.meter_class = meta.mapping_meter_class;
+            }
+        }
+        meter_bucket.apply();
+        if (meta.direction == dash_direction_t.OUTBOUND) {
+            meter_bucket_outbound.count((bit<32>)meta.meter_bucket_index);
+        } else if (meta.direction == dash_direction_t.INBOUND) {
+            meter_bucket_inbound.count((bit<32>)meta.meter_bucket_index);
+        }
+        eni_meter.apply();
+    }
+}
+
+control underlay(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
+    action set_nhop(bit<9> next_hop_id) {
+        standard_metadata.egress_spec = next_hop_id;
+    }
+    action pkt_act(bit<9> packet_action, bit<9> next_hop_id) {
+        if (packet_action == 0) {
+            meta.dropped = true;
+        } else if (packet_action == 1) {
+            set_nhop(next_hop_id);
+        }
+    }
+    action def_act() {
+        standard_metadata.egress_spec = standard_metadata.ingress_port;
+    }
+    @SaiTable[name="route", api="route", api_type="underlay"] table underlay_routing {
+        key = {
+            meta.dst_ip_addr: lpm @SaiVal[name="destination"];
+        }
+        actions = {
+            pkt_act;
+            @defaultonly def_act;
+        }
+    }
+    apply {
+        underlay_routing.apply();
     }
 }
 
@@ -650,9 +1015,10 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     }
     action accept() {
     }
-    @name("vip|dash_vip") table vip {
+    @SaiCounter[name="lb_fast_path_icmp_in", attr_type="stats"] counter(1, CounterType.packets_and_bytes) port_lb_fast_path_icmp_in_counter;
+    @SaiTable[name="vip", api="dash_vip"] table vip {
         key = {
-            hdr.ipv4.dst_addr: exact @name("hdr.ipv4.dst_addr:VIP");
+            hdr.u0_ipv4.dst_addr: exact @SaiVal[name="VIP", type="sai_ip_address_t"];
         }
         actions = {
             accept;
@@ -660,40 +1026,31 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         const default_action = deny;
     }
-    action set_outbound_direction() {
-        meta.direction = dash_direction_t.OUTBOUND;
-    }
-    action set_inbound_direction() {
-        meta.direction = dash_direction_t.INBOUND;
-    }
-    @name("direction_lookup|dash_direction_lookup") table direction_lookup {
-        key = {
-            hdr.vxlan.vni: exact @name("hdr.vxlan.vni:VNI");
-        }
-        actions = {
-            set_outbound_direction;
-            @defaultonly set_inbound_direction;
-        }
-        const default_action = set_inbound_direction;
-    }
     action set_appliance(EthernetAddress neighbor_mac, EthernetAddress mac) {
         meta.encap_data.underlay_dmac = neighbor_mac;
         meta.encap_data.underlay_smac = mac;
     }
-    table appliance {
+    @SaiTable[ignored="true"] table appliance {
         key = {
-            meta.appliance_id: ternary @name("meta.appliance_id:appliance_id");
+            meta.appliance_id: ternary;
         }
         actions = {
             set_appliance;
         }
     }
-    action set_eni_attrs(bit<32> cps, bit<32> pps, bit<32> flows, bit<1> admin_state, IPv4Address vm_underlay_dip, @Sai[type="sai_uint32_t"] bit<24> vm_vni, bit<16> vnet_id, bit<16> v4_meter_policy_id, bit<16> v6_meter_policy_id, bit<16> inbound_v4_stage1_dash_acl_group_id, bit<16> inbound_v4_stage2_dash_acl_group_id, bit<16> inbound_v4_stage3_dash_acl_group_id, bit<16> inbound_v4_stage4_dash_acl_group_id, bit<16> inbound_v4_stage5_dash_acl_group_id, bit<16> inbound_v6_stage1_dash_acl_group_id, bit<16> inbound_v6_stage2_dash_acl_group_id, bit<16> inbound_v6_stage3_dash_acl_group_id, bit<16> inbound_v6_stage4_dash_acl_group_id, bit<16> inbound_v6_stage5_dash_acl_group_id, bit<16> outbound_v4_stage1_dash_acl_group_id, bit<16> outbound_v4_stage2_dash_acl_group_id, bit<16> outbound_v4_stage3_dash_acl_group_id, bit<16> outbound_v4_stage4_dash_acl_group_id, bit<16> outbound_v4_stage5_dash_acl_group_id, bit<16> outbound_v6_stage1_dash_acl_group_id, bit<16> outbound_v6_stage2_dash_acl_group_id, bit<16> outbound_v6_stage3_dash_acl_group_id, bit<16> outbound_v6_stage4_dash_acl_group_id, bit<16> outbound_v6_stage5_dash_acl_group_id) {
+    @SaiCounter[name="lb_fast_path_icmp_in", attr_type="stats", action_names="set_eni_attrs"] counter(64, CounterType.packets_and_bytes) eni_lb_fast_path_icmp_in_counter;
+    action set_eni_attrs(bit<32> cps, bit<32> pps, bit<32> flows, bit<1> admin_state, @SaiVal[type="sai_ip_address_t"] IPv4Address vm_underlay_dip, @SaiVal[type="sai_uint32_t"] bit<24> vm_vni, @SaiVal[type="sai_object_id_t"] bit<16> vnet_id, IPv6Address pl_sip, IPv6Address pl_sip_mask, @SaiVal[type="sai_ip_address_t"] IPv4Address pl_underlay_sip, @SaiVal[type="sai_object_id_t"] bit<16> v4_meter_policy_id, @SaiVal[type="sai_object_id_t"] bit<16> v6_meter_policy_id, @SaiVal[type="sai_dash_tunnel_dscp_mode_t"] dash_tunnel_dscp_mode_t dash_tunnel_dscp_mode, @SaiVal[type="sai_uint8_t", validonly="SAI_ENI_ATTR_DASH_TUNNEL_DSCP_MODE == SAI_DASH_TUNNEL_DSCP_MODE_PIPE_MODEL"] bit<6> dscp, @SaiVal[type="sai_object_id_t"] bit<16> inbound_v4_stage1_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> inbound_v4_stage2_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> inbound_v4_stage3_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> inbound_v4_stage4_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> inbound_v4_stage5_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> inbound_v6_stage1_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> inbound_v6_stage2_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> inbound_v6_stage3_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> inbound_v6_stage4_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> inbound_v6_stage5_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> outbound_v4_stage1_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> outbound_v4_stage2_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> outbound_v4_stage3_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> outbound_v4_stage4_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> outbound_v4_stage5_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> outbound_v6_stage1_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> outbound_v6_stage2_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> outbound_v6_stage3_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> outbound_v6_stage4_dash_acl_group_id, @SaiVal[type="sai_object_id_t"] bit<16> outbound_v6_stage5_dash_acl_group_id, bit<1> disable_fast_path_icmp_flow_redirection) {
         meta.eni_data.cps = cps;
         meta.eni_data.pps = pps;
         meta.eni_data.flows = flows;
         meta.eni_data.admin_state = admin_state;
+        meta.eni_data.pl_sip = pl_sip;
+        meta.eni_data.pl_sip_mask = pl_sip_mask;
+        meta.eni_data.pl_underlay_sip = pl_underlay_sip;
         meta.encap_data.underlay_dip = vm_underlay_dip;
+        if (dash_tunnel_dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
+            meta.eni_data.dscp = dscp;
+        }
         meta.encap_data.vni = vm_vni;
         meta.vnet_id = vnet_id;
         if (meta.is_overlay_ip_v6 == 1) {
@@ -731,10 +1088,11 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             }
             meta.meter_policy_id = v4_meter_policy_id;
         }
+        meta.fast_path_icmp_flow_redirection_disabled = disable_fast_path_icmp_flow_redirection;
     }
-    @name("eni|dash_eni") table eni {
+    @SaiTable[name="eni", api="dash_eni", order=1, isobject="true"] table eni {
         key = {
-            meta.eni_id: exact @name("meta.eni_id:eni_id");
+            meta.eni_id: exact @SaiVal[type="sai_object_id_t"];
         }
         actions = {
             set_eni_attrs;
@@ -742,27 +1100,15 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         const default_action = deny;
     }
-    direct_counter(CounterType.packets_and_bytes) eni_counter;
-    table eni_meter {
-        key = {
-            meta.eni_id   : exact @name("meta.eni_id:eni_id");
-            meta.direction: exact @name("meta.direction:direction");
-            meta.dropped  : exact @name("meta.dropped:dropped");
-        }
-        actions = {
-            NoAction;
-        }
-        counters = eni_counter;
-    }
     action permit() {
     }
-    action vxlan_decap_pa_validate(bit<16> src_vnet_id) {
+    action tunnel_decap_pa_validate(@SaiVal[type="sai_object_id_t"] bit<16> src_vnet_id) {
         meta.vnet_id = src_vnet_id;
     }
-    @name("pa_validation|dash_pa_validation") table pa_validation {
+    @SaiTable[name="pa_validation", api="dash_pa_validation"] table pa_validation {
         key = {
-            meta.vnet_id     : exact @name("meta.vnet_id:vnet_id");
-            hdr.ipv4.src_addr: exact @name("hdr.ipv4.src_addr:sip");
+            meta.vnet_id        : exact @SaiVal[type="sai_object_id_t"];
+            hdr.u0_ipv4.src_addr: exact @SaiVal[name="sip", type="sai_ip_address_t"];
         }
         actions = {
             permit;
@@ -770,20 +1116,20 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         const default_action = deny;
     }
-    @name("inbound_routing|dash_inbound_routing") table inbound_routing {
+    @SaiTable[name="inbound_routing", api="dash_inbound_routing"] table inbound_routing {
         key = {
-            meta.eni_id      : exact @name("meta.eni_id:eni_id");
-            hdr.vxlan.vni    : exact @name("hdr.vxlan.vni:VNI");
-            hdr.ipv4.src_addr: ternary @name("hdr.ipv4.src_addr:sip");
+            meta.eni_id         : exact @SaiVal[type="sai_object_id_t"];
+            hdr.u0_vxlan.vni    : exact @SaiVal[name="VNI"];
+            hdr.u0_ipv4.src_addr: ternary @SaiVal[name="sip", type="sai_ip_address_t"];
         }
         actions = {
-            vxlan_decap(hdr);
-            vxlan_decap_pa_validate;
+            tunnel_decap(hdr, meta);
+            tunnel_decap_pa_validate;
             @defaultonly deny;
         }
         const default_action = deny;
     }
-    action check_ip_addr_family(@Sai[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
+    action set_acl_group_attrs(@SaiVal[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
         if (ip_addr_family == 0) {
             if (meta.is_overlay_ip_v6 == 1) {
                 meta.dropped = true;
@@ -794,112 +1140,36 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             }
         }
     }
-    @name("meter_policy|dash_meter") @Sai[isobject="true"] table meter_policy {
+    @SaiTable[name="dash_acl_group", api="dash_acl", order=0, isobject="true"] table acl_group {
         key = {
-            meta.meter_policy_id: exact @name("meta.meter_policy_id:meter_policy_id");
-        }
-        actions = {
-            check_ip_addr_family;
-        }
-    }
-    action set_policy_meter_class(bit<16> meter_class) {
-        meta.policy_meter_class = meter_class;
-    }
-    @name("meter_rule|dash_meter") @Sai[isobject="true"] table meter_rule {
-        key = {
-            meta.meter_policy_id: exact @name("meta.meter_policy_id:meter_policy_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="METER_POLICY"];
-            hdr.ipv4.dst_addr   : ternary @name("hdr.ipv4.dst_addr:dip");
-        }
-        actions = {
-            set_policy_meter_class;
-            @defaultonly NoAction;
-        }
-        const default_action = NoAction();
-    }
-    counter(262144, CounterType.bytes) meter_bucket_inbound;
-    counter(262144, CounterType.bytes) meter_bucket_outbound;
-    action meter_bucket_action(@Sai[type="sai_uint64_t", isreadonly="true"] bit<64> outbound_bytes_counter, @Sai[type="sai_uint64_t", isreadonly="true"] bit<64> inbound_bytes_counter, @Sai[type="sai_uint32_t", skipattr="true"] bit<32> meter_bucket_index) {
-        meta.meter_bucket_index = meter_bucket_index;
-    }
-    @name("meter_bucket|dash_meter") @Sai[isobject="true"] table meter_bucket {
-        key = {
-            meta.eni_id     : exact @name("meta.eni_id:eni_id");
-            meta.meter_class: exact @name("meta.meter_class:meter_class");
-        }
-        actions = {
-            meter_bucket_action;
-            @defaultonly NoAction;
-        }
-        const default_action = NoAction();
-    }
-    action set_eni(bit<16> eni_id) {
-        meta.eni_id = eni_id;
-    }
-    @name("eni_ether_address_map|dash_eni") table eni_ether_address_map {
-        key = {
-            meta.eni_addr: exact @name("meta.eni_addr:address");
-        }
-        actions = {
-            set_eni;
-            @defaultonly deny;
-        }
-        const default_action = deny;
-    }
-    action set_acl_group_attrs(@Sai[type="sai_ip_addr_family_t", isresourcetype="true"] bit<32> ip_addr_family) {
-        if (ip_addr_family == 0) {
-            if (meta.is_overlay_ip_v6 == 1) {
-                meta.dropped = true;
-            }
-        } else {
-            if (meta.is_overlay_ip_v6 == 0) {
-                meta.dropped = true;
-            }
-        }
-    }
-    @name("dash_acl_group|dash_acl") table acl_group {
-        key = {
-            meta.stage1_dash_acl_group_id: exact @name("meta.stage1_dash_acl_group_id:dash_acl_group_id");
+            meta.stage1_dash_acl_group_id: exact @SaiVal[name="dash_acl_group_id"];
         }
         actions = {
             set_acl_group_attrs();
         }
     }
-    action set_src_tag(tag_map_t tag_map) {
-        meta.src_tag_map = tag_map;
-    }
-    @name("src_tag|dash_tag") table src_tag {
-        key = {
-            meta.src_ip_addr: lpm @name("meta.src_ip_addr:sip");
-        }
-        actions = {
-            set_src_tag;
-        }
-    }
-    action set_dst_tag(tag_map_t tag_map) {
-        meta.dst_tag_map = tag_map;
-    }
-    @name("dst_tag|dash_tag") table dst_tag {
-        key = {
-            meta.dst_ip_addr: lpm @name("meta.dst_ip_addr:dip");
-        }
-        actions = {
-            set_dst_tag;
-        }
-    }
     apply {
-        standard_metadata.egress_spec = standard_metadata.ingress_port;
-        if (vip.apply().hit) {
-            meta.encap_data.underlay_sip = hdr.ipv4.dst_addr;
+        if (meta.is_fast_path_icmp_flow_redirection_packet) {
+            port_lb_fast_path_icmp_in_counter.count((bit<32>)0);
         }
-        direction_lookup.apply();
+        if (vip.apply().hit) {
+            meta.encap_data.underlay_sip = hdr.u0_ipv4.dst_addr;
+        } else {
+            if (meta.is_fast_path_icmp_flow_redirection_packet) {
+            }
+        }
+        direction_lookup_stage.apply(hdr, meta);
         appliance.apply();
+        eni_lookup_stage.apply(hdr, meta);
+        meta.eni_data.dscp_mode = dash_tunnel_dscp_mode_t.PRESERVE_MODEL;
+        meta.eni_data.dscp = (bit<6>)hdr.u0_ipv4.diffserv;
         if (meta.direction == dash_direction_t.OUTBOUND) {
-            vxlan_decap(hdr);
+            tunnel_decap(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
             switch (inbound_routing.apply().action_run) {
-                vxlan_decap_pa_validate: {
+                tunnel_decap_pa_validate: {
                     pa_validation.apply();
-                    vxlan_decap(hdr);
+                    tunnel_decap(hdr, meta);
                 }
             }
         }
@@ -907,58 +1177,44 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         meta.ip_protocol = 0;
         meta.dst_ip_addr = 0;
         meta.src_ip_addr = 0;
-        if (hdr.ipv6.isValid()) {
-            meta.ip_protocol = hdr.ipv6.next_header;
-            meta.src_ip_addr = hdr.ipv6.src_addr;
-            meta.dst_ip_addr = hdr.ipv6.dst_addr;
+        if (hdr.customer_ipv6.isValid()) {
+            meta.ip_protocol = hdr.customer_ipv6.next_header;
+            meta.src_ip_addr = hdr.customer_ipv6.src_addr;
+            meta.dst_ip_addr = hdr.customer_ipv6.dst_addr;
             meta.is_overlay_ip_v6 = 1;
-        } else if (hdr.ipv4.isValid()) {
-            meta.ip_protocol = hdr.ipv4.protocol;
-            meta.src_ip_addr = (bit<128>)hdr.ipv4.src_addr;
-            meta.dst_ip_addr = (bit<128>)hdr.ipv4.dst_addr;
+        } else if (hdr.customer_ipv4.isValid()) {
+            meta.ip_protocol = hdr.customer_ipv4.protocol;
+            meta.src_ip_addr = (bit<128>)hdr.customer_ipv4.src_addr;
+            meta.dst_ip_addr = (bit<128>)hdr.customer_ipv4.dst_addr;
         }
-        if (hdr.tcp.isValid()) {
-            meta.src_l4_port = hdr.tcp.src_port;
-            meta.dst_l4_port = hdr.tcp.dst_port;
-        } else if (hdr.udp.isValid()) {
-            meta.src_l4_port = hdr.udp.src_port;
-            meta.dst_l4_port = hdr.udp.dst_port;
+        if (hdr.customer_tcp.isValid()) {
+            meta.src_l4_port = hdr.customer_tcp.src_port;
+            meta.dst_l4_port = hdr.customer_tcp.dst_port;
+        } else if (hdr.customer_udp.isValid()) {
+            meta.src_l4_port = hdr.customer_udp.src_port;
+            meta.dst_l4_port = hdr.customer_udp.dst_port;
         }
-        meta.eni_addr = (meta.direction == dash_direction_t.OUTBOUND ? hdr.ethernet.src_addr : hdr.ethernet.dst_addr);
-        eni_ether_address_map.apply();
         eni.apply();
         if (meta.eni_data.admin_state == 0) {
             deny();
         }
+        if (meta.is_fast_path_icmp_flow_redirection_packet) {
+            eni_lb_fast_path_icmp_in_counter.count((bit<32>)meta.eni_id);
+        }
         acl_group.apply();
-        src_tag.apply();
-        dst_tag.apply();
         if (meta.direction == dash_direction_t.OUTBOUND) {
+            meta.target_stage = dash_pipeline_stage_t.OUTBOUND_ROUTING;
             outbound.apply(hdr, meta);
         } else if (meta.direction == dash_direction_t.INBOUND) {
             inbound.apply(hdr, meta);
         }
-        if (meta.meter_policy_en == 1) {
-            meter_policy.apply();
-            meter_rule.apply();
+        routing_action_apply.apply(hdr, meta);
+        meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;
+        underlay.apply(hdr, meta, standard_metadata);
+        if (meta.eni_data.dscp_mode == dash_tunnel_dscp_mode_t.PIPE_MODEL) {
+            hdr.u0_ipv4.diffserv = (bit<8>)meta.eni_data.dscp;
         }
-        {
-            if (meta.meter_policy_en == 1) {
-                meta.meter_class = meta.policy_meter_class;
-            } else {
-                meta.meter_class = meta.route_meter_class;
-            }
-            if (meta.meter_class == 0 || meta.mapping_meter_class_override == 1) {
-                meta.meter_class = meta.mapping_meter_class;
-            }
-        }
-        meter_bucket.apply();
-        if (meta.direction == dash_direction_t.OUTBOUND) {
-            meter_bucket_outbound.count(meta.meter_bucket_index);
-        } else if (meta.direction == dash_direction_t.INBOUND) {
-            meter_bucket_inbound.count(meta.meter_bucket_index);
-        }
-        eni_meter.apply();
+        metering_update_stage.apply(hdr, meta);
         if (meta.dropped) {
             drop_action();
         }
@@ -972,6 +1228,7 @@ control dash_verify_checksum(inout headers_t hdr, inout metadata_t meta) {
 
 control dash_compute_checksum(inout headers_t hdr, inout metadata_t meta) {
     apply {
+        update_checksum(hdr.u0_ipv4.isValid(), { hdr.u0_ipv4.version, hdr.u0_ipv4.ihl, hdr.u0_ipv4.diffserv, hdr.u0_ipv4.total_len, hdr.u0_ipv4.identification, hdr.u0_ipv4.frag_offset, hdr.u0_ipv4.flags, hdr.u0_ipv4.ttl, hdr.u0_ipv4.protocol, hdr.u0_ipv4.src_addr, hdr.u0_ipv4.dst_addr }, hdr.u0_ipv4.hdr_checksum, HashAlgorithm.csum16);
     }
 }
 

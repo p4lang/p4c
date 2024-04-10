@@ -596,6 +596,15 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             if (annoVal->text == "macaddr" || annoVal->text == "ipv4" || annoVal->text == "ipv6") {
                 noEndiannessConversion = true;
                 break;
+            } else if (annoVal->text == "be16" || annoVal->text == "be32" ||
+                       annoVal->text == "be64") {
+                std::string sInt = annoVal->text.substr(2).c_str();
+                unsigned int width = std::stoi(sInt);
+                if (widthToExtract != width) {
+                    ::error("Width of the field doesnt match the annotation width. '%1%'", field);
+                }
+                noEndiannessConversion = true;
+                break;
             }
         }
     }
@@ -1587,7 +1596,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->appendLine("};");
             builder->emitIndent();
             builder->append(
-                "bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf)");
+                "bpf_p4tc_entry_update(skb, &update_params, sizeof(params), &key, sizeof(key))");
         }
         return;
     } else if (function->expr->method->toString() == "add_entry") {
@@ -1671,6 +1680,8 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         builder->emitIndent();
         builder->appendLine("struct p4tc_table_entry_create_bpf_params__local update_params = {");
         builder->emitIndent();
+        builder->appendLine("    .act_bpf = update_act_bpf,");
+        builder->emitIndent();
         builder->appendLine("    .pipeid = p4tc_filter_fields.pipeid,");
         builder->emitIndent();
         builder->appendLine("    .handle = p4tc_filter_fields.handle,");
@@ -1696,8 +1707,8 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         builder->appendLine("};");
         builder->emitIndent();
         builder->append(
-            "bpf_p4tc_entry_create_on_miss(skb, &update_params, &key, sizeof(key), "
-            "&update_act_bpf)");
+            "bpf_p4tc_entry_create_on_miss(skb, &update_params, sizeof(params), &key, "
+            "sizeof(key))");
         return;
     }
     processCustomExternFunction(function, EBPF::EBPFTypeFactory::instance);
@@ -1835,7 +1846,8 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
         builder->appendLine("/* perform lookup */");
         builder->target->emitTraceMessage(builder, "Control: performing table lookup");
         builder->emitIndent();
-        builder->appendLine("act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));");
+        builder->appendLine(
+            "act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));");
         builder->emitIndent();
         builder->appendFormat("value = (struct %s *)act_bpf;", table->valueTypeName.c_str());
         builder->newline();
@@ -2047,7 +2059,8 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                     if (anno->name != ParseTCAnnotations::tcType) continue;
                     for (auto annoVal : anno->body) {
                         if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
-                            annoVal->text == "ipv6") {
+                            annoVal->text == "ipv6" || annoVal->text == "be16" ||
+                            annoVal->text == "be32" || annoVal->text == "be64") {
                             noEndiannessConversion = true;
                             break;
                         }

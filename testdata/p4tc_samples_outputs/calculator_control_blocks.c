@@ -83,7 +83,7 @@ if (/* hdr->p4calc.isValid() */
                     /* value */
                     struct MainControlImpl_calculate_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
                     value = (struct MainControlImpl_calculate_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
