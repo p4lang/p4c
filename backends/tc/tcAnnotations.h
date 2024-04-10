@@ -30,12 +30,13 @@ class ParseTCAnnotations : public P4::ParseAnnotations {
     static const cstring tcType;
     static const cstring numMask;
     static const cstring tcMayOverride;
+    static const cstring tc_acl;
     ParseTCAnnotations()
         : P4::ParseAnnotations(
               "TC", true,
               {PARSE_EMPTY(defaultHit), PARSE_EMPTY(defaultHitConst),
                PARSE_CONSTANT_OR_STRING_LITERAL(tcType), PARSE_CONSTANT_OR_STRING_LITERAL(numMask),
-               PARSE_EMPTY(tcMayOverride)}) {}
+               PARSE_EMPTY(tcMayOverride), PARSE_CONSTANT_OR_STRING_LITERAL(tc_acl)}) {}
 };
 
 }  // namespace TC

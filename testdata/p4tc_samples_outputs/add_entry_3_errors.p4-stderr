@@ -1,0 +1,76 @@
+terminate called after throwing an instance of 'backtrace_exception<std::out_of_range>'
+  what():  vector::_M_range_check: __n (which is 0) >= this->size() (which is 0)
+  ./p4c-pna-p4tc(_ZSt24__throw_out_of_range_fmtPKcz+0x113) [0xcf8d93]
+    std::__throw_out_of_range_fmt(char const*, ...) at ??:?
+  ./p4c-pna-p4tc() [0x4d7c7f]
+    TC::ConvertToBackendIR::HandleTableAccessPermisson(IR::Annotation const*, IR::P4Table const*) at ??:?
+  ./p4c-pna-p4tc() [0x4d7e4f]
+    TC::ConvertToBackendIR::updateAddOnMissTable(IR::P4Table const*) at ??:?
+  ./p4c-pna-p4tc() [0x50a880]
+    TC::ControlBodyTranslatorPNA::processFunction(P4::ExternFunction const*) at ??:?
+  ./p4c-pna-p4tc() [0x57bff9]
+    EBPF::ControlBodyTranslator::preorder(IR::MethodCallExpression const*) at ??:?
+  ./p4c-pna-p4tc() [0xce393c]
+    Inspector::apply_visitor(IR::Node const*, char const*) at ??:?
+  ./p4c-pna-p4tc() [0xcd9f95]
+    Visitor::visit(IR::MethodCallExpression const* const&, char const*) at ??:?
+  ./p4c-pna-p4tc() [0x5982a9]
+    EBPF::CodeGenInspector::preorder(IR::MethodCallStatement const*) at ??:?
+  ./p4c-pna-p4tc() [0xce393c]
+    Inspector::apply_visitor(IR::Node const*, char const*) at ??:?
+  ./p4c-pna-p4tc() [0xce5de0]
+    Visitor::visit(IR::StatOrDecl const*&, char const*) at ??:?
+  ./p4c-pna-p4tc() [0x59a12c]
+    EBPF::CodeGenInspector::preorder(IR::BlockStatement const*) at ??:?
+  ./p4c-pna-p4tc() [0xce393c]
+    Inspector::apply_visitor(IR::Node const*, char const*) at ??:?
+  ./p4c-pna-p4tc() [0xcdb7c5]
+    Visitor::visit(IR::BlockStatement const* const&, char const*) at ??:?
+  ./p4c-pna-p4tc() [0x56ac27]
+    virtual thunk to EBPF::ActionTranslationVisitor::preorder(IR::P4Action const*) at ??:?
+  ./p4c-pna-p4tc() [0xce393c]
+    Inspector::apply_visitor(IR::Node const*, char const*) at ??:?
+  ./p4c-pna-p4tc() [0xc6861f]
+    IR::Node::apply(Visitor&, Visitor_Context const*) const at ??:?
+  ./p4c-pna-p4tc() [0x509da9]
+    TC::EBPFTablePNA::emitAction(EBPF::CodeBuilder*, cstring, cstring) at ??:?
+  ./p4c-pna-p4tc() [0x5070fe]
+    TC::ControlBodyTranslatorPNA::processApply(P4::ApplyMethod const*) at ??:?
+  ./p4c-pna-p4tc() [0x57bd79]
+    EBPF::ControlBodyTranslator::preorder(IR::MethodCallExpression const*) at ??:?
+  ./p4c-pna-p4tc() [0xce393c]
+    Inspector::apply_visitor(IR::Node const*, char const*) at ??:?
+  ./p4c-pna-p4tc() [0xcd9f95]
+    Visitor::visit(IR::MethodCallExpression const* const&, char const*) at ??:?
+  ./p4c-pna-p4tc() [0x5982a9]
+    EBPF::CodeGenInspector::preorder(IR::MethodCallStatement const*) at ??:?
+  ./p4c-pna-p4tc() [0xce393c]
+    Inspector::apply_visitor(IR::Node const*, char const*) at ??:?
+  ./p4c-pna-p4tc() [0xcdb465]
+    Visitor::visit(IR::Statement const* const&, char const*) at ??:?
+  ./p4c-pna-p4tc() [0x57b1db]
+    EBPF::ControlBodyTranslator::preorder(IR::IfStatement const*) at ??:?
+  ./p4c-pna-p4tc() [0xce393c]
+    Inspector::apply_visitor(IR::Node const*, char const*) at ??:?
+  ./p4c-pna-p4tc() [0xce5de0]
+    Visitor::visit(IR::StatOrDecl const*&, char const*) at ??:?
+  ./p4c-pna-p4tc() [0x59a12c]
+    EBPF::CodeGenInspector::preorder(IR::BlockStatement const*) at ??:?
+  ./p4c-pna-p4tc() [0xce393c]
+    Inspector::apply_visitor(IR::Node const*, char const*) at ??:?
+  ./p4c-pna-p4tc() [0xc6861f]
+    IR::Node::apply(Visitor&, Visitor_Context const*) const at ??:?
+  ./p4c-pna-p4tc() [0x57a9e6]
+    EBPF::EBPFControl::emit(EBPF::CodeBuilder*) at ??:?
+  ./p4c-pna-p4tc() [0x507d0d]
+    TC::TCIngressPipelinePNA::emit(EBPF::CodeBuilder*) at ??:?
+  ./p4c-pna-p4tc() [0x500b9f]
+    TC::PNAArchTC::emit(EBPF::CodeBuilder*) const at ??:?
+  ./p4c-pna-p4tc() [0x4dc01f]
+    TC::Backend::serialize() const at ??:?
+  ./p4c-pna-p4tc() [0x4c8428]
+    main at ??:?
+  /lib64/libc.so.6(+0x3feb0) [0x7ff9b771deb0]
+  /lib64/libc.so.6(__libc_start_main+0x80) [0x7ff9b771df60]
+  ./p4c-pna-p4tc() [0x4d3285]
+    _start at ??:?
