@@ -89,10 +89,10 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                 goto reject;
             }
 
-            __builtin_memcpy(&hdr->tcp.srcPort, pkt + BYTES(ebpf_packetOffsetInBits), 2);
+            hdr->tcp.srcPort = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
-            __builtin_memcpy(&hdr->tcp.dstPort, pkt + BYTES(ebpf_packetOffsetInBits), 2);
+            hdr->tcp.dstPort = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
             hdr->tcp.seqNo = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));

@@ -231,7 +231,7 @@ if (/* hdr->ipv4.isValid() */
                     /* value */
                     struct MainControlImpl_ipv4_tbl_1_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_ipv4_tbl_1_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -284,7 +284,7 @@ if (hdr->ipv4.protocol != 6) {
                     /* value */
                     struct MainControlImpl_ipv4_tbl_2_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_ipv4_tbl_2_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -337,7 +337,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                     /* value */
                     struct MainControlImpl_ipv4_tbl_3_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_ipv4_tbl_3_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -389,7 +389,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                     /* value */
                     struct MainControlImpl_ipv4_tbl_4_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_ipv4_tbl_4_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -439,7 +439,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                     /* value */
                     struct MainControlImpl_ipv4_tbl_5_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_ipv4_tbl_5_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -474,7 +474,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                     /* value */
                     struct MainControlImpl_set_ct_options_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_set_ct_options_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -524,7 +524,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                     /* value */
                     struct MainControlImpl_set_all_options_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_set_all_options_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */

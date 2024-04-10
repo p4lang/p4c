@@ -77,7 +77,7 @@ if (/* hdr->ipv4.isValid() */
                     /* value */
                     struct MainControlImpl_ipv4_tbl_1_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_ipv4_tbl_1_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -99,7 +99,6 @@ if (/* hdr->ipv4.isValid() */
 
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
-                                        .act_bpf = update_act_bpf,
                                         .pipeid = p4tc_filter_fields.pipeid,
                                         .handle = p4tc_filter_fields.handle,
                                         .classid = p4tc_filter_fields.classid,
@@ -109,7 +108,7 @@ if (/* hdr->ipv4.isValid() */
                                         .tblid = 1,
                                         .profile_id = 2
                                     };
-                                    bpf_p4tc_entry_create_on_miss(skb, &update_params, sizeof(params), &key, sizeof(key));
+                                    bpf_p4tc_entry_create_on_miss(skb, &update_params, &key, sizeof(key), &update_act_bpf);
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_SEND_NH: 

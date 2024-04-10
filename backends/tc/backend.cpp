@@ -573,8 +573,8 @@ cstring ConvertToBackendIR::HandleTableAccessPermisson(const IR::P4Table *t) {
     auto find = tablePermissons.find(t->name.originalName);
     if (find != tablePermissons.end()) {
         auto paths = tablePermissons[t->name.originalName];
-        control_path = paths.first;
-        data_path = paths.second;
+        control_path = paths->first;
+        data_path = paths->second;
     }
     // Default access value of Control_path and Data_Path
     if (control_path.isNullOrEmpty()) {
@@ -603,7 +603,8 @@ cstring ConvertToBackendIR::HandleTableAccessPermisson(const IR::P4Table *t) {
     return value.str().c_str();
 }
 
-std::pair<cstring, cstring> ConvertToBackendIR::GetAnnotatedAccessPath(const IR::Annotation *anno) {
+std::pair<cstring, cstring> *ConvertToBackendIR::GetAnnotatedAccessPath(
+    const IR::Annotation *anno) {
     cstring control_path, data_path;
     if (anno) {
         auto expr = anno->expr[0];
@@ -614,7 +615,8 @@ std::pair<cstring, cstring> ConvertToBackendIR::GetAnnotatedAccessPath(const IR:
             data_path = permisson_str.substr(char_pos - permisson_str.begin() + 1);
         }
     }
-    return std::make_pair<cstring, cstring>(std::move(control_path), std::move(data_path));
+    auto paths = new std::pair<cstring, cstring>(control_path, data_path);
+    return paths;
 }
 
 void ConvertToBackendIR::postorder(const IR::P4Table *t) {
