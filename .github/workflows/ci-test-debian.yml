@@ -20,7 +20,6 @@ jobs:
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
-      COMPILE_WITH_CLANG: ON
       BUILD_GENERATOR: Ninja
     steps:
       - uses: actions/checkout@v4
@@ -52,7 +51,6 @@ jobs:
         unity: [ON, OFF]
     runs-on: ubuntu-20.04
     env:
-      COMPILE_WITH_CLANG: ON
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ${{ matrix.unity }}
