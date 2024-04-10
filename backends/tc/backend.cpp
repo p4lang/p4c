@@ -521,7 +521,7 @@ void ConvertToBackendIR::updateAddOnMissTable(const IR::P4Table *t) {
             add_on_miss_tables.push_back(t);
             auto tableDefinition = ((IR::TCTable *)table);
             tableDefinition->setTableAddOnMiss();
-            tableDefinition->setTablePermisson(HandleTableAccessPermisson(t));
+            tableDefinition->setTablePermisson(HandleTableAccessPermission(t));
         }
     }
 }
@@ -561,7 +561,7 @@ unsigned ConvertToBackendIR::GetAccessNumericValue(cstring access) {
     return value;
 }
 
-cstring ConvertToBackendIR::HandleTableAccessPermisson(const IR::P4Table *t) {
+cstring ConvertToBackendIR::HandleTableAccessPermission(const IR::P4Table *t) {
     bool unused_ps[14], IsTableAddOnMiss = false;
     cstring control_path, data_path;
     memset(unused_ps, true, 14);
@@ -570,9 +570,9 @@ cstring ConvertToBackendIR::HandleTableAccessPermisson(const IR::P4Table *t) {
             IsTableAddOnMiss = true;
         }
     }
-    auto find = tablePermissons.find(t->name.originalName);
-    if (find != tablePermissons.end()) {
-        auto paths = tablePermissons[t->name.originalName];
+    auto find = tablePermissions.find(t->name.originalName);
+    if (find != tablePermissions.end()) {
+        auto paths = tablePermissions[t->name.originalName];
         control_path = paths->first;
         data_path = paths->second;
     }
@@ -588,7 +588,7 @@ cstring ConvertToBackendIR::HandleTableAccessPermisson(const IR::P4Table *t) {
 
     if (IsTableAddOnMiss) {
         auto access = data_path.find('C');
-        if (access == nullptr) {
+        if (!access) {
             ::warning(
                 ErrorType::WARN_INVALID,
                 "Add on miss table '%1%' should have 'create' access permissons for data path.",
@@ -657,7 +657,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         auto annoList = t->getAnnotations()->annotations;
         for (auto anno : annoList) {
             if (anno->name == ParseTCAnnotations::tc_acl) {
-                tablePermissons.emplace(t->name.originalName, GetAnnotatedAccessPath(anno));
+                tablePermissions.emplace(t->name.originalName, GetAnnotatedAccessPath(anno));
             } else if (anno->name == ParseTCAnnotations::numMask) {
                 auto expr = anno->expr[0];
                 if (auto val = expr->to<IR::Constant>()) {
@@ -670,7 +670,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                 }
             }
         }
-        tableDefinition->setTablePermisson(HandleTableAccessPermisson(t));
+        tableDefinition->setTablePermisson(HandleTableAccessPermission(t));
         auto actionlist = t->getActionList();
         for (auto action : actionlist->actionList) {
             for (auto actionDef : tcPipeline->actionDefs) {

@@ -6,6 +6,7 @@
       "name" : "MainControlImpl/tbl_default",
       "id" : 1,
       "tentries" : 100,
+      "permissions" : "0x25a4",
       "nummask" : 8,
       "keysize" : 128,
       "keyfields" : [

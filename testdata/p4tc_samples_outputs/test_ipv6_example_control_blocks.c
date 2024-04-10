@@ -66,7 +66,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
                 /* value */
                 struct MainControlImpl_tbl_default_value *value = NULL;
                 /* perform lookup */
-                act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
                 value = (struct MainControlImpl_tbl_default_value *)act_bpf;
                 if (value == NULL) {
                     /* miss; find default action */

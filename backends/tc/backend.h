@@ -63,7 +63,7 @@ class ConvertToBackendIR : public Inspector {
     ordered_map<unsigned, cstring> actionIDList;
     ordered_map<unsigned, unsigned> tableKeysizeList;
     safe_vector<const IR::P4Table *> add_on_miss_tables;
-    ordered_map<cstring, std::pair<cstring, cstring> *> tablePermissons;
+    ordered_map<cstring, std::pair<cstring, cstring> *> tablePermissions;
 
  public:
     ConvertToBackendIR(const IR::ToplevelBlock *tlb, IR::TCPipeline *pipe, P4::ReferenceMap *refMap,
@@ -91,7 +91,7 @@ class ConvertToBackendIR : public Inspector {
     unsigned getActionId(cstring actionName) const;
     unsigned getTableKeysize(unsigned tableId) const;
     cstring externalName(const IR::IDeclaration *declaration) const;
-    cstring HandleTableAccessPermisson(const IR::P4Table *t);
+    cstring HandleTableAccessPermission(const IR::P4Table *t);
     std::pair<cstring, cstring> *GetAnnotatedAccessPath(const IR::Annotation *anno);
     unsigned GetAccessNumericValue(cstring access);
     void updateAddOnMissTable(const IR::P4Table *t);

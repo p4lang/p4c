@@ -97,6 +97,7 @@ struct ActionAttributes {
 
 struct TableAttributes {
     cstring name;
+    cstring permissions;
     unsigned int id;
     unsigned int tentries;
     unsigned int numMask;

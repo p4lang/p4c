@@ -24,17 +24,6 @@ header ipv4_t {
     @tc_type ("ipv4") bit<32> dstAddr;
 }
 
-//////////////////////////////////////////////////////////////////////
-// Struct types for holding user-defined collections of headers and
-// metadata in the P4 developer's program.
-//
-// Note: The names of these struct types are completely up to the P4
-// developer, as are their member fields, with the only restriction
-// being that the structs intended to contain headers should only
-// contain members whose types are header, header stack, or
-// header_union.
-//////////////////////////////////////////////////////////////////////
-
 struct main_metadata_t {
     // empty for this skeleton
 }

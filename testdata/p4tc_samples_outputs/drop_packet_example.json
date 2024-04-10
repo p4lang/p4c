@@ -6,6 +6,7 @@
       "name" : "MainControlImpl/ipv4_tbl",
       "id" : 1,
       "tentries" : 2048,
+      "permissions" : "0x25a4",
       "nummask" : 8,
       "keysize" : 32,
       "keyfields" : [
