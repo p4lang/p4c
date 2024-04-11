@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       CTEST_PARALLEL_LEVEL: 4
+      COMPILE_WITH_CLANG: ON
       IMAGE_TYPE: test
       BUILD_GENERATOR: Ninja
     steps:
@@ -52,6 +53,7 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       CTEST_PARALLEL_LEVEL: 4
+      COMPILE_WITH_CLANG: ON
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ${{ matrix.unity }}
       BUILD_GENERATOR: Ninja
