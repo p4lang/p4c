@@ -14,6 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Some systems (e.g. those with GNU libc) declare posix_memalign with an
+// exception specifier. Compilers (clang including) might have special handling
+// of this to allow posix_memalign redeclaration with / without exception
+// specifier. As we define posix_memalign below in this file we really need to
+// ensure the proper include order to workaround this this weirdness.
+#include <mm_malloc.h>  // NOLINT(build/include_order)
+
 #include "config.h"
 #if HAVE_LIBGC
 #include <gc/gc_cpp.h>
@@ -264,7 +271,7 @@ void *calloc(size_t size, size_t elsize) {
 }
 int posix_memalign(void **memptr, size_t alignment, size_t size)
 #ifdef __GLIBC__
-    noexcept
+    __THROW
 #endif
 {
     maybe_initialize_gc();
