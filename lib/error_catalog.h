@@ -124,7 +124,7 @@ class ErrorCatalog {
     /// retrieve the name for errorCode
     cstring getName(int errorCode) {
         if (errorCatalog.count(errorCode)) return errorCatalog.at(errorCode);
-        return "--unknown--";
+        return cstring("--unknown--");
     }
 
     /// return true if the given diagnostic can _only_ be an error; false otherwise
