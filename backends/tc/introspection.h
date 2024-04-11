@@ -107,6 +107,7 @@ struct TableAttributes {
     safe_vector<struct ActionAttributes *> actions;
     TableAttributes() {
         name = nullptr;
+        permissions = nullptr;
         id = 0;
         tentries = 0;
         numMask = 0;

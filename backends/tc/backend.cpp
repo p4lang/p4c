@@ -521,7 +521,7 @@ void ConvertToBackendIR::updateAddOnMissTable(const IR::P4Table *t) {
             add_on_miss_tables.push_back(t);
             auto tableDefinition = ((IR::TCTable *)table);
             tableDefinition->setTableAddOnMiss();
-            tableDefinition->setTablePermisson(HandleTableAccessPermission(t));
+            tableDefinition->setTablePermission(HandleTableAccessPermission(t));
         }
     }
 }
@@ -670,7 +670,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                 }
             }
         }
-        tableDefinition->setTablePermisson(HandleTableAccessPermission(t));
+        tableDefinition->setTablePermission(HandleTableAccessPermission(t));
         auto actionlist = t->getActionList();
         for (auto action : actionlist->actionList) {
             for (auto actionDef : tcPipeline->actionDefs) {

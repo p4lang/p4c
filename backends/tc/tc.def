@@ -245,7 +245,7 @@ class TCTable {
     ordered_map<TCAction, unsigned> actionList;
     safe_vector<TCEntry> const_entries;
 
-    void setTablePermisson(cstring p) {
+    void setTablePermission(cstring p) {
         permissions = p;
     }
     void setKeySize(unsigned k) {
