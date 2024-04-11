@@ -263,7 +263,7 @@ void *calloc(size_t size, size_t elsize) {
     return rv;
 }
 int posix_memalign(void **memptr, size_t alignment, size_t size)
-#ifndef __APPLE__
+#ifdef __GLIBC__
     noexcept
 #endif
 {
