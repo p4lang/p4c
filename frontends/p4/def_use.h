@@ -477,12 +477,12 @@ class AllDefinitions : public IHasDbPrint {
 
 class ComputeWriteSet : public Inspector, public IHasDbPrint {
  protected:
-    AllDefinitions *allDefinitions;    /// Result computed by this pass.
-    Definitions *currentDefinitions;   /// Before statement currently processed.
-    Definitions *returnedDefinitions;  /// Definitions after return statements.
-    Definitions *exitDefinitions;      /// Definitions after exit statements.
-    Definitions *breakDefinitions = nullptr;
-    Definitions *continueDefinitions = nullptr;
+    AllDefinitions *allDefinitions;              /// Result computed by this pass.
+    Definitions *currentDefinitions;             /// Before statement currently processed.
+    Definitions *returnedDefinitions;            /// Definitions after return statements.
+    Definitions *exitDefinitions;                /// Definitions after exit statements.
+    Definitions *breakDefinitions = nullptr;     /// Definitions at break statements.
+    Definitions *continueDefinitions = nullptr;  /// Definitions at continue statements.
     ProgramPoint callingContext;
     const StorageMap *storageMap;
     /// if true we are processing an expression on the lhs of an assignment

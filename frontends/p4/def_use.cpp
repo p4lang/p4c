@@ -469,8 +469,8 @@ bool ComputeWriteSet::setDefinitions(Definitions *defs, const IR::Node *node, bo
     // overwriting always in parser states.  In this case we actually expect
     // that the definitions are monotonically increasing.
     if (findContext<IR::ParserState>()) overwrite = true;
-    // loop bodies get visited repeatedly until a fixed point, so we likewise
-    // expect monotonically increasing write sets
+    // Loop bodies get visited repeatedly until a fixed point, so we likewise
+    // expect monotonically increasing write sets.
     if (continueDefinitions != nullptr) overwrite = true;  // in a loop
     allDefinitions->setDefinitionsAt(point, currentDefinitions, overwrite);
     if (LOGGING(5))

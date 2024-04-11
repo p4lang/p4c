@@ -481,6 +481,9 @@ class ControlFlowVisitor : public virtual Visitor {
     friend void dump(const flow_join_points_t &);
     friend void dump(const flow_join_points_t *);
 
+    // Flag set by visit_children of nodes that are unconditional branches, to denote that
+    // the control flow is currently unreachable.  Future flow_merges to this visitor should
+    // clear this if merging a reachable state.
     bool unreachable = false;
 
     flow_join_points_t *flow_join_points = 0;
