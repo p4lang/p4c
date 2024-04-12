@@ -989,7 +989,9 @@ class P4RuntimeAnalyzer {
 
         // add other annotations on the P4 package to the message. @pkginfo is
         // ignored using the unary predicate argument to addAnnotations.
-        addAnnotations(pkginfo, decl, [](cstring name) { return name == "pkginfo"; });
+        addAnnotations(pkginfo, decl, [](cstring name) {
+            return name == "pkginfo" || name == "platform_property";
+        });
 
         addDocumentation(pkginfo, decl);
     }
