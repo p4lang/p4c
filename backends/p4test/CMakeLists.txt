@@ -87,6 +87,9 @@ set (P4RUNTIME_EXCLUDE
   testdata/p4_16_samples/issue1062-1-bmv2.p4
   # table t key named meta.err is type error
   testdata/p4_16_samples/issue1304.p4
+  # table parser_error_count_and_convert key named istd.parser_error
+  # is type error
+  testdata/p4_16_samples/psa-example-parser-checksum.p4
 )
 
 set (P4_XFAIL_TESTS
