@@ -134,10 +134,12 @@ class BXor : Operation_Binary {
 class LAnd : Operation_Binary {
     stringOp = "&&";
     precedence = DBPrint::Prec_LAnd;
+    LAnd { if (type->is<Type::Unknown>()) type = IR::Type_Boolean::get(); }
 }
 class LOr : Operation_Binary {
     stringOp = "||";
     precedence = DBPrint::Prec_LOr;
+    LOr { if (type->is<Type::Unknown>()) type = IR::Type_Boolean::get(); }
 }
 
 /// Represents the ... default initializer expression
