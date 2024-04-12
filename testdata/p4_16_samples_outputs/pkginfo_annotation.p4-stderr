@@ -1,0 +1,3 @@
+[--Wwarn=ignore] warning: Got Int64 field: multicast_table_size with value 10
+[--Wwarn=ignore] warning: Got Int64 field: multicast_table_total_replicas with value 20
+[--Wwarn=ignore] warning: Got Int64 field: multicast_table_max_replicas_per_entry with value 30

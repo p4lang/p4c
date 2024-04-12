@@ -1,0 +1,12 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  name: "some_name"
+  version: "some_version"
+  annotations: "@platform_property(multicast_table_size=10, multicast_table_total_replicas=20, multicast_table_max_replicas_per_entry=30)"
+  arch: "v1model"
+  organization: "some_org"
+  contact: "some_contact"
+  url: "some_url"
+}
