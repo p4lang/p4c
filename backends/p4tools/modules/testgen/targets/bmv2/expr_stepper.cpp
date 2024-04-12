@@ -18,7 +18,6 @@
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
-#include "ir/ir-generated.h"
 #include "ir/irutils.h"
 #include "ir/node.h"
 #include "ir/solver.h"

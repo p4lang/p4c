@@ -192,14 +192,12 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::StateVariable &headerRef) 
             const auto *res = value->to<IR::BoolLiteral>();
             BUG_CHECK(res, "%1%: expected a boolean", value);
             if (res->value) {
-                state.replaceTopBody(
-                    Continuation::Return(new IR::BoolLiteral(IR::Type::Boolean::get(), true)));
+                state.replaceTopBody(Continuation::Return(IR::getBoolLiteral(true)));
                 result->emplace_back(state);
                 return false;
             }
         }
-        state.replaceTopBody(
-            Continuation::Return(new IR::BoolLiteral(IR::Type::Boolean::get(), false)));
+        state.replaceTopBody(Continuation::Return(IR::getBoolLiteral(false)));
         result->emplace_back(state);
         return false;
     }

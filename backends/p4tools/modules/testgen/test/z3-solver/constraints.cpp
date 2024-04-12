@@ -5,7 +5,6 @@
 
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/variables.h"
-#include "ir/ir-generated.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
