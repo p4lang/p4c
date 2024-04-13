@@ -26,8 +26,8 @@ header ipv4_t {
 }
 
 header tcp_t {
-    bit<16> srcPort;
-    bit<16> dstPort;
+    @tc_type("be16") bit<16> srcPort;
+    @tc_type("be16") bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
     bit<4>  dataOffset;

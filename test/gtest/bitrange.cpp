@@ -44,36 +44,41 @@ class BitrangeTestBase : public ::testing::Test {
 /// A fixture for testing properties that apply to all HalfOpenRange types.
 template <typename T>
 class HalfOpenRangeTest : public BitrangeTestBase {};
-typedef ::testing::Types<nw_bitinterval, nw_byteinterval, le_bitinterval, le_byteinterval>
-    HalfOpenRangeTypes;
-TYPED_TEST_CASE(HalfOpenRangeTest, HalfOpenRangeTypes);
+using HalfOpenRangeTypes =
+    ::testing::Types<nw_bitinterval, nw_byteinterval, le_bitinterval, le_byteinterval>;
+TYPED_TEST_SUITE(HalfOpenRangeTest,
+                 HalfOpenRangeTypes, );  // NOLINT(whitespace/parens), remove with C++20 upgrade.
 
 /// A fixture for testing properties that apply to all ClosedRange types.
 template <typename T>
 class ClosedRangeTest : public BitrangeTestBase {};
-typedef ::testing::Types<nw_bitrange, nw_byterange, le_bitrange, le_byterange> ClosedRangeTypes;
-TYPED_TEST_CASE(ClosedRangeTest, ClosedRangeTypes);
+using ClosedRangeTypes = ::testing::Types<nw_bitrange, nw_byterange, le_bitrange, le_byterange>;
+TYPED_TEST_SUITE(ClosedRangeTest,
+                 ClosedRangeTypes, );  // NOLINT(whitespace/parens), remove with C++20 upgrade.
 
 /// A fixture for testing properties that apply to all ranges with bit units.
 template <typename T>
 class BitRangeTest : public BitrangeTestBase {};
-typedef ::testing::Types<nw_bitinterval, le_bitinterval, nw_bitrange, le_bitrange> BitRangeTypes;
-TYPED_TEST_CASE(BitRangeTest, BitRangeTypes);
+using BitRangeTypes = ::testing::Types<nw_bitinterval, le_bitinterval, nw_bitrange, le_bitrange>;
+TYPED_TEST_SUITE(BitRangeTest,
+                 BitRangeTypes, );  // NOLINT(whitespace/parens), remove with C++20 upgrade.
 
 /// A fixture for testing properties that apply to all ranges with byte units.
 template <typename T>
 class ByteRangeTest : public BitrangeTestBase {};
-typedef ::testing::Types<nw_byteinterval, le_byteinterval, nw_byterange, le_byterange>
-    ByteRangeTypes;
-TYPED_TEST_CASE(ByteRangeTest, ByteRangeTypes);
+using ByteRangeTypes =
+    ::testing::Types<nw_byteinterval, le_byteinterval, nw_byterange, le_byterange>;
+TYPED_TEST_SUITE(ByteRangeTest,
+                 ByteRangeTypes, );  // NOLINT(whitespace/parens), remove with C++20 upgrade.
 
 /// A fixture for testing properties that apply to all ranges of any type.
 template <typename T>
 class AnyRangeTest : public BitrangeTestBase {};
-typedef ::testing::Types<nw_bitinterval, le_bitinterval, nw_bitrange, le_bitrange, nw_byteinterval,
-                         le_byteinterval, nw_byterange, le_byterange>
-    AnyRangeTypes;
-TYPED_TEST_CASE(AnyRangeTest, AnyRangeTypes);
+using AnyRangeTypes =
+    ::testing::Types<nw_bitinterval, le_bitinterval, nw_bitrange, le_bitrange, nw_byteinterval,
+                     le_byteinterval, nw_byterange, le_byterange>;
+TYPED_TEST_SUITE(AnyRangeTest,
+                 AnyRangeTypes, );  // NOLINT(whitespace/parens), remove with C++20 upgrade.
 
 TYPED_TEST(HalfOpenRangeTest, EmptyRange) {
     using HalfOpenRangeType = TypeParam;
