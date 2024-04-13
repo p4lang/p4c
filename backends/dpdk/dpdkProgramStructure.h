@@ -5,12 +5,12 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-// DPDK target implementation treats tables with keys lying non-contiguous in underlying
-// structure as wildcard even if all keys are exact match keys.
-// Learner tables are special table with contiguous and exact match keys.
+/// DPDK target implementation treats tables with keys lying non-contiguous in underlying
+/// structure as wildcard even if all keys are exact match keys.
+/// Learner tables are special table with contiguous and exact match keys.
 enum InternalTableType { REGULAR_EXACT, LEARNER, WILDCARD };
 
-/* Collect information related to P4 programs targeting dpdk */
+/// Collect information related to P4 programs targeting dpdk.
 struct DpdkProgramStructure {
     cstring p4arch;  // 'pna' or 'psa'
     ordered_map<cstring, const IR::Declaration_Variable *> scalars;
@@ -26,7 +26,7 @@ struct DpdkProgramStructure {
     ordered_map<cstring, const IR::Declaration_Variable *> header_unions;
     ordered_map<cstring, const IR::P4Action *> actions;
 
-    // table and action info for learner tables
+    /// table and action info for learner tables
     ordered_set<cstring> learner_tables;
     ordered_set<cstring> learner_actions;
     ordered_map<std::pair<cstring, cstring>, cstring> learner_action_map;
@@ -78,24 +78,20 @@ struct DpdkProgramStructure {
         return false;
     }
 
-    /**
-     * @brief Predicate that states whether architecture is PSA or not.
-     *
-     * Architecture is known after pass ParseDpdkArchitecture
-     *
-     * @return true If architecture is PSA.
-     * @return false If architecture is not PSA.
-     */
+    /// @brief Predicate that states whether architecture is PSA or not.
+    ///
+    /// Architecture is known after pass ParseDpdkArchitecture
+    ///
+    /// @return true If architecture is PSA.
+    /// @return false If architecture is not PSA.
     bool isPSA(void) { return (p4arch == "psa") ? true : false; }
 
-    /**
-     * @brief Predicate that states whether architecture is PNA or not.
-     *
-     * Architecture is known after pass ParseDpdkArchitecture
-     *
-     * @return true If architecture is PNA.
-     * @return false If architecture is not PNA.
-     */
+    /// @brief Predicate that states whether architecture is PNA or not.
+    ///
+    /// Architecture is known after pass ParseDpdkArchitecture
+    ///
+    /// @return true If architecture is PNA.
+    /// @return false If architecture is not PNA.
     bool isPNA(void) { return (p4arch == "pna") ? true : false; }
 };
 

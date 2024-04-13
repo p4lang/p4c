@@ -29,10 +29,9 @@ class TypeMap;
 
 namespace DPDK {
 
-/**
- * @brief Class for checking constraints for invocations of PNA architecture extern
- *        methods and functions.
- */
+/// @brief Class for checking constraints for invocations of PNA architecture extern
+///        methods and functions.
+
 class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
     DpdkProgramStructure *structure;
 
@@ -140,10 +139,8 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
     }
 };
 
-/**
- * @brief Class which chooses the correct class for checking the constraints for invocations
- *        of extern methods and functions depending on the architecture.
- */
+/// @brief Class which chooses the correct class for checking the constraints for invocations
+///        of extern methods and functions depending on the architecture.
 class CheckExternInvocation : public Inspector {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
