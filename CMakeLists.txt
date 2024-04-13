@@ -63,6 +63,7 @@ OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during bu
 OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
 # Support a legacy option. TODO: Remove?
 OPTION (ENABLE_UNIFIED_COMPILATION "Enable CMAKE_UNITY_BUILD" OFF)
+OPTION (BUILD_CONTROL_PLANE "Build the control plane" ON)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
@@ -434,7 +435,20 @@ endforeach(ext)
 
 add_subdirectory (frontends)
 add_subdirectory (midend)
-add_subdirectory (control-plane)
+
+if(NOT BUILD_CONTROL_PLANE)
+  if(ENABLE_TEST_TOOLS)
+    message(FATAL_ERROR "Building the control plane is required to build the P4Tools development platform.")
+  endif()
+  if(ENABLE_DPDK)
+    message(FATAL_ERROR "Building the control plane is required to build the P4Tools development platform.")
+  endif()
+  if(ENABLE_GTESTS)
+    message(FATAL_ERROR "Building the control plane is required to build the DPDK development platform.")
+  endif()
+else()
+  add_subdirectory(control-plane)
+endif()
 
 # With the current implementation of ir-generator, all targets share the
 # same ir-generated.h and ir-generated.cpp file, which means all targets
