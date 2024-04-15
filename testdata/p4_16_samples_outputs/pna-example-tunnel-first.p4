@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <pna.p4>
+#include <dpdk/pna.p4>
 
 typedef bit<48> ethernet_addr_t;
 typedef bit<32> ipv4_addr_t;
