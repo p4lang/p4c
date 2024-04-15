@@ -1,6 +1,6 @@
 /* Issue #4087 p4c-dpdk back end gives error for assignment between elements of a header stack */
 #include <core.p4>
-#include <pna.p4>
+#include <dpdk/pna.p4>
 
 header eth_t {
     bit<48> da;

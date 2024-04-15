@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #include <core.p4>
-#include <pna.p4>
+#include <dpdk/pna.p4>
 
 header header1_t {
     bit<8> type1;
