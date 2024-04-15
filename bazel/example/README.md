@@ -1,11 +1,11 @@
 # Bazel example ![bazel build](https://github.com/p4lang/p4c/workflows/bazel/badge.svg)
 
-This folder contains a toy Bazel project depending on p4c. This is to
+This folder contains a toy Bazel project depending on P4C. This is to
 demonstrate how to:
 
-- set up a Bazel workspace that depends on p4c,
+- set up a Bazel workspace that depends on P4C,
 
-- use the `p4_library` rule to invoke p4c during the Bazel build process, and
+- use the `p4_library` rule to invoke P4C during the Bazel build process, and
 
 - define custom IR extensions.
 
