@@ -562,9 +562,8 @@ unsigned ConvertToBackendIR::GetAccessNumericValue(cstring access) {
 }
 
 cstring ConvertToBackendIR::HandleTableAccessPermission(const IR::P4Table *t) {
-    bool unused_ps[14], IsTableAddOnMiss = false;
+    bool IsTableAddOnMiss = false;
     cstring control_path, data_path;
-    memset(unused_ps, true, 14);
     for (auto table : add_on_miss_tables) {
         if (table->name.originalName == t->name.originalName) {
             IsTableAddOnMiss = true;
