@@ -159,7 +159,7 @@ If you cannot use a repository to install P4C, you can download the `.deb` file
 for your release and install it manually. You need to download a new file each
 time you want to upgrade P4C.
 
-1. Go to [p4lang-P4C package page on OpenSUSE Build Service](https://build.opensuse.org/package/show/home:p4lang/p4lang-p4c), click on
+1. Go to [p4lang-p4c package page on OpenSUSE Build Service](https://build.opensuse.org/package/show/home:p4lang/p4lang-p4c), click on
 "Download package" and choose your operating system version.
 
 2. Install P4C, changing the path below to the path where you downloaded the package.
@@ -238,7 +238,7 @@ sudo dpkg -i /path/to/package.deb
     ```
     sudo make install
     ```
-    The compiler driver `P4C` and binaries for each of the backends are
+    The compiler driver `p4c` and binaries for each of the backends are
     installed in `/usr/local/bin` by default; the P4 headers are placed in
     `/usr/local/share/p4c`.
 
@@ -309,10 +309,10 @@ After cloning Protobuf and before you build, check-out version 3.25.3:
 `git checkout v3.25.3`
 
 Please note that while all Protobuf versions newer than 3.0 should work for
-`P4C` itself, you may run into trouble with some extensions and other p4lang
+P4C itself, you may run into trouble with some extensions and other p4lang
 projects unless you install version 3.25.3.
 
-`P4C` also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's `FetchContent` module (Abseil LTS 20240116.1 at the moment).
+P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's `FetchContent` module (Abseil LTS 20240116.1 at the moment).
 
 ### CMake
 P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using `pip3 install --user cmake==3.16.3`. We have a CI test on Ubuntu 18.04 that uses this option, but there is no guarantee that this will lead to a successful build.
