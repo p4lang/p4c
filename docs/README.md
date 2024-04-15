@@ -292,7 +292,7 @@ To add a new input test with a sample P4 code file (under `testdata/p4_16_sample
 
 ## Compiler Driver
 
-**P4C** is a compiler driver. The goal is to provide a consistent user interface
+**p4c** is a compiler driver. The goal is to provide a consistent user interface
 across different p4 backends and work flows. The compiler driver is written in
 Python. It can be extended for custom backends.
 
@@ -335,7 +335,7 @@ makefile variable.
 p4c_PYTHON += p4c.custom.cfg
 ```
 
-There is an global variable `config` in P4C compiler driver that stores the build steps
+There is an global variable `config` in the `p4c` compiler driver that stores the build steps
 for a particular target. By default, the bmv2 and ebpf backends are supported. Each backend
 is identified with a triplet: **target-arch-vendor**. For example, the default bmv2 backend is
 identified as `bmv2-ss-p4org`. Users may choose to implement different architectures running
@@ -354,5 +354,5 @@ config.target.append("bmv2-newarch-p4org")
 
 After adding the new configuration file, rerun `bootstrap.sh`
 
-For testing purpose, P4C will be installed in the build/ directory when executing `make`.
-User can install `P4C` to other system path by running `make install`
+For testing purposes, `p4c` will be installed in the build/ directory when executing `make`.
+Users can install `p4c` to other system path by running `make install`
