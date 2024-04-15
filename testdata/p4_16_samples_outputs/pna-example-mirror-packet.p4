@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <dpdk/pna.p4>
+#include <pna.p4>
 
 const MirrorSlotId_t MIRROR_SLOT_ID = (MirrorSlotId_t)3;
 const MirrorSessionId_t MIRROR_SESSION1 = (MirrorSessionId_t)58;

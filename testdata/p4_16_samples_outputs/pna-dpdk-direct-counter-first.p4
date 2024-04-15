@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <dpdk/pna.p4>
+#include <pna.p4>
 
 typedef bit<48> EthernetAddress;
 const bit<8> ETHERNET_HEADER_LEN = 8w14;

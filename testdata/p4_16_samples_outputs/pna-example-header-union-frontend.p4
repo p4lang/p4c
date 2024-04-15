@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <dpdk/pna.p4>
+#include <pna.p4>
 
 header S {
     bit<8> t;

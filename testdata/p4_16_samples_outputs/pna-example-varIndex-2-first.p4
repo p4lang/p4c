@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <dpdk/pna.p4>
+#include <pna.p4>
 
 typedef bit<48> EthernetAddress;
 enum bit<16> ether_type_t {

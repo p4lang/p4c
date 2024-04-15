@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <dpdk/pna.p4>
+#include <pna.p4>
 
 header Ethernet_h {
     bit<48> dstAddr;
