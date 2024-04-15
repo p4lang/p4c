@@ -290,7 +290,7 @@ const IR::Literal *Z3Solver::toLiteral(const z3::expr &e, const IR::Type *type) 
     // Handle booleans.
     if (type->is<IR::Type::Boolean>()) {
         BUG_CHECK(e.is_bool(), "Expected a boolean value: %1%", e);
-        return new IR::BoolLiteral(type, e.is_true());
+        return IR::getBoolLiteral(e.is_true());
     }
 
     // Handle bit vectors.

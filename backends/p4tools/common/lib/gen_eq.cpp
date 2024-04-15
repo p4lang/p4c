@@ -36,13 +36,11 @@ const IR::Expression *equateListTypes(const IR::Expression *left, const IR::Expr
               "different.",
               leftElemsSize, rightElemsSize);
 
-    const IR::Expression *result = new IR::BoolLiteral(IR::Type::Boolean::get(), true);
-    bool firstLoop = true;
+    const IR::Expression *result = nullptr;
     for (size_t i = 0; i < leftElems.size(); i++) {
         const auto *conjunct = equate(leftElems.at(i), rightElems.at(i));
-        if (firstLoop) {
+        if (result == nullptr) {
             result = conjunct;
-            firstLoop = false;
         } else {
             result = new IR::LAnd(IR::Type::Boolean::get(), result, conjunct);
         }
@@ -62,7 +60,7 @@ const IR::Expression *equate(const IR::Expression *left, const IR::Expression *r
 
     // A single default expression can be matched with a list expression.
     if (left->is<IR::DefaultExpression>() || right->is<IR::DefaultExpression>()) {
-        return new IR::BoolLiteral(IR::Type::Boolean::get(), true);
+        return IR::getBoolLiteral(true);
     }
 
     // If we still have lists after unrolling, compare them.
@@ -82,9 +80,9 @@ const IR::Expression *equate(const IR::Expression *left, const IR::Expression *r
     }
 
     if (const auto *rangeKey = right->to<IR::Range>()) {
-        const auto *boolType = IR::Type::Boolean::get();
-        return new IR::LAnd(boolType, new IR::Leq(boolType, rangeKey->left, left),
-                            new IR::Leq(boolType, left, rangeKey->right));
+        return new IR::LAnd(IR::Type::Boolean::get(),
+                            new IR::Leq(IR::Type::Boolean::get(), rangeKey->left, left),
+                            new IR::Leq(IR::Type::Boolean::get(), left, rangeKey->right));
     }
 
     return mkEq(left, right);
