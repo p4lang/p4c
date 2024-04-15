@@ -78,6 +78,7 @@ class Visitor::ChangeTracker {
         if (!inserted) {  // We already seen this node, determine its status
             if (it->second.visit_in_progress) return VisitStatus::Busy;
             if (it->second.visitOnce) return VisitStatus::Done;
+            it->second.visit_in_progress = true;
             return VisitStatus::Revisit;
         }
 
@@ -250,6 +251,7 @@ class Visitor::Tracker {
         if (!inserted) {  // We already seen this node, determine its status
             if (!it->second.done) return VisitStatus::Busy;
             if (it->second.visitOnce) return VisitStatus::Done;
+            it->second.done = false;
             return VisitStatus::Revisit;
         }
 

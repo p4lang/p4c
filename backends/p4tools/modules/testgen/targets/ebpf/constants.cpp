@@ -3,6 +3,6 @@
 namespace P4Tools::P4Testgen::EBPF {
 
 const IR::PathExpression EBPFConstants::ACCEPT_VAR =
-    IR::PathExpression(new IR::Type_Boolean(), new IR::Path("*accept"));
+    IR::PathExpression(IR::Type_Boolean::get(), new IR::Path("*accept"));
 
 }  // namespace P4Tools::P4Testgen::EBPF
