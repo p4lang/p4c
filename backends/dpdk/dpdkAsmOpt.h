@@ -141,7 +141,7 @@ class RemoveLabelAfterLabel : public Transform {
     }
 };
 
-/// This pass Collects all metadata struct member used in program
+/// This pass Collects all metadata struct member used in program.
 class CollectUsedMetadataField : public Inspector {
     ordered_set<cstring> &used_fields;
 
@@ -166,7 +166,7 @@ class RemoveUnusedMetadataFields : public Transform {
     bool isByteSizeField(const IR::Type *field_type);
 };
 
-/// This pass shorten the Identifier length
+/// This pass shorten the Identifier length.
 class ShortenTokenLength : public Transform {
     ordered_map<cstring, cstring> &newNameMap;
     static size_t count;
@@ -336,7 +336,7 @@ class ShortenTokenLength : public Transform {
 };
 
 /// This pass collect use def info by analysing all possible
-/// source and destinations, this info will be used by copy elimination pass
+/// source and destinations, this info will be used by copy elimination pass.
 class CollectUseDefInfo : public Inspector {
     P4::TypeMap *typeMap;
 

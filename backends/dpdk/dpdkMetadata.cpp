@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace DPDK {
 
-/// make sure new decls and fields name are unique
+/// Make sure new decls and fields name are unique.
 void DirectionToRegRead::uniqueNames(IR::DpdkAsmProgram *p) {
     // "direction" name is used in dpdk for initialzing direction port mask
     // make sure no such decls exist with that name
@@ -50,7 +50,7 @@ const IR::Node *DirectionToRegRead::preorder(IR::DpdkAsmProgram *p) {
     return p;
 }
 
-/// create and add register declaration instance to program
+/// Create and add register declaration instance to program.
 IR::DpdkExternDeclaration *DirectionToRegRead::addRegDeclInstance(cstring instanceName) {
     auto typepath = new IR::Path("Register");
     auto type = new IR::Type_Name(typepath);
@@ -64,9 +64,9 @@ IR::DpdkExternDeclaration *DirectionToRegRead::addRegDeclInstance(cstring instan
     return decl;
 }
 
-/// replace all direction uses with m.pna_main_input_metadata_direction
+/// Replace all direction uses with m.pna_main_input_metadata_direction
 /// it's initilization will be done like istd.direction = direction.read(istd.input_port)
-/// at start of the pipeline
+/// at start of the pipeline.
 const IR::Node *DirectionToRegRead::preorder(IR::Member *m) {
     if (isDirection(m))
         return new IR::Member(new IR::PathExpression(IR::ID("m")),
@@ -92,7 +92,7 @@ IR::IndexedVector<IR::DpdkAsmStatement> DirectionToRegRead::addRegReadStmtForDir
     return newStmts;
 }
 
-/// check member expression using metadata pass field
+/// Check member expression using metadata pass field.
 /// "recircid" instruction takes the pass metadata type as argument to fetch the pass_id.
 bool PrependPassRecircId::isPass(const IR::Member *m) {
     if (m == nullptr) return false;

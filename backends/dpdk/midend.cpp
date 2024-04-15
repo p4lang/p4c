@@ -95,7 +95,7 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
 };
 
 /// This class implements a policy suitable for the ConvertErrors pass.
-/// The policy is: convert all errors to specified width
+/// The policy is: convert all errors to specified width.
 class ErrorWidth : public P4::ChooseErrorRepresentation {
     unsigned width;
     bool convert(const IR::Type_Error *) const override { return true; }

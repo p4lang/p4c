@@ -23,14 +23,14 @@ limitations under the License.
 const unsigned table_handle_prefix = 0x00010000;
 const unsigned action_handle_prefix = 0x00020000;
 
-/// Default values
+/// Default values.
 const unsigned dpdk_default_table_size = 65536;
 #define DPDK_MAX_SHIFT_AMOUNT 64
 
-/// Maximum number of configurable timeout values
+/// Maximum number of configurable timeout values.
 const unsigned dpdk_learner_max_configurable_timeout_values = 8;
 const unsigned default_learner_table_size = 0x10000;
-/// default timeout values for learner table to support common protocol states
+/// Default timeout values for learner table to support common protocol states.
 const unsigned default_learner_table_timeout[dpdk_learner_max_configurable_timeout_values] = {
     10, 30, 60, 120, 300, 43200, 120, 120};
 
@@ -46,7 +46,7 @@ const cstring tdiSchemaVersion = "0.1";
 #define CRC4 4
 #define JHASH5 5
 #define TOEPLITZ 6
-/// Initial values for group_id and member_id for action selector and action profile tables
+/// Initial values for group_id and member_id for action selector and action profile tables.
 const unsigned initial_member_id = 0;
 const unsigned initial_group_id = 0xFFFFFFFF;
 

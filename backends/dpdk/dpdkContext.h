@@ -37,15 +37,15 @@ namespace p4configv1 = ::p4::config::v1;
 namespace DPDK {
 
 /// This structure holds table attributes required for context JSON which are not
-///   part of P4Table
+/// part of P4Table.
 struct TableAttributes {
     /// Direction of the table, can be ["ingress","egress"]
     cstring direction;
     /// Unique ID for the table
     unsigned tableHandle;
     /// Table type can one of "match", "selection" and "action
-    ///   Match table is a regular P4 table, selection table and action tables are compiler
-    ///   generated tables when psa_implementation is action_selector or action_profile
+    /// Match table is a regular P4 table, selection table and action tables are compiler
+    /// generated tables when psa_implementation is action_selector or action_profile.
     cstring tableType;
     bool is_add_on_miss;
     bool idle_timeout_with_auto_delete;
@@ -59,7 +59,7 @@ struct TableAttributes {
 };
 
 /// This structure holds action attributes required for context JSON which are not
-///  part of P4Action
+///  part of P4Action.
 struct actionAttributes {
     bool constant_default_action;
     bool is_compiler_added_action;
@@ -77,7 +77,7 @@ struct externAttributes {
     unsigned table_id;
 };
 
-/// Program level information for context json
+/// Program level information for context json.
 struct TopLevelCtxt {
     cstring progName;
     cstring buildDate;
@@ -98,7 +98,7 @@ struct TopLevelCtxt {
     }
 };
 
-/// Selection table attributes
+/// Selection table attributes.
 struct SelectionTable {
     unsigned max_n_groups;
     unsigned max_n_members_per_group;
@@ -125,22 +125,22 @@ struct SelectionTable {
     }
 };
 
-/// This pass generates context JSON into user specified file
+/// This pass generates context JSON into user specified file.
 class DpdkContextGenerator : public Inspector {
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
     const p4configv1::P4Info &p4info;
     DpdkOptions &options;
-    /// All tables are collected into this vector
+    /// All tables are collected into this vector.
     IR::IndexedVector<IR::Declaration> tables;
     std::vector<const IR::Declaration_Instance *> externs;
 
-    /// Maps holding table, extern and action attributes needed for context JSON
+    /// Maps holding table, extern and action attributes needed for context JSON.
     std::map<const cstring, struct TableAttributes> tableAttrmap;
     std::map<cstring, struct actionAttributes> actionAttrMap;
     std::map<cstring, struct externAttributes> externAttrMap;
 
-    /// Running unique ID for tables and actions
+    /// Running unique ID for tables and actions.
     std::map<cstring, size_t> context_handle_map;
 
  public:

@@ -162,7 +162,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
     for (auto d : action_data_tables) tables.push_back(d);
 }
 
-/// This functions insert a single key field in the match keys array
+/// This functions insert a single key field in the match keys array.
 void DpdkContextGenerator::addKeyField(Util::JsonArray *keyJson, const cstring name,
                                        const cstring nameAnnotation, const IR::KeyElement *key,
                                        int position) {
@@ -187,7 +187,7 @@ void DpdkContextGenerator::addKeyField(Util::JsonArray *keyJson, const cstring n
     keyJson->append(keyField);
 }
 
-/// This function sets the common table properties
+/// This function sets the common table properties.
 Util::JsonObject *DpdkContextGenerator::initTableCommonJson(const cstring name,
                                                             const struct TableAttributes &attr) {
     auto *tableJson = new Util::JsonObject();
@@ -316,7 +316,7 @@ void DpdkContextGenerator::setDefaultActionHandle(const IR::P4Table *table) {
     }
 }
 
-/// This functions creates JSON object for immediate fields (action parameters)
+/// This functions creates JSON object for immediate fields (action parameters).
 void DpdkContextGenerator::addImmediateField(Util::JsonArray *paramJson, const cstring name,
                                              int dest_start, int dest_width) {
     auto *oneParam = new Util::JsonObject();
@@ -475,7 +475,7 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
     return hasActionProfileSelector;
 }
 
-/// Add tables to the context json
+/// Add tables to the context json.
 void DpdkContextGenerator::addMatchTables(Util::JsonArray *tablesJson) {
     for (auto t : tables) {
         auto tbl = t->to<IR::P4Table>();
@@ -530,7 +530,7 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray *tablesJson) {
     }
 }
 
-/// Add extern information to the context json
+/// Add extern information to the context json.
 void DpdkContextGenerator::addExternInfo(Util::JsonArray *externsJson) {
     for (auto t : externs) {
         auto externAttr = ::get(externAttrMap, t->name.name);

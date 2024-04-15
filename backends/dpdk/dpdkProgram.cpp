@@ -264,7 +264,7 @@ IR::Declaration_Variable *ConvertToDpdkParser::addNewTmpVarToMetadata(cstring na
 /// of select case is simple expressions, it populates the left and right operands with the input
 /// expressions. When the keyset is Mask expression "a &&& b", it inserts temporary variables in
 /// Metadata structure and populates the left and right operands of comparison with
-/// "input & b" and "a & b"
+/// "input & b" and "a & b".
 void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expression *ce,
                                       IR::Expression **leftExpr, IR::Expression **rightExpr) {
     if (sv->is<IR::Constant>() && sv->type->width_bits() > 32) {
@@ -322,7 +322,7 @@ void ConvertToDpdkParser::handleTupleExpression(const IR::ListExpression *cl,
                                                 cstring trueLabel, cstring falseLabel) {
     IR::Expression *left;
     IR::Expression *right;
-    // Compare each element in the input tuple with the keyset tuple
+    // Compare each element in the input tuple with the keyset tuple.
     for (auto i = 0; i < inputSize; i++) {
         auto switch_var = input->components.at(i);
         auto caseExpr = cl->components.at(i);

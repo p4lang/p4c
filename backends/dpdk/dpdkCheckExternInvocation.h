@@ -139,7 +139,7 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
     }
 };
 
-/// @brief Class which chooses the correct class for checking the constraints for invocations
+/// @brief Class which chooses the correct class for checking the constraints for invocations.
 ///        of extern methods and functions depending on the architecture.
 class CheckExternInvocation : public Inspector {
     P4::ReferenceMap *refMap;

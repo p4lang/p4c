@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/// DPDK architecture assume the following control block signature
+/// DPDK architecture assume the following control block signature.
 ///
 /// control ingress(header h, metadata m);
 /// control egress(header h, metadata m);
@@ -79,7 +79,7 @@ const IR::Type_Control *ConvertToDpdkArch::rewriteDeparserType(const IR::Type_Co
                                                                cstring name) {
     // Dpdk requires all local variables to be collected in a structure called
     // metadata, and we perform read/write on this struct fields, so here we unify
-    // direction of this metadata decl to always be inout
+    // direction of this metadata decl to always be inout.
     auto applyParams = new IR::ParameterList();
     if (name == "IngressDeparser") {
         applyParams->push_back(c->applyParams->parameters.at(0));
@@ -1554,7 +1554,7 @@ cstring CopyMatchKeysToSingleStruct::getTableKeyName(const IR::Expression *e) {
                   "Method calls except isValid must be simplified before"
                   " reaching here, found %1%",
                   m->method);
-        // Moving h.<hdr>.isValid() used as table key to Metadata
+        // Moving h.<hdr>.isValid() used as table key to Metadata.
         auto mem = m->method->to<IR::Member>();
         CHECK_NULL(mem);
         keyName = "h." + mem->expr->to<IR::Member>()->member + "." + IR::Type_Header::isValid;
@@ -1586,13 +1586,13 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
         if (firstKeyStr.startsWith("h")) firstKeyHdr = true;
     }
 
-    // Key fields should be part of same header/metadata struct
+    // Key fields should be part of same header/metadata struct.
     for (auto key : keys->keyElements) {
         cstring keyTypeStr = "";
         if (auto keyField = key->expression->to<IR::Member>()) {
             keyTypeStr = keyField->expr->toString();
         } else if (auto m = key->expression->to<IR::MethodCallExpression>()) {
-            // When isValid is present as table key, it should be moved to metadata
+            // When isValid is present as table key, it should be moved to metadata.
             if (isValidCall(m)) {
                 copyNeeded = true;
                 break;
@@ -2097,14 +2097,14 @@ const IR::Node *SplitActionProfileTable::postorder(IR::P4Table *tbl) {
     decls->push_back(match_table);
     cstring member_table_name = instance_name;
 
-    // Create member table for the first table using this action profile instance
+    // Create member table for the first table using this action profile instance.
     if (!isApInstanceShared) {
         // member table match on member_id
         auto member_table = create_member_table(tbl, member_table_name, member_id);
         decls->push_back(member_table);
         structure->member_tables.emplace(tbl->name, member_table);
     } else {
-        // Use existing member table created for this action profile instance
+        // Use existing member table created for this action profile instance.
         for (auto mt : structure->member_tables) {
             if (mt.second->name == member_table_name) {
                 auto memTable = mt.second;
@@ -2431,8 +2431,8 @@ const IR::Node *SplitP4TableCommon::postorder(IR::P4Control *a) {
     return injector.inject_control(control, a);
 }
 
-/// For regular tables, the direct counter array size is same as table size
-/// For learner tables, the direct counter/meter array size is 4 times the table size
+/// For regular tables, the direct counter array size is same as table size.
+/// For learner tables, the direct counter/meter array size is 4 times the table size.
 int CollectDirectCounterMeter::getTableSize(const IR::P4Table *tbl) {
     int tableSize = dpdk_default_table_size;
     auto size = tbl->getSizeProperty();
@@ -2522,7 +2522,7 @@ bool CollectDirectCounterMeter::preorder(const IR::P4Table *tbl) {
     int table_size = getTableSize(tbl);
     auto table_type = ::get(structure->table_type_map, tbl->name.name);
 
-    // Direct Counter and Meter are not supported with Wildcard match tables
+    // Direct Counter and Meter are not supported with Wildcard match tables.
     if (table_type == InternalTableType::WILDCARD && (counterInstance || meterInstance)) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "Direct counters and direct meters are"
@@ -2709,7 +2709,7 @@ void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
     // In p4c, by design, only  backend checks args of an extern.
     BUG_CHECK(mce->arguments->size() == 3, "%1%: expected 3 arguments in add_entry extern", mcs);
     auto action = mce->arguments->at(0);
-    // assuming syntax check is already performed earlier
+    // assuming syntax check is already performed earlier.
     auto action_name = action->expression->to<IR::StringLiteral>()->value;
     structure->learner_actions.insert(action_name);
     return;
@@ -2874,7 +2874,7 @@ const IR::Node *ElimHeaderCopy::preorder(IR::AssignmentStatement *as) {
 
 /// Replace method call expression with temporary instances
 /// like eth_0.setInvalid()
-/// with empty statement as all uses of eth_0 already replaced
+/// with empty statement as all uses of eth_0 already replaced.
 const IR::Node *ElimHeaderCopy::preorder(IR::MethodCallStatement *mcs) {
     auto me = mcs->methodCall;
     auto m = me->method->to<IR::Member>();
@@ -2908,7 +2908,7 @@ const IR::Node *DpdkAddPseudoHeaderDecl::preorder(IR::P4Program *program) {
     return program;
 }
 
-/// add pseudo header field to the headers struct for it be instantiated
+/// Add pseudo header field to the headers struct for it be instantiated.
 const IR::Node *DpdkAddPseudoHeaderDecl::preorder(IR::Type_Struct *st) {
     if (is_all_args_header) return st;
     bool header_found = isHeadersStruct(st);
@@ -3029,7 +3029,7 @@ const IR::Node *MoveNonHeaderFieldsToPseudoHeader::postorder(IR::MethodCallState
                                 }
                                 if (!is_header_field) {
                                     // replace non header expression with pseudo header field,
-                                    // after initializing it with existing expression
+                                    // after initializing it with existing expression.
                                     added_copy = true;
                                     auto stm = addAssignmentStmt(c->expression);
                                     result->push_back(stm.first);
@@ -3037,7 +3037,7 @@ const IR::Node *MoveNonHeaderFieldsToPseudoHeader::postorder(IR::MethodCallState
                                         new IR::NamedExpression(c->srcInfo, c->name, stm.second));
                                 }
                             }
-                            // Creating Byte Aligned struct, it is type of struct expression
+                            // Creating Byte Aligned struct, it is type of struct expression.
                             IR::IndexedVector<IR::StructField> fields;
                             auto tmps0 = tmp->type->to<IR::Type_Struct>();
                             for (auto f : tmps0->fields) {
@@ -3212,7 +3212,7 @@ const IR::Node *CollectStructLocalVariables::postorder(IR::P4Parser *p) {
 }
 const IR::Type_Struct *CollectStructLocalVariables::metadataStrct = nullptr;
 
-/// create and add register declaration instance to program
+/// Create and add register declaration instance to program.
 IR::IndexedVector<IR::StatOrDecl> *InsertReqDeclForIPSec::addRegDeclInstance(
     std::vector<cstring> portRegs) {
     auto decls = new IR::IndexedVector<IR::StatOrDecl>;
@@ -3274,7 +3274,7 @@ const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Program *program) {
     return program;
 }
 
-/// Create an instance of ipsec_hdr in the header struct
+/// Create an instance of ipsec_hdr in the header struct.
 const IR::Node *InsertReqDeclForIPSec::preorder(IR::Type_Struct *s) {
     if (!is_ipsec_used) return s;
     if (s->name.name == structure->header_type) {

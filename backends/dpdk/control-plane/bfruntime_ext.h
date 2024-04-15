@@ -59,7 +59,7 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
         BF_RT_DATA_MAX_GROUP_SIZE,
         BF_RT_DATA_HASH_VALUE,
     };
-    /// Externs only for DPDK backend
+    /// Externs only for DPDK backend.
     struct ActionSelector;
 
     void addDPDKExterns(Util::JsonArray *tablesJson, Util::JsonArray *learnFiltersJson) const;

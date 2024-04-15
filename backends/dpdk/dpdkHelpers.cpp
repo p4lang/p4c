@@ -48,7 +48,7 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression *ds
         add_instr(new IR::DpdkJmpGreaterStatement(false_label, op->left, op->right));
     } else if (op->is<IR::Geq>()) {
         // Dpdk target does not support the condition Geq, so negate the condition and jump
-        //  on false label
+        // on false label.
         condNegated = true;
         add_instr(new IR::DpdkJmpLessStatement(false_label, op->left, op->right));
     } else {
@@ -539,7 +539,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 auto true_label = refmap->newName("label_true");
                 auto end_label = refmap->newName("label_end");
 
-                // Emit jump to block containing assignment for PNA_Direction_t.NET_TO_HOST
+                // Emit jump to block containing assignment for PNA_Direction_t.NET_TO_HOST.
                 add_instr(new IR::DpdkJmpEqualStatement(true_label, dir, new IR::Constant(0)));
                 add_instr(new IR::DpdkMovStatement(left, secondVal));
                 add_instr(new IR::DpdkJmpLabelStatement(end_label));
@@ -651,7 +651,7 @@ void ConvertStatementToDpdk::processHashParams(const IR::Argument *field,
 
 /// This function moves the hash parameter fields to metadata structure if they happen
 /// to come from different header/metadata structures or are not consecutively laid in
-/// the structure they are coming from
+/// the structure they are coming from.
 void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument *field,
                                                     IR::Vector<IR::Expression> &components) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
@@ -871,17 +871,17 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
         return is_and;
     } else if (auto lss = expr->to<IR::Lss>()) {
         // Dpdk target does not support the negated condition Geq,
-        // so always jump on true label
+        // so always jump on true label.
         instructions.push_back(new IR::DpdkJmpLessStatement(true_label, lss->left, lss->right));
         return false;
     } else if (auto grt = expr->to<IR::Grt>()) {
         // Dpdk target does not support the negated condition Leq,
-        // so always jump on true label
+        // so always jump on true label.
         instructions.push_back(new IR::DpdkJmpGreaterStatement(true_label, grt->left, grt->right));
         return false;
     } else if (auto geq = expr->to<IR::Geq>()) {
         // Dpdk target does not support the condition Geq,
-        // so always negate the condition and jump on false label
+        // so always negate the condition and jump on false label.
         instructions.push_back(new IR::DpdkJmpLessStatement(false_label, geq->left, geq->right));
         return true;
     } else if (auto leq = expr->to<IR::Leq>()) {
@@ -1074,7 +1074,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                     } else {
                         auto header = args->at(0);
                         auto length = args->at(1);
-                        // Extract instruction of DPDK target expects the second argument
+                        // Extract instruction of DPDK target expects the second argument.
                         // (size of the varbit field of the header) to be the number of bytes
                         // to be extracted while in P4 it is the number of bits to be extracted.
                         // We need to compute the size in bytes.

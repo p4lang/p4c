@@ -126,7 +126,7 @@ bool isDirection(const IR::Member *m) {
            m->member.name == "pna_main_parser_input_metadata_direction";
 }
 
-/// Creates Register extern declaration for holding persistent information
+/// Creates Register extern declaration for holding persistent information.
 IR::Declaration_Instance *createRegDeclarationInstance(cstring instanceName, int regSize,
                                                        int indexBitWidth, int initValBitWidth) {
     auto typepath = new IR::Path("Register");
@@ -142,7 +142,7 @@ IR::Declaration_Instance *createRegDeclarationInstance(cstring instanceName, int
     return decl;
 }
 
-/// Check for reserved names for DPDK target
+/// Check for reserved names for DPDK target.
 bool reservedNames(P4::ReferenceMap *refMap, std::vector<cstring> names, cstring &resName) {
     for (auto name : names) {
         auto newname = refMap->newName(name);

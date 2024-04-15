@@ -44,7 +44,7 @@ namespace DPDK {
 /// To send a packet to a specific port, we need to do the following:
 /// - add definition of new metadata field to main metadata structure for rte_swx_pipeline
 /// - use the same name of this newly defined metadata field when assigning value of output port
-/// - use this metadata field with 'tx' instruction
+/// - use this metadata field with 'tx' instruction.
 const char PnaMainOutputMetadataOutputPortName[] = "pna_main_output_metadata_output_port";
 const char DirectResourceTableEntryIndex[] = "table_entry_index";
 
@@ -187,7 +187,7 @@ class ConvertStatementToDpdk : public Inspector {
     bool handleConstSwitch(const IR::SwitchStatement *a);
 };
 
-/// only simplify complex expression in ingress/egress
+/// Only simplify complex expression in ingress/egress.
 class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     const std::set<cstring> *process;
 

@@ -26,7 +26,7 @@ struct DpdkProgramStructure {
     ordered_map<cstring, const IR::Declaration_Variable *> header_unions;
     ordered_map<cstring, const IR::P4Action *> actions;
 
-    /// table and action info for learner tables
+    /// Table and action info for learner tables.
     ordered_set<cstring> learner_tables;
     ordered_set<cstring> learner_actions;
     ordered_map<std::pair<cstring, cstring>, cstring> learner_action_map;

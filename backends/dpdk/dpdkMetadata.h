@@ -39,7 +39,7 @@ class IsDirectionMetadataUsed : public Inspector {
 
 /// This pass adds decl instance of Register extern in dpdk pna program which will
 /// be used by dpdk backend for initializing the mask for calculating packet direction
-/// at beginning of pipeline
+/// at beginning of pipeline.
 class DirectionToRegRead : public Transform {
     ordered_map<cstring, cstring> dirToDirMapping;
     ordered_map<cstring, cstring> inputToInputPortMapping;
@@ -48,10 +48,10 @@ class DirectionToRegRead : public Transform {
 
  public:
     DirectionToRegRead() {
-        /// dpdk currently only uses pna_main_input_metadata_direction
+        /// Dpdk currently only uses pna_main_input_metadata_direction
         /// and pna_main_input_metadata_input_port
         /// so even when we use any other direction or input port metadata we
-        /// replace it like below
+        /// replace it like below.
         dirToDirMapping.insert(std::make_pair(cstring("pna_main_input_metadata_direction"),
                                               cstring("pna_main_input_metadata_direction")));
         dirToDirMapping.insert(std::make_pair(cstring("pna_pre_input_metadata_direction"),

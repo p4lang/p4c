@@ -118,7 +118,8 @@ overview of the compiler goals and architecture.
 - Double slashes `//` should be used for inline comment.
 - For rare occasions such as adding comments to multi-line macros, you may use `/* ... */` style comments.
 - There should be no space at the end of the comment.
-- First latter of comment should be Capital letter.
+- First letter of the comment should be a capital letter.
+- Each comment should be end with a fullstop/period.
 
 Happy writing! Should you have any questions, please don't hesitate to ask.
 
