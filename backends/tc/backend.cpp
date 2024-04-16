@@ -518,6 +518,110 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
     }
 }
 
+void ConvertToBackendIR::updateAddOnMissTable(const IR::P4Table *t) {
+    auto tblname = t->name.originalName;
+    for (auto table : tcPipeline->tableDefs) {
+        if (table->tableName == tblname) {
+            add_on_miss_tables.push_back(t);
+            auto tableDefinition = ((IR::TCTable *)table);
+            tableDefinition->setTableAddOnMiss();
+            tableDefinition->setTablePermission(HandleTableAccessPermission(t));
+        }
+    }
+}
+
+unsigned ConvertToBackendIR::GetAccessNumericValue(cstring access) {
+    unsigned value = 0;
+    for (auto s : access) {
+        unsigned mask = 0;
+        switch (s) {
+            case 'C':
+                mask = 1 << 6;
+                break;
+            case 'R':
+                mask = 1 << 5;
+                break;
+            case 'U':
+                mask = 1 << 4;
+                break;
+            case 'D':
+                mask = 1 << 3;
+                break;
+            case 'X':
+                mask = 1 << 2;
+                break;
+            case 'P':
+                mask = 1 << 1;
+                break;
+            case 'S':
+                mask = 1;
+                break;
+            default:
+                ::error(ErrorType::ERR_INVALID,
+                        "tc_acl annotation cannot have '%1%' in access permisson", s);
+        }
+        value |= mask;
+    }
+    return value;
+}
+
+cstring ConvertToBackendIR::HandleTableAccessPermission(const IR::P4Table *t) {
+    bool IsTableAddOnMiss = false;
+    cstring control_path, data_path;
+    for (auto table : add_on_miss_tables) {
+        if (table->name.originalName == t->name.originalName) {
+            IsTableAddOnMiss = true;
+        }
+    }
+    auto find = tablePermissions.find(t->name.originalName);
+    if (find != tablePermissions.end()) {
+        auto paths = tablePermissions[t->name.originalName];
+        control_path = paths->first;
+        data_path = paths->second;
+    }
+    // Default access value of Control_path and Data_Path
+    if (control_path.isNullOrEmpty()) {
+        control_path = IsTableAddOnMiss ? DEFAULT_ADD_ON_MISS_TABLE_CONTROL_PATH_ACCESS
+                                        : DEFAULT_TABLE_CONTROL_PATH_ACCESS;
+    }
+    if (data_path.isNullOrEmpty()) {
+        data_path = IsTableAddOnMiss ? DEFAULT_ADD_ON_MISS_TABLE_DATA_PATH_ACCESS
+                                     : DEFAULT_TABLE_DATA_PATH_ACCESS;
+    }
+
+    if (IsTableAddOnMiss) {
+        auto access = data_path.find('C');
+        if (!access) {
+            ::warning(
+                ErrorType::WARN_INVALID,
+                "Add on miss table '%1%' should have 'create' access permissons for data path.",
+                t->name.originalName);
+        }
+    }
+    auto access_cp = GetAccessNumericValue(control_path);
+    auto access_dp = GetAccessNumericValue(data_path);
+    auto access_permisson = (access_cp << 7) | access_dp;
+    std::stringstream value;
+    value << "0x" << std::hex << access_permisson;
+    return value.str().c_str();
+}
+
+std::pair<cstring, cstring> *ConvertToBackendIR::GetAnnotatedAccessPath(
+    const IR::Annotation *anno) {
+    cstring control_path, data_path;
+    if (anno) {
+        auto expr = anno->expr[0];
+        if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
+            auto permisson_str = typeLiteral->value;
+            auto char_pos = permisson_str.find(":");
+            control_path = permisson_str.before(char_pos);
+            data_path = permisson_str.substr(char_pos - permisson_str.begin() + 1);
+        }
+    }
+    auto paths = new std::pair<cstring, cstring>(control_path, data_path);
+    return paths;
+}
+
 void ConvertToBackendIR::postorder(const IR::P4Table *t) {
     if (t != nullptr) {
         tableCount++;
@@ -555,17 +659,21 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         tableKeysizeList.emplace(tId, keySize);
         auto annoList = t->getAnnotations()->annotations;
         for (auto anno : annoList) {
-            if (anno->name != ParseTCAnnotations::numMask) continue;
-            auto expr = anno->expr[0];
-            if (auto val = expr->to<IR::Constant>()) {
-                tableDefinition->setNumMask(val->asUint64());
-            } else {
-                ::error(ErrorType::ERR_INVALID,
-                        "nummask annotation cannot have '%1%' as value. Only integer "
-                        "constants are allowed",
-                        expr);
+            if (anno->name == ParseTCAnnotations::tc_acl) {
+                tablePermissions.emplace(t->name.originalName, GetAnnotatedAccessPath(anno));
+            } else if (anno->name == ParseTCAnnotations::numMask) {
+                auto expr = anno->expr[0];
+                if (auto val = expr->to<IR::Constant>()) {
+                    tableDefinition->setNumMask(val->asUint64());
+                } else {
+                    ::error(ErrorType::ERR_INVALID,
+                            "nummask annotation cannot have '%1%' as value. Only integer "
+                            "constants are allowed",
+                            expr);
+                }
             }
         }
+        tableDefinition->setTablePermission(HandleTableAccessPermission(t));
         auto actionlist = t->getActionList();
         if (actionlist->size() == 0) {
             tableDefinition->addAction(tcPipeline->NoAction, TC::TABLEDEFAULT);

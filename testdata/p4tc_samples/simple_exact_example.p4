@@ -86,7 +86,7 @@ control ingress(
         drop_packet();
     }
 
-    table nh_table {
+    @tc_acl("RUS:RXP") table nh_table {
         key = {
             hdr.ipv4.srcAddr : exact @tc_type ("ipv4");
         }

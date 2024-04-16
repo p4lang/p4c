@@ -27,6 +27,12 @@ inline constexpr auto DEFAULT_METADATA_ID = 1;
 inline constexpr auto BITWIDTH = 32;
 inline constexpr auto DEFAULT_TIMER_PROFILES = 4;
 
+// Default Access Permissons
+inline constexpr auto DEFAULT_TABLE_CONTROL_PATH_ACCESS = "CRUDPS";
+inline constexpr auto DEFAULT_TABLE_DATA_PATH_ACCESS = "RX";
+inline constexpr auto DEFAULT_ADD_ON_MISS_TABLE_CONTROL_PATH_ACCESS = "CRUDPS";
+inline constexpr auto DEFAULT_ADD_ON_MISS_TABLE_DATA_PATH_ACCESS = "CRXP";
+
 // Supported data types.
 inline constexpr auto BIT_TYPE = 0;
 inline constexpr auto DEV_TYPE = 1;

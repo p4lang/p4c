@@ -47,9 +47,8 @@ namespace p4configv1 = ::p4::config::v1;
 
 namespace P4 {
 
-/** \addtogroup control_plane
- *  @{
- */
+/// \addtogroup control_plane
+///  @{
 namespace ControlPlaneAPI {
 
 /// Declarations specific to standard architectures (v1model & PSA).

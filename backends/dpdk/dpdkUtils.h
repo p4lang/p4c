@@ -36,9 +36,9 @@ bool isValidMemberField(const IR::Member *mem);
 int getMetadataFieldWidth(int width);
 const IR::Type_Bits *getEightBitAlignedType(const IR::Type_Bits *tb);
 
-// Check for reserved names for DPDK target
+/// Check for reserved names for DPDK target.
 bool reservedNames(P4::ReferenceMap *refMap, std::vector<cstring> names, cstring &resName);
-// Creates Register extern declaration for holding persistent information
+/// Creates Register extern declaration for holding persistent information.
 IR::Declaration_Instance *createRegDeclarationInstance(cstring instanceName, int regSize,
                                                        int indexBitWidth, int initValBitwidth);
 }  // namespace DPDK
