@@ -77,7 +77,7 @@ struct MultiVisitModifier : public Modifier,
         }
     }
 
-    bool preorder(IR::PathExpression *path) {
+    bool preorder(IR::PathExpression *path) override {
         visit_def(path);
         return true;
     }
