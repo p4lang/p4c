@@ -47,7 +47,7 @@ struct MultiVisitInspector : public Inspector, virtual public P4::ResolutionCont
         }
     }
 
-    bool preorder(const IR::PathExpression *path) {
+    bool preorder(const IR::PathExpression *path) override {
         visit_def(path);
         return true;
     }
@@ -77,7 +77,7 @@ struct MultiVisitModifier : public Modifier,
         }
     }
 
-    bool preorder(IR::PathExpression *path) {
+    bool preorder(IR::PathExpression *path) override {
         visit_def(path);
         return true;
     }

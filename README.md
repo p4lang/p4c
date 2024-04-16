@@ -297,7 +297,9 @@ pip3 install --user -r requirements.txt
 ```
 
 For documentation building:
-`sudo apt-get install -y doxygen graphviz texlive-full`
+```bash
+sudo apt-get install -y doxygen graphviz texlive-full
+```
 
 `P4C` also depends on Google Protocol Buffers (Protobuf). `P4C` requires version
 3.0 or higher, so the packaged version provided in Ubuntu 20.04 **should**
