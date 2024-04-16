@@ -48,19 +48,22 @@ $TC p4template create table/multiple_tables_example_02/MainControlImpl/ipv4_tbl_
 	type exact \
 	keysz 67 nummasks 8 tentries 1024 \
 	table_acts act name multiple_tables_example_02/MainControlImpl/sendtoport \
-	act name multiple_tables_example_02/MainControlImpl/drop
+	act name multiple_tables_example_02/MainControlImpl/drop \
+	act name NoAction flags defaultonly
 
 $TC p4template create table/multiple_tables_example_02/MainControlImpl/ipv4_tbl_4 \
 	tblid 4 \
 	type exact \
 	keysz 77 nummasks 8 tentries 1024 \
 	table_acts act name multiple_tables_example_02/MainControlImpl/sendtoport \
-	act name multiple_tables_example_02/MainControlImpl/drop
+	act name multiple_tables_example_02/MainControlImpl/drop \
+	act name NoAction
 
 $TC p4template create table/multiple_tables_example_02/MainControlImpl/ipv4_tbl_5 \
 	tblid 5 \
 	type exact \
-	keysz 13 nummasks 8 tentries 1024
+	keysz 13 nummasks 8 tentries 1024 \
+	table_acts act name NoAction
 
 $TC p4template create table/multiple_tables_example_02/MainControlImpl/set_ct_options \
 	tblid 6 \
@@ -81,7 +84,8 @@ $TC p4template create table/multiple_tables_example_02/MainControlImpl/set_all_o
 	act name multiple_tables_example_02/MainControlImpl/tcp_fin_or_rst_packet \
 	act name multiple_tables_example_02/MainControlImpl/tcp_other_packets \
 	act name multiple_tables_example_02/MainControlImpl/sendtoport \
-	act name multiple_tables_example_02/MainControlImpl/drop
+	act name multiple_tables_example_02/MainControlImpl/drop \
+	act name NoAction
 $TC p4template update table/multiple_tables_example_02/MainControlImpl/set_all_options default_miss_action permissions 0x1024 action multiple_tables_example_02/MainControlImpl/drop
 $TC p4template create table/multiple_tables_example_02/MainControlImpl/set_all_options entry hdr.ipv4.srcAddr 0x1000 hdr.tcp.srcPort 0x10 hdr.ipv4.fragOffset 10 hdr.ipv4.flags 1 permissions 0x1024 action multiple_tables_example_02/MainControlImpl/tcp_syn_packet
 $TC p4template create table/multiple_tables_example_02/MainControlImpl/set_all_options entry hdr.ipv4.srcAddr 0x2000 hdr.tcp.srcPort 0x20 hdr.ipv4.fragOffset 20 hdr.ipv4.flags 2 permissions 0x1024 action multiple_tables_example_02/MainControlImpl/tcp_fin_or_rst_packet

@@ -211,17 +211,21 @@ cstring ConvertToBackendIR::externalName(const IR::IDeclaration *declaration) co
     return Name;
 }
 
-bool ConvertToBackendIR::isDuplicateOrNoAction(const IR::P4Action *action) {
+bool ConvertToBackendIR::isDuplicateAction(const IR::P4Action *action) {
     auto actionName = externalName(action);
     if (actions.find(actionName) != actions.end()) return true;
-    if (actionName == P4::P4CoreLibrary::instance().noAction.name) return true;
     return false;
 }
 
 void ConvertToBackendIR::postorder(const IR::P4Action *action) {
     if (action != nullptr) {
-        if (isDuplicateOrNoAction(action)) return;
+        if (isDuplicateAction(action)) return;
         auto actionName = externalName(action);
+        if (actionName == P4::P4CoreLibrary::instance().noAction.name) {
+            tcPipeline->addNoActionDefinition(new IR::TCAction("NoAction"));
+            actions.emplace("NoAction", action);
+            return;
+        }
         actions.emplace(actionName, action);
         actionCount++;
         unsigned int actionId = actionCount;
@@ -563,11 +567,20 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
             }
         }
         auto actionlist = t->getActionList();
-        for (auto action : actionlist->actionList) {
-            for (auto actionDef : tcPipeline->actionDefs) {
+        if (actionlist->size() == 0) {
+            tableDefinition->addAction(tcPipeline->NoAction, TC::TABLEDEFAULT);
+        } else {
+            for (auto action : actionlist->actionList) {
+                const IR::TCAction *tcAction = nullptr;
                 auto adecl = refMap->getDeclaration(action->getPath(), true);
                 auto actionName = externalName(adecl);
-                if (actionName != actionDef->actionName) continue;
+                for (auto actionDef : tcPipeline->actionDefs) {
+                    if (actionName != actionDef->actionName) continue;
+                    tcAction = actionDef;
+                }
+                if (actionName == P4::P4CoreLibrary::instance().noAction.name) {
+                    tcAction = tcPipeline->NoAction;
+                }
                 auto annoList = action->getAnnotations()->annotations;
                 unsigned int tableFlag = TC::TABLEDEFAULT;
                 for (auto anno : annoList) {
@@ -578,7 +591,9 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                         tableFlag = TC::DEFAULTONLY;
                     }
                 }
-                tableDefinition->addAction(actionDef, tableFlag);
+                if (tcAction) {
+                    tableDefinition->addAction(tcAction, tableFlag);
+                }
             }
         }
         updateDefaultHitAction(t, tableDefinition);

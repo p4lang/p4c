@@ -23,5 +23,6 @@ $TC p4template update table/noaction_example_02/MainControlImpl/ipv4_tbl_1 defau
 $TC p4template create table/noaction_example_02/MainControlImpl/ipv4_tbl_2 \
 	tblid 2 \
 	type exact \
-	keysz 3 nummasks 8 tentries 1024
+	keysz 3 nummasks 8 tentries 1024 \
+	table_acts act name NoAction
 $TC p4template update pipeline/noaction_example_02 state ready

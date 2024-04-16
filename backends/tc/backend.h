@@ -73,7 +73,7 @@ class ConvertToBackendIR : public Inspector {
     void postorder(const IR::P4Action *a) override;
     void postorder(const IR::P4Table *t) override;
     void postorder(const IR::P4Program *p) override;
-    bool isDuplicateOrNoAction(const IR::P4Action *action);
+    bool isDuplicateAction(const IR::P4Action *action);
     void updateDefaultHitAction(const IR::P4Table *t, IR::TCTable *tdef);
     void updateDefaultMissAction(const IR::P4Table *t, IR::TCTable *tdef);
     void updateConstEntries(const IR::P4Table *t, IR::TCTable *tdef);

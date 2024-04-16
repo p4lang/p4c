@@ -32,5 +32,6 @@ $TC p4template create table/noaction_example_01/MainControlImpl/ipv4_tbl_2 \
 	type exact \
 	keysz 67 nummasks 8 tentries 1024 \
 	table_acts act name noaction_example_01/MainControlImpl/sendtoport \
-	act name noaction_example_01/MainControlImpl/drop
+	act name noaction_example_01/MainControlImpl/drop \
+	act name NoAction
 $TC p4template update pipeline/noaction_example_01 state ready
