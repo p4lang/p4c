@@ -31,8 +31,8 @@ cstring DpdkContextGenerator::removePipePrefix(cstring tableName) {
     return tableName;
 }
 
-// This function collects all tables in a vector and sets the table attributes required
-// by context json into a map.
+/// This function collects all tables in a vector and sets the table attributes required
+/// by context json into a map.
 void DpdkContextGenerator::CollectTablesAndSetAttributes() {
     IR::IndexedVector<IR::Declaration> selector_tables;
     IR::IndexedVector<IR::Declaration> action_data_tables;
@@ -162,7 +162,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
     for (auto d : action_data_tables) tables.push_back(d);
 }
 
-// This functions insert a single key field in the match keys array
+/// This functions insert a single key field in the match keys array.
 void DpdkContextGenerator::addKeyField(Util::JsonArray *keyJson, const cstring name,
                                        const cstring nameAnnotation, const IR::KeyElement *key,
                                        int position) {
@@ -187,7 +187,7 @@ void DpdkContextGenerator::addKeyField(Util::JsonArray *keyJson, const cstring n
     keyJson->append(keyField);
 }
 
-// This function sets the common table properties
+/// This function sets the common table properties.
 Util::JsonObject *DpdkContextGenerator::initTableCommonJson(const cstring name,
                                                             const struct TableAttributes &attr) {
     auto *tableJson = new Util::JsonObject();
@@ -232,7 +232,7 @@ size_t DpdkContextGenerator::getHandleId(cstring name) {
     return id;
 }
 
-// This function sets action attributes for actions in a table.
+/// This function sets action attributes for actions in a table.
 void DpdkContextGenerator::setActionAttributes(const IR::P4Table *tbl) {
     for (auto act : tbl->getActionList()->actionList) {
         struct actionAttributes attr;
@@ -280,8 +280,8 @@ void DpdkContextGenerator::setActionAttributes(const IR::P4Table *tbl) {
             }
         }
 
-        /* DPDK target takes a structure as parameter for Actions. So, all action
-           parameters are collected into a structure by an earlier pass. */
+        // DPDK target takes a structure as parameter for Actions. So, all action
+        // parameters are collected into a structure by an earlier pass.
         auto params = ::get(structure->args_struct_map, act->getPath()->name.name + "_arg_t");
         if (params)
             attr.params = params->clone();
@@ -316,7 +316,7 @@ void DpdkContextGenerator::setDefaultActionHandle(const IR::P4Table *table) {
     }
 }
 
-// This functions creates JSON object for immediate fields (action parameters)
+/// This functions creates JSON object for immediate fields (action parameters).
 void DpdkContextGenerator::addImmediateField(Util::JsonArray *paramJson, const cstring name,
                                              int dest_start, int dest_width) {
     auto *oneParam = new Util::JsonObject();
@@ -326,7 +326,7 @@ void DpdkContextGenerator::addImmediateField(Util::JsonArray *paramJson, const c
     paramJson->append(oneParam);
 }
 
-// This functions creates JSON object for match attributes of a table.
+/// This functions creates JSON object for match attributes of a table.
 Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *table,
                                                            const cstring ctrlName) {
     auto tableAttr = ::get(tableAttrmap, table->name.originalName);
@@ -367,7 +367,7 @@ Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *ta
     return match_attributes;
 }
 
-// This function adds a single parameter to the parameters array.
+/// This function adds a single parameter to the parameters array.
 void DpdkContextGenerator::addActionParam(Util::JsonArray *paramJson, const cstring name,
                                           int bitWidth, int position, int byte_array_index) {
     auto *oneParam = new Util::JsonObject();
@@ -379,7 +379,7 @@ void DpdkContextGenerator::addActionParam(Util::JsonArray *paramJson, const cstr
     paramJson->append(oneParam);
 }
 
-// This function creates JSON objects for  actions within a table.
+/// This function creates JSON objects for  actions within a table.
 Util::JsonArray *DpdkContextGenerator::addActions(const IR::P4Table *table,
                                                   const cstring controlName, bool isMatch) {
     auto *actArray = new Util::JsonArray();
@@ -430,7 +430,7 @@ Util::JsonArray *DpdkContextGenerator::addActions(const IR::P4Table *table,
     return actArray;
 }
 
-// This function adds the tables referred by this table.
+/// This function adds the tables referred by this table.
 bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Table **memberTable,
                                         Util::JsonObject *tableJson) {
     bool hasActionProfileSelector = false;
@@ -475,7 +475,7 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
     return hasActionProfileSelector;
 }
 
-// Add tables to the context json
+/// Add tables to the context json.
 void DpdkContextGenerator::addMatchTables(Util::JsonArray *tablesJson) {
     for (auto t : tables) {
         auto tbl = t->to<IR::P4Table>();
@@ -530,7 +530,7 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray *tablesJson) {
     }
 }
 
-// Add extern information to the context json
+/// Add extern information to the context json.
 void DpdkContextGenerator::addExternInfo(Util::JsonArray *externsJson) {
     for (auto t : externs) {
         auto externAttr = ::get(externAttrMap, t->name.name);

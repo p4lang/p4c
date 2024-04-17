@@ -25,9 +25,8 @@ limitations under the License.
 #include "lib/stringify.h"
 
 namespace DPDK {
-/* Insert the metadata structure updated with tmp variables created during parser conversion
-   Add all the structures to DPDK structtype.
-*/
+/// Insert the metadata structure updated with tmp variables created during parser conversion
+/// Add all the structures to DPDK structtype.
 IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata(
     IR::P4Program *prog, IR::Type_Struct *metadata) {
     IR::IndexedVector<IR::DpdkStructType> structType;
@@ -186,31 +185,29 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
         auto s = kv.second;
         auto structTypeName = s->getName().name;
         if (updatedHeaderMetadataStructs.getDeclaration(structTypeName) != nullptr) {
-            /**
-             * UpdateHeaderMetadata returns IndexedVector filled with following 3 types of structs:
-             * - main metadata structure (whose name is stored in structure->local_metadata_type)
-             * - structures for action arguments created internally by compiler (stored in
-             *   structure->args_struct_map)
-             * - main structure which holds all headers (whose name is stored in
-             *   structure->header_type)
-             *
-             * Only the first one (main metadata structure) can be present in
-             * structure->metadata_types map.
-             * Main metadata structure is added to the map when it contains metadata whose
-             * type is a structure.
-             * It happens during InspectDpdkProgram pass which visits IR::Parameter nodes in
-             * InspectDpdkProgram::preorder(const IR::Parameter* param).
-             * During that pass the visitor only visits the parameter in the statement from
-             * architecture.
-             * Structures internally created for action arguments are not visited in that pass,
-             * so they are not added to structure->metadata_types.
-             * As they are created internally by compiler they are not used as types of fields
-             * in main metadata structure neither.
-             * Main headers structure contains only headers so it is not added to
-             * structure->metadata_types map neither.
-             * InspectDpdkProgram adds there only the structures which contain some field
-             * with structure type.
-             */
+            // UpdateHeaderMetadata returns IndexedVector filled with following 3 types of structs:
+            // - main metadata structure (whose name is stored in structure->local_metadata_type)
+            // - structures for action arguments created internally by compiler (stored in
+            //   structure->args_struct_map)
+            // - main structure which holds all headers (whose name is stored in
+            //   structure->header_type)
+            //
+            // Only the first one (main metadata structure) can be present in
+            // structure->metadata_types map.
+            // Main metadata structure is added to the map when it contains metadata whose
+            // type is a structure.
+            // It happens during InspectDpdkProgram pass which visits IR::Parameter nodes in
+            // InspectDpdkProgram::preorder(const IR::Parameter* param).
+            // During that pass the visitor only visits the parameter in the statement from
+            // architecture.
+            // Structures internally created for action arguments are not visited in that pass,
+            // so they are not added to structure->metadata_types.
+            // As they are created internally by compiler they are not used as types of fields
+            // in main metadata structure neither.
+            // Main headers structure contains only headers so it is not added to
+            // structure->metadata_types map neither.
+            // InspectDpdkProgram adds there only the structures which contain some field
+            // with structure type.
             LOG3("Struct type already added to DpdkStructType vector: "
                  << s << std::endl
                  << "Main metadata structure is: " << structure->local_metadata_type);
@@ -262,12 +259,12 @@ IR::Declaration_Variable *ConvertToDpdkParser::addNewTmpVarToMetadata(cstring na
     return newTmpVar;
 }
 
-/* This is a helper function for handling the transition select statement. It populates the left
-   and right operands of comparison, to be used  in conditional jump instructions. When the keyset
-   of select case is simple expressions, it populates the left and rigt operands with the input
-   expressions. When the keyset is Mask expression "a &&& b", it inserts temporary variables in
-   Metadata structure and populates the left and right operands of comparison with
-   "input & b" and "a & b" */
+/// This is a helper function for handling the transition select statement. It populates the left
+/// and right operands of comparison, to be used  in conditional jump instructions. When the keyset
+/// of select case is simple expressions, it populates the left and right operands with the input
+/// expressions. When the keyset is Mask expression "a &&& b", it inserts temporary variables in
+/// Metadata structure and populates the left and right operands of comparison with
+/// "input & b" and "a & b".
 void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expression *ce,
                                       IR::Expression **leftExpr, IR::Expression **rightExpr) {
     if (sv->is<IR::Constant>() && sv->type->width_bits() > 32) {
@@ -325,7 +322,7 @@ void ConvertToDpdkParser::handleTupleExpression(const IR::ListExpression *cl,
                                                 cstring trueLabel, cstring falseLabel) {
     IR::Expression *left;
     IR::Expression *right;
-    /* Compare each element in the input tuple with the keyset tuple */
+    // Compare each element in the input tuple with the keyset tuple.
     for (auto i = 0; i < inputSize; i++) {
         auto switch_var = input->components.at(i);
         auto caseExpr = cl->components.at(i);
@@ -395,14 +392,13 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                 IR::Expression *left;
                 IR::Expression *right;
 
-                /* Handling single expression in keyset as special case because :
-                   - for tuple expression we emit a series of jmpneq followed by an unconditional
-                     jump, handling single expression separately by emitting a jmpeq saves us one
-                     unconditional jmp
-                   - the keyset for single expression is not a ListExpression, so handling it with
-                     tuple expressions would anyways require additional and conversion to
-                     ListExpression.
-                */
+                // Handling single expression in keyset as special case because :
+                //   - for tuple expression we emit a series of jmpneq followed by an unconditional
+                //     jump, handling single expression separately by emitting a jmpeq saves us one
+                //     unconditional jmp
+                //   - the keyset for single expression is not a ListExpression, so handling it with
+                //     tuple expressions would anyways require additional and conversion to
+                //     ListExpression.
                 if (e->select->components.size() == 1) {
                     switch_var = e->select->components.at(0);
                     for (auto sc : caseList) {
@@ -420,12 +416,12 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                     auto tupleInputExpr = e->select;
                     auto inputSize = tupleInputExpr->components.size();
                     cstring trueLabel, falseLabel;
-                    /* For each select case, emit the block start label and then a series of
-                       jmp instructions. */
+                    // For each select case, emit the block start label and then a series of
+                    // jmp instructions.
                     for (auto sc : caseList) {
                         if (!sc->keyset->is<IR::DefaultExpression>()) {
-                            /* Create label names, falseLabel for next keyset comparison and
-                               trueLabel for the state to jump on match */
+                            // Create label names, falseLabel for next keyset comparison and
+                            // trueLabel for the state to jump on match.
                             falseLabel = refmap->newName(state->name);
                             trueLabel = sc->state->path->name;
                             handleTupleExpression(sc->keyset->to<IR::ListExpression>(),
@@ -507,11 +503,10 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
     return false;
 }
 
-/* This function checks if a table satisfies the DPDK limitations mentioned below:
-     - Only one LPM match field allowed per table.
-     - If there is a key field with lpm match kind, the other match fields, if any,
-       must all be exact match.
-*/
+/// This function checks if a table satisfies the DPDK limitations mentioned below:
+///   - Only one LPM match field allowed per table.
+///   - If there is a key field with lpm match kind, the other match fields, if any,
+///     must all be exact match.
 bool ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
     auto keys = a->getKey();
     auto lpmCount = 0;
