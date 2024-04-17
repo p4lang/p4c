@@ -228,6 +228,7 @@ class TCTable {
     cstring tableName;
     cstring controlName;
     cstring pipelineName;
+    cstring permissions;
     unsigned keySize;
     unsigned tableEntriesCount;
     unsigned numMask;
@@ -244,6 +245,9 @@ class TCTable {
     ordered_map<TCAction, unsigned> actionList;
     safe_vector<TCEntry> const_entries;
 
+    void setTablePermission(cstring p) {
+        permissions = p;
+    }
     void setKeySize(unsigned k) {
         keySize = k;
     }
@@ -326,12 +330,10 @@ class TCTable {
         tcTable += "\n\ttype " + printMatchType(matchType) + " \\";
         tcTable += "\n\tkeysz " + Util::toString(keySize);
         tcTable += " nummasks " + Util::toString(numMask);
+        tcTable += " permissions " + Util::toString(permissions);
         tcTable += " tentries " + Util::toString(tableEntriesCount);
-        if (isTableAddOnMiss) {
-            tcTable += " permissions 0x3DE6";
-            if(timerProfiles > defaultTimerProfiles) {
-                tcTable += " num_timer_profiles " + Util::toString(timerProfiles);
-            }
+        if (isTableAddOnMiss && timerProfiles > defaultTimerProfiles) {
+            tcTable += " num_timer_profiles " + Util::toString(timerProfiles);
         }
 
         if (!actionList.empty()) {

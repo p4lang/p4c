@@ -115,7 +115,11 @@ overview of the compiler goals and architecture.
 ## Documentation Comments Style Guide 
 - Use triple slashes `///` for documenting functions and classes in files.
 - Double slashes `//` should be used for "internal" comments within functions.
+- Double slashes `//` should be used for inline comment.
 - For rare occasions such as adding comments to multi-line macros, you may use `/* ... */` style comments.
+- There should be no space at the end of the comment.
+- First letter of the comment should be a capital letter.
+- Each comment should end with a period.
 
 Happy writing! Should you have any questions, please don't hesitate to ask.
 

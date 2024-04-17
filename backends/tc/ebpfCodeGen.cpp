@@ -1534,7 +1534,6 @@ void ControlBodyTranslatorPNA::ValidateAddOnMissMissAction(const IR::P4Action *a
                 act);
     }
     const IR::P4Table *t = table->table->container;
-    cstring tblname = t->name.originalName;
     const IR::Expression *defaultAction = t->getDefaultAction();
     CHECK_NULL(defaultAction);
     auto defaultActionName = table->getActionNameExpression(defaultAction);
@@ -1548,7 +1547,7 @@ void ControlBodyTranslatorPNA::ValidateAddOnMissMissAction(const IR::P4Action *a
                   "add_entry extern can only be used in an action"
                   " of a table with property add_on_miss equals to true.");
     }
-    tcIR->updateAddOnMissTable(tblname);
+    ((ConvertToBackendIR *)tcIR)->updateAddOnMissTable(t);
 }
 
 void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *function) {

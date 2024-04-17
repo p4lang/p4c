@@ -39,18 +39,18 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
  private:
     bool isTDI;
     DPDK::DpdkOptions &options;
-    // TODO(antonin): these values may need to be available to the BF-RT
-    // implementation as well, if they want to expose them as enums.
+    /// TODO(antonin): these values may need to be available to the BF-RT
+    /// implementation as well, if they want to expose them as enums.
 
-    // To avoid potential clashes with P4 names, we prefix the names of "fixed"
-    // data field with a '$'. For example, for TD_DATA_ACTION_MEMBER_ID, we
-    // use the name $ACTION_MEMBER_ID.
+    /// To avoid potential clashes with P4 names, we prefix the names of "fixed"
+    /// data field with a '$'. For example, for TD_DATA_ACTION_MEMBER_ID, we
+    /// use the name $ACTION_MEMBER_ID.
     enum BFRuntimeDataFieldIds : P4Id {
-        // ids for fixed data fields must not collide with the auto-generated
-        // ids for P4 fields (e.g. match key fields). Snapshot tables include
-        // ALL the fields defined in the P4 program so we need to ensure that
-        // this BF_RT_DATA_START offset is quite large.
-        // PSA Ids are between TD_DATA_START = (1 << 16) and TD_DATA_END,
+        /// ids for fixed data fields must not collide with the auto-generated
+        /// ids for P4 fields (e.g. match key fields). Snapshot tables include
+        /// ALL the fields defined in the P4 program so we need to ensure that
+        /// this BF_RT_DATA_START offset is quite large.
+        /// PSA Ids are between TD_DATA_START = (1 << 16) and TD_DATA_END,
         BF_RT_DATA_START = TD_DATA_END,
 
         BF_RT_DATA_ACTION_MEMBER_ID,
@@ -59,7 +59,7 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
         BF_RT_DATA_MAX_GROUP_SIZE,
         BF_RT_DATA_HASH_VALUE,
     };
-    // Externs only for DPDK backend
+    /// Externs only for DPDK backend.
     struct ActionSelector;
 
     void addDPDKExterns(Util::JsonArray *tablesJson, Util::JsonArray *learnFiltersJson) const;
