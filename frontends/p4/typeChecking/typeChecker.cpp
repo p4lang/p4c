@@ -3615,6 +3615,13 @@ bool TypeInference::onlyBitsOrBitStructs(const IR::Type *type) const {
     return false;
 }
 
+const IR::Node *TypeInference::postorder(IR::MethodCallStatement *mcs) {
+    if (!mcs->methodCall)
+        // Remove mcs if child methodCall resolves to a compile-time constant.
+        return nullptr;
+    return mcs;
+}
+
 const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
     if (done()) return expression;
     LOG2("Solving method call " << dbp(expression));
@@ -3653,6 +3660,8 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
                 LOG3("Folding " << mem << " to " << w);
                 if (w < 0) return expression;
                 if (mem->member.name.endsWith("Bytes")) w = ROUNDUP(w, 8);
+                if (getParent<IR::MethodCallStatement>())
+                    return nullptr;
                 auto result = new IR::Constant(expression->srcInfo, w);
                 auto tt = new IR::Type_Type(result->type);
                 setType(result->type, tt);
@@ -3670,6 +3679,8 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
                     lit = new IR::BoolLiteral(expression->srcInfo, true);
                 if (lit) {
                     LOG3("Folding " << mem << " to " << lit);
+                    if (getParent<IR::MethodCallStatement>())
+                        return nullptr;
                     setType(lit, IR::Type_Boolean::get());
                     setCompileTimeConstant(lit);
                     return lit;
