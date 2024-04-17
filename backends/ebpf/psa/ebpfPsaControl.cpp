@@ -106,7 +106,7 @@ void EBPFControlPSA::emitTableTypes(CodeBuilder *builder) {
     for (auto it : registers) it.second->emitTypes(builder);
     for (auto it : meters) it.second->emitKeyType(builder);
 
-    //  Value type for any indirect meter is the same
+    //  Value type for any indirect meter is the same.
     if (!meters.empty()) {
         meters.begin()->second->emitValueType(builder);
     }

@@ -14,13 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/*
- * Runtime operations specific to the kernel target. Opens a raw socket per
- * interface, launches a tcpdump packet listener, and writes packets to a
- * virtual interface. The successful output is recorded by tcpdump and written
- * to file.
- */
-
+/// Runtime operations specific to the kernel target. Opens a raw socket per
+/// interface, launches a tcpdump packet listener, and writes packets to a
+/// virtual interface. The successful output is recorded by tcpdump and written
+/// to file.
 #ifndef BACKENDS_EBPF_RUNTIME_EBPF_RUNTIME_KERNEL_H_
 #define BACKENDS_EBPF_RUNTIME_EBPF_RUNTIME_KERNEL_H_
 

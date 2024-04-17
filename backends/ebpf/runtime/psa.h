@@ -37,7 +37,7 @@ static const PSA_PacketPath_t CLONE_E2E = 4;  /// Packet created via a clone ope
 static const PSA_PacketPath_t RESUBMIT = 5;  /// Packet arrival is the result of a resubmit operation
 static const PSA_PacketPath_t RECIRCULATE = 6;  /// Packet arrival is the result of a recirculate operation
 
-// Instead of using enum we define ParserError_t as __u8 to save memory.
+/// Instead of using enum we define ParserError_t as __u8 to save memory.
 typedef __u8 ParserError_t;
 static const ParserError_t NoError = 0;  /// No error.
 static const ParserError_t PacketTooShort = 1;  /// Not enough bits in packet for 'extract'.
@@ -50,9 +50,8 @@ static const ParserError_t ParserInvalidArgument = 6;  /// Parser operation was 
 
 enum PSA_MeterColor_t { RED, GREEN, YELLOW };
 
-/*
- * INGRESS data types
- */
+
+/// INGRESS data types
 struct psa_ingress_parser_input_metadata_t {
     PortId_t                 ingress_port;  // taken from xdp_md or __sk_buff
     PSA_PacketPath_t         packet_path;   // taken from psa_global_metadata

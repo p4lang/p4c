@@ -27,8 +27,8 @@ class ControlBodyTranslatorPSA;
 class EBPFRegisterPSA : public EBPFTableBase {
  protected:
     size_t size;
-    // initial value for Register cells.
-    // It can be nullptr if an initial value is not provided or not IR::Constant.
+    /// Initial value for Register cells.
+    /// It can be nullptr if an initial value is not provided or not IR::Constant.
     const IR::Constant *initialValue = nullptr;
     const IR::Type *keyArg;
     const IR::Type *valueArg;

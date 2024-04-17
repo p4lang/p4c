@@ -14,10 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/*
-Implementation of userlevel eBPF map structure. Emulates the linux kernel bpf maps.
-*/
-
+/// Implementation of userlevel eBPF map structure. Emulates the linux kernel bpf maps.
 #include <assert.h>
 #include <stdio.h>
 #include "ebpf_map.h"
@@ -30,13 +27,13 @@ enum bpf_flags {
 
 static int check_flags(void *elem, unsigned long long map_flags) {
     if (map_flags > USER_BPF_EXIST)
-        /* unknown flags */
+        // unknown flags
         return EXIT_FAILURE;
     if (elem && map_flags == USER_BPF_NOEXIST)
-        /* elem already exists */
+        // elem already exists
         return EXIT_FAILURE;
     if (!elem && map_flags == USER_BPF_EXIST)
-        /* elem doesn't exist, cannot update it */
+        // elem doesn't exist, cannot update it
         return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
