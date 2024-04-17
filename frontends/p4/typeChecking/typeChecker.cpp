@@ -3616,10 +3616,8 @@ bool TypeInference::onlyBitsOrBitStructs(const IR::Type *type) const {
 }
 
 const IR::Node *TypeInference::postorder(IR::MethodCallStatement *mcs) {
-    if (!mcs->methodCall)
-        // Remove mcs if child methodCall resolves to a compile-time constant.
-        return nullptr;
-    return mcs;
+    // Remove mcs if child methodCall resolves to a compile-time constant.
+    return !mcs->methodCall ? nullptr : mcs;
 }
 
 const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
