@@ -13,6 +13,7 @@ namespace IR {
 
 // Forward-declare some IR classes that are used in function declarations.
 class BoolLiteral;
+class StringLiteral;
 class Constant;
 class Expression;
 class BaseListExpression;
@@ -49,6 +50,10 @@ const Constant *getConstant(const Type *type, big_int v, const Util::SourceInfo 
 
 /// @returns a bool literal. The value is cached.
 const BoolLiteral *getBoolLiteral(bool value, const Util::SourceInfo &srcInfo = {});
+
+/// @returns a string literal. If @param type is nullptr, Type_String is used. The value is cached.
+const StringLiteral *getStringLiteral(cstring value, const Type *type = nullptr,
+                                      const Util::SourceInfo &srcInfo = {});
 
 /// @returns a constant with the maximum big_int value that can fit into this bit width.
 /// Implicitly converts boolean types to a bit vector of width one with value 1.

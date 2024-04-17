@@ -84,51 +84,49 @@ TEST_F(Z3SolverSatisfiabilityChecks, Strings) {
     const auto *fooVar = P4Tools::ToolsVariables::getSymbolicVariable(stringType, "foo");
     const auto *barVar = P4Tools::ToolsVariables::getSymbolicVariable(stringType, "bar");
     {
-        auto *expression = new IR::Equ(new IR::StringLiteral(stringType, "dead"),
-                                       new IR::StringLiteral(stringType, "dead"));
+        auto *expression = new IR::Equ(IR::getStringLiteral("dead"), IR::getStringLiteral("dead"));
         ConstraintVector inputExpression = {expression};
         testCheckSat(inputExpression, true);
     }
     {
-        auto *expression = new IR::Equ(new IR::StringLiteral(stringType, "dead"),
-                                       new IR::StringLiteral(stringType, "beef"));
+        auto *expression = new IR::Equ(IR::getStringLiteral("dead"), IR::getStringLiteral("beef"));
         ConstraintVector inputExpression = {expression};
         testCheckSat(inputExpression, false);
     }
     {
-        auto *expression = new IR::Equ(fooVar, new IR::StringLiteral(stringType, "dead"));
+        auto *expression = new IR::Equ(fooVar, IR::getStringLiteral("dead"));
         ConstraintVector inputExpression = {expression};
         testCheckSat(inputExpression, true);
     }
     {
-        auto *expression = new IR::Equ(fooVar, new IR::StringLiteral(stringType, "dead"));
-        auto *constraint1 = new IR::Equ(fooVar, new IR::StringLiteral(stringType, "dead"));
+        auto *expression = new IR::Equ(fooVar, IR::getStringLiteral("dead"));
+        auto *constraint1 = new IR::Equ(fooVar, IR::getStringLiteral("dead"));
         ConstraintVector inputExpression = {expression, constraint1};
         testCheckSat(inputExpression, true);
     }
     {
         auto *expression = new IR::Equ(fooVar, barVar);
-        auto *constraint1 = new IR::Equ(fooVar, new IR::StringLiteral(stringType, "dead"));
+        auto *constraint1 = new IR::Equ(fooVar, IR::getStringLiteral("dead"));
         ConstraintVector inputExpression = {expression, constraint1};
         testCheckSat(inputExpression, true);
     }
     {
         auto *expression = new IR::Equ(fooVar, barVar);
-        auto *constraint1 = new IR::Equ(fooVar, new IR::StringLiteral(stringType, "dead"));
-        auto *constraint2 = new IR::Equ(barVar, new IR::StringLiteral(stringType, "dead"));
+        auto *constraint1 = new IR::Equ(fooVar, IR::getStringLiteral("dead"));
+        auto *constraint2 = new IR::Equ(barVar, IR::getStringLiteral("dead"));
         ConstraintVector inputExpression = {expression, constraint1, constraint2};
         testCheckSat(inputExpression, true);
     }
     {
-        auto *expression = new IR::Equ(fooVar, new IR::StringLiteral(stringType, "dead"));
-        auto *constraint1 = new IR::Equ(fooVar, new IR::StringLiteral(stringType, "beef"));
+        auto *expression = new IR::Equ(fooVar, IR::getStringLiteral("dead"));
+        auto *constraint1 = new IR::Equ(fooVar, IR::getStringLiteral("beef"));
         ConstraintVector inputExpression = {expression, constraint1};
         testCheckSat(inputExpression, false);
     }
     {
         auto *expression = new IR::Equ(fooVar, barVar);
-        auto *constraint1 = new IR::Equ(fooVar, new IR::StringLiteral(stringType, "dead"));
-        auto *constraint2 = new IR::Equ(barVar, new IR::StringLiteral(stringType, "beef"));
+        auto *constraint1 = new IR::Equ(fooVar, IR::getStringLiteral("dead"));
+        auto *constraint2 = new IR::Equ(barVar, IR::getStringLiteral("beef"));
         ConstraintVector inputExpression = {expression, constraint1, constraint2};
         testCheckSat(inputExpression, false);
     }

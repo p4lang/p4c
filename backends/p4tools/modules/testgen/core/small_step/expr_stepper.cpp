@@ -303,7 +303,7 @@ bool ExprStepper::preorder(const IR::PathExpression *pathExpression) {
     // If the path expression is a Type_MatchKind, convert it to a StringLiteral.
     if (pathExpression->type->is<IR::Type_MatchKind>()) {
         state.replaceTopBody(Continuation::Return(
-            new IR::StringLiteral(IR::Type_MatchKind::get(), pathExpression->path->name)));
+            IR::getStringLiteral(pathExpression->path->name, IR::Type_MatchKind::get())));
         result->emplace_back(state);
         return false;
     }

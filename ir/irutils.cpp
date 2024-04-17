@@ -72,6 +72,22 @@ const BoolLiteral *getBoolLiteral(bool value, const Util::SourceInfo &srcInfo) {
     return result;
 }
 
+const IR::StringLiteral *getStringLiteral(cstring value, const IR::Type *type,
+                                          const Util::SourceInfo &srcInfo) {
+    if (type == nullptr) {
+        type = Type::String::get();
+    }
+    // String literals are interned.
+    using key_t = std::pair<cstring, const IR::Type *>;
+    static std::map<key_t, const IR::StringLiteral *> STRINGS;
+
+    auto *&result = STRINGS[{value, type}];
+    if (result == nullptr) {
+        result = new IR::StringLiteral(srcInfo, type, value);
+    }
+    return result;
+}
+
 const IR::Constant *convertBoolLiteral(const IR::BoolLiteral *lit) {
     return IR::getConstant(IR::getBitType(1), lit->value ? 1 : 0, lit->getSourceInfo());
 }
