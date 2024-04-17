@@ -106,7 +106,7 @@ aspects that are overlooked. Therefore, please take the time to think
 through the information you want to convey and write good, explicit
 error messages.
 
-An additional goal of the p4c compiler is to provide as many error
+An additional goal of the P4C compiler is to provide as many error
 messages as possible in one go. Therefore, while there is support for
 `FATAL_ERROR`s, it is desirable to try to continue execution and
 report all possible errors, using the `error` and `warning`
