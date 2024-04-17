@@ -6,7 +6,7 @@ CMake Files:
 
 How to Run tests:
 =====================
-1) All p4c submodule tests are tagged with 'testgen-p4c-bmv2' label
+1) All P4C submodule tests are tagged with 'testgen-p4c-bmv2' label
    - cd build/testgen
    - ctest -R testgen-p4c-bmv2
 
