@@ -466,8 +466,8 @@ class AllDefinitions : public IHasDbPrint {
 /**
  * Computes the write set for each expression and statement.
  *
- * This pass is run for each parser and control separately.  It
- * controls precisely the visit order --- to simulate a simbolic
+ * This pass is run for each parser and control separately. It
+ * controls precisely the visit order --- to simulate a symbolic
  * execution of the program.
  *
  * @pre Must be executed after variable initializers have been removed.
