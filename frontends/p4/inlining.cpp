@@ -935,6 +935,6 @@ const IR::Node *GeneralInliner::preorder(IR::P4Parser *caller) {
 }
 
 // set of annotations to _not_ propagate during inlining
-std::set<cstring> Inline::noPropagateAnnotations = {"name"};
+std::set<cstring> Inline::noPropagateAnnotations = {IR::Annotation::nameAnnotation};
 
 }  // namespace P4
