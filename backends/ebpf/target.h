@@ -261,7 +261,7 @@ class XdpTarget : public KernelSamplesTarget {
     }
 };
 
-/// Represents a target compiled by bcc that uses the TC
+/// Represents a target compiled by bcc that uses the TC.
 class BccTarget : public Target {
  public:
     BccTarget() : Target("BCC") {}
