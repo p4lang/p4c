@@ -51,7 +51,7 @@ static const ParserError_t ParserInvalidArgument = 6;  /// Parser operation was 
 enum PSA_MeterColor_t { RED, GREEN, YELLOW };
 
 
-/// INGRESS data types
+/// INGRESS data types.
 struct psa_ingress_parser_input_metadata_t {
     PortId_t                 ingress_port;  // taken from xdp_md or __sk_buff
     PSA_PacketPath_t         packet_path;   // taken from psa_global_metadata
