@@ -19,8 +19,8 @@ limitations under the License.
 
 #include "config.h"
 
-// Shouldn't happen as cmake will not try to build this backend if the boost
-// graph headers couldn't be found.
+/// Shouldn't happen as cmake will not try to build this backend if the boost
+/// graph headers couldn't be found.
 #ifndef HAVE_LIBBOOST_GRAPH
 #error "This backend requires the boost graph headers, which could not be found"
 #endif
@@ -110,11 +110,11 @@ class Graphs : public Inspector {
         VertexType type;
     };
 
-    // The boost graph support for graphviz subgraphs is not very intuitive. In
-    // particular the write_graphviz code assumes the existence of a lot of
-    // properties. See
-    // https://stackoverflow.com/questions/29312444/how-to-write-graphviz-subgraphs-with-boostwrite-graphviz
-    // for more information.
+    /// The boost graph support for graphviz subgraphs is not very intuitive. In
+    /// particular the write_graphviz code assumes the existence of a lot of
+    /// properties. See
+    /// https://stackoverflow.com/questions/29312444/how-to-write-graphviz-subgraphs-with-boostwrite-graphviz
+    /// for more information.
     using GraphvizAttributes = std::map<cstring, cstring>;
     using vertexProperties = boost::property<boost::vertex_attribute_t, GraphvizAttributes, Vertex>;
     using edgeProperties = boost::property<
@@ -133,20 +133,19 @@ class Graphs : public Inspector {
 
     using Parents = std::vector<std::pair<vertex_t, EdgeTypeIface *>>;
 
-    // merge misc control statements (action calls, extern method calls,
-    // assignments) into a single vertex to reduce graph complexity
+    /// merge misc control statements (action calls, extern method calls,
+    /// assignments) into a single vertex to reduce graph complexity
     std::optional<vertex_t> merge_other_statements_into_vertex();
 
     vertex_t add_vertex(const cstring &name, VertexType type);
     vertex_t add_and_connect_vertex(const cstring &name, VertexType type);
     void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name);
-    /**
-     * @brief used to connect subgraphs
-     * @param from node from wich edge will start
-     * @param to node where edge will end
-     * @param name used as edge label
-     * @param cluster_id id of cluster, that will be connected to previous cluster
-     */
+    /// Used to connect subgraphs
+    ///
+    /// @param from Node from which edge will start
+    /// @param to Node where edge will end
+    /// @param name Used as edge label
+    /// @param cluster_id ID of cluster, that will be connected to the previous cluster.
     void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name,
                   unsigned cluster_id);
 
@@ -215,11 +214,10 @@ class Graphs : public Inspector {
     std::vector<const IR::Statement *> statementsStack{};
 
  private:
-    /**
-     * @brief Limits string size in helper_sstream and resets it
-     * @param[out] sstream stringstream where trimmed string is stored
-     * @param helper_sstream contains string, which will be trimmed
-     */
+    /// Limits string size in helper_sstream and resets it
+    ///
+    /// @param[out] sstream Stringstream where trimmed string is stored
+    /// @param helper_sstream Contains string, which will be trimmed
     void limitStringSize(std::stringstream &sstream, std::stringstream &helper_sstream);
 };
 

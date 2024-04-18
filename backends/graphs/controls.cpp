@@ -157,7 +157,7 @@ bool ControlGraphs::preorder(const IR::IfStatement *statement) {
 bool ControlGraphs::preorder(const IR::SwitchStatement *statement) {
     auto tbl = P4::TableApplySolver::isActionRun(statement->expression, refMap, typeMap);
     vertex_t v;
-    // special case for action_run
+    // Special case for action_run.
     std::stringstream sstream;
     if (tbl == nullptr) {
         statement->expression->dbprint(sstream);
@@ -184,7 +184,7 @@ bool ControlGraphs::preorder(const IR::SwitchStatement *statement) {
         }
     }
     // TODO(antonin): do not add default statement for action_run if all actions
-    // are present
+    // are present.
     if (!hasDefault)
         new_parents.emplace_back(v, new EdgeSwitch(new IR::DefaultExpression()));
     else
