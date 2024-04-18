@@ -18,7 +18,7 @@ limitations under the License.
 // exception specifier. Compilers (clang including) might have special handling
 // of this to allow posix_memalign redeclaration with / without exception
 // specifier. As we define posix_memalign below in this file we really need to
-// ensure the proper include order to workaround this this weirdness.
+// ensure the proper include order to workaround this weirdness.
 #include <mm_malloc.h>  // NOLINT(build/include_order)
 
 #include "config.h"
