@@ -237,7 +237,7 @@ class P4TCTarget : public KernelSamplesTarget {
     }
 };
 
-/// Target XDP
+/// Target XDP.
 class XdpTarget : public KernelSamplesTarget {
  public:
     explicit XdpTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "XDP") {}
