@@ -32,7 +32,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-@my_anno_5 @my_anno_3 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+@my_anno_5 @my_anno_3 @name("MyIngress.inner_ctrl") control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.inner.set_hdr") action inner_set_hdr_0(@name("val") bit<16> val) {
