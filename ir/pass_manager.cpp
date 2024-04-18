@@ -79,14 +79,14 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
         try {
             try {
                 LOG1(log_indent << name() << " invoking " << v->name());
-                auto after = program->apply(**it);
+                program = program->apply(**it);
                 if (LOGGING(3)) {
                     size_t maxmem, mem = gc_mem_inuse(&maxmem);  // triggers gc
                     LOG3(log_indent << "heap after " << v->name() << ": in use " << n4(mem)
                                     << "B, max " << n4(maxmem) << "B");
                 }
                 if (stop_on_error && ::errorCount() > initial_error_count) early_exit_flag = true;
-                if ((program = after) == nullptr) early_exit_flag = true;
+                if (program == nullptr) early_exit_flag = true;
             } catch (Backtrack::trigger::type_t &trig_type) {
                 throw Backtrack::trigger(trig_type);
             }
