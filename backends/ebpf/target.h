@@ -291,8 +291,8 @@ class BccTarget : public Target {
     cstring packetDescriptorType() const override { return "struct __sk_buff"; }
 };
 
-/// A userspace test version with functionality equivalent to the kernel
-/// Compiles with gcc
+/// A userspace test version with functionality equivalent to the kernel.
+/// Compiles with GCC.
 class TestTarget : public EBPF::KernelSamplesTarget {
  public:
     TestTarget() : KernelSamplesTarget(false, "Userspace Test") {}
