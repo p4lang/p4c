@@ -24,8 +24,8 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/sourceCodeBuilder.h"
 
-// We are prepared to support code generation using multiple styles
-// (e.g., using BCC or using CLANG).
+/// We are prepared to support code generation using multiple styles
+/// (e.g., using BCC or using CLANG).
 
 namespace EBPF {
 
@@ -34,7 +34,7 @@ enum TableKind {
     TableArray,
     TablePerCPUArray,
     TableProgArray,
-    TableLPMTrie,  // longest prefix match trie
+    TableLPMTrie,  // Longest prefix match trie.
     TableHashLRU,
     TableDevmap
 };
@@ -74,8 +74,8 @@ class Target {
         ::error(ErrorType::ERR_UNSUPPORTED, "emitTableDeclSpinlock is not supported on %1% target",
                 name);
     }
-    // map-in-map requires declaration of both inner and outer map,
-    // thus we define them together in a single method.
+    /// map-in-map requires declaration of both inner and outer map,
+    /// thus we define them together in a single method.
     virtual void emitMapInMapDecl(Util::SourceCodeBuilder *builder, cstring innerName,
                                   TableKind innerTableKind, cstring innerKeyType,
                                   cstring innerValueType, unsigned innerSize, cstring outerName,
@@ -123,8 +123,8 @@ class Target {
     virtual void emitTraceMessage(Util::SourceCodeBuilder *builder, const char *format) const;
 };
 
-// Represents a target that is compiled within the kernel
-// source tree samples folder and which attaches to a socket
+/// Represents a target that is compiled within the kernel.
+/// source tree samples folder and which attaches to a socket.
 class KernelSamplesTarget : public Target {
  private:
     mutable unsigned int innerMapIndex;
@@ -237,7 +237,7 @@ class P4TCTarget : public KernelSamplesTarget {
     }
 };
 
-// Target XDP
+/// Target XDP.
 class XdpTarget : public KernelSamplesTarget {
  public:
     explicit XdpTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "XDP") {}
@@ -261,7 +261,7 @@ class XdpTarget : public KernelSamplesTarget {
     }
 };
 
-// Represents a target compiled by bcc that uses the TC
+/// Represents a target compiled by bcc that uses the TC.
 class BccTarget : public Target {
  public:
     BccTarget() : Target("BCC") {}
@@ -291,8 +291,8 @@ class BccTarget : public Target {
     cstring packetDescriptorType() const override { return "struct __sk_buff"; }
 };
 
-// A userspace test version with functionality equivalent to the kernel
-// Compiles with gcc
+/// A userspace test version with functionality equivalent to the kernel.
+/// Compiles with GCC.
 class TestTarget : public EBPF::KernelSamplesTarget {
  public:
     TestTarget() : KernelSamplesTarget(false, "Userspace Test") {}

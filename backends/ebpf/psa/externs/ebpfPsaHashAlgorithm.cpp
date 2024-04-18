@@ -215,21 +215,19 @@ void CRCChecksumAlgorithm::emitClear(CodeBuilder *builder) {
     builder->endOfStatement(true);
 }
 
-/*
- * This method generates a C code that is responsible for updating
- * a CRC check value from a given data.
- *
- * From following P4 code:
- * Checksum<bit<32>>(PSA_HashAlgorithm_t.CRC32) checksum;
- * checksum.update(parsed_hdr.crc.f1);
- * There will be generated a C code:
- * crc32_update(&c_0_reg, (u8 *) &(parsed_hdr->crc.f1), 5, 0xEDB88320);
- * Where:
- * c_0_reg - a checksum internal state (CRC register)
- * parsed_hdr->field1 - a data on which CRC is calculated
- * 5 - a field size in bytes
- * 0xEDB88320 - a polynomial in a reflected bit order.
- */
+/// This method generates a C code that is responsible for updating
+/// a CRC check value from a given data.
+///
+/// From following P4 code:
+/// Checksum<bit<32>>(PSA_HashAlgorithm_t.CRC32) checksum;
+/// checksum.update(parsed_hdr.crc.f1);
+/// There will be generated a C code:
+/// crc32_update(&c_0_reg, (u8 *) &(parsed_hdr->crc.f1), 5, 0xEDB88320);
+/// Where:
+/// c_0_reg - a checksum internal state (CRC register)
+/// parsed_hdr->field1 - a data on which CRC is calculated
+/// 5 - a field size in bytes
+/// 0xEDB88320 - a polynomial in a reflected bit order.
 void CRCChecksumAlgorithm::emitAddData(CodeBuilder *builder, const ArgumentsList &arguments) {
     cstring tmpVar = program->refMap->newName(baseName + "_tmp");
 
@@ -250,7 +248,7 @@ void CRCChecksumAlgorithm::emitAddData(CodeBuilder *builder, const ArgumentsList
         }
         const int width = fieldType->width_bits();
 
-        // We concatenate less than 8-bit fields into one byte
+        // We concatenate less than 8-bit fields into one byte.
         if (width < 8 || concatenateBits) {
             concatenateBits = true;
             if (width > remainingBits) {
@@ -395,7 +393,7 @@ void InternetChecksumAlgorithm::updateChecksum(CodeBuilder *builder, const Argum
 
             // Let's convert internal array into an array of u16 and calc csum for such entries.
             // Byte order conversion is required, because csum is calculated in host byte order
-            // but data is preserved in network byte order
+            // but data is preserved in network byte order.
             const unsigned arrayEntries = width / 16;
             for (unsigned i = 0; i < arrayEntries; ++i) {
                 builder->emitIndent();
@@ -426,7 +424,7 @@ void InternetChecksumAlgorithm::updateChecksum(CodeBuilder *builder, const Argum
                     builder->append(" | ");
                 }
 
-                // TODO: add masks for fields, however they should not exceed declared width
+                // TODO: add masks for fields, however they should not exceed declared width.
                 if (bitsToRead < remainingBits) {
                     remainingBits -= bitsToRead;
                     builder->append("(");

@@ -24,32 +24,30 @@ limitations under the License.
 
 namespace EBPF {
 
-/*
- * EBPFPipeline represents a single eBPF program in the TC/XDP hook.
- */
+/// EBPFPipeline represents a single eBPF program in the TC/XDP hook.
 class EBPFPipeline : public EBPFProgram {
  public:
-    // a custom name of eBPF program
+    /// A custom name of eBPF program.
     cstring name;
-    // eBPF section name, which should a concatenation of `classifier/` + a custom name.
+    /// eBPF section name, which should a concatenation of `classifier/` + a custom name.
     cstring sectionName;
-    // Variable name storing pointer to eBPF packet descriptor (e.g., __sk_buff).
+    /// Variable name storing pointer to eBPF packet descriptor (e.g., __sk_buff).
     cstring contextVar;
-    // Variable name storing current timestamp retrieved from bpf_ktime_get_ns().
+    /// Variable name storing current timestamp retrieved from bpf_ktime_get_ns().
     cstring timestampVar;
-    // Variable storing ingress interface index.
+    /// Variable storing ingress interface index.
     cstring ifindexVar;
-    // Variable storing skb->priority value (TC only).
+    /// Variable storing skb->priority value (TC only).
     cstring priorityVar;
-    // Variables storing global metadata (packet_path & instance).
+    /// Variables storing global metadata (packet_path & instance).
     cstring packetPathVar, pktInstanceVar;
-    // A name of an internal variable storing global metadata.
+    /// A name of an internal variable storing global metadata.
     cstring compilerGlobalMetadata;
-    // A variable name storing "1" value. Used to access BPF array map index.
+    /// A variable name storing "1" value. Used to access BPF array map index.
     cstring oneKey;
-    // A unique mark used to differentiate packets processed by P4/eBPF from others.
+    /// A unique mark used to differentiate packets processed by P4/eBPF from others.
     unsigned packetMark;
-    // A variable to store ifindex after mapping (e.g. due to recirculation)
+    /// A variable to store ifindex after mapping (e.g. due to recirculation).
     cstring inputPortVar;
 
     EBPFControlPSA *control;
@@ -81,8 +79,8 @@ class EBPFPipeline : public EBPFProgram {
         progTarget = new KernelSamplesTarget(options.emitTraceMessages);
     }
 
-    /* Check if pipeline does any processing.
-     * Return false if not. */
+    /// Check if pipeline does any processing.
+    /// Return false if not.
     bool isEmpty() const;
 
     virtual cstring dropReturnCode() {
@@ -107,25 +105,26 @@ class EBPFPipeline : public EBPFProgram {
     virtual void emitPSAControlInputMetadata(CodeBuilder *builder) = 0;
     virtual void emitPSAControlOutputMetadata(CodeBuilder *builder) = 0;
 
-    /* Generates a pointer to struct Headers_t and puts it on the BPF program's stack. */
+    /// Generates a pointer to struct Headers_t and puts it on the BPF program's stack.
     void emitLocalHeaderInstancesAsPointers(CodeBuilder *builder);
-    /* Generates a pointer to struct hdr_md. The pointer is used to access data from per-CPU map. */
+    /// Generates a pointer to struct hdr_md. The pointer is used to access data from per-CPU map.
     void emitCPUMAPHeadersInitializers(CodeBuilder *builder);
-    /* Generates an instance of struct Headers_t,
-     * allocated in the per-CPU map. */
+    /// Generates an instance of struct Headers_t,
+    /// allocated in the per-CPU map.
     void emitHeaderInstances(CodeBuilder *builder) override;
-    /* Generates a set of helper variables that are used during packet processing. */
+    /// Generates a set of helper variables that are used during packet processing.
     void emitLocalVariables(CodeBuilder *builder) override;
 
-    /* Generates and instance of user metadata for a pipeline,
-     * allocated in the per-CPU map. */
+    /// Generates and instance of user metadata for a pipeline,
+    /// allocated in the per-CPU map.
     void emitUserMetadataInstance(CodeBuilder *builder);
 
     virtual void emitCPUMAPInitializers(CodeBuilder *builder);
     virtual void emitCPUMAPLookup(CodeBuilder *builder);
-    /* Generates a pointer to skb->cb and maps it to
-     * psa_global_metadata to access global metadata shared between pipelines. */
+    /// Generates a pointer to skb->cb and maps it to
+    /// psa_global_metadata to access global metadata shared between pipelines.
     virtual void emitGlobalMetadataInitializer(CodeBuilder *builder);
+
     virtual void emitPacketLength(CodeBuilder *builder);
     virtual void emitTimestamp(CodeBuilder *builder);
     void emitInputPortMapping(CodeBuilder *builder);
@@ -141,27 +140,23 @@ class EBPFPipeline : public EBPFProgram {
         bool anyDirectMeter = directMeter != control->tables.end();
         return anyDirectMeter || (!control->meters.empty());
     }
-    /*
-     * Returns whether the compiler should generate
-     * timestamp retrieved by bpf_ktime_get_ns().
-     *
-     * This allows to avoid overhead introduced by bpf_ktime_get_ns(),
-     * if the timestamp field is not used within a pipeline.
-     */
+    /// Returns whether the compiler should generate
+    /// timestamp retrieved by bpf_ktime_get_ns().
+    ///
+    /// This allows to avoid overhead introduced by bpf_ktime_get_ns(),
+    /// if the timestamp field is not used within a pipeline.
     bool shouldEmitTimestamp() const { return hasAnyMeter() || control->timestampIsUsed; }
 
     DECLARE_TYPEINFO(EBPFPipeline, EBPFProgram);
 };
 
-/*
- * EBPFIngressPipeline represents a hook-independent EBPF-based ingress pipeline.
- * It includes common definitions for TC and XDP.
- */
+/// EBPFIngressPipeline represents a hook-independent EBPF-based ingress pipeline.
+/// It includes common definitions for TC and XDP.
 class EBPFIngressPipeline : public EBPFPipeline {
  public:
     unsigned int maxResubmitDepth;
-    // actUnspecCode stores the "undefined action" value.
-    // It's returned from eBPF program is PSA-eBPF doesn't make any forwarding/drop decision.
+    //// actUnspecCode stores the "undefined action" value.
+    /// It's returned from eBPF program is PSA-eBPF doesn't make any forwarding/drop decision.
     int actUnspecCode;
 
     EBPFIngressPipeline(cstring name, const EbpfOptions &options, P4::ReferenceMap *refMap,
@@ -183,10 +178,8 @@ class EBPFIngressPipeline : public EBPFPipeline {
     DECLARE_TYPEINFO(EBPFIngressPipeline, EBPFPipeline);
 };
 
-/*
- * EBPFEgressPipeline represents a hook-independent EBPF-based egress pipeline.
- * It includes common definitions for TC and XDP.
- */
+/// EBPFEgressPipeline represents a hook-independent EBPF-based egress pipeline.
+/// It includes common definitions for TC and XDP.
 class EBPFEgressPipeline : public EBPFPipeline {
  public:
     EBPFEgressPipeline(cstring name, const EbpfOptions &options, P4::ReferenceMap *refMap,

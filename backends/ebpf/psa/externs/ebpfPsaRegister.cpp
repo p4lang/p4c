@@ -67,7 +67,7 @@ bool EBPFRegisterPSA::shouldUseArrayMap() {
     if (auto wt = this->keyType->to<IHasWidth>()) {
         unsigned keyWidth = wt->widthInBits();
         // For keys <= 32 bit register is based on array map,
-        // otherwise we use hash map
+        // otherwise we use hash map.
         return (keyWidth > 0 && keyWidth <= 32);
     }
 
@@ -97,13 +97,13 @@ void EBPFRegisterPSA::emitValueType(CodeBuilder *builder) {
 
 void EBPFRegisterPSA::emitInitializer(CodeBuilder *builder) {
     if (!shouldUseArrayMap()) {
-        // initialize array-based Registers only,
+        // Initialize array-based Registers only,
         // hash-based Registers are "lazy-initialized", upon a first lookup to the map.
         return;
     }
 
     if (this->initialValue == nullptr || this->initialValue->value.is_zero()) {
-        // for array maps, initialize only if an initial value is provided by a developer,
+        // For array maps, initialize only if an initial value is provided by a developer,
         // or if an initial value doesn't equal 0. Otherwise, array map is already zero-initialized.
         return;
     }
@@ -190,7 +190,7 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMet
 
     if (leftExpression != nullptr) {
         if (initialValue != nullptr || leftExpression->type->is<IR::Type_Bits>()) {
-            // let's create fake assigment statement and use it to generate valid code
+            // Let's create fake assigment statement and use it to generate valid code.
             const IR::Expression *right =
                 initialValue != nullptr ? initialValue : new IR::Constant(leftExpression->type, 0);
             const auto *assigment = new IR::AssignmentStatement(leftExpression, right);
