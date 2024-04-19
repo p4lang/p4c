@@ -116,6 +116,9 @@ set(DPDK_PTF_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/run-dpdk-ptf-test.py")
 set(DPDK_COMPILER_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/run-dpdk-test.py")
 
 set (P4_16_SUITES
+# TODO (issue #4614): Consider moving dpdk pna and psa tests to their own
+# subdirectories (e.g. p4_16_psa_samples/), similar to what is done for the
+# dpdk/psa/pna errors tests.
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/psa-*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_psa_errors/*.p4"

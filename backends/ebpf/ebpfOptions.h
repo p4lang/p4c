@@ -25,21 +25,21 @@ enum XDP2TC { XDP2TC_NONE, XDP2TC_META, XDP2TC_HEAD, XDP2TC_CPUMAP };
 
 class EbpfOptions : public CompilerOptions {
  public:
-    // file to output to
+    /// file to output to
     cstring outputFile = nullptr;
-    // read from json
+    /// read from json
     bool loadIRFromJson = false;
-    // Externs generation
+    /// Externs generation
     bool emitExterns = false;
-    // tracing eBPF code execution
+    /// tracing eBPF code execution
     bool emitTraceMessages = false;
-    // generate program to XDP layer
+    /// generate program to XDP layer
     bool generateToXDP = false;
-    // XDP2TC mode for PSA-eBPF
+    //// XDP2TC mode for PSA-eBPF
     enum XDP2TC xdp2tcMode = XDP2TC_NONE;
-    // maximum number of unique ternary masks
+    /// maximum number of unique ternary masks
     unsigned int maxTernaryMasks = 128;
-    // Enable table cache for LPM and ternary tables
+    /// Enable table cache for LPM and ternary tables
     bool enableTableCache = false;
 
     EbpfOptions();

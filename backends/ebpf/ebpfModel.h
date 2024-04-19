@@ -60,7 +60,7 @@ struct Filter_Model : public ::Model::Elem {
     ::Model::Elem filter;
 };
 
-// Keep this in sync with ebpf_model.p4 and xdp_model.p4
+/// Keep this in sync with ebpf_model.p4 and xdp_model.p4
 class EBPFModel : public ::Model::Model {
  protected:
     EBPFModel()
@@ -87,7 +87,7 @@ class EBPFModel : public ::Model::Model {
     ::Model::Elem CPacketName;
     ::Model::Param_Model packet;
     ModelArchitecture arch;
-    // Only one of these should be used, depending on arch value.
+    /// Only one of these should be used, depending on arch value.
     Filter_Model filter;
     Xdp_Model xdp;
 

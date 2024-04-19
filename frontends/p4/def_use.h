@@ -17,9 +17,8 @@ limitations under the License.
 #ifndef FRONTENDS_P4_DEF_USE_H_
 #define FRONTENDS_P4_DEF_USE_H_
 
-#include <absl/container/flat_hash_set.h>
-#include <absl/container/inlined_vector.h>
-
+#include "absl/container/flat_hash_set.h"
+#include "absl/container/inlined_vector.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 #include "lib/alloc_trace.h"
@@ -467,8 +466,8 @@ class AllDefinitions : public IHasDbPrint {
 /**
  * Computes the write set for each expression and statement.
  *
- * This pass is run for each parser and control separately.  It
- * controls precisely the visit order --- to simulate a simbolic
+ * This pass is run for each parser and control separately. It
+ * controls precisely the visit order --- to simulate a symbolic
  * execution of the program.
  *
  * @pre Must be executed after variable initializers have been removed.

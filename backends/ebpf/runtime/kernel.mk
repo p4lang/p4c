@@ -61,7 +61,7 @@ verify_target_bpf: verify_cmds
 # Keep the intermediate .c file
 .PRECIOUS: %.c
 $(BPFNAME).c: $(P4FILE)
-	@if ! ($(P4C) --help > /dev/null 2>&1); then \
+	@if ! ($(P4C) --version); then \
 		echo "*** ERROR: Cannot find p4c-ebpf"; \
 		exit 1;\
 	fi;

@@ -6,6 +6,7 @@
       "name" : "MainControlImpl/ipv4_tbl_1",
       "id" : 1,
       "tentries" : 2048,
+      "permissions" : "0x38e6",
       "nummask" : 8,
       "keysize" : 64,
       "keyfields" : [
@@ -43,7 +44,7 @@
             {
               "id" : 1,
               "name" : "dmac",
-              "type" : "bit48",
+              "type" : "macaddr",
               "bitwidth" : 48
             },
             {

@@ -112,66 +112,66 @@ struct __attribute__((__packed__)) p4tc_table_entry_act_bpf {
 };
 
 struct p4tc_table_entry_create_bpf_params__local {
+        struct p4tc_table_entry_act_bpf act_bpf;
         u32 pipeid;
         u32 tblid;
         u32 profile_id;
+        u32 handle;                                                                     
+        u32 classid;                                                                               
+        u32 chain;                     
+        u16 proto;
+        u16 prio;
 };
-extern struct p4tc_table_entry_act_bpf *bpf_p4tc_tbl_read(
-    struct __sk_buff *skb, struct p4tc_table_entry_act_bpf_params__local *params, void *key,
-    const u32 key__sz) __ksym;
-extern struct p4tc_table_entry_act_bpf *bpf_xdp_p4tc_tbl_lookup(
-    struct xdp_md *skb, struct p4tc_table_entry_act_bpf_params__local *params, void *key,
-    const u32 key__sz) __ksym;
+extern struct p4tc_table_entry_act_bpf * 
+bpf_p4tc_tbl_read(struct __sk_buff *skb_ctx,
+                  struct p4tc_table_entry_act_bpf_params__local *params,
+                  const u32 params__sz,
+                  void *key, const __u32 key__sz) __ksym;
+
+extern struct p4tc_table_entry_act_bpf * 
+xdp_p4tc_tbl_read(struct xdp_md *skb_ctx,
+                  struct p4tc_table_entry_act_bpf_params__local *params,
+                  const u32 params__sz,
+                  void *key, const __u32 key__sz) __ksym;
 
 /* No mapping to PNA, but are useful utilities */
 extern int
 bpf_p4tc_entry_create(struct __sk_buff *skb_ctx,
                       struct p4tc_table_entry_create_bpf_params__local *params,
-                      void *key, const u32 key__sz,
-                      struct p4tc_table_entry_act_bpf *act_bpf) __ksym;
+                      const u32 params__sz,
+                      void *key, const u32 key__sz) __ksym;
 
 extern int
 xdp_p4tc_entry_create(struct xdp_md *xdp_ctx,
                       struct p4tc_table_entry_create_bpf_params__local *params,
-                      void *bpf_key_mask, u32 bpf_key_mask__sz,
-                      struct p4tc_table_entry_act_bpf *act_bpf) __ksym;
+                      const u32 params__sz,
+                      void *bpf_key_mask, u32 bpf_key_mask__sz) __ksym;
 
 /* Equivalent to PNA add-on-miss */
 extern int
 bpf_p4tc_entry_create_on_miss(struct __sk_buff *skb_ctx,
-			      struct p4tc_table_entry_create_bpf_params__local *params,
-			      void *key, const u32 key__sz,
-			      struct p4tc_table_entry_act_bpf *act_bpf) __ksym;
+                              struct p4tc_table_entry_create_bpf_params__local *params,
+                              const u32 params__sz,
+                              void *key, const u32 key__sz) __ksym;
 
 extern int
 xdp_p4tc_entry_create_on_miss(struct xdp_md *xdp_ctx,
-			      struct p4tc_table_entry_create_bpf_params__local *params,
-			      void *key, const u32 key__sz,
-			      struct p4tc_table_entry_act_bpf *act_bpf) __ksym;
-
-/* No mapping to PNA, but are useful utilities */
-extern int
-bpf_p4tc_entry_update(struct __sk_buff *skb_ctx,
-		      struct p4tc_table_entry_create_bpf_params__local *params,
-		      void *key, const u32 key__sz,
-		      struct p4tc_table_entry_act_bpf *act_bpf) __ksym;
-
-extern int
-xdp_p4tc_entry_update(struct xdp_md *xdp_ctx,
-		      struct p4tc_table_entry_create_bpf_params__local *params,
-		      void *key, const u32 key__sz,
-		      struct p4tc_table_entry_act_bpf *act_bpf) __ksym;
+                              struct p4tc_table_entry_create_bpf_params__local *params,
+                              const u32 params__sz,
+                              void *key, const u32 key__sz) __ksym;
 
 /* No mapping to PNA, but are useful utilities */
 extern int
 bpf_p4tc_entry_delete(struct __sk_buff *skb_ctx,
-		      struct p4tc_table_entry_create_bpf_params__local *params,
-		      void *key, const u32 key__sz) __ksym;
+                      struct p4tc_table_entry_create_bpf_params__local *params,
+                      const u32 params__sz,
+                      void *key, const u32 key__sz) __ksym;
 
 extern int
 xdp_p4tc_entry_delete(struct xdp_md *xdp_ctx,
-		      struct p4tc_table_entry_create_bpf_params__local *params,
-		      void *key, const u32 key__sz) __ksym;
+                      struct p4tc_table_entry_create_bpf_params__local *params,
+                      const u32 params__sz,
+                      void *key, const u32 key__sz) __ksym;
 
 /* Start generic kfunc interface to any extern */
 struct p4tc_ext_bpf_params {

@@ -17,13 +17,15 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_TARGET_H_
 #define BACKENDS_EBPF_TARGET_H_
 
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/sourceCodeBuilder.h"
 
-// We are prepared to support code generation using multiple styles
-// (e.g., using BCC or using CLANG).
+/// We are prepared to support code generation using multiple styles
+/// (e.g., using BCC or using CLANG).
 
 namespace EBPF {
 
@@ -32,7 +34,7 @@ enum TableKind {
     TableArray,
     TablePerCPUArray,
     TableProgArray,
-    TableLPMTrie,  // longest prefix match trie
+    TableLPMTrie,  // Longest prefix match trie.
     TableHashLRU,
     TableDevmap
 };
@@ -72,8 +74,8 @@ class Target {
         ::error(ErrorType::ERR_UNSUPPORTED, "emitTableDeclSpinlock is not supported on %1% target",
                 name);
     }
-    // map-in-map requires declaration of both inner and outer map,
-    // thus we define them together in a single method.
+    /// map-in-map requires declaration of both inner and outer map,
+    /// thus we define them together in a single method.
     virtual void emitMapInMapDecl(Util::SourceCodeBuilder *builder, cstring innerName,
                                   TableKind innerTableKind, cstring innerKeyType,
                                   cstring innerValueType, unsigned innerSize, cstring outerName,
@@ -121,8 +123,8 @@ class Target {
     virtual void emitTraceMessage(Util::SourceCodeBuilder *builder, const char *format) const;
 };
 
-// Represents a target that is compiled within the kernel
-// source tree samples folder and which attaches to a socket
+/// Represents a target that is compiled within the kernel.
+/// source tree samples folder and which attaches to a socket.
 class KernelSamplesTarget : public Target {
  private:
     mutable unsigned int innerMapIndex;
@@ -196,7 +198,46 @@ class KernelSamplesTarget : public Target {
                               cstring valueType) const;
 };
 
-// Target XDP
+class P4TCTarget : public KernelSamplesTarget {
+ public:
+    explicit P4TCTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "P4TC") {}
+    cstring getByteOrderFromAnnotation(const IR::Vector<IR::Annotation> annotations) const {
+        for (auto anno : annotations) {
+            if (anno->name != "tc_type") continue;
+            for (auto annoVal : anno->body) {
+                if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
+                    annoVal->text == "ipv6" || annoVal->text == "be16" || annoVal->text == "be32" ||
+                    annoVal->text == "be64") {
+                    return "NETWORK";
+                }
+            }
+        }
+        return "HOST";
+    }
+
+    cstring getByteOrder(P4::TypeMap *typeMap, const IR::P4Action *action,
+                         const IR::Expression *exp) const {
+        if (auto mem = exp->to<IR::Member>()) {
+            auto type = typeMap->getType(mem->expr, true);
+            if (type->is<IR::Type_StructLike>()) {
+                auto field = type->to<IR::Type_StructLike>()->getField(mem->member);
+                return getByteOrderFromAnnotation(field->getAnnotations()->annotations);
+            }
+        } else if (action) {
+            auto paramList = action->getParameters();
+            if (paramList != nullptr && !paramList->empty()) {
+                for (auto param : paramList->parameters) {
+                    if (param->name.originalName == exp->toString()) {
+                        return getByteOrderFromAnnotation(param->getAnnotations()->annotations);
+                    }
+                }
+            }
+        }
+        return "HOST";
+    }
+};
+
+/// Target XDP.
 class XdpTarget : public KernelSamplesTarget {
  public:
     explicit XdpTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "XDP") {}
@@ -220,14 +261,14 @@ class XdpTarget : public KernelSamplesTarget {
     }
 };
 
-// Represents a target compiled by bcc that uses the TC
+/// Represents a target compiled by bcc that uses the TC.
 class BccTarget : public Target {
  public:
     BccTarget() : Target("BCC") {}
-    void emitLicense(Util::SourceCodeBuilder *, cstring) const override {};
+    void emitLicense(Util::SourceCodeBuilder *, cstring) const override {}
     void emitCodeSection(Util::SourceCodeBuilder *, cstring) const override {}
     void emitIncludes(Util::SourceCodeBuilder *builder) const override;
-    void emitResizeBuffer(Util::SourceCodeBuilder *, cstring, cstring) const override {};
+    void emitResizeBuffer(Util::SourceCodeBuilder *, cstring, cstring) const override {}
     void emitTableLookup(Util::SourceCodeBuilder *builder, cstring tblName, cstring key,
                          cstring value) const override;
     void emitTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName, cstring key,
@@ -250,13 +291,13 @@ class BccTarget : public Target {
     cstring packetDescriptorType() const override { return "struct __sk_buff"; }
 };
 
-// A userspace test version with functionality equivalent to the kernel
-// Compiles with gcc
+/// A userspace test version with functionality equivalent to the kernel.
+/// Compiles with GCC.
 class TestTarget : public EBPF::KernelSamplesTarget {
  public:
     TestTarget() : KernelSamplesTarget(false, "Userspace Test") {}
 
-    void emitResizeBuffer(Util::SourceCodeBuilder *, cstring, cstring) const override {};
+    void emitResizeBuffer(Util::SourceCodeBuilder *, cstring, cstring) const override {}
     void emitIncludes(Util::SourceCodeBuilder *builder) const override;
     void emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName, TableKind tableKind,
                        cstring keyType, cstring valueType, unsigned size) const override;

@@ -14,12 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/*
- * Runtime operations specific to the test target. Runs a provided filter
- * function, records the output, and writes it to a physical file. Does not use
- * any Linux networking tools and only operates on custom hash maps.
- */
-
+/// Runtime operations specific to the test target. Runs a provided filter
+/// function, records the output, and writes it to a physical file. Does not use
+/// any Linux networking tools and only operates on custom hash maps.
 #ifndef BACKENDS_EBPF_RUNTIME_EBPF_RUNTIME_TEST_H_
 #define BACKENDS_EBPF_RUNTIME_EBPF_RUNTIME_TEST_H_
 

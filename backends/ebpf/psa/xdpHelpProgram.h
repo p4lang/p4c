@@ -108,7 +108,7 @@ class XDPHelpProgram : public EBPFProgram {
         builder->spc();
         builder->blockStart();
         builder->emitIndent();
-        // this is static program, so we can just paste a piece of code.
+        // This is static program, so we can just paste a piece of code.
         if (options.xdp2tcMode == XDP2TC_META) {
             builder->appendLine(XDPProgUsingMetaForXDP2TC);
         } else if (options.xdp2tcMode == XDP2TC_HEAD) {

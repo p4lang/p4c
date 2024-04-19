@@ -4,7 +4,7 @@
 typedef bit<48>  EthernetAddress;
 
 header ethernet_t {
-    @tc_type("macaddr") EthernetAddress dstAddr;
+    EthernetAddress dstAddr;
     @tc_type("macaddr") EthernetAddress srcAddr;
     bit<16>         etherType;
 }
@@ -73,7 +73,7 @@ control MainControlImpl(
     in    pna_main_input_metadata_t istd,
     inout pna_main_output_metadata_t ostd)
 {
-    action send_nh( bit<48> dmac, bit<48> smac) {
+    action send_nh( @tc_type("macaddr") bit<48> dmac, bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr = dmac;
     }
@@ -90,7 +90,7 @@ control MainControlImpl(
         drop_packet();
     }
 
-    table ipv4_tbl_1 {
+    @tc_acl("CRUS:CRXP") table ipv4_tbl_1 {
         key = {
             hdr.ipv4.dstAddr : exact @tc_type ("ipv4");
             istd.input_port : exact;

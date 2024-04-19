@@ -45,7 +45,7 @@ class PSASwitchBackend {
     void convert(const IR::ToplevelBlock *tlb);
     void codegen(std::ostream &cstream) const {
         CodeBuilder c(target);
-        // instead of generating two files, put all the code in a single file
+        // Instead of generating two files, put all the code in a single file.
         ebpf_program->emit(&c);
         cstream << c.toString();
     }

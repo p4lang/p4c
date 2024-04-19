@@ -131,29 +131,20 @@ void PNAEbpfGenerator::emitP4TCFilterFields(EBPF::CodeBuilder *builder) const {
 }
 
 void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
-    std::vector<cstring> actionParamList;
     for (auto table : tcIR->tcPipeline->tableDefs) {
         if (table->isTcMayOverride) {
             cstring tblName = table->getTableName();
             cstring defaultActionName = table->defaultMissAction->getActionName();
-            auto actionNameStr = defaultActionName.c_str();
-            for (long unsigned int i = 0; i < defaultActionName.size(); i++) {
-                if (actionNameStr[i] == '/') {
-                    defaultActionName = defaultActionName.substr(i + 1, defaultActionName.size());
-                    break;
-                }
-            }
+            defaultActionName = defaultActionName.substr(
+                defaultActionName.find('/') - defaultActionName.begin() + 1,
+                defaultActionName.size());
             for (auto param : table->defaultMissActionParams) {
                 cstring paramName = param->paramDetail->getParamName();
                 cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
-                auto itr = find(actionParamList.begin(), actionParamList.end(), placeholder);
-                if (itr == actionParamList.end()) {
-                    actionParamList.push_back(placeholder);
-                    cstring typeName = param->paramDetail->getParamType();
-                    builder->emitIndent();
-                    builder->appendFormat("%s %s", typeName, placeholder);
-                    builder->endOfStatement(true);
-                }
+                cstring typeName = param->paramDetail->getParamType();
+                builder->emitIndent();
+                builder->appendFormat("%s %s", typeName, placeholder);
+                builder->endOfStatement(true);
             }
         }
     }
@@ -605,6 +596,15 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             if (annoVal->text == "macaddr" || annoVal->text == "ipv4" || annoVal->text == "ipv6") {
                 noEndiannessConversion = true;
                 break;
+            } else if (annoVal->text == "be16" || annoVal->text == "be32" ||
+                       annoVal->text == "be64") {
+                std::string sInt = annoVal->text.substr(2).c_str();
+                unsigned int width = std::stoi(sInt);
+                if (widthToExtract != width) {
+                    ::error("Width of the field doesnt match the annotation width. '%1%'", field);
+                }
+                noEndiannessConversion = true;
+                break;
             }
         }
     }
@@ -965,16 +965,63 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
                 builder->target->emitTraceMessage(builder, msgStr.c_str());
             }
         }
+        bool generateDefaultMissCode = false;
+        for (auto tbl : tcIR->tcPipeline->tableDefs) {
+            if (tbl->getTableName() == table->container->name.originalName) {
+                if (tbl->isTcMayOverride) {
+                    cstring defaultActionName = tbl->defaultMissAction->getActionName();
+                    defaultActionName = defaultActionName.substr(
+                        defaultActionName.find('/') - defaultActionName.begin() + 1,
+                        defaultActionName.size());
+                    if (defaultActionName == action->name.originalName)
+                        generateDefaultMissCode = true;
+                }
+            }
+        }
+        if (generateDefaultMissCode) {
+            builder->emitIndent();
+            builder->appendFormat("{");
+            builder->newline();
+            builder->increaseIndent();
 
-        builder->emitIndent();
+            builder->emitIndent();
+            builder->appendFormat("if (%s->is_default_miss_act) ", valueName.c_str());
+            builder->newline();
 
-        auto visitor = createActionTranslationVisitor(valueName, program);
-        visitor->setBuilder(builder);
-        visitor->copySubstitutions(codeGen);
-        visitor->copyPointerVariables(codeGen);
+            builder->emitIndent();
+            auto defaultVisitor = createActionTranslationVisitor(valueName, program, action, true);
+            defaultVisitor->setBuilder(builder);
+            defaultVisitor->copySubstitutions(codeGen);
+            defaultVisitor->copyPointerVariables(codeGen);
+            action->apply(*defaultVisitor);
+            builder->newline();
 
-        action->apply(*visitor);
-        builder->newline();
+            builder->emitIndent();
+            builder->appendFormat("else");
+            builder->newline();
+
+            builder->emitIndent();
+            auto visitor = createActionTranslationVisitor(valueName, program, action, false);
+            visitor->setBuilder(builder);
+            visitor->copySubstitutions(codeGen);
+            visitor->copyPointerVariables(codeGen);
+            action->apply(*visitor);
+            builder->newline();
+
+            builder->decreaseIndent();
+            builder->emitIndent();
+            builder->appendFormat("}");
+            builder->newline();
+        } else {
+            builder->emitIndent();
+            auto visitor = createActionTranslationVisitor(valueName, program, action, false);
+            visitor->setBuilder(builder);
+            visitor->copySubstitutions(codeGen);
+            visitor->copyPointerVariables(codeGen);
+            action->apply(*visitor);
+            builder->newline();
+        }
+
         builder->emitIndent();
         builder->appendLine("break;");
         builder->decreaseIndent();
@@ -1487,7 +1534,6 @@ void ControlBodyTranslatorPNA::ValidateAddOnMissMissAction(const IR::P4Action *a
                 act);
     }
     const IR::P4Table *t = table->table->container;
-    cstring tblname = t->name.originalName;
     const IR::Expression *defaultAction = t->getDefaultAction();
     CHECK_NULL(defaultAction);
     auto defaultActionName = table->getActionNameExpression(defaultAction);
@@ -1501,7 +1547,7 @@ void ControlBodyTranslatorPNA::ValidateAddOnMissMissAction(const IR::P4Action *a
                   "add_entry extern can only be used in an action"
                   " of a table with property add_on_miss equals to true.");
     }
-    tcIR->updateAddOnMissTable(tblname);
+    ((ConvertToBackendIR *)tcIR)->updateAddOnMissTable(t);
 }
 
 void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *function) {
@@ -1550,7 +1596,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->appendLine("};");
             builder->emitIndent();
             builder->append(
-                "bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf)");
+                "bpf_p4tc_entry_update(skb, &update_params, sizeof(params), &key, sizeof(key))");
         }
         return;
     } else if (function->expr->method->toString() == "add_entry") {
@@ -1634,7 +1680,19 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         builder->emitIndent();
         builder->appendLine("struct p4tc_table_entry_create_bpf_params__local update_params = {");
         builder->emitIndent();
+        builder->appendLine("    .act_bpf = update_act_bpf,");
+        builder->emitIndent();
         builder->appendLine("    .pipeid = p4tc_filter_fields.pipeid,");
+        builder->emitIndent();
+        builder->appendLine("    .handle = p4tc_filter_fields.handle,");
+        builder->emitIndent();
+        builder->appendLine("    .classid = p4tc_filter_fields.classid,");
+        builder->emitIndent();
+        builder->appendLine("    .chain = p4tc_filter_fields.chain,");
+        builder->emitIndent();
+        builder->appendLine("    .proto = p4tc_filter_fields.proto,");
+        builder->emitIndent();
+        builder->appendLine("    .prio = p4tc_filter_fields.prio,");
         builder->emitIndent();
         auto tableName = table->instanceName.substr(controlName.size() + 1);
         auto tblId = tcIR->getTableId(tableName);
@@ -1649,8 +1707,8 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         builder->appendLine("};");
         builder->emitIndent();
         builder->append(
-            "bpf_p4tc_entry_create_on_miss(skb, &update_params, &key, sizeof(key), "
-            "&update_act_bpf)");
+            "bpf_p4tc_entry_create_on_miss(skb, &update_params, sizeof(params), &key, "
+            "sizeof(key))");
         return;
     }
     processCustomExternFunction(function, EBPF::EBPFTypeFactory::instance);
@@ -1712,10 +1770,17 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
             EBPF::EBPFScalarType *scalar = nullptr;
             cstring swap;
 
-            bool isLPMKeyBigEndian = false;
-            if (table->isLPMTable()) {
-                if (c->matchType->path->name.name == P4::P4CoreLibrary::instance().lpmMatch.name)
-                    isLPMKeyBigEndian = true;
+            auto tcTarget = dynamic_cast<const EBPF::P4TCTarget *>(builder->target);
+            cstring isKeyBigEndian =
+                tcTarget->getByteOrderFromAnnotation(c->getAnnotations()->annotations);
+            cstring isDefnBigEndian = "HOST";
+            if (auto mem = c->expression->to<IR::Member>()) {
+                auto type = typeMap->getType(mem->expr, true);
+                if (type->is<IR::Type_StructLike>()) {
+                    auto field = type->to<IR::Type_StructLike>()->getField(mem->member);
+                    isDefnBigEndian =
+                        tcTarget->getByteOrderFromAnnotation(field->getAnnotations()->annotations);
+                }
             }
 
             if (ebpfType->is<EBPF::EBPFScalarType>()) {
@@ -1723,7 +1788,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                 unsigned width = scalar->implementationWidthInBits();
                 memcpy = !EBPF::EBPFScalarType::generatesScalar(width);
 
-                if (isLPMKeyBigEndian) {
+                if (isKeyBigEndian == "NETWORK" && isDefnBigEndian == "HOST") {
                     if (width <= 8) {
                         swap = "";  // single byte, nothing to swap
                     } else if (width <= 16) {
@@ -1746,9 +1811,10 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                 builder->appendFormat("[0]), %d)", scalar->bytesRequired());
             } else {
                 builder->appendFormat("%s.%s = ", keyname.c_str(), fieldName.c_str());
-                if (isLPMKeyBigEndian) builder->appendFormat("%s(", swap.c_str());
+                if (isKeyBigEndian == "NETWORK" && isDefnBigEndian == "HOST")
+                    builder->appendFormat("%s(", swap.c_str());
                 table->codeGen->visit(c->expression);
-                if (isLPMKeyBigEndian) builder->append(")");
+                if (isKeyBigEndian == "NETWORK" && isDefnBigEndian == "HOST") builder->append(")");
             }
             builder->endOfStatement(true);
 
@@ -1780,7 +1846,8 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
         builder->appendLine("/* perform lookup */");
         builder->target->emitTraceMessage(builder, "Control: performing table lookup");
         builder->emitIndent();
-        builder->appendLine("act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));");
+        builder->appendLine(
+            "act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));");
         builder->emitIndent();
         builder->appendFormat("value = (struct %s *)act_bpf;", table->valueTypeName.c_str());
         builder->newline();
@@ -1856,14 +1923,16 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
     return EBPF::CodeGenInspector::preorder(a);
 }
 // =====================ActionTranslationVisitorPNA=============================
-ActionTranslationVisitorPNA::ActionTranslationVisitorPNA(const EBPF::EBPFProgram *program,
-                                                         cstring valueName,
-                                                         const EBPF::EBPFTablePSA *table,
-                                                         const ConvertToBackendIR *tcIR)
+ActionTranslationVisitorPNA::ActionTranslationVisitorPNA(
+    const EBPF::EBPFProgram *program, cstring valueName, const EBPF::EBPFTablePSA *table,
+    const ConvertToBackendIR *tcIR, const IR::P4Action *act, bool isDefaultAction)
     : EBPF::CodeGenInspector(program->refMap, program->typeMap),
       EBPF::ActionTranslationVisitor(valueName, program),
       ControlBodyTranslatorPNA(program->as<EBPF::EBPFPipeline>().control, tcIR, table),
-      table(table) {}
+      table(table),
+      isDefaultAction(isDefaultAction) {
+    action = act;
+}
 
 bool ActionTranslationVisitorPNA::preorder(const IR::PathExpression *pe) {
     if (isActionParameter(pe)) {
@@ -1884,7 +1953,15 @@ bool ActionTranslationVisitorPNA::isActionParameter(const IR::Expression *expres
 cstring ActionTranslationVisitorPNA::getParamInstanceName(const IR::Expression *expression) const {
     if (auto cast = expression->to<IR::Cast>()) expression = cast->expr;
 
-    return EBPF::ActionTranslationVisitor::getParamInstanceName(expression);
+    if (isDefaultAction) {
+        cstring actionName = action->name.originalName;
+        auto paramStr = Util::printf_format("p4tc_filter_fields.%s_%s_%s",
+                                            table->table->container->name.originalName, actionName,
+                                            expression->toString());
+        return paramStr;
+    } else {
+        return EBPF::ActionTranslationVisitor::getParamInstanceName(expression);
+    }
 }
 
 cstring ActionTranslationVisitorPNA::getParamName(const IR::PathExpression *expr) {
@@ -1895,9 +1972,10 @@ cstring ActionTranslationVisitorPNA::getParamName(const IR::PathExpression *expr
 }
 
 EBPF::ActionTranslationVisitor *EBPFTablePNA::createActionTranslationVisitor(
-    cstring valueName, const EBPF::EBPFProgram *program) const {
+    cstring valueName, const EBPF::EBPFProgram *program, const IR::P4Action *action,
+    bool isDefault) const {
     return new ActionTranslationVisitorPNA(program->checkedTo<EBPF::EBPFPipeline>(), valueName,
-                                           this, tcIR);
+                                           this, tcIR, action, isDefault);
 }
 
 void EBPFTablePNA::validateKeys() const {
@@ -1981,7 +2059,8 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                     if (anno->name != ParseTCAnnotations::tcType) continue;
                     for (auto annoVal : anno->body) {
                         if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
-                            annoVal->text == "ipv6") {
+                            annoVal->text == "ipv6" || annoVal->text == "be16" ||
+                            annoVal->text == "be32" || annoVal->text == "be64") {
                             noEndiannessConversion = true;
                             break;
                         }

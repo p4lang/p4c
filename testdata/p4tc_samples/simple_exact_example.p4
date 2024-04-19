@@ -25,8 +25,8 @@ header ipv4_t {
     bit<8>  ttl;
     bit<8>  protocol;
     bit<16> hdrChecksum;
-    @tc_type ("ipv4") bit<32> srcAddr;
-    @tc_type ("ipv4") bit<32> dstAddr;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 struct my_ingress_headers_t {
@@ -86,9 +86,9 @@ control ingress(
         drop_packet();
     }
 
-    table nh_table {
+    @tc_acl("RUS:RXP") table nh_table {
         key = {
-            hdr.ipv4.srcAddr : exact;
+            hdr.ipv4.srcAddr : exact @tc_type ("ipv4");
         }
         actions = {
             send_nh;

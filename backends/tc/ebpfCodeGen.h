@@ -139,8 +139,10 @@ class EBPFPnaParser : public EBPF::EBPFPsaParser {
 
 class EBPFTablePNA : public EBPF::EBPFTablePSA {
  protected:
-    EBPF::ActionTranslationVisitor *createActionTranslationVisitor(
-        cstring valueName, const EBPF::EBPFProgram *program) const override;
+    EBPF::ActionTranslationVisitor *createActionTranslationVisitor(cstring valueName,
+                                                                   const EBPF::EBPFProgram *program,
+                                                                   const IR::P4Action *action,
+                                                                   bool isDefaultAction) const;
     void validateKeys() const override;
     const ConvertToBackendIR *tcIR;
 
@@ -333,12 +335,13 @@ class ActionTranslationVisitorPNA : public EBPF::ActionTranslationVisitor,
                                     public ControlBodyTranslatorPNA {
  protected:
     const EBPF::EBPFTablePSA *table;
+    bool isDefaultAction;
 
  public:
     const ConvertToBackendIR *tcIR;
     ActionTranslationVisitorPNA(const EBPF::EBPFProgram *program, cstring valueName,
-                                const EBPF::EBPFTablePSA *table, const ConvertToBackendIR *tcIR);
-
+                                const EBPF::EBPFTablePSA *table, const ConvertToBackendIR *tcIR,
+                                const IR::P4Action *act, bool isDefaultAction);
     bool preorder(const IR::PathExpression *pe) override;
     bool isActionParameter(const IR::Expression *expression) const;
 

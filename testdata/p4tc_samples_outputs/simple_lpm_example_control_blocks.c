@@ -66,12 +66,12 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                 struct ingress_nh_table_key key;
                 __builtin_memset(&key, 0, sizeof(key));
                 key.keysz = 32;
-                key.field0 = bpf_htonl(hdr->ipv4.srcAddr);
+                key.field0 = hdr->ipv4.srcAddr;
                 struct p4tc_table_entry_act_bpf *act_bpf;
                 /* value */
                 struct ingress_nh_table_value *value = NULL;
                 /* perform lookup */
-                act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
                 value = (struct ingress_nh_table_value *)act_bpf;
                 if (value == NULL) {
                     /* miss; find default action */

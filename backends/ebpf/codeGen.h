@@ -36,20 +36,20 @@ class CodeBuilder : public Util::SourceCodeBuilder {
     explicit CodeBuilder(const Target *target) : target(target) {}
 };
 
-// Visitor for generating C for EBPF
-// This visitor is invoked on various subtrees
+/// Visitor for generating C for EBPF.
+/// This visitor is invoked on various subtrees.
 class CodeGenInspector : public Inspector {
  protected:
     CodeBuilder *builder;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     std::map<const IR::Parameter *, const IR::Parameter *> substitution;
-    // asPointerVariables stores the list of string expressions that
-    // should be emitted as pointer variables.
+    /// asPointerVariables stores the list of string expressions that
+    /// should be emitted as pointer variables.
     std::set<cstring> asPointerVariables;
 
-    // Since CodeGenInspector also generates C comments,
-    // this variable keeps track of the current comment depth.
+    /// Since CodeGenInspector also generates C comments,
+    /// this variable keeps track of the current comment depth.
     int commentDescriptionDepth = 0;
 
  public:
@@ -126,14 +126,18 @@ class CodeGenInspector : public Inspector {
     bool preorder(const IR::IfStatement *s) override;
 
     void widthCheck(const IR::Node *node) const;
+    void emitAndConvertByteOrder(const IR::Expression *expr, cstring byte_order);
+    void emitTCBinaryOperation(const IR::Operation_Binary *b, bool isScalar);
+    void emitTCAssignmentEndianessConversion(const IR::Expression *lexpr,
+                                             const IR::Expression *rexpr);
 };
 
 class EBPFInitializerUtils {
  public:
-    // return *real* number of bits required by type
+    /// return *real* number of bits required by type
     static unsigned ebpfTypeWidth(P4::TypeMap *typeMap, const IR::Expression *expr);
 
-    // Generate hex string and prepend it with zeroes when shorter than required width
+    /// Generate hex string and prepend it with zeroes when shorter than required width.
     static cstring genHexStr(const big_int &value, unsigned width, const IR::Expression *expr);
 };
 

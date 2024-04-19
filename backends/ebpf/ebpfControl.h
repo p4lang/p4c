@@ -35,7 +35,7 @@ class ControlBodyTranslator : public virtual CodeGenInspector {
  public:
     explicit ControlBodyTranslator(const EBPFControl *control);
 
-    // handle the packet_out.emit method
+    /// Handle the packet_out.emit method.
     virtual void compileEmitField(const IR::Expression *expr, cstring field, unsigned alignment,
                                   EBPFType *type);
     virtual void compileEmit(const IR::Vector<IR::Argument> *args);
@@ -63,7 +63,7 @@ class EBPFControl : public EBPFObject {
     const IR::Parameter *xdpInputMeta;   // only for xdp progs
     const IR::Parameter *xdpOutputMeta;  // only for xdp progs
     const IR::Parameter *parserHeaders;
-    // replace references to headers with references to parserHeaders
+    /// Replace references to headers with references to parserHeaders
     cstring hitVariable;
     ControlBodyTranslator *codeGen;
     const bool emitExterns;

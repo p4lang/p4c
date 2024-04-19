@@ -6,13 +6,14 @@
       "name" : "ingress/nh_table",
       "id" : 1,
       "tentries" : 262144,
+      "permissions" : "0x18a6",
       "nummask" : 8,
       "keysize" : 32,
       "keyfields" : [
         {
           "id" : 1,
           "name" : "hdr.ipv4.srcAddr",
-          "type" : "bit32",
+          "type" : "ipv4",
           "match_type" : "exact",
           "bitwidth" : 32
         }

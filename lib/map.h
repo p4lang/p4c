@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef LIB_MAP_H_
 #define LIB_MAP_H_
 
+#include <iterator>
 #include <optional>
 
 /// Given a map and a key, return the value corresponding to the key in the map,
@@ -207,7 +208,7 @@ class MapForKey {
     M &map;
     typename M::key_type key;
     class iterator {
-        using MapIt = decltype(map.begin);
+        using MapIt = decltype(map.begin());
 
         const MapForKey &self;
         MapIt it;

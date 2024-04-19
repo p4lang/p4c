@@ -22,8 +22,11 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 # Whether to enable translation validation
 : "${VALIDATION:=OFF}"
 # This creates a release build that includes link time optimization and links
-# all libraries statically.
-: "${BUILD_STATIC_RELEASE_SANS_GLIBC:=OFF}"
+# all libraries except for glibc statically.
+: "${STATIC_BUILD_WITH_DYNAMIC_GLIBC:=OFF}"
+# This creates a release build that includes link time optimization and links
+# all libraries except for glibc and libstdc++ statically.
+: "${STATIC_BUILD_WITH_DYNAMIC_STDLIB:=OFF}"
 # No questions asked during package installation.
 : "${DEBIAN_FRONTEND:=noninteractive}"
 # Whether to install dependencies required to run PTF-ebpf tests
@@ -236,7 +239,8 @@ export CXXFLAGS="${CXXFLAGS} -O3"
 # Toggle unity compilation.
 CMAKE_FLAGS+="-DCMAKE_UNITY_BUILD=${CMAKE_UNITY_BUILD} "
 # Toggle static builds.
-CMAKE_FLAGS+="-DBUILD_STATIC_RELEASE_SANS_GLIBC=${BUILD_STATIC_RELEASE_SANS_GLIBC} "
+CMAKE_FLAGS+="-DSTATIC_BUILD_WITH_DYNAMIC_GLIBC=${STATIC_BUILD_WITH_DYNAMIC_GLIBC} "
+CMAKE_FLAGS+="-DSTATIC_BUILD_WITH_DYNAMIC_STDLIB=${STATIC_BUILD_WITH_DYNAMIC_STDLIB} "
 # Toggle the installation of the tools back end.
 CMAKE_FLAGS+="-DENABLE_TEST_TOOLS=${ENABLE_TEST_TOOLS} "
 # RELEASE should be default, but we want to make sure.

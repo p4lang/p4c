@@ -37,6 +37,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/hvec_map.cpp
   gtest/indexed_vector.cpp
   gtest/json_test.cpp
+  gtest/map.cpp
   gtest/midend_def_use.cpp
   gtest/midend_pass.cpp
   gtest/midend_test.cpp
@@ -52,6 +53,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/stringify.cpp
   gtest/rtti_test.cpp
   gtest/nethash.cpp
+  gtest/visitor.cpp
 )
 
 # Combine the executable and the non-backend-specific unit tests into a single

@@ -37,6 +37,7 @@ void IntrospectionGenerator::collectTableInfo() {
         tableInfo->id = table->tableID;
         tableInfo->name = table->controlName + "/" + table->tableName;
         tableInfo->tentries = table->tableEntriesCount;
+        tableInfo->permissions = table->permissions;
         tableInfo->numMask = table->numMask;
         if (table->keySize != 0) {
             tableInfo->keysize = table->keySize;
@@ -240,6 +241,7 @@ Util::JsonObject *IntrospectionGenerator::genTableInfo(struct TableAttributes *t
     tableJson->emplace("name", tbl->name);
     tableJson->emplace("id", tbl->id);
     tableJson->emplace("tentries", tbl->tentries);
+    tableJson->emplace("permissions", tbl->permissions);
     tableJson->emplace("nummask", tbl->numMask);
     if (tbl->keysize != 0) {
         tableJson->emplace("keysize", tbl->keysize);

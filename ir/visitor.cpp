@@ -19,8 +19,7 @@ limitations under the License.
 #include <stdlib.h>
 #include <time.h>
 
-#include <absl/container/flat_hash_map.h>
-
+#include "absl/container/flat_hash_map.h"
 #include "ir/ir-generated.h"
 #include "lib/hash.h"
 
@@ -79,6 +78,7 @@ class Visitor::ChangeTracker {
         if (!inserted) {  // We already seen this node, determine its status
             if (it->second.visit_in_progress) return VisitStatus::Busy;
             if (it->second.visitOnce) return VisitStatus::Done;
+            it->second.visit_in_progress = true;
             return VisitStatus::Revisit;
         }
 
@@ -251,6 +251,7 @@ class Visitor::Tracker {
         if (!inserted) {  // We already seen this node, determine its status
             if (!it->second.done) return VisitStatus::Busy;
             if (it->second.visitOnce) return VisitStatus::Done;
+            it->second.done = false;
             return VisitStatus::Revisit;
         }
 

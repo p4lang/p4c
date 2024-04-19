@@ -1,7 +1,7 @@
 # Repository
 
 This folder contains documentation for the P4_16 prototype compiler.
-The code and documentation are hosted in the following repository: https://github.com/p4lang/p4c
+The code and documentation are hosted in the [p4c repository](https://github.com/p4lang/p4c). 
 
 # Compiler source code organization
 
@@ -38,7 +38,7 @@ p4c
 ├── tools                     -- external programs used in the build/test process
 │   ├── ci-ptf                -- scripts to run PSA PTF tests
 │   ├── debian-build          -- resources and scripts for creating Ubuntu (or Debian) packages
-│   ├── driver                -- p4c compiler driver: a script that invokes various compilers
+│   ├── driver                -- P4C compiler driver: a script that invokes various compilers
 │   ├── hooks                 -- useful git hooks for development
 |   ├── ir-generator          -- code to generate the P4C IR from .def files
 │   ├── iwyu_mappings         -- mappings used by the Include What You Use (IWYU) tool for analyzing #include directives in C and C++ source files
@@ -86,21 +86,12 @@ p4c
 
 * Check out the [IntelliJ P4 plugin](https://github.com/TakeshiTseng/IntelliJ-P4-Plugin)
 
-# How to contribute
-
-* do write unit test code
-* code has to be reviewed before it is merged
-* make sure all tests pass when you send a pull request
-* make sure `make cpplint` produces no errors (`make check` will also run this)
-* write documentation
-
 # Writing documentation
 
 Documenting the workings of the compiler is a never-ending (many times
 overlooked) job. We can always write better documentation!
 
-In P4C, documentation is generated using Doxygen
-(http://www.stack.nl/~dimitri/doxygen/index.html). There are two main
+In P4C, documentation is generated using Doxygen. There are two main
 sources from which we generate documentation: comments in the code and
 markup documents in the docs/doxygen directory.
 
@@ -121,12 +112,20 @@ XX is a number between 02-99. Currently, 00_revision_history.md
 contains the documentation revision history, and 01_overview.md is the
 overview of the compiler goals and architecture.
 
+## Documentation Comments Style Guide 
+- Use triple slashes `///` for documenting functions and classes in files.
+- Double slashes `//` should be used for "internal" comments within functions.
+- Double slashes `//` should be used for inline comment.
+- For rare occasions such as adding comments to multi-line macros, you may use `/* ... */` style comments.
+- There should be no space at the end of the comment.
+- First letter of the comment should be a capital letter.
+- Each comment should end with a period.
+
 Happy writing! Should you have any questions, please don't hesitate to ask.
 
 ## Git usage
 
-* To contribute: fork the p4lang/p4c repository on github
-  (see https://help.github.com/articles/fork-a-repo/)
+* To contribute: fork the p4lang/p4c repository on github.  [Detailed instructions on forking a repository](https://help.github.com/articles/fork-a-repo/).
 * To merge a forked repository with the latest changes in the source use:
 
 ```
@@ -223,8 +222,8 @@ tests are run with a "recently built" version of `simple_switch` from
 the
 [p4lang/behavioral-model](https://github.com/p4lang/behavioral-model)
 repository, but it can be several hours old.  If you are working on
-p4c features that rely on newly committed changes to `simple_switch`
-you can find out which `simple_switch` version these p4c automated
+P4C features that rely on newly committed changes to `simple_switch`
+you can find out which `simple_switch` version these P4C automated
 tests are using at the link below:
 
 + [https://hub.docker.com/r/p4lang/behavioral-model/builds](https://hub.docker.com/r/p4lang/behavioral-model/builds)
@@ -248,6 +247,8 @@ To add a new input test with a sample P4 code file (under `testdata/p4_16_sample
 
 * We generally follow the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html). This is partially enforced by `cpplint` and `clang-format` and their respective configuration files. We have customized Google's `cpplint.py` tool for our purposes.  The tool can be invoked with `make cpplint`. To be able to run `clang-format` on Ubuntu 20.04, install it with `pip3 install --user clang-format`. Do not use the Debian package. Both tools run in a git hook and as part of CI.
 
+* Commenting Style is guided by the [following rules](#documentation-comments-style-guide).
+  
 * Watch out for `const`; it is very important.
 
 * Use `override` whenever possible (new gcc versions enforce this).
@@ -338,7 +339,7 @@ makefile variable.
 p4c_PYTHON += p4c.custom.cfg
 ```
 
-There is an global variable `config` in p4c compiler driver that stores the build steps
+There is an global variable `config` in the `p4c` compiler driver that stores the build steps
 for a particular target. By default, the bmv2 and ebpf backends are supported. Each backend
 is identified with a triplet: **target-arch-vendor**. For example, the default bmv2 backend is
 identified as `bmv2-ss-p4org`. Users may choose to implement different architectures running
@@ -357,5 +358,5 @@ config.target.append("bmv2-newarch-p4org")
 
 After adding the new configuration file, rerun `bootstrap.sh`
 
-For testing purpose, p4c will be installed in the build/ directory when executing `make`.
-User can install `p4c` to other system path by running `make install`
+For testing purposes, `p4c` will be installed in the build/ directory when executing `make`.
+Users can install `p4c` to other system path by running `make install`

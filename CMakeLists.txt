@@ -48,10 +48,15 @@ OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
-OPTION (BUILD_STATIC_RELEASE_SANS_GLIBC
-       "Build a (mostly) statically linked release binary. Glibc is linked dynamically." OFF
-)
-if (BUILD_STATIC_RELEASE_SANS_GLIBC)
+OPTION (STATIC_BUILD_WITH_DYNAMIC_GLIBC "Build a (mostly) statically linked release binary. \
+Glibc is linked dynamically. WARNING: This only works if all dependencies that depend on the C++ \
+standard library can be linked statically, otherwise the build will likely be broken and it will \
+likely depend on the standard libary anyway. If you have some non-static C++ dependencies, use \
+STATIC_BUILD_WITH_DYNAMIC_STDLIB." OFF)
+OPTION (STATIC_BUILD_WITH_DYNAMIC_STDLIB "Build a (mostly) statically linked release binary. \
+Glibc and C++ standard library is linked dynamically." OFF)
+
+if (STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
     # We want to optimize the binary size for a static release binary by default.
     set (_ENABLE_LTO_DEFAULT ON)
 else()
@@ -130,9 +135,15 @@ endif ()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Set the required options for a (mostly) static release build.
-if(BUILD_STATIC_RELEASE_SANS_GLIBC)
+if(STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
+  if (STATIC_BUILD_WITH_DYNAMIC_GLIBC AND STATIC_BUILD_WITH_DYNAMIC_STDLIB)
+    message(WARNING "Both STATIC_BUILD_WITH_DYNAMIC_GLIBC and STATIC_BUILD_WITH_DYNAMIC_STDLIB "
+      "enabled at once; using 'DYNAMIC_STDLIB' settings (dynamic glibc and c++ standard library).")
+  endif()
   message(STATUS "Building static release binaries")
-  message(WARNING "glibc is linked dynamically in current static builds.")
+  if (NOT STATIC_BUILD_WITH_DYNAMIC_STDLIB)
+    message(WARNING "glibc is linked dynamically in current static builds.")
+  endif()
   set(BUILD_SHARED_LIBS OFF)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
   # Link Boost statically
@@ -146,8 +157,11 @@ if(BUILD_STATIC_RELEASE_SANS_GLIBC)
   # and see whether static linking improves on Linux.
   # Do not bring in dynamic libstdcc and libgcc
   set(CMAKE_EXE_LINKER_FLAGS
-      "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -Wl,-z,muldefs"
+      "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -Wl,-z,muldefs"
   )
+  if (NOT STATIC_BUILD_WITH_DYNAMIC_STDLIB)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++")
+  endif()
   add_definitions(-DP4C_STATIC_BUILD)
 endif()
 
@@ -525,18 +539,13 @@ add_custom_target(update_includes ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/*.p4 ${P4C_BINARY_DIR}/p4include
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/bmv2
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/bmv2/psa.p4 ${P4C_BINARY_DIR}/p4include/bmv2
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/dpdk
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/psa.p4 ${P4C_BINARY_DIR}/p4include/dpdk
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/pna.p4 ${P4C_BINARY_DIR}/p4include/dpdk
   COMMAND for h in ${OTHER_HEADERS} \; do
     ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/\$$h ${P4C_BINARY_DIR}/p4include \;
   done
   )
-if (ENABLE_DPDK)
-add_custom_target(dpdk_includes ALL
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/dpdk
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/psa.p4 ${P4C_BINARY_DIR}/p4include/dpdk
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/pna.p4 ${P4C_BINARY_DIR}/p4include/dpdk
-  DEPENDS update_includes
-)
-endif()
 
 # Installation
 # Targets install themselves. Here we install the core headers
@@ -620,53 +629,3 @@ SET(CPACK_SOURCE_IGNORE_FILES
 INCLUDE(CPack)
 
 ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} clean package_source)
-
-#################### IWYU
-# Needs to be part of the top-level to be able to find all targets in the compiler framework.
-if(ENABLE_IWYU)
-  # Set up IWYU for P4C.
-  message("Enabling IWYU checks.")
-  find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
-  set(iwyu_path
-      ${iwyu_path}
-      -Xiwyu
-      --max_line_length=100
-      -Xiwyu
-      --no_fwd_decls
-      -Xiwyu
-      --cxx17ns
-      -Xiwyu
-      --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/p4c.imp
-  )
-  message("IWYU command: ${iwyu_path}")
-  function(get_all_targets var)
-    set(targets)
-    get_all_targets_recursive(targets ${CMAKE_CURRENT_SOURCE_DIR})
-    set(${var} ${targets} PARENT_SCOPE)
-  endfunction()
-
-  macro(get_all_targets_recursive targets dir)
-    get_property(subdirectories DIRECTORY ${dir} PROPERTY SUBDIRECTORIES)
-    foreach(subdir ${subdirectories})
-      get_all_targets_recursive(${targets} ${subdir})
-    endforeach()
-
-    get_property(current_targets DIRECTORY ${dir} PROPERTY BUILDSYSTEM_TARGETS)
-    list(APPEND ${targets} ${current_targets})
-  endmacro()
-
-  # Apply IWYU to all targets.
-  get_all_targets(all_targets)
-  # Remove generated files from IWYU.
-  list(FILTER all_targets EXCLUDE REGEX "controlplane-gen")
-  list(FILTER all_targets EXCLUDE REGEX "dpdk_runtime")
-  list(FILTER all_targets EXCLUDE REGEX "ir-generated")
-  list(FILTER all_targets EXCLUDE REGEX "genIR")
-  list(FILTER all_targets EXCLUDE REGEX "parser-gen")
-  list(FILTER all_targets EXCLUDE REGEX "gtest")
-  message("Applying IWYU to targets: ${all_targets}")
-  foreach(target ${all_targets})
-    set_property(TARGET ${target} PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
-  endforeach()
-
-endif()

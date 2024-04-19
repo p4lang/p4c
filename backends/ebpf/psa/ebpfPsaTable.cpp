@@ -31,9 +31,9 @@ class EBPFTablePsaPropertyVisitor : public Inspector {
  public:
     explicit EBPFTablePsaPropertyVisitor(EBPFTablePSA *table) : table(table) {}
 
-    // Use these two preorders to print error when property contains something other than name of
-    // extern instance. ListExpression is required because without it Expression will take
-    // precedence over it and throw error for whole list.
+    /// Use these two preorders to print error when property contains something other than name of
+    /// extern instance. ListExpression is required because without it Expression will take
+    /// precedence over it and throw error for whole list.
     bool preorder(const IR::ListExpression *) override { return true; }
     bool preorder(const IR::Expression *expr) override {
         ::error(ErrorType::ERR_UNSUPPORTED,
@@ -105,8 +105,8 @@ class EBPFTablePSAImplementationPropertyVisitor : public EBPFTablePsaPropertyVis
     explicit EBPFTablePSAImplementationPropertyVisitor(EBPFTablePSA *table)
         : EBPFTablePsaPropertyVisitor(table) {}
 
-    // PSA table is allowed to have up to one table implementation. This visitor
-    // will iterate over all entries in property, so lets use this and print errors.
+    /// PSA table is allowed to have up to one table implementation. This visitor
+    /// will iterate over all entries in property, so lets use this and print errors.
     bool preorder(const IR::PathExpression *pe) override {
         auto decl = table->program->refMap->getDeclaration(pe->path, true);
         auto di = decl->to<IR::Declaration_Instance>();
@@ -137,8 +137,8 @@ class EBPFTablePSAImplementationPropertyVisitor : public EBPFTablePsaPropertyVis
     }
 };
 
-// Generator for table key/value initializer value (const entries). Can't be used during table
-// lookup because this inspector expects only constant values as initializer.
+/// Generator for table key/value initializer value (const entries). Can't be used during table
+/// lookup because this inspector expects only constant values as initializer.
 class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
  protected:
     unsigned currentKeyEntryIndex = 0;
@@ -189,7 +189,7 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
         return false;
     }
 
-    // {pre,post}orders for table key initializer
+    /// {pre,post}orders for table key initializer
     bool preorder(const IR::Key *) override {
         BUG_CHECK(table->keyGenerator->keyElements.size() == currentEntry->keys->size(),
                   "Entry key size does not match table key size");
@@ -252,7 +252,7 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
     }
     void postorder(const IR::Key *) override { builder->blockEnd(false); }
 
-    // preorder for value table value initializer
+    /// preorder for value table value initializer
     bool preorder(const IR::MethodCallExpression *mce) override {
         auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
         auto ac = mi->to<P4::ActionCall>();
@@ -280,13 +280,13 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
     bool preorder(const IR::PathExpression *p) override { return notSupported(p); }
 };
 
-// Generate mask for whole table key
+/// Generate mask for whole table key
 class EBPFTablePSATernaryTableMaskGenerator : public Inspector {
  protected:
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
-    // Mask generation is done using string concatenation,
-    // so use std::string as it behave better in this case than cstring.
+    /// Mask generation is done using string concatenation,
+    /// so use std::string as it behave better in this case than cstring.
     std::string mask;
 
  public:
@@ -315,7 +315,7 @@ class EBPFTablePSATernaryTableMaskGenerator : public Inspector {
     }
 };
 
-// Build mask initializer for a single table key entry
+/// Build mask initializer for a single table key entry.
 class EBPFTablePSATernaryKeyMaskGenerator : public EBPFTablePSAInitializerCodeGen {
  public:
     EBPFTablePSATernaryKeyMaskGenerator(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
@@ -542,10 +542,8 @@ void EBPFTablePSA::emitTypes(CodeBuilder *builder) {
     emitCacheTypes(builder);
 }
 
-/**
- * Order of emitting counters and meters affects generated layout of BPF map value.
- * Do not change this order!
- */
+/// Order of emitting counters and meters affects generated layout of BPF map value.
+/// Do not change this order!
 void EBPFTablePSA::emitDirectValueTypes(CodeBuilder *builder) {
     for (auto ctr : counters) {
         ctr.second->emitValueType(builder);
@@ -861,12 +859,10 @@ void EBPFTablePSA::emitValueMask(CodeBuilder *builder, const cstring valueMask,
     }
 }
 
-/**
- * This method groups entries with the same prefix into separate lists.
- * For example four entries which have two different masks
- * will give as a result a list of two list (each with two entries).
- * @return a vector of vectors with const entries that have the same prefix
- */
+/// This method groups entries with the same prefix into separate lists.
+/// For example four entries which have two different masks
+/// will give as a result a list of two list (each with two entries).
+/// @return a vector of vectors with const entries that have the same prefix.
 EBPFTablePSA::EntriesGroupedByMask_t EBPFTablePSA::getConstEntriesGroupedByMask() {
     EntriesGroupedByMask_t result;
     const IR::EntriesList *entries = table->container->getEntries();

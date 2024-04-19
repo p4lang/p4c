@@ -72,7 +72,7 @@ class PSAEbpfGenerator : public EbpfCodeGenerator {
     virtual void emitInitializerSection(CodeBuilder *builder) const = 0;
     void emitHelperFunctions(CodeBuilder *builder) const;
 
-    // TODO: move them to the externs/ebpfPsaHashAlgorithm.cpp file
+    /// TODO: move them to the externs/ebpfPsaHashAlgorithm.cpp file
     void emitCRC32LookupTableTypes(CodeBuilder *builder) const;
     void emitCRC32LookupTableInitializer(CodeBuilder *builder) const;
     void emitCRC32LookupTableInstance(CodeBuilder *builder) const;
@@ -94,9 +94,9 @@ class PSAArchTC : public PSAEbpfGenerator {
 
 class PSAArchXDP : public PSAEbpfGenerator {
  public:
-    // TC Ingress program used to support packet cloning in the XDP mode.
+    /// TC Ingress program used to support packet cloning in the XDP mode.
     EBPFPipeline *tcIngressForXDP;
-    // If the XDP mode is used, we need to have TC Egress pipeline to handle cloned packets.
+    /// If the XDP mode is used, we need to have TC Egress pipeline to handle cloned packets.
     EBPFPipeline *tcEgressForXDP;
     static const unsigned egressDevmapSize = 256;
 

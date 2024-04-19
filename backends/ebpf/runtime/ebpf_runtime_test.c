@@ -23,17 +23,15 @@ limitations under the License.
 
 #define PCAPOUT "_out.pcap"
 
-/**
- * @brief Feed a list packets into an eBPF program.
- * @details This is a mock function emulating the behavior of a running
- * eBPF program. It takes a list of input packets and iteratively parses them
- * using the given imported ebpf_filter function. The output defines whether
- * or not the packet is "dropped." If the packet is not dropped, its content is
- * copied and appended to an output packet list.
- *
- * @param pkt_list A list of input packets running through the filter.
- * @return The list of packets "surviving" the filter function
- */
+/// @brief Feed a list packets into an eBPF program.
+/// @details This is a mock function emulating the behavior of a running
+/// eBPF program. It takes a list of input packets and iteratively parses them
+/// using the given imported ebpf_filter function. The output defines whether
+/// or not the packet is "dropped." If the packet is not dropped, its content is
+/// copied and appended to an output packet list.
+///
+/// @param pkt_list A list of input packets running through the filter.
+/// @return The list of packets "surviving" the filter function
 pcap_list_t *feed_packets(packet_filter ebpf_filter, pcap_list_t *pkt_list, int debug) {
     pcap_list_t *output_pkts = allocate_pkt_list();
     uint32_t list_len = get_pkt_list_length(pkt_list);
@@ -45,7 +43,7 @@ pcap_list_t *feed_packets(packet_filter ebpf_filter, pcap_list_t *pkt_list, int 
         skb.len = input_pkt->pcap_hdr.len;
         int result = ebpf_filter(&skb);
         if (result != 0) {
-            /* We copy the entire content to emulate an outgoing packet */
+            // We copy the entire content to emulate an outgoing packet.
             pcap_pkt *out_pkt = copy_pkt(input_pkt);
             output_pkts = append_packet(output_pkts, out_pkt);
         }
@@ -68,20 +66,20 @@ void write_pkts_to_pcaps(const char *pcap_base, pcap_list_array_t *output_array,
 }
 
 void *run_and_record_output(packet_filter ebpf_filter, const char *pcap_base, pcap_list_t *pkt_list, int debug) {
-    /* Create an array of packet lists */
+    // Create an array of packet lists.
     pcap_list_array_t *output_array = allocate_pkt_list_array();
-    /* Feed the packets into our "loaded" program */
+    // Feed the packets into our "loaded" program.
     pcap_list_t *output_pkts = feed_packets(ebpf_filter, pkt_list, debug);
-    /* Split the output packet list by interface. This destroys the list. */
+    // Split the output packet list by interface. This destroys the list.
     output_array = split_and_delete_list(output_pkts, output_array);
-    /* Write each list to a separate pcap output file */
+    // Write each list to a separate pcap output file.
     write_pkts_to_pcaps(pcap_base, output_array, debug);
-    /* Delete the array, including the data it is holding */
+    // Delete the array, including the data it is holding.
     delete_array(output_array);
 }
 
 void init_ebpf_tables(int debug) {
-    /* Initialize the registry of shared tables */
+    // Initialize the registry of shared tables.
     struct bpf_table* current = tables;
     while (current->name != NULL) {
         if (debug)
@@ -92,7 +90,7 @@ void init_ebpf_tables(int debug) {
 }
 
 void delete_ebpf_tables(int debug) {
-    /* Delete all the remaining tables in the user program */
+    // Delete all the remaining tables in the user program.
     struct bpf_table* current = tables;
     while (current->name != NULL) {
         if (debug)
