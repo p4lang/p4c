@@ -5965,7 +5965,7 @@ _HEADERS_CONTAINING_TEMPLATES = (
     ('<utility>', ('pair',)),
     ('<vector>', ('vector',)),
 
-    # gcc extensions.
+    # GCC extensions.
     # Note: std::hash is their hash, ::hash is our hash
     ('<hash_map>', ('hash_map', 'hash_multimap',)),
     ('<hash_set>', ('hash_set', 'hash_multiset',)),
