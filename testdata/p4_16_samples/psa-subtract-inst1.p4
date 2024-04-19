@@ -1,6 +1,6 @@
 /* -*- P4_16 -*- */
 #include <core.p4>
-#include <psa.p4>
+#include <dpdk/psa.p4>
 
 /************ H E A D E R S ******************************/
 #define MAX_LAYERS 2
