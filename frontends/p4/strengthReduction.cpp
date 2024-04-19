@@ -182,7 +182,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::Sub *expr) {
     if (isZero(expr->right)) return expr->left;
     if (isZero(expr->left)) return new IR::Neg(expr->srcInfo, expr->type, expr->right);
     // Replace `a - constant` with `a + (-constant)`
-    if (expr->right->is<IR::Constant>()) {
+    if (enableSubConstToAddTransform && expr->right->is<IR::Constant>()) {
         auto cst = expr->right->to<IR::Constant>();
         auto neg = new IR::Constant(cst->srcInfo, cst->type, -cst->value, cst->base, true);
         auto result = new IR::Add(expr->srcInfo, expr->type, expr->left, neg);
