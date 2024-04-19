@@ -749,7 +749,7 @@ do {                                                                            
  *
  * Note the preprocessor built-in defines can be emitted using:
  *
- *   gcc -m64 -dM -E - < /dev/null                  (on gcc)
+ *   gcc -m64 -dM -E - < /dev/null                  (on GCC)
  *   cc -## a.c (where a.c is a simple test file)   (Sun Studio)
  */
 #if (defined(__i386__) || defined(__x86_64__)  || defined(_M_IX86))
