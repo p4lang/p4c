@@ -25,7 +25,6 @@
 
 namespace graphs {
 
-
 /// "process" function of class is dependent on previous aplication of visitor
 /// classes Controls and Parsers onto IR, and can only be run after them.
 class Graph_visitor : public Graphs {
@@ -71,7 +70,7 @@ class Graph_visitor : public Graphs {
           filename(filename) {}
     /// @brief Maps VertexType to string
     /// @param v_type VertexType to map
-    ///@return string representation of v_type.
+    /// @return string representation of v_type.
     const char *getType(const VertexType &v_type);
 
     /// @brief Maps PrevType to string
@@ -109,7 +108,7 @@ class Graph_visitor : public Graphs {
     /// @param[in,out] opts stores fullgraph and needed variables used for indexing
     /// @param prev_type used to correctly connect subgraphs of parser and control type
     void forLoopFullGraph(std::vector<Graph *> &graphsArray, fullGraphOpts *opts,
-                        PrevType prev_type);
+                          PrevType prev_type);
 
     Util::JsonObject *json = nullptr;          // stores json that will be outputted
     Util::JsonArray *programBlocks = nullptr;  // stores objects in top level array "nodes"
