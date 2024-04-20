@@ -23,5 +23,6 @@ const cstring ParseTCAnnotations::defaultHitConst = "default_hit_const";
 const cstring ParseTCAnnotations::tcType = "tc_type";
 const cstring ParseTCAnnotations::numMask = "nummask";
 const cstring ParseTCAnnotations::tcMayOverride = "tc_may_override";
+const cstring ParseTCAnnotations::tc_acl = "tc_acl";
 
 }  // namespace TC

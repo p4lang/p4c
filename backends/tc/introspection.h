@@ -97,6 +97,7 @@ struct ActionAttributes {
 
 struct TableAttributes {
     cstring name;
+    cstring permissions;
     unsigned int id;
     unsigned int tentries;
     unsigned int numMask;
@@ -106,6 +107,7 @@ struct TableAttributes {
     safe_vector<struct ActionAttributes *> actions;
     TableAttributes() {
         name = nullptr;
+        permissions = nullptr;
         id = 0;
         tentries = 0;
         numMask = 0;

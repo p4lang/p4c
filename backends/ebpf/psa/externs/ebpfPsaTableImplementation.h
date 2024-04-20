@@ -24,7 +24,7 @@ limitations under the License.
 
 namespace EBPF {
 
-// Base class for ActionProfile and ActionSelector
+/// Base class for ActionProfile and ActionSelector.
 class EBPFTableImplementationPSA : public EBPFTablePSA {
  public:
     EBPFTableImplementationPSA(const EBPFProgram *program, CodeGenInspector *codeGen,

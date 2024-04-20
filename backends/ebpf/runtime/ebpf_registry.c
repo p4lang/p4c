@@ -14,18 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/*
-Implementation of ebpf registry. Intended to provide a common access interface between control and data plane. Emulates the linux userspace API which can access the kernel eBPF map using string and integer identifiers.
-*/
-
+/// Implementation of ebpf registry. Intended to provide a common access interface between control and data plane. Emulates the linux userspace API which can access the kernel eBPF map using string and integer identifiers.
 #include <stdio.h>
 #include "ebpf_registry.h"
 
-/**
- * @brief Defines the structure of the central registry.
- * @details Defines a registry type, which maps names to tables
- * as well as integer identifiers.
- */
+/// @brief Defines the structure of the central registry.
+/// @details Defines a registry type, which maps names to tables
+/// as well as integer identifiers.
 typedef struct {
     char name[MAX_TABLE_NAME_LENGTH];   // name of the map
     struct bpf_table *tbl;            // ptr to the map
@@ -36,7 +31,7 @@ typedef struct {
 
 static int table_indexer = 0;
 
-/* Instantiation of the central registry by id and name */
+// Instantiation of the central registry by id and name
 static registry_entry *reg_tables_name = NULL;
 static registry_entry *reg_tables_id = NULL;
 
@@ -51,28 +46,28 @@ static registry_entry *find_register(const char *name) {
 }
 
 int registry_add(struct bpf_table *tbl) {
-    /* Check if the register exists already */
+    // Check if the register exists already
     registry_entry *tmp_reg = find_register(tbl->name);
     if (tmp_reg != NULL) {
         fprintf(stderr, "Error: Table %s already exists!\n", tbl->name);
         return EXIT_FAILURE;
     }
-    /* Check key maximum length */
+    // Check key maximum length
     if (strlen(tbl->name) > MAX_TABLE_NAME_LENGTH) {
         fprintf(stderr, "Error: Key name %s exceeds maximum size %d", tbl->name, MAX_TABLE_NAME_LENGTH);
         return EXIT_FAILURE;
     }
-    /* Add the table */
+    // Add the table
     tmp_reg = malloc(sizeof(registry_entry));
     if (!tmp_reg) {
         perror("Fatal: Could not allocate memory\n");
         exit(EXIT_FAILURE);
     }
-    /* Do not forget to actually copy the values to the entry... */
+    // Do not forget to actually copy the values to the entry...
     memcpy(tmp_reg->name, tbl->name, strlen(tbl->name));
     tmp_reg->handle = table_indexer;
     tmp_reg->tbl = tbl;
-    /* Add the id and name to the registry. */
+    // Add the id and name to the registry.
     HASH_ADD(h_name, reg_tables_name, name, strlen(tbl->name), tmp_reg);
     HASH_ADD(h_id, reg_tables_id, handle, sizeof(int), tmp_reg);
     table_indexer++;
@@ -123,7 +118,7 @@ struct bpf_table *registry_lookup_table_id(int tbl_id) {
 int registry_update_table(const char *name, void *key, void *value, unsigned long long flags) {
     struct bpf_table *tmp_tbl = registry_lookup_table(name);
     if (tmp_tbl == NULL)
-        /* not found, return */
+        // not found, return
         return EXIT_FAILURE;
     return bpf_map_update_elem(&tmp_tbl->bpf_map, key, tmp_tbl->key_size, value, tmp_tbl->value_size, flags);
 }
@@ -131,7 +126,7 @@ int registry_update_table(const char *name, void *key, void *value, unsigned lon
 int registry_update_table_id(int tbl_id, void *key, void *value, unsigned long long flags) {
     struct bpf_table *tmp_tbl = registry_lookup_table_id(tbl_id);
     if (tmp_tbl == NULL)
-        /* not found, return */
+        // not found, return
         return EXIT_FAILURE;
     return bpf_map_update_elem(&tmp_tbl->bpf_map, key, tmp_tbl->key_size, value, tmp_tbl->value_size, flags);
 }
@@ -139,7 +134,7 @@ int registry_update_table_id(int tbl_id, void *key, void *value, unsigned long l
 int registry_delete_table_elem(const char *name, void *key) {
     struct bpf_table *tmp_tbl = registry_lookup_table(name);
     if (tmp_tbl == NULL)
-        /* not found, return */
+        // not found, return
         return EXIT_FAILURE;
     return bpf_map_delete_elem(tmp_tbl->bpf_map, key, tmp_tbl->key_size);;
 }
@@ -147,7 +142,7 @@ int registry_delete_table_elem(const char *name, void *key) {
 int registry_delete_table_elem_id(int tbl_id, void *key) {
     struct bpf_table *tmp_tbl = registry_lookup_table_id(tbl_id);
     if (tmp_tbl == NULL)
-        /* not found, return */
+        // not found, return
         return EXIT_FAILURE;
     return bpf_map_delete_elem(tmp_tbl->bpf_map, key, tmp_tbl->key_size);;
 }
@@ -155,7 +150,7 @@ int registry_delete_table_elem_id(int tbl_id, void *key) {
 void *registry_lookup_table_elem(const char *name, void *key) {
     struct bpf_table *tmp_tbl = registry_lookup_table(name);
     if (tmp_tbl == NULL)
-        /* not found, return */
+        // not found, return
         return NULL;
     return bpf_map_lookup_elem(tmp_tbl->bpf_map, key, tmp_tbl->key_size);
 }
@@ -163,7 +158,7 @@ void *registry_lookup_table_elem(const char *name, void *key) {
 void *registry_lookup_table_elem_id(int tbl_id, void *key) {
     struct bpf_table *tmp_tbl = registry_lookup_table_id(tbl_id);
     if (tmp_tbl == NULL)
-        /* not found, return */
+        // not found, return
         return NULL;
     return bpf_map_lookup_elem(tmp_tbl->bpf_map, key, tmp_tbl->key_size);
 }

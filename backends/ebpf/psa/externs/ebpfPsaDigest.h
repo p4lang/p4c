@@ -31,8 +31,8 @@ class EBPFDigestPSA : public EBPFObject {
     EBPFType *valueType;
     cstring valueTypeName;
     const IR::Declaration_Instance *declaration;
-    // arbitrary value for max queue size
-    // TODO: make it configurable
+    /// arbitrary value for max queue size
+    /// TODO: make it configurable
     int maxDigestQueueSize = 128;
 
  public:

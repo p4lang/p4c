@@ -404,7 +404,7 @@ bool CodeGenInspector::preorder(const IR::BlockStatement *s) {
     return false;
 }
 
-// This is correct only after inlining
+/// This is correct only after inlining.
 bool CodeGenInspector::preorder(const IR::ExitStatement *) {
     builder->append("return");
     builder->endOfStatement();
@@ -590,25 +590,24 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
         return;
     }
     if (rByteOrder == "NETWORK") {
-        /*
-        If left side of assignment is not annotated field i.e host endian and right expression
-        is annotated field i.e network endian, we need to convert rexp to host order.
-        Example -
-            select_0 = hdr.ipv4.diffserv
-            select_0 = bntoh(hdr.ipv4.diffserv)
-        */
+        // If left side of assignment is not annotated field i.e host endian and right expression
+        // is annotated field i.e network endian, we need to convert rexp to host order.
+        // Example -
+        //     select_0 = hdr.ipv4.diffserv
+        //     select_0 = bntoh(hdr.ipv4.diffserv)
+        //
         emitAndConvertByteOrder(rexpr, "HOST");
     }
     if (lByteOrder == "NETWORK") {
-        /*
-        If left side of assignment is annotated field i.e network endian, we need to convert
-        right expression to network order.
-        Example -
-            hdr.opv4.diffserv = 0x1;
-            hdr.opv4.diffserv = bhton(0x1)
-        */
+        // If left side of assignment is annotated field i.e network endian, we need to convert
+        // right expression to network order.
+        // Example -
+        //     hdr.opv4.diffserv = 0x1;
+        //     hdr.opv4.diffserv = bhton(0x1)
+        //
         emitAndConvertByteOrder(rexpr, "NETWORK");
     }
+
     return;
 }
 

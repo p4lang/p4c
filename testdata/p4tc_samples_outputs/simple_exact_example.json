@@ -6,6 +6,7 @@
       "name" : "ingress/nh_table",
       "id" : 1,
       "tentries" : 262144,
+      "permissions" : "0x18a6",
       "nummask" : 8,
       "keysize" : 32,
       "keyfields" : [
