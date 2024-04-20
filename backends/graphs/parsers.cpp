@@ -33,7 +33,7 @@ static cstring toString(const IR::Expression *expression) {
     return cstring(ss.str());
 }
 
-// we always have only one subgraph
+/// We always have only one subgraph.
 Graph *ParserGraphs::CreateSubGraph(Graph &currentSubgraph, const cstring &name) {
     auto &newSubgraph = currentSubgraph.create_subgraph();
     boost::get_property(newSubgraph, boost::graph_name) = "cluster" + name;
@@ -102,7 +102,7 @@ void ParserGraphs::postorder(const IR::PathExpression *expression) {
 }
 
 void ParserGraphs::postorder(const IR::SelectExpression *expression) {
-    // transition (..) { ... } may imply a transition to
+    // Transition (..) { ... } may imply a transition to
     // "reject" - if none of the cases matches.
     for (auto c : expression->selectCases) {
         if (c->keyset->is<IR::DefaultExpression>())
