@@ -137,3 +137,50 @@ IR::Constant IR::Constant::operator-() const { return IR::Constant(-value); }
 IR::Constant IR::Constant::GetMask(unsigned width) {
     return (IR::Constant(1) << width) - IR::Constant(1);
 }
+
+const IR::Constant *IR::Constant::get(const IR::Type *t, big_int v, Util::SourceInfo si) {
+    // Only cache bits with width lower than 16 bit to restrict the size of the cache.
+    // Do not cache values with a non-empty source info (yet).
+    const auto *tb = t->to<Type_Bits>();
+    if (t->width_bits() > 16 || tb == nullptr || si.isValid()) {
+        return new IR::Constant(si, t, v);
+    }
+    // Constants are interned. Keys in the intern map are pairs of types and values.
+    using key_t = std::tuple<int, RTTI::TypeId, bool, big_int>;
+    static std::map<key_t, const Constant *> CONSTANTS;
+
+    auto *&result = CONSTANTS[{tb->width_bits(), t->typeId(), tb->isSigned, v}];
+    if (result == nullptr) {
+        result = new Constant(si, tb, v);
+    }
+
+    return result;
+}
+
+const IR::BoolLiteral *IR::BoolLiteral::get(bool value, const Util::SourceInfo &si) {
+    // Do not cache values with a non-empty source info (yet).
+    if (si.isValid()) {
+        return new IR::BoolLiteral(si, value);
+    }
+    // Boolean literals are interned.
+    static IR::BoolLiteral TRUE_BOOLLITERAL(si, IR::Type_Boolean::get(), true);
+    static IR::BoolLiteral FALSE_BOOLLITERAL(si, IR::Type_Boolean::get(), false);
+    return value ? &TRUE_BOOLLITERAL : &FALSE_BOOLLITERAL;
+}
+
+const IR::StringLiteral *IR::StringLiteral::get(const IR::Type *t, cstring value,
+                                                const Util::SourceInfo &si) {
+    // Do not cache values with a non-empty source info (yet).
+    if (si.isValid()) {
+        return new IR::StringLiteral(si, t, value);
+    }
+    // String literals are interned.
+    using key_t = std::pair<cstring, const IR::Type *>;
+    static std::map<key_t, const IR::StringLiteral *> STRINGS;
+
+    auto *&result = STRINGS[{value, t}];
+    if (result == nullptr) {
+        result = new IR::StringLiteral(si, t, value);
+    }
+    return result;
+}

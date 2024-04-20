@@ -198,7 +198,11 @@ class Constant : Literal {
         Literal(si, t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
 #emit
     static Constant GetMask(unsigned width);
+
+    /// @return a constant. Any constant returned here is interned. Base is always 10.
+    static const Constant *get(const Type *t, big_int v, Util::SourceInfo si = {});
 #end
+
     bool fitsInt() const { return value >= INT_MIN && value <= INT_MAX; }
     bool fitsLong() const { return value >= LONG_MIN && value <= LONG_MAX; }
     bool fitsUint() const { return value >= 0 && value <= UINT_MAX; }
@@ -257,6 +261,11 @@ class Constant : Literal {
 class BoolLiteral : Literal {
     bool value;
     toString{ return value ? "true" : "false"; }
+
+#emit
+    /// @return a bool literal. Both booleans are interned.
+    static const BoolLiteral *get(bool value, const Util::SourceInfo &si = {});
+#end
 }
 
 class StringLiteral : Literal {
@@ -266,6 +275,9 @@ class StringLiteral : Literal {
     StringLiteral(ID v) : Literal(v.srcInfo), value(v.name) {}
 #emit
     operator IR::ID() const { return IR::ID(srcInfo, value); }
+
+    /// @returns a string literal. The value is cached.
+    static const StringLiteral *get(cstring value, const Type *t = Type_String::get(), const Util::SourceInfo &si = {});
 #end
 }
 
