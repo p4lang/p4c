@@ -83,11 +83,11 @@ void ProgramInfo::produceCopyInOutCall(const IR::Parameter *param, size_t paramI
     }
     const auto *archPath = new IR::PathExpression(paramType, new IR::Path(archRef));
     const auto *paramRef = new IR::PathExpression(paramType, new IR::Path(param->name));
-    const auto *paramDir = IR::getStringLiteral(directionToString(param->direction));
+    const auto *paramDir = IR::StringLiteral::get(directionToString(param->direction));
     if (copyIns != nullptr) {
         // This mimicks the copy-in from the architecture environment.
         const auto *copyInCall = new IR::MethodCallStatement(Utils::generateInternalMethodCall(
-            "copy_in", {archPath, paramRef, paramDir, IR::getBoolLiteral(false)}));
+            "copy_in", {archPath, paramRef, paramDir, IR::BoolLiteral::get(false)}));
         copyIns->emplace_back(copyInCall);
     }
     if (copyOuts != nullptr) {

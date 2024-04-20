@@ -303,7 +303,7 @@ bool ExprStepper::preorder(const IR::PathExpression *pathExpression) {
     // If the path expression is a Type_MatchKind, convert it to a StringLiteral.
     if (pathExpression->type->is<IR::Type_MatchKind>()) {
         state.replaceTopBody(Continuation::Return(
-            IR::getStringLiteral(pathExpression->path->name, IR::Type_MatchKind::get())));
+            IR::StringLiteral::get(pathExpression->path->name, IR::Type_MatchKind::get())));
         result->emplace_back(state);
         return false;
     }
@@ -423,7 +423,7 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
         }
     }
 
-    const IR::Expression *missCondition = IR::getBoolLiteral(true);
+    const IR::Expression *missCondition = IR::BoolLiteral::get(true);
     bool hasDefault = false;
     for (const auto *selectCase : selectCases) {
         auto &nextState = state.clone();

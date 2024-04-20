@@ -78,9 +78,9 @@ TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
     if (testInfo.outputPacket->type->width_bits() == 0) {
         int outPktSize = ZERO_PKT_WIDTH;
         testInfo.outputPacket =
-            IR::getConstant(IR::getBitType(outPktSize), Bmv2TestBackend::ZERO_PKT_VAL);
+            IR::Constant::get(IR::getBitType(outPktSize), Bmv2TestBackend::ZERO_PKT_VAL);
         testInfo.packetTaintMask =
-            IR::getConstant(IR::getBitType(outPktSize), Bmv2TestBackend::ZERO_PKT_MAX);
+            IR::Constant::get(IR::getBitType(outPktSize), Bmv2TestBackend::ZERO_PKT_MAX);
     }
     return testInfo;
 }
@@ -88,7 +88,7 @@ TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
 const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionState,
                                                 const Model *finalModel, const TestInfo &testInfo) {
     const auto *ingressPayload = testInfo.inputPacket;
-    const auto *ingressPayloadMask = IR::getConstant(IR::getBitType(1), 1);
+    const auto *ingressPayloadMask = IR::Constant::get(IR::getBitType(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
 
     std::optional<Packet> egressPacket = std::nullopt;

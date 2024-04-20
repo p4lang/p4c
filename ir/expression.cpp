@@ -168,7 +168,7 @@ const IR::BoolLiteral *IR::BoolLiteral::get(bool value, const Util::SourceInfo &
     return value ? &TRUE_BOOLLITERAL : &FALSE_BOOLLITERAL;
 }
 
-const IR::StringLiteral *IR::StringLiteral::get(const IR::Type *t, cstring value,
+const IR::StringLiteral *IR::StringLiteral::get(cstring value, const IR::Type *t,
                                                 const Util::SourceInfo &si) {
     // Do not cache values with a non-empty source info (yet).
     if (si.isValid()) {

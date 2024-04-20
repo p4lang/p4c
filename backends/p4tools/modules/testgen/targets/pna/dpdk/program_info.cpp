@@ -70,7 +70,7 @@ std::vector<Continuation::Command> PnaDpdkProgramInfo::processDeclaration(
     std::vector<Continuation::Command> cmds;
     // Copy-in.
     const auto *copyInCall = new IR::MethodCallStatement(Utils::generateInternalMethodCall(
-        "copy_in", {IR::getStringLiteral(typeDecl->name)}, IR::Type_Void::get(),
+        "copy_in", {IR::StringLiteral::get(typeDecl->name)}, IR::Type_Void::get(),
         new IR::ParameterList(
             {new IR::Parameter("blockRef", IR::Direction::In, IR::Type_Unknown::get())})));
     cmds.emplace_back(copyInCall);
@@ -78,7 +78,7 @@ std::vector<Continuation::Command> PnaDpdkProgramInfo::processDeclaration(
     cmds.emplace_back(typeDecl);
     // Copy-out.
     const auto *copyOutCall = new IR::MethodCallStatement(Utils::generateInternalMethodCall(
-        "copy_out", {IR::getStringLiteral(typeDecl->name)}, IR::Type_Void::get(),
+        "copy_out", {IR::StringLiteral::get(typeDecl->name)}, IR::Type_Void::get(),
         new IR::ParameterList(
             {new IR::Parameter("blockRef", IR::Direction::In, IR::Type_Unknown::get())})));
     cmds.emplace_back(copyOutCall);

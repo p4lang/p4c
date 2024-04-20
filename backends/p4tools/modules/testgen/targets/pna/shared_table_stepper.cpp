@@ -66,8 +66,8 @@ const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
         const IR::Expression *minKey = nullptr;
         const IR::Expression *maxKey = nullptr;
         if (keyProperties.isTainted) {
-            minKey = IR::getConstant(keyExpr->type, 0);
-            maxKey = IR::getConstant(keyExpr->type, IR::getMaxBvVal(keyExpr->type));
+            minKey = IR::Constant::get(keyExpr->type, 0);
+            maxKey = IR::Constant::get(keyExpr->type, IR::getMaxBvVal(keyExpr->type));
             keyExpr = minKey;
         } else {
             std::tie(minKey, maxKey) = Bmv2ControlPlaneState::getTableRange(
@@ -148,7 +148,7 @@ void SharedPnaTableStepper::evalTableActionProfile(
             collector.updateNodeCoverage(actionType, coveredNodes);
         }
 
-        nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableHitVar(table), IR::BoolLiteral::get(true));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
@@ -235,7 +235,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
             collector.updateNodeCoverage(actionType, coveredNodes);
         }
 
-        nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableHitVar(table), IR::BoolLiteral::get(true));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
 
         std::stringstream tableStream;

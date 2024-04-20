@@ -60,7 +60,7 @@ EBPFProgramInfo::EBPFProgramInfo(const TestgenCompilerResult &compilerResult,
     // The input packet should be larger than 0.
     targetConstraints =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, 0));
+                    IR::Constant::get(&PacketVars::PACKET_SIZE_VAR_TYPE, 0));
 }
 
 const ArchSpec &EBPFProgramInfo::getArchSpec() const { return ARCH_SPEC; }
@@ -85,7 +85,7 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
 
     // Copy-in.
     const auto *copyInCall = new IR::MethodCallStatement(Utils::generateInternalMethodCall(
-        "copy_in", {IR::getStringLiteral(typeDecl->name)}, IR::Type_Void::get(),
+        "copy_in", {IR::StringLiteral::get(typeDecl->name)}, IR::Type_Void::get(),
         new IR::ParameterList(
             {new IR::Parameter("blockRef", IR::Direction::In, IR::Type_Unknown::get())})));
     cmds.emplace_back(copyInCall);
@@ -93,7 +93,7 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
     cmds.emplace_back(typeDecl);
     // Copy-out.
     const auto *copyOutCall = new IR::MethodCallStatement(Utils::generateInternalMethodCall(
-        "copy_out", {IR::getStringLiteral(typeDecl->name)}, IR::Type_Void::get(),
+        "copy_out", {IR::StringLiteral::get(typeDecl->name)}, IR::Type_Void::get(),
         new IR::ParameterList(
             {new IR::Parameter("blockRef", IR::Direction::In, IR::Type_Unknown::get())})));
     cmds.emplace_back(copyOutCall);

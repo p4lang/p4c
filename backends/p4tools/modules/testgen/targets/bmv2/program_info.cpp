@@ -73,7 +73,7 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
     }
     const IR::Expression *constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, minPktSize));
+                    IR::Constant::get(&PacketVars::PACKET_SIZE_VAR_TYPE, minPktSize));
 
     for (const auto &restriction : compilerResult.getP4ConstraintsRestrictions()) {
         constraint = new IR::LAnd(constraint, restriction);
@@ -120,7 +120,7 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
     std::vector<Continuation::Command> cmds;
     // Copy-in.
     const auto *copyInCall = new IR::MethodCallStatement(Utils::generateInternalMethodCall(
-        "copy_in", {IR::getStringLiteral(typeDecl->name)}, IR::Type_Void::get(),
+        "copy_in", {IR::StringLiteral::get(typeDecl->name)}, IR::Type_Void::get(),
         new IR::ParameterList(
             {new IR::Parameter("blockRef", IR::Direction::In, IR::Type_Unknown::get())})));
     cmds.emplace_back(copyInCall);
@@ -128,7 +128,7 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
     cmds.emplace_back(typeDecl);
     // Copy-out.
     const auto *copyOutCall = new IR::MethodCallStatement(Utils::generateInternalMethodCall(
-        "copy_out", {IR::getStringLiteral(typeDecl->name)}, IR::Type_Void::get(),
+        "copy_out", {IR::StringLiteral::get(typeDecl->name)}, IR::Type_Void::get(),
         new IR::ParameterList(
             {new IR::Parameter("blockRef", IR::Direction::In, IR::Type_Unknown::get())})));
     cmds.emplace_back(copyOutCall);
@@ -152,8 +152,8 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
             const IR::Expression *cond = new IR::Equ(
                 outPortVar, new IR::Constant(outPortVar->type, BMv2Constants::DROP_PORT));
             for (auto portRange : options.permittedPortRanges) {
-                const auto *loVarOut = IR::getConstant(outPortVar->type, portRange.first);
-                const auto *hiVarOut = IR::getConstant(outPortVar->type, portRange.second);
+                const auto *loVarOut = IR::Constant::get(outPortVar->type, portRange.first);
+                const auto *hiVarOut = IR::Constant::get(outPortVar->type, portRange.second);
                 cond = new IR::LOr(cond, new IR::LAnd(new IR::Leq(loVarOut, outPortVar),
                                                       new IR::Leq(outPortVar, hiVarOut)));
             }
@@ -163,7 +163,7 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
         // Drop the packet if the multicast group is set.
         const IR::Expression *mcastGroupVar = new IR::Member(
             IR::getBitType(16), new IR::PathExpression("*standard_metadata"), "mcast_grp");
-        mcastGroupVar = new IR::Neq(mcastGroupVar, IR::getConstant(IR::getBitType(16), 0));
+        mcastGroupVar = new IR::Neq(mcastGroupVar, IR::Constant::get(IR::getBitType(16), 0));
         auto *mcastStmt = new IR::IfStatement(mcastGroupVar, dropStmt, nullptr);
         cmds.emplace_back(mcastStmt);
     }
@@ -197,7 +197,7 @@ const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const 
 
 const IR::Expression *Bmv2V1ModelProgramInfo::dropIsActive() const {
     const auto &egressPortVar = getTargetOutputPortVar();
-    return new IR::Equ(IR::getConstant(egressPortVar->type, BMv2Constants::DROP_PORT),
+    return new IR::Equ(IR::Constant::get(egressPortVar->type, BMv2Constants::DROP_PORT),
                        egressPortVar);
 }
 

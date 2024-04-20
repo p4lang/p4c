@@ -21,7 +21,7 @@ const IR::Node *CastBooleanTableKeys::postorder(IR::Entry *entry) {
         const auto *keyExpr = keyExprs->components.at(idx);
         if (const auto *boolLiteral = keyExpr->to<IR::BoolLiteral>()) {
             int v = boolLiteral->value ? 1 : 0;
-            keyExprs->components[idx] = IR::getConstant(IR::getBitType(1), v);
+            keyExprs->components[idx] = IR::Constant::get(IR::getBitType(1), v);
         }
     }
     entry->keys = keyExprs;
