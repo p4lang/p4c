@@ -31,7 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>   /* exit */
 
 /* These macros use decltype or the earlier __typeof GNU extension.
-   As decltype is only available in newer compilers (VS2010 or gcc 4.3+
+   As decltype is only available in newer compilers (VS2010 or GCC 4.3+
    when compiling c++ source) this code uses whatever method is needed
    or, for VS2008 where neither is available, uses casting workarounds. */
 #if !defined(DECLTYPE) && !defined(NO_DECLTYPE)
@@ -749,7 +749,7 @@ do {                                                                            
  *
  * Note the preprocessor built-in defines can be emitted using:
  *
- *   gcc -m64 -dM -E - < /dev/null                  (on gcc)
+ *   gcc -m64 -dM -E - < /dev/null                  (on GCC)
  *   cc -## a.c (where a.c is a simple test file)   (Sun Studio)
  */
 #if (defined(__i386__) || defined(__x86_64__)  || defined(_M_IX86))
