@@ -12,7 +12,7 @@ file formats.
 
 ## Dependencies
 
-In addition to other p4c dependencies, this backend requires the Boost graph
+In addition to other P4C dependencies, this backend requires the Boost graph
 headers. On a Debian system, they can be installed with `sudo apt-get install
 libboost-graph-dev`.
 

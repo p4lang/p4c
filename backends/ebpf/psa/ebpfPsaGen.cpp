@@ -41,7 +41,7 @@ class PSAErrorCodesGen : public Inspector {
             ++id;
             if (decl->srcInfo.isValid()) {
                 auto sourceFile = decl->srcInfo.getSourceFile();
-                // all the error codes are located in core.p4 file, they are defined in psa.h
+                // All the error codes are located in core.p4 file, they are defined in psa.h
                 if (sourceFile.endsWith("p4include/core.p4")) continue;
             }
 
@@ -49,7 +49,7 @@ class PSAErrorCodesGen : public Inspector {
             builder->appendFormat("static const ParserError_t %s = %d", decl->name.name, id);
             builder->endOfStatement(true);
 
-            // type ParserError_t is u8, which can have values from 0 to 255
+            // Type ParserError_t is u8, which can have values from 0 to 255.
             if (id > 255) {
                 ::error(ErrorType::ERR_OVERLIMIT, "%1%: Reached maximum number of possible errors",
                         decl);
@@ -113,7 +113,7 @@ void PSAEbpfGenerator::emitInternalStructures(CodeBuilder *builder) const {
     builder->newline();
 }
 
-/* Generate headers and structs in p4 prog */
+/// Generate headers and structs in p4 prog.
 void PSAEbpfGenerator::emitTypes(CodeBuilder *builder) const {
     PSAErrorCodesGen errorGen(builder);
     ingress->program->apply(errorGen);
@@ -149,7 +149,7 @@ void PSAEbpfGenerator::emitGlobalHeadersMetadata(CodeBuilder *builder) const {
     userMetadataType->declare(builder, "cpumap_usermeta", false);
     builder->endOfStatement(true);
 
-    // additional field to avoid compiler errors when both headers and user_metadata are empty.
+    // Additional field to avoid compiler errors when both headers and user_metadata are empty.
     builder->emitIndent();
     builder->append("__u8 __hook");
     builder->endOfStatement(true);
@@ -239,7 +239,7 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
     builder->appendLine(forEachFunc);
     builder->newline();
 
-    // Function to perform cloning, common for ingress and egress
+    // Function to perform cloning, common for ingress and egress.
     cstring cloneFunction =
         "static __always_inline\n"
         "void do_clone(SK_BUFF *skb, void *data)\n"
@@ -417,19 +417,17 @@ void PSAEbpfGenerator::emitCRC32LookupTableInitializer(CodeBuilder *builder) con
 
 // =====================PSAArchTC=============================
 void PSAArchTC::emit(CodeBuilder *builder) const {
-    /**
-     * How the structure of a single C program for PSA should look like?
-     * 1. Automatically generated comment
-     * 2. Includes
-     * 3. Macro definitions (it's called "preamble")
-     * 4. Headers, structs, types, PSA-specific data types.
-     * 5. BPF map definitions.
-     * 6. BPF map initialization
-     * 7. XDP helper program.
-     * 8. Helper functions
-     * 9. TC Ingress program.
-     * 10. TC Egress program.
-     */
+    // How the structure of a single C program for PSA should look like?
+    // 1. Automatically generated comment
+    // 2. Includes
+    // 3. Macro definitions (it's called "preamble")
+    // 4. Headers, structs, types, PSA-specific data types.
+    // 5. BPF map definitions.
+    // 6. BPF map initialization
+    // 7. XDP helper program.
+    // 8. Helper functions
+    // 9. TC Ingress program.
+    // 10. TC Egress program.
 
     // 1. Automatically generated comment.
     // Note we use inherited function from EBPFProgram.
@@ -441,47 +439,31 @@ void PSAArchTC::emit(CodeBuilder *builder) const {
     builder->target->emitIncludes(builder);
     emitPSAIncludes(builder);
 
-    /*
-     * 3. Macro definitions (it's called "preamble")
-     */
+    // 3. Macro definitions (it's called "preamble")
     emitPreamble(builder);
 
-    /*
-     * 4. Headers, structs, types, PSA-specific data types.
-     */
+    // 4. Headers, structs, types, PSA-specific data types.
     emitInternalStructures(builder);
     emitTypes(builder);
     emitGlobalHeadersMetadata(builder);
 
-    /*
-     * 5. BPF map definitions.
-     */
+    // 5. BPF map definitions.
     emitInstances(builder);
 
-    /*
-     * 6. Helper functions for ingress and egress program.
-     */
+    // 6. Helper functions for ingress and egress program.
     emitHelperFunctions(builder);
 
-    /*
-     * 7. BPF map initialization.
-     */
+    // 7. BPF map initialization.
     emitInitializer(builder);
     builder->newline();
 
-    /*
-     * 8. XDP helper program.
-     */
+    // 8. XDP helper program.
     xdp->emit(builder);
 
-    /*
-     * 9. TC Ingress program.
-     */
+    // 9. TC Ingress program.
     ingress->emit(builder);
 
-    /*
-     * 10. TC Egress program.
-     */
+    // 10. TC Egress program.
     if (!egress->isEmpty()) {
         // Do not generate TC Egress program if PSA egress pipeline is not used (empty).
         egress->emit(builder);

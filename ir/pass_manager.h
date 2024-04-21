@@ -29,6 +29,8 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/safe_vector.h"
 
+/// A hook called by pass manager after a pass finishes.
+/// @param node a result of the last pass, which can be the (transformed) node, or a nullptr.
 typedef std::function<void(const char *manager, unsigned seqNo, const char *pass,
                            const IR::Node *node)>
     DebugHook;

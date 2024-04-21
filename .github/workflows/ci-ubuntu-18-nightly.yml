@@ -10,7 +10,7 @@ on:
     branches: [main]
 
 jobs:
-  # Build with gcc and test p4c on Ubuntu 18.04.
+  # Build with GCC and test p4c on Ubuntu 18.04.
   test-ubuntu18:
     # Only run on pull requests with the "run-ubuntu18" label.
     if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'run-ubuntu18') }}

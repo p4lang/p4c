@@ -59,7 +59,7 @@ limitations under the License.
 ///  inlined and therefore is again series of typeid ranged checks interleaved
 ///  with `this` adjustment.
 ///  The code relies on C++17 features. Care was taken to ensure that `constexpr`
-///  functions are compiled down to compile-time constants for gcc >= 9 and recent
+///  functions are compiled down to compile-time constants for GCC >= 9 and recent
 ///  of clang. Some of them likely would need to be marked as `consteval` when C++20
 ///  would be used across the codebase.
 
@@ -73,7 +73,7 @@ static constexpr uint64_t kHashDiscriminator = UINT64_C(0xFF);
 
 namespace detail {
 // Apparently string_view does not optimize properly in constexpr context
-// for gcc < 13
+// for GCC < 13
 struct TypeNameHolder {
     template <size_t N>
     constexpr TypeNameHolder(const char (&str)[N]) : str(&str[0]), length(N - 1) {}  // NOLINT

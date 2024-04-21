@@ -50,17 +50,17 @@ class EBPFProgram : public EBPFObject {
     EBPFParser *parser;
     EBPFControl *control;
     EBPFModel &model;
-    // Deparser may be NULL if not supported (e.g. ebpfFilter package)
+    /// Deparser may be NULL if not supported (e.g. ebpfFilter package).
     EBPFDeparser *deparser;
 
     cstring endLabel, offsetVar, lengthVar, headerStartVar;
     cstring zeroKey, functionName, errorVar;
     cstring packetStartVar, packetEndVar, byteVar;
     cstring errorEnum;
-    cstring license = "GPL";  // TODO: this should be a compiler option probably
+    cstring license = "GPL";  /// TODO: this should be a compiler option probably
     cstring arrayIndexType = "u32";
 
-    virtual bool build();  // return 'true' on success
+    virtual bool build();  /// return 'true' on success
 
     EBPFProgram(const EbpfOptions &options, const IR::P4Program *program, P4::ReferenceMap *refMap,
                 P4::TypeMap *typeMap, const IR::ToplevelBlock *toplevel)
