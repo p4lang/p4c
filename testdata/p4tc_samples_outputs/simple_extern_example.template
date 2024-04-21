@@ -1,0 +1,32 @@
+#!/bin/bash -x
+
+set -e
+
+TC="tc"
+$TC p4template create pipeline/simple_extern_example pipeid 1 numtables 1
+
+$TC p4template create action/simple_extern_example/ingress/send_nh actid 1 \
+	param port_id type dev \
+	param dmac type macaddr \
+	param smac type macaddr
+$TC p4template update action/simple_extern_example/ingress/send_nh state active
+
+$TC p4template create action/simple_extern_example/ingress/drop actid 2
+$TC p4template update action/simple_extern_example/ingress/drop state active
+
+$TC p4template create table/simple_extern_example/ingress/nh_table \
+	tblid 1 \
+	type lpm \
+	keysz 32 nummasks 8 tentries 262144 \
+	table_acts act name simple_extern_example/ingress/send_nh \
+	act name simple_extern_example/ingress/drop
+$TC p4template update table/simple_extern_example/ingress/nh_table default_miss_action permissions 0x109 action simple_extern_example/ingress/drop
+
+$TC p4template create extern/simple_extern_example/ingress/Register extid 1 numinstances 2 tc_acl 0x18e6
+$TC p4template create extern_inst/simple_extern_example/Register instid 1 \
+ control_path tc_type index type bit32 tc_data value type bit32
+tc_numel 10
+$TC p4template create extern_inst/simple_extern_example/Register instid 2 \
+ control_path tc_type index type bit32 tc_data value type bit32
+tc_numel 10
+$TC p4template update pipeline/simple_extern_example state ready

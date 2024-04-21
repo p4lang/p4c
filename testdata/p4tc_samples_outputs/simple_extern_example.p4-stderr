@@ -1,0 +1,6 @@
+p4tc_samples/simple_extern_example.p4(80): [--Wwarn=unused] warning: reg1: unused instance
+    Register<bit<32>, PortId_t>(10, 13) reg1;
+                                        ^^^^
+p4tc_samples/simple_extern_example.p4(81): [--Wwarn=unused] warning: reg2: unused instance
+    Register<bit<32>, bit<32>>(10, 13) reg2;
+                                       ^^^^

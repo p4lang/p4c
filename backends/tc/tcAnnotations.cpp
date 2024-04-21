@@ -23,6 +23,15 @@ const cstring ParseTCAnnotations::defaultHitConst = "default_hit_const";
 const cstring ParseTCAnnotations::tcType = "tc_type";
 const cstring ParseTCAnnotations::numMask = "nummask";
 const cstring ParseTCAnnotations::tcMayOverride = "tc_may_override";
+const cstring ParseTCAnnotations::tc_md_write = "tc_md_write";
+const cstring ParseTCAnnotations::tc_md_read = "tc_md_read";
+const cstring ParseTCAnnotations::tc_md_exec = "tc_md_exec";
+const cstring ParseTCAnnotations::tc_ContrlPath = "tc_ContrlPath";
+const cstring ParseTCAnnotations::tc_key = "tc_key";
+const cstring ParseTCAnnotations::tc_data = "tc_data";
+const cstring ParseTCAnnotations::tc_data_scalar = "tc_data_scalar";
+const cstring ParseTCAnnotations::tc_init_val = "tc_init_val";
+const cstring ParseTCAnnotations::tc_numel = "tc_numel";
 const cstring ParseTCAnnotations::tc_acl = "tc_acl";
 
 }  // namespace TC

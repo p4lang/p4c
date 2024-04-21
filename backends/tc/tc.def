@@ -391,11 +391,87 @@ class TCTable {
     dbprint { out << toString(); }
 }
 
+class TCExternInstance {
+    bool isNumelemns;
+    unsigned numelemns;
+    bool isControlPath;
+    ordered_map<cstring, cstring> type_per_field;
+    ordered_map<cstring, safe_vector<cstring>> annotation_per_field;
+    TCExternInstance(unsigned ne, ordered_map<cstring, cstring> type, ordered_map<cstring, safe_vector<cstring>> annos) {
+        isNumelemns = true;
+        numelemns = ne;
+        isControlPath = true;
+        type_per_field = type;
+        annotation_per_field = annos;
+    }
+    toString {
+        std::string tcExternInstance = "";
+        if (isControlPath) {
+            tcExternInstance += "\n control_path";
+            for (auto field : type_per_field) {
+                auto find = annotation_per_field.find(field.first);
+                if (find != annotation_per_field.end()) {
+                    for (auto anno : annotation_per_field.at(field.first)) {
+                        tcExternInstance += " " + anno;
+                    }
+                }
+                tcExternInstance += " " + field.first + " type " + field.second;
+            }
+        }
+        if (isNumelemns) {
+            tcExternInstance += "\ntc_numel " + Util::toString(numelemns);
+        }
+        return tcExternInstance;
+    }
+    dbprint { out << toString(); }
+}
+
+class TCExtern {
+    unsigned externID;
+    cstring externName;
+    cstring controlName;
+    cstring pipelineName;
+    unsigned numinstances;
+    cstring acl_permisson;
+    safe_vector<TCExternInstance> externInstances;
+    TCExtern(unsigned eId, cstring eN, cstring cN, cstring pN, unsigned inst, cstring p) {
+        externID = eId;
+        externName = eN;
+        controlName = cN;
+        pipelineName = pN;
+        numinstances = inst;
+        acl_permisson = p;
+    }
+    void addExternInstance(TCExternInstance tei) {
+        externInstances.push_back(tei);
+    }
+    toString {
+        std::string tcExtern = "";
+        tcExtern += "\n$TC p4template create extern/";
+        tcExtern += pipelineName + "/" + controlName + "/" + externName;
+        tcExtern += " extid " + Util::toString(externID);
+        tcExtern += " numinstances " + Util::toString(numinstances);
+        tcExtern += " tc_acl " + acl_permisson;
+        
+        for (unsigned iter = 0; iter < numinstances; iter++) {
+            tcExtern += "\n$TC p4template create extern_inst/" + pipelineName
+                      + "/" + externName + " instid " + Util::toString(iter + 1) + " \\";
+            if (externInstances.size() > iter)
+                tcExtern += externInstances[iter]->toString();
+        }
+        return tcExtern;
+    }
+    dbprint { out << toString(); }
+}
+
 class TCPipeline {
     cstring pipelineName;
     unsigned numTables;
     safe_vector<TCAction> actionDefs;
     safe_vector<TCTable> tableDefs;
+    safe_vector<TCExtern> externDefs;
+    TCAction preaction;
+    TCAction postaction;
     void setPipelineName(cstring pName) {
         pipelineName = pName;
     }
@@ -407,6 +483,15 @@ class TCPipeline {
     }
     void addTableDefinition(TCTable tableDef) {
         tableDefs.push_back(tableDef);
+    }
+    void setPipelinePreAction(TCAction action) {
+        preaction = action;
+    }
+    void setPipelinePostAction(TCAction action) {
+        postaction = action;
+    }
+    void addExternDefinition(TCExtern externDef) {
+        externDefs.push_back(externDef);
     }
     TCPipeline() {
         Util::SourceInfo* srcinfo = new Util::SourceInfo();
@@ -429,6 +514,21 @@ class TCPipeline {
             for (auto t : tableDefs) {
                 tcCode += "\n" + t->toString();
             }
+        }
+        if (!externDefs.empty()) {
+            for (auto e : externDefs) {
+                tcCode += "\n" + e->toString();
+            }
+        }
+        if (preaction != nullptr) {
+            tcCode += "\n" + preaction->toString();
+            tcCode += "\n$TC p4template update pipeline/" + pipelineName
+                      + " preactions action " + pipelineName + "/preaction";
+        }
+        if (postaction != nullptr) {
+            tcCode += "\n" + postaction->toString();
+            tcCode += "\n$TC p4template update pipeline/" + pipelineName
+                      + " postactions action " + pipelineName + "/postaction";
         }
         tcCode += "\n$TC p4template update pipeline/" + pipelineName + " state ready";
         return tcCode;

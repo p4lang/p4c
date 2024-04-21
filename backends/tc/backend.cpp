@@ -48,8 +48,9 @@ bool Backend::process() {
     parseTCAnno = new ParseTCAnnotations();
     tcIR = new ConvertToBackendIR(toplevel, pipeline, refMap, typeMap, options);
     genIJ = new IntrospectionGenerator(pipeline, refMap, typeMap);
-    addPasses({parseTCAnno, new P4::ResolveReferences(refMap),
-               new P4::TypeInference(refMap, typeMap), tcIR, genIJ});
+    extAnno = new AddExternAnnotations(refMap, typeMap);
+    addPasses({parseTCAnno, extAnno, new P4::ClearTypeMap(typeMap),
+               new P4::TypeChecking(refMap, typeMap, true), tcIR, genIJ});
     toplevel->getProgram()->apply(*this);
     if (::errorCount() > 0) return false;
     if (!ebpfCodeGen(refMapEBPF, typeMapEBPF)) return false;
@@ -698,10 +699,186 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
     }
 }
 
+/* Get value for annotation @tc_numel from extern Declaration Instance*/
+int ConvertToBackendIR::getNumElemens(const IR::Type_Extern *extn,
+                                      const IR::Declaration_Instance *decl) {
+    for (auto gd : *extn->getDeclarations()) {
+        if (auto method = gd->getNode()->to<IR::Method>()) {
+            // Check if method is an extern constructor
+            if (method->name != extn->name) {
+                continue;
+            }
+            auto params = method->getParameters();
+            if (decl->arguments->size() != params->size()) {
+                continue;
+            }
+            for (unsigned itr = 0; itr < params->size(); itr++) {
+                auto param = params->getParameter(itr);
+                auto anno = param->getAnnotations()->getSingle(ParseTCAnnotations::tc_numel);
+                if (anno != nullptr) {
+                    auto exp = decl->arguments->at(itr)->expression;
+                    if (exp->is<IR::Constant>()) {
+                        return exp->to<IR::Constant>()->asInt();
+                    }
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+/* Process each declaration instance of externs*/
+void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
+    if (decl->arguments->size() == 0 && !decl->type->is<IR::Type_Specialized>()) return;
+    auto type = typeMap->getType(decl, true);
+    auto instance = new struct ExternInstance();
+    if (type->is<IR::Type_SpecializedCanonical>()) {
+        auto ts = type->to<IR::Type_SpecializedCanonical>();
+        if (auto extn = ts->baseType->to<IR::Type_Extern>()) {
+            // Get value for annotation tc_numel.
+            auto numelements = getNumElemens(extn, decl);
+            if (numelements != -1) {
+                instance->numelements = numelements;
+            }
+            auto eName = ts->baseType->toString();
+            auto ctrl = findContext<IR::P4Control>();
+            cstring cName = ctrl == nullptr ? "root" : ctrl->name.originalName;
+
+            // Get Control Path information if specified for extern.
+            auto find = structPerExterns.find(eName);
+            if (find != structPerExterns.end()) {
+                auto extern_control_path = structPerExterns[eName];
+                for (auto field : extern_control_path->fields) {
+                    safe_vector<cstring> annoList;
+                    for (auto anno : field->getAnnotations()->annotations) {
+                        annoList.push_back(anno->name);
+                    }
+                    instance->annotation_per_field.emplace(field->toString(), annoList);
+                    auto widthBits = "bit" + Util::toString(field->type->width_bits());
+                    instance->type_per_field.emplace(field->toString(), widthBits);
+                }
+            }
+
+            auto iterator = externsInfo.find(eName);
+            if (iterator == externsInfo.end()) {
+                externCount++;
+                struct ExternBlock *eb = new struct ExternBlock();
+                eb->control_name = cName;
+                eb->externId = externCount;
+                // Get access permisson for extern.
+                auto find = externAccessPermisson.find(eName);
+                if (find != externAccessPermisson.end()) {
+                    eb->permissions = externAccessPermisson[eName];
+                }
+                eb->no_of_instances += 1;
+                externsInfo.emplace(eName, eb);
+                eb->eInstance.push_back(instance);
+            } else {
+                auto eb = externsInfo[eName];
+                eb->no_of_instances += 1;
+                eb->eInstance.push_back(instance);
+            }
+        }
+    }
+}
+
+void ConvertToBackendIR::postorder(const IR::Type_Struct *ts) {
+    auto struct_name = ts->externalName();
+    auto cp = "tc_ControlPath_";
+    if (struct_name.startsWith(cp)) {
+        auto type_extern_name = struct_name.substr(strlen(cp));
+        structPerExterns.emplace(type_extern_name, ts);
+    }
+}
+
+void ConvertToBackendIR::postorder(const IR::Type_Extern *ext) {
+    cstring control_path, data_path;
+    // Check if access permissions is defined with annotation @tc_acl
+    auto annoList = ext->getAnnotations()->annotations;
+    for (auto anno : annoList) {
+        if (anno->name == ParseTCAnnotations::tc_acl) {
+            auto expr = anno->expr[0];
+            bool unused_ps[14];
+            memset(unused_ps, true, 14);
+            if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
+                auto permisson_str = typeLiteral->value;
+                auto char_pos = permisson_str.find(":");
+                control_path = permisson_str.before(char_pos);
+                data_path = permisson_str.substr(char_pos - permisson_str.begin() + 1);
+            }
+        }
+    }
+    // Default access value of Control_path and Data_Path
+    if (control_path.isNullOrEmpty()) {
+        control_path = "RUS";
+    }
+    if (data_path.isNullOrEmpty()) {
+        data_path = "CRUXP";
+    }
+    auto access_cp = GetAccessNumericValue(control_path);
+    auto access_dp = GetAccessNumericValue(data_path);
+    auto access_permisson = (access_cp << 7) | access_dp;
+    std::stringstream value;
+    value << "0x" << std::hex << access_permisson;
+    externAccessPermisson.emplace(ext->name, value.str().c_str());
+}
+
+/* Calculate numeric value for access permisson string*/
+unsigned ConvertToBackendIR::GetAccessNumericValue(cstring access) {
+    unsigned value = 0;
+    for (auto s : access) {
+        unsigned mask = 0;
+        switch (s) {
+            case 'C':
+                mask = 1 << 6;
+                break;
+            case 'R':
+                mask = 1 << 5;
+                break;
+            case 'U':
+                mask = 1 << 4;
+                break;
+            case 'D':
+                mask = 1 << 3;
+                break;
+            case 'X':
+                mask = 1 << 2;
+                break;
+            case 'P':
+                mask = 1 << 1;
+                break;
+            case 'S':
+                mask = 1;
+                break;
+            default:
+                ::error(ErrorType::ERR_INVALID,
+                        "tc_acl annotation cannot have '%1%' in access permisson", s);
+        }
+        value |= mask;
+    }
+    return value;
+}
 void ConvertToBackendIR::postorder(const IR::P4Program *p) {
     if (p != nullptr) {
         tcPipeline->setPipelineName(pipelineName);
         tcPipeline->setNumTables(tableCount);
+        for (auto eb : externsInfo) {
+            auto eId = eb.second->externId;
+            auto eName = eb.first;
+            auto cName = eb.second->control_name;
+            auto instances = eb.second->no_of_instances;
+            auto permissions = eb.second->permissions;
+            /* TODO : Handle externs with no control path*/
+            IR::TCExtern *externDefinition =
+                new IR::TCExtern(eId, eName, cName, pipelineName, instances, permissions);
+
+            for (auto ei : eb.second->eInstance) {
+                IR::TCExternInstance *tcExternInstance = new IR::TCExternInstance(
+                    ei->numelements, ei->type_per_field, ei->annotation_per_field);
+                externDefinition->addExternInstance(tcExternInstance);
+            }
+            tcPipeline->addExternDefinition(externDefinition);
+        }
     }
 }
 

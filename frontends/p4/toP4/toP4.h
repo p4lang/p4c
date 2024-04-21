@@ -32,7 +32,7 @@ class ToP4 : public Inspector {
     bool isDeclaration;        /// current type is a declaration
     bool showIR;               /// if true dump IR as comments
     bool withinArgument;       /// if true we are within a method call argument
-    bool noIncludes = false;   /// If true do not generate #include statements.
+    bool noIncludes = true;    /// If true do not generate #include statements.
                                /// Used for debugging.
 
     struct VecPrint {
