@@ -29,7 +29,7 @@ void Graph_visitor::writeGraphToFile(const Graph &g, const cstring &name) {
         ::error(ErrorType::ERR_IO, "Failed to open file %1%", path.toString());
         return;
     }
-    // custom label writers not supported with subgraphs, so we populate
+    // Custom label writers not supported with subgraphs, so we populate
     // *_attribute_t properties instead using our GraphAttributeSetter class.
     boost::write_graphviz(*out, g);
 }
@@ -141,14 +141,14 @@ void Graph_visitor::forLoopFullGraph(std::vector<Graph *> &graphsArray, fullGrap
         boost::get_property(subfg, boost::graph_graph_attribute)["style"] = "bold";
         boost::get_property(subfg, boost::graph_graph_attribute)["fontsize"] = "22pt";
 
-        // no statements in graph, merge "__START__" and "__EXIT__" nodes
+        // No statements in graph, merge "__START__" and "__EXIT__" nodes
         if (g_->m_global_vertex.size() == 2) {
             add_vertex(cstring("Empty body"), VertexType::EMPTY);
         } else {
             boost::copy_graph(*g_, subfg, boost::edge_copy(edge_name_copier(*g_, subfg)));
         }
 
-        // connect subgraphs
+        // Connect subgraphs
         if (opts->cluster_i > 1) {
             if (prev_type == PrevType::Parser) {
                 add_edge(opts->node_i - 2, opts->node_i, "", opts->cluster_i);
@@ -158,7 +158,7 @@ void Graph_visitor::forLoopFullGraph(std::vector<Graph *> &graphsArray, fullGrap
             }
         }
 
-        // if "__START__" and "__EXIT__" nodes merged, increase opts->node_i only by one
+        // If "__START__" and "__EXIT__" nodes merged, increase opts->node_i only by one
         if (g_->m_global_vertex.size() == 2) {
             t_prev_adder = opts->node_i;
             opts->node_i += 1;
@@ -186,7 +186,7 @@ void Graph_visitor::process(std::vector<Graph *> &controlGraphsArray,
         fullGraphOpts opts;
 
         boost::get_property(opts.fg, boost::graph_name) = "fullGraph";
-        // enables edges with tails between clusters
+        // Enables edges with tails between clusters.
         boost::get_property(opts.fg, boost::graph_graph_attribute)["compound"] = "true";
 
         forLoopFullGraph(parserGraphsArray, &opts, PrevType::Parser);
@@ -199,7 +199,7 @@ void Graph_visitor::process(std::vector<Graph *> &controlGraphsArray,
     if (jsonOut) {
         json = new Util::JsonObject();
 
-        // remove '.p4' and path from program name
+        // Remove '.p4' and path from program name.
         auto file_without_p4 = (filename.findlast('.') == nullptr)
                                    ? filename
                                    : filename.before(filename.findlast('.'));

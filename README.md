@@ -454,7 +454,7 @@ On some platforms Docker limits the memory usage of any container, even
 containers used during the `docker build` process. On macOS in particular the
 default is 2GB, which is not enough to build P4C. Increase the memory limit to
 at least 4GB via Docker preferences or you are likely to see "internal compiler
-errors" from gcc which are caused by low memory.
+errors" from GCC which are caused by low memory.
 
 # Bazel
 [![Bazel Build](https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml)

@@ -268,7 +268,7 @@ std::ostream &uncachedFileLogOutput(const char *file) {
             if (!end) end = spec + strlen(spec);
             std::string logname(spec, end - spec);
             if (!logfiles.count(logname)) {
-                // FIXME: can't emplace a unique_ptr in some versions of gcc -- need
+                // FIXME: can't emplace a unique_ptr in some versions of GCC -- need
                 // explicit reset call.
                 logfiles[logname].reset(new std::ofstream(logname, mode));
             }

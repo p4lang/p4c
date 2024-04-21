@@ -2013,7 +2013,7 @@ class CleansedLines(object):
         # the integer/fractional/exponent parts would all be parsed
         # correctly as long as there are digits on both sides of the
         # separator.  So we are fine as long as we don't see something
-        # like "0.'3" (gcc 4.9.0 will not allow this literal).
+        # like "0.'3" (GCC 4.9.0 will not allow this literal).
         if Search(r'\b(?:0[bBxX]?|[1-9])[0-9a-fA-F]*$', head):
           match_literal = Match(r'^((?:\'?[0-9a-zA-Z_])*)(.*)$', "'" + tail)
           collapsed += head + match_literal.group(1).replace("'", '')
@@ -5965,7 +5965,7 @@ _HEADERS_CONTAINING_TEMPLATES = (
     ('<utility>', ('pair',)),
     ('<vector>', ('vector',)),
 
-    # gcc extensions.
+    # GCC extensions.
     # Note: std::hash is their hash, ::hash is our hash
     ('<hash_map>', ('hash_map', 'hash_multimap',)),
     ('<hash_set>', ('hash_set', 'hash_multiset',)),

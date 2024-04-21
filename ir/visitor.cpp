@@ -800,7 +800,7 @@ cstring Visitor::demangle(const char *str) { return str; }
 #endif
 
 #if HAVE_LIBGC
-/** There's a bad interaction between the garbage collector and gcc's exception handling --
+/** There's a bad interaction between the garbage collector and GCC's exception handling --
  * the exception support code in glibstdc++ (specifically __cxa_allocate_exception) allocates
  * space for exceptions being throw with malloc (NOT with ::operrator new for some reason),
  * and the garbage collector does not scan the malloc heap for roots when garbage collecting
