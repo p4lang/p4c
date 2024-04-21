@@ -163,11 +163,11 @@ class TCAction {
     unsigned actId;
     optional safe_vector<TCActionParam> actionParams;
     cstring getName() const {
-        cstring tcAction = "";
-        if (pipelineName) {
-            tcAction += pipelineName + "/";
+        if (actionName == "NoAction") {
+            return "NoAction";
         }
-        tcAction += actionName;
+        cstring tcAction = pipelineName;
+        tcAction += "/" + actionName;
         return tcAction;
     }
     cstring getActionName() const {
