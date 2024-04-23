@@ -60,7 +60,7 @@ struct DiagnosticCountInfoGuard {
 struct DiagnosticCountInfo {
     /// @param ctxt Optionally, you can provide a compilation context to take the diagnostic counts
     /// from. If not provied BaseCompileContext::get() is used.
-    DiagnosticCountInfo(BaseCompileContext &ctxt = BaseCompileContext::get());
+    explicit DiagnosticCountInfo(BaseCompileContext &ctxt = BaseCompileContext::get());
 
     /// Very similar to \ref getDiagnosticCountInPassHook, but the state is tied with this instance
     /// so that calling the hook and the \ref emitInfo/\ref getInfoGuard during one compilation will
