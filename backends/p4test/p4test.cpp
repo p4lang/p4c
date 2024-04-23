@@ -26,6 +26,7 @@ limitations under the License.
 #include "frontends/p4/toP4/toP4.h"
 #include "ir/ir.h"
 #include "ir/json_loader.h"
+#include "ir/pass_utils.h"
 #include "lib/crash.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
@@ -137,6 +138,9 @@ int main(int argc, char *const argv[]) {
                 try {
                     P4::FrontEnd fe;
                     fe.addDebugHook(hook);
+                    // use -TdiagnosticCountInPass:1 / -TdiagnosticCountInPass:4 to get output of
+                    // this hook
+                    fe.addDebugHook(P4::getDiagnosticCountInPassHook());
                     program = fe.run(options, program);
                 } catch (const std::exception &bug) {
                     std::cerr << bug.what() << std::endl;
