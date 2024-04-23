@@ -3,7 +3,9 @@
 #include <initializer_list>
 #include <tuple>
 
+#include "absl/strings/str_cat.h"
 #include "lib/log.h"
+#include "pass_utils.h"
 
 /// @file
 /// @authors Vladimír Štill
@@ -12,31 +14,28 @@
 namespace P4 {
 
 // The state needs to be shared between all hook copies as the hook is copied in the pass manager.
-struct DiagnosticCountInPassHookState {
-    explicit DiagnosticCountInPassHookState(BaseCompileContext &ctxt)
-        : lastDiagCount(ctxt.errorReporter().getDiagnosticCount()),
+struct DiagnosticCountInfoState {
+    explicit DiagnosticCountInfoState(BaseCompileContext &ctxt)
+        : ctxt(ctxt),
+          lastDiagCount(ctxt.errorReporter().getDiagnosticCount()),
           lastErrorCount(ctxt.errorReporter().getErrorCount()),
           lastWarningCount(ctxt.errorReporter().getWarningCount()),
           lastInfoCount(ctxt.errorReporter().getInfoCount()) {}
 
-    unsigned lastDiagCount, lastErrorCount, lastWarningCount, lastInfoCount;
-};
+    void info(std::string_view componentInfo) {
+        if (!Log::fileLogLevelIsAtLeast(DIAGNOSTIC_COUNT_IN_PASS_TAG, 1)) return;
 
-DebugHook getDiagnosticCountInPassHook(BaseCompileContext &ctxt) {
-    return [state = std::make_shared<DiagnosticCountInPassHookState>(ctxt), &ctxt](
-               const char *manager, unsigned seqNo, const char *pass, const IR::Node *) mutable {
         unsigned diag = ctxt.errorReporter().getDiagnosticCount();
 
-        if (diag != state->lastDiagCount) {
+        if (diag != lastDiagCount) {
             unsigned errs = ctxt.errorReporter().getErrorCount(),
                      warns = ctxt.errorReporter().getWarningCount(),
                      infos = ctxt.errorReporter().getInfoCount();
             std::stringstream summary;
             const char *sep = "";
-            for (auto [newCnt, oldCnt, kind] :
-                 {std::tuple(errs, state->lastErrorCount, "error"),
-                  std::tuple(warns, state->lastWarningCount, "warning"),
-                  std::tuple(infos, state->lastInfoCount, "info")}) {
+            for (auto [newCnt, oldCnt, kind] : {std::tuple(errs, lastErrorCount, "error"),
+                                                std::tuple(warns, lastWarningCount, "warning"),
+                                                std::tuple(infos, lastInfoCount, "info")}) {
                 if (newCnt > oldCnt) {
                     auto diff = newCnt - oldCnt;
                     summary << sep << diff << " " << kind << (diff > 1 ? "s" : "");
@@ -44,21 +43,49 @@ DebugHook getDiagnosticCountInPassHook(BaseCompileContext &ctxt) {
                 }
             }
 
-            // If the log level is high enough, emit also pass count.
-            if (Log::fileLogLevelIsAtLeast(DIAGNOSTIC_COUNT_IN_PASS_TAG, 4)) {
-                LOG_FEATURE(DIAGNOSTIC_COUNT_IN_PASS_TAG, 4,
-                            "PASS " << manager << "[" << seqNo << "] ~> " << pass << " emitted "
-                                    << summary.str());
-            } else {
-                LOG_FEATURE(DIAGNOSTIC_COUNT_IN_PASS_TAG, 1,
-                            "PASS " << manager << " ~> " << pass << " emitted " << summary.str());
-            }
-            state->lastDiagCount = diag;
-            state->lastErrorCount = errs;
-            state->lastWarningCount = warns;
-            state->lastInfoCount = infos;
+            LOG_FEATURE(DIAGNOSTIC_COUNT_IN_PASS_TAG, 1,
+                        componentInfo << " emitted " << summary.str());
+            lastDiagCount = diag;
+            lastErrorCount = errs;
+            lastWarningCount = warns;
+            lastInfoCount = infos;
         }
+    }
+
+    BaseCompileContext &ctxt;
+    unsigned lastDiagCount, lastErrorCount, lastWarningCount, lastInfoCount;
+};
+
+static DebugHook hook(std::shared_ptr<DiagnosticCountInfoState> state) {
+    return [state](const char *manager, unsigned seqNo, const char *pass, const IR::Node *) {
+        if (!Log::fileLogLevelIsAtLeast(DIAGNOSTIC_COUNT_IN_PASS_TAG, 1)) return;
+
+        std::string compInfo = absl::StrCat("PASS ", manager);
+        // If the log level is high enough, emit also pass count.
+        if (Log::fileLogLevelIsAtLeast(DIAGNOSTIC_COUNT_IN_PASS_TAG, 4)) {
+            absl::StrAppend(&compInfo, "[", seqNo, "]");
+        }
+        absl::StrAppend(&compInfo, " ~> ", pass);
+
+        state->info(compInfo);
     };
+}
+
+DebugHook getDiagnosticCountInPassHook(BaseCompileContext &ctxt) {
+    return hook(std::make_shared<DiagnosticCountInfoState>(ctxt));
+}
+
+DiagnosticCountInfoGuard::~DiagnosticCountInfoGuard() { state->info(componentInfo); }
+
+DiagnosticCountInfo::DiagnosticCountInfo(BaseCompileContext &ctxt)
+    : state(std::make_shared<DiagnosticCountInfoState>(ctxt)) {}
+
+DebugHook DiagnosticCountInfo::getPassManagerHook() { return hook(state); }
+
+void DiagnosticCountInfo::emitInfo(std::string_view componentInfo) { state->info(componentInfo); }
+
+DiagnosticCountInfoGuard DiagnosticCountInfo::getInfoGuard(std::string_view componentInfo) {
+    return {componentInfo, state};
 }
 
 }  // namespace P4
