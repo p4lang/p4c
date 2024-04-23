@@ -44,7 +44,7 @@ DebugHook getDiagnosticCountInPassHook(BaseCompileContext &ctxt) {
                 }
             }
 
-            // if the log level is high enough, emit also pass count
+            // If the log level is high enough, emit also pass count.
             if (Log::fileLogLevelIsAtLeast(DIAGNOSTIC_COUNT_IN_PASS_TAG, 4)) {
                 LOG_FEATURE(DIAGNOSTIC_COUNT_IN_PASS_TAG, 4,
                             "PASS " << manager << "[" << seqNo << "] ~> " << pass << " emitted "
