@@ -128,11 +128,14 @@ int main(int argc, char *const argv[]) {
             error(ErrorType::ERR_IO, "Can't open %s", options.file);
         }
     } else {
+        P4::DiagnosticCountInfo info;
         program = P4::parseP4File(options);
+        info.emitInfo("PARSER");
 
         if (program != nullptr && ::errorCount() == 0) {
             P4::P4COptionPragmaParser optionsPragmaParser;
             program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
+            info.emitInfo("PASS P4COptionPragmaParser");
 
             if (!options.parseOnly) {
                 try {
@@ -140,7 +143,7 @@ int main(int argc, char *const argv[]) {
                     fe.addDebugHook(hook);
                     // use -TdiagnosticCountInPass:1 / -TdiagnosticCountInPass:4 to get output of
                     // this hook
-                    fe.addDebugHook(P4::getDiagnosticCountInPassHook());
+                    fe.addDebugHook(info.getPassManagerHook());
                     program = fe.run(options, program);
                 } catch (const std::exception &bug) {
                     std::cerr << bug.what() << std::endl;
