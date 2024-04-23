@@ -5,7 +5,6 @@
 #include "lib/compile_context.h"
 
 /// @file
-/// @authors Vladimír Štill
 /// @brief Utilities for passes and pass managers.
 
 namespace P4 {

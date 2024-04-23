@@ -8,7 +8,6 @@
 #include "pass_utils.h"
 
 /// @file
-/// @authors Vladimír Štill
 /// @brief Utilities for passes and pass managers.
 
 namespace P4 {
