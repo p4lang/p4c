@@ -13,7 +13,6 @@ struct headers_t {
 control c(inout headers_t hdrs) {
     @name("c.i") bit<8> i_0;
     @name("c.i") bit<8> i_1;
-    @name("c.i") bit<8> i_2;
     @name("c.i") bit<8> i_3;
     @name("c.j") bit<8> j_0;
     @name("c.i") bit<8> i_5;
@@ -25,9 +24,6 @@ control c(inout headers_t hdrs) {
             ;
         }
         for (i_1 in 8w1 .. x_3 + y) {
-            ;
-        }
-        for (i_2 in 8w1 .. 8w42) {
             ;
         }
     }

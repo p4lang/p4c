@@ -51,6 +51,7 @@ parser MainParserImpl(packet_in pkt, out headers_t hdrs, inout main_metadata_t m
 control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     bit<2> hsiVar;
     bit<12> hsVar;
+    bit<12> switch_0_key;
     @name("MainControlImpl.execute") action execute_1() {
         hsiVar = meta.depth;
         if (hsiVar == 2w0) {
@@ -83,7 +84,6 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
         const default_action = execute_3();
         size = 1000000;
     }
-    bit<12> switch_0_key;
     @hidden action switch_0_case() {
     }
     @hidden action switch_0_case_0() {

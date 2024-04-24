@@ -52,6 +52,7 @@ control verifyChecksum(inout headers_t hdr, inout main_metadata_t meta) {
 control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout standard_metadata_t stdmeta) {
     bit<2> hsiVar;
     bit<12> hsVar;
+    bit<12> switch_0_key;
     bit<2> hsiVar_0;
     bit<16> hsVar_0;
     @name("ingressImpl.execute") action execute() {
@@ -120,7 +121,6 @@ control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout stan
         const default_action = execute_1();
         size = 1000000;
     }
-    bit<12> switch_0_key;
     @hidden action switch_0_case() {
     }
     @hidden action switch_0_case_0() {

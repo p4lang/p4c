@@ -22,6 +22,8 @@ parser MyParser(packet_in packet, out header_t hdr, inout metadata meta, inout s
 
 control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bit<8> switch_0_key;
+    bit<8> switch_1_key;
+    bit<8> switch_2_key;
     @hidden action switch_0_case() {
     }
     @hidden action switch_0_case_0() {
@@ -39,7 +41,6 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
                         const 8w1 : switch_0_case();
         }
     }
-    bit<8> switch_1_key;
     @hidden action switch_1_case() {
     }
     @hidden action switch_1_case_0() {
@@ -57,7 +58,6 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
                         const 8w1 : switch_1_case();
         }
     }
-    bit<8> switch_2_key;
     @hidden action switch_2_case() {
     }
     @hidden action switch_2_case_0() {

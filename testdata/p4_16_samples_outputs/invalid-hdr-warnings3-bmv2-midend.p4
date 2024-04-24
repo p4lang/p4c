@@ -25,6 +25,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name("IngressI.h1") Header h1_0;
     @name("IngressI.h2") Header h2_0;
     bit<32> switch_0_key;
+    bit<32> switch_1_key;
     @hidden action switch_0_case() {
     }
     @hidden action switch_0_case_0() {
@@ -42,7 +43,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
                         const 32w0 : switch_0_case();
         }
     }
-    bit<32> switch_1_key;
     @hidden action switch_1_case() {
     }
     @hidden action switch_1_case_0() {

@@ -60,6 +60,7 @@ limitations under the License.
 #include "midend/simplifySelectCases.h"
 #include "midend/simplifySelectList.h"
 #include "midend/tableHit.h"
+#include "midend/unrollLoops.h"
 
 namespace P4Test {
 
@@ -81,6 +82,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
     setName("MidEnd");
 
     auto v1controls = new std::set<cstring>();
+    auto defUse = new P4::ComputeDefUse;
 
     addPasses(
         {options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
@@ -125,7 +127,9 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::EliminateSwitch(&refMap, &typeMap),
          new P4::ResolveReferences(&refMap),
          new P4::TypeChecking(&refMap, &typeMap, true),  // update types before ComputeDefUse
-         new P4::ComputeDefUse,                          // present for testing
+         defUse,
+         new P4::UnrollLoops(refMap, defUse),
+         new P4::MoveDeclarations(),  // more may have been introduced
          evaluator,
          [v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
              auto toplevel = evaluator->getToplevelBlock();

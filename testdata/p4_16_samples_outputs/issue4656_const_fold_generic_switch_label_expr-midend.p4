@@ -5,6 +5,7 @@ extern void bar();
 extern bit<8> baz();
 control c() {
     @name("c.tmp") bit<8> tmp;
+    bit<8> switch_0_key;
     @name(".a") action a_0() {
     }
     @name(".b") action b_0() {
@@ -19,7 +20,6 @@ control c() {
         }
         default_action = NoAction_1();
     }
-    bit<8> switch_0_key;
     @hidden action switch_0_case() {
     }
     @hidden action switch_0_case_0() {

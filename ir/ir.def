@@ -422,7 +422,9 @@ class P4Program : IGeneralNamespace {
 
 ///////////////////////////// Statements //////////////////////////
 
-abstract Statement : StatOrDecl {}
+abstract Statement : StatOrDecl {
+#apply
+}
 
 class ExitStatement : Statement {
     toString{ return "exit"; }
@@ -476,6 +478,8 @@ class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
     void push_back(StatOrDecl st) { components.push_back(st); }
     Annotations getAnnotations() const override { return annotations; }
     bool empty() const { return components.empty(); }
+    void append(StatOrDecl stmt);
+    BlockStatement(std::initializer_list<StatOrDecl> il) { for (auto el : il) append(el); }
 }
 
 class MethodCallStatement : Statement {

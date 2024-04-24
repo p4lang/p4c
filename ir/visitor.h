@@ -393,6 +393,9 @@ class Modifier : public virtual Visitor {
     bool visit_in_progress(const IR::Node *) const;
     void visitOnce() const override;
     void visitAgain() const override;
+
+ protected:
+    bool forceClone = false;  // force clone whole tree even if unchanged
 };
 
 class Inspector : public virtual Visitor {
@@ -452,6 +455,7 @@ class Transform : public virtual Visitor {
         prune_flag = true;
         return rv;
     }
+    bool forceClone = false;  // force clone whole tree even if unchanged
 };
 
 // turn this on for extra info tracking control joinFlows for debugging
