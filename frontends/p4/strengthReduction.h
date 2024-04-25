@@ -43,6 +43,11 @@ namespace P4 {
  *
  */
 class DoStrengthReduction final : public Transform {
+ protected:
+    /// Enable the subtract constant to add negative constant transform.
+    /// Replaces `a - constant` with `a + (-constant)`.
+    bool enableSubConstToAddTransform = true;
+
     /// @returns `true` if @p expr is the constant `1`.
     bool isOne(const IR::Expression *expr) const;
     /// @returns `true` if @p expr is the constant `0`.
@@ -68,6 +73,11 @@ class DoStrengthReduction final : public Transform {
     DoStrengthReduction() {
         visitDagOnce = true;
         setName("StrengthReduction");
+    }
+
+    explicit DoStrengthReduction(bool enableSubConstToAddTransform)
+        : enableSubConstToAddTransform(enableSubConstToAddTransform) {
+        DoStrengthReduction();
     }
 
     using Transform::postorder;
@@ -104,14 +114,19 @@ class DoStrengthReduction final : public Transform {
 
 class StrengthReduction : public PassManager {
  public:
-    StrengthReduction(ReferenceMap *refMap, TypeMap *typeMap,
-                      TypeChecking *typeChecking = nullptr) {
+    explicit StrengthReduction(ReferenceMap *refMap, TypeMap *typeMap,
+                               TypeChecking *typeChecking = nullptr,
+                               bool enableSubConstToAddTransform = true) {
         if (typeMap != nullptr) {
             if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap, true);
             passes.push_back(typeChecking);
         }
-        passes.push_back(new DoStrengthReduction());
+        passes.push_back(new DoStrengthReduction(enableSubConstToAddTransform));
     }
+
+    explicit StrengthReduction(ReferenceMap *refMap, TypeMap *typeMap,
+                               bool enableSubConstToAddTransform)
+        : StrengthReduction(refMap, typeMap, nullptr, enableSubConstToAddTransform) {}
 };
 
 }  // namespace P4
