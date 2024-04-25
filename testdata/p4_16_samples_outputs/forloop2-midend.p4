@@ -70,6 +70,7 @@ control c(inout headers_t hdrs) {
         for (popcnti_0 in 64w1 .. 64w63) {
             if (v_0 == 64w0) {
                 tbl_forloop2l18.apply();
+                break;
             }
             if (hasReturned) {
                 ;

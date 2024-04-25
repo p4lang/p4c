@@ -26,6 +26,7 @@ control c(inout headers_t hdrs) {
             if (v_0 == 64w0) {
                 hasReturned = true;
                 retval = n_0;
+                break;
             }
             if (hasReturned) {
                 ;

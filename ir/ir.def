@@ -512,8 +512,13 @@ class SwitchStatement : Statement {
         split.run_visit(); }
 }
 
-class ForStatement : Statement, ISimpleNamespace, IAnnotated {
+/* abstract base class for all loops */
+abstract LoopStatement : Statement, ISimpleNamespace, IAnnotated {
     optional Annotations                annotations = Annotations::empty;
+    Annotations getAnnotations() const override { return annotations; }
+}
+
+class ForStatement : LoopStatement {
     inline IndexedVector<StatOrDecl>    init;
     Expression                          condition;
     inline IndexedVector<StatOrDecl>    updates;
@@ -522,7 +527,6 @@ class ForStatement : Statement, ISimpleNamespace, IAnnotated {
         return init.getDeclaration(name); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return init.getDeclarations(); }
-    Annotations getAnnotations() const override { return annotations; }
     visit_children;
 #emit
     // template single implementation of const vs non-const ForStatement
@@ -531,8 +535,7 @@ class ForStatement : Statement, ISimpleNamespace, IAnnotated {
 }
 
 // FIXME -- should we try to directly convert this to a ForStatement in the parser?
-class ForInStatement : Statement, ISimpleNamespace, IAnnotated {
-    optional Annotations                annotations = Annotations::empty;
+class ForInStatement : LoopStatement {
     NullOK Declaration_Variable         decl;
     // the declaration will be moved to the enclosing block by MoveDeclarations, but
     // we keep a ref (PathExpression) to it that will be set by the ctor
@@ -541,13 +544,12 @@ class ForInStatement : Statement, ISimpleNamespace, IAnnotated {
     Statement                           body;
     ForInStatement { ref = new PathExpression(decl->name); }
     ForInStatement(Util::SourceInfo si, Annotations a, PathExpression pe, Expression c, Statement b)
-        : Statement(si), annotations(a), decl(nullptr), ref(pe), collection(c), body(b) {}
+        : LoopStatement(si, a), decl(nullptr), ref(pe), collection(c), body(b) {}
     IDeclaration getDeclByName(cstring name) const override {
         return decl && decl->name == name ? decl : nullptr; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         if (decl) return new Util::SingleEnumerator<const IDeclaration *>(decl);
         return new Util::EmptyEnumerator<const IDeclaration *>(); }
-    Annotations getAnnotations() const override { return annotations; }
     visit_children;
 #emit
     // template single implementation of const vs non-const ForInStatement
