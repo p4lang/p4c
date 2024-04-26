@@ -27,6 +27,7 @@ set (IR_SRCS
   json_parser.cpp
   node.cpp
   pass_manager.cpp
+  pass_utils.cpp
   type.cpp
   v1.cpp
   visitor.cpp
@@ -50,6 +51,7 @@ set (IR_HDRS
   node.h
   nodemap.h
   pass_manager.h
+  pass_utils.h
   vector.h
   visitor.h
 )
