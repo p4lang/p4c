@@ -16,6 +16,7 @@ limitations under the License.
 
 #include <ostream>
 
+#include "absl/container/flat_hash_map.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
@@ -147,7 +148,7 @@ const IR::Constant *IR::Constant::get(const IR::Type *t, big_int v, Util::Source
     }
     // Constants are interned. Keys in the intern map are pairs of types and values.
     using key_t = std::tuple<int, RTTI::TypeId, bool, big_int>;
-    static std::map<key_t, const Constant *> CONSTANTS;
+    static absl::flat_hash_map<key_t, const Constant *, Util::Hash> CONSTANTS;
 
     auto *&result = CONSTANTS[{tb->width_bits(), t->typeId(), tb->isSigned, v}];
     if (result == nullptr) {
@@ -176,7 +177,7 @@ const IR::StringLiteral *IR::StringLiteral::get(cstring value, const IR::Type *t
     }
     // String literals are interned.
     using key_t = std::pair<cstring, const IR::Type *>;
-    static std::map<key_t, const IR::StringLiteral *> STRINGS;
+    static absl::flat_hash_map<key_t, const IR::StringLiteral *, Util::Hash> STRINGS;
 
     auto *&result = STRINGS[{value, t}];
     if (result == nullptr) {
