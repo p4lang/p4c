@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef LIB_ERROR_REPORTER_H_
 #define LIB_ERROR_REPORTER_H_
 
+#include <absl/strings/str_format.h>
+
 #include <iostream>
 #include <ostream>
 #include <set>
@@ -25,7 +27,6 @@ limitations under the License.
 
 #include <boost/format.hpp>
 
-#include "absl/strings/str_format.h"
 #include "bug_helper.h"
 #include "error_catalog.h"
 #include "error_helper.h"
