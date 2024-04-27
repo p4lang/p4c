@@ -12,11 +12,12 @@
 
 #include <unistd.h>
 
+#include <absl/strings/str_cat.h>
+
 #include <exception>
 #include <string>
 #include <utility>
 
-#include "absl/strings/str_cat.h"
 #include "lib/format.h"
 
 namespace P4::Util {

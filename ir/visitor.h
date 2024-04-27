@@ -8,6 +8,8 @@
 #ifndef IR_VISITOR_H_
 #define IR_VISITOR_H_
 
+#include <absl/time/time.h>
+
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -20,7 +22,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include "absl/time/time.h"
 #include "ir/gen-tree-macro.h"
 #include "ir/ir-tree-macros.h"
 #include "ir/node.h"

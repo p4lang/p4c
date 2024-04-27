@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+#include <absl/strings/substitute.h>
 #include <gtest/gtest.h>
 
 #include <optional>
 
-#include "absl/strings/substitute.h"
 #include "frontends/common/applyOptionsPragmas.h"
 #include "test/gtest/helpers.h"
 

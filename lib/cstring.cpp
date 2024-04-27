@@ -5,9 +5,9 @@
 
 #include "cstring.h"
 
-#include "absl/container/node_hash_set.h"
-#include "absl/strings/str_cat.h"
-#include "absl/strings/str_replace.h"
+#include <absl/container/node_hash_set.h>
+#include <absl/strings/str_cat.h>
+#include <absl/strings/str_replace.h>
 
 #if HAVE_LIBGC
 #include <gc/gc_cpp.h>

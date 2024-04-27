@@ -5,10 +5,11 @@
 
 #include "ir/pass_utils.h"
 
+#include <absl/strings/str_cat.h>
+
 #include <initializer_list>
 #include <tuple>
 
-#include "absl/strings/str_cat.h"
 #include "lib/log.h"
 #include "pass_utils.h"
 

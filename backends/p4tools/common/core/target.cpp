@@ -4,13 +4,14 @@
 
 #include "backends/p4tools/common/core/target.h"
 
+#include <absl/strings/ascii.h>
+
 #include <algorithm>
 #include <cctype>
 #include <map>
 #include <optional>
 #include <string>
 
-#include "absl/strings/ascii.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"
 

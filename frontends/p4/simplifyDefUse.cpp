@@ -5,7 +5,8 @@
 
 #include "simplifyDefUse.h"
 
-#include "absl/container/flat_hash_set.h"
+#include <absl/container/flat_hash_set.h>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/def_use.h"
 #include "frontends/p4/methodInstance.h"

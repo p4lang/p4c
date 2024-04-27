@@ -8,8 +8,9 @@
 #ifndef FRONTENDS_COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
 #define FRONTENDS_COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/inlined_vector.h"
+#include <absl/container/flat_hash_map.h>
+#include <absl/container/inlined_vector.h>
+
 #include "frontends/common/parser_options.h"
 #include "ir/ir.h"
 #include "ir/pass_manager.h"

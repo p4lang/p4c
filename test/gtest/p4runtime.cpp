@@ -5,6 +5,7 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <absl/strings/substitute.h>
 #include <google/protobuf/util/message_differencer.h>
 #include <gtest/gtest.h>
 
@@ -13,7 +14,6 @@
 #include <string>
 #include <vector>
 
-#include "absl/strings/substitute.h"
 #include "control-plane/p4/config/v1/p4types.pb.h"
 #include "control-plane/p4/v1/p4runtime.pb.h"
 #include "p4/config/v1/p4info.pb.h"

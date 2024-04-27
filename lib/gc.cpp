@@ -22,13 +22,13 @@
 #include <gc/gc_cpp.h>
 #include <gc/gc_mark.h>
 #endif /* HAVE_LIBGC */
+#include <absl/debugging/stacktrace.h>
 #include <sys/mman.h>
 
 #include <cstddef>
 #include <cstring>
 #include <new>
 
-#include "absl/debugging/stacktrace.h"
 #include "backtrace_exception.h"
 #include "cstring.h"
 #include "log.h"

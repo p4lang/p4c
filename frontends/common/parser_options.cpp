@@ -8,6 +8,8 @@
 #include <getopt.h>
 #include <unistd.h>
 
+#include <absl/strings/escaping.h>
+#include <absl/strings/str_format.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -20,8 +22,6 @@
 #include <regex>
 #include <unordered_set>
 
-#include "absl/strings/escaping.h"
-#include "absl/strings/str_format.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "lib/exceptions.h"
 #include "lib/exename.h"

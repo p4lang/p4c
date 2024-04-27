@@ -4,10 +4,9 @@ module(
 
 bazel_dep(name = "protobuf", version = "33.5")
 bazel_dep(name = "rules_cc", version = "0.2.17")
-bazel_dep(name = "p4c")
+bazel_dep(name = "p4c", version = "1.2.5.18")
 
-# Replace this with git_override in your own project.
-# Once p4c is in the BCR, this can go away completely.
+# Keep this override so downstream CI tests the checkout, not the BCR release.
 local_path_override(
     module_name = "p4c",
     path = "../..",

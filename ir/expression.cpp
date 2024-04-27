@@ -3,9 +3,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+#include <absl/container/flat_hash_map.h>
+
 #include <ostream>
 
-#include "absl/container/flat_hash_map.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"

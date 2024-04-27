@@ -5,12 +5,12 @@
 
 #include "ir/json_parser.h"
 
+#include <absl/strings/escaping.h>
+
 #include <cctype>
 #include <iostream>
 #include <list>
 #include <utility>
-
-#include "absl/strings/escaping.h"
 
 namespace P4 {
 

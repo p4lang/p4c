@@ -5,10 +5,11 @@
 
 #include "json.h"
 
+#include <absl/strings/str_cat.h>
+
 #include <sstream>
 #include <stdexcept>
 
-#include "absl/strings/str_cat.h"
 #include "indent.h"
 #include "lib/big_int_util.h"
 

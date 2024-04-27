@@ -1,12 +1,13 @@
 #include "parserDriver.h"
 
+#include <absl/strings/str_format.h>
+
 #include <cerrno>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
 #include <string_view>
 
-#include "absl/strings/str_format.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/parsers/p4/p4AnnotationLexer.hpp"

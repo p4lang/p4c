@@ -4,7 +4,8 @@
 
 #include "backends/p4tools/modules/testgen/targets/bmv2/test/gtest_utils.h"
 
-#include "absl/strings/substitute.h"
+#include <absl/strings/substitute.h>
+
 #include "test/gtest/helpers.h"
 
 namespace P4::P4Tools::Test {

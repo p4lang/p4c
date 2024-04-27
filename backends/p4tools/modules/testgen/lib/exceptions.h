@@ -7,7 +7,8 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_EXCEPTIONS_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_EXCEPTIONS_H_
 
-#include "absl/strings/str_cat.h"
+#include <absl/strings/str_cat.h>
+
 #include "lib/exceptions.h"
 
 namespace P4::P4Tools::P4Testgen {

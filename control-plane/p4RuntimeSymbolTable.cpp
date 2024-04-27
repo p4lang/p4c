@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "p4RuntimeSymbolTable.h"
 
-#include "absl/strings/str_split.h"
+#include <absl/strings/str_split.h>
+
 #include "lib/cstring.h"
 #include "lib/iterator_range.h"
 #include "p4RuntimeArchHandler.h"

@@ -12,7 +12,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "absl/strings/substitute.h"
+#include <absl/strings/substitute.h>
+
 #include "constantTypeSubstitution.h"
 #include "typeChecker.h"
 
