@@ -102,6 +102,7 @@ class Pattern {
         Pattern operator<=(const Pattern &a) { return Pattern(*this) <= a; }
         Pattern operator>(const Pattern &a) { return Pattern(*this) > a; }
         Pattern operator>=(const Pattern &a) { return Pattern(*this) >= a; }
+        Pattern Relation(const Pattern &a) { return Pattern(*this).Relation(a); }
         Pattern operator&(const Pattern &a) { return Pattern(*this) & a; }
         Pattern operator|(const Pattern &a) { return Pattern(*this) | a; }
         Pattern operator^(const Pattern &a) { return Pattern(*this) ^ a; }
@@ -161,6 +162,9 @@ class Pattern {
     }
     Pattern operator>=(const Pattern &r) const {
         return Pattern(new Binary<IR::Geq>(pattern, r.pattern));
+    }
+    Pattern Relation(const Pattern &r) const {
+        return Pattern(new Binary<IR::Operation::Relation>(pattern, r.pattern, true));
     }
     Pattern operator&(const Pattern &r) const {
         return Pattern(new Binary<IR::BAnd>(pattern, r.pattern, true));

@@ -121,6 +121,7 @@ class ComputeDefUse : public Inspector,
 
     profile_t init_apply(const IR::Node *root) override {
         auto rv = Inspector::init_apply(root);
+        LOG3("## Midend ComputeDefUse");
         state = SKIPPING;
         clear();
         return rv;
@@ -151,6 +152,7 @@ class ComputeDefUse : public Inspector,
     ComputeDefUse()
         : ResolutionContext(true), cached_locs(*new std::set<loc_t>), defuse(*new defuse_t) {
         joinFlows = true;
+        visitDagOnce = false;
     }
     void clear() {
         cached_locs.clear();

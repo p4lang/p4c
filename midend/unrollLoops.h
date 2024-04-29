@@ -28,7 +28,7 @@ class UnrollLoops : public Transform, public P4::ResolutionContext {
 
     struct loop_bounds_t {
         const IR::Declaration_Variable *index = nullptr;
-        long min, max;
+        long min, max, step;
     };
     bool findLoopBounds(IR::ForStatement *, loop_bounds_t &);
     bool findLoopBounds(IR::ForInStatement *, loop_bounds_t &);

@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "unrollLoops.h"
 
+#include "ir/pattern.h"
+
 /** helper function to create a simple assignment to a boolean flag variable */
 static IR::AssignmentStatement *setFlag(cstring name, bool val) {
     auto var = new IR::PathExpression(IR::Type::Boolean::get(), new IR::Path(name));
@@ -109,8 +111,67 @@ class ReplaceIndexRefs : public Transform {
 };
 
 bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds) {
-    (void)fstmt;
-    (void)bounds;
+    Pattern::Match<IR::PathExpression> v;
+    Pattern::Match<IR::Constant> k;
+    if (v.Relation(k).match(fstmt->condition)) {
+        auto d = resolveUnique(v->path->name, P4::ResolutionType::Any);
+        bounds.index = d ? d->to<IR::Declaration_Variable>() : nullptr;
+        if (!bounds.index) return false;
+        auto &defs = defUse->getDefs(v);
+        const IR::AssignmentStatement *init = nullptr, *incr = nullptr;
+        for (auto *d : defs) {
+            bool ok = false;
+            for (auto *a : fstmt->init) {
+                if (a == d->parent->node) {
+                    init = a->to<IR::AssignmentStatement>();
+                    ok = true;
+                    break;
+                }
+            }
+            for (auto *a : fstmt->updates) {
+                if (a == d->parent->node) {
+                    incr = a->to<IR::AssignmentStatement>();
+                    ok = true;
+                    break;
+                }
+            }
+            if (!ok) return false;
+        }
+        if (!init || !incr) return false;
+        auto initval = init->right->to<IR::Constant>();
+        if (!initval) return false;
+        Pattern::Match<IR::PathExpression> v2;
+        Pattern::Match<IR::Constant> k2;
+        long neg_incr = 1;
+        if ((v2 + k2).match(incr->right)) {
+            if (!v2->equiv(*v)) return false;
+            neg_incr = 1;
+        } else if ((v2 - k2).match(incr->right)) {
+            if (!v2->equiv(*v)) return false;
+            neg_incr = -1;
+        } else {
+            return false;
+        }
+        bounds.step = k2->asLong() * neg_incr;
+        if (bounds.step > 0) {
+            bounds.min = initval->asLong();
+            bounds.max = k->asLong();
+            if (fstmt->condition->is<IR::Lss>())
+                bounds.max--;
+            else if (!fstmt->condition->is<IR::Leq>())
+                return false;
+            ;
+        } else {
+            bounds.min = k->asLong();
+            bounds.max = initval->asLong();
+            if (fstmt->condition->is<IR::Grt>())
+                bounds.min++;
+            else if (!fstmt->condition->is<IR::Geq>())
+                return false;
+            ;
+        }
+        return true;
+    }
     return false;
 }
 
@@ -121,6 +182,7 @@ bool UnrollLoops::findLoopBounds(IR::ForInStatement *fstmt, loop_bounds_t &bound
         if (lo && hi) {
             bounds.min = lo->asLong();
             bounds.max = hi->asLong();
+            bounds.step = 1;
             if (!(bounds.index = fstmt->decl)) {
                 auto d = resolveUnique(fstmt->ref->path->name, P4::ResolutionType::Any);
                 BUG_CHECK(d && d->is<IR::Declaration_Variable>(), "index is not a var?");
@@ -142,8 +204,13 @@ const IR::Statement *UnrollLoops::doUnroll(const loop_bounds_t &bounds, const IR
     if (rbc.breakFlag) rv->append(rbc.breakFlag);
     if (rbc.continueFlag) rv->append(rbc.continueFlag);
     if (rbc.breakFlag) rv->append(setFlag(rbc.breakFlag->name, false));
-    for (long indexval = bounds.min; indexval <= bounds.max; ++indexval)
-        rv->append(body->apply(ReplaceIndexRefs(bounds.index->name, indexval)));
+    if (bounds.step > 0) {
+        for (long indexval = bounds.min; indexval <= bounds.max; indexval += bounds.step)
+            rv->append(body->apply(ReplaceIndexRefs(bounds.index->name, indexval)));
+    } else {
+        for (long indexval = bounds.max; indexval >= bounds.min; indexval += bounds.step)
+            rv->append(body->apply(ReplaceIndexRefs(bounds.index->name, indexval)));
+    }
     return rv;
 }
 
