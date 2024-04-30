@@ -51,7 +51,6 @@ parser MainParserImpl(packet_in pkt, out headers_t hdrs, inout main_metadata_t m
 control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     bit<2> hsiVar;
     bit<12> hsVar;
-    bit<12> switch_0_key;
     @name("MainControlImpl.execute") action execute_1() {
         hsiVar = meta.depth;
         if (hsiVar == 2w0) {
@@ -90,9 +89,10 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
     }
     @hidden action switch_0_case_1() {
     }
+    bit<12> key_1;
     @hidden table switch_0_table {
         key = {
-            switch_0_key: exact;
+            key_1: exact;
         }
         actions = {
             switch_0_case();
@@ -106,13 +106,13 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
         }
     }
     @hidden action pnaexamplevarIndex2l125() {
-        switch_0_key = hdrs.vlan_tag[2w0].vid;
+        key_1 = hdrs.vlan_tag[2w0].vid;
     }
     @hidden action pnaexamplevarIndex2l125_0() {
-        switch_0_key = hdrs.vlan_tag[2w1].vid;
+        key_1 = hdrs.vlan_tag[2w1].vid;
     }
     @hidden action pnaexamplevarIndex2l125_1() {
-        switch_0_key = hsVar;
+        key_1 = hsVar;
     }
     @hidden action pnaexamplevarIndex2l125_2() {
         hsiVar = meta.depth;

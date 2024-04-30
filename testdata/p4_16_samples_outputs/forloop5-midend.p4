@@ -12,18 +12,8 @@ struct headers_t {
 }
 
 control c(inout headers_t hdrs) {
-    @name("c.result") bit<32> result_0;
     @name("c.a0") action a0() {
-        result_0 = 32w0;
-        result_0 = result_0 << 8;
-        result_0 = result_0 + ((hdrs.t1.x >> (8w0 << 3)) + (hdrs.t1.y >> (8w0 << 3)) & 32w0xff);
-        result_0 = result_0 << 8;
-        result_0 = result_0 + ((hdrs.t1.x >> (8w1 << 3)) + (hdrs.t1.y >> (8w1 << 3)) & 32w0xff);
-        result_0 = result_0 << 8;
-        result_0 = result_0 + ((hdrs.t1.x >> (8w2 << 3)) + (hdrs.t1.y >> (8w2 << 3)) & 32w0xff);
-        result_0 = result_0 << 8;
-        result_0 = result_0 + ((hdrs.t1.x >> (8w3 << 3)) + (hdrs.t1.y >> (8w3 << 3)) & 32w0xff);
-        hdrs.t1.x = result_0;
+        hdrs.t1.x = ((((hdrs.t1.x + hdrs.t1.y & 32w0xff) << 8) + ((hdrs.t1.x >> 8w8) + (hdrs.t1.y >> 8w8) & 32w0xff) << 8) + ((hdrs.t1.x >> 8w16) + (hdrs.t1.y >> 8w16) & 32w0xff) << 8) + ((hdrs.t1.x >> 8w24) + (hdrs.t1.y >> 8w24) & 32w0xff);
     }
     @hidden table tbl_a0 {
         actions = {

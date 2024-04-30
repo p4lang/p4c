@@ -52,7 +52,6 @@ control verifyChecksum(inout headers_t hdr, inout main_metadata_t meta) {
 control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout standard_metadata_t stdmeta) {
     bit<2> hsiVar;
     bit<12> hsVar;
-    bit<12> switch_0_key;
     bit<2> hsiVar_0;
     bit<16> hsVar_0;
     @name("ingressImpl.execute") action execute() {
@@ -127,9 +126,10 @@ control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout stan
     }
     @hidden action switch_0_case_1() {
     }
+    bit<12> key_1;
     @hidden table switch_0_table {
         key = {
-            switch_0_key: exact;
+            key_1: exact;
         }
         actions = {
             switch_0_case();
@@ -143,13 +143,13 @@ control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout stan
         }
     }
     @hidden action issue3374l126() {
-        switch_0_key = hdrs.vlan_tag[2w0].vid;
+        key_1 = hdrs.vlan_tag[2w0].vid;
     }
     @hidden action issue3374l126_0() {
-        switch_0_key = hdrs.vlan_tag[2w1].vid;
+        key_1 = hdrs.vlan_tag[2w1].vid;
     }
     @hidden action issue3374l126_1() {
-        switch_0_key = hsVar;
+        key_1 = hsVar;
     }
     @hidden action issue3374l126_2() {
         hsiVar = meta.depth;

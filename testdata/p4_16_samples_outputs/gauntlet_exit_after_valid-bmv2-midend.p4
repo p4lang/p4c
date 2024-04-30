@@ -29,19 +29,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bool hasExited;
     @hidden action gauntlet_exit_after_validbmv2l36() {
         h.eth_hdr.dst_addr = h.h.a;
-        hasExited = true;
-    }
-    @hidden action act() {
-        hasExited = false;
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
     }
     @hidden table tbl_gauntlet_exit_after_validbmv2l36 {
         actions = {
@@ -50,7 +39,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = gauntlet_exit_after_validbmv2l36();
     }
     apply {
-        tbl_act.apply();
         if (h.h.isValid()) {
             tbl_gauntlet_exit_after_validbmv2l36.apply();
         }

@@ -66,7 +66,7 @@ parser v1model_parser(packet_in pkt, out headers_t hdrs, inout local_metadata_t 
         ipv4_0.header_checksum = tmp[79:64];
         ipv4_0.src_addr = tmp[63:32];
         ipv4_0.dst_addr = tmp[31:0];
-        pkt.extract<ipv4_options_t>(hdrs.ip, (bit<32>)tmp[155:152] << 2 + 3);
+        pkt.extract<ipv4_options_t>(hdrs.ip, (bit<32>)tmp[155:152] << 5);
         transition accept;
     }
 }

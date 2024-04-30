@@ -18,7 +18,7 @@ control c(inout headers_t hdrs) {
     bool breakFlag;
     @hidden action forloop2l18() {
         hasReturned = true;
-        retval = n_0;
+        retval = 64w0;
         breakFlag = true;
     }
     @hidden action act() {
@@ -26,8 +26,8 @@ control c(inout headers_t hdrs) {
         breakFlag = false;
     }
     @hidden action forloop2l19() {
-        n_0 = n_0 + 64w1;
-        v_0 = v_0 & v_0 + 64w18446744073709551615;
+        n_0 = 64w1;
+        v_0 = hdrs.t1.v & hdrs.t1.v + 64w18446744073709551615;
     }
     @hidden action forloop2l18_0() {
         hasReturned = true;
@@ -1381,7 +1381,7 @@ control c(inout headers_t hdrs) {
     apply {
         tbl_forloop2l14.apply();
         tbl_act.apply();
-        if (v_0 == 64w0) {
+        if (hdrs.t1.v == 64w0) {
             tbl_forloop2l18.apply();
         }
         if (breakFlag) {

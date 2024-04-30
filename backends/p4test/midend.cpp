@@ -127,8 +127,13 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::EliminateSwitch(&refMap, &typeMap),
          new P4::ResolveReferences(&refMap),
          new P4::TypeChecking(&refMap, &typeMap, true),  // update types before ComputeDefUse
-         defUse,
-         new P4::UnrollLoops(refMap, defUse),
+         new PassRepeated({
+             defUse,
+             new P4::UnrollLoops(refMap, defUse),
+             new P4::LocalCopyPropagation(&refMap, &typeMap),
+             new P4::ConstantFolding(&refMap, &typeMap),
+             new P4::StrengthReduction(&refMap, &typeMap),
+         }),
          new P4::MoveDeclarations(),  // more may have been introduced
          evaluator,
          [v1controls, evaluator](const IR::Node *root) -> const IR::Node * {

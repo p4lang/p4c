@@ -23,18 +23,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bool hasExited;
     @name("ingress.simple_action") action simple_action() {
-        hasExited = true;
-    }
-    @hidden action act() {
-        hasExited = false;
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
     }
     @hidden table tbl_simple_action {
         actions = {
@@ -43,7 +32,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = simple_action();
     }
     apply {
-        tbl_act.apply();
         tbl_simple_action.apply();
     }
 }

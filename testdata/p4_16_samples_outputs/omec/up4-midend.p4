@@ -952,15 +952,12 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
 }
 
 control PostQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta, inout standard_metadata_t std_meta) {
-    bool hasExited_0;
     @name("PostQosPipe.post_qos_counter") counter<bit<32>>(32w1024, CounterType.packets_and_bytes) post_qos_counter_0;
     @hidden action up4l754() {
         hdr.packet_in.setValid();
         hdr.packet_in.ingress_port = local_meta.preserved_ingress_port;
-        hasExited_0 = true;
     }
     @hidden action up4l752() {
-        hasExited_0 = false;
         post_qos_counter_0.count(local_meta.ctr_idx);
     }
     @hidden table tbl_up4l752 {
