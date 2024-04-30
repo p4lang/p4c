@@ -359,6 +359,7 @@ EBPFMethodDeclaration::EBPFMethodDeclaration(const IR::Method *method) : method_
 
 void EBPFMethodDeclaration::emit(CodeBuilder *builder) {
     auto *returnType = EBPFTypeFactory::instance->create(method_->type->returnType);
+    builder->append("static ");
     returnType->emit(builder);
     builder->append(" ");
     builder->append(method_->name);
@@ -375,6 +376,7 @@ void EBPFMethodDeclaration::emit(CodeBuilder *builder) {
         }
     }
     builder->append(");");
+    builder->newline();
 }
 
 }  // namespace EBPF
