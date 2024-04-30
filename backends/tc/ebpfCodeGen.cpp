@@ -254,7 +254,7 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     // FIXME: use Target to generate metadata type
     cstring func_name = (name == "tc-parse") ? "run_parser" : "process";
     builder->appendFormat(
-        "int %s(%s *%s, %s %s *%s, "
+        "int %s(%s *%s, %s %s *%s/*HDR*/, "
         "struct pna_global_metadata *%s",
         func_name, builder->target->packetDescriptorType(), model.CPacketName.str(),
         parser->headerType->as<EBPF::EBPFStructType>().kind,
@@ -2077,6 +2077,32 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
     }
 }
 
+/*
+ * This comment added by Mouse, 2023-11-29, and updated by Mouse,
+ *  2024-01-03.
+ *
+ * I have not found any API spec for this method, so I have had to
+ *  guess at some things.
+ *
+ * In particular, I do not know what alignment is supposed to be.  My
+ *  best guess is that it is the number of bits already loaded in the
+ *  first byte to be loaded, ie, it is the number of bits that 0x80
+ *  must be shifted right in order to end up at the bit the high bit of
+ *  the value should end up in.  This guess is based on observing that
+ *  deparsing an IPv4 packet header passes in 4 for alignment for the
+ *  IHL, 3 for the fragment offset, and 0 for all other fields.
+ *
+ * The final alignment value will of course be the input alignment
+ *  value, plus the number of bits written, modulo 8.  But we have no
+ *  path via which we could return that, so we have to trust that our
+ *  caller computes alignment correctly for the next field.
+ *
+ * I also do not know what noEndiannessConversion is, but in this case
+ *  the Eliza-effect implications are extremely strong.  But passing
+ *  this down from our caller seems to me like a very wrong way to
+ *  handle endianness.
+ */
+extern bool want_to_write(const IR::Expression *, const cstring *);
 void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring field,
                                              const IR::Expression *hdrExpr, unsigned int alignment,
                                              EBPF::EBPFType *type, bool noEndiannessConversion) {
@@ -2111,82 +2137,87 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
         builder->target->emitTraceMessage(builder, msgStr.c_str());
     }
 
-    if (widthToEmit <= 8) {
-        emitSize = 8;
-    } else if (widthToEmit <= 16) {
-        swap = "bpf_htons";
-        emitSize = 16;
-    } else if (widthToEmit <= 32) {
-        swap = "htonl";
-        emitSize = 32;
-    } else if (widthToEmit <= 64) {
-        swap = "htonll";
-        emitSize = 64;
-    }
-    unsigned shift =
-        widthToEmit < 8 ? (emitSize - alignment - widthToEmit) : (emitSize - widthToEmit);
-
-    if (!swap.isNullOrEmpty() && !noEndiannessConversion) {
-        builder->emitIndent();
-        visit(hdrExpr);
-        builder->appendFormat(".%s = %s(", field, swap);
-        visit(hdrExpr);
-        builder->appendFormat(".%s", field);
-        if (shift != 0) builder->appendFormat(" << %d", shift);
-        builder->append(")");
-        builder->endOfStatement(true);
-    }
-    unsigned bitsInFirstByte = widthToEmit % 8;
-    if (bitsInFirstByte == 0) bitsInFirstByte = 8;
-    unsigned bitsInCurrentByte = bitsInFirstByte;
-    unsigned left = widthToEmit;
-    for (unsigned i = 0; i < (widthToEmit + 7) / 8; i++) {
-        builder->emitIndent();
-        builder->appendFormat("%s = ((char*)(&", program->byteVar.c_str());
-        visit(hdrExpr);
-        builder->appendFormat(".%s))[%d]", field, i);
-        builder->endOfStatement(true);
-        unsigned freeBits = alignment != 0 ? (8 - alignment) : 8;
-        bitsInCurrentByte = left >= 8 ? 8 : left;
-        unsigned bitsToWrite = bitsInCurrentByte > freeBits ? freeBits : bitsInCurrentByte;
-        BUG_CHECK((bitsToWrite > 0) && (bitsToWrite <= 8), "invalid bitsToWrite %d", bitsToWrite);
-        builder->emitIndent();
-        if (alignment == 0 && bitsToWrite == 8) {  // write whole byte
-            builder->appendFormat("write_byte(%s, BYTES(%s) + %d, (%s))",
-                                  program->packetStartVar.c_str(), program->offsetVar.c_str(),
-                                  i,  // do not reverse byte order
-                                  program->byteVar.c_str());
-        } else {  // write partial
-            shift = (8 - alignment - bitsToWrite);
-            builder->appendFormat("write_partial(%s + BYTES(%s) + %d, %d, %d, (%s >> %d))",
-                                  program->packetStartVar.c_str(), program->offsetVar.c_str(),
-                                  i,  // do not reverse byte order
-                                  bitsToWrite, shift, program->byteVar.c_str(),
-                                  widthToEmit > freeBits ? alignment == 0 ? shift : alignment : 0);
+    if (want_to_write(hdrExpr, &field)) {
+        if (widthToEmit <= 8) {
+            emitSize = 8;
+        } else if (widthToEmit <= 16) {
+            swap = "bpf_htons";
+            emitSize = 16;
+        } else if (widthToEmit <= 32) {
+            swap = "htonl";
+            emitSize = 32;
+        } else if (widthToEmit <= 64) {
+            swap = "htonll";
+            emitSize = 64;
         }
-        builder->endOfStatement(true);
-        left -= bitsToWrite;
-        bitsInCurrentByte -= bitsToWrite;
-        alignment = (alignment + bitsToWrite) % 8;
-        bitsToWrite = (8 - bitsToWrite);
-        if (bitsInCurrentByte > 0) {
+        unsigned shift =
+            widthToEmit < 8 ? (emitSize - alignment - widthToEmit) : (emitSize - widthToEmit);
+
+        if (!swap.isNullOrEmpty() && !noEndiannessConversion) {
             builder->emitIndent();
-            if (bitsToWrite == 8) {
-                builder->appendFormat("write_byte(%s, BYTES(%s) + %d + 1, (%s << %d))",
+            visit(hdrExpr);
+            builder->appendFormat(".%s = %s(", field, swap);
+            visit(hdrExpr);
+            builder->appendFormat(".%s", field);
+            if (shift != 0) builder->appendFormat(" << %d", shift);
+            builder->append(")");
+            builder->endOfStatement(true);
+        }
+        unsigned bitsInFirstByte = widthToEmit % 8;
+        if (bitsInFirstByte == 0) bitsInFirstByte = 8;
+        unsigned bitsInCurrentByte = bitsInFirstByte;
+        unsigned left = widthToEmit;
+        for (unsigned i = 0; i < (widthToEmit + 7) / 8; i++) {
+            builder->emitIndent();
+            builder->appendFormat("%s = ((char*)(&", program->byteVar.c_str());
+            visit(hdrExpr);
+            builder->appendFormat(".%s))[%d]", field, i);
+            builder->endOfStatement(true);
+            unsigned freeBits = alignment != 0 ? (8 - alignment) : 8;
+            bitsInCurrentByte = left >= 8 ? 8 : left;
+            unsigned bitsToWrite = bitsInCurrentByte > freeBits ? freeBits : bitsInCurrentByte;
+            BUG_CHECK((bitsToWrite > 0) && (bitsToWrite <= 8), "invalid bitsToWrite %d",
+                      bitsToWrite);
+            builder->emitIndent();
+            if (alignment == 0 && bitsToWrite == 8) {  // write whole byte
+                builder->appendFormat("write_byte(%s, BYTES(%s) + %d, (%s))",
                                       program->packetStartVar.c_str(), program->offsetVar.c_str(),
                                       i,  // do not reverse byte order
-                                      program->byteVar.c_str(), 8 - alignment % 8);
-            } else {
-                builder->appendFormat("write_partial(%s + BYTES(%s) + %d + 1, %d, %d, (%s))",
-                                      program->packetStartVar.c_str(), program->offsetVar.c_str(),
-                                      i,  // do not reverse byte order
-                                      bitsToWrite, 8 + alignment - bitsToWrite,
                                       program->byteVar.c_str());
+            } else {  // write partial
+                shift = (8 - alignment - bitsToWrite);
+                builder->appendFormat(
+                    "write_partial(%s + BYTES(%s) + %d, %d, %d, (%s >> %d))",
+                    program->packetStartVar.c_str(), program->offsetVar.c_str(),
+                    i,  // do not reverse byte order
+                    bitsToWrite, shift, program->byteVar.c_str(),
+                    widthToEmit > freeBits ? alignment == 0 ? shift : alignment : 0);
             }
             builder->endOfStatement(true);
             left -= bitsToWrite;
+            bitsInCurrentByte -= bitsToWrite;
+            alignment = (alignment + bitsToWrite) % 8;
+            bitsToWrite = (8 - bitsToWrite);
+            if (bitsInCurrentByte > 0) {
+                builder->emitIndent();
+                if (bitsToWrite == 8) {
+                    builder->appendFormat("write_byte(%s, BYTES(%s) + %d + 1, (%s << %d))",
+                                          program->packetStartVar.c_str(),
+                                          program->offsetVar.c_str(),
+                                          i,  // do not reverse byte order
+                                          program->byteVar.c_str(), 8 - alignment % 8);
+                } else {
+                    builder->appendFormat(
+                        "write_partial(%s + BYTES(%s) + %d + 1, %d, %d, (%s))",
+                        program->packetStartVar.c_str(), program->offsetVar.c_str(),
+                        i,  // do not reverse byte order
+                        bitsToWrite, 8 + alignment - bitsToWrite, program->byteVar.c_str());
+                }
+                builder->endOfStatement(true);
+                left -= bitsToWrite;
+            }
+            alignment = (alignment + bitsToWrite) % 8;
         }
-        alignment = (alignment + bitsToWrite) % 8;
     }
     builder->emitIndent();
     builder->appendFormat("%s += %d", program->offsetVar.c_str(), widthToEmit);
