@@ -64,7 +64,7 @@ macro(p4c_obtain_abseil)
     endforeach()
     # TODO: Remove once the Abseil compilation issue is fixed.
     if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 14)
-      message(WARNING "Compiling with GCC>14. Adding -mbmi to Abseil targets.")
+      message(WARNING "Compiling with GCC > 14. Adding -mbmi to Abseil targets, this may cause incompatibility with old CPUs.")
     endif()
 
     # Reset temporary variable modifications.
