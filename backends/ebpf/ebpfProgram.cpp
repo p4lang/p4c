@@ -197,15 +197,13 @@ void EBPFProgram::emitTypes(CodeBuilder *builder) {
             builder->newline();
         }
         if (const auto *method = d->to<IR::Method>()) {
-            if (method->srcInfo.isValid()) {
+            if (!method->srcInfo.isValid()) {
                 continue;
             }
             // Ignore methods originating from core.p4 and ubpf_model.p4 because they are already
             // defined.
-            // TODO: Is there a more portable way to do this? Currently we check for a specific
-            // filename as the source of a method.
-            auto sourceName = std::filesystem::path(method->srcInfo.getSourceFile().c_str());
-            if (sourceName.filename() == "core.p4" || sourceName.filename() == "ubpf_model.p4") {
+            // TODO: Maybe we should still generate declarations for these methods?
+            if (isLibraryMethod(method->controlPlaneName())) {
                 continue;
             }
             EBPFMethodDeclaration methodInstance(method);
@@ -346,6 +344,19 @@ void EBPFProgram::emitPipeline(CodeBuilder *builder) {
         builder->target->emitTraceMessage(builder, "Control: packet processing finished, pass=%d",
                                           1, control->accept->name.name.c_str());
     }
+}
+
+bool EBPFProgram::isLibraryMethod(cstring methodName) {
+    static std::set<cstring> DEFAULT_METHODS = {"static_assert", "verify"};
+    if (DEFAULT_METHODS.find(methodName) != DEFAULT_METHODS.end() && options.target != "xdp") {
+        return true;
+    }
+
+    static std::set<cstring> XDP_METHODS = {
+        "ebpf_ipv4_checksum",    "csum_replace2",    "csum_replace4",
+        "BPF_PERF_EVENT_OUTPUT", "BPF_KTIME_GET_NS",
+    };
+    return XDP_METHODS.find(methodName) != XDP_METHODS.end();
 }
 
 }  // namespace EBPF

@@ -95,6 +95,11 @@ class EBPFProgram : public EBPFObject {
     virtual void emitLocalVariables(CodeBuilder *builder);
     virtual void emitPipeline(CodeBuilder *builder);
 
+    /// Checks whether a method name is considered to be part of the standard library, e.g., defined
+    /// in core.p4 or ebpf_model.p4.
+    /// TODO: Should we also distinguish overloaded methods?
+    virtual bool isLibraryMethod(cstring methodName);
+
  public:
     virtual void emitCommonPreamble(CodeBuilder *builder);
     virtual void emitGeneratedComment(CodeBuilder *builder);

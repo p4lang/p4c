@@ -175,10 +175,8 @@ void UBPFProgram::emitTypes(EBPF::CodeBuilder *builder) {
             }
             // Ignore methods originating from core.p4 and ubpf_model.p4 because they are already
             // defined.
-            // TODO: Is there a more portable way to do this? Currently we check for a specific
-            // filename as the source of a method.
-            auto sourceName = std::filesystem::path(method->srcInfo.getSourceFile().c_str());
-            if (sourceName.filename() == "core.p4" || sourceName.filename() == "ubpf_model.p4") {
+            // TODO: Maybe we should still generate declarations for these methods?
+            if (isLibraryMethod(method->controlPlaneName())) {
                 continue;
             }
             EBPF::EBPFMethodDeclaration methodInstance(method);
