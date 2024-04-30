@@ -44,10 +44,7 @@ class Target(EBPFTarget):
         # include the src of libbpf directly, does not require installation
         args += f"INCLUDES+=-I{self.runtimedir}/contrib/libbpf/src "
         if self.options.extern:
-            # we inline the extern so we need a direct include
-            args += f"INCLUDES+=-include{self.options.extern} "
-            # need to include the temporary dir because of the tmp import
-            args += f"INCLUDES+=-I{self.tmpdir} "
+            args += f"EXTERNOBJ+={self.options.extern} "
         result = testutils.exec_process(args)
         if result.returncode != testutils.SUCCESS:
             testutils.log.error("Failed to build the filter")
