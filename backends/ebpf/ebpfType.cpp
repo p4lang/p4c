@@ -359,6 +359,7 @@ EBPFMethodDeclaration::EBPFMethodDeclaration(const IR::Method *method) : method_
 
 void EBPFMethodDeclaration::emit(CodeBuilder *builder) {
     auto *returnType = EBPFTypeFactory::instance->create(method_->type->returnType);
+    builder->append("extern ");
     returnType->emit(builder);
     builder->append(" ");
     builder->append(method_->name);
