@@ -237,6 +237,7 @@ include (CheckIncludeFile)
 check_include_file (execinfo.h HAVE_EXECINFO_H)
 check_include_file (ucontext.h HAVE_UCONTEXT_H)
 check_include_file (backtrace-supported.h HAVE_LIBBACKTRACE)
+check_include_file(mm_malloc.h, HAVE_MM_MALLOC_H)
 include (CheckIncludeFileCXX)
 check_include_file_cxx (cxxabi.h HAVE_CXXABI_H)
 
