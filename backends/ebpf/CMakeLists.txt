@@ -21,8 +21,8 @@ if(NOT APPLE)
   set(FETCHCONTENT_QUIET OFF)
   fetchcontent_declare(
     bpfrepo
-    URL https://github.com/libbpf/libbpf/archive/refs/tags/v1.2.2.tar.gz
-    URL_HASH SHA256=32b0c41eabfbbe8e0c8aea784d7495387ff9171b5a338480a8fbaceb9da8d5e5
+    URL https://github.com/libbpf/libbpf/archive/refs/tags/v1.4.1.tar.gz
+    URL_HASH SHA256=cc01a3a05d25e5978c20be7656f14eb8b6fcb120bb1c7e8041e497814fc273cb
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/runtime/contrib/libbpf
     USES_TERMINAL_DOWNLOAD TRUE
     GIT_PROGRESS TRUE
