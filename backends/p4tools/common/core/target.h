@@ -70,23 +70,24 @@ class Target {
  protected:
     /// Creates and registers a new Target instance for the given @toolName, @deviceName, and
     /// @archName.
-    Target(const std::string &toolName, const std::string &deviceName, const std::string &archName);
+    Target(std::string_view toolName, const std::string &deviceName, const std::string &archName);
 
     /// @returns the target instance for the given tool and active target, as selected by @init.
     //
     // Implemented here because of limitations of templates.
     template <class TargetImpl>
-    static const TargetImpl &get(const std::string &toolName) {
+    static const TargetImpl &get(std::string_view toolName) {
         if (curTarget == std::nullopt) {
             FATAL_ERROR(
                 "Target not initialized. Please provide a target using the --target option.");
         }
 
         const auto &instances = registry.at(*curTarget);
-        BUG_CHECK(instances.count(toolName), "Architecture %1% on device %2% not supported for %3%",
-                  curTarget->archName, curTarget->deviceName, toolName);
+        BUG_CHECK(instances.count(toolName.data()),
+                  "Architecture %1% on device %2% not supported for %3%", curTarget->archName,
+                  curTarget->deviceName, toolName);
 
-        const auto *instance = instances.at(toolName);
+        const auto *instance = instances.at(toolName.data());
         const auto *casted = dynamic_cast<const TargetImpl *>(instance);
         BUG_CHECK(casted, "%1%/%2% implementation for %3% has wrong type", curTarget->deviceName,
                   curTarget->archName, toolName);

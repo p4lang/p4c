@@ -18,16 +18,16 @@
 
 namespace P4Tools {
 
-ICompileContext *CompilerTarget::makeContext(const std::string &toolName) {
+ICompileContext *CompilerTarget::makeContext(std::string_view toolName) {
     return get(toolName).makeContextImpl();
 }
 
-std::vector<const char *> *CompilerTarget::initCompiler(const std::string &toolName, int argc,
+std::vector<const char *> *CompilerTarget::initCompiler(std::string_view toolName, int argc,
                                                         char **argv) {
     return get(toolName).initCompilerImpl(argc, argv);
 }
 
-CompilerResultOrError CompilerTarget::runCompiler(const std::string &toolName) {
+CompilerResultOrError CompilerTarget::runCompiler(std::string_view toolName) {
     const auto *program = P4Tools::CompilerTarget::runParser();
     if (program == nullptr) {
         return std::nullopt;
@@ -36,7 +36,7 @@ CompilerResultOrError CompilerTarget::runCompiler(const std::string &toolName) {
     return runCompiler(toolName, program);
 }
 
-CompilerResultOrError CompilerTarget::runCompiler(const std::string &toolName,
+CompilerResultOrError CompilerTarget::runCompiler(std::string_view toolName,
                                                   const std::string &source) {
     const auto *program = P4::parseP4String(source, P4CContext::get().options().langVersion);
     if (program == nullptr) {
@@ -46,7 +46,7 @@ CompilerResultOrError CompilerTarget::runCompiler(const std::string &toolName,
     return runCompiler(toolName, program);
 }
 
-CompilerResultOrError CompilerTarget::runCompiler(const std::string &toolName,
+CompilerResultOrError CompilerTarget::runCompiler(std::string_view toolName,
                                                   const IR::P4Program *program) {
     return get(toolName).runCompilerImpl(program);
 }
@@ -118,12 +118,12 @@ const IR::P4Program *CompilerTarget::runMidEnd(const IR::P4Program *program) con
     return program->apply(midEnd);
 }
 
-CompilerTarget::CompilerTarget(const std::string &toolName, const std::string &deviceName,
+CompilerTarget::CompilerTarget(std::string_view toolName, const std::string &deviceName,
                                const std::string &archName)
     : Target(toolName, deviceName, archName) {}
 
-const CompilerTarget &CompilerTarget::get(const std::string &toolName) {
-    return Target::get<CompilerTarget>(toolName);
+const CompilerTarget &CompilerTarget::get(std::string_view toolName) {
+    return Target::get<CompilerTarget>(toolName.data());
 }
 
 }  // namespace P4Tools

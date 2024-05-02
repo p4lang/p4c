@@ -76,13 +76,13 @@ const IR::Expression *Target::createTargetUninitialized(const IR::Type *type,
     return IR::getDefaultValue(type);
 }
 
-Target::Target(const std::string &toolName, const std::string &deviceName,
+Target::Target(std::string_view toolName, const std::string &deviceName,
                const std::string &archName)
     : toolName(toolName), spec(deviceName, archName) {
     // Register this instance.
-    BUG_CHECK(!registry[spec].count(toolName), "Already registered %1%/%2% instance for %3%",
+    BUG_CHECK(!registry[spec].count(toolName.data()), "Already registered %1%/%2% instance for %3%",
               deviceName, archName, toolName);
-    registry[spec][toolName] = this;
+    registry[spec][toolName.data()] = this;
 
     // Register default device and architecture, if needed.
     if (defaultDeviceByArch.count(spec.archName) == 0U) {

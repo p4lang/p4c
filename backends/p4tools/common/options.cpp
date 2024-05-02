@@ -108,7 +108,7 @@ struct InheritedCompilerOptionSpec {
     std::optional<std::function<bool(const char *)>> handler;
 };
 
-AbstractP4cToolOptions::AbstractP4cToolOptions(const std::string &toolName, cstring message)
+AbstractP4cToolOptions::AbstractP4cToolOptions(std::string_view toolName, cstring message)
     : Options(message), _toolName(toolName) {
     // Register some common options.
     registerOption(

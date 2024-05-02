@@ -18,31 +18,30 @@ namespace P4Tools {
 class CompilerTarget : public Target {
  public:
     /// @returns a new compilation context for the compiler.
-    static ICompileContext *makeContext(const std::string &toolName);
+    static ICompileContext *makeContext(std::string_view toolName);
 
     /// Initializes the P4 compiler with the given compiler-specific command-line arguments.
     ///
     /// @returns any unprocessed arguments, or nullptr if there was an error.
-    static std::vector<const char *> *initCompiler(const std::string &toolName, int argc,
+    static std::vector<const char *> *initCompiler(std::string_view toolName, int argc,
                                                    char **argv);
 
     /// Runs the P4 compiler to produce an IR and various other kinds of information on the input
     /// program.
     ///
     /// @returns std::nullopt if an error occurs during compilation.
-    static CompilerResultOrError runCompiler(const std::string &toolName);
+    static CompilerResultOrError runCompiler(std::string_view toolName);
 
     /// Runs the P4 compiler to produce an IR and other information for the given source code.
     ///
     /// @returns std::nullopt if an error occurs during compilation.
-    static CompilerResultOrError runCompiler(const std::string &toolName,
-                                             const std::string &source);
+    static CompilerResultOrError runCompiler(std::string_view toolName, const std::string &source);
 
  private:
     /// Runs the front and mid ends on the given parsed program.
     ///
     /// @returns std::nullopt if an error occurs during compilation.
-    static CompilerResultOrError runCompiler(const std::string &toolName, const IR::P4Program *);
+    static CompilerResultOrError runCompiler(std::string_view toolName, const IR::P4Program *);
 
  protected:
     /// @see @makeContext.
@@ -77,12 +76,12 @@ class CompilerTarget : public Target {
     /// @returns nullptr if an error occurs during compilation.
     const IR::P4Program *runMidEnd(const IR::P4Program *program) const;
 
-    explicit CompilerTarget(const std::string &toolName, const std::string &deviceName,
+    explicit CompilerTarget(std::string_view toolName, const std::string &deviceName,
                             const std::string &archName);
 
  private:
     /// @returns the singleton instance for the current target.
-    static const CompilerTarget &get(const std::string &toolName);
+    static const CompilerTarget &get(std::string_view toolName);
 };
 
 }  // namespace P4Tools

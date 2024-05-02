@@ -30,7 +30,7 @@ class AbstractP4cTool {
     /// @param args
     ///     Contains the path to the executable, followed by the command-line arguments for this
     ///     tool.
-    int main(const std::string &toolName, const std::vector<const char *> &args) {
+    int main(std::string_view toolName, const std::vector<const char *> &args) {
         // Register supported compiler targets.
         registerTarget();
 
