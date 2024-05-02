@@ -11,6 +11,7 @@
 #include "lib/exceptions.h"
 
 #include "backends/p4tools/modules/testgen/register.h"
+#include "backends/p4tools/modules/testgen/toolname.h"
 
 namespace Test {
 
@@ -26,10 +27,12 @@ std::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
               deviceName, archName);
 
     // Set up the compilation context and set the source language.
-    AutoCompileContext autoCompileContext(P4Tools::CompilerTarget::makeContext("testgen"));
+    AutoCompileContext autoCompileContext(
+        P4Tools::CompilerTarget::makeContext(P4Tools::P4Testgen::TOOL_NAME));
     P4CContext::get().options().langVersion = langVersion;
 
-    auto compilerResults = P4Tools::CompilerTarget::runCompiler(source);
+    auto compilerResults =
+        P4Tools::CompilerTarget::runCompiler(P4Tools::P4Testgen::TOOL_NAME, source);
     if (!compilerResults.has_value()) {
         return std::nullopt;
     }
