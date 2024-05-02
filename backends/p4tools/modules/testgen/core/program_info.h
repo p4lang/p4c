@@ -3,7 +3,6 @@
 
 #include <cstddef>
 #include <optional>
-#include <vector>
 
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
@@ -12,7 +11,7 @@
 #include "lib/rtti.h"
 #include "midend/coverage.h"
 
-#include "backends/p4tools/modules/testgen/core/compiler_target.h"
+#include "backends/p4tools/modules/testgen/core/compiler_result.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 

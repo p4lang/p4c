@@ -1,7 +1,7 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_COMPILER_TARGET_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_COMPILER_TARGET_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_COMPILER_RESULT_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_COMPILER_RESULT_H_
 
-#include "backends/p4tools/common/compiler/compiler_target.h"
+#include "backends/p4tools/common/compiler/compiler_result.h"
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "midend/coverage.h"
 
@@ -32,14 +32,6 @@ class TestgenCompilerResult : public CompilerResult {
     DECLARE_TYPEINFO(TestgenCompilerResult, CompilerResult);
 };
 
-class TestgenCompilerTarget : public CompilerTarget {
- protected:
-    explicit TestgenCompilerTarget(std::string deviceName, std::string archName);
-
- private:
-    CompilerResultOrError runCompilerImpl(const IR::P4Program *program) const override;
-};
-
 }  // namespace P4Tools::P4Testgen
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_COMPILER_TARGET_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_COMPILER_RESULT_H_ */

@@ -11,7 +11,7 @@
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 
-#include "backends/p4tools/modules/testgen/core/compiler_target.h"
+#include "backends/p4tools/modules/testgen/core/compiler_result.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -84,6 +84,14 @@ EBPFExprStepper *EBPFTestgenTarget::getExprStepperImpl(ExecutionState &state,
                                                        AbstractSolver &solver,
                                                        const ProgramInfo &programInfo) const {
     return new EBPFExprStepper(state, solver, programInfo);
+}
+
+MidEnd EBPFTestgenTarget::mkMidEnd(const CompilerOptions &options) const {
+    MidEnd midEnd(options);
+    midEnd.addPasses({});
+    midEnd.addDefaultPasses();
+
+    return midEnd;
 }
 
 }  // namespace P4Tools::P4Testgen::EBPF

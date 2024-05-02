@@ -76,7 +76,8 @@ const IR::Expression *Target::createTargetUninitialized(const IR::Type *type,
     return IR::getDefaultValue(type);
 }
 
-Target::Target(std::string toolName, std::string deviceName, std::string archName)
+Target::Target(const std::string &toolName, const std::string &deviceName,
+               const std::string &archName)
     : toolName(toolName), spec(deviceName, archName) {
     // Register this instance.
     BUG_CHECK(!registry[spec].count(toolName), "Already registered %1%/%2% instance for %3%",

@@ -70,7 +70,7 @@ class Target {
  protected:
     /// Creates and registers a new Target instance for the given @toolName, @deviceName, and
     /// @archName.
-    Target(std::string toolName, std::string deviceName, std::string archName);
+    Target(const std::string &toolName, const std::string &deviceName, const std::string &archName);
 
     /// @returns the target instance for the given tool and active target, as selected by @init.
     //

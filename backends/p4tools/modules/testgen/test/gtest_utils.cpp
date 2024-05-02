@@ -26,7 +26,7 @@ std::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
               deviceName, archName);
 
     // Set up the compilation context and set the source language.
-    AutoCompileContext autoCompileContext(P4Tools::CompilerTarget::makeContext());
+    AutoCompileContext autoCompileContext(P4Tools::CompilerTarget::makeContext("testgen"));
     P4CContext::get().options().langVersion = langVersion;
 
     auto compilerResults = P4Tools::CompilerTarget::runCompiler(source);
@@ -61,9 +61,6 @@ void P4ToolsTestCase::ensureInit() {
     if (INITIALIZED) {
         return;
     }
-    // Register supported compiler targets.
-    P4Tools::P4Testgen::registerCompilerTargets();
-
     // Register supported Testgen targets.
     P4Tools::P4Testgen::registerTestgenTargets();
 
