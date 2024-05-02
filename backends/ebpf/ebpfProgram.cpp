@@ -196,20 +196,24 @@ void EBPFProgram::emitTypes(CodeBuilder *builder) {
             type->emit(builder);
             builder->newline();
         }
-        if (const auto *method = d->to<IR::Method>()) {
-            if (!method->srcInfo.isValid()) {
-                continue;
-            }
-            // Ignore methods originating from core.p4 and ubpf_model.p4 because they are already
-            // defined.
-            // TODO: Maybe we should still generate declarations for these methods?
-            if (isLibraryMethod(method->controlPlaneName())) {
-                continue;
-            }
-            EBPFMethodDeclaration methodInstance(method);
-            methodInstance.emit(builder);
-            builder->newline();
-        }
+        // TODO: This code is disabled until we fix stability issues in Ubuntu 20.04.
+        // For an unclear reason we can not use definitions and declarations for eBPF externs there.
+        // All externs need to be defined as static inline, which clashes with these definitions.
+        // Context: https://github.com/p4lang/p4c/pull/4644
+        // if (const auto *method = d->to<IR::Method>()) {
+        //     if (!method->srcInfo.isValid()) {
+        //         continue;
+        //     }
+        //     // Ignore methods originating from core.p4 and ubpf_model.p4 because they are already
+        //     // defined.
+        //     // TODO: Maybe we should still generate declarations for these methods?
+        //     if (isLibraryMethod(method->controlPlaneName())) {
+        //         continue;
+        //     }
+        //     EBPFMethodDeclaration methodInstance(method);
+        //     methodInstance.emit(builder);
+        //     builder->newline();
+        // }
     }
 }
 

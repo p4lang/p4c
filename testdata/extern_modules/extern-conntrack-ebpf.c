@@ -32,7 +32,7 @@ REGISTER_START()
 REGISTER_TABLE(tcp_reg, BPF_MAP_TYPE_HASH, sizeof(u32), sizeof(struct connInfo), MAX_ENTRIES)
 REGISTER_END()
 
-inline __attribute__((always_inline)) u8 tcp_conntrack(struct Headers_t hdrs)
+static inline u8 tcp_conntrack(struct Headers_t hdrs)
 {
     u32 saddr = hdrs.ipv4.srcAddr;
     u32 daddr = hdrs.ipv4.dstAddr;
