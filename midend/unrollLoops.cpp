@@ -64,17 +64,16 @@ class RemoveBreakContinue : public Transform {
 
     IR::Node *postorder(IR::BreakStatement *) override {
         if (!breakFlag) {
-            breakFlag = new IR::Declaration_Variable(
-                nameGen.newName("breakFlag"), IR::Type_Boolean::get(), new IR::BoolLiteral(false));
+            breakFlag =
+                new IR::Declaration_Variable(nameGen.newName("breakFlag"), IR::Type_Boolean::get());
         }
         needFlagCheck = true;
         return setFlag(breakFlag->name, true);
     }
     IR::Node *postorder(IR::ContinueStatement *) override {
         if (!continueFlag) {
-            continueFlag =
-                new IR::Declaration_Variable(nameGen.newName("continueFlag"),
-                                             IR::Type_Boolean::get(), new IR::BoolLiteral(false));
+            continueFlag = new IR::Declaration_Variable(nameGen.newName("continueFlag"),
+                                                        IR::Type_Boolean::get());
         }
         needFlagCheck = true;
         return setFlag(continueFlag->name, true);
@@ -97,18 +96,72 @@ class RemoveBreakContinue : public Transform {
 };
 
 /* replace references to the 'index' var with a constant */
-class ReplaceIndexRefs : public Transform {
+class ReplaceIndexRefs : public Transform, P4WriteContext {
     cstring indexVar;
     long value;
+    bool stop_after_modification = false;
 
     IR::Node *preorder(IR::PathExpression *pe) {
-        if (pe->path->name == indexVar) return new IR::Constant(pe->type, value);
-        return pe;
+        if (stop_after_modification || pe->path->name != indexVar) return pe;
+        if (isWrite()) {
+            stop_after_modification = true;
+            return pe;
+        }
+        return new IR::Constant(pe->type, value);
+    }
+    IR::AssignmentStatement *preorder(IR::AssignmentStatement *assign) {
+        visit(assign->right, "right", 1);
+        visit(assign->left, "left", 0);
+        prune();
+        return assign;
     }
 
  public:
     ReplaceIndexRefs(cstring iv, long v) : indexVar(iv), value(v) { forceClone = true; }
 };
+
+static long evalLoop(const IR::Expression *exp, cstring index, long val, bool &fail) {
+    if (auto *pe = exp->to<IR::PathExpression>()) {
+        if (pe->path->name != index) fail = true;
+        return val;
+    } else if (auto *k = exp->to<IR::Constant>()) {
+        return k->asLong();
+    } else if (auto *e = exp->to<IR::Leq>()) {
+        return evalLoop(e->left, index, val, fail) <= evalLoop(e->right, index, val, fail);
+    } else if (auto *e = exp->to<IR::Lss>()) {
+        return evalLoop(e->left, index, val, fail) < evalLoop(e->right, index, val, fail);
+    } else if (auto *e = exp->to<IR::Geq>()) {
+        return evalLoop(e->left, index, val, fail) >= evalLoop(e->right, index, val, fail);
+    } else if (auto *e = exp->to<IR::Grt>()) {
+        return evalLoop(e->left, index, val, fail) > evalLoop(e->right, index, val, fail);
+    } else if (auto *e = exp->to<IR::Equ>()) {
+        return evalLoop(e->left, index, val, fail) == evalLoop(e->right, index, val, fail);
+    } else if (auto *e = exp->to<IR::Neq>()) {
+        return evalLoop(e->left, index, val, fail) != evalLoop(e->right, index, val, fail);
+    } else if (auto *e = exp->to<IR::Add>()) {
+        return evalLoop(e->left, index, val, fail) + evalLoop(e->right, index, val, fail);
+    } else if (auto *e = exp->to<IR::Sub>()) {
+        return evalLoop(e->left, index, val, fail) - evalLoop(e->right, index, val, fail);
+    } else if (auto *e = exp->to<IR::Mul>()) {
+        return evalLoop(e->left, index, val, fail) * evalLoop(e->right, index, val, fail);
+    } else if (auto *e = exp->to<IR::Div>()) {
+        return evalLoop(e->left, index, val, fail) / evalLoop(e->right, index, val, fail);
+    } else if (auto *e = exp->to<IR::Mod>()) {
+        return evalLoop(e->left, index, val, fail) % evalLoop(e->right, index, val, fail);
+    } else if (auto *e = exp->to<IR::Shl>()) {
+        return evalLoop(e->left, index, val, fail) << evalLoop(e->right, index, val, fail);
+    } else if (auto *e = exp->to<IR::Shr>()) {
+        return evalLoop(e->left, index, val, fail) >> evalLoop(e->right, index, val, fail);
+    } else if (auto *e = exp->to<IR::Neg>()) {
+        return -evalLoop(e->expr, index, val, fail);
+    } else if (auto *e = exp->to<IR::Cmpl>()) {
+        return ~evalLoop(e->expr, index, val, fail);
+    } else if (auto *e = exp->to<IR::LNot>()) {
+        return !evalLoop(e->expr, index, val, fail);
+    }
+    fail = true;
+    return 0;
+}
 
 bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds) {
     Pattern::Match<IR::PathExpression> v;
@@ -140,37 +193,17 @@ bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds)
         if (!init || !incr) return false;
         auto initval = init->right->to<IR::Constant>();
         if (!initval) return false;
-        Pattern::Match<IR::PathExpression> v2;
-        Pattern::Match<IR::Constant> k2;
-        long neg_incr = 1;
-        if ((v2 + k2).match(incr->right)) {
-            if (!v2->equiv(*v)) return false;
-            neg_incr = 1;
-        } else if ((v2 - k2).match(incr->right)) {
-            if (!v2->equiv(*v)) return false;
-            neg_incr = -1;
-        } else {
-            return false;
+        bool fail = false;
+        for (long val = initval->asLong();
+             evalLoop(fstmt->condition, bounds.index->name, val, fail) && !fail;
+             val = evalLoop(incr->right, bounds.index->name, val, fail)) {
+            if (bounds.indexes.size() > 1000) {
+                fail = true;
+                break;
+            }
+            bounds.indexes.push_back(val);
         }
-        bounds.step = k2->asLong() * neg_incr;
-        if (bounds.step > 0) {
-            bounds.min = initval->asLong();
-            bounds.max = k->asLong();
-            if (fstmt->condition->is<IR::Lss>())
-                bounds.max--;
-            else if (!fstmt->condition->is<IR::Leq>())
-                return false;
-            ;
-        } else {
-            bounds.min = k->asLong();
-            bounds.max = initval->asLong();
-            if (fstmt->condition->is<IR::Grt>())
-                bounds.min++;
-            else if (!fstmt->condition->is<IR::Geq>())
-                return false;
-            ;
-        }
-        return true;
+        return !fail;
     }
     return false;
 }
@@ -180,9 +213,7 @@ bool UnrollLoops::findLoopBounds(IR::ForInStatement *fstmt, loop_bounds_t &bound
         auto lo = range->left->to<IR::Constant>();
         auto hi = range->right->to<IR::Constant>();
         if (lo && hi) {
-            bounds.min = lo->asLong();
-            bounds.max = hi->asLong();
-            bounds.step = 1;
+            for (long i = lo->asLong(); i <= hi->asLong(); ++i) bounds.indexes.push_back(i);
             if (!(bounds.index = fstmt->decl)) {
                 auto d = resolveUnique(fstmt->ref->path->name, P4::ResolutionType::Any);
                 BUG_CHECK(d && d->is<IR::Declaration_Variable>(), "index is not a var?");
@@ -194,7 +225,8 @@ bool UnrollLoops::findLoopBounds(IR::ForInStatement *fstmt, loop_bounds_t &bound
     return false;
 }
 
-const IR::Statement *UnrollLoops::doUnroll(const loop_bounds_t &bounds, const IR::Statement *body) {
+const IR::Statement *UnrollLoops::doUnroll(const loop_bounds_t &bounds, const IR::Statement *body,
+                                           const IR::IndexedVector<IR::StatOrDecl> *updates) {
     RemoveBreakContinue rbc(nameGen);
     body = body->apply(rbc, getChildContext());
     if (rbc.continueFlag)
@@ -204,12 +236,23 @@ const IR::Statement *UnrollLoops::doUnroll(const loop_bounds_t &bounds, const IR
     if (rbc.breakFlag) rv->append(rbc.breakFlag);
     if (rbc.continueFlag) rv->append(rbc.continueFlag);
     if (rbc.breakFlag) rv->append(setFlag(rbc.breakFlag->name, false));
-    if (bounds.step > 0) {
-        for (long indexval = bounds.min; indexval <= bounds.max; indexval += bounds.step)
-            rv->append(body->apply(ReplaceIndexRefs(bounds.index->name, indexval)));
-    } else {
-        for (long indexval = bounds.max; indexval >= bounds.min; indexval += bounds.step)
-            rv->append(body->apply(ReplaceIndexRefs(bounds.index->name, indexval)));
+    IR::BlockStatement *blk = rv;
+    for (long indexval : bounds.indexes) {
+        ReplaceIndexRefs rir(bounds.index->name, indexval);
+        blk->append(body->apply(rir));
+        if (rbc.breakFlag) {
+            auto newblk = new IR::BlockStatement;
+            auto cond = new IR::LNot(new IR::PathExpression(rbc.breakFlag->name));
+            blk->append(new IR::IfStatement(cond, newblk, nullptr));
+            blk = newblk;
+        }
+        if (updates) {
+            for (auto *u : *updates) {
+                auto *n = u->apply(rir)->to<IR::StatOrDecl>();
+                BUG_CHECK(n, "unexpected nullptr");
+                blk->append(n);
+            }
+        }
     }
     return rv;
 }
@@ -217,7 +260,10 @@ const IR::Statement *UnrollLoops::doUnroll(const loop_bounds_t &bounds, const IR
 const IR::Statement *UnrollLoops::preorder(IR::ForStatement *fstmt) {
     loop_bounds_t bounds;
     if (findLoopBounds(fstmt, bounds)) {
-        return doUnroll(bounds, fstmt->body);
+        auto *rv = new IR::BlockStatement;
+        for (auto *i : fstmt->init) rv->append(i);
+        rv->append(doUnroll(bounds, fstmt->body, &fstmt->updates));
+        return rv;
     }
     return fstmt;
 }

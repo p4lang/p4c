@@ -28,11 +28,12 @@ class UnrollLoops : public Transform, public P4::ResolutionContext {
 
     struct loop_bounds_t {
         const IR::Declaration_Variable *index = nullptr;
-        long min, max, step;
+        std::vector<long> indexes;
     };
     bool findLoopBounds(IR::ForStatement *, loop_bounds_t &);
     bool findLoopBounds(IR::ForInStatement *, loop_bounds_t &);
-    const IR::Statement *doUnroll(const loop_bounds_t &, const IR::Statement *);
+    const IR::Statement *doUnroll(const loop_bounds_t &, const IR::Statement *,
+                                  const IR::IndexedVector<IR::StatOrDecl> * = nullptr);
 
     const IR::Statement *preorder(IR::ForStatement *) override;
     const IR::Statement *preorder(IR::ForInStatement *) override;
