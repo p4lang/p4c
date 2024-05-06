@@ -215,7 +215,7 @@ class TaintPropagator : public Transform {
         }
         // Otherwise we convert the expression to a constant of the sliced type.
         // Ultimately, the value here does not matter.
-        return IR::getConstant(sliceTb, 0);
+        return IR::Constant::get(sliceTb, 0);
     }
 
  public:
@@ -231,7 +231,7 @@ class MaskBuilder : public Transform {
 
     const IR::Node *preorder(IR::PathExpression *path) override {
         // Non-tainted members just return the max value, which corresponds to a mask of all zeroes.
-        return IR::getConstant(path->type, IR::getMaxBvVal(path->type));
+        return IR::Constant::get(path->type, IR::getMaxBvVal(path->type));
     }
 
     const IR::Node *preorder(IR::TaintExpression *taintExpr) override {

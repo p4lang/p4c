@@ -108,11 +108,12 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
     if (TestgenOptions::get().testBackend == "PTF") {
         cond = new IR::LAnd(
             new IR::LAnd(
-                new IR::Leq(sessionIdExpr, IR::getConstant(sessionIdExpr->type,
-                                                           BMv2Constants::CLONE_SESSION_ID_MAX)),
-                new IR::Geq(sessionIdExpr, IR::getConstant(sessionIdExpr->type,
-                                                           BMv2Constants::CLONE_SESSION_ID_MIN))),
-            new IR::LAnd(cond, new IR::Lss(clonePortVar, IR::getConstant(clonePortVar->type, 8))));
+                new IR::Leq(sessionIdExpr, IR::Constant::get(sessionIdExpr->type,
+                                                             BMv2Constants::CLONE_SESSION_ID_MAX)),
+                new IR::Geq(sessionIdExpr, IR::Constant::get(sessionIdExpr->type,
+                                                             BMv2Constants::CLONE_SESSION_ID_MIN))),
+            new IR::LAnd(cond,
+                         new IR::Lss(clonePortVar, IR::Constant::get(clonePortVar->type, 8))));
     }
     // clone methods have a default state where the packet continues as is.
     {
@@ -147,7 +148,7 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
         // exit statement.
         cloneState->set(
             instanceTypeVar,
-            IR::getConstant(instanceBitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
+            IR::Constant::get(instanceBitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
         const auto *progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
         // Reset the packet buffer, which corresponds to the output packet.
         // We need to reset everything to the state before the ingress call. We use a
@@ -188,7 +189,7 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
         // Set the metadata instance type.
         cloneState->set(
             instanceTypeVar,
-            IR::getConstant(instanceBitType, BMv2Constants::PKT_INSTANCE_TYPE_EGRESS_CLONE));
+            IR::Constant::get(instanceBitType, BMv2Constants::PKT_INSTANCE_TYPE_EGRESS_CLONE));
         if (preserveIndex.has_value()) {
             // This program segment resets the user metadata of the v1model program to
             // 0. However, fields in the user metadata that have the field_list
@@ -253,7 +254,7 @@ void Bmv2V1ModelExprStepper::processRecirculate(const ExecutionState &state,
         new IR::Member(&PacketVars::PACKET_SIZE_VAR_TYPE,
                        new IR::PathExpression("*standard_metadata"), "packet_length");
     const auto *packetSizeConst =
-        IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, recState.getPacketBufferSize() / 8);
+        IR::Constant::get(&PacketVars::PACKET_SIZE_VAR_TYPE, recState.getPacketBufferSize() / 8);
     recState.set(packetSizeVar, packetSizeConst);
 
     if (recState.hasProperty("recirculate_index")) {
@@ -272,7 +273,7 @@ void Bmv2V1ModelExprStepper::processRecirculate(const ExecutionState &state,
     const auto *bitType = IR::getBitType(32);
     const auto *instanceTypeVar =
         new IR::Member(bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
-    recState.set(instanceTypeVar, IR::getConstant(bitType, instanceType));
+    recState.set(instanceTypeVar, IR::Constant::get(bitType, instanceType));
 
     // Set recirculate to false to avoid infinite loops.
     recState.setProperty("recirculate_active", false);
@@ -346,7 +347,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // Use an assignment to set egress_spec to true.
              // This variable will be processed in the deparser.
              const auto *portVar = new IR::Member(nineBitType, metadataLabel->ref, "egress_spec");
-             nextState.set(portVar, IR::getConstant(nineBitType, BMv2Constants::DROP_PORT));
+             nextState.set(portVar, IR::Constant::get(nineBitType, BMv2Constants::DROP_PORT));
              nextState.add(*new TraceEvents::Generic("mark_to_drop executed."));
              nextState.popBody();
              result->emplace_back(nextState);
@@ -797,8 +798,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  auto &nextState = state.clone();
                  nextState.set(
                      meterResult,
-                     IR::getConstant(meterResult->type,
-                                     static_cast<big_int>(BMv2Constants::METER_COLOR::GREEN)));
+                     IR::Constant::get(meterResult->type,
+                                       static_cast<big_int>(BMv2Constants::METER_COLOR::GREEN)));
                  nextState.popBody();
                  result->emplace_back(nextState);
                  return;
@@ -820,7 +821,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto &inputValue = ToolsVariables::getSymbolicVariable(
                  meterResult->type, "meter_value" + std::to_string(call->clone_id));
              // Make sure we do not accidentally get "3" as enum assignment...
-             auto *cond = new IR::Lss(inputValue, IR::getConstant(meterResult->type, 3));
+             auto *cond = new IR::Lss(inputValue, IR::Constant::get(meterResult->type, 3));
              if (meterState != nullptr) {
                  meterValue =
                      new Bmv2V1ModelMeterValue(*meterState->checkedTo<Bmv2V1ModelMeterValue>());
@@ -907,8 +908,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                      testBackend);
                  nextState.set(
                      meterResult,
-                     IR::getConstant(meterResult->type,
-                                     static_cast<big_int>(BMv2Constants::METER_COLOR::GREEN)));
+                     IR::Constant::get(meterResult->type,
+                                       static_cast<big_int>(BMv2Constants::METER_COLOR::GREEN)));
                  nextState.popBody();
                  result->emplace_back(nextState);
                  return;
@@ -923,14 +924,14 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto &inputValue = ToolsVariables::getSymbolicVariable(
                  meterResult->type, "meter_value" + std::to_string(call->clone_id));
              // Make sure we do not accidentally get "3" as enum assignment...
-             auto *cond = new IR::Lss(inputValue, IR::getConstant(meterResult->type, 3));
+             auto *cond = new IR::Lss(inputValue, IR::Constant::get(meterResult->type, 3));
              if (meterState != nullptr) {
                  meterValue =
                      new Bmv2V1ModelMeterValue(*meterState->checkedTo<Bmv2V1ModelMeterValue>());
              } else {
                  meterValue = new Bmv2V1ModelMeterValue(inputValue, true);
              }
-             meterValue->writeToIndex(IR::getConstant(IR::getBitType(1), 0), inputValue);
+             meterValue->writeToIndex(IR::Constant::get(IR::getBitType(1), 0), inputValue);
              nextState.addTestObject("meter_values", externInstance->controlPlaneName(),
                                      meterValue);
 
@@ -1398,7 +1399,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  const auto *checksumErr = new IR::Member(
                      oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
                  const auto *assign =
-                     new IR::AssignmentStatement(checksumErr, IR::getConstant(oneBitType, 1));
+                     new IR::AssignmentStatement(checksumErr, IR::Constant::get(oneBitType, 1));
                  auto *errorCond = new IR::LAnd(verifyCond, checksumMatchCond);
                  replacements.emplace_back(assign);
                  nextState.replaceTopBody(&replacements);
@@ -1634,7 +1635,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  const auto *checksumErr = new IR::Member(
                      oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
                  const auto *assign =
-                     new IR::AssignmentStatement(checksumErr, IR::getConstant(oneBitType, 1));
+                     new IR::AssignmentStatement(checksumErr, IR::Constant::get(oneBitType, 1));
                  auto *errorCond = new IR::LAnd(verifyCond, checksumMatchCond);
                  replacements.emplace_back(assign);
                  nextState.replaceTopBody(&replacements);

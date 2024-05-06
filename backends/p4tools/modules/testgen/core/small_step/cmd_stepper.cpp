@@ -284,8 +284,8 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
         std::optional<const Constraint *> portRangeCond = std::nullopt;
         const auto &inputPortVar = programInfo.getTargetInputPortVar();
         for (auto portRange : options.permittedPortRanges) {
-            const auto *loVarIn = IR::getConstant(inputPortVar->type, portRange.first);
-            const auto *hiVarIn = IR::getConstant(inputPortVar->type, portRange.second);
+            const auto *loVarIn = IR::Constant::get(inputPortVar->type, portRange.first);
+            const auto *hiVarIn = IR::Constant::get(inputPortVar->type, portRange.second);
             if (portRangeCond.has_value()) {
                 portRangeCond = new IR::LOr(portRangeCond.value(),
                                             new IR::LAnd(new IR::Leq(loVarIn, inputPortVar),
@@ -308,7 +308,7 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
     if (pktSize != 0) {
         const auto *fixedSizeEqu =
             new IR::Geq(ExecutionState::getInputPacketSizeVar(),
-                        IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, pktSize));
+                        IR::Constant::get(&PacketVars::PACKET_SIZE_VAR_TYPE, pktSize));
         if (cond == std::nullopt) {
             cond = fixedSizeEqu;
         } else {
@@ -446,7 +446,7 @@ const Constraint *CmdStepper::startParser(const IR::P4Parser *parser, ExecutionS
     const auto *boolType = IR::Type::Boolean::get();
     const Constraint *result =
         new IR::Leq(boolType, ExecutionState::getInputPacketSizeVar(),
-                    IR::getConstant(parserCursorVarType, ExecutionState::getMaxPacketLength()));
+                    IR::Constant::get(parserCursorVarType, ExecutionState::getMaxPacketLength()));
 
     // Constrain the input packet size to be a multiple of 8 bits. Do this by constraining the
     // lowest three bits of the packet size to 0.
@@ -455,9 +455,9 @@ const Constraint *CmdStepper::startParser(const IR::P4Parser *parser, ExecutionS
         boolType, result,
         new IR::Equ(boolType,
                     new IR::Slice(threeBitType, ExecutionState::getInputPacketSizeVar(),
-                                  IR::getConstant(parserCursorVarType, 2),
-                                  IR::getConstant(parserCursorVarType, 0)),
-                    IR::getConstant(threeBitType, 0)));
+                                  IR::Constant::get(parserCursorVarType, 2),
+                                  IR::Constant::get(parserCursorVarType, 0)),
+                    IR::Constant::get(threeBitType, 0)));
 
     // Call the implementation for the specific target.
     // If we get a constraint back, add it to the result.

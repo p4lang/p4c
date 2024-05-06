@@ -17,6 +17,7 @@ limitations under the License.
 #include <gtest/gtest.h>
 
 #include "helpers.h"
+#include "ir/ir-generated.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/visitor.h"
@@ -62,7 +63,7 @@ TEST_F(P4C_IR, InlineBlock) {
     const auto *pe = new IR::PathExpression(new IR::Path("foo"));
     const auto *stmt = new IR::BlockStatement(IR::IndexedVector<IR::StatOrDecl>({
         new IR::AssignmentStatement(pe, c2),
-        new IR::IfStatement(IR::getBoolLiteral(true), new IR::AssignmentStatement(pe, c2),
+        new IR::IfStatement(IR::BoolLiteral::get(true), new IR::AssignmentStatement(pe, c2),
                             new IR::BlockStatement(IR::IndexedVector<IR::StatOrDecl>({
                                 new IR::AssignmentStatement(pe, c2),
                             }))),
