@@ -70,7 +70,7 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
     TestSpec *testSpec = nullptr;
 
     const auto *ingressPayload = testInfo.inputPacket;
-    const auto *ingressPayloadMask = IR::getConstant(IR::getBitType(1), 1);
+    const auto *ingressPayloadMask = IR::Constant::get(IR::getBitType(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
 
     std::optional<Packet> egressPacket = std::nullopt;

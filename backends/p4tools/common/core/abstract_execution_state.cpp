@@ -176,7 +176,7 @@ void AbstractExecutionState::initializeStructLike(const Target &target,
     std::vector<IR::StateVariable> flatTargetValids;
     auto flatTargetFields = getFlatFields(targetVar, &flatTargetValids);
     for (const auto &fieldTargetValid : flatTargetValids) {
-        set(fieldTargetValid, IR::getBoolLiteral(false));
+        set(fieldTargetValid, IR::BoolLiteral::get(false));
     }
     for (const auto &flatTargetRef : flatTargetFields) {
         set(flatTargetRef, target.createTargetUninitialized(flatTargetRef->type, forceTaint));

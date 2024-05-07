@@ -96,7 +96,7 @@ const IR::Expression *TableStepper::computeTargetMatchType(
         const IR::Expression *ternaryMask = nullptr;
         // We can recover from taint by inserting a ternary match that is 0.
         if (keyProperties.isTainted) {
-            ternaryMask = IR::getConstant(keyExpr->type, 0);
+            ternaryMask = IR::Constant::get(keyExpr->type, 0);
             keyExpr = ternaryMask;
         } else {
             ternaryMask = ControlPlaneState::getTableTernaryMask(properties.tableName,
@@ -115,22 +115,22 @@ const IR::Expression *TableStepper::computeTargetMatchType(
         // The maxReturn is the maximum vale for the given bit width. This value is shifted by
         // the mask variable to create a mask (and with that, a prefix).
         auto maxReturn = IR::getMaxBvVal(keyWidth);
-        auto *prefix = new IR::Sub(IR::getConstant(keyType, keyWidth), maskVar);
+        auto *prefix = new IR::Sub(IR::Constant::get(keyType, keyWidth), maskVar);
         const IR::Expression *lpmMask = nullptr;
         // We can recover from taint by inserting a ternary match that is 0.
         if (keyProperties.isTainted) {
-            lpmMask = IR::getConstant(keyExpr->type, 0);
+            lpmMask = IR::Constant::get(keyExpr->type, 0);
             maskVar = lpmMask;
             keyExpr = lpmMask;
         } else {
-            lpmMask = new IR::Shl(IR::getConstant(keyType, maxReturn), prefix);
+            lpmMask = new IR::Shl(IR::Constant::get(keyType, maxReturn), prefix);
         }
         matches->emplace(keyProperties.name, new LPM(keyProperties.key, ctrlPlaneKey, maskVar));
         return new IR::LAnd(
             hitCondition,
             new IR::LAnd(
                 // This is the actual LPM match under the shifted mask (the prefix).
-                new IR::Leq(maskVar, IR::getConstant(keyType, keyWidth)),
+                new IR::Leq(maskVar, IR::Constant::get(keyType, keyWidth)),
                 // The mask variable shift should not be larger than the key width.
                 new IR::Equ(new IR::BAnd(keyExpr, lpmMask), new IR::BAnd(ctrlPlaneKey, lpmMask))));
     }
@@ -139,7 +139,7 @@ const IR::Expression *TableStepper::computeTargetMatchType(
 }
 
 const IR::Expression *TableStepper::computeHit(TableMatchMap *matches) {
-    const IR::Expression *hitCondition = IR::getBoolLiteral(!properties.resolvedKeys.empty());
+    const IR::Expression *hitCondition = IR::BoolLiteral::get(!properties.resolvedKeys.empty());
     for (auto keyProperties : properties.resolvedKeys) {
         hitCondition = computeTargetMatchType(keyProperties, matches, hitCondition);
     }
@@ -148,12 +148,11 @@ const IR::Expression *TableStepper::computeHit(TableMatchMap *matches) {
 
 const IR::StringLiteral *TableStepper::getTableActionString(
     const IR::MethodCallExpression *actionCall) {
-    cstring actionName = actionCall->method->toString();
-    return new IR::StringLiteral(IR::Type_String::get(), actionName);
+    return IR::StringLiteral::get(actionCall->method->toString());
 }
 
 const IR::Expression *TableStepper::evalTableConstEntries() {
-    const IR::Expression *tableMissCondition = IR::getBoolLiteral(true);
+    const IR::Expression *tableMissCondition = IR::BoolLiteral::get(true);
 
     const auto *key = table->getKey();
     BUG_CHECK(key != nullptr, "An empty key list should have been handled earlier.");
@@ -190,7 +189,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
-        nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableHitVar(table), IR::BoolLiteral::get(true));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
 
         // Some path selection strategies depend on looking ahead and collecting potential
@@ -287,7 +286,7 @@ void TableStepper::setTableDefaultEntries(
             auto collector = CoverableNodesScanner(stepper->state);
             collector.updateNodeCoverage(actionType, coveredNodes);
         }
-        nextState.set(getTableHitVar(table), IR::getBoolLiteral(false));
+        nextState.set(getTableHitVar(table), IR::BoolLiteral::get(false));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
@@ -355,7 +354,7 @@ void TableStepper::evalTableControlEntries(
             collector.updateNodeCoverage(actionType, coveredNodes);
         }
 
-        nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableHitVar(table), IR::BoolLiteral::get(true));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
 
         std::stringstream tableStream;
@@ -510,7 +509,7 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
         auto collector = CoverableNodesScanner(stepper->state);
         collector.updateNodeCoverage(actionType, coveredNodes);
     }
-    nextState.set(getTableHitVar(table), IR::getBoolLiteral(false));
+    nextState.set(getTableHitVar(table), IR::BoolLiteral::get(false));
     nextState.set(getTableActionVar(table), getTableActionString(tableAction));
 
     nextState.replaceTopBody(&replacements);

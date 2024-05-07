@@ -19,9 +19,14 @@ limitations under the License.
 // of this to allow posix_memalign redeclaration with / without exception
 // specifier. As we define posix_memalign below in this file we really need to
 // ensure the proper include order to workaround this weirdness.
-#include <mm_malloc.h>  // NOLINT(build/include_order)
+// Some systems (e.g., GCC compiling on arm64) do not have mm_malloc.h. We need to skip it.
 
 #include "config.h"
+
+#if HAVE_MM_MALLOC_H
+#include <mm_malloc.h>  // NOLINT(build/include_order)
+#endif
+
 #if HAVE_LIBGC
 #include <gc/gc_cpp.h>
 #include <gc/gc_mark.h>

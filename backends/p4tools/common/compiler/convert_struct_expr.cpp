@@ -13,7 +13,7 @@ const IR::Node *ConvertStructExpr::postorder(IR::StructExpression *structExpr) {
     }
     if (structType->is<IR::Type_Header>()) {
         return new IR::HeaderExpression(structExpr->srcInfo, structType, structExpr->type,
-                                        structExpr->components, IR::getBoolLiteral(true));
+                                        structExpr->components, IR::BoolLiteral::get(true));
     }
     if (resolved) {
         return new IR::StructExpression(structExpr->srcInfo, structType, structExpr->type,

@@ -104,7 +104,7 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              auto emitIsTainted = Taint::hasTaint(validVar);
              if (emitIsTainted || !validVar->checkedTo<IR::BoolLiteral>()->value) {
                  auto &nextState = state.clone();
-                 nextState.replaceTopBody(Continuation::Return(IR::getBoolLiteral(false)));
+                 nextState.replaceTopBody(Continuation::Return(IR::BoolLiteral::get(false)));
                  result->emplace_back(nextState);
                  return;
              }
@@ -148,7 +148,7 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              checksum =
                  new IR::Add(bt16, new IR::Slice(checksum, 31, 16), new IR::Slice(checksum, 15, 0));
              const auto *calcResult = new IR::Cmpl(bt16, checksum);
-             const auto *comparison = new IR::Equ(calcResult, IR::getConstant(bt16, 0));
+             const auto *comparison = new IR::Equ(calcResult, IR::Constant::get(bt16, 0));
              auto &nextState = state.clone();
              nextState.replaceTopBody(Continuation::Return(comparison));
              result->emplace_back(nextState);
@@ -184,8 +184,8 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              // TODO: We need custom test objects to implement richer, stateful testing here.
              auto &nextState = state.clone();
              const auto *cond =
-                 new IR::LAnd(new IR::Equ(synExpr, IR::getConstant(synExpr->type, 1)),
-                              new IR::Equ(ackExpr, IR::getConstant(ackExpr->type, 0)));
+                 new IR::LAnd(new IR::Equ(synExpr, IR::Constant::get(synExpr->type, 1)),
+                              new IR::Equ(ackExpr, IR::Constant::get(ackExpr->type, 0)));
              nextState.replaceTopBody(Continuation::Return(cond));
              result->emplace_back(nextState);
          }},
