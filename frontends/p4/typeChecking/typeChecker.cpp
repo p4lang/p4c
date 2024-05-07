@@ -2684,8 +2684,13 @@ const IR::Node *TypeInference::shift(const IR::Operation_Binary *expression) {
         return expression;
     }
 
-    if (ltype->is<IR::Type_InfInt>() && !rtype->is<IR::Type_InfInt>()) {
-        typeError("%1%: width of left operand of shift needs to be specified", expression);
+    if (ltype->is<IR::Type_InfInt>() && !rtype->is<IR::Type_InfInt>() &&
+        !isCompileTimeConstant(expression->right)) {
+        typeError(
+            "%1%: shift result type is arbitrary-precision int, but right operand is not constant; "
+            "width of left operand of shift needs to be specified or both operands need to be "
+            "constant",
+            expression);
         return expression;
     }
 
