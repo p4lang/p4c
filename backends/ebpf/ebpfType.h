@@ -194,6 +194,35 @@ class EBPFEnumType : public EBPFType, public EBPF::IHasWidth {
     DECLARE_TYPEINFO(EBPFEnumType, EBPFType, IHasWidth);
 };
 
+class EBPFErrorType : public EBPFType, public EBPF::IHasWidth {
+ public:
+    explicit EBPFErrorType(const IR::Type_Error *type) : EBPFType(type) {}
+    void emit(CodeBuilder *builder) override;
+    void declare(CodeBuilder *builder, cstring id, bool asPointer) override;
+    void declareInit(CodeBuilder *builder, cstring id, bool asPointer) override;
+    void emitInitializer(CodeBuilder *builder) override { builder->append("0"); }
+    unsigned widthInBits() const override { return 32; }
+    unsigned implementationWidthInBits() const override { return 32; }
+    const IR::Type_Error *getType() const { return type->to<IR::Type_Error>(); }
+
+    DECLARE_TYPEINFO(EBPFErrorType, EBPFType, IHasWidth);
+};
+
+/// Methods are function signatures.
+class EBPFMethodDeclaration : public EBPFObject {
+ private:
+    /// The underlying P4 method of this declaration.
+    const IR::Method *method_;
+
+ public:
+    explicit EBPFMethodDeclaration(const IR::Method *method);
+
+    /// Emit the signature declaration of this method in C-style form.
+    void emit(CodeBuilder *builder);
+
+    DECLARE_TYPEINFO(EBPFMethodDeclaration, EBPFObject);
+};
+
 }  // namespace EBPF
 
 #endif /* BACKENDS_EBPF_EBPFTYPE_H_ */

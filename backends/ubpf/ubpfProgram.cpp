@@ -169,6 +169,20 @@ void UBPFProgram::emitTypes(EBPF::CodeBuilder *builder) {
             type->emit(builder);
             builder->newline();
         }
+        if (const auto *method = d->to<IR::Method>()) {
+            if (!method->srcInfo.isValid()) {
+                continue;
+            }
+            // Ignore methods originating from core.p4 and ubpf_model.p4 because they are already
+            // defined.
+            // TODO: Maybe we should still generate declarations for these methods?
+            if (isLibraryMethod(method->controlPlaneName())) {
+                continue;
+            }
+            EBPF::EBPFMethodDeclaration methodInstance(method);
+            methodInstance.emit(builder);
+            builder->newline();
+        }
     }
 }
 

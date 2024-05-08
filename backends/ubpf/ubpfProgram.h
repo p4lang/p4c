@@ -73,6 +73,15 @@ class UBPFProgram : public EBPF::EBPFProgram {
     void emitMetadataInstance(EBPF::CodeBuilder *builder) const;
     void emitLocalVariables(EBPF::CodeBuilder *builder) override;
     void emitPipeline(EBPF::CodeBuilder *builder) override;
+
+    bool isLibraryMethod(cstring methodName) override {
+        static std::set<cstring> DEFAULT_METHODS = {
+            "mark_to_drop", "mark_to_pass",  "ubpf_time_get_ns", "truncate",
+            "hash",         "csum_replace2", "csum_replace4",
+        };
+        return DEFAULT_METHODS.find(methodName) != DEFAULT_METHODS.end() ||
+               EBPFProgram::isLibraryMethod(methodName);
+    }
 };
 
 }  // namespace UBPF
