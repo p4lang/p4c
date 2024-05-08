@@ -125,7 +125,7 @@ if (/* hdr->ipv4.isValid() */
                                         .tblid = 1,
                                         .profile_id = 2
                                     };
-                                    bpf_p4tc_entry_create_on_miss(skb, &update_params, sizeof(params), &key, sizeof(key));
+                                    bpf_p4tc_entry_create_on_miss(skb, &update_params, sizeof(update_params), &key, sizeof(key));
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP: 
@@ -189,7 +189,7 @@ if (/* hdr->ipv4.isValid() */
                                         .tblid = 2,
                                         .profile_id = 2
                                     };
-                                    bpf_p4tc_entry_create_on_miss(skb, &update_params, sizeof(params), &key, sizeof(key));
+                                    bpf_p4tc_entry_create_on_miss(skb, &update_params, sizeof(update_params), &key, sizeof(key));
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP: 
