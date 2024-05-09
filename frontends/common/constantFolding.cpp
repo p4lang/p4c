@@ -712,16 +712,12 @@ const IR::Node *DoConstantFolding::postorder(IR::LNot *e) {
 const IR::Node *DoConstantFolding::postorder(IR::Mux *e) {
     if (!typesKnown) {
         // Action enum switch case labels must be action names.
-        // If we are in the context of an action enum switch label, we want
-        // the typechecker to look at the expression first, so don't fold yet.
+        // If we are in the context of a switch label, we want the typechecker
+        // to look at the label expression first.
         if (const auto *switchStatement = findContext<IR::SwitchStatement>()) {
-            if (const auto *type = typeMap->getType(switchStatement->expression)) {
-                if (type->is<IR::Type_ActionEnum>()) {
-                    for (const auto *c : switchStatement->cases) {
-                        if (isInContext(c->label)) {
-                            return e;
-                        }
-                    }
+            for (const auto *c : switchStatement->cases) {
+                if (isInContext(c->label)) {
+                    return e;
                 }
             }
         }
