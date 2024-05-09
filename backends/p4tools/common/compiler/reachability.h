@@ -7,7 +7,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
-#include <vector>
 
 #include "frontends/p4/callGraph.h"
 #include "ir/id.h"
@@ -34,7 +33,7 @@ class ExtendedCallGraph : public P4::CallGraph<T> {
     /// Function adds current vertex to a hash which allows to get access
     /// for vertexes from string in DCG.
     /// If name is empty then it doesn't hash it.
-    void addToHash(T vertex, IR::ID name) {
+    void addToHash(T vertex, const IR::ID &name) {
         if (name.name.size() == 0) {
             return;
         }
@@ -51,7 +50,7 @@ class ExtendedCallGraph : public P4::CallGraph<T> {
             cstring newName = name.name.before(prev);
             i = hash.find(newName);
             if (i == hash.end()) {
-                addToHash(vertex, (newName.size() ? IR::ID(newName) : IR::ID()));
+                addToHash(vertex, ((newName.size() != 0U) ? IR::ID(newName) : IR::ID()));
             }
         }
     }
@@ -98,7 +97,7 @@ class P4ProgramDCGCreator : public Inspector {
 
     bool preorder(const IR::Annotation *annotation) override;
     bool preorder(const IR::ConstructorCallExpression *callExpr) override;
-    bool preorder(const IR::MethodCallExpression *method) override;
+    bool preorder(const IR::MethodCallExpression *call) override;
     bool preorder(const IR::MethodCallStatement *method) override;
     bool preorder(const IR::P4Action *action) override;
     bool preorder(const IR::P4Parser *parser) override;
@@ -115,7 +114,7 @@ class P4ProgramDCGCreator : public Inspector {
  protected:
     /// Function add edge to current @vertex in DCG.
     /// The edge is a pair (@prev, @vertex).
-    void addEdge(const DCGVertexType *vertex, IR::ID vertexName = IR::ID());
+    void addEdge(const DCGVertexType *vertex, const IR::ID &vertexName = IR::ID());
 };
 
 /// The main data for reachability engine.

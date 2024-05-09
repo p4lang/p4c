@@ -47,11 +47,21 @@ class CallGraph {
 
  public:
     ordered_set<T> nodes;  // all nodes; do not modify this directly
-    typedef typename ordered_map<T, std::vector<T> *>::const_iterator const_iterator;
+    using const_iterator = typename ordered_map<T, std::vector<T> *>::const_iterator;
 
     explicit CallGraph(cstring name) : name(name) {}
 
-    const cstring &getName() const { return name; }
+    [[nodiscard]] const cstring &getName() const { return name; }
+
+    [[nodiscard]] bool empty() const { return nodes.empty(); }
+
+    [[nodiscard]] size_t size() const { return nodes.size(); }
+
+    [[nodiscard]] const ordered_map<T, std::vector<T> *> &getOutEdges() const { return out_edges; }
+
+    [[nodiscard]] const ordered_map<T, std::vector<T> *> &getInEdges() const { return in_edges; }
+
+    [[nodiscard]] const ordered_set<T> &getNodes() const { return nodes; }
 
     // Graph construction.
 
@@ -118,7 +128,6 @@ class CallGraph {
     void getCallees(T caller, std::set<T> &toAppend) {
         if (isCaller(caller)) toAppend.insert(out_edges[caller]->begin(), out_edges[caller]->end());
     }
-    size_t size() const { return nodes.size(); }
     // out will contain all nodes reachable from start
     void reachable(T start, std::set<T> &out) const {
         std::set<T> work;
@@ -141,7 +150,7 @@ class CallGraph {
         for (auto n : toRemove) remove(n);
     }
 
-    typedef std::unordered_set<T> Set;
+    using Set = std::unordered_set<T>;
 
     // Compute for each node the set of dominators with the indicated start node.
     // Node d dominates node n if all paths from the start to n go through d

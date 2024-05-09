@@ -1,15 +1,16 @@
 #include "backends/p4tools/common/compiler/reachability.h"
 
 #include <cstddef>
-#include <functional>
 #include <iostream>
 #include <list>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "backends/p4tools/common/lib/table_utils.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
+#include "ir/ir-generated.h"
 #include "ir/vector.h"
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
@@ -52,57 +53,70 @@ bool P4ProgramDCGCreator::preorder(const IR::ConstructorCallExpression *callExpr
     return true;
 }
 
-bool P4ProgramDCGCreator::preorder(const IR::MethodCallExpression *method) {
+bool P4ProgramDCGCreator::preorder(const IR::MethodCallExpression *call) {
     // Check for application of a table.
-    CHECK_NULL(method->method);
-    if (const auto *path = method->method->to<IR::PathExpression>()) {
-        const auto *currentControl = findOrigCtxt<IR::P4Control>();
-        if (currentControl != nullptr) {
-            const auto *decl = currentControl->getDeclByName(path->path->name.name);
-            if (decl != nullptr) {
-                if (const auto *action = decl->to<IR::P4Action>()) {
-                    for (const auto *arg : *method->arguments) {
-                        visit(arg);
-                    }
-                    addEdge(method);
-                    visit(action);
-                    return false;
-                }
-            }
-        }
-    }
-    if (!method->method->is<IR::Member>()) {
-        return true;
-    }
-    const auto *member = method->method->to<IR::Member>();
-    for (const auto *arg : *method->arguments) {
+    CHECK_NULL(call->method);
+    for (const auto *arg : *call->arguments) {
         visit(arg);
     }
-    // Do not anylyse tables apply and value set index methods.
-    if (member->member != IR::IApply::applyMethodName && member->member.originalName != "index") {
-        return true;
-    }
-    if (const auto *pathExpr = member->expr->to<IR::PathExpression>()) {
+    if (call->method->type->is<IR::Type_Action>()) {
         const auto *currentControl = findOrigCtxt<IR::P4Control>();
-        if (currentControl != nullptr) {
-            const auto *decl = currentControl->getDeclByName(pathExpr->path->name.name);
-            visit(decl->checkedTo<IR::P4Table>());
-            return false;
-        }
-        const auto *parser = findOrigCtxt<IR::P4Parser>();
-        if (parser != nullptr) {
-            const auto *decl = parser->getDeclByName(pathExpr->path->name.name);
-            visit(decl->checkedTo<IR::Declaration_Instance>());
-            return true;
-        }
-        return true;
-    }
-    const auto *type = member->expr->type;
-    if (const auto *tableType = type->to<IR::Type_Table>()) {
-        visit(tableType->table);
+        BUG_CHECK(currentControl != nullptr, "Trying to find an action without a control");
+        const auto *path = call->method->checkedTo<IR::PathExpression>();
+        const auto *decl = currentControl->getDeclByName(path->path->name.name);
+        BUG_CHECK(decl != nullptr, "P4Action declaration for call %1% not found", call);
+        const auto *action = decl->checkedTo<IR::P4Action>();
+        addEdge(call);
+        visit(action);
         return false;
     }
-    return true;
+    if (call->method->type->is<IR::Type_Method>()) {
+        if (call->method->is<IR::PathExpression>()) {
+            return false;
+        }
+        if (const auto *method = call->method->to<IR::Member>()) {
+            // Case where call->method is a Member expression. For table invocations, the
+            // qualifier of the member determines the table being invoked. For extern calls,
+            // the qualifier determines the extern object containing the method being invoked.
+            BUG_CHECK(method->expr, "Method call has unexpected format: %1%", call);
+
+            // Handle table calls.
+            if (const auto *tableType = method->expr->type->to<IR::Type_Table>()) {
+                visit(tableType->table);
+                return false;
+            }
+
+            // Handle extern calls. They may also be of Type_SpecializedCanonical.
+            if (method->expr->type->is<IR::Type_Extern>() ||
+                method->expr->type->is<IR::Type_SpecializedCanonical>()) {
+                return false;
+            }
+
+            // Handle calls to header methods.
+            if (method->expr->type->is<IR::Type_Header>() ||
+                method->expr->type->is<IR::Type_HeaderUnion>()) {
+                if (method->member == "isValid" || method->member == "setInvalid" ||
+                    method->member == "setValid") {
+                    return false;
+                }
+                BUG("Unknown method call on header instance: %1%", call);
+            }
+
+            if (method->expr->type->is<IR::Type_Stack>()) {
+                if (method->member == "push_front" || method->member == "pop_front") {
+                    return false;
+                }
+                BUG("Unknown method call on stack instance: %1%", call);
+            }
+
+            BUG("Unknown method member expression: %1% of type %2%", method->expr,
+                method->expr->type);
+        }
+
+        BUG("Unknown method call: %1% of type %2%", call->method, call->method->node_type_name());
+    }
+
+    BUG("Unsupported method call type for %1%: %2%", call, call->method->type);
 }
 
 bool P4ProgramDCGCreator::preorder(const IR::MethodCallStatement *method) {
@@ -131,7 +145,6 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Parser *parser) {
 
 bool P4ProgramDCGCreator::preorder(const IR::P4Table *table) {
     addEdge(table, table->name);
-    DCGVertexTypeSet prevSet;
     if (table->annotations != nullptr) {
         for (const auto *annotation : table->annotations->annotations) {
             visit(annotation);
@@ -146,25 +159,43 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Table *table) {
             }
         }
     }
-    auto storedSet = prev;
-    const auto *entryList = table->getEntries();
-    if (entryList != nullptr) {
-        for (const auto *entry : entryList->entries) {
-            prev = storedSet;
-            visit(entry);
+    TableUtils::TableProperties properties;
+
+    TableUtils::checkTableImmutability(*table, properties);
+
+    if (properties.tableIsImmutable && properties.defaultIsImmutable) {
+        DCGVertexTypeSet prevSet;
+        auto storedSet = prev;
+        const auto *entryList = table->getEntries();
+        if (entryList != nullptr) {
+            for (const auto *entry : entryList->entries) {
+                prev = storedSet;
+                visit(entry);
+                prevSet.insert(prev.begin(), prev.end());
+            }
+        } else if (wasImplementations) {
             prevSet.insert(prev.begin(), prev.end());
         }
-    } else if (wasImplementations) {
+        prev = storedSet;
+        visit(table->getDefaultAction());
         prevSet.insert(prev.begin(), prev.end());
+        prev = prevSet;
+        return false;
     }
-    prev = storedSet;
-    visit(table->getDefaultAction());
-    prevSet.insert(prev.begin(), prev.end());
-    prev = prevSet;
+    DCGVertexTypeSet next = prev;
+    auto storedSet = prev;
+    for (const auto *action : table->getActionList()->actionList) {
+        prev = storedSet;
+        visit(action->expression);
+        next.insert(prev.begin(), prev.end());
+    }
+    prev = next;
     return false;
 }
 
 bool P4ProgramDCGCreator::preorder(const IR::ParserState *parserState) {
+    const auto *currentParser = findOrigCtxt<IR::P4Parser>();
+    BUG_CHECK(currentParser != nullptr, "Null parser pointer");
     addEdge(parserState, parserState->name);
     visited.insert(parserState);
     if (parserState->annotations != nullptr) {
@@ -177,16 +208,17 @@ bool P4ProgramDCGCreator::preorder(const IR::ParserState *parserState) {
     }
     if (parserState->selectExpression != nullptr) {
         if (const auto *pathExpr = parserState->selectExpression->to<IR::PathExpression>()) {
-            if (pathExpr->path->name.name == IR::ParserState::accept ||
-                pathExpr->path->name.name == IR::ParserState::reject) {
-                addEdge(parserState->selectExpression);
-                return true;
+            const auto *declaration =
+                currentParser->states.getDeclaration<IR::ParserState>(pathExpr->path->name.name);
+            BUG_CHECK(declaration != nullptr, "Parser state not found: %1%",
+                      pathExpr->path->name.name);
+            if (visited.count(declaration) != 0U) {
+                return false;
             }
+            visit(declaration);
+        } else {
+            visit(parserState->selectExpression);
         }
-        if (visited.count(parserState->selectExpression) != 0U) {
-            return false;
-        }
-        visit(parserState->selectExpression);
     }
     return false;
 }
@@ -218,8 +250,9 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Program *program) {
             // declaration instance.
             auto filter = [pathExpr](const IR::IDeclaration *d) {
                 CHECK_NULL(d);
-                if (const auto *decl = d->to<IR::Declaration_Instance>())
+                if (const auto *decl = d->to<IR::Declaration_Instance>()) {
                     return pathExpr->path->name == decl->name;
+                }
                 return false;
             };
             // Convert the declaration instance into a constructor-call expression.
@@ -276,6 +309,8 @@ bool P4ProgramDCGCreator::preorder(const IR::IfStatement *ifStatement) {
         prev = storedSet;
         visit(ifStatement->ifFalse);
         next.insert(prev.begin(), prev.end());
+    } else {
+        next.insert(storedSet.begin(), storedSet.end());
     }
     prev = next;
     return false;
@@ -315,7 +350,7 @@ bool P4ProgramDCGCreator::preorder(const IR::StatOrDecl *statOrDecl) {
     return true;
 }
 
-void P4ProgramDCGCreator::addEdge(const DCGVertexType *vertex, IR::ID vertexName) {
+void P4ProgramDCGCreator::addEdge(const DCGVertexType *vertex, const IR::ID &vertexName) {
     LOG1("Add edge : " << prev.size() << "(" << *prev.begin() << ") : " << vertex);
     for (const auto *p : prev) {
         dcg->calls(p, vertex);
