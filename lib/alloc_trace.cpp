@@ -64,6 +64,9 @@ void AllocTrace::count(void **bt, size_t sz) {
 }
 
 std::ostream &operator<<(std::ostream &out, const AllocTrace &at) {
+#if HAVE_LIBGC
+    PauseTrace temp_pause;
+#endif
     typedef decltype(at.data)::value_type data_t;
     std::vector<std::pair<size_t, const data_t *>> sorted;
     size_t total_total = 0;

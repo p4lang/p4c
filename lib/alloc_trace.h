@@ -20,6 +20,7 @@ limitations under the License.
 #include <map>
 #include <ostream>
 
+#include "config.h"
 #include "exceptions.h"
 #include "gc.h"
 
