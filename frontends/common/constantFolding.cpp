@@ -317,8 +317,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Add *e) {
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::AddSat *e) {
-    return binary(
-        e, [](big_int a, big_int b) -> big_int { return a + b; }, true);
+    return binary(e, [](big_int a, big_int b) -> big_int { return a + b; }, true);
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Sub *e) {
@@ -326,8 +325,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Sub *e) {
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::SubSat *e) {
-    return binary(
-        e, [](big_int a, big_int b) -> big_int { return a - b; }, true);
+    return binary(e, [](big_int a, big_int b) -> big_int { return a - b; }, true);
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Mul *e) {
