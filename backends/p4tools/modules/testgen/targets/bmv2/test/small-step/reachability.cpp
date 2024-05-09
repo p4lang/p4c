@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <functional>
 
 #include "backends/p4tools/common/compiler/midend.h"
 #include "frontends/common/options.h"
@@ -13,6 +12,8 @@
 #include "frontends/common/parser_options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/frontend.h"
+#include "frontends/p4/toP4/toP4.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"
@@ -69,6 +70,8 @@ ReturnedInfo loadExampleForReachability(const char *curFile) {
     P4::TypeMap typeMap;
     P4Tools::MidEnd midEnd(options);
     program = program->apply(midEnd);
+    // Need a last round of type checking.
+    program = program->apply(P4::TypeChecking(&refMap, &typeMap, true));
     auto *currentDCG = new P4Tools::NodesCallGraph("NodesCallGraph");
     P4Tools::P4ProgramDCGCreator dcgCreator(currentDCG);
     program->apply(dcgCreator);
@@ -384,12 +387,14 @@ void callTestgen(const char *inputFile, const char *behavior, const char *path, 
     }
 }
 
-bool checkResultingSTF(std::list<std::list<std::string>> identifiersList, std::string path) {
-    std::ostringstream resDir;
-    resDir << buildPath << path;
-    for (const auto &f : std::filesystem::directory_iterator(resDir.str())) {
-        std::string fpath = f.path().c_str();
-        if (fpath.rfind(".stf") == std::string::npos) {
+bool checkResultingSTF(const std::list<std::list<std::string>> &identifiersList,
+                       const std::filesystem::path &path) {
+    std::filesystem::path resDir = std::filesystem::path(buildPath) / path;
+    if (!std::filesystem::exists(resDir)) {
+        return false;
+    }
+    for (const auto &f : std::filesystem::directory_iterator(resDir)) {
+        if (f.path().extension() != ".stf") {
             // Not a STF file.
             continue;
         }
