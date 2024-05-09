@@ -42,6 +42,11 @@ struct my_ingress_metadata_t {
 struct empty_metadata_t {
 }
 
+struct reg_val_t {
+    bit<8> protocol;
+    bit<8> aux;
+};
+
 /***********************  P A R S E R  **************************/
 
 parser Ingress_Parser(
@@ -78,20 +83,20 @@ control ingress(
 )
 {
     Register<bit<32>, PortId_t>(10, 13) reg1;
-    Register<bit<32>, bit<32>>(10, 13) reg2;
+    Register<reg_val_t, bit<32>>(3) reg3;
     action send_nh( @tc_type ("dev") PortId_t port_id,  @tc_type ("macaddr") bit<48> dmac,  @tc_type ("macaddr") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr = dmac;
         send_to_port(port_id);
     }
 
-    /*action ext_reg(PortId_t port_id) {
-        bit<32> tmp1;
-        tmp1 = reg1.read(port_id);
-        tmp1 = tmp1 + 10;
-        reg1.write(port_id, tmp1);
+    action ext_reg(PortId_t port_id) {
+        bit<32> val;
+        val = reg1.read(port_id);
+        val = val + 10;
+        reg1.write(port_id, val);
         send_to_port(port_id);
-    }*/
+    }
     action drop() {
         drop_packet();
     }
@@ -101,17 +106,19 @@ control ingress(
             hdr.ipv4.srcAddr : lpm;
         }
         actions = {
+            ext_reg;
             send_nh;
             drop;
         }
         size = PORT_TABLE_SIZE;
         const default_action = drop;
     }
-
     
-    
-
     apply {
+        reg_val_t arg_val;
+        arg_val.protocol = hdr.ipv4.protocol;
+        arg_val.aux = 22;
+        reg3.write(2, arg_val);
         nh_table.apply();
     }
 }
@@ -120,7 +127,7 @@ control ingress(
 
 control Ingress_Deparser(
     packet_out pkt,
-    in    my_ingress_headers_t hdr,
+    inout    my_ingress_headers_t hdr,
     in    my_ingress_metadata_t meta,
     in    pna_main_output_metadata_t ostd)
 {

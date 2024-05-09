@@ -1,6 +1,7 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "ipip",
+  "externs" : [],
   "tables" : [
     {
       "name" : "Main/fwd_table",

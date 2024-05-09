@@ -22,8 +22,8 @@ set(P4TC_BACKEND_SOURCES
     pnaProgramStructure.cpp
     tc.cpp
     tcAnnotations.cpp
+    tcExterns.cpp
     version.cpp
-    addExternAnnotations.cpp
     ../ebpf/ebpfBackend.cpp
     ../ebpf/ebpfProgram.cpp
     ../ebpf/ebpfTable.cpp
@@ -64,8 +64,8 @@ set(P4TC_BACKEND_HEADERS
    options.h
    pnaProgramStructure.h
    tcAnnotations.h
+   tcExterns.h
    version.h
-   addExternsAnnotations.h
    ../ebpf/codeGen.h
    ../ebpf/ebpfBackend.h
    ../ebpf/ebpfControl.h

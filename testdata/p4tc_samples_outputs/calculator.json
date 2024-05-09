@@ -1,6 +1,7 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "calculator",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/calculate",

@@ -32,6 +32,8 @@ inline constexpr auto DEFAULT_TABLE_CONTROL_PATH_ACCESS = "CRUDPS";
 inline constexpr auto DEFAULT_TABLE_DATA_PATH_ACCESS = "RX";
 inline constexpr auto DEFAULT_ADD_ON_MISS_TABLE_CONTROL_PATH_ACCESS = "CRUDPS";
 inline constexpr auto DEFAULT_ADD_ON_MISS_TABLE_DATA_PATH_ACCESS = "CRXP";
+inline constexpr auto DEFAULT_EXTERN_CONTROL_PATH_ACCESS = "RUS";
+inline constexpr auto DEFAULT_EXTERN_DATA_PATH_ACCESS = "CRUXP";
 
 // Supported data types.
 inline constexpr auto BIT_TYPE = 0;

@@ -391,31 +391,45 @@ class TCTable {
     dbprint { out << toString(); }
 }
 
+class TCKey {
+    unsigned keyID;
+    unsigned bitwidth;
+    cstring keyName;
+    cstring keyAttribute;
+    toString {
+        std::string tckeyInstance = " " + keyAttribute + " " + keyName + " type bit" + Util::toString(bitwidth)
+                        + " id " + Util::toString(keyID);
+        return tckeyInstance;
+    }
+    dbprint { out << toString(); }
+
+}
+
 class TCExternInstance {
+    unsigned instanceID;
+    cstring instanceName;
     bool isNumelemns;
     unsigned numelemns;
     bool isControlPath;
-    ordered_map<cstring, cstring> type_per_field;
-    ordered_map<cstring, safe_vector<cstring>> annotation_per_field;
-    TCExternInstance(unsigned ne, ordered_map<cstring, cstring> type, ordered_map<cstring, safe_vector<cstring>> annos) {
-        isNumelemns = true;
+    safe_vector<TCKey> keys;
+    TCExternInstance(unsigned id, cstring name, bool isNe, unsigned ne) {
+        instanceID = id;
+        instanceName = name;
+        isNumelemns = isNe;
         numelemns = ne;
-        isControlPath = true;
-        type_per_field = type;
-        annotation_per_field = annos;
+    }
+    void addControlPathKeys(safe_vector<TCKey> k) {
+        if (k.size() > 0) {
+            isControlPath = true;
+            keys = k;
+        }
     }
     toString {
         std::string tcExternInstance = "";
         if (isControlPath) {
             tcExternInstance += "\n control_path";
-            for (auto field : type_per_field) {
-                auto find = annotation_per_field.find(field.first);
-                if (find != annotation_per_field.end()) {
-                    for (auto anno : annotation_per_field.at(field.first)) {
-                        tcExternInstance += " " + anno;
-                    }
-                }
-                tcExternInstance += " " + field.first + " type " + field.second;
+            for (auto field : keys) {
+                tcExternInstance += field->toString();
             }
         }
         if (isNumelemns) {
@@ -457,7 +471,7 @@ class TCExtern {
             tcExtern += "\n$TC p4template create extern_inst/" + pipelineName
                       + "/" + externName + " instid " + Util::toString(iter + 1) + " \\";
             if (externInstances.size() > iter)
-                tcExtern += externInstances[iter]->toString();
+                tcExtern += "\n" + externInstances[iter]->toString();
         }
         return tcExtern;
     }
@@ -492,6 +506,14 @@ class TCPipeline {
     }
     void addExternDefinition(TCExtern externDef) {
         externDefs.push_back(externDef);
+    }
+    TCExtern getExternDefinition(cstring eName) const {
+        for (auto externDef : externDefs) {
+            if(externDef->externName == eName) {
+                return externDef;
+            }
+        }
+        return nullptr;
     }
     TCPipeline() {
         Util::SourceInfo* srcinfo = new Util::SourceInfo();

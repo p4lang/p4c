@@ -19,7 +19,6 @@ and limitations under the License.
 
 #include <deque>
 
-#include "addExternAnnotations.h"
 #include "backends/ebpf/psa/ebpfPsaGen.h"
 #include "ebpfCodeGen.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -49,15 +48,16 @@ class PNAEbpfGenerator;
 class ConvertToBackendIR : public Inspector {
  public:
     struct ExternInstance {
-        int numelements;
-        ordered_map<cstring, cstring> type_per_field;
-        ordered_map<cstring, safe_vector<cstring>> annotation_per_field;
+        cstring instance_name;
+        unsigned instance_id;
+        bool is_num_elements;
+        int num_elements;
     };
     struct ExternBlock {
         unsigned externId;
         cstring control_name;
         unsigned no_of_instances;
-        cstring permissions = "0x18A6";
+        cstring permissions;
         safe_vector<struct ExternInstance *> eInstance;
     };
     const IR::ToplevelBlock *tlb;
@@ -78,8 +78,7 @@ class ConvertToBackendIR : public Inspector {
     ordered_map<unsigned, unsigned> tableKeysizeList;
     safe_vector<const IR::P4Table *> add_on_miss_tables;
     ordered_map<cstring, std::pair<cstring, cstring> *> tablePermissions;
-    ordered_map<cstring, cstring> externAccessPermisson;
-    ordered_map<cstring, const IR::Type_Struct *> structPerExterns;
+    ordered_map<cstring, const IR::Type_Struct *> ControlStructPerExtern;
     ordered_map<cstring, struct ExternBlock *> externsInfo;
 
  public:
@@ -94,8 +93,12 @@ class ConvertToBackendIR : public Inspector {
     void postorder(const IR::P4Program *p) override;
     void postorder(const IR::Declaration_Instance *d) override;
     void postorder(const IR::Type_Struct *ts) override;
-    void postorder(const IR::Type_Extern *ext);
-    int getNumElemens(const IR::Type_Extern *extn, const IR::Declaration_Instance *decl);
+    void processExternConstructorAnnotations(const IR::Type_Extern *extn,
+                                             const IR::Declaration_Instance *decl,
+                                             struct ExternInstance *instance);
+    safe_vector<const IR::TCKey *> processExternControlPath(const IR::Type_SpecializedCanonical *ts,
+                                                            const IR::Type_Extern *extn,
+                                                            cstring eName);
     unsigned GetAccessNumericValue(cstring access);
     bool isDuplicateOrNoAction(const IR::P4Action *action);
     void updateDefaultHitAction(const IR::P4Table *t, IR::TCTable *tdef);
@@ -111,11 +114,13 @@ class ConvertToBackendIR : public Inspector {
     unsigned getTcType(const IR::StringLiteral *sl);
     unsigned getTableId(cstring tableName) const;
     unsigned getActionId(cstring actionName) const;
+    unsigned getExternId(cstring externName) const;
+    unsigned getExternInstanceId(cstring externName, cstring instanceName) const;
+    cstring processExternPermission(const IR::Type_Extern *ext);
     unsigned getTableKeysize(unsigned tableId) const;
     cstring externalName(const IR::IDeclaration *declaration) const;
     cstring HandleTableAccessPermission(const IR::P4Table *t);
     std::pair<cstring, cstring> *GetAnnotatedAccessPath(const IR::Annotation *anno);
-    unsigned GetAccessNumericValue(cstring access);
     void updateAddOnMissTable(const IR::P4Table *t);
 };
 
@@ -134,7 +139,6 @@ class Backend : public PassManager {
     IR::TCPipeline *pipeline = new IR::TCPipeline();
     TC::ConvertToBackendIR *tcIR;
     TC::IntrospectionGenerator *genIJ;
-    TC::AddExternAnnotations *extAnno;
     TC::ParseTCAnnotations *parseTCAnno;
     const IR::ToplevelBlock *top = nullptr;
     EbpfOptions ebpfOption;

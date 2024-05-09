@@ -48,12 +48,14 @@ struct KeyFieldAttributes {
     cstring name;
     cstring type;
     cstring matchType;
+    cstring attribute;
     unsigned int bitwidth;
     KeyFieldAttributes() {
         id = 0;
         name = nullptr;
         type = nullptr;
         matchType = nullptr;
+        attribute = nullptr;
         bitwidth = 0;
     }
 };
@@ -116,11 +118,34 @@ struct TableAttributes {
     }
 };
 
+struct ExternInstancesAttributes {
+    unsigned int id;
+    cstring name;
+    safe_vector<struct KeyFieldAttributes *> keyFields;
+    ExternInstancesAttributes() {
+        id = 0;
+        name = nullptr;
+    }
+};
+
+struct ExternAttributes {
+    cstring name;
+    cstring permissions;
+    unsigned int id;
+    safe_vector<struct ExternInstancesAttributes *> instances;
+    ExternAttributes() {
+        name = nullptr;
+        permissions = nullptr;
+        id = 0;
+    }
+};
+
 /// This pass generates introspection JSON into user specified file
 class IntrospectionGenerator : public Inspector {
     IR::TCPipeline *tcPipeline;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
+    safe_vector<struct ExternAttributes *> externsInfo;
     safe_vector<struct TableAttributes *> tablesInfo;
     ordered_map<cstring, const IR::P4Table *> p4tables;
 
@@ -130,9 +155,12 @@ class IntrospectionGenerator : public Inspector {
         : tcPipeline(tcPipeline), refMap(refMap), typeMap(typeMap) {}
     void postorder(const IR::P4Table *t);
     const Util::JsonObject *genIntrospectionJson();
+    void genExternJson(Util::JsonArray *externJson);
+    Util::JsonObject *genExternInfo(struct ExternAttributes *extn);
     void genTableJson(Util::JsonArray *tablesJson);
     Util::JsonObject *genTableInfo(struct TableAttributes *tbl);
     void collectTableInfo();
+    void collectExternInfo();
     void collectKeyInfo(const IR::Key *k, struct TableAttributes *tableinfo);
     void collectActionInfo(const IR::ActionList *actionlist, struct TableAttributes *tableinfo,
                            const IR::P4Table *p4table, const IR::TCTable *table);

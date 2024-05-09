@@ -1,6 +1,7 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "global_action_example_01",
+  "externs" : [],
   "tables" : [
     {
       "name" : "ingress/nh_table",

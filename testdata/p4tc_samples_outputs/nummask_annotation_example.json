@@ -1,6 +1,7 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "nummask_annotation_example",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/set_ct_options",

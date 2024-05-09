@@ -1,6 +1,7 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "default_hit_const_example",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/set_ct_options",
