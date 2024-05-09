@@ -2,7 +2,6 @@
 #define BACKENDS_P4TOOLS_COMMON_COMPILER_CONFIGURATION_H_
 
 #include <climits>
-#include <limits>
 
 #include "ir/configuration.h"
 
@@ -12,7 +11,7 @@ namespace P4Tools {
 /// integer.
 class CompilerConfiguration : public DefaultP4CConfiguration {
  public:
-    int maximumWidthSupported() const override { return INT_MAX; }
+    [[nodiscard]] int maximumWidthSupported() const override { return INT_MAX; }
 
     /// @return the singleton instance.
     static const CompilerConfiguration &get() {

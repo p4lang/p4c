@@ -33,3 +33,6 @@
 
 /* Define to 1 if you have the cxxabi.h header */
 #cmakedefine HAVE_CXXABI_H 1
+
+/* Define to 1 if you have the mm_malloc.h header */
+#cmakedefine HAVE_MM_MALLOC_H 1

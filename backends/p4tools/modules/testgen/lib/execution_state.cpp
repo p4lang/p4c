@@ -67,8 +67,8 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
     : AbstractExecutionState(program),
       body({program}),
       stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
-    env.set(&PacketVars::INPUT_PACKET_LABEL, IR::getConstant(IR::getBitType(0), 0));
-    env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::getConstant(IR::getBitType(0), 0));
+    env.set(&PacketVars::INPUT_PACKET_LABEL, IR::Constant::get(IR::getBitType(0), 0));
+    env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::Constant::get(IR::getBitType(0), 0));
     // We also add the taint property and set it to false.
     setProperty("inUndefinedState", false);
     // Drop is initialized to false, too.
@@ -507,7 +507,7 @@ void ExecutionState::prependToPacketBuffer(const IR::Expression *expr) {
 }
 
 void ExecutionState::resetPacketBuffer() {
-    env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::getConstant(IR::getBitType(0), 0));
+    env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::Constant::get(IR::getBitType(0), 0));
 }
 
 const IR::Expression *ExecutionState::getEmitBuffer() const {
@@ -515,7 +515,7 @@ const IR::Expression *ExecutionState::getEmitBuffer() const {
 }
 
 void ExecutionState::resetEmitBuffer() {
-    env.set(&PacketVars::EMIT_BUFFER_LABEL, IR::getConstant(IR::getBitType(0), 0));
+    env.set(&PacketVars::EMIT_BUFFER_LABEL, IR::Constant::get(IR::getBitType(0), 0));
 }
 
 void ExecutionState::appendToEmitBuffer(const IR::Expression *expr) {

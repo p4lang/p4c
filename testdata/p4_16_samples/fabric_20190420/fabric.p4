@@ -17,7 +17,7 @@
 // All of the P4 source files in this directory were copied from the
 // following location on 2019-Apr-20:
 
-// https://github.com/opennetworkinglab/onos/blob/master/pipelines/fabric/src/main/resources
+// https://github.com/opennetworkinglab/onos/blob/master/pipelines/fabric/impl/src/main/resources
 
 // The only changes made were:
 

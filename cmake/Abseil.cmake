@@ -20,7 +20,7 @@ macro(p4c_obtain_abseil)
     endif()
   else()
     set(P4C_ABSEIL_VERSION "20240116.1")
-    message("Fetching Abseil version ${P4C_ABSEIL_VERSION} for P4C...")
+    message(STATUS "Fetching Abseil version ${P4C_ABSEIL_VERSION} for P4C...")
 
     # Unity builds do not work for Abseil...
     set(CMAKE_UNITY_BUILD_PREV ${CMAKE_UNITY_BUILD})
@@ -53,15 +53,24 @@ macro(p4c_obtain_abseil)
         # Do not suppress warnings for Abseil library targets that are aliased.
         get_target_property(target_type ${target} TYPE)
         if (NOT ${target_type} STREQUAL "INTERFACE_LIBRARY")
-          set_target_properties(${target} PROPERTIES COMPILE_FLAGS "-Wno-error -w")
+          # We need this workaround because of https://github.com/abseil/abseil-cpp/issues/1664.
+          # TODO: Remove once the Abseil compilation issue is fixed.
+          if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 14)
+            target_compile_options(${target} PUBLIC "-mbmi")
+          endif()
+          target_compile_options(${target} PRIVATE "-Wno-error" "-w")
         endif()
       endif()
     endforeach()
+    # TODO: Remove once the Abseil compilation issue is fixed.
+    if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 14)
+      message(WARNING "Compiling with GCC > 14. Adding -mbmi to Abseil targets, this may cause incompatibility with old CPUs.")
+    endif()
 
     # Reset temporary variable modifications.
     set(CMAKE_UNITY_BUILD ${CMAKE_UNITY_BUILD_PREV})
     set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
   endif()
 
-  message("Done with setting up Abseil for P4C.")
+  message(STATUS "Done with setting up Abseil for P4C.")
 endmacro(p4c_obtain_abseil)

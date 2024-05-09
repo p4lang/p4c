@@ -5,7 +5,7 @@ The back-end accepts only P4_16 code written for the `ebpf_model.p4` or
 compiled into [eBPF (extended Berkeley Packet Filters)](https://en.wikipedia.org/wiki/Berkeley_Packet_Filter) using clang/llvm or
 [bcc](https://github.com/iovisor/bcc.git).
 
-An older version of this compiler for compiling P4_14 is available [here](https://github.com/iovisor/bcc/tree/master/src/cc/frontends/p4).
+An older version of this compiler for compiling P4_14 is available [here](https://github.com/iovisor/bcc/tree/master/src/cc/frontends/p4) (historical reference only).
 
 Identifiers starting with ebpf_ are reserved in P4 programs, including
 for structure field names.
@@ -37,7 +37,7 @@ Communications Review in 2014:
 P4 itself is protocol-independent but allows programmers to express a
 rich set of data plane behaviors and protocols.  This back-end only
 supports the newest version of the P4 programming language,
-[P4_16](http://p4.org/wp-content/uploads/2016/12/P4_16-prerelease-Dec_16.html).
+[P4_16]( https://p4.org/specs).
 The core P4 abstractions are:
 
 * Headers describe the format (the set of fields and their

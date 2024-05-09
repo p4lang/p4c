@@ -1,0 +1,3 @@
+shift-int-non-const.p4(8): [--Werror=type-error] error: 5 >> b: shift result type is arbitrary-precision int, but right operand is not constant; width of left operand of shift needs to be specified or both operands need to be constant
+    hdr.v = (bit<8>)(a >> b);
+                     ^^^^^^
