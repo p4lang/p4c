@@ -100,6 +100,7 @@ class ConvertToBackendIR : public Inspector {
                                                             const IR::Type_Extern *extn,
                                                             cstring eName);
     unsigned GetAccessNumericValue(cstring access);
+    bool isDuplicateAction(const IR::P4Action *action);
     bool isDuplicateOrNoAction(const IR::P4Action *action);
     void updateDefaultHitAction(const IR::P4Table *t, IR::TCTable *tdef);
     void updateDefaultMissAction(const IR::P4Table *t, IR::TCTable *tdef);
