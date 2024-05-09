@@ -117,7 +117,8 @@ class CollapseChains : public Transform {
             auto node = oe.first;
             // Avoid merging in case of state annotation
             if (!node->annotations->annotations.empty()) {
-                if (!node->getAnnotation("name") || node->annotations->annotations.size() != 1)
+                if (!node->getAnnotation(IR::Annotation::nameAnnotation) ||
+                    node->annotations->annotations.size() != 1)
                     continue;
             }
             auto outedges = oe.second;

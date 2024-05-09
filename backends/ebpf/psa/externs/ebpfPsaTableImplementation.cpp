@@ -45,17 +45,17 @@ void EBPFTableImplementationPSA::emitReferenceEntry(CodeBuilder *builder) {
 }
 
 void EBPFTableImplementationPSA::registerTable(const EBPFTablePSA *instance) {
-    // verify table instance
+    // Verify table instance.
     verifyTableNoEntries(instance);
     verifyTableNoDefaultAction(instance);
     verifyTableNoDirectObjects(instance);
 
     if (table == nullptr) {
-        // no other tables at the moment, take it as a reference
+        // No other tables at the moment, take it as a reference.
         table = instance->table;
         actionList = instance->actionList;
     } else {
-        // another table, check that new instance has the same action list
+        // Another table, check that new instance has the same action list.
         verifyTableActionList(instance);
     }
 }

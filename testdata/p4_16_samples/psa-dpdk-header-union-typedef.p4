@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <psa.p4>
+#include <dpdk/psa.p4>
 
 header EMPTY_H {};
 struct EMPTY_RESUB {};

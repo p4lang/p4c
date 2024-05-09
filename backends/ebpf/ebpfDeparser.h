@@ -23,7 +23,7 @@ namespace EBPF {
 
 class EBPFDeparser;
 
-// this translator emits deparser externs
+/// This translator emits deparser externs.
 class DeparserBodyTranslator : public ControlBodyTranslator {
  protected:
     const EBPFDeparser *deparser;
@@ -34,7 +34,7 @@ class DeparserBodyTranslator : public ControlBodyTranslator {
     bool preorder(const IR::MethodCallExpression *expression) override;
 };
 
-// this translator emits buffer preparation (eg. which headers will be emitted)
+/// This translator emits buffer preparation (eg. which headers will be emitted)
 class DeparserPrepareBufferTranslator : public ControlBodyTranslator {
  protected:
     const EBPFDeparser *deparser;
@@ -47,7 +47,7 @@ class DeparserPrepareBufferTranslator : public ControlBodyTranslator {
     bool preorder(const IR::MethodCallExpression *expression) override;
 };
 
-// this translator emits headers
+/// This translator emits headers
 class DeparserHdrEmitTranslator : public DeparserPrepareBufferTranslator {
  protected:
     const EBPFDeparser *deparser;
@@ -79,9 +79,9 @@ class EBPFDeparser : public EBPFControl {
 
     bool build() override;
     void emit(CodeBuilder *builder) override;
-    // A "PreDeparser" is emitted just before a sequence of hdr.emit() functions.
-    // It is useful in the case of resubmit or clone operation, as these operations
-    // require to have an original packet.
+    /// A "PreDeparser" is emitted just before a sequence of hdr.emit() functions.
+    /// It is useful in the case of resubmit or clone operation, as these operations
+    /// require to have an original packet.
     virtual void emitPreDeparser(CodeBuilder *builder) { (void)builder; }
 
     virtual void emitDeparserExternCalls(CodeBuilder *builder) { (void)builder; }

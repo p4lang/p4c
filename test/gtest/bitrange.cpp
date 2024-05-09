@@ -25,7 +25,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/json_loader.h"
 
-// disable these tests for gcc-4.9, which for some reason
+// disable these tests for GCC-4.9, which for some reason
 // do not link with std::optional
 #if (__GNUC__ > 4) || defined(__clang__)
 namespace Test {

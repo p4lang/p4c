@@ -21,7 +21,7 @@ limitations under the License.
 namespace EBPF {
 
 bool EBPFPipeline::isEmpty() const {
-    // check if parser doesn't have any state
+    // Check if parser doesn't have any state
     // Why 3? Parser will always have at least start, accept and reject states.
     if (parser->parserBlock->container->states.size() > 3) {
         return false;
@@ -34,12 +34,12 @@ bool EBPFPipeline::isEmpty() const {
         return false;
     }
 
-    // check if control is empty
+    // Check if control is empty
     if (!control->controlBlock->container->body->components.empty()) {
         return false;
     }
 
-    // check if deparser doesn't emit anything
+    // Check if deparser doesn't emit anything
     if (!deparser->controlBlock->container->body->components.empty()) {
         return false;
     }
@@ -176,7 +176,7 @@ void EBPFPipeline::emitInputPortMapping(CodeBuilder *builder) {
     builder->appendFormat("if (%s == PSA_PORT_RECIRCULATE) ", inputPortVar.c_str());
     builder->blockStart();
     builder->emitIndent();
-    // To be conformant with psa.p4, where PSA_PORT_RECIRCULATE is constant
+    // To be conformant with psa.p4, where PSA_PORT_RECIRCULATE is constant.
     builder->appendFormat("%s = P4C_PSA_PORT_RECIRCULATE", inputPortVar.c_str());
     builder->endOfStatement(true);
     builder->blockEnd(true);
@@ -223,7 +223,7 @@ void EBPFIngressPipeline::emitPSAControlOutputMetadata(CodeBuilder *builder) {
 void EBPFIngressPipeline::emit(CodeBuilder *builder) {
     cstring msgStr, varStr;
 
-    // firstly emit process() in-lined function and then the actual BPF section.
+    // Firstly emit process() in-lined function and then the actual BPF section.
     builder->append("static __always_inline");
     builder->spc();
     // FIXME: use Target to generate metadata type
@@ -552,11 +552,9 @@ void TCIngressPipeline::emitTCWorkaroundUsingCPUMAP(CodeBuilder *builder) {
         "    eth->h_proto = *orig_ethtype;\n");
 }
 
-/*
- * The Traffic Manager for Ingress pipeline implements:
- * - Multicast handling
- * - send to port
- */
+/// The Traffic Manager for Ingress pipeline implements:
+/// - Multicast handling
+/// - send to port
 void TCIngressPipeline::emitTrafficManager(CodeBuilder *builder) {
     cstring mcast_grp =
         Util::printf_format("%s.multicast_group", control->outputStandardMetadata->name.name);

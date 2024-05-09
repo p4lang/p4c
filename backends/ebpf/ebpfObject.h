@@ -27,7 +27,7 @@ limitations under the License.
 
 namespace EBPF {
 
-// Base class for EBPF objects
+/// Base class for EBPF objects.
 class EBPFObject : public ICastable {
  public:
     virtual ~EBPFObject() {}

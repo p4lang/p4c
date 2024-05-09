@@ -96,7 +96,7 @@ class Vector : public VectorBase {
     iterator erase(iterator s, iterator e) { return vec.erase(s, e); }
     template <typename ForwardIter>
     iterator insert(iterator i, ForwardIter b, ForwardIter e) {
-        /* FIXME -- gcc prior to 4.9 is broken and the insert routine returns void
+        /* FIXME -- GCC prior to 4.9 is broken and the insert routine returns void
          * FIXME -- rather than an iterator.  So we recalculate it from an index */
         int index = i - vec.begin();
         vec.insert(i, b, e);
@@ -129,14 +129,14 @@ class Vector : public VectorBase {
     }
 
     iterator insert(iterator i, const T *v) {
-        /* FIXME -- gcc prior to 4.9 is broken and the insert routine returns void
+        /* FIXME -- GCC prior to 4.9 is broken and the insert routine returns void
          * FIXME -- rather than an iterator.  So we recalculate it from an index */
         int index = i - vec.begin();
         vec.insert(i, v);
         return vec.begin() + index;
     }
     iterator insert(iterator i, size_t n, const T *v) {
-        /* FIXME -- gcc prior to 4.9 is broken and the insert routine returns void
+        /* FIXME -- GCC prior to 4.9 is broken and the insert routine returns void
          * FIXME -- rather than an iterator.  So we recalculate it from an index */
         int index = i - vec.begin();
         vec.insert(i, n, v);

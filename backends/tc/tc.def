@@ -163,6 +163,9 @@ class TCAction {
     unsigned actId;
     optional safe_vector<TCActionParam> actionParams;
     cstring getName() const {
+        if (actionName == "NoAction") {
+            return "NoAction";
+        }
         cstring tcAction = pipelineName;
         tcAction += "/" + actionName;
         return tcAction;
@@ -481,6 +484,7 @@ class TCExtern {
 class TCPipeline {
     cstring pipelineName;
     unsigned numTables;
+    TCAction NoAction;
     safe_vector<TCAction> actionDefs;
     safe_vector<TCTable> tableDefs;
     safe_vector<TCExtern> externDefs;
@@ -491,6 +495,9 @@ class TCPipeline {
     }
     void setNumTables(unsigned n) {
         numTables = n;
+    }
+    void addNoActionDefinition(TCAction actionDef) {
+        NoAction = actionDef;
     }
     void addActionDefinition(TCAction actionDef) {
         actionDefs.push_back(actionDef);
