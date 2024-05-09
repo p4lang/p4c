@@ -184,7 +184,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
         new SetStrictStruct(&typeMap, true),  // Next pass uses strict struct checking
-        new TypeInference(&refMap, &typeMap, false, false),  // insert casts, dont' check arrays
+        new TypeInference(&refMap, &typeMap, false, false),  // insert casts, don't check arrays
         new SetStrictStruct(&typeMap, false),
         new ValidateMatchAnnotations(&typeMap),
         new ValidateValueSets(),
