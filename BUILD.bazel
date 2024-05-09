@@ -41,6 +41,7 @@ cc_library(
     name = "config_h",
     hdrs = ["config.h"],
     include_prefix = ".",
+    deps = [":sed_config_h"],
 )
 
 cc_library(

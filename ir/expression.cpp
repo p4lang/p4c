@@ -161,7 +161,7 @@ const IR::Constant *IR::Constant::get(const IR::Type *t, big_int v, Util::Source
 const IR::BoolLiteral *IR::BoolLiteral::get(bool value, const Util::SourceInfo &si) {
     // Do not cache values with a non-empty source info (yet).
     if (si.isValid()) {
-        return new IR::BoolLiteral(si, value);
+        return new IR::BoolLiteral(si, IR::Type_Boolean::get(), value);
     }
     // Boolean literals are interned.
     static IR::BoolLiteral TRUE_BOOLLITERAL(si, IR::Type_Boolean::get(), true);

@@ -11,8 +11,6 @@
 #include <tuple>
 #include <type_traits>
 
-#include "lib/big_int_util.h"
-
 namespace Util {
 
 namespace Detail {
@@ -177,9 +175,6 @@ struct Hasher<signed char> : Detail::IntegerHasher<signed char> {};
 
 template <>
 struct Hasher<char> : Detail::IntegerHasher<char> {};
-
-template <>
-struct Hasher<big_int> : Detail::StdHasher {};
 
 template <>
 struct Hasher<float> : Detail::FloatHasher<float> {};
