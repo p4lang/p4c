@@ -240,8 +240,7 @@ const IR::Node *DoConstantFolding::preorder(IR::ArrayIndex *e) {
 const IR::Node *DoConstantFolding::preorder(IR::SwitchCase *c) {
     // Action enum switch case labels must be action names.
     // We only want to fold the label expression after it is inspected by the typechecker.
-    if (typesKnown)
-        visit(c->label);
+    if (typesKnown) visit(c->label);
     visit(c->statement);
     prune();
     return c;
@@ -318,7 +317,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Add *e) {
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::AddSat *e) {
-    return binary(e, [](big_int a, big_int b) -> big_int { return a + b; }, true);
+    return binary(
+        e, [](big_int a, big_int b) -> big_int { return a + b; }, true);
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Sub *e) {
@@ -326,7 +326,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Sub *e) {
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::SubSat *e) {
-    return binary(e, [](big_int a, big_int b) -> big_int { return a - b; }, true);
+    return binary(
+        e, [](big_int a, big_int b) -> big_int { return a - b; }, true);
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Mul *e) {
