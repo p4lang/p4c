@@ -237,6 +237,16 @@ const IR::Node *DoConstantFolding::preorder(IR::ArrayIndex *e) {
     return e;
 }
 
+const IR::Node *DoConstantFolding::preorder(IR::SwitchCase *c) {
+    // Action enum switch case labels must be action names.
+    // We only want to fold the label expression after it is inspected by the typechecker.
+    if (typesKnown)
+        visit(c->label);
+    visit(c->statement);
+    prune();
+    return c;
+}
+
 const IR::Node *DoConstantFolding::postorder(IR::Cmpl *e) {
     auto op = getConstant(e->expr);
     if (op == nullptr) return e;
@@ -710,18 +720,6 @@ const IR::Node *DoConstantFolding::postorder(IR::LNot *e) {
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Mux *e) {
-    if (!typesKnown) {
-        // Action enum switch case labels must be action names.
-        // If we are in the context of a switch label, we want the typechecker
-        // to look at the label expression first.
-        if (const auto *switchStatement = findContext<IR::SwitchStatement>()) {
-            for (const auto *c : switchStatement->cases) {
-                if (isInContext(c->label)) {
-                    return e;
-                }
-            }
-        }
-    }
     auto cond = getConstant(e->e0);
     if (cond == nullptr) return e;
     auto b = cond->to<IR::BoolLiteral>();
