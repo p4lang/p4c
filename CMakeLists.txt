@@ -109,11 +109,11 @@ include(P4CUtils)
 include(FetchContent)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 # More utilities.
-include (CheckIncludeFile)
-include (CheckIncludeFileCXX)
-include (CheckFunctionExists)
-include (FindPythonModule)
-INCLUDE(CPack)
+include(CheckIncludeFile)
+include(CheckIncludeFileCXX)
+include(CheckFunctionExists)
+include(FindPythonModule)
+include(CPack)
 # TODO: Remove this deprecated include eventually.
 include(UnifiedBuild)
 
