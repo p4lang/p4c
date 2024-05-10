@@ -26,7 +26,7 @@
 #include <utility>
 #include <vector>
 
-#include <boost/optional/optional_io.hpp>
+#include <boost/format.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
 #include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
