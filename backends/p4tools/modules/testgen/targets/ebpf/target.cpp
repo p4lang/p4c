@@ -88,7 +88,6 @@ EBPFExprStepper *EBPFTestgenTarget::getExprStepperImpl(ExecutionState &state,
 
 MidEnd EBPFTestgenTarget::mkMidEnd(const CompilerOptions &options) const {
     MidEnd midEnd(options);
-    midEnd.addPasses({});
     midEnd.addDefaultPasses();
 
     return midEnd;

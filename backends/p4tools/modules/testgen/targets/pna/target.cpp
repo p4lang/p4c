@@ -80,7 +80,6 @@ PnaDpdkExprStepper *PnaDpdkTestgenTarget::getExprStepperImpl(ExecutionState &sta
 
 MidEnd PnaDpdkTestgenTarget::mkMidEnd(const CompilerOptions &options) const {
     MidEnd midEnd(options);
-    midEnd.addPasses({});
     midEnd.addDefaultPasses();
 
     return midEnd;

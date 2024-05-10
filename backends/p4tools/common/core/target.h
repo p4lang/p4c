@@ -83,9 +83,8 @@ class Target {
         }
 
         const auto &instances = registry.at(*curTarget);
-        BUG_CHECK(instances.count(toolName.data()),
-                  "Architecture %1% on device %2% not supported for %3%", curTarget->archName,
-                  curTarget->deviceName, toolName);
+        BUG_CHECK(instances.count(toolName), "Architecture %1% on device %2% not supported for %3%",
+                  curTarget->archName, curTarget->deviceName, toolName);
 
         const auto *instance = instances.at(toolName.data());
         const auto *casted = dynamic_cast<const TargetImpl *>(instance);
@@ -99,13 +98,13 @@ class Target {
     static std::optional<Spec> curTarget;
 
     /// Maps supported target specs to Target implementations for each supported tool.
-    static std::map<Spec, std::map<std::string, const Target *>> registry;
+    static std::map<Spec, std::map<std::string, const Target *, std::less<>>> registry;
 
     /// Maps the name of the first architecture registered for each device name.
-    static std::map<std::string, std::string> defaultArchByDevice;
+    static std::map<std::string, std::string, std::less<>> defaultArchByDevice;
 
     /// Maps the name of the first device registered for each architecture name.
-    static std::map<std::string, std::string> defaultDeviceByArch;
+    static std::map<std::string, std::string, std::less<>> defaultDeviceByArch;
 };
 
 }  // namespace P4Tools

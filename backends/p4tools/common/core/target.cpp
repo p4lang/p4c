@@ -33,9 +33,10 @@ bool Target::Spec::operator<(const Spec &other) const {
  * ============================================================================================= */
 
 std::optional<Target::Spec> Target::curTarget = std::nullopt;
-std::map<Target::Spec, std::map<std::string, const Target *>> Target::registry = {};
-std::map<std::string, std::string> Target::defaultArchByDevice = {};
-std::map<std::string, std::string> Target::defaultDeviceByArch = {};
+std::map<Target::Spec, std::map<std::string, const Target *, std::less<>>> Target::registry =
+    {};
+std::map<std::string, std::string, std::less<>> Target::defaultArchByDevice = {};
+std::map<std::string, std::string, std::less<>> Target::defaultDeviceByArch = {};
 
 bool Target::init(std::string deviceName, std::string archName) {
     Spec spec(std::move(deviceName), std::move(archName));
@@ -80,7 +81,7 @@ Target::Target(std::string_view toolName, const std::string &deviceName,
                const std::string &archName)
     : toolName(toolName), spec(deviceName, archName) {
     // Register this instance.
-    BUG_CHECK(!registry[spec].count(toolName.data()), "Already registered %1%/%2% instance for %3%",
+    BUG_CHECK(!registry[spec].count(toolName), "Already registered %1%/%2% instance for %3%",
               deviceName, archName, toolName);
     registry[spec][toolName.data()] = this;
 

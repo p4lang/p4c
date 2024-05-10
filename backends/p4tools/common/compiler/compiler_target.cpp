@@ -123,7 +123,7 @@ CompilerTarget::CompilerTarget(std::string_view toolName, const std::string &dev
     : Target(toolName, deviceName, archName) {}
 
 const CompilerTarget &CompilerTarget::get(std::string_view toolName) {
-    return Target::get<CompilerTarget>(toolName.data());
+    return Target::get<CompilerTarget>(toolName);
 }
 
 }  // namespace P4Tools
