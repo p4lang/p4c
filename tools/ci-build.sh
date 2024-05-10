@@ -73,9 +73,6 @@ P4C_DEPS="bison \
           g++ \
           git \
           lld \
-          libboost-dev \
-          libboost-graph-dev \
-          libboost-iostreams-dev \
           libfl-dev \
           pkg-config \
           python3 \
