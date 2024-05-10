@@ -20,8 +20,6 @@
 
 #include <vector>
 
-#include <boost/optional.hpp>
-
 #include "constants.h"
 #include "lib/bitops.h"
 #include "lib/ordered_set.h"
