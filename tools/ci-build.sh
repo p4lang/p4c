@@ -46,7 +46,7 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 # Build with -ftrivial-auto-var-init=pattern to catch more bugs caused by
 # uninitialized variables.
 : "${BUILD_AUTO_VAR_INIT_PATTERN:=OFF}"
-# BMv2 is enable by default.
+# BMv2 is enabled by default.
 : "${ENABLE_BMV2:=ON}"
 # eBPF is enabled by default.
 : "${ENABLE_EBPF:=ON}"
@@ -96,9 +96,6 @@ P4C_DEPS="bison \
           g++ \
           git \
           lld \
-          libboost-dev \
-          libboost-graph-dev \
-          libboost-iostreams-dev \
           libfl-dev \
           pkg-config \
           python3 \
