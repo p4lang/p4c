@@ -83,11 +83,12 @@ class Target {
         }
 
         const auto &instances = registry.at(*curTarget);
-        BUG_CHECK(instances.count(toolName), "Architecture %1% on device %2% not supported for %3%",
-                  curTarget->archName, curTarget->deviceName, toolName);
+        auto instance = instances.find(toolName);
+        BUG_CHECK(instance != instances.end(),
+                  "Architecture %1% on device %2% not supported for %3%", curTarget->archName,
+                  curTarget->deviceName, toolName);
 
-        const auto *instance = instances.at(toolName.data());
-        const auto *casted = dynamic_cast<const TargetImpl *>(instance);
+        const auto *casted = dynamic_cast<const TargetImpl *>(instance->second);
         BUG_CHECK(casted, "%1%/%2% implementation for %3% has wrong type", curTarget->deviceName,
                   curTarget->archName, toolName);
         return *casted;

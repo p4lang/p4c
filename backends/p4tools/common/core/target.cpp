@@ -33,8 +33,7 @@ bool Target::Spec::operator<(const Spec &other) const {
  * ============================================================================================= */
 
 std::optional<Target::Spec> Target::curTarget = std::nullopt;
-std::map<Target::Spec, std::map<std::string, const Target *, std::less<>>> Target::registry =
-    {};
+std::map<Target::Spec, std::map<std::string, const Target *, std::less<>>> Target::registry = {};
 std::map<std::string, std::string, std::less<>> Target::defaultArchByDevice = {};
 std::map<std::string, std::string, std::less<>> Target::defaultDeviceByArch = {};
 
