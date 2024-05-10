@@ -21,7 +21,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <boost/optional/optional_io.hpp>
+#include <boost/format.hpp>
 
 #include "backends/tofino/bf-p4c/mau/table_summary.h"
 #include "backends/tofino/bf-p4c/phv/phv.h"
