@@ -1,0 +1,18 @@
+issue4656_const_fold_generic_switch_label_expr.p4(14): [--Werror=type-error] error: Width must be specified for at least one of 1 or 2
+            1 + 2 == 3 ? 1 : 2 : { foo(); }
+                         ^
+issue4656_const_fold_generic_switch_label_expr.p4(14)
+            1 + 2 == 3 ? 1 : 2 : { foo(); }
+                             ^
+issue4656_const_fold_generic_switch_label_expr.p4(15): [--Werror=type-error] error: Width must be specified for at least one of 3 or 4
+            3 + 4 == 0 ? 3 : 4 : { bar(); }
+                         ^
+issue4656_const_fold_generic_switch_label_expr.p4(15)
+            3 + 4 == 0 ? 3 : 4 : { bar(); }
+                             ^
+issue4656_const_fold_generic_switch_label_expr.p4(14): [--Werror=type-error] error: ?:: must be a compile-time constant
+            1 + 2 == 3 ? 1 : 2 : { foo(); }
+            ^^^^^^^^^^^^^^^^^^
+issue4656_const_fold_generic_switch_label_expr.p4(15): [--Werror=type-error] error: ?:: must be a compile-time constant
+            3 + 4 == 0 ? 3 : 4 : { bar(); }
+            ^^^^^^^^^^^^^^^^^^
