@@ -1,3 +1,5 @@
+#include <core.p4>
+
 extern void foo();
 extern void bar();
 extern bit<8> baz();
@@ -7,7 +9,7 @@ control c() {
     }
     @name(".b") action b_0() {
     }
-    @name(".NoAction") action NoAction_1() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.t") table t_0 {
         actions = {

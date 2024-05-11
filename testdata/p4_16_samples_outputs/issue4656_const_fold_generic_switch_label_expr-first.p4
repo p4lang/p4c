@@ -1,11 +1,11 @@
+#include <core.p4>
+
 extern void foo();
 extern void bar();
 extern bit<8> baz();
 action a() {
 }
 action b() {
-}
-action NoAction() {
 }
 control c() {
     table t {

@@ -237,10 +237,32 @@ const IR::Node *DoConstantFolding::preorder(IR::ArrayIndex *e) {
     return e;
 }
 
+// Returns true if the given expression is of the form "some_table.apply().action_run."
+bool isActionRun(const IR::Expression *e, const ReferenceMap *refMap) {
+    const auto* actionRunMem = e->to<IR::Member>();
+    if (!actionRunMem) return false;
+    if (actionRunMem->member.name != IR::Type_Table::action_run) return false;
+
+    const auto* applyMce = actionRunMem->expr->to<IR::MethodCallExpression>();
+    if (!applyMce) return false;
+    const auto* applyMceMem = applyMce->method->to<IR::Member>();
+    if (!applyMceMem) return false;
+    if (applyMceMem->member.name != IR::IApply::applyMethodName) return false;
+
+    const auto* tablePathExpr = applyMceMem->expr->to<IR::PathExpression>();
+    if (!tablePathExpr) return false;
+    const auto* tableDecl = refMap->getDeclaration(tablePathExpr->path);
+    if (!tableDecl) return false;
+
+    return tableDecl->is<IR::P4Table>();
+}
+
 const IR::Node *DoConstantFolding::preorder(IR::SwitchCase *c) {
     // Action enum switch case labels must be action names.
     // We only want to fold the label expression after it is inspected by the typechecker.
-    if (typesKnown) visit(c->label);
+    const auto* parent = static_cast<const IR::SwitchStatement*>(getContext()->node);
+    if (typesKnown || !isActionRun(parent->expression, refMap))
+        visit(c->label);
     visit(c->statement);
     prune();
     return c;
