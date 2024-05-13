@@ -53,6 +53,14 @@ void IR::IfStatement::dbprint(std::ostream &out) const {
     out << " }" << unindent << setprec(prec);
 }
 
+void IR::ForEachStatement::dbprint(std::ostream &out) const {
+    int prec = getprec(out);
+    out << Prec_Low << "foreach (" << index << " in " << range << ") {" << indent << setprec(0)
+        << Log::endl
+        << body;
+    out << " }" << unindent << setprec(prec);
+}
+
 void IR::MethodCallStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << Prec_Low << methodCall << setprec(prec);
