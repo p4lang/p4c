@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 
+#include "backends/bmv2/common/annotations.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
 #include "ir/solver.h"
@@ -15,10 +16,12 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/bmv2.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/cmd_stepper.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/compiler_result.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/expr_stepper.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/p4runtime_translation.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend.h"
 
@@ -35,6 +38,85 @@ void Bmv2V1ModelTestgenTarget::make() {
     if (INSTANCE == nullptr) {
         INSTANCE = new Bmv2V1ModelTestgenTarget();
     }
+}
+
+CompilerResultOrError Bmv2V1ModelTestgenTarget::runCompilerImpl(
+    const IR::P4Program *program) const {
+    program = runFrontend(program);
+    if (program == nullptr) {
+        return std::nullopt;
+    }
+
+    /// After the front end, get the P4Runtime API for the V1model architecture.
+    auto p4runtimeApi = P4::P4RuntimeSerializer::get()->generateP4Runtime(program, "v1model");
+
+    if (::errorCount() > 0) {
+        return std::nullopt;
+    }
+
+    program = runMidEnd(program);
+    if (program == nullptr) {
+        return std::nullopt;
+    }
+
+    // Create DCG.
+    NodesCallGraph *dcg = nullptr;
+    if (TestgenOptions::get().dcg || !TestgenOptions::get().pattern.empty()) {
+        dcg = new NodesCallGraph("NodesCallGraph");
+        P4ProgramDCGCreator dcgCreator(dcg);
+        program->apply(dcgCreator);
+    }
+    if (::errorCount() > 0) {
+        return std::nullopt;
+    }
+    /// Collect coverage information about the program.
+    auto coverage = P4::Coverage::CollectNodes(TestgenOptions::get().coverageOptions);
+    program->apply(coverage);
+    if (::errorCount() > 0) {
+        return std::nullopt;
+    }
+
+    // Parses any @refers_to annotations and converts them into a vector of restrictions.
+    auto refersToParser = RefersToParser();
+    program->apply(refersToParser);
+    if (::errorCount() > 0) {
+        return std::nullopt;
+    }
+    ConstraintsVector p4ConstraintsRestrictions = refersToParser.getRestrictionsVector();
+
+    // Defines all "entry_restriction" and then converts restrictions from string to IR
+    // expressions, and stores them in p4ConstraintsRestrictions to move targetConstraints
+    // further.
+    program->apply(AssertsParser(p4ConstraintsRestrictions));
+    if (::errorCount() > 0) {
+        return std::nullopt;
+    }
+    // Try to map all instances of direct externs to the table they are attached to.
+    // Save the map in @var directExternMap.
+    auto directExternMapper = MapDirectExterns();
+    program->apply(directExternMapper);
+    if (::errorCount() > 0) {
+        return std::nullopt;
+    }
+
+    return {*new BMv2V1ModelCompilerResult{
+        TestgenCompilerResult(CompilerResult(*program), coverage.getCoverableNodes(), dcg),
+        p4runtimeApi, directExternMapper.getDirectExternMap(), p4ConstraintsRestrictions}};
+}
+
+MidEnd Bmv2V1ModelTestgenTarget::mkMidEnd(const CompilerOptions &options) const {
+    MidEnd midEnd(options);
+    auto *refMap = midEnd.getRefMap();
+    auto *typeMap = midEnd.getTypeMap();
+    midEnd.addPasses({
+        // Parse BMv2-specific annotations.
+        new BMV2::ParseAnnotations(),
+        new P4::TypeChecking(refMap, typeMap, true),
+        new PropagateP4RuntimeTranslation(*typeMap),
+    });
+    midEnd.addDefaultPasses();
+
+    return midEnd;
 }
 
 const Bmv2V1ModelProgramInfo *Bmv2V1ModelTestgenTarget::produceProgramInfoImpl(

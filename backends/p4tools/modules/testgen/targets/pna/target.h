@@ -42,6 +42,8 @@ class PnaDpdkTestgenTarget : public TestgenTarget {
 
  private:
     PnaDpdkTestgenTarget();
+
+    [[nodiscard]] MidEnd mkMidEnd(const CompilerOptions &options) const override;
 };
 
 }  // namespace P4Tools::P4Testgen::Pna

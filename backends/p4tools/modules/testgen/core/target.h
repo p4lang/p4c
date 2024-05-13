@@ -1,12 +1,9 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_TARGET_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_TARGET_H_
 
-#include <filesystem>
 #include <string>
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
-#include "backends/p4tools/common/core/target.h"
-#include "backends/p4tools/common/lib/arch_spec.h"
 #include "ir/ir.h"
 #include "ir/solver.h"
 
@@ -19,7 +16,7 @@
 
 namespace P4Tools::P4Testgen {
 
-class TestgenTarget : public Target {
+class TestgenTarget : public CompilerTarget {
  public:
     /// @returns the singleton instance for the current target.
     static const TestgenTarget &get();
@@ -64,7 +61,9 @@ class TestgenTarget : public Target {
     virtual ExprStepper *getExprStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                             const ProgramInfo &programInfo) const = 0;
 
-    explicit TestgenTarget(std::string deviceName, std::string archName);
+    explicit TestgenTarget(const std::string &deviceName, const std::string &archName);
+
+    CompilerResultOrError runCompilerImpl(const IR::P4Program *program) const override;
 };
 
 }  // namespace P4Tools::P4Testgen

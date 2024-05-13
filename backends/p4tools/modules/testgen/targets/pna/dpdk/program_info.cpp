@@ -1,8 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/program_info.h"
 
-#include <list>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include "backends/p4tools/common/lib/arch_spec.h"
@@ -13,8 +11,7 @@
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
-#include "backends/p4tools/modules/testgen/core/compiler_target.h"
-#include "backends/p4tools/modules/testgen/core/target.h"
+#include "backends/p4tools/modules/testgen/core/compiler_result.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"

@@ -13,8 +13,8 @@ set(TESTGEN_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/metadata.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/ptf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/stf.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cmd_stepper.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/compiler_result.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/concolic.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/constants.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/expr_stepper.cpp

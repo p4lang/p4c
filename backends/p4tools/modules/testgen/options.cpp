@@ -13,6 +13,7 @@
 #include "lib/error.h"
 
 #include "backends/p4tools/modules/testgen/lib/logging.h"
+#include "backends/p4tools/modules/testgen/toolname.h"
 
 namespace P4Tools::P4Testgen {
 
@@ -28,7 +29,7 @@ const char *TestgenOptions::getIncludePath() {
 const std::set<cstring> TestgenOptions::SUPPORTED_STOP_METRICS = {"MAX_NODE_COVERAGE"};
 
 TestgenOptions::TestgenOptions()
-    : AbstractP4cToolOptions("Generate packet tests for a P4 program.") {
+    : AbstractP4cToolOptions(TOOL_NAME, "Generate packet tests for a P4 program.") {
     registerOption(
         "--strict", nullptr,
         [this](const char *) {
