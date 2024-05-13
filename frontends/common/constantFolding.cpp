@@ -259,11 +259,13 @@ bool isActionRun(const IR::Expression *e, const ReferenceMap *refMap) {
 
 const IR::Node *DoConstantFolding::preorder(IR::SwitchCase *c) {
     // Action enum switch case labels must be action names.
-    // We only want to fold the label expression after it is inspected by the typechecker.
+    // Do not fold the switch case's 'label' expression so that it can be inspected by the
+    // TypeInference pass.
     const auto *parent = static_cast<const IR::SwitchStatement *>(getContext()->node);
-    if (typesKnown || !isActionRun(parent->expression, refMap)) visit(c->label);
-    visit(c->statement);
-    prune();
+    if (isActionRun(parent->expression, refMap)) {
+        visit(c->statement);
+        prune();
+    }
     return c;
 }
 
