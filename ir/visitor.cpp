@@ -24,7 +24,7 @@ limitations under the License.
 #include "lib/hash.h"
 
 #if HAVE_LIBGC
-#include <gc/gc.h>
+#include <gc.h>
 #endif
 
 #include "dbprint.h"

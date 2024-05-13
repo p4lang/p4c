@@ -20,7 +20,6 @@ sudo dnf install -y -q \
     elfutils-libelf-devel \
     flex \
     g++ \
-    gc-devel \
     git \
     gmp-devel \
     grpc-devel \

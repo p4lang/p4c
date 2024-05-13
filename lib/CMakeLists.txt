@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set (LIBP4CTOOLKIT_SRCS
+set(LIBP4CTOOLKIT_SRCS
     alloc_trace.cpp
     backtrace_exception.cpp
     bitrange.cpp
@@ -41,7 +41,7 @@ set (LIBP4CTOOLKIT_SRCS
     timer.cpp
 )
 
-set (LIBP4CTOOLKIT_HDRS
+set(LIBP4CTOOLKIT_HDRS
     algorithm.h
     alloc_trace.h
     backtrace_exception.h
@@ -95,4 +95,8 @@ add_library(p4ctoolkit STATIC ${LIBP4CTOOLKIT_SRCS})
 
 # Disable libcall (realloc, malloc) optimizations which may cause infinite loops.
 set_target_properties(p4ctoolkit PROPERTIES COMPILE_FLAGS -fno-builtin)
-target_link_libraries(p4ctoolkit absl::bits)
+target_link_libraries(p4ctoolkit
+  # These libraries are exposed by a header.
+  PUBLIC absl::bits
+  PUBLIC ${LIBGC_LIBRARIES}
+)
