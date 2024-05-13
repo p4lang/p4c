@@ -265,6 +265,7 @@ const IR::Node *DoConstantFolding::preorder(IR::SwitchCase *c) {
     // Action enum switch case labels must be action names.
     // Do not fold the switch case's 'label' expression so that it can be inspected by the
     // TypeInference pass.
+    // Note: static_cast is used as a SwitchCase's parent is always SwitchStatement.
     const auto *parent = static_cast<const IR::SwitchStatement *>(getContext()->node);
     if (isActionRun(parent->expression, refMap)) {
         visit(c->statement);
