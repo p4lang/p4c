@@ -237,6 +237,8 @@ const IR::Node *DoConstantFolding::preorder(IR::ArrayIndex *e) {
     return e;
 }
 
+namespace {
+
 // Returns true if the given expression is of the form "some_table.apply().action_run."
 bool isActionRun(const IR::Expression *e, const ReferenceMap *refMap) {
     const auto *actionRunMem = e->to<IR::Member>();
@@ -256,6 +258,8 @@ bool isActionRun(const IR::Expression *e, const ReferenceMap *refMap) {
 
     return tableDecl->is<IR::P4Table>();
 }
+
+}  // namespace
 
 const IR::Node *DoConstantFolding::preorder(IR::SwitchCase *c) {
     // Action enum switch case labels must be action names.
