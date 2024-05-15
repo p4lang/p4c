@@ -497,7 +497,7 @@ extern Register<T, S> {
   Register(@tc_numel bit<32> size);
   /// Initialize an array of <size> registers and set their value to
   /// initial_value.
-  Register(bit<32> size, T initial_value);
+  Register(@tc_numel bit<32> size, T initial_value);
 
   @tc_md_read T    read  (@tc_key in S index);
   @tc_md_write void write (@tc_key in S index, @tc_data in T value);

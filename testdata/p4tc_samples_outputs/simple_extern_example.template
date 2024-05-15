@@ -28,11 +28,12 @@ $TC p4template create table/simple_extern_example/ingress/nh_table \
 $TC p4template update table/simple_extern_example/ingress/nh_table default_miss_action permissions 0x1024 action simple_extern_example/ingress/drop
 
 $TC p4template create extern/simple_extern_example/ingress/Register extid 1 numinstances 2 tc_acl 0x18f6
-$TC p4template create extern_inst/simple_extern_example/Register instid 1 \
 
- control_path tc_key index type bit32 id 1 param a_value type bit32 id 2
-$TC p4template create extern_inst/simple_extern_example/Register instid 2 \
+$TC p4template create extern_inst/simple_extern_example/Register/ingress.reg1 instid 1 \
+control_path tc_key index type bit32 id 1 param a_value type bit32 id 2
+tc_numel 10
 
- control_path tc_key index type bit32 id 1 param protocol type bit8 id 2 param aux type bit8 id 3
+$TC p4template create extern_inst/simple_extern_example/Register/ingress.reg3 instid 2 \
+control_path tc_key index type bit32 id 1 param protocol type bit8 id 2 param aux type bit8 id 3
 tc_numel 3
 $TC p4template update pipeline/simple_extern_example state ready

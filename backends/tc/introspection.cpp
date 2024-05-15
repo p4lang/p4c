@@ -287,7 +287,7 @@ Util::JsonObject *IntrospectionGenerator::genKeyInfo(struct KeyFieldAttributes *
     keyJson->emplace("name", keyField->name);
     keyJson->emplace("type", keyField->type);
     if (keyField->attribute) {
-        keyJson->emplace("match_type", keyField->attribute);
+        keyJson->emplace("attr", keyField->attribute);
     }
     if (keyField->matchType) {
         keyJson->emplace("match_type", keyField->matchType);

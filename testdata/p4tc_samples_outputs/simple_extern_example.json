@@ -15,14 +15,14 @@
               "id" : 1,
               "name" : "index",
               "type" : "bit32",
-              "match_type" : "tc_key",
+              "attr" : "tc_key",
               "bitwidth" : 32
             },
             {
               "id" : 2,
               "name" : "a_value",
               "type" : "bit32",
-              "match_type" : "param",
+              "attr" : "param",
               "bitwidth" : 32
             }
           ]
@@ -35,21 +35,21 @@
               "id" : 1,
               "name" : "index",
               "type" : "bit32",
-              "match_type" : "tc_key",
+              "attr" : "tc_key",
               "bitwidth" : 32
             },
             {
               "id" : 2,
               "name" : "protocol",
               "type" : "bit8",
-              "match_type" : "param",
+              "attr" : "param",
               "bitwidth" : 8
             },
             {
               "id" : 3,
               "name" : "aux",
               "type" : "bit8",
-              "match_type" : "param",
+              "attr" : "param",
               "bitwidth" : 8
             }
           ]

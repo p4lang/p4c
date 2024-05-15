@@ -33,7 +33,7 @@ class ParseTCAnnotations : public P4::ParseAnnotations {
     static const cstring tc_md_write;
     static const cstring tc_md_read;
     static const cstring tc_md_exec;
-    static const cstring tc_ContrlPath;
+    static const cstring tc_ControlPath;
     static const cstring tc_key;
     static const cstring tc_data;
     static const cstring tc_data_scalar;
@@ -47,7 +47,7 @@ class ParseTCAnnotations : public P4::ParseAnnotations {
                PARSE_CONSTANT_OR_STRING_LITERAL(tcType), PARSE_CONSTANT_OR_STRING_LITERAL(numMask),
                PARSE_EMPTY(tcMayOverride), PARSE_CONSTANT_OR_STRING_LITERAL(tc_acl),
                PARSE_EMPTY(tc_md_write), PARSE_EMPTY(tc_md_read), PARSE_EMPTY(tc_md_write),
-               PARSE_EMPTY(tc_md_exec), PARSE_EMPTY(tc_ContrlPath), PARSE_EMPTY(tc_key),
+               PARSE_EMPTY(tc_md_exec), PARSE_EMPTY(tc_ControlPath), PARSE_EMPTY(tc_key),
                PARSE_EMPTY(tc_data), PARSE_EMPTY(tc_data_scalar), PARSE_EMPTY(tc_init_val),
                PARSE_EMPTY(tc_numel)}) {}
 };

@@ -429,8 +429,9 @@ class TCExternInstance {
     }
     toString {
         std::string tcExternInstance = "";
+        tcExternInstance += instanceName + " instid " + Util::toString(instanceID) + " \\";
         if (isControlPath) {
-            tcExternInstance += "\n control_path";
+            tcExternInstance += "\ncontrol_path";
             for (auto field : keys) {
                 tcExternInstance += field->toString();
             }
@@ -471,10 +472,10 @@ class TCExtern {
         tcExtern += " tc_acl " + acl_permisson;
         
         for (unsigned iter = 0; iter < numinstances; iter++) {
-            tcExtern += "\n$TC p4template create extern_inst/" + pipelineName
-                      + "/" + externName + " instid " + Util::toString(iter + 1) + " \\";
+            tcExtern += "\n\n$TC p4template create extern_inst/" + pipelineName
+                      + "/" + externName + "/";
             if (externInstances.size() > iter)
-                tcExtern += "\n" + externInstances[iter]->toString();
+                tcExtern += externInstances[iter]->toString();
         }
         return tcExtern;
     }

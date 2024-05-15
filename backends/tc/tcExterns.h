@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2023 Intel Corporation
+Copyright (C) 2024 Intel Corporation
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -41,7 +41,7 @@ class EBPFRegisterPNA : public EBPF::EBPFTableBase {
         }
         auto ts = di->type->to<IR::Type_Specialized>();
 
-        if (ts->arguments->size() != 2) {
+        if (ts->arguments->size() != PARAM_INDEX_2) {
             ::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%",
                     ts);
             return;
