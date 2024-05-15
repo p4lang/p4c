@@ -237,6 +237,43 @@ const IR::Node *DoConstantFolding::preorder(IR::ArrayIndex *e) {
     return e;
 }
 
+namespace {
+
+// Returns true if the given expression is of the form "some_table.apply().action_run."
+bool isActionRun(const IR::Expression *e, const ReferenceMap *refMap) {
+    const auto *actionRunMem = e->to<IR::Member>();
+    if (!actionRunMem) return false;
+    if (actionRunMem->member.name != IR::Type_Table::action_run) return false;
+
+    const auto *applyMce = actionRunMem->expr->to<IR::MethodCallExpression>();
+    if (!applyMce) return false;
+    const auto *applyMceMem = applyMce->method->to<IR::Member>();
+    if (!applyMceMem) return false;
+    if (applyMceMem->member.name != IR::IApply::applyMethodName) return false;
+
+    const auto *tablePathExpr = applyMceMem->expr->to<IR::PathExpression>();
+    if (!tablePathExpr) return false;
+    const auto *tableDecl = refMap->getDeclaration(tablePathExpr->path);
+    if (!tableDecl) return false;
+
+    return tableDecl->is<IR::P4Table>();
+}
+
+}  // namespace
+
+const IR::Node *DoConstantFolding::preorder(IR::SwitchCase *c) {
+    // Action enum switch case labels must be action names.
+    // Do not fold the switch case's 'label' expression so that it can be inspected by the
+    // TypeInference pass.
+    // Note: static_cast is used as a SwitchCase's parent is always SwitchStatement.
+    const auto *parent = static_cast<const IR::SwitchStatement *>(getContext()->node);
+    if (isActionRun(parent->expression, refMap)) {
+        visit(c->statement);
+        prune();
+    }
+    return c;
+}
+
 const IR::Node *DoConstantFolding::postorder(IR::Cmpl *e) {
     auto op = getConstant(e->expr);
     if (op == nullptr) return e;
@@ -710,9 +747,6 @@ const IR::Node *DoConstantFolding::postorder(IR::LNot *e) {
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Mux *e) {
-    if (!typesKnown)
-        // We want the typechecker to look at the expression first
-        return e;
     auto cond = getConstant(e->e0);
     if (cond == nullptr) return e;
     auto b = cond->to<IR::BoolLiteral>();
