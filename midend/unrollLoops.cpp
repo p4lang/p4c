@@ -91,7 +91,9 @@ class RemoveBreakContinue : public Transform {
         s->visit_children(*this);
         needFlagCheck = true;
         prune();
-        return new IR::IfStatement(cond, s, nullptr);
+        auto s2 = s->apply_visitor_postorder(*this)->to<IR::Statement>();
+        BUG_CHECK(s2, "RemoveBreakContinue::postorder failed to return a statement");
+        return new IR::IfStatement(cond, s2, nullptr);
     }
 };
 
@@ -260,9 +262,11 @@ const IR::Statement *UnrollLoops::doUnroll(const loop_bounds_t &bounds, const IR
 const IR::Statement *UnrollLoops::preorder(IR::ForStatement *fstmt) {
     loop_bounds_t bounds;
     if (findLoopBounds(fstmt, bounds)) {
+        LOG4("Unrolling loop" << Log::indent << Log::endl << fstmt << Log::unindent);
         auto *rv = new IR::BlockStatement;
         for (auto *i : fstmt->init) rv->append(i);
         rv->append(doUnroll(bounds, fstmt->body, &fstmt->updates));
+        LOG4("Unrolled loop" << Log::indent << Log::endl << rv << Log::unindent);
         return rv;
     }
     return fstmt;
@@ -271,7 +275,10 @@ const IR::Statement *UnrollLoops::preorder(IR::ForStatement *fstmt) {
 const IR::Statement *UnrollLoops::preorder(IR::ForInStatement *fstmt) {
     loop_bounds_t bounds;
     if (findLoopBounds(fstmt, bounds)) {
-        return doUnroll(bounds, fstmt->body);
+        LOG4("Unrolling loop" << Log::indent << Log::endl << fstmt << Log::unindent);
+        auto rv = doUnroll(bounds, fstmt->body);
+        LOG4("Unrolled loop" << Log::indent << Log::endl << rv << Log::unindent);
+        return rv;
     }
     return fstmt;
 }
