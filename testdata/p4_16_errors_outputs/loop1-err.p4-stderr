@@ -1,0 +1,6 @@
+loop1-err.p4(3): [--Werror=invalid] error: break: break statement must be used in the context of a for statement.
+    break;
+    ^^^^^
+loop1-err.p4(7): [--Werror=invalid] error: continue: continue statement must be used in the context of a for statement.
+    continue;
+    ^^^^^^^^
