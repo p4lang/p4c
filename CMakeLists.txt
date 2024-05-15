@@ -44,8 +44,7 @@ OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suit
 OPTION (ENABLE_TEST_TOOLS "Build the P4Tools development platform" OFF)
 OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
-OPTION (ENABLE_GC "Use libgc" ON)
-OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
+OPTION (ENABLE_GC "Compile with the Boehm-Demers-Weiser garbage collector." ON)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
 OPTION (STATIC_BUILD_WITH_DYNAMIC_GLIBC "Build a (mostly) statically linked release binary. \
@@ -103,11 +102,18 @@ else()
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
   set (P4C_VERSION "${P4C_SEM_VERSION_STRING} (SHA: ${P4C_GIT_SHA} BUILD: ${CMAKE_BUILD_TYPE})")
 endif()
+
 # P4 General Utilities
 include(P4CUtils)
 # CMake Utilities to fetch dependencies.
 include(FetchContent)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+# More utilities.
+include(CheckIncludeFile)
+include(CheckIncludeFileCXX)
+include(CheckFunctionExists)
+include(FindPythonModule)
+include(CPack)
 # TODO: Remove this deprecated include eventually.
 include(UnifiedBuild)
 
@@ -198,6 +204,10 @@ p4c_obtain_abseil()
 include(Protobuf)
 p4c_obtain_protobuf()
 
+# We require -pthread to make std::call_once work, even if we're not using threads...
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 # The boost graph headers are optional and only required by the graphs back end.
 find_package (Boost QUIET COMPONENTS graph)
 if (Boost_FOUND)
@@ -207,20 +217,18 @@ else ()
 endif ()
 find_package (Boost REQUIRED COMPONENTS iostreams)
 
+# Compile with the Boehm garbage collector (https://github.com/ivmai/bdwgc), if requested.
+# One can disable the GC, e.g., to run under Valgrind, by editing config.h.
 if (ENABLE_GC)
-  find_package (LibGc 7.4.2 REQUIRED)
-  set (HAVE_LIBGC 1)
+  include(BDWGC)
+  p4c_obtain_bdwgc()
 endif ()
 if (ENABLE_MULTITHREAD)
   add_definitions(-DMULTITHREAD)
 endif()
-# we require -pthread to make std::call_once work, even if we're not using threads...
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
 list (APPEND P4C_LIB_DEPS ${CMAKE_THREAD_LIBS_INIT})
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 include_directories(SYSTEM ${PROTOBUF_INCLUDE_DIRS})
-include_directories(SYSTEM ${LIBGC_INCLUDE_DIR})
 set (HAVE_LIBBOOST_IOSTREAMS 1)
 list (APPEND P4C_LIB_DEPS ${Boost_LIBRARIES})
 if (ENABLE_GC)
@@ -229,19 +237,18 @@ endif ()
 set (P4C_ABSL_LIBRARIES absl::flat_hash_map absl::flat_hash_set)
 list (APPEND P4C_LIB_DEPS ${P4C_ABSL_LIBRARIES})
 
-# other required libraries
+# Other required libraries.
 p4c_add_library (rt clock_gettime HAVE_CLOCK_GETTIME)
 
-# check includes
-include (CheckIncludeFile)
-include (CheckIncludeFileCXX)
+# Check includes.
 check_include_file(execinfo.h HAVE_EXECINFO_H)
 check_include_file(ucontext.h HAVE_UCONTEXT_H)
 check_include_file(backtrace-supported.h HAVE_LIBBACKTRACE)
 check_include_file_cxx(mm_malloc.h HAVE_MM_MALLOC_H)
 check_include_file_cxx(cxxabi.h HAVE_CXXABI_H)
 if (HAVE_LIBBACKTRACE)
-set (P4C_LIB_DEPS "${P4C_LIB_DEPS};-lbacktrace")
+  message(STATUS "Linking libbacktrace.")
+  set (P4C_LIB_DEPS "${P4C_LIB_DEPS};-lbacktrace")
 endif ()
 
 # check functions
@@ -252,16 +259,13 @@ if (ENABLE_GC)
   set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${LIBGC_LIBRARIES})
 endif ()
 
-include (CheckFunctionExists)
 check_function_exists (memchr HAVE_MEMCHR)
 check_function_exists (pipe2 HAVE_PIPE2)
-check_function_exists (GC_print_stats HAVE_GC_PRINT_STATS)
 
 # restore CMAKE_REQUIRED_LIBRARIES
 set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_PRECHECK})
 
 # python modules
-include (FindPythonModule)
 find_python_module (difflib REQUIRED)
 find_python_module (shutil REQUIRED)
 find_python_module (tempfile REQUIRED)
@@ -367,9 +371,9 @@ else()
 endif()
 
 include_directories (
-  ${P4C_SOURCE_DIR}/extensions
   ${P4C_SOURCE_DIR}
   ${P4C_BINARY_DIR}
+  ${P4C_SOURCE_DIR}/extensions
   )
 add_definitions (-DCONFIG_PREFIX="${CMAKE_INSTALL_PREFIX}")
 add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_INSTALL_PREFIX}/${P4C_ARTIFACTS_OUTPUT_DIRECTORY}")
@@ -421,7 +425,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(p4runtime)
 set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
-message("Done with setting up P4Runtime for P4C.")
+message(STATUS "Done with setting up P4Runtime for P4C.")
 # The standard P4Runtime protocol buffers message definitions live in the PI
 # repo, which is included in this repo as a git module.
 set(P4RUNTIME_STD_DIR ${p4runtime_SOURCE_DIR}/proto CACHE INTERNAL
@@ -626,6 +630,5 @@ SET(CPACK_SOURCE_PACKAGE_FILE_NAME
    "p4c-${P4C_SEM_VERSION_STRING}")
 SET(CPACK_SOURCE_IGNORE_FILES
    "${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}-*;${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}_*;/build/;/.git/;/config.log;/CMakeFiles/;CMakeCache.txt$;.tar.gz$;/_CPack_Packages;/Makefile$;~$;/build-deb;/clean-deb;/filter-empty-entries;/make-symbols;/make-ppa;/make-deb;/debian.conf;/make-rpm;/rpm.conf;${CPACK_SOURCE_IGNORE_FILES}")
-INCLUDE(CPack)
 
 ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} clean package_source)

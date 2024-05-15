@@ -14,7 +14,6 @@ set(
   ${CMAKE_CURRENT_SOURCE_DIR}/dpdk/expr_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dpdk/program_info.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dpdk/table_stepper.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/pna.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/concolic.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/constants.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/shared_cmd_stepper.cpp

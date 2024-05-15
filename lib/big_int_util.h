@@ -17,10 +17,8 @@ limitations under the License.
 #ifndef LIB_BIG_INT_UTIL_H_
 #define LIB_BIG_INT_UTIL_H_
 
-#include <boost/multiprecision/cpp_int.hpp>
-
-#include "config.h"
-typedef boost::multiprecision::cpp_int big_int;
+#include "big_int.h"
+#include "hash.h"
 
 namespace Util {
 
@@ -92,5 +90,8 @@ static inline int floor_log2(big_int v) {
 }
 
 static inline int ceil_log2(big_int v) { return v ? floor_log2(v - 1) + 1 : -1; }
+
+template <>
+struct Util::Hasher<big_int> : Detail::StdHasher {};
 
 #endif /* LIB_BIG_INT_UTIL_H_ */

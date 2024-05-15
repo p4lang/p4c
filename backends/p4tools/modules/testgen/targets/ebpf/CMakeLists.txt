@@ -9,7 +9,6 @@ set(
   TESTGEN_SOURCES
   ${TESTGEN_SOURCES}
   ${CMAKE_CURRENT_SOURCE_DIR}/backend/stf/stf.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ebpf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cmd_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/concolic.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/constants.cpp

@@ -19,13 +19,12 @@
 
 #include "backends/p4tools/modules/testgen//lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
-#include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/options.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/bmv2.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/compiler_result.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/concolic.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 

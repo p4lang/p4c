@@ -10,6 +10,7 @@ set(
   options.cpp
   version.cpp
 
+  compiler/compiler_result.cpp
   compiler/compiler_target.cpp
   compiler/convert_hs_index.cpp
   compiler/convert_struct_expr.cpp

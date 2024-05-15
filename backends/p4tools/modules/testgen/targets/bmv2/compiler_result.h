@@ -1,13 +1,12 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BMV2_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BMV2_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_COMPILER_RESULT_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_COMPILER_RESULT_H_
 
-#include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/compiler/midend.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "control-plane/p4RuntimeSerializer.h"
 #include "frontends/common/options.h"
 
-#include "backends/p4tools/modules/testgen/core/compiler_target.h"
+#include "backends/p4tools/modules/testgen/core/compiler_result.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/map_direct_externs.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
 
@@ -45,19 +44,6 @@ class BMv2V1ModelCompilerResult : public TestgenCompilerResult {
     DECLARE_TYPEINFO(BMv2V1ModelCompilerResult, TestgenCompilerResult);
 };
 
-class Bmv2V1ModelCompilerTarget : public TestgenCompilerTarget {
- public:
-    /// Registers this target.
-    static void make();
-
- private:
-    [[nodiscard]] MidEnd mkMidEnd(const CompilerOptions &options) const override;
-
-    CompilerResultOrError runCompilerImpl(const IR::P4Program *program) const override;
-
-    Bmv2V1ModelCompilerTarget();
-};
-
 }  // namespace P4Tools::P4Testgen::Bmv2
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BMV2_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_COMPILER_RESULT_H_ */

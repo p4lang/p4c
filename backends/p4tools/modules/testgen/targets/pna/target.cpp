@@ -10,7 +10,7 @@
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 
-#include "backends/p4tools/modules/testgen/core/compiler_target.h"
+#include "backends/p4tools/modules/testgen/core/compiler_result.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -76,6 +76,13 @@ PnaDpdkExprStepper *PnaDpdkTestgenTarget::getExprStepperImpl(ExecutionState &sta
                                                              AbstractSolver &solver,
                                                              const ProgramInfo &programInfo) const {
     return new PnaDpdkExprStepper(state, solver, programInfo);
+}
+
+MidEnd PnaDpdkTestgenTarget::mkMidEnd(const CompilerOptions &options) const {
+    MidEnd midEnd(options);
+    midEnd.addDefaultPasses();
+
+    return midEnd;
 }
 
 }  // namespace P4Tools::P4Testgen::Pna

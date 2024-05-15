@@ -30,7 +30,7 @@ limitations under the License.
 #include "config.h"
 
 #if HAVE_LIBGC
-#include <gc/gc_cpp.h>
+#include <gc_cpp.h>
 #define IF_HAVE_LIBGC(X) X
 #else
 #define IF_HAVE_LIBGC(X)

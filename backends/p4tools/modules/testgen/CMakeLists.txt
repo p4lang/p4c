@@ -14,7 +14,7 @@ set(
   options.cpp
   testgen.cpp
 
-  core/compiler_target.cpp
+  core/compiler_result.cpp
   core/externs.cpp
   core/program_info.cpp
   core/small_step/abstract_stepper.cpp
@@ -92,7 +92,6 @@ foreach(ext ${testgen_targets})
       message("-- Enabling target ${ext}")
       add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/${ext})
       set(include_statements_var "${include_statements_var}#include \"backends/p4tools/modules/testgen/targets/${ext}/register.h\"\n")
-      set(compiler_targets_var "${compiler_targets_var}    ${ext}RegisterCompilerTarget();\n")
       set(testgen_targets_var "${testgen_targets_var}    ${ext}RegisterTestgenTarget();\n")
     endif()
   endif()
