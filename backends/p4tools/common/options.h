@@ -1,7 +1,6 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_OPTIONS_H_
 #define BACKENDS_P4TOOLS_COMMON_OPTIONS_H_
 
-// Boost
 #include <cstdint>
 #include <optional>
 #include <tuple>

@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <utility>
 
-#include <boost/container/vector.hpp>
-
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/indexed_vector.h"
 #include "ir/vector.h"
