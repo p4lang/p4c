@@ -79,7 +79,8 @@ void EBPFRegisterPNA::emitRegisterWrite(EBPF::CodeBuilder *builder, const P4::Ex
     builder->newline();
     builder->emitIndent();
     builder->appendLine(
-        "bpf_p4tc_extern_md_write(skb, ext_params, sizeof(*ext_params), ext_val, sizeof(*ext_val));");
+        "bpf_p4tc_extern_md_write(skb, ext_params, sizeof(*ext_params), ext_val, "
+        "sizeof(*ext_val));");
 }
 
 }  // namespace TC

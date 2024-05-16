@@ -3,7 +3,7 @@
   "pipeline_name" : "send_to_port_example",
   "externs" : [
     {
-      "name" : "MainControlImpl/Register",
+      "name" : "Register",
       "id" : 1,
       "permissions" : "0x19b6",
       "instances" : [

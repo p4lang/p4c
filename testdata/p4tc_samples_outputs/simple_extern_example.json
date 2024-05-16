@@ -3,7 +3,7 @@
   "pipeline_name" : "simple_extern_example",
   "externs" : [
     {
-      "name" : "ingress/Register",
+      "name" : "Register",
       "id" : 1,
       "permissions" : "0x19b6",
       "instances" : [

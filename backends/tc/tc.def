@@ -448,15 +448,13 @@ class TCExternInstance {
 class TCExtern {
     unsigned externID;
     cstring externName;
-    cstring controlName;
     cstring pipelineName;
     unsigned numinstances;
     cstring acl_permisson;
     safe_vector<TCExternInstance> externInstances;
-    TCExtern(unsigned eId, cstring eN, cstring cN, cstring pN, unsigned inst, cstring p) {
+    TCExtern(unsigned eId, cstring eN, cstring pN, unsigned inst, cstring p) {
         externID = eId;
         externName = eN;
-        controlName = cN;
         pipelineName = pN;
         numinstances = inst;
         acl_permisson = p;
@@ -467,7 +465,7 @@ class TCExtern {
     toString {
         std::string tcExtern = "";
         tcExtern += "\n$TC p4template create extern/";
-        tcExtern += pipelineName + "/" + controlName + "/" + externName;
+        tcExtern += pipelineName + "/root/" + externName;
         tcExtern += " extid " + Util::toString(externID);
         tcExtern += " numinstances " + Util::toString(numinstances);
         tcExtern += " tc_acl " + acl_permisson;

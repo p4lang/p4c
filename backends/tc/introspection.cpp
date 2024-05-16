@@ -156,7 +156,7 @@ void IntrospectionGenerator::collectExternInfo() {
     for (auto extn : tcPipeline->externDefs) {
         auto externInfo = new struct ExternAttributes();
         externInfo->id = extn->externID;
-        externInfo->name = extn->controlName + "/" + extn->externName;
+        externInfo->name = extn->externName;
         externInfo->permissions = extn->acl_permisson;
 
         for (auto externInstance : extn->externInstances) {

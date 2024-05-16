@@ -844,9 +844,6 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
             auto iterator = externsInfo.find(eName);
             if (iterator == externsInfo.end()) {
                 struct ExternBlock *eb = new struct ExternBlock();
-                auto ctrl = findContext<IR::P4Control>();
-                cstring cName = ctrl == nullptr ? "root" : ctrl->name.originalName;
-                eb->control_name = cName;
                 eb->externId = ++externCount;
                 eb->permissions = processExternPermission(extn);
                 eb->no_of_instances += 1;
@@ -855,9 +852,8 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
                 instance->instance_id = eb->no_of_instances;
                 eb->eInstance.push_back(instance);
 
-                externDefinition =
-                    new IR::TCExtern(eb->externId, eName, eb->control_name, pipelineName,
-                                     eb->no_of_instances, eb->permissions);
+                externDefinition = new IR::TCExtern(eb->externId, eName, pipelineName,
+                                                    eb->no_of_instances, eb->permissions);
                 tcPipeline->addExternDefinition(externDefinition);
             } else {
                 auto eb = externsInfo[eName];
