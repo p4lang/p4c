@@ -95,12 +95,12 @@ endif()
 find_program(CLANG_TIDY_CMD clang-tidy)
 
 if(CLANG_TIDY_CMD)
-  if (NOT CMAKE_EXPORT_COMPILE_COMMANDS)
-    message(WARNING "CMAKE_EXPORT_COMPILE_COMMANDS is not set ON, clang-tidy remains disabled.")
-  endif()
-
   # Retrieve the global clang-tidy property.
   get_property(CLANG_TIDY_FILES GLOBAL PROPERTY CLANG_TIDY-files)
+
+  if (DEFINED CLANG_TIDY_FILES AND NOT CMAKE_EXPORT_COMPILE_COMMANDS)
+    message(WARNING "CMAKE_EXPORT_COMPILE_COMMANDS is not set ON, clang-tidy remains disabled.")
+  endif()
   if(DEFINED CLANG_TIDY_FILES AND CMAKE_EXPORT_COMPILE_COMMANDS)
 
     # Write the list to a file.
