@@ -25,6 +25,17 @@ struct SymbolicVariableLess {
     }
 };
 
+/// Hash for SymbolicVariable pointers. We only hash the label.
+struct SymbolicVariableHash {
+    size_t operator()(const IR::SymbolicVariable *s1) const {
+        return std::hash<cstring>()(s1->label);
+    }
+
+    size_t operator()(const IR::SymbolicVariable &s1) const {
+        return std::hash<cstring>()(s1.label);
+    }
+};
+
 }  // namespace P4::IR
 
 #endif /* IR_COMPARE_H_ */
