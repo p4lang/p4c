@@ -90,7 +90,7 @@ control ingress(
         send_to_port(port_id);
     }
 
-    action ext_reg(PortId_t port_id) {
+    action ext_reg(@tc_type("dev") PortId_t port_id) {
         bit<32> val;
         val = reg1.read(port_id);
         val = val + 10;
@@ -103,7 +103,7 @@ control ingress(
 
     table nh_table {
         key = {
-            hdr.ipv4.srcAddr : lpm;
+            hdr.ipv4.srcAddr : lpm @tc_type("ipv4");
         }
         actions = {
             ext_reg;

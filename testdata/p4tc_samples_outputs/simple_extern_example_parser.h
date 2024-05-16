@@ -1,6 +1,7 @@
 #include "ebpf_kernel.h"
 
 #include <stdbool.h>
+#include <stdlib.h>
 #include <linux/if_ether.h>
 #include "pna.h"
 

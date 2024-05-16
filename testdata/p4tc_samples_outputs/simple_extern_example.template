@@ -12,7 +12,7 @@ $TC p4template create action/simple_extern_example/ingress/send_nh actid 1 \
 $TC p4template update action/simple_extern_example/ingress/send_nh state active
 
 $TC p4template create action/simple_extern_example/ingress/ext_reg actid 2 \
-	param port_id type bit32
+	param port_id type dev
 $TC p4template update action/simple_extern_example/ingress/ext_reg state active
 
 $TC p4template create action/simple_extern_example/ingress/drop actid 3
@@ -27,13 +27,13 @@ $TC p4template create table/simple_extern_example/ingress/nh_table \
 	act name simple_extern_example/ingress/drop
 $TC p4template update table/simple_extern_example/ingress/nh_table default_miss_action permissions 0x1024 action simple_extern_example/ingress/drop
 
-$TC p4template create extern/simple_extern_example/ingress/Register extid 1 numinstances 2 tc_acl 0x18f6
+$TC p4template create extern/simple_extern_example/ingress/Register extid 1 numinstances 2 tc_acl 0x19b6
 
 $TC p4template create extern_inst/simple_extern_example/Register/ingress.reg1 instid 1 \
-control_path tc_key index type bit32 id 1 param a_value type bit32 id 2
+control_path tc_key index type bit32 id 1 param a_value type bit32 id 2 \
 tc_numel 10
 
 $TC p4template create extern_inst/simple_extern_example/Register/ingress.reg3 instid 2 \
-control_path tc_key index type bit32 id 1 param protocol type bit8 id 2 param aux type bit8 id 3
+control_path tc_key index type bit32 id 1 param protocol type bit8 id 2 param aux type bit8 id 3 \
 tc_numel 3
 $TC p4template update pipeline/simple_extern_example state ready

@@ -5,7 +5,7 @@
     {
       "name" : "MainControlImpl/Register",
       "id" : 1,
-      "permissions" : "0x18f6",
+      "permissions" : "0x19b6",
       "instances" : [
         {
           "inst_name" : "MainControlImpl.reg1",

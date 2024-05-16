@@ -58,8 +58,8 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
     hdr = &(hdrMd->cpumap_hdr);
     meta = &(hdrMd->cpumap_usermeta);
 {
-        struct p4tc_ext_bpf_params* ext_params;
-        struct p4tc_ext_bpf_val* ext_val;
+        struct p4tc_ext_bpf_params* ext_params = malloc(sizeof(struct p4tc_ext_bpf_params));
+        struct p4tc_ext_bpf_val* ext_val = malloc(sizeof(struct p4tc_ext_bpf_val));
         u8 hit;
         u32 val_0 = 0;
         struct reg_val_t arg_val_0;
@@ -75,7 +75,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             ext_params->index = 2;
 
             __builtin_memcpy(ext_val->out_params, &arg_val_0, sizeof(struct reg_val_t ));
-            bpf_p4tc_extern_md_write(skb, ext_params, sizeof(ext_params), ext_val, sizeof(ext_val));
+            bpf_p4tc_extern_md_write(skb, ext_params, sizeof(*ext_params), ext_val, sizeof(*ext_val));
 ;
             /* nh_table_0.apply() */
             {
@@ -87,7 +87,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                 struct ingress_nh_table_key key;
                 __builtin_memset(&key, 0, sizeof(key));
                 key.keysz = 32;
-                key.field0 = hdr->ipv4.srcAddr;
+                key.field0 = bpf_htonl(hdr->ipv4.srcAddr);
                 struct p4tc_table_entry_act_bpf *act_bpf;
                 /* value */
                 struct ingress_nh_table_value *value = NULL;
@@ -111,7 +111,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                                 ext_params->inst_id = 1;
                                 ext_params->index = value->u.ingress_ext_reg.port_id;
 
-                                ext_val = bpf_p4tc_extern_md_read(skb, ext_params, sizeof(ext_params));
+                                ext_val = bpf_p4tc_extern_md_read(skb, ext_params, sizeof(*ext_params));
                                 if (!ext_val) 
                                      return TC_ACT_SHOT;
                                 __builtin_memcpy(&val_0, ext_val->out_params, sizeof(u32 ));
@@ -124,7 +124,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                                 ext_params->index = value->u.ingress_ext_reg.port_id;
 
                                 __builtin_memcpy(ext_val->out_params, &val_0, sizeof(u32 ));
-                                bpf_p4tc_extern_md_write(skb, ext_params, sizeof(ext_params), ext_val, sizeof(ext_val));
+                                bpf_p4tc_extern_md_write(skb, ext_params, sizeof(*ext_params), ext_val, sizeof(*ext_val));
 ;
                                 /* send_to_port(value->u.ingress_ext_reg.port_id) */
                                 compiler_meta__->drop = false;

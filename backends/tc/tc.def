@@ -435,6 +435,7 @@ class TCExternInstance {
             for (auto field : keys) {
                 tcExternInstance += field->toString();
             }
+            tcExternInstance += " \\";
         }
         if (isNumelemns) {
             tcExternInstance += "\ntc_numel " + Util::toString(numelemns);

@@ -54,8 +54,8 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     hdr = &(hdrMd->cpumap_hdr);
     user_meta = &(hdrMd->cpumap_usermeta);
 {
-        struct p4tc_ext_bpf_params* ext_params;
-        struct p4tc_ext_bpf_val* ext_val;
+        struct p4tc_ext_bpf_params* ext_params = malloc(sizeof(struct p4tc_ext_bpf_params));
+        struct p4tc_ext_bpf_val* ext_val = malloc(sizeof(struct p4tc_ext_bpf_val));
         u8 hit;
         u32 val_0 = 0;
         {
@@ -97,7 +97,7 @@ if (/* hdr->ipv4.isValid() */
                                     ext_params->inst_id = 1;
                                     ext_params->index = value->u.MainControlImpl_next_hop.vport;
 
-                                    ext_val = bpf_p4tc_extern_md_read(skb, ext_params, sizeof(ext_params));
+                                    ext_val = bpf_p4tc_extern_md_read(skb, ext_params, sizeof(*ext_params));
                                     if (!ext_val) 
                                          return TC_ACT_SHOT;
                                     __builtin_memcpy(&val_0, ext_val->out_params, sizeof(u32 ));
@@ -110,7 +110,7 @@ if (/* hdr->ipv4.isValid() */
                                     ext_params->index = value->u.MainControlImpl_next_hop.vport;
 
                                     __builtin_memcpy(ext_val->out_params, &val_0, sizeof(u32 ));
-                                    bpf_p4tc_extern_md_write(skb, ext_params, sizeof(ext_params), ext_val, sizeof(ext_val));
+                                    bpf_p4tc_extern_md_write(skb, ext_params, sizeof(*ext_params), ext_val, sizeof(*ext_val));
 ;
                                     /* send_to_port(value->u.MainControlImpl_next_hop.vport) */
                                     compiler_meta__->drop = false;
