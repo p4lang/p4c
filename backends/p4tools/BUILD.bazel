@@ -19,7 +19,14 @@ TESTGEN_TARGETS = [
 
 filegroup(
     name = "ir_extension",
-    srcs = ["p4tools.def"],
+    srcs = ["common/ir.def"],
+    visibility = ["//visibility:public"],  # So p4c can compile these.
+)
+
+# Sources for IR definitions in P4Tools. Need to be compiled in the top-level.
+filegroup(
+    name = "ir_extension_sources",
+    srcs = ["common/ir.cpp"],
     visibility = ["//visibility:public"],  # So p4c can compile these.
 )
 
@@ -77,10 +84,13 @@ genrule(
 
 cc_library(
     name = "common",
-    srcs = glob([
-        "common/**/*.h",
-        "common/**/*.cpp",
-    ]) + [":version"],
+    srcs = glob(
+        [
+            "common/**/*.h",
+            "common/**/*.cpp",
+        ],
+        exclude = ["common/ir.cpp"],
+    ) + [":version"],
     copts = [
         "-fexceptions",
         "-w",
@@ -226,6 +236,20 @@ cc_library(
         "//:test_helpers",
         "@abseil-cpp//absl/strings",
         "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "p4tools_ir_compare_test",
+    srcs = [
+        "modules/testgen/test/lib/ir_compare.cpp",
+        "//:test/gtest/gtestp4c.cpp",
+    ],
+    data = ["//p4include"],
+    deps = [
+        ":common",
+        "//:test_helpers",
+        "@googletest//:gtest",
     ],
 )
 

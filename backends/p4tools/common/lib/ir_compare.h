@@ -11,17 +11,17 @@
 
 namespace P4::IR {
 
-/// Equals for StateVariable pointers. We only compare the label.
+/// Equality of state references, ignoring types.
 struct StateVariableEqual {
     bool operator()(const IR::StateVariable *s1, const IR::StateVariable *s2) const {
-        return s1->equiv(*s2);
+        return *s1 == *s2;
     }
     bool operator()(const IR::StateVariable &s1, const IR::StateVariable &s2) const {
-        return s1.equiv(s2);
+        return s1 == s2;
     }
 };
 
-/// Less for StateVariable pointers. We only compare the label.
+/// Ordering of state references, ignoring types.
 struct StateVariableLess {
     bool operator()(const IR::StateVariable *s1, const IR::StateVariable *s2) const {
         return *s1 < *s2;
@@ -29,6 +29,13 @@ struct StateVariableLess {
     bool operator()(const IR::StateVariable &s1, const IR::StateVariable &s2) const {
         return s1 < s2;
     }
+};
+
+/// Hash of state references, ignoring types. Use with StateVariableEqual.
+struct StateVariableHash {
+    size_t operator()(const IR::StateVariable *s1) const { return s1->hash(); }
+
+    size_t operator()(const IR::StateVariable &s1) const { return s1.hash(); }
 };
 
 }  // namespace P4::IR
