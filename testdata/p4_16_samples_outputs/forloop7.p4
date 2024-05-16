@@ -14,9 +14,9 @@ struct headers_t {
 
 control c(inout headers_t hdrs) {
     action a0(bit<8> m) {
-        for (bit<16> a in 16w1 .. 16w2) {
+        for (bit<16> a in 1 .. 2) {
             fn(a, 0);
-            for (bit<16> b in 16w1 .. 16w2) {
+            for (bit<16> b in 1 .. 2) {
                 if (fn(a, b)) {
                     continue;
                 }

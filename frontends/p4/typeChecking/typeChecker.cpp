@@ -2754,6 +2754,10 @@ const IR::Node *TypeInference::typeSet(const IR::Operation_Binary *expression) {
     } else {
         // both are InfInt: use same exact type for both sides, so it is properly
         // set after unification
+        // FIXME -- the below is obviously wrong and just serves to tweak when precisely
+        // the type will be inferred -- papering over bugs elsewhere in typechecking,
+        // avoiding the BUG_CHECK(!readOnly... in end_apply/apply_visitor above.
+        // (maybe just need learner->readOnly = false in TypeInference::learn above?)
         auto r = expression->right->clone();
         auto e = expression->clone();
         if (isCompileTimeConstant(expression->right)) setCompileTimeConstant(r);
@@ -4147,6 +4151,40 @@ const IR::Node *TypeInference::postorder(IR::AssignmentStatement *assign) {
     if (newInit != assign->right)
         assign = new IR::AssignmentStatement(assign->srcInfo, assign->left, newInit);
     return assign;
+}
+
+const IR::Node *TypeInference::postorder(IR::ForInStatement *forin) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
+    auto ltype = getType(forin->ref);
+    if (ltype == nullptr) return forin;
+    auto ctype = getType(forin->collection);
+    if (ctype == nullptr) return forin;
+
+    if (!isLeftValue(forin->ref)) {
+        typeError("Expression %1% cannot be the target of an assignment", forin->ref);
+        LOG2(forin->ref);
+        return forin;
+    }
+    if (auto range = forin->collection->to<IR::Range>()) {
+        auto rclone = range->clone();
+        rclone->left = assignment(forin, ltype, rclone->left);
+        rclone->right = assignment(forin, ltype, rclone->right);
+        if (*range != *rclone)
+            forin->collection = rclone;
+        else
+            delete rclone;
+    } else if (auto *stack = ctype->to<IR::Type_Stack>()) {
+        if (!canCastBetween(stack->elementType, ltype))
+            typeError("%1% does not match header stack type %2%", forin->ref, ctype);
+    } else if (auto *list = ctype->to<IR::Type_P4List>()) {
+        if (!canCastBetween(list->elementType, ltype))
+            typeError("%1% does not match %2% element type", forin->ref, ctype);
+    } else {
+        error(ErrorType::ERR_UNSUPPORTED,
+              "%1%Typechecking does not support iteration over this collection of type %2%",
+              forin->collection->srcInfo, ctype);
+    }
+    return forin;
 }
 
 const IR::Node *TypeInference::postorder(IR::ActionListElement *elem) {
