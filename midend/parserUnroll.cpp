@@ -791,8 +791,8 @@ class ParserSymbolicInterpreter {
         }
         hasOutOfboundState = true;
         newStates.insert(newName);
-        auto *pathExpr =
-            new IR::PathExpression(new IR::Type_State(), new IR::Path(outOfBoundsStateName, false));
+        auto *pathExpr = new IR::PathExpression(IR::Type_State::get(),
+                                                new IR::Path(outOfBoundsStateName, false));
         stateInfo->newState = new IR::ParserState(newName, components, pathExpr);
     }
 

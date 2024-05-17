@@ -48,7 +48,7 @@ class EnumRepresentation {
     const IR::Type_Bits *type;
 
     EnumRepresentation(Util::SourceInfo srcInfo, unsigned width) {
-        type = new IR::Type_Bits(srcInfo, width, false);
+        type = IR::Type_Bits::get(srcInfo, width, false);
     }
     void add(cstring decl) { repr.emplace(decl, repr.size()); }
     unsigned get(cstring decl) const { return ::get(repr, decl); }

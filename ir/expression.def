@@ -169,28 +169,28 @@ class Constant : Literal {
     // 32-bit systems (which ain't long!) and mpz_import is too big a hammer because and it loses
     // the signess of the value.
     Constant(int v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
     Constant(unsigned v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
 #emit
 #if __WORDSIZE == 64
     Constant(intmax_t v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
 #else
     Constant(long v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
     Constant(unsigned long v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
     Constant(intmax_t v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
 #endif
 #end
     Constant(uint64_t v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
     Constant(big_int v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
     Constant(Util::SourceInfo si, big_int v, unsigned base = 10) :
-        Literal(si, new Type_InfInt()), value(v), base(base) {}
+        Literal(si, Type_InfInt::get()), value(v), base(base) {}
     Constant(const Type *t, big_int v, unsigned base = 10, bool noWarning = false) :
         Literal(t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
     Constant(Util::SourceInfo si, const Type *t, big_int v,

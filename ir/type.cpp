@@ -21,6 +21,7 @@ limitations under the License.
 #include "frontends/common/parser_options.h"
 #include "ir/configuration.h"
 #include "ir/id.h"
+#include "ir/ir-generated.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
@@ -87,26 +88,8 @@ const Type_Bits *Type_Bits::get(int width, bool isSigned) {
     return result;
 }
 
-const Type::Unknown *Type::Unknown::get() {
-    static const Type::Unknown *singleton = nullptr;
-    if (!singleton) singleton = (new Type::Unknown());
-    return singleton;
-}
-
-const Type::Boolean *Type::Boolean::get() {
-    static const Type::Boolean *singleton = nullptr;
-    if (!singleton) singleton = (new Type::Boolean());
-    return singleton;
-}
-
-const Type_String *Type_String::get() {
-    static const Type_String *singleton = nullptr;
-    if (!singleton) singleton = (new Type_String());
-    return singleton;
-}
-
-const Type::Bits *Type::Bits::get(Util::SourceInfo si, int sz, bool isSigned) {
-    auto result = new IR::Type_Bits(si, sz, isSigned);
+const Type_Bits *Type_Bits::get(const Util::SourceInfo &si, int sz, bool isSigned) {
+    auto *result = new IR::Type_Bits(si, sz, isSigned);
     if (sz < 0) {
         ::error(ErrorType::ERR_INVALID, "%1%: Width of type cannot be negative", result);
         // Return a value that will not cause crashes later on
@@ -120,8 +103,50 @@ const Type::Bits *Type::Bits::get(Util::SourceInfo si, int sz, bool isSigned) {
     return result;
 }
 
-const Type::Varbits *Type::Varbits::get(Util::SourceInfo si, int sz) {
-    auto result = new Type::Varbits(si, sz);
+const Type_Bits *Type_Bits::get(const Util::SourceInfo &si, const IR::Expression *expression,
+                                bool isSigned) {
+    return new IR::Type_Bits(si, expression, isSigned);
+}
+
+const Type_Unknown *Type_Unknown::get() {
+    static const Type_Unknown *singleton = nullptr;
+    if (!singleton) singleton = (new Type_Unknown());
+    return singleton;
+}
+
+const Type_Unknown *Type_Unknown::get(const Util::SourceInfo &si) {
+    // We do not cache types with source info (yet).
+    return new Type_Unknown(si);
+}
+
+const Type_Boolean *Type_Boolean::get() {
+    static const Type_Boolean *singleton = nullptr;
+    if (!singleton) singleton = (new Type_Boolean());
+    return singleton;
+}
+
+const Type_Boolean *Type_Boolean::get(const Util::SourceInfo &si) {
+    // We do not cache types with source info (yet).
+    return new Type_Boolean(si);
+}
+
+const Type_String *Type_String::get() {
+    static const Type_String *singleton = nullptr;
+    if (!singleton) singleton = (new Type_String());
+    return singleton;
+}
+
+const Type_String *Type_String::get(const Util::SourceInfo &si) {
+    // We do not cache types with source info (yet).
+    return new Type_String(si);
+}
+
+const Type_Varbits *Type_Varbits::get(const Util::SourceInfo &si, const IR::Expression *expr) {
+    return new Type_Varbits(si, expr);
+}
+
+const Type_Varbits *Type_Varbits::get(const Util::SourceInfo &si, int sz) {
+    auto result = new Type_Varbits(si, sz);
     if (sz < 0) {
         ::error(ErrorType::ERR_INVALID, "%1%: Width cannot be negative or zero", result);
         // Return a value that will not cause crashes later on
@@ -130,12 +155,29 @@ const Type::Varbits *Type::Varbits::get(Util::SourceInfo si, int sz) {
     return result;
 }
 
-const Type::Varbits *Type::Varbits::get() { return new Type::Varbits(0); }
+const Type_Varbits *Type_Varbits::get(int sz) { return new Type_Varbits(sz); }
+
+const Type_Varbits *Type_Varbits::get() { return new Type_Varbits(0); }
+
+const Type_InfInt *Type_InfInt::get() {
+    // We do not cache types with declaration IDs (yet).
+    return new Type_InfInt();
+}
+
+const Type_InfInt *Type_InfInt::get(const Util::SourceInfo &si) {
+    // We do not cache types with source info and declaration IDs (yet).
+    return new Type_InfInt(si);
+}
 
 const Type_Dontcare *Type_Dontcare::get() {
     static const Type_Dontcare *singleton;
     if (!singleton) singleton = (new Type_Dontcare());
     return singleton;
+}
+
+const Type_Dontcare *Type_Dontcare::get(const Util::SourceInfo &si) {
+    // We do not cache types with source info (yet).
+    return new Type_Dontcare(si);
 }
 
 const Type_State *Type_State::get() {
@@ -144,16 +186,41 @@ const Type_State *Type_State::get() {
     return singleton;
 }
 
+const Type_State *Type_State::get(const Util::SourceInfo &si) {
+    // We do not cache types with source info (yet).
+    return new Type_State(si);
+}
+
 const Type_Void *Type_Void::get() {
     static const Type_Void *singleton;
     if (!singleton) singleton = (new Type_Void());
     return singleton;
 }
 
+const Type_Void *Type_Void::get(const Util::SourceInfo &si) {
+    // We do not cache types with source info (yet).
+    return new Type_Void(si);
+}
+
 const Type_MatchKind *Type_MatchKind::get() {
     static const Type_MatchKind *singleton;
     if (!singleton) singleton = (new Type_MatchKind());
     return singleton;
+}
+
+const Type_MatchKind *Type_MatchKind::get(const Util::SourceInfo &si) {
+    // We do not cache types with source info (yet).
+    return new Type_MatchKind(si);
+}
+
+const Type_Any *Type_Any::get() {
+    // We do not cache types with declaration IDs (yet).
+    return new Type_Any();
+}
+
+const Type_Any *Type_Any::get(const Util::SourceInfo &si) {
+    // We do not cache types with source info and declaration IDs (yet).
+    return new Type_Any(si);
 }
 
 bool Type_ActionEnum::contains(cstring name) const {

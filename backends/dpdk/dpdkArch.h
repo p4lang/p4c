@@ -593,7 +593,7 @@ class InjectInternetChecksumIntermediateValue : public Transform {
                     auto fields = new IR::IndexedVector<IR::StructField>;
                     for (auto fld : *csum_vec) {
                         fields->push_back(
-                            new IR::StructField(IR::ID(fld), new IR::Type_Bits(16, false)));
+                            new IR::StructField(IR::ID(fld), IR::Type::Bits::get(16, false)));
                     }
                     new_objs->push_back(new IR::Type_Header(IR::ID("cksum_state_t"), *fields));
                 }
