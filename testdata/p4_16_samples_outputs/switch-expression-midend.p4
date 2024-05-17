@@ -1,7 +1,6 @@
 #include <core.p4>
 
 control c(inout bit<32> b) {
-    bit<32> switch_0_key;
     @hidden action switch_0_case() {
     }
     @hidden action switch_0_case_0() {
@@ -10,7 +9,7 @@ control c(inout bit<32> b) {
     }
     @hidden table switch_0_table {
         key = {
-            switch_0_key: exact;
+            b: exact;
         }
         actions = {
             switch_0_case();
@@ -34,15 +33,6 @@ control c(inout bit<32> b) {
     @hidden action switchexpression10() {
         b = 32w3;
     }
-    @hidden action switchexpression5() {
-        switch_0_key = b;
-    }
-    @hidden table tbl_switchexpression5 {
-        actions = {
-            switchexpression5();
-        }
-        const default_action = switchexpression5();
-    }
     @hidden table tbl_switchexpression7 {
         actions = {
             switchexpression7();
@@ -62,7 +52,6 @@ control c(inout bit<32> b) {
         const default_action = switchexpression10();
     }
     apply {
-        tbl_switchexpression5.apply();
         switch (switch_0_table.apply().action_run) {
             switch_0_case: {
                 tbl_switchexpression7.apply();

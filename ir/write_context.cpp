@@ -54,6 +54,8 @@ bool P4WriteContext::isWrite(bool root_value) {
             return true;
         }
     }
+    // The `ref` of a for..in is written and read
+    if (ctxt->node->is<IR::ForInStatement>()) return ctxt->child_index == 1;
     if (ctxt->node->is<IR::MethodCallExpression>()) {
         /* receiver of a method call -- some methods might be 'const' and not modify
          * their receiver, but we currently have no way of determining that */

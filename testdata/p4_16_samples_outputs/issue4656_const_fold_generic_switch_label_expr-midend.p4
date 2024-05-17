@@ -19,7 +19,6 @@ control c() {
         }
         default_action = NoAction_1();
     }
-    bit<8> switch_0_key;
     @hidden action switch_0_case() {
     }
     @hidden action switch_0_case_0() {
@@ -28,7 +27,7 @@ control c() {
     }
     @hidden table switch_0_table {
         key = {
-            switch_0_key: exact;
+            tmp: exact;
         }
         actions = {
             switch_0_case();
@@ -47,9 +46,6 @@ control c() {
     @hidden action issue4656_const_fold_generic_switch_label_expr15() {
         bar();
     }
-    @hidden action issue4656_const_fold_generic_switch_label_expr13() {
-        switch_0_key = tmp;
-    }
     @hidden action act() {
         tmp = baz();
     }
@@ -58,12 +54,6 @@ control c() {
             act();
         }
         const default_action = act();
-    }
-    @hidden table tbl_issue4656_const_fold_generic_switch_label_expr13 {
-        actions = {
-            issue4656_const_fold_generic_switch_label_expr13();
-        }
-        const default_action = issue4656_const_fold_generic_switch_label_expr13();
     }
     @hidden table tbl_issue4656_const_fold_generic_switch_label_expr14 {
         actions = {
@@ -79,7 +69,6 @@ control c() {
     }
     apply {
         tbl_act.apply();
-        tbl_issue4656_const_fold_generic_switch_label_expr13.apply();
         switch (switch_0_table.apply().action_run) {
             switch_0_case: {
                 tbl_issue4656_const_fold_generic_switch_label_expr14.apply();

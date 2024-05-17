@@ -1,0 +1,9 @@
+loop2-err.p4(5): [--Werror=type-error] error: 'ForInStatement'
+        for (bit<8> a in 16w0..16w15) {
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+  Cannot cast implicitly type 'bit<16>' to type 'bit<8>'
+  ---- Originating from:
+loop2-err.p4(5): Source expression '16w0' produces a result of type 'bit<16>' which cannot be assigned to a left-value with type 'bit<8>'
+          for (bit<8> a in 16w0..16w15) {
+                           ^^^^

@@ -282,6 +282,7 @@ class StringLiteral : Literal {
 class PathExpression : Expression {
     Path path;
     PathExpression { if (!srcInfo && path) srcInfo = path->srcInfo; }
+    PathExpression(Type t, IR::ID id) : Expression(id.srcInfo, t), path(new IR::Path(id)) {}
     PathExpression(IR::ID id) : Expression(id.srcInfo), path(new IR::Path(id)) {}
     toString{ return path->toString(); }
 }
