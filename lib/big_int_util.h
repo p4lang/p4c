@@ -17,6 +17,12 @@ limitations under the License.
 #ifndef LIB_BIG_INT_UTIL_H_
 #define LIB_BIG_INT_UTIL_H_
 
+#include <boost/version.hpp>
+
+#if BOOST_VERSION < 106700
+#include <boost/functional/hash.hpp>
+#endif
+
 #include "big_int.h"
 #include "hash.h"
 
