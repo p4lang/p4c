@@ -8,28 +8,28 @@
 
 namespace P4Tools {
 
-void enableInformationLogging() { ::Log::addDebugSpec("test_info:4"); }
+void enableInformationLogging() { ::Log::addDebugSpec("tools_info:4"); }
 
-void enablePerformanceLogging() { ::Log::addDebugSpec("performance:4"); }
+void enablePerformanceLogging() { ::Log::addDebugSpec("tools_performance:4"); }
 
 void printPerformanceReport(const std::optional<std::filesystem::path> &basePath) {
     // Do not emit a report if performance logging is not enabled.
-    if (!Log::fileLogLevelIsAtLeast("performance", 4)) {
+    if (!Log::fileLogLevelIsAtLeast("tools_performance", 4)) {
         return;
     }
-    printFeature("performance", 4, "============ Timers ============");
+    printFeature("tools_performance", 4, "============ Timers ============");
     using TimerData = std::unordered_map<std::string, std::string>;
     std::vector<TimerData> timerList;
     for (const auto &c : Util::getTimers()) {
         TimerData timerData;
         timerData["time"] = std::to_string(c.milliseconds);
         if (c.timerName.empty()) {
-            printFeature("performance", 4, "Total: %i ms", c.milliseconds);
+            printFeature("tools_performance", 4, "Total: %i ms", c.milliseconds);
             timerData["pct"] = "100";
             timerData["name"] = "total";
         } else {
             timerData["pct"] = std::to_string(c.relativeToParent * 100);
-            printFeature("performance", 4, "%s: %i ms (%0.2f %% of parent)", c.timerName,
+            printFeature("tools_performance", 4, "%s: %i ms (%0.2f %% of parent)", c.timerName,
                          c.milliseconds, c.relativeToParent * 100);
             auto prunedName = c.timerName;
             prunedName.erase(remove_if(prunedName.begin(), prunedName.end(), isspace),

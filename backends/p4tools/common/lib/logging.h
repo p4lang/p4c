@@ -9,11 +9,41 @@
 
 namespace P4Tools {
 
-/// Helper functions that prints strings associated with basic test generation information., for
-/// example the covered nodes or tests number.
+/// Helper function for @printFeature
+inline std::string logHelper(boost::format &f) { return f.str(); }
+
+/// Helper function for @printFeature
+template <class T, class... Args>
+std::string logHelper(boost::format &f, T &&t, Args &&...args) {
+    return logHelper(f % std::forward<T>(t), std::forward<Args>(args)...);
+}
+
+/// A helper function that allows us to configure logging for a particular feature. This code is
+/// taken from
+// https://stackoverflow.com/a/25859856
+template <typename... Arguments>
+void printFeature(const std::string &label, int level, const std::string &fmt,
+                  Arguments &&...args) {
+    boost::format f(fmt);
+
+    auto result = logHelper(f, std::forward<Arguments>(args)...);
+
+    LOG_FEATURE(label.c_str(), level, result);
+}
+
+/// Helper functions that prints strings associated with basic tool information.
+/// For example, the seed, status of test case generation, etc.
 template <typename... Arguments>
 void printInfo(const std::string &fmt, Arguments &&...args) {
-    printFeature("test_info", 4, fmt, std::forward<Arguments>(args)...);
+    printFeature("tools_info", 4, fmt, std::forward<Arguments>(args)...);
+}
+
+/// Convenience function for printing debug information.
+/// Easier to use then LOG(XX) since we only need one specific log-level across all files.
+/// Can be invoked with "-T 4:tools_debug".
+template <typename... Arguments>
+void printDebug(const std::string &fmt, Arguments &&...args) {
+    printFeature("tools_debug", 4, fmt, std::forward<Arguments>(args)...);
 }
 
 /// Enable the printing of basic run information.

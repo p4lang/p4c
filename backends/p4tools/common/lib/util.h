@@ -7,40 +7,15 @@
 #include <optional>
 #include <ostream>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <boost/format.hpp>
 #include <boost/random/mersenne_twister.hpp>
 
 #include "ir/ir.h"
-#include "lib/big_int_util.h"
 #include "lib/cstring.h"
-#include "lib/log.h"
 
 namespace P4Tools {
-
-/// Helper function for @printFeature
-inline std::string logHelper(boost::format &f) { return f.str(); }
-
-/// Helper function for @printFeature
-template <class T, class... Args>
-std::string logHelper(boost::format &f, T &&t, Args &&...args) {
-    return logHelper(f % std::forward<T>(t), std::forward<Args>(args)...);
-}
-
-/// A helper function that allows us to configure logging for a particular feature. This code is
-/// taken from
-// https://stackoverflow.com/a/25859856
-template <typename... Arguments>
-void printFeature(const std::string &label, int level, const std::string &fmt,
-                  Arguments &&...args) {
-    boost::format f(fmt);
-
-    auto result = logHelper(f, std::forward<Arguments>(args)...);
-
-    LOG_FEATURE(label.c_str(), level, result);
-}
 
 /// General utility functions that are not present in the compiler framework.
 class Utils {
