@@ -723,7 +723,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                      BUG_CHECK(!fieldType->is<IR::Type_StructLike>(),
                                "Unexpected emit field %1% of type %2%", fieldExpr, fieldType);
                      if (const auto *varbits = fieldType->to<IR::Extracted_Varbits>()) {
-                         fieldType = IR::getBitType(varbits->assignedSize);
+                         fieldType = IR::Type_Bits::get(varbits->assignedSize);
                      }
                      auto fieldWidth = fieldType->width_bits();
                      // If the width is zero, do not bother with emitting.

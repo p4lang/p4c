@@ -81,6 +81,7 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 
 control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @name("MyIC.tmp") bit<16> tmp_0;
+    bit<16> switch_0_key;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
@@ -117,7 +118,6 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
         }
         default_action = NoAction_3();
     }
-    bit<16> switch_0_key;
     @hidden action switch_0_case() {
     }
     @hidden action switch_0_case_0() {

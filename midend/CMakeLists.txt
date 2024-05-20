@@ -58,6 +58,7 @@ set (MIDEND_SRCS
   simplifySelectList.cpp
   singleArgumentSelect.cpp
   tableHit.cpp
+  unrollLoops.cpp
   validateProperties.cpp
   )
 
@@ -111,6 +112,7 @@ set (MIDEND_HDRS
   simplifySelectList.h
   singleArgumentSelect.h
   tableHit.h
+  unrollLoops.h
   validateProperties.h
   )
 

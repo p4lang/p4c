@@ -56,6 +56,8 @@ static cstring expr_name(const IR::Expression *exp) {
     return cstring();
 }
 
+int DoLocalCopyPropagation::uid_ctr = 0;
+
 /* LocalCopyPropagation does copy propagation and dead code elimination within a 'block'
  * the body of an action or control (TODO -- extend to parsers/states).  Within the
  * block it tracks all variables defined in the block as well as those defined outside the
@@ -177,11 +179,21 @@ class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
 void DoLocalCopyPropagation::flow_merge(Visitor &a_) {
     auto &a = dynamic_cast<DoLocalCopyPropagation &>(a_);
     BUG_CHECK(working == a.working, "inconsitent DoLocalCopyPropagation state on merge");
+    LOG8("flow_merge " << a.uid << " into " << uid);
+    unreachable &= a.unreachable;
     for (auto &var : available) {
         if (auto merge = ::getref(a.available, var.first)) {
-            if (merge->val != var.second.val) var.second.val = nullptr;
+            if (merge->val != var.second.val) {
+                if (var.second.val) {
+                    LOG4("    dropping " << var.first << " = " << var.second.val
+                                         << " in flow_merge");
+                }
+                var.second.val = nullptr;
+            }
             if (merge->live) var.second.live = true;
         } else {
+            if (var.second.val)
+                LOG4("    dropping " << var.first << " = " << var.second.val << " in flow_merge");
             var.second.val = nullptr;
         }
     }
@@ -190,11 +202,30 @@ void DoLocalCopyPropagation::flow_merge(Visitor &a_) {
 void DoLocalCopyPropagation::flow_copy(ControlFlowVisitor &a_) {
     auto &a = dynamic_cast<DoLocalCopyPropagation &>(a_);
     BUG_CHECK(working == a.working, "inconsistent DoLocalCopyPropagation state on copy");
+    LOG8("flow_copy " << a.uid << " into " << uid);
+    unreachable = a.unreachable;
     available = a.available;
     need_key_rewrite = a.need_key_rewrite;
     BUG_CHECK(inferForTable == a.inferForTable,
               "inconsistent DoLocalCopyPropagation state on copy");
     BUG_CHECK(inferForFunc == a.inferForFunc, "inconsistent DoLocalCopyPropagation state on copy");
+}
+bool DoLocalCopyPropagation::operator==(const ControlFlowVisitor &a_) const {
+    auto &a = dynamic_cast<const DoLocalCopyPropagation &>(a_);
+    BUG_CHECK(working == a.working, "inconsistent DoLocalCopyPropagation state on ==");
+    if (unreachable != a.unreachable) return false;
+    auto it = a.available.begin();
+    for (auto &var : available) {
+        if (it == a.available.end()) return false;
+        if (var.first != it->first) return false;
+        if (var.second.local != it->second.local) return false;
+        if (var.second.live != it->second.live) return false;
+        if (var.second.val != it->second.val) return false;
+        ++it;
+    }
+    if (it != a.available.end()) return false;
+    if (need_key_rewrite != a.need_key_rewrite) return false;
+    return true;
 }
 
 /// test to see if names denote overlapping locations
@@ -405,6 +436,10 @@ IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStateme
     return as;
 }
 
+void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::AssignmentStatement *as) {
+    if (auto dest = expr_name(as->left)) self.dropValuesUsing(dest);
+}
+
 IR::IfStatement *DoLocalCopyPropagation::postorder(IR::IfStatement *s) {
     if (s->ifTrue == nullptr) {
         /* can't leave ifTrue == nullptr, as that will fail validation -- fold away
@@ -422,6 +457,32 @@ IR::IfStatement *DoLocalCopyPropagation::postorder(IR::IfStatement *s) {
             s->condition = new IR::LNot(s->condition);
         }
     }
+    return s;
+}
+
+IR::ForStatement *DoLocalCopyPropagation::preorder(IR::ForStatement *s) {
+    visit(s->init, "init");
+    s->apply(LoopPrepass(*this), getContext());
+    ControlFlowVisitor::SaveGlobal outer(*this, "-BREAK-", "-CONTINUE-");
+    visit(s->condition, "condition");
+    visit(s->body, "body");
+    flow_merge_global_from("-CONTINUE-");
+    visit(s->updates, "updates");
+    flow_merge_global_from("-BREAK-");
+    prune();
+    return s;
+}
+
+IR::ForInStatement *DoLocalCopyPropagation::preorder(IR::ForInStatement *s) {
+    visit(s->decl, "decl", 0);
+    visit(s->collection, "collection", 2);
+    s->apply(LoopPrepass(*this), getContext());
+    ControlFlowVisitor::SaveGlobal outer(*this, "-BREAK-", "-CONTINUE-");
+    visit(s->ref, "ref", 1);
+    visit(s->body, "body", 3);
+    flow_merge_global_from("-CONTINUE-");
+    flow_merge_global_from("-BREAK-");
+    prune();
     return s;
 }
 
@@ -531,6 +592,77 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
         }
     }
     return mc;
+}
+
+// FIXME -- this duplicates much of what is in the above method -- factor things better
+void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::MethodCallExpression *mc) {
+    auto *mi = MethodInstance::resolve(mc, self.refMap, self.typeMap, true);
+    if (auto mem = mc->method->to<IR::Member>()) {
+        if (auto obj = expr_name(mem->expr)) {
+            if (self.tables.count(obj)) {
+                LOG3("loop prepass table apply method call " << mc->method);
+                apply_table(&self.tables[obj]);
+                return;
+            } else if (auto em = mi->to<ExternMethod>()) {
+                auto ext = em->actualExternType;
+                auto name = obj + '.' + mem->member;
+                if (self.methods.count(name)) {
+                    LOG3("loop prepass concrete method call " << name);
+                    apply_function(&self.methods[name]);
+                    return;
+                } else if (ext && (ext->name == "packet_in" || ext->name == "packet_out")) {
+                    LOG3("loop prepass " << ext->name << '.' << mem->member << " call");
+                    // we currently do no track the liveness of packet_in/out objects
+                    return;
+                } else {
+                    // extern method call might trigger various concrete implementation
+                    // method in the object, so act as if all of them are applied
+                    // FIXME -- Could it invoke methods on other objects or otherwise affect
+                    // global values?  Not clear -- we probably need a hook for backends
+                    // to provide per-extern flow info to this (and other) frontend passes.
+                    LOG3("loop prepass extern method call " << name);
+                    for (auto *n : em->mayCall()) {
+                        if (auto *method = ::getref(self.methods, obj + '.' + n->getName())) {
+                            LOG4("  might call " << obj << '.' << n->getName());
+                            apply_function(method);
+                        }
+                    }
+                    return;
+                }
+            } else if (mem->expr->type->is<IR::Type_Header>() ||
+                       mem->expr->type->is<IR::Type_HeaderUnion>()) {
+                BUG_CHECK(mem->member == "setValid" || mem->member == "setInvalid",
+                          "Unexpected header method %s", mem->member);
+                LOG3("loop prepass header method call " << mc->method << " writes to " << obj);
+                self.dropValuesUsing(obj);
+                return;
+            } else if (mem->expr->type->is<IR::Type_Stack>()) {
+                BUG_CHECK(mem->member == "push_front" || mem->member == "pop_front",
+                          "Unexpected stack method %s", mem->member);
+                self.dropValuesUsing(obj);
+                return;
+            }
+        }
+    } else if (auto fn = mc->method->to<IR::PathExpression>()) {
+        if (self.actions.count(fn->path->name)) {
+            LOG3("loop prepass action method call " << mc->method);
+            apply_function(&self.actions[fn->path->name]);
+            return;
+        } else if (mi->is<P4::ExternFunction>()) {
+            LOG3("self.extern function call " << mc->method);
+            // assume it has no side-effects on anything not explicitly passed to it?
+            // maybe should have annotations if it does
+            return;
+        }
+    }
+    LOG3("loop prepass unknown method call " << mc->method << " clears all nonlocal saved values");
+    for (auto &var : self.available) {
+        if (!var.second.local) {
+            LOG7("    may access non-local " << var.first);
+            var.second.val = nullptr;
+        }
+    }
+    return;
 }
 
 IR::P4Action *DoLocalCopyPropagation::preorder(IR::P4Action *act) {
@@ -649,6 +781,11 @@ void DoLocalCopyPropagation::apply_function(DoLocalCopyPropagation::FuncInfo *ac
     }
 }
 
+void DoLocalCopyPropagation::LoopPrepass::apply_function(DoLocalCopyPropagation::FuncInfo *act) {
+    LOG7("loop prepass apply_function writes=" << act->writes);
+    for (auto write : act->writes) self.dropValuesUsing(write);
+}
+
 void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl) {
     ++tbl->apply_count;
     std::unordered_set<cstring> remaps_seen;
@@ -716,6 +853,10 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
     for (auto action : tbl->actions) apply_function(&actions[action]);
 }
 
+void DoLocalCopyPropagation::LoopPrepass::apply_table(DoLocalCopyPropagation::TableInfo *tbl) {
+    for (auto action : tbl->actions) apply_function(&self.actions[action]);
+}
+
 IR::P4Table *DoLocalCopyPropagation::preorder(IR::P4Table *tbl) {
     visitOnce();
     BUG_CHECK(!inferForTable, "corrupt internal data struct");
@@ -772,6 +913,9 @@ IR::ParserState *DoLocalCopyPropagation::postorder(IR::ParserState *state) {
 // Reset the state of internal data structures after traversing IR,
 // needed for this pass to function correctly when used in a PassRepeated
 Visitor::profile_t DoLocalCopyPropagation::init_apply(const IR::Node *node) {
+    auto rv = Transform::init_apply(node);
+    uid = uid_ctr = 0;  // reset uids
+
     // clear maps
     available.clear();
     tables.clear();
@@ -786,7 +930,7 @@ Visitor::profile_t DoLocalCopyPropagation::init_apply(const IR::Node *node) {
     elimUnusedTables = false;
     working = false;
 
-    return Transform::init_apply(node);
+    return rv;
 }
 
 }  // namespace P4

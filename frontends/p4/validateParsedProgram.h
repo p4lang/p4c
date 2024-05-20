@@ -47,6 +47,7 @@ namespace P4 {
    - names of all parameters are distinct
    - no duplicate declarations in toplevel program
    - Dots are the last field
+   - continue and break statements are only used in the context of a for statement
  */
 class ValidateParsedProgram final : public Inspector {
     void container(const IR::IContainer *type);
@@ -89,6 +90,8 @@ class ValidateParsedProgram final : public Inspector {
                            parser->getConstructorParameters());
     }
     void postorder(const IR::Dots *dots) override;
+    void postorder(const IR::BreakStatement *s) override;
+    void postorder(const IR::ContinueStatement *s) override;
 };
 
 }  // namespace P4

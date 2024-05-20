@@ -274,7 +274,7 @@ class RewriteAllParsers : public Transform {
                 arguments)));
             auto *outOfBoundsState = new IR::ParserState(
                 IR::ID(outOfBoundsStateName), components,
-                new IR::PathExpression(new IR::Type_State(),
+                new IR::PathExpression(IR::Type_State::get(),
                                        new IR::Path(IR::ParserState::reject, false)));
             newParser->states.push_back(outOfBoundsState);
         }

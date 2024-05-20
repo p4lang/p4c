@@ -46,6 +46,8 @@ class ComputeDefUse : public Inspector,
     ComputeDefUse *clone() const override { return new ComputeDefUse(*this); }
     void flow_merge(Visitor &) override;
     void flow_copy(ControlFlowVisitor &) override;
+    bool operator==(const ControlFlowVisitor &) const override;
+
     enum { SKIPPING, NORMAL, READ_ONLY, WRITE_ONLY } state = SKIPPING;
 
  public:
@@ -83,6 +85,8 @@ class ComputeDefUse : public Inspector,
         // for those bits/elements/fields where live is set.
         ordered_set<const loc_t *> defs;
         bitvec live;
+        // FIXME -- this parent field is never used and is not set consistently, so
+        // appears to be useless?
         def_info_t *parent = nullptr;
         // track valid bit access for headers separate from the rest of the header
         ordered_set<const loc_t *> valid_bit_defs;
@@ -95,6 +99,8 @@ class ComputeDefUse : public Inspector,
         void erase_slice(le_bitrange);
         void split_slice(le_bitrange);
         void flow_merge(def_info_t &);
+        bool operator==(const def_info_t &) const;
+        bool operator!=(const def_info_t &a) const { return !(*this == a); }
         def_info_t() = default;
         def_info_t(const def_info_t &);
         def_info_t(def_info_t &&);
@@ -115,6 +121,7 @@ class ComputeDefUse : public Inspector,
 
     profile_t init_apply(const IR::Node *root) override {
         auto rv = Inspector::init_apply(root);
+        LOG3("## Midend ComputeDefUse");
         state = SKIPPING;
         clear();
         return rv;
@@ -145,6 +152,7 @@ class ComputeDefUse : public Inspector,
     ComputeDefUse()
         : ResolutionContext(true), cached_locs(*new std::set<loc_t>), defuse(*new defuse_t) {
         joinFlows = true;
+        visitDagOnce = false;
     }
     void clear() {
         cached_locs.clear();

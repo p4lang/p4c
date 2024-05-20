@@ -30,11 +30,9 @@ control c(out bit<32> x) {
         u_0_h1.setValid();
         u_0_h1.f = 32w0;
         u_0_h2.setInvalid();
-        x = x;
         u_0_h2.setValid();
         u_0_h2.g = 32w0;
         u_0_h1.setInvalid();
-        x = x;
         u2_0[0].h1.setValid();
         u2_0[0].h2.setInvalid();
         u2_0[0].h1.setValid();

@@ -56,11 +56,13 @@ class Visitor::ChangeTracker {
         const IR::Node *result;
     };
     using visited_t = absl::flat_hash_map<const IR::Node *, visit_info_t, Util::Hash>;
+    bool forceClone;
     visited_t visited;
 
  public:
-    ChangeTracker()
-        : visited(16) {}  // Pre-allocate 16 slots as usually these maps are small, but we do create
+    explicit ChangeTracker(bool forceClone)
+        : forceClone(forceClone),
+          visited(16) {}  // Pre-allocate 16 slots as usually these maps are small, but we do create
                           // lots of them. This saves quite some time for rehashes
 
     /** Begin tracking @n during a visiting pass.  Use `finish(@n)` to mark @n as
@@ -107,7 +109,7 @@ class Visitor::ChangeTracker {
         if (!final) {
             orig_visit_info->result = final;
             return true;
-        } else if (final != orig && *final != *orig) {
+        } else if (forceClone || (final != orig && *final != *orig)) {
             orig_visit_info->result = final;
             visited.emplace(final, visit_info_t{false, orig_visit_info->visitOnce, final});
             return true;
@@ -351,7 +353,7 @@ Visitor::profile_t Visitor::init_apply(const IR::Node *root, const Context *pare
 }
 Visitor::profile_t Modifier::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
-    visited = std::make_shared<ChangeTracker>();
+    visited = std::make_shared<ChangeTracker>(forceClone);
     return rv;
 }
 Visitor::profile_t Inspector::init_apply(const IR::Node *root) {
@@ -361,7 +363,7 @@ Visitor::profile_t Inspector::init_apply(const IR::Node *root) {
 }
 Visitor::profile_t Transform::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
-    visited = std::make_shared<ChangeTracker>();
+    visited = std::make_shared<ChangeTracker>(forceClone);
     return rv;
 }
 void Visitor::end_apply() {}
@@ -471,7 +473,7 @@ class ForwardChildren : public Visitor {
 }  // namespace
 
 const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
-    if (ctxt) ctxt->child_name = name;
+    if (ctxt && name) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
         switch (visited->try_start(n, visitDagOnce)) {
@@ -508,7 +510,7 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
 }
 
 const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
-    if (ctxt) ctxt->child_name = name;
+    if (ctxt && name) ctxt->child_name = name;
     if (n && !join_flows(n)) {
         PushContext local(ctxt, n);
         switch (visited->try_start(n, visitDagOnce)) {
@@ -536,7 +538,7 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
 }
 
 const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
-    if (ctxt) ctxt->child_name = name;
+    if (ctxt && name) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
         switch (visited->try_start(n, visitDagOnce)) {

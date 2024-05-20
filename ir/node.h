@@ -108,8 +108,6 @@ class Node : public virtual INode {
  protected:
     static int currentId;
     void traceVisit(const char *visitor) const;
-    virtual void visit_children(Visitor &) {}
-    virtual void visit_children(Visitor &) const {}
     friend class ::Visitor;
     friend class ::Inspector;
     friend class ::Modifier;
@@ -158,6 +156,8 @@ class Node : public virtual INode {
     virtual bool operator==(const CLASS &) const { return false; }
     IRNODE_ALL_SUBCLASSES(DEFINE_OPEQ_FUNC)
 #undef DEFINE_OPEQ_FUNC
+    virtual void visit_children(Visitor &) {}
+    virtual void visit_children(Visitor &) const {}
 
     bool operator!=(const Node &n) const { return !operator==(n); }
 

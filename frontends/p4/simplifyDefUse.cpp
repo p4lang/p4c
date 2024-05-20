@@ -948,6 +948,26 @@ class FindUninitialized : public Inspector {
         return setCurrent(statement);
     }
 
+    bool preorder(const IR::ForInStatement *statement) override {
+        Log::TempIndent indent;
+        LOG3("FU Visiting " << dbp(statement) << " " << statement << indent);
+        if (!unreachable) {
+            visit(statement->collection, "collection");
+            lhs = true;
+            visit(statement->decl, "decl");
+            visit(statement->ref, "ref");
+            for (auto *l : *headerDefs->getStorageLocation(statement->ref))
+                headerDefs->setValueToStorage(l, TernaryBool::Yes);
+            lhs = false;
+            currentPoint.assign(context, statement->ref);
+            visit(statement->body);
+            unreachable = false;
+        } else {
+            LOG3("Unreachable");
+        }
+        return setCurrent(statement);
+    }
+
     ////////////////// Expressions
 
     bool preorder(const IR::Literal *expression) override {

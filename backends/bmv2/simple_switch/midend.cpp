@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "midend.h"
 
+#include "backends/bmv2/common/check_unsupported.h"
 #include "backends/bmv2/simple_switch/options.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -75,6 +76,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
         addPasses(
             {options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
              new P4::CheckTableSize(),
+             new CheckUnsupported(),
              new P4::RemoveMiss(&refMap, &typeMap),
              new P4::EliminateNewtype(&refMap, &typeMap),
              new P4::EliminateInvalidHeaders(&refMap, &typeMap),

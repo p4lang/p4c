@@ -209,7 +209,7 @@ class TaintPropagator : public Transform {
         auto slLeftInt = slice->e1->checkedTo<IR::Constant>()->asInt();
         auto slRightInt = slice->e2->checkedTo<IR::Constant>()->asInt();
         auto width = 1 + slLeftInt - slRightInt;
-        const auto *sliceTb = IR::getBitType(width);
+        const auto *sliceTb = IR::Type_Bits::get(width);
         if (Taint::hasTaint(slice)) {
             return ToolsVariables::getTaintExpression(sliceTb);
         }
