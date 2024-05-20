@@ -273,12 +273,11 @@ class EBPFControlPNA : public EBPF::EBPFControlPSA {
     void emitExternDefinition(EBPF::CodeBuilder *builder) {
         if (defineExtern) {
             builder->emitIndent();
-            builder->appendLine(
-                "struct p4tc_ext_bpf_params* ext_params = malloc(sizeof(struct "
-                "p4tc_ext_bpf_params));");
+            builder->appendLine("struct p4tc_ext_bpf_params ext_params = {};");
             builder->emitIndent();
-            builder->appendLine(
-                "struct p4tc_ext_bpf_val* ext_val = malloc(sizeof(struct p4tc_ext_bpf_val));");
+            builder->appendLine("struct p4tc_ext_bpf_val ext_val = {};");
+            builder->emitIndent();
+            builder->appendLine("struct p4tc_ext_bpf_val *ext_val_ptr;");
         }
     }
 };
