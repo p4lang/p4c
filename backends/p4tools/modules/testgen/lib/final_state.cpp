@@ -47,7 +47,7 @@ void FinalState::calculatePayload(const ExecutionState &executionState, Model &e
     const auto *inputPacketExpr = executionState.getInputPacket();
     int payloadSize = calculatedPacketSize - inputPacketExpr->type->width_bits();
     if (payloadSize > 0) {
-        const auto *payloadType = IR::getBitType(payloadSize);
+        const auto *payloadType = IR::Type_Bits::get(payloadSize);
         const IR::Expression *payloadExpr = evaluatedModel.get(&PacketVars::PAYLOAD_SYMBOL, false);
         if (payloadExpr == nullptr) {
             payloadExpr = Utils::getRandConstantForType(payloadType);

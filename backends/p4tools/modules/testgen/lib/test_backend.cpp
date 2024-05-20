@@ -199,10 +199,10 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
     const auto *payloadExpr = finalModel->get(&PacketVars::PAYLOAD_SYMBOL, false);
     if (payloadExpr != nullptr) {
         inputPacketExpr =
-            new IR::Concat(IR::getBitType(calculatedPacketSize), inputPacketExpr, payloadExpr);
-        outputPacketExpr = new IR::Concat(
-            IR::getBitType(outputPacketExpr->type->width_bits() + payloadExpr->type->width_bits()),
-            outputPacketExpr, payloadExpr);
+            new IR::Concat(IR::Type_Bits::get(calculatedPacketSize), inputPacketExpr, payloadExpr);
+        outputPacketExpr = new IR::Concat(IR::Type_Bits::get(outputPacketExpr->type->width_bits() +
+                                                             payloadExpr->type->width_bits()),
+                                          outputPacketExpr, payloadExpr);
     }
     const auto *inputPacket = finalModel->evaluate(inputPacketExpr, true);
     const auto *outputPacket = finalModel->evaluate(outputPacketExpr, true);

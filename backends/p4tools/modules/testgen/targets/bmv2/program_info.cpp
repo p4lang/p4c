@@ -138,7 +138,7 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
     // processing. For example, the egress port.
     if ((archMember->blockName == "Ingress")) {
         auto *egressPortVar =
-            new IR::Member(IR::getBitType(BMv2Constants::PORT_BIT_WIDTH),
+            new IR::Member(IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH),
                            new IR::PathExpression("*standard_metadata"), "egress_port");
         auto *portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
         cmds.emplace_back(portStmt);
@@ -161,8 +161,8 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
         // TODO: We have not implemented multi cast yet.
         // Drop the packet if the multicast group is set.
         const IR::Expression *mcastGroupVar = new IR::Member(
-            IR::getBitType(16), new IR::PathExpression("*standard_metadata"), "mcast_grp");
-        mcastGroupVar = new IR::Neq(mcastGroupVar, IR::Constant::get(IR::getBitType(16), 0));
+            IR::Type_Bits::get(16), new IR::PathExpression("*standard_metadata"), "mcast_grp");
+        mcastGroupVar = new IR::Neq(mcastGroupVar, IR::Constant::get(IR::Type_Bits::get(16), 0));
         auto *mcastStmt = new IR::IfStatement(mcastGroupVar, dropStmt, nullptr);
         cmds.emplace_back(mcastStmt);
     }
@@ -183,13 +183,13 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
 }
 
 const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetInputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::getBitType(BMv2Constants::PORT_BIT_WIDTH),
+    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH),
                                                  new IR::PathExpression("*standard_metadata"),
                                                  "ingress_port"));
 }
 
 const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::getBitType(BMv2Constants::PORT_BIT_WIDTH),
+    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH),
                                                  new IR::PathExpression("*standard_metadata"),
                                                  "egress_spec"));
 }

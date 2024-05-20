@@ -49,7 +49,7 @@ void EBPFCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) cons
         blockIdx++;
     }
 
-    const auto *nineBitType = IR::getBitType(9);
+    const auto *nineBitType = IR::Type_Bits::get(9);
     // Set the input ingress port to 0.
     nextState.set(programInfo.getTargetInputPortVar(), IR::Constant::get(nineBitType, 0));
     // eBPF implicitly sets the output port to 0. In reality, there is no output port.

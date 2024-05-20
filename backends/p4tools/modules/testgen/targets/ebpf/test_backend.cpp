@@ -64,9 +64,9 @@ TestBackEnd::TestInfo EBPFTestBackend::produceTestInfo(
     if (testInfo.outputPacket->type->width_bits() == 0) {
         int outPktSize = ZERO_PKT_WIDTH;
         testInfo.outputPacket =
-            IR::Constant::get(IR::getBitType(outPktSize), EBPFTestBackend::ZERO_PKT_VAL);
+            IR::Constant::get(IR::Type_Bits::get(outPktSize), EBPFTestBackend::ZERO_PKT_VAL);
         testInfo.packetTaintMask =
-            IR::Constant::get(IR::getBitType(outPktSize), EBPFTestBackend::ZERO_PKT_MAX);
+            IR::Constant::get(IR::Type_Bits::get(outPktSize), EBPFTestBackend::ZERO_PKT_MAX);
     } else {
         // eBPF actually can not modify the input packet. It can only filter. Thus we reuse our
         // input packet here.
@@ -83,7 +83,7 @@ const TestSpec *EBPFTestBackend::createTestSpec(const ExecutionState *executionS
     TestSpec *testSpec = nullptr;
 
     const auto *ingressPayload = testInfo.inputPacket;
-    const auto *ingressPayloadMask = IR::Constant::get(IR::getBitType(1), 1);
+    const auto *ingressPayloadMask = IR::Constant::get(IR::Type_Bits::get(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
 
     std::optional<Packet> egressPacket = std::nullopt;

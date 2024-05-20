@@ -75,7 +75,7 @@ big_int Utils::getRandBigInt(big_int max) {
 const IR::Constant *Utils::getRandConstantForWidth(int bitWidth) {
     auto maxVal = IR::getMaxBvVal(bitWidth);
     auto randInt = Utils::getRandBigInt(maxVal);
-    const auto *constType = IR::getBitType(bitWidth);
+    const auto *constType = IR::Type_Bits::get(bitWidth);
     return IR::Constant::get(constType, randInt);
 }
 

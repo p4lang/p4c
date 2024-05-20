@@ -60,7 +60,7 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> 
         for (size_t idx = 1; idx < exprList.size(); idx++) {
             const auto *expr = exprList.at(idx);
             const auto *newWidth =
-                IR::getBitType(concatExpr->type->width_bits() + expr->type->width_bits());
+                IR::Type_Bits::get(concatExpr->type->width_bits() + expr->type->width_bits());
             concatExpr = new IR::Concat(newWidth, concatExpr, expr);
         }
 
@@ -71,8 +71,8 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> 
         if (remainder != 0) {
             auto fillWidth = CHUNK_SIZE - remainder;
             concatWidth += fillWidth;
-            const auto *remainderExpr = IR::Constant::get(IR::getBitType(fillWidth), 0);
-            concatExpr = new IR::Concat(IR::getBitType(concatWidth), concatExpr, remainderExpr);
+            const auto *remainderExpr = IR::Constant::get(IR::Type_Bits::get(fillWidth), 0);
+            concatExpr = new IR::Concat(IR::Type_Bits::get(concatWidth), concatExpr, remainderExpr);
         }
         auto dataInt =
             IR::getBigIntFromLiteral(finalModel.evaluate(concatExpr, true, resolvedExpressions));

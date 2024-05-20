@@ -77,8 +77,8 @@ void Bmv2V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextStat
         blockIdx++;
     }
 
-    const auto *nineBitType = IR::getBitType(9);
-    const auto *oneBitType = IR::getBitType(1);
+    const auto *nineBitType = IR::Type_Bits::get(9);
+    const auto *oneBitType = IR::Type_Bits::get(1);
     nextState.set(programInfo.getTargetInputPortVar(),
                   ToolsVariables::getSymbolicVariable(nineBitType, "bmv2_ingress_port"));
     // BMv2 implicitly sets the output port to 0.
