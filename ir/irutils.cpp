@@ -15,15 +15,10 @@ namespace IR {
  *  Types
  * ============================================================================================= */
 
-const Type_Bits *getBitType(int size, bool isSigned) {
-    // Types are cached already.
-    return Type_Bits::get(size, isSigned);
-}
-
 const Type_Bits *getBitTypeToFit(int value) {
     // To represent a number N, we need ceil(log2(N + 1)) bits.
     int width = ceil(log2(value + 1));
-    return getBitType(width);
+    return Type_Bits::get(width);
 }
 
 /* =============================================================================================
@@ -35,13 +30,13 @@ const IR::Constant *getMaxValueConstant(const Type *t, const Util::SourceInfo &s
         return IR::Constant::get(t, IR::getMaxBvVal(t), srcInfo);
     }
     if (t->is<Type_Boolean>()) {
-        return IR::Constant::get(IR::getBitType(1), 1, srcInfo);
+        return IR::Constant::get(IR::Type_Bits::get(1), 1, srcInfo);
     }
     P4C_UNIMPLEMENTED("Maximum value calculation for type %1% not implemented.", t);
 }
 
 const IR::Constant *convertBoolLiteral(const IR::BoolLiteral *lit) {
-    return IR::Constant::get(IR::getBitType(1), lit->value ? 1 : 0, lit->getSourceInfo());
+    return IR::Constant::get(IR::Type_Bits::get(1), lit->value ? 1 : 0, lit->getSourceInfo());
 }
 
 const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceInfo &srcInfo,

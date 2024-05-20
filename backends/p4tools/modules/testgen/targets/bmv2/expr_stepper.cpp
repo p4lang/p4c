@@ -135,7 +135,7 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
     std::vector<Continuation::Command> cmds;
 
     // We need to set the instance type once we recirculate.
-    const auto *instanceBitType = IR::getBitType(32);
+    const auto *instanceBitType = IR::Type_Bits::get(32);
     const auto *instanceTypeVar = new IR::Member(
         instanceBitType, new IR::PathExpression("*standard_metadata"), "instance_type");
 
@@ -270,7 +270,7 @@ void Bmv2V1ModelExprStepper::processRecirculate(const ExecutionState &state,
     }
 
     // Update the metadata variable to the correct instance type as provided by recirculation.
-    const auto *bitType = IR::getBitType(32);
+    const auto *bitType = IR::Type_Bits::get(32);
     const auto *instanceTypeVar =
         new IR::Member(bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
     recState.set(instanceTypeVar, IR::Constant::get(bitType, instanceType));
@@ -342,7 +342,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto &nextState = state.clone();
-             const auto *nineBitType = IR::getBitType(BMv2Constants::PORT_BIT_WIDTH);
+             const auto *nineBitType = IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH);
              const auto *metadataLabel = args->at(0)->expression->checkedTo<IR::InOutReference>();
              // Use an assignment to set egress_spec to true.
              // This variable will be processed in the deparser.
@@ -931,7 +931,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              } else {
                  meterValue = new Bmv2V1ModelMeterValue(inputValue, true);
              }
-             meterValue->writeToIndex(IR::Constant::get(IR::getBitType(1), 0), inputValue);
+             meterValue->writeToIndex(IR::Constant::get(IR::Type_Bits::get(1), 0), inputValue);
              nextState.addTestObject("meter_values", externInstance->controlPlaneName(),
                                      meterValue);
 
@@ -1342,7 +1342,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto *checksumValue = args->at(2)->expression;
              const auto *checksumValueType = checksumValue->type;
              const auto *algo = args->at(3)->expression;
-             const auto *oneBitType = IR::getBitType(1);
+             const auto *oneBitType = IR::Type_Bits::get(1);
 
              // In some cases the condition is false already. No need to do complex processing then.
              if (const auto *boolVal = verifyCond->to<IR::BoolLiteral>()) {
@@ -1589,7 +1589,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto *checksumValue = args->at(2)->expression;
              const auto *checksumValueType = checksumValue->type;
              const auto *algo = args->at(3)->expression;
-             const auto *oneBitType = IR::getBitType(1);
+             const auto *oneBitType = IR::Type_Bits::get(1);
              // If the condition is tainted or the input data is tainted, the checksum error
              // will not be reliable.
              if (argsAreTainted) {

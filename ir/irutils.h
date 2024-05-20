@@ -35,9 +35,6 @@ class IndexedVector;
  *  Types
  * ========================================================================================= */
 
-/// @returns a representation of bit<>. If isSigned is true, will return an int<>.
-const Type_Bits *getBitType(int size, bool isSigned = false);
-
 /// @returns a representation of bit<> that is just wide enough to fit the given value.
 const Type_Bits *getBitTypeToFit(int value);
 

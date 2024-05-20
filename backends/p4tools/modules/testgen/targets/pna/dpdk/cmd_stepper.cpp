@@ -49,7 +49,7 @@ void PnaDpdkCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) c
         nextState.initializeBlockParams(target, typeDecl, &archMember->blockParams);
         blockIdx++;
     }
-    const auto *thirtytwoBitType = IR::getBitType(32);
+    const auto *thirtytwoBitType = IR::Type_Bits::get(32);
     nextState.set(&PnaConstants::DROP_VAR, IR::BoolLiteral::get(false));
     // PNA implicitly sets the output port to 0.
     nextState.set(&PnaConstants::OUTPUT_PORT_VAR, IR::Constant::get(thirtytwoBitType, 0));

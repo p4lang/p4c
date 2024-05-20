@@ -68,7 +68,7 @@ const IR::StateVariable &TableStepper::getTableActionVar(const IR::P4Table *tabl
     size_t max = 255;
     BUG_CHECK(numActions < max, "Number of actions in the table (%1%) exceeds the maximum of %2%.",
               numActions, max);
-    return getTableStateVariable(IR::getBitType(8), table, "*action");
+    return getTableStateVariable(IR::Type_Bits::get(8), table, "*action");
 }
 
 const IR::StateVariable &TableStepper::getTableResultVar(const IR::P4Table *table) {

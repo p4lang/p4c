@@ -25,7 +25,7 @@ class Z3SolverSatisfiabilityChecks : public ::testing::Test {
 };
 
 TEST_F(Z3SolverSatisfiabilityChecks, BitVectors) {
-    const auto *eightBitType = IR::getBitType(8);
+    const auto *eightBitType = IR::Type_Bits::get(8);
     const auto *fooVar = P4Tools::ToolsVariables::getSymbolicVariable(eightBitType, "foo");
     const auto *barVar = P4Tools::ToolsVariables::getSymbolicVariable(eightBitType, "bar");
     {
