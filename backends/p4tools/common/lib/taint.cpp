@@ -1,22 +1,15 @@
 #include "backends/p4tools/common/lib/taint.h"
 
 #include <cstddef>
-#include <string>
-#include <vector>
-
-#include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/variables.h"
-#include "ir/indexed_vector.h"
 #include "ir/irutils.h"
 #include "ir/node.h"
-#include "ir/vector.h"
 #include "ir/visitor.h"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
 #include "lib/null.h"
 
 namespace P4Tools {

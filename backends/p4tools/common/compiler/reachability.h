@@ -7,7 +7,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
-#include <vector>
 
 #include "frontends/p4/callGraph.h"
 #include "ir/id.h"
@@ -51,7 +50,7 @@ class ExtendedCallGraph : public P4::CallGraph<T> {
             cstring newName = name.name.before(prev);
             i = hash.find(newName);
             if (i == hash.end()) {
-                addToHash(vertex, (newName.size() ? IR::ID(newName) : IR::ID()));
+                addToHash(vertex, (newName.size() != 0u ? IR::ID(newName) : IR::ID()));
             }
         }
     }
@@ -194,9 +193,8 @@ class ReachabilityEngine {
                                        const DCGVertexType *currentState);
     /// Translates a string representation into an IR::Expression.
     /// Not implemented yet.
-    static const IR::Expression *stringToNode(std::string name);
+    static const IR::Expression *stringToNode(const std::string &name);
 
- protected:
     /// Adds an edge to the current @vertex in DCG.
     /// The edge is a pair (@prev, @vertex).
     void addEdge(const DCGVertexType *vertex, IR::ID vertexName = IR::ID());

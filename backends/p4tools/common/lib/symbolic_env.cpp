@@ -7,6 +7,7 @@
 
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/indexed_vector.h"
+#include "ir/node.h"
 #include "ir/vector.h"
 #include "ir/visitor.h"
 #include "lib/exceptions.h"

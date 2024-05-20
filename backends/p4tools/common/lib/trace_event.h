@@ -16,7 +16,7 @@ class TraceEvent : public ICastable {
     friend std::ostream &operator<<(std::ostream &os, const TraceEvent &event);
 
  public:
-    virtual ~TraceEvent() = default;
+    ~TraceEvent() override = default;
     TraceEvent();
 
     /// Substitutes state variables in the body of this trace event for their symbolic value in the

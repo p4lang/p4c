@@ -1,10 +1,16 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_CORE_ABSTRACT_EXECUTION_STATE_H_
 #define BACKENDS_P4TOOLS_COMMON_CORE_ABSTRACT_EXECUTION_STATE_H_
 
+#include <iostream>
+#include <ostream>
+#include <vector>
+
 #include "backends/p4tools/common/core/target.h"
 #include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "ir/declaration.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace P4Tools {
 
@@ -45,7 +51,7 @@ class AbstractExecutionState {
     /* =========================================================================================
      *  Accessors
      * ========================================================================================= */
- public:
+
     /// @returns the value associated with the given state variable.
     [[nodiscard]] virtual const IR::Expression *get(const IR::StateVariable &var) const = 0;
 
@@ -62,7 +68,6 @@ class AbstractExecutionState {
     /// Produce a formatted output of the current symbolic environment.
     void printSymbolicEnv(std::ostream &out = std::cout) const;
 
- public:
     /// Looks up a declaration from a path. A BUG occurs if no declaration is found.
     [[nodiscard]] const IR::IDeclaration *findDecl(const IR::Path *path) const;
 

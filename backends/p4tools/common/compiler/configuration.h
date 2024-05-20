@@ -15,8 +15,8 @@ class CompilerConfiguration : public DefaultP4CConfiguration {
 
     /// @return the singleton instance.
     static const CompilerConfiguration &get() {
-        static CompilerConfiguration instance;
-        return instance;
+        static CompilerConfiguration INSTANCE;
+        return INSTANCE;
     }
     virtual ~CompilerConfiguration() = default;
 

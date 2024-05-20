@@ -4,26 +4,34 @@
 #include <z3_api.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <exception>
+#include <istream>
 #include <iterator>
 #include <map>
+#include <optional>
+#include <sstream>
 #include <string>
 #include <utility>
-
-#include <boost/multiprecision/cpp_int.hpp>
+#include <vector>
 
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/json_loader.h"  // IWYU pragma: keep
 #include "ir/json_parser.h"  // IWYU pragma: keep
 #include "ir/node.h"
+#include "ir/solver.h"
 #include "ir/visitor.h"
 #include "lib/big_int_util.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/indent.h"
 #include "lib/log.h"
+#include "lib/null.h"
+#include "lib/safe_vector.h"
 #include "lib/timer.h"
+#include "z3++.h"
 
 namespace P4Tools {
 
@@ -120,9 +128,9 @@ void Z3Solver::pop() {
 
     size_t sz = checkpoints.back();
     checkpoints.pop_back();
-    // TODO: This check should be active, but because of JSON loader issues we can not use it.
-    // So we have to be tolerant for now.
-    // BUG_CHECK(!declaredVarsById.empty(), "Declaration list is empty");
+    // TODO(fruffy): This check should be active, but because of JSON loader issues we can not use
+    // it. So we have to be tolerant for now. BUG_CHECK(!declaredVarsById.empty(), "Declaration list
+    // is empty");
     if (!declaredVarsById.empty()) {
         declaredVarsById.pop_back();
     }
@@ -346,7 +354,7 @@ bool Z3Solver::isInIncrementalMode() const { return isIncremental; }
 Z3Solver::Z3Solver(bool isIncremental, std::optional<std::istream *> inOpt)
     : z3solver(*new z3::context), isIncremental(isIncremental), z3Assertions(ctx()) {
     // Add a top-level set to declaration vars that we can insert variables.
-    // TODO: Think about whether this is necessary or it is not better to remove it.
+    // TODO(fruffy): Think about whether this is necessary or it is not better to remove it.
     declaredVarsById.emplace_back();
     if (inOpt == std::nullopt) {
         return;

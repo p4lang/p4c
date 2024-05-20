@@ -77,5 +77,12 @@ foreach(ext ${tools_modules})
   endif()
 endforeach(ext)
 
+file(
+  GLOB_RECURSE P4TOOLS_CLANG_TIDY_LINT_LIST  FOLLOW_SYMLINKS
+  ${CMAKE_CURRENT_SOURCE_DIR}/common/*.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/common/*.h
+)
+add_clang_tidy_files(${P4C_SOURCE_DIR} "${P4TOOLS_CLANG_TIDY_LINT_LIST}")
+
 # Propagate new def files upwards after all modules have been included.
 set(IR_DEF_FILES ${IR_DEF_FILES} PARENT_SCOPE)

@@ -5,15 +5,18 @@
 #include <iostream>
 #include <list>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
+#include "ir/ir.h"
 #include "ir/vector.h"
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
+#include "lib/null.h"
 
 namespace P4Tools {
 
@@ -322,7 +325,7 @@ void P4ProgramDCGCreator::addEdge(const DCGVertexType *vertex, IR::ID vertexName
     }
     prev.clear();
     prev.insert(vertex);
-    dcg->addToHash(vertex, vertexName);
+    dcg->addToHash(vertex, std::move(vertexName));
 }
 
 ReachabilityEngineState *ReachabilityEngineState::getInitial() {
@@ -341,7 +344,9 @@ ReachabilityEngineState *ReachabilityEngineState::copy() {
 
 std::list<const DCGVertexType *> ReachabilityEngineState::getState() { return state; }
 
-void ReachabilityEngineState::setState(std::list<const DCGVertexType *> ls) { state = ls; }
+void ReachabilityEngineState::setState(std::list<const DCGVertexType *> ls) {
+    state = std::move(ls);
+}
 
 const DCGVertexType *ReachabilityEngineState::getPrevNode() { return prevNode; }
 
@@ -376,7 +381,7 @@ ReachabilityEngine::ReachabilityEngine(const NodesCallGraph &dcg,
             auto currentNames = getName(dotSubExpr);
             if (eliminateAnnotations) {
                 std::unordered_set<const DCGVertexType *> result;
-                for (auto i : currentNames) {
+                for (const auto *i : currentNames) {
                     if (!i->is<IR::Annotation>()) {
                         result.insert(i);
                         continue;
@@ -412,7 +417,7 @@ void ReachabilityEngine::annotationToStatements(const DCGVertexType *node,
             s.insert(nd);
             continue;
         }
-        // TODO: This is nasty. I am not sure why a const cast should be allowed here.
+        // TODO(fruffy): This is nasty. I am not sure why a const cast should be allowed here.
         const auto *v = const_cast<NodesCallGraph *>(&dcg)->getCallers(nd);
         if (v != nullptr) {
             if (!(*v->begin())->is<IR::MethodCallStatement>() &&
@@ -450,14 +455,14 @@ const IR::Expression *ReachabilityEngine::addCondition(const IR::Expression *pre
 
 std::unordered_set<const DCGVertexType *> ReachabilityEngine::getName(std::string name) {
     std::string params;
-    if ((name.length() != 0U) && name[name.length() - 1] == ')') {
+    if ((!name.empty()) && name[name.length() - 1] == ')') {
         size_t n = name.find('(');
         BUG_CHECK(n != std::string::npos, "Invalid format : %1%", name);
         params = name.substr(n + 1, name.length() - n - 2);
         name = name.substr(0, n);
     }
-    size_t n;
-    while ((n = name.find(" ")) != std::string::npos) {
+    size_t n = 0;
+    while ((n = name.find(' ')) != std::string::npos) {
         name.erase(n, 1);
     }
     auto i = hash.find(name);
@@ -466,7 +471,7 @@ std::unordered_set<const DCGVertexType *> ReachabilityEngine::getName(std::strin
         i = hash.find(name);
     }
     BUG_CHECK(i != hash.end(), "Can't find name %1% in hash of the program", name);
-    if (params.length() != 0U) {
+    if (!params.empty()) {
         // Add condition to a point.
         const auto *expr = stringToNode(params);
         for (const auto *j : i->second) {
@@ -485,7 +490,7 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState *state,
                                             const DCGVertexType *next) {
     CHECK_NULL(state);
     CHECK_NULL(next);
-    if (forbiddenVertexes.count(next)) {
+    if (forbiddenVertexes.count(next) != 0u) {
         return std::make_pair(false, nullptr);
     }
     if (state->isEmpty()) {
@@ -559,7 +564,7 @@ const IR::Expression *ReachabilityEngine::getCondition(const DCGVertexType *n) {
     return nullptr;
 }
 
-const IR::Expression *ReachabilityEngine::stringToNode(std::string /*name*/) {
+const IR::Expression *ReachabilityEngine::stringToNode(const std::string & /*name*/) {
     P4C_UNIMPLEMENTED("Converting a string into an IR::Expression");
 }
 

@@ -3,7 +3,9 @@
 #include <set>
 #include <vector>
 
+#include "ir/declaration.h"
 #include "ir/id.h"
+#include "ir/ir.h"
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
 
@@ -38,7 +40,9 @@ const IR::IDeclaration *NamespaceContext::findNestedDecl(
         // If there is no match, we fall through.
         if (const auto *ns = subNamespace->to<IR::IGeneralNamespace>()) {
             auto *decl = ns->getDeclsByName(name)->singleOrDefault();
-            if (decl != nullptr) return decl;
+            if (decl != nullptr) {
+                return decl;
+            }
         }
 
         // As last resort, fall through to a NestedNamespace check.
@@ -78,7 +82,9 @@ const IR::IDeclaration *NamespaceContext::findDecl(const IR::Path *path) const {
     // If there is no match, we fall through.
     if (const auto *ns = curNamespace->to<IR::IGeneralNamespace>()) {
         auto *decl = ns->getDeclsByName(name)->singleOrDefault();
-        if (decl != nullptr) return decl;
+        if (decl != nullptr) {
+            return decl;
+        }
     }
     // As last resort, check if the NestedNamespace contains the declaration.
     if (const auto *ns = curNamespace->to<IR::INestedNamespace>()) {
