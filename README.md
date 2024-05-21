@@ -311,7 +311,7 @@ After cloning Protobuf and before you build, check-out version 3.25.3:
 `git checkout v3.25.3`
 
 Please note that while all Protobuf versions newer than 3.0 should work for
-P4C itself, you may run into trouble with some extensions and other p4lang
+P4C itself, you may run into trouble with Abseil, some extensions and other p4lang
 projects unless you install version 3.25.3.
 
 P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's `FetchContent` module (Abseil LTS 20240116.1 at the moment).

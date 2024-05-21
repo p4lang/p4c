@@ -18,32 +18,38 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake"
 ################ Proto
 set (DPDK_P4RUNTIME_DIR ${CMAKE_CURRENT_SOURCE_DIR}/control-plane/proto)
 set (DPDK_P4RUNTIME_INFO_PROTO ${DPDK_P4RUNTIME_DIR}/p4info.proto)
-set (DPDK_P4RUNTIME_INFO_GEN_SRCS ${CMAKE_CURRENT_BINARY_DIR}/p4/config/p4info.pb.cc)
-set (DPDK_P4RUNTIME_INFO_GEN_HDRS ${CMAKE_CURRENT_BINARY_DIR}/p4/config/p4info.pb.h)
 
 add_custom_target (dpdk_runtime_dir
   ${CMAKE_COMMAND} -E make_directory
   ${CMAKE_CURRENT_BINARY_DIR}/p4/config)
+
 # Generate source code from .proto using protoc. The output is
 # placed in the build directory inside `control-plane` directory
-add_custom_command(
-    OUTPUT ${DPDK_P4RUNTIME_INFO_GEN_SRCS} ${DPDK_P4RUNTIME_INFO_GEN_HDRS}
-  COMMAND ${Protobuf_PROTOC_EXECUTABLE}
-    --proto_path ${DPDK_P4RUNTIME_DIR}
-    --proto_path ${P4RUNTIME_STD_DIR}
-    --cpp_out ${CMAKE_CURRENT_BINARY_DIR}/p4/config
-    --python_out ${CMAKE_CURRENT_BINARY_DIR}/p4/config
-          ${DPDK_P4RUNTIME_INFO_PROTO}
-  DEPENDS ${DPDK_P4RUNTIME_INFO_PROTO} dpdk_runtime_dir
-  COMMENT "Generating protobuf files for p4info on target DPDK."
-  )
-add_dependencies(dpdk_runtime_dir controlplane)
-
-add_library(dpdk_runtime STATIC ${DPDK_P4RUNTIME_INFO_GEN_SRCS})
+add_library(dpdk_runtime OBJECT ${DPDK_P4RUNTIME_INFO_PROTO})
+target_include_directories(dpdk_runtime PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(dpdk_runtime PRIVATE controlplane)
+# Ideally we use DEPENDENCIES, but it only works in later versions (3.28).
+add_dependencies(dpdk_runtime mkP4configdir dpdk_runtime_dir)
+protobuf_generate(
+  TARGET dpdk_runtime
+  LANGUAGE cpp
+  IMPORT_DIRS ${P4RUNTIME_STD_DIR} ${DPDK_P4RUNTIME_DIR} ${Protobuf_INCLUDE_DIRS}
+  PROTOC_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/p4/config
+  OUT_VAR DPDK_P4RUNTIME_INFO_CPP_GEN_SRCS
+  DEPENDENCIES ${DPDK_P4RUNTIME_INFO_PROTO} mkP4configdir dpdk_runtime_dir
+)
+protobuf_generate(
+  TARGET dpdk_runtime
+  LANGUAGE python
+  IMPORT_DIRS ${P4RUNTIME_STD_DIR} ${DPDK_P4RUNTIME_DIR} ${Protobuf_INCLUDE_DIRS}
+  PROTOC_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/p4/config
+  OUT_VAR DPDK_P4RUNTIME_INFO_PY_GEN_SRCS
+  DEPENDENCIES ${DPDK_P4RUNTIME_INFO_PROTO}
+  mkP4configdir dpdk_runtime_dir
+)
 
 # Silence various warnings as the root issue is out of our control, example https://github.com/protocolbuffers/protobuf/issues/7140
-set_source_files_properties(${DPDK_P4RUNTIME_INFO_GEN_SRCS} {$DPDK_P4RUNTIME_INFO_GEN_HDRS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-error")
+set_source_files_properties(${DPDK_P4RUNTIME_INFO_CPP_GEN_SRCS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-error")
 
 set(P4C_DPDK_SOURCES
     ../bmv2/common/lower.cpp
