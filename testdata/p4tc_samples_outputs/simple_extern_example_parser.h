@@ -13,8 +13,8 @@
 
 
 struct ethernet_t {
-    u64 dstAddr; /* EthernetAddress */
-    u64 srcAddr; /* EthernetAddress */
+    u64 dstAddr; /* bit<48> */
+    u64 srcAddr; /* bit<48> */
     u16 etherType; /* bit<16> */
     u8 ebpf_valid;
 };
@@ -33,27 +33,22 @@ struct ipv4_t {
     u32 dstAddr; /* bit<32> */
     u8 ebpf_valid;
 };
-struct ipv6_t {
-    u8 version; /* bit<4> */
-    u8 trafficClass; /* bit<8> */
-    u32 flowLabel; /* bit<20> */
-    u16 payloadLength; /* bit<16> */
-    u8 nextHeader; /* bit<8> */
-    u8 hopLimit; /* bit<8> */
-    u8 srcAddr[16]; /* bit<128> */
-    u8 dstAddr[16]; /* bit<128> */
-    u8 ebpf_valid;
-};
-struct main_metadata_t {
-};
-struct headers_t {
+struct my_ingress_headers_t {
     struct ethernet_t ethernet; /* ethernet_t */
-    struct ipv6_t ipv6; /* ipv6_t */
+    struct ipv4_t ipv4; /* ipv4_t */
+};
+struct my_ingress_metadata_t {
+};
+struct empty_metadata_t {
+};
+struct reg_val_t {
+    u8 protocol; /* bit<8> */
+    u8 aux; /* bit<8> */
 };
 
 struct hdr_md {
-    struct headers_t cpumap_hdr;
-    struct main_metadata_t cpumap_usermeta;
+    struct my_ingress_headers_t cpumap_hdr;
+    struct my_ingress_metadata_t cpumap_usermeta;
     unsigned ebpf_packetOffsetInBits;
     __u8 __hook;
 };

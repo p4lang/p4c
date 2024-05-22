@@ -18,11 +18,13 @@ and limitations under the License.
 #define BACKENDS_TC_EBPFCODEGEN_H_
 
 #include "backend.h"
+#include "tcExterns.h"
 
 namespace TC {
 
 class ConvertToBackendIR;
 class EBPFPnaParser;
+class EBPFRegisterPNA;
 
 //  Similar to class PSAEbpfGenerator in backends/ebpf/psa/ebpfPsaGen.h
 
@@ -254,12 +256,38 @@ class ConvertToEBPFParserPNA : public Inspector {
     EBPF::EBPFParser *getEBPFParser() { return parser; }
 };
 
+class EBPFControlPNA : public EBPF::EBPFControlPSA {
+ public:
+    bool defineExtern = false;
+    std::map<cstring, EBPFRegisterPNA *> pna_registers;
+
+    EBPFControlPNA(const EBPF::EBPFProgram *program, const IR::ControlBlock *control,
+                   const IR::Parameter *parserHeaders)
+        : EBPF::EBPFControlPSA(program, control, parserHeaders) {}
+
+    EBPFRegisterPNA *getRegister(cstring name) const {
+        auto result = ::get(pna_registers, name);
+        BUG_CHECK(result != nullptr, "No register named %1%", name);
+        return result;
+    }
+    void emitExternDefinition(EBPF::CodeBuilder *builder) {
+        if (defineExtern) {
+            builder->emitIndent();
+            builder->appendLine("struct p4tc_ext_bpf_params ext_params = {};");
+            builder->emitIndent();
+            builder->appendLine("struct p4tc_ext_bpf_val ext_val = {};");
+            builder->emitIndent();
+            builder->appendLine("struct p4tc_ext_bpf_val *ext_val_ptr;");
+        }
+    }
+};
+
 // Similar to class ConvertToEBPFControlPSA in backends/ebpf/psa/ebpfPsaGen.h
 
 class ConvertToEBPFControlPNA : public Inspector {
     EBPF::EBPFProgram *program;
     EBPF::pipeline_type type;
-    EBPF::EBPFControlPSA *control;
+    EBPFControlPNA *control;
 
     const IR::Parameter *parserHeaders;
     P4::ReferenceMap *refmap;
@@ -284,7 +312,7 @@ class ConvertToEBPFControlPNA : public Inspector {
     bool preorder(const IR::IfStatement *a) override;
     bool preorder(const IR::ExternBlock *instance) override;
     bool checkPnaTimestampMem(const IR::Member *m);
-    EBPF::EBPFControlPSA *getEBPFControl() { return control; }
+    EBPFControlPNA *getEBPFControl() { return control; }
 };
 
 // Similar to class ConvertToEBPFDeparserPSA in backends/ebpf/psa/ebpfPsaGen.h
@@ -311,11 +339,10 @@ class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
  public:
     const ConvertToBackendIR *tcIR;
     const EBPF::EBPFTablePSA *table;
-    explicit ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control);
-    explicit ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
+    explicit ControlBodyTranslatorPNA(const EBPFControlPNA *control);
+    explicit ControlBodyTranslatorPNA(const EBPFControlPNA *control,
                                       const ConvertToBackendIR *tcIR);
-    explicit ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
-                                      const ConvertToBackendIR *tcIR,
+    explicit ControlBodyTranslatorPNA(const EBPFControlPNA *control, const ConvertToBackendIR *tcIR,
                                       const EBPF::EBPFTablePSA *table);
     void processFunction(const P4::ExternFunction *function) override;
     void processApply(const P4::ApplyMethod *method) override;

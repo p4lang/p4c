@@ -1,21 +1,20 @@
-#include "send_to_port_example_parser.h"
+#include "simple_extern_example_parser.h"
 struct p4tc_filter_fields p4tc_filter_fields;
 
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
 
-struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_key {
+struct __attribute__((__packed__)) ingress_nh_table_key {
     u32 keysz;
     u32 maskid;
-    u32 field0; /* hdr.ipv4.dstAddr */
-    u32 field1; /* hdr.ipv4.srcAddr */
-    u8 field2; /* hdr.ipv4.protocol */
+    u32 field0; /* hdr.ipv4.srcAddr */
 } __attribute__((aligned(8)));
-#define MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_NEXT_HOP 1
-#define MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
-#define MAINCONTROLIMPL_IPV4_TBL_ACT_NOACTION 0
-struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_value {
+#define INGRESS_NH_TABLE_ACT_INGRESS_EXT_REG 2
+#define INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH 1
+#define INGRESS_NH_TABLE_ACT_INGRESS_DROP 3
+#define INGRESS_NH_TABLE_ACT_NOACTION 0
+struct __attribute__((__packed__)) ingress_nh_table_value {
     unsigned int action;
     u32 hit:1,
     is_default_miss_act:1,
@@ -24,14 +23,19 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_value {
         struct {
         } _NoAction;
         struct __attribute__((__packed__)) {
-            u32 vport;
-        } MainControlImpl_next_hop;
+            u32 port_id;
+        } ingress_ext_reg;
+        struct __attribute__((__packed__)) {
+            u32 port_id;
+            u64 dmac;
+            u64 smac;
+        } ingress_send_nh;
         struct {
-        } MainControlImpl_default_route_drop;
+        } ingress_drop;
     } u;
 };
 
-static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
+static __always_inline int process(struct __sk_buff *skb, struct my_ingress_headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
 
@@ -45,96 +49,114 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     unsigned char ebpf_byte;
     u32 pkt_len = skb->len;
 
-    struct main_metadata_t *user_meta;
+    struct my_ingress_metadata_t *meta;
     hdrMd = BPF_MAP_LOOKUP_ELEM(hdr_md_cpumap, &ebpf_zero);
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
     hdr_start = pkt + BYTES(ebpf_packetOffsetInBits);
     hdr = &(hdrMd->cpumap_hdr);
-    user_meta = &(hdrMd->cpumap_usermeta);
+    meta = &(hdrMd->cpumap_usermeta);
 {
         struct p4tc_ext_bpf_params ext_params = {};
         struct p4tc_ext_bpf_val ext_val = {};
         struct p4tc_ext_bpf_val *ext_val_ptr;
         u8 hit;
         u32 val_0 = 0;
+        struct reg_val_t arg_val_0;
+        __builtin_memset((void *) &arg_val_0, 0, sizeof(struct reg_val_t ));
         {
-if (/* hdr->ipv4.isValid() */
-            hdr->ipv4.ebpf_valid) {
-/* ipv4_tbl_0.apply() */
-                {
-                    /* construct key */
-                    struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = p4tc_filter_fields.pipeid,
-                        .tblid = 1
-                    };
-                    struct MainControlImpl_ipv4_tbl_key key;
-                    __builtin_memset(&key, 0, sizeof(key));
-                    key.keysz = 72;
-                    key.field0 = hdr->ipv4.dstAddr;
-                    key.field1 = hdr->ipv4.srcAddr;
-                    key.field2 = hdr->ipv4.protocol;
-                    struct p4tc_table_entry_act_bpf *act_bpf;
-                    /* value */
-                    struct MainControlImpl_ipv4_tbl_value *value = NULL;
-                    /* perform lookup */
-                    act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
-                    value = (struct MainControlImpl_ipv4_tbl_value *)act_bpf;
-                    if (value == NULL) {
-                        /* miss; find default action */
-                        hit = 0;
-                    } else {
-                        hit = value->hit;
-                    }
-                    if (value != NULL) {
-                        /* run action */
-                        switch (value->action) {
-                            case MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_NEXT_HOP: 
-                                {
-                                    __builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));
-                                    ext_params.pipe_id = p4tc_filter_fields.pipeid;
-                                    ext_params.ext_id = 1;
-                                    ext_params.inst_id = 1;
-                                    ext_params.index = value->u.MainControlImpl_next_hop.vport;
+            arg_val_0.protocol = hdr->ipv4.protocol;
+                        arg_val_0.aux = 22;
+            /* reg3_0.write(2, arg_val_0) */
+            __builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));
+            ext_params.pipe_id = p4tc_filter_fields.pipeid;
+            ext_params.ext_id = 1;
+            ext_params.inst_id = 2;
+            ext_params.index = 2;
 
-                                    ext_val_ptr = bpf_p4tc_extern_md_read(skb, &ext_params, sizeof(ext_params));
-                                    if (!ext_val_ptr) 
-                                         return TC_ACT_SHOT;
-ext_val = *ext_val_ptr;
-                                    __builtin_memcpy(&val_0, ext_val.out_params, sizeof(u32 ));
-                                                                        val_0 = (val_0 + 10);
-                                    /* reg1_0.write(value->u.MainControlImpl_next_hop.vport, val_0) */
-                                    __builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));
-                                    ext_params.pipe_id = p4tc_filter_fields.pipeid;
-                                    ext_params.ext_id = 1;
-                                    ext_params.inst_id = 1;
-                                    ext_params.index = value->u.MainControlImpl_next_hop.vport;
-
-                                    __builtin_memcpy(ext_val.out_params, &val_0, sizeof(u32 ));
-                                    bpf_p4tc_extern_md_write(skb, &ext_params, sizeof(ext_params), &ext_val, sizeof(ext_val));
+            __builtin_memcpy(ext_val.out_params, &arg_val_0, sizeof(struct reg_val_t ));
+            bpf_p4tc_extern_md_write(skb, &ext_params, sizeof(ext_params), &ext_val, sizeof(ext_val));
 ;
-                                    /* send_to_port(value->u.MainControlImpl_next_hop.vport) */
-                                    compiler_meta__->drop = false;
-                                    send_to_port(value->u.MainControlImpl_next_hop.vport);
-                                }
-                                break;
-                            case MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
-                                {
-/* drop_packet() */
-                                    drop_packet();
-                                }
-                                break;
-                            case MAINCONTROLIMPL_IPV4_TBL_ACT_NOACTION: 
-                                {
-                                }
-                                break;
-                        }
-                    } else {
-                    }
+            /* nh_table_0.apply() */
+            {
+                /* construct key */
+                struct p4tc_table_entry_act_bpf_params__local params = {
+                    .pipeid = p4tc_filter_fields.pipeid,
+                    .tblid = 1
+                };
+                struct ingress_nh_table_key key;
+                __builtin_memset(&key, 0, sizeof(key));
+                key.keysz = 32;
+                key.field0 = bpf_htonl(hdr->ipv4.srcAddr);
+                struct p4tc_table_entry_act_bpf *act_bpf;
+                /* value */
+                struct ingress_nh_table_value *value = NULL;
+                /* perform lookup */
+                act_bpf = bpf_p4tc_tbl_read(skb, &params, sizeof(params), &key, sizeof(key));
+                value = (struct ingress_nh_table_value *)act_bpf;
+                if (value == NULL) {
+                    /* miss; find default action */
+                    hit = 0;
+                } else {
+                    hit = value->hit;
                 }
-;            }
+                if (value != NULL) {
+                    /* run action */
+                    switch (value->action) {
+                        case INGRESS_NH_TABLE_ACT_INGRESS_EXT_REG: 
+                            {
+                                __builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));
+                                ext_params.pipe_id = p4tc_filter_fields.pipeid;
+                                ext_params.ext_id = 1;
+                                ext_params.inst_id = 1;
+                                ext_params.index = value->u.ingress_ext_reg.port_id;
 
+                                ext_val_ptr = bpf_p4tc_extern_md_read(skb, &ext_params, sizeof(ext_params));
+                                if (!ext_val_ptr) 
+                                     return TC_ACT_SHOT;
+ext_val = *ext_val_ptr;
+                                __builtin_memcpy(&val_0, ext_val.out_params, sizeof(u32 ));
+                                                                val_0 = (val_0 + 10);
+                                /* reg1_0.write(value->u.ingress_ext_reg.port_id, val_0) */
+                                __builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));
+                                ext_params.pipe_id = p4tc_filter_fields.pipeid;
+                                ext_params.ext_id = 1;
+                                ext_params.inst_id = 1;
+                                ext_params.index = value->u.ingress_ext_reg.port_id;
+
+                                __builtin_memcpy(ext_val.out_params, &val_0, sizeof(u32 ));
+                                bpf_p4tc_extern_md_write(skb, &ext_params, sizeof(ext_params), &ext_val, sizeof(ext_val));
+;
+                                /* send_to_port(value->u.ingress_ext_reg.port_id) */
+                                compiler_meta__->drop = false;
+                                send_to_port(value->u.ingress_ext_reg.port_id);
+                            }
+                            break;
+                        case INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH: 
+                            {
+                                hdr->ethernet.srcAddr = value->u.ingress_send_nh.smac;
+                                                                hdr->ethernet.dstAddr = value->u.ingress_send_nh.dmac;
+                                /* send_to_port(value->u.ingress_send_nh.port_id) */
+                                compiler_meta__->drop = false;
+                                send_to_port(value->u.ingress_send_nh.port_id);
+                            }
+                            break;
+                        case INGRESS_NH_TABLE_ACT_INGRESS_DROP: 
+                            {
+/* drop_packet() */
+                                drop_packet();
+                            }
+                            break;
+                        case INGRESS_NH_TABLE_ACT_NOACTION: 
+                            {
+                            }
+                            break;
+                    }
+                } else {
+                }
+            }
+;
         }
     }
     {
@@ -170,7 +192,6 @@ ext_val = *ext_val_ptr;
                 return TC_ACT_SHOT;
             }
             
-            hdr->ethernet.dstAddr = htonll(hdr->ethernet.dstAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
@@ -185,7 +206,6 @@ ext_val = *ext_val_ptr;
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = htonll(hdr->ethernet.srcAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];
@@ -266,6 +286,7 @@ ext_val = *ext_val_ptr;
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
+            hdr->ipv4.srcAddr = htonl(hdr->ipv4.srcAddr);
             ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[1];
@@ -276,6 +297,7 @@ ext_val = *ext_val_ptr;
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
+            hdr->ipv4.dstAddr = htonl(hdr->ipv4.dstAddr);
             ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[1];
@@ -307,9 +329,9 @@ int tc_ingress_func(struct __sk_buff *skb) {
         }
     }
     struct hdr_md *hdrMd;
-    struct headers_t *hdr;
+    struct my_ingress_headers_t *hdr;
     int ret = -1;
-    ret = process(skb, (struct headers_t *) hdr, compiler_meta__);
+    ret = process(skb, (struct my_ingress_headers_t *) hdr, compiler_meta__);
     if (ret != -1) {
         return ret;
     }

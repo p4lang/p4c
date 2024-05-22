@@ -1,7 +1,62 @@
 {
   "schema_version" : "1.0.0",
-  "pipeline_name" : "global_action_example_02",
-  "externs" : [],
+  "pipeline_name" : "simple_extern_example",
+  "externs" : [
+    {
+      "name" : "Register",
+      "id" : 1,
+      "permissions" : "0x19b6",
+      "instances" : [
+        {
+          "inst_name" : "ingress.reg1",
+          "inst_id" : 1,
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "index",
+              "type" : "bit32",
+              "attr" : "tc_key",
+              "bitwidth" : 32
+            },
+            {
+              "id" : 2,
+              "name" : "a_value",
+              "type" : "bit32",
+              "attr" : "param",
+              "bitwidth" : 32
+            }
+          ]
+        },
+        {
+          "inst_name" : "ingress.reg3",
+          "inst_id" : 2,
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "index",
+              "type" : "bit32",
+              "attr" : "tc_key",
+              "bitwidth" : 32
+            },
+            {
+              "id" : 2,
+              "name" : "protocol",
+              "type" : "bit8",
+              "attr" : "param",
+              "bitwidth" : 8
+            },
+            {
+              "id" : 3,
+              "name" : "aux",
+              "type" : "bit8",
+              "attr" : "param",
+              "bitwidth" : 8
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "tables" : [
     {
       "name" : "ingress/nh_table",
@@ -14,15 +69,15 @@
         {
           "id" : 1,
           "name" : "hdr.ipv4.srcAddr",
-          "type" : "bit32",
-          "match_type" : "exact",
+          "type" : "ipv4",
+          "match_type" : "lpm",
           "bitwidth" : 32
         }
       ],
       "actions" : [
         {
           "id" : 2,
-          "name" : "ingress/send_nh",
+          "name" : "ingress/ext_reg",
           "action_scope" : "TableAndDefault",
           "annotations" : [],
           "params" : [
@@ -31,18 +86,6 @@
               "name" : "port_id",
               "type" : "dev",
               "bitwidth" : 32
-            },
-            {
-              "id" : 2,
-              "name" : "dmac",
-              "type" : "macaddr",
-              "bitwidth" : 48
-            },
-            {
-              "id" : 3,
-              "name" : "smac",
-              "type" : "macaddr",
-              "bitwidth" : 48
             }
           ],
           "default_hit_action" : false,
@@ -50,34 +93,6 @@
         },
         {
           "id" : 1,
-          "name" : "drop",
-          "action_scope" : "TableAndDefault",
-          "annotations" : [],
-          "params" : [],
-          "default_hit_action" : false,
-          "default_miss_action" : true
-        }
-      ]
-    },
-    {
-      "name" : "ingress/nh_table2",
-      "id" : 2,
-      "tentries" : 262144,
-      "permissions" : "0x3da4",
-      "nummask" : 8,
-      "keysize" : 32,
-      "keyfields" : [
-        {
-          "id" : 1,
-          "name" : "hdr.ipv4.srcAddr",
-          "type" : "bit32",
-          "match_type" : "exact",
-          "bitwidth" : 32
-        }
-      ],
-      "actions" : [
-        {
-          "id" : 2,
           "name" : "ingress/send_nh",
           "action_scope" : "TableAndDefault",
           "annotations" : [],

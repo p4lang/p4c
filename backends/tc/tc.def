@@ -394,12 +394,102 @@ class TCTable {
     dbprint { out << toString(); }
 }
 
+class TCKey {
+    unsigned keyID;
+    unsigned bitwidth;
+    cstring keyName;
+    cstring keyAttribute;
+    toString {
+        std::string tckeyInstance = " " + keyAttribute + " " + keyName + " type bit" + Util::toString(bitwidth)
+                        + " id " + Util::toString(keyID);
+        return tckeyInstance;
+    }
+    dbprint { out << toString(); }
+
+}
+
+class TCExternInstance {
+    unsigned instanceID;
+    cstring instanceName;
+    bool isNumelemns;
+    unsigned numelemns;
+    bool isControlPath;
+    safe_vector<TCKey> keys;
+    TCExternInstance(unsigned id, cstring name, bool isNe, unsigned ne) {
+        instanceID = id;
+        instanceName = name;
+        isNumelemns = isNe;
+        numelemns = ne;
+    }
+    void addControlPathKeys(safe_vector<TCKey> k) {
+        if (k.size() > 0) {
+            isControlPath = true;
+            keys = k;
+        }
+    }
+    toString {
+        std::string tcExternInstance = "";
+        tcExternInstance += instanceName + " instid " + Util::toString(instanceID) + " \\";
+        if (isControlPath) {
+            tcExternInstance += "\ncontrol_path";
+            for (auto field : keys) {
+                tcExternInstance += field->toString();
+            }
+            tcExternInstance += " \\";
+        }
+        if (isNumelemns) {
+            tcExternInstance += "\ntc_numel " + Util::toString(numelemns);
+        }
+        return tcExternInstance;
+    }
+    dbprint { out << toString(); }
+}
+
+class TCExtern {
+    unsigned externID;
+    cstring externName;
+    cstring pipelineName;
+    unsigned numinstances;
+    cstring acl_permisson;
+    safe_vector<TCExternInstance> externInstances;
+    TCExtern(unsigned eId, cstring eN, cstring pN, unsigned inst, cstring p) {
+        externID = eId;
+        externName = eN;
+        pipelineName = pN;
+        numinstances = inst;
+        acl_permisson = p;
+    }
+    void addExternInstance(TCExternInstance tei) {
+        externInstances.push_back(tei);
+    }
+    toString {
+        std::string tcExtern = "";
+        tcExtern += "\n$TC p4template create extern/";
+        tcExtern += pipelineName + "/root/" + externName;
+        tcExtern += " extid " + Util::toString(externID);
+        tcExtern += " numinstances " + Util::toString(numinstances);
+        tcExtern += " tc_acl " + acl_permisson;
+        
+        for (unsigned iter = 0; iter < numinstances; iter++) {
+            tcExtern += "\n\n$TC p4template create extern_inst/" + pipelineName
+                      + "/" + externName + "/";
+            if (externInstances.size() > iter)
+                tcExtern += externInstances[iter]->toString();
+        }
+        return tcExtern;
+    }
+    dbprint { out << toString(); }
+}
+
 class TCPipeline {
     cstring pipelineName;
     unsigned numTables;
     TCAction NoAction;
     safe_vector<TCAction> actionDefs;
     safe_vector<TCTable> tableDefs;
+    safe_vector<TCExtern> externDefs;
+    TCAction preaction;
+    TCAction postaction;
     void setPipelineName(cstring pName) {
         pipelineName = pName;
     }
@@ -414,6 +504,23 @@ class TCPipeline {
     }
     void addTableDefinition(TCTable tableDef) {
         tableDefs.push_back(tableDef);
+    }
+    void setPipelinePreAction(TCAction action) {
+        preaction = action;
+    }
+    void setPipelinePostAction(TCAction action) {
+        postaction = action;
+    }
+    void addExternDefinition(TCExtern externDef) {
+        externDefs.push_back(externDef);
+    }
+    TCExtern getExternDefinition(cstring eName) const {
+        for (auto externDef : externDefs) {
+            if(externDef->externName == eName) {
+                return externDef;
+            }
+        }
+        return nullptr;
     }
     TCPipeline() {
         Util::SourceInfo* srcinfo = new Util::SourceInfo();
@@ -436,6 +543,21 @@ class TCPipeline {
             for (auto t : tableDefs) {
                 tcCode += "\n" + t->toString();
             }
+        }
+        if (!externDefs.empty()) {
+            for (auto e : externDefs) {
+                tcCode += "\n" + e->toString();
+            }
+        }
+        if (preaction != nullptr) {
+            tcCode += "\n" + preaction->toString();
+            tcCode += "\n$TC p4template update pipeline/" + pipelineName
+                      + " preactions action " + pipelineName + "/preaction";
+        }
+        if (postaction != nullptr) {
+            tcCode += "\n" + postaction->toString();
+            tcCode += "\n$TC p4template update pipeline/" + pipelineName
+                      + " postactions action " + pipelineName + "/postaction";
         }
         tcCode += "\n$TC p4template update pipeline/" + pipelineName + " state ready";
         return tcCode;

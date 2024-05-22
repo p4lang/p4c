@@ -47,6 +47,19 @@ class PNAEbpfGenerator;
  */
 class ConvertToBackendIR : public Inspector {
  public:
+    struct ExternInstance {
+        cstring instance_name;
+        unsigned instance_id;
+        bool is_num_elements;
+        int num_elements;
+    };
+    struct ExternBlock {
+        unsigned externId;
+        cstring control_name;
+        unsigned no_of_instances;
+        cstring permissions;
+        safe_vector<struct ExternInstance *> eInstance;
+    };
     const IR::ToplevelBlock *tlb;
     IR::TCPipeline *tcPipeline;
     P4::ReferenceMap *refMap;
@@ -56,6 +69,7 @@ class ConvertToBackendIR : public Inspector {
     unsigned int actionCount = 0;
     unsigned int metadataCount = 0;
     unsigned int labelCount = 0;
+    unsigned int externCount = 0;
     cstring pipelineName = nullptr;
     cstring mainParserName = nullptr;
     ordered_map<cstring, const IR::P4Action *> actions;
@@ -64,6 +78,8 @@ class ConvertToBackendIR : public Inspector {
     ordered_map<unsigned, unsigned> tableKeysizeList;
     safe_vector<const IR::P4Table *> add_on_miss_tables;
     ordered_map<cstring, std::pair<cstring, cstring> *> tablePermissions;
+    ordered_map<cstring, const IR::Type_Struct *> ControlStructPerExtern;
+    ordered_map<cstring, struct ExternBlock *> externsInfo;
 
  public:
     ConvertToBackendIR(const IR::ToplevelBlock *tlb, IR::TCPipeline *pipe, P4::ReferenceMap *refMap,
@@ -75,7 +91,17 @@ class ConvertToBackendIR : public Inspector {
     void postorder(const IR::P4Action *a) override;
     void postorder(const IR::P4Table *t) override;
     void postorder(const IR::P4Program *p) override;
+    void postorder(const IR::Declaration_Instance *d) override;
+    void postorder(const IR::Type_Struct *ts) override;
+    void processExternConstructorAnnotations(const IR::Type_Extern *extn,
+                                             const IR::Declaration_Instance *decl,
+                                             struct ExternInstance *instance);
+    safe_vector<const IR::TCKey *> processExternControlPath(const IR::Type_SpecializedCanonical *ts,
+                                                            const IR::Type_Extern *extn,
+                                                            cstring eName);
+    unsigned GetAccessNumericValue(cstring access);
     bool isDuplicateAction(const IR::P4Action *action);
+    bool isDuplicateOrNoAction(const IR::P4Action *action);
     void updateDefaultHitAction(const IR::P4Table *t, IR::TCTable *tdef);
     void updateDefaultMissAction(const IR::P4Table *t, IR::TCTable *tdef);
     void updateConstEntries(const IR::P4Table *t, IR::TCTable *tdef);
@@ -89,11 +115,13 @@ class ConvertToBackendIR : public Inspector {
     unsigned getTcType(const IR::StringLiteral *sl);
     unsigned getTableId(cstring tableName) const;
     unsigned getActionId(cstring actionName) const;
+    unsigned getExternId(cstring externName) const;
+    unsigned getExternInstanceId(cstring externName, cstring instanceName) const;
+    cstring processExternPermission(const IR::Type_Extern *ext);
     unsigned getTableKeysize(unsigned tableId) const;
     cstring externalName(const IR::IDeclaration *declaration) const;
     cstring HandleTableAccessPermission(const IR::P4Table *t);
     std::pair<cstring, cstring> *GetAnnotatedAccessPath(const IR::Annotation *anno);
-    unsigned GetAccessNumericValue(cstring access);
     void updateAddOnMissTable(const IR::P4Table *t);
 };
 
