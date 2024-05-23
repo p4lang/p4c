@@ -465,7 +465,7 @@ class TCExtern {
     toString {
         std::string tcExtern = "";
         tcExtern += "\n$TC p4template create extern/";
-        tcExtern += pipelineName + "/root/" + externName;
+        tcExtern += "root/" + externName;
         tcExtern += " extid " + Util::toString(externID);
         tcExtern += " numinstances " + Util::toString(numinstances);
         tcExtern += " tc_acl " + acl_permisson;
