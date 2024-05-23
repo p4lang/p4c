@@ -1,6 +1,6 @@
 {
   "schema_version" : "1.0.0",
-  "pipeline_name" : "tc_may_override_example_01",
+  "pipeline_name" : "tc_may_override_example_07",
   "externs" : [],
   "tables" : [
     {
@@ -45,7 +45,7 @@
         },
         {
           "id" : 2,
-          "name" : "MainControlImpl/default_route_drop",
+          "name" : "MainControlImpl/dflt_route_drop",
           "action_scope" : "TableAndDefault",
           "annotations" : [],
           "params" : [],
@@ -89,7 +89,7 @@
           "id" : 1,
           "name" : "MainControlImpl/next_hop",
           "action_scope" : "TableAndDefault",
-          "annotations" : ["tc_may_override", "default_hit_const"],
+          "annotations" : ["default_hit", "tc_may_override"],
           "params" : [
             {
               "id" : 1,
@@ -99,6 +99,15 @@
             }
           ],
           "default_hit_action" : true,
+          "default_miss_action" : false
+        },
+        {
+          "id" : 2,
+          "name" : "MainControlImpl/dflt_route_drop",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
           "default_miss_action" : false
         },
         {

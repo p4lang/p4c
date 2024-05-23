@@ -49,6 +49,7 @@ class TCActionParam {
     cstring paramName;
     unsigned dataType;
     unsigned bitSize;
+    unsigned direction;
     void setParamName(cstring pN) {
         paramName = pN;
     }
@@ -57,6 +58,9 @@ class TCActionParam {
     }
     void setDataType(unsigned d) {
         dataType = d;
+    }
+    void setDirection(unsigned d){
+        direction = d;
     }
     TCActionParam() {
         paramName = nullptr;
@@ -67,6 +71,9 @@ class TCActionParam {
     }
     cstring getName() const {
         return "param." + paramName;
+    }
+    unsigned getDirection() const {
+        return direction;
     }
     cstring getParamType() const {
         std::string paramType = "";
@@ -240,11 +247,13 @@ class TCTable {
     unsigned defaultTimerProfiles = 4;
     TCAction defaultHitAction;
     bool isDefaultHitConst;
+    bool isTcMayOverrideHit;
+    optional safe_vector<TCDefaultActionParam> defaultHitActionParams;
     TCAction defaultMissAction;
-    optional safe_vector<TCDefaultActionParam> defaultMissActionParams;
     bool isDefaultMissConst;
+    bool isTcMayOverrideMiss;
+    optional safe_vector<TCDefaultActionParam> defaultMissActionParams;
     bool isTableAddOnMiss;
-    bool isTcMayOverride;
     ordered_map<TCAction, unsigned> actionList;
     safe_vector<TCEntry> const_entries;
 
@@ -275,11 +284,14 @@ class TCTable {
     void setDefaultMissConst(bool i) {
         isDefaultMissConst = i;
     }
+    void setTcMayOverrideHit() {
+        isTcMayOverrideHit = true;
+    }
+    void setTcMayOverrideMiss() {
+        isTcMayOverrideMiss = true;
+    }
     void setTableAddOnMiss() {
         isTableAddOnMiss = true;
-    }
-    void setTcMayOverride() {
-        isTcMayOverride = true;
     }
     void addAction(TCAction action, unsigned flag) {
         actionList.emplace(action, flag);
@@ -322,8 +334,9 @@ class TCTable {
         defaultMissAction = nullptr;
         isDefaultHitConst = false;
         isDefaultMissConst = false;
+        isTcMayOverrideHit = false;
+        isTcMayOverrideMiss = false;
         isTableAddOnMiss = false;
-        isTcMayOverride = false;
     }
     toString {
         std::string tcTable = "";
@@ -363,6 +376,12 @@ class TCTable {
                 tcTable += " permissions 0x1024";
             }
             tcTable += " action " + defaultHitAction->getName();
+            if (!defaultHitActionParams.empty())
+                tcTable += " param";
+            for (auto param : defaultHitActionParams)
+                tcTable += param->toString();
+            if (isTcMayOverrideHit)
+                tcTable += " flags runtime";
         }
         if (defaultMissAction != nullptr) {
             tcTable += "\n$TC p4template update table/" + pipelineName
@@ -376,7 +395,7 @@ class TCTable {
                 tcTable += " param";
             for (auto param : defaultMissActionParams)
                 tcTable += param->toString();
-            if (isTcMayOverride)
+            if (isTcMayOverrideMiss)
                 tcTable += " flags runtime";
         }
         if (const_entries.size() != 0) {

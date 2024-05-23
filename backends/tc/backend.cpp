@@ -271,6 +271,16 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
                                 "tc_type annotation cannot have '%1%' as value", expr);
                     }
                 }
+                auto direction = param->direction;
+                if (direction == IR::Direction::InOut) {
+                    tcActionParam->setDirection(TC::INOUT);
+                } else if (direction == IR::Direction::In) {
+                    tcActionParam->setDirection(TC::IN);
+                } else if (direction == IR::Direction::Out) {
+                    tcActionParam->setDirection(TC::OUT);
+                } else {
+                    tcActionParam->setDirection(TC::NONE);
+                }
                 tcAction->addActionParams(tcActionParam);
             }
         }
@@ -381,12 +391,12 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                 if (defaultActionProperty->isConstant) {
                     tabledef->setDefaultMissConst(true);
                 }
-                bool isTCMayOverride = false;
+                bool isTCMayOverrideMiss = false;
                 const IR::Annotation *overrideAnno =
                     defaultActionProperty->getAnnotations()->getSingle(
                         ParseTCAnnotations::tcMayOverride);
                 if (overrideAnno) {
-                    isTCMayOverride = true;
+                    isTCMayOverrideMiss = true;
                 }
                 bool directionParamPresent = false;
                 auto paramList = actionCall->action->getParameters();
@@ -395,14 +405,14 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                 }
                 if (!directionParamPresent) {
                     auto i = 0;
-                    if (isTCMayOverride) {
+                    if (isTCMayOverrideMiss) {
                         if (paramList->parameters.empty())
                             ::warning(ErrorType::WARN_INVALID,
                                       "%1% annotation cannot be used with default_action without "
                                       "parameters",
                                       overrideAnno);
                         else
-                            tabledef->setTcMayOverride();
+                            tabledef->setTcMayOverrideMiss();
                     }
                     for (auto param : paramList->parameters) {
                         auto defaultParam = new IR::TCDefaultActionParam();
@@ -413,14 +423,14 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                         }
                         auto defaultArg = methodexp->arguments->at(i++);
                         if (auto constVal = defaultArg->expression->to<IR::Constant>()) {
-                            if (!isTCMayOverride)
+                            if (!isTCMayOverrideMiss)
                                 defaultParam->setDefaultValue(
                                     Util::toString(constVal->value, 0, true, constVal->base));
                             tabledef->defaultMissActionParams.push_back(defaultParam);
                         }
                     }
                 } else {
-                    if (isTCMayOverride)
+                    if (isTCMayOverrideMiss)
                         ::warning(ErrorType::WARN_INVALID,
                                   "%1% annotation cannot be used with default_action with "
                                   "directional parameters",
@@ -437,11 +447,13 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
         unsigned int defaultHit = 0;
         unsigned int defaultHitConst = 0;
         cstring defaultActionName = nullptr;
+        bool isTcMayOverrideHitAction = false;
         for (auto action : actionlist->actionList) {
             auto annoList = action->getAnnotations()->annotations;
             bool isTableOnly = false;
             bool isDefaultHit = false;
             bool isDefaultHitConst = false;
+            bool isTcMayOverrideHit = false;
             for (auto anno : annoList) {
                 if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                     isTableOnly = true;
@@ -457,6 +469,9 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
                     defaultHitConst++;
                     auto adecl = refMap->getDeclaration(action->getPath(), true);
                     defaultActionName = externalName(adecl);
+                }
+                if (anno->name == ParseTCAnnotations::tcMayOverride) {
+                    isTcMayOverrideHit = true;
                 }
             }
             if (isTableOnly && isDefaultHit && isDefaultHitConst) {
@@ -483,6 +498,26 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
                         "annotated with '@default_hit' and '@default_hit_const'",
                         t->name.originalName, action->getName().originalName);
                 break;
+            } else if (isTcMayOverrideHit) {
+                auto adecl = refMap->getDeclaration(action->getPath(), true);
+                auto p4Action = adecl->getNode()->checkedTo<IR::P4Action>();
+                if (!isDefaultHit && !isDefaultHitConst) {
+                    ::warning(ErrorType::WARN_INVALID,
+                              "Table '%1%' has an action reference '%2%' which is "
+                              "annotated with '@tc_may_override' without '@default_hit' or "
+                              "'@default_hit_const'",
+                              t->name.originalName, action->getName().originalName);
+                    isTcMayOverrideHit = false;
+                    break;
+                } else if (p4Action->getParameters()->parameters.empty()) {
+                    ::warning(ErrorType::WARN_INVALID,
+                              " '@tc_may_override' cannot be used for %1%  action "
+                              " without parameters",
+                              action->getName().originalName);
+                    isTcMayOverrideHit = false;
+                    break;
+                }
+                isTcMayOverrideHitAction = true;
             }
         }
         if (::errorCount() > 0) {
@@ -511,6 +546,16 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
                     tabledef->setDefaultHitAction(tcAction);
                     if (defaultHitConst == 1) {
                         tabledef->setDefaultHitConst(true);
+                    }
+                    if (isTcMayOverrideHitAction) {
+                        if (!checkParameterDirection(tcAction)) {
+                            tabledef->setTcMayOverrideHit();
+                            for (auto param : tcAction->actionParams) {
+                                auto defaultParam = new IR::TCDefaultActionParam();
+                                defaultParam->setParamDetail(param);
+                                tabledef->defaultHitActionParams.push_back(defaultParam);
+                            }
+                        }
                     }
                 }
             }
@@ -1099,6 +1144,17 @@ void ConvertToBackendIR::updateMatchType(const IR::P4Table *t, IR::TCTable *tabl
         }
     }
     tabledef->setMatchType(tableMatchType);
+}
+
+bool ConvertToBackendIR::checkParameterDirection(const IR::TCAction *tcAction) {
+    bool dirParam = false;
+    for (auto actionParam : tcAction->actionParams) {
+        if (actionParam->getDirection() != TC::NONE) {
+            dirParam = true;
+            break;
+        }
+    }
+    return dirParam;
 }
 
 }  // namespace TC

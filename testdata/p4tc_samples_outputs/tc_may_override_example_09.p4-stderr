@@ -1,0 +1,1 @@
+[--Wwarn=invalid] warning: Table 'ipv4_tbl_2' has an action reference 'next_hop' which is annotated with '@tc_may_override' without '@default_hit' or '@default_hit_const'
