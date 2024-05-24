@@ -25,6 +25,7 @@ limitations under the License.
 
 #include <boost/format.hpp>
 
+#include "absl/strings/str_cat.h"
 #include "lib/bug_helper.h"
 
 namespace Util {
@@ -92,15 +93,15 @@ class CompilerBug final : public P4CExceptionBase {
         : P4CExceptionBase(format, std::forward<Args>(args)...) {
         // Check if output is redirected and if so, then don't color text so that
         // escape characters are not present
-        message = std::string(cerr_colorize(ANSI_RED)) + "Compiler Bug" + cerr_clear_colors() +
-                  ":\n" + message;
+        message = absl::StrCat(cerr_colorize(ANSI_RED), "Compiler Bug", cerr_clear_colors(), ":\n",
+                               message);
     }
 
     template <typename... Args>
     CompilerBug(int line, const char *file, const char *format, Args &&...args)
         : P4CExceptionBase(format, std::forward<Args>(args)...) {
-        message = std::string("In file: ") + file + ":" + std::to_string(line) + "\n" +
-                  cerr_colorize(ANSI_RED) + "Compiler Bug" + cerr_clear_colors() + ": " + message;
+        message = absl::StrCat("In file: ", file, ":", line, "\n", cerr_colorize(ANSI_RED),
+                               "Compiler Bug", cerr_clear_colors(), ": ", message);
     }
 };
 
@@ -111,16 +112,16 @@ class CompilerUnimplemented final : public P4CExceptionBase {
     explicit CompilerUnimplemented(const char *format, Args &&...args)
         : P4CExceptionBase(format, std::forward<Args>(args)...) {
         // Do not add colors when redirecting to stderr
-        message = std::string(cerr_colorize(ANSI_BLUE)) + "Not yet implemented" +
-                  cerr_clear_colors() + ":\n" + message;
+        message = absl::StrCat(cerr_colorize(ANSI_BLUE), "Not yet implemented", cerr_clear_colors(),
+                               ":\n", message);
     }
 
     template <typename... Args>
     CompilerUnimplemented(int line, const char *file, const char *format, Args &&...args)
         : P4CExceptionBase(format, std::forward<Args>(args)...) {
-        message = std::string("In file: ") + file + ":" + std::to_string(line) + "\n" +
-                  cerr_colorize(ANSI_BLUE) + "Unimplemented compiler support" +
-                  cerr_clear_colors() + ": " + message;
+        message =
+            absl::StrCat("In file: ", file, ":", line, "\n", cerr_colorize(ANSI_BLUE),
+                         "Unimplemented compiler support", cerr_clear_colors(), ": ", message);
     }
 };
 

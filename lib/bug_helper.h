@@ -22,6 +22,7 @@ limitations under the License.
 
 #include <boost/format.hpp>
 
+#include "absl/strings/str_cat.h"
 #include "lib/big_int.h"
 #include "lib/cstring.h"
 #include "lib/source_file.h"
@@ -87,14 +88,7 @@ static inline auto getPositionTail(const Util::SourceInfo &info, std::string_vie
 static inline std::string bug_helper(boost::format &f, std::string_view message,
                                      std::string_view position, std::string_view tail) {
     std::string text = boost::str(f);
-    std::string result(position);
-    if (!position.empty()) result += ": ";
-    // FIXME: operator+(std::string, std::string_view) is a C++26 feature
-    result.append(message);
-    result.append(text);
-    result += "\n";
-    result.append(tail);
-    return result;
+    return absl::StrCat(position, position.empty() ? "" : ": ", message, text, "\n", tail);
 }
 
 template <class... Args>
