@@ -13,6 +13,7 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include "absl/strings/str_format.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/json_loader.h"  // IWYU pragma: keep
@@ -31,18 +32,9 @@ namespace P4Tools {
 const char *toString(const z3::expr &e) { return Z3_ast_to_string(e.ctx(), e); }
 
 #ifndef NDEBUG
-template <typename... Args>
-std::string stringFormat(const char *format, Args... args) {
-    size_t size = snprintf(nullptr, 0, format, args...) + 1;
-    BUG_CHECK(size > 0, "Z3Solver: error during formatting.");
-    std::unique_ptr<char[]> buf(new char[size]);
-    snprintf(buf.get(), size, format, args...);
-    return {buf.get(), buf.get() + size - 1};
-}
-
-#define Z3_LOG(FORMAT, ...)                                                                       \
-    LOG1(stringFormat("Z3Solver:%s() in %s, line %i: " FORMAT "\n", __func__, __FILE__, __LINE__, \
-                      __VA_ARGS__))
+#define Z3_LOG(FORMAT, ...)                                                                \
+    LOG1(absl::StrFormat("Z3Solver:%s() in %s, line %i: " FORMAT "\n", __func__, __FILE__, \
+                         __LINE__, __VA_ARGS__))
 
 /// Converts a Z3 model to a string.
 const char *toString(z3::model m) { return Z3_model_to_string(m.ctx(), m); }

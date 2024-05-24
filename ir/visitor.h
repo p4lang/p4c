@@ -294,20 +294,18 @@ class Visitor {
     /// Static version of the above function, which can be called
     /// even if not directly in a visitor
     static bool warning_enabled(const Visitor *visitor, int warning_kind);
-    template <
-        class T,
-        typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
-        class... Args>
-    void warn(const int kind, const char *format, const T *node, Args... args) {
+    template <class T,
+              typename = typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>>,
+              class... Args>
+    void warn(const int kind, const char *format, const T *node, Args &&...args) {
         if (warning_enabled(kind)) ::warning(kind, format, node, std::forward<Args>(args)...);
     }
 
     /// The const ref variant of the above
-    template <
-        class T,
-        typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
-        class... Args>
-    void warn(const int kind, const char *format, const T &node, Args... args) {
+    template <class T,
+              typename = typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>>,
+              class... Args>
+    void warn(const int kind, const char *format, const T &node, Args &&...args) {
         if (warning_enabled(kind)) ::warning(kind, format, node, std::forward<Args>(args)...);
     }
 

@@ -63,9 +63,9 @@ class TypeChecking : public PassManager {
                  bool updateExpressions = false);
 };
 
-template <typename... T>
-void typeError(const char *format, T... args) {
-    ::error(ErrorType::ERR_TYPE_ERROR, format, args...);
+template <typename... Args>
+void typeError(const char *format, Args &&...args) {
+    ::error(ErrorType::ERR_TYPE_ERROR, format, std::forward<Args>(args)...);
 }
 /// True if the type contains any varbit or header_union subtypes
 bool hasVarbitsOrUnions(const TypeMap *typeMap, const IR::Type *type);

@@ -35,134 +35,130 @@ static inline ErrorMessage error_helper(boost::format &f, ErrorMessage out) {
 }
 
 template <class... Args>
-ErrorMessage error_helper(boost::format &f, ErrorMessage out, const char *t, Args... args);
+ErrorMessage error_helper(boost::format &f, ErrorMessage out, const char *t, Args &&...args);
 
 template <class... Args>
-ErrorMessage error_helper(boost::format &f, ErrorMessage out, const cstring &t, Args... args);
+ErrorMessage error_helper(boost::format &f, ErrorMessage out, const cstring &t, Args &&...args);
 
 // use: ir/mau.cpp:805
 template <class... Args>
 ErrorMessage error_helper(boost::format &f, ErrorMessage out, const Util::SourceInfo &info,
-                          Args... args);
+                          Args &&...args);
 
 template <typename T, class... Args>
-auto error_helper(boost::format &f, ErrorMessage out, const T &t, Args... args) ->
-    typename std::enable_if<Util::HasToString<T>::value &&
-                                !std::is_base_of<Util::IHasSourceInfo, T>::value,
-                            ErrorMessage>::type;
+auto error_helper(boost::format &f, ErrorMessage out, const T &t, Args &&...args) ->
+    typename std::enable_if_t<
+        Util::HasToString<T>::value && !std::is_base_of_v<Util::IHasSourceInfo, T>, ErrorMessage>;
 
 template <typename T, class... Args>
-auto error_helper(boost::format &f, ErrorMessage out, const T *t, Args... args) ->
-    typename std::enable_if<Util::HasToString<T>::value &&
-                                !std::is_base_of<Util::IHasSourceInfo, T>::value,
-                            ErrorMessage>::type;
+auto error_helper(boost::format &f, ErrorMessage out, const T *t, Args &&...args) ->
+    typename std::enable_if_t<
+        Util::HasToString<T>::value && !std::is_base_of_v<Util::IHasSourceInfo, T>, ErrorMessage>;
 
 template <typename T, class... Args>
-auto error_helper(boost::format &f, ErrorMessage out, const T &t, Args... args) ->
-    typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type;
+auto error_helper(boost::format &f, ErrorMessage out, const T &t, Args &&...args) ->
+    typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, ErrorMessage>;
 
 template <typename T, class... Args>
-auto error_helper(boost::format &f, ErrorMessage out, const T *t, Args... args) ->
-    typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type;
+auto error_helper(boost::format &f, ErrorMessage out, const T *t, Args &&...args) ->
+    typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, ErrorMessage>;
 
 template <class... Args>
-ErrorMessage error_helper(boost::format &f, ErrorMessage out, const big_int *t, Args... args);
+ErrorMessage error_helper(boost::format &f, ErrorMessage out, const big_int *t, Args &&...args);
 
 template <class... Args>
-ErrorMessage error_helper(boost::format &f, ErrorMessage out, const big_int &t, Args... args);
+ErrorMessage error_helper(boost::format &f, ErrorMessage out, const big_int &t, Args &&...args);
 
 template <typename T, class... Args>
-auto error_helper(boost::format &f, ErrorMessage out, const T &t, Args... args) ->
-    typename std::enable_if<std::is_arithmetic<T>::value, ErrorMessage>::type;
+auto error_helper(boost::format &f, ErrorMessage out, const T &t, Args &&...args) ->
+    typename std::enable_if_t<std::is_arithmetic_v<T>, ErrorMessage>;
 
 // actual implementations
 
 template <class... Args>
-ErrorMessage error_helper(boost::format &f, ErrorMessage out, const char *t, Args... args) {
-    return error_helper(f % t, out, std::forward<Args>(args)...);
+ErrorMessage error_helper(boost::format &f, ErrorMessage out, const char *t, Args &&...args) {
+    return error_helper(f % t, std::move(out), std::forward<Args>(args)...);
 }
 
 template <class... Args>
-ErrorMessage error_helper(boost::format &f, ErrorMessage out, const cstring &t, Args... args) {
-    return error_helper(f % t.c_str(), out, std::forward<Args>(args)...);
+ErrorMessage error_helper(boost::format &f, ErrorMessage out, const cstring &t, Args &&...args) {
+    return error_helper(f % t.string_view(), std::move(out), std::forward<Args>(args)...);
 }
 
 template <typename T, class... Args>
-auto error_helper(boost::format &f, ErrorMessage out, const T &t, Args... args) ->
-    typename std::enable_if<Util::HasToString<T>::value &&
-                                !std::is_base_of<Util::IHasSourceInfo, T>::value,
-                            ErrorMessage>::type {
-    return error_helper(f % t.toString(), out, std::forward<Args>(args)...);
+auto error_helper(boost::format &f, ErrorMessage out, const T &t, Args &&...args) ->
+    typename std::enable_if_t<
+        Util::HasToString<T>::value && !std::is_base_of_v<Util::IHasSourceInfo, T>, ErrorMessage> {
+    return error_helper(f % t.toString(), std::move(out), std::forward<Args>(args)...);
 }
 
 template <typename T, class... Args>
-auto error_helper(boost::format &f, ErrorMessage out, const T *t, Args... args) ->
-    typename std::enable_if<Util::HasToString<T>::value &&
-                                !std::is_base_of<Util::IHasSourceInfo, T>::value,
-                            ErrorMessage>::type {
-    return error_helper(f % t->toString(), out, std::forward<Args>(args)...);
+auto error_helper(boost::format &f, ErrorMessage out, const T *t, Args &&...args) ->
+    typename std::enable_if_t<Util::HasToString<T>::value &&
+                                  !std::is_base_of_v<Util::IHasSourceInfo, T>,
+                              ErrorMessage>::type {
+    return error_helper(f % t->toString(), std::move(out), std::forward<Args>(args)...);
 }
 
 template <class... Args>
-ErrorMessage error_helper(boost::format &f, ErrorMessage out, const big_int *t, Args... args) {
-    return error_helper(f % t, out, std::forward<Args>(args)...);
+ErrorMessage error_helper(boost::format &f, ErrorMessage out, const big_int *t, Args &&...args) {
+    return error_helper(f % t, std::move(out), std::forward<Args>(args)...);
 }
 
 template <class... Args>
-ErrorMessage error_helper(boost::format &f, ErrorMessage out, const big_int &t, Args... args) {
-    return error_helper(f % t, out, std::forward<Args>(args)...);
+ErrorMessage error_helper(boost::format &f, ErrorMessage out, const big_int &t, Args &&...args) {
+    return error_helper(f % t, std::move(out), std::forward<Args>(args)...);
 }
 
 template <typename T, class... Args>
-auto error_helper(boost::format &f, ErrorMessage out, const T &t, Args... args) ->
-    typename std::enable_if<std::is_arithmetic<T>::value, ErrorMessage>::type {
-    return error_helper(f % t, out, std::forward<Args>(args)...);
+auto error_helper(boost::format &f, ErrorMessage out, const T &t, Args &&...args) ->
+    typename std::enable_if_t<std::is_arithmetic_v<T>, ErrorMessage> {
+    return error_helper(f % t, std::move(out), std::forward<Args>(args)...);
 }
 
 template <class... Args>
 ErrorMessage error_helper(boost::format &f, ErrorMessage out, const Util::SourceInfo &info,
-                          Args... args) {
+                          Args &&...args) {
     if (info.isValid()) out.locations.push_back(info);
-    return error_helper(f % "", out, std::forward<Args>(args)...);
+    return error_helper(f % "", std::move(out), std::forward<Args>(args)...);
 }
 
 template <typename T, class... Args>
-auto error_helper(boost::format &f, ErrorMessage out, const T *t, Args... args) ->
-    typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type {
+auto error_helper(boost::format &f, ErrorMessage out, const T *t, Args &&...args) ->
+    typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, ErrorMessage> {
     auto info = t->getSourceInfo();
     if (info.isValid()) out.locations.push_back(info);
-    return error_helper(f % t->toString(), out, std::forward<Args>(args)...);
+    return error_helper(f % t->toString(), std::move(out), std::forward<Args>(args)...);
 }
 
 template <typename T, class... Args>
-auto error_helper(boost::format &f, ErrorMessage out, const T &t, Args... args) ->
-    typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type {
+auto error_helper(boost::format &f, ErrorMessage out, const T &t, Args &&...args) ->
+    typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, ErrorMessage> {
     auto info = t.getSourceInfo();
     if (info.isValid()) out.locations.push_back(info);
-    return error_helper(f % t.toString(), out, std::forward<Args>(args)...);
+    return error_helper(f % t.toString(), std::move(out), std::forward<Args>(args)...);
 }
 
 }  // namespace priv
 
 // Most direct invocations of error_helper usually only reduce arguments
 template <class... Args>
-ErrorMessage error_helper(boost::format &f, Args... args) {
+ErrorMessage error_helper(boost::format &f, Args &&...args) {
     ErrorMessage msg;
     return ::priv::error_helper(f, msg, std::forward<Args>(args)...);
 }
 
 // Invoked from ErrorReporter
 template <class... Args>
-ErrorMessage error_helper(boost::format &f, ErrorMessage &msg, Args... args) {
-    return ::priv::error_helper(f, msg, std::forward<Args>(args)...);
+ErrorMessage error_helper(boost::format &f, ErrorMessage msg, Args &&...args) {
+    return ::priv::error_helper(f, std::move(msg), std::forward<Args>(args)...);
 }
 
 // This overload exists for backwards compatibility
 template <class... Args>
 ErrorMessage error_helper(boost::format &f, const std::string &prefix, const Util::SourceInfo &info,
-                          const std::string &suffix, Args... args) {
-    ErrorMessage msg(prefix, info, suffix);
-    return ::priv::error_helper(f, msg, std::forward<Args>(args)...);
+                          const std::string &suffix, Args &&...args) {
+    return ::priv::error_helper(f, ErrorMessage(prefix, info, suffix), std::forward<Args>(args)...);
 }
 
 #endif /* LIB_ERROR_HELPER_H_ */
