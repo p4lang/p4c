@@ -79,7 +79,7 @@ class P4CExceptionBase : public std::exception {
         boost::format fmt(format);
         // FIXME: This will implicitly take location of the first argument having
         // SourceInfo. Not sure if this always desireable or not.
-        message = ::bug_helper(fmt, "", "", "", std::forward<Args>(args)...);
+        message = ::bug_helper(fmt, "", "", std::forward<Args>(args)...);
     }
 
     const char *what() const noexcept { return message.c_str(); }

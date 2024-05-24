@@ -27,35 +27,35 @@ limitations under the License.
 #include "lib/source_file.h"
 
 template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                       std::string_view tail, const char *t, Args &&...args);
+std::string bug_helper(boost::format &f, std::string_view position, std::string_view tail,
+                       const char *t, Args &&...args);
 
 template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                       std::string_view tail, const cstring &t, Args &&...args);
+std::string bug_helper(boost::format &f, std::string_view position, std::string_view tail,
+                       const cstring &t, Args &&...args);
 
 template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                       std::string_view tail, const Util::SourceInfo &info, Args &&...args);
+std::string bug_helper(boost::format &f, std::string_view position, std::string_view tail,
+                       const Util::SourceInfo &info, Args &&...args);
 
 template <typename T, class... Args>
-auto bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                std::string_view tail, const T &t, Args &&...args) ->
+auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T &t,
+                Args &&...args) ->
     typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
 
 template <typename T, class... Args>
-auto bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                std::string_view tail, const T &t, Args &&...args) ->
+auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T &t,
+                Args &&...args) ->
     typename std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
 
 template <typename T, class... Args>
-auto bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                std::string_view tail, const T *t, Args &&...args) ->
+auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T *t,
+                Args &&...args) ->
     typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
 
 template <typename T, class... Args>
-auto bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                std::string_view tail, const T *t, Args &&...args) ->
+auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T *t,
+                Args &&...args) ->
     typename std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
 
 // actual implementations
@@ -76,68 +76,67 @@ static inline auto getPositionTail(const Util::SourceInfo &info, std::string_vie
 }
 }  // namespace detail
 
-static inline std::string bug_helper(boost::format &f, std::string_view message,
-                                     std::string_view position, std::string_view tail) {
-    std::string text = boost::str(f);
-    return absl::StrCat(position, position.empty() ? "" : ": ", message, text, "\n", tail);
+static inline std::string bug_helper(boost::format &f, std::string_view position,
+                                     std::string_view tail) {
+    return absl::StrCat(position, position.empty() ? "" : ": ", boost::str(f), "\n", tail);
 }
 
 template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                       std::string_view tail, const char *t, Args &&...args) {
-    return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
+std::string bug_helper(boost::format &f, std::string_view position, std::string_view tail,
+                       const char *t, Args &&...args) {
+    return bug_helper(f % t, position, tail, std::forward<Args>(args)...);
 }
 
 template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                       std::string_view tail, const cstring &t, Args &&...args) {
-    return bug_helper(f % t.string_view(), message, position, tail, std::forward<Args>(args)...);
+std::string bug_helper(boost::format &f, std::string_view position, std::string_view tail,
+                       const cstring &t, Args &&...args) {
+    return bug_helper(f % t.string_view(), position, tail, std::forward<Args>(args)...);
 }
 
 template <typename T, class... Args>
-auto bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                std::string_view tail, const T *t, Args &&...args) ->
+auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T *t,
+                Args &&...args) ->
     typename std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
     std::stringstream str;
     str << t;
-    return bug_helper(f % str.str(), message, position, tail, std::forward<Args>(args)...);
+    return bug_helper(f % str.str(), position, tail, std::forward<Args>(args)...);
 }
 
 template <typename T, class... Args>
-auto bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                std::string_view tail, const T &t, Args &&...args) ->
+auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T &t,
+                Args &&...args) ->
     typename std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
-    return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
+    return bug_helper(f % t, position, tail, std::forward<Args>(args)...);
 }
 
 template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                       std::string_view tail, const Util::SourceInfo &info, Args &&...args) {
+std::string bug_helper(boost::format &f, std::string_view position, std::string_view tail,
+                       const Util::SourceInfo &info, Args &&...args) {
     auto [outPos, outTail] = detail::getPositionTail(info, position, tail);
-    return bug_helper(f % "", message, outPos, outTail, std::forward<Args>(args)...);
+    return bug_helper(f % "", outPos, outTail, std::forward<Args>(args)...);
 }
 
 template <typename T, class... Args>
-auto bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                std::string_view tail, const T *t, Args &&...args) ->
+auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T *t,
+                Args &&...args) ->
     typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
-    if (t == nullptr) return bug_helper(f, message, position, tail, std::forward<Args>(args)...);
+    if (t == nullptr) return bug_helper(f, position, tail, std::forward<Args>(args)...);
 
     auto [outPos, outTail] = detail::getPositionTail(t->getSourceInfo(), position, tail);
     std::stringstream str;
     str << t;
-    return bug_helper(f % str.str(), message, outPos, outTail, std::forward<Args>(args)...);
+    return bug_helper(f % str.str(), outPos, outTail, std::forward<Args>(args)...);
 }
 
 template <typename T, class... Args>
-auto bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                std::string_view tail, const T &t, Args &&...args) ->
+auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T &t,
+                Args &&...args) ->
     typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
     auto [outPos, outTail] = detail::getPositionTail(t.getSourceInfo(), position, tail);
 
     std::stringstream str;
     str << t;
-    return bug_helper(f % str.str(), message, outPos, outTail, std::forward<Args>(args)...);
+    return bug_helper(f % str.str(), outPos, outTail, std::forward<Args>(args)...);
 }
 
 #endif /* LIB_BUG_HELPER_H_ */

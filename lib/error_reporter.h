@@ -96,7 +96,7 @@ class ErrorReporter {
         boost::format fmt(format);
         // FIXME: This will implicitly take location of the first argument having
         // SourceInfo. Not sure if this always desireable or not.
-        return ::bug_helper(fmt, "", "", "", std::forward<Args>(args)...);
+        return ::bug_helper(fmt, "", "", std::forward<Args>(args)...);
     }
 
     template <typename... T>
