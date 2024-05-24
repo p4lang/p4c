@@ -22,6 +22,7 @@ limitations under the License.
 #include <functional>
 #include <sstream>
 #include <string>
+#include <string_view>
 
 #include "hash.h"
 
@@ -164,6 +165,12 @@ class cstring {
     char get(unsigned index) const { return (index < size()) ? str[index] : 0; }
     const char *c_str() const { return str; }
     operator const char *() const { return str; }
+
+    std::string string() const { return std::string(str); }
+    explicit operator std::string() const { return string(); }
+
+    std::string_view string_view() const { return std::string_view(str); }
+    explicit operator std::string_view() const { return string_view(); }
 
     // Size tests. Constant time except for size(), which is linear time.
     size_t size() const {
