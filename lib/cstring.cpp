@@ -203,8 +203,7 @@ cstring cstring::before(const char *at) const { return substr(0, at - str); }
 
 cstring cstring::substr(size_t start, size_t length) const {
     if (size() <= start) return cstring::empty;
-    auto s = string_view();
-    return cstring(s.substr(start, length));
+    return cstring(string_view().substr(start, length));
 }
 
 cstring cstring::replace(char c, char with) const {
