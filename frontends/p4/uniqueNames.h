@@ -31,17 +31,33 @@ class RenameMap {
     std::map<const IR::MethodCallExpression *, const IR::P4Action *> actionCall;
 
  public:
-    void setNewName(const IR::IDeclaration *decl, cstring name);
+    /// @brief Add rename entry for the declaration to be named with the given name.
+    /// @param allowOverride If set to true, don't fail if a new name was already set but replace it
+    /// instead.
+    void setNewName(const IR::IDeclaration *decl, cstring name, bool allowOverride = false);
+
+    /// Get new name for the declaration, fails if none exists.
     cstring getName(const IR::IDeclaration *decl) const {
-        CHECK_NULL(decl);
-        BUG_CHECK(newName.find(decl) != newName.end(), "%1%: no new name", decl);
-        auto result = ::get(newName, decl);
-        return result;
+        auto n = get(decl);
+        BUG_CHECK(n.has_value(), "%1%: no new name", decl);
+        return *n;
     }
+
+    /// @returns true if there is a new name for the declaration, false otherwise.
     bool toRename(const IR::IDeclaration *decl) const {
         CHECK_NULL(decl);
         return newName.find(decl) != newName.end();
     }
+
+    /// Get new name for the declaration (wrapped in optional), or std::nullopt if there is none.
+    std::optional<cstring> get(const IR::IDeclaration *decl) const {
+        CHECK_NULL(decl);
+        if (auto it = newName.find(decl); it != newName.end()) {
+            return it->second;
+        }
+        return {};
+    }
+
     void foundInTable(const IR::P4Action *action);
     void markActionCall(const IR::P4Action *action, const IR::MethodCallExpression *call);
     const IR::P4Action *actionCalled(const IR::MethodCallExpression *expression) const;
