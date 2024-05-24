@@ -23,7 +23,6 @@ limitations under the License.
 #include <boost/format.hpp>
 
 #include "absl/strings/str_cat.h"
-#include "lib/big_int.h"
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 
@@ -58,14 +57,6 @@ template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view message, std::string_view position,
                 std::string_view tail, const T *t, Args &&...args) ->
     typename std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
-
-template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                       std::string_view tail, const big_int *t, Args &&...args);
-
-template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                       std::string_view tail, const big_int &t, Args &&...args);
 
 // actual implementations
 namespace detail {
@@ -110,18 +101,6 @@ auto bug_helper(boost::format &f, std::string_view message, std::string_view pos
     std::stringstream str;
     str << t;
     return bug_helper(f % str.str(), message, position, tail, std::forward<Args>(args)...);
-}
-
-template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                       std::string_view tail, const big_int *t, Args &&...args) {
-    return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
-}
-
-template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view message, std::string_view position,
-                       std::string_view tail, const big_int &t, Args &&...args) {
-    return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
 }
 
 template <typename T, class... Args>
