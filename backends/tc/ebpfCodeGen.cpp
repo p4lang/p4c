@@ -132,13 +132,28 @@ void PNAEbpfGenerator::emitP4TCFilterFields(EBPF::CodeBuilder *builder) const {
 
 void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
     for (auto table : tcIR->tcPipeline->tableDefs) {
-        if (table->isTcMayOverride) {
+        if (table->isTcMayOverrideMiss) {
             cstring tblName = table->getTableName();
             cstring defaultActionName = table->defaultMissAction->getActionName();
             defaultActionName = defaultActionName.substr(
                 defaultActionName.find('/') - defaultActionName.begin() + 1,
                 defaultActionName.size());
             for (auto param : table->defaultMissActionParams) {
+                cstring paramName = param->paramDetail->getParamName();
+                cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
+                cstring typeName = param->paramDetail->getParamType();
+                builder->emitIndent();
+                builder->appendFormat("%s %s", typeName, placeholder);
+                builder->endOfStatement(true);
+            }
+        }
+        if (table->isTcMayOverrideHit) {
+            cstring tblName = table->getTableName();
+            cstring defaultActionName = table->defaultHitAction->getActionName();
+            defaultActionName = defaultActionName.substr(
+                defaultActionName.find('/') - defaultActionName.begin() + 1,
+                defaultActionName.size());
+            for (auto param : table->defaultHitActionParams) {
                 cstring paramName = param->paramDetail->getParamName();
                 cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
                 cstring typeName = param->paramDetail->getParamType();
@@ -967,9 +982,10 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
             }
         }
         bool generateDefaultMissCode = false;
+        bool generateDefaultHitCode = false;
         for (auto tbl : tcIR->tcPipeline->tableDefs) {
             if (tbl->getTableName() == table->container->name.originalName) {
-                if (tbl->isTcMayOverride) {
+                if (tbl->isTcMayOverrideMiss) {
                     cstring defaultActionName = tbl->defaultMissAction->getActionName();
                     defaultActionName = defaultActionName.substr(
                         defaultActionName.find('/') - defaultActionName.begin() + 1,
@@ -977,16 +993,27 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
                     if (defaultActionName == action->name.originalName)
                         generateDefaultMissCode = true;
                 }
+                if (tbl->isTcMayOverrideHit) {
+                    cstring defaultActionName = tbl->defaultHitAction->getActionName();
+                    defaultActionName = defaultActionName.substr(
+                        defaultActionName.find('/') - defaultActionName.begin() + 1,
+                        defaultActionName.size());
+                    if (defaultActionName == action->name.originalName)
+                        generateDefaultHitCode = true;
+                }
             }
         }
-        if (generateDefaultMissCode) {
+        if (generateDefaultMissCode || generateDefaultHitCode) {
             builder->emitIndent();
             builder->appendFormat("{");
             builder->newline();
             builder->increaseIndent();
 
             builder->emitIndent();
-            builder->appendFormat("if (%s->is_default_miss_act) ", valueName.c_str());
+            if (generateDefaultMissCode)
+                builder->appendFormat("if (%s->is_default_miss_act) ", valueName.c_str());
+            else if (generateDefaultHitCode)
+                builder->appendFormat("if (%s->is_default_hit_act) ", valueName.c_str());
             builder->newline();
 
             builder->emitIndent();

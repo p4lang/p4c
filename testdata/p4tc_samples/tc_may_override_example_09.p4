@@ -74,7 +74,7 @@ control MainControlImpl(
     action next_hop(PortId_t vport) {
         send_to_port(vport);
     }
-    action default_route_drop() {
+    action dflt_route_drop() {
         drop_packet();
     }
     action drop() {
@@ -88,7 +88,7 @@ control MainControlImpl(
         }
         actions = {
             next_hop;
-            default_route_drop;
+            dflt_route_drop;
         }
         @tc_may_override default_action = next_hop((PortId_t)123);
     }
@@ -99,7 +99,8 @@ control MainControlImpl(
             hdr.ipv4.protocol : exact;
         }
         actions = {
-            @tc_may_override @default_hit_const next_hop;
+            @tc_may_override next_hop;
+            dflt_route_drop;
             drop;
         }
         default_action = drop;

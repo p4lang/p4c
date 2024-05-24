@@ -86,6 +86,11 @@ inline constexpr auto DEFAULTONLY = 2;
 inline constexpr auto EXACT_TYPE = 0;
 inline constexpr auto LPM_TYPE = 1;
 inline constexpr auto TERNARY_TYPE = 2;
+
+inline constexpr auto NONE = 0;
+inline constexpr auto IN = 1;
+inline constexpr auto OUT = 2;
+inline constexpr auto INOUT = 3;
 }  // namespace TC
 
 #endif /* BACKENDS_TC_TC_DEFINES_H_ */

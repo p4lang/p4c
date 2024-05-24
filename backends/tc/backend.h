@@ -123,6 +123,7 @@ class ConvertToBackendIR : public Inspector {
     cstring HandleTableAccessPermission(const IR::P4Table *t);
     std::pair<cstring, cstring> *GetAnnotatedAccessPath(const IR::Annotation *anno);
     void updateAddOnMissTable(const IR::P4Table *t);
+    bool checkParameterDirection(const IR::TCAction *tcAction);
 };
 
 class Extern {

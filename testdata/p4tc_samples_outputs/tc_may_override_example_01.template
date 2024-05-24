@@ -29,5 +29,6 @@ $TC p4template create table/tc_may_override_example_01/MainControlImpl/ipv4_tbl_
 	keysz 72 nummasks 8 permissions 0x3da4 tentries 2048 \
 	table_acts act name tc_may_override_example_01/MainControlImpl/next_hop \
 	act name tc_may_override_example_01/MainControlImpl/drop
+$TC p4template update table/tc_may_override_example_01/MainControlImpl/ipv4_tbl_2 default_hit_action permissions 0x1024 action tc_may_override_example_01/MainControlImpl/next_hop param vport flags runtime
 $TC p4template update table/tc_may_override_example_01/MainControlImpl/ipv4_tbl_2 default_miss_action action tc_may_override_example_01/MainControlImpl/drop
 $TC p4template update pipeline/tc_may_override_example_01 state ready
