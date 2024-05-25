@@ -18,6 +18,7 @@ limitations under the License.
 #define LIB_OPTIONS_H_
 
 #include <functional>
+#include <iostream>
 #include <ostream>
 #include <stdexcept>
 #include <string>

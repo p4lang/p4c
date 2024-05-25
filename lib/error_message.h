@@ -67,10 +67,10 @@ struct ErrorMessage {
  */
 struct ParserErrorMessage {
     Util::SourceInfo location;
-    cstring message;
+    std::string message;
 
-    ParserErrorMessage(const Util::SourceInfo &loc, const cstring &msg)
-        : location(loc), message(msg) {}
+    ParserErrorMessage(Util::SourceInfo loc, std::string msg)
+        : location(std::move(loc)), message(std::move(msg)) {}
 
     std::string toString() const;
 };

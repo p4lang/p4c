@@ -17,12 +17,15 @@ limitations under the License.
 #ifndef LIB_ERROR_REPORTER_H_
 #define LIB_ERROR_REPORTER_H_
 
+#include <iostream>
 #include <ostream>
 #include <set>
 #include <type_traits>
 #include <unordered_map>
 
 #include <boost/format.hpp>
+
+#include "absl/strings/str_format.h"
 
 #include "bug_helper.h"
 #include "error_catalog.h"
@@ -206,8 +209,7 @@ class ErrorReporter {
         std::stringstream ss;
         ss << message;
 
-        ParserErrorMessage msg(location, ss.str());
-        emit_message(msg);
+        emit_message(ParserErrorMessage(location, ss.str()));
     }
 
     /**
@@ -216,22 +218,20 @@ class ErrorReporter {
      * generator's C-based Bison parser, which doesn't have location information
      * available.
      */
-    void parser_error(const Util::InputSources *sources, const char *fmt, va_list args) {
+    template <typename... Args>
+    void parser_error(const Util::InputSources *sources, const char *fmt, Args &&...args) {
         errorCount++;
 
         Util::SourcePosition position = sources->getCurrentPosition();
         position--;
-        cstring message = Util::vprintf_format(fmt, args);
 
-        Util::SourceInfo info(sources, position);
-        ParserErrorMessage msg(info, message);
-        emit_message(msg);
-    }
-    void parser_error(const Util::InputSources *sources, const char *fmt, ...) {
-        va_list args;
-        va_start(args, fmt);
-        parser_error(sources, fmt, args);
-        va_end(args);
+        std::string message;
+        if (!absl::FormatUntyped(&message, absl::UntypedFormatSpec(fmt),
+                                 {absl::FormatArg(args)...})) {
+            BUG("Failed to format string");
+        }
+
+        emit_message(ParserErrorMessage(Util::SourceInfo(sources, position), std::move(message)));
     }
 
     /// @return the action to take for the given diagnostic, falling back to the
