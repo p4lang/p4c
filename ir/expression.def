@@ -29,6 +29,12 @@ class Cmpl : Operation_Unary {
 
 class LNot : Operation_Unary {
     stringOp = "!";
+    LNot {
+        // This sets the type only when no type is explicitly provided in the constructor.
+        // If a type is provided in the constructor this assignment has no effect
+        // because the type member is shadowed by the type parameter.
+        type = Type::Boolean::get();
+    }
 }
 
 abstract Operation_Binary : Operation {
@@ -53,7 +59,12 @@ abstract Operation_Ternary : Operation {
 }
 
 abstract Operation_Relation : Operation_Binary {
-    Operation_Relation { type = Type::Boolean::get(); }
+    Operation_Relation {
+        // This sets the type only when no type is explicitly provided in the constructor.
+        // If a type is provided in the constructor this assignment has no effect
+        // because the type member is shadowed by the type parameter.
+        type = Type::Boolean::get();
+    }
 }
 
 class Mul : Operation_Binary {
@@ -134,11 +145,22 @@ class BXor : Operation_Binary {
 class LAnd : Operation_Binary {
     stringOp = "&&";
     precedence = DBPrint::Prec_LAnd;
+    LAnd {
+        // This sets the type only when no type is explicitly provided in the constructor.
+        // If a type is provided in the constructor this assignment has no effect
+        // because the type member is shadowed by the type parameter.
+        type = Type::Boolean::get();
+    }
 }
 class LOr : Operation_Binary {
     stringOp = "||";
     precedence = DBPrint::Prec_LOr;
-}
+    LOr {
+        // This sets the type only when no type is explicitly provided in the constructor.
+        // If a type is provided in the constructor this assignment has no effect
+        // because the type member is shadowed by the type parameter.
+        type = Type::Boolean::get();
+    }}
 
 /// Represents the ... default initializer expression
 class Dots : Expression {
