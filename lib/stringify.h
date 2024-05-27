@@ -19,11 +19,12 @@ limitations under the License.
 #ifndef LIB_STRINGIFY_H_
 #define LIB_STRINGIFY_H_
 
-#include <stdint.h>
-
 #include <cstdarg>
+#include <string>
+#include <string_view>
+#include <type_traits>
 
-#include "big_int_util.h"
+#include "big_int_fwd.h"
 #include "cstring.h"
 
 // convert values to cstrings
@@ -70,7 +71,7 @@ cstring toString(const char *value);
 cstring toString(cstring value);
 cstring toString(std::string_view value);
 /// A width of zero indicates that no width should be displayed.
-cstring toString(const big_int value, unsigned width, bool sign, unsigned int base = 10);
+cstring toString(const big_int &value, unsigned width, bool sign, unsigned int base = 10);
 cstring toString(const void *value);
 
 // printf into a string
