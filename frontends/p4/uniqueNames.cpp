@@ -104,7 +104,7 @@ const IR::Annotations *RenameSymbols::addNameAnnotation(cstring name,
 }
 
 const IR::Node *RenameSymbols::postorder(IR::Declaration_Variable *decl) {
-    return renameDeclWithNameAnno(decl);
+    return renameDeclWithNameAnnotation(decl);
 }
 
 const IR::Node *RenameSymbols::postorder(IR::Declaration_Constant *decl) {
@@ -114,7 +114,7 @@ const IR::Node *RenameSymbols::postorder(IR::Declaration_Constant *decl) {
 }
 
 const IR::Node *RenameSymbols::postorder(IR::Parameter *param) {
-    return renameDeclWithNameAnno(param);
+    return renameDeclWithNameAnnotation(param);
 }
 
 const IR::Node *RenameSymbols::postorder(IR::PathExpression *expression) {
@@ -131,17 +131,19 @@ const IR::Node *RenameSymbols::postorder(IR::PathExpression *expression) {
 }
 
 const IR::Node *RenameSymbols::postorder(IR::Declaration_Instance *decl) {
-    return renameDeclWithNameAnno(decl);
+    return renameDeclWithNameAnnotation(decl);
 }
 
-const IR::Node *RenameSymbols::postorder(IR::P4Table *decl) { return renameDeclWithNameAnno(decl); }
+const IR::Node *RenameSymbols::postorder(IR::P4Table *decl) {
+    return renameDeclWithNameAnnotation(decl);
+}
 
 const IR::Node *RenameSymbols::postorder(IR::P4Action *decl) {
-    return renameDeclWithNameAnno(decl);
+    return renameDeclWithNameAnnotation(decl);
 }
 
 const IR::Node *RenameSymbols::postorder(IR::P4ValueSet *decl) {
-    return renameDeclWithNameAnno(decl);
+    return renameDeclWithNameAnnotation(decl);
 }
 
 const IR::Node *RenameSymbols::postorder(IR::Argument *arg) {

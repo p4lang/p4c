@@ -131,7 +131,7 @@ class RenameSymbols : public Transform {
     /// Rename any declaration where we want to add @name annotation with the original name.
     /// Has to be a template as there is no common base for declarations with annotations member.
     template <typename D>
-    const IR::Node *renameDeclWithNameAnno(D *decl) {
+    const IR::Node *renameDeclWithNameAnnotation(D *decl) {
         auto name = getName();
         if (name != nullptr && *name != decl->name) {
             decl->annotations = addNameAnnotation(decl->name, decl->annotations);
