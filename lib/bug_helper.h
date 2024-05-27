@@ -53,6 +53,8 @@ std::pair<std::string_view, std::string> maybeAddSourceInfo(const T &t, std::str
     if constexpr (Util::has_SourceInfo_v<T>)
         return getPositionTail(t.getSourceInfo(), position, tail);
 
+    (void)position;
+    (void)tail;
     return {"", ""};
 }
 
