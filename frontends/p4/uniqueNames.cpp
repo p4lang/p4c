@@ -21,12 +21,12 @@ limitations under the License.
 
 namespace P4 {
 
-void RenameMap::setNewName(const IR::IDeclaration *decl, cstring name) {
+void RenameMap::setNewName(const IR::IDeclaration *decl, cstring name, bool allowOverride) {
     CHECK_NULL(decl);
     BUG_CHECK(!name.isNullOrEmpty(), "Empty name");
     LOG1("Will rename " << dbp(decl) << " to " << name);
-    if (newName.find(decl) != newName.end()) BUG("%1%: already renamed", decl);
-    newName.emplace(decl, name);
+    BUG_CHECK(allowOverride || newName.find(decl) == newName.end(), "%1%: already renamed", decl);
+    newName.insert_or_assign(decl, name);
 }
 
 const IR::P4Action *RenameMap::actionCalled(const IR::MethodCallExpression *expression) const {
@@ -97,9 +97,9 @@ UniqueParameters::UniqueParameters(ReferenceMap *refMap, TypeMap *typeMap)
 
 IR::ID *RenameSymbols::getName() const {
     auto orig = getOriginal<IR::IDeclaration>();
-    if (!renameMap->toRename(orig)) return nullptr;
-    auto newName = renameMap->getName(orig);
-    auto name = new IR::ID(orig->getName().srcInfo, newName, orig->getName().originalName);
+    auto newName = renameMap->get(orig);
+    if (!newName.has_value()) return nullptr;
+    auto name = new IR::ID(orig->getName().srcInfo, *newName, orig->getName().originalName);
     return name;
 }
 
