@@ -190,6 +190,9 @@ class cstring {
     bool operator==(cstring a) const { return str == a.str; }
     bool operator!=(cstring a) const { return str != a.str; }
 
+    bool operator==(std::nullptr_t) const { return str == nullptr; }
+    bool operator!=(std::nullptr_t) const { return str != nullptr; }
+
     // Other comparisons and tests. Linear time.
     bool operator==(const char *a) const { return str ? a && !strcmp(str, a) : !a; }
     bool operator!=(const char *a) const { return str ? !a || !!strcmp(str, a) : !!a; }
