@@ -22,6 +22,7 @@ limitations under the License.
 #define LIB_SOURCE_FILE_H_
 
 #include <map>
+#include <string_view>
 #include <vector>
 
 #include "cstring.h"
@@ -267,7 +268,7 @@ class InputSources final {
  public:
     InputSources();
 
-    cstring getLine(unsigned lineNumber) const;
+    std::string_view getLine(unsigned lineNumber) const;
     /// Original source line that produced the line with the specified number
     SourceFileLine getSourceLine(unsigned line) const;
 
