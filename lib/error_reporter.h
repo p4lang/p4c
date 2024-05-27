@@ -24,6 +24,7 @@ limitations under the License.
 
 #include <boost/format.hpp>
 
+#include "bug_helper.h"
 #include "error_catalog.h"
 #include "error_helper.h"
 #include "exceptions.h"

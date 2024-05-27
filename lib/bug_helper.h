@@ -40,23 +40,23 @@ std::string bug_helper(boost::format &f, std::string_view position, std::string_
 
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T &t,
-                Args &&...args) ->
-    typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
+                Args &&...args)
+    -> std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
 
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T &t,
-                Args &&...args) ->
-    typename std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
+                Args &&...args)
+    -> std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
 
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T *t,
-                Args &&...args) ->
-    typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
+                Args &&...args)
+    -> std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
 
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T *t,
-                Args &&...args) ->
-    typename std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
+                Args &&...args)
+    -> std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
 
 // actual implementations
 namespace detail {
@@ -72,7 +72,7 @@ static inline auto getPositionTail(const Util::SourceInfo &info, std::string_vie
     }
     outTail += info.toSourceFragment();
 
-    return std::make_pair(position, outTail);
+    return std::pair(position, outTail);
 }
 }  // namespace detail
 
@@ -95,8 +95,8 @@ std::string bug_helper(boost::format &f, std::string_view position, std::string_
 
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T *t,
-                Args &&...args) ->
-    typename std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
+                Args &&...args)
+    -> std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
     std::stringstream str;
     str << t;
     return bug_helper(f % str.str(), position, tail, std::forward<Args>(args)...);
@@ -104,8 +104,8 @@ auto bug_helper(boost::format &f, std::string_view position, std::string_view ta
 
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T &t,
-                Args &&...args) ->
-    typename std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
+                Args &&...args)
+    -> std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
     return bug_helper(f % t, position, tail, std::forward<Args>(args)...);
 }
 
@@ -118,8 +118,8 @@ std::string bug_helper(boost::format &f, std::string_view position, std::string_
 
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T *t,
-                Args &&...args) ->
-    typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
+                Args &&...args)
+    -> std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
     if (t == nullptr) return bug_helper(f, position, tail, std::forward<Args>(args)...);
 
     auto [outPos, outTail] = detail::getPositionTail(t->getSourceInfo(), position, tail);
@@ -130,8 +130,8 @@ auto bug_helper(boost::format &f, std::string_view position, std::string_view ta
 
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T &t,
-                Args &&...args) ->
-    typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
+                Args &&...args)
+    -> std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
     auto [outPos, outTail] = detail::getPositionTail(t.getSourceInfo(), position, tail);
 
     std::stringstream str;
