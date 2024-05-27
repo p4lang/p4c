@@ -64,14 +64,6 @@ class FindActionCalls : public Inspector {
 
 }  // namespace
 
-// Add a @name annotation ONLY if it does not already exist.
-// Otherwise do nothing.
-static const IR::Annotations *addNameAnnotation(cstring name, const IR::Annotations *annos) {
-    if (annos == nullptr) annos = IR::Annotations::empty;
-    return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(name),
-                                     false);
-}
-
 UniqueNames::UniqueNames(ReferenceMap *refMap) : renameMap(new RenameMap) {
     setName("UniqueNames");
     visitDagOnce = false;
@@ -96,21 +88,25 @@ UniqueParameters::UniqueParameters(ReferenceMap *refMap, TypeMap *typeMap)
 /**************************************************************************/
 
 IR::ID *RenameSymbols::getName() const {
-    auto orig = getOriginal<IR::IDeclaration>();
-    auto newName = renameMap->get(orig);
+    return getName(getOriginal<IR::IDeclaration>());
+}
+
+IR::ID *RenameSymbols::getName(const IR::IDeclaration *decl) const {
+    auto newName = renameMap->get(decl);
     if (!newName.has_value()) return nullptr;
-    auto name = new IR::ID(orig->getName().srcInfo, *newName, orig->getName().originalName);
+    auto name = new IR::ID(decl->getName().srcInfo, *newName, decl->getName().originalName);
     return name;
 }
 
+const IR::Annotations *RenameSymbols::addNameAnnotation(cstring name,
+                                                        const IR::Annotations *annos) {
+    if (annos == nullptr) annos = IR::Annotations::empty;
+    return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(name),
+                                     false);
+}
+
 const IR::Node *RenameSymbols::postorder(IR::Declaration_Variable *decl) {
-    auto name = getName();
-    if (name != nullptr && *name != decl->name) {
-        auto annos = addNameAnnotation(decl->name, decl->annotations);
-        decl->name = *name;
-        decl->annotations = annos;
-    }
-    return decl;
+    return renameDeclWithNameAnno(decl);
 }
 
 const IR::Node *RenameSymbols::postorder(IR::Declaration_Constant *decl) {
@@ -120,12 +116,7 @@ const IR::Node *RenameSymbols::postorder(IR::Declaration_Constant *decl) {
 }
 
 const IR::Node *RenameSymbols::postorder(IR::Parameter *param) {
-    auto name = getName();
-    if (name != nullptr && *name != param->name.name) {
-        param->annotations = addNameAnnotation(param->name, param->annotations);
-        param->name = IR::ID(param->name.srcInfo, *name, param->name.originalName);
-    }
-    return param;
+    return renameDeclWithNameAnno(param);
 }
 
 const IR::Node *RenameSymbols::postorder(IR::PathExpression *expression) {
@@ -142,43 +133,19 @@ const IR::Node *RenameSymbols::postorder(IR::PathExpression *expression) {
 }
 
 const IR::Node *RenameSymbols::postorder(IR::Declaration_Instance *decl) {
-    auto name = getName();
-    if (name != nullptr && *name != decl->name) {
-        auto annos = addNameAnnotation(decl->name, decl->annotations);
-        decl->name = *name;
-        decl->annotations = annos;
-    }
-    return decl;
+    return renameDeclWithNameAnno(decl);
 }
 
 const IR::Node *RenameSymbols::postorder(IR::P4Table *decl) {
-    auto name = getName();
-    if (name != nullptr && *name != decl->name) {
-        auto annos = addNameAnnotation(decl->name, decl->annotations);
-        decl->name = *name;
-        decl->annotations = annos;
-    }
-    return decl;
+    return renameDeclWithNameAnno(decl);
 }
 
 const IR::Node *RenameSymbols::postorder(IR::P4Action *decl) {
-    auto name = getName();
-    if (name != nullptr && *name != decl->name) {
-        auto annos = addNameAnnotation(decl->name, decl->annotations);
-        decl->name = *name;
-        decl->annotations = annos;
-    }
-    return decl;
+    return renameDeclWithNameAnno(decl);
 }
 
 const IR::Node *RenameSymbols::postorder(IR::P4ValueSet *decl) {
-    auto name = getName();
-    if (name != nullptr && *name != decl->name) {
-        auto annos = addNameAnnotation(decl->name, decl->annotations);
-        decl->name = *name;
-        decl->annotations = annos;
-    }
-    return decl;
+    return renameDeclWithNameAnno(decl);
 }
 
 const IR::Node *RenameSymbols::postorder(IR::Argument *arg) {
