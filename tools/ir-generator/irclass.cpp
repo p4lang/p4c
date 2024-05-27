@@ -151,6 +151,25 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     }
     impl << " };\n" << std::endl;
 
+    impl << "template class IR::Vector<IR::Node>;" << std::endl;
+    out << "extern template class IR::Vector<IR::Node>;" << std::endl;
+    impl << "template class IR::IndexedVector<IR::Node>;" << std::endl;
+    out << "extern template class IR::IndexedVector<IR::Node>;" << std::endl;
+    for (auto cls : *getClasses()) {
+        if (cls->needVector || cls->needIndexedVector) {
+            impl << "template class IR::Vector<IR::" << cls->containedIn << cls->name << ">;"
+                 << std::endl;
+            out << "extern template class IR::Vector<IR::" << cls->containedIn << cls->name << ">;"
+                << std::endl;
+        }
+        if (cls->needIndexedVector) {
+            impl << "template class IR::IndexedVector<IR::" << cls->containedIn << cls->name << ">;"
+                 << std::endl;
+            out << "extern template class IR::IndexedVector<IR::" << cls->containedIn << cls->name
+                << ">;" << std::endl;
+        }
+    }
+
     for (auto e : elements) {
         e->generate_hdr(out);
         e->generate_impl(impl);
@@ -564,17 +583,10 @@ void IrEnumType::generate_hdr(std::ostream &out) const {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-void IrField::generate(std::ostream &out, bool asField) const {
-    if (asField) {
-        out << IrClass::indent;
-        if (isStatic) out << "static ";
-        if (isConst) out << "const ";
-    }
-
+void IrField::resolve() {
     auto tmpl = dynamic_cast<const TemplateInstantiation *>(type);
     const IrClass *cls = type->resolve(clss ? clss->containedIn : nullptr);
     if (cls) {
-        // FIXME -- should be doing this in resolve and converting type to PointerType as needed
         if (tmpl) {
             if (cls->kind != NodeKind::Template)
                 throw Util::CompilationError("Template args with non-template class %1%", cls);
@@ -602,6 +614,16 @@ void IrField::generate(std::ostream &out, bool asField) const {
             throw Util::CompilationError("No args for template %1%", cls);
         }
     }
+}
+
+void IrField::generate(std::ostream &out, bool asField) const {
+    if (asField) {
+        out << IrClass::indent;
+        if (isStatic) out << "static ";
+        if (isConst) out << "const ";
+    }
+
+    const IrClass *cls = type->resolve(clss ? clss->containedIn : nullptr);
     if (cls != nullptr && !isInline) out << "const ";
     out << type->toString();
     if (cls != nullptr && !isInline) out << "*";
