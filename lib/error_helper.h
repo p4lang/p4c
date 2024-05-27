@@ -33,8 +33,24 @@ static inline ErrorMessage error_helper(boost::format &f, ErrorMessage out) {
     return out;
 }
 
+template <class... Args>
+auto error_helper(boost::format &f, ErrorMessage out, const char *t, Args &&...args) {
+    return error_helper(f % t, out, std::forward<Args>(args)...);
+}
+
+template <typename T, class... Args>
+auto error_helper(boost::format &f, ErrorMessage out, const T &t,
+                  Args &&...args) -> std::enable_if_t<Util::has_toString_v<T>, ErrorMessage>;
+
+template <typename T, class... Args>
+auto error_helper(boost::format &f, ErrorMessage out, const T &t, Args &&...args)
+    -> std::enable_if_t<!Util::has_toString_v<T> && !std::is_pointer_v<T>, ErrorMessage>;
+
 template <typename T, class... Args>
 auto error_helper(boost::format &f, ErrorMessage out, const T *t, Args &&...args) {
+    // Contrary to bug_helper we do not want to show raw pointers to users in
+    // ordinary error messages. Therefore we explicitly delegate to
+    // reference-arg implementation here.
     return error_helper(f, out, *t, std::forward<Args>(args)...);
 }
 

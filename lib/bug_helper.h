@@ -17,51 +17,23 @@ limitations under the License.
 #ifndef LIB_BUG_HELPER_H_
 #define LIB_BUG_HELPER_H_
 
+#include <sstream>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include <boost/format.hpp>
 
 #include "absl/strings/str_cat.h"
-#include "lib/cstring.h"
-#include "lib/source_file.h"
+#include "cstring.h"
+#include "source_file.h"
+#include "stringify.h"
 
-template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view position, std::string_view tail,
-                       const char *t, Args &&...args);
-
-template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view position, std::string_view tail,
-                       const cstring &t, Args &&...args);
-
-template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view position, std::string_view tail,
-                       const Util::SourceInfo &info, Args &&...args);
-
-template <typename T, class... Args>
-auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T &t,
-                Args &&...args)
-    -> std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
-
-template <typename T, class... Args>
-auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T &t,
-                Args &&...args)
-    -> std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
-
-template <typename T, class... Args>
-auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T *t,
-                Args &&...args)
-    -> std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
-
-template <typename T, class... Args>
-auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T *t,
-                Args &&...args)
-    -> std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string>;
-
-// actual implementations
 namespace detail {
-static inline auto getPositionTail(const Util::SourceInfo &info, std::string_view position,
-                                   std::string_view tail) {
+
+static inline std::pair<std::string_view, std::string> getPositionTail(const Util::SourceInfo &info,
+                                                                       std::string_view position,
+                                                                       std::string_view tail) {
     std::string_view posString = info.toPositionString().string_view();
     std::string outTail(tail);
     if (position.empty()) {
@@ -74,38 +46,32 @@ static inline auto getPositionTail(const Util::SourceInfo &info, std::string_vie
 
     return std::pair(position, outTail);
 }
-}  // namespace detail
+
+template <typename T>
+std::pair<std::string_view, std::string> maybeAddSourceInfo(const T &t, std::string_view position,
+                                                            std::string_view tail) {
+    if constexpr (Util::has_SourceInfo_v<T>)
+        return getPositionTail(t.getSourceInfo(), position, tail);
+
+    return {"", ""};
+}
 
 static inline std::string bug_helper(boost::format &f, std::string_view position,
                                      std::string_view tail) {
     return absl::StrCat(position, position.empty() ? "" : ": ", boost::str(f), "\n", tail);
 }
 
-template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view position, std::string_view tail,
-                       const char *t, Args &&...args) {
-    return bug_helper(f % t, position, tail, std::forward<Args>(args)...);
-}
-
-template <class... Args>
-std::string bug_helper(boost::format &f, std::string_view position, std::string_view tail,
-                       const cstring &t, Args &&...args) {
-    return bug_helper(f % t.string_view(), position, tail, std::forward<Args>(args)...);
-}
-
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T *t,
-                Args &&...args)
-    -> std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
-    std::stringstream str;
-    str << t;
-    return bug_helper(f % str.str(), position, tail, std::forward<Args>(args)...);
-}
+                Args &&...args);
 
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T &t,
-                Args &&...args)
-    -> std::enable_if_t<!std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
+                Args &&...args) -> std::enable_if_t<!std::is_pointer_v<T>, std::string>;
+
+template <class... Args>
+std::string bug_helper(boost::format &f, std::string_view position, std::string_view tail,
+                       const char *t, Args &&...args) {
     return bug_helper(f % t, position, tail, std::forward<Args>(args)...);
 }
 
@@ -118,11 +84,18 @@ std::string bug_helper(boost::format &f, std::string_view position, std::string_
 
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T *t,
-                Args &&...args)
-    -> std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
+                Args &&...args) {
     if (t == nullptr) return bug_helper(f, position, tail, std::forward<Args>(args)...);
 
-    auto [outPos, outTail] = detail::getPositionTail(t->getSourceInfo(), position, tail);
+    auto [outPos, outTail] = maybeAddSourceInfo(*t, position, tail);
+    // We define operator<< for all T's that have either dbprint() or toString()
+    // methods (in stringify.h).  Note, however, that these overloads are
+    // provided in the global namespace, not namespace of the T itself and
+    // therefore cannot be found via ADL. As a result, name lookup for the `str
+    // << t` below succeeds as it is encloding namespace for `detail`. However,
+    // `f % t` will fail as operator<< will be called from some
+    // `boost::io::detail` namespace for which global namespace is not a direct
+    // enclosing one and therefore the lookup for operator<< will fail.
     std::stringstream str;
     str << t;
     return bug_helper(f % str.str(), outPos, outTail, std::forward<Args>(args)...);
@@ -130,13 +103,19 @@ auto bug_helper(boost::format &f, std::string_view position, std::string_view ta
 
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T &t,
-                Args &&...args)
-    -> std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>, std::string> {
-    auto [outPos, outTail] = detail::getPositionTail(t.getSourceInfo(), position, tail);
-
+                Args &&...args) -> std::enable_if_t<!std::is_pointer_v<T>, std::string> {
+    auto [outPos, outTail] = maybeAddSourceInfo(t, position, tail);
     std::stringstream str;
     str << t;
     return bug_helper(f % str.str(), outPos, outTail, std::forward<Args>(args)...);
+}
+}  // namespace detail
+
+// Most direct invocations of bug_helper usually only reduce arguments
+template <class... Args>
+std::string bug_helper(boost::format &f, std::string_view position, std::string_view tail,
+                       Args &&...args) {
+    return detail::bug_helper(f, position, tail, std::forward<Args>(args)...);
 }
 
 #endif /* LIB_BUG_HELPER_H_ */
