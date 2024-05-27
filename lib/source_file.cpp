@@ -19,7 +19,8 @@ limitations under the License.
 #include <algorithm>
 #include <sstream>
 
-#include "exceptions.h"
+#include "absl/strings/str_format.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/stringify.h"
 
@@ -35,7 +36,7 @@ SourcePosition::SourcePosition(unsigned lineNumber, unsigned columnNumber)
 }
 
 cstring SourcePosition::toString() const {
-    return Util::printf_format("%d:%d", lineNumber, columnNumber);
+    return absl::StrFormat("%d:%d", lineNumber, columnNumber);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +51,8 @@ SourceInfo::SourceInfo(const InputSources *sources, SourcePosition start, Source
 }
 
 cstring SourceInfo::toString() const {
-    return Util::printf_format("(%s)-(%s)", start.toString(), end.toString());
+    return absl::StrFormat("(%s)-(%s)", start.toString().string_view(),
+                           end.toString().string_view());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -93,13 +95,13 @@ void InputSources::appendToLastLine(std::string_view text) {
         char c = text[i];
         if (c == '\n') BUG("Text contains newlines");
     }
-    contents.back() += toString(text);
+    contents.back() += text;
 }
 
 // Append a newline and start a new line
 void InputSources::appendNewline(std::string_view newline) {
     if (sealed) BUG("Appending to sealed InputSources");
-    contents.back() += toString(newline);
+    contents.back() += newline;
     contents.push_back("");  // start a new line
 }
 
@@ -259,7 +261,7 @@ cstring InputSources::toDebugString() const {
     for (auto line : contents) builder << line;
     builder << "---------------" << std::endl;
     for (auto lf : line_file_map) builder << lf.first << ": " << lf.second.toString() << std::endl;
-    return cstring(builder.str());
+    return builder.str();
 }
 
 ///////////////////////////////////////////////////
@@ -308,7 +310,7 @@ cstring SourceInfo::getLineNum() const {
 ////////////////////////////////////////////////////////
 
 cstring SourceFileLine::toString() const {
-    return Util::printf_format("%s(%d)", fileName.c_str(), sourceLine);
+    return absl::StrFormat("%s(%d)", fileName.string_view(), sourceLine);
 }
 
 }  // namespace Util
