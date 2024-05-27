@@ -31,11 +31,11 @@ struct set_exception_arg_t {
 	bit<32> vport
 }
 
-struct tbl_set_group_id_arg_t {
+struct tbl_0_set_group_id_arg_t {
 	bit<32> group_id
 }
 
-struct tbl_set_member_id_arg_t {
+struct tbl_0_set_member_id_arg_t {
 	bit<32> member_id
 }
 
@@ -67,23 +67,23 @@ action set_exception args instanceof set_exception_arg_t {
 	return
 }
 
-action tbl_set_group_id args instanceof tbl_set_group_id_arg_t {
+action tbl_0_set_group_id args instanceof tbl_0_set_group_id_arg_t {
 	mov m.MainControlT_as_group_id t.group_id
 	return
 }
 
-action tbl_set_member_id args instanceof tbl_set_member_id_arg_t {
+action tbl_0_set_member_id args instanceof tbl_0_set_member_id_arg_t {
 	mov m.MainControlT_as_member_id t.member_id
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
 	actions {
-		tbl_set_group_id
-		tbl_set_member_id
+		tbl_0_set_group_id
+		tbl_0_set_member_id
 		set_exception
 	}
 	default_action set_exception args vport 0x0 const
@@ -123,7 +123,7 @@ apply {
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	mov m.MainControlT_as_member_id 0x0
 	mov m.MainControlT_as_group_id 0xFFFFFFFF
-	table tbl
+	table tbl_0
 	jmpnh LABEL_END
 	jmpeq LABEL_END_0 m.MainControlT_as_group_id 0xFFFFFFFF
 	table as_sel

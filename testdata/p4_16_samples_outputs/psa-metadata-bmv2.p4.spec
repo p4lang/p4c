@@ -53,7 +53,7 @@ action set_output args instanceof set_output_arg_t {
 	return
 }
 
-table match_meta {
+table match_meta_0 {
 	key {
 		m.Ingress_key exact
 	}
@@ -81,7 +81,7 @@ apply {
 	mov m.Ingress_tmp_2 m.Ingress_tmp_1
 	and m.Ingress_tmp_2 0xFF
 	mov m.Ingress_key m.Ingress_tmp_2
-	table match_meta
+	table match_meta_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port

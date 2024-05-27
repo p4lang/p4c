@@ -229,7 +229,7 @@ class Substitutions : public SubstituteParameters {
     }
     const IR::Node *postorder(IR::P4Table *table) override {
         auto orig = getOriginal<IR::IDeclaration>();
-        cstring newName = renameMap->getName(orig);
+        auto newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << " (" << extName << ")");
         return new IR::P4Table(table->srcInfo, newName,
@@ -238,7 +238,7 @@ class Substitutions : public SubstituteParameters {
     }
     const IR::Node *postorder(IR::P4ValueSet *set) override {
         auto orig = getOriginal<IR::IDeclaration>();
-        cstring newName = renameMap->getName(orig);
+        auto newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
         return new IR::P4ValueSet(set->srcInfo, newName,
@@ -247,7 +247,7 @@ class Substitutions : public SubstituteParameters {
     }
     const IR::Node *postorder(IR::P4Action *action) override {
         auto orig = getOriginal<IR::IDeclaration>();
-        cstring newName = renameMap->getName(orig);
+        auto newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
         return new IR::P4Action(action->srcInfo, newName,
@@ -256,7 +256,7 @@ class Substitutions : public SubstituteParameters {
     }
     const IR::Node *postorder(IR::Declaration_Instance *instance) override {
         auto orig = getOriginal<IR::IDeclaration>();
-        cstring newName = renameMap->getName(orig);
+        auto newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
         instance->name = newName;
@@ -266,10 +266,10 @@ class Substitutions : public SubstituteParameters {
     }
     const IR::Node *postorder(IR::Declaration_Variable *decl) override {
         auto orig = getOriginal<IR::IDeclaration>();
-        cstring newName = renameMap->getName(orig);
+        auto newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
-        decl->name = IR::ID(decl->name.srcInfo, newName, decl->name.originalName);
+        decl->name = newName;
         IR::Annotations::addOrReplace(decl->annotations, IR::Annotation::nameAnnotation,
                                       new IR::StringLiteral(extName));
         return decl;

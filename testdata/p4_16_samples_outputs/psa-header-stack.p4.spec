@@ -35,8 +35,8 @@ struct EMPTY_M {
 	bit<16> psa_ingress_input_metadata_parser_error
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<48> MyIC_tbl_ethernet_srcAddr
-	bit<16> MyIC_tbl_key
+	bit<48> MyIC_tbl_0_ethernet_srcAddr
+	bit<16> MyIC_tbl_0_key
 }
 metadata instanceof EMPTY_M
 
@@ -49,10 +49,10 @@ action NoAction args none {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
-		m.MyIC_tbl_ethernet_srcAddr exact
-		m.MyIC_tbl_key exact
+		m.MyIC_tbl_0_ethernet_srcAddr exact
+		m.MyIC_tbl_0_key exact
 	}
 	actions {
 		NoAction
@@ -77,9 +77,9 @@ apply {
 	MYIP_PARSE_VLAN_TAG2 :	mov m.psa_ingress_input_metadata_parser_error 0x3
 	MYIP_ACCEPT :	jmpnv LABEL_FALSE h.ethernet
 	jmp LABEL_END_0
-	LABEL_FALSE :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	mov m.MyIC_tbl_key h.vlan_tag_0.ether_type
-	table tbl
+	LABEL_FALSE :	mov m.MyIC_tbl_0_ethernet_srcAddr h.ethernet.srcAddr
+	mov m.MyIC_tbl_0_key h.vlan_tag_0.ether_type
+	table tbl_0
 	LABEL_END_0 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.vlan_tag_0

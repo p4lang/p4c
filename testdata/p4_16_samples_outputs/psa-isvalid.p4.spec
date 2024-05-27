@@ -38,7 +38,7 @@ action NoAction args none {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
@@ -56,7 +56,7 @@ apply {
 	extract h.ethernet
 	jmpnv LABEL_FALSE h.ethernet
 	jmp LABEL_END
-	LABEL_FALSE :	table tbl
+	LABEL_FALSE :	table tbl_0
 	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop

@@ -37,7 +37,7 @@ action a1 args instanceof a1_arg_t {
 	return
 }
 
-table t1 {
+table t1_0 {
 	key {
 		h.ethernet.dstAddr exact
 	}
@@ -57,7 +57,7 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_CUSTOM :	extract h.custom
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.custom
-	table t1
+	table t1_0
 	LABEL_END :	emit h.ethernet
 	emit h.custom
 	tx m.pna_main_output_metadata_output_port

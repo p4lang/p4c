@@ -105,7 +105,7 @@ struct SelectionTable {
             max_n_members_per_group = n_members_expr->to<IR::Constant>()->asInt();
         }
         // Fetch associated member table handle
-        cstring actionDataTableName = tbl->name.originalName.replace("_sel", "");
+        cstring actionDataTableName = tbl->name.name.replace("_sel", "");
         auto actionTableAttr = ::P4::get(tableAttrmap, actionDataTableName);
         bound_to_action_data_table_handle = actionTableAttr.tableHandle;
     }
@@ -122,6 +122,7 @@ class DpdkContextGenerator : public Inspector {
     std::vector<const IR::Declaration_Instance *> externs;
 
     /// Maps holding table, extern and action attributes needed for context JSON.
+    /// Key these by internal names: inlined copies can share the same originalName.
     std::map<const cstring, struct TableAttributes> tableAttrmap;
     std::map<cstring, struct actionAttributes> actionAttrMap;
     std::map<cstring, struct externAttributes> externAttrMap;
@@ -150,7 +151,7 @@ class DpdkContextGenerator : public Inspector {
                            int dest_Width);
     void addActionParam(Util::JsonArray *paramJson, const cstring name, int bitWidth, int position,
                         int byte_array_index);
-    Util::JsonObject *addMatchAttributes(const IR::P4Table *table, const cstring ctrlName);
+    Util::JsonObject *addMatchAttributes(const IR::P4Table *table);
     void setActionAttributes(const IR::P4Table *table);
     void setDefaultActionHandle(const IR::P4Table *table);
     void CollectTablesAndSetAttributes();

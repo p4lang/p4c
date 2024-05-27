@@ -44,7 +44,7 @@ action default_route_drop args none {
 	return
 }
 
-table ipv4_da_lpm {
+table ipv4_da_lpm_0 {
 	key {
 		h.ipv4.dstAddr lpm
 	}
@@ -70,7 +70,7 @@ apply {
 	jmp LABEL_END_0
 	LABEL_TRUE_0 :	mov m.MainControlT_tmp h.ipv4.srcAddr
 	LABEL_END_0 :	jmpneq LABEL_END m.MainControlT_tmp h.ipv4.dstAddr
-	table ipv4_da_lpm
+	table ipv4_da_lpm_0
 	LABEL_END :	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port
