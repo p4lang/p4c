@@ -55,8 +55,8 @@ struct CallInfo : public IHasDbPrint {
 };
 
 class SymRenameMap {
-    std::map<const IR::IDeclaration *, cstring> internalName;
-    std::map<const IR::IDeclaration *, cstring> externalName;
+    std::map<const IR::IDeclaration *, IR::ID> internalName;
+    std::map<const IR::IDeclaration *, IR::ID> externalName;
 
  public:
     void setNewName(const IR::IDeclaration *decl, cstring name, cstring extName) {
@@ -64,16 +64,16 @@ class SymRenameMap {
         BUG_CHECK(!name.isNullOrEmpty() && !extName.isNullOrEmpty(), "Empty name");
         LOG3("setNewName " << dbp(decl) << " to " << name);
         if (internalName.find(decl) != internalName.end()) BUG("%1%: already renamed", decl);
-        internalName.emplace(decl, name);
-        externalName.emplace(decl, extName);
+        internalName.emplace(decl, IR::ID(name, decl->toString()));
+        externalName.emplace(decl, IR::ID(extName, decl->externalName()));
     }
-    cstring getName(const IR::IDeclaration *decl) const {
+    IR::ID getName(const IR::IDeclaration *decl) const {
         CHECK_NULL(decl);
         BUG_CHECK(internalName.find(decl) != internalName.end(), "%1%: no new name", decl);
         auto result = ::P4::get(internalName, decl);
         return result;
     }
-    cstring getExtName(const IR::IDeclaration *decl) const {
+    IR::ID getExtName(const IR::IDeclaration *decl) const {
         CHECK_NULL(decl);
         BUG_CHECK(externalName.find(decl) != externalName.end(), "%1%: no external name", decl);
         auto result = ::P4::get(externalName, decl);
