@@ -24,7 +24,8 @@ limitations under the License.
 #include <string_view>
 #include <type_traits>
 
-#include "big_int_fwd.h"
+// FIXME: Replace with big_int_fwd.h with Boost 1.84+
+#include "big_int.h"
 #include "cstring.h"
 
 class IHasDbPrint {
