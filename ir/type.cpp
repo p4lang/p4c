@@ -89,18 +89,17 @@ const Type_Bits *Type_Bits::get(int width, bool isSigned) {
 }
 
 const Type_Bits *Type_Bits::get(const Util::SourceInfo &si, int sz, bool isSigned) {
-    auto *result = new IR::Type_Bits(si, sz, isSigned);
     if (sz < 0) {
-        ::error(ErrorType::ERR_INVALID, "%1%: Width of type cannot be negative", result);
+        ::error(ErrorType::ERR_INVALID, "%1%Width %2% of type cannot be negative", si, sz);
         // Return a value that will not cause crashes later on
         return new IR::Type_Bits(si, 1024, isSigned);
     }
     if (sz == 0 && isSigned) {
-        ::error(ErrorType::ERR_INVALID, "%1%: Width of signed type cannot be zero", result);
+        ::error(ErrorType::ERR_INVALID, "%1%Width of signed type cannot be zero", si);
         // Return a value that will not cause crashes later on
         return new IR::Type_Bits(si, 1024, isSigned);
     }
-    return result;
+    return new IR::Type_Bits(si, sz, isSigned);
 }
 
 const Type_Bits *Type_Bits::get(const Util::SourceInfo &si, const IR::Expression *expression,
