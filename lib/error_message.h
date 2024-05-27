@@ -44,7 +44,7 @@ struct ErrorMessage {
 
     ErrorMessage() {}
     // Invoked from backwards compatible error_helper
-    ErrorMessage(std::string prefix, const Util::SourceInfo &info, std::string suffix)
+    ErrorMessage(std::string prefix, Util::SourceInfo info, std::string suffix)
         : prefix(std::move(prefix)), locations({info}), suffix(std::move(suffix)) {}
     // Invoked from error_reporter
     ErrorMessage(MessageType type, std::string prefix, std::string suffix)
@@ -70,7 +70,7 @@ struct ParserErrorMessage {
     std::string message;
 
     ParserErrorMessage(Util::SourceInfo loc, std::string msg)
-        : location(std::move(loc)), message(std::move(msg)) {}
+        : location(loc), message(std::move(msg)) {}
 
     std::string toString() const;
 };

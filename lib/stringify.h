@@ -28,21 +28,16 @@ limitations under the License.
 
 // convert values to cstrings
 namespace Util {
-// Check whether type T has a method with signature
-// cstring toString() const
-template <typename T>
-class HasToString final {
-    template <typename U, cstring (U::*)() const>
-    struct Check;
-    template <typename U>
-    static char func(Check<U, &U::toString> *);
-    template <typename U>
-    static int func(...);
 
- public:
-    typedef HasToString type;
-    enum { value = sizeof(func<T>(0)) == sizeof(char) };
-};
+/// SFINAE helper to check if given class has a `toString` method.
+template <class, class = void>
+struct has_toString : std::false_type {};
+
+template <class T>
+struct has_toString<T, std::void_t<decltype(std::declval<T>().toString())>> : std::true_type {};
+
+template <class T>
+inline constexpr bool has_toString_v = has_toString<T>::value;
 
 template <typename T, typename = decltype(std::to_string(std::declval<T>()))>
 cstring toString(T value) {
@@ -50,22 +45,22 @@ cstring toString(T value) {
 }
 
 template <typename T>
-auto toString(const T &value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
+auto toString(const T &value) -> typename std::enable_if_t<has_toString_v<T>, cstring> {
     return value.toString();
 }
 
 template <typename T>
-auto toString(T &value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
+auto toString(T &value) -> typename std::enable_if_t<has_toString_v<T>, cstring> {
     return value.toString();
 }
 
 template <typename T>
-auto toString(const T *value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
+auto toString(const T *value) -> typename std::enable_if_t<has_toString_v<T>, cstring> {
     return value->toString();
 }
 
 template <typename T>
-auto toString(T *value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
+auto toString(T *value) -> typename std::enable_if_t<has_toString_v<T>, cstring> {
     return value->toString();
 }
 

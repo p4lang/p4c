@@ -217,6 +217,9 @@ class IHasSourceInfo {
     virtual ~IHasSourceInfo() {}
 };
 
+template <class T>
+inline constexpr bool has_SourceInfo_v = std::is_base_of_v<Util::IHasSourceInfo, T>;
+
 /** A line in a source file */
 struct SourceFileLine {
     /// an empty filename indicates stdin
