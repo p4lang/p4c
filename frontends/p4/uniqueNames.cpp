@@ -87,9 +87,7 @@ UniqueParameters::UniqueParameters(ReferenceMap *refMap, TypeMap *typeMap)
 
 /**************************************************************************/
 
-IR::ID *RenameSymbols::getName() const {
-    return getName(getOriginal<IR::IDeclaration>());
-}
+IR::ID *RenameSymbols::getName() const { return getName(getOriginal<IR::IDeclaration>()); }
 
 IR::ID *RenameSymbols::getName(const IR::IDeclaration *decl) const {
     auto newName = renameMap->get(decl);
@@ -136,9 +134,7 @@ const IR::Node *RenameSymbols::postorder(IR::Declaration_Instance *decl) {
     return renameDeclWithNameAnno(decl);
 }
 
-const IR::Node *RenameSymbols::postorder(IR::P4Table *decl) {
-    return renameDeclWithNameAnno(decl);
-}
+const IR::Node *RenameSymbols::postorder(IR::P4Table *decl) { return renameDeclWithNameAnno(decl); }
 
 const IR::Node *RenameSymbols::postorder(IR::P4Action *decl) {
     return renameDeclWithNameAnno(decl);
