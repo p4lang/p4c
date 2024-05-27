@@ -42,7 +42,7 @@ class TypeNameSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
     }
     // When cloning the value of an argument we want to make a fresh
     // copy for each new InfInt type, and not share the same one.
-    const IR::Node *postorder(IR::Type_InfInt *) override { return new IR::Type_InfInt(); }
+    const IR::Node *postorder(IR::Type_InfInt *) override { return IR::Type_InfInt::get(); }
 };
 }  // namespace
 

@@ -27,7 +27,7 @@ static const IR::Expression *convertList(const IR::Expression *expression,
                                          const IR::Type *selectListType) {
     if (expression->is<IR::DefaultExpression>()) {
         int width = selectListType->width_bits();
-        auto type = new IR::Type_Bits(width, false);
+        auto type = IR::Type_Bits::get(width, false);
         return new IR::Mask(expression->srcInfo, new IR::Constant(type, 0, 16),
                             new IR::Constant(type, 0, 16));
     }
