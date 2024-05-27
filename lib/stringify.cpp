@@ -28,7 +28,7 @@ cstring toString(bool value) {
     return value ? cstring::literal("true") : cstring::literal("false");
 }
 
-cstring toString(std::string value) { return value; }
+cstring toString(const std::string &value) { return value; }
 
 cstring toString(const char *value) {
     if (value == nullptr) return cstring::literal("<nullptr>");

@@ -65,7 +65,7 @@ auto toString(T *value) -> typename std::enable_if_t<has_toString_v<T>, cstring>
 }
 
 cstring toString(bool value);
-cstring toString(std::string value);
+cstring toString(const std::string &value);
 cstring toString(const char *value);
 cstring toString(cstring value);
 cstring toString(std::string_view value);
