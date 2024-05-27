@@ -21,6 +21,7 @@ limitations under the License.
 
 #include "exceptions.h"
 #include "lib/log.h"
+#include "lib/stringify.h"
 
 void IHasDbPrint::print() const {
     dbprint(std::cout);
