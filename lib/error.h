@@ -53,8 +53,7 @@ inline void error(const char *format, Args &&...args) {
 
 /// Report errors of type kind. Requires that the node argument have source info.
 /// The message format is declared in the error catalog.
-template <class T, typename = typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>>,
-          class... Args>
+template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
 void error(const int kind, const char *format, const T *node, Args &&...args) {
     auto &context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
@@ -62,8 +61,7 @@ void error(const int kind, const char *format, const T *node, Args &&...args) {
 }
 
 /// This is similar to the above method, but also has a suffix
-template <class T, typename = typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>>,
-          class... Args>
+template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
 void errorWithSuffix(const int kind, const char *format, const char *suffix, const T *node,
                      Args &&...args) {
     auto &context = BaseCompileContext::get();
@@ -73,8 +71,7 @@ void errorWithSuffix(const int kind, const char *format, const char *suffix, con
 }
 
 /// The const ref variant of the above
-template <class T, typename = typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>>,
-          class... Args>
+template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
 void error(const int kind, const char *format, const T &node, Args &&...args) {
     error(kind, format, &node, std::forward<Args>(args)...);
 }
@@ -84,16 +81,14 @@ void error(const int kind, const char *format, const T &node, Args &&...args) {
 /// This allows incremental migration toward minimizing the number of errors and warnings
 /// reported when passes are repeated, as typed errors are filtered.
 // LEGACY: once we transition to error types, this should be deprecated
-template <class T, typename = typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>>,
-          class... Args>
+template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
 void error(const char *format, const T *node, Args &&...args) {
     error(ErrorType::LEGACY_ERROR, format, node, std::forward<Args>(args)...);
 }
 
 /// The const ref variant of the above
 // LEGACY: once we transition to error types, this should be deprecated
-template <class T, typename = typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>>,
-          class... Args>
+template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
 void error(const char *format, const T &node, Args &&...args) {
     error(ErrorType::LEGACY_ERROR, format, node, std::forward<Args>(args)...);
 }
@@ -119,8 +114,7 @@ inline void warning(const char *format, Args &&...args) {
 #endif
 
 /// Report warnings of type kind. Requires that the node argument have source info.
-template <class T, typename = typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>>,
-          class... Args>
+template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
 void warning(const int kind, const char *format, const T *node, Args &&...args) {
     auto &context = BaseCompileContext::get();
     auto action = context.getDefaultWarningDiagnosticAction();
@@ -128,8 +122,7 @@ void warning(const int kind, const char *format, const T *node, Args &&...args) 
 }
 
 /// The const ref variant of the above
-template <class T, typename = typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>>,
-          class... Args>
+template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
 void warning(const int kind, const char *format, const T &node, Args &&...args) {
     ::warning(kind, format, &node, std::forward<Args>(args)...);
 }
@@ -144,8 +137,7 @@ void warning(const int kind, const char *format, Args &&...args) {
 }
 
 /// Report info messages of type kind. Requires that the node argument have source info.
-template <class T, typename = typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>>,
-          class... Args>
+template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
 void info(const int kind, const char *format, const T *node, Args &&...args) {
     auto &context = BaseCompileContext::get();
     auto action = context.getDefaultInfoDiagnosticAction();
@@ -153,8 +145,7 @@ void info(const int kind, const char *format, const T *node, Args &&...args) {
 }
 
 /// The const ref variant of the above
-template <class T, typename = typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>>,
-          class... Args>
+template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
 void info(const int kind, const char *format, const T &node, Args &&...args) {
     ::info(kind, format, &node, std::forward<Args>(args)...);
 }

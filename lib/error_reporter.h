@@ -26,7 +26,6 @@ limitations under the License.
 #include <boost/format.hpp>
 
 #include "absl/strings/str_format.h"
-
 #include "bug_helper.h"
 #include "error_catalog.h"
 #include "error_helper.h"
@@ -109,9 +108,7 @@ class ErrorReporter {
         return ::error_helper(fmt, std::forward<Args>(args)...).toString();
     }
 
-    template <class T,
-              typename = typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>>,
-              typename... Args>
+    template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, typename... Args>
     void diagnose(DiagnosticAction action, const int errorCode, const char *format,
                   const char *suffix, const T *node, Args &&...args) {
         if (node && !error_reported(errorCode, node->getSourceInfo())) {
@@ -124,9 +121,7 @@ class ErrorReporter {
         }
     }
 
-    template <class T,
-              typename = typename std::enable_if_t<std::is_base_of_v<Util::IHasSourceInfo, T>>,
-              typename... Args>
+    template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, typename... Args>
     void diagnose(DiagnosticAction action, const int errorCode, const char *format,
                   const char *suffix, const T &node, Args &&...args) {
         diagnose(action, errorCode, format, suffix, &node, std::forward<Args>(args)...);
