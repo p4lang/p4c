@@ -24,6 +24,7 @@ set (IR_SRCS
   expression.cpp
   ir.cpp
   irutils.cpp
+  indexed_vector.cpp
   json_parser.cpp
   loop-visitor.cpp
   node.cpp
@@ -32,6 +33,7 @@ set (IR_SRCS
   type.cpp
   v1.cpp
   visitor.cpp
+  vector.cpp
   write_context.cpp
 )
 

@@ -215,6 +215,21 @@ class IndexedVector : public Vector<T> {
                                         Vector<T>);
 };
 
+/// These instantiations of Vector are created in ir-generated. Therefore we instantiate them
+/// explicitly to speed up compilation.
+extern template class IndexedVector<ActionListElement>;
+extern template class IndexedVector<Declaration>;
+extern template class IndexedVector<Declaration_ID>;
+extern template class IndexedVector<NamedExpression>;
+extern template class IndexedVector<Node>;
+extern template class IndexedVector<Parameter>;
+extern template class IndexedVector<ParserState>;
+extern template class IndexedVector<Property>;
+extern template class IndexedVector<SerEnumMember>;
+extern template class IndexedVector<StatOrDecl>;
+extern template class IndexedVector<StructField>;
+extern template class IndexedVector<Type_Var>;
+
 }  // namespace IR
 
 #endif /* IR_INDEXED_VECTOR_H_ */

@@ -209,6 +209,24 @@ class Vector : public VectorBase {
     DECLARE_TYPEINFO_WITH_DISCRIMINATOR(Vector<T>, NodeDiscriminator::VectorT, T, VectorBase);
 };
 
+/// These instantiations of Vector are created in ir-generated. Therefore we instantiate them
+/// explicitly to speed up compilation.
+extern template class Vector<Annotation>;
+extern template class Vector<AnnotationToken>;
+extern template class Vector<Argument>;
+extern template class Vector<ArgumentInfo>;
+extern template class Vector<CaseEntry>;
+extern template class Vector<Entry>;
+extern template class Vector<Expression>;
+extern template class Vector<KeyElement>;
+extern template class Vector<Method>;
+extern template class Vector<NamedExpression>;
+extern template class Vector<Node>;
+extern template class Vector<Primitive>;
+extern template class Vector<SelectCase>;
+extern template class Vector<SwitchCase>;
+extern template class Vector<Type>;
+
 }  // namespace IR
 
 // XXX(seth): We use this namespace to hide our get() overloads from ADL. GCC
