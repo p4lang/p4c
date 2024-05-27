@@ -92,7 +92,7 @@ TEST(UtilSourceFile, SourceInfo) {
     SourceInfo t2 = SourceInfo(&sources, t2_s, t2_e);
 
     SourceInfo span = t1 + t2;
-    cstring str = span.toDebugString();
+    cstring str = span.toString();
     EXPECT_EQ("(1:1)-(2:2)", str);
 
     SourceInfo invalid;

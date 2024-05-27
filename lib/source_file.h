@@ -25,6 +25,7 @@ limitations under the License.
 #include <vector>
 
 #include "cstring.h"
+#include "stringify.h"
 
 // GTest
 #ifdef P4C_GTEST_ENABLED
@@ -34,13 +35,6 @@ limitations under the License.
 namespace Test {
 class UtilSourceFile;
 }
-
-class IHasDbPrint {
- public:
-    virtual void dbprint(std::ostream &out) const = 0;
-    void print() const;  // useful in the debugger
-    virtual ~IHasDbPrint() = default;
-};
 
 namespace Util {
 struct SourceFileLine;
@@ -170,9 +164,9 @@ class SourceInfo final {
 
     bool operator==(const SourceInfo &rhs) const { return start == rhs.start && end == rhs.end; }
 
-    cstring toDebugString() const;
+    cstring toString() const;
 
-    void dbprint(std::ostream &out) const { out << this->toDebugString(); }
+    void dbprint(std::ostream &out) const { out << this->toString(); }
 
     cstring toSourceFragment(bool useMarker = true) const;
     cstring toBriefSourceFragment() const;
