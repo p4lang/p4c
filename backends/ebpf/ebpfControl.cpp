@@ -271,7 +271,7 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument> *args) {
 
     // Increment header pointer
     builder->emitIndent();
-    builder->appendFormat("%s += BYTES(%s);", program->headerStartVar.c_str(), width);
+    builder->appendFormat("%s += BYTES(%d);", program->headerStartVar.c_str(), width);
     builder->newline();
 
     builder->blockEnd(true);

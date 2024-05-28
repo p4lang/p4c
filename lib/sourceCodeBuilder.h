@@ -78,15 +78,9 @@ class SourceCodeBuilder {
     }
 
     template <typename... Args>
-    void appendFormat(const char *format, Args &&...args) {
+    void appendFormat(const absl::FormatSpec<Args...> &format, Args &&...args) {
         // FIXME: Sink directly to cord
-        // FIXME: Forward format to abseil, so we'd end with static compile-time check
-        std::string out;
-        if (!absl::FormatUntyped(&out, absl::UntypedFormatSpec(format),
-                                 {absl::FormatArg(args)...})) {
-            BUG("Failed to format string");
-        }
-        append(out);
+        append(absl::StrFormat(format, std::forward<Args>(args)...));
     }
     void append(unsigned u) { appendFormat("%d", u); }
     void append(int u) { appendFormat("%d", u); }

@@ -655,8 +655,7 @@ void TCEgressPipeline::emitTrafficManager(CodeBuilder *builder) {
     builder->appendFormat("%s->packet_path = RECIRCULATE", compilerGlobalMetadata);
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("return bpf_redirect(PSA_PORT_RECIRCULATE, BPF_F_INGRESS)",
-                          contextVar.c_str());
+    builder->appendFormat("return bpf_redirect(PSA_PORT_RECIRCULATE, BPF_F_INGRESS)");
     builder->endOfStatement(true);
     builder->blockEnd(true);
 
