@@ -31,6 +31,7 @@ limitations under the License.
 #include "lib/path.h"
 
 namespace P4V1 {
+using namespace P4::literals;
 
 static const IR::IDeclaration *getFirstDeclaration(const IR::Vector<IR::Node> *nodes,
                                                    cstring name) {
@@ -90,7 +91,7 @@ const IR::Annotations *ProgramStructure::addNameAnnotation(cstring name,
 
 const IR::Annotations *ProgramStructure::addGlobalNameAnnotation(cstring name,
                                                                  const IR::Annotations *annos) {
-    return addNameAnnotation(cstring(".") + name, annos);
+    return addNameAnnotation("."_cs + name, annos);
 }
 
 cstring ProgramStructure::makeUniqueName(cstring base) {

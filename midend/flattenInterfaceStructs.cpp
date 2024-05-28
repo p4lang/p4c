@@ -17,6 +17,7 @@ limitations under the License.
 #include "flattenInterfaceStructs.h"
 
 namespace P4 {
+using namespace literals;
 
 namespace {
 static const IR::Type_Struct *isNestedStruct(const P4::TypeMap *typeMap, const IR::Type *type) {
@@ -73,7 +74,7 @@ const IR::Node *ReplaceStructs::postorder(IR::Member *expression) {
     cstring prefix = "";
     while (auto mem = e->to<IR::Member>()) {
         e = mem->expr;
-        prefix = cstring(".") + mem->member + prefix;
+        prefix = "."_cs + mem->member + prefix;
     }
     auto pe = e->to<IR::PathExpression>();
     if (pe == nullptr) return expression;

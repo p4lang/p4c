@@ -70,6 +70,13 @@ limitations under the License.
  * This is convenient, but in performance-sensitive code it's good to be aware
  * that mixing the two types of strings can trigger a lot of implicit copies.
  */
+
+class cstring;
+
+namespace P4::literals {
+inline cstring operator""_cs(const char *str, std::size_t len);
+};
+
 class cstring {
     const char *str = nullptr;
 
@@ -150,6 +157,8 @@ class cstring {
 
     // string is literal
     void construct_from_literal(const char *string, std::size_t length);
+
+    friend cstring P4::literals::operator""_cs(const char *str, std::size_t len);
 
  public:
     /// @return a version of the string where all necessary characters
@@ -384,7 +393,11 @@ namespace P4::literals {
 /// A user-provided literal suffix to allow creation of cstring from literals: "foo"_cs.
 /// Note that the C++ standard mandates that all user-defined literal suffixes defined outside of
 /// the standard library must start with underscore.
-inline cstring operator""_cs(const char *str, std::size_t len) { return cstring(str, len); }
+inline cstring operator""_cs(const char *str, std::size_t len) {
+    cstring result;
+    result.construct_from_literal(str, len);
+    return result;
+}
 }  // namespace P4::literals
 
 namespace std {

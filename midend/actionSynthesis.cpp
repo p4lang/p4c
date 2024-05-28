@@ -21,6 +21,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 const IR::Node *DoMoveActionsToTables::postorder(IR::MethodCallStatement *statement) {
     auto mi = MethodInstance::resolve(statement, refMap, typeMap);
     if (!mi->is<ActionCall>()) return statement;
@@ -66,7 +68,7 @@ const IR::Node *DoMoveActionsToTables::postorder(IR::MethodCallStatement *statem
     // List of table properties
     auto props = new IR::TableProperties({prop, defprop});
     // Synthesize a new table
-    cstring tblName = IR::ID(refMap->newName(cstring("tbl_") + ac->action->name.name), nullptr);
+    cstring tblName = IR::ID(refMap->newName("tbl_"_cs + ac->action->name.name), nullptr);
 
     auto annos = new IR::Annotations();
     annos->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));

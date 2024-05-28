@@ -179,7 +179,7 @@ class Type_Varbits : Type_Base {
     static Type_Varbits get(const Util::SourceInfo &si, int size);
     static Type_Varbits get(int size);
     static Type_Varbits get();
-    toString{ return cstring("varbit<") + Util::toString(size) + ">"; }
+    toString{ return "varbit<"_cs + Util::toString(size) + ">"_cs; }
     dbprint { out << "varbit<" << size << ">"; }
 }
 
@@ -385,7 +385,7 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
 
 class Type_Struct : Type_StructLike {
 #nodbprint
-    toString{ return cstring("struct ") + externalName(); }
+    toString{ return "struct "_cs + externalName(); }
 }
 
 /// This is the type of a struct-valued expression whose
@@ -397,7 +397,7 @@ class Type_UnknownStruct : Type_StructLike {
 
 class Type_HeaderUnion : Type_StructLike {
 #nodbprint
-    toString{ return cstring("header_union ") + externalName(); }
+    toString{ return "header_union "_cs + externalName(); }
     // this makes some assumptions on padding
     int width_bits() const override {
         int rv = 0;
@@ -419,13 +419,13 @@ class Type_Header : Type_StructLike {
     static const cstring setInvalid;
     static const cstring isValid;
 #nodbprint
-    toString{ return cstring("header ") + externalName(); }
+    toString{ return "header "_cs + externalName(); }
 }
 
 class Type_Set : Type {
     Type elementType;
     dbprint{ Node::dbprint(out); out << "<" << elementType << ">"; }
-    toString { return cstring("set<") + elementType->toString() + ">"; }
+    toString { return "set<"_cs + elementType->toString() + ">"_cs; }
     const Type* getP4Type() const override { return nullptr; }
     int width_bits() const override {
         /// returning the width of the set elements, not the set itself, which doesn't
@@ -454,6 +454,7 @@ abstract Type_BaseList : Type, Type_Indexed {
         }
         return rv; }
     cstring asString(const char* name) const {
+        // FIXME: simplify concatenation
         std::string result = name;
         result += "<";
         bool first = true;
@@ -492,8 +493,7 @@ class Type_P4List : Type {
     Type elementType;
     const Type* getP4Type() const override;
     toString{
-        std::string result = "list<" + elementType->toString() + ">";
-        return result;
+        return "list<"_cs + elementType->toString() + ">"_cs;
     }
 }
 
@@ -515,7 +515,7 @@ class Type_Package : Type_ArchBlock, IContainer, ISimpleNamespace {
     ParameterList constructorParams;
     Type_Method getConstructorMethodType() const override;
     ParameterList getConstructorParameters() const override { return constructorParams; }
-    toString{ return cstring("package ") + externalName(); }
+    toString{ return "package "_cs + externalName(); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return typeParameters->getDeclarations()->concat(constructorParams->getDeclarations()); }
     IDeclaration getDeclByName(cstring name) const override {
@@ -528,14 +528,14 @@ class Type_Parser : Type_ArchBlock, IApply {
     ParameterList applyParams;
     Type_Method getApplyMethodType() const override;
     ParameterList getApplyParameters() const override { return applyParams; }
-    toString { return cstring("parser ") + externalName(); }
+    toString { return "parser "_cs + externalName(); }
 }
 
 class Type_Control : Type_ArchBlock, IApply {
     ParameterList applyParams;
     Type_Method getApplyMethodType() const override;
     ParameterList getApplyParameters() const override { return applyParams; }
-    toString { return cstring("control ") + externalName(); }
+    toString { return "control "_cs + externalName(); }
 }
 
 /// A type referred by name

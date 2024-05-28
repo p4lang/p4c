@@ -20,6 +20,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 namespace {
 
 class ParamCloner : public CloneExpressions {
@@ -41,7 +43,7 @@ const IR::Node *TagGlobalActions::preorder(IR::P4Action *action) {
     if (findContext<IR::P4Control>() == nullptr) {
         auto annos = action->annotations;
         if (annos == nullptr) annos = IR::Annotations::empty;
-        cstring name = cstring(".") + action->name;
+        cstring name = "."_cs + action->name;
         annos = annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
                                           new IR::StringLiteral(name), false);
         action->annotations = annos;

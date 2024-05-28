@@ -24,6 +24,8 @@ limitations under the License.
 
 namespace Util {
 
+using namespace P4::literals;
+
 class NamedSymbol : public ICastable {
  protected:
     Util::SourceInfo sourceInfo;
@@ -93,7 +95,7 @@ class Namespace : public NamedSymbol {
         if (it == contents.end()) return nullptr;
         return it->second;
     }
-    cstring toString() const override { return cstring("Namespace ") + getName(); }
+    cstring toString() const override { return "Namespace "_cs + getName(); }
     void dump(std::stringstream &into, unsigned indent) const override {
         std::string s(indent, ' ');
         into << s;
@@ -116,7 +118,7 @@ class Object : public NamedSymbol {
 
  public:
     Object(cstring name, Util::SourceInfo si) : NamedSymbol(name, si) {}
-    cstring toString() const override { return cstring("Object ") + getName(); }
+    cstring toString() const override { return cstring::literal("Object ") + getName(); }
     const Namespace *symNamespace() const override { return typeNamespace; }
     void setNamespace(const Namespace *ns) { typeNamespace = ns; }
 
@@ -126,7 +128,7 @@ class Object : public NamedSymbol {
 class SimpleType : public NamedSymbol {
  public:
     SimpleType(cstring name, Util::SourceInfo si) : NamedSymbol(name, si) {}
-    cstring toString() const override { return cstring("SimpleType ") + getName(); }
+    cstring toString() const override { return "SimpleType "_cs + getName(); }
 
     DECLARE_TYPEINFO(SimpleType, NamedSymbol);
 };
@@ -136,7 +138,7 @@ class ContainerType : public Namespace {
  public:
     ContainerType(cstring name, Util::SourceInfo si, bool allowDuplicates)
         : Namespace(name, si, allowDuplicates) {}
-    cstring toString() const override { return cstring("ContainerType ") + getName(); }
+    cstring toString() const override { return "ContainerType "_cs + getName(); }
 
     DECLARE_TYPEINFO(ContainerType, Namespace);
 };

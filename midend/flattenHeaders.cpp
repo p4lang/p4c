@@ -18,6 +18,7 @@ limitations under the License.
 #include "flattenHeaders.h"
 
 namespace P4 {
+using namespace literals;
 
 void FindHeaderTypesToReplace::createReplacement(const IR::Type_Header *type,
                                                  AnnotationSelectionPolicy *policy) {
@@ -67,7 +68,7 @@ const IR::Node *ReplaceHeaders::postorder(IR::Member *expression) {
     const IR::Type_Header *h = nullptr;
     while (auto mem = e->to<IR::Member>()) {
         e = mem->expr;
-        prefix = cstring(".") + mem->member + prefix;
+        prefix = "."_cs + mem->member + prefix;
         auto type = typeMap->getType(e, true);
         if ((h = type->to<IR::Type_Header>())) break;
     }

@@ -191,13 +191,13 @@ class Path {
     toString{
         // This is the ORIGINAL name the user used
         if (absolute)
-            return cstring(".") + name.toString();
+            return "."_cs + name.toString();
         return name.toString();
     }
     cstring asString() const {
         // The CURRENT internal name
         if (absolute)
-            return cstring(".") + name;
+            return "."_cs + name;
         return name;
     }
     dbprint { out << name; }
@@ -289,7 +289,7 @@ class Annotation {
     static const cstring matchAnnotation;  /// Match annotation (for value sets).
     static const cstring fieldListAnnotation;  /// Used for recirculate, etc.
     static const cstring debugLoggingAnnotation;  /// Used by compiler implementer to limit debug log to the annotated IR context.
-    toString{ return cstring("@") + name; }
+    toString{ return "@"_cs + name; }
     validate{
         BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name");
         BUG_CHECK(!(needsParsing && !expr.empty()),
