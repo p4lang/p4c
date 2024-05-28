@@ -44,9 +44,7 @@ bool ActionTranslationVisitor::isActionParameter(const IR::PathExpression *expre
 
 cstring ActionTranslationVisitor::getParamInstanceName(const IR::Expression *expression) const {
     cstring actionName = EBPFObject::externalName(action);
-    auto paramStr =
-        Util::printf_format("%s->u.%s.%s", valueName, actionName, expression->toString());
-    return paramStr;
+    return absl::StrFormat("%s->u.%s.%s", valueName, actionName, expression->toString());
 }
 
 bool ActionTranslationVisitor::preorder(const IR::P4Action *act) {
@@ -512,12 +510,12 @@ void EBPFTable::emitKey(CodeBuilder *builder, cstring keyName) {
 
         cstring msgStr, varStr;
         if (memcpy) {
-            msgStr = Util::printf_format("Control: key %s", c->expression->toString());
+            msgStr = absl::StrFormat("Control: key %s", c->expression->toString());
             builder->target->emitTraceMessage(builder, msgStr.c_str());
         } else {
-            msgStr = Util::printf_format("Control: key %s=0x%%llx", c->expression->toString());
-            varStr = Util::printf_format("(unsigned long long) %s.%s", keyName.c_str(),
-                                         fieldName.c_str());
+            msgStr = absl::StrFormat("Control: key %s=0x%%llx", c->expression->toString());
+            varStr =
+                absl::StrFormat("(unsigned long long) %s.%s", keyName.c_str(), fieldName.c_str());
             builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, varStr.c_str());
         }
     }
@@ -538,21 +536,20 @@ void EBPFTable::emitAction(CodeBuilder *builder, cstring valueName, cstring acti
         builder->newline();
         builder->increaseIndent();
 
-        msgStr = Util::printf_format("Control: executing action %s", name);
+        msgStr = absl::StrFormat("Control: executing action %s", name);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
         for (auto param : *(action->parameters)) {
             auto etype = EBPFTypeFactory::instance->create(param->type);
             unsigned width = etype->as<IHasWidth>().widthInBits();
 
             if (width <= 64) {
-                convStr = Util::printf_format("(unsigned long long) (%s->u.%s.%s)", valueName, name,
-                                              param->toString());
-                msgStr = Util::printf_format("Control: param %s=0x%%llx (%d bits)",
-                                             param->toString(), width);
+                convStr = absl::StrFormat("(unsigned long long) (%s->u.%s.%s)", valueName, name,
+                                          param->toString());
+                msgStr = absl::StrFormat("Control: param %s=0x%%llx (%d bits)", param->toString(),
+                                         width);
                 builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, convStr.c_str());
             } else {
-                msgStr =
-                    Util::printf_format("Control: param %s (%d bits)", param->toString(), width);
+                msgStr = absl::StrFormat("Control: param %s (%d bits)", param->toString(), width);
                 builder->target->emitTraceMessage(builder, msgStr.c_str());
             }
         }
@@ -782,7 +779,7 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
     builder->emitIndent();
     builder->appendFormat("for (int i = 0; i < sizeof(struct %s_mask) / 4; i++) ", keyTypeName);
     builder->blockStart();
-    cstring str = Util::printf_format("*(((__u32 *) &%s) + i)", key);
+    cstring str = absl::StrFormat("*(((__u32 *) &%s) + i)", key);
     builder->target->emitTraceMessage(
         builder, "Control: [Ternary] Masking next 4 bytes of %llx with mask %llx", 2, str,
         "mask[i]");
@@ -806,8 +803,9 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
     builder->append("if (!tuple) ");
     builder->blockStart();
     builder->target->emitTraceMessage(
-        builder, Util::printf_format("Control: Tuples map %s not found during ternary lookup. Bug?",
-                                     instanceName));
+        builder, absl::StrFormat("Control: Tuples map %s not found during ternary lookup. Bug?",
+                                 instanceName)
+                     .c_str());
     builder->emitIndent();
     builder->append("break;");
     builder->newline();
@@ -861,7 +859,7 @@ cstring EBPFTable::p4ActionToActionIDName(const IR::P4Action *action) const {
 
     cstring actionName = EBPFObject::externalName(action);
     cstring tableInstance = dataMapName;
-    return Util::printf_format("%s_ACT_%s", tableInstance.toUpper(), actionName.toUpper());
+    return absl::StrFormat("%s_ACT_%s", tableInstance.toUpper(), actionName.toUpper());
 }
 
 /// As ternary has precedence over lpm, this function checks if any
@@ -1145,7 +1143,7 @@ void EBPFValueSet::emitTypes(CodeBuilder *builder) {
     } else if (auto tuple = elemType->to<IR::Type_Tuple>()) {
         int i = 0;
         for (auto field : tuple->components) {
-            cstring name = Util::printf_format("field%d", i++);
+            cstring name = absl::StrFormat("field%d", i++);
             fieldEmitter(field, name);
             fieldNames.emplace_back(std::make_pair(name, field));
         }
@@ -1191,7 +1189,7 @@ void EBPFValueSet::emitKeyInitializer(CodeBuilder *builder, const IR::SelectExpr
             }
 
             cstring dst =
-                Util::printf_format("%s.%s", keyVarName.c_str(), fieldNames.at(i).first.c_str());
+                absl::StrFormat("%s.%s", keyVarName.c_str(), fieldNames.at(i).first.c_str());
             builder->appendFormat("__builtin_memcpy(&%s, &(", dst.c_str());
             codeGen->visit(keyExpr);
             builder->appendFormat("[0]), sizeof(%s))", dst.c_str());

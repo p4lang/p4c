@@ -143,7 +143,7 @@ bool ControlBodyTranslator::preorder(const IR::MethodCallExpression *expression)
         BUG_CHECK(expression->arguments->size() == 0, "%1%: unexpected arguments for action call",
                   expression);
         cstring msg =
-            Util::printf_format("Control: explicit calling action %s()", ac->action->name.name);
+            absl::StrFormat("Control: explicit calling action %s()", ac->action->name.name);
         builder->target->emitTraceMessage(builder, msg.c_str());
         visit(ac->action->body);
         return false;
@@ -304,7 +304,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
     auto table = control->getTable(method->object->getName().name);
     BUG_CHECK(table != nullptr, "No table for %1%", method->expr);
 
-    msgStr = Util::printf_format("Control: applying %s", method->object->getName().name);
+    msgStr = absl::StrFormat("Control: applying %s", method->object->getName().name);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
@@ -393,7 +393,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
     builder->blockEnd(true);
     builder->blockEnd(true);
 
-    msgStr = Util::printf_format("Control: %s applied", method->object->getName().name);
+    msgStr = absl::StrFormat("Control: %s applied", method->object->getName().name);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 }
 

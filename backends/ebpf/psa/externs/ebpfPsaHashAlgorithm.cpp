@@ -296,11 +296,11 @@ void CRCChecksumAlgorithm::emitAddData(CodeBuilder *builder, const ArgumentsList
         }
     }
 
-    cstring varStr = Util::printf_format("(u64) %s", registerVar.c_str());
+    cstring varStr = absl::StrFormat("(u64) %s", registerVar.c_str());
     builder->target->emitTraceMessage(builder, "CRC: checksum state: %llx", 1, varStr.c_str());
 
     cstring final_crc =
-        Util::printf_format("(u64) %s(%s)", finalizeMethod.c_str(), registerVar.c_str());
+        absl::StrFormat("(u64) %s(%s)", finalizeMethod.c_str(), registerVar.c_str());
     builder->target->emitTraceMessage(builder, "CRC: final checksum: %llx", 1, final_crc.c_str());
 
     builder->blockEnd(true);

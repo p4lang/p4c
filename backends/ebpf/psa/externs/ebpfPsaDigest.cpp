@@ -82,7 +82,7 @@ class EBPFDigestPSAValueVisitor : public CodeGenInspector {
 
         for (const auto *f : se->components) {
             auto type = typeMap->getType(f->expression);
-            cstring path = Util::printf_format("%s.%s", tmpVar, f->name.name);
+            cstring path = absl::StrFormat("%s.%s", tmpVar, f->name.name);
             codegen->emitAssignStatement(type, nullptr, path, f->expression);
             builder->newline();
         }
