@@ -1327,8 +1327,8 @@ bool ToP4::preorder(const IR::Annotations *a) {
 bool ToP4::preorder(const IR::Annotation *a) {
     builder.append("@");
     builder.append(a->name);
-    char open = a->structured ? '[' : '(';
-    char close = a->structured ? ']' : ')';
+    const char *open = a->structured ? "[" : "(";
+    const char *close = a->structured ? "]" : ")";
     if (!a->expr.empty()) {
         builder.append(open);
         setVecSep(", ");

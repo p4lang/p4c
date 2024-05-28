@@ -19,8 +19,8 @@ limitations under the License.
 
 #include <ctype.h>
 
-#include <sstream>
-
+#include "absl/strings/cord.h"
+#include "absl/strings/str_format.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/stringify.h"
@@ -30,8 +30,7 @@ class SourceCodeBuilder {
     int indentLevel;  // current indent level
     unsigned indentAmount;
 
-    std::stringstream buffer;
-    const std::string nl = "\n";
+    absl::Cord buffer;
     bool endsInSpace;
     bool supressSemi = false;
 
@@ -44,11 +43,11 @@ class SourceCodeBuilder {
         if (indentLevel < 0) BUG("Negative indent");
     }
     void newline() {
-        buffer << nl;
+        buffer.Append("\n");
         endsInSpace = true;
     }
     void spc() {
-        if (!endsInSpace) buffer << " ";
+        if (!endsInSpace) buffer.Append(" ");
         endsInSpace = true;
     }
 
@@ -63,25 +62,31 @@ class SourceCodeBuilder {
     }
     void append(const std::string &str) {
         if (str.empty()) return;
-        endsInSpace = ::isspace(str.at(str.size() - 1));
-        buffer << str;
+        endsInSpace = ::isspace(str.back());
+        buffer.Append(str);
     }
+    [[deprecated("use string / char* version instead")]]
     void append(char c) {
-        endsInSpace = ::isspace(c);
-        buffer << c;
+        std::string str(1, c);
+        append(str);
     }
     void append(const char *str) {
         if (str == nullptr) BUG("Null argument to append");
         if (strlen(str) == 0) return;
         endsInSpace = ::isspace(str[strlen(str) - 1]);
-        buffer << str;
+        buffer.Append(str);
     }
-    void appendFormat(const char *format, ...) {
-        va_list ap;
-        va_start(ap, format);
-        cstring str = Util::vprintf_format(format, ap);
-        va_end(ap);
-        append(str);
+
+    template <typename... Args>
+    void appendFormat(const char *format, Args &&...args) {
+        // FIXME: Sink directly to cord
+        // FIXME: Forward format to abseil, so we'd end with static compile-time check
+        std::string out;
+        if (!absl::FormatUntyped(&out, absl::UntypedFormatSpec(format),
+                                 {absl::FormatArg(args)...})) {
+            BUG("Failed to format string");
+        }
+        append(out);
     }
     void append(unsigned u) { appendFormat("%d", u); }
     void append(int u) { appendFormat("%d", u); }
@@ -100,7 +105,7 @@ class SourceCodeBuilder {
     }
 
     void emitIndent() {
-        buffer << std::string(indentLevel, ' ');
+        buffer.Append(std::string(indentLevel, ' '));
         if (indentLevel > 0) endsInSpace = true;
     }
 
@@ -111,7 +116,7 @@ class SourceCodeBuilder {
         if (nl) newline();
     }
 
-    std::string toString() const { return buffer.str(); }
+    std::string toString() const { return std::string(buffer); }
     void commentStart() { append("/* "); }
     void commentEnd() { append(" */"); }
     bool lastIsSpace() const { return endsInSpace; }
