@@ -274,14 +274,24 @@ bool StateTranslationVisitor::preorder(const IR::SelectCase *selectCase) {
     return false;
 }
 
-void StateTranslationVisitor::compileExtractField(const IR::Expression *expr,
-                                                  const IR::StructField *field,
-                                                  unsigned hdrOffsetBits, EBPFType *type) {
+unsigned int StateTranslationVisitor::compileExtractField(const IR::Expression *expr,
+                                                          const IR::StructField *field,
+                                                          unsigned hdrOffsetBits, EBPFType *type,
+                                                          const char *sizecode) {
     unsigned alignment = hdrOffsetBits % 8;
     unsigned widthToExtract = type->as<IHasWidth>().widthInBits();
     auto program = state->parser->program;
     cstring msgStr;
     cstring fieldName = field->name.name;
+
+    builder->appendFormat("/* EBPF::StateTranslationVisitor::compileExtractField: field %s",
+                          fieldName);
+    if (type->is<EBPF::EBPFScalarType>()) {
+        builder->appendFormat(" (%s scalar)",
+                              type->as<EBPF::EBPFScalarType>().isvariable ? "variable" : "fixed");
+    }
+    if (sizecode) builder->appendFormat("\n%s", sizecode);
+    builder->appendFormat("*/");
 
     msgStr = Util::printf_format("Parser: extracting field %s", fieldName);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
@@ -399,15 +409,127 @@ void StateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         msgStr = Util::printf_format("Parser: extracted %s (%u bits)", fieldName, widthToExtract);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
     }
+    return (0);
 }
 
-void StateTranslationVisitor::compileExtract(const IR::Expression *destination) {
+/*
+ * There has GOT to be a better way to do this, but, given the
+ *  interfaces the rest of the code exports, I don't see anything much
+ *  better.  Maybe I've just missed something.
+ *
+ * My thinking is that ->toString returns a P4(ish) decompilation of
+ *  the Expression, so we can't use that.  The only thing I know of
+ *  that generates C code is to visit() it.  But that outputs to a
+ *  SourceCodeBuilder.  I tried using a CodeBuilder, but this->builder
+ *  is typed as an EBPF::CodeBuilder, so we can't swap a
+ *  Util::SourceCodeBuilder in instead.  So we create a relatively
+ *  transient EBPF::CodeBuilder and output to that (by swapping it into
+ *  this->builder for the duration).  This means we need a Target to
+ *  pass when creating the EBPF::CodeBuilder, and Target is a virtual
+ *  base class, demanding implementations for a bunch of methods we
+ *  have no use for.  Annoying, but nothing worse; we just provide
+ *  dummies that do nothing.
+ *
+ * The returned string is on the heap, allocated with strdup().  It
+ *  would probably be better to make this a std::string or some such,
+ *  but I'm not good enough at C++ to get that right.
+ *
+ * Fortunately, this->builder is a pointer, or I'd have to worry about
+ *  copies and moves and try to get _that_ right.  But pointers are
+ *  lightweight and totally copyable without issue.
+ */
+char *StateTranslationVisitor::visit_to_string(const IR::Expression *expr) {
+    class StringTarget : public Target {
+     public:
+        StringTarget(cstring n) : Target(n) {}
+#define VB1(a) \
+    { (void)a; }
+#define VB2(a, b) \
+    {             \
+        (void)a;  \
+        (void)b;  \
+    }
+#define VB3(a, b, c) \
+    {                \
+        (void)a;     \
+        (void)b;     \
+        (void)c;     \
+    }
+#define VB4(a, b, c, d) \
+    {                   \
+        (void)a;        \
+        (void)b;        \
+        (void)c;        \
+        (void)d;        \
+    }
+#define VB6(a, b, c, d, e, f) \
+    {                         \
+        (void)a;              \
+        (void)b;              \
+        (void)c;              \
+        (void)d;              \
+        (void)e;              \
+        (void)f;              \
+    }
+#define SB0() \
+    { return (""); }
+#define SB1(a)       \
+    {                \
+        (void)a;     \
+        return (""); \
+    }
+        virtual void emitLicense(Util::SourceCodeBuilder *b, cstring l) const
+            VB2(b, l) virtual void emitCodeSection(Util::SourceCodeBuilder *b, cstring n) const
+            VB2(b, n) virtual void emitIncludes(Util::SourceCodeBuilder *b) const
+            VB1(b) virtual void emitResizeBuffer(Util::SourceCodeBuilder *b, cstring bf,
+                                                 cstring o) const
+            VB3(b, bf, o) virtual void emitTableLookup(Util::SourceCodeBuilder *b, cstring n,
+                                                       cstring k, cstring v) const
+            VB4(b, n, k, v) virtual void emitTableUpdate(Util::SourceCodeBuilder *b, cstring n,
+                                                         cstring k, cstring v) const
+            VB4(b, n, k, v) virtual void emitUserTableUpdate(Util::SourceCodeBuilder *b, cstring n,
+                                                             cstring k, cstring v) const
+            VB4(b, n, k, v) virtual void emitTableDecl(Util::SourceCodeBuilder *b, cstring tn,
+                                                       TableKind k, cstring kt, cstring vt,
+                                                       unsigned int sz) const
+            VB6(b, tn, k, kt, vt, sz) virtual void emitMain(Util::SourceCodeBuilder *b, cstring fn,
+                                                            cstring an) const
+            VB3(b, fn, an) virtual cstring dataOffset(cstring b) const SB1(b) virtual cstring
+            dataEnd(cstring b) const SB1(b) virtual cstring dataLength(cstring b) const
+            SB1(b) virtual cstring forwardReturnCode() const SB0() virtual cstring
+            dropReturnCode() const SB0() virtual cstring abortReturnCode() const
+            SB0() virtual cstring sysMapPath() const SB0() virtual cstring
+            packetDescriptorType() const SB0()
+#undef VB1
+#undef VB2
+#undef VB3
+#undef VB4
+#undef VB6
+#undef SB0
+#undef SB1
+    };
+    StringTarget t = StringTarget("stringizer");
+    auto save = builder;
+    builder = new EBPF::CodeBuilder(&t);
+    visit(expr);
+    auto s = builder->toString();
+    delete builder;
+    builder = save;
+    return (strdup(s.c_str()));
+}
+
+void StateTranslationVisitor::compileExtract(const IR::Expression *dest,
+                                             const IR::Expression *varsize) {
+    builder->appendFormat("//compileExtract\n");
+    builder->appendFormat("// compileExtract: dest = %s\n", dest->toString());
+    builder->appendFormat("// compileExtract: varsize = %s\n",
+                          varsize ? varsize->toString() : "nil");
     cstring msgStr;
-    auto type = state->parser->typeMap->getType(destination);
+    auto type = state->parser->typeMap->getType(dest);
     auto ht = type->to<IR::Type_StructLike>();
     if (ht == nullptr) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot extract to a non-struct type %1%",
-                destination);
+                dest);
         return;
     }
 
@@ -415,7 +537,7 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
     unsigned width = ht->width_bits();
     if ((width % 8) != 0) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "Header %1% size %2% is not a multiple of 8 bits.", destination, width);
+                "Header %1% size %2% is not a multiple of 8 bits.", dest, width);
         return;
     }
 
@@ -465,28 +587,58 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
     builder->newline();
     builder->blockEnd(true);
 
-    msgStr = Util::printf_format("Parser: extracting header %s", destination->toString());
+    msgStr = Util::printf_format("Parser: extracting header %s", dest->toString());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
     builder->newline();
 
     unsigned hdrOffsetBits = 0;
+    /*
+     * Some of the tests in this loop appear to be can't-happens.  For
+     *  example, when varsize is not nil, there appears to be code
+     *  elsewhere which (a) requires at least one varbit field in the
+     *  header struct and (b) forbids multiple varbit fields in a header,
+     *  so we will have exactly one varbit field.  I'm leaving the tests
+     *  in both for the cases which aren't can't-happens and for the sake
+     *  of firewalling in case code elsewhere changes such that the
+     *  can't-happens actually can happen.
+     */
+    bool had_varbit;
+    had_varbit = false;
     for (auto f : ht->fields) {
         auto ftype = state->parser->typeMap->getType(f);
+        char *sizecode = 0;
+        if (ftype->is<IR::Type_Varbits>()) {
+            if (varsize == nullptr) {
+                ::error(
+                    ErrorType::ERR_INVALID,
+                    "Extract to a header with a varbit<> member requires two-argument extract()");
+                return;
+            } else if (had_varbit) {
+                ::error(ErrorType::ERR_INVALID,
+                        "Two-argument extract() target must not have multiple varbit<> members");
+                return;
+            } else {
+                sizecode = visit_to_string(varsize);
+                builder->appendFormat("/* compileExtract varbit size = %s */", sizecode);
+                builder->newline();
+                had_varbit = true;
+            }
+        }
         auto etype = EBPFTypeFactory::instance->create(ftype);
         auto et = etype->to<IHasWidth>();
         if (et == nullptr) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "Only headers with fixed widths supported %1%", f);
+                    "Headers must use defined-widths types: %1%", f);
             return;
         }
-        compileExtractField(destination, f, hdrOffsetBits, etype);
-        hdrOffsetBits += et->widthInBits();
+        unsigned int advance = compileExtractField(dest, f, hdrOffsetBits, etype, sizecode);
+        hdrOffsetBits += advance ? advance : et->widthInBits();
     }
     builder->newline();
 
     if (ht->is<IR::Type_Header>()) {
         builder->emitIndent();
-        visit(destination);
+        visit(dest);
         builder->appendLine(".ebpf_valid = 1;");
     }
 
@@ -495,7 +647,7 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
     builder->appendFormat("%s += BYTES(%u);", program->headerStartVar.c_str(), width);
     builder->newline();
 
-    msgStr = Util::printf_format("Parser: extracted %s", destination->toString());
+    msgStr = Util::printf_format("Parser: extracted %s", dest->toString());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->newline();
@@ -516,12 +668,20 @@ void StateTranslationVisitor::processMethod(const P4::ExternMethod *method) {
     auto decl = method->object;
     if (decl == state->parser->packet) {
         if (method->method->name.name == p4lib.packetIn.extract.name) {
-            if (expression->arguments->size() != 1) {
-                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                        "Variable-sized header fields not yet supported %1%", expression);
-                return;
+            switch (expression->arguments->size()) {
+                case 1:
+                    compileExtract(expression->arguments->at(0)->expression);
+                    break;
+                case 2:
+                    compileExtract(expression->arguments->at(0)->expression,
+                                   expression->arguments->at(1)->expression);
+                    break;
+                default:
+                    // Can other size() values occur?
+                    ::error(ErrorType::ERR_UNEXPECTED, "extract() with unexpected arg count %1%",
+                            expression->arguments->size());
+                    break;
             }
-            compileExtract(expression->arguments->at(0)->expression);
             return;
         } else if (method->method->name.name == p4lib.packetIn.length.name) {
             builder->append(state->parser->program->lengthVar);

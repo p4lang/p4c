@@ -16,6 +16,8 @@ and limitations under the License.
 
 #include "ebpfCodeGen.h"
 
+#include <cassert>
+
 namespace TC {
 
 // =====================PNAEbpfGenerator=============================
@@ -590,18 +592,138 @@ void EBPFPnaParser::emitRejectState(EBPF::CodeBuilder *builder) {
     builder->endOfStatement(true);
 }
 
+/*
+ * The API to this function (inherited from compileExtractField's) is a
+ *  bit broken.  Our caller expects us to return the number of bits
+ *  parsed out of the packet.  But, for varbit fields, we can't know
+ *  that until run time.  Perhaps fortunately, nothing depends on more
+ *  than the low three bits of this value, and we check that both size
+ *  and location are octet-aligned, so returning 0 here is suitable.
+ *
+ * We do generate code to advance ebpf_packetOffsetInBits (the offset
+ *  at runtime) by the correct (runtime) amount.
+ */
+unsigned int PnaStateTranslationVisitor::compileExtractVarbits(const IR::Expression *expr,
+                                                               const IR::StructField *field,
+                                                               unsigned bitoff,
+                                                               EBPF::EBPFType *type,
+                                                               const char *sizecode) {
+    static const char *const wvar = "ebpf_varbits_width";
+    static const char *const ovar = "ebpf_varbits_offset";
+    int maxwidth;
+    int w;
+    auto bytetype = EBPF::EBPFTypeFactory::instance->create(IR::Type_Bits::get(8));
+    cstring fieldName = field->name.name;
+    auto program = state->parser->program;
+
+    maxwidth = type->to<EBPF::IHasWidth>()->widthInBits();
+    // XXX Is this an error condition?
+    // if (maxwidth & 7) ...
+    // I'm going to assume not and let the runtime test handle it.
+    maxwidth >>= 3;
+    // Do we need to handle the case where bitoff isn't a multiple of 8?
+    // It would greatly complicate much other code.
+    if (bitoff & 7) {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Variable-size extract must be on a byte boundary");
+        return (0);
+    }
+    builder->emitIndent();
+    builder->blockStart();
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("u32 %s = %s;", wvar, sizecode);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("u32 %s;", ovar);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("// Can't handle this case yet");
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("if (%s & 7) ", wvar);
+    builder->blockStart();
+    builder->emitIndent();
+    // XXX Is ParserInvalidArgument the best error code here?
+    builder->appendFormat("ebpf_errorCode = ParserInvalidArgument;");
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("goto reject;");
+    builder->newline();
+    builder->blockEnd(true);
+    builder->emitIndent();
+    builder->appendFormat("%s >>= 3;", wvar);
+    builder->newline();
+    /*
+     * We can't loop in BPF code; I don't know about EBPF, but it's
+     *  relatively simple to work around here.  We generate a string of
+     *  assignments, wrapped in a switch to enter the string at the
+     *  correct place at runtime (vaguely reminiscent of Duff's device).
+     */
+    builder->emitIndent();
+    builder->appendFormat("%s = BYTES(%s) + %s;\n", ovar, program->offsetVar.c_str(), wvar);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("switch (%s)", wvar);
+    builder->newline();
+    builder->emitIndent();
+    builder->blockStart();
+    for (w = maxwidth - 1; w >= 0; w--) {
+        builder->emitIndent();
+        builder->appendFormat("case %d: ", w + 1);
+        builder->emitIndent();
+        visit(expr);
+        builder->appendFormat(".%s.data[%d] = (", fieldName.c_str(), w);
+        bytetype->emit(builder);
+        builder->appendFormat(")load_byte(%s,--%s);", program->packetStartVar.c_str(), ovar);
+        builder->newline();
+    }
+    builder->blockEnd(true);
+    builder->emitIndent();
+    visit(expr);
+    builder->appendFormat(".%s.curwidth = %s;", fieldName.c_str(), wvar);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("%s += %s << 3;", program->offsetVar.c_str(), wvar);
+    builder->newline();
+    builder->blockEnd(true);
+    // See function header comment for why 0.
+    return (0);
+}
+
 //  This code is similar to compileExtractField function in PsaStateTranslationVisitor.
 //  Handled TC "macaddr" annotation.
-void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
-                                                     const IR::StructField *field,
-                                                     unsigned hdrOffsetBits, EBPF::EBPFType *type) {
+unsigned int PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
+                                                             const IR::StructField *field,
+                                                             unsigned hdrOffsetBits,
+                                                             EBPF::EBPFType *type,
+                                                             const char *sizecode) {
     unsigned alignment = hdrOffsetBits % 8;
     auto width = type->to<EBPF::IHasWidth>();
-    if (width == nullptr) return;
+    if (width == nullptr) return (0);
     unsigned widthToExtract = width->widthInBits();
     auto program = state->parser->program;
     cstring msgStr;
     cstring fieldName = field->name.name;
+
+    if (type->is<EBPF::EBPFScalarType>() && type->as<EBPF::EBPFScalarType>().isvariable) {
+        if (!sizecode) assert(!"Impossible extract of varbits field with no size code");
+    } else {
+        if (sizecode) assert(!"Impossible extract of fixed-width field with size code");
+    }
+    builder->appendFormat("/* TC::PnaStateTranslationVisitor::compileExtractField: field %s",
+                          fieldName);
+    if (type->is<EBPF::EBPFScalarType>()) {
+        builder->appendFormat(" (%s scalar)",
+                              type->as<EBPF::EBPFScalarType>().isvariable ? "variable" : "fixed");
+    }
+    if (sizecode) builder->appendFormat(", sizecode = %s", sizecode);
+    builder->appendFormat(" */");
+    builder->newline();
+
+    if (sizecode) {
+        return (compileExtractVarbits(expr, field, hdrOffsetBits, type, sizecode));
+    }
 
     bool noEndiannessConversion = false;
     auto annolist = field->getAnnotations()->annotations;
@@ -752,6 +874,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     }
 
     builder->newline();
+    return (0);
 }
 
 void PnaStateTranslationVisitor::compileLookahead(const IR::Expression *destination) {
@@ -1784,6 +1907,12 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
         builder->emitIndent();
         builder->appendFormat("struct %s %s", table->keyTypeName.c_str(), keyname.c_str());
         builder->endOfStatement(true);
+        builder->emitIndent();
+        builder->appendFormat("// XXX eBPF gets upset at memset(); let's");
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("// hope __builtin_memset() does what we want");
+        builder->newline();
         builder->emitIndent();
         builder->appendFormat("__builtin_memset(&%s, 0, sizeof(%s))", keyname.c_str(),
                               keyname.c_str());
