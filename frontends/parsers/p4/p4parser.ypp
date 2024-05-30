@@ -1019,12 +1019,12 @@ specializedType
     ;
 
 baseType
-    : BOOL   { $$ = new IR::Type_Boolean(@1); }
-    | MATCH_KIND { $$ = new IR::Type_MatchKind(@1); }
+    : BOOL   { $$ = IR::Type_Boolean::get(@1); }
+    | MATCH_KIND { $$ = IR::Type_MatchKind::get(@1); }
     | ERROR  { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"))); }
     | BIT    { $$ = IR::Type::Bits::get(@1, 1); }
-    | STRING { $$ = new IR::Type::String(@1); }
-    | INT    { $$ = new IR::Type_InfInt(@1); }
+    | STRING { $$ = IR::Type::String::get(@1); }
+    | INT    { $$ = IR::Type_InfInt::get(@1); }
     | BIT l_angle INTEGER r_angle
       { $$ = IR::Type::Bits::get(@1+@4, parseConstantChecked(@3, $3), false); }
     | INT l_angle INTEGER r_angle
@@ -1033,16 +1033,16 @@ baseType
       { $$ = IR::Type::Varbits::get(@1+@4, parseConstantChecked(@3, $3)); }
 
     | BIT l_angle "(" expression ")" r_angle
-      { $$ = new IR::Type_Bits(@1+@6, $4, false); }
+      { $$ = IR::Type_Bits::get(@1+@6, $4, false); }
     | INT l_angle "(" expression ")" r_angle
-      { $$ = new IR::Type_Bits(@1+@6, $4, true); }
+      { $$ = IR::Type_Bits::get(@1+@6, $4, true); }
     | VARBIT l_angle "(" expression ")" r_angle
-      { $$ = new IR::Type_Varbits(@1+@6, $4); }
+      { $$ = IR::Type_Varbits::get(@1+@6, $4); }
     ;
 
 typeOrVoid
     : typeRef     { $$ = $1; }
-    | VOID        { $$ = new IR::Type_Void(@1); }
+    | VOID        { $$ = IR::Type_Void::get(@1); }
     | IDENTIFIER  { $$ = new IR::Type_Name(@1, new IR::Path(*(new IR::ID(@1, $1)))); }
         // This is necessary because template arguments may introduce the return type
     ;
@@ -1066,8 +1066,8 @@ typeArg
     : typeRef                     { $$ = $1; }
     | nonTypeName                 { $$ = new IR::Type_Name(@1, new IR::Path(*$1)); }
         // This is necessary because template arguments may introduce the return type
-    | VOID                        { $$ = new IR::Type_Void(@1); }
-    | "_"                         { $$ = new IR::Type_Dontcare(@1); }
+    | VOID                        { $$ = IR::Type_Void::get(@1); }
+    | "_"                         { $$ = IR::Type_Dontcare::get(@1); }
     ;
 
 typeArgumentList
@@ -1078,8 +1078,8 @@ typeArgumentList
 
 realTypeArg
     : typeRef                     { $$ = $1; }
-    | VOID                        { $$ = new IR::Type_Void(@1); }
-    | "_"                         { $$ = new IR::Type_Dontcare(@1); }
+    | VOID                        { $$ = IR::Type_Void::get(@1); }
+    | "_"                         { $$ = IR::Type_Dontcare::get(@1); }
     ;
 
 // For use in contexts where the `<` might be a less-than rather than introducing a type

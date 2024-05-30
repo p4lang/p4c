@@ -260,8 +260,8 @@ const IR::MethodCallStatement *generateStacksetValid(const IR::Expression *stack
         stackRef->type->checkedTo<IR::Type_Stack>()->elementType, stackRef, index);
     auto name = (isValid) ? IR::Type_Header::setValid : IR::Type_Header::setInvalid;
     return new IR::MethodCallStatement(new IR::MethodCallExpression(
-        new IR::Type_Void(),
-        new IR::Member(new IR::Type_Method(new IR::Type_Void(), new IR::ParameterList(), name),
+        IR::Type_Void::get(),
+        new IR::Member(new IR::Type_Method(IR::Type_Void::get(), new IR::ParameterList(), name),
                        arrayIndex, name)));
 }
 

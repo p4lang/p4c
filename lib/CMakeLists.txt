@@ -98,5 +98,6 @@ set_target_properties(p4ctoolkit PROPERTIES COMPILE_FLAGS -fno-builtin)
 target_link_libraries(p4ctoolkit
   # These libraries are exposed by a header.
   PUBLIC absl::bits
+  PUBLIC absl::strings
   PUBLIC ${LIBGC_LIBRARIES}
 )

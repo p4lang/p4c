@@ -120,6 +120,7 @@ abstract Type_Base : Type {
 class Type_Unknown : Type_Base {
 #nodbprint
     static Type_Unknown get();
+    static Type_Unknown get(const Util::SourceInfo &si);
     toString{ return "Unknown type"; }
 }
 

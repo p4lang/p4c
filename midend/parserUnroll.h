@@ -254,8 +254,7 @@ class RewriteAllParsers : public Transform {
         if (rewriter->hasOutOfboundState) {
             // generating state with verify(false, error.StackOutOfBounds)
             IR::Vector<IR::Argument> *arguments = new IR::Vector<IR::Argument>();
-            arguments->push_back(
-                new IR::Argument(new IR::BoolLiteral(IR::Type::Boolean::get(), false)));
+            arguments->push_back(new IR::Argument(IR::BoolLiteral::get(false)));
             arguments->push_back(new IR::Argument(
                 new IR::Member(new IR::TypeNameExpression(new IR::Type_Name(IR::ID("error"))),
                                IR::ID("StackOutOfBounds"))));

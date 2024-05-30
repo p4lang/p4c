@@ -42,22 +42,20 @@ const IR::Constant *convertBoolLiteral(const IR::BoolLiteral *lit) {
 const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceInfo &srcInfo,
                                       bool valueRequired) {
     if (const auto *tb = type->to<IR::Type_Bits>()) {
-        // TODO: Use getConstant.
-        return new IR::Constant(srcInfo, tb, 0);
+        return IR::Constant::get(tb, 0, srcInfo);
     }
     if (type->is<IR::Type_Boolean>()) {
-        // TODO: Use getBoolLiteral.
-        return new BoolLiteral(srcInfo, Type::Boolean::get(), false);
+        return IR::BoolLiteral::get(false, srcInfo);
     }
     if (type->is<IR::Type_InfInt>()) {
-        return new IR::Constant(srcInfo, 0);
+        return IR::Constant::get(type, 0, srcInfo);
     }
     if (const auto *te = type->to<IR::Type_Enum>()) {
         return new IR::Member(srcInfo, new IR::TypeNameExpression(te->name),
                               te->members.at(0)->getName());
     }
     if (const auto *te = type->to<IR::Type_SerEnum>()) {
-        return new IR::Cast(srcInfo, type->getP4Type(), new IR::Constant(srcInfo, te->type, 0));
+        return new IR::Cast(srcInfo, type->getP4Type(), IR::Constant::get(te->type, 0, srcInfo));
     }
     if (const auto *te = type->to<IR::Type_Error>()) {
         return new IR::Member(srcInfo, new IR::TypeNameExpression(te->name), "NoError");

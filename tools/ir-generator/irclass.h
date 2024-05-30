@@ -164,6 +164,7 @@ class IrField : public IrElement {
         : IrField(Util::SourceInfo(), type, name, init, flags) {}
     IrField(const Type *type, cstring name, int flags)
         : IrField(Util::SourceInfo(), type, name, cstring(), flags) {}
+    void resolve() override;
     void generate(std::ostream &out, bool asField) const;
     void generate_hdr(std::ostream &out) const override { generate(out, true); }
     void generate_impl(std::ostream &) const override;

@@ -1184,7 +1184,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::con
         auto params = constructor->parameters;
         for (auto param : params->parameters) {
             if (auto v = param->type->to<IR::Type_InfInt>()) {
-                auto tv = new IR::Type_InfInt(param->type->srcInfo);
+                auto tv = IR::Type_InfInt::get(param->type->srcInfo);
                 bool b = tvs.setBinding(v, tv);
                 BUG_CHECK(b, "failed replacing %2% with %3%", v, tv);
             }
@@ -1236,7 +1236,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::con
         forAllMatching<IR::Type_Var>(p, [tvs, dontCares, typeParams](const IR::Type_Var *tv) {
             if (tvs->lookup(tv)) return;                            // already bound
             if (typeParams->getDeclByName(tv->name) != tv) return;  // not a tv of this call
-            dontCares->setBinding(tv, new IR::Type_Dontcare);
+            dontCares->setBinding(tv, IR::Type_Dontcare::get());
         });
     }
     addSubstitutions(dontCares);
@@ -2533,7 +2533,7 @@ const IR::Node *TypeInference::binaryArith(const IR::Operation_Binary *expressio
                   expression->getStringOp(), expression->right, rtype->toString());
         return expression;
     } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
-        auto t = new IR::Type_InfInt();
+        auto t = IR::Type_InfInt::get();
         auto result = constantFold(expression);
         setType(getOriginal(), t);
         setCompileTimeConstant(result);
@@ -2660,7 +2660,7 @@ const IR::Node *TypeInference::shift(const IR::Operation_Binary *expression) {
         // If the amount is signed but positive, make it unsigned
         if (auto bt = rtype->to<IR::Type_Bits>()) {
             if (bt->isSigned) {
-                rtype = new IR::Type_Bits(rtype->srcInfo, bt->width_bits(), false);
+                rtype = IR::Type_Bits::get(rtype->srcInfo, bt->width_bits(), false);
                 auto amt = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
                 if (expression->is<IR::Shl>()) {
                     expression = new IR::Shl(expression->srcInfo, expression->left, amt);
@@ -3168,8 +3168,8 @@ const IR::Node *TypeInference::postorder(IR::Slice *expression) {
 
 const IR::Node *TypeInference::postorder(IR::Dots *expression) {
     if (done()) return expression;
-    setType(expression, new IR::Type_Any());
-    setType(getOriginal(), new IR::Type_Any());
+    setType(expression, IR::Type_Any::get());
+    setType(getOriginal(), IR::Type_Any::get());
     setCompileTimeConstant(expression);
     setCompileTimeConstant(getOriginal<IR::Expression>());
     return expression;
@@ -3267,7 +3267,7 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
     // Built-in methods
     if (inMethod && (member == IR::Type::minSizeInBits || member == IR::Type::minSizeInBytes ||
                      member == IR::Type::maxSizeInBits || member == IR::Type::maxSizeInBytes)) {
-        auto type = new IR::Type_Method(new IR::Type_InfInt(), new IR::ParameterList(), member);
+        auto type = new IR::Type_Method(IR::Type_InfInt::get(), new IR::ParameterList(), member);
         auto ctype = canonicalize(type);
         if (ctype == nullptr) return expression;
         setType(getOriginal(), ctype);
@@ -3381,7 +3381,7 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
                 typeError("%1%: must be applied to a left-value", expression);
             auto params = new IR::IndexedVector<IR::Parameter>();
             auto param = new IR::Parameter(IR::ID("count", nullptr), IR::Direction::None,
-                                           new IR::Type_InfInt());
+                                           IR::Type_InfInt::get());
             auto tt = new IR::Type_Type(param->type);
             setType(param->type, tt);
             setType(param, param->type);
@@ -3736,7 +3736,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
                         return;                                             // already bound
                     if (tvs->lookup(tv)) return;                            // already bound
                     if (typeParams->getDeclByName(tv->name) != tv) return;  // not a tv of this call
-                    dontCares->setBinding(tv, new IR::Type_Dontcare);
+                    dontCares->setBinding(tv, IR::Type_Dontcare::get());
                 });
         }
         addSubstitutions(dontCares);
