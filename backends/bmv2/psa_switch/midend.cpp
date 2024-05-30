@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "midend.h"
 
+#include "backends/bmv2/common/check_unsupported.h"
 #include "backends/bmv2/psa_switch/options.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -107,6 +108,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
     if (BMV2::PsaSwitchContext::get().options().loadIRFromJson == false) {
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
+            new CheckUnsupported(),
             new P4::RemoveMiss(&refMap, &typeMap),
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::EliminateInvalidHeaders(&refMap, &typeMap),
@@ -167,6 +169,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
         addPasses({
             new P4::ResolveReferences(&refMap),
             new P4::TypeChecking(&refMap, &typeMap),
+            new CheckUnsupported(),
             fillEnumMap,
             [this, fillEnumMap]() { enumMap = fillEnumMap->repr; },
             evaluator,

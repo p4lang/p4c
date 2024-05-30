@@ -1,11 +1,13 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "matchtype",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/ipv4_tbl_1",
       "id" : 1,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 32,
       "keyfields" : [
@@ -49,6 +51,7 @@
       "name" : "MainControlImpl/ipv4_tbl_2",
       "id" : 2,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 72,
       "keyfields" : [
@@ -106,6 +109,7 @@
       "name" : "MainControlImpl/ipv4_tbl_3",
       "id" : 3,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 32,
       "keyfields" : [
@@ -149,6 +153,7 @@
       "name" : "MainControlImpl/ipv4_tbl_4",
       "id" : 4,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 72,
       "keyfields" : [

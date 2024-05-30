@@ -127,14 +127,15 @@ const IR::Node *DoRemoveReturns::preorder(IR::ReturnStatement *statement) {
     set(TernaryBool::Yes);
     auto vec = new IR::IndexedVector<IR::StatOrDecl>();
 
-    auto left = new IR::PathExpression(returnVar);
+    auto left = new IR::PathExpression(IR::Type::Boolean::get(), returnVar);
     vec->push_back(
         new IR::AssignmentStatement(statement->srcInfo, left, new IR::BoolLiteral(true)));
     if (statement->expression != nullptr) {
-        left = new IR::PathExpression(returnedValue);
+        left = new IR::PathExpression(statement->expression->type, returnedValue);
         vec->push_back(
             new IR::AssignmentStatement(statement->srcInfo, left, statement->expression));
     }
+    if (findContext<IR::LoopStatement>()) vec->push_back(new IR::BreakStatement);
     return new IR::BlockStatement(*vec);
 }
 
@@ -158,7 +159,7 @@ const IR::Node *DoRemoveReturns::preorder(IR::BlockStatement *statement) {
             break;
         } else if (r == TernaryBool::Maybe) {
             auto newBlock = new IR::BlockStatement;
-            auto path = new IR::PathExpression(returnVar);
+            auto path = new IR::PathExpression(IR::Type::Boolean::get(), returnVar);
             auto condition = new IR::LNot(path);
             auto ifstat = new IR::IfStatement(condition, newBlock, nullptr);
             block->push_back(ifstat);
@@ -209,6 +210,23 @@ const IR::Node *DoRemoveReturns::preorder(IR::SwitchStatement *statement) {
     set(r);
     prune();
     return statement;
+}
+
+const IR::Node *DoRemoveReturns::postorder(IR::LoopStatement *loop) {
+    // loop body might not (all) execute, so can't be certain if it returns
+    if (hasReturned() == TernaryBool::Yes) set(TernaryBool::Maybe);
+
+    // only need to add an extra check for nested loops
+    if (!findContext<IR::LoopStatement>()) return loop;
+    // only if the inner loop may have returned
+    if (hasReturned() == TernaryBool::No) return loop;
+
+    // break out of the outer loop if the inner loop returned
+    auto rv = new IR::BlockStatement();
+    rv->push_back(loop);
+    rv->push_back(new IR::IfStatement(new IR::PathExpression(IR::Type::Boolean::get(), returnVar),
+                                      new IR::BreakStatement(), nullptr));
+    return rv;
 }
 
 }  // namespace P4

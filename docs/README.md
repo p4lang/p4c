@@ -38,7 +38,7 @@ p4c
 ├── tools                     -- external programs used in the build/test process
 │   ├── ci-ptf                -- scripts to run PSA PTF tests
 │   ├── debian-build          -- resources and scripts for creating Ubuntu (or Debian) packages
-│   ├── driver                -- p4c compiler driver: a script that invokes various compilers
+│   ├── driver                -- P4C compiler driver: a script that invokes various compilers
 │   ├── hooks                 -- useful git hooks for development
 |   ├── ir-generator          -- code to generate the P4C IR from .def files
 │   ├── iwyu_mappings         -- mappings used by the Include What You Use (IWYU) tool for analyzing #include directives in C and C++ source files
@@ -115,7 +115,11 @@ overview of the compiler goals and architecture.
 ## Documentation Comments Style Guide 
 - Use triple slashes `///` for documenting functions and classes in files.
 - Double slashes `//` should be used for "internal" comments within functions.
+- Double slashes `//` should be used for inline comment.
 - For rare occasions such as adding comments to multi-line macros, you may use `/* ... */` style comments.
+- There should be no space at the end of the comment.
+- First letter of the comment should be a capital letter.
+- Each comment should end with a period.
 
 Happy writing! Should you have any questions, please don't hesitate to ask.
 
@@ -218,8 +222,8 @@ tests are run with a "recently built" version of `simple_switch` from
 the
 [p4lang/behavioral-model](https://github.com/p4lang/behavioral-model)
 repository, but it can be several hours old.  If you are working on
-p4c features that rely on newly committed changes to `simple_switch`
-you can find out which `simple_switch` version these p4c automated
+P4C features that rely on newly committed changes to `simple_switch`
+you can find out which `simple_switch` version these P4C automated
 tests are using at the link below:
 
 + [https://hub.docker.com/r/p4lang/behavioral-model/builds](https://hub.docker.com/r/p4lang/behavioral-model/builds)
@@ -247,7 +251,7 @@ To add a new input test with a sample P4 code file (under `testdata/p4_16_sample
   
 * Watch out for `const`; it is very important.
 
-* Use `override` whenever possible (new gcc versions enforce this).
+* Use `override` whenever possible (new GCC versions enforce this).
 
 * Never use `const_cast` and `reinterpret_cast`.
 
@@ -335,7 +339,7 @@ makefile variable.
 p4c_PYTHON += p4c.custom.cfg
 ```
 
-There is an global variable `config` in p4c compiler driver that stores the build steps
+There is an global variable `config` in the `p4c` compiler driver that stores the build steps
 for a particular target. By default, the bmv2 and ebpf backends are supported. Each backend
 is identified with a triplet: **target-arch-vendor**. For example, the default bmv2 backend is
 identified as `bmv2-ss-p4org`. Users may choose to implement different architectures running
@@ -354,5 +358,5 @@ config.target.append("bmv2-newarch-p4org")
 
 After adding the new configuration file, rerun `bootstrap.sh`
 
-For testing purpose, p4c will be installed in the build/ directory when executing `make`.
-User can install `p4c` to other system path by running `make install`
+For testing purposes, `p4c` will be installed in the build/ directory when executing `make`.
+Users can install `p4c` to other system path by running `make install`

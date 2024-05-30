@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <bmv2/psa.p4>
+#include <dpdk/psa.p4>
 
 header ethernet_t {
     bit<48> dstAddr;

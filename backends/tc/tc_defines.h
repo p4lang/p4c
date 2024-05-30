@@ -27,6 +27,14 @@ inline constexpr auto DEFAULT_METADATA_ID = 1;
 inline constexpr auto BITWIDTH = 32;
 inline constexpr auto DEFAULT_TIMER_PROFILES = 4;
 
+// Default Access Permissons
+inline constexpr auto DEFAULT_TABLE_CONTROL_PATH_ACCESS = "CRUDPS";
+inline constexpr auto DEFAULT_TABLE_DATA_PATH_ACCESS = "RX";
+inline constexpr auto DEFAULT_ADD_ON_MISS_TABLE_CONTROL_PATH_ACCESS = "CRUDPS";
+inline constexpr auto DEFAULT_ADD_ON_MISS_TABLE_DATA_PATH_ACCESS = "CRXP";
+inline constexpr auto DEFAULT_EXTERN_CONTROL_PATH_ACCESS = "RUPS";
+inline constexpr auto DEFAULT_EXTERN_DATA_PATH_ACCESS = "RUXP";
+
 // Supported data types.
 inline constexpr auto BIT_TYPE = 0;
 inline constexpr auto DEV_TYPE = 1;
@@ -78,6 +86,11 @@ inline constexpr auto DEFAULTONLY = 2;
 inline constexpr auto EXACT_TYPE = 0;
 inline constexpr auto LPM_TYPE = 1;
 inline constexpr auto TERNARY_TYPE = 2;
+
+inline constexpr auto NONE = 0;
+inline constexpr auto IN = 1;
+inline constexpr auto OUT = 2;
+inline constexpr auto INOUT = 3;
 }  // namespace TC
 
 #endif /* BACKENDS_TC_TC_DEFINES_H_ */

@@ -1,11 +1,13 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "tc_type_annotation_example",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/ipv4_tbl_1",
       "id" : 1,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 32,
       "keyfields" : [
@@ -56,6 +58,7 @@
       "name" : "MainControlImpl/ipv4_tbl_2",
       "id" : 2,
       "tentries" : 1024,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 3,
       "keyfields" : [

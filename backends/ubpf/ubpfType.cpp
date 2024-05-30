@@ -41,6 +41,8 @@ EBPF::EBPFType *UBPFTypeFactory::create(const IR::Type *type) {
         result = new EBPF::EBPFTypeName(tn, result);
     } else if (auto te = type->to<IR::Type_Enum>()) {
         result = new UBPFEnumType(te);
+    } else if (auto te = type->to<IR::Type_Error>()) {
+        result = new UBPFErrorType(te);
     } else if (auto ts = type->to<IR::Type_Stack>()) {
         auto et = create(ts->elementType);
         if (et == nullptr) return nullptr;
@@ -155,9 +157,25 @@ void UBPFStructType::declare(EBPF::CodeBuilder *builder, cstring id, bool asPoin
 void UBPFStructType::declareInit(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
     declare(builder, id, asPointer);
 }
+
 //////////////////////////////////////////////////////////
 
 void UBPFEnumType::emit(EBPF::CodeBuilder *builder) {
+    builder->append("enum ");
+    auto et = getType();
+    builder->append(et->name);
+    builder->blockStart();
+    for (auto m : et->members) {
+        builder->append(m->name);
+        builder->appendLine(",");
+    }
+    builder->blockEnd(false);
+    builder->endOfStatement(true);
+}
+
+//////////////////////////////////////////////////////////
+
+void UBPFErrorType::emit(EBPF::CodeBuilder *builder) {
     builder->append("enum ");
     auto et = getType();
     builder->append(et->name);

@@ -290,7 +290,7 @@ const IR::Literal *Z3Solver::toLiteral(const z3::expr &e, const IR::Type *type) 
     // Handle booleans.
     if (type->is<IR::Type::Boolean>()) {
         BUG_CHECK(e.is_bool(), "Expected a boolean value: %1%", e);
-        return new IR::BoolLiteral(type, e.is_true());
+        return IR::BoolLiteral::get(e.is_true());
     }
 
     // Handle bit vectors.
@@ -306,7 +306,7 @@ const IR::Literal *Z3Solver::toLiteral(const z3::expr &e, const IR::Type *type) 
         strNum.erase(remove(strNum.begin(), strNum.end(), ' '), strNum.end());
     }
     big_int bigint(strNum.c_str());
-    return IR::getConstant(type, bigint);
+    return IR::Constant::get(type, bigint);
 }
 
 void Z3Solver::toJSON(JSONGenerator &json) const {
@@ -491,7 +491,7 @@ const ShiftType *Z3Translator::rewriteShift(const ShiftType *shift) const {
     // vector.
     const auto *shiftAmount = right->to<IR::Constant>();
     BUG_CHECK(shiftAmount, "Shift amount is not a compile-time known constant: %1%", right);
-    const auto *newShiftAmount = IR::getConstant(left->type, shiftAmount->value);
+    const auto *newShiftAmount = IR::Constant::get(left->type, shiftAmount->value);
 
     return new ShiftType(shift->type, left, newShiftAmount);
 }

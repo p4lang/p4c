@@ -104,7 +104,7 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              auto emitIsTainted = Taint::hasTaint(validVar);
              if (emitIsTainted || !validVar->checkedTo<IR::BoolLiteral>()->value) {
                  auto &nextState = state.clone();
-                 nextState.replaceTopBody(Continuation::Return(IR::getBoolLiteral(false)));
+                 nextState.replaceTopBody(Continuation::Return(IR::BoolLiteral::get(false)));
                  result->emplace_back(nextState);
                  return;
              }
@@ -121,9 +121,9 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              const auto *hdrChecksum = state.get(new IR::Member(ipHdrRef, "hdrChecksum"));
              const auto *srcAddr = state.get(new IR::Member(ipHdrRef, "srcAddr"));
              const auto *dstAddr = state.get(new IR::Member(ipHdrRef, "dstAddr"));
-             const auto *bt8 = IR::getBitType(8);
-             const auto *bt16 = IR::getBitType(16);
-             const auto *bt32 = IR::getBitType(32);
+             const auto *bt8 = IR::Type_Bits::get(8);
+             const auto *bt16 = IR::Type_Bits::get(16);
+             const auto *bt32 = IR::Type_Bits::get(32);
 
              // The checksum is computed as a series of 16-bit additions.
              // We need to widen to 32 bits to handle overflows.
@@ -148,7 +148,7 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              checksum =
                  new IR::Add(bt16, new IR::Slice(checksum, 31, 16), new IR::Slice(checksum, 15, 0));
              const auto *calcResult = new IR::Cmpl(bt16, checksum);
-             const auto *comparison = new IR::Equ(calcResult, IR::getConstant(bt16, 0));
+             const auto *comparison = new IR::Equ(calcResult, IR::Constant::get(bt16, 0));
              auto &nextState = state.clone();
              nextState.replaceTopBody(Continuation::Return(comparison));
              result->emplace_back(nextState);
@@ -184,8 +184,8 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              // TODO: We need custom test objects to implement richer, stateful testing here.
              auto &nextState = state.clone();
              const auto *cond =
-                 new IR::LAnd(new IR::Equ(synExpr, IR::getConstant(synExpr->type, 1)),
-                              new IR::Equ(ackExpr, IR::getConstant(ackExpr->type, 0)));
+                 new IR::LAnd(new IR::Equ(synExpr, IR::Constant::get(synExpr->type, 1)),
+                              new IR::Equ(ackExpr, IR::Constant::get(ackExpr->type, 0)));
              nextState.replaceTopBody(Continuation::Return(cond));
              result->emplace_back(nextState);
          }},

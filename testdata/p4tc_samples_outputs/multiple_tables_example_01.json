@@ -1,11 +1,13 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "multiple_tables_example_01",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/ipv4_tbl_1",
       "id" : 1,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 32,
       "keyfields" : [
@@ -49,6 +51,7 @@
       "name" : "MainControlImpl/ipv4_tbl_2",
       "id" : 2,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 72,
       "keyfields" : [
@@ -106,6 +109,7 @@
       "name" : "MainControlImpl/ipv4_tbl_3",
       "id" : 3,
       "tentries" : 1024,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 67,
       "keyfields" : [
@@ -163,6 +167,7 @@
       "name" : "MainControlImpl/ipv4_tbl_4",
       "id" : 4,
       "tentries" : 1024,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 77,
       "keyfields" : [
@@ -220,6 +225,7 @@
       "name" : "MainControlImpl/ipv4_tbl_5",
       "id" : 5,
       "tentries" : 1024,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 13,
       "keyfields" : [
@@ -236,6 +242,7 @@
       "name" : "MainControlImpl/set_ct_options",
       "id" : 6,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 8,
       "keyfields" : [
@@ -281,6 +288,7 @@
       "name" : "MainControlImpl/set_all_options",
       "id" : 7,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 64,
       "keyfields" : [

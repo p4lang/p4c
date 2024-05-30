@@ -90,7 +90,7 @@ control MainControlImpl(
         drop_packet();
     }
 
-    table ipv4_tbl_1 {
+    @tc_acl("CRUS:CRXP") table ipv4_tbl_1 {
         key = {
             hdr.ipv4.dstAddr : exact @tc_type ("ipv4");
             istd.input_port : exact;

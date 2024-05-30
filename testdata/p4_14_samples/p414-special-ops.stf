@@ -2,7 +2,7 @@
 
 # For details on the behavior of this program with these input
 # packets, and how they should produce these expected output packets,
-# see https://github.com/jafingerhut/p4-guide/tbd/README-p414.md
+# see https://github.com/jafingerhut/p4-guide/blob/master/v1model-special-ops/README-p414.md
 
 # test resubmit operation
 

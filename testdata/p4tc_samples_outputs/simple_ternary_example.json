@@ -1,11 +1,13 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "simple_ternary_example",
+  "externs" : [],
   "tables" : [
     {
       "name" : "ingress/nh_table",
       "id" : 1,
       "tentries" : 262144,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 64,
       "keyfields" : [

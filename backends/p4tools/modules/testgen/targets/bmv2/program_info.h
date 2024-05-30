@@ -2,17 +2,13 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_PROGRAM_INFO_H_
 
 #include <cstddef>
-#include <map>
-#include <vector>
 
 #include "control-plane/p4RuntimeSerializer.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
-#include "lib/ordered_map.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
-#include "backends/p4tools/modules/testgen/lib/continuation.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/bmv2.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/compiler_result.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 

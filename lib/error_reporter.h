@@ -24,6 +24,7 @@ limitations under the License.
 
 #include <boost/format.hpp>
 
+#include "bug_helper.h"
 #include "error_catalog.h"
 #include "error_helper.h"
 #include "exceptions.h"
@@ -91,11 +92,12 @@ class ErrorReporter {
     }
 
     // error message for a bug
-    template <typename... T>
-    std::string bug_message(const char *format, T... args) {
+    template <typename... Args>
+    std::string bug_message(const char *format, Args &&...args) {
         boost::format fmt(format);
-        std::string message = ::bug_helper(fmt, "", "", "", args...);
-        return message;
+        // FIXME: This will implicitly take location of the first argument having
+        // SourceInfo. Not sure if this always desireable or not.
+        return ::bug_helper(fmt, "", "", std::forward<Args>(args)...);
     }
 
     template <typename... T>

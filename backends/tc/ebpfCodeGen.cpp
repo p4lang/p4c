@@ -21,6 +21,7 @@ namespace TC {
 // =====================PNAEbpfGenerator=============================
 void PNAEbpfGenerator::emitPNAIncludes(EBPF::CodeBuilder *builder) const {
     builder->appendLine("#include <stdbool.h>");
+    builder->appendLine("#include <stdlib.h>");
     builder->appendLine("#include <linux/if_ether.h>");
     builder->appendLine("#include \"pna.h\"");
 }
@@ -132,13 +133,28 @@ void PNAEbpfGenerator::emitP4TCFilterFields(EBPF::CodeBuilder *builder) const {
 
 void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
     for (auto table : tcIR->tcPipeline->tableDefs) {
-        if (table->isTcMayOverride) {
+        if (table->isTcMayOverrideMiss) {
             cstring tblName = table->getTableName();
             cstring defaultActionName = table->defaultMissAction->getActionName();
             defaultActionName = defaultActionName.substr(
                 defaultActionName.find('/') - defaultActionName.begin() + 1,
                 defaultActionName.size());
             for (auto param : table->defaultMissActionParams) {
+                cstring paramName = param->paramDetail->getParamName();
+                cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
+                cstring typeName = param->paramDetail->getParamType();
+                builder->emitIndent();
+                builder->appendFormat("%s %s", typeName, placeholder);
+                builder->endOfStatement(true);
+            }
+        }
+        if (table->isTcMayOverrideHit) {
+            cstring tblName = table->getTableName();
+            cstring defaultActionName = table->defaultHitAction->getActionName();
+            defaultActionName = defaultActionName.substr(
+                defaultActionName.find('/') - defaultActionName.begin() + 1,
+                defaultActionName.size());
+            for (auto param : table->defaultHitActionParams) {
                 cstring paramName = param->paramDetail->getParamName();
                 cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
                 cstring typeName = param->paramDetail->getParamType();
@@ -323,6 +339,7 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->blockStart();
         msgStr = Util::printf_format("%s control: packet processing started", sectionName);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
+        ((EBPFControlPNA *)control)->emitExternDefinition(builder);
         control->emit(builder);
         builder->blockEnd(true);
         msgStr = Util::printf_format("%s control: packet processing finished", sectionName);
@@ -966,9 +983,10 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
             }
         }
         bool generateDefaultMissCode = false;
+        bool generateDefaultHitCode = false;
         for (auto tbl : tcIR->tcPipeline->tableDefs) {
             if (tbl->getTableName() == table->container->name.originalName) {
-                if (tbl->isTcMayOverride) {
+                if (tbl->isTcMayOverrideMiss) {
                     cstring defaultActionName = tbl->defaultMissAction->getActionName();
                     defaultActionName = defaultActionName.substr(
                         defaultActionName.find('/') - defaultActionName.begin() + 1,
@@ -976,16 +994,27 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
                     if (defaultActionName == action->name.originalName)
                         generateDefaultMissCode = true;
                 }
+                if (tbl->isTcMayOverrideHit) {
+                    cstring defaultActionName = tbl->defaultHitAction->getActionName();
+                    defaultActionName = defaultActionName.substr(
+                        defaultActionName.find('/') - defaultActionName.begin() + 1,
+                        defaultActionName.size());
+                    if (defaultActionName == action->name.originalName)
+                        generateDefaultHitCode = true;
+                }
             }
         }
-        if (generateDefaultMissCode) {
+        if (generateDefaultMissCode || generateDefaultHitCode) {
             builder->emitIndent();
             builder->appendFormat("{");
             builder->newline();
             builder->increaseIndent();
 
             builder->emitIndent();
-            builder->appendFormat("if (%s->is_default_miss_act) ", valueName.c_str());
+            if (generateDefaultMissCode)
+                builder->appendFormat("if (%s->is_default_miss_act) ", valueName.c_str());
+            else if (generateDefaultHitCode)
+                builder->appendFormat("if (%s->is_default_hit_act) ", valueName.c_str());
             builder->newline();
 
             builder->emitIndent();
@@ -1320,7 +1349,7 @@ bool ConvertToEBPFParserPNA::preorder(const IR::P4ValueSet *pvs) {
 
 // =====================ConvertToEBPFControlPNA=============================
 bool ConvertToEBPFControlPNA::preorder(const IR::ControlBlock *ctrl) {
-    control = new EBPF::EBPFControlPSA(program, ctrl, parserHeaders);
+    control = new EBPFControlPNA(program, ctrl, parserHeaders);
     program->control = control;
     program->as<EBPF::EBPFPipeline>().control = control;
     control->hitVariable = refmap->newName("hit");
@@ -1414,10 +1443,13 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ExternBlock *instance) {
     if (di == nullptr) return false;
     cstring name = EBPF::EBPFObject::externalName(di);
     cstring typeName = instance->type->getName().name;
-
     if (typeName == "Hash") {
         auto hash = new EBPF::EBPFHashPSA(program, di, name);
         control->hashes.emplace(name, hash);
+    } else if (typeName == "Register") {
+        auto reg = new EBPFRegisterPNA(program, name, di, control->codeGen);
+        control->pna_registers.emplace(name, reg);
+        control->defineExtern = true;
     } else {
         ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control", instance);
     }
@@ -1457,11 +1489,11 @@ bool ConvertToEBPFDeparserPNA::preorder(const IR::Declaration_Instance *di) {
 }
 
 // =====================ControlBodyTranslatorPNA=============================
-ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control)
+ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPFControlPNA *control)
     : EBPF::CodeGenInspector(control->program->refMap, control->program->typeMap),
       EBPF::ControlBodyTranslator(control) {}
 
-ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
+ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPFControlPNA *control,
                                                    const ConvertToBackendIR *tcIR)
     : EBPF::CodeGenInspector(control->program->refMap, control->program->typeMap),
       EBPF::ControlBodyTranslator(control),
@@ -1487,7 +1519,7 @@ bool ControlBodyTranslatorPNA::preorder(const IR::Member *m) {
     return CodeGenInspector::preorder(m);
 }
 
-ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
+ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPFControlPNA *control,
                                                    const ConvertToBackendIR *tcIR,
                                                    const EBPF::EBPFTablePSA *table)
     : EBPF::CodeGenInspector(control->program->refMap, control->program->typeMap),
@@ -1534,7 +1566,6 @@ void ControlBodyTranslatorPNA::ValidateAddOnMissMissAction(const IR::P4Action *a
                 act);
     }
     const IR::P4Table *t = table->table->container;
-    cstring tblname = t->name.originalName;
     const IR::Expression *defaultAction = t->getDefaultAction();
     CHECK_NULL(defaultAction);
     auto defaultActionName = table->getActionNameExpression(defaultAction);
@@ -1548,7 +1579,7 @@ void ControlBodyTranslatorPNA::ValidateAddOnMissMissAction(const IR::P4Action *a
                   "add_entry extern can only be used in an action"
                   " of a table with property add_on_miss equals to true.");
     }
-    tcIR->updateAddOnMissTable(tblname);
+    ((ConvertToBackendIR *)tcIR)->updateAddOnMissTable(t);
 }
 
 void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *function) {
@@ -1708,7 +1739,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         builder->appendLine("};");
         builder->emitIndent();
         builder->append(
-            "bpf_p4tc_entry_create_on_miss(skb, &update_params, sizeof(params), &key, "
+            "bpf_p4tc_entry_create_on_miss(skb, &update_params, sizeof(update_params), &key, "
             "sizeof(key))");
         return;
     }
@@ -1892,8 +1923,18 @@ void ControlBodyTranslatorPNA::processMethod(const P4::ExternMethod *method) {
     auto decl = method->object;
     auto declType = method->originalExternType;
     cstring name = EBPF::EBPFObject::externalName(decl);
+    auto pnaControl = dynamic_cast<const EBPFControlPNA *>(control);
 
-    if (declType->name.name == "Hash") {
+    if (declType->name.name == "Register") {
+        auto reg = pnaControl->getRegister(name);
+        if (method->method->type->name == "write") {
+            reg->emitRegisterWrite(builder, method, this);
+        } else if (method->method->type->name == "read") {
+            ::warning(ErrorType::WARN_UNUSED, "This Register(%1%) read value is not used!", name);
+            reg->emitRegisterRead(builder, method, this, nullptr);
+        }
+        return;
+    } else if (declType->name.name == "Hash") {
         auto hash = control->to<EBPF::EBPFControlPSA>()->getHash(name);
         hash->processMethod(builder, method->method->name.name, method->expr, this);
         return;
@@ -1907,11 +1948,17 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
         auto mi = P4::MethodInstance::resolve(methodCallExpr, control->program->refMap,
                                               control->program->typeMap);
         auto ext = mi->to<P4::ExternMethod>();
+        auto pnaControl = dynamic_cast<const EBPFControlPNA *>(control);
         if (ext == nullptr) {
             return false;
         }
 
-        if (ext->originalExternType->name.name == "Hash") {
+        if (ext->originalExternType->name.name == "Register" && ext->method->type->name == "read") {
+            cstring name = EBPF::EBPFObject::externalName(ext->object);
+            auto reg = pnaControl->getRegister(name);
+            reg->emitRegisterRead(builder, ext, this, a->left);
+            return false;
+        } else if (ext->originalExternType->name.name == "Hash") {
             cstring name = EBPF::EBPFObject::externalName(ext->object);
             auto hash = control->to<EBPF::EBPFControlPSA>()->getHash(name);
             // Before assigning a value to a left expression we have to calculate a hash.
@@ -1929,7 +1976,8 @@ ActionTranslationVisitorPNA::ActionTranslationVisitorPNA(
     const ConvertToBackendIR *tcIR, const IR::P4Action *act, bool isDefaultAction)
     : EBPF::CodeGenInspector(program->refMap, program->typeMap),
       EBPF::ActionTranslationVisitor(valueName, program),
-      ControlBodyTranslatorPNA(program->as<EBPF::EBPFPipeline>().control, tcIR, table),
+      ControlBodyTranslatorPNA((const EBPFControlPNA *)program->as<EBPF::EBPFPipeline>().control,
+                               tcIR, table),
       table(table),
       isDefaultAction(isDefaultAction) {
     action = act;

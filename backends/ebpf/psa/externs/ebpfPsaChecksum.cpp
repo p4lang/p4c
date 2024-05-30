@@ -96,9 +96,7 @@ void EBPFHashPSA::processMethod(CodeBuilder *builder, cstring method,
     }
 }
 
-/**
- * This method calculates a hash value and saves it to the registerVar.
- */
+/// This method calculates a hash value and saves it to the registerVar.
 void EBPFHashPSA::calculateHash(CodeBuilder *builder, const IR::MethodCallExpression *expr,
                                 Visitor *visitor) {
     engine->setVisitor(visitor);

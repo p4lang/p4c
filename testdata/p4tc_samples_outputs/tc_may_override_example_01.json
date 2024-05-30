@@ -1,11 +1,13 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "tc_may_override_example_01",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/ipv4_tbl_1",
       "id" : 1,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 64,
       "keyfields" : [
@@ -56,6 +58,7 @@
       "name" : "MainControlImpl/ipv4_tbl_2",
       "id" : 2,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 72,
       "keyfields" : [
@@ -86,7 +89,7 @@
           "id" : 1,
           "name" : "MainControlImpl/next_hop",
           "action_scope" : "TableAndDefault",
-          "annotations" : [],
+          "annotations" : ["tc_may_override", "default_hit_const"],
           "params" : [
             {
               "id" : 1,
@@ -95,7 +98,7 @@
               "bitwidth" : 32
             }
           ],
-          "default_hit_action" : false,
+          "default_hit_action" : true,
           "default_miss_action" : false
         },
         {

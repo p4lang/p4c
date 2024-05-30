@@ -1184,7 +1184,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::con
         auto params = constructor->parameters;
         for (auto param : params->parameters) {
             if (auto v = param->type->to<IR::Type_InfInt>()) {
-                auto tv = new IR::Type_InfInt(param->type->srcInfo);
+                auto tv = IR::Type_InfInt::get(param->type->srcInfo);
                 bool b = tvs.setBinding(v, tv);
                 BUG_CHECK(b, "failed replacing %2% with %3%", v, tv);
             }
@@ -1236,7 +1236,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::con
         forAllMatching<IR::Type_Var>(p, [tvs, dontCares, typeParams](const IR::Type_Var *tv) {
             if (tvs->lookup(tv)) return;                            // already bound
             if (typeParams->getDeclByName(tv->name) != tv) return;  // not a tv of this call
-            dontCares->setBinding(tv, new IR::Type_Dontcare);
+            dontCares->setBinding(tv, IR::Type_Dontcare::get());
         });
     }
     addSubstitutions(dontCares);
@@ -2533,7 +2533,7 @@ const IR::Node *TypeInference::binaryArith(const IR::Operation_Binary *expressio
                   expression->getStringOp(), expression->right, rtype->toString());
         return expression;
     } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
-        auto t = new IR::Type_InfInt();
+        auto t = IR::Type_InfInt::get();
         auto result = constantFold(expression);
         setType(getOriginal(), t);
         setCompileTimeConstant(result);
@@ -2660,7 +2660,7 @@ const IR::Node *TypeInference::shift(const IR::Operation_Binary *expression) {
         // If the amount is signed but positive, make it unsigned
         if (auto bt = rtype->to<IR::Type_Bits>()) {
             if (bt->isSigned) {
-                rtype = new IR::Type_Bits(rtype->srcInfo, bt->width_bits(), false);
+                rtype = IR::Type_Bits::get(rtype->srcInfo, bt->width_bits(), false);
                 auto amt = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
                 if (expression->is<IR::Shl>()) {
                     expression = new IR::Shl(expression->srcInfo, expression->left, amt);
@@ -2684,8 +2684,13 @@ const IR::Node *TypeInference::shift(const IR::Operation_Binary *expression) {
         return expression;
     }
 
-    if (ltype->is<IR::Type_InfInt>() && !rtype->is<IR::Type_InfInt>()) {
-        typeError("%1%: width of left operand of shift needs to be specified", expression);
+    if (ltype->is<IR::Type_InfInt>() && !rtype->is<IR::Type_InfInt>() &&
+        !isCompileTimeConstant(expression->right)) {
+        typeError(
+            "%1%: shift result type is arbitrary-precision int, but right operand is not constant; "
+            "width of left operand of shift needs to be specified or both operands need to be "
+            "constant",
+            expression);
         return expression;
     }
 
@@ -2749,6 +2754,10 @@ const IR::Node *TypeInference::typeSet(const IR::Operation_Binary *expression) {
     } else {
         // both are InfInt: use same exact type for both sides, so it is properly
         // set after unification
+        // FIXME -- the below is obviously wrong and just serves to tweak when precisely
+        // the type will be inferred -- papering over bugs elsewhere in typechecking,
+        // avoiding the BUG_CHECK(!readOnly... in end_apply/apply_visitor above.
+        // (maybe just need learner->readOnly = false in TypeInference::learn above?)
         auto r = expression->right->clone();
         auto e = expression->clone();
         if (isCompileTimeConstant(expression->right)) setCompileTimeConstant(r);
@@ -3159,8 +3168,8 @@ const IR::Node *TypeInference::postorder(IR::Slice *expression) {
 
 const IR::Node *TypeInference::postorder(IR::Dots *expression) {
     if (done()) return expression;
-    setType(expression, new IR::Type_Any());
-    setType(getOriginal(), new IR::Type_Any());
+    setType(expression, IR::Type_Any::get());
+    setType(getOriginal(), IR::Type_Any::get());
     setCompileTimeConstant(expression);
     setCompileTimeConstant(getOriginal<IR::Expression>());
     return expression;
@@ -3258,7 +3267,7 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
     // Built-in methods
     if (inMethod && (member == IR::Type::minSizeInBits || member == IR::Type::minSizeInBytes ||
                      member == IR::Type::maxSizeInBits || member == IR::Type::maxSizeInBytes)) {
-        auto type = new IR::Type_Method(new IR::Type_InfInt(), new IR::ParameterList(), member);
+        auto type = new IR::Type_Method(IR::Type_InfInt::get(), new IR::ParameterList(), member);
         auto ctype = canonicalize(type);
         if (ctype == nullptr) return expression;
         setType(getOriginal(), ctype);
@@ -3372,7 +3381,7 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
                 typeError("%1%: must be applied to a left-value", expression);
             auto params = new IR::IndexedVector<IR::Parameter>();
             auto param = new IR::Parameter(IR::ID("count", nullptr), IR::Direction::None,
-                                           new IR::Type_InfInt());
+                                           IR::Type_InfInt::get());
             auto tt = new IR::Type_Type(param->type);
             setType(param->type, tt);
             setType(param, param->type);
@@ -3615,6 +3624,11 @@ bool TypeInference::onlyBitsOrBitStructs(const IR::Type *type) const {
     return false;
 }
 
+const IR::Node *TypeInference::postorder(IR::MethodCallStatement *mcs) {
+    // Remove mcs if child methodCall resolves to a compile-time constant.
+    return !mcs->methodCall ? nullptr : mcs;
+}
+
 const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
     if (done()) return expression;
     LOG2("Solving method call " << dbp(expression));
@@ -3653,6 +3667,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
                 LOG3("Folding " << mem << " to " << w);
                 if (w < 0) return expression;
                 if (mem->member.name.endsWith("Bytes")) w = ROUNDUP(w, 8);
+                if (getParent<IR::MethodCallStatement>()) return nullptr;
                 auto result = new IR::Constant(expression->srcInfo, w);
                 auto tt = new IR::Type_Type(result->type);
                 setType(result->type, tt);
@@ -3670,6 +3685,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
                     lit = new IR::BoolLiteral(expression->srcInfo, true);
                 if (lit) {
                     LOG3("Folding " << mem << " to " << lit);
+                    if (getParent<IR::MethodCallStatement>()) return nullptr;
                     setType(lit, IR::Type_Boolean::get());
                     setCompileTimeConstant(lit);
                     return lit;
@@ -3720,7 +3736,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
                         return;                                             // already bound
                     if (tvs->lookup(tv)) return;                            // already bound
                     if (typeParams->getDeclByName(tv->name) != tv) return;  // not a tv of this call
-                    dontCares->setBinding(tv, new IR::Type_Dontcare);
+                    dontCares->setBinding(tv, IR::Type_Dontcare::get());
                 });
         }
         addSubstitutions(dontCares);
@@ -4135,6 +4151,40 @@ const IR::Node *TypeInference::postorder(IR::AssignmentStatement *assign) {
     if (newInit != assign->right)
         assign = new IR::AssignmentStatement(assign->srcInfo, assign->left, newInit);
     return assign;
+}
+
+const IR::Node *TypeInference::postorder(IR::ForInStatement *forin) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
+    auto ltype = getType(forin->ref);
+    if (ltype == nullptr) return forin;
+    auto ctype = getType(forin->collection);
+    if (ctype == nullptr) return forin;
+
+    if (!isLeftValue(forin->ref)) {
+        typeError("Expression %1% cannot be the target of an assignment", forin->ref);
+        LOG2(forin->ref);
+        return forin;
+    }
+    if (auto range = forin->collection->to<IR::Range>()) {
+        auto rclone = range->clone();
+        rclone->left = assignment(forin, ltype, rclone->left);
+        rclone->right = assignment(forin, ltype, rclone->right);
+        if (*range != *rclone)
+            forin->collection = rclone;
+        else
+            delete rclone;
+    } else if (auto *stack = ctype->to<IR::Type_Stack>()) {
+        if (!canCastBetween(stack->elementType, ltype))
+            typeError("%1% does not match header stack type %2%", forin->ref, ctype);
+    } else if (auto *list = ctype->to<IR::Type_P4List>()) {
+        if (!canCastBetween(list->elementType, ltype))
+            typeError("%1% does not match %2% element type", forin->ref, ctype);
+    } else {
+        error(ErrorType::ERR_UNSUPPORTED,
+              "%1%Typechecking does not support iteration over this collection of type %2%",
+              forin->collection->srcInfo, ctype);
+    }
+    return forin;
 }
 
 const IR::Node *TypeInference::postorder(IR::ActionListElement *elem) {

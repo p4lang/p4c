@@ -37,6 +37,7 @@ void IntrospectionGenerator::collectTableInfo() {
         tableInfo->id = table->tableID;
         tableInfo->name = table->controlName + "/" + table->tableName;
         tableInfo->tentries = table->tableEntriesCount;
+        tableInfo->permissions = table->permissions;
         tableInfo->numMask = table->numMask;
         if (table->keySize != 0) {
             tableInfo->keysize = table->keySize;
@@ -151,6 +152,61 @@ void IntrospectionGenerator::collectActionInfo(const IR::ActionList *actionlist,
     }
 }
 
+void IntrospectionGenerator::collectExternInfo() {
+    for (auto extn : tcPipeline->externDefs) {
+        auto externInfo = new struct ExternAttributes();
+        externInfo->id = extn->externID;
+        externInfo->name = extn->externName;
+        externInfo->permissions = extn->acl_permisson;
+
+        for (auto externInstance : extn->externInstances) {
+            auto externInstanceInfo = new struct ExternInstancesAttributes();
+            externInstanceInfo->id = externInstance->instanceID;
+            externInstanceInfo->name = externInstance->instanceName;
+            for (auto control_field : externInstance->keys) {
+                auto keyField = new struct KeyFieldAttributes();
+                keyField->id = control_field->keyID;
+                keyField->name = control_field->keyName;
+                keyField->attribute = control_field->keyAttribute;
+                keyField->type = "bit" + Util::toString(control_field->bitwidth);
+                keyField->bitwidth = control_field->bitwidth;
+                externInstanceInfo->keyFields.push_back(keyField);
+            }
+            externInfo->instances.push_back(externInstanceInfo);
+        }
+        externsInfo.push_back(externInfo);
+    }
+}
+
+Util::JsonObject *IntrospectionGenerator::genExternInfo(struct ExternAttributes *extn) {
+    auto externJson = new Util::JsonObject();
+    externJson->emplace("name", extn->name);
+    externJson->emplace("id", extn->id);
+    externJson->emplace("permissions", extn->permissions);
+    auto instanceJson = new Util::JsonArray();
+    for (auto eInstance : extn->instances) {
+        auto eInstanceJson = new Util::JsonObject();
+        eInstanceJson->emplace("inst_name", eInstance->name);
+        eInstanceJson->emplace("inst_id", eInstance->id);
+        auto paramArray = new Util::JsonArray();
+        for (auto param : eInstance->keyFields) {
+            auto keyJson = genKeyInfo(param);
+            paramArray->append(keyJson);
+        }
+        eInstanceJson->emplace("params", paramArray);
+        instanceJson->append(eInstanceJson);
+    }
+    externJson->emplace("instances", instanceJson);
+    return externJson;
+}
+
+void IntrospectionGenerator::genExternJson(Util::JsonArray *externsJson) {
+    for (auto extn : externsInfo) {
+        auto extnJson = genExternInfo(extn);
+        externsJson->append(extnJson);
+    }
+}
+
 void IntrospectionGenerator::genTableJson(Util::JsonArray *tablesJson) {
     for (auto table : tablesInfo) {
         auto tableJson = genTableInfo(table);
@@ -230,7 +286,12 @@ Util::JsonObject *IntrospectionGenerator::genKeyInfo(struct KeyFieldAttributes *
     keyJson->emplace("id", keyField->id);
     keyJson->emplace("name", keyField->name);
     keyJson->emplace("type", keyField->type);
-    keyJson->emplace("match_type", keyField->matchType);
+    if (keyField->attribute) {
+        keyJson->emplace("attr", keyField->attribute);
+    }
+    if (keyField->matchType) {
+        keyJson->emplace("match_type", keyField->matchType);
+    }
     keyJson->emplace("bitwidth", keyField->bitwidth);
     return keyJson;
 }
@@ -240,6 +301,7 @@ Util::JsonObject *IntrospectionGenerator::genTableInfo(struct TableAttributes *t
     tableJson->emplace("name", tbl->name);
     tableJson->emplace("id", tbl->id);
     tableJson->emplace("tentries", tbl->tentries);
+    tableJson->emplace("permissions", tbl->permissions);
     tableJson->emplace("nummask", tbl->numMask);
     if (tbl->keysize != 0) {
         tableJson->emplace("keysize", tbl->keysize);
@@ -266,11 +328,15 @@ Util::JsonObject *IntrospectionGenerator::genTableInfo(struct TableAttributes *t
 const Util::JsonObject *IntrospectionGenerator::genIntrospectionJson() {
     auto *json = new Util::JsonObject();
     auto *tablesJson = new Util::JsonArray();
+    auto *externJson = new Util::JsonArray();
     struct IntrospectionInfo introspec;
     collectTableInfo();
+    collectExternInfo();
     introspec.initIntrospectionInfo(tcPipeline);
     json->emplace("schema_version", introspec.schemaVersion);
     json->emplace("pipeline_name", introspec.pipelineName);
+    genExternJson(externJson);
+    json->emplace("externs", externJson);
     genTableJson(tablesJson);
     json->emplace("tables", tablesJson);
     return json;

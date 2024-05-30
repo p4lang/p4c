@@ -91,7 +91,7 @@ std::vector<const IR::Mask *> *DoReplaceSelectRange::rangeToMasks(const IR::Rang
     auto inType = r->left->type->to<IR::Type_Bits>();
     BUG_CHECK(inType != nullptr, "Range type %1% is not fixed-width integer", r->left->type);
     bool isSigned = inType->isSigned;
-    auto maskType = isSigned ? new IR::Type_Bits(inType->srcInfo, inType->size, false) : inType;
+    auto maskType = isSigned ? IR::Type_Bits::get(inType->srcInfo, inType->size, false) : inType;
 
     if (isSigned) {
         signedIndicesToReplace.emplace(keyIndex);
@@ -150,7 +150,7 @@ const IR::Node *DoReplaceSelectRange::postorder(IR::SelectExpression *e) {
                           "Cannot handle select on types other then fixed-width integeral "
                           "types: %1%",
                           expr->type);
-                auto unsignedType = new IR::Type_Bits(eType->srcInfo, eType->size, false);
+                auto unsignedType = IR::Type_Bits::get(eType->srcInfo, eType->size, false);
 
                 newSelectList.push_back(new IR::Cast(expr->srcInfo, unsignedType, expr));
             } else {

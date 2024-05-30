@@ -50,17 +50,17 @@ class EBPFProgram : public EBPFObject {
     EBPFParser *parser;
     EBPFControl *control;
     EBPFModel &model;
-    // Deparser may be NULL if not supported (e.g. ebpfFilter package)
+    /// Deparser may be NULL if not supported (e.g. ebpfFilter package).
     EBPFDeparser *deparser;
 
     cstring endLabel, offsetVar, lengthVar, headerStartVar;
     cstring zeroKey, functionName, errorVar;
     cstring packetStartVar, packetEndVar, byteVar;
     cstring errorEnum;
-    cstring license = "GPL";  // TODO: this should be a compiler option probably
+    cstring license = "GPL";  /// TODO: this should be a compiler option probably
     cstring arrayIndexType = "u32";
 
-    virtual bool build();  // return 'true' on success
+    virtual bool build();  /// return 'true' on success
 
     EBPFProgram(const EbpfOptions &options, const IR::P4Program *program, P4::ReferenceMap *refMap,
                 P4::TypeMap *typeMap, const IR::ToplevelBlock *toplevel)
@@ -94,6 +94,11 @@ class EBPFProgram : public EBPFObject {
     virtual void emitHeaderInstances(CodeBuilder *builder);
     virtual void emitLocalVariables(CodeBuilder *builder);
     virtual void emitPipeline(CodeBuilder *builder);
+
+    /// Checks whether a method name is considered to be part of the standard library, e.g., defined
+    /// in core.p4 or ebpf_model.p4.
+    /// TODO: Should we also distinguish overloaded methods?
+    virtual bool isLibraryMethod(cstring methodName);
 
  public:
     virtual void emitCommonPreamble(CodeBuilder *builder);

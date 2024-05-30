@@ -7,6 +7,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
+#include "backends/p4tools/modules/testgen/toolname.h"
 
 std::string updateErrorMsg(std::string errorMsg) {
     for (const std::string_view toReplace : {"Compiler", "compiler"}) {
@@ -31,7 +32,7 @@ int main(int argc, char **argv) {
     int result = EXIT_SUCCESS;
     try {
         Util::ScopedTimer timer("P4Testgen Main");
-        result = P4Tools::P4Testgen::Testgen().main(args);
+        result = P4Tools::P4Testgen::Testgen().main(P4Tools::P4Testgen::TOOL_NAME, args);
     } catch (const Util::CompilerBug &e) {
         std::cerr << "Internal error: " << updateErrorMsg(e.what()) << "\n";
         std::cerr << "Please submit a bug report with your code." << "\n";

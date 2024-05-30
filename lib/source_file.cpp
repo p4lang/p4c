@@ -21,6 +21,7 @@ limitations under the License.
 
 #include "exceptions.h"
 #include "lib/log.h"
+#include "lib/stringify.h"
 
 void IHasDbPrint::print() const {
     dbprint(std::cout);
@@ -317,4 +318,5 @@ cstring SourceFileLine::toString() const {
 [[gnu::used]]  // ensure linker will not drop function even if unused
 void dbprint(const IHasDbPrint *o) {
     o->dbprint(std::cout);
+    std::cout << std::endl << std::flush;
 }

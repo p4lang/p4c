@@ -31,7 +31,7 @@ $TC p4template update action/multiple_tables_example_01/MainControlImpl/tcp_othe
 $TC p4template create table/multiple_tables_example_01/MainControlImpl/ipv4_tbl_1 \
 	tblid 1 \
 	type exact \
-	keysz 32 nummasks 8 tentries 2048 \
+	keysz 32 nummasks 8 permissions 0x3da4 tentries 2048 \
 	table_acts act name multiple_tables_example_01/MainControlImpl/next_hop \
 	act name multiple_tables_example_01/MainControlImpl/default_route_drop
 $TC p4template update table/multiple_tables_example_01/MainControlImpl/ipv4_tbl_1 default_miss_action action multiple_tables_example_01/MainControlImpl/default_route_drop
@@ -39,7 +39,7 @@ $TC p4template update table/multiple_tables_example_01/MainControlImpl/ipv4_tbl_
 $TC p4template create table/multiple_tables_example_01/MainControlImpl/ipv4_tbl_2 \
 	tblid 2 \
 	type exact \
-	keysz 72 nummasks 8 tentries 2048 \
+	keysz 72 nummasks 8 permissions 0x3da4 tentries 2048 \
 	table_acts act name multiple_tables_example_01/MainControlImpl/next_hop \
 	act name multiple_tables_example_01/MainControlImpl/drop
 $TC p4template update table/multiple_tables_example_01/MainControlImpl/ipv4_tbl_2 default_miss_action action multiple_tables_example_01/MainControlImpl/drop
@@ -47,26 +47,29 @@ $TC p4template update table/multiple_tables_example_01/MainControlImpl/ipv4_tbl_
 $TC p4template create table/multiple_tables_example_01/MainControlImpl/ipv4_tbl_3 \
 	tblid 3 \
 	type exact \
-	keysz 67 nummasks 8 tentries 1024 \
+	keysz 67 nummasks 8 permissions 0x3da4 tentries 1024 \
 	table_acts act name multiple_tables_example_01/MainControlImpl/sendtoport \
-	act name multiple_tables_example_01/MainControlImpl/drop
+	act name multiple_tables_example_01/MainControlImpl/drop \
+	act name NoAction flags defaultonly
 
 $TC p4template create table/multiple_tables_example_01/MainControlImpl/ipv4_tbl_4 \
 	tblid 4 \
 	type exact \
-	keysz 77 nummasks 8 tentries 1024 \
+	keysz 77 nummasks 8 permissions 0x3da4 tentries 1024 \
 	table_acts act name multiple_tables_example_01/MainControlImpl/sendtoport \
-	act name multiple_tables_example_01/MainControlImpl/drop
+	act name multiple_tables_example_01/MainControlImpl/drop \
+	act name NoAction
 
 $TC p4template create table/multiple_tables_example_01/MainControlImpl/ipv4_tbl_5 \
 	tblid 5 \
 	type exact \
-	keysz 13 nummasks 8 tentries 1024
+	keysz 13 nummasks 8 permissions 0x3da4 tentries 1024 \
+	table_acts act name NoAction
 
 $TC p4template create table/multiple_tables_example_01/MainControlImpl/set_ct_options \
 	tblid 6 \
 	type ternary \
-	keysz 8 nummasks 8 tentries 2048 \
+	keysz 8 nummasks 8 permissions 0x3da4 tentries 2048 \
 	table_acts act name multiple_tables_example_01/MainControlImpl/tcp_syn_packet \
 	act name multiple_tables_example_01/MainControlImpl/tcp_fin_or_rst_packet \
 	act name multiple_tables_example_01/MainControlImpl/tcp_other_packets
@@ -75,14 +78,15 @@ $TC p4template update table/multiple_tables_example_01/MainControlImpl/set_ct_op
 $TC p4template create table/multiple_tables_example_01/MainControlImpl/set_all_options \
 	tblid 7 \
 	type exact \
-	keysz 64 nummasks 8 tentries 2048 \
+	keysz 64 nummasks 8 permissions 0x3da4 tentries 2048 \
 	table_acts act name multiple_tables_example_01/MainControlImpl/next_hop \
 	act name multiple_tables_example_01/MainControlImpl/default_route_drop \
 	act name multiple_tables_example_01/MainControlImpl/tcp_syn_packet \
 	act name multiple_tables_example_01/MainControlImpl/tcp_fin_or_rst_packet \
 	act name multiple_tables_example_01/MainControlImpl/tcp_other_packets \
 	act name multiple_tables_example_01/MainControlImpl/sendtoport \
-	act name multiple_tables_example_01/MainControlImpl/drop
+	act name multiple_tables_example_01/MainControlImpl/drop \
+	act name NoAction
 $TC p4template update table/multiple_tables_example_01/MainControlImpl/set_all_options default_miss_action permissions 0x1024 action multiple_tables_example_01/MainControlImpl/drop
 $TC p4template create table/multiple_tables_example_01/MainControlImpl/set_all_options entry hdr.ipv4.srcAddr 0x1000 hdr.tcp.srcPort 0x10 hdr.ipv4.fragOffset 10 hdr.ipv4.flags 1 permissions 0x1024 action multiple_tables_example_01/MainControlImpl/tcp_syn_packet
 $TC p4template create table/multiple_tables_example_01/MainControlImpl/set_all_options entry hdr.ipv4.srcAddr 0x2000 hdr.tcp.srcPort 0x20 hdr.ipv4.fragOffset 20 hdr.ipv4.flags 2 permissions 0x1024 action multiple_tables_example_01/MainControlImpl/tcp_fin_or_rst_packet

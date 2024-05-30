@@ -1,11 +1,13 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "tc_may_override_example_03",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/ipv4_tbl_1",
       "id" : 1,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 64,
       "keyfields" : [
@@ -49,6 +51,7 @@
       "name" : "MainControlImpl/ipv4_tbl_2",
       "id" : 2,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 72,
       "keyfields" : [

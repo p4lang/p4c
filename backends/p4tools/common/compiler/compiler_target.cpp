@@ -18,47 +18,46 @@
 
 namespace P4Tools {
 
-const IR::P4Program &CompilerResult::getProgram() const { return program; }
-
-CompilerResult::CompilerResult(const IR::P4Program &program) : program(program) {}
-
-ICompileContext *CompilerTarget::makeContext() { return get().makeContextImpl(); }
-
-std::vector<const char *> *CompilerTarget::initCompiler(int argc, char **argv) {
-    return get().initCompilerImpl(argc, argv);
+ICompileContext *CompilerTarget::makeContext(std::string_view toolName) {
+    return get(toolName).makeContextImpl();
 }
 
-CompilerResultOrError CompilerTarget::runCompiler() {
+std::vector<const char *> *CompilerTarget::initCompiler(std::string_view toolName, int argc,
+                                                        char **argv) {
+    return get(toolName).initCompilerImpl(argc, argv);
+}
+
+CompilerResultOrError CompilerTarget::runCompiler(std::string_view toolName) {
     const auto *program = P4Tools::CompilerTarget::runParser();
     if (program == nullptr) {
         return std::nullopt;
     }
 
-    return runCompiler(program);
+    return runCompiler(toolName, program);
 }
 
-CompilerResultOrError CompilerTarget::runCompiler(const std::string &source) {
+CompilerResultOrError CompilerTarget::runCompiler(std::string_view toolName,
+                                                  const std::string &source) {
     const auto *program = P4::parseP4String(source, P4CContext::get().options().langVersion);
     if (program == nullptr) {
         return std::nullopt;
     }
 
-    return runCompiler(program);
+    return runCompiler(toolName, program);
 }
 
-CompilerResultOrError CompilerTarget::runCompiler(const IR::P4Program *program) {
-    return get().runCompilerImpl(program);
+CompilerResultOrError CompilerTarget::runCompiler(std::string_view toolName,
+                                                  const IR::P4Program *program) {
+    return get(toolName).runCompilerImpl(program);
 }
 
 CompilerResultOrError CompilerTarget::runCompilerImpl(const IR::P4Program *program) const {
-    const auto &self = get();
-
-    program = self.runFrontend(program);
+    program = runFrontend(program);
     if (program == nullptr) {
         return std::nullopt;
     }
 
-    program = self.runMidEnd(program);
+    program = runMidEnd(program);
     if (program == nullptr) {
         return std::nullopt;
     }
@@ -119,8 +118,12 @@ const IR::P4Program *CompilerTarget::runMidEnd(const IR::P4Program *program) con
     return program->apply(midEnd);
 }
 
-CompilerTarget::CompilerTarget(std::string deviceName, std::string archName)
-    : Target("compiler", std::move(deviceName), std::move(archName)) {}
+CompilerTarget::CompilerTarget(std::string_view toolName, const std::string &deviceName,
+                               const std::string &archName)
+    : Target(toolName, deviceName, archName) {}
 
-const CompilerTarget &CompilerTarget::get() { return Target::get<CompilerTarget>("compiler"); }
+const CompilerTarget &CompilerTarget::get(std::string_view toolName) {
+    return Target::get<CompilerTarget>(toolName);
+}
+
 }  // namespace P4Tools

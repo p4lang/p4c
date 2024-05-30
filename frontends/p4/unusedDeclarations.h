@@ -56,6 +56,7 @@ class RemoveUnusedPolicy {
  * @pre Requires an up-to-date ReferenceMap.
  */
 class RemoveUnusedDeclarations : public Transform {
+ protected:
     const ReferenceMap *refMap;
 
     /** If not null, logs the following unused elements in @warn:
@@ -75,7 +76,6 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node *process(const IR::IDeclaration *decl);
     const IR::Node *warnIfUnused(const IR::Node *node);
 
- protected:
     // Prevent direct instantiations of this class.
     friend class RemoveUnusedPolicy;
     RemoveUnusedDeclarations(const ReferenceMap *refMap, bool warn)

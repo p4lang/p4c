@@ -83,12 +83,12 @@ control pipe(inout Headers_t headers, out bool xout) {
         filter_tbl.apply();
 
         // If-statement below tests if appropriate parenthesis are
-        // added because, if not, gcc compling fails with emitted C code.
+        // added because, if not, GCC compling fails with emitted C code.
         if (headers.ipv6.isValid() && ((headers.ethernet.etherType == 0x86dd)
 	    || (headers.ipv6.hop_limit == 255)))
             headers.ipv6.protocol = 17;
         // If-statement below tests if duplicate parenthesis
-        // are not added in emitted C code causing gcc compiling failure.
+        // are not added in emitted C code causing GCC compiling failure.
         if (headers.ethernet.etherType == 0x0800)
             headers.ipv6.protocol = 10;
     }

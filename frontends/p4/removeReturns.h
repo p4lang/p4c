@@ -98,6 +98,8 @@ class DoRemoveReturns : public Transform {
         prune();
         return parser;
     }
+
+    const IR::Node *postorder(IR::LoopStatement *loop) override;
 };
 
 class RemoveReturns : public PassManager {

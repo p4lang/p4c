@@ -153,6 +153,10 @@ class SymbolicVariable : Expression {
 
 /// This type replaces Type_Varbits and can store information about the current size
 class Extracted_Varbits : Type_Bits {
+ public:
+#emit
+    void *operator new(size_t size) { return ::operator new(size); }
+#end
     /// The assigned size of this varbit (assigned by extract calls).
     int assignedSize;
 

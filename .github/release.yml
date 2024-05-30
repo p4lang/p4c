@@ -1,0 +1,41 @@
+# .github/release.yml
+
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - octocat
+  categories:
+    - title: Breaking Changes 🛠
+      labels:
+        - breaking-change
+    - title: P4 Specification Implementation
+      labels:
+        - p4-spec
+    - title: Changes to the Compiler Core
+      labels:
+        - core
+    - title: Changes to the Control Plane
+      labels:
+        - control-plane
+    - title: Changes to the BMv2 Back Ends
+      labels:
+        - bmv2
+        - bmv2-psa
+    - title: Changes to the eBPF Back Ends
+      labels:
+        - ebpf
+        - ebpf-psa
+    - title: Changes to the TC Back End
+      labels:
+        - p4tc
+    - title: Changes to the DPDK Back End
+      labels:
+        - dpdk
+    - title: Changes to the P4Tools Back End
+      labels:
+        - p4tools
+    - title: Other Changes
+      labels:
+        - "*"

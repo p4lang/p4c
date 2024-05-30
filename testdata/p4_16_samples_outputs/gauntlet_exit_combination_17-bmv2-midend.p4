@@ -23,7 +23,6 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bool hasExited;
     @name("ingress.hasReturned") bool hasReturned;
     bit<48> key_0;
     bit<48> key_1;
@@ -63,12 +62,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         key_1 = 48w1;
     }
     @hidden action gauntlet_exit_combination_17bmv2l30() {
-        hasExited = false;
         hasReturned = false;
         key_0 = 48w1;
-    }
-    @hidden action gauntlet_exit_combination_17bmv2l55() {
-        hasExited = true;
     }
     @hidden table tbl_gauntlet_exit_combination_17bmv2l30 {
         actions = {
@@ -88,12 +83,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_exit_combination_17bmv2l49();
     }
-    @hidden table tbl_gauntlet_exit_combination_17bmv2l55 {
-        actions = {
-            gauntlet_exit_combination_17bmv2l55();
-        }
-        const default_action = gauntlet_exit_combination_17bmv2l55();
-    }
     apply {
         tbl_gauntlet_exit_combination_17bmv2l30.apply();
         switch (simple_table.apply().action_run) {
@@ -109,11 +98,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             }
             default: {
             }
-        }
-        if (hasReturned) {
-            ;
-        } else {
-            tbl_gauntlet_exit_combination_17bmv2l55.apply();
         }
     }
 }

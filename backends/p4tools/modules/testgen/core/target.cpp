@@ -1,7 +1,6 @@
 #include "backends/p4tools/modules/testgen/core/target.h"
 
 #include <string>
-#include <utility>
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/core/target.h"
@@ -12,11 +11,12 @@
 #include "lib/exceptions.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/toolname.h"
 
 namespace P4Tools::P4Testgen {
 
-TestgenTarget::TestgenTarget(std::string deviceName, std::string archName)
-    : Target("testgen", std::move(deviceName), std::move(archName)) {}
+TestgenTarget::TestgenTarget(const std::string &deviceName, const std::string &archName)
+    : CompilerTarget(TOOL_NAME, deviceName, archName) {}
 
 const ProgramInfo *TestgenTarget::produceProgramInfoImpl(
     const CompilerResult &compilerResult) const {
@@ -58,6 +58,33 @@ ExprStepper *TestgenTarget::getExprStepper(ExecutionState &state, AbstractSolver
 CmdStepper *TestgenTarget::getCmdStepper(ExecutionState &state, AbstractSolver &solver,
                                          const ProgramInfo &programInfo) {
     return get().getCmdStepperImpl(state, solver, programInfo);
+}
+
+CompilerResultOrError TestgenTarget::runCompilerImpl(const IR::P4Program *program) const {
+    program = runFrontend(program);
+    if (program == nullptr) {
+        return std::nullopt;
+    }
+
+    program = runMidEnd(program);
+    if (program == nullptr) {
+        return std::nullopt;
+    }
+
+    // Create DCG.
+    NodesCallGraph *dcg = nullptr;
+    if (TestgenOptions::get().dcg || !TestgenOptions::get().pattern.empty()) {
+        dcg = new NodesCallGraph("NodesCallGraph");
+        P4ProgramDCGCreator dcgCreator(dcg);
+        program->apply(dcgCreator);
+    }
+
+    /// Collect coverage information about the program.
+    auto coverage = P4::Coverage::CollectNodes(TestgenOptions::get().coverageOptions);
+    program->apply(coverage);
+
+    return {
+        *new TestgenCompilerResult(CompilerResult(*program), coverage.getCoverableNodes(), dcg)};
 }
 
 }  // namespace P4Tools::P4Testgen

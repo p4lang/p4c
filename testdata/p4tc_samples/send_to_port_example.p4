@@ -71,7 +71,12 @@ control MainControlImpl(
     in    pna_main_input_metadata_t istd,
     inout pna_main_output_metadata_t ostd)
 {
+    Register<bit<32>, PortId_t>(10, 13) reg1;
     action next_hop(PortId_t vport) {
+        bit<32> val;
+        val = reg1.read(vport);
+        val = val + 10;
+        reg1.write(vport, val);
         send_to_port(vport);
     }
     action default_route_drop() {

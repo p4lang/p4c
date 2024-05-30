@@ -422,7 +422,9 @@ class P4Program : IGeneralNamespace {
 
 ///////////////////////////// Statements //////////////////////////
 
-abstract Statement : StatOrDecl {}
+abstract Statement : StatOrDecl {
+#apply
+}
 
 class ExitStatement : Statement {
     toString{ return "exit"; }
@@ -454,6 +456,18 @@ class IfStatement : Statement {
         SplitFlowVisit<Statement>(v, ifTrue, ifFalse).run_visit(); }
 }
 
+class BreakStatement : Statement {
+    toString{ return "break"; }
+    dbprint { out << "break"; }
+    visit_children;  // in loop-visitor.cpp
+}
+
+class ContinueStatement : Statement {
+    toString{ return "continue"; }
+    dbprint { out << "continue"; }
+    visit_children;  // in loop-visitor.cpp
+}
+
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
     optional Annotations                        annotations = Annotations::empty;
     optional inline IndexedVector<StatOrDecl>   components;
@@ -464,6 +478,8 @@ class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
     void push_back(StatOrDecl st) { components.push_back(st); }
     Annotations getAnnotations() const override { return annotations; }
     bool empty() const { return components.empty(); }
+    void append(StatOrDecl stmt);
+    BlockStatement(std::initializer_list<StatOrDecl> il) { for (auto el : il) append(el); }
 }
 
 class MethodCallStatement : Statement {
@@ -499,6 +515,53 @@ class SwitchStatement : Statement {
         for (auto &c : cases) split.addNode(c);
         split.run_visit(); }
 }
+
+/* abstract base class for all loops */
+abstract LoopStatement : Statement, ISimpleNamespace, IAnnotated {
+    optional Annotations                annotations = Annotations::empty;
+    Annotations getAnnotations() const override { return annotations; }
+}
+
+class ForStatement : LoopStatement {
+    inline IndexedVector<StatOrDecl>    init;
+    Expression                          condition;
+    inline IndexedVector<StatOrDecl>    updates;
+    Statement                           body;
+    IDeclaration getDeclByName(cstring name) const override {
+        return init.getDeclaration(name); }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return init.getDeclarations(); }
+    visit_children;
+#emit
+    // template single implementation of const vs non-const ForStatement
+    template<class THIS> static void visit_children(THIS *, Visitor &v);
+#end
+}
+
+// FIXME -- should we try to directly convert this to a ForStatement in the parser?
+class ForInStatement : LoopStatement {
+    NullOK Declaration_Variable         decl;
+    // the declaration will be moved to the enclosing block by MoveDeclarations, but
+    // we keep a ref (PathExpression) to it that will be set by the ctor
+    PathExpression                      ref = nullptr;
+    Expression                          collection;
+    Statement                           body;
+    ForInStatement { ref = new PathExpression(decl->name); }
+    ForInStatement(Util::SourceInfo si, Annotations a, PathExpression pe, Expression c, Statement b)
+        : LoopStatement(si, a), decl(nullptr), ref(pe), collection(c), body(b) {}
+    IDeclaration getDeclByName(cstring name) const override {
+        return decl && decl->name == name ? decl : nullptr; }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        if (decl) return new Util::SingleEnumerator<const IDeclaration *>(decl);
+        return new Util::EmptyEnumerator<const IDeclaration *>(); }
+    visit_children;
+#emit
+    // template single implementation of const vs non-const ForInStatement
+    template<class THIS> static void visit_children(THIS *, Visitor &v);
+#end
+}
+
+/////////////////////////////////////////////////////////////
 
 class Function : Declaration, IFunctional, IAnnotated, ISimpleNamespace, INestedNamespace {
     optional Annotations        annotations = Annotations::empty;

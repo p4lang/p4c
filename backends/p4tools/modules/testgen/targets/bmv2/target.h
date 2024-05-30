@@ -1,11 +1,6 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TARGET_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TARGET_H_
 
-#include <cstdint>
-#include <filesystem>
-#include <optional>
-
-#include "backends/p4tools/common/lib/arch_spec.h"
 #include "ir/ir.h"
 #include "ir/solver.h"
 
@@ -42,6 +37,10 @@ class Bmv2V1ModelTestgenTarget : public TestgenTarget {
 
  private:
     Bmv2V1ModelTestgenTarget();
+
+    [[nodiscard]] MidEnd mkMidEnd(const CompilerOptions &options) const override;
+
+    CompilerResultOrError runCompilerImpl(const IR::P4Program *program) const override;
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2

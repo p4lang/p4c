@@ -48,8 +48,8 @@ bool Backend::process() {
     parseTCAnno = new ParseTCAnnotations();
     tcIR = new ConvertToBackendIR(toplevel, pipeline, refMap, typeMap, options);
     genIJ = new IntrospectionGenerator(pipeline, refMap, typeMap);
-    addPasses({parseTCAnno, new P4::ResolveReferences(refMap),
-               new P4::TypeInference(refMap, typeMap), tcIR, genIJ});
+    addPasses({parseTCAnno, new P4::ClearTypeMap(typeMap),
+               new P4::TypeChecking(refMap, typeMap, true), tcIR, genIJ});
     toplevel->getProgram()->apply(*this);
     if (::errorCount() > 0) return false;
     if (!ebpfCodeGen(refMapEBPF, typeMapEBPF)) return false;
@@ -211,17 +211,21 @@ cstring ConvertToBackendIR::externalName(const IR::IDeclaration *declaration) co
     return Name;
 }
 
-bool ConvertToBackendIR::isDuplicateOrNoAction(const IR::P4Action *action) {
+bool ConvertToBackendIR::isDuplicateAction(const IR::P4Action *action) {
     auto actionName = externalName(action);
     if (actions.find(actionName) != actions.end()) return true;
-    if (actionName == P4::P4CoreLibrary::instance().noAction.name) return true;
     return false;
 }
 
 void ConvertToBackendIR::postorder(const IR::P4Action *action) {
     if (action != nullptr) {
-        if (isDuplicateOrNoAction(action)) return;
+        if (isDuplicateAction(action)) return;
         auto actionName = externalName(action);
+        if (actionName == P4::P4CoreLibrary::instance().noAction.name) {
+            tcPipeline->addNoActionDefinition(new IR::TCAction("NoAction"));
+            actions.emplace("NoAction", action);
+            return;
+        }
         actions.emplace(actionName, action);
         actionCount++;
         unsigned int actionId = actionCount;
@@ -266,6 +270,16 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
                         ::error(ErrorType::ERR_INVALID,
                                 "tc_type annotation cannot have '%1%' as value", expr);
                     }
+                }
+                auto direction = param->direction;
+                if (direction == IR::Direction::InOut) {
+                    tcActionParam->setDirection(TC::INOUT);
+                } else if (direction == IR::Direction::In) {
+                    tcActionParam->setDirection(TC::IN);
+                } else if (direction == IR::Direction::Out) {
+                    tcActionParam->setDirection(TC::OUT);
+                } else {
+                    tcActionParam->setDirection(TC::NONE);
                 }
                 tcAction->addActionParams(tcActionParam);
             }
@@ -377,12 +391,12 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                 if (defaultActionProperty->isConstant) {
                     tabledef->setDefaultMissConst(true);
                 }
-                bool isTCMayOverride = false;
+                bool isTCMayOverrideMiss = false;
                 const IR::Annotation *overrideAnno =
                     defaultActionProperty->getAnnotations()->getSingle(
                         ParseTCAnnotations::tcMayOverride);
                 if (overrideAnno) {
-                    isTCMayOverride = true;
+                    isTCMayOverrideMiss = true;
                 }
                 bool directionParamPresent = false;
                 auto paramList = actionCall->action->getParameters();
@@ -391,14 +405,14 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                 }
                 if (!directionParamPresent) {
                     auto i = 0;
-                    if (isTCMayOverride) {
+                    if (isTCMayOverrideMiss) {
                         if (paramList->parameters.empty())
                             ::warning(ErrorType::WARN_INVALID,
                                       "%1% annotation cannot be used with default_action without "
                                       "parameters",
                                       overrideAnno);
                         else
-                            tabledef->setTcMayOverride();
+                            tabledef->setTcMayOverrideMiss();
                     }
                     for (auto param : paramList->parameters) {
                         auto defaultParam = new IR::TCDefaultActionParam();
@@ -409,14 +423,14 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                         }
                         auto defaultArg = methodexp->arguments->at(i++);
                         if (auto constVal = defaultArg->expression->to<IR::Constant>()) {
-                            if (!isTCMayOverride)
+                            if (!isTCMayOverrideMiss)
                                 defaultParam->setDefaultValue(
                                     Util::toString(constVal->value, 0, true, constVal->base));
                             tabledef->defaultMissActionParams.push_back(defaultParam);
                         }
                     }
                 } else {
-                    if (isTCMayOverride)
+                    if (isTCMayOverrideMiss)
                         ::warning(ErrorType::WARN_INVALID,
                                   "%1% annotation cannot be used with default_action with "
                                   "directional parameters",
@@ -433,11 +447,13 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
         unsigned int defaultHit = 0;
         unsigned int defaultHitConst = 0;
         cstring defaultActionName = nullptr;
+        bool isTcMayOverrideHitAction = false;
         for (auto action : actionlist->actionList) {
             auto annoList = action->getAnnotations()->annotations;
             bool isTableOnly = false;
             bool isDefaultHit = false;
             bool isDefaultHitConst = false;
+            bool isTcMayOverrideHit = false;
             for (auto anno : annoList) {
                 if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                     isTableOnly = true;
@@ -453,6 +469,9 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
                     defaultHitConst++;
                     auto adecl = refMap->getDeclaration(action->getPath(), true);
                     defaultActionName = externalName(adecl);
+                }
+                if (anno->name == ParseTCAnnotations::tcMayOverride) {
+                    isTcMayOverrideHit = true;
                 }
             }
             if (isTableOnly && isDefaultHit && isDefaultHitConst) {
@@ -479,6 +498,26 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
                         "annotated with '@default_hit' and '@default_hit_const'",
                         t->name.originalName, action->getName().originalName);
                 break;
+            } else if (isTcMayOverrideHit) {
+                auto adecl = refMap->getDeclaration(action->getPath(), true);
+                auto p4Action = adecl->getNode()->checkedTo<IR::P4Action>();
+                if (!isDefaultHit && !isDefaultHitConst) {
+                    ::warning(ErrorType::WARN_INVALID,
+                              "Table '%1%' has an action reference '%2%' which is "
+                              "annotated with '@tc_may_override' without '@default_hit' or "
+                              "'@default_hit_const'",
+                              t->name.originalName, action->getName().originalName);
+                    isTcMayOverrideHit = false;
+                    break;
+                } else if (p4Action->getParameters()->parameters.empty()) {
+                    ::warning(ErrorType::WARN_INVALID,
+                              " '@tc_may_override' cannot be used for %1%  action "
+                              " without parameters",
+                              action->getName().originalName);
+                    isTcMayOverrideHit = false;
+                    break;
+                }
+                isTcMayOverrideHitAction = true;
             }
         }
         if (::errorCount() > 0) {
@@ -508,10 +547,124 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
                     if (defaultHitConst == 1) {
                         tabledef->setDefaultHitConst(true);
                     }
+                    if (isTcMayOverrideHitAction) {
+                        if (!checkParameterDirection(tcAction)) {
+                            tabledef->setTcMayOverrideHit();
+                            for (auto param : tcAction->actionParams) {
+                                auto defaultParam = new IR::TCDefaultActionParam();
+                                defaultParam->setParamDetail(param);
+                                tabledef->defaultHitActionParams.push_back(defaultParam);
+                            }
+                        }
+                    }
                 }
             }
         }
     }
+}
+
+void ConvertToBackendIR::updateAddOnMissTable(const IR::P4Table *t) {
+    auto tblname = t->name.originalName;
+    for (auto table : tcPipeline->tableDefs) {
+        if (table->tableName == tblname) {
+            add_on_miss_tables.push_back(t);
+            auto tableDefinition = ((IR::TCTable *)table);
+            tableDefinition->setTableAddOnMiss();
+            tableDefinition->setTablePermission(HandleTableAccessPermission(t));
+        }
+    }
+}
+
+unsigned ConvertToBackendIR::GetAccessNumericValue(cstring access) {
+    unsigned value = 0;
+    for (auto s : access) {
+        unsigned mask = 0;
+        switch (s) {
+            case 'C':
+                mask = 1 << 6;
+                break;
+            case 'R':
+                mask = 1 << 5;
+                break;
+            case 'U':
+                mask = 1 << 4;
+                break;
+            case 'D':
+                mask = 1 << 3;
+                break;
+            case 'X':
+                mask = 1 << 2;
+                break;
+            case 'P':
+                mask = 1 << 1;
+                break;
+            case 'S':
+                mask = 1;
+                break;
+            default:
+                ::error(ErrorType::ERR_INVALID,
+                        "tc_acl annotation cannot have '%1%' in access permisson", s);
+        }
+        value |= mask;
+    }
+    return value;
+}
+
+cstring ConvertToBackendIR::HandleTableAccessPermission(const IR::P4Table *t) {
+    bool IsTableAddOnMiss = false;
+    cstring control_path, data_path;
+    for (auto table : add_on_miss_tables) {
+        if (table->name.originalName == t->name.originalName) {
+            IsTableAddOnMiss = true;
+        }
+    }
+    auto find = tablePermissions.find(t->name.originalName);
+    if (find != tablePermissions.end()) {
+        auto paths = tablePermissions[t->name.originalName];
+        control_path = paths->first;
+        data_path = paths->second;
+    }
+    // Default access value of Control_path and Data_Path
+    if (control_path.isNullOrEmpty()) {
+        control_path = IsTableAddOnMiss ? DEFAULT_ADD_ON_MISS_TABLE_CONTROL_PATH_ACCESS
+                                        : DEFAULT_TABLE_CONTROL_PATH_ACCESS;
+    }
+    if (data_path.isNullOrEmpty()) {
+        data_path = IsTableAddOnMiss ? DEFAULT_ADD_ON_MISS_TABLE_DATA_PATH_ACCESS
+                                     : DEFAULT_TABLE_DATA_PATH_ACCESS;
+    }
+
+    if (IsTableAddOnMiss) {
+        auto access = data_path.find('C');
+        if (!access) {
+            ::warning(
+                ErrorType::WARN_INVALID,
+                "Add on miss table '%1%' should have 'create' access permissons for data path.",
+                t->name.originalName);
+        }
+    }
+    auto access_cp = GetAccessNumericValue(control_path);
+    auto access_dp = GetAccessNumericValue(data_path);
+    auto access_permisson = (access_cp << 7) | access_dp;
+    std::stringstream value;
+    value << "0x" << std::hex << access_permisson;
+    return value.str().c_str();
+}
+
+std::pair<cstring, cstring> *ConvertToBackendIR::GetAnnotatedAccessPath(
+    const IR::Annotation *anno) {
+    cstring control_path, data_path;
+    if (anno) {
+        auto expr = anno->expr[0];
+        if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
+            auto permisson_str = typeLiteral->value;
+            auto char_pos = permisson_str.find(":");
+            control_path = permisson_str.before(char_pos);
+            data_path = permisson_str.substr(char_pos - permisson_str.begin() + 1);
+        }
+    }
+    auto paths = new std::pair<cstring, cstring>(control_path, data_path);
+    return paths;
 }
 
 void ConvertToBackendIR::postorder(const IR::P4Table *t) {
@@ -551,23 +704,36 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         tableKeysizeList.emplace(tId, keySize);
         auto annoList = t->getAnnotations()->annotations;
         for (auto anno : annoList) {
-            if (anno->name != ParseTCAnnotations::numMask) continue;
-            auto expr = anno->expr[0];
-            if (auto val = expr->to<IR::Constant>()) {
-                tableDefinition->setNumMask(val->asUint64());
-            } else {
-                ::error(ErrorType::ERR_INVALID,
-                        "nummask annotation cannot have '%1%' as value. Only integer "
-                        "constants are allowed",
-                        expr);
+            if (anno->name == ParseTCAnnotations::tc_acl) {
+                tablePermissions.emplace(t->name.originalName, GetAnnotatedAccessPath(anno));
+            } else if (anno->name == ParseTCAnnotations::numMask) {
+                auto expr = anno->expr[0];
+                if (auto val = expr->to<IR::Constant>()) {
+                    tableDefinition->setNumMask(val->asUint64());
+                } else {
+                    ::error(ErrorType::ERR_INVALID,
+                            "nummask annotation cannot have '%1%' as value. Only integer "
+                            "constants are allowed",
+                            expr);
+                }
             }
         }
+        tableDefinition->setTablePermission(HandleTableAccessPermission(t));
         auto actionlist = t->getActionList();
-        for (auto action : actionlist->actionList) {
-            for (auto actionDef : tcPipeline->actionDefs) {
+        if (actionlist->size() == 0) {
+            tableDefinition->addAction(tcPipeline->NoAction, TC::TABLEDEFAULT);
+        } else {
+            for (auto action : actionlist->actionList) {
+                const IR::TCAction *tcAction = nullptr;
                 auto adecl = refMap->getDeclaration(action->getPath(), true);
                 auto actionName = externalName(adecl);
-                if (actionName != actionDef->actionName) continue;
+                for (auto actionDef : tcPipeline->actionDefs) {
+                    if (actionName != actionDef->actionName) continue;
+                    tcAction = actionDef;
+                }
+                if (actionName == P4::P4CoreLibrary::instance().noAction.name) {
+                    tcAction = tcPipeline->NoAction;
+                }
                 auto annoList = action->getAnnotations()->annotations;
                 unsigned int tableFlag = TC::TABLEDEFAULT;
                 for (auto anno : annoList) {
@@ -578,7 +744,9 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                         tableFlag = TC::DEFAULTONLY;
                     }
                 }
-                tableDefinition->addAction(actionDef, tableFlag);
+                if (tcAction) {
+                    tableDefinition->addAction(tcAction, tableFlag);
+                }
             }
         }
         updateDefaultHitAction(t, tableDefinition);
@@ -587,6 +755,175 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         updateConstEntries(t, tableDefinition);
         updateTimerProfiles(tableDefinition);
         tcPipeline->addTableDefinition(tableDefinition);
+    }
+}
+
+cstring ConvertToBackendIR::processExternPermission(const IR::Type_Extern *ext) {
+    cstring control_path, data_path;
+    // Check if access permissions is defined with annotation @tc_acl
+    auto annoList = ext->getAnnotations()->annotations;
+    for (auto anno : annoList) {
+        if (anno->name == ParseTCAnnotations::tc_acl) {
+            auto path = GetAnnotatedAccessPath(anno);
+            control_path = path->first;
+            data_path = path->second;
+        }
+    }
+    // Default access value of Control_path and Data_Path
+    if (control_path.isNullOrEmpty()) {
+        control_path = DEFAULT_EXTERN_CONTROL_PATH_ACCESS;
+    }
+    if (data_path.isNullOrEmpty()) {
+        data_path = DEFAULT_EXTERN_DATA_PATH_ACCESS;
+    }
+    auto access_cp = GetAccessNumericValue(control_path);
+    auto access_dp = GetAccessNumericValue(data_path);
+    auto access_permisson = (access_cp << 7) | access_dp;
+    std::stringstream value;
+    value << "0x" << std::hex << access_permisson;
+    return value.str().c_str();
+}
+
+void ConvertToBackendIR::processExternConstructorAnnotations(const IR::Type_Extern *extn,
+                                                             const IR::Declaration_Instance *decl,
+                                                             struct ExternInstance *instance) {
+    for (auto gd : *extn->getDeclarations()) {
+        if (!gd->getNode()->is<IR::Method>()) {
+            continue;
+        }
+        auto method = gd->getNode()->to<IR::Method>();
+        auto params = method->getParameters();
+        // Check if method is an constructor
+        if (method->name != extn->name) {
+            continue;
+        }
+        if (decl->arguments->size() != params->size()) {
+            continue;
+        }
+        for (unsigned itr = 0; itr < params->size(); itr++) {
+            auto annoList = params->getParameter(itr)->getAnnotations()->annotations;
+            for (auto anno : annoList) {
+                if (anno->name == ParseTCAnnotations::tc_numel) {
+                    auto exp = decl->arguments->at(itr)->expression;
+                    if (exp->is<IR::Constant>()) {
+                        instance->is_num_elements = true;
+                        instance->num_elements = exp->to<IR::Constant>()->asInt();
+                    }
+                }
+                if (anno->name == ParseTCAnnotations::tc_init_val) {
+                    // TODO: Process tc_init_val.
+                }
+            }
+        }
+    }
+}
+
+safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternControlPath(
+    const IR::Type_SpecializedCanonical *ts, const IR::Type_Extern *extn, cstring eName) {
+    safe_vector<const IR::TCKey *> keys;
+    auto find = ControlStructPerExtern.find(eName);
+    if (find != ControlStructPerExtern.end()) {
+        auto extern_control_path = ControlStructPerExtern[eName];
+        int kId = 1;
+        for (auto field : extern_control_path->fields) {
+            if (field->getAnnotations()->annotations.size() != 1) {
+                continue;
+            }
+            cstring annoName;
+            auto annotation = field->getAnnotations()->annotations.at(0);
+            if (annotation->name == ParseTCAnnotations::tc_key ||
+                annotation->name == ParseTCAnnotations::tc_data_scalar) {
+                annoName = annotation->name;
+            } else if (annotation->name == ParseTCAnnotations::tc_data) {
+                annoName = "param";
+            }
+            /* If the field is of Type_Name example 'T' and 'T' is of Type_Struct,
+                extract all fields of structure*/
+            if (field->type->is<IR::Type_Name>()) {
+                auto type_extern_params = extn->getTypeParameters()->parameters;
+                for (unsigned itr = 0; itr < type_extern_params.size(); itr++) {
+                    if (type_extern_params.at(itr)->toString() == field->type->toString()) {
+                        auto param_val = ts->arguments->at(itr);
+                        if (auto param_struct = param_val->to<IR::Type_Struct>()) {
+                            for (auto f : param_struct->fields) {
+                                IR::TCKey *key = new IR::TCKey(kId++, f->type->width_bits(),
+                                                               f->toString(), annoName);
+                                keys.push_back(key);
+                            }
+                        } else {
+                            IR::TCKey *key = new IR::TCKey(kId++, param_val->width_bits(),
+                                                           field->toString(), annoName);
+                            keys.push_back(key);
+                        }
+                    }
+                }
+            } else {
+                IR::TCKey *key =
+                    new IR::TCKey(kId++, field->type->width_bits(), field->toString(), annoName);
+                keys.push_back(key);
+            }
+        }
+    }
+    return keys;
+}
+
+/* Process each declaration instance of externs*/
+void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
+    auto decl_type = typeMap->getType(decl, true);
+    if (auto ts = decl_type->to<IR::Type_SpecializedCanonical>()) {
+        if (auto extn = ts->baseType->to<IR::Type_Extern>()) {
+            auto eName = ts->baseType->toString();
+            // TODO: Enable template generation for other externs as well.
+            if (eName != "Register") return;
+            IR::TCExtern *externDefinition;
+            auto instance = new struct ExternInstance();
+            instance->instance_name = decl->toString();
+
+            processExternConstructorAnnotations(extn, decl, instance);
+
+            // Get Control Path information if specified for extern.
+            auto controlKeys = processExternControlPath(ts, extn, eName);
+
+            /* If the extern info is already present, add new instance
+               Or else create new extern info.*/
+            auto iterator = externsInfo.find(eName);
+            if (iterator == externsInfo.end()) {
+                struct ExternBlock *eb = new struct ExternBlock();
+                eb->externId = ++externCount;
+                eb->permissions = processExternPermission(extn);
+                eb->no_of_instances += 1;
+                externsInfo.emplace(eName, eb);
+
+                instance->instance_id = eb->no_of_instances;
+                eb->eInstance.push_back(instance);
+
+                externDefinition = new IR::TCExtern(eb->externId, eName, pipelineName,
+                                                    eb->no_of_instances, eb->permissions);
+                tcPipeline->addExternDefinition(externDefinition);
+            } else {
+                auto eb = externsInfo[eName];
+                externDefinition = ((IR::TCExtern *)tcPipeline->getExternDefinition(eName));
+                externDefinition->numinstances = ++eb->no_of_instances;
+                instance->instance_id = eb->no_of_instances;
+                eb->eInstance.push_back(instance);
+            }
+            IR::TCExternInstance *tcExternInstance =
+                new IR::TCExternInstance(instance->instance_id, instance->instance_name,
+                                         instance->is_num_elements, instance->num_elements);
+            if (controlKeys.size() != 0) {
+                tcExternInstance->addControlPathKeys(controlKeys);
+            }
+            externDefinition->addExternInstance(tcExternInstance);
+        }
+    }
+}
+
+void ConvertToBackendIR::postorder(const IR::Type_Struct *ts) {
+    auto struct_name = ts->externalName();
+    auto cp = "tc_ControlPath_";
+    if (struct_name.startsWith(cp)) {
+        auto type_extern_name = struct_name.substr(strlen(cp));
+        ControlStructPerExtern.emplace(type_extern_name, ts);
     }
 }
 
@@ -708,6 +1045,26 @@ unsigned ConvertToBackendIR::getActionId(cstring actionName) const {
     return 0;
 }
 
+unsigned ConvertToBackendIR::getExternId(cstring externName) const {
+    for (auto e : externsInfo) {
+        if (e.first == externName) return e.second->externId;
+    }
+    return 0;
+}
+
+unsigned ConvertToBackendIR::getExternInstanceId(cstring externName, cstring instanceName) const {
+    for (auto e : externsInfo) {
+        if (e.first == externName) {
+            for (auto eI : e.second->eInstance) {
+                if (eI->instance_name == instanceName) {
+                    return eI->instance_id;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 unsigned ConvertToBackendIR::getTableKeysize(unsigned tableId) const {
     auto itr = tableKeysizeList.find(tableId);
     if (itr != tableKeysizeList.end()) return itr->second;
@@ -787,6 +1144,17 @@ void ConvertToBackendIR::updateMatchType(const IR::P4Table *t, IR::TCTable *tabl
         }
     }
     tabledef->setMatchType(tableMatchType);
+}
+
+bool ConvertToBackendIR::checkParameterDirection(const IR::TCAction *tcAction) {
+    bool dirParam = false;
+    for (auto actionParam : tcAction->actionParams) {
+        if (actionParam->getDirection() != TC::NONE) {
+            dirParam = true;
+            break;
+        }
+    }
+    return dirParam;
 }
 
 }  // namespace TC

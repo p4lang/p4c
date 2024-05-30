@@ -1,11 +1,41 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "send_to_port_example",
+  "externs" : [
+    {
+      "name" : "Register",
+      "id" : 1,
+      "permissions" : "0x19b6",
+      "instances" : [
+        {
+          "inst_name" : "MainControlImpl.reg1",
+          "inst_id" : 1,
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "index",
+              "type" : "bit32",
+              "attr" : "tc_key",
+              "bitwidth" : 32
+            },
+            {
+              "id" : 2,
+              "name" : "a_value",
+              "type" : "bit32",
+              "attr" : "param",
+              "bitwidth" : 32
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "tables" : [
     {
       "name" : "MainControlImpl/ipv4_tbl",
       "id" : 1,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 72,
       "keyfields" : [

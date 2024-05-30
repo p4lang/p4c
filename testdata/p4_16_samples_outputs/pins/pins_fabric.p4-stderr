@@ -1,6 +1,6 @@
 pins_fabric.p4(645): [--Wwarn=shadow] warning: 'ttl' shadows 'control ttl'
     bit<8> ttl = 0;
-    ^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^
 pins_fabric.p4(558)
 control ttl(inout headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
         ^^^

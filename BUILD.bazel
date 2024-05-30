@@ -26,10 +26,13 @@ genrule(
     name = "sed_config_h",
     srcs = ["cmake/config.h.cmake"],
     outs = ["config.h"],
+    # TODO: We should actually check these properly instead of just #undefing them.
+    # Maybe select() can help here?
     cmd = " | ".join([
         "sed 's|cmakedefine|define|g' < $(SRCS)",
         "sed 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g'",
         "sed 's|define HAVE_LIBBACKTRACE 1|undef HAVE_LIBBACKTRACE|g' > $(OUTS)",
+        "sed 's|define HAVE_MM_MALLOC_H 1|undef HAVE_MM_MALLOC_H|g' > $(OUTS)",
     ]),
     visibility = ["//visibility:private"],
 )
@@ -38,6 +41,7 @@ cc_library(
     name = "config_h",
     hdrs = ["config.h"],
     include_prefix = ".",
+    deps = [":sed_config_h"],
 )
 
 cc_library(
@@ -49,6 +53,7 @@ cc_library(
         "@boost//:format",
         "@boost//:multiprecision",
         "@com_google_absl//absl/numeric:bits",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest",
     ],
 )

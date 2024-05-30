@@ -2,7 +2,7 @@
 
 # Setting up Eclipse
 
-Use the following installation steps to setup an Eclipse development environment for p4c.
+Use the following installation steps to setup an Eclipse development environment for P4C.
 Note that the following assumes you have already performed the preliminary environment
 bootstrap, as described in [README](README.md).
 

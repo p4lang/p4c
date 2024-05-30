@@ -89,11 +89,11 @@ const IR::Expression *computeEntryMatch(const IR::P4Table &table, const IR::Entr
     auto numKeys = key.keyElements.size();
     // If there are no entries or keys, there is nothing we can match against.
     if (numKeys == 0) {
-        return IR::getBoolLiteral(false);
+        return IR::BoolLiteral::get(false);
     }
     BUG_CHECK(key.keyElements.size() == entry.keys->size(),
               "The entry key list and key match list must be equal in size.");
-    const IR::Expression *entryMatchCondition = IR::getBoolLiteral(true);
+    const IR::Expression *entryMatchCondition = IR::BoolLiteral::get(true);
     for (size_t idx = 0; idx < numKeys; ++idx) {
         const auto *keyElement = key.keyElements.at(idx);
         const auto *keyExpr = keyElement->expression;

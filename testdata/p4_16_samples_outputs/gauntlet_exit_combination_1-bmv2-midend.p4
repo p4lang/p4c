@@ -23,7 +23,6 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bool hasExited;
     @name("ingress.hasReturned") bool hasReturned;
     bit<32> key_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
@@ -32,7 +31,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.do_action") action do_action() {
         h.eth_hdr.eth_type = 16w1;
-        hasExited = true;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
@@ -48,7 +46,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         hasReturned = true;
     }
     @hidden action gauntlet_exit_combination_1bmv2l39() {
-        hasExited = false;
         hasReturned = false;
         key_0 = 32w1;
     }

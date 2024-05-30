@@ -1,11 +1,13 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "nummask_annotation_example",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/set_ct_options",
       "id" : 1,
       "tentries" : 2048,
+      "permissions" : "0x3da4",
       "nummask" : 64,
       "keysize" : 8,
       "keyfields" : [

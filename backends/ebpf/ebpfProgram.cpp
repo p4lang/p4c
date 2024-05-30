@@ -196,6 +196,24 @@ void EBPFProgram::emitTypes(CodeBuilder *builder) {
             type->emit(builder);
             builder->newline();
         }
+        // TODO: This code is disabled until we fix stability issues in Ubuntu 20.04.
+        // For an unclear reason we can not use definitions and declarations for eBPF externs there.
+        // All externs need to be defined as static inline, which clashes with these definitions.
+        // Context: https://github.com/p4lang/p4c/pull/4644
+        // if (const auto *method = d->to<IR::Method>()) {
+        //     if (!method->srcInfo.isValid()) {
+        //         continue;
+        //     }
+        //     // Ignore methods originating from core.p4 and ubpf_model.p4 because they are already
+        //     // defined.
+        //     // TODO: Maybe we should still generate declarations for these methods?
+        //     if (isLibraryMethod(method->controlPlaneName())) {
+        //         continue;
+        //     }
+        //     EBPFMethodDeclaration methodInstance(method);
+        //     methodInstance.emit(builder);
+        //     builder->newline();
+        // }
     }
 }
 
@@ -330,6 +348,19 @@ void EBPFProgram::emitPipeline(CodeBuilder *builder) {
         builder->target->emitTraceMessage(builder, "Control: packet processing finished, pass=%d",
                                           1, control->accept->name.name.c_str());
     }
+}
+
+bool EBPFProgram::isLibraryMethod(cstring methodName) {
+    static std::set<cstring> DEFAULT_METHODS = {"static_assert", "verify"};
+    if (DEFAULT_METHODS.find(methodName) != DEFAULT_METHODS.end() && options.target != "xdp") {
+        return true;
+    }
+
+    static std::set<cstring> XDP_METHODS = {
+        "ebpf_ipv4_checksum",    "csum_replace2",    "csum_replace4",
+        "BPF_PERF_EVENT_OUTPUT", "BPF_KTIME_GET_NS",
+    };
+    return XDP_METHODS.find(methodName) != XDP_METHODS.end();
 }
 
 }  // namespace EBPF

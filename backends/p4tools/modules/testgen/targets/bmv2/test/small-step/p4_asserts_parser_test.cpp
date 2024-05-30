@@ -101,8 +101,8 @@ TEST_F(P4AssertsParserTest, Restrictions) {
             IR::Type_Bits::get(8), "ingress.ternary_table_mask_h.h.a1");
         const auto &expr2 = P4Tools::ToolsVariables::getSymbolicVariable(
             IR::Type_Bits::get(8), "ingress.ternary_table_lpm_prefix_h.h.a1");
-        const auto *const1 = IR::getConstant(IR::Type_Bits::get(8), 0);
-        const auto *const2 = IR::getConstant(IR::Type_Bits::get(8), 64);
+        const auto *const1 = IR::Constant::get(IR::Type_Bits::get(8), 0);
+        const auto *const2 = IR::Constant::get(IR::Type_Bits::get(8), 64);
         const auto *operation =
             new IR::LAnd(new IR::Neq(expr1, const1), new IR::Neq(expr2, const2));
         ASSERT_TRUE(parsingResult[0]->equiv(*operation));
@@ -110,14 +110,14 @@ TEST_F(P4AssertsParserTest, Restrictions) {
     {
         const auto &expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
             IR::Type_Bits::get(8), "ingress.ternary_table_key_h.h.a1");
-        const auto *const1 = IR::getConstant(IR::Type_Bits::get(8), 0);
+        const auto *const1 = IR::Constant::get(IR::Type_Bits::get(8), 0);
         const auto *operation1 = new IR::Neq(expr1, const1);
         ASSERT_TRUE(parsingResult[1]->equiv(*operation1));
     }
     {
         const auto &expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
             IR::Type_Bits::get(8), "ingress.ternary_table_key_h.h.a");
-        const auto *const2 = IR::getConstant(IR::Type_Bits::get(8), 255);
+        const auto *const2 = IR::Constant::get(IR::Type_Bits::get(8), 255);
         const auto *operation2 = new IR::Neq(expr1, const2);
         ASSERT_TRUE(parsingResult[2]->equiv(*operation2));
     }

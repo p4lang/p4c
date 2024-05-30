@@ -78,6 +78,8 @@ class FindVariableValues final : public Inspector {
 
     bool preorder(const IR::IfStatement *) override;
     bool preorder(const IR::SwitchStatement *) override;
+    bool preorder(const IR::ForStatement *) override;
+    bool preorder(const IR::ForInStatement *) override;
     void postorder(const IR::P4Control *) override;
     bool preorder(const IR::P4Control *) override;
     bool preorder(const IR::P4Table *) override;
@@ -126,6 +128,8 @@ class DoGlobalCopyPropagation final : public Transform {
     const IR::Expression *copyprop_name(cstring name);
 
     IR::IfStatement *preorder(IR::IfStatement *) override;
+    IR::ForStatement *preorder(IR::ForStatement *) override;
+    IR::ForInStatement *preorder(IR::ForInStatement *) override;
     const IR::Expression *postorder(IR::PathExpression *) override;
     const IR::Expression *preorder(IR::ArrayIndex *) override;
     const IR::Expression *preorder(IR::Member *) override;

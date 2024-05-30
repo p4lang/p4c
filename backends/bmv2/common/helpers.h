@@ -165,7 +165,7 @@ struct CounterlikeTraits;
 /// be a definition. If the declaration is not a definition, the specialization
 /// may be defined later (7.3.1.2).
 ///
-/// gcc reports an error when trying so specialize CounterlikeTraits<> for
+/// GCC reports an error when trying so specialize CounterlikeTraits<> for
 /// Standard::CounterExtern & Standard::MeterExtern outside of the Helpers
 /// namespace, even when qualifying CounterlikeTraits<> with Helpers::. It seems
 /// to be related to this bug:

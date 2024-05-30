@@ -1,0 +1,3 @@
+issue4656_const_fold_generic_switch_label_expr.p4(13): [--Wwarn=mismatch] warning: baz(): constant expression in switch
+        switch(baz()) {
+               ^^^^^

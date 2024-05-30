@@ -1,11 +1,13 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "test_ipv6_example",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/tbl_default",
       "id" : 1,
       "tentries" : 100,
+      "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 128,
       "keyfields" : [

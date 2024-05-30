@@ -1,9 +1,7 @@
 #include "backends/p4tools/common/lib/symbolic_env.h"
 
 #include <algorithm>
-#include <string>
 #include <utility>
-#include <vector>
 
 #include <boost/container/vector.hpp>
 
@@ -11,7 +9,6 @@
 #include "ir/indexed_vector.h"
 #include "ir/vector.h"
 #include "ir/visitor.h"
-#include "lib/cstring.h"
 #include "lib/exceptions.h"
 
 namespace P4Tools {
@@ -28,7 +25,8 @@ bool SymbolicEnv::exists(const IR::StateVariable &var) const { return map.find(v
 
 void SymbolicEnv::set(const IR::StateVariable &var, const IR::Expression *value) {
     BUG_CHECK(value->type && !value->type->is<IR::Type_Unknown>(),
-              "Cannot set value with unspecified type: %1%", value);
+              "Cannot set value for node %1% with unspecified type: %2%", value->node_type_name(),
+              value);
     map[var] = value;
 }
 

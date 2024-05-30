@@ -1,16 +1,13 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/program_info.h"
 
-#include <list>
 #include <optional>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
@@ -18,9 +15,8 @@
 #include "lib/exceptions.h"
 
 #include "backends/p4tools/modules/testgen//lib/exceptions.h"
-#include "backends/p4tools/modules/testgen/core/compiler_target.h"
+#include "backends/p4tools/modules/testgen/core/compiler_result.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
-#include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -60,7 +56,7 @@ EBPFProgramInfo::EBPFProgramInfo(const TestgenCompilerResult &compilerResult,
     // The input packet should be larger than 0.
     targetConstraints =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, 0));
+                    IR::Constant::get(&PacketVars::PACKET_SIZE_VAR_TYPE, 0));
 }
 
 const ArchSpec &EBPFProgramInfo::getArchSpec() const { return ARCH_SPEC; }
@@ -85,7 +81,7 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
 
     // Copy-in.
     const auto *copyInCall = new IR::MethodCallStatement(Utils::generateInternalMethodCall(
-        "copy_in", {new IR::StringLiteral(typeDecl->name)}, IR::Type_Void::get(),
+        "copy_in", {IR::StringLiteral::get(typeDecl->name)}, IR::Type_Void::get(),
         new IR::ParameterList(
             {new IR::Parameter("blockRef", IR::Direction::In, IR::Type_Unknown::get())})));
     cmds.emplace_back(copyInCall);
@@ -93,7 +89,7 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
     cmds.emplace_back(typeDecl);
     // Copy-out.
     const auto *copyOutCall = new IR::MethodCallStatement(Utils::generateInternalMethodCall(
-        "copy_out", {new IR::StringLiteral(typeDecl->name)}, IR::Type_Void::get(),
+        "copy_out", {IR::StringLiteral::get(typeDecl->name)}, IR::Type_Void::get(),
         new IR::ParameterList(
             {new IR::Parameter("blockRef", IR::Direction::In, IR::Type_Unknown::get())})));
     cmds.emplace_back(copyOutCall);
@@ -110,12 +106,12 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
 }
 
 const IR::StateVariable &EBPFProgramInfo::getTargetInputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::getBitType(EBPFConstants::PORT_BIT_WIDTH),
+    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(EBPFConstants::PORT_BIT_WIDTH),
                                                  new IR::PathExpression("*"), "input_port"));
 }
 
 const IR::StateVariable &EBPFProgramInfo::getTargetOutputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::getBitType(EBPFConstants::PORT_BIT_WIDTH),
+    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(EBPFConstants::PORT_BIT_WIDTH),
                                                  new IR::PathExpression("*"), "output_port"));
 }
 

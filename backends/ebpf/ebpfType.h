@@ -25,7 +25,7 @@ limitations under the License.
 
 namespace EBPF {
 
-// Base class for EBPF types
+/// Base class for EBPF types
 class EBPFType : public EBPFObject {
  protected:
     explicit EBPFType(const IR::Type *type) : type(type) {}
@@ -46,10 +46,10 @@ class EBPFType : public EBPFObject {
 class IHasWidth : public ICastable {
  public:
     virtual ~IHasWidth() {}
-    // P4 width
+    /// P4 width
     virtual unsigned widthInBits() const = 0;
-    // Width in the target implementation.
-    // Currently a multiple of 8.
+    /// Width in the target implementation.
+    /// Currently a multiple of 8.
     virtual unsigned implementationWidthInBits() const = 0;
 
     DECLARE_TYPEINFO(IHasWidth);
@@ -125,7 +125,7 @@ class EBPFScalarType : public EBPFType, public IHasWidth {
     DECLARE_TYPEINFO(EBPFScalarType, EBPFType, IHasWidth);
 };
 
-// This should not always implement IHasWidth, but it may...
+/// This should not always implement IHasWidth, but it may...
 class EBPFTypeName : public EBPFType, public IHasWidth {
     const IR::Type_Name *type;
     EBPFType *canonical;
@@ -149,7 +149,7 @@ class EBPFTypeName : public EBPFType, public IHasWidth {
     DECLARE_TYPEINFO(EBPFTypeName, EBPFType, IHasWidth);
 };
 
-// Also represents headers and unions
+/// Also represents headers and unions
 class EBPFStructType : public EBPFType, public IHasWidth {
     class EBPFField {
      public:
@@ -192,6 +192,35 @@ class EBPFEnumType : public EBPFType, public EBPF::IHasWidth {
     const IR::Type_Enum *getType() const { return type->to<IR::Type_Enum>(); }
 
     DECLARE_TYPEINFO(EBPFEnumType, EBPFType, IHasWidth);
+};
+
+class EBPFErrorType : public EBPFType, public EBPF::IHasWidth {
+ public:
+    explicit EBPFErrorType(const IR::Type_Error *type) : EBPFType(type) {}
+    void emit(CodeBuilder *builder) override;
+    void declare(CodeBuilder *builder, cstring id, bool asPointer) override;
+    void declareInit(CodeBuilder *builder, cstring id, bool asPointer) override;
+    void emitInitializer(CodeBuilder *builder) override { builder->append("0"); }
+    unsigned widthInBits() const override { return 32; }
+    unsigned implementationWidthInBits() const override { return 32; }
+    const IR::Type_Error *getType() const { return type->to<IR::Type_Error>(); }
+
+    DECLARE_TYPEINFO(EBPFErrorType, EBPFType, IHasWidth);
+};
+
+/// Methods are function signatures.
+class EBPFMethodDeclaration : public EBPFObject {
+ private:
+    /// The underlying P4 method of this declaration.
+    const IR::Method *method_;
+
+ public:
+    explicit EBPFMethodDeclaration(const IR::Method *method);
+
+    /// Emit the signature declaration of this method in C-style form.
+    void emit(CodeBuilder *builder);
+
+    DECLARE_TYPEINFO(EBPFMethodDeclaration, EBPFObject);
 };
 
 }  // namespace EBPF

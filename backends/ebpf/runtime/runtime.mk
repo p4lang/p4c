@@ -7,6 +7,8 @@ BPFOBJ=
 BPFNAME=$(basename $(BPFOBJ))
 BPFDIR=$(dir $(BPFOBJ))
 override INCLUDES+= -I$(dir $(BPFOBJ))
+# This can be any file with the extension ".c"
+EXTERNOBJ=
 
 # Arguments for the P4 Compiler
 P4INCLUDE=-I./p4include
@@ -31,7 +33,7 @@ SOURCE_BASE= $(ROOT_DIR)ebpf_runtime.c $(ROOT_DIR)pcap_util.c
 SOURCE_BASE+= $(ROOT_DIR)ebpf_runtime_$(TARGET).c
 # Add the generated file and externs to the base sources
 override SOURCES+= $(SOURCE_BASE)
-SRC_PROCESSED= $(notdir $(SOURCES))
+SRC_PROCESSED= $(notdir $(SOURCES)) $(EXTERNOBJ)
 OBJECTS = $(SRC_PROCESSED:%.c=$(BUILDDIR)/%.o)
 DEPS = $(OBJECTS:%.o=%.d)
 

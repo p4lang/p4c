@@ -14,12 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/* The runtime emulates a loaded eBPF program. It parses a set of given
-  pcap files and executes a C program that processes packets extracted from
-  the capture files. The C program takes a packet structure (commonly an skbuf)
-  and returns an action value for each packet.
- */
-
+/// The runtime emulates a loaded eBPF program. It parses a set of given
+/// pcap files and executes a C program that processes packets extracted from
+/// the capture files. The C program takes a packet structure (commonly an skbuf)
+/// and returns an action value for each packet.
 #include <unistd.h>     // getopt()
 #include <ctype.h>      // isprint()
 #include <string.h>     // memcpy()
@@ -51,7 +49,7 @@ void usage(char *name) {
 
 static pcap_list_t *get_packets(const char *pcap_base, uint16_t num_pcaps, pcap_list_t *merged_list) {
     pcap_list_array_t *tmp_list_array = allocate_pkt_list_array();
-    /* Retrieve a list for each file and append it to the temporary array */
+    // Retrieve a list for each file and append it to the temporary array
     for (uint16_t i = 0; i < num_pcaps; i++) {
         char *pcap_in_name = generate_pcap_name(pcap_base, i, PCAPIN);
         if (debug)
@@ -60,17 +58,17 @@ static pcap_list_t *get_packets(const char *pcap_base, uint16_t num_pcaps, pcap_
         tmp_list_array = insert_list(tmp_list_array, pkt_list, i);
         free(pcap_in_name);
     }
-    /* Merge the array into a newly allocated list. This destroys the array. */
+    // Merge the array into a newly allocated list. This destroys the array.
     return merge_and_delete_lists(tmp_list_array, merged_list);
 }
 
 void launch_runtime(const char *pcap_name, uint16_t num_pcaps) {
     if (num_pcaps == 0)
         return;
-    /* Initialize the list of input packets */
+    // Initialize the list of input packets
     pcap_list_t *input_list = allocate_pkt_list();
 
-    /* Create the basic pcap filename from the input */
+    // Create the basic pcap filename from the input
     const char *suffix = strrchr(pcap_name, DELIM);
     if (suffix == NULL) {
         fprintf(stderr, "Expected a filename with delimiter \"%c\"."
@@ -81,13 +79,13 @@ void launch_runtime(const char *pcap_name, uint16_t num_pcaps) {
     char pcap_base[baselen + 1];
     snprintf(pcap_base, baselen + 1 , "%s", pcap_name);
 
-    /* Open all matching pcap files retrieve a merged list of packets */
+    // Open all matching pcap files retrieve a merged list of packets
     input_list = get_packets(pcap_base, num_pcaps, input_list);
-    /* Sort the list */
+    // Sort the list
     sort_pcap_list(input_list);
-    /* Run the "program" and retrieve output lists */
+    // Run the "program" and retrieve output lists
     RUN(ebpf_filter, pcap_base, num_pcaps, input_list, debug);
-    /* Delete the list of input packets */
+    // Delete the list of input packets
     delete_list(input_list);
 }
 
@@ -130,15 +128,15 @@ int main(int argc, char **argv) {
         }
     }
 
-    /* Check if there was actually any file or number input */
+    // Check if there was actually any file or number input
     if (!pcap_name || num_pcaps == -1)
         usage(argv[0]);
 
     INIT_EBPF_TABLES(debug);
 #ifdef CONTROL_PLANE
-    /* Set the default action for the userspace hash tables */
+    // Set the default action for the userspace hash tables
     init_tables();
-    /* Run all commands specified in the control file */
+    // Run all commands specified in the control file
     setup_control_plane();
 #endif
 

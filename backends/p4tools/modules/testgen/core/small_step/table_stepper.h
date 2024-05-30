@@ -73,7 +73,8 @@ class TableStepper {
 
     /// Sets the action taken by the given table. The arguments in the given MethodCallExpression
     /// are assumed to be symbolic values.
-    const IR::StringLiteral *getTableActionString(const IR::MethodCallExpression *actionCall);
+    static const IR::StringLiteral *getTableActionString(
+        const IR::MethodCallExpression *actionCall);
 
     /// A helper function to iteratively resolve table keys into symbolic values.
     /// This function returns false, if no key needs to be resolved.
