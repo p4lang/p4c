@@ -951,7 +951,7 @@ class P4RuntimeAnalyzer {
             }
         }
 
-        // @platform_property annotation
+        // Parse `@platform_property` annotation into the PkgInfo.
         for (auto *annotation : decl->getAnnotations()->annotations) {
             if (annotation->name != "platform_property") continue;
             auto *platform_properties = pkginfo->mutable_platform_properties();
@@ -960,14 +960,13 @@ class P4RuntimeAnalyzer {
                 auto setInt32Field = [kv, &platform_properties](cstring fName) {
                     auto *v = kv->expression->to<IR::Constant>();
                     if (v == nullptr) {
-                        ::error(
-                            ErrorType::ERR_UNSUPPORTED,
-                            "Value for '%1%' key in @platform_property annotation is not a integer",
-                            kv);
+                        ::error(ErrorType::ERR_UNSUPPORTED,
+                                "Value for '%1%' key in @platform_property annotation is not an "
+                                "integer",
+                                kv);
                         return;
                     }
-                    // use Protobuf reflection library to minimize code
-                    // duplication.
+                    // use Protobuf reflection library to minimize code duplication.
                     auto *descriptor = platform_properties->GetDescriptor();
                     auto *f = descriptor->FindFieldByName(static_cast<std::string>(fName));
                     platform_properties->GetReflection()->SetInt32(platform_properties, f,
