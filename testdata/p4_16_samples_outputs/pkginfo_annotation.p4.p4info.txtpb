@@ -8,4 +8,9 @@ pkg_info {
   organization: "some_org"
   contact: "some_contact"
   url: "some_url"
+  platform_properties {
+    multicast_group_table_size: 10
+    multicast_group_table_total_replicas: 20
+    multicast_group_table_max_replicas_per_entry: 30
+  }
 }

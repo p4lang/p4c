@@ -53,9 +53,9 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
   url = "some_url"
 )
 @platform_property(
-  multicast_table_size = 10,
-  multicast_table_total_replicas = 20,
-  multicast_table_max_replicas_per_entry = 30
+  multicast_group_table_size = 10,
+  multicast_group_table_total_replicas = 20,
+  multicast_group_table_max_replicas_per_entry = 30
 )
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(),
          ComputeChecksumI(), DeparserI()) main;

@@ -39,4 +39,4 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
     }
 }
 
-@pkginfo(name="some_name", organization="some_org", version="some_version", contact="some_contact", url="some_url") @platform_property(multicast_table_size = 10 , multicast_table_total_replicas = 20 , multicast_table_max_replicas_per_entry = 30) V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+@pkginfo(name="some_name", organization="some_org", version="some_version", contact="some_contact", url="some_url") @platform_property(multicast_group_table_size = 10 , multicast_group_table_total_replicas = 20 , multicast_group_table_max_replicas_per_entry = 30) V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

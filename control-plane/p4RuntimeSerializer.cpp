@@ -954,11 +954,10 @@ class P4RuntimeAnalyzer {
         // @platform_property annotation
         for (auto *annotation : decl->getAnnotations()->annotations) {
             if (annotation->name != "platform_property") continue;
-            // TODO(dilo): Add once supported by P4Runtime protobuf.
-            // auto *platform_property = pkginfo->mutable_platform_property();
+            auto *platform_properties = pkginfo->mutable_platform_properties();
             for (auto *kv : annotation->kv) {
                 auto name = kv->name.name;
-                auto setInt64Field = [kv](cstring fName) {
+                auto setInt32Field = [kv, &platform_properties](cstring fName) {
                     auto *v = kv->expression->to<IR::Constant>();
                     if (v == nullptr) {
                         ::error(
@@ -967,19 +966,17 @@ class P4RuntimeAnalyzer {
                             kv);
                         return;
                     }
-                    // TODO(dilo): Fix below once supported by P4Runtime protobuf.
-                    ::warning(ErrorType::WARN_IGNORE, "Got Int64 field: %1% with value %2%", fName,
-                              static_cast<int64_t>(v->value));
                     // use Protobuf reflection library to minimize code
                     // duplication.
-                    // auto *descriptor = platform_property->GetDescriptor();
-                    // auto *f = descriptor->FindFieldByName(static_cast<std::string>(fName));
-                    // platform_property->GetReflection()->SetInt64(platform_property, f,
-                    // static_cast<int64_t>(v->value));
+                    auto *descriptor = platform_properties->GetDescriptor();
+                    auto *f = descriptor->FindFieldByName(static_cast<std::string>(fName));
+                    platform_properties->GetReflection()->SetInt32(platform_properties, f,
+                                                                   static_cast<int32_t>(v->value));
                 };
-                if (name == "multicast_table_size" || name == "multicast_table_total_replicas" ||
-                    name == "multicast_table_max_replicas_per_entry") {
-                    setInt64Field(name);
+                if (name == "multicast_group_table_size" ||
+                    name == "multicast_group_table_total_replicas" ||
+                    name == "multicast_group_table_max_replicas_per_entry") {
+                    setInt32Field(name);
                 } else {
                     ::warning(ErrorType::WARN_UNKNOWN,
                               "Unknown key name '%1%' in @platform_property annotation", name);
