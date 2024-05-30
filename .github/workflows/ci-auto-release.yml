@@ -78,7 +78,7 @@ jobs:
         with:
           base: main
           add-paths: Version.txt
-          reviewers: mbudiu-vmw
+          reviewers: fruffy, jafingerhut, jnfoster
           commit-message: ${{ steps.message.outputs.content }}
           signoff: false
           branch: v${{ env.VERSION }}
