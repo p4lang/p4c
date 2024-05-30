@@ -50,10 +50,7 @@ filegroup(
             # Newest commit on main branch as of May 30, 2024.
             commit = "62a9bd60599b87497a15feb6c7893b7ec8ba461f",
             shallow_since = "1680213111 -0700",
-            # strip_prefix is broken; we use patch_cmds as a workaround,
-            # see https://github.com/bazelbuild/bazel/issues/10062.
-            # strip_prefix = "proto",
-            patch_cmds = ["mv -n proto/* ."],
+            strip_prefix = "proto",
         )
     if not native.existing_rule("com_google_googletest"):
         # Cannot currently use local_repository due to Bazel limitation,
