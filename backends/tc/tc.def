@@ -239,6 +239,7 @@ class TCTable {
     cstring controlName;
     cstring pipelineName;
     cstring permissions;
+    cstring directCounterInstance;
     unsigned keySize;
     unsigned tableEntriesCount;
     unsigned numMask;
@@ -254,11 +255,17 @@ class TCTable {
     bool isTcMayOverrideMiss;
     optional safe_vector<TCDefaultActionParam> defaultMissActionParams;
     bool isTableAddOnMiss;
+    bool isTcMayOverride;
+    bool isDirectCounter;
     ordered_map<TCAction, unsigned> actionList;
     safe_vector<TCEntry> const_entries;
 
     void setTablePermission(cstring p) {
         permissions = p;
+    }
+    void setDirectCounter(cstring counter) {
+        isDirectCounter = true;
+        directCounterInstance = counter;
     }
     void setKeySize(unsigned k) {
         keySize = k;
@@ -337,6 +344,8 @@ class TCTable {
         isTcMayOverrideHit = false;
         isTcMayOverrideMiss = false;
         isTableAddOnMiss = false;
+        isTcMayOverride = false;
+        isDirectCounter = false;
     }
     toString {
         std::string tcTable = "";
@@ -350,6 +359,9 @@ class TCTable {
         tcTable += " tentries " + Util::toString(tableEntriesCount);
         if (isTableAddOnMiss && timerProfiles > defaultTimerProfiles) {
             tcTable += " num_timer_profiles " + Util::toString(timerProfiles);
+        }
+        if (isDirectCounter) {
+            tcTable += " \\\n\tpna_direct_counter Counter/" + directCounterInstance;
         }
 
         if (!actionList.empty()) {
@@ -418,9 +430,26 @@ class TCKey {
     unsigned bitwidth;
     cstring keyName;
     cstring keyAttribute;
+    bool emitID;
+    bool emitValue;
+    unsigned value;
+    TCKey(unsigned id, unsigned width, cstring name, cstring attr, bool isID) {
+        keyID = id;
+        bitwidth = width;
+        keyName = name;
+        keyAttribute = attr;
+        emitID = isID;
+        emitValue = false;
+    }
+    void setValue(unsigned v) {
+        value = v;
+        emitValue = true;
+    }
     toString {
-        std::string tckeyInstance = " " + keyAttribute + " " + keyName + " type bit" + Util::toString(bitwidth)
-                        + " id " + Util::toString(keyID);
+        std::string tckeyInstance = " " + keyAttribute + " " + keyName + " type bit" + Util::toString(bitwidth);
+        if (emitID) {
+            tckeyInstance += " id " + Util::toString(keyID);
+        }
         return tckeyInstance;
     }
     dbprint { out << toString(); }
@@ -433,31 +462,60 @@ class TCExternInstance {
     bool isNumelemns;
     unsigned numelemns;
     bool isControlPath;
-    safe_vector<TCKey> keys;
+    bool isTablBindable;
+    bool isConstructorKeys;
+    safe_vector<TCKey> controlKeys;
+    safe_vector<TCKey> constructorKeys;
     TCExternInstance(unsigned id, cstring name, bool isNe, unsigned ne) {
         instanceID = id;
         instanceName = name;
         isNumelemns = isNe;
         numelemns = ne;
+        isControlPath = false;
+        isTablBindable = false;
+        isConstructorKeys = false;
     }
     void addControlPathKeys(safe_vector<TCKey> k) {
         if (k.size() > 0) {
             isControlPath = true;
-            keys = k;
+            controlKeys = k;
         }
     }
+    void addConstructorKeys(safe_vector<TCKey> k) {
+        if (k.size() > 0) {
+            isConstructorKeys = true;
+            constructorKeys = k;
+        }
+    }
+    void setExternTableBindable(bool flag) {
+        isTablBindable = flag;
+    }
+    void setNumElements(unsigned ne) {
+        isNumelemns = true;
+        numelemns = ne;
+    } 
     toString {
         std::string tcExternInstance = "";
         tcExternInstance += instanceName + " instid " + Util::toString(instanceID) + " \\";
-        if (isControlPath) {
-            tcExternInstance += "\ncontrol_path";
-            for (auto field : keys) {
+        
+        if (isNumelemns) {
+            tcExternInstance += "\ntc_numel " + Util::toString(numelemns);
+        }
+        if (isTablBindable) {
+            tcExternInstance += " tbl_bindable";
+        }
+        if (isConstructorKeys) {
+            tcExternInstance += " constructor";
+            for (auto field : constructorKeys) {
                 tcExternInstance += field->toString();
             }
             tcExternInstance += " \\";
         }
-        if (isNumelemns) {
-            tcExternInstance += "\ntc_numel " + Util::toString(numelemns);
+        if (isControlPath) {
+            tcExternInstance += "\ncontrol_path";
+            for (auto field : controlKeys) {
+                tcExternInstance += field->toString();
+            }
         }
         return tcExternInstance;
     }
@@ -465,21 +523,31 @@ class TCExternInstance {
 }
 
 class TCExtern {
-    unsigned externID;
     cstring externName;
     cstring pipelineName;
-    unsigned numinstances;
     cstring acl_permisson;
+    unsigned externID;
+    unsigned numinstances;
     safe_vector<TCExternInstance> externInstances;
-    TCExtern(unsigned eId, cstring eN, cstring pN, unsigned inst, cstring p) {
+    bool has_exec_method;
+    TCExtern(unsigned eId, cstring eN, cstring pN, unsigned inst, cstring p, bool exec_method) {
         externID = eId;
         externName = eN;
         pipelineName = pN;
         numinstances = inst;
         acl_permisson = p;
+        has_exec_method = exec_method;
     }
     void addExternInstance(TCExternInstance tei) {
         externInstances.push_back(tei);
+    }
+    TCExternInstance getExternInstance(cstring inst_name) const {
+        for (auto extnInstDef : externInstances) {
+            if(extnInstDef->instanceName == inst_name) {
+                return extnInstDef;
+            }
+        }
+        return nullptr;
     }
     toString {
         std::string tcExtern = "";
@@ -488,7 +556,9 @@ class TCExtern {
         tcExtern += " extid " + Util::toString(externID);
         tcExtern += " numinstances " + Util::toString(numinstances);
         tcExtern += " tc_acl " + acl_permisson;
-        
+        if (has_exec_method) {
+             tcExtern += " has_exec_method ";
+        }
         for (unsigned iter = 0; iter < numinstances; iter++) {
             tcExtern += "\n\n$TC p4template create extern_inst/" + pipelineName
                       + "/" + externName + "/";

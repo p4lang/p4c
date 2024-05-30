@@ -85,4 +85,44 @@ void EBPFRegisterPNA::emitRegisterWrite(EBPF::CodeBuilder *builder, const P4::Ex
         "sizeof(ext_val));");
 }
 
+void EBPFCounterPNA::emitDirectMethodInvocation(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
+                                                const ConvertToBackendIR *tcIR) {
+    if (method->method->name.name != "count") {
+        ::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
+        return;
+    }
+    BUG_CHECK(isDirect, "Bad Counter invocation");
+    BUG_CHECK(method->expr->arguments->size() == 0, "Expected no arguments for %1%", method->expr);
+    emitCounterUpdate(builder, tcIR);
+}
+
+void EBPFCounterPNA::emitCounterUpdate(EBPF::CodeBuilder *builder, const ConvertToBackendIR *tcIR) {
+    builder->emitIndent();
+    builder->appendLine("__builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));");
+    builder->emitIndent();
+    builder->appendLine("ext_params.pipe_id = p4tc_filter_fields.pipeid;");
+    auto tblId = tcIR->getTableId(tblname);
+    BUG_CHECK(tblId != 0, "Table ID not found");
+    builder->emitIndent();
+    builder->appendFormat("ext_params.tbl_id = %d;", tblId);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendLine("ext_params.flags = P4TC_EXT_CNT_DIRECT;");
+    builder->emitIndent();
+
+    if (type == CounterType::BYTES) {
+        builder->append(
+        "bpf_p4tc_extern_count_bytes(skb, &ext_params, sizeof(ext_params), &key, "
+        "sizeof(key))");
+    } else if (type == CounterType::PACKETS) {
+        builder->append(
+        "bpf_p4tc_extern_count_pkts(skb, &ext_params, sizeof(ext_params), &key, "
+        "sizeof(key))");
+    } else if (type == CounterType::PACKETS_AND_BYTES) {
+        builder->append(
+        "bpf_p4tc_extern_count_pktsnbytes(skb, &ext_params, sizeof(ext_params), &key, "
+        "sizeof(key))");
+    }
+}
+
 }  // namespace TC

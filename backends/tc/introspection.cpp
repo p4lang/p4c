@@ -163,7 +163,7 @@ void IntrospectionGenerator::collectExternInfo() {
             auto externInstanceInfo = new struct ExternInstancesAttributes();
             externInstanceInfo->id = externInstance->instanceID;
             externInstanceInfo->name = externInstance->instanceName;
-            for (auto control_field : externInstance->keys) {
+            for (auto control_field : externInstance->controlKeys) {
                 auto keyField = new struct KeyFieldAttributes();
                 keyField->id = control_field->keyID;
                 keyField->name = control_field->keyName;

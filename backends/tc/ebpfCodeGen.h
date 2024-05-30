@@ -146,12 +146,15 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
                                                                    const IR::P4Action *action,
                                                                    bool isDefaultAction) const;
     void validateKeys() const override;
+    void initDirectCounters();
     const ConvertToBackendIR *tcIR;
 
  public:
     EBPFTablePNA(const EBPF::EBPFProgram *program, const IR::TableBlock *table,
                  EBPF::CodeGenInspector *codeGen, const ConvertToBackendIR *tcIR)
-        : EBPF::EBPFTablePSA(program, table, codeGen), tcIR(tcIR) {}
+        : EBPF::EBPFTablePSA(program, table, codeGen), tcIR(tcIR) {
+            initDirectCounters();
+        }
     void emitInitializer(EBPF::CodeBuilder *builder) override;
     void emitDefaultActionStruct(EBPF::CodeBuilder *builder);
     void emitKeyType(EBPF::CodeBuilder *builder) override;
@@ -371,6 +374,7 @@ class ActionTranslationVisitorPNA : public EBPF::ActionTranslationVisitor,
                                 const IR::P4Action *act, bool isDefaultAction);
     bool preorder(const IR::PathExpression *pe) override;
     bool isActionParameter(const IR::Expression *expression) const;
+    void processMethod(const P4::ExternMethod *method);
 
     cstring getParamInstanceName(const IR::Expression *expression) const override;
     cstring getParamName(const IR::PathExpression *) override;

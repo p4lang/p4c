@@ -16,10 +16,23 @@ and limitations under the License.
 
 #include "backend.h"
 #include "ebpfCodeGen.h"
+// #include "backends/ebpf/psa/ebpPsaTable.h"
 
 namespace TC {
 
 class ControlBodyTranslatorPNA;
+class ConvertToBackendIR;
+
+class EBPFCounterPNA : public EBPF::EBPFCounterPSA {
+    cstring tblname;
+ public:
+    EBPFCounterPNA(const EBPF::EBPFProgram *program, const IR::Declaration_Instance *di, cstring name,
+                   EBPF::CodeGenInspector *codeGen, cstring tblname): EBPF::EBPFCounterPSA(program, di, name, codeGen) {
+        this->tblname = tblname;
+    }
+    void emitDirectMethodInvocation(EBPF::CodeBuilder *builder, const P4::ExternMethod *method, const ConvertToBackendIR *tcIR);
+    virtual void emitCounterUpdate(EBPF::CodeBuilder *builder, const ConvertToBackendIR *tcIR);
+};
 
 class EBPFRegisterPNA : public EBPF::EBPFTableBase {
  protected:
@@ -60,6 +73,32 @@ class EBPFRegisterPNA : public EBPF::EBPFTableBase {
                            ControlBodyTranslatorPNA *translator);
     void emitInitializer(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
                          ControlBodyTranslatorPNA *translator);
+};
+
+class EBPFTablePNADirectCounterPropertyVisitor : public EBPF::EBPFTablePsaPropertyVisitor {
+ public:
+    explicit EBPFTablePNADirectCounterPropertyVisitor(EBPF::EBPFTablePSA *table)
+        : EBPF::EBPFTablePsaPropertyVisitor(table) {}
+
+    bool preorder(const IR::PathExpression *pe) override {
+        auto decl = table->program->refMap->getDeclaration(pe->path, true);
+        auto di = decl->to<IR::Declaration_Instance>();
+        CHECK_NULL(di);
+        if (EBPF::EBPFObject::getSpecializedTypeName(di) != "DirectCounter") {
+            ::error(ErrorType::ERR_UNEXPECTED, "%1%: not a DirectCounter, see declaration of %2%",
+                    pe, decl);
+            return false;
+        }
+        auto counterName = EBPF::EBPFObject::externalName(di);
+        auto tblname = table->table->container->name.originalName;
+        auto ctr = new EBPFCounterPNA(table->program, di, counterName, table->codeGen, tblname);
+        table->counters.emplace_back(std::make_pair(counterName, ctr));
+        return false;
+    }
+
+    void visitTableProperty() {
+        EBPF::EBPFTablePsaPropertyVisitor::visitTableProperty("pna_direct_counter");
+    }
 };
 
 }  // namespace TC

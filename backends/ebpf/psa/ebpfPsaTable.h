@@ -120,6 +120,29 @@ class EBPFTablePSA : public EBPFTable {
     DECLARE_TYPEINFO(EBPFTablePSA, EBPFTable);
 };
 
+class EBPFTablePsaPropertyVisitor : public Inspector {
+ protected:
+    EBPFTablePSA *table;
+
+ public:
+    explicit EBPFTablePsaPropertyVisitor(EBPFTablePSA *table) : table(table) {}
+
+    /// Use these two preorders to print error when property contains something other than name of
+    /// extern instance. ListExpression is required because without it Expression will take
+    /// precedence over it and throw error for whole list.
+    bool preorder(const IR::ListExpression *) override { return true; }
+    bool preorder(const IR::Expression *expr) override {
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "%1%: unsupported expression, expected a named instance", expr);
+        return false;
+    }
+
+    void visitTableProperty(cstring propertyName) {
+        auto property = table->table->container->properties->getProperty(propertyName);
+        if (property != nullptr) property->apply(*this);
+    }
+};
+
 }  // namespace EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EBPFPSATABLE_H_ */
