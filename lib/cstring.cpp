@@ -16,6 +16,13 @@ limitations under the License.
 
 #include "cstring.h"
 
+#if HAVE_LIBGC
+#include <gc_cpp.h>
+#define IF_HAVE_LIBGC(X) X
+#else
+#define IF_HAVE_LIBGC(X)
+#endif /* HAVE_LIBGC */
+
 #include <algorithm>
 #include <cctype>
 #include <iomanip>
@@ -76,8 +83,7 @@ class table_entry {
             m_flags = table_entry_flags::inplace;
         } else {
             // Make copy of string elsewhere
-            // FIXME: should we allocate the buffer with GC off here?
-            auto copy = new char[length + 1];
+            auto copy = new IF_HAVE_LIBGC((NoGC)) char[length + 1];
             std::memcpy(copy, string, length);
             copy[length] = '\0';
             m_string = copy;
