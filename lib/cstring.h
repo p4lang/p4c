@@ -92,7 +92,7 @@ class cstring {
     // Owner of string is someone else, we do not know size of string.
     // Do not use if possible, this is linear time operation if string
     // not exists in table, because the underlying string must be copied.
-    cstring(const char *string) {  // NOLINT(runtime/explicit)
+    explicit cstring(const char *string) {
         if (string != nullptr) {
             construct_from_shared(string, std::strlen(string));
         }
@@ -100,13 +100,13 @@ class cstring {
 
     // construct cstring from std::string. Do not use if possible, this is linear
     // time operation if string not exists in table, because the underlying string must be copied.
-    cstring(const std::string &string) {  // NOLINT(runtime/explicit)
+    explicit cstring(const std::string &string) {
         construct_from_shared(string.data(), string.length());
     }
 
     // construct cstring from std::string_view. Do not use if possible, this is linear
     // time operation if string not exists in table, because the underlying string must be copied.
-    explicit cstring(std::string_view string) {  // NOLINT(runtime/explicit)
+    explicit cstring(std::string_view string) {
         construct_from_shared(string.data(), string.length());
     }
 
@@ -115,8 +115,18 @@ class cstring {
     // Just helper function, for lazies, who do not like to write .str()
     // Do not use it, implicit std::string construction with implicit overhead
     // TODO (DanilLutsenko): Remove it?
-    cstring(const std::stringstream &stream)  // NOLINT(runtime/explicit)
+    explicit cstring(const std::stringstream &stream)
         : cstring(stream.str()) {}
+
+    cstring(const cstring &) = default;
+    cstring(cstring &&) = default;
+
+    cstring &operator=(const cstring &) = default;
+    cstring &operator=(cstring &&) = default;
+    cstring &operator=(const std::string &str) {
+        construct_from_shared(str.data(), str.length());
+        return *this;
+    }
 
     // TODO (DanilLutsenko): Construct from StringRef?
 
@@ -164,6 +174,7 @@ class cstring {
 
     char get(unsigned index) const { return (index < size()) ? str[index] : 0; }
     const char *c_str() const { return str; }
+    const char *data() const { return str; }
     operator const char *() const { return str; }
 
     std::string string() const { return std::string(str); }
@@ -218,6 +229,9 @@ class cstring {
     bool operator<=(const std::string &a) const { return *this <= a.c_str(); }
     bool operator>(const std::string &a) const { return *this > a.c_str(); }
     bool operator>=(const std::string &a) const { return *this >= a.c_str(); }
+
+    /// implicit cast to std::string_view, similar to what std::string has
+    operator std::string_view() const { return std::string_view(data(), size()); }
 
     bool startsWith(const cstring &prefix) const;
     bool endsWith(const cstring &suffix) const;
