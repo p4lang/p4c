@@ -27,7 +27,7 @@ $TC p4template create table/simple_extern_example/ingress/nh_table \
 	act name simple_extern_example/ingress/drop
 $TC p4template update table/simple_extern_example/ingress/nh_table default_miss_action permissions 0x1024 action simple_extern_example/ingress/drop
 
-$TC p4template create extern/simple_extern_example/root/Register extid 1 numinstances 2 tc_acl 0x19b6
+$TC p4template create extern/root/Register extid 1 numinstances 2 tc_acl 0x19b6
 
 $TC p4template create extern_inst/simple_extern_example/Register/ingress.reg1 instid 1 \
 control_path tc_key index type bit32 id 1 param a_value type bit32 id 2 \

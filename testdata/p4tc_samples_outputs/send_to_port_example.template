@@ -20,7 +20,7 @@ $TC p4template create table/send_to_port_example/MainControlImpl/ipv4_tbl \
 	act name send_to_port_example/MainControlImpl/default_route_drop
 $TC p4template update table/send_to_port_example/MainControlImpl/ipv4_tbl default_miss_action permissions 0x1024 action send_to_port_example/MainControlImpl/default_route_drop
 
-$TC p4template create extern/send_to_port_example/root/Register extid 1 numinstances 1 tc_acl 0x19b6
+$TC p4template create extern/root/Register extid 1 numinstances 1 tc_acl 0x19b6
 
 $TC p4template create extern_inst/send_to_port_example/Register/MainControlImpl.reg1 instid 1 \
 control_path tc_key index type bit32 id 1 param a_value type bit32 id 2 \
