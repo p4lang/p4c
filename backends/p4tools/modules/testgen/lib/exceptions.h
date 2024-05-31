@@ -8,7 +8,6 @@ namespace P4Tools::P4Testgen {
 
 /// This class indicates a feature that is not implemented in P4Testgen.
 /// Paths with this unimplemented feature should be skipped
-// FIXME: Can we use CompilerUnimplemented instead?
 class TestgenUnimplemented final : public Util::P4CExceptionBase {
  public:
     template <typename... Args>
