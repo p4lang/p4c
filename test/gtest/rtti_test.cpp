@@ -113,6 +113,18 @@ TEST(RttiUtils, to) {
 
     EXPECT_EQ(RTTI::to<IR::Literal>(n), n->to<IR::Literal>());
     EXPECT_EQ(RTTI::to<IR::Type_Boolean>(c->type), nullptr);
+
+    std::vector<const IR::Node *> from{c, new IR::Add(c, c), n, new IR::LNot(c)};
+    std::vector<const IR::Operation *> to;
+    std::transform(from.begin(), from.end(), std::back_inserter(to), RTTI::to<IR::Operation>);
+
+    ASSERT_EQ(to.size(), 4);
+    EXPECT_EQ(to[0], nullptr);
+    ASSERT_NE(to[1], nullptr);
+    EXPECT_TRUE(to[1]->is<IR::Add>());
+    EXPECT_EQ(to[2], nullptr);
+    ASSERT_NE(to[3], nullptr);
+    EXPECT_TRUE(to[3]->is<IR::LNot>());
 }
 
 TEST(RttiUtils, is) {
@@ -125,6 +137,13 @@ TEST(RttiUtils, is) {
     EXPECT_FALSE(RTTI::is<IR::Add>(c));
     EXPECT_FALSE(RTTI::is<IR::BoolLiteral>(c));
     EXPECT_FALSE(RTTI::is<IR::Add>(nullNode));
+
+    std::vector<const IR::Node *> from{c, new IR::Add(c, c), n, new IR::LNot(c)};
+    auto it = std::find_if(from.begin(), from.end(), RTTI::is<IR::Operation_Unary>);
+
+    EXPECT_NE(it, from.end());
+    EXPECT_EQ(it, std::prev(from.end()));
+    EXPECT_EQ(*it, from[3]);
 }
 
 TEST(RttiUtils, isAny) {
@@ -141,6 +160,14 @@ TEST(RttiUtils, isAny) {
     EXPECT_TRUE((RTTI::isAny<IR::BoolLiteral, IR::Constant>(n)));
     // EXPECT_TRUE(RTTI::isAny<>(n)); // does not compile, with is right
     EXPECT_FALSE((RTTI::isAny<IR::Add, IR::LOr, IR::BAnd>(c)));
+
+    std::vector<const IR::Node *> from{c, new IR::Add(c, c), n, new IR::LNot(c)};
+    auto it = std::find_if(from.begin(), from.end(),
+                           RTTI::isAny<IR::Operation_Unary, IR::Operation_Binary>);
+
+    EXPECT_NE(it, from.end());
+    EXPECT_EQ(it, std::next(from.begin()));
+    EXPECT_EQ(*it, from[1]);
 }
 
 }  // namespace Test
