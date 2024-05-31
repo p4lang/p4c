@@ -36,6 +36,7 @@ class ParseP4RuntimeAnnotations : public ParseAnnotations {
                   PARSE("id", Constant),
                   PARSE("brief", StringLiteral),
                   PARSE("description", StringLiteral),
+                  PARSE_KV_LIST("platform_property"),
                   // These annotations are architecture-specific in theory, but
                   // given that they are "reserved" by the P4Runtime
                   // specification, I don't really have any qualms about adding

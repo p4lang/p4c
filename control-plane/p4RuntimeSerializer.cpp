@@ -951,9 +951,43 @@ class P4RuntimeAnalyzer {
             }
         }
 
+        // Parse `@platform_property` annotation into the PkgInfo.
+        for (auto *annotation : decl->getAnnotations()->annotations) {
+            if (annotation->name != "platform_property") continue;
+            auto *platform_properties = pkginfo->mutable_platform_properties();
+            for (auto *kv : annotation->kv) {
+                auto name = kv->name.name;
+                auto setInt32Field = [kv, &platform_properties](cstring fName) {
+                    auto *v = kv->expression->to<IR::Constant>();
+                    if (v == nullptr) {
+                        ::error(ErrorType::ERR_UNSUPPORTED,
+                                "Value for '%1%' key in @platform_property annotation is not an "
+                                "integer",
+                                kv);
+                        return;
+                    }
+                    // use Protobuf reflection library to minimize code duplication.
+                    auto *descriptor = platform_properties->GetDescriptor();
+                    auto *f = descriptor->FindFieldByName(static_cast<std::string>(fName));
+                    platform_properties->GetReflection()->SetInt32(platform_properties, f,
+                                                                   static_cast<int32_t>(v->value));
+                };
+                if (name == "multicast_group_table_size" ||
+                    name == "multicast_group_table_total_replicas" ||
+                    name == "multicast_group_table_max_replicas_per_entry") {
+                    setInt32Field(name);
+                } else {
+                    ::warning(ErrorType::WARN_UNKNOWN,
+                              "Unknown key name '%1%' in @platform_property annotation", name);
+                }
+            }
+        }
+
         // add other annotations on the P4 package to the message. @pkginfo is
         // ignored using the unary predicate argument to addAnnotations.
-        addAnnotations(pkginfo, decl, [](cstring name) { return name == "pkginfo"; });
+        addAnnotations(pkginfo, decl, [](cstring name) {
+            return name == "pkginfo" || name == "platform_property";
+        });
 
         addDocumentation(pkginfo, decl);
     }
