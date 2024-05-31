@@ -23,7 +23,7 @@ limitations under the License.
 namespace P4 {
 
 const IR::Node *CreateBuiltins::preorder(IR::P4Program *program) {
-    auto decls = program->getDeclsByName(P4::P4CoreLibrary::instance().noAction.str());
+    auto decls = program->getDeclsByName(P4::P4CoreLibrary::instance().noAction.toString());
     auto vec = decls->toVector();
     if (vec.empty()) return program;
     if (vec.size() > 1) {
@@ -118,7 +118,7 @@ const IR::Node *CreateBuiltins::postorder(IR::ParserState *state) {
 
 const IR::Node *CreateBuiltins::postorder(IR::ActionList *actions) {
     if (!addNoAction) return actions;
-    auto decl = actions->getDeclaration(P4::P4CoreLibrary::instance().noAction.str());
+    auto decl = actions->getDeclaration(P4::P4CoreLibrary::instance().noAction.toString());
     if (decl != nullptr) return actions;
     checkGlobalAction();
     actions->push_back(new IR::ActionListElement(

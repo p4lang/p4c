@@ -101,7 +101,7 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
              new P4::RemoveLeftSlices(&refMap, &typeMap), new EBPF::Lower(&refMap, &typeMap),
              evaluator, new P4::MidEndLast()});
         if (options.listMidendPasses) {
-            midEnd.listPasses(*outStream, "\n");
+            midEnd.listPasses(*outStream, cstring::newline);
             *outStream << std::endl;
             return nullptr;
         }

@@ -93,7 +93,7 @@ void ReferenceMap::dbprint(std::ostream &out) const {
     for (auto e : pathToDeclaration) out << dbp(e.first) << "->" << dbp(e.second) << std::endl;
 }
 
-cstring ReferenceMap::newName(cstring base) {
+cstring ReferenceMap::newName(std::string_view base) {
     // Maybe in the future we'll maintain information with per-scope identifiers,
     // but today we are content to generate globally-unique identifiers.
 
@@ -102,17 +102,20 @@ cstring ReferenceMap::newName(cstring base) {
     // This will not impact correctness.
     unsigned len = base.size();
     const char digits[] = "0123456789";
-    const char *s = base.c_str();
+    const char *s = base.data();
     while (len > 0 && strchr(digits, s[len - 1])) len--;
     if (len > 0 && base[len - 1] == '_') base = base.substr(0, len - 1);
 
-    cstring name = base;
-    if (usedNames.count(name)) name = cstring::make_unique(usedNames, name, usedNames[base], '_');
-    usedNames.emplace(name, 0);
+    cstring name(base);
+    auto [it, inserted] = usedNames.emplace(name, 0);
+    if (!inserted) {
+        name = cstring::make_unique(usedNames, name, it->second, '_');
+        usedNames.emplace(name, 0);
+    }
     return name;
 }
 
-cstring MinimalNameGenerator::newName(cstring base) {
+cstring MinimalNameGenerator::newName(std::string_view base) {
     // Maybe in the future we'll maintain information with per-scope identifiers,
     // but today we are content to generate globally-unique identifiers.
 
@@ -121,13 +124,16 @@ cstring MinimalNameGenerator::newName(cstring base) {
     // This will not impact correctness.
     unsigned len = base.size();
     const char digits[] = "0123456789";
-    const char *s = base.c_str();
+    const char *s = base.data();
     while (len > 0 && strchr(digits, s[len - 1])) len--;
     if (len > 0 && base[len - 1] == '_') base = base.substr(0, len - 1);
 
-    cstring name = base;
-    if (usedNames.count(name)) name = cstring::make_unique(usedNames, name, usedNames[base], '_');
-    usedNames.emplace(name, 0);
+    cstring name(base);
+    auto [it, inserted] = usedNames.emplace(name, 0);
+    if (!inserted) {
+        name = cstring::make_unique(usedNames, name, it->second, '_');
+        usedNames.emplace(name, 0);
+    }
     return name;
 }
 

@@ -56,7 +56,7 @@ class AbstractP4cToolOptions : protected Util::Options {
     /// Converts a vector of command-line arguments into the traditional (argc, argv) format.
     static std::tuple<int, char **> convertArgs(const std::vector<const char *> &args);
 
-    explicit AbstractP4cToolOptions(std::string_view toolName, cstring message);
+    explicit AbstractP4cToolOptions(std::string_view toolName, std::string_view message);
 };
 
 }  // namespace P4Tools

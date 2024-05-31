@@ -136,7 +136,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
          new P4::MidEndLast()});
     if (options.listMidendPasses) {
-        listPasses(*outStream, "\n");
+        listPasses(*outStream, cstring::newline);
         *outStream << std::endl;
         return;
     }

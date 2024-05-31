@@ -71,7 +71,7 @@ class Options : public CompilerOptions {
         registerOption(
             "--graphs-dir", "dir",
             [this](const char *arg) {
-                graphsDir = arg;
+                graphsDir = cstring(arg);
                 return true;
             },
             "Use this directory to dump graphs in dot format "
@@ -80,7 +80,7 @@ class Options : public CompilerOptions {
             "--fromJSON", "file",
             [this](const char *arg) {
                 loadIRFromJson = true;
-                file = arg;
+                file = cstring(arg);
                 return true;
             },
             "Use IR representation from JsonFile dumped previously, "
@@ -129,7 +129,7 @@ int main(int argc, char *const argv[]) {
     AutoCompileContext autoGraphsContext(new ::graphs::GraphsContext);
     auto &options = ::graphs::GraphsContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
-    options.compilerVersion = P4C_GRAPHS_VERSION_STRING;
+    options.compilerVersion = cstring(P4C_GRAPHS_VERSION_STRING);
 
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false) options.setInputFile();

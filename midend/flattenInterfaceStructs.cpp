@@ -71,10 +71,10 @@ const IR::Node *ReplaceStructs::postorder(IR::Type_Struct *type) {
 const IR::Node *ReplaceStructs::postorder(IR::Member *expression) {
     // Find out if this applies to one of the parameters that are being replaced.
     const IR::Expression *e = expression;
-    cstring prefix = "";
+    std::string prefix;
     while (auto mem = e->to<IR::Member>()) {
         e = mem->expr;
-        prefix = "."_cs + mem->member + prefix;
+        prefix = "." + mem->member + prefix;
     }
     auto pe = e->to<IR::PathExpression>();
     if (pe == nullptr) return expression;

@@ -124,8 +124,8 @@ int generateAndWriteAbstractTests(const TestgenOptions &testgenOptions,
     }
 
     // The test name is the stem of the output base path.
-    TestBackendConfiguration testBackendConfiguration{testPath.c_str(), testgenOptions.maxTests,
-                                                      testPath, testgenOptions.seed};
+    TestBackendConfiguration testBackendConfiguration{
+        cstring(testPath.c_str()), testgenOptions.maxTests, testPath, testgenOptions.seed};
 
     // Need to declare the solver here to ensure its lifetime.
     Z3Solver solver;

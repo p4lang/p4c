@@ -56,9 +56,9 @@ const IR::Node *DoEntryPriorities::preorder(IR::EntriesList *entries) {
 
     bool largestWins = true;   // default value
     size_t priorityDelta = 1;  // default value
-    auto largestProp = table->getBooleanProperty("largest_priority_wins");
+    auto largestProp = table->getBooleanProperty("largest_priority_wins"_cs);
     if (largestProp) largestWins = largestProp->value;
-    auto deltaProp = table->getConstantProperty("priority_delta");
+    auto deltaProp = table->getConstantProperty("priority_delta"_cs);
     if (deltaProp) {
         if (!deltaProp->fitsUint()) {
             ::error(ErrorType::ERR_INVALID, "%1% must be a positive value", deltaProp);

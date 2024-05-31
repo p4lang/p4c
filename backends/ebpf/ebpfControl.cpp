@@ -22,6 +22,7 @@ limitations under the License.
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeMap.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
 
 namespace EBPF {
@@ -67,7 +68,7 @@ void ControlBodyTranslator::processCustomExternFunction(const P4::ExternFunction
             builder->append("(const ");
             auto type = typeMap->getType(arg);
             auto ebpfType = typeFactory->create(type);
-            ebpfType->declare(builder, "", false);
+            ebpfType->declare(builder, cstring::empty, false);
             builder->append(") ");
         }
         visit(arg);
@@ -156,11 +157,11 @@ void ControlBodyTranslator::compileEmitField(const IR::Expression *expr, cstring
                                              unsigned hdrOffsetBits, EBPFType *type) {
     unsigned alignment = hdrOffsetBits % 8;
     unsigned widthToEmit = type->as<IHasWidth>().widthInBits();
-    cstring swap = "";
+    cstring swap = cstring::empty;
     if (widthToEmit == 16)
-        swap = "htons";
+        swap = "htons"_cs;
     else if (widthToEmit == 32)
-        swap = "htonl";
+        swap = "htonl"_cs;
     if (!swap.isNullOrEmpty()) {
         builder->emitIndent();
         visit(expr);
@@ -318,7 +319,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
     builder->blockStart();
 
     BUG_CHECK(method->expr->arguments->size() == 0, "%1%: table apply with arguments", method);
-    cstring keyname = "key";
+    cstring keyname = "key"_cs;
     if (table->keyGenerator != nullptr) {
         builder->emitIndent();
         builder->appendLine("/* construct key */");
@@ -330,7 +331,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
     builder->emitIndent();
     builder->appendLine("/* value */");
     builder->emitIndent();
-    cstring valueName = "value";
+    cstring valueName = "value"_cs;
     builder->appendFormat("struct %s *%s = NULL", table->valueTypeName.c_str(), valueName.c_str());
     builder->endOfStatement(true);
 

@@ -20,6 +20,7 @@ limitations under the License.
 #include "dpdkUtils.h"
 #include "frontends/p4/tableApply.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace DPDK {
 
@@ -244,17 +245,17 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 }
                 auto hash_alg = declArgs->at(0)->expression;
                 unsigned hashAlgValue = CRC1;
-                cstring hashInstr = "hash";
+                cstring hashInstr = "hash"_cs;
                 if (hash_alg->is<IR::Constant>())
                     hashAlgValue = hash_alg->to<IR::Constant>()->asUnsigned();
-                cstring hashAlgName = "crc32";
+                cstring hashAlgName = "crc32"_cs;
                 if (hashAlgValue == JHASH0 || hashAlgValue == JHASH5)
-                    hashAlgName = "jhash";
+                    hashAlgName = "jhash"_cs;
                 else if (hashAlgValue >= CRC1 && hashAlgValue <= CRC4)
-                    hashAlgName = "crc32";
+                    hashAlgName = "crc32"_cs;
                 else if (hashAlgValue == TOEPLITZ) {
                     hashAlgName = e->object->getName().name;
-                    hashInstr = "rss";
+                    hashInstr = "rss"_cs;
                 }
 
                 IR::Vector<IR::Expression> components;
@@ -345,7 +346,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             } else if (e->originalExternType->getName().name == "InternetChecksum") {
                 if (e->method->getName().name == "get") {
                     auto res = structure->csum_map.find(e->object->to<IR::Declaration_Instance>());
-                    cstring intermediate = "";
+                    cstring intermediate = cstring::empty;
                     if (res != structure->csum_map.end()) {
                         intermediate = res->second;
                     } else {
@@ -443,9 +444,9 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     metadataStruct->fields.push_back(
                         new IR::StructField(portInOutbound, IR::Type_Bits::get(32)));
                     add_instr(new IR::DpdkRegisterReadStatement(
-                        port_in_inbound, "ipsec_port_in_inbound", new IR::Constant(0)));
+                        port_in_inbound, "ipsec_port_in_inbound"_cs, new IR::Constant(0)));
                     add_instr(new IR::DpdkRegisterReadStatement(
-                        port_in_outbound, "ipsec_port_in_outbound", new IR::Constant(0)));
+                        port_in_outbound, "ipsec_port_in_outbound"_cs, new IR::Constant(0)));
                     add_instr(new IR::DpdkMovStatement(left, new IR::Constant(false)));
                     auto true_label = refmap->newName("label_true");
                     auto end_label = refmap->newName("label_end");
@@ -686,7 +687,7 @@ void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument *field,
 
 /// This function returns the header/metadata structure name
 cstring ConvertStatementToDpdk::getHdrMdStrName(const IR::Member *mem) {
-    cstring sName = "";
+    cstring sName = cstring::empty;
     if ((mem != nullptr) && (mem->expr != nullptr) && (mem->expr->type != nullptr)) {
         if (auto st = mem->expr->type->to<IR::Type_Header>()) {
             sName = st->name.name;
@@ -703,9 +704,9 @@ bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argumen
     if (auto s = field->expression->to<IR::StructExpression>()) {
         if (s->components.size() == 1) return true;
 
-        cstring hdrStrName = "";
+        cstring hdrStrName = cstring::empty;
         for (auto field1 : s->components) {
-            cstring sName = "";
+            cstring sName = cstring::empty;
             if (auto exp = field1->expression->to<IR::Member>()) {
                 auto type = typemap->getType(exp, true);
                 if (type->is<IR::Type_Header>()) {
@@ -717,7 +718,7 @@ bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argumen
                 }
             }
 
-            if (hdrStrName == "")
+            if (hdrStrName.isNullOrEmpty())
                 hdrStrName = sName;
             else if (hdrStrName != sName)
                 return false;
@@ -745,12 +746,12 @@ bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argumen
 bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument *field) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
         if (s->components.size() == 1) return true;
-        cstring stName = "";
+        cstring stName = cstring::empty;
         const IR::Type *hdrMdType = nullptr;
         std::vector<cstring> fldList;
         for (auto field1 : s->components) {
             if (auto exp = field1->expression->to<IR::Member>()) {
-                if (stName == "") stName = getHdrMdStrName(exp);
+                if (stName.isNullOrEmpty()) stName = getHdrMdStrName(exp);
 
                 auto type = typemap->getType(exp, true);
                 if (type->is<IR::Type_Header>()) {
@@ -1003,7 +1004,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         // Checksum function call
         if (a->originalExternType->getName().name == "InternetChecksum") {
             auto res = structure->csum_map.find(a->object->to<IR::Declaration_Instance>());
-            cstring intermediate = "";
+            cstring intermediate = cstring::empty;
             if (res != structure->csum_map.end()) {
                 intermediate = res->second;
             } else {
@@ -1081,9 +1082,9 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                         //
                         // @warning If the value is not aligned to 8 bits, the remainder after
                         // division is dropped during runtime (this is a target limitation).
-                        cstring baseName = "";
+                        cstring baseName;
                         if (length->expression->is<IR::Constant>()) {
-                            baseName = "varbit";
+                            baseName = "varbit"_cs;
                         } else if (length->expression->is<IR::Member>()) {
                             baseName = length->expression->to<IR::Member>()->member.name;
                         } else {
@@ -1401,7 +1402,7 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     auto size = s->cases.size();
     std::vector<cstring> labels;
     cstring label;
-    cstring default_label = "";
+    cstring default_label = cstring::empty;
     auto end_label = refmap->newName("label_endswitch");
     if (tc) {
         add_instr(new IR::DpdkApplyStatement(tc->name.toString()));

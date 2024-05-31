@@ -70,7 +70,7 @@ class EBPFTablePSADirectCounterPropertyVisitor : public EBPFTablePsaPropertyVisi
     }
 
     void visitTableProperty() {
-        EBPFTablePsaPropertyVisitor::visitTableProperty("psa_direct_counter");
+        EBPFTablePsaPropertyVisitor::visitTableProperty("psa_direct_counter"_cs);
     }
 };
 
@@ -96,7 +96,7 @@ class EBPFTablePSADirectMeterPropertyVisitor : public EBPFTablePsaPropertyVisito
     }
 
     void visitTableProperty() {
-        EBPFTablePsaPropertyVisitor::visitTableProperty("psa_direct_meter");
+        EBPFTablePsaPropertyVisitor::visitTableProperty("psa_direct_meter"_cs);
     }
 };
 
@@ -133,7 +133,7 @@ class EBPFTablePSAImplementationPropertyVisitor : public EBPFTablePsaPropertyVis
     }
 
     void visitTableProperty() {
-        EBPFTablePsaPropertyVisitor::visitTableProperty("psa_implementation");
+        EBPFTablePsaPropertyVisitor::visitTableProperty("psa_implementation"_cs);
     }
 };
 
@@ -418,7 +418,7 @@ cstring ActionTranslationVisitorPSA::getParamName(const IR::PathExpression *expr
 EBPFTablePSA::EBPFTablePSA(const EBPFProgram *program, const IR::TableBlock *table,
                            CodeGenInspector *codeGen)
     : EBPFTable(program, table, codeGen), implementation(nullptr) {
-    auto sizeProperty = table->container->properties->getProperty("size");
+    auto sizeProperty = table->container->properties->getProperty("size"_cs);
     if (keyGenerator == nullptr && sizeProperty != nullptr) {
         ::warning(ErrorType::WARN_IGNORE_PROPERTY,
                   "%1%: property ignored because table does not have a key", sizeProperty);
@@ -482,7 +482,7 @@ void EBPFTablePSA::initImplementation() {
                 "%1%: implementation not found, ActionSelector is required",
                 selectorKey->matchType);
     }
-    auto emptyGroupAction = table->container->properties->getProperty("psa_empty_group_action");
+    auto emptyGroupAction = table->container->properties->getProperty("psa_empty_group_action"_cs);
     if (!hasActionSelector && emptyGroupAction != nullptr) {
         ::warning(ErrorType::WARN_UNUSED, "%1%: unused property (ActionSelector not provided)",
                   emptyGroupAction);
@@ -601,7 +601,7 @@ void EBPFTablePSA::emitConstEntriesInitializer(CodeBuilder *builder) {
         auto ret = program->refMap->newName("ret");
         builder->emitIndent();
         builder->appendFormat("int %s = ", ret.c_str());
-        builder->target->emitTableUpdate(builder, instanceName, keyName.c_str(), valueName.c_str());
+        builder->target->emitTableUpdate(builder, instanceName, keyName, valueName);
         builder->newline();
 
         emitMapUpdateTraceMsg(builder, instanceName, ret);
@@ -619,8 +619,7 @@ void EBPFTablePSA::emitDefaultActionInitializer(CodeBuilder *builder) {
         auto ret = program->refMap->newName("ret");
         builder->emitIndent();
         builder->appendFormat("int %s = ", ret.c_str());
-        builder->target->emitTableUpdate(builder, defaultActionMapName, program->zeroKey.c_str(),
-                                         value.c_str());
+        builder->target->emitTableUpdate(builder, defaultActionMapName, program->zeroKey, value);
         builder->newline();
 
         emitMapUpdateTraceMsg(builder, defaultActionMapName, ret);
@@ -931,25 +930,26 @@ cstring EBPFTablePSA::addPrefixFunc(bool trace) {
         "%trace_msg_tuple_not_found%"
         "        return;\n"
         "    }\n"
-        "}";
+        "}"_cs;
 
     if (trace) {
         addPrefixFunc = addPrefixFunc.replace(
-            "%trace_msg_prefix_map_fail%",
-            "        bpf_trace_message(\"Prefixes map update failed\\n\");\n");
+            "%trace_msg_prefix_map_fail%"_cs,
+            "        bpf_trace_message(\"Prefixes map update failed\\n\");\n"_cs);
         addPrefixFunc = addPrefixFunc.replace(
-            "%trace_msg_tuple_update_fail%",
-            "                bpf_trace_message(\"Tuple map update failed\\n\");\n");
+            "%trace_msg_tuple_update_fail%"_cs,
+            "                bpf_trace_message(\"Tuple map update failed\\n\");\n"_cs);
         addPrefixFunc = addPrefixFunc.replace(
-            "%trace_msg_tuple_update_success%",
-            "                bpf_trace_message(\"Tuple map update succeed\\n\");\n");
-        addPrefixFunc = addPrefixFunc.replace(
-            "%trace_msg_tuple_not_found%", "        bpf_trace_message(\"Tuple not found\\n\");\n");
+            "%trace_msg_tuple_update_success%"_cs,
+            "                bpf_trace_message(\"Tuple map update succeed\\n\");\n"_cs);
+        addPrefixFunc =
+            addPrefixFunc.replace("%trace_msg_tuple_not_found%"_cs,
+                                  "        bpf_trace_message(\"Tuple not found\\n\");\n"_cs);
     } else {
-        addPrefixFunc = addPrefixFunc.replace("%trace_msg_prefix_map_fail%", "");
-        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_update_fail%", "");
-        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_update_success%", "");
-        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_not_found%", "");
+        addPrefixFunc = addPrefixFunc.replace("%trace_msg_prefix_map_fail%"_cs, ""_cs);
+        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_update_fail%"_cs, ""_cs);
+        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_update_success%"_cs, ""_cs);
+        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_not_found%"_cs, ""_cs);
     }
 
     return addPrefixFunc;
@@ -1012,7 +1012,7 @@ void EBPFTablePSA::emitCacheInstance(CodeBuilder *builder) {
 }
 
 void EBPFTablePSA::emitCacheLookup(CodeBuilder *builder, cstring key, cstring value) {
-    cstring cacheVal = "cached_value";
+    cstring cacheVal = "cached_value"_cs;
 
     builder->appendFormat("struct %s* %s = NULL", cacheValueTypeName.c_str(), cacheVal.c_str());
     builder->endOfStatement(true);
@@ -1048,7 +1048,7 @@ void EBPFTablePSA::emitCacheLookup(CodeBuilder *builder, cstring key, cstring va
 }
 
 void EBPFTablePSA::emitCacheUpdate(CodeBuilder *builder, cstring key, cstring value) {
-    cstring cacheUpdateVarName = "cache_update";
+    cstring cacheUpdateVarName = "cache_update"_cs;
 
     builder->emitIndent();
     builder->appendFormat("if (%s != NULL) ", value.c_str());

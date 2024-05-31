@@ -20,6 +20,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 const ordered_set<const ComputeDefUse::loc_t *> ComputeDefUse::empty = {};
 
 void ComputeDefUse::flow_merge(Visitor &a_) {
@@ -143,7 +145,8 @@ class ComputeDefUse::SetupJoinPoints : public ControlFlowVisitor::SetupJoinPoint
         IndentCtl::TempIndent indent;
         LOG6("SetupJoinPoints(P4Parser " << p->name << ")" << indent);
         LOG8("    " << Log::indent << Log::indent << *p << Log::unindent << Log::unindent);
-        if (auto start = p->states.getDeclaration<IR::ParserState>("start")) visit(start, "start");
+        if (auto start = p->states.getDeclaration<IR::ParserState>("start"_cs))
+            visit(start, "start");
         return false;
     }
     bool preorder(const IR::P4Control *) override { return false; }
@@ -317,7 +320,7 @@ bool ComputeDefUse::preorder(const IR::P4Parser *p) {
         if (a->direction == IR::Direction::In || a->direction == IR::Direction::InOut)
             def_info[a].defs.insert(getLoc(a));
     state = NORMAL;
-    if (auto start = p->states.getDeclaration<IR::ParserState>("start")) {
+    if (auto start = p->states.getDeclaration<IR::ParserState>("start"_cs)) {
         visit(start, "start");
     } else {
         BUG("No start state in %s", p);

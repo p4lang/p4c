@@ -28,7 +28,7 @@ void PNAEbpfGenerator::emitPNAIncludes(EBPF::CodeBuilder *builder) const {
 cstring PNAEbpfGenerator::getProgramName() const {
     auto progName = options.file;
     auto filename = progName.findlast('/');
-    if (filename) progName = filename;
+    if (filename) progName = cstring(filename);
     progName = progName.exceptLast(3);
     progName = progName.trim("/\t\n\r");
     return progName;
@@ -76,13 +76,13 @@ void PNAEbpfGenerator::emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) con
     builder->blockStart();
     builder->emitIndent();
 
-    pipeline->parser->headerType->declare(builder, "cpumap_hdr", false);
+    pipeline->parser->headerType->declare(builder, "cpumap_hdr"_cs, false);
     builder->endOfStatement(true);
     builder->emitIndent();
     auto user_md_type = pipeline->typeMap->getType(pipeline->control->user_metadata);
     BUG_CHECK(user_md_type != nullptr, "cannot declare user metadata");
     auto userMetadataType = EBPF::EBPFTypeFactory::instance->create(user_md_type);
-    userMetadataType->declare(builder, "cpumap_usermeta", false);
+    userMetadataType->declare(builder, "cpumap_usermeta"_cs, false);
     builder->endOfStatement(true);
 
     builder->emitIndent();
@@ -169,8 +169,8 @@ void PNAEbpfGenerator::emitPipelineInstances(EBPF::CodeBuilder *builder) const {
     pipeline->parser->emitValueSetInstances(builder);
     pipeline->deparser->emitDigestInstances(builder);
 
-    builder->target->emitTableDecl(builder, "hdr_md_cpumap", EBPF::TablePerCPUArray, "u32",
-                                   "struct hdr_md", 2);
+    builder->target->emitTableDecl(builder, "hdr_md_cpumap"_cs, EBPF::TablePerCPUArray, "u32"_cs,
+                                   "struct hdr_md"_cs, 2);
 }
 
 // =====================PNAArchTC=============================
@@ -211,8 +211,8 @@ void PNAArchTC::emitInstances(EBPF::CodeBuilder *builder) const {
     builder->appendLine("REGISTER_START()");
 
     if (options.xdp2tcMode == XDP2TC_CPUMAP) {
-        builder->target->emitTableDecl(builder, "xdp2tc_cpumap", EBPF::TablePerCPUArray, "u32",
-                                       "u16", 1);
+        builder->target->emitTableDecl(builder, "xdp2tc_cpumap"_cs, EBPF::TablePerCPUArray,
+                                       "u32"_cs, "u16"_cs, 1);
     }
 
     emitPipelineInstances(builder);
@@ -235,9 +235,9 @@ void PNAArchTC::emitParser(EBPF::CodeBuilder *builder) const {
     builder->newline();
     builder->appendLine("struct p4tc_filter_fields p4tc_filter_fields;");
     builder->newline();
-    pipeline->name = "tc-parse";
-    pipeline->sectionName = "p4tc/parse";
-    pipeline->functionName = pipeline->name.replace("-", "_") + "_func";
+    pipeline->name = "tc-parse"_cs;
+    pipeline->sectionName = "p4tc/parse"_cs;
+    pipeline->functionName = pipeline->name.replace('-', '_') + "_func";
     pipeline->emit(builder);
     builder->target->emitLicense(builder, pipeline->license);
 }
@@ -267,7 +267,7 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     builder->append("static __always_inline");
     builder->spc();
     // FIXME: use Target to generate metadata type
-    cstring func_name = (name == "tc-parse") ? "run_parser" : "process";
+    cstring func_name = (name == "tc-parse") ? "run_parser"_cs : "process"_cs;
     builder->appendFormat(
         "int %s(%s *%s, %s %s *%s, "
         "struct pna_global_metadata *%s",
@@ -526,14 +526,14 @@ void TCIngressPipelinePNA::emitLocalVariables(EBPF::CodeBuilder *builder) {
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("void* %s = %s;", packetStartVar.c_str(),
-                          builder->target->dataOffset(model.CPacketName.str()).c_str());
+                          builder->target->dataOffset(model.CPacketName.toString()).c_str());
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("u8* %s = %s;", headerStartVar.c_str(), packetStartVar.c_str());
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("void* %s = %s;", packetEndVar.c_str(),
-                          builder->target->dataEnd(model.CPacketName.str()).c_str());
+                          builder->target->dataEnd(model.CPacketName.toString()).c_str());
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("u32 %s = 0;", zeroKey.c_str());
@@ -737,7 +737,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         if (auto member = expr->to<IR::Member>()) {
             if (auto pathExpr = member->expr->to<IR::PathExpression>()) {
                 if (isPointerVariable(pathExpr->path->name.name)) {
-                    exprStr = exprStr.replace(".", "->");
+                    exprStr = exprStr.replace("."_cs, "->"_cs);
                 }
             }
         }
@@ -1200,11 +1200,11 @@ void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     emitBufferAdjusts(builder);
     builder->emitIndent();
     builder->appendFormat("%s = %s;", program->packetStartVar,
-                          builder->target->dataOffset(program->model.CPacketName.str()));
+                          builder->target->dataOffset(program->model.CPacketName.toString()));
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("%s = %s;", program->packetEndVar,
-                          builder->target->dataEnd(program->model.CPacketName.str()));
+                          builder->target->dataEnd(program->model.CPacketName.toString()));
     builder->newline();
 
     builder->emitIndent();
@@ -1249,17 +1249,17 @@ const PNAEbpfGenerator *ConvertToEbpfPNA::build(const IR::ToplevelBlock *tlb) {
      * PIPELINE
      */
     auto pipeline = tlb->getMain()->checkedTo<IR::PackageBlock>();
-    auto pipelineParser = pipeline->getParameterValue("main_parser");
+    auto pipelineParser = pipeline->getParameterValue("main_parser"_cs);
     BUG_CHECK(pipelineParser != nullptr, "No parser block found");
-    auto pipelineControl = pipeline->getParameterValue("main_control");
+    auto pipelineControl = pipeline->getParameterValue("main_control"_cs);
     BUG_CHECK(pipelineControl != nullptr, "No control block found");
-    auto pipelineDeparser = pipeline->getParameterValue("main_deparser");
+    auto pipelineDeparser = pipeline->getParameterValue("main_deparser"_cs);
     BUG_CHECK(pipelineDeparser != nullptr, "No deparser block found");
 
     auto xdp = new EBPF::XDPHelpProgram(options);
 
     auto pipeline_converter = new ConvertToEbpfPipelineTC(
-        "tc-ingress", EBPF::TC_INGRESS, options, pipelineParser->checkedTo<IR::ParserBlock>(),
+        "tc-ingress"_cs, EBPF::TC_INGRESS, options, pipelineParser->checkedTo<IR::ParserBlock>(),
         pipelineControl->checkedTo<IR::ControlBlock>(),
         pipelineDeparser->checkedTo<IR::ControlBlock>(), refmap, typemap, tcIR);
     pipeline->apply(*pipeline_converter);
@@ -1280,7 +1280,7 @@ bool ConvertToEbpfPipelineTC::preorder(const IR::PackageBlock *block) {
     (void)block;
 
     pipeline = new TCIngressPipelinePNA(name, options, refmap, typemap);
-    pipeline->sectionName = "p4tc/main";
+    pipeline->sectionName = "p4tc/main"_cs;
     auto parser_converter = new ConvertToEBPFParserPNA(pipeline, typemap);
     parserBlock->apply(*parser_converter);
     pipeline->parser = parser_converter->getEBPFParser();
@@ -1531,7 +1531,7 @@ cstring ControlBodyTranslatorPNA::getParamName(const IR::PathExpression *expr) {
 }
 
 bool ControlBodyTranslatorPNA::IsTableAddOnMiss(const IR::P4Table *table) {
-    auto property = table->getBooleanProperty("add_on_miss");
+    auto property = table->getBooleanProperty("add_on_miss"_cs);
     if (property && property->value) {
         return true;
     }
@@ -1544,7 +1544,7 @@ const IR::P4Action *ControlBodyTranslatorPNA::GetAddOnMissHitAction(cstring acti
         auto action = adecl->getNode()->to<IR::P4Action>();
         if (action->name.originalName == actionName) {
             auto annotations = a->getAnnotations();
-            if (annotations && annotations->getSingle("defaultonly")) {
+            if (annotations && annotations->getSingle("defaultonly"_cs)) {
                 ::error(ErrorType::ERR_UNEXPECTED,
                         "add_entry hit action %1% cannot be annotated with defaultonly.",
                         actionName);
@@ -1766,7 +1766,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
     builder->blockStart();
 
     BUG_CHECK(method->expr->arguments->size() == 0, "%1%: table apply with arguments", method);
-    cstring keyname = "key";
+    cstring keyname = "key"_cs;
     if (table->keyGenerator != nullptr) {
         builder->emitIndent();
         builder->appendLine("/* construct key */");
@@ -1804,7 +1804,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
             auto tcTarget = dynamic_cast<const EBPF::P4TCTarget *>(builder->target);
             cstring isKeyBigEndian =
                 tcTarget->getByteOrderFromAnnotation(c->getAnnotations()->annotations);
-            cstring isDefnBigEndian = "HOST";
+            cstring isDefnBigEndian = "HOST"_cs;
             if (auto mem = c->expression->to<IR::Member>()) {
                 auto type = typeMap->getType(mem->expr, true);
                 if (type->is<IR::Type_StructLike>()) {
@@ -1821,13 +1821,13 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
 
                 if (isKeyBigEndian == "NETWORK" && isDefnBigEndian == "HOST") {
                     if (width <= 8) {
-                        swap = "";  // single byte, nothing to swap
+                        swap = ""_cs;  // single byte, nothing to swap
                     } else if (width <= 16) {
-                        swap = "bpf_htons";
+                        swap = "bpf_htons"_cs;
                     } else if (width <= 32) {
-                        swap = "bpf_htonl";
+                        swap = "bpf_htonl"_cs;
                     } else if (width <= 64) {
-                        swap = "bpf_htonll";
+                        swap = "bpf_htonll"_cs;
                     }
                     /* For width greater than 64 bit, there is no need of conversion.
                         and the value will be copied directly from memory.*/
@@ -1868,7 +1868,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
     builder->emitIndent();
     builder->appendLine("/* value */");
     builder->emitIndent();
-    cstring valueName = "value";
+    cstring valueName = "value"_cs;
     builder->appendFormat("struct %s *%s = NULL", table->valueTypeName.c_str(), valueName.c_str());
     builder->endOfStatement(true);
 
@@ -2138,7 +2138,7 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
     }
     unsigned widthToEmit = et->widthInBits();
     unsigned emitSize = 0;
-    cstring swap = "", msgStr;
+    cstring swap = ""_cs, msgStr;
 
     if (widthToEmit <= 64) {
         if (program->options.emitTraceMessages) {
@@ -2162,13 +2162,13 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
     if (widthToEmit <= 8) {
         emitSize = 8;
     } else if (widthToEmit <= 16) {
-        swap = "bpf_htons";
+        swap = "bpf_htons"_cs;
         emitSize = 16;
     } else if (widthToEmit <= 32) {
-        swap = "htonl";
+        swap = "htonl"_cs;
         emitSize = 32;
     } else if (widthToEmit <= 64) {
-        swap = "htonll";
+        swap = "htonll"_cs;
         emitSize = 64;
     }
     unsigned shift =
@@ -2252,7 +2252,7 @@ void CRCChecksumAlgorithmPNA::emitUpdateMethod(EBPF::CodeBuilder *builder, int c
         // incremented. For data shorter than or equal 64 bits, bytes are processed in little endian
         // byte order - data pointer is decremented by outer loop in this case.
         // There is no need for lookup table.
-        cstring code =
+        const char *code =
             "static __always_inline\n"
             "void crc16_update(u16 * reg, const u8 * data, "
             "u16 data_size, const u16 poly) {\n"
@@ -2284,7 +2284,7 @@ void CRCChecksumAlgorithmPNA::emitUpdateMethod(EBPF::CodeBuilder *builder, int c
         // 4. Data size more than 8 bytes and not multiply of 8 bytes - calculated using slice-by-8
         //    and Standard Implementation both in big endian byte order.
         // Lookup table is necessary for both algorithms.
-        cstring code =
+        const char *code =
             "static __always_inline\n"
             "void crc32_update(u32 * reg, const u8 * data, u16 data_size, const u32 poly) {\n"
             "    u32* current = (u32*) data;\n"
@@ -2369,7 +2369,7 @@ void CRCChecksumAlgorithmPNA::emitUpdateMethod(EBPF::CodeBuilder *builder, int c
 void CRC16ChecksumAlgorithmPNA::emitGlobals(EBPF::CodeBuilder *builder) {
     CRCChecksumAlgorithmPNA::emitUpdateMethod(builder, 16);
 
-    cstring code =
+    const char *code =
         "static __always_inline "
         "u16 crc16_finalize(u16 reg) {\n"
         "    return reg;\n"
@@ -2382,7 +2382,7 @@ void CRC16ChecksumAlgorithmPNA::emitGlobals(EBPF::CodeBuilder *builder) {
 void CRC32ChecksumAlgorithmPNA::emitGlobals(EBPF::CodeBuilder *builder) {
     CRCChecksumAlgorithmPNA::emitUpdateMethod(builder, 32);
 
-    cstring code =
+    const char *code =
         "static __always_inline "
         "u32 crc32_finalize(u32 reg) {\n"
         "    return reg ^ 0xFFFFFFFF;\n"

@@ -269,7 +269,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new FrontEndLast(),
     });
     if (options.listFrontendPasses) {
-        passes.listPasses(*outStream, "\n");
+        passes.listPasses(*outStream, cstring::newline);
         *outStream << std::endl;
         return nullptr;
     }

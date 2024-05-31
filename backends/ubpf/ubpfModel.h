@@ -25,8 +25,11 @@ limitations under the License.
 
 namespace UBPF {
 
+using namespace P4::literals;
+
 struct Pipeline_Model : public ::Model::Elem {
-    Pipeline_Model() : Elem("Pipeline"), parser("prs"), control("p"), deparser("dprs") {}
+    Pipeline_Model()
+        : Elem("Pipeline"_cs), parser("prs"_cs), control("p"_cs), deparser("dprs"_cs) {}
 
     ::Model::Elem parser;
     ::Model::Elem control;
@@ -35,13 +38,13 @@ struct Pipeline_Model : public ::Model::Elem {
 
 struct Register_Model : public ::Model::Extern_Model {
     Register_Model()
-        : Extern_Model("Register"),
-          sizeParam("size"),
-          read("read"),
-          write("write"),
-          initial_value("initial_value"),
-          index("index"),
-          value("value") {}
+        : Extern_Model("Register"_cs),
+          sizeParam("size"_cs),
+          read("read"_cs),
+          write("write"_cs),
+          initial_value("initial_value"_cs),
+          index("index"_cs),
+          value("value"_cs) {}
 
     ::Model::Elem sizeParam;
     ::Model::Elem read;
@@ -52,28 +55,28 @@ struct Register_Model : public ::Model::Extern_Model {
 };
 
 struct Algorithm_Model : public ::Model::Enum_Model {
-    Algorithm_Model() : ::Model::Enum_Model("HashAlgorithm"), lookup3("lookup3") {}
+    Algorithm_Model() : ::Model::Enum_Model("HashAlgorithm"_cs), lookup3("lookup3"_cs) {}
 
     ::Model::Elem lookup3;
 };
 
 struct Hash_Model : public ::Model::Elem {
-    Hash_Model() : ::Model::Elem("hash") {}
+    Hash_Model() : ::Model::Elem("hash"_cs) {}
 };
 
 class UBPFModel : public ::Model::Model {
  protected:
     UBPFModel()
-        : CPacketName("pkt"),
-          packet("packet", P4::P4CoreLibrary::instance().packetIn, 0),
+        : CPacketName("pkt"_cs),
+          packet("packet"_cs, P4::P4CoreLibrary::instance().packetIn, 0),
           pipeline(),
           registerModel(),
-          drop("mark_to_drop"),
-          pass("mark_to_pass"),
-          ubpf_time_get_ns("ubpf_time_get_ns"),
-          truncate("truncate"),
-          csum_replace2("csum_replace2"),
-          csum_replace4("csum_replace4"),
+          drop("mark_to_drop"_cs),
+          pass("mark_to_pass"_cs),
+          ubpf_time_get_ns("ubpf_time_get_ns"_cs),
+          truncate("truncate"_cs),
+          csum_replace2("csum_replace2"_cs),
+          csum_replace4("csum_replace4"_cs),
           hashAlgorithm(),
           hash() {}
 

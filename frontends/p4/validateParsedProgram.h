@@ -22,6 +22,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 /**
    This pass performs some simple semantic checks on the program;
    since the grammar accepts many programs that are actually illegal,
@@ -81,7 +83,7 @@ class ValidateParsedProgram final : public Inspector {
                            control->getConstructorParameters());
     }
     void postorder(const IR::P4Parser *parser) override {
-        auto start = parser->states.getDeclaration("start");
+        auto start = parser->states.getDeclaration("start"_cs);
         if (!start) {
             ::error(ErrorType::ERR_INVALID, "Parser %1% has no 'start' state", parser);
         }

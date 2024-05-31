@@ -100,13 +100,13 @@ TEST_F(P4CConstantFoldingValidation, no_filter) {
     ASSERT_TRUE(program);
 
     // my_hdr_stack_1_t.hdr should be a Constant
-    auto *sf_1 = getStructField(program, "my_hdr_stack_1_t", "hdr");
+    auto *sf_1 = getStructField(program, "my_hdr_stack_1_t"_cs, "hdr"_cs);
     ASSERT_TRUE(sf_1);
     auto *ts_1 = sf_1->type->to<IR::Type_Stack>();
     ASSERT_TRUE(ts_1->size->is<IR::Constant>());
 
     // my_hdr_stack_2_t.hdr should be a Constant
-    auto *sf_2 = getStructField(program, "my_hdr_stack_2_t", "hdr");
+    auto *sf_2 = getStructField(program, "my_hdr_stack_2_t"_cs, "hdr"_cs);
     ASSERT_TRUE(sf_2);
     auto *ts_2 = sf_2->type->to<IR::Type_Stack>();
     ASSERT_TRUE(ts_2->size->is<IR::Constant>());
@@ -121,13 +121,13 @@ TEST_F(P4CConstantFoldingValidation, filter) {
     ASSERT_TRUE(program);
 
     // my_hdr_stack_1_t.hdr should be a Constant
-    auto *sf_1 = getStructField(program, "my_hdr_stack_1_t", "hdr");
+    auto *sf_1 = getStructField(program, "my_hdr_stack_1_t"_cs, "hdr"_cs);
     ASSERT_TRUE(sf_1);
     auto *ts_1 = sf_1->type->to<IR::Type_Stack>();
     EXPECT_TRUE(ts_1->size->is<IR::PathExpression>());
 
     // my_hdr_stack_2_t.hdr should be a Constant
-    auto *sf_2 = getStructField(program, "my_hdr_stack_2_t", "hdr");
+    auto *sf_2 = getStructField(program, "my_hdr_stack_2_t"_cs, "hdr"_cs);
     ASSERT_TRUE(sf_2);
     auto *ts_2 = sf_2->type->to<IR::Type_Stack>();
     EXPECT_TRUE(ts_2->size->is<IR::Constant>());

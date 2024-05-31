@@ -88,7 +88,7 @@ class Utils {
     /// @returns a method call to an internal extern consumed by the interpreter. The return type
     /// is typically Type_Void.
     static const IR::MethodCallExpression *generateInternalMethodCall(
-        cstring methodName, const std::vector<const IR::Expression *> &argVector,
+        std::string_view methodName, const std::vector<const IR::Expression *> &argVector,
         const IR::Type *returnType = IR::Type_Void::get(),
         const IR::ParameterList *paramList = new IR::ParameterList());
 

@@ -44,7 +44,7 @@ class BMV2Options : public CompilerOptions {
         registerOption(
             "-o", "outfile",
             [this](const char *arg) {
-                outputFile = arg;
+                outputFile = cstring(arg);
                 return true;
             },
             "Write output to outfile");
@@ -52,7 +52,7 @@ class BMV2Options : public CompilerOptions {
             "--fromJSON", "file",
             [this](const char *arg) {
                 loadIRFromJson = true;
-                file = arg;
+                file = cstring(arg);
                 return true;
             },
             "Use IR representation from JsonFile dumped previously,"

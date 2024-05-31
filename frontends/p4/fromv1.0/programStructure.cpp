@@ -200,7 +200,7 @@ cstring ProgramStructure::createType(const IR::Type_StructLike *type, bool heade
 void ProgramStructure::createTypes() {
     if (allFieldLists.size()) {
         // An enum containing the recirculated/cloned/resubmitted field lists
-        fieldListsEnum = makeUniqueName("FieldLists");
+        fieldListsEnum = makeUniqueName("FieldLists"_cs);
         auto members = new IR::IndexedVector<IR::SerEnumMember>();
         unsigned index = 0;
         P4::MinimalNameGenerator mng;
@@ -240,7 +240,7 @@ void ProgramStructure::createTypes() {
 
             BUG_CHECK(type->is<IR::Type_Header>(), "%1%: unexpected type", type);
             // Must convert to a struct type
-            cstring type_name = makeUniqueName(st->name);
+            cstring type_name = makeUniqueName(st->name.name);
             // Registers always use struct types
             auto annos = addNameAnnotation(layoutTypeName, type->annotations);
             auto newType = new IR::Type_Struct(type->srcInfo, type_name, annos, st->fields);
@@ -279,7 +279,7 @@ const IR::Type_Struct *ProgramStructure::createFieldListType(const IR::Expressio
         return nullptr;
     }
 
-    auto name = makeUniqueName(nr->path->name);
+    auto name = makeUniqueName(nr->path->name.name);
     auto annos = addNameAnnotation(nr->path->name);
     auto result = new IR::Type_Struct(expression->srcInfo, name, annos);
     std::set<cstring> fieldNames;
@@ -556,7 +556,7 @@ const IR::ParserState *ProgramStructure::convertParser(
                 value_sets_implemented.emplace(first->path->name);
 
                 auto type = explodeType(fieldTypes);
-                auto sizeAnnotation = value_set->annotations->getSingle("parser_value_set_size");
+                auto sizeAnnotation = value_set->annotations->getSingle("parser_value_set_size"_cs);
                 const IR::Constant *sizeConstant;
                 if (sizeAnnotation) {
                     if (sizeAnnotation->expr.size() != 1) {
@@ -897,9 +897,9 @@ const IR::Declaration_Instance *ProgramStructure::convertActionProfile(
         auto width = new IR::Constant(v1model.action_selector.widthType, flc->output_width);
         args->push_back(new IR::Argument(width));
         if (action_selector->mode)
-            annos = annos->addAnnotation("mode", new IR::StringLiteral(action_selector->mode));
+            annos = annos->addAnnotation("mode"_cs, new IR::StringLiteral(action_selector->mode));
         if (action_selector->type)
-            annos = annos->addAnnotation("type", new IR::StringLiteral(action_selector->type));
+            annos = annos->addAnnotation("type"_cs, new IR::StringLiteral(action_selector->type));
         auto fl = getFieldLists(flc);
         for (auto annot : fl->annotations->annotations) {
             annos = annos->add(annot);
@@ -937,7 +937,7 @@ const IR::P4Table *ProgramStructure::convertTable(const IR::V1Table *table, cstr
         if (mtr != nullptr || ctr != nullptr) {
             // we must synthesize a new action, which has a writeback to
             // the meter/counter
-            newname = makeUniqueName(a);
+            newname = makeUniqueName(a.name);
             auto actCont = convertAction(action, newname, mtr, ctr);
             stateful.push_back(actCont);
             mapNames[table->name + '.' + a] = newname;
@@ -1140,7 +1140,7 @@ static bool isSaturatedField(const IR::Expression *expr) {
     auto header_type = member->expr->type->to<IR::Type_StructLike>();
     if (!header_type) return false;
     auto field = header_type->getField(member->member.name);
-    if (field && field->getAnnotation("saturating")) {
+    if (field && field->getAnnotation("saturating"_cs)) {
         return true;
     }
     return false;
@@ -1574,7 +1574,7 @@ CONVERT_PRIMITIVE(
     auto block = new IR::BlockStatement;
     if (primitive->operands.size() == 3) {
         mask = conv.convert(primitive->operands.at(2));
-        cstring tmpvar = structure->makeUniqueName("tmp");
+        cstring tmpvar = structure->makeUniqueName("tmp"_cs);
         auto decl = new IR::Declaration_Variable(tmpvar, field->type);
         block->push_back(decl);
         dest = new IR::PathExpression(field->type, new IR::Path(tmpvar));
@@ -2090,9 +2090,9 @@ const IR::Declaration_Instance *ProgramStructure::convert(const IR::CounterOrMet
     auto annos = addGlobalNameAnnotation(cm->name, cm->annotations);
     if (auto *c = cm->to<IR::Counter>()) {
         if (c->min_width >= 0)
-            annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width));
+            annos = annos->addAnnotation("min_width"_cs, new IR::Constant(c->min_width));
         if (c->max_width >= 0)
-            annos = annos->addAnnotation("max_width", new IR::Constant(c->max_width));
+            annos = annos->addAnnotation("max_width"_cs, new IR::Constant(c->max_width));
     }
     auto decl = new IR::Declaration_Instance(newName, annos, type, args, nullptr);
     return decl;
@@ -2121,7 +2121,7 @@ const IR::Declaration_Instance *ProgramStructure::convertDirectMeter(const IR::M
     auto annos = addGlobalNameAnnotation(m->name, m->annotations);
     if (m->pre_color != nullptr) {
         auto meterPreColor = ExpressionConverter(this).convert(m->pre_color);
-        if (meterPreColor != nullptr) annos = annos->addAnnotation("pre_color", meterPreColor);
+        if (meterPreColor != nullptr) annos = annos->addAnnotation("pre_color"_cs, meterPreColor);
     }
     auto decl = new IR::Declaration_Instance(newName, annos, specType, args, nullptr);
     return decl;
@@ -2139,9 +2139,9 @@ const IR::Declaration_Instance *ProgramStructure::convertDirectCounter(const IR:
     args->push_back(new IR::Argument(kindarg));
     auto annos = addGlobalNameAnnotation(c->name, c->annotations);
     if (c->min_width >= 0)
-        annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width));
+        annos = annos->addAnnotation("min_width"_cs, new IR::Constant(c->min_width));
     if (c->max_width >= 0)
-        annos = annos->addAnnotation("max_width", new IR::Constant(c->max_width));
+        annos = annos->addAnnotation("max_width"_cs, new IR::Constant(c->max_width));
     auto decl = new IR::Declaration_Instance(newName, annos, type, args, nullptr);
     return decl;
 }
@@ -2627,6 +2627,7 @@ void ProgramStructure::tablesReferred(const IR::V1Control *control,
 }
 
 void ProgramStructure::populateOutputNames() {
+    // FIXME: modernize
     static const char *used_names[] = {
         // core.p4
         "packet_in", "packet_out", "NoAction", "exact", "ternary", "lpm",
@@ -2644,7 +2645,7 @@ void ProgramStructure::populateOutputNames() {
         "DeparserImpl",
         // parameters
         "packet", "hdr", "meta", nullptr};
-    for (const char **c = used_names; *c != nullptr; ++c) allNames.insert({*c, 0});
+    for (const char **c = used_names; *c != nullptr; ++c) allNames.emplace(cstring(*c), 0);
     ;
 }
 

@@ -51,7 +51,7 @@ std::optional<const IR::Declaration_Instance *> MapDirectExterns::getExternFromT
 bool MapDirectExterns::preorder(const IR::P4Table *table) {
     // Try to get extern implementation properties from the table.
     for (const auto *tableProperty : kTableExternProperties) {
-        const auto *impl = table->properties->getProperty(tableProperty);
+        const auto *impl = table->properties->getProperty(cstring(tableProperty));
         if (impl != nullptr) {
             auto declInstanceOpt = getExternFromTableImplementation(impl);
             if (declInstanceOpt.has_value()) {

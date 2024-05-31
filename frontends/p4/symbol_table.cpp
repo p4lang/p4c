@@ -18,6 +18,7 @@ limitations under the License.
 
 #include <sstream>
 
+#include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
@@ -110,7 +111,7 @@ class Namespace : public NamedSymbol {
     DECLARE_TYPEINFO(Namespace, NamedSymbol);
 };
 
-const Namespace Namespace::empty("<empty>", Util::SourceInfo(), false);
+const Namespace Namespace::empty("<empty>"_cs, Util::SourceInfo(), false);
 const Namespace *NamedSymbol::symNamespace() const { return &Namespace::empty; }
 
 class Object : public NamedSymbol {
@@ -118,7 +119,7 @@ class Object : public NamedSymbol {
 
  public:
     Object(cstring name, Util::SourceInfo si) : NamedSymbol(name, si) {}
-    cstring toString() const override { return cstring::literal("Object ") + getName(); }
+    cstring toString() const override { return "Object "_cs + getName(); }
     const Namespace *symNamespace() const override { return typeNamespace; }
     void setNamespace(const Namespace *ns) { typeNamespace = ns; }
 
@@ -147,7 +148,7 @@ class ContainerType : public Namespace {
 
 ProgramStructure::ProgramStructure()
     : debug(false), debugStream(nullptr), rootNamespace(nullptr), currentNamespace(nullptr) {
-    rootNamespace = new Namespace("", Util::SourceInfo(), true);
+    rootNamespace = new Namespace(cstring::empty, Util::SourceInfo(), true);
     currentNamespace = rootNamespace;
     // We use stderr because we want debugging output
     // to be the same as the bison debugging output.
@@ -166,7 +167,7 @@ void ProgramStructure::push(Namespace *ns) {
 
 void ProgramStructure::pushNamespace(SourceInfo si, bool allowDuplicates) {
     // Today we don't have named namespaces
-    auto ns = new Util::Namespace("", si, allowDuplicates);
+    auto ns = new Util::Namespace(cstring::empty, si, allowDuplicates);
     push(ns);
 }
 

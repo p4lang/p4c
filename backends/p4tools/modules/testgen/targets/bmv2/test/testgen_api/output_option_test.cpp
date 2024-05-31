@@ -9,6 +9,8 @@
 
 namespace Test {
 
+using namespace P4::literals;
+
 TEST(P4TestgenOutputOptionTest, GenerateOuputsCorrectly) {
     std::stringstream streamTest;
     streamTest << R"p4(
@@ -55,11 +57,11 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
 
     auto source = P4_SOURCE(P4Headers::V1MODEL, streamTest.str().c_str());
     auto compilerOptions = P4CContextWithOptions<CompilerOptions>::get().options();
-    compilerOptions.target = "bmv2";
-    compilerOptions.arch = "v1model";
+    compilerOptions.target = "bmv2"_cs;
+    compilerOptions.arch = "v1model"_cs;
     auto &testgenOptions = P4Tools::P4Testgen::TestgenOptions::get();
-    testgenOptions.testBackend = "PROTOBUF_IR";
-    testgenOptions.testBaseName = "dummy";
+    testgenOptions.testBackend = "PROTOBUF_IR"_cs;
+    testgenOptions.testBaseName = "dummy"_cs;
     testgenOptions.seed = 1;
     testgenOptions.maxTests = 0;
     // Create a bespoke packet for the Ethernet extract call.

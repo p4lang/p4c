@@ -23,19 +23,22 @@ and limitations under the License.
 
 namespace TC {
 
-const cstring Extern::dropPacket = "drop_packet";
-const cstring Extern::sendToPort = "send_to_port";
+using namespace P4::literals;
 
-cstring pnaMainParserInputMetaFields[TC::MAX_PNA_PARSER_META] = {"recirculated", "input_port"};
+const cstring Extern::dropPacket = "drop_packet"_cs;
+const cstring Extern::sendToPort = "send_to_port"_cs;
+
+cstring pnaMainParserInputMetaFields[TC::MAX_PNA_PARSER_META] = {"recirculated"_cs,
+                                                                 "input_port"_cs};
 
 cstring pnaMainInputMetaFields[TC::MAX_PNA_INPUT_META] = {
-    "recirculated", "timestamp", "parser_error", "class_of_service", "input_port"};
+    "recirculated"_cs, "timestamp"_cs, "parser_error"_cs, "class_of_service"_cs, "input_port"_cs};
 
-cstring pnaMainOutputMetaFields[TC::MAX_PNA_OUTPUT_META] = {"class_of_service"};
+cstring pnaMainOutputMetaFields[TC::MAX_PNA_OUTPUT_META] = {"class_of_service"_cs};
 
-const cstring pnaParserMeta = "pna_main_parser_input_metadata_t";
-const cstring pnaInputMeta = "pna_main_input_metadata_t";
-const cstring pnaOutputMeta = "pna_main_output_metadata_t";
+const cstring pnaParserMeta = "pna_main_parser_input_metadata_t"_cs;
+const cstring pnaInputMeta = "pna_main_input_metadata_t"_cs;
+const cstring pnaOutputMeta = "pna_main_output_metadata_t"_cs;
 
 bool Backend::process() {
     CHECK_NULL(toplevel);
@@ -188,11 +191,11 @@ void ConvertToBackendIR::setPipelineName() {
     }
     auto fileName = path.findlast('/');
     if (fileName) {
-        pipelineName = fileName;
-        pipelineName = pipelineName.replace("/", "");
+        pipelineName = cstring(fileName);
+        pipelineName = pipelineName.replace("/"_cs, ""_cs);
     }
-    auto fileext = pipelineName.find(".");
-    pipelineName = pipelineName.replace(fileext, "");
+    auto fileext = cstring(pipelineName.find("."));
+    pipelineName = pipelineName.replace(fileext, ""_cs);
     pipelineName = pipelineName.trim();
 }
 
@@ -222,8 +225,8 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
         if (isDuplicateAction(action)) return;
         auto actionName = externalName(action);
         if (actionName == P4::P4CoreLibrary::instance().noAction.name) {
-            tcPipeline->addNoActionDefinition(new IR::TCAction("NoAction"));
-            actions.emplace("NoAction", action);
+            tcPipeline->addNoActionDefinition(new IR::TCAction("NoAction"_cs));
+            actions.emplace("NoAction"_cs, action);
             return;
         }
         actions.emplace(actionName, action);
@@ -314,14 +317,14 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
             auto keyString = keyElement->expression->toString();
             auto annotations = keyElement->getAnnotations();
             if (annotations) {
-                if (auto anno = annotations->getSingle("name")) {
+                if (auto anno = annotations->getSingle("name"_cs)) {
                     keyString = anno->expr.at(0)->to<IR::StringLiteral>()->value;
                 }
             }
             auto keySetElement = keyset->components.at(itr);
             auto key = keySetElement->toString();
             if (keySetElement->is<IR::DefaultExpression>()) {
-                key = "default";
+                key = "default"_cs;
             } else if (keySetElement->is<IR::Constant>()) {
                 big_int kValue = keySetElement->to<IR::Constant>()->value;
                 int kBase = keySetElement->to<IR::Constant>()->base;
@@ -348,7 +351,7 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
                     buf.push_front(Util::DigitToChar(digit));
                 } while (kValue > 0);
                 for (auto ch : buf) value << ch;
-                key = value.str().c_str();
+                key = value.str();
             } else if (keySetElement->is<IR::Range>()) {
                 auto left = keySetElement->to<IR::Range>()->left;
                 auto right = keySetElement->to<IR::Range>()->right;
@@ -575,7 +578,7 @@ void ConvertToBackendIR::updateAddOnMissTable(const IR::P4Table *t) {
     }
 }
 
-unsigned ConvertToBackendIR::GetAccessNumericValue(cstring access) {
+unsigned ConvertToBackendIR::GetAccessNumericValue(std::string_view access) {
     unsigned value = 0;
     for (auto s : access) {
         unsigned mask = 0;
@@ -626,12 +629,12 @@ cstring ConvertToBackendIR::HandleTableAccessPermission(const IR::P4Table *t) {
     }
     // Default access value of Control_path and Data_Path
     if (control_path.isNullOrEmpty()) {
-        control_path = IsTableAddOnMiss ? DEFAULT_ADD_ON_MISS_TABLE_CONTROL_PATH_ACCESS
-                                        : DEFAULT_TABLE_CONTROL_PATH_ACCESS;
+        control_path = cstring(IsTableAddOnMiss ? DEFAULT_ADD_ON_MISS_TABLE_CONTROL_PATH_ACCESS
+                                                : DEFAULT_TABLE_CONTROL_PATH_ACCESS);
     }
     if (data_path.isNullOrEmpty()) {
-        data_path = IsTableAddOnMiss ? DEFAULT_ADD_ON_MISS_TABLE_DATA_PATH_ACCESS
-                                     : DEFAULT_TABLE_DATA_PATH_ACCESS;
+        data_path = cstring(IsTableAddOnMiss ? DEFAULT_ADD_ON_MISS_TABLE_DATA_PATH_ACCESS
+                                             : DEFAULT_TABLE_DATA_PATH_ACCESS);
     }
 
     if (IsTableAddOnMiss) {
@@ -643,12 +646,13 @@ cstring ConvertToBackendIR::HandleTableAccessPermission(const IR::P4Table *t) {
                 t->name.originalName);
         }
     }
-    auto access_cp = GetAccessNumericValue(control_path);
-    auto access_dp = GetAccessNumericValue(data_path);
+    // FIXME: refactor not to require cstring
+    auto access_cp = GetAccessNumericValue(control_path.string_view());
+    auto access_dp = GetAccessNumericValue(data_path.string_view());
     auto access_permisson = (access_cp << 7) | access_dp;
     std::stringstream value;
     value << "0x" << std::hex << access_permisson;
-    return value.str().c_str();
+    return value.str();
 }
 
 std::pair<cstring, cstring> *ConvertToBackendIR::GetAnnotatedAccessPath(
@@ -771,17 +775,17 @@ cstring ConvertToBackendIR::processExternPermission(const IR::Type_Extern *ext) 
     }
     // Default access value of Control_path and Data_Path
     if (control_path.isNullOrEmpty()) {
-        control_path = DEFAULT_EXTERN_CONTROL_PATH_ACCESS;
+        control_path = cstring(DEFAULT_EXTERN_CONTROL_PATH_ACCESS);
     }
     if (data_path.isNullOrEmpty()) {
-        data_path = DEFAULT_EXTERN_DATA_PATH_ACCESS;
+        data_path = cstring(DEFAULT_EXTERN_DATA_PATH_ACCESS);
     }
-    auto access_cp = GetAccessNumericValue(control_path);
-    auto access_dp = GetAccessNumericValue(data_path);
+    auto access_cp = GetAccessNumericValue(control_path.string_view());
+    auto access_dp = GetAccessNumericValue(data_path.string_view());
     auto access_permisson = (access_cp << 7) | access_dp;
     std::stringstream value;
     value << "0x" << std::hex << access_permisson;
-    return value.str().c_str();
+    return value.str();
 }
 
 void ConvertToBackendIR::processExternConstructorAnnotations(const IR::Type_Extern *extn,
@@ -835,7 +839,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternControlPath(
                 annotation->name == ParseTCAnnotations::tc_data_scalar) {
                 annoName = annotation->name;
             } else if (annotation->name == ParseTCAnnotations::tc_data) {
-                annoName = "param";
+                annoName = "param"_cs;
             }
             /* If the field is of Type_Name example 'T' and 'T' is of Type_Struct,
                 extract all fields of structure*/

@@ -66,7 +66,7 @@ bool FindGlobalActionUses::preorder(const IR::PathExpression *path) {
     auto control = findContext<IR::P4Control>();
     if (control != nullptr) {
         if (repl->getReplacement(action, control) != nullptr) return false;
-        auto newName = refMap->newName(action->name);
+        auto newName = refMap->newName(action->name.name.string_view());
         ParamCloner cloner;
         auto replBody = cloner.clone<IR::BlockStatement>(action->body);
         auto params = cloner.clone<IR::ParameterList>(action->parameters);
@@ -149,7 +149,7 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression *expression) {
     LOG1(dbp(expression) << " used by " << dbp(actionUser));
     auto replacement = repl->getActionUser(action, actionUser);
     if (replacement == nullptr) {
-        auto newName = refMap->newName(action->name);
+        auto newName = refMap->newName(action->name.name.string_view());
         ParamCloner cloner;
         auto replBody = cloner.clone<IR::BlockStatement>(action->body);
         auto annos = action->annotations;

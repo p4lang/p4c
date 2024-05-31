@@ -18,6 +18,7 @@ limitations under the License.
 #define BACKENDS_GRAPHS_GRAPHS_H_
 
 #include "config.h"
+#include "lib/cstring.h"
 
 /// Shouldn't happen as cmake will not try to build this backend if the boost
 /// graph headers couldn't be found.
@@ -47,6 +48,8 @@ class TypeMap;
 
 namespace graphs {
 
+using namespace P4::literals;
+
 class EdgeTypeIface {
  public:
     virtual ~EdgeTypeIface() {}
@@ -56,7 +59,7 @@ class EdgeTypeIface {
 class EdgeUnconditional : public EdgeTypeIface {
  public:
     EdgeUnconditional() = default;
-    cstring label() const override { return ""; };
+    cstring label() const override { return cstring::empty; };
 };
 
 class EdgeIf : public EdgeTypeIface {
@@ -66,12 +69,12 @@ class EdgeIf : public EdgeTypeIface {
     cstring label() const override {
         switch (branch) {
             case Branch::TRUE:
-                return "TRUE";
+                return "TRUE"_cs;
             case Branch::FALSE:
-                return "FALSE";
+                return "FALSE"_cs;
         }
         BUG("unreachable");
-        return "";
+        return cstring::empty;
     };
 
  private:
@@ -156,15 +159,15 @@ class Graphs : public Inspector {
             for (auto &vit = vertices.first; vit != vertices.second; ++vit) {
                 const auto &vinfo = g[*vit];
                 auto attrs = boost::get(boost::vertex_attribute, g);
-                attrs[*vit]["label"] = vinfo.name;
-                attrs[*vit]["style"] = vertexTypeGetStyle(vinfo.type);
-                attrs[*vit]["shape"] = vertexTypeGetShape(vinfo.type);
-                attrs[*vit]["margin"] = vertexTypeGetMargin(vinfo.type);
+                attrs[*vit]["label"_cs] = vinfo.name;
+                attrs[*vit]["style"_cs] = vertexTypeGetStyle(vinfo.type);
+                attrs[*vit]["shape"_cs] = vertexTypeGetShape(vinfo.type);
+                attrs[*vit]["margin"_cs] = vertexTypeGetMargin(vinfo.type);
             }
             auto edges = boost::edges(g);
             for (auto &eit = edges.first; eit != edges.second; ++eit) {
                 auto attrs = boost::get(boost::edge_attribute, g);
-                attrs[*eit]["label"] = boost::get(boost::edge_name, g, *eit);
+                attrs[*eit]["label"_cs] = boost::get(boost::edge_name, g, *eit);
             }
         }
 
@@ -173,35 +176,35 @@ class Graphs : public Inspector {
             switch (type) {
                 case VertexType::TABLE:
                 case VertexType::ACTION:
-                    return "ellipse";
+                    return "ellipse"_cs;
                 default:
-                    return "rectangle";
+                    return "rectangle"_cs;
             }
             BUG("unreachable");
-            return "";
+            return cstring::empty;
         }
 
         static cstring vertexTypeGetStyle(VertexType type) {
             switch (type) {
                 case VertexType::CONTROL:
-                    return "dashed";
+                    return "dashed"_cs;
                 case VertexType::EMPTY:
-                    return "invis";
+                    return "invis"_cs;
                 case VertexType::KEY:
                 case VertexType::CONDITION:
                 case VertexType::SWITCH:
-                    return "rounded";
+                    return "rounded"_cs;
                 default:
-                    return "solid";
+                    return "solid"_cs;
             }
             BUG("unreachable");
-            return "";
+            return cstring::empty;
         }
 
         static cstring vertexTypeGetMargin(VertexType type) {
             switch (type) {
                 default:
-                    return "";
+                    return cstring::empty;
             }
         }
     };  // end class GraphAttributeSetter

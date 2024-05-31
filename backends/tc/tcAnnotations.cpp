@@ -18,20 +18,22 @@ and limitations under the License.
 
 namespace TC {
 
-const cstring ParseTCAnnotations::defaultHit = "default_hit";
-const cstring ParseTCAnnotations::defaultHitConst = "default_hit_const";
-const cstring ParseTCAnnotations::tcType = "tc_type";
-const cstring ParseTCAnnotations::numMask = "nummask";
-const cstring ParseTCAnnotations::tcMayOverride = "tc_may_override";
-const cstring ParseTCAnnotations::tc_md_write = "tc_md_write";
-const cstring ParseTCAnnotations::tc_md_read = "tc_md_read";
-const cstring ParseTCAnnotations::tc_md_exec = "tc_md_exec";
-const cstring ParseTCAnnotations::tc_ControlPath = "tc_ControlPath";
-const cstring ParseTCAnnotations::tc_key = "tc_key";
-const cstring ParseTCAnnotations::tc_data = "tc_data";
-const cstring ParseTCAnnotations::tc_data_scalar = "tc_data_scalar";
-const cstring ParseTCAnnotations::tc_init_val = "tc_init_val";
-const cstring ParseTCAnnotations::tc_numel = "tc_numel";
-const cstring ParseTCAnnotations::tc_acl = "tc_acl";
+using namespace P4::literals;
+
+const cstring ParseTCAnnotations::defaultHit = "default_hit"_cs;
+const cstring ParseTCAnnotations::defaultHitConst = "default_hit_const"_cs;
+const cstring ParseTCAnnotations::tcType = "tc_type"_cs;
+const cstring ParseTCAnnotations::numMask = "nummask"_cs;
+const cstring ParseTCAnnotations::tcMayOverride = "tc_may_override"_cs;
+const cstring ParseTCAnnotations::tc_md_write = "tc_md_write"_cs;
+const cstring ParseTCAnnotations::tc_md_read = "tc_md_read"_cs;
+const cstring ParseTCAnnotations::tc_md_exec = "tc_md_exec"_cs;
+const cstring ParseTCAnnotations::tc_ControlPath = "tc_ControlPath"_cs;
+const cstring ParseTCAnnotations::tc_key = "tc_key"_cs;
+const cstring ParseTCAnnotations::tc_data = "tc_data"_cs;
+const cstring ParseTCAnnotations::tc_data_scalar = "tc_data_scalar"_cs;
+const cstring ParseTCAnnotations::tc_init_val = "tc_init_val"_cs;
+const cstring ParseTCAnnotations::tc_numel = "tc_numel"_cs;
+const cstring ParseTCAnnotations::tc_acl = "tc_acl"_cs;
 
 }  // namespace TC

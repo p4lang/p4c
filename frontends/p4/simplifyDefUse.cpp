@@ -1035,12 +1035,10 @@ class FindUninitialized : public Inspector {
             // This could happen if we are writing to an array element
             // with an unknown index.
             auto type = typeMap->getType(expression, true);
-            cstring message;
-            if (type->is<IR::Type_Base>())
-                message = "%1% may be uninitialized";
-            else
-                message = "%1% may not be completely initialized";
-            warn(ErrorType::WARN_UNINITIALIZED_USE, message, expression);
+            warn(ErrorType::WARN_UNINITIALIZED_USE,
+                 type->is<IR::Type_Base>() ? "%1% may be uninitialized"
+                                           : "%1% may not be completely initialized",
+                 expression);
         }
 
         hasUses->add(points);

@@ -18,6 +18,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 void KeyNameGenerator::error(const IR::Expression *expression) {
     ::error(ErrorType::ERR_EXPECTED, "%1%: Complex key expression requires a @name annotation",
             expression);
@@ -30,6 +32,9 @@ void KeyNameGenerator::postorder(const IR::PathExpression *expression) {
 }
 
 namespace {
+
+static const cstring isValid = "isValid"_cs;
+static const cstring isValidD = "$valid$"_cs;
 
 /// @return a canonicalized string representation of the given Member
 /// expression's right-hand side, suitable for use as part of a key name.
@@ -46,7 +51,7 @@ cstring keyComponentNameForMember(const IR::Member *expression, const P4::TypeMa
     // SynthesizeValidField, which leaves `isValid()` as-is for header unions,
     // but that's a BMV2-specific thing.
     if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>())
-        if (expression->member == "isValid") return "$valid$";
+        if (expression->member == isValid) return isValidD;
 
     // If this Member represents a field which has an @name annotation, use it.
     if (type->is<IR::Type_StructLike>()) {
@@ -73,7 +78,7 @@ void KeyNameGenerator::postorder(const IR::Member *expression) {
 
     // We can generate a name for the overall Member expression only if we were
     // able to generate a name for its left-hand side.
-    if (cstring n = getName(expression->expr)) name.emplace(expression, n + "." + fname);
+    if (cstring n = getName(expression->expr)) name.emplace(expression, n + "."_cs + fname);
 }
 
 void KeyNameGenerator::postorder(const IR::ArrayIndex *expression) {

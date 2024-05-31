@@ -52,15 +52,15 @@ int main(int argc, char *argv[]) {
                 usage(argv[0]);
                 return 1;
             case 'o':
-                header = openFile(optarg, false);
+                header = openFile(cstring(optarg), false);
                 if (header == nullptr) return 1;
                 break;
             case 'i':
-                impl = openFile(optarg, false);
+                impl = openFile(cstring(optarg), false);
                 if (impl == nullptr) return 1;
                 break;
             case 't':
-                t = openFile(optarg, false);
+                t = openFile(cstring(optarg), false);
                 if (t == nullptr) return 1;
                 break;
             case 'P':

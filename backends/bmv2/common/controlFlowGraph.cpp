@@ -27,6 +27,8 @@ limitations under the License.
 
 namespace BMV2 {
 
+using namespace P4::literals;
+
 unsigned CFG::Node::crtId = 0;
 
 void CFG::EdgeSet::dbprint(std::ostream &out) const {
@@ -260,7 +262,7 @@ class CFGBuilder : public Inspector {
         for (auto sw : statement->cases) {
             cstring label;
             if (sw->label->is<IR::DefaultExpression>()) {
-                label = "default";
+                label = "default"_cs;
             } else {
                 auto pe = sw->label->to<IR::PathExpression>();
                 CHECK_NULL(pe);
@@ -294,7 +296,7 @@ class CFGBuilder : public Inspector {
 void CFG::build(const IR::P4Control *cc, P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
     container = cc;
     entryPoint = makeNode(cc->name + ".entry");
-    exitPoint = makeNode("");  // the only node with an empty name
+    exitPoint = makeNode(cstring::empty);  // the only node with an empty name
 
     CFGBuilder builder(this, refMap, typeMap);
     auto startValue = new CFG::EdgeSet(new CFG::Edge(entryPoint));

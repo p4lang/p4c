@@ -61,7 +61,7 @@ class ParserOptions : public Util::Options {
     // Which language to compile
     FrontendVersion langVersion = FrontendVersion::P4_16;
     // options to pass to preprocessor
-    cstring preprocessor_options = "";
+    cstring preprocessor_options = cstring::empty;
     // file to compile (- for stdin)
     cstring file = nullptr;
     // if true preprocess only
@@ -73,7 +73,7 @@ class ParserOptions : public Util::Options {
     // substrings matched against pass names
     std::vector<cstring> top4;
     // debugging dumps of programs written in this folder
-    cstring dumpFolder = ".";
+    cstring dumpFolder = cstring::literal(".");
     // If false, optimization of callee parsers (subparsers) inlining is disabled.
     bool optimizeParserInlining = false;
     // Expect that the only remaining argument is the input file.
@@ -145,7 +145,7 @@ class P4CContext : public BaseCompileContext {
     }
 
     /// Set the action to take for the given diagnostic.
-    void setDiagnosticAction(cstring diagnostic, DiagnosticAction action) {
+    void setDiagnosticAction(std::string_view diagnostic, DiagnosticAction action) {
         errorReporter().setDiagnosticAction(diagnostic, action);
     }
 

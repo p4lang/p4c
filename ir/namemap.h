@@ -46,7 +46,7 @@ class NameMap : public Node {
     auto obj_name(const U *obj) -> decltype(obj->name) {
         return obj->name;
     }
-    cstring obj_name(const void *) { return cstring(0); }
+    cstring obj_name(const void *) { return nullptr; }
 
  public:
     NameMap() = default;

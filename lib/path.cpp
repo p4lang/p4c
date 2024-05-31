@@ -54,7 +54,7 @@ cstring PathName::getExtension() const {
 
     const char *dot = filename.str.findlast('.');
     if (dot == nullptr) return cstring::empty;
-    return dot + 1;
+    return cstring(dot + 1);
 }
 
 PathName PathName::getFolder() const {

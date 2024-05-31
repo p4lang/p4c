@@ -68,7 +68,8 @@ const IR::Node *ExpressionConverter::postorder(IR::Constant *expression) {
 
 const IR::Node *ExpressionConverter::postorder(IR::FieldList *fl) {
     // Field lists may contain other field lists
-    if (auto func = get(std::type_index(typeid(*fl)).name())) {
+    cstring name(std::type_index(typeid(*fl)).name());
+    if (auto func = get(name)) {
         return func(fl);
     }
     return new IR::ListExpression(fl->srcInfo, fl->fields);
@@ -409,7 +410,7 @@ const IR::Statement *StatementConverter::convert(const IR::Vector<IR::Expression
 const IR::Type_Varbits *TypeConverter::postorder(IR::Type_Varbits *vbtype) {
     if (vbtype->size == 0) {
         if (auto type = findContext<IR::Type_StructLike>()) {
-            if (auto max = type->getAnnotation("max_length")) {
+            if (auto max = type->getAnnotation("max_length"_cs)) {
                 if (max->expr.size() != 1 || !max->expr[0]->is<IR::Constant>())
                     error(ErrorType::ERR_UNSUPPORTED, "%s: max_length must be a constant", max);
                 else
@@ -458,7 +459,7 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
     // given a struct with length and max_length, the
     // varbit field size is max_length * 8 - struct_size
     if (field->type->is<IR::Type_Varbits>()) {
-        if (auto len = type->getAnnotation("length")) {
+        if (auto len = type->getAnnotation("length"_cs)) {
             if (len->expr.size() == 1) {
                 auto lenexpr = len->expr[0];
                 ValidateLenExpr vle(type, field);
@@ -468,12 +469,12 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
                 auto fieldlen =
                     new IR::Sub(scale->srcInfo, scale, new IR::Constant(type->width_bits()));
                 field->annotations =
-                    field->annotations->add(new IR::Annotation("length", {fieldlen}));
+                    field->annotations->add(new IR::Annotation("length"_cs, {fieldlen}));
             }
         }
     }
     if (auto vec = structure->listIndexes(type->name.name, field->name.name))
-        field->annotations = field->annotations->add(new IR::Annotation("field_list", *vec));
+        field->annotations = field->annotations->add(new IR::Annotation("field_list"_cs, *vec));
     return field;
 }
 
@@ -522,7 +523,7 @@ class FixupExtern : public Modifier {
     bool preorder(IR::Parameter *param) override {
         BUG_CHECK(typeParams, "recursion failure");
         if (param->type->is<IR::Type_FieldListCalculation>()) {
-            auto n = new IR::Type_Var(structure->makeUniqueName("FL"));
+            auto n = new IR::Type_Var(structure->makeUniqueName("FL"_cs));
             param->type = n;
             typeParams->push_back(n);
         }
@@ -592,10 +593,11 @@ ExternConverter *ExternConverter::get(cstring type) {
 
 std::map<cstring, std::vector<PrimitiveConverter *>> *PrimitiveConverter::all_converters;
 
-PrimitiveConverter::PrimitiveConverter(cstring name, int prio) : prim_name(name), priority(prio) {
+PrimitiveConverter::PrimitiveConverter(std::string_view name, int prio)
+    : prim_name(name), priority(prio) {
     static std::map<cstring, std::vector<PrimitiveConverter *>> converters;
     all_converters = &converters;
-    auto &vec = converters[name];
+    auto &vec = converters[prim_name];
     auto it = vec.begin();
     while (it != vec.end() && (*it)->priority > prio) ++it;
     if (it != vec.end() && (*it)->priority == prio)

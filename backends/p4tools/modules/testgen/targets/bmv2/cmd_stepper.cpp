@@ -80,7 +80,7 @@ void Bmv2V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextStat
     const auto *nineBitType = IR::Type_Bits::get(9);
     const auto *oneBitType = IR::Type_Bits::get(1);
     nextState.set(programInfo.getTargetInputPortVar(),
-                  ToolsVariables::getSymbolicVariable(nineBitType, "bmv2_ingress_port"));
+                  ToolsVariables::getSymbolicVariable(nineBitType, "bmv2_ingress_port"_cs));
     // BMv2 implicitly sets the output port to 0.
     nextState.set(programInfo.getTargetOutputPortVar(), IR::Constant::get(nineBitType, 0));
     // Initialize parser_err with no error.
@@ -105,7 +105,7 @@ std::optional<const Constraint *> Bmv2V1ModelCmdStepper::startParserImpl(
     const IR::P4Parser *parser, ExecutionState &nextState) const {
     // We need to explicitly map the parser error
     const auto *errVar = Bmv2V1ModelProgramInfo::getParserParamVar(
-        parser, programInfo.getParserErrorType(), 3, "parser_error");
+        parser, programInfo.getParserErrorType(), 3, "parser_error"_cs);
     nextState.setParserErrorLabel(errVar);
 
     return std::nullopt;
@@ -119,7 +119,7 @@ std::map<Continuation::Exception, Continuation> Bmv2V1ModelCmdStepper::getExcept
     auto gress = programInfo.getGress(parser);
 
     const auto *errVar = Bmv2V1ModelProgramInfo::getParserParamVar(
-        parser, programInfo.getParserErrorType(), 3, "parser_error");
+        parser, programInfo.getParserErrorType(), 3, "parser_error"_cs);
 
     switch (gress) {
         case BMV2_INGRESS:

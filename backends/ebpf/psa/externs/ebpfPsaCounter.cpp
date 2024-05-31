@@ -100,7 +100,7 @@ EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram *program, const IR::Declaration
         if (isHash) {
             indexWidthType = EBPFTypeFactory::instance->create(istype);
         } else {
-            keyTypeName = "u32";
+            keyTypeName = "u32"_cs;
         }
 
         auto declaredSize = di->arguments->at(0)->expression->to<IR::Constant>();
@@ -204,7 +204,7 @@ void EBPFCounterPSA::emitDirectMethodInvocation(CodeBuilder *builder,
     cstring varStr = Util::printf_format("%s", pipeline->lengthVar.c_str());
     builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, varStr.c_str());
 
-    emitCounterUpdate(builder, target, "");
+    emitCounterUpdate(builder, target, ""_cs);
 
     msgStr = Util::printf_format("Counter: %s updated", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msgStr.c_str());

@@ -53,6 +53,10 @@ class SourceCodeBuilder {
     }
 
     void append(cstring str) { append(str.c_str()); }
+    void appendLine(const char *str) {
+        append(str);
+        newline();
+    }
     void appendLine(cstring str) {
         append(str);
         newline();
