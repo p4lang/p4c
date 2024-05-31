@@ -42,7 +42,7 @@ add_library(p4tools-common OBJECT ${P4C_TOOLS_COMMON_SOURCES})
 
 target_link_libraries(
   p4tools-common
-  # We export Z3' with the common library.
+  # We export Z3 with the common library.
   PUBLIC ${P4TOOLS_Z3_LIB}
     # For Abseil includes.
   PRIVATE frontend
@@ -50,7 +50,8 @@ target_link_libraries(
 
 target_include_directories(
   p4tools-common
-  # We export Z3's includes with the common library.
+  # We also export Z3's includes with the common library.
+  # This is necessary because the z3 target itself does not export its includes.
   SYSTEM BEFORE PUBLIC ${P4TOOLS_Z3_INCLUDE_DIR}
 )
 
