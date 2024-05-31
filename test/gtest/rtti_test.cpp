@@ -20,6 +20,7 @@ limitations under the License.
 #include "ir/json_loader.h"
 #include "ir/node.h"
 #include "ir/vector.h"
+#include "lib/rtti_utils.h"
 
 namespace Test {
 
@@ -98,6 +99,48 @@ TEST(RTTI, JsonRestore) {
     loader >> e2;
 
     EXPECT_EQ(e2->typeId(), IR::NodeKind::Add);
+}
+
+TEST(RttiUtils, to) {
+    const auto *c = IR::Constant::get(IR::Type::Bits::get(4), 2);
+    const IR::Node *n = c;
+    const IR::Node *nullNode = nullptr;
+
+    EXPECT_EQ(RTTI::to<IR::Constant>(n), c);
+    EXPECT_EQ(RTTI::to<IR::Constant>(c), c);
+    EXPECT_EQ(RTTI::to<IR::Add>(c), nullptr);
+    EXPECT_EQ(RTTI::to<IR::Add>(nullNode), nullptr);
+
+    EXPECT_EQ(RTTI::to<IR::Literal>(n), n->to<IR::Literal>());
+    EXPECT_EQ(RTTI::to<IR::Type_Boolean>(c->type), nullptr);
+}
+
+TEST(RttiUtils, is) {
+    const auto *c = IR::Constant::get(IR::Type::Bits::get(4), 2);
+    const IR::Node *n = c;
+    const IR::Node *nullNode = nullptr;
+
+    EXPECT_TRUE(RTTI::is<IR::Constant>(n));
+    EXPECT_TRUE(RTTI::is<IR::Constant>(c));
+    EXPECT_FALSE(RTTI::is<IR::Add>(c));
+    EXPECT_FALSE(RTTI::is<IR::BoolLiteral>(c));
+    EXPECT_FALSE(RTTI::is<IR::Add>(nullNode));
+}
+
+TEST(RttiUtils, isAny) {
+    const auto *c = IR::Constant::get(IR::Type::Bits::get(4), 2);
+    const IR::Node *n = c;
+    const IR::Node *nullNode = nullptr;
+
+    EXPECT_TRUE(RTTI::isAny<IR::Constant>(n));
+    EXPECT_TRUE(RTTI::isAny<IR::Constant>(c));
+    EXPECT_FALSE(RTTI::isAny<IR::Add>(c));
+    EXPECT_FALSE(RTTI::isAny<IR::BoolLiteral>(c));
+    EXPECT_FALSE(RTTI::isAny<IR::Add>(nullNode));
+
+    EXPECT_TRUE((RTTI::isAny<IR::BoolLiteral, IR::Constant>(n)));
+    // EXPECT_TRUE(RTTI::isAny<>(n)); // does not compile, with is right
+    EXPECT_FALSE((RTTI::isAny<IR::Add, IR::LOr, IR::BAnd>(c)));
 }
 
 }  // namespace Test
