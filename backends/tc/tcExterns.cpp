@@ -85,7 +85,8 @@ void EBPFRegisterPNA::emitRegisterWrite(EBPF::CodeBuilder *builder, const P4::Ex
         "sizeof(ext_val));");
 }
 
-void EBPFCounterPNA::emitDirectMethodInvocation(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
+void EBPFCounterPNA::emitDirectMethodInvocation(EBPF::CodeBuilder *builder,
+                                                const P4::ExternMethod *method,
                                                 const ConvertToBackendIR *tcIR) {
     if (method->method->name.name != "count") {
         ::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
@@ -112,16 +113,16 @@ void EBPFCounterPNA::emitCounterUpdate(EBPF::CodeBuilder *builder, const Convert
 
     if (type == CounterType::BYTES) {
         builder->append(
-        "bpf_p4tc_extern_count_bytes(skb, &ext_params, sizeof(ext_params), &key, "
-        "sizeof(key))");
+            "bpf_p4tc_extern_count_bytes(skb, &ext_params, sizeof(ext_params), &key, "
+            "sizeof(key))");
     } else if (type == CounterType::PACKETS) {
         builder->append(
-        "bpf_p4tc_extern_count_pkts(skb, &ext_params, sizeof(ext_params), &key, "
-        "sizeof(key))");
+            "bpf_p4tc_extern_count_pkts(skb, &ext_params, sizeof(ext_params), &key, "
+            "sizeof(key))");
     } else if (type == CounterType::PACKETS_AND_BYTES) {
         builder->append(
-        "bpf_p4tc_extern_count_pktsnbytes(skb, &ext_params, sizeof(ext_params), &key, "
-        "sizeof(key))");
+            "bpf_p4tc_extern_count_pktsnbytes(skb, &ext_params, sizeof(ext_params), &key, "
+            "sizeof(key))");
     }
 }
 

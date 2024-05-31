@@ -25,12 +25,15 @@ class ConvertToBackendIR;
 
 class EBPFCounterPNA : public EBPF::EBPFCounterPSA {
     cstring tblname;
+
  public:
-    EBPFCounterPNA(const EBPF::EBPFProgram *program, const IR::Declaration_Instance *di, cstring name,
-                   EBPF::CodeGenInspector *codeGen, cstring tblname): EBPF::EBPFCounterPSA(program, di, name, codeGen) {
+    EBPFCounterPNA(const EBPF::EBPFProgram *program, const IR::Declaration_Instance *di,
+                   cstring name, EBPF::CodeGenInspector *codeGen, cstring tblname)
+        : EBPF::EBPFCounterPSA(program, di, name, codeGen) {
         this->tblname = tblname;
     }
-    void emitDirectMethodInvocation(EBPF::CodeBuilder *builder, const P4::ExternMethod *method, const ConvertToBackendIR *tcIR);
+    void emitDirectMethodInvocation(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
+                                    const ConvertToBackendIR *tcIR);
     virtual void emitCounterUpdate(EBPF::CodeBuilder *builder, const ConvertToBackendIR *tcIR);
 };
 

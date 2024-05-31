@@ -563,7 +563,8 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
     }
 }
 
-void ConvertToBackendIR::updatePnaDirectCounter(const IR::P4Table *t, IR::TCTable *tabledef, unsigned tentries) {
+void ConvertToBackendIR::updatePnaDirectCounter(const IR::P4Table *t, IR::TCTable *tabledef,
+                                                unsigned tentries) {
     cstring propertyName = "pna_direct_counter";
     auto property = t->properties->getProperty(propertyName);
     if (property == nullptr) return;
@@ -578,7 +579,8 @@ void ConvertToBackendIR::updatePnaDirectCounter(const IR::P4Table *t, IR::TCTabl
         if (ext.first == externInstance->type->toString()) {
             auto externDefinition = tcPipeline->getExternDefinition(ext.first);
             if (externDefinition) {
-                auto extInstDef = ((IR::TCExternInstance *)externDefinition->getExternInstance(externInstanceName));
+                auto extInstDef = ((IR::TCExternInstance *)externDefinition->getExternInstance(
+                    externInstanceName));
                 extInstDef->setExternTableBindable(true);
                 extInstDef->setNumElements(tentries);
             }
@@ -808,9 +810,9 @@ cstring ConvertToBackendIR::processExternPermission(const IR::Type_Extern *ext) 
     return value.str().c_str();
 }
 
-safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(const IR::Type_Extern *extn,
-                                                             const IR::Declaration_Instance *decl,
-                                                             struct ExternInstance *instance) {
+safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(
+    const IR::Type_Extern *extn, const IR::Declaration_Instance *decl,
+    struct ExternInstance *instance) {
     safe_vector<const IR::TCKey *> keys;
     for (auto gd : *extn->getDeclarations()) {
         if (!gd->getNode()->is<IR::Method>()) {
@@ -840,7 +842,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(cons
                 /* If a parameter is not annoated by tc_init or tc_numel then it is emitted as
                 constructor parameters.*/
                 IR::TCKey *key = new IR::TCKey(0, parameter->type->width_bits(),
-                                                               parameter->toString(), "param", false);
+                                               parameter->toString(), "param", false);
                 keys.push_back(key);
                 if (exp->is<IR::Constant>()) {
                     key->setValue(exp->to<IR::Constant>()->asInt());
@@ -851,7 +853,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(cons
     return keys;
 }
 
-cstring ConvertToBackendIR::getControlPathKeyAnnotation(const IR::StructField* field) {
+cstring ConvertToBackendIR::getControlPathKeyAnnotation(const IR::StructField *field) {
     cstring annoName;
     auto annotation = field->getAnnotations()->annotations.at(0);
     if (annotation->name == ParseTCAnnotations::tc_key ||
@@ -874,16 +876,20 @@ ConvertToBackendIR::CounterType ConvertToBackendIR::toCounterType(const int type
     BUG("Unknown counter type %1%", type);
 }
 
-safe_vector<const IR::TCKey *> ConvertToBackendIR::processCounterControlPathKeys(const IR::Type_Struct *extern_control_path, const IR::Type_Extern *extn, const IR::Declaration_Instance *decl) {
+safe_vector<const IR::TCKey *> ConvertToBackendIR::processCounterControlPathKeys(
+    const IR::Type_Struct *extern_control_path, const IR::Type_Extern *extn,
+    const IR::Declaration_Instance *decl) {
     safe_vector<const IR::TCKey *> keys;
     auto typeArg = decl->arguments->at(decl->arguments->size() - 1)->expression->to<IR::Constant>();
     CounterType type = toCounterType(typeArg->asInt());
     int kId = 1;
     for (auto field : extern_control_path->fields) {
         /* If there is no annotation to control path key, ignore the key.*/
-        if (field->getAnnotations()->annotations.size() != 1) { continue; }
+        if (field->getAnnotations()->annotations.size() != 1) {
+            continue;
+        }
         cstring annoName = getControlPathKeyAnnotation(field);
-        
+
         if (field->toString() == "pkts") {
             if (type == CounterType::PACKETS || type == CounterType::PACKETS_AND_BYTES) {
                 auto temp_keys = HandleTypeNameStructField(field, extn, decl, kId, annoName);
@@ -898,7 +904,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processCounterControlPathKeys
             }
             continue;
         }
-        
+
         /* If the field is of Type_Name example 'T'*/
         if (field->type->is<IR::Type_Name>()) {
             auto temp_keys = HandleTypeNameStructField(field, extn, decl, kId, annoName);
@@ -926,16 +932,18 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternControlPath(
         int kId = 1;
         for (auto field : extern_control_path->fields) {
             /* If there is no annotation to control path key, ignore the key.*/
-            if (field->getAnnotations()->annotations.size() != 1) { continue; }
+            if (field->getAnnotations()->annotations.size() != 1) {
+                continue;
+            }
             cstring annoName = getControlPathKeyAnnotation(field);
-            
+
             /* If the field is of Type_Name example 'T'*/
             if (field->type->is<IR::Type_Name>()) {
                 auto temp_keys = HandleTypeNameStructField(field, extn, decl, kId, annoName);
                 keys.insert(keys.end(), temp_keys.begin(), temp_keys.end());
             } else {
-                IR::TCKey *key =
-                    new IR::TCKey(kId++, field->type->width_bits(), field->toString(), annoName, true);
+                IR::TCKey *key = new IR::TCKey(kId++, field->type->width_bits(), field->toString(),
+                                               annoName, true);
                 keys.push_back(key);
             }
         }
@@ -943,7 +951,9 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternControlPath(
     return keys;
 }
 
-safe_vector<const IR::TCKey *> ConvertToBackendIR::HandleTypeNameStructField(const IR::StructField* field, const IR::Type_Extern *extn, const IR::Declaration_Instance *decl, int &kId, cstring annoName) {
+safe_vector<const IR::TCKey *> ConvertToBackendIR::HandleTypeNameStructField(
+    const IR::StructField *field, const IR::Type_Extern *extn, const IR::Declaration_Instance *decl,
+    int &kId, cstring annoName) {
     safe_vector<const IR::TCKey *> keys;
     auto type_extern_params = extn->getTypeParameters()->parameters;
     for (unsigned itr = 0; itr < type_extern_params.size(); itr++) {
@@ -951,17 +961,17 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::HandleTypeNameStructField(con
             auto decl_type = typeMap->getType(decl, true);
             auto ts = decl_type->to<IR::Type_SpecializedCanonical>();
             auto param_val = ts->arguments->at(itr);
-            
+
             /* If 'T' is of Type_Struct, extract all fields of structure*/
             if (auto param_struct = param_val->to<IR::Type_Struct>()) {
                 for (auto f : param_struct->fields) {
-                    IR::TCKey *key = new IR::TCKey(kId++, f->type->width_bits(),
-                                                   f->toString(), annoName, true);
+                    IR::TCKey *key =
+                        new IR::TCKey(kId++, f->type->width_bits(), f->toString(), annoName, true);
                     keys.push_back(key);
                 }
             } else {
-                IR::TCKey *key = new IR::TCKey(kId++, param_val->width_bits(),
-                                               field->toString(), annoName, true);
+                IR::TCKey *key = new IR::TCKey(kId++, param_val->width_bits(), field->toString(),
+                                               annoName, true);
                 keys.push_back(key);
             }
             break;
@@ -977,8 +987,7 @@ bool ConvertToBackendIR::hasExecuteMethod(const IR::Type_Extern *extn) {
         }
         auto method = gd->getNode()->to<IR::Method>();
         const IR::Annotation *execAnnotation =
-                    method->getAnnotations()->getSingle(
-                        ParseTCAnnotations::tc_md_exec);
+            method->getAnnotations()->getSingle(ParseTCAnnotations::tc_md_exec);
         if (execAnnotation) {
             return true;
         }
@@ -993,7 +1002,9 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
         if (auto extn = ts->baseType->to<IR::Type_Extern>()) {
             auto eName = ts->baseType->toString();
             auto find = ControlStructPerExtern.find(eName);
-            if (find == ControlStructPerExtern.end()) { return; }
+            if (find == ControlStructPerExtern.end()) {
+                return;
+            }
             IR::TCExtern *externDefinition;
             auto instance = new struct ExternInstance();
             instance->instance_name = decl->toString();
@@ -1018,8 +1029,9 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
                 instance->instance_id = eb->no_of_instances;
                 eb->eInstance.push_back(instance);
 
-                externDefinition = new IR::TCExtern(eb->externId, eName, pipelineName,
-                                                    eb->no_of_instances, eb->permissions, has_exec_method);
+                externDefinition =
+                    new IR::TCExtern(eb->externId, eName, pipelineName, eb->no_of_instances,
+                                     eb->permissions, has_exec_method);
                 tcPipeline->addExternDefinition(externDefinition);
             } else {
                 auto eb = externsInfo[eName];

@@ -20,11 +20,11 @@ and limitations under the License.
 #include <deque>
 
 #include "backends/ebpf/psa/ebpfPsaGen.h"
+#include "control-plane/p4RuntimeArchHandler.h"
 #include "ebpfCodeGen.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/parseAnnotations.h"
 #include "frontends/p4/parserCallGraph.h"
-#include "control-plane/p4RuntimeArchHandler.h"
 #include "introspection.h"
 #include "ir/ir.h"
 #include "lib/error.h"
@@ -96,12 +96,12 @@ class ConvertToBackendIR : public Inspector {
     void postorder(const IR::Declaration_Instance *d) override;
     void postorder(const IR::Type_Struct *ts) override;
     safe_vector<const IR::TCKey *> processExternConstructor(const IR::Type_Extern *extn,
-                                             const IR::Declaration_Instance *decl,
-                                             struct ExternInstance *instance);
+                                                            const IR::Declaration_Instance *decl,
+                                                            struct ExternInstance *instance);
     safe_vector<const IR::TCKey *> processExternControlPath(const IR::Type_Extern *extn,
                                                             const IR::Declaration_Instance *decl,
                                                             cstring eName);
-    cstring getControlPathKeyAnnotation(const IR::StructField* field);
+    cstring getControlPathKeyAnnotation(const IR::StructField *field);
     unsigned GetAccessNumericValue(cstring access);
     bool isDuplicateAction(const IR::P4Action *action);
     bool isDuplicateOrNoAction(const IR::P4Action *action);
@@ -129,8 +129,13 @@ class ConvertToBackendIR : public Inspector {
     void updateAddOnMissTable(const IR::P4Table *t);
     bool checkParameterDirection(const IR::TCAction *tcAction);
     bool hasExecuteMethod(const IR::Type_Extern *extn);
-    safe_vector<const IR::TCKey *> HandleTypeNameStructField(const IR::StructField* field, const IR::Type_Extern *extn, const IR::Declaration_Instance *decl, int &kId, cstring annoName);
-    safe_vector<const IR::TCKey *> processCounterControlPathKeys(const IR::Type_Struct *extern_control_path, const IR::Type_Extern *extn, const IR::Declaration_Instance *decl);
+    safe_vector<const IR::TCKey *> HandleTypeNameStructField(const IR::StructField *field,
+                                                             const IR::Type_Extern *extn,
+                                                             const IR::Declaration_Instance *decl,
+                                                             int &kId, cstring annoName);
+    safe_vector<const IR::TCKey *> processCounterControlPathKeys(
+        const IR::Type_Struct *extern_control_path, const IR::Type_Extern *extn,
+        const IR::Declaration_Instance *decl);
     CounterType toCounterType(const int type);
 };
 

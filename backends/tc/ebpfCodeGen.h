@@ -153,8 +153,8 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
     EBPFTablePNA(const EBPF::EBPFProgram *program, const IR::TableBlock *table,
                  EBPF::CodeGenInspector *codeGen, const ConvertToBackendIR *tcIR)
         : EBPF::EBPFTablePSA(program, table, codeGen), tcIR(tcIR) {
-            initDirectCounters();
-        }
+        initDirectCounters();
+    }
     void emitInitializer(EBPF::CodeBuilder *builder) override;
     void emitDefaultActionStruct(EBPF::CodeBuilder *builder);
     void emitKeyType(EBPF::CodeBuilder *builder) override;
