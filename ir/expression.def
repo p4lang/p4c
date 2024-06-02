@@ -46,7 +46,8 @@ abstract Operation_Binary : Operation {
             type = left->type; }
     toString {
         std::stringstream tmp;
-        tmp << DBPrint::Prec_Low << *this;
+        tmp << DBPrint::Prec_Low;
+        dbprint(tmp);
         return tmp.str();
     }
 }

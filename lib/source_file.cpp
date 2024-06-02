@@ -49,7 +49,7 @@ SourceInfo::SourceInfo(const InputSources *sources, SourcePosition start, Source
         BUG("SourceInfo position start %1% after end %2%", start.toString(), end.toString());
 }
 
-cstring SourceInfo::toDebugString() const {
+cstring SourceInfo::toString() const {
     return Util::printf_format("(%s)-(%s)", start.toString(), end.toString());
 }
 
@@ -302,7 +302,7 @@ cstring SourceInfo::getSourceFile() const {
 
 cstring SourceInfo::getLineNum() const {
     SourceFileLine sourceLine = sources->getSourceLine(start.getLineNumber());
-    return toString(sourceLine.sourceLine);
+    return Util::toString(sourceLine.sourceLine);
 }
 
 ////////////////////////////////////////////////////////

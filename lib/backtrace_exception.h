@@ -37,7 +37,7 @@ class backtrace_exception : public E {
 
  public:
     template <class... Args>
-    explicit backtrace_exception(Args... args) : E(std::forward<Args>(args)...) {
+    explicit backtrace_exception(Args &&...args) : E(std::forward<Args>(args)...) {
 #if HAVE_EXECINFO_H
         backtrace_size = backtrace(backtrace_buffer, buffer_size);
 #else

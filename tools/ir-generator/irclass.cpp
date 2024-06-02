@@ -119,6 +119,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
 
     out << "#include <functional>\n"
         << "#include <map>\n\n"
+        << "#include \"lib/big_int.h\"        // IWYU pragma: keep\n"
         << "// Special IR classes and types\n"
         << "#include \"ir/dbprint.h\"         // IWYU pragma: keep\n"
         << "#include \"ir/id.h\"              // IWYU pragma: keep\n"

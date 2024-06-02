@@ -19,30 +19,47 @@ limitations under the License.
 #ifndef LIB_STRINGIFY_H_
 #define LIB_STRINGIFY_H_
 
-#include <stdint.h>
-
 #include <cstdarg>
+#include <string>
+#include <string_view>
+#include <type_traits>
 
-#include "big_int_util.h"
+// FIXME: Replace with big_int_fwd.h with Boost 1.84+
+#include "big_int.h"
 #include "cstring.h"
+
+class IHasDbPrint {
+ public:
+    virtual void dbprint(std::ostream &out) const = 0;
+    void print() const;  // useful in the debugger
+    virtual ~IHasDbPrint() = default;
+};
+
+/// SFINAE helper to check if given class has a `dbprint` method. Apparently,
+/// not everything are descendants of IHasDbPrint...
+template <class, class = void>
+struct has_dbprint : std::false_type {};
+
+template <class T>
+struct has_dbprint<T,
+                   std::void_t<decltype(std::declval<T>().dbprint(std::declval<std::ostream &>()))>>
+    : std::true_type {};
+
+template <class T>
+inline constexpr bool has_dbprint_v = has_dbprint<T>::value;
 
 // convert values to cstrings
 namespace Util {
-// Check whether type T has a method with signature
-// cstring toString() const
-template <typename T>
-class HasToString final {
-    template <typename U, cstring (U::*)() const>
-    struct Check;
-    template <typename U>
-    static char func(Check<U, &U::toString> *);
-    template <typename U>
-    static int func(...);
 
- public:
-    typedef HasToString type;
-    enum { value = sizeof(func<T>(0)) == sizeof(char) };
-};
+/// SFINAE helper to check if given class has a `toString` method.
+template <class, class = void>
+struct has_toString : std::false_type {};
+
+template <class T>
+struct has_toString<T, std::void_t<decltype(std::declval<T>().toString())>> : std::true_type {};
+
+template <class T>
+inline constexpr bool has_toString_v = has_toString<T>::value;
 
 template <typename T, typename = decltype(std::to_string(std::declval<T>()))>
 cstring toString(T value) {
@@ -50,32 +67,32 @@ cstring toString(T value) {
 }
 
 template <typename T>
-auto toString(const T &value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
+auto toString(const T &value) -> typename std::enable_if_t<has_toString_v<T>, cstring> {
     return value.toString();
 }
 
 template <typename T>
-auto toString(T &value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
+auto toString(T &value) -> typename std::enable_if_t<has_toString_v<T>, cstring> {
     return value.toString();
 }
 
 template <typename T>
-auto toString(const T *value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
+auto toString(const T *value) -> typename std::enable_if_t<has_toString_v<T>, cstring> {
     return value->toString();
 }
 
 template <typename T>
-auto toString(T *value) -> typename std::enable_if_t<HasToString<T>::value, cstring> {
+auto toString(T *value) -> typename std::enable_if_t<has_toString_v<T>, cstring> {
     return value->toString();
 }
 
 cstring toString(bool value);
-cstring toString(std::string value);
+cstring toString(const std::string &value);
 cstring toString(const char *value);
 cstring toString(cstring value);
 cstring toString(std::string_view value);
 /// A width of zero indicates that no width should be displayed.
-cstring toString(const big_int value, unsigned width, bool sign, unsigned int base = 10);
+cstring toString(const big_int &value, unsigned width, bool sign, unsigned int base = 10);
 cstring toString(const void *value);
 
 // printf into a string
@@ -84,4 +101,40 @@ cstring printf_format(const char *fmt_str, ...);
 cstring vprintf_format(const char *fmt_str, va_list ap);
 char DigitToChar(int digit);
 }  // namespace Util
+
+template <typename T>
+auto operator<<(std::ostream &out, const T &value)
+    -> std::enable_if_t<Util::has_toString_v<T> && !has_dbprint_v<T>, std::ostream &> {
+    return out << value.toString();
+}
+
+template <typename T>
+auto operator<<(std::ostream &out, const T *value)
+    -> std::enable_if_t<Util::has_toString_v<T> && !has_dbprint_v<T>, std::ostream &> {
+    if (value == nullptr)
+        out << "<null>";
+    else
+        out << value->toString();
+
+    return out;
+}
+
+// Prefer dbprint() method when both toString() and dbprint() methods are present
+template <class T>
+inline auto operator<<(std::ostream &out,
+                       const T &obj) -> std::enable_if_t<has_dbprint_v<T>, std::ostream &> {
+    obj.dbprint(out);
+    return out;
+}
+
+template <class T>
+inline auto operator<<(std::ostream &out,
+                       const T *obj) -> std::enable_if_t<has_dbprint_v<T>, std::ostream &> {
+    if (obj)
+        obj->dbprint(out);
+    else
+        out << "<null>";
+    return out;
+}
+
 #endif /* LIB_STRINGIFY_H_ */

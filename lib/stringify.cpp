@@ -20,6 +20,7 @@ limitations under the License.
 #include <sstream>
 #include <string>
 
+#include "big_int.h"
 #include "cstring.h"
 #include "exceptions.h"
 
@@ -28,7 +29,7 @@ cstring toString(bool value) {
     return value ? cstring::literal("true") : cstring::literal("false");
 }
 
-cstring toString(std::string value) { return value; }
+cstring toString(const std::string &value) { return value; }
 
 cstring toString(const char *value) {
     if (value == nullptr) return cstring::literal("<nullptr>");
@@ -82,9 +83,10 @@ char DigitToChar(int digit) {
     BUG("Unexpected digit: %1%", digit);
 }
 
-cstring toString(big_int value, unsigned width, bool sign, unsigned int base) {
+cstring toString(const big_int &v, unsigned width, bool sign, unsigned int base) {
     std::ostringstream oss;
     big_int zero = 0;
+    big_int value = v;
     if (value < zero) {
         oss << "-";
         value = -value;

@@ -639,7 +639,8 @@ std::ostream &operator<<(
     const std::pair<const IR::Node *, const ordered_set<const ComputeDefUse::loc_t *>> &p) {
     out << Log::endl;
     out << DBPrint::setprec(DBPrint::Prec_Low);
-    out << p.first << '<' << p.first->id << '>';
+    p.first->dbprint(out);
+    out << '<' << p.first->id << '>';
     if (p.first->srcInfo) {
         unsigned line, col;
         out << '(' << p.first->srcInfo.toSourcePositionData(&line, &col);

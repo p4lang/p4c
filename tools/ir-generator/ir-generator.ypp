@@ -41,7 +41,9 @@ limitations under the License.
     ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                  \
                  : Util::SourceInfo(sources, YYRHSLOC(Rhs, 0).getEnd()))
 
-static void yyerror(const char *fmt, ...);
+template<typename... Args>
+void yyerror(const char *fmt, Args&&... args);
+
 static std::vector<IrElement*> global;
 static CommentBlock *currCommentBlock = nullptr;
 
@@ -408,7 +410,8 @@ name: IDENTIFIER
 %%
 }  // end anonymous namespace
 
-void yyerror(const char *fmt, ...) {
+template<typename... Args>
+void yyerror(const char *fmt, Args&&... args) {
     auto& context = BaseCompileContext::get();
     if (!strcmp(fmt, "syntax error, unexpected IDENTIFIER")) {
         context.errorReporter().parser_error(sources,
@@ -416,10 +419,7 @@ void yyerror(const char *fmt, ...) {
                                              yylval.str.c_str());
         return;
     }
-    va_list args;
-    va_start(args, fmt);
-    context.errorReporter().parser_error(sources, fmt, args);
-    va_end(args);
+    context.errorReporter().parser_error(sources, fmt, std::forward<Args>(args)...);
 }
 
 IrDefinitions *parse(char** files, int count) {

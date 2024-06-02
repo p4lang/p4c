@@ -25,6 +25,7 @@ limitations under the License.
 
 #include "config.h"
 #include "indent.h"
+#include "stringify.h"
 
 #ifndef __GNUC__
 #define __attribute__(X)
@@ -150,21 +151,6 @@ void increaseVerbosity();
 static inline std::ostream &operator<<(std::ostream &out,
                                        std::function<std::ostream &(std::ostream &)> fn) {
     return fn(out);
-}
-
-template <class T>
-inline auto operator<<(std::ostream &out, const T &obj) -> decltype((void)obj.dbprint(out), out) {
-    obj.dbprint(out);
-    return out;
-}
-
-template <class T>
-inline auto operator<<(std::ostream &out, const T *obj) -> decltype((void)obj->dbprint(out), out) {
-    if (obj)
-        obj->dbprint(out);
-    else
-        out << "<null>";
-    return out;
 }
 
 /// Serializes the @p container into the stream @p out, delimining it by bracketing it with
