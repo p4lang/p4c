@@ -28,6 +28,10 @@ namespace RTTI {
 
 /// A trait that check T is custom-RTTI-enabled. Works just like standard property type traits.
 /// One would normally use the _v variant.
+/// NOTE: Custom-RTTI-enabled classes should not only derive from RTTI::Base, but should also
+/// declare typeId properly. However, not doing so would be a bug and use of such class in
+/// RTTI-related operations would lead to static_assert failuire in RTTI::TypeInfo, so we just check
+/// the base.
 template <typename T>
 struct has_rtti : std::is_base_of<RTTI::Base, T> {};
 
