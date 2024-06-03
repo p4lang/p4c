@@ -665,7 +665,7 @@ bool CollectTableInfo::preorder(const IR::Key *keys) {
     auto table = findOrigCtxt<IR::P4Table>();
     CHECK_NULL(control);
     CHECK_NULL(table);
-    structure->key_map.emplace(control->name.originalName + "_" + table->name.originalName,
+    structure->key_map.emplace(control->controlPlaneName() + "_" + table->controlPlaneName(),
                                tableKeys);
     return false;
 }
@@ -1782,10 +1782,10 @@ std::tuple<const IR::P4Table *, cstring, cstring> SplitP4TableCommon::create_mat
     const IR::P4Table *tbl) {
     cstring grpActionName = "", memActionName;
     if (implementation == TableImplementation::ACTION_SELECTOR) {
-        grpActionName = refMap->newName(tbl->name.originalName + "_set_group_id");
-        memActionName = refMap->newName(tbl->name.originalName + "_set_member_id");
+        grpActionName = refMap->newName(tbl->controlPlaneName() + "_set_group_id");
+        memActionName = refMap->newName(tbl->controlPlaneName() + "_set_member_id");
     } else if (implementation == TableImplementation::ACTION_PROFILE) {
-        memActionName = refMap->newName(tbl->name.originalName + "_set_member_id");
+        memActionName = refMap->newName(tbl->controlPlaneName() + "_set_member_id");
     } else {
         BUG("Unexpected table implementation type");
     }
@@ -2542,7 +2542,7 @@ bool CollectDirectCounterMeter::preorder(const IR::P4Table *tbl) {
         auto path = default_action->to<IR::PathExpression>();
         BUG_CHECK(path, "Default action path %s cannot be found", default_action);
         if (auto defaultActionDecl = refMap->getDeclaration(path->path)->to<IR::P4Action>()) {
-            if (defaultActionDecl->name.originalName != "NoAction") {
+            if (defaultActionDecl->controlPlaneName() != "NoAction") {
                 if (!ifMethodFound(defaultActionDecl, "count", counterExternName)) {
                     if (counterInstance) {
                         ::error(ErrorType::ERR_EXPECTED,
@@ -2598,7 +2598,7 @@ void ValidateDirectCounterMeter::validateMethodInvocation(P4::ExternMethod *a) {
             ::error(ErrorType::ERR_UNEXPECTED,
                     "%1% method of %2% extern "
                     "must only be called from within an action",
-                    a->method->getName().name, di->name.originalName);
+                    a->method->getName().name, di->controlPlaneName());
             return;
         }
 
@@ -2614,7 +2614,7 @@ void ValidateDirectCounterMeter::validateMethodInvocation(P4::ExternMethod *a) {
             ::error(ErrorType::ERR_UNEXPECTED,
                     "%1% method of %2% extern "
                     "can only be invoked from within action of ownertable",
-                    a->method->getName(), di->name.originalName);
+                    a->method->getName(), di->controlPlaneName());
             return;
         }
     }
