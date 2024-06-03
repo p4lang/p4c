@@ -146,14 +146,14 @@ class hvec_map : hash_vector_base {
     bool empty() const { return inuse == 0; }
     size_t size() const { return inuse; }
     size_t max_size() const { return UINT32_MAX; }
-    bool operator==(const hvec_map &a) {
+    bool operator==(const hvec_map &a) const {
         if (inuse != a.inuse) return false;
         auto it = begin();
         for (auto &el : a)
             if (el != *it++) return false;
         return true;
     }
-    bool operator!=(const hvec_map &a) { return !(*this == a); }
+    bool operator!=(const hvec_map &a) const { return !(*this == a); }
     void clear() {
         hash_vector_base::clear();
         data.clear();
