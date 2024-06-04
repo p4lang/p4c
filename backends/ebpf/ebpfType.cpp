@@ -128,16 +128,20 @@ void EBPFScalarType::emit(CodeBuilder *builder) {
 }
 
 void EBPFScalarType::declare(CodeBuilder *builder, cstring id, bool asPointer) {
-    if (EBPFScalarType::generatesScalar(width)) {
+    if (isvariable) {
+        builder->appendFormat("struct { u8 data[%d]; u16 curwidth; } %s", (width + 7) >> 3,
+                              id.c_str());
+    } else if (EBPFScalarType::generatesScalar(width)) {
         emit(builder);
         if (asPointer) builder->append("*");
         builder->spc();
         builder->append(id);
     } else {
-        if (asPointer)
+        if (asPointer) {
             builder->appendFormat("u8* %s", id.c_str());
-        else
+        } else {
             builder->appendFormat("u8 %s[%d]", id.c_str(), bytesRequired());
+        }
     }
 }
 
