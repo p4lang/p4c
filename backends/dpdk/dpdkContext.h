@@ -118,7 +118,7 @@ struct SelectionTable {
             max_n_members_per_group = n_members_expr->to<IR::Constant>()->asInt();
         }
         // Fetch associated member table handle
-        cstring actionDataTableName = tbl->name.originalName;
+        cstring actionDataTableName = tbl->controlPlaneName();
         actionDataTableName = actionDataTableName.replace("_sel", "");
         auto actionTableAttr = ::get(tableAttrmap, actionDataTableName);
         bound_to_action_data_table_handle = actionTableAttr.tableHandle;

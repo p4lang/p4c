@@ -243,8 +243,8 @@ class Substitutions : public SubstituteParameters {
     }
     const IR::Node *postorder(IR::P4Table *table) override {
         auto orig = getOriginal<IR::IDeclaration>();
-        cstring newName = renameMap->getName(orig);
-        cstring extName = renameMap->getExtName(orig);
+        auto newName = renameMap->getName(orig);
+        auto extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << " (" << extName << ")");
         auto annos = setNameAnnotation(extName, table->annotations);
         auto result = new IR::P4Table(table->srcInfo, newName, annos, table->properties);
@@ -252,8 +252,8 @@ class Substitutions : public SubstituteParameters {
     }
     const IR::Node *postorder(IR::P4ValueSet *set) override {
         auto orig = getOriginal<IR::IDeclaration>();
-        cstring newName = renameMap->getName(orig);
-        cstring extName = renameMap->getExtName(orig);
+        auto newName = renameMap->getName(orig);
+        auto extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
         auto annos = setNameAnnotation(extName, set->annotations);
         auto result = new IR::P4ValueSet(set->srcInfo, newName, annos, set->elementType, set->size);
@@ -261,8 +261,8 @@ class Substitutions : public SubstituteParameters {
     }
     const IR::Node *postorder(IR::P4Action *action) override {
         auto orig = getOriginal<IR::IDeclaration>();
-        cstring newName = renameMap->getName(orig);
-        cstring extName = renameMap->getExtName(orig);
+        auto newName = renameMap->getName(orig);
+        auto extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
         auto annos = setNameAnnotation(extName, action->annotations);
         auto result =
@@ -271,8 +271,8 @@ class Substitutions : public SubstituteParameters {
     }
     const IR::Node *postorder(IR::Declaration_Instance *instance) override {
         auto orig = getOriginal<IR::IDeclaration>();
-        cstring newName = renameMap->getName(orig);
-        cstring extName = renameMap->getExtName(orig);
+        auto newName = renameMap->getName(orig);
+        auto extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
         auto annos = setNameAnnotation(extName, instance->annotations);
         instance->name = newName;
@@ -301,7 +301,7 @@ class Substitutions : public SubstituteParameters {
             return value;
         }
 
-        cstring newName;
+        IR::ID newName;
         if (renameMap->isRenamed(decl))
             newName = renameMap->getName(decl);
         else
