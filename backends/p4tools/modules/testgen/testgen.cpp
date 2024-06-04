@@ -147,6 +147,7 @@ std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view
                                                   const CompilerOptions &compilerOptions,
                                                   const TestgenOptions &testgenOptions,
                                                   bool writeTests) {
+    registerTestgenTargets();
     P4Tools::Target::init(compilerOptions.target.c_str(), compilerOptions.arch.c_str());
 
     // Set up the compilation context.
