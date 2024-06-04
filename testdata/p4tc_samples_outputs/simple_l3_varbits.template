@@ -1,0 +1,24 @@
+#!/bin/bash -x
+
+set -e
+
+TC="tc"
+$TC p4template create pipeline/simple_l3_varbits numtables 1
+
+$TC p4template create action/simple_l3_varbits/ingress/send_nh actid 1 \
+	param port type dev \
+	param srcMac type macaddr \
+	param dstMac type macaddr
+$TC p4template update action/simple_l3_varbits/ingress/send_nh state active
+
+$TC p4template create action/simple_l3_varbits/ingress/drop actid 2
+$TC p4template update action/simple_l3_varbits/ingress/drop state active
+
+$TC p4template create table/simple_l3_varbits/ingress/nh_table \
+	tblid 1 \
+	type exact \
+	keysz 32 nummasks 8 permissions 0x3da4 tentries 2048 \
+	table_acts act name simple_l3_varbits/ingress/send_nh \
+	act name simple_l3_varbits/ingress/drop
+$TC p4template update table/simple_l3_varbits/ingress/nh_table default_miss_action permissions 0x1024 action simple_l3_varbits/ingress/drop
+$TC p4template update pipeline/simple_l3_varbits state ready
