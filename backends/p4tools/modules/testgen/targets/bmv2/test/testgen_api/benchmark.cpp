@@ -35,7 +35,8 @@ TEST(P4TestgenBenchmark, SuccessfullyGenerate1000Tests) {
     // This enables performance printing.
     P4Tools::enablePerformanceLogging();
 
-    P4Tools::P4Testgen::Testgen::generateTests(compilerOptions, testgenOptions);
+    auto testList = P4Tools::P4Testgen::Testgen::generateTests(compilerOptions, testgenOptions);
+    ASSERT_TRUE(testList.has_value());
 
     // Print the report.
     P4Tools::printPerformanceReport();
