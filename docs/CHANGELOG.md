@@ -1,0 +1,3209 @@
+## Release v1.2.4.12 [[view](#4699)]
+- Add support for new platform property annotations for P4Runtime. [[view](#4611)]
+- Fix extern pipeline name in template file [[view](#4675)]
+- Add a release template to the compiler. [[view](#4692)]
+- irgen: Generate explicit instantiations [[view](#4681)]
+- Workaround for gcc-11.4/draft 2x spec flaw [[view](#4679)]
+- Remove no-longer-used *.p4info.txt files [[view](#4687)]
+- Improve `BUG_CHECK` internals [[view](#4678)]
+- Make the new operator protected for some IR types. [[view](#4670)]
+- Set type for LAnd, LOr, LNot to be Type_Boolean if unknown. [[view](#4612)]
+- Facilitate inheritance from RenameSymbols pass, deduplicate code [[view](#4682)]
+- Add string_view and string conversion operators and functions to cstring [[view](#4676)]
+- Generalization & minor refactoring in RenameMap [[view](#4677)]
+- Added changes for default hit actions for tc backend [[view](#4673)]
+- Support for Register Extern in P4TC [[view](#4671)]
+- Aggressively clean up the Protobuf CMake dependency. [[view](#4543)]
+- RemoveUnusedDeclarations - make helpers protected [[view](#4668)]
+- Replace IR::getBitType with IR::Type_Bits::get. [[view](#4669)]
+- Only emit the warning on EXPORT_COMPILE_COMMANDS when there are clang-tidy files to lint. [[view](#4665)]
+- Explicitly include hash for Ubuntu 18.04. [[view](#4664)]
+- Changes for for loops [[view](#4562)]
+- [#4656] Explicitly delay constant folding of only action enum `IR::SwitchCase` `label` expressions, instead of delaying constant folding of all `IR::Mux` expressions [[view](#4657)]
+- Link against the Boehm-Demers-Weiser Garbage Collector using FetchContent. [[view](#3930)]
+- Merge TestgenCompilerTarget into TestgenTarget. [[view](#4650)]
+- Add support for a clang-tidy linter. Add a files utility function. [[view](#4254)]
+- Fixes to lib/hash and lib/big_int_util. [[view](#4655)]
+- Change parameter for kfunc 'bpf_p4tc_entry_create_on_miss' [[view](#4637)]
+- Fix missing declaration of custom externs in the generated eBPF/uBPF header file. [[view](#4644)]
+- Improve error message when shifting int by non-const [[view](#4653)]
+- Move IRUtils Literal get functions to the respective IR members. Add stringliteral get function.  [[view](#4623)]
+- Use check_include_file_cxx instead of check_include_file to find mm_malloc.h [[view](#4649)]
+## Release v1.2.4.11 [[view](#4646)]
+- Introduce guard for aarch64 GCC compilation. [[view](#4647)]
+- Add -mbmi flag to Abseil for GCC versions greater than 14.  [[view](#4638)]
+- Rename reused-counter.p4 as reused-counter-bmv2.p4 so a test is created for it [[view](#4636)]
+- Fix: Outdated links [[view](#4618)]
+- Update MacOS brew version. [[view](#4642)]
+- Contribute DiagnosticCountInPassHook [[view](#4629)]
+- allow disabling of subtraction transform [[view](#4633)]
+- P4TC - Emit 'NoAction' in table actions list in template file [[view](#4622)]
+- Update graphs comment formatting. [[view](#4630)]
+- [Docs]  capitalize "GCC" acronym in docs and comment [[view](#4632)]
+- [#4625] Prune `MethodCallStatement`s if child `MethodCallExpression` resolves to a compile-time constant. [[view](#4627)]
+- [#4614] Unconditionally copy `dpdk` p4include files to the binary directory [[view](#4615)]
+- Update ebpf comment format [[view](#4624)]
+- Call PassManager's debug hook even after a failing pass [[view](#4626)]
+- Ensure we take compiler-provided declaration of posix_memalign [[view](#4609)]
+- Use `IR::Annotation::nameAnnotation` everywhere instead of hard-coding `@name` annotation name [[view](#4628)]
+- [Docs] Non-Breaking change of "p4c" to "P4C" [[view](#4620)]
+- P4TC - Add permission annotations to tables  [[view](#4610)]
+- Update the Commenting Style in the DPDK backend [[view](#4619)]
+- Force black to use pytoml as config. [[view](#4588)]
+- Fix missing override. [[view](#4621)]
+- Miscellaneous cleanups for P4Testgen. [[view](#4613)]
+- Format: Documentation dependency command [[view](#4616)]
+- clear done/visit_in_progress when revisiting node [[view](#4608)]
+- Add missing <iterator> include to map.h [[view](#4607)]
+- Add option to build with dynamic libc and c++, but static other dependencies; change static option name [[view](#4597)]
+- Fix a warning emerging from a testsuite in GTest on newer versions of Clang.  [[view](#4605)]
+- Change kfunc definition for bpf_p4tc_tbl_read, xdp_p4tc_tbl_read, [[view](#4604)]
+- Update Commenting Style in Bmv2 Backend [[view](#4603)]
+- Update the dash programs. [[view](#4593)]
+- Update the comment format of common [[view](#4602)]
+- Make the tree cloner also clone Member(TypeNameExpression)] to ensure the result is a DAG [[view](#4539)]
+- restore missing parentheses [[view](#4600)]
+- Do not swallow the test output when checking for the static binary functionality. [[view](#4601)]
+- [Docs] Add Table of Content [[view](#4590)]
+- allow disabling of p4 input count check [[view](#4446)]
+- Improve & Move "How to contribute" section to Top level readme  [[view](#4580)]
+- Fix spurious failure when two tests try to remove `ptf.log` at the same time. [[view](#4591)]
+- [DOCS][Refactor] Replace direct links with word links [[view](#4577)]
+- Revert using Abseil system includes. [[view](#4594)]
+- Create CONTRIBUTING.md [[view](#4581)]
+- Handle Arithmetic operations for fields which are in network order [[view](#4566)]
+## Release v1.2.4.10 [[view](#4587)]
+- [doc] backends: Add Doxygen-style documentation for BMV2 JSONObjects [[view](#4554)]
+- Add Comment Style Guide [[view](#4573)]
+- Fix rules_boost which pulls in the compromised xz dependency. [[view](#4584)]
+- [Fix] Resource links in Additional documentation [[view](#4565)]
+- Fix broken Debian CI test badge in the README. Add Fedora and MacOS CI badge.  [[view](#4569)]
+- Small build fixes. [[view](#4564)]
+- Added default action code for tc backend [[view](#4561)]
+- Add p4tc_filter_fields in add_entry [[view](#4559)]
+- Suppress Abseil warnings. [[view](#4556)]
+- Add a missing nullopt check. [[view](#4560)]
+- [P4Testgen] Clean up the direct extern map implementation for BMv2. [[view](#4546)]
+- Support new ActionProfile annotations for P4Runtime. [[view](#4533)]
+- Add width to parameters in const entries template definition. [[view](#4557)]
+- Implict cast fix [[view](#4399)]
+- Corrected version in README.md [[view](#4555)]
+- Refactor Util::Enumerator [[view](#4513)]
+- Add more CRC checksum variants to lib/nethash [[view](#4550)]
+- Bump black from 24.2.0 to 24.3.0 [[view](#4551)]
+- P4TC - Support add_on_miss, add entry externs [[view](#4522)]
+- Allow constructing an IR::ID from a std::string [[view](#4549)]
+- Move the network hashes implementation from Bmv2 testgen to lib/ [[view](#4526)]
+- Fix a warning on missing override in def use class. [[view](#4547)]
+- Add policy controlling RemoveUnusedDeclarations [[view](#4528)]
+- Use Abseil system includes [[view](#4511)]
+- Bump softprops/action-gh-release from 1 to 2 [[view](#4545)]
+- [documentation] Add hyperlinks to the actual directory in the README file [[view](#4531)]
+- Remove obsolete `output_to_genfiles = True`. [[view](#4541)]
+- [P4Testgen] Fix append and prepend invocation. [[view](#4306)]
+- Clean up P4Tools and control-plane linking. [[view](#4520)]
+- Midend def-use pass [[view](#4489)]
+- [docs] Sync Directory structure of P4tools  [[view](#4516)]
+- Preserve annotations on functions properly [[view](#4532)]
+- Add ninja as a default build system for some runners. [[view](#4491)]
+- Extend parser to allow parentheses in lvalues [[view](#4530)]
+- tc_may_override annotation implementation [[view](#4529)]
+- tc struct fields addition and memory initialization [[view](#4524)]
+- Allow annotations on functions [[view](#4452)]
+- Add 4 digit uid to dump file names [[view](#4509)]
+- help compiler folding for divideFloor/moduloFloor [[view](#4512)]
+- gc: implement posix_memalign. [[view](#4508)]
+- [docs] subdirectories and description for control plane [[view](#4506)]
+- Bump softprops/action-gh-release from 1 to 2 [[view](#4518)]
+ - YAML formatting from Redhead YAML language server. [[view](#4521)]
+- [Docs] Added tools to directory structure [[view](#4504)]
+ - [docs] Add Backend to directory structure [[view](#4503)]
+- Fix broken MacOS and Ubuntu18.04 runs.  [[view](#4517)]
+- Update formatters (clang-format, isort, black)] [[view](#4515)]
+- HalfOpenRange/ClosedRange classes [[view](#4496)]
+- Link bazel badge to the bazel build ci [[view](#4505)]
+- Build P4Testgen on MacOS. [[view](#4492)]
+- Replace boost string algorithms with their abseil counterparts [[view](#4482)]
+- Move CI Mac and Fedora tests to separate test runs. [[view](#4495)]
+- Open up the Z3 api. [[view](#4322)]
+- fix comment typo [[view](#4498)]
+- restore underscore after DISABLED in test name [[view](#4497)]
+- warn on unused controls/parsers [[view](#4440)]
+- [P4Testgen] Add a rudimentary P4Testgen benchmark with via GTest. [[view](#4475)]
+## Release v1.2.4.9 [[view](#4490)]
+- Move out of place comment in gc.cpp [[view](#4494)]
+- Use abseil maps even more [[view](#4473)]
+- Fetch latest brew formulae [[view](#4488)]
+- Generalize get in map utils [[view](#4483)]
+- Distinguish runner OS. [[view](#4487)]
+- Fixes from static analysis [[view](#4442)]
+- Add missing Bazel targets. [[view](#4486)]
+- Update MacOS runner to Ventura, add MacOS Sonoma (M1)] runner [[view](#4393)]
+- [P4Testgen] Add an option to selectively ignore control plane elements.  [[view](#4417)]
+- backends/tc: Fix issues reported in #4327 [[view](#4484)]
+- Fix for default_action [[view](#4485)]
++ Removed pipeline id from template for tc backend [[view](#4480)]
+- Try to clean up the Protobuf includes. [[view](#4474)]
+- Use better maps to store visitor state [[view](#4459)]
+- [P4Testgen] Implement a library for common control-plane symbolic variables. [[view](#4398)]
+- Dowload pre-built Z3 on Macs as well [[view](#4476)]
+- Bump protobuf version and add Abseil as compiler dependency.  [[view](#4463)]
+- Try to speed up the CI build process [[view](#4470)]
+- Add some more global operator new / delete overrides [[view](#4465)]
+- Add support for parser errors in tc backend [[view](#4443)]
+- Bump docker/build-push-action from 3 to 5 [[view](#4467)]
+- Bump actions/setup-python from 4 to 5 [[view](#4466)]
+- Fix hvec_map insert/emplace [[view](#4458)]
+- Remove some unused boost headers and switch from boost code to alternatives [[view](#4464)]
+- Handle value suffixes in the asserts parser. [[view](#4450)]
+- Add more API options to the P4Testgen api. [[view](#4451)]
+- Add merge group label to relevant branches. [[view](#4462)]
+- Refactor ReferenceResolver to use native C++-enumerators in some places [[view](#4432)]
+- Bump actions/checkout from 3 to 4 [[view](#4457)]
+- Bump actions/cache from 2 to 4 [[view](#4456)]
+- Bump docker/setup-buildx-action from 2 to 3 [[view](#4455)]
+- Bump peter-evans/create-pull-request from 5 to 6 [[view](#4454)]
+- Bump docker/login-action from 2 to 3 [[view](#4453)]
+- Refactor some visitor internals [[view](#4447)]
+- Create a dependabot.yml for Github actions [[view](#4405)]
+- Fix comment [[view](#4449)]
+- Change minimum key struct alignment to 8 [[view](#4426)]
+- P4TC - CRC32 Initialisation [[view](#4427)]
+- Avoid to-after-is double calls to RTTI in type checker [[view](#4441)]
+- add missing srcInfo to ParserState [[view](#4438)]
+- Move information logging to toplevel. [[view](#4436)]
+- Clean up Python linters. [[view](#4437)]
+- -lldb arg run run lldb on the compiler in tests [[view](#4435)]
+- Don't apply defaultArguments in table action lists [[view](#4434)]
+- Error casting bool const to other than bit<1> [[view](#4419)]
+- Provide better hash functions and boilerplate [[view](#4424)]
+- allow json output format to be modified [[view](#4407)]
+- Pass FrontEndPolicy to unit tests [[view](#4433)]
+- Basic support for `@p4runtime_translation` and `@p4runtime_translation_mappings`. [[view](#4363)]
+- Add a missing build rule to Bazel. [[view](#4429)]
+- [P4Testgen] Add an option to only generate tests with dropped packets.  [[view](#4416)]
+- [P4Testgen] Look up the alias in the P4Info instead of using the fully qualified control plane name for Protobuf IR tests. [[view](#4425)]
+- frontend policy fix: missed ConstantFolding [[view](#4423)]
+- gtest include: quotes -> angled brackets [[view](#4422)]
+- test for ContantFolding + policy [[view](#4421)]
+- Add IR::inlineBlock utility that helps with return of multiple statements from Transform [[view](#4414)]
+- Emit a reasonable error if someone uses type in place where expression is exprected [[view](#4411)]
+- Introduce a frontend policy as a customization point for frontend [[view](#4406)]
+- Add a P4Testgen library API. [[view](#4374)]
+- Implement lightweight RTTI for (not only)] IR::Node class hierarchies [[view](#4377)]
+- Add buildifier to Bazel workspace and run it on the bazel build files. [[view](#4413)]
+- Memoize & improve name lookup in `ResolveReferences`  [[view](#4376)]
+- Stop when an error is throwing in the P4Runtime serializer. Make stop on error explicit in pass manager. [[view](#4408)]
+- Do not check for shadowing repeatedly in inlining passes. [[view](#4396)]
+- Add an option to override the test name. [[view](#4401)]
+- Add a silent mode to P4Tools. Add performance counting at the top level. [[view](#4369)]
+- Introduce a configuration structure for the test back ends. [[view](#4372)]
+- Implement copy assignment operator for hvec_map [[view](#4388)]
+- [P4Testgen] Fix generation of specific fields in the Protobuf IR back end. Move hex separator utility to common class. [[view](#4400)]
+- Improve diagnostics for `MethodCallExpression` [[view](#4354)]
+- Step 4: Use the P4Runtime API in the Protobuf back end. [[view](#4303)]
+- Fix failing P4Testgen gtest. [[view](#4397)]
+- Dpdk backend:Explicitly use method toString()] while moving isValid()] Methodcall used as table key, to metadata. [[view](#4383)]
+- [#4365] Do not allow `--Wdisable` or `--Wwarn` to demote errors. Allow `--Winfo=diagnostic` to work for `diagnostic`s that can be both warnings and errors. [[view](#4366)]
+- Rename eBPF section names for tc backend [[view](#4361)]
+- Fixes from static analysis [[view](#4391)]
+- [P4Testgen] Hotfixes and improvements to the P4Constraints parsers. [[view](#4387)]
+- backends/ebpf: Track header offset in bytes rather than bits. [[view](#4327)]
+- backends/tc: Honour P4TEST_REPLACE environment variable like other backends. [[view](#4395)]
+- Use proper Github actions syntax. [[view](#4394)]
+- Allow one more round of type inference after specialization [[view](#4291)]
+## Release v1.2.4.8 [[view](#4386)]
+- Add a P4Info API to the control-plane folder and P4Tools. [[view](#4381)]
+- [NFC] Eliminate the majority of `dynamic_cast` usage in the codebase in favor of ICastable interface [[view](#4382)]
+- Tweak optional CI run execution. [[view](#4380)]
+- Remove unused parser declarations and unused parser type declarations that result from `RemoveRedundantParsers` pass. [[view](#4368)]
+- Remove redundant protobuf installation. [[view](#4379)]
+- Remove XDP code generated for TC [[view](#4349)]
+- Use std::allocator_traits::rebind_alloc instead of std::allocator::rebind [[view](#4373)]
+- Support ebpf Hash and Checksum [[view](#4378)]
+- P4TC - Support const entries [[view](#4329)]
+- Fixes for MacOS/macports. [[view](#4375)]
+- Fix compiler stdin. [[view](#4367)]
+- Add missing equiv implementation to Type_Any. [[view](#4336)]
+- Remove options from gtest binary. [[view](#4334)]
+- Provide hints on how to fix CI complaints. [[view](#4355)]
+- Improve diagnostics for AssignmentStatement [[view](#4360)]
+- Improve diagnostics for `BaseListExpression` [[view](#4358)]
+- Improve diagnostics for `StructExpression` [[view](#4357)]
+- [P4Testgen] Introduce a compiler target for P4Testgen. Move computation from the ProgramInfo to the midend. [[view](#4292)]
+ - Deprecate .txt, support in favour of .txtpb.  [[view](#4352)]
+- [P4Testgen] Introduce the option to produce lowercase hex for the formatting library. [[view](#4340)]
+- Trigger CI workflows based on assigned label. [[view](#4348)]
+- Emit the Protobuf header with the P4 entries and runtime files. [[view](#4350)]
+- DoConstantFolding: make typeMap param const [[view](#4346)]
+- Repair the static DPDK PTF tests. [[view](#4210)]
+- Documentation & testfix follow-up to #4160 [[view](#4328)]
+- cstring: Add string literal suffix, add toLower [[view](#4342)]
+- Allow unknown fields when parsing P4Info files [[view](#4341)]
+- Convert deparser header to 'inout' and address casting for functions with control block parameters  [[view](#4338)]
+- Step 2: Refactor ProgramInfo to be initialized with CompilerResult instead of a IR::P4Program. [[view](#4324)]
+- Ignore clang-tidy complaints about macro do-while loops. [[view](#4332)]
+- Fix build with system Protobuf [[view](#4321)]
+- [P4Testgen] Extend the CompilerTarget runProgram function with data structures which can pass on more information. [[view](#4323)]
+- Update status badges [[view](#4330)]
+- Allow constant-folding of arbitrary-precision integer casts [[view](#4325)]
+- Rename --with-output-packet to --output-packet-only. [[view](#4314)]
+- Make sure P4 expression optimization does not strip away types [[view](#4300)]
+- Respect ENABLE_LTO even for static build, but keep LTO default for static [[view](#4320)]
+- Allow constructing PassRepeated from a PassManager [[view](#4319)]
+- keep P4Control->body->srcInfo during init move [[view](#4317)]
+- [P4Testgen] Implement coverage tracking of actions [[view](#4307)]
+## Release v1.2.4.7 [[view](#4312)]
+- Fix some problems with the Protobuf CMake file [[view](#4262)]
+- Fix actionparams type field in introspection.json [[view](#4313)]
+- Move arch spec to ProgramInfo to allow it to depend on P4 program [[view](#4267)]
+- Support default action in P4TC [[view](#4308)]
+- [P4Testgen] Add support for @format annotations in P4 programs for protobuf-ir tests [[view](#4276)]
+- Remove -static and rename static build appropriately. [[view](#4284)]
+- Fix incorrect field extraction arithmetic when multiple non-byte aligned header fields are combined into single byte aligned field [[view](#4301)]
+- [P4Testgen] Fix stringliteral conversion. Value must be a literal, NOT a constant [[view](#4298)]
+- Remove uses of `incompatible_use_toolchain_transition`. [[view](#4299)]
+- Fix initialization order in gtest helper [[view](#4296)]
+- [P4Testgen] Fix behavior of coverage on edge cases with no nodes to cover [[view](#4275)]
+- Add validation of constant enum values fitting [[view](#4287)]
+- Do not toggle BOOST_NO_ARGUMENT_DEPENDENT_LOOKUP in CMakelists.txt [[view](#4181)]
+- P4TC - Support for set_entry_timer extern [[view](#4269)]
+- Try to fix some issues with slowness in the MacOS build. [[view](#4280)]
+- Move P4Testgen's logging function into the common library. [[view](#4279)]
+- Remove deprecated inheritance. [[view](#4283)]
+- [P4Testgen] Fix accidental system file categorization. [[view](#4278)]
+- Fix problem with bpftool in PTF tests [[view](#4277)]
+- [P4Testgen] Move static helpers from TestgenTarget and ProgramInfo to common/lib/utils [[view](#4268)]
+- [P4Testgen] Resolve method call arguments before stepping into an extern - preserve InOut references [[view](#4255)]
+## Release v1.2.4.6 [[view](#4271)]
+- Remove stale XFail. [[view](#4270)]
+- [P4Testgen] Introduce a new Protobuf backend which uses P4 PDPI instead of P4Runtime  [[view](#4221)]
+- [P4Testgen]  Add struct and header expressions as a first-class expression to P4Testgen.  [[view](#4231)]
+- P4tc Runtime issue fix [[view](#4263)]
+- Fix clang-tidy config file. [[view](#4253)]
+- More code improvements based on static analysis [[view](#4258)]
+- [P4Testgen] Flatten the genEq function and support struct expressions. [[view](#4225)]
+- [P4Testgen] Add a compiler pass to resolve Type_Name in StructExpressions. [[view](#4215)]
+- Rename TF to TestFramework [[view](#4247)]
+- [P4Testgen] Generate NoMatch for selects without default [[view](#4250)]
+- [P4Testgen] Fix argument names in GenericDescription trace event [[view](#4257)]
+- [P4Testgen] Add --assert-min-coverage option to check coverage of generated test cases [[view](#4251)]
+- [P4Testgen] Change crash message [[view](#4252)]
+- Added range check of error codes [[view](#4249)]
+- Fixed ebpf_packetOffsetInBits field in parser and control_block C file [[view](#4233)]
+- Ensure accurate typing for functions that work with references. [[view](#4223)]
+- Allow non-cast checkedTo cast. [[view](#4243)]
+- Allow custom usage in backends [[view](#4244)]
+- Fix some problems and suggestions found by clang-tidy [[view](#4237)]
+- [P4Testgen] Add EliminateInvalidHeaders midend pass [[view](#4239)]
+- Report offending node in the type-checker immutability check [[view](#4238)]
+- Allow method calls in index expressions in hsIndexSimplify [[view](#4240)]
+- Simplify jsonAssignment in ParserConverter and ActionConverter [[view](#4232)]
+- Fix build for latest Fedora version [[view](#4241)]
+- Disable DPDK PTF tests. Remove the deprecated travis.yml file. [[view](#4228)]
+- improved bootstrap.sh. [[view](#4227)]
+- [P4Testgen] Move common code of BMv2 test back ends into a common class. [[view](#4220)]
+- Flatten nesting of test backends and rename the folder appropriately. [[view](#4219)]
+- #noconstructor should also include the json loader constructor [[view](#4216)]
+- Fix some issues found by static analysis [[view](#4213)]
+- Ignore flaky test in P4Testgen eBPF back end. [[view](#4224)]
+- Still parse STF files, even when BMv2 model is not present in system. [[view](#4222)]
+## Release v1.2.4.5 [[view](#4217)]
+- Benchmarking fixes for P4Testgen. [[view](#4205)]
+- Add a testgen.p4 file with custom extern definitions such as testgen_assert and testgen_assume. [[view](#4214)]
+- Fix textproto generation and escape traces properly. [[view](#4207)]
+- Fix P4TC issues [[view](#4209)]
+- generic -O option to set optimization level/options [[view](#4206)]
+- Fix another segmentation fault when using the coverable nodes scanner. [[view](#4203)]
+- [P4Testgen] Add a DPDK-PTF P4Testgen back end and the corresponding test runner [[view](#4173)]
+- ParserUnroll: fix seg. fault for uninitialized variables inside header stack indexes [[view](#4200)]
+- Match switch labels directly instead of replacing them. Use .action_run return value instead of indirection. [[view](#4161)]
+- [P4Testgen] Change Protobuf backend test case file extension to `.txtpb` [[view](#4201)]
+- Ensured that error messages cannot be demoted to info messages [[view](#4197)]
+- Fixes for the artifact evaluation. [[view](#4199)]
+- Only look ahead for the else branch when it is not null. Check for null in node coverage. [[view](#4191)]
+- [P4Testgen] Support string types in the Z3 solver. [[view](#4195)]
+- testutils: Fix LogPipe to always record output.
+- backends/ebpf: Output an error if a header is not byte-aligned [[view](#4176)].
+- backends/ebpf: Support errors testing.
+- Stop endianess conversion in parser [[view](#4193)]
+- Update BUILD.bazel [[view](#4192)]
+- Update the Bazel build files [[view](#4190)]
+- Added support of info messages [[view](#4184)]
+- Move the solver file from the lib folder to the ir folder. [[view](#4188)]
+- Do not treat an array index as a purely symbolic variable and resolve the index correctly. [[view](#4186)]
+- Delete top-level dash-pipeline file. [[view](#4187)]
+- Run Gauntlet validation, sanitizers, and Ubuntu 18 build/test as nightly actions. [[view](#4105)]
+- Show annotations in actions' dbprint [[view](#4183)]
+- Update the dash-pipeline programs. [[view](#4060)]
+- Simplify the DPDK PTF build and test scripts.  [[view](#4168)]
+- Encode more P4Runtime constraints for the behavioral model. [[view](#4103)]
+- [P4Testgen] Add more trace information to P4Testgen [[view](#4157)]
+- Add an option to only generate tests which improve coverage. [[view](#4163)]
+## Release v1.2.4.4 [[view](#4180)]
+- Get host architecture dynamically while downloading `protoc` binary [[view](#4179)]
+- Change PNA port width to 32 instead of 9. [[view](#4177)]
+- Build the libbpf library during the cmake configuration process [[view](#4166)]
+- backends/ebpf: Add support for XDP model. [[view](#4160)]
+- Dpdk backend: Remove illegal instruction generation, reject operations on >64bit operands [[view](#4171)]
+- [P4Testgen] Remove untested/unreliable P4Testgen features. [[view](#4165)]
+- Do not panic when user specifies impossible types for declarations [[view](#4169)]
+- backends/ebpf: Fix #4098 by renaming conflicting write_partial macro. [[view](#4134)]
+- Do not allow 'void' for lookahead type [[view](#4148)]
+- Increase the timeout of the switch.p4 p4_14 program. [[view](#4164)]
+- [P4Testgen] Minor improvements and fixes for P4Testgen.  [[view](#4162)]
+- Hashvec-based maps to save memory [[view](#4150)]
+- Move solver class to lib folder. [[view](#4091)]
+- Fix whole header move instructions for DPDK [[view](#4153)]
+- Add error message for non-package main declaration [[view](#4141)]
+- Do not use equ for mandating a minimum size. [[view](#4154)]
+- eBPF backend: generate P4Runtime files if required [[view](#4113)]
+- Allow lookahead of structs with size of 0 [[view](#4149)]
+- Fix incorrect learn action in case of learner table invoked from nested controls
+- Sane handling of P4C_DEFAULT_X envvars in p4c [[view](#4130)]
+- Separate Parser and Post-parser code C code [[view](#4138)]
+- Add error message for slice with negative indexes [[view](#4137)]
+- Fix invalid string format specifier [[view](#4145)]
+- Perform type inference after constant-folding a code fragment [[view](#4135)]
+- Fix incorrect installation link in P4Testgen README [[view](#4131)]
+- Resolve P4tc ebpf c issues [[view](#4115)]
+- ci/release: enable push [[view](#4128)]
+## Release v1.2.4.3 [[view](#4124)]
+- ci/release: create tagged container images [[view](#4125)]
+- Remove P4Testgen codeowners file. [[view](#4119)]
+- Migrate Automatic Exec Groups by adding a toolchain parameter to the affected actions [[view](#4116)]
+- Fix linking with Protobuf 23 [[view](#4104)]
+- Fix MAC Address endianness issue [[view](#4089)]
+- Add a comment on a not strictly necessary grammar rule [[view](#3016)]
+- Use namespace for dpdk PTF tests [[view](#4111)]
+- Added hooks in p4RuntimeArch and p4RuntimeSerializer [[view](#4112)]
+- [P4Testgen] Add documentation to P4Testgen [[view](#4097)]
+- Continuing the implementation of initial entries support in p4c [[view](#4080)]
+- Minor tweaks [[view](#4106)]
+- [P4Testgen] Allow building p4testgen without BMV2 target [[view](#4109)]
+- Use libbacktrace for stack dumps if available [[view](#4088)]
+- Pull the libbpf library with FetchContent instead of submodules and a script. [[view](#3970)]
+- Add a PTF test CI pipeline for p4c-dpdk on the DPDK SoftNIC [[view](#4072)]
+- Migrate STF scripts to the STF parser library. Modernize stale run-bmv2-test.py code. [[view](#4040)]
+- Fix header stack assignment in p4c-dpdk [[view](#4100)]
+- [P4Testgen] Add target-specifc P4Testgen gtests [[view](#4093)]
+- Update GoogleTest and install it via FetchContent [[view](#4092)]
+- Automated Release v1.2.4.2 [[view](#4090)]
+- Make sure we ignore warnings in the Protobuf dependency source code. [[view](#4086)]
+- Update P4Runtime and use FetchContent instead of a submodule. [[view](#4082)]
+- Fix missing header for intmax_t typedef [[view](#4084)]
+- Install Protobuf using FetchContent. [[view](#4056)]
+- Add test program that uses 'priority' as identifier of a few kinds [[view](#4079)]
+- Allow building testgen without P4TEST enabled [[view](#4078)]
+- Add an option to the DPDK P4C back end to generate TDI builder configurations. [[view](#4068)]
+- Try to fix Opensuse certificate errors. [[view](#4075)]
+- Update the plotting script. [[view](#4061)]
+- Fix an infinite loop in the coverable nodes scanner. [[view](#4073)]
+- Fix #4067: Add static casts required by newer versions of G++ [[view](#4074)]
+- Fix MacOS installation typo. [[view](#4071)]
+## Release v1.2.4.1 [[view](#4052)]
+- [P4Testgen] Make the ranges of supported ports a command line parameter for P4Testgen [[view](#4069)]
+- Allow building the compiler without P4TEST enabled [[view](#4065)]
+- Avoid using reserved identifiers as include guards [[view](#4063)]
+- Don't omit the apply block label in P4Control::dbprint [[view](#4062)]
+- Fix crash in eliminateTuples [[view](#4058)]
+- Fix parser so that `priority` can be used in expressions [[view](#4053)]
+- [P4Testgen] More fixes to the refers_to and p4_asserts parser [[view](#4051)]
+- Add Bazel build rules for P4TestGen [[view](#4050)]
+- Include annotations for new_type messages. [[view](#4047)]
+- [P4Testgen] BMv2 test generation improvements [[view](#4046)]
+- Change Dockerfile to build p4tools by default. [[view](#4049)]
+- Wrap the TC defines in a namespace, use constexpr. [[view](#4048)]
+- Fixed tc table type [[view](#4045)]
+- Cleaner dbprint of if-else if chains [[view](#4044)]
+- Fix race condition for parallel PTF nanomsg tests by using network namespaces. [[view](#4042)]
+- [P4Testgen] Control the Z3 dependency in CMake using fetchcontent, generalize FindZ3.cmake [[view](#4034)]
+- Remove old ipaddr python module [[view](#4037)]
+- Use a version of simple switch that uses nanomsg instead of virtual interfaces for PTF tests. [[view](#3951)]
+- Fix incorrect boolean cast in the Z3 solver implementation. [[view](#4039)]
+- [P4Testgen] Miscellaneous fixes for P4testgen [[view](#4036)]
+- Remove execution state from the symbolic executor, make it a parameter. Simplify SelectedBranches. [[view](#4031)]
+- Reduce overtainting by short-circuiting some expressions and extern invocations. [[view](#4030)]
+- Hotfix for failing MacOS tests. Pin boost.  [[view](#4027)]
+- Dpdk Backend: Fixed target_name and action parameter bitwidth [[view](#4025)]
+- Remove the array indices conversions and handle indices in the interpreter. [[view](#4024)]
+- [P4Testgen] Simplify the model [[view](#4021)]
+- p4c-pna-p4tc : new TC backend for p4c [[view](#4018)]
+- [P4Testgen] Remove complete from the model, make it part of the evaluation step instead.  [[view](#4015)]
+- Implement support for non-const table entries [[view](#3748)]
+- Also suppress no-gnu-zero-variadic-macro-arguments warnings for MacOs. [[view](#4023)]
+## Release v1.2.4
+- [P4Testgen] Open up P4Testgen interface.  [[view](#4014)]
+- [P4Testgen] Create abstract execution state with utility functions - move copy-in/out to control/parser blocks. [[view](#4011)]
+- cmake: Fix include search for Z3 in testgen library [[view](#4012)]
+- [P4Testgen] Move some table code into helper functions, move gen_eq to "common" folder [[view](#4010)]
+- Properly track indices when removing parser value sets from the select cases [[view](#4008)]
+- Open up ResolutionContext interface a bit [[view](#4009)]
+- Add a simple PSA test program and STF test to verify parser_error ope??? [[view](#2571)]
+- lib/crash.cpp: `addr2line`: `fcntl` calls in `pipe` initializations fixed. [[view](#3298)]
+- [P4Testgen] More P4Tools refactoring work. [[view](#4005)]
+- [P4Testgen] Fix small issues with metadata test backend. Add more functions to IR utilities. Merge default value function. [[view](#4004)]
+- [P4Testgen] Also include table entries in the coverage set. [[view](#3999)]
+- Allowing local_copyprop to propagate MethodCallExpression into table ??? [[view](#4003)]
+- [P4Testgen] Fix include paths [[view](#3997)]
+- [P4Testgen] More StateVariable refactoring. Allow PathExpression to be state variables.  [[view](#3990)]
+- Make P4_16 the default parser option. [[view](#4002)]
+- misc helper functions [[view](#3995)]
+- NVFMSA-2399 Fix initialization-order-fiasco of P4CoreLibrary instance [[view](#3994)]
+- [P4Testgen] Implement meter support for the BMv2 V1model PTF test back end [[view](#3974)]
+## Release v1.2.3.9 [[view](#3998)]
+- [P4Testgen] Clean up the implementation of the BMv2 clone externs.  [[view](#3976)]
+- Split state variables and symbolic variables. Stricter type checking. [[view](#3987)]
+- Run linters across test folder. [[view](#3982)]
+- Add some more type information to the strength reduction pass. [[view](#3993)]
+- FreeBSD patches [[view](#3991)]
+- Also include the backend IR files in the ir-generated library file. [[view](#3985)]
+- Set up P4C for IWYU [[view](#3981)]
+- Make StateVariable an IR class that accepts IR::Member. Use ICastable for some nodes. [[view](#3741)]
+- Cleanup some P4Testgen code.  [[view](#3978)]
+- Bump Bazel dependency versions to enable using latest Bazel [[view](#3979)]
+- Add style and formating files for Python. Format Python code. [[view](#3870)]
+- Implement support for default initializers (...)] [[view](#3968)]
+- Always insert instantiation statement at the end of the local statement list [[view](#3962)]
+- ir generator fixes + cleanup [[view](#3975)]
+- initialize json pointer (coverity fix)] [[view](#3972)]
+- ebpf/PSA: Fix weekly PTF tests [[view](#3969)]
+- Resolve types in the prepend internal extern. [[view](#3964)]
+- Change array index[] in table keys in context.json to $ to match with the key name in bfrt.json [[view](#3963)]
+- Clean up the trace event class of P4Tools.  [[view](#3950)]
+- Remove gsl-lite module. Introduce std::referencewrapper. [[view](#3961)]
+- Remove the inja submodule and replace it with a CMake fetchcontent instrumentation. [[view](#3959)]
+- Remove boost variant from Tools. [[view](#3960)]
+- Fix the following issues [[view](#3958)]
+## Release v1.2.3.8 [[view](#3957)]
+- Add documentation on adding test data [[view](#3954)]
+- Make cpplint use python3 explicitely. [[view](#3956)]
+- Eliminate typedefs when resolving constructor type declaration [[view](#3953)]
+- Run IWYU across tools again to clean up some includes.  [[view](#3940)]
+- Better logging for lists/sets of things that take multiple lines
+- Implement a PNA-DPDK extension with a metadata test back end for P4Testgen [[view](#3937)]
+- Introduce stack initializers [[view](#3803)]
+- Update cpplint.py [[view](#3941)]
+- Clean up the commit hook installation script. [[view](#3947)]
+- Replace boost::optional with std::optional. [[view](#3942)]
+- Remove boost::filesystem from P4Testgen. [[view](#3944)]
+- Support for invalid union expressions [[view](#3843)]
+- Dash reference files. [[view](#3943)]
+- Add a metadata collection mode. [[view](#3933)]
+- Remove predication pass from p4test [[view](#3916)]
+- Fix context generation when both --context and --bf-rt-schema options are supplied [[view](#3936)]
+- Direct cast is possible between equivalent types [[view](#3935)]
+- p4tool: Fix build with Z3 installed in non-standard path [[view](#3932)]
+- testgen: Add missing include [[view](#3931)]
+- Rename some exploration strategies - Simplify DFS and random selection [[view](#3918)]
+- Use Ubuntu 22.04 for Testgen PTF tests.  [[view](#3923)]
+- Try out a simpler advance expression calculation. [[view](#3926)]
+- Third party libraries are now included as SYSTEM [[view](#3924)]
+- Refactor P4Testgen strategies - Part 1. Add a new strategy - greedy search. [[view](#3878)]
+- Add an explicit optional match key type. [[view](#3920)]
+- Add the DASH BMv2 model to the tested programs. [[view](#3885)]
+- Remove @vhavel from the list of P4Testgen code owners. [[view](#3919)]
+- Dpdk Backend: Add support for assignments to and from large (>64-bit)] operand [[view](#3910)]
+- ebpf/PSA: Add support for wide fields in parser value_set [[view](#3912)]
+- Fix mask calculation for concat operator [[view](#3911)]
+- Add an explanation for unity builds. Add a deprecation warning. [[view](#3914)]
+- Resolve parser states at once instead of resolving them iteratively. [[view](#3875)]
+- Do not allow arguments with type table, control, etc [[view](#3901)]
+- CMake build tweaks [[view](#3907)]
+- Rework testutils.py [[view](#3899)]
+## Release v1.2.3.7 [[view](#3909)]
+- Test support for wide fields in ActionProfile and ActionSelector [[view](#3908)]
+- Fix up the refers_to parser. [[view](#3906)]
+- ebpf/PSA: Support for wide fields in Digest [[view](#3877)]
+- Fix varbit handling [[view](#3761)]
+- SplitFlowVisitor improvements
+- Deprecate unified build in favor of unity build. [[view](#3491)]
+- Collect and flatten local struct decls [[view](#3903)]
+- Fix warnings in compilation using clang 15 [[view](#3904)]
+- Add support for toeplitz hash [[view](#3897)]
+- Add support for flattening header union stack [[view](#3890)]
+- Container arguments with type infint are treated as type variables [[view](#3889)]
+- Build with -pedantic, fix problems [[view](#3892)]
+- CI: Find protobuf and pass it to cmake on macOS [[view](#3896)]
+- Install & use GCC 9 in Ubuntu 18 build [[view](#3893)]
+- add a feature to control logging via an annotation on annotated IR ob??? [[view](#3882)]
+- Add assert and assume mode for testgen. [[view](#3775)]
+- SplitFlowVisitor to better capture split/join in ControlFlowVisitor
+- Replace invalid clone id 0 with 1 for selected BMv2 programs [[view](#3860)]
+- Fix up one-shot-action-selectors with action arguments. Appropriately rename some P4 table programs. [[view](#3864)]
+- Fix bug in parserUnroll [[view](#3874)]
+## Release v1.2.3.6 [[view](#3871)]
+- log: Add a format_container helper & use it [[view](#3872)]
+- Unbounded random strategy to pick a branch for test generation [[view](#3873)]
+- Dpdk Backend: Add IPSec support  [[view](#3858)]
+- Update test to be backend agnostic by removing allocation specific code for match groups [[view](#3869)]
+- Refactor Python testing scripts and utilities - Part 1  [[view](#3855)]
+- Move p4runtime arch handler class declaration to header file [[view](#3867)]
+- Fix flawed code in up4.p4 and the pins switch models. [[view](#3857)]
+- Fix hardcoded tests line. [[view](#3856)]
+- ebpf/PSA: Support for wide fields in Register and Meter [[view](#3854)]
+ - Support "clone" function for BMV2 PTF [[view](#3848)]
+- [P4testgen] Coverage script [[view](#3853)]
+- Simple proof of concept PTF test for BMV2 test framework. [[view](#3849)]
+- Emit action sel id as in bfrt [[view](#3852)]
+- Require action_run to be within a switch statement [[view](#3850)]
+- Table application results are not comparable [[view](#3851)]
+ - Correction of PTF tests for BMV2 [[view](#3737)]
+- Fix ckadd argument [[view](#3845)]
+- Fix clang formatting
+- Streamline seed initialization and try to minimize nondeterminism in P4Testgen. [[view](#3839)]
+- Add stop metrics for P4Testgen. Sanitize some P4Testgen options. [[view](#3829)]
+- Avoiding choosing the same port as egress port for clone. [[view](#3844)]
+- Testgen: allow block param initialization with taintexpr [[view](#3840)]
+- Fix clang_format mismatch. [[view](#3831)]
+- Cannot compare externs [[view](#3834)]
+- Make {#} a single token [[view](#3835)]
+- Experimental: support for trailing commas [[view](#3804)]
+- Unify ctxt json's id with other runtime files [[view](#3833)]
+- Drop flawed input-packet-only option. [[view](#3830)]
+- [dpdk] Emit a pseudo header, for dpdk instructions which require [[view](#3807)]
+- Simplify DoConstantFolding::postorder [[view](#3805)]
+- Not all Type_InfInt are the same - keep track of ones that need to be unified [[view](#3828)]
+- Forbid @optional parameters in some places [[view](#3827)]
+- Make ports an int32 type. [[view](#3825)]
+- Equal types are always equivalent [[view](#3707)]
+- Fix IndexedVector methods and constructor [[view](#3821)]
+- Refactor ci-build.sh script. [[view](#3792)]
+- Move timer from testgen to lib folder. [[view](#3785)]
+- Utility edits for P4Tools. [[view](#3824)]
+- Update inja and fix inja formatting. [[view](#3782)]
+- Dpdk Backend : Do not treat BAnd expresion in table key as simple expression [[view](#3823)]
+- initialize direction metadata at begining of pipeline [[view](#3817)]
+- Fix for STF tests with BMv2 when Scapy 2.5.0 is installed [[view](#3816)]
+## Release v1.2.3.5 [[view](#3815)]
+- Use big_int for match_t so can match wider that 64 bits
+- ebpf/PSA: Checksum support for fields wider than 64 bits [[view](#3801)]
+- Constant-fold isValid calls when possible [[view](#3794)]
+- Always emit the action selector constants in hex [[view](#3800)]
+- Forbid generic externs for in parameter values [[view](#3793)]
+- ebpf/PSA: improve support for wide fields [[view](#3790)]
+- Use https with opensuse repositories [[view](#3797)]
+- Remove permissions. [[view](#3791)]
+- Fix bazel version to 5.4.0 [[view](#3796)]
+- ci: update actions [[view](#3789)]
+- Build (only)] container images for new PRs [[view](#3788)]
+- Generate warning when 0 tests are produced [[view](#3784)]
+- Fix container build [[view](#3786)]
+- Run build and tests directly on Ubuntu 20.04, 22.04 without docker [[view](#3770)]
+- eBPF/PSA: add support for parser input metadata [[view](#3778)]
+- Run MacOS tests in correct directory. [[view](#3718)]
+- Option to produce tests exclusively with output packets [[view](#3783)]
+- Fix non-contiguous table keys when keys come from different header and metadata struct but existing metadata keys are already contiguous [[view](#3780)]
+- Remove backends from CMake include paths.  [[view](#3769)]
+- Check whether a test back end has been provided. [[view](#3777)]
+- Dpdk Backend: Fix action selector and action profile to apply the group/member tables only on base table hit [[view](#3758)]
+- Fixed missing invocation of Address Sanitizer [[view](#3735)]
+- Ignore formatting PR from blame. [[view](#3766)]
+- Add missing semicolon at end of Bison rule in p4parser.ypp [[view](#3764)]
+- Apply clang-format to ir and lib files. [[view](#3759)]
+- Fix non-consecutive table keys for add_on_miss table [[view](#3763)]
+- Refactor add_cpplint_files and add_clang_format files to support downstream projects, large file numbers. [[view](#3762)]
+- Switch cases can fall through. [[view](#3756)]
+- Check that value sets have a constant constructor argument [[view](#3754)]
+- PSA/ebpf backend: add support for generating programs for XDP hook [[view](#3752)]
+- Raise minimum required CMake version to Ubuntu 18.04 version. [[view](#3745)]
+- Clean up the includes in the IR folder [[view](#3701)]
+- Disallow Type_Control as a tuple argument [[view](#3753)]
+## Release v1.2.3.4 [[view](#3747)]
+- Propagate def files upwards in the correct order from extensions and modules. [[view](#3744)]
+- List contributors to P4Tools backend [[view](#3742)]
+- eBPF/PSA: Implement caching for ActionSelector, LPM and ternary tables [[view](#3738)]
+- Unroll finite loops in programs which have infinite loops. [[view](#3689)]
+- Try to merge copyHeaders into copyStructures. [[view](#3739)]
+- Add support for register extern [[view](#3723)]
+- Move some P4Tool compiler passes to the midend folder. [[view](#3726)]
+- Small clang-format and P4Tools README fixes. [[view](#3736)]
+- Fixed issues found by static analysis [[view](#3732)]
+- Expand google.protobuf.Any when emit p4info in text format [[view](#3731)]
+- Remove unused files in p4_16_samples_outputs directory [[view](#3733)]
+- Emit table config [[view](#3710)]
+- Enable auto var initialization with pattern in Clang CI build [[view](#3729)]
+- Defensive programming suggested by static analysis - check iterator bounds [[view](#3725)]
+- Method calls in the actions list must invoke actions [[view](#3728)]
+- Arithmetic and bitwise operations are typechecked the same way [[view](#3716)]
+- Off by one warning error in constant-folding for large shifts [[view](#3715)]
+- Fix bug caused by uninitialized variable in typechecker [[view](#3720)]
+- Fix advance condition calculation. [[view](#3721)]
+- P4Testgen: Fix off-by-one bug in taint checking for slices [[view](#3722)]
+- PSA/eBPF: Enable passing packets up to the kernel stack [[view](#3691)]
+- Restructure P4Tools to easily add new modules. [[view](#3646)]
+- P4Tools: Unify packet sizing options. [[view](#3695)]
+- P4Tools: Implement default action override for BMv2 STF. [[view](#3685)]
+- Try to avoid gcc-specific include headers for IWYU. [[view](#3717)]
+- Do not allow type arguments that are generic if they are not specialized [[view](#3714)]
+- Run IWYU on P4Tools. [[view](#3678)]
+- Dags needs to be revisited when renaming metadata [[view](#3713)]
+- Add PINS examples to test suite. [[view](#3694)]
+- Linter usability improvements. [[view](#3709)]
+- Add ignore revs file for clang-format PR. [[view](#3712)]
+- Alternate strength reduction and constant folding to eliminate constants [[view](#3706)]
+- Support for list types and literals [[view](#3520)]
+- Enforce clang-format on the entire code base. [[view](#3679)]
+- Cleanup warnings produced by Clang [[view](#3693)]
+- Fix name shortening [[view](#3692)]
+- Add a dedicated target for cpplint, if no files are set. [[view](#3697)]
+- Update p4_library.bzl [[view](#3698)]
+- Correctly infer argument types for constructor calls [[view](#3686)]
+- Enabled permissive by default. [[view](#3690)]
+- PSA/eBPF: use slice-by-8 algorithm for CRC-32 [[view](#3688)]
+- create dpdk specific pna.p4 and extend it  [[view](#3658)]
+- Fix tmpMask alignment [[view](#3687)]
+- Insert casts in action call arguments [[view](#3675)]
+- Fix dpdk test infrastructure to enable comparison of error output [[view](#3680)]
+- Experimental: literal for invalid header [[view](#3667)]
+- Add a p4-constraints and @refers_to parser to P4Tools.  [[view](#3568)]
+- Update PSA include files to match recent changes in version from PSA spec [[view](#3618)]
+- Fix cpplint CMake check. [[view](#3684)]
+- Rename psabpf repository into NIKSS [[view](#3677)]
+- Initialize drop metadata to 1 as per PSA specification [[view](#3681)]
+- Migrate P4Testgen tooling to core P4C (IWYU, clang-format, cpplint, clang-tidy, git hooks)] [[view](#3663)]
+- Build DCG if pattern flag was enabled [[view](#3673)]
+- DPDK Backend : Minor fixes [[view](#3674)]
+- Make RemoveUnusedDeclarations constructor protected. [[view](#3670)]
+- Use vector to populate checksum struct [[view](#3668)]
+- Remove useless grammar rule [[view](#3664)]
+- DPDK Backend: Direct counter and direct meter support [[view](#3631)]
+- 'size' is always a legal table property [[view](#3662)]
+- Do not allow action invocations with type arguments [[view](#3661)]
+- Clone empty blocks before def-use analysis [[view](#3653)]
+- Tighten checks for NoAction [[view](#3651)]
+- Check if 'match_kind.exact' is defined when expanding switch statements [[view](#3654)]
+- PSA/eBPF: retrieve interface numbers from OS in PTF tests  [[view](#3659)]
+- Fix and improve ordered_map & ordered_set [[view](#3577)]
+- Handle correctly general switch statements when simplifying [[view](#3624)]
+- Allow implicit casts in switch labels; improve error message [[view](#3634)]
+## Release v1.2.3.3 [[view](#3648)]
+- CI: add sanitizers [[view](#3625)]
+- Fix compilation issues after reachability merge [[view](#3649)]
+- Reachability Engine for P4Tools [[view](#3609)]
+- Fix incorrect tests : totalLen field of ipv4 header, action name in add_entry call [[view](#3647)]
+- Tighten p4c for add-on-miss [[view](#3614)]
+- Update hex constants to use uppercase [[view](#3645)]
+- Migrate some P4Testgen utilities to lib folder. [[view](#3630)]
+- Add more code owners. [[view](#3629)]
+- Modify test script running PTF tests for PSA/eBPF [[view](#3643)]
+- Fix PTF eBPF weekly CI job [[view](#3642)]
+- Update comments in issue2201-bmv2.p4 to match current behavior [[view](#3637)]
+- Rename .stf file to match corresponding default_action_ubpf.p4 file [[view](#3638)]
+- Do not constant fold mux before it has been typechecked [[view](#3633)]
+- An action profile implementation for v1model protobuf. [[view](#3626)]
+- Remove GMP support.  [[view](#3485)]
+- Fix typo in test program for reachability tests.  [[view](#3628)]
+- Clean up two desynced tests. [[view](#3605)]
+- switch labels must be path expressions [[view](#3615)]
+- Dpdk Backend: Minor changes to add error check for mask operands and adding optional match kind to pna.p4 [[view](#3588)]
+- Allow serenum members initializers refer to other serenum members [[view](#3617)]
+- Remove unused expected output files -- their test programs were renamed [[view](#3621)]
+- CI: added build with clang [[view](#3607)]
+- Remove unncessary v1model include in P4 test programs - fix up programs that use v1model externs. [[view](#3608)]
+- Fix extra toP4 whitespace after annotations and declaration instances. [[view](#3606)]
+- Run def-use analysis again after inlining  [[view](#3591)]
+- Disable libcall optimizations to avoid infinite loops in malloc [[view](#3586)]
+- Add missing select-struct.p4 test program to p4_16_samples directory [[view](#3600)]
+- Remove obsolete expected output files issue1409*.p4 [[view](#3601)]
+- Remove unused expected output files key_ebpf-issue-1020*.p4 [[view](#3602)]
+- Add missing test program precedence-lt.p4 [[view](#3603)]
+- Add missing test program fwd-bmv2-psa.p4 [[view](#3604)]
+- Add missing P4 test program issue2495-bmv2.p4 [[view](#3599)]
+- Remove unused expected output file [[view](#3598)]
+- Remove unused expected output file [[view](#3597)]
+- Remove expected output for non-existent action_param_serenum.p4 test program [[view](#3596)]
+- Tables cannot be compared [[view](#3590)]
+- Remove header field size constraints, now [[view](#3579)]
+- Implement the eBPF extension for P4Tools' P4Testgen [[view](#3510)]
+- [p4Tools and p4Testgen] New exploration strategy for test generation [[view](#3566)]
+- Fix taint analysis that was too conservative. [[view](#3583)]
+- Dpdk backend: Support for large keysize >64 bytes with additional restrictions [[view](#3580)]
+- made "errorCount", "warningCount", and "maxErrorCount" [all "unsigned int"] be "protected" rather than "private" in "class ErrorReporter" in "error_reporter.h"
+- Fix shift overlimit error for valid bit slicing operation [[view](#3578)]
+- Add a reachability analysis to P4Tools [[view](#3569)].
+- Introduce cmake option to enable -Werror; use it for CI/docker builds [[view](#3555)]
+- Add CODEOWNERS file for P4Tools. [[view](#3567)]
+- More fixes to the P4Tools repository. [[view](#3565)]
+- Cpplint fixup. [[view](#3564)]
+- Switch to macOS 11 [[view](#3556)]
+- Several small compilation fixes for tools. [[view](#3558)]
+- Update gitmodule to fix cloning with https [[view](#3562)]
+- add ICastable interface to Backtrack::trigger [[view](#3561)]
+- Contribute the P4Tools platform and P4Testgen  [[view](#3495)]
+- Fixing bug for ParserUnroll application to a p4 program with a header union [[view](#3121)]
+- fixed spelling in CMakelists.txt in 2 different lines [[view](#3554)]
+- Switch to C++17 standard [[view](#3547)]
+- Use prefixedNonTypeName to simplify the expression production in parser [[view](#3553)]
+- Entries can be implicitly cast to the key type [[view](#3551)]
+- BMv2: fix hashing non-tuple causing segfault [[view](#3465)]
+- PSA/ebpf backed: update psabpf-ctl to the latest version [[view](#3539)]
+- Change warrning messages in ParserUnroll [[view](#3548)]
+- New class ICastable; new type constraint added [[view](#3542)]
+- Add note to DPDK README that PSA egress is not implemented [[view](#3525)]
+## Release v1.2.3.2 [[view](#3546)]
+- Run PTF tests under different kernel versions [[view](#3535)]
+- add set_member_id in action list for action selector [[view](#3540)]
+- Dpdk backend: Flatten header union into individual fields [[view](#3524)]
+- Set C++ standard only if it is not set at parent scope [[view](#3541)]
+- Fixing bug in ParserUnroll for infinite loops without header stacks  [[view](#3538)]
+- remove unused lib/alloc.h
+- Constant-fold static_assert calls [[view](#3533)]
+- Dpdk Backend: Update default timeout values for learner table entries [[view](#3530)]
+- Since dpdk now Support large struct fields(more than 64 bits)] as key [[view](#3528)]
+- Fix hdr align [[view](#3521)]
+- Forbid use of .lastIndex outside of parsers [[view](#3523)]
+- Fixing bug in parserUnroll [[view](#3503)]
+- Fix: prevent copy elimination for statement which does not support constant values [[view](#3512)]
+- Fixes related to type and function specialization [[view](#3458)]
+- Prototype implementation of static_assert [[view](#3196)]
+- Silence -Warray-bounds for generated code for protobuf [[view](#3515)]
+- cmake: Fixed multi line comment [[view](#3513)]
+- Add new option to build p4c with LTO [[view](#3470)]
+- Load table action from json without 'name' field for BMV2 [[view](#3435)]
+- Add null check for default action property [[view](#3500)]
+## Release v1.2.3.1 [[view](#3505)]
+- Update protobuf installation instructions link [[view](#3501)]
+- Handle table.apply()].hit correctly in ubpf backend [[view](#3498)]
+- fixing bug for loop with one parser state only [[view](#3492)]
+- Update README.md [[view](#3497)]
+- Dpdk Backend: Fix support for non-zero action arguments for default action in a table using action selector [[view](#3496)]
+- Fix action param processing [[view](#3493)]
+- Fix incorrect CFG generated for BMV2 backend for switch statements [[view](#3490)]
+- Fix bug related to varbits width [[view](#3487)]
+- Delete keys that are empty tuples [[view](#3489)]
+- Support GCC-style options for writing dependencies to a file. [[view](#3484)]
+- Support inverted ranges [[view](#3482)]
+- Improve generation of unique strings [[view](#3350)]
+- missing return
+- Dpdk Backend: Allow non-constant arguments to mirror_packet extern [[view](#3473)]
+- Log/IndentCtl sanity/cleanup
+- readme: Update supported Ubuntu versions [[view](#3476)]
+- Fix ir_frontend_midend_control_plane build target [[view](#3475)]
+- Remove GMP dependency from BUILD.bazel [[view](#3474)]
+- Dpdk backend: optional and range match kinds translate to wildcard match for dpdk [[view](#3472)]
+## Release v1.2.3.0 [[view](#3466)]
+- Remove "frontends" from the include directories. [[view](#3467)]
+- Implicit casts between InfInt and Bit are allowed [[view](#3469)]
+- Dpdk Backend: Move Mux handling after simplifying select expression [[view](#3464)]
+- Remove undefined behaviour in pass manager initialization [[view](#3468)]
+- Add a compiler pass that adds missing IDs to control plane objects. [[view](#3455)]
+- Forbid packages, controls, etc as tuple fields [[view](#3461)]
+- Do not allow constructor calls of externs with abstract methods [[view](#3460)]
+- Fix include headers for lib/stringify.h [[view](#3457)]
+- Use Type_Dontcare for _ expressions in table entries [[view](#3444)]
+- pft-ebpf tests: update psabpf to fix tests [[view](#3456)]
+- Fix Missing metadata for temporary variables added for Mask operation [[view](#3452)]
+- DPDK Backend: Add support for tdi.json [[view](#3440)]
+- P4C-DPDK - Incorrect constant value when there is a substract operation involved with a constant [[view](#3411)]
+- Fixed build with older bison on Ubuntu 18 [[view](#3454)]
+- Add bazel support for p4c-dpdk compiler [[view](#3441)]
+- initial commit [[view](#3447)]
+- Values with type int are legal constants [[view](#3446)]
+- Fixed usage of yyFlexLexer with multiple parsers [[view](#3445)]
+- Prevent crash caused by incorrect error message [[view](#3443)]
+- ordered_set: operator<: Fix for a case of strict inclusion. [[view](#3431)]
+- DPDK Backend: Avoid compiler crash by handling possible types of length argument in packet extract for header containing varbit field [[view](#3439)]
+- DPDK Backend: Emit name information for externs in context json [[view](#3433)]
+- [dpdk] shorten label names and header instance type [[view](#3436)]
+- remove debug info [[view](#3438)]
+- Added new P4C option [[view](#3425)]
+- Avoid crash in ebpf backend by checking expected IR node kinds [[view](#3427)]
+- remove unused include [[view](#3428)]
+- Do not remove externs which are defined not in system files. [[view](#3424)]
+- Implement Copy Elimination for dpdk backend [[view](#3406)]
+- save annotations after parser unroll [[view](#3422)]
+- Handle constant folding for tuple/list constants [[view](#3421)]
+- loop unrolling: Use type of original expression [[view](#3420)]
+## Release v1.2.2.3 [[view](#3418)]
+- Inhibit compiler optimizations in GC malloc()] implementation [[view](#3415)]
+- Fix def-use analysis bug when handling virtual methods [[view](#3419)]
+- Only crash if the error count exceeds the maximum [[view](#3413)]
+- Use a helper to to define the cpp toolchain type [[view](#3416)]
+- Fix incorrect overload resolution for specialized (package)] types [[view](#3412)]
+- Always prepend local gtest include paths [[view](#3414)]
+- Add support of path expressions for a header stack inside parserUnroll [[view](#3405)]
+- Values with type int are legal constants [[view](#3408)]
+- collects decls from parser and control block [[view](#3392)]
+- Update BUILD.bazel to remove constat patterns from glob [[view](#3397)]
+- Remove apply()] calls to redundant parsers [[view](#3356)]
+- psabpf-ctl: update action-selector CLI - rename commands [[view](#3404)]
+- Fix incorrect copy propagation into table match keys [[view](#3399)]
+- Solving problems with HeaderUnion [[view](#3342)]
+- Update rules that require a cpp toolchain to use a helper function that defines the toolchain type. [[view](#3401)]
+- Improve the way we wait for commands in driver [[view](#3398)]
+- Fixing parserUnroll bug for sequential next operator usage [[view](#3193)]
+- Fix missing key initialization when header/metadata fields used as table keys are copied in new metadata fields [[view](#3395)]
+- actionSynthesis: add original source info to synthesized actions [[view](#3396)]
+- Use width_bits()] instead of size for constantFolding. [[view](#3400)]
+- BUILD_USE_COLOR=OFF disables colors for the C++ compiler [[view](#3389)]
+- Make bitvec helpers available as global, don't polute top-level namespace [[view](#3393)]
+- Bring commonly used builtin options under lib directory [[view](#3381)]
+- Update reference outputs [[view](#3388)]
+- Dpdk Backend: Enable header stack dynamic index elimination [[view](#3375)]
+- Add metadata fields uses as Member Expression [[view](#3387)]
+- Enable Automated Releases [[view](#3386)]
+- DPDK Backend: Fix action name used in learn instruction, minor fix in context json [[view](#3385)]
+- Fixing bug in HSIndexSimplifier path [[view](#3382)]
+- PSA-eBPF PTF tests: update psabpf to the latest version [[view](#3383)]
+- Dpdk backend: Add target_name field for tables to context json.  [[view](#3380)]
+- Fixed comparison between two Type_Bits [[view](#3377)]
+- accept PSA_MeterColor_t in action parameter [[view](#3365)]
+- Type unification should always use the canonical type [[view](#3370)]
+- Dpdk backend: Minor changes in context json and learner table timeout values. Supercedes PR #3369 [[view](#3372)]
+- P4C-DPDK : Add support for Hash extern [[view](#3368)]
+- Add types for tables keys after switchElimination [[view](#3064)]
+- Do not allow variables with type Type_Parser/Control [[view](#3361)]
+- Remove unused variables in psa/ebpf backend [[view](#3362)]
+- String utility functions [[view](#3366)]
+- crash.cpp: Register names fixed for building under Cygwin. [[view](#3296)]
+- Added nullptr check into graphs backend [[view](#3367)]
+- Add old parser state in loopsUnroll if ExpressionEvaluator returns a error [[view](#3150)]
+- Use 0 as default PSA_PORT_RECIRCULATE value [[view](#3360)]
+- Add support for ternary const entries [[view](#3347)]
+- Improve error message when select types do not match [[view](#3352)]
+- Do not crash if constant width is 0 [[view](#3358)]
+- Allow value sets as labels when select()] is done on a constant [[view](#3353)]
+- Allow unification between serenum and underlying type [[view](#3341)]
+- Allow shifts with serenums on the RHS [[view](#3355)]
+- Unification of generic types can reduce to unification of Type_Name [[view](#3354)]
+- Fixed start state renaming for p4-14 translation using @packet_entry [[view](#3348)]
+- Validate value_set element types [[view](#3351)]
+- Do not generate TC Egress program if PSA Egress pipeline is empty [[view](#3349)]
+- Improve error message when validating select expressions [[view](#3340)]
+- Require a start state in parsers [[view](#3339)]
+- Use psabpf-ctl register command in PTF tests [[view](#3337)]
+- Dpdk:  Fix missing initialization for table properties for add_on_miss tables in context json [[view](#3334)]
+- Do not specialize functions when arguments are type variables [[view](#3328)]
+- Add generic structs to P4Runtime digest example [[view](#3332)]
+- Fix control-plane generation for headers containing structs [[view](#3331)]
+- Check that parameter default values are compile-time known [[view](#3330)]
+- Fix handling of keys without name annotation in graphs [[view](#3327)]
+- [dpdk]  Fix calculation of direction from input port [[view](#3326)]
+- DPDK Backend: Connection tracking support [[view](#3290)]
+- Update PSA-eBPF documentation [[view](#3320)]
+- Expand 'emit' calls in the ebpf backend [[view](#3323)]
+- Fix warnings generated by XDP helper program [[view](#3322)]
+- Fixes for Graph generation for switch(t.apply()].action_run)] [[view](#3314)]
+- Allow shifts with constant signed positive amounts [[view](#3303)]
+- Correctly handle don't care named arguments  [[view](#3278)]
+- Avoid dereferencing nullptr in GetStackItemRef::baseRef [[view](#3315)]
+- Not all returns in parsers are disallowed [[view](#3309)]
+- Do not allow structure have specialized parsers as type arguments [[view](#3310)]
+- Fixing bug for concat elimination in SimpleSwitch [[view](#3300)]
+- Require generic return types to be specialized [[view](#3302)]
+- p4test does not support switch statements in actions [[view](#3301)]
+- Forbid instantiations in functions or methods [[view](#3279)]
+- Forbid methods to return int or string [[view](#3280)]
+- Emit table apply for switch expression with action_run [[view](#3284)]
+- Test for isValid as a header field [[view](#3275)]
+- Improvement of p4c-graphs backend [[view](#3268)]
+- Add support for LLD linker, cmake options for LLD and Gold [[view](#3263)]
+- Update used psabpf library for PTF tests (PSA/eBPF)] [[view](#3261)]
+- Preserve build failure semantics. [[view](#3270)]
+- [dpdk] Eliminate header copy [[view](#3257)]
+- DPDK Backend: PNA Pass metadata support [[view](#3245)]
+- Add UPF sample program for PSA/eBPF backend [[view](#3267)]
+- Add BNG sample program for PSA/eBPF backend [[view](#3266)]
+- Use ccache with Github actions [[view](#3073)]
+- Add cmake option to force-enable colors in build [[view](#3269)]
+- Do not crash on illegal uses of 'this' [[view](#3265)]
+- Allow specialized types for direct control/parser invocations [[view](#3260)]
+- Add support for ternary match kind to eBPF backend [[view](#3256)]
+- Stricter type checking for built-in methods [[view](#3259)]
+- Add L2L3-ACL sample program for PSA/eBPF backend [[view](#3255)]
+- Improve padding calculation in eBPF parser [[view](#3254)]
+- UBPF backend header files were not cpplinted [[view](#3252)]
+- Fix incorrect C code generation for ebpf control plane [[view](#3253)]
+- Add support for Random extern to PSA/eBPF backend [[view](#3251)]
+- Fix support for verify()] and error type to fully support verify()] in PSA/eBPF backend [[view](#3250)]
+- Implement DirectMeter extern for eBPF backend [[view](#3243)]
+- p4c: Handle spaces in file name [[view](#3249)]
+- Fix a typo in README [[view](#3248)]
+## Release 1.2.2.2 [[view](#3247)]
+- Point to PSA/eBPF implementation in main README [[view](#3244)]
+- Add support for parser value_set to eBPF backend [[view](#3235)]
+- Fixed bitvec.h [[view](#3239)]
+- Fix error message for cast to 'type' [[view](#3241)]
+- manage lifetimes of Visitor::visited [[view](#3168)]
+- Allow P4 filenames containing spaces [[view](#3242)]
+- DPDK Backend: Add support for recirculate()] extern [[view](#3236)]
+- Do not allow casts to struct types [[view](#3234)]
+- P4C-DPDK - Support Non-zero arguments for default action [[view](#3206)]
+- Implement Meter extern for eBPF backend [[view](#3231)]
+- Replace pna direction with register read [[view](#3224)]
+- Strength reduction should not remove some casts [[view](#3226)]
+- Try to cancel previous Jenkins runs [[view](#3230)]
+- Fix expansion of signed ranges to masks [[view](#3212)]
+- improving the driver re: the checking of input pathnames, improving error messages, trying to prevent misleading error messages. [[view](#3218)]
+- Allow casts int to int [[view](#3220)]
+- Add support for Hash extern to eBPF backend [[view](#3215)]
+- Add support for ActionSelector extern to PSA/eBPF backend [[view](#3216)]
+- P4C-DPDK: Emit error when struct fields >64-bit is present in the P4 [[view](#3217)]
+- DPDK Backend: Fix binary operations with 1st operand is not same as dst operand [[view](#3209)]
+- Solving problems with Header Union verify function (reopened)] [[view](#3214)]
+- Add support for Register extern to PSA/eBPF backend [[view](#3202)]
+- Fix Context json to emit target_action_name and NoAction [[view](#3213)]
+- [dpdk] Emit key name in context file as in bfrt and p4info [[view](#3205)]
+- Add support for DirectCounter extern to PSA/eBPF backend [[view](#3195)]
+- Insert type specializations before functions [[view](#3207)]
+- Remove incorrect test for recursion [[view](#3199)]
+- Add support for InternetChecksum extern to eBPF backend [[view](#3194)]
+- adding tests re the driver (1)] missing error messages and (2)] giving misleading error messages [[view](#3198)]
+- [dpdk] Shorten the Identifer name, including dots(.)] in Member expression [[view](#3175)]
+- Add --xdp2tc compiler flag for eBPF backend [[view](#3187)]
+- test: Update install_fedora_deps.sh [[view](#3190)]
+- Add support for ActionProfile extern to PSA/eBPF backend [[view](#3177)]
+- Constant fold casts of serializble enums [[view](#3181)]
+- Improve error messages during type checking [[view](#3182)]
+- Add support for Checksum extern and CRC16/32 algorithms to eBPF backend [[view](#3167)]
+- Add Digest extern to PSA/eBPF backend [[view](#3164)]
+- typedef with generic types requires type arguments [[view](#3174)]
+- Add support for Counter extern to PSA/eBPF backend [[view](#3165)]
+- Handle struct expression in ebfp backend [[view](#3173)]
+- Fixed underflow during row-access in the SymBitMatrix [[view](#3143)] [[view](#3169)]
+- PSA-eBPF: Add missing header name substitution in deparser [[view](#3162)]
+- DPDK Backend: Insert table keys generated by compiler closer to the standard and user metadata [[view](#3160)]
+- DPDK Backend: Move learn instructions constant argument to metadata [[view](#3163)]
+- Removed execute permission bits from all 3 of the P4 files that had them.
+- Add PTF test infra for eBPF backend [[view](#3158)]
+- Implement PSA for eBPF backend [[view](#3139)]
+- Represent unary plus in the IR [[view](#3157)]
+- Disable 'unused' warning for some psa.p4 externs [[view](#3147)]
+- P4C-DPDK-Support header field with Slice as a Table key [[view](#3151)]
+- typeChecker: make error message less confusing [[view](#3152)]
+- Compile the P4 compiler tools in host configuration [[view](#3148)]
+- Keep track of source position for p4-14 switch statement labels [[view](#3141)]
+- Split psa_switch.h into two files [[view](#3144)]
+- Improve efficiency of range translation to mask  [[view](#3133)]
+- Added nullptr checks for l/rtype [[view](#3138)]
+- Implement EBPF deparser [[view](#3136)]
+- Add packet_in.length()] and packet_in.advance()] methods to a eBPF target [[view](#3137)]
+- sfinae-protect operator== StringRef overload [[view](#3132)]
+- DPDK: Implementation for non byte aligned metadata and header fields [[view](#3114)]
+- Comparisons of list expressions, structure-valued expressions, tuples and structs #3057 [[view](#3122)]
+- DPDK: Add support for "mirror_packet" PNA extern [[view](#3128)]
+- Type of a unary expression is not always the same as the input type [[view](#3135)]
+- Enable generation of pointer variables by eBPF codeGen [[view](#3131)]
+- Eliminate typedefs in bmv2-ss backend [[view](#3123)]
+- Struct expressions can be ConstantExpressions [[view](#3125)]
+- Solution for "Non Type_Bits type bool for expression" error [[view](#3120)]
+- Use 0 as action ID for NoAction and refactor eBPF table implementation [[view](#3129)]
+- Extend eBPF kernel target with support for additional BPF helpers and more types of BPF maps [[view](#3119)]
+- Fix off-by-one bug in source file position calculation [[view](#3124)]
+- from1.0: fix register type signess [[view](#3117)]
+- Print the current node type name when checkedTo fails [[view](#3116)]
+- DPDK: Fix core dump while generating bfrt json for PNA programs with action selector [[view](#3115)]
+- Fix cpplint errors for dpdk sources [[view](#3111)]
+- DPDK: Fix missing action definitions in spec file [[view](#3109)]
+- Refactor SetupJoinPoints to make it more extensible
+- Flatten local struct decl in dpdk [[view](#3108)]
+- Remove unnecessary check in conversion of log_msg to a JSON [[view](#3067)]
+- loop_revisit method for dealing with recursive loops in the IR [[view](#3106)]
+- Forbid egress pipeline in dpdk by default [[view](#3104)]
+- Improve error message for count()] in dpdk [[view](#3101)]
+- Handle bfrt Info for new type [[view](#3103)]
+- Add dpdk version string [[view](#3105)]
+- Add debug messages for generated eBPF programs [[view](#3097)]
+- Add correct and error test cases for structure-values expressions [[view](#3100)]
+- Treat match_kind as a regular type [[view](#3099)]
+- dpdk: Eliminate unused metadata fields [[view](#3096)]
+- Preserve some types in constant folding. [[view](#3094)]
+- Emit semicolon after method call [[view](#3093)]
+- Dismantle Mux expression in dpdk [[view](#3087)]
+- Moved FindRecirculated from .cpp to .h [[view](#3088)]
+## Release 1.2.2.1 [[view](#3085)]
+- dpdk: make unique names for header and metadata struct fields [[view](#3080)]
+- default-init Alloc1D/2D [[view](#3081)]
+- DPDK Backend: Fix action selector and action profile support for PNA architecture [[view](#3079)]
+- Run CI tests with Fedora [[view](#3078)]
+- Solution when p4include may be within the path [[view](#3075)]
+- Switch to CMake. [[view](#3043)]
+- Build improvements after updating to Ubuntu 20.04 [[view](#3076)]
+- Updates for Ubuntu 20.04 [[view](#3074)]
+- Accept const qualified ref for 2nd argument in ordered_set [[view](#3072)]
+- Support resubmit and recirculate with no arguments in p4-14 [[view](#3069)]
+- Handle implicit serenum casts in more circumstances [[view](#3070)]
+- DPDK Backend: Add support for general switch statements [[view](#3055)]
+- ir: fix deprecated directive warnings [[view](#3066)]
+- Changes so that -E (only preprocessor run)] does not create the output [[view](#3065)]
+- Solve some problems with cast [[view](#3054)]
+- DPDK Backend: Fix a bug in handling GEQ and LEQ operations [[view](#3062)]
+- Fix issues in generated learner table and statement for dpdk [[view](#3060)]
+- DPDK Backend: Add initial support for generating runtime files for PNA architecture [[view](#3059)]
+- Optional parameters may not have initializers [[view](#3052)]
+- Unification for generic types must compare type arguments too [[view](#3047)]
+- Tweak type checking to accomodate generic functions that handle generic structs [[view](#2637)]
+- Do not require explicit types for type variables of optional parameters [[view](#3038)]
+- Proper constant folding in the abstract interpreter [[view](#3046)]
+- Handle packet_in.lookahead in symbolic interpreter [[view](#3042)]
+- Allow empty entries lists for tables [[view](#3035)]
+- Fixed missing types for folded constants [[view](#3040)]
+- More negative tests for select expression type checks [[view](#3039)]
+- Check the types of sub-expressions involved in a select expression [[view](#2918)]
+- docs: add example for running a single test case [[view](#3034)]
+- When doing copyprop use original source position [[view](#3024)]
+- Disallow programs that call tables in the 'actions' table property [[view](#3033)]
+- Update the p4c Docker image periodically [[view](#3032)]
+- dpdk: add simple subparser test for pna architecture [[view](#3031)]
+- dpdk: fix unsupported parser loop bug [[view](#3029)]
+- dpdk: use varbit field size for extract in bytes instead of bits [[view](#3028)]
+- Added evaluation for SerEnums. Added p4runtime info SerEnum support for counters. [[view](#3026)]
+- Support p4runtime info for serenum action arguments [[view](#3025)]
+- Restored optional priority for CONVERT_PRIMITIVE [[view](#3020)]
+- Allow nullptr refmap and typemap in StrenghtReduction. [[view](#3013)]
+- DPDK Backend: Fixing a regression failure 'not defined on bool and bit<' [[view](#3021)]
+- Inline Alloc{1,2}D storage [[view](#3012)]
+ - SimplifyDefUse does not respect method calls in stack indices in parsers #2957  [[view](#3011)]
+- DPDK Backend: Add support for SelectByDirection PNA extern [[view](#3000)]
+- dpdk: explictly discard upper bits when downcasting [[view](#3007)]
+- Remove BUG_CHECK which is too conservative [[view](#3003)]
+- Switch statement not correctly translated when default case is not present in switch [[view](#3002)]
+- psa: Add missing new line in error message [[view](#2998)]
+- Fixed wrong warning for header union and header union stack [[view](#2999)]
+- dpdk: move definition of main metadata structure to the end [[view](#2997)]
+- dpdk: fix duplicates declaration error [[view](#2996)]
+- DPDK Backend: Update DPDK Readme.md [[view](#2991)]
+- Handle nested headers correctly when flattening [[view](#2987)]
+- dpdk: change varbit tests for psa and pna arch [[view](#2993)]
+- Use Status::ok()] accessor [[view](#2992)]
+- Add instructions to README for regenerating all expected test outputs [[view](#2990)]
+- Remember original identifier name if possible [[view](#2988)]
+- DPDK Backend: Convert error codes to its constant values [[view](#2966)]
+- v1model metadata preservation updates [[view](#2985)]
+- Remove file added by mistake [[view](#2979)]
+- dpdk: fix varbit output to spec [[view](#2976)]
+- Support minSizeInBits and minSizeInBytes for scalars and type names [[view](#2917)]
+- Rebased version of #1698 [[view](#2902)]
+- Continue unrolling for parser after evaluation error [[view](#2962)]
+- Backtrack::trigger::register_for_gc [[view](#2968)]
+- GlobalCopyPropagation is too agressive in switch statements [[view](#2956)] [[view](#2974)]
+- HS index unroller simple update [[view](#2975)]
+- Elimination of non-concrete indexes for header stacks from controls [[view](#2914)]
+- ci: Auto-build container image [[view](#2973)]
+- Add minWidthBits for Type_Error [[view](#2967)]
+- Add temporary IR nodes to typeMap [[view](#2972)]
+- Compiler Bug : overwriting definitions in defuse [[view](#2900)] [[view](#2971)]
+- Dpdk: skip ExpandLookAhead pass in dpdk midend. [[view](#2970)]
+- Fix SWX DPDK typo in README [[view](#2963)]
+- "Null element" errors which are related with HeaderUnion type [[view](#2938)]
+- Fix problems with OutOfBound state creation [[view](#2959)]
+- dpdk: support of PNA extern send_to_port [[view](#2930)]
+- DPDK Backend: Fix a corner case in handling isValid()] as table key [[view](#2955)]
+- Pragma fix [[view](#2953)]
+- Def-use should not treat array.next as a structure field [[view](#2954)]
+- dpdk: add support for tableonly and defaultonly annotation [[view](#2952)]
+- Minor gtest helper refactor to make it easier to extend [[view](#2949)]
+- Fix minor issues in handling Cast operations [[view](#2948)]
+- DPDK Backend: Add support for switch statement in p4c-dpdk [[view](#2943)]
+- Fix undefined behavior in GlobalCopyPropagation pass [[view](#2945)]
+- Fix: Issue #2279 - Implementing the GlobalCopyPropagation pass [[view](#2932)]
+- Invalid headers warnings: support for header stacks and unions [[view](#2910)]
+- improve include path to bpf_endian.h [[view](#2936)]
+- readme: Update installation instructions [[view](#2941)]
+- Fix bfRT Json output to add pipe name prefix to table names [[view](#2939)]
+- add support for errors [[view](#2940)]
+- Cleanup override warnings [[view](#2934)]
+- lastIndex support for parserUnroll [[view](#2933)]
+- Throw an error when reference files are missing. [[view](#2926)]
+- Fix context Json generation when table size is explicitly specified [[view](#2931)]
+- Added nullptr checks to changes introduced by commit 51611f0 [[view](#2881)] [[view](#2923)]
+- Initial support for generating DPDK context JSON [[view](#2916)]
+- dbg: replace unordered collections with ordered [[view](#2929)]
+- Improve portability of backtrace.cpp [[view](#2924)]
+- Use mmap instead of sbrk [[view](#2925)]
+- Added type for key PathExpression [[view](#2919)]
+- Move cpplint.py to python3 [[view](#2920)]
+- Silence warnings automatically if @nowarn appears in the context [[view](#2911)]
+- DPDK Backend: Fix verify statement support and few other minor issues [[view](#2909)]
+- Missed optimization: Struct-assignment in action prevents ConstantFolding [[view](#2249)] [[view](#2842)]
+- DPDK Backend: Fix conditional jumps when condition is LEQ or GEQ [[view](#2912)]
+- readme: Add fedora dependencies [[view](#2908)]
+- DPDK: add support for varbit and variable length extraction [[view](#2906)]
+- initialize member_id and group_id for action profile and selector [[view](#2907)]
+- [PSA] Hash support for PSA model added [[view](#2896)]
+- DPDK: add support for add_on_miss table property [[view](#2901)]
+- Remove colors from error messages when redirected to a file [[view](#2888)]
+- Giving warnings on accessing fields of invalid headers [[view](#2881)]
+- Add missing spaces to help of driver command line option [[view](#2899)]
+- dpdk: export egress tables and actions [[view](#2894)]
+- Writes to a header field implicitly read the header valid bit [[view](#2891)]
+- A few small optimizations for zero width values [[view](#2886)]
+- DPDK: initial support for pna [[view](#2887)]
+- refactoring DPDK backend to prepare for pna support [[view](#2885)]
+- Detect some incorrect usages of v1model [[view](#2830)]
+- Optimize subparser inlining in specific case [[view](#2803)]
+- Support of Operation_Ternary for ExpressionEvaluator [[view](#2861)]
+- Added HeaderUnion support [[view](#2883)]
+- Improve midend convertEnums pass to allow custom encoding policy by the the backends [[view](#2882)]
+- Print unparsed annotations differently [[view](#2879)]
+- Allow masks in select expressions [[view](#2827)]
+- p4RuntimeArchStandard uses P4V1 but does not include the proper header file [[view](#2878)]
+- [PSA] Internet Checksum support for PSA model added [[view](#2872)]
+- DPDK backend: Add support for using isValid as table key [[view](#2871)]
+- DPDK backend: Fixing couple of issues in counter implementation and extend jump and label optimizations in action body [[view](#2870)]
+- Initial support for BFRuntime Json Generation for DPDK [[view](#2862)]
+- Fixing table key consolidation criteria [[view](#2867)]
+- initial commit for pna.p4 [[view](#2866)]
+- Fix "dontcare" type method argument [[view](#2863)]
+- dpdk: add reference to the pipeline user guide [[view](#2846)]
+- annotation to disable optimization in a block [[view](#2865)]
+- dpdk: add support for action profile [[view](#2859)]
+- dpdk: add support for verify()] statement [[view](#2858)]
+- DPDK backend: Added error checks for limitations imposed by DPDK target on table keys. Convert table such that all match keys come from same struct [[view](#2845)]
+- dpdk: add support for action selector [[view](#2847)]
+- update psa.p4 include in output tests [[view](#2852)]
+- Fix install Ubuntu dependencies script. [[view](#2854)]
+- Update README.md [[view](#2853)]
+- Bazel rules for the graphs backend. [[view](#2849)]
+- Allow backend to skip input file check [[view](#2848)]
+- DPDK backend: Add support for tuple expressions in transition select statement [[view](#2836)]
+- remove obsolete p4d2model.p4 [[view](#2843)]
+- Remove unnecessary p4include/psa.p4 [[view](#2837)]
+- Minor updates to BMv2 and DPDK psa.p4 include files [[view](#2838)]
+- Modernize run-bmv2-test a little [[view](#2833)]
+- Support target-specific customizations of psa.p4 include file [[view](#2818)]
+- Reference outputs that were not updated for merged PR #2805 [[view](#2832)]
+- Expand side-effect computations in table keys [[view](#2805)]
+- Enable automatic release on version change [[view](#2829)]
+- DPDK backend: Add support for meter and counter extern [[view](#2813)]
+- Fix: Issue #2647 predication condition assignment of value [[view](#2779)]
+- Add C variable initialization [[view](#2826)]
+- Test case for issue #2321 [[view](#2823)]
+- Move RemoveActionParameters pass to frontend [[view](#2820)]
+- Cancel active workflows on new push [[view](#2821)]
+- Fix off-by-one bug in ebpf backend mask computation [[view](#2815)]
+- Update compiled design documentation [[view](#2817)]
+- Typecheck properly casts of header expressions [[view](#2796)]
+- Do not allow function calls in select labels  [[view](#2259)]
+- Set table size when entries are known [[view](#2812)]
+- Enable static builds for p4c [[view](#2731)]
+- Refactor error logging [[view](#2804)]
+- support additional search path for p4include directory from backend [[view](#2807)]
+- Add support for mask(&&&)] and range (.. )] operations in dpdk backend and fixed few typos [[view](#2787)]
+- Fix bug in ebpf C code generation for parsers [[view](#2806)]
+- Optimize usages of "not" [[view](#2798)]
+- Update build status badge. [[view](#2801)]
+- Ci Edits. [[view](#2799)]
+- keep unused method declaration [[view](#2789)]
+- Call setInvalid on all uninitialized headers. [[view](#2785)]
+- Support setValid/setInvalid in ebpf parsers [[view](#2788)]
+- Added underscore to "#no.." regex to fix syntax error for "#novisit_children" [[view](#2783)]
+- Expand structs into lists for bmv2 backend computations [[view](#2781)]
+- Conditional operator support in dpdk backend [[view](#2778)]
+- A utility function is added to get the field offset of aggregate type??? [[view](#2774)]
+- Fixing a typo and one minor issue in DPDK backend [[view](#2773)]
+- Attempt to fix Mac build breakage [[view](#2780)]
+- Features no longer marked as experimental [[view](#2759)]
+- Cleanups to help with resolving methodcalls without a typeMap [[view](#2772)]
+- dpdk:fix registers implementation [[view](#2768)]
+- Fixed nullptr related issues [[view](#2769)]
+- dpdk: Fix default table size to 0x10000 [[view](#2765)]
+- Eliminate redundant validation code. [[view](#2766)]
+- dpdk: fix non-determinism in parser state assembly generation [[view](#2763)]
+- dpdk: implement checksum clear method [[view](#2761)]
+- Test `main` branch [[view](#2758)]
+- Minor run-dpdk-test improvements [[view](#2757)]
+- Replace "master" with "main" in preparation for change of p4c's primary branch [[view](#2708)]
+- dpdk: fix checksum support [[view](#2756)]
+- Update StrengthReduction pass relative to signed shift left operation [[view](#2754)]
+- Find install_manifest.txt for uninstall target [[view](#2752)]
+- Add match_kind optional to PSA include file [[view](#2696)]
+- Parser unroll gtest now does not modify environment [[view](#2750)]
+- Fix dpdk regression failure: Duplicates declaration [[view](#2744)]
+- Changing relative paths for parsers Unroll gtests [[view](#2748)]
+- Minor updates to a few README files [[view](#2747)]
+- dpdk: add support for header stack [[view](#2745)]
+- Update PSA test programs to always put parsed headers inside a struct [[view](#2746)]
+- dpdk: fix support for bitwise and/or/xor [[view](#2742)]
+- Fix typo in def-use analysis [[view](#2743)]
+- Support serenum types for array indexes [[view](#2738)]
+- Handle typedefs of generic types [[view](#2737)]
+- Added some null pointer checks to clean up the code [[view](#2740)]
+- propagate annotations when inlining blocks [[view](#2727)] [[view](#2728)]
+- Remove inlined constant from code [[view](#2725)]
+- Move debian build scripts to dedicated folder. [[view](#2730)]
+- Fix dpdk regression failure: declaration not found [[view](#2733)]
+- More options cleanup [[view](#2721)]
+- Support for 0-width bit and varbit [[view](#2724)]
+- dpdk: support drop operation [[view](#2720)]
+- Debian/Ubuntu packaging [[view](#2712)]
+- Algorithm for loop unrolling [[view](#2687)]
+- Missing override keyword [[view](#2719)]
+- dpdk: fix table and action name to be original name, optimize direct action invocation call in apply block [[view](#2722)]
+- Fix unified build check. [[view](#2723)]
+- Upgrade cpplint to Python3 [[view](#2703)]
+- Remove generic types after specialization [[view](#2627)]
+- dpdk: fix variable naming to use originalName [[view](#2718)]
+- Revert "dpdk: translate pkt.emit to conditional emit instruction [[view](#2704)]" [[view](#2717)]
+- Give unique names to action directionless parameters [[view](#2715)]
+- Even `in` arguments must be saved to temporaries if aliased [[view](#2640)]
+- Make model immutable [[view](#2706)]
+- Delete xdp_target.py [[view](#2714)]
+- Some build fixes [[view](#2711)]
+- Added initialization of member variables for SourceInfo [[view](#2709)]
+- Remove P4 file that was spuriously added to top-level p4c directory. [[view](#2705)]
+- dpdk: translate pkt.emit to conditional emit instruction [[view](#2704)]
+- dpdk: bugfix to use .equiv for comparison [[view](#2702)]
+- Update run-p4-sample.py [[view](#2682)]
+- dpdk: optimization for jump instruction generation [[view](#2701)]
+- Fix uninitialized variable [[view](#2697)]
+- Seperate parser options from frontend options [[view](#2694)]
+- dpdk: support table.apply()].hit and table.apply()].miss expression in ??? [[view](#2693)]
+- Do not dump json when program is null because of an error [[view](#2691)]
+- Fix Gauntlet install. [[view](#2695)]
+- Dpdk: fix bug in isValid handling in if statement condition [[view](#2689)]
+- Missing null pointer check [[view](#2690)]
+- Add regression script for dpdk backend [[view](#2685)]
+- Add correct Bazel cc toolchain dependency [[view](#2683)]
+- Merging PRs broke master; fix it [[view](#2680)]
+- Make declarations global in parser before converting ifs to states [[view](#2644)]
+- Tuple field access using array index operator [[view](#2655)]
+- Update noop tests and reference files. [[view](#2677)]
+- Do not crash when handling unknown externs [[view](#2667)]
+- Fix for p4c Issue 2670 [[view](#2671)]
+- Reference outputs changed [[view](#2676)]
+- Add the Gauntlet tests to p4c [[view](#2661)]
+- Use the type for the original IR node [[view](#2653)]
+- Mask strength-reduction [[view](#2607)]
+- Constant-fold switch statements [[view](#2645)]
+- add return statement to ordered_set::emplace_back [[view](#2673)]
+- SimplifyDefUse removing redundant method calls now, BugFix #2628: [[view](#2662)]
+- DPDK: add support for h.setValid and h.setInvalid [[view](#2669)]
+- Added test case with out-of-bounds index to header stack [[view](#2666)]
+- Add more flexibility to compiler configuration. [[view](#2663)]
+- Allow casts between int and bool [[view](#2658)]
+- Improve Bazel CI build times through smarter caching [[view](#2656)]
+- Revert "Add -o option to p4test backend [[view](#2634)]" [[view](#2651)]
+- Fixed warnings about deprecated default copy. [[view](#2649)]
+- P4C-3458: Fixed non-PHV Klocwork "critical" & "error" issues fro 9.4 [[view](#2646)]
+- Add -o option to p4test backend [[view](#2634)]
+- minor bugfix: check for nullptr [[view](#2639)]
+- Set idle timeout behavior based on table property in PSA  [[view](#2632)]
+- Add don't cares to the list of type variable bindings [[view](#2633)]
+- Convert SimplifyDefUse to a PassRepeated [[view](#2610)] [[view](#2621)]
+- Remove compiler warnings [[view](#2626)]
+- add ceil_log2 to gmputil.h [[view](#2625)]
+- Fixes #2613 predication issue [[view](#2624)]
+- cleanup PassManger construction [[view](#2618)]
+- remove duplicated library function in favor of big_int version [[view](#2622)]
+- Remove redundant slice statements during SimplifyDefUse [[view](#2583)] [[view](#2610)]
+- Add INode::checkedTo for checked casts. [[view](#2620)]
+- p4c-dpdk: new DPDK backend for p4c [[view](#2595)]
+- Support for generic structs [[view](#2592)]
+- Improve error messages for errors during type inference  [[view](#2603)]
+- Support for general-purpose switch statements [[view](#2575)]
+- Fix off-by-one error in strength-reduction [[view](#2616)]
+- Re-enable MacOS build [[view](#2604)]
+- Default arguments values should be fresh clones [[view](#2608)]
+ - Support lookahead with scalars in ebpf  [[view](#2577)]
+- Fix validation tests. [[view](#2605)]
+- Do not assume the presence of realpath [[view](#2602)]
+- Migrate to Github actions [[view](#2601)]
+- Do not allow apply calls in actions [[view](#2598)]
+- Separate Gauntlet from the normal P4C tests [[view](#2593)]
+- Declaration resolution fix [[view](#2544)] [[view](#2589)]
+- Update CI script to improve caching. [[view](#2584)]
+- Small changes for better P4 symbol naming [[view](#2586)]
+- Reassociation pass; two more strength-reduction optimizations [[view](#2587)]
+- More strength-reduction optimizations [[view](#2566)]
+- Convert deep nested struct initializers [[view](#2581)]
+- Fix bugs related to StructureExpressions [[view](#2552)]
+- Use temporaries for slices use as out arguments [[view](#2579)]
+- Eliminate grammar ambiguity [[view](#2574)]
+- Substitute directionless parameters early in inlining [[view](#2562)]
+- Give error message for unsupported construct [[view](#2559)]
+- Fix EBPF parenthesis issue [[view](#2570)]
+- Do not constant fold structs before typing [[view](#2580)]
+- Drop support for Python 2 [[view](#2578)]
+- Ignore crashes in Gauntlet validation [[view](#2576)]
+- uBPF: support for default action [[view](#2572)]
+- [psa] e2e cloning bmv2 stf tests [[view](#2549)]
+- Fix: Predication issue #2345 [[view](#2564)]
+- Fix: UBPF fails examples P4 program #2554 [[view](#2567)]
+- ir generator fixes [[view](#2561)]
+- Fix default p4c driver name
+- Re-introduce legacy version of `::warning`. [[view](#2556)]
+- Allow customization of driver-script name. [[view](#2555)]
+- Tuple elim [[view](#2451)]
+- Improve error handing and error messages [[view](#2531)]
+- EmptyEnumerator instread of nullptr [[view](#2551)]
+- Check width limits in more places [[view](#2510)]
+- Allow tuples with a single element in key expressions [[view](#2518)]
+- Do not call super::visit [[view](#2547)]
+- Update p4_library Bazel rule to allow workspace-relative include paths. [[view](#2548)]
+- uBPF target: add support for LPM match [[view](#2550)]
+- Fix: don't supply arguments twice in p4_library. [[view](#2540)]
+- Make p4_library more portable, making it work on platforms where cc may not be on the PATH. [[view](#2539)]
+- Remove redundant license comment to avoid future inconsistencies. [[view](#2538)]
+- Replace pointer equality with equiv. [[view](#2537)]
+- Fixes for possible uninit accesses from static analyzer [[view](#2536)]
+- Avoid linking errors. [[view](#2533)]
+- Improved Bazel BUILD file [[view](#2534)]
+- Handle side effect ordering in structure and tuple initializers [[view](#2520)]
+- Fix compiler bug for #1985 [[view](#2500)]
+- Add test case attempting to name an action 'default' [[view](#2530)]
+- Rename ERROR and WARNING macros [[view](#2524)]
+- Rejet switch statements with two default labels [[view](#2529)]
+- Add a test case verifying that p4c gives compile time error for bad switch label [[view](#2526)]
+- [psa] i2e cloning bmv2 stf tests [[view](#2499)]
+- Add checking of class_of_service field to PSA unii- and multicast tests [[view](#2513)]
+- Add tests to verify end-of-ingress behavior of a PSA implementation [[view](#2519)]
+- error and exit if --help-pragmas used for bmv2 [[view](#2522)]
+- More fixes from static analysis tool [[view](#2517)]
+- Handle Mux when generating struct initializers [[view](#2490)]
+- Add another PSA test of Register extern [[view](#2516)]
+- Enhancement: Issue #2396 duplicated setValid()] call removal [[view](#2503)]
+- Make PSA resubmit test slightly more strict [[view](#2511)]
+- Make PSA recirculate test verify more packet_path values filled in correctly [[view](#2512)]
+- Make stricter PSA tests that verify packet_path and instance fields i??? [[view](#2509)]
+- Added options for p4test [[view](#2508)]
+- Make PSA packet recirculation test more strict [[view](#2505)]
+- Strength-reduce !! [[view](#2497)]
+- Small updates to CMakeLists.txt for PSA test programs [[view](#2504)]
+- Use an older version of python-xdist [[view](#2502)]
+- Infer don't care for type args used only by @optional args [[view](#2494)]
+- Fix warnings about uninitialized fields/vars [[view](#2484)]
+- [Testing] Add Travis Validation Tests for P4C. [[view](#2458)]
+- Fix Range error found with Issue 2485 [[view](#2489)]
+ - Analyze copy-in before calling functions  [[view](#2483)]
+- Use type inference for constructor type arguments [[view](#2482)]
+- String literals are constants [[view](#2481)]
+- Support regex matching for toP4 dumps. [[view](#2463)]
+- Fix some typos in options.h [[view](#2473)]
+- Substitute type parameters as well in default arguments [[view](#2441)]
+- Support header stacks in lookahead [[view](#2468)]
+- refactor bmv2 backend to reuse more code for psa support [[view](#2453)]
+- Add TCP and UDP Checksum Test [[view](#2474)]
+- let @name annotation states merge [[view](#2469)]
+- Remove incorrect ubpf_model.p4 [[view](#2464)]
+- [PSA] Supporting Indexed Meter as a Extern [[view](#2437)]
+- Fix: issue #2330 in Predication pass [[view](#2471)]
+- Validate arguments to log_msg [[view](#2462)]
+- Add Bazel build files for p4c [[view](#2430)]
+- Implementation of advance()] for parser in uBPF backend [[view](#2466)]
+- Illegal P4 to report error rather than  compiler-error [[view](#2467)]
+- Disable merging of specific state [[view](#2452)]
+- Reject headers with multiple varbits only if used in extract [[view](#2460)]
+- Defensive coding after an error is encountered [[view](#2459)]
+- Use std::string instead of cstring in InputSources [[view](#2457)]
+- out-of-memory fixes/improvements [[view](#2455)]
+- Fix irgen operator== on arrays to compare elements [[view](#2450)]
+- Fix issue 2307 [[view](#2440)]
+- Clarify STF test case with too-short packet [[view](#2449)]
+- LocalCopyProp enhancements for unused tables/actions [[view](#2446)]
+- Check if all parameters have arguments in action calls [[view](#2414)]
+- Generalize SerEnum [[view](#2424)]
+- python3 missing from p4lang/p4c docker image [[view](#2439)]
+- Implementation of lookahead<bit<w>>()] for parser in uBPF backend [[view](#2427)]
+- Packet truncation support for uBPF backend [[view](#2426)]
+- Add libbpf to dependencies [[view](#2436)]
+- Move byte order into targets. [[view](#2434)]
+- Update PSA programs [[view](#2428)]
+- Fix stf file with missing comments [[view](#2423)]
+- Evaluate function after casting [[view](#2404)]
+- Supporting scalar type in PSA [[view](#2420)]
+- Unset bitwidth for string controller types in P4Info
+- Fix gmputil - ffs()] to handle -ve big_int values [[view](#2416)]
+- Add serializable enum support for p4runtime generation of parser value [[view](#2415)]
+- Add libbpf to maintain Ubuntu 16.04 compatibility [[view](#2403)]
+- Enable generation of P4Info file for uBPF backend [[view](#2412)]
+- Adding register support to PSA [[view](#2395)]
+- miss one [[view](#2401)]
+- update psa action selector/profile tests to include action data [[view](#2400)]
+- Fix duplication error with __v1model_version [[view](#2398)]
+- int parameters must be directionless [[view](#2360)]
+- Error for parser infinite loops [[view](#2387)]
+- Set headers valid when expanding initializations [[view](#2385)]
+- Inherit all operations for serEnum from underlying type [[view](#2018)]
+- Faster crash dumps [[view](#2380)]
+- Make IR DAG into tree to remove ambiguities [[view](#2388)]
+- Support new @p4runtime_translation syntax. [[view](#2365)]
+- Support if statements in parsers [[view](#2386)]
+- uBPF backend: Support for forwarding [[view](#2381)]
+- more clang warning fixes [[view](#2377)]
+- Prevent crash [[view](#2363)]
+- Save to temporary when side effects may modify the first operand [[view](#2352)]
+- Fix incorrect invocation of pass; unrolling still disabled [[view](#2353)]
+- Return a Block instead of a Vector [[view](#2364)]
+- Check nullptr before invoking methods. [[view](#2367)]
+- Fix clang warnings [[view](#2372)]
+- Get rid of symlinks in include paths to avoid mismatches [[view](#2371)]
+- Remove compilation warning [[view](#2370)]
+- Add the build type to the release information. [[view](#2366)]
+- Do not generate negative indexes for slices [[view](#2361)]
+- Insert copy-out before returns and exits [[view](#2351)]
+- Stronger checks for int values [[view](#2337)]
+- Fix two bugs related to generics [[view](#2350)]
+- Fix bmv2 default parser transitions
+- Fix strength reduction [[view](#2347)]
+- Constant fold slices always [[view](#2346)]
+- Pay more attention to types during constant folding [[view](#2338)]
+- Fix bug in BMv2 back end handling const entries with lpm field with m??? [[view](#2341)]
+- Check for circular dependences in tables [[view](#2320)]
+- Fix P4_16 name resolution [[view](#2324)]
+- Change precedence of '<' based on symbol immediately before it [[view](#2326)]
+- Simple stf parser fix. [[view](#2328)]
+- Create a new state for initializations [[view](#2319)]
+- Predication fixes and cleanup [[view](#2276)]
+- Do not allow actions to be used in expressions [[view](#2318)]
+- Clean up redundant isv1/anyOrder flags in ResolveReferences [[view](#2315)]
+- Rename StructInitializerExpression to StructExpression; paranthesize ??? [[view](#2304)]
+- update reference outputs for new tests [[view](#2313)]
+- refactor resolveReferences to use visitor infrastructure rather than maintining its own redundant stack [[view](#918)]
+- Infer counter/meter/register index sizes from P4_14 instance count [[view](#2299)]
+- When errors happen do not bug-check; fixes #2290 [[view](#2298)]
+- Return the proper vectors; fixes #2289 [[view](#2295)]
+- more annotation cleanup [[view](#2309)]
+- Cleanup annotation creation by using default args [[view](#2308)]
+- Convert @noWarnUnused to @noWarn('unused')] [[view](#2306)]
+- Add pure annotation [[view](#2302)]
+- Run inliner until convergence [[view](#2300)]
+- Better syntax for structure-valued expressions [[view](#2255)]
+- Update Travis CI status badge
+- Pay attention to side effects in some optimizations; fixes #2287 [[view](#2294)]
+- Support arbitrary unsigned integer ids
+- use /usr/bin/env bash instead of /bin/bash [[view](#2285)]
+- Support structured annotations in P4Info serializer
+- Replace $$()] with ${} in CMakeList.tx [[view](#2281)]
+- Support for structured annotations [[view](#2227)]
+- Improve style to pass cpplint test [[view](#2280)]
+- @noWarnUnused annotation to supress unused warnings [[view](#2277)]
+- Implement @id annotation support for non top-level objects [[view](#2274)]
+- Cleanup def-use analysis; fixes #2273 [[view](#2275)]
+- Only some declarations have to be collected; fixes #2261 [[view](#2262)]
+- Specialize generic functions; fixes #2260 [[view](#2264)]
+- fix ninja builds [[view](#2268)]
+- Fix arg-dependent lookup for debug printing helpers [[view](#2263)]
+ - Convert variable initializers too; fixes #2253  [[view](#2254)]
+- Merge dataflow analysis across switch cases; fixes #2170  [[view](#2252)]
+- Check live variables in reject state as well; fixes #2155 [[view](#2250)]
+- check side effects in strength reduction; fixes #2221 [[view](#2251)]
+- Delete only toplevel serenum; fixes #2220 [[view](#2246)]
+- Check structure names; fixes #2230 [[view](#2245)]
+- out parameters checked in the right context; fixes #2175 [[view](#2192)]
+- Predication pass optimization for nested if statements (p4lang#2083)] [[view](#2231)]
+- Fix a stray print [[view](#2238)]
+- Ensure that ID prefixes are correct in P4Info when '@id' is used [[view](#2243)]
+- Fix type_info generation
+- Custom C externs implementation [[view](#2094)] [[view](#2232)]
+- Fix "new type" handling in P4Info serialization code
+- Refactor ubpfDeparser to properly emit outgoing packet size calculation [[view](#2237)]
+- Struct initializers should infer types for nested structs; fixes #2213 [[view](#2233)]
+- One instantiation per value set; fixed #2196 [[view](#2198)]
+- Keep checking for aliasing; fixes #2176 [[view](#2180)]
+- p4c-ubpf: Update links in installation scripts to point to the proper repo [[view](#2228)]
+- Require width of left-operands of shifts; fixes #2206 [[view](#2217)]
+- Fix error messages [[view](#2226)]
+- Correct checksum pragma collection [[view](#2137)]
+- p4c-ubpf: new uBPF back-end for p4c [[view](#2134)]
+- Some small changes to run-bmv2-test.py [[view](#2222)]
+- Update stf test [[view](#2219)]
+- Remove broken link-handling code (stat follows links anyways)]
+- missing %1% in error messages
+- Add only compatible values; fixes #2190 [[view](#2193)]
+- Reject value sets with masks [[view](#2199)]
+- Warn in bmv2 backend about unsupported match types in value_sets [[view](#2214)]
+- Use relative paths for symlinks [[view](#2215)]
+- Fix gcc warnings [[view](#2211)]
+- Print correctly negative constants with InfInt types [[view](#2209)]
+- Remove format prefix from ::error; fixes #2197 [[view](#2200)]
+- Change JSON size to max_size [[view](#2195)]
+- Constified some function parameters. [[view](#2191)]
+- Restore naming convention in CMakeLists.txt
+- Remove comment from CMakeLists.txt
+- Change CMakeLists.txt
+- Fix to Issue 1690
+- Add pvs size to bmv2 JSON [[view](#2185)]
+- New and updated tests of parser value sets that exercise bmv2 back end [[view](#2174)]
+- Remove unused function declaration in bmv2 backend [[view](#2187)]
+- Fixes for issues found by the klockwork static analyzer [[view](#2189)]
+- Use the type from the typeMap; fixes #2163 [[view](#2179)]
+- Add match_kind optional to v1model.p4 and bmv2 back end [[view](#2184)]
+- One more strength reduction [[view](#2178)]
+- Add function to set left value [[view](#2165)]
+- ordered_set sorted_iterator [[view](#2181)]
+- Fix mask generation for PVS [[view](#2183)]
+- Quarantine four tests broken by behavioral model [[view](#2182)]
+- Fix uninitialized 'unreachable' field in FindUninitialized [[view](#2171)]
+- new SwitchAddDefault pass to add default: {} to switch [[view](#2168)]
+- tools-driver: Drop shebang line
+- Allow for a Transform that combines identical nodes [[view](#2167)]
+- Fix precedence of RSH rule [[view](#2166)]
+- Enable Slice test with runtime index [[view](#2162)]
+- Exit makes statements unreachable; fixes #2151 [[view](#2159)]
+- Update leftValues when lowering; fixed #2150 [[view](#2154)]
+- Complete p4c bmv2 backend header stack runtime index support [[view](#2139)]
+- Add docs for register constructor, and update metadata preservation notes [[view](#2157)]
+- Update error message for invalid ranges in const entries [[view](#2160)]
+- Fix right-shift operator precedence [[view](#2158)]
+- visitDagOnce = false for control flow simplifications; fixes #2148 [[view](#2149)]
+- Add test program that tests catching of incorrect lpm const entries [[view](#2145)]
+- simplify slices [[view](#2142)]
+- fix missing header when backends are disabled
+- Misc minor fixes [[view](#2138)]
+- Fix supporting Range operator for bmv2 backend [[view](#2125)]
+- Block statements in parser create a new scope [[view](#2133)]
+- Allow empty statements in parsers [[view](#2131)]
+- Correctly parse action references in const table entries [[view](#2129)]
+- Allow primitive calls in bbox expressions [[view](#2119)]
+- refactoring sideEffects.cpp to fix problems [[view](#2108)]
+- Use libgc for all malloc calls, so they are scanned properly. [[view](#2116)]
+- Add Python 3 ply to install steps in README [[view](#2115)]
+- Fix simplifyDefUse to deal with side effect in if condition [[view](#2114)]
+- Allow extern methods to be marked @noSideEffects [[view](#2112)]
+- Ignore warnings if we've already emitted errors [[view](#2111)]
+- Return a BlockStatement instead of a Vector; fixes #2102 [[view](#2103)]
+- Handle MUX in FindUses; fixes #2105 [[view](#2109)]
+- Track unreachable statements; fixes #2104 [[view](#2107)]
+- Treat P4_14 default_action with ()] args as const [[view](#2084)]
+- Order of src and dst template function arguments fix [[view](#2106)]
+- Add a Type_List for list expressions; fixes #2036 [[view](#2085)]
+- Add instructions to install Python 3 version of Scapy as dependency [[view](#2097)]
+- Quick scapy fix. [[view](#2099)]
+- Update installation instructions for python3 [[view](#2101)]
+- Remove GMP, using boost::multiprecision instead [[view](#1418)]
+- Stack backtrace in exceptions [[view](#2100)]
+- Fix FindPythonModule to avoid warnings
+- fix type inference for IR::Neg and IR::Cmpl [[view](#2093)]
+- Fix for python3 [[view](#2092)]
+- Fix SerEnum member values in generated P4Info
+- Insert cast for signed slices; fixes #2090 [[view](#2091)]
+- Move to Python3 [[view](#2087)]
+- Update first paragraph of README to no longer say alpha-quality [[view](#2081)]
+- Update version to match language specification [[view](#2059)]
+- IR/json support for bitvec fields [[view](#2078)]
+- Support table.apply()].miss [[view](#2051)]
+- Allow actions with absolute paths; fixes #2037 [[view](#2042)]
+- Revert "remove test_args from p4c_add_test_with_args, always pass args throug??? [[view](#2068)]" [[view](#2077)]
+- Compile-time MAX_LOGGING_LEVEL [[view](#2074)]
+- Do unified and non-unified builds in separate Travis instances [[view](#2076)]
+- clean up remove_if/erase_if a bit [[view](#2058)]
+- Logging prettification [[view](#2072)]
+- WIP: Add non-unified builds to Travis [[view](#2031)]
+- remove test_args from p4c_add_test_with_args, always pass args throug??? [[view](#2068)]
+- Make argument in only; fixes #2057 [[view](#2061)]
+- Correct import statement in ebpf target.py test running file [[view](#2063)]
+- Disable kernel ebpf tests [[view](#2050)]
+- Change that seems to enable EBPF back end to build on Ubuntu 16.04 [[view](#2049)]
+- Add pthreads to move to protobuf v3.6.1 [[view](#2047)]
+- detect whether the kernel header files are available and disable EBPF tests if not
+- dyslexic help
+- add a compiler option to disable specific annotations/pragmas
+- refactoring to allow overriding the default p4-14 converter  [[view](#2015)]
+- Do not constant fold on the lhs of = [[view](#2022)]
+- Support for logging user defined messages [[view](#2010)]
+- Avoid ambiguous overload when doing operations on a Match [[view](#2040)]
+- fix type inference for modify_conditionally primitive [[view](#2039)]
+- Add a add function to eBPF CounterArray [[view](#2011)]
+- Require  list to come first; fix unified build [[view](#2034)]
+- Implement IAnnotated where possible [[view](#2035)]
+- Infrastruction additions (PassIf and LOG_UNINDENT)] [[view](#2030)]
+- Missing commas [[view](#2029)]
+- Add support for more kinds of annotation bodies. [[view](#2028)]
+- Use sourceInfo to generate action names in ActionSynthesis [[view](#2024)]
+- Implementation of string type [[view](#2017)]
+- Abillity to disable passes in the frontend and midend.[[view](#830)] [[view](#2016)]
+- fix shadow warning issue1172 [[view](#2014)]
+- keep annotation when converting action selector [[view](#2009)]
+- Support serializable enums in const table entries
+- Added support for zeros_as_ones [[view](#2005)]
+- Add documentation of assert and assume statements [[view](#2002)]
+- Warn on unsupported use of recirculate/resubmit/clone [[view](#2000)]
+- Constant fold values with type int; fixes #1997 [[view](#1998)]
+- emit braces for ifs; fixes #1992 [[view](#1995)]
+- add type args to extern instance [[view](#1996)]
+- Bug fix in typechecker: fixes #1937 [[view](#1948)]
+- Fix gc.cpp tracing [[view](#1993)]
+- Prepend rather than append variable declarations; fixes #1989 [[view](#1990)]
+- Fix broken build [[view](#1991)]
+- Add IPv6 switch ml test [[view](#1969)]
+- Add test program with bit slices and bitwise AND for table key fields [[view](#1910)]
+- Fix construction of bitref or bitranges object with a temp bitvec to not dangle. [[view](#1988)]
+- Do not return null pointer; fixes #1986 [[view](#1987)]
+- Remove 6 unneeded fields from v1model standard_metadata [[view](#1911)]
+- V1model doc enhancements [[view](#1892)]
+- Extend generic control plane name generation for const entries [[view](#1983)]
+- Fix small bug [[view](#1979)]
+- Report errors for duplicate objects with the same name; fixes #1932 [[view](#1934)]
+- LPM match support for EBPF back-end [[view](#1962)]
+- one more fix to p4-14 translation [[view](#1974)]
+- minor refactoring for direct meter/counter translation [[view](#1976)]
+- Support function-type arguments in IR generator [[view](#1975)]
+- some refactoring to enable translating from p4-14 to other architectures in p4-16 at the beginning of the frontend. [[view](#1966)]
+- Added support for assert and assume statement in bmv2 backend [[view](#1548)] [[view](#1859)]
+- add erase method to NamedObjectInfo [[view](#1971)]
+- Fix for issue 1923 [[view](#1970)]
+- Small updates to the same command lines in README [[view](#1965)]
+- Enhancements to logging and internal error checking for PSA back end [[view](#1922)]
+- add resubmit test for psa [[view](#1959)]
+- Fix borked ebpf-kernel tests. [[view](#1960)]
+- Inlining should rename ValueSets; fixes #1955 [[view](#1957)]
+- ebpf: avoid global ebpf map pinning [[view](#1956)]
+- Support for structure-valued expressions [[view](#1951)]
+- minor tweaks [[view](#1952)]
+- fix stream output for default value of match_t [[view](#1954)]
+- Made all slices unsigned [[view](#1947)]
+- Make eBPF CMAKE robust against llvm check failures [[view](#1946)]
+- Improve error messages; fixes #1944 [[view](#1945)]
+- p4c_driver: add missing return in case of success
+- Add a getter for invocations and move a BMV2 specific test under ENABLE_BMV2 flag [[view](#1941)]
+- Consistent naming for extern instances; fixes #1882 [[view](#1940)]
+- Add test program from issue 1834, which now passes [[view](#1935)]
+- p4c changes to support PSA1.1 [[view](#1792)]
+- Framework for non-local branches in ControlFlowVisitor [[view](#1933)]
+- Emit instances for unknown externs [[view](#1927)]
+- Fix Travis CI by removing python-pip from Dockerfile deps
+- fix for non-unified build [[view](#1930)]
+- defensive programming
+- Move exit; statement to actions in actionSynthesis [[view](#1920)]
+- add corrected psa stf tests which evenly parse and emit packets [[view](#1915)]
+- P4_14->16 convert counter/meter/register as globals [[view](#1912)]
+- add test with shared counter [[view](#1907)]
+- Process source_info strings via JSON escaping in one missing case [[view](#1909)]
+- add support for printing help for pragmas [[view](#1905)]
+- Remove unnecessary PSA test program [[view](#1903)]
+- Temporarily disable test which hangs [[view](#1902)]
+- Updates to p4c automated tests to handle recent changes in psa_switch [[view](#1899)]
+- ordered_set::operator< [[view](#1901)]
+- BMV2: handle local variables that are a header_union; fixes #1897 [[view](#1898)]
+ - Make an extra copy when source and destination of copy are aliased  [[view](#1868)]
+- Warn on metadata and header instances with the same name; fixes #1873 [[view](#1885)]
+- Delete useless PassManagers; fixes #1876 [[view](#1884)]
+- expr_uses should visit the DAG multiple times; fixes #1879 [[view](#1895)]
+- Forbid 'last' and 'next' outside parser; fixes #1853 [[view](#1865)]
+- Handle p4-14 intrinsic_metadata [[view](#1704)]
+- P4C Emit PSA_Counter bug fix + basic counter STF [[view](#1896)]
+- Fix that enumMap is not empty when --fromJSON is used [[view](#1784)] [[view](#1842)]
+- Fix incorrect STF files; fixes #1889 [[view](#1894)]
+- Add a useful link to the p4c developer docs [[view](#1893)]
+- Clean up a few more STF files [[view](#1888)]
+- Correct STF file [[view](#1887)]
+- Fix #1881 - enhance BMv2 backend, support const entries range with 1 ??? [[view](#1883)]
+- Remove XFAIL for two PSA test programs that should now pass [[view](#1878)]
+- Remove 2016/02 version of switch.p4 [[view](#1875)]
+- Add 2019-Apr-20 version of ONOS's fabric.p4 P4_16 v1model program [[view](#1869)]
+- Test for issue #1167 [[view](#1866)]
+- Allow 1-bit int values [[view](#1619)]
+- Proposed additional documentation of v1model.p4 [[view](#1818)]
+- Add STF test exercising new ParserInvalidArgument parser error [[view](#1861)]
+- Deprecate mark_to_drop()]; replace with mark_to_drop(standard_metadata)] function [[view](#1835)]
+- Make changes to 3 PSA tests that are causing the build to fail [[view](#1862)]
+- PSA - Emit psa_packet_path enum to JSON + psa_switch recirculate(no meta data)] stf test [[view](#1857)]
+- Remove old intrinsic_metadata fields [[view](#1852)]
+- Fix #1771 - Add new parser error ParserInvalidArgument to core.p4
+- revert cmake changes [[view](#1854)]
+- add p4parser.hpp to controlplane dependency [[view](#1851)]
+- Convert some error messages to the new format [[view](#1813)]
+- Restrict duplicate name check for P4Info to objects of the same "type" [[view](#1849)]
+- remove dependency between controlplane and frontend [[view](#1850)]
+- add bmv2 psa_switch stf tests for drop all, unicast, multicast  [[view](#1848)]
+- A couple bugfixes [[view](#1847)]
+- Detect duplicate names in P4Info [[view](#1844)]
+- fix stf test [[view](#1846)]
+- opts.json_source is only available in DEVELOPER mode [[view](#1843)]
+- Avoid multiple definition error from linker... [[view](#1839)]
+- Fix Type_InfInt::equiv (all InfInt types are the same)] [[view](#1838)]
+- Fix issue #1829 - better error messages for some wrong uses of direct??? [[view](#1837)]
+- Added support for --fromJSON flag [[view](#1754)]
+- Fix for the issue when number of error values is more than 9 [[view](#1825)]
+- Each function invocation uses fresh type variables; fixes #1830 [[view](#1833)]
+- Do not delete unused type parameters; fixes #1822 [[view](#1826)]
+- Fix bug in implementation of bool cast; fixes #1814 [[view](#1821)]
+- Handle @max_group_size annotation when generating P4Info
+- Add canonical base types to typemap; fixes #1806 [[view](#1812)]
+- Fix P4 code output [[view](#1816)]
+- extracting metadata is a user error not a compiler issue [[view](#1810)]
+- Refactor GeneralInliner common code [[view](#1820)]
+- add a bound to the number of errors that are printed before exiting [[view](#1817)]
+- Fix issue with bmv2 psa_switch backend not able to reference the new metadata [[view](#1815)]
+- Update IR::Constant::toString to print the base
+- Make --p4runtime-entries outputs more conformant to P4Runtime spec
+- allow custom typechecker in SimplifyDefUse pass [[view](#1807)]
+- Allow 'void' as a type argument. [[view](#1802)]
+- Run p4test tests with --p4runtime-entries-files
+- Fix to issue 1788
+- Show pkts if STF test fails by mismatch of # of expected vs. actual pkts [[view](#1798)]
+- fix Ubuntu 18.04/gcc-7 warnings
+- Add psa specific metadata to bmv2 psa_switch backend [[view](#1795)]
+- move annotations on header to fields [[view](#1786)]
+- Inline functions into actions; fixes #1781 [[view](#1783)]
+- Do not ignore lookup when output is not used; fixes #1768 [[view](#1774)]
+- Generic control plane name generation from IR::Block [[view](#1789)]
+- Handle Newtype for table keys; fixes #1739 [[view](#1787)]
+- Add program that tests p4c's error-detection capability for bad type's [[view](#1766)]
+ - Error for struct arguments in out argument positions [[view](#1782)]
+- Implement "advance" on bmv2; fixes #1755 [[view](#1775)]
+- actionSynthesis propagate source info [[view](#1773)]
+- Do not allow 'type tuple<> X' [[view](#1772)]
+- p4c-psa emit Counter and DirectCounter externs in json dump  [[view](#1757)]
+- Do not generate negative slice indexes; fixes #1724 [[view](#1753)]
+- Close dump files so as to avoid running out of file descriptors [[view](#1770)]
+- Reject programs that make computations in update/verify checksum [[view](#1769)]
+- Implement sizeInBits [[view](#1751)]
+- Support for header unions in bmv2 simple_switch back-end; multiple test examples [[view](#1760)]
+- Support for 'int' type [[view](#1618)]
+- Add option to STF "expect" command for stricter checking of output packets [[view](#1763)]
+- Clear the type map after parsing annotations. [[view](#1759)]
+- Validate @match annotations; fixes #1732 [[view](#1752)]
+- Reject varbit fields that do not come last in header in P4-14 [[view](#1749)]
+- Ability to serialize existing P4Info message
+- Change python script for psa [[view](#1747)]
+- Add p4runtime_translation for all seven `type`s in psa.p4
+- Add support for multiple parsers / deparsers in bmv2 backend
+- Update P4Runtime version to v1.0.0
+- Fix non-unified build
+- add MoveActionsToTables pass to psa midend [[view](#1737)]
+- fix psa json generation for slice [[view](#1735)]
+- fix header json generation [[view](#1733)]
+- Update PSA include file psa.p4 to PSA version 1.1, plus psa_switch sp??? [[view](#1730)]
+- add EliminateNewtype and EliminateSerEnums to psa midend [[view](#1729)]
+- V1 hlir compat [[view](#1728)]
+- allow overloading typeChecker in some midend passes [[view](#1727)]
+- Propagate --p4runtime-files from p4c driver to compiler [[view](#1723)]
+ - add expressions to several type checking warnings [[view](#1725)]
+- Support multiple p4runtime files [[view](#1718)]
+- Fix bug in bmv2 backend regarding slices of signed values [[view](#1719)]
+- Update expected output files that were not yet present when ... [[view](#1714)]
+- Fix to Issue 1706 [[view](#1707)]
+- Add XFAIL P4_14 test program that fails because of issue #1694 [[view](#1710)]
+- Add XFAIL P4_14 test program that fails because of issue #1669 [[view](#1709)]
+- Show both expected and received packet when STF test fails [[view](#1711)]
+- Handle complex headers (with nested structs)] in P4Info generation [[view](#1708)]
+- error reporting [[view](#1646)]
+- Avoid warning about negative unsigned value from add_to_field [[view](#1702)]
+- Remove spurious warning caused by stack[next] self-loops [[view](#1701)]
+- Remove standard_metadata from preserved metadata in test program [[view](#1693)]
+- Remove unused proto file
+- extend ActionSynthesisPolicy [[view](#1689)]
+- do not flatten headers for control-plane API; temporary solution for ??? [[view](#1682)]
+- move clone()] method from ControlFlowVisitor to Visitor [[view](#1686)]
+- Preserve content of custom annotations in P4Info [[view](#1684)]
+- Get rid of Visitor::flow_dead [[view](#1683)]
+- Move a message to assert [[view](#1680)]
+- Fix equiv generation to be easier to override properly [[view](#1677)]
+- Bitvec Barrel Shift [[view](#1666)]
+- Validate headers type for v1model [[view](#1676)]
+- Follow-on work for nested struct - add SerEnum and boolean to nested struct [[view](#1654)]
+- improved strength reduction pass [[view](#1673)]
+- Add p4info files as reference outputs [[view](#1675)]
+- Changed FlattenHeaders to explicitly handle Type_Header and Type_Struct [[view](#1667)]
+- change setTypeType to virtual to allow override. [[view](#1668)]
+- Avoid unneeded copies when inlining controls [[view](#1665)]
+- Do not insert casts for fields in field lists; remove ugly macros.  [[view](#1664)]
+- extend strength reduction pass to handle concat operator with slice [[view](#1662)]
+- Fix def_use/SimplifyDefUse to deal with extern methods properly [[view](#1284)] [[view](#1652)]
+- make canonicalize.* virtual functions [[view](#1658)]
+- Attempt to fix broken build on OSX due to Scapy changes [[view](#1657)]
+- Add nested bit-vector support to p4c [[view](#1623)]
+- Revert "Fix def_use/SimplifyDefUse to deal with extern methods properly [[view](#1284)]" [[view](#1650)]
+- Fix def_use/SimplifyDefUse to deal with extern methods properly [[view](#1284)]
+- Populate Documentation fields and PkgInfo in P4Info
+- Added missing build dependencies [[view](#1645)]
+- Handle headers in structs; fixes #1642 [[view](#1643)]
+- Improved translation of P4-14 header stacks with varbits (fixes #576)] [[view](#1635)]
+- fix for issue 1593: default type parameter in architecture definition [[view](#1637)]
+ - Reorganize passes to handle default values; fixes #1638 and #1639  [[view](#1640)]
+- Add verify update checksum tests [[view](#1636)]
+- documentation for match_t [[view](#1634)]
+- Fix for issue #1630 [[view](#1632)]
+- Issue1083 [[view](#1633)]
+- Empty tuple [[view](#1617)]
+- Extend local_copyprop to parsers and parser states. [[view](#1629)]
+- Support for ENABLE_MULTITHREAD (defaults to off)] [[view](#1631)]
+- Fix possible infinite recursion in cast operator [[view](#1626)]
+- dbprint fixes for clearer log traces. [[view](#1628)]
+- Fix Travis & missing build dependency [[view](#1627)]
+- Fixes & improvements to annotation parsing [[view](#1624)]
+- Move #include directives to fix broken dependencies
+- Fix for issue #692 [[view](#1615)]
+- Fix for systems that default to python3 [[view](#1622)]
+- Added support for free-form annotations [[view](#1614)]
+- Update P4Runtime version to v1.0.0-rc4 and support action ref scope
+- Fix non-unified build
+- Support lookahead in ebpf backend [[view](#1602)]
+- Fixed a typo [[view](#1612)]
+- Small refactor of ArchHandlerIface in P4Runtime serializer
+- Fix for issue #1607 [[view](#1611)]
+- Fix for issue #562 [[view](#1605)]
+- Logging fixes/improvements
+- fail early when the input file does not exist
+- Fix for issue #1595 [[view](#1596)]
+- Fix for spec issue 692 [[view](#1600)]
+- add hook to support custom expression converter visitor function [[view](#1601)]
+- Constant Folding AddSat/SubSat operations.
+- Fix for issue #1569 [[view](#1588)]
+- Fix for issue #1586; added more test cases [[view](#1587)]
+- Fix for issue #1560 [[view](#1590)]
+- add ior/xor operators to IR::Constant [[view](#1594)]
+- add support for versioning p4c backends [[view](#1592)]
+- Struct initializer [[view](#1498)]
+- Fix for issue #1580 [[view](#1583)]
+- add specialized methods for other integer types
+- house cleaning for 32-bit compilation [[view](#1582)]
+- Fixed an issue on bitvec slices larger than 64 bits [[view](#1581)]
+- support routine additions [[view](#1579)]
+- Minor fix on misplaced break in adding default args [[view](#1578)]
+- Supress error in P4RuntimeSerializer for default entry of unknown type
+- Insert zero initialized default arguments when not present in program [[view](#1576)]
+- Fix 2 bugs in P4Info generation code
+- Change bmv2 back end to give error if any header is not a multiple of??? [[view](#1532)]
+- Remove PI submodule and use p4runtime instead
+- remove testcase [[view](#1573)]
+- Allow ebpf tests to work in any build location [[view](#1570)]
+- Add path to Flex headers determined by FindFLEX cmake module [[view](#1572)]
+- Include missing header [[view](#1571)]
+- Add test case for issue #1566 [[view](#1568)]
+- Fix for issue #1540 [[view](#1567)]
+- Fix for issue #1538 [[view](#1539)]
+- fix for issue 1559 [[view](#1561)]
+- Extend arch-handler interface in P4Runtime serializer code
+- Fix for issue #1544 [[view](#1555)]
+- Fix for issue #1542 [[view](#1556)]
+- Save/restore prune_flag in Transform::apply_visitor
+- get parser value set size from annotation [[view](#1554)]
+- add saturated arithmetic support to p4-14
+- 'saturating' as attribute in P4_14 parser. [[view](#1553)]
+- Fix OS X dependency script [[view](#1551)]
+- add support for OSX in Travis [[view](#1550)]
+- disable a gtest case for older clang version [[view](#1549)]
+- return from failure rather than exit [[view](#1547)]
+- Fix for issue #1541 [[view](#1543)]
+- Fix for issue #1535 [[view](#1537)]
+- Optimizations on the testing backend [[view](#1531)]
+- make optional arguments to cmake explicit [[view](#1536)]
+- P4_14->16 conversion of field_list_calculation with same name as other object [[view](#1533)]
+- Fix for issue #1524 [[view](#1525)]
+- Remove TODO that was done. [[view](#1530)]
+- fix the const default action example again. [[view](#1529)]
+- pad header to byte boundary [[view](#1527)]
+- Fix for issue #1517 [[view](#1519)]
+- support const default_action in p4-14 [[view](#1523)]
+- Fix for issue #1520 [[view](#1522)]
+- Enhancements for adding source_info [[view](#1518)]
+- Sanitize CMake file paths. Second attempt. [[view](#1512)]
+- Fix for issue #1508 [[view](#1509)]
+- Fix inverted test [[view](#1510)]
+- Fix for issue #1499 [[view](#1502)]
+- Update comment on v1model.p4 checksum_error field to match simple_switch
+- support for static linking
+ - Improve error message for a specific type inferencing failure that seems to come up frequently. [[view](#1507)]
+- Fix for issue #1478 [[view](#1503)]
+- Revert "Sanitize file path input in cmake, add travis check to skip tests [[view](#1476)]" [[view](#1506)]
+- Refactored generate()] for pairs. [[view](#1501)]
+- fix warning on osx [[view](#1500)]
+- Remove deprecated drop field from p4c tests for v1model arch [[view](#1494)]
+- add equality operator for ordered_set [[view](#1492)]
+- warnings [[view](#1497)]
+- Sanitize file path input in cmake, add travis check to skip tests [[view](#1476)]
+- Add P4_16 + v1model arch test program for testing multiple "packet pa??? [[view](#1486)]
+- Add comments to v1model.p4 about simple_switch not using some metadat??? [[view](#1493)]
+- v1 ambiguous symbol referencing fix [[view](#1481)]
+- Avoid crashing after errors [[view](#1482)]
+- Fix for issue #1466 [[view](#1469)]
+- Fix for issue #1470 [[view](#1473)]
+ - Fixes for issues #1333 and #1381  [[view](#1472)]
+- cstring optimization [[view](#1463)]
+- Fix for issue #1334 [[view](#1467)]
+- Skip tests that require root rather than failing them [[view](#1465)]
+- Test for issue #808 [[view](#1456)]
+- Option for additional ags to test scripts not in the script [[view](#1464)]
+- Refactor the testing backend to support backend extensions. [[view](#1431)]
+- Add libgccpp to LIBGC_LIBRARIES [[view](#1454)]
+- Fix for issue #1452 [[view](#1457)]
+- Fix .test script generation to include args [[view](#1382)]
+- Avoid 'Null e' CompilerBug [[view](#1458)]
+- Utilities minor fixes [[view](#1455)]
+- add support for uint64_t constants in IR::Constant (for 32-bit)] [[view](#1453)]
+- Save and restore ostream fill character in hex.cpp
+- Fix for issue #1325, hopefully for #808 too [[view](#1448)]
+- bitvec gtest when no __int128_t defined [[view](#1450)]
+- P4_14 blackbox method typechecking
+- Fix code generation bug for ebpf booleans [[view](#1444)]
+- python-ply is a dependence if one wants to use tools/stf [[view](#1447)]
+- 32-bit support [[view](#1437)]
+- Fix for issue #991 [[view](#1445)]
+- Try to preserve IR::ID::originalName when renaming things [[view](#1446)]
+- fix for issue #1412 [[view](#1417)]
+- Fix gtest spurious build warning [[view](#1443)]
+- gtest additions for bitvec
+- Construct bitvec from integer types larger than uintptr_t
+- fixes for issue-1436 [[view](#1439)]
+- Fix for issue #1397 [[view](#1408)]
+- Add getOutputStream method to ErrorReporter
+- Fix bdw-gc package name in FindLibGc.make [[view](#1435)]
+- Implement full end-to-end ebpf tests. [[view](#1413)]
+- local_copyprop table key fix [[view](#issue 1426)]
+- change the language used by the preprocessor [[view](#1429)]
+- Fix a bug with the backtracking framework [[view](#1425)]
+- modified graphs::ParserGraphs for reuse [[view](#1424)]
+- option to recursively add debug hooks to child pass managers
+- Track the original clone source id in IR::Node across clone()]
+- prevent opening a pipe in case there were errors [[view](#1421)]
+- Fix stack checks in toP4::end_apply
+- Fix corner case bug in Transfor::apply_visitor
+- Remove update includes for non-existent path
+- Fix overflow bug in stringify. va_copy was missing. [[view](#1416)]
+- add `-undef` and `-nostdinc` to preprocessor cmd line
+- Implement multi-interface parsing in the runtime. [[view](#1383)]
+- Fix for issue #1406 [[view](#1407)]
+- Support other hash algorithms; fixes several other bugs [[view](#1410)]
+- Fix for issue #1401 [[view](#1404)]
+- bugfix: reset bool 'simple' to true when apply to a new IR node [[view](#1402)]
+- retain annotations for checksum update/verify translation (v1model)] [[view](#1399)]
+- Generate P4Info as part of p4test backend tests
+- Fix P4Info register serialization for PSA
+- Ignore unknown match types (with warning)] rather than crashing out.
+- Fix irgenerator dependecy in cmake files [[view](#1396)]
+- Include missing header file [[view](#1395)]
+- update psa test programs [[view](#1393)]
+- Updated compiled design documentation [[view](#1388)]
+- Remove unused lambda captures [[view](#1392)]
+- add annotation to IR::SerEnum and IR::Enum [[view](#1389)]
+- check nullptr [[view](#1391)]
+- Fix 'default rule can be matched' FLEX warning [[view](#1390)]
+- Extend P4-14 frontend to support multiple entry points to parser [[view](#1385)]
+- Fix for issue #1386 [[view](#1387)]
+- Fix for issue #1331 [[view](#1384)]
+- Add testcase corresponding to issue #1342 [[view](#1380)]
+- Add automatic control plane generation for the ebpf user tests. [[view](#1379)]
+- Fix for issue #1366 [[view](#1373)]
+- Fix for issue #1365 [[view](#1374)]
+- Implementing functions [[view](#1355)]
+- Fix compilation issues when not using unified build
+- Fix global static variable initializations in IR generator
+- Hotfix. [[view](#1372)]
+- Fix the userspace ebpf map, integrate control plane initializer. [[view](#1368)]
+- Add some tests [[view](#1370)]
+- Fix handling of p4runtime options in p4c driver
+- Add a cmake option to disable GC [[view](#1364)]
+- Add support for PSA in p4RuntimeSerializer
+- Minor extension: prevent defined types from disabling table properties [[view](#1363)]
+- Add Kernel Compilation and loading to the eBPF tests [[view](#1348)]
+- fix nullptr bug [[view](#1362)]
+- missing include file [[view](#1359)]
+- shift has lower precedence than minus [[view](#1358)]
+- Clean-up P4Runtime serializer code [[view](#1357)]
+- Emit extern functions with --emit-externs [[view](#1289)]
+- Fix for issue #1352 [[view](#1353)]
+- fixes for issue 1350 [[view](#1351)]
+- Serializable enum implementation [[view](#1349)]
+- fixes for #1329 [[view](#1330)]
+- Fix build when boost 1.55 is used
+- Refactor the eBPF testing framework [[view](#1339)]
+- Put `TYPE` back with the other keywords into `nonTypeName` [[view](#1344)]
+ - Use dotPrefix non-terminal for expressions having a dot prefix [[view](#1343)]
+- Fix for issue 1336 [[view](#1338)]
+- bugfix: default_action translation to p4-16 [[view](#1332)]
+- Add a userspace test target to the ebpf compiler backend. [[view](#1326)]
+- use parent stdout and stderr rather than pipe for subprocesses
+- Update psa.p4 2018 06 05 [[view](#1324)]
+- Fix for issue #47 [[view](#1308)]
+- Fix for issue #1291 [[view](#1307)]
+- Fix for issue #1296 [[view](#1303)]
+- Add newtype primitive [[view](#1244)]
+- Added some set information to the JSON loader [[view](#1323)]
+- Handle boolean literals in static table entries in P4Runtime serializer [[view](#1321)]
+- Fix segfault when compiling with O3
+- Add sample command lines [[view](#1295)]
+- Fix for issue #1310: remove SynthesizeValidField pass. [[view](#1317)]
+- Support typedef in P4Info TypeSpecConverter pass
+- fix bmv2 backend names [[view](#1318)]
+- A framework for P4Info generation for arbitrary architectures
+- initial support for psa architecture in bmv2 backend [[view](#1298)]
+- Added an annotation for meter pre_color [[view](#1315)]
+- fix backend graph to check for optional arguments in PackageBlock [[view](#1313)]
+- Update to latest P4Runtime version
+- check for nullptr when generating control plane api [[view](#1309)]
+- Fix for issue #1304 [[view](#1306)]
+- fix for issue #1301 [[view](#1302)]
+- Support named arguments in frontend and midend [[view](#1288)]
+- Generate a deep-compare "equiv" function for IR nodes [[view](#1294)]
+- support key=value annotations [[view](#1300)]
+- Alternate cleaner way of specifying pattern matches.
+- propagate -g only to "known" tools
+- Do not eliminate annotated states. [[view](#1287)]
+- Improved documentation for two passes [[view](#1275)]
+- Removed the DATA token from parser. [[view](#1285)]
+- add --fromJSON option to p4test to load previously dumped json
+- Improved options documentation [[view](#1281)]
+- DirectCounter min_width [[view](#1278)]
+- Fixed some small bugs in simplifyBitwise. [[view](#1276)]
+- Fix ordered_map::emplace to forward construct properly rather than requiring a move or copy ctor
+- Support struct as type parameter in value_set<T> [[view](#1271)]
+- Fix generation of P4Info for v1model registers
+- Fix for issue #1237 [[view](#1240)]
+- change -o option to non-default option provided by individual backend [[view](#1265)]
+- Fix for issue #1238 [[view](#1239)]
+- Fix for issue #1230 [[view](#1235)]
+- Fix for issue #1233 [[view](#1234)]
+- Add P4_14 test program for header stack operations [[view](#1249)]
+- experimental: Allow @optional on abstract methods
+- Update p4lang/PI submodule ref point
+- Move p4RuntimeSerializer invocation to right after frontend
+- Remove p4runtime-to-pd generator
+- Remove HeaderFieldPath in p4RuntimeSerializer
+- Generate v1model digest information correctly in P4Info
+- Add support for generating P4Runtime's P4DataTypeSpec
+- Added Another Policy to SimplifyKey [[view](#1257)]
+- Fix uninitialized variable bug in ComplexComparison
+- Use correct ID prefixes in P4Runtime serializer
+- Update PI submodule ref point
+- adds support for saturating arithmetic in P4_16 [[view](#1241)]
+- Allow named arguments in calls; first step: types and grammar [[view](#1222)]
+- Fix for issue #1160 [[view](#1226)]
+- remove macro for PSA_SWITCH in psa.p4, update testcase [[view](#1231)]
+- Infer bool type for modify_field_conditionally condition
+- Support to --emit-externs [[view](#1217)]
+- fix missing dependency on .ll files [[view](#1227)]
+- Fix for issue #933 [[view](#1223)]
+- exit after printing command line option error [[view](#1225)]
+- change parser value_set to accept a size argument [[view](#1213)]
+- Fix for issue #1208 [[view](#1211)]
+- Handle "long long" primitive types in lib/json
+- Pass '-a' flag from p4c driver to p4c-bm2-ss as '--arch' [[view](#1219)]
+- Fix for issue #1210 [[view](#1212)]
+- Fix for issue #1205 [[view](#1209)]
+- Fix ClangTidy complaints about parameter name differences
+- Fix for issue #1202; missing reference outputs [[view](#1203)]
+- Fix parse error reporting in the ir generator [[view](#1204)]
+- fix default_action in P4_14->16 translation [[view](#1200)]
+- Test for issue #1093 [[view](#1185)]
+- separate --target flag to --target and --arch [[view](#1199)]
+- P4_14 push/pop with a single arg (equivalent to second arg 1)] [[view](#1201)]
+- use relative paths to package relocatable binaries [[view](#1198)]
+- When calling cmake's add_test pass args as array
+- add error check for unsupported externs [[view](#1194)]
+- Add STF tests of P4_16 header stack operation behavior [[view](#1129)]
+- Support value_set in P4Info generation [[view](#1191)]
+- Revert "use relative paths for installing artifacts to allow packaging"
+- P4_14->alternate architecture conversion [[view](#1187)]
+- Fix for issue #1184 [[view](#1186)]
+- Add egress timestamp to v1model's metadata fields
+- Fix resubmit in bmv2 backend
+- Fix for issue #489 [[view](#1178)]
+- Fix for spec issue 563 [[view](#1174)]
+- Match explicit END tokens after error in bison parser
+- fix typo in installing target configs
+- add sha to the p4c version
+- handle boolean type action parameter in p4Runtime [[view](#1156)]
+- Add --std as a variant of the -x option to select the language
+- use relative paths for installing artifacts to allow packaging
+- Simplify SimplifyBitwise by using a general pattern matcher for expressions [[view](#1165)]
+- Added Midend Pass to Optimize Complex Bitwise Operations [[view](#1163)]
+- Better comment about IR::Vector override problems.
+- Add support for 'is_const_table' in P4Info generation
+- Make sure protoc is run when proto files change
+- Raise precedence of bitwise ops
+- Introduce value_set as a first class type (experimental)] [[view](#1158)]
+- Dot is not legal in an identifier in C
+- Check for constant arguments, as required by spec [[view](#1152)]
+- Fix for issue #1143 [[view](#1147)]
+- Implement equality testing for structures [[view](#1145)]
+- fix for #1150: implement |= in a naive way [[view](#1151)]
+- Fix for issue #486 [[view](#1106)]
+- BUG_CHECK condition is in reverse [[view](#1148)]
+- Fix for issue #1128 [[view](#1144)]
+- driver installs only the targets that were configured
+- fixs for non-unified-build [[view](#1141)]
+- Fix for issue #1137 [[view](#1139)]
+- Remove incorrect expansion of array copy [[view](#1133)]
+- proposed fix for #1135 [[view](#1136)]
+- swap precedence ot bitwise and relational operators in P4_14 parser
+- Tweaks for supporting Arch Linux. [[view](#1131)]
+- Move inlining to the front-end [[view](#1116)]
+- Fix for issue #1127 [[view](#1130)]
+- fixes for P4-14 to 16 register extern translation [[view](#1126)]
+- Add P4_14 frontend support for mulitple algorithms in a field list
+- Fix for issue #1121 and #1120 [[view](#1123)]
+- Update psa.p4 as of dec-22-2017, update test case and its outputs [[view](#1118)]
+- remove alias fields from standard_metadata when translating p4-14 [[view](#1117)]
+- Fix for issues #696 and #1097 [[view](#1099)]
+- Fix for issue #1107 [[view](#1111)]
+- Add CMake flag to disable building GTests
+- update gtest infra to support psa [[view](#1112)]
+- Add HAVE_CXXABI_H to config.h.cmake so it gets added properly to config.h
+- add a label to cpplint testcase [[view](#1110)]
+- Add #ifdef __clang__ around diagnostic pragma [[view](#1104)]
+- Make v1model 'random' extern type generic
+- Add 'policy' argument for local_copyprop
+- do not copy p4include files in driver cmake rules, the files are already copied in the update_includes rule [[view](#1102)]
+- Fix for issues #1082 and #1038 [[view](#1085)]
+- Update psa.p4 to the version in p4-spec as of 2017-Dec-13. [[view](#1098)]
+- Fix for issue #1092 and testcase [[view](#1096)]
+- Fix for issue #1079 [[view](#1080)]
+- Fix for issue #490 [[view](#1090)]
+- Fix driver exec search to look from the executable dir rather than cwd
+- debugging/loggin improvements
+- Recommend installing version 3.2.0 of protobuf
+- Change base Docker image to behavioral-model
+- print the output directly to stdout rather than using parser.exit
+- streamlines option processing
+- polished output
+- refactors the p4c driver code to allow more flexibility for backends
+- Support for shared action_profiles in P4_14->16 conversion [[view](#1075)]
+- Make --Werror etc. affect all warnings if no diagnostic is provided
+- Replace registerOption()]'s hide argument with OptionFlags
+- moved the files in a more appropriate location
+- adds STF parsing code based on ply
+- Added missing include [[view](#1071)]
+- Make P4TEST_REPLACE strip paths correctly on macOS
+- Add a GTest suite for diagnostics pragmas
+- Renable the disabled P4-14 P4Runtime GTest
+- Work around GTest path issues by searching for p4include/ in the parent dir
+- Make some SimplifyDefUse warnings into diagnostics
+- Make diagnostics configurable via pragmas
+- Make Util::Options::process()] virtual
+- Add support for configurable compiler diagnostics
+- Move the definition of ErrorReporter to a separate header
+- Fix GCC unused return value warning in p4test.cpp
+- support a blackbox primitive  in p4-14 type inference [[view](#1069)]
+- Use ::errorCount()] in PassManager
+- Store ErrorReporter and CompilerOptions in a stack of CompilerContexts
+- Eliminate the global InputSources singleton
+- Fix GCC unused return value warning
+- Fix override warning in simplifyKey.h
+- Mark tests as xfailed due issue #486 - to be fixed
+- Fix for issue #1057 [[view](#1060)]
+- Fix for issue #1062 [[view](#1063)]
+- Fix for issue #1059 [[view](#1064)]
+- Fix for issue #1058 [[view](#1061)]
+- Fix for issue #961 [[view](#1046)]
+- Don't assert if a source line is missing
+- Fix for issue #1048 [[view](#1055)]
+- fromv1.0 extensions for register conversions
+- list expression fixes
+- Do not hide options for p4test [[view](#1035)]
+- Fix for issue #1049 [[view](#1052)]
+- Fix for issue #1047 [[view](#1051)]
+- Fix for issue #1032 [[view](#1045)]
+- Fix some of the failing STF tests described in #961 [[view](#1031)]
+- fix for #1039 [[view](#1041)]
+- Fix for issue #986 [[view](#1023)]
+- Fix for issue #983 [[view](#1011)]
+- Fix for issue #841 and #955 [[view](#1014)]
+- Fix for issue #530
+- Fix for issue #1013
+- Fix for issue 1027
+- Fix for issue #1025 - Use units of bytes, not bits, for max_length in bmv2 JSON [[view](#1026)]
+- Fix for issue #1020 [[view](#1021)]
+- Test case for issue #737, which seems to be fixed [[view](#1022)]
+- Missing test case for closed issue #891 [[view](#1019)]
+- Test case to validate that #461 is fixed [[view](#1018)]
+- Fix for issue #988 [[view](#1017)]
+- This should fix issue #1006 [[view](#1010)]
+- Minor fix of p4c-graph.
+- fix for issue1001 [[view](#1009)]
+- fix indentation and remove forward reference
+- fixes includes and class definitions for non-unified build
+- Fail test if compiler crashes [[view](#977)]
+- Support 64-bit values in ebpf back-end [[view](#987)]
+- Fix for issue #1000 - enable _ in multi-field select statements for bmv2 backend [[view](#1002)]
+- clang warning cleanup
+- parser graph generation support for graphs backend [[view](#969)]
+- Proposed fix for issue #995 [[view](#998)]
+- constant folding if statements with constant conditions [[view](#993)]
+- Fixed two more test cases which use egress_spec incorrectly [[view](#992)]
+- Fix for issue #989 [[view](#990)]
+- Fix for issue #982 [[view](#984)]
+- Fir for Issue #891 [[view](#985)]
+- Fix for issue #980 [[view](#981)]
+- Fix for issue #960 [[view](#963)]
+- Fix for issue #794, #934 [[view](#974)]
+- update simple_router.p4 and issue767.p4 to set egress_spec, instead of egress_port [[view](#976)]
+- Fix for issue #950 [[view](#965)]
+- remove -march=native for Travis optimized builds
+- Fixes to stf tests [[view](#968)]
+- Fix for issue #951 [[view](#954)]
+- output annotation on IR::Method and IR::Type_Extern with top4 [[view](#967)]
+- allow annotation on extern methods [[view](#966)]
+- bitvec::operator< (needed to use bitvec as a map key)]
+- Add serializeP4RuntimeIfRequired convenience wrapper [[view](#962)]
+- Add comments for some ControlFlowVisitor methods. [[view](#956)]
+- Fix for issue #763 [[view](#931)]
+- Added libboost-graph-dev to Ubuntu dependencies [[view](#947)]
+- fixes the path and the install command for documentation.
+- remove checksum1-bmv2 from xfail
+- remove checksum1-bmv2 from p4test xfail
+- update issue949 reference output
+- update reference output for checksum1-bmv2.p4
+- update issue946 reference output
+- fix another test case
+- update testcase
+- Introduced new checksum APIs in v1model.p4 [[view](#939)]
+- Add missing include dependencies:
+- When eliminating an assignment, preserve side effects in the rhs.
+- Frontend support for parser_value_set [[view](#948)]
+- fix missing includes and namespace qualifier for non-unified build
+- Fix for issue #937 [[view](#943)]
+- Clean up and fix log metalogging
+- Fix for issue #940 [[view](#942)]
+- Make generateP4Runtime()] depend only on the frontend
+- Move SynthesizeValidField to the midend
+- Move 'vector' to 'safe_vector' and remove ir/std.h
+- add flag for producing debug information
+- adds support for versioning the driver
+- Fix misleading warning about action parameter types
+- Fix clang warnings in p4RuntimeSerializer.cpp
+- Fix for issue #822 [[view](#925)]
+- Make unified build paths relative to PROJECT_SOURCE_DIR
+- Add unified compilation support for cmake
+- rebind allocators in ordered_map/set to make newer compilers happy
+- fix ordered_map bug for clang 9.0 on osx [[view](#928)]
+- Fix build for P4Runtime gtest
+- Fix p4runtime include issue in gtest
+- Add ability to serialize static table entries [[view](#912)]
+- allow CopyStructures pass to ignore methods [[view](#900)]
+- Better alias analysis in side-effects pass [[view](#922)]
+- Add unit tests for the P4Runtime code
+- Fix bugs in GTest CMakeLists.txt configuration
+- Add a GTest helper for constructing frontend test cases
+- Separate P4Runtime generation from serialization
+- Update test outputs
+- Only allow explicit @name annotations for naming P4Runtime match fields
+- Handle global names in Member expressions correctly in TableKeyNames
+- Generate a P4Runtime-compatible representation of isValid()] in TableKeyNames
+- Automatically generate names for bitwise AND in table keys
+- Don't treat bitwise AND masks specially in the P4-14 converter
+- Don't expose P4-14-converter-generated top-level structs to the control plane
+- Make P4Runtime digest()] support more general
+- Remove dead P4RuntimeSerializer::addSynthesizeAction()] method
+- Fix typo in control-plane/CMakeLists.txt
+- Fix P4_14 binop typechecking fix to not error on `int` [[view](#920)]
+- Fix for issue #914 [[view](#919)]
+- fix version detection for libgc on Ubuntu 14.04
+- Fix for issue #907 [[view](#917)]
+- Fix for issue #905 [[view](#916)]
+- Generate an option to disable each extension
+- Make libboost-graph available on Travis
+- Make all backends optional
+- LocalCopyprop improvements -- track struct fields and stack elements [[view](#904)]
+- add a check to make sure no one uses width_bits on non-canonical type [[view](#910)]
+- Build with -O3 on Travis
+- Fix for issue #901 [[view](#903)]
+- Avoid warning spew from BISON_TARGET's VERSION option
+- Use the gold linker if available
+- Fix for issue #887 [[view](#890)]
+ - Fix for issue #677 [[view](#879)]
+- Fix for issue #774 [[view](#876)]
+- Fix for issue #871 [[view](#875)]
+- Fix use of unexported GC library variables [[view](#849)]
+- Fix for issue #894 [[view](#895)]
+- fixes hiding of overloaded constructors with variable number of arguments
+- adds fully qualified names to a couple of STF tests.
+- Remove unreasonable cpplint casting check
+- Try to convince Travis to actually cache the ccache db
+- Eliminate mkdir race in p4test/run-p4-sample.py
+- Enable building of only master and stable branches on Travis
+- Enable ccache for p4c builds
+- Allow 0-arg P4_14 resubmit for an empty field list
+- Add test of v1model update_checksum implementation [[view](#882)]
+- Remove shift-reduce conflicts in IR Generator grammar [[view](#881)]
+- Statically linking libprotobuf
+- Fix for issue #870: support slice and concat in ebpf back-end [[view](#874)]
+- Some documentation fixes [[view](#860)]
+- add fully qualified names to STF counter tests
+- P4_14 casts that change both size and signedness need two explicit casts
+- Revert "New checksum APIs in v1model; better alias analysis in side-effects; ??? [[view](#858)]"
+- Update include files whe rebuilding
+- Update CMakeLists.txt to support CMake 3.0.2 [[view](#863)]
+- New checksum APIs in v1model; better alias analysis in side-effects; ??? [[view](#858)]
+- Bmv2 backend calculations const fix [[view](#857)]
+- allow counter and meter enum names to be all capitalized [[view](#856)]
+- Do not crash if wrong model is used [[view](#855)]
+- Fix for issue #754 [[view](#854)]
+- Introduced a bug in EBPF back-end [[view](#853)]
+- Fix for issue #764 [[view](#851)]
+- Fix incorrect generation of table keys [[view](#850)]
+- Make it possible to return a value type from fromJSON()]
+- Do not call LOG()] macros, which may allocate memory, in gc_callback()]
+- Add Vector::pushBackOrAppend()]
+- Add a method to InstantiatedBlock to safely retrieve possibly-nonexistent parameter values
+- converts boolean expressions comparing bools to ints [[view](#847)]
+- Bug-fixes for ebpf code generation [[view](#837)]
+- Fix for issue #759 [[view](#836)]
+- Fix for issue #803 [[view](#834)]
+- Add information about p4c-graphs to README
+- Refactor control graph generation code
+- Sugar for making constructing calls easier.
+- P4_14 brace generalization
+- Add graphs backend [[view](#833)]
+- Fix for issue #816 [[view](#820)]
+- add getApplyParameters()] method to IApply interface [[view](#832)]
+- update README.md about adding custom p4c flag in make check [[view](#831)]
+- Fix for issue #807 [[view](#815)]
+- Mac OSX does not have rt (and ir-generator)] doesn't need it anyway)] [[view](#828)]
+- Fix for issue #781 [[view](#813)]
+- Fix for issue #823 [[view](#826)]
+- Fixes for issue #818 and #819 [[view](#821)]
+- adds -D option to the driver [[view](#829)]
+- Start numbering learn_lists at 1 [[view](#824)]
+- Merge branch 'cc/fix-add-test-label'
+- Fix typo in P4Runtime
+- Fix for issue #793 [[view](#814)]
+- added cmake find_package()] Modules for GMP and GC [[view](#804)]
+- support make uninstall in cmake [[view](#811)]
+- Revert "convert path passed by -I to absolute path internally [[view](#770)]" [[view](#812)]
+- Add support for IR node fields of boost::optional type
+- In P4Runtime, reject anonymous table properties
+- Issue780 [[view](#798)]
+- Support P4Runtime options in driver
+- Rebuild driver when its source has changed
+- Support extra args in p4c_add_test_with_args
+- fix path for p4runtime-to-pd
+- make createTypes()] and createExterns()] in P4V1::ProgramStructure public [[view](#796)]
+- XFAILs are meant to fail (and therefore pass!)]
+- adds macro to append labels and reduces the verbosity for running tests.
+- Fix for issue #783 [[view](#787)]
+- Fix for issue #785; readme formatting [[view](#786)]
+- Better complex key policy; more tests for header unions [[view](#735)]
+- increase timeout to handle slow Travis
+- removes automake build
+- Fixed a small bug in the bitvec >>= function [[view](#784)]
+- cmake macro to add an individual test with arguments
+- Add tests for architecture examples from spec. [[view](#777)]
+- adds cpplint as a test
+- convert path passed by -I to absolute path internally [[view](#770)]
+- adjusts the paths for the include files to the env variable set by p4c driver
+- proper path to include directory
+- support for Ubuntu 14.04 cmake 3.2.2
+- adds cmake build system [[view](#755)]
+- Simplify and clarify warning message
+- Strip out p4_14 extern support code in ResolveReferences
+- extensible PrimitveConverter framework
+- fix crashes for optional construtor paramters
+- Rework ExternConverter to be simpler and more flexible
+- test case for issue 759
+- Add --parse-only option to p4test.
+- Include SourceInfo in the JSON output of p4test.
+- add ExternConverter::convertExternCall to allow changes in extern method calls
+- typecehcking fixes
+- per-node control of visitDagOnce via visitAgain()]/visitOnce()] in the pre/postorder functions
+- Changed width_bits on Type_Typedef in order to get the width of the underneath definition rather than the typedef itself [[view](#752)]
+- fix segfault and adds p4_14_errors directory to tests [[view](#748)]
+- Annotate bmv2 $valid$ fields as hidden
+- Better STF check to test if simple_switch is ready
+- Adjusted getslice function of bitvec to return empty bitvec when the size requested is 0. [[view](#744)]
+- Nonunified build fixes
+- Move unnecessary inclusions and code out of json_parser.h
+- Don't include <regex> unnecessarily in options.h
+- Remove unnecessary functions from ir-inline.h
+- Add preliminary support for learning to p4runtime-to-pd
+- Simplify grammar [[view](#738)]
+- Add unit tests for SynthesizeValidField
+- Add a test for matching against isValid()] on header unions
+- Simplify isValid()] out of match keys on BMV2
+- Represent $valid$ explicitly in the BMV2 IR
+- Don't constrain the return type of transformAllMatching()]
+- Fix bug in LocalCopyPropagation pass in midend [[view](#730)]
+- print applyParams in P4Control [[view](#734)]
+- Use IDeclaration::controlPlaneName()] in p4RuntimeSerializer
+- Use controlPlaneName()] pervasively when generating BMV2 JSON
+- Mark most names as global during 14-to-16 conversion
+- Add IDeclaration::controlPlaneName()]
+- Add some Doxygen comments for IDeclaration and IndexedVector
+- Support for header unions in bmv2 back-end: part 1 [[view](#724)]
+- Fix SimplifyDefUse to deal with abstract Function implementations
+- Build p4runtime-to-pd in the Docker image
+- Wrap || in a subshell so bootstrap failures make 'docker build' fail
+- Use scapy from the third-party Docker image instead of the python-scapy package
+- Add a README.md file for p4runtime-to-pd
+- Add p4runtime-to-pd to allow generation of a PD frontend from p4c's P4Runtime output
+- Add P4Runtime serialization support for the v1model digest()] extern function
+- Make libcontrolplane extensible
+- Remove unused action parameters for P4-14 programs on BMV2
+- Unconditionally infer counter/execute_meter's second argument as bit<32>
+- support for @optional parameters to functions in type unification
+- adds non-wildcard targets to p4c driver [[view](#725)]
+- support for modify_field_with_shift primitive
+- Added contiguous function to bitvec [[view](#721)]
+- Add support for P4Runtime ControllerPacketMetadata
+- avoid crashing on null pointers
+- Fix for issue #510 [[view](#715)]
+- Fix memory error when building bmv2 JSON
+- pull --pp to top level options [[view](#712)]
+- Wrong Structure Name?
+- link to unsupported features [[view](#711)]
+- Interface for architecture-specific conversion of P4_14 externs to P4_16
+- Fix p4c driver stdout/stderr handling
+- add --top4 and -T to top level options in p4c driver [[view](#707)]
+- Output warning messages from tools after they run successfully
+- Fix from code review
+- Support for temporary variables with varbit type
+- Prepare to rebase
+- adds build type env variable to driver script
+- adds relative path from binary to artifacts when exec_prefix != prefix
+- missing outputs
+- Filter out file paths in error messages in expected outputs.
+- Fix for issue #700; typo fix [[view](#701)]
+- Simplify the setup required for unified compilation
+- Track unified .cpp file dependencies more intelligently
+- Eliminate trivial differences between invocations of gen-unified-makefile.py
+- Don't reinstall package data in all-local unless it changed
+- Don't update IR generator output files unless they changed
+- Replace setup.h with CPP symbols
+- Fix counters attribute name
+- Apply GTest feature flags globally in AM_CPPFLAGS
+- Use libtool for all p4c convenience libraries
+- adding putrange func to bitvec.h [[view](#693)]
+- p4c-bm2-ss should gracifully exit when compiling a program without main [[view](#691)]
+- Fix circular dep in includes
+- do not issue 'error' if user has defined PSA_CORE_TYPES [[view](#684)]
+- Disable GTest features that interact poorly with p4c
+- Turn all unit tests into GTests
+- insert explicit casts in p4_14 typechecking
+- Fix non-unified build by adding missing include
+- Fix "Argument list too long" make check errors on Linux
+- Fix bmv2 inspector which validates selector sharing
+- Remove bmv2 header include from P4_14 frontend
+- Fix for issue #638 [[view](#653)]
+- Fix #674 - avoid printing duplicate header_type entries in bmv2 JSON ??? [[view](#676)]
+- Fix for issue #655 [[view](#670)]
+- run-bmv2-test.py should exit on unknown option [[view](#673)]
+- Remove lib/default.h
+- Replace incorrect BUG_CHECK with BUG
+- Documented better running and debugging tests
+- Brought compiler documentation up-to-date
+- Fix for issue #667 [[view](#669)]
+- support for a binary distribution [[view](#647)]
+- Correct example program extracting header with varbit field [[view](#662)]
+- Don't include json_loader.h in ir.h [[view](#643)]
+- Correctly manage symbol table in parser for P4 parse states. [[view](#666)]
+- Update p4 spec versions [[view](#668)]
+- Added test case to confirm that #635 is fixed [[view](#654)]
+- Ignore path differences coming from p4_14include
+- Fix undefined behavior in p4parser.ypp
+- Add debugging arguments to gtestp4c
+- Add BUG_CHECK()]-like macros for ::warning and ::error
+- Add a helper to get a combined total of warnings and errors
+- Accept more types as arguments to BUG()]
+- Make it possible for extensions to link additional libraries into gtestp4c
+- Add visitor utility functions
+- Fix for issue #619 [[view](#656)]
+- Support emits of structs; test parsing of varbit fields [[view](#634)]
+- Fix for issue #629 [[view](#636)]
+- Minor change in bmv2 backend: set action_const [[view](#652)]
+- IRGen fixes
+- Bug fix in simplifyDefUse analysis
+- Fix for issue #604 [[view](#637)]
+- Fix for issue #648
+- Add missing size check in bitvec.h [[view](#645)]
+- adds the list of open and currently unsupported issues. [[view](#641)]
+- Visitor additions to clean up custom visitor routines a bit.
+- (Part 1)] PSA support - addressing review comments [[view](#618)]
+- Set MAKEFLAGS in a single place in .travis.yml [[view](#581)]
+- Tiny clarification in core.p4 comment for error.NoMatch [[view](#620)]
+- Fix for issue #600 [[view](#624)]
+- Issue430 [[view](#626)]
+- Fix for issue #610 [[view](#625)]
+- Fix unittests in non-unified build
+- Front-end support for header_unions [[view](#606)]
+- fix typo [[view](#623)]
+- Move error check for direct registers to bmv2 backend
+- Fix non-unified build for ebpf backend
+- Fix non-unified build for bmv2 backend
+- Fix for issue #388 [[view](#615)]
+- Corrections to code for determining source fragments of assignments statements [[view](#607)]
+- Fix for issue #583 [[view](#603)]
+- Fix for issue #529 [[view](#593)]
+- Special handling for register layout types
+- cpplint fixes
+- Fix for issue #583
+- Add Doxygen documentation for ResolveReferences [[view](#613)]
+- Fix for issue #572 [[view](#592)]
+- fix for issue #584 [[view](#589)]
+- Doxygen generation for a few midend passes  [[view](#614)]
+- Check that verify is only used in parsers. [[view](#611)]
+- (Part 1)] PSA support [[view](#601)]
+- Fix for issue #578; commented core.p4 [[view](#586)]
+- Don't use an invalid srcInfo to construct json source info. [[view](#588)]
+- constant folding streamlining, bug fixes, and Doxygen comments [[view](#541)]
+- Add/convert Doxygen-style comments for SpecializeAll. [[view](#596)]
+- Doxygen-style comments for ParserCallGraph and SimplifyParsers. [[view](#571)]
+- Remove unnecessary dependency on constraint_solver.h
+- Explicitly depend on libfl-dev and check for FlexLexer.h
+- Add Doxygen-style documentation for the SimplifyControlFlow pass. [[view](#568)]
+- fix lookahead byte order issue [[view](#579)]
+- Run tests with MAKEFLAGS=-j2
+- Lower Bison version requirement
+- Fix bmv2 backend crash for unused action selectors
+- Update PI submodule pointer
+- Generate annotations for action profiles in p4RuntimeSerializer
+- Fix ActionProfile comparator in p4RuntimeSerializer
+- Fix for issue #396 [[view](#540)]
+- Work around spurious GCC warning in P4RuntimeSymbolTable::piResourceType()]
+- Generate header field names differently in p4runtime
+- Stop generation action_ids for p4runtime tables
+- strength reduction improvement [[view](#559)]
+- (Part 12)] - Disable clang preprocessor comment warnings
+- (Part 11)] - Make Bison happy with the P4-14 grammar's blackbox implementation
+- (Part 10)] - Reset to saveState even for multicharacter operators in the P4-14 lexer
+- (Part 9)] - Reset to saveState for operators in the P4-14 lexer
+- (Part 8)] - Use literals instead of symbolic names for operator tokens.
+- (Part 7)] - Address Mihai's review comments
+- (Part 6)] - Finish removing unused CompilerOptions parameter to IR::V1Program()]
+- (Part 5)] - Use C++ reentrant parsers and lexers for P4-14 and P4-16
+- (Part 4)] - Add a parser_error()] overload that matches Bison's C++ API (and add comments)]
+- (Part 3)] - Fix spelling and null-handling in dbprint()] for CalculatedField and FieldListCalculation
+- (Part 2)] - Prepare to remove unused CompilerOptions parameter to IR::V1Program()]
+- (Part 1)] - Add an optional dependency on libboost-iostreams
+- Start a list of unsupported P4_16 fatures in bmv2 backend README
+- Fix for issue #539 [[view](#557)]
+- Fix for issue #481 [[view](#553)]
+- Documentation improvements [[view](#531)]
+- Support for 'bool' type in P4_14 [[view](#558)]
+- Fix internal links in README.md
+- Add/convert Doxygen comments for SideEffects and DoSimplifyExpressions visitors. [[view](#556)]
+- adds an unimplemented exception and exception catching in drivers [[view](#555)]
+- Document the convertEnums and CompileTimeOps pass [[view](#550)]
+- Add Doxygen comments for the ResetHeaders pass. [[view](#552)]
+- Reformat comments for the MoveDeclarations pass to Doxygen style. [[view](#547)]
+- Document the RemoveUnusedDeclarations pass. [[view](#548)]
+- Add Doxygen comments for the TableKeyExtraction pass. [[view](#528)]
+- Add Doxygen comments for the ParserControlFlow pass. [[view](#551)]
+- Fix p4Runtime serializer for shared action profs
+- Comments on copy structs & eliminateTuples pass [[view](#546)]
+- Partial implementation of adding filename, line, column info to JSON ??? [[view](#509)]
+- P4_14 register related fixes
+- Implement syntactic sugar for calling controls and parsers [[view](#538)]
+- cpplint fix
+- Fix for issue #532
+- addresses reviewer's comments
+- cpplint
+- forces documentation rebuild
+- documents the ir interfaces and classes in base.def
+- associates multi-line comments with the class object in ir generation
+- Doxygen comments for nestedStructs pass [[view](#533)]
+- writes out json boolean values for valid match keys. [[view](#536)]
+- Fix for issue #516 [[view](#522)]
+- Polish front end last pass. [[view](#527)]
+- Strength reduction polishing. [[view](#520)]
+- Add support for new ActionRef message in p4runtime
+- Fix for issue #512 [[view](#519)]
+- Fix for issue #513: better error message [[view](#518)]
+- Cleanup old code; use Doxygen comments
+- Remove bmv2/inlining files
+- more flexible append method for vectors
+- add generic getAnnotation method to make it easier to inspect annotations
+- Fix for issue #496 [[view](#500)]
+- Documentation improvements [[view](#499)]
+- Inherit from the PI docker image
+- Fix for issue #493
+- Fix PI submodule ref pointer
+- Update P4Runtime serializer after p4info changes
+- Remove references to PDFs and LaTeX
+- Use in-document links correctly
+- Add a little more quotation and linkification
+- Consolidate 'Development tools' section
+- Move things around to clean up the main dependencies section
+- Spell 'dependencies' correctly
+- Add a 'Getting started' section to the README
+- Tighten up summary and reference the autogenerated P4 specs
+- Update supported compilers and platforms
+- Issue497 [[view](#504)]
+- Add missing include exposed by non-unified build [[view](#498)]
+- Add inline in ir classes to reduce indirections
+- Support P4Runtime annotations for match keys. Fixes #463.
+- Make KeyElement an IAnnotated, since it has annotations. #463
+- Support P4Runtime annotations for action params. #463
+- Add a build arg to p4c's Dockerfile to specify MAKEFLAGS
+- Fixes for issues #477 and #478 [[view](#483)]
+- Issue473 [[view](#474)]
+- Some fixes for issue #407 [[view](#454)]
+- Remove '--p4runtime-as-json'
+- Use ASSERT_TRUE when checking nullness in GTests
+- Omit tables/actions with @hidden from p4runtime
+- Fix for issue #425
+- Work around automake bug related to recheck
+- Fix for issue #413
+- Distinct subdirectory in docs/README.md [[view](#460)]
+- Fix for issue #67
+- Move model instances into one source file, so they get initialized in the correct order.
+- Optionally specify standard headers with the P4_SOURCE macro
+- Cache core.p4 in GTests
+- Check compiler version in configure.ac. Fixes #441
+- Refactor and document change tracker [[view](#462)]
+- Add support for writing P4Runtime in text format
+- Map errors in P4 programs in GTests to the right source line
+- Support different Docker images for normal builds and testing
+- Exclude some unnecessary files from the Docker image
+- Install p4c globally in the Docker image
+- cleanup -- remove unnecessary default args to constructors
+- A few gtest cases for PSA [[view](#459)]
+- fix comment block handling in ir generator [[view](#456)]
+- Create explicit count calls for direct counters in P4_14->16 translation.
+- Fix for issue #361; bettern constant folding; useless cast removal
+- Fix for issue #430
+- Updated test
+- Fix for issue #435
+- add control-plane sources and module [[view](#451)]
+- fix bitvec:set/clrrange with size of 0 [[view](#449)]
+- added a couple more midend unit tests from code review [[view](#444)]
+- Add ability to clear ErrorReporter; helps unit tests that need a clean error state [[view](#448)]
+- add an example gtest case, useful for unit-testing compiler pass [[view](#434)]
+- cpplint
+- remove .bak file
+- resolve shift/reduce conflict by moving annotations to the end of entry rule
+- add validation for const entries
+- clean up CONST qual and attibs on table properties
+- negative tests
+- addresses reviewer comments
+- fixes indentation
+- Addresses reviewers' comments:
+- cpplint
+- fix printing toP4 and enforce keysets to be ListExpressions
+- adds table entries support
+- implement a few more P4_14 primitives
+- Fix for issue #394
+- Fix for issue #420
+- Updated testdata after merging
+- Fix for issue #379
+- Add missing includes exposed by non-unified build
+- implement P4_14 mark_for_drop primitive
+- adds comment handling to ir-generator
+- adds doxygen comments and group markers for the IR
+- add customized HTML formatting and parsing of ir-generated.h rather than def
+- Fix for issue #422
+- Fix for issue #414; do not warn about the same instance multiple times
+- handle bare @pragma line in P4_14 (convert to @pragma annotation)]
+- Turn random text on @pragma line into STRING_LITERALs
+- Stop using 0 for params and match fields ids [[view](#417)]
+- WIP: partial fix for issue #386 [[view](#395)]
+- fix local_copyprop flow_merge (need_key_rewrite flag)]
+- Fix slice generation for table keys in P4_14->16 conversion [[view](#405)]
+- Handle lists in case for IR::Cast in constantFolding.cpp [[view](#402)]
+- Guard against a possible null pointer dereference. [[view](#382)]
+- avoid crashing in removeReturns for BlockStatements not in controls/actions
+- Fix all warnings reported by clang-800.0.42.1
+- Suppress protobuf-related unused parameter warnings correctly when building libcontrolplane
+- Enable warnings globally
+- Strip leading dot from control plane names in p4RuntimeSerializer
+- Fixes for issues #364 #376 and #377 [[view](#389)]
+- automake warning EXTRA_DIST [[view](#392)]
+- fixes missing conversions from/to int/str for interfaces [[view](#393)]
+- cpplint fix
+- Additional bug-fixes in side-effect ordering pass
+- cpplint fixes
+- Fix in python script; update reference outputs; delete dead code
+- rebased
+- Fixes for issues #355, #356; removed table parameters from the language and the associated tests
+- Bug fix: use external name of type
+- Partial commit; WIP for issues 356, 357; use empty stf file if no file is present to validate json
+- Too agressive shadow warnings; fixes for several compilation bugs not noticed
+- add doc for p4c compiler driver [[view](#391)]
+- p4c compiler driver [[view](#378)]
+- Add support for GTest to the build system
+- Add GTest submodule
+- adds documentation generation using doxygen [[view](#384)]
+- Fixed non-determinism issue for a switch profile [[view](#385)]
+- Three minor changes [[view](#370)]
+- support for double digit ports [[view](#375)]
+- Update P4Runtime
+- add option to skip preprocess [[view](#371)]
+- Remove header field and header field list support from p4RuntimeSerializer
+- Update P4Runtime
+- Update match fields to support new P4Info and allocate ids locally
+- Add comment to clarify HeaderFieldPath::from()]
+- Add partial p4RuntimeSerializer support for P4Info's new Table attributes
+- Allocate action parameter ids locally
+- Add alias support to p4RuntimeSerializer
+- Update P4Runtime to the most recent version
+- Add a little more documentation and organization to cstring.h
+- Don't unconditionally copy std::strings when converting to cstring
+- Add a cstring constructor that takes a pair of iterators
+- Add more documentation to cstring.h
+- Revert "autotest: add autotest framework for utility unit tests [[view](#348)]" [[view](#365)]
+- autotest: add autotest framework for utility unit tests [[view](#348)]
+- Change bmv2 test runner to run bmv2 model and CLI from build tree if it can be found [[view](#362)]
+- Extend local_copyprop to deal with more stuff in control blocks [[view](#359)]
+- Fix selector input check for shared action selectors [[view](#358)]
+- shut up warnings about AttribLocal shadowing [[view](#360)]
+- Enable sharing an action_selector between tables [[view](#354)]
+- Too agressive shadow warnings [[view](#352)]
+- fix return code on run-*.py scripts [[view](#353)]
+- Independent compiler versions for different back-ends [[view](#350)]
+- clean up override warning for NDEBUG builds [[view](#351)]
+- Add P4-14 type checker logging [[view](#343)]
+- Fixed bug in name resolution; better shadowing tests [[view](#349)]
+- Removed a bit of useless code
+- Fix for issue #345
+- Fix for issue #344
+- Removed useless map
+- Fix for issue #297
+- Extend local_copyprop to run over control bodies [[view](#342)]
+- Update tests
+- Allow widening when combining bit<> types during P4-14 type inference
+- Rearrange P4-14 type inference passes to visit duplicated ActionArg nodes
+- Infer operand types for P4-14 clone primitives correctly
+- Fix for issue #297 [[view](#340)]
+- Update README.md [[view](#336)]
+- Better support for header stacks in expr for bmv2 [[view](#338)]
+- Added --Werror flag [[view](#337)]
+- More Test Cases [[view](#334)]
+- Add missing forward references for non-unified source build environments [[view](#332)]
+- put p14_to_16 outputs in the right p4_14_outputs subdir [[view](#335)]
+- program should exit after printing version [[view](#333)]
+- leave deprecated option flags out of help text without break existing tools [[view](#331)]
+- Update P4-14 to P4-16 conversion tests to use const default_action
+- Only expose default actions via const_default_action_id if they're actually const. See #309
+- Treat P4-14 explicit default actions as const
+- Fix for issue #323 [[view](#327)]
+- mark --p4-14,--p4-16 flags as deprecated
+- remove redudant -h flag
+- P4_14->16: Include registers referenced by externs in the control that holds the externs.
+- check-ifail target to run just IFAIL_TESTS
+- Annotate Frontend Counters with Min and Max Width [[view](#329)]
+- allows spaces within bytes in STF scripts [[view](#322)]
+- fix for issue #313 [[view](#320)]
+- Update test outputs accordingly
+- Add name annotation to NoAction in core.p4
+- Make p4test members public to aid test development for external extensions [[view](#324)]
+- Support references to action profile instances in table implementations in p4RuntimeSerializer. See #296
+- Add support for serializing direct counters and meters in p4RuntimeSerializer. Fixes #311
+- Add ExternInstance to make resolving extern instance references easier. Fixes #302
+- Desugar valid match correctly in p4RuntimeSerializer
+- Fix for issue #314 [[view](#315)]
+- Deduplicate serialized actions with the same id. Fixes #308
+- misc cleanups
+- Fixes for P4_14->16 conversion of externs
+- Fix for issue #304 [[view](#305)]
+- Add missing include-what-you-use headers
+- ClonePathExpressions: set visitDagOnce to false
+- Add selector mode/type params as annotations when translating to P4_16
+- Support functions for TableProperties
+- Fix for Issue #298 [[view](#299)]
+- Clean up some more toolchain sensitivities [[view](#301)]
+- Support action profiles in P4RuntimeSerializer
+- Add support to p4RuntimeSerializer to indexing into header stacks in table match keys. Fixes #291
+- Provide a directory separator if needed when converting relative to absolute path
+- Test for issue #187 [[view](#295)]
+- Several EBPF back-end fixes. [[view](#288)]
+- Add missing frontends/backends direct include dependencies [[view](#292)]
+- Fix incorrect error message in p4RuntimeSerializer [[view](#290)]
+- Issue #242 test update [[view](#286)]
+- Fix localcopyprop (issue #242)]
+- Add support for generating a PI control plane API to p4c
+- Annotate the standard metadata struct so we can make it visible to PI
+- Add the dependencies for PI serialization to the build
+- Work around a bug in GCC 4.8 affecting ADL of get()]
+- Test for issue #134 [[view](#280)]
+- Merge pull request #283 from teverman/master
+- Merge pull request #282 from mbudiu-vmw/mbudiu
+- Update bootstrap.sh [[view](#279)]
+- Fix for (updated)] issue #272 [[view](#277)]
+- Fix for issue #270 [[view](#271)]
+- Fix make recheck
+- Fix for issue #272
+- Add explicit expects for output ports that might be used in stf files
+- Rework include file/path handling so we can install the compiler
+- Fixes for problems identified by google (issues 34773327, 34872853)]
+- Work around dynamic_cast bug in clang
+- Two more improvements
+- Use cstring()] instead of the empty cstring
+- Make our Docker image inherit from the behavioral-model Docker image
+- Save the key names in @name annotations: fix for issue #259
+- add union for SymBitMatrix
+- Check to ensure PassManagers are called properly with apply.
+- tweak log dumping in p4test backend
+- fix parsing of default action to allow emty argmuents
+- Several improvements [[view](#260)]
+- Don't ignore output of preprocessor
+- fix a couple of v1 primitives
+- Use only two make jobs on Travis
+- Only rebuild otherMakefiles.am if a makefile has changed
+- Run P4C tests that require the behavioral model in Travis
+- Enable cpplint on Travis
+- Fix cpplint's complaints
+- Increase timeout to 10 minutes for all test types
+- check that clone clones properly
+- Insert explicit conversions for P4_14 implicit conversions in typechecking.
+- support for "@optional" arguments to extern methods
+- Extend typechecking to extern attribute locals
+- Typechecking fixes for extern types
+- Changed switch profiles in testdata with temporary name change
+- cpplint fixes; two small ebpf fixes
+- Fix for issue 249; ebpf improvements
+- Removed unused field
+- Remove unused exit tables from BMv2 JSON output
+- Merge pull request #251 from sethfowler/seth/docker-and-travis
+- add type of newly created $valid$ to typeMap
+- Clean up the comments about automake variables populated in subprojects
+- Turn libfrontend.a into a libtool library
+- Document the fact that the tests don't pass on Ubuntu without tcpdump installed
+- Add support for enums in bmv2 backend [[view](#247)]
+- More general support for errors in bmv2 backend [[view](#245)]
+- Remove redundant override keyword from getNode()] overloads
+- Revert "Turn libfrontend.a into a libtool library"
+- Replace BUG_CHECK with error in bmv2 backend
+- Add support for initializing ordered_set with an initializer_list
+- Turn libfrontend.a into a libtool library
+- More thoroughly exclude scalars from the BMV2 JSON -> PI path
+- Mark Node::getNode()] final
+- Enable constant folding after copy propagation
+- EBPF back-end improvements
+- Two constant folding bug-fixes
+- Add support for verify statements in bmv2 backend
+- Update README.md
+- Fix for issues #231, #232
+- Allow header.valid as alias for valid(header)]
+- p4_14->16 conversion: default action handling
+- v1 primitive info fix
+- prefer Makefile-p4c-extension.am to Makefile.am from extension directories
+- updated output
+- Fix for issue #226
+- Added more v1 primitives to primitive table
+- IR::Node::as template method like "to" except it throws bad_cast instead of returning nullptr
+- remove spurious extra ;s
+- remove nameFromAnnotation globally -- use externName instead
+- Add version information to bmv2 JSON [[view](#224)]
+- Update jsonconverter to use most recent format [[view](#223)]
+- Fix for issue #220
+- use "externalName()]" consistently to get the names of things in the json
+- Reference outputs have changed when sources have changed
+- Fix for issue #210; a few other small bugfixes
+- Bugfix for lowering pass: fixes test_config_23_* test
+- Fix for issue #217
+- Fix for issue #216
+- Fix for issue #212
+- extend counter tests a bit
+- counter test fixes/stf files
+- add testcase
+- Enable predication for BMv2 back-end
+- Implement predication in actions: convert if to ?:; fix for issue #207
+- Allow direct action calls in ebpf
+- docs: update git instructions to rebase
+- Fix for issue #208
+- Fix for issue #166: spec changed for header stacks
+- Merge pull request #209 from sethfowler/exclude-scalars-from-pi
+- Cropped image
+- Improved EBPF documentation
+- fixes in documentation; changed links to point to the released spec
+- Update unified compilation info when automake files change (fixes #197)]
+- Exclude generated unified compilation files as inputs in gen-unified-makefile.py
+- Make generated unified compilation .cpp files depend on the generated .am file
+- Allow specifying the source tree root and output file to gen-unified-makefile.py
+- Set types on newly craeted expressions based on operands.
+- Tweak gateway7 test case
+- use followlinks instead of symlinks in tools/gen-unified-makefile.py
+- Merge pull request #200 from mbudiu-vmw/master
+- Fix for issue #199
+- Brought README files up-to-date
+- Two small fixes for ebpf
+- Replace IR::NamedRef -> IR::PathExpression
+- Add LICENSE.md
+- Update LICENSE
+- cpplint fixes
+- Fix for issue #172
+- Made .last a non-l-value
+- additional ebpf fixes
+- new test
+- cpplint fixes
+- test for ebpf hit case
+- Implement table.apply()].hit properly in ebpf
+- Add headers to noinst_HEADERS so they continue to be linted
+- Support reldir expansions in _UNIFIED automake rules
+- Bug-fixes in ebpf back-end
+- Fix json for header stack ref in push/pop primitives
+- Better support unified builds for extensions that add new IR classes
+- Add support for unified builds
+- Remove anonymous namespace from parserUnroll.cpp
+- Fix for issues #187
+- Merge pull request #186 from sethfowler/seth/fix-addconfig-ac-issues
+- Various P4_14->P4_16 convesion issue fixes
+- Rework log level caching to avoid the need for per-file static variables
+- Keep This in ReferenceMap [[view](#184)]
+- Added to the frontend to bring all of the correct type information for Action Selectors and Action Profiles in the tofino backend
+- Update bmv2stf.py to take an observation log argument and to handle the case when it is invoked directly without such an argument.
+- Merge remote-tracking branch 'upstream/master'
+- Fix for issue #178
+- Some changes in preparation for fixing issue #172
+- Merge remote-tracking branch 'upstream/master'
+- default_action has to bind ALL parameters; fix for issue #164
+- Brought compiler documentation up-to-date
+- Merge remote-tracking branch 'upstream/master'
+- Improved documentation
+- Fixed bug in type checking
+- Made CFG traversal deterministic
+- Moved truncate to v1model; disabled P4 special compilation path
+- update outputs
+- support for varbit types
+- Support for truncate primitive
+- Fix for issue #131
+- Fix for issue #158
+- Fix for issue #158
+- Fix for inliner bug introduced with latest change
+- small code cleanups
+- Inlining with fewer fat temporaries: fix for issue #152
+- Removed set<> from the grammar
+- recurse throghu BlockStatements processing checksum
+- cpplint cleanups
+- Fix for issue #150
+- cleanup includes
+- Don't give warnings about constant folding late in the compilation
+- Merged with upstream
+- Merge remote-tracking branch 'upstream/master'
+- Fixes for issues #24, #25, #119, #144 - unfold nested structs
+- Fix for issue #148; other bug-fixes
+- Fix for issue #145
+- Fix for issues #138 and #141
+- Moved table property validation to midend
+- Fix for issue #140
+- Removed path prefixes and namespaces from IR
+- Convert P4_14 pragmas into annotations as strings
+- disable P4_14 specific path in bmv2 midend
+- remove redundant id change in template visit_children
+- Fix for issue #138
+- Fix for issue #137
+- Fix for issue ##136
+- removed junk file
+- Fixed copyright
+- Fix for issue #133: implement nested structure copying
+- up p4test timeout to 300 seconds
+- Fix for issue #130
+- Add ternary valid test case.
+- valid and $valid as aliases for $valid$ in bmv2stf keys
+- clean up gcc6.2 warnings
+- Timeout opening fifos when running bmv2 tests (avoid hang when bmv2 crashes on startup)]
+- Fix for issue #125
+- fix bmv2 json generation for ternary valid match
+- Fix for issue #98
+- set direct meter name in bmv2 json properly
+- bmv2 backend fixes for register_read and random
+- Don't move checksum operations into an action.
+- support for range match in bmv2 backend
+- show both current and peak memory use in logs
+- trigger GC and show memory use after each pass with -Tpass_manager:3
+- Fix bmv2/json generation crashes for p4_16 code converted from p4_14
+- Support for header.valid in table reads (P4_14)]
+- Support for set<> type
+- submit minimal example exposing bug #113
+- Fix for issue #120
+- Fix for issue #117
+- Allow blocks in parsers; bug fix for issue #115
+- Better error message if source file does not exist
+- minimal example triggering bug p4lang/p4c#115
+- recheck-% pattern target
+- Fix for issue #113
+- Removed XFAIL test; removed @name annotations on variables
+- Fix for issue #99
+- Fix for issue #111
+- ControlFlowVisitor -- add flow_dead
+- add action_name to IR::ActionArg
+- bmv2stf: Delay in starting CLI if there are no interfaces
+- p4_14 pragma support
+- Fix incorrect translation of current()] [[view](#107)]
+- New exact_match_valid1.stf test
+- Fix issue #108 [[view](#109)]
+- Lexer fix for integer literals; removed XPASS test
+- Squashed commit of the following:
+- Add .stf files for more gateway tests [[view](#106)]
+- Merge pull request #104 from ChrisDodd/cdodd
+- cpplint fixes
+- merged with upstream
+- Implemented removal of unused assignments
+- Do not add @name annotations on variables and constants - ID can now be used for this purpose
+- Fixed two small bugs
+- support for _ as alias for default; unused assignment removal
+- An ID now has two potential strings: the original name and the new name
+- Moved specialization to front-end; added pass to remove control-flow from parsers
+- Added 3 @atomic tests and fix for bug losing @atomic block
+- Another bug fix addressing issue #94 - for the emit method
+- Added 'tuple' to P4 grammar; fixed def-use analysis bug
+- fix for issue #91
+- Fixes and tests for issue #94
+- removed test by mistake
+- merged with upstream
+- Fixed specialization to properly cope with parsers/controls passed as arguments
+- Merge branch 'mbudiu' into mbudiu-stage
+- remove spurious #include
+- Fixed compiler warnings on uninitialized variable use
+- cpplint cleanup
+- Merge branch 'master' of github.com:p4lang/p4c
+- Merge branch 'master' into stage-json
+- clean up fromJSON autogen
+- make --toJSON argument work
+- Fix broken json decode routines
+- Merge branch 'master' into stage-json
+- Merge branch 'master' into stage-json
+- Fix bugs with json deserialization
+- Merge branch 'master' into cdodd-json
+- Merge branch 'emre-orbay' into cdodd-json
+- cpplint cleanups
+- Merge branch 'master' into cdodd-json
+- Added support for dumping json into build/json_outputs/. Currently always on.
+- Merge cdodd-json and emre-orbay
+- Merge pull request
+- Add Json Parser for generic parsing
+- Extend json_generator simplification to more classes.
+- Fix methods.cpp Resolve pull request
+- Add json parser
+- Fix merge issues and various bugs
+- Fixed error in merge
+- Add /mau/resource.h into ir-generated includes
+- Resolve merge conflicts
+- Progress on serialzer
+- Finished generate<> overloads
+- Testing json-generate templates
+- first commit
+- libgc use fixes for OSX
+- Simplify toString methods
+- avoid crash after error
+- OSX workaround for missing pipe2
+- const_cast fix for OSX
+- configure fixes for OSX
+- Trivial bridged metadata test
+- add revisit_visited()] visitor functionality
+- changed outputs
+- missing primitives
+- v1 metadata mods to allow better p4-16->v1 conversion
+- bitvec/bitops improvements
+- update outputs
+- Read-only symbolic evaluation for parsers - will be used to unroll and optimize parsers
+- first cut at parser symbolic execution implemented
+- Allow non-constant values for directionless action parameters
+- add negate IR::Constant operator
+- update outputs
+- merged with upstream
+- moved annotations to front for declarations and typedef
+- merged with upstream
+- completed specialization and type variable replacements
+- fixes to typechecking and type variable inference
+- added unification for stacks
+- Implemented specialization - still incomplete
+- move generated tests makefiles into build directory
+- more irgen cleanup
+- add PassRepeatUntil
+- README update
+- backwards compatible test runnner additions
+- updated compiler documentation with new IR language and new folder names
+- renamed v1.2 to P4_16, etc.
+- merged with upstream
+- added alias checking; moved some code from IR to P4 namespace; parser inlining is incomplete
+- added constant folding for select expressions
+- cpplint fixes
+- merged with upstream
+- Attempt to speed-up type checking by skipping program parts already processed
+- merged with upstream
+- table key simplification implemented
+- Removed file not yet working
+- added copyright to some P4 files
+- Tightened type checking
+- Merge branch 'mbudiu'
+- XFAIL update
+- minor updates
+- merged with upstream
+- Fixes in type-checking; parameter removal for actions
+- Integers in structs were not unified (cast)] properly
+- added copyright; ran cpplint
+- new pass to remove table arguments; renamed reference outputs to fixed names; some bug-fixes
+- Merge branch 'mbudiu'
+- add Range of std::pair
+- Only generated Vectors needed by the IR - faster compilation
+- Added new pass to rename table and action parameters
+- Moved RemoveLeftSlices to the mid-end
+- deleted useless code
+- Merge branch 'master' into mbudiu
+- small change in v1model.p4; fixed compiler warnings and errors with clang-3.6 and gcc-4.9
+- Merge branch 'master' into mbudiu
+- bmv2 does not support default_action for all tables
+- Added nice pass names to most passes
+- Added support for BMv2 default actions
+- Removed TypeMap and ReferenceMap from BlockMap - in preparation for removing BlockMap
+- removed some useless code
+- Fixed bugs in exit removal pass
+- made the body of an action a BlockStatement
+- preparing for merge
+- Changed setValid(bool)] to setValid()] and setInvalid()]
+- Merge branch 'master' into mbudiu
+- Moved P4/IR dumping into options and made uniform
+- Pass to duplicate an action for each table using it
+- Fixed bug in keeping track of used names
+- more robust check
+- constant folding for enum values
+- delete incorrectly added file
+- last class converted to use IndexedVector
+- bug fix
+- Converted all classes to use IndexedVector
+- convert more classes to use IndexedVector
+- Merge branch 'master' into mbudiu
+- Implemented IndexedVector; used in several places already
+- new reference outputs
+- new reference output
+- merged with cdodd-stage
+- do not visit Expression::type
+- Added this experimental keyword
+- fixes to make switch.p4 run again
+- fixes for v1 front-end; made Expression::type free to use; started pass to localize actions
+- more precise SideEffects visitor
+- correct semantics for locals in parser states
+- dump P4 and IR
+- created some useful PassManagers
+- commented new sample program
+- cpplint fixes
+- show always the externalName to the user
+- Merge branch 'master' into mbudiu
+- added experimental support for abstract extern methods
+- added tests for abstract methods
+- Experimental virtual extern method support
+- more aggressive unique names; added mid-end for ebpf compiler
+- a few small fixes
+- BMv2 support for local variables
+- synthesizing actions from control code
+- Merge branch 'cdodd' into mbudiu
+- started work on moving action calls to tables
+- improved bmv2 mid-end; added debugHook for passmanager; better error reporting on BUG
+- configure detection of clang; fail on errors in bootstrap
+- cpplint fixes
+- Simplified handling of Type_InfInt
+- Merge branch 'master' into mbudiu
+- more resilient type-checking: do not traverse Expression::type if not needed
+- Merge branch 'master' into mbudiu
+- Optional support for BMv2 installation
+- merged with master
+- completed control inliner
+- cpplint fixes
+- more passes to v12 midend
+- Merge branch 'master' into mbudiu
+- forgot to add a file
+- (hopefully)] correct actions inliner
+- fixed bug in moveDeclarations
+- new reference files
+- add default_action when converting v1->v1.2; renaming locals; remove return statements
+- merged with master
+- actions inliner is actually not good enough for v1.2; refactored
+- refactored general inlining code into a separate set of classes
+- removed the specialization pass: not general enough; will be replaced with inliner
+- pass bootstrap.sh arguments to configure
+- added visitor::end_apply
+- removed useless includes
+- added more BMV2 tests and fixes
+- fixes in type-checking; better bmv code generation
+- Merge branch 'master' into mbudiu
+- bugfixes in bmv2 back-end
+- added one extra STF test
+- handle array keys properly
+- separated v1 IR; renamed some IR classes
+- fixed typo in error message
+- fixed uninitialized fields and virtual destructors
+- updated documentation; added TODO list
+- fixed typos
+- added empty.pcap in tools
+- STF tests now work with BMV2
+- added exit
+- removed useless code path
+- renamed assert to verify and .valid to .isValid
+- Merge branch 'master' into mbudiu
+- work towards automatic testing using bmv2
+- Merge branch 'master' into mbudiu
+- fixed typo
+- more error checks
+- handle table.apply()].hit in bmv2
+- Removed broken test
+- Merge branch 'master' of https://github.com/p4lang/p4c
+- handling direct meters
+- renamed create-makefile to find-makefiles
+- renamed p4c-bmv2 to p4c-bm2 to avoid confusion with the old compiler
+- reference compiler outputs
+- added test programs
+- P4 v1.2 compiler prototype
+- 
