@@ -33,8 +33,10 @@ void KeyNameGenerator::postorder(const IR::PathExpression *expression) {
 
 namespace {
 
+// The constants are used below. We se `$valid$` to represent `isValid()` calls
+// on headers and header unions; this is what P4Runtime expects.
 static const cstring isValid = "isValid"_cs;
-static const cstring isValidD = "$valid$"_cs;
+static const cstring isValidKey = "$valid$"_cs;
 
 /// @return a canonicalized string representation of the given Member
 /// expression's right-hand side, suitable for use as part of a key name.
@@ -51,7 +53,7 @@ cstring keyComponentNameForMember(const IR::Member *expression, const P4::TypeMa
     // SynthesizeValidField, which leaves `isValid()` as-is for header unions,
     // but that's a BMV2-specific thing.
     if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>())
-        if (expression->member == isValid) return isValidD;
+        if (expression->member == isValid) return isValidKey;
 
     // If this Member represents a field which has an @name annotation, use it.
     if (type->is<IR::Type_StructLike>()) {

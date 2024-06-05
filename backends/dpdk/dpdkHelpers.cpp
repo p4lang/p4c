@@ -24,6 +24,8 @@ limitations under the License.
 
 namespace DPDK {
 
+using namespace P4::literals;
+
 /// convert relation comparison statements into the corresponding branching
 /// instructions in dpdk.
 void ConvertStatementToDpdk::process_relation_operation(const IR::Expression *dst,

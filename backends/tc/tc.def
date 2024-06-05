@@ -173,7 +173,7 @@ class TCAction {
         if (actionName == "NoAction") {
             return actionName;
         }
-        std::string tcAction = pipelineName.c_str();
+        std::string tcAction = pipelineName.string();
         tcAction += "/" + actionName;
         return tcAction;
     }

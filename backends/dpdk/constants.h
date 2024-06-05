@@ -19,9 +19,6 @@ limitations under the License.
 
 #include "lib/cstring.h"
 
-// FIXME: all constants below must be in a namespace
-using namespace P4::literals;
-
 /// Unique handle for action and table.
 const unsigned table_handle_prefix = 0x00010000;
 const unsigned action_handle_prefix = 0x00020000;
@@ -38,8 +35,8 @@ const unsigned default_learner_table_timeout[dpdk_learner_max_configurable_timeo
     10, 30, 60, 120, 300, 43200, 120, 120};
 
 /// JSON schema versions
-const cstring bfrtSchemaVersion = "1.0.0"_cs;
-const cstring tdiSchemaVersion = "0.1"_cs;
+const cstring bfrtSchemaVersion = cstring::literal("1.0.0");
+const cstring tdiSchemaVersion = cstring::literal("0.1");
 
 /// HASH Values
 // FIXME: These should be enum
