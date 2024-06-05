@@ -1,4 +1,4 @@
-# Changelog 
+\page changelog Changelog
 
 ## Release v1.2.4.12 [[view](https://github.com/p4lang/p4c/pull/4699)]
 
