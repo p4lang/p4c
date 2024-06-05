@@ -1,34 +1,52 @@
 ## Release v1.2.4.12 [[view](#4699)]
-- Add support for new platform property annotations for P4Runtime. [[view](#4611)]
-- Fix extern pipeline name in template file [[view](#4675)]
-- Add a release template to the compiler. [[view](#4692)]
-- irgen: Generate explicit instantiations [[view](#4681)]
-- Workaround for gcc-11.4/draft 2x spec flaw [[view](#4679)]
-- Remove no-longer-used *.p4info.txt files [[view](#4687)]
-- Improve `BUG_CHECK` internals [[view](#4678)]
-- Make the new operator protected for some IR types. [[view](#4670)]
-- Set type for LAnd, LOr, LNot to be Type_Boolean if unknown. [[view](#4612)]
-- Facilitate inheritance from RenameSymbols pass, deduplicate code [[view](#4682)]
-- Add string_view and string conversion operators and functions to cstring [[view](#4676)]
-- Generalization & minor refactoring in RenameMap [[view](#4677)]
-- Added changes for default hit actions for tc backend [[view](#4673)]
-- Support for Register Extern in P4TC [[view](#4671)]
-- Aggressively clean up the Protobuf CMake dependency. [[view](#4543)]
-- RemoveUnusedDeclarations - make helpers protected [[view](#4668)]
+
+### Breaking Changes 🛠
 - Replace IR::getBitType with IR::Type_Bits::get. [[view](#4669)]
-- Only emit the warning on EXPORT_COMPILE_COMMANDS when there are clang-tidy files to lint. [[view](#4665)]
-- Explicitly include hash for Ubuntu 18.04. [[view](#4664)]
-- Changes for for loops [[view](#4562)]
+- Make the new operator protected for some IR types. [[view](#4670)]
+  
+### P4 Specification Implementation
 - [#4656] Explicitly delay constant folding of only action enum `IR::SwitchCase` `label` expressions, instead of delaying constant folding of all `IR::Mux` expressions [[view](#4657)]
-- Link against the Boehm-Demers-Weiser Garbage Collector using FetchContent. [[view](#3930)]
-- Merge TestgenCompilerTarget into TestgenTarget. [[view](#4650)]
-- Add support for a clang-tidy linter. Add a files utility function. [[view](#4254)]
-- Fixes to lib/hash and lib/big_int_util. [[view](#4655)]
-- Change parameter for kfunc 'bpf_p4tc_entry_create_on_miss' [[view](#4637)]
-- Fix missing declaration of custom externs in the generated eBPF/uBPF header file. [[view](#4644)]
-- Improve error message when shifting int by non-const [[view](#4653)]
-- Move IRUtils Literal get functions to the respective IR members. Add stringliteral get function.  [[view](#4623)]
+- Changes for for loops [[view](#4562)]
+
+### Changes to the Compiler Core
 - Use check_include_file_cxx instead of check_include_file to find mm_malloc.h [[view](#4649)]
+- Move IRUtils Literal get functions to the respective IR members. Add stringliteral get function.  [[view](#4623)]
+- Improve error message when shifting int by non-const [[view](#4653)]
+- Fixes to lib/hash and lib/big_int_util. [[view](#4655)]
+- Link against the Boehm-Demers-Weiser Garbage Collector using FetchContent. [[view](#3930)]
+- Explicitly include hash for Ubuntu 18.04. [[view](#4664)]
+- RemoveUnusedDeclarations - make helpers protected [[view](#4668)]
+- Generalization & minor refactoring in RenameMap [[view](#4677)]
+- Add string_view and string conversion operators and functions to cstring [[view](#4676)]
+- Facilitate inheritance from RenameSymbols pass, deduplicate code [[view](#4682)]
+- Set type for LAnd, LOr, LNot to be Type_Boolean if unknown. [[view](#4612)]
+- Improve `BUG_CHECK` internals [[view](#4678)]
+- Workaround for gcc-11.4/draft 2x spec flaw [[view](#4679)]
+- irgen: Generate explicit instantiations [[view](#4681)]
+
+### Changes to the Control Plane
+- Add support for new platform property annotations for P4Runtime. [[view](#4611)]
+
+### Changes to the eBPF Back Ends
+- Fix missing declaration of custom externs in the generated eBPF/uBPF header file. [[view](#4644)]
+
+### Changes to the TC Back End
+- Support for Register Extern in P4TC [[view](#4671)]
+- Added changes for default hit actions for tc backend [[view](#4673)]
+- Fix extern pipeline name in template file [[view](#4675)]
+
+### Changes to the P4Tools Back End
+- Merge TestgenCompilerTarget into TestgenTarget. [[view](#4650)]
+### Other Changes
+- Change parameter for kfunc 'bpf_p4tc_entry_create_on_miss' [[view](#4637)]
+- Add support for a clang-tidy linter. Add a files utility function. [[view](#4254)]
+- Only emit the warning on EXPORT_COMPILE_COMMANDS when there are clang-tidy files to lint. [[view](#4665)]
+- Aggressively clean up the Protobuf CMake dependency. [[view](#4543)]
+- Remove no-longer-used *.p4info.txt files [[view](#4687)]
+- Add a release template to the compiler. [[view](#4692)]
+
+Full Changelog: https://github.com/p4lang/p4c/compare/v1.2.4.11...v1.2.4.12
+
 ## Release v1.2.4.11 [[view](#4646)]
 - Introduce guard for aarch64 GCC compilation. [[view](#4647)]
 - Add -mbmi flag to Abseil for GCC versions greater than 14.  [[view](#4638)]
