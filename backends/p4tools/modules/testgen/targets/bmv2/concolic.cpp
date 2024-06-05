@@ -60,7 +60,7 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> 
         for (size_t idx = 1; idx < exprList.size(); idx++) {
             const auto *expr = exprList.at(idx);
             const auto *newWidth =
-                IR::getBitType(concatExpr->type->width_bits() + expr->type->width_bits());
+                IR::Type_Bits::get(concatExpr->type->width_bits() + expr->type->width_bits());
             concatExpr = new IR::Concat(newWidth, concatExpr, expr);
         }
 
@@ -71,8 +71,8 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> 
         if (remainder != 0) {
             auto fillWidth = CHUNK_SIZE - remainder;
             concatWidth += fillWidth;
-            const auto *remainderExpr = IR::getConstant(IR::getBitType(fillWidth), 0);
-            concatExpr = new IR::Concat(IR::getBitType(concatWidth), concatExpr, remainderExpr);
+            const auto *remainderExpr = IR::Constant::get(IR::Type_Bits::get(fillWidth), 0);
+            concatExpr = new IR::Concat(IR::Type_Bits::get(concatWidth), concatExpr, remainderExpr);
         }
         auto dataInt =
             IR::getBigIntFromLiteral(finalModel.evaluate(concatExpr, true, resolvedExpressions));
@@ -141,7 +141,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          // Assign a value to the @param result using the computed result
          if (const auto *checksumVarType = checksumVar->type->to<IR::Type_Bits>()) {
              // Overwrite any previous assignment or result.
-             (*resolvedConcolicVariables)[*var] = IR::getConstant(checksumVarType, computedResult);
+             (*resolvedConcolicVariables)[*var] =
+                 IR::Constant::get(checksumVarType, computedResult);
 
          } else {
              TESTGEN_UNIMPLEMENTED("Checksum output %1% of type %2% not supported", checksumVar,
@@ -194,7 +195,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          // Assign a value to the @param result using the computed result
          if (checksumVarType->is<IR::Type_Bits>()) {
              // Overwrite any previous assignment or result.
-             (*resolvedConcolicVariables)[*var] = IR::getConstant(checksumVarType, computedResult);
+             (*resolvedConcolicVariables)[*var] =
+                 IR::Constant::get(checksumVarType, computedResult);
          } else {
              TESTGEN_UNIMPLEMENTED("Checksum output %1% of type %2% not supported", checksumVar,
                                    checksumVarType);
@@ -248,7 +250,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          // Assign a value to the @param result using the computed result
          if (checksumVarType->is<IR::Type_Bits>()) {
              // Overwrite any previous assignment or result.
-             (*resolvedConcolicVariables)[*var] = IR::getConstant(checksumVarType, computedResult);
+             (*resolvedConcolicVariables)[*var] =
+                 IR::Constant::get(checksumVarType, computedResult);
          } else {
              TESTGEN_UNIMPLEMENTED("Checksum output %1% of type %2% not supported", checksumVar,
                                    checksumVarType);

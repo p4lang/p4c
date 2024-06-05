@@ -42,6 +42,8 @@ class EBPFTestgenTarget : public TestgenTarget {
 
  private:
     EBPFTestgenTarget();
+
+    [[nodiscard]] MidEnd mkMidEnd(const CompilerOptions &options) const override;
 };
 
 }  // namespace P4Tools::P4Testgen::EBPF

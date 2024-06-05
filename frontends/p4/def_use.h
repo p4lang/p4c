@@ -231,6 +231,7 @@ class LocationSet : public IHasDbPrint {
     }
     // only defined for canonical representations
     bool overlaps(const LocationSet *other) const;
+    bool operator==(const LocationSet &other) const;
     bool isEmpty() const { return locations.empty(); }
 };
 
@@ -476,10 +477,12 @@ class AllDefinitions : public IHasDbPrint {
 
 class ComputeWriteSet : public Inspector, public IHasDbPrint {
  protected:
-    AllDefinitions *allDefinitions;    /// Result computed by this pass.
-    Definitions *currentDefinitions;   /// Before statement currently processed.
-    Definitions *returnedDefinitions;  /// Definitions after return statements.
-    Definitions *exitDefinitions;      /// Definitions after exit statements.
+    AllDefinitions *allDefinitions;              /// Result computed by this pass.
+    Definitions *currentDefinitions;             /// Before statement currently processed.
+    Definitions *returnedDefinitions;            /// Definitions after return statements.
+    Definitions *exitDefinitions;                /// Definitions after exit statements.
+    Definitions *breakDefinitions = nullptr;     /// Definitions at break statements.
+    Definitions *continueDefinitions = nullptr;  /// Definitions at continue statements.
     ProgramPoint callingContext;
     const StorageMap *storageMap;
     /// if true we are processing an expression on the lhs of an assignment
@@ -498,6 +501,8 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
           currentDefinitions(definitions),
           returnedDefinitions(nullptr),
           exitDefinitions(source->exitDefinitions),
+          breakDefinitions(source->breakDefinitions),
+          continueDefinitions(source->continueDefinitions),
           callingContext(context),
           storageMap(source->storageMap),
           lhs(false),
@@ -522,9 +527,12 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
         CHECK_NULL(expression);
         CHECK_NULL(loc);
         LOG3(expression << dbp(expression) << " writes " << loc);
-        BUG_CHECK(writes.find(expression) == writes.end() || expression->is<IR::Literal>(),
-                  "Expression %1% write set already set", expression);
-        writes.emplace(expression, loc);
+        if (auto it = writes.find(expression); it != writes.end()) {
+            BUG_CHECK(*it->second == *loc || expression->is<IR::Literal>(),
+                      "Expression %1% write set already set", expression);
+        } else {
+            writes.emplace(expression, loc);
+        }
     }
     void dbprint(std::ostream &out) const override {
         if (writes.empty()) out << "No writes";
@@ -589,7 +597,12 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     bool preorder(const IR::AssignmentStatement *statement) override;
     bool preorder(const IR::ReturnStatement *statement) override;
     bool preorder(const IR::ExitStatement *statement) override;
+    bool preorder(const IR::BreakStatement *statement) override;
+    bool handleJump(const char *tok, Definitions *&defs);
+    bool preorder(const IR::ContinueStatement *statement) override;
     bool preorder(const IR::IfStatement *statement) override;
+    bool preorder(const IR::ForStatement *statement) override;
+    bool preorder(const IR::ForInStatement *statement) override;
     bool preorder(const IR::BlockStatement *statement) override;
     bool preorder(const IR::SwitchStatement *statement) override;
     bool preorder(const IR::EmptyStatement *statement) override;

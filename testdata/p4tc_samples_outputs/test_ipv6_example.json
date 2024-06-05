@@ -1,6 +1,7 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "test_ipv6_example",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/tbl_default",

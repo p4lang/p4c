@@ -18,7 +18,8 @@ const IR::Node *HSIndexToMember::postorder(IR::ArrayIndex *curArrayIndex) {
 const IR::ArrayIndex *HSIndexToMember::produceStackIndex(const IR::Type *type,
                                                          const IR::Expression *expression,
                                                          size_t arrayIndex) {
-    return new IR::ArrayIndex(type, expression, IR::getConstant(IR::getBitType(32), arrayIndex));
+    return new IR::ArrayIndex(type, expression,
+                              IR::Constant::get(IR::Type_Bits::get(32), arrayIndex));
 }
 
 }  // namespace P4Tools

@@ -67,8 +67,8 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
     : AbstractExecutionState(program),
       body({program}),
       stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
-    env.set(&PacketVars::INPUT_PACKET_LABEL, IR::getConstant(IR::getBitType(0), 0));
-    env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::getConstant(IR::getBitType(0), 0));
+    env.set(&PacketVars::INPUT_PACKET_LABEL, IR::Constant::get(IR::Type_Bits::get(0), 0));
+    env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::Constant::get(IR::Type_Bits::get(0), 0));
     // We also add the taint property and set it to false.
     setProperty("inUndefinedState", false);
     // Drop is initialized to false, too.
@@ -385,14 +385,14 @@ int ExecutionState::getInputPacketSize() const {
 
 void ExecutionState::appendToInputPacket(const IR::Expression *expr) {
     const auto *inputPkt = getInputPacket();
-    const auto *width = IR::getBitType(expr->type->width_bits() + inputPkt->type->width_bits());
+    const auto *width = IR::Type_Bits::get(expr->type->width_bits() + inputPkt->type->width_bits());
     const auto *concat = new IR::Concat(width, inputPkt, expr);
     env.set(&PacketVars::INPUT_PACKET_LABEL, concat);
 }
 
 void ExecutionState::prependToInputPacket(const IR::Expression *expr) {
     const auto *inputPkt = getInputPacket();
-    const auto *width = IR::getBitType(expr->type->width_bits() + inputPkt->type->width_bits());
+    const auto *width = IR::Type_Bits::get(expr->type->width_bits() + inputPkt->type->width_bits());
     const auto *concat = new IR::Concat(width, expr, inputPkt);
     env.set(&PacketVars::INPUT_PACKET_LABEL, concat);
 }
@@ -415,18 +415,18 @@ const IR::Expression *ExecutionState::peekPacketBuffer(int amount) {
     auto bufferSize = buffer->type->width_bits();
 
     auto diff = amount - bufferSize;
-    const auto *amountType = IR::getBitType(amount);
+    const auto *amountType = IR::Type_Bits::get(amount);
     // We are running off the available buffer, we need to generate new packet content.
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
-        const IR::Expression *newVar = createPacketVariable(IR::getBitType(diff));
+        const IR::Expression *newVar = createPacketVariable(IR::Type_Bits::get(diff));
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
         if (bufferSize > 0) {
             auto *slice = new IR::Slice(buffer, bufferSize - 1, 0);
-            slice->type = IR::getBitType(amount);
+            slice->type = IR::Type_Bits::get(amount);
             newVar = new IR::Concat(amountType, slice, newVar);
             resetPacketBuffer();
         }
@@ -457,18 +457,18 @@ const IR::Expression *ExecutionState::slicePacketBuffer(int amount) {
 
     // Compute the difference between what we have in the buffer and what we want to slice.
     auto diff = amount - bufferSize;
-    const auto *amountType = IR::getBitType(amount);
+    const auto *amountType = IR::Type_Bits::get(amount);
     // We are running off the available buffer, we need to generate new packet content.
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
-        const IR::Expression *newVar = createPacketVariable(IR::getBitType(diff));
+        const IR::Expression *newVar = createPacketVariable(IR::Type_Bits::get(diff));
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
         if (bufferSize > 0) {
             auto *slice = new IR::Slice(buffer, bufferSize - 1, 0);
-            slice->type = IR::getBitType(amount);
+            slice->type = IR::Type_Bits::get(amount);
             newVar = new IR::Concat(amountType, slice, newVar);
             resetPacketBuffer();
         }
@@ -482,7 +482,7 @@ const IR::Expression *ExecutionState::slicePacketBuffer(int amount) {
     // If the buffer is larger, update the buffer with its remainder.
     if (diff < 0) {
         auto *remainder = new IR::Slice(buffer, bufferSize - amount - 1, 0);
-        remainder->type = IR::getBitType(bufferSize - amount);
+        remainder->type = IR::Type_Bits::get(bufferSize - amount);
         env.set(&PacketVars::PACKET_BUFFER_LABEL, remainder);
     }
     // The amount we slice is equal to what is in the buffer. Just set the buffer to zero.
@@ -494,20 +494,20 @@ const IR::Expression *ExecutionState::slicePacketBuffer(int amount) {
 
 void ExecutionState::appendToPacketBuffer(const IR::Expression *expr) {
     const auto *buffer = getPacketBuffer();
-    const auto *width = IR::getBitType(expr->type->width_bits() + buffer->type->width_bits());
+    const auto *width = IR::Type_Bits::get(expr->type->width_bits() + buffer->type->width_bits());
     const auto *concat = new IR::Concat(width, buffer, expr);
     env.set(&PacketVars::PACKET_BUFFER_LABEL, concat);
 }
 
 void ExecutionState::prependToPacketBuffer(const IR::Expression *expr) {
     const auto *buffer = getPacketBuffer();
-    const auto *width = IR::getBitType(expr->type->width_bits() + buffer->type->width_bits());
+    const auto *width = IR::Type_Bits::get(expr->type->width_bits() + buffer->type->width_bits());
     const auto *concat = new IR::Concat(width, expr, buffer);
     env.set(&PacketVars::PACKET_BUFFER_LABEL, concat);
 }
 
 void ExecutionState::resetPacketBuffer() {
-    env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::getConstant(IR::getBitType(0), 0));
+    env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::Constant::get(IR::Type_Bits::get(0), 0));
 }
 
 const IR::Expression *ExecutionState::getEmitBuffer() const {
@@ -515,12 +515,12 @@ const IR::Expression *ExecutionState::getEmitBuffer() const {
 }
 
 void ExecutionState::resetEmitBuffer() {
-    env.set(&PacketVars::EMIT_BUFFER_LABEL, IR::getConstant(IR::getBitType(0), 0));
+    env.set(&PacketVars::EMIT_BUFFER_LABEL, IR::Constant::get(IR::Type_Bits::get(0), 0));
 }
 
 void ExecutionState::appendToEmitBuffer(const IR::Expression *expr) {
     const auto *buffer = getEmitBuffer();
-    const auto *width = IR::getBitType(expr->type->width_bits() + buffer->type->width_bits());
+    const auto *width = IR::Type_Bits::get(expr->type->width_bits() + buffer->type->width_bits());
     const auto *concat = new IR::Concat(width, buffer, expr);
     env.set(&PacketVars::EMIT_BUFFER_LABEL, concat);
 }

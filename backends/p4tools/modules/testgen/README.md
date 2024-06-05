@@ -152,7 +152,7 @@ If you would like to cite this work please use this citation format:
 
 ## Contributing
 
-Contributions to P4Testgen in any form are welcome! Please follow the guidelines listed [here](https://github.com/p4lang/p4c/tree/main/docs) to contribute.
+Contributions to P4Testgen in any form are welcome! Please follow the guidelines listed [here](https://github.com/p4lang/p4c/blob/main/CONTRIBUTING.md) to contribute.
 
 ## License
 

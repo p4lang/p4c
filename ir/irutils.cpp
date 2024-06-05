@@ -1,8 +1,6 @@
 #include "ir/irutils.h"
 
 #include <cmath>
-#include <map>
-#include <tuple>
 #include <vector>
 
 #include "ir/indexed_vector.h"
@@ -10,7 +8,6 @@
 #include "ir/vector.h"
 #include "ir/visitor.h"
 #include "lib/exceptions.h"
-#include "lib/rtti.h"
 
 namespace IR {
 
@@ -18,83 +15,47 @@ namespace IR {
  *  Types
  * ============================================================================================= */
 
-const Type_Bits *getBitType(int size, bool isSigned) {
-    // Types are cached already.
-    return Type_Bits::get(size, isSigned);
-}
-
 const Type_Bits *getBitTypeToFit(int value) {
     // To represent a number N, we need ceil(log2(N + 1)) bits.
     int width = ceil(log2(value + 1));
-    return getBitType(width);
+    return Type_Bits::get(width);
 }
 
 /* =============================================================================================
  *  Expressions
  * ============================================================================================= */
 
-const Constant *getConstant(const Type *type, big_int v, const Util::SourceInfo &srcInfo) {
-    // Only cache bits with width lower than 16 bit to restrict the size of the cache.
-    const auto *tb = type->to<Type_Bits>();
-    if (type->width_bits() > 16 || tb == nullptr) {
-        return new Constant(srcInfo, type, v);
-    }
-    // Constants are interned. Keys in the intern map are pairs of types and values.
-    using key_t = std::tuple<int, RTTI::TypeId, bool, big_int>;
-    static std::map<key_t, const Constant *> CONSTANTS;
-
-    auto *&result = CONSTANTS[{tb->width_bits(), type->typeId(), tb->isSigned, v}];
-    if (result == nullptr) {
-        result = new Constant(srcInfo, tb, v);
-    }
-
-    return result;
-}
-
 const IR::Constant *getMaxValueConstant(const Type *t, const Util::SourceInfo &srcInfo) {
     if (t->is<Type_Bits>()) {
-        return IR::getConstant(t, IR::getMaxBvVal(t), srcInfo);
+        return IR::Constant::get(t, IR::getMaxBvVal(t), srcInfo);
     }
     if (t->is<Type_Boolean>()) {
-        return IR::getConstant(IR::getBitType(1), 1, srcInfo);
+        return IR::Constant::get(IR::Type_Bits::get(1), 1, srcInfo);
     }
     P4C_UNIMPLEMENTED("Maximum value calculation for type %1% not implemented.", t);
 }
 
-const BoolLiteral *getBoolLiteral(bool value, const Util::SourceInfo &srcInfo) {
-    // Boolean literals are interned.
-    static std::map<bool, const BoolLiteral *> LITERALS;
-
-    auto *&result = LITERALS[value];
-    if (result == nullptr) {
-        result = new BoolLiteral(srcInfo, Type::Boolean::get(), value);
-    }
-    return result;
-}
-
 const IR::Constant *convertBoolLiteral(const IR::BoolLiteral *lit) {
-    return IR::getConstant(IR::getBitType(1), lit->value ? 1 : 0, lit->getSourceInfo());
+    return IR::Constant::get(IR::Type_Bits::get(1), lit->value ? 1 : 0, lit->getSourceInfo());
 }
 
 const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceInfo &srcInfo,
                                       bool valueRequired) {
     if (const auto *tb = type->to<IR::Type_Bits>()) {
-        // TODO: Use getConstant.
-        return new IR::Constant(srcInfo, tb, 0);
+        return IR::Constant::get(tb, 0, srcInfo);
     }
     if (type->is<IR::Type_Boolean>()) {
-        // TODO: Use getBoolLiteral.
-        return new BoolLiteral(srcInfo, Type::Boolean::get(), false);
+        return IR::BoolLiteral::get(false, srcInfo);
     }
     if (type->is<IR::Type_InfInt>()) {
-        return new IR::Constant(srcInfo, 0);
+        return IR::Constant::get(type, 0, srcInfo);
     }
     if (const auto *te = type->to<IR::Type_Enum>()) {
         return new IR::Member(srcInfo, new IR::TypeNameExpression(te->name),
                               te->members.at(0)->getName());
     }
     if (const auto *te = type->to<IR::Type_SerEnum>()) {
-        return new IR::Cast(srcInfo, type->getP4Type(), new IR::Constant(srcInfo, te->type, 0));
+        return new IR::Cast(srcInfo, type->getP4Type(), IR::Constant::get(te->type, 0, srcInfo));
     }
     if (const auto *te = type->to<IR::Type_Error>()) {
         return new IR::Member(srcInfo, new IR::TypeNameExpression(te->name), "NoError");

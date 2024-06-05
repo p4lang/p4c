@@ -22,15 +22,15 @@ const RefersToParser::RefersToBuiltinMap RefersToParser::REFERS_TO_BUILTIN_MAP =
     {
         {
             "multicast_group_id",
-            IR::SymbolicVariable(IR::getBitType(16), "refers_to_multicast_group_id"),
+            IR::SymbolicVariable(IR::Type_Bits::get(16), "refers_to_multicast_group_id"),
         },
         {
             "replica.port",
-            IR::SymbolicVariable(IR::getBitType(9), "refers_to_replica.port"),
+            IR::SymbolicVariable(IR::Type_Bits::get(9), "refers_to_replica.port"),
         },
         {
             "replica.instance",
-            IR::SymbolicVariable(IR::getBitType(16), "refers_to_replica.instance"),
+            IR::SymbolicVariable(IR::Type_Bits::get(16), "refers_to_replica.instance"),
         },
     },
 }};

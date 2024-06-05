@@ -43,7 +43,8 @@ limitations under the License.
 /// If we operate in user space we only need to include bpf.h and
 /// define the userspace API macros.
 /// For kernel programs we need to specify a list of kernel helpers. These are
-/// taken from here: https://github.com/torvalds/linux/blob/master/tools/testing/selftests/bpf/bpf_helpers.h
+/// taken from here: https://github.com/torvalds/linux/blob/master/tools/lib/bpf/bpf_helpers.h
+
 #ifdef CONTROL_PLANE // BEGIN EBPF USER SPACE DEFINITIONS
 
 #include <bpf/bpf.h> // bpf_obj_get/pin, bpf_map_update_elem

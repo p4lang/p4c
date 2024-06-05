@@ -251,7 +251,7 @@ To add a new input test with a sample P4 code file (under `testdata/p4_16_sample
   
 * Watch out for `const`; it is very important.
 
-* Use `override` whenever possible (new gcc versions enforce this).
+* Use `override` whenever possible (new GCC versions enforce this).
 
 * Never use `const_cast` and `reinterpret_cast`.
 

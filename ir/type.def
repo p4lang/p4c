@@ -67,16 +67,20 @@ inline bool operator>>(cstring s, IR::Direction &d) {
 /// There is no syntax to represent this type.
 /// Treated like a type variable so that unification can assign it a value.
 class Type_Any : Type, ITypeVar {
-    long declid = nextId++;
- private:
+ protected:
+#emit
+    void *operator new(size_t size) { return ::operator new(size); }
+#end
     static long nextId;
  public:
+    long declid = nextId++;
     cstring getVarName() const override { return "int_" + Util::toString(declid); }
     int getDeclId() const override { return declid; }
     dbprint { out << "ANYTYPE/" << declid; }
     toString { return "ANYTYPE"; }
     operator== { return declid == a.declid; }
     static Type_Any get();
+    static Type_Any get(const Util::SourceInfo &si);
     const Type* getP4Type() const override { return nullptr; }
     equiv {
         (void)a;  // silence unused warning
@@ -118,7 +122,13 @@ class Type_Type : Type {
 }
 
 class Type_Boolean : Type_Base {
+ protected:
+#emit
+    void *operator new(size_t size) { return ::operator new(size); }
+#end
+ public:
     static Type_Boolean get();
+    static Type_Boolean get(const Util::SourceInfo &si);
     int width_bits() const override { return 1; }
     toString{ return "bool"; }
     dbprint { out << "bool"; }
@@ -126,17 +136,29 @@ class Type_Boolean : Type_Base {
 
 /// The type of a parser state
 class Type_State : Type_Base {
+ protected:
+#emit
+    void *operator new(size_t size) { return ::operator new(size); }
+#end
+ public:
     static Type_State get();
+    static Type_State get(const Util::SourceInfo &si);
     toString{ return "state"; }
     dbprint { out << "state"; }
 }
 
 /// Represents both bit<> and int<> types in P4-14 and P4-16
 class Type_Bits : Type_Base {
+ protected:
+#emit
+    void *operator new(size_t size) { return ::operator new(size); }
+#end
+ public:
     optional int size = 0;      // zero (only) for not-yet evaluated const expression
     NullOK optional Expression expression; // only used temporarily
     bool isSigned;
-    static Type_Bits get(Util::SourceInfo si, int sz, bool isSigned = false);
+    static Type_Bits get(const Util::SourceInfo &si, Expression expression, bool isSigned = false);
+    static Type_Bits get(const Util::SourceInfo &si, int sz, bool isSigned = false);
     static Type_Bits get(int sz, bool isSigned = false);
     cstring baseName() const { return isSigned ? "int" : "bit"; }
     int width_bits() const override { return size; }
@@ -146,9 +168,16 @@ class Type_Bits : Type_Base {
 }
 
 class Type_Varbits : Type_Base {
+ protected:
+#emit
+    void *operator new(size_t size) { return ::operator new(size); }
+#end
+ public:
     optional int         size = 0;   // if zero it means "unknown"
     NullOK optional Expression  expression = nullptr;  // only used temporarily
-    static Type_Varbits get(Util::SourceInfo si, int size = 0);
+    static Type_Varbits get(const Util::SourceInfo &si, Expression expr);
+    static Type_Varbits get(const Util::SourceInfo &si, int size);
+    static Type_Varbits get(int size);
     static Type_Varbits get();
     toString{ return cstring("varbit<") + Util::toString(size) + ">"; }
     dbprint { out << "varbit<" << size << ">"; }
@@ -215,6 +244,10 @@ class Type_Var : Type_Declaration, ITypeVar {
 /// type unification to discover the correct type for the constants
 /// in some contexts.
 class Type_InfInt : Type, ITypeVar {
+ protected:
+#emit
+    void *operator new(size_t size) { return ::operator new(size); }
+#end
     long declid = nextId++;
  private:
     static long nextId;
@@ -224,6 +257,8 @@ class Type_InfInt : Type, ITypeVar {
     dbprint { out << "int/" << declid; }
     toString { return "int"; }
     operator== { return declid == a.declid; }
+    static Type_InfInt get();
+    static Type_InfInt get(const Util::SourceInfo &si);
     equiv {
         (void)a;  // silence unused warning
         return true; /* ignore declid */
@@ -232,20 +267,38 @@ class Type_InfInt : Type, ITypeVar {
 }
 
 class Type_Dontcare : Type_Base {
+ protected:
+#emit
+    void *operator new(size_t size) { return ::operator new(size); }
+#end
+ public:
     toString{ return "_"; }
     static Type_Dontcare get();
+    static Type_Dontcare get(const Util::SourceInfo &si);
     dbprint { out << "_"; }
 }
 
 class Type_Void : Type_Base {
+ protected:
+#emit
+    void *operator new(size_t size) { return ::operator new(size); }
+#end
+ public:
     toString{ return "void"; }
     static Type_Void get();
+    static Type_Void get(const Util::SourceInfo &si);
     dbprint { out << "void"; }
 }
 
 class Type_MatchKind : Type_Base {
+ protected:
+#emit
+    void *operator new(size_t size) { return ::operator new(size); }
+#end
+ public:
     toString{ return "match_kind"; }
     static Type_MatchKind get();
+    static Type_MatchKind get(const Util::SourceInfo &si);
     dbprint { out << "match_kind"; }
 }
 
@@ -567,7 +620,13 @@ class Declaration_ID : Declaration, CompileTimeValue {
 /// The type of a string literal
 class Type_String : Type_Base {
 #nodbprint
+ protected:
+#emit
+    void *operator new(size_t size) { return ::operator new(size); }
+#end
+ public:
     static Type_String get();
+    static Type_String get(const Util::SourceInfo &si);
     toString{ return "string"; }
 }
 

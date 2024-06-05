@@ -311,7 +311,7 @@ After cloning Protobuf and before you build, check-out version 3.25.3:
 `git checkout v3.25.3`
 
 Please note that while all Protobuf versions newer than 3.0 should work for
-P4C itself, you may run into trouble with some extensions and other p4lang
+P4C itself, you may run into trouble with Abseil, some extensions and other p4lang
 projects unless you install version 3.25.3.
 
 P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's `FetchContent` module (Abseil LTS 20240116.1 at the moment).
@@ -454,7 +454,7 @@ On some platforms Docker limits the memory usage of any container, even
 containers used during the `docker build` process. On macOS in particular the
 default is 2GB, which is not enough to build P4C. Increase the memory limit to
 at least 4GB via Docker preferences or you are likely to see "internal compiler
-errors" from gcc which are caused by low memory.
+errors" from GCC which are caused by low memory.
 
 # Bazel
 [![Bazel Build](https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml)

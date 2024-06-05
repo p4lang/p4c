@@ -22,6 +22,7 @@ limitations under the License.
 #include <functional>
 #include <sstream>
 #include <string>
+#include <string_view>
 
 #include "hash.h"
 
@@ -165,6 +166,12 @@ class cstring {
     const char *c_str() const { return str; }
     operator const char *() const { return str; }
 
+    std::string string() const { return std::string(str); }
+    explicit operator std::string() const { return string(); }
+
+    std::string_view string_view() const { return std::string_view(str); }
+    explicit operator std::string_view() const { return string_view(); }
+
     // Size tests. Constant time except for size(), which is linear time.
     size_t size() const {
         // TODO (DanilLutsenko): We store size of string in table on object construction,
@@ -189,6 +196,9 @@ class cstring {
     // Equality tests with other cstrings. Constant time.
     bool operator==(cstring a) const { return str == a.str; }
     bool operator!=(cstring a) const { return str != a.str; }
+
+    bool operator==(std::nullptr_t) const { return str == nullptr; }
+    bool operator!=(std::nullptr_t) const { return str != nullptr; }
 
     // Other comparisons and tests. Linear time.
     bool operator==(const char *a) const { return str ? a && !strcmp(str, a) : !a; }

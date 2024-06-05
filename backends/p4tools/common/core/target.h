@@ -70,24 +70,25 @@ class Target {
  protected:
     /// Creates and registers a new Target instance for the given @toolName, @deviceName, and
     /// @archName.
-    Target(std::string toolName, std::string deviceName, std::string archName);
+    Target(std::string_view toolName, const std::string &deviceName, const std::string &archName);
 
     /// @returns the target instance for the given tool and active target, as selected by @init.
     //
     // Implemented here because of limitations of templates.
     template <class TargetImpl>
-    static const TargetImpl &get(const std::string &toolName) {
+    static const TargetImpl &get(std::string_view toolName) {
         if (curTarget == std::nullopt) {
             FATAL_ERROR(
                 "Target not initialized. Please provide a target using the --target option.");
         }
 
         const auto &instances = registry.at(*curTarget);
-        BUG_CHECK(instances.count(toolName), "Architecture %1% on device %2% not supported for %3%",
-                  curTarget->archName, curTarget->deviceName, toolName);
+        auto instance = instances.find(toolName);
+        BUG_CHECK(instance != instances.end(),
+                  "Architecture %1% on device %2% not supported for %3%", curTarget->archName,
+                  curTarget->deviceName, toolName);
 
-        const auto *instance = instances.at(toolName);
-        const auto *casted = dynamic_cast<const TargetImpl *>(instance);
+        const auto *casted = dynamic_cast<const TargetImpl *>(instance->second);
         BUG_CHECK(casted, "%1%/%2% implementation for %3% has wrong type", curTarget->deviceName,
                   curTarget->archName, toolName);
         return *casted;
@@ -98,13 +99,13 @@ class Target {
     static std::optional<Spec> curTarget;
 
     /// Maps supported target specs to Target implementations for each supported tool.
-    static std::map<Spec, std::map<std::string, const Target *>> registry;
+    static std::map<Spec, std::map<std::string, const Target *, std::less<>>> registry;
 
     /// Maps the name of the first architecture registered for each device name.
-    static std::map<std::string, std::string> defaultArchByDevice;
+    static std::map<std::string, std::string, std::less<>> defaultArchByDevice;
 
     /// Maps the name of the first device registered for each architecture name.
-    static std::map<std::string, std::string> defaultDeviceByArch;
+    static std::map<std::string, std::string, std::less<>> defaultDeviceByArch;
 };
 
 }  // namespace P4Tools

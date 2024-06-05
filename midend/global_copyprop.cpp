@@ -122,6 +122,28 @@ bool FindVariableValues::preorder(const IR::SwitchStatement *stat) {
     return false;
 }
 
+// Loops are treated like ifs, as the body may run multiple times or may not run
+bool FindVariableValues::preorder(const IR::ForStatement *stat) {
+    visit(stat->init, "init");
+    std::map<cstring, const IR::Expression *> copyOfVars(vars);
+    visit(stat->condition, "condition");
+    visit(stat->body, "body");
+    compareValuesInMaps(&copyOfVars, &vars);
+    vars = copyOfVars;
+    visit(stat->updates, "updates");
+    compareValuesInMaps(&copyOfVars, &vars);
+    vars = copyOfVars;
+    return false;
+}
+bool FindVariableValues::preorder(const IR::ForInStatement *stat) {
+    std::map<cstring, const IR::Expression *> copyOfVars(vars);
+    removeVarsContaining(&vars, stat->ref->path->name);
+    visit(stat->body, "body");
+    compareValuesInMaps(&copyOfVars, &vars);
+    vars = copyOfVars;
+    return false;
+}
+
 // Update the value for the 'stat->left' variable.
 bool FindVariableValues::preorder(const IR::AssignmentStatement *stat) {
     if (!working || GlobalCopyProp::lValueName(stat->left).isNullOrEmpty()) return false;
@@ -277,6 +299,62 @@ IR::IfStatement *DoGlobalCopyPropagation::preorder(IR::IfStatement *stat) {
     LOG3("Finished 'IfStatement->ifFalse' block: " << stat->ifFalse);
     prune();
 
+    return stat;
+}
+
+/** remove all the vars that might be modified by the code visited from the `vars` map
+ */
+class RemoveModifiedValues : public Inspector {
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
+    std::map<cstring, const IR::Expression *> *vars;
+
+    bool preorder(const IR::AssignmentStatement *stat) override {
+        if ((*vars)[GlobalCopyProp::lValueName(stat->left)] == nullptr ||
+            !(stat->right->equiv(*((*vars)[GlobalCopyProp::lValueName(stat->left)]))))
+            removeVarsContaining(vars, GlobalCopyProp::lValueName(stat->left));
+        return true;
+    }
+    bool preorder(const IR::MethodCallExpression *mc) override {
+        auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
+        if (auto eFun = mi->to<ExternFunction>()) {
+            LOG6("  Is 'ExternFunction'. Checking params for: " << eFun->method);
+            checkParametersForMap(eFun->method->getParameters(), vars);
+        } else if (auto fCall = mi->to<P4::FunctionCall>()) {
+            LOG6("  Is 'FunctionCall'. Checking params for: " << fCall->function);
+            checkParametersForMap(fCall->function->getParameters(), vars);
+        }
+        return true;
+    }
+
+ public:
+    RemoveModifiedValues(ReferenceMap *rM, TypeMap *tM,
+                         std::map<cstring, const IR::Expression *> *v)
+        : refMap(rM), typeMap(tM), vars(v) {}
+};
+
+IR::ForStatement *DoGlobalCopyPropagation::preorder(IR::ForStatement *stat) {
+    if (!performRewrite) return stat;
+    visit(stat->init, "init");
+    stat->body->apply(RemoveModifiedValues(refMap, typeMap, vars));
+    stat->updates.apply(RemoveModifiedValues(refMap, typeMap, vars));
+    visit(stat->condition, "condition");
+    visit(stat->body, "body");
+    visit(stat->updates, "updates");
+    stat->body->apply(RemoveModifiedValues(refMap, typeMap, vars));
+    stat->updates.apply(RemoveModifiedValues(refMap, typeMap, vars));
+    prune();
+    return stat;
+}
+
+IR::ForInStatement *DoGlobalCopyPropagation::preorder(IR::ForInStatement *stat) {
+    if (!performRewrite) return stat;
+    visit(stat->collection, "collection");
+    removeVarsContaining(vars, stat->ref->path->name);
+    stat->body->apply(RemoveModifiedValues(refMap, typeMap, vars));
+    visit(stat->body, "body");
+    stat->body->apply(RemoveModifiedValues(refMap, typeMap, vars));
+    prune();
     return stat;
 }
 

@@ -29,6 +29,12 @@ class Cmpl : Operation_Unary {
 
 class LNot : Operation_Unary {
     stringOp = "!";
+    LNot {
+        // This sets the type only when no type is explicitly provided in the constructor.
+        // If a type is provided in the constructor this assignment has no effect
+        // because the type member is shadowed by the type parameter.
+        type = Type::Boolean::get();
+    }
 }
 
 abstract Operation_Binary : Operation {
@@ -40,7 +46,8 @@ abstract Operation_Binary : Operation {
             type = left->type; }
     toString {
         std::stringstream tmp;
-        tmp << DBPrint::Prec_Low << *this;
+        tmp << DBPrint::Prec_Low;
+        dbprint(tmp);
         return tmp.str();
     }
 }
@@ -53,7 +60,12 @@ abstract Operation_Ternary : Operation {
 }
 
 abstract Operation_Relation : Operation_Binary {
-    Operation_Relation { type = Type::Boolean::get(); }
+    Operation_Relation {
+        // This sets the type only when no type is explicitly provided in the constructor.
+        // If a type is provided in the constructor this assignment has no effect
+        // because the type member is shadowed by the type parameter.
+        type = Type::Boolean::get();
+    }
 }
 
 class Mul : Operation_Binary {
@@ -134,11 +146,22 @@ class BXor : Operation_Binary {
 class LAnd : Operation_Binary {
     stringOp = "&&";
     precedence = DBPrint::Prec_LAnd;
+    LAnd {
+        // This sets the type only when no type is explicitly provided in the constructor.
+        // If a type is provided in the constructor this assignment has no effect
+        // because the type member is shadowed by the type parameter.
+        type = Type::Boolean::get();
+    }
 }
 class LOr : Operation_Binary {
     stringOp = "||";
     precedence = DBPrint::Prec_LOr;
-}
+    LOr {
+        // This sets the type only when no type is explicitly provided in the constructor.
+        // If a type is provided in the constructor this assignment has no effect
+        // because the type member is shadowed by the type parameter.
+        type = Type::Boolean::get();
+    }}
 
 /// Represents the ... default initializer expression
 class Dots : Expression {
@@ -169,28 +192,28 @@ class Constant : Literal {
     // 32-bit systems (which ain't long!) and mpz_import is too big a hammer because and it loses
     // the signess of the value.
     Constant(int v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
     Constant(unsigned v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
 #emit
 #if __WORDSIZE == 64
     Constant(intmax_t v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
 #else
     Constant(long v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
     Constant(unsigned long v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
     Constant(intmax_t v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
 #endif
 #end
     Constant(uint64_t v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
     Constant(big_int v, unsigned base = 10) :
-        Literal(new Type_InfInt()), value(v), base(base) {}
+        Literal(Type_InfInt::get()), value(v), base(base) {}
     Constant(Util::SourceInfo si, big_int v, unsigned base = 10) :
-        Literal(si, new Type_InfInt()), value(v), base(base) {}
+        Literal(si, Type_InfInt::get()), value(v), base(base) {}
     Constant(const Type *t, big_int v, unsigned base = 10, bool noWarning = false) :
         Literal(t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
     Constant(Util::SourceInfo si, const Type *t, big_int v,
@@ -199,6 +222,10 @@ class Constant : Literal {
 #emit
     static Constant GetMask(unsigned width);
 #end
+
+    /// @return a constant. Any constant returned here is interned. Base is always 10.
+    static const Constant *get(const Type *t, big_int v, Util::SourceInfo si = {});
+
     bool fitsInt() const { return value >= INT_MIN && value <= INT_MAX; }
     bool fitsLong() const { return value >= LONG_MIN && value <= LONG_MAX; }
     bool fitsUint() const { return value >= 0 && value <= UINT_MAX; }
@@ -257,6 +284,9 @@ class Constant : Literal {
 class BoolLiteral : Literal {
     bool value;
     toString{ return value ? "true" : "false"; }
+
+    /// @return a bool literal. Both booleans are interned.
+    static const BoolLiteral *get(bool value, const Util::SourceInfo &si = {});
 }
 
 class StringLiteral : Literal {
@@ -267,11 +297,15 @@ class StringLiteral : Literal {
 #emit
     operator IR::ID() const { return IR::ID(srcInfo, value); }
 #end
+
+    /// @returns a string literal. The value is cached.
+    static const StringLiteral *get(cstring value, const Type *t = Type_String::get(), const Util::SourceInfo &si = {});
 }
 
 class PathExpression : Expression {
     Path path;
     PathExpression { if (!srcInfo && path) srcInfo = path->srcInfo; }
+    PathExpression(Type t, IR::ID id) : Expression(id.srcInfo, t), path(new IR::Path(id)) {}
     PathExpression(IR::ID id) : Expression(id.srcInfo), path(new IR::Path(id)) {}
     toString{ return path->toString(); }
 }

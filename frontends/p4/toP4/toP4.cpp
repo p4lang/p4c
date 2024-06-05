@@ -1131,6 +1131,20 @@ bool ToP4::preorder(const IR::BlockStatement *s) {
     return false;
 }
 
+bool ToP4::preorder(const IR::BreakStatement *) {
+    dump(1);
+    builder.append("break");
+    builder.endOfStatement();
+    return false;
+}
+
+bool ToP4::preorder(const IR::ContinueStatement *) {
+    dump(1);
+    builder.append("continue");
+    builder.endOfStatement();
+    return false;
+}
+
 bool ToP4::preorder(const IR::ExitStatement *) {
     dump(1);
     builder.append("exit");
@@ -1188,6 +1202,80 @@ bool ToP4::preorder(const IR::IfStatement *s) {
             builder.emitIndent();
             builder.append("}");
         }
+    }
+    return false;
+}
+
+bool ToP4::preorder(const IR::ForStatement *s) {
+    dump(2);
+    if (!s->annotations->annotations.empty()) {
+        visit(s->annotations);
+        builder.spc();
+    }
+    builder.append("for (");
+    bool first = true;
+    for (auto *d : s->init) {
+        if (!first) builder.append(", ");
+        builder.supressStatementSemi();
+        visit(d, "init");
+        first = false;
+    }
+    builder.append("; ");
+    visit(s->condition, "condition");
+    builder.append("; ");
+    first = true;
+    for (auto *e : s->updates) {
+        if (e->is<IR::EmptyStatement>()) continue;
+        if (!first) builder.append(", ");
+        builder.supressStatementSemi();
+        visit(e, "updates");
+        first = false;
+    }
+    builder.append(") ");
+    if (!s->body->is<IR::BlockStatement>()) {
+        builder.append("{");
+        builder.increaseIndent();
+        builder.newline();
+        builder.emitIndent();
+    }
+    visit(s->body, "body");
+    if (!s->body->is<IR::BlockStatement>()) {
+        builder.newline();
+        builder.decreaseIndent();
+        builder.emitIndent();
+        builder.append("}");
+    }
+    return false;
+}
+
+bool ToP4::preorder(const IR::ForInStatement *s) {
+    dump(2);
+    if (!s->annotations->annotations.empty()) {
+        visit(s->annotations);
+        builder.spc();
+    }
+    builder.append("for (");
+    if (s->decl) {
+        builder.supressStatementSemi();
+        visit(s->decl, "decl");
+    } else {
+        visit(s->ref, "ref");
+    }
+    builder.append(" in ");
+    visit(s->collection);
+    builder.append(") ");
+    if (!s->body->is<IR::BlockStatement>()) {
+        builder.append("{");
+        builder.increaseIndent();
+        builder.newline();
+        builder.emitIndent();
+    }
+    visit(s->body, "body");
+    if (!s->body->is<IR::BlockStatement>()) {
+        builder.newline();
+        builder.decreaseIndent();
+        builder.emitIndent();
+        builder.append("}");
     }
     return false;
 }

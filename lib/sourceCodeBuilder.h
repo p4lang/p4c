@@ -33,6 +33,7 @@ class SourceCodeBuilder {
     std::stringstream buffer;
     const std::string nl = "\n";
     bool endsInSpace;
+    bool supressSemi = false;
 
  public:
     SourceCodeBuilder() : indentLevel(0), indentAmount(4), endsInSpace(false) {}
@@ -82,9 +83,11 @@ class SourceCodeBuilder {
     void append(int u) { appendFormat("%d", u); }
 
     void endOfStatement(bool addNl = false) {
-        append(";");
+        if (!supressSemi) append(";");
+        supressSemi = false;
         if (addNl) newline();
     }
+    void supressStatementSemi() { supressSemi = true; }
 
     void blockStart() {
         append("{");

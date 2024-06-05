@@ -60,7 +60,7 @@ const IR::Expression *equate(const IR::Expression *left, const IR::Expression *r
 
     // A single default expression can be matched with a list expression.
     if (left->is<IR::DefaultExpression>() || right->is<IR::DefaultExpression>()) {
-        return IR::getBoolLiteral(true);
+        return IR::BoolLiteral::get(true);
     }
 
     // If we still have lists after unrolling, compare them.

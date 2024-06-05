@@ -256,6 +256,40 @@ class IteratorEnumerator : public Enumerator<typename Iter::value_type> {
 
 /////////////////////////////////////////////////////////////////////
 
+template <typename T>
+class SingleEnumerator : public Enumerator<T> {
+    T value;
+
+ public:
+    explicit SingleEnumerator(T v) : Enumerator<T>(), value(v) {}
+    bool moveNext() {
+        switch (this->state) {
+            case EnumeratorState::NotStarted:
+                this->state = EnumeratorState::Valid;
+                return true;
+            case EnumeratorState::PastEnd:
+                return false;
+            case EnumeratorState::Valid:
+                this->state = EnumeratorState::PastEnd;
+                return false;
+        }
+        throw std::runtime_error("Unexpected enumerator state");
+    }
+    T getCurrent() const {
+        switch (this->state) {
+            case EnumeratorState::NotStarted:
+                throw std::logic_error("You cannot call 'getCurrent' before 'moveNext'");
+            case EnumeratorState::PastEnd:
+                throw std::logic_error("You cannot call 'getCurrent' past the collection end");
+            case EnumeratorState::Valid:
+                return this->value;
+        }
+        throw std::runtime_error("Unexpected enumerator state");
+    }
+};
+
+/////////////////////////////////////////////////////////////////////
+
 /// Always empty iterator (equivalent to end())
 template <typename T>
 class EmptyEnumerator : public Enumerator<T> {

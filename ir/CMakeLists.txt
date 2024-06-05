@@ -25,8 +25,10 @@ set (IR_SRCS
   ir.cpp
   irutils.cpp
   json_parser.cpp
+  loop-visitor.cpp
   node.cpp
   pass_manager.cpp
+  pass_utils.cpp
   type.cpp
   v1.cpp
   visitor.cpp
@@ -50,6 +52,7 @@ set (IR_HDRS
   node.h
   nodemap.h
   pass_manager.h
+  pass_utils.h
   vector.h
   visitor.h
 )
@@ -65,8 +68,7 @@ set (BASE_IR_DEF_FILES
 set (IR_DEF_FILES ${IR_DEF_FILES} ${BASE_IR_DEF_FILES} PARENT_SCOPE)
 
 add_library (ir STATIC ${IR_SRCS})
-target_link_libraries(ir
-  PRIVATE absl::flat_hash_map)
+target_link_libraries(ir PRIVATE absl::flat_hash_map ${LIBGC_LIBRARIES})
 add_dependencies(ir genIR)
 
 

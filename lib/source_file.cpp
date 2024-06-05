@@ -21,6 +21,7 @@ limitations under the License.
 
 #include "exceptions.h"
 #include "lib/log.h"
+#include "lib/stringify.h"
 
 void IHasDbPrint::print() const {
     dbprint(std::cout);
@@ -48,7 +49,7 @@ SourceInfo::SourceInfo(const InputSources *sources, SourcePosition start, Source
         BUG("SourceInfo position start %1% after end %2%", start.toString(), end.toString());
 }
 
-cstring SourceInfo::toDebugString() const {
+cstring SourceInfo::toString() const {
     return Util::printf_format("(%s)-(%s)", start.toString(), end.toString());
 }
 
@@ -301,7 +302,7 @@ cstring SourceInfo::getSourceFile() const {
 
 cstring SourceInfo::getLineNum() const {
     SourceFileLine sourceLine = sources->getSourceLine(start.getLineNumber());
-    return toString(sourceLine.sourceLine);
+    return Util::toString(sourceLine.sourceLine);
 }
 
 ////////////////////////////////////////////////////////
@@ -317,4 +318,5 @@ cstring SourceFileLine::toString() const {
 [[gnu::used]]  // ensure linker will not drop function even if unused
 void dbprint(const IHasDbPrint *o) {
     o->dbprint(std::cout);
+    std::cout << std::endl << std::flush;
 }

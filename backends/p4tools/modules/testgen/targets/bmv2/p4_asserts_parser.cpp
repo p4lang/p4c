@@ -147,9 +147,9 @@ const IR::Expression *makeConstant(Token input, const IdenitifierTypeMap &typeMa
     }
     if (input.is(Token::Kind::Number)) {
         if (leftType == nullptr) {
-            return IR::getConstant(IR::Type_Bits::get(32), big_int(std::string(inputStr)));
+            return IR::Constant::get(IR::Type_Bits::get(32), big_int(std::string(inputStr)));
         }
-        return IR::getConstant(leftType, big_int(std::string(inputStr)));
+        return IR::Constant::get(leftType, big_int(std::string(inputStr)));
     }
     // TODO: Is this the right solution for priorities?
     if (input.is(Token::Kind::Priority)) {

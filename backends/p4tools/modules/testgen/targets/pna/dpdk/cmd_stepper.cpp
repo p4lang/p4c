@@ -49,10 +49,10 @@ void PnaDpdkCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) c
         nextState.initializeBlockParams(target, typeDecl, &archMember->blockParams);
         blockIdx++;
     }
-    const auto *thirtytwoBitType = IR::getBitType(32);
-    nextState.set(&PnaConstants::DROP_VAR, IR::getBoolLiteral(false));
+    const auto *thirtytwoBitType = IR::Type_Bits::get(32);
+    nextState.set(&PnaConstants::DROP_VAR, IR::BoolLiteral::get(false));
     // PNA implicitly sets the output port to 0.
-    nextState.set(&PnaConstants::OUTPUT_PORT_VAR, IR::getConstant(thirtytwoBitType, 0));
+    nextState.set(&PnaConstants::OUTPUT_PORT_VAR, IR::Constant::get(thirtytwoBitType, 0));
     // Initialize the direction metadata variables.
     nextState.set(
         new IR::Member(thirtytwoBitType, new IR::PathExpression("*pre_istd"), "direction"),
@@ -71,7 +71,7 @@ std::optional<const Constraint *> PnaDpdkCmdStepper::startParserImpl(
     nextState.setParserErrorLabel(&PnaConstants::PARSER_ERROR);
     // Initialize the parser error to 0.
     nextState.set(&PnaConstants::PARSER_ERROR,
-                  IR::getConstant(programInfo.getParserErrorType(), 0));
+                  IR::Constant::get(programInfo.getParserErrorType(), 0));
     return std::nullopt;
 }
 
@@ -83,7 +83,7 @@ std::map<Continuation::Exception, Continuation> PnaDpdkCmdStepper::getExceptionH
     result.emplace(
         Continuation::Exception::PacketTooShort,
         Continuation::Body({new IR::AssignmentStatement(
-            &PnaConstants::PARSER_ERROR, IR::getConstant(programInfo.getParserErrorType(), 1))}));
+            &PnaConstants::PARSER_ERROR, IR::Constant::get(programInfo.getParserErrorType(), 1))}));
     // NoMatch will transition to the next block.
     result.emplace(Continuation::Exception::NoMatch, Continuation::Body({}));
 

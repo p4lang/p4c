@@ -14,7 +14,7 @@
 #include "lib/cstring.h"
 #include "lib/error.h"
 
-#include "backends/p4tools/modules/testgen/core/compiler_target.h"
+#include "backends/p4tools/modules/testgen/core/compiler_result.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/depth_first.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/greedy_node_cov.h"
@@ -27,6 +27,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/register.h"
+#include "backends/p4tools/modules/testgen/toolname.h"
 
 namespace P4Tools::P4Testgen {
 
@@ -146,12 +147,6 @@ std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view
                                                   const CompilerOptions &compilerOptions,
                                                   const TestgenOptions &testgenOptions,
                                                   bool writeTests) {
-    // Register supported compiler targets.
-    registerCompilerTargets();
-
-    // Register supported Testgen targets.
-    registerTestgenTargets();
-
     P4Tools::Target::init(compilerOptions.target.c_str(), compilerOptions.arch.c_str());
 
     // Set up the compilation context.
@@ -161,14 +156,15 @@ std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view
     CompilerResultOrError compilerResultOpt;
     if (program.has_value()) {
         // Run the compiler to get an IR and invoke the tool.
-        compilerResultOpt = P4Tools::CompilerTarget::runCompiler(std::string(program.value()));
+        compilerResultOpt =
+            P4Tools::CompilerTarget::runCompiler(TOOL_NAME, std::string(program.value()));
     } else {
         if (compilerOptions.file.isNullOrEmpty()) {
             ::error("Expected a file input.");
             return std::nullopt;
         }
         // Run the compiler to get an IR and invoke the tool.
-        compilerResultOpt = P4Tools::CompilerTarget::runCompiler();
+        compilerResultOpt = P4Tools::CompilerTarget::runCompiler(TOOL_NAME);
     }
 
     if (!compilerResultOpt.has_value()) {
@@ -198,16 +194,12 @@ std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view
 }  // namespace
 
 void Testgen::registerTarget() {
-    // Register all available compiler targets.
-    // These are discovered by CMAKE, which fills out the register.h.in file.
-    registerCompilerTargets();
-}
-
-int Testgen::mainImpl(const CompilerResult &compilerResult) {
     // Register all available P4Testgen targets.
     // These are discovered by CMAKE, which fills out the register.h.in file.
     registerTestgenTargets();
+}
 
+int Testgen::mainImpl(const CompilerResult &compilerResult) {
     // Make sure the input result corresponds to the result we expect.
     const auto *testgenCompilerResult = compilerResult.checkedTo<TestgenCompilerResult>();
 

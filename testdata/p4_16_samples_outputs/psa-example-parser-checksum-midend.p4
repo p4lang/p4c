@@ -96,7 +96,6 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    bool hasExited;
     @noWarn("unused") @name(".ingress_drop") action ingress_drop_0() {
         ostd.drop = true;
     }
@@ -124,36 +123,16 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         }
         psa_direct_counter = parser_error_counts_0;
     }
-    @hidden action psaexampleparserchecksum185() {
-        hasExited = true;
-    }
-    @hidden action act() {
-        hasExited = false;
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
     @hidden table tbl_ingress_drop {
         actions = {
             ingress_drop_0();
         }
         const default_action = ingress_drop_0();
     }
-    @hidden table tbl_psaexampleparserchecksum185 {
-        actions = {
-            psaexampleparserchecksum185();
-        }
-        const default_action = psaexampleparserchecksum185();
-    }
     apply {
-        tbl_act.apply();
         if (istd.parser_error != error.NoError) {
             parser_error_count_and_convert_0.apply();
             tbl_ingress_drop.apply();
-            tbl_psaexampleparserchecksum185.apply();
         }
     }
 }

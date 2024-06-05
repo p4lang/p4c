@@ -37,9 +37,9 @@ HOMEBREW_PREFIX=$(brew --prefix)
 # Fetch the latest formulae
 brew update
 
-BOOST_LIB="boost@1.84"
+BOOST_LIB="boost@1.85"
 REQUIRED_PACKAGES=(
-    autoconf automake bdw-gc ccache cmake libtool
+    autoconf automake ccache cmake libtool
     openssl pkg-config coreutils bison grep ninja
     ${BOOST_LIB}
 )

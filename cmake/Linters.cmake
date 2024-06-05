@@ -18,7 +18,6 @@ file(
   tools/*.h
 )
 # Filter some folders from the CI checks.
-list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ebpf/runtime")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ubpf/runtime")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
@@ -29,7 +28,7 @@ list(FILTER P4C_LINT_LIST EXCLUDE REGEX "test/frameworks")
 add_cpplint_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 
 # Retrieve the global cpplint property.
-get_property(CPPLINT_FILES GLOBAL PROPERTY cpplint-files)
+get_property(CPPLINT_FILES GLOBAL PROPERTY CPPLINT-files)
 
 if(DEFINED CPPLINT_FILES)
   # Write the list to a file. We need to do this as too many files will reach
@@ -58,17 +57,15 @@ endif()
 add_clang_format_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 
 find_program(CLANG_FORMAT_CMD clang-format)
-
-if(NOT ${CLANG_FORMAT_CMD})
+if(CLANG_FORMAT_CMD)
   # Retrieve the global clang-format property.
-  get_property(CLANG_FORMAT_FILES GLOBAL PROPERTY clang-format-files)
+  get_property(CLANG_FORMAT_FILES GLOBAL PROPERTY CLANG_FORMAT-files)
   if(DEFINED CLANG_FORMAT_FILES)
     # Write the list to a file.
     # We need to do this as too many files will reach the shell argument limit.
     set(CLANG_FORMAT_TXT_FILE ${P4C_BINARY_DIR}/clang_format_files.txt)
     list(SORT CLANG_FORMAT_FILES)
     file(WRITE ${CLANG_FORMAT_TXT_FILE} "${CLANG_FORMAT_FILES}")
-    set(CLANG_FORMAT_CMD clang-format)
     add_custom_target(
       clang-format
       COMMAND xargs -a ${CLANG_FORMAT_TXT_FILE} -r -d '\;' ${CLANG_FORMAT_CMD} --verbose --Werror --dry-run -i -- || (echo ${RED}clang-format failed. Run \"make clang-format-fix-errors\" to fix the complaints.${COLOURRESET} && false)
@@ -83,7 +80,49 @@ if(NOT ${CLANG_FORMAT_CMD})
     )
   endif()
 else()
-  message(WARNING "clang-format executable not found. Disabling clang-format checks. clang-format can be installed with \"pip3 install --user --upgrade clang-format\"")
+  message(WARNING "clang-format executable not found. Disabling clang-format checks. clang-format can be installed with \"pip3 install --user --upgrade clang-format\" or your distribution's package manager.")
+endif()
+
+
+#################### CLANG-TIDY
+
+# TODO: Add files here once clang-tidy is fast enough.
+# file(
+#   GLOB_RECURSE P4C_CLANG_TIDY_LINT_LIST  FOLLOW_SYMLINKS
+# )
+# add_clang_tidy_files(${P4C_SOURCE_DIR} "${P4C_CLANG_TIDY_LINT_LIST}")
+
+find_program(CLANG_TIDY_CMD clang-tidy)
+
+if(CLANG_TIDY_CMD)
+  # Retrieve the global clang-tidy property.
+  get_property(CLANG_TIDY_FILES GLOBAL PROPERTY CLANG_TIDY-files)
+
+  if (DEFINED CLANG_TIDY_FILES AND NOT CMAKE_EXPORT_COMPILE_COMMANDS)
+    message(WARNING "CMAKE_EXPORT_COMPILE_COMMANDS is not set ON, clang-tidy remains disabled.")
+  endif()
+  if(DEFINED CLANG_TIDY_FILES AND CMAKE_EXPORT_COMPILE_COMMANDS)
+
+    # Write the list to a file.
+    # We need to do this as too many files will reach the shell argument limit.
+    set(CLANG_TIDY_TXT_FILE ${P4C_BINARY_DIR}/clang_tidy_files.txt)
+    list(SORT CLANG_TIDY_FILES)
+    file(WRITE ${CLANG_TIDY_TXT_FILE} "${CLANG_TIDY_FILES}")
+    add_custom_target(
+      clang-tidy
+      COMMAND xargs -a ${CLANG_TIDY_TXT_FILE} -r -d '\;' ${CLANG_TIDY_CMD} -p ${CMAKE_BINARY_DIR}
+      WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+      COMMENT "Applying clang-tidy analysis."
+    )
+    add_custom_target(
+      clang-tidy-apply-fix-its
+      COMMAND xargs -a ${CLANG_TIDY_TXT_FILE} -r -d '\;' ${CLANG_TIDY_CMD} -p ${CMAKE_BINARY_DIR} --fix
+      WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+      COMMENT "Applying clang-tidy fix-its."
+    )
+  endif()
+else()
+  message(WARNING "clang-tidy executable not found. Disabling clang-tidy checks. clang-tidy can be installed with \"pip3 install --user --upgrade clang-tidy\" or your distribution's package manager.")
 endif()
 
 
@@ -105,9 +144,9 @@ find_program(BLACK_CMD black)
 find_program(ISORT_CMD isort)
 
 # Black and isort share the same files and should be run together.
-if(NOT ${BLACK_CMD} OR NOT (NOT ${ISORT_CMD}))
+if(BLACK_CMD AND ISORT_CMD)
   # Retrieve the global black property.
-  get_property(BLACK_FILES GLOBAL PROPERTY black-files)
+  get_property(BLACK_FILES GLOBAL PROPERTY BLACK-files)
   if(DEFINED BLACK_FILES)
     # Write the list to a file.
     # We need to do this as too many files will reach the shell argument limit.
@@ -141,7 +180,7 @@ if(NOT ${BLACK_CMD} OR NOT (NOT ${ISORT_CMD}))
     )
   endif()
 else()
-  message(WARNING "black or isort executable not found. Disabling black/isort checks. black/isort can be installed with \"pip3 install --user --upgrade black\" and \"pip3 install --user --upgrade isort\" ")
+  message(WARNING "black or isort executable not found. Disabling black/isort checks. black/isort can be installed with \"pip3 install --user --upgrade black\" and \"pip3 install --user --upgrade isort\" or your distribution's package manager. ")
 endif()
 
 #################### IWYU

@@ -45,7 +45,7 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
          auto &nextState = state.clone();
          // Use an assignment to set drop variable to true.
          // This variable will be processed in the deparser.
-         nextState.set(&PnaConstants::DROP_VAR, IR::getBoolLiteral(true));
+         nextState.set(&PnaConstants::DROP_VAR, IR::BoolLiteral::get(true));
          nextState.add(*new TraceEvents::Generic("drop_packet executed"));
          nextState.popBody();
          result->emplace_back(nextState);
@@ -142,7 +142,7 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
              return;
          };
          auto *cond = new IR::Equ(
-             directionVar, IR::getConstant(directionVar->type, PacketDirection::NET_TO_HOST));
+             directionVar, IR::Constant::get(directionVar->type, PacketDirection::NET_TO_HOST));
 
          // Return the NET_TO_HOST value.
          auto &netToHostState = state.clone();
@@ -168,7 +168,7 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
         const ExecutionState &state, SmallStepEvaluator::Result &result) {
          auto &nextState = state.clone();
          nextState.add(*new TraceEvents::Generic("add_entry executed. Currently a no-op."));
-         nextState.replaceTopBody(Continuation::Return(IR::getBoolLiteral(true)));
+         nextState.replaceTopBody(Continuation::Return(IR::BoolLiteral::get(true)));
          result->emplace_back(nextState);
      }},
 });

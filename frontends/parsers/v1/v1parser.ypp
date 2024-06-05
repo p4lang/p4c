@@ -356,7 +356,7 @@ type: BIT { $$ = IR::Type::Bits::get(@1, 1); }
     | COUNTER { $$ = IR::Type_Counter::get(); }
     | EXPRESSION { $$ = IR::Type_Expression::get(); }
     | FIELD_LIST_CALCULATION { $$ = IR::Type_FieldListCalculation::get(); }
-    | INT { $$ = new IR::Type_InfInt; }
+    | INT { $$ = IR::Type_InfInt::get(); }
     | INT "<" INTEGER ">"
       { $$ = IR::Type::Bits::get(@3, parseConstant(@3, $3, 0)->asInt(), true); }
     | METER { $$ = IR::Type_Meter::get(); }

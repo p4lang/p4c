@@ -58,6 +58,20 @@ class UBPFScalarType : public EBPF::EBPFScalarType {
     DECLARE_TYPEINFO(UBPFScalarType, EBPF::EBPFScalarType);
 };
 
+class UBPFExternType : public EBPF::EBPFScalarType {
+ public:
+    explicit UBPFExternType(const IR::Type_Bits *bits) : EBPF::EBPFScalarType(bits) {}
+
+    void emit(EBPF::CodeBuilder *builder) override;
+
+    cstring getAsString();
+
+    void declare(EBPF::CodeBuilder *builder, cstring id, bool asPointer) override;
+    void declareInit(EBPF::CodeBuilder *builder, cstring id, bool asPointer) override;
+
+    DECLARE_TYPEINFO(UBPFExternType, EBPF::EBPFScalarType);
+};
+
 class UBPFStructType : public EBPF::EBPFStructType {
  public:
     explicit UBPFStructType(const IR::Type_StructLike *strct) : EBPF::EBPFStructType(strct) {}
@@ -75,6 +89,15 @@ class UBPFEnumType : public EBPF::EBPFEnumType {
     void emit(EBPF::CodeBuilder *builder) override;
 
     DECLARE_TYPEINFO(UBPFEnumType, EBPF::EBPFEnumType);
+};
+
+class UBPFErrorType : public EBPF::EBPFErrorType {
+ public:
+    explicit UBPFErrorType(const IR::Type_Error *strct) : EBPF::EBPFErrorType(strct) {}
+
+    void emit(EBPF::CodeBuilder *builder) override;
+
+    DECLARE_TYPEINFO(UBPFErrorType, EBPF::EBPFErrorType);
 };
 
 class UBPFListType : public EBPF::EBPFType, public EBPF::IHasWidth {

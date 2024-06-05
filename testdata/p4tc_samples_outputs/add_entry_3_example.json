@@ -1,6 +1,7 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "add_entry_3_example",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/ipv4_tbl_1",

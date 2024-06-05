@@ -253,6 +253,15 @@ bool LocationSet::overlaps(const LocationSet *other) const {
     return false;
 }
 
+bool LocationSet::operator==(const LocationSet &other) const {
+    auto it = other.begin();
+    for (auto s : locations) {
+        if (it == other.end() || *it != s) return false;
+        ++it;
+    }
+    return it == other.end();
+}
+
 void ProgramPoints::add(const ProgramPoints *from) {
     points.insert(from->points.begin(), from->points.end());
 }
@@ -406,7 +415,7 @@ void ComputeWriteSet::enterScope(const IR::ParameterList *parameters,
             }
         }
     }
-    allDefinitions->setDefinitionsAt(entryPoint, defs, false);
+    allDefinitions->setDefinitionsAt(entryPoint, defs, true);
     currentDefinitions = defs;
     if (LOGGING(5))
         LOG5("CWS Entered scope " << entryPoint << " definitions are " << Log::endl << defs);
@@ -460,6 +469,9 @@ bool ComputeWriteSet::setDefinitions(Definitions *defs, const IR::Node *node, bo
     // overwriting always in parser states.  In this case we actually expect
     // that the definitions are monotonically increasing.
     if (findContext<IR::ParserState>()) overwrite = true;
+    // Loop bodies get visited repeatedly until a fixed point, so we likewise
+    // expect monotonically increasing write sets.
+    if (continueDefinitions != nullptr) overwrite = true;  // in a loop
     allDefinitions->setDefinitionsAt(point, currentDefinitions, overwrite);
     if (LOGGING(5))
         LOG5("CWS Definitions at " << point << " are " << Log::endl << defs);
@@ -820,6 +832,69 @@ bool ComputeWriteSet::preorder(const IR::IfStatement *statement) {
     return setDefinitions(result);
 }
 
+bool ComputeWriteSet::preorder(const IR::ForStatement *statement) {
+    LOG3("CWS Visiting " << dbp(statement));
+    if (currentDefinitions->isUnreachable()) return setDefinitions(currentDefinitions);
+    visit(statement->init, "init");
+
+    auto saveBreak = breakDefinitions;
+    auto saveContinue = continueDefinitions;
+    breakDefinitions = new Definitions();
+    continueDefinitions = new Definitions();
+    Definitions *startDefs = nullptr;
+    Definitions *exitDefs = nullptr;
+
+    do {
+        startDefs = currentDefinitions;
+        visit(statement->condition, "condition");
+        auto cond = getWrites(statement->condition);
+        // exitDefs are the definitions after evaluating the condition
+        exitDefs = currentDefinitions->writes(getProgramPoint(), cond);
+        (void)setDefinitions(exitDefs, statement->condition, true);
+        visit(statement->body, "body");
+        currentDefinitions = currentDefinitions->joinDefinitions(continueDefinitions);
+        visit(statement->updates, "updates");
+        currentDefinitions = currentDefinitions->joinDefinitions(startDefs);
+    } while (!(*startDefs == *currentDefinitions));
+
+    exitDefs = exitDefs->joinDefinitions(breakDefinitions);
+    breakDefinitions = saveBreak;
+    continueDefinitions = saveContinue;
+    return setDefinitions(exitDefs);
+}
+
+bool ComputeWriteSet::preorder(const IR::ForInStatement *statement) {
+    LOG3("CWS Visiting " << dbp(statement));
+    if (currentDefinitions->isUnreachable()) return setDefinitions(currentDefinitions);
+    visit(statement->collection, "collection");
+
+    auto saveBreak = breakDefinitions;
+    auto saveContinue = continueDefinitions;
+    breakDefinitions = new Definitions();
+    continueDefinitions = new Definitions();
+    Definitions *startDefs = nullptr;
+    Definitions *exitDefs = currentDefinitions;  // in case collection is empty;
+
+    do {
+        startDefs = currentDefinitions;
+        lhs = true;
+        visit(statement->ref, "ref");
+        lhs = false;
+        auto cond = getWrites(statement->ref);
+        auto defs = currentDefinitions->writes(getProgramPoint(), cond);
+        (void)setDefinitions(defs, statement->ref, true);
+        visit(statement->body, "body");
+        currentDefinitions = currentDefinitions->joinDefinitions(continueDefinitions);
+        currentDefinitions = currentDefinitions->joinDefinitions(startDefs);
+    } while (!(*startDefs == *currentDefinitions));
+
+    exitDefs = exitDefs->joinDefinitions(currentDefinitions);
+    exitDefs = exitDefs->joinDefinitions(breakDefinitions);
+    breakDefinitions = saveBreak;
+    continueDefinitions = saveContinue;
+    return setDefinitions(exitDefs);
+}
+
 bool ComputeWriteSet::preorder(const IR::BlockStatement *statement) {
     if (currentDefinitions->isUnreachable()) return setDefinitions(currentDefinitions);
     visit(statement->components, "components");
@@ -827,27 +902,35 @@ bool ComputeWriteSet::preorder(const IR::BlockStatement *statement) {
 }
 
 bool ComputeWriteSet::preorder(const IR::ReturnStatement *statement) {
+    if (currentDefinitions->isUnreachable()) return setDefinitions(currentDefinitions);
     if (statement->expression != nullptr) visit(statement->expression);
-    returnedDefinitions = returnedDefinitions->joinDefinitions(currentDefinitions);
-    if (LOGGING(5))
-        LOG5("Return definitions " << returnedDefinitions);
-    else
-        LOG3("Return " << returnedDefinitions->size() << " definitions");
-    auto defs = currentDefinitions->cloneDefinitions();
-    defs->setUnreachable();
-    return setDefinitions(defs);
+    return handleJump("Return", returnedDefinitions);
 }
 
 bool ComputeWriteSet::preorder(const IR::ExitStatement *) {
     if (currentDefinitions->isUnreachable()) return setDefinitions(currentDefinitions);
-    exitDefinitions = exitDefinitions->joinDefinitions(currentDefinitions);
+    return handleJump("Exit", exitDefinitions);
+}
+
+bool ComputeWriteSet::preorder(const IR::BreakStatement *) {
+    if (currentDefinitions->isUnreachable()) return setDefinitions(currentDefinitions);
+    return handleJump("Break", breakDefinitions);
+}
+
+bool ComputeWriteSet::preorder(const IR::ContinueStatement *) {
+    if (currentDefinitions->isUnreachable()) return setDefinitions(currentDefinitions);
+    return handleJump("Continue", continueDefinitions);
+}
+
+bool ComputeWriteSet::handleJump(const char *tok, Definitions *&defs) {
+    defs = defs->joinDefinitions(currentDefinitions);
     if (LOGGING(5))
-        LOG5("Exit definitions " << exitDefinitions);
+        LOG5(tok << " definitions " << defs);
     else
-        LOG3("Exit with " << exitDefinitions->size() << " definitions");
-    auto defs = currentDefinitions->cloneDefinitions();
-    defs->setUnreachable();
-    return setDefinitions(defs);
+        LOG3(tok << " with " << defs->size() << " definitions");
+    auto after = currentDefinitions->cloneDefinitions();
+    after->setUnreachable();
+    return setDefinitions(after);
 }
 
 bool ComputeWriteSet::preorder(const IR::EmptyStatement *) {

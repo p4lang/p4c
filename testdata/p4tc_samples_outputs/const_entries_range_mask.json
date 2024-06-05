@@ -1,6 +1,7 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "const_entries_range_mask",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/t_range",

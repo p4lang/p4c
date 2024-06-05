@@ -1,6 +1,7 @@
 {
   "schema_version" : "1.0.0",
   "pipeline_name" : "tc_may_override_example_01",
+  "externs" : [],
   "tables" : [
     {
       "name" : "MainControlImpl/ipv4_tbl_1",
@@ -88,7 +89,7 @@
           "id" : 1,
           "name" : "MainControlImpl/next_hop",
           "action_scope" : "TableAndDefault",
-          "annotations" : [],
+          "annotations" : ["tc_may_override", "default_hit_const"],
           "params" : [
             {
               "id" : 1,
@@ -97,7 +98,7 @@
               "bitwidth" : 32
             }
           ],
-          "default_hit_action" : false,
+          "default_hit_action" : true,
           "default_miss_action" : false
         },
         {

@@ -2013,7 +2013,7 @@ class CleansedLines(object):
         # the integer/fractional/exponent parts would all be parsed
         # correctly as long as there are digits on both sides of the
         # separator.  So we are fine as long as we don't see something
-        # like "0.'3" (gcc 4.9.0 will not allow this literal).
+        # like "0.'3" (GCC 4.9.0 will not allow this literal).
         if Search(r'\b(?:0[bBxX]?|[1-9])[0-9a-fA-F]*$', head):
           match_literal = Match(r'^((?:\'?[0-9a-zA-Z_])*)(.*)$', "'" + tail)
           collapsed += head + match_literal.group(1).replace("'", '')
@@ -3587,7 +3587,7 @@ def CheckForFunctionLengths(filename, clean_lines, linenum,
   """Reports for long function bodies.
 
   For an overview why this is done, see:
-  https://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Write_Short_Functions
+  https://google.github.io/styleguide/cppguide.html#Write_Short_Functions
 
   Uses a simplistic algorithm assuming other style guidelines
   (especially spacing) are followed.
@@ -5423,7 +5423,7 @@ def CheckLanguage(filename, clean_lines, linenum, file_extension,
       and line[-1] != '\\'):
     error(filename, linenum, 'build/namespaces_headers', 4,
           'Do not use unnamed namespaces in header files.  See '
-          'https://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Namespaces'
+          'https://google.github.io/styleguide/cppguide.html#Namespaces'
           ' for more information.')
 
 
@@ -5965,7 +5965,7 @@ _HEADERS_CONTAINING_TEMPLATES = (
     ('<utility>', ('pair',)),
     ('<vector>', ('vector',)),
 
-    # gcc extensions.
+    # GCC extensions.
     # Note: std::hash is their hash, ::hash is our hash
     ('<hash_map>', ('hash_map', 'hash_multimap',)),
     ('<hash_set>', ('hash_set', 'hash_multiset',)),

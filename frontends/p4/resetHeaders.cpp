@@ -53,9 +53,11 @@ void DoResetHeaders::generateResets(const TypeMap *typeMap, const IR::Type *type
 const IR::Node *DoResetHeaders::postorder(IR::Declaration_Variable *decl) {
     if (decl->initializer != nullptr) return decl;
     LOG3("DoResetHeaders context " << dbp(getContext()->node));
+    auto parent = getContext()->node;
+    // Don't reset index var in for..in statements.
+    if (parent->is<IR::ForInStatement>()) return decl;
     auto type = typeMap->getType(getOriginal(), true);
     auto path = new IR::PathExpression(decl->getName());
-    auto parent = getContext()->node;
     // For declarations in parsers and controls we have to insert the
     // reset in the start state or the body respectively.
     bool separate = parent->is<IR::P4Parser>() || parent->is<IR::P4Control>();

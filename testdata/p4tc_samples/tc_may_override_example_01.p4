@@ -99,7 +99,7 @@ control MainControlImpl(
             hdr.ipv4.protocol : exact;
         }
         actions = {
-            next_hop;
+            @tc_may_override @default_hit_const next_hop;
             drop;
         }
         default_action = drop;
