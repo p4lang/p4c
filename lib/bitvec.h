@@ -653,7 +653,9 @@ class bitvec::copy_bitref : public bitvec::bitref<const bitvec> {
     copy_bitref(const copy_bitref &a) = default;
     copy_bitref(copy_bitref &&a) = default;
     bool operator==(const bitref &a) const { return idx == a.idx && self == a.self; }
+    bool operator==(const copy_bitref &a) const { return idx == a.idx && self == a.self; }
     bool operator!=(const bitref &a) const { return idx != a.idx || self != a.self; }
+    bool operator!=(const copy_bitref &a) const { return idx != a.idx || self != a.self; }
 };
 inline bitvec::copy_bitref bitvec::min() && { return copy_bitref(*this, ffs()); }
 inline bitvec::copy_bitref bitvec::max() && { return --copy_bitref(*this, size * bits_per_unit); }
