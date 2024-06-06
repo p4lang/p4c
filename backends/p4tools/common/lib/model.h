@@ -3,9 +3,6 @@
 
 #include <map>
 #include <utility>
-#include <vector>
-
-#include <boost/container/flat_map.hpp>
 
 #include "ir/ir.h"
 #include "ir/solver.h"
@@ -14,7 +11,7 @@
 namespace P4Tools {
 
 /// Symbolic maps map a state variable to a IR::Expression.
-using SymbolicMapType = boost::container::flat_map<IR::StateVariable, const IR::Expression *>;
+using SymbolicMapType = P4C::flat_map<IR::StateVariable, const IR::Expression *>;
 
 /// Represents a solution found by the solver. A model is a concretized form of a symbolic
 /// environment. All the expressions in a Model must be of type IR::Literal.
