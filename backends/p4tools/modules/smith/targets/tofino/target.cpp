@@ -22,6 +22,8 @@
 
 namespace P4Tools::P4Smith::Tofino {
 
+using namespace P4::literals;
+
 /* =============================================================================================
  *  AbstractTofinoSmithTarget implementation
  * ============================================================================================= */
@@ -312,12 +314,14 @@ IR::P4Parser *TofinoTnaSmithTarget::generateIngressParserBlock() const {
     // Generate type_parser, note that this is labeled "p".
     IR::IndexedVector<IR::Parameter> params;
 
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "pkt", "packet_in"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "hdr", SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::Out, "ig_md", "ingress_metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "ig_intr_md",
-                                                         "ingress_intrinsic_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::None, "pkt"_cs, "packet_in"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::Out, "hdr"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "ig_md"_cs,
+                                                         "ingress_metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "ig_intr_md"_cs,
+                                                         "ingress_intrinsic_metadata_t"_cs));
     auto *parList = new IR::ParameterList(params);
 
     auto *tpParser = new IR::Type_Parser("SwitchIngressParser", parList);
@@ -381,17 +385,18 @@ IR::P4Control *TofinoTnaSmithTarget::generateIngressBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "h", SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "ig_md", "ingress_metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "ig_intr_md",
-                                                         "ingress_intrinsic_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "ig_md"_cs,
+                                                         "ingress_metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "ig_intr_md"_cs,
+                                                         "ingress_intrinsic_metadata_t"_cs));
     params.push_back(declarationGenerator().genParameter(
-        IR::Direction::In, "ig_prsr_md", "ingress_intrinsic_metadata_from_parser_t"));
+        IR::Direction::In, "ig_prsr_md"_cs, "ingress_intrinsic_metadata_from_parser_t"_cs));
     params.push_back(declarationGenerator().genParameter(
-        IR::Direction::InOut, "ig_dprsr_md", "ingress_intrinsic_metadata_for_deparser_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "ig_tm_md",
-                                                         "ingress_intrinsic_metadata_for_tm_t"));
+        IR::Direction::InOut, "ig_dprsr_md"_cs, "ingress_intrinsic_metadata_for_deparser_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "ig_tm_md"_cs,
+                                                         "ingress_intrinsic_metadata_for_tm_t"_cs));
 
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("ingress", parList);
@@ -432,12 +437,14 @@ IR::P4Control *TofinoTnaSmithTarget::generateIngressDeparserBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "pkt", "packet_out"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "h", SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::In, "ig_md", "ingress_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::None, "pkt"_cs, "packet_out"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "ig_md"_cs,
+                                                         "ingress_metadata_t"_cs));
     params.push_back(declarationGenerator().genParameter(
-        IR::Direction::In, "ig_dprsr_md", "ingress_intrinsic_metadata_for_deparser_t"));
+        IR::Direction::In, "ig_dprsr_md"_cs, "ingress_intrinsic_metadata_for_deparser_t"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("SwitchIngressDeparser", parList);
     IR::IndexedVector<IR::Declaration> localDecls;
@@ -452,12 +459,13 @@ IR::P4Parser *TofinoTnaSmithTarget::generateEgressParserBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "pkt", "packet_in"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "h", SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::Out, "eg_md", "egress_metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "eg_intr_md",
-                                                         "egress_intrinsic_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::None, "pkt"_cs, "packet_in"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "h"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "eg_md"_cs,
+                                                         "egress_metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "eg_intr_md"_cs,
+                                                         "egress_intrinsic_metadata_t"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeParser = new IR::Type_Parser("SwitchEgressParser", parList);
     IR::IndexedVector<IR::Declaration> localDecls;
@@ -482,14 +490,16 @@ IR::P4Control *TofinoTnaSmithTarget::generateEgressDeparserBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "pkt", "packet_out"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "h", SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::In, "eg_md", "egress_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::None, "pkt"_cs, "packet_out"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::In, "eg_md"_cs, "egress_metadata_t"_cs));
     params.push_back(declarationGenerator().genParameter(
-        IR::Direction::In, "eg_intr_dprs_md", "egress_intrinsic_metadata_for_deparser_t"));
+        IR::Direction::In, "eg_intr_dprs_md"_cs, "egress_intrinsic_metadata_for_deparser_t"_cs));
     auto *parList = new IR::ParameterList(params);
-    auto *typeCtrl = new IR::Type_Control("SwitchEgressDeparser", parList);
+    auto *typeCtrl = new IR::Type_Control("SwitchEgressDeparser"_cs, parList);
     IR::IndexedVector<IR::Declaration> localDecls;
     auto *blkStat = new IR::BlockStatement();
     blkStat->push_back(generateDeparserEmitCall());
@@ -502,17 +512,20 @@ IR::P4Control *TofinoTnaSmithTarget::generateEgressBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "h", SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "eg_md", "egress_metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "eg_intr_md",
-                                                         "egress_intrinsic_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "eg_md"_cs,
+                                                         "egress_metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "eg_intr_md"_cs,
+                                                         "egress_intrinsic_metadata_t"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::In, "eg_intr_md_from_prsr"_cs,
+                                            "egress_intrinsic_metadata_from_parser_t"_cs));
     params.push_back(declarationGenerator().genParameter(
-        IR::Direction::In, "eg_intr_md_from_prsr", "egress_intrinsic_metadata_from_parser_t"));
-    params.push_back(declarationGenerator().genParameter(
-        IR::Direction::InOut, "eg_intr_dprs_md", "egress_intrinsic_metadata_for_deparser_t"));
-    params.push_back(declarationGenerator().genParameter(
-        IR::Direction::InOut, "eg_intr_oport_md", "egress_intrinsic_metadata_for_output_port_t"));
+        IR::Direction::InOut, "eg_intr_dprs_md"_cs, "egress_intrinsic_metadata_for_deparser_t"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::InOut, "eg_intr_oport_md"_cs,
+                                            "egress_intrinsic_metadata_for_output_port_t"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("SwitchEgress", parList);
     IR::IndexedVector<IR::Declaration> localDecls;
@@ -532,14 +545,14 @@ const IR::P4Program *TofinoTnaSmithTarget::generateP4Program() const {
     P4Scope::startLocalScope();
 
     // insert banned structures
-    P4Scope::notInitializedStructs.insert("ingress_intrinsic_metadata_t");
-    P4Scope::notInitializedStructs.insert("ingress_intrinsic_metadata_for_tm_t");
-    P4Scope::notInitializedStructs.insert("ingress_intrinsic_metadata_from_parser_t");
-    P4Scope::notInitializedStructs.insert("ingress_intrinsic_metadata_for_deparser_t");
-    P4Scope::notInitializedStructs.insert("egress_intrinsic_metadata_t");
-    P4Scope::notInitializedStructs.insert("egress_intrinsic_metadata_from_parser_t");
-    P4Scope::notInitializedStructs.insert("egress_intrinsic_metadata_for_deparser_t");
-    P4Scope::notInitializedStructs.insert("egress_intrinsic_metadata_for_output_port_t");
+    P4Scope::notInitializedStructs.insert("ingress_intrinsic_metadata_t"_cs);
+    P4Scope::notInitializedStructs.insert("ingress_intrinsic_metadata_for_tm_t"_cs);
+    P4Scope::notInitializedStructs.insert("ingress_intrinsic_metadata_from_parser_t"_cs);
+    P4Scope::notInitializedStructs.insert("ingress_intrinsic_metadata_for_deparser_t"_cs);
+    P4Scope::notInitializedStructs.insert("egress_intrinsic_metadata_t"_cs);
+    P4Scope::notInitializedStructs.insert("egress_intrinsic_metadata_from_parser_t"_cs);
+    P4Scope::notInitializedStructs.insert("egress_intrinsic_metadata_for_deparser_t"_cs);
+    P4Scope::notInitializedStructs.insert("egress_intrinsic_metadata_for_output_port_t"_cs);
 
     // set tna-specific probabilities
     setTnaProbabilities();

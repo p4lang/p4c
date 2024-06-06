@@ -56,7 +56,7 @@ int Smith::mainImpl(const CompilerResult & /*result*/) {
 
     // Use a default name if no specific output name is provided.
     if (outputFile == nullptr) {
-        outputFile = "out.p4";
+        outputFile = cstring("out.p4");
     }
     auto *ostream = openFile(outputFile, false);
     if (ostream == nullptr) {

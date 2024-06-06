@@ -14,6 +14,7 @@
 #include "backends/p4tools/modules/smith/core/target.h"
 #include "backends/p4tools/modules/smith/util/util.h"
 #include "ir/indexed_vector.h"
+#include "ir/ir-generated.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
@@ -309,14 +310,13 @@ IR::Statement *StatementGenerator::genMethodCallStatement(bool is_in_func) {
             auto hdrLvalIter = std::begin(hdrLvals);
             std::advance(hdrLvalIter, idx);
             cstring hdrLval = *hdrLvalIter;
-            cstring call;
+            const IR::Expression *member = nullptr;
             if (Utils::getRandInt(0, 1) != 0) {
-                call = "setValid";
+                member = new IR::Member(new IR::PathExpression(hdrLval), "setValid");
             } else {
-                call = "setInvalid";
+                member = new IR::Member(new IR::PathExpression(hdrLval), "setInvalid");
             }
-            auto *mem = new IR::Member(new IR::PathExpression(hdrLval), call);
-            mce = new IR::MethodCallExpression(mem);
+            mce = new IR::MethodCallExpression(member);
             break;
         }
     }

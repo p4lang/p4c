@@ -519,7 +519,7 @@ IR::Type_Struct *DeclarationGenerator::genHeaderStruct() {
                 tp = genHeaderStackType();
                 // Right now there is now way to initialize a header stack
                 // So we have to add the entire structure to the banned expressions
-                P4Scope::notInitializedStructs.insert("Headers");
+                P4Scope::notInitializedStructs.insert(cstring("Headers"));
             }
         }
         fields.push_back(new IR::StructField(fieldName, tp));

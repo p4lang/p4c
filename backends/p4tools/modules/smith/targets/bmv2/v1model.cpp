@@ -21,6 +21,8 @@
 
 namespace P4Tools::P4Smith::BMv2 {
 
+using namespace P4::literals;
+
 /* =============================================================================================
  *  Bmv2V1modelSmithTarget implementation
  * ============================================================================================= */
@@ -40,11 +42,13 @@ IR::P4Parser *Bmv2V1modelSmithTarget::generateParserBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "pkt", "packet_in"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "hdr", SYS_HDR_NAME));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "m", "Meta"));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "sm", "standard_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::None, "pkt"_cs, "packet_in"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::Out, "hdr"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "m"_cs, "Meta"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "sm"_cs,
+                                                         "standard_metadata_t"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeParser = new IR::Type_Parser("p", parList);
 
@@ -84,10 +88,11 @@ IR::P4Control *Bmv2V1modelSmithTarget::generateIngressBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "h", SYS_HDR_NAME));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "m", "Meta"));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "sm", "standard_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "m"_cs, "Meta"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "sm"_cs,
+                                                         "standard_metadata_t"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("ingress", parList);
 
@@ -121,8 +126,9 @@ IR::P4Control *Bmv2V1modelSmithTarget::generateVerifyBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "h", SYS_HDR_NAME));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "m", "Meta"));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "m"_cs, "Meta"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("vrfy", parList);
     IR::IndexedVector<IR::Declaration> localDecls;
@@ -136,8 +142,9 @@ IR::P4Control *Bmv2V1modelSmithTarget::generateUpdateBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "h", SYS_HDR_NAME));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "m", "Meta"));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "m"_cs, "Meta"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("update", parList);
     IR::IndexedVector<IR::Declaration> localDecls;
@@ -151,10 +158,11 @@ IR::P4Control *Bmv2V1modelSmithTarget::generateEgressBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "h", SYS_HDR_NAME));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "m", "Meta"));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "sm", "standard_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "m"_cs, "Meta"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "sm"_cs,
+                                                         "standard_metadata_t"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("egress", parList);
     IR::IndexedVector<IR::Declaration> localDecls;
@@ -179,15 +187,16 @@ IR::P4Control *Bmv2V1modelSmithTarget::generateDeparserBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "pkt", "packet_out"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "h", SYS_HDR_NAME));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::None, "pkt"_cs, "packet_out"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "h"_cs, SYS_HDR_NAME));
     auto *parList = new IR::ParameterList(params);
-    auto *typeCtrl = new IR::Type_Control("deparser", parList);
+    auto *typeCtrl = new IR::Type_Control("deparser"_cs, parList);
     IR::IndexedVector<IR::Declaration> localDecls;
     auto *blkStat = new IR::BlockStatement();
     blkStat->push_back(generateDeparserEmitCall());
 
-    return new IR::P4Control("deparser", typeCtrl, localDecls, blkStat);
+    return new IR::P4Control("deparser"_cs, typeCtrl, localDecls, blkStat);
 }
 
 IR::Declaration_Instance *generateMainV1ModelPackage() {
@@ -312,7 +321,7 @@ const IR::P4Program *Bmv2V1modelSmithTarget::generateP4Program() const {
     P4Scope::startLocalScope();
 
     // insert banned structures
-    P4Scope::notInitializedStructs.insert("standard_metadata_t");
+    P4Scope::notInitializedStructs.insert("standard_metadata_t"_cs);
     // Set bmv2-v1model-specific probabilities.
     setProbabilitiesforBmv2V1model();
 

@@ -20,6 +20,8 @@
 
 namespace P4Tools::P4Smith::Nic {
 
+using namespace P4::literals;
+
 /* =============================================================================================
  *  AbstractNicSmithTarget implementation
  * ============================================================================================= */
@@ -48,12 +50,14 @@ IR::P4Parser *DpdkPnaSmithTarget::generateMainParserBlock() const {
     // generate type_parser !that this is labeled "p"
     IR::IndexedVector<IR::Parameter> params;
 
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "pkt", "packet_in"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "hdr", SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "user_meta", "main_metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd",
-                                                         "pna_main_parser_input_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::None, "pkt"_cs, "packet_in"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::Out, "hdr"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "user_meta"_cs,
+                                                         "main_metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd"_cs,
+                                                         "pna_main_parser_input_metadata_t"_cs));
     auto *parList = new IR::ParameterList(params);
 
     auto *tpParser = new IR::Type_Parser("MainParserImpl", parList);
@@ -95,13 +99,14 @@ IR::P4Control *DpdkPnaSmithTarget::generatePreControlBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "hdr", SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "user_meta", "main_metadata_t"));
-    params.push_back(
-        declarationGenerator().genParameter(IR::Direction::In, "istd", "pna_pre_input_metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "ostd",
-                                                         "pna_pre_output_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::In, "hdr"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "user_meta"_cs,
+                                                         "main_metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd"_cs,
+                                                         "pna_pre_input_metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "ostd"_cs,
+                                                         "pna_pre_output_metadata_t"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("PreControlImpl", parList);
     IR::IndexedVector<IR::Declaration> localDecls;
@@ -116,13 +121,13 @@ IR::P4Control *DpdkPnaSmithTarget::generateMainControlBlock() const {
 
     IR::IndexedVector<IR::Parameter> params;
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "hdr", SYS_HDR_NAME));
-    params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "user_meta", "main_metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd",
-                                                         "pna_main_input_metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "ostd",
-                                                         "pna_main_output_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::InOut, "hdr"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "user_meta"_cs,
+                                                         "main_metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd"_cs,
+                                                         "pna_main_input_metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "ostd"_cs,
+                                                         "pna_main_output_metadata_t"_cs));
 
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("MainControlImpl", parList);
@@ -166,12 +171,14 @@ IR::P4Control *DpdkPnaSmithTarget::generateMainDeparserBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "pkt", "packet_out"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "hdr", SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::In, "user_meta", "main_metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "ostd",
-                                                         "pna_main_output_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::None, "pkt"_cs, "packet_out"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::In, "hdr"_cs, SYS_HDR_NAME));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "user_meta"_cs,
+                                                         "main_metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "ostd"_cs,
+                                                         "pna_main_output_metadata_t"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("MainDeparserImpl", parList);
     IR::IndexedVector<IR::Declaration> localDecls;
@@ -246,11 +253,11 @@ int DpdkPnaSmithTarget::writeTargetPreamble(std::ostream *ostream) const {
 const IR::P4Program *DpdkPnaSmithTarget::generateP4Program() const {
     P4Scope::startLocalScope();
     // insert banned structures
-    P4Scope::notInitializedStructs.insert("psa_ingress_parser_input_metadata_t");
-    P4Scope::notInitializedStructs.insert("psa_ingress_input_metadata_t");
-    P4Scope::notInitializedStructs.insert("psa_ingress_output_metadata_t");
-    P4Scope::notInitializedStructs.insert("psa_egress_input_metadata_t");
-    P4Scope::notInitializedStructs.insert("psa_egress_output_metadata_t");
+    P4Scope::notInitializedStructs.insert("psa_ingress_parser_input_metadata_t"_cs);
+    P4Scope::notInitializedStructs.insert("psa_ingress_input_metadata_t"_cs);
+    P4Scope::notInitializedStructs.insert("psa_ingress_output_metadata_t"_cs);
+    P4Scope::notInitializedStructs.insert("psa_egress_input_metadata_t"_cs);
+    P4Scope::notInitializedStructs.insert("psa_egress_output_metadata_t"_cs);
     // set psa-specific probabilities
     setPnaDpdkProbabilities();
     // insert some dummy metadata

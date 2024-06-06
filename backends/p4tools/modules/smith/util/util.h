@@ -1,17 +1,18 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_SMITH_UTIL_UTIL_H_
 #define BACKENDS_P4TOOLS_MODULES_SMITH_UTIL_UTIL_H_
 
-#include <cstddef>
 #include <string>
+
+#include "lib/cstring.h"
 
 namespace P4Tools::P4Smith {
 
-#define INTEGER_WIDTH 32
+static constexpr int INTEGER_WIDTH(32);
 
 /// These are hardcoded initialization names.
-#define SYS_HDR_NAME "Headers"
-#define ETH_HEADER_T "ethernet_t"
-#define ETH_HDR "eth_hdr"
+static const cstring SYS_HDR_NAME("Headers");
+static const cstring ETH_HEADER_T("ethernet_t");
+static const cstring ETH_HDR("eth_hdr");
 
 /// @returns a randomly generated string.
 /// If we can, return a word from a 10,000 word wordlist,

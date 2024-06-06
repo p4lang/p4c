@@ -10,13 +10,12 @@
 #include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/modules/smith/common/scope.h"
 #include "backends/p4tools/modules/smith/util/wordlist.h"
-#include "lib/cstring.h"
 
 namespace P4Tools::P4Smith {
 
 std::string getRandomString(size_t len) {
-    static const std::vector<cstring> P4_KEYWORDS = {"if",  "void",    "else",
-                                                     "key", "actions", "true"};
+    static const std::vector<std::string> P4_KEYWORDS = {"if",  "void",    "else",
+                                                         "key", "actions", "true"};
     static const std::array<char, 53> ALPHANUMERIC_CHARACTERS = {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"};

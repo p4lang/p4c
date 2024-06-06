@@ -21,6 +21,8 @@
 
 namespace P4Tools::P4Smith::BMv2 {
 
+using namespace P4::literals;
+
 /* =============================================================================================
  *  Bmv2PsaSmithTarget implementation
  * ============================================================================================= */
@@ -41,16 +43,18 @@ IR::P4Parser *Bmv2PsaSmithTarget::generateIngressParserBlock() const {
     // generate type_parser !that this is labeled "p"
     IR::IndexedVector<IR::Parameter> params;
 
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "pkt", "packet_in"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "hdr", SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "user_meta", "metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd",
-                                                         "psa_ingress_parser_input_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::None, "pkt"_cs, "packet_in"_cs));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::In, "resubmit_meta", "empty_t"));
+        declarationGenerator().genParameter(IR::Direction::Out, "hdr"_cs, SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::In, "recirculate_meta", "empty_t"));
+        declarationGenerator().genParameter(IR::Direction::InOut, "user_meta"_cs, "metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd"_cs,
+                                                         "psa_ingress_parser_input_metadata_t"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::In, "resubmit_meta"_cs, "empty_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "recirculate_meta"_cs,
+                                                         "empty_t"_cs));
     auto *parList = new IR::ParameterList(params);
 
     auto *tpParser = new IR::Type_Parser("IngressParserImpl", parList);
@@ -92,13 +96,14 @@ IR::P4Control *Bmv2PsaSmithTarget::generateIngressBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "h", SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "user_meta", "metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd",
-                                                         "psa_ingress_input_metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "ostd",
-                                                         "psa_ingress_output_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::InOut, "user_meta"_cs, "metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd"_cs,
+                                                         "psa_ingress_input_metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "ostd"_cs,
+                                                         "psa_ingress_output_metadata_t"_cs));
 
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("ingress", parList);
@@ -160,18 +165,20 @@ IR::P4Control *Bmv2PsaSmithTarget::generateIngressDeparserBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "pkt", "packet_out"));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::Out, "clone_i2e_meta", "empty_t"));
+        declarationGenerator().genParameter(IR::Direction::None, "pkt"_cs, "packet_out"_cs));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::Out, "resubmit_meta", "empty_t"));
+        declarationGenerator().genParameter(IR::Direction::Out, "clone_i2e_meta"_cs, "empty_t"_cs));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::Out, "normal_meta", "empty_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "h", SYS_HDR_NAME));
+        declarationGenerator().genParameter(IR::Direction::Out, "resubmit_meta"_cs, "empty_t"_cs));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::In, "user_meta", "metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd",
-                                                         "psa_ingress_output_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::Out, "normal_meta"_cs, "empty_t"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::In, "user_meta"_cs, "metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd"_cs,
+                                                         "psa_ingress_output_metadata_t"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("IngressDeparserImpl", parList);
     IR::IndexedVector<IR::Declaration> localDecls;
@@ -186,18 +193,20 @@ IR::P4Parser *Bmv2PsaSmithTarget::generateEgressParserBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "pkt", "packet_in"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "hdr", SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "user_meta", "metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd",
-                                                         "psa_egress_parser_input_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::None, "pkt"_cs, "packet_in"_cs));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::In, "normal_meta", "empty_t"));
+        declarationGenerator().genParameter(IR::Direction::Out, "hdr"_cs, SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::In, "clone_i2e_meta", "empty_t"));
+        declarationGenerator().genParameter(IR::Direction::InOut, "user_meta"_cs, "metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd"_cs,
+                                                         "psa_egress_parser_input_metadata_t"_cs));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::In, "clone_e2e_meta", "empty_t"));
+        declarationGenerator().genParameter(IR::Direction::In, "normal_meta"_cs, "empty_t"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::In, "clone_i2e_meta"_cs, "empty_t"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::In, "clone_e2e_meta"_cs, "empty_t"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeParser = new IR::Type_Parser("EgressParserImpl", parList);
     IR::IndexedVector<IR::Declaration> localDecls;
@@ -216,13 +225,14 @@ IR::P4Control *Bmv2PsaSmithTarget::generateEgressBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "h", SYS_HDR_NAME));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "user_meta", "metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd",
-                                                         "psa_egress_input_metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "ostd",
-                                                         "psa_egress_output_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::InOut, "user_meta"_cs, "metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd"_cs,
+                                                         "psa_egress_input_metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "ostd"_cs,
+                                                         "psa_egress_output_metadata_t"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("egress", parList);
     IR::IndexedVector<IR::Declaration> localDecls;
@@ -236,18 +246,20 @@ IR::P4Control *Bmv2PsaSmithTarget::generateEgressDeparserBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "pkt", "packet_out"));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::Out, "clone_e2e_meta", "empty_t"));
+        declarationGenerator().genParameter(IR::Direction::None, "pkt"_cs, "packet_out"_cs));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::Out, "recirculate_meta", "empty_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "h", SYS_HDR_NAME));
+        declarationGenerator().genParameter(IR::Direction::Out, "clone_e2e_meta"_cs, "empty_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "recirculate_meta"_cs,
+                                                         "empty_t"_cs));
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::In, "user_meta", "metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd",
-                                                         "psa_egress_output_metadata_t"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "edstd",
-                                                         "psa_egress_deparser_input_metadata_t"));
+        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::In, "user_meta"_cs, "metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::In, "istd"_cs,
+                                                         "psa_egress_output_metadata_t"_cs));
+    params.push_back(declarationGenerator().genParameter(
+        IR::Direction::In, "edstd"_cs, "psa_egress_deparser_input_metadata_t"_cs));
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("EgressDeparserImpl", parList);
     IR::IndexedVector<IR::Declaration> localDecls;
@@ -359,11 +371,11 @@ const IR::P4Program *Bmv2PsaSmithTarget::generateP4Program() const {
     P4Scope::startLocalScope();
 
     // insert banned structures
-    P4Scope::notInitializedStructs.insert("psa_ingress_parser_input_metadata_t");
-    P4Scope::notInitializedStructs.insert("psa_ingress_input_metadata_t");
-    P4Scope::notInitializedStructs.insert("psa_ingress_output_metadata_t");
-    P4Scope::notInitializedStructs.insert("psa_egress_input_metadata_t");
-    P4Scope::notInitializedStructs.insert("psa_egress_output_metadata_t");
+    P4Scope::notInitializedStructs.insert("psa_ingress_parser_input_metadata_t"_cs);
+    P4Scope::notInitializedStructs.insert("psa_ingress_input_metadata_t"_cs);
+    P4Scope::notInitializedStructs.insert("psa_ingress_output_metadata_t"_cs);
+    P4Scope::notInitializedStructs.insert("psa_egress_input_metadata_t"_cs);
+    P4Scope::notInitializedStructs.insert("psa_egress_output_metadata_t"_cs);
     // set psa-specific probabilities
     setBmv2PsaProbabilities();
     // insert some dummy metadata

@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <set>
+#include <utility>
 
 #include "backends/p4tools/common/lib/logging.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -63,8 +64,8 @@ IR::Key *TableGenerator::genKeyElementList(size_t len) {
     return new IR::Key(keys);
 }
 
-IR::KeyElement *TableGenerator::genKeyElement(cstring match_kind) {
-    auto *match = new IR::PathExpression(match_kind);
+IR::KeyElement *TableGenerator::genKeyElement(IR::ID match_kind) {
+    auto *match = new IR::PathExpression(std::move(match_kind));
     auto *annotations = target().declarationGenerator().genAnnotation();
     auto *bitType = P4Scope::pickDeclaredBitType(false);
 

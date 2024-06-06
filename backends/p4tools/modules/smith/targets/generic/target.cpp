@@ -21,6 +21,8 @@
 
 namespace P4Tools::P4Smith::Generic {
 
+using namespace P4::literals;
+
 /* =============================================================================================
  *  AbstractGenericSmithTarget implementation
  * ============================================================================================= */
@@ -48,8 +50,10 @@ IR::P4Parser *GenericCoreSmithTarget::generateParserBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "pkt", "packet_in"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "hdr", SYS_HDR_NAME));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::None, "pkt"_cs, "packet_in"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::Out, "hdr"_cs, SYS_HDR_NAME));
     auto *parList = new IR::ParameterList(params);
     auto *typeParser = new IR::Type_Parser("p", parList);
 
@@ -88,7 +92,8 @@ IR::P4Control *GenericCoreSmithTarget::generateIngressBlock() const {
     P4Scope::startLocalScope();
 
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::InOut, "h", SYS_HDR_NAME));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
     auto *parList = new IR::ParameterList(params);
     auto *typeCtrl = new IR::Type_Control("ingress", parList);
 
@@ -130,8 +135,10 @@ IR::Declaration_Instance *GenericCoreSmithTarget::generateMainPackage() {
 
 IR::Type_Parser *GenericCoreSmithTarget::generateParserBlockType() const {
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "b", "packet_in"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::Out, "hdr", SYS_HDR_NAME));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::None, "b"_cs, "packet_in"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::Out, "hdr"_cs, SYS_HDR_NAME));
     auto *parList = new IR::ParameterList(params);
     return new IR::Type_Parser("Parser", parList);
 }
@@ -139,15 +146,16 @@ IR::Type_Parser *GenericCoreSmithTarget::generateParserBlockType() const {
 IR::Type_Control *GenericCoreSmithTarget::generateIngressBlockType() const {
     IR::IndexedVector<IR::Parameter> params;
     params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "hdr", SYS_HDR_NAME));
+        declarationGenerator().genParameter(IR::Direction::InOut, "hdr"_cs, SYS_HDR_NAME));
     auto *parList = new IR::ParameterList(params);
     return new IR::Type_Control("Ingress", parList);
 }
 
 IR::Type_Package *GenericCoreSmithTarget::generatePackageType() const {
     IR::IndexedVector<IR::Parameter> params;
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "p", "Parser"));
-    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "ig", "Ingress"));
+    params.push_back(declarationGenerator().genParameter(IR::Direction::None, "p"_cs, "Parser"_cs));
+    params.push_back(
+        declarationGenerator().genParameter(IR::Direction::None, "ig"_cs, "Ingress"_cs));
     auto *parList = new IR::ParameterList(params);
     return new IR::Type_Package("top", parList);
 }
