@@ -45,3 +45,4 @@ bazel-*
 
 # JetBrains
 .idea/
+docs/doxygen/p4c-doxygen-warn.log
