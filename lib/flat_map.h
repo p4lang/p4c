@@ -23,7 +23,7 @@ namespace P4C {
 /// A header-only implementation of a memory-efficient flat_map.
 /// TODO: Replace this map with std::flat_map once available in C++23:
 /// https://en.cppreference.com/w/cpp/container/flat_map
-template <typename K, typename V, typename Compare = std::less<K>,
+template <typename K, typename V, typename Compare = std::less<>,
           typename Container = std::vector<std::pair<K, V>>>
 struct flat_map {
     using key_type = K;
@@ -97,9 +97,18 @@ struct flat_map {
         return lower->second;
     }
 
-    mapped_type &at(const key_type &key) { return lower_bound(key)->second; }
-
-    const mapped_type &at(const key_type &key) const { return lower_bound(key)->second; }
+    template <class Key>
+    mapped_type &at(const Key &key) {
+        auto found = lower_bound(key);
+        if (found == end()) throw std::out_of_range("key is out of range");
+        return found->second;
+    }
+    template <class Key>
+    const mapped_type &at(const Key &key) const {
+        auto found = lower_bound(key);
+        if (found == end()) throw std::out_of_range("key is out of range");
+        return found->second;
+    }
 
     std::pair<iterator, bool> insert(value_type &&value) { return emplace(std::move(value)); }
 
@@ -269,33 +278,17 @@ struct flat_map {
     iterator iterator_const_cast(const_iterator it) { return begin() + (it - cbegin()); }
 
     struct KeyOrValueCompare {
-        bool operator()(const key_type &lhs, const key_type &rhs) const {
-            return key_compare()(lhs, rhs);
+        template <typename T, typename U>
+        bool operator()(const T &lhs, const U &rhs) const {
+            return key_compare()(extract(lhs), extract(rhs));
         }
-        bool operator()(const key_type &lhs, const value_type &rhs) const {
-            return key_compare()(lhs, rhs.first);
-        }
-        template <typename T>
-        bool operator()(const key_type &lhs, const T &rhs) const {
-            return key_compare()(lhs, rhs);
-        }
-        template <typename T>
-        bool operator()(const T &lhs, const key_type &rhs) const {
-            return key_compare()(lhs, rhs);
-        }
-        bool operator()(const value_type &lhs, const key_type &rhs) const {
-            return key_compare()(lhs.first, rhs);
-        }
-        bool operator()(const value_type &lhs, const value_type &rhs) const {
-            return key_compare()(lhs.first, rhs.first);
-        }
-        template <typename T>
-        bool operator()(const value_type &lhs, const T &rhs) const {
-            return key_compare()(lhs.first, rhs);
-        }
-        template <typename T>
-        bool operator()(const T &lhs, const value_type &rhs) const {
-            return key_compare()(lhs, rhs.first);
+
+     private:
+        const key_type &extract(const value_type &v) const { return v.first; }
+
+        template <typename Key>
+        const Key &extract(const Key &k) const {
+            return k;
         }
     };
 
