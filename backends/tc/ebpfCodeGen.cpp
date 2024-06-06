@@ -1453,9 +1453,9 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ExternBlock *instance) {
     } else if (typeName == "Register") {
         auto reg = new EBPFRegisterPNA(program, name, di, control->codeGen);
         control->pna_registers.emplace(name, reg);
-        control->defineExtern = true;
+        control->addExternDeclaration = true;
     } else if (typeName == "DirectCounter") {
-        control->defineExtern = true;
+        control->addExternDeclaration = true;
         return false;
     } else {
         ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control", instance);

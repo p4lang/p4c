@@ -445,7 +445,7 @@ extern Counter<W, S> {
 // END:Counter_extern
 
 // BEGIN:DirectCounter_extern
-@noWarn("unused")
+@noWarn("unused") @tc_acl("RP:RUXP")
 extern DirectCounter<W> {
   DirectCounter(PNA_CounterType_t type);
   @tc_md_exec void count();

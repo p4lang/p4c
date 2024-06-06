@@ -261,7 +261,7 @@ class ConvertToEBPFParserPNA : public Inspector {
 
 class EBPFControlPNA : public EBPF::EBPFControlPSA {
  public:
-    bool defineExtern = false;
+    bool addExternDeclaration = false;
     std::map<cstring, EBPFRegisterPNA *> pna_registers;
 
     EBPFControlPNA(const EBPF::EBPFProgram *program, const IR::ControlBlock *control,
@@ -274,7 +274,7 @@ class EBPFControlPNA : public EBPF::EBPFControlPSA {
         return result;
     }
     void emitExternDefinition(EBPF::CodeBuilder *builder) {
-        if (defineExtern) {
+        if (addExternDeclaration) {
             builder->emitIndent();
             builder->appendLine("struct p4tc_ext_bpf_params ext_params = {};");
             builder->emitIndent();

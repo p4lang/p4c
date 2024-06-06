@@ -446,9 +446,12 @@ class TCKey {
         emitValue = true;
     }
     toString {
-        std::string tckeyInstance = " " + keyAttribute + " " + keyName + " type bit" + Util::toString(bitwidth);
+        std::string tckeyInstance = " " + keyAttribute + " " + keyName + " ptype bit" + Util::toString(bitwidth);
         if (emitID) {
             tckeyInstance += " id " + Util::toString(keyID);
+        }
+        if (emitValue) {
+            tckeyInstance += Util::toString(value);
         }
         return tckeyInstance;
     }
@@ -628,14 +631,14 @@ class TCPipeline {
                 tcCode += "\n" + a->toString();
             }
         }
-        if (!tableDefs.empty()) {
-            for (auto t : tableDefs) {
-                tcCode += "\n" + t->toString();
-            }
-        }
         if (!externDefs.empty()) {
             for (auto e : externDefs) {
                 tcCode += "\n" + e->toString();
+            }
+        }
+        if (!tableDefs.empty()) {
+            for (auto t : tableDefs) {
+                tcCode += "\n" + t->toString();
             }
         }
         if (preaction != nullptr) {

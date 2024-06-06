@@ -45,12 +45,15 @@ bool Backend::process() {
     }
     auto refMapEBPF = refMap;
     auto typeMapEBPF = typeMap;
+    auto hook = options.getDebugHook();
     parseTCAnno = new ParseTCAnnotations();
     tcIR = new ConvertToBackendIR(toplevel, pipeline, refMap, typeMap, options);
     genIJ = new IntrospectionGenerator(pipeline, refMap, typeMap);
-    addPasses({parseTCAnno, new P4::ClearTypeMap(typeMap),
-               new P4::TypeChecking(refMap, typeMap, true), tcIR, genIJ});
-    toplevel->getProgram()->apply(*this);
+    PassManager backEnd = {};
+    backEnd.addPasses({parseTCAnno, new P4::ClearTypeMap(typeMap),
+                       new P4::TypeChecking(refMap, typeMap, true), tcIR, genIJ});
+    backEnd.addDebugHook(hook, true);
+    toplevel->getProgram()->apply(backEnd);
     if (::errorCount() > 0) return false;
     if (!ebpfCodeGen(refMapEBPF, typeMapEBPF)) return false;
     return true;
@@ -575,6 +578,13 @@ void ConvertToBackendIR::updatePnaDirectCounter(const IR::P4Table *t, IR::TCTabl
     tabledef->setDirectCounter(externInstanceName);
 
     auto externInstance = P4::ExternInstance::resolve(expr, refMap, typeMap);
+    if (!externInstance) {
+        ::error(ErrorType::ERR_INVALID,
+                "Expected %1% property value for table %2% to resolve to an "
+                "extern instance: %3%",
+                propertyName, t->name.originalName, property);
+        return;
+    }
     for (auto ext : externsInfo) {
         if (ext.first == externInstance->type->toString()) {
             auto externDefinition = tcPipeline->getExternDefinition(ext.first);
@@ -583,6 +593,7 @@ void ConvertToBackendIR::updatePnaDirectCounter(const IR::P4Table *t, IR::TCTabl
                     externInstanceName));
                 extInstDef->setExternTableBindable(true);
                 extInstDef->setNumElements(tentries);
+                break;
             }
         }
     }
@@ -845,7 +856,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(
                                                parameter->toString(), "param", false);
                 keys.push_back(key);
                 if (exp->is<IR::Constant>()) {
-                    key->setValue(exp->to<IR::Constant>()->asInt());
+                    key->setValue(exp->to<IR::Constant>()->asInt64());
                 }
             }
         }
@@ -1021,7 +1032,11 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
             auto iterator = externsInfo.find(eName);
             if (iterator == externsInfo.end()) {
                 struct ExternBlock *eb = new struct ExternBlock();
-                eb->externId = ++externCount;
+                if (eName == "DirectCounter") {
+                    eb->externId = 101;
+                } else {
+                    eb->externId = ++externCount;
+                }
                 eb->permissions = processExternPermission(extn);
                 eb->no_of_instances += 1;
                 externsInfo.emplace(eName, eb);

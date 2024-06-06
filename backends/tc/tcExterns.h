@@ -16,7 +16,6 @@ and limitations under the License.
 
 #include "backend.h"
 #include "ebpfCodeGen.h"
-// #include "backends/ebpf/psa/ebpPsaTable.h"
 
 namespace TC {
 

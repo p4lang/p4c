@@ -14,6 +14,12 @@ $TC p4template update action/direct_counter_example/ingress/send_nh state active
 $TC p4template create action/direct_counter_example/ingress/drop actid 2
 $TC p4template update action/direct_counter_example/ingress/drop state active
 
+$TC p4template create extern/root/DirectCounter extid 101 numinstances 1 tc_acl 0x19b6 has_exec_method 
+
+$TC p4template create extern_inst/direct_counter_example/DirectCounter/ingress.global_counter instid 1 \
+tc_numel 2048 tbl_bindable constructor param type ptype bit320 \
+control_path tc_key index ptype bit32 id 1 param pkts ptype bit64 id 2
+
 $TC p4template create table/direct_counter_example/ingress/nh_table \
 	tblid 1 \
 	type exact \
@@ -22,10 +28,4 @@ $TC p4template create table/direct_counter_example/ingress/nh_table \
 	table_acts act name direct_counter_example/ingress/send_nh \
 	act name direct_counter_example/ingress/drop
 $TC p4template update table/direct_counter_example/ingress/nh_table default_miss_action permissions 0x1024 action direct_counter_example/ingress/drop
-
-$TC p4template create extern//root/DirectCounter extid 1 numinstances 1 tc_acl 0x19b6 has_exec_method 
-
-$TC p4template create extern_inst/direct_counter_example/DirectCounter/ingress.global_counter instid 1 \
-tc_numel 2048 tbl_bindable constructor param type type bit32 \
-control_path tc_key index type bit32 id 1 param pkts type bit64 id 2
 $TC p4template update pipeline/direct_counter_example state ready
