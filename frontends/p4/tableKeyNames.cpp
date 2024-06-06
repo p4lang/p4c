@@ -33,7 +33,7 @@ void KeyNameGenerator::postorder(const IR::PathExpression *expression) {
 
 namespace {
 
-// The constants are used below. We se `$valid$` to represent `isValid()` calls
+// The constants are used below. We use `$valid$` to represent `isValid()` calls
 // on headers and header unions; this is what P4Runtime expects.
 static const cstring isValid = "isValid"_cs;
 static const cstring isValidKey = "$valid$"_cs;
