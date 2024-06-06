@@ -5,7 +5,7 @@
     {
       "name" : "DirectCounter",
       "id" : 101,
-      "permissions" : "0x19b6",
+      "permissions" : "0x1136",
       "instances" : [
         {
           "inst_name" : "ingress.global_counter",

@@ -490,7 +490,7 @@ const IR::Type *TypeInference::canonicalize(const IR::Type *type) {
         if (tps == nullptr) return nullptr;
         const IR::Type *resultType = type;
         if (changes || tps != te->typeParameters)
-            resultType = new IR::Type_Extern(te->srcInfo, te->name, tps, *methods);
+            resultType = new IR::Type_Extern(te->srcInfo, te->name, tps, *methods, te->annotations);
         return resultType;
     } else if (auto mt = type->to<IR::Type_Method>()) {
         const IR::Type *res = nullptr;
