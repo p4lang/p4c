@@ -1566,6 +1566,11 @@ cstring CopyMatchKeysToSingleStruct::getTableKeyName(const IR::Expression *e) {
 }
 
 const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
+    // If copyNeeded is false at this point, it means the keys are from same struct.
+    // Check remaining conditions to see if the copy is needed or not
+    // TODO: This indirection should not be needed. Instead of using a visitor for IR::KeyElement
+    // just resolve each key element directly.
+    metaCopyNeeded = false;
     // If any key field is from different structure, put all keys in metadata
     LOG3("Visiting " << keys);
     bool copyNeeded = false;
@@ -1645,10 +1650,6 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
     } else {
         structure->table_type_map.emplace(table->name.name, InternalTableType::WILDCARD);
     }
-
-    // If copyNeeded is false at this point, it means the keys are from same struct.
-    // Check remaining conditions to see if the copy is needed or not
-    metaCopyNeeded = false;
     if (copyNeeded) contiguous = false;
 
     if (!contiguous &&
@@ -1670,6 +1671,7 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
     }
     return keys;
 }
+
 const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) {
     // If we got here we need to put the key element in metadata.
     LOG3("Extracting key element " << element);

@@ -826,7 +826,7 @@ struct keyInfo {
 class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
     IR::IndexedVector<IR::Declaration> decls;
     DpdkProgramStructure *structure;
-    bool metaCopyNeeded;
+    bool metaCopyNeeded = false;
 
  public:
     CopyMatchKeysToSingleStruct(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
