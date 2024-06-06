@@ -4,8 +4,6 @@
 #include <string>
 #include <utility>
 
-#include <boost/container/vector.hpp>
-
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/indexed_vector.h"
 #include "ir/irutils.h"

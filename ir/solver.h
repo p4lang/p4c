@@ -4,9 +4,7 @@
 #include <optional>
 #include <vector>
 
-#include <boost/container/flat_map.hpp>
-#include <boost/container/flat_set.hpp>
-
+#include "absl/container/btree_map.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
@@ -23,10 +21,8 @@ struct SymbolicVarComp {
 };
 
 /// This type maps symbolic variables to their value assigned by the solver.
-using SymbolicMapping = boost::container::flat_map<const IR::SymbolicVariable *,
-                                                   const IR::Expression *, SymbolicVarComp>;
-
-using SymbolicSet = boost::container::flat_set<const IR::SymbolicVariable *, SymbolicVarComp>;
+using SymbolicMapping =
+    absl::btree_map<const IR::SymbolicVariable *, const IR::Expression *, SymbolicVarComp>;
 
 /// Provides a higher-level interface for an SMT solver.
 class AbstractSolver : public ICastable {
