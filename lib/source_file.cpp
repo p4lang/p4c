@@ -56,7 +56,7 @@ cstring SourceInfo::toString() const {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 InputSources::InputSources() : sealed(false) {
-    mapLine(nullptr, 1);  // the first line read will be line 1 of stdin
+    mapLine("", 1);  // the first line read will be line 1 of stdin
     contents.push_back("");
 }
 
@@ -137,7 +137,7 @@ void InputSources::appendText(const char *text) {
 
 cstring InputSources::getLine(unsigned lineNumber) const {
     if (lineNumber == 0) {
-        return "";
+        return ""_cs;
         // BUG("Lines are numbered starting at 1");
         // don't throw: this code may be called by exceptions
         // reporting on elements that have no source position
@@ -145,7 +145,7 @@ cstring InputSources::getLine(unsigned lineNumber) const {
     return contents.at(lineNumber - 1);
 }
 
-void InputSources::mapLine(cstring file, unsigned originalSourceLineNo) {
+void InputSources::mapLine(std::string_view file, unsigned originalSourceLineNo) {
     if (sealed) BUG("Changing mapping to sealed InputSources");
     unsigned lineno = getCurrentLineNumber();
     line_file_map.emplace(lineno, SourceFileLine(file, originalSourceLineNo));
@@ -169,7 +169,7 @@ SourceFileLine InputSources::getSourceLine(unsigned line) const {
     // So we have to subtract one to get the real line number.
     const auto nominalLine = line - it->first + it->second.sourceLine;
     const auto realLine = nominalLine > 0 ? nominalLine - 1 : 0;
-    return SourceFileLine(it->second.fileName, realLine);
+    return SourceFileLine(it->second.fileName.string_view(), realLine);
 }
 
 unsigned InputSources::getCurrentLineNumber() const { return contents.size(); }
@@ -204,7 +204,7 @@ cstring carets(cstring source, unsigned start, unsigned end) {
 }
 
 cstring InputSources::getSourceFragment(const SourceInfo &position, bool useMarker) const {
-    if (!position.isValid()) return "";
+    if (!position.isValid()) return ""_cs;
 
     // If the position spans multiple lines, truncate to just the first line
     if (position.getEnd().getLineNumber() > position.getStart().getLineNumber())
@@ -213,7 +213,7 @@ cstring InputSources::getSourceFragment(const SourceInfo &position, bool useMark
     cstring result = getLine(position.getStart().getLineNumber());
     // Normally result has a newline, but if not
     // then we have to add a newline
-    cstring toadd = "";
+    cstring toadd = ""_cs;
     if (result.find('\n') == nullptr) toadd = cstring::newline;
     cstring marker =
         carets(result, position.getStart().getColumnNumber(), position.getEnd().getColumnNumber());
@@ -225,12 +225,12 @@ cstring InputSources::getSourceFragment(const SourceInfo &position, bool useMark
 }
 
 cstring InputSources::getBriefSourceFragment(const SourceInfo &position) const {
-    if (!position.isValid()) return "";
+    if (!position.isValid()) return ""_cs;
 
     cstring result = getLine(position.getStart().getLineNumber());
     unsigned int start = position.getStart().getColumnNumber();
     unsigned int end;
-    cstring toadd = "";
+    cstring toadd = ""_cs;
 
     // If the position spans multiple lines, truncate to just the first line
     if (position.getEnd().getLineNumber() > position.getStart().getLineNumber()) {
@@ -239,7 +239,7 @@ cstring InputSources::getBriefSourceFragment(const SourceInfo &position) const {
         if (result.find('\n') != nullptr) {
             --end;
         }
-        toadd = " ...";
+        toadd = " ..."_cs;
     } else {
         end = position.getEnd().getColumnNumber();
     }
@@ -247,7 +247,7 @@ cstring InputSources::getBriefSourceFragment(const SourceInfo &position) const {
     // Adding escape character in front of '"' character to properly store
     // quote marks as part of JSON properties, they must be escaped.
     if (result.find('"') != nullptr) {
-        cstring out = result.replace("\"", "\\\"");
+        cstring out = result.replace("\""_cs, "\\\""_cs);
         return out.substr(0, out.size() - 1);
     }
 
@@ -265,17 +265,17 @@ cstring InputSources::toDebugString() const {
 ///////////////////////////////////////////////////
 
 cstring SourceInfo::toSourceFragment(bool useMarker) const {
-    if (!isValid()) return "";
+    if (!isValid()) return ""_cs;
     return sources->getSourceFragment(*this, useMarker);
 }
 
 cstring SourceInfo::toBriefSourceFragment() const {
-    if (!isValid()) return "";
+    if (!isValid()) return ""_cs;
     return sources->getBriefSourceFragment(*this);
 }
 
 cstring SourceInfo::toPositionString() const {
-    if (!isValid()) return "";
+    if (!isValid()) return ""_cs;
     SourceFileLine position = sources->getSourceLine(start.getLineNumber());
     return position.toString();
 }
@@ -288,7 +288,7 @@ cstring SourceInfo::toSourcePositionData(unsigned *outLineNumber, unsigned *outC
     if (outColumnNumber != nullptr) {
         *outColumnNumber = start.getColumnNumber();
     }
-    return position.fileName.c_str();
+    return position.fileName;
 }
 
 SourceFileLine SourceInfo::toPosition() const {

@@ -29,7 +29,7 @@ class ExtendedCallGraph : public P4::CallGraph<T> {
     ReachabilityHashType hash;
 
  public:
-    explicit ExtendedCallGraph(cstring name) : P4::CallGraph<T>(name) {}
+    explicit ExtendedCallGraph(std::string_view name) : P4::CallGraph<T>(name) {}
     const ReachabilityHashType &getHash() const { return hash; }
     /// Function adds current vertex to a hash which allows to get access
     /// for vertexes from string in DCG.

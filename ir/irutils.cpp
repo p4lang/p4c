@@ -11,6 +11,8 @@
 
 namespace IR {
 
+using namespace P4::literals;
+
 /* =============================================================================================
  *  Types
  * ============================================================================================= */
@@ -61,7 +63,7 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
         return new IR::Member(srcInfo, new IR::TypeNameExpression(te->name), "NoError");
     }
     if (type->is<IR::Type_String>()) {
-        return new IR::StringLiteral(srcInfo, cstring(""));
+        return new IR::StringLiteral(srcInfo, ""_cs);
     }
     if (type->is<IR::Type_Varbits>()) {
         if (valueRequired) {

@@ -23,6 +23,8 @@
 
 namespace P4Tools::P4Testgen {
 
+using namespace P4::literals;
+
 /// Type definitions for abstract tests.
 struct AbstractTest : ICastable {};
 /// TODO: It would be nice if this were a reference to signal non-nullness.
@@ -77,14 +79,14 @@ class TestFramework {
     template <class ProfileType, class SelectorType>
     static void checkForTableActionProfile(inja::json &tblJson, std::map<cstring, cstring> &apAsMap,
                                            const TableConfig *tblConfig) {
-        const auto *apObject = tblConfig->getProperty("action_profile", false);
+        const auto *apObject = tblConfig->getProperty("action_profile"_cs, false);
         if (apObject != nullptr) {
             const auto *actionProfile = apObject->checkedTo<ProfileType>();
             tblJson["has_ap"] = true;
             // Check if we have an Action Selector too.
             // TODO: Change this to check in ActionSelector with table
             // property "action_selectors".
-            const auto *asObject = tblConfig->getProperty("action_selector", false);
+            const auto *asObject = tblConfig->getProperty("action_selector"_cs, false);
             if (asObject != nullptr) {
                 const auto *actionSelector = asObject->checkedTo<SelectorType>();
                 apAsMap[actionProfile->getProfileDecl()->controlPlaneName()] =
@@ -97,7 +99,8 @@ class TestFramework {
     /// Check whether the table object has an overridden default action.
     /// In this case, we assume there are no keys and we just set the default action of the table.
     static void checkForDefaultActionOverride(inja::json &tblJson, const TableConfig *tblConfig) {
-        const auto *defaultOverrideObj = tblConfig->getProperty("overriden_default_action", false);
+        const auto *defaultOverrideObj =
+            tblConfig->getProperty("overriden_default_action"_cs, false);
         if (defaultOverrideObj != nullptr) {
             const auto *defaultAction = defaultOverrideObj->checkedTo<ActionCall>();
             inja::json a;
@@ -120,7 +123,7 @@ class TestFramework {
     static void collectActionProfileDeclarations(const TestSpec *testSpec,
                                                  inja::json &controlPlaneJson,
                                                  const std::map<cstring, cstring> &apAsMap) {
-        auto actionProfiles = testSpec->getTestObjectCategory("action_profiles");
+        auto actionProfiles = testSpec->getTestObjectCategory("action_profiles"_cs);
         if (!actionProfiles.empty()) {
             controlPlaneJson["action_profiles"] = inja::json::array();
         }

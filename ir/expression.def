@@ -166,17 +166,17 @@ class LOr : Operation_Binary {
 /// Represents the ... default initializer expression
 class Dots : Expression {
     dbprint { out << "..."; }
-    toString { return "..."; }
+    toString { return "..."_cs; }
 }
 
 /// Represents the ... default initializer expression
 /// when used in a StructExpression.
 class NamedDots : NamedExpression {
     NamedDots() : NamedExpression("...", new Dots()) {}
-    NamedDots(Util::SourceInfo srcInfo, Dots dots) : NamedExpression(srcInfo, "...", dots) { CHECK_NULL(dots); }
+    NamedDots(Util::SourceInfo srcInfo, Dots dots) : NamedExpression(srcInfo, "..."_cs, dots) { CHECK_NULL(dots); }
     NamedDots(Util::SourceInfo srcInfo) : NamedExpression(srcInfo, "...", new Dots()) {}
     dbprint { out << "..."; }
-    toString { return "..."; }
+    toString { return "..."_cs; }
 }
 
 abstract Literal : Expression, CompileTimeValue {}
@@ -283,7 +283,7 @@ class Constant : Literal {
 
 class BoolLiteral : Literal {
     bool value;
-    toString{ return value ? "true" : "false"; }
+    toString{ return value ? "true"_cs : "false"_cs; }
 
     /// @return a bool literal. Both booleans are interned.
     static const BoolLiteral *get(bool value, const Util::SourceInfo &si = {});
@@ -292,7 +292,7 @@ class BoolLiteral : Literal {
 class StringLiteral : Literal {
     cstring value;
     validate{ if (value.isNull()) BUG("null StringLiteral"); }
-    toString{ return cstring("\"") + value.escapeJson() + "\""; }
+    toString{ return "\""_cs + value.escapeJson() + "\""_cs; }
     StringLiteral(ID v) : Literal(v.srcInfo), value(v.name) {}
 #emit
     operator IR::ID() const { return IR::ID(srcInfo, value); }
@@ -327,7 +327,7 @@ class TypeNameExpression : Expression {
 class Slice : Operation_Ternary {
     precedence = DBPrint::Prec_Postfix;
     stringOp = "[:]";
-    toString{ return e0->toString() + "[" + e1->toString() + ":" + e2->toString() + "]"; }
+    toString{ return e0->toString() + "["_cs + e1->toString() + ":"_cs + e2->toString() + "]"_cs; }
     // After type checking e1 and e2 will be constants
     unsigned getH() const { return e1->to<IR::Constant>()->asUnsigned(); }
     unsigned getL() const { return e2->to<IR::Constant>()->asUnsigned(); }
@@ -349,7 +349,7 @@ class Member : Operation_Unary {
     int lsb() const;
     int msb() const;
     stringOp = ".";
-    toString{ return expr->toString() + "." + member; }
+    toString{ return expr->toString() + "."_cs + member; }
 }
 
 class Concat : Operation_Binary {
@@ -369,7 +369,7 @@ class ArrayIndex : Operation_Binary {
     ArrayIndex {
         if (auto st = left ? left->type->to<IR::Type_Stack>() : nullptr)
             type = st->elementType; }
-    toString{ return left->toString() + "[" + right->toString() + "]"; }
+    toString{ return left->toString() + "["_cs + right->toString() + "]"_cs; }
 }
 
 class Range : Operation_Binary {
@@ -401,7 +401,7 @@ class DefaultExpression : Expression {}
 // That's why we use a hidden id field to distinguish them.
 class This : Expression {
     long id = nextId++;
-    toString { return "this"; }
+    toString { return "this"_cs; }
  private:
     static long nextId;
 }
@@ -413,7 +413,7 @@ class Cast : Operation_Unary {
     /// type, and 'type' will only be updated later when type inferencing occurs
     precedence = DBPrint::Prec_Prefix;
     stringOp = "(cast)";
-    toString{ return "(" + destType->toString() + ")" + expr->toString(); }
+    toString{ return "("_cs + destType->toString() + ")"_cs + expr->toString(); }
     validate{ BUG_CHECK(!destType->is<Type_Unknown>(), "%1%: Cannot cast to unknown type", this); }
 }
 
@@ -436,7 +436,7 @@ class MethodCallExpression : Expression {
     optional Vector<Type>       typeArguments = new Vector<Type>;
     optional Vector<Argument>   arguments = new Vector<Argument>;
     toString {
-        cstring str = method->toString() + "(";
+        std::string str = method->toString() + "(";
         if (!arguments->empty()) {
             str += arguments->at(0)->toString();
         }
@@ -480,7 +480,7 @@ class BaseListExpression : Expression {
         return components.at(size - 1)->is<IR::Dots>();
     }
     toString {
-        cstring str = "{";
+        std::string str = "{";
         if (!components.empty()) {
             str += " " + components.at(0)->toString();
         }
@@ -535,7 +535,7 @@ class StructExpression : Expression {
         return components.at(size - 1)->is<IR::NamedDots>();
     }
     toString {
-        cstring str = "{";
+        std::string str = "{";
         if (!components.empty()) {
             cstring exprStr = components.at(0)->expression->toString();
             str += " " + components.at(0)->toString() + " = " + exprStr;

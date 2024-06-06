@@ -90,7 +90,7 @@ inja::json Bmv2TestFramework::getControlPlane(const TestSpec *testSpec) const {
     // Map of actionProfiles and actionSelectors for easy reference.
     std::map<cstring, cstring> apAsMap;
 
-    auto tables = testSpec->getTestObjectCategory("tables");
+    auto tables = testSpec->getTestObjectCategory("tables"_cs);
     if (!tables.empty()) {
         controlPlaneJson["tables"] = inja::json::array();
     }

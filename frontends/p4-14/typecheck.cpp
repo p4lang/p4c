@@ -19,6 +19,8 @@ limitations under the License.
 #include "ir/dump.h"
 #include "lib/log.h"
 
+using namespace P4::literals;
+
 /// P4-14 (v1.0 and v1.1) type checking algorithm
 /// Initial type setting based on immediate context:
 /// - replace named reference to ActionParams in the bodies of ActionFunctions with the
@@ -181,8 +183,8 @@ class TypeCheck::AssignInitialTypes : public Transform {
         auto prim = getParent<IR::Primitive>();                   // context is a primitive call
         static const std::set<cstring> header_prims = {
             // primitives that operate on headers or header stacks
-            "add_header", "copy_header", "emit",          "extract",
-            "push",       "pop",         "remove_header", "valid"};
+            "add_header"_cs, "copy_header"_cs, "emit"_cs,          "extract"_cs,
+            "push"_cs,       "pop"_cs,         "remove_header"_cs, "valid"_cs};
         if (hdr && (!obj || preferHdr || (prim && header_prims.count(prim->name)))) {
             // prefer header to object only if in a simple member reference or in a
             // header stack reference or a primitive that is valid on headers.

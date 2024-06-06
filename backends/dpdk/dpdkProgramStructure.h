@@ -57,8 +57,8 @@ struct DpdkProgramStructure {
 
     IR::Type_Struct *metadataStruct;
     IR::Expression *ipsec_header;
-    cstring local_metadata_type = "";
-    cstring header_type = "";
+    cstring local_metadata_type = cstring::empty;
+    cstring header_type = cstring::empty;
     IR::IndexedVector<IR::StructField> compiler_added_fields;
     IR::IndexedVector<IR::StructField> key_fields;
     IR::Vector<IR::Type> used_metadata;
@@ -104,8 +104,8 @@ struct hdrFieldInfo {
     unsigned msb;
     unsigned fieldWidth;
     hdrFieldInfo() {
-        modifiedName = "";
-        headerStr = "";
+        modifiedName = cstring::empty;
+        headerStr = cstring::empty;
         modifiedWidth = 0;
         offset = 0;
         lsb = 0;

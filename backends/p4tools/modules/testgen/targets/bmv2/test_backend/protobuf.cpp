@@ -40,7 +40,7 @@ inja::json Protobuf::getControlPlane(const TestSpec *testSpec) const {
     // Map of actionProfiles and actionSelectors for easy reference.
     std::map<cstring, cstring> apAsMap;
 
-    auto tables = testSpec->getTestObjectCategory("tables");
+    auto tables = testSpec->getTestObjectCategory("tables"_cs);
     if (!tables.empty()) {
         controlPlaneJson["tables"] = inja::json::array();
     }
@@ -335,11 +335,11 @@ inja::json Protobuf::produceTestCase(const TestSpec *testSpec, cstring selectedB
     // Check whether this test has a clone configuration.
     // These are special because they require additional instrumentation and produce two output
     // packets.
-    auto cloneSpecs = testSpec->getTestObjectCategory("clone_specs");
+    auto cloneSpecs = testSpec->getTestObjectCategory("clone_specs"_cs);
     if (!cloneSpecs.empty()) {
         dataJson["clone_specs"] = getClone(cloneSpecs);
     }
-    auto meterValues = testSpec->getTestObjectCategory("meter_values");
+    auto meterValues = testSpec->getTestObjectCategory("meter_values"_cs);
     dataJson["meter_values"] = getMeter(meterValues);
 
     return dataJson;

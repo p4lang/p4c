@@ -16,19 +16,23 @@ limitations under the License.
 
 #include "ternaryBool.h"
 
+#include "lib/cstring.h"
+
 namespace P4 {
+
+using namespace literals;
 
 cstring toString(const TernaryBool &c) {
     switch (c) {
         case TernaryBool::Yes:
-            return "Yes";
+            return "Yes"_cs;
         case TernaryBool::No:
-            return "No";
+            return "No"_cs;
             ;
         case TernaryBool::Maybe:
-            return "Maybe";
+            return "Maybe"_cs;
     }
-    return "";
+    return cstring::empty;
 }
 
 }  // namespace P4

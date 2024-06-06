@@ -356,7 +356,7 @@ void EBPFTable::emitTernaryInstance(CodeBuilder *builder) {
                                    "struct " + valueTypeName + "_mask", size);
     builder->target->emitMapInMapDecl(builder, instanceName + "_tuple", TableHash,
                                       "struct " + keyTypeName, "struct " + valueTypeName, size,
-                                      instanceName + "_tuples_map", TableArray, "__u32", size);
+                                      instanceName + "_tuples_map", TableArray, "__u32"_cs, size);
 }
 
 void EBPFTable::emitInstance(CodeBuilder *builder) {
@@ -471,13 +471,13 @@ void EBPFTable::emitKey(CodeBuilder *builder, cstring keyName) {
             memcpy = !EBPFScalarType::generatesScalar(width);
 
             if (width <= 8) {
-                swap = "";  // single byte, nothing to swap
+                swap = cstring::empty;  // single byte, nothing to swap
             } else if (width <= 16) {
-                swap = "bpf_htons";
+                swap = "bpf_htons"_cs;
             } else if (width <= 32) {
-                swap = "bpf_htonl";
+                swap = "bpf_htonl"_cs;
             } else if (width <= 64) {
-                swap = "bpf_htonll";
+                swap = "bpf_htonll"_cs;
             } else {
                 // The code works with fields wider than 64 bits for PSA architecture. It is shared
                 // with filter model, so should work but has not been tested. Error message is
@@ -603,10 +603,10 @@ void EBPFTable::emitInitializer(CodeBuilder *builder) {
     BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
     auto action = ac->action;
     cstring name = EBPFObject::externalName(action);
-    cstring fd = "tableFileDescriptor";
+    cstring fd = "tableFileDescriptor"_cs;
     cstring defaultTable = defaultActionMapName;
-    cstring value = "value";
-    cstring key = "key";
+    cstring value = "value"_cs;
+    cstring key = "key"_cs;
 
     builder->emitIndent();
     builder->blockStart();
@@ -744,7 +744,7 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("struct %s_mask *", valueTypeName);
-    builder->target->emitTableLookup(builder, instanceName + "_prefixes", "head", "val");
+    builder->target->emitTableLookup(builder, instanceName + "_prefixes", "head"_cs, "val"_cs);
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->append("if (val && val->has_next != 0) ");
@@ -759,7 +759,7 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
     builder->blockStart();
     builder->emitIndent();
     builder->appendFormat("struct %s_mask *", valueTypeName);
-    builder->target->emitTableLookup(builder, instanceName + "_prefixes", "next", "v");
+    builder->target->emitTableLookup(builder, instanceName + "_prefixes", "next"_cs, "v"_cs);
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->append("if (!v) ");
@@ -769,7 +769,7 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
     builder->appendLine("break;");
     builder->blockEnd(true);
     builder->emitIndent();
-    cstring new_key = "k";
+    cstring new_key = "k"_cs;
     builder->appendFormat("struct %s %s = {};", keyTypeName, new_key);
     builder->newline();
     builder->emitIndent();
@@ -799,7 +799,8 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
     builder->newline();
     builder->emitIndent();
     builder->append("struct bpf_elf_map *");
-    builder->target->emitTableLookup(builder, instanceName + "_tuples_map", "tuple_id", "tuple");
+    builder->target->emitTableLookup(builder, instanceName + "_tuples_map", "tuple_id"_cs,
+                                     "tuple"_cs);
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->append("if (!tuple) ");
@@ -855,7 +856,7 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
 cstring EBPFTable::p4ActionToActionIDName(const IR::P4Action *action) const {
     if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name) {
         // NoAction always gets ID=0.
-        return "0";
+        return "0"_cs;
     }
 
     cstring actionName = EBPFObject::externalName(action);
@@ -984,7 +985,7 @@ void EBPFCounterTable::emitCounterIncrement(CodeBuilder *builder,
     builder->appendLine("else");
     builder->increaseIndent();
     builder->emitIndent();
-    builder->target->emitTableUpdate(builder, dataMapName, keyName, "init_val");
+    builder->target->emitTableUpdate(builder, dataMapName, keyName, "init_val"_cs);
     builder->newline();
     builder->decreaseIndent();
 }
@@ -1047,7 +1048,7 @@ void EBPFCounterTable::emitCounterAdd(CodeBuilder *builder,
     builder->appendLine("else");
     builder->increaseIndent();
     builder->emitIndent();
-    builder->target->emitTableUpdate(builder, dataMapName, keyName, "init_val");
+    builder->target->emitTableUpdate(builder, dataMapName, keyName, "init_val"_cs);
     builder->newline();
     builder->decreaseIndent();
 }
@@ -1082,7 +1083,7 @@ EBPFValueSet::EBPFValueSet(const EBPFProgram *program, const IR::P4ValueSet *p4v
                            cstring instanceName, CodeGenInspector *codeGen)
     : EBPFTableBase(program, instanceName, codeGen), size(0), pvs(p4vs) {
     CHECK_NULL(pvs);
-    valueTypeName = "u32";  // map value is not used, so its type can be anything
+    valueTypeName = "u32"_cs;  // map value is not used, so its type can be anything
 
     // validate size
     if (pvs->size->is<IR::Constant>()) {
@@ -1138,7 +1139,7 @@ void EBPFValueSet::emitTypes(CodeBuilder *builder) {
     };
 
     if (auto tb = elemType->to<IR::Type_Bits>()) {
-        cstring name = "field0";
+        cstring name = "field0"_cs;
         fieldEmitter(tb, name);
         fieldNames.emplace_back(std::make_pair(name, tb));
     } else if (auto tuple = elemType->to<IR::Type_Tuple>()) {
@@ -1212,7 +1213,7 @@ void EBPFValueSet::emitKeyInitializer(CodeBuilder *builder, const IR::SelectExpr
 }
 
 void EBPFValueSet::emitLookup(CodeBuilder *builder) {
-    builder->target->emitTableLookup(builder, instanceName, keyVarName, "");
+    builder->target->emitTableLookup(builder, instanceName, keyVarName, cstring::empty);
 }
 
 }  // namespace EBPF

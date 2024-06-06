@@ -47,7 +47,7 @@ std::string Bmv2V1ModelExprStepper::getClassName() { return "Bmv2V1ModelExprStep
 bool Bmv2V1ModelExprStepper::isPartOfFieldList(const IR::StructField *field,
                                                uint64_t recirculateIndex) {
     // Check whether the field has a "field_list" annotation associated with it.
-    const auto *annotation = field->getAnnotation("field_list");
+    const auto *annotation = field->getAnnotation("field_list"_cs);
     if (annotation != nullptr) {
         // Grab the index of the annotation.
         auto annoExprs = annotation->expr;
@@ -84,16 +84,17 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
                                           SmallStepEvaluator::Result &result) {
     const auto *progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
     // Pick a clone port var. It must adhere to the constraints of the target.
-    const auto *cloneInfo = state.getTestObject<Bmv2V1ModelCloneInfo>("clone_infos", "clone_info");
+    const auto *cloneInfo =
+        state.getTestObject<Bmv2V1ModelCloneInfo>("clone_infos"_cs, "clone_info"_cs);
     const auto *sessionIdExpr = cloneInfo->getSessionId();
     const auto &preserveIndex = cloneInfo->getPreserveIndex();
     const auto &egressPortVar = programInfo.getTargetOutputPortVar();
     const auto &clonePortVar =
-        ToolsVariables::getSymbolicVariable(egressPortVar->type, "clone_port_var");
+        ToolsVariables::getSymbolicVariable(egressPortVar->type, "clone_port_var"_cs);
 
     uint64_t recirculateCount = 0;
-    if (state.hasProperty("recirculate_count")) {
-        recirculateCount = state.getProperty<uint64_t>("recirculate_count");
+    if (state.hasProperty("recirculate_count"_cs)) {
+        recirculateCount = state.getProperty<uint64_t>("recirculate_count"_cs);
     }
 
     // Pick a clone port var. It must adhere to the constraints of the target.
@@ -119,13 +120,13 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
     {
         auto &defaultState = state.clone();
         // Delete the stale clone info to free up some space and reset the clone_active flag.
-        defaultState.deleteTestObjectCategory("clone_infos");
-        defaultState.setProperty("clone_active", false);
+        defaultState.deleteTestObjectCategory("clone_infos"_cs);
+        defaultState.setProperty("clone_active"_cs, false);
         // Increment the recirculation count.
-        defaultState.setProperty("recirculate_count", ++recirculateCount);
+        defaultState.setProperty("recirculate_count"_cs, ++recirculateCount);
         // Attach the clone specification for test generation.
         const auto *defaultCloneInfo = new Bmv2V1ModelCloneSpec(sessionIdExpr, clonePortVar, false);
-        defaultState.addTestObject("clone_specs", "clone_spec", defaultCloneInfo);
+        defaultState.addTestObject("clone_specs"_cs, "clone_spec"_cs, defaultCloneInfo);
         defaultState.popBody();
         result->emplace_back(cond, state, defaultState);
     }
@@ -156,7 +157,7 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
         // information for that, including the exact parameter names of the ingress
         // block we are in. Just grab the ingress from the programmable blocks.
         const auto *programmableBlocks = progInfo->getProgrammableBlocks();
-        const auto *typeDecl = programmableBlocks->at("Ingress");
+        const auto *typeDecl = programmableBlocks->at("Ingress"_cs);
         const auto *applyBlock = typeDecl->checkedTo<IR::P4Control>();
         const auto *params = applyBlock->getApplyParameters();
         auto blockIndex = 2;
@@ -195,7 +196,7 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
             // 0. However, fields in the user metadata that have the field_list
             // annotation and the appropriate index will not be reset. The user
             // metadata is the third parameter of the parser control.
-            const auto *paramPath = progInfo->getBlockParam("Parser", 2);
+            const auto *paramPath = progInfo->getBlockParam("Parser"_cs, 2);
             resetPreservingFieldList(*cloneState, paramPath, preserveIndex.value());
         }
 
@@ -219,13 +220,13 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
         TESTGEN_UNIMPLEMENTED("Unsupported clone type %1%.", cloneType);
     }
     // Attach the clone specification for test generation.
-    cloneState->addTestObject("clone_specs", "clone_spec",
+    cloneState->addTestObject("clone_specs"_cs, "clone_spec"_cs,
                               new Bmv2V1ModelCloneSpec(sessionIdExpr, clonePortVar, true));
     // Delete the stale clone info to free up some space and reset the clone_active flag.
-    cloneState->setProperty("clone_active", false);
-    cloneState->deleteTestObjectCategory("clone_infos");
+    cloneState->setProperty("clone_active"_cs, false);
+    cloneState->deleteTestObjectCategory("clone_infos"_cs);
     // Increment the recirculation count.
-    cloneState->setProperty("recirculate_count", ++recirculateCount);
+    cloneState->setProperty("recirculate_count"_cs, ++recirculateCount);
     /// Reset the packet buffer for recirculation.
     cloneState->resetPacketBuffer();
     cloneState->replaceTopBody(&cmds);
@@ -234,13 +235,13 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
 
 void Bmv2V1ModelExprStepper::processRecirculate(const ExecutionState &state,
                                                 SmallStepEvaluator::Result &result) {
-    auto instanceType = state.getProperty<uint64_t>("recirculate_instance_type");
+    auto instanceType = state.getProperty<uint64_t>("recirculate_instance_type"_cs);
     const auto *progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
     auto &recState = state.clone();
 
     // Check whether the packet needs to be reset.
     // If that is the case, reset the packet buffer to the calculated input packet.
-    auto recirculateReset = state.hasProperty("recirculate_reset_pkt");
+    auto recirculateReset = state.hasProperty("recirculate_reset_pkt"_cs);
     if (recirculateReset) {
         // Reset the packet buffer, which corresponds to the output packet.
         recState.resetPacketBuffer();
@@ -257,15 +258,15 @@ void Bmv2V1ModelExprStepper::processRecirculate(const ExecutionState &state,
         IR::Constant::get(&PacketVars::PACKET_SIZE_VAR_TYPE, recState.getPacketBufferSize() / 8);
     recState.set(packetSizeVar, packetSizeConst);
 
-    if (recState.hasProperty("recirculate_index")) {
+    if (recState.hasProperty("recirculate_index"_cs)) {
         // Get the index set by the recirculate/resubmit function. Will fail if no index is
         // set.
-        auto recirculateIndex = recState.getProperty<uint64_t>("recirculate_index");
+        auto recirculateIndex = recState.getProperty<uint64_t>("recirculate_index"_cs);
         // This program segment resets the user metadata of the v1model program to 0.
         // However, fields in the user metadata that have the field_list annotation and the
         // appropriate index will not be reset.
         // The user metadata is the third parameter of the parser control.
-        const auto *paramPath = progInfo->getBlockParam("Parser", 2);
+        const auto *paramPath = progInfo->getBlockParam("Parser"_cs, 2);
         resetPreservingFieldList(recState, paramPath, recirculateIndex);
     }
 
@@ -276,7 +277,7 @@ void Bmv2V1ModelExprStepper::processRecirculate(const ExecutionState &state,
     recState.set(instanceTypeVar, IR::Constant::get(bitType, instanceType));
 
     // Set recirculate to false to avoid infinite loops.
-    recState.setProperty("recirculate_active", false);
+    recState.setProperty("recirculate_active"_cs, false);
 
     // "Recirculate" by attaching the sequence again.
     // Does NOT initialize state or adds new conditions.
@@ -336,8 +337,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          * ======================================================================================
          */
         // TODO: Implement extern path expression calls.
-        {"*method.mark_to_drop",
-         {"standard_metadata"},
+        {"*method.mark_to_drop"_cs,
+         {"standard_metadata"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -348,7 +349,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // This variable will be processed in the deparser.
              const auto *portVar = new IR::Member(nineBitType, metadataLabel->ref, "egress_spec");
              nextState.set(portVar, IR::Constant::get(nineBitType, BMv2Constants::DROP_PORT));
-             nextState.add(*new TraceEvents::Generic("mark_to_drop executed."));
+             nextState.add(*new TraceEvents::Generic("mark_to_drop executed."_cs));
              nextState.popBody();
              result->emplace_back(nextState);
          }},
@@ -358,8 +359,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *  it to the result parameter.
          * ======================================================================================
          */
-        {"*method.random",
-         {"result", "lo", "hi"},
+        {"*method.random"_cs,
+         {"result"_cs, "lo"_cs, "hi"_cs},
          [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -421,7 +422,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *  is likely that your assumption was wrong, and should be reexamined.
          * ======================================================================================
          */
-        {"*method.assume", {"check"}, assertAssumeExecute},
+        {"*method.assume"_cs, {"check"_cs}, assertAssumeExecute},
         /* ======================================================================================
          *  assert
          *  Calling assert when the argument is true has no effect, except any
@@ -445,7 +446,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *  same way when assert statements are removed.
          * ======================================================================================
          */
-        {"*method.assert", {"check"}, assertAssumeExecute},
+        {"*method.assert"_cs, {"check"_cs}, assertAssumeExecute},
         /* ======================================================================================
          *  log_msg
          *  Log user defined messages
@@ -453,8 +454,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *  or log_msg("Value1 = {}, Value2 = {}",{value1, value2});
          * ======================================================================================
          */
-        {"*method.log_msg",
-         {"msg", "args"},
+        {"*method.log_msg"_cs,
+         {"msg"_cs, "args"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -470,12 +471,12 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                                 assignString.cend());
 
              auto &nextState = state.clone();
-             nextState.add(*new TraceEvents::Generic(assignString.c_str()));
+             nextState.add(*new TraceEvents::Generic(assignString));
              nextState.popBody();
              result->emplace_back(nextState);
          }},
-        {"*method.log_msg",
-         {"msg"},
+        {"*method.log_msg"_cs,
+         {"msg"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -501,8 +502,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *  @param M          Must be a type bit<W>
          * ======================================================================================
          */
-        {"*method.hash",
-         {"result", "algo", "base", "data", "max"},
+        {"*method.hash"_cs,
+         {"result"_cs, "algo"_cs, "base"_cs, "data"_cs, "max"_cs},
          [this](const IR::MethodCallExpression *call, const IR::Expression *receiver, IR::ID &name,
                 const IR::Vector<IR::Argument> *args, const ExecutionState &state,
                 SmallStepEvaluator::Result &result) {
@@ -558,8 +559,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *
          * ======================================================================================
          */
-        {"register.read",
-         {"result", "index"},
+        {"register.read"_cs,
+         {"result"_cs, "index"_cs},
          [this](const IR::MethodCallExpression * /*call*/, const IR::Expression *receiver,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -573,8 +574,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // Retrieve the register state from the object store. If it is already present, just
              // cast the object to the correct class and retrieve the current value according to the
              // index. If the register has not been added yet, create a new register object.
-             const auto *registerState =
-                 state.getTestObject("registervalues", externInstance->controlPlaneName(), false);
+             const auto *registerState = state.getTestObject(
+                 "registervalues"_cs, externInstance->controlPlaneName(), false);
              const Bmv2V1ModelRegisterValue *registerValue = nullptr;
              if (registerState != nullptr) {
                  registerValue = registerState->checkedTo<Bmv2V1ModelRegisterValue>();
@@ -582,7 +583,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  const auto *inputValue =
                      programInfo.createTargetUninitialized(readOutput->type, false);
                  registerValue = new Bmv2V1ModelRegisterValue(inputValue);
-                 nextState.addTestObject("registervalues", externInstance->controlPlaneName(),
+                 nextState.addTestObject("registervalues"_cs, externInstance->controlPlaneName(),
                                          registerValue);
              }
              const IR::Expression *baseExpr = registerValue->getValueAtIndex(index);
@@ -633,8 +634,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *
          * ======================================================================================
          */
-        {"register.write",
-         {"index", "value"},
+        {"register.write"_cs,
+         {"index"_cs, "value"_cs},
          [this](const IR::MethodCallExpression * /*call*/, const IR::Expression *receiver,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -661,7 +662,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // "Write" to the register by update the internal test object state. If the register
              // did not exist previously, update it with the value to write as initial value.
              const auto *registerState = nextState.getTestObject(
-                 "registervalues", externInstance->controlPlaneName(), false);
+                 "registervalues"_cs, externInstance->controlPlaneName(), false);
              Bmv2V1ModelRegisterValue *registerValue = nullptr;
              if (registerState != nullptr) {
                  registerValue = new Bmv2V1ModelRegisterValue(
@@ -673,7 +674,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  registerValue = new Bmv2V1ModelRegisterValue(writeValue);
                  registerValue->writeToIndex(index, inputValue);
              }
-             nextState.addTestObject("registervalues", externInstance->controlPlaneName(),
+             nextState.addTestObject("registervalues"_cs, externInstance->controlPlaneName(),
                                      registerValue);
              nextState.popBody();
              result->emplace_back(nextState);
@@ -706,8 +707,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          * ======================================================================================
          */
         // TODO: Count currently has no effect in the symbolic interpreter.
-        {"counter.count",
-         {"index"},
+        {"counter.count"_cs,
+         {"index"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -743,7 +744,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          * ======================================================================================
          */
         // TODO: Count currently has no effect in the symbolic interpreter.
-        {"direct_counter.count",
+        {"direct_counter.count"_cs,
          {},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
@@ -783,8 +784,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *               range, the final value of result is not specified,
          *  and should be ignored by the caller.
          * ====================================================================================== */
-        {"meter.execute_meter",
-         {"index", "result"},
+        {"meter.execute_meter"_cs,
+         {"index"_cs, "result"_cs},
          [](const IR::MethodCallExpression *call, const IR::Expression *receiver,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -816,7 +817,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // cast the object to the correct class and retrieve the current value according to the
              // index. If the meter has not been added had, create a new meter object.
              const auto *meterState =
-                 state.getTestObject("meter_values", externInstance->controlPlaneName(), false);
+                 state.getTestObject("meter_values"_cs, externInstance->controlPlaneName(), false);
              Bmv2V1ModelMeterValue *meterValue = nullptr;
              const auto &inputValue = ToolsVariables::getSymbolicVariable(
                  meterResult->type, "meter_value" + std::to_string(call->clone_id));
@@ -829,7 +830,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  meterValue = new Bmv2V1ModelMeterValue(inputValue, false);
              }
              meterValue->writeToIndex(index, inputValue);
-             nextState.addTestObject("meter_values", externInstance->controlPlaneName(),
+             nextState.addTestObject("meter_values"_cs, externInstance->controlPlaneName(),
                                      meterValue);
 
              if (meterResult->type->is<IR::Type_Bits>()) {
@@ -881,8 +882,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *               color YELLOW, and 2 for color RED (see RFC 2697
          *               and RFC 2698 for the meaning of these colors).
          * ====================================================================================== */
-        {"direct_meter.read",
-         {"result"},
+        {"direct_meter.read"_cs,
+         {"result"_cs},
          [this](const IR::MethodCallExpression *call, const IR::Expression *receiver,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -892,7 +893,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto *externInstance = state.findDecl(receiverPath);
              const auto *table = progInfo->getTableofDirectExtern(externInstance);
              const auto *tableEntry =
-                 state.getTestObject("tableconfigs", table->controlPlaneName(), false);
+                 state.getTestObject("tableconfigs"_cs, table->controlPlaneName(), false);
 
              auto &nextState = state.clone();
              std::vector<Continuation::Command> replacements;
@@ -919,7 +920,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // cast the object to the correct class and retrieve the current value according to the
              // index. If the meter has not been added had, create a new meter object.
              const auto *meterState =
-                 state.getTestObject("meter_values", externInstance->controlPlaneName(), false);
+                 state.getTestObject("meter_values"_cs, externInstance->controlPlaneName(), false);
              Bmv2V1ModelMeterValue *meterValue = nullptr;
              const auto &inputValue = ToolsVariables::getSymbolicVariable(
                  meterResult->type, "meter_value" + std::to_string(call->clone_id));
@@ -932,7 +933,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  meterValue = new Bmv2V1ModelMeterValue(inputValue, true);
              }
              meterValue->writeToIndex(IR::Constant::get(IR::Type_Bits::get(1), 0), inputValue);
-             nextState.addTestObject("meter_values", externInstance->controlPlaneName(),
+             nextState.addTestObject("meter_values"_cs, externInstance->controlPlaneName(),
                                      meterValue);
 
              if (meterResult->type->is<IR::Type_Bits>()) {
@@ -978,8 +979,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *  value of the receiver parameter.
          * ======================================================================================
          */
-        {"*method.digest",
-         {"receiver", "data"},
+        {"*method.digest"_cs,
+         {"receiver"_cs, "data"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -1024,16 +1025,16 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *  v1model architecture documentation (Note 1) for more details.
          * ======================================================================================
          */
-        {"*method.clone_preserving_field_list",
-         {"type", "session", "data"},
+        {"*method.clone_preserving_field_list"_cs,
+         {"type"_cs, "session"_cs, "data"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
              // TODO: Determine the exact count.
-             if (state.hasProperty("recirculate_count")) {
-                 if (state.getProperty<uint64_t>("recirculate_count") > 0) {
+             if (state.hasProperty("recirculate_count"_cs)) {
+                 if (state.getProperty<uint64_t>("recirculate_count"_cs) > 0) {
                      auto &nextState = state.clone();
                      ::warning("Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
@@ -1066,9 +1067,9 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  sessionIdExpr, static_cast<BMv2Constants::CloneType>(cloneType), state.clone(),
                  preserveIndex);
              auto &nextState = state.clone();
-             nextState.addTestObject("clone_infos", "clone_info", cloneInfo);
+             nextState.addTestObject("clone_infos"_cs, "clone_info"_cs, cloneInfo);
              // Also set clone as active, which will trigger "processClone" in the deparser.
-             nextState.setProperty("clone_active", true);
+             nextState.setProperty("clone_active"_cs, true);
              nextState.popBody();
              result->emplace_back(nextState);
          }},
@@ -1108,8 +1109,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *  resubmit_preserving_field_list(2) will only preserve field y.
          * ======================================================================================
          */
-        {"*method.resubmit_preserving_field_list",
-         {"data"},
+        {"*method.resubmit_preserving_field_list"_cs,
+         {"data"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -1118,8 +1119,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
              // TODO: Determine the exact count.
-             if (state.hasProperty("recirculate_count")) {
-                 recirculateCount = state.getProperty<uint64_t>("recirculate_count");
+             if (state.hasProperty("recirculate_count"_cs)) {
+                 recirculateCount = state.getProperty<uint64_t>("recirculate_count"_cs);
                  if (recirculateCount > 0) {
                      ::warning("Only single resubmit supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
@@ -1130,19 +1131,19 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  }
              }
              // Increment the recirculation count.
-             nextState.setProperty("recirculate_count", ++recirculateCount);
+             nextState.setProperty("recirculate_count"_cs, ++recirculateCount);
              // Recirculate is now active and "processRecirculate" will be triggered in the
              // deparser.
-             nextState.setProperty("recirculate_active", true);
+             nextState.setProperty("recirculate_active"_cs, true);
              // Grab the index and save it to the execution state.
              auto index = args->at(0)->expression->checkedTo<IR::Constant>()->asUint64();
-             nextState.setProperty("recirculate_index", index);
+             nextState.setProperty("recirculate_index"_cs, index);
              // Resubmit actually uses the original input packet, not the deparsed packet.
              // We have to reset the packet content to the input packet in "processRecirculate".
-             nextState.setProperty("recirculate_reset_pkt", true);
+             nextState.setProperty("recirculate_reset_pkt"_cs, true);
              // Set the appropriate instance type, which will be processed by
              // "processRecirculate".
-             nextState.setProperty("recirculate_instance_type",
+             nextState.setProperty("recirculate_instance_type"_cs,
                                    BMv2Constants::PKT_INSTANCE_TYPE_RESUBMIT);
              nextState.popBody();
              result->emplace_back(nextState);
@@ -1169,8 +1170,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          * for more details.
          * ======================================================================================
          */
-        {"*method.recirculate_preserving_field_list",
-         {"index"},
+        {"*method.recirculate_preserving_field_list"_cs,
+         {"index"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -1179,8 +1180,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
              // TODO: Determine the exact count.
-             if (state.hasProperty("recirculate_count")) {
-                 recirculateCount = state.getProperty<uint64_t>("recirculate_count");
+             if (state.hasProperty("recirculate_count"_cs)) {
+                 recirculateCount = state.getProperty<uint64_t>("recirculate_count"_cs);
                  if (recirculateCount > 0) {
                      ::warning("Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
@@ -1191,16 +1192,16 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  }
              }
              // Increment the recirculation count.
-             nextState.setProperty("recirculate_count", ++recirculateCount);
+             nextState.setProperty("recirculate_count"_cs, ++recirculateCount);
              // Recirculate is now active and "processRecirculate" will be triggered in the
              // deparser.
-             nextState.setProperty("recirculate_active", true);
+             nextState.setProperty("recirculate_active"_cs, true);
              // Grab the index and save it to the execution state.
              auto index = args->at(0)->expression->checkedTo<IR::Constant>()->asUint64();
-             nextState.setProperty("recirculate_index", index);
+             nextState.setProperty("recirculate_index"_cs, index);
              // Set the appropriate instance type, which will be processed by
              // "processRecirculate".
-             nextState.setProperty("recirculate_instance_type",
+             nextState.setProperty("recirculate_instance_type"_cs,
                                    BMv2Constants::PKT_INSTANCE_TYPE_RECIRC);
              nextState.popBody();
              result->emplace_back(nextState);
@@ -1214,16 +1215,16 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *  type and session parameter values, with empty data.
          * ======================================================================================
          */
-        {"*method.clone",
-         {"type", "session"},
+        {"*method.clone"_cs,
+         {"type"_cs, "session"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
              // TODO: Determine the exact count.
-             if (state.hasProperty("recirculate_count")) {
-                 if (state.getProperty<uint64_t>("recirculate_count") > 0) {
+             if (state.hasProperty("recirculate_count"_cs)) {
+                 if (state.getProperty<uint64_t>("recirculate_count"_cs) > 0) {
                      auto &nextState = state.clone();
                      ::warning("Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
@@ -1255,9 +1256,9 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              auto *cloneInfo = new Bmv2V1ModelCloneInfo(
                  sessionIdExpr, static_cast<BMv2Constants::CloneType>(cloneType), state.clone(),
                  std::nullopt);
-             nextState.addTestObject("clone_infos", "clone_info", cloneInfo);
+             nextState.addTestObject("clone_infos"_cs, "clone_info"_cs, cloneInfo);
              // Also set clone as active, which will trigger "processClone" in the deparser.
-             nextState.setProperty("clone_active", true);
+             nextState.setProperty("clone_active"_cs, true);
              nextState.popBody();
              result->emplace_back(nextState);
          }},
@@ -1267,21 +1268,22 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          */
         /// Helper extern that processes the parameters set by the recirculate, clone and resubmit
         /// externs. This extern assume the TM is executed at the end of the deparser.
-        {"*.invoke_traffic_manager",
+        {"*.invoke_traffic_manager"_cs,
          {},
          [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // Check whether the clone variant is  active.
              // Clone triggers a branch and slightly different processing.
-             if (state.hasProperty("clone_active") && state.getProperty<bool>("clone_active")) {
+             if (state.hasProperty("clone_active"_cs) &&
+                 state.getProperty<bool>("clone_active"_cs)) {
                  processClone(state, result);
                  return;
              }
 
              // Check whether recirculate is active.
-             if (state.hasProperty("recirculate_active") &&
-                 state.getProperty<bool>("recirculate_active")) {
+             if (state.hasProperty("recirculate_active"_cs) &&
+                 state.getProperty<bool>("recirculate_active"_cs)) {
                  processRecirculate(state, result);
                  return;
              }
@@ -1294,8 +1296,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          * Checksum16.get
          * ======================================================================================
          */
-        {"Checksum16.get",
-         {"data"},
+        {"Checksum16.get"_cs,
+         {"data"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
             const ExecutionState & /*state*/, SmallStepEvaluator::Result & /*result*/) {
@@ -1325,8 +1327,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *                    constant.
          * ======================================================================================
          */
-        {"*method.verify_checksum",
-         {"condition", "data", "checksum", "algo"},
+        {"*method.verify_checksum"_cs,
+         {"condition"_cs, "data"_cs, "checksum"_cs, "algo"_cs},
          [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -1379,7 +1381,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  // Try to force the checksum expression to be equal to the result.
                  auto &nextState = state.clone();
                  const auto *concolicVar = new IR::ConcolicVariable(
-                     checksumValueType, "*method_checksum", checksumArgs, call->clone_id, 0);
+                     checksumValueType, "*method_checksum"_cs, checksumArgs, call->clone_id, 0);
                  std::vector<Continuation::Command> replacements;
                  // We use a guard to enforce that the match condition after the call is true.
                  auto *checksumMatchCond = new IR::Equ(concolicVar, checksumValue);
@@ -1391,8 +1393,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // The condition is true and the checksum does not match.
              {
                  auto &nextState = state.clone();
-                 auto *concolicVar = new IR::ConcolicVariable(checksumValueType, "*method_checksum",
-                                                              checksumArgs, call->clone_id, 0);
+                 auto *concolicVar = new IR::ConcolicVariable(
+                     checksumValueType, "*method_checksum"_cs, checksumArgs, call->clone_id, 0);
                  std::vector<Continuation::Command> replacements;
                  auto *checksumMatchCond = new IR::Neq(concolicVar, checksumValue);
 
@@ -1433,8 +1435,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *                    constant.
          * ======================================================================================
          */
-        {"*method.update_checksum",
-         {"condition", "data", "checksum", "algo"},
+        {"*method.update_checksum"_cs,
+         {"condition"_cs, "data"_cs, "checksum"_cs, "algo"_cs},
          [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -1486,7 +1488,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
 
                  auto &nextState = state.clone();
                  const auto *concolicVar = new IR::ConcolicVariable(
-                     checksumVarType, "*method_checksum", checksumArgs, call->clone_id, 0);
+                     checksumVarType, "*method_checksum"_cs, checksumArgs, call->clone_id, 0);
                  nextState.set(checksumVar, concolicVar);
                  nextState.popBody();
                  result->emplace_back(updateCond, state, nextState);
@@ -1509,8 +1511,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *  ComputeChecksum control.
          * ======================================================================================
          */
-        {"*method.update_checksum_with_payload",
-         {"condition", "data", "checksum", "algo"},
+        {"*method.update_checksum_with_payload"_cs,
+         {"condition"_cs, "data"_cs, "checksum"_cs, "algo"_cs},
          [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -1548,7 +1550,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
 
                  auto &nextState = state.clone();
                  const auto *concolicVar =
-                     new IR::ConcolicVariable(checksumVarType, "*method_checksum_with_payload",
+                     new IR::ConcolicVariable(checksumVarType, "*method_checksum_with_payload"_cs,
                                               checksumArgs, call->clone_id, 0);
                  nextState.set(checksumVar, concolicVar);
                  nextState.popBody();
@@ -1572,8 +1574,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *  VerifyChecksum control.
          * ======================================================================================
          */
-        {"*method.verify_checksum_with_payload",
-         {"condition", "data", "checksum", "algo"},
+        {"*method.verify_checksum_with_payload"_cs,
+         {"condition"_cs, "data"_cs, "checksum"_cs, "algo"_cs},
          [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -1614,7 +1616,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  // Try to force the checksum expression to be equal to the result.
                  auto &nextState = state.clone();
                  const auto *concolicVar =
-                     new IR::ConcolicVariable(checksumValueType, "*method_checksum_with_payload",
+                     new IR::ConcolicVariable(checksumValueType, "*method_checksum_with_payload"_cs,
                                               checksumArgs, call->clone_id, 0);
                  // We use a guard to enforce that the match condition after the call is true.
                  auto *checksumMatchCond = new IR::Equ(concolicVar, checksumValue);
@@ -1627,7 +1629,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              {
                  auto &nextState = state.clone();
                  auto *concolicVar =
-                     new IR::ConcolicVariable(checksumValueType, "*method_checksum_with_payload",
+                     new IR::ConcolicVariable(checksumValueType, "*method_checksum_with_payload"_cs,
                                               checksumArgs, call->clone_id, 0);
                  std::vector<Continuation::Command> replacements;
                  auto *checksumMatchCond = new IR::Neq(concolicVar, checksumValue);

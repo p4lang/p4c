@@ -94,14 +94,17 @@ typedef const IR::Type ConstType;
 #define YY_NULLPTR nullptr
 
 namespace P4 {
+using namespace literals;
+
 class Token {
  public:
     int type;
     cstring text;
     UnparsedConstant* unparsedConstant;
 
-    Token() : Token(0, "", nullptr) { }
+    Token() : Token(0, cstring::empty, nullptr) { }
     Token(int type, cstring text) : Token(type, text, nullptr) { }
+    Token(int type, const char* text) : Token(type, cstring(text), nullptr) { }    
     Token(int type, UnparsedConstant unparsedConstant)
             : Token(type, unparsedConstant.text,
                     new UnparsedConstant(unparsedConstant)) { }
@@ -440,7 +443,7 @@ fragment
 // TODO: Could this be redesigned to avoid this hack?
 p4rtControllerType
     : STRING
-        { $$ = new IR::StringLiteral(@1, ""); }
+        { $$ = new IR::StringLiteral(@1, ""_cs); }
     | BIT l_angle INTEGER r_angle
         { $$ = new IR::Constant(parseConstantChecked(@3, $3)); }
     // Legacy syntax; to be removed in P4RT 2.0
@@ -471,28 +474,28 @@ declaration
 
 nonTypeName
     : IDENTIFIER  { $$ = new IR::ID(@1, $1); }
-    | APPLY       { $$ = new IR::ID(@1, "apply"); }
-    | KEY         { $$ = new IR::ID(@1, "key"); }
-    | ACTIONS     { $$ = new IR::ID(@1, "actions"); }
-    | STATE       { $$ = new IR::ID(@1, "state"); }
-    | ENTRIES     { $$ = new IR::ID(@1, "entries"); }
-    | TYPE        { $$ = new IR::ID(@1, "type"); }
-    | PRIORITY    { $$ = new IR::ID(@1, "priority"); }
+    | APPLY       { $$ = new IR::ID(@1, "apply"_cs); }
+    | KEY         { $$ = new IR::ID(@1, "key"_cs); }
+    | ACTIONS     { $$ = new IR::ID(@1, "actions"_cs); }
+    | STATE       { $$ = new IR::ID(@1, "state"_cs); }
+    | ENTRIES     { $$ = new IR::ID(@1, "entries"_cs); }
+    | TYPE        { $$ = new IR::ID(@1, "type"_cs); }
+    | PRIORITY    { $$ = new IR::ID(@1, "priority"_cs); }
     ;
 
 name
     : nonTypeName { $$ = $1; }
-    | LIST { $$ = new IR::ID(@1, "list"); }
+    | LIST { $$ = new IR::ID(@1, "list"_cs); }
     | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
     ;
 
 nonTableKwName
     : IDENTIFIER       { $$ = new IR::ID(@1, $1); }
     | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
-    | APPLY            { $$ = new IR::ID(@1, "apply"); }
-    | STATE            { $$ = new IR::ID(@1, "state"); }
-    | TYPE             { $$ = new IR::ID(@1, "type"); }
-    | PRIORITY         { $$ = new IR::ID(@1, "priority"); }
+    | APPLY            { $$ = new IR::ID(@1, "apply"_cs); }
+    | STATE            { $$ = new IR::ID(@1, "state"_cs); }
+    | TYPE             { $$ = new IR::ID(@1, "type"_cs); }
+    | PRIORITY         { $$ = new IR::ID(@1, "priority"_cs); }
     ;
 
 optCONST
@@ -1021,7 +1024,7 @@ specializedType
 baseType
     : BOOL   { $$ = IR::Type_Boolean::get(@1); }
     | MATCH_KIND { $$ = IR::Type_MatchKind::get(@1); }
-    | ERROR  { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"))); }
+    | ERROR  { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"_cs))); }
     | BIT    { $$ = IR::Type::Bits::get(@1, 1); }
     | STRING { $$ = IR::Type::String::get(@1); }
     | INT    { $$ = IR::Type_InfInt::get(@1); }
@@ -1160,7 +1163,7 @@ specifiedIdentifier
 
 errorDeclaration
     : ERROR "{" identifierList "}"
-        { $$ = new IR::Type_Error(@1 + @4, IR::ID(@1, "error"), *$3); }
+        { $$ = new IR::Type_Error(@1 + @4, IR::ID(@1, "error"_cs), *$3); }
     ;
 
 matchKindDeclaration
@@ -1239,12 +1242,12 @@ continueStatement
 directApplication
     : typeName "." APPLY "(" argumentList ")" ";" {
                                   auto method = new IR::Member(
-                                      @1 + @3, new IR::TypeNameExpression($1), IR::ID(@3, "apply"));
+                                      @1 + @3, new IR::TypeNameExpression($1), IR::ID(@3, "apply"_cs));
                                   auto mce = new IR::MethodCallExpression(@1 + @6, method, $5);
                                   $$ = new IR::MethodCallStatement(@1 + @6, mce); }
     | specializedType "." APPLY "(" argumentList ")" ";" {
                                   auto method = new IR::Member(
-                                      @1 + @3, new IR::TypeNameExpression($1), IR::ID(@3, "apply"));
+                                      @1 + @3, new IR::TypeNameExpression($1), IR::ID(@3, "apply"_cs));
                                   auto mce = new IR::MethodCallExpression(@1 + @6, method, $5);
                                   $$ = new IR::MethodCallStatement(@1 + @6, mce); }
     ;
@@ -1369,15 +1372,15 @@ tablePropertyList
 tableProperty
     : KEY "=" "{" keyElementList "}"
         { auto v = new IR::Key(@4, *$4);
-          auto id = IR::ID(@1, "key");
+          auto id = IR::ID(@1, "key"_cs);
           $$ = new IR::Property( @1 + @5, id, v, false); }
     | ACTIONS "=" "{" actionList "}"
         { auto v = new IR::ActionList(@4, *$4);
-          auto id = IR::ID(@1, "actions");
+          auto id = IR::ID(@1, "actions"_cs);
           $$ = new IR::Property(@1 + @5, id, v, false); }
     | optAnnotations optCONST ENTRIES "=" "{" entriesList "}"
         { auto l = new IR::EntriesList(@3, *$6);
-          auto id = IR::ID(@3+@7, "entries");
+          auto id = IR::ID(@3+@7, "entries"_cs);
           $$ = new IR::Property(@3, id, $1, l, $2.isConst); }
     | optAnnotations optCONST nonTableKwName "=" initializer ";"
         { auto v = new IR::ExpressionValue(@5, $5);
@@ -1569,7 +1572,7 @@ expression
     | typeName dot_name %prec DOT
         { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), *$2); }
     | ERROR "." name
-        { auto typeName = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error")));
+        { auto typeName = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"_cs)));
           $$ = new IR::Member(@1+@3, new IR::TypeNameExpression(@1+@3, typeName), *$3); }
     | expression dot_name %prec DOT      { $$ = new IR::Member(@1 + @2, $1, *$2); }
     | expression "*" expression          { $$ = new IR::Mul(@1 + @3, $1, $3); }
@@ -1622,7 +1625,7 @@ nonBraceExpression
     | typeName dot_name %prec DOT
         { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), *$2); }
     | ERROR "." name
-        { auto typeName = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error")));
+        { auto typeName = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"_cs)));
           $$ = new IR::Member(@1+@3, new IR::TypeNameExpression(@1+@3, typeName), *$3); }
     | nonBraceExpression dot_name %prec DOT      { $$ = new IR::Member(@1 + @2, $1, *$2); }
     | nonBraceExpression "*" expression          { $$ = new IR::Mul(@1 + @3, $1, $3); }

@@ -58,6 +58,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
 %union {
     YYSTYPE() {}
     int                         i;
+    // FIXME: decide if this is a good idea to store all tokens inside cstring cache
     cstring                     str;
     IrClass                     *irClass;
     IrElement                   *irElement;
@@ -71,6 +72,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
     NodeKind                    kind;
     struct {
         bool                    impl;
+        // FIXME: decide if this is a good idea to store all code blocks inside cstring cache
         cstring                 block;
     }                           emit;
 }
@@ -130,9 +132,10 @@ symbol_print(FILE* file, int type, YYSTYPE value)
 #include "ir-generator-lex.c"
 #pragma GCC diagnostic pop
 
+// FIXME: should receive string_view
 static cstring canon_name(cstring name) {
     /* canonical method names for backwards compatibility */
-    if (name == "visitchildren") return "visit_children";
+    if (name == "visitchildren") return "visit_children"_cs;
     return name;
 }
 
@@ -278,16 +281,16 @@ method
 
 methodName
     : IDENTIFIER
-    | OPERATOR '=' '='          { $$ = "operator=="; }
-    | OPERATOR '!' '='          { $$ = "operator!="; }
-    | OPERATOR '<' '='          { $$ = "operator<="; }
-    | OPERATOR '>' '='          { $$ = "operator>="; }
-    | OPERATOR '<'              { $$ = "operator<"; }
-    | OPERATOR '<' '<'          { $$ = "operator<<"; }
-    | OPERATOR '>'              { $$ = "operator>"; }
-    | OPERATOR '>' '>'          { $$ = "operator>>"; }
-    | OPERATOR '*'              { $$ = "operator*"; }
-    | OPERATOR '-' '>'          { $$ = "operator->"; }
+    | OPERATOR '=' '='          { $$ = "operator=="_cs; }
+    | OPERATOR '!' '='          { $$ = "operator!="_cs; }
+    | OPERATOR '<' '='          { $$ = "operator<="_cs; }
+    | OPERATOR '>' '='          { $$ = "operator>="_cs; }
+    | OPERATOR '<'              { $$ = "operator<"_cs; }
+    | OPERATOR '<' '<'          { $$ = "operator<<"_cs; }
+    | OPERATOR '>'              { $$ = "operator>"_cs; }
+    | OPERATOR '>' '>'          { $$ = "operator>>"_cs; }
+    | OPERATOR '*'              { $$ = "operator*"_cs; }
+    | OPERATOR '-' '>'          { $$ = "operator->"_cs; }
     ;
 
 optArgList : argList | ;
@@ -311,10 +314,10 @@ optOverride
                             yyerror("syntax error, expecting override or method body"); }
 
 body: BLOCK
-    | '=' ZERO ';'    { $$ = "= 0;"; }
-    | '=' DEFAULT ';' { $$ = "= default;"; }
-    | '=' DELETE ';'  { $$ = "= delete;"; }
-    | ';'             { $$ = nullptr; }
+    | '=' ZERO ';'    { $$ = "= 0;"_cs; }
+    | '=' DEFAULT ';' { $$ = "= default;"_cs; }
+    | '=' DELETE ';'  { $$ = "= delete;"_cs; }
+    | ';'             { $$ = {}; }
     ;
 
 irField
@@ -338,10 +341,10 @@ modifier
 
 modifiers : { $$ = 0; } | modifiers modifier { $$ = $1 | $2; }
 
-fieldName: IDENTIFIER | OPTIONAL { $$ = "optional"; } ;
+fieldName: IDENTIFIER | OPTIONAL { $$ = "optional"_cs; } ;
 
 optInitializer
-    : /* empty */       { $$ = nullptr; }
+    : /* empty */       { $$ = {}; }
     | '=' expression    { $$ = $2; }
     | '=' BLOCK         { $$ = $2; }
     ;
@@ -354,7 +357,7 @@ lookup_scope
 nonRefType
     : IDENTIFIER                        { $$ = new NamedType(@1, 0, $1); }
     | lookup_scope IDENTIFIER           { $$ = new NamedType(@2, $1, $2); }
-    | lookup_scope OPTIONAL             { $$ = new NamedType(@2, $1, "optional"); }
+    | lookup_scope OPTIONAL             { $$ = new NamedType(@2, $1, "optional"_cs); }
     | nonRefType '<' type_args '>'      { $$ = new TemplateInstantiation(@1+@4, $1, *$3); }
     | nonRefType '[' INTEGER ']'        { $$ = new ArrayType(@1+@4, $1, atoi($3)); }
     ;

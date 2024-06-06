@@ -176,7 +176,7 @@ template <typename... Args>
 inline void diagnose(DiagnosticAction defaultAction, const char *diagnosticName, const char *format,
                      const char *suffix, Args &&...args) {
     auto &context = BaseCompileContext::get();
-    auto action = context.getDiagnosticAction(diagnosticName, defaultAction);
+    auto action = context.getDiagnosticAction(cstring(diagnosticName), defaultAction);
     context.errorReporter().diagnose(action, diagnosticName, format, suffix,
                                      std::forward<Args>(args)...);
 }

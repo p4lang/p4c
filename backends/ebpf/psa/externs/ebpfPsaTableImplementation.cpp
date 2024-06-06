@@ -159,8 +159,8 @@ void EBPFActionProfilePSA::emitInstance(CodeBuilder *builder) {
     //   If user change action for given reference to NoAction, it will be hard to
     //   distinguish it from non-existing entry using only key value.
     auto tableKind = TableHash;
-    builder->target->emitTableDecl(builder, instanceName, tableKind, "u32",
-                                   cstring("struct ") + valueTypeName, size);
+    builder->target->emitTableDecl(builder, instanceName, tableKind, "u32"_cs,
+                                   "struct "_cs + valueTypeName, size);
 }
 
 void EBPFActionProfilePSA::applyImplementation(CodeBuilder *builder, cstring tableValueName,
@@ -304,16 +304,17 @@ void EBPFActionSelectorPSA::emitInstance(CodeBuilder *builder) {
     // group map (group ref -> {action refs})
     // TODO: group size (inner size) is assumed to be 128. Make more logic for this.
     //  One additional entry is for group size.
-    builder->target->emitMapInMapDecl(builder, groupsMapName + "_inner", TableArray, "u32", "u32",
-                                      128 + 1, groupsMapName, TableHash, "u32", groupsMapSize);
+    builder->target->emitMapInMapDecl(builder, groupsMapName + "_inner", TableArray, "u32"_cs,
+                                      "u32"_cs, 128 + 1, groupsMapName, TableHash, "u32"_cs,
+                                      groupsMapSize);
 
     // default empty group action (0 -> action)
     builder->target->emitTableDecl(builder, emptyGroupActionMapName, TableArray,
-                                   program->arrayIndexType, cstring("struct ") + valueTypeName, 1);
+                                   program->arrayIndexType, "struct "_cs + valueTypeName, 1);
 
     // action map (ref -> action)
-    builder->target->emitTableDecl(builder, actionsMapName, TableHash, "u32",
-                                   cstring("struct ") + valueTypeName, size);
+    builder->target->emitTableDecl(builder, actionsMapName, TableHash, "u32"_cs,
+                                   "struct "_cs + valueTypeName, size);
 
     emitCacheInstance(builder);
 }
@@ -339,8 +340,8 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder *builder, cstring ta
     cstring innerGroupName = program->refMap->newName("as_group_map");
     groupStateVarName = program->refMap->newName("as_group_state");
     // these can be hardcoded because they are declared inside of a block
-    cstring checksumValName = "as_checksum_val";
-    cstring mapEntryName = "as_map_entry";
+    cstring checksumValName = "as_checksum_val"_cs;
+    cstring mapEntryName = "as_map_entry"_cs;
 
     emitCacheVariables(builder);
 
@@ -547,7 +548,7 @@ void EBPFActionSelectorPSA::registerTable(const EBPFTablePSA *instance) {
     if (table == nullptr) {
         selectors = getSelectorsFromTable(instance);
         emptyGroupAction =
-            instance->table->container->properties->getProperty("psa_empty_group_action");
+            instance->table->container->properties->getProperty("psa_empty_group_action"_cs);
         groupsMapSize = instance->size;
     } else {
         verifyTableSelectorKeySet(instance);
@@ -587,7 +588,7 @@ void EBPFActionSelectorPSA::verifyTableSelectorKeySet(const EBPFTablePSA *instan
 }
 
 void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA *instance) {
-    auto iega = instance->table->container->properties->getProperty("psa_empty_group_action");
+    auto iega = instance->table->container->properties->getProperty("psa_empty_group_action"_cs);
 
     if (emptyGroupAction == nullptr && iega == nullptr) return;  // nothing to do here
     if (emptyGroupAction == nullptr && iega != nullptr) {
@@ -607,7 +608,7 @@ void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA *inst
     }
 
     bool same = true;
-    cstring additionalNote;
+    const char *additionalNote = "";
 
     if (emptyGroupAction->isConstant != iega->isConstant) {
         same = false;

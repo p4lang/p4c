@@ -23,7 +23,7 @@ limitations under the License.
 
 namespace P4 {
 
-extern std::set<cstring> reservedWords;
+extern const std::set<cstring> reservedWords;
 
 }  // namespace P4
 

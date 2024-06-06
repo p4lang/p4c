@@ -4,6 +4,8 @@
 
 namespace P4 {
 
+using namespace literals;
+
 bool ComplexValues::isNestedStruct(const IR::Type *type) {
     if (!type->is<IR::Type_Struct>()) return false;
     auto st = type->to<IR::Type_Struct>();
@@ -30,7 +32,7 @@ void ComplexValues::explode(cstring prefix, const IR::Type_Struct *type, FieldsM
             map->members.emplace(f->name.name, submap);
             explode(fname, ftype->to<IR::Type_Struct>(), submap, result);
         } else {
-            cstring newName = refMap->newName(fname);
+            cstring newName = refMap->newName(fname.string_view());
             auto comp = new FinalName(newName);
             map->members.emplace(f->name.name, comp);
             auto clone = new IR::Declaration_Variable(IR::ID(newName), ftype->getP4Type());
@@ -45,9 +47,10 @@ const IR::Node *RemoveNestedStructs::postorder(IR::Declaration_Variable *decl) {
     if (!values->isNestedStruct(type)) return decl;
 
     BUG_CHECK(decl->initializer == nullptr, "%1%: did not expect an initializer", decl);
-    BUG_CHECK(decl->annotations->size() == 0 || (decl->annotations->size() == 1 &&
-                                                 decl->annotations->getSingle("name") != nullptr),
-              "%1%: don't know how to handle variable annotations other than @name", decl);
+    BUG_CHECK(
+        decl->annotations->size() == 0 ||
+            (decl->annotations->size() == 1 && decl->annotations->getSingle("name"_cs) != nullptr),
+        "%1%: don't know how to handle variable annotations other than @name", decl);
     auto map = new ComplexValues::FieldsMap(type);
     values->values.emplace(getOriginal<IR::Declaration_Variable>(), map);
     if (findContext<IR::Function>()) {

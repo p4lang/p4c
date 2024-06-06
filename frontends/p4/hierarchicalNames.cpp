@@ -27,7 +27,7 @@ const IR::Node *HierarchicalNames::postorder(IR::Annotation *annotation) {
 
     cstring name = annotation->getName();
     if (name.startsWith(".")) return annotation;
-    cstring newName = "";
+    std::string newName = "";
     for (cstring s : stack) newName += s + ".";
     newName += name;
     LOG2("Changing " << name << " to " << newName);

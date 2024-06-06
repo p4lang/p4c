@@ -22,6 +22,7 @@ limitations under the License.
 #include "constants.h"
 #include "control-plane/bfruntime.h"
 #include "dpdkProgramStructure.h"
+#include "lib/cstring.h"
 #include "lib/json.h"
 #include "lib/nullstream.h"
 #include "options.h"
@@ -35,6 +36,8 @@ namespace p4configv1 = ::p4::config::v1;
 /// The context JSON is based on the JSON Schema defined in DPDK_context_schema.json.
 
 namespace DPDK {
+
+using namespace P4::literals;
 
 /// This structure holds table attributes required for context JSON which are not
 /// part of P4Table.
@@ -90,9 +93,9 @@ struct TopLevelCtxt {
         auto fileName = progName.findlast('/');
         // Handle the case when input file is in the current working directory.
         // fileName would be null in that case, hence progName should remain unchanged.
-        if (fileName) progName = fileName;
+        if (fileName) progName = cstring(fileName);
         auto fileext = progName.find(".");
-        progName = progName.replace(fileext, "");
+        progName = progName.replace(cstring(fileext), cstring::empty);
         progName = progName.trim("/\t\n\r");
         compilerVersion = options.compilerVersion;
     }
@@ -107,19 +110,19 @@ struct SelectionTable {
                        const std::map<const cstring, struct TableAttributes> &tableAttrmap) {
         max_n_groups = 0;
         max_n_members_per_group = 0;
-        auto n_groups = tbl->properties->getProperty("n_groups_max");
+        auto n_groups = tbl->properties->getProperty("n_groups_max"_cs);
         if (n_groups) {
             auto n_groups_expr = n_groups->value->to<IR::ExpressionValue>()->expression;
             max_n_groups = n_groups_expr->to<IR::Constant>()->asInt();
         }
-        auto n_members = tbl->properties->getProperty("n_members_per_group_max");
+        auto n_members = tbl->properties->getProperty("n_members_per_group_max"_cs);
         if (n_members) {
             auto n_members_expr = n_members->value->to<IR::ExpressionValue>()->expression;
             max_n_members_per_group = n_members_expr->to<IR::Constant>()->asInt();
         }
         // Fetch associated member table handle
         cstring actionDataTableName = tbl->name.originalName;
-        actionDataTableName = actionDataTableName.replace("_sel", "");
+        actionDataTableName = actionDataTableName.replace("_sel"_cs, cstring::empty);
         auto actionTableAttr = ::get(tableAttrmap, actionDataTableName);
         bound_to_action_data_table_handle = actionTableAttr.tableHandle;
     }

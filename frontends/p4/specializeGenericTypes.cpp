@@ -49,7 +49,7 @@ void TypeSpecializationMap::add(const IR::Type_Specialized *t, const IR::Type_St
         }
     }
 
-    cstring name = refMap->newName(decl->getName());
+    cstring name = refMap->newName(decl->getName().name.string_view());
     LOG3("Found to specialize: " << dbp(t) << "(" << t << ") with name " << name
                                  << " insert before " << dbp(insertion));
     auto argTypes = new IR::Vector<IR::Type>();

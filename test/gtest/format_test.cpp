@@ -37,8 +37,8 @@ TEST(Util, Format) {
         int a, b, c;
 
         cstring toString() const {
-            return cstring("(") + Util::toString(this->a) + "," + Util::toString(this->b) + "," +
-                   Util::toString(this->c) + ")";
+            return "("_cs + Util::toString(this->a) + ","_cs + Util::toString(this->b) + ","_cs +
+                   Util::toString(this->c) + ")"_cs;
         }
     };
 
@@ -46,8 +46,8 @@ TEST(Util, Format) {
     message = context.errorReporter().format_message("Nice=%1%", nf);
     EXPECT_EQ("Nice=(1,2,3)\n", message);
 
-    cstring x = "x";
-    cstring y = "y";
+    cstring x = "x"_cs;
+    cstring y = "y"_cs;
     message = context.errorReporter().format_message("%1% %2%", x, y);
     EXPECT_EQ("x y\n", message);
 

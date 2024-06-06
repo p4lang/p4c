@@ -25,7 +25,10 @@ limitations under the License.
 #include "cstring.h"
 
 namespace Util {
+using namespace P4::literals;
+
 // Represents a filename path, e.g., /usr/local/bin/file.exe
+// FIXME: Can we replace with std::filesystem?
 class PathName final {
  private:
     static const char pathSeparators[2];
@@ -36,9 +39,9 @@ class PathName final {
  public:
     static inline cstring separator() {
 #ifdef _WIN32
-        return "\\";
+        return "\\"_cs;
 #else
-        return "/";
+        return "/"_cs;
 #endif
     }
 

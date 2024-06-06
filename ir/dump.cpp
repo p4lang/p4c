@@ -25,6 +25,8 @@ limitations under the License.
 #include "lib/indent.h"
 #include "lib/source_file.h"
 
+using namespace P4::literals;
+
 namespace {
 class IRDumper : public Inspector {
     std::ostream &out;
@@ -81,19 +83,19 @@ void dump(const IR::Node *n) { dump(n, ~0U); }
 void dump(const IR::INode *n, unsigned maxdepth) { dump(std::cout, n->getNode(), maxdepth); }
 void dump(const IR::INode *n) { dump(n, ~0U); }
 void dump_notype(const IR::Node *n, unsigned maxdepth) {
-    n->apply(IRDumper(std::cout, maxdepth, "type", false));
+    n->apply(IRDumper(std::cout, maxdepth, "type"_cs, false));
 }
 void dump_notype(const IR::Node *n) { dump_notype(n, ~0U); }
 void dump_notype(const IR::INode *n, unsigned maxdepth) {
-    n->getNode()->apply(IRDumper(std::cout, maxdepth, "type", false));
+    n->getNode()->apply(IRDumper(std::cout, maxdepth, "type"_cs, false));
 }
 void dump_notype(const IR::INode *n) { dump_notype(n, ~0U); }
 void dump_src(const IR::Node *n, unsigned maxdepth) {
-    n->apply(IRDumper(std::cout, maxdepth, "type", true));
+    n->apply(IRDumper(std::cout, maxdepth, "type"_cs, true));
 }
 void dump_src(const IR::Node *n) { dump_src(n, ~0U); }
 void dump_src(const IR::INode *n, unsigned maxdepth) {
-    n->getNode()->apply(IRDumper(std::cout, maxdepth, "type", true));
+    n->getNode()->apply(IRDumper(std::cout, maxdepth, "type"_cs, true));
 }
 void dump_src(const IR::INode *n) { dump_src(n, ~0U); }
 

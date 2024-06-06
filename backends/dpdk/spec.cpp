@@ -14,7 +14,7 @@ auto &origNameMap = DPDK::ShortenTokenLength::origNameMap;
 
 void add_space(std::ostream &out, int size) { out << std::setfill(' ') << std::setw(size) << " "; }
 
-void add_comment(std::ostream &out, cstring str, cstring sep = "") {
+void add_comment(std::ostream &out, cstring str, std::string_view sep = "") {
     if (origNameMap.count(str)) {
         out << sep << ";oldname:" << origNameMap.at(str) << "\n";
     }
@@ -211,7 +211,7 @@ std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
-    if (getAnnotations()->getSingle("__packet_data__")) {
+    if (getAnnotations()->getSingle("__packet_data__"_cs)) {
         for (auto it = fields.begin(); it != fields.end(); ++it) {
             add_comment(out, (*it)->name.toString());
             if (auto t = (*it)->type->to<IR::Type_Name>()) {
@@ -258,7 +258,7 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
             out << std::endl;
         }
         out << "}" << std::endl;
-        if (getAnnotations()->getSingle("__metadata__")) {
+        if (getAnnotations()->getSingle("__metadata__"_cs)) {
             out << "metadata instanceof " << name << std::endl;
         }
     }
@@ -402,8 +402,8 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
         } else {
             out << "\t\t" << DPDK::toStr(action->expression);
         }
-        if (action->annotations->getAnnotation("tableonly")) out << " @tableonly";
-        if (action->annotations->getAnnotation("defaultonly")) out << " @defaultonly";
+        if (action->annotations->getAnnotation("tableonly"_cs)) out << " @tableonly";
+        if (action->annotations->getAnnotation("defaultonly"_cs)) out << " @defaultonly";
         out << std::endl;
     }
     out << "\t}" << std::endl;
@@ -444,13 +444,13 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
             }
         }
     }
-    auto def = properties->getProperty("default_action");
+    auto def = properties->getProperty("default_action"_cs);
     if (def->isConstant) out << "const";
     out << std::endl;
-    if (auto psa_implementation = properties->getProperty("psa_implementation")) {
+    if (auto psa_implementation = properties->getProperty("psa_implementation"_cs)) {
         out << "\taction_selector " << DPDK::toStr(psa_implementation->value) << std::endl;
     }
-    if (auto size = properties->getProperty("size")) {
+    if (auto size = properties->getProperty("size"_cs)) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
     } else {
         out << "\tsize 0x10000" << std::endl;
@@ -489,8 +489,8 @@ std::ostream &IR::DpdkLearner::toSpec(std::ostream &out) const {
     out << "\tactions {" << std::endl;
     for (auto action : actions->actionList) {
         out << "\t\t" << DPDK::toStr(action->expression);
-        if (action->getAnnotation("tableonly")) out << " @tableonly";
-        if (action->getAnnotation("defaultonly")) out << " @defaultonly";
+        if (action->getAnnotation("tableonly"_cs)) out << " @tableonly";
+        if (action->getAnnotation("defaultonly"_cs)) out << " @defaultonly";
         out << std::endl;
     }
     out << "\t}" << std::endl;
@@ -502,7 +502,7 @@ std::ostream &IR::DpdkLearner::toSpec(std::ostream &out) const {
         BUG("non-zero default action arguments not supported yet");
     }
     out << std::endl;
-    if (auto size = properties->getProperty("size")) {
+    if (auto size = properties->getProperty("size"_cs)) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
     } else {
         out << "\tsize 0x" << std::hex << std::uppercase << default_learner_table_size << std::endl;

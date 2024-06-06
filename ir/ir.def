@@ -112,7 +112,7 @@ class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, I
         for (auto d : parserLocals)
             BUG_CHECK(!d->is<ParserState>(), "%1%: state in locals", d);
     }
-    toString { return cstring("parser ") + externalName(); }
+    toString { return "parser "_cs + externalName(); }
 }
 
 class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, IContainer, IAnnotated {
@@ -140,7 +140,7 @@ class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, 
             BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
         controlLocals.check_null();
     }
-    toString { return cstring("control ") + externalName(); }
+    toString { return "control "_cs + externalName(); }
 }
 
 /// A P4-16 action
@@ -283,7 +283,7 @@ class Property : Declaration, IAnnotated {
 
 class TableProperties : ISimpleNamespace {
     optional inline IndexedVector<Property> properties;
-    toString{ return "TableProperties(" + Util::toString(properties.size()) + ")"; }
+    toString{ return "TableProperties("_cs + Util::toString(properties.size()) + ")"_cs; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return properties.getDeclarations(); }
     Property getProperty(cstring name) const {
@@ -427,14 +427,14 @@ abstract Statement : StatOrDecl {
 }
 
 class ExitStatement : Statement {
-    toString{ return "exit"; }
+    toString{ return "exit"_cs; }
     dbprint { out << "exit"; }
 }
 
 class ReturnStatement : Statement {
     NullOK Expression expression;
-    toString{ return cstring("return ") +
-                (expression != nullptr ? expression->toString() : cstring("")); }
+    toString{ return "return "_cs +
+                (expression != nullptr ? expression->toString() : ""_cs); }
 }
 
 class EmptyStatement : Statement {
@@ -444,7 +444,7 @@ class EmptyStatement : Statement {
 class AssignmentStatement : Statement {
     Expression left;
     Expression right;
-    toString{ return left->toString() + " = " + right->toString(); }
+    toString{ return left->toString() + " = "_cs + right->toString(); }
 }
 
 class IfStatement : Statement {
@@ -457,13 +457,13 @@ class IfStatement : Statement {
 }
 
 class BreakStatement : Statement {
-    toString{ return "break"; }
+    toString{ return "break"_cs; }
     dbprint { out << "break"; }
     visit_children;  // in loop-visitor.cpp
 }
 
 class ContinueStatement : Statement {
-    toString{ return "continue"; }
+    toString{ return "continue"_cs; }
     dbprint { out << "continue"; }
     visit_children;  // in loop-visitor.cpp
 }

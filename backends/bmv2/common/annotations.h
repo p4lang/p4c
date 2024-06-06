@@ -22,18 +22,20 @@ limitations under the License.
 
 namespace BMV2 {
 
+using namespace P4::literals;
+
 /// Parses BMV2-specific annotations.
 class ParseAnnotations : public P4::ParseAnnotations {
  public:
     ParseAnnotations()
-        : P4::ParseAnnotations("BMV2", false,
+        : P4::ParseAnnotations("BMV2"_cs, false,
                                {
-                                   PARSE_EMPTY("metadata"),
-                                   PARSE_EXPRESSION_LIST("field_list"),
-                                   PARSE("alias", StringLiteral),
-                                   PARSE("priority", Constant),
-                                   PARSE_EXPRESSION_LIST("p4runtime_translation_mappings"),
-                                   PARSE_P4RUNTIME_TRANSLATION("p4runtime_translation"),
+                                   PARSE_EMPTY("metadata"_cs),
+                                   PARSE_EXPRESSION_LIST("field_list"_cs),
+                                   PARSE("alias"_cs, StringLiteral),
+                                   PARSE("priority"_cs, Constant),
+                                   PARSE_EXPRESSION_LIST("p4runtime_translation_mappings"_cs),
+                                   PARSE_P4RUNTIME_TRANSLATION("p4runtime_translation"_cs),
                                }) {}
 };
 

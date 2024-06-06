@@ -45,8 +45,8 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          *  CounterArray.add: Add value to counter with specified index.
          * ====================================================================================== */
         // TODO: Count currently has no effect in the symbolic interpreter.
-        {"CounterArray.add",
-         {"index", "value"},
+        {"CounterArray.add"_cs,
+         {"index"_cs, "value"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -66,8 +66,8 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          *  CounterArray.increment: Add value to counter with specified index.
          * ====================================================================================== */
         // TODO: Count currently has no effect in the symbolic interpreter.
-        {"CounterArray.increment",
-         {"index"},
+        {"CounterArray.increment"_cs,
+         {"index"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -85,8 +85,8 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          *  @return True if checksum is correct.
          * Implemented in p4c/testdata/extern_modules/extern-checksum-ebpf.c
          * ====================================================================================== */
-        {"*method.verify_ipv4_checksum",
-         {"iphdr"},
+        {"*method.verify_ipv4_checksum"_cs,
+         {"iphdr"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -162,19 +162,19 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          * stateful packet processing.
          * Implemented in p4c/testdata/extern_modules/extern-conntrack-ebpf.c
          * ====================================================================================== */
-        {"*method.tcp_conntrack",
-         {"hdrs"},
+        {"*method.tcp_conntrack"_cs,
+         {"hdrs"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // Input must be the headers struct.
              const auto *headers = args->at(0)->expression->checkedTo<IR::StructExpression>();
-             const auto *tcpRef = headers->getField("tcp");
+             const auto *tcpRef = headers->getField("tcp"_cs);
              CHECK_NULL(tcpRef);
              const auto *tcpHeader = tcpRef->expression->checkedTo<IR::HeaderExpression>();
-             const auto *syn = tcpHeader->getField("syn");
+             const auto *syn = tcpHeader->getField("syn"_cs);
              CHECK_NULL(syn);
-             const auto *ack = tcpHeader->getField("ack");
+             const auto *ack = tcpHeader->getField("ack"_cs);
              CHECK_NULL(ack);
              const auto *synExpr = syn->expression;
              const auto *ackExpr = ack->expression;

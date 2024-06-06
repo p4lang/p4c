@@ -9,6 +9,8 @@
 using ::google::protobuf::TextFormat;
 using ::p4::config::v1::P4Info;
 
+using namespace P4::literals;
+
 const char kP4InfoFile[] = "program.p4info.txt";
 
 int main() {
@@ -24,6 +26,6 @@ int main() {
   std::cout << p4info.DebugString();
 
   // Demonstrate that IR extension is present.
-  IR::MyCustomStatement statement("Hello, P4 extension world!");
+  IR::MyCustomStatement statement("Hello, P4 extension world!"_cs);
   std::cout << statement << std::endl;
 }

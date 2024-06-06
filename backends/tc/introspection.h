@@ -30,6 +30,8 @@ and limitations under the License.
 /// control plane programming by P4TC in Linux kernel
 namespace TC {
 
+using namespace P4::literals;
+
 struct IntrospectionInfo {
     cstring schemaVersion;
     cstring pipelineName;
@@ -38,7 +40,7 @@ struct IntrospectionInfo {
         pipelineName = nullptr;
     }
     void initIntrospectionInfo(IR::TCPipeline *tcPipeline) {
-        schemaVersion = "1.0.0";
+        schemaVersion = "1.0.0"_cs;
         pipelineName = tcPipeline->pipelineName;
     }
 };

@@ -69,7 +69,7 @@ class P4TestOptions : public CompilerOptions {
             "--fromJSON", "file",
             [this](const char *arg) {
                 loadIRFromJson = true;
-                file = arg;
+                file = cstring(arg);
                 return true;
             },
             "read previously dumped json instead of P4 source code");
@@ -108,7 +108,7 @@ int main(int argc, char *const argv[]) {
     AutoCompileContext autoP4TestContext(new P4TestContext);
     auto &options = P4TestContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
-    options.compilerVersion = P4TEST_VERSION_STRING;
+    options.compilerVersion = cstring(P4TEST_VERSION_STRING);
 
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false) options.setInputFile();

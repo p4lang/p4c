@@ -86,11 +86,11 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::pa
 
     cstring diagnosticOption;
     if (diagnosticAction->value == "disable") {
-        diagnosticOption = "--Wdisable=";
+        diagnosticOption = "--Wdisable="_cs;
     } else if (diagnosticAction->value == "warn") {
-        diagnosticOption = "--Wwarn=";
+        diagnosticOption = "--Wwarn="_cs;
     } else if (diagnosticAction->value == "error") {
-        diagnosticOption = "--Werror=";
+        diagnosticOption = "--Werror="_cs;
     } else {
         ::warning(ErrorType::WARN_MISMATCH,
                   "@diagnostic's second argument must be 'disable', "

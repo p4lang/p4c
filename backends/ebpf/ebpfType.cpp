@@ -168,11 +168,11 @@ void EBPFScalarType::emitInitializer(CodeBuilder *builder) {
 
 EBPFStructType::EBPFStructType(const IR::Type_StructLike *strct) : EBPFType(strct) {
     if (strct->is<IR::Type_Struct>())
-        kind = "struct";
+        kind = "struct"_cs;
     else if (strct->is<IR::Type_Header>())
-        kind = "struct";
+        kind = "struct"_cs;
     else if (strct->is<IR::Type_HeaderUnion>())
-        kind = "union";
+        kind = "union"_cs;
     else
         BUG("Unexpected struct type %1%", strct);
     name = strct->name.name;
@@ -216,7 +216,8 @@ void EBPFStructType::emitInitializer(CodeBuilder *builder) {
         }
     } else if (type->is<IR::Type_Header>()) {
         builder->emitIndent();
-        builder->appendLine(".ebpf_valid = 0");
+        builder->append(".ebpf_valid = 0");
+        builder->newline();
     } else {
         BUG("Unexpected type %1%", type);
     }
@@ -251,7 +252,7 @@ void EBPFStructType::emit(CodeBuilder *builder) {
         builder->emitIndent();
         auto type = EBPFTypeFactory::instance->create(IR::Type_Boolean::get());
         if (type != nullptr) {
-            type->declare(builder, "ebpf_valid", false);
+            type->declare(builder, "ebpf_valid"_cs, false);
             builder->endOfStatement(true);
         }
     }
@@ -322,7 +323,8 @@ void EBPFEnumType::emit(EBPF::CodeBuilder *builder) {
     builder->blockStart();
     for (auto m : et->members) {
         builder->append(m->name);
-        builder->appendLine(",");
+        builder->append(",");
+        builder->newline();
     }
     builder->blockEnd(true);
 }
@@ -348,7 +350,8 @@ void EBPFErrorType::emit(EBPF::CodeBuilder *builder) {
     builder->blockStart();
     for (auto m : et->members) {
         builder->append(m->name);
-        builder->appendLine(",");
+        builder->append(",");
+        builder->newline();
     }
     builder->blockEnd(true);
 }

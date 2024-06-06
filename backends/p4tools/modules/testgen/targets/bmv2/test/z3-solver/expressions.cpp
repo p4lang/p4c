@@ -17,6 +17,8 @@
 
 namespace Test {
 
+using namespace P4::literals;
+
 using P4Tools::Z3Solver;
 using P4Tools::P4Testgen::TestgenTarget;
 using Value = IR::Literal;
@@ -87,7 +89,7 @@ class Z3SolverTests : public ::testing::Test {
         }
 
         // Extract the binary operation from the P4Program
-        const auto *decl = test->getProgram().getDeclsByName("mau")->single();
+        const auto *decl = test->getProgram().getDeclsByName("mau"_cs)->single();
         const auto *control = decl->to<IR::P4Control>();
         for (const auto *st : control->body->components) {
             if (const auto *as = st->to<IR::IfStatement>()) {

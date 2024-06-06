@@ -57,8 +57,8 @@ class EBPFProgram : public EBPFObject {
     cstring zeroKey, functionName, errorVar;
     cstring packetStartVar, packetEndVar, byteVar;
     cstring errorEnum;
-    cstring license = "GPL";  /// TODO: this should be a compiler option probably
-    cstring arrayIndexType = "u32";
+    cstring license = "GPL"_cs;  /// TODO: this should be a compiler option probably
+    cstring arrayIndexType = "u32"_cs;
 
     virtual bool build();  /// return 'true' on success
 
@@ -75,17 +75,17 @@ class EBPFProgram : public EBPFObject {
           model(EBPFModel::instance),
           deparser(nullptr) {
         // NB: offsetVar not used in eBPF backend - uBPF and TC only
-        offsetVar = EBPFModel::reserved("packetOffsetInBits");
-        zeroKey = EBPFModel::reserved("zero");
-        functionName = EBPFModel::reserved("filter");
-        errorVar = EBPFModel::reserved("errorCode");
-        packetStartVar = EBPFModel::reserved("packetStart");
-        packetEndVar = EBPFModel::reserved("packetEnd");
-        headerStartVar = EBPFModel::reserved("headerStart");
-        lengthVar = EBPFModel::reserved("pkt_len");
-        byteVar = EBPFModel::reserved("byte");
-        endLabel = EBPFModel::reserved("end");
-        errorEnum = EBPFModel::reserved("errorCodes");
+        offsetVar = EBPFModel::reserved("packetOffsetInBits"_cs);
+        zeroKey = EBPFModel::reserved("zero"_cs);
+        functionName = EBPFModel::reserved("filter"_cs);
+        errorVar = EBPFModel::reserved("errorCode"_cs);
+        packetStartVar = EBPFModel::reserved("packetStart"_cs);
+        packetEndVar = EBPFModel::reserved("packetEnd"_cs);
+        headerStartVar = EBPFModel::reserved("headerStart"_cs);
+        lengthVar = EBPFModel::reserved("pkt_len"_cs);
+        byteVar = EBPFModel::reserved("byte"_cs);
+        endLabel = EBPFModel::reserved("end"_cs);
+        errorEnum = EBPFModel::reserved("errorCodes"_cs);
     }
 
  protected:

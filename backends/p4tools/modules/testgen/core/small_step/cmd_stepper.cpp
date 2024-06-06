@@ -103,7 +103,7 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
     nextState.pushCurrentContinuation(handlers);
 
     // Set the start state as the new body.
-    const auto *startState = p4parser->states.getDeclaration<IR::ParserState>("start");
+    const auto *startState = p4parser->states.getDeclaration<IR::ParserState>("start"_cs);
     std::vector<Continuation::Command> cmds;
 
     // Initialize parser-local declarations.
@@ -194,14 +194,14 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
     if (Taint::hasTaint(ifStatement->condition)) {
         auto &nextState = state.clone();
         std::vector<Continuation::Command> cmds;
-        auto currentTaint = state.getProperty<bool>("inUndefinedState");
+        auto currentTaint = state.getProperty<bool>("inUndefinedState"_cs);
         nextState.add(*new TraceEvents::IfStatementCondition(ifStatement->condition));
-        cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", true));
+        cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState"_cs, true));
         cmds.emplace_back(ifStatement->ifTrue);
         if (ifStatement->ifFalse != nullptr) {
             cmds.emplace_back(ifStatement->ifFalse);
         }
-        cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", currentTaint));
+        cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState"_cs, currentTaint));
         nextState.replaceTopBody(&cmds);
         result->emplace_back(nextState);
         return false;
@@ -376,7 +376,7 @@ bool CmdStepper::preorder(const IR::ParserState *parserState) {
     if (select->is<IR::SelectExpression>()) {
         // Push a new continuation that will take the next state as an argument and execute the
         // state as a command. Create a parameter for the continuation we're about to build.
-        const auto *v = Continuation::genParameter(IR::Type_State::get(), "nextState",
+        const auto *v = Continuation::genParameter(IR::Type_State::get(), "nextState"_cs,
                                                    state.getNamespaceContext());
 
         // Create the continuation itself.
@@ -432,7 +432,7 @@ bool CmdStepper::preorder(const IR::ExitStatement *e) {
     logStep(e);
     auto &nextState = state.clone();
     nextState.markVisited(e);
-    nextState.add(*new TraceEvents::Generic("Exit"));
+    nextState.add(*new TraceEvents::Generic("Exit"_cs));
     nextState.replaceTopBody(Continuation::Exception::Exit);
     result->emplace_back(nextState);
     return false;
@@ -492,15 +492,15 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     // If the switch expression is tainted, we can not predict which case will be chosen. We taint
     // the program counter and execute all of the statements.
     if (Taint::hasTaint(switchExpr)) {
-        auto currentTaint = state.getProperty<bool>("inUndefinedState");
-        cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", true));
+        auto currentTaint = state.getProperty<bool>("inUndefinedState"_cs);
+        cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState"_cs, true));
         for (const auto *switchCase : switchCases) {
             if (switchCase->statement != nullptr) {
                 cmds.emplace_back(switchCase->statement);
             }
         }
-        state.add(*new TraceEvents::Generic("TaintedSwitchCase"));
-        cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", currentTaint));
+        state.add(*new TraceEvents::Generic("TaintedSwitchCase"_cs));
+        cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState"_cs, currentTaint));
         state.replaceTopBody(&cmds);
         return false;
     }
@@ -527,7 +527,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
                 collector.updateNodeCoverage(switchCase->statement, coveredNodes);
             }
             nextState.add(*new TraceEvents::GenericDescription(
-                "SwitchCase", switchCase->label->getSourceInfo().toBriefSourceFragment()));
+                "SwitchCase"_cs, switchCase->label->getSourceInfo().toBriefSourceFragment()));
             cmds.emplace_back(switchCase->statement);
             // If the statement is a block, we do not fall through and terminate execution.
             if (switchCase->statement->is<IR::BlockStatement>()) {
@@ -536,7 +536,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
         }
         // The default label must be last. Always break here.
         if (switchCase->label->is<IR::DefaultExpression>()) {
-            nextState.add(*new TraceEvents::GenericDescription("SwitchCase", "default"));
+            nextState.add(*new TraceEvents::GenericDescription("SwitchCase"_cs, "default"_cs));
             cmds.emplace_back(switchCase->statement);
             break;
         }

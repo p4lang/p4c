@@ -112,7 +112,7 @@ cstring UBPFControlBodyTranslator::createHashKeyInstance(const P4::ExternFunctio
     auto ubpfList = atype->to<UBPFListType>();
     ubpfList->name = this->refMap->newName("tuple");
 
-    atype->declare(builder, "", false);
+    atype->declare(builder, ""_cs, false);
     builder->blockStart();
     atype->emit(builder);
     builder->blockEnd(false);
@@ -182,7 +182,7 @@ void UBPFControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
     builder->blockStart();
 
     BUG_CHECK(method->expr->arguments->empty(), "%1%: table apply with arguments", method);
-    cstring keyname = "key";
+    cstring keyname = "key"_cs;
     if (table->keyGenerator != nullptr) {
         builder->emitIndent();
         builder->appendLine("/* construct key */");
@@ -194,7 +194,7 @@ void UBPFControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
     builder->emitIndent();
     builder->appendLine("/* value */");
     builder->emitIndent();
-    cstring valueName = "value";
+    cstring valueName = "value"_cs;
     builder->appendFormat("struct %s *%s = NULL", table->valueTypeName.c_str(), valueName.c_str());
     builder->endOfStatement(true);
 
@@ -532,7 +532,7 @@ bool UBPFControlBodyTranslator::comparison(const IR::Operation_Relation *b) {
 }
 
 bool UBPFControlBodyTranslator::preorder(const IR::Member *expression) {
-    cstring name = "";
+    cstring name = ""_cs;
     if (expression->expr->is<IR::PathExpression>()) {
         name = expression->expr->to<IR::PathExpression>()->path->name.name;
     }

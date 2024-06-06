@@ -43,7 +43,7 @@ int main(int argc, char *const argv[]) {
     AutoCompileContext autoPsaSwitchContext(new BMV2::PsaSwitchContext);
     auto &options = BMV2::PsaSwitchContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
-    options.compilerVersion = BMV2_PSA_VERSION_STRING;
+    options.compilerVersion = cstring(BMV2_PSA_VERSION_STRING);
 
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false) options.setInputFile();

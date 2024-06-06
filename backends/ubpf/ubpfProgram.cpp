@@ -77,7 +77,7 @@ void UBPFProgram::emitC(UbpfCodeBuilder *builder, cstring headerFile) {
     builder->target->emitChecksumHelpers(builder);
 
     builder->emitIndent();
-    builder->target->emitMain(builder, "entry", contextVar.c_str(), stdMetadataVar.c_str());
+    builder->target->emitMain(builder, "entry"_cs, contextVar, stdMetadataVar);
     builder->blockStart();
 
     emitPktVariable(builder);
@@ -247,7 +247,7 @@ void UBPFProgram::emitPktVariable(UbpfCodeBuilder *builder) const {
 void UBPFProgram::emitPacketLengthVariable(UbpfCodeBuilder *builder) const {
     builder->emitIndent();
     builder->appendFormat("uint32_t %s = ", lengthVar.c_str());
-    builder->target->emitGetFromStandardMetadata(builder, stdMetadataVar, "packet_length");
+    builder->target->emitGetFromStandardMetadata(builder, stdMetadataVar, "packet_length"_cs);
     builder->endOfStatement(true);
 }
 

@@ -28,6 +28,8 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
+using namespace P4::literals;
+
 static big_int checksum(Bmv2HashAlgorithm algo, const uint8_t *buf, size_t len) {
     // Pick a checksum according to the algorithm value.
     switch (algo) {
@@ -97,8 +99,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
     /// int<W>) or varbits.
     /// @param T          Must be a type bit<W>
     /// @param M          Must be a type bit<W>
-    {"*method_hash",
-     {"result", "algo", "base", "data", "max"},
+    {"*method_hash"_cs,
+     {"result"_cs, "algo"_cs, "base"_cs, "data"_cs, "max"_cs},
      [](cstring /*concolicMethodName*/, const IR::ConcolicVariable *var,
         const ExecutionState & /*state*/, const Model &finalModel,
         ConcolicVariableMap *resolvedConcolicVariables) {
@@ -163,8 +165,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
      * ====================================================================================== */
     /// This method is almost equivalent to the hash method. Except that when the checksum output is
     /// out of bounds, this method assigns the maximum instead of using a modulo operation.
-    {"*method_checksum",
-     {"result", "algo", "data"},
+    {"*method_checksum"_cs,
+     {"result"_cs, "algo"_cs, "data"_cs},
      [](cstring /*concolicMethodName*/, const IR::ConcolicVariable *var,
         const ExecutionState & /*state*/, const Model &finalModel,
         ConcolicVariableMap *resolvedConcolicVariables) {
@@ -212,8 +214,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          }
      }},
 
-    {"*method_checksum_with_payload",
-     {"result", "algo", "data"},
+    {"*method_checksum_with_payload"_cs,
+     {"result"_cs, "algo"_cs, "data"_cs},
      [](cstring /*concolicMethodName*/, const IR::ConcolicVariable *var,
         const ExecutionState & /*state*/, const Model &finalModel,
         ConcolicVariableMap *resolvedConcolicVariables) {

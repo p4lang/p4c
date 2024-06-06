@@ -32,6 +32,7 @@ class ErrorType {
  public:
     // -------- Errors -------------
     // errors as initially defined with a format string
+    // FIXME: make these constexpr
     static const int LEGACY_ERROR;
     static const int ERR_UNKNOWN;                // unknown construct (in context)
     static const int ERR_UNSUPPORTED;            // unsupported construct
@@ -123,17 +124,20 @@ class ErrorCatalog {
 
     /// retrieve the name for errorCode
     cstring getName(int errorCode) {
+        using namespace P4::literals;
+
         if (errorCatalog.count(errorCode)) return errorCatalog.at(errorCode);
-        return "--unknown--";
+        return "--unknown--"_cs;
     }
 
     /// return true if the given diagnostic can _only_ be an error; false otherwise
-    bool isError(cstring name) {
+    bool isError(std::string_view name) {
+        cstring lookup(name);
         // Some diagnostics might be both errors and warning/info
         // (e.g. "invalid" -> both ERR_INVALID and WARN_INVALID).
         bool error = false;
         for (const auto &pair : errorCatalog) {
-            if (pair.second == name) {
+            if (pair.second == lookup) {
                 if (pair.first < ErrorType::LEGACY_ERROR || pair.first > ErrorType::ERR_MAX)
                     return false;
                 error = true;

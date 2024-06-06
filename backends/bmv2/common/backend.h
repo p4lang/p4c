@@ -24,6 +24,7 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "helpers.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"
@@ -153,7 +154,7 @@ class RenameUserMetadata : public Transform {
         IR::IndexedVector<IR::StructField> fields;
         for (auto f : type->fields) {
             auto anno = f->getAnnotation(IR::Annotation::nameAnnotation);
-            cstring suffix = "";
+            cstring suffix = cstring::empty;
             if (anno != nullptr) suffix = anno->getName();
             if (suffix.startsWith(".")) {
                 // We can't change the name of this field.
@@ -163,9 +164,9 @@ class RenameUserMetadata : public Transform {
             }
 
             if (!suffix.isNullOrEmpty())
-                suffix = cstring(".") + suffix;
+                suffix = "."_cs + suffix;
             else
-                suffix = cstring(".") + f->name;
+                suffix = "."_cs + f->name;
             cstring newName = namePrefix + suffix;
             auto stringLit = new IR::StringLiteral(newName);
             LOG2("Renaming " << f << " to " << newName);

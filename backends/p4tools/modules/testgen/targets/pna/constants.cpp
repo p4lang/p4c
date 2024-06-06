@@ -5,6 +5,8 @@
 
 namespace P4Tools::P4Testgen::Pna {
 
+using namespace P4::literals;
+
 const IR::Member PnaConstants::DROP_VAR =
     IR::Member(IR::Type_Boolean::get(), new IR::PathExpression("*pna_internal"), "drop_var");
 const IR::Member PnaConstants::OUTPUT_PORT_VAR =
@@ -14,6 +16,6 @@ const IR::Member PnaConstants::PARSER_ERROR =
 // TODO: Make this a proper variables variable.
 // We can not use the utilities because of an issue related to the garbage collector.
 const IR::SymbolicVariable PnaSymbolicVars::DIRECTION =
-    IR::SymbolicVariable(IR::Type_Bits::get(32), "direction");
+    IR::SymbolicVariable(IR::Type_Bits::get(32), "direction"_cs);
 
 }  // namespace P4Tools::P4Testgen::Pna

@@ -64,6 +64,7 @@ transition select(a, b, c, d) {
 class UnnestSelectList : public Transform {
     // Represent the nesting of lists inside of a selectExpression.
     // E.g.: [__[__]_] for two nested lists.
+    // FIXME: Lots of terrible concatenations here, must be std::string
     cstring nesting;
 
     void flatten(const IR::Expression *expression, IR::Vector<IR::Expression> *output);

@@ -22,6 +22,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 /// Unifies a call with a prototype.
 bool TypeUnification::unifyCall(const BinaryConstraint *constraint) {
     // These are canonical types.
@@ -408,7 +410,7 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
             }
             if (stHasDots) {
                 auto dotsType = new IR::Type_UnknownStruct(st->name, *missingFields);
-                auto dotsField = st->getField("...");
+                auto dotsField = st->getField("..."_cs);
                 CHECK_NULL(dotsField);
                 auto partial = new IR::Type_Fragment(dotsType);
                 constraints->add(new EqualityConstraint(dotsField->type, partial, constraint));

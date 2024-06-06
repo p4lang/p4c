@@ -46,11 +46,11 @@ const IR::SymbolicVariable *getTableActionChoice(cstring tableName) {
 namespace Bmv2ControlPlaneState {
 
 const IR::SymbolicVariable *getCloneActive() {
-    return ToolsVariables::getSymbolicVariable(IR::Type_Boolean::get(), "clone_session_active");
+    return ToolsVariables::getSymbolicVariable(IR::Type_Boolean::get(), "clone_session_active"_cs);
 }
 
 const IR::SymbolicVariable *getCloneSessionId(const IR::Type *type) {
-    return ToolsVariables::getSymbolicVariable(type, "clone_session_id");
+    return ToolsVariables::getSymbolicVariable(type, "clone_session_id"_cs);
 }
 
 std::pair<const IR::SymbolicVariable *, const IR::SymbolicVariable *> getTableRange(

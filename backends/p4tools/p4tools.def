@@ -173,11 +173,11 @@ class Extracted_Varbits : Type_Bits {
         return size == a.size;
     }
 
-    cstring baseName() const { return "SizedVarbit"; }
+    cstring baseName() const { return "SizedVarbit"_cs; }
 
     toString {
-        return baseName() + "<" + Util::toString(size) + ">" + "<" + Util::toString(assignedSize) +
-               ">";
+        return baseName() + "<"_cs + Util::toString(size) + ">"_cs + "<"_cs + Util::toString(assignedSize) +
+               ">"_cs;
     }
 
     dbprint { out << toString(); }
@@ -209,11 +209,11 @@ public:
     optional inline IndexedVector<Node> associatedNodes;
 
     /// The name of the concolic method that this variable targets.
-    inline cstring concolicMethodName = "";
+    inline cstring concolicMethodName = cstring::empty;
 
     toString {
-        cstring argumentStr = "";
-        cstring sep = "";
+        std::string argumentStr = "";
+        std::string sep = "";
         for (const auto *arg : *arguments) {
             argumentStr += sep + arg->toString();
             sep = ", ";
@@ -290,7 +290,7 @@ class InOutReference : Expression {
         Expression(ref.type), ref(ref), resolvedRef(resolvedRef)
         { validate(); }
 
-    toString { return ref->toString() + "(" + resolvedRef->toString() + ")"; }
+    toString { return ref->toString() + "("_cs + resolvedRef->toString() + ")"_cs; }
 
     dbprint { out << ref << "(" << resolvedRef << ")"; }
 }
