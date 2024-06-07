@@ -6,7 +6,7 @@ P4fmtOptions::P4fmtOptions() {
     registerOption(
         "-o", "outfile",
         [this](const char *arg) {
-            outFile = arg;
+            outFile = cstring(arg);
             return true;
         },
         "Write formatted output to outfile");
