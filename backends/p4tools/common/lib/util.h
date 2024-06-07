@@ -70,9 +70,18 @@ class Utils {
     /// @returns a random integer in the range [0, @param max]. Always return 0 if no seed is set.
     static uint64_t getRandInt(uint64_t max);
 
+    /// @returns a random integer between min and max.
+    static int64_t getRandInt(int64_t min, int64_t max);
+
+    /// @returns a random integer based on the percent vector.
+    static int64_t getRandInt(const std::vector<int64_t> &percent);
+
     /// @returns a random big integer in the range [0, @param max]. Always return 0 if no seed is
     /// set.
-    static big_int getRandBigInt(big_int max);
+    static big_int getRandBigInt(const big_int &max);
+
+    /// This is a big_int version of getRndInt.
+    static big_int getRandBigInt(const big_int &min, const big_int &max);
 
     /// @returns a IR::Constant with a random big integer that fits the specified bit width.
     /// The type will be an unsigned Type_Bits with @param bitWidth.

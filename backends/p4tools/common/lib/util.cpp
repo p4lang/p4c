@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <ctime>
 #include <iomanip>
+#include <numeric>
 #include <optional>
-#include <ratio>
 
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/cpp_int/add.hpp>
@@ -64,11 +64,42 @@ uint64_t Utils::getRandInt(uint64_t max) {
     return dist(rng);
 }
 
-big_int Utils::getRandBigInt(big_int max) {
+int64_t Utils::getRandInt(int64_t min, int64_t max) {
+    boost::random::uniform_int_distribution<int64_t> distribution(min, max);
+    return distribution(rng);
+}
+
+int64_t Utils::getRandInt(const std::vector<int64_t> &percent) {
+    int sum = std::accumulate(percent.begin(), percent.end(), 0);
+
+    // Do not pick zero since that conflicts with zero percentage values.
+    auto randNum = getRandInt(1, sum);
+    int ret = 0;
+
+    int64_t retSum = 0;
+    for (auto i : percent) {
+        retSum += i;
+        if (retSum >= randNum) {
+            break;
+        }
+        ret = ret + 1;
+    }
+    return ret;
+}
+
+big_int Utils::getRandBigInt(const big_int &max) {
     if (!currentSeed) {
         return 0;
     }
     boost::random::uniform_int_distribution<big_int> dist(0, max);
+    return dist(rng);
+}
+
+big_int Utils::getRandBigInt(const big_int &min, const big_int &max) {
+    if (!currentSeed) {
+        return 0;
+    }
+    boost::random::uniform_int_distribution<big_int> dist(min, max);
     return dist(rng);
 }
 
@@ -145,8 +176,10 @@ std::vector<const IR::Type_Declaration *> argumentsToTypeDeclarations(
 
 const IR::IDeclaration *findProgramDecl(const IR::IGeneralNamespace *ns, const IR::Path *path) {
     auto name = path->name.name;
-    auto *decl = ns->getDeclsByName(name)->singleOrDefault();
-    if (decl != nullptr) return decl;
+    const auto *decl = ns->getDeclsByName(name)->singleOrDefault();
+    if (decl != nullptr) {
+        return decl;
+    }
     BUG("Variable %1% not found in the available namespaces.", path);
 }
 
