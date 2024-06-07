@@ -254,17 +254,11 @@ class cstring {
     }
     cstring substr(size_t start, size_t length) const;
     cstring replace(char find, char replace) const;
-    cstring replace(cstring find, cstring replace) const;
+    cstring replace(std::string_view find, std::string_view replace) const;
     cstring exceptLast(size_t count) { return substr(0, size() - count); }
 
     // trim leading and trailing whitespace (or other)
-    cstring trim(const char *ws = " \t\r\n") const {
-        if (!str) return *this;
-        const char *start = str + strspn(str, ws);
-        size_t len = strlen(start);
-        while (len > 0 && strchr(ws, start[len - 1])) --len;
-        return cstring(start, len);
-    }
+    cstring trim(const char *ws = " \t\r\n") const;
 
     // Useful singletons.
     static cstring newline;

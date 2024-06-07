@@ -238,7 +238,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     unsigned nkId = 3;
     auto *irNamespace = IrNamespace::get(nullptr, "IR"_cs);
     for (auto *cls : *getClasses())
-        t << "  " << cls->qualified_name(irNamespace).replace("::"_cs, "_"_cs) << " = " << nkId++
+        t << "  " << cls->qualified_name(irNamespace).replace("::", "_") << " = " << nkId++
           << ",\n";
 
     // Add some specials:
@@ -443,7 +443,7 @@ void IrClass::generate_hdr(std::ostream &out) const {
     auto *irNamespace = IrNamespace::get(nullptr, "IR"_cs);
     if (kind != NodeKind::Nested) {
         out << indent << "DECLARE_TYPEINFO_WITH_TYPEID(" << name
-            << ", NodeKind::" << qualified_name(irNamespace).replace("::"_cs, "_"_cs);
+            << ", NodeKind::" << qualified_name(irNamespace).replace("::", "_");
         if (!concreteParent) out << ", " << (kind != NodeKind::Interface ? "Node" : "INode");
         for (const auto *p : parentClasses) out << ", " << p->qualified_name(containedIn);
         out << ");" << std::endl;
