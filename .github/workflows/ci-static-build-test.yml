@@ -19,19 +19,17 @@ jobs:
   build-linux:
     # Only run on pull requests with the "run-static" label.
     if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'run-static') }}
-    # Note: Actions have no real ternary condition operator, but this hack works because non-empty
-    # strings are true.
-    name: Dynamic ${{ matrix.dynamic.glibc == 'ON' && 'glibc' || 'stdlib' }}
+    name: Dynamic ${{ matrix.type }}
     strategy:
       fail-fast: false
       matrix:
-        dynamic: [{glibc: ON, stdlib: OFF}, {glibc: OFF, stdlib: ON}]
+        type: ["glibc", "stdlib"]
     runs-on: ubuntu-20.04
     env:
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ON
-      STATIC_BUILD_WITH_DYNAMIC_GLIBC: "${{ matrix.dynamic.glibc }}"
-      STATIC_BUILD_WITH_DYNAMIC_STDLIB: "${{ matrix.dynamic.stdlib }}"
+      STATIC_BUILD_WITH_DYNAMIC_GLIBC: ${{ matrix.type }} == "glibc" && "ON" || "OFF"
+      STATIC_BUILD_WITH_DYNAMIC_STDLIB: ${{ matrix.type}} == "stdlib" && "ON" || "OFF"
       ENABLE_TEST_TOOLS: ON
       BUILD_GENERATOR: Ninja
     steps:
