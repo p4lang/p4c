@@ -32,6 +32,7 @@ limitations under the License.
 #include "midend/eliminateTypedefs.h"
 #include "midend/removeComplexExpressions.h"
 #include "midend/simplifyKey.h"
+
 namespace DPDK {
 
 void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
@@ -129,29 +130,40 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     };
     simplify.addDebugHook(hook, true);
     program = program->apply(simplify);
-    ordered_set<cstring> used_fields;
+    if (errorCount() > 0) {
+        return;
+    }
+
     dpdk_program = convertToDpdk->getDpdkProgram();
-    if (!dpdk_program) return;
+    if (dpdk_program == nullptr) {
+        return;
+    }
+
+    PassManager postCodeGen;
+    ordered_map<cstring, cstring> newNameMap;
+    ordered_set<cstring> usedFields;
     if (structure.p4arch == "pna") {
-        PassManager post_code_gen = {
+        postCodeGen.addPasses({
             new PrependPassRecircId(),
             new DirectionToRegRead(),
-        };
-        dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
+        });
     }
-    ordered_map<cstring, cstring> newNameMap;
-    PassManager post_code_gen = {
+    postCodeGen.addPasses({
         new EliminateUnusedAction(),
         new DpdkAsmOptimization,
         new CopyPropagationAndElimination(typeMap),
-        new CollectUsedMetadataField(used_fields),
-        new RemoveUnusedMetadataFields(used_fields),
+        new CollectUsedMetadataField(usedFields),
+        new RemoveUnusedMetadataFields(usedFields),
         new ShortenTokenLength(newNameMap),
         new EmitDpdkTableConfig(refMap, typeMap, newNameMap),
-    };
-
-    dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
+    });
+    const auto *optimizedProgram = dpdk_program->apply(postCodeGen);
+    if (errorCount() > 0) {
+        return;
+    }
+    dpdk_program = optimizedProgram->to<IR::DpdkAsmProgram>();
 }
 
 void DpdkBackend::codegen(std::ostream &out) const { dpdk_program->toSpec(out) << std::endl; }
+
 }  // namespace DPDK

@@ -67,8 +67,8 @@ void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstrin
                                         TableKind tableKind, cstring keyType, cstring valueType,
                                         unsigned size) const {
     cstring kind, flags;
-    cstring registerTable = "REGISTER_TABLE(%s, %s, %s, %s, %d)";
-    cstring registerTableWithFlags = "REGISTER_TABLE_FLAGS(%s, %s, %s, %s, %d, %s)";
+    cstring registerTable = "REGISTER_TABLE(%s, %s, %s, %s, %d)"_cs;
+    cstring registerTableWithFlags = "REGISTER_TABLE_FLAGS(%s, %s, %s, %s, %d, %s)"_cs;
 
     kind = getBPFMapType(tableKind);
 
@@ -77,18 +77,18 @@ void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstrin
         // as array map must have u32 key type.
         ::warning(ErrorType::WARN_INVALID,
                   "Invalid key type (%1%) for table kind %2%, replacing with u32", keyType, kind);
-        keyType = "u32";
+        keyType = "u32"_cs;
     } else if (tableKind == TableProgArray && (keyType != "u32" || valueType != "u32")) {
         ::warning(ErrorType::WARN_INVALID,
                   "Invalid key type (%1%) or value type (%2%) for table kind %3%, "
                   "replacing with u32",
                   keyType, valueType, kind);
-        keyType = "u32";
-        valueType = "u32";
+        keyType = "u32"_cs;
+        valueType = "u32"_cs;
     }
 
     if (tableKind == TableLPMTrie) {
-        flags = "BPF_F_NO_PREALLOC";
+        flags = "BPF_F_NO_PREALLOC"_cs;
     }
 
     if (flags.isNullOrEmpty()) {
@@ -121,8 +121,8 @@ void KernelSamplesTarget::emitMapInMapDecl(Util::SourceCodeBuilder *builder, cst
         BUG("Unsupported type of outer map for map-in-map");
     }
 
-    cstring registerOuterTable = "REGISTER_TABLE_OUTER(%s, %s_OF_MAPS, %s, %s, %d, %d, %s)";
-    cstring registerInnerTable = "REGISTER_TABLE_INNER(%s, %s, %s, %s, %d, %d, %d)";
+    cstring registerOuterTable = "REGISTER_TABLE_OUTER(%s, %s_OF_MAPS, %s, %s, %d, %d, %s)"_cs;
+    cstring registerInnerTable = "REGISTER_TABLE_INNER(%s, %s, %s, %s, %d, %d, %d)"_cs;
 
     innerMapIndex++;
 
@@ -133,11 +133,11 @@ void KernelSamplesTarget::emitMapInMapDecl(Util::SourceCodeBuilder *builder, cst
     annotateTableWithBTF(builder, innerName, innerKeyType, innerValueType);
 
     kind = getBPFMapType(outerTableKind);
-    cstring keyType = outerTableKind == TableArray ? "__u32" : outerKeyType;
+    cstring keyType = outerTableKind == TableArray ? "__u32"_cs : outerKeyType;
     builder->appendFormat(registerOuterTable, outerName, kind, keyType, "__u32", outerSize,
                           innerMapIndex, innerName);
     builder->newline();
-    annotateTableWithBTF(builder, outerName, keyType, "__u32");
+    annotateTableWithBTF(builder, outerName, keyType, "__u32"_cs);
 }
 
 void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder *builder, cstring license) const {
@@ -157,7 +157,7 @@ void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder *builder, cstring fun
 }
 
 void KernelSamplesTarget::emitPreamble(Util::SourceCodeBuilder *builder) const {
-    cstring macro;
+    const char *macro;
     if (emitTraceMessages) {
         macro =
             "#define bpf_trace_message(fmt, ...)                                \\\n"
@@ -174,11 +174,12 @@ void KernelSamplesTarget::emitPreamble(Util::SourceCodeBuilder *builder) const {
     builder->newline();
 }
 
+// FIXME: Fix terrible implementation
 void KernelSamplesTarget::emitTraceMessage(Util::SourceCodeBuilder *builder, const char *format,
                                            int argc, ...) const {
     if (!emitTraceMessages) return;
 
-    cstring msg = format;
+    cstring msg = cstring(format);
     va_list ap;
 
     // Older kernels do not append new line when printing message but newer do that,
@@ -186,7 +187,7 @@ void KernelSamplesTarget::emitTraceMessage(Util::SourceCodeBuilder *builder, con
     // will look better than everything in a single line.
     if (!msg.endsWith("\\n")) msg = msg + "\\n";
 
-    msg = cstring("\"") + msg + "\"";
+    msg = "\""_cs + msg + "\""_cs;
     va_start(ap, argc);
     for (int i = 0; i < argc; ++i) {
         auto arg = va_arg(ap, const char *);
@@ -261,11 +262,11 @@ void BccTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName,
                               unsigned size) const {
     cstring kind;
     if (tableKind == TableHash)
-        kind = "hash";
+        kind = "hash"_cs;
     else if (tableKind == TableArray)
-        kind = "array";
+        kind = "array"_cs;
     else if (tableKind == TableLPMTrie)
-        kind = "lpm_trie";
+        kind = "lpm_trie"_cs;
     else
         BUG("%1%: unsupported table kind", tableKind);
 

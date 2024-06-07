@@ -304,7 +304,8 @@ const IR::Expression *getIR(std::vector<Token> tokens, const IdenitifierTypeMap 
 std::vector<Token> combineTokensToNames(const std::vector<Token> &inputVector) {
     std::vector<Token> result;
     Token prevToken = Token(Token::Kind::Unknown, " ", 1);
-    cstring txt = "";
+    std::string txt;
+    // FIXME: Can try to use absl::Cord
     for (const auto &input : inputVector) {
         if (prevToken.is(Token::Kind::Text) && input.is(Token::Kind::Number)) {
             txt += std::string(input.lexeme());
@@ -324,7 +325,8 @@ std::vector<Token> combineTokensToNames(const std::vector<Token> &inputVector) {
             }
         } else {
             if (txt.size() > 0) {
-                result.emplace_back(Token::Kind::Text, txt, txt.size());
+                cstring buf(txt);
+                result.emplace_back(Token::Kind::Text, buf, buf.size());
                 txt = "";
             }
             result.push_back(input);
@@ -346,7 +348,8 @@ std::vector<Token> combineTokensToNames(const std::vector<Token> &inputVector) {
 /// [2(Number), 5(number), 5(number), ==(Equal), 0xff(Text)] -> [255(number), ==(Equal),
 /// 0xff(Number)] - This example is possible only after executing combineTokensToNames
 std::vector<Token> combineTokensToNumbers(std::vector<Token> input) {
-    cstring numb = "";
+    // FIXME: Can try to use absl::cord
+    std::string numb;
     std::vector<Token> result;
     for (uint64_t i = 0; i < input.size(); i++) {
         if (input[i].is(Token::Kind::Minus)) {
@@ -376,13 +379,15 @@ std::vector<Token> combineTokensToNumbers(std::vector<Token> input) {
         if (input[i].is(Token::Kind::Number)) {
             numb += std::string(input[i].lexeme());
             if (i + 1 == input.size()) {
-                result.emplace_back(Token::Kind::Number, numb, numb.size());
+                cstring cstr(numb);
+                result.emplace_back(Token::Kind::Number, cstr, cstr.size());
                 numb = "";
                 continue;
             }
         } else {
             if (numb.size() > 0) {
-                result.emplace_back(Token::Kind::Number, numb, numb.size());
+                cstring cstr(numb);
+                result.emplace_back(Token::Kind::Number, cstr, cstr.size());
                 numb = "";
             }
             result.push_back(input[i]);
@@ -509,7 +514,7 @@ std::vector<const IR::Expression *> AssertsParser::genIRStructs(cstring tableNam
 }
 
 const IR::Node *AssertsParser::postorder(IR::P4Action *actionContext) {
-    const auto *annotation = actionContext->getAnnotation("action_restriction");
+    const auto *annotation = actionContext->getAnnotation("action_restriction"_cs);
     if (annotation == nullptr) {
         return actionContext;
     }
@@ -531,7 +536,7 @@ const IR::Node *AssertsParser::postorder(IR::P4Action *actionContext) {
 }
 
 const IR::Node *AssertsParser::postorder(IR::P4Table *tableContext) {
-    const auto *annotation = tableContext->getAnnotation("entry_restriction");
+    const auto *annotation = tableContext->getAnnotation("entry_restriction"_cs);
     const auto *key = tableContext->getKey();
     if (annotation == nullptr || key == nullptr) {
         return tableContext;
@@ -539,7 +544,7 @@ const IR::Node *AssertsParser::postorder(IR::P4Table *tableContext) {
 
     IdenitifierTypeMap typeMap;
     for (const auto *keyElement : tableContext->getKey()->keyElements) {
-        const auto *nameAnnot = keyElement->getAnnotation("name");
+        const auto *nameAnnot = keyElement->getAnnotation("name"_cs);
         BUG_CHECK(nameAnnot != nullptr, "%1% table key without a name annotation",
                   annotation->name.name);
         typeMap[nameAnnot->getName()] = keyElement->expression->type;

@@ -163,9 +163,9 @@ JsonObject *JsonObject::emplace(cstring label, IJson *value) {
     auto j = get(label);
     if (j != nullptr) {
         cstring s = value->toString();
-        throw std::logic_error(cstring("Attempt to add to json object a value "
-                                       "for a label which already exists ") +
-                               label.c_str() + " " + s.c_str());
+        throw std::logic_error(std::string("Attempt to add to json object a value "
+                                           "for a label which already exists ") +
+                               label.string() + " " + s.string());
     }
     ordered_map<cstring, IJson *>::emplace(label, value);
     return this;

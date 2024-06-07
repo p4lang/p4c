@@ -94,7 +94,7 @@ int64_t getTableSize(const IR::P4Table *table) {
     // default table size.
     const int64_t defaultTableSize = P4V1::V1Model::instance.tableAttributes.defaultTableSize;
 
-    auto sizeProperty = table->properties->getProperty("size");
+    auto sizeProperty = table->properties->getProperty("size"_cs);
     if (sizeProperty == nullptr) {
         return defaultTableSize;
     }

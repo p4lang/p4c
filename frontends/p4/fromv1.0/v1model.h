@@ -26,6 +26,8 @@ limitations under the License.
 
 namespace P4V1 {
 
+using namespace P4::literals;
+
 // This should be kept in sync with p4includes/v1model.p4
 // In a perfect world this would be generated automatically from
 // p4includes/v1model.p4
@@ -33,11 +35,11 @@ namespace P4V1 {
 struct Parser_Model : public ::Model::Elem {
     Parser_Model(Model::Type_Model headersType, Model::Type_Model userMetaType,
                  Model::Type_Model standardMetadataType)
-        : Model::Elem("ParserImpl"),
-          packetParam("packet", P4::P4CoreLibrary::instance().packetIn, 0),
-          headersParam("hdr", headersType, 1),
-          metadataParam("meta", userMetaType, 2),
-          standardMetadataParam("standard_metadata", standardMetadataType, 3) {}
+        : Model::Elem("ParserImpl"_cs),
+          packetParam("packet"_cs, P4::P4CoreLibrary::instance().packetIn, 0),
+          headersParam("hdr"_cs, headersType, 1),
+          metadataParam("meta"_cs, userMetaType, 2),
+          standardMetadataParam("standard_metadata"_cs, standardMetadataType, 3) {}
     ::Model::Param_Model packetParam;
     ::Model::Param_Model headersParam;
     ::Model::Param_Model metadataParam;
@@ -46,9 +48,9 @@ struct Parser_Model : public ::Model::Elem {
 
 struct Deparser_Model : public ::Model::Elem {
     explicit Deparser_Model(Model::Type_Model headersType)
-        : Model::Elem("DeparserImpl"),
-          packetParam("packet", P4::P4CoreLibrary::instance().packetOut, 0),
-          headersParam("hdr", headersType, 1) {}
+        : Model::Elem("DeparserImpl"_cs),
+          packetParam("packet"_cs, P4::P4CoreLibrary::instance().packetOut, 0),
+          headersParam("hdr"_cs, headersType, 1) {}
     ::Model::Param_Model packetParam;
     ::Model::Param_Model headersParam;
 };
@@ -58,9 +60,9 @@ struct Control_Model : public ::Model::Elem {
     Control_Model(cstring name, Model::Type_Model headersType, Model::Type_Model metadataType,
                   Model::Type_Model standardMetadataType)
         : Model::Elem(name),
-          headersParam("hdr", headersType, 0),
-          metadataParam("meta", metadataType, 1),
-          standardMetadataParam("standard_metadata", standardMetadataType, 2) {}
+          headersParam("hdr"_cs, headersType, 0),
+          metadataParam("meta"_cs, metadataType, 1),
+          standardMetadataParam("standard_metadata"_cs, standardMetadataType, 2) {}
     ::Model::Param_Model headersParam;
     ::Model::Param_Model metadataParam;
     ::Model::Param_Model standardMetadataParam;
@@ -68,41 +70,44 @@ struct Control_Model : public ::Model::Elem {
 
 struct VerifyUpdate_Model : public ::Model::Elem {
     VerifyUpdate_Model(cstring name, Model::Type_Model headersType)
-        : Model::Elem(name), headersParam("hdr", headersType, 0) {}
+        : Model::Elem(name), headersParam("hdr"_cs, headersType, 0) {}
     ::Model::Param_Model headersParam;
 };
 
 struct CounterType_Model : public ::Model::Enum_Model {
     CounterType_Model()
-        : ::Model::Enum_Model("CounterType"),
-          packets("packets"),
-          bytes("bytes"),
-          both("packets_and_bytes") {}
+        : ::Model::Enum_Model("CounterType"_cs),
+          packets("packets"_cs),
+          bytes("bytes"_cs),
+          both("packets_and_bytes"_cs) {}
     ::Model::Elem packets;
     ::Model::Elem bytes;
     ::Model::Elem both;
 };
 
 struct MeterType_Model : public ::Model::Enum_Model {
-    MeterType_Model() : ::Model::Enum_Model("MeterType"), packets("packets"), bytes("bytes") {}
+    MeterType_Model()
+        : ::Model::Enum_Model("MeterType"_cs), packets("packets"_cs), bytes("bytes"_cs) {}
     ::Model::Elem packets;
     ::Model::Elem bytes;
 };
 
 struct ActionProfile_Model : public ::Model::Extern_Model {
     ActionProfile_Model()
-        : Extern_Model("action_profile"), sizeType(IR::Type_Bits::get(32)), sizeParam("size") {}
+        : Extern_Model("action_profile"_cs),
+          sizeType(IR::Type_Bits::get(32)),
+          sizeParam("size"_cs) {}
     const IR::Type *sizeType;
     ::Model::Elem sizeParam;
 };
 
 struct ActionSelector_Model : public ::Model::Extern_Model {
     ActionSelector_Model()
-        : Extern_Model("action_selector"),
+        : Extern_Model("action_selector"_cs),
           sizeType(IR::Type_Bits::get(32)),
-          sizeParam("size"),
+          sizeParam("size"_cs),
           widthType(IR::Type_Bits::get(32)),
-          algorithmParam("algorithm") {}
+          algorithmParam("algorithm"_cs) {}
     const IR::Type *sizeType;
     ::Model::Elem sizeParam;
     const IR::Type *widthType;
@@ -110,21 +115,21 @@ struct ActionSelector_Model : public ::Model::Extern_Model {
 };
 
 struct Random_Model : public ::Model::Elem {
-    Random_Model() : Elem("random"), modify_field_rng_uniform("modify_field_rng_uniform") {}
+    Random_Model() : Elem("random"_cs), modify_field_rng_uniform("modify_field_rng_uniform"_cs) {}
     ::Model::Elem modify_field_rng_uniform;
 };
 
 class Truncate : public Model::Extern_Model {
  public:
-    Truncate() : Extern_Model("truncate"), length_type(IR::Type::Bits::get(32)) {}
+    Truncate() : Extern_Model("truncate"_cs), length_type(IR::Type::Bits::get(32)) {}
     const IR::Type *length_type;
 };
 
 struct CounterOrMeter_Model : public ::Model::Extern_Model {
     explicit CounterOrMeter_Model(cstring name)
         : Extern_Model(name),
-          sizeParam("size"),
-          typeParam("type"),
+          sizeParam("size"_cs),
+          typeParam("type"_cs),
           size_type(IR::Type_Bits::get(32)) {}
     ::Model::Elem sizeParam;
     ::Model::Elem typeParam;
@@ -135,10 +140,10 @@ struct CounterOrMeter_Model : public ::Model::Extern_Model {
 
 struct Register_Model : public ::Model::Extern_Model {
     Register_Model()
-        : Extern_Model("register"),
-          sizeParam("size"),
-          read("read"),
-          write("write"),
+        : Extern_Model("register"_cs),
+          sizeParam("size"_cs),
+          read("read"_cs),
+          write("write"_cs),
           size_type(IR::Type_Bits::get(32)) {}
     ::Model::Elem sizeParam;
     ::Model::Elem read;
@@ -147,58 +152,58 @@ struct Register_Model : public ::Model::Extern_Model {
 };
 
 struct DigestReceiver_Model : public ::Model::Elem {
-    DigestReceiver_Model() : Elem("digest"), receiverType(IR::Type_Bits::get(32)) {}
+    DigestReceiver_Model() : Elem("digest"_cs), receiverType(IR::Type_Bits::get(32)) {}
     const IR::Type *receiverType;
 };
 
 struct Counter_Model : public CounterOrMeter_Model {
-    Counter_Model() : CounterOrMeter_Model("counter"), increment("count") {}
+    Counter_Model() : CounterOrMeter_Model("counter"_cs), increment("count"_cs) {}
     ::Model::Elem increment;
 };
 
 struct Meter_Model : public CounterOrMeter_Model {
-    Meter_Model() : CounterOrMeter_Model("meter"), executeMeter("execute_meter") {}
+    Meter_Model() : CounterOrMeter_Model("meter"_cs), executeMeter("execute_meter"_cs) {}
     ::Model::Elem executeMeter;
 };
 
 struct DirectMeter_Model : public CounterOrMeter_Model {
-    DirectMeter_Model() : CounterOrMeter_Model("direct_meter"), read("read") {}
+    DirectMeter_Model() : CounterOrMeter_Model("direct_meter"_cs), read("read"_cs) {}
     ::Model::Elem read;
 };
 
 struct DirectCounter_Model : public CounterOrMeter_Model {
-    DirectCounter_Model() : CounterOrMeter_Model("direct_counter"), count("count") {}
+    DirectCounter_Model() : CounterOrMeter_Model("direct_counter"_cs), count("count"_cs) {}
     ::Model::Elem count;
 };
 
 struct StandardMetadataType_Model : public ::Model::Type_Model {
     explicit StandardMetadataType_Model(cstring name)
         : ::Model::Type_Model(name),
-          dropBit("drop"),
-          recirculate("recirculate_port"),
-          egress_spec("egress_spec") {}
+          dropBit("drop"_cs),
+          recirculate("recirculate_port"_cs),
+          egress_spec("egress_spec"_cs) {}
     ::Model::Elem dropBit;
     ::Model::Elem recirculate;
     ::Model::Elem egress_spec;
 };
 
 struct CloneType_Model : public ::Model::Enum_Model {
-    CloneType_Model() : ::Model::Enum_Model("CloneType"), i2e("I2E"), e2e("E2E") {}
+    CloneType_Model() : ::Model::Enum_Model("CloneType"_cs), i2e("I2E"_cs), e2e("E2E"_cs) {}
     ::Model::Elem i2e;
     ::Model::Elem e2e;
 };
 
 struct Algorithm_Model : public ::Model::Enum_Model {
     Algorithm_Model()
-        : ::Model::Enum_Model("HashAlgorithm"),
-          crc32("crc32"),
-          crc32_custom("crc32_custom"),
-          crc16("crc16"),
-          crc16_custom("crc16_custom"),
-          random("random"),
-          identity("identity"),
-          csum16("csum16"),
-          xor16("xor16") {}
+        : ::Model::Enum_Model("HashAlgorithm"_cs),
+          crc32("crc32"_cs),
+          crc32_custom("crc32_custom"_cs),
+          crc16("crc16"_cs),
+          crc16_custom("crc16_custom"_cs),
+          random("random"_cs),
+          identity("identity"_cs),
+          csum16("csum16"_cs),
+          xor16("xor16"_cs) {}
     ::Model::Elem crc32;
     ::Model::Elem crc32_custom;
     ::Model::Elem crc16;
@@ -210,13 +215,13 @@ struct Algorithm_Model : public ::Model::Enum_Model {
 };
 
 struct Hash_Model : public ::Model::Elem {
-    Hash_Model() : ::Model::Elem("hash") {}
+    Hash_Model() : ::Model::Elem("hash"_cs) {}
 };
 
 struct Cloner_Model : public ::Model::Extern_Model {
     Cloner_Model()
-        : Extern_Model("clone"),
-          clone3("clone_preserving_field_list"),
+        : Extern_Model("clone"_cs),
+          clone3("clone_preserving_field_list"_cs),
 
           sessionType(IR::Type_Bits::get(32)) {}
     ::Model::Elem clone3;
@@ -226,13 +231,13 @@ struct Cloner_Model : public ::Model::Extern_Model {
 
 struct Switch_Model : public ::Model::Elem {
     Switch_Model()
-        : Model::Elem("V1Switch"),
-          parser("p"),
-          verify("vr"),
-          ingress("ig"),
-          egress("eg"),
-          compute("ck"),
-          deparser("dep") {}
+        : Model::Elem("V1Switch"_cs),
+          parser("p"_cs),
+          verify("vr"_cs),
+          ingress("ig"_cs),
+          egress("eg"_cs),
+          compute("ck"_cs),
+          deparser("dep"_cs) {}
     ::Model::Elem parser;  // names of the package arguments
     ::Model::Elem verify;
     ::Model::Elem ingress;
@@ -243,11 +248,11 @@ struct Switch_Model : public ::Model::Elem {
 
 struct TableAttributes_Model {
     TableAttributes_Model()
-        : tableImplementation("implementation"),
-          counters("counters"),
-          meters("meters"),
-          size("size"),
-          supportTimeout("support_timeout") {}
+        : tableImplementation("implementation"_cs),
+          counters("counters"_cs),
+          meters("meters"_cs),
+          size("size"_cs),
+          supportTimeout("support_timeout"_cs) {}
     ::Model::Elem tableImplementation;
     ::Model::Elem counters;
     ::Model::Elem meters;
@@ -259,44 +264,44 @@ struct TableAttributes_Model {
 class V1Model : public ::Model::Model {
  protected:
     V1Model()
-        : file("v1model.p4"),
-          standardMetadata("standard_metadata"),
+        : file("v1model.p4"_cs),
+          standardMetadata("standard_metadata"_cs),
           // The following 2 are not really docmented in the P4-14 spec.
-          intrinsicMetadata("intrinsic_metadata"),
-          queueingMetadata("queueing_metadata"),
-          headersType("headers"),
-          metadataType("metadata"),
-          standardMetadataType("standard_metadata_t"),
+          intrinsicMetadata("intrinsic_metadata"_cs),
+          queueingMetadata("queueing_metadata"_cs),
+          headersType("headers"_cs),
+          metadataType("metadata"_cs),
+          standardMetadataType("standard_metadata_t"_cs),
           parser(headersType, metadataType, standardMetadataType),
           deparser(headersType),
-          egress("egress", headersType, metadataType, standardMetadataType),
-          ingress("ingress", headersType, metadataType, standardMetadataType),
+          egress("egress"_cs, headersType, metadataType, standardMetadataType),
+          ingress("ingress"_cs, headersType, metadataType, standardMetadataType),
           sw(),
-          counterOrMeter("$"),
+          counterOrMeter("$"_cs),
           counter(),
           meter(),
           random(),
           action_profile(),
           action_selector(),
           clone(),
-          resubmit("resubmit_preserving_field_list"),
+          resubmit("resubmit_preserving_field_list"_cs),
           tableAttributes(),
-          rangeMatchType("range"),
-          optionalMatchType("optional"),
-          selectorMatchType("selector"),
-          verify("verifyChecksum", headersType),
-          compute("computeChecksum", headersType),
+          rangeMatchType("range"_cs),
+          optionalMatchType("optional"_cs),
+          selectorMatchType("selector"_cs),
+          verify("verifyChecksum"_cs, headersType),
+          compute("computeChecksum"_cs, headersType),
           digest_receiver(),
           hash(),
           algorithm(),
           registers(),
-          drop("mark_to_drop"),
-          recirculate("recirculate_preserving_field_list"),
-          verify_checksum("verify_checksum"),
-          update_checksum("update_checksum"),
-          verify_checksum_with_payload("verify_checksum_with_payload"),
-          update_checksum_with_payload("update_checksum_with_payload"),
-          log_msg("log_msg"),
+          drop("mark_to_drop"_cs),
+          recirculate("recirculate_preserving_field_list"_cs),
+          verify_checksum("verify_checksum"_cs),
+          update_checksum("update_checksum"_cs),
+          verify_checksum_with_payload("verify_checksum_with_payload"_cs),
+          update_checksum_with_payload("update_checksum_with_payload"_cs),
+          log_msg("log_msg"_cs),
           directMeter(),
           directCounter() {}
 

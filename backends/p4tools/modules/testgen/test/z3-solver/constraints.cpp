@@ -10,6 +10,7 @@
 #include "lib/cstring.h"
 
 namespace Test {
+using namespace P4::literals;
 using ConstraintVector = const std::vector<const Constraint *>;
 
 class Z3SolverSatisfiabilityChecks : public ::testing::Test {
@@ -26,8 +27,8 @@ class Z3SolverSatisfiabilityChecks : public ::testing::Test {
 
 TEST_F(Z3SolverSatisfiabilityChecks, BitVectors) {
     const auto *eightBitType = IR::Type_Bits::get(8);
-    const auto *fooVar = P4Tools::ToolsVariables::getSymbolicVariable(eightBitType, "foo");
-    const auto *barVar = P4Tools::ToolsVariables::getSymbolicVariable(eightBitType, "bar");
+    const auto *fooVar = P4Tools::ToolsVariables::getSymbolicVariable(eightBitType, "foo"_cs);
+    const auto *barVar = P4Tools::ToolsVariables::getSymbolicVariable(eightBitType, "bar"_cs);
     {
         auto *expression =
             new IR::Equ(IR::Constant::get(eightBitType, 1), IR::Constant::get(eightBitType, 1));
@@ -81,54 +82,54 @@ TEST_F(Z3SolverSatisfiabilityChecks, BitVectors) {
 
 TEST_F(Z3SolverSatisfiabilityChecks, Strings) {
     const auto *stringType = IR::Type_String::get();
-    const auto *fooVar = P4Tools::ToolsVariables::getSymbolicVariable(stringType, "foo");
-    const auto *barVar = P4Tools::ToolsVariables::getSymbolicVariable(stringType, "bar");
+    const auto *fooVar = P4Tools::ToolsVariables::getSymbolicVariable(stringType, "foo"_cs);
+    const auto *barVar = P4Tools::ToolsVariables::getSymbolicVariable(stringType, "bar"_cs);
     {
         auto *expression =
-            new IR::Equ(IR::StringLiteral::get("dead"), IR::StringLiteral::get("dead"));
+            new IR::Equ(IR::StringLiteral::get("dead"_cs), IR::StringLiteral::get("dead"_cs));
         ConstraintVector inputExpression = {expression};
         testCheckSat(inputExpression, true);
     }
     {
         auto *expression =
-            new IR::Equ(IR::StringLiteral::get("dead"), IR::StringLiteral::get("beef"));
+            new IR::Equ(IR::StringLiteral::get("dead"_cs), IR::StringLiteral::get("beef"_cs));
         ConstraintVector inputExpression = {expression};
         testCheckSat(inputExpression, false);
     }
     {
-        auto *expression = new IR::Equ(fooVar, IR::StringLiteral::get("dead"));
+        auto *expression = new IR::Equ(fooVar, IR::StringLiteral::get("dead"_cs));
         ConstraintVector inputExpression = {expression};
         testCheckSat(inputExpression, true);
     }
     {
-        auto *expression = new IR::Equ(fooVar, IR::StringLiteral::get("dead"));
-        auto *constraint1 = new IR::Equ(fooVar, IR::StringLiteral::get("dead"));
+        auto *expression = new IR::Equ(fooVar, IR::StringLiteral::get("dead"_cs));
+        auto *constraint1 = new IR::Equ(fooVar, IR::StringLiteral::get("dead"_cs));
         ConstraintVector inputExpression = {expression, constraint1};
         testCheckSat(inputExpression, true);
     }
     {
         auto *expression = new IR::Equ(fooVar, barVar);
-        auto *constraint1 = new IR::Equ(fooVar, IR::StringLiteral::get("dead"));
+        auto *constraint1 = new IR::Equ(fooVar, IR::StringLiteral::get("dead"_cs));
         ConstraintVector inputExpression = {expression, constraint1};
         testCheckSat(inputExpression, true);
     }
     {
         auto *expression = new IR::Equ(fooVar, barVar);
-        auto *constraint1 = new IR::Equ(fooVar, IR::StringLiteral::get("dead"));
-        auto *constraint2 = new IR::Equ(barVar, IR::StringLiteral::get("dead"));
+        auto *constraint1 = new IR::Equ(fooVar, IR::StringLiteral::get("dead"_cs));
+        auto *constraint2 = new IR::Equ(barVar, IR::StringLiteral::get("dead"_cs));
         ConstraintVector inputExpression = {expression, constraint1, constraint2};
         testCheckSat(inputExpression, true);
     }
     {
-        auto *expression = new IR::Equ(fooVar, IR::StringLiteral::get("dead"));
-        auto *constraint1 = new IR::Equ(fooVar, IR::StringLiteral::get("beef"));
+        auto *expression = new IR::Equ(fooVar, IR::StringLiteral::get("dead"_cs));
+        auto *constraint1 = new IR::Equ(fooVar, IR::StringLiteral::get("beef"_cs));
         ConstraintVector inputExpression = {expression, constraint1};
         testCheckSat(inputExpression, false);
     }
     {
         auto *expression = new IR::Equ(fooVar, barVar);
-        auto *constraint1 = new IR::Equ(fooVar, IR::StringLiteral::get("dead"));
-        auto *constraint2 = new IR::Equ(barVar, IR::StringLiteral::get("beef"));
+        auto *constraint1 = new IR::Equ(fooVar, IR::StringLiteral::get("dead"_cs));
+        auto *constraint2 = new IR::Equ(barVar, IR::StringLiteral::get("beef"_cs));
         ConstraintVector inputExpression = {expression, constraint1, constraint2};
         testCheckSat(inputExpression, false);
     }
@@ -136,8 +137,8 @@ TEST_F(Z3SolverSatisfiabilityChecks, Strings) {
 
 TEST_F(Z3SolverSatisfiabilityChecks, Bools) {
     const auto *boolType = IR::Type_Boolean::get();
-    const auto *fooVar = P4Tools::ToolsVariables::getSymbolicVariable(boolType, "foo");
-    const auto *barVar = P4Tools::ToolsVariables::getSymbolicVariable(boolType, "bar");
+    const auto *fooVar = P4Tools::ToolsVariables::getSymbolicVariable(boolType, "foo"_cs);
+    const auto *barVar = P4Tools::ToolsVariables::getSymbolicVariable(boolType, "bar"_cs);
     {
         auto *expression = new IR::Equ(IR::BoolLiteral::get(true), IR::BoolLiteral::get(true));
         ConstraintVector inputExpression = {expression};

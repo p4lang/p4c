@@ -126,7 +126,7 @@ void EBPFDigestPSA::emitInstance(CodeBuilder *builder) const {
     builder->appendFormat("REGISTER_TABLE_NO_KEY_TYPE(%s, BPF_MAP_TYPE_QUEUE, 0, ", instanceName);
 
     if (valueTypeName.isNullOrEmpty()) {
-        valueType->declare(builder, "", false);
+        valueType->declare(builder, cstring::empty, false);
     } else {
         builder->append(valueTypeName);
     }

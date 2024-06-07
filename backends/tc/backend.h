@@ -102,7 +102,7 @@ class ConvertToBackendIR : public Inspector {
                                                             const IR::Declaration_Instance *decl,
                                                             cstring eName);
     cstring getControlPathKeyAnnotation(const IR::StructField *field);
-    unsigned GetAccessNumericValue(cstring access);
+    unsigned GetAccessNumericValue(std::string_view access);
     bool isDuplicateAction(const IR::P4Action *action);
     bool isDuplicateOrNoAction(const IR::P4Action *action);
     void updateDefaultHitAction(const IR::P4Table *t, IR::TCTable *tdef);

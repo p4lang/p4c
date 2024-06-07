@@ -70,25 +70,25 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
     env.set(&PacketVars::INPUT_PACKET_LABEL, IR::Constant::get(IR::Type_Bits::get(0), 0));
     env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::Constant::get(IR::Type_Bits::get(0), 0));
     // We also add the taint property and set it to false.
-    setProperty("inUndefinedState", false);
+    setProperty("inUndefinedState"_cs, false);
     // Drop is initialized to false, too.
-    setProperty("drop", false);
+    setProperty("drop"_cs, false);
     // If a user-pattern is provided, initialize the reachability engine state.
     if (!TestgenOptions::get().pattern.empty()) {
         reachabilityEngineState = ReachabilityEngineState::getInitial();
     }
     // If assertion mode is enabled, set the assertion property to false.
     if (TestgenOptions::get().assertionModeEnabled) {
-        setProperty("assertionTriggered", false);
+        setProperty("assertionTriggered"_cs, false);
     }
 }
 
 ExecutionState::ExecutionState(Continuation::Body body)
     : body(std::move(body)), stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
     // We also add the taint property and set it to false.
-    setProperty("inUndefinedState", false);
+    setProperty("inUndefinedState"_cs, false);
     // Drop is initialized to false, too.
-    setProperty("drop", false);
+    setProperty("drop"_cs, false);
     // If a user-pattern is provided, initialize the reachability engine state.
     if (!TestgenOptions::get().pattern.empty()) {
         reachabilityEngineState = ReachabilityEngineState::getInitial();
@@ -200,7 +200,7 @@ void ExecutionState::set(const IR::StateVariable &var, const IR::Expression *val
     const auto *type = value->type;
     BUG_CHECK(type && !type->is<IR::Type_Unknown>(), "Cannot set value with unspecified type: %1%",
               value);
-    if (getProperty<bool>("inUndefinedState")) {
+    if (getProperty<bool>("inUndefinedState"_cs)) {
         // If we are in an undefined state, the variable we set is tainted.
         value = ToolsVariables::getTaintExpression(type);
     } else {
@@ -304,7 +304,7 @@ void ExecutionState::pushCurrentContinuation(std::optional<const IR::Type *> par
     std::optional<const Continuation::Parameter *> parameterOpt = std::nullopt;
     if (parameterType_opt) {
         const auto *parameter =
-            Continuation::genParameter(*parameterType_opt, "_", getNamespaceContext());
+            Continuation::genParameter(*parameterType_opt, "_"_cs, getNamespaceContext());
         parameterOpt = parameter;
     }
 
@@ -369,7 +369,7 @@ void ExecutionState::pushBranchDecision(uint64_t bIdx) { selectedBranches.push_b
 
 const IR::SymbolicVariable *ExecutionState::getInputPacketSizeVar() {
     return ToolsVariables::getSymbolicVariable(&PacketVars::PACKET_SIZE_VAR_TYPE,
-                                               "*packetLen_bits");
+                                               "*packetLen_bits"_cs);
 }
 
 int ExecutionState::getMaxPacketLength() { return TestgenOptions::get().maxPktSize; }

@@ -17,14 +17,14 @@ P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation::lookupP4RuntimeAnnotati
     if (annotatedType == nullptr) {
         return p4RuntimeAnnotations;
     }
-    const auto *p4runtimeAnnotation = annotatedType->getAnnotation("p4runtime_translation");
+    const auto *p4runtimeAnnotation = annotatedType->getAnnotation("p4runtime_translation"_cs);
     if (p4runtimeAnnotation != nullptr) {
         BUG_CHECK(!p4runtimeAnnotation->needsParsing,
                   "The @p4runtime_translation annotation should have been parsed already.");
         p4RuntimeAnnotations.push_back(p4runtimeAnnotation);
     }
     const auto *p4runtimeTranslationMappings =
-        annotatedType->getAnnotation("p4runtime_translation_mappings");
+        annotatedType->getAnnotation("p4runtime_translation_mappings"_cs);
     if (p4runtimeTranslationMappings != nullptr) {
         BUG_CHECK(
             !p4runtimeTranslationMappings->needsParsing,

@@ -244,32 +244,32 @@ const IR::Member *Bmv2V1ModelProgramInfo::getParserParamVar(const IR::P4Parser *
         const auto *paramString = parser->getApplyParameters()->parameters.at(paramIndex);
         structLabel = paramString->name;
     } else {
-        structLabel = ARCH_SPEC.getParamName("Parser", paramIndex);
+        structLabel = ARCH_SPEC.getParamName("Parser"_cs, paramIndex);
     }
     return new IR::Member(type, new IR::PathExpression(structLabel), paramLabel);
 }
 
-const ArchSpec Bmv2V1ModelProgramInfo::ARCH_SPEC =
-    ArchSpec("V1Switch", {// parser Parser<H, M>(packet_in b,
-                          //                     out H parsedHdr,
-                          //                     inout M meta,
-                          //                     inout standard_metadata_t standard_metadata);
-                          {"Parser", {nullptr, "*hdr", "*meta", "*standard_metadata"}},
-                          // control VerifyChecksum<H, M>(inout H hdr,
-                          //                              inout M meta);
-                          {"VerifyChecksum", {"*hdr", "*meta"}},
-                          // control Ingress<H, M>(inout H hdr,
-                          //                       inout M meta,
-                          //                       inout standard_metadata_t standard_metadata);
-                          {"Ingress", {"*hdr", "*meta", "*standard_metadata"}},
-                          // control Egress<H, M>(inout H hdr,
-                          //            inout M meta,
-                          //            inout standard_metadata_t standard_metadata);
-                          {"Egress", {"*hdr", "*meta", "*standard_metadata"}},
-                          // control ComputeChecksum<H, M>(inout H hdr,
-                          //                       inout M meta);
-                          {"ComputeChecksum", {"*hdr", "*meta"}},
-                          // control Deparser<H>(packet_out b, in H hdr);
-                          {"Deparser", {nullptr, "*hdr"}}});
+const ArchSpec Bmv2V1ModelProgramInfo::ARCH_SPEC = ArchSpec(
+    "V1Switch"_cs, {// parser Parser<H, M>(packet_in b,
+                    //                     out H parsedHdr,
+                    //                     inout M meta,
+                    //                     inout standard_metadata_t standard_metadata);
+                    {"Parser"_cs, {nullptr, "*hdr"_cs, "*meta"_cs, "*standard_metadata"_cs}},
+                    // control VerifyChecksum<H, M>(inout H hdr,
+                    //                              inout M meta);
+                    {"VerifyChecksum"_cs, {"*hdr"_cs, "*meta"_cs}},
+                    // control Ingress<H, M>(inout H hdr,
+                    //                       inout M meta,
+                    //                       inout standard_metadata_t standard_metadata);
+                    {"Ingress"_cs, {"*hdr"_cs, "*meta"_cs, "*standard_metadata"_cs}},
+                    // control Egress<H, M>(inout H hdr,
+                    //            inout M meta,
+                    //            inout standard_metadata_t standard_metadata);
+                    {"Egress"_cs, {"*hdr"_cs, "*meta"_cs, "*standard_metadata"_cs}},
+                    // control ComputeChecksum<H, M>(inout H hdr,
+                    //                       inout M meta);
+                    {"ComputeChecksum"_cs, {"*hdr"_cs, "*meta"_cs}},
+                    // control Deparser<H>(packet_out b, in H hdr);
+                    {"Deparser"_cs, {nullptr, "*hdr"_cs}}});
 
 }  // namespace P4Tools::P4Testgen::Bmv2

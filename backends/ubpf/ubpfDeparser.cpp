@@ -120,17 +120,17 @@ void UBPFDeparserTranslationVisitor::compileEmitField(const IR::Expression *expr
     unsigned widthToEmit = et->widthInBits();
 
     unsigned loadSize = 0;
-    cstring swap = "";
+    cstring swap = ""_cs;
     if (widthToEmit <= 8) {
         loadSize = 8;
     } else if (widthToEmit <= 16) {
-        swap = "bpf_htons";
+        swap = "bpf_htons"_cs;
         loadSize = 16;
     } else if (widthToEmit <= 32) {
-        swap = "htonl";
+        swap = "htonl"_cs;
         loadSize = 32;
     } else if (widthToEmit <= 64) {
-        swap = "htonll";
+        swap = "htonll"_cs;
         loadSize = 64;
     }
     unsigned bytes = ROUNDUP(widthToEmit, 8);

@@ -46,6 +46,8 @@ class SmallStepTest : public P4ToolsTest {
 
 namespace SmallStepUtil {
 
+using namespace P4::literals;
+
 /// Creates a test case with the given header fields for
 /// stepping on a given expression.
 std::optional<const P4ToolsTestCase> createSmallStepExprTest(const std::string &,
@@ -55,7 +57,7 @@ std::optional<const P4ToolsTestCase> createSmallStepExprTest(const std::string &
 template <class T>
 const T *extractExpr(const IR::P4Program &program) {
     // Get the mau declarations in the P4Program.
-    auto *decl = program.getDeclsByName("mau")->single();
+    auto *decl = program.getDeclsByName("mau"_cs)->single();
 
     // Convert the mau declaration to a control and ensure that
     // there is a single statement in the body.
@@ -86,7 +88,7 @@ void stepAndExamineValue(const T *value, const P4Tools::CompilerResult &compiler
     ASSERT_TRUE(progInfo);
 
     // Create a base state with a parameter continuation to apply the value on.
-    const auto *v = Continuation::genParameter(value->type, "v", NamespaceContext::Empty);
+    const auto *v = Continuation::genParameter(value->type, "v"_cs, NamespaceContext::Empty);
     Body bodyBase({Return(v->param)});
     Continuation continuationBase(v, bodyBase);
     ExecutionState esBase = SmallStepTest::mkState(bodyBase);

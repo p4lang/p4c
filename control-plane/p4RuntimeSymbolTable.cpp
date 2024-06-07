@@ -26,13 +26,13 @@ namespace P4 {
 namespace ControlPlaneAPI {
 
 bool isControllerHeader(const IR::Type_Header *type) {
-    return type->getAnnotation("controller_header") != nullptr;
+    return type->getAnnotation("controller_header"_cs) != nullptr;
 }
 
-bool isHidden(const IR::Node *node) { return node->getAnnotation("hidden") != nullptr; }
+bool isHidden(const IR::Node *node) { return node->getAnnotation("hidden"_cs) != nullptr; }
 
 std::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node) {
-    const auto *idAnnotation = node->getAnnotation("id");
+    const auto *idAnnotation = node->getAnnotation("id"_cs);
     if (idAnnotation == nullptr) {
         return std::nullopt;
     }

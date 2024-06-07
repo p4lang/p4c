@@ -16,6 +16,8 @@
 
 namespace P4Tools::P4Testgen {
 
+using namespace P4::literals;
+
 /* =========================================================================================
  *  Test Specification Objects
  * ========================================================================================= */
@@ -23,7 +25,7 @@ namespace P4Tools::P4Testgen {
 Packet::Packet(int port, const IR::Expression *payload, const IR::Expression *payloadIgnoreMask)
     : port(port), payload(payload), payloadIgnoreMask(payloadIgnoreMask) {}
 
-cstring Packet::getObjectName() const { return "Packet"; }
+cstring Packet::getObjectName() const { return "Packet"_cs; }
 
 int Packet::getPort() const { return port; }
 
@@ -74,7 +76,7 @@ const IR::Constant *ActionArg::getEvaluatedValue() const {
     return constant;
 }
 
-cstring ActionArg::getObjectName() const { return "ActionArg"; }
+cstring ActionArg::getObjectName() const { return "ActionArg"_cs; }
 
 const ActionArg *ActionArg::evaluate(const Model &model, bool doComplete) const {
     const auto &newValue = model.evaluate(value, doComplete);
@@ -100,7 +102,7 @@ const ActionCall *ActionCall::evaluate(const Model &model, bool doComplete) cons
     return new ActionCall(identifier, action, evaluatedArgs);
 }
 
-cstring ActionCall::getObjectName() const { return "ActionCall"; }
+cstring ActionCall::getObjectName() const { return "ActionCall"_cs; }
 
 const std::vector<ActionArg> *ActionCall::getArgs() const { return &args; }
 
@@ -135,7 +137,7 @@ const Ternary *Ternary::evaluate(const Model &model, bool doComplete) const {
     return new Ternary(getKey(), evaluatedValue, evaluatedMask);
 }
 
-cstring Ternary::getObjectName() const { return "Ternary"; }
+cstring Ternary::getObjectName() const { return "Ternary"_cs; }
 
 LPM::LPM(const IR::KeyElement *key, const IR::Expression *value, const IR::Expression *prefixLength)
     : TableMatch(key), value(value), prefixLength(prefixLength) {}
@@ -164,7 +166,7 @@ const LPM *LPM::evaluate(const Model &model, bool doComplete) const {
     return new LPM(getKey(), evaluatedValue, evaluatedPrefixLength);
 }
 
-cstring LPM::getObjectName() const { return "LPM"; }
+cstring LPM::getObjectName() const { return "LPM"_cs; }
 
 Exact::Exact(const IR::KeyElement *key, const IR::Expression *val) : TableMatch(key), value(val) {}
 
@@ -182,7 +184,7 @@ const Exact *Exact::evaluate(const Model &model, bool doComplete) const {
     return new Exact(getKey(), evaluatedValue);
 }
 
-cstring Exact::getObjectName() const { return "Exact"; }
+cstring Exact::getObjectName() const { return "Exact"_cs; }
 
 TableRule::TableRule(TableMatchMap matches, int priority, ActionCall action, int ttl)
     : matches(std::move(matches)), priority(priority), action(std::move(action)), ttl(ttl) {}
@@ -195,7 +197,7 @@ const ActionCall *TableRule::getActionCall() const { return &action; }
 
 int TableRule::getTTL() const { return ttl; }
 
-cstring TableRule::getObjectName() const { return "TableRule"; }
+cstring TableRule::getObjectName() const { return "TableRule"_cs; }
 
 const TableRule *TableRule::evaluate(const Model &model, bool doComplete) const {
     TableMatchMap evaluatedMatches;
@@ -212,7 +214,7 @@ const TableRule *TableRule::evaluate(const Model &model, bool doComplete) const 
 
 const IR::P4Table *TableConfig::getTable() const { return table; }
 
-cstring TableConfig::getObjectName() const { return "TableConfig"; }
+cstring TableConfig::getObjectName() const { return "TableConfig"_cs; }
 
 TableConfig::TableConfig(const IR::P4Table *table, std::vector<TableRule> rules)
     : table(table), rules(std::move(rules)) {}

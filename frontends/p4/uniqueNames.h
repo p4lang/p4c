@@ -90,7 +90,7 @@ class FindSymbols : public Inspector {
         setName("FindSymbols");
     }
     void doDecl(const IR::Declaration *decl) {
-        cstring newName = refMap->newName(decl->getName());
+        cstring newName = refMap->newName(decl->getName().name.string_view());
         renameMap->setNewName(decl, newName);
     }
     void postorder(const IR::Declaration_Variable *decl) override { doDecl(decl); }
@@ -166,7 +166,7 @@ class FindParameters : public Inspector {
 
     void doParameters(const IR::ParameterList *pl) {
         for (auto p : pl->parameters) {
-            cstring newName = refMap->newName(p->name);
+            cstring newName = refMap->newName(p->name.name.string_view());
             renameMap->setNewName(p, newName);
         }
     }

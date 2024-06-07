@@ -20,11 +20,13 @@ limitations under the License.
 
 namespace DPDK {
 
+using namespace P4::literals;
+
 /// Make sure new decls and fields name are unique.
 void DirectionToRegRead::uniqueNames(IR::DpdkAsmProgram *p) {
     // "direction" name is used in dpdk for initialzing direction port mask
     // make sure no such decls exist with that name
-    registerInstanceName = "direction";
+    registerInstanceName = "direction"_cs;
     for (auto decl : p->externDeclarations) {
         usedNames.insert(decl->name);
     }

@@ -25,6 +25,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "lib/algorithm.h"
+#include "lib/cstring.h"
 #include "lib/log.h"
 #include "syntacticEquivalence.h"
 #include "typeConstraints.h"
@@ -220,7 +221,7 @@ void TypeInference::addSubstitutions(const TypeVariableSubstitution *tvs) {
 
 TypeVariableSubstitution *TypeInference::unifyBase(
     bool allowCasts, const IR::Node *errorPosition, const IR::Type *destType,
-    const IR::Type *srcType, cstring errorFormat,
+    const IR::Type *srcType, std::string_view errorFormat,
     std::initializer_list<const IR::Node *> errorArgs) {
     CHECK_NULL(destType);
     CHECK_NULL(srcType);
@@ -232,7 +233,7 @@ TypeVariableSubstitution *TypeInference::unifyBase(
         constraint = new CanBeImplicitlyCastConstraint(destType, srcType, errorPosition);
     else
         constraint = new EqualityConstraint(destType, srcType, errorPosition);
-    if (!errorFormat.isNullOrEmpty()) constraint->setError(errorFormat, errorArgs);
+    if (!errorFormat.empty()) constraint->setError(errorFormat, errorArgs);
     constraints.add(constraint);
     auto tvs = constraints.solve();
     addSubstitutions(tvs);
@@ -788,7 +789,7 @@ const IR::Expression *TypeInference::assignment(const IR::Node *errorPosition,
                 if (src != compI->expression) changes = true;
                 vec.push_back(new IR::NamedExpression(fieldI->name, src));
             }
-            if (hasDots) vec.push_back(si->getField("..."));
+            if (hasDots) vec.push_back(si->getField("..."_cs));
             if (!changes) vec = si->components;
             if (initType->is<IR::Type_UnknownStruct>() || changes) {
                 sourceExpression = new IR::StructExpression(type, type, vec);
@@ -979,7 +980,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::che
     }
 
     // will always be bound to Type_Void.
-    auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "<returned type>"));
+    auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "<returned type>"_cs));
     auto callType =
         new IR::Type_MethodCall(errorPosition->srcInfo, new IR::Vector<IR::Type>(), rettype, args);
     auto tvs = unify(errorPosition, methodType, callType,
@@ -1087,7 +1088,7 @@ bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance *inst,
     }
     bool rv = true;
     for (auto &vm : virt) {
-        if (!vm.second->annotations->getSingle("optional")) {
+        if (!vm.second->annotations->getSingle("optional"_cs)) {
             typeError("%1%: %2% abstract method not implemented", inst, vm.second);
             rv = false;
         }
@@ -3276,7 +3277,7 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
     }
 
     if (type->is<IR::Type_StructLike>()) {
-        cstring typeStr = "structure ";
+        std::string typeStr = "structure ";
         if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>()) {
             typeStr = "";
             if (inMethod && (member == IR::Type_Header::isValid)) {
@@ -3380,7 +3381,7 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
             if (!isLeftValue(expression->expr))
                 typeError("%1%: must be applied to a left-value", expression);
             auto params = new IR::IndexedVector<IR::Parameter>();
-            auto param = new IR::Parameter(IR::ID("count", nullptr), IR::Direction::None,
+            auto param = new IR::Parameter(IR::ID("count"_cs, nullptr), IR::Direction::None,
                                            IR::Type_InfInt::get());
             auto tt = new IR::Type_Type(param->type);
             setType(param->type, tt);
@@ -3700,7 +3701,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
 
         // We build a type for the callExpression and unify it with the method expression
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
-        auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "<returned type>"));
+        auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "<returned type>"_cs));
         auto args = new IR::Vector<IR::ArgumentInfo>();
         bool constArgs = true;
         for (auto aarg : *expression->arguments) {

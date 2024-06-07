@@ -20,20 +20,20 @@ void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
     v.visit(self->annotations, "annotations");
     v.visit(self->init, "init");
     if (auto *cfv = v.controlFlowVisitor()) {
-        ControlFlowVisitor::SaveGlobal outer(*cfv, "-BREAK-", "-CONTINUE-");
+        ControlFlowVisitor::SaveGlobal outer(*cfv, "-BREAK-"_cs, "-CONTINUE-"_cs);
         ControlFlowVisitor *top = nullptr;
         while (true) {
             top = &cfv->flow_clone();
             cfv->visit(self->condition, "condition", 1000);
             auto &inloop = cfv->flow_clone();
             inloop.visit(self->body, "body");
-            inloop.flow_merge_global_from("-CONTINUE-");
+            inloop.flow_merge_global_from("-CONTINUE-"_cs);
             inloop.visit(self->updates, "updates");
             inloop.flow_merge(*top);
             if (inloop == *top) break;
             cfv->flow_copy(inloop);
         }
-        cfv->flow_merge_global_from("-BREAK-");
+        cfv->flow_merge_global_from("-BREAK-"_cs);
     } else {
         /* Since there is a variable number of init statements (0 or more), we
          * don't know what the child index of subsequent children will be.  So we
@@ -57,15 +57,15 @@ void IR::ForInStatement::visit_children(THIS *self, Visitor &v) {
     v.visit(self->decl, "decl", 0);
     v.visit(self->collection, "collection", 2);
     if (auto *cfv = v.controlFlowVisitor()) {
-        ControlFlowVisitor::SaveGlobal outer(*cfv, "-BREAK-", "-CONTINUE-");
+        ControlFlowVisitor::SaveGlobal outer(*cfv, "-BREAK-"_cs, "-CONTINUE-"_cs);
         ControlFlowVisitor *top = nullptr;
         do {
             top = &cfv->flow_clone();
             cfv->visit(self->ref, "ref", 1);
             cfv->visit(self->body, "body", 3);
-            cfv->flow_merge_global_from("-CONTINUE-");
+            cfv->flow_merge_global_from("-CONTINUE-"_cs);
         } while (*cfv != *top);
-        cfv->flow_merge_global_from("-BREAK-");
+        cfv->flow_merge_global_from("-BREAK-"_cs);
     } else {
         v.visit(self->ref, "ref", 1);
         v.visit(self->body, "body", 3);
@@ -76,7 +76,7 @@ void IR::ForInStatement::visit_children(Visitor &v) const { visit_children(this,
 
 void IR::BreakStatement::visit_children(Visitor &v) const {
     if (auto *cfv = v.controlFlowVisitor()) {
-        cfv->flow_merge_global_to("-BREAK-");
+        cfv->flow_merge_global_to("-BREAK-"_cs);
         cfv->setUnreachable();
     }
 }
@@ -86,7 +86,7 @@ void IR::BreakStatement::visit_children(Visitor &v) {
 
 void IR::ContinueStatement::visit_children(Visitor &v) const {
     if (auto *cfv = v.controlFlowVisitor()) {
-        cfv->flow_merge_global_to("-CONTINUE-");
+        cfv->flow_merge_global_to("-CONTINUE-"_cs);
         cfv->setUnreachable();
     }
 }

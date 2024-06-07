@@ -36,9 +36,9 @@ class EBPFTablePSA : public EBPFTable {
     typedef std::vector<EntriesGroup_t> EntriesGroupedByMask_t;
     EntriesGroupedByMask_t getConstEntriesGroupedByMask();
     bool hasConstEntries();
-    const cstring addPrefixFunctionName = "add_prefix_and_entries";
-    const cstring tuplesMapName = instanceName + "_tuples_map";
-    const cstring prefixesMapName = instanceName + "_prefixes";
+    const cstring addPrefixFunctionName = "add_prefix_and_entries"_cs;
+    const cstring tuplesMapName = instanceName + "_tuples_map"_cs;
+    const cstring prefixesMapName = instanceName + "_prefixes"_cs;
 
  protected:
     ActionTranslationVisitor *createActionTranslationVisitor(

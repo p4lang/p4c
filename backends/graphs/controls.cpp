@@ -23,6 +23,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
 #include "graphs.h"
+#include "lib/cstring.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
@@ -33,12 +34,12 @@ using Graph = ControlGraphs::Graph;
 Graph *ControlGraphs::ControlStack::pushBack(Graph &currentSubgraph, const cstring &name) {
     auto &newSubgraph = currentSubgraph.create_subgraph();
     auto fullName = getName(name);
-    boost::get_property(newSubgraph, boost::graph_name) = "cluster" + fullName;
-    boost::get_property(newSubgraph, boost::graph_graph_attribute)["label"] =
+    boost::get_property(newSubgraph, boost::graph_name) = "cluster"_cs + fullName;
+    boost::get_property(newSubgraph, boost::graph_graph_attribute)["label"_cs] =
         boost::get_property(currentSubgraph, boost::graph_name) +
         (fullName != "" ? "." + fullName : fullName);
-    boost::get_property(newSubgraph, boost::graph_graph_attribute)["fontsize"] = "22pt";
-    boost::get_property(newSubgraph, boost::graph_graph_attribute)["style"] = "bold";
+    boost::get_property(newSubgraph, boost::graph_graph_attribute)["fontsize"_cs] = "22pt"_cs;
+    boost::get_property(newSubgraph, boost::graph_graph_attribute)["style"_cs] = "bold"_cs;
     names.push_back(name);
     subgraphs.push_back(&newSubgraph);
     return getSubgraph();
@@ -85,9 +86,9 @@ bool ControlGraphs::preorder(const IR::PackageBlock *block) {
             instanceName = std::nullopt;
             boost::get_property(*g_, boost::graph_name) = name;
             BUG_CHECK(controlStack.isEmpty(), "Invalid control stack state");
-            g = controlStack.pushBack(*g_, "");
-            start_v = add_vertex("__START__", VertexType::OTHER);
-            exit_v = add_vertex("__EXIT__", VertexType::OTHER);
+            g = controlStack.pushBack(*g_, cstring::empty);
+            start_v = add_vertex("__START__"_cs, VertexType::OTHER);
+            exit_v = add_vertex("__EXIT__"_cs, VertexType::OTHER);
             parents = {{start_v, new EdgeUnconditional()}};
             visit(it.second->getNode());
 

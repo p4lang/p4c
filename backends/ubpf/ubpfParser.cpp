@@ -334,7 +334,7 @@ void UBPFStateTranslationVisitor::compileLookahead(const IR::Expression *destina
     builder->append(" ");
     visit(destination);
     builder->append(" = ");
-    compileExtractField(nullptr, "", 0, etype, false);
+    compileExtractField(nullptr, ""_cs, 0, etype, false);
     builder->endOfStatement(true);
 }
 

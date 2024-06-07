@@ -54,14 +54,14 @@ void EBPFPipeline::emitLocalVariables(CodeBuilder *builder) {
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("void* %s = %s;", packetStartVar.c_str(),
-                          builder->target->dataOffset(model.CPacketName.str()).c_str());
+                          builder->target->dataOffset(model.CPacketName.toString()).c_str());
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("u8* %s = %s;", headerStartVar.c_str(), packetStartVar.c_str());
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("void* %s = %s;", packetEndVar.c_str(),
-                          builder->target->dataEnd(model.CPacketName.str()).c_str());
+                          builder->target->dataEnd(model.CPacketName.toString()).c_str());
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("u32 %s = 0;", zeroKey.c_str());
@@ -123,7 +123,7 @@ void EBPFPipeline::emitHeaderInstances(CodeBuilder *builder) {
 
 void EBPFPipeline::emitCPUMAPLookup(CodeBuilder *builder) {
     builder->emitIndent();
-    builder->target->emitTableLookup(builder, "hdr_md_cpumap", zeroKey.c_str(), "hdrMd");
+    builder->target->emitTableLookup(builder, "hdr_md_cpumap"_cs, zeroKey, "hdrMd"_cs);
     builder->endOfStatement(true);
 }
 
@@ -391,7 +391,7 @@ void EBPFEgressPipeline::emitPSAControlOutputMetadata(CodeBuilder *builder) {
 
 void EBPFEgressPipeline::emitCPUMAPLookup(CodeBuilder *builder) {
     builder->emitIndent();
-    builder->target->emitTableLookup(builder, "hdr_md_cpumap", oneKey.c_str(), "hdrMd");
+    builder->target->emitTableLookup(builder, "hdr_md_cpumap"_cs, oneKey, "hdrMd"_cs);
     builder->endOfStatement(true);
 }
 
@@ -401,7 +401,7 @@ void EBPFEgressPipeline::emit(CodeBuilder *builder) {
     builder->newline();
     progTarget->emitCodeSection(builder, sectionName);
     builder->emitIndent();
-    progTarget->emitMain(builder, functionName, model.CPacketName.str());
+    progTarget->emitMain(builder, functionName, model.CPacketName.toString());
     builder->spc();
     builder->blockStart();
 
@@ -773,7 +773,7 @@ void TCTrafficManagerForXDP::emit(CodeBuilder *builder) {
     cstring msgStr;
     progTarget->emitCodeSection(builder, sectionName);
     builder->emitIndent();
-    progTarget->emitMain(builder, functionName, model.CPacketName.str());
+    progTarget->emitMain(builder, functionName, model.CPacketName.toString());
     builder->spc();
     builder->blockStart();
     emitGlobalMetadataInitializer(builder);
@@ -855,8 +855,8 @@ void TCTrafficManagerForXDP::emitReadXDP2TCMetadataFromHead(CodeBuilder *builder
 
 void TCTrafficManagerForXDP::emitReadXDP2TCMetadataFromCPUMAP(CodeBuilder *builder) {
     builder->emitIndent();
-    builder->target->emitTableLookup(builder, "xdp2tc_shared_map", this->zeroKey.c_str(),
-                                     "struct xdp2tc_metadata *md");
+    builder->target->emitTableLookup(builder, "xdp2tc_shared_map"_cs, this->zeroKey,
+                                     "struct xdp2tc_metadata *md"_cs);
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->append("if (!md) ");

@@ -21,6 +21,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 const IR::Node *DoMoveActionsToTables::postorder(IR::MethodCallStatement *statement) {
     auto mi = MethodInstance::resolve(statement, refMap, typeMap);
     if (!mi->is<ActionCall>()) return statement;
@@ -66,7 +68,7 @@ const IR::Node *DoMoveActionsToTables::postorder(IR::MethodCallStatement *statem
     // List of table properties
     auto props = new IR::TableProperties({prop, defprop});
     // Synthesize a new table
-    cstring tblName = IR::ID(refMap->newName(cstring("tbl_") + ac->action->name.name), nullptr);
+    cstring tblName = IR::ID(refMap->newName("tbl_"_cs + ac->action->name.name), nullptr);
 
     auto annos = new IR::Annotations();
     annos->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
@@ -167,9 +169,9 @@ const IR::Node *DoSynthesizeActions::preorder(IR::BlockStatement *statement) {
 }
 
 static cstring createName(const Util::SourceInfo &si) {
-    if (!si.isValid()) return "act";
+    if (!si.isValid()) return "act"_cs;
     auto pos = si.toPosition();
-    if (pos.fileName.isNullOrEmpty() || pos.sourceLine == 0) return "act";
+    if (pos.fileName.isNullOrEmpty() || pos.sourceLine == 0) return "act"_cs;
     std::string name;
     const char *p = pos.fileName.findlast('/');
     p = p ? p + 1 : pos.fileName.c_str();
@@ -178,14 +180,14 @@ static cstring createName(const Util::SourceInfo &si) {
         if (isalnum(*p) || *p == '_') name += *p;
         ++p;
     }
-    if (name.empty()) return "act";
+    if (name.empty()) return "act"_cs;
     if (isdigit(name.back())) name += 'l';
     return name + std::to_string(pos.sourceLine);
 }
 
 const IR::Statement *DoSynthesizeActions::createAction(const IR::Statement *toAdd) {
     changes = true;
-    auto name = refMap->newName(createName(toAdd->srcInfo));
+    cstring name = refMap->newName(createName(toAdd->srcInfo).string_view());
     const IR::BlockStatement *body;
     if (toAdd->is<IR::BlockStatement>()) {
         body = toAdd->to<IR::BlockStatement>();

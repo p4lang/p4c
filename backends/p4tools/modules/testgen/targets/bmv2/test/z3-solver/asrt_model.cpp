@@ -25,6 +25,8 @@
 
 namespace Test {
 
+using namespace P4::literals;
+
 using P4Tools::Model;
 using P4Tools::Z3Solver;
 using P4Tools::Z3SolverAccessor;
@@ -93,7 +95,7 @@ class Z3SolverTest : public P4ToolsTest {
         }
 
         // Extract the binary operation from the P4Program
-        const auto *decl = test->getProgram().getDeclsByName("mau")->single();
+        const auto *decl = test->getProgram().getDeclsByName("mau"_cs)->single();
         const auto *control = decl->to<IR::P4Control>();
         SymbolicConverter converter;
         for (const auto *st : control->body->components) {

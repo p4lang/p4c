@@ -40,14 +40,16 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
+using namespace P4::literals;
+
 void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOptions &options) {
     auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();
     if (options.arch == "psa")
         p4RuntimeSerializer->registerArch(
-            "psa", new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK());
+            "psa"_cs, new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK());
     if (options.arch == "pna")
         p4RuntimeSerializer->registerArch(
-            "pna", new P4::ControlPlaneAPI::Standard::PNAArchHandlerBuilderForDPDK());
+            "pna"_cs, new P4::ControlPlaneAPI::Standard::PNAArchHandlerBuilderForDPDK());
     auto p4Runtime = P4::generateP4Runtime(program, options.arch);
 
     cstring filename = isTDI ? options.tdiFile : options.bfRtSchema;
@@ -66,7 +68,7 @@ int main(int argc, char *const argv[]) {
     AutoCompileContext autoDpdkContext(new DPDK::DpdkContext);
     auto &options = DPDK::DpdkContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
-    options.compilerVersion = DPDK_VERSION_STRING;
+    options.compilerVersion = cstring(DPDK_VERSION_STRING);
 
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false) options.setInputFile();

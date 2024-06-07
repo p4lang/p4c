@@ -60,10 +60,10 @@ Util::IJson *ExternConverter::convertExternObject(ConversionContext *ctxt,
     if (emitExterns) {
         auto primitive = mkPrimitive("_" + em->originalExternType->name + "_" + em->method->name);
         auto parameters = mkParameters(primitive);
-        primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
+        primitive->emplace_non_null("source_info"_cs, mc->sourceInfoJsonObj());
         auto etr = new Util::JsonObject();
-        etr->emplace("type", "extern");
-        etr->emplace("value", em->object->controlPlaneName());
+        etr->emplace("type"_cs, "extern");
+        etr->emplace("value"_cs, em->object->controlPlaneName());
         parameters->append(etr);
         for (auto arg : *mc->arguments) {
             auto args = ctxt->conv->convert(arg->expression);
@@ -92,10 +92,10 @@ void ExternConverter::convertExternInstance(ConversionContext *ctxt, const IR::D
         cstring type;
         cstring value;
         if (auto cst = val->to<IR::Constant>()) {
-            type = "hexstr";
+            type = "hexstr"_cs;
             value = Util::toString(cst->value, 0, false, 16);
         } else if (auto str = val->to<IR::StringLiteral>()) {
-            type = "string";
+            type = "string"_cs;
             value = str->value;
         } else {
             modelError("%1%: parameter type not unsupported", param->type);
@@ -116,7 +116,7 @@ Util::IJson *ExternConverter::convertExternFunction(ConversionContext *ctxt,
         return nullptr;
     }
     auto primitive = mkPrimitive(ef->method->name);
-    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     auto parameters = mkParameters(primitive);
     for (auto arg : *mc->arguments) {
         auto args = ctxt->conv->convert(arg->expression);
@@ -161,14 +161,14 @@ void ExternConverter::addToFieldList(ConversionContext *ctxt, const IR::Expressi
     auto j = ctxt->conv->convert(expr);
     ctxt->conv->simpleExpressionsOnly = simple;  // restore state
     if (auto jo = j->to<Util::JsonObject>()) {
-        if (auto t = jo->get("type")) {
+        if (auto t = jo->get("type"_cs)) {
             if (auto type = t->to<Util::JsonValue>()) {
                 if (*type == "runtime_data") {
                     // Can't have runtime_data in field lists -- need hexstr instead
-                    auto val = jo->get("value")->to<Util::JsonValue>();
+                    auto val = jo->get("value"_cs)->to<Util::JsonValue>();
                     j = jo = new Util::JsonObject();
-                    jo->emplace("type", "hexstr");
-                    jo->emplace("value", stringRepr(val->getValue()));
+                    jo->emplace("type"_cs, "hexstr");
+                    jo->emplace("value"_cs, stringRepr(val->getValue()));
                 }
             }
         }
@@ -182,10 +182,10 @@ int ExternConverter::createFieldList(ConversionContext *ctxt, const IR::Expressi
     auto fl = new Util::JsonObject();
     field_lists->append(fl);
     int id = nextId(group);
-    fl->emplace("id", id);
-    fl->emplace("name", listName);
-    fl->emplace_non_null("source_info", expr->sourceInfoJsonObj());
-    auto elements = mkArrayField(fl, "elements");
+    fl->emplace("id"_cs, id);
+    fl->emplace("name"_cs, listName);
+    fl->emplace_non_null("source_info"_cs, expr->sourceInfoJsonObj());
+    auto elements = mkArrayField(fl, "elements"_cs);
     addToFieldList(ctxt, expr, elements);
     return id;
 }
@@ -196,11 +196,11 @@ cstring ExternConverter::createCalculation(ConversionContext *ctxt, cstring algo
                                            const IR::Node *sourcePositionNode = nullptr) {
     cstring calcName = ctxt->refMap->newName("calc_");
     auto calc = new Util::JsonObject();
-    calc->emplace("name", calcName);
-    calc->emplace("id", nextId("calculations"));
+    calc->emplace("name"_cs, calcName);
+    calc->emplace("id"_cs, nextId("calculations"_cs));
     if (sourcePositionNode != nullptr)
-        calc->emplace_non_null("source_info", sourcePositionNode->sourceInfoJsonObj());
-    calc->emplace("algo", algo);
+        calc->emplace_non_null("source_info"_cs, sourcePositionNode->sourceInfoJsonObj());
+    calc->emplace("algo"_cs, algo);
     fields = convertToList(fields, ctxt->typeMap);
     if (!fields) {
         modelError("%1%: expected a struct", fields);
@@ -211,36 +211,27 @@ cstring ExternConverter::createCalculation(ConversionContext *ctxt, cstring algo
         auto array = jright->to<Util::JsonArray>();
         BUG_CHECK(array, "expected a JSON array");
         auto payload = new Util::JsonObject();
-        payload->emplace("type", "payload");
-        payload->emplace("value", (Util::IJson *)nullptr);
+        payload->emplace("type"_cs, "payload");
+        payload->emplace("value"_cs, (Util::IJson *)nullptr);
         array->append(payload);
     }
-    calc->emplace("input", jright);
+    calc->emplace("input"_cs, jright);
     calculations->append(calc);
     return calcName;
 }
 
 cstring ExternConverter::convertHashAlgorithm(cstring algorithm) {
-    cstring result;
-    if (algorithm == P4V1::V1Model::instance.algorithm.crc32.name)
-        result = "crc32";
-    else if (algorithm == P4V1::V1Model::instance.algorithm.crc32_custom.name)
-        result = "crc32_custom";
-    else if (algorithm == P4V1::V1Model::instance.algorithm.crc16.name)
-        result = "crc16";
-    else if (algorithm == P4V1::V1Model::instance.algorithm.crc16_custom.name)
-        result = "crc16_custom";
-    else if (algorithm == P4V1::V1Model::instance.algorithm.random.name)
-        result = "random";
-    else if (algorithm == P4V1::V1Model::instance.algorithm.identity.name)
-        result = "identity";
-    else if (algorithm == P4V1::V1Model::instance.algorithm.csum16.name)
-        result = "csum16";
-    else if (algorithm == P4V1::V1Model::instance.algorithm.xor16.name)
-        result = "xor16";
-    else
-        ::error(ErrorType::ERR_UNSUPPORTED, "Unsupported algorithm %1%", algorithm);
-    return result;
+    if (algorithm == P4V1::V1Model::instance.algorithm.crc32.name) return "crc32"_cs;
+    if (algorithm == P4V1::V1Model::instance.algorithm.crc32_custom.name) return "crc32_custom"_cs;
+    if (algorithm == P4V1::V1Model::instance.algorithm.crc16.name) return "crc16"_cs;
+    if (algorithm == P4V1::V1Model::instance.algorithm.crc16_custom.name) return "crc16_custom"_cs;
+    if (algorithm == P4V1::V1Model::instance.algorithm.random.name) return "random"_cs;
+    if (algorithm == P4V1::V1Model::instance.algorithm.identity.name) return "identity"_cs;
+    if (algorithm == P4V1::V1Model::instance.algorithm.csum16.name) return "csum16"_cs;
+    if (algorithm == P4V1::V1Model::instance.algorithm.xor16.name) return "xor16"_cs;
+
+    ::error(ErrorType::ERR_UNSUPPORTED, "Unsupported algorithm %1%", algorithm);
+    return cstring::empty;
 }
 
 ExternConverter_assert ExternConverter_assert::singleton;
@@ -260,7 +251,7 @@ Util::IJson *ExternConverter::convertAssertAssume(ConversionContext *ctxt,
     // cast the result of expression to b2d
     auto jsonExpr = ctxt->conv->convert(cond->expression, true, true, true);
     parameters->append(jsonExpr);
-    primitive->emplace_non_null("source_info", methodCall->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info"_cs, methodCall->sourceInfoJsonObj());
     return primitive;
 }
 

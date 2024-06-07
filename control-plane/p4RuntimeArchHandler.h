@@ -38,10 +38,13 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
 #include "lib/ordered_set.h"
 #include "typeSpecConverter.h"
 
 namespace P4 {
+
+using namespace literals;
 
 /** \addtogroup control_plane
  *  @{
@@ -139,7 +142,7 @@ class P4RuntimeArchHandlerIface {
     /// Get control plane name for @block
     virtual cstring getControlPlaneName(const IR::Block *block) {
         auto decl = block->getContainer();
-        return decl ? decl->controlPlaneName() : "";
+        return decl ? decl->controlPlaneName() : cstring::empty;
     }
     /// Collects architecture-specific properties for @tableBlock in @symbols
     /// table.
@@ -396,7 +399,7 @@ struct Counterlike {
         // Counter and meter externs refer to their unit as a "type"; this is
         // (confusingly) unrelated to the "type" field of a counter or meter in
         // P4Info.
-        auto unit = instance->getParameterValue("type");
+        auto unit = instance->getParameterValue("type"_cs);
         if (!unit->is<IR::Declaration_ID>()) {
             ::error(ErrorType::ERR_INVALID,
                     "%1% '%2%' has a unit type which is not an enum constant: %3%",
@@ -457,7 +460,7 @@ struct Counterlike {
             return std::nullopt;
         }
 
-        auto unitArgument = instance.substitution.lookupByName("type")->expression;
+        auto unitArgument = instance.substitution.lookupByName("type"_cs)->expression;
         if (unitArgument == nullptr) {
             ::error(ErrorType::ERR_EXPECTED,
                     "Direct %1% instance %2% should take a constructor argument",
@@ -477,7 +480,7 @@ struct Counterlike {
                                  unit,
                                  Helpers::getTableSize(table),
                                  table->controlPlaneName(),
-                                 ""};
+                                 cstring::empty};
     }
 };
 

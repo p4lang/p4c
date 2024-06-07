@@ -173,15 +173,17 @@ bool ToP4::preorder(const IR::P4Program *program) {
                         program->apply(g);
                         builder.append("#define V1MODEL_VERSION ");
                         builder.append(g.version);
-                        builder.appendLine("");
+                        builder.newline();
                     }
                     builder.append("#include <");
                     builder.append(p);
-                    builder.appendLine(">");
+                    builder.append(">");
+                    builder.newline();
                 } else {
                     builder.append("#include \"");
                     builder.append(sourceFile);
-                    builder.appendLine("\"");
+                    builder.append("\"");
+                    builder.newline();
                 }
                 includesEmitted.emplace(sourceFile);
             }
@@ -872,8 +874,8 @@ bool ToP4::preorder(const IR::SelectExpression *e) {
 bool ToP4::preorder(const IR::ListExpression *e) {
     cstring start, end;
     if (listTerminators.empty()) {
-        start = "{ ";
-        end = " }";
+        start = "{ "_cs;
+        end = " }"_cs;
     } else {
         start = listTerminators.back().start;
         end = listTerminators.back().end;

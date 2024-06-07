@@ -35,10 +35,11 @@ const unsigned default_learner_table_timeout[dpdk_learner_max_configurable_timeo
     10, 30, 60, 120, 300, 43200, 120, 120};
 
 /// JSON schema versions
-const cstring bfrtSchemaVersion = "1.0.0";
-const cstring tdiSchemaVersion = "0.1";
+const cstring bfrtSchemaVersion = cstring::literal("1.0.0");
+const cstring tdiSchemaVersion = cstring::literal("0.1");
 
 /// HASH Values
+// FIXME: These should be enum
 #define JHASH0 0
 #define CRC1 1
 #define CRC2 2

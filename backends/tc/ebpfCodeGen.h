@@ -17,10 +17,13 @@ and limitations under the License.
 #ifndef BACKENDS_TC_EBPFCODEGEN_H_
 #define BACKENDS_TC_EBPFCODEGEN_H_
 
+// FIXME: these include each other and present file
 #include "backend.h"
 #include "tcExterns.h"
 
 namespace TC {
+
+using namespace P4::literals;
 
 class ConvertToBackendIR;
 class EBPFPnaParser;
@@ -406,12 +409,12 @@ class CRC16ChecksumAlgorithmPNA : public CRCChecksumAlgorithmPNA {
  public:
     CRC16ChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name)
         : CRCChecksumAlgorithmPNA(program, name, 16) {
-        initialValue = "0";
+        initialValue = "0"_cs;
         // We use a 0x8005 polynomial.
         // 0xA001 comes from 0x8005 value bits reflection.
-        polynomial = "0xA001";
-        updateMethod = "crc16_update";
-        finalizeMethod = "crc16_finalize";
+        polynomial = "0xA001"_cs;
+        updateMethod = "crc16_update"_cs;
+        finalizeMethod = "crc16_finalize"_cs;
     }
 
     static void emitGlobals(EBPF::CodeBuilder *builder);
@@ -421,12 +424,12 @@ class CRC32ChecksumAlgorithmPNA : public CRCChecksumAlgorithmPNA {
  public:
     CRC32ChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name)
         : CRCChecksumAlgorithmPNA(program, name, 32) {
-        initialValue = "0xffffffff";
+        initialValue = "0xffffffff"_cs;
         // We use a 0x04C11DB7 polynomial.
         // 0xEDB88320 comes from 0x04C11DB7 value bits reflection.
-        polynomial = "0xEDB88320";
-        updateMethod = "crc32_update";
-        finalizeMethod = "crc32_finalize";
+        polynomial = "0xEDB88320"_cs;
+        updateMethod = "crc32_update"_cs;
+        finalizeMethod = "crc32_finalize"_cs;
     }
 
     static void emitGlobals(EBPF::CodeBuilder *builder);

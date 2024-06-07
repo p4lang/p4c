@@ -17,6 +17,8 @@
 
 namespace P4Tools::P4Testgen {
 
+using namespace P4::literals;
+
 TestgenOptions &TestgenOptions::get() {
     static TestgenOptions INSTANCE;
     return INSTANCE;
@@ -26,7 +28,7 @@ const char *TestgenOptions::getIncludePath() {
     P4C_UNIMPLEMENTED("getIncludePath not implemented for P4Testgen.");
 }
 
-const std::set<cstring> TestgenOptions::SUPPORTED_STOP_METRICS = {"MAX_NODE_COVERAGE"};
+const std::set<cstring> TestgenOptions::SUPPORTED_STOP_METRICS = {"MAX_NODE_COVERAGE"_cs};
 
 TestgenOptions::TestgenOptions()
     : AbstractP4cToolOptions(TOOL_NAME, "Generate packet tests for a P4 program.") {
@@ -182,7 +184,7 @@ TestgenOptions::TestgenOptions()
     registerOption(
         "--test-backend", "testBackend",
         [this](const char *arg) {
-            testBackend = arg;
+            testBackend = cstring(arg);
             testBackend = testBackend.toUpper();
             return true;
         },
@@ -254,9 +256,9 @@ TestgenOptions::TestgenOptions()
             using P4Testgen::PathSelectionPolicy;
 
             static std::map<cstring, PathSelectionPolicy> const PATH_SELECTION_OPTIONS = {
-                {"DEPTH_FIRST", PathSelectionPolicy::DepthFirst},
-                {"RANDOM_BACKTRACK", PathSelectionPolicy::RandomBacktrack},
-                {"GREEDY_STATEMENT_SEARCH", PathSelectionPolicy::GreedyStmtCoverage},
+                {"DEPTH_FIRST"_cs, PathSelectionPolicy::DepthFirst},
+                {"RANDOM_BACKTRACK"_cs, PathSelectionPolicy::RandomBacktrack},
+                {"GREEDY_STATEMENT_SEARCH"_cs, PathSelectionPolicy::GreedyStmtCoverage},
             };
             auto selectionString = cstring(arg).toUpper();
             auto it = PATH_SELECTION_OPTIONS.find(selectionString);
@@ -283,8 +285,8 @@ TestgenOptions::TestgenOptions()
     registerOption(
         "--track-coverage", "coverageItem",
         [this](const char *arg) {
-            static std::set<cstring> const COVERAGE_OPTIONS = {"STATEMENTS", "TABLE_ENTRIES",
-                                                               "ACTIONS"};
+            static std::set<cstring> const COVERAGE_OPTIONS = {"STATEMENTS"_cs, "TABLE_ENTRIES"_cs,
+                                                               "ACTIONS"_cs};
             hasCoverageTracking = true;
             auto selectionString = cstring(arg).toUpper();
             auto it = COVERAGE_OPTIONS.find(selectionString);
@@ -398,7 +400,7 @@ TestgenOptions::TestgenOptions()
     registerOption(
         "--test-name", "testBaseName",
         [this](const char *arg) {
-            testBaseName = arg;
+            testBaseName = cstring(arg);
             return true;
         },
         "The base name of the tests which are generated.");

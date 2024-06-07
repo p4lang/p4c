@@ -388,7 +388,7 @@ void StateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         if (expr->is<IR::Member>() && expr->to<IR::Member>()->expr->is<IR::PathExpression>() &&
             isPointerVariable(
                 expr->to<IR::Member>()->expr->to<IR::PathExpression>()->path->name.name)) {
-            exprStr = exprStr.replace(".", "->");
+            exprStr = exprStr.replace("."_cs, "->"_cs);
         }
         cstring tmp = Util::printf_format("(unsigned long long) %s.%s", exprStr, fieldName);
 

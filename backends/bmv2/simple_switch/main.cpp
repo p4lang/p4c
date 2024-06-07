@@ -44,7 +44,7 @@ int main(int argc, char *const argv[]) {
     AutoCompileContext autoBMV2Context(new BMV2::SimpleSwitchContext);
     auto &options = BMV2::SimpleSwitchContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
-    options.compilerVersion = BMV2_SIMPLESWITCH_VERSION_STRING;
+    options.compilerVersion = cstring(BMV2_SIMPLESWITCH_VERSION_STRING);
 
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false) options.setInputFile();
