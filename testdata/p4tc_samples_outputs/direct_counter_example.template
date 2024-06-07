@@ -17,14 +17,14 @@ $TC p4template update action/direct_counter_example/ingress/drop state active
 $TC p4template create extern/root/DirectCounter extid 101 numinstances 1 tc_acl 0x1136 has_exec_method 
 
 $TC p4template create extern_inst/direct_counter_example/DirectCounter/ingress.global_counter instid 1 \
-tc_numel 2048 tbl_bindable constructor param type ptype bit320 \
+tc_numel 2048 tbl_bindable constructor param type ptype bit32 0 \
 control_path tc_key index ptype bit32 id 1 param pkts ptype bit64 id 2
 
 $TC p4template create table/direct_counter_example/ingress/nh_table \
 	tblid 1 \
 	type exact \
-	keysz 32 nummasks 8 permissions 0x18a6 tentries 2048 \
-	pna_direct_counter Counter/ingress.global_counter \
+	keysz 32 nummasks 8 permissions 0x3da4 tentries 2048 \
+	pna_direct_counter DirectCounter/ingress.global_counter \
 	table_acts act name direct_counter_example/ingress/send_nh \
 	act name direct_counter_example/ingress/drop
 $TC p4template update table/direct_counter_example/ingress/nh_table default_miss_action permissions 0x1024 action direct_counter_example/ingress/drop

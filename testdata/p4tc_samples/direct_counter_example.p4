@@ -91,7 +91,7 @@ control ingress(
         drop_packet();
     }
 
-    @tc_acl("RUS:RXP") table nh_table {
+    @tc_acl("CRUDPS:RX") table nh_table {
         key = {
             hdr.ipv4.srcAddr : exact @tc_type ("ipv4");
         }

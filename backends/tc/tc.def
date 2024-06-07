@@ -361,7 +361,7 @@ class TCTable {
             tcTable += " num_timer_profiles " + Util::toString(timerProfiles);
         }
         if (isDirectCounter) {
-            tcTable += " \\\n\tpna_direct_counter Counter/" + directCounterInstance;
+            tcTable += " \\\n\tpna_direct_counter DirectCounter/" + directCounterInstance;
         }
 
         if (!actionList.empty()) {
@@ -451,7 +451,7 @@ class TCKey {
             tckeyInstance += " id " + Util::toString(keyID);
         }
         if (emitValue) {
-            tckeyInstance += Util::toString(value);
+            tckeyInstance += " " + Util::toString(value);
         }
         return tckeyInstance;
     }
