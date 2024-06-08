@@ -105,8 +105,8 @@ int generateAndWriteAbstractTests(const TestgenOptions &testgenOptions,
     /// If the test name is not provided, use the steam of the input file name as test name.
     if (testgenOptions.testBaseName.has_value()) {
         testPath = testgenOptions.testBaseName.value().c_str();
-    } else if (cstring inputFile = P4CContext::get().options().file) {
-        testPath = std::filesystem::path(inputFile.c_str()).stem();
+    } else if (!P4CContext::get().options().file.empty()) {
+        testPath = P4CContext::get().options().file.stem();
     } else {
         ::error("Neither a file nor test base name was set. Can not infer a test name.");
     }
@@ -159,7 +159,7 @@ std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view
         compilerResultOpt =
             P4Tools::CompilerTarget::runCompiler(TOOL_NAME, std::string(program.value()));
     } else {
-        if (compilerOptions.file.isNullOrEmpty()) {
+        if (compilerOptions.file.empty()) {
             ::error("Expected a file input.");
             return std::nullopt;
         }

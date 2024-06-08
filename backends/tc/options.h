@@ -20,6 +20,7 @@ and limitations under the License.
 #include "backends/ebpf/ebpfOptions.h"
 #include "frontends/common/options.h"
 #include "lib/cstring.h"
+#include "lib/path.h"
 
 namespace TC {
 
@@ -28,7 +29,7 @@ using namespace P4::literals;
 class TCOptions : public CompilerOptions {
  public:
     // file to output to
-    cstring outputFolder = ""_cs;
+    Util::PathName outputFolder;
     bool DebugOn = false;
     // tracing eBPF code execution
     bool emitTraceMessages = false;
@@ -40,7 +41,7 @@ class TCOptions : public CompilerOptions {
         registerOption(
             "-o", "output Directory",
             [this](const char *arg) {
-                outputFolder = cstring(arg);
+                outputFolder = arg;
                 return true;
             },
             "Write pipeline template, introspection json and C output to given directory");

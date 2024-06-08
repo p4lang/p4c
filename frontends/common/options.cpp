@@ -53,7 +53,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
     registerOption(
         "--toJSON", "file",
         [this](const char *arg) {
-            dumpJsonFile = cstring(arg);
+            dumpJsonFile = arg;
             return true;
         },
         "Dump the compiler IR after the midend as JSON in the specified file.");
@@ -74,7 +74,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
     registerOption(
         "--pp", "file",
         [this](const char *arg) {
-            prettyPrintFile = cstring(arg);
+            prettyPrintFile = arg;
             return true;
         },
         "Pretty-print the program in the specified file.");

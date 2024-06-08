@@ -53,6 +53,8 @@ struct ID : Util::IHasSourceInfo {
     bool operator!=(const char *a) const { return name != a; }
     explicit operator bool() const { return name; }
     operator cstring() const { return name; }
+    std::string string() const { return name.string(); }
+    std::string_view string_view() const { return name.string_view(); }
     bool isDontCare() const { return name == "_"; }
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     cstring toString() const override { return originalName.isNullOrEmpty() ? name : originalName; }

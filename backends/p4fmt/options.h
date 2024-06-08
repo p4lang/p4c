@@ -3,6 +3,7 @@
 
 #include "frontends/common/options.h"
 #include "frontends/common/parser_options.h"
+#include "lib/path.h"
 
 namespace P4Fmt {
 
@@ -15,11 +16,11 @@ class P4fmtOptions : public CompilerOptions {
     P4fmtOptions &operator=(const P4fmtOptions &) = default;
     P4fmtOptions &operator=(P4fmtOptions &&) = delete;
 
-    const cstring &outputFile() const;
+    const Util::PathName &outputFile() const;
 
  private:
     /// File to output to.
-    cstring outFile = nullptr;
+    Util::PathName outFile;
 };
 
 using P4FmtContext = P4CContextWithOptions<P4fmtOptions>;

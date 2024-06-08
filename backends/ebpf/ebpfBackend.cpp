@@ -22,6 +22,7 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "lib/error.h"
 #include "lib/nullstream.h"
+#include "lib/path.h"
 #include "psa/backend.h"
 #include "psa/ebpfPsaGen.h"
 #include "target.h"
@@ -37,19 +38,14 @@ void emitFilterModel(const EbpfOptions &options, Target *target, const IR::Tople
     auto ebpfprog = new EBPFProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
     if (!ebpfprog->build()) return;
 
-    if (options.outputFile.isNullOrEmpty()) return;
+    if (options.outputFile.empty()) return;
 
-    cstring cfile = options.outputFile;
-    auto cstream = openFile(cfile, false);
+    auto *cstream = openFile(options.outputFile, false);
     if (cstream == nullptr) return;
 
-    cstring hfile;
-    const char *dot = cfile.findlast('.');
-    if (dot == nullptr)
-        hfile = cfile + ".h";
-    else
-        hfile = cfile.before(dot) + ".h";
-    auto hstream = openFile(hfile, false);
+    Util::PathName hfile = options.outputFile;
+    hfile.replace_extension(".h");
+    auto *hstream = openFile(hfile, false);
     if (hstream == nullptr) return;
 
     ebpfprog->emitH(&h, hfile);
@@ -96,10 +92,9 @@ void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
         auto backend = new EBPF::PSASwitchBackend(options, target, refMap, typeMap);
         backend->convert(toplevel);
 
-        if (options.outputFile.isNullOrEmpty()) return;
+        if (options.outputFile.empty()) return;
 
-        cstring cfile = options.outputFile;
-        auto cstream = openFile(cfile, false);
+        auto cstream = openFile(options.outputFile, false);
         if (cstream == nullptr) return;
 
         backend->codegen(*cstream);

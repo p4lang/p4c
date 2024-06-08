@@ -669,7 +669,7 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
     // line for the preporicessor
     char *drvP4IncludePath = getenv("P4C_16_INCLUDE_PATH");
     Util::PathName path(drvP4IncludePath ? drvP4IncludePath : p4includePath);
-    path = path.join(filename);
+    path /= std::string(filename);
 
     CompilerOptions options;
     if (ppoptions) {
@@ -677,10 +677,10 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
         options.preprocessor_options += ppoptions;
     }
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
-    options.file = path.toString();
+    options.file = path;
     if (!::errorCount()) {
         if (FILE *file = options.preprocess()) {
-            auto code = P4::P4ParserDriver::parse(file, options.file);
+            auto code = P4::P4ParserDriver::parse(file, options.file.string());
             if (code && !::errorCount())
                 for (auto decl : code->objects) declarations->push_back(decl);
             options.closePreprocessedInput(file);

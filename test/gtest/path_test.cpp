@@ -27,62 +27,62 @@ TEST(Util, PathName) {
 
     {
         PathName path = "/usr/local/bin/file.exe";
-        auto ext = path.getExtension();
-        EXPECT_EQ("exe", ext);
+        auto ext = path.extension();
+        EXPECT_EQ(".exe", ext);
 
-        PathName file = path.getFilename();
-        EXPECT_EQ("file.exe", file.toString());
+        PathName file = path.filename();
+        EXPECT_EQ("file.exe", file);
 
-        auto base = path.getBasename();
+        auto base = path.stem();
         EXPECT_EQ("file", base);
 
-        PathName folder = path.getFolder();
-        EXPECT_EQ("/usr/local/bin", folder.toString());
+        PathName folder = path.parent_path();
+        EXPECT_EQ("/usr/local/bin", folder);
     }
 
     {
         PathName path = "/usr/local/bin/";
-        auto ext = path.getExtension();
+        auto ext = path.extension();
         EXPECT_EQ("", ext);
 
-        PathName file = path.getFilename();
-        EXPECT_EQ("", file.toString());
+        PathName file = path.filename();
+        EXPECT_EQ("", file);
 
-        auto base = path.getBasename();
+        auto base = path.stem();
         EXPECT_EQ("", base);
 
-        PathName folder = path.getFolder();
-        EXPECT_EQ("/usr/local/bin", folder.toString());
+        PathName folder = path.parent_path();
+        EXPECT_EQ("/usr/local/bin", folder);
     }
 
     {
         PathName path = "file.exe";
-        auto ext = path.getExtension();
-        EXPECT_EQ("exe", ext);
+        auto ext = path.extension();
+        EXPECT_EQ(".exe", ext);
 
-        PathName file = path.getFilename();
-        EXPECT_EQ("file.exe", file.toString());
+        PathName file = path.filename();
+        EXPECT_EQ("file.exe", file);
 
-        auto base = path.getBasename();
+        auto base = path.stem();
         EXPECT_EQ("file", base);
 
-        PathName folder = path.getFolder();
-        EXPECT_EQ("", folder.toString());
+        PathName folder = path.parent_path();
+        EXPECT_EQ("", folder);
     }
 
     {
         PathName path = "";
-        EXPECT_TRUE(path.isNullOrEmpty());
-        PathName grow = path.join("x"_cs);
-        EXPECT_EQ("x", grow.toString());
-        EXPECT_FALSE(grow.isNullOrEmpty());
+        EXPECT_TRUE(path.empty());
+        PathName grow = path / "x";
+        EXPECT_EQ("x", grow);
+        EXPECT_FALSE(grow.empty());
 
-        grow = grow.join("y"_cs);
-        EXPECT_EQ("x/y", grow.toString());
+        grow = grow / "y";
+        EXPECT_EQ("x/y", grow);
 
         path = PathName("x/");
-        grow = path.join("y"_cs);
-        EXPECT_EQ("x/y", grow.toString());
+        grow = path / "y";
+        EXPECT_EQ("x/y", grow);
     }
 }
 

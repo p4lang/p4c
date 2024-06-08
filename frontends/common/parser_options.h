@@ -27,6 +27,7 @@ limitations under the License.
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/options.h"
+#include "lib/path.h"
 
 // Standard include paths for .p4 header files. The values are determined by
 // `configure`.
@@ -63,7 +64,7 @@ class ParserOptions : public Util::Options {
     // options to pass to preprocessor
     cstring preprocessor_options = cstring::empty;
     // file to compile (- for stdin)
-    cstring file = nullptr;
+    Util::PathName file;
     // if true preprocess only
     bool doNotCompile = false;
     // Compiler version.
@@ -73,7 +74,7 @@ class ParserOptions : public Util::Options {
     // substrings matched against pass names
     std::vector<cstring> top4;
     // debugging dumps of programs written in this folder
-    cstring dumpFolder = cstring::literal(".");
+    Util::PathName dumpFolder = ".";
     // If false, optimization of callee parsers (subparsers) inlining is disabled.
     bool optimizeParserInlining = false;
     // Expect that the only remaining argument is the input file.

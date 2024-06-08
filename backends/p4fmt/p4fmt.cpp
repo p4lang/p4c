@@ -23,13 +23,13 @@ int main(int argc, char *const argv[]) {
     std::ostream *out = nullptr;
 
     // Write to stdout in absence of an output file.
-    if (options.outputFile().isNullOrEmpty()) {
+    if (options.outputFile().empty()) {
         out = &std::cout;
     } else {
         out = openFile(options.outputFile(), false);
         if (!(*out)) {
             ::error(ErrorType::ERR_NOT_FOUND, "%2%: No such file or directory.",
-                    options.outputFile());
+                    options.outputFile().string());
             options.usage();
             return EXIT_FAILURE;
         }

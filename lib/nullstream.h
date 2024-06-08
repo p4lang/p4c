@@ -21,8 +21,7 @@ limitations under the License.
 #include <ostream>
 #include <streambuf>
 
-#include "cstring.h"
-#include "error.h"
+#include "lib/path.h"
 
 template <class cT, class traits = std::char_traits<cT>>
 class basic_nullbuf final : public std::basic_streambuf<cT, traits> {
@@ -46,6 +45,7 @@ typedef onullstream<char> nullstream;
 
 // If nullOnError is 'true', on error a nullstream is returned
 // otherwise a nullptr is returned
-std::ostream *openFile(cstring name, bool nullOnError);
+// FIXME: This should return unique_ptr instead to track lifetime
+std::ostream *openFile(const Util::PathName &name, bool nullOnError);
 
 #endif /* LIB_NULLSTREAM_H_ */

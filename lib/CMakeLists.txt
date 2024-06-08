@@ -35,7 +35,6 @@ set(LIBP4CTOOLKIT_SRCS
     nethash.cpp
     nullstream.cpp
     options.cpp
-    path.cpp
     source_file.cpp
     stringify.cpp
     timer.cpp

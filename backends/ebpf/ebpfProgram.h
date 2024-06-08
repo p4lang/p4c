@@ -25,6 +25,7 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "lib/path.h"
 #include "target.h"
 
 namespace EBPF {
@@ -103,8 +104,8 @@ class EBPFProgram : public EBPFObject {
  public:
     virtual void emitCommonPreamble(CodeBuilder *builder);
     virtual void emitGeneratedComment(CodeBuilder *builder);
-    virtual void emitH(CodeBuilder *builder, cstring headerFile);  // emits C headers
-    virtual void emitC(CodeBuilder *builder, cstring headerFile);  // emits C program
+    virtual void emitH(CodeBuilder *builder, const Util::PathName &headerFile);  // emits C headers
+    virtual void emitC(CodeBuilder *builder, const Util::PathName &headerFile);  // emits C program
 
     DECLARE_TYPEINFO(EBPFProgram, EBPFObject);
 };

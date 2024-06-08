@@ -1207,7 +1207,7 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     // called (e.g. resubmit or generate_digest)
     BMV2::nextId("field_lists"_cs);
     BMV2::nextId("learn_lists"_cs);
-    json->add_program_info(options.file);
+    json->add_program_info(cstring(options.file));
     json->add_meta_info();
 
     // convert all enums to json

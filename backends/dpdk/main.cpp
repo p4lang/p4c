@@ -52,7 +52,7 @@ void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOpt
             "pna"_cs, new P4::ControlPlaneAPI::Standard::PNAArchHandlerBuilderForDPDK());
     auto p4Runtime = P4::generateP4Runtime(program, options.arch);
 
-    cstring filename = isTDI ? options.tdiFile : options.bfRtSchema;
+    Util::PathName filename = isTDI ? options.tdiFile : options.bfRtSchema;
     auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info, isTDI, options);
     std::ostream *out = openFile(filename, false);
     if (!out) {
@@ -115,14 +115,14 @@ int main(int argc, char *const argv[]) {
     P4::serializeP4RuntimeIfRequired(program, options);
     if (::errorCount() > 0) return 1;
 
-    if (!options.tdiBuilderConf.isNullOrEmpty()) {
+    if (!options.tdiBuilderConf.empty()) {
         DPDK::TdiBfrtConf::generate(program, options);
     }
 
-    if (!options.bfRtSchema.isNullOrEmpty()) {
+    if (!options.bfRtSchema.empty()) {
         generateTDIBfrtJson(false, program, options);
     }
-    if (!options.tdiFile.isNullOrEmpty()) {
+    if (!options.tdiFile.empty()) {
         generateTDIBfrtJson(true, program, options);
     }
 
@@ -133,7 +133,7 @@ int main(int argc, char *const argv[]) {
     try {
         toplevel = midEnd.process(program);
         if (::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr) return 1;
-        if (options.dumpJsonFile)
+        if (!options.dumpJsonFile.empty())
             JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
@@ -146,7 +146,7 @@ int main(int argc, char *const argv[]) {
     backend->convert(toplevel);
     if (::errorCount() > 0) return 1;
 
-    if (!options.outputFile.isNullOrEmpty()) {
+    if (!options.outputFile.empty()) {
         std::ostream *out = openFile(options.outputFile, false);
         if (out != nullptr) {
             backend->codegen(*out);

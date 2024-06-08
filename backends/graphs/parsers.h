@@ -43,7 +43,7 @@ class ParserGraphs : public Graphs {
     std::map<const IR::P4Parser *, safe_vector<const IR::ParserState *>> states;
 
  public:
-    ParserGraphs(P4::ReferenceMap *refMap, const cstring &graphsDir);
+    ParserGraphs(P4::ReferenceMap *refMap, Util::PathName graphsDir);
 
     Graph *CreateSubGraph(Graph &currentSubgraph, const cstring &name);
     void postorder(const IR::P4Parser *parser) override;

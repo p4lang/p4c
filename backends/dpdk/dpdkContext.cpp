@@ -23,10 +23,9 @@ limitations under the License.
 namespace DPDK {
 
 cstring DpdkContextGenerator::removePipePrefix(cstring tableName) {
-    if (!options.bfRtSchema.isNullOrEmpty() || !options.tdiFile.isNullOrEmpty()) {
+    if (!options.bfRtSchema.empty() || !options.tdiFile.empty()) {
         cstring tablename = cstring(tableName.find('.'));
-        tablename = tablename.trim(".\t\n\r");
-        return tablename;
+        return tablename.trim(".\t\n\r");
     }
     return tableName;
 }

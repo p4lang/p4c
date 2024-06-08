@@ -26,6 +26,7 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
+#include "lib/path.h"
 
 namespace graphs {
 
@@ -34,7 +35,7 @@ using Graph = ControlGraphs::Graph;
 Graph *ControlGraphs::ControlStack::pushBack(Graph &currentSubgraph, const cstring &name) {
     auto &newSubgraph = currentSubgraph.create_subgraph();
     auto fullName = getName(name);
-    boost::get_property(newSubgraph, boost::graph_name) = "cluster"_cs + fullName;
+    boost::get_property(newSubgraph, boost::graph_name) = "cluster" + fullName;
     boost::get_property(newSubgraph, boost::graph_graph_attribute)["label"_cs] =
         boost::get_property(currentSubgraph, boost::graph_name) +
         (fullName != "" ? "." + fullName : fullName);
@@ -69,8 +70,8 @@ bool ControlGraphs::ControlStack::isEmpty() const { return subgraphs.empty(); }
 using vertex_t = ControlGraphs::vertex_t;
 
 ControlGraphs::ControlGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                             const cstring &graphsDir)
-    : refMap(refMap), typeMap(typeMap), graphsDir(graphsDir) {
+                             Util::PathName graphsDir)
+    : refMap(refMap), typeMap(typeMap), graphsDir(std::move(graphsDir)) {
     visitDagOnce = false;
 }
 
@@ -84,7 +85,7 @@ bool ControlGraphs::preorder(const IR::PackageBlock *block) {
             Graph *g_ = new Graph();
             g = g_;
             instanceName = std::nullopt;
-            boost::get_property(*g_, boost::graph_name) = name;
+            boost::get_property(*g_, boost::graph_name) = name.string();
             BUG_CHECK(controlStack.isEmpty(), "Invalid control stack state");
             g = controlStack.pushBack(*g_, cstring::empty);
             start_v = add_vertex("__START__"_cs, VertexType::OTHER);

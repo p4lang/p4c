@@ -26,6 +26,7 @@ limitations under the License.
 #include "ebpfType.h"
 #include "frontends/common/options.h"
 #include "frontends/p4/coreLibrary.h"
+#include "lib/path.h"
 
 namespace EBPF {
 
@@ -82,17 +83,11 @@ bool EBPFProgram::build() {
     return true;
 }
 
-void EBPFProgram::emitC(CodeBuilder *builder, cstring header) {
+void EBPFProgram::emitC(CodeBuilder *builder, const Util::PathName &header) {
     emitGeneratedComment(builder);
 
-    // Find the last occurrence of a folder slash (Linux only)
-    const char *header_stripped = header.findlast('/');
-    if (header_stripped)
-        // Remove the path from the header
-        builder->appendFormat("#include \"%s\"", header_stripped + 1);
-    else
-        // There is no prepended path, just include the header
-        builder->appendFormat("#include \"%s\"", header.c_str());
+    // Remove the path from the header
+    builder->appendFormat("#include \"%s\"", header.filename());
     builder->newline();
 
     builder->target->emitIncludes(builder);
@@ -162,7 +157,7 @@ void EBPFProgram::emitGeneratedComment(CodeBuilder *builder) {
     builder->newline();
 }
 
-void EBPFProgram::emitH(CodeBuilder *builder, cstring) {
+void EBPFProgram::emitH(CodeBuilder *builder, const Util::PathName &) {
     emitGeneratedComment(builder);
     builder->appendLine("#ifndef _P4_GEN_HEADER_");
     builder->appendLine("#define _P4_GEN_HEADER_");

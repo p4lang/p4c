@@ -92,9 +92,9 @@ This pass outputs the program as a P4 source file.
 */
 class PrettyPrint : public Inspector {
     /// output file
-    cstring ppfile;
+    Util::PathName ppfile;
     /// The file that is being compiled.
-    cstring inputfile;
+    Util::PathName inputfile;
 
  public:
     explicit PrettyPrint(const CompilerOptions &options) {
@@ -103,10 +103,10 @@ class PrettyPrint : public Inspector {
         inputfile = options.file;
     }
     bool preorder(const IR::P4Program *program) override {
-        if (!ppfile.isNullOrEmpty()) {
-            Util::PathName path(ppfile);
-            std::ostream *ppStream = openFile(path.toString(), true);
-            P4::ToP4 top4(ppStream, false, inputfile);
+        if (!ppfile.empty()) {
+            std::ostream *ppStream = openFile(ppfile, true);
+            // FIXME: ToP4 should accept PathName
+            P4::ToP4 top4(ppStream, false, cstring(inputfile));
             (void)program->apply(top4);
         }
         return false;  // prune

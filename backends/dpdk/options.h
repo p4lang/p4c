@@ -18,20 +18,21 @@ limitations under the License.
 #define BACKENDS_DPDK_OPTIONS_H_
 
 #include "backends/dpdk/midend.h"
+#include "lib/path.h"
 
 namespace DPDK {
 
 class DpdkOptions : public CompilerOptions {
  public:
-    cstring bfRtSchema = cstring::empty;
+    Util::PathName bfRtSchema;
     /// File to output to.
-    cstring outputFile = nullptr;
+    Util::PathName outputFile;
     /// File to output TDI JSON to.
-    cstring tdiFile = cstring::empty;
+    Util::PathName tdiFile;
     /// File to output context JSON to.
-    cstring ctxtFile = cstring::empty;
+    Util::PathName ctxtFile;
     /// File to output the TDI builder configuration to.
-    cstring tdiBuilderConf = cstring::empty;
+    Util::PathName tdiBuilderConf;
     /// Read from JSON.
     bool loadIRFromJson = false;
     /// Enable/disable Egress pipeline in PSA.
@@ -58,35 +59,35 @@ class DpdkOptions : public CompilerOptions {
         registerOption(
             "--bf-rt-schema", "file",
             [this](const char *arg) {
-                bfRtSchema = cstring(arg);
+                bfRtSchema = arg;
                 return true;
             },
             "Generate and write BF-RT JSON schema to the specified file");
         registerOption(
             "-o", "outfile",
             [this](const char *arg) {
-                outputFile = cstring(arg);
+                outputFile = arg;
                 return true;
             },
             "Write output to outfile");
         registerOption(
             "--tdi-builder-conf", "file",
             [this](const char *arg) {
-                tdiBuilderConf = cstring(arg);
+                tdiBuilderConf = arg;
                 return true;
             },
             "Generate and write the TDI builder configuration to the specified file");
         registerOption(
             "--tdi", "file",
             [this](const char *arg) {
-                tdiFile = cstring(arg);
+                tdiFile = arg;
                 return true;
             },
             "Generate and write TDI JSON to the specified file");
         registerOption(
             "--context", "file",
             [this](const char *arg) {
-                ctxtFile = cstring(arg);
+                ctxtFile = arg;
                 return true;
             },
             "Generate and write context JSON to the specified file");
@@ -94,7 +95,7 @@ class DpdkOptions : public CompilerOptions {
             "--fromJSON", "file",
             [this](const char *arg) {
                 loadIRFromJson = true;
-                file = cstring(arg);
+                file = arg;
                 return true;
             },
             "Use IR representation from JsonFile dumped previously,"
