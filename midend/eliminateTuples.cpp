@@ -4,6 +4,8 @@
 
 namespace P4 {
 
+using namespace literals;
+
 const IR::Type *ReplacementMap::convertType(const IR::Type *type) {
     auto it = replacement.find(type);
     if (it != replacement.end()) return it->second;
@@ -31,7 +33,7 @@ const IR::Type *ReplacementMap::convertType(const IR::Type *type) {
         size_t index = 0;
         for (auto t : bl->components) {
             auto ftype = convertType(t);
-            auto fname = cstring("f") + cstring(std::to_string(index));
+            auto fname = "f"_cs + Util::toString(index);
             auto field = new IR::StructField(IR::ID(fname), ftype->getP4Type());
             fields.push_back(field);
             index++;
@@ -92,7 +94,7 @@ const IR::Node *DoReplaceTuples::postorder(IR::ArrayIndex *expression) {
     if (type->is<IR::Type_Tuple>()) {
         auto cst = expression->right->to<IR::Constant>();
         BUG_CHECK(cst, "%1%: Expected a constant", expression->right);
-        cstring field = cstring("f") + Util::toString(cst->asInt());
+        cstring field = "f"_cs + Util::toString(cst->asInt());
         auto src = expression->right->srcInfo;
         return new IR::Member(src, expression->left, IR::ID(src, field));
     }

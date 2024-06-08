@@ -44,8 +44,8 @@ void Graphs::add_edge(const vertex_t &from, const vertex_t &to, const cstring &n
 
     auto attrs = boost::get(boost::edge_attribute, g->root());
 
-    attrs[ep.first]["ltail"] = "cluster" + Util::toString(cluster_id - 2);
-    attrs[ep.first]["lhead"] = "cluster" + Util::toString(cluster_id - 1);
+    attrs[ep.first]["ltail"_cs] = "cluster"_cs + Util::toString(cluster_id - 2);
+    attrs[ep.first]["lhead"_cs] = "cluster"_cs + Util::toString(cluster_id - 1);
 }
 
 void Graphs::limitStringSize(std::stringstream &sstream, std::stringstream &helper_sstream) {

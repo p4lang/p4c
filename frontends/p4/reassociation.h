@@ -22,6 +22,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 /** Implements a pass that reorders associative operations when beneficial.
  * For example, (a + c0) + c1 is rewritten as a + (c0 + c1) when cs are constants.
  */
@@ -41,7 +43,7 @@ class Reassociation final : public Transform {
     const IR::Node *postorder(IR::BAnd *expr) override { return reassociate(expr); }
     const IR::Node *postorder(IR::BXor *expr) override { return reassociate(expr); }
     const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
-        if (bs->annotations->getSingle("disable_optimization")) prune();
+        if (bs->annotations->getSingle("disable_optimization"_cs)) prune();
         return bs;
     }
 };

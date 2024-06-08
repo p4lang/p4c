@@ -59,11 +59,11 @@ void UbpfTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName
 
     cstring type;
     if (tableKind == EBPF::TableHash) {
-        type = "UBPF_MAP_TYPE_HASHMAP";
+        type = "UBPF_MAP_TYPE_HASHMAP"_cs;
     } else if (tableKind == EBPF::TableArray) {
-        type = "UBPF_MAP_TYPE_ARRAY";
+        type = "UBPF_MAP_TYPE_ARRAY"_cs;
     } else if (tableKind == EBPF::TableLPMTrie) {
-        type = "UBPF_MAP_TYPE_LPM_TRIE";
+        type = "UBPF_MAP_TYPE_LPM_TRIE"_cs;
     } else {
         BUG("%1%: unsupported table kind", tableKind);
     }

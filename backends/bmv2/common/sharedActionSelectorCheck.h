@@ -69,7 +69,7 @@ class SharedActionSelectorCheck : public Inspector {
     }
 
     bool preorder(const IR::P4Table *table) override {
-        auto implementation = table->properties->getProperty("implementation");
+        auto implementation = table->properties->getProperty("implementation"_cs);
         if (implementation == nullptr) return false;
         if (!implementation->value->is<IR::ExpressionValue>()) {
             ::error(ErrorType::ERR_EXPECTED, "%1%: expected expression for property",

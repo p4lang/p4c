@@ -21,6 +21,8 @@ limitations under the License.
 
 namespace DPDK {
 
+using namespace P4::literals;
+
 std::vector<cstring> TdiBfrtConf::getPipeNames(const IR::Declaration_Instance *main) {
     std::vector<cstring> pipeNames;
     for (const auto *arg : *main->arguments) {
@@ -42,11 +44,11 @@ std::optional<cstring> TdiBfrtConf::findPipeName(const IR::P4Program *prog,
                                                  DPDK::DpdkOptions &options) {
     if (options.arch == "pna") {
         // The PNA pipename is currently fixed to "pipe".
-        return "pipe";
+        return "pipe"_cs;
     }
     if (options.arch == "psa") {
         // We try to infer the pipename by looking up the "main" declaration.
-        auto *decls = prog->getDeclsByName("main");
+        auto *decls = prog->getDeclsByName("main"_cs);
         const IR::Declaration_Instance *main = nullptr;
         for (const auto *decl : *decls) {
             main = decl->checkedTo<IR::Declaration_Instance>();
@@ -78,14 +80,14 @@ void TdiBfrtConf::generate(const IR::P4Program *prog, DPDK::DpdkOptions &options
     auto programName = inputFile.stem();
 
     if (options.bfRtSchema.isNullOrEmpty()) {
-        options.bfRtSchema = (outDir / programName).replace_filename("json").c_str();
+        options.bfRtSchema = cstring((outDir / programName).replace_filename("json").c_str());
         ::warning(
             "BF-Runtime Schema file name not provided, but is required for the TDI builder "
             "configuration. Generating file %1%",
             options.bfRtSchema);
     }
     if (options.ctxtFile.isNullOrEmpty()) {
-        options.ctxtFile = (outDir / "context.json").c_str();
+        options.ctxtFile = cstring((outDir / "context.json").c_str());
         ::warning(
             "DPDK context file name not provided, but is required for the TDI builder "
             "configuration. Generating file %1%",

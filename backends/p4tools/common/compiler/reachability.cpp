@@ -17,6 +17,8 @@
 
 namespace P4Tools {
 
+using namespace P4::literals;
+
 P4ProgramDCGCreator::P4ProgramDCGCreator(NodesCallGraph *dcg) : dcg(dcg), p4program(nullptr) {
     CHECK_NULL(dcg);
     setName("P4ProgramDCGCreator");
@@ -125,7 +127,7 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Action *action) {
 
 bool P4ProgramDCGCreator::preorder(const IR::P4Parser *parser) {
     addEdge(parser, parser->name);
-    visit(parser->states.getDeclaration<IR::ParserState>("start"));
+    visit(parser->states.getDeclaration<IR::ParserState>("start"_cs));
     return false;
 }
 

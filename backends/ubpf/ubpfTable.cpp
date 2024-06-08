@@ -44,7 +44,7 @@ class UbpfActionTranslationVisitor : public EBPF::CodeGenInspector {
     }
 
     bool preorder(const IR::Member *expression) override {
-        cstring name = "";
+        cstring name = ""_cs;
         if (expression->expr->is<IR::PathExpression>()) {
             name = expression->expr->to<IR::PathExpression>()->path->name.name;
         }
@@ -166,13 +166,13 @@ UBPFTable::UBPFTable(const UBPFProgram *program, const IR::TableBlock *table,
                      EBPF::CodeGenInspector *codeGen)
     : UBPFTableBase(program, EBPFObject::externalName(table->container), codeGen), table(table) {
     cstring base = instanceName + "_defaultAction";
-    defaultActionMapName = program->refMap->newName(base);
+    defaultActionMapName = program->refMap->newName(base.string_view());
 
     base = table->container->name.name + "_actions";
-    actionEnumName = program->refMap->newName(base);
+    actionEnumName = program->refMap->newName(base.string_view());
 
     base = instanceName + "_NoAction";
-    noActionName = program->refMap->newName(base);
+    noActionName = program->refMap->newName(base.string_view());
 
     keyGenerator = table->container->getKey();
     actionList = table->container->getActionList();
@@ -187,7 +187,7 @@ UBPFTable::UBPFTable(const UBPFProgram *program, const IR::TableBlock *table,
 void UBPFTable::emitInstance(EBPF::CodeBuilder *builder) {
     UBPFTableBase::emitInstance(builder, tableKind);
     builder->target->emitTableDecl(builder, defaultActionMapName, EBPF::TableArray,
-                                   program->arrayIndexType, cstring("struct ") + valueTypeName, 1);
+                                   program->arrayIndexType, "struct "_cs + valueTypeName, 1);
 }
 
 void UBPFTable::setTableKind() {

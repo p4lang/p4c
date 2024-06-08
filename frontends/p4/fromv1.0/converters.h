@@ -143,7 +143,7 @@ class PrimitiveConverter {
     int priority;
 
  protected:
-    PrimitiveConverter(cstring name, int prio);
+    PrimitiveConverter(std::string_view name, int prio);
     virtual ~PrimitiveConverter();
 
     // helper functions
@@ -178,8 +178,9 @@ class DiscoverStructure : public Inspector {
     ProgramStructure *structure;
 
     // These names can only be used for very specific purposes
-    std::map<cstring, cstring> reserved_names = {
-        {"standard_metadata_t", "type"}, {"standard_metadata", "metadata"}, {"egress", "control"}};
+    std::map<cstring, cstring> reserved_names = {{"standard_metadata_t"_cs, "type"_cs},
+                                                 {"standard_metadata"_cs, "metadata"_cs},
+                                                 {"egress"_cs, "control"_cs}};
 
     void checkReserved(const IR::Node *node, cstring nodeName, cstring kind) const {
         auto it = reserved_names.find(nodeName);
@@ -203,7 +204,7 @@ class DiscoverStructure : public Inspector {
     }
     void postorder(const IR::Metadata *md) override {
         structure->metadata.emplace(md);
-        checkReserved(md, md->name, "metadata");
+        checkReserved(md, md->name, "metadata"_cs);
     }
     void postorder(const IR::Header *hd) override {
         structure->headers.emplace(hd);
@@ -211,11 +212,11 @@ class DiscoverStructure : public Inspector {
     }
     void postorder(const IR::Type_StructLike *t) override {
         structure->types.emplace(t);
-        checkReserved(t, t->name, "type");
+        checkReserved(t, t->name, "type"_cs);
     }
     void postorder(const IR::V1Control *control) override {
         structure->controls.emplace(control);
-        checkReserved(control, control->name, "control");
+        checkReserved(control, control->name, "control"_cs);
     }
     void postorder(const IR::V1Parser *parser) override {
         structure->parserStates.emplace(parser);
@@ -537,7 +538,7 @@ class FixExtracts final : public Transform {
 
         for (auto f : type->fields) {
             if (f->type->is<IR::Type_Varbits>()) {
-                cstring hname = structure->makeUniqueName(type->name);
+                cstring hname = structure->makeUniqueName(type->name.name);
                 if (fixedHeaderType != nullptr) {
                     ::error(ErrorType::ERR_INVALID,
                             "%1%: header types with multiple varbit fields are not supported",
@@ -637,7 +638,7 @@ class FixExtracts final : public Transform {
         CHECK_NULL(fixed->fixedHeaderType);
 
         auto result = new IR::IndexedVector<IR::StatOrDecl>();
-        cstring varName = structure->makeUniqueName("tmp_hdr");
+        cstring varName = structure->makeUniqueName("tmp_hdr"_cs);
         auto var =
             new IR::Declaration_Variable(IR::ID(varName), fixed->fixedHeaderType->to<IR::Type>());
         varDecls.push_back(var);
@@ -796,9 +797,9 @@ class InsertCompilerGeneratedStartState : public Transform {
     explicit InsertCompilerGeneratedStartState(ProgramStructure *structure) : structure(structure) {
         setName("InsertCompilerGeneratedStartState");
         structure->allNames.insert({IR::ParserState::start, 0});
-        structure->allNames.insert({"InstanceType", 0});
+        structure->allNames.insert({"InstanceType"_cs, 0});
         newStartState = structure->makeUniqueName(IR::ParserState::start);
-        newInstanceType = structure->makeUniqueName("InstanceType");
+        newInstanceType = structure->makeUniqueName("InstanceType"_cs);
     }
 
     const IR::Node *postorder(IR::P4Program *program) override {
@@ -841,7 +842,8 @@ class InsertCompilerGeneratedStartState : public Transform {
         // transition to original start state
         members.push_back(new IR::SerEnumMember("START", new IR::Constant(0)));
         selCases.push_back(new IR::SelectCase(
-            new IR::Member(new IR::TypeNameExpression(new IR::Type_Name(newInstanceType)), "START"),
+            new IR::Member(new IR::TypeNameExpression(new IR::Type_Name(newInstanceType)),
+                           "START"_cs),
             new IR::PathExpression(new IR::Path(newStartState))));
 
         // transition to addtional entry points
@@ -854,19 +856,19 @@ class InsertCompilerGeneratedStartState : public Transform {
                 new IR::PathExpression(new IR::Path(p.second->name))));
         }
         auto instAnnos = new IR::Annotations();
-        instAnnos->add(new IR::Annotation(IR::Annotation::nameAnnotation, ".$InstanceType"));
+        instAnnos->add(new IR::Annotation(IR::Annotation::nameAnnotation, ".$InstanceType"_cs));
         auto instEnum =
             new IR::Type_SerEnum(newInstanceType, instAnnos, IR::Type_Bits::get(32), members);
         allTypeDecls.push_back(instEnum);
 
         IR::Vector<IR::Expression> selExpr;
-        selExpr.push_back(
-            new IR::Cast(new IR::Type_Name(newInstanceType),
-                         new IR::Member(new IR::PathExpression(new IR::Path("standard_metadata")),
-                                        "instance_type")));
+        selExpr.push_back(new IR::Cast(
+            new IR::Type_Name(newInstanceType),
+            new IR::Member(new IR::PathExpression(new IR::Path("standard_metadata"_cs)),
+                           "instance_type"_cs)));
         auto selects = new IR::SelectExpression(new IR::ListExpression(selExpr), selCases);
         auto annos = new IR::Annotations();
-        annos->add(new IR::Annotation(IR::Annotation::nameAnnotation, ".$start"));
+        annos->add(new IR::Annotation(IR::Annotation::nameAnnotation, ".$start"_cs));
         auto startState = new IR::ParserState(IR::ParserState::start, annos, selects);
         parserStates.push_back(startState);
 

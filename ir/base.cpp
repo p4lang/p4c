@@ -37,12 +37,12 @@ cstring Annotation::getName() const {
 cstring Annotation::getSingleString() const {
     if (expr.size() != 1) {
         ::error(ErrorType::ERR_INVALID, "%1%: should contain a string", this);
-        return "";
+        return cstring::empty;
     }
     auto str = expr[0]->to<IR::StringLiteral>();
     if (str == nullptr) {
         ::error(ErrorType::ERR_INVALID, "%1%: should contain a string", this);
-        return "";
+        return cstring::empty;
     }
     return str->value;
 }

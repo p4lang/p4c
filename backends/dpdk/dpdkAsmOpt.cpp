@@ -370,9 +370,11 @@ int EmitDpdkTableConfig::getTypeWidth(const IR::Type *type, P4::TypeMap *typeMap
     return typeMap->widthBits(type, type->getNode(), false);
 }
 
-void EmitDpdkTableConfig::print(cstring str, cstring sep) { dpdkTableConfigFile << str << sep; }
+void EmitDpdkTableConfig::print(std::string_view str, std::string_view sep) {
+    dpdkTableConfigFile << str << sep;
+}
 
-void EmitDpdkTableConfig::print(big_int str, cstring sep) {
+void EmitDpdkTableConfig::print(big_int str, std::string_view sep) {
     try {
         dpdkTableConfigFile << "0x" << std::hex << str << sep;
     } catch (const std::runtime_error &re) {
@@ -423,7 +425,7 @@ void EmitDpdkTableConfig::addAction(const IR::Expression *actionRef, P4::Referen
         actionName = newNameMap[actionDecl->name.name];
     else
         actionName = actionDecl->name.name;
-    print(actionName, " ");
+    print(actionName.string_view(), " ");
     if (actionDecl->parameters->parameters.size() == 1) {
         std::vector<cstring> paramNames;
         std::vector<big_int> argVals;
@@ -455,7 +457,7 @@ void EmitDpdkTableConfig::addAction(const IR::Expression *actionRef, P4::Referen
         }
 
         for (size_t i = 0; i < argVals.size(); i++) {
-            print(paramNames[i], " ");
+            print(paramNames[i].string_view(), " ");
             print(argVals[i], " ");
         }
     }

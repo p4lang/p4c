@@ -18,19 +18,19 @@ namespace P4Tools::P4Testgen::Bmv2 {
 RefersToParser::RefersToParser() { setName("RefersToParser"); }
 
 const RefersToParser::RefersToBuiltinMap RefersToParser::REFERS_TO_BUILTIN_MAP = {{
-    "multicast_group_table",
+    "multicast_group_table"_cs,
     {
         {
-            "multicast_group_id",
-            IR::SymbolicVariable(IR::Type_Bits::get(16), "refers_to_multicast_group_id"),
+            "multicast_group_id"_cs,
+            IR::SymbolicVariable(IR::Type_Bits::get(16), "refers_to_multicast_group_id"_cs),
         },
         {
-            "replica.port",
-            IR::SymbolicVariable(IR::Type_Bits::get(9), "refers_to_replica.port"),
+            "replica.port"_cs,
+            IR::SymbolicVariable(IR::Type_Bits::get(9), "refers_to_replica.port"_cs),
         },
         {
-            "replica.instance",
-            IR::SymbolicVariable(IR::Type_Bits::get(16), "refers_to_replica.instance"),
+            "replica.instance"_cs,
+            IR::SymbolicVariable(IR::Type_Bits::get(16), "refers_to_replica.instance"_cs),
         },
     },
 }};
@@ -53,7 +53,7 @@ const IR::SymbolicVariable *RefersToParser::lookUpBuiltinKey(
         refersAnno);
     BUG_CHECK(annotationList.at(1)->text == ":" && annotationList.at(2)->text == ":",
               "'@refers_to' annotation %1% does not have the correct format.", refersAnno);
-    cstring tableReference = "";
+    cstring tableReference = cstring::empty;
     size_t offset = 3;
     for (; offset < annotationList.size(); offset++) {
         auto token = annotationList[offset]->text;
@@ -79,7 +79,7 @@ const IR::SymbolicVariable *RefersToParser::lookUpKeyInTable(const IR::P4Table &
     BUG_CHECK(key != nullptr, "Table %1% does not have any keys.", srcTable);
     for (const auto *keyElement : key->keyElements) {
         auto annotations = keyElement->annotations->annotations;
-        const auto *nameAnnot = keyElement->getAnnotation("name");
+        const auto *nameAnnot = keyElement->getAnnotation("name"_cs);
         // Some hidden tables do not have any key name annotations.
         BUG_CHECK(nameAnnot != nullptr, "Refers-to table key without a name annotation");
         if (keyReference == nameAnnot->getName()) {
@@ -110,7 +110,7 @@ const IR::SymbolicVariable *RefersToParser::getReferencedKey(const IR::P4Control
     const IR::IDeclaration *tableDeclaration = nullptr;
     for (const auto *decl : *ctrlContext.getDeclarations()) {
         auto declName = decl->controlPlaneName();
-        if (declName.endsWith(tableReference)) {
+        if (declName.endsWith(tableReference.string_view())) {
             tableDeclaration = decl;
             break;
         }
@@ -134,7 +134,7 @@ bool RefersToParser::preorder(const IR::P4Table *tableContext) {
         auto annotations = keyElement->annotations->annotations;
         for (const auto *annotation : annotations) {
             if (annotation->name.name == "refers_to" || annotation->name.name == "referenced_by") {
-                const auto *nameAnnot = keyElement->getAnnotation("name");
+                const auto *nameAnnot = keyElement->getAnnotation("name"_cs);
                 BUG_CHECK(nameAnnot != nullptr, "%1% table key without a name annotation",
                           annotation->name.name);
                 const auto *srcKey = ControlPlaneState::getTableKey(

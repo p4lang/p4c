@@ -105,11 +105,11 @@ void EBPFProgram::emitC(CodeBuilder *builder, cstring header) {
     builder->emitIndent();
     // Use different section name for XDP - this is used by the runtime test framework.
     if (model.arch == ModelArchitecture::XdpSwitch)
-        builder->target->emitCodeSection(builder, "xdp");
+        builder->target->emitCodeSection(builder, "xdp"_cs);
     else
-        builder->target->emitCodeSection(builder, "prog");
+        builder->target->emitCodeSection(builder, "prog"_cs);
     builder->emitIndent();
-    builder->target->emitMain(builder, functionName, model.CPacketName.str());
+    builder->target->emitMain(builder, functionName, model.CPacketName.toString());
     builder->blockStart();
 
     emitHeaderInstances(builder);
@@ -280,14 +280,14 @@ void EBPFProgram::emitLocalVariables(CodeBuilder *builder) {
 
     builder->emitIndent();
     builder->appendFormat("void* %s = %s;", packetStartVar.c_str(),
-                          builder->target->dataOffset(model.CPacketName.str()).c_str());
+                          builder->target->dataOffset(model.CPacketName.toString()).c_str());
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("u8* %s = %s;", headerStartVar.c_str(), packetStartVar.c_str());
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("void* %s = %s;", packetEndVar.c_str(),
-                          builder->target->dataEnd(model.CPacketName.str()).c_str());
+                          builder->target->dataEnd(model.CPacketName.toString()).c_str());
     builder->newline();
 
     if (model.arch == ModelArchitecture::EbpfFilter) {
@@ -315,7 +315,7 @@ void EBPFProgram::emitLocalVariables(CodeBuilder *builder) {
 
     builder->emitIndent();
     builder->appendFormat("u32 %s = %s", lengthVar.c_str(),
-                          builder->target->dataLength(model.CPacketName.str()).c_str());
+                          builder->target->dataLength(model.CPacketName.toString()).c_str());
     builder->endOfStatement(true);
 }
 
@@ -351,14 +351,14 @@ void EBPFProgram::emitPipeline(CodeBuilder *builder) {
 }
 
 bool EBPFProgram::isLibraryMethod(cstring methodName) {
-    static std::set<cstring> DEFAULT_METHODS = {"static_assert", "verify"};
+    static std::set<cstring> DEFAULT_METHODS = {"static_assert"_cs, "verify"_cs};
     if (DEFAULT_METHODS.find(methodName) != DEFAULT_METHODS.end() && options.target != "xdp") {
         return true;
     }
 
     static std::set<cstring> XDP_METHODS = {
-        "ebpf_ipv4_checksum",    "csum_replace2",    "csum_replace4",
-        "BPF_PERF_EVENT_OUTPUT", "BPF_KTIME_GET_NS",
+        "ebpf_ipv4_checksum"_cs,    "csum_replace2"_cs,    "csum_replace4"_cs,
+        "BPF_PERF_EVENT_OUTPUT"_cs, "BPF_KTIME_GET_NS"_cs,
     };
     return XDP_METHODS.find(methodName) != XDP_METHODS.end();
 }

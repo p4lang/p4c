@@ -31,6 +31,8 @@ limitations under the License.
 
 namespace DPDK {
 
+using namespace P4::literals;
+
 cstring TypeStruct2Name(const cstring *s);
 bool isSimpleExpression(const IR::Expression *e);
 bool isNonConstantSimpleExpression(const IR::Expression *e);
@@ -826,7 +828,7 @@ struct keyInfo {
 class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
     IR::IndexedVector<IR::Declaration> decls;
     DpdkProgramStructure *structure;
-    bool metaCopyNeeded;
+    bool metaCopyNeeded = false;
 
  public:
     CopyMatchKeysToSingleStruct(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
@@ -1009,7 +1011,8 @@ class CollectDirectCounterMeter : public Inspector {
     cstring oneInstance;
     bool methodCallFound;
     int getTableSize(const IR::P4Table *tbl);
-    bool ifMethodFound(const IR::P4Action *a, cstring method, cstring instancename = "");
+    bool ifMethodFound(const IR::P4Action *a, cstring method,
+                       cstring instancename = cstring::empty);
     void checkMethodCallInAction(const P4::ExternMethod *);
 
  public:
@@ -1019,9 +1022,9 @@ class CollectDirectCounterMeter : public Inspector {
         : refMap(refMap), typeMap(typeMap), structure(structure) {
         setName("CollectDirectCounterMeter");
         visitDagOnce = false;
-        method = "";
-        instancename = "";
-        oneInstance = "";
+        method = cstring::empty;
+        instancename = cstring::empty;
+        oneInstance = cstring::empty;
         methodCallFound = false;
     }
 
@@ -1502,11 +1505,11 @@ class InsertReqDeclForIPSec : public Transform {
     DpdkProgramStructure *structure;
     bool &is_ipsec_used;
     int &sa_id_width;
-    cstring newHeaderName = "platform_hdr_t";
+    cstring newHeaderName = "platform_hdr_t"_cs;
     IR::Type_Header *ipsecHeader = nullptr;
     std::vector<cstring> registerInstanceNames = {
-        "ipsec_port_out_inbound", "ipsec_port_out_outbound", "ipsec_port_in_inbound",
-        "ipsec_port_in_outbound"};
+        "ipsec_port_out_inbound"_cs, "ipsec_port_out_outbound"_cs, "ipsec_port_in_inbound"_cs,
+        "ipsec_port_in_outbound"_cs};
 
  public:
     InsertReqDeclForIPSec(P4::ReferenceMap *refMap, DpdkProgramStructure *structure,

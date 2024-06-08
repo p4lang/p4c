@@ -30,7 +30,7 @@ const IR::Node *DoRemoveReturns::preorder(IR::P4Action *action) {
         return action;
     }
     LOG3("Processing " << dbp(action));
-    cstring var = refMap->newName(variableName);
+    cstring var = refMap->newName(variableName.string_view());
     returnVar = IR::ID(var, nullptr);
     auto f = new IR::BoolLiteral(false);
     auto decl = new IR::Declaration_Variable(returnVar, IR::Type_Boolean::get(), f);
@@ -67,11 +67,11 @@ const IR::Node *DoRemoveReturns::preorder(IR::Function *function) {
     bool returnsVal =
         function->type->returnType != nullptr && !function->type->returnType->is<IR::Type_Void>();
 
-    cstring var = refMap->newName(variableName);
+    cstring var = refMap->newName(variableName.string_view());
     returnVar = IR::ID(var, nullptr);
     IR::Declaration_Variable *retvalDecl = nullptr;
     if (returnsVal) {
-        var = refMap->newName(retValName);
+        var = refMap->newName(retValName.string_view());
         returnedValue = IR::ID(var, nullptr);
         retvalDecl = new IR::Declaration_Variable(returnedValue, function->type->returnType);
     }
@@ -105,7 +105,7 @@ const IR::Node *DoRemoveReturns::preorder(IR::P4Control *control) {
         return control;
     }
 
-    cstring var = refMap->newName(variableName);
+    cstring var = refMap->newName(variableName.string_view());
     returnVar = IR::ID(var, nullptr);
     auto f = new IR::BoolLiteral(false);
     auto decl = new IR::Declaration_Variable(returnVar, IR::Type_Boolean::get(), f);

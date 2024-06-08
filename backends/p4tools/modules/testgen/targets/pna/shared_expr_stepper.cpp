@@ -37,7 +37,7 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
      *  drop_packet
      *  drop_packet sets the PNA internal drop variable to true.
      * ====================================================================================== */
-    {"*method.drop_packet",
+    {"*method.drop_packet"_cs,
      {},
      [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
         IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
@@ -46,7 +46,7 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
          // Use an assignment to set drop variable to true.
          // This variable will be processed in the deparser.
          nextState.set(&PnaConstants::DROP_VAR, IR::BoolLiteral::get(true));
-         nextState.add(*new TraceEvents::Generic("drop_packet executed"));
+         nextState.add(*new TraceEvents::Generic("drop_packet executed"_cs));
          nextState.popBody();
          result->emplace_back(nextState);
      }},
@@ -55,8 +55,8 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
      *  send_to_port sets the PNA internal egress port variable to true.
      * ====================================================================================== */
     // TODO: Implement extern path expression calls.
-    {"*method.send_to_port",
-     {"dest_port"},
+    {"*method.send_to_port"_cs,
+     {"dest_port"_cs},
      [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
         IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args, const ExecutionState &state,
         SmallStepEvaluator::Result &result) {
@@ -79,7 +79,7 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
          }
          // Use an assignment to set the output port to the input.
          nextState.set(&PnaConstants::OUTPUT_PORT_VAR, destPort);
-         nextState.add(*new TraceEvents::Generic("send_to_port executed"));
+         nextState.add(*new TraceEvents::Generic("send_to_port executed"_cs));
          nextState.popBody();
          result->emplace_back(nextState);
      }},
@@ -106,8 +106,8 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
      *     }
      * }
      * ====================================================================================== */
-    {"*method.SelectByDirection",
-     {"direction", "n2h_value", "h2n_value"},
+    {"*method.SelectByDirection"_cs,
+     {"direction"_cs, "n2h_value"_cs, "h2n_value"_cs},
      [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
         IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args, const ExecutionState &state,
         SmallStepEvaluator::Result &result) {
@@ -161,13 +161,13 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
      * ====================================================================================== */
     // TODO: Currently, this is a no-op. This is because we only test a single packet input.
     // Implement a way to test add_entry.
-    {"*method.add_entry",
-     {"action_name", "action_params", "expire_time_profile_id"},
+    {"*method.add_entry"_cs,
+     {"action_name"_cs, "action_params"_cs, "expire_time_profile_id"_cs},
      [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
         IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
         const ExecutionState &state, SmallStepEvaluator::Result &result) {
          auto &nextState = state.clone();
-         nextState.add(*new TraceEvents::Generic("add_entry executed. Currently a no-op."));
+         nextState.add(*new TraceEvents::Generic("add_entry executed. Currently a no-op."_cs));
          nextState.replaceTopBody(Continuation::Return(IR::BoolLiteral::get(true)));
          result->emplace_back(nextState);
      }},

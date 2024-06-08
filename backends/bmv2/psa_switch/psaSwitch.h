@@ -58,20 +58,20 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
         cstring ptName = param->type->toString();
         if (PsaProgramStructure::isCounterMetadata(ptName)) {  // check if its counter metadata
             auto jsn = new Util::JsonObject();
-            jsn->emplace("name", param->toString());
-            jsn->emplace("type", "hexstr");
+            jsn->emplace("name"_cs, param->toString());
+            jsn->emplace("type"_cs, "hexstr");
             auto bitwidth = param->type->width_bits();
 
             // encode the counter type from enum -> int
             if (fieldName == "BYTES") {
                 cstring repr = BMV2::stringRepr(0, ROUNDUP(bitwidth, 32));
-                jsn->emplace("value", repr);
+                jsn->emplace("value"_cs, repr);
             } else if (fieldName == "PACKETS") {
                 cstring repr = BMV2::stringRepr(1, ROUNDUP(bitwidth, 32));
-                jsn->emplace("value", repr);
+                jsn->emplace("value"_cs, repr);
             } else if (fieldName == "PACKETS_AND_BYTES") {
                 cstring repr = BMV2::stringRepr(2, ROUNDUP(bitwidth, 32));
-                jsn->emplace("value", repr);
+                jsn->emplace("value"_cs, repr);
             } else {
                 modelError("%1%: Exptected a PSA_CounterType_t", fieldName);
                 return nullptr;
@@ -81,8 +81,8 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
             auto jsn = new Util::JsonObject();
 
             // encode the metadata type and field in json
-            jsn->emplace("type", "field");
-            auto a = mkArrayField(jsn, "value");
+            jsn->emplace("type"_cs, "field");
+            auto a = mkArrayField(jsn, "value"_cs);
             a->append(ptName.exceptLast(2));
             a->append(fieldName);
             return jsn;
@@ -133,7 +133,7 @@ class ConvertPsaToJson : public Inspector {
     }
 
     void postorder(UNUSED const IR::P4Program *program) override {
-        cstring scalarsName = "scalars";
+        cstring scalarsName = "scalars"_cs;
         // This visitor is used in multiple passes to convert expression to json
         auto conv = new PsaSwitchExpressionConverter(refMap, typeMap, structure, scalarsName);
         auto ctxt = new ConversionContext(refMap, typeMap, toplevel, structure, conv, json);

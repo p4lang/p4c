@@ -10,18 +10,20 @@
 
 namespace Test {
 
+using namespace P4::literals;
+
 TEST(P4TestgenBenchmark, SuccessfullyGenerate1000Tests) {
     auto compilerOptions = P4CContextWithOptions<CompilerOptions>::get().options();
-    compilerOptions.target = "bmv2";
-    compilerOptions.arch = "v1model";
+    compilerOptions.target = "bmv2"_cs;
+    compilerOptions.arch = "v1model"_cs;
     auto includePath = P4CTestEnvironment::getProjectRoot() / "p4include";
     compilerOptions.preprocessor_options = "-I" + includePath.string();
     auto fabricFile =
         P4CTestEnvironment::getProjectRoot() / "testdata/p4_16_samples/fabric_20190420/fabric.p4";
     compilerOptions.file = fabricFile.string();
     auto &testgenOptions = P4Tools::P4Testgen::TestgenOptions::get();
-    testgenOptions.testBackend = "PROTOBUF_IR";
-    testgenOptions.testBaseName = "dummy";
+    testgenOptions.testBackend = "PROTOBUF_IR"_cs;
+    testgenOptions.testBaseName = "dummy"_cs;
     testgenOptions.seed = 1;
     // Fix the packet size.
     testgenOptions.minPktSize = 512;

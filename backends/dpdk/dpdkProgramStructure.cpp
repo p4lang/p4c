@@ -3,6 +3,8 @@
 #include "ir/ir.h"
 #include "options.h"
 
+using namespace P4::literals;
+
 bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock *block) {
     // Blocks are not in IR tree, use a custom visitor to traverse.
     for (auto it : block->constantValue) {
@@ -12,89 +14,89 @@ bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock *block) {
 }
 
 void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock *block) {
-    structure->p4arch = "pna";
-    auto p = block->findParameterValue("main_parser");
+    structure->p4arch = "pna"_cs;
+    auto p = block->findParameterValue("main_parser"_cs);
     if (p == nullptr) {
         ::error(ErrorType::ERR_MODEL, "Package %1% has no parameter named 'main_parser'", block);
         return;
     }
     auto parser = p->to<IR::ParserBlock>();
-    structure->parsers.emplace("MainParserT", parser->container);
-    p = block->findParameterValue("pre_control");
+    structure->parsers.emplace("MainParserT"_cs, parser->container);
+    p = block->findParameterValue("pre_control"_cs);
     auto pre_control = p->to<IR::ControlBlock>();
-    structure->pipelines.emplace("PreControlT", pre_control->container);
-    p = block->findParameterValue("main_control");
+    structure->pipelines.emplace("PreControlT"_cs, pre_control->container);
+    p = block->findParameterValue("main_control"_cs);
     auto pipeline = p->to<IR::ControlBlock>();
-    structure->pipelines.emplace("MainControlT", pipeline->container);
+    structure->pipelines.emplace("MainControlT"_cs, pipeline->container);
     structure->pipeline_controls.emplace(pipeline->container->name);
-    p = block->findParameterValue("main_deparser");
+    p = block->findParameterValue("main_deparser"_cs);
     auto deparser = p->to<IR::ControlBlock>();
-    structure->deparsers.emplace("MainDeparserT", deparser->container);
+    structure->deparsers.emplace("MainDeparserT"_cs, deparser->container);
     structure->non_pipeline_controls.emplace(deparser->container->name);
 }
 
 void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
-    structure->p4arch = "psa";
-    auto pkg = block->findParameterValue("ingress");
+    structure->p4arch = "psa"_cs;
+    auto pkg = block->findParameterValue("ingress"_cs);
     if (pkg == nullptr) {
         ::error(ErrorType::ERR_MODEL, "Package %1% has no parameter named 'ingress'", block);
         return;
     }
     if (auto ingress = pkg->to<IR::PackageBlock>()) {
-        auto p = ingress->findParameterValue("ip");
+        auto p = ingress->findParameterValue("ip"_cs);
         if (!p) {
             ::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'ip'",
                     block);
             return;
         }
         auto parser = p->to<IR::ParserBlock>();
-        structure->parsers.emplace("IngressParser", parser->container);
-        p = ingress->findParameterValue("ig");
+        structure->parsers.emplace("IngressParser"_cs, parser->container);
+        p = ingress->findParameterValue("ig"_cs);
         if (!p) {
             ::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'ig'",
                     block);
             return;
         }
         auto pipeline = p->to<IR::ControlBlock>();
-        structure->pipelines.emplace("Ingress", pipeline->container);
+        structure->pipelines.emplace("Ingress"_cs, pipeline->container);
         structure->pipeline_controls.emplace(pipeline->container->name);
-        p = ingress->findParameterValue("id");
+        p = ingress->findParameterValue("id"_cs);
         if (!p) {
             ::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'id'",
                     block);
             return;
         }
         auto deparser = p->to<IR::ControlBlock>();
-        structure->deparsers.emplace("IngressDeparser", deparser->container);
+        structure->deparsers.emplace("IngressDeparser"_cs, deparser->container);
         structure->non_pipeline_controls.emplace(deparser->container->name);
     }
-    pkg = block->findParameterValue("egress");
+    pkg = block->findParameterValue("egress"_cs);
     if (auto egress = pkg->to<IR::PackageBlock>()) {
-        auto p = egress->findParameterValue("ep");
+        auto p = egress->findParameterValue("ep"_cs);
         if (!p) {
             ::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'ep'",
                     block);
             return;
         }
         auto parser = p->to<IR::ParserBlock>();
-        structure->parsers.emplace("EgressParser", parser->container);
-        p = egress->findParameterValue("eg");
+        structure->parsers.emplace("EgressParser"_cs, parser->container);
+        p = egress->findParameterValue("eg"_cs);
         if (!p) {
             ::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'eg'",
                     block);
             return;
         }
         auto pipeline = p->to<IR::ControlBlock>();
-        structure->pipelines.emplace("Egress", pipeline->container);
+        structure->pipelines.emplace("Egress"_cs, pipeline->container);
         structure->pipeline_controls.emplace(pipeline->container->name);
-        p = egress->findParameterValue("ed");
+        p = egress->findParameterValue("ed"_cs);
         if (!p) {
             ::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'ed'",
                     block);
             return;
         }
         auto deparser = p->to<IR::ControlBlock>();
-        structure->deparsers.emplace("EgressDeparser", deparser->container);
+        structure->deparsers.emplace("EgressDeparser"_cs, deparser->container);
         structure->non_pipeline_controls.emplace(deparser->container->name);
     }
 }
@@ -237,6 +239,7 @@ void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike *type, b
 }
 
 bool InspectDpdkProgram::isStandardMetadata(cstring ptName) {
+    // FIXME: do we really need strcmp here?
     return (!strcmp(ptName, "psa_ingress_parser_input_metadata_t") ||
             !strcmp(ptName, "psa_egress_parser_input_metadata_t") ||
             !strcmp(ptName, "psa_ingress_input_metadata_t") ||

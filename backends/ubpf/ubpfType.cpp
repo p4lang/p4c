@@ -20,6 +20,8 @@ limitations under the License.
 
 namespace UBPF {
 
+using namespace P4::literals;
+
 EBPF::EBPFTypeFactory *instance = UBPFTypeFactory::getInstance();
 
 EBPF::EBPFType *UBPFTypeFactory::create(const IR::Type *type) {
@@ -69,16 +71,12 @@ void UBPFScalarType::emit(EBPF::CodeBuilder *builder) {
 }
 
 cstring UBPFScalarType::getAsString() {
-    if (width <= 8)
-        return cstring("uint8_t");
-    else if (width <= 16)
-        return cstring("uint16_t");
-    else if (width <= 32)
-        return cstring("uint32_t");
-    else if (width <= 64)
-        return cstring("uint64_t");
-    else
-        return cstring("uint8_t*");
+    if (width <= 8) return "uint8_t"_cs;
+    if (width <= 16) return "uint16_t"_cs;
+    if (width <= 32) return "uint32_t"_cs;
+    if (width <= 64) return "uint64_t"_cs;
+
+    return "uint8_t*"_cs;
 }
 
 void UBPFScalarType::declare(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
@@ -138,7 +136,7 @@ void UBPFStructType::emit(EBPF::CodeBuilder *builder) {
         builder->emitIndent();
         auto type = UBPFTypeFactory::instance->create(IR::Type_Boolean::get());
         if (type != nullptr) {
-            type->declare(builder, "ebpf_valid", false);
+            type->declare(builder, "ebpf_valid"_cs, false);
             builder->endOfStatement(true);
         }
     }
@@ -191,7 +189,7 @@ void UBPFErrorType::emit(EBPF::CodeBuilder *builder) {
 //////////////////////////////////////////////////////////
 
 UBPFListType::UBPFListType(const IR::Type_List *lst) : EBPFType(lst) {
-    kind = "struct";
+    kind = "struct"_cs;
     width = 0;
     implWidth = 0;
     // The first iteration is to compute total width of Type_List.

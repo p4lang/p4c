@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace EBPF {
 
-cstring EBPFModel::reservedPrefix = "ebpf_";
+cstring EBPFModel::reservedPrefix = "ebpf_"_cs;
 EBPFModel EBPFModel::instance;
 
 }  // namespace EBPF

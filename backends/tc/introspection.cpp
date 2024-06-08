@@ -180,23 +180,23 @@ void IntrospectionGenerator::collectExternInfo() {
 
 Util::JsonObject *IntrospectionGenerator::genExternInfo(struct ExternAttributes *extn) {
     auto externJson = new Util::JsonObject();
-    externJson->emplace("name", extn->name);
-    externJson->emplace("id", extn->id);
-    externJson->emplace("permissions", extn->permissions);
+    externJson->emplace("name"_cs, extn->name);
+    externJson->emplace("id"_cs, extn->id);
+    externJson->emplace("permissions"_cs, extn->permissions);
     auto instanceJson = new Util::JsonArray();
     for (auto eInstance : extn->instances) {
         auto eInstanceJson = new Util::JsonObject();
-        eInstanceJson->emplace("inst_name", eInstance->name);
-        eInstanceJson->emplace("inst_id", eInstance->id);
+        eInstanceJson->emplace("inst_name"_cs, eInstance->name);
+        eInstanceJson->emplace("inst_id"_cs, eInstance->id);
         auto paramArray = new Util::JsonArray();
         for (auto param : eInstance->keyFields) {
             auto keyJson = genKeyInfo(param);
             paramArray->append(keyJson);
         }
-        eInstanceJson->emplace("params", paramArray);
+        eInstanceJson->emplace("params"_cs, paramArray);
         instanceJson->append(eInstanceJson);
     }
-    externJson->emplace("instances", instanceJson);
+    externJson->emplace("instances"_cs, instanceJson);
     return externJson;
 }
 
@@ -216,95 +216,95 @@ void IntrospectionGenerator::genTableJson(Util::JsonArray *tablesJson) {
 
 Util::JsonObject *IntrospectionGenerator::genActionInfo(struct ActionAttributes *action) {
     auto actionJson = new Util::JsonObject();
-    actionJson->emplace("id", action->id);
-    actionJson->emplace("name", action->name);
-    cstring actionScope = "";
+    actionJson->emplace("id"_cs, action->id);
+    actionJson->emplace("name"_cs, action->name);
+    cstring actionScope;
     if (action->scope == TableOnly) {
-        actionScope = "TableOnly";
+        actionScope = "TableOnly"_cs;
     } else if (action->scope == DefaultOnly) {
-        actionScope = "DefaultOnly";
+        actionScope = "DefaultOnly"_cs;
     } else {
-        actionScope = "TableAndDefault";
+        actionScope = "TableAndDefault"_cs;
     }
-    actionJson->emplace("action_scope", actionScope);
+    actionJson->emplace("action_scope"_cs, actionScope);
     auto annoArray = new Util::JsonArray();
     for (auto anno : action->annotations) {
         annoArray->append(anno->name);
     }
-    actionJson->emplace("annotations", annoArray);
+    actionJson->emplace("annotations"_cs, annoArray);
     auto paramArray = new Util::JsonArray();
     for (auto param : action->actionParams) {
         auto paramJson = new Util::JsonObject();
-        paramJson->emplace("id", param->id);
-        paramJson->emplace("name", param->name);
+        paramJson->emplace("id"_cs, param->id);
+        paramJson->emplace("name"_cs, param->name);
         switch (param->dataType) {
             case TC::BIT_TYPE: {
                 auto paramtype = "bit" + Util::toString(param->bitwidth);
-                paramJson->emplace("type", paramtype);
+                paramJson->emplace("type"_cs, paramtype);
                 break;
             }
             case TC::DEV_TYPE: {
-                paramJson->emplace("type", "dev");
+                paramJson->emplace("type"_cs, "dev");
                 break;
             }
             case TC::MACADDR_TYPE: {
-                paramJson->emplace("type", "macaddr");
+                paramJson->emplace("type"_cs, "macaddr");
                 break;
             }
             case TC::IPV4_TYPE: {
-                paramJson->emplace("type", "ipv4");
+                paramJson->emplace("type"_cs, "ipv4");
                 break;
             }
             case TC::IPV6_TYPE: {
-                paramJson->emplace("type", "ipv6");
+                paramJson->emplace("type"_cs, "ipv6");
                 break;
             }
             case TC::BE16_TYPE: {
-                paramJson->emplace("type", "be16");
+                paramJson->emplace("type"_cs, "be16");
                 break;
             }
             case TC::BE32_TYPE: {
-                paramJson->emplace("type", "be32");
+                paramJson->emplace("type"_cs, "be32");
                 break;
             }
             case TC::BE64_TYPE: {
-                paramJson->emplace("type", "be64");
+                paramJson->emplace("type"_cs, "be64");
                 break;
             }
         }
-        paramJson->emplace("bitwidth", param->bitwidth);
+        paramJson->emplace("bitwidth"_cs, param->bitwidth);
         paramArray->append(paramJson);
     }
-    actionJson->emplace("params", paramArray);
-    actionJson->emplace("default_hit_action", action->defaultHit);
-    actionJson->emplace("default_miss_action", action->defaultMiss);
+    actionJson->emplace("params"_cs, paramArray);
+    actionJson->emplace("default_hit_action"_cs, action->defaultHit);
+    actionJson->emplace("default_miss_action"_cs, action->defaultMiss);
     return actionJson;
 }
 
 Util::JsonObject *IntrospectionGenerator::genKeyInfo(struct KeyFieldAttributes *keyField) {
     auto keyJson = new Util::JsonObject();
-    keyJson->emplace("id", keyField->id);
-    keyJson->emplace("name", keyField->name);
-    keyJson->emplace("type", keyField->type);
+    keyJson->emplace("id"_cs, keyField->id);
+    keyJson->emplace("name"_cs, keyField->name);
+    keyJson->emplace("type"_cs, keyField->type);
     if (keyField->attribute) {
-        keyJson->emplace("attr", keyField->attribute);
+        keyJson->emplace("attr"_cs, keyField->attribute);
     }
     if (keyField->matchType) {
-        keyJson->emplace("match_type", keyField->matchType);
+        keyJson->emplace("match_type"_cs, keyField->matchType);
     }
-    keyJson->emplace("bitwidth", keyField->bitwidth);
+    keyJson->emplace("bitwidth"_cs, keyField->bitwidth);
     return keyJson;
 }
 
 Util::JsonObject *IntrospectionGenerator::genTableInfo(struct TableAttributes *tbl) {
     auto tableJson = new Util::JsonObject();
-    tableJson->emplace("name", tbl->name);
-    tableJson->emplace("id", tbl->id);
-    tableJson->emplace("tentries", tbl->tentries);
-    tableJson->emplace("permissions", tbl->permissions);
-    tableJson->emplace("nummask", tbl->numMask);
+    tableJson->emplace("name"_cs, tbl->name);
+    tableJson->emplace("id"_cs, tbl->id);
+    tableJson->emplace("tentries"_cs, tbl->tentries);
+    tableJson->emplace("permissions"_cs, tbl->permissions);
+    tableJson->emplace("nummask"_cs, tbl->numMask);
     if (tbl->keysize != 0) {
-        tableJson->emplace("keysize", tbl->keysize);
+        tableJson->emplace("keysize"_cs, tbl->keysize);
     }
     auto keysJson = new Util::JsonArray();
     for (auto keyField : tbl->keyFields) {
@@ -312,7 +312,7 @@ Util::JsonObject *IntrospectionGenerator::genTableInfo(struct TableAttributes *t
         keysJson->append(keyJson);
     }
     if (keysJson->size() != 0) {
-        tableJson->emplace("keyfields", keysJson);
+        tableJson->emplace("keyfields"_cs, keysJson);
     }
     auto actionsJson = new Util::JsonArray();
     for (auto action : tbl->actions) {
@@ -320,7 +320,7 @@ Util::JsonObject *IntrospectionGenerator::genTableInfo(struct TableAttributes *t
         actionsJson->append(actionJson);
     }
     if (actionsJson->size() != 0) {
-        tableJson->emplace("actions", actionsJson);
+        tableJson->emplace("actions"_cs, actionsJson);
     }
     return tableJson;
 }
@@ -333,12 +333,12 @@ const Util::JsonObject *IntrospectionGenerator::genIntrospectionJson() {
     collectTableInfo();
     collectExternInfo();
     introspec.initIntrospectionInfo(tcPipeline);
-    json->emplace("schema_version", introspec.schemaVersion);
-    json->emplace("pipeline_name", introspec.pipelineName);
+    json->emplace("schema_version"_cs, introspec.schemaVersion);
+    json->emplace("pipeline_name"_cs, introspec.pipelineName);
     genExternJson(externJson);
-    json->emplace("externs", externJson);
+    json->emplace("externs"_cs, externJson);
     genTableJson(tablesJson);
-    json->emplace("tables", tablesJson);
+    json->emplace("tables"_cs, tablesJson);
     return json;
 }
 

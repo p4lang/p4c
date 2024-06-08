@@ -68,15 +68,15 @@ const IR::StateVariable &TableStepper::getTableActionVar(const IR::P4Table *tabl
     size_t max = 255;
     BUG_CHECK(numActions < max, "Number of actions in the table (%1%) exceeds the maximum of %2%.",
               numActions, max);
-    return getTableStateVariable(IR::Type_Bits::get(8), table, "*action");
+    return getTableStateVariable(IR::Type_Bits::get(8), table, "*action"_cs);
 }
 
 const IR::StateVariable &TableStepper::getTableResultVar(const IR::P4Table *table) {
-    return getTableStateVariable(IR::Type::Boolean::get(), table, "*result");
+    return getTableStateVariable(IR::Type::Boolean::get(), table, "*result"_cs);
 }
 
 const IR::StateVariable &TableStepper::getTableHitVar(const IR::P4Table *table) {
-    return getTableStateVariable(IR::Type::Boolean::get(), table, "*hit");
+    return getTableStateVariable(IR::Type::Boolean::get(), table, "*hit"_cs);
 }
 
 const IR::Expression *TableStepper::computeTargetMatchType(
@@ -272,8 +272,8 @@ void TableStepper::setTableDefaultEntries(
         // Finally, add all the new rules to the execution stepper->state.
         auto *tableConfig = new TableConfig(table, {});
         // Add the action selector to the table. This signifies a slightly different implementation.
-        tableConfig->addTableProperty("overriden_default_action", ctrlPlaneActionCall);
-        nextState.addTestObject("tableconfigs", properties.tableName, tableConfig);
+        tableConfig->addTableProperty("overriden_default_action"_cs, ctrlPlaneActionCall);
+        nextState.addTestObject("tableconfigs"_cs, properties.tableName, tableConfig);
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
@@ -340,7 +340,7 @@ void TableStepper::evalTableControlEntries(
         auto tableRule =
             TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
         auto *tableConfig = new TableConfig(table, {tableRule});
-        nextState.addTestObject("tableconfigs", properties.tableName, tableConfig);
+        nextState.addTestObject("tableconfigs"_cs, properties.tableName, tableConfig);
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
@@ -389,8 +389,8 @@ void TableStepper::evalTaintedTable() {
 
     // If the table is immutable, we execute all the constant entries in its list.
     // We get the current value of the inUndefinedState property.
-    auto currentTaint = stepper->state.getProperty<bool>("inUndefinedState");
-    replacements.emplace_back(Continuation::PropertyUpdate("inUndefinedState", true));
+    auto currentTaint = stepper->state.getProperty<bool>("inUndefinedState"_cs);
+    replacements.emplace_back(Continuation::PropertyUpdate("inUndefinedState"_cs, true));
 
     const auto *entries = table->getEntries();
     // Sometimes, there are no entries. Just return.
@@ -414,7 +414,7 @@ void TableStepper::evalTaintedTable() {
     nextState.set(hitVar, stepper->programInfo.createTargetUninitialized(hitVar->type, true));
 
     // Reset the property to its previous stepper->state.
-    replacements.emplace_back(Continuation::PropertyUpdate("inUndefinedState", currentTaint));
+    replacements.emplace_back(Continuation::PropertyUpdate("inUndefinedState"_cs, currentTaint));
     nextState.replaceTopBody(&replacements);
     stepper->result->emplace_back(nextState);
 }
@@ -466,7 +466,7 @@ bool TableStepper::resolveTableKeys() {
             return true;
         }
 
-        const auto *nameAnnot = keyElement->getAnnotation("name");
+        const auto *nameAnnot = keyElement->getAnnotation("name"_cs);
         // Some hidden tables do not have any key name annotations.
         BUG_CHECK(nameAnnot != nullptr || properties.tableIsImmutable,
                   "Non-constant table key without an annotation");

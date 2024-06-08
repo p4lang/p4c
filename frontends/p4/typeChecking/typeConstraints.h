@@ -80,8 +80,8 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
     std::string localError(Explain *explainer) const;
 
  public:
-    void setError(cstring format, std::initializer_list<const IR::Node *> nodes) {
-        errFormat = format;
+    void setError(std::string_view format, std::initializer_list<const IR::Node *> nodes) {
+        errFormat = cstring(format);
         errArguments = nodes;
     }
     template <typename... Args>

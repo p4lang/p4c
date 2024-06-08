@@ -83,7 +83,7 @@ bool AbstractStepper::stepToSubexpr(
     const IR::Expression *subexpr, SmallStepEvaluator::Result &result, const ExecutionState &state,
     std::function<const Continuation::Command(const Continuation::Parameter *)> rebuildCmd) {
     // Create a parameter for the continuation we're about to build.
-    const auto *v = Continuation::genParameter(subexpr->type, "v", state.getNamespaceContext());
+    const auto *v = Continuation::genParameter(subexpr->type, "v"_cs, state.getNamespaceContext());
 
     // Create the continuation itself.
     Continuation::Body kBody(state.getBody());

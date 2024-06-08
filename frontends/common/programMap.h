@@ -30,7 +30,7 @@ class ProgramMap : public IHasDbPrint {
     const IR::P4Program *fake = new IR::P4Program();
     const IR::P4Program *program = nullptr;
     cstring mapKind;
-    explicit ProgramMap(cstring kind) : mapKind(kind) {}
+    explicit ProgramMap(std::string_view kind) : mapKind(kind) {}
     virtual ~ProgramMap() {}
 
  public:

@@ -33,8 +33,8 @@ class EBPFMeterPSA : public EBPFTableBase {
                    ControlBodyTranslatorPSA *translator) const;
 
  protected:
-    const cstring indirectValueField = "value";
-    const cstring spinlockField = "lock";
+    const cstring indirectValueField = "value"_cs;
+    const cstring spinlockField = "lock"_cs;
 
     size_t size{};
     EBPFType *keyType{};

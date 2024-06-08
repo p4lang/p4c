@@ -72,13 +72,13 @@ namespace Helpers {
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for v1model
 template <>
 struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL>> {
-    static const cstring name() { return "counter"; }
+    static const cstring name() { return "counter"_cs; }
     static const cstring directPropertyName() {
         return P4V1::V1Model::instance.tableAttributes.counters.name;
     }
     static const cstring typeName() { return P4V1::V1Model::instance.counter.name; }
     static const cstring directTypeName() { return P4V1::V1Model::instance.directCounter.name; }
-    static const cstring sizeParamName() { return "size"; }
+    static const cstring sizeParamName() { return "size"_cs; }
     static p4configv1::CounterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::CounterSpec;
         if (name == "packets")
@@ -94,13 +94,13 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL>> {
 
 template <>
 struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL2020>> {
-    static const cstring name() { return "counter"; }
+    static const cstring name() { return "counter"_cs; }
     static const cstring directPropertyName() {
         return P4V1::V1Model::instance.tableAttributes.counters.name;
     }
     static const cstring typeName() { return P4V1::V1Model::instance.counter.name; }
     static const cstring directTypeName() { return P4V1::V1Model::instance.directCounter.name; }
-    static const cstring sizeParamName() { return "size"; }
+    static const cstring sizeParamName() { return "size"_cs; }
     static p4configv1::CounterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::CounterSpec;
         if (name == "packets")
@@ -117,11 +117,11 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL2020>> {
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for PSA
 template <>
 struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PSA>> {
-    static const cstring name() { return "counter"; }
-    static const cstring directPropertyName() { return "psa_direct_counter"; }
-    static const cstring typeName() { return "Counter"; }
-    static const cstring directTypeName() { return "DirectCounter"; }
-    static const cstring sizeParamName() { return "n_counters"; }
+    static const cstring name() { return "counter"_cs; }
+    static const cstring directPropertyName() { return "psa_direct_counter"_cs; }
+    static const cstring typeName() { return "Counter"_cs; }
+    static const cstring directTypeName() { return "DirectCounter"_cs; }
+    static const cstring sizeParamName() { return "n_counters"_cs; }
     static p4configv1::CounterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::CounterSpec;
         if (name == "PACKETS")
@@ -140,11 +140,11 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PSA>> {
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for PNA
 template <>
 struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PNA>> {
-    static const cstring name() { return "counter"; }
-    static const cstring directPropertyName() { return "pna_direct_counter"; }
-    static const cstring typeName() { return "Counter"; }
-    static const cstring directTypeName() { return "DirectCounter"; }
-    static const cstring sizeParamName() { return "n_counters"; }
+    static const cstring name() { return "counter"_cs; }
+    static const cstring directPropertyName() { return "pna_direct_counter"_cs; }
+    static const cstring typeName() { return "Counter"_cs; }
+    static const cstring directTypeName() { return "DirectCounter"_cs; }
+    static const cstring sizeParamName() { return "n_counters"_cs; }
     static p4configv1::CounterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::CounterSpec;
         if (name == "PACKETS")
@@ -163,13 +163,13 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PNA>> {
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for v1model
 template <>
 struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL>> {
-    static const cstring name() { return "meter"; }
+    static const cstring name() { return "meter"_cs; }
     static const cstring directPropertyName() {
         return P4V1::V1Model::instance.tableAttributes.meters.name;
     }
     static const cstring typeName() { return P4V1::V1Model::instance.meter.name; }
     static const cstring directTypeName() { return P4V1::V1Model::instance.directMeter.name; }
-    static const cstring sizeParamName() { return "size"; }
+    static const cstring sizeParamName() { return "size"_cs; }
     static p4configv1::MeterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::MeterSpec;
         if (name == "packets")
@@ -183,13 +183,13 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL>> {
 
 template <>
 struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL2020>> {
-    static const cstring name() { return "meter"; }
+    static const cstring name() { return "meter"_cs; }
     static const cstring directPropertyName() {
         return P4V1::V1Model::instance.tableAttributes.meters.name;
     }
     static const cstring typeName() { return P4V1::V1Model::instance.meter.name; }
     static const cstring directTypeName() { return P4V1::V1Model::instance.directMeter.name; }
-    static const cstring sizeParamName() { return "size"; }
+    static const cstring sizeParamName() { return "size"_cs; }
     static p4configv1::MeterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::MeterSpec;
         if (name == "packets")
@@ -204,11 +204,11 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL2020>> {
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for PSA
 template <>
 struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA>> {
-    static const cstring name() { return "meter"; }
-    static const cstring directPropertyName() { return "psa_direct_meter"; }
-    static const cstring typeName() { return "Meter"; }
-    static const cstring directTypeName() { return "DirectMeter"; }
-    static const cstring sizeParamName() { return "n_meters"; }
+    static const cstring name() { return "meter"_cs; }
+    static const cstring directPropertyName() { return "psa_direct_meter"_cs; }
+    static const cstring typeName() { return "Meter"_cs; }
+    static const cstring directTypeName() { return "DirectMeter"_cs; }
+    static const cstring sizeParamName() { return "n_meters"_cs; }
     static p4configv1::MeterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::MeterSpec;
         if (name == "PACKETS")
@@ -225,11 +225,11 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA>> {
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for PNA
 template <>
 struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PNA>> {
-    static const cstring name() { return "meter"; }
-    static const cstring directPropertyName() { return "pna_direct_meter"; }
-    static const cstring typeName() { return "Meter"; }
-    static const cstring directTypeName() { return "DirectMeter"; }
-    static const cstring sizeParamName() { return "n_meters"; }
+    static const cstring name() { return "meter"_cs; }
+    static const cstring directPropertyName() { return "pna_direct_meter"_cs; }
+    static const cstring typeName() { return "Meter"_cs; }
+    static const cstring directTypeName() { return "DirectMeter"_cs; }
+    static const cstring sizeParamName() { return "n_meters"_cs; }
     static p4configv1::MeterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::MeterSpec;
         if (name == "PACKETS")
@@ -308,38 +308,38 @@ struct ActionProfileTraits;
 
 template <>
 struct ActionProfileTraits<Arch::V1MODEL> {
-    static const cstring name() { return "action profile"; }
+    static const cstring name() { return "action profile"_cs; }
     static const cstring propertyName() {
         return P4V1::V1Model::instance.tableAttributes.tableImplementation.name;
     }
     static const cstring typeName() { return P4V1::V1Model::instance.action_profile.name; }
-    static const cstring sizeParamName() { return "size"; }
+    static const cstring sizeParamName() { return "size"_cs; }
 };
 
 template <>
 struct ActionProfileTraits<Arch::V1MODEL2020> {
-    static const cstring name() { return "action profile"; }
+    static const cstring name() { return "action profile"_cs; }
     static const cstring propertyName() {
         return P4V1::V1Model::instance.tableAttributes.tableImplementation.name;
     }
     static const cstring typeName() { return P4V1::V1Model::instance.action_profile.name; }
-    static const cstring sizeParamName() { return "size"; }
+    static const cstring sizeParamName() { return "size"_cs; }
 };
 
 template <>
 struct ActionProfileTraits<Arch::PSA> {
-    static const cstring name() { return "action profile"; }
-    static const cstring propertyName() { return "psa_implementation"; }
-    static const cstring typeName() { return "ActionProfile"; }
-    static const cstring sizeParamName() { return "size"; }
+    static const cstring name() { return "action profile"_cs; }
+    static const cstring propertyName() { return "psa_implementation"_cs; }
+    static const cstring typeName() { return "ActionProfile"_cs; }
+    static const cstring sizeParamName() { return "size"_cs; }
 };
 
 template <>
 struct ActionProfileTraits<Arch::PNA> {
-    static const cstring name() { return "action profile"; }
-    static const cstring propertyName() { return "pna_implementation"; }
-    static const cstring typeName() { return "ActionProfile"; }
-    static const cstring sizeParamName() { return "size"; }
+    static const cstring name() { return "action profile"_cs; }
+    static const cstring propertyName() { return "pna_implementation"_cs; }
+    static const cstring typeName() { return "ActionProfile"_cs; }
+    static const cstring sizeParamName() { return "size"_cs; }
 };
 
 /// Traits for the action selector extern, must be specialized for v1model and
@@ -349,26 +349,26 @@ struct ActionSelectorTraits;
 
 template <>
 struct ActionSelectorTraits<Arch::V1MODEL> : public ActionProfileTraits<Arch::V1MODEL> {
-    static const cstring name() { return "action selector"; }
+    static const cstring name() { return "action selector"_cs; }
     static const cstring typeName() { return P4V1::V1Model::instance.action_selector.name; }
 };
 
 template <>
 struct ActionSelectorTraits<Arch::V1MODEL2020> : public ActionProfileTraits<Arch::V1MODEL2020> {
-    static const cstring name() { return "action selector"; }
+    static const cstring name() { return "action selector"_cs; }
     static const cstring typeName() { return P4V1::V1Model::instance.action_selector.name; }
 };
 
 template <>
 struct ActionSelectorTraits<Arch::PSA> : public ActionProfileTraits<Arch::PSA> {
-    static const cstring name() { return "action selector"; }
-    static const cstring typeName() { return "ActionSelector"; }
+    static const cstring name() { return "action selector"_cs; }
+    static const cstring typeName() { return "ActionSelector"_cs; }
 };
 
 template <>
 struct ActionSelectorTraits<Arch::PNA> : public ActionProfileTraits<Arch::PNA> {
-    static const cstring name() { return "action selector"; }
-    static const cstring typeName() { return "ActionSelector"; }
+    static const cstring name() { return "action selector"_cs; }
+    static const cstring typeName() { return "ActionSelector"_cs; }
 };
 
 /// Traits for the register extern, must be specialized for v1model and PSA.
@@ -377,9 +377,9 @@ struct RegisterTraits;
 
 template <>
 struct RegisterTraits<Arch::V1MODEL> {
-    static const cstring name() { return "register"; }
+    static const cstring name() { return "register"_cs; }
     static const cstring typeName() { return P4V1::V1Model::instance.registers.name; }
-    static const cstring sizeParamName() { return "size"; }
+    static const cstring sizeParamName() { return "size"_cs; }
     // the index of the type parameter for the data stored in the register, in
     // the type parameter list of the extern type declaration
     static size_t dataTypeParamIdx() { return 0; }
@@ -388,9 +388,9 @@ struct RegisterTraits<Arch::V1MODEL> {
 
 template <>
 struct RegisterTraits<Arch::V1MODEL2020> {
-    static const cstring name() { return "register"; }
+    static const cstring name() { return "register"_cs; }
     static const cstring typeName() { return P4V1::V1Model::instance.registers.name; }
-    static const cstring sizeParamName() { return "size"; }
+    static const cstring sizeParamName() { return "size"_cs; }
     // the index of the type parameter for the data stored in the register, in
     // the type parameter list of the extern type declaration
     static size_t dataTypeParamIdx() { return 0; }
@@ -399,9 +399,9 @@ struct RegisterTraits<Arch::V1MODEL2020> {
 
 template <>
 struct RegisterTraits<Arch::PSA> {
-    static const cstring name() { return "register"; }
-    static const cstring typeName() { return "Register"; }
-    static const cstring sizeParamName() { return "size"; }
+    static const cstring name() { return "register"_cs; }
+    static const cstring typeName() { return "Register"_cs; }
+    static const cstring sizeParamName() { return "size"_cs; }
     static size_t dataTypeParamIdx() { return 0; }
     // the index of the type parameter for the register index, in the type
     // parameter list of the extern type declaration.
@@ -410,9 +410,9 @@ struct RegisterTraits<Arch::PSA> {
 
 template <>
 struct RegisterTraits<Arch::PNA> {
-    static const cstring name() { return "register"; }
-    static const cstring typeName() { return "Register"; }
-    static const cstring sizeParamName() { return "size"; }
+    static const cstring name() { return "register"_cs; }
+    static const cstring typeName() { return "Register"_cs; }
+    static const cstring sizeParamName() { return "size"_cs; }
     static size_t dataTypeParamIdx() { return 0; }
     // the index of the type parameter for the register index, in the type
     // parameter list of the extern type declaration.
@@ -448,7 +448,7 @@ struct Register {
         CHECK_NULL(instance);
         auto declaration = instance->node->to<IR::Declaration_Instance>();
 
-        auto size = instance->getParameterValue("size")->to<IR::Constant>();
+        auto size = instance->getParameterValue("size"_cs)->to<IR::Constant>();
         if (!size->is<IR::Constant>()) {
             ::error(ErrorType::ERR_UNSUPPORTED, "Register '%1%' has a non-constant size: %2%",
                     declaration, size);
@@ -776,7 +776,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                     });
         profile->set_with_selector(actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR);
         profile->set_size(actionProfile.size);
-        auto maxGroupSizeAnnotation = actionProfile.annotations->getAnnotation("max_group_size");
+        auto maxGroupSizeAnnotation = actionProfile.annotations->getAnnotation("max_group_size"_cs);
         if (maxGroupSizeAnnotation) {
             if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR) {
                 auto maxGroupSizeConstant =
@@ -793,7 +793,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
 
         // By default, an action profile uses the SumOfWeights semantics.
         auto selectorSizeSemanticsAnnotation =
-            actionProfile.annotations->getAnnotation("selector_size_semantics");
+            actionProfile.annotations->getAnnotation("selector_size_semantics"_cs);
         if (selectorSizeSemanticsAnnotation) {
             if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR) {
                 auto selectorSizeSemantics =
@@ -821,7 +821,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
 
         // By default, an action profile uses the SumOfWeights semantics.
         auto maxMemberWeightAnnotation =
-            actionProfile.annotations->getAnnotation("max_member_weight");
+            actionProfile.annotations->getAnnotation("max_member_weight"_cs);
         if (maxMemberWeightAnnotation) {
             if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR &&
                 profile->has_sum_of_members()) {
@@ -1058,7 +1058,7 @@ class P4RuntimeArchHandlerPSAPNA : public P4RuntimeArchHandlerCommon<arch> {
     /// @return true if @table's 'psa_idle_timeout' property exists and is true. This
     /// indicates that @table supports entry ageing.
     static bool getSupportsTimeout(const IR::P4Table *table) {
-        auto timeout = table->properties->getProperty("psa_idle_timeout");
+        auto timeout = table->properties->getProperty("psa_idle_timeout"_cs);
 
         if (timeout == nullptr) return false;
 

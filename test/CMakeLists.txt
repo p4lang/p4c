@@ -51,7 +51,6 @@ set (GTEST_UNITTEST_SOURCES
   gtest/source_file_test.cpp
   gtest/strength_reduction.cpp
   gtest/transforms.cpp
-  gtest/stringify.cpp
   gtest/rtti_test.cpp
   gtest/nethash.cpp
   gtest/visitor.cpp

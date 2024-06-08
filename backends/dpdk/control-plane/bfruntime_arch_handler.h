@@ -136,7 +136,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
 
     cstring getBlockNamePrefix(const IR::Block *blk) {
         if (blockNamePrefixMap.count(blk) > 0) return blockNamePrefixMap[blk];
-        return "pipe";
+        return "pipe"_cs;
     }
 
     static p4configv1::Extern *getP4InfoExtern(P4RuntimeSymbolType typeId, cstring typeName,
@@ -154,7 +154,8 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                                         P4RuntimeSymbolType typeId, cstring typeName, cstring name,
                                         const IR::IAnnotated *annotations,
                                         const ::google::protobuf::Message &message,
-                                        p4configv1::P4Info *p4info, cstring pipeName = "") {
+                                        p4configv1::P4Info *p4info,
+                                        cstring pipeName = cstring::empty) {
         auto *externType = getP4InfoExtern(typeId, typeName, p4info);
         auto *externInstance = externType->add_instances();
         auto *pre = externInstance->mutable_preamble();
@@ -169,7 +170,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
     std::optional<ActionSelector> getActionSelector(const IR::ExternBlock *instance) {
         auto actionSelDecl = instance->node->to<IR::IDeclaration>();
         // to be deleted, used to support deprecated ActionSelector constructor.
-        auto size = instance->getParameterValue("size");
+        auto size = instance->getParameterValue("size"_cs);
         BUG_CHECK(size->is<IR::Constant>(), "Non-constant size");
         return ActionSelector{actionSelDecl->controlPlaneName(), size->to<IR::Constant>()->asInt(),
                               ActionSelector::defaultMaxGroupSize,
@@ -178,7 +179,8 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
     }
 
     void addActionSelector(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4Info,
-                           const ActionSelector &actionSelector, cstring pipeName = "") {
+                           const ActionSelector &actionSelector,
+                           cstring pipeName = cstring::empty) {
         ::dpdk::ActionSelector selector;
         selector.set_max_group_size(actionSelector.maxGroupSize);
         selector.set_num_groups(actionSelector.numGroups);
@@ -197,9 +199,9 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         selector.set_action_profile_id(
             symbols.getId(SymbolType::P4RT_ACTION_PROFILE(), profileName));
         cstring selectorName = profileName + "_sel";
-        addP4InfoExternInstance(symbols, SymbolTypeDPDK::P4RT_ACTION_SELECTOR(), "ActionSelector",
-                                selectorName, actionSelector.annotations, selector, p4Info,
-                                pipeName);
+        addP4InfoExternInstance(symbols, SymbolTypeDPDK::P4RT_ACTION_SELECTOR(),
+                                "ActionSelector"_cs, selectorName, actionSelector.annotations,
+                                selector, p4Info, pipeName);
     }
 
     void collectExternInstance(P4RuntimeSymbolTableIface *symbols,
@@ -316,7 +318,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
     /// @return true if @table's 'psa_idle_timeout' property exists and is true. This
     /// indicates that @table supports entry ageing.
     static bool getSupportsTimeout(const IR::P4Table *table) {
-        auto timeout = table->properties->getProperty("psa_idle_timeout");
+        auto timeout = table->properties->getProperty("psa_idle_timeout"_cs);
 
         if (timeout == nullptr) return false;
 

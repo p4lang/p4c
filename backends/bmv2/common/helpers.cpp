@@ -19,12 +19,12 @@ limitations under the License.
 namespace BMV2 {
 
 /// constant definition for bmv2
-const cstring MatchImplementation::selectorMatchTypeName = "selector";
-const cstring MatchImplementation::rangeMatchTypeName = "range";
-const cstring MatchImplementation::optionalMatchTypeName = "optional";
+const cstring MatchImplementation::selectorMatchTypeName = "selector"_cs;
+const cstring MatchImplementation::rangeMatchTypeName = "range"_cs;
+const cstring MatchImplementation::optionalMatchTypeName = "optional"_cs;
 const unsigned TableAttributes::defaultTableSize = 1024;
-const cstring V1ModelProperties::jsonMetadataParameterName = "standard_metadata";
-const cstring V1ModelProperties::validField = "$valid$";
+const cstring V1ModelProperties::jsonMetadataParameterName = "standard_metadata"_cs;
+const cstring V1ModelProperties::validField = "$valid$"_cs;
 
 Util::IJson *nodeName(const CFG::Node *node) {
     if (node->name.isNullOrEmpty())
@@ -40,26 +40,26 @@ Util::JsonArray *mkArrayField(Util::JsonObject *parent, cstring name) {
 }
 
 Util::JsonArray *mkParameters(Util::JsonObject *object) {
-    return mkArrayField(object, "parameters");
+    return mkArrayField(object, "parameters"_cs);
 }
 
 Util::JsonObject *mkPrimitive(cstring name, Util::JsonArray *appendTo) {
     auto result = new Util::JsonObject();
-    result->emplace("op", name);
+    result->emplace("op"_cs, name);
     appendTo->append(result);
     return result;
 }
 
 Util::JsonObject *mkPrimitive(cstring name) {
     auto result = new Util::JsonObject();
-    result->emplace("op", name);
+    result->emplace("op"_cs, name);
     return result;
 }
 
 cstring stringRepr(big_int value, unsigned bytes) {
-    cstring sign = "";
+    std::string sign;
     std::stringstream r;
-    cstring filler = "";
+    std::string filler;
     if (value < 0) {
         value = -value;
         sign = "-";
@@ -109,14 +109,14 @@ void ConversionContext::addToFieldList(const IR::Expression *expr, Util::JsonArr
     auto j = conv->convert(expr);
     conv->simpleExpressionsOnly = simple;  // restore state
     if (auto jo = j->to<Util::JsonObject>()) {
-        if (auto t = jo->get("type")) {
+        if (auto t = jo->get("type"_cs)) {
             if (auto type = t->to<Util::JsonValue>()) {
                 if (*type == "runtime_data") {
                     // Can't have runtime_data in field lists -- need hexstr instead
-                    auto val = jo->get("value")->to<Util::JsonValue>();
+                    auto val = jo->get("value"_cs)->to<Util::JsonValue>();
                     j = jo = new Util::JsonObject();
-                    jo->emplace("type", "hexstr");
-                    jo->emplace("value", stringRepr(val->getValue()));
+                    jo->emplace("type"_cs, "hexstr");
+                    jo->emplace("value"_cs, stringRepr(val->getValue()));
                 }
             }
         }
@@ -128,17 +128,17 @@ int ConversionContext::createFieldList(const IR::Expression *expr, cstring listN
     cstring group;
     auto fl = new Util::JsonObject();
     if (learn) {
-        group = "learn_lists";
+        group = "learn_lists"_cs;
         json->learn_lists->append(fl);
     } else {
-        group = "field_lists";
+        group = "field_lists"_cs;
         json->field_lists->append(fl);
     }
     int id = nextId(group);
-    fl->emplace("id", id);
-    fl->emplace("name", listName);
-    fl->emplace_non_null("source_info", expr->sourceInfoJsonObj());
-    auto elements = mkArrayField(fl, "elements");
+    fl->emplace("id"_cs, id);
+    fl->emplace("name"_cs, listName);
+    fl->emplace_non_null("source_info"_cs, expr->sourceInfoJsonObj());
+    auto elements = mkArrayField(fl, "elements"_cs);
     addToFieldList(expr, elements);
     return id;
 }
@@ -153,11 +153,11 @@ cstring ConversionContext::createCalculation(cstring algo, const IR::Expression 
                                              const IR::Node *sourcePositionNode = nullptr) {
     cstring calcName = refMap->newName("calc_");
     auto calc = new Util::JsonObject();
-    calc->emplace("name", calcName);
-    calc->emplace("id", nextId("calculations"));
+    calc->emplace("name"_cs, calcName);
+    calc->emplace("id"_cs, nextId("calculations"_cs));
     if (sourcePositionNode != nullptr)
-        calc->emplace_non_null("source_info", sourcePositionNode->sourceInfoJsonObj());
-    calc->emplace("algo", algo);
+        calc->emplace_non_null("source_info"_cs, sourcePositionNode->sourceInfoJsonObj());
+    calc->emplace("algo"_cs, algo);
     auto listFields = convertToList(fields, typeMap);
     if (!listFields) {
         modelError("%1%: expected a struct", fields);
@@ -168,11 +168,11 @@ cstring ConversionContext::createCalculation(cstring algo, const IR::Expression 
         auto array = jright->to<Util::JsonArray>();
         BUG_CHECK(array, "expected a JSON array");
         auto payload = new Util::JsonObject();
-        payload->emplace("type", "payload");
-        payload->emplace("value", (Util::IJson *)nullptr);
+        payload->emplace("type"_cs, "payload"_cs);
+        payload->emplace("value"_cs, (Util::IJson *)nullptr);
         array->append(payload);
     }
-    calc->emplace("input", jright);
+    calc->emplace("input"_cs, jright);
     calculations->append(calc);
     return calcName;
 }

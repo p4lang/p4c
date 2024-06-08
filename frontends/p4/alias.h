@@ -33,6 +33,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 /// This class represents the path to a location.
 /// Given a struct S { bit a; bit b; } and a variable S x;
 /// a path can be x.a, or just x.  An array index is represented as a
@@ -157,7 +159,7 @@ class ReadsWrites : public Inspector {
             result = e->append(Util::toString(index));
         } else {
             auto index = ::get(rw, expression->right);
-            result = e->append("*")->join(index);
+            result = e->append("*"_cs)->join(index);
         }
         rw.emplace(expression, result);
     }

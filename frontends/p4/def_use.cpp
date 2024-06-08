@@ -23,9 +23,11 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 // internal name for header valid bit; used only locally
-const cstring StorageFactory::validFieldName = "$valid";
-const cstring StorageFactory::indexFieldName = "$lastIndex";
+const cstring StorageFactory::validFieldName = "$valid"_cs;
+const cstring StorageFactory::indexFieldName = "$lastIndex"_cs;
 const LocationSet *LocationSet::empty = new LocationSet();
 ProgramPoint ProgramPoint::beforeStart;
 

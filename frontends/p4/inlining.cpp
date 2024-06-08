@@ -29,6 +29,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 namespace {
 
 class FindLocationSets : public Inspector {
@@ -570,7 +572,7 @@ void GeneralInliner::inline_subst(P4Block *caller,
                     substs->paramSubst.add(param, initializer);
                 } else {
                     // use a temporary variable
-                    cstring newName = refMap->newName(param->name);
+                    cstring newName = refMap->newName(param->name.name.string_view());
                     auto path = new IR::PathExpression(
                         param->srcInfo, new IR::Path(param->srcInfo, IR::ID(newName)));
                     substs->paramSubst.add(param, new IR::Argument(path));
@@ -705,7 +707,7 @@ class ComputeNewStateNames : public Inspector {
         } else if (state->name.name == IR::ParserState::accept) {
             newName = acceptName;
         } else {
-            cstring base = prefix + "_" + state->name.name;
+            std::string base = prefix + "_" + state->name.name;
             newName = refMap->newName(base);
         }
         stateRenameMap->emplace(state->name.name, newName);
@@ -850,7 +852,7 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
 
         callee = substs->rename<IR::P4Parser>(refMap, callee);
 
-        cstring nextState = refMap->newName(state->name);
+        cstring nextState = refMap->newName(state->name.name.string_view());
         std::map<cstring, cstring> renameMap;
         ComputeNewStateNames cnn(refMap, callee->name.name, nextState, &renameMap);
         cnn.setCalledBy(this);
@@ -935,6 +937,6 @@ const IR::Node *GeneralInliner::preorder(IR::P4Parser *caller) {
 }
 
 // set of annotations to _not_ propagate during inlining
-std::set<cstring> Inline::noPropagateAnnotations = {"name"};
+std::set<cstring> Inline::noPropagateAnnotations = {"name"_cs};
 
 }  // namespace P4

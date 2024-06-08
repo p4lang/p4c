@@ -23,6 +23,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 /**
  * Evaluates static_assert invocations.
  * A successful assertion is constant-folded to 'true'.
@@ -31,6 +33,9 @@ class DoStaticAssert : public Transform {
     ReferenceMap *refMap;
     TypeMap *typeMap;
     bool removeStatement;
+
+    // Cannot go static here as cstring is not constexpr
+    const cstring staticAssertMethodName = "static_assert"_cs;
 
  public:
     DoStaticAssert(ReferenceMap *refMap, TypeMap *typeMap)
@@ -42,7 +47,7 @@ class DoStaticAssert : public Transform {
     const IR::Node *postorder(IR::MethodCallExpression *method) override {
         MethodInstance *mi = MethodInstance::resolve(method, refMap, typeMap);
         if (auto ef = mi->to<ExternFunction>()) {
-            if (ef->method->name == "static_assert") {
+            if (ef->method->name == staticAssertMethodName) {
                 auto subst = ef->substitution;
                 auto params = subst.getParametersInOrder();
                 if (!params->moveNext()) {
@@ -56,7 +61,7 @@ class DoStaticAssert : public Transform {
                 CHECK_NULL(arg);
                 if (auto bl = arg->expression->to<IR::BoolLiteral>()) {
                     if (!bl->value) {
-                        cstring message = "static_assert failed";
+                        cstring message = "static_assert failed"_cs;
                         if (params->moveNext()) {
                             param = params->getCurrent();
                             CHECK_NULL(param);

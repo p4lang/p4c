@@ -110,12 +110,12 @@ class CRC16ChecksumAlgorithm : public CRCChecksumAlgorithm {
  public:
     CRC16ChecksumAlgorithm(const EBPFProgram *program, cstring name)
         : CRCChecksumAlgorithm(program, name, 16) {
-        initialValue = "0";
+        initialValue = "0"_cs;
         // We use a 0x8005 polynomial.
         // 0xA001 comes from 0x8005 value bits reflection.
-        polynomial = "0xA001";
-        updateMethod = "crc16_update";
-        finalizeMethod = "crc16_finalize";
+        polynomial = "0xA001"_cs;
+        updateMethod = "crc16_update"_cs;
+        finalizeMethod = "crc16_finalize"_cs;
     }
 
     static void emitGlobals(CodeBuilder *builder);
@@ -132,12 +132,12 @@ class CRC32ChecksumAlgorithm : public CRCChecksumAlgorithm {
  public:
     CRC32ChecksumAlgorithm(const EBPFProgram *program, cstring name)
         : CRCChecksumAlgorithm(program, name, 32) {
-        initialValue = "0xffffffff";
+        initialValue = "0xffffffff"_cs;
         // We use a 0x04C11DB7 polynomial.
         // 0xEDB88320 comes from 0x04C11DB7 value bits reflection.
-        polynomial = "0xEDB88320";
-        updateMethod = "crc32_update";
-        finalizeMethod = "crc32_finalize";
+        polynomial = "0xEDB88320"_cs;
+        updateMethod = "crc32_update"_cs;
+        finalizeMethod = "crc32_finalize"_cs;
     }
 
     static void emitGlobals(CodeBuilder *builder);

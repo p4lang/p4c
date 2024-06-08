@@ -84,7 +84,7 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
     if (TestgenOptions::get().testBackend == "METADATA") {
         auto *metadataCollection = new MetadataCollection();
         const auto *pnaProgInfo = getProgramInfo().checkedTo<PnaDpdkProgramInfo>();
-        const auto *localMetadataVar = pnaProgInfo->getBlockParam("MainParserT", 2);
+        const auto *localMetadataVar = pnaProgInfo->getBlockParam("MainParserT"_cs, 2);
         const auto &flatFields = executionState->getFlatFields(localMetadataVar, {});
         for (const auto &fieldRef : flatFields) {
             const auto *fieldVal = finalModel->evaluate(executionState->get(fieldRef), true);
@@ -94,35 +94,36 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
             fieldString = fieldString.substr(fieldString.find('.') - fieldString.begin() + 1);
             metadataCollection->addMetaDataField(fieldString, fieldVal);
         }
-        testSpec->addTestObject("metadata_collection", "metadata_collection", metadataCollection);
+        testSpec->addTestObject("metadata_collection"_cs, "metadata_collection"_cs,
+                                metadataCollection);
         return testSpec;
     }
 
     // We retrieve the individual table configurations from the execution state.
-    const auto uninterpretedTableConfigs = executionState->getTestObjectCategory("tableconfigs");
+    const auto uninterpretedTableConfigs = executionState->getTestObjectCategory("tableconfigs"_cs);
     // Since these configurations are uninterpreted we need to convert them. We launch a
     // helper function to solve the variables involved in each table configuration.
     for (const auto &tablePair : uninterpretedTableConfigs) {
         const auto tableName = tablePair.first;
         const auto *uninterpretedTableConfig = tablePair.second->checkedTo<TableConfig>();
         const auto *const tableConfig = uninterpretedTableConfig->evaluate(*finalModel, true);
-        testSpec->addTestObject("tables", tableName, tableConfig);
+        testSpec->addTestObject("tables"_cs, tableName, tableConfig);
     }
 
-    const auto actionProfiles = executionState->getTestObjectCategory("action_profile");
+    const auto actionProfiles = executionState->getTestObjectCategory("action_profile"_cs);
     for (const auto &testObject : actionProfiles) {
         const auto profileName = testObject.first;
         const auto *actionProfile = testObject.second->checkedTo<PnaDpdkActionProfile>();
         const auto *evaluatedProfile = actionProfile->evaluate(*finalModel, true);
-        testSpec->addTestObject("action_profiles", profileName, evaluatedProfile);
+        testSpec->addTestObject("action_profiles"_cs, profileName, evaluatedProfile);
     }
 
-    const auto actionSelectors = executionState->getTestObjectCategory("action_selector");
+    const auto actionSelectors = executionState->getTestObjectCategory("action_selector"_cs);
     for (const auto &testObject : actionSelectors) {
         const auto selectorName = testObject.first;
         const auto *actionSelector = testObject.second->checkedTo<PnaDpdkActionSelector>();
         const auto *evaluatedSelector = actionSelector->evaluate(*finalModel, true);
-        testSpec->addTestObject("action_selectors", selectorName, evaluatedSelector);
+        testSpec->addTestObject("action_selectors"_cs, selectorName, evaluatedSelector);
     }
 
     return testSpec;

@@ -48,7 +48,7 @@ bool ControlBodyTranslatorPSA::preorder(const IR::AssignmentStatement *a) {
                    ext->originalExternType->name.name == "DirectMeter") {
             // It is just for trace message before meter execution
             cstring name = EBPFObject::externalName(ext->object);
-            auto msgStr = Util::printf_format("Executing meter: %s", name);
+            auto msgStr = absl::StrFormat("Executing meter: %s", name);
             builder->target->emitTraceMessage(builder, msgStr.c_str());
         }
     }
