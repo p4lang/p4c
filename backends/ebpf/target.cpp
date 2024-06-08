@@ -67,8 +67,8 @@ void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstrin
                                         TableKind tableKind, cstring keyType, cstring valueType,
                                         unsigned size) const {
     cstring kind, flags;
-    cstring registerTable = "REGISTER_TABLE(%s, %s, %s, %s, %d)"_cs;
-    cstring registerTableWithFlags = "REGISTER_TABLE_FLAGS(%s, %s, %s, %s, %d, %s)"_cs;
+    static constexpr char registerTable[] = "REGISTER_TABLE(%s, %s, %s, %s, %d)";
+    static constexpr char registerTableWithFlags[] = "REGISTER_TABLE_FLAGS(%s, %s, %s, %s, %d, %s)";
 
     kind = getBPFMapType(tableKind);
 
@@ -121,8 +121,9 @@ void KernelSamplesTarget::emitMapInMapDecl(Util::SourceCodeBuilder *builder, cst
         BUG("Unsupported type of outer map for map-in-map");
     }
 
-    cstring registerOuterTable = "REGISTER_TABLE_OUTER(%s, %s_OF_MAPS, %s, %s, %d, %d, %s)"_cs;
-    cstring registerInnerTable = "REGISTER_TABLE_INNER(%s, %s, %s, %s, %d, %d, %d)"_cs;
+    static constexpr char registerOuterTable[] =
+        "REGISTER_TABLE_OUTER(%s, %s_OF_MAPS, %s, %s, %d, %d, %s)";
+    static constexpr char registerInnerTable[] = "REGISTER_TABLE_INNER(%s, %s, %s, %s, %d, %d, %d)";
 
     innerMapIndex++;
 

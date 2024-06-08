@@ -165,12 +165,11 @@ void EBPFActionProfilePSA::emitInstance(CodeBuilder *builder) {
 
 void EBPFActionProfilePSA::applyImplementation(CodeBuilder *builder, cstring tableValueName,
                                                cstring actionRunVariable) {
-    cstring msg = Util::printf_format("ActionProfile: applying %s", instanceName.c_str());
+    cstring msg = absl::StrFormat("ActionProfile: applying %s", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msg.c_str());
 
     cstring apValueName = program->refMap->newName("ap_value");
-    cstring apKeyName =
-        Util::printf_format("%s->%s", tableValueName.c_str(), referenceName.c_str());
+    cstring apKeyName = absl::StrFormat("%s->%s", tableValueName.c_str(), referenceName.c_str());
 
     builder->target->emitTraceMessage(builder, "ActionProfile: entry id %u", 1, apKeyName.c_str());
 
@@ -200,7 +199,7 @@ void EBPFActionProfilePSA::applyImplementation(CodeBuilder *builder, cstring tab
     builder->endOfStatement(true);
     builder->blockEnd(true);
 
-    msg = Util::printf_format("ActionProfile: %s applied", instanceName.c_str());
+    msg = absl::StrFormat("ActionProfile: %s applied", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msg.c_str());
 }
 
@@ -236,7 +235,7 @@ EBPFActionSelectorPSA::EBPFActionSelectorPSA(const EBPFProgram *program, CodeGen
                 "value truncation, must be at least 1 bit",
                 decl->arguments->at(2)->expression);
     }
-    outputHashMask = Util::printf_format("0x%llx", (1ull << outputHashWidth) - 1);
+    outputHashMask = absl::StrFormat("0x%llx", (1ull << outputHashWidth) - 1);
 
     // map names
     actionsMapName = instanceName + "_actions";
@@ -330,7 +329,7 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder *builder, cstring ta
                                                 cstring actionRunVariable) {
     if (hashEngine == nullptr) return;
 
-    cstring msg = Util::printf_format("ActionSelector: applying %s", instanceName.c_str());
+    cstring msg = absl::StrFormat("ActionSelector: applying %s", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msg.c_str());
 
     // 1. Declare variables.
@@ -518,7 +517,7 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder *builder, cstring ta
     }
     builder->blockEnd(true);
 
-    msg = Util::printf_format("ActionSelector: %s applied", instanceName.c_str());
+    msg = absl::StrFormat("ActionSelector: %s applied", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msg.c_str());
 }
 
@@ -674,7 +673,7 @@ void EBPFActionSelectorPSA::emitCacheTypes(CodeBuilder *builder) {
     for (auto s : selectors) {
         auto type = program->typeMap->getType(s->expression);
         auto ebpfType = EBPFTypeFactory::instance->create(type);
-        cstring fieldName = Util::printf_format("field%u", fieldNumber++);
+        cstring fieldName = absl::StrFormat("field%u", fieldNumber++);
 
         builder->emitIndent();
         ebpfType->declare(builder, fieldName, false);
@@ -719,7 +718,7 @@ void EBPFActionSelectorPSA::emitCacheLookup(CodeBuilder *builder, cstring key, c
     for (auto s : selectors) {
         auto type = program->typeMap->getType(s->expression);
         auto ebpfType = EBPFTypeFactory::instance->create(type);
-        cstring fieldName = Util::printf_format("field%u", fieldNumber++);
+        cstring fieldName = absl::StrFormat("field%u", fieldNumber++);
 
         bool memcpy = false;
         auto scalar = ebpfType->to<EBPFScalarType>();

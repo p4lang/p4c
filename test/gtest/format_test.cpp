@@ -53,9 +53,6 @@ TEST(Util, Format) {
 
     message = context.errorReporter().format_message("%1% %2%", x, 5);
     EXPECT_EQ("x 5\n", message);
-
-    message = Util::printf_format("Number=%d, String=%s", 5, "short");
-    EXPECT_EQ("Number=5, String=short", message);
 }
 
 }  // namespace Util

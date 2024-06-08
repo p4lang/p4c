@@ -218,6 +218,8 @@ class ErrorReporter {
         Util::SourcePosition position = sources->getCurrentPosition();
         position--;
 
+        // Unfortunately, we cannot go with statically checked format string
+        // here as it would require some changes to yyerror
         std::string message;
         if (!absl::FormatUntyped(&message, absl::UntypedFormatSpec(fmt),
                                  {absl::FormatArg(args)...})) {

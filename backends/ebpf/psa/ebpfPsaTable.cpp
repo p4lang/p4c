@@ -634,16 +634,15 @@ void EBPFTablePSA::emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName,
     builder->emitIndent();
     builder->appendFormat("if (%s) ", returnCode.c_str());
     builder->blockStart();
-    cstring msgStr = Util::printf_format("Map initializer: Error while map (%s) update, code: %s",
-                                         mapName, "%d");
+    cstring msgStr =
+        absl::StrFormat("Map initializer: Error while map (%s) update, code: %s", mapName, "%d");
     builder->target->emitTraceMessage(builder, msgStr, 1, returnCode.c_str());
 
     builder->blockEnd(false);
     builder->append(" else ");
 
     builder->blockStart();
-    msgStr = Util::printf_format("Map initializer: Map (%s) update succeed", mapName,
-                                 returnCode.c_str());
+    msgStr = absl::StrFormat("Map initializer: Map (%s) update succeed", mapName);
     builder->target->emitTraceMessage(builder, msgStr);
     builder->blockEnd(true);
 }
