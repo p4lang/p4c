@@ -54,7 +54,7 @@ bool TestBackEnd::run(const FinalState &state) {
         // produce a test with an output packet.
         if (testgenOptions.outputPacketOnly) {
             if (executionState->getPacketBufferSize() <= 0 ||
-                executionState->getProperty<bool>("drop")) {
+                executionState->getProperty<bool>("drop"_cs)) {
                 return needsToTerminate(testCount);
             }
         }
@@ -62,14 +62,14 @@ bool TestBackEnd::run(const FinalState &state) {
         // Don't increase the test count if --dropped-packet-only is enabled and we produce a test
         // with an output packet.
         if (testgenOptions.droppedPacketOnly) {
-            if (!executionState->getProperty<bool>("drop")) {
+            if (!executionState->getProperty<bool>("drop"_cs)) {
                 return needsToTerminate(testCount);
             }
         }
 
         // If assertion mode is active, ignore any test that does not trigger an assertion.
         if (testgenOptions.assertionModeEnabled) {
-            if (!executionState->getProperty<bool>("assertionTriggered")) {
+            if (!executionState->getProperty<bool>("assertionTriggered"_cs)) {
                 return needsToTerminate(testCount);
             }
             printFeature("test_info", 4,
@@ -217,10 +217,10 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
     auto inputPortInt = IR::getIntFromLiteral(inputPort);
     auto outputPortInt = IR::getIntFromLiteral(outputPortVar);
 
-    return {inputPacket->checkedTo<IR::Constant>(),   inputPortInt,
-            outputPacket->checkedTo<IR::Constant>(),  outputPortInt,
-            evalMask->checkedTo<IR::Constant>(),      *programTraces,
-            executionState->getProperty<bool>("drop")};
+    return {inputPacket->checkedTo<IR::Constant>(),      inputPortInt,
+            outputPacket->checkedTo<IR::Constant>(),     outputPortInt,
+            evalMask->checkedTo<IR::Constant>(),         *programTraces,
+            executionState->getProperty<bool>("drop"_cs)};
 }
 
 bool TestBackEnd::printTestInfo(const ExecutionState * /*executionState*/, const TestInfo &testInfo,

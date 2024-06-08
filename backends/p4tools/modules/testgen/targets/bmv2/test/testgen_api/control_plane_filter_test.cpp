@@ -13,6 +13,8 @@
 
 namespace Test {
 
+using namespace P4::literals;
+
 using testing::Contains;
 using testing::HasSubstr;
 using testing::Not;
@@ -63,15 +65,15 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
 
 CompilerOptions generateDefaultApiTestCompilerOptions() {
     auto compilerOptions = P4CContextWithOptions<CompilerOptions>::get().options();
-    compilerOptions.target = "bmv2";
-    compilerOptions.arch = "v1model";
+    compilerOptions.target = "bmv2"_cs;
+    compilerOptions.arch = "v1model"_cs;
     return compilerOptions;
 }
 
 P4Tools::P4Testgen::TestgenOptions &generateDefaultApiTestTestgenOptions() {
     auto &testgenOptions = P4Tools::P4Testgen::TestgenOptions::get();
-    testgenOptions.testBackend = "PROTOBUF_IR";
-    testgenOptions.testBaseName = "dummy";
+    testgenOptions.testBackend = "PROTOBUF_IR"_cs;
+    testgenOptions.testBaseName = "dummy"_cs;
     testgenOptions.seed = 1;
     testgenOptions.maxTests = 0;
     // Create a bespoke packet for the Ethernet extract call.
@@ -156,7 +158,7 @@ TEST(P4TestgenControlPlaneFilterTest, FiltersControlPlaneEntities) {
 
     // We install a filter.
     // Since we can not generate a config for the table we should only generate one test.
-    testgenOptions.skippedControlPlaneEntities = {"ingress.drop_table"};
+    testgenOptions.skippedControlPlaneEntities = {"ingress.drop_table"_cs};
 
     auto testListOpt =
         P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
@@ -196,7 +198,7 @@ TEST(P4TestgenControlPlaneFilterTest, IgnoresBogusControlPlaneEntities) {
 
     // This is a bogus control plane element, which is ignored. We expect two tests.
     // One which exercises action acl_drop and one which exercises the default action, NoAction.
-    testgenOptions.skippedControlPlaneEntities = {"ingress.bogus_table"};
+    testgenOptions.skippedControlPlaneEntities = {"ingress.bogus_table"_cs};
 
     auto testListOpt =
         P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
@@ -262,7 +264,8 @@ TEST(P4TestgenControlPlaneFilterTest, FiltersMultipleControlPlaneEntities) {
 
     // We install a filter.
     // Since we can not generate a config for the table we should only generate one test.
-    testgenOptions.skippedControlPlaneEntities = {"ingress.drop_table", "ingress.set_eth_table"};
+    testgenOptions.skippedControlPlaneEntities = {"ingress.drop_table"_cs,
+                                                  "ingress.set_eth_table"_cs};
 
     auto testListOpt =
         P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);

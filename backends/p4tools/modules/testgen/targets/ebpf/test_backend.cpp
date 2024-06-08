@@ -92,14 +92,14 @@ const TestSpec *EBPFTestBackend::createTestSpec(const ExecutionState *executionS
     }
     testSpec = new TestSpec(ingressPacket, egressPacket, testInfo.programTraces);
     // We retrieve the individual table configurations from the execution state.
-    const auto uninterpretedTableConfigs = executionState->getTestObjectCategory("tableconfigs");
+    const auto uninterpretedTableConfigs = executionState->getTestObjectCategory("tableconfigs"_cs);
     // Since these configurations are uninterpreted we need to convert them. We launch a
     // helper function to solve the variables involved in each table configuration.
     for (const auto &tablePair : uninterpretedTableConfigs) {
         const auto tableName = tablePair.first;
         const auto *uninterpretedTableConfig = tablePair.second->checkedTo<TableConfig>();
         const auto *const tableConfig = uninterpretedTableConfig->evaluate(*finalModel, true);
-        testSpec->addTestObject("tables", tableName, tableConfig);
+        testSpec->addTestObject("tables"_cs, tableName, tableConfig);
     }
     return testSpec;
 }

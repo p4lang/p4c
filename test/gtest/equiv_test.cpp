@@ -17,8 +17,8 @@ limitations under the License.
 #include <gtest/gtest.h>
 
 #include "ir/ir.h"
-#include "ir/visitor.h"
-#include "lib/exceptions.h"
+
+using namespace P4::literals;
 
 TEST(IR, Equiv) {
     auto *t = IR::Type::Bits::get(16);
@@ -60,14 +60,14 @@ TEST(IR, Equiv) {
 
     auto *pr1 = new IR::V1Program;
     auto *pr2 = pr1->clone();
-    pr1->add("a", a1);
-    pr1->add("b", b);
-    pr1->add("call", call1);
-    pr2->add("a", a2);
-    pr2->add("b", b);
-    pr2->add("call", call2);
+    pr1->add("a"_cs, a1);
+    pr1->add("b"_cs, b);
+    pr1->add("call"_cs, call1);
+    pr2->add("a"_cs, a2);
+    pr2->add("b"_cs, b);
+    pr2->add("call"_cs, call2);
     EXPECT_TRUE(pr1->equiv(*pr2));
-    pr1->add("lista", list1);
-    pr2->add("listb", list1);
+    pr1->add("lista"_cs, list1);
+    pr2->add("listb"_cs, list1);
     EXPECT_FALSE(pr1->equiv(*pr2));
 }

@@ -23,15 +23,15 @@ TEST(IndexedVector, basics) {
     EXPECT_EQ(vec.size(), 1u);
     EXPECT_EQ(vec[0]->name.name, "foo");
 
-    vec.push_back(testItem("bar"));
+    vec.push_back(testItem("bar"_cs));
     EXPECT_FALSE(vec.empty());
     EXPECT_EQ(vec.size(), 2u);
     EXPECT_EQ(vec[1]->name.name, "bar");
 
-    cstring check = "foo";
-    for (auto *dec : vec) {
+    cstring check = "foo"_cs;
+    for (const auto *dec : vec) {
         EXPECT_EQ(dec->name.name, check);
-        check = "bar";
+        check = "bar"_cs;
     }
 
     vec.pop_back();
@@ -39,7 +39,7 @@ TEST(IndexedVector, basics) {
     EXPECT_EQ(vec.size(), 1u);
     EXPECT_EQ(vec[0]->name.name, "foo");
 
-    vec.removeByName("foo");
+    vec.removeByName("foo"_cs);
     EXPECT_TRUE(vec.empty());
     EXPECT_EQ(vec.size(), 0u);
 }
@@ -64,7 +64,7 @@ TEST(IndexedVector, move_ctor) {
     TestVector vec2(std::move(vec));
     EXPECT_TRUE(vec.empty());
     EXPECT_TRUE(vec2.empty());
-    vec2.push_back(testItem("foo"));
+    vec2.push_back(testItem("foo"_cs));
     EXPECT_TRUE(vec.empty());
     EXPECT_FALSE(vec2.empty());
 
@@ -75,21 +75,21 @@ TEST(IndexedVector, move_ctor) {
 }
 
 TEST(IndexedVector, ilist_ctor) {
-    TestVector vec{testItem("foo"), testItem("bar")};
+    TestVector vec{testItem("foo"_cs), testItem("bar"_cs)};
     EXPECT_EQ(vec.size(), 2u);
     EXPECT_EQ(vec[0]->name.name, "foo");
     EXPECT_EQ(vec[1]->name.name, "bar");
 }
 
 TEST(IndexedVector, save_vector_ctor) {
-    TestVector vec(safe_vector<const StructField *>{testItem("foo"), testItem("bar")});
+    TestVector vec(safe_vector<const StructField *>{testItem("foo"_cs), testItem("bar"_cs)});
     EXPECT_EQ(vec.size(), 2u);
     EXPECT_EQ(vec[0]->name.name, "foo");
     EXPECT_EQ(vec[1]->name.name, "bar");
 }
 
 TEST(IndexedVector, Vector_ctor) {
-    TestVector vec(Vector<StructField>{testItem("foo"), testItem("bar")});
+    TestVector vec(Vector<StructField>{testItem("foo"_cs), testItem("bar"_cs)});
     EXPECT_EQ(vec.size(), 2u);
     EXPECT_EQ(vec[0]->name.name, "foo");
     EXPECT_EQ(vec[1]->name.name, "bar");

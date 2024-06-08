@@ -18,16 +18,21 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 // Keep this in sync with the lexer
-std::set<cstring> reservedWords = {
-    "abstract",  // experimental
-    "action",     "actions", "apply",  "bool",    "bit",    "const",      "control", "default",
-    "else",       "enum",    "error",  "exit",    "extern", "false",      "header",  "header_union",
-    "if",         "in",      "inout",  "int",     "key",    "match_kind", "out",     "parser",
-    "package",    "return",  "select", "set",     "state",  "struct",     "switch",  "table",
-    "this",  // experimental
-    "transition", "true",    "tuple",  "typedef", "varbit", "verify",     "void",    "_",
-    "NoAction"  // core.p4
+const std::set<cstring> reservedWords = {
+    "abstract"_cs,  // experimental
+    "action"_cs,     "actions"_cs, "apply"_cs,  "bool"_cs,         "bit"_cs,    "const"_cs,
+    "control"_cs,    "default"_cs, "else"_cs,   "enum"_cs,         "error"_cs,  "exit"_cs,
+    "extern"_cs,     "false"_cs,   "header"_cs, "header_union"_cs, "if"_cs,     "in"_cs,
+    "inout"_cs,      "int"_cs,     "key"_cs,    "match_kind"_cs,   "out"_cs,    "parser"_cs,
+    "package"_cs,    "return"_cs,  "select"_cs, "set"_cs,          "state"_cs,  "struct"_cs,
+    "switch"_cs,     "table"_cs,
+    "this"_cs,  // experimental
+    "transition"_cs, "true"_cs,    "tuple"_cs,  "typedef"_cs,      "varbit"_cs, "verify"_cs,
+    "void"_cs,       "_"_cs,
+    "NoAction"_cs  // core.p4
 };
 
 }  // namespace P4

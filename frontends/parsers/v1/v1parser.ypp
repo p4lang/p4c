@@ -42,6 +42,8 @@ namespace V1 {
 class V1Lexer;
 class V1ParserDriver;
 
+using namespace P4::literals;
+
 struct BBoxType {
     IR::Vector<IR::Method>* methods;
     IR::NameMap<IR::Attribute, ordered_map>* attribs;
@@ -500,7 +502,7 @@ parser_statement_list: /* epsilon */
     | parser_statement_list SET_METADATA "(" expression "," expression ")" ";"
       { ($$=$1)->stmts.push_back(new IR::Primitive(@2+@7, $2, $4, $6)); }
     | parser_statement_list expression "=" expression ";"
-      { ($$=$1)->stmts.push_back(new IR::Primitive(@3, "set_metadata", $2, $4)); }
+      { ($$=$1)->stmts.push_back(new IR::Primitive(@3, "set_metadata"_cs, $2, $4)); }
     | parser_statement_list RETURN name ";"
       { ($$=$1)->default_return = IR::ID(@3, $3); }
     | parser_statement_list RETURN SELECT "(" expression_list ")" "{" case_entry_list "}"
@@ -698,7 +700,7 @@ action_statement_list: /* epsilon */
     | action_statement_list name "(" opt_expression_list ")" ";"
       { ($$ = $1)->action.push_back(new IR::Primitive(@2+@5, $2, $4)); }
     | action_statement_list field_ref "=" expression ";"
-      { ($$ = $1)->action.push_back(new IR::Primitive(@3, "modify_field", $2, $4)); }
+      { ($$ = $1)->action.push_back(new IR::Primitive(@3, "modify_field"_cs, $2, $4)); }
     | action_statement_list field_ref "(" opt_expression_list ")" ";"
       { ($$ = $1)->action.push_back(new IR::Primitive(@2+@5, $2->member, $2->expr, $4)); }
     | action_statement_list error ";"
@@ -855,7 +857,7 @@ apply_case_list: /* epsilon */ { $$ = new IR::Apply; }
           }
           $$ = $1; }
     | apply_case_list DEFAULT control_statement
-        { ($$=$1)->actions["default"] = $3; }
+        { ($$=$1)->actions["default"_cs] = $3; }
 ;
 
 /************/

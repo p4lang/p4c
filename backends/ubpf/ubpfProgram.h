@@ -44,7 +44,7 @@ class UBPFProgram : public EBPF::EBPFProgram {
     cstring contextVar, outerHdrOffsetVar, outerHdrLengthVar;
     cstring stdMetadataVar;
     cstring packetTruncatedSizeVar;
-    cstring arrayIndexType = "uint32_t";
+    cstring arrayIndexType = "uint32_t"_cs;
 
     UBPFProgram(const EbpfOptions &options, const IR::P4Program *program, P4::ReferenceMap *refMap,
                 P4::TypeMap *typeMap, const IR::ToplevelBlock *toplevel)
@@ -76,8 +76,8 @@ class UBPFProgram : public EBPF::EBPFProgram {
 
     bool isLibraryMethod(cstring methodName) override {
         static std::set<cstring> DEFAULT_METHODS = {
-            "mark_to_drop", "mark_to_pass",  "ubpf_time_get_ns", "truncate",
-            "hash",         "csum_replace2", "csum_replace4",
+            "mark_to_drop"_cs, "mark_to_pass"_cs,  "ubpf_time_get_ns"_cs, "truncate"_cs,
+            "hash"_cs,         "csum_replace2"_cs, "csum_replace4"_cs,
         };
         return DEFAULT_METHODS.find(methodName) != DEFAULT_METHODS.end() ||
                EBPFProgram::isLibraryMethod(methodName);

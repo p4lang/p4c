@@ -70,13 +70,20 @@ limitations under the License.
  * This is convenient, but in performance-sensitive code it's good to be aware
  * that mixing the two types of strings can trigger a lot of implicit copies.
  */
+
+class cstring;
+
+namespace P4::literals {
+inline cstring operator""_cs(const char *str, std::size_t len);
+}
+
 class cstring {
     const char *str = nullptr;
 
  public:
     cstring() = default;
-    // TODO (DanilLutsenko): Enable when initialization with 0 will be eliminated
-    // cstring(std::nullptr_t) {} // NOLINT(runtime/explicit)
+
+    cstring(std::nullptr_t) {}  // NOLINT(runtime/explicit)
 
     // Copy and assignment from other kinds of strings
 
@@ -92,7 +99,7 @@ class cstring {
     // Owner of string is someone else, we do not know size of string.
     // Do not use if possible, this is linear time operation if string
     // not exists in table, because the underlying string must be copied.
-    cstring(const char *string) {  // NOLINT(runtime/explicit)
+    explicit cstring(const char *string) {
         if (string != nullptr) {
             construct_from_shared(string, std::strlen(string));
         }
@@ -151,6 +158,8 @@ class cstring {
     // string is literal
     void construct_from_literal(const char *string, std::size_t length);
 
+    friend cstring P4::literals::operator""_cs(const char *str, std::size_t len);
+
  public:
     /// @return a version of the string where all necessary characters
     /// are properly escaped to make this into a json string (without
@@ -166,10 +175,12 @@ class cstring {
     const char *c_str() const { return str; }
     operator const char *() const { return str; }
 
-    std::string string() const { return std::string(str); }
+    std::string string() const { return str ? std::string(str) : std::string(""); }
     explicit operator std::string() const { return string(); }
 
-    std::string_view string_view() const { return std::string_view(str); }
+    std::string_view string_view() const {
+        return str ? std::string_view(str) : std::string_view("");
+    }
     explicit operator std::string_view() const { return string_view(); }
 
     // Size tests. Constant time except for size(), which is linear time.
@@ -211,6 +222,8 @@ class cstring {
     bool operator>(const char *a) const { return str ? !a || strcmp(str, a) > 0 : false; }
     bool operator>=(cstring a) const { return *this >= a.str; }
     bool operator>=(const char *a) const { return str ? !a || strcmp(str, a) >= 0 : !a; }
+    bool operator==(std::string_view a) const { return str ? a.compare(str) == 0 : a.empty(); }
+    bool operator!=(std::string_view a) const { return str ? a.compare(str) != 0 : !a.empty(); }
 
     bool operator==(const std::string &a) const { return *this == a.c_str(); }
     bool operator!=(const std::string &a) const { return *this != a.c_str(); }
@@ -219,8 +232,8 @@ class cstring {
     bool operator>(const std::string &a) const { return *this > a.c_str(); }
     bool operator>=(const std::string &a) const { return *this >= a.c_str(); }
 
-    bool startsWith(const cstring &prefix) const;
-    bool endsWith(const cstring &suffix) const;
+    bool startsWith(std::string_view prefix) const;
+    bool endsWith(std::string_view suffix) const;
 
     // FIXME (DanilLutsenko): We really need mutations for immutable string?
     // Probably better do transformation in std::string-like containter and
@@ -237,7 +250,7 @@ class cstring {
 
     cstring before(const char *at) const;
     cstring substr(size_t start) const {
-        return (start >= size()) ? "" : substr(start, size() - start);
+        return (start >= size()) ? cstring::literal("") : substr(start, size() - start);
     }
     cstring substr(size_t start, size_t length) const;
     cstring replace(char find, char replace) const;
@@ -384,7 +397,11 @@ namespace P4::literals {
 /// A user-provided literal suffix to allow creation of cstring from literals: "foo"_cs.
 /// Note that the C++ standard mandates that all user-defined literal suffixes defined outside of
 /// the standard library must start with underscore.
-inline cstring operator""_cs(const char *str, std::size_t len) { return cstring(str, len); }
+inline cstring operator""_cs(const char *str, std::size_t len) {
+    cstring result;
+    result.construct_from_literal(str, len);
+    return result;
+}
 }  // namespace P4::literals
 
 namespace std {

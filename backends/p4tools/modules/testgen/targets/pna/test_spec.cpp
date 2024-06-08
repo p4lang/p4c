@@ -7,6 +7,8 @@
 
 namespace P4Tools::P4Testgen::Pna {
 
+using namespace P4::literals;
+
 /* =========================================================================================
  *  PnaDpdkRegister
  * ========================================================================================= */
@@ -20,7 +22,7 @@ void PnaDpdkRegisterValue::addRegisterCondition(PnaDpdkRegisterCondition cond) {
 
 const IR::Expression *PnaDpdkRegisterValue::getInitialValue() const { return initialValue; }
 
-cstring PnaDpdkRegisterValue::getObjectName() const { return "PnaDpdkRegisterValue"; }
+cstring PnaDpdkRegisterValue::getObjectName() const { return "PnaDpdkRegisterValue"_cs; }
 
 const IR::Expression *PnaDpdkRegisterValue::getCurrentValue(const IR::Expression *index) const {
     const IR::Expression *baseExpr = initialValue;
@@ -76,7 +78,7 @@ const PnaDpdkRegisterCondition *PnaDpdkRegisterCondition::evaluate(const Model &
     return new PnaDpdkRegisterCondition(evaluatedIndex, evaluatedValue);
 }
 
-cstring PnaDpdkRegisterCondition::getObjectName() const { return "PnaDpdkRegisterCondition"; }
+cstring PnaDpdkRegisterCondition::getObjectName() const { return "PnaDpdkRegisterCondition"_cs; }
 
 /* =========================================================================================
  *  PnaDpdkActionProfile
@@ -122,7 +124,7 @@ PnaDpdkActionSelector::PnaDpdkActionSelector(const IR::IDeclaration *selectorDec
                                              const PnaDpdkActionProfile *actionProfile)
     : selectorDecl(selectorDecl), actionProfile(actionProfile) {}
 
-cstring PnaDpdkActionSelector::getObjectName() const { return "PnaDpdkActionSelector"; }
+cstring PnaDpdkActionSelector::getObjectName() const { return "PnaDpdkActionSelector"_cs; }
 
 const IR::IDeclaration *PnaDpdkActionSelector::getSelectorDecl() const { return selectorDecl; }
 
@@ -157,7 +159,7 @@ const Optional *Optional::evaluate(const Model &model, bool doComplete) const {
     return new Optional(getKey(), evaluatedValue, addMatch);
 }
 
-cstring Optional::getObjectName() const { return "Optional"; }
+cstring Optional::getObjectName() const { return "Optional"_cs; }
 
 bool Optional::addAsExactMatch() const { return addMatch; }
 
@@ -194,7 +196,7 @@ const Range *Range::evaluate(const Model &model, bool doComplete) const {
 
 MetadataCollection::MetadataCollection() = default;
 
-cstring MetadataCollection::getObjectName() const { return "MetadataCollection"; }
+cstring MetadataCollection::getObjectName() const { return "MetadataCollection"_cs; }
 
 const MetadataCollection *MetadataCollection::evaluate(const Model & /*model*/,
                                                        bool /*finalModel*/) const {
@@ -213,6 +215,6 @@ void MetadataCollection::addMetaDataField(cstring name, const IR::Literal *metad
     metadataFields[name] = metadataField;
 }
 
-cstring Range::getObjectName() const { return "Range"; }
+cstring Range::getObjectName() const { return "Range"_cs; }
 
 }  // namespace P4Tools::P4Testgen::Pna

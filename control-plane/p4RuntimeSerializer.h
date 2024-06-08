@@ -48,6 +48,8 @@ class CompilerOptions;
 
 namespace P4 {
 
+using namespace literals;
+
 /// A P4 program's control-plane API, represented in terms of P4Runtime's data
 /// structures. Can be inspected or serialized.
 struct P4RuntimeAPI {
@@ -139,7 +141,7 @@ class P4RuntimeSerializer {
 
 /// Calls @ref P4RuntimeSerializer::generateP4Runtime on the @ref
 /// P4RuntimeSerializer singleton.
-P4RuntimeAPI generateP4Runtime(const IR::P4Program *program, cstring arch = "v1model");
+P4RuntimeAPI generateP4Runtime(const IR::P4Program *program, cstring arch = "v1model"_cs);
 
 /// Calls @ref P4RuntimeSerializer::serializeP4RuntimeIfRequired on the @ref
 /// P4RuntimeSerializer singleton.

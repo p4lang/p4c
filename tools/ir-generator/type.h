@@ -25,6 +25,8 @@ limitations under the License.
 class IrClass;
 class IrNamespace;
 
+using namespace P4::literals;
+
 #define ALL_TYPES(M) \
     M(NamedType)     \
     M(TemplateInstantiation) M(ReferenceType) M(PointerType) M(ArrayType) M(FunctionType)
@@ -41,7 +43,7 @@ class Type : public Util::IHasSourceInfo {
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     virtual const IrClass *resolve(const IrNamespace *) const = 0;
     virtual bool isResolved() const = 0;
-    virtual cstring declSuffix() const { return ""; }
+    virtual cstring declSuffix() const { return ""_cs; }
     virtual bool operator==(const Type &) const = 0;
     bool operator!=(const Type &t) const { return !operator==(t); }
 #define OP_EQUALS(T) \
@@ -62,8 +64,8 @@ struct LookupScope : public Util::IHasSourceInfo {
 
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     cstring toString() const override {
-        if (global) return "IR::";
-        return (in ? in->toString() + name : name) + "::";
+        if (global) return "IR::"_cs;
+        return (in ? in->toString() + name : name) + "::"_cs;
     }
     IrNamespace *resolve(const IrNamespace *) const;
     bool operator==(const LookupScope &l) const {

@@ -204,7 +204,7 @@ using Parser = P4::P4Parser;
 [A-Za-z_][A-Za-z0-9_]* {
                   BEGIN(driver.saveState);
                   driver.template_args = false;
-                  cstring name = yytext;
+                  cstring name = cstring(yytext);
                   Util::ProgramStructure::SymbolKind kind =
                       driver.structure->lookupIdentifier(name);
                   switch (kind)
@@ -229,44 +229,44 @@ using Parser = P4::P4Parser;
 
 0[xX][0-9a-fA-F_]+ { BEGIN(driver.saveState);
                      driver.template_args = false;
-                     UnparsedConstant constant{yytext, 2, 16, false};
+                     UnparsedConstant constant{cstring(yytext), 2, 16, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
 0[dD][0-9_]+       { BEGIN(driver.saveState);
                      driver.template_args = false;
-                     UnparsedConstant constant{yytext, 2, 10, false};
+                     UnparsedConstant constant{cstring(yytext), 2, 10, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
 0[oO][0-7_]+       { BEGIN(driver.saveState);
                      driver.template_args = false;
-                     UnparsedConstant constant{yytext, 2, 8, false};
+                     UnparsedConstant constant{cstring(yytext), 2, 8, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
 0[bB][01_]+        { BEGIN(driver.saveState);
                      driver.template_args = false;
-                     UnparsedConstant constant{yytext, 2, 2, false};
+                     UnparsedConstant constant{cstring(yytext), 2, 2, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9][0-9_]*       { BEGIN(driver.saveState);
                      driver.template_args = false;
-                     UnparsedConstant constant{yytext, 0, 10, false};
+                     UnparsedConstant constant{cstring(yytext), 0, 10, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
 
 [0-9]+[ws]0[xX][0-9a-fA-F_]+ { BEGIN(driver.saveState);
                                driver.template_args = false;
-                               UnparsedConstant constant{yytext, 2, 16, true};
+                               UnparsedConstant constant{cstring(yytext), 2, 16, true};
                                return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9]+[ws]0[dD][0-9_]+  { BEGIN(driver.saveState);
                           driver.template_args = false;
-                          UnparsedConstant constant{yytext, 2, 10, true};
+                          UnparsedConstant constant{cstring(yytext), 2, 10, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9]+[ws]0[oO][0-7_]+  { BEGIN(driver.saveState);
                           driver.template_args = false;
-                          UnparsedConstant constant{yytext, 2, 8, true};
+                          UnparsedConstant constant{cstring(yytext), 2, 8, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9]+[ws]0[bB][01_]+   { BEGIN(driver.saveState);
                           driver.template_args = false;
-                          UnparsedConstant constant{yytext, 2, 2, true};
+                          UnparsedConstant constant{cstring(yytext), 2, 2, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9]+[ws][0-9_]+       { BEGIN(driver.saveState);
                           driver.template_args = false;
-                          UnparsedConstant constant{yytext, 0, 10, true};
+                          UnparsedConstant constant{cstring(yytext), 0, 10, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
 
 "&&&"   { BEGIN(driver.saveState); driver.template_args = false; return makeToken(MASK); }

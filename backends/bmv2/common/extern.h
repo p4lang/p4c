@@ -74,7 +74,7 @@ class ExternConverter {
     class ExternConverter_##extern_name : public ExternConverter {                                \
         model_type &model_name;                                                                   \
         ExternConverter_##extern_name() : model_name(model_type::instance) {                      \
-            registerExternConverter(#extern_name, this);                                          \
+            registerExternConverter(cstring(#extern_name), this);                                 \
         }                                                                                         \
         static ExternConverter_##extern_name singleton;                                           \
         Util::IJson *convertExternFunction(ConversionContext *ctxt, const P4::ExternFunction *ef, \
@@ -85,7 +85,7 @@ class ExternConverter {
 
 #define EXTERN_CONVERTER_W_FUNCTION(extern_name)                                                  \
     class ExternConverter_##extern_name : public ExternConverter {                                \
-        ExternConverter_##extern_name() { registerExternConverter(#extern_name, this); }          \
+        ExternConverter_##extern_name() { registerExternConverter(cstring(#extern_name), this); } \
         static ExternConverter_##extern_name singleton;                                           \
         Util::IJson *convertExternFunction(ConversionContext *ctxt, const P4::ExternFunction *ef, \
                                            const IR::MethodCallExpression *mc,                    \
@@ -97,26 +97,26 @@ class ExternConverter {
     class ExternConverter_##extern_name : public ExternConverter {                               \
         model_type &model_name;                                                                  \
         ExternConverter_##extern_name() : model_name(model_type::instance) {                     \
-            registerExternConverter(#extern_name, this);                                         \
+            registerExternConverter(cstring(#extern_name), this);                                \
         }                                                                                        \
         static ExternConverter_##extern_name singleton;                                          \
         void convertExternInstance(ConversionContext *ctxt, const IR::Declaration *c,            \
                                    const IR::ExternBlock *eb, const bool &emitExterns) override; \
     };
 
-#define EXTERN_CONVERTER_W_INSTANCE(extern_name)                                                 \
-    class ExternConverter_##extern_name : public ExternConverter {                               \
-        ExternConverter_##extern_name() { registerExternConverter(#extern_name, this); }         \
-        static ExternConverter_##extern_name singleton;                                          \
-        void convertExternInstance(ConversionContext *ctxt, const IR::Declaration *c,            \
-                                   const IR::ExternBlock *eb, const bool &emitExterns) override; \
+#define EXTERN_CONVERTER_W_INSTANCE(extern_name)                                                  \
+    class ExternConverter_##extern_name : public ExternConverter {                                \
+        ExternConverter_##extern_name() { registerExternConverter(cstring(#extern_name), this); } \
+        static ExternConverter_##extern_name singleton;                                           \
+        void convertExternInstance(ConversionContext *ctxt, const IR::Declaration *c,             \
+                                   const IR::ExternBlock *eb, const bool &emitExterns) override;  \
     };
 
 #define EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE_AND_MODEL(extern_name, type, name)                 \
     class ExternConverter_##extern_name : public ExternConverter {                                \
         type &name;                                                                               \
         ExternConverter_##extern_name() : name(type::instance) {                                  \
-            registerExternConverter(#extern_name, this);                                          \
+            registerExternConverter(cstring(#extern_name), this);                                 \
         }                                                                                         \
         static ExternConverter_##extern_name singleton;                                           \
         void convertExternInstance(ConversionContext *ctxt, const IR::Declaration *c,             \
@@ -127,16 +127,16 @@ class ExternConverter {
                                          const bool &emitExterns) override;                       \
     };
 
-#define EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(extern_name)                                      \
-    class ExternConverter_##extern_name : public ExternConverter {                               \
-        ExternConverter_##extern_name() { registerExternConverter(#extern_name, this); }         \
-        static ExternConverter_##extern_name singleton;                                          \
-        void convertExternInstance(ConversionContext *ctxt, const IR::Declaration *c,            \
-                                   const IR::ExternBlock *eb, const bool &emitExterns) override; \
-        Util::IJson *convertExternObject(ConversionContext *ctxt, const P4::ExternMethod *em,    \
-                                         const IR::MethodCallExpression *mc,                     \
-                                         const IR::StatOrDecl *s,                                \
-                                         const bool &emitExterns) override;                      \
+#define EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(extern_name)                                       \
+    class ExternConverter_##extern_name : public ExternConverter {                                \
+        ExternConverter_##extern_name() { registerExternConverter(cstring(#extern_name), this); } \
+        static ExternConverter_##extern_name singleton;                                           \
+        void convertExternInstance(ConversionContext *ctxt, const IR::Declaration *c,             \
+                                   const IR::ExternBlock *eb, const bool &emitExterns) override;  \
+        Util::IJson *convertExternObject(ConversionContext *ctxt, const P4::ExternMethod *em,     \
+                                         const IR::MethodCallExpression *mc,                      \
+                                         const IR::StatOrDecl *s,                                 \
+                                         const bool &emitExterns) override;                       \
     };
 
 EXTERN_CONVERTER_W_FUNCTION(assert)

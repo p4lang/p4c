@@ -20,6 +20,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 namespace {
 
 class ParamCloner : public CloneExpressions {
@@ -41,7 +43,7 @@ const IR::Node *TagGlobalActions::preorder(IR::P4Action *action) {
     if (findContext<IR::P4Control>() == nullptr) {
         auto annos = action->annotations;
         if (annos == nullptr) annos = IR::Annotations::empty;
-        cstring name = cstring(".") + action->name;
+        cstring name = "."_cs + action->name;
         annos = annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
                                           new IR::StringLiteral(name), false);
         action->annotations = annos;
@@ -64,7 +66,7 @@ bool FindGlobalActionUses::preorder(const IR::PathExpression *path) {
     auto control = findContext<IR::P4Control>();
     if (control != nullptr) {
         if (repl->getReplacement(action, control) != nullptr) return false;
-        auto newName = refMap->newName(action->name);
+        auto newName = refMap->newName(action->name.name.string_view());
         ParamCloner cloner;
         auto replBody = cloner.clone<IR::BlockStatement>(action->body);
         auto params = cloner.clone<IR::ParameterList>(action->parameters);
@@ -147,7 +149,7 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression *expression) {
     LOG1(dbp(expression) << " used by " << dbp(actionUser));
     auto replacement = repl->getActionUser(action, actionUser);
     if (replacement == nullptr) {
-        auto newName = refMap->newName(action->name);
+        auto newName = refMap->newName(action->name.name.string_view());
         ParamCloner cloner;
         auto replBody = cloner.clone<IR::BlockStatement>(action->body);
         auto annos = action->annotations;

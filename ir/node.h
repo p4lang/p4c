@@ -40,6 +40,8 @@ class JsonObject;
 
 namespace IR {
 
+using namespace P4::literals;
+
 class Node;
 class Annotation;  // IWYU pragma: keep
 template <class T>
@@ -138,8 +140,8 @@ class Node : public virtual INode {
     const Node *getNode() const final { return this; }
     Node *getNode() final { return this; }
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
-    cstring node_type_name() const override { return "Node"; }
-    static cstring static_type_name() { return "Node"; }
+    cstring node_type_name() const override { return "Node"_cs; }
+    static cstring static_type_name() { return "Node"_cs; }
     virtual int num_children() { return 0; }
     explicit Node(JSONLoader &json);
     cstring toString() const override { return node_type_name(); }

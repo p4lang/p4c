@@ -47,8 +47,8 @@ class EbpfCodeGenerator {
 
 class PSAEbpfGenerator : public EbpfCodeGenerator {
  public:
-    static const unsigned MaxClones = 64;
-    static const unsigned MaxCloneSessions = 1024;
+    static constexpr unsigned MaxClones = 64;
+    static constexpr unsigned MaxCloneSessions = 1024;
 
     EBPFPipeline *ingress;
     EBPFPipeline *egress;
@@ -98,7 +98,7 @@ class PSAArchXDP : public PSAEbpfGenerator {
     EBPFPipeline *tcIngressForXDP;
     /// If the XDP mode is used, we need to have TC Egress pipeline to handle cloned packets.
     EBPFPipeline *tcEgressForXDP;
-    static const unsigned egressDevmapSize = 256;
+    static constexpr unsigned egressDevmapSize = 256;
 
     PSAArchXDP(const EbpfOptions &options, std::vector<EBPFType *> &ebpfTypes,
                EBPFPipeline *xdpIngress, EBPFPipeline *xdpEgress, EBPFPipeline *tcTrafficManager,

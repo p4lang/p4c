@@ -19,6 +19,8 @@ limitations under the License.
 
 namespace BMV2 {
 
+using namespace P4::literals;
+
 void InspectPsaProgram::postorder(const IR::Declaration_Instance *di) {
     if (!pinfo->resourceMap.count(di)) return;
     auto blk = pinfo->resourceMap.at(di);
@@ -204,9 +206,9 @@ void InspectPsaProgram::postorder(const IR::P4Parser *p) {
     if (pinfo->block_type.count(p)) {
         auto info = pinfo->block_type.at(p);
         if (info.first == INGRESS && info.second == PARSER)
-            pinfo->parsers.emplace("ingress", p);
+            pinfo->parsers.emplace("ingress"_cs, p);
         else if (info.first == EGRESS && info.second == PARSER)
-            pinfo->parsers.emplace("egress", p);
+            pinfo->parsers.emplace("egress"_cs, p);
     }
 }
 
@@ -214,13 +216,13 @@ void InspectPsaProgram::postorder(const IR::P4Control *c) {
     if (pinfo->block_type.count(c)) {
         auto info = pinfo->block_type.at(c);
         if (info.first == INGRESS && info.second == PIPELINE)
-            pinfo->pipelines.emplace("ingress", c);
+            pinfo->pipelines.emplace("ingress"_cs, c);
         else if (info.first == EGRESS && info.second == PIPELINE)
-            pinfo->pipelines.emplace("egress", c);
+            pinfo->pipelines.emplace("egress"_cs, c);
         else if (info.first == INGRESS && info.second == DEPARSER)
-            pinfo->deparsers.emplace("ingress", c);
+            pinfo->deparsers.emplace("ingress"_cs, c);
         else if (info.first == EGRESS && info.second == DEPARSER)
-            pinfo->deparsers.emplace("egress", c);
+            pinfo->deparsers.emplace("egress"_cs, c);
     }
 }
 
@@ -238,13 +240,13 @@ bool ParsePsaArchitecture::preorder(const IR::ExternBlock *block) {
 }
 
 bool ParsePsaArchitecture::preorder(const IR::PackageBlock *block) {
-    auto pkg = block->findParameterValue("ingress");
+    auto pkg = block->findParameterValue("ingress"_cs);
     if (pkg == nullptr) {
         modelError("Package %1% has no parameter named 'ingress'", block);
         return false;
     }
     if (auto ingress = pkg->to<IR::PackageBlock>()) {
-        auto p = ingress->findParameterValue("ip");
+        auto p = ingress->findParameterValue("ip"_cs);
         if (p == nullptr) {
             modelError("'ingress' package %1% has no parameter named 'ip'", block);
             return false;
@@ -254,7 +256,7 @@ bool ParsePsaArchitecture::preorder(const IR::PackageBlock *block) {
             modelError("%1%: 'ip' argument of 'ingress' should be bound to a parser", block);
             return false;
         }
-        p = ingress->findParameterValue("ig");
+        p = ingress->findParameterValue("ig"_cs);
         if (p == nullptr) {
             modelError("'ingress' package %1% has no parameter named 'ig'", block);
             return false;
@@ -264,7 +266,7 @@ bool ParsePsaArchitecture::preorder(const IR::PackageBlock *block) {
             modelError("%1%: 'ig' argument of 'ingress' should be bound to a control", block);
             return false;
         }
-        p = ingress->findParameterValue("id");
+        p = ingress->findParameterValue("id"_cs);
         if (p == nullptr) {
             modelError("'ingress' package %1% has no parameter named 'id'", block);
             return false;
@@ -283,13 +285,13 @@ bool ParsePsaArchitecture::preorder(const IR::PackageBlock *block) {
         modelError("'ingress' %1% is not bound to a package", pkg);
         return false;
     }
-    pkg = block->findParameterValue("egress");
+    pkg = block->findParameterValue("egress"_cs);
     if (pkg == nullptr) {
         modelError("Package %1% has no parameter named 'egress'", block);
         return false;
     }
     if (auto egress = pkg->to<IR::PackageBlock>()) {
-        auto p = egress->findParameterValue("ep");
+        auto p = egress->findParameterValue("ep"_cs);
         if (p == nullptr) {
             modelError("'egress' package %1% has no parameter named 'ep'", block);
             return false;
@@ -299,7 +301,7 @@ bool ParsePsaArchitecture::preorder(const IR::PackageBlock *block) {
             modelError("%1%: 'ep' argument of 'egress' should be bound to a parser", block);
             return false;
         }
-        p = egress->findParameterValue("eg");
+        p = egress->findParameterValue("eg"_cs);
         if (p == nullptr) {
             modelError("'egress' package %1% has no parameter named 'eg'", block);
             return false;
@@ -309,7 +311,7 @@ bool ParsePsaArchitecture::preorder(const IR::PackageBlock *block) {
             modelError("%1%: 'ig' argument of 'egress' should be bound to a control", block);
             return false;
         }
-        p = egress->findParameterValue("ed");
+        p = egress->findParameterValue("ed"_cs);
         if (p == nullptr) {
             modelError("'egress' package %1% has no parameter named 'ed'", block);
             return false;

@@ -103,7 +103,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     if (TestgenOptions::get().testBackend == "METADATA") {
         auto *metadataCollection = new MetadataCollection();
         const auto *bmv2ProgInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
-        const auto *localMetadataVar = bmv2ProgInfo->getBlockParam("Parser", 2);
+        const auto *localMetadataVar = bmv2ProgInfo->getBlockParam("Parser"_cs, 2);
         const auto &flatFields = executionState->getFlatFields(localMetadataVar, {});
         for (const auto &fieldRef : flatFields) {
             const auto *fieldVal = finalModel->evaluate(executionState->get(fieldRef), true);
@@ -113,51 +113,52 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
             fieldString = fieldString.substr(fieldString.find('.') - fieldString.begin() + 1);
             metadataCollection->addMetaDataField(fieldString, fieldVal);
         }
-        testSpec->addTestObject("metadata_collection", "metadata_collection", metadataCollection);
+        testSpec->addTestObject("metadata_collection"_cs, "metadata_collection"_cs,
+                                metadataCollection);
         return testSpec;
     }
 
     // We retrieve the individual table configurations from the execution state.
-    const auto uninterpretedTableConfigs = executionState->getTestObjectCategory("tableconfigs");
+    const auto uninterpretedTableConfigs = executionState->getTestObjectCategory("tableconfigs"_cs);
     // Since these configurations are uninterpreted we need to convert them. We launch a
     // helper function to solve the variables involved in each table configuration.
     for (const auto &tablePair : uninterpretedTableConfigs) {
         const auto tableName = tablePair.first;
         const auto *uninterpretedTableConfig = tablePair.second->checkedTo<TableConfig>();
         const auto *tableConfig = uninterpretedTableConfig->evaluate(*finalModel, true);
-        testSpec->addTestObject("tables", tableName, tableConfig);
+        testSpec->addTestObject("tables"_cs, tableName, tableConfig);
     }
 
-    const auto actionProfiles = executionState->getTestObjectCategory("action_profile");
+    const auto actionProfiles = executionState->getTestObjectCategory("action_profile"_cs);
     for (const auto &testObject : actionProfiles) {
         const auto profileName = testObject.first;
         const auto *actionProfile = testObject.second->checkedTo<Bmv2V1ModelActionProfile>();
         const auto *evaluatedProfile = actionProfile->evaluate(*finalModel, true);
-        testSpec->addTestObject("action_profiles", profileName, evaluatedProfile);
+        testSpec->addTestObject("action_profiles"_cs, profileName, evaluatedProfile);
     }
 
-    const auto actionSelectors = executionState->getTestObjectCategory("action_selector");
+    const auto actionSelectors = executionState->getTestObjectCategory("action_selector"_cs);
     for (const auto &testObject : actionSelectors) {
         const auto selectorName = testObject.first;
         const auto *actionSelector = testObject.second->checkedTo<Bmv2V1ModelActionSelector>();
         const auto *evaluatedSelector = actionSelector->evaluate(*finalModel, true);
-        testSpec->addTestObject("action_selectors", selectorName, evaluatedSelector);
+        testSpec->addTestObject("action_selectors"_cs, selectorName, evaluatedSelector);
     }
 
-    const auto cloneSpecs = executionState->getTestObjectCategory("clone_specs");
+    const auto cloneSpecs = executionState->getTestObjectCategory("clone_specs"_cs);
     for (const auto &testObject : cloneSpecs) {
         const auto sessionId = testObject.first;
         const auto *cloneSpec = testObject.second->checkedTo<Bmv2V1ModelCloneSpec>();
         const auto *evaluatedInfo = cloneSpec->evaluate(*finalModel, true);
-        testSpec->addTestObject("clone_specs", sessionId, evaluatedInfo);
+        testSpec->addTestObject("clone_specs"_cs, sessionId, evaluatedInfo);
     }
 
-    const auto meterInfos = executionState->getTestObjectCategory("meter_values");
+    const auto meterInfos = executionState->getTestObjectCategory("meter_values"_cs);
     for (const auto &testObject : meterInfos) {
         const auto meterName = testObject.first;
         const auto *meterInfo = testObject.second->checkedTo<Bmv2V1ModelMeterValue>();
         const auto *evaluateMeterValue = meterInfo->evaluate(*finalModel, true);
-        testSpec->addTestObject("meter_values", meterName, evaluateMeterValue);
+        testSpec->addTestObject("meter_values"_cs, meterName, evaluateMeterValue);
     }
 
     return testSpec;

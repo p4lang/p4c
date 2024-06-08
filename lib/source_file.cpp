@@ -19,7 +19,11 @@ limitations under the License.
 #include <algorithm>
 #include <sstream>
 
-#include "exceptions.h"
+#include "absl/strings/match.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_format.h"
+#include "absl/strings/str_replace.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/stringify.h"
 
@@ -35,7 +39,7 @@ SourcePosition::SourcePosition(unsigned lineNumber, unsigned columnNumber)
 }
 
 cstring SourcePosition::toString() const {
-    return Util::printf_format("%d:%d", lineNumber, columnNumber);
+    return absl::StrFormat("%d:%d", lineNumber, columnNumber);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -50,13 +54,14 @@ SourceInfo::SourceInfo(const InputSources *sources, SourcePosition start, Source
 }
 
 cstring SourceInfo::toString() const {
-    return Util::printf_format("(%s)-(%s)", start.toString(), end.toString());
+    return absl::StrFormat("(%s)-(%s)", start.toString().string_view(),
+                           end.toString().string_view());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
 InputSources::InputSources() : sealed(false) {
-    mapLine(nullptr, 1);  // the first line read will be line 1 of stdin
+    mapLine("", 1);  // the first line read will be line 1 of stdin
     contents.push_back("");
 }
 
@@ -64,8 +69,7 @@ void InputSources::addComment(SourceInfo srcInfo, bool singleLine, cstring body)
     if (!singleLine)
         // Drop the "*/"
         body = body.exceptLast(2);
-    auto comment = new Comment(srcInfo, singleLine, body);
-    comments.push_back(comment);
+    comments.push_back(new Comment(srcInfo, singleLine, body));
 }
 
 /// prevent further changes
@@ -93,13 +97,13 @@ void InputSources::appendToLastLine(std::string_view text) {
         char c = text[i];
         if (c == '\n') BUG("Text contains newlines");
     }
-    contents.back() += toString(text);
+    contents.back() += text;
 }
 
 // Append a newline and start a new line
 void InputSources::appendNewline(std::string_view newline) {
     if (sealed) BUG("Appending to sealed InputSources");
-    contents.back() += toString(newline);
+    contents.back() += newline;
     contents.push_back("");  // start a new line
 }
 
@@ -135,7 +139,7 @@ void InputSources::appendText(const char *text) {
     }
 }
 
-cstring InputSources::getLine(unsigned lineNumber) const {
+std::string_view InputSources::getLine(unsigned lineNumber) const {
     if (lineNumber == 0) {
         return "";
         // BUG("Lines are numbered starting at 1");
@@ -145,7 +149,7 @@ cstring InputSources::getLine(unsigned lineNumber) const {
     return contents.at(lineNumber - 1);
 }
 
-void InputSources::mapLine(cstring file, unsigned originalSourceLineNo) {
+void InputSources::mapLine(std::string_view file, unsigned originalSourceLineNo) {
     if (sealed) BUG("Changing mapping to sealed InputSources");
     unsigned lineno = getCurrentLineNumber();
     line_file_map.emplace(lineno, SourceFileLine(file, originalSourceLineNo));
@@ -169,7 +173,7 @@ SourceFileLine InputSources::getSourceLine(unsigned line) const {
     // So we have to subtract one to get the real line number.
     const auto nominalLine = line - it->first + it->second.sourceLine;
     const auto realLine = nominalLine > 0 ? nominalLine - 1 : 0;
-    return SourceFileLine(it->second.fileName, realLine);
+    return SourceFileLine(it->second.fileName.string_view(), realLine);
 }
 
 unsigned InputSources::getCurrentLineNumber() const { return contents.size(); }
@@ -185,13 +189,13 @@ cstring InputSources::getSourceFragment(const SourcePosition &position, bool use
     return getSourceFragment(info, useMarker);
 }
 
-cstring carets(cstring source, unsigned start, unsigned end) {
+static std::string carets(std::string_view source, unsigned start, unsigned end) {
     std::stringstream builder;
     if (start > source.size()) start = source.size();
 
-    unsigned i;
-    for (i = 0; i < start; i++) {
-        char c = source.c_str()[i];
+    unsigned i = 0;
+    for (; i < start; i++) {
+        char c = source[i];
         if (c == ' ' || c == '\t')
             builder.put(c);
         else
@@ -204,78 +208,76 @@ cstring carets(cstring source, unsigned start, unsigned end) {
 }
 
 cstring InputSources::getSourceFragment(const SourceInfo &position, bool useMarker) const {
-    if (!position.isValid()) return "";
+    if (!position.isValid()) return ""_cs;
 
     // If the position spans multiple lines, truncate to just the first line
     if (position.getEnd().getLineNumber() > position.getStart().getLineNumber())
         return getSourceFragment(position.getStart(), useMarker);
 
-    cstring result = getLine(position.getStart().getLineNumber());
-    // Normally result has a newline, but if not
-    // then we have to add a newline
-    cstring toadd = "";
-    if (result.find('\n') == nullptr) toadd = cstring::newline;
-    cstring marker =
-        carets(result, position.getStart().getColumnNumber(), position.getEnd().getColumnNumber());
+    std::string_view result = getLine(position.getStart().getLineNumber());
+    unsigned int start = position.getStart().getColumnNumber();
+    unsigned int end = position.getEnd().getColumnNumber();
+
+    // Normally result has a newline, but if not then we have to add a newline
+    bool addNewline = !absl::StrContains(result, "\n");
     if (useMarker) {
-        return result + toadd + marker + cstring::newline;
-    } else {
-        return result + toadd + cstring::newline;
+        return absl::StrCat(result, addNewline ? "\n" : "", carets(result, start, end), "\n");
     }
+
+    return absl::StrCat(result, addNewline ? "\n" : "", "\n");
 }
 
 cstring InputSources::getBriefSourceFragment(const SourceInfo &position) const {
-    if (!position.isValid()) return "";
+    if (!position.isValid()) return ""_cs;
 
-    cstring result = getLine(position.getStart().getLineNumber());
+    std::string_view result = getLine(position.getStart().getLineNumber());
     unsigned int start = position.getStart().getColumnNumber();
-    unsigned int end;
-    cstring toadd = "";
+    unsigned int end = position.getEnd().getColumnNumber();
+    bool truncate = false;
 
     // If the position spans multiple lines, truncate to just the first line
     if (position.getEnd().getLineNumber() > position.getStart().getLineNumber()) {
         // go to the end of the first line
         end = result.size();
-        if (result.find('\n') != nullptr) {
+        if (absl::StrContains(result, "\n")) {
             --end;
         }
-        toadd = " ...";
-    } else {
-        end = position.getEnd().getColumnNumber();
+        truncate = true;
     }
 
     // Adding escape character in front of '"' character to properly store
     // quote marks as part of JSON properties, they must be escaped.
-    if (result.find('"') != nullptr) {
-        cstring out = result.replace("\"", "\\\"");
+    if (absl::StrContains(result, "\"")) {
+        auto out = absl::StrReplaceAll(result, {{"\"", "\\\""}});
         return out.substr(0, out.size() - 1);
     }
 
-    return result.substr(start, end - start) + toadd;
+    return absl::StrCat(result.substr(start, end - start), truncate ? " ..." : "");
 }
 
 cstring InputSources::toDebugString() const {
     std::stringstream builder;
-    for (auto line : contents) builder << line;
+    for (const auto &line : contents) builder << line;
     builder << "---------------" << std::endl;
-    for (auto lf : line_file_map) builder << lf.first << ": " << lf.second.toString() << std::endl;
-    return cstring(builder.str());
+    for (const auto &lf : line_file_map)
+        builder << lf.first << ": " << lf.second.toString() << std::endl;
+    return builder.str();
 }
 
 ///////////////////////////////////////////////////
 
 cstring SourceInfo::toSourceFragment(bool useMarker) const {
-    if (!isValid()) return "";
+    if (!isValid()) return ""_cs;
     return sources->getSourceFragment(*this, useMarker);
 }
 
 cstring SourceInfo::toBriefSourceFragment() const {
-    if (!isValid()) return "";
+    if (!isValid()) return ""_cs;
     return sources->getBriefSourceFragment(*this);
 }
 
 cstring SourceInfo::toPositionString() const {
-    if (!isValid()) return "";
+    if (!isValid()) return ""_cs;
     SourceFileLine position = sources->getSourceLine(start.getLineNumber());
     return position.toString();
 }
@@ -288,7 +290,7 @@ cstring SourceInfo::toSourcePositionData(unsigned *outLineNumber, unsigned *outC
     if (outColumnNumber != nullptr) {
         *outColumnNumber = start.getColumnNumber();
     }
-    return position.fileName.c_str();
+    return position.fileName;
 }
 
 SourceFileLine SourceInfo::toPosition() const {
@@ -308,7 +310,7 @@ cstring SourceInfo::getLineNum() const {
 ////////////////////////////////////////////////////////
 
 cstring SourceFileLine::toString() const {
-    return Util::printf_format("%s(%d)", fileName.c_str(), sourceLine);
+    return absl::StrFormat("%s(%d)", fileName.string_view(), sourceLine);
 }
 
 }  // namespace Util

@@ -26,8 +26,8 @@ static cstring lValueName(const IR::Expression *exp) {
 /// Test to see if names denote overlapping locations.
 bool names_overlap(cstring name1, cstring name2) {
     if (name1 == name2) return true;
-    if (name1.startsWith(name2) && strchr(".[", name1.get(name2.size()))) return true;
-    if (name2.startsWith(name1) && strchr(".[", name2.get(name1.size()))) return true;
+    if (name1.startsWith(name2.string_view()) && strchr(".[", name1.get(name2.size()))) return true;
+    if (name2.startsWith(name1.string_view()) && strchr(".[", name2.get(name1.size()))) return true;
     return false;
 }
 

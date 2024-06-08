@@ -99,8 +99,8 @@ Util::IJson *ExpressionConverter::get(const IR::Expression *expression) const {
 
 void ExpressionConverter::postorder(const IR::BoolLiteral *expression) {
     auto result = new Util::JsonObject();
-    result->emplace("type", "bool");
-    result->emplace("value", expression->value);
+    result->emplace("type"_cs, "bool");
+    result->emplace("value"_cs, expression->value);
     mapExpression(expression, result);
 }
 
@@ -116,8 +116,8 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression *expression) 
             int width = typearg->width_bits();
             BUG_CHECK(width > 0, "%1%: unknown width", targ);
             auto j = new Util::JsonObject();
-            j->emplace("type", "lookahead");
-            auto v = mkArrayField(j, "value");
+            j->emplace("type"_cs, "lookahead");
+            auto v = mkArrayField(j, "value"_cs);
             v->append(0);
             v->append(width);
             mapExpression(expression, j);
@@ -130,18 +130,18 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression *expression) 
             auto l = get(bim->appliedTo);
             if (!l) return;
             if (type->is<IR::Type_HeaderUnion>()) {
-                result->emplace("type", "expression");
+                result->emplace("type"_cs, "expression");
                 auto e = new Util::JsonObject();
-                result->emplace("value", e);
-                e->emplace("op", "valid_union");
-                e->emplace("left", Util::JsonValue::null);
-                e->emplace("right", l);
+                result->emplace("value"_cs, e);
+                e->emplace("op"_cs, "valid_union");
+                e->emplace("left"_cs, Util::JsonValue::null);
+                e->emplace("right"_cs, l);
             } else {
                 // Treat this as appliedTo.$valid$
-                result->emplace("type", "field");
-                auto e = mkArrayField(result, "value");
+                result->emplace("type"_cs, "field");
+                auto e = mkArrayField(result, "value"_cs);
                 if (l->is<Util::JsonObject>())
-                    e->append(l->to<Util::JsonObject>()->get("value"));
+                    e->append(l->to<Util::JsonObject>()->get("value"_cs));
                 else
                     e->append(l);
                 e->append(V1ModelProperties::validField);
@@ -150,11 +150,11 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression *expression) 
                     // for table keys we don't need the casts.
                     auto cast = new Util::JsonObject();
                     auto value = new Util::JsonObject();
-                    cast->emplace("type", "expression");
-                    cast->emplace("value", value);
-                    value->emplace("op", "d2b");  // data to Boolean cast
-                    value->emplace("left", Util::JsonValue::null);
-                    value->emplace("right", result);
+                    cast->emplace("type"_cs, "expression");
+                    cast->emplace("value"_cs, value);
+                    value->emplace("op"_cs, "d2b");  // data to Boolean cast
+                    value->emplace("left"_cs, Util::JsonValue::null);
+                    value->emplace("right"_cs, result);
                     result = cast;
                 }
             }
@@ -175,11 +175,11 @@ void ExpressionConverter::postorder(const IR::Cast *expression) {
 
 void ExpressionConverter::postorder(const IR::Constant *expression) {
     auto result = new Util::JsonObject();
-    result->emplace("type", "hexstr");
+    result->emplace("type"_cs, "hexstr");
     auto bitwidth = expression->type->width_bits();
     cstring repr = stringRepr(expression->value, ROUNDUP(bitwidth, 8));
-    result->emplace("value", repr);
-    if (withConstantWidths) result->emplace("bitwidth", bitwidth);
+    result->emplace("value"_cs, repr);
+    if (withConstantWidths) result->emplace("bitwidth"_cs, bitwidth);
     mapExpression(expression, result);
 }
 
@@ -213,21 +213,21 @@ void ExpressionConverter::postorder(const IR::ArrayIndex *expression) {
         }
         BUG_CHECK(fresult, "%1%: Runtime array index json generation failed", ex);
         Util::JsonObject *fres = fresult->to<Util::JsonObject>();
-        result->emplace("type", "expression");
+        result->emplace("type"_cs, "expression");
 
         auto e = new Util::JsonObject();
-        e->emplace("op", "dereference_header_stack");
+        e->emplace("op"_cs, "dereference_header_stack");
         auto l = new Util::JsonObject();
-        l->emplace("type", "header_stack");
-        l->emplace("value", elementAccess);
-        e->emplace("left", l);
-        e->emplace("right", fres);
-        result->emplace("value", e);
+        l->emplace("type"_cs, "header_stack");
+        l->emplace("value"_cs, elementAccess);
+        e->emplace("left"_cs, l);
+        e->emplace("right"_cs, fres);
+        result->emplace("value"_cs, e);
     } else {
-        result->emplace("type", "header");
+        result->emplace("type"_cs, "header");
         int index = expression->right->to<IR::Constant>()->asInt();
         elementAccess += "[" + Util::toString(index) + "]";
-        result->emplace("value", elementAccess);
+        result->emplace("value"_cs, elementAccess);
     }
     mapExpression(expression, result);
 }
@@ -266,12 +266,12 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
     // handle error
     if (type->is<IR::Type_Error>() && expression->expr->is<IR::TypeNameExpression>()) {
         // this deals with constants that have type 'error'
-        result->emplace("type", "hexstr");
+        result->emplace("type"_cs, "hexstr");
         auto decl = type->to<IR::Type_Error>()->getDeclByName(expression->member.name);
         auto errorValue = structure->errorCodesMap.at(decl);
         // this generates error constant like hex value
         auto reprValue = stringRepr(errorValue);
-        result->emplace("value", reprValue);
+        result->emplace("value"_cs, reprValue);
         mapExpression(expression, result);
         return;
     }
@@ -287,27 +287,27 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
         if (auto st = type->to<IR::Type_Stack>()) {
             auto et = typeMap->getTypeType(st->elementType, true);
             if (et->is<IR::Type_HeaderUnion>())
-                result->emplace("type", "header_union_stack");
+                result->emplace("type"_cs, "header_union_stack");
             else
-                result->emplace("type", "header_stack");
-            result->emplace("value", fieldName);
+                result->emplace("type"_cs, "header_stack");
+            result->emplace("value"_cs, fieldName);
         } else if (type->is<IR::Type_HeaderUnion>()) {
-            result->emplace("type", "header_union");
-            result->emplace("value", fieldName);
+            result->emplace("type"_cs, "header_union");
+            result->emplace("value"_cs, fieldName);
         } else if (parentType->is<IR::Type_HeaderUnion>()) {
             auto l = get(expression->expr);
             if (!l) return;
             cstring nestedField = fieldName;
             if (auto lv = l->to<Util::JsonObject>()) {
-                lv->get("value");
+                lv->get("value"_cs);
                 if (lv->is<Util::JsonValue>()) {
                     // header in union reference ["u", "f"] => "u.f"
                     cstring prefix = lv->to<Util::JsonValue>()->getString();
                     nestedField = prefix + "." + nestedField;
                 }
             }
-            result->emplace("type", "header");
-            result->emplace("value", nestedField);
+            result->emplace("type"_cs, "header");
+            result->emplace("value"_cs, nestedField);
         } else if (parentType->is<IR::Type_StructLike>() &&
                    (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() ||
                     type->is<IR::Type_Boolean>())) {
@@ -318,32 +318,32 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
             BUG_CHECK((name != nullptr), "NULL name: %1%", field->name);
             if (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() || leftValue ||
                 simpleExpressionsOnly) {
-                result->emplace("type", "field");
-                auto e = mkArrayField(result, "value");
+                result->emplace("type"_cs, "field");
+                auto e = mkArrayField(result, "value"_cs);
                 e->append(scalarsName);
                 e->append(name);
             } else if (type->is<IR::Type_Boolean>()) {
                 // Boolean variables are stored as ints, so we
                 // have to insert a conversion when reading such a
                 // variable
-                result->emplace("type", "expression");
+                result->emplace("type"_cs, "expression");
                 auto e = new Util::JsonObject();
-                result->emplace("value", e);
-                e->emplace("op", "d2b");  // data to Boolean cast
-                e->emplace("left", Util::JsonValue::null);
+                result->emplace("value"_cs, e);
+                e->emplace("op"_cs, "d2b");  // data to Boolean cast
+                e->emplace("left"_cs, Util::JsonValue::null);
                 auto r = new Util::JsonObject();
-                e->emplace("right", r);
+                e->emplace("right"_cs, r);
 
-                r->emplace("type", "field");
-                auto a = mkArrayField(r, "value");
+                r->emplace("type"_cs, "field");
+                auto a = mkArrayField(r, "value"_cs);
                 a->append(scalarsName);
                 a->append(name);
             }
         } else {
             // This may be wrong, but the caller will handle it properly
             // (e.g., this can be a method, such as packet.lookahead)
-            result->emplace("type", "header");
-            result->emplace("value", fieldName);
+            result->emplace("type"_cs, "header");
+            result->emplace("value"_cs, fieldName);
         }
         mapExpression(expression, result);
         return;
@@ -359,10 +359,10 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
         if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::last) {
             auto l = get(mem->expr);
             if (!l) return;
-            result->emplace("type", "stack_field");
-            auto e = mkArrayField(result, "value");
+            result->emplace("type"_cs, "stack_field");
+            auto e = mkArrayField(result, "value"_cs);
             if (l->is<Util::JsonObject>())
-                e->append(l->to<Util::JsonObject>()->get("value"));
+                e->append(l->to<Util::JsonObject>()->get("value"_cs));
             else
                 e->append(l);
             e->append(fieldName);
@@ -375,42 +375,42 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
         if (!l) return;
         if (parentType->is<IR::Type_HeaderUnion>()) {
             BUG_CHECK(l->is<Util::JsonObject>(), "Not a JsonObject");
-            auto lv = l->to<Util::JsonObject>()->get("value");
+            auto lv = l->to<Util::JsonObject>()->get("value"_cs);
             if (lv->is<Util::JsonValue>()) {
                 fieldName = lv->to<Util::JsonValue>()->getString() + "." + fieldName;
                 // Each header in a union is allocated a separate header instance.
                 // Refer to that instance directly.
-                result->emplace("type", "header");
-                result->emplace("value", fieldName);
+                result->emplace("type"_cs, "header");
+                result->emplace("value"_cs, fieldName);
             } else {
                 // lv must be a reference to a union stack field
                 auto a = lv->to<Util::JsonArray>()->clone();
                 CHECK_NULL(a);
-                result->emplace("type", "union_stack_field");
+                result->emplace("type"_cs, "union_stack_field");
                 a->append(fieldName);
-                result->emplace("value", a);
+                result->emplace("value"_cs, a);
             }
         } else if (parentType->is<IR::Type_Stack>() &&
                    expression->member == IR::Type_Stack::lastIndex) {
             auto l = get(expression->expr);
             if (!l) return;
-            result->emplace("type", "expression");
+            result->emplace("type"_cs, "expression");
             auto e = new Util::JsonObject();
-            result->emplace("value", e);
-            e->emplace("op", "last_stack_index");
-            e->emplace("left", Util::JsonValue::null);
-            e->emplace("right", l);
+            result->emplace("value"_cs, e);
+            e->emplace("op"_cs, "last_stack_index");
+            e->emplace("left"_cs, Util::JsonValue::null);
+            e->emplace("right"_cs, l);
         } else {
             const char *fieldRef = parentType->is<IR::Type_Stack>() ? "stack_field" : "field";
             Util::JsonArray *e = nullptr;
             bool st = isArrayIndexRuntime(expression);
             if (!st) {
-                result->emplace("type", fieldRef);
-                e = mkArrayField(result, "value");
+                result->emplace("type"_cs, fieldRef);
+                e = mkArrayField(result, "value"_cs);
             }
 
             if (l->is<Util::JsonObject>()) {
-                auto lv = l->to<Util::JsonObject>()->get("value");
+                auto lv = l->to<Util::JsonObject>()->get("value"_cs);
                 if (lv->is<Util::JsonArray>()) {
                     // TODO: is this case still necessary after eliminating nested structs?
                     // nested struct reference [ ["m", "f"], "x" ] => [ "m", "f.x" ]
@@ -436,12 +436,12 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
                                     "for runtime index computation %1%",
                                     st);
                         }
-                        result->emplace("type", "expression");
+                        result->emplace("type"_cs, "expression");
                         auto e = new Util::JsonObject();
-                        result->emplace("value", e);
-                        e->emplace("op", "access_field");
-                        e->emplace("left", jo);
-                        e->emplace("right", index_pos);
+                        result->emplace("value"_cs, e);
+                        e->emplace("op"_cs, "access_field");
+                        e->emplace("left"_cs, jo);
+                        e->emplace("right"_cs, index_pos);
                     }
                 } else {
                     BUG("%1%: Unexpected json", lv);
@@ -454,11 +454,11 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
             if (!simpleExpressionsOnly && !leftValue && type->is<IR::Type_Boolean>()) {
                 auto cast = new Util::JsonObject();
                 auto value = new Util::JsonObject();
-                cast->emplace("type", "expression");
-                cast->emplace("value", value);
-                value->emplace("op", "d2b");  // data to Boolean cast
-                value->emplace("left", Util::JsonValue::null);
-                value->emplace("right", result);
+                cast->emplace("type"_cs, "expression");
+                cast->emplace("value"_cs, value);
+                value->emplace("op"_cs, "d2b");  // data to Boolean cast
+                value->emplace("left"_cs, Util::JsonValue::null);
+                value->emplace("right"_cs, result);
                 result = cast;
             }
         }
@@ -469,12 +469,12 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
 Util::IJson *ExpressionConverter::fixLocal(Util::IJson *json) {
     if (!json) return new Util::JsonValue();  // null
     if (auto jo = json->to<Util::JsonObject>()) {
-        auto to = jo->get("type");
+        auto to = jo->get("type"_cs);
         if (to != nullptr && to->to<Util::JsonValue>() != nullptr &&
             (*to->to<Util::JsonValue>()) == "runtime_data") {
             auto result = new Util::JsonObject();
-            result->emplace("type", "local");
-            result->emplace("value", jo->get("value"));
+            result->emplace("type"_cs, "local");
+            result->emplace("value"_cs, jo->get("value"_cs));
             return result;
         }
     }
@@ -490,36 +490,36 @@ void ExpressionConverter::postorder(const IR::Mux *expression) {
         return;
     }
 
-    result->emplace("type", "expression");
+    result->emplace("type"_cs, "expression");
     auto e = new Util::JsonObject();
-    result->emplace("value", e);
-    e->emplace("op", "?");
+    result->emplace("value"_cs, e);
+    e->emplace("op"_cs, "?");
     auto l = get(expression->e1);
     if (!l) return;
-    e->emplace("left", fixLocal(l));
+    e->emplace("left"_cs, fixLocal(l));
     auto r = get(expression->e2);
     if (!r) return;
-    e->emplace("right", fixLocal(r));
+    e->emplace("right"_cs, fixLocal(r));
     auto c = get(expression->e0);
     if (!c) return;
-    e->emplace("cond", fixLocal(c));
+    e->emplace("cond"_cs, fixLocal(c));
 }
 
 void ExpressionConverter::postorder(const IR::IntMod *expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
-    result->emplace("type", "expression");
+    result->emplace("type"_cs, "expression");
     auto e = new Util::JsonObject();
-    result->emplace("value", e);
-    e->emplace("op", "two_comp_mod");
+    result->emplace("value"_cs, e);
+    e->emplace("op"_cs, "two_comp_mod");
     auto l = get(expression->expr);
     if (!l) return;
-    e->emplace("left", fixLocal(l));
+    e->emplace("left"_cs, fixLocal(l));
     auto r = new Util::JsonObject();
-    r->emplace("type", "hexstr");
+    r->emplace("type"_cs, "hexstr");
     cstring repr = stringRepr(expression->width);
-    r->emplace("value", repr);
-    e->emplace("right", r);
+    r->emplace("value"_cs, repr);
+    e->emplace("right"_cs, r);
 }
 
 void ExpressionConverter::postorder(const IR::Operation_Binary *expression) { binary(expression); }
@@ -533,21 +533,21 @@ void ExpressionConverter::binary(const IR::Operation_Binary *expression) {
         return;
     }
 
-    result->emplace("type", "expression");
+    result->emplace("type"_cs, "expression");
     auto e = new Util::JsonObject();
-    result->emplace("value", e);
+    result->emplace("value"_cs, e);
     cstring op = expression->getStringOp();
     if (op == "&&")
-        op = "and";
+        op = "and"_cs;
     else if (op == "||")
-        op = "or";
-    e->emplace("op", op);
+        op = "or"_cs;
+    e->emplace("op"_cs, op);
     auto l = get(expression->left);
     if (!l) return;
-    e->emplace("left", fixLocal(l));
+    e->emplace("left"_cs, fixLocal(l));
     auto r = get(expression->right);
     if (!r) return;
-    e->emplace("right", fixLocal(r));
+    e->emplace("right"_cs, fixLocal(r));
 }
 
 void ExpressionConverter::saturated_binary(const IR::Operation_Binary *expression) {
@@ -556,30 +556,30 @@ void ExpressionConverter::saturated_binary(const IR::Operation_Binary *expressio
 
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
-    result->emplace("type", "expression");
+    result->emplace("type"_cs, "expression");
     auto e = new Util::JsonObject();
-    result->emplace("value", e);
+    result->emplace("value"_cs, e);
     auto eType = expression->type->to<IR::Type_Bits>();
     CHECK_NULL(eType);
     auto opType = eType->isSigned ? "sat_cast" : "usat_cast";
-    e->emplace("op", opType);
+    e->emplace("op"_cs, opType);
 
     // the left operand is the binary expression, but as a simple add/sub
     auto eLeft = new Util::JsonObject();
-    eLeft->emplace("type", "expression");
+    eLeft->emplace("type"_cs, "expression");
     auto e1 = new Util::JsonObject();
-    e1->emplace("op", expression->getStringOp() == "|+|" ? "+" : "-");
-    e1->emplace("left", fixLocal(get(expression->left)));
-    e1->emplace("right", fixLocal(get(expression->right)));
-    eLeft->emplace("value", e1);
-    e->emplace("left", eLeft);
+    e1->emplace("op"_cs, expression->getStringOp() == "|+|" ? "+" : "-");
+    e1->emplace("left"_cs, fixLocal(get(expression->left)));
+    e1->emplace("right"_cs, fixLocal(get(expression->right)));
+    eLeft->emplace("value"_cs, e1);
+    e->emplace("left"_cs, eLeft);
 
     // the right operand is the width of the type
     auto r = new Util::JsonObject();
-    r->emplace("type", "hexstr");
+    r->emplace("type"_cs, "hexstr");
     cstring repr = stringRepr(eType->width_bits());
-    r->emplace("value", repr);
-    e->emplace("right", r);
+    r->emplace("value"_cs, repr);
+    e->emplace("right"_cs, r);
 }
 
 void ExpressionConverter::postorder(const IR::ListExpression *expression) {
@@ -624,16 +624,16 @@ void ExpressionConverter::postorder(const IR::Operation_Unary *expression) {
         return;
     }
 
-    result->emplace("type", "expression");
+    result->emplace("type"_cs, "expression");
     auto e = new Util::JsonObject();
-    result->emplace("value", e);
+    result->emplace("value"_cs, e);
     cstring op = expression->getStringOp();
-    if (op == "!") op = "not";
-    e->emplace("op", op);
-    e->emplace("left", Util::JsonValue::null);
+    if (op == "!") op = "not"_cs;
+    e->emplace("op"_cs, op);
+    e->emplace("left"_cs, Util::JsonValue::null);
     auto r = get(expression->expr);
     if (!r) return;
-    e->emplace("right", fixLocal(r));
+    e->emplace("right"_cs, fixLocal(r));
 }
 
 void ExpressionConverter::postorder(const IR::PathExpression *expression) {
@@ -643,11 +643,11 @@ void ExpressionConverter::postorder(const IR::PathExpression *expression) {
         if (structure->nonActionParameters.find(param) != structure->nonActionParameters.end()) {
             auto type = typeMap->getType(param, true);
             if (type->is<IR::Type_StructLike>()) {
-                auto result = convertParam(param, "");
+                auto result = convertParam(param, cstring::empty);
                 if (result == nullptr) {
                     auto r = new Util::JsonObject();
-                    r->emplace("type", "header");
-                    r->emplace("value", param->name.name);
+                    r->emplace("type"_cs, "header");
+                    r->emplace("value"_cs, param->name.name);
                     result = r;
                 }
                 mapExpression(expression, result);
@@ -657,56 +657,56 @@ void ExpressionConverter::postorder(const IR::PathExpression *expression) {
             return;
         }
         auto result = new Util::JsonObject();
-        result->emplace("type", "runtime_data");
+        result->emplace("type"_cs, "runtime_data");
         unsigned paramIndex = ::get(&structure->index, param);
-        result->emplace("value", paramIndex);
+        result->emplace("value"_cs, paramIndex);
         mapExpression(expression, result);
     } else if (auto var = decl->to<IR::Declaration_Variable>()) {
         LOG3("Variable to json " << var);
         auto result = new Util::JsonObject();
         auto type = typeMap->getType(var, true);
         if (type->is<IR::Type_StructLike>()) {
-            result->emplace("type", "header");
-            result->emplace("value", var->name);
+            result->emplace("type"_cs, "header");
+            result->emplace("value"_cs, var->name);
         } else if (type->is<IR::Type_Bits>() ||
                    (type->is<IR::Type_Boolean>() && (leftValue || simpleExpressionsOnly))) {
             // no conversion d2b when writing (leftValue is true) to a boolean
-            result->emplace("type", "field");
-            auto e = mkArrayField(result, "value");
+            result->emplace("type"_cs, "field");
+            auto e = mkArrayField(result, "value"_cs);
             e->append(scalarsName);
             e->append(var->name);
         } else if (type->is<IR::Type_Varbits>()) {
             // varbits are synthesized in separate metadata instances
             // with a single field each, where the field is named
             // "field".
-            result->emplace("type", "field");
-            auto e = mkArrayField(result, "value");
+            result->emplace("type"_cs, "field");
+            auto e = mkArrayField(result, "value"_cs);
             e->append(var->name);
             e->append("field");
         } else if (type->is<IR::Type_Boolean>()) {
             // Boolean variables are stored as ints, so we have to insert a conversion when
             // reading such a variable
-            result->emplace("type", "expression");
+            result->emplace("type"_cs, "expression");
             auto e = new Util::JsonObject();
-            result->emplace("value", e);
-            e->emplace("op", "d2b");  // data to Boolean cast
-            e->emplace("left", Util::JsonValue::null);
+            result->emplace("value"_cs, e);
+            e->emplace("op"_cs, "d2b");  // data to Boolean cast
+            e->emplace("left"_cs, Util::JsonValue::null);
             auto r = new Util::JsonObject();
-            e->emplace("right", r);
-            r->emplace("type", "field");
-            auto f = mkArrayField(r, "value");
+            e->emplace("right"_cs, r);
+            r->emplace("type"_cs, "field");
+            auto f = mkArrayField(r, "value"_cs);
             f->append(scalarsName);
             f->append(var->name);
         } else if (auto st = type->to<IR::Type_Stack>()) {
             auto et = typeMap->getTypeType(st->elementType, true);
             if (et->is<IR::Type_HeaderUnion>())
-                result->emplace("type", "header_union_stack");
+                result->emplace("type"_cs, "header_union_stack");
             else
-                result->emplace("type", "header_stack");
-            result->emplace("value", var->name);
+                result->emplace("type"_cs, "header_stack");
+            result->emplace("value"_cs, var->name);
         } else if (type->is<IR::Type_Error>()) {
-            result->emplace("type", "field");
-            auto f = mkArrayField(result, "value");
+            result->emplace("type"_cs, "field");
+            auto f = mkArrayField(result, "value"_cs);
             f->append(scalarsName);
             f->append(var->name);
         } else {
@@ -718,8 +718,8 @@ void ExpressionConverter::postorder(const IR::PathExpression *expression) {
 
 void ExpressionConverter::postorder(const IR::StringLiteral *expression) {
     auto result = new Util::JsonObject();
-    result->emplace("type", "string");
-    result->emplace("value", expression->value);
+    result->emplace("type"_cs, "string");
+    result->emplace("value"_cs, expression->value);
     mapExpression(expression, result);
 }
 
@@ -731,18 +731,18 @@ void ExpressionConverter::postorder(const IR::Slice *expression) {
     int h = expression->getH();
     int l = expression->getL();
     auto mask = Util::maskFromSlice(h, l);
-    result->emplace("type", "expression");
+    result->emplace("type"_cs, "expression");
     auto band = new Util::JsonObject();
-    result->emplace("value", band);
-    band->emplace("op", "&");
+    result->emplace("value"_cs, band);
+    band->emplace("op"_cs, "&");
     auto right = new Util::JsonObject();
     auto bitwidth = expression->type->width_bits();
-    right->emplace("type", "hexstr");
-    right->emplace("value", stringRepr(mask, ROUNDUP(bitwidth, 8)));
+    right->emplace("type"_cs, "hexstr");
+    right->emplace("value"_cs, stringRepr(mask, ROUNDUP(bitwidth, 8)));
     auto le = get(expr);
     if (!le) return;
-    band->emplace("left", le);
-    band->emplace("right", right);
+    band->emplace("left"_cs, le);
+    band->emplace("right"_cs, right);
     mapExpression(expression, result);
 }
 
@@ -785,27 +785,27 @@ Util::IJson *ExpressionConverter::convert(const IR::Expression *e, bool doFixup,
     auto type = typeMap->getType(e, true);
     if (convertBool && type->is<IR::Type_Boolean>()) {
         auto obj = new Util::JsonObject();
-        obj->emplace("type", "expression");
+        obj->emplace("type"_cs, "expression");
         auto conv = new Util::JsonObject();
-        obj->emplace("value", conv);
-        conv->emplace("op", "b2d");  // boolean to data cast
-        conv->emplace("left", Util::JsonValue::null);
-        conv->emplace("right", result);
+        obj->emplace("value"_cs, conv);
+        conv->emplace("op"_cs, "b2d");  // boolean to data cast
+        conv->emplace("left"_cs, Util::JsonValue::null);
+        conv->emplace("right"_cs, result);
         result = obj;
     }
 
-    std::set<cstring> to_wrap({"expression", "stack_field"});
+    std::set<cstring> to_wrap({"expression"_cs, "stack_field"_cs});
     // This is weird, but that's how it is: expression and stack_field must be wrapped in
     // another outer object. In a future version of the bmv2 JSON, this will not be needed
     // anymore as expressions will be treated in a more uniform way.
     if (wrap) {
         if (auto ro = result->to<Util::JsonObject>()) {
-            if (auto to = ro->get("type")) {
+            if (auto to = ro->get("type"_cs)) {
                 if (auto jv = to->to<Util::JsonValue>()) {
                     if (jv->isString() && to_wrap.find(jv->getString()) != to_wrap.end()) {
                         auto rwrap = new Util::JsonObject();
-                        rwrap->emplace("type", "expression");
-                        rwrap->emplace("value", result);
+                        rwrap->emplace("type"_cs, "expression");
+                        rwrap->emplace("value"_cs, result);
                         result = rwrap;
                     }
                 }

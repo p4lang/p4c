@@ -22,6 +22,7 @@ limitations under the License.
 #define LIB_SOURCE_FILE_H_
 
 #include <map>
+#include <string_view>
 #include <vector>
 
 #include "cstring.h"
@@ -37,6 +38,8 @@ class UtilSourceFile;
 }
 
 namespace Util {
+using namespace P4::literals;
+
 struct SourceFileLine;
 /**
 A character position within some InputSources: a pair of
@@ -119,10 +122,10 @@ SourceInfo can also be "invalid"
 */
 class SourceInfo final {
  public:
-    cstring filename = "";
+    cstring filename = ""_cs;
     int line = -1;
     int column = -1;
-    cstring srcBrief = "";
+    cstring srcBrief = ""_cs;
     SourceInfo(cstring filename, int line, int column, cstring srcBrief) {
         this->filename = filename;
         this->line = line;
@@ -220,7 +223,7 @@ struct SourceFileLine {
     cstring fileName;
     unsigned sourceLine;
 
-    SourceFileLine(cstring file, unsigned line) : fileName(file), sourceLine(line) {}
+    SourceFileLine(std::string_view file, unsigned line) : fileName(file), sourceLine(line) {}
 
     cstring toString() const;
 };
@@ -265,7 +268,7 @@ class InputSources final {
  public:
     InputSources();
 
-    cstring getLine(unsigned lineNumber) const;
+    std::string_view getLine(unsigned lineNumber) const;
     /// Original source line that produced the line with the specified number
     SourceFileLine getSourceLine(unsigned line) const;
 
@@ -282,7 +285,7 @@ class InputSources final {
     /**
         Map the next line in the file to the line with number 'originalSourceLine'
         from file 'file'. */
-    void mapLine(cstring file, unsigned originalSourceLineNo);
+    void mapLine(std::string_view file, unsigned originalSourceLineNo);
 
     /**
        The following return a nice (multi-line, newline-terminated)

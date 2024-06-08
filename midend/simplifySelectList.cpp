@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "simplifySelectList.h"
 
+#include "lib/cstring.h"
+
 namespace P4 {
 
 void SubstituteStructures::explode(const IR::Expression *expression, const IR::Type *type,
@@ -89,7 +91,7 @@ void UnnestSelectList::flatten(const IR::Expression *expression, unsigned *nesti
 
 const IR::Node *UnnestSelectList::preorder(IR::SelectExpression *expression) {
     IR::Vector<IR::Expression> vec;
-    nesting = "";
+    nesting = cstring::empty;
     flatten(expression->select, &vec);
     if (nesting.findlast(']') == nesting.c_str())
         // no nested lists found

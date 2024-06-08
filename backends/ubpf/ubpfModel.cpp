@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace UBPF {
 
-cstring UBPFModel::reservedPrefix = "ubpf_";
+cstring UBPFModel::reservedPrefix = "ubpf_"_cs;
 UBPFModel UBPFModel::instance;
 
 }  // namespace UBPF

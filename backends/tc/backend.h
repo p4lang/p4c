@@ -99,7 +99,7 @@ class ConvertToBackendIR : public Inspector {
     safe_vector<const IR::TCKey *> processExternControlPath(const IR::Type_SpecializedCanonical *ts,
                                                             const IR::Type_Extern *extn,
                                                             cstring eName);
-    unsigned GetAccessNumericValue(cstring access);
+    unsigned GetAccessNumericValue(std::string_view access);
     bool isDuplicateAction(const IR::P4Action *action);
     bool isDuplicateOrNoAction(const IR::P4Action *action);
     void updateDefaultHitAction(const IR::P4Table *t, IR::TCTable *tdef);

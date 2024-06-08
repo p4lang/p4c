@@ -39,7 +39,7 @@ class DoRemoveExits : public DoRemoveReturns {
 
  public:
     DoRemoveExits(ReferenceMap *refMap, TypeMap *typeMap)
-        : DoRemoveReturns(refMap, "hasExited"), typeMap(typeMap) {
+        : DoRemoveReturns(refMap, "hasExited"_cs), typeMap(typeMap) {
         visitDagOnce = false;
         CHECK_NULL(typeMap);
         setName("DoRemoveExits");

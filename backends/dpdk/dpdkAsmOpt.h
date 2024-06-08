@@ -36,6 +36,9 @@ limitations under the License.
 #define DPDK_TABLE_MAX_KEY_SIZE 64 * 8
 
 namespace DPDK {
+
+using namespace P4::literals;
+
 /// This pass removes label that no jmps jump to
 class RemoveRedundantLabel : public Transform {
  public:
@@ -207,7 +210,7 @@ class ShortenTokenLength : public Transform {
     }
 
     const IR::Node *preorder(IR::DpdkStructType *s) override {
-        if (s->getAnnotations()->getSingle("__packet_data__")) {
+        if (s->getAnnotations()->getSingle("__packet_data__"_cs)) {
             s->name = shortenString(s->name);
             IR::IndexedVector<IR::StructField> changedFields;
             for (auto field : s->fields) {
@@ -350,9 +353,9 @@ class CollectUseDefInfo : public Inspector {
     std::unordered_map<cstring, bool> dontEliminate;
 
     explicit CollectUseDefInfo(P4::TypeMap *typeMap) : typeMap(typeMap) {
-        dontEliminate["m.pna_main_output_metadata_output_port"] = true;
-        dontEliminate["m.psa_ingress_output_metadata_drop"] = true;
-        dontEliminate["m.psa_ingress_output_metadata_egress_port"] = true;
+        dontEliminate["m.pna_main_output_metadata_output_port"_cs] = true;
+        dontEliminate["m.psa_ingress_output_metadata_drop"_cs] = true;
+        dontEliminate["m.psa_ingress_output_metadata_egress_port"_cs] = true;
     }
 
     bool preorder(const IR::DpdkJmpCondStatement *b) override {
@@ -624,8 +627,8 @@ class EmitDpdkTableConfig : public Inspector {
                                                P4::TypeMap *typeMap);
     bool tableNeedsPriority(const IR::DpdkTable *table, P4::ReferenceMap *refMap);
     bool isAllKeysDefaultExpression(const IR::ListExpression *keyset);
-    void print(cstring str, cstring sep = "");
-    void print(big_int, cstring sep = "");
+    void print(std::string_view str, std::string_view sep = "");
+    void print(big_int, std::string_view sep = "");
 
  public:
     EmitDpdkTableConfig(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,

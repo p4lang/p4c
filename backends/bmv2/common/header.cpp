@@ -287,7 +287,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
 
     LOG2("... creating aliases for metadata fields " << st);
     for (auto f : st->fields) {
-        if (auto aliasAnnotation = f->getAnnotation("alias")) {
+        if (auto aliasAnnotation = f->getAnnotation("alias"_cs)) {
             auto container = new Util::JsonArray();
             auto alias = new Util::JsonArray();
             auto target_name = "";
@@ -399,7 +399,7 @@ Visitor::profile_t HeaderConverter::init_apply(const IR::Node *node) {
 
     // always-have metadata instance
     ctxt->json->add_metadata(scalarsTypeName, scalarsName);
-    ctxt->json->add_metadata("standard_metadata", "standard_metadata");
+    ctxt->json->add_metadata("standard_metadata"_cs, "standard_metadata"_cs);
     return Inspector::init_apply(node);
 }
 
@@ -443,7 +443,7 @@ bool HeaderConverter::preorder(const IR::Parameter *param) {
         else
             visitedHeaders.emplace(st->getName());
 
-        if (st->getAnnotation("metadata")) {
+        if (st->getAnnotation("metadata"_cs)) {
             addHeaderType(st);
         } else {
             auto isHeader = isHeaders(st);

@@ -200,8 +200,8 @@ void XDPIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     // resubmitted or multicasted because this check is not at the end of deparser.
     cstring conditionSendToTC =
         "if (%s->clone || %s->multicast_group != 0 ||"
-        " (!%s->drop && %s->egress_port == 0 && !%s->resubmit && %s->multicast_group == 0)) ";
-    conditionSendToTC = conditionSendToTC.replace("%s", istd->name.name);
+        " (!%s->drop && %s->egress_port == 0 && !%s->resubmit && %s->multicast_group == 0)) "_cs;
+    conditionSendToTC = conditionSendToTC.replace("%s"_cs, istd->name);
     builder->append(conditionSendToTC);
     builder->blockStart();
     builder->emitIndent();
@@ -253,8 +253,8 @@ void XDPIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
             "&xdp2tc_md, sizeof(struct xdp2tc_metadata));");
     } else if (program->options.xdp2tcMode == XDP2TC_CPUMAP) {
         builder->emitIndent();
-        builder->target->emitTableUpdate(builder, "xdp2tc_shared_map",
-                                         this->program->zeroKey.c_str(), "xdp2tc_md");
+        builder->target->emitTableUpdate(builder, "xdp2tc_shared_map"_cs, this->program->zeroKey,
+                                         "xdp2tc_md"_cs);
         builder->newline();
     }
     builder->target->emitTraceMessage(builder, "Sending packet up to TC for cloning or to kernel");
@@ -263,7 +263,7 @@ void XDPIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->endOfStatement(true);
     builder->blockEnd(true);
     builder->emitIndent();
-    builder->appendFormat("if (%s->drop) ", istd->name.name, istd->name.name);
+    builder->appendFormat("if (%s->drop) ", istd->name.name);
     builder->blockStart();
     builder->target->emitTraceMessage(builder, "PreDeparser: dropping packet..");
     builder->emitIndent();

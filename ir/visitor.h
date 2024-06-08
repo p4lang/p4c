@@ -221,7 +221,7 @@ class Visitor {
         if (!internalName) internalName = demangle(typeid(*this).name());
         return internalName.c_str();
     }
-    void setName(const char *name) { internalName = name; }
+    void setName(const char *name) { internalName = cstring(name); }
     void print_context() const;  // for debugging; can be called from debugger
 
     // Context access/search functions.  getContext returns the context

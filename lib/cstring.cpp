@@ -16,6 +16,13 @@ limitations under the License.
 
 #include "cstring.h"
 
+#if HAVE_LIBGC
+#include <gc_cpp.h>
+#define IF_HAVE_LIBGC(X) X
+#else
+#define IF_HAVE_LIBGC(X)
+#endif /* HAVE_LIBGC */
+
 #include <algorithm>
 #include <cctype>
 #include <iomanip>
@@ -75,8 +82,8 @@ class table_entry {
             m_inplace_string[length] = '\0';
             m_flags = table_entry_flags::inplace;
         } else {
-            // Make copy of string elseware
-            auto copy = new char[length + 1];
+            // Make copy of string elsewhere
+            auto copy = new IF_HAVE_LIBGC((NoGC)) char[length + 1];
             std::memcpy(copy, string, length);
             copy[length] = '\0';
             m_string = copy;
@@ -185,18 +192,18 @@ size_t cstring::cache_size(size_t &count) {
     return rv;
 }
 
-cstring cstring::newline = cstring("\n");
-cstring cstring::empty = cstring("");
+cstring cstring::newline = cstring::literal("\n");
+cstring cstring::empty = cstring::literal("");
 
-bool cstring::startsWith(const cstring &prefix) const {
-    if (prefix.isNullOrEmpty()) return true;
-    return size() >= prefix.size() && memcmp(str, prefix.str, prefix.size()) == 0;
+bool cstring::startsWith(std::string_view prefix) const {
+    if (prefix.empty()) return true;
+    return size() >= prefix.size() && memcmp(str, prefix.data(), prefix.size()) == 0;
 }
 
-bool cstring::endsWith(const cstring &suffix) const {
-    if (suffix.isNullOrEmpty()) return true;
+bool cstring::endsWith(std::string_view suffix) const {
+    if (suffix.empty()) return true;
     return size() >= suffix.size() &&
-           memcmp(str + size() - suffix.size(), suffix.str, suffix.size()) == 0;
+           memcmp(str + size() - suffix.size(), suffix.data(), suffix.size()) == 0;
 }
 
 cstring cstring::before(const char *at) const { return substr(0, at - str); }
@@ -231,8 +238,8 @@ cstring cstring::replace(cstring search, cstring replace) const {
 cstring cstring::indent(size_t amount) const {
     std::string spaces = "";
     for (size_t i = 0; i < amount; i++) spaces += " ";
-    cstring spc = cstring("\n") + spaces;
-    return cstring(spaces) + replace("\n", spc);
+    cstring spc = newline + spaces;
+    return cstring(spaces) + replace(newline, spc);
 }
 
 // See https://stackoverflow.com/a/33799784/4538702

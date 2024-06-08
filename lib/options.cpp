@@ -27,15 +27,15 @@ void Util::Options::registerOption(const char *option, const char *argName,
     if (option[0] != '-')
         throw std::logic_error(std::string("Expected option to start with -: ") + option);
     auto o = new Option();
-    o->option = option;
+    o->option = cstring(option);
     o->argName = argName;
     o->processor = processor;
     o->description = description;
     o->flags = flags;
-    auto opt = get(options, option);
+    auto opt = get(options, cstring(option));
     if (opt != nullptr) throw std::logic_error(std::string("Option already registered: ") + option);
     options.emplace(option, o);
-    optionOrder.push_back(option);
+    optionOrder.push_back(cstring(option));
 }
 
 // Process options; return list of remaining options.
@@ -57,7 +57,7 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
     strftime(build_date, 50, "%c", localtime(&now));
     buildDate = cstring(build_date);
     for (int i = 1; i < argc; i++) {
-        cstring opt = argv[i];
+        cstring opt = cstring(argv[i]);
         const char *arg = nullptr;
         const Option *option = nullptr;
 

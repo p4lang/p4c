@@ -53,6 +53,8 @@ limitations under the License.
 
 namespace EBPF {
 
+using namespace P4::literals;
+
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum *type) const override {
         if (type->srcInfo.isValid()) {
@@ -111,14 +113,14 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
 
         if (options.arch == "psa") {
             midEnd.addPasses({new P4::ValidateTableProperties(
-                {"size", "psa_direct_counter", "psa_direct_meter", "psa_empty_group_action",
-                 "psa_implementation"})});
+                {"size"_cs, "psa_direct_counter"_cs, "psa_direct_meter"_cs,
+                 "psa_empty_group_action"_cs, "psa_implementation"_cs})});
         } else {
-            midEnd.addPasses({new P4::ValidateTableProperties({"size", "implementation"})});
+            midEnd.addPasses({new P4::ValidateTableProperties({"size"_cs, "implementation"_cs})});
         }
 
         if (options.listMidendPasses) {
-            midEnd.listPasses(*outStream, "\n");
+            midEnd.listPasses(*outStream, cstring::newline);
             *outStream << std::endl;
         }
         if (options.excludeMidendPasses) {

@@ -76,7 +76,7 @@ std::optional<ICompileContext *> AbstractP4cToolOptions::process(
         usage();
         return std::nullopt;
     }
-    P4CContext::get().options().file = remainingArgs->at(0);
+    P4CContext::get().options().file = cstring(remainingArgs->at(0));
 
     if (!validateOptions()) {
         return std::nullopt;
@@ -108,7 +108,7 @@ struct InheritedCompilerOptionSpec {
     std::optional<std::function<bool(const char *)>> handler;
 };
 
-AbstractP4cToolOptions::AbstractP4cToolOptions(std::string_view toolName, cstring message)
+AbstractP4cToolOptions::AbstractP4cToolOptions(std::string_view toolName, std::string_view message)
     : Options(message), _toolName(toolName) {
     // Register some common options.
     registerOption(

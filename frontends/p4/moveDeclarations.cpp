@@ -110,7 +110,7 @@ const IR::Node *MoveInitializers::preorder(IR::P4Parser *parser) {
         }
     }
     if (someInitializers) {
-        newStartName = refMap->newName(IR::ParserState::start);
+        newStartName = refMap->newName(IR::ParserState::start.string_view());
         oldStart = parser->states.getDeclaration(IR::ParserState::start)->to<IR::ParserState>();
         CHECK_NULL(oldStart);
     }

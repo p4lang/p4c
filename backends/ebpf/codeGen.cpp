@@ -63,7 +63,7 @@ bool CodeGenInspector::preorder(const IR::Declaration_Variable *decl) {
 
 static cstring getMask(P4::TypeMap *typeMap, const IR::Node *node) {
     auto type = typeMap->getType(node, true);
-    cstring mask = "";
+    cstring mask = cstring::empty;
     if (auto tb = type->to<IR::Type_Bits>()) {
         if (tb->size != 8 && tb->size != 16 && tb->size != 32 && tb->size != 64)
             mask = " & ((1 << " + Util::toString(tb->size) + ") - 1)";
@@ -478,16 +478,16 @@ void CodeGenInspector::emitAndConvertByteOrder(const IR::Expression *expr, cstri
     auto ftype = typeMap->getType(expr);
     auto et = EBPFTypeFactory::instance->create(ftype);
     unsigned widthToEmit = dynamic_cast<IHasWidth *>(et)->widthInBits();
-    cstring emit = "";
+    cstring emit = cstring::empty;
     unsigned loadSize = 64;
     if (widthToEmit <= 16) {
-        emit = byte_order == "HOST" ? "bpf_ntohs" : "bpf_htons";
+        emit = byte_order == "HOST" ? "bpf_ntohs"_cs : "bpf_htons"_cs;
         loadSize = 16;
     } else if (widthToEmit <= 32) {
-        emit = byte_order == "HOST" ? "bpf_ntohl" : "bpf_htonl";
+        emit = byte_order == "HOST" ? "bpf_ntohl"_cs : "bpf_htonl"_cs;
         loadSize = 32;
     } else if (widthToEmit <= 64) {
-        emit = byte_order == "HOST" ? "ntohll" : "bpf_cpu_to_be64";
+        emit = byte_order == "HOST" ? "ntohll"_cs : "bpf_cpu_to_be64"_cs;
         loadSize = 64;
     }
     unsigned shift = loadSize - widthToEmit;
@@ -504,7 +504,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
 
     auto action = findContext<IR::P4Action>();
     auto tcTarget = dynamic_cast<const P4TCTarget *>(builder->target);
-    cstring lByteOrder = "HOST", rByteOrder = "HOST";
+    cstring lByteOrder = "HOST"_cs, rByteOrder = "HOST"_cs;
     if (lexpr) {
         lByteOrder = tcTarget->getByteOrder(typeMap, action, lexpr);
     }
@@ -532,7 +532,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
         if (width <= 8) {
             visit(lexpr);
         } else {
-            emitAndConvertByteOrder(lexpr, "NETWORK");
+            emitAndConvertByteOrder(lexpr, "NETWORK"_cs);
         }
         if (isScalar) {
             builder->spc();
@@ -561,7 +561,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
         if (width <= 8) {
             visit(rexpr);
         } else {
-            emitAndConvertByteOrder(rexpr, "NETWORK");
+            emitAndConvertByteOrder(rexpr, "NETWORK"_cs);
         }
     }
     return;
@@ -571,7 +571,7 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
                                                            const IR::Expression *rexpr) {
     auto action = findContext<IR::P4Action>();
     auto b = dynamic_cast<const P4TCTarget *>(builder->target);
-    cstring lByteOrder = "HOST", rByteOrder = "HOST";
+    cstring lByteOrder = "HOST"_cs, rByteOrder = "HOST"_cs;
     if (lexpr) {
         lByteOrder = b->getByteOrder(typeMap, action, lexpr);
     }
@@ -596,7 +596,7 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
         //     select_0 = hdr.ipv4.diffserv
         //     select_0 = bntoh(hdr.ipv4.diffserv)
         //
-        emitAndConvertByteOrder(rexpr, "HOST");
+        emitAndConvertByteOrder(rexpr, "HOST"_cs);
     }
     if (lByteOrder == "NETWORK") {
         // If left side of assignment is annotated field i.e network endian, we need to convert
@@ -605,7 +605,7 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
         //     hdr.opv4.diffserv = 0x1;
         //     hdr.opv4.diffserv = bhton(0x1)
         //
-        emitAndConvertByteOrder(rexpr, "NETWORK");
+        emitAndConvertByteOrder(rexpr, "NETWORK"_cs);
     }
 
     return;

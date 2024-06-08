@@ -61,21 +61,21 @@ class EBPFPipeline : public EBPFProgram {
           control(nullptr),
           deparser(nullptr) {
         sectionName = "classifier/" + name;
-        functionName = name.replace("-", "_") + "_func";
-        errorEnum = "ParserError_t";
-        packetStartVar = cstring("pkt");
-        headerStartVar = cstring("hdr_start");
-        contextVar = cstring("skb");
-        lengthVar = cstring("pkt_len");
-        endLabel = cstring("deparser");
-        timestampVar = cstring("tstamp");
-        ifindexVar = cstring("skb->ifindex");
-        compilerGlobalMetadata = cstring("compiler_meta__");
-        packetPathVar = compilerGlobalMetadata + cstring("->packet_path");
-        pktInstanceVar = compilerGlobalMetadata + cstring("->instance");
-        priorityVar = cstring("skb->priority");
-        oneKey = EBPFModel::reserved("one");
-        inputPortVar = cstring("ebpf_input_port");
+        functionName = name.replace('-', '_') + "_func";
+        errorEnum = "ParserError_t"_cs;
+        packetStartVar = "pkt"_cs;
+        headerStartVar = "hdr_start"_cs;
+        contextVar = "skb"_cs;
+        lengthVar = "pkt_len"_cs;
+        endLabel = "deparser"_cs;
+        timestampVar = "tstamp"_cs;
+        ifindexVar = "skb->ifindex"_cs;
+        compilerGlobalMetadata = "compiler_meta__"_cs;
+        packetPathVar = compilerGlobalMetadata + "->packet_path"_cs;
+        pktInstanceVar = compilerGlobalMetadata + "->instance"_cs;
+        priorityVar = "skb->priority"_cs;
+        oneKey = EBPFModel::reserved("one"_cs);
+        inputPortVar = "ebpf_input_port"_cs;
         progTarget = new KernelSamplesTarget(options.emitTraceMessages);
     }
 
@@ -85,19 +85,19 @@ class EBPFPipeline : public EBPFProgram {
 
     virtual cstring dropReturnCode() {
         if (sectionName.startsWith("xdp")) {
-            return "XDP_DROP";
+            return "XDP_DROP"_cs;
         }
 
         // TC is the default hookpoint
-        return "TC_ACT_SHOT";
+        return "TC_ACT_SHOT"_cs;
     }
     virtual cstring forwardReturnCode() {
         if (sectionName.startsWith("xdp")) {
-            return "XDP_PASS";
+            return "XDP_PASS"_cs;
         }
 
         // TC is the default hookpoint
-        return "TC_ACT_OK";
+        return "TC_ACT_OK"_cs;
     }
 
     virtual void emit(CodeBuilder *builder) = 0;
@@ -231,8 +231,8 @@ class XDPIngressPipeline : public EBPFIngressPipeline {
                        P4::TypeMap *typeMap)
         : EBPFIngressPipeline(name, options, refMap, typeMap) {
         sectionName = "xdp_ingress/" + name;
-        ifindexVar = cstring("skb->ingress_ifindex");
-        packetPathVar = cstring(compilerGlobalMetadata + "->packet_path");
+        ifindexVar = "skb->ingress_ifindex"_cs;
+        packetPathVar = compilerGlobalMetadata + "->packet_path"_cs;
         progTarget = new XdpTarget(options.emitTraceMessages);
     }
 
@@ -248,11 +248,11 @@ class XDPEgressPipeline : public EBPFEgressPipeline {
                       P4::TypeMap *typeMap)
         : EBPFEgressPipeline(name, options, refMap, typeMap) {
         sectionName = "xdp_devmap/" + name;
-        ifindexVar = cstring("skb->egress_ifindex");
+        ifindexVar = "skb->egress_ifindex"_cs;
         // we do not support packet path, instance & priority in the XDP egress.
-        packetPathVar = cstring("0");
-        pktInstanceVar = cstring("0");
-        priorityVar = cstring("0");
+        packetPathVar = "0"_cs;
+        pktInstanceVar = "0"_cs;
+        priorityVar = "0"_cs;
         progTarget = new XdpTarget(options.emitTraceMessages);
     }
 

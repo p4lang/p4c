@@ -154,8 +154,8 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
          *  the prepending of metadata that some P4 targets perform.
          * ======================================================================================
          */
-        {"*.prepend_to_prog_header",
-         {"hdr"},
+        {"*.prepend_to_prog_header"_cs,
+         {"hdr"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -164,7 +164,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              auto &nextState = state.clone();
              const auto *prependType = state.resolveType(prependVar->type);
 
-             nextState.add(*new TraceEvents::Expression(prependVar, "PrependToProgramHeader"));
+             nextState.add(*new TraceEvents::Expression(prependVar, "PrependToProgramHeader"_cs));
              // Prepend the field to the packet buffer.
              if (const auto *structExpr = prependVar->to<IR::StructExpression>()) {
                  auto exprList = IR::flattenStructExpression(structExpr);
@@ -188,8 +188,8 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
          *  the appending of metadata that some P4 targets perform.
          * ======================================================================================
          */
-        {"*.append_to_prog_header",
-         {"hdr"},
+        {"*.append_to_prog_header"_cs,
+         {"hdr"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -198,7 +198,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              auto &nextState = state.clone();
              const auto *appendType = state.resolveType(appendVar->type);
 
-             nextState.add(*new TraceEvents::Expression(appendVar, "AppendToProgramHeader"));
+             nextState.add(*new TraceEvents::Expression(appendVar, "AppendToProgramHeader"_cs));
              // Append the field to the packet buffer.
              if (const auto *structExpr = appendVar->to<IR::StructExpression>()) {
                  auto exprList = IR::flattenStructExpression(structExpr);
@@ -221,7 +221,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
          * the output packet, which can either be emitted or forwarded to the next parser.
          * ======================================================================================
          */
-        {"*.prepend_emit_buffer",
+        {"*.prepend_emit_buffer"_cs,
          {},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
@@ -230,7 +230,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              const auto *emitBuffer = state.getEmitBuffer();
              nextState.prependToPacketBuffer(emitBuffer);
              nextState.add(
-                 *new TraceEvents::Generic("Prepending the emit buffer to the program packet"));
+                 *new TraceEvents::Generic("Prepending the emit buffer to the program packet"_cs));
              nextState.popBody();
              result->emplace_back(nextState);
          }},
@@ -240,7 +240,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
          *  We do this by clearing the packet variable and pushing an exit continuation.
          * ======================================================================================
          */
-        {"*.drop_and_exit",
+        {"*.drop_and_exit"_cs,
          {},
          [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
@@ -253,8 +253,8 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                                programInfo.createTargetUninitialized(
                                    programInfo.getTargetOutputPortVar()->type, true));
              }
-             nextState.add(*new TraceEvents::Generic("Packet marked dropped"));
-             nextState.setProperty("drop", true);
+             nextState.add(*new TraceEvents::Generic("Packet marked dropped"_cs));
+             nextState.setProperty("drop"_cs, true);
              nextState.replaceTopBody(Continuation::Exception::Drop);
              result->emplace_back(nextState);
          }},
@@ -265,8 +265,8 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
          * appropriately.
          * ======================================================================================
          */
-        {"*.copy_in",
-         {"blockRef"},
+        {"*.copy_in"_cs,
+         {"blockRef"_cs},
          [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -282,14 +282,14 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
 
              // Copy-in.
              // Get the current level and disable it for these operations to avoid overtainting.
-             auto currentTaint = state.getProperty<bool>("inUndefinedState");
-             nextState.setProperty("inUndefinedState", false);
+             auto currentTaint = state.getProperty<bool>("inUndefinedState"_cs);
+             nextState.setProperty("inUndefinedState"_cs, false);
              for (size_t paramIdx = 0; paramIdx < blockParams->size(); ++paramIdx) {
                  const auto *internalParam = blockParams->getParameter(paramIdx);
                  auto externalParamName = archSpec.getParamName(canonicalName, paramIdx);
                  nextState.copyIn(TestgenTarget::get(), internalParam, externalParamName);
              }
-             nextState.setProperty("inUndefinedState", currentTaint);
+             nextState.setProperty("inUndefinedState"_cs, currentTaint);
              nextState.popBody();
              result->emplace_back(nextState);
          }},
@@ -300,8 +300,8 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
          * appropriately.
          * ======================================================================================
          */
-        {"*.copy_out",
-         {"blockRef"},
+        {"*.copy_out"_cs,
+         {"blockRef"_cs},
          [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -317,14 +317,14 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
 
              // Copy-in.
              // Get the current level and disable it for these operations to avoid overtainting.
-             auto currentTaint = state.getProperty<bool>("inUndefinedState");
-             nextState.setProperty("inUndefinedState", false);
+             auto currentTaint = state.getProperty<bool>("inUndefinedState"_cs);
+             nextState.setProperty("inUndefinedState"_cs, false);
              for (size_t paramIdx = 0; paramIdx < blockParams->size(); ++paramIdx) {
                  const auto *internalParam = blockParams->getParameter(paramIdx);
                  auto externalParamName = archSpec.getParamName(canonicalName, paramIdx);
                  nextState.copyOut(internalParam, externalParamName);
              }
-             nextState.setProperty("inUndefinedState", currentTaint);
+             nextState.setProperty("inUndefinedState"_cs, currentTaint);
              nextState.popBody();
              result->emplace_back(nextState);
          }},
@@ -350,7 +350,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          *  T lookahead<T>();
          * ======================================================================================
          */
-        {"packet_in.lookahead",
+        {"packet_in.lookahead"_cs,
          {},
          [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
@@ -376,7 +376,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  auto &nextState = state.clone();
                  // Peek into the buffer, we do NOT slice from it.
                  const auto *lookaheadVar = nextState.peekPacketBuffer(lookaheadSize);
-                 nextState.add(*new TraceEvents::Expression(lookaheadVar, "Lookahead result"));
+                 nextState.add(*new TraceEvents::Expression(lookaheadVar, "Lookahead result"_cs));
                  // Record the condition we are passing at this at this point.
                  nextState.add(*new TraceEvents::Generic(condStream.str()));
                  nextState.replaceTopBody(Continuation::Return(lookaheadVar));
@@ -386,7 +386,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              if (condInfo.advanceFailCond != nullptr) {
                  auto &rejectState = state.clone();
                  // Record the condition we are failing at this at this point.
-                 rejectState.add(*new TraceEvents::Generic("Lookahead: Packet too short"));
+                 rejectState.add(*new TraceEvents::Generic("Lookahead: Packet too short"_cs));
                  rejectState.replaceTopBody(Continuation::Exception::PacketTooShort);
                  result->emplace_back(condInfo.advanceFailCond, state, rejectState);
              }
@@ -396,8 +396,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          *  Advance the packet cursor by the specified number of bits.
          * ======================================================================================
          */
-        {"packet_in.advance",
-         {"sizeInBits"},
+        {"packet_in.advance"_cs,
+         {"sizeInBits"_cs},
          [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -459,7 +459,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  // Advancing by zero can be considered a no-op.
                  if (condInfo.advanceSize == 0) {
                      auto &nextState = state.clone();
-                     nextState.add(*new TraceEvents::Generic("Advance: 0 bits."));
+                     nextState.add(*new TraceEvents::Generic("Advance: 0 bits."_cs));
                      nextState.popBody();
                      result->emplace_back(nextState);
                  } else {
@@ -477,7 +477,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  // Handle the case where the packet is too short.
                  auto &rejectState = state.clone();
                  // Record the condition we are failing at this at this point.
-                 rejectState.add(*new TraceEvents::Generic("Advance: Packet too short"));
+                 rejectState.add(*new TraceEvents::Generic("Advance: Packet too short"_cs));
                  rejectState.replaceTopBody(Continuation::Exception::PacketTooShort);
                  result->emplace_back(condInfo.advanceFailCond, state, rejectState);
              }
@@ -489,8 +489,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          *  remains in the most recent position until we enter a new start parser.
          * ======================================================================================
          */
-        {"packet_in.extract",
-         {"hdr"},
+        {"packet_in.extract"_cs,
+         {"hdr"_cs},
          [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -545,8 +545,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  result->emplace_back(condInfo.advanceFailCond, state, rejectState);
              }
          }},
-        {"packet_in.extract",
-         {"hdr", "sizeInBits"},
+        {"packet_in.extract"_cs,
+         {"hdr"_cs, "sizeInBits"_cs},
          [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -674,7 +674,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          *  some target architectures.
          * ======================================================================================
          */
-        {"packet_in.length",
+        {"packet_in.length"_cs,
          {},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*name*/, const IR::Vector<IR::Argument> * /*args*/,
@@ -684,7 +684,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              const auto *divVar =
                  new IR::Div(lengthVar->type, ExecutionState::getInputPacketSizeVar(),
                              IR::Constant::get(lengthVar->type, 8));
-             nextState.add(*new TraceEvents::Expression(divVar, "Return packet length"));
+             nextState.add(*new TraceEvents::Expression(divVar, "Return packet length"_cs));
              nextState.replaceTopBody(Continuation::Return(divVar));
              result->emplace_back(std::nullopt, state, nextState);
          }},
@@ -694,8 +694,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          *  We use a concatenation for this.
          * ======================================================================================
          */
-        {"packet_out.emit",
-         {"hdr"},
+        {"packet_out.emit"_cs,
+         {"hdr"_cs},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -774,8 +774,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          *  argument.
          * ======================================================================================
          */
-        {"*method.verify",
-         {"bool", "error"},
+        {"*method.verify"_cs,
+         {"bool"_cs, "error"_cs},
          [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
                 IR::ID & /*name*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -824,8 +824,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
         /* ======================================================================================
          *  assume
          * ====================================================================================== */
-        {"*method.testgen_assume",
-         {"check"},
+        {"*method.testgen_assume"_cs,
+         {"check"_cs},
          [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -870,8 +870,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
         /* ======================================================================================
          *  assert
          * ====================================================================================== */
-        {"*method.testgen_assert",
-         {"check"},
+        {"*method.testgen_assert"_cs,
+         {"check"_cs},
          [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
@@ -917,7 +917,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  cond->dbprint(condStream);
                  nextState.add(*new TraceEvents::Generic(condStream.str()));
                  // Do not bother executing further. We have triggered an assertion.
-                 nextState.setProperty("assertionTriggered", true);
+                 nextState.setProperty("assertionTriggered"_cs, true);
                  nextState.replaceTopBody(Continuation::Exception::Abort);
                  result->emplace_back(new IR::LNot(cond), state, nextState);
              }

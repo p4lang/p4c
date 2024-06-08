@@ -17,14 +17,18 @@ limitations under the License.
 #include "typeSubstitution.h"
 
 #include "frontends/p4/typeMap.h"
+#include "lib/cstring.h"
 #include "typeConstraints.h"
 #include "typeSubstitutionVisitor.h"
 
 namespace P4 {
+using namespace literals;
+
+// FIXME: see if we can not return format string as cstring here
 cstring TypeVariableSubstitution::compose(const IR::ITypeVar *var, const IR::Type *substitution) {
     LOG3("Adding " << var << "->" << dbp(substitution) << "=" << substitution
                    << " to substitution");
-    if (substitution->is<IR::Type_Dontcare>()) return "";
+    if (substitution->is<IR::Type_Dontcare>()) return cstring::empty;
 
     // Type variables that represent Type_InfInt can only be unified to bit<> types
     // or to other Type_InfInt types.
@@ -35,7 +39,7 @@ cstring TypeVariableSubstitution::compose(const IR::ITypeVar *var, const IR::Typ
         if (!substitution->is<IR::Type_InfInt>() && !substitution->is<IR::Type_Bits>() &&
             !substitution->is<IR::Type_Any>()) {
             return "'%1%' type can only be unified with 'int', 'bit<>', or 'signed<>' types, "
-                   "not with '%2%'";
+                   "not with '%2%'"_cs;
         }
     }
 
@@ -43,7 +47,7 @@ cstring TypeVariableSubstitution::compose(const IR::ITypeVar *var, const IR::Typ
     // It is not if var occurs in substitution
     TypeOccursVisitor occurs(var);
     substitution->apply(occurs);
-    if (occurs.occurs) return "'%1%' cannot be replaced with '%2%' which already contains it";
+    if (occurs.occurs) return "'%1%' cannot be replaced with '%2%' which already contains it"_cs;
 
     // Check to see whether we already have a binding for this variable
     if (containsKey(var)) {
@@ -62,7 +66,7 @@ cstring TypeVariableSubstitution::compose(const IR::ITypeVar *var, const IR::Typ
     for (auto &bound : binding) {
         const IR::Type *type = bound.second;
         const IR::Node *newType = type->apply(visitor);
-        if (newType == nullptr) return "Could not replace '%1%' with '%2%'";
+        if (newType == nullptr) return "Could not replace '%1%' with '%2%'"_cs;
         if (newType == type) continue;
 
         if (bound.first->asType() == newType) {
@@ -81,7 +85,7 @@ cstring TypeVariableSubstitution::compose(const IR::ITypeVar *var, const IR::Typ
         success = setBinding(var, substitution);
         if (!success) BUG("Failed to insert binding");
     }
-    return "";
+    return cstring::empty;
 }
 
 void TypeVariableSubstitution::simpleCompose(const TypeVariableSubstitution *other) {
