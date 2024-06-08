@@ -29,9 +29,14 @@ header ipv4_t {
     bit<32> dstAddr;
 }
 
+header v4_options_t {
+    varbit<320> opts;
+}
+
 struct my_ingress_headers_t {
     ethernet_t ethernet;
     ipv4_t     ipv4;
+    v4_options_t opts;
 }
 
 /******  G L O B A L   I N G R E S S   M E T A D A T A  *********/
@@ -64,6 +69,18 @@ parser Ingress_Parser(
     }
     state parse_ipv4 {
         pkt.extract(hdr.ipv4);
+	transition select(hdr.ipv4.ihl) {
+            4w0: reject;
+            4w1: reject;
+            4w2: reject;
+            4w3: reject;
+            4w4: reject;
+            5: accept;
+            default: parse_v4_opts;
+        }
+    }
+    state parse_v4_opts {
+        pkt.extract(hdr.opts,(bit<32>)(32*(bit<9>)(hdr.ipv4.ihl-5)));
         transition accept;
     }
 }
