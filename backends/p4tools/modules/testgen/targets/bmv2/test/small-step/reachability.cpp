@@ -24,6 +24,8 @@
 
 namespace Test {
 
+using namespace P4::literals;
+
 class P4ReachabilityOptions : public CompilerOptions {
  public:
     virtual ~P4ReachabilityOptions() = default;
@@ -52,7 +54,7 @@ ReturnedInfo loadExampleForReachability(const char *curFile) {
     auto *originalEnv = getenv("P4C_16_INCLUDE_PATH");
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
     const IR::P4Program *program = nullptr;
-    options.file = sourcePath;
+    options.file = cstring(sourcePath);
     options.file += curFile;
     program = P4::parseP4File(options);
     if (originalEnv == nullptr) {
@@ -109,13 +111,13 @@ TEST_F(P4CReachability, testParserStatesAndAnnotations) {
     const auto *program = std::get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
-    const auto *parser = getSpecificNode<IR::P4Parser>(program, "ParserI");
+    const auto *parser = getSpecificNode<IR::P4Parser>(program, "ParserI"_cs);
     ASSERT_TRUE(parser);
     // Parser ParserI is reachable.
     ASSERT_TRUE(dcg->isReachable(program, parser));
-    const auto *ingress = getSpecificNode<IR::P4Control>(program, "IngressI");
+    const auto *ingress = getSpecificNode<IR::P4Control>(program, "IngressI"_cs);
     ASSERT_TRUE(ingress);
-    const auto *engress = getSpecificNode<IR::P4Control>(program, "EgressI");
+    const auto *engress = getSpecificNode<IR::P4Control>(program, "EgressI"_cs);
     ASSERT_TRUE(engress);
     // IngressI is reachable.
     ASSERT_TRUE(dcg->isReachable(program, ingress));
@@ -126,10 +128,10 @@ TEST_F(P4CReachability, testParserStatesAndAnnotations) {
     // IgressI is not reachable from EngressI.
     ASSERT_TRUE(!dcg->isReachable(engress, ingress));
     const auto *indirect =
-        ingress->to<IR::P4Control>()->getDeclByName("indirect_0")->to<IR::P4Table>();
+        ingress->to<IR::P4Control>()->getDeclByName("indirect_0"_cs)->to<IR::P4Table>();
     ASSERT_TRUE(indirect);
     const auto *indirectWs =
-        ingress->to<IR::P4Control>()->getDeclByName("indirect_ws_0")->to<IR::P4Table>();
+        ingress->to<IR::P4Control>()->getDeclByName("indirect_ws_0"_cs)->to<IR::P4Table>();
     ASSERT_TRUE(indirectWs);
     // Inderect table is reachable from ingress
     ASSERT_TRUE(dcg->isReachable(ingress, indirect));
@@ -164,7 +166,7 @@ TEST_F(P4CReachability, testLoops) {
 
 const IR::Node *getFromHash(const P4Tools::ReachabilityHashType &hash, const char *name) {
     CHECK_NULL(name);
-    auto s = hash.find(name);
+    auto s = hash.find(cstring(name));
     if (s == hash.end()) {
         std::string nm = name;
         nm += "_table";

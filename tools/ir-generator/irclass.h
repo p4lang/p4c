@@ -33,6 +33,8 @@ limitations under the License.
 class IrClass;
 class IrField;
 
+using namespace P4::literals;
+
 class IrNamespace {
     std::map<cstring, IrClass *> classes;
     std::map<cstring, IrNamespace *> children;
@@ -190,7 +192,7 @@ class IrNo : public IrElement {
     IrNo(Util::SourceInfo info, cstring text) : IrElement(info), text(text) {}
     void generate_hdr(std::ostream &) const override {}
     void generate_impl(std::ostream &) const override {}
-    cstring toString() const override { return "#no" + text; }
+    cstring toString() const override { return "#no"_cs + text; }
 };
 
 class IrApply : public IrElement {
@@ -198,7 +200,7 @@ class IrApply : public IrElement {
     explicit IrApply(Util::SourceInfo info) : IrElement(info) {}
     void generate_hdr(std::ostream &out) const override;
     void generate_impl(std::ostream &out) const override;
-    cstring toString() const override { return "#apply"; }
+    cstring toString() const override { return "#apply"_cs; }
 };
 
 enum class NodeKind {
@@ -229,7 +231,7 @@ class CommentBlock : public IrElement {
     cstring toString() const override {
         // print only Doxygen comments
         if (body.startsWith("/**") || body.startsWith("///")) return body;
-        return "";
+        return ""_cs;
     }
     void append(cstring comment) { body += "\n" + comment; }
     void generate_hdr(std::ostream &out) const override { out << toString() << std::endl; };

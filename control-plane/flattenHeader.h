@@ -40,7 +40,7 @@ class FlattenHeader {
 
     void doFlatten(const IR::Type *type);
 
-    cstring makeName(cstring sep) const;
+    cstring makeName(std::string_view sep) const;
     const IR::Annotations *mergeAnnotations() const;
 
  public:

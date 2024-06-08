@@ -10,6 +10,8 @@
 
 namespace Test {
 
+using namespace P4::literals;
+
 TEST(P4TestgenLibrary, GeneratesCorrectProtobufIrTest) {
     std::stringstream streamTest;
     streamTest << R"p4(
@@ -56,11 +58,11 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
 
     auto source = P4_SOURCE(P4Headers::V1MODEL, streamTest.str().c_str());
     auto compilerOptions = P4CContextWithOptions<CompilerOptions>::get().options();
-    compilerOptions.target = "bmv2";
-    compilerOptions.arch = "v1model";
+    compilerOptions.target = "bmv2"_cs;
+    compilerOptions.arch = "v1model"_cs;
     auto &testgenOptions = P4Tools::P4Testgen::TestgenOptions::get();
-    testgenOptions.testBackend = "PROTOBUF_IR";
-    testgenOptions.testBaseName = "dummy";
+    testgenOptions.testBackend = "PROTOBUF_IR"_cs;
+    testgenOptions.testBaseName = "dummy"_cs;
     // Create a bespoke packet for the Ethernet extract call.
     testgenOptions.minPktSize = 112;
     testgenOptions.maxPktSize = 112;
@@ -79,7 +81,7 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
         EXPECT_THAT(protobufIrTest->getFormattedTest(), ::testing::HasSubstr(R"(input_packet)"));
     }
     /// Now try running again with the test back end set to Protobuf. The result should be the same.
-    testgenOptions.testBackend = "PROTOBUF";
+    testgenOptions.testBackend = "PROTOBUF"_cs;
 
     auto testListOpt =
         P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);

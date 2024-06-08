@@ -59,7 +59,7 @@ struct FunctionSpecializationMap {
 
     void add(const IR::MethodCallExpression *mce, const IR::Function *func,
              const IR::Node *insert) {
-        cstring name = refMap->newName(func->name);
+        cstring name = refMap->newName(func->name.name.string_view());
         FunctionSpecialization *fs = new FunctionSpecialization(name, mce, func, insert);
         map.emplace(mce, fs);
     }

@@ -160,21 +160,21 @@ abstract DpdkJmpStatement : DpdkAsmStatement {
 class DpdkJmpLabelStatement : DpdkJmpStatement {
 #noconstructor
     DpdkJmpLabelStatement(cstring label) :
-        DpdkJmpStatement("jmp", label) { }
+        DpdkJmpStatement("jmp"_cs, label) { }
 }
 
 class DpdkJmpHitStatement : DpdkJmpStatement {
 #nodbprint
 #noconstructor
     DpdkJmpHitStatement(cstring label) :
-        DpdkJmpStatement("jmph", label) { }
+        DpdkJmpStatement("jmph"_cs, label) { }
 }
 
 class DpdkJmpMissStatement : DpdkJmpStatement {
 #nodbprint
 #noconstructor
     DpdkJmpMissStatement(cstring label) :
-        DpdkJmpStatement("jmpnh", label) { }
+        DpdkJmpStatement("jmpnh"_cs, label) { }
 }
 
 abstract DpdkJmpActionStatement : DpdkJmpStatement {
@@ -190,14 +190,14 @@ class DpdkJmpIfActionRunStatement : DpdkJmpActionStatement {
 #nodbprint
 #noconstructor
     DpdkJmpIfActionRunStatement(cstring label, cstring act) :
-        DpdkJmpActionStatement("jmpa", label, act) { }
+        DpdkJmpActionStatement("jmpa"_cs, label, act) { }
 }
 
 class DpdkJmpIfActionNotRunStatement : DpdkJmpActionStatement {
 #nodbprint
 #noconstructor
     DpdkJmpIfActionNotRunStatement(cstring label, cstring act) :
-        DpdkJmpActionStatement("jmpna", label, act) { }
+        DpdkJmpActionStatement("jmpna"_cs, label, act) { }
 }
 
 abstract DpdkJmpHeaderStatement : DpdkJmpStatement {
@@ -211,14 +211,14 @@ abstract DpdkJmpHeaderStatement : DpdkJmpStatement {
 class DpdkJmpIfInvalidStatement : DpdkJmpHeaderStatement {
 #noconstructor
     DpdkJmpIfInvalidStatement(cstring label, Expression hdr) :
-        DpdkJmpHeaderStatement("jmpnv", label, hdr) { }
+        DpdkJmpHeaderStatement("jmpnv"_cs, label, hdr) { }
 }
 
 class DpdkJmpIfValidStatement : DpdkJmpHeaderStatement {
 #nodbprint
 #noconstructor
     DpdkJmpIfValidStatement(cstring label, Expression hdr) :
-        DpdkJmpHeaderStatement("jmpv", label, hdr) { }
+        DpdkJmpHeaderStatement("jmpv"_cs, label, hdr) { }
 }
 
 abstract DpdkJmpCondStatement : DpdkJmpStatement {
@@ -232,42 +232,42 @@ abstract DpdkJmpCondStatement : DpdkJmpStatement {
 
 class DpdkJmpEqualStatement: DpdkJmpCondStatement, IDPDKNode {
     DpdkJmpEqualStatement(cstring label, Expression src1, Expression src2) :
-        DpdkJmpCondStatement("jmpeq", label, src1, src2) { }
+        DpdkJmpCondStatement("jmpeq"_cs, label, src1, src2) { }
 #noconstructor
 }
 
 class DpdkJmpNotEqualStatement: DpdkJmpCondStatement, IDPDKNode {
 #noconstructor
     DpdkJmpNotEqualStatement(cstring label, Expression src1, Expression src2) :
-        DpdkJmpCondStatement("jmpneq", label, src1, src2) { }
+        DpdkJmpCondStatement("jmpneq"_cs, label, src1, src2) { }
 }
 
 class DpdkJmpGreaterEqualStatement: DpdkJmpCondStatement, IDPDKNode {
 #nodbprint
 #noconstructor
     DpdkJmpGreaterEqualStatement(cstring label, Expression src1, Expression src2) :
-        DpdkJmpCondStatement("jmpge", label, src1, src2) { }
+        DpdkJmpCondStatement("jmpge"_cs, label, src1, src2) { }
 }
 
 class DpdkJmpGreaterStatement: DpdkJmpCondStatement, IDPDKNode {
 #nodbprint
 #noconstructor
     DpdkJmpGreaterStatement(cstring label, Expression src1, Expression src2) :
-        DpdkJmpCondStatement("jmpgt", label, src1, src2) { }
+        DpdkJmpCondStatement("jmpgt"_cs, label, src1, src2) { }
 }
 
 class DpdkJmpLessOrEqualStatement: DpdkJmpCondStatement, IDPDKNode {
 #nodbprint
 #noconstructor
     DpdkJmpLessOrEqualStatement(cstring label, Expression src1, Expression src2) :
-        DpdkJmpCondStatement("jmple", label, src1, src2) { }
+        DpdkJmpCondStatement("jmple"_cs, label, src1, src2) { }
 }
 
 class DpdkJmpLessStatement: DpdkJmpCondStatement, IDPDKNode {
 #nodbprint
 #noconstructor
     DpdkJmpLessStatement(cstring label, Expression src1, Expression src2) :
-        DpdkJmpCondStatement("jmplt", label, src1, src2) { }
+        DpdkJmpCondStatement("jmplt"_cs, label, src1, src2) { }
 }
 
 class DpdkRxStatement : DpdkAsmStatement, IDPDKNode {
@@ -300,7 +300,7 @@ abstract DpdkUnaryStatement : DpdkAssignmentStatement {
 
 class DpdkMovStatement : DpdkUnaryStatement {
     DpdkMovStatement(Expression dst, Expression src) :
-        DpdkUnaryStatement("mov", dst, src) { }
+        DpdkUnaryStatement("mov"_cs, dst, src) { }
 #noconstructor
 }
 
@@ -317,49 +317,49 @@ class DpdkAddStatement : DpdkBinaryStatement {
 #nodbprint
 #noconstructor
     DpdkAddStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("add", dst, src1, src2) { }
+        DpdkBinaryStatement("add"_cs, dst, src1, src2) { }
 }
 
 class DpdkAndStatement : DpdkBinaryStatement, IDPDKNode {
 #nodbprint
 #noconstructor
     DpdkAndStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("and", dst, src1, src2) { }
+        DpdkBinaryStatement("and"_cs, dst, src1, src2) { }
 }
 
 class DpdkShlStatement : DpdkBinaryStatement, IDPDKNode {
 #nodbprint
 #noconstructor
     DpdkShlStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("shl", dst, src1, src2) { }
+        DpdkBinaryStatement("shl"_cs, dst, src1, src2) { }
 }
 
 class DpdkShrStatement : DpdkBinaryStatement, IDPDKNode {
 #nodbprint
 #noconstructor
     DpdkShrStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("shr", dst, src1, src2) { }
+        DpdkBinaryStatement("shr"_cs, dst, src1, src2) { }
 }
 
 class DpdkSubStatement : DpdkBinaryStatement, IDPDKNode {
 #nodbprint
 #noconstructor
     DpdkSubStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("sub", dst, src1, src2) { }
+        DpdkBinaryStatement("sub"_cs, dst, src1, src2) { }
 }
 
 class DpdkOrStatement : DpdkBinaryStatement, IDPDKNode {
 #nodbprint
 #noconstructor
     DpdkOrStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("or", dst, src1, src2) { }
+        DpdkBinaryStatement("or"_cs, dst, src1, src2) { }
 }
 
 class DpdkXorStatement : DpdkBinaryStatement, IDPDKNode {
 #nodbprint
 #noconstructor
     DpdkXorStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("xor", dst, src1, src2) { }
+        DpdkBinaryStatement("xor"_cs, dst, src1, src2) { }
 }
 
 class DpdkRecircidStatement : DpdkAsmStatement, IDPDKNode {
@@ -499,7 +499,7 @@ class DpdkRegisterReadStatement: DpdkAssignmentStatement {
 #nodbprint
 #noconstructor
     DpdkRegisterReadStatement(Expression dst, cstring reg, Expression index) :
-        DpdkAssignmentStatement("read", dst), reg(reg), index(index) { }
+        DpdkAssignmentStatement("read"_cs, dst), reg(reg), index(index) { }
 }
 
 class DpdkRegisterWriteStatement: DpdkAsmStatement, IDPDKNode {

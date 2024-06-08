@@ -31,12 +31,12 @@ class ParseP4RuntimeAnnotations : public ParseAnnotations {
         : ParseAnnotations(
               "P4Runtime", false,
               {
-                  PARSE("controller_header", StringLiteral),
-                  PARSE_EMPTY("hidden"),
-                  PARSE("id", Constant),
-                  PARSE("brief", StringLiteral),
-                  PARSE("description", StringLiteral),
-                  PARSE_KV_LIST("platform_property"),
+                  PARSE("controller_header"_cs, StringLiteral),
+                  PARSE_EMPTY("hidden"_cs),
+                  PARSE("id"_cs, Constant),
+                  PARSE("brief"_cs, StringLiteral),
+                  PARSE("description"_cs, StringLiteral),
+                  PARSE_KV_LIST("platform_property"_cs),
                   // These annotations are architecture-specific in theory, but
                   // given that they are "reserved" by the P4Runtime
                   // specification, I don't really have any qualms about adding
@@ -50,10 +50,10 @@ class ParseP4RuntimeAnnotations : public ParseAnnotations {
                   // ParseAnnotations instance, or 2) run a ParseAnnotations
                   // pass "locally" (in this case on action profile instances
                   // since these annotations are for them).
-                  PARSE("max_group_size", Constant),
-                  PARSE("selector_size_semantics", StringLiteral),
-                  PARSE("max_member_weight", Constant),
-                  {"p4runtime_translation", &ParseAnnotations::parseP4rtTranslationAnnotation},
+                  PARSE("max_group_size"_cs, Constant),
+                  PARSE("selector_size_semantics"_cs, StringLiteral),
+                  PARSE("max_member_weight"_cs, Constant),
+                  {"p4runtime_translation"_cs, &ParseAnnotations::parseP4rtTranslationAnnotation},
               }) {}
 };
 

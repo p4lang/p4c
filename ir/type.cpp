@@ -32,40 +32,40 @@ limitations under the License.
 
 namespace IR {
 
-const cstring IR::Type_Stack::next = "next";
-const cstring IR::Type_Stack::last = "last";
-const cstring IR::Type_Stack::arraySize = "size";
-const cstring IR::Type_Stack::lastIndex = "lastIndex";
-const cstring IR::Type_Stack::push_front = "push_front";
-const cstring IR::Type_Stack::pop_front = "pop_front";
-const cstring IR::Type_Header::isValid = "isValid";
-const cstring IR::Type_Header::setValid = "setValid";
-const cstring IR::Type_Header::setInvalid = "setInvalid";
-const cstring IR::Type::minSizeInBits = "minSizeInBits";
-const cstring IR::Type::minSizeInBytes = "minSizeInBytes";
-const cstring IR::Type::maxSizeInBits = "maxSizeInBits";
-const cstring IR::Type::maxSizeInBytes = "maxSizeInBytes";
+const cstring IR::Type_Stack::next = "next"_cs;
+const cstring IR::Type_Stack::last = "last"_cs;
+const cstring IR::Type_Stack::arraySize = "size"_cs;
+const cstring IR::Type_Stack::lastIndex = "lastIndex"_cs;
+const cstring IR::Type_Stack::push_front = "push_front"_cs;
+const cstring IR::Type_Stack::pop_front = "pop_front"_cs;
+const cstring IR::Type_Header::isValid = "isValid"_cs;
+const cstring IR::Type_Header::setValid = "setValid"_cs;
+const cstring IR::Type_Header::setInvalid = "setInvalid"_cs;
+const cstring IR::Type::minSizeInBits = "minSizeInBits"_cs;
+const cstring IR::Type::minSizeInBytes = "minSizeInBytes"_cs;
+const cstring IR::Type::maxSizeInBits = "maxSizeInBits"_cs;
+const cstring IR::Type::maxSizeInBytes = "maxSizeInBytes"_cs;
 
 const IR::ID IR::Type_Table::hit = ID("hit");
 const IR::ID IR::Type_Table::miss = ID("miss");
 const IR::ID IR::Type_Table::action_run = ID("action_run");
 
-const cstring IR::Annotation::nameAnnotation = "name";
-const cstring IR::Annotation::tableOnlyAnnotation = "tableonly";
-const cstring IR::Annotation::defaultOnlyAnnotation = "defaultonly";
-const cstring IR::Annotation::atomicAnnotation = "atomic";
-const cstring IR::Annotation::hiddenAnnotation = "hidden";
-const cstring IR::Annotation::lengthAnnotation = "length";
-const cstring IR::Annotation::optionalAnnotation = "optional";
-const cstring IR::Annotation::pkginfoAnnotation = "pkginfo";
-const cstring IR::Annotation::deprecatedAnnotation = "deprecated";
-const cstring IR::Annotation::synchronousAnnotation = "synchronous";
-const cstring IR::Annotation::pureAnnotation = "pure";
-const cstring IR::Annotation::noSideEffectsAnnotation = "noSideEffects";
-const cstring IR::Annotation::noWarnAnnotation = "noWarn";
-const cstring IR::Annotation::matchAnnotation = "match";
-const cstring IR::Annotation::fieldListAnnotation = "field_list";
-const cstring IR::Annotation::debugLoggingAnnotation = "__debug";
+const cstring IR::Annotation::nameAnnotation = "name"_cs;
+const cstring IR::Annotation::tableOnlyAnnotation = "tableonly"_cs;
+const cstring IR::Annotation::defaultOnlyAnnotation = "defaultonly"_cs;
+const cstring IR::Annotation::atomicAnnotation = "atomic"_cs;
+const cstring IR::Annotation::hiddenAnnotation = "hidden"_cs;
+const cstring IR::Annotation::lengthAnnotation = "length"_cs;
+const cstring IR::Annotation::optionalAnnotation = "optional"_cs;
+const cstring IR::Annotation::pkginfoAnnotation = "pkginfo"_cs;
+const cstring IR::Annotation::deprecatedAnnotation = "deprecated"_cs;
+const cstring IR::Annotation::synchronousAnnotation = "synchronous"_cs;
+const cstring IR::Annotation::pureAnnotation = "pure"_cs;
+const cstring IR::Annotation::noSideEffectsAnnotation = "noSideEffects"_cs;
+const cstring IR::Annotation::noWarnAnnotation = "noWarn"_cs;
+const cstring IR::Annotation::matchAnnotation = "match"_cs;
+const cstring IR::Annotation::fieldListAnnotation = "field_list"_cs;
+const cstring IR::Annotation::debugLoggingAnnotation = "__debug"_cs;
 
 long Type_Declaration::nextId = 0;
 long Type_InfInt::nextId = 0;

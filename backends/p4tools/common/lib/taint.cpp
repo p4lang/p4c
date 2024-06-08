@@ -21,7 +21,7 @@
 
 namespace P4Tools {
 
-const IR::StringLiteral Taint::TAINTED_STRING_LITERAL = IR::StringLiteral(cstring("Taint"));
+const IR::StringLiteral Taint::TAINTED_STRING_LITERAL = IR::StringLiteral("Taint"_cs);
 
 /// Returns a bitmask that indicates which bits of given expression are tainted given a complex
 /// expression.

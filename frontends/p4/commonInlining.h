@@ -32,6 +32,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 template <class Callable, class CallNode>
 class SimpleCallInfo : public IHasDbPrint {
     // Callable can be P4Action, Function, P4Control, P4Parser
@@ -164,7 +166,7 @@ class InlineDriver : public Visitor {
         : toInline(toInline), inliner(inliner) {
         CHECK_NULL(toInline);
         CHECK_NULL(inliner);
-        setName((cstring("InlineDriver_") + cstring(inliner->name())).c_str());
+        setName(("InlineDriver_"_cs + cstring(inliner->name())).c_str());
     }
     const IR::Node *apply_visitor(const IR::Node *program, const char * = 0) override {
         LOG2("InlineDriver");

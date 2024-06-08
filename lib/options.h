@@ -82,7 +82,8 @@ class Options {
                         const char *description,    // option help message
                         OptionFlags flags = OptionFlags::Default);  // additional flags
 
-    explicit Options(cstring message) : binaryName(nullptr), message(message), compileCommand("") {}
+    explicit Options(std::string_view message)
+        : binaryName(nullptr), message(message), compileCommand("") {}
 
  public:
     /**

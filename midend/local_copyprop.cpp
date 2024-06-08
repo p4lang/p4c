@@ -26,6 +26,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 /* helper function to get the 'outermost' containing expression in an lvalue */
 static const IR::Expression *lvalue_out(const IR::Expression *exp) {
     if (auto ai = exp->to<IR::ArrayIndex>()) return lvalue_out(ai->left);
@@ -231,8 +233,8 @@ bool DoLocalCopyPropagation::operator==(const ControlFlowVisitor &a_) const {
 /// test to see if names denote overlapping locations
 bool DoLocalCopyPropagation::name_overlap(cstring name1, cstring name2) {
     if (name1 == name2) return true;
-    if (name1.startsWith(name2) && strchr(".[", name1.get(name2.size()))) return true;
-    if (name2.startsWith(name1) && strchr(".[", name2.get(name1.size()))) return true;
+    if (name1.startsWith(name2.string_view()) && strchr(".[", name1.get(name2.size()))) return true;
+    if (name2.startsWith(name1.string_view()) && strchr(".[", name2.get(name1.size()))) return true;
     return false;
 }
 
@@ -256,7 +258,8 @@ void DoLocalCopyPropagation::forOverlapAvail(cstring name,
         if (it != available.end()) fn(it->first, &it->second);
     }
     for (auto it = available.upper_bound(name); it != available.end(); ++it) {
-        if (!it->first.startsWith(name) || !strchr(".[", it->first.get(name.size()))) break;
+        if (!it->first.startsWith(name.string_view()) || !strchr(".[", it->first.get(name.size())))
+            break;
         fn(it->first, &it->second);
     }
 }
@@ -463,12 +466,12 @@ IR::IfStatement *DoLocalCopyPropagation::postorder(IR::IfStatement *s) {
 IR::ForStatement *DoLocalCopyPropagation::preorder(IR::ForStatement *s) {
     visit(s->init, "init");
     s->apply(LoopPrepass(*this), getContext());
-    ControlFlowVisitor::SaveGlobal outer(*this, "-BREAK-", "-CONTINUE-");
+    ControlFlowVisitor::SaveGlobal outer(*this, "-BREAK-"_cs, "-CONTINUE-"_cs);
     visit(s->condition, "condition");
     visit(s->body, "body");
-    flow_merge_global_from("-CONTINUE-");
+    flow_merge_global_from("-CONTINUE-"_cs);
     visit(s->updates, "updates");
-    flow_merge_global_from("-BREAK-");
+    flow_merge_global_from("-BREAK-"_cs);
     prune();
     return s;
 }
@@ -477,11 +480,11 @@ IR::ForInStatement *DoLocalCopyPropagation::preorder(IR::ForInStatement *s) {
     visit(s->decl, "decl", 0);
     visit(s->collection, "collection", 2);
     s->apply(LoopPrepass(*this), getContext());
-    ControlFlowVisitor::SaveGlobal outer(*this, "-BREAK-", "-CONTINUE-");
+    ControlFlowVisitor::SaveGlobal outer(*this, "-BREAK-"_cs, "-CONTINUE-"_cs);
     visit(s->ref, "ref", 1);
     visit(s->body, "body", 3);
-    flow_merge_global_from("-CONTINUE-");
-    flow_merge_global_from("-BREAK-");
+    flow_merge_global_from("-CONTINUE-"_cs);
+    flow_merge_global_from("-BREAK-"_cs);
     prune();
     return s;
 }

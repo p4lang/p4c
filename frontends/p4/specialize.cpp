@@ -64,7 +64,7 @@ const IR::Argument *SpecializationMap::convertArgument(const IR::Argument *arg,
                                                        const IR::Parameter *param) {
     if (arg->expression->is<IR::ConstructorCallExpression>()) {
         auto cce = arg->expression->to<IR::ConstructorCallExpression>();
-        cstring nName = refMap->newName(param->name);
+        cstring nName = refMap->newName(param->name.name.string_view());
         IR::ID id(param->srcInfo, nName, param->name);
         auto decl =
             new IR::Declaration_Instance(param->srcInfo, id, cce->constructedType, cce->arguments);
@@ -84,7 +84,7 @@ void SpecializationMap::addSpecialization(const IR::ConstructorCallExpression *i
     auto spec = new SpecializationInfo(invocation, cont, insertion);
     auto declaration = cont->to<IR::IDeclaration>();
     CHECK_NULL(declaration);
-    spec->name = refMap->newName(declaration->getName());
+    spec->name = refMap->newName(declaration->getName().name.string_view());
     auto cc = ConstructorCall::resolve(invocation, refMap, typeMap);
     auto ccc = cc->to<ContainerConstructorCall>();
     CHECK_NULL(ccc);
@@ -107,7 +107,7 @@ void SpecializationMap::addSpecialization(const IR::Declaration_Instance *invoca
     auto spec = new SpecializationInfo(invocation, cont, insertion);
     auto declaration = cont->to<IR::IDeclaration>();
     CHECK_NULL(declaration);
-    spec->name = refMap->newName(declaration->getName());
+    spec->name = refMap->newName(declaration->getName().name.string_view());
     const IR::Type_Name *type;
     const IR::Vector<IR::Type> *typeArgs;
     if (invocation->type->is<IR::Type_Specialized>()) {

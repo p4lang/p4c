@@ -26,23 +26,23 @@ limitations under the License.
 namespace BMV2 {
 
 cstring ParserConverter::jsonAssignment(const IR::Type *type) {
-    if (type->is<IR::Type_HeaderUnion>()) return "assign_union";
-    if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header";
+    if (type->is<IR::Type_HeaderUnion>()) return "assign_union"_cs;
+    if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header"_cs;
     if (auto ts = type->to<IR::Type_Stack>()) {
         auto et = ts->elementType;
         if (et->is<IR::Type_HeaderUnion>())
-            return "assign_union_stack";
+            return "assign_union_stack"_cs;
         else
-            return "assign_header_stack";
+            return "assign_header_stack"_cs;
     }
     // Unfortunately set can do some things that assign cannot, e.g., handle
     // lookahead on the RHS.
-    return "set";
+    return "set"_cs;
 }
 
 Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat) {
     auto result = new Util::JsonObject();
-    auto params = mkArrayField(result, "parameters");
+    auto params = mkArrayField(result, "parameters"_cs);
     auto isR = false;
     IR::MethodCallExpression *mce2 = nullptr;
     if (stat->is<IR::AssignmentStatement>()) {
@@ -104,7 +104,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
         auto assign = stat->to<IR::AssignmentStatement>();
         auto type = ctxt->typeMap->getType(assign->left, true);
         cstring operation = jsonAssignment(type);
-        result->emplace("op", operation);
+        result->emplace("op"_cs, operation);
         auto l = ctxt->conv->convertLeftValue(assign->left);
         bool convertBool = type->is<IR::Type_Boolean>();
         auto r = ctxt->conv->convert(assign->right, true, true, convertBool);
@@ -114,7 +114,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
         if (operation != "set") {
             // must wrap into another outer object
             auto wrap = new Util::JsonObject();
-            wrap->emplace("op", "primitive");
+            wrap->emplace("op"_cs, "primitive");
             auto params = mkParameters(wrap);
             params->append(result);
             result = wrap;
@@ -134,8 +134,8 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                     return result;
                 }
 
-                cstring ename = argCount == 1 ? "extract" : "extract_VL";
-                result->emplace("op", ename);
+                cstring ename = argCount == 1 ? "extract"_cs : "extract_VL"_cs;
+                result->emplace("op"_cs, ename);
                 auto arg = mce->arguments->at(0);
                 auto argtype = ctxt->typeMap->getType(arg->expression, true);
                 if (!argtype->is<IR::Type_Header>()) {
@@ -154,7 +154,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                     if (baseType->is<IR::Type_Stack>()) {
                         if (mem->member == IR::Type_Stack::next) {
                             // stack.next
-                            type = "stack";
+                            type = "stack"_cs;
                             j = ctxt->conv->convert(mem->expr);
                         } else {
                             BUG("%1%: unsupported", mem);
@@ -166,20 +166,20 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                             if (parentType->is<IR::Type_Stack>()) {
                                 // stack.next.unionfield
                                 if (parent->member == IR::Type_Stack::next) {
-                                    type = "union_stack";
+                                    type = "union_stack"_cs;
                                     j = ctxt->conv->convert(parent->expr);
                                     Util::JsonArray *a;
                                     if (j->is<Util::JsonArray>()) {
                                         a = j->to<Util::JsonArray>()->clone();
                                     } else if (j->is<Util::JsonObject>()) {
                                         a = new Util::JsonArray();
-                                        a->push_back(j->to<Util::JsonObject>()->get("value"));
+                                        a->push_back(j->to<Util::JsonObject>()->get("value"_cs));
                                     } else {
                                         BUG("unexpected");
                                     }
                                     a->append(mem->member.name);
                                     auto j0 = new Util::JsonObject();
-                                    j = j0->emplace("value", a);
+                                    j = j0->emplace("value"_cs, a);
                                 } else {
                                     BUG("%1%: unsupported", mem);
                                 }
@@ -188,12 +188,12 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                     }
                 }
                 if (j == nullptr) {
-                    type = "regular";
+                    type = "regular"_cs;
                     j = ctxt->conv->convert(arg->expression);
                 }
-                auto value = j->to<Util::JsonObject>()->get("value");
-                param->emplace("type", type);
-                param->emplace("value", value);
+                auto value = j->to<Util::JsonObject>()->get("value"_cs);
+                param->emplace("type"_cs, type);
+                param->emplace("value"_cs, value);
 
                 if (argCount == 2) {
                     auto arg2 = mce->arguments->at(1);
@@ -202,8 +202,8 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                     // does not do that.
                     auto jexpr = ctxt->conv->convert(arg2->expression, true, false);
                     auto rwrap = new Util::JsonObject();
-                    rwrap->emplace("type", "expression");
-                    rwrap->emplace("value", jexpr);
+                    rwrap->emplace("type"_cs, "expression");
+                    rwrap->emplace("value"_cs, jexpr);
                     params->append(rwrap);
                 }
                 return result;
@@ -218,7 +218,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 }
                 auto arg = mce->arguments->at(0);
                 auto jexpr = ctxt->conv->convert(arg->expression, true, false);
-                result->emplace("op", "advance");
+                result->emplace("op"_cs, "advance");
                 params->append(jexpr);
                 return result;
             } else if ((extmeth->originalExternType->name == "InternetChecksum" &&
@@ -236,7 +236,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                     json = ExternConverter::cvtExternObject(ctxt, extmeth, mce, stat, true);
                 }
                 if (json) {
-                    result->emplace("op", "primitive");
+                    result->emplace("op"_cs, "primitive");
                     params->append(json);
                 }
                 return result;
@@ -245,7 +245,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
             auto extfn = minst->to<P4::ExternFunction>();
             auto extFuncName = extfn->method->name.name;
             if (extFuncName == IR::ParserState::verify) {
-                result->emplace("op", "verify");
+                result->emplace("op"_cs, "verify");
                 BUG_CHECK(mce->arguments->size() == 2, "%1%: Expected 2 arguments", mce);
                 {
                     auto cond = mce->arguments->at(0);
@@ -264,19 +264,19 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 return result;
             } else if (extFuncName == "assert" || extFuncName == "assume") {
                 BUG_CHECK(mce->arguments->size() == 1, "%1%: Expected 1 argument ", mce);
-                result->emplace("op", "primitive");
+                result->emplace("op"_cs, "primitive");
                 auto paramValue = new Util::JsonObject();
                 params->append(paramValue);
-                auto paramsArray = mkArrayField(paramValue, "parameters");
+                auto paramsArray = mkArrayField(paramValue, "parameters"_cs);
                 auto cond = mce->arguments->at(0);
                 auto expr = ctxt->conv->convert(cond->expression, true, true, true);
                 paramsArray->append(expr);
-                paramValue->emplace("op", extFuncName);
-                paramValue->emplace_non_null("source_info", mce->sourceInfoJsonObj());
+                paramValue->emplace("op"_cs, extFuncName);
+                paramValue->emplace_non_null("source_info"_cs, mce->sourceInfoJsonObj());
             } else if (extFuncName == P4V1::V1Model::instance.log_msg.name) {
                 BUG_CHECK(mce->arguments->size() == 2 || mce->arguments->size() == 1,
                           "%1%: Expected 1 or 2 arguments", mce);
-                result->emplace("op", "primitive");
+                result->emplace("op"_cs, "primitive");
                 auto ef = minst->to<P4::ExternFunction>();
                 auto ijson = ExternConverter::cvtExternFunction(ctxt, ef, mce, stat, false);
                 params->append(ijson);
@@ -293,27 +293,27 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
               ],
               "op" : "primitive"
             } */
-            result->emplace("op", "primitive");
+            result->emplace("op"_cs, "primitive");
 
             auto bi = minst->to<P4::BuiltInMethod>();
             cstring primitive;
             auto paramsValue = new Util::JsonObject();
             params->append(paramsValue);
 
-            auto pp = mkArrayField(paramsValue, "parameters");
+            auto pp = mkArrayField(paramsValue, "parameters"_cs);
             auto obj = ctxt->conv->convert(bi->appliedTo);
             pp->append(obj);
 
             if (bi->name == IR::Type_Header::setValid) {
-                primitive = "add_header";
+                primitive = "add_header"_cs;
             } else if (bi->name == IR::Type_Header::setInvalid) {
-                primitive = "remove_header";
+                primitive = "remove_header"_cs;
             } else if (bi->name == IR::Type_Stack::push_front ||
                        bi->name == IR::Type_Stack::pop_front) {
                 if (bi->name == IR::Type_Stack::push_front)
-                    primitive = "push";
+                    primitive = "push"_cs;
                 else
-                    primitive = "pop";
+                    primitive = "pop"_cs;
 
                 BUG_CHECK(mce->arguments->size() == 1, "Expected 1 argument for %1%", mce);
                 auto arg = ctxt->conv->convert(mce->arguments->at(0)->expression);
@@ -322,7 +322,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 BUG("%1%: Unexpected built-in method", bi->name);
             }
 
-            paramsValue->emplace("op", primitive);
+            paramsValue->emplace("op"_cs, primitive);
             return result;
         }
     }
@@ -460,24 +460,24 @@ std::vector<Util::IJson *> ParserConverter::convertSelectExpression(
         cstring vset_name;
         unsigned bytes = combine(sc->keyset, se->select, value, mask, is_vset, vset_name);
         if (is_vset) {
-            trans->emplace("type", "parse_vset");
-            trans->emplace("value", vset_name);
-            trans->emplace("mask", Util::JsonValue::null);
-            trans->emplace("next_state", stateName(sc->state->path->name));
+            trans->emplace("type"_cs, "parse_vset");
+            trans->emplace("value"_cs, vset_name);
+            trans->emplace("mask"_cs, Util::JsonValue::null);
+            trans->emplace("next_state"_cs, stateName(sc->state->path->name));
         } else {
             if (mask == 0) {
-                trans->emplace("type", "default");
-                trans->emplace("value", Util::JsonValue::null);
-                trans->emplace("mask", Util::JsonValue::null);
-                trans->emplace("next_state", stateName(sc->state->path->name));
+                trans->emplace("type"_cs, "default");
+                trans->emplace("value"_cs, Util::JsonValue::null);
+                trans->emplace("mask"_cs, Util::JsonValue::null);
+                trans->emplace("next_state"_cs, stateName(sc->state->path->name));
             } else {
-                trans->emplace("type", "hexstr");
-                trans->emplace("value", stringRepr(value, bytes));
+                trans->emplace("type"_cs, "hexstr");
+                trans->emplace("value"_cs, stringRepr(value, bytes));
                 if (mask == -1)
-                    trans->emplace("mask", Util::JsonValue::null);
+                    trans->emplace("mask"_cs, Util::JsonValue::null);
                 else
-                    trans->emplace("mask", stringRepr(mask, bytes));
-                trans->emplace("next_state", stateName(sc->state->path->name));
+                    trans->emplace("mask"_cs, stringRepr(mask, bytes));
+                trans->emplace("next_state"_cs, stateName(sc->state->path->name));
             }
         }
         result.push_back(trans);
@@ -494,19 +494,19 @@ Util::IJson *ParserConverter::convertSelectKey(const IR::SelectExpression *expr)
 
 Util::IJson *ParserConverter::convertPathExpression(const IR::PathExpression *pe) {
     auto trans = new Util::JsonObject();
-    trans->emplace("type", "default");
-    trans->emplace("value", Util::JsonValue::null);
-    trans->emplace("mask", Util::JsonValue::null);
-    trans->emplace("next_state", stateName(pe->path->name));
+    trans->emplace("type"_cs, "default");
+    trans->emplace("value"_cs, Util::JsonValue::null);
+    trans->emplace("mask"_cs, Util::JsonValue::null);
+    trans->emplace("next_state"_cs, stateName(pe->path->name));
     return trans;
 }
 
 Util::IJson *ParserConverter::createDefaultTransition() {
     auto trans = new Util::JsonObject();
-    trans->emplace("type", "default");
-    trans->emplace("value", Util::JsonValue::null);
-    trans->emplace("mask", Util::JsonValue::null);
-    trans->emplace("next_state", Util::JsonValue::null);
+    trans->emplace("type"_cs, "default");
+    trans->emplace("value"_cs, Util::JsonValue::null);
+    trans->emplace("mask"_cs, Util::JsonValue::null);
+    trans->emplace("next_state"_cs, Util::JsonValue::null);
     return trans;
 }
 

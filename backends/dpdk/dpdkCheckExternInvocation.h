@@ -17,9 +17,13 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKCHECKEXTERNINVOCATION_H_
 #define BACKENDS_DPDK_DPDKCHECKEXTERNINVOCATION_H_
 
+#include <array>
+
+#include "dpdkProgramStructure.h"
 #include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
+#include "lib/cstring.h"
 #include "midend/checkExternInvocationCommon.h"
 
 namespace P4 {
@@ -28,6 +32,8 @@ class TypeMap;
 }  // namespace P4
 
 namespace DPDK {
+
+using namespace P4::literals;
 
 /// @brief Class for checking constraints for invocations of PNA architecture extern
 ///        methods and functions.
@@ -46,15 +52,14 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
     void initPipeConstraints() override {
         bitvec validInMainControl;
         validInMainControl.setbit(MAIN_CONTROL);
-        setPipeConstraints("send_to_port", validInMainControl);
-        setPipeConstraints("mirror_packet", validInMainControl);
+        setPipeConstraints("send_to_port"_cs, validInMainControl);
+        setPipeConstraints("mirror_packet"_cs, validInMainControl);
         // Add new constraints here
     }
 
     cstring getBlockName(int bit) override {
-        static const char *lookup[] = {"main parser", "pre control", "main control",
-                                       "main deparser"};
-        BUG_CHECK(sizeof(lookup) / sizeof(lookup[0]) == BLOCK_COUNT, "Bad lookup table");
+        static const std::array<cstring, BLOCK_COUNT> lookup = {
+            "main parser"_cs, "pre control"_cs, "main control"_cs, "main deparser"_cs};
         return lookup[bit % BLOCK_COUNT];
     }
 
@@ -95,19 +100,19 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
         LOG4("externType: " << externType << ", externName: " << externName);
 
         if (pipeConstraints.count(externType)) {
-            if (auto block = getParser("MainParserT")) {
+            if (auto block = getParser("MainParserT"_cs)) {
                 LOG4("MainParser: " << (void *)block << " " << dbp(block));
                 pos.setbit(MAIN_PARSER);
                 checkPipeConstraints(externType, pos, expr, externName, block->name);
-            } else if (auto block = getControl("PreControlT")) {
+            } else if (auto block = getControl("PreControlT"_cs)) {
                 LOG4("PreControl: " << (void *)block << " " << dbp(block));
                 pos.setbit(PRE_CONTROL);
                 checkPipeConstraints(externType, pos, expr, externName, block->name);
-            } else if (auto block = getControl("MainControlT")) {
+            } else if (auto block = getControl("MainControlT"_cs)) {
                 LOG4("MainControl: " << (void *)block << " " << dbp(block));
                 pos.setbit(MAIN_CONTROL);
                 checkPipeConstraints(externType, pos, expr, externName, block->name);
-            } else if (auto block = getDeparser("MainDeparserT")) {
+            } else if (auto block = getDeparser("MainDeparserT"_cs)) {
                 LOG4("MainDeparser: " << (void *)block << " " << dbp(block));
                 pos.setbit(MAIN_DEPARSER);
                 checkPipeConstraints(externType, pos, expr, externName, block->name);
@@ -128,7 +133,7 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
     void checkExtern(const P4::ExternFunction *extFunction,
                      const IR::MethodCallExpression *expr) override {
         LOG3("ExternFunction: " << extFunction << ", MethodCallExpression: " << expr);
-        checkBlock(expr, expr->method->toString(), "");
+        checkBlock(expr, expr->method->toString(), cstring::empty);
     }
 
  public:

@@ -103,7 +103,7 @@ class JsonValue final : public IJson {
 
     const Kind tag;
     const big_int value = 0;
-    const cstring str = nullptr;
+    const cstring str = ""_cs;
 
     DECLARE_TYPEINFO(JsonValue, IJson);
 };

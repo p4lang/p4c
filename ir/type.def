@@ -20,13 +20,13 @@ enum class Direction {
 inline cstring directionToString(IR::Direction direction) {
     switch (direction) {
         case IR::Direction::None:
-            return "<none>";
+            return "<none>"_cs;
         case IR::Direction::In:
-            return "in";
+            return "in"_cs;
         case IR::Direction::Out:
-            return "out";
+            return "out"_cs;
         case IR::Direction::InOut:
-            return "inout";
+            return "inout"_cs;
         default:
             BUG("Unhandled case");
     }
@@ -52,8 +52,9 @@ inline std::ostream& operator<<(std::ostream &out, IR::Direction d) {
     return out;
 }
 
+// FIXME: should accept string_view
 inline bool operator>>(cstring s, IR::Direction &d) {
-    if (!s || s == "") d = IR::Direction::None;
+    if (!s || s == cstring::empty) d = IR::Direction::None;
     else if (s == "in") d = IR::Direction::In;
     else if (s == "out") d = IR::Direction::Out;
     else if (s == "inout") d = IR::Direction::InOut;
@@ -74,10 +75,10 @@ class Type_Any : Type, ITypeVar {
     static long nextId;
  public:
     long declid = nextId++;
-    cstring getVarName() const override { return "int_" + Util::toString(declid); }
+    cstring getVarName() const override { return "int_"_cs + Util::toString(declid); }
     int getDeclId() const override { return declid; }
     dbprint { out << "ANYTYPE/" << declid; }
-    toString { return "ANYTYPE"; }
+    toString { return "ANYTYPE"_cs; }
     operator== { return declid == a.declid; }
     static Type_Any get();
     static Type_Any get(const Util::SourceInfo &si);
@@ -102,7 +103,7 @@ class Type_Any : Type, ITypeVar {
 class Type_Fragment : Type {
     Type type;
     dbprint { out << "FRAGMENT(" << type << ")"; }
-    toString { return "FRAGMENT(" + type->toString() + ")"; }
+    toString { return "FRAGMENT("_cs + type->toString() + ")"_cs; }
     const Type* getP4Type() const override { return nullptr; }
 }
 
@@ -115,7 +116,7 @@ class Type_Fragment : Type {
 /// by type-checking.
 class Type_Type : Type {
     Type type;
-    toString { return "Type(" + type->toString() + ")"; }
+    toString { return "Type("_cs + type->toString() + ")"_cs; }
     dbprint { out << "Type(" << type << ")"; }
     const Type* getP4Type() const override { return type; }
     validate { BUG_CHECK(!type->is<IR::Type_Type>(), "%1%: nested Type_Type", type); }
@@ -130,7 +131,7 @@ class Type_Boolean : Type_Base {
     static Type_Boolean get();
     static Type_Boolean get(const Util::SourceInfo &si);
     int width_bits() const override { return 1; }
-    toString{ return "bool"; }
+    toString{ return "bool"_cs; }
     dbprint { out << "bool"; }
 }
 
@@ -143,7 +144,7 @@ class Type_State : Type_Base {
  public:
     static Type_State get();
     static Type_State get(const Util::SourceInfo &si);
-    toString{ return "state"; }
+    toString{ return "state"_cs; }
     dbprint { out << "state"; }
 }
 
@@ -160,10 +161,10 @@ class Type_Bits : Type_Base {
     static Type_Bits get(const Util::SourceInfo &si, Expression expression, bool isSigned = false);
     static Type_Bits get(const Util::SourceInfo &si, int sz, bool isSigned = false);
     static Type_Bits get(int sz, bool isSigned = false);
-    cstring baseName() const { return isSigned ? "int" : "bit"; }
+    cstring baseName() const { return isSigned ? "int"_cs : "bit"_cs; }
     int width_bits() const override { return size; }
 
-    toString{ return baseName() + "<" + Util::toString(size) + ">"; }
+    toString{ return baseName() + "<"_cs + Util::toString(size) + ">"_cs; }
     dbprint { out << toString(); }
 }
 
@@ -179,7 +180,7 @@ class Type_Varbits : Type_Base {
     static Type_Varbits get(const Util::SourceInfo &si, int size);
     static Type_Varbits get(int size);
     static Type_Varbits get();
-    toString{ return cstring("varbit<") + Util::toString(size) + ">"; }
+    toString{ return "varbit<"_cs + Util::toString(size) + ">"_cs; }
     dbprint { out << "varbit<" << size << ">"; }
 }
 
@@ -215,7 +216,7 @@ class ParameterList : ISimpleNamespace {
     IR::IDeclaration getDeclByName(cstring name) const override { return getParameter(name); }
     void push_back(const Parameter *p) { parameters.push_back(p); }
     toString {
-        cstring result = "";
+        std::string result = "";
         bool first = true;
         for (auto p : parameters) {
             if (!first)
@@ -255,7 +256,7 @@ class Type_InfInt : Type, ITypeVar {
     cstring getVarName() const override { return "int_" + Util::toString(declid); }
     int getDeclId() const override { return declid; }
     dbprint { out << "int/" << declid; }
-    toString { return "int"; }
+    toString { return "int"_cs; }
     operator== { return declid == a.declid; }
     static Type_InfInt get();
     static Type_InfInt get(const Util::SourceInfo &si);
@@ -272,7 +273,7 @@ class Type_Dontcare : Type_Base {
     void *operator new(size_t size) { return ::operator new(size); }
 #end
  public:
-    toString{ return "_"; }
+    toString{ return "_"_cs; }
     static Type_Dontcare get();
     static Type_Dontcare get(const Util::SourceInfo &si);
     dbprint { out << "_"; }
@@ -284,7 +285,7 @@ class Type_Void : Type_Base {
     void *operator new(size_t size) { return ::operator new(size); }
 #end
  public:
-    toString{ return "void"; }
+    toString{ return "void"_cs; }
     static Type_Void get();
     static Type_Void get(const Util::SourceInfo &si);
     dbprint { out << "void"; }
@@ -296,7 +297,7 @@ class Type_MatchKind : Type_Base {
     void *operator new(size_t size) { return ::operator new(size); }
 #end
  public:
-    toString{ return "match_kind"; }
+    toString{ return "match_kind"_cs; }
     static Type_MatchKind get();
     static Type_MatchKind get(const Util::SourceInfo &si);
     dbprint { out << "match_kind"; }
@@ -314,8 +315,8 @@ class TypeParameters : ISimpleNamespace {
     validate{ parameters.check_null(); }
     toString {
         if (parameters.size() == 0)
-            return "";
-        cstring result = "<";
+            return ""_cs;
+        std::string result = "<";
         bool first = true;
         for (auto p : parameters) {
             if (!first)
@@ -385,7 +386,7 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
 
 class Type_Struct : Type_StructLike {
 #nodbprint
-    toString{ return cstring("struct ") + externalName(); }
+    toString{ return "struct "_cs + externalName(); }
 }
 
 /// This is the type of a struct-valued expression whose
@@ -397,7 +398,7 @@ class Type_UnknownStruct : Type_StructLike {
 
 class Type_HeaderUnion : Type_StructLike {
 #nodbprint
-    toString{ return cstring("header_union ") + externalName(); }
+    toString{ return "header_union "_cs + externalName(); }
     // this makes some assumptions on padding
     int width_bits() const override {
         int rv = 0;
@@ -419,13 +420,13 @@ class Type_Header : Type_StructLike {
     static const cstring setInvalid;
     static const cstring isValid;
 #nodbprint
-    toString{ return cstring("header ") + externalName(); }
+    toString{ return "header "_cs + externalName(); }
 }
 
 class Type_Set : Type {
     Type elementType;
     dbprint{ Node::dbprint(out); out << "<" << elementType << ">"; }
-    toString { return cstring("set<") + elementType->toString() + ">"; }
+    toString { return "set<"_cs + elementType->toString() + ">"_cs; }
     const Type* getP4Type() const override { return nullptr; }
     int width_bits() const override {
         /// returning the width of the set elements, not the set itself, which doesn't
@@ -454,6 +455,7 @@ abstract Type_BaseList : Type, Type_Indexed {
         }
         return rv; }
     cstring asString(const char* name) const {
+        // FIXME: simplify concatenation
         std::string result = name;
         result += "<";
         bool first = true;
@@ -492,8 +494,7 @@ class Type_P4List : Type {
     Type elementType;
     const Type* getP4Type() const override;
     toString{
-        std::string result = "list<" + elementType->toString() + ">";
-        return result;
+        return "list<"_cs + elementType->toString() + ">"_cs;
     }
 }
 
@@ -515,7 +516,7 @@ class Type_Package : Type_ArchBlock, IContainer, ISimpleNamespace {
     ParameterList constructorParams;
     Type_Method getConstructorMethodType() const override;
     ParameterList getConstructorParameters() const override { return constructorParams; }
-    toString{ return cstring("package ") + externalName(); }
+    toString{ return "package "_cs + externalName(); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return typeParameters->getDeclarations()->concat(constructorParams->getDeclarations()); }
     IDeclaration getDeclByName(cstring name) const override {
@@ -528,14 +529,14 @@ class Type_Parser : Type_ArchBlock, IApply {
     ParameterList applyParams;
     Type_Method getApplyMethodType() const override;
     ParameterList getApplyParameters() const override { return applyParams; }
-    toString { return cstring("parser ") + externalName(); }
+    toString { return "parser "_cs + externalName(); }
 }
 
 class Type_Control : Type_ArchBlock, IApply {
     ParameterList applyParams;
     Type_Method getApplyMethodType() const override;
     ParameterList getApplyParameters() const override { return applyParams; }
-    toString { return cstring("control ") + externalName(); }
+    toString { return "control "_cs + externalName(); }
 }
 
 /// A type referred by name
@@ -554,8 +555,9 @@ class Type_Name : Type {
 class Type_Stack : Type_Indexed, Type {
     Type        elementType;
     Expression  size;
-    toString{ return elementType->toString() + "[" +
-                (sizeKnown() ? Util::toString(getSize()) : "?") + "]"; }
+    // FIXME: do not create all these intermediate cstring's
+    toString{ return elementType->toString() + "["_cs +
+                (sizeKnown() ? Util::toString(getSize()) : "?"_cs) + "]"_cs; }
     dbprint{ out << elementType << "[" << size << "]"; }
     bool sizeKnown() const;
     size_t getSize() const override;
@@ -581,8 +583,8 @@ class Type_Specialized : Type {
     validate{ arguments->check_null(); }
     const Type* getP4Type() const override;
     toString{
-        cstring result = baseType->toString() + "<";
-        cstring sep = "";
+        std::string result = baseType->toString() + "<";
+        std::string sep = "";
         for (auto t : *arguments) {
             result += sep + t->toString();
             sep = ", ";
@@ -609,7 +611,7 @@ class Type_SpecializedCanonical : Type {
         BUG_CHECK(substituted->is<IMayBeGenericType>(), "substituted %1% is not generic", substituted);
     }
     const Type* getP4Type() const override;
-    toString{ return baseType->toString() + "<...>"; }
+    toString{ return baseType->toString() + "<...>"_cs; }
 }
 
 /// A declaration that consists of just an identifier, e.g., an enum member
@@ -627,7 +629,7 @@ class Type_String : Type_Base {
  public:
     static Type_String get();
     static Type_String get(const Util::SourceInfo &si);
-    toString{ return "string"; }
+    toString{ return "string"_cs; }
 }
 
 class Type_Enum : Type_Declaration, ISimpleNamespace, IAnnotated {
@@ -696,7 +698,7 @@ abstract Type_MethodBase : Type, IMayBeGenericType, ISimpleNamespace {
     size_t minParameterCount() const;
     virtual TypeParameters getTypeParameters() const override { return typeParameters; }
     void dbprint(std::ostream& out) const override;
-    toString { return "<Method>"; }
+    toString { return "<Method>"_cs; }
     const IR::Type* getP4Type() const override { return nullptr; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return typeParameters->getDeclarations()->concat(parameters->getDeclarations()); }
@@ -734,7 +736,7 @@ class Type_MethodCall : Type {
     Vector<ArgumentInfo> arguments;
     validate{ typeArguments->check_null(); arguments->check_null(); }
     const Type* getP4Type() const override { return nullptr; }
-    toString { return "<Method call>"; }
+    toString { return "<Method call>"_cs; }
 }
 
 /// Actions look a lot like methods in many respects.

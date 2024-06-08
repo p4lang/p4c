@@ -23,6 +23,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 /// A policy for constant folding that allows customization of the folding.
 /// Currently we only have hook for customizing IR::PathExpression, but more can be added.
 /// Each hook takes a visitor and a node and is called from the visitor's preorder function on that
@@ -163,7 +165,7 @@ class DoConstantFolding : public Transform {
     const IR::Node *preorder(IR::ArrayIndex *e) override;
     const IR::Node *preorder(IR::SwitchCase *c) override;
     const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
-        if (bs->annotations->getSingle("disable_optimization")) prune();
+        if (bs->annotations->getSingle("disable_optimization"_cs)) prune();
         return bs;
     }
 };

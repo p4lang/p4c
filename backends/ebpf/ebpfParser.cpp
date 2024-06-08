@@ -24,9 +24,9 @@ limitations under the License.
 namespace EBPF {
 
 void StateTranslationVisitor::compileLookahead(const IR::Expression *destination) {
-    cstring msgStr = Util::printf_format("Parser: lookahead for %s %s",
-                                         state->parser->typeMap->getType(destination)->toString(),
-                                         destination->toString());
+    cstring msgStr = absl::StrFormat("Parser: lookahead for %s %s",
+                                     state->parser->typeMap->getType(destination)->toString(),
+                                     destination->toString());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
@@ -49,8 +49,8 @@ void StateTranslationVisitor::compileAdvance(const P4::ExternMethod *extMethod) 
     if (cnst) {
         cstring argStr = cstring::to_cstring(cnst->asUnsigned());
         cstring offsetStr =
-            Util::printf_format("%s - (u8*)%s + BYTES(%s)", state->parser->program->headerStartVar,
-                                state->parser->program->packetStartVar, argStr);
+            absl::StrFormat("%s - (u8*)%s + BYTES(%s)", state->parser->program->headerStartVar,
+                            state->parser->program->packetStartVar, argStr);
         builder->target->emitTraceMessage(builder,
                                           "Parser (advance): check pkt_len=%%d < "
                                           "last_read_byte=%%d",
@@ -115,8 +115,8 @@ void StateTranslationVisitor::compileVerify(const IR::MethodCallExpression *expr
                           errorMember->member.name);
     builder->endOfStatement(true);
 
-    cstring msg = Util::printf_format("Verify: condition failed, parser_error=%%u (%s)",
-                                      errorMember->member.name);
+    cstring msg = absl::StrFormat("Verify: condition failed, parser_error=%%u (%s)",
+                                  errorMember->member.name);
     builder->target->emitTraceMessage(builder, msg.c_str(), 1,
                                       state->parser->program->errorVar.c_str());
 
@@ -156,10 +156,9 @@ bool StateTranslationVisitor::preorder(const IR::ParserState *parserState) {
     builder->spc();
     builder->blockStart();
 
-    cstring msgStr =
-        Util::printf_format("Parser: state %s (curr_offset=%%d)", parserState->name.name);
-    cstring offsetStr = Util::printf_format("%s - (u8*)%s", state->parser->program->headerStartVar,
-                                            state->parser->program->packetStartVar);
+    cstring msgStr = absl::StrFormat("Parser: state %s (curr_offset=%%d)", parserState->name.name);
+    cstring offsetStr = absl::StrFormat("%s - (u8*)%s", state->parser->program->headerStartVar,
+                                        state->parser->program->packetStartVar);
     builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, offsetStr.c_str());
 
     visit(parserState->components, "components");
@@ -283,7 +282,7 @@ void StateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     cstring msgStr;
     cstring fieldName = field->name.name;
 
-    msgStr = Util::printf_format("Parser: extracting field %s", fieldName);
+    msgStr = absl::StrFormat("Parser: extracting field %s", fieldName);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     if (widthToExtract <= 64) {
@@ -388,15 +387,15 @@ void StateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         if (expr->is<IR::Member>() && expr->to<IR::Member>()->expr->is<IR::PathExpression>() &&
             isPointerVariable(
                 expr->to<IR::Member>()->expr->to<IR::PathExpression>()->path->name.name)) {
-            exprStr = exprStr.replace(".", "->");
+            exprStr = exprStr.replace("."_cs, "->"_cs);
         }
-        cstring tmp = Util::printf_format("(unsigned long long) %s.%s", exprStr, fieldName);
+        cstring tmp = absl::StrFormat("(unsigned long long) %s.%s", exprStr, fieldName);
 
-        msgStr = Util::printf_format("Parser: extracted %s=0x%%llx (%u bits)", fieldName,
-                                     widthToExtract);
+        msgStr =
+            absl::StrFormat("Parser: extracted %s=0x%%llx (%u bits)", fieldName, widthToExtract);
         builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, tmp.c_str());
     } else {
-        msgStr = Util::printf_format("Parser: extracted %s (%u bits)", fieldName, widthToExtract);
+        msgStr = absl::StrFormat("Parser: extracted %s (%u bits)", fieldName, widthToExtract);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
     }
 }
@@ -421,8 +420,8 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
 
     auto program = state->parser->program;
 
-    cstring offsetStr = Util::printf_format("(%s - (u8*)%s) + BYTES(%s)", program->headerStartVar,
-                                            program->packetStartVar, cstring::to_cstring(width));
+    cstring offsetStr = absl::StrFormat("(%s - (u8*)%s) + BYTES(%s)", program->headerStartVar,
+                                        program->packetStartVar, cstring::to_cstring(width));
 
     builder->target->emitTraceMessage(builder, "Parser: check pkt_len=%d >= last_read_byte=%d", 2,
                                       program->lengthVar.c_str(), offsetStr.c_str());
@@ -465,7 +464,7 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
     builder->newline();
     builder->blockEnd(true);
 
-    msgStr = Util::printf_format("Parser: extracting header %s", destination->toString());
+    msgStr = absl::StrFormat("Parser: extracting header %s", destination->toString());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
     builder->newline();
 
@@ -495,7 +494,7 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
     builder->appendFormat("%s += BYTES(%u);", program->headerStartVar.c_str(), width);
     builder->newline();
 
-    msgStr = Util::printf_format("Parser: extracted %s", destination->toString());
+    msgStr = absl::StrFormat("Parser: extracted %s", destination->toString());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->newline();

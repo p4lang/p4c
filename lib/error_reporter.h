@@ -78,9 +78,7 @@ class ErrorReporter {
     }
 
     /// retrieve the format from the error catalog
-    const char *get_error_name(int errorCode) {
-        return ErrorCatalog::getCatalog().getName(errorCode);
-    }
+    cstring get_error_name(int errorCode) { return ErrorCatalog::getCatalog().getName(errorCode); }
 
  public:
     ErrorReporter()
@@ -112,7 +110,7 @@ class ErrorReporter {
     void diagnose(DiagnosticAction action, const int errorCode, const char *format,
                   const char *suffix, const T *node, Args &&...args) {
         if (node && !error_reported(errorCode, node->getSourceInfo())) {
-            const char *name = get_error_name(errorCode);
+            cstring name = get_error_name(errorCode);
             auto da = getDiagnosticAction(name, action);
             if (name)
                 diagnose(da, name, format, suffix, node, std::forward<Args>(args)...);
@@ -130,7 +128,7 @@ class ErrorReporter {
     template <typename... Args>
     void diagnose(DiagnosticAction action, const int errorCode, const char *format,
                   const char *suffix, Args &&...args) {
-        const char *name = get_error_name(errorCode);
+        cstring name = get_error_name(errorCode);
         auto da = getDiagnosticAction(name, action);
         if (name)
             diagnose(da, name, format, suffix, std::forward<Args>(args)...);
@@ -220,6 +218,8 @@ class ErrorReporter {
         Util::SourcePosition position = sources->getCurrentPosition();
         position--;
 
+        // Unfortunately, we cannot go with statically checked format string
+        // here as it would require some changes to yyerror
         std::string message;
         if (!absl::FormatUntyped(&message, absl::UntypedFormatSpec(fmt),
                                  {absl::FormatArg(args)...})) {
@@ -245,8 +245,8 @@ class ErrorReporter {
     }
 
     /// Set the action to take for the given diagnostic.
-    void setDiagnosticAction(cstring diagnostic, DiagnosticAction action) {
-        diagnosticActions[diagnostic] = action;
+    void setDiagnosticAction(std::string_view diagnostic, DiagnosticAction action) {
+        diagnosticActions[cstring(diagnostic)] = action;
     }
 
     /// @return the default diagnostic action for calls to `::warning()`.

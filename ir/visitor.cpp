@@ -789,16 +789,16 @@ cstring Visitor::demangle(const char *str) {
     int status;
     cstring rv;
     if (char *n = abi::__cxa_demangle(str, 0, 0, &status)) {
-        rv = n;
+        rv = cstring(n);
         free(n);
     } else {
-        rv = str;
+        rv = cstring(str);
     }
     return rv;
 }
 #else
 #warning "No name demangling available; class names in logs will be mangled"
-cstring Visitor::demangle(const char *str) { return str; }
+cstring Visitor::demangle(const char *str) { return cstring(str); }
 #endif
 
 #if HAVE_LIBGC

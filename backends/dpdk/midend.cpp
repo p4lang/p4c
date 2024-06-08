@@ -30,6 +30,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/uniqueNames.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "lib/cstring.h"
 #include "midend/actionSynthesis.h"
 #include "midend/compileTimeOps.h"
 #include "midend/complexComparison.h"
@@ -119,17 +120,17 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
                 cstring externMethod = em->method->getName().name;
 
                 std::vector<std::pair<cstring, cstring>> doNotCopyPropList = {
-                    {"Checksum", "update"},
-                    {"Hash", "get_hash"},
-                    {"InternetChecksum", "add"},
-                    {"InternetChecksum", "subtract"},
-                    {"InternetChecksum", "set_state"},
-                    {"Register", "read"},
-                    {"Register", "write"},
-                    {"Counter", "count"},
-                    {"Meter", "execute"},
-                    {"Meter", "dpdk_execute"},
-                    {"Digest", "pack"},
+                    {"Checksum"_cs, "update"_cs},
+                    {"Hash"_cs, "get_hash"_cs},
+                    {"InternetChecksum"_cs, "add"_cs},
+                    {"InternetChecksum"_cs, "subtract"_cs},
+                    {"InternetChecksum"_cs, "set_state"_cs},
+                    {"Register"_cs, "read"_cs},
+                    {"Register"_cs, "write"_cs},
+                    {"Counter"_cs, "count"_cs},
+                    {"Meter"_cs, "execute"_cs},
+                    {"Meter"_cs, "dpdk_execute"_cs},
+                    {"Digest"_cs, "pack"_cs},
                 };
                 for (auto f : doNotCopyPropList) {
                     if (externType == f.first && externMethod == f.second) {
@@ -139,7 +140,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             } else if (auto ef = mi->to<P4::ExternFunction>()) {
                 cstring externFuncName = ef->method->getName().name;
                 std::vector<cstring> doNotCopyPropList = {
-                    "verify",
+                    "verify"_cs,
                 };
                 for (auto f : doNotCopyPropList) {
                     if (externFuncName == f) return false;
@@ -152,19 +153,20 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
     std::function<Inspector *(cstring)> validateTableProperties = [=](cstring arch) -> Inspector * {
         if (arch == "pna") {
             return new P4::ValidateTableProperties(
-                {"pna_implementation", "pna_direct_counter", "pna_direct_meter", "pna_idle_timeout",
-                 "size", "add_on_miss", "idle_timeout_with_auto_delete",
-                 "default_idle_timeout_for_data_plane_added_entries"});
+                {"pna_implementation"_cs, "pna_direct_counter"_cs, "pna_direct_meter"_cs,
+                 "pna_idle_timeout"_cs, "size"_cs, "add_on_miss"_cs,
+                 "idle_timeout_with_auto_delete"_cs,
+                 "default_idle_timeout_for_data_plane_added_entries"_cs});
         } else if (arch == "psa") {
-            return new P4::ValidateTableProperties({"psa_implementation", "psa_direct_counter",
-                                                    "psa_direct_meter", "psa_idle_timeout",
-                                                    "size"});
+            return new P4::ValidateTableProperties({"psa_implementation"_cs,
+                                                    "psa_direct_counter"_cs, "psa_direct_meter"_cs,
+                                                    "psa_idle_timeout"_cs, "size"_cs});
         } else {
             return nullptr;
         }
     };
 
-    if (DPDK::DpdkContext::get().options().loadIRFromJson == false) {
+    if (!DPDK::DpdkContext::get().options().loadIRFromJson) {
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new P4::RemoveMiss(&refMap, &typeMap),
@@ -225,7 +227,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
         });
         if (options.listMidendPasses) {
-            listPasses(*outStream, "\n");
+            listPasses(*outStream, cstring::newline);
             *outStream << std::endl;
             return;
         }

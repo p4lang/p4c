@@ -19,8 +19,8 @@ limitations under the License.
 #include <gtest/gtest.h>
 
 #include "ir/ir.h"
-#include "ir/visitor.h"
-#include "lib/exceptions.h"
+
+using namespace P4::literals;
 
 TEST(expr_uses, expr_uses) {
     auto obj1 = new IR::PathExpression("obj1");
@@ -33,16 +33,16 @@ TEST(expr_uses, expr_uses) {
     auto sub = new IR::Sub(obj1_f11, obj2_f1);
     auto add2 = new IR::Add(obj1_f1, obj1_f11);
 
-    EXPECT_TRUE(exprUses(add, "obj1"));
-    EXPECT_TRUE(exprUses(add, "obj2"));
-    EXPECT_TRUE(exprUses(add, "obj1.f1"));
-    EXPECT_TRUE(exprUses(add, "obj1.f1[0]"));
-    EXPECT_FALSE(exprUses(add, "obj1.f11"));
-    EXPECT_FALSE(exprUses(add, "obj1.f11[1]"));
-    EXPECT_FALSE(exprUses(add, "obj2.f1"));
-    EXPECT_TRUE(exprUses(add, "obj2.f11"));
-    EXPECT_TRUE(exprUses(sub, "obj1"));
-    EXPECT_TRUE(exprUses(sub, "obj2"));
-    EXPECT_TRUE(exprUses(add2, "obj1.f1"));
-    EXPECT_TRUE(exprUses(add2, "obj1.f11"));
+    EXPECT_TRUE(exprUses(add, "obj1"_cs));
+    EXPECT_TRUE(exprUses(add, "obj2"_cs));
+    EXPECT_TRUE(exprUses(add, "obj1.f1"_cs));
+    EXPECT_TRUE(exprUses(add, "obj1.f1[0]"_cs));
+    EXPECT_FALSE(exprUses(add, "obj1.f11"_cs));
+    EXPECT_FALSE(exprUses(add, "obj1.f11[1]"_cs));
+    EXPECT_FALSE(exprUses(add, "obj2.f1"_cs));
+    EXPECT_TRUE(exprUses(add, "obj2.f11"_cs));
+    EXPECT_TRUE(exprUses(sub, "obj1"_cs));
+    EXPECT_TRUE(exprUses(sub, "obj2"_cs));
+    EXPECT_TRUE(exprUses(add2, "obj1.f1"_cs));
+    EXPECT_TRUE(exprUses(add2, "obj1.f11"_cs));
 }

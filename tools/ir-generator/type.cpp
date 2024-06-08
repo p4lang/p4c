@@ -71,63 +71,63 @@ const IrClass *NamedType::resolve(const IrNamespace *in) const {
 }
 
 NamedType &NamedType::Bool() {
-    static NamedType nt("bool");
+    static NamedType nt("bool"_cs);
     return nt;
 }
 
 NamedType &NamedType::Int() {
-    static NamedType nt("int");
+    static NamedType nt("int"_cs);
     return nt;
 }
 
 NamedType &NamedType::Void() {
-    static NamedType nt("void");
+    static NamedType nt("void"_cs);
     return nt;
 }
 
 NamedType &NamedType::Cstring() {
-    static NamedType nt("cstring");
+    static NamedType nt("cstring"_cs);
     return nt;
 }
 
 NamedType &NamedType::Ostream() {
-    static NamedType nt(new LookupScope("std"), "ostream");
+    static NamedType nt(new LookupScope("std"_cs), "ostream"_cs);
     return nt;
 }
 
 NamedType &NamedType::Visitor() {
-    static NamedType nt("Visitor");
+    static NamedType nt("Visitor"_cs);
     return nt;
 }
 
 NamedType &NamedType::Unordered_Set() {
-    static NamedType nt(new LookupScope("std"), "unordered_set");
+    static NamedType nt(new LookupScope("std"_cs), "unordered_set"_cs);
     return nt;
 }
 
 NamedType &NamedType::JSONGenerator() {
-    static NamedType nt("JSONGenerator");
+    static NamedType nt("JSONGenerator"_cs);
     return nt;
 }
 
 NamedType &NamedType::JSONLoader() {
-    static NamedType nt("JSONLoader");
+    static NamedType nt("JSONLoader"_cs);
     return nt;
 }
 
 NamedType &NamedType::JSONObject() {
-    static NamedType nt("JSONObject");
+    static NamedType nt("JSONObject"_cs);
     return nt;
 }
 
 NamedType &NamedType::SourceInfo() {
-    static NamedType nt(new LookupScope("Util"), "SourceInfo");
+    static NamedType nt(new LookupScope("Util"_cs), "SourceInfo"_cs);
     return nt;
 }
 
 cstring NamedType::toString() const {
     if (resolved) return resolved->fullName();
-    if (!lookup && name == "ID") return "IR::ID";  // hack -- ID is in namespace IR
+    if (!lookup && name == "ID") return "IR::ID"_cs;  // hack -- ID is in namespace IR
     if (lookup) return lookup->toString() + name;
     if (foundin) return LookupScope(foundin).toString() + name;
     return name;
@@ -137,7 +137,7 @@ cstring TemplateInstantiation::toString() const {
     std::string rv = base->toString().c_str();
     rv += '<';
     const char *sep = "";
-    for (auto arg : args) {
+    for (const auto *arg : args) {
         rv += sep;
         if (arg->isResolved() && !base->isResolved()) rv += "const ";
         rv += arg->toString().c_str();
@@ -149,7 +149,7 @@ cstring TemplateInstantiation::toString() const {
 }
 
 cstring ReferenceType::toString() const {
-    cstring rv = base->toString();
+    std::string rv = base->toString().c_str();
     if (isConst) rv += " const";
     rv += " &";
     return rv;
@@ -159,7 +159,7 @@ ReferenceType ReferenceType::OstreamRef(&NamedType::Ostream()), ReferenceType::V
                                                                     &NamedType::Visitor());
 
 cstring PointerType::toString() const {
-    cstring rv = base->toString();
+    std::string rv = base->toString().c_str();
     if (isConst) rv += " const";
     rv += " *";
     return rv;
@@ -168,7 +168,7 @@ cstring PointerType::toString() const {
 cstring ArrayType::declSuffix() const {
     char buf[16];
     snprintf(buf, sizeof(buf), "[%d]", size);
-    return buf;
+    return cstring(buf);
 }
 
 const IrClass *FunctionType::resolve(const IrNamespace *ns) const {
@@ -178,10 +178,10 @@ const IrClass *FunctionType::resolve(const IrNamespace *ns) const {
 }
 
 cstring FunctionType::toString() const {
-    cstring result = ret->toString();
+    std::string result = ret->toString().c_str();
     result += "(";
     const char *sep = "";
-    for (auto arg : args) {
+    for (const auto *arg : args) {
         result += sep;
         if (arg->isResolved()) result += "const ";
         result += arg->toString().c_str();

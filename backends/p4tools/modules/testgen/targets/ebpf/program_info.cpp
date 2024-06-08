@@ -26,6 +26,8 @@
 
 namespace P4Tools::P4Testgen::EBPF {
 
+using namespace P4::literals;
+
 const IR::Type_Bits EBPFProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
 
 EBPFProgramInfo::EBPFProgramInfo(const TestgenCompilerResult &compilerResult,
@@ -122,9 +124,9 @@ const IR::Expression *EBPFProgramInfo::dropIsActive() const {
 const IR::Type_Bits *EBPFProgramInfo::getParserErrorType() const { return &PARSER_ERR_BITS; }
 
 const ArchSpec EBPFProgramInfo::ARCH_SPEC =
-    ArchSpec("ebpfFilter", {// parser parse<H>(packet_in packet, out H headers);
-                            {"parse", {nullptr, "*hdr"}},
-                            // control filter<H>(inout H headers, out bool accept);
-                            {"filter", {"*hdr", "*accept"}}});
+    ArchSpec("ebpfFilter"_cs, {// parser parse<H>(packet_in packet, out H headers);
+                               {"parse"_cs, {nullptr, "*hdr"_cs}},
+                               // control filter<H>(inout H headers, out bool accept);
+                               {"filter"_cs, {"*hdr"_cs, "*accept"_cs}}});
 
 }  // namespace P4Tools::P4Testgen::EBPF

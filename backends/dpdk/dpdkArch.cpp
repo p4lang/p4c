@@ -29,6 +29,7 @@ limitations under the License.
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeMap.h"
+#include "lib/cstring.h"
 
 namespace DPDK {
 
@@ -36,7 +37,7 @@ cstring TypeStruct2Name(const cstring s) {
     if (isStandardMetadata(s)) {
         return s.substr(0, s.size() - 2);
     } else {
-        return "local_metadata";
+        return "local_metadata"_cs;
     }
 }
 
@@ -498,7 +499,7 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
                 field_name_list.emplace(field->name, obj);
             }
         }
-        cstring modifiedName = "";
+        cstring modifiedName = cstring::empty;
         auto size = field_name_list.size();
         unsigned i = 0;
         // Check if the sum of width of non-aligned field is divisble by 8.
@@ -552,7 +553,7 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
             fields->push_back(
                 new IR::StructField(IR::ID(modifiedName), IR::Type_Bits::get(size_sum_so_far)));
             size_sum_so_far = 0;
-            modifiedName = "";
+            modifiedName = cstring::empty;
             field_name_list.clear();
         }
     }
@@ -592,7 +593,7 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
            if (hdrs.ipv4.flags_fragOffset[15:3] == 4) ....
 */
 const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
-    cstring hdrStrName = "";
+    cstring hdrStrName = cstring::empty;
     // Get the member's header structure name.
     if ((m != nullptr) && (m->expr != nullptr) && (m->expr->type != nullptr) &&
         (m->expr->type->is<IR::Type_Header>())) {
@@ -1225,7 +1226,7 @@ const IR::Node *CollectLocalVariables::postorder(IR::P4Parser *p) {
 /// This function stores the information about parameters of default action
 /// for each table.
 void DefActionValue::postorder(const IR::P4Table *t) {
-    auto default_action = t->properties->getProperty("default_action");
+    auto default_action = t->properties->getProperty("default_action"_cs);
     if (default_action != nullptr && default_action->value->is<IR::ExpressionValue>()) {
         auto expr = default_action->value->to<IR::ExpressionValue>()->expression;
         auto mi =
@@ -1456,7 +1457,7 @@ const IR::Node *DismantleMuxExpressions::postorder(IR::AssignmentStatement *stat
 
 bool CopyMatchKeysToSingleStruct::isLearnerTable(const IR::P4Table *t) {
     bool use_add_on_miss = false;
-    auto add_on_miss = t->properties->getProperty("add_on_miss");
+    auto add_on_miss = t->properties->getProperty("add_on_miss"_cs);
     if (add_on_miss == nullptr) return false;
     if (add_on_miss->value->is<IR::ExpressionValue>()) {
         auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
@@ -1566,6 +1567,11 @@ cstring CopyMatchKeysToSingleStruct::getTableKeyName(const IR::Expression *e) {
 }
 
 const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
+    // If copyNeeded is false at this point, it means the keys are from same struct.
+    // Check remaining conditions to see if the copy is needed or not
+    // TODO: This indirection should not be needed. Instead of using a visitor for IR::KeyElement
+    // just resolve each key element directly.
+    metaCopyNeeded = false;
     // If any key field is from different structure, put all keys in metadata
     LOG3("Visiting " << keys);
     bool copyNeeded = false;
@@ -1575,7 +1581,7 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
         return keys;
     }
 
-    cstring firstKeyStr = "";
+    cstring firstKeyStr = cstring::empty;
     bool firstKeyHdr = false;
 
     if (auto firstKeyField = keys->keyElements.at(0)->expression->to<IR::Member>()) {
@@ -1588,7 +1594,7 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
 
     // Key fields should be part of same header/metadata struct.
     for (auto key : keys->keyElements) {
-        cstring keyTypeStr = "";
+        cstring keyTypeStr = cstring::empty;
         if (auto keyField = key->expression->to<IR::Member>()) {
             keyTypeStr = keyField->expr->toString();
         } else if (auto m = key->expression->to<IR::MethodCallExpression>()) {
@@ -1645,10 +1651,6 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
     } else {
         structure->table_type_map.emplace(table->name.name, InternalTableType::WILDCARD);
     }
-
-    // If copyNeeded is false at this point, it means the keys are from same struct.
-    // Check remaining conditions to see if the copy is needed or not
-    metaCopyNeeded = false;
     if (copyNeeded) contiguous = false;
 
     if (!contiguous &&
@@ -1670,6 +1672,7 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
     }
     return keys;
 }
+
 const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) {
     // If we got here we need to put the key element in metadata.
     LOG3("Extracting key element " << element);
@@ -1694,19 +1697,19 @@ const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) 
         isHeader = true;
         keyName = keyName.replace('.', '_');
         keyName =
-            keyName.replace("h_", control->name.toString() + "_" + table->name.toString() + "_");
+            keyName.replace("h_"_cs, control->name.toString() + "_" + table->name.toString() + "_");
     } else if (metaCopyNeeded) {
         if (keyName.startsWith("m.")) {
             keyName = keyName.replace('.', '_');
             keyName = keyName.replace(
-                "m_", control->name.toString() + "_" + table->name.toString() + "_");
+                "m_"_cs, control->name.toString() + "_" + table->name.toString() + "_");
         } else {
             keyName = control->name.toString() + "_" + table->name.toString() + "_" + keyName;
         }
     }
 
     if (isHeader || metaCopyNeeded) {
-        IR::ID keyNameId(refMap->newName(keyName));
+        IR::ID keyNameId(refMap->newName(keyName.string_view()));
         auto decl = new IR::Declaration_Variable(keyNameId, element->expression->type, nullptr);
         // Store the compiler generated table keys in Program structure. These will be
         // inserted to Metadata by CollectLocalVariables pass.
@@ -1780,7 +1783,7 @@ std::optional<P4::ExternInstance> getExternInstanceFromProperty(
 /// for subsequent table lookup.
 std::tuple<const IR::P4Table *, cstring, cstring> SplitP4TableCommon::create_match_table(
     const IR::P4Table *tbl) {
-    cstring grpActionName = "", memActionName;
+    cstring grpActionName = cstring::empty, memActionName;
     if (implementation == TableImplementation::ACTION_SELECTOR) {
         grpActionName = refMap->newName(tbl->name.originalName + "_set_group_id");
         memActionName = refMap->newName(tbl->name.originalName + "_set_member_id");
@@ -1812,7 +1815,7 @@ std::tuple<const IR::P4Table *, cstring, cstring> SplitP4TableCommon::create_mat
         }
     }
 
-    auto constDefAction = tbl->properties->getProperty("default_action");
+    auto constDefAction = tbl->properties->getProperty("default_action"_cs);
     bool isConstDefAction = constDefAction ? constDefAction->isConstant : false;
 
     IR::IndexedVector<IR::Property> properties;
@@ -1856,7 +1859,7 @@ const IR::P4Table *SplitP4TableCommon::create_member_table(const IR::P4Table *tb
     hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     auto nameAnnon = tbl->getAnnotation(IR::Annotation::nameAnnotation);
     cstring nameA = nameAnnon->getSingleString();
-    cstring memName = nameA.replace(nameA.findlast('.'), "." + memberTableName);
+    cstring memName = nameA.replace(cstring(nameA.findlast('.')), "."_cs + memberTableName);
     hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(memName), false);
 
     IR::IndexedVector<IR::ActionListElement> memberActionList;
@@ -1891,7 +1894,7 @@ const IR::P4Table *SplitP4TableCommon::create_group_table(const IR::P4Table *tbl
     hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     auto nameAnnon = tbl->getAnnotation(IR::Annotation::nameAnnotation);
     cstring nameA = nameAnnon->getSingleString();
-    cstring selName = nameA.replace(nameA.findlast('.'), "." + selectorTableName);
+    cstring selName = nameA.replace(cstring(nameA.findlast('.')), "."_cs + selectorTableName);
     hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(selName), false);
     IR::IndexedVector<IR::Property> selector_properties;
     selector_properties.push_back(new IR::Property("selector", new IR::Key(selector_keys), false));
@@ -1915,16 +1918,16 @@ const IR::P4Table *SplitP4TableCommon::create_group_table(const IR::P4Table *tbl
 const IR::Node *SplitActionSelectorTable::postorder(IR::P4Table *tbl) {
     bool isConstructedInPlace = false;
     bool isAsInstanceShared = false;
-    cstring externName = "";
-    cstring prefix = "psa_";
+    cstring externName = cstring::empty;
+    cstring prefix = "psa_"_cs;
 
     if (structure->isPNA()) {
-        prefix = "pna_";
+        prefix = "pna_"_cs;
     }
 
-    auto property = tbl->properties->getProperty(prefix + "implementation");
-    auto counterProperty = tbl->properties->getProperty(prefix + "direct_counter");
-    auto meterProperty = tbl->properties->getProperty(prefix + "direct_meter");
+    auto property = tbl->properties->getProperty(prefix + "implementation"_cs);
+    auto counterProperty = tbl->properties->getProperty(prefix + "direct_counter"_cs);
+    auto meterProperty = tbl->properties->getProperty(prefix + "direct_meter"_cs);
 
     if (property != nullptr && (counterProperty != nullptr || meterProperty != nullptr)) {
         ::error(ErrorType::ERR_UNEXPECTED,
@@ -1971,7 +1974,7 @@ const IR::Node *SplitActionSelectorTable::postorder(IR::P4Table *tbl) {
 
     // Remove the control block name prefix from instance name
     cstring instance_name = *instance->name;
-    instance_name = instance_name.findlast('.');
+    instance_name = cstring(instance_name.findlast('.'));
     instance_name = instance_name.trim(".\t\n\r");
 
     cstring member_id = instance_name + "_member_id";
@@ -1997,8 +2000,8 @@ const IR::Node *SplitActionSelectorTable::postorder(IR::P4Table *tbl) {
     cstring grpActionName, memActionName;
     const IR::P4Table *match_table;
     std::tie(match_table, grpActionName, memActionName) = create_match_table(tbl);
-    auto grpAction = create_action(grpActionName, group_id, "group_id");
-    auto memAction = create_action(memActionName, member_id, "member_id");
+    auto grpAction = create_action(grpActionName, group_id, "group_id"_cs);
+    auto memAction = create_action(memActionName, member_id, "member_id"_cs);
     decls->push_back(grpAction);
     decls->push_back(memAction);
     decls->push_back(match_table);
@@ -2046,10 +2049,10 @@ const IR::Node *SplitActionSelectorTable::postorder(IR::P4Table *tbl) {
 const IR::Node *SplitActionProfileTable::postorder(IR::P4Table *tbl) {
     bool isConstructedInPlace = false;
     bool isApInstanceShared = false;
-    cstring externName = "";
-    cstring implementation = "psa_implementation";
+    cstring externName = cstring::empty;
+    cstring implementation = "psa_implementation"_cs;
 
-    if (structure->isPNA()) implementation = "pna_implementation";
+    if (structure->isPNA()) implementation = "pna_implementation"_cs;
 
     auto instance = Helpers::getExternInstanceFromProperty(tbl, implementation, refMap, typeMap,
                                                            &isConstructedInPlace, externName);
@@ -2069,8 +2072,9 @@ const IR::Node *SplitActionProfileTable::postorder(IR::P4Table *tbl) {
     }
 
     // Remove the control block name prefix from instance name
+    // FIXME: simplify
     cstring instance_name = *instance->name;
-    instance_name = instance_name.findlast('.');
+    instance_name = cstring(instance_name.findlast('.'));
     instance_name = instance_name.trim(".\t\n\r");
 
     auto decls = new IR::IndexedVector<IR::Declaration>();
@@ -2092,7 +2096,7 @@ const IR::Node *SplitActionProfileTable::postorder(IR::P4Table *tbl) {
     cstring actionName, ignoreGroup;
     const IR::P4Table *match_table;
     std::tie(match_table, ignoreGroup, actionName) = create_match_table(tbl);
-    auto action = create_action(actionName, member_id, "member_id");
+    auto action = create_action(actionName, member_id, "member_id"_cs);
     decls->push_back(action);
     decls->push_back(match_table);
     cstring member_table_name = instance_name;
@@ -2484,7 +2488,7 @@ bool CollectDirectCounterMeter::preorder(const IR::AssignmentStatement *assn) {
 
 bool CollectDirectCounterMeter::ifMethodFound(const IR::P4Action *a, cstring methodName,
                                               cstring instance) {
-    oneInstance = "";
+    oneInstance = cstring::empty;
     instancename = instance;
     method = methodName;
     methodCallFound = false;
@@ -2496,23 +2500,23 @@ bool CollectDirectCounterMeter::ifMethodFound(const IR::P4Action *a, cstring met
 /// method calls for only one Direct counter/meter instance. The error for the same is emitted
 /// in the ifMethodFound function itself and return value is not required to be checked here.
 bool CollectDirectCounterMeter::preorder(const IR::P4Action *a) {
-    ifMethodFound(a, "count");
-    ifMethodFound(a, "dpdk_execute");
+    ifMethodFound(a, "count"_cs);
+    ifMethodFound(a, "dpdk_execute"_cs);
     return false;
 }
 
 bool CollectDirectCounterMeter::preorder(const IR::P4Table *tbl) {
     bool isConstructedInPlace = false;
-    cstring implementation = "psa_implementation";
-    cstring counterExternName = "";
-    cstring meterExternName = "";
-    cstring direct_counter = "psa_direct_counter";
-    cstring direct_meter = "psa_direct_meter";
+    cstring implementation = "psa_implementation"_cs;
+    cstring counterExternName = cstring::empty;
+    cstring meterExternName = cstring::empty;
+    cstring direct_counter = "psa_direct_counter"_cs;
+    cstring direct_meter = "psa_direct_meter"_cs;
 
     if (structure->isPNA()) {
-        implementation = "pna_implementation";
-        direct_counter = "pna_direct_counter";
-        direct_meter = "pna_direct_meter";
+        implementation = "pna_implementation"_cs;
+        direct_counter = "pna_direct_counter"_cs;
+        direct_meter = "pna_direct_meter"_cs;
     }
 
     auto counterInstance = Helpers::getExternInstanceFromProperty(
@@ -2543,7 +2547,7 @@ bool CollectDirectCounterMeter::preorder(const IR::P4Table *tbl) {
         BUG_CHECK(path, "Default action path %s cannot be found", default_action);
         if (auto defaultActionDecl = refMap->getDeclaration(path->path)->to<IR::P4Action>()) {
             if (defaultActionDecl->name.originalName != "NoAction") {
-                if (!ifMethodFound(defaultActionDecl, "count", counterExternName)) {
+                if (!ifMethodFound(defaultActionDecl, "count"_cs, counterExternName)) {
                     if (counterInstance) {
                         ::error(ErrorType::ERR_EXPECTED,
                                 "Expected default action %1% to have "
@@ -2552,7 +2556,7 @@ bool CollectDirectCounterMeter::preorder(const IR::P4Table *tbl) {
                         return false;
                     }
                 }
-                if (!ifMethodFound(defaultActionDecl, "dpdk_execute", meterExternName)) {
+                if (!ifMethodFound(defaultActionDecl, "dpdk_execute"_cs, meterExternName)) {
                     if (meterInstance) {
                         ::error(ErrorType::ERR_EXPECTED,
                                 "Expected default action %1% to have "
@@ -2638,8 +2642,8 @@ void ValidateDirectCounterMeter::postorder(const IR::MethodCallStatement *mcs) {
 
 void CollectAddOnMissTable::postorder(const IR::P4Table *t) {
     bool use_add_on_miss = false;
-    auto add_on_miss = t->properties->getProperty("add_on_miss");
-    cstring default_actname = "NoAction";
+    auto add_on_miss = t->properties->getProperty("add_on_miss"_cs);
+    cstring default_actname = "NoAction"_cs;
     if (add_on_miss == nullptr) return;
     if (add_on_miss->value->is<IR::ExpressionValue>()) {
         auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
@@ -2654,7 +2658,7 @@ void CollectAddOnMissTable::postorder(const IR::P4Table *t) {
     }
 
     // sanity checks
-    auto default_action = t->properties->getProperty("default_action");
+    auto default_action = t->properties->getProperty("default_action"_cs);
     if (use_add_on_miss && default_action == nullptr) {
         ::error(ErrorType::ERR_UNEXPECTED,
                 "%1%: add_on_miss property is defined, "
@@ -2684,8 +2688,9 @@ void CollectAddOnMissTable::postorder(const IR::P4Table *t) {
             // Map the compiler generated internal name of action (emitted in .spec file) with
             // user visible name in P4 program.
             // To get the user visible name, strip any prefixes from externalName.
+            // FIXME: Simplify
             cstring userVisibleName = action_decl->externalName();
-            userVisibleName = userVisibleName.findlast('.');
+            userVisibleName = cstring(userVisibleName.findlast('.'));
             userVisibleName = userVisibleName.trim(".\t\n\r");
             structure->learner_action_map.emplace(std::make_pair(userVisibleName, default_actname),
                                                   action_decl->name.name);
@@ -2717,7 +2722,7 @@ void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
 
 void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
     bool isValidExternCall = false;
-    cstring propName = "";
+    cstring propName = cstring::empty;
     auto mce = mcs->methodCall;
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
     if (!mi->is<P4::ExternFunction>()) {
@@ -2735,9 +2740,9 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
         bool use_idle_timeout_with_auto_delete = false;
         if (tbl) {
             auto idle_timeout_with_auto_delete =
-                tbl->properties->getProperty("idle_timeout_with_auto_delete");
+                tbl->properties->getProperty("idle_timeout_with_auto_delete"_cs);
             if (idle_timeout_with_auto_delete != nullptr) {
-                propName = "idle_timeout_with_auto_delete";
+                propName = "idle_timeout_with_auto_delete"_cs;
                 if (idle_timeout_with_auto_delete->value->is<IR::ExpressionValue>()) {
                     auto expr =
                         idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()->expression;
@@ -2761,9 +2766,9 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
             auto args = mce->arguments;
             auto at = args->at(0)->expression;
             auto an = at->to<IR::StringLiteral>()->value;
-            auto add_on_miss = tbl->properties->getProperty("add_on_miss");
+            auto add_on_miss = tbl->properties->getProperty("add_on_miss"_cs);
             if (add_on_miss != nullptr) {
-                propName = "add_on_miss";
+                propName = "add_on_miss"_cs;
                 if (add_on_miss->value->is<IR::ExpressionValue>()) {
                     auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
                     if (!expr->is<IR::BoolLiteral>()) {
@@ -3046,7 +3051,7 @@ const IR::Node *MoveNonHeaderFieldsToPseudoHeader::postorder(IR::MethodCallState
                                 fields.push_back(
                                     new IR::StructField(f->name, getEightBitAlignedType(type)));
                             }
-                            auto newName = refMap->newName(tmps0->name);
+                            auto newName = refMap->newName(tmps0->name.name.string_view());
                             newTname = new IR::Type_Name(newName);
                             auto newStructType =
                                 new IR::Type_Struct(tmps0->srcInfo, newName, tmps0->annotations,
@@ -3098,7 +3103,7 @@ const IR::Node *MoveNonHeaderFieldsToPseudoHeader::postorder(IR::MethodCallState
 
 const IR::Node *AddFieldsToPseudoHeader::preorder(IR::Type_Header *h) {
     if (is_all_args_header) return h;
-    auto annon = h->getAnnotation("__pseudo_header__");
+    auto annon = h->getAnnotation("__pseudo_header__"_cs);
     if (annon == nullptr) return h;
     IR::IndexedVector<IR::StructField> fields = h->fields;
     for (auto &p : MoveNonHeaderFieldsToPseudoHeader::pseudoFieldNameType) {
@@ -3225,7 +3230,7 @@ IR::IndexedVector<IR::StatOrDecl> *InsertReqDeclForIPSec::addRegDeclInstance(
 
 const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Program *program) {
     if (!is_ipsec_used) return program;
-    cstring resName = "";
+    cstring resName = cstring::empty;
     if (!reservedNames(refMap, registerInstanceNames, resName)) {
         ::error(ErrorType::ERR_RESERVED, "%1% name is reserved for DPDK IPSec port register",
                 resName);

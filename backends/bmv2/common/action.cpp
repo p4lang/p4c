@@ -20,18 +20,20 @@ limitations under the License.
 
 namespace BMV2 {
 
+using namespace P4::literals;
+
 cstring ActionConverter::jsonAssignment(const IR::Type *type) {
-    if (type->is<IR::Type_Varbits>()) return "assign_VL";
-    if (type->is<IR::Type_HeaderUnion>()) return "assign_union";
-    if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header";
+    if (type->is<IR::Type_Varbits>()) return "assign_VL"_cs;
+    if (type->is<IR::Type_HeaderUnion>()) return "assign_union"_cs;
+    if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header"_cs;
     if (auto ts = type->to<IR::Type_Stack>()) {
         auto et = ts->elementType;
         if (et->is<IR::Type_HeaderUnion>())
-            return "assign_union_stack";
+            return "assign_union_stack"_cs;
         else
-            return "assign_header_stack";
+            return "assign_header_stack"_cs;
     }
-    return "assign";
+    return "assign"_cs;
 }
 
 void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
@@ -98,9 +100,9 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
         } else if (s->is<IR::ReturnStatement>()) {
             break;
         } else if (s->is<IR::ExitStatement>()) {
-            auto primitive = mkPrimitive("exit", result);
+            auto primitive = mkPrimitive("exit"_cs, result);
             (void)mkParameters(primitive);
-            primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+            primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
             break;
         } else if (s->is<IR::AssignmentStatement>()) {
             const IR::Expression *l, *r;
@@ -111,7 +113,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
             cstring operation = jsonAssignment(type);
             auto primitive = mkPrimitive(operation, result);
             auto parameters = mkParameters(primitive);
-            primitive->emplace_non_null("source_info", assign->sourceInfoJsonObj());
+            primitive->emplace_non_null("source_info"_cs, assign->sourceInfoJsonObj());
             bool convertBool = type->is<IR::Type_Boolean>();
             Util::IJson *left;
             if (ctxt->conv->isArrayIndexRuntime(l)) {
@@ -141,25 +143,25 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                 parameters->append(obj);
 
                 if (builtin->name == IR::Type_Header::setValid) {
-                    prim = "add_header";
+                    prim = "add_header"_cs;
                 } else if (builtin->name == IR::Type_Header::setInvalid) {
-                    prim = "remove_header";
+                    prim = "remove_header"_cs;
                 } else if (builtin->name == IR::Type_Stack::push_front) {
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
                     auto arg = ctxt->conv->convert(mc->arguments->at(0)->expression);
-                    prim = "push";
+                    prim = "push"_cs;
                     parameters->append(arg);
                 } else if (builtin->name == IR::Type_Stack::pop_front) {
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
                     auto arg = ctxt->conv->convert(mc->arguments->at(0)->expression);
-                    prim = "pop";
+                    prim = "pop"_cs;
                     parameters->append(arg);
                 } else {
                     BUG("%1%: Unexpected built-in method", s);
                 }
                 auto primitive = mkPrimitive(prim, result);
-                primitive->emplace("parameters", parameters);
-                primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+                primitive->emplace("parameters"_cs, parameters);
+                primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
                 continue;
             } else if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
@@ -190,14 +192,14 @@ void ActionConverter::convertActionParams(const IR::ParameterList *parameters,
             warn(ErrorType::WARN_UNUSED, "Unused action parameter %1%", p);
 
         auto param = new Util::JsonObject();
-        param->emplace("name", p->externalName());
+        param->emplace("name"_cs, p->externalName());
         auto type = ctxt->typeMap->getType(p, true);
         // TODO: added IR::Type_Enum here to support PSA_MeterColor_t
         // should re-consider how to support action parameters that is neither bit<> nor int<>
         if (!(type->is<IR::Type_Bits>() || type->is<IR::Type_Enum>()))
             ::error(ErrorType::ERR_INVALID,
                     "%1%: action parameters must be bit<> or int<> on this target", p);
-        param->emplace("bitwidth", type->width_bits());
+        param->emplace("bitwidth"_cs, type->width_bits());
         params->append(param);
     }
 }

@@ -25,9 +25,9 @@ void CheckDeprecated::warnIfDeprecated(const IR::IAnnotated *annotated, const IR
     auto anno = annotated->getAnnotations()->getSingle(IR::Annotation::deprecatedAnnotation);
     if (anno == nullptr) return;
 
-    cstring message = "";
-    for (auto a : anno->expr) {
-        if (auto str = a->to<IR::StringLiteral>()) message += str->value;
+    std::string message;
+    for (const auto *a : anno->expr) {
+        if (const auto *str = a->to<IR::StringLiteral>()) message += str->value;
     }
     ::warning(ErrorType::WARN_DEPRECATED, "%1%: Using deprecated feature %2%. %3%", errorNode,
               annotated->getNode(), message);

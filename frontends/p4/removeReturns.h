@@ -23,6 +23,7 @@ limitations under the License.
 #include "ir/ir.h"
 
 namespace P4 {
+using namespace literals;
 
 /**
 This inspector detects whether an IR tree contains
@@ -77,8 +78,8 @@ class DoRemoveReturns : public Transform {
     }
 
  public:
-    explicit DoRemoveReturns(P4::ReferenceMap *refMap, cstring varName = "hasReturned",
-                             cstring retValName = "retval")
+    explicit DoRemoveReturns(P4::ReferenceMap *refMap, cstring varName = "hasReturned"_cs,
+                             cstring retValName = "retval"_cs)
         : refMap(refMap), variableName(varName), retValName(retValName) {
         visitDagOnce = false;
         CHECK_NULL(refMap);

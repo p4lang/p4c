@@ -169,7 +169,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::SimplifyControlFlow(&refMap, &typeMap),
          new P4::MidEndLast()});
     if (options.listMidendPasses) {
-        listPasses(*outStream, "\n");
+        listPasses(*outStream, cstring::newline);
         *outStream << std::endl;
         return;
     }

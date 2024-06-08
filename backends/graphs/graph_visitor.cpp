@@ -81,17 +81,17 @@ const char *Graph_visitor::getPrevType(const PrevType &prev_type) {
 
 void Graph_visitor::forLoopJson(std::vector<Graph *> &graphsArray, PrevType node_type) {
     for (auto g : graphsArray) {
-        auto block = new Util::JsonObject();
+        auto *block = new Util::JsonObject();
         programBlocks->emplace_back(block);
 
-        block->emplace("type", getPrevType(node_type));
-        block->emplace("name", boost::get_property(*g, boost::graph_name));
+        block->emplace("type"_cs, getPrevType(node_type));
+        block->emplace("name"_cs, boost::get_property(*g, boost::graph_name));
 
-        auto nodesArray = new Util::JsonArray();
-        block->emplace("nodes", nodesArray);
+        auto *nodesArray = new Util::JsonArray();
+        block->emplace("nodes"_cs, nodesArray);
 
-        auto parserEdges = new Util::JsonArray();
-        block->emplace("transitions", parserEdges);
+        auto *parserEdges = new Util::JsonArray();
+        block->emplace("transitions"_cs, parserEdges);
 
         auto subg = *g;
 
@@ -99,13 +99,13 @@ void Graph_visitor::forLoopJson(std::vector<Graph *> &graphsArray, PrevType node
         for (auto &vit = vertices.first; vit != vertices.second; ++vit) {
             auto node = new Util::JsonObject();
             nodesArray->emplace_back(node);
-            node->emplace("node_nmb", *vit);
+            node->emplace("node_nmb"_cs, *vit);
 
             const auto &vinfo = subg[*vit];
 
-            node->emplace("name", vinfo.name.escapeJson());
-            node->emplace("type", getType(vinfo.type));
-            node->emplace("type_enum", (unsigned)vinfo.type);
+            node->emplace("name"_cs, vinfo.name.escapeJson());
+            node->emplace("type"_cs, getType(vinfo.type));
+            node->emplace("type_enum"_cs, (unsigned)vinfo.type);
         }
 
         auto edges = boost::edges(subg);
@@ -117,10 +117,10 @@ void Graph_visitor::forLoopJson(std::vector<Graph *> &graphsArray, PrevType node
             auto from = boost::source(*eit, subg);
             auto to = boost::target(*eit, subg);
 
-            edge->emplace("from", from);
-            edge->emplace("to", to);
+            edge->emplace("from"_cs, from);
+            edge->emplace("to"_cs, to);
 
-            edge->emplace("cond", boost::get(boost::edge_name, subg, *eit).escapeJson());
+            edge->emplace("cond"_cs, boost::get(boost::edge_name, subg, *eit).escapeJson());
         }
     }
 }
@@ -136,10 +136,10 @@ void Graph_visitor::forLoopFullGraph(std::vector<Graph *> &graphsArray, fullGrap
         // set subg properties
         boost::get_property(subfg, boost::graph_name) =
             "cluster" + Util::toString(opts->cluster_i++);
-        boost::get_property(subfg, boost::graph_graph_attribute)["label"] =
+        boost::get_property(subfg, boost::graph_graph_attribute)["label"_cs] =
             boost::get_property(*g_, boost::graph_name);
-        boost::get_property(subfg, boost::graph_graph_attribute)["style"] = "bold";
-        boost::get_property(subfg, boost::graph_graph_attribute)["fontsize"] = "22pt";
+        boost::get_property(subfg, boost::graph_graph_attribute)["style"_cs] = "bold"_cs;
+        boost::get_property(subfg, boost::graph_graph_attribute)["fontsize"_cs] = "22pt"_cs;
 
         // No statements in graph, merge "__START__" and "__EXIT__" nodes
         if (g_->m_global_vertex.size() == 2) {
@@ -151,10 +151,10 @@ void Graph_visitor::forLoopFullGraph(std::vector<Graph *> &graphsArray, fullGrap
         // Connect subgraphs
         if (opts->cluster_i > 1) {
             if (prev_type == PrevType::Parser) {
-                add_edge(opts->node_i - 2, opts->node_i, "", opts->cluster_i);
+                add_edge(opts->node_i - 2, opts->node_i, cstring::empty, opts->cluster_i);
                 prev_type = PrevType::Control;
             } else {
-                add_edge(t_prev_adder, opts->node_i, "", opts->cluster_i);
+                add_edge(t_prev_adder, opts->node_i, cstring::empty, opts->cluster_i);
             }
         }
 
@@ -185,15 +185,15 @@ void Graph_visitor::process(std::vector<Graph *> &controlGraphsArray,
     if (fullGraph) {
         fullGraphOpts opts;
 
-        boost::get_property(opts.fg, boost::graph_name) = "fullGraph";
+        boost::get_property(opts.fg, boost::graph_name) = "fullGraph"_cs;
         // Enables edges with tails between clusters.
-        boost::get_property(opts.fg, boost::graph_graph_attribute)["compound"] = "true";
+        boost::get_property(opts.fg, boost::graph_graph_attribute)["compound"_cs] = "true"_cs;
 
         forLoopFullGraph(parserGraphsArray, &opts, PrevType::Parser);
         forLoopFullGraph(controlGraphsArray, &opts, PrevType::Parser);
 
         GraphAttributeSetter()(opts.fg);
-        writeGraphToFile(opts.fg, "fullGraph");
+        writeGraphToFile(opts.fg, "fullGraph"_cs);
     }
 
     if (jsonOut) {
@@ -208,15 +208,15 @@ void Graph_visitor::process(std::vector<Graph *> &controlGraphsArray,
             file_without_path = file_without_p4.findlast('/') + 1;  // char* without '/'
         }
 
-        json->emplace("name", file_without_path);
+        json->emplace("name"_cs, file_without_path);
         programBlocks = new Util::JsonArray();
-        json->emplace("nodes", programBlocks);
+        json->emplace("nodes"_cs, programBlocks);
 
         forLoopJson(parserGraphsArray, PrevType::Parser);
         forLoopJson(controlGraphsArray, PrevType::Control);
 
         std::ofstream file;
-        auto path = Util::PathName(graphsDir).join("fullGraph.json");
+        auto path = Util::PathName(graphsDir).join("fullGraph.json"_cs);
         file.open(path.toString());
         file << json->toString() << std::endl;
         file.close();

@@ -100,7 +100,7 @@ const IR::Node *DoRemoveExits::preorder(IR::P4Control *control) {
         return control;
     }
 
-    cstring var = refMap->newName(variableName);
+    cstring var = refMap->newName(variableName.string_view());
     returnVar = IR::ID(var, nullptr);
     visit(control->controlLocals, "controlLocals");
 

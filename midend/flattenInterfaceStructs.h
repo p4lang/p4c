@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace P4 {
 
@@ -67,7 +68,7 @@ struct StructTypeReplacement : public IHasDbPrint {
     StructTypeReplacement(const P4::TypeMap *typeMap, const IR::Type_StructLike *type,
                           AnnotationSelectionPolicy *policy) {
         auto vec = new IR::IndexedVector<IR::StructField>();
-        flatten(typeMap, "", type, type->annotations, vec, policy);
+        flatten(typeMap, cstring::empty, type, type->annotations, vec, policy);
         if (type->is<IR::Type_Struct>()) {
             replacementType =
                 new IR::Type_Struct(type->srcInfo, type->name, IR::Annotations::empty, *vec);
@@ -123,7 +124,7 @@ struct StructTypeReplacement : public IHasDbPrint {
             }
             return;
         }
-        cstring fieldName = prefix.replace(".", "_") + cstring::to_cstring(fieldNameRemap.size());
+        cstring fieldName = prefix.replace('.', '_') + std::to_string(fieldNameRemap.size());
         fieldNameRemap.emplace(prefix, fieldName);
         fields->push_back(new IR::StructField(IR::ID(fieldName), annotations, type->getP4Type()));
         LOG3("Flatten: " << type << " | " << prefix);

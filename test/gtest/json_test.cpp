@@ -65,9 +65,9 @@ TEST(Util, Json) {
 
     auto obj = new JsonObject();
     EXPECT_EQ("{\n}", obj->toString());
-    obj->emplace("x", "x");
+    obj->emplace("x"_cs, "x");
     EXPECT_EQ("{\n  \"x\" : \"x\"\n}", obj->toString());
-    obj->emplace("y", arr);
+    obj->emplace("y"_cs, arr);
     EXPECT_EQ("{\n  \"x\" : \"x\",\n  \"y\" : [\n    5,\n    \"5\",\n    [true]\n  ]\n}",
               obj->toString());
 }

@@ -25,6 +25,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 /** Implements a pass that replaces expensive arithmetic and boolean
  * operations with cheaper ones -- i.e., strength reduction
  *
@@ -107,7 +109,7 @@ class DoStrengthReduction final : public Transform {
     const IR::Node *postorder(IR::ArrayIndex *expr) override;
 
     const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
-        if (bs->annotations->getSingle("disable_optimization")) prune();
+        if (bs->annotations->getSingle("disable_optimization"_cs)) prune();
         return bs;
     }
 };

@@ -79,8 +79,8 @@ class SimpleSwitchExpressionConverter : public ExpressionConverter {
         : ExpressionConverter(refMap, typeMap, structure, scalarsName), structure(structure) {}
 
     void modelError(const char *format, const IR::Node *node) {
-        ::error(ErrorType::ERR_MODEL,
-                (cstring(format) + "\nAre you using an up-to-date v1model.p4?").c_str(), node);
+        ::errorWithSuffix(ErrorType::ERR_MODEL, format, "\nAre you using an up-to-date v1model.p4?",
+                          node);
     }
 
     bool isStandardMetadataParameter(const IR::Parameter *param) {
@@ -112,13 +112,13 @@ class SimpleSwitchExpressionConverter : public ExpressionConverter {
         if (isStandardMetadataParameter(param)) {
             auto result = new Util::JsonObject();
             if (fieldName != "") {
-                result->emplace("type", "field");
-                auto e = BMV2::mkArrayField(result, "value");
+                result->emplace("type"_cs, "field");
+                auto e = BMV2::mkArrayField(result, "value"_cs);
                 e->append("standard_metadata");
                 e->append(fieldName);
             } else {
-                result->emplace("type", "header");
-                result->emplace("value", "standard_metadata");
+                result->emplace("type"_cs, "header");
+                result->emplace("value"_cs, "standard_metadata");
             }
             return result;
         }

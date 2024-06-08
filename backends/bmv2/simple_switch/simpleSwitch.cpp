@@ -135,14 +135,14 @@ Util::IJson *ExternConverter_clone::convertExternFunction(ConversionContext *ctx
     }
     cstring prim;
     if (ei->name == "I2E") {
-        prim = "clone_ingress_pkt_to_egress";
+        prim = "clone_ingress_pkt_to_egress"_cs;
         if (ctxt->blockConverted != BlockConverted::Ingress) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "'clone(I2E, ...) not invoked in ingress %1%", mc);
             return nullptr;
         }
     } else {
-        prim = "clone_egress_pkt_to_egress";
+        prim = "clone_egress_pkt_to_egress"_cs;
         if (ctxt->blockConverted != BlockConverted::Egress) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "'clone(E2E, ...) not invoked in egress %1%", mc);
@@ -153,7 +153,7 @@ Util::IJson *ExternConverter_clone::convertExternFunction(ConversionContext *ctx
     auto session = ctxt->conv->convert(mc->arguments->at(1)->expression);
     auto primitive = mkPrimitive(prim);
     auto parameters = mkParameters(primitive);
-    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info"_cs, mc->sourceInfoJsonObj());
     parameters->append(session);
 
     if (id >= 0) {
@@ -172,9 +172,9 @@ static unsigned getFieldListById(ConversionContext *ctxt, unsigned index) {
     for (auto it : *ctxt->json->field_lists) {
         auto j = it->to<Util::JsonObject>();
         CHECK_NULL(j);
-        auto name = j->get("name")->to<Util::JsonValue>()->getString();
+        auto name = j->get("name"_cs)->to<Util::JsonValue>()->getString();
         if (name == search) {
-            id = j->get("id")->to<Util::JsonValue>()->getInt();
+            id = j->get("id"_cs)->to<Util::JsonValue>()->getInt();
             break;
         }
     }
@@ -206,14 +206,14 @@ Util::IJson *ExternConverter_clone_preserving_field_list::convertExternFunction(
     }
     cstring prim;
     if (ei->name == "I2E") {
-        prim = "clone_ingress_pkt_to_egress";
+        prim = "clone_ingress_pkt_to_egress"_cs;
         if (ctxt->blockConverted != BlockConverted::Ingress) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "'clone_preserving_field_list(I2E, ...) not invoked in ingress %1%", mc);
             return nullptr;
         }
     } else {
-        prim = "clone_egress_pkt_to_egress";
+        prim = "clone_egress_pkt_to_egress"_cs;
         if (ctxt->blockConverted != BlockConverted::Egress) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "'clone_preserving_field_list(E2E, ...) not invoked in egress %1%", mc);
@@ -223,7 +223,7 @@ Util::IJson *ExternConverter_clone_preserving_field_list::convertExternFunction(
     auto session = ctxt->conv->convert(mc->arguments->at(1)->expression);
     auto primitive = mkPrimitive(prim);
     auto parameters = mkParameters(primitive);
-    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info"_cs, mc->sourceInfoJsonObj());
     parameters->append(session);
 
     auto fl = mc->arguments->at(2);
@@ -256,9 +256,9 @@ Util::IJson *ExternConverter_hash::convertExternFunction(ConversionContext *ctxt
         modelError("Expected 5 arguments for %1%", mc);
         return nullptr;
     }
-    auto primitive = mkPrimitive("modify_field_with_hash_based_offset");
+    auto primitive = mkPrimitive("modify_field_with_hash_based_offset"_cs);
     auto parameters = mkParameters(primitive);
-    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
     parameters->append(dest);
     auto base = ctxt->conv->convert(mc->arguments->at(2)->expression);
@@ -273,8 +273,8 @@ Util::IJson *ExternConverter_hash::convertExternFunction(ConversionContext *ctxt
     auto fields = mc->arguments->at(3);
     auto calcName = ctxt->createCalculation(ei->name, fields->expression, ctxt->json->calculations,
                                             false, nullptr);
-    calculation->emplace("type", "calculation");
-    calculation->emplace("value", calcName);
+    calculation->emplace("type"_cs, "calculation");
+    calculation->emplace("value"_cs, calcName);
     parameters->append(calculation);
     auto max = ctxt->conv->convert(mc->arguments->at(4)->expression);
     parameters->append(max);
@@ -290,12 +290,12 @@ Util::IJson *ExternConverter_digest::convertExternFunction(ConversionContext *ct
         modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
     }
-    auto primitive = mkPrimitive("generate_digest");
+    auto primitive = mkPrimitive("generate_digest"_cs);
     auto parameters = mkParameters(primitive);
-    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info"_cs, mc->sourceInfoJsonObj());
     auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
     parameters->append(dest);
-    cstring listName = "digest";
+    cstring listName = "digest"_cs;
     // If we are supplied a type argument that is a named type use
     // that for the list name.
     if (mc->typeArguments->size() == 1) {
@@ -328,9 +328,9 @@ Util::IJson *ExternConverter_resubmit_preserving_field_list::convertExternFuncti
         return nullptr;
     }
     if (mc->arguments->size() == 1) {
-        auto primitive = mkPrimitive("resubmit");
+        auto primitive = mkPrimitive("resubmit"_cs);
         auto parameters = mkParameters(primitive);
-        primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
+        primitive->emplace_non_null("source_info"_cs, mc->sourceInfoJsonObj());
         auto arg = mc->arguments->at(0);
         auto cst = arg->expression->to<IR::Constant>();
         if (cst == nullptr) {
@@ -359,9 +359,9 @@ Util::IJson *ExternConverter_recirculate_preserving_field_list::convertExternFun
         return nullptr;
     }
     if (mc->arguments->size() == 1) {
-        auto primitive = mkPrimitive("recirculate");
+        auto primitive = mkPrimitive("recirculate"_cs);
         auto parameters = mkParameters(primitive);
-        primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
+        primitive->emplace_non_null("source_info"_cs, mc->sourceInfoJsonObj());
         auto arg = mc->arguments->at(0);
         auto cst = arg->expression->to<IR::Constant>();
         if (cst == nullptr) {
@@ -389,11 +389,11 @@ Util::IJson *ExternConverter_mark_to_drop::convertExternFunction(
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
-    auto primitive = mkPrimitive("mark_to_drop");
+    auto primitive = mkPrimitive("mark_to_drop"_cs);
     auto params = mkParameters(primitive);
     auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
     params->append(dest);
-    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     return primitive;
 }
 
@@ -408,7 +408,7 @@ Util::IJson *ExternConverter_random::convertExternFunction(ConversionContext *ct
     }
     auto primitive = mkPrimitive(v1model.random.modify_field_rng_uniform.name);
     auto params = mkParameters(primitive);
-    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info"_cs, mc->sourceInfoJsonObj());
     auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
     auto lo = ctxt->conv->convert(mc->arguments->at(1)->expression);
     auto hi = ctxt->conv->convert(mc->arguments->at(2)->expression);
@@ -429,7 +429,7 @@ Util::IJson *ExternConverter_truncate::convertExternFunction(UNUSED ConversionCo
     }
     auto primitive = mkPrimitive(v1model.truncate.name);
     auto params = mkParameters(primitive);
-    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info"_cs, mc->sourceInfoJsonObj());
     auto len = ctxt->conv->convert(mc->arguments->at(0)->expression);
     params->append(len);
     return primitive;
@@ -444,12 +444,12 @@ Util::IJson *ExternConverter_counter::convertExternObject(ConversionContext *ctx
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
-    auto primitive = mkPrimitive("count");
+    auto primitive = mkPrimitive("count"_cs);
     auto parameters = mkParameters(primitive);
-    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     auto ctr = new Util::JsonObject();
-    ctr->emplace("type", "counter_array");
-    ctr->emplace("value", em->object->controlPlaneName());
+    ctr->emplace("type"_cs, "counter_array");
+    ctr->emplace("value"_cs, em->object->controlPlaneName());
     parameters->append(ctr);
     auto index = ctxt->conv->convert(mc->arguments->at(0)->expression);
     parameters->append(index);
@@ -463,17 +463,17 @@ void ExternConverter_counter::convertExternInstance(ConversionContext *ctxt,
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jctr = new Util::JsonObject();
-    jctr->emplace("name", name);
-    jctr->emplace("id", nextId("counter_arrays"));
-    jctr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+    jctr->emplace("name"_cs, name);
+    jctr->emplace("id"_cs, nextId("counter_arrays"_cs));
+    jctr->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
     auto sz = eb->findParameterValue(v1model.counter.sizeParam.name);
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
         modelError("%1%: expected a constant", sz->getNode());
         return;
     }
-    jctr->emplace("size", sz->to<IR::Constant>()->value);
-    jctr->emplace("is_direct", false);
+    jctr->emplace("size"_cs, sz->to<IR::Constant>()->value);
+    jctr->emplace("is_direct"_cs, false);
     ctxt->json->counters->append(jctr);
 }
 
@@ -486,12 +486,12 @@ Util::IJson *ExternConverter_meter::convertExternObject(ConversionContext *ctxt,
         modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
     }
-    auto primitive = mkPrimitive("execute_meter");
+    auto primitive = mkPrimitive("execute_meter"_cs);
     auto parameters = mkParameters(primitive);
-    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     auto mtr = new Util::JsonObject();
-    mtr->emplace("type", "meter_array");
-    mtr->emplace("value", em->object->controlPlaneName());
+    mtr->emplace("type"_cs, "meter_array");
+    mtr->emplace("value"_cs, em->object->controlPlaneName());
     parameters->append(mtr);
     auto index = ctxt->conv->convert(mc->arguments->at(0)->expression);
     parameters->append(index);
@@ -506,18 +506,18 @@ void ExternConverter_meter::convertExternInstance(ConversionContext *ctxt, const
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jmtr = new Util::JsonObject();
-    jmtr->emplace("name", name);
-    jmtr->emplace("id", nextId("meter_arrays"));
-    jmtr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
-    jmtr->emplace("is_direct", false);
+    jmtr->emplace("name"_cs, name);
+    jmtr->emplace("id"_cs, nextId("meter_arrays"_cs));
+    jmtr->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
+    jmtr->emplace("is_direct"_cs, false);
     auto sz = eb->findParameterValue(v1model.meter.sizeParam.name);
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
         modelError("%1%: expected a constant", sz->getNode());
         return;
     }
-    jmtr->emplace("size", sz->to<IR::Constant>()->value);
-    jmtr->emplace("rate_count", 2);
+    jmtr->emplace("size"_cs, sz->to<IR::Constant>()->value);
+    jmtr->emplace("rate_count"_cs, 2);
     auto mkind = eb->findParameterValue(v1model.meter.typeParam.name);
     CHECK_NULL(mkind);
     if (!mkind->is<IR::Declaration_ID>()) {
@@ -525,15 +525,15 @@ void ExternConverter_meter::convertExternInstance(ConversionContext *ctxt, const
         return;
     }
     cstring mkind_name = mkind->to<IR::Declaration_ID>()->name;
-    cstring type = "?";
+    cstring type = "?"_cs;
     if (mkind_name == v1model.meter.meterType.packets.name)
-        type = "packets";
+        type = "packets"_cs;
     else if (mkind_name == v1model.meter.meterType.bytes.name)
-        type = "bytes";
+        type = "bytes"_cs;
     else
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Unexpected meter type %1%",
                 mkind->getNode());
-    jmtr->emplace("type", type);
+    jmtr->emplace("type"_cs, type);
     ctxt->json->meter_arrays->append(jmtr);
 }
 
@@ -547,13 +547,13 @@ Util::IJson *ExternConverter_register::convertExternObject(ConversionContext *ct
         return nullptr;
     }
     auto reg = new Util::JsonObject();
-    reg->emplace("type", "register_array");
+    reg->emplace("type"_cs, "register_array");
     cstring name = em->object->controlPlaneName();
-    reg->emplace("value", name);
+    reg->emplace("value"_cs, name);
     if (em->method->name == v1model.registers.read.name) {
-        auto primitive = mkPrimitive("register_read");
+        auto primitive = mkPrimitive("register_read"_cs);
         auto parameters = mkParameters(primitive);
-        primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+        primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
         auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
         parameters->append(dest);
         parameters->append(reg);
@@ -561,9 +561,9 @@ Util::IJson *ExternConverter_register::convertExternObject(ConversionContext *ct
         parameters->append(index);
         return primitive;
     } else if (em->method->name == v1model.registers.write.name) {
-        auto primitive = mkPrimitive("register_write");
+        auto primitive = mkPrimitive("register_write"_cs);
         auto parameters = mkParameters(primitive);
-        primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+        primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
         parameters->append(reg);
         auto index = ctxt->conv->convert(mc->arguments->at(0)->expression);
         parameters->append(index);
@@ -581,9 +581,9 @@ void ExternConverter_register::convertExternInstance(ConversionContext *ctxt,
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jreg = new Util::JsonObject();
-    jreg->emplace("name", name);
-    jreg->emplace("id", nextId("register_arrays"));
-    jreg->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+    jreg->emplace("name"_cs, name);
+    jreg->emplace("id"_cs, nextId("register_arrays"_cs));
+    jreg->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
     auto sz = eb->findParameterValue(v1model.registers.sizeParam.name);
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
@@ -593,7 +593,7 @@ void ExternConverter_register::convertExternInstance(ConversionContext *ctxt,
     if (sz->to<IR::Constant>()->value == 0)
         error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
               "%1%: direct registers are not supported in bmv2", inst);
-    jreg->emplace("size", sz->to<IR::Constant>()->value);
+    jreg->emplace("size"_cs, sz->to<IR::Constant>()->value);
     if (auto st = eb->instanceType->to<IR::Type_SpecializedCanonical>()) {
         if (st->arguments->size() < 1 || st->arguments->size() > 2) {
             modelError("%1%: expected 1 or 2 type arguments", st);
@@ -610,7 +610,7 @@ void ExternConverter_register::convertExternInstance(ConversionContext *ctxt,
             ::error(ErrorType::ERR_EXPRESSION, "%1%: unknown width", st->arguments->at(0));
             return;
         }
-        jreg->emplace("bitwidth", width);
+        jreg->emplace("bitwidth"_cs, width);
         ctxt->json->register_arrays->append(jreg);
     } else {
         modelError("%1%: Expected a generic specialized type", eb->instanceType);
@@ -641,11 +641,11 @@ void ExternConverter_direct_counter::convertExternInstance(ConversionContext *ct
         ::warning(ErrorType::WARN_UNUSED, "%1%: Direct counter not used; ignoring", inst);
     } else {
         auto jctr = new Util::JsonObject();
-        jctr->emplace("name", name);
-        jctr->emplace("id", nextId("counter_arrays"));
-        jctr->emplace("is_direct", true);
-        jctr->emplace("binding", it->second->controlPlaneName());
-        jctr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+        jctr->emplace("name"_cs, name);
+        jctr->emplace("id"_cs, nextId("counter_arrays"_cs));
+        jctr->emplace("is_direct"_cs, true);
+        jctr->emplace("binding"_cs, it->second->controlPlaneName());
+        jctr->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
         ctxt->json->counters->append(jctr);
     }
 }
@@ -696,11 +696,11 @@ void ExternConverter_direct_meter::convertExternInstance(ConversionContext *ctxt
     CHECK_NULL(info->destinationField);
 
     auto jmtr = new Util::JsonObject();
-    jmtr->emplace("name", name);
-    jmtr->emplace("id", nextId("meter_arrays"));
-    jmtr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
-    jmtr->emplace("is_direct", true);
-    jmtr->emplace("rate_count", 2);
+    jmtr->emplace("name"_cs, name);
+    jmtr->emplace("id"_cs, nextId("meter_arrays"_cs));
+    jmtr->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
+    jmtr->emplace("is_direct"_cs, true);
+    jmtr->emplace("rate_count"_cs, 2);
     auto mkind = eb->findParameterValue(v1model.directMeter.typeParam.name);
     CHECK_NULL(mkind);
     if (!mkind->is<IR::Declaration_ID>()) {
@@ -708,21 +708,21 @@ void ExternConverter_direct_meter::convertExternInstance(ConversionContext *ctxt
         return;
     }
     cstring mkind_name = mkind->to<IR::Declaration_ID>()->name;
-    cstring type = "?";
+    cstring type = "?"_cs;
     if (mkind_name == v1model.meter.meterType.packets.name) {
-        type = "packets";
+        type = "packets"_cs;
     } else if (mkind_name == v1model.meter.meterType.bytes.name) {
-        type = "bytes";
+        type = "bytes"_cs;
     } else {
         modelError("%1%: unexpected meter type", mkind->getNode());
         return;
     }
-    jmtr->emplace("type", type);
-    jmtr->emplace("size", info->tableSize);
+    jmtr->emplace("type"_cs, type);
+    jmtr->emplace("size"_cs, info->tableSize);
     cstring tblname = info->table->controlPlaneName();
-    jmtr->emplace("binding", tblname);
+    jmtr->emplace("binding"_cs, tblname);
     auto result = ctxt->conv->convert(info->destinationField);
-    jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
+    jmtr->emplace("result_target"_cs, result->to<Util::JsonObject>()->get("value"_cs));
     ctxt->json->meter_arrays->append(jmtr);
 }
 
@@ -736,9 +736,9 @@ void ExternConverter_action_profile::convertExternInstance(ConversionContext *ct
     // once in a pipeline, so only add it to the action_profiles once
     if (BMV2::JsonObjects::find_object_by_name(ctxt->action_profiles, name)) return;
     auto action_profile = new Util::JsonObject();
-    action_profile->emplace("name", name);
-    action_profile->emplace("id", nextId("action_profiles"));
-    action_profile->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+    action_profile->emplace("name"_cs, name);
+    action_profile->emplace("id"_cs, nextId("action_profiles"_cs));
+    action_profile->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
 
     auto add_size = [&action_profile, &eb](const cstring &pname) {
         auto sz = eb->findParameterValue(pname);
@@ -748,7 +748,7 @@ void ExternConverter_action_profile::convertExternInstance(ConversionContext *ct
             ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
             return;
         }
-        action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
+        action_profile->emplace("max_size"_cs, sz->to<IR::Constant>()->value);
     };
 
     if (eb->type->name == v1model.action_profile.name) {
@@ -762,7 +762,7 @@ void ExternConverter_action_profile::convertExternInstance(ConversionContext *ct
             return;
         }
         auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
-        selector->emplace("algo", algo);
+        selector->emplace("algo"_cs, algo);
         auto input = ctxt->get_selector_input(inst);
         if (input == nullptr) {
             // the selector is never used by any table, we cannot figure out its
@@ -773,12 +773,12 @@ void ExternConverter_action_profile::convertExternInstance(ConversionContext *ct
                       c);
             return;
         }
-        auto j_input = mkArrayField(selector, "input");
+        auto j_input = mkArrayField(selector, "input"_cs);
         for (auto expr : *input) {
             auto jk = ctxt->conv->convert(expr);
             j_input->append(jk);
         }
-        action_profile->emplace("selector", selector);
+        action_profile->emplace("selector"_cs, selector);
     }
 
     ctxt->action_profiles->append(action_profile);
@@ -795,9 +795,9 @@ void ExternConverter_action_selector::convertExternInstance(ConversionContext *c
     // once in a pipeline, so only add it to the action_profiles once
     if (BMV2::JsonObjects::find_object_by_name(ctxt->action_profiles, name)) return;
     auto action_profile = new Util::JsonObject();
-    action_profile->emplace("name", name);
-    action_profile->emplace("id", nextId("action_profiles"));
-    action_profile->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+    action_profile->emplace("name"_cs, name);
+    action_profile->emplace("id"_cs, nextId("action_profiles"_cs));
+    action_profile->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
 
     auto add_size = [&action_profile, &eb](const cstring &pname) {
         auto sz = eb->findParameterValue(pname);
@@ -807,7 +807,7 @@ void ExternConverter_action_selector::convertExternInstance(ConversionContext *c
             ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
             return;
         }
-        action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
+        action_profile->emplace("max_size"_cs, sz->to<IR::Constant>()->value);
     };
 
     if (eb->type->name == v1model.action_profile.name) {
@@ -821,7 +821,7 @@ void ExternConverter_action_selector::convertExternInstance(ConversionContext *c
             return;
         }
         auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
-        selector->emplace("algo", algo);
+        selector->emplace("algo"_cs, algo);
         auto input = ctxt->get_selector_input(inst);
         if (input == nullptr) {
             // the selector is never used by any table, we cannot figure out its
@@ -832,12 +832,12 @@ void ExternConverter_action_selector::convertExternInstance(ConversionContext *c
                       c);
             return;
         }
-        auto j_input = mkArrayField(selector, "input");
+        auto j_input = mkArrayField(selector, "input"_cs);
         for (auto expr : *input) {
             auto jk = ctxt->conv->convert(expr);
             j_input->append(jk);
         }
-        action_profile->emplace("selector", selector);
+        action_profile->emplace("selector"_cs, selector);
     }
 
     ctxt->action_profiles->append(action_profile);
@@ -852,11 +852,11 @@ Util::IJson *ExternConverter_log_msg::convertExternFunction(ConversionContext *c
         modelError("Expected 1 or 2 arguments for %1%", mc);
         return nullptr;
     }
-    auto primitive = mkPrimitive("log_msg");
+    auto primitive = mkPrimitive("log_msg"_cs);
     auto params = mkParameters(primitive);
-    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     auto paramsValue = new Util::JsonObject();
-    paramsValue->emplace("type", "parameters_vector");
+    paramsValue->emplace("type"_cs, "parameters_vector");
     auto str = ctxt->conv->convert(mc->arguments->at(0)->expression);
     params->append(str);
     if (mc->arguments->size() == 2) {
@@ -882,18 +882,18 @@ Util::IJson *ExternConverter_log_msg::convertExternFunction(ConversionContext *c
             auto val = ctxt->conv->convert(v, false, true, true);
             arr->append(val);
         }
-        paramsValue->emplace("value", arr);
+        paramsValue->emplace("value"_cs, arr);
     } else {
         auto tmp = new Util::JsonObject();
-        paramsValue->emplace("value", tmp);
+        paramsValue->emplace("value"_cs, tmp);
     }
     params->append(paramsValue);
     return primitive;
 }
 
 void SimpleSwitchBackend::modelError(const char *format, const IR::Node *node) const {
-    ::error(ErrorType::ERR_MODEL,
-            (cstring("%1%") + format + "\nAre you using an up-to-date v1model.p4?").c_str(), node);
+    ::errorWithSuffix(ErrorType::ERR_MODEL, format, "\nAre you using an up-to-date v1model.p4?",
+                      node);
 }
 
 cstring SimpleSwitchBackend::createCalculation(cstring algo, const IR::Expression *fields,
@@ -901,11 +901,11 @@ cstring SimpleSwitchBackend::createCalculation(cstring algo, const IR::Expressio
                                                const IR::Node *sourcePositionNode = nullptr) {
     cstring calcName = refMap->newName("calc_");
     auto calc = new Util::JsonObject();
-    calc->emplace("name", calcName);
-    calc->emplace("id", nextId("calculations"));
+    calc->emplace("name"_cs, calcName);
+    calc->emplace("id"_cs, nextId("calculations"_cs));
     if (sourcePositionNode != nullptr)
-        calc->emplace_non_null("source_info", sourcePositionNode->sourceInfoJsonObj());
-    calc->emplace("algo", algo);
+        calc->emplace_non_null("source_info"_cs, sourcePositionNode->sourceInfoJsonObj());
+    calc->emplace("algo"_cs, algo);
     fields = convertToList(fields, typeMap);
     if (!fields) {
         modelError("%1%: expected a struct", fields);
@@ -916,11 +916,11 @@ cstring SimpleSwitchBackend::createCalculation(cstring algo, const IR::Expressio
         auto array = jright->to<Util::JsonArray>();
         BUG_CHECK(array, "expected a JSON array");
         auto payload = new Util::JsonObject();
-        payload->emplace("type", "payload");
-        payload->emplace("value", (Util::IJson *)nullptr);
+        payload->emplace("type"_cs, "payload");
+        payload->emplace("value"_cs, (Util::IJson *)nullptr);
         array->append(payload);
     }
-    calc->emplace("input", jright);
+    calc->emplace("input"_cs, jright);
     calculations->append(calc);
     return calcName;
 }
@@ -978,18 +978,18 @@ void SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block,
                     (void)calcExpr->apply(eeis);
                     cstring calcName =
                         createCalculation(algo, calcExpr, calculations, usePayload, mc);
-                    cksum->emplace("name", refMap->newName("cksum_"));
-                    cksum->emplace("id", nextId("checksums"));
-                    cksum->emplace_non_null("source_info", stat->sourceInfoJsonObj());
+                    cksum->emplace("name"_cs, refMap->newName("cksum_"));
+                    cksum->emplace("id"_cs, nextId("checksums"_cs));
+                    cksum->emplace_non_null("source_info"_cs, stat->sourceInfoJsonObj());
                     auto jleft = conv->convert(mi->expr->arguments->at(2)->expression);
-                    cksum->emplace("target", jleft->to<Util::JsonObject>()->get("value"));
-                    cksum->emplace("type", "generic");
-                    cksum->emplace("calculation", calcName);
-                    cksum->emplace("verify", verify);
-                    cksum->emplace("update", !verify);
+                    cksum->emplace("target"_cs, jleft->to<Util::JsonObject>()->get("value"_cs));
+                    cksum->emplace("type"_cs, "generic");
+                    cksum->emplace("calculation"_cs, calcName);
+                    cksum->emplace("verify"_cs, verify);
+                    cksum->emplace("update"_cs, !verify);
                     auto ifcond =
                         conv->convert(mi->expr->arguments->at(0)->expression, true, false);
-                    cksum->emplace("if_cond", ifcond);
+                    cksum->emplace("if_cond"_cs, ifcond);
                     checksums->append(cksum);
                     continue;
                 }
@@ -1037,7 +1037,7 @@ void SimpleSwitchBackend::createRecirculateFieldsList(ConversionContext *ctxt,
     LOG2("Scanning user metadata fields for annotations");
     for (auto f : userMetaType->fields) {
         LOG3("Scanning field " << f);
-        auto anno = f->getAnnotations()->getSingle("field_list");
+        auto anno = f->getAnnotations()->getSingle("field_list"_cs);
         if (anno == nullptr) continue;
 
         for (auto e : anno->expr) {
@@ -1055,23 +1055,23 @@ void SimpleSwitchBackend::createRecirculateFieldsList(ConversionContext *ctxt,
                 fl = new Util::JsonObject();
                 ctxt->json->field_lists->append(fl);
                 fieldLists.emplace(index, fl);
-                int id = nextId("field_lists");
-                fl->emplace("id", id);
-                cstring listName = cstring("field_list") + Util::toString(index);
-                fl->emplace("name", listName);
-                elements = mkArrayField(fl, "elements");
+                int id = nextId("field_lists"_cs);
+                fl->emplace("id"_cs, id);
+                cstring listName = "field_list"_cs + Util::toString(index);
+                fl->emplace("name"_cs, listName);
+                elements = mkArrayField(fl, "elements"_cs);
             } else {
-                elements = fl->get("elements")->to<Util::JsonArray>();
+                elements = fl->get("elements"_cs)->to<Util::JsonArray>();
                 CHECK_NULL(elements);
             }
 
             auto field = new Util::JsonObject();
-            field->emplace("type", "field");
+            field->emplace("type"_cs, "field");
             auto value = new Util::JsonArray();
             value->append(scalarName);
             auto name = ::get(ctxt->structure->scalarMetadataFields, f);
             value->append(name);
-            field->emplace("value", value);
+            field->emplace("value"_cs, value);
             elements->append(field);
         }
     }
@@ -1205,8 +1205,8 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     // other objects: they need to start at 1 (not 0) since the id is also used
     // as a "flag" to indicate that a certain simple_switch primitive has been
     // called (e.g. resubmit or generate_digest)
-    BMV2::nextId("field_lists");
-    BMV2::nextId("learn_lists");
+    BMV2::nextId("field_lists"_cs);
+    BMV2::nextId("learn_lists"_cs);
     json->add_program_info(options.file);
     json->add_meta_info();
 
@@ -1250,11 +1250,11 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
 
     ctxt->blockConverted = BlockConverted::Ingress;
     auto cconv =
-        new ControlConverter<Standard::Arch::V1MODEL>(ctxt, "ingress", options.emitExterns);
+        new ControlConverter<Standard::Arch::V1MODEL>(ctxt, "ingress"_cs, options.emitExterns);
     structure->ingress->apply(*cconv);
 
     ctxt->blockConverted = BlockConverted::Egress;
-    cconv = new ControlConverter<Standard::Arch::V1MODEL>(ctxt, "egress", options.emitExterns);
+    cconv = new ControlConverter<Standard::Arch::V1MODEL>(ctxt, "egress"_cs, options.emitExterns);
     structure->egress->apply(*cconv);
 
     ctxt->blockConverted = BlockConverted::Deparser;

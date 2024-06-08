@@ -44,6 +44,8 @@ const char *p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
 const char *ParserOptions::defaultMessage = "Compile a P4 program";
 
+using namespace P4::literals;
+
 ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
     registerOption(
         "--help", nullptr,
@@ -180,7 +182,7 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         "--disable-annotations", "annotations",
         [this](const char *arg) {
             auto copy = strdup(arg);
-            while (auto name = strsep(&copy, ",")) disabledAnnotations.insert(name);
+            while (auto name = strsep(&copy, ",")) disabledAnnotations.insert(cstring(name));
             return true;
         },
         "Specify a (comma separated) list of annotations that should be "
@@ -277,7 +279,7 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         "--top4", "pass1[,pass2]",
         [this](const char *arg) {
             auto copy = strdup(arg);
-            while (auto pass = strsep(&copy, ",")) top4.push_back(pass);
+            while (auto pass = strsep(&copy, ",")) top4.push_back(cstring(pass));
             return true;
         },
         "[Compiler debugging] Dump the P4 representation after\n"
@@ -286,7 +288,7 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
     registerOption(
         "--dump", "folder",
         [this](const char *arg) {
-            dumpFolder = arg;
+            dumpFolder = cstring(arg);
             return true;
         },
         "[Compiler debugging] Folder where P4 programs are dumped\n");
@@ -308,7 +310,7 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
     registerOption(
         "--doNotEmitIncludes", "condition",
         [this](const char *arg) {
-            noIncludes = arg;
+            noIncludes = cstring(arg);
             return true;
         },
         "[Compiler debugging] If true do not generate #include statements\n");
@@ -329,7 +331,7 @@ void ParserOptions::setInputFile() {
         usage();
         exit(1);
     } else {
-        file = remainingOptions.at(0);
+        file = cstring(remainingOptions.at(0));
     }
 }
 
@@ -358,7 +360,7 @@ bool ParserOptions::searchForIncludePath(const char *&includePathOut,
     snprintf(buffer, sizeof(buffer), "%s", exename);
     if (char *p = strrchr(buffer, '/')) {
         ++p;
-        exe_name = p;
+        exe_name = cstring(p);
 
         for (auto path : userSpecifiedPaths) {
             snprintf(p, buffer + sizeof(buffer) - p, "%s", path.c_str());
@@ -373,10 +375,10 @@ bool ParserOptions::searchForIncludePath(const char *&includePathOut,
 }
 
 std::vector<const char *> *ParserOptions::process(int argc, char *const argv[]) {
-    searchForIncludePath(p4includePath, {"p4include", "../p4include", "../../p4include"},
+    searchForIncludePath(p4includePath, {"p4include"_cs, "../p4include"_cs, "../../p4include"_cs},
                          exename(argv[0]));
     searchForIncludePath(p4_14includePath,
-                         {"p4_14include", "../p4_14include", "../../p4_14include"},
+                         {"p4_14include"_cs, "../p4_14include"_cs, "../../p4_14include"_cs},
                          exename(argv[0]));
 
     auto remainingOptions = Util::Options::process(argc, argv);
@@ -387,15 +389,15 @@ std::vector<const char *> *ParserOptions::process(int argc, char *const argv[]) 
 void ParserOptions::validateOptions() const {}
 
 const char *ParserOptions::getIncludePath() {
-    cstring path = "";
+    cstring path = cstring::empty;
     // the p4c driver sets environment variables for include
     // paths.  check the environment and add these to the command
     // line for the preprocessor
     char *driverP4IncludePath =
         isv1() ? getenv("P4C_14_INCLUDE_PATH") : getenv("P4C_16_INCLUDE_PATH");
-    if (driverP4IncludePath != nullptr) path += (cstring(" -I") + cstring(driverP4IncludePath));
-    path += cstring(" -I") + (isv1() ? p4_14includePath : p4includePath);
-    if (!isv1()) path += cstring(" -I") + p4includePath + cstring("/bmv2");
+    if (driverP4IncludePath != nullptr) path += (" -I"_cs + cstring(driverP4IncludePath));
+    path += " -I"_cs + (isv1() ? p4_14includePath : p4includePath);
+    if (!isv1()) path += " -I"_cs + p4includePath + "/bmv2"_cs;
     return path.c_str();
 }
 
@@ -403,7 +405,7 @@ FILE *ParserOptions::preprocess() {
     FILE *in = nullptr;
 
     if (file == "-") {
-        file = "<stdin>";
+        file = "<stdin>"_cs;
         in = stdin;
     } else {
 #ifdef __clang__
@@ -412,10 +414,10 @@ FILE *ParserOptions::preprocess() {
         std::string cmd("cpp");
 #endif
 
-        if (file == nullptr) file = "";
-        if (file.find(' ')) file = cstring("\"") + file + "\"";
-        cmd += cstring(" -C -undef -nostdinc -x assembler-with-cpp") + " " + preprocessor_options +
-               getIncludePath() + " " + file;
+        if (file == nullptr) file = cstring::empty;
+        if (file.find(' ')) file = "\""_cs + file + "\""_cs;
+        cmd += " -C -undef -nostdinc -x assembler-with-cpp " + preprocessor_options.string() +
+               getIncludePath() + " " + file.string();
 
         if (Log::verbose()) std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;
         in = popen(cmd.c_str(), "r");
@@ -483,11 +485,12 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
             exit(1);
         }
         if (match) {
+            // FIXME: switch to sane printing via abseil
             char buf[16];
             snprintf(buf, sizeof(buf), "-%04zu-", ++dump_uid);
             cstring suffix = cstring(buf) + name;
             cstring filename = file;
-            if (filename == "-") filename = "tmp.p4";
+            if (filename == "-") filename = "tmp.p4"_cs;
 
             cstring fileName = makeFileName(dumpFolder, filename, suffix);
             std::unique_ptr<std::ostream> stream{openFile(fileName, true)};
@@ -531,7 +534,7 @@ const P4CConfiguration &P4CContext::getConfig() {
 
 bool P4CContext::isRecognizedDiagnostic(cstring diagnostic) {
     static const std::unordered_set<cstring> recognizedDiagnostics = {
-        "uninitialized_out_param", "uninitialized_use", "unknown_diagnostic"};
+        "uninitialized_out_param"_cs, "uninitialized_use"_cs, "unknown_diagnostic"_cs};
 
     return recognizedDiagnostics.count(diagnostic);
 }

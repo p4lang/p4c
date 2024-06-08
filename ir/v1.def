@@ -43,37 +43,37 @@ inline bool operator>>(cstring s, IR::CounterType &ctr) {
 #end
 
 class Type_Block : Type_Base {
-    toString { return "block"; }
+    toString { return "block"_cs; }
     static Type_Block get();
     dbprint { out << "block"; }
 }
 class Type_Counter : Type_Base {
-    toString { return "counter"; }
+    toString { return "counter"_cs; }
     static Type_Counter get();
     dbprint { out << "counter"; }
 }
 class Type_Expression : Type_Base {
-    toString { return "expression"; }
+    toString { return "expression"_cs; }
     static Type_Expression get();
     dbprint { out << "expression"; }
 }
 class Type_FieldListCalculation : Type_Base {
-    toString { return "field_list_calculation"; }
+    toString { return "field_list_calculation"_cs; }
     static Type_FieldListCalculation get();
     dbprint { out << "field_list_calculation"; }
 }
 class Type_Meter : Type_Base {
-    toString { return "meter"; }
+    toString { return "meter"_cs; }
     static Type_Meter get();
     dbprint { out << "meter"; }
 }
 class Type_Register : Type_Base {
-    toString { return "register"; }
+    toString { return "register"_cs; }
     static Type_Register get();
     dbprint { out << "register"; }
 }
 class Type_AnyTable : Type_Base {
-    toString { return "table"; }
+    toString { return "table"_cs; }
     static Type_AnyTable get();
     dbprint { out << "table"; }
 }
@@ -368,9 +368,9 @@ class ActionFunction : IAnnotated {
         v.visit(annotations, "annotations");
     }
     toString {
-        return cstring("action ") + name + " {\n" +
+        return "action "_cs + name + " {\n"_cs +
                  cstring::join(action.begin(), action.end(), ";\n") +
-                 " }"; }
+                 " }"_cs; }
 }
 
 class ActionProfile : Attached {
