@@ -70,7 +70,7 @@ using Parser = V1::V1Parser;
                   BEGIN((driver.saveState = PRAGMA_LINE));
                   return Parser::make_PRAGMA(cstring(V1Lexer::trim(yytext+7)), driver.yylloc); }
 "@pragma"[ \t]* { BEGIN((driver.saveState = PRAGMA_LINE));
-                  return Parser::make_PRAGMA("pragma", driver.yylloc); }
+                  return Parser::make_PRAGMA(cstring::literal("pragma"), driver.yylloc); }
 
 "action"        { BEGIN(driver.saveState);
                   return Parser::make_ACTION(cstring(yytext), driver.yylloc); }
@@ -253,65 +253,65 @@ using Parser = V1::V1Parser;
                   return Parser::make_WRITES(cstring(yytext), driver.yylloc); }
 [A-Za-z_][A-Za-z0-9_]* {
                   BEGIN(driver.saveState);
-                  cstring name = yytext;
+                  cstring name = cstring(yytext);
                   driver.onReadIdentifier(name);
                   return Parser::make_IDENTIFIER(name, driver.yylloc);
 }
 
 0[xX][0-9a-fA-F_]+ { BEGIN(driver.saveState);
-                     UnparsedConstant constant{yytext, 2, 16, false};
+                     UnparsedConstant constant{cstring(yytext), 2, 16, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
 0[dD][0-9_]+    { BEGIN(driver.saveState);
-                  UnparsedConstant constant{yytext, 2, 10, false};
+                  UnparsedConstant constant{cstring(yytext), 2, 10, false};
                   return Parser::make_INTEGER(constant, driver.yylloc); }
 0[oO][0-7_]+    { BEGIN(driver.saveState);
-                  UnparsedConstant constant{yytext, 2, 8, false};
+                  UnparsedConstant constant{cstring(yytext), 2, 8, false};
                   return Parser::make_INTEGER(constant, driver.yylloc); }
 0[bB][01_]+     { BEGIN(driver.saveState);
-                  UnparsedConstant constant{yytext, 2, 2, false};
+                  UnparsedConstant constant{cstring(yytext), 2, 2, false};
                   return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9]+          { BEGIN(driver.saveState);
-                  UnparsedConstant constant{yytext, 0, 10, false};
+                  UnparsedConstant constant{cstring(yytext), 0, 10, false};
                   return Parser::make_INTEGER(constant, driver.yylloc); }
 
 [0-9]+[ws']0[xX][0-9a-fA-F_]+ { BEGIN(driver.saveState);
-                                UnparsedConstant constant{yytext, 2, 16, true};
+                                UnparsedConstant constant{cstring(yytext), 2, 16, true};
                                 return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9]+[ws']0[dD][0-9_]+ { BEGIN(driver.saveState);
-                          UnparsedConstant constant{yytext, 2, 10, true};
+                          UnparsedConstant constant{cstring(yytext), 2, 10, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9]+[ws']0[oO][0-7_]+ { BEGIN(driver.saveState);
-                          UnparsedConstant constant{yytext, 2, 8, true};
+                          UnparsedConstant constant{cstring(yytext), 2, 8, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9]+[ws']0[bB][01_]+  { BEGIN(driver.saveState);
-                          UnparsedConstant constant{yytext, 2, 2, true};
+                          UnparsedConstant constant{cstring(yytext), 2, 2, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9]+[ws'][0-9]+       { BEGIN(driver.saveState);
-                          UnparsedConstant constant{yytext, 0, 10, true};
+                          UnparsedConstant constant{cstring(yytext), 0, 10, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
 
 [0-9]+[ \t\r]*['][ \t\r]*0[xX][0-9a-fA-F_]+ {
                 BEGIN(driver.saveState);
-                UnparsedConstant constant{yytext, 2, 16, true};
+                UnparsedConstant constant{cstring(yytext), 2, 16, true};
                 return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9]+[ \t\r]*['][ \t\r]*0[dD][0-9_]+ {
                 BEGIN(driver.saveState);
-                UnparsedConstant constant{yytext, 2, 10, true};
+                UnparsedConstant constant{cstring(yytext), 2, 10, true};
                 return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9]+[ \t\r]*['][ \t\r]*0[oO][0-7_]+ {
                 BEGIN(driver.saveState);
-                UnparsedConstant constant{yytext, 2, 8, true};
+                UnparsedConstant constant{cstring(yytext), 2, 8, true};
                 return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9]+[ \t\r]*['][ \t\r]*0[bB][01_]+  {
                 BEGIN(driver.saveState);
-                UnparsedConstant constant{yytext, 2, 2, true};
+                UnparsedConstant constant{cstring(yytext), 2, 2, true};
                 return Parser::make_INTEGER(constant, driver.yylloc); }
 [0-9]+[ \t\r]*['][ \t\r]*[0-9]+       {
                 BEGIN(driver.saveState);
-                UnparsedConstant constant{yytext, 0, 10, true};
+                UnparsedConstant constant{cstring(yytext), 0, 10, true};
                 return Parser::make_INTEGER(constant, driver.yylloc); }
 
-<PRAGMA_LINE>[^ \t\r\n,][^ \t\r\n,]* { return Parser::make_STRING_LITERAL(yytext, driver.yylloc); }
+<PRAGMA_LINE>[^ \t\r\n,][^ \t\r\n,]* { return Parser::make_STRING_LITERAL(cstring(yytext), driver.yylloc); }
 
 "<<"            { BEGIN(driver.saveState); return Parser::make_SHL(driver.yylloc); }
 ">>"            { BEGIN(driver.saveState); return Parser::make_SHR(driver.yylloc); }

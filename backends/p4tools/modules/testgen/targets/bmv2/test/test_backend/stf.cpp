@@ -15,6 +15,8 @@
 
 namespace Test {
 
+using namespace P4::literals;
+
 using ::testing::HasSubstr;
 
 TableConfig STFTest::getForwardTableConfig() {
@@ -22,13 +24,13 @@ TableConfig STFTest::getForwardTableConfig() {
                    IR::Constant::get(IR::Type_Bits::get(9), big_int("0x2")));
     std::vector<ActionArg> args({port});
     const auto hit = ActionCall(
-        "SwitchIngress.hit",
+        "SwitchIngress.hit"_cs,
         new IR::P4Action("dummy", new IR::ParameterList({}, {}), new IR::BlockStatement()), args);
 
     auto const *exactMatch = new Exact(
         new IR::KeyElement(new IR::PathExpression("key"), new IR::PathExpression("exact")),
         IR::Constant::get(IR::Type_Bits::get(48), big_int("0x222222222222")));
-    auto matches = TableMatchMap({{"hdr.ethernet.dst_addr", exactMatch}});
+    auto matches = TableMatchMap({{"hdr.ethernet.dst_addr"_cs, exactMatch}});
 
     return TableConfig(new IR::P4Table("table", new IR::TableProperties()),
                        {TableRule(matches, TestSpec::NO_PRIORITY, hit, 0)});
@@ -46,7 +48,7 @@ TableConfig STFTest::getIPRouteTableConfig() {
                   IR::Constant::get(IR::Type_Bits::get(9), big_int("0x2")));
     const auto args = std::vector<ActionArg>({srcAddr, dstAddr, dstPort});
     const auto nat = ActionCall(
-        "SwitchIngress.nat",
+        "SwitchIngress.nat"_cs,
         new IR::P4Action("dummy", new IR::ParameterList({}, {}), new IR::BlockStatement()), args);
 
     const auto *dipExactMatch = new Exact(
@@ -57,7 +59,7 @@ TableConfig STFTest::getIPRouteTableConfig() {
         new IR::KeyElement(new IR::PathExpression("key"), new IR::PathExpression("exact")),
         IR::Constant::get(IR::Type_Bits::get(16), big_int("0x0")));
 
-    TableMatchMap matches({{"vrf", vrfExactMatch}, {"hdr.ipv4.dst_addr", dipExactMatch}});
+    TableMatchMap matches({{"vrf"_cs, vrfExactMatch}, {"hdr.ipv4.dst_addr"_cs, dipExactMatch}});
 
     return TableConfig(new IR::P4Table("table", new IR::TableProperties()),
                        {TableRule(matches, TestSpec::NO_PRIORITY, nat, 0)});
@@ -80,11 +82,11 @@ TEST_F(STFTest, Stf01) {
     const auto fwdConfig = getForwardTableConfig();
 
     auto testSpec = TestSpec(ingressPacket, egressPacket, {});
-    testSpec.addTestObject("tables", "SwitchIngress.forward", &fwdConfig);
+    testSpec.addTestObject("tables"_cs, "SwitchIngress.forward"_cs, &fwdConfig);
 
-    TestBackendConfiguration testBackendConfiguration{"test01", 1, "test01", 1};
+    TestBackendConfiguration testBackendConfiguration{"test01"_cs, 1, "test01", 1};
     auto testWriter = STF(testBackendConfiguration);
-    testWriter.writeTestToFile(&testSpec, "", 1, 0);
+    testWriter.writeTestToFile(&testSpec, cstring::empty, 1, 0);
 }
 
 /// Create a test spec with two Exact matches and print an stf test.
@@ -110,12 +112,12 @@ TEST_F(STFTest, Stf02) {
     const auto ipRouteConfig = getIPRouteTableConfig();
 
     auto testSpec = TestSpec(ingressPacket, egressPacket, {});
-    testSpec.addTestObject("tables", "SwitchIngress.forward", &fwdConfig);
-    testSpec.addTestObject("tables", "SwitchIngress.ipRoute", &ipRouteConfig);
+    testSpec.addTestObject("tables"_cs, "SwitchIngress.forward"_cs, &fwdConfig);
+    testSpec.addTestObject("tables"_cs, "SwitchIngress.ipRoute"_cs, &ipRouteConfig);
 
-    TestBackendConfiguration testBackendConfiguration{"test02", 1, "test02", 2};
+    TestBackendConfiguration testBackendConfiguration{"test02"_cs, 1, "test02", 2};
     auto testWriter = STF(testBackendConfiguration);
-    testWriter.writeTestToFile(&testSpec, "", 2, 0);
+    testWriter.writeTestToFile(&testSpec, cstring::empty, 2, 0);
 }
 
 TableConfig STFTest::gettest1TableConfig() {
@@ -126,15 +128,15 @@ TableConfig STFTest::gettest1TableConfig() {
                   IR::Constant::get(IR::Type_Bits::get(9), big_int("0x2")));
     const auto args = std::vector<ActionArg>({val, port});
     const auto setb1 = ActionCall(
-        "setb1", new IR::P4Action("dummy", new IR::ParameterList({}, {}), new IR::BlockStatement()),
-        args);
+        "setb1"_cs,
+        new IR::P4Action("dummy", new IR::ParameterList({}, {}), new IR::BlockStatement()), args);
 
     const auto *f1TernaryMatch = new Ternary(
         new IR::KeyElement(new IR::PathExpression("key"), new IR::PathExpression("ternary")),
         IR::Constant::get(IR::Type_Bits::get(32), big_int("0xABCD0101")),
         IR::Constant::get(IR::Type_Bits::get(32), big_int("0xFFFF0000")));
 
-    TableMatchMap matches({{"data.f1", f1TernaryMatch}});
+    TableMatchMap matches({{"data.f1"_cs, f1TernaryMatch}});
 
     return TableConfig(new IR::P4Table("table", new IR::TableProperties()),
                        {TableRule(matches, TestSpec::LOW_PRIORITY, setb1, 0)});
@@ -157,12 +159,12 @@ TEST_F(STFTest, Stf03) {
     const auto test1Config = gettest1TableConfig();
 
     auto testSpec = TestSpec(ingressPacket, egressPacket, {});
-    testSpec.addTestObject("tables", "test1", &test1Config);
+    testSpec.addTestObject("tables"_cs, "test1"_cs, &test1Config);
 
-    TestBackendConfiguration testBackendConfiguration{"test03", 1, "test03", 3};
+    TestBackendConfiguration testBackendConfiguration{"test03"_cs, 1, "test03", 3};
     auto testWriter = STF(testBackendConfiguration);
     try {
-        testWriter.writeTestToFile(&testSpec, "", 3, 0);
+        testWriter.writeTestToFile(&testSpec, cstring::empty, 3, 0);
     } catch (const Util::CompilerBug &e) {
         EXPECT_THAT(e.what(), HasSubstr("Unimplemented for Ternary FieldMatch"));
     }
@@ -176,8 +178,8 @@ TableConfig STFTest::gettest1TableConfig2() {
                   IR::Constant::get(IR::Type_Bits::get(9), big_int("0x2")));
     const auto args = std::vector<ActionArg>({val, port});
     const auto setb1 = ActionCall(
-        "setb1", new IR::P4Action("dummy", new IR::ParameterList({}, {}), new IR::BlockStatement()),
-        args);
+        "setb1"_cs,
+        new IR::P4Action("dummy", new IR::ParameterList({}, {}), new IR::BlockStatement()), args);
 
     const auto *h1ExactMatch = new Exact(
         new IR::KeyElement(new IR::PathExpression("key"), new IR::PathExpression("exact")),
@@ -197,12 +199,12 @@ TableConfig STFTest::gettest1TableConfig2() {
         IR::Constant::get(IR::Type_Bits::get(32), big_int("0xABCDD00D")),
         IR::Constant::get(IR::Type_Bits::get(32), big_int("0x0000FFFF")));
 
-    TableMatchMap matches1({{"data.f1", f1TernaryMatch}});
+    TableMatchMap matches1({{"data.f1"_cs, f1TernaryMatch}});
 
-    TableMatchMap matches2({{"data.h1", h1ExactMatch},
-                            {"data.f1", f1TernaryMatch},
-                            {"data.b1", b1ExactMatch},
-                            {"data.f2", f2TernaryMatch}});
+    TableMatchMap matches2({{"data.h1"_cs, h1ExactMatch},
+                            {"data.f1"_cs, f1TernaryMatch},
+                            {"data.b1"_cs, b1ExactMatch},
+                            {"data.f2"_cs, f2TernaryMatch}});
 
     return TableConfig(new IR::P4Table("table", new IR::TableProperties()),
                        {TableRule(matches1, TestSpec::LOW_PRIORITY, setb1, 0),
@@ -226,12 +228,12 @@ TEST_F(STFTest, Stf04) {
     const auto test1Config = gettest1TableConfig2();
 
     auto testSpec = TestSpec(ingressPacket, egressPacket, {});
-    testSpec.addTestObject("tables", "test1", &test1Config);
+    testSpec.addTestObject("tables"_cs, "test1"_cs, &test1Config);
 
-    TestBackendConfiguration testBackendConfiguration{"test04", 1, "test04", 4};
+    TestBackendConfiguration testBackendConfiguration{"test04"_cs, 1, "test04", 4};
     auto testWriter = STF(testBackendConfiguration);
     try {
-        testWriter.writeTestToFile(&testSpec, "", 4, 0);
+        testWriter.writeTestToFile(&testSpec, cstring::empty, 4, 0);
     } catch (const Util::CompilerBug &e) {
         EXPECT_THAT(e.what(), HasSubstr("Unimplemented for Ternary FieldMatch"));
     }

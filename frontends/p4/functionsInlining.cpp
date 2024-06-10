@@ -177,7 +177,7 @@ const IR::Node *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     // evaluate in and inout parameters in order
     for (auto param : callee->type->parameters->parameters) {
         auto argument = substitution.lookup(param);
-        cstring newName = refMap->newName(param->name);
+        cstring newName = refMap->newName(param->name.name.string_view());
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
             auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type,

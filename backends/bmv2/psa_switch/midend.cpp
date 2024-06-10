@@ -64,6 +64,8 @@ limitations under the License.
 
 namespace BMV2 {
 
+using namespace P4::literals;
+
 /// This class implements a policy suitable for the ConvertEnums pass.
 /// The policy is: convert all enums that are not part of the psa.
 /// Use 32-bit values for all enums.
@@ -76,7 +78,7 @@ class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
         if (type->name == "PSA_MeterColor_t") return true;
         if (type->srcInfo.isValid()) {
             auto sourceFile = type->srcInfo.getSourceFile();
-            if (sourceFile.endsWith(filename))
+            if (sourceFile.endsWith(filename.string_view()))
                 // Don't convert any of the standard enums
                 return false;
         }
@@ -90,7 +92,7 @@ class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
 
 PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStream)
     : MidEnd(options) {
-    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PsaEnumOn32Bits("psa.p4"));
+    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PsaEnumOn32Bits("psa.p4"_cs));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::function<bool(const Context *, const IR::Expression *)> policy =
         [=](const Context *, const IR::Expression *e) -> bool {
@@ -143,8 +145,9 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new PassRepeated({new P4::ConstantFolding(&refMap, &typeMap),
                               new P4::StrengthReduction(&refMap, &typeMap)}),
             new P4::MoveDeclarations(),
-            new P4::ValidateTableProperties({"psa_implementation", "psa_direct_counter",
-                                             "psa_direct_meter", "psa_idle_timeout", "size"}),
+            new P4::ValidateTableProperties({"psa_implementation"_cs, "psa_direct_counter"_cs,
+                                             "psa_direct_meter"_cs, "psa_idle_timeout"_cs,
+                                             "size"_cs}),
             new P4::SimplifyControlFlow(&refMap, &typeMap),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&refMap, &typeMap),
@@ -157,7 +160,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
         });
         if (options.listMidendPasses) {
-            listPasses(*outStream, "\n");
+            listPasses(*outStream, cstring::newline);
             *outStream << std::endl;
             return;
         }
@@ -165,7 +168,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             removePasses(options.passesToExcludeMidend);
         }
     } else {
-        auto fillEnumMap = new P4::FillEnumMap(new PsaEnumOn32Bits("psa.p4"), &typeMap);
+        auto fillEnumMap = new P4::FillEnumMap(new PsaEnumOn32Bits("psa.p4"_cs), &typeMap);
         addPasses({
             new P4::ResolveReferences(&refMap),
             new P4::TypeChecking(&refMap, &typeMap),

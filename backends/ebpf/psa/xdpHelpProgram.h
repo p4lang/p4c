@@ -22,7 +22,7 @@ limitations under the License.
 namespace EBPF {
 
 class XDPHelpProgram : public EBPFProgram {
-    cstring XDPProgUsingMetaForXDP2TC =
+    const char *XDPProgUsingMetaForXDP2TC =
         "    void *data_end = (void *)(long)skb->data_end;\n"
         "    struct ethhdr *eth = (struct ethhdr *)(long)skb->data;\n"
         "    if ((void *)((struct ethhdr *) eth + 1) > data_end) {\n"
@@ -50,7 +50,7 @@ class XDPHelpProgram : public EBPFProgram {
         "\n"
         "    return XDP_PASS;";
 
-    cstring XDPProgUsingHeadForXDP2TC =
+    const char *XDPProgUsingHeadForXDP2TC =
         "    void *data = (void *)(long)skb->data;\n"
         "    void *data_end = (void *)(long)skb->data_end;\n"
         "    struct ethhdr *eth = data;\n"
@@ -80,7 +80,7 @@ class XDPHelpProgram : public EBPFProgram {
         "\n"
         "    return XDP_PASS;";
 
-    cstring XDPProgUsingCPUMAPForXDP2TC =
+    const char *XDPProgUsingCPUMAPForXDP2TC =
         "    void *data = (void *)(long)skb->data;\n"
         "    void *data_end = (void *)(long)skb->data_end;\n"
         "    struct ethhdr *eth = data;\n"
@@ -97,8 +97,8 @@ class XDPHelpProgram : public EBPFProgram {
     cstring sectionName;
     explicit XDPHelpProgram(const EbpfOptions &options)
         : EBPFProgram(options, nullptr, nullptr, nullptr, nullptr) {
-        sectionName = "xdp/xdp-ingress";
-        functionName = "xdp_func";
+        sectionName = "xdp/xdp-ingress"_cs;
+        functionName = "xdp_func"_cs;
     }
 
     void emit(CodeBuilder *builder) {

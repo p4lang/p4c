@@ -18,6 +18,8 @@ and limitations under the License.
 
 namespace TC {
 
+using namespace P4::literals;
+
 void InspectPnaProgram::postorder(const IR::Declaration_Instance *di) {
     if (!pinfo->resourceMap.count(di)) return;
     auto blk = pinfo->resourceMap.at(di);
@@ -231,7 +233,7 @@ bool ParsePnaArchitecture::preorder(const IR::ExternBlock *block) {
 
 bool ParsePnaArchitecture::preorder(const IR::PackageBlock *block) {
     if (auto pna_nic = block->to<IR::PackageBlock>()) {
-        auto p = pna_nic->findParameterValue("main_parser");
+        auto p = pna_nic->findParameterValue("main_parser"_cs);
         if (p == nullptr) {
             modelError("'PNA_NIC' package %1% has no parameter named 'ip'", block);
             return false;
@@ -242,7 +244,7 @@ bool ParsePnaArchitecture::preorder(const IR::PackageBlock *block) {
                        block);
             return false;
         }
-        p = pna_nic->findParameterValue("main_control");
+        p = pna_nic->findParameterValue("main_control"_cs);
         if (p == nullptr) {
             modelError("'PNA_NIC' package %1% has no parameter named 'main_control'", block);
             return false;
@@ -253,7 +255,7 @@ bool ParsePnaArchitecture::preorder(const IR::PackageBlock *block) {
                        block);
             return false;
         }
-        p = pna_nic->findParameterValue("main_deparser");
+        p = pna_nic->findParameterValue("main_deparser"_cs);
         if (p == nullptr) {
             modelError("'PNA_NIC' package %1% has no parameter named 'main_deparser'", block);
             return false;

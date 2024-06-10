@@ -29,6 +29,8 @@ limitations under the License.
 
 namespace EBPF {
 
+using namespace P4::literals;
+
 enum TableKind {
     TableHash,
     TableArray,
@@ -131,19 +133,19 @@ class KernelSamplesTarget : public Target {
 
     cstring getBPFMapType(TableKind kind) const {
         if (kind == TableHash) {
-            return "BPF_MAP_TYPE_HASH";
+            return "BPF_MAP_TYPE_HASH"_cs;
         } else if (kind == TableArray) {
-            return "BPF_MAP_TYPE_ARRAY";
+            return "BPF_MAP_TYPE_ARRAY"_cs;
         } else if (kind == TablePerCPUArray) {
-            return "BPF_MAP_TYPE_PERCPU_ARRAY";
+            return "BPF_MAP_TYPE_PERCPU_ARRAY"_cs;
         } else if (kind == TableLPMTrie) {
-            return "BPF_MAP_TYPE_LPM_TRIE";
+            return "BPF_MAP_TYPE_LPM_TRIE"_cs;
         } else if (kind == TableHashLRU) {
-            return "BPF_MAP_TYPE_LRU_HASH";
+            return "BPF_MAP_TYPE_LRU_HASH"_cs;
         } else if (kind == TableProgArray) {
-            return "BPF_MAP_TYPE_PROG_ARRAY";
+            return "BPF_MAP_TYPE_PROG_ARRAY"_cs;
         } else if (kind == TableDevmap) {
-            return "BPF_MAP_TYPE_DEVMAP";
+            return "BPF_MAP_TYPE_DEVMAP"_cs;
         }
         BUG("Unknown table kind");
     }
@@ -152,7 +154,7 @@ class KernelSamplesTarget : public Target {
     bool emitTraceMessages;
 
  public:
-    explicit KernelSamplesTarget(bool emitTrace = false, cstring name = "Linux kernel")
+    explicit KernelSamplesTarget(bool emitTrace = false, cstring name = "Linux kernel"_cs)
         : Target(name), innerMapIndex(0), emitTraceMessages(emitTrace) {}
 
     void emitLicense(Util::SourceCodeBuilder *builder, cstring license) const override;
@@ -187,12 +189,12 @@ class KernelSamplesTarget : public Target {
         return cstring("((void*)(long)") + base + "->data_end)";
     }
     cstring dataLength(cstring base) const override { return cstring(base) + "->len"; }
-    cstring forwardReturnCode() const override { return "TC_ACT_OK"; }
-    cstring dropReturnCode() const override { return "TC_ACT_SHOT"; }
-    cstring abortReturnCode() const override { return "TC_ACT_SHOT"; }
-    cstring sysMapPath() const override { return "/sys/fs/bpf/tc/globals"; }
+    cstring forwardReturnCode() const override { return "TC_ACT_OK"_cs; }
+    cstring dropReturnCode() const override { return "TC_ACT_SHOT"_cs; }
+    cstring abortReturnCode() const override { return "TC_ACT_SHOT"_cs; }
+    cstring sysMapPath() const override { return "/sys/fs/bpf/tc/globals"_cs; }
 
-    cstring packetDescriptorType() const override { return "struct __sk_buff"; }
+    cstring packetDescriptorType() const override { return "struct __sk_buff"_cs; }
 
     void annotateTableWithBTF(Util::SourceCodeBuilder *builder, cstring name, cstring keyType,
                               cstring valueType) const;
@@ -200,7 +202,7 @@ class KernelSamplesTarget : public Target {
 
 class P4TCTarget : public KernelSamplesTarget {
  public:
-    explicit P4TCTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "P4TC") {}
+    explicit P4TCTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "P4TC"_cs) {}
     cstring getByteOrderFromAnnotation(const IR::Vector<IR::Annotation> annotations) const {
         for (auto anno : annotations) {
             if (anno->name != "tc_type") continue;
@@ -208,11 +210,11 @@ class P4TCTarget : public KernelSamplesTarget {
                 if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
                     annoVal->text == "ipv6" || annoVal->text == "be16" || annoVal->text == "be32" ||
                     annoVal->text == "be64") {
-                    return "NETWORK";
+                    return "NETWORK"_cs;
                 }
             }
         }
-        return "HOST";
+        return "HOST"_cs;
     }
 
     cstring getByteOrder(P4::TypeMap *typeMap, const IR::P4Action *action,
@@ -233,21 +235,21 @@ class P4TCTarget : public KernelSamplesTarget {
                 }
             }
         }
-        return "HOST";
+        return "HOST"_cs;
     }
 };
 
 /// Target XDP.
 class XdpTarget : public KernelSamplesTarget {
  public:
-    explicit XdpTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "XDP") {}
+    explicit XdpTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "XDP"_cs) {}
 
-    cstring forwardReturnCode() const override { return "XDP_PASS"; }
-    cstring dropReturnCode() const override { return "XDP_DROP"; }
-    cstring abortReturnCode() const override { return "XDP_ABORTED"; }
-    cstring redirectReturnCode() const { return "XDP_REDIRECT"; }
-    cstring sysMapPath() const override { return "/sys/fs/bpf/xdp/globals"; }
-    cstring packetDescriptorType() const override { return "struct xdp_md"; }
+    cstring forwardReturnCode() const override { return "XDP_PASS"_cs; }
+    cstring dropReturnCode() const override { return "XDP_DROP"_cs; }
+    cstring abortReturnCode() const override { return "XDP_ABORTED"_cs; }
+    cstring redirectReturnCode() const { return "XDP_REDIRECT"_cs; }
+    cstring sysMapPath() const override { return "/sys/fs/bpf/xdp/globals"_cs; }
+    cstring packetDescriptorType() const override { return "struct xdp_md"_cs; }
 
     cstring dataLength(cstring base) const override {
         return cstring("(") + base + "->data_end - " + base + "->data)";
@@ -264,7 +266,7 @@ class XdpTarget : public KernelSamplesTarget {
 /// Represents a target compiled by bcc that uses the TC.
 class BccTarget : public Target {
  public:
-    BccTarget() : Target("BCC") {}
+    BccTarget() : Target("BCC"_cs) {}
     void emitLicense(Util::SourceCodeBuilder *, cstring) const override {}
     void emitCodeSection(Util::SourceCodeBuilder *, cstring) const override {}
     void emitIncludes(Util::SourceCodeBuilder *builder) const override;
@@ -284,18 +286,18 @@ class BccTarget : public Target {
         return cstring("(") + base + " + " + base + "->len)";
     }
     cstring dataLength(cstring base) const override { return cstring(base) + "->len"; }
-    cstring forwardReturnCode() const override { return "0"; }
-    cstring dropReturnCode() const override { return "1"; }
-    cstring abortReturnCode() const override { return "1"; }
-    cstring sysMapPath() const override { return "/sys/fs/bpf"; }
-    cstring packetDescriptorType() const override { return "struct __sk_buff"; }
+    cstring forwardReturnCode() const override { return "0"_cs; }
+    cstring dropReturnCode() const override { return "1"_cs; }
+    cstring abortReturnCode() const override { return "1"_cs; }
+    cstring sysMapPath() const override { return "/sys/fs/bpf"_cs; }
+    cstring packetDescriptorType() const override { return "struct __sk_buff"_cs; }
 };
 
 /// A userspace test version with functionality equivalent to the kernel.
 /// Compiles with GCC.
 class TestTarget : public EBPF::KernelSamplesTarget {
  public:
-    TestTarget() : KernelSamplesTarget(false, "Userspace Test") {}
+    TestTarget() : KernelSamplesTarget(false, "Userspace Test"_cs) {}
 
     void emitResizeBuffer(Util::SourceCodeBuilder *, cstring, cstring) const override {}
     void emitIncludes(Util::SourceCodeBuilder *builder) const override;
@@ -307,11 +309,11 @@ class TestTarget : public EBPF::KernelSamplesTarget {
     cstring dataEnd(cstring base) const override {
         return cstring("((void*)(long)(") + base + "->data + " + base + "->len))";
     }
-    cstring forwardReturnCode() const override { return "true"; }
-    cstring dropReturnCode() const override { return "false"; }
-    cstring abortReturnCode() const override { return "false"; }
-    cstring sysMapPath() const override { return "/sys/fs/bpf"; }
-    cstring packetDescriptorType() const override { return "struct __sk_buff"; }
+    cstring forwardReturnCode() const override { return "true"_cs; }
+    cstring dropReturnCode() const override { return "false"_cs; }
+    cstring abortReturnCode() const override { return "false"_cs; }
+    cstring sysMapPath() const override { return "/sys/fs/bpf"_cs; }
+    cstring packetDescriptorType() const override { return "struct __sk_buff"_cs; }
 };
 
 }  // namespace EBPF

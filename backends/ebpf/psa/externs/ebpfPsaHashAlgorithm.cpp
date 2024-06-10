@@ -59,7 +59,7 @@ void CRCChecksumAlgorithm::emitUpdateMethod(CodeBuilder *builder, int crcWidth) 
         // incremented. For data shorter than or equal 64 bits, bytes are processed in little endian
         // byte order - data pointer is decremented by outer loop in this case.
         // There is no need for lookup table.
-        cstring code =
+        const char *code =
             "static __always_inline\n"
             "void crc16_update(u16 * reg, const u8 * data, "
             "u16 data_size, const u16 poly) {\n"
@@ -91,7 +91,7 @@ void CRCChecksumAlgorithm::emitUpdateMethod(CodeBuilder *builder, int crcWidth) 
         // 4. Data size more than 8 bytes and not multiply of 8 bytes - calculated using slice-by-8
         //    and Standard Implementation both in big endian byte order.
         // Lookup table is necessary for both algorithms.
-        cstring code =
+        const char *code =
             "static __always_inline\n"
             "void crc32_update(u32 * reg, const u8 * data, u16 data_size, const u32 poly) {\n"
             "    u32* current = (u32*) data;\n"
@@ -296,11 +296,11 @@ void CRCChecksumAlgorithm::emitAddData(CodeBuilder *builder, const ArgumentsList
         }
     }
 
-    cstring varStr = Util::printf_format("(u64) %s", registerVar.c_str());
+    cstring varStr = absl::StrFormat("(u64) %s", registerVar.c_str());
     builder->target->emitTraceMessage(builder, "CRC: checksum state: %llx", 1, varStr.c_str());
 
     cstring final_crc =
-        Util::printf_format("(u64) %s(%s)", finalizeMethod.c_str(), registerVar.c_str());
+        absl::StrFormat("(u64) %s(%s)", finalizeMethod.c_str(), registerVar.c_str());
     builder->target->emitTraceMessage(builder, "CRC: final checksum: %llx", 1, final_crc.c_str());
 
     builder->blockEnd(true);
@@ -333,7 +333,7 @@ void CRCChecksumAlgorithm::emitSetInternalState(CodeBuilder *builder,
 void CRC16ChecksumAlgorithm::emitGlobals(CodeBuilder *builder) {
     CRCChecksumAlgorithm::emitUpdateMethod(builder, 16);
 
-    cstring code =
+    const char *code =
         "static __always_inline "
         "u16 crc16_finalize(u16 reg) {\n"
         "    return reg;\n"
@@ -346,7 +346,7 @@ void CRC16ChecksumAlgorithm::emitGlobals(CodeBuilder *builder) {
 void CRC32ChecksumAlgorithm::emitGlobals(CodeBuilder *builder) {
     CRCChecksumAlgorithm::emitUpdateMethod(builder, 32);
 
-    cstring code =
+    const char *code =
         "static __always_inline "
         "u32 crc32_finalize(u32 reg) {\n"
         "    return reg ^ 0xFFFFFFFF;\n"

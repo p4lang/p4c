@@ -95,10 +95,6 @@ cstring toString(std::string_view value);
 cstring toString(const big_int &value, unsigned width, bool sign, unsigned int base = 10);
 cstring toString(const void *value);
 
-// printf into a string
-cstring printf_format(const char *fmt_str, ...);
-// vprintf into a string
-cstring vprintf_format(const char *fmt_str, va_list ap);
 char DigitToChar(int digit);
 }  // namespace Util
 

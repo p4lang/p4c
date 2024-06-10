@@ -110,7 +110,7 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     dataJson["coverage"] = coverageStr.str();
     dataJson["metadata_fields"] = inja::json::array();
     const auto *metadataCollection =
-        testSpec->getTestObject("metadata_collection", "metadata_collection", true)
+        testSpec->getTestObject("metadata_collection"_cs, "metadata_collection"_cs, true)
             ->checkedTo<MetadataCollection>();
     auto offset = 0;
     for (auto const &metadataField : metadataCollection->getMetadataFields()) {

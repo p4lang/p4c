@@ -100,7 +100,7 @@ EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram *program, const IR::Declaration
         if (isHash) {
             indexWidthType = EBPFTypeFactory::instance->create(istype);
         } else {
-            keyTypeName = "u32";
+            keyTypeName = "u32"_cs;
         }
 
         auto declaredSize = di->arguments->at(0)->expression->to<IR::Constant>();
@@ -200,13 +200,13 @@ void EBPFCounterPSA::emitDirectMethodInvocation(CodeBuilder *builder,
     CHECK_NULL(pipeline);
 
     cstring msgStr =
-        Util::printf_format("Counter: updating %s, packets=1, bytes=%%u", instanceName.c_str());
-    cstring varStr = Util::printf_format("%s", pipeline->lengthVar.c_str());
+        absl::StrFormat("Counter: updating %s, packets=1, bytes=%%u", instanceName.c_str());
+    cstring varStr = absl::StrFormat("%s", pipeline->lengthVar.c_str());
     builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, varStr.c_str());
 
-    emitCounterUpdate(builder, target, "");
+    emitCounterUpdate(builder, target, ""_cs);
 
-    msgStr = Util::printf_format("Counter: %s updated", instanceName.c_str());
+    msgStr = absl::StrFormat("Counter: %s updated", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 }
 
@@ -231,9 +231,9 @@ void EBPFCounterPSA::emitCount(CodeBuilder *builder, const IR::MethodCallExpress
     codeGen->visit(index);
     builder->endOfStatement(true);
 
-    msgStr = Util::printf_format("Counter: updating %s, id=%%u, packets=1, bytes=%%u",
-                                 instanceName.c_str());
-    varStr = Util::printf_format("%s", program->lengthVar.c_str());
+    msgStr =
+        absl::StrFormat("Counter: updating %s, id=%%u, packets=1, bytes=%%u", instanceName.c_str());
+    varStr = absl::StrFormat("%s", program->lengthVar.c_str());
     builder->target->emitTraceMessage(builder, msgStr.c_str(), 2, keyName.c_str(), varStr.c_str());
 
     builder->emitIndent();
@@ -242,7 +242,7 @@ void EBPFCounterPSA::emitCount(CodeBuilder *builder, const IR::MethodCallExpress
 
     emitCounterUpdate(builder, valueName, keyName);
 
-    msgStr = Util::printf_format("Counter: %s updated", instanceName.c_str());
+    msgStr = absl::StrFormat("Counter: %s updated", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 }
 
@@ -263,7 +263,7 @@ void EBPFCounterPSA::emitCounterUpdate(CodeBuilder *builder, const cstring targe
                               program->lengthVar);
         builder->endOfStatement(true);
 
-        varStr = Util::printf_format("%sbytes", targetWAccess.c_str());
+        varStr = absl::StrFormat("%sbytes", targetWAccess.c_str());
         builder->target->emitTraceMessage(builder, "Counter: now bytes=%u", 1, varStr.c_str());
     }
     if (type == CounterType::PACKETS || type == CounterType::PACKETS_AND_BYTES) {
@@ -271,7 +271,7 @@ void EBPFCounterPSA::emitCounterUpdate(CodeBuilder *builder, const cstring targe
         builder->appendFormat("__sync_fetch_and_add(&(%spackets), 1)", targetWAccess.c_str());
         builder->endOfStatement(true);
 
-        varStr = Util::printf_format("%spackets", targetWAccess.c_str());
+        varStr = absl::StrFormat("%spackets", targetWAccess.c_str());
         builder->target->emitTraceMessage(builder, "Counter: now packets=%u", 1, varStr.c_str());
     }
 

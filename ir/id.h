@@ -37,9 +37,9 @@ struct ID : Util::IHasSourceInfo {
     ID(Util::SourceInfo si, cstring n) : srcInfo(si), name(n), originalName(n) {
         if (n.isNullOrEmpty()) BUG("Identifier with no name");
     }
-    ID(const char *n) : ID(Util::SourceInfo(), n) {}  // NOLINT(runtime/explicit)
-    ID(cstring n) : ID(Util::SourceInfo(), n) {}      // NOLINT(runtime/explicit)
-    ID(std::string n) : ID(Util::SourceInfo(), n) {}  // NOLINT(runtime/explicit)
+    ID(const char *n) : ID(Util::SourceInfo(), cstring(n)) {}  // NOLINT(runtime/explicit)
+    ID(cstring n) : ID(Util::SourceInfo(), n) {}               // NOLINT(runtime/explicit)
+    ID(std::string n) : ID(Util::SourceInfo(), n) {}           // NOLINT(runtime/explicit)
     ID(cstring n, cstring old) : ID(Util::SourceInfo(), n, old) {}
     void dbprint(std::ostream &out) const {
         out << name;

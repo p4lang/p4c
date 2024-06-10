@@ -26,7 +26,7 @@ ProtobufIr::ProtobufIr(const TestBackendConfiguration &testBackendConfiguration,
 
 std::optional<std::string> ProtobufIr::checkForP4RuntimeTranslationAnnotation(
     const IR::IAnnotated *node) {
-    const auto *p4RuntimeTranslationAnnotation = node->getAnnotation("p4runtime_translation");
+    const auto *p4RuntimeTranslationAnnotation = node->getAnnotation("p4runtime_translation"_cs);
     if (p4RuntimeTranslationAnnotation == nullptr) {
         return std::nullopt;
     }
@@ -46,7 +46,7 @@ std::optional<std::string> ProtobufIr::checkForP4RuntimeTranslationAnnotation(
 std::map<cstring, cstring> ProtobufIr::getP4RuntimeTranslationMappings(const IR::IAnnotated *node) {
     std::map<cstring, cstring> p4RuntimeTranslationMappings;
     const auto *p4RuntimeTranslationMappingAnnotation =
-        node->getAnnotation("p4runtime_translation_mappings");
+        node->getAnnotation("p4runtime_translation_mappings"_cs);
     if (p4RuntimeTranslationMappingAnnotation == nullptr) {
         return p4RuntimeTranslationMappings;
     }
@@ -72,7 +72,7 @@ std::string ProtobufIr::getFormatOfNode(const IR::IAnnotated *node) {
         return p4RuntimeTranslationFormat.value();
     }
 
-    const auto *formatAnnotation = node->getAnnotation("format");
+    const auto *formatAnnotation = node->getAnnotation("format"_cs);
     if (formatAnnotation == nullptr) {
         return "hex_str";
     }
@@ -428,11 +428,11 @@ inja::json ProtobufIr::produceTestCase(const TestSpec *testSpec, cstring selecte
     // Check whether this test has a clone configuration.
     // These are special because they require additional instrumentation and produce two output
     // packets.
-    auto cloneSpecs = testSpec->getTestObjectCategory("clone_specs");
+    auto cloneSpecs = testSpec->getTestObjectCategory("clone_specs"_cs);
     if (!cloneSpecs.empty()) {
         dataJson["clone_specs"] = getClone(cloneSpecs);
     }
-    auto meterValues = testSpec->getTestObjectCategory("meter_values");
+    auto meterValues = testSpec->getTestObjectCategory("meter_values"_cs);
     dataJson["meter_values"] = getMeter(meterValues);
 
     return dataJson;

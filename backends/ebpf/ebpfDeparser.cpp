@@ -133,7 +133,7 @@ void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
                         "Header %1% size %2% is not a multiple of 8 bits.", expr, width);
                 return;
             }
-            msgStr = Util::printf_format("Deparser: emitting header %s", expr->toString().c_str());
+            msgStr = absl::StrFormat("Deparser: emitting header %s", expr->toString().c_str());
             builder->target->emitTraceMessage(builder, msgStr.c_str());
 
             builder->emitIndent();
@@ -190,7 +190,7 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder *builder, cstring field,
     }
     unsigned widthToEmit = et->widthInBits();
     unsigned emitSize = 0;
-    cstring swap = "", msgStr;
+    cstring swap = cstring::empty, msgStr;
 
     if (widthToEmit <= 64) {
         if (program->options.emitTraceMessages) {
@@ -201,26 +201,26 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder *builder, cstring field,
             visit(hdrExpr);
             builder->appendFormat(".%s", field.c_str());
             builder->endOfStatement(true);
-            msgStr = Util::printf_format("Deparser: emitting field %s=0x%%llx (%u bits)", field,
-                                         widthToEmit);
+            msgStr = absl::StrFormat("Deparser: emitting field %s=0x%%llx (%u bits)", field,
+                                     widthToEmit);
             builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, "tmp");
             builder->blockEnd(true);
         }
     } else {
-        msgStr = Util::printf_format("Deparser: emitting field %s (%u bits)", field, widthToEmit);
+        msgStr = absl::StrFormat("Deparser: emitting field %s (%u bits)", field, widthToEmit);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
     }
 
     if (widthToEmit <= 8) {
         emitSize = 8;
     } else if (widthToEmit <= 16) {
-        swap = "bpf_htons";
+        swap = "bpf_htons"_cs;
         emitSize = 16;
     } else if (widthToEmit <= 32) {
-        swap = "htonl";
+        swap = "htonl"_cs;
         emitSize = 32;
     } else if (widthToEmit <= 64) {
-        swap = "htonll";
+        swap = "htonll"_cs;
         emitSize = 64;
     }
     unsigned shift =
@@ -329,7 +329,7 @@ void EBPFDeparser::emitBufferAdjusts(CodeBuilder *builder) const {
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->appendFormat("%s = ", returnCode.c_str());
-    program->progTarget->emitResizeBuffer(builder, program->model.CPacketName.str(),
+    program->progTarget->emitResizeBuffer(builder, program->model.CPacketName.toString(),
                                           outerHdrOffsetVar);
     builder->endOfStatement(true);
 
@@ -371,14 +371,14 @@ void EBPFDeparser::emit(CodeBuilder *builder) {
 
     builder->emitIndent();
     builder->appendFormat("%s = %s;", program->packetStartVar,
-                          builder->target->dataOffset(program->model.CPacketName.str()));
+                          builder->target->dataOffset(program->model.CPacketName.toString()));
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("%s = %s;", program->headerStartVar, program->packetStartVar);
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("%s = %s;", program->packetEndVar,
-                          builder->target->dataEnd(program->model.CPacketName.str()));
+                          builder->target->dataEnd(program->model.CPacketName.toString()));
     builder->newline();
 
     // emit headers

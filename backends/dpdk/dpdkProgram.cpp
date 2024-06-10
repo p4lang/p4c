@@ -87,7 +87,7 @@ IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_postamb
     IR::IndexedVector<IR::DpdkAsmStatement> instr;
     instr.push_back(new IR::DpdkTxStatement(
         new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_egress_port")));
-    instr.push_back(new IR::DpdkLabelStatement("label_drop"));
+    instr.push_back(new IR::DpdkLabelStatement("label_drop"_cs));
     instr.push_back(new IR::DpdkDropStatement());
     return instr;
 }
@@ -253,7 +253,8 @@ cstring ConvertToDpdkParser::append_parser_name(const IR::P4Parser *p, cstring l
 
 IR::Declaration_Variable *ConvertToDpdkParser::addNewTmpVarToMetadata(cstring name,
                                                                       const IR::Type *type) {
-    auto newTmpVar = new IR::Declaration_Variable(IR::ID(refmap->newName(name)), type);
+    auto newTmpVar =
+        new IR::Declaration_Variable(IR::ID(refmap->newName(name.string_view())), type);
     metadataStruct->fields.push_back(
         new IR::StructField(IR::ID(newTmpVar->name.name), newTmpVar->type));
     return newTmpVar;
@@ -284,7 +285,7 @@ void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expres
         auto right = maskexpr->right;
         unsigned value =
             right->to<IR::Constant>()->asUnsigned() & left->to<IR::Constant>()->asUnsigned();
-        auto tmpDecl = addNewTmpVarToMetadata("tmpMask", IR::Type_Bits::get(byteAlignedWidth));
+        auto tmpDecl = addNewTmpVarToMetadata("tmpMask"_cs, IR::Type_Bits::get(byteAlignedWidth));
         auto tmpMask =
             new IR::Member(new IR::PathExpression(IR::ID("m")), IR::ID(tmpDecl->name.name));
         structure->push_variable(new IR::DpdkDeclaration(tmpDecl));
@@ -363,8 +364,8 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
             }
         }
     }
-    degree_map.erase("start");
-    state_map.erase("start");
+    degree_map.erase("start"_cs);
+    state_map.erase("start"_cs);
 
     while (stack.size() > 0) {
         auto state = stack.back();
@@ -422,7 +423,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                         if (!sc->keyset->is<IR::DefaultExpression>()) {
                             // Create label names, falseLabel for next keyset comparison and
                             // trueLabel for the state to jump on match.
-                            falseLabel = refmap->newName(state->name);
+                            falseLabel = refmap->newName(state->name.name.string_view());
                             trueLabel = sc->state->path->name;
                             handleTupleExpression(sc->keyset->to<IR::ListExpression>(),
                                                   tupleInputExpr, inputSize,
@@ -497,7 +498,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
     for (auto i : helper->get_instr()) stmt_list->push_back(i);
 
     auto actName = a->name.name;
-    if (a->name.originalName == "NoAction") actName = "NoAction";
+    if (a->name.originalName == "NoAction") actName = a->name.originalName;
     auto action = new IR::DpdkAction(*stmt_list, actName, *a->parameters);
     actions.push_back(action);
     return false;
@@ -586,12 +587,12 @@ std::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Table
 bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
     if (!checkTableValid(t)) return false;
 
-    if (t->properties->getProperty("selector") != nullptr) {
-        auto group_id = getMemExprFromProperty(t, "group_id");
-        auto member_id = getMemExprFromProperty(t, "member_id");
-        auto selector_key = t->properties->getProperty("selector");
-        auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
-        auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
+    if (t->properties->getProperty("selector"_cs) != nullptr) {
+        auto group_id = getMemExprFromProperty(t, "group_id"_cs);
+        auto member_id = getMemExprFromProperty(t, "member_id"_cs);
+        auto selector_key = t->properties->getProperty("selector"_cs);
+        auto n_groups_max = getNumberFromProperty(t, "n_groups_max"_cs);
+        auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max"_cs);
 
         if (group_id == std::nullopt || member_id == std::nullopt || n_groups_max == std::nullopt ||
             n_members_per_group_max == std::nullopt)
@@ -627,7 +628,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
     c->body->apply(*helper);
     if (deparser && structure->isPSA()) {
         add_inst(new IR::DpdkJmpNotEqualStatement(
-            "LABEL_DROP",
+            "LABEL_DROP"_cs,
             new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
             new IR::Constant(0)));
     }

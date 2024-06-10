@@ -23,8 +23,9 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
         "--excludeFrontendPasses", "pass1[,pass2]",
         [this](const char *arg) {
             excludeFrontendPasses = true;
+            // FIXME: just split into string_view's
             auto copy = strdup(arg);
-            while (auto pass = strsep(&copy, ",")) passesToExcludeFrontend.push_back(pass);
+            while (auto pass = strsep(&copy, ",")) passesToExcludeFrontend.push_back(cstring(pass));
             return true;
         },
         "Exclude passes from frontend passes whose name is equal\n"
@@ -44,7 +45,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
         [this](const char *arg) {
             excludeMidendPasses = true;
             auto copy = strdup(arg);
-            while (auto pass = strsep(&copy, ",")) passesToExcludeMidend.push_back(pass);
+            while (auto pass = strsep(&copy, ",")) passesToExcludeMidend.push_back(cstring(pass));
             return true;
         },
         "Exclude passes from midend passes whose name is equal\n"
@@ -52,7 +53,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
     registerOption(
         "--toJSON", "file",
         [this](const char *arg) {
-            dumpJsonFile = arg;
+            dumpJsonFile = cstring(arg);
             return true;
         },
         "Dump the compiler IR after the midend as JSON in the specified file.");
@@ -73,14 +74,14 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
     registerOption(
         "--pp", "file",
         [this](const char *arg) {
-            prettyPrintFile = arg;
+            prettyPrintFile = cstring(arg);
             return true;
         },
         "Pretty-print the program in the specified file.");
     registerOption(
         "--p4runtime-file", "file",
         [this](const char *arg) {
-            p4RuntimeFile = arg;
+            p4RuntimeFile = cstring(arg);
             return true;
         },
         "Write a P4Runtime control plane API description to the specified "
@@ -89,7 +90,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
     registerOption(
         "--p4runtime-entries-file", "file",
         [this](const char *arg) {
-            p4RuntimeEntriesFile = arg;
+            p4RuntimeEntriesFile = cstring(arg);
             return true;
         },
         "Write static table entries as a P4Runtime WriteRequest message"
@@ -98,7 +99,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
     registerOption(
         "--p4runtime-files", "filelist",
         [this](const char *arg) {
-            p4RuntimeFiles = arg;
+            p4RuntimeFiles = cstring(arg);
             return true;
         },
         "Write the P4Runtime control plane API description to the specified\n"
@@ -107,7 +108,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
     registerOption(
         "--p4runtime-entries-files", "files",
         [this](const char *arg) {
-            p4RuntimeEntriesFiles = arg;
+            p4RuntimeEntriesFiles = cstring(arg);
             return true;
         },
         "Write static table entries as a P4Runtime WriteRequest message\n"
@@ -134,14 +135,14 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
     registerOption(
         "--target", "target",
         [this](const char *arg) {
-            target = arg;
+            target = cstring(arg);
             return true;
         },
         "Compile for the specified target device.");
     registerOption(
         "--arch", "arch",
         [this](const char *arg) {
-            arch = arg;
+            arch = cstring(arg);
             return true;
         },
         "Compile for the specified architecture.");

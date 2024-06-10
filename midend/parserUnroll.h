@@ -151,7 +151,7 @@ class ParserStructure {
     std::map<cstring, size_t> callsIndexes;  // map for curent calls of state insite current one
     void setParser(const IR::P4Parser *parser) {
         CHECK_NULL(parser);
-        callGraph = new StateCallGraph(parser->name);
+        callGraph = new StateCallGraph(parser->name.name.string_view());
         this->parser = parser;
         start = nullptr;
     }
@@ -268,7 +268,7 @@ class RewriteAllParsers : public Transform {
                 IR::Type::Void::get(),
                 new IR::PathExpression(
                     new IR::Type_Method(IR::Type::Void::get(), new IR::ParameterList(parameters),
-                                        "*method"),
+                                        "*method"_cs),
                     new IR::Path(IR::ID("verify"))),
                 arguments)));
             auto *outOfBoundsState = new IR::ParserState(

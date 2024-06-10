@@ -73,15 +73,15 @@ TEST(Util, PathName) {
     {
         PathName path = "";
         EXPECT_TRUE(path.isNullOrEmpty());
-        PathName grow = path.join("x");
+        PathName grow = path.join("x"_cs);
         EXPECT_EQ("x", grow.toString());
         EXPECT_FALSE(grow.isNullOrEmpty());
 
-        grow = grow.join("y");
+        grow = grow.join("y"_cs);
         EXPECT_EQ("x/y", grow.toString());
 
         path = PathName("x/");
-        grow = path.join("y");
+        grow = path.join("y"_cs);
         EXPECT_EQ("x/y", grow.toString());
     }
 }

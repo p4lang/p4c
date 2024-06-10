@@ -21,40 +21,40 @@ limitations under the License.
 
 const char *IrClass::indent = "    ";
 IrNamespace &IrNamespace::global() {
-    static IrNamespace irn(nullptr, nullptr);
+    static IrNamespace irn({}, {});
     return irn;
 }
-static const LookupScope utilScope(nullptr, "Util");
-static const NamedType srcInfoType(Util::SourceInfo(), &utilScope, "SourceInfo");
+static const LookupScope utilScope(nullptr, "Util"_cs);
+static const NamedType srcInfoType(Util::SourceInfo(), &utilScope, "SourceInfo"_cs);
 
 IrField *IrField::srcInfoField() {
-    static IrField irf(Util::SourceInfo(), &srcInfoType, "srcInfo", nullptr,
+    static IrField irf(Util::SourceInfo(), &srcInfoType, "srcInfo"_cs, {},
                        IrField::Inline | IrField::Optional);
     return &irf;
 }
 
 IrClass *IrClass::nodeClass() {
-    static IrClass irc(NodeKind::Abstract, "Node", {IrField::srcInfoField()});
+    static IrClass irc(NodeKind::Abstract, "Node"_cs, {IrField::srcInfoField()});
     return &irc;
 }
 IrClass *IrClass::vectorClass() {
-    static IrClass irc(NodeKind::Template, "Vector");
+    static IrClass irc(NodeKind::Template, "Vector"_cs);
     return &irc;
 }
 IrClass *IrClass::namemapClass() {
-    static IrClass irc(NodeKind::Template, "NameMap");
+    static IrClass irc(NodeKind::Template, "NameMap"_cs);
     return &irc;
 }
 IrClass *IrClass::nodemapClass() {
-    static IrClass irc(NodeKind::Template, "NodeMap");
+    static IrClass irc(NodeKind::Template, "NodeMap"_cs);
     return &irc;
 }
 IrClass *IrClass::ideclaration() {
-    static IrClass irc(NodeKind::Interface, "IDeclaration");
+    static IrClass irc(NodeKind::Interface, "IDeclaration"_cs);
     return &irc;
 }
 IrClass *IrClass::indexedVectorClass() {
-    static IrClass irc(NodeKind::Template, "IndexedVector");
+    static IrClass irc(NodeKind::Template, "IndexedVector"_cs);
     return &irc;
 }
 bool LineDirective::inhibit = false;
@@ -134,6 +134,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << std::endl
         << "namespace IR {\n"
         << "extern std::map<cstring, NodeFactoryFn> unpacker_table;\n"
+        << "using namespace P4::literals;\n"
         << "}\n";
 
     impl << "std::map<cstring, NodeFactoryFn> IR::unpacker_table = {\n";
@@ -145,7 +146,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
                 first = false;
             else
                 impl << ",\n";
-            impl << "{\"" << cls->name << "\", NodeFactoryFn(&IR::";
+            impl << "{\"" << cls->name << "\"_cs, NodeFactoryFn(&IR::";
             if (cls->containedIn && cls->containedIn->name) impl << cls->containedIn->name << "::";
             impl << cls->name << "::fromJSON)}";
         }
@@ -235,9 +236,9 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
       << "  Node = 2,\n";
 
     unsigned nkId = 3;
-    auto *irNamespace = IrNamespace::get(nullptr, "IR");
+    auto *irNamespace = IrNamespace::get(nullptr, "IR"_cs);
     for (auto *cls : *getClasses())
-        t << "  " << cls->qualified_name(irNamespace).replace("::", "_") << " = " << nkId++
+        t << "  " << cls->qualified_name(irNamespace).replace("::"_cs, "_"_cs) << " = " << nkId++
           << ",\n";
 
     // Add some specials:
@@ -374,14 +375,14 @@ std::string IrClass::fullName() const {
 }
 
 cstring IrNamespace::qualified_name(const IrNamespace *in) const {
-    cstring rv = name ? name : "IR";
+    cstring rv = name ? name : "IR"_cs;
     if (parent) {
         for (auto i = in; i; i = i->parent) {
             auto sym = i->lookupChild(name);
             if (sym && this != sym) break;
             if (parent == i) return rv;
         }
-        rv = parent->qualified_name(in) + "::" + rv;
+        rv = parent->qualified_name(in) + "::"_cs + rv;
     }
     return rv;
 }
@@ -394,7 +395,7 @@ cstring IrClass::qualified_name(const IrNamespace *in) const {
             if (sym && this != sym) break;
             if (containedIn == i) return rv;
         }
-        rv = containedIn->qualified_name(in) + "::" + rv;
+        rv = containedIn->qualified_name(in) + "::"_cs + rv;
     }
     return rv;
 }
@@ -439,10 +440,10 @@ void IrClass::generate_hdr(std::ostream &out) const {
         out << indent << "IRNODE" << (kind == NodeKind::Abstract ? "_ABSTRACT" : "") << "_SUBCLASS("
             << name << ")" << std::endl;
 
-    auto *irNamespace = IrNamespace::get(nullptr, "IR");
+    auto *irNamespace = IrNamespace::get(nullptr, "IR"_cs);
     if (kind != NodeKind::Nested) {
         out << indent << "DECLARE_TYPEINFO_WITH_TYPEID(" << name
-            << ", NodeKind::" << qualified_name(irNamespace).replace("::", "_");
+            << ", NodeKind::" << qualified_name(irNamespace).replace("::"_cs, "_"_cs);
         if (!concreteParent) out << ", " << (kind != NodeKind::Interface ? "Node" : "INode");
         for (const auto *p : parentClasses) out << ", " << p->qualified_name(containedIn);
         out << ");" << std::endl;
@@ -494,9 +495,9 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
         if (arg.second == this) {
             body << end_parent;
             end_parent = "";
-        } else if (parent) {
+        } else if (!parent.isNullOrEmpty()) {
             body << sep << parent;
-            parent = nullptr;
+            parent = ""_cs;
             sep = "(";
             end_parent = ")";
         }
@@ -651,10 +652,10 @@ void IrField::generate_impl(std::ostream &) const {
 void ConstFieldInitializer::generate_hdr(std::ostream &out) const {
     out << IrClass::indent;
     if (name == "precedence")
-        out << "int getPrecedence() const override { return ";
+        out << "int getPrecedence() const override { return " << initializer << "; }" << std::endl;
     else if (name == "stringOp")
-        out << "cstring getStringOp() const override { return ";
+        out << "cstring getStringOp() const override { return cstring(" << initializer << "); }"
+            << std::endl;
     else
         throw Util::CompilationError("Unexpected constant field %1%", this);
-    out << initializer << "; }" << std::endl;
 }

@@ -38,12 +38,11 @@ class AbstractP4cTool {
         auto &toolOptions = Options::get();
         auto compileContext = toolOptions.process(args);
         if (!compileContext) {
-            return 1;
+            return EXIT_FAILURE;
         }
 
         // Set up the compilation context.
         AutoCompileContext autoContext(*compileContext);
-
         // If not explicitly disabled, print basic information to standard output.
         if (!toolOptions.disableInformationLogging) {
             enableInformationLogging();

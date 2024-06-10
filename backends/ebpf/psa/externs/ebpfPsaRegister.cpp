@@ -135,8 +135,8 @@ void EBPFRegisterPSA::emitInitializer(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("if (%s) ", ret.c_str());
     builder->blockStart();
-    cstring msgStr = Util::printf_format("Map initializer: Error while map (%s) update, code: %s",
-                                         instanceName, "%d");
+    cstring msgStr = absl::StrFormat("Map initializer: Error while map (%s) update, code: %s",
+                                     instanceName, "%d");
     builder->target->emitTraceMessage(builder, msgStr, 1, ret.c_str());
 
     builder->blockEnd(true);
@@ -160,7 +160,7 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMet
     this->valueType->declare(builder, valueName, true);
     builder->endOfStatement(true);
 
-    cstring msgStr = Util::printf_format("Register: reading %s", instanceName.c_str());
+    cstring msgStr = absl::StrFormat("Register: reading %s", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
@@ -215,7 +215,7 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMet
 
 void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder *builder, const P4::ExternMethod *method,
                                         ControlBodyTranslatorPSA *translator) {
-    cstring msgStr = Util::printf_format("Register: writing %s", instanceName.c_str());
+    cstring msgStr = absl::StrFormat("Register: writing %s", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
@@ -230,8 +230,7 @@ void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder *builder, const P4::ExternMe
     builder->emitIndent();
     builder->appendFormat("if (%s) ", ret.c_str());
     builder->blockStart();
-    msgStr =
-        Util::printf_format("Register: Error while map (%s) update, code: %s", instanceName, "%d");
+    msgStr = absl::StrFormat("Register: Error while map (%s) update, code: %s", instanceName, "%d");
     builder->target->emitTraceMessage(builder, msgStr, 1, ret.c_str());
 
     builder->blockEnd(true);

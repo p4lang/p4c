@@ -16,6 +16,8 @@ limitations under the License.
 #include "dpdkUtils.h"
 
 namespace DPDK {
+using namespace P4::literals;
+
 bool isSimpleExpression(const IR::Expression *e) {
     if (e->is<IR::Member>() || e->is<IR::PathExpression>() || e->is<IR::Constant>() ||
         e->is<IR::BoolLiteral>())
@@ -38,6 +40,7 @@ bool isCommutativeBinaryOperation(const IR::Operation_Binary *bin) {
 }
 
 bool isStandardMetadata(cstring name) {
+    // FIXME: should be better structured (e.g. a set)
     bool isStdMeta =
         name == "psa_ingress_parser_input_metadata_t" || name == "psa_ingress_input_metadata_t" ||
         name == "psa_ingress_output_metadata_t" || name == "psa_egress_parser_input_metadata_t" ||
@@ -50,13 +53,13 @@ bool isStandardMetadata(cstring name) {
 
 bool isHeadersStruct(const IR::Type_Struct *st) {
     if (!st) return false;
-    auto annon = st->getAnnotation("__packet_data__");
+    auto annon = st->getAnnotation("__packet_data__"_cs);
     if (annon) return true;
     return false;
 }
 bool isMetadataStruct(const IR::Type_Struct *st) {
     for (auto anno : st->annotations->annotations) {
-        if (anno->name == "__metadata__") {
+        if (anno->name == "__metadata__"_cs) {
             return true;
         }
     }
@@ -143,9 +146,9 @@ IR::Declaration_Instance *createRegDeclarationInstance(cstring instanceName, int
 }
 
 /// Check for reserved names for DPDK target.
-bool reservedNames(P4::ReferenceMap *refMap, std::vector<cstring> names, cstring &resName) {
-    for (auto name : names) {
-        auto newname = refMap->newName(name);
+bool reservedNames(P4::ReferenceMap *refMap, const std::vector<cstring> &names, cstring &resName) {
+    for (const auto &name : names) {
+        auto newname = refMap->newName(name.string_view());
         if (newname != name) {
             resName = name;
             return false;

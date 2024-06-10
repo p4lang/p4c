@@ -24,18 +24,20 @@ limitations under the License.
 
 namespace EBPF {
 
+using namespace P4::literals;
+
 struct TableImpl_Model : public ::Model::Extern_Model {
-    explicit TableImpl_Model(cstring name) : Extern_Model(name), size("size") {}
+    explicit TableImpl_Model(cstring name) : Extern_Model(name), size("size"_cs) {}
     ::Model::Elem size;
 };
 
 struct CounterArray_Model : public ::Model::Extern_Model {
     CounterArray_Model()
-        : Extern_Model("CounterArray"),
-          increment("increment"),
-          add("add"),
-          max_index("max_index"),
-          sparse("sparse") {}
+        : Extern_Model("CounterArray"_cs),
+          increment("increment"_cs),
+          add("add"_cs),
+          max_index("max_index"_cs),
+          sparse("sparse"_cs) {}
     ::Model::Elem increment;
     ::Model::Elem add;
     ::Model::Elem max_index;
@@ -48,14 +50,14 @@ enum ModelArchitecture {
 };
 
 struct Xdp_Model : public ::Model::Elem {
-    Xdp_Model() : Elem("xdp"), parser("p"), switch_("s"), deparser("d") {}
+    Xdp_Model() : Elem("xdp"_cs), parser("p"_cs), switch_("s"_cs), deparser("d"_cs) {}
     ::Model::Elem parser;
     ::Model::Elem switch_;
     ::Model::Elem deparser;
 };
 
 struct Filter_Model : public ::Model::Elem {
-    Filter_Model() : Elem("ebpf_filter"), parser("prs"), filter("filt") {}
+    Filter_Model() : Elem("ebpf_filter"_cs), parser("prs"_cs), filter("filt"_cs) {}
     ::Model::Elem parser;
     ::Model::Elem filter;
 };
@@ -65,16 +67,16 @@ class EBPFModel : public ::Model::Model {
  protected:
     EBPFModel()
         : counterArray(),
-          array_table("array_table"),
-          hash_table("hash_table"),
-          tableImplProperty("implementation"),
-          CPacketName("skb"),
-          packet("packet", P4::P4CoreLibrary::instance().packetIn, 0),
+          array_table("array_table"_cs),
+          hash_table("hash_table"_cs),
+          tableImplProperty("implementation"_cs),
+          CPacketName("skb"_cs),
+          packet("packet"_cs, P4::P4CoreLibrary::instance().packetIn, 0),
           arch(EbpfFilter),
           filter(),
           xdp(),
-          counterIndexType("u32"),
-          counterValueType("u32") {}
+          counterIndexType("u32"_cs),
+          counterValueType("u32"_cs) {}
 
  public:
     static EBPFModel instance;

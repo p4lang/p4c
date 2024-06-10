@@ -22,6 +22,7 @@ limitations under the License.
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeMap.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
 
 namespace EBPF {
@@ -67,7 +68,7 @@ void ControlBodyTranslator::processCustomExternFunction(const P4::ExternFunction
             builder->append("(const ");
             auto type = typeMap->getType(arg);
             auto ebpfType = typeFactory->create(type);
-            ebpfType->declare(builder, "", false);
+            ebpfType->declare(builder, cstring::empty, false);
             builder->append(") ");
         }
         visit(arg);
@@ -142,7 +143,7 @@ bool ControlBodyTranslator::preorder(const IR::MethodCallExpression *expression)
         BUG_CHECK(expression->arguments->size() == 0, "%1%: unexpected arguments for action call",
                   expression);
         cstring msg =
-            Util::printf_format("Control: explicit calling action %s()", ac->action->name.name);
+            absl::StrFormat("Control: explicit calling action %s()", ac->action->name.name);
         builder->target->emitTraceMessage(builder, msg.c_str());
         visit(ac->action->body);
         return false;
@@ -156,11 +157,11 @@ void ControlBodyTranslator::compileEmitField(const IR::Expression *expr, cstring
                                              unsigned hdrOffsetBits, EBPFType *type) {
     unsigned alignment = hdrOffsetBits % 8;
     unsigned widthToEmit = type->as<IHasWidth>().widthInBits();
-    cstring swap = "";
+    cstring swap = cstring::empty;
     if (widthToEmit == 16)
-        swap = "htons";
+        swap = "htons"_cs;
     else if (widthToEmit == 32)
-        swap = "htonl";
+        swap = "htonl"_cs;
     if (!swap.isNullOrEmpty()) {
         builder->emitIndent();
         visit(expr);
@@ -270,7 +271,7 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument> *args) {
 
     // Increment header pointer
     builder->emitIndent();
-    builder->appendFormat("%s += BYTES(%s);", program->headerStartVar.c_str(), width);
+    builder->appendFormat("%s += BYTES(%d);", program->headerStartVar.c_str(), width);
     builder->newline();
 
     builder->blockEnd(true);
@@ -303,7 +304,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
     auto table = control->getTable(method->object->getName().name);
     BUG_CHECK(table != nullptr, "No table for %1%", method->expr);
 
-    msgStr = Util::printf_format("Control: applying %s", method->object->getName().name);
+    msgStr = absl::StrFormat("Control: applying %s", method->object->getName().name);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
@@ -318,7 +319,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
     builder->blockStart();
 
     BUG_CHECK(method->expr->arguments->size() == 0, "%1%: table apply with arguments", method);
-    cstring keyname = "key";
+    cstring keyname = "key"_cs;
     if (table->keyGenerator != nullptr) {
         builder->emitIndent();
         builder->appendLine("/* construct key */");
@@ -330,7 +331,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
     builder->emitIndent();
     builder->appendLine("/* value */");
     builder->emitIndent();
-    cstring valueName = "value";
+    cstring valueName = "value"_cs;
     builder->appendFormat("struct %s *%s = NULL", table->valueTypeName.c_str(), valueName.c_str());
     builder->endOfStatement(true);
 
@@ -392,7 +393,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
     builder->blockEnd(true);
     builder->blockEnd(true);
 
-    msgStr = Util::printf_format("Control: %s applied", method->object->getName().name);
+    msgStr = absl::StrFormat("Control: %s applied", method->object->getName().name);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 }
 

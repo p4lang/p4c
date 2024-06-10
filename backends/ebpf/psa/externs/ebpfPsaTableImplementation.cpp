@@ -159,18 +159,17 @@ void EBPFActionProfilePSA::emitInstance(CodeBuilder *builder) {
     //   If user change action for given reference to NoAction, it will be hard to
     //   distinguish it from non-existing entry using only key value.
     auto tableKind = TableHash;
-    builder->target->emitTableDecl(builder, instanceName, tableKind, "u32",
-                                   cstring("struct ") + valueTypeName, size);
+    builder->target->emitTableDecl(builder, instanceName, tableKind, "u32"_cs,
+                                   "struct "_cs + valueTypeName, size);
 }
 
 void EBPFActionProfilePSA::applyImplementation(CodeBuilder *builder, cstring tableValueName,
                                                cstring actionRunVariable) {
-    cstring msg = Util::printf_format("ActionProfile: applying %s", instanceName.c_str());
+    cstring msg = absl::StrFormat("ActionProfile: applying %s", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msg.c_str());
 
     cstring apValueName = program->refMap->newName("ap_value");
-    cstring apKeyName =
-        Util::printf_format("%s->%s", tableValueName.c_str(), referenceName.c_str());
+    cstring apKeyName = absl::StrFormat("%s->%s", tableValueName.c_str(), referenceName.c_str());
 
     builder->target->emitTraceMessage(builder, "ActionProfile: entry id %u", 1, apKeyName.c_str());
 
@@ -200,7 +199,7 @@ void EBPFActionProfilePSA::applyImplementation(CodeBuilder *builder, cstring tab
     builder->endOfStatement(true);
     builder->blockEnd(true);
 
-    msg = Util::printf_format("ActionProfile: %s applied", instanceName.c_str());
+    msg = absl::StrFormat("ActionProfile: %s applied", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msg.c_str());
 }
 
@@ -236,7 +235,7 @@ EBPFActionSelectorPSA::EBPFActionSelectorPSA(const EBPFProgram *program, CodeGen
                 "value truncation, must be at least 1 bit",
                 decl->arguments->at(2)->expression);
     }
-    outputHashMask = Util::printf_format("0x%llx", (1ull << outputHashWidth) - 1);
+    outputHashMask = absl::StrFormat("0x%llx", (1ull << outputHashWidth) - 1);
 
     // map names
     actionsMapName = instanceName + "_actions";
@@ -304,16 +303,17 @@ void EBPFActionSelectorPSA::emitInstance(CodeBuilder *builder) {
     // group map (group ref -> {action refs})
     // TODO: group size (inner size) is assumed to be 128. Make more logic for this.
     //  One additional entry is for group size.
-    builder->target->emitMapInMapDecl(builder, groupsMapName + "_inner", TableArray, "u32", "u32",
-                                      128 + 1, groupsMapName, TableHash, "u32", groupsMapSize);
+    builder->target->emitMapInMapDecl(builder, groupsMapName + "_inner", TableArray, "u32"_cs,
+                                      "u32"_cs, 128 + 1, groupsMapName, TableHash, "u32"_cs,
+                                      groupsMapSize);
 
     // default empty group action (0 -> action)
     builder->target->emitTableDecl(builder, emptyGroupActionMapName, TableArray,
-                                   program->arrayIndexType, cstring("struct ") + valueTypeName, 1);
+                                   program->arrayIndexType, "struct "_cs + valueTypeName, 1);
 
     // action map (ref -> action)
-    builder->target->emitTableDecl(builder, actionsMapName, TableHash, "u32",
-                                   cstring("struct ") + valueTypeName, size);
+    builder->target->emitTableDecl(builder, actionsMapName, TableHash, "u32"_cs,
+                                   "struct "_cs + valueTypeName, size);
 
     emitCacheInstance(builder);
 }
@@ -329,7 +329,7 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder *builder, cstring ta
                                                 cstring actionRunVariable) {
     if (hashEngine == nullptr) return;
 
-    cstring msg = Util::printf_format("ActionSelector: applying %s", instanceName.c_str());
+    cstring msg = absl::StrFormat("ActionSelector: applying %s", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msg.c_str());
 
     // 1. Declare variables.
@@ -339,8 +339,8 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder *builder, cstring ta
     cstring innerGroupName = program->refMap->newName("as_group_map");
     groupStateVarName = program->refMap->newName("as_group_state");
     // these can be hardcoded because they are declared inside of a block
-    cstring checksumValName = "as_checksum_val";
-    cstring mapEntryName = "as_map_entry";
+    cstring checksumValName = "as_checksum_val"_cs;
+    cstring mapEntryName = "as_map_entry"_cs;
 
     emitCacheVariables(builder);
 
@@ -517,7 +517,7 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder *builder, cstring ta
     }
     builder->blockEnd(true);
 
-    msg = Util::printf_format("ActionSelector: %s applied", instanceName.c_str());
+    msg = absl::StrFormat("ActionSelector: %s applied", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msg.c_str());
 }
 
@@ -547,7 +547,7 @@ void EBPFActionSelectorPSA::registerTable(const EBPFTablePSA *instance) {
     if (table == nullptr) {
         selectors = getSelectorsFromTable(instance);
         emptyGroupAction =
-            instance->table->container->properties->getProperty("psa_empty_group_action");
+            instance->table->container->properties->getProperty("psa_empty_group_action"_cs);
         groupsMapSize = instance->size;
     } else {
         verifyTableSelectorKeySet(instance);
@@ -587,7 +587,7 @@ void EBPFActionSelectorPSA::verifyTableSelectorKeySet(const EBPFTablePSA *instan
 }
 
 void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA *instance) {
-    auto iega = instance->table->container->properties->getProperty("psa_empty_group_action");
+    auto iega = instance->table->container->properties->getProperty("psa_empty_group_action"_cs);
 
     if (emptyGroupAction == nullptr && iega == nullptr) return;  // nothing to do here
     if (emptyGroupAction == nullptr && iega != nullptr) {
@@ -607,7 +607,7 @@ void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA *inst
     }
 
     bool same = true;
-    cstring additionalNote;
+    const char *additionalNote = "";
 
     if (emptyGroupAction->isConstant != iega->isConstant) {
         same = false;
@@ -673,7 +673,7 @@ void EBPFActionSelectorPSA::emitCacheTypes(CodeBuilder *builder) {
     for (auto s : selectors) {
         auto type = program->typeMap->getType(s->expression);
         auto ebpfType = EBPFTypeFactory::instance->create(type);
-        cstring fieldName = Util::printf_format("field%u", fieldNumber++);
+        cstring fieldName = absl::StrFormat("field%u", fieldNumber++);
 
         builder->emitIndent();
         ebpfType->declare(builder, fieldName, false);
@@ -718,7 +718,7 @@ void EBPFActionSelectorPSA::emitCacheLookup(CodeBuilder *builder, cstring key, c
     for (auto s : selectors) {
         auto type = program->typeMap->getType(s->expression);
         auto ebpfType = EBPFTypeFactory::instance->create(type);
-        cstring fieldName = Util::printf_format("field%u", fieldNumber++);
+        cstring fieldName = absl::StrFormat("field%u", fieldNumber++);
 
         bool memcpy = false;
         auto scalar = ebpfType->to<EBPFScalarType>();

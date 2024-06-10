@@ -23,15 +23,15 @@ namespace DPDK {
 
 class DpdkOptions : public CompilerOptions {
  public:
-    cstring bfRtSchema = "";
+    cstring bfRtSchema = cstring::empty;
     /// File to output to.
     cstring outputFile = nullptr;
     /// File to output TDI JSON to.
-    cstring tdiFile = "";
+    cstring tdiFile = cstring::empty;
     /// File to output context JSON to.
-    cstring ctxtFile = "";
+    cstring ctxtFile = cstring::empty;
     /// File to output the TDI builder configuration to.
-    cstring tdiBuilderConf = "";
+    cstring tdiBuilderConf = cstring::empty;
     /// Read from JSON.
     bool loadIRFromJson = false;
     /// Enable/disable Egress pipeline in PSA.
@@ -58,35 +58,35 @@ class DpdkOptions : public CompilerOptions {
         registerOption(
             "--bf-rt-schema", "file",
             [this](const char *arg) {
-                bfRtSchema = arg;
+                bfRtSchema = cstring(arg);
                 return true;
             },
             "Generate and write BF-RT JSON schema to the specified file");
         registerOption(
             "-o", "outfile",
             [this](const char *arg) {
-                outputFile = arg;
+                outputFile = cstring(arg);
                 return true;
             },
             "Write output to outfile");
         registerOption(
             "--tdi-builder-conf", "file",
             [this](const char *arg) {
-                tdiBuilderConf = arg;
+                tdiBuilderConf = cstring(arg);
                 return true;
             },
             "Generate and write the TDI builder configuration to the specified file");
         registerOption(
             "--tdi", "file",
             [this](const char *arg) {
-                tdiFile = arg;
+                tdiFile = cstring(arg);
                 return true;
             },
             "Generate and write TDI JSON to the specified file");
         registerOption(
             "--context", "file",
             [this](const char *arg) {
-                ctxtFile = arg;
+                ctxtFile = cstring(arg);
                 return true;
             },
             "Generate and write context JSON to the specified file");
@@ -94,7 +94,7 @@ class DpdkOptions : public CompilerOptions {
             "--fromJSON", "file",
             [this](const char *arg) {
                 loadIRFromJson = true;
-                file = arg;
+                file = cstring(arg);
                 return true;
             },
             "Use IR representation from JsonFile dumped previously,"

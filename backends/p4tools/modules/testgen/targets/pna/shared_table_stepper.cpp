@@ -32,6 +32,8 @@
 
 namespace P4Tools::P4Testgen::Pna {
 
+using namespace P4::literals;
+
 const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
     const TableUtils::KeyProperties &keyProperties, TableMatchMap *matches,
     const IR::Expression *hitCondition) {
@@ -119,7 +121,7 @@ void SharedPnaTableStepper::evalTableActionProfile(
         // TODO: Should we check if we exceed the maximum number of possible profile entries?
         actionProfile->addToActionMap(actionName, ctrlPlaneArgs);
         // Update the action profile in the execution state.
-        nextState.addTestObject("action_profile", actionProfile->getObjectName(), actionProfile);
+        nextState.addTestObject("action_profile"_cs, actionProfile->getObjectName(), actionProfile);
 
         // We add the arguments to our action call, effectively creating a const entry call.
         auto *synthesizedAction = tableAction->clone();
@@ -133,8 +135,8 @@ void SharedPnaTableStepper::evalTableActionProfile(
 
         // Add the action profile to the table.
         // This implies a slightly different implementation to usual control plane table behavior.
-        tableConfig->addTableProperty("action_profile", actionProfile);
-        nextState.addTestObject("tableconfigs", table->controlPlaneName(), tableConfig);
+        tableConfig->addTableProperty("action_profile"_cs, actionProfile);
+        nextState.addTestObject("tableconfigs"_cs, table->controlPlaneName(), tableConfig);
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
@@ -202,9 +204,10 @@ void SharedPnaTableStepper::evalTableActionSelector(
             SharedPnaProperties.actionSelector->getSelectorDecl(), actionProfile);
 
         // Update the action profile in the execution state.
-        nextState.addTestObject("action_profile", actionProfile->getObjectName(), actionProfile);
+        nextState.addTestObject("action_profile"_cs, actionProfile->getObjectName(), actionProfile);
         // Update the action selector in the execution state.
-        nextState.addTestObject("action_selector", actionSelector->getObjectName(), actionSelector);
+        nextState.addTestObject("action_selector"_cs, actionSelector->getObjectName(),
+                                actionSelector);
 
         // We add the arguments to our action call, effectively creating a const entry call.
         auto *synthesizedAction = tableAction->clone();
@@ -217,11 +220,11 @@ void SharedPnaTableStepper::evalTableActionSelector(
         auto *tableConfig = new TableConfig(table, {tableRule});
 
         // Add the action profile to the table. This signifies a slightly different implementation.
-        tableConfig->addTableProperty("action_profile", actionProfile);
+        tableConfig->addTableProperty("action_profile"_cs, actionProfile);
         // Add the action selector to the table. This signifies a slightly different implementation.
-        tableConfig->addTableProperty("action_selector", actionSelector);
+        tableConfig->addTableProperty("action_selector"_cs, actionSelector);
 
-        nextState.addTestObject("tableconfigs", table->controlPlaneName(), tableConfig);
+        nextState.addTestObject("tableconfigs"_cs, table->controlPlaneName(), tableConfig);
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
@@ -248,7 +251,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
 }
 
 bool SharedPnaTableStepper::checkForActionProfile() {
-    const auto *impl = table->properties->getProperty("implementation");
+    const auto *impl = table->properties->getProperty("implementation"_cs);
     if (impl == nullptr) {
         return false;
     }
@@ -276,7 +279,7 @@ bool SharedPnaTableStepper::checkForActionProfile() {
     }
 
     const auto *testObject =
-        state->getTestObject("action_profile", implExtern->controlPlaneName(), false);
+        state->getTestObject("action_profile"_cs, implExtern->controlPlaneName(), false);
     if (testObject == nullptr) {
         // This means, for every possible control plane entry (and with that, new execution state)
         // add the generated action profile.
@@ -290,7 +293,7 @@ bool SharedPnaTableStepper::checkForActionProfile() {
 }
 
 bool SharedPnaTableStepper::checkForActionSelector() {
-    const auto *impl = table->properties->getProperty("implementation");
+    const auto *impl = table->properties->getProperty("implementation"_cs);
     if (impl == nullptr) {
         return false;
     }
@@ -319,7 +322,7 @@ bool SharedPnaTableStepper::checkForActionSelector() {
     // Treat action selectors like action profiles for now.
     // The behavioral model P4Runtime is unclear how to configure action selectors.
     const auto *testObject =
-        state->getTestObject("action_profile", selectorExtern->controlPlaneName(), false);
+        state->getTestObject("action_profile"_cs, selectorExtern->controlPlaneName(), false);
     if (testObject == nullptr) {
         // This means, for every possible control plane entry (and with that, new execution state)
         // add the generated action profile.

@@ -7,6 +7,8 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
+using namespace P4::literals;
+
 /* =========================================================================================
  *  IndexExpression
  * ========================================================================================= */
@@ -32,7 +34,7 @@ const IR::Expression *IndexExpression::getIndex() const { return index; }
 
 const IR::Expression *IndexExpression::getValue() const { return value; }
 
-cstring IndexExpression::getObjectName() const { return "IndexExpression"; }
+cstring IndexExpression::getObjectName() const { return "IndexExpression"_cs; }
 
 const IndexExpression *IndexExpression::evaluate(const Model &model, bool doComplete) const {
     const auto *evaluatedIndex = model.evaluate(index, doComplete);
@@ -89,7 +91,7 @@ const IR::Constant *IndexMap::getEvaluatedInitialValue() const {
 Bmv2V1ModelRegisterValue::Bmv2V1ModelRegisterValue(const IR::Expression *initialValue)
     : IndexMap(initialValue) {}
 
-cstring Bmv2V1ModelRegisterValue::getObjectName() const { return "Bmv2V1ModelRegisterValue"; }
+cstring Bmv2V1ModelRegisterValue::getObjectName() const { return "Bmv2V1ModelRegisterValue"_cs; }
 
 const Bmv2V1ModelRegisterValue *Bmv2V1ModelRegisterValue::evaluate(const Model &model,
                                                                    bool doComplete) const {
@@ -110,7 +112,7 @@ const Bmv2V1ModelRegisterValue *Bmv2V1ModelRegisterValue::evaluate(const Model &
 Bmv2V1ModelMeterValue::Bmv2V1ModelMeterValue(const IR::Expression *initialValue, bool isDirect)
     : IndexMap(initialValue), isDirect(isDirect) {}
 
-cstring Bmv2V1ModelMeterValue::getObjectName() const { return "Bmv2V1ModelMeterValue"; }
+cstring Bmv2V1ModelMeterValue::getObjectName() const { return "Bmv2V1ModelMeterValue"_cs; }
 
 const Bmv2V1ModelMeterValue *Bmv2V1ModelMeterValue::evaluate(const Model &model,
                                                              bool doComplete) const {
@@ -171,7 +173,7 @@ Bmv2V1ModelActionSelector::Bmv2V1ModelActionSelector(const IR::IDeclaration *sel
                                                      const Bmv2V1ModelActionProfile *actionProfile)
     : selectorDecl(selectorDecl), actionProfile(actionProfile) {}
 
-cstring Bmv2V1ModelActionSelector::getObjectName() const { return "Bmv2V1ModelActionSelector"; }
+cstring Bmv2V1ModelActionSelector::getObjectName() const { return "Bmv2V1ModelActionSelector"_cs; }
 
 const IR::IDeclaration *Bmv2V1ModelActionSelector::getSelectorDecl() const { return selectorDecl; }
 
@@ -198,7 +200,7 @@ Bmv2V1ModelCloneInfo::Bmv2V1ModelCloneInfo(const IR::Expression *sessionId,
       clonedState(clonedState),
       preserveIndex(preserveIndex) {}
 
-cstring Bmv2V1ModelCloneInfo::getObjectName() const { return "Bmv2V1ModelCloneInfo"; }
+cstring Bmv2V1ModelCloneInfo::getObjectName() const { return "Bmv2V1ModelCloneInfo"_cs; }
 
 BMv2Constants::CloneType Bmv2V1ModelCloneInfo::getCloneType() const { return cloneType; }
 
@@ -221,7 +223,7 @@ Bmv2V1ModelCloneSpec::Bmv2V1ModelCloneSpec(const IR::Expression *sessionId,
                                            const IR::Expression *clonePort, bool isClone)
     : sessionId(sessionId), clonePort(clonePort), isClone(isClone) {}
 
-cstring Bmv2V1ModelCloneSpec::getObjectName() const { return "Bmv2V1ModelCloneSpec"; }
+cstring Bmv2V1ModelCloneSpec::getObjectName() const { return "Bmv2V1ModelCloneSpec"_cs; }
 
 const IR::Expression *Bmv2V1ModelCloneSpec::getClonePort() const { return clonePort; }
 
@@ -270,7 +272,7 @@ const Optional *Optional::evaluate(const Model &model, bool doComplete) const {
     return new Optional(getKey(), evaluatedValue, addMatch);
 }
 
-cstring Optional::getObjectName() const { return "Optional"; }
+cstring Optional::getObjectName() const { return "Optional"_cs; }
 
 bool Optional::addAsExactMatch() const { return addMatch; }
 
@@ -307,7 +309,7 @@ const Range *Range::evaluate(const Model &model, bool doComplete) const {
 
 MetadataCollection::MetadataCollection() = default;
 
-cstring MetadataCollection::getObjectName() const { return "MetadataCollection"; }
+cstring MetadataCollection::getObjectName() const { return "MetadataCollection"_cs; }
 
 const MetadataCollection *MetadataCollection::evaluate(const Model & /*model*/,
                                                        bool /*finalModel*/) const {
@@ -326,6 +328,6 @@ void MetadataCollection::addMetaDataField(cstring name, const IR::Literal *metad
     metadataFields[name] = metadataField;
 }
 
-cstring Range::getObjectName() const { return "Range"; }
+cstring Range::getObjectName() const { return "Range"_cs; }
 
 }  // namespace P4Tools::P4Testgen::Bmv2

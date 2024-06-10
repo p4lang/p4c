@@ -171,9 +171,9 @@ class TCAction {
     optional safe_vector<TCActionParam> actionParams;
     cstring getName() const {
         if (actionName == "NoAction") {
-            return "NoAction";
+            return actionName;
         }
-        cstring tcAction = pipelineName;
+        std::string tcAction = pipelineName.string();
         tcAction += "/" + actionName;
         return tcAction;
     }
@@ -306,16 +306,16 @@ class TCTable {
         return tableName;
     }
     cstring printMatchType(unsigned matchType) const {
-        cstring matchTypeString = "";
+        cstring matchTypeString = cstring::empty;
         switch(matchType) {
                 case TC::EXACT_TYPE :
-                    matchTypeString = "exact";
+                    matchTypeString = "exact"_cs;
                     break;
                 case TC::LPM_TYPE :
-                    matchTypeString = "lpm";
+                    matchTypeString = "lpm"_cs;
                     break;
                 case TC::TERNARY_TYPE :
-                    matchTypeString = "ternary";
+                    matchTypeString = "ternary"_cs;
                     break;
         }
         return matchTypeString;

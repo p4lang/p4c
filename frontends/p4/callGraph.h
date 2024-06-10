@@ -49,7 +49,7 @@ class CallGraph {
     ordered_set<T> nodes;  // all nodes; do not modify this directly
     typedef typename ordered_map<T, std::vector<T> *>::const_iterator const_iterator;
 
-    explicit CallGraph(cstring name) : name(name) {}
+    explicit CallGraph(std::string_view name) : name(name) {}
 
     const cstring &getName() const { return name; }
 

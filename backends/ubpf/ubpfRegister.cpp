@@ -112,14 +112,14 @@ void UBPFRegister::emitRegisterRead(EBPF::CodeBuilder *builder,
     BUG_CHECK(expression->arguments->size() == 1, "Expected 1 argument for %1%", expression);
     auto target = builder->target;
 
-    target->emitTableLookup(builder, dataMapName, last_key_name, "");
+    target->emitTableLookup(builder, dataMapName, last_key_name, ""_cs);
 }
 
 void UBPFRegister::emitKeyInstance(EBPF::CodeBuilder *builder,
                                    const IR::MethodCallExpression *expression) {
     auto arg_key = expression->arguments->at(0);
 
-    cstring keyName = "";
+    cstring keyName = ""_cs;
 
     if (arg_key->expression->is<IR::PathExpression>()) {
         keyName = arg_key->expression->to<IR::PathExpression>()->path->name.name;

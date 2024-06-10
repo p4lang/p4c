@@ -128,32 +128,4 @@ cstring toString(cstring value) {
 
 cstring toString(std::string_view value) { return cstring(value); }
 
-cstring printf_format(const char *fmt_str, ...) {
-    if (fmt_str == nullptr) throw std::runtime_error("Null format string");
-    va_list ap;
-    va_start(ap, fmt_str);
-    cstring formatted = vprintf_format(fmt_str, ap);
-    va_end(ap);
-    return formatted;
-}
-
-// printf into a string
-cstring vprintf_format(const char *fmt_str, va_list ap) {
-    static char buf[128];
-    va_list ap_copy;
-    va_copy(ap_copy, ap);
-    if (fmt_str == nullptr) throw std::runtime_error("Null format string");
-
-    int size = vsnprintf(buf, sizeof(buf), fmt_str, ap);
-    if (size < 0) throw std::runtime_error("Error in vsnprintf");
-    if (static_cast<size_t>(size) >= sizeof(buf)) {
-        char *formatted = new char[size + 1];
-        vsnprintf(formatted, size + 1, fmt_str, ap_copy);
-        va_end(ap_copy);
-        return cstring::own(formatted, size);
-    }
-    va_end(ap_copy);
-    return cstring(buf);
-}
-
 }  // namespace Util
