@@ -377,7 +377,7 @@ class ActionTranslationVisitorPNA : public EBPF::ActionTranslationVisitor,
                                 const IR::P4Action *act, bool isDefaultAction);
     bool preorder(const IR::PathExpression *pe) override;
     bool isActionParameter(const IR::Expression *expression) const;
-    void processMethod(const P4::ExternMethod *method);
+    void processMethod(const P4::ExternMethod *method) override;
 
     cstring getParamInstanceName(const IR::Expression *expression) const override;
     cstring getParamName(const IR::PathExpression *) override;
