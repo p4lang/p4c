@@ -571,7 +571,7 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
 
 void ConvertToBackendIR::updatePnaDirectCounter(const IR::P4Table *t, IR::TCTable *tabledef,
                                                 unsigned tentries) {
-    cstring propertyName = "pna_direct_counter";
+    cstring propertyName = "pna_direct_counter"_cs;
     auto property = t->properties->getProperty(propertyName);
     if (property == nullptr) return;
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
@@ -857,7 +857,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(
                 /* If a parameter is not annoated by tc_init or tc_numel then it is emitted as
                 constructor parameters.*/
                 IR::TCKey *key = new IR::TCKey(0, parameter->type->width_bits(),
-                                               parameter->toString(), "param", false);
+                                               parameter->toString(), "param"_cs, false);
                 keys.push_back(key);
                 if (exp->is<IR::Constant>()) {
                     key->setValue(exp->to<IR::Constant>()->asInt64());
@@ -875,7 +875,7 @@ cstring ConvertToBackendIR::getControlPathKeyAnnotation(const IR::StructField *f
         annotation->name == ParseTCAnnotations::tc_data_scalar) {
         annoName = annotation->name;
     } else if (annotation->name == ParseTCAnnotations::tc_data) {
-        annoName = "param";
+        annoName = "param"_cs;
     }
     return annoName;
 }

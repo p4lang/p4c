@@ -19,6 +19,8 @@ and limitations under the License.
 
 namespace TC {
 
+using namespace P4::literals;
+
 class ControlBodyTranslatorPNA;
 class ConvertToBackendIR;
 
@@ -99,7 +101,7 @@ class EBPFTablePNADirectCounterPropertyVisitor : public EBPF::EBPFTablePsaProper
     }
 
     void visitTableProperty() {
-        EBPF::EBPFTablePsaPropertyVisitor::visitTableProperty("pna_direct_counter");
+        EBPF::EBPFTablePsaPropertyVisitor::visitTableProperty("pna_direct_counter"_cs);
     }
 };
 
