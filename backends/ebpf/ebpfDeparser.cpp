@@ -133,7 +133,7 @@ void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
                         "Header %1% size %2% is not a multiple of 8 bits.", expr, width);
                 return;
             }
-            msgStr = Util::printf_format("Deparser: emitting header %s", expr->toString().c_str());
+            msgStr = absl::StrFormat("Deparser: emitting header %s", expr->toString().c_str());
             builder->target->emitTraceMessage(builder, msgStr.c_str());
 
             builder->emitIndent();
@@ -201,13 +201,13 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder *builder, cstring field,
             visit(hdrExpr);
             builder->appendFormat(".%s", field.c_str());
             builder->endOfStatement(true);
-            msgStr = Util::printf_format("Deparser: emitting field %s=0x%%llx (%u bits)", field,
-                                         widthToEmit);
+            msgStr = absl::StrFormat("Deparser: emitting field %s=0x%%llx (%u bits)", field,
+                                     widthToEmit);
             builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, "tmp");
             builder->blockEnd(true);
         }
     } else {
-        msgStr = Util::printf_format("Deparser: emitting field %s (%u bits)", field, widthToEmit);
+        msgStr = absl::StrFormat("Deparser: emitting field %s (%u bits)", field, widthToEmit);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
     }
 

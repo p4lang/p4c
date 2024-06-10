@@ -798,7 +798,7 @@ cstring Visitor::demangle(const char *str) {
 }
 #else
 #warning "No name demangling available; class names in logs will be mangled"
-cstring Visitor::demangle(const char *str) { return str; }
+cstring Visitor::demangle(const char *str) { return cstring(str); }
 #endif
 
 #if HAVE_LIBGC

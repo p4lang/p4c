@@ -67,10 +67,10 @@ TEST(UtilSourceFile, InputSources) {
 
     EXPECT_EQ(3u, sources.lineCount());
 
-    cstring fl = sources.getLine(1);
+    auto fl = sources.getLine(1);
     EXPECT_EQ("First line\n", fl);
 
-    cstring sl = sources.getLine(2);
+    auto sl = sources.getLine(2);
     EXPECT_EQ("Second line\n", sl);
 
     SourceFileLine original = sources.getSourceLine(3);

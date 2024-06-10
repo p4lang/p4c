@@ -1,0 +1,13 @@
+#ifndef BACKENDS_P4TOOLS_MODULES_SMITH_REGISTER_H_
+#define BACKENDS_P4TOOLS_MODULES_SMITH_REGISTER_H_
+
+@include_statements_var@
+
+namespace P4Tools::P4Smith {
+
+inline void registerSmithTargets() {
+@smith_targets_var@}
+
+}  // namespace P4Tools::P4Smith
+
+#endif /* BACKENDS_P4TOOLS_MODULES_SMITH_REGISTER_H_ */
