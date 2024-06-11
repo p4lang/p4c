@@ -9,7 +9,6 @@
 #include "lib/error.h"
 #include "lib/nullstream.h"
 #include "options.h"
-#include "test/gtest/helpers.h"
 
 int main(int argc, char *const argv[]) {
     AutoCompileContext autoP4FmtContext(new P4Fmt::P4FmtContext);
