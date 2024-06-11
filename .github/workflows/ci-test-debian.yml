@@ -44,15 +44,17 @@ jobs:
 
   # Build with GCC and test P4C on Ubuntu 20.04.
   test-ubuntu20:
-    name: test-ubuntu20 (Unity ${{ matrix.unity }})
+    name: test-ubuntu20 (GTest ${{ matrix.gtest }}, Unity ${{ matrix.unity }})
     strategy:
       fail-fast: false
       matrix:
+        gtest: [ON, OFF]
         unity: [ON, OFF]
     runs-on: ubuntu-20.04
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
+      ENABLE_GTESTS: ${{ matrix.gtest }}
       CMAKE_UNITY_BUILD: ${{ matrix.unity }}
       BUILD_GENERATOR: Ninja
     steps:
@@ -75,4 +77,4 @@ jobs:
         # Need to use sudo for the eBPF kernel tests.
         run: sudo -E ctest --output-on-failure --schedule-random
         working-directory: ./build
-        if: matrix.unity == 'ON'
+        if: matrix.gtest == 'ON' && matrix.unity == 'ON'
