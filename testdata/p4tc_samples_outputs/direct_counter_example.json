@@ -1,14 +1,14 @@
 {
   "schema_version" : "1.0.0",
-  "pipeline_name" : "send_to_port_example",
+  "pipeline_name" : "direct_counter_example",
   "externs" : [
     {
-      "name" : "Register",
-      "id" : 1,
-      "permissions" : "0x19b6",
+      "name" : "DirectCounter",
+      "id" : 101,
+      "permissions" : "0x1136",
       "instances" : [
         {
-          "inst_name" : "MainControlImpl.reg1",
+          "inst_name" : "ingress.global_counter",
           "inst_id" : 1,
           "params" : [
             {
@@ -20,10 +20,10 @@
             },
             {
               "id" : 2,
-              "name" : "a_value",
-              "type" : "bit32",
+              "name" : "pkts",
+              "type" : "bit64",
               "attr" : "param",
-              "bitwidth" : 32
+              "bitwidth" : 64
             }
           ]
         }
@@ -32,47 +32,45 @@
   ],
   "tables" : [
     {
-      "name" : "MainControlImpl/ipv4_tbl",
+      "name" : "ingress/nh_table",
       "id" : 1,
-      "tentries" : 1024,
+      "tentries" : 2048,
       "permissions" : "0x3da4",
       "nummask" : 8,
-      "keysize" : 72,
+      "keysize" : 32,
       "keyfields" : [
         {
           "id" : 1,
-          "name" : "hdr.ipv4.dstAddr",
-          "type" : "bit32",
-          "match_type" : "exact",
-          "bitwidth" : 32
-        },
-        {
-          "id" : 2,
           "name" : "hdr.ipv4.srcAddr",
-          "type" : "bit32",
+          "type" : "ipv4",
           "match_type" : "exact",
           "bitwidth" : 32
-        },
-        {
-          "id" : 3,
-          "name" : "hdr.ipv4.protocol",
-          "type" : "bit8",
-          "match_type" : "exact",
-          "bitwidth" : 8
         }
       ],
       "actions" : [
         {
           "id" : 1,
-          "name" : "MainControlImpl/next_hop",
+          "name" : "ingress/send_nh",
           "action_scope" : "TableAndDefault",
           "annotations" : [],
           "params" : [
             {
               "id" : 1,
-              "name" : "vport",
-              "type" : "bit32",
+              "name" : "port_id",
+              "type" : "dev",
               "bitwidth" : 32
+            },
+            {
+              "id" : 2,
+              "name" : "dmac",
+              "type" : "macaddr",
+              "bitwidth" : 48
+            },
+            {
+              "id" : 3,
+              "name" : "smac",
+              "type" : "macaddr",
+              "bitwidth" : 48
             }
           ],
           "default_hit_action" : false,
@@ -80,7 +78,7 @@
         },
         {
           "id" : 2,
-          "name" : "MainControlImpl/default_route_drop",
+          "name" : "ingress/drop",
           "action_scope" : "TableAndDefault",
           "annotations" : [],
           "params" : [],
