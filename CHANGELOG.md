@@ -54,3 +54,7 @@
 - Add a release template to the compiler. [[view](https://github.com/p4lang/p4c/pull/4692)]
 
 [Click here to find Full Changelog](https://github.com/p4lang/p4c/compare/v1.2.4.11...v1.2.4.12) 
+
+
+> [!TIP]
+> The commit history prior to the earliest known release is not included here but is available in the full commit history.
