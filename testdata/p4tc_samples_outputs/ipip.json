@@ -6,7 +6,7 @@
     {
       "name" : "Main/fwd_table",
       "id" : 1,
-      "tentries" : 2048,
+      "tentries" : 1024,
       "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 32,

@@ -1,0 +1,6 @@
+p4tc_samples/direct_counter_errors.p4(88): [--Werror=not-found] error: global_counter.count(): Table ingress.nh_table does not own DirectCounter named ingress_global_counter
+        global_counter.count();
+        ^^^^^^^^^^^^^^^^^^^^^^
+p4tc_samples/direct_counter_errors.p4(94)
+    @tc_acl("CRUDPS:RX") table nh_table {
+                               ^^^^^^^^
