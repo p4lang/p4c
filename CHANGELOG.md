@@ -1,5 +1,11 @@
 <!-- \page changelog Changelog -->
 
+> [!NOTE]  
+> # Semantic Versioning
+> We follow a monthly release cadence. Our versioning scheme is as follows:
+> - **Major.Minor.Patch** versions align with the P4 specification.
+> - **Revision** (the last number) is incremented with each monthly release.
+
 ## Release v1.2.4.12 [[view](https://github.com/p4lang/p4c/pull/4699)]
 
 ### Breaking Changes 🛠
