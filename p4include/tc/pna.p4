@@ -445,12 +445,18 @@ extern Counter<W, S> {
 // END:Counter_extern
 
 // BEGIN:DirectCounter_extern
-@noWarn("unused")
+@noWarn("unused") @tc_acl("RP:RUXP")
 extern DirectCounter<W> {
   DirectCounter(PNA_CounterType_t type);
-  void count();
+  @tc_md_exec void count();
 }
 // END:DirectCounter_extern
+
+struct tc_ControlPath_DirectCounter<W> {
+    @tc_key bit<32> index;
+    @tc_data W pkts;
+    @tc_data W bytes;
+}
 
 // BEGIN:MeterType_defn
 enum PNA_MeterType_t {
@@ -497,7 +503,7 @@ extern Register<T, S> {
   Register(@tc_numel bit<32> size);
   /// Initialize an array of <size> registers and set their value to
   /// initial_value.
-  Register(@tc_numel bit<32> size, T initial_value);
+  Register(@tc_numel bit<32> size, @tc_init_val T initial_value);
 
   @tc_md_read T    read  (@tc_key in S index);
   @tc_md_write void write (@tc_key in S index, @tc_data in T value);

@@ -6,7 +6,7 @@
     {
       "name" : "MainControlImpl/ipv4_tbl_1",
       "id" : 1,
-      "tentries" : 2048,
+      "tentries" : 1024,
       "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 32,
@@ -50,7 +50,7 @@
     {
       "name" : "MainControlImpl/ipv4_tbl_2",
       "id" : 2,
-      "tentries" : 2048,
+      "tentries" : 1024,
       "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 72,
@@ -241,7 +241,7 @@
     {
       "name" : "MainControlImpl/set_ct_options",
       "id" : 6,
-      "tentries" : 2048,
+      "tentries" : 1024,
       "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 8,
@@ -287,7 +287,7 @@
     {
       "name" : "MainControlImpl/set_all_options",
       "id" : 7,
-      "tentries" : 2048,
+      "tentries" : 1024,
       "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 64,

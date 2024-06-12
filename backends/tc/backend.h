@@ -20,6 +20,7 @@ and limitations under the License.
 #include <deque>
 
 #include "backends/ebpf/psa/ebpfPsaGen.h"
+#include "control-plane/p4RuntimeArchHandler.h"
 #include "ebpfCodeGen.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/parseAnnotations.h"
@@ -60,6 +61,7 @@ class ConvertToBackendIR : public Inspector {
         cstring permissions;
         safe_vector<struct ExternInstance *> eInstance;
     };
+    enum CounterType { PACKETS, BYTES, PACKETS_AND_BYTES };
     const IR::ToplevelBlock *tlb;
     IR::TCPipeline *tcPipeline;
     P4::ReferenceMap *refMap;
@@ -93,12 +95,13 @@ class ConvertToBackendIR : public Inspector {
     void postorder(const IR::P4Program *p) override;
     void postorder(const IR::Declaration_Instance *d) override;
     void postorder(const IR::Type_Struct *ts) override;
-    void processExternConstructorAnnotations(const IR::Type_Extern *extn,
-                                             const IR::Declaration_Instance *decl,
-                                             struct ExternInstance *instance);
-    safe_vector<const IR::TCKey *> processExternControlPath(const IR::Type_SpecializedCanonical *ts,
-                                                            const IR::Type_Extern *extn,
+    safe_vector<const IR::TCKey *> processExternConstructor(const IR::Type_Extern *extn,
+                                                            const IR::Declaration_Instance *decl,
+                                                            struct ExternInstance *instance);
+    safe_vector<const IR::TCKey *> processExternControlPath(const IR::Type_Extern *extn,
+                                                            const IR::Declaration_Instance *decl,
                                                             cstring eName);
+    cstring getControlPathKeyAnnotation(const IR::StructField *field);
     unsigned GetAccessNumericValue(std::string_view access);
     bool isDuplicateAction(const IR::P4Action *action);
     bool isDuplicateOrNoAction(const IR::P4Action *action);
@@ -107,6 +110,7 @@ class ConvertToBackendIR : public Inspector {
     void updateConstEntries(const IR::P4Table *t, IR::TCTable *tdef);
     void updateMatchType(const IR::P4Table *t, IR::TCTable *tabledef);
     void updateTimerProfiles(IR::TCTable *tabledef);
+    void updatePnaDirectCounter(const IR::P4Table *t, IR::TCTable *tabledef, unsigned tentries);
     bool isPnaParserMeta(const IR::Member *mem);
     bool isPnaMainInputMeta(const IR::Member *mem);
     bool isPnaMainOutputMeta(const IR::Member *mem);
@@ -124,6 +128,15 @@ class ConvertToBackendIR : public Inspector {
     std::pair<cstring, cstring> *GetAnnotatedAccessPath(const IR::Annotation *anno);
     void updateAddOnMissTable(const IR::P4Table *t);
     bool checkParameterDirection(const IR::TCAction *tcAction);
+    bool hasExecuteMethod(const IR::Type_Extern *extn);
+    safe_vector<const IR::TCKey *> HandleTypeNameStructField(const IR::StructField *field,
+                                                             const IR::Type_Extern *extn,
+                                                             const IR::Declaration_Instance *decl,
+                                                             int &kId, cstring annoName);
+    safe_vector<const IR::TCKey *> processCounterControlPathKeys(
+        const IR::Type_Struct *extern_control_path, const IR::Type_Extern *extn,
+        const IR::Declaration_Instance *decl);
+    CounterType toCounterType(const int type);
 };
 
 class Extern {
