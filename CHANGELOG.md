@@ -57,4 +57,4 @@
 
 
 > [!TIP]
-> The commit history prior to the earliest known release is not included here but is available in the full commit history.
+> The commit history prior to the earliest known release is not included here but is available in the commit history.
