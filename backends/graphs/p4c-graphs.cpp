@@ -31,7 +31,6 @@ limitations under the License.
 #include "lib/gc.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "lib/path.h"
 #include "parsers.h"
 
 namespace graphs {
@@ -63,7 +62,7 @@ MidEnd::MidEnd(CompilerOptions &options) {
 
 class Options : public CompilerOptions {
  public:
-    Util::PathName graphsDir{"."};
+    std::filesystem::path graphsDir{"."};
     bool loadIRFromJson = false;  // read from json
     bool graphs = true;           // default behavior
     bool fullGraph = false;

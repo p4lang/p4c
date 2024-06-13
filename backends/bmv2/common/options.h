@@ -20,7 +20,6 @@ limitations under the License.
 #include <getopt.h>
 
 #include "frontends/common/options.h"
-#include "lib/path.h"
 
 namespace BMV2 {
 
@@ -29,7 +28,7 @@ class BMV2Options : public CompilerOptions {
     /// Generate externs.
     bool emitExterns = false;
     /// File to output to.
-    Util::PathName outputFile;
+    std::filesystem::path outputFile;
     /// Read from json.
     bool loadIRFromJson = false;
 

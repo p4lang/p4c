@@ -21,7 +21,6 @@
 #include "ir/irutils.h"
 #include "lib/compile_context.h"
 #include "lib/null.h"
-#include "lib/path.h"
 
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
@@ -58,11 +57,11 @@ ConstraintsVector loadExample(const char *curFile, bool flag) {
     auto *originalEnv = getenv("P4C_16_INCLUDE_PATH");
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
     const IR::P4Program *program = nullptr;
-    options.file = Util::PathName(sourcePath) / curFile;
+    options.file = std::filesystem::path(sourcePath) / curFile;
     if (access(options.file.c_str(), 0) != 0) {
         // Subpath for bf-p4c-compilers.
         // FIXME: what is the logic behind here?
-        options.file = Util::PathName(sourcePath) / curFile;
+        options.file = std::filesystem::path(sourcePath) / curFile;
     }
     program = P4::parseP4File(options);
     if (originalEnv == nullptr) {

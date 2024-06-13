@@ -19,6 +19,7 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_PARSER_OPTIONS_H_
 #define FRONTENDS_COMMON_PARSER_OPTIONS_H_
 
+#include <filesystem>
 #include <set>
 #include <unordered_map>
 
@@ -27,7 +28,6 @@ limitations under the License.
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/options.h"
-#include "lib/path.h"
 
 // Standard include paths for .p4 header files. The values are determined by
 // `configure`.
@@ -64,7 +64,7 @@ class ParserOptions : public Util::Options {
     // options to pass to preprocessor
     cstring preprocessor_options = cstring::empty;
     // file to compile (- for stdin)
-    Util::PathName file;
+    std::filesystem::path file;
     // if true preprocess only
     bool doNotCompile = false;
     // Compiler version.
@@ -74,7 +74,7 @@ class ParserOptions : public Util::Options {
     // substrings matched against pass names
     std::vector<cstring> top4;
     // debugging dumps of programs written in this folder
-    Util::PathName dumpFolder = ".";
+    std::filesystem::path dumpFolder = ".";
     // If false, optimization of callee parsers (subparsers) inlining is disabled.
     bool optimizeParserInlining = false;
     // Expect that the only remaining argument is the input file.

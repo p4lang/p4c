@@ -77,7 +77,6 @@ set(LIBP4CTOOLKIT_HDRS
     options.h
     ordered_map.h
     ordered_set.h
-    path.h
     range.h
     safe_vector.h
     set.h

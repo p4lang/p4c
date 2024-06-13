@@ -26,7 +26,6 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/nullstream.h"
-#include "lib/path.h"
 // Passes
 #include "actionsInlining.h"
 #include "checkConstants.h"
@@ -92,9 +91,9 @@ This pass outputs the program as a P4 source file.
 */
 class PrettyPrint : public Inspector {
     /// output file
-    Util::PathName ppfile;
+    std::filesystem::path ppfile;
     /// The file that is being compiled.
-    Util::PathName inputfile;
+    std::filesystem::path inputfile;
 
  public:
     explicit PrettyPrint(const CompilerOptions &options) {

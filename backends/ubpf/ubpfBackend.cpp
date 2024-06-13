@@ -56,7 +56,7 @@ void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
     auto *cstream = openFile(options.outputFile, false);
     if (cstream == nullptr) return;
 
-    Util::PathName hfile = options.outputFile;
+    std::filesystem::path hfile = options.outputFile;
     hfile.replace_extension(".h");
 
     auto *hstream = openFile(hfile, false);

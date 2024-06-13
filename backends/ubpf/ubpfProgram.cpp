@@ -60,7 +60,7 @@ bool UBPFProgram::build() {
     return success;
 }
 
-void UBPFProgram::emitC(UbpfCodeBuilder *builder, const Util::PathName &headerFile) {
+void UBPFProgram::emitC(UbpfCodeBuilder *builder, const std::filesystem::path &headerFile) {
     emitGeneratedComment(builder);
 
     builder->appendFormat("#include \"%s\"", headerFile);
@@ -126,7 +126,7 @@ void UBPFProgram::emitC(UbpfCodeBuilder *builder, const Util::PathName &headerFi
     builder->blockEnd(true);
 }
 
-void UBPFProgram::emitH(EBPF::CodeBuilder *builder, const Util::PathName &) {
+void UBPFProgram::emitH(EBPF::CodeBuilder *builder, const std::filesystem::path &) {
     emitGeneratedComment(builder);
     builder->appendLine("#ifndef _P4_GEN_HEADER_");
     builder->appendLine("#define _P4_GEN_HEADER_");

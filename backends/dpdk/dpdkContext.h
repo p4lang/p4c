@@ -25,7 +25,6 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/json.h"
 #include "lib/nullstream.h"
-#include "lib/path.h"
 #include "options.h"
 #include "p4/config/v1/p4info.pb.h"
 

@@ -34,7 +34,6 @@ limitations under the License.
 #include "lib/exename.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "lib/path.h"
 
 /* CONFIG_PKGDATADIR is defined by cmake at compile time to be the same as
  * CMAKE_INSTALL_PREFIX This is only valid when the compiler is built and
@@ -454,9 +453,10 @@ void ParserOptions::closePreprocessedInput(FILE *inputStream) const {
 
 // From (folder, file.ext, suffix)  returns
 // folder/file-suffix.ext
-static Util::PathName makeFileName(const Util::PathName &folder, const Util::PathName &name,
-                                   std::string_view baseSuffix) {
-    Util::PathName newName(name.stem());
+static std::filesystem::path makeFileName(const std::filesystem::path &folder,
+                                          const std::filesystem::path &name,
+                                          std::string_view baseSuffix) {
+    std::filesystem::path newName(name.stem());
     newName += baseSuffix;
     newName += name.extension();
 
@@ -488,7 +488,7 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
         }
         if (match) {
             std::string suffix = absl::StrFormat("-%04zu-%s", ++dump_uid, name);
-            Util::PathName fileName =
+            std::filesystem::path fileName =
                 makeFileName(dumpFolder, (file == "-" ? "tmp.p4" : file), suffix);
 
             std::unique_ptr<std::ostream> stream{openFile(fileName, true)};

@@ -18,21 +18,20 @@ limitations under the License.
 #define BACKENDS_DPDK_OPTIONS_H_
 
 #include "backends/dpdk/midend.h"
-#include "lib/path.h"
 
 namespace DPDK {
 
 class DpdkOptions : public CompilerOptions {
  public:
-    Util::PathName bfRtSchema;
+    std::filesystem::path bfRtSchema;
     /// File to output to.
-    Util::PathName outputFile;
+    std::filesystem::path outputFile;
     /// File to output TDI JSON to.
-    Util::PathName tdiFile;
+    std::filesystem::path tdiFile;
     /// File to output context JSON to.
-    Util::PathName ctxtFile;
+    std::filesystem::path ctxtFile;
     /// File to output the TDI builder configuration to.
-    Util::PathName tdiBuilderConf;
+    std::filesystem::path tdiBuilderConf;
     /// Read from JSON.
     bool loadIRFromJson = false;
     /// Enable/disable Egress pipeline in PSA.

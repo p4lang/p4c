@@ -23,7 +23,6 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
-#include "lib/path.h"
 #include "target.h"
 #include "ubpfModel.h"
 
@@ -63,8 +62,8 @@ class UBPFProgram : public EBPF::EBPFProgram {
     }
 
     bool build() override;
-    void emitC(UbpfCodeBuilder *builder, const Util::PathName &headerFile);
-    void emitH(EBPF::CodeBuilder *builder, const Util::PathName &headerFile) override;
+    void emitC(UbpfCodeBuilder *builder, const std::filesystem::path &headerFile);
+    void emitH(EBPF::CodeBuilder *builder, const std::filesystem::path &headerFile) override;
     void emitPreamble(EBPF::CodeBuilder *builder) override;
     void emitTypes(EBPF::CodeBuilder *builder) override;
     void emitTableDefinition(EBPF::CodeBuilder *builder) const;

@@ -20,7 +20,6 @@
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "lib/nullstream.h"
-#include "lib/path.h"
 
 namespace graphs {
 
@@ -44,7 +43,7 @@ Graph *ParserGraphs::CreateSubGraph(Graph &currentSubgraph, const cstring &name)
     return &newSubgraph;
 }
 
-ParserGraphs::ParserGraphs(P4::ReferenceMap *refMap, Util::PathName graphsDir)
+ParserGraphs::ParserGraphs(P4::ReferenceMap *refMap, std::filesystem::path graphsDir)
     : refMap(refMap), graphsDir(std::move(graphsDir)) {
     visitDagOnce = false;
 }

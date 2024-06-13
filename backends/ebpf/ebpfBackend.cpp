@@ -22,7 +22,6 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "lib/error.h"
 #include "lib/nullstream.h"
-#include "lib/path.h"
 #include "psa/backend.h"
 #include "psa/ebpfPsaGen.h"
 #include "target.h"
@@ -43,7 +42,7 @@ void emitFilterModel(const EbpfOptions &options, Target *target, const IR::Tople
     auto *cstream = openFile(options.outputFile, false);
     if (cstream == nullptr) return;
 
-    Util::PathName hfile = options.outputFile;
+    std::filesystem::path hfile = options.outputFile;
     hfile.replace_extension(".h");
     auto *hstream = openFile(hfile, false);
     if (hstream == nullptr) return;

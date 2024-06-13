@@ -52,7 +52,7 @@ void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOpt
             "pna"_cs, new P4::ControlPlaneAPI::Standard::PNAArchHandlerBuilderForDPDK());
     auto p4Runtime = P4::generateP4Runtime(program, options.arch);
 
-    Util::PathName filename = isTDI ? options.tdiFile : options.bfRtSchema;
+    std::filesystem::path filename = isTDI ? options.tdiFile : options.bfRtSchema;
     auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info, isTDI, options);
     std::ostream *out = openFile(filename, false);
     if (!out) {

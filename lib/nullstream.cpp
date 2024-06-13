@@ -19,9 +19,8 @@ limitations under the License.
 #include <fstream>  // IWYU pragma: keep
 
 #include "lib/error.h"
-#include "lib/path.h"
 
-std::ostream *openFile(const Util::PathName &name, bool nullOnError) {
+std::ostream *openFile(const std::filesystem::path &name, bool nullOnError) {
     if (name.empty()) {
         if (nullOnError) return new nullstream();
         ::error(ErrorType::ERR_INVALID, "Empty name for openFile");

@@ -18,7 +18,6 @@
 
 #include "graphs.h"
 #include "lib/nullstream.h"
-#include "lib/path.h"
 
 namespace graphs {
 

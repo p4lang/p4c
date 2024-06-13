@@ -24,7 +24,7 @@ enum XDP2TC { XDP2TC_NONE, XDP2TC_META, XDP2TC_HEAD, XDP2TC_CPUMAP };
 class EbpfOptions : public CompilerOptions {
  public:
     /// file to output to
-    Util::PathName outputFile;
+    std::filesystem::path outputFile;
     /// read from json
     bool loadIRFromJson = false;
     /// Externs generation

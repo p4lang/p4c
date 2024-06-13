@@ -26,7 +26,6 @@ limitations under the License.
 #include "ebpfType.h"
 #include "frontends/common/options.h"
 #include "frontends/p4/coreLibrary.h"
-#include "lib/path.h"
 
 namespace EBPF {
 
@@ -83,7 +82,7 @@ bool EBPFProgram::build() {
     return true;
 }
 
-void EBPFProgram::emitC(CodeBuilder *builder, const Util::PathName &header) {
+void EBPFProgram::emitC(CodeBuilder *builder, const std::filesystem::path &header) {
     emitGeneratedComment(builder);
 
     // Remove the path from the header
@@ -157,7 +156,7 @@ void EBPFProgram::emitGeneratedComment(CodeBuilder *builder) {
     builder->newline();
 }
 
-void EBPFProgram::emitH(CodeBuilder *builder, const Util::PathName &) {
+void EBPFProgram::emitH(CodeBuilder *builder, const std::filesystem::path &) {
     emitGeneratedComment(builder);
     builder->appendLine("#ifndef _P4_GEN_HEADER_");
     builder->appendLine("#define _P4_GEN_HEADER_");

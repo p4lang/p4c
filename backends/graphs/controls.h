@@ -18,7 +18,6 @@ limitations under the License.
 #define BACKENDS_GRAPHS_CONTROLS_H_
 
 #include "graphs.h"
-#include "lib/path.h"
 
 namespace graphs {
 
@@ -37,7 +36,7 @@ class ControlGraphs : public Graphs {
         std::vector<Graph *> subgraphs{};
     };
 
-    ControlGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, Util::PathName graphsDir);
+    ControlGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, std::filesystem::path graphsDir);
 
     bool preorder(const IR::PackageBlock *block) override;
     bool preorder(const IR::ControlBlock *block) override;

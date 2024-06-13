@@ -20,7 +20,6 @@ and limitations under the License.
 
 #include "backends/ebpf/ebpfOptions.h"
 #include "backends/ebpf/target.h"
-#include "lib/path.h"
 
 namespace TC {
 
@@ -132,7 +131,7 @@ void Backend::serialize() const {
     if (::errorCount() > 0) {
         return;
     }
-    Util::PathName outputFile = options.outputFolder / (progName + ".template");
+    std::filesystem::path outputFile = options.outputFolder / (progName + ".template");
 
     auto outstream = openFile(outputFile, false);
     if (outstream != nullptr) {
@@ -144,9 +143,9 @@ void Backend::serialize() const {
                                          std::filesystem::perms::others_all,
                                      std::filesystem::perm_options::add);
     }
-    Util::PathName parserFile = options.outputFolder / (progName + "_parser.c");
-    Util::PathName postParserFile = options.outputFolder / (progName + "_control_blocks.c");
-    Util::PathName headerFile = options.outputFolder / (progName + "_parser.h");
+    std::filesystem::path parserFile = options.outputFolder / (progName + "_parser.c");
+    std::filesystem::path postParserFile = options.outputFolder / (progName + "_control_blocks.c");
+    std::filesystem::path headerFile = options.outputFolder / (progName + "_parser.h");
 
     auto cstream = openFile(postParserFile, false);
     auto pstream = openFile(parserFile, false);

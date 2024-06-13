@@ -26,7 +26,6 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "lib/path.h"
 
 namespace graphs {
 
@@ -70,7 +69,7 @@ bool ControlGraphs::ControlStack::isEmpty() const { return subgraphs.empty(); }
 using vertex_t = ControlGraphs::vertex_t;
 
 ControlGraphs::ControlGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                             Util::PathName graphsDir)
+                             std::filesystem::path graphsDir)
     : refMap(refMap), typeMap(typeMap), graphsDir(std::move(graphsDir)) {
     visitDagOnce = false;
 }

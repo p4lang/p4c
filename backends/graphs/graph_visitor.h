@@ -21,7 +21,6 @@
 
 #include "graphs.h"
 #include "lib/json.h"
-#include "lib/path.h"
 
 #ifndef BACKENDS_GRAPHS_GRAPH_VISITOR_H_
 #define BACKENDS_GRAPHS_GRAPH_VISITOR_H_
@@ -64,8 +63,8 @@ class Graph_visitor : public Graphs {
     /// @param graphs option to output graph for each function block
     /// @param fullGraph option to create fullGraph
     /// @param jsonOut option to create json fullGraph.
-    Graph_visitor(Util::PathName graphsDir, const bool graphs, const bool fullGraph,
-                  const bool jsonOut, Util::PathName filename)
+    Graph_visitor(std::filesystem::path graphsDir, const bool graphs, const bool fullGraph,
+                  const bool jsonOut, std::filesystem::path filename)
         : graphsDir(std::move(graphsDir)),
           graphs(graphs),
           fullGraph(fullGraph),
@@ -115,13 +114,13 @@ class Graph_visitor : public Graphs {
 
     Util::JsonObject *json = nullptr;          // stores json that will be outputted
     Util::JsonArray *programBlocks = nullptr;  // stores objects in top level array "nodes"
-    Util::PathName graphsDir;
+    std::filesystem::path graphsDir;
     /// options
     const bool graphs;     // output boost graphs to files
     const bool fullGraph;  // merge boost graphs into one CFG, and output to file
     const bool jsonOut;    // iterate over boost graphs, and create json representation of these
                            // graphs
-    const Util::PathName filename;
+    const std::filesystem::path filename;
 };
 
 }  // namespace graphs
