@@ -1,5 +1,4 @@
 <!-- \page changelog Changelog -->
-
 # Semantic Versioning
 We follow a monthly release cadence. Our versioning scheme is as follows:
 - **Major.Minor.Patch** versions align with the P4 specification.
