@@ -1140,12 +1140,6 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
 
                 BUG_CHECK(hdr->is<SymbolicHeader>(), "%1%: Not a header?", hdr);
                 auto sh = hdr->to<SymbolicHeader>();
-                if (sh->valid->isKnown() && sh->valid->value) {
-                    auto result = new SymbolicException(expression,
-                                                        P4::StandardExceptions::OverwritingHeader);
-                    set(expression, result);
-                    return;
-                }
                 sh->setAllUnknown();
                 sh->setValid(true);
                 set(expression, SymbolicVoid::get());
