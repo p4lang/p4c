@@ -126,6 +126,61 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           buf << cl->indent << "}";
           return buf.str();
       }}},
+    {"isSemanticallyLess"_cs,
+     {&NamedType::Bool(),
+      {new IrField(new ReferenceType(new NamedType(IrClass::nodeClass()), true), "a_"_cs)},
+      CONST + IN_IMPL + OVERRIDE,
+      [](IrClass *cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
+          std::stringstream buf;
+          buf << "{" << std::endl;
+          buf << cl->indent << cl->indent
+              << "if (static_cast<const Node *>(this) == &a_) return false;\n";
+          if (auto parent = cl->getParent()) {
+              buf << cl->indent << cl->indent
+                  << "if (typeId() != a_.typeId()) "
+                     "return typeId() < a_.typeId();\n";
+              if (parent->name != "Node") {
+                  buf << cl->indent << cl->indent << "if (!"
+                      << parent->qualified_name(cl->containedIn) << "::equiv(a_)) return "
+                      << parent->qualified_name(cl->containedIn) << "::isSemanticallyLess(a_);\n";
+              }
+          }
+          if (body) {
+              buf << cl->indent << cl->indent << "auto &a = static_cast<const " << cl->name
+                  << " &>(a_);\n";
+              buf << LineDirective(srcInfo, true) << body;
+          } else {
+              bool first = true;
+              for (auto f : *cl->getFields()) {
+                  if (*f->type == NamedType::SourceInfo())
+                      continue;  // FIXME -- deal with SourcInfo
+                  if (first) {
+                      buf << cl->indent << cl->indent << "auto &a = static_cast<const " << cl->name
+                          << " &>(a_);\n";
+                      buf << cl->indent << cl->indent << "return ";
+                      first = false;
+                  } else {
+                      buf << std::endl << cl->indent << cl->indent << "|| ";
+                  }
+                  if (f->type->resolve(cl->containedIn) == nullptr) {
+                      // This is not an IR pointer
+                      buf << "IR::isSemanticallyLess(" << f->name << ", a." << f->name << ")";
+                  } else if (f->isInline) {
+                      buf << f->name << ".isSemanticallyLess(a." << f->name << ")";
+                  } else {
+                      buf << "(" << f->name << " != nullptr ? a." << f->name << " != nullptr ? "
+                          << f->name << "->isSemanticallyLess(*a." << f->name << ")"
+                          << " : false : a." << f->name << " != nullptr)";
+                  }
+              }
+              if (first) {  // no fields?
+                  buf << cl->indent << cl->indent << "return typeId() < a_.typeId()";
+              }
+              buf << ";" << std::endl;
+          }
+          buf << cl->indent << "}";
+          return buf.str();
+      }}},
     {"operator<<"_cs,
      {&ReferenceType::OstreamRef,
       {new IrField(&ReferenceType::OstreamRef, "out"_cs)},
@@ -320,15 +375,20 @@ void IrClass::generateMethods() {
                 }
             }
         }
-        for (auto *parent = getParent(); parent; parent = parent->getParent()) {
-            auto eq_overload = new IrMethod("operator=="_cs, "{ return a == *this; }"_cs);
-            eq_overload->clss = this;
-            eq_overload->isOverride = true;
-            eq_overload->rtype = &NamedType::Bool();
-            eq_overload->args.push_back(
-                new IrField(new ReferenceType(new NamedType(parent), true), "a"_cs));
-            eq_overload->isConst = true;
-            elements.push_back(eq_overload);
+        for (const auto *parent = getParent(); parent != nullptr; parent = parent->getParent()) {
+            if (!hasNoDirective("operator=="_cs)) {
+                std::stringstream buf;
+                buf << "{ return a.operator==(*this); }";
+                auto *eq_overload = new IrMethod("operator=="_cs, buf.str());
+                eq_overload->clss = this;
+                eq_overload->isOverride = true;
+                eq_overload->inImpl = true;
+                eq_overload->rtype = &NamedType::Bool();
+                eq_overload->args.push_back(
+                    new IrField(new ReferenceType(new NamedType(parent), true), "a"_cs));
+                eq_overload->isConst = true;
+                elements.push_back(eq_overload);
+            }
         }
     }
     IrMethod *ctor = nullptr;
