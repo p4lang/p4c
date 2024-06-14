@@ -3724,7 +3724,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
         auto rettype = new IR::Type_Var(IR::ID(nameGen->newName("R"), "<returned type>"_cs));
         auto args = new IR::Vector<IR::ArgumentInfo>();
-        bool constArgs = true;
+        bool constArgs = !expression->arguments->empty();
         for (auto aarg : *expression->arguments) {
             auto arg = aarg->expression;
             auto argType = getType(arg);
