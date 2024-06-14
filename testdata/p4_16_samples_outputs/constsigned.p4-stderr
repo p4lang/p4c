@@ -1,24 +1,6 @@
-constsigned.p4(37): [--Wwarn=overflow] warning: 8s128: signed value does not fit in 8 bits
-const int<8> e0 = -8s128
-                   ^^^^^
-constsigned.p4(38): [--Wwarn=overflow] warning: 8s129: signed value does not fit in 8 bits
-const int<8> f0 = -8s129
-                   ^^^^^
-constsigned.p4(39): [--Wwarn=overflow] warning: 8s255: signed value does not fit in 8 bits
-const int<8> g0 = -8s255
-                   ^^^^^
 constsigned.p4(40): [--Wwarn=overflow] warning: 8s256: signed value does not fit in 8 bits
 const int<8> h0 = -8s256
                    ^^^^^
-constsigned.p4(44): [--Wwarn=overflow] warning: 8s128: signed value does not fit in 8 bits
-const int<8> l0 = 8s128
-                  ^^^^^
-constsigned.p4(45): [--Wwarn=overflow] warning: 8s129: signed value does not fit in 8 bits
-const int<8> m0 = 8s129
-                  ^^^^^
-constsigned.p4(46): [--Wwarn=overflow] warning: 8s255: signed value does not fit in 8 bits
-const int<8> n0 = 8s255
-                  ^^^^^
 constsigned.p4(47): [--Wwarn=overflow] warning: 8s256: signed value does not fit in 8 bits
 const int<8> o0 = 8s256
                   ^^^^^
@@ -31,22 +13,7 @@ const int<8> g = -255;
 constsigned.p4(24): [--Wwarn=overflow] warning: -8s256: signed value does not fit in 8 bits
 const int<8> h = -256;
                   ^^^
-constsigned.p4(28): [--Wwarn=overflow] warning: 8s128: signed value does not fit in 8 bits
-const int<8> l = 128;
-                 ^^^
-constsigned.p4(29): [--Wwarn=overflow] warning: 8s129: signed value does not fit in 8 bits
-const int<8> m = 129;
-                 ^^^
-constsigned.p4(30): [--Wwarn=overflow] warning: 8s255: signed value does not fit in 8 bits
-const int<8> n = 255;
-                 ^^^
 constsigned.p4(31): [--Wwarn=overflow] warning: 8s256: signed value does not fit in 8 bits
 const int<8> o = 256;
                  ^^^
-constsigned.p4(50): [--Wwarn=overflow] warning: 1s1: signed value does not fit in 1 bits
-const int<1> zz1 = 1;
-                   ^
-constsigned.p4(51): [--Wwarn=overflow] warning: 2s2: signed value does not fit in 2 bits
-const int<2> zz2 = 2;
-                   ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -142,4 +142,43 @@ TEST_F(ConstantExpr, TestIntegerFuncs) {
     EXPECT_EQ(neg_res.asInt(), -123);
 }
 
+TEST_F(ConstantExpr, TestSignedUnsigned) {
+    const bool isSigned = true;
+    const bool isUnsigned = false;
+
+    auto t7s = IR::Type_Bits(7, isSigned);
+    auto t7u = IR::Type_Bits(7, isUnsigned);
+    auto t13s = IR::Type_Bits(13, isSigned);
+    auto t13u = IR::Type_Bits(13, isUnsigned);
+
+    auto c0 = IR::Constant(&t7s, 0x7f);
+    EXPECT_EQ(c0.asInt(), -1);
+    EXPECT_ANY_THROW(c0.asUnsigned());  // will also print error message
+
+    auto c1 = IR::Constant(&t7u, 0x7f);
+    EXPECT_EQ(c1.asUnsigned(), 127);
+
+    // overflow, but this should not even generate a warning under regular settings
+    auto c2 = IR::Constant(&t7s, 0xff);
+    EXPECT_EQ(c2.asInt(), -1);
+
+    // overflow, but this should not even generate a warning under regular settings
+    auto c3 = IR::Constant(&t7u, 0xff);
+    EXPECT_EQ(c3.asUnsigned(), 127);
+
+    auto c4 = IR::Constant(&t13s, 0x1555);  // 0b1_0101_0101_0101
+    EXPECT_EQ(c4.asInt(), -2731);
+    EXPECT_ANY_THROW(c4.asUnsigned());  // will also print error message
+
+    auto c5 = IR::Constant(&t13u, 0x1555);
+    EXPECT_EQ(c5.asUnsigned(), 5461);
+
+    // overflow, but this should not even generate a warning under regular settings
+    auto c6 = IR::Constant(&t13s, 0x3555);  // 0b1_0101_0101_0101
+    EXPECT_EQ(c6.asInt(), -2731);
+
+    // overflow, but this should not even generate a warning under regular settings
+    auto c7 = IR::Constant(&t13u, 0x3555);
+    EXPECT_EQ(c7.asUnsigned(), 5461);
+}
 }  // namespace Test
