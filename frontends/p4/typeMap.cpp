@@ -158,15 +158,23 @@ bool TypeMap::equivalent(const IR::Type *left, const IR::Type *right, bool stric
         return lv->getVarName() == rv->getVarName() && lv->getDeclId() == rv->getDeclId();
     }
     if (auto ls = left->to<IR::Type_Stack>()) {
+        const auto isLegal = [](const IR::Type_Stack *stack) {
+            if (!stack->sizeKnown()) {
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: Size of header stack type should be a constant", stack);
+                return false;
+            }
+            if (stack->getSize() < 1) {
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "Invalid size of header stack %1%. The size must be a positive integer.",
+                        stack);
+                return false;
+            }
+            return true;
+        };
+
         auto rs = right->to<IR::Type_Stack>();
-        if (!ls->sizeKnown()) {
-            ::error(ErrorType::ERR_TYPE_ERROR,
-                    "%1%: Size of header stack type should be a constant", left);
-            return false;
-        }
-        if (!rs->sizeKnown()) {
-            ::error(ErrorType::ERR_TYPE_ERROR,
-                    "%1%: Size of header stack type should be a constant", right);
+        if (!isLegal(ls) || !isLegal(rs)) {
             return false;
         }
         return equivalent(ls->elementType, rs->elementType, strict) &&
