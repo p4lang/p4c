@@ -148,8 +148,12 @@ const Bmv2V1ModelProgramInfo *Bmv2V1ModelTestgenTarget::produceProgramInfoImpl(
         }
     }
 
-    return new Bmv2V1ModelProgramInfo(*compilerResult.checkedTo<BMv2V1ModelCompilerResult>(),
-                                      programmableBlocks, declIdToGress);
+    auto *progInfo = new Bmv2V1ModelProgramInfo(
+        *compilerResult.checkedTo<BMv2V1ModelCompilerResult>(), programmableBlocks, declIdToGress);
+    for (const auto &block : *progInfo->getProgrammableBlocks()) {
+        ::warning("Programmable block: %1%", block.second->toString());
+    }
+    return progInfo;
 }
 
 Bmv2TestBackend *Bmv2V1ModelTestgenTarget::getTestBackendImpl(
