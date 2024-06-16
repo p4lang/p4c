@@ -1140,6 +1140,12 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
 
                 BUG_CHECK(hdr->is<SymbolicHeader>(), "%1%: Not a header?", hdr);
                 auto sh = hdr->to<SymbolicHeader>();
+                if (sh->valid->isKnown() && sh->valid->value) {
+                    ::warning(ErrorType::WARN_MULTI_HDR_EXTRACT, "%1%: Performing an extraction "
+                    "more than once on the same header will nearly always cause all but the last "
+                    "extracted header to be deleted from the packet. It may be preferable to "
+                    "replace previous extractions with lookaheads instead.", expression);
+                }
                 sh->setAllUnknown();
                 sh->setValid(true);
                 set(expression, SymbolicVoid::get());
