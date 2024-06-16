@@ -15,7 +15,6 @@ set(
   testgen.cpp
 
   core/compiler_result.cpp
-  core/externs.cpp
   core/program_info.cpp
   core/small_step/abstract_stepper.cpp
   core/small_step/cmd_stepper.cpp

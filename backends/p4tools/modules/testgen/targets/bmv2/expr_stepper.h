@@ -4,10 +4,8 @@
 #include <cstdint>
 #include <string>
 
-#include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/solver.h"
-#include "ir/vector.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
@@ -39,13 +37,17 @@ class Bmv2V1ModelExprStepper : public ExprStepper {
     /// program.
     void processRecirculate(const ExecutionState &state, SmallStepEvaluator::Result &result);
 
+    // using MethodImpl = std::function<void(const ExternInfo &, Bmv2V1ModelExprStepper &stepper)>;
+    // Provides implementations of BMv2 externs.
+    static const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>::MethodImpl
+        ASSERT_ASSUME_EXECUTE;
+    static const ExternMethodImpls<Bmv2V1ModelExprStepper> BMV2_EXTERN_METHOD_IMPLS;
+
  public:
     Bmv2V1ModelExprStepper(ExecutionState &state, AbstractSolver &solver,
                            const ProgramInfo &programInfo);
 
-    void evalExternMethodCall(const IR::MethodCallExpression *call, const IR::Expression *receiver,
-                              IR::ID name, const IR::Vector<IR::Argument> *args,
-                              ExecutionState &state) override;
+    void evalExternMethodCall(const ExternInfo &externInfo) override;
 
     bool preorder(const IR::P4Table * /*table*/) override;
 };

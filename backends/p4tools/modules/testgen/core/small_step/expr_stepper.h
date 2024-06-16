@@ -1,15 +1,15 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_EXPR_STEPPER_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_EXPR_STEPPER_H_
 
+#include <cstdint>
 #include <utility>
 #include <vector>
 
-#include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/solver.h"
-#include "ir/vector.h"
 #include "lib/cstring.h"
 
+#include "backends/p4tools/modules/testgen/core/extern_info.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -18,6 +18,148 @@ namespace P4Tools::P4Testgen {
 
 /// Implements small-step operational semantics for expressions.
 class ExprStepper : public AbstractStepper {
+    /**************************************************************************************************
+    ExternMethodImpls
+    **************************************************************************************************/
+ public:
+    /// Encapsulates a set of extern method implementations.
+    template <typename StepperType>
+    class ExternMethodImpls {
+     public:
+        /// The type of an extern-method implementation.
+        /// @param externInfo is general useful information that can be consumsed by externs
+        /// (arguments, method names, etc).
+        /// @param stepper is the abstract stepper invoking the function. Templated on the type of
+        /// stepper invoking it.
+        using MethodImpl = std::function<void(const ExternInfo &externInfo, StepperType &stepper)>;
+
+        /// @param call the original method call expression, can be used for stepInto calls.
+        /// @param receiver a symbolic value representing the object on which the method is being
+        ///     called.
+        /// @param name the name of the method being called.
+        /// @param args the list of arguments being passed to method.
+        /// @param state the state in which the call is being made, with the call at the top of the
+        ///     current continuation body.
+        ///
+        /// @returns the matching extern-method implementation if it was found; std::nullopt
+        /// otherwise.
+        ///
+        /// A BUG occurs if the receiver is not an extern or if the call is ambiguous.
+        std::optional<MethodImpl> find(const IR::PathExpression &externObjectRef,
+                                       const IR::ID &methodName,
+                                       const IR::Vector<IR::Argument> &args) const {
+            // We have to check the extern type here. We may receive a specialized canonical type,
+            // which we need to unpack.
+            const IR::Type_Extern *externType = nullptr;
+            if (const auto *type = externObjectRef.type->to<IR::Type_Extern>()) {
+                externType = type;
+            } else if (const auto *specType =
+                           externObjectRef.type->to<IR::Type_SpecializedCanonical>()) {
+                CHECK_NULL(specType->substituted);
+                externType = specType->substituted->checkedTo<IR::Type_Extern>();
+            } else if (externObjectRef.path->name == IR::ID("*method")) {
+            } else {
+                BUG("Not a valid extern: %1% with member %2%. Type is %3%.", externObjectRef,
+                    methodName, externObjectRef.type->node_type_name());
+            }
+
+            cstring qualifiedMethodName = externType->name + "." + methodName;
+            auto submapIt = impls.find(qualifiedMethodName);
+            if (submapIt == impls.end()) {
+                return std::nullopt;
+            }
+            if (submapIt->second.count(args.size()) == 0) {
+                return std::nullopt;
+            }
+
+            // Find matching methods: if any arguments are named, then the parameter name must
+            // match.
+            std::optional<MethodImpl> matchingImpl;
+            for (const auto &pair : submapIt->second.at(args.size())) {
+                const auto &paramNames = pair.first;
+                const auto &methodImpl = pair.second;
+
+                if (matches(paramNames, args)) {
+                    BUG_CHECK(!matchingImpl, "Ambiguous extern method call: %1%",
+                              qualifiedMethodName);
+                    matchingImpl = methodImpl;
+                }
+            }
+
+            return matchingImpl;
+        }
+
+     private:
+        /// A two-level map. First-level keys are method names qualified by the extern type name
+        /// (e.g., "packet_in.advance". Second-level keys are the number of arguments. Values are
+        /// lists of matching extern-method implementations, paired with the names of the method
+        /// parameters.
+        std::map<cstring,
+                 std::map<size_t, std::vector<std::pair<std::vector<cstring>, MethodImpl>>>>
+            impls;
+
+        /// Determines whether the given list of parameter names matches the given argument list.
+        /// According to the P4 specification, a match occurs when the lists have the same length
+        /// and the name of any named argument matches the name of the corresponding parameter.
+        static bool matches(const std::vector<cstring> &paramNames,
+                            const IR::Vector<IR::Argument> &args) {
+            // Number of parameters should match the number of arguments.
+            if (paramNames.size() != args.size()) {
+                return false;
+            }
+            // Any named argument should match the name of the corresponding parameter.
+            for (size_t idx = 0; idx < paramNames.size(); idx++) {
+                const auto &paramName = paramNames.at(idx);
+                const auto &arg = args.at(idx);
+
+                if (arg->name.name == nullptr) {
+                    continue;
+                }
+                if (paramName != arg->name.name) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+     public:
+        /// Represents a list of extern method implementations. The components of each element in
+        /// this list are as follows:
+        ///   1. The method name qualified by the extern type name (e.g., "packet_in.advance").
+        ///   2. The names of the method parameters.
+        ///   3. The method's implementation.
+        using ImplList = std::list<std::tuple<cstring, std::vector<cstring>, MethodImpl>>;
+
+        explicit ExternMethodImpls(const ImplList &implList) {
+            for (const auto &implSpec : implList) {
+                auto &[name, paramNames, impl] = implSpec;
+
+                auto &tmpImplList = impls[name][paramNames.size()];
+
+                // Make sure that we have at most one implementation for each set of parameter
+                // names. This is a quadratic-time algorithm, but should be fine, since we expect
+                // the number of overloads to be small in practice.
+                for (auto &pair : tmpImplList) {
+                    BUG_CHECK(pair.first != paramNames, "Multiple implementations of %1%(%2%)",
+                              name, paramNames);
+                }
+
+                tmpImplList.emplace_back(paramNames, impl);
+            }
+        }
+    };
+
+    /// Definitions of internal helper functions.
+    static const ExprStepper::ExternMethodImpls<ExprStepper> INTERNAL_EXTERN_METHOD_IMPLS;
+
+    /// Provides implementations of all known extern methods built into P4 core.
+    static const ExprStepper::ExternMethodImpls<ExprStepper> CORE_EXTERN_METHOD_IMPLS;
+
+    /**************************************************************************************************
+    ExprStepper
+    **************************************************************************************************/
+
  private:
     /// We delegate evaluation to the TableStepper, which needs to access protected members.
     friend class TableStepper;
@@ -83,9 +225,8 @@ class ExprStepper : public AbstractStepper {
     /// @param state the state in which the call is being made, with the call at the top of the
     ///     current continuation body.
     /// TODO(fruffy): Move this call out of the expression stepper. The location is confusing.
-    virtual void evalExternMethodCall(const IR::MethodCallExpression *call,
-                                      const IR::Expression *receiver, IR::ID name,
-                                      const IR::Vector<IR::Argument> *args, ExecutionState &state);
+    virtual void evalExternMethodCall(const ExternInfo &externInfo);
+
     /// Evaluates a call to an extern method that only exists in the interpreter. These are helper
     /// functions used to execute custom operations and specific control flow. They do not exist as
     /// P4 code or call.
@@ -98,10 +239,7 @@ class ExprStepper : public AbstractStepper {
     /// @param state the state in which the call is being made, with the call at the top of the
     ///     current continuation body.
     /// TODO(fruffy): Move this call out of the expression stepper. The location is confusing.
-    virtual void evalInternalExternMethodCall(const IR::MethodCallExpression *call,
-                                              const IR::Expression *receiver, IR::ID name,
-                                              const IR::Vector<IR::Argument> *args,
-                                              const ExecutionState &state);
+    void evalInternalExternMethodCall(const ExternInfo &externInfo);
 
     /// Evaluates a call to an action. This usually only happens when a table is invoked or when
     /// action is directly invoked from a control.

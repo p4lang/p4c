@@ -2,7 +2,6 @@
 
 #include "ir/solver.h"
 
-#include "backends/p4tools/modules/testgen/core/externs.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/table_stepper.h"
@@ -18,15 +17,17 @@ PnaDpdkExprStepper::PnaDpdkExprStepper(ExecutionState &state, AbstractSolver &so
 
 // Provides implementations of PNA-DPDK externs.
 // NOLINTNEXTLINE(cppcoreguidelines-interfaces-global-init)
-const ExternMethodImpls PnaDpdkExprStepper::PNA_DPDK_EXTERN_METHOD_IMPLS({});
+const ExprStepper::ExternMethodImpls<PnaDpdkExprStepper>
+    PnaDpdkExprStepper::PNA_DPDK_EXTERN_METHOD_IMPLS({});
 
-void PnaDpdkExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
-                                              const IR::Expression *receiver, IR::ID name,
-                                              const IR::Vector<IR::Argument> *args,
-                                              ExecutionState &state) {
-    if (!PNA_DPDK_EXTERN_METHOD_IMPLS.exec(call, receiver, name, args, state, result)) {
-        SharedPnaExprStepper::evalExternMethodCall(call, receiver, name, args, state);
+void PnaDpdkExprStepper::evalExternMethodCall(const ExternInfo &externInfo) {
+    auto method = PNA_DPDK_EXTERN_METHOD_IMPLS.find(
+        externInfo.externObjectRef, externInfo.methodName, externInfo.externArguments);
+    if (method.has_value()) {
+        return method.value()(externInfo, *this);
     }
+    // Lastly, check whether we are calling an internal extern method.
+    return SharedPnaExprStepper::evalExternMethodCall(externInfo);
 }
 
 bool PnaDpdkExprStepper::preorder(const IR::P4Table *table) {
