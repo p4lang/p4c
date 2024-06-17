@@ -1146,7 +1146,8 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
                         "%1%: Performing an extraction more than once on the same header will "
                         "nearly always cause all but the last extracted header to be deleted "
                         "from the packet. It may be preferable to replace previous extractions "
-                        "with lookaheads instead.", expression);
+                        "with lookaheads instead.",
+                        expression);
                 }
                 sh->setAllUnknown();
                 sh->setValid(true);
