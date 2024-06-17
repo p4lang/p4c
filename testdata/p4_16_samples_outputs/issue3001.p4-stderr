@@ -1,3 +1,0 @@
-issue3001.p4(23): [--Wwarn=uninitialized_use] warning: h may not be completely initialized
-    return h;
-           ^

@@ -1,4 +1,0 @@
-issue3623.p4(5): [--Wwarn=unused] warning: Control c is not used; removing
-control c(in bit<4> v) {
-        ^
-[--Wwarn=missing] warning: Program does not contain a `main' module

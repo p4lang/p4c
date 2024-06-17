@@ -1,3 +1,0 @@
-psa-type-hdr.p4(43): [--Werror=type-error] error: IPV4T_t: `type' can only be applied to base types
-type ipv4_t IPV4T_t;
-            ^^^^^^^

@@ -1,6 +1,0 @@
-stack1_e.p4(21): [--Wwarn=overflow] warning: 3s5: signed value does not fit in 3 bits
-        int<3> w = 5;
-                   ^
-stack1_e.p4(22): [--Werror=type-error] error: header h[?]: Size of header stack type should be a constant
-        h[w] stack;
-        ^^^^

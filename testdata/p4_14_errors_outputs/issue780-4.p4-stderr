@@ -1,4 +1,0 @@
-issue780-4.p4(1): [--Werror=invalid] error: header egress: invalid name; it can only be used for control
-header_type egress {
-^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

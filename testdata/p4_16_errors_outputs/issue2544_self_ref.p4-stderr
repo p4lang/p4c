@@ -1,6 +1,0 @@
-issue2544_self_ref.p4(2): [--Werror=unsupported] error: Self-referencing types not supported: 'E' within 'E'
-  void method(E e);
-              ^
-issue2544_self_ref.p4(1)
-extern E {
-       ^

@@ -1,3 +1,0 @@
-issue3644-2.p4(1): [--Werror=Target model error] error: NoAction: Expected an action with no parameters; did you include core.p4?
-action NoAction(in bit t) {}
-       ^^^^^^^^

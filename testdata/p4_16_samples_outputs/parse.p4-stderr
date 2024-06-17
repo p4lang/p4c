@@ -1,4 +1,0 @@
-parse.p4(19): [--Wwarn=unused] warning: Parser p is not used; removing
-parser p(in bs b, out bool matches)
-       ^
-[--Wwarn=missing] warning: Program does not contain a `main' module

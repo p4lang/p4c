@@ -1,4 +1,0 @@
-constructor1_e.p4(18):syntax error, unexpected (
-    Y<T>(
-        ^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

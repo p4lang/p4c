@@ -1,3 +1,0 @@
-issue754.p4(6): [--Wwarn=mismatch] warning: 3w12345: value does not fit in 3 bits
-top(c(12345)) main;
-      ^^^^^

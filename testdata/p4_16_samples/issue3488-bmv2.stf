@@ -1,2 +1,0 @@
-add test_ingress.pre_tbl1 hdr.ipv4.dst_addr:0xcb0b3bfe test_ingress.action3()
-packet 0 000000000000000000000000080000000000000000000000000000000000cb0b3bfe

@@ -1,3 +1,0 @@
-overflow.p4(36): [--Wwarn=mismatch] warning: 1w11: value does not fit in 1 bits
-action action_1_1(value) { modify_field(md.field_1_1_1, value); modify_field(md.field_2_1_1, 11); }
-                                                                                             ^^

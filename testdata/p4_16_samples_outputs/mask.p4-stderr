@@ -1,3 +1,0 @@
-mask.p4(26): [--Wwarn=unused] warning: Parser Parser is not used; removing
-parser Parser(packet_in b, out Parsed_Packet p) {
-       ^^^^^^

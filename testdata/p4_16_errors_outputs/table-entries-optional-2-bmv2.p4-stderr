@@ -1,9 +1,0 @@
-table-entries-optional-2-bmv2.p4(71): [--Wwarn=mismatch] warning: 8w0x100: value does not fit in 8 bits
-            (0x100, default): a_with_control_params(2);
-             ^^^^^
-table-entries-optional-2-bmv2.p4(73): [--Wwarn=mismatch] warning: 16w0x10000: value does not fit in 16 bits
-            (default, 0x10000): a_with_control_params(3);
-                      ^^^^^^^
-table-entries-optional-2-bmv2.p4(69): [--Werror=invalid] error: 170 &&& 240 invalid key expression
-            (0xaa &&& 0xf0, 0x1111 &&& 0xffff) : a_with_control_params(1);
-             ^^^^^^^^^^^^^

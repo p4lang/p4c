@@ -1,6 +1,0 @@
-const1_e.p4(19): [--Werror=invalid] error: 5 + 3: operands have different types: bit<32> and bit<16>
-    x = 32w5 + 16w3;
-        ^^^^^^^^^^^
-const1_e.p4(21): [--Werror=invalid] error: 5 / 0: Division by zero
-    x = 5 / 0;
-        ^^^^^

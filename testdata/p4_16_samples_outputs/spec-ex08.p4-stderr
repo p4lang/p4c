@@ -1,4 +1,0 @@
-spec-ex08.p4(25): [--Wwarn=unused] warning: Control p is not used; removing
-control p()
-        ^
-[--Wwarn=missing] warning: Program does not contain a `main' module

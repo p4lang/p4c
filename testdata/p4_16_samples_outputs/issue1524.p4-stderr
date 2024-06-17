@@ -1,9 +1,0 @@
-issue1524.p4(36): [--Wwarn=unused] warning: Parser ParserImpl is not used; removing
-parser ParserImpl(packet_in packet,
-       ^^^^^^^^^^
-issue1524.p4(50): [--Wwarn=unused] warning: Control bar is not used; removing
-control bar() {
-        ^^^
-[--Wwarn=missing] warning: Program does not contain a `main' module
-[--Wwarn=missing] warning: Program does not contain a main module, so P4Info's 'pkg_info' field will not be set
-[--Wwarn=missing] warning: Program does not contain a `main' module

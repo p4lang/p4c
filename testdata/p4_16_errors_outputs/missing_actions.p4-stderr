@@ -1,3 +1,0 @@
-missing_actions.p4(19): [--Werror=expected] error: t: expected 'actions' property
-    table t {
-          ^

@@ -1,6 +1,0 @@
-acl1.p4(223): [--Wwarn=type-inference] warning: Could not infer type for session_id, using bit<8>
-action negative_mirror(session_id) {
-                       ^^^^^^^^^^
-acl1.p4(223): [--Wwarn=unused] warning: 'session_id' is unused
-action negative_mirror(session_id) {
-                       ^^^^^^^^^^

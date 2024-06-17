@@ -1,0 +1,8 @@
+<map id="P4::CanBeImplicitlyCastConstraint" name="P4::CanBeImplicitlyCastConstraint">
+<area shape="rect" id="node1" title="The right type can be implicitly cast to the left type." alt="" coords="5,304,251,331"/>
+<area shape="rect" id="node2" href="$class_p4_1_1_binary_constraint.html" title="Base class for EqualityConstraint and CanBeImplicitlyCastConstraint." alt="" coords="51,229,205,256"/>
+<area shape="rect" id="node3" href="$class_p4_1_1_type_constraint.html" title=" " alt="" coords="57,155,199,181"/>
+<area shape="rect" id="node4" href="$class_i_has_db_print.html" title=" " alt="" coords="21,80,120,107"/>
+<area shape="rect" id="node5" href="$class_i_castable.html" title=" " alt="" coords="144,80,227,107"/>
+<area shape="rect" id="node6" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="140,5,231,32"/>
+</map>

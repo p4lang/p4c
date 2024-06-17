@@ -1,7 +1,0 @@
-issue1932.p4(2): [--Werror=duplicate] error: Re-declaration of foo with different type: 
-bool foo(
-     ^^^
-issue1932.p4(1)
-control foo (in bit<8> x, out bit<8> y) { apply { y = x + 7; } }
-        ^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

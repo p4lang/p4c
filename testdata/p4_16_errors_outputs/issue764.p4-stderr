@@ -1,3 +1,0 @@
-issue764.p4(8): [--Werror=type-error] error: 5: could not infer a width
-        func(5);
-             ^

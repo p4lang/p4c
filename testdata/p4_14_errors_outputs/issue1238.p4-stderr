@@ -1,4 +1,0 @@
-issue1238.p4(11): [--Werror=type-error] error: subtract: operation only defined for bit/int types
-  subtract(palatalising, palatalising, 1);
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

@@ -1,4 +1,0 @@
-extern X {
-    void X();
-}
-

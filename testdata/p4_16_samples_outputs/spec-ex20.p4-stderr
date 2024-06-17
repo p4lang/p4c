@@ -1,4 +1,0 @@
-spec-ex20.p4(37): [--Wwarn=unused] warning: Parser X is not used; removing
-parser X(packet_in b, out Pkthdr p)
-       ^
-[--Wwarn=missing] warning: Program does not contain a `main' module

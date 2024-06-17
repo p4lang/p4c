@@ -1,3 +1,0 @@
-function_e1.p4(1): [--Werror=insufficient] error: Function 'max' does not return a value on all paths
-bit<16> max(in bit<16> left, in bit<16> right) {
-        ^^^

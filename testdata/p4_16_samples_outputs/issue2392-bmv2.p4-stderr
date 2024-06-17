@@ -1,3 +1,0 @@
-issue2392-bmv2.p4(30): [--Wwarn=mismatch] warning: -8w1: negative value with unsigned type
-        if (8w255 == -1) {
-                      ^

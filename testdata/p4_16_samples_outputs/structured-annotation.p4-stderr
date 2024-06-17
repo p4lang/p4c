@@ -1,4 +1,0 @@
-structured-annotation.p4(10): [--Wwarn=unused] warning: Control c is not used; removing
-control c() {
-        ^
-[--Wwarn=missing] warning: Program does not contain a `main' module

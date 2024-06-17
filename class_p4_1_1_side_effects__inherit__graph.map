@@ -1,0 +1,5 @@
+<map id="P4::SideEffects" name="P4::SideEffects">
+<area shape="rect" id="node1" title="Determines whether an expression may have method or constructor invocations." alt="" coords="5,155,124,181"/>
+<area shape="rect" id="node2" href="$class_inspector.html" title=" " alt="" coords="23,80,106,107"/>
+<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="33,5,97,32"/>
+</map>

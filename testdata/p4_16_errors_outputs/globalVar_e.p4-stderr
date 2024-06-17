@@ -1,4 +1,0 @@
-globalVar_e.p4(16):syntax error, unexpected ;, expecting (
-bit x;
-     ^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

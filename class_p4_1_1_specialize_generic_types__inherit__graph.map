@@ -1,0 +1,7 @@
+<map id="P4::SpecializeGenericTypes" name="P4::SpecializeGenericTypes">
+<area shape="rect" id="node1" title="Specializes each generic type by substituting type parameters." alt="" coords="5,304,204,331"/>
+<area shape="rect" id="node2" href="$class_pass_repeated.html" title=" " alt="" coords="48,229,161,256"/>
+<area shape="rect" id="node3" href="$class_pass_manager.html" title=" " alt="" coords="51,155,159,181"/>
+<area shape="rect" id="node4" href="$class_visitor.html" title=" " alt="" coords="73,5,137,32"/>
+<area shape="rect" id="node5" href="$class_backtrack.html" title=" " alt="" coords="103,80,189,107"/>
+</map>

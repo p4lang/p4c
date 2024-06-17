@@ -1,9 +1,0 @@
-issue3623-3.p4(8): [--Werror=type-error] error: 'v' with type 'e' cannot be compared to '1' with type 'int'
-    switch(v) {
-           ^
-issue3623-3.p4(1)
-enum bit<4> e
-            ^
-issue3623-3.p4(9)
-      1:
-      ^

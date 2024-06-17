@@ -1,1 +1,0 @@
-[--Wwarn=ordering] warning: hdr.ethernet: the order of headers in deparser is not uniquely determined by parser!

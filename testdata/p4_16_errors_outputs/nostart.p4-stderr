@@ -1,3 +1,0 @@
-nostart.p4(17): [--Werror=invalid] error: Parser parser p has no 'start' state
-parser p() {
-       ^

@@ -1,6 +1,0 @@
-key_after_exit.p4(27): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
-            16w1: exact @name("key") ;
-            ^^^^
-key_after_exit.p4(27): [--Wwarn=mismatch] warning: 16w1: Constant key field
-            16w1: exact @name("key") ;
-            ^^^^

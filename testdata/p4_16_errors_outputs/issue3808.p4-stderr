@@ -1,3 +1,0 @@
-issue3808.p4(11): [--Werror=type-error] error: t: argument cannot have type Type_Table
-    f<_>(t);
-         ^

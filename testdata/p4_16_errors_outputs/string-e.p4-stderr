@@ -1,6 +1,0 @@
-string-e.p4(1): [--Werror=type-error] error: s: a parameter with type string cannot have a direction
-extern void f(in string s);
-                        ^
-string-e.p4(1)
-extern void f(in string s);
-                 ^^^^^^

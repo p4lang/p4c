@@ -1,0 +1,6 @@
+<map id="P4::ControlPlaneAPI::ParseP4RuntimeAnnotations" name="P4::ControlPlaneAPI::ParseP4RuntimeAnnotations">
+<area shape="rect" id="node1" title="Parses P4Runtime&#45;specific annotations." alt="" coords="5,229,220,271"/>
+<area shape="rect" id="node2" href="$class_p4_1_1_parse_annotations.html" title=" " alt="" coords="33,155,192,181"/>
+<area shape="rect" id="node3" href="$class_modifier.html" title=" " alt="" coords="75,80,150,107"/>
+<area shape="rect" id="node4" href="$class_visitor.html" title=" " alt="" coords="81,5,145,32"/>
+</map>

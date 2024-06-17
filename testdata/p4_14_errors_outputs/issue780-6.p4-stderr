@@ -1,4 +1,0 @@
-issue780-6.p4(1): [--Werror=invalid] error: header standard_metadata: invalid name; it can only be used for metadata
-header_type standard_metadata {
-^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

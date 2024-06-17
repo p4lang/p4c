@@ -1,5 +1,0 @@
-# Exclude bazel sub-projects so `bazel build //...` works.
-control-plane/p4runtime
-test/frameworks/gtest
-bazel/example
-build

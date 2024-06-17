@@ -1,8 +1,0 @@
-issue1237.p4(37): [--Wwarn=invalid] warning: 48w0: zero mask
-    kilometer.flaccidly mask 0 : lpm;
-                             ^
-[--Wwarn=ignore-prop] warning: KeyElement: constant key element
-[--Wwarn=ignore-prop] warning: KeyElement: constant key element
-issue1237.p4(37): [--Wwarn=mismatch] warning: 48w0: Constant key field
-    kilometer.flaccidly mask 0 : lpm;
-                             ^

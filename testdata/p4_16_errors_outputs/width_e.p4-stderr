@@ -1,4 +1,0 @@
-width_e.p4(16): [--Werror=overlimit] error: 12301923123132: this implementation does not support bitstrings this large
-const bit<12301923123132>
-          ^^^^^^^^^^^^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

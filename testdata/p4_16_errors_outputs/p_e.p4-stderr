@@ -1,4 +1,0 @@
-p_e.p4(17):syntax error, unexpected END
-   x
-    ^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

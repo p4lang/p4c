@@ -1,6 +1,0 @@
-issue2148.p4(19): [--Wwarn=invalid_header] warning: accessing a field of an invalid header not_initialized
-    if (not_initialized.a < 6) {
-        ^^^^^^^^^^^^^^^
-issue2148.p4(19): [--Wwarn=uninitialized_use] warning: not_initialized.a may be uninitialized
-    if (not_initialized.a < 6) {
-        ^^^^^^^^^^^^^^^^^

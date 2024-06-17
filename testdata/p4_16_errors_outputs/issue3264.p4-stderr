@@ -1,3 +1,0 @@
-issue3264.p4(4): [--Werror=invalid] error: 'this' can only be used in the definition of an abstract method
-  t = this;
-      ^^^^

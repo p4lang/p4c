@@ -1,3 +1,0 @@
-psa-example-dpdk-directmeter.p4(59): [--Wwarn=unsupported] warning: MyIC.meter0: Packet metering is not supported. Falling back to byte metering.
-    DirectMeter(PSA_MeterType_t.PACKETS) meter0;
-                                         ^^^^^^

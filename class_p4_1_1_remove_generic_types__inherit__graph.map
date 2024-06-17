@@ -1,0 +1,5 @@
+<map id="P4::RemoveGenericTypes" name="P4::RemoveGenericTypes">
+<area shape="rect" id="node1" title="Removes all structs or stacks that are generic." alt="" coords="5,155,192,181"/>
+<area shape="rect" id="node2" href="$class_transform.html" title=" " alt="" coords="55,80,142,107"/>
+<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="67,5,131,32"/>
+</map>

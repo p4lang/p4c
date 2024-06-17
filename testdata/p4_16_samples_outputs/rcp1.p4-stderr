@@ -1,3 +1,0 @@
-rcp1.p4(34): [--Wwarn=unused] warning: 'T' is unused
-extern Counter<T> {
-               ^

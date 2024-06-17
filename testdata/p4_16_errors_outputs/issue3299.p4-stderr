@@ -1,3 +1,0 @@
-issue3299.p4(17): error: SwitchStatement: switch statements not supported in actions on this target
- switch (m.m0) {
- ^^^^^^

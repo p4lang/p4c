@@ -1,1 +1,0 @@
-Contains git hooks.

@@ -1,9 +1,0 @@
-div.p4(18): [--Werror=invalid] error: -8 / -2: Division is not defined for negative numbers
-    a = - 8 / -2;
-        ^^^^^^^^
-div.p4(19): [--Werror=invalid] error: -10 % 2: Modulo is not defined for negative numbers
-    a = -10 % 2;
-        ^^^^^^^
-div.p4(20): [--Werror=invalid] error: 10 % -2: Modulo is not defined for negative numbers
-    a = 10 % -2;
-        ^^^^^^^

@@ -1,9 +1,0 @@
-const.p4(19): [--Wwarn=mismatch] warning: 48w0xaabbccddeeff00: value does not fit in 48 bits
-const bit<48> tooLarge = 48w0xAA_BB_CC_DD_EE_FF_00
-                         ^^^^^^^^^^^^^^^^^^^^^^^^^
-const.p4(22): [--Werror=type-error] error: z: initializer has wrong type bit<1>
-const bit<32> z = 1w1;
-              ^
-const.p4(22)
-const bit<32> z = 1w1;
-                  ^^^

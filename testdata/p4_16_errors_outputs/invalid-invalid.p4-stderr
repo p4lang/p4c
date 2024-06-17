@@ -1,4 +1,0 @@
-invalid-invalid.p4(2):syntax error, unexpected UNEXPECTED_TOKEN, expecting }
-const H h = { #
-              ^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

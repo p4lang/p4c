@@ -1,0 +1,9 @@
+<map id="EBPF::DeparserPrepareBufferTranslator" name="EBPF::DeparserPrepareBufferTranslator">
+<area shape="rect" id="node1" title="This translator emits buffer preparation (eg. which headers will be emitted)" alt="" coords="153,304,363,345"/>
+<area shape="rect" id="node6" href="$class_e_b_p_f_1_1_deparser_hdr_emit_translator.html" title="This translator emits headers." alt="" coords="5,393,244,420"/>
+<area shape="rect" id="node7" href="$class_t_c_1_1_deparser_hdr_emit_translator_p_n_a.html" title=" " alt="" coords="268,393,517,420"/>
+<area shape="rect" id="node2" href="$class_e_b_p_f_1_1_control_body_translator.html" title=" " alt="" coords="155,229,361,256"/>
+<area shape="rect" id="node3" href="$class_e_b_p_f_1_1_code_gen_inspector.html" title=" " alt="" coords="167,155,349,181"/>
+<area shape="rect" id="node4" href="$class_inspector.html" title=" " alt="" coords="217,80,299,107"/>
+<area shape="rect" id="node5" href="$class_visitor.html" title=" " alt="" coords="226,5,290,32"/>
+</map>

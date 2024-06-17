@@ -1,0 +1,8 @@
+<map id="P4::EnumInstance" name="P4::EnumInstance">
+<area shape="rect" id="node1" title=" " alt="" coords="113,229,251,256"/>
+<area shape="rect" id="node5" href="$class_p4_1_1_ser_enum_instance.html" title=" " alt="" coords="5,304,164,331"/>
+<area shape="rect" id="node6" href="$class_p4_1_1_simple_enum_instance.html" title="An instance of a simple enum, e.g., X.A from enum X { A, B }." alt="" coords="188,304,371,331"/>
+<area shape="rect" id="node2" href="$class_p4_1_1_instance_base.html" title=" " alt="" coords="115,155,249,181"/>
+<area shape="rect" id="node3" href="$class_i_castable.html" title=" " alt="" coords="141,80,223,107"/>
+<area shape="rect" id="node4" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="137,5,227,32"/>
+</map>

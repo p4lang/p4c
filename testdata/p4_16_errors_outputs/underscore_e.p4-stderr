@@ -1,4 +1,0 @@
-underscore_e.p4(16):syntax error, unexpected _
-extern void _
-            ^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

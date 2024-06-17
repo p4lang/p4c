@@ -1,0 +1,7 @@
+<map id="P4Tools::P4Testgen::TestgenCompilerResult" name="P4Tools::P4Testgen::TestgenCompilerResult">
+<area shape="rect" id="node1" title="Extends the CompilerResult with the associated P4RuntimeApi." alt="" coords="30,229,210,271"/>
+<area shape="rect" id="node5" href="$class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_b_mv2_v1_model_compiler_result.html" title="Extends the CompilerResult with information specific to the V1Model running on BMv2." alt="" coords="5,319,235,375"/>
+<area shape="rect" id="node2" href="$class_p4_tools_1_1_compiler_result.html" title=" " alt="" coords="31,155,209,181"/>
+<area shape="rect" id="node3" href="$class_i_castable.html" title=" " alt="" coords="79,80,161,107"/>
+<area shape="rect" id="node4" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="75,5,165,32"/>
+</map>

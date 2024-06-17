@@ -1,3 +1,0 @@
-issue2444-1.p4(2): [--Werror=invalid] error: (bool)2: Only 0 and 1 can be cast to booleans
-const bool b1 = (bool)a1;
-                ^^^^^^^^

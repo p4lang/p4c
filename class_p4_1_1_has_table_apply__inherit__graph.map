@@ -1,0 +1,5 @@
+<map id="P4::HasTableApply" name="P4::HasTableApply">
+<area shape="rect" id="node1" title="Checks to see whether an IR node includes a table.apply() sub&#45;expression." alt="" coords="5,155,148,181"/>
+<area shape="rect" id="node2" href="$class_inspector.html" title=" " alt="" coords="35,80,118,107"/>
+<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="45,5,109,32"/>
+</map>

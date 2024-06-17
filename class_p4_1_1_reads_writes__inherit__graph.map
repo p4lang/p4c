@@ -1,0 +1,5 @@
+<map id="P4::ReadsWrites" name="P4::ReadsWrites">
+<area shape="rect" id="node1" title="Computes the SetOfLocations read and written by an expression." alt="" coords="5,155,133,181"/>
+<area shape="rect" id="node2" href="$class_inspector.html" title=" " alt="" coords="28,80,111,107"/>
+<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="37,5,101,32"/>
+</map>

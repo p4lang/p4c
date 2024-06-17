@@ -1,3 +1,0 @@
-issue3656.p4(4): [--Werror=type-error] error: Vector<Type>: Cannot supply type parameters for an action invocation
-        a<bit>();
-          ^^^

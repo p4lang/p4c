@@ -1,7 +1,0 @@
-cases.p4(31): [--Wwarn=missing] warning: SwitchCase: fallthrough with no statement
-            c:
-            ^
-cases.p4(17): [--Wwarn=unused] warning: Control ctrl is not used; removing
-control ctrl() {
-        ^^^^
-[--Wwarn=missing] warning: Program does not contain a `main' module

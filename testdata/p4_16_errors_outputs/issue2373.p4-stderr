@@ -1,3 +1,0 @@
-issue2373.p4(26): [--Werror=--unknown--] error: parser PROTParser: Parser never reaches accept or reject state
-parser PROTParser(packet_in packet,
-       ^^^^^^^^^^

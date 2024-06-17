@@ -1,3 +1,0 @@
-inro.p4(19): [--Werror=type-error] error: Expression x cannot be the target of an assignment
-        x = 3; // x is not a left-value
-        ^

@@ -1,3 +1,0 @@
-div3.p4(19): [--Werror=invalid] error: a / 3: could not evaluate expression at compilation time
-        a = a / b; // not a compile-time constant
-            ^^^^^

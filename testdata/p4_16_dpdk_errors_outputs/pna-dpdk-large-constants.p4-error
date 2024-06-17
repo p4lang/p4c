@@ -1,6 +1,0 @@
-pna-dpdk-large-constants.p4(136): [--Wwarn=uninitialized_use] warning: tmp1 may be uninitialized
-        headers.ipv6.srcAddr = (bit<128>)tmp1;
-                                         ^^^^
-pna-dpdk-large-constants.p4(109): [--Werror=overlimit] error: DPDK target supports up-to 64-bit immediate values, 128w0x123456789abcdef12345678 exceeds the limit
-    bit<128> tmp = 128w0x123456789abcdef12345678;
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

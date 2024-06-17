@@ -1,0 +1,6 @@
+<map id="graphs::EdgeTypeIface" name="graphs::EdgeTypeIface">
+<area shape="rect" id="node1" title=" " alt="" coords="135,5,303,32"/>
+<area shape="rect" id="node2" href="$classgraphs_1_1_edge_if.html" title=" " alt="" coords="5,80,120,107"/>
+<area shape="rect" id="node3" href="$classgraphs_1_1_edge_switch.html" title=" " alt="" coords="144,80,293,107"/>
+<area shape="rect" id="node4" href="$classgraphs_1_1_edge_unconditional.html" title=" " alt="" coords="318,80,514,107"/>
+</map>

@@ -1,6 +1,0 @@
-dup-param.p4(17): [--Werror=duplicate] error: p duplicates p.
-control c(bit<32> p)(bool p) {
-                  ^
-dup-param.p4(17)
-control c(bit<32> p)(bool p) {
-                          ^

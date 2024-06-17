@@ -1,0 +1,5 @@
+<map id="TypeCheck::InferExpressionsTopDown" name="TypeCheck::InferExpressionsTopDown">
+<area shape="rect" id="node1" title="Top down type inferencing – set the type of expression nodes based on their uses." alt="" coords="5,155,213,196"/>
+<area shape="rect" id="node2" href="$class_modifier.html" title=" " alt="" coords="72,80,147,107"/>
+<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="77,5,141,32"/>
+</map>

@@ -1,3 +1,0 @@
-issue2147.p4(2): [--Wwarn=unused] warning: 'b' is unused
-    action a(inout bit<7> b) {
-                          ^

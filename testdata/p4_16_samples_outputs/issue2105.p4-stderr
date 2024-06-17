@@ -1,3 +1,0 @@
-issue2105.p4(21): [--Wwarn=unused] warning: 'T' is unused
-control e<T>();
-          ^

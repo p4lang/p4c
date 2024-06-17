@@ -1,3 +1,0 @@
-issue2597.p4(35): [--Werror=type-error] error: sub_ctrl_1.apply(): apply cannot be called from actions
-        sub_ctrl_1.apply();
-        ^^^^^^^^^^^^^^^^^^

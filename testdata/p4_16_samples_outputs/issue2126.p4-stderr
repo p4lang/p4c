@@ -1,4 +1,0 @@
-issue2126.p4(1): [--Wwarn=unused] warning: Parser p is not used; removing
-parser p() {
-       ^
-[--Wwarn=missing] warning: Program does not contain a `main' module

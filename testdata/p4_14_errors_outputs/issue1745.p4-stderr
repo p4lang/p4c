@@ -1,7 +1,0 @@
-issue1745.p4(6): [--Werror=invalid] error: length_: header length must depend only on fields prior to the varbit field options
-    length: length_;
-            ^^^^^^^
-issue1745.p4(3)
-        options : *;
-        ^^^^^^^^^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

@@ -1,3 +1,0 @@
-pna-dpdk-direct-counter-err.p4(95): [--Werror=unexpected] error: implementation property cannot co-exist with direct counter and direct meter property for table ipv4_host
-    table ipv4_host {
-          ^^^^^^^^^

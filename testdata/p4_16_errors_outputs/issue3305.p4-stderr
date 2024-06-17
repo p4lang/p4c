@@ -1,3 +1,0 @@
-issue3305.p4(13): [--Werror=type-error] error: s1: generic type needs type arguments
-    s<s1> v;
-      ^^

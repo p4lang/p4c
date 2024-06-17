@@ -1,3 +1,0 @@
-forloop7.p4(17): [--Wwarn=unused] warning: 'm' is unused
-    action a0(bit<8> m) {
-                     ^

@@ -1,7 +1,0 @@
-#!/bin/bash -x
-
-set -e
-
-TC="tc"
-$TC p4template create pipeline/no_table_example numtables 0
-$TC p4template update pipeline/no_table_example state ready

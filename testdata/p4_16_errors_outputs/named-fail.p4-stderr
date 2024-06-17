@@ -1,9 +1,0 @@
-named-fail.p4(8): [--Werror=invalid] error: xv: either all or none of the arguments of a call must be named
-        f(y = b, xv); // not all arguments named
-                 ^^
-named-fail.p4(9): [--Werror=duplicate] error: y = b and y = b: same argument name
-        f(y = b, y = b); // same argument twice
-          ^
-named-fail.p4(9)
-        f(y = b, y = b); // same argument twice
-                 ^

@@ -1,7 +1,0 @@
-issue1499.p4(18): [--Werror=invalid] error: latest: latest not yet defined
-  set_metadata(hesitation.contracts, latest.cornstarchs);
-                                     ^^^^^^
-issue1499.p4(21): [--Werror=not-found] error: ingress: unknown state
-    1024 : ingress;
-           ^^^^^^^
-[--Werror=overlimit] error: 2 errors encountered, aborting compilation

@@ -1,4 +1,0 @@
-cast.p4(17): [--Wwarn=unused] warning: Control p is not used; removing
-control p()
-        ^
-[--Wwarn=missing] warning: Program does not contain a `main' module

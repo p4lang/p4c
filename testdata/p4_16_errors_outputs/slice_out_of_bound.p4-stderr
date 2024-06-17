@@ -1,3 +1,0 @@
-slice_out_of_bound.p4(80): [--Werror=type-error] error: Bit index 5 greater than width 4
-        n[7:4][5:2] = 4w0;
-               ^

@@ -1,0 +1,8 @@
+<map id="P4Tools::TraceEvents::Generic" name="P4Tools::TraceEvents::Generic">
+<area shape="rect" id="node1" title="A generic event that only takes in a string as label." alt="" coords="96,229,253,271"/>
+<area shape="rect" id="node5" href="$class_p4_tools_1_1_trace_events_1_1_expression.html" title="A simple event that stores the provided expression." alt="" coords="5,319,163,360"/>
+<area shape="rect" id="node6" href="$class_p4_tools_1_1_trace_events_1_1_generic_description.html" title=" " alt="" coords="187,319,344,360"/>
+<area shape="rect" id="node2" href="$class_p4_tools_1_1_trace_event.html" title="An event in a trace of the execution of a P4 program." alt="" coords="99,155,250,181"/>
+<area shape="rect" id="node3" href="$class_i_castable.html" title=" " alt="" coords="133,80,216,107"/>
+<area shape="rect" id="node4" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="129,5,220,32"/>
+</map>

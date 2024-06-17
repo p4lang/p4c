@@ -1,0 +1,23 @@
+<map id="P4::InstanceBase" name="P4::InstanceBase">
+<area shape="rect" id="node1" title=" " alt="" coords="275,208,408,235"/>
+<area shape="rect" id="node4" href="$class_p4_1_1_constructor_call.html" title=" " alt="" coords="458,56,605,83"/>
+<area shape="rect" id="node7" href="$class_p4_1_1_enum_instance.html" title=" " alt="" coords="462,157,601,184"/>
+<area shape="rect" id="node10" href="$class_p4_1_1_instantiation.html" title="Used to resolve a Declaration_Instance." alt="" coords="467,259,595,285"/>
+<area shape="rect" id="node15" href="$class_p4_1_1_method_instance.html" title=" " alt="" coords="456,512,607,539"/>
+<area shape="rect" id="node2" href="$class_i_castable.html" title=" " alt="" coords="144,208,227,235"/>
+<area shape="rect" id="node3" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,208,96,235"/>
+<area shape="rect" id="node5" href="$class_p4_1_1_container_constructor_call.html" title=" " alt="" coords="655,5,864,32"/>
+<area shape="rect" id="node6" href="$class_p4_1_1_extern_constructor_call.html" title=" " alt="" coords="665,56,853,83"/>
+<area shape="rect" id="node8" href="$class_p4_1_1_ser_enum_instance.html" title=" " alt="" coords="680,107,839,133"/>
+<area shape="rect" id="node9" href="$class_p4_1_1_simple_enum_instance.html" title="An instance of a simple enum, e.g., X.A from enum X { A, B }." alt="" coords="668,157,851,184"/>
+<area shape="rect" id="node11" href="$class_p4_1_1_control_instantiation.html" title=" " alt="" coords="672,208,847,235"/>
+<area shape="rect" id="node12" href="$class_p4_1_1_extern_instantiation.html" title=" " alt="" coords="674,259,845,285"/>
+<area shape="rect" id="node13" href="$class_p4_1_1_package_instantiation.html" title=" " alt="" coords="669,309,850,336"/>
+<area shape="rect" id="node14" href="$class_p4_1_1_parser_instantiation.html" title=" " alt="" coords="675,360,843,387"/>
+<area shape="rect" id="node16" href="$class_p4_1_1_action_call.html" title=" " alt="" coords="703,411,815,437"/>
+<area shape="rect" id="node17" href="$class_p4_1_1_apply_method.html" title=" " alt="" coords="693,461,825,488"/>
+<area shape="rect" id="node18" href="$class_p4_1_1_built_in_method.html" title=" " alt="" coords="691,512,828,539"/>
+<area shape="rect" id="node19" href="$class_p4_1_1_extern_function.html" title=" " alt="" coords="688,563,831,589"/>
+<area shape="rect" id="node20" href="$class_p4_1_1_extern_method.html" title=" " alt="" coords="691,613,828,640"/>
+<area shape="rect" id="node21" href="$class_p4_1_1_function_call.html" title=" " alt="" coords="696,664,823,691"/>
+</map>

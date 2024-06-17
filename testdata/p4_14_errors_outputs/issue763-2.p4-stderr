@@ -1,4 +1,0 @@
-issue763-2.p4(1): [--Werror=invalid] error: v1HeaderType is invalid; name standard_metadata_t is reserved
-header_type standard_metadata_t {
-^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

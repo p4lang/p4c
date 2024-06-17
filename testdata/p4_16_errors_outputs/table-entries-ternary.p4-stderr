@@ -1,3 +1,0 @@
-table-entries-ternary.p4(76): [--Werror=not-found] error: missing_a: declaration not found
-            0x1111 : missing_a(); // action not in action list
-                     ^^^^^^^^^

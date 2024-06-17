@@ -1,4 +1,0 @@
-constant-fold-infint.p4(6): [--Wwarn=mismatch] warning: -7w1: negative value with unsigned type
-const int e = (int)d; // -1
-              ^^^^^^
-[--Wwarn=missing] warning: Program does not contain a `main' module

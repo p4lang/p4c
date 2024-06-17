@@ -1,9 +1,0 @@
-interface1.p4(19): [--Wwarn=unused] warning: 'T' is unused
-extern X<T> { X(); }
-         ^
-interface1.p4(24): [--Wwarn=unused] warning: x: unused instance
-    X<int<32>>() x;
-                 ^
-interface1.p4(25): [--Wwarn=unused] warning: y: unused instance
-    Y() y;
-        ^

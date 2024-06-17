@@ -1,3 +1,0 @@
-issue2208.p4(57): [--Wwarn=mismatch] warning: -8w1: negative value with unsigned type
-        hdr.h.a = 0 - 1;
-                  ^^^^^

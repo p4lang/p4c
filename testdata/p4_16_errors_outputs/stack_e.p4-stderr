@@ -1,9 +1,0 @@
-stack_e.p4(23): [--Werror=type-error] error: Header stack struct s[5] used with non-header type struct s
-        s[5] stack1; // non-header illegal in header stack
-        ^^^^
-stack_e.p4(23): [--Werror=type-error] error: Error while analyzing struct s[5]
-        s[5] stack1; // non-header illegal in header stack
-        ^^^^
-stack_e.p4(26): [--Werror=overlimit] error: 1231092310293: Value too large for int
-        h b = stack[1231092310293];
-                    ^^^^^^^^^^^^^

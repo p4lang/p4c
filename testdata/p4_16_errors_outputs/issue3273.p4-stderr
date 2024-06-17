@@ -1,3 +1,0 @@
-issue3273.p4(3): [--Werror=type-error] error: int: illegal return type for method
-    abstract int f();
-             ^^^

@@ -1,4 +1,0 @@
-match.p4(51): [--Wwarn=unused] warning: Parser Top is not used; removing
-parser Top(packet_in b, out Parsed_headers headers) {
-       ^^^
-[--Wwarn=missing] warning: Program does not contain a `main' module

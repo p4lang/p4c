@@ -1,2 +1,0 @@
-[--Werror=duplicate] error: Name 'MyIC.counter0' is used for multiple direct counter objects in the P4Info message
-[--Werror=duplicate] error: Found 1 duplicate name(s) in the P4Info

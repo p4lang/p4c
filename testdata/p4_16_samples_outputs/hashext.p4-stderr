@@ -1,4 +1,0 @@
-hashext.p4(36): [--Wwarn=unused] warning: Control test is not used; removing
-control test(inout hdrs hdr) {
-        ^^^^
-[--Wwarn=missing] warning: Program does not contain a `main' module

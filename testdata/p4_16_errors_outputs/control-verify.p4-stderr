@@ -1,3 +1,0 @@
-control-verify.p4(7): [--Werror=type-error] error: verify(false, error.Oops): may only be invoked in parsers
-    verify(8w0 == 8w1, error.Oops);
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

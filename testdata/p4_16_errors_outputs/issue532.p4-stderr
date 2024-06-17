@@ -1,6 +1,0 @@
-issue532.p4(34): [--Werror=type-error] error: Action parameter choices has a type which is not bit<>, int<>, bool, type or serializable enum
-  action select_entry(choices_t choices) {
-                                ^^^^^^^
-issue532.p4(35): [--Werror=unsupported] error: my_meta.entry: writing to a structure is not supported on this target
-    my_meta.entry = choose_entry(choices);
-    ^^^^^^^^^^^^^

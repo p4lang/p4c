@@ -1,6 +1,0 @@
-twovarbit.p4(4): [--Werror=type-error] error: x and u: multiple varbit fields in a header
-    varbit<120> x;
-                ^
-twovarbit.p4(5)
-    varbit<120> u;
-                ^

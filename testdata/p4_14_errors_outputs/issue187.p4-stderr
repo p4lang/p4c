@@ -1,2 +1,0 @@
-[--Werror=unsupported] error: Program contains recursive control blocks
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

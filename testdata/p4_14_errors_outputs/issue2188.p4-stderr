@@ -1,7 +1,0 @@
-issue2188.p4(19): [--Wwarn=missing] warning: CaseEntry: parser_value_set has no @parser_value_set_size annotation.Using default size 4.
-        pvs0 mask 0x0ff0 : ingress; //  <--- this is the most significant line of the example
-        ^^^^^^^^^^^^^^^^
-issue2188.p4(19): [--Werror=invalid] error: 0xff0: masks not supported for value sets
-        pvs0 mask 0x0ff0 : ingress; //  <--- this is the most significant line of the example
-                  ^^^^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

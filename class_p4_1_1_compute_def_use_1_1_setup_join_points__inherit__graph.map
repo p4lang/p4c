@@ -1,0 +1,8 @@
+<map id="P4::ComputeDefUse::SetupJoinPoints" name="P4::ComputeDefUse::SetupJoinPoints">
+<area shape="rect" id="node1" title=" " alt="" coords="51,244,212,285"/>
+<area shape="rect" id="node2" href="$class_control_flow_visitor_1_1_setup_join_points.html" title=" " alt="" coords="5,155,148,196"/>
+<area shape="rect" id="node3" href="$class_inspector.html" title=" " alt="" coords="15,80,98,107"/>
+<area shape="rect" id="node4" href="$class_visitor.html" title=" " alt="" coords="30,5,94,32"/>
+<area shape="rect" id="node5" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="123,80,289,107"/>
+<area shape="rect" id="node6" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="123,5,289,32"/>
+</map>

@@ -1,3 +1,0 @@
-p4tc_samples/checksum_errors.p4(100): [--Werror=unexpected] error: Unexpected block InternetChecksum nested within control
-    InternetChecksum() ck;
-                       ^^

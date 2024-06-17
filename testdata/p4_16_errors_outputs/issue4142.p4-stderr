@@ -1,3 +1,0 @@
-issue4142.p4(1): [--Werror=invalid] error: bit<32>: invalid type for declaration
-bit<32>() main;
-^^^^^^^

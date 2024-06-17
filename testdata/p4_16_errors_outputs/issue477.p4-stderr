@@ -1,3 +1,0 @@
-issue477.p4(28): [--Werror=type-error] error: p.h: argument must be a header
-        b.extract(p.h);
-                  ^^^

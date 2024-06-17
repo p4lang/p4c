@@ -1,0 +1,12 @@
+<map id="P4::StorageLocation" name="P4::StorageLocation">
+<area shape="rect" id="node1" title="Abstraction for something that is has a left value (variable, parameter)" alt="" coords="163,155,314,181"/>
+<area shape="rect" id="node5" href="$class_p4_1_1_base_location.html" title=" " alt="" coords="5,229,139,256"/>
+<area shape="rect" id="node6" href="$class_p4_1_1_indexed_location.html" title="Interface for locations that support an index operation." alt="" coords="163,229,315,256"/>
+<area shape="rect" id="node9" href="$class_p4_1_1_with_fields_location.html" title="Base class for location sets that contain fields." alt="" coords="339,229,509,256"/>
+<area shape="rect" id="node2" href="$class_i_has_db_print.html" title=" " alt="" coords="132,80,231,107"/>
+<area shape="rect" id="node3" href="$class_i_castable.html" title=" " alt="" coords="255,80,337,107"/>
+<area shape="rect" id="node4" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="251,5,341,32"/>
+<area shape="rect" id="node7" href="$class_p4_1_1_array_location.html" title=" " alt="" coords="23,304,159,331"/>
+<area shape="rect" id="node8" href="$class_p4_1_1_tuple_location.html" title=" " alt="" coords="183,304,318,331"/>
+<area shape="rect" id="node10" href="$class_p4_1_1_struct_location.html" title=" " alt="" coords="355,304,493,331"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="EBPF::DeparserBodyTranslator" name="EBPF::DeparserBodyTranslator">
+<area shape="rect" id="node1" title="This translator emits deparser externs." alt="" coords="18,304,237,331"/>
+<area shape="rect" id="node6" href="$class_e_b_p_f_1_1_deparser_body_translator_p_s_a.html" title=" " alt="" coords="5,379,249,405"/>
+<area shape="rect" id="node2" href="$class_e_b_p_f_1_1_control_body_translator.html" title=" " alt="" coords="24,229,231,256"/>
+<area shape="rect" id="node3" href="$class_e_b_p_f_1_1_code_gen_inspector.html" title=" " alt="" coords="37,155,218,181"/>
+<area shape="rect" id="node4" href="$class_inspector.html" title=" " alt="" coords="86,80,169,107"/>
+<area shape="rect" id="node5" href="$class_visitor.html" title=" " alt="" coords="95,5,159,32"/>
+</map>

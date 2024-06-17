@@ -1,3 +1,0 @@
-issue583.p4(189): [--Wwarn=mismatch] warning: 9w0xffffffff: value does not fit in 9 bits
-    modify_field(standard_metadata.egress_spec, egress_spec, 0xFFFFFFFF);
-                                                             ^^^^^^^^^^

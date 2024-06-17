@@ -1,4 +1,0 @@
-structured-annotation-e.p4(1):syntax error, unexpected INTEGER, expecting ]
-@IllegalMixing[key=4, 5
-                      ^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

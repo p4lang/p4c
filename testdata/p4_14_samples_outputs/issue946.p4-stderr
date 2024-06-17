@@ -1,3 +1,0 @@
-issue946.p4(19): [--Wwarn=missing] warning: CaseEntry: parser_value_set has no @parser_value_set_size annotation.Using default size 4.
-        pvs : ingress;
-        ^^^

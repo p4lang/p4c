@@ -1,3 +1,0 @@
-issue1331.p4(17): [--Werror=invalid] error: p: instantiation of parser in control
-control MyC(packet_in pkt, inout ethernet ether)(P p) {
-                                                   ^

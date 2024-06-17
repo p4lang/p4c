@@ -1,3 +1,0 @@
-issue2635.p4(1): [--Wwarn=unused] warning: 'N' is unused
-struct S<T, N> {
-            ^

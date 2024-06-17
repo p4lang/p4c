@@ -1,6 +1,0 @@
-issue819.p4(27): [--Werror=type-error] error: WrapControls: contains self 'WrapControls' as type argument
-  WrapControls<MyC1,MyC2>(c1,c2) wc;
-  ^^^^^^^^^^^^
-issue819.p4(7)
-extern WrapControls<T1,T2> {
-       ^^^^^^^^^^^^

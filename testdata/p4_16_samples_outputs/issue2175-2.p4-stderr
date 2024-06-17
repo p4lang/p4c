@@ -1,3 +1,0 @@
-issue2175-2.p4(7): [--Wwarn=unused] warning: c1_x: unused instance
-    X() c1_x = {
-        ^^^^

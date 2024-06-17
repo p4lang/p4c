@@ -1,3 +1,0 @@
-init-entries-error2-bmv2.p4(77): [--Werror=expected] error: Entry entry must have a priority
-                         (0x01, 0x1111 &&& 0xF ) : a_params(1);
-                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

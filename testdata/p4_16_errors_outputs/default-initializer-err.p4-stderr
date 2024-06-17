@@ -1,3 +1,0 @@
-default-initializer-err.p4(34): [--Werror=invalid] error: ... must be the last element
-        S sb = { b = false, h={3, true, ..., 2 }, ...};
-                                        ^^^

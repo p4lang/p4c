@@ -1,6 +1,0 @@
-issue2196.p4(48): [--Wwarn=missing] warning: CaseEntry: parser_value_set has no @parser_value_set_size annotation.Using default size 4.
-        pv2 : parse_pv2;
-        ^^^
-issue2196.p4(37): [--Wwarn=missing] warning: CaseEntry: parser_value_set has no @parser_value_set_size annotation.Using default size 4.
-        pv1 : parse_pv1;
-        ^^^

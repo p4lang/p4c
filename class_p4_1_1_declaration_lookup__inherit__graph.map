@@ -1,0 +1,9 @@
+<map id="P4::DeclarationLookup" name="P4::DeclarationLookup">
+<area shape="rect" id="node1" title=" " alt="" coords="5,68,172,95"/>
+<area shape="rect" id="node2" href="$class_p4_1_1_reference_map.html" title="Class used to encode maps from paths to declarations." alt="" coords="233,43,373,69"/>
+<area shape="rect" id="node3" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="220,93,387,120"/>
+<area shape="rect" id="node4" href="$class_p4_1_1_compute_def_use.html" title="Compute defuse info within P4Parser and P4Control blocks in the midend." alt="" coords="443,5,597,32"/>
+<area shape="rect" id="node5" href="$class_p4_1_1_compute_def_use_1_1_setup_join_points.html" title=" " alt="" coords="439,57,601,98"/>
+<area shape="rect" id="node6" href="$class_p4_1_1_resolve_references.html" title=" " alt="" coords="435,123,605,149"/>
+<area shape="rect" id="node7" href="$class_p4_1_1_unroll_loops.html" title=" " alt="" coords="459,173,581,200"/>
+</map>

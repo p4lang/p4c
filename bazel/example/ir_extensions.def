@@ -1,5 +1,0 @@
-// Your p4c IR extensions go here.
-class MyCustomStatement : Statement {
-  cstring foo_bar;
-#nodbprint
-}

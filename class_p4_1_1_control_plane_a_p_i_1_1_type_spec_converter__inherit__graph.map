@@ -1,0 +1,5 @@
+<map id="P4::ControlPlaneAPI::TypeSpecConverter" name="P4::ControlPlaneAPI::TypeSpecConverter">
+<area shape="rect" id="node1" title="Generates the appropriate p4.P4DataTypeSpec for a given IR::Type node." alt="" coords="5,155,160,196"/>
+<area shape="rect" id="node2" href="$class_inspector.html" title=" " alt="" coords="41,80,124,107"/>
+<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="51,5,115,32"/>
+</map>

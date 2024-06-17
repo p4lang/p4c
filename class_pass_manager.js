@@ -1,0 +1,26 @@
+var class_pass_manager =
+[
+    [ "VisitorRef", "class_pass_manager_1_1_visitor_ref.html", "class_pass_manager_1_1_visitor_ref" ],
+    [ "PassManager", "class_pass_manager.html#a5e24d7098c9c7c82ab4ead5ecbeb23b6", null ],
+    [ "PassManager", "class_pass_manager.html#aa5fec1fc89c16a09fcd18478860415f5", null ],
+    [ "PassManager", "class_pass_manager.html#a2970507e318328b444a044731753a417", null ],
+    [ "PassManager", "class_pass_manager.html#ab238822b41eb7fe2a119335e1d85a9cd", null ],
+    [ "addDebugHook", "class_pass_manager.html#ad2161a43f3eb25ae5a17285ab50a2faa", null ],
+    [ "addDebugHooks", "class_pass_manager.html#a9fadb3eebd3da47050a2624d4d6e1e1a", null ],
+    [ "addPasses", "class_pass_manager.html#a69b80d16d08af7d5408d5704edf03c11", null ],
+    [ "apply_visitor", "class_pass_manager.html#add9ad80e05ee249b54a3ce30fc8bce44", null ],
+    [ "backtrack", "class_pass_manager.html#a478ec356f8f9f5b16f4e7bf17ee8fe73", null ],
+    [ "clone", "class_pass_manager.html#a038ec66ecfb76a1f26730b378b9e11a8", null ],
+    [ "early_exit", "class_pass_manager.html#a5e07c16c9987bbaa838caa00863de047", null ],
+    [ "init_apply", "class_pass_manager.html#a65a0d35f6fa8c8d286a6b2d0efaf9d09", null ],
+    [ "listPasses", "class_pass_manager.html#aa763d71c06378439201b4ee45a76faac", null ],
+    [ "never_backtracks", "class_pass_manager.html#ada2b5d823d9b53bb27beb8141b96cc59", null ],
+    [ "removePasses", "class_pass_manager.html#a323669e88489e9cfffb68738889fe1d7", null ],
+    [ "runDebugHooks", "class_pass_manager.html#a7fd8bdc6ba061efa58d27e6f590739cf", null ],
+    [ "setStopOnError", "class_pass_manager.html#a17f60bad0df260f27afa5dd6648a7bbe", null ],
+    [ "debugHooks", "class_pass_manager.html#ae2a89d9e763968a2c69e13a27f86ce6c", null ],
+    [ "passes", "class_pass_manager.html#af63e9cb7ec0833be4f8a2159eaa2ae19", null ],
+    [ "running", "class_pass_manager.html#a1e1a08681ebb86b5726257b81b7683c5", null ],
+    [ "seqNo", "class_pass_manager.html#aff24b0e68838229050724e33b18989a8", null ],
+    [ "stop_on_error", "class_pass_manager.html#ac89567101fc6e6cdc54b6dcf886c79b0", null ]
+];

@@ -1,3 +1,0 @@
-constructor_e.p4(18): [--Werror=invalid] error: X: invalid constructor; cannot have a return type.
-    void X(); // no return type allowed
-         ^

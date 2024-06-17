@@ -1,6 +1,0 @@
-test_config_23_same_container_modified.p4(88): [--Wwarn=type-inference] warning: Could not infer type for my_param2, using bit<8>
-action action_1(my_param2) {
-                ^^^^^^^^^
-test_config_23_same_container_modified.p4(88): [--Wwarn=unused] warning: 'my_param2' is unused
-action action_1(my_param2) {
-                ^^^^^^^^^

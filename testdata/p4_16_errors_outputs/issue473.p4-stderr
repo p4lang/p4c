@@ -1,3 +1,0 @@
-issue473.p4(70): [--Werror=type-error] error: (bit<8>)meta.d: action argument must be a compile-time constant
-        default_action = b(meta.c, (bit<8>) meta.d);
-                                   ^^^^^^^^^^^^^^^

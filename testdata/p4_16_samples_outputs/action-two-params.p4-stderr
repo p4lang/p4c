@@ -1,6 +1,0 @@
-action-two-params.p4(63): [--Wwarn=unused] warning: 'id' is unused
-    action actTbl(bit<24> id, bit<32> ip) {
-                          ^^
-action-two-params.p4(63): [--Wwarn=unused] warning: 'ip' is unused
-    action actTbl(bit<24> id, bit<32> ip) {
-                                      ^^

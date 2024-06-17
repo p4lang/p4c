@@ -1,4 +1,0 @@
-pna-example-ipsec-err2.p4(79): [--Wwarn=unused] warning: ipsec_port_out_inbound: unused instance
-Register<bit<32>, bit<32>>(1) ipsec_port_out_inbound;
-                              ^^^^^^^^^^^^^^^^^^^^^^
-[--Werror=reserved] error: ipsec_port_out_inbound name is reserved for DPDK IPSec port register

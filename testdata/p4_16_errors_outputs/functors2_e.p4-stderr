@@ -1,6 +1,0 @@
-functors2_e.p4(20): [--Werror=unsupported] error: Self-referencing types not supported: 'p' within 'control p'
-        p.apply();
-        ^
-functors2_e.p4(16)
-control p()
-        ^

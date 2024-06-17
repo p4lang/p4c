@@ -1,0 +1,6 @@
+<map id="P4::GeneralInliner" name="P4::GeneralInliner">
+<area shape="rect" id="node1" title="Performs actual inlining work." alt="" coords="45,244,184,271"/>
+<area shape="rect" id="node2" href="$class_p4_1_1_abstract_inliner.html" title=" " alt="" coords="5,155,224,196"/>
+<area shape="rect" id="node3" href="$class_transform.html" title=" " alt="" coords="71,80,158,107"/>
+<area shape="rect" id="node4" href="$class_visitor.html" title=" " alt="" coords="83,5,147,32"/>
+</map>

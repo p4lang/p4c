@@ -1,6 +1,0 @@
-methodArgDontcare.p4(9): [--Werror=type-error] error: 0: Could not infer a type for parameter arg (inferred type is don't care '_')
-        e.f(0);
-            ^
-methodArgDontcare.p4(3)
-    void f(in T arg);
-                ^^^

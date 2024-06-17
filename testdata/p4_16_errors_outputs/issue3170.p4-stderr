@@ -1,3 +1,0 @@
-issue3170.p4(6): [--Werror=type-error] error: t: no type parameters supplied for generic type
-typedef t ty;
-        ^

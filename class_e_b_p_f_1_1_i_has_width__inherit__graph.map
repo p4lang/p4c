@@ -1,0 +1,19 @@
+<map id="EBPF::IHasWidth" name="EBPF::IHasWidth">
+<area shape="rect" id="node1" title=" " alt="" coords="275,183,404,209"/>
+<area shape="rect" id="node4" href="$class_e_b_p_f_1_1_e_b_p_f_bool_type.html" title=" " alt="" coords="457,5,611,32"/>
+<area shape="rect" id="node6" href="$class_e_b_p_f_1_1_e_b_p_f_enum_type.html" title=" " alt="" coords="453,56,615,83"/>
+<area shape="rect" id="node8" href="$class_e_b_p_f_1_1_e_b_p_f_error_type.html" title=" " alt="" coords="456,107,612,133"/>
+<area shape="rect" id="node10" href="$class_e_b_p_f_1_1_e_b_p_f_scalar_type.html" title=" " alt="" coords="452,157,616,184"/>
+<area shape="rect" id="node13" href="$class_e_b_p_f_1_1_e_b_p_f_stack_type.html" title=" " alt="" coords="454,208,614,235"/>
+<area shape="rect" id="node14" href="$class_e_b_p_f_1_1_e_b_p_f_struct_type.html" title="Also represents headers and unions." alt="" coords="453,259,615,285"/>
+<area shape="rect" id="node16" href="$class_e_b_p_f_1_1_e_b_p_f_type_name.html" title="This should not always implement IHasWidth, but it may..." alt="" coords="453,309,615,336"/>
+<area shape="rect" id="node17" href="$class_u_b_p_f_1_1_u_b_p_f_list_type.html" title=" " alt="" coords="458,360,610,387"/>
+<area shape="rect" id="node2" href="$class_i_castable.html" title=" " alt="" coords="144,183,227,209"/>
+<area shape="rect" id="node3" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,183,96,209"/>
+<area shape="rect" id="node5" href="$class_u_b_p_f_1_1_u_b_p_f_bool_type.html" title=" " alt="" coords="670,5,829,32"/>
+<area shape="rect" id="node7" href="$class_u_b_p_f_1_1_u_b_p_f_enum_type.html" title=" " alt="" coords="666,56,833,83"/>
+<area shape="rect" id="node9" href="$class_u_b_p_f_1_1_u_b_p_f_error_type.html" title=" " alt="" coords="669,107,829,133"/>
+<area shape="rect" id="node11" href="$class_u_b_p_f_1_1_u_b_p_f_extern_type.html" title=" " alt="" coords="664,157,835,184"/>
+<area shape="rect" id="node12" href="$class_u_b_p_f_1_1_u_b_p_f_scalar_type.html" title=" " alt="" coords="665,208,833,235"/>
+<area shape="rect" id="node15" href="$class_u_b_p_f_1_1_u_b_p_f_struct_type.html" title=" " alt="" coords="666,259,833,285"/>
+</map>

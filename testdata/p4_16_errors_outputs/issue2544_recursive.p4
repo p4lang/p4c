@@ -1,4 +1,0 @@
-struct S {
-    S x;
-}
-

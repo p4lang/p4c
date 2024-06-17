@@ -1,6 +1,0 @@
-default2.p4(28): [--Wwarn=parser-transition] warning: SelectCase: unreachable
-            default: reject;
-            ^^^^^^^^^^^^^^^
-default2.p4(26): [--Wwarn=parser-transition] warning: '{ h.data }': transition does not depend on select argument
-        transition select(h.data) {
-                          ^^^^^^

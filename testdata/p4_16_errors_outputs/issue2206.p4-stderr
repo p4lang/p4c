@@ -1,3 +1,0 @@
-issue2206.p4(27): [--Werror=type-error] error: 1 << h.h.c: shift result type is arbitrary-precision int, but right operand is not constant; width of left operand of shift needs to be specified or both operands need to be constant
-        h.h.a = (1 << h.h.c) + 8w2;
-                 ^^^^^^^^^^

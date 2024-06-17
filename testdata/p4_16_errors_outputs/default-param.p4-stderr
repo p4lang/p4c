@@ -1,6 +1,0 @@
-default-param.p4(1): [--Werror=invalid] error: x: out parameters cannot have default values
-extern void f(out bit<32> x = 0, // illegal: out parameter with default value
-                          ^
-default-param.p4(2): [--Werror=invalid] error: y: optional parameters cannot have default values
-             @optional bit<32> y = 0); // illegal: optional parameter with default value
-                               ^

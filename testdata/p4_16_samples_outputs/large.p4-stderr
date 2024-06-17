@@ -1,4 +1,0 @@
-large.p4(17): [--Wwarn=mismatch] warning: 128w0x1234567890123456789012345678901234567890: value does not fit in 128 bits
-const bit<128> large = 0x1234567890123456789012345678901234567890;
-                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-[--Wwarn=missing] warning: Program does not contain a `main' module

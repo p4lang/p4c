@@ -1,0 +1,16 @@
+<map id="Modifier" name="Modifier">
+<area shape="rect" id="node1" title=" " alt="" coords="117,208,192,235"/>
+<area shape="rect" id="node3" href="$class_check_header_types.html" title=" " alt="" coords="285,5,432,32"/>
+<area shape="rect" id="node4" href="$class_header_type_max_length_calculator.html" title=" " alt="" coords="240,56,477,83"/>
+<area shape="rect" id="node5" href="$class_p4_1_1_check_table_size.html" title="Checks some possible misuses of the table size property." alt="" coords="285,107,432,133"/>
+<area shape="rect" id="node6" href="$class_p4_1_1_do_single_argument_select.html" title=" " alt="" coords="255,157,463,184"/>
+<area shape="rect" id="node7" href="$class_p4_1_1_parse_annotations.html" title=" " alt="" coords="279,208,438,235"/>
+<area shape="rect" id="node11" href="$class_p4_1_1_switch_add_default.html" title=" " alt="" coords="277,259,440,285"/>
+<area shape="rect" id="node12" href="$class_type_check_1_1_assign_action_arg_types.html" title=" " alt="" coords="255,310,462,351"/>
+<area shape="rect" id="node13" href="$class_type_check_1_1_infer_expressions_bottom_up.html" title="Bottom up type inferencing – set the types of expression nodes based on operands." alt="" coords="255,375,463,417"/>
+<area shape="rect" id="node14" href="$class_type_check_1_1_infer_expressions_top_down.html" title="Top down type inferencing – set the type of expression nodes based on their uses." alt="" coords="255,441,463,482"/>
+<area shape="rect" id="node2" href="$class_visitor.html" title=" " alt="" coords="5,208,69,235"/>
+<area shape="rect" id="node8" href="$class_b_m_v2_1_1_parse_annotations.html" title="Parses BMV2&#45;specific annotations." alt="" coords="542,149,723,176"/>
+<area shape="rect" id="node9" href="$class_p4_1_1_control_plane_a_p_i_1_1_parse_p4_runtime_annotations.html" title="Parses P4Runtime&#45;specific annotations." alt="" coords="525,201,740,242"/>
+<area shape="rect" id="node10" href="$class_t_c_1_1_parse_t_c_annotations.html" title=" " alt="" coords="545,267,720,293"/>
+</map>

@@ -1,3 +1,0 @@
-gauntlet_set_invalid-bmv2.p4(37): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h.h
-        h.h.b = 8w1;
-        ^^^

@@ -1,1 +1,0 @@
-[--Werror=unexpected] error: count method of per_prefix_pkt_bytes_count extern must only be called from within an action

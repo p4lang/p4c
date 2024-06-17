@@ -1,3 +1,0 @@
-bool_to_bit_cast.p4(45): [--Wwarn=unused] warning: Control C is not used; removing
-control C() {
-        ^

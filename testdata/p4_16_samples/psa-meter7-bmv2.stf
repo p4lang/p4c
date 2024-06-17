@@ -1,9 +1,0 @@
-# cmd | port | dest | src | ethertype
-packet 4 000000000001 000000000000 ffff
-expect 3 000000000003 000000000000 ffff
-
-meter_set_rates cIngress.meter0 2 0.000005:4 0.00002:5
-meter_get_rates cIngress.meter0 2
-meter_array_set_rates cIngress.meter0 0.000006:7 0.00008:9
-meter_get_rates cIngress.meter0 1
-meter_get_rates cIngress.meter0 2

@@ -1,3 +1,0 @@
-package.p4(18): [--Werror=invalid] error: _c: invalid direction. Constructor parameters cannot have a direction
-package top(in proto _c); // Package should not have in parameters
-                     ^^

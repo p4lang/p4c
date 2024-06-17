@@ -1,3 +1,0 @@
-issue2266.p4(32): [--Wwarn=unused] warning: 'val' is unused
-    action simple_action(in bit<16> val) {
-                                    ^^^

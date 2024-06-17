@@ -1,3 +1,0 @@
-factory2.p4(18): [--Wwarn=unused] warning: 'T' is unused
-extern widget<T> { }
-              ^

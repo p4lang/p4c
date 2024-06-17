@@ -1,6 +1,0 @@
-self-call.p4(17): [--Werror=unsupported] error: Self-referencing types not supported: 'c' within 'control c'
-    c() c_inst;
-    ^
-self-call.p4(16)
-control c() {
-        ^

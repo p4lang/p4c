@@ -1,4 +1,0 @@
-tuple-left.p4(21):syntax error, unexpected ","
-        { a,
-           ^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

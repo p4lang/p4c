@@ -1,3 +1,0 @@
-issue435.p4(7): [--Werror=invalid] error: mystruct1: invalid type; method has no return type.
-    mystruct1(in bit<8> a, out bit<16> b);
-    ^^^^^^^^^

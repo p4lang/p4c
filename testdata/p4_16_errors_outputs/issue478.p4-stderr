@@ -1,3 +1,0 @@
-issue478.p4(29): [--Werror=type-error] error: p.h: argument cannot contain varbit fields
-        b.extract(p.h);
-                  ^^^

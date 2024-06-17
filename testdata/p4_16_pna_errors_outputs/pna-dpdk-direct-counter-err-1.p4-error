@@ -1,6 +1,0 @@
-pna-dpdk-direct-counter-err-1.p4(92): [--Werror=expected] error: Expected default action default_route_drop to have 'count' method call for DirectCounter extern instance MainControlImpl.per_prefix_pkt_byte_count1
-    action default_route_drop() {
-           ^^^^^^^^^^^^^^^^^^
-pna-dpdk-direct-counter-err-1.p4(105): [--Werror=target-error] error: Direct counters and direct meters are unsupported for wildcard match table ipv4_tbl
-    table ipv4_tbl {
-          ^^^^^^^^

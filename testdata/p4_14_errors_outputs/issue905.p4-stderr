@@ -1,4 +1,0 @@
-issue905.p4(34): [--Werror=type-error] error: can_data.value * 2: not defined on operands of type varbit<0>
- modify_field(can_data.value, can_data.value * 2); // error
-                                             ^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

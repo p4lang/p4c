@@ -1,0 +1,5 @@
+<map id="P4::Explain" name="P4::Explain">
+<area shape="rect" id="node1" title="Creates a string that describes the values of current type variables." alt="" coords="5,155,100,181"/>
+<area shape="rect" id="node2" href="$class_inspector.html" title=" " alt="" coords="11,80,94,107"/>
+<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="21,5,85,32"/>
+</map>

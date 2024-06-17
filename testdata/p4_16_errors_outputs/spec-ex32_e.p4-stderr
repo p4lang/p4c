@@ -1,3 +1,0 @@
-spec-ex32_e.p4(22): [--Werror=not-found] error: size2: declaration not found
-    @length(size2) // illegal: cannot use size2, defined after data2
-            ^^^^^

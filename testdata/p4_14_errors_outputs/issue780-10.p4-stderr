@@ -1,4 +1,0 @@
-issue780-10.p4(1): [--Werror=invalid] error: V1Control standard_metadata_t: invalid name; it can only be used for type
-control standard_metadata_t { }
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

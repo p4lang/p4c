@@ -1,6 +1,0 @@
-string-e2.p4(1): [--Werror=type-error] error: data: a parameter with type string cannot have a direction
-extern void f<T>(in T data);
-                      ^^^^
-string-e2.p4(1): [--Werror=type-error] error: Error while analyzing f
-extern void f<T>(in T data);
-            ^

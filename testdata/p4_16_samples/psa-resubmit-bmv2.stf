@@ -1,3 +1,0 @@
-# this packet should be resubmitted once only
-packet 4 000000000002 000000000001 ffff   deadbeef deadbeef deadbeef deadbeef
-expect 2 000000000002 000000000001 f00d   00000006 deadbeef deadbeef deadbeef $

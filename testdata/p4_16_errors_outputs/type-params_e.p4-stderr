@@ -1,3 +1,0 @@
-type-params_e.p4(18): [--Werror=not-found] error: D: declaration not found
-package m(p<D> m);
-            ^

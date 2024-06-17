@@ -1,4 +1,0 @@
-unknown-state.p4(2): [--Werror=not-found] error: ingress: unknown state
-    return ingress;
-           ^^^^^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

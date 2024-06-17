@@ -1,7 +1,0 @@
-issue763.p4(1): [--Werror=duplicate] error: v1HeaderType: same name as v1HeaderType
-header_type X {
-^
-issue763.p4(7)
-header_type X {
-^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

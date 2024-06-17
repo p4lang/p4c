@@ -1,4 +1,0 @@
-TLV_parsing.p4(116): [--Wwarn=mismatch] warning: 4w20: value does not fit in 4 bits
-    set_metadata(my_metadata.parse_ipv4_counter, ipv4_base.ihl * 4 - 20);
-                                                                     ^^
-[--Wwarn=ordering] warning: "start": the order of headers in deparser is not uniquely determined by parser!

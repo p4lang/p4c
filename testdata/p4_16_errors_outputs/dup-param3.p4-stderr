@@ -1,7 +1,0 @@
-dup-param3.p4(17): [--Werror=duplicate] error: Re-declaration of p with different type: 
-control MyIngress<p>(inout bit<32> p)
-                                   ^
-dup-param3.p4(17)
-control MyIngress<p>(inout bit<32> p)
-                  ^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

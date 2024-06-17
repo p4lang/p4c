@@ -1,6 +1,0 @@
-interface_e.p4(21): [--Werror=type-error] error: x: type X has no matching constructor
-    X() x;
-        ^
-interface_e.p4(16)
-extern X<T> { }
-       ^

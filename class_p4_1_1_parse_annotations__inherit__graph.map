@@ -1,0 +1,8 @@
+<map id="P4::ParseAnnotations" name="P4::ParseAnnotations">
+<area shape="rect" id="node1" title=" " alt="" coords="240,64,399,91"/>
+<area shape="rect" id="node4" href="$class_b_m_v2_1_1_parse_annotations.html" title="Parses BMV2&#45;specific annotations." alt="" coords="463,5,645,32"/>
+<area shape="rect" id="node5" href="$class_p4_1_1_control_plane_a_p_i_1_1_parse_p4_runtime_annotations.html" title="Parses P4Runtime&#45;specific annotations." alt="" coords="447,57,661,98"/>
+<area shape="rect" id="node6" href="$class_t_c_1_1_parse_t_c_annotations.html" title=" " alt="" coords="467,123,641,149"/>
+<area shape="rect" id="node2" href="$class_modifier.html" title=" " alt="" coords="117,64,192,91"/>
+<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="5,64,69,91"/>
+</map>

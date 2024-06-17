@@ -1,4 +1,0 @@
-pragma-action.p4(17): [--Wwarn=unused] warning: Control test is not used; removing
-control test()
-        ^^^^
-[--Wwarn=missing] warning: Program does not contain a `main' module

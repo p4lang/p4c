@@ -1,3 +1,0 @@
-range_e.p4(20): [--Werror=type-error] error: 2 .. 3: Cannot operate on values with different types bit<2> and bit<3>
-            2w2 .. 3w3 : reject; // different widths
-            ^^^^^^^^^^

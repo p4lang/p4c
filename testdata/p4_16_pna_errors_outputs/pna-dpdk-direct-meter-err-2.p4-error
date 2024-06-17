@@ -1,4 +1,0 @@
-pna-dpdk-direct-meter-err-2.p4(81): [--Wwarn=unsupported] warning: MainControlImpl.meter0: Packet metering is not supported. Falling back to byte metering.
-    DirectMeter(PNA_MeterType_t.PACKETS) meter0;
-                                         ^^^^^^
-[--Werror=unexpected] error: dpdk_execute method of meter0 extern must only be called from within an action

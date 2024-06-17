@@ -1,3 +1,0 @@
-issue1696-1.p4(10): [--Wwarn=ordering] warning: hdr.stack[0]: the order of headers in deparser is not uniquely determined by parser!
-    extract(stack[0]);
-                  ^

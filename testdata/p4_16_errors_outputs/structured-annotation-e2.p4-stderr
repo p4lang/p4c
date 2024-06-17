@@ -1,3 +1,0 @@
-structured-annotation-e2.p4(1): [--Werror=type-error] error: { 2, 3 }: illegal type for structured annotation; must be int, string or bool
-@badType[a = { 2, 3 }]
-             ^^^^^^^^

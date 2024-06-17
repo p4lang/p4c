@@ -1,9 +1,0 @@
-width1_e.p4(16): [--Wwarn=overflow] warning: 32s0xffffffff: signed value does not fit in 32 bits
-const int<32> c1 = 0xFFFFFFFF;
-                   ^^^^^^^^^^
-width1_e.p4(17): [--Werror=invalid] error: int<-2>: invalid type size
-const int<(c1 + c1)> c2 = 0;
-      ^^^^^^^^^^^^^^
-width1_e.p4(18): [--Werror=invalid] error: int<-3>: invalid type size
-const int<(-3)> c3 = 0;
-      ^^^^^^^^^

@@ -1,0 +1,5 @@
+<map id="DPDK::CollectUsedMetadataField" name="DPDK::CollectUsedMetadataField">
+<area shape="rect" id="node1" title="This pass Collects all metadata struct member used in program." alt="" coords="5,155,212,196"/>
+<area shape="rect" id="node2" href="$class_inspector.html" title=" " alt="" coords="67,80,150,107"/>
+<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="77,5,141,32"/>
+</map>

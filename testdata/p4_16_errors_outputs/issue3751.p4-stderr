@@ -1,3 +1,0 @@
-issue3751.p4(3): [--Werror=expected] error: t: value_set size must be constant
-  value_set<bit>(t) vs;
-                 ^

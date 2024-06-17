@@ -1,4 +1,0 @@
-apply-cf.p4(19): [--Wwarn=unused] warning: Control x is not used; removing
-control x()
-        ^
-[--Wwarn=missing] warning: Program does not contain a `main' module

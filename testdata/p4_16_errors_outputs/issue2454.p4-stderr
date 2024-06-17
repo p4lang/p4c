@@ -1,6 +1,0 @@
-issue2454.p4(8): [--Werror=type-error] error: c: argument cannot have type control C
-        f(c);
-          ^
-issue2454.p4(1)
-control C() { apply { } }
-        ^

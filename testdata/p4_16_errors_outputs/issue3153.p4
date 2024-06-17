@@ -1,1 +1,0 @@
-const bool b = +false;

@@ -1,3 +1,0 @@
-key-name.p4(28): [--Werror=expected] error: h.a + h.a: Complex key expression requires a @name annotation
-        key = { h.a + h.a : exact; }
-                ^^^^^^^^^

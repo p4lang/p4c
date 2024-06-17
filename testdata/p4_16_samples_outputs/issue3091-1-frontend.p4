@@ -1,4 +1,0 @@
-match_kind {
-    exact
-}
-

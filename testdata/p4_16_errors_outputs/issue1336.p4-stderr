@@ -1,4 +1,0 @@
-issue1336.p4(3):syntax error, unexpected (
-type id<type> (
-              ^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

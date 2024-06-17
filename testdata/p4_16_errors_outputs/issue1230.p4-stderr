@@ -1,3 +1,0 @@
-issue1230.p4(6): [--Werror=invalid] error: size must be a constant numeric expression
-        size = true;
-        ^^^^

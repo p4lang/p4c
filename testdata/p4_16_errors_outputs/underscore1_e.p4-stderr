@@ -1,4 +1,0 @@
-underscore1_e.p4(17):syntax error, unexpected _
-    bit _
-        ^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation

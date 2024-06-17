@@ -1,3 +1,0 @@
-issue2496.p4(25): [--Werror=unsupported] error: 1985245330 << 903012108: Compiler only supports widths up to 2048
-        h.eth_hdr.eth_type = 1985245330 << 903012108;
-                             ^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,9 +1,0 @@
-issue2413.p4(22): [--Wwarn=unused] warning: 'b' is unused
-    action y(bit<8> a, bit<8> b) {
-                              ^
-issue2413.p4(23): [--Werror=uninitialized] error: x(a): No argument supplied for b
-        x(a);
-        ^^^^
-issue2413.p4(18)
-    action x(bit<8> a, bit<8> b) {
-                              ^

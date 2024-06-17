@@ -1,6 +1,0 @@
-duplicate-label.p4(26): [--Werror=type-error] error: a: 'switch' label duplicates a
-            a: { arun = 1; } // duplicate label
-            ^
-duplicate-label.p4(25)
-            a: { arun = 1; }
-            ^

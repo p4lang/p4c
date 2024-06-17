@@ -1,4 +1,0 @@
-issue747.p4(31): [--Werror=expected] error: local_port: expected a field list
-action local_recirc(local_port) {
-                    ^^^^^^^^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation
