@@ -155,7 +155,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "Unknown or unimplemented extern method: increment"
+  "Unknown or unimplemented extern method: (.)*.increment"
   # user defined externs
   issue1882-1-bmv2.p4
   issue1882-bmv2.p4
@@ -163,7 +163,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "Unknown or unimplemented extern method: update"
+  "Unknown or unimplemented extern method: (.)*.update"
   issue2664-bmv2.p4
 )
 
