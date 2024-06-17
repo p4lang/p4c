@@ -9,24 +9,29 @@
 
 namespace P4Tools::P4Testgen {
 
+/// This class defines parameters useful for the invocation of P4 extern and P4Testgen-internal
+/// functions.
 class ExternInfo {
  public:
+    /// Reference to the original P4 extern call.
     const IR::MethodCallExpression &originalCall;
+    /// Name of the extern object the call was a member of, if any.
     const IR::PathExpression &externObjectRef;
+    /// Name of the extern method.
     const IR::ID &methodName;
-    const IR::Vector<IR::Argument> *externArgs;
+    /// Arguments to the extern method.
+    const IR::Vector<IR::Argument> &externArguments;
 
     ExternInfo(const IR::MethodCallExpression &originalCall,
                const IR::PathExpression &externObjectRef, const IR::ID &methodName,
-               const IR::Vector<IR::Argument> *externArgs)
+               const IR::Vector<IR::Argument> &externArguments)
         : originalCall(originalCall),
           externObjectRef(externObjectRef),
           methodName(methodName),
-          externArgs(externArgs) {}
+          externArguments(externArguments) {}
 
-    /// Do not accidentally copy-assign the extern info.
+    /// Do not accidentally copy-assign the extern info. It is only passed as reference.
     ExternInfo &operator=(const ExternInfo &) = delete;
-
     ExternInfo &operator=(ExternInfo &&) = delete;
 };
 

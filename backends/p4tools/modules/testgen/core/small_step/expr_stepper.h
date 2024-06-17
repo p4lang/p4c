@@ -17,15 +17,20 @@ namespace P4Tools::P4Testgen {
 
 /// Implements small-step operational semantics for expressions.
 class ExprStepper : public AbstractStepper {
+    /**************************************************************************************************
+    ExternMethodImpls
+    **************************************************************************************************/
  public:
     /// Encapsulates a set of extern method implementations.
     template <typename StepperType>
     class ExternMethodImpls {
      public:
-        /// The type of an extern-method implementation. See @ref exec for an
-        /// explanation of the arguments.
-        using MethodImpl = std::function<void(const ExternInfo &, StepperType &stepper)>;
-        ///
+        /// The type of an extern-method implementation. @param externInfo is general useful
+        /// information that can be consumsed by externs (arguments, method names, etc). @param
+        /// stepper is the abstract stepper invoking the function. Templated on the type of stepper
+        /// invoking it.
+        using MethodImpl = std::function<void(const ExternInfo &externInfo, StepperType &stepper)>;
+
         /// @param call the original method call expression, can be used for stepInto calls.
         /// @param receiver a symbolic value representing the object on which the method is being
         ///     called.
@@ -39,7 +44,7 @@ class ExprStepper : public AbstractStepper {
         /// A BUG occurs if the receiver is not an extern or if the call is ambiguous.
         std::optional<MethodImpl> find(const IR::PathExpression &externObjectRef,
                                        const IR::ID &methodName,
-                                       const IR::Vector<IR::Argument> *args) const {
+                                       const IR::Vector<IR::Argument> &args) const {
             // We have to check the extern type here. We may receive a specialized canonical type,
             // which we need to unpack.
             const IR::Type_Extern *externType = nullptr;
@@ -61,14 +66,14 @@ class ExprStepper : public AbstractStepper {
             }
 
             const auto &submap = impls.at(qualifiedMethodName);
-            if (submap.count(args->size()) == 0) {
+            if (submap.count(args.size()) == 0) {
                 return std::nullopt;
             }
 
             // Find matching methods: if any arguments are named, then the parameter name must
             // match.
             std::optional<MethodImpl> matchingImpl;
-            for (const auto &pair : submap.at(args->size())) {
+            for (const auto &pair : submap.at(args.size())) {
                 const auto &paramNames = pair.first;
                 const auto &methodImpl = pair.second;
 
@@ -94,17 +99,15 @@ class ExprStepper : public AbstractStepper {
         /// According to the P4 specification, a match occurs when the lists have the same length
         /// and the name of any named argument matches the name of the corresponding parameter.
         static bool matches(const std::vector<cstring> &paramNames,
-                            const IR::Vector<IR::Argument> *args) {
-            CHECK_NULL(args);
-
+                            const IR::Vector<IR::Argument> &args) {
             // Number of parameters should match the number of arguments.
-            if (paramNames.size() != args->size()) {
+            if (paramNames.size() != args.size()) {
                 return false;
             }
             // Any named argument should match the name of the corresponding parameter.
             for (size_t idx = 0; idx < paramNames.size(); idx++) {
                 const auto &paramName = paramNames.at(idx);
-                const auto &arg = args->at(idx);
+                const auto &arg = args.at(idx);
 
                 if (arg->name.name == nullptr) {
                     continue;
@@ -152,6 +155,10 @@ class ExprStepper : public AbstractStepper {
 
     /// Provides implementations of all known extern methods built into P4 core.
     static const ExprStepper::ExternMethodImpls<ExprStepper> CORE_EXTERN_METHOD_IMPLS;
+
+    /**************************************************************************************************
+    ExprStepper
+    **************************************************************************************************/
 
  private:
     /// We delegate evaluation to the TableStepper, which needs to access protected members.

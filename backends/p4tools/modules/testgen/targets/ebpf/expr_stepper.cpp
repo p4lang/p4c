@@ -77,7 +77,7 @@ const EBPFExprStepper::ExternMethodImpls<EBPFExprStepper> EBPFExprStepper::EBPF_
         {"*method.verify_ipv4_checksum"_cs,
          {"iphdr"_cs},
          [](const ExternInfo &externInfo, EBPFExprStepper &stepper) {
-             const auto *ipHdrRef = externInfo.externArgs->at(0)->expression;
+             const auto *ipHdrRef = externInfo.externArguments.at(0)->expression;
              if (!(ipHdrRef->is<IR::Member>() || ipHdrRef->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("IP header input %1% of type %2% not supported", ipHdrRef,
                                        ipHdrRef->type);
@@ -155,7 +155,7 @@ const EBPFExprStepper::ExternMethodImpls<EBPFExprStepper> EBPFExprStepper::EBPF_
          [](const ExternInfo &externInfo, EBPFExprStepper &stepper) {
              // Input must be the headers struct.
              const auto *headers =
-                 externInfo.externArgs->at(0)->expression->checkedTo<IR::StructExpression>();
+                 externInfo.externArguments.at(0)->expression->checkedTo<IR::StructExpression>();
              const auto *tcpRef = headers->getField("tcp"_cs);
              CHECK_NULL(tcpRef);
              const auto *tcpHeader = tcpRef->expression->checkedTo<IR::HeaderExpression>();
@@ -180,7 +180,7 @@ const EBPFExprStepper::ExternMethodImpls<EBPFExprStepper> EBPFExprStepper::EBPF_
 
 void EBPFExprStepper::evalExternMethodCall(const ExternInfo &externInfo) {
     auto method = EBPF_EXTERN_METHOD_IMPLS.find(externInfo.externObjectRef, externInfo.methodName,
-                                                externInfo.externArgs);
+                                                externInfo.externArguments);
     if (method.has_value()) {
         return method.value()(externInfo, *this);
     }

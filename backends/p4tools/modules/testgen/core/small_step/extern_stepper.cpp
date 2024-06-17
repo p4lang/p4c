@@ -152,7 +152,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::INTERNAL_EXTERN_M
     {"*.prepend_to_prog_header"_cs,
      {"hdr"_cs},
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
-         const auto *prependVar = externInfo.externArgs->at(0)->expression;
+         const auto *prependVar = externInfo.externArguments.at(0)->expression;
          auto &nextState = stepper.state.clone();
          const auto *prependType = stepper.state.resolveType(prependVar->type);
 
@@ -183,7 +183,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::INTERNAL_EXTERN_M
     {"*.append_to_prog_header"_cs,
      {"hdr"_cs},
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
-         const auto *appendVar = externInfo.externArgs->at(0)->expression;
+         const auto *appendVar = externInfo.externArguments.at(0)->expression;
 
          auto &nextState = stepper.state.clone();
          const auto *appendType = stepper.state.resolveType(appendVar->type);
@@ -256,7 +256,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::INTERNAL_EXTERN_M
      {"blockRef"_cs},
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
          const auto *blockRef =
-             externInfo.externArgs->at(0)->expression->checkedTo<IR::StringLiteral>();
+             externInfo.externArguments.at(0)->expression->checkedTo<IR::StringLiteral>();
          const auto *block = stepper.state.findDecl(new IR::Path(blockRef->value));
          auto blockName = block->getName().name;
          auto &nextState = stepper.state.clone();
@@ -290,7 +290,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::INTERNAL_EXTERN_M
      {"blockRef"_cs},
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
          const auto *blockRef =
-             externInfo.externArgs->at(0)->expression->checkedTo<IR::StringLiteral>();
+             externInfo.externArguments.at(0)->expression->checkedTo<IR::StringLiteral>();
          const auto *block = stepper.state.findDecl(new IR::Path(blockRef->value));
          const auto &archSpec = stepper.programInfo.getArchSpec();
          auto blockName = block->getName().name;
@@ -318,13 +318,16 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::INTERNAL_EXTERN_M
 void ExprStepper::evalInternalExternMethodCall(const ExternInfo &externInfo) {
     // Provides implementations of extern calls internal to the interpreter.
     // These calls do not exist in P4.
-    auto method = INTERNAL_EXTERN_METHOD_IMPLS.find(externInfo.externObjectRef,
-                                                    externInfo.methodName, externInfo.externArgs);
+    auto method = INTERNAL_EXTERN_METHOD_IMPLS.find(
+        externInfo.externObjectRef, externInfo.methodName, externInfo.externArguments);
     if (method.has_value()) {
         return method.value()(externInfo, *this);
     }
-    P4C_UNIMPLEMENTED("Unknown or unimplemented extern method: %1%.%2%",
-                      externInfo.externObjectRef.toString(), externInfo.methodName);
+    // Do not expose internal method prefixes to the user.
+    auto externRefName = externInfo.externObjectRef.toString();
+    P4C_UNIMPLEMENTED("Unknown or unimplemented extern method: %1%%2%",
+                      externRefName.startsWith("*") ? "" : externRefName + ".",
+                      externInfo.methodName);
 }
 
 const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHOD_IMPLS({
@@ -384,7 +387,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
     {"packet_in.advance"_cs,
      {"sizeInBits"_cs},
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
-         const auto *advanceExpr = externInfo.externArgs->at(0)->expression;
+         const auto *advanceExpr = externInfo.externArguments.at(0)->expression;
 
          if (!SymbolicEnv::isSymbolicValue(advanceExpr)) {
              stepToSubexpr(advanceExpr, stepper.result, stepper.state,
@@ -478,7 +481,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
          // This argument is the structure being written by the extract.
          const auto &extractOutput =
-             ToolsVariables::convertReference(externInfo.externArgs->at(0)->expression);
+             ToolsVariables::convertReference(externInfo.externArguments.at(0)->expression);
 
          // Get the extractedType
          const auto *typeArgs = externInfo.originalCall.typeArguments;
@@ -533,8 +536,8 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
          // This argument is the structure being written by the extract.
          const auto &extractOutput =
-             ToolsVariables::convertReference(externInfo.externArgs->at(0)->expression);
-         const auto *varbitExtractExpr = externInfo.externArgs->at(1)->expression;
+             ToolsVariables::convertReference(externInfo.externArguments.at(0)->expression);
+         const auto *varbitExtractExpr = externInfo.externArguments.at(1)->expression;
          if (!SymbolicEnv::isSymbolicValue(varbitExtractExpr)) {
              stepToSubexpr(varbitExtractExpr, stepper.result, stepper.state,
                            [&externInfo](const Continuation::Parameter *v) {
@@ -681,7 +684,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
      {"hdr"_cs},
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
          const auto *emitHeader =
-             externInfo.externArgs->at(0)->expression->checkedTo<IR::HeaderExpression>();
+             externInfo.externArguments.at(0)->expression->checkedTo<IR::HeaderExpression>();
          const auto *validVar = emitHeader->validity;
 
          // Check whether the validity bit of the header is tainted. If it is, the entire
@@ -759,8 +762,9 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
     {"*method.verify"_cs,
      {"bool"_cs, "error"_cs},
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
-         const auto *cond = externInfo.externArgs->at(0)->expression;
-         const auto *error = externInfo.externArgs->at(1)->expression->checkedTo<IR::Constant>();
+         const auto *cond = externInfo.externArguments.at(0)->expression;
+         const auto *error =
+             externInfo.externArguments.at(1)->expression->checkedTo<IR::Constant>();
          if (!SymbolicEnv::isSymbolicValue(cond)) {
              // Evaluate the condition.
              stepToSubexpr(cond, stepper.result, stepper.state,
@@ -816,7 +820,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
              stepper.result->emplace_back(nextState);
              return;
          }
-         const auto *cond = externInfo.externArgs->at(0)->expression;
+         const auto *cond = externInfo.externArguments.at(0)->expression;
 
          // If assumption mode is active, add the condition to the required path conditions.
          if (!SymbolicEnv::isSymbolicValue(cond)) {
@@ -862,7 +866,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
              stepper.result->emplace_back(nextState);
              return;
          }
-         const auto *cond = externInfo.externArgs->at(0)->expression;
+         const auto *cond = externInfo.externArguments.at(0)->expression;
 
          // If assumption mode is active, add the condition to the required path conditions.
          if (!SymbolicEnv::isSymbolicValue(cond)) {
@@ -913,7 +917,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
 
 void ExprStepper::evalExternMethodCall(const ExternInfo &externInfo) {
     auto method = CORE_EXTERN_METHOD_IMPLS.find(externInfo.externObjectRef, externInfo.methodName,
-                                                externInfo.externArgs);
+                                                externInfo.externArguments);
     if (method.has_value()) {
         return method.value()(externInfo, *this);
     }

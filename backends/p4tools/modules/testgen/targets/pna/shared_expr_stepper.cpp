@@ -56,7 +56,7 @@ const ExprStepper::ExternMethodImpls<SharedPnaExprStepper>
          [](const ExternInfo &externInfo, SharedPnaExprStepper &stepper) {
              auto &nextState = stepper.state.clone();
 
-             const auto *destPort = externInfo.externArgs->at(0)->expression;
+             const auto *destPort = externInfo.externArguments.at(0)->expression;
              // TODO: Frontload this in the expression stepper for method call expressions.
              if (!SymbolicEnv::isSymbolicValue(destPort)) {
                  // Evaluate the condition.
@@ -104,8 +104,8 @@ const ExprStepper::ExternMethodImpls<SharedPnaExprStepper>
         {"*method.SelectByDirection"_cs,
          {"direction"_cs, "n2h_value"_cs, "h2n_value"_cs},
          [](const ExternInfo &externInfo, SharedPnaExprStepper &stepper) {
-             for (size_t idx = 0; idx < externInfo.externArgs->size(); ++idx) {
-                 const auto *arg = externInfo.externArgs->at(idx);
+             for (size_t idx = 0; idx < externInfo.externArguments.size(); ++idx) {
+                 const auto *arg = externInfo.externArguments.at(idx);
                  const auto *argExpr = arg->expression;
 
                  // TODO: Frontload this in the expression stepper for method call expressions.
@@ -124,9 +124,9 @@ const ExprStepper::ExternMethodImpls<SharedPnaExprStepper>
                      return;
                  }
              }
-             const auto *directionVar = externInfo.externArgs->at(0)->expression;
-             const auto *n2hValue = externInfo.externArgs->at(1)->expression;
-             const auto *h2nValue = externInfo.externArgs->at(2)->expression;
+             const auto *directionVar = externInfo.externArguments.at(0)->expression;
+             const auto *n2hValue = externInfo.externArguments.at(1)->expression;
+             const auto *h2nValue = externInfo.externArguments.at(2)->expression;
              if (Taint::hasTaint(directionVar)) {
                  auto &taintedState = stepper.state.clone();
                  taintedState.replaceTopBody(
@@ -166,7 +166,7 @@ const ExprStepper::ExternMethodImpls<SharedPnaExprStepper>
 
 void SharedPnaExprStepper::evalExternMethodCall(const ExternInfo &externInfo) {
     auto method = PNA_EXTERN_METHOD_IMPLS.find(externInfo.externObjectRef, externInfo.methodName,
-                                               externInfo.externArgs);
+                                               externInfo.externArguments);
     if (method.has_value()) {
         return method.value()(externInfo, *this);
     }

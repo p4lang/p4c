@@ -21,8 +21,8 @@ const ExprStepper::ExternMethodImpls<PnaDpdkExprStepper>
     PnaDpdkExprStepper::PNA_DPDK_EXTERN_METHOD_IMPLS({});
 
 void PnaDpdkExprStepper::evalExternMethodCall(const ExternInfo &externInfo) {
-    auto method = PNA_DPDK_EXTERN_METHOD_IMPLS.find(externInfo.externObjectRef,
-                                                    externInfo.methodName, externInfo.externArgs);
+    auto method = PNA_DPDK_EXTERN_METHOD_IMPLS.find(
+        externInfo.externObjectRef, externInfo.methodName, externInfo.externArguments);
     if (method.has_value()) {
         return method.value()(externInfo, *this);
     }
