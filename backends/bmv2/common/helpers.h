@@ -60,7 +60,7 @@ class V1ModelProperties {
 
 namespace Standard {
 
-/// We re-use as much code as possible between PSA and v1model. The two
+/// We re-use as much code as possible between PSA, PNA and v1model. The two
 /// architectures have some differences though, in particular regarding naming
 /// (of table properties, extern types, parameter names). We define some
 /// "traits" for each extern type, templatized by the architecture name (using
@@ -68,7 +68,7 @@ namespace Standard {
 /// architecture-specific names in the unified code.
 /// The V1MODEL2020 is the modified v1model.p4 file with a version
 /// >= 20200408
-enum class Arch { V1MODEL, PSA, V1MODEL2020 };
+enum class Arch { V1MODEL, PSA, PNA, V1MODEL2020 };
 
 /// Traits for the action profile extern, must be specialized for v1model and
 /// PSA.
@@ -96,6 +96,9 @@ struct ActionProfileTraits<Arch::PSA> {
     static const cstring sizeParamName() { return "size"_cs; }
 };
 
+template <>
+struct ActionProfileTraits<Arch::PNA> : public ActionProfileTraits<Arch::PSA> {};
+
 /// Traits for the action selector extern, must be specialized for v1model and
 /// PSA. Inherits from ActionProfileTraits because of their similarities.
 template <Arch arch>
@@ -115,6 +118,9 @@ struct ActionSelectorTraits<Arch::PSA> : public ActionProfileTraits<Arch::PSA> {
     static const cstring name() { return "action selector"_cs; }
     static const cstring typeName() { return "ActionSelector"_cs; }
 };
+
+template <>
+struct ActionSelectorTraits<Arch::PNA> : public ActionSelectorTraits<Arch::PSA> {};
 
 /// Traits for the register extern, must be specialized for v1model and PSA.
 template <Arch arch>
@@ -146,6 +152,9 @@ struct RegisterTraits<Arch::PSA> {
     /// parameter list of the extern type declaration.
     static std::optional<size_t> indexTypeParamIdx() { return 1; }
 };
+
+template <>
+struct RegisterTraits<Arch::PNA> : public RegisterTraits<Arch::PSA> {};
 
 template <Arch arch>
 struct CounterExtern {};
@@ -211,6 +220,13 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PSA>> {
     static std::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
+/// @ref CounterlikeTraits<> specialization for @ref CounterExtern for PNA
+template <>
+struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PNA>>
+    : public CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PSA>> {
+    static const cstring directPropertyName() { return "pna_direct_counter"_cs; }
+};
+
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for v1model
 template <>
 struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL>> {
@@ -247,6 +263,13 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA>> {
     /// the index of the type parameter for the meter index, in the type
     /// parameter list of the extern type declaration.
     static std::optional<size_t> indexTypeParamIdx() { return 0; }
+};
+
+/// @ref CounterlikeTraits<> specialization for @ref MeterExtern for PNA
+template <>
+struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PNA>>
+    : public CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA>> {
+    static const cstring directPropertyName() { return "pna_direct_meter"_cs; }
 };
 
 }  // namespace Helpers
