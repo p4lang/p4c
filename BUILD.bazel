@@ -28,12 +28,11 @@ genrule(
     outs = ["config.h"],
     # TODO: We should actually check these properly instead of just #undefing them.
     # Maybe select() can help here?
-    cmd = " | ".join([
-        "sed 's|cmakedefine|define|g' < $(SRCS)",
-        "sed 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g'",
-        "sed 's|define HAVE_LIBBACKTRACE 1|undef HAVE_LIBBACKTRACE|g' > $(OUTS)",
-        "sed 's|define HAVE_MM_MALLOC_H 1|undef HAVE_MM_MALLOC_H|g' > $(OUTS)",
-    ]),
+    cmd = "sed -e 's|cmakedefine|define|g' \
+             -e 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g' \
+             -e 's|define HAVE_LIBBACKTRACE 1|undef HAVE_LIBBACKTRACE|g' \
+             -e 's|define HAVE_MM_MALLOC_H 1|undef HAVE_MM_MALLOC_H|g' \
+             < $(SRCS) > $(OUTS)",
     visibility = ["//visibility:private"],
 )
 

@@ -48,12 +48,15 @@ bool Backend::process() {
     }
     auto refMapEBPF = refMap;
     auto typeMapEBPF = typeMap;
+    auto hook = options.getDebugHook();
     parseTCAnno = new ParseTCAnnotations();
     tcIR = new ConvertToBackendIR(toplevel, pipeline, refMap, typeMap, options);
     genIJ = new IntrospectionGenerator(pipeline, refMap, typeMap);
-    addPasses({parseTCAnno, new P4::ClearTypeMap(typeMap),
-               new P4::TypeChecking(refMap, typeMap, true), tcIR, genIJ});
-    toplevel->getProgram()->apply(*this);
+    PassManager backEnd = {};
+    backEnd.addPasses({parseTCAnno, new P4::ClearTypeMap(typeMap),
+                       new P4::TypeChecking(refMap, typeMap, true), tcIR, genIJ});
+    backEnd.addDebugHook(hook, true);
+    toplevel->getProgram()->apply(backEnd);
     if (::errorCount() > 0) return false;
     if (!ebpfCodeGen(refMapEBPF, typeMapEBPF)) return false;
     return true;
@@ -566,6 +569,39 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
     }
 }
 
+void ConvertToBackendIR::updatePnaDirectCounter(const IR::P4Table *t, IR::TCTable *tabledef,
+                                                unsigned tentries) {
+    cstring propertyName = "pna_direct_counter"_cs;
+    auto property = t->properties->getProperty(propertyName);
+    if (property == nullptr) return;
+    auto expr = property->value->to<IR::ExpressionValue>()->expression;
+    auto ctrl = findContext<IR::P4Control>();
+    auto cName = ctrl->name.originalName;
+    auto externInstanceName = cName + "." + expr->toString();
+    tabledef->setDirectCounter(externInstanceName);
+
+    auto externInstance = P4::ExternInstance::resolve(expr, refMap, typeMap);
+    if (!externInstance) {
+        ::error(ErrorType::ERR_INVALID,
+                "Expected %1% property value for table %2% to resolve to an "
+                "extern instance: %3%",
+                propertyName, t->name.originalName, property);
+        return;
+    }
+    for (auto ext : externsInfo) {
+        if (ext.first == externInstance->type->toString()) {
+            auto externDefinition = tcPipeline->getExternDefinition(ext.first);
+            if (externDefinition) {
+                auto extInstDef = ((IR::TCExternInstance *)externDefinition->getExternInstance(
+                    externInstanceName));
+                extInstDef->setExternTableBindable(true);
+                extInstDef->setNumElements(tentries);
+                break;
+            }
+        }
+    }
+}
+
 void ConvertToBackendIR::updateAddOnMissTable(const IR::P4Table *t) {
     auto tblname = t->name.originalName;
     for (auto table : tcPipeline->tableDefs) {
@@ -753,6 +789,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                 }
             }
         }
+        updatePnaDirectCounter(t, tableDefinition, tEntriesCount);
         updateDefaultHitAction(t, tableDefinition);
         updateDefaultMissAction(t, tableDefinition);
         updateMatchType(t, tableDefinition);
@@ -788,9 +825,10 @@ cstring ConvertToBackendIR::processExternPermission(const IR::Type_Extern *ext) 
     return value.str();
 }
 
-void ConvertToBackendIR::processExternConstructorAnnotations(const IR::Type_Extern *extn,
-                                                             const IR::Declaration_Instance *decl,
-                                                             struct ExternInstance *instance) {
+safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(
+    const IR::Type_Extern *extn, const IR::Declaration_Instance *decl,
+    struct ExternInstance *instance) {
+    safe_vector<const IR::TCKey *> keys;
     for (auto gd : *extn->getDeclarations()) {
         if (!gd->getNode()->is<IR::Method>()) {
             continue;
@@ -804,71 +842,172 @@ void ConvertToBackendIR::processExternConstructorAnnotations(const IR::Type_Exte
         if (decl->arguments->size() != params->size()) {
             continue;
         }
+        // Process all constructor arguments
         for (unsigned itr = 0; itr < params->size(); itr++) {
-            auto annoList = params->getParameter(itr)->getAnnotations()->annotations;
-            for (auto anno : annoList) {
-                if (anno->name == ParseTCAnnotations::tc_numel) {
-                    auto exp = decl->arguments->at(itr)->expression;
-                    if (exp->is<IR::Constant>()) {
-                        instance->is_num_elements = true;
-                        instance->num_elements = exp->to<IR::Constant>()->asInt();
-                    }
+            auto parameter = params->getParameter(itr);
+            auto exp = decl->arguments->at(itr)->expression;
+            if (parameter->getAnnotations()->getSingle(ParseTCAnnotations::tc_numel)) {
+                if (exp->is<IR::Constant>()) {
+                    instance->is_num_elements = true;
+                    instance->num_elements = exp->to<IR::Constant>()->asInt();
                 }
-                if (anno->name == ParseTCAnnotations::tc_init_val) {
-                    // TODO: Process tc_init_val.
+            } else if (parameter->getAnnotations()->getSingle(ParseTCAnnotations::tc_init_val)) {
+                // TODO: Process tc_init_val.
+            } else {
+                /* If a parameter is not annoated by tc_init or tc_numel then it is emitted as
+                constructor parameters.*/
+                IR::TCKey *key = new IR::TCKey(0, parameter->type->width_bits(),
+                                               parameter->toString(), "param"_cs, false);
+                keys.push_back(key);
+                if (exp->is<IR::Constant>()) {
+                    key->setValue(exp->to<IR::Constant>()->asInt64());
                 }
             }
         }
     }
+    return keys;
+}
+
+cstring ConvertToBackendIR::getControlPathKeyAnnotation(const IR::StructField *field) {
+    cstring annoName;
+    auto annotation = field->getAnnotations()->annotations.at(0);
+    if (annotation->name == ParseTCAnnotations::tc_key ||
+        annotation->name == ParseTCAnnotations::tc_data_scalar) {
+        annoName = annotation->name;
+    } else if (annotation->name == ParseTCAnnotations::tc_data) {
+        annoName = "param"_cs;
+    }
+    return annoName;
+}
+
+ConvertToBackendIR::CounterType ConvertToBackendIR::toCounterType(const int type) {
+    if (type == 0)
+        return CounterType::PACKETS;
+    else if (type == 1)
+        return CounterType::BYTES;
+    else if (type == 2)
+        return CounterType::PACKETS_AND_BYTES;
+
+    BUG("Unknown counter type %1%", type);
+}
+
+safe_vector<const IR::TCKey *> ConvertToBackendIR::processCounterControlPathKeys(
+    const IR::Type_Struct *extern_control_path, const IR::Type_Extern *extn,
+    const IR::Declaration_Instance *decl) {
+    safe_vector<const IR::TCKey *> keys;
+    auto typeArg = decl->arguments->at(decl->arguments->size() - 1)->expression->to<IR::Constant>();
+    CounterType type = toCounterType(typeArg->asInt());
+    int kId = 1;
+    for (auto field : extern_control_path->fields) {
+        /* If there is no annotation to control path key, ignore the key.*/
+        if (field->getAnnotations()->annotations.size() != 1) {
+            continue;
+        }
+        cstring annoName = getControlPathKeyAnnotation(field);
+
+        if (field->toString() == "pkts") {
+            if (type == CounterType::PACKETS || type == CounterType::PACKETS_AND_BYTES) {
+                auto temp_keys = HandleTypeNameStructField(field, extn, decl, kId, annoName);
+                keys.insert(keys.end(), temp_keys.begin(), temp_keys.end());
+            }
+            continue;
+        }
+        if (field->toString() == "bytes") {
+            if (type == CounterType::BYTES || type == CounterType::PACKETS_AND_BYTES) {
+                auto temp_keys = HandleTypeNameStructField(field, extn, decl, kId, annoName);
+                keys.insert(keys.end(), temp_keys.begin(), temp_keys.end());
+            }
+            continue;
+        }
+
+        /* If the field is of Type_Name example 'T'*/
+        if (field->type->is<IR::Type_Name>()) {
+            auto temp_keys = HandleTypeNameStructField(field, extn, decl, kId, annoName);
+            keys.insert(keys.end(), temp_keys.begin(), temp_keys.end());
+        } else {
+            IR::TCKey *key =
+                new IR::TCKey(kId++, field->type->width_bits(), field->toString(), annoName, true);
+            keys.push_back(key);
+        }
+    }
+    return keys;
 }
 
 safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternControlPath(
-    const IR::Type_SpecializedCanonical *ts, const IR::Type_Extern *extn, cstring eName) {
+    const IR::Type_Extern *extn, const IR::Declaration_Instance *decl, cstring eName) {
     safe_vector<const IR::TCKey *> keys;
     auto find = ControlStructPerExtern.find(eName);
     if (find != ControlStructPerExtern.end()) {
         auto extern_control_path = ControlStructPerExtern[eName];
+        if (eName == "DirectCounter" || eName == "Counter") {
+            keys = processCounterControlPathKeys(extern_control_path, extn, decl);
+            return keys;
+        }
+
         int kId = 1;
         for (auto field : extern_control_path->fields) {
+            /* If there is no annotation to control path key, ignore the key.*/
             if (field->getAnnotations()->annotations.size() != 1) {
                 continue;
             }
-            cstring annoName;
-            auto annotation = field->getAnnotations()->annotations.at(0);
-            if (annotation->name == ParseTCAnnotations::tc_key ||
-                annotation->name == ParseTCAnnotations::tc_data_scalar) {
-                annoName = annotation->name;
-            } else if (annotation->name == ParseTCAnnotations::tc_data) {
-                annoName = "param"_cs;
-            }
-            /* If the field is of Type_Name example 'T' and 'T' is of Type_Struct,
-                extract all fields of structure*/
+            cstring annoName = getControlPathKeyAnnotation(field);
+
+            /* If the field is of Type_Name example 'T'*/
             if (field->type->is<IR::Type_Name>()) {
-                auto type_extern_params = extn->getTypeParameters()->parameters;
-                for (unsigned itr = 0; itr < type_extern_params.size(); itr++) {
-                    if (type_extern_params.at(itr)->toString() == field->type->toString()) {
-                        auto param_val = ts->arguments->at(itr);
-                        if (auto param_struct = param_val->to<IR::Type_Struct>()) {
-                            for (auto f : param_struct->fields) {
-                                IR::TCKey *key = new IR::TCKey(kId++, f->type->width_bits(),
-                                                               f->toString(), annoName);
-                                keys.push_back(key);
-                            }
-                        } else {
-                            IR::TCKey *key = new IR::TCKey(kId++, param_val->width_bits(),
-                                                           field->toString(), annoName);
-                            keys.push_back(key);
-                        }
-                    }
-                }
+                auto temp_keys = HandleTypeNameStructField(field, extn, decl, kId, annoName);
+                keys.insert(keys.end(), temp_keys.begin(), temp_keys.end());
             } else {
-                IR::TCKey *key =
-                    new IR::TCKey(kId++, field->type->width_bits(), field->toString(), annoName);
+                IR::TCKey *key = new IR::TCKey(kId++, field->type->width_bits(), field->toString(),
+                                               annoName, true);
                 keys.push_back(key);
             }
         }
     }
     return keys;
+}
+
+safe_vector<const IR::TCKey *> ConvertToBackendIR::HandleTypeNameStructField(
+    const IR::StructField *field, const IR::Type_Extern *extn, const IR::Declaration_Instance *decl,
+    int &kId, cstring annoName) {
+    safe_vector<const IR::TCKey *> keys;
+    auto type_extern_params = extn->getTypeParameters()->parameters;
+    for (unsigned itr = 0; itr < type_extern_params.size(); itr++) {
+        if (type_extern_params.at(itr)->toString() == field->type->toString()) {
+            auto decl_type = typeMap->getType(decl, true);
+            auto ts = decl_type->to<IR::Type_SpecializedCanonical>();
+            auto param_val = ts->arguments->at(itr);
+
+            /* If 'T' is of Type_Struct, extract all fields of structure*/
+            if (auto param_struct = param_val->to<IR::Type_Struct>()) {
+                for (auto f : param_struct->fields) {
+                    IR::TCKey *key =
+                        new IR::TCKey(kId++, f->type->width_bits(), f->toString(), annoName, true);
+                    keys.push_back(key);
+                }
+            } else {
+                IR::TCKey *key = new IR::TCKey(kId++, param_val->width_bits(), field->toString(),
+                                               annoName, true);
+                keys.push_back(key);
+            }
+            break;
+        }
+    }
+    return keys;
+}
+
+bool ConvertToBackendIR::hasExecuteMethod(const IR::Type_Extern *extn) {
+    for (auto gd : *extn->getDeclarations()) {
+        if (!gd->getNode()->is<IR::Method>()) {
+            continue;
+        }
+        auto method = gd->getNode()->to<IR::Method>();
+        const IR::Annotation *execAnnotation =
+            method->getAnnotations()->getSingle(ParseTCAnnotations::tc_md_exec);
+        if (execAnnotation) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /* Process each declaration instance of externs*/
@@ -877,23 +1016,31 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
     if (auto ts = decl_type->to<IR::Type_SpecializedCanonical>()) {
         if (auto extn = ts->baseType->to<IR::Type_Extern>()) {
             auto eName = ts->baseType->toString();
-            // TODO: Enable template generation for other externs as well.
-            if (eName != "Register") return;
+            auto find = ControlStructPerExtern.find(eName);
+            if (find == ControlStructPerExtern.end()) {
+                return;
+            }
             IR::TCExtern *externDefinition;
             auto instance = new struct ExternInstance();
             instance->instance_name = decl->toString();
 
-            processExternConstructorAnnotations(extn, decl, instance);
+            auto constructorKeys = processExternConstructor(extn, decl, instance);
 
             // Get Control Path information if specified for extern.
-            auto controlKeys = processExternControlPath(ts, extn, eName);
+            auto controlKeys = processExternControlPath(extn, decl, eName);
+
+            bool has_exec_method = hasExecuteMethod(extn);
 
             /* If the extern info is already present, add new instance
                Or else create new extern info.*/
             auto iterator = externsInfo.find(eName);
             if (iterator == externsInfo.end()) {
                 struct ExternBlock *eb = new struct ExternBlock();
-                eb->externId = ++externCount;
+                if (eName == "DirectCounter") {
+                    eb->externId = 101;
+                } else {
+                    eb->externId = ++externCount;
+                }
                 eb->permissions = processExternPermission(extn);
                 eb->no_of_instances += 1;
                 externsInfo.emplace(eName, eb);
@@ -901,8 +1048,9 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
                 instance->instance_id = eb->no_of_instances;
                 eb->eInstance.push_back(instance);
 
-                externDefinition = new IR::TCExtern(eb->externId, eName, pipelineName,
-                                                    eb->no_of_instances, eb->permissions);
+                externDefinition =
+                    new IR::TCExtern(eb->externId, eName, pipelineName, eb->no_of_instances,
+                                     eb->permissions, has_exec_method);
                 tcPipeline->addExternDefinition(externDefinition);
             } else {
                 auto eb = externsInfo[eName];
@@ -916,6 +1064,9 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
                                          instance->is_num_elements, instance->num_elements);
             if (controlKeys.size() != 0) {
                 tcExternInstance->addControlPathKeys(controlKeys);
+            }
+            if (constructorKeys.size() != 0) {
+                tcExternInstance->addConstructorKeys(constructorKeys);
             }
             externDefinition->addExternInstance(tcExternInstance);
         }

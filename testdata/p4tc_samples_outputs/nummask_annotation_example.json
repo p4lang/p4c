@@ -6,7 +6,7 @@
     {
       "name" : "MainControlImpl/set_ct_options",
       "id" : 1,
-      "tentries" : 2048,
+      "tentries" : 1024,
       "permissions" : "0x3da4",
       "nummask" : 64,
       "keysize" : 8,

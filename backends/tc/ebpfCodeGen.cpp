@@ -1131,6 +1131,11 @@ void EBPFTablePNA::emitValueActionIDNames(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
 }
 
+void EBPFTablePNA::initDirectCounters() {
+    EBPFTablePNADirectCounterPropertyVisitor visitor(this);
+    visitor.visitTableProperty();
+}
+
 // =====================IngressDeparserPNA=============================
 bool IngressDeparserPNA::build() {
     auto pl = controlBlock->container->type->applyParams;
@@ -1447,7 +1452,10 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ExternBlock *instance) {
     } else if (typeName == "Register") {
         auto reg = new EBPFRegisterPNA(program, name, di, control->codeGen);
         control->pna_registers.emplace(name, reg);
-        control->defineExtern = true;
+        control->addExternDeclaration = true;
+    } else if (typeName == "DirectCounter") {
+        control->addExternDeclaration = true;
+        return false;
     } else {
         ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control", instance);
     }
@@ -1978,6 +1986,7 @@ ActionTranslationVisitorPNA::ActionTranslationVisitorPNA(
                                tcIR, table),
       table(table),
       isDefaultAction(isDefaultAction) {
+    this->tcIR = tcIR;
     action = act;
 }
 
@@ -2016,6 +2025,26 @@ cstring ActionTranslationVisitorPNA::getParamName(const IR::PathExpression *expr
         return getParamInstanceName(expr);
     }
     return ControlBodyTranslatorPNA::getParamName(expr);
+}
+
+void ActionTranslationVisitorPNA::processMethod(const P4::ExternMethod *method) {
+    auto declType = method->originalExternType;
+    auto decl = method->object;
+    BUG_CHECK(decl->is<IR::Declaration_Instance>(), "Extern has not been declared: %1%", decl);
+    auto di = decl->to<IR::Declaration_Instance>();
+    auto instanceName = EBPF::EBPFObject::externalName(di);
+
+    if (declType->name.name == "DirectCounter") {
+        auto ctr = table->getDirectCounter(instanceName);
+        auto pna_ctr = dynamic_cast<EBPFCounterPNA *>(ctr);
+        if (pna_ctr != nullptr)
+            pna_ctr->emitDirectMethodInvocation(builder, method, this->tcIR);
+        else
+            ::error(ErrorType::ERR_NOT_FOUND, "%1%: Table %2% does not own DirectCounter named %3%",
+                    method->expr, table->table->container, instanceName);
+    } else {
+        ControlBodyTranslatorPNA::processMethod(method);
+    }
 }
 
 EBPF::ActionTranslationVisitor *EBPFTablePNA::createActionTranslationVisitor(
