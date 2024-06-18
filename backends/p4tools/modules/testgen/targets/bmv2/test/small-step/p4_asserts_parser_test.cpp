@@ -58,11 +58,6 @@ ConstraintsVector loadExample(const char *curFile, bool flag) {
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
     const IR::P4Program *program = nullptr;
     options.file = std::filesystem::path(sourcePath) / curFile;
-    if (access(options.file.c_str(), 0) != 0) {
-        // Subpath for bf-p4c-compilers.
-        // FIXME: what is the logic behind here?
-        options.file = std::filesystem::path(sourcePath) / curFile;
-    }
     program = P4::parseP4File(options);
     if (originalEnv == nullptr) {
         unsetenv("P4C_16_INCLUDE_PATH");
