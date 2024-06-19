@@ -40,6 +40,7 @@ limitations under the License.
 #include "dontcareArgs.h"
 #include "entryPriorities.h"
 #include "evaluator/evaluator.h"
+#include "decl_copyprop.h"
 #include "frontends/common/constantFolding.h"
 #include "functionsInlining.h"
 #include "hierarchicalNames.h"
@@ -181,11 +182,17 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ResolveReferences(&refMap),
         new Deprecated(&refMap),
         new CheckNamedArgs(),
+        new DeclarationCopyPropagation(&refMap, &typeMap, true),
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
         new SetStrictStruct(&typeMap, true),  // Next pass uses strict struct checking
         new TypeInference(&refMap, &typeMap, false, false),  // insert casts, don't check arrays
         new SetStrictStruct(&typeMap, false),
+        new ResolveReferences(&refMap),
+        new PassRepeated({
+            new ConstantFolding(&refMap, nullptr),
+            new DeclarationCopyPropagation(&refMap, &typeMap)
+        }),
         new ValidateMatchAnnotations(&typeMap),
         new ValidateValueSets(),
         new DefaultValues(&refMap, &typeMap),
