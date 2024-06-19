@@ -80,6 +80,7 @@ class ErrorType {
     static const int WARN_INVALID_HEADER;           // access to fields of an invalid header
     static const int WARN_DUPLICATE_PRIORITIES;     // two entries with the same priority
     static const int WARN_ENTRIES_OUT_OF_ORDER;     // entries with priorities out of order
+    static const int WARN_MULTI_HDR_EXTRACT;        // same header may be extracted more than once
     // Backends should extend this class with additional warnings in the range 1500-2141.
     static const int WARN_MIN_BACKEND = 1500;  // first allowed backend warning code
     static const int WARN_MAX = 2141;          // last allowed warning code
