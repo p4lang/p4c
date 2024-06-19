@@ -1,6 +1,10 @@
 <map id="P4::InstantiateDirectCalls" name="P4::InstantiateDirectCalls">
-<area shape="rect" id="node1" title=" " alt="" coords="5,229,192,256"/>
-<area shape="rect" id="node2" href="$class_pass_manager.html" title=" " alt="" coords="45,155,153,181"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="67,5,131,32"/>
-<area shape="rect" id="node4" href="$class_backtrack.html" title=" " alt="" coords="97,80,183,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,192,251"/>
+<area shape="rect" id="Node000002" href="$class_pass_manager.html" title=" " alt="" coords="45,152,153,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,191,101,225,96,225,96,191"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="67,5,131,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="94,44,87,79,89,119,97,151,92,153,83,119,81,78,89,43"/>
+<area shape="rect" id="Node000004" href="$class_backtrack.html" title=" " alt="" coords="97,79,183,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="115,41,136,77,131,80,110,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="129,117,108,153,103,151,124,115"/>
 </map>

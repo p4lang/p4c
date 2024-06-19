@@ -1,5 +1,7 @@
 <map id="DPDK::RemoveUnusedMetadataFields" name="DPDK::RemoveUnusedMetadataFields">
-<area shape="rect" id="node1" title="This pass removes all unused fields from metadata struct." alt="" coords="5,155,237,196"/>
-<area shape="rect" id="node2" href="$class_transform.html" title=" " alt="" coords="78,80,165,107"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="89,5,153,32"/>
+<area shape="rect" id="Node000001" title="This pass removes all unused fields from metadata struct." alt="" coords="5,152,237,192"/>
+<area shape="rect" id="Node000002" href="$class_transform.html" title=" " alt="" coords="78,79,165,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="124,118,124,152,119,152,119,118"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="89,5,153,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="124,44,124,79,119,79,119,44"/>
 </map>

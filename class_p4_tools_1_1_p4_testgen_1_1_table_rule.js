@@ -1,7 +1,5 @@
 var class_p4_tools_1_1_p4_testgen_1_1_table_rule =
 [
-    [ "TableRule", "class_p4_tools_1_1_p4_testgen_1_1_table_rule.html#aeff5ab4c80417e933fcbb75b61d90c2a", null ],
-    [ "DECLARE_TYPEINFO", "class_p4_tools_1_1_p4_testgen_1_1_table_rule.html#a10729cdfd0c9ed70535838d0316ef7ba", null ],
     [ "evaluate", "class_p4_tools_1_1_p4_testgen_1_1_table_rule.html#a9d23733ec204291833bea045e1abf728", null ],
     [ "getActionCall", "class_p4_tools_1_1_p4_testgen_1_1_table_rule.html#af42638374f998bd1ef5bb43e41c786e4", null ],
     [ "getMatches", "class_p4_tools_1_1_p4_testgen_1_1_table_rule.html#aed13ae8f997124e25101b1c1077929fd", null ],

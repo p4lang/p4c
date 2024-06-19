@@ -1,6 +1,10 @@
 <map id="P4::InlinePass" name="P4::InlinePass">
-<area shape="rect" id="node1" title="Performs one round of inlining bottoms&#45;up." alt="" coords="5,229,116,256"/>
-<area shape="rect" id="node2" href="$class_pass_manager.html" title=" " alt="" coords="7,155,115,181"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="29,5,93,32"/>
-<area shape="rect" id="node4" href="$class_backtrack.html" title=" " alt="" coords="59,80,145,107"/>
+<area shape="rect" id="Node000001" title="Performs one round of inlining bottoms&#45;up." alt="" coords="5,225,116,251"/>
+<area shape="rect" id="Node000002" href="$class_pass_manager.html" title=" " alt="" coords="7,152,115,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="63,191,63,225,58,225,58,191"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="29,5,93,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="56,44,49,79,51,119,59,151,54,153,45,119,43,78,51,43"/>
+<area shape="rect" id="Node000004" href="$class_backtrack.html" title=" " alt="" coords="59,79,145,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="77,41,98,77,93,80,72,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="91,117,70,153,65,151,86,115"/>
 </map>

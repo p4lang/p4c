@@ -1,7 +1,11 @@
 <map id="ICompileContext" name="ICompileContext">
-<area shape="rect" id="node1" title=" " alt="" coords="132,5,263,32"/>
-<area shape="rect" id="node2" href="$class_base_compile_context.html" title=" " alt="" coords="118,80,277,107"/>
-<area shape="rect" id="node3" href="$class_p4_c_context.html" title=" " alt="" coords="148,155,247,181"/>
-<area shape="rect" id="node4" href="$class_p4_c_context_with_options.html" title=" " alt="" coords="5,229,184,271"/>
-<area shape="rect" id="node5" href="$class_p4_tools_1_1_compile_context.html" title="A compilation context for P4Tools that provides a custom compiler configuration." alt="" coords="208,229,392,271"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="132,5,263,31"/>
+<area shape="rect" id="Node000002" href="$class_base_compile_context.html" title=" " alt="" coords="118,79,277,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,44,200,79,195,79,195,44"/>
+<area shape="rect" id="Node000003" href="$class_p4_c_context.html" title=" " alt="" coords="148,152,247,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="200,118,200,152,195,152,195,118"/>
+<area shape="rect" id="Node000004" href="$class_p4_c_context_with_options.html" title=" " alt="" coords="5,225,184,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="173,188,121,227,118,223,170,184"/>
+<area shape="rect" id="Node000005" href="$class_p4_tools_1_1_compile_context.html" title="A compilation context for P4Tools that provides a custom compiler configuration." alt="" coords="208,225,392,265"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="225,184,277,223,274,227,222,188"/>
 </map>

@@ -1,5 +1,7 @@
 <map id="bitvec" name="bitvec">
-<area shape="rect" id="node1" title=" " alt="" coords="86,5,149,32"/>
-<area shape="rect" id="node2" href="$class_l_t_bit_matrix.html" title=" " alt="" coords="5,80,101,107"/>
-<area shape="rect" id="node3" href="$class_sym_bit_matrix.html" title=" " alt="" coords="126,80,237,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="86,5,149,31"/>
+<area shape="rect" id="Node000002" href="$class_l_t_bit_matrix.html" title=" " alt="" coords="5,79,101,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,43,66,80,62,77,96,39"/>
+<area shape="rect" id="Node000003" href="$class_sym_bit_matrix.html" title=" " alt="" coords="126,79,237,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="139,39,173,77,169,80,135,43"/>
 </map>

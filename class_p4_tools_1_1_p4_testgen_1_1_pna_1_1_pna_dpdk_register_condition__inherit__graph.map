@@ -1,6 +1,9 @@
 <map id="P4Tools::P4Testgen::Pna::PnaDpdkRegisterCondition" name="P4Tools::P4Testgen::Pna::PnaDpdkRegisterCondition">
-<area shape="rect" id="node1" title=" " alt="" coords="5,244,241,285"/>
-<area shape="rect" id="node2" href="$class_p4_tools_1_1_p4_testgen_1_1_test_object.html" title=" " alt="" coords="51,155,196,196"/>
-<area shape="rect" id="node3" href="$class_i_castable.html" title=" " alt="" coords="82,80,165,107"/>
-<area shape="rect" id="node4" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="78,5,169,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,240,241,280"/>
+<area shape="rect" id="Node000002" href="$class_p4_tools_1_1_p4_testgen_1_1_test_object.html" title=" " alt="" coords="51,152,196,192"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,206,126,240,121,240,121,206"/>
+<area shape="rect" id="Node000003" href="$class_i_castable.html" title=" " alt="" coords="82,79,165,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="126,118,126,152,121,152,121,118"/>
+<area shape="rect" id="Node000004" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="78,5,169,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="126,44,126,79,121,79,121,44"/>
 </map>

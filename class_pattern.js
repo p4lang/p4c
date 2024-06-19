@@ -1,31 +1,4 @@
 var class_pattern =
 [
-    [ "Match", "class_pattern_1_1_match.html", "class_pattern_1_1_match" ],
-    [ "Pattern", "class_pattern.html#a853e373165211029f991a789e7e5ecf7", null ],
-    [ "Pattern", "class_pattern.html#aed99e8630b005bd0b6cf790d39ad9575", null ],
-    [ "Pattern", "class_pattern.html#a53566a0f748d88dd88803e55e119dfe4", null ],
-    [ "Pattern", "class_pattern.html#a839baab0d34e84df983f00e5e1b0ed0f", null ],
-    [ "match", "class_pattern.html#af6f642e9673990b14182a905a81bbeda", null ],
-    [ "operator!", "class_pattern.html#ade160d6b3d4e2f066a7737fa2403fbef", null ],
-    [ "operator!=", "class_pattern.html#a47270ddcd2a65ea975e3d47466d7eb92", null ],
-    [ "operator%", "class_pattern.html#a96292cba4bdc7b229cb165775e49568d", null ],
-    [ "operator&", "class_pattern.html#acbac55b07a03d72854e24d911989cc06", null ],
-    [ "operator&&", "class_pattern.html#a498e0a53eb4198428bcbaffe4f21e73f", null ],
-    [ "operator*", "class_pattern.html#ada28d52ffe191bbafd370300c598afb5", null ],
-    [ "operator+", "class_pattern.html#a295ff2de549fa3b3f44fd7ba8a67cb5f", null ],
-    [ "operator-", "class_pattern.html#ab58eee91db7d454f365272b479d9b6be", null ],
-    [ "operator-", "class_pattern.html#a2c40bdaa0e4c229dfd149e3ed111ff46", null ],
-    [ "operator/", "class_pattern.html#a968bb65e88a2f55e10af3e9205957fa9", null ],
-    [ "operator<", "class_pattern.html#a38d4d7833f2c0e89b02fa39c67373b5c", null ],
-    [ "operator<<", "class_pattern.html#a8a49f03b91b4aaf23cc013ce9dc43c6a", null ],
-    [ "operator<=", "class_pattern.html#a628b091fdc495a84f13e7637e5777721", null ],
-    [ "operator==", "class_pattern.html#ab73b988e2d9441f0d35b7868b0d73b6a", null ],
-    [ "operator>", "class_pattern.html#a9ba740e655772b967026c25699e9f0d4", null ],
-    [ "operator>=", "class_pattern.html#a9c5cfafa43f943dcde22cdd447887b97", null ],
-    [ "operator>>", "class_pattern.html#a32649a7e6b8570656f3e4481cbcefaeb", null ],
-    [ "operator^", "class_pattern.html#a63bdf9351cb6f5164ee6099447a72979", null ],
-    [ "operator|", "class_pattern.html#a0b755ebac4e38bdfc4d8f062f65a7eb3", null ],
-    [ "operator||", "class_pattern.html#ad2e827ce40afbde3898a0c046f593863", null ],
-    [ "operator~", "class_pattern.html#a270e9d7a007a022b28a2ddc8b661d3e7", null ],
-    [ "Relation", "class_pattern.html#a31d6bd77891f0fe8e37511949ea1215d", null ]
+    [ "Match", "class_pattern_1_1_match.html", null ]
 ];

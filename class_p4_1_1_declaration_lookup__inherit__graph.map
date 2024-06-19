@@ -1,9 +1,15 @@
 <map id="P4::DeclarationLookup" name="P4::DeclarationLookup">
-<area shape="rect" id="node1" title=" " alt="" coords="5,68,172,95"/>
-<area shape="rect" id="node2" href="$class_p4_1_1_reference_map.html" title="Class used to encode maps from paths to declarations." alt="" coords="233,43,373,69"/>
-<area shape="rect" id="node3" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="220,93,387,120"/>
-<area shape="rect" id="node4" href="$class_p4_1_1_compute_def_use.html" title="Compute defuse info within P4Parser and P4Control blocks in the midend." alt="" coords="443,5,597,32"/>
-<area shape="rect" id="node5" href="$class_p4_1_1_compute_def_use_1_1_setup_join_points.html" title=" " alt="" coords="439,57,601,98"/>
-<area shape="rect" id="node6" href="$class_p4_1_1_resolve_references.html" title=" " alt="" coords="435,123,605,149"/>
-<area shape="rect" id="node7" href="$class_p4_1_1_unroll_loops.html" title=" " alt="" coords="459,173,581,200"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,68,172,93"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_reference_map.html" title="Class used to encode maps from paths to declarations." alt="" coords="233,43,373,68"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,67,233,61,233,66,186,72"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="220,92,387,117"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="186,89,220,93,219,98,186,94"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_compute_def_use.html" title="Compute defuse info within P4Parser and P4Control blocks in the midend." alt="" coords="443,5,597,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="367,85,385,77,409,59,433,41,465,28,467,33,436,46,412,63,388,82,370,90"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_compute_def_use_1_1_setup_join_points.html" title=" " alt="" coords="439,55,601,95"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="400,89,439,84,440,89,401,94"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_resolve_references.html" title=" " alt="" coords="435,120,605,145"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="401,115,435,119,434,124,400,120"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_unroll_loops.html" title=" " alt="" coords="459,169,581,195"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="348,120,436,154,475,167,473,172,434,159,346,125"/>
 </map>

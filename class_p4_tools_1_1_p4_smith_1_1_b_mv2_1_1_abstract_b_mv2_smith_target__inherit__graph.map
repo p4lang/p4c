@@ -1,8 +1,13 @@
 <map id="P4Tools::P4Smith::BMv2::AbstractBMv2SmithTarget" name="P4Tools::P4Smith::BMv2::AbstractBMv2SmithTarget">
-<area shape="rect" id="node1" title=" " alt="" coords="665,39,864,80"/>
-<area shape="rect" id="node5" href="$class_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_bmv2_psa_smith_target.html" title=" " alt="" coords="925,5,1103,47"/>
-<area shape="rect" id="node6" href="$class_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_bmv2_v1model_smith_target.html" title=" " alt="" coords="912,71,1116,112"/>
-<area shape="rect" id="node2" href="$class_p4_tools_1_1_p4_smith_1_1_smith_target.html" title=" " alt="" coords="399,46,617,73"/>
-<area shape="rect" id="node3" href="$class_p4_tools_1_1_compiler_target.html" title="Encapsulates the details of invoking the P4 compiler for a target device and architecture." alt="" coords="172,46,351,73"/>
-<area shape="rect" id="node4" href="$class_p4_tools_1_1_target.html" title=" " alt="" coords="5,46,124,73"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="665,37,864,77"/>
+<area shape="rect" id="Node000005" href="$class_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_bmv2_psa_smith_target.html" title=" " alt="" coords="925,5,1103,45"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="877,40,924,34,925,39,878,45"/>
+<area shape="rect" id="Node000006" href="$class_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_bmv2_v1model_smith_target.html" title=" " alt="" coords="912,69,1116,109"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="878,69,912,74,912,79,877,74"/>
+<area shape="rect" id="Node000002" href="$class_p4_tools_1_1_p4_smith_1_1_smith_target.html" title=" " alt="" coords="399,45,617,70"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="631,55,665,55,665,60,631,60"/>
+<area shape="rect" id="Node000003" href="$class_p4_tools_1_1_compiler_target.html" title="Encapsulates the details of invoking the P4 compiler for a target device and architecture." alt="" coords="172,45,351,70"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="364,55,398,55,398,60,364,60"/>
+<area shape="rect" id="Node000004" href="$class_p4_tools_1_1_target.html" title=" " alt="" coords="5,45,124,70"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="138,55,172,55,172,60,138,60"/>
 </map>

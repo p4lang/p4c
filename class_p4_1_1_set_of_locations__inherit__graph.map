@@ -1,4 +1,5 @@
 <map id="P4::SetOfLocations" name="P4::SetOfLocations">
-<area shape="rect" id="node1" title=" " alt="" coords="5,80,149,107"/>
-<area shape="rect" id="node2" href="$class_i_has_db_print.html" title=" " alt="" coords="28,5,127,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,149,104"/>
+<area shape="rect" id="Node000002" href="$class_i_has_db_print.html" title=" " alt="" coords="28,5,127,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,44,80,79,75,79,75,44"/>
 </map>

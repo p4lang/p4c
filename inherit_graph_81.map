@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classgraphs_1_1_control_graphs_1_1_control_stack.html" title=" " alt="" coords="5,5,172,47"/>
+<area shape="rect" id="Node000000" href="$classgraphs_1_1_edge_type_iface.html" title=" " alt="" coords="5,55,173,80"/>
+<area shape="rect" id="Node000001" href="$classgraphs_1_1_edge_if.html" title=" " alt="" coords="262,5,377,31"/>
+<area shape="poly" id="edge32_Node000000_Node000001" title=" " alt="" coords="162,49,261,28,262,33,163,54"/>
+<area shape="rect" id="Node000002" href="$classgraphs_1_1_edge_switch.html" title=" " alt="" coords="245,55,394,80"/>
+<area shape="poly" id="edge33_Node000000_Node000002" title=" " alt="" coords="187,65,244,65,244,70,187,70"/>
+<area shape="rect" id="Node000003" href="$classgraphs_1_1_edge_unconditional.html" title=" " alt="" coords="221,104,417,129"/>
+<area shape="poly" id="edge34_Node000000_Node000003" title=" " alt="" coords="163,80,260,101,259,107,162,85"/>
 </map>

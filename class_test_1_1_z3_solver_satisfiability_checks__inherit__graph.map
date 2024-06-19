@@ -1,4 +1,5 @@
 <map id="Test::Z3SolverSatisfiabilityChecks" name="Test::Z3SolverSatisfiabilityChecks">
-<area shape="rect" id="node1" title=" " alt="" coords="5,80,200,121"/>
-<area shape="rect" id="node2" title=" " alt="" coords="52,5,153,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,200,119"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="52,5,153,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,44,105,79,100,79,100,44"/>
 </map>

@@ -1,6 +1,10 @@
 <map id="P4::FlattenHeaderUnion" name="P4::FlattenHeaderUnion">
-<area shape="rect" id="node1" title=" " alt="" coords="5,229,183,256"/>
-<area shape="rect" id="node2" href="$class_pass_manager.html" title=" " alt="" coords="40,155,148,181"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="62,5,126,32"/>
-<area shape="rect" id="node4" href="$class_backtrack.html" title=" " alt="" coords="92,80,179,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,183,251"/>
+<area shape="rect" id="Node000002" href="$class_pass_manager.html" title=" " alt="" coords="40,152,148,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,191,97,225,91,225,91,191"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="62,5,126,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="89,44,82,79,84,119,92,151,87,153,79,119,77,78,84,43"/>
+<area shape="rect" id="Node000004" href="$class_backtrack.html" title=" " alt="" coords="92,79,179,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="110,41,131,77,126,80,105,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="124,117,103,153,98,151,119,115"/>
 </map>

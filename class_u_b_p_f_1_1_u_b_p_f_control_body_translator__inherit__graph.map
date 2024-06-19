@@ -1,7 +1,11 @@
 <map id="UBPF::UBPFControlBodyTranslator" name="UBPF::UBPFControlBodyTranslator">
-<area shape="rect" id="node1" title=" " alt="" coords="5,304,248,331"/>
-<area shape="rect" id="node2" href="$class_e_b_p_f_1_1_control_body_translator.html" title=" " alt="" coords="23,229,230,256"/>
-<area shape="rect" id="node3" href="$class_e_b_p_f_1_1_code_gen_inspector.html" title=" " alt="" coords="36,155,217,181"/>
-<area shape="rect" id="node4" href="$class_inspector.html" title=" " alt="" coords="85,80,168,107"/>
-<area shape="rect" id="node5" href="$class_visitor.html" title=" " alt="" coords="95,5,159,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,299,248,324"/>
+<area shape="rect" id="Node000002" href="$class_e_b_p_f_1_1_control_body_translator.html" title=" " alt="" coords="23,225,230,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,264,129,299,124,299,124,264"/>
+<area shape="rect" id="Node000003" href="$class_e_b_p_f_1_1_code_gen_inspector.html" title=" " alt="" coords="36,152,217,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="129,191,129,225,124,225,124,191"/>
+<area shape="rect" id="Node000004" href="$class_inspector.html" title=" " alt="" coords="85,79,168,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="129,118,129,152,124,152,124,118"/>
+<area shape="rect" id="Node000005" href="$class_visitor.html" title=" " alt="" coords="95,5,159,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="129,44,129,79,124,79,124,44"/>
 </map>

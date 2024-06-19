@@ -1,6 +1,10 @@
 <map id="P4Tools::MidEnd" name="P4Tools::MidEnd">
-<area shape="rect" id="node1" title=" " alt="" coords="5,229,132,256"/>
-<area shape="rect" id="node2" href="$class_pass_manager.html" title=" " alt="" coords="15,155,123,181"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="37,5,101,32"/>
-<area shape="rect" id="node4" href="$class_backtrack.html" title=" " alt="" coords="67,80,153,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,132,251"/>
+<area shape="rect" id="Node000002" href="$class_pass_manager.html" title=" " alt="" coords="15,152,123,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="71,191,71,225,66,225,66,191"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="37,5,101,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="64,44,57,79,59,119,67,151,62,153,53,119,51,78,59,43"/>
+<area shape="rect" id="Node000004" href="$class_backtrack.html" title=" " alt="" coords="67,79,153,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="85,41,106,77,101,80,80,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="99,117,78,153,73,151,94,115"/>
 </map>

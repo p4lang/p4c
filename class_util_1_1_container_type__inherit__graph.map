@@ -1,7 +1,11 @@
 <map id="Util::ContainerType" name="Util::ContainerType">
-<area shape="rect" id="node1" title=" " alt="" coords="7,304,153,331"/>
-<area shape="rect" id="node2" href="$class_util_1_1_namespace.html" title=" " alt="" coords="15,229,145,256"/>
-<area shape="rect" id="node3" href="$class_util_1_1_named_symbol.html" title=" " alt="" coords="5,155,155,181"/>
-<area shape="rect" id="node4" href="$class_i_castable.html" title=" " alt="" coords="39,80,121,107"/>
-<area shape="rect" id="node5" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="35,5,125,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="7,299,153,324"/>
+<area shape="rect" id="Node000002" href="$class_util_1_1_namespace.html" title=" " alt="" coords="15,225,145,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,264,83,299,77,299,77,264"/>
+<area shape="rect" id="Node000003" href="$class_util_1_1_named_symbol.html" title=" " alt="" coords="5,152,155,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="83,191,83,225,77,225,77,191"/>
+<area shape="rect" id="Node000004" href="$class_i_castable.html" title=" " alt="" coords="39,79,121,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="83,118,83,152,77,152,77,118"/>
+<area shape="rect" id="Node000005" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="35,5,125,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="83,44,83,79,77,79,77,44"/>
 </map>

@@ -1,5 +1,7 @@
 <map id="EBPF::ConvertToEBPFDeparserPSA" name="EBPF::ConvertToEBPFDeparserPSA">
-<area shape="rect" id="node1" title=" " alt="" coords="5,155,251,181"/>
-<area shape="rect" id="node2" href="$class_inspector.html" title=" " alt="" coords="87,80,169,107"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="96,5,160,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,251,177"/>
+<area shape="rect" id="Node000002" href="$class_inspector.html" title=" " alt="" coords="87,79,169,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,118,131,152,125,152,125,118"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="96,5,160,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="131,44,131,79,125,79,125,44"/>
 </map>

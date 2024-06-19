@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$class_control_flow_visitor_1_1_save_global.html" title="RAII class to save and restore one or more global keys." alt="" coords="5,5,148,47"/>
+<area shape="rect" id="Node000000" href="$class_d_b_print_1_1setflags__helper.html" title=" " alt="" coords="5,55,184,80"/>
+<area shape="rect" id="Node000001" href="$struct_d_b_print_1_1clrflag.html" title=" " alt="" coords="236,5,355,31"/>
+<area shape="poly" id="edge14_Node000000_Node000001" title=" " alt="" coords="160,49,242,28,243,33,161,54"/>
+<area shape="rect" id="Node000002" href="$struct_d_b_print_1_1setflag.html" title=" " alt="" coords="234,55,357,80"/>
+<area shape="poly" id="edge15_Node000000_Node000002" title=" " alt="" coords="198,65,234,65,234,70,198,70"/>
+<area shape="rect" id="Node000003" href="$struct_d_b_print_1_1setprec.html" title=" " alt="" coords="232,104,359,129"/>
+<area shape="poly" id="edge16_Node000000_Node000003" title=" " alt="" coords="161,81,243,101,242,107,160,86"/>
 </map>

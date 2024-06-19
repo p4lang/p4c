@@ -1,6 +1,9 @@
 <map id="P4Tools::TraceEvents::ParserState" name="P4Tools::TraceEvents::ParserState">
-<area shape="rect" id="node1" title="Marks the entry into a parser state." alt="" coords="5,229,163,271"/>
-<area shape="rect" id="node2" href="$class_p4_tools_1_1_trace_event.html" title="An event in a trace of the execution of a P4 program." alt="" coords="9,155,159,181"/>
-<area shape="rect" id="node3" href="$class_i_castable.html" title=" " alt="" coords="43,80,125,107"/>
-<area shape="rect" id="node4" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="39,5,129,32"/>
+<area shape="rect" id="Node000001" title="Marks the entry into a parser state." alt="" coords="5,225,163,265"/>
+<area shape="rect" id="Node000002" href="$class_p4_tools_1_1_trace_event.html" title="An event in a trace of the execution of a P4 program." alt="" coords="9,152,159,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,191,87,225,81,225,81,191"/>
+<area shape="rect" id="Node000003" href="$class_i_castable.html" title=" " alt="" coords="43,79,125,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="87,118,87,152,81,152,81,118"/>
+<area shape="rect" id="Node000004" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="39,5,129,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="87,44,87,79,81,79,81,44"/>
 </map>

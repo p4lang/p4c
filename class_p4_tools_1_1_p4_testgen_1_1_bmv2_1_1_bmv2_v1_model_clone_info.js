@@ -1,7 +1,5 @@
 var class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_clone_info =
 [
-    [ "Bmv2V1ModelCloneInfo", "class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_clone_info.html#a6c9340438d7deebb063bf40f05289e31", null ],
-    [ "DECLARE_TYPEINFO", "class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_clone_info.html#a3ed3c91b20c175363fa9647ff6e7fd72", null ],
     [ "evaluate", "class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_clone_info.html#ab230c9f23981d908e7ebfbe247938558", null ],
     [ "getClonedState", "class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_clone_info.html#ab7d418c7472f54cc5e5d90aadf01dc6c", null ],
     [ "getCloneType", "class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_clone_info.html#a998f0836d0d1c68cd754a78293272e93", null ],

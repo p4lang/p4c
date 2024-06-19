@@ -1,8 +1,6 @@
 var class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_action_profile =
 [
-    [ "PnaDpdkActionProfile", "class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_action_profile.html#aaff92d575736253938bf729fce6a14c1", null ],
     [ "addToActionMap", "class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_action_profile.html#a0cd6aa60e7aff3a5fdfc79797449d909", null ],
-    [ "DECLARE_TYPEINFO", "class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_action_profile.html#a5033c30d827764818868e228c05818a2", null ],
     [ "evaluate", "class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_action_profile.html#ab9fe0f9f5a3a0d223bf6d6e2a62fd3a6", null ],
     [ "getActionMapSize", "class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_action_profile.html#ae5e54d437ee2311676436ca0a112756c", null ],
     [ "getActions", "class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_action_profile.html#a36d7a3b89c52b98cf0d39b43ad6eea7a", null ],

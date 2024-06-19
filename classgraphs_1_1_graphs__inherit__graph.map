@@ -1,8 +1,13 @@
 <map id="graphs::Graphs" name="graphs::Graphs">
-<area shape="rect" id="node1" title=" " alt="" coords="217,155,337,181"/>
-<area shape="rect" id="node4" href="$classgraphs_1_1_control_graphs.html" title=" " alt="" coords="5,229,172,256"/>
-<area shape="rect" id="node5" href="$classgraphs_1_1_graph__visitor.html" title=" " alt="" coords="196,229,357,256"/>
-<area shape="rect" id="node6" href="$classgraphs_1_1_parser_graphs.html" title=" " alt="" coords="382,229,542,256"/>
-<area shape="rect" id="node2" href="$class_inspector.html" title=" " alt="" coords="235,80,318,107"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="245,5,309,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="217,152,337,177"/>
+<area shape="rect" id="Node000004" href="$classgraphs_1_1_control_graphs.html" title=" " alt="" coords="5,225,172,251"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="235,185,120,228,118,223,233,180"/>
+<area shape="rect" id="Node000005" href="$classgraphs_1_1_graph__visitor.html" title=" " alt="" coords="196,225,357,251"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="279,191,279,225,274,225,274,191"/>
+<area shape="rect" id="Node000006" href="$classgraphs_1_1_parser_graphs.html" title=" " alt="" coords="382,225,542,251"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="320,180,433,223,431,228,318,185"/>
+<area shape="rect" id="Node000002" href="$class_inspector.html" title=" " alt="" coords="235,79,318,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="279,118,279,152,274,152,274,118"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="245,5,309,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="279,44,279,79,274,79,274,44"/>
 </map>

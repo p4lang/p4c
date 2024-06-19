@@ -1,9 +1,15 @@
 <map id="TC::EBPFCounterPNA" name="TC::EBPFCounterPNA">
-<area shape="rect" id="node1" title=" " alt="" coords="17,453,174,480"/>
-<area shape="rect" id="node2" href="$class_e_b_p_f_1_1_e_b_p_f_counter_p_s_a.html" title=" " alt="" coords="9,379,181,405"/>
-<area shape="rect" id="node3" href="$class_e_b_p_f_1_1_e_b_p_f_counter_table.html" title=" " alt="" coords="5,304,185,331"/>
-<area shape="rect" id="node4" href="$class_e_b_p_f_1_1_e_b_p_f_table_base.html" title="Also used to represent counters." alt="" coords="15,229,175,256"/>
-<area shape="rect" id="node5" href="$class_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="27,155,164,181"/>
-<area shape="rect" id="node6" href="$class_i_castable.html" title=" " alt="" coords="54,80,137,107"/>
-<area shape="rect" id="node7" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="50,5,141,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="17,445,174,471"/>
+<area shape="rect" id="Node000002" href="$class_e_b_p_f_1_1_e_b_p_f_counter_p_s_a.html" title=" " alt="" coords="9,372,181,397"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,411,98,445,93,445,93,411"/>
+<area shape="rect" id="Node000003" href="$class_e_b_p_f_1_1_e_b_p_f_counter_table.html" title=" " alt="" coords="5,299,185,324"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="98,338,98,372,93,372,93,338"/>
+<area shape="rect" id="Node000004" href="$class_e_b_p_f_1_1_e_b_p_f_table_base.html" title="Also used to represent counters." alt="" coords="15,225,175,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="98,264,98,299,93,299,93,264"/>
+<area shape="rect" id="Node000005" href="$class_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="27,152,164,177"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="98,191,98,225,93,225,93,191"/>
+<area shape="rect" id="Node000006" href="$class_i_castable.html" title=" " alt="" coords="54,79,137,104"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="98,118,98,152,93,152,93,118"/>
+<area shape="rect" id="Node000007" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="50,5,141,31"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="98,44,98,79,93,79,93,44"/>
 </map>

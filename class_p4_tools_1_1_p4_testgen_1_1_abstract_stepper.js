@@ -1,13 +1,9 @@
 var class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper =
 [
-    [ "Branch", "class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html#aff9e0068f04188afb44a68ba3863b507", null ],
-    [ "Result", "class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html#a5232b55c3017372d41b7ef0c0ae60ac5", null ],
-    [ "AbstractStepper", "class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html#a9797bc1e19ff1dba80932f4eb359773b", null ],
     [ "declareBaseType", "class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html#a464096d69c6b2676d8fb0885d088c38c", null ],
     [ "declareStructLike", "class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html#a9474ff27a95e1733987fafbe9e4b390a", null ],
     [ "evaluateExpression", "class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html#a8da76c09ac851000ab8457e130b2387f", null ],
     [ "getClassName", "class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html#a290cf6baa09365cc4ffca7173b1aa07d", null ],
-    [ "getProgramInfo", "class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html#a9995f9472d292b00bdd0bae08ba97818", null ],
     [ "logStep", "class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html#aa59745a0f830475e8c0c09fdb76b5957", null ],
     [ "preorder", "class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html#a439fd20600e52d58f5b4868e90b7f410", null ],
     [ "setHeaderValidity", "class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html#ad4c66adede8e589eee6e8b03b5c5fb02", null ],

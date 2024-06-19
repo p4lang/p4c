@@ -1,6 +1,9 @@
 <map id="P4Tools::P4Testgen::Bmv2::Bmv2V1ModelActionProfile" name="P4Tools::P4Testgen::Bmv2::Bmv2V1ModelActionProfile">
-<area shape="rect" id="node1" title=" " alt="" coords="5,244,259,285"/>
-<area shape="rect" id="node2" href="$class_p4_tools_1_1_p4_testgen_1_1_test_object.html" title=" " alt="" coords="59,155,205,196"/>
-<area shape="rect" id="node3" href="$class_i_castable.html" title=" " alt="" coords="91,80,173,107"/>
-<area shape="rect" id="node4" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="87,5,177,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,240,259,280"/>
+<area shape="rect" id="Node000002" href="$class_p4_tools_1_1_p4_testgen_1_1_test_object.html" title=" " alt="" coords="59,152,205,192"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,206,135,240,129,240,129,206"/>
+<area shape="rect" id="Node000003" href="$class_i_castable.html" title=" " alt="" coords="91,79,173,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="135,118,135,152,129,152,129,118"/>
+<area shape="rect" id="Node000004" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="87,5,177,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="135,44,135,79,129,79,129,44"/>
 </map>

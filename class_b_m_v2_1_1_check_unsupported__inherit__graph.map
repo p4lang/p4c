@@ -1,5 +1,7 @@
 <map id="BMV2::CheckUnsupported" name="BMV2::CheckUnsupported">
-<area shape="rect" id="node1" title=" " alt="" coords="5,155,196,181"/>
-<area shape="rect" id="node2" href="$class_inspector.html" title=" " alt="" coords="59,80,142,107"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="69,5,133,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,196,177"/>
+<area shape="rect" id="Node000002" href="$class_inspector.html" title=" " alt="" coords="59,79,142,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,118,103,152,98,152,98,118"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="69,5,133,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,44,103,79,98,79,98,44"/>
 </map>

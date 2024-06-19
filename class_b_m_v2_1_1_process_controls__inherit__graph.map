@@ -1,4 +1,5 @@
 <map id="BMV2::ProcessControls" name="BMV2::ProcessControls">
-<area shape="rect" id="node1" title=" " alt="" coords="37,95,209,121"/>
-<area shape="rect" id="node2" href="$class_p4_1_1_remove_complex_expressions_policy.html" title=" " alt="" coords="5,5,241,47"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="37,93,209,119"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_remove_complex_expressions_policy.html" title=" " alt="" coords="5,5,241,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,59,126,93,121,93,121,59"/>
 </map>

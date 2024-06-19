@@ -7,7 +7,6 @@ var namespace_net_hash =
     [ "crc32", "namespace_net_hash.html#a9e84c130c366a0cb3911ce0927c8b3d5", null ],
     [ "crc32FCS", "namespace_net_hash.html#a629b4c7537cb83d4cc7d5710cb1ad95c", null ],
     [ "crcCCITT", "namespace_net_hash.html#a5ee2a7bc16756c869fe1cc9c3b85998b", null ],
-    [ "crcGeneric", "namespace_net_hash.html#a40aa3f95c293e45ab41757939162b57c", null ],
     [ "csum16", "namespace_net_hash.html#a1cec1727556ae59423c1e43eea1234ed", null ],
     [ "identity", "namespace_net_hash.html#abbc72e6fd903c19bd3128739c923212d", null ],
     [ "xor16", "namespace_net_hash.html#a02848f7ba3463d7d58e2a405046e8627", null ]

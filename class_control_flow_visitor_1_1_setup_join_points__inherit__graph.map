@@ -1,6 +1,9 @@
 <map id="ControlFlowVisitor::SetupJoinPoints" name="ControlFlowVisitor::SetupJoinPoints">
-<area shape="rect" id="node1" title=" " alt="" coords="15,155,157,196"/>
-<area shape="rect" id="node4" href="$class_p4_1_1_compute_def_use_1_1_setup_join_points.html" title=" " alt="" coords="5,244,167,285"/>
-<area shape="rect" id="node2" href="$class_inspector.html" title=" " alt="" coords="45,80,127,107"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="54,5,118,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="15,152,157,192"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_compute_def_use_1_1_setup_join_points.html" title=" " alt="" coords="5,240,167,280"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="89,206,89,240,83,240,83,206"/>
+<area shape="rect" id="Node000002" href="$class_inspector.html" title=" " alt="" coords="45,79,127,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,118,89,152,83,152,83,118"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="54,5,118,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="89,44,89,79,83,79,83,44"/>
 </map>

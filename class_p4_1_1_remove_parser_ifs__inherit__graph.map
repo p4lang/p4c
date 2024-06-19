@@ -1,6 +1,10 @@
 <map id="P4::RemoveParserIfs" name="P4::RemoveParserIfs">
-<area shape="rect" id="node1" title=" " alt="" coords="5,229,161,256"/>
-<area shape="rect" id="node2" href="$class_pass_manager.html" title=" " alt="" coords="29,155,137,181"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="51,5,115,32"/>
-<area shape="rect" id="node4" href="$class_backtrack.html" title=" " alt="" coords="81,80,168,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,161,251"/>
+<area shape="rect" id="Node000002" href="$class_pass_manager.html" title=" " alt="" coords="29,152,137,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,191,86,225,81,225,81,191"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="51,5,115,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="78,44,71,79,73,119,82,151,77,153,68,119,66,78,73,43"/>
+<area shape="rect" id="Node000004" href="$class_backtrack.html" title=" " alt="" coords="81,79,168,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="99,41,120,77,116,80,95,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="113,117,92,153,88,151,109,115"/>
 </map>

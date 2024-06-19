@@ -1,4 +1,5 @@
 <map id="has_dbprint&lt; T, std::void_t&lt; decltype(std::declval&lt; T &gt;().dbprint(std::declval&lt; std::ostream &amp; &gt;()))&gt; &gt;" name="has_dbprint&lt; T, std::void_t&lt; decltype(std::declval&lt; T &gt;().dbprint(std::declval&lt; std::ostream &amp; &gt;()))&gt; &gt;">
-<area shape="rect" id="node1" title=" " alt="" coords="5,80,204,165"/>
-<area shape="rect" id="node2" title=" " alt="" coords="49,5,161,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,204,163"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="49,5,161,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,44,107,79,102,79,102,44"/>
 </map>

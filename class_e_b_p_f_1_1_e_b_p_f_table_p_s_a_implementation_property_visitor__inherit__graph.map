@@ -1,6 +1,9 @@
 <map id="EBPF::EBPFTablePSAImplementationPropertyVisitor" name="EBPF::EBPFTablePSAImplementationPropertyVisitor">
-<area shape="rect" id="node1" title=" " alt="" coords="5,244,264,285"/>
-<area shape="rect" id="node2" href="$class_e_b_p_f_1_1_e_b_p_f_table_psa_property_visitor.html" title=" " alt="" coords="31,155,238,196"/>
-<area shape="rect" id="node3" href="$class_inspector.html" title=" " alt="" coords="93,80,176,107"/>
-<area shape="rect" id="node4" href="$class_visitor.html" title=" " alt="" coords="103,5,167,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,240,264,280"/>
+<area shape="rect" id="Node000002" href="$class_e_b_p_f_1_1_e_b_p_f_table_psa_property_visitor.html" title=" " alt="" coords="31,152,238,192"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,206,137,240,132,240,132,206"/>
+<area shape="rect" id="Node000003" href="$class_inspector.html" title=" " alt="" coords="93,79,176,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="137,118,137,152,132,152,132,118"/>
+<area shape="rect" id="Node000004" href="$class_visitor.html" title=" " alt="" coords="103,5,167,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="137,44,137,79,132,79,132,44"/>
 </map>

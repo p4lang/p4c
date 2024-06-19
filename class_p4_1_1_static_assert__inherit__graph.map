@@ -1,6 +1,10 @@
 <map id="P4::StaticAssert" name="P4::StaticAssert">
-<area shape="rect" id="node1" title=" " alt="" coords="5,229,129,256"/>
-<area shape="rect" id="node2" href="$class_pass_manager.html" title=" " alt="" coords="13,155,121,181"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="35,5,99,32"/>
-<area shape="rect" id="node4" href="$class_backtrack.html" title=" " alt="" coords="65,80,152,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,129,251"/>
+<area shape="rect" id="Node000002" href="$class_pass_manager.html" title=" " alt="" coords="13,152,121,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="70,191,70,225,65,225,65,191"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="35,5,99,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="62,44,55,79,57,119,66,151,61,153,52,119,50,78,57,43"/>
+<area shape="rect" id="Node000004" href="$class_backtrack.html" title=" " alt="" coords="65,79,152,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="83,41,104,77,100,80,79,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="97,117,76,153,72,151,93,115"/>
 </map>

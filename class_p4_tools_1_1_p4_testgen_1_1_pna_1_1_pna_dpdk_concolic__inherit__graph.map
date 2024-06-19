@@ -1,4 +1,5 @@
 <map id="P4Tools::P4Testgen::Pna::PnaDpdkConcolic" name="P4Tools::P4Testgen::Pna::PnaDpdkConcolic">
-<area shape="rect" id="node1" title=" " alt="" coords="5,95,180,136"/>
-<area shape="rect" id="node2" href="$class_p4_tools_1_1_p4_testgen_1_1_concolic.html" title=" " alt="" coords="20,5,165,47"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,93,180,133"/>
+<area shape="rect" id="Node000002" href="$class_p4_tools_1_1_p4_testgen_1_1_concolic.html" title=" " alt="" coords="20,5,165,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,59,95,93,90,93,90,59"/>
 </map>

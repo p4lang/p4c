@@ -1,23 +1,6 @@
 var class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common =
 [
-    [ "ArchCounterExtern", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#ae1ec5cf15a5d9b467af27e5d26514728", null ],
-    [ "ArchMeterExtern", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#ac63cb08866f2bd394b5dd394d6eebd37", null ],
-    [ "Counter", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#abafa96e7e2c206ebdf0b7bffebdf40e0", null ],
-    [ "CounterSpec", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a5cbe6a95b0f1f04c93bbafe849fd7c0f", null ],
-    [ "CounterTraits", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a1902a815db835dfcae53bfc3e06ed0d3", null ],
-    [ "Meter", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#ae010812f25c227c6de8e91f61cb22c86", null ],
-    [ "MeterSpec", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#ac686a1e774869cb350a6cfb935a169f2", null ],
-    [ "MeterTraits", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a3b7f1696a7c04b8524095485c2500137", null ],
-    [ "P4RuntimeArchHandlerCommon", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a078af4da3af22a13732c8381ce91cf5d", null ],
-    [ "addActionProfile", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a415ad1cd2227a4ee875e55acd62d0d86", null ],
-    [ "addCounter", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a7d38162e93ce0917b6db3af4c183211e", null ],
-    [ "addDigest", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a6ce5d7fa3282483a8b0d436b7b71e30b", null ],
     [ "addExternEntries", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a305938d79a5e4bc74b85afb5b3325a84", null ],
-    [ "addExternFunction", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a82b9e0dce3a0fb813c88ef2f6a12e512", null ],
-    [ "addExternInstance", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a0f4433f20f6c80f6d4b46aaeca3c4ef4", null ],
-    [ "addMeter", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#ab85b1d95b9452e6a6e52d598310352c6", null ],
-    [ "addRegister", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a75110b7bfd7fbdfd00b9c0b626193430", null ],
-    [ "addTableProperties", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a81205e9d7ccf793615a25a3d769f937d", null ],
     [ "collectAssignmentStatement", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#ae7a7d7f407ed6bf4050fd481e7debcb6", null ],
     [ "collectExternFunction", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a514455e5acd7e32baf6f560cf6d099d7", null ],
     [ "collectExternInstance", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a5e3bc07cb79aea44959afe0fb9dbd87b", null ],
@@ -30,10 +13,5 @@ var class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_co
     [ "postCollect", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#abd9d3118d77910da23f7612a0404afe8", null ],
     [ "setCounterCommon", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a80718eefebeba9d8a34feef409bf886c", null ],
     [ "setMeterCommon", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#aee5329f95a75eea475203fc2c8c3ddab", null ],
-    [ "actionProfilesRefs", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a0022de7d345c9fb08a947a8ce9a4df4a", null ],
-    [ "evaluatedProgram", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#abf6eaee5a1a13b5f12c3bd44e5e2be57", null ],
-    [ "jsonPrintOptions", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a47423181e1c7165850f97e9587fff197", null ],
-    [ "refMap", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#ad73e634459a2d6de4f21cadea8708cfe", null ],
-    [ "serializedInstances", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a40b344a0adbaa702b79c3e62fe0e4e0f", null ],
-    [ "typeMap", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a003f46d026d64ea543920277bb3247f2", null ]
+    [ "serializedInstances", "class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#a40b344a0adbaa702b79c3e62fe0e4e0f", null ]
 ];

@@ -1,6 +1,10 @@
 <map id="P4::ConvertErrors" name="P4::ConvertErrors">
-<area shape="rect" id="node1" title=" " alt="" coords="5,229,140,256"/>
-<area shape="rect" id="node2" href="$class_pass_manager.html" title=" " alt="" coords="19,155,127,181"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="41,5,105,32"/>
-<area shape="rect" id="node4" href="$class_backtrack.html" title=" " alt="" coords="71,80,157,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,140,251"/>
+<area shape="rect" id="Node000002" href="$class_pass_manager.html" title=" " alt="" coords="19,152,127,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="75,191,75,225,70,225,70,191"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="41,5,105,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="68,44,61,79,63,119,71,151,66,153,57,119,55,78,63,43"/>
+<area shape="rect" id="Node000004" href="$class_backtrack.html" title=" " alt="" coords="71,79,157,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="89,41,110,77,105,80,84,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="103,117,82,153,77,151,98,115"/>
 </map>

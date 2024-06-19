@@ -1,5 +1,7 @@
 <map id="P4V1::ComputeCallGraph" name="P4V1::ComputeCallGraph">
-<area shape="rect" id="node1" title=" " alt="" coords="5,155,192,181"/>
-<area shape="rect" id="node2" href="$class_inspector.html" title=" " alt="" coords="57,80,140,107"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="67,5,131,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,192,177"/>
+<area shape="rect" id="Node000002" href="$class_inspector.html" title=" " alt="" coords="57,79,140,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,118,101,152,96,152,96,118"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="67,5,131,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="101,44,101,79,96,79,96,44"/>
 </map>

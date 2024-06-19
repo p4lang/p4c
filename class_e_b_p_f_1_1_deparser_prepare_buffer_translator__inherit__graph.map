@@ -1,9 +1,15 @@
 <map id="EBPF::DeparserPrepareBufferTranslator" name="EBPF::DeparserPrepareBufferTranslator">
-<area shape="rect" id="node1" title="This translator emits buffer preparation (eg. which headers will be emitted)" alt="" coords="153,304,363,345"/>
-<area shape="rect" id="node6" href="$class_e_b_p_f_1_1_deparser_hdr_emit_translator.html" title="This translator emits headers." alt="" coords="5,393,244,420"/>
-<area shape="rect" id="node7" href="$class_t_c_1_1_deparser_hdr_emit_translator_p_n_a.html" title=" " alt="" coords="268,393,517,420"/>
-<area shape="rect" id="node2" href="$class_e_b_p_f_1_1_control_body_translator.html" title=" " alt="" coords="155,229,361,256"/>
-<area shape="rect" id="node3" href="$class_e_b_p_f_1_1_code_gen_inspector.html" title=" " alt="" coords="167,155,349,181"/>
-<area shape="rect" id="node4" href="$class_inspector.html" title=" " alt="" coords="217,80,299,107"/>
-<area shape="rect" id="node5" href="$class_visitor.html" title=" " alt="" coords="226,5,290,32"/>
+<area shape="rect" id="Node000001" title="This translator emits buffer preparation (eg. which headers will be emitted)" alt="" coords="153,299,363,339"/>
+<area shape="rect" id="Node000006" href="$class_e_b_p_f_1_1_deparser_hdr_emit_translator.html" title="This translator emits headers." alt="" coords="5,387,244,412"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="216,348,146,389,143,384,213,343"/>
+<area shape="rect" id="Node000007" href="$class_t_c_1_1_deparser_hdr_emit_translator_p_n_a.html" title=" " alt="" coords="268,387,517,412"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="304,343,374,384,371,389,301,348"/>
+<area shape="rect" id="Node000002" href="$class_e_b_p_f_1_1_control_body_translator.html" title=" " alt="" coords="155,225,361,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="261,264,261,299,255,299,255,264"/>
+<area shape="rect" id="Node000003" href="$class_e_b_p_f_1_1_code_gen_inspector.html" title=" " alt="" coords="167,152,349,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="261,191,261,225,255,225,255,191"/>
+<area shape="rect" id="Node000004" href="$class_inspector.html" title=" " alt="" coords="217,79,299,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="261,118,261,152,255,152,255,118"/>
+<area shape="rect" id="Node000005" href="$class_visitor.html" title=" " alt="" coords="226,5,290,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="261,44,261,79,255,79,255,44"/>
 </map>

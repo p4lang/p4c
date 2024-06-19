@@ -1,7 +1,11 @@
 <map id="JsonObject" name="JsonObject">
-<area shape="rect" id="node1" title=" " alt="" coords="85,244,176,271"/>
-<area shape="rect" id="node2" href="$class_json_data.html" title=" " alt="" coords="11,162,91,189"/>
-<area shape="rect" id="node3" href="$class_i_castable.html" title=" " alt="" coords="9,80,92,107"/>
-<area shape="rect" id="node4" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,5,96,32"/>
-<area shape="rect" id="node5" href="$classordered__map.html" title=" " alt="" coords="115,155,307,196"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="85,240,176,265"/>
+<area shape="rect" id="Node000002" href="$class_json_data.html" title=" " alt="" coords="11,159,91,185"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,193,121,238,117,242,71,196"/>
+<area shape="rect" id="Node000003" href="$class_i_castable.html" title=" " alt="" coords="9,79,92,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="53,118,53,159,48,159,48,118"/>
+<area shape="rect" id="Node000004" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,5,96,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="53,44,53,79,48,79,48,44"/>
+<area shape="rect" id="Node000005" href="$classordered__map.html" title=" " alt="" coords="115,152,307,192"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="183,204,145,242,141,238,180,200"/>
 </map>

@@ -1,10 +1,17 @@
 <map id="EBPF::EBPFEgressPipeline" name="EBPF::EBPFEgressPipeline">
-<area shape="rect" id="node1" title=" " alt="" coords="98,379,289,405"/>
-<area shape="rect" id="node7" href="$class_e_b_p_f_1_1_t_c_egress_pipeline.html" title=" " alt="" coords="5,453,179,480"/>
-<area shape="rect" id="node8" href="$class_e_b_p_f_1_1_x_d_p_egress_pipeline.html" title=" " alt="" coords="203,453,387,480"/>
-<area shape="rect" id="node2" href="$class_e_b_p_f_1_1_e_b_p_f_pipeline.html" title="EBPFPipeline represents a single eBPF program in the TC/XDP hook." alt="" coords="120,304,267,331"/>
-<area shape="rect" id="node3" href="$class_e_b_p_f_1_1_e_b_p_f_program.html" title=" " alt="" coords="118,229,269,256"/>
-<area shape="rect" id="node4" href="$class_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="125,155,262,181"/>
-<area shape="rect" id="node5" href="$class_i_castable.html" title=" " alt="" coords="152,80,235,107"/>
-<area shape="rect" id="node6" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="148,5,239,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="98,372,289,397"/>
+<area shape="rect" id="Node000007" href="$class_e_b_p_f_1_1_t_c_egress_pipeline.html" title=" " alt="" coords="5,445,179,471"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="167,407,110,447,107,443,164,403"/>
+<area shape="rect" id="Node000008" href="$class_e_b_p_f_1_1_x_d_p_egress_pipeline.html" title=" " alt="" coords="203,445,387,471"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="222,403,280,443,277,447,219,407"/>
+<area shape="rect" id="Node000002" href="$class_e_b_p_f_1_1_e_b_p_f_pipeline.html" title="EBPFPipeline represents a single eBPF program in the TC/XDP hook." alt="" coords="120,299,267,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,338,196,372,191,372,191,338"/>
+<area shape="rect" id="Node000003" href="$class_e_b_p_f_1_1_e_b_p_f_program.html" title=" " alt="" coords="118,225,269,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="196,264,196,299,191,299,191,264"/>
+<area shape="rect" id="Node000004" href="$class_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="125,152,262,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="196,191,196,225,191,225,191,191"/>
+<area shape="rect" id="Node000005" href="$class_i_castable.html" title=" " alt="" coords="152,79,235,104"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="196,118,196,152,191,152,191,118"/>
+<area shape="rect" id="Node000006" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="148,5,239,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="196,44,196,79,191,79,191,44"/>
 </map>

@@ -11,6 +11,5 @@ var namespace_p4_tools_1_1_trace_events =
     [ "MethodCall", "class_p4_tools_1_1_trace_events_1_1_method_call.html", "class_p4_tools_1_1_trace_events_1_1_method_call" ],
     [ "Packet", "class_p4_tools_1_1_trace_events_1_1_packet.html", "class_p4_tools_1_1_trace_events_1_1_packet" ],
     [ "ParserStart", "class_p4_tools_1_1_trace_events_1_1_parser_start.html", "class_p4_tools_1_1_trace_events_1_1_parser_start" ],
-    [ "ParserState", "class_p4_tools_1_1_trace_events_1_1_parser_state.html", "class_p4_tools_1_1_trace_events_1_1_parser_state" ],
-    [ "operator<<", "namespace_p4_tools_1_1_trace_events.html#aec4edfa54639ac22f46f463b56e70998", null ]
+    [ "ParserState", "class_p4_tools_1_1_trace_events_1_1_parser_state.html", "class_p4_tools_1_1_trace_events_1_1_parser_state" ]
 ];

@@ -1,16 +1,29 @@
 <map id="CompilerOptions" name="CompilerOptions">
-<area shape="rect" id="node1" title=" " alt="" coords="316,233,447,260"/>
-<area shape="rect" id="node4" href="$class_b_m_v2_1_1_b_m_v2_options.html" title=" " alt="" coords="518,31,674,57"/>
-<area shape="rect" id="node7" href="$class_d_p_d_k_1_1_dpdk_options.html" title=" " alt="" coords="521,81,671,108"/>
-<area shape="rect" id="node8" href="$class_ebpf_options.html" title=" " alt="" coords="545,132,647,159"/>
-<area shape="rect" id="node9" href="$class_p4_fmt_1_1_p4fmt_options.html" title=" " alt="" coords="515,183,677,209"/>
-<area shape="rect" id="node10" href="$class_p4_test_options.html" title=" " alt="" coords="539,233,653,260"/>
-<area shape="rect" id="node11" href="$class_t_c_1_1_t_c_options.html" title=" " alt="" coords="540,284,652,311"/>
-<area shape="rect" id="node12" href="$class_test_1_1_p4_reachability_options.html" title=" " alt="" coords="495,335,697,361"/>
-<area shape="rect" id="node13" href="$class_test_1_1_p4_test_options.html" title=" " alt="" coords="522,385,670,412"/>
-<area shape="rect" id="node14" href="$classgraphs_1_1_options.html" title=" " alt="" coords="534,436,658,463"/>
-<area shape="rect" id="node2" href="$class_parser_options.html" title=" " alt="" coords="156,233,268,260"/>
-<area shape="rect" id="node3" href="$class_util_1_1_options.html" title=" " alt="" coords="5,233,108,260"/>
-<area shape="rect" id="node5" href="$class_b_m_v2_1_1_psa_switch_options.html" title=" " alt="" coords="757,5,941,32"/>
-<area shape="rect" id="node6" href="$class_b_m_v2_1_1_simple_switch_options.html" title=" " alt="" coords="745,56,952,83"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="316,227,447,252"/>
+<area shape="rect" id="Node000004" href="$class_b_m_v2_1_1_b_m_v2_options.html" title=" " alt="" coords="518,29,674,55"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="390,213,405,179,427,139,457,99,493,65,518,52,520,57,496,70,461,103,432,142,410,181,395,215"/>
+<area shape="rect" id="Node000007" href="$class_d_p_d_k_1_1_dpdk_options.html" title=" " alt="" coords="521,79,671,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="396,213,436,163,463,137,493,114,522,102,524,107,496,119,466,141,440,167,400,217"/>
+<area shape="rect" id="Node000008" href="$class_ebpf_options.html" title=" " alt="" coords="545,128,647,153"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="408,216,447,189,494,164,544,147,546,152,496,168,450,193,411,220"/>
+<area shape="rect" id="Node000009" href="$class_p4_fmt_1_1_p4fmt_options.html" title=" " alt="" coords="515,177,677,203"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="450,221,539,200,540,205,451,226"/>
+<area shape="rect" id="Node000010" href="$class_p4_test_options.html" title=" " alt="" coords="539,227,653,252"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="461,237,539,237,539,242,461,242"/>
+<area shape="rect" id="Node000011" href="$class_t_c_1_1_t_c_options.html" title=" " alt="" coords="540,276,652,301"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="451,253,540,273,539,279,450,258"/>
+<area shape="rect" id="Node000012" href="$class_test_1_1_p4_reachability_options.html" title=" " alt="" coords="495,325,697,351"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="410,259,449,286,496,312,528,323,527,328,494,316,447,291,407,263"/>
+<area shape="rect" id="Node000013" href="$class_test_1_1_p4_test_options.html" title=" " alt="" coords="522,375,670,400"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="400,262,439,313,466,339,496,361,523,373,521,378,493,366,463,343,435,316,396,265"/>
+<area shape="rect" id="Node000014" href="$classgraphs_1_1_options.html" title=" " alt="" coords="534,424,658,449"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="394,264,409,298,431,338,460,377,496,411,514,421,535,427,533,432,512,425,493,415,456,381,427,341,405,300,390,266"/>
+<area shape="rect" id="Node000002" href="$class_parser_options.html" title=" " alt="" coords="156,227,268,252"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="282,237,316,237,316,242,282,242"/>
+<area shape="rect" id="Node000003" href="$class_util_1_1_options.html" title=" " alt="" coords="5,227,108,252"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="122,237,156,237,156,242,122,242"/>
+<area shape="rect" id="Node000005" href="$class_b_m_v2_1_1_psa_switch_options.html" title=" " alt="" coords="757,5,941,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="687,31,756,24,757,29,688,36"/>
+<area shape="rect" id="Node000006" href="$class_b_m_v2_1_1_simple_switch_options.html" title=" " alt="" coords="745,55,952,80"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="688,48,745,54,745,60,687,54"/>
 </map>

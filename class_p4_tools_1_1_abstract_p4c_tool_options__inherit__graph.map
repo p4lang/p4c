@@ -1,6 +1,9 @@
 <map id="P4Tools::AbstractP4cToolOptions" name="P4Tools::AbstractP4cToolOptions">
-<area shape="rect" id="node1" title=" " alt="" coords="76,80,259,121"/>
-<area shape="rect" id="node3" href="$class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html" title="Encapsulates and processes command&#45;line options for P4Testgen." alt="" coords="5,169,151,211"/>
-<area shape="rect" id="node4" href="$class_p4_tools_1_1_smith_options.html" title=" " alt="" coords="175,177,341,203"/>
-<area shape="rect" id="node2" href="$class_util_1_1_options.html" title=" " alt="" coords="116,5,219,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="76,79,259,119"/>
+<area shape="rect" id="Node000003" href="$class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html" title="Encapsulates and processes command&#45;line options for P4Testgen." alt="" coords="5,167,151,207"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="139,130,100,168,96,165,136,127"/>
+<area shape="rect" id="Node000004" href="$class_p4_tools_1_1_smith_options.html" title=" " alt="" coords="175,174,341,199"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="199,126,247,172,244,175,195,130"/>
+<area shape="rect" id="Node000002" href="$class_util_1_1_options.html" title=" " alt="" coords="116,5,219,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,44,170,79,165,79,165,44"/>
 </map>

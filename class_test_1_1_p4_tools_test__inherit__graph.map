@@ -1,12 +1,21 @@
 <map id="Test::P4ToolsTest" name="Test::P4ToolsTest">
-<area shape="rect" id="node1" title="GTest for P4 Tools tests." alt="" coords="155,183,285,209"/>
-<area shape="rect" id="node3" href="$class_test_1_1_format_test.html" title="Helper methods to build configurations for Format Tests." alt="" coords="363,5,491,32"/>
-<area shape="rect" id="node4" href="$class_test_1_1_p4_asserts_parser_test.html" title=" " alt="" coords="333,56,520,83"/>
-<area shape="rect" id="node5" href="$class_test_1_1_p4_runtime_api_test.html" title="Helper methods to build configurations for P4RuntimeApi Tests." alt="" coords="339,107,514,133"/>
-<area shape="rect" id="node6" href="$class_test_1_1_p_t_f_test.html" title="Helper methods to build configurations for PTF Tests." alt="" coords="374,157,479,184"/>
-<area shape="rect" id="node7" href="$class_test_1_1_s_t_f_test.html" title="Helper methods to build configurations for STF Tests." alt="" coords="374,208,479,235"/>
-<area shape="rect" id="node8" href="$class_test_1_1_small_step_test.html" title=" " alt="" coords="353,259,501,285"/>
-<area shape="rect" id="node9" href="$class_test_1_1_taint_test.html" title="Helper methods to build configurations for Taint Tests." alt="" coords="370,309,483,336"/>
-<area shape="rect" id="node10" href="$class_test_1_1_z3_solver_test.html" title=" " alt="" coords="357,360,497,387"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,183,107,209"/>
+<area shape="rect" id="Node000001" title="GTest for P4 Tools tests." alt="" coords="155,179,285,204"/>
+<area shape="rect" id="Node000003" href="$class_test_1_1_format_test.html" title="Helper methods to build configurations for Format Tests." alt="" coords="363,5,491,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="231,165,270,102,298,68,332,40,361,26,364,31,335,44,302,72,274,105,236,168"/>
+<area shape="rect" id="Node000004" href="$class_test_1_1_p4_asserts_parser_test.html" title=" " alt="" coords="333,55,520,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="239,166,279,127,305,106,332,89,359,78,362,83,335,94,308,111,283,131,243,170"/>
+<area shape="rect" id="Node000005" href="$class_test_1_1_p4_runtime_api_test.html" title="Helper methods to build configurations for P4RuntimeApi Tests." alt="" coords="339,104,514,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="258,170,332,138,370,127,371,132,334,143,260,175"/>
+<area shape="rect" id="Node000006" href="$class_test_1_1_p_t_f_test.html" title="Helper methods to build configurations for PTF Tests." alt="" coords="374,153,479,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="299,179,373,170,374,175,300,184"/>
+<area shape="rect" id="Node000007" href="$class_test_1_1_s_t_f_test.html" title="Helper methods to build configurations for STF Tests." alt="" coords="374,203,479,228"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="300,198,374,207,373,212,299,203"/>
+<area shape="rect" id="Node000008" href="$class_test_1_1_small_step_test.html" title=" " alt="" coords="353,252,501,277"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="261,208,334,238,371,249,370,254,332,243,259,212"/>
+<area shape="rect" id="Node000009" href="$class_test_1_1_taint_test.html" title="Helper methods to build configurations for Taint Tests." alt="" coords="370,301,483,327"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="243,212,283,251,335,288,371,301,369,306,332,292,279,255,239,216"/>
+<area shape="rect" id="Node000010" href="$class_test_1_1_z3_solver_test.html" title=" " alt="" coords="357,351,497,376"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="236,215,274,277,302,310,335,337,357,348,355,353,332,342,298,313,270,280,231,218"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,179,107,204"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,189,155,189,155,194,120,194"/>
 </map>

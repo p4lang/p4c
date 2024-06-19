@@ -1,6 +1,5 @@
 var class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_iface =
 [
-    [ "~P4RuntimeArchHandlerIface", "class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_iface.html#a2acfc1cbfdd1db646ba7404635a9b96f", null ],
     [ "addExternEntries", "class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_iface.html#af6d1c2aeb2b3758554a5010fe57972c4", null ],
     [ "addExternFunction", "class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_iface.html#a9e7666f68ccfd98fb89156379665254a", null ],
     [ "addExternInstance", "class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_iface.html#a475707d33eeb44b4c3ed04fcb537c15d", null ],

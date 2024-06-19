@@ -1,6 +1,9 @@
 <map id="graphs::ControlGraphs" name="graphs::ControlGraphs">
-<area shape="rect" id="node1" title=" " alt="" coords="5,229,172,256"/>
-<area shape="rect" id="node2" href="$classgraphs_1_1_graphs.html" title=" " alt="" coords="29,155,149,181"/>
-<area shape="rect" id="node3" href="$class_inspector.html" title=" " alt="" coords="47,80,130,107"/>
-<area shape="rect" id="node4" href="$class_visitor.html" title=" " alt="" coords="57,5,121,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,172,251"/>
+<area shape="rect" id="Node000002" href="$classgraphs_1_1_graphs.html" title=" " alt="" coords="29,152,149,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,191,91,225,86,225,86,191"/>
+<area shape="rect" id="Node000003" href="$class_inspector.html" title=" " alt="" coords="47,79,130,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,118,91,152,86,152,86,118"/>
+<area shape="rect" id="Node000004" href="$class_visitor.html" title=" " alt="" coords="57,5,121,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="91,44,91,79,86,79,86,44"/>
 </map>

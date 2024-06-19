@@ -1,23 +1,43 @@
 <map id="Test::Z3SolverTests" name="Test::Z3SolverTests">
-<area shape="rect" id="node1" title=" " alt="" coords="155,543,301,569"/>
-<area shape="rect" id="node3" href="$class_test_1_1_z3_test_1_1_z3_solver_add.html" title=" " alt="" coords="379,5,569,32"/>
-<area shape="rect" id="node4" href="$class_test_1_1_z3_test_1_1_z3_solver_b_and.html" title=" " alt="" coords="375,56,573,83"/>
-<area shape="rect" id="node5" href="$class_test_1_1_z3_test_1_1_z3_solver_b_o_r.html" title=" " alt="" coords="377,107,571,133"/>
-<area shape="rect" id="node6" href="$class_test_1_1_z3_test_1_1_z3_solver_b_xor.html" title=" " alt="" coords="376,157,572,184"/>
-<area shape="rect" id="node7" href="$class_test_1_1_z3_test_1_1_z3_solver_cast_bit2_bool.html" title=" " alt="" coords="377,209,571,250"/>
-<area shape="rect" id="node8" href="$class_test_1_1_z3_test_1_1_z3_solver_cast_bit2_equal_bit.html" title=" " alt="" coords="377,274,571,315"/>
-<area shape="rect" id="node9" href="$class_test_1_1_z3_test_1_1_z3_solver_cast_bit2_larger_bit.html" title=" " alt="" coords="377,339,571,381"/>
-<area shape="rect" id="node10" href="$class_test_1_1_z3_test_1_1_z3_solver_cast_bit2_less_bit.html" title=" " alt="" coords="377,405,571,446"/>
-<area shape="rect" id="node11" href="$class_test_1_1_z3_test_1_1_z3_solver_cast_bool2_bit.html" title=" " alt="" coords="377,470,571,511"/>
-<area shape="rect" id="node12" href="$class_test_1_1_z3_test_1_1_z3_solver_cast_in_assignment.html" title=" " alt="" coords="377,535,571,577"/>
-<area shape="rect" id="node13" href="$class_test_1_1_z3_test_1_1_z3_solver_complement.html" title=" " alt="" coords="349,601,599,628"/>
-<area shape="rect" id="node14" href="$class_test_1_1_z3_test_1_1_z3_solver_conc.html" title=" " alt="" coords="375,652,573,679"/>
-<area shape="rect" id="node15" href="$class_test_1_1_z3_test_1_1_z3_solver_i_t_e.html" title=" " alt="" coords="381,703,567,729"/>
-<area shape="rect" id="node16" href="$class_test_1_1_z3_test_1_1_z3_solver_mod.html" title=" " alt="" coords="377,753,571,780"/>
-<area shape="rect" id="node17" href="$class_test_1_1_z3_test_1_1_z3_solver_mult.html" title=" " alt="" coords="377,804,571,831"/>
-<area shape="rect" id="node18" href="$class_test_1_1_z3_test_1_1_z3_solver_shl.html" title=" " alt="" coords="381,855,567,881"/>
-<area shape="rect" id="node19" href="$class_test_1_1_z3_test_1_1_z3_solver_shr_s.html" title=" " alt="" coords="377,905,571,932"/>
-<area shape="rect" id="node20" href="$class_test_1_1_z3_test_1_1_z3_solver_shr_u.html" title=" " alt="" coords="376,956,572,983"/>
-<area shape="rect" id="node21" href="$class_test_1_1_z3_test_1_1_z3_solver_sub.html" title=" " alt="" coords="379,1007,569,1033"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,543,107,569"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="155,531,301,556"/>
+<area shape="rect" id="Node000003" href="$class_test_1_1_z3_test_1_1_z3_solver_add.html" title=" " alt="" coords="379,5,569,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="229,517,242,413,265,269,281,197,300,131,322,77,348,40,377,22,380,27,351,44,327,79,305,132,286,198,271,270,247,413,235,517"/>
+<area shape="rect" id="Node000004" href="$class_test_1_1_z3_test_1_1_z3_solver_b_and.html" title=" " alt="" coords="375,55,573,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="230,517,244,421,269,293,285,228,303,170,324,122,348,89,373,73,376,78,351,93,329,124,308,172,290,230,274,294,249,422,235,517"/>
+<area shape="rect" id="Node000005" href="$class_test_1_1_z3_test_1_1_z3_solver_b_o_r.html" title=" " alt="" coords="377,104,571,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="226,517,229,441,234,392,244,339,259,284,281,231,310,182,348,139,376,122,379,126,351,143,314,185,285,233,264,286,249,340,240,393,234,442,231,517"/>
+<area shape="rect" id="Node000006" href="$class_test_1_1_z3_test_1_1_z3_solver_b_xor.html" title=" " alt="" coords="376,153,572,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="227,517,233,450,251,362,266,314,287,269,314,226,348,189,374,173,377,178,351,193,318,229,292,271,271,316,256,363,239,451,233,517"/>
+<area shape="rect" id="Node000007" href="$class_test_1_1_z3_test_1_1_z3_solver_cast_bit2_bool.html" title=" " alt="" coords="377,203,571,243"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="230,516,240,461,261,390,276,353,296,316,319,283,348,253,375,236,378,241,351,257,323,286,300,319,281,355,266,392,245,462,235,517"/>
+<area shape="rect" id="Node000008" href="$class_test_1_1_z3_test_1_1_z3_solver_cast_bit2_equal_bit.html" title=" " alt="" coords="377,267,571,307"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="233,516,247,473,270,419,303,364,324,339,348,317,375,301,378,306,351,321,328,343,308,367,275,421,252,474,238,518"/>
+<area shape="rect" id="Node000009" href="$class_test_1_1_z3_test_1_1_z3_solver_cast_bit2_larger_bit.html" title=" " alt="" coords="377,331,571,371"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="239,517,280,449,311,412,348,381,375,367,378,372,351,386,315,416,285,452,243,520"/>
+<area shape="rect" id="Node000010" href="$class_test_1_1_z3_test_1_1_z3_solver_cast_bit2_less_bit.html" title=" " alt="" coords="377,395,571,435"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="250,518,293,481,348,445,377,433,379,438,351,450,297,485,254,522"/>
+<area shape="rect" id="Node000011" href="$class_test_1_1_z3_test_1_1_z3_solver_cast_bool2_bit.html" title=" " alt="" coords="377,459,571,499"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="289,524,349,509,394,497,396,502,350,514,291,530"/>
+<area shape="rect" id="Node000012" href="$class_test_1_1_z3_test_1_1_z3_solver_cast_in_assignment.html" title=" " alt="" coords="377,523,571,563"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="315,541,376,541,376,546,315,546"/>
+<area shape="rect" id="Node000013" href="$class_test_1_1_z3_test_1_1_z3_solver_complement.html" title=" " alt="" coords="349,588,599,613"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="288,557,350,573,408,585,407,591,349,578,287,562"/>
+<area shape="rect" id="Node000014" href="$class_test_1_1_z3_test_1_1_z3_solver_conc.html" title=" " alt="" coords="375,637,573,663"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="255,563,298,595,350,624,385,635,383,640,348,628,295,599,252,567"/>
+<area shape="rect" id="Node000015" href="$class_test_1_1_z3_test_1_1_z3_solver_i_t_e.html" title=" " alt="" coords="381,687,567,712"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="247,566,289,621,318,650,351,673,382,686,380,691,348,678,314,654,285,625,242,570"/>
+<area shape="rect" id="Node000016" href="$class_test_1_1_z3_test_1_1_z3_solver_mod.html" title=" " alt="" coords="377,736,571,761"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="241,568,257,604,281,646,312,688,351,722,378,736,376,741,348,727,308,691,276,649,252,606,236,570"/>
+<area shape="rect" id="Node000017" href="$class_test_1_1_z3_test_1_1_z3_solver_mult.html" title=" " alt="" coords="377,785,571,811"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="238,569,251,614,273,669,306,725,327,750,351,772,377,786,375,791,348,776,323,754,302,729,268,672,246,616,232,570"/>
+<area shape="rect" id="Node000018" href="$class_test_1_1_z3_test_1_1_z3_solver_shl.html" title=" " alt="" coords="381,835,567,860"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="235,569,245,623,266,692,281,728,300,762,323,794,351,821,382,838,380,842,348,825,319,798,296,765,276,730,261,694,240,625,230,570"/>
+<area shape="rect" id="Node000019" href="$class_test_1_1_z3_test_1_1_z3_solver_shr_s.html" title=" " alt="" coords="377,884,571,909"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="233,569,240,632,259,714,274,757,294,799,320,838,351,871,378,886,375,891,348,875,315,841,289,802,269,759,254,716,235,633,228,570"/>
+<area shape="rect" id="Node000020" href="$class_test_1_1_z3_test_1_1_z3_solver_shr_u.html" title=" " alt="" coords="376,933,572,959"/>
+<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="232,570,236,640,252,736,267,786,288,836,316,881,351,920,377,935,374,940,348,924,312,884,283,838,262,788,247,737,231,641,226,570"/>
+<area shape="rect" id="Node000021" href="$class_test_1_1_z3_test_1_1_z3_solver_sub.html" title=" " alt="" coords="379,983,569,1008"/>
+<area shape="poly" id="edge20_Node000001_Node000021" title=" " alt="" coords="236,570,251,660,276,781,292,841,310,896,330,940,351,969,380,986,378,991,348,973,325,943,305,898,287,843,271,782,245,661,230,570"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,531,107,556"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,541,154,541,154,546,120,546"/>
 </map>

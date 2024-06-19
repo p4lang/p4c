@@ -1,6 +1,9 @@
 <map id="P4::PacketIn" name="P4::PacketIn">
-<area shape="rect" id="node1" title=" " alt="" coords="35,229,135,256"/>
-<area shape="rect" id="node2" href="$struct_model_1_1_extern___model.html" title="Extern_Model : Type_Model." alt="" coords="5,155,164,181"/>
-<area shape="rect" id="node3" href="$struct_model_1_1_type___model.html" title=" " alt="" coords="11,80,158,107"/>
-<area shape="rect" id="node4" href="$struct_model_1_1_elem.html" title=" " alt="" coords="33,5,136,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="35,225,135,251"/>
+<area shape="rect" id="Node000002" href="$struct_model_1_1_extern___model.html" title="Extern_Model : Type_Model." alt="" coords="5,152,164,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,191,87,225,82,225,82,191"/>
+<area shape="rect" id="Node000003" href="$struct_model_1_1_type___model.html" title=" " alt="" coords="11,79,158,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="87,118,87,152,82,152,82,118"/>
+<area shape="rect" id="Node000004" href="$struct_model_1_1_elem.html" title=" " alt="" coords="33,5,136,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="87,44,87,79,82,79,82,44"/>
 </map>

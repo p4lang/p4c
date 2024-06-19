@@ -1,9 +1,15 @@
 <map id="P4::ChooseEnumRepresentation" name="P4::ChooseEnumRepresentation">
-<area shape="rect" id="node1" title=" " alt="" coords="5,132,236,159"/>
-<area shape="rect" id="node2" href="$class_b_m_v2_1_1_enum_on32_bits.html" title=" " alt="" coords="295,5,459,32"/>
-<area shape="rect" id="node3" href="$class_b_m_v2_1_1_psa_enum_on32_bits.html" title=" " alt="" coords="284,56,471,83"/>
-<area shape="rect" id="node4" href="$class_d_p_d_k_1_1_enum_on32_bits.html" title=" " alt="" coords="296,107,459,133"/>
-<area shape="rect" id="node5" href="$class_e_b_p_f_1_1_enum_on32_bits.html" title=" " alt="" coords="298,157,457,184"/>
-<area shape="rect" id="node6" href="$class_p4_1_1_enum_on32_bits.html" title=" " alt="" coords="306,208,449,235"/>
-<area shape="rect" id="node7" href="$class_u_b_p_f_1_1_enum_on32_bits.html" title=" " alt="" coords="297,259,457,285"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,129,236,155"/>
+<area shape="rect" id="Node000002" href="$class_b_m_v2_1_1_enum_on32_bits.html" title=" " alt="" coords="295,5,459,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,119,208,79,283,40,316,28,318,33,285,44,211,84,151,123"/>
+<area shape="rect" id="Node000003" href="$class_b_m_v2_1_1_psa_enum_on32_bits.html" title=" " alt="" coords="284,55,471,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="173,122,283,89,325,78,326,83,285,94,175,128"/>
+<area shape="rect" id="Node000004" href="$class_d_p_d_k_1_1_enum_on32_bits.html" title=" " alt="" coords="296,104,459,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="250,127,295,122,296,127,250,132"/>
+<area shape="rect" id="Node000005" href="$class_e_b_p_f_1_1_enum_on32_bits.html" title=" " alt="" coords="298,153,457,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="250,151,298,156,298,161,250,157"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_enum_on32_bits.html" title=" " alt="" coords="306,203,449,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="178,156,285,187,330,200,328,205,283,193,176,161"/>
+<area shape="rect" id="Node000007" href="$class_u_b_p_f_1_1_enum_on32_bits.html" title=" " alt="" coords="297,252,457,277"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="152,160,212,199,285,237,321,249,319,254,283,242,209,203,149,165"/>
 </map>

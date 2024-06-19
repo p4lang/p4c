@@ -1,9 +1,15 @@
 <map id="P4::SymbolicError" name="P4::SymbolicError">
-<area shape="rect" id="node1" title=" " alt="" coords="121,229,258,256"/>
-<area shape="rect" id="node6" href="$class_p4_1_1_symbolic_exception.html" title=" " alt="" coords="5,304,176,331"/>
-<area shape="rect" id="node7" href="$class_p4_1_1_symbolic_static_error.html" title=" " alt="" coords="201,304,375,331"/>
-<area shape="rect" id="node2" href="$class_p4_1_1_symbolic_value.html" title=" " alt="" coords="118,155,261,181"/>
-<area shape="rect" id="node3" href="$class_i_has_db_print.html" title=" " alt="" coords="83,80,181,107"/>
-<area shape="rect" id="node4" href="$class_i_castable.html" title=" " alt="" coords="205,80,288,107"/>
-<area shape="rect" id="node5" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="201,5,292,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="121,225,258,251"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_symbolic_exception.html" title=" " alt="" coords="5,299,176,324"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="164,261,108,301,105,296,161,256"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_symbolic_static_error.html" title=" " alt="" coords="201,299,375,324"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="218,256,273,296,270,301,214,261"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_symbolic_value.html" title=" " alt="" coords="118,152,261,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,191,192,225,187,225,187,191"/>
+<area shape="rect" id="Node000003" href="$class_i_has_db_print.html" title=" " alt="" coords="83,79,181,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="152,113,182,150,178,154,148,116"/>
+<area shape="rect" id="Node000004" href="$class_i_castable.html" title=" " alt="" coords="205,79,288,104"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="231,116,201,154,197,150,227,113"/>
+<area shape="rect" id="Node000005" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="201,5,292,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="249,44,249,79,244,79,244,44"/>
 </map>

@@ -1,5 +1,7 @@
 <map id="BMV2::LowerExpressions" name="BMV2::LowerExpressions">
-<area shape="rect" id="node1" title="This pass rewrites expressions which are not supported natively on BMv2." alt="" coords="5,155,191,181"/>
-<area shape="rect" id="node2" href="$class_transform.html" title=" " alt="" coords="55,80,141,107"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="66,5,130,32"/>
+<area shape="rect" id="Node000001" title="This pass rewrites expressions which are not supported natively on BMv2." alt="" coords="5,152,191,177"/>
+<area shape="rect" id="Node000002" href="$class_transform.html" title=" " alt="" coords="55,79,141,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,118,101,152,95,152,95,118"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="66,5,130,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="101,44,101,79,95,79,95,44"/>
 </map>

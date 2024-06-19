@@ -1,6 +1,10 @@
 <map id="TypeCheck::MakeImplicitCastsExplicit" name="TypeCheck::MakeImplicitCastsExplicit">
-<area shape="rect" id="node1" title=" " alt="" coords="5,155,225,196"/>
-<area shape="rect" id="node2" href="$class_transform.html" title=" " alt="" coords="8,80,95,107"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="83,5,147,32"/>
-<area shape="rect" id="node4" href="$class_p4_write_context.html" title=" " alt="" coords="119,80,243,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,225,192"/>
+<area shape="rect" id="Node000002" href="$class_transform.html" title=" " alt="" coords="8,79,95,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="72,113,102,150,98,154,67,117"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="83,5,147,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="98,43,64,80,60,77,94,39"/>
+<area shape="rect" id="Node000004" href="$class_p4_write_context.html" title=" " alt="" coords="119,79,243,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="137,39,172,77,168,80,133,43"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="164,116,133,154,129,150,160,113"/>
 </map>

@@ -1,6 +1,9 @@
 <map id="P4::GeneralInliner" name="P4::GeneralInliner">
-<area shape="rect" id="node1" title="Performs actual inlining work." alt="" coords="45,244,184,271"/>
-<area shape="rect" id="node2" href="$class_p4_1_1_abstract_inliner.html" title=" " alt="" coords="5,155,224,196"/>
-<area shape="rect" id="node3" href="$class_transform.html" title=" " alt="" coords="71,80,158,107"/>
-<area shape="rect" id="node4" href="$class_visitor.html" title=" " alt="" coords="83,5,147,32"/>
+<area shape="rect" id="Node000001" title="Performs actual inlining work." alt="" coords="45,240,184,265"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_abstract_inliner.html" title=" " alt="" coords="5,152,224,192"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,206,117,240,112,240,112,206"/>
+<area shape="rect" id="Node000003" href="$class_transform.html" title=" " alt="" coords="71,79,158,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="117,118,117,152,112,152,112,118"/>
+<area shape="rect" id="Node000004" href="$class_visitor.html" title=" " alt="" coords="83,5,147,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="117,44,117,79,112,79,112,44"/>
 </map>

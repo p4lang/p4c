@@ -1,6 +1,10 @@
 <map id="P4::ReplaceHeaders" name="P4::ReplaceHeaders">
-<area shape="rect" id="node1" title=" " alt="" coords="37,155,189,181"/>
-<area shape="rect" id="node2" href="$class_transform.html" title=" " alt="" coords="5,80,92,107"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="81,5,145,32"/>
-<area shape="rect" id="node4" href="$class_p4_write_context.html" title=" " alt="" coords="116,80,240,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="37,152,189,177"/>
+<area shape="rect" id="Node000002" href="$class_transform.html" title=" " alt="" coords="5,79,92,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="70,113,104,150,100,154,66,116"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="81,5,145,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="95,43,61,80,57,77,91,39"/>
+<area shape="rect" id="Node000004" href="$class_p4_write_context.html" title=" " alt="" coords="116,79,240,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="135,39,169,77,165,80,131,43"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="160,116,125,154,121,150,156,113"/>
 </map>

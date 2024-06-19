@@ -1,13 +1,23 @@
 <map id="P4Tools::P4Testgen::TableMatch" name="P4Tools::P4Testgen::TableMatch">
-<area shape="rect" id="node1" title=" " alt="" coords="468,195,613,236"/>
-<area shape="rect" id="node5" href="$class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_optional.html" title=" " alt="" coords="679,5,824,47"/>
-<area shape="rect" id="node6" href="$class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_range.html" title=" " alt="" coords="679,71,824,112"/>
-<area shape="rect" id="node7" href="$class_p4_tools_1_1_p4_testgen_1_1_exact.html" title=" " alt="" coords="679,136,824,177"/>
-<area shape="rect" id="node8" href="$class_p4_tools_1_1_p4_testgen_1_1_l_p_m.html" title=" " alt="" coords="661,202,841,229"/>
-<area shape="rect" id="node9" href="$class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_optional.html" title=" " alt="" coords="679,253,824,295"/>
-<area shape="rect" id="node10" href="$class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_range.html" title=" " alt="" coords="679,319,824,360"/>
-<area shape="rect" id="node11" href="$class_p4_tools_1_1_p4_testgen_1_1_ternary.html" title=" " alt="" coords="679,384,824,425"/>
-<area shape="rect" id="node2" href="$class_p4_tools_1_1_p4_testgen_1_1_test_object.html" title=" " alt="" coords="275,195,420,236"/>
-<area shape="rect" id="node3" href="$class_i_castable.html" title=" " alt="" coords="144,202,227,229"/>
-<area shape="rect" id="node4" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,202,96,229"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="468,191,613,231"/>
+<area shape="rect" id="Node000005" href="$class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_optional.html" title=" " alt="" coords="679,5,824,45"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="557,177,599,116,627,83,660,55,680,43,683,48,663,59,631,87,603,119,562,180"/>
+<area shape="rect" id="Node000006" href="$class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_range.html" title=" " alt="" coords="679,69,824,109"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="574,179,614,148,660,119,686,107,688,112,663,124,617,153,577,184"/>
+<area shape="rect" id="Node000007" href="$class_p4_tools_1_1_p4_testgen_1_1_exact.html" title=" " alt="" coords="679,133,824,173"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="626,185,678,170,679,176,627,190"/>
+<area shape="rect" id="Node000008" href="$class_p4_tools_1_1_p4_testgen_1_1_l_p_m.html" title=" " alt="" coords="661,198,841,223"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="627,208,661,208,661,213,627,213"/>
+<area shape="rect" id="Node000009" href="$class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_optional.html" title=" " alt="" coords="679,248,824,288"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="627,231,679,246,678,251,626,237"/>
+<area shape="rect" id="Node000010" href="$class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_range.html" title=" " alt="" coords="679,312,824,352"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="577,238,617,269,663,298,688,309,686,314,660,302,614,273,574,242"/>
+<area shape="rect" id="Node000011" href="$class_p4_tools_1_1_p4_testgen_1_1_ternary.html" title=" " alt="" coords="679,376,824,416"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="562,241,603,302,631,334,663,362,683,374,680,378,660,366,627,338,599,306,557,244"/>
+<area shape="rect" id="Node000002" href="$class_p4_tools_1_1_p4_testgen_1_1_test_object.html" title=" " alt="" coords="275,191,420,231"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="434,208,467,208,467,213,434,213"/>
+<area shape="rect" id="Node000003" href="$class_i_castable.html" title=" " alt="" coords="144,198,227,223"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="240,208,274,208,274,213,240,213"/>
+<area shape="rect" id="Node000004" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,198,96,223"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="110,208,144,208,144,213,110,213"/>
 </map>

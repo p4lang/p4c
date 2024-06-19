@@ -1,7 +1,5 @@
 var class_p4_tools_1_1_p4_testgen_1_1_testgen_options =
 [
-    [ "~TestgenOptions", "class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a01a95e7ff41796196037f1b46f30e5fb", null ],
-    [ "getIncludePath", "class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#acbd1dce4da1e1ab48694ee29b578f863", null ],
     [ "validateOptions", "class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#abde27b75a7f3fb760ac906b96794442f", null ],
     [ "assertionModeEnabled", "class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#af6465eb043e4e0b4b7448422f996b67b", null ],
     [ "coverageOptions", "class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a9481ec3f43e54a2995d703e2955e91ca", null ],
@@ -20,7 +18,6 @@ var class_p4_tools_1_1_p4_testgen_1_1_testgen_options =
     [ "permittedPortRanges", "class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#ab1bce660a6bbc4c00a257c35387861ca", null ],
     [ "selectedBranches", "class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a3423db9cea7082c0118eb28777dd2877", null ],
     [ "skippedControlPlaneEntities", "class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a71a491c3efb0792ff55e3b361aed43de", null ],
-    [ "stopMetric", "class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a5007b890e226fba848bee671a07c5667", null ],
     [ "strict", "class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#ae0b7d8be8959b8d9e696a0ca11a490ba", null ],
     [ "testBackend", "class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a32c4bc2a24cf3bf76cdb4e0c9af53036", null ],
     [ "testBaseName", "class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a77374d11669911e054be643d73c1764b", null ],

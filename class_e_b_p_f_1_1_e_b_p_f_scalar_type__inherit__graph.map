@@ -1,10 +1,18 @@
 <map id="EBPF::EBPFScalarType" name="EBPF::EBPFScalarType">
-<area shape="rect" id="node1" title=" " alt="" coords="105,304,269,331"/>
-<area shape="rect" id="node7" href="$class_u_b_p_f_1_1_u_b_p_f_extern_type.html" title=" " alt="" coords="5,379,176,405"/>
-<area shape="rect" id="node8" href="$class_u_b_p_f_1_1_u_b_p_f_scalar_type.html" title=" " alt="" coords="200,379,368,405"/>
-<area shape="rect" id="node2" href="$class_e_b_p_f_1_1_e_b_p_f_type.html" title="Base class for EBPF types." alt="" coords="50,229,174,256"/>
-<area shape="rect" id="node3" href="$class_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="65,155,202,181"/>
-<area shape="rect" id="node4" href="$class_i_castable.html" title=" " alt="" coords="145,80,228,107"/>
-<area shape="rect" id="node6" href="$class_e_b_p_f_1_1_i_has_width.html" title=" " alt="" coords="198,229,327,256"/>
-<area shape="rect" id="node5" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="141,5,232,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="105,299,269,324"/>
+<area shape="rect" id="Node000007" href="$class_u_b_p_f_1_1_u_b_p_f_extern_type.html" title=" " alt="" coords="5,372,176,397"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="162,334,108,374,105,370,159,330"/>
+<area shape="rect" id="Node000008" href="$class_u_b_p_f_1_1_u_b_p_f_scalar_type.html" title=" " alt="" coords="200,372,368,397"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="215,330,270,370,267,374,212,334"/>
+<area shape="rect" id="Node000002" href="$class_e_b_p_f_1_1_e_b_p_f_type.html" title="Base class for EBPF types." alt="" coords="50,225,174,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,258,176,297,173,300,132,262"/>
+<area shape="rect" id="Node000003" href="$class_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="65,152,202,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="128,192,118,226,113,224,123,190"/>
+<area shape="rect" id="Node000004" href="$class_i_castable.html" title=" " alt="" coords="145,79,228,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="172,117,144,153,140,150,168,113"/>
+<area shape="rect" id="Node000006" href="$class_e_b_p_f_1_1_i_has_width.html" title=" " alt="" coords="198,225,327,251"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="202,115,259,224,254,226,197,118"/>
+<area shape="rect" id="Node000005" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="141,5,232,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="189,44,189,79,184,79,184,44"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="242,262,201,300,197,296,239,258"/>
 </map>

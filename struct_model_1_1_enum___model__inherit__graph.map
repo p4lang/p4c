@@ -1,10 +1,17 @@
 <map id="Model::Enum_Model" name="Model::Enum_Model">
-<area shape="rect" id="node1" title="Enum_Model : Type_Model." alt="" coords="351,107,505,133"/>
-<area shape="rect" id="node4" href="$struct_p4_v1_1_1_algorithm___model.html" title=" " alt="" coords="561,5,736,32"/>
-<area shape="rect" id="node5" href="$struct_p4_v1_1_1_clone_type___model.html" title=" " alt="" coords="560,56,737,83"/>
-<area shape="rect" id="node6" href="$struct_p4_v1_1_1_counter_type___model.html" title=" " alt="" coords="553,107,744,133"/>
-<area shape="rect" id="node7" href="$struct_p4_v1_1_1_meter_type___model.html" title=" " alt="" coords="559,157,738,184"/>
-<area shape="rect" id="node8" href="$struct_u_b_p_f_1_1_algorithm___model.html" title=" " alt="" coords="561,208,736,235"/>
-<area shape="rect" id="node2" href="$struct_model_1_1_type___model.html" title=" " alt="" coords="156,107,303,133"/>
-<area shape="rect" id="node3" href="$struct_model_1_1_elem.html" title=" " alt="" coords="5,107,108,133"/>
+<area shape="rect" id="Node000001" title="Enum_Model : Type_Model." alt="" coords="351,104,505,129"/>
+<area shape="rect" id="Node000004" href="$struct_p4_v1_1_1_algorithm___model.html" title=" " alt="" coords="561,5,736,31"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="457,94,501,66,552,40,586,28,588,33,554,44,503,70,460,98"/>
+<area shape="rect" id="Node000005" href="$struct_p4_v1_1_1_clone_type___model.html" title=" " alt="" coords="560,55,737,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="498,98,590,77,592,83,499,104"/>
+<area shape="rect" id="Node000006" href="$struct_p4_v1_1_1_counter_type___model.html" title=" " alt="" coords="553,104,744,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="519,114,553,114,553,119,519,119"/>
+<area shape="rect" id="Node000007" href="$struct_p4_v1_1_1_meter_type___model.html" title=" " alt="" coords="559,153,738,179"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="499,130,592,151,590,156,498,135"/>
+<area shape="rect" id="Node000008" href="$struct_u_b_p_f_1_1_algorithm___model.html" title=" " alt="" coords="561,203,736,228"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="460,135,503,163,554,189,588,200,586,205,552,194,501,167,457,140"/>
+<area shape="rect" id="Node000002" href="$struct_model_1_1_type___model.html" title=" " alt="" coords="156,104,303,129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="317,114,351,114,351,119,317,119"/>
+<area shape="rect" id="Node000003" href="$struct_model_1_1_elem.html" title=" " alt="" coords="5,104,108,129"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="122,114,156,114,156,119,122,119"/>
 </map>

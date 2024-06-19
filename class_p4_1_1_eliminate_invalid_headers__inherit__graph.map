@@ -1,6 +1,10 @@
 <map id="P4::EliminateInvalidHeaders" name="P4::EliminateInvalidHeaders">
-<area shape="rect" id="node1" title=" " alt="" coords="5,229,212,256"/>
-<area shape="rect" id="node2" href="$class_pass_manager.html" title=" " alt="" coords="55,155,163,181"/>
-<area shape="rect" id="node3" href="$class_visitor.html" title=" " alt="" coords="77,5,141,32"/>
-<area shape="rect" id="node4" href="$class_backtrack.html" title=" " alt="" coords="107,80,193,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,212,251"/>
+<area shape="rect" id="Node000002" href="$class_pass_manager.html" title=" " alt="" coords="55,152,163,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,191,111,225,106,225,106,191"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="77,5,141,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="104,44,97,79,99,119,107,151,102,153,93,119,91,78,99,43"/>
+<area shape="rect" id="Node000004" href="$class_backtrack.html" title=" " alt="" coords="107,79,193,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="125,41,146,77,141,80,120,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="139,117,118,153,113,151,134,115"/>
 </map>

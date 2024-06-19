@@ -1,4 +1,5 @@
 <map id="DBPrint::clrflag" name="DBPrint::clrflag">
-<area shape="rect" id="node1" title=" " alt="" coords="35,80,154,107"/>
-<area shape="rect" id="node2" href="$class_d_b_print_1_1setflags__helper.html" title=" " alt="" coords="5,5,184,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="35,79,154,104"/>
+<area shape="rect" id="Node000002" href="$class_d_b_print_1_1setflags__helper.html" title=" " alt="" coords="5,5,184,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,44,97,79,92,79,92,44"/>
 </map>

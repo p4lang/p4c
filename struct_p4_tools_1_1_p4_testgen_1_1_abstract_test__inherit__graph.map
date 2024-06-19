@@ -1,7 +1,11 @@
 <map id="P4Tools::P4Testgen::AbstractTest" name="P4Tools::P4Testgen::AbstractTest">
-<area shape="rect" id="node1" title="Type definitions for abstract tests." alt="" coords="109,155,255,196"/>
-<area shape="rect" id="node4" href="$struct_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_protobuf_ir_test.html" title=" " alt="" coords="5,244,172,285"/>
-<area shape="rect" id="node5" href="$struct_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_protobuf_test.html" title=" " alt="" coords="197,244,354,285"/>
-<area shape="rect" id="node2" href="$class_i_castable.html" title=" " alt="" coords="141,80,223,107"/>
-<area shape="rect" id="node3" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="137,5,227,32"/>
+<area shape="rect" id="Node000001" title="Type definitions for abstract tests." alt="" coords="109,152,255,192"/>
+<area shape="rect" id="Node000004" href="$struct_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_protobuf_ir_test.html" title=" " alt="" coords="5,240,172,280"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="153,203,111,242,108,238,149,199"/>
+<area shape="rect" id="Node000005" href="$struct_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_protobuf_test.html" title=" " alt="" coords="197,240,354,280"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="215,199,256,238,253,242,211,203"/>
+<area shape="rect" id="Node000002" href="$class_i_castable.html" title=" " alt="" coords="141,79,223,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,118,185,152,179,152,179,118"/>
+<area shape="rect" id="Node000003" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="137,5,227,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="185,44,185,79,179,79,179,44"/>
 </map>

@@ -1,9 +1,16 @@
 <map id="EBPF::ActionTranslationVisitorPSA" name="EBPF::ActionTranslationVisitorPSA">
-<area shape="rect" id="node1" title=" " alt="" coords="116,379,359,405"/>
-<area shape="rect" id="node2" href="$class_e_b_p_f_1_1_action_translation_visitor.html" title=" " alt="" coords="5,304,221,331"/>
-<area shape="rect" id="node3" href="$class_e_b_p_f_1_1_code_gen_inspector.html" title=" " alt="" coords="147,155,328,181"/>
-<area shape="rect" id="node7" href="$class_e_b_p_f_1_1_control_body_translator.html" title=" " alt="" coords="231,229,438,256"/>
-<area shape="rect" id="node4" href="$class_inspector.html" title=" " alt="" coords="196,80,279,107"/>
-<area shape="rect" id="node5" href="$class_visitor.html" title=" " alt="" coords="205,5,269,32"/>
-<area shape="rect" id="node6" href="$class_e_b_p_f_1_1_control_body_translator_p_s_a.html" title=" " alt="" coords="245,304,477,331"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="116,372,359,397"/>
+<area shape="rect" id="Node000002" href="$class_e_b_p_f_1_1_action_translation_visitor.html" title=" " alt="" coords="5,299,221,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,328,218,369,216,374,144,333"/>
+<area shape="rect" id="Node000003" href="$class_e_b_p_f_1_1_code_gen_inspector.html" title=" " alt="" coords="147,152,328,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="220,190,125,300,121,297,216,186"/>
+<area shape="rect" id="Node000007" href="$class_e_b_p_f_1_1_control_body_translator.html" title=" " alt="" coords="231,225,438,251"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="266,183,320,223,317,227,263,188"/>
+<area shape="rect" id="Node000004" href="$class_inspector.html" title=" " alt="" coords="196,79,279,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="240,118,240,152,235,152,235,118"/>
+<area shape="rect" id="Node000005" href="$class_visitor.html" title=" " alt="" coords="205,5,269,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="240,44,240,79,235,79,235,44"/>
+<area shape="rect" id="Node000006" href="$class_e_b_p_f_1_1_control_body_translator_p_s_a.html" title=" " alt="" coords="245,299,477,324"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="331,333,259,374,256,369,328,328"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="346,263,360,298,355,299,341,265"/>
 </map>

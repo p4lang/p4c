@@ -1,6 +1,9 @@
 <map id="DBPrint::setflags_helper" name="DBPrint::setflags_helper">
-<area shape="rect" id="node1" title=" " alt="" coords="121,5,299,32"/>
-<area shape="rect" id="node2" href="$struct_d_b_print_1_1clrflag.html" title=" " alt="" coords="5,80,124,107"/>
-<area shape="rect" id="node3" href="$struct_d_b_print_1_1setflag.html" title=" " alt="" coords="149,80,271,107"/>
-<area shape="rect" id="node4" href="$struct_d_b_print_1_1setprec.html" title=" " alt="" coords="296,80,423,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="121,5,299,31"/>
+<area shape="rect" id="Node000002" href="$struct_d_b_print_1_1clrflag.html" title=" " alt="" coords="5,79,124,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,39,90,81,87,76,173,34"/>
+<area shape="rect" id="Node000003" href="$struct_d_b_print_1_1setflag.html" title=" " alt="" coords="149,79,271,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="213,44,213,79,207,79,207,44"/>
+<area shape="rect" id="Node000004" href="$struct_d_b_print_1_1setprec.html" title=" " alt="" coords="296,79,423,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="247,34,336,76,334,81,245,39"/>
 </map>

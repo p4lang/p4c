@@ -1,6 +1,9 @@
 <map id="EBPF::EBPFMethodDeclaration" name="EBPF::EBPFMethodDeclaration">
-<area shape="rect" id="node1" title="Methods are function signatures." alt="" coords="5,229,224,256"/>
-<area shape="rect" id="node2" href="$class_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="46,155,183,181"/>
-<area shape="rect" id="node3" href="$class_i_castable.html" title=" " alt="" coords="73,80,156,107"/>
-<area shape="rect" id="node4" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="69,5,160,32"/>
+<area shape="rect" id="Node000001" title="Methods are function signatures." alt="" coords="5,225,224,251"/>
+<area shape="rect" id="Node000002" href="$class_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="46,152,183,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,191,117,225,112,225,112,191"/>
+<area shape="rect" id="Node000003" href="$class_i_castable.html" title=" " alt="" coords="73,79,156,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="117,118,117,152,112,152,112,118"/>
+<area shape="rect" id="Node000004" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="69,5,160,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="117,44,117,79,112,79,112,44"/>
 </map>
