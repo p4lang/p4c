@@ -17,10 +17,25 @@ jobs:
             - name : Checkout
               uses: actions/checkout@v4
 
-            - name: Install Custom Doxygen Version 
-              uses: AdarshRawat1/Install-Doxygen@v1.0
-              with:
-                version: '1.11.0'
+            - name: Install Clang and dependencies
+              run: |
+                sudo apt-get update
+                sudo apt-get install -y clang
+
+            - name: Export Doxygen version in environment
+              shell: bash
+              run: |
+                echo "DOXYGEN_VERSION=1.11.0" >> $GITHUB_ENV
+            
+            - name: "Doxygen Installation"
+              shell: bash
+              run: |
+                wget https://github.com/doxygen/doxygen/releases/download/Release_${DOXYGEN_VERSION//./_}/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz
+                tar xzvf doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz
+                cd doxygen-${DOXYGEN_VERSION}
+                sudo make install
+                cd ..
+                rm -rf doxygen-${DOXYGEN_VERSION}*  
             
             - name: Install graphviz
               run: sudo apt-get install graphviz -y
