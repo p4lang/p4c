@@ -12,7 +12,7 @@ $TC p4template update action/send_to_port_example/MainControlImpl/next_hop state
 $TC p4template create action/send_to_port_example/MainControlImpl/default_route_drop actid 2
 $TC p4template update action/send_to_port_example/MainControlImpl/default_route_drop state active
 
-$TC p4template create extern/root/Register extid 1 numinstances 1 tc_acl 0x19b6
+$TC p4template create extern/root/Register extid 0x1 numinstances 1 tc_acl 0x19b6
 
 $TC p4template create extern_inst/send_to_port_example/Register/MainControlImpl.reg1 instid 1 \
 tc_numel 10

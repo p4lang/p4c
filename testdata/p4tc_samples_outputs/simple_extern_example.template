@@ -18,7 +18,7 @@ $TC p4template update action/simple_extern_example/ingress/ext_reg state active
 $TC p4template create action/simple_extern_example/ingress/drop actid 3
 $TC p4template update action/simple_extern_example/ingress/drop state active
 
-$TC p4template create extern/root/Register extid 1 numinstances 2 tc_acl 0x19b6
+$TC p4template create extern/root/Register extid 0x1 numinstances 2 tc_acl 0x19b6
 
 $TC p4template create extern_inst/simple_extern_example/Register/ingress.reg1 instid 1 \
 tc_numel 10
