@@ -19,7 +19,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     apply {
         tmp = hdr.h1.f1;
         hdr.h1.f1 = tmp >> 2;
-        hdr.h1.f2 = 8w5 >> 2;
+        hdr.h1.f2 = 8w1;
     }
 }
 
