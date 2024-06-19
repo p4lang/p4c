@@ -7,7 +7,6 @@ var class_p4_1_1_p4_core_library =
     [ "noAction", "class_p4_1_1_p4_core_library.html#a934fc526989f990c1f0a555c43792621", null ],
     [ "noError", "class_p4_1_1_p4_core_library.html#ac4b8999d5d4927acbfe62c06d456baf6", null ],
     [ "noMatch", "class_p4_1_1_p4_core_library.html#a2b3bd2418acb9c4e646345331181d97a", null ],
-    [ "overwritingHeader", "class_p4_1_1_p4_core_library.html#ae3249b04ba9995e48aa02484bbfb21ca", null ],
     [ "packetIn", "class_p4_1_1_p4_core_library.html#a7a1894ca4cc29a3299f2626015117976", null ],
     [ "packetOut", "class_p4_1_1_p4_core_library.html#a145363c6b1cf5bb8d3b8b5585a7ab364", null ],
     [ "packetTooShort", "class_p4_1_1_p4_core_library.html#a8a96a1c54d58f7f237152846307f05f5", null ],

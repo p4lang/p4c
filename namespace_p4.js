@@ -422,7 +422,6 @@ var namespace_p4 =
       [ "PacketTooShort", "namespace_p4.html#a91953b31088ae7c6af78fa6dc0555f3ba21b21f9ae0165b78d1303cca26cacca9", null ],
       [ "NoMatch", "namespace_p4.html#a91953b31088ae7c6af78fa6dc0555f3bac8b77721c677e0429241a9250972122d", null ],
       [ "StackOutOfBounds", "namespace_p4.html#a91953b31088ae7c6af78fa6dc0555f3ba454477967a730501096207b1f75ecd70", null ],
-      [ "OverwritingHeader", "namespace_p4.html#a91953b31088ae7c6af78fa6dc0555f3bae7f27102f2e20222a70230c7c532775f", null ],
       [ "HeaderTooShort", "namespace_p4.html#a91953b31088ae7c6af78fa6dc0555f3baf73a13813e0dd255437f9544a8cab8c0", null ],
       [ "ParserTimeout", "namespace_p4.html#a91953b31088ae7c6af78fa6dc0555f3bacca4fc7fb960fffdcd75f4e4fcdb56cd", null ]
     ] ],
