@@ -28,7 +28,7 @@ parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
         transition foo_start_0;
     }
     state foo_start_0 {
-        hdr.h1.f2 = 8w5 >> 2;
+        hdr.h1.f2 = 8w1;
         transition start_1;
     }
     state start_1 {
