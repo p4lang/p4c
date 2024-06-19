@@ -8,7 +8,10 @@ on:
     push:
         branches:
         - main
-       
+
+env:
+  DOXYGEN_VERSION: 1.11.0
+        
 jobs:
     build-and-deploy:
         runs-on: ubuntu-latest
@@ -17,9 +20,23 @@ jobs:
             - name : Checkout
               uses: actions/checkout@v4
 
-            - name: Install Doxygen
-              run: sudo apt-get install doxygen graphviz -y
+            - name: Install Clang
+              run: |
+                sudo apt-get update
+                sudo apt-get install -y clang
+            
+            - name: Install Doxygen 
               shell: bash
+              run: |
+                wget https://github.com/doxygen/doxygen/releases/download/Release_${DOXYGEN_VERSION//./_}/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz
+                tar xzvf doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz
+                cd doxygen-${DOXYGEN_VERSION}
+                sudo make install
+                cd ..
+                rm -rf doxygen-${DOXYGEN_VERSION}*  
+            
+            - name: Install graphviz
+              run: sudo apt-get install graphviz -y
     
             - name: Generate Doxygen Documentation
               run: |
