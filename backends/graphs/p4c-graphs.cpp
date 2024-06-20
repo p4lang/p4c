@@ -62,7 +62,7 @@ MidEnd::MidEnd(CompilerOptions &options) {
 
 class Options : public CompilerOptions {
  public:
-    cstring graphsDir{"."};
+    std::filesystem::path graphsDir{"."};
     bool loadIRFromJson = false;  // read from json
     bool graphs = true;           // default behavior
     bool fullGraph = false;
@@ -71,7 +71,7 @@ class Options : public CompilerOptions {
         registerOption(
             "--graphs-dir", "dir",
             [this](const char *arg) {
-                graphsDir = cstring(arg);
+                graphsDir = arg;
                 return true;
             },
             "Use this directory to dump graphs in dot format "
@@ -80,7 +80,7 @@ class Options : public CompilerOptions {
             "--fromJSON", "file",
             [this](const char *arg) {
                 loadIRFromJson = true;
-                file = cstring(arg);
+                file = arg;
                 return true;
             },
             "Use IR representation from JsonFile dumped previously, "
@@ -178,7 +178,7 @@ int main(int argc, char *const argv[]) {
     const IR::ToplevelBlock *top = nullptr;
     try {
         top = midEnd.process(program);
-        if (options.dumpJsonFile)
+        if (!options.dumpJsonFile.empty())
             JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;

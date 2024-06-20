@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -27,7 +28,6 @@ limitations under the License.
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
-#include "fstream"
 #include "ir/ir.h"
 #include "ir/json_generator.h"
 #include "ir/json_loader.h"
@@ -99,7 +99,7 @@ int main(int argc, char *const argv[]) {
     try {
         toplevel = midEnd.process(program);
         if (::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr) return 1;
-        if (options.dumpJsonFile && !options.loadIRFromJson)
+        if (!options.dumpJsonFile.empty() && !options.loadIRFromJson)
             JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
@@ -120,7 +120,7 @@ int main(int argc, char *const argv[]) {
     }
     if (::errorCount() > 0) return 1;
 
-    if (!options.outputFile.isNullOrEmpty()) {
+    if (!options.outputFile.empty()) {
         std::ostream *out = openFile(options.outputFile, false);
         if (out != nullptr) {
             backend->serialize(*out);

@@ -113,7 +113,7 @@ void AbstractParserDriver::onParseError(const Util::SourceInfo &location,
 P4ParserDriver::P4ParserDriver()
     : structure(new Util::ProgramStructure), nodes(new IR::Vector<IR::Node>()) {}
 
-bool P4ParserDriver::parse(AbstractP4Lexer &lexer, const char *sourceFile,
+bool P4ParserDriver::parse(AbstractP4Lexer &lexer, std::string_view sourceFile,
                            unsigned sourceLine /* = 1 */) {
     // Create and configure the parser.
     P4Parser parser(*this, lexer);
@@ -132,7 +132,8 @@ bool P4ParserDriver::parse(AbstractP4Lexer &lexer, const char *sourceFile,
     return true;
 }
 
-/* static */ const IR::P4Program *P4ParserDriver::parse(std::istream &in, const char *sourceFile,
+/* static */ const IR::P4Program *P4ParserDriver::parse(std::istream &in,
+                                                        std::string_view sourceFile,
                                                         unsigned sourceLine /* = 1 */) {
     LOG1("Parsing P4-16 program " << sourceFile);
 
@@ -142,7 +143,7 @@ bool P4ParserDriver::parse(AbstractP4Lexer &lexer, const char *sourceFile,
     return new IR::P4Program(driver.nodes->srcInfo, *driver.nodes);
 }
 
-/* static */ const IR::P4Program *P4ParserDriver::parse(FILE *in, const char *sourceFile,
+/* static */ const IR::P4Program *P4ParserDriver::parse(FILE *in, std::string_view sourceFile,
                                                         unsigned sourceLine /* = 1 */) {
     AutoStdioInputStream inputStream(in);
     return parse(inputStream.get(), sourceFile, sourceLine);
@@ -154,7 +155,7 @@ const T *P4ParserDriver::parse(P4AnnotationLexer::Type type, const Util::SourceI
     LOG3("Parsing P4-16 annotation " << srcInfo);
 
     P4AnnotationLexer lexer(type, srcInfo, body);
-    if (!parse(lexer, srcInfo.getSourceFile())) {
+    if (!parse(lexer, srcInfo.getSourceFile().string_view())) {
         return nullptr;
     }
 
@@ -283,7 +284,8 @@ namespace V1 {
 
 V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
 
-/* static */ const IR::V1Program *V1ParserDriver::parse(std::istream &in, const char *sourceFile,
+/* static */ const IR::V1Program *V1ParserDriver::parse(std::istream &in,
+                                                        std::string_view sourceFile,
                                                         unsigned sourceLine /* = 1 */) {
     LOG1("Parsing P4-14 program " << sourceFile);
 
@@ -304,7 +306,7 @@ V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
     return driver.global;
 }
 
-/* static */ const IR::V1Program *V1ParserDriver::parse(FILE *in, const char *sourceFile,
+/* static */ const IR::V1Program *V1ParserDriver::parse(FILE *in, std::string_view sourceFile,
                                                         unsigned sourceLine /* = 1 */) {
     AutoStdioInputStream inputStream(in);
     return parse(inputStream.get(), sourceFile, sourceLine);

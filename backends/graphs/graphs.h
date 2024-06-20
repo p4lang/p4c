@@ -124,7 +124,7 @@ class Graphs : public Inspector {
         boost::edge_attribute_t, GraphvizAttributes,
         boost::property<boost::edge_name_t, cstring, boost::property<boost::edge_index_t, int>>>;
     using graphProperties = boost::property<
-        boost::graph_name_t, cstring,
+        boost::graph_name_t, std::string,
         boost::property<
             boost::graph_graph_attribute_t, GraphvizAttributes,
             boost::property<boost::graph_vertex_attribute_t, GraphvizAttributes,

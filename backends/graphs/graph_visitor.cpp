@@ -18,15 +18,14 @@
 
 #include "graphs.h"
 #include "lib/nullstream.h"
-#include "lib/path.h"
 
 namespace graphs {
 
-void Graph_visitor::writeGraphToFile(const Graph &g, const cstring &name) {
-    auto path = Util::PathName(graphsDir).join(name + ".dot");
-    auto out = openFile(path.toString(), false);
+void Graph_visitor::writeGraphToFile(const Graph &g, const std::string &name) {
+    auto path = graphsDir / (name + ".dot");
+    auto out = openFile(path, false);
     if (out == nullptr) {
-        ::error(ErrorType::ERR_IO, "Failed to open file %1%", path.toString());
+        ::error(ErrorType::ERR_IO, "Failed to open file %1%", path);
         return;
     }
     // Custom label writers not supported with subgraphs, so we populate
@@ -135,7 +134,7 @@ void Graph_visitor::forLoopFullGraph(std::vector<Graph *> &graphsArray, fullGrap
 
         // set subg properties
         boost::get_property(subfg, boost::graph_name) =
-            "cluster" + Util::toString(opts->cluster_i++);
+            "cluster" + std::to_string(opts->cluster_i++);
         boost::get_property(subfg, boost::graph_graph_attribute)["label"_cs] =
             boost::get_property(*g_, boost::graph_name);
         boost::get_property(subfg, boost::graph_graph_attribute)["style"_cs] = "bold"_cs;
@@ -185,7 +184,7 @@ void Graph_visitor::process(std::vector<Graph *> &controlGraphsArray,
     if (fullGraph) {
         fullGraphOpts opts;
 
-        boost::get_property(opts.fg, boost::graph_name) = "fullGraph"_cs;
+        boost::get_property(opts.fg, boost::graph_name) = "fullGraph";
         // Enables edges with tails between clusters.
         boost::get_property(opts.fg, boost::graph_graph_attribute)["compound"_cs] = "true"_cs;
 
@@ -193,31 +192,21 @@ void Graph_visitor::process(std::vector<Graph *> &controlGraphsArray,
         forLoopFullGraph(controlGraphsArray, &opts, PrevType::Parser);
 
         GraphAttributeSetter()(opts.fg);
-        writeGraphToFile(opts.fg, "fullGraph"_cs);
+        writeGraphToFile(opts.fg, "fullGraph");
     }
 
     if (jsonOut) {
         json = new Util::JsonObject();
 
         // Remove '.p4' and path from program name.
-        auto file_without_p4 = (filename.findlast('.') == nullptr)
-                                   ? filename
-                                   : filename.before(filename.findlast('.'));
-        const char *file_without_path = file_without_p4;
-        if (file_without_p4.findlast('/') != nullptr) {
-            file_without_path = file_without_p4.findlast('/') + 1;  // char* without '/'
-        }
-
-        json->emplace("name"_cs, file_without_path);
+        json->emplace("name"_cs, filename.stem());
         programBlocks = new Util::JsonArray();
         json->emplace("nodes"_cs, programBlocks);
 
         forLoopJson(parserGraphsArray, PrevType::Parser);
         forLoopJson(controlGraphsArray, PrevType::Control);
 
-        std::ofstream file;
-        auto path = Util::PathName(graphsDir).join("fullGraph.json"_cs);
-        file.open(path.toString());
+        std::ofstream file(graphsDir / "fullGraph.json");
         file << json->toString() << std::endl;
         file.close();
     }

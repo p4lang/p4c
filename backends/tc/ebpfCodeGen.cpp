@@ -25,14 +25,7 @@ void PNAEbpfGenerator::emitPNAIncludes(EBPF::CodeBuilder *builder) const {
     builder->appendLine("#include \"pna.h\"");
 }
 
-cstring PNAEbpfGenerator::getProgramName() const {
-    auto progName = options.file;
-    auto filename = progName.findlast('/');
-    if (filename) progName = cstring(filename);
-    progName = progName.exceptLast(3);
-    progName = progName.trim("/\t\n\r");
-    return progName;
-}
+cstring PNAEbpfGenerator::getProgramName() const { return cstring(options.file.stem()); }
 
 void PNAEbpfGenerator::emitPreamble(EBPF::CodeBuilder *builder) const {
     emitCommonPreamble(builder);

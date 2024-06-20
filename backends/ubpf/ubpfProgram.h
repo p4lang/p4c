@@ -62,8 +62,8 @@ class UBPFProgram : public EBPF::EBPFProgram {
     }
 
     bool build() override;
-    void emitC(UbpfCodeBuilder *builder, cstring headerFile);
-    void emitH(EBPF::CodeBuilder *builder, cstring headerFile) override;
+    void emitC(UbpfCodeBuilder *builder, const std::filesystem::path &headerFile);
+    void emitH(EBPF::CodeBuilder *builder, const std::filesystem::path &headerFile) override;
     void emitPreamble(EBPF::CodeBuilder *builder) override;
     void emitTypes(EBPF::CodeBuilder *builder) override;
     void emitTableDefinition(EBPF::CodeBuilder *builder) const;

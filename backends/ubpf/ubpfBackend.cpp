@@ -47,30 +47,26 @@ void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
     }
 
     UBPFTypeFactory::createFactory(typeMap);
-    auto prog = new UBPFProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
+    auto *prog = new UBPFProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
 
     if (!prog->build()) return;
 
-    if (options.outputFile.isNullOrEmpty()) return;
+    if (options.outputFile.empty()) return;
 
-    cstring cfile = options.outputFile;
-    auto cstream = openFile(cfile, false);
+    auto *cstream = openFile(options.outputFile, false);
     if (cstream == nullptr) return;
 
-    cstring hfile;
-    const char *dot = cfile.findlast('.');
-    if (dot == nullptr)
-        hfile = cfile + ".h";
-    else
-        hfile = cfile.before(dot) + ".h";
-    auto hstream = openFile(hfile, false);
+    std::filesystem::path hfile = options.outputFile;
+    hfile.replace_extension(".h");
+
+    auto *hstream = openFile(hfile, false);
     if (hstream == nullptr) return;
 
     UbpfCodeBuilder c(target);
     UbpfCodeBuilder h(target);
 
     prog->emitH(&h, hfile);
-    prog->emitC(&c, UBPF::extract_file_name(hfile.c_str()));
+    prog->emitC(&c, hfile.filename());
 
     *cstream << c.toString();
     *hstream << h.toString();
@@ -78,8 +74,4 @@ void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
     hstream->flush();
 }
 
-std::string extract_file_name(const std::string &fullPath) {
-    const size_t lastSlashIndex = fullPath.find_last_of("/\\");
-    return fullPath.substr(lastSlashIndex + 1);
-}
 }  // namespace UBPF

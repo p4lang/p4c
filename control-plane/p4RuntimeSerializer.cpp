@@ -1581,6 +1581,7 @@ void P4RuntimeSerializer::serializeP4RuntimeIfRequired(const IR::P4Program *prog
 
 void P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI &p4Runtime,
                                                        const CompilerOptions &options) {
+    // FIXME: get rid of cstring here
     std::vector<cstring> files;
     std::vector<P4::P4RuntimeFormat> formats;
 
@@ -1594,7 +1595,7 @@ void P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI &p4Run
         for (unsigned i = 0; i < files.size(); i++) {
             cstring file = files.at(i);
             P4::P4RuntimeFormat format = formats.at(i);
-            std::ostream *out = openFile(file, false);
+            std::ostream *out = openFile(file.string(), false);
             if (!out) {
                 ::error(ErrorType::ERR_IO, "Couldn't open P4Runtime API file: %1%", file);
                 continue;
@@ -1616,7 +1617,7 @@ void P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI &p4Run
         for (unsigned i = 0; i < files.size(); i++) {
             cstring file = files.at(i);
             P4::P4RuntimeFormat format = formats.at(i);
-            std::ostream *out = openFile(file, false);
+            std::ostream *out = openFile(file.string(), false);
             if (!out) {
                 ::error(ErrorType::ERR_IO, "Couldn't open P4Runtime static entries file: %1%",
                         options.p4RuntimeEntriesFile);

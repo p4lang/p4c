@@ -28,7 +28,7 @@ class BMV2Options : public CompilerOptions {
     /// Generate externs.
     bool emitExterns = false;
     /// File to output to.
-    cstring outputFile = nullptr;
+    std::filesystem::path outputFile;
     /// Read from json.
     bool loadIRFromJson = false;
 
@@ -44,7 +44,7 @@ class BMV2Options : public CompilerOptions {
         registerOption(
             "-o", "outfile",
             [this](const char *arg) {
-                outputFile = cstring(arg);
+                outputFile = arg;
                 return true;
             },
             "Write output to outfile");
@@ -52,7 +52,7 @@ class BMV2Options : public CompilerOptions {
             "--fromJSON", "file",
             [this](const char *arg) {
                 loadIRFromJson = true;
-                file = cstring(arg);
+                file = arg;
                 return true;
             },
             "Use IR representation from JsonFile dumped previously,"

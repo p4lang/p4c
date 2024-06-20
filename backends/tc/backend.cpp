@@ -122,7 +122,7 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
 }
 
 void Backend::serialize() const {
-    cstring progName = tcIR->getPipelineName();
+    std::string progName = tcIR->getPipelineName().string();
     if (ebpf_program == nullptr) return;
     EBPF::CodeBuilder c(target), p(target), h(target);
     ebpf_program->emit(&c);
@@ -131,10 +131,8 @@ void Backend::serialize() const {
     if (::errorCount() > 0) {
         return;
     }
-    cstring outputFile = progName + ".template";
-    if (!options.outputFolder.isNullOrEmpty()) {
-        outputFile = options.outputFolder + outputFile;
-    }
+    std::filesystem::path outputFile = options.outputFolder / (progName + ".template");
+
     auto outstream = openFile(outputFile, false);
     if (outstream != nullptr) {
         *outstream << pipeline->toString();
@@ -145,14 +143,10 @@ void Backend::serialize() const {
                                          std::filesystem::perms::others_all,
                                      std::filesystem::perm_options::add);
     }
-    cstring parserFile = progName + "_parser.c";
-    cstring postParserFile = progName + "_control_blocks.c";
-    cstring headerFile = progName + "_parser.h";
-    if (!options.outputFolder.isNullOrEmpty()) {
-        parserFile = options.outputFolder + parserFile;
-        postParserFile = options.outputFolder + postParserFile;
-        headerFile = options.outputFolder + headerFile;
-    }
+    std::filesystem::path parserFile = options.outputFolder / (progName + "_parser.c");
+    std::filesystem::path postParserFile = options.outputFolder / (progName + "_control_blocks.c");
+    std::filesystem::path headerFile = options.outputFolder / (progName + "_parser.h");
+
     auto cstream = openFile(postParserFile, false);
     auto pstream = openFile(parserFile, false);
     auto hstream = openFile(headerFile, false);
@@ -185,21 +179,12 @@ bool Backend::serializeIntrospectionJson(std::ostream &out) const {
 }
 
 void ConvertToBackendIR::setPipelineName() {
-    cstring path = options.file;
-    if (path != nullptr) {
-        pipelineName = path;
-    } else {
+    if (options.file.empty()) {
         ::error("filename is not given in command line option");
         return;
     }
-    auto fileName = path.findlast('/');
-    if (fileName) {
-        pipelineName = cstring(fileName);
-        pipelineName = pipelineName.replace("/"_cs, ""_cs);
-    }
-    auto fileext = cstring(pipelineName.find("."));
-    pipelineName = pipelineName.replace(fileext, ""_cs);
-    pipelineName = pipelineName.trim();
+
+    pipelineName = cstring(options.file.stem());
 }
 
 bool ConvertToBackendIR::preorder(const IR::P4Program *p) {

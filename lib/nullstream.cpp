@@ -18,9 +18,10 @@ limitations under the License.
 
 #include <fstream>  // IWYU pragma: keep
 
-// FIXME: this should accept string_view instead
-std::ostream *openFile(cstring name, bool nullOnError) {
-    if (name.isNullOrEmpty()) {
+#include "lib/error.h"
+
+std::ostream *openFile(const std::filesystem::path &name, bool nullOnError) {
+    if (name.empty()) {
         if (nullOnError) return new nullstream();
         ::error(ErrorType::ERR_INVALID, "Empty name for openFile");
         return nullptr;

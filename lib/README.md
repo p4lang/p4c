@@ -71,10 +71,6 @@ A simple ostream that does nothing.
 
 Represents compiler command-line options.
 
-##### path.h, path.cpp
-
-Simple system-independent pathname abstraction.
-
 ##### range.h
 
 Iterators over numeric ranges.

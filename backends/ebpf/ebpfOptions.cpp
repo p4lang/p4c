@@ -23,7 +23,7 @@ EbpfOptions::EbpfOptions() {
     registerOption(
         "-o", "outfile",
         [this](const char *arg) {
-            outputFile = cstring(arg);
+            outputFile = arg;
             return true;
         },
         "Write output to outfile");
@@ -42,7 +42,7 @@ EbpfOptions::EbpfOptions() {
         "--fromJSON", "file",
         [this](const char *arg) {
             loadIRFromJson = true;
-            file = cstring(arg);
+            file = arg;
             return true;
         },
         "Use IR representation from JsonFile dumped previously,"

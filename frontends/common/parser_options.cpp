@@ -26,13 +26,14 @@ limitations under the License.
 #include <regex>
 #include <unordered_set>
 
+#include "absl/strings/escaping.h"
+#include "absl/strings/str_format.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "ir/json_generator.h"
 #include "lib/exceptions.h"
 #include "lib/exename.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "lib/path.h"
 
 /* CONFIG_PKGDATADIR is defined by cmake at compile time to be the same as
  * CMAKE_INSTALL_PREFIX This is only valid when the compiler is built and
@@ -288,7 +289,7 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
     registerOption(
         "--dump", "folder",
         [this](const char *arg) {
-            dumpFolder = cstring(arg);
+            dumpFolder = arg;
             return true;
         },
         "[Compiler debugging] Folder where P4 programs are dumped\n");
@@ -331,7 +332,7 @@ void ParserOptions::setInputFile() {
         usage();
         exit(1);
     } else {
-        file = cstring(remainingOptions.at(0));
+        file = remainingOptions.at(0);
     }
 }
 
@@ -405,7 +406,7 @@ FILE *ParserOptions::preprocess() {
     FILE *in = nullptr;
 
     if (file == "-") {
-        file = "<stdin>"_cs;
+        file = "<stdin>";
         in = stdin;
     } else {
 #ifdef __clang__
@@ -414,10 +415,8 @@ FILE *ParserOptions::preprocess() {
         std::string cmd("cpp");
 #endif
 
-        if (file == nullptr) file = cstring::empty;
-        if (file.find(' ')) file = "\""_cs + file + "\""_cs;
         cmd += " -C -undef -nostdinc -x assembler-with-cpp " + preprocessor_options.string() +
-               getIncludePath() + " " + file.string();
+               getIncludePath() + " " + absl::CEscape(file.native());
 
         if (Log::verbose()) std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;
         in = popen(cmd.c_str(), "r");
@@ -454,11 +453,14 @@ void ParserOptions::closePreprocessedInput(FILE *inputStream) const {
 
 // From (folder, file.ext, suffix)  returns
 // folder/file-suffix.ext
-static cstring makeFileName(cstring folder, cstring name, cstring baseSuffix) {
-    Util::PathName filename(name);
-    Util::PathName newName(filename.getBasename() + baseSuffix + "." + filename.getExtension());
-    auto result = Util::PathName(folder).join(newName.toString());
-    return result.toString();
+static std::filesystem::path makeFileName(const std::filesystem::path &folder,
+                                          const std::filesystem::path &name,
+                                          std::string_view baseSuffix) {
+    std::filesystem::path newName(name.stem());
+    newName += baseSuffix;
+    newName += name.extension();
+
+    return folder / newName;
 }
 
 bool ParserOptions::isv1() const { return langVersion == ParserOptions::FrontendVersion::P4_14; }
@@ -466,7 +468,7 @@ bool ParserOptions::isv1() const { return langVersion == ParserOptions::Frontend
 void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass,
                              const IR::Node *node) const {
     if (strncmp(pass, "P4::", 4) == 0) pass += 4;
-    cstring name = cstring(manager) + "_" + Util::toString(seq) + "_" + pass;
+    std::string name = absl::StrCat(manager, "_", seq, "_", pass);
     if (Log::verbose()) std::cerr << name << std::endl;
 
     for (auto s : top4) {
@@ -485,18 +487,15 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
             exit(1);
         }
         if (match) {
-            // FIXME: switch to sane printing via abseil
-            char buf[16];
-            snprintf(buf, sizeof(buf), "-%04zu-", ++dump_uid);
-            cstring suffix = cstring(buf) + name;
-            cstring filename = file;
-            if (filename == "-") filename = "tmp.p4"_cs;
+            std::string suffix = absl::StrFormat("-%04zu-%s", ++dump_uid, name);
+            std::filesystem::path fileName =
+                makeFileName(dumpFolder, (file == "-" ? "tmp.p4" : file), suffix);
 
-            cstring fileName = makeFileName(dumpFolder, filename, suffix);
             std::unique_ptr<std::ostream> stream{openFile(fileName, true)};
             if (stream != nullptr) {
                 if (Log::verbose()) std::cerr << "Writing program to " << fileName << std::endl;
-                P4::ToP4 toP4(stream.get(), Log::verbose(), file);
+                // FIXME: Accept path here
+                P4::ToP4 toP4(stream.get(), Log::verbose(), cstring(file));
                 if (noIncludes) {
                     toP4.setnoIncludesArg(true);
                 }
