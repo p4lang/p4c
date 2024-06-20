@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "methodInstance.h"
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -123,7 +124,7 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
     return nullptr;  // unreachable
 }
 
-const IR::P4Action *ActionCall::specialize(ReferenceMap *refMap) const {
+const IR::P4Action *ActionCall::specialize(const DeclarationLookup *refMap) const {
     SubstituteParameters sp(refMap, &substitution, new TypeVariableSubstitution());
     auto result = action->apply(sp);
     return result->to<IR::P4Action>();

@@ -38,7 +38,6 @@ const IR::Node *SubstituteParameters::postorder(IR::PathExpression *expr) {
     auto path = new IR::Path(newid, expr->path->absolute);
     auto result = new IR::PathExpression(path);
     LOG1("Cloned " << dbp(expr) << " into " << dbp(result));
-    refMap->setDeclaration(path, decl);
     return result;
 }
 
@@ -53,7 +52,6 @@ const IR::Node *SubstituteParameters::postorder(IR::Type_Name *type) {
 
     IR::ID newid = type->path->name;
     auto path = new IR::Path(newid, type->path->absolute);
-    refMap->setDeclaration(path, decl);
     auto result = new IR::Type_Name(type->srcInfo, path);
     LOG1("Cloned " << dbp(type) << " into " << dbp(result));
     return result;

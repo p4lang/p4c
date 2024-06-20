@@ -210,7 +210,7 @@ class ActionCall final : public MethodInstance {
     const IR::P4Action *action;
     /// Generate a version of the action where the parameters in the
     /// substitution have been replaced with the arguments.
-    const IR::P4Action *specialize(ReferenceMap *refMap) const;
+    const IR::P4Action *specialize(const DeclarationLookup *refMap) const;
 
     DECLARE_TYPEINFO(ActionCall, MethodInstance);
 };

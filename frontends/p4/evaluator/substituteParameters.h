@@ -28,14 +28,10 @@ namespace P4 {
 
 class SubstituteParameters : public TypeVariableSubstitutionVisitor {
  protected:
-    // When a PathExpression is cloned, it is added to the RefMap.
-    // It is set to point to the same declaration as the original path.
-    // But running this pass may change some declaration nodes - so
-    // in general the refMap won't be up-to-date at the end.
-    ReferenceMap *refMap;                // input and output
+    const DeclarationLookup *refMap;     // input
     const ParameterSubstitution *subst;  // input
  public:
-    SubstituteParameters(ReferenceMap *refMap, const ParameterSubstitution *subst,
+    SubstituteParameters(const DeclarationLookup *refMap, const ParameterSubstitution *subst,
                          const TypeVariableSubstitution *tvs)
         : TypeVariableSubstitutionVisitor(tvs), refMap(refMap), subst(subst) {
         CHECK_NULL(refMap);
