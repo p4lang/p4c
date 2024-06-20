@@ -127,9 +127,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6bb1f80143c540abd8e8a5ee1ca80e1e" id="r_a6bb1f80143c540abd8e8a5ee1ca80e1e"><td class="memItemLeft" align="right" valign="top"><a id="a6bb1f80143c540abd8e8a5ee1ca80e1e" name="a6bb1f80143c540abd8e8a5ee1ca80e1e"></a>
 <a class="el" href="class_p4_fmt_1_1_p4fmt_options.html">P4fmtOptions</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="class_p4_fmt_1_1_p4fmt_options.html">P4fmtOptions</a> &amp;&amp;)=delete</td></tr>
 <tr class="separator:a6bb1f80143c540abd8e8a5ee1ca80e1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a667532974e77df242fad359b4ff2d25e" id="r_a667532974e77df242fad359b4ff2d25e"><td class="memItemLeft" align="right" valign="top"><a id="a667532974e77df242fad359b4ff2d25e" name="a667532974e77df242fad359b4ff2d25e"></a>
-const <a class="el" href="classcstring.html">cstring</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>outputFile</b> () const</td></tr>
-<tr class="separator:a667532974e77df242fad359b4ff2d25e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4a90a97c9b1c4c420a61adf7c0b1cc0" id="r_ac4a90a97c9b1c4c420a61adf7c0b1cc0"><td class="memItemLeft" align="right" valign="top"><a id="ac4a90a97c9b1c4c420a61adf7c0b1cc0" name="ac4a90a97c9b1c4c420a61adf7c0b1cc0"></a>
+const std::filesystem::path &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>outputFile</b> () const</td></tr>
+<tr class="separator:ac4a90a97c9b1c4c420a61adf7c0b1cc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_compiler_options"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_compiler_options')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_compiler_options.html">CompilerOptions</a></td></tr>
 <tr class="memitem:a8fc449cd532ef281094e04db631c0be8 inherit pub_methods_class_compiler_options" id="r_a8fc449cd532ef281094e04db631c0be8"><td class="memItemLeft" align="right" valign="top">
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>enable_intrinsic_metadata_fix</b> ()</td></tr>
@@ -197,9 +197,9 @@ typedef std::function&lt; bool(const char *optarg)&gt;&#160;</td><td class="memI
 <tr class="memitem:a4577983ebfa9854aad088747d53990a4 inherit pub_attribs_class_compiler_options" id="r_a4577983ebfa9854aad088747d53990a4"><td class="memItemLeft" align="right" valign="top">
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>debugJson</b> = false</td></tr>
 <tr class="separator:a4577983ebfa9854aad088747d53990a4 inherit pub_attribs_class_compiler_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5acc6a644b6d16866bf4cce678b1329c inherit pub_attribs_class_compiler_options" id="r_a5acc6a644b6d16866bf4cce678b1329c"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>dumpJsonFile</b> = nullptr</td></tr>
-<tr class="separator:a5acc6a644b6d16866bf4cce678b1329c inherit pub_attribs_class_compiler_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26be36cbfdb9fe018790a08a2afdb250 inherit pub_attribs_class_compiler_options" id="r_a26be36cbfdb9fe018790a08a2afdb250"><td class="memItemLeft" align="right" valign="top">
+std::filesystem::path&#160;</td><td class="memItemRight" valign="bottom"><b>dumpJsonFile</b></td></tr>
+<tr class="separator:a26be36cbfdb9fe018790a08a2afdb250 inherit pub_attribs_class_compiler_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64fd3b9aeada9e6401265447d394cf50 inherit pub_attribs_class_compiler_options" id="r_a64fd3b9aeada9e6401265447d394cf50"><td class="memItemLeft" align="right" valign="top">
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>excludeBackendPasses</b> = false</td></tr>
 <tr class="separator:a64fd3b9aeada9e6401265447d394cf50 inherit pub_attribs_class_compiler_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -254,9 +254,9 @@ std::vector&lt; <a class="el" href="classcstring.html">cstring</a> &gt;&#160;</t
 <tr class="memitem:a482f3acb7d3047cf3cc6877001469a4a inherit pub_attribs_class_compiler_options" id="r_a482f3acb7d3047cf3cc6877001469a4a"><td class="memItemLeft" align="right" valign="top">
 std::vector&lt; <a class="el" href="classcstring.html">cstring</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>passesToExcludeMidend</b></td></tr>
 <tr class="separator:a482f3acb7d3047cf3cc6877001469a4a inherit pub_attribs_class_compiler_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e45e861fa4dccd58c41c3aecbbe308e inherit pub_attribs_class_compiler_options" id="r_a6e45e861fa4dccd58c41c3aecbbe308e"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>prettyPrintFile</b> = nullptr</td></tr>
-<tr class="separator:a6e45e861fa4dccd58c41c3aecbbe308e inherit pub_attribs_class_compiler_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49267111eb47fd13be9d6e9730f55114 inherit pub_attribs_class_compiler_options" id="r_a49267111eb47fd13be9d6e9730f55114"><td class="memItemLeft" align="right" valign="top">
+std::filesystem::path&#160;</td><td class="memItemRight" valign="bottom"><b>prettyPrintFile</b></td></tr>
+<tr class="separator:a49267111eb47fd13be9d6e9730f55114 inherit pub_attribs_class_compiler_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a263bd07a53cf087f3bb21872ac14a2f7 inherit pub_attribs_class_compiler_options" id="r_a263bd07a53cf087f3bb21872ac14a2f7"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>target</b> = nullptr</td></tr>
 <tr class="separator:a263bd07a53cf087f3bb21872ac14a2f7 inherit pub_attribs_class_compiler_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -270,15 +270,15 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>doNotCompile</b> = fa
 <tr class="memitem:aed40ea3a9a4bdceeb5e2a28df4cc8195 inherit pub_attribs_class_parser_options" id="r_aed40ea3a9a4bdceeb5e2a28df4cc8195"><td class="memItemLeft" align="right" valign="top">
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>doNotPreprocess</b> = false</td></tr>
 <tr class="separator:aed40ea3a9a4bdceeb5e2a28df4cc8195 inherit pub_attribs_class_parser_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8f845210f4d58057e16b820f106c41b8 inherit pub_attribs_class_parser_options" id="r_a8f845210f4d58057e16b820f106c41b8"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>dumpFolder</b> = cstring::literal(&quot;.&quot;)</td></tr>
-<tr class="separator:a8f845210f4d58057e16b820f106c41b8 inherit pub_attribs_class_parser_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7bc164a8b80093361ec408fb5b6ab4cb inherit pub_attribs_class_parser_options" id="r_a7bc164a8b80093361ec408fb5b6ab4cb"><td class="memItemLeft" align="right" valign="top">
+std::filesystem::path&#160;</td><td class="memItemRight" valign="bottom"><b>dumpFolder</b> = &quot;.&quot;</td></tr>
+<tr class="separator:a7bc164a8b80093361ec408fb5b6ab4cb inherit pub_attribs_class_parser_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad0ee07f9e5e35022fce21baa30a638b1 inherit pub_attribs_class_parser_options" id="r_ad0ee07f9e5e35022fce21baa30a638b1"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>exe_name</b></td></tr>
 <tr class="separator:ad0ee07f9e5e35022fce21baa30a638b1 inherit pub_attribs_class_parser_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a84fb9e90029051133c04617d58b96f7d inherit pub_attribs_class_parser_options" id="r_a84fb9e90029051133c04617d58b96f7d"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>file</b> = nullptr</td></tr>
-<tr class="separator:a84fb9e90029051133c04617d58b96f7d inherit pub_attribs_class_parser_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6462ed7df9925391aae4f353d59d2490 inherit pub_attribs_class_parser_options" id="r_a6462ed7df9925391aae4f353d59d2490"><td class="memItemLeft" align="right" valign="top">
+std::filesystem::path&#160;</td><td class="memItemRight" valign="bottom"><b>file</b></td></tr>
+<tr class="separator:a6462ed7df9925391aae4f353d59d2490 inherit pub_attribs_class_parser_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1bb54a6df7d3c14ede7d726897cf3455 inherit pub_attribs_class_parser_options" id="r_a1bb54a6df7d3c14ede7d726897cf3455"><td class="memItemLeft" align="right" valign="top">
 FrontendVersion&#160;</td><td class="memItemRight" valign="bottom"><b>langVersion</b> = FrontendVersion::P4_16</td></tr>
 <tr class="separator:a1bb54a6df7d3c14ede7d726897cf3455 inherit pub_attribs_class_parser_options"><td class="memSeparator" colspan="2">&#160;</td></tr>

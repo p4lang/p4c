@@ -115,8 +115,8 @@ Inheritance diagram for graphs::Graph_visitor:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5ba26d19ca4576037995cd29e270ffd4" id="r_a5ba26d19ca4576037995cd29e270ffd4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5ba26d19ca4576037995cd29e270ffd4">Graph_visitor</a> (const <a class="el" href="classcstring.html">cstring</a> &amp;graphsDir, const bool graphs, const bool fullGraph, const bool jsonOut, const <a class="el" href="classcstring.html">cstring</a> &amp;filename)</td></tr>
-<tr class="separator:a5ba26d19ca4576037995cd29e270ffd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad45b58667dbfb651c4c521fe5ec489a9" id="r_ad45b58667dbfb651c4c521fe5ec489a9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad45b58667dbfb651c4c521fe5ec489a9">Graph_visitor</a> (std::filesystem::path graphsDir, const bool graphs, const bool fullGraph, const bool jsonOut, std::filesystem::path filename)</td></tr>
+<tr class="separator:ad45b58667dbfb651c4c521fe5ec489a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98cc5c638e2d3e7cd1b064112b9a5d9a" id="r_a98cc5c638e2d3e7cd1b064112b9a5d9a"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a98cc5c638e2d3e7cd1b064112b9a5d9a">getPrevType</a> (const PrevType &amp;prev_type)</td></tr>
 <tr class="memdesc:a98cc5c638e2d3e7cd1b064112b9a5d9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps PrevType to string.  <br /></td></tr>
 <tr class="separator:a98cc5c638e2d3e7cd1b064112b9a5d9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -125,8 +125,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a8d234151d665125a29b51c640834447a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad828b1e80a00601b32de7a1829c0d67b" id="r_ad828b1e80a00601b32de7a1829c0d67b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad828b1e80a00601b32de7a1829c0d67b">process</a> (std::vector&lt; Graph * &gt; &amp;controlGraphsArray, std::vector&lt; Graph * &gt; &amp;parserGraphsArray)</td></tr>
 <tr class="separator:ad828b1e80a00601b32de7a1829c0d67b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf7050f5726e1fe00e8a4635c83b223c" id="r_acf7050f5726e1fe00e8a4635c83b223c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acf7050f5726e1fe00e8a4635c83b223c">writeGraphToFile</a> (const Graph &amp;g, const <a class="el" href="classcstring.html">cstring</a> &amp;name)</td></tr>
-<tr class="separator:acf7050f5726e1fe00e8a4635c83b223c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d7aca04bc2355feac5fa7cf0d2f9b8d" id="r_a8d7aca04bc2355feac5fa7cf0d2f9b8d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8d7aca04bc2355feac5fa7cf0d2f9b8d">writeGraphToFile</a> (const Graph &amp;g, const std::string &amp;name)</td></tr>
+<tr class="separator:a8d7aca04bc2355feac5fa7cf0d2f9b8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classgraphs_1_1_graphs"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classgraphs_1_1_graphs')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classgraphs_1_1_graphs.html">graphs::Graphs</a></td></tr>
 <tr class="memitem:a9bc53eeadd00c1e8f99a84bdf1afc48f inherit pub_methods_classgraphs_1_1_graphs" id="r_a9bc53eeadd00c1e8f99a84bdf1afc48f"><td class="memItemLeft" align="right" valign="top">
 vertex_t&#160;</td><td class="memItemRight" valign="bottom"><b>add_and_connect_vertex</b> (const <a class="el" href="classcstring.html">cstring</a> &amp;name, VertexType type)</td></tr>
@@ -333,8 +333,8 @@ using&#160;</td><td class="memItemRight" valign="bottom"><b>Graph</b> = boost::s
 <tr class="separator:a7ae8e07c1ec36fde61457056456b7000 inherit pub_types_classgraphs_1_1_graphs"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aedbd4cccfec42897b18cd6a853ea3173 inherit pub_types_classgraphs_1_1_graphs" id="r_aedbd4cccfec42897b18cd6a853ea3173"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraphs_1_1_graphs.html#aedbd4cccfec42897b18cd6a853ea3173">Graph_</a></td></tr>
 <tr class="separator:aedbd4cccfec42897b18cd6a853ea3173 inherit pub_types_classgraphs_1_1_graphs"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeddea5eae1757f6b2c2a0f265caefa34 inherit pub_types_classgraphs_1_1_graphs" id="r_aeddea5eae1757f6b2c2a0f265caefa34"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraphs_1_1_graphs.html#aeddea5eae1757f6b2c2a0f265caefa34">graphProperties</a></td></tr>
-<tr class="separator:aeddea5eae1757f6b2c2a0f265caefa34 inherit pub_types_classgraphs_1_1_graphs"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4218e12444dd685ce98d9c9c4b2adf6e inherit pub_types_classgraphs_1_1_graphs" id="r_a4218e12444dd685ce98d9c9c4b2adf6e"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraphs_1_1_graphs.html#a4218e12444dd685ce98d9c9c4b2adf6e">graphProperties</a></td></tr>
+<tr class="separator:a4218e12444dd685ce98d9c9c4b2adf6e inherit pub_types_classgraphs_1_1_graphs"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a36096ab2d37828b734ab52e8cec4312f inherit pub_types_classgraphs_1_1_graphs" id="r_a36096ab2d37828b734ab52e8cec4312f"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgraphs_1_1_graphs.html#a36096ab2d37828b734ab52e8cec4312f">GraphvizAttributes</a> = std::map&lt;<a class="el" href="classcstring.html">cstring</a>, <a class="el" href="classcstring.html">cstring</a>&gt;</td></tr>
 <tr class="separator:a36096ab2d37828b734ab52e8cec4312f inherit pub_types_classgraphs_1_1_graphs"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8458b85f112b93ef6f32cae3b26e72b7 inherit pub_types_classgraphs_1_1_graphs" id="r_a8458b85f112b93ef6f32cae3b26e72b7"><td class="memItemLeft" align="right" valign="top">
@@ -426,8 +426,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>"process" function of class is dependent on previous aplication of visitor classes Controls and Parsers onto IR, and can only be run after them. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a5ba26d19ca4576037995cd29e270ffd4" name="a5ba26d19ca4576037995cd29e270ffd4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5ba26d19ca4576037995cd29e270ffd4">&#9670;&#160;</a></span>Graph_visitor()</h2>
+<a id="ad45b58667dbfb651c4c521fe5ec489a9" name="ad45b58667dbfb651c4c521fe5ec489a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad45b58667dbfb651c4c521fe5ec489a9">&#9670;&#160;</a></span>Graph_visitor()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -438,7 +438,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
         <tr>
           <td class="memname">graphs::Graph_visitor::Graph_visitor </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classcstring.html">cstring</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>graphsDir</em></span>, </td>
+          <td class="paramtype">std::filesystem::path</td>          <td class="paramname"><span class="paramname"><em>graphsDir</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -458,7 +458,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classcstring.html">cstring</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>filename</em></span>&#160;)</td>
+          <td class="paramtype">std::filesystem::path</td>          <td class="paramname"><span class="paramname"><em>filename</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -562,8 +562,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 
 </div>
 </div>
-<a id="acf7050f5726e1fe00e8a4635c83b223c" name="acf7050f5726e1fe00e8a4635c83b223c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acf7050f5726e1fe00e8a4635c83b223c">&#9670;&#160;</a></span>writeGraphToFile()</h2>
+<a id="a8d7aca04bc2355feac5fa7cf0d2f9b8d" name="a8d7aca04bc2355feac5fa7cf0d2f9b8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d7aca04bc2355feac5fa7cf0d2f9b8d">&#9670;&#160;</a></span>writeGraphToFile()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -576,7 +576,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classcstring.html">cstring</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em></span>&#160;)</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">

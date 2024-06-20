@@ -1315,7 +1315,6 @@ var hierarchy =
       ] ]
     ] ],
     [ "Util::Options::Option", "class_util_1_1_options.html#struct_util_1_1_options_1_1_option", null ],
-    [ "Util::PathName", "class_util_1_1_path_name.html", null ],
     [ "Util::ProgramStructure", "class_util_1_1_program_structure.html", null ],
     [ "Util::ScopedTimer", "class_util_1_1_scoped_timer.html", null ],
     [ "Util::ScopedTimerCtx", "struct_util_1_1_scoped_timer_ctx.html", null ],

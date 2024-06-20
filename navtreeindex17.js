@@ -1,6 +1,5 @@
 var NAVTREEINDEX17 =
 {
-"struct_auto_compile_context.html":[30,0,27],
 "struct_auto_stdio_input_stream.html":[30,0,28],
 "struct_b_m_v2_1_1_conversion_context.html":[29,0,0,8],
 "struct_b_m_v2_1_1_conversion_context.html":[30,0,1,10],
@@ -249,5 +248,6 @@ var NAVTREEINDEX17 =
 "struct_p4_1_1_coverage_1_1_source_id_cmp.html":[29,0,5,1,2],
 "struct_p4_1_1_coverage_1_1_source_id_cmp.html":[30,0,11,2,2],
 "struct_p4_1_1_diagnostic_count_info.html":[29,0,5,63],
-"struct_p4_1_1_diagnostic_count_info.html":[30,0,11,64]
+"struct_p4_1_1_diagnostic_count_info.html":[30,0,11,64],
+"struct_p4_1_1_diagnostic_count_info.html#a8f9e7a1f3f84ec8e9be2fee20edab056":[29,0,5,63,1]
 };

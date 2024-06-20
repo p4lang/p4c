@@ -1277,7 +1277,6 @@ var annotated_dup =
       [ "Object", "class_util_1_1_object.html", null ],
       [ "Options", "class_util_1_1_options.html", "class_util_1_1_options" ],
       [ "P4CExceptionBase", "class_util_1_1_p4_c_exception_base.html", null ],
-      [ "PathName", "class_util_1_1_path_name.html", null ],
       [ "ProgramStructure", "class_util_1_1_program_structure.html", null ],
       [ "ScopedTimer", "class_util_1_1_scoped_timer.html", null ],
       [ "ScopedTimerCtx", "struct_util_1_1_scoped_timer_ctx.html", null ],

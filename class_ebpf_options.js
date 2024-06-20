@@ -6,5 +6,5 @@ var class_ebpf_options =
     [ "generateToXDP", "class_ebpf_options.html#accf8fec5950ef244106bee06b1005ce0", null ],
     [ "loadIRFromJson", "class_ebpf_options.html#a91e59ea6232c38818daf0259bc43f54a", null ],
     [ "maxTernaryMasks", "class_ebpf_options.html#a63e15925fdc4eb0baa123611e00a9bd7", null ],
-    [ "outputFile", "class_ebpf_options.html#a2313ba7936385e37316565318f52dc64", null ]
+    [ "outputFile", "class_ebpf_options.html#a34ce7ecae61e55eb7778198a1687cfb9", null ]
 ];

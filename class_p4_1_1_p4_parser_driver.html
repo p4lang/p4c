@@ -121,11 +121,11 @@ Inheritance diagram for P4::P4ParserDriver:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a92485abe33886d0a72107f4a0f500119" id="r_a92485abe33886d0a72107f4a0f500119"><td class="memItemLeft" align="right" valign="top"><a id="a92485abe33886d0a72107f4a0f500119" name="a92485abe33886d0a72107f4a0f500119"></a>
-static const IR::P4Program *&#160;</td><td class="memItemRight" valign="bottom"><b>parse</b> (FILE *in, const char *sourceFile, unsigned sourceLine=1)</td></tr>
-<tr class="separator:a92485abe33886d0a72107f4a0f500119"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68c18acb78c4b8f5ef03d41a9cefe46b" id="r_a68c18acb78c4b8f5ef03d41a9cefe46b"><td class="memItemLeft" align="right" valign="top">static const IR::P4Program *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a68c18acb78c4b8f5ef03d41a9cefe46b">parse</a> (std::istream &amp;in, const char *sourceFile, unsigned sourceLine=1)</td></tr>
-<tr class="separator:a68c18acb78c4b8f5ef03d41a9cefe46b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a0725c57ab0766c4a8ab4cc9ab8fe9d" id="r_a6a0725c57ab0766c4a8ab4cc9ab8fe9d"><td class="memItemLeft" align="right" valign="top"><a id="a6a0725c57ab0766c4a8ab4cc9ab8fe9d" name="a6a0725c57ab0766c4a8ab4cc9ab8fe9d"></a>
+static const IR::P4Program *&#160;</td><td class="memItemRight" valign="bottom"><b>parse</b> (FILE *in, std::string_view sourceFile, unsigned sourceLine=1)</td></tr>
+<tr class="separator:a6a0725c57ab0766c4a8ab4cc9ab8fe9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6bc15b9fe1509ceb53a2cf87160c5b8" id="r_af6bc15b9fe1509ceb53a2cf87160c5b8"><td class="memItemLeft" align="right" valign="top">static const IR::P4Program *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af6bc15b9fe1509ceb53a2cf87160c5b8">parse</a> (std::istream &amp;in, std::string_view sourceFile, unsigned sourceLine=1)</td></tr>
+<tr class="separator:af6bc15b9fe1509ceb53a2cf87160c5b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab531b9633feb12b284535397b22ab341" id="r_ab531b9633feb12b284535397b22ab341"><td class="memItemLeft" align="right" valign="top"><a id="ab531b9633feb12b284535397b22ab341" name="ab531b9633feb12b284535397b22ab341"></a>
 static const IR::Constant *&#160;</td><td class="memItemRight" valign="bottom"><b>parseConstant</b> (const <a class="el" href="class_util_1_1_source_info.html">Util::SourceInfo</a> &amp;srcInfo, const <a class="el" href="class_i_r_1_1_vector.html">IR::Vector</a>&lt; IR::AnnotationToken &gt; &amp;body)</td></tr>
 <tr class="separator:ab531b9633feb12b284535397b22ab341"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -241,8 +241,8 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>P4::P4Parser</b></td
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A ParserDriver that can parse P4-16 programs. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a68c18acb78c4b8f5ef03d41a9cefe46b" name="a68c18acb78c4b8f5ef03d41a9cefe46b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a68c18acb78c4b8f5ef03d41a9cefe46b">&#9670;&#160;</a></span>parse()</h2>
+<a id="af6bc15b9fe1509ceb53a2cf87160c5b8" name="af6bc15b9fe1509ceb53a2cf87160c5b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6bc15b9fe1509ceb53a2cf87160c5b8">&#9670;&#160;</a></span>parse()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -258,7 +258,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>P4::P4Parser</b></td
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>sourceFile</em></span>, </td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>sourceFile</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
