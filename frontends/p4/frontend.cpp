@@ -252,6 +252,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new SetHeaders(&refMap, &typeMap),
             // Check for constants only after inlining
             new CheckConstants(&refMap, &typeMap),
+            new ConstantFolding(&refMap, &typeMap, constantFoldingPolicy),
             new SimplifyControlFlow(&refMap, &typeMap),
             // more ifs may have been added to parsers
             new RemoveParserControlFlow(&refMap, &typeMap),

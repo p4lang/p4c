@@ -7,9 +7,7 @@ extern void baz();
 control c() {
     apply {
         bar(E.e0);
-        if (E.e0 == E.e0) {
-            baz();
-        }
+        baz();
     }
 }
 

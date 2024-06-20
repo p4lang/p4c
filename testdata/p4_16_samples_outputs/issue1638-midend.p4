@@ -32,17 +32,17 @@ control MyC(inout hdr_t hdr, inout meta_t meta, in intrinsic_metadata_t intr_md)
         }
         default_action = NoAction_1();
     }
-    @hidden action issue1638l23() {
+    @hidden action issue1638l20() {
         key_0 = 8w0;
     }
-    @hidden table tbl_issue1638l23 {
+    @hidden table tbl_issue1638l20 {
         actions = {
-            issue1638l23();
+            issue1638l20();
         }
-        const default_action = issue1638l23();
+        const default_action = issue1638l20();
     }
     apply {
-        tbl_issue1638l23.apply();
+        tbl_issue1638l20.apply();
         c2_a.apply();
     }
 }

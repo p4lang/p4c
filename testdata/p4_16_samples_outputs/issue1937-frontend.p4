@@ -19,7 +19,7 @@ parser parserImpl(out h1_t hdr) {
         transition foo_start_0;
     }
     state foo_start_0 {
-        hdr.f2 = 8w5 >> 2;
+        hdr.f2 = 8w1;
         transition start_1;
     }
     state start_1 {
