@@ -437,12 +437,18 @@ enum PNA_CounterType_t {
 /// Indirect counter with n_counters independent counter values, where
 /// every counter value has a data plane size specified by type W.
 
-@noWarn("unused")
+@noWarn("unused") @tc_acl("RP:RUXP")
 extern Counter<W, S> {
-  Counter(bit<32> n_counters, PNA_CounterType_t type);
-  void count(in S index);
+  Counter(@tc_numel bit<32> n_counters, PNA_CounterType_t type);
+  @tc_md_exec void count(in S index);
 }
 // END:Counter_extern
+
+struct tc_ControlPath_Counter<W, S> {
+  @tc_key S index;
+  @tc_data W pkts;
+  @tc_data W bytes;
+}
 
 // BEGIN:DirectCounter_extern
 @noWarn("unused") @tc_acl("RP:RUXP")

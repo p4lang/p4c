@@ -1,14 +1,14 @@
 {
   "schema_version" : "1.0.0",
-  "pipeline_name" : "simple_extern_example",
+  "pipeline_name" : "indirect_counter_01_example",
   "externs" : [
     {
-      "name" : "Register",
-      "id" : "0x1",
-      "permissions" : "0x19b6",
+      "name" : "Counter",
+      "id" : "0x19000000",
+      "permissions" : "0x1136",
       "instances" : [
         {
-          "inst_name" : "ingress.reg1",
+          "inst_name" : "ingress.global_counter",
           "inst_id" : 1,
           "params" : [
             {
@@ -20,37 +20,10 @@
             },
             {
               "id" : 2,
-              "name" : "a_value",
-              "type" : "bit32",
+              "name" : "pkts",
+              "type" : "bit64",
               "attr" : "param",
-              "bitwidth" : 32
-            }
-          ]
-        },
-        {
-          "inst_name" : "ingress.reg3",
-          "inst_id" : 2,
-          "params" : [
-            {
-              "id" : 1,
-              "name" : "index",
-              "type" : "bit32",
-              "attr" : "tc_key",
-              "bitwidth" : 32
-            },
-            {
-              "id" : 2,
-              "name" : "protocol",
-              "type" : "bit8",
-              "attr" : "param",
-              "bitwidth" : 8
-            },
-            {
-              "id" : 3,
-              "name" : "aux",
-              "type" : "bit8",
-              "attr" : "param",
-              "bitwidth" : 8
+              "bitwidth" : 64
             }
           ]
         }
@@ -61,7 +34,7 @@
     {
       "name" : "ingress/nh_table",
       "id" : 1,
-      "tentries" : 262144,
+      "tentries" : 2048,
       "permissions" : "0x3da4",
       "nummask" : 8,
       "keysize" : 32,
@@ -70,27 +43,11 @@
           "id" : 1,
           "name" : "hdr.ipv4.srcAddr",
           "type" : "ipv4",
-          "match_type" : "lpm",
+          "match_type" : "exact",
           "bitwidth" : 32
         }
       ],
       "actions" : [
-        {
-          "id" : 2,
-          "name" : "ingress/ext_reg",
-          "action_scope" : "TableAndDefault",
-          "annotations" : [],
-          "params" : [
-            {
-              "id" : 1,
-              "name" : "port_id",
-              "type" : "dev",
-              "bitwidth" : 32
-            }
-          ],
-          "default_hit_action" : false,
-          "default_miss_action" : false
-        },
         {
           "id" : 1,
           "name" : "ingress/send_nh",
@@ -120,7 +77,7 @@
           "default_miss_action" : false
         },
         {
-          "id" : 3,
+          "id" : 2,
           "name" : "ingress/drop",
           "action_scope" : "TableAndDefault",
           "annotations" : [],

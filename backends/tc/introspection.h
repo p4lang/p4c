@@ -133,7 +133,7 @@ struct ExternInstancesAttributes {
 struct ExternAttributes {
     cstring name;
     cstring permissions;
-    unsigned int id;
+    cstring id;
     safe_vector<struct ExternInstancesAttributes *> instances;
     ExternAttributes() {
         name = nullptr;

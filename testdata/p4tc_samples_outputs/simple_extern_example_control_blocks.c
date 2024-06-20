@@ -71,7 +71,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             /* reg3_0.write(2, arg_val_0) */
             __builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));
             ext_params.pipe_id = p4tc_filter_fields.pipeid;
-            ext_params.ext_id = 1;
+            ext_params.ext_id = 0x1;
             ext_params.inst_id = 2;
             ext_params.index = 2;
 
@@ -108,7 +108,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                             {
                                 __builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));
                                 ext_params.pipe_id = p4tc_filter_fields.pipeid;
-                                ext_params.ext_id = 1;
+                                ext_params.ext_id = 0x1;
                                 ext_params.inst_id = 1;
                                 ext_params.index = value->u.ingress_ext_reg.port_id;
 
@@ -121,7 +121,7 @@ ext_val = *ext_val_ptr;
                                 /* reg1_0.write(value->u.ingress_ext_reg.port_id, val_0) */
                                 __builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));
                                 ext_params.pipe_id = p4tc_filter_fields.pipeid;
-                                ext_params.ext_id = 1;
+                                ext_params.ext_id = 0x1;
                                 ext_params.inst_id = 1;
                                 ext_params.index = value->u.ingress_ext_reg.port_id;
 

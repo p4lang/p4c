@@ -4,7 +4,7 @@
   "externs" : [
     {
       "name" : "DirectCounter",
-      "id" : 101,
+      "id" : "0x1A000000",
       "permissions" : "0x1136",
       "instances" : [
         {

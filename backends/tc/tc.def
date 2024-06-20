@@ -529,11 +529,11 @@ class TCExtern {
     cstring externName;
     cstring pipelineName;
     cstring acl_permisson;
-    unsigned externID;
+    cstring externID;
     unsigned numinstances;
     safe_vector<TCExternInstance> externInstances;
     bool has_exec_method;
-    TCExtern(unsigned eId, cstring eN, cstring pN, unsigned inst, cstring p, bool exec_method) {
+    TCExtern(cstring eId, cstring eN, cstring pN, unsigned inst, cstring p, bool exec_method) {
         externID = eId;
         externName = eN;
         pipelineName = pN;
@@ -556,7 +556,7 @@ class TCExtern {
         std::string tcExtern = "";
         tcExtern += "\n$TC p4template create extern/";
         tcExtern += "root/" + externName;
-        tcExtern += " extid " + Util::toString(externID);
+        tcExtern += " extid " + externID;
         tcExtern += " numinstances " + Util::toString(numinstances);
         tcExtern += " tc_acl " + acl_permisson;
         if (has_exec_method) {

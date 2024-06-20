@@ -25,6 +25,7 @@ class ControlBodyTranslatorPNA;
 class ConvertToBackendIR;
 
 class EBPFCounterPNA : public EBPF::EBPFCounterPSA {
+    const IR::Declaration_Instance *di;
     cstring tblname;
 
  public:
@@ -32,10 +33,21 @@ class EBPFCounterPNA : public EBPF::EBPFCounterPSA {
                    cstring name, EBPF::CodeGenInspector *codeGen, cstring tblname)
         : EBPF::EBPFCounterPSA(program, di, name, codeGen) {
         this->tblname = tblname;
+        this->di = di;
     }
+    EBPFCounterPNA(const EBPF::EBPFProgram *program, const IR::Declaration_Instance *di,
+                   cstring name, EBPF::CodeGenInspector *codeGen)
+        : EBPF::EBPFCounterPSA(program, di, name, codeGen) {
+        this->di = di;
+    }
+
     void emitDirectMethodInvocation(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
                                     const ConvertToBackendIR *tcIR);
+    void emitMethodInvocation(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
+                              ControlBodyTranslatorPNA *translator);
     virtual void emitCounterUpdate(EBPF::CodeBuilder *builder, const ConvertToBackendIR *tcIR);
+    virtual void emitCount(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
+                           ControlBodyTranslatorPNA *translator);
 };
 
 class EBPFRegisterPNA : public EBPF::EBPFTableBase {

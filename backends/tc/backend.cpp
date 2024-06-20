@@ -1037,9 +1037,14 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
             if (iterator == externsInfo.end()) {
                 struct ExternBlock *eb = new struct ExternBlock();
                 if (eName == "DirectCounter") {
-                    eb->externId = 101;
+                    eb->externId = "0x1A000000"_cs;
+                } else if (eName == "Counter") {
+                    eb->externId = "0x19000000"_cs;
                 } else {
-                    eb->externId = ++externCount;
+                    externCount += 1;
+                    std::stringstream value;
+                    value << "0x" << std::hex << externCount;
+                    eb->externId = value.str();
                 }
                 eb->permissions = processExternPermission(extn);
                 eb->no_of_instances += 1;
@@ -1200,11 +1205,11 @@ unsigned ConvertToBackendIR::getActionId(cstring actionName) const {
     return 0;
 }
 
-unsigned ConvertToBackendIR::getExternId(cstring externName) const {
+cstring ConvertToBackendIR::getExternId(cstring externName) const {
     for (auto e : externsInfo) {
         if (e.first == externName) return e.second->externId;
     }
-    return 0;
+    return ""_cs;
 }
 
 unsigned ConvertToBackendIR::getExternInstanceId(cstring externName, cstring instanceName) const {
