@@ -42,8 +42,7 @@ class ConstantTypeSubstitution : public Transform {
     TypeInference *tc;
 
  public:
-    ConstantTypeSubstitution(TypeVariableSubstitution *subst, ReferenceMap *, TypeMap *typeMap,
-                             TypeInference *tc)
+    ConstantTypeSubstitution(TypeVariableSubstitution *subst, TypeMap *typeMap, TypeInference *tc)
         : subst(subst), typeMap(typeMap), tc(tc) {
         CHECK_NULL(subst);
         CHECK_NULL(typeMap);
@@ -742,7 +741,7 @@ const IR::Expression *TypeInference::assignment(const IR::Node *errorPosition,
         // error already signalled
         return sourceExpression;
     if (!tvs->isIdentity()) {
-        ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+        ConstantTypeSubstitution cts(tvs, typeMap, this);
         sourceExpression = cts.convert(sourceExpression);  // sets type
     }
     if (destType->is<IR::Type_SerEnum>() && !typeMap->equivalent(destType, initType) &&
@@ -1002,7 +1001,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::che
     BUG_CHECK(functionType != nullptr, "Method type is %1%", specMethodType);
     if (!functionType->is<IR::Type_Method>()) BUG("Unexpected type for function %1%", functionType);
 
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
     // Arguments may need to be cast, e.g., list expression to a
     // header type.
     auto paramIt = functionType->parameters->begin();
@@ -1242,7 +1241,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::con
     }
     addSubstitutions(dontCares);
 
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
     auto newArgs = cts.convert(constructorArguments);
 
     auto returnType = tvs->lookup(rettype);
@@ -1586,7 +1585,7 @@ const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
         return member;
     if (tvs->isIdentity()) return member;
 
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
     member->value = cts.convert(member->value);  // sets type
     if (!typeMap->getType(member)) setType(member, getTypeType(serEnum));
     return member;
@@ -1888,7 +1887,7 @@ bool TypeInference::compare(const IR::Node *errorPosition, const IR::Type *ltype
         auto tvs = unify(errorPosition, ltype, rtype);
         if (tvs == nullptr) return false;
         if (!tvs->isIdentity()) {
-            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+            ConstantTypeSubstitution cts(tvs, typeMap, this);
             compare->left = cts.convert(compare->left);
             compare->right = cts.convert(compare->right);
         }
@@ -1917,7 +1916,7 @@ bool TypeInference::compare(const IR::Node *errorPosition, const IR::Type *ltype
             }
             if (tvs == nullptr) return false;
             if (!tvs->isIdentity()) {
-                ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+                ConstantTypeSubstitution cts(tvs, typeMap, this);
                 compare->left = cts.convert(compare->left);
                 compare->right = cts.convert(compare->right);
             }
@@ -1959,7 +1958,7 @@ bool TypeInference::compare(const IR::Node *errorPosition, const IR::Type *ltype
             auto tvs = unify(errorPosition, ltype, rtype);
             if (tvs == nullptr) return false;
             if (!tvs->isIdentity()) {
-                ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+                ConstantTypeSubstitution cts(tvs, typeMap, this);
                 compare->left = cts.convert(compare->left);
                 compare->right = cts.convert(compare->right);
             }
@@ -2208,7 +2207,7 @@ const IR::Node *TypeInference::postorder(IR::Entry *entry) {
                   "Table entry has type '%1%' which is not the expected type '%2%'",
                   {keyTuple, entryKeyType});
     if (tvs == nullptr) return entry;
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
     auto ks = cts.convert(keyset);
     if (::errorCount() > 0) return entry;
 
@@ -2309,7 +2308,7 @@ const IR::Node *TypeInference::postorder(IR::P4ListExpression *expression) {
                          {type, elementType});
         if (tvs == nullptr) return expression;
         if (!tvs->isIdentity()) {
-            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+            ConstantTypeSubstitution cts(tvs, typeMap, this);
             auto converted = cts.convert(c);
             vec->push_back(converted);
             changed = changed || converted != c;
@@ -2352,7 +2351,7 @@ const IR::Node *TypeInference::postorder(IR::HeaderStackExpression *expression) 
                              {type, elementType});
             if (tvs == nullptr) return expression;
             if (!tvs->isIdentity()) {
-                ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+                ConstantTypeSubstitution cts(tvs, typeMap, this);
                 auto converted = cts.convert(c);
                 vec->push_back(converted);
                 changed = true;
@@ -2403,7 +2402,7 @@ const IR::Node *TypeInference::postorder(IR::StructExpression *expression) {
                          {structType, desired});
         if (tvs == nullptr) return expression;
         if (!tvs->isIdentity()) {
-            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+            ConstantTypeSubstitution cts(tvs, typeMap, this);
             result = cts.convert(expression);
         }
         structType = desired;
@@ -2987,7 +2986,7 @@ const IR::Node *TypeInference::postorder(IR::Cast *expression) {
         if (tvs == nullptr) return expression;
         const IR::Expression *rhs = expression->expr;
         if (!tvs->isIdentity()) {
-            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+            ConstantTypeSubstitution cts(tvs, typeMap, this);
             rhs = cts.convert(expression->expr);  // sets type
         }
         if (rhs != expression->expr) {
@@ -3199,7 +3198,7 @@ const IR::Node *TypeInference::postorder(IR::Mux *expression) {
                      {secondType, thirdType});
     if (tvs != nullptr) {
         if (!tvs->isIdentity()) {
-            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+            ConstantTypeSubstitution cts(tvs, typeMap, this);
             auto e1 = cts.convert(expression->e1);
             auto e2 = cts.convert(expression->e2);
             if (::errorCount() > 0) return expression;
@@ -3569,7 +3568,7 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
     if (tvs == nullptr || errorCount() > 0) return actionCall;
     addSubstitutions(tvs);
 
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
     actionCall = cts.convert(actionCall)->to<IR::MethodCallExpression>();  // cast arguments
     if (::errorCount() > 0) return actionCall;
 
@@ -3779,7 +3778,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
         setType(getOriginal(), returnType);
         setType(expression, returnType);
 
-        ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+        ConstantTypeSubstitution cts(tvs, typeMap, this);
         auto result = expression;
         // Arguments may need to be cast, e.g., list expression to a
         // header type.
@@ -3940,7 +3939,7 @@ const IR::SelectCase *TypeInference::matchCase(const IR::SelectExpression *selec
         "'match' case label '%1%' has type '%2%' which does not match the expected type '%3%'",
         {selectCase->keyset, caseType, useSelType});
     if (tvs == nullptr) return nullptr;
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
     auto ks = cts.convert(selectCase->keyset);
     if (::errorCount() > 0) return selectCase;
 
