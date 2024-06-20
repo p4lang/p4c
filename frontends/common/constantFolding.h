@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef COMMON_CONSTANTFOLDING_H_
 #define COMMON_CONSTANTFOLDING_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
-#include "lib/big_int_util.h"
 
 namespace P4 {
 
@@ -63,7 +63,7 @@ class DoConstantFolding : public Transform {
 
     /// Used to resolve IR nodes to declarations.
     /// If `nullptr`, then `const` values cannot be resolved.
-    const ReferenceMap *refMap;
+    const DeclarationLookup *refMap;
 
     /// Used to resolve nodes to their types.
     /// If `nullptr`, then type information is not available.
@@ -113,7 +113,7 @@ class DoConstantFolding : public Transform {
     Result setContains(const IR::Expression *keySet, const IR::Expression *constant) const;
 
  public:
-    DoConstantFolding(const ReferenceMap *refMap, const TypeMap *typeMap, bool warnings = true,
+    DoConstantFolding(const DeclarationLookup *refMap, const TypeMap *typeMap, bool warnings = true,
                       ConstantFoldingPolicy *policy = nullptr)
         : refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr), warnings(warnings) {
         if (policy) {
