@@ -319,72 +319,72 @@ match_kind {
 }
 
 control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("dash_ingress.meta") metadata_t meta_0;
-    @name("dash_ingress.meta") metadata_t meta_5;
-    @name("dash_ingress.meta") metadata_t meta_6;
+    @name("dash_ingress.meta") metadata_t meta_3_inlined_set_route_meter_attrs;
+    @name("dash_ingress.meta") metadata_t meta_3_inlined_set_route_meter_attrs_0;
+    @name("dash_ingress.meta") metadata_t meta_3_inlined_set_route_meter_attrs_1;
     @name("dash_ingress.tmp_5") bit<32> tmp;
     @name("dash_ingress.tmp_6") bit<32> tmp_0;
-    @name("dash_ingress.meta") metadata_t meta_7;
-    @name("dash_ingress.sip") IPv6Address sip_1;
-    @name("dash_ingress.sip_mask") IPv6Address sip_mask_1;
-    @name("dash_ingress.dip") IPv6Address dip_1;
-    @name("dash_ingress.dip_mask") IPv6Address dip_mask_1;
-    @name("dash_ingress.meta") metadata_t meta_8;
-    @name("dash_ingress.encap") dash_encapsulation_t encap;
-    @name("dash_ingress.vni") bit<24> vni_1;
-    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_0;
-    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_0;
-    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_0;
-    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_0;
-    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_0;
+    @name("dash_ingress.meta") metadata_t meta_2_inlined_push_action_nat46;
+    @name("dash_ingress.sip") IPv6Address sip_0_inlined_push_action_nat46;
+    @name("dash_ingress.sip_mask") IPv6Address sip_mask_0_inlined_push_action_nat46;
+    @name("dash_ingress.dip") IPv6Address dip_0_inlined_push_action_nat46;
+    @name("dash_ingress.dip_mask") IPv6Address dip_mask_0_inlined_push_action_nat46;
+    @name("dash_ingress.meta") metadata_t meta_1_inlined_push_action_static_encap;
+    @name("dash_ingress.encap") dash_encapsulation_t encap_0_inlined_push_action_static_encap;
+    @name("dash_ingress.vni") bit<24> vni_0_inlined_push_action_static_encap;
+    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_2_inlined_push_action_static_encap;
+    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_2_inlined_push_action_static_encap;
+    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_2_inlined_push_action_static_encap;
+    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_2_inlined_push_action_static_encap;
+    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_2_inlined_push_action_static_encap;
     @name("dash_ingress.tmp") bit<24> tmp_1;
     @name("dash_ingress.tmp_0") bit<48> tmp_2;
     @name("dash_ingress.tmp_1") bit<48> tmp_3;
     @name("dash_ingress.tmp_2") bit<32> tmp_4;
     @name("dash_ingress.tmp_3") bit<32> tmp_5;
     @name("dash_ingress.tmp_4") bit<48> tmp_6;
-    @name("dash_ingress.meta") metadata_t meta_9;
-    @name("dash_ingress.meta") metadata_t meta_10;
-    @name("dash_ingress.encap") dash_encapsulation_t encap_1;
-    @name("dash_ingress.vni") bit<24> vni_3;
-    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_1;
-    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_1;
-    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_1;
-    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_1;
-    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_1;
+    @name("dash_ingress.meta") metadata_t meta_3_inlined_set_route_meter_attrs_2;
+    @name("dash_ingress.meta") metadata_t meta_1_inlined_push_action_static_encap_0;
+    @name("dash_ingress.encap") dash_encapsulation_t encap_0_inlined_push_action_static_encap_0;
+    @name("dash_ingress.vni") bit<24> vni_0_inlined_push_action_static_encap_0;
+    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_2_inlined_push_action_static_encap_0;
+    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_2_inlined_push_action_static_encap_0;
+    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_2_inlined_push_action_static_encap_0;
+    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_2_inlined_push_action_static_encap_0;
+    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_2_inlined_push_action_static_encap_0;
     @name("dash_ingress.tmp") bit<24> tmp_7;
     @name("dash_ingress.tmp_0") bit<48> tmp_8;
     @name("dash_ingress.tmp_1") bit<48> tmp_31;
     @name("dash_ingress.tmp_2") bit<32> tmp_32;
     @name("dash_ingress.tmp_3") bit<32> tmp_33;
     @name("dash_ingress.tmp_4") bit<48> tmp_34;
-    @name("dash_ingress.meta") metadata_t meta_11;
-    @name("dash_ingress.meter_class") bit<16> meter_class_2;
-    @name("dash_ingress.meter_class_override") bit<1> meter_class_override_1;
+    @name("dash_ingress.meta") metadata_t meta_4_inlined_set_mapping_meter_attr;
+    @name("dash_ingress.meter_class") bit<16> meter_class_1_inlined_set_mapping_meter_attr;
+    @name("dash_ingress.meter_class_override") bit<1> meter_class_override_0_inlined_set_mapping_meter_attr;
     @name("dash_ingress.tmp_7") bit<32> tmp_35;
     @name("dash_ingress.tmp_8") bit<128> tmp_36;
-    @name("dash_ingress.meta") metadata_t meta_30;
-    @name("dash_ingress.encap") dash_encapsulation_t encap_2;
-    @name("dash_ingress.vni") bit<24> vni_4;
-    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_3;
-    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_3;
-    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_11;
-    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_11;
-    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_3;
+    @name("dash_ingress.meta") metadata_t meta_1_inlined_push_action_static_encap_1;
+    @name("dash_ingress.encap") dash_encapsulation_t encap_0_inlined_push_action_static_encap_1;
+    @name("dash_ingress.vni") bit<24> vni_0_inlined_push_action_static_encap_1;
+    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_2_inlined_push_action_static_encap_1;
+    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_2_inlined_push_action_static_encap_1;
+    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_2_inlined_push_action_static_encap_1;
+    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_2_inlined_push_action_static_encap_1;
+    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_2_inlined_push_action_static_encap_1;
     @name("dash_ingress.tmp") bit<24> tmp_37;
     @name("dash_ingress.tmp_0") bit<48> tmp_38;
     @name("dash_ingress.tmp_1") bit<48> tmp_39;
     @name("dash_ingress.tmp_2") bit<32> tmp_40;
     @name("dash_ingress.tmp_3") bit<32> tmp_41;
     @name("dash_ingress.tmp_4") bit<48> tmp_42;
-    @name("dash_ingress.meta") metadata_t meta_31;
-    @name("dash_ingress.sip") IPv6Address sip_2;
-    @name("dash_ingress.sip_mask") IPv6Address sip_mask_2;
-    @name("dash_ingress.dip") IPv6Address dip_2;
-    @name("dash_ingress.dip_mask") IPv6Address dip_mask_2;
-    @name("dash_ingress.meta") metadata_t meta_32;
-    @name("dash_ingress.meter_class") bit<16> meter_class_3;
-    @name("dash_ingress.meter_class_override") bit<1> meter_class_override_2;
+    @name("dash_ingress.meta") metadata_t meta_2_inlined_push_action_nat46_0;
+    @name("dash_ingress.sip") IPv6Address sip_0_inlined_push_action_nat46_0;
+    @name("dash_ingress.sip_mask") IPv6Address sip_mask_0_inlined_push_action_nat46_0;
+    @name("dash_ingress.dip") IPv6Address dip_0_inlined_push_action_nat46_0;
+    @name("dash_ingress.dip_mask") IPv6Address dip_mask_0_inlined_push_action_nat46_0;
+    @name("dash_ingress.meta") metadata_t meta_4_inlined_set_mapping_meter_attr_0;
+    @name("dash_ingress.meter_class") bit<16> meter_class_1_inlined_set_mapping_meter_attr_0;
+    @name("dash_ingress.meter_class_override") bit<1> meter_class_override_0_inlined_set_mapping_meter_attr_0;
     @name("dash_ingress.customer_ip_len") bit<16> customer_ip_len_0;
     @name("dash_ingress.customer_ip_len") bit<16> customer_ip_len_3;
     @name("dash_ingress.customer_ip_len") bit<16> customer_ip_len_4;
@@ -400,66 +400,66 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
     @name("dash_ingress.routing_action_apply.do_action_nat64.hasReturned_2") bool routing_action_apply_do_action_nat64_hasReturned;
     @name("dash_ingress.routing_action_apply.do_action_static_encap.hasReturned_0") bool routing_action_apply_do_action_static_encap_hasReturned;
     @name("dash_ingress.hdr") headers_t hdr_0;
-    @name("dash_ingress.meta") metadata_t meta_33;
+    @name("dash_ingress.meta") metadata_t meta_0;
     @name("dash_ingress.hdr") headers_t hdr_1;
-    @name("dash_ingress.meta") metadata_t meta_34;
+    @name("dash_ingress.meta") metadata_t meta_5;
     @name("dash_ingress.hdr") headers_t hdr_2;
-    @name("dash_ingress.meta") metadata_t meta_35;
+    @name("dash_ingress.meta") metadata_t meta_6;
     @name("dash_ingress.hdr") headers_t hdr_5;
-    @name("dash_ingress.meta") metadata_t meta_36;
+    @name("dash_ingress.meta") metadata_t meta_7;
     @name("dash_ingress.hdr") headers_t hdr_6;
-    @name("dash_ingress.meta") metadata_t meta_37;
+    @name("dash_ingress.meta") metadata_t meta_8;
     @name("dash_ingress.hdr") headers_t hdr_7;
-    @name("dash_ingress.meta") metadata_t meta_38;
+    @name("dash_ingress.meta") metadata_t meta_9;
     @name("dash_ingress.hdr") headers_t hdr_8;
-    @name("dash_ingress.meta") metadata_t meta_39;
-    @name("dash_ingress.meta") metadata_t meta_40;
-    @name("dash_ingress.meta") metadata_t meta_41;
+    @name("dash_ingress.meta") metadata_t meta_10;
+    @name("dash_ingress.meta") metadata_t meta_11;
+    @name("dash_ingress.meta") metadata_t meta_19;
     @name("dash_ingress.hdr") headers_t hdr_9;
-    @name("dash_ingress.meta") metadata_t meta_42;
+    @name("dash_ingress.meta") metadata_t meta_20;
     @name("dash_ingress.hdr") headers_t hdr_10;
-    @name("dash_ingress.meta") metadata_t meta_43;
+    @name("dash_ingress.meta") metadata_t meta_21;
     @name("dash_ingress.hdr") headers_t hdr_24;
-    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_12;
-    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_12;
-    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_12;
-    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_4;
-    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_13;
+    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_0;
+    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_0;
+    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_0;
+    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_0;
+    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_0;
     @name("dash_ingress.tunnel_key") bit<24> tunnel_key_0;
     @name("dash_ingress.hdr") headers_t hdr_25;
-    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_13;
-    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_13;
-    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_13;
-    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_5;
-    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_14;
+    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_1;
+    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_1;
+    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_1;
+    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_1;
+    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_1;
     @name("dash_ingress.tunnel_key") bit<24> tunnel_key_1;
     @name("dash_ingress.hdr") headers_t hdr_26;
-    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_14;
-    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_14;
-    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_14;
-    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_17;
-    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_15;
+    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_3;
+    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_8;
+    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_8;
+    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_3;
+    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_3;
     @name("dash_ingress.tunnel_key") bit<24> tunnel_key_2;
     @name("dash_ingress.hdr") headers_t hdr_27;
-    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_15;
-    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_15;
-    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_15;
-    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_18;
-    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_16;
+    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_9;
+    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_9;
+    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_9;
+    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_4;
+    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_10;
     @name("dash_ingress.tunnel_key") bit<24> tunnel_key_3;
     @name("dash_ingress.hdr") headers_t hdr_28;
-    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_16;
-    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_16;
-    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_16;
-    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_19;
-    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_17;
+    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_10;
+    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_10;
+    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_10;
+    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_5;
+    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_11;
     @name("dash_ingress.tunnel_key") bit<24> tunnel_key_11;
     @name("dash_ingress.hdr") headers_t hdr_29;
-    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_17;
-    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_17;
-    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_17;
-    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_20;
-    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_18;
+    @name("dash_ingress.overlay_dmac") EthernetAddress overlay_dmac_11;
+    @name("dash_ingress.underlay_dmac") EthernetAddress underlay_dmac_11;
+    @name("dash_ingress.underlay_smac") EthernetAddress underlay_smac_11;
+    @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_14;
+    @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_12;
     @name("dash_ingress.tunnel_key") bit<24> tunnel_key_12;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -479,321 +479,321 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
     }
     @name(".tunnel_decap") action tunnel_decap_1() {
         hdr_0 = hdr;
-        meta_33 = meta;
+        meta_0 = meta;
         hdr_0.u0_ethernet.setInvalid();
         hdr_0.u0_ipv4.setInvalid();
         hdr_0.u0_ipv6.setInvalid();
         hdr_0.u0_nvgre.setInvalid();
         hdr_0.u0_vxlan.setInvalid();
         hdr_0.u0_udp.setInvalid();
-        meta_33.tunnel_pointer = 16w0;
+        meta_0.tunnel_pointer = 16w0;
         hdr = hdr_0;
-        meta = meta_33;
+        meta = meta_0;
     }
     @name(".tunnel_decap") action tunnel_decap_2() {
         hdr_1 = hdr;
-        meta_34 = meta;
+        meta_5 = meta;
         hdr_1.u0_ethernet.setInvalid();
         hdr_1.u0_ipv4.setInvalid();
         hdr_1.u0_ipv6.setInvalid();
         hdr_1.u0_nvgre.setInvalid();
         hdr_1.u0_vxlan.setInvalid();
         hdr_1.u0_udp.setInvalid();
-        meta_34.tunnel_pointer = 16w0;
+        meta_5.tunnel_pointer = 16w0;
         hdr = hdr_1;
-        meta = meta_34;
+        meta = meta_5;
     }
     @name(".tunnel_decap") action tunnel_decap_3() {
         hdr_2 = hdr;
-        meta_35 = meta;
+        meta_6 = meta;
         hdr_2.u0_ethernet.setInvalid();
         hdr_2.u0_ipv4.setInvalid();
         hdr_2.u0_ipv6.setInvalid();
         hdr_2.u0_nvgre.setInvalid();
         hdr_2.u0_vxlan.setInvalid();
         hdr_2.u0_udp.setInvalid();
-        meta_35.tunnel_pointer = 16w0;
+        meta_6.tunnel_pointer = 16w0;
         hdr = hdr_2;
-        meta = meta_35;
+        meta = meta_6;
     }
-    @name(".route_vnet") action route_vnet_0(@SaiVal[type="sai_object_id_t"] @name("dst_vnet_id") bit<16> dst_vnet_id_2, @name("meter_policy_en") bit<1> meter_policy_en_0, @name("meter_class") bit<16> meter_class_9) {
+    @name(".route_vnet") action route_vnet_0(@SaiVal[type="sai_object_id_t"] @name("dst_vnet_id") bit<16> dst_vnet_id_2, @name("meter_policy_en") bit<1> meter_policy_en_0, @name("meter_class") bit<16> meter_class_0) {
         hdr_5 = hdr;
-        meta_36 = meta;
-        meta_36.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
-        meta_36.dst_vnet_id = dst_vnet_id_2;
-        meta_0 = meta_36;
-        meta_0.meter_policy_en = meter_policy_en_0;
-        meta_0.route_meter_class = meter_class_9;
-        meta_36 = meta_0;
+        meta_7 = meta;
+        meta_7.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
+        meta_7.dst_vnet_id = dst_vnet_id_2;
+        meta_3_inlined_set_route_meter_attrs = meta_7;
+        meta_3_inlined_set_route_meter_attrs.meter_policy_en = meter_policy_en_0;
+        meta_3_inlined_set_route_meter_attrs.route_meter_class = meter_class_0;
+        meta_7 = meta_3_inlined_set_route_meter_attrs;
         hdr = hdr_5;
-        meta = meta_36;
+        meta = meta_7;
     }
-    @name(".route_vnet_direct") action route_vnet_direct_0(@name("dst_vnet_id") bit<16> dst_vnet_id_3, @name("overlay_ip_is_v6") bit<1> overlay_ip_is_v6, @SaiVal[type="sai_ip_address_t"] @name("overlay_ip") IPv4ORv6Address overlay_ip, @name("meter_policy_en") bit<1> meter_policy_en_5, @name("meter_class") bit<16> meter_class_10) {
+    @name(".route_vnet_direct") action route_vnet_direct_0(@name("dst_vnet_id") bit<16> dst_vnet_id_3, @name("overlay_ip_is_v6") bit<1> overlay_ip_is_v6, @SaiVal[type="sai_ip_address_t"] @name("overlay_ip") IPv4ORv6Address overlay_ip, @name("meter_policy_en") bit<1> meter_policy_en_5, @name("meter_class") bit<16> meter_class_1) {
         hdr_6 = hdr;
-        meta_37 = meta;
-        meta_37.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
-        meta_37.dst_vnet_id = dst_vnet_id_3;
-        meta_37.lkup_dst_ip_addr = overlay_ip;
-        meta_37.is_lkup_dst_ip_v6 = overlay_ip_is_v6;
-        meta_5 = meta_37;
-        meta_5.meter_policy_en = meter_policy_en_5;
-        meta_5.route_meter_class = meter_class_10;
-        meta_37 = meta_5;
+        meta_8 = meta;
+        meta_8.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
+        meta_8.dst_vnet_id = dst_vnet_id_3;
+        meta_8.lkup_dst_ip_addr = overlay_ip;
+        meta_8.is_lkup_dst_ip_v6 = overlay_ip_is_v6;
+        meta_3_inlined_set_route_meter_attrs_0 = meta_8;
+        meta_3_inlined_set_route_meter_attrs_0.meter_policy_en = meter_policy_en_5;
+        meta_3_inlined_set_route_meter_attrs_0.route_meter_class = meter_class_1;
+        meta_8 = meta_3_inlined_set_route_meter_attrs_0;
         hdr = hdr_6;
-        meta = meta_37;
+        meta = meta_8;
     }
-    @name(".route_direct") action route_direct_0(@name("meter_policy_en") bit<1> meter_policy_en_6, @name("meter_class") bit<16> meter_class_11) {
+    @name(".route_direct") action route_direct_0(@name("meter_policy_en") bit<1> meter_policy_en_6, @name("meter_class") bit<16> meter_class_9) {
         hdr_7 = hdr;
-        meta_38 = meta;
-        meta_38.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
-        meta_6 = meta_38;
-        meta_6.meter_policy_en = meter_policy_en_6;
-        meta_6.route_meter_class = meter_class_11;
-        meta_38 = meta_6;
+        meta_9 = meta;
+        meta_9.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+        meta_3_inlined_set_route_meter_attrs_1 = meta_9;
+        meta_3_inlined_set_route_meter_attrs_1.meter_policy_en = meter_policy_en_6;
+        meta_3_inlined_set_route_meter_attrs_1.route_meter_class = meter_class_9;
+        meta_9 = meta_3_inlined_set_route_meter_attrs_1;
         hdr = hdr_7;
-        meta = meta_38;
+        meta = meta_9;
     }
-    @name(".route_service_tunnel") action route_service_tunnel_0(@name("overlay_dip_is_v6") bit<1> overlay_dip_is_v6, @name("overlay_dip") IPv4ORv6Address overlay_dip, @name("overlay_dip_mask_is_v6") bit<1> overlay_dip_mask_is_v6, @name("overlay_dip_mask") IPv4ORv6Address overlay_dip_mask, @name("overlay_sip_is_v6") bit<1> overlay_sip_is_v6, @name("overlay_sip") IPv4ORv6Address overlay_sip, @name("overlay_sip_mask_is_v6") bit<1> overlay_sip_mask_is_v6, @name("overlay_sip_mask") IPv4ORv6Address overlay_sip_mask, @name("underlay_dip_is_v6") bit<1> underlay_dip_is_v6, @name("underlay_dip") IPv4ORv6Address underlay_dip_6, @name("underlay_sip_is_v6") bit<1> underlay_sip_is_v6, @name("underlay_sip") IPv4ORv6Address underlay_sip_4, @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"] @name("dash_encapsulation") dash_encapsulation_t dash_encapsulation_2, @name("tunnel_key") bit<24> tunnel_key, @name("meter_policy_en") bit<1> meter_policy_en_7, @name("meter_class") bit<16> meter_class_12) {
+    @name(".route_service_tunnel") action route_service_tunnel_0(@name("overlay_dip_is_v6") bit<1> overlay_dip_is_v6, @name("overlay_dip") IPv4ORv6Address overlay_dip, @name("overlay_dip_mask_is_v6") bit<1> overlay_dip_mask_is_v6, @name("overlay_dip_mask") IPv4ORv6Address overlay_dip_mask, @name("overlay_sip_is_v6") bit<1> overlay_sip_is_v6, @name("overlay_sip") IPv4ORv6Address overlay_sip, @name("overlay_sip_mask_is_v6") bit<1> overlay_sip_mask_is_v6, @name("overlay_sip_mask") IPv4ORv6Address overlay_sip_mask, @name("underlay_dip_is_v6") bit<1> underlay_dip_is_v6, @name("underlay_dip") IPv4ORv6Address underlay_dip_2, @name("underlay_sip_is_v6") bit<1> underlay_sip_is_v6, @name("underlay_sip") IPv4ORv6Address underlay_sip_2, @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"] @name("dash_encapsulation") dash_encapsulation_t dash_encapsulation_2, @name("tunnel_key") bit<24> tunnel_key, @name("meter_policy_en") bit<1> meter_policy_en_7, @name("meter_class") bit<16> meter_class_10) {
         hdr_8 = hdr;
-        meta_39 = meta;
-        meta_39.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
-        meta_7 = meta_39;
-        sip_1 = overlay_sip;
-        sip_mask_1 = overlay_sip_mask;
-        dip_1 = overlay_dip;
-        dip_mask_1 = overlay_dip_mask;
-        meta_7.routing_actions = meta_7.routing_actions | 32w2;
-        meta_7.overlay_data.is_ipv6 = true;
-        meta_7.overlay_data.sip = sip_1;
-        meta_7.overlay_data.sip_mask = sip_mask_1;
-        meta_7.overlay_data.dip = dip_1;
-        meta_7.overlay_data.dip_mask = dip_mask_1;
-        meta_39 = meta_7;
-        if (underlay_sip_4 == 128w0) {
+        meta_10 = meta;
+        meta_10.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+        meta_2_inlined_push_action_nat46 = meta_10;
+        sip_0_inlined_push_action_nat46 = overlay_sip;
+        sip_mask_0_inlined_push_action_nat46 = overlay_sip_mask;
+        dip_0_inlined_push_action_nat46 = overlay_dip;
+        dip_mask_0_inlined_push_action_nat46 = overlay_dip_mask;
+        meta_2_inlined_push_action_nat46.routing_actions = meta_2_inlined_push_action_nat46.routing_actions | 32w2;
+        meta_2_inlined_push_action_nat46.overlay_data.is_ipv6 = true;
+        meta_2_inlined_push_action_nat46.overlay_data.sip = sip_0_inlined_push_action_nat46;
+        meta_2_inlined_push_action_nat46.overlay_data.sip_mask = sip_mask_0_inlined_push_action_nat46;
+        meta_2_inlined_push_action_nat46.overlay_data.dip = dip_0_inlined_push_action_nat46;
+        meta_2_inlined_push_action_nat46.overlay_data.dip_mask = dip_mask_0_inlined_push_action_nat46;
+        meta_10 = meta_2_inlined_push_action_nat46;
+        if (underlay_sip_2 == 128w0) {
             tmp = hdr_8.u0_ipv4.src_addr;
         } else {
-            tmp = (IPv4Address)underlay_sip_4;
+            tmp = (IPv4Address)underlay_sip_2;
         }
-        if (underlay_dip_6 == 128w0) {
+        if (underlay_dip_2 == 128w0) {
             tmp_0 = hdr_8.u0_ipv4.dst_addr;
         } else {
-            tmp_0 = (IPv4Address)underlay_dip_6;
+            tmp_0 = (IPv4Address)underlay_dip_2;
         }
-        meta_8 = meta_39;
-        encap = dash_encapsulation_2;
-        vni_1 = tunnel_key;
-        underlay_sip_0 = tmp;
-        underlay_dip_0 = tmp_0;
-        underlay_smac_0 = 48w0;
-        underlay_dmac_0 = 48w0;
-        overlay_dmac_0 = hdr_8.u0_ethernet.dst_addr;
-        meta_8.routing_actions = meta_8.routing_actions | 32w1;
-        meta_8.encap_data.dash_encapsulation = encap;
-        if (vni_1 == 24w0) {
-            tmp_1 = meta_8.encap_data.vni;
+        meta_1_inlined_push_action_static_encap = meta_10;
+        encap_0_inlined_push_action_static_encap = dash_encapsulation_2;
+        vni_0_inlined_push_action_static_encap = tunnel_key;
+        underlay_sip_2_inlined_push_action_static_encap = tmp;
+        underlay_dip_2_inlined_push_action_static_encap = tmp_0;
+        underlay_smac_2_inlined_push_action_static_encap = 48w0;
+        underlay_dmac_2_inlined_push_action_static_encap = 48w0;
+        overlay_dmac_2_inlined_push_action_static_encap = hdr_8.u0_ethernet.dst_addr;
+        meta_1_inlined_push_action_static_encap.routing_actions = meta_1_inlined_push_action_static_encap.routing_actions | 32w1;
+        meta_1_inlined_push_action_static_encap.encap_data.dash_encapsulation = encap_0_inlined_push_action_static_encap;
+        if (vni_0_inlined_push_action_static_encap == 24w0) {
+            tmp_1 = meta_1_inlined_push_action_static_encap.encap_data.vni;
         } else {
-            tmp_1 = vni_1;
+            tmp_1 = vni_0_inlined_push_action_static_encap;
         }
-        meta_8.encap_data.vni = tmp_1;
-        if (underlay_smac_0 == 48w0) {
-            tmp_2 = meta_8.encap_data.underlay_smac;
+        meta_1_inlined_push_action_static_encap.encap_data.vni = tmp_1;
+        if (underlay_smac_2_inlined_push_action_static_encap == 48w0) {
+            tmp_2 = meta_1_inlined_push_action_static_encap.encap_data.underlay_smac;
         } else {
-            tmp_2 = underlay_smac_0;
+            tmp_2 = underlay_smac_2_inlined_push_action_static_encap;
         }
-        meta_8.encap_data.underlay_smac = tmp_2;
-        if (underlay_dmac_0 == 48w0) {
-            tmp_3 = meta_8.encap_data.underlay_dmac;
+        meta_1_inlined_push_action_static_encap.encap_data.underlay_smac = tmp_2;
+        if (underlay_dmac_2_inlined_push_action_static_encap == 48w0) {
+            tmp_3 = meta_1_inlined_push_action_static_encap.encap_data.underlay_dmac;
         } else {
-            tmp_3 = underlay_dmac_0;
+            tmp_3 = underlay_dmac_2_inlined_push_action_static_encap;
         }
-        meta_8.encap_data.underlay_dmac = tmp_3;
-        if (underlay_sip_0 == 32w0) {
-            tmp_4 = meta_8.encap_data.underlay_sip;
+        meta_1_inlined_push_action_static_encap.encap_data.underlay_dmac = tmp_3;
+        if (underlay_sip_2_inlined_push_action_static_encap == 32w0) {
+            tmp_4 = meta_1_inlined_push_action_static_encap.encap_data.underlay_sip;
         } else {
-            tmp_4 = underlay_sip_0;
+            tmp_4 = underlay_sip_2_inlined_push_action_static_encap;
         }
-        meta_8.encap_data.underlay_sip = tmp_4;
-        if (underlay_dip_0 == 32w0) {
-            tmp_5 = meta_8.encap_data.underlay_dip;
+        meta_1_inlined_push_action_static_encap.encap_data.underlay_sip = tmp_4;
+        if (underlay_dip_2_inlined_push_action_static_encap == 32w0) {
+            tmp_5 = meta_1_inlined_push_action_static_encap.encap_data.underlay_dip;
         } else {
-            tmp_5 = underlay_dip_0;
+            tmp_5 = underlay_dip_2_inlined_push_action_static_encap;
         }
-        meta_8.encap_data.underlay_dip = tmp_5;
-        if (overlay_dmac_0 == 48w0) {
-            tmp_6 = meta_8.overlay_data.dmac;
+        meta_1_inlined_push_action_static_encap.encap_data.underlay_dip = tmp_5;
+        if (overlay_dmac_2_inlined_push_action_static_encap == 48w0) {
+            tmp_6 = meta_1_inlined_push_action_static_encap.overlay_data.dmac;
         } else {
-            tmp_6 = overlay_dmac_0;
+            tmp_6 = overlay_dmac_2_inlined_push_action_static_encap;
         }
-        meta_8.overlay_data.dmac = tmp_6;
-        meta_39 = meta_8;
-        meta_9 = meta_39;
-        meta_9.meter_policy_en = meter_policy_en_7;
-        meta_9.route_meter_class = meter_class_12;
-        meta_39 = meta_9;
+        meta_1_inlined_push_action_static_encap.overlay_data.dmac = tmp_6;
+        meta_10 = meta_1_inlined_push_action_static_encap;
+        meta_3_inlined_set_route_meter_attrs_2 = meta_10;
+        meta_3_inlined_set_route_meter_attrs_2.meter_policy_en = meter_policy_en_7;
+        meta_3_inlined_set_route_meter_attrs_2.route_meter_class = meter_class_10;
+        meta_10 = meta_3_inlined_set_route_meter_attrs_2;
         hdr = hdr_8;
-        meta = meta_39;
+        meta = meta_10;
     }
     @name(".drop") action drop_1() {
-        meta_40 = meta;
-        meta_40.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
-        meta_40.dropped = true;
-        meta = meta_40;
+        meta_11 = meta;
+        meta_11.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+        meta_11.dropped = true;
+        meta = meta_11;
     }
     @name(".drop") action drop_2() {
-        meta_41 = meta;
-        meta_41.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
-        meta_41.dropped = true;
-        meta = meta_41;
+        meta_19 = meta;
+        meta_19.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+        meta_19.dropped = true;
+        meta = meta_19;
     }
-    @name(".set_tunnel_mapping") action set_tunnel_mapping_0(@SaiVal[type="sai_ip_address_t"] @name("underlay_dip") IPv4Address underlay_dip_7, @name("overlay_dmac") EthernetAddress overlay_dmac, @name("use_dst_vnet_vni") bit<1> use_dst_vnet_vni, @name("meter_class") bit<16> meter_class_13, @name("meter_class_override") bit<1> meter_class_override) {
+    @name(".set_tunnel_mapping") action set_tunnel_mapping_0(@SaiVal[type="sai_ip_address_t"] @name("underlay_dip") IPv4Address underlay_dip_6, @name("overlay_dmac") EthernetAddress overlay_dmac, @name("use_dst_vnet_vni") bit<1> use_dst_vnet_vni, @name("meter_class") bit<16> meter_class_11, @name("meter_class_override") bit<1> meter_class_override) {
         hdr_9 = hdr;
-        meta_42 = meta;
-        meta_42.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+        meta_20 = meta;
+        meta_20.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
         if (use_dst_vnet_vni == 1w1) {
-            meta_42.vnet_id = meta_42.dst_vnet_id;
+            meta_20.vnet_id = meta_20.dst_vnet_id;
         }
-        meta_10 = meta_42;
-        encap_1 = dash_encapsulation_t.VXLAN;
-        vni_3 = 24w0;
-        underlay_sip_1 = 32w0;
-        underlay_dip_1 = underlay_dip_7;
-        underlay_smac_1 = 48w0;
-        underlay_dmac_1 = 48w0;
-        overlay_dmac_1 = overlay_dmac;
-        meta_10.routing_actions = meta_10.routing_actions | 32w1;
-        meta_10.encap_data.dash_encapsulation = encap_1;
-        if (vni_3 == 24w0) {
-            tmp_7 = meta_10.encap_data.vni;
+        meta_1_inlined_push_action_static_encap_0 = meta_20;
+        encap_0_inlined_push_action_static_encap_0 = dash_encapsulation_t.VXLAN;
+        vni_0_inlined_push_action_static_encap_0 = 24w0;
+        underlay_sip_2_inlined_push_action_static_encap_0 = 32w0;
+        underlay_dip_2_inlined_push_action_static_encap_0 = underlay_dip_6;
+        underlay_smac_2_inlined_push_action_static_encap_0 = 48w0;
+        underlay_dmac_2_inlined_push_action_static_encap_0 = 48w0;
+        overlay_dmac_2_inlined_push_action_static_encap_0 = overlay_dmac;
+        meta_1_inlined_push_action_static_encap_0.routing_actions = meta_1_inlined_push_action_static_encap_0.routing_actions | 32w1;
+        meta_1_inlined_push_action_static_encap_0.encap_data.dash_encapsulation = encap_0_inlined_push_action_static_encap_0;
+        if (vni_0_inlined_push_action_static_encap_0 == 24w0) {
+            tmp_7 = meta_1_inlined_push_action_static_encap_0.encap_data.vni;
         } else {
-            tmp_7 = vni_3;
+            tmp_7 = vni_0_inlined_push_action_static_encap_0;
         }
-        meta_10.encap_data.vni = tmp_7;
-        if (underlay_smac_1 == 48w0) {
-            tmp_8 = meta_10.encap_data.underlay_smac;
+        meta_1_inlined_push_action_static_encap_0.encap_data.vni = tmp_7;
+        if (underlay_smac_2_inlined_push_action_static_encap_0 == 48w0) {
+            tmp_8 = meta_1_inlined_push_action_static_encap_0.encap_data.underlay_smac;
         } else {
-            tmp_8 = underlay_smac_1;
+            tmp_8 = underlay_smac_2_inlined_push_action_static_encap_0;
         }
-        meta_10.encap_data.underlay_smac = tmp_8;
-        if (underlay_dmac_1 == 48w0) {
-            tmp_31 = meta_10.encap_data.underlay_dmac;
+        meta_1_inlined_push_action_static_encap_0.encap_data.underlay_smac = tmp_8;
+        if (underlay_dmac_2_inlined_push_action_static_encap_0 == 48w0) {
+            tmp_31 = meta_1_inlined_push_action_static_encap_0.encap_data.underlay_dmac;
         } else {
-            tmp_31 = underlay_dmac_1;
+            tmp_31 = underlay_dmac_2_inlined_push_action_static_encap_0;
         }
-        meta_10.encap_data.underlay_dmac = tmp_31;
-        if (underlay_sip_1 == 32w0) {
-            tmp_32 = meta_10.encap_data.underlay_sip;
+        meta_1_inlined_push_action_static_encap_0.encap_data.underlay_dmac = tmp_31;
+        if (underlay_sip_2_inlined_push_action_static_encap_0 == 32w0) {
+            tmp_32 = meta_1_inlined_push_action_static_encap_0.encap_data.underlay_sip;
         } else {
-            tmp_32 = underlay_sip_1;
+            tmp_32 = underlay_sip_2_inlined_push_action_static_encap_0;
         }
-        meta_10.encap_data.underlay_sip = tmp_32;
-        if (underlay_dip_1 == 32w0) {
-            tmp_33 = meta_10.encap_data.underlay_dip;
+        meta_1_inlined_push_action_static_encap_0.encap_data.underlay_sip = tmp_32;
+        if (underlay_dip_2_inlined_push_action_static_encap_0 == 32w0) {
+            tmp_33 = meta_1_inlined_push_action_static_encap_0.encap_data.underlay_dip;
         } else {
-            tmp_33 = underlay_dip_1;
+            tmp_33 = underlay_dip_2_inlined_push_action_static_encap_0;
         }
-        meta_10.encap_data.underlay_dip = tmp_33;
-        if (overlay_dmac_1 == 48w0) {
-            tmp_34 = meta_10.overlay_data.dmac;
+        meta_1_inlined_push_action_static_encap_0.encap_data.underlay_dip = tmp_33;
+        if (overlay_dmac_2_inlined_push_action_static_encap_0 == 48w0) {
+            tmp_34 = meta_1_inlined_push_action_static_encap_0.overlay_data.dmac;
         } else {
-            tmp_34 = overlay_dmac_1;
+            tmp_34 = overlay_dmac_2_inlined_push_action_static_encap_0;
         }
-        meta_10.overlay_data.dmac = tmp_34;
-        meta_42 = meta_10;
-        meta_11 = meta_42;
-        meter_class_2 = meter_class_13;
-        meter_class_override_1 = meter_class_override;
-        meta_11.mapping_meter_class = meter_class_2;
-        meta_11.mapping_meter_class_override = meter_class_override_1;
-        meta_42 = meta_11;
+        meta_1_inlined_push_action_static_encap_0.overlay_data.dmac = tmp_34;
+        meta_20 = meta_1_inlined_push_action_static_encap_0;
+        meta_4_inlined_set_mapping_meter_attr = meta_20;
+        meter_class_1_inlined_set_mapping_meter_attr = meter_class_11;
+        meter_class_override_0_inlined_set_mapping_meter_attr = meter_class_override;
+        meta_4_inlined_set_mapping_meter_attr.mapping_meter_class = meter_class_1_inlined_set_mapping_meter_attr;
+        meta_4_inlined_set_mapping_meter_attr.mapping_meter_class_override = meter_class_override_0_inlined_set_mapping_meter_attr;
+        meta_20 = meta_4_inlined_set_mapping_meter_attr;
         hdr = hdr_9;
-        meta = meta_42;
+        meta = meta_20;
     }
-    @name(".set_private_link_mapping") action set_private_link_mapping_0(@SaiVal[type="sai_ip_address_t"] @name("underlay_dip") IPv4Address underlay_dip_8, @name("overlay_sip") IPv6Address overlay_sip_2, @name("overlay_dip") IPv6Address overlay_dip_2, @SaiVal[type="sai_dash_encapsulation_t"] @name("dash_encapsulation") dash_encapsulation_t dash_encapsulation_3, @name("tunnel_key") bit<24> tunnel_key_4, @name("meter_class") bit<16> meter_class_14, @name("meter_class_override") bit<1> meter_class_override_3) {
+    @name(".set_private_link_mapping") action set_private_link_mapping_0(@SaiVal[type="sai_ip_address_t"] @name("underlay_dip") IPv4Address underlay_dip_7, @name("overlay_sip") IPv6Address overlay_sip_2, @name("overlay_dip") IPv6Address overlay_dip_2, @SaiVal[type="sai_dash_encapsulation_t"] @name("dash_encapsulation") dash_encapsulation_t dash_encapsulation_3, @name("tunnel_key") bit<24> tunnel_key_4, @name("meter_class") bit<16> meter_class_12, @name("meter_class_override") bit<1> meter_class_override_0) {
         hdr_10 = hdr;
-        meta_43 = meta;
-        meta_43.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
-        tmp_35 = meta_43.eni_data.pl_underlay_sip;
-        meta_30 = meta_43;
-        encap_2 = dash_encapsulation_3;
-        vni_4 = tunnel_key_4;
-        underlay_sip_3 = tmp_35;
-        underlay_dip_3 = underlay_dip_8;
-        underlay_smac_11 = 48w0;
-        underlay_dmac_11 = 48w0;
-        overlay_dmac_3 = hdr_10.u0_ethernet.dst_addr;
-        meta_30.routing_actions = meta_30.routing_actions | 32w1;
-        meta_30.encap_data.dash_encapsulation = encap_2;
-        if (vni_4 == 24w0) {
-            tmp_37 = meta_30.encap_data.vni;
+        meta_21 = meta;
+        meta_21.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
+        tmp_35 = meta_21.eni_data.pl_underlay_sip;
+        meta_1_inlined_push_action_static_encap_1 = meta_21;
+        encap_0_inlined_push_action_static_encap_1 = dash_encapsulation_3;
+        vni_0_inlined_push_action_static_encap_1 = tunnel_key_4;
+        underlay_sip_2_inlined_push_action_static_encap_1 = tmp_35;
+        underlay_dip_2_inlined_push_action_static_encap_1 = underlay_dip_7;
+        underlay_smac_2_inlined_push_action_static_encap_1 = 48w0;
+        underlay_dmac_2_inlined_push_action_static_encap_1 = 48w0;
+        overlay_dmac_2_inlined_push_action_static_encap_1 = hdr_10.u0_ethernet.dst_addr;
+        meta_1_inlined_push_action_static_encap_1.routing_actions = meta_1_inlined_push_action_static_encap_1.routing_actions | 32w1;
+        meta_1_inlined_push_action_static_encap_1.encap_data.dash_encapsulation = encap_0_inlined_push_action_static_encap_1;
+        if (vni_0_inlined_push_action_static_encap_1 == 24w0) {
+            tmp_37 = meta_1_inlined_push_action_static_encap_1.encap_data.vni;
         } else {
-            tmp_37 = vni_4;
+            tmp_37 = vni_0_inlined_push_action_static_encap_1;
         }
-        meta_30.encap_data.vni = tmp_37;
-        if (underlay_smac_11 == 48w0) {
-            tmp_38 = meta_30.encap_data.underlay_smac;
+        meta_1_inlined_push_action_static_encap_1.encap_data.vni = tmp_37;
+        if (underlay_smac_2_inlined_push_action_static_encap_1 == 48w0) {
+            tmp_38 = meta_1_inlined_push_action_static_encap_1.encap_data.underlay_smac;
         } else {
-            tmp_38 = underlay_smac_11;
+            tmp_38 = underlay_smac_2_inlined_push_action_static_encap_1;
         }
-        meta_30.encap_data.underlay_smac = tmp_38;
-        if (underlay_dmac_11 == 48w0) {
-            tmp_39 = meta_30.encap_data.underlay_dmac;
+        meta_1_inlined_push_action_static_encap_1.encap_data.underlay_smac = tmp_38;
+        if (underlay_dmac_2_inlined_push_action_static_encap_1 == 48w0) {
+            tmp_39 = meta_1_inlined_push_action_static_encap_1.encap_data.underlay_dmac;
         } else {
-            tmp_39 = underlay_dmac_11;
+            tmp_39 = underlay_dmac_2_inlined_push_action_static_encap_1;
         }
-        meta_30.encap_data.underlay_dmac = tmp_39;
-        if (underlay_sip_3 == 32w0) {
-            tmp_40 = meta_30.encap_data.underlay_sip;
+        meta_1_inlined_push_action_static_encap_1.encap_data.underlay_dmac = tmp_39;
+        if (underlay_sip_2_inlined_push_action_static_encap_1 == 32w0) {
+            tmp_40 = meta_1_inlined_push_action_static_encap_1.encap_data.underlay_sip;
         } else {
-            tmp_40 = underlay_sip_3;
+            tmp_40 = underlay_sip_2_inlined_push_action_static_encap_1;
         }
-        meta_30.encap_data.underlay_sip = tmp_40;
-        if (underlay_dip_3 == 32w0) {
-            tmp_41 = meta_30.encap_data.underlay_dip;
+        meta_1_inlined_push_action_static_encap_1.encap_data.underlay_sip = tmp_40;
+        if (underlay_dip_2_inlined_push_action_static_encap_1 == 32w0) {
+            tmp_41 = meta_1_inlined_push_action_static_encap_1.encap_data.underlay_dip;
         } else {
-            tmp_41 = underlay_dip_3;
+            tmp_41 = underlay_dip_2_inlined_push_action_static_encap_1;
         }
-        meta_30.encap_data.underlay_dip = tmp_41;
-        if (overlay_dmac_3 == 48w0) {
-            tmp_42 = meta_30.overlay_data.dmac;
+        meta_1_inlined_push_action_static_encap_1.encap_data.underlay_dip = tmp_41;
+        if (overlay_dmac_2_inlined_push_action_static_encap_1 == 48w0) {
+            tmp_42 = meta_1_inlined_push_action_static_encap_1.overlay_data.dmac;
         } else {
-            tmp_42 = overlay_dmac_3;
+            tmp_42 = overlay_dmac_2_inlined_push_action_static_encap_1;
         }
-        meta_30.overlay_data.dmac = tmp_42;
-        meta_43 = meta_30;
-        tmp_36 = overlay_sip_2 & ~meta_43.eni_data.pl_sip_mask | meta_43.eni_data.pl_sip | (IPv6Address)hdr_10.u0_ipv4.src_addr;
-        meta_31 = meta_43;
-        sip_2 = tmp_36;
-        sip_mask_2 = 128w0xffffffffffffffffffffffff;
-        dip_2 = overlay_dip_2;
-        dip_mask_2 = 128w0xffffffffffffffffffffffff;
-        meta_31.routing_actions = meta_31.routing_actions | 32w2;
-        meta_31.overlay_data.is_ipv6 = true;
-        meta_31.overlay_data.sip = sip_2;
-        meta_31.overlay_data.sip_mask = sip_mask_2;
-        meta_31.overlay_data.dip = dip_2;
-        meta_31.overlay_data.dip_mask = dip_mask_2;
-        meta_43 = meta_31;
-        meta_32 = meta_43;
-        meter_class_3 = meter_class_14;
-        meter_class_override_2 = meter_class_override_3;
-        meta_32.mapping_meter_class = meter_class_3;
-        meta_32.mapping_meter_class_override = meter_class_override_2;
-        meta_43 = meta_32;
+        meta_1_inlined_push_action_static_encap_1.overlay_data.dmac = tmp_42;
+        meta_21 = meta_1_inlined_push_action_static_encap_1;
+        tmp_36 = overlay_sip_2 & ~meta_21.eni_data.pl_sip_mask | meta_21.eni_data.pl_sip | (IPv6Address)hdr_10.u0_ipv4.src_addr;
+        meta_2_inlined_push_action_nat46_0 = meta_21;
+        sip_0_inlined_push_action_nat46_0 = tmp_36;
+        sip_mask_0_inlined_push_action_nat46_0 = 128w0xffffffffffffffffffffffff;
+        dip_0_inlined_push_action_nat46_0 = overlay_dip_2;
+        dip_mask_0_inlined_push_action_nat46_0 = 128w0xffffffffffffffffffffffff;
+        meta_2_inlined_push_action_nat46_0.routing_actions = meta_2_inlined_push_action_nat46_0.routing_actions | 32w2;
+        meta_2_inlined_push_action_nat46_0.overlay_data.is_ipv6 = true;
+        meta_2_inlined_push_action_nat46_0.overlay_data.sip = sip_0_inlined_push_action_nat46_0;
+        meta_2_inlined_push_action_nat46_0.overlay_data.sip_mask = sip_mask_0_inlined_push_action_nat46_0;
+        meta_2_inlined_push_action_nat46_0.overlay_data.dip = dip_0_inlined_push_action_nat46_0;
+        meta_2_inlined_push_action_nat46_0.overlay_data.dip_mask = dip_mask_0_inlined_push_action_nat46_0;
+        meta_21 = meta_2_inlined_push_action_nat46_0;
+        meta_4_inlined_set_mapping_meter_attr_0 = meta_21;
+        meter_class_1_inlined_set_mapping_meter_attr_0 = meter_class_12;
+        meter_class_override_0_inlined_set_mapping_meter_attr_0 = meter_class_override_0;
+        meta_4_inlined_set_mapping_meter_attr_0.mapping_meter_class = meter_class_1_inlined_set_mapping_meter_attr_0;
+        meta_4_inlined_set_mapping_meter_attr_0.mapping_meter_class_override = meter_class_override_0_inlined_set_mapping_meter_attr_0;
+        meta_21 = meta_4_inlined_set_mapping_meter_attr_0;
         hdr = hdr_10;
-        meta = meta_43;
+        meta = meta_21;
     }
     @name(".push_vxlan_tunnel_u0") action push_vxlan_tunnel_u0_1() {
         hdr_24 = hdr;
-        overlay_dmac_12 = meta.overlay_data.dmac;
-        underlay_dmac_12 = meta.encap_data.underlay_dmac;
-        underlay_smac_12 = meta.encap_data.underlay_smac;
-        underlay_dip_4 = meta.encap_data.underlay_dip;
-        underlay_sip_13 = meta.encap_data.underlay_sip;
+        overlay_dmac_0 = meta.overlay_data.dmac;
+        underlay_dmac_0 = meta.encap_data.underlay_dmac;
+        underlay_smac_0 = meta.encap_data.underlay_smac;
+        underlay_dip_0 = meta.encap_data.underlay_dip;
+        underlay_sip_0 = meta.encap_data.underlay_sip;
         tunnel_key_0 = meta.encap_data.vni;
-        hdr_24.customer_ethernet.dst_addr = overlay_dmac_12;
+        hdr_24.customer_ethernet.dst_addr = overlay_dmac_0;
         hdr_24.u0_ethernet.setValid();
-        hdr_24.u0_ethernet.dst_addr = underlay_dmac_12;
-        hdr_24.u0_ethernet.src_addr = underlay_smac_12;
+        hdr_24.u0_ethernet.dst_addr = underlay_dmac_0;
+        hdr_24.u0_ethernet.src_addr = underlay_smac_0;
         hdr_24.u0_ethernet.ether_type = 16w0x800;
         hdr_24.u0_ipv4.setValid();
         customer_ip_len_0 = 16w0;
@@ -812,8 +812,8 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr_24.u0_ipv4.frag_offset = 13w0;
         hdr_24.u0_ipv4.ttl = 8w64;
         hdr_24.u0_ipv4.protocol = 8w17;
-        hdr_24.u0_ipv4.dst_addr = underlay_dip_4;
-        hdr_24.u0_ipv4.src_addr = underlay_sip_13;
+        hdr_24.u0_ipv4.dst_addr = underlay_dip_0;
+        hdr_24.u0_ipv4.src_addr = underlay_sip_0;
         hdr_24.u0_ipv4.hdr_checksum = 16w0;
         hdr_24.u0_udp.setValid();
         hdr_24.u0_udp.src_port = 16w0;
@@ -829,16 +829,16 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
     }
     @name(".push_vxlan_tunnel_u0") action push_vxlan_tunnel_u0_2() {
         hdr_25 = hdr;
-        overlay_dmac_13 = meta.overlay_data.dmac;
-        underlay_dmac_13 = meta.encap_data.underlay_dmac;
-        underlay_smac_13 = meta.encap_data.underlay_smac;
-        underlay_dip_5 = meta.encap_data.underlay_dip;
-        underlay_sip_14 = meta.encap_data.underlay_sip;
+        overlay_dmac_1 = meta.overlay_data.dmac;
+        underlay_dmac_1 = meta.encap_data.underlay_dmac;
+        underlay_smac_1 = meta.encap_data.underlay_smac;
+        underlay_dip_1 = meta.encap_data.underlay_dip;
+        underlay_sip_1 = meta.encap_data.underlay_sip;
         tunnel_key_1 = meta.encap_data.vni;
-        hdr_25.customer_ethernet.dst_addr = overlay_dmac_13;
+        hdr_25.customer_ethernet.dst_addr = overlay_dmac_1;
         hdr_25.u0_ethernet.setValid();
-        hdr_25.u0_ethernet.dst_addr = underlay_dmac_13;
-        hdr_25.u0_ethernet.src_addr = underlay_smac_13;
+        hdr_25.u0_ethernet.dst_addr = underlay_dmac_1;
+        hdr_25.u0_ethernet.src_addr = underlay_smac_1;
         hdr_25.u0_ethernet.ether_type = 16w0x800;
         hdr_25.u0_ipv4.setValid();
         customer_ip_len_3 = 16w0;
@@ -857,8 +857,8 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr_25.u0_ipv4.frag_offset = 13w0;
         hdr_25.u0_ipv4.ttl = 8w64;
         hdr_25.u0_ipv4.protocol = 8w17;
-        hdr_25.u0_ipv4.dst_addr = underlay_dip_5;
-        hdr_25.u0_ipv4.src_addr = underlay_sip_14;
+        hdr_25.u0_ipv4.dst_addr = underlay_dip_1;
+        hdr_25.u0_ipv4.src_addr = underlay_sip_1;
         hdr_25.u0_ipv4.hdr_checksum = 16w0;
         hdr_25.u0_udp.setValid();
         hdr_25.u0_udp.src_port = 16w0;
@@ -874,16 +874,16 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
     }
     @name(".push_vxlan_tunnel_u0") action push_vxlan_tunnel_u0_3() {
         hdr_26 = hdr;
-        overlay_dmac_14 = meta.overlay_data.dmac;
-        underlay_dmac_14 = meta.encap_data.underlay_dmac;
-        underlay_smac_14 = meta.encap_data.underlay_smac;
-        underlay_dip_17 = meta.encap_data.underlay_dip;
-        underlay_sip_15 = meta.encap_data.underlay_sip;
+        overlay_dmac_3 = meta.overlay_data.dmac;
+        underlay_dmac_8 = meta.encap_data.underlay_dmac;
+        underlay_smac_8 = meta.encap_data.underlay_smac;
+        underlay_dip_3 = meta.encap_data.underlay_dip;
+        underlay_sip_3 = meta.encap_data.underlay_sip;
         tunnel_key_2 = meta.encap_data.vni;
-        hdr_26.customer_ethernet.dst_addr = overlay_dmac_14;
+        hdr_26.customer_ethernet.dst_addr = overlay_dmac_3;
         hdr_26.u0_ethernet.setValid();
-        hdr_26.u0_ethernet.dst_addr = underlay_dmac_14;
-        hdr_26.u0_ethernet.src_addr = underlay_smac_14;
+        hdr_26.u0_ethernet.dst_addr = underlay_dmac_8;
+        hdr_26.u0_ethernet.src_addr = underlay_smac_8;
         hdr_26.u0_ethernet.ether_type = 16w0x800;
         hdr_26.u0_ipv4.setValid();
         customer_ip_len_4 = 16w0;
@@ -902,8 +902,8 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr_26.u0_ipv4.frag_offset = 13w0;
         hdr_26.u0_ipv4.ttl = 8w64;
         hdr_26.u0_ipv4.protocol = 8w17;
-        hdr_26.u0_ipv4.dst_addr = underlay_dip_17;
-        hdr_26.u0_ipv4.src_addr = underlay_sip_15;
+        hdr_26.u0_ipv4.dst_addr = underlay_dip_3;
+        hdr_26.u0_ipv4.src_addr = underlay_sip_3;
         hdr_26.u0_ipv4.hdr_checksum = 16w0;
         hdr_26.u0_udp.setValid();
         hdr_26.u0_udp.src_port = 16w0;
@@ -919,16 +919,16 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
     }
     @name(".push_vxlan_tunnel_u1") action push_vxlan_tunnel_u1_1() {
         hdr_27 = hdr;
-        overlay_dmac_15 = meta.overlay_data.dmac;
-        underlay_dmac_15 = meta.encap_data.underlay_dmac;
-        underlay_smac_15 = meta.encap_data.underlay_smac;
-        underlay_dip_18 = meta.encap_data.underlay_dip;
-        underlay_sip_16 = meta.encap_data.underlay_sip;
+        overlay_dmac_9 = meta.overlay_data.dmac;
+        underlay_dmac_9 = meta.encap_data.underlay_dmac;
+        underlay_smac_9 = meta.encap_data.underlay_smac;
+        underlay_dip_4 = meta.encap_data.underlay_dip;
+        underlay_sip_10 = meta.encap_data.underlay_sip;
         tunnel_key_3 = meta.encap_data.vni;
-        hdr_27.u0_ethernet.dst_addr = overlay_dmac_15;
+        hdr_27.u0_ethernet.dst_addr = overlay_dmac_9;
         hdr_27.u1_ethernet.setValid();
-        hdr_27.u1_ethernet.dst_addr = underlay_dmac_15;
-        hdr_27.u1_ethernet.src_addr = underlay_smac_15;
+        hdr_27.u1_ethernet.dst_addr = underlay_dmac_9;
+        hdr_27.u1_ethernet.src_addr = underlay_smac_9;
         hdr_27.u1_ethernet.ether_type = 16w0x800;
         hdr_27.u1_ipv4.setValid();
         u0_ip_len_0 = 16w0;
@@ -947,8 +947,8 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr_27.u1_ipv4.frag_offset = 13w0;
         hdr_27.u1_ipv4.ttl = 8w64;
         hdr_27.u1_ipv4.protocol = 8w17;
-        hdr_27.u1_ipv4.dst_addr = underlay_dip_18;
-        hdr_27.u1_ipv4.src_addr = underlay_sip_16;
+        hdr_27.u1_ipv4.dst_addr = underlay_dip_4;
+        hdr_27.u1_ipv4.src_addr = underlay_sip_10;
         hdr_27.u1_ipv4.hdr_checksum = 16w0;
         hdr_27.u1_udp.setValid();
         hdr_27.u1_udp.src_port = 16w0;
@@ -964,16 +964,16 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
     }
     @name(".push_vxlan_tunnel_u1") action push_vxlan_tunnel_u1_2() {
         hdr_28 = hdr;
-        overlay_dmac_16 = meta.overlay_data.dmac;
-        underlay_dmac_16 = meta.encap_data.underlay_dmac;
-        underlay_smac_16 = meta.encap_data.underlay_smac;
-        underlay_dip_19 = meta.encap_data.underlay_dip;
-        underlay_sip_17 = meta.encap_data.underlay_sip;
+        overlay_dmac_10 = meta.overlay_data.dmac;
+        underlay_dmac_10 = meta.encap_data.underlay_dmac;
+        underlay_smac_10 = meta.encap_data.underlay_smac;
+        underlay_dip_5 = meta.encap_data.underlay_dip;
+        underlay_sip_11 = meta.encap_data.underlay_sip;
         tunnel_key_11 = meta.encap_data.vni;
-        hdr_28.u0_ethernet.dst_addr = overlay_dmac_16;
+        hdr_28.u0_ethernet.dst_addr = overlay_dmac_10;
         hdr_28.u1_ethernet.setValid();
-        hdr_28.u1_ethernet.dst_addr = underlay_dmac_16;
-        hdr_28.u1_ethernet.src_addr = underlay_smac_16;
+        hdr_28.u1_ethernet.dst_addr = underlay_dmac_10;
+        hdr_28.u1_ethernet.src_addr = underlay_smac_10;
         hdr_28.u1_ethernet.ether_type = 16w0x800;
         hdr_28.u1_ipv4.setValid();
         u0_ip_len_3 = 16w0;
@@ -992,8 +992,8 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr_28.u1_ipv4.frag_offset = 13w0;
         hdr_28.u1_ipv4.ttl = 8w64;
         hdr_28.u1_ipv4.protocol = 8w17;
-        hdr_28.u1_ipv4.dst_addr = underlay_dip_19;
-        hdr_28.u1_ipv4.src_addr = underlay_sip_17;
+        hdr_28.u1_ipv4.dst_addr = underlay_dip_5;
+        hdr_28.u1_ipv4.src_addr = underlay_sip_11;
         hdr_28.u1_ipv4.hdr_checksum = 16w0;
         hdr_28.u1_udp.setValid();
         hdr_28.u1_udp.src_port = 16w0;
@@ -1009,16 +1009,16 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
     }
     @name(".push_vxlan_tunnel_u1") action push_vxlan_tunnel_u1_3() {
         hdr_29 = hdr;
-        overlay_dmac_17 = meta.overlay_data.dmac;
-        underlay_dmac_17 = meta.encap_data.underlay_dmac;
-        underlay_smac_17 = meta.encap_data.underlay_smac;
-        underlay_dip_20 = meta.encap_data.underlay_dip;
-        underlay_sip_18 = meta.encap_data.underlay_sip;
+        overlay_dmac_11 = meta.overlay_data.dmac;
+        underlay_dmac_11 = meta.encap_data.underlay_dmac;
+        underlay_smac_11 = meta.encap_data.underlay_smac;
+        underlay_dip_14 = meta.encap_data.underlay_dip;
+        underlay_sip_12 = meta.encap_data.underlay_sip;
         tunnel_key_12 = meta.encap_data.vni;
-        hdr_29.u0_ethernet.dst_addr = overlay_dmac_17;
+        hdr_29.u0_ethernet.dst_addr = overlay_dmac_11;
         hdr_29.u1_ethernet.setValid();
-        hdr_29.u1_ethernet.dst_addr = underlay_dmac_17;
-        hdr_29.u1_ethernet.src_addr = underlay_smac_17;
+        hdr_29.u1_ethernet.dst_addr = underlay_dmac_11;
+        hdr_29.u1_ethernet.src_addr = underlay_smac_11;
         hdr_29.u1_ethernet.ether_type = 16w0x800;
         hdr_29.u1_ipv4.setValid();
         u0_ip_len_4 = 16w0;
@@ -1037,8 +1037,8 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr_29.u1_ipv4.frag_offset = 13w0;
         hdr_29.u1_ipv4.ttl = 8w64;
         hdr_29.u1_ipv4.protocol = 8w17;
-        hdr_29.u1_ipv4.dst_addr = underlay_dip_20;
-        hdr_29.u1_ipv4.src_addr = underlay_sip_18;
+        hdr_29.u1_ipv4.dst_addr = underlay_dip_14;
+        hdr_29.u1_ipv4.src_addr = underlay_sip_12;
         hdr_29.u1_ipv4.hdr_checksum = 16w0;
         hdr_29.u1_udp.setValid();
         hdr_29.u1_udp.src_port = 16w0;
@@ -1342,8 +1342,8 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         }
         const default_action = drop_2();
     }
-    @name("dash_ingress.outbound.outbound_mapping_stage.set_vnet_attrs") action outbound_outbound_mapping_stage_set_vnet_attrs_0(@name("vni") bit<24> vni_2) {
-        meta.encap_data.vni = vni_2;
+    @name("dash_ingress.outbound.outbound_mapping_stage.set_vnet_attrs") action outbound_outbound_mapping_stage_set_vnet_attrs_0(@name("vni") bit<24> vni_0) {
+        meta.encap_data.vni = vni_0;
     }
     @SaiTable[name="vnet", api="dash_vnet", isobject="true"] @name("dash_ingress.outbound.outbound_mapping_stage.vnet") table outbound_outbound_mapping_stage_vnet {
         key = {
@@ -1475,8 +1475,8 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         }
         default_action = NoAction_5();
     }
-    @name("dash_ingress.metering_update_stage.set_policy_meter_class") action metering_update_stage_set_policy_meter_class_0(@name("meter_class") bit<16> meter_class_15) {
-        meta.policy_meter_class = meter_class_15;
+    @name("dash_ingress.metering_update_stage.set_policy_meter_class") action metering_update_stage_set_policy_meter_class_0(@name("meter_class") bit<16> meter_class_13) {
+        meta.policy_meter_class = meter_class_13;
     }
     @SaiTable[name="meter_rule", api="dash_meter", order=2, isobject="true"] @name("dash_ingress.metering_update_stage.meter_rule") table metering_update_stage_meter_rule {
         key = {

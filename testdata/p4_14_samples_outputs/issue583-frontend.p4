@@ -185,7 +185,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 @name(".cnt1") counter<bit<5>>(32w32, CounterType.packets) cnt1;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ingress.ttl") bit<8> ttl_1;
+    @name("ingress.ttl") bit<8> ttl_0_inlined_hop;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
@@ -194,10 +194,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         mark_to_drop(standard_metadata);
     }
     @name(".hop_ipv4") action hop_ipv4(@name("egress_spec") bit<9> egress_spec_0) {
-        ttl_1 = hdr.ipv4.ttl;
-        ttl_1 = ttl_1 + 8w255;
+        ttl_0_inlined_hop = hdr.ipv4.ttl;
+        ttl_0_inlined_hop = ttl_0_inlined_hop + 8w255;
         standard_metadata.egress_spec = egress_spec_0;
-        hdr.ipv4.ttl = ttl_1;
+        hdr.ipv4.ttl = ttl_0_inlined_hop;
     }
     @name(".act") action act() {
         cnt1.count(5w10);

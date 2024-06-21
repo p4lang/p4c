@@ -97,10 +97,10 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 }
 
 control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name("ingress.meta") psa_ingress_output_metadata_t meta_1;
-    @name("ingress.egress_port") PortId_t egress_port_1;
-    @name("ingress.meta") psa_ingress_output_metadata_t meta_2;
-    @name("ingress.egress_port") PortId_t egress_port_2;
+    @name("ingress.meta") psa_ingress_output_metadata_t meta_0_inlined_send_to_port;
+    @name("ingress.egress_port") PortId_t egress_port_0_inlined_send_to_port;
+    @name("ingress.meta") psa_ingress_output_metadata_t meta_0_inlined_send_to_port_0;
+    @name("ingress.egress_port") PortId_t egress_port_0_inlined_send_to_port_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
@@ -122,21 +122,21 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         }
         default_action = unknown_source();
     }
-    @name("ingress.do_L2_forward") action do_L2_forward(@name("egress_port") PortId_t egress_port_3) {
-        meta_1 = ostd;
-        egress_port_1 = egress_port_3;
-        meta_1.drop = false;
-        meta_1.multicast_group = (MulticastGroup_t)32w0;
-        meta_1.egress_port = egress_port_1;
-        ostd = meta_1;
+    @name("ingress.do_L2_forward") action do_L2_forward(@name("egress_port") PortId_t egress_port_0) {
+        meta_0_inlined_send_to_port = ostd;
+        egress_port_0_inlined_send_to_port = egress_port_0;
+        meta_0_inlined_send_to_port.drop = false;
+        meta_0_inlined_send_to_port.multicast_group = (MulticastGroup_t)32w0;
+        meta_0_inlined_send_to_port.egress_port = egress_port_0_inlined_send_to_port;
+        ostd = meta_0_inlined_send_to_port;
     }
-    @name("ingress.do_tst") action do_tst(@name("egress_port") PortId_t egress_port_4, @name("serEnumT") EthTypes serEnumT) {
-        meta_2 = ostd;
-        egress_port_2 = egress_port_4;
-        meta_2.drop = false;
-        meta_2.multicast_group = (MulticastGroup_t)32w0;
-        meta_2.egress_port = egress_port_2;
-        ostd = meta_2;
+    @name("ingress.do_tst") action do_tst(@name("egress_port") PortId_t egress_port_3, @name("serEnumT") EthTypes serEnumT) {
+        meta_0_inlined_send_to_port_0 = ostd;
+        egress_port_0_inlined_send_to_port_0 = egress_port_3;
+        meta_0_inlined_send_to_port_0.drop = false;
+        meta_0_inlined_send_to_port_0.multicast_group = (MulticastGroup_t)32w0;
+        meta_0_inlined_send_to_port_0.egress_port = egress_port_0_inlined_send_to_port_0;
+        ostd = meta_0_inlined_send_to_port_0;
     }
     @name("ingress.l2_tbl") table l2_tbl_0 {
         key = {

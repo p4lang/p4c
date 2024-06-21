@@ -102,15 +102,15 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         }
         default_action = unknown_source();
     }
-    @name("ingress.do_L2_forward") action do_L2_forward(@name("egress_port") bit<32> egress_port_3) {
+    @name("ingress.do_L2_forward") action do_L2_forward(@name("egress_port") bit<32> egress_port_0) {
+        ostd.drop = false;
+        ostd.multicast_group = 32w0;
+        ostd.egress_port = egress_port_0;
+    }
+    @name("ingress.do_tst") action do_tst(@name("egress_port") bit<32> egress_port_3, @name("serEnumT") bit<16> serEnumT) {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
         ostd.egress_port = egress_port_3;
-    }
-    @name("ingress.do_tst") action do_tst(@name("egress_port") bit<32> egress_port_4, @name("serEnumT") bit<16> serEnumT) {
-        ostd.drop = false;
-        ostd.multicast_group = 32w0;
-        ostd.egress_port = egress_port_4;
     }
     @name("ingress.l2_tbl") table l2_tbl_0 {
         key = {

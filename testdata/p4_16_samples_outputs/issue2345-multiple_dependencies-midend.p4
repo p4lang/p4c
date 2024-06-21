@@ -24,7 +24,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.hasReturned") bool hasReturned;
-    ethernet_t val1_eth_hdr;
+    ethernet_t val1_0_inlined_dummy_eth_hdr;
     @name("ingress.simple_action") action simple_action() {
         hasReturned = false;
         if (h.eth_hdr.eth_type == 16w1) {
@@ -34,10 +34,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             ;
         } else {
             h.eth_hdr.src_addr = 48w1;
-            val1_eth_hdr = h.eth_hdr;
-            val1_eth_hdr.dst_addr = 48w2;
-            val1_eth_hdr.dst_addr = 48w5;
-            h.eth_hdr = val1_eth_hdr;
+            val1_0_inlined_dummy_eth_hdr = h.eth_hdr;
+            val1_0_inlined_dummy_eth_hdr.dst_addr = 48w2;
+            val1_0_inlined_dummy_eth_hdr.dst_addr = 48w5;
+            h.eth_hdr = val1_0_inlined_dummy_eth_hdr;
         }
     }
     @hidden action issue2345multiple_dependencies60() {

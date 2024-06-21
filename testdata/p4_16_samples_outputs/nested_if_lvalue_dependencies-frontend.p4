@@ -59,7 +59,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name("MyIngress.x") bit<16> x_0;
     @name("MyIngress.y") bit<16> y_0;
     @name("MyIngress.z") bit<16> z_0;
-    @name("MyIngress.value") bit<16> value_1;
+    @name("MyIngress.value") bit<16> value_0_inlined_if_testing;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.ipv4_forward") action ipv4_forward() {
@@ -75,8 +75,8 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
             x_0 = 16w5;
             z_0 = z_0 + x_0 + y_0 + 16w13;
         }
-        value_1 = z_0 + x_0 + y_0;
-        hdr.ipv4.totalLen = value_1;
+        value_0_inlined_if_testing = z_0 + x_0 + y_0;
+        hdr.ipv4.totalLen = value_0_inlined_if_testing;
     }
     @name("MyIngress.drop") action drop() {
     }

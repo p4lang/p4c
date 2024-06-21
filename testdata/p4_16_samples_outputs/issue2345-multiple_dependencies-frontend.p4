@@ -24,9 +24,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.hasReturned") bool hasReturned;
-    @name("ingress.val1") Headers val1;
-    @name("ingress.dst") bit<48> dst;
-    @name("ingress.type") bit<16> type_1;
+    @name("ingress.val1") Headers val1_0_inlined_dummy;
+    @name("ingress.dst") bit<48> dst_0_inlined_dummy1;
+    @name("ingress.type") bit<16> type_0_inlined_dummy1;
     @name("ingress.c") bool c_0;
     @name("ingress.c1") bool c1_0;
     @name("ingress.simple_action") action simple_action() {
@@ -38,25 +38,25 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             ;
         } else {
             h.eth_hdr.src_addr = 48w1;
-            val1 = h;
-            dst = val1.eth_hdr.dst_addr;
-            type_1 = val1.eth_hdr.eth_type;
+            val1_0_inlined_dummy = h;
+            dst_0_inlined_dummy1 = val1_0_inlined_dummy.eth_hdr.dst_addr;
+            type_0_inlined_dummy1 = val1_0_inlined_dummy.eth_hdr.eth_type;
             c_0 = true;
             c1_0 = false;
             if (c_0) {
-                type_1 = type_1;
+                type_0_inlined_dummy1 = type_0_inlined_dummy1;
                 if (c1_0) {
-                    dst = 48w1;
+                    dst_0_inlined_dummy1 = 48w1;
                 } else {
-                    dst = 48w2;
+                    dst_0_inlined_dummy1 = 48w2;
                 }
             } else {
-                type_1 = 16w3;
+                type_0_inlined_dummy1 = 16w3;
             }
-            val1.eth_hdr.dst_addr = dst;
-            val1.eth_hdr.eth_type = type_1;
-            val1.eth_hdr.dst_addr = val1.eth_hdr.dst_addr + 48w3;
-            h = val1;
+            val1_0_inlined_dummy.eth_hdr.dst_addr = dst_0_inlined_dummy1;
+            val1_0_inlined_dummy.eth_hdr.eth_type = type_0_inlined_dummy1;
+            val1_0_inlined_dummy.eth_hdr.dst_addr = val1_0_inlined_dummy.eth_hdr.dst_addr + 48w3;
+            h = val1_0_inlined_dummy;
         }
     }
     apply {

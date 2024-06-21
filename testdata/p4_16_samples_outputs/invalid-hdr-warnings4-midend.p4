@@ -39,29 +39,29 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     Header[2] h_copy_0_h2;
     Header[2] h_copy2_0_h1;
     Header[2] h_copy2_0_h2;
+    @name("IngressI.hd") Header hd_1_inlined_invalidateHeader;
+    @name("IngressI.hd") Header hd_1_inlined_invalidateHeader_0;
+    @name("IngressI.hd") Header hd_1_inlined_invalidateHeader_5;
+    @name("IngressI.hd") Header hd_1_inlined_invalidateHeader_6;
     @name("IngressI.hd") Header hd_0;
     @name("IngressI.hd") Header hd_1;
-    @name("IngressI.hd") Header hd_8;
-    @name("IngressI.hd") Header hd_9;
-    @name("IngressI.hd") Header hd_10;
-    @name("IngressI.hd") Header hd_11;
-    @name("IngressI.hd") Header hd_12;
+    @name("IngressI.hd") Header hd_4;
     @name("IngressI.validateHeader") action validateHeader() {
-        hd_10.setValid();
+        hd_0.setValid();
     }
     @name("IngressI.validateHeader") action validateHeader_1() {
-        hd_11.setValid();
+        hd_1.setValid();
     }
     @name("IngressI.invalidateHeader") action invalidateHeader() {
-        hd_12.setInvalid();
+        hd_4.setInvalid();
     }
     @name("IngressI.invalidateStack") action invalidateStack() {
-        hd_0.setInvalid();
-        hd_1.setInvalid();
+        hd_1_inlined_invalidateHeader.setInvalid();
+        hd_1_inlined_invalidateHeader_0.setInvalid();
     }
     @name("IngressI.invalidateStack") action invalidateStack_1() {
-        hd_8.setInvalid();
-        hd_9.setInvalid();
+        hd_1_inlined_invalidateHeader_5.setInvalid();
+        hd_1_inlined_invalidateHeader_6.setInvalid();
     }
     @hidden action invalidhdrwarnings4l45() {
         h_0_h1[0].setInvalid();

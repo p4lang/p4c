@@ -24,8 +24,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.hasReturned") bool hasReturned;
-    @name("ingress.val1") Headers val1;
-    @name("ingress.val") Headers val;
+    @name("ingress.val1") Headers val1_0_inlined_dummy2;
+    @name("ingress.val") Headers val_0_inlined_dummy;
     @name("ingress.simple_action") action simple_action() {
         hasReturned = false;
         if (h.eth_hdr.eth_type == 16w1) {
@@ -35,13 +35,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             ;
         } else {
             h.eth_hdr.src_addr = 48w1;
-            val1 = h;
-            val = val1;
-            val.eth_hdr.dst_addr = 48w2;
-            val.eth_hdr.eth_type = 16w4;
-            val1 = val;
-            val1.eth_hdr.dst_addr = 48w3;
-            h = val1;
+            val1_0_inlined_dummy2 = h;
+            val_0_inlined_dummy = val1_0_inlined_dummy2;
+            val_0_inlined_dummy.eth_hdr.dst_addr = 48w2;
+            val_0_inlined_dummy.eth_hdr.eth_type = 16w4;
+            val1_0_inlined_dummy2 = val_0_inlined_dummy;
+            val1_0_inlined_dummy2.eth_hdr.dst_addr = 48w3;
+            h = val1_0_inlined_dummy2;
         }
     }
     apply {

@@ -21,17 +21,17 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ingress.y0") bit<1> y0;
-    @name("ingress.y0") bit<1> y0_1;
+    @name("ingress.y0") bit<1> y0_0_inlined_a;
+    @name("ingress.y0") bit<1> y0_0_inlined_a_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".b") action b_1() {
-        y0 = meta.md.b;
-        y0 = y0 + 1w1;
-        meta.md.b = y0;
-        y0_1 = meta.md.b;
-        y0_1 = y0_1 + 1w1;
-        meta.md.b = y0_1;
+        y0_0_inlined_a = meta.md.b;
+        y0_0_inlined_a = y0_0_inlined_a + 1w1;
+        meta.md.b = y0_0_inlined_a;
+        y0_0_inlined_a_0 = meta.md.b;
+        y0_0_inlined_a_0 = y0_0_inlined_a_0 + 1w1;
+        meta.md.b = y0_0_inlined_a_0;
     }
     @name(".t") table t_0 {
         actions = {
