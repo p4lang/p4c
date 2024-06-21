@@ -18,16 +18,12 @@ limitations under the License.
 #define TYPECHECKING_TYPECHECKER_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/methodInstance.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeSubstitution.h"
-#include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 #include "ir/visitor.h"
-#include "lib/cstring.h"
-#include "lib/exceptions.h"
-#include "typeUnification.h"
 
 namespace P4 {
 
@@ -80,9 +76,9 @@ bool hasVarbitsOrUnions(const TypeMap *typeMap, const IR::Type *type);
 // In fact, several passes do modify the program such that types are invalidated.
 // For example, enum elimination converts enum values into integers.  After such
 // changes the typemap has to be cleared and types must be recomputed from scratch.
-class TypeInference : public Transform {
-    // Input: reference map
-    ReferenceMap *refMap;
+class TypeInference : public Transform, public ResolutionContext {
+    // Input: name generator
+    NameGenerator *nameGen;
     // Output: type map
     TypeMap *typeMap;
     const IR::Node *initialNode;
@@ -90,7 +86,7 @@ class TypeInference : public Transform {
  public:
     // @param readOnly If true it will assert that it behaves like
     //        an Inspector.
-    TypeInference(ReferenceMap *refMap, TypeMap *typeMap, bool readOnly = false,
+    TypeInference(NameGenerator *nameGen, TypeMap *typeMap, bool readOnly = false,
                   bool checkArrays = true);
 
  protected:
@@ -205,7 +201,8 @@ class TypeInference : public Transform {
     using Transform::preorder;
 
     static const IR::Type *specialize(const IR::IMayBeGenericType *type,
-                                      const IR::Vector<IR::Type> *arguments);
+                                      const IR::Vector<IR::Type> *arguments,
+                                      const Visitor::Context *ctxt);
     const IR::Node *pruneIfDone(const IR::Node *node) {
         if (done()) {
             prune();
@@ -346,7 +343,7 @@ class TypeInference : public Transform {
     // Apply recursively the typechecker to the newly created node
     // to add all component subtypes in the typemap.
     // Return 'true' if errors were discovered in the learning process.
-    bool learn(const IR::Node *node, Visitor *caller);
+    bool learn(const IR::Node *node, Visitor *caller, const Visitor::Context *ctxt);
 };
 
 // Copy types from the typeMap to expressions.  Updates the typeMap with newly created nodes

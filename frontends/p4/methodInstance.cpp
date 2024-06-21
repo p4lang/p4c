@@ -25,9 +25,9 @@ namespace P4 {
 
 // If useExpressionType is true trust the type in mce->type
 MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
-                                        DeclarationLookup *refMap, TypeMap *typeMap,
-                                        bool useExpressionType, const Visitor::Context *ctxt,
-                                        bool incomplete) {
+                                        const DeclarationLookup *refMap, NameGenerator *nameGen,
+                                        TypeMap *typeMap, bool useExpressionType,
+                                        const Visitor::Context *ctxt, bool incomplete) {
     auto mt = typeMap ? typeMap->getType(mce->method) : nullptr;
     if (mt == nullptr && useExpressionType) mt = mce->method->type;
     BUG_CHECK(mt, "%1%: unknown type", mce->method);
@@ -35,11 +35,10 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
     auto originalType = mt->to<IR::Type_MethodBase>();
     auto actualType = originalType;
     if (typeMap && !mce->typeArguments->empty()) {
-        auto t = TypeInference::specialize(originalType, mce->typeArguments);
+        auto t = TypeInference::specialize(originalType, mce->typeArguments, ctxt);
         CHECK_NULL(t);
         actualType = t->to<IR::Type_MethodBase>();
-        // FIXME -- currently refMap is always a ReferenceMap, but this arg should soon go away
-        TypeInference tc(dynamic_cast<ReferenceMap *>(refMap), typeMap, true);
+        TypeInference tc(nameGen, typeMap, true);
         (void)actualType->apply(tc, ctxt);  // may need to learn new type components
         CHECK_NULL(actualType);
     }
@@ -76,7 +75,7 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
                 decl = refMap->getDeclaration(pe->path, true);
                 type = typeMap ? typeMap->getType(decl->getNode()) : pe->type;
             } else if (auto mc = mem->expr->to<IR::MethodCallExpression>()) {
-                auto mi = resolve(mc, refMap, typeMap, useExpressionType);
+                auto mi = resolve(mc, refMap, nameGen, typeMap, useExpressionType);
                 decl = mi->object;
                 type = mi->actualMethodType->returnType;
             } else if (auto cce = mem->expr->to<IR::ConstructorCallExpression>()) {
@@ -131,7 +130,7 @@ const IR::P4Action *ActionCall::specialize(const DeclarationLookup *refMap) cons
 }
 
 ConstructorCall *ConstructorCall::resolve(const IR::ConstructorCallExpression *cce,
-                                          DeclarationLookup *refMap, TypeMap *typeMap) {
+                                          const DeclarationLookup *refMap, TypeMap *typeMap) {
     auto ct = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
     ConstructorCall *result;
     const IR::Vector<IR::Type> *typeArguments;

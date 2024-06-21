@@ -1195,7 +1195,7 @@ class FindUninitialized : public Inspector {
     bool preorder(const IR::MethodCallExpression *expression) override {
         LOG3("FU Visiting [" << expression->id << "]: " << expression);
         visit(expression->method);
-        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+        auto mi = MethodInstance::resolve(expression, refMap, refMap, typeMap);
         if (auto bim = mi->to<BuiltInMethod>()) {
             auto base = getReads(bim->appliedTo, true);
             cstring name = bim->name.name;

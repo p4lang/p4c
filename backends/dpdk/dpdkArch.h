@@ -1464,7 +1464,7 @@ class CollectIPSecInfo : public Inspector {
           typeMap(typeMap),
           structure(structure) {}
     bool preorder(const IR::MethodCallStatement *mcs) override {
-        auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
+        auto mi = P4::MethodInstance::resolve(mcs, refMap, typeMap);
         if (auto a = mi->to<P4::ExternMethod>()) {
             if (a->originalExternType->getName().name == "ipsec_accelerator") {
                 if (structure->isPSA()) {

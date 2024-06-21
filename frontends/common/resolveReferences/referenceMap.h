@@ -29,6 +29,7 @@ namespace P4 {
 class NameGenerator {
  public:
     virtual cstring newName(std::string_view base) = 0;
+    virtual ~NameGenerator() = default;
 };
 
 // replacement for ReferenceMap NameGenerator to make it easier to remove uses of refMap
@@ -42,7 +43,7 @@ class MinimalNameGenerator : public NameGenerator, public Inspector {
 
  public:
     MinimalNameGenerator();
-    void usedName(cstring name) { usedNames.insert({name, 0}); }
+    void usedName(cstring name) { usedNames.emplace(name, 0); }
     explicit MinimalNameGenerator(const IR::Node *root) : MinimalNameGenerator() {
         root->apply(*this);
     }

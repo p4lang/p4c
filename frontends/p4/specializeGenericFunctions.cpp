@@ -16,6 +16,9 @@ limitations under the License.
 
 #include "specializeGenericFunctions.h"
 
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
+
 namespace P4 {
 
 bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression *mce) {
@@ -33,7 +36,8 @@ bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression *mce) 
     if (!insert) insert = findContext<IR::Declaration_Instance>();
     if (!insert) insert = findContext<IR::P4Action>();
     CHECK_NULL(insert);
-    MethodInstance *mi = MethodInstance::resolve(mce, specMap->refMap, specMap->typeMap);
+    MethodInstance *mi =
+        MethodInstance::resolve(mce, specMap->refMap, specMap->refMap, specMap->typeMap);
     if (auto func = mi->to<FunctionCall>()) {
         LOG3("Will specialize " << mce);
         specMap->add(mce, func->function, insert);

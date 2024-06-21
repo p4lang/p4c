@@ -91,14 +91,14 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
                 LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
 
                 if (type == ResolutionType::Type) {
-                    if (auto *type_decl = findContext<IR::Type_Declaration>())
+                    if (auto *type_decl = findOrigCtxt<IR::Type_Declaration>())
                         if (type_decl->getNode() == d->getNode()) {
                             ::error(ErrorType::ERR_UNSUPPORTED,
                                     "Self-referencing types not supported: '%1%' within '%2%'",
                                     name, d->getNode());
                         }
                 } else if (type == ResolutionType::Any) {
-                    if (auto *decl_ctxt = findContext<IR::Declaration>())
+                    if (auto *decl_ctxt = findOrigCtxt<IR::Declaration>())
                         if (decl_ctxt->getNode() == d->getNode()) before = false;
                 }
 
@@ -143,10 +143,8 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
                 LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
 
                 if (type == ResolutionType::Any)
-                    if (auto *ctxt = findContext<IR::Declaration>()) {
-                        if (ctxt->getNode() == decl->getNode()) {
-                            before = false;
-                        }
+                    if (auto *ctxt = findOrigCtxt<IR::Declaration>()) {
+                        if (ctxt->getNode() == decl->getNode()) before = false;
                     }
 
                 if (!before) decl = nullptr;
@@ -260,6 +258,7 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
             rtype = ResolutionType::Type;
         const IR::INamespace *ns = nullptr;
         if (path->absolute) ns = findContext<IR::P4Program>();
+
         result = resolveUnique(path->name, rtype, ns);
     }
     if (notNull) BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", path);

@@ -17,6 +17,7 @@ limitations under the License.
 #include "expandEmit.h"
 
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 
