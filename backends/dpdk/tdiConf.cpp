@@ -68,33 +68,33 @@ std::optional<cstring> TdiBfrtConf::findPipeName(const IR::P4Program *prog,
 }
 
 void TdiBfrtConf::generate(const IR::P4Program *prog, DPDK::DpdkOptions &options) {
-    if (options.outputFile.isNullOrEmpty()) {
+    if (options.outputFile.empty()) {
         ::error(ErrorType::ERR_UNEXPECTED,
                 "No output file provided. Unable to generate correct TDI builder config file.");
         return;
     }
-    auto inputFile = std::filesystem::absolute(options.file.c_str());
-    auto outFile = std::filesystem::absolute(options.outputFile.c_str());
+    auto inputFile = std::filesystem::absolute(options.file);
+    auto outFile = std::filesystem::absolute(options.outputFile);
     auto outDir = outFile.parent_path();
-    auto tdiFile = std::filesystem::absolute(options.tdiBuilderConf.c_str());
+    auto tdiFile = std::filesystem::absolute(options.tdiBuilderConf);
     auto programName = inputFile.stem();
 
-    if (options.bfRtSchema.isNullOrEmpty()) {
-        options.bfRtSchema = cstring((outDir / programName).replace_filename("json").c_str());
+    if (options.bfRtSchema.empty()) {
+        options.bfRtSchema = (outDir / programName).replace_filename("json");
         ::warning(
             "BF-Runtime Schema file name not provided, but is required for the TDI builder "
             "configuration. Generating file %1%",
             options.bfRtSchema);
     }
-    if (options.ctxtFile.isNullOrEmpty()) {
-        options.ctxtFile = cstring((outDir / "context.json").c_str());
+    if (options.ctxtFile.empty()) {
+        options.ctxtFile = outDir / "context.json";
         ::warning(
             "DPDK context file name not provided, but is required for the TDI builder "
             "configuration. Generating file %1%",
             options.ctxtFile);
     }
 
-    auto contextFile = std::filesystem::absolute(options.ctxtFile.c_str());
+    auto contextFile = std::filesystem::absolute(options.ctxtFile);
     auto bfRtSchema = std::filesystem::absolute(options.bfRtSchema.c_str());
 
     auto pipeName = findPipeName(prog, options);
@@ -103,6 +103,7 @@ void TdiBfrtConf::generate(const IR::P4Program *prog, DPDK::DpdkOptions &options
     }
     // TODO: Ideally, this should be a template. We could use Inja, but this adds another
     // dependency.
+    // FIXME: Just use absl::StrSubstitute
     std::stringstream ss;
     ss << R"""({
     "chip_list": [
@@ -149,7 +150,7 @@ void TdiBfrtConf::generate(const IR::P4Program *prog, DPDK::DpdkOptions &options
     if (out.is_open()) {
         out << ss;
     } else {
-        ::error(ErrorType::ERR_IO, "Could not open file: %1%", tdiFile.c_str());
+        ::error(ErrorType::ERR_IO, "Could not open file: %1%", tdiFile);
         return;
     }
     out.close();

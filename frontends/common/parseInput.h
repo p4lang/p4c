@@ -31,7 +31,7 @@ class P4Program;
 namespace P4 {
 
 template <typename Input, typename C = P4V1::Converter>
-static const IR::P4Program *parseV1Program(Input &stream, const char *sourceFile,
+static const IR::P4Program *parseV1Program(Input &stream, std::string_view sourceFile,
                                            unsigned sourceLine,
                                            std::optional<DebugHook> debugHook = std::nullopt) {
     // We load the model before parsing the input file, so that the SourceInfo
@@ -67,7 +67,7 @@ const IR::P4Program *parseP4File(ParserOptions &options) {
               "compiler context");
     FILE *in = nullptr;
     if (options.doNotPreprocess) {
-        in = fopen(options.file, "r");
+        in = fopen(options.file.c_str(), "r");
         if (in == nullptr) {
             ::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file or directory.", options.file);
             return nullptr;
@@ -77,9 +77,9 @@ const IR::P4Program *parseP4File(ParserOptions &options) {
         if (::errorCount() > 0 || in == nullptr) return nullptr;
     }
 
-    auto result = options.isv1()
-                      ? parseV1Program<FILE *, C>(in, options.file, 1, options.getDebugHook())
-                      : P4ParserDriver::parse(in, options.file);
+    auto result = options.isv1() ? parseV1Program<FILE *, C>(in, options.file.string(), 1,
+                                                             options.getDebugHook())
+                                 : P4ParserDriver::parse(in, options.file.string());
     if (options.doNotPreprocess) {
         fclose(in);
     } else {

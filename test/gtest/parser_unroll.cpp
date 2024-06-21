@@ -66,9 +66,9 @@ const IR::P4Program *load_model(const char *curFile, CompilerOptions &options) {
     auto originalEnv = getenv("P4C_16_INCLUDE_PATH");
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
     options.loopsUnrolling = true;
-    options.file = cstring(sourcePath);
-    options.file += "testdata/p4_16_samples/";
-    options.file += curFile;
+    options.file = sourcePath;
+    options.file /= "testdata/p4_16_samples";
+    options.file /= curFile;
     auto program = P4::parseP4File(options);
     if (!originalEnv)
         unsetenv("P4C_16_INCLUDE_PATH");

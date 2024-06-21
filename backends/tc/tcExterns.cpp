@@ -28,8 +28,8 @@ void EBPFRegisterPNA::emitInitializer(EBPF::CodeBuilder *builder, const P4::Exte
     builder->appendLine("ext_params.pipe_id = p4tc_filter_fields.pipeid;");
     builder->emitIndent();
     auto extId = translator->tcIR->getExternId(externName);
-    BUG_CHECK(extId != 0, "Extern ID not found");
-    builder->appendFormat("ext_params.ext_id = %d;", extId);
+    BUG_CHECK(!extId.isNullOrEmpty(), "Extern ID not found");
+    builder->appendFormat("ext_params.ext_id = %s;", extId);
     builder->newline();
     builder->emitIndent();
     auto instId = translator->tcIR->getExternInstanceId(externName, this->instanceName);
@@ -123,6 +123,59 @@ void EBPFCounterPNA::emitCounterUpdate(EBPF::CodeBuilder *builder, const Convert
         builder->append(
             "bpf_p4tc_extern_count_pktsnbytes(skb, &ext_params, sizeof(ext_params), &key, "
             "sizeof(key))");
+    }
+}
+
+void EBPFCounterPNA::emitMethodInvocation(EBPF::CodeBuilder *builder,
+                                          const P4::ExternMethod *method,
+                                          ControlBodyTranslatorPNA *translator) {
+    if (method->method->name.name != "count") {
+        ::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
+        return;
+    }
+    BUG_CHECK(!isDirect, "DirectCounter used outside of table");
+    BUG_CHECK(method->expr->arguments->size() == 1, "Expected just 1 argument for %1%",
+              method->expr);
+    emitCount(builder, method, translator);
+}
+
+void EBPFCounterPNA::emitCount(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
+                               ControlBodyTranslatorPNA *translator) {
+    builder->emitIndent();
+    builder->appendLine("__builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));");
+    builder->emitIndent();
+    builder->appendLine("ext_params.pipe_id = p4tc_filter_fields.pipeid;");
+    auto externName = method->originalExternType->name.name;
+    auto instanceName = di->toString();
+    auto index = method->expr->arguments->at(0)->expression;
+    builder->emitIndent();
+    auto extId = translator->tcIR->getExternId(externName);
+    BUG_CHECK(!extId.isNullOrEmpty(), "Extern ID not found");
+    builder->appendFormat("ext_params.ext_id = %s;", extId);
+    builder->newline();
+    builder->emitIndent();
+    auto instId = translator->tcIR->getExternInstanceId(externName, instanceName);
+    BUG_CHECK(instId != 0, "Extern instance ID not found");
+    builder->appendFormat("ext_params.inst_id = %d;", instId);
+    builder->newline();
+    builder->emitIndent();
+    builder->append("ext_params.index = ");
+    translator->visit(index);
+    builder->endOfStatement(true);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendLine("ext_params.flags = P4TC_EXT_CNT_INDIRECT;");
+    builder->emitIndent();
+
+    if (type == CounterType::BYTES) {
+        builder->append(
+            "bpf_p4tc_extern_count_bytes(skb, &ext_params, sizeof(ext_params), NULL, 0)");
+    } else if (type == CounterType::PACKETS) {
+        builder->append(
+            "bpf_p4tc_extern_count_pkts(skb, &ext_params, sizeof(ext_params), NULL, 0)");
+    } else if (type == CounterType::PACKETS_AND_BYTES) {
+        builder->append(
+            "bpf_p4tc_extern_count_pktsnbytes(skb, &ext_params, sizeof(ext_params), NULL, 0)");
     }
 }
 

@@ -82,21 +82,14 @@ struct externAttributes {
 
 /// Program level information for context json.
 struct TopLevelCtxt {
-    cstring progName;
+    std::string progName;
     cstring buildDate;
     cstring compileCommand;
     cstring compilerVersion;
     void initTopLevelCtxt(DpdkOptions &options) {
         buildDate = options.getBuildDate();
         compileCommand = options.getCompileCommand();
-        progName = options.file;
-        auto fileName = progName.findlast('/');
-        // Handle the case when input file is in the current working directory.
-        // fileName would be null in that case, hence progName should remain unchanged.
-        if (fileName) progName = cstring(fileName);
-        auto fileext = progName.find(".");
-        progName = progName.replace(cstring(fileext), cstring::empty);
-        progName = progName.trim("/\t\n\r");
+        progName = options.file.stem();
         compilerVersion = options.compilerVersion;
     }
 };

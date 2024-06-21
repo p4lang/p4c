@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <string>
+
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/copy.hpp>
 
@@ -61,13 +63,13 @@ class Graph_visitor : public Graphs {
     /// @param graphs option to output graph for each function block
     /// @param fullGraph option to create fullGraph
     /// @param jsonOut option to create json fullGraph.
-    Graph_visitor(const cstring &graphsDir, const bool graphs, const bool fullGraph,
-                  const bool jsonOut, const cstring &filename)
-        : graphsDir(graphsDir),
+    Graph_visitor(std::filesystem::path graphsDir, const bool graphs, const bool fullGraph,
+                  const bool jsonOut, std::filesystem::path filename)
+        : graphsDir(std::move(graphsDir)),
           graphs(graphs),
           fullGraph(fullGraph),
           jsonOut(jsonOut),
-          filename(filename) {}
+          filename(std::move(filename)) {}
     /// @brief Maps VertexType to string
     /// @param v_type VertexType to map
     /// @return string representation of v_type.
@@ -92,7 +94,7 @@ class Graph_visitor : public Graphs {
     ///
     /// @param g boost graph
     /// @param name file name
-    void writeGraphToFile(const Graph &g, const cstring &name);
+    void writeGraphToFile(const Graph &g, const std::string &name);
 
  private:
     /// Loops over vector graphsArray with boost graphs, creating json representation of CFG
@@ -112,13 +114,13 @@ class Graph_visitor : public Graphs {
 
     Util::JsonObject *json = nullptr;          // stores json that will be outputted
     Util::JsonArray *programBlocks = nullptr;  // stores objects in top level array "nodes"
-    const cstring graphsDir;
+    std::filesystem::path graphsDir;
     /// options
     const bool graphs;     // output boost graphs to files
     const bool fullGraph;  // merge boost graphs into one CFG, and output to file
     const bool jsonOut;    // iterate over boost graphs, and create json representation of these
                            // graphs
-    const cstring filename;
+    const std::filesystem::path filename;
 };
 
 }  // namespace graphs

@@ -103,8 +103,10 @@ class EBPFProgram : public EBPFObject {
  public:
     virtual void emitCommonPreamble(CodeBuilder *builder);
     virtual void emitGeneratedComment(CodeBuilder *builder);
-    virtual void emitH(CodeBuilder *builder, cstring headerFile);  // emits C headers
-    virtual void emitC(CodeBuilder *builder, cstring headerFile);  // emits C program
+    virtual void emitH(CodeBuilder *builder,
+                       const std::filesystem::path &headerFile);  // emits C headers
+    virtual void emitC(CodeBuilder *builder,
+                       const std::filesystem::path &headerFile);  // emits C program
 
     DECLARE_TYPEINFO(EBPFProgram, EBPFObject);
 };

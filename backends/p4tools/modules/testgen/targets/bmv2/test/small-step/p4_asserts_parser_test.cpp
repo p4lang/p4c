@@ -26,6 +26,7 @@
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
 /// Variables are declared in "test/gtest/env.h" which is already included in reachability.cpp
+// FIXME: Make these Util::Path
 extern const char *sourcePath;
 extern const char *buildPath;
 
@@ -56,13 +57,7 @@ ConstraintsVector loadExample(const char *curFile, bool flag) {
     auto *originalEnv = getenv("P4C_16_INCLUDE_PATH");
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
     const IR::P4Program *program = nullptr;
-    options.file = cstring(sourcePath);
-    options.file += curFile;
-    if (access(options.file, 0) != 0) {
-        // Subpath for bf-p4c-compilers.
-        options.file = cstring(sourcePath);
-        options.file += curFile;
-    }
+    options.file = std::filesystem::path(sourcePath) / curFile;
     program = P4::parseP4File(options);
     if (originalEnv == nullptr) {
         unsetenv("P4C_16_INCLUDE_PATH");

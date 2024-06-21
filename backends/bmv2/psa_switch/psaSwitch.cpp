@@ -314,7 +314,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         }
     }
     program->apply(toJson);
-    json->add_program_info(options.file);
+    json->add_program_info(cstring(options.file));
     json->add_meta_info();
 }
 

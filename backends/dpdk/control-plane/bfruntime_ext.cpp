@@ -221,14 +221,7 @@ const Util::JsonObject *BFRuntimeSchemaGenerator::genSchema() const {
     auto *json = new Util::JsonObject();
 
     if (isTDI) {
-        cstring progName = options.file;
-        auto fileName = progName.findlast('/');
-        // Handle the case when input file is in the current working directory.
-        // fileName would be null in that case, hence progName should remain unchanged.
-        if (fileName) progName = cstring(fileName);
-        auto fileext = cstring(progName.find("."));
-        progName = cstring(progName.replace(fileext, cstring::empty));
-        progName = progName.trim("/\t\n\r");
+        auto progName = options.file.stem();
         json->emplace("program_name"_cs, progName);
         json->emplace("build_date"_cs, cstring(options.getBuildDate()));
         json->emplace("compile_command"_cs, cstring(options.getCompileCommand()));

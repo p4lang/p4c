@@ -17,8 +17,6 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_EBPFOPTIONS_H_
 #define BACKENDS_EBPF_EBPFOPTIONS_H_
 
-#include <getopt.h>
-
 #include "frontends/common/options.h"
 
 enum XDP2TC { XDP2TC_NONE, XDP2TC_META, XDP2TC_HEAD, XDP2TC_CPUMAP };
@@ -26,7 +24,7 @@ enum XDP2TC { XDP2TC_NONE, XDP2TC_META, XDP2TC_HEAD, XDP2TC_CPUMAP };
 class EbpfOptions : public CompilerOptions {
  public:
     /// file to output to
-    cstring outputFile = nullptr;
+    std::filesystem::path outputFile;
     /// read from json
     bool loadIRFromJson = false;
     /// Externs generation

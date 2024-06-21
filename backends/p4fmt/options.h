@@ -15,11 +15,11 @@ class P4fmtOptions : public CompilerOptions {
     P4fmtOptions &operator=(const P4fmtOptions &) = default;
     P4fmtOptions &operator=(P4fmtOptions &&) = delete;
 
-    const cstring &outputFile() const;
+    const std::filesystem::path &outputFile() const;
 
  private:
     /// File to output to.
-    cstring outFile = nullptr;
+    std::filesystem::path outFile;
 };
 
 using P4FmtContext = P4CContextWithOptions<P4fmtOptions>;

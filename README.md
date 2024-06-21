@@ -673,7 +673,7 @@ Educational material on P4:
 
 # Contact
 We appreciate your contributions and look forward to working with you to improve the P4 Compiler Project (P4C)!
-- For further assistance or questions regarding contributions, reach out to us in our [community chat](https://p4-lang.slack.com/).  [Joining link](https://join.slack.com/t/p4-lang/shared_invite/zt-a9pe96br-Th73ueaBAwJw1ZbD_z1Rpg) .
+- For further assistance or questions regarding contributions, reach out to us in our [community chat](https://p4lang.zulipchat.com/).  [Joining link](https://p4lang.zulipchat.com/join/kjtv2reafrylssget425wx6c/) .
 - For general P4-related questions, use the [P4 forum](https://forum.p4.org/).
 - For other communication channels click [here](https://p4.org/join/).
 

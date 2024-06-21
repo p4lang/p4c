@@ -25,14 +25,7 @@ void PNAEbpfGenerator::emitPNAIncludes(EBPF::CodeBuilder *builder) const {
     builder->appendLine("#include \"pna.h\"");
 }
 
-cstring PNAEbpfGenerator::getProgramName() const {
-    auto progName = options.file;
-    auto filename = progName.findlast('/');
-    if (filename) progName = cstring(filename);
-    progName = progName.exceptLast(3);
-    progName = progName.trim("/\t\n\r");
-    return progName;
-}
+cstring PNAEbpfGenerator::getProgramName() const { return cstring(options.file.stem()); }
 
 void PNAEbpfGenerator::emitPreamble(EBPF::CodeBuilder *builder) const {
     emitCommonPreamble(builder);
@@ -1456,6 +1449,10 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ExternBlock *instance) {
     } else if (typeName == "DirectCounter") {
         control->addExternDeclaration = true;
         return false;
+    } else if (typeName == "Counter") {
+        control->addExternDeclaration = true;
+        auto ctr = new EBPFCounterPNA(program, di, name, control->codeGen);
+        control->counters.emplace(name, ctr);
     } else {
         ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control", instance);
     }
@@ -1939,6 +1936,11 @@ void ControlBodyTranslatorPNA::processMethod(const P4::ExternMethod *method) {
             ::warning(ErrorType::WARN_UNUSED, "This Register(%1%) read value is not used!", name);
             reg->emitRegisterRead(builder, method, this, nullptr);
         }
+        return;
+    } else if (declType->name.name == "Counter") {
+        auto counterMap = control->getCounter(name);
+        auto pna_ctr = dynamic_cast<EBPFCounterPNA *>(counterMap);
+        pna_ctr->emitMethodInvocation(builder, method, this);
         return;
     } else if (declType->name.name == "Hash") {
         auto hash = control->to<EBPF::EBPFControlPSA>()->getHash(name);

@@ -54,8 +54,8 @@ ReturnedInfo loadExampleForReachability(const char *curFile) {
     auto *originalEnv = getenv("P4C_16_INCLUDE_PATH");
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
     const IR::P4Program *program = nullptr;
-    options.file = cstring(sourcePath);
-    options.file += curFile;
+    options.file = sourcePath;
+    options.file /= curFile;
     program = P4::parseP4File(options);
     if (originalEnv == nullptr) {
         unsetenv("P4C_16_INCLUDE_PATH");

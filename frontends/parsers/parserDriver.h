@@ -20,6 +20,7 @@ limitations under the License.
 #include <cstdio>
 #include <iostream>
 #include <string>
+#include <string_view>
 
 #include "frontends/p4/symbol_table.h"
 #include "frontends/parsers/p4/abstractP4Lexer.hpp"
@@ -109,9 +110,10 @@ class P4ParserDriver final : public AbstractParserDriver {
      *                    set the initial source location.
      * @returns a P4Program object if parsing was successful, or null otherwise.
      */
-    static const IR::P4Program *parse(std::istream &in, const char *sourceFile,
+    static const IR::P4Program *parse(std::istream &in, std::string_view sourceFile,
                                       unsigned sourceLine = 1);
-    static const IR::P4Program *parse(FILE *in, const char *sourceFile, unsigned sourceLine = 1);
+    static const IR::P4Program *parse(FILE *in, std::string_view sourceFile,
+                                      unsigned sourceLine = 1);
 
     /**
      * Parses a P4-16 annotation body.
@@ -202,7 +204,7 @@ class P4ParserDriver final : public AbstractParserDriver {
     P4ParserDriver();
 
     /// Common functionality for parsing.
-    bool parse(AbstractP4Lexer &lexer, const char *sourceFile, unsigned sourceLine = 1);
+    bool parse(AbstractP4Lexer &lexer, std::string_view sourceFile, unsigned sourceLine = 1);
 
     /// Common functionality for parsing annotation bodies.
     template <typename T>
@@ -238,9 +240,10 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
      *                    set the initial source location.
      * @returns a V1Program object if parsing was successful, or null otherwise.
      */
-    static const IR::V1Program *parse(std::istream &in, const char *sourceFile,
+    static const IR::V1Program *parse(std::istream &in, std::string_view sourceFile,
                                       unsigned sourceLine = 1);
-    static const IR::V1Program *parse(FILE *in, const char *sourceFile, unsigned sourceLine = 1);
+    static const IR::V1Program *parse(FILE *in, std::string_view sourceFile,
+                                      unsigned sourceLine = 1);
 
  protected:
     friend class V1::V1Lexer;

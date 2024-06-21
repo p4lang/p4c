@@ -19,6 +19,8 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_OPTIONS_H_
 #define FRONTENDS_COMMON_OPTIONS_H_
 
+#include <filesystem>
+
 #include "parser_options.h"
 // for p4::P4RuntimeFormat definition
 #include "control-plane/p4RuntimeTypes.h"
@@ -52,7 +54,7 @@ class CompilerOptions : public ParserOptions {
     // passes.
     std::vector<cstring> passesToExcludeBackend;
     // Dump a JSON representation of the IR in the file.
-    cstring dumpJsonFile = nullptr;
+    std::filesystem::path dumpJsonFile;
     // Dump and undump the IR tree.
     bool debugJson = false;
     // if this flag is true, compile program in non-debug mode.
@@ -70,7 +72,7 @@ class CompilerOptions : public ParserOptions {
     // Choose format for P4Runtime API description.
     P4::P4RuntimeFormat p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;
     // Pretty-print the program in the specified file.
-    cstring prettyPrintFile = nullptr;
+    std::filesystem::path prettyPrintFile;
     // Target.
     cstring target = nullptr;
     // Architecture.

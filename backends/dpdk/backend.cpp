@@ -116,12 +116,12 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new DpdkArchLast(),
         new VisitFunctor([this, genContextJson] {
             // Serialize context json object into user specified file
-            if (!options.ctxtFile.isNullOrEmpty()) {
-                std::ostream *out = openFile(options.ctxtFile, false);
-                if (out != nullptr) {
+            if (!options.ctxtFile.empty()) {
+                if (std::ostream *out = openFile(options.ctxtFile, false)) {
                     genContextJson->serializeContextJson(out);
-                }
-                out->flush();
+                    out->flush();
+                } else
+                    ::error(ErrorType::ERR_IO, "Could not open file: %1%", options.ctxtFile);
             }
         }),
         new ReplaceHdrMetaField(),

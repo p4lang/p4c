@@ -55,8 +55,8 @@ int Smith::mainImpl(const CompilerResult & /*result*/) {
     auto &smithOptions = P4Tools::SmithOptions::get();
 
     // Use a default name if no specific output name is provided.
-    if (outputFile == nullptr) {
-        outputFile = cstring("out.p4");
+    if (outputFile.empty()) {
+        outputFile = "out.p4";
     }
     auto *ostream = openFile(outputFile, false);
     if (ostream == nullptr) {

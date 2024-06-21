@@ -55,7 +55,7 @@ class ConvertToBackendIR : public Inspector {
         int num_elements;
     };
     struct ExternBlock {
-        unsigned externId;
+        cstring externId;
         cstring control_name;
         unsigned no_of_instances;
         cstring permissions;
@@ -119,7 +119,7 @@ class ConvertToBackendIR : public Inspector {
     unsigned getTcType(const IR::StringLiteral *sl);
     unsigned getTableId(cstring tableName) const;
     unsigned getActionId(cstring actionName) const;
-    unsigned getExternId(cstring externName) const;
+    cstring getExternId(cstring externName) const;
     unsigned getExternInstanceId(cstring externName, cstring instanceName) const;
     cstring processExternPermission(const IR::Type_Extern *ext);
     unsigned getTableKeysize(unsigned tableId) const;

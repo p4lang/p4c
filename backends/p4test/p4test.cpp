@@ -69,7 +69,7 @@ class P4TestOptions : public CompilerOptions {
             "--fromJSON", "file",
             [this](const char *arg) {
                 loadIRFromJson = true;
-                file = cstring(arg);
+                file = arg;
                 return true;
             },
             "read previously dumped json instead of P4 source code");
@@ -182,7 +182,7 @@ int main(int argc, char *const argv[]) {
             }
         }
         if (program) {
-            if (options.dumpJsonFile)
+            if (!options.dumpJsonFile.empty())
                 JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
             if (options.debugJson) {
                 std::stringstream ss1, ss2;
