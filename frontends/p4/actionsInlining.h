@@ -18,6 +18,7 @@ limitations under the License.
 #define FRONTENDS_P4_ACTIONSINLINING_H_
 
 #include "commonInlining.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "ir/ir.h"
@@ -28,16 +29,13 @@ typedef SimpleCallInfo<IR::P4Action, IR::MethodCallStatement> ActionCallInfo;
 typedef SimpleInlineWorkList<IR::P4Action, IR::MethodCallStatement, ActionCallInfo> AInlineWorkList;
 typedef SimpleInlineList<IR::P4Action, ActionCallInfo, AInlineWorkList> ActionsInlineList;
 
-class DiscoverActionsInlining : public Inspector {
+class DiscoverActionsInlining : public Inspector, public ResolutionContext {
     ActionsInlineList *toInline;  // output
-    P4::ReferenceMap *refMap;     // input
     P4::TypeMap *typeMap;         // input
  public:
-    DiscoverActionsInlining(ActionsInlineList *toInline, P4::ReferenceMap *refMap,
-                            P4::TypeMap *typeMap)
-        : toInline(toInline), refMap(refMap), typeMap(typeMap) {
+    DiscoverActionsInlining(ActionsInlineList *toInline, P4::ReferenceMap *, P4::TypeMap *typeMap)
+        : toInline(toInline), typeMap(typeMap) {
         CHECK_NULL(toInline);
-        CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DiscoverActionsInlining");
     }

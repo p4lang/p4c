@@ -17,7 +17,6 @@ limitations under the License.
 #include "actionsInlining.h"
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/callGraph.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
@@ -25,7 +24,7 @@ limitations under the License.
 namespace P4 {
 
 void DiscoverActionsInlining::postorder(const IR::MethodCallStatement *mcs) {
-    auto mi = P4::MethodInstance::resolve(mcs, refMap, typeMap);
+    auto mi = P4::MethodInstance::resolve(mcs, this, typeMap);
     CHECK_NULL(mi);
     auto ac = mi->to<P4::ActionCall>();
     if (ac == nullptr) return;
