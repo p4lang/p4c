@@ -111,6 +111,8 @@ $(function(){initNavTree('class_d_p_d_k_1_1_move_non_header_fields_to_pseudo_hea
 
 <p>This pass identifies and collects statement which requires it's operand to be in a header and also initialize added header fields with original operand. i.e. csum_0.add&lt;tuple_0&gt;((tuple_0){f0 = m.Ingress_tmp_1,f1 = m.Ingress_tmp_2, f2 = m.Ingress_tmp_3,f3 = m.Ingress_tmp_4,f4 = m.Ingress_tmp_5}); transformed into h.dpdk_pseudo_header.pseudo = (bit&lt;16&gt;)m.Ingress_tmp_1; h.dpdk_pseudo_header.pseudo_0 = (bit&lt;16&gt;)m.Ingress_tmp_2; h.dpdk_pseudo_header.pseudo_1 = (bit&lt;8&gt;)m.Ingress_tmp_3; h.dpdk_pseudo_header.pseudo_2 = (bit&lt;32&gt;)m.Ingress_tmp_4; h.dpdk_pseudo_header.pseudo_3 = (bit&lt;32&gt;)m.Ingress_tmp_5; csum_0.add&lt;tuple_1&gt;((tuple_1){f0 = h.dpdk_pseudo_header.pseudo, f1 = h.dpdk_pseudo_header.pseudo_0,f2 = h.dpdk_pseudo_header.pseudo_1, f3 = h.dpdk_pseudo_header.pseudo_2,f4 = h.dpdk_pseudo_header.pseudo_3});.  
  <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="dpdk_arch_8h_source.html">dpdkArch.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for DPDK::MoveNonHeaderFieldsToPseudoHeader:</div>
 <div class="dyncontent">

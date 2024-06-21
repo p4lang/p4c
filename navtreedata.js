@@ -266,8 +266,51 @@ var NAVTREE =
     [ "Steps to run tests", "md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2tests_2_r_e_a_d_m_e.html", null ],
     [ "Common Utilities", "md__2home_2runner_2work_2p4c_2p4c_2lib_2_r_e_a_d_m_e.html", null ],
     [ "Intermediate Representation (IR) Classes", "irdefs.html", null ],
+    [ "Changelog", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html", [
+      [ "Semantic Versioning", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md225", null ],
+      [ "Release v1.2.4.12 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md226", [
+        [ "Breaking Changes 🛠", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md227", null ],
+        [ "P4 Specification Implementation", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md228", null ],
+        [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md229", null ],
+        [ "Changes to the Control Plane", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md230", null ],
+        [ "Changes to the eBPF Back Ends", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md231", null ],
+        [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md232", null ],
+        [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md233", null ],
+        [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md234", null ]
+      ] ],
+      [ "Release v1.2.4.11 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md235", [
+        [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md236", null ],
+        [ "Changes to the eBPF Back Ends", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md237", null ],
+        [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md238", null ],
+        [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md239", null ],
+        [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md240", null ]
+      ] ],
+      [ "Release v1.2.4.10 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md241", null ],
+      [ "Release v1.2.4.9 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md242", null ],
+      [ "Release v1.2.4.8 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md243", null ],
+      [ "Release v1.2.4.7 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md244", null ],
+      [ "Release v1.2.4.6 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md245", null ],
+      [ "Release v1.2.4.5 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md246", null ],
+      [ "Release v1.2.4.4 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md247", null ],
+      [ "Release v1.2.4.3 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md248", null ],
+      [ "Release v1.2.4.1 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md249", null ],
+      [ "Release v1.2.4", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md250", null ],
+      [ "Release v1.2.3.9 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md251", null ],
+      [ "Release v1.2.3.8 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md252", null ],
+      [ "Release v1.2.3.7 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md253", null ],
+      [ "Release v1.2.3.6 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md254", null ],
+      [ "Release v1.2.3.5 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md255", null ],
+      [ "Release v1.2.3.4 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md256", null ],
+      [ "Release v1.2.3.3 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md257", null ],
+      [ "Release v1.2.3.2 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md258", null ],
+      [ "Release v1.2.3.1 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md259", null ],
+      [ "Release v1.2.3.0 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md260", null ],
+      [ "Release v1.2.2.3 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md261", null ],
+      [ "Release 1.2.2.2 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#autotoc_md262", null ]
+    ] ],
     [ "Deprecated List", "deprecated.html", null ],
     [ "Todo List", "todo.html", null ],
+    [ "Topics", "topics.html", "topics" ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
       [ "Namespace Members", "namespacemembers.html", [
@@ -313,10 +356,10 @@ var NAVTREEINDEX =
 "class_p4_tools_1_1_trace_events_1_1_emit.html#aa9427a9e39f8da1ae60dd6bce5f138da",
 "class_t_c_1_1_e_b_p_f_table_p_n_a.html#a24eef68a3aa0e7c586de279862021fe6",
 "class_visitor_1_1_tracker.html#afd2e6b4c992ffb823d3f9863e54017da",
-"md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2_r_e_a_d_m_e.html#autotoc_md157",
-"struct_auto_stdio_input_stream.html",
-"struct_p4_1_1_diagnostic_count_info.html#a8f9e7a1f3f84ec8e9be2fee20edab056",
-"structstd_1_1hash_3_01cstring_01_4.html"
+"md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html#autotoc_md46",
+"namespace_p4_tools.html#a13fdc77c87c7de9e4a842aa897793c5f",
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_action_selector.html",
+"struct_util_1_1_detail_1_1_integer_hasher.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
