@@ -77,21 +77,19 @@ bool hasVarbitsOrUnions(const TypeMap *typeMap, const IR::Type *type);
 // For example, enum elimination converts enum values into integers.  After such
 // changes the typemap has to be cleared and types must be recomputed from scratch.
 class TypeInference : public Transform, public ResolutionContext {
-    // Input: name generator
-    NameGenerator *nameGen;
     // Output: type map
     TypeMap *typeMap;
     const IR::Node *initialNode;
+    MinimalNameGenerator nameGen;
 
  public:
     // @param readOnly If true it will assert that it behaves like
     //        an Inspector.
-    TypeInference(NameGenerator *nameGen, TypeMap *typeMap, bool readOnly = false,
-                  bool checkArrays = true);
+    explicit TypeInference(TypeMap *typeMap, bool readOnly = false, bool checkArrays = true);
 
  protected:
     // If true we expect to leave the program unchanged
-    bool readOnly;
+    bool readOnly = false;
     bool checkArrays = true;
     const IR::Type *getType(const IR::Node *element) const;
     const IR::Type *getTypeType(const IR::Node *element) const;

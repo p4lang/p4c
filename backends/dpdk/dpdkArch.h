@@ -1184,7 +1184,7 @@ class EliminateHeaderCopy : public PassManager {
     EliminateHeaderCopy(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::ResolveReferences(refMap));
-        passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+        passes.push_back(new P4::TypeInference(typeMap, false));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new ElimHeaderCopy(typeMap));
     }
@@ -1435,13 +1435,13 @@ class CollectLocalStructAndFlatten : public PassManager {
     CollectLocalStructAndFlatten(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::ResolveReferences(refMap));
-        passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+        passes.push_back(new P4::TypeInference(typeMap, false));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new CollectStructLocalVariables(refMap, typeMap));
         passes.push_back(new MoveCollectedStructLocalVariableToMetadata(typeMap));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::ResolveReferences(refMap));
-        passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+        passes.push_back(new P4::TypeInference(typeMap, false));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new P4::FlattenInterfaceStructs(refMap, typeMap));
     }
@@ -1542,7 +1542,7 @@ struct DpdkHandleIPSec : public PassManager {
         passes.push_back(new InsertReqDeclForIPSec(refMap, structure, is_ipsec_used, sa_id_width));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::ResolveReferences(refMap));
-        passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+        passes.push_back(new P4::TypeInference(typeMap, false));
     }
 };
 

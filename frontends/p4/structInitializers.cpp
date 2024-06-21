@@ -108,7 +108,7 @@ const IR::Node *CreateStructInitializers::postorder(IR::Declaration_Variable *de
 }
 
 const IR::Node *CreateStructInitializers::postorder(IR::MethodCallExpression *expression) {
-    auto mi = MethodInstance::resolve(expression, refMap, refMap, typeMap);
+    auto mi = MethodInstance::resolve(expression, refMap, typeMap);
     auto result = expression;
     auto convertedArgs = new IR::Vector<IR::Argument>();
     bool modified = false;

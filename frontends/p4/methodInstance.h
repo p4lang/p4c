@@ -92,41 +92,28 @@ class MethodInstance : public InstanceBase {
      *                           all type arguments.
      */
     static MethodInstance *resolve(const IR::MethodCallExpression *mce,
-                                   const DeclarationLookup *refMap, NameGenerator *nameGen,
-                                   TypeMap *typeMap, bool useExpressionType = false,
+                                   const DeclarationLookup *refMap, TypeMap *typeMap,
+                                   bool useExpressionType = false,
                                    const Visitor::Context *ctxt = nullptr, bool incomplete = false);
-    // Deprecated, do not use
-    static MethodInstance *resolve(const IR::MethodCallExpression *mce, ReferenceMap *refMap,
-                                   TypeMap *typeMap, bool useExpressionType = false,
-                                   const Visitor::Context *ctxt = nullptr,
-                                   bool incomplete = false) {
-        return resolve(mce, refMap, refMap, typeMap, useExpressionType, ctxt, incomplete);
-    }
     static MethodInstance *resolve(const IR::MethodCallExpression *mce,
-                                   const DeclarationLookup *refMap, NameGenerator *nameGen,
-                                   TypeMap *typeMap, const Visitor::Context *ctxt,
-                                   bool incomplete = false) {
-        return resolve(mce, refMap, nameGen, typeMap, false, ctxt, incomplete);
+                                   const DeclarationLookup *refMap, TypeMap *typeMap,
+                                   const Visitor::Context *ctxt, bool incomplete = false) {
+        return resolve(mce, refMap, typeMap, false, ctxt, incomplete);
     }
     static MethodInstance *resolve(const IR::MethodCallStatement *mcs,
-                                   const DeclarationLookup *refMap, NameGenerator *nameGen,
-                                   TypeMap *typeMap, const Visitor::Context *ctxt = nullptr) {
-        return resolve(mcs->methodCall, refMap, nameGen, typeMap, false, ctxt, false);
-    }
-    // Deprecated, do not use
-    static MethodInstance *resolve(const IR::MethodCallStatement *mcs, ReferenceMap *refMap,
-                                   TypeMap *typeMap, const Visitor::Context *ctxt = nullptr) {
-        return resolve(mcs->methodCall, refMap, refMap, typeMap, false, ctxt, false);
+                                   const DeclarationLookup *refMap, TypeMap *typeMap,
+                                   const Visitor::Context *ctxt = nullptr) {
+        return resolve(mcs->methodCall, refMap, typeMap, false, ctxt, false);
     }
     static MethodInstance *resolve(const IR::MethodCallExpression *mce,
                                    const DeclarationLookup *refMap,
                                    const Visitor::Context *ctxt = nullptr) {
-        return resolve(mce, refMap, nullptr, nullptr, true, ctxt, false);
+        return resolve(mce, refMap, nullptr, true, ctxt, false);
     }
     static MethodInstance *resolve(const IR::MethodCallStatement *mcs,
                                    const DeclarationLookup *refMap,
                                    const Visitor::Context *ctxt = nullptr) {
-        return resolve(mcs->methodCall, refMap, nullptr, nullptr, true, ctxt, false);
+        return resolve(mcs->methodCall, refMap, nullptr, true, ctxt, false);
     }
 
     const IR::ParameterList *getOriginalParameters() const {

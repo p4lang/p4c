@@ -360,7 +360,7 @@ class GetWrittenExpressions : public Inspector {
         setName("GetWrittenExpressions");
     }
     void postorder(const IR::MethodCallExpression *expression) override {
-        auto mi = MethodInstance::resolve(expression, refMap, refMap, typeMap);
+        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
         if (auto a = mi->to<ApplyMethod>()) {
             if (a->isTableApply()) {
                 written.emplace(everything);
@@ -395,7 +395,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
 
     auto copyBack = new IR::IndexedVector<IR::StatOrDecl>();
     auto args = new IR::Vector<IR::Argument>();
-    auto mi = MethodInstance::resolve(orig, refMap, refMap, typeMap);
+    auto mi = MethodInstance::resolve(orig, refMap, typeMap);
 
     // If a parameter is in this set then we use a temporary to
     // copy the corresponding argument.  We could always use

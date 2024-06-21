@@ -45,7 +45,7 @@ class DoStaticAssert : public Transform {
         setName("DoStaticAssert");
     }
     const IR::Node *postorder(IR::MethodCallExpression *method) override {
-        MethodInstance *mi = MethodInstance::resolve(method, refMap, refMap, typeMap);
+        MethodInstance *mi = MethodInstance::resolve(method, refMap, typeMap);
         if (auto ef = mi->to<ExternFunction>()) {
             if (ef->method->name == staticAssertMethodName) {
                 auto subst = ef->substitution;
@@ -101,7 +101,7 @@ class DoStaticAssert : public Transform {
 class StaticAssert : public PassManager {
  public:
     StaticAssert(ReferenceMap *refMap, TypeMap *typeMap) {
-        passes.push_back(new TypeInference(refMap, typeMap));
+        passes.push_back(new TypeInference(typeMap));
         passes.push_back(new DoStaticAssert(refMap, typeMap));
         setName("StaticAssert");
     }

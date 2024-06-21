@@ -287,7 +287,7 @@ SpecializeAll::SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap, FrontEndPol
     passes.emplace_back(new FindSpecializations(&specMap));
     passes.emplace_back(new Specialize(&specMap));
     passes.emplace_back(new ResolveReferences(refMap));
-    passes.emplace_back(new TypeInference(refMap, typeMap, false));  // more casts may be needed
+    passes.emplace_back(new TypeInference(typeMap, false));  // more casts may be needed
     passes.emplace_back(new RemoveAllUnusedDeclarations(refMap, *policy));
     specMap.refMap = refMap;
     specMap.typeMap = typeMap;

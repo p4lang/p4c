@@ -116,7 +116,7 @@ void DoCheckCoreMethods::checkCorelibMethods(const ExternMethod *em) const {
 }
 
 void DoCheckCoreMethods::postorder(const IR::MethodCallExpression *expression) {
-    auto mi = MethodInstance::resolve(expression, refMap, refMap, typeMap, nullptr, true);
+    auto mi = MethodInstance::resolve(expression, refMap, typeMap, nullptr, true);
     if (mi->is<ExternMethod>()) checkCorelibMethods(mi->to<ExternMethod>());
 
     // Check that verify is only invoked from parsers.

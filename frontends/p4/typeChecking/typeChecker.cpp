@@ -92,9 +92,9 @@ class ConstantTypeSubstitution : public Transform, ResolutionContext {
 }  // namespace
 
 TypeChecking::TypeChecking(ReferenceMap *refMap, TypeMap *typeMap, bool updateExpressions) {
-    addPasses({new P4::ResolveReferences(refMap), new P4::TypeInference(refMap, typeMap, true),
+    addPasses({new P4::TypeInference(typeMap, /* readOnly */ true),
                updateExpressions ? new ApplyTypesToExpressions(typeMap) : nullptr,
-               updateExpressions ? new P4::ResolveReferences(refMap) : nullptr});
+               new P4::ResolveReferences(refMap)});
     setStopOnError(true);
 }
 
@@ -140,25 +140,24 @@ const IR::Type *TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGener
     return cl->to<IR::Type>();
 }
 
-TypeInference::TypeInference(NameGenerator *nameGen, TypeMap *typeMap, bool readOnly,
-                             bool checkArrays)
-    : nameGen(nameGen),
-      typeMap(typeMap),
+TypeInference::TypeInference(TypeMap *typeMap, bool readOnly, bool checkArrays)
+    : typeMap(typeMap),
       initialNode(nullptr),
       readOnly(readOnly),
       checkArrays(checkArrays),
       currentActionList(nullptr) {
     CHECK_NULL(typeMap);
-    CHECK_NULL(nameGen);
     visitDagOnce = false;  // the done() method will take care of this
 }
 
 Visitor::profile_t TypeInference::init_apply(const IR::Node *node) {
+    auto rv = Transform::init_apply(node);
     if (node->is<IR::P4Program>()) {
         LOG2("TypeInference for " << dbp(node));
     }
     initialNode = node;
-    return Transform::init_apply(node);
+    node->apply(nameGen);
+    return rv;
 }
 
 void TypeInference::end_apply(const IR::Node *node) {
@@ -179,9 +178,7 @@ const IR::Node *TypeInference::apply_visitor(const IR::Node *orig, const char *n
     return transformed;
 }
 
-TypeInference *TypeInference::clone() const {
-    return new TypeInference(this->nameGen, this->typeMap, true);
-}
+TypeInference *TypeInference::clone() const { return new TypeInference(this->typeMap, true); }
 
 bool TypeInference::done() const {
     auto orig = getOriginal();
@@ -981,7 +978,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::che
     }
 
     // will always be bound to Type_Void.
-    auto rettype = new IR::Type_Var(IR::ID(nameGen->newName("R"), "<returned type>"_cs));
+    auto rettype = new IR::Type_Var(IR::ID(nameGen.newName("R"), "<returned type>"_cs));
     auto callType =
         new IR::Type_MethodCall(errorPosition->srcInfo, new IR::Vector<IR::Type>(), rettype, args);
     auto tvs = unify(errorPosition, methodType, callType,
@@ -1217,7 +1214,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::con
         auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType, aarg);
         args->push_back(argInfo);
     }
-    auto rettype = new IR::Type_Var(IR::ID(nameGen->newName("<any>")));
+    auto rettype = new IR::Type_Var(IR::ID(nameGen.newName("<any>")));
     // There are never type arguments at this point; if they exist, they have been folded
     // into the constructor by type specialization.
     auto callType =
@@ -3703,7 +3700,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
 
         // We build a type for the callExpression and unify it with the method expression
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
-        auto rettype = new IR::Type_Var(IR::ID(nameGen->newName("R"), "<returned type>"_cs));
+        auto rettype = new IR::Type_Var(IR::ID(nameGen.newName("R"), "<returned type>"_cs));
         auto args = new IR::Vector<IR::ArgumentInfo>();
         bool constArgs = true;
         for (auto aarg : *expression->arguments) {
@@ -3837,7 +3834,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
                                                   result->typeArguments, newArgs);
         setType(result, returnType);
 
-        auto mi = MethodInstance::resolve(result, this, nameGen, typeMap, getChildContext(), true);
+        auto mi = MethodInstance::resolve(result, this, typeMap, getChildContext(), true);
         if (mi->isApply() && findContext<IR::P4Action>()) {
             typeError("%1%: apply cannot be called from actions", expression);
             return expression;
@@ -4285,10 +4282,9 @@ const IR::ActionListElement *TypeInference::validateActionInitializer(
     }
 
     SameExpression se(this, typeMap);
-    auto callInstance =
-        MethodInstance::resolve(call, this, nameGen, typeMap, getChildContext(), true);
+    auto callInstance = MethodInstance::resolve(call, this, typeMap, getChildContext(), true);
     auto listInstance =
-        MethodInstance::resolve(actionListCall, this, nameGen, typeMap, getChildContext(), true);
+        MethodInstance::resolve(actionListCall, this, typeMap, getChildContext(), true);
 
     for (auto param : *listInstance->substitution.getParametersInArgumentOrder()) {
         auto aa = listInstance->substitution.lookup(param);

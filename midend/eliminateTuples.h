@@ -124,7 +124,7 @@ class EliminateTuples final : public PassManager {
         // into StructExpression where tuples were converted
         // to structs.
         passes.push_back(new ResolveReferences(refMap));
-        if (!typeInference) typeInference = new TypeInference(refMap, typeMap, false);
+        if (!typeInference) typeInference = new TypeInference(typeMap, false);
         passes.push_back(typeInference);
         setName("EliminateTuples");
     }

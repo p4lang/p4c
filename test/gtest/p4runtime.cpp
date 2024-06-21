@@ -1658,7 +1658,7 @@ class P4RuntimeDataTypeSpec : public P4Runtime {
                                           {"p4runtime_translation"_cs,
                                            &P4::ParseAnnotations::parseP4rtTranslationAnnotation},
                                       }),
-             new P4::ResolveReferences(&refMap), new P4::TypeInference(&refMap, &typeMap, false)});
+             new P4::ResolveReferences(&refMap), new P4::TypeInference(&typeMap, false)});
         pgm = pgm->apply(passes);
         return pgm;
     }

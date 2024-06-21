@@ -195,7 +195,7 @@ class FlattenHeaderUnion : public PassManager {
             passes.push_back(new DoFlattenHeaderUnionStack(refMap, typeMap));
             passes.push_back(new P4::ClearTypeMap(typeMap));
             passes.push_back(new P4::ResolveReferences(refMap));
-            passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+            passes.push_back(new P4::TypeInference(typeMap, false));
             passes.push_back(new P4::TypeChecking(refMap, typeMap));
             passes.push_back(new P4::RemoveAllUnusedDeclarations(refMap, RemoveUnusedPolicy()));
         }
