@@ -20,13 +20,14 @@ limitations under the License.
 #define EVALUATOR_SUBSTITUTEPARAMETERS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 #include "ir/ir.h"
 
 namespace P4 {
 
-class SubstituteParameters : public TypeVariableSubstitutionVisitor {
+class SubstituteParameters : public TypeVariableSubstitutionVisitor, public ResolutionContext {
  protected:
     const DeclarationLookup *refMap;     // input
     const ParameterSubstitution *subst;  // input
@@ -34,7 +35,6 @@ class SubstituteParameters : public TypeVariableSubstitutionVisitor {
     SubstituteParameters(const DeclarationLookup *refMap, const ParameterSubstitution *subst,
                          const TypeVariableSubstitution *tvs)
         : TypeVariableSubstitutionVisitor(tvs), refMap(refMap), subst(subst) {
-        CHECK_NULL(refMap);
         CHECK_NULL(subst);
         CHECK_NULL(tvs);
         visitDagOnce = true;

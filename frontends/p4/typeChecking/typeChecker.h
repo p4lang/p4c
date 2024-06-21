@@ -85,12 +85,14 @@ class TypeInference : public Transform, public ResolutionContext {
  public:
     // @param readOnly If true it will assert that it behaves like
     //        an Inspector.
-    explicit TypeInference(TypeMap *typeMap, bool readOnly = false, bool checkArrays = true);
+    explicit TypeInference(TypeMap *typeMap, bool readOnly = false, bool checkArrays = true,
+                           bool errorOnNullDecls = false);
 
  protected:
     // If true we expect to leave the program unchanged
     bool readOnly = false;
     bool checkArrays = true;
+    bool errorOnNullDecls = false;
     const IR::Type *getType(const IR::Node *element) const;
     const IR::Type *getTypeType(const IR::Node *element) const;
     void setType(const IR::Node *element, const IR::Type *type);

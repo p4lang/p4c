@@ -92,7 +92,8 @@ class ConstantTypeSubstitution : public Transform, ResolutionContext {
 }  // namespace
 
 TypeChecking::TypeChecking(ReferenceMap *refMap, TypeMap *typeMap, bool updateExpressions) {
-    addPasses({new P4::TypeInference(typeMap, /* readOnly */ true),
+    addPasses({new P4::TypeInference(typeMap, /* readOnly */ true, /* checkArrays */ true,
+                                     /* errorOnNullDecls */ true),
                updateExpressions ? new ApplyTypesToExpressions(typeMap) : nullptr,
                new P4::ResolveReferences(refMap)});
     setStopOnError(true);
@@ -140,11 +141,13 @@ const IR::Type *TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGener
     return cl->to<IR::Type>();
 }
 
-TypeInference::TypeInference(TypeMap *typeMap, bool readOnly, bool checkArrays)
+TypeInference::TypeInference(TypeMap *typeMap, bool readOnly, bool checkArrays,
+                             bool errorOnNullDecls)
     : typeMap(typeMap),
       initialNode(nullptr),
       readOnly(readOnly),
       checkArrays(checkArrays),
+      errorOnNullDecls(errorOnNullDecls),
       currentActionList(nullptr) {
     CHECK_NULL(typeMap);
     visitDagOnce = false;  // the done() method will take care of this
@@ -1416,7 +1419,11 @@ const IR::Node *TypeInference::postorder(IR::Type_Name *typeName) {
         auto t = IR::Type_Dontcare::get();
         type = new IR::Type_Type(t);
     } else {
-        auto decl = getDeclaration(typeName->path, true);
+        auto decl = getDeclaration(typeName->path, !errorOnNullDecls);
+        if (errorOnNullDecls && decl == nullptr) {
+            typeError("%1%: Cannot resolve type", typeName);
+            return typeName;
+        }
         // Check for references of a control or parser within itself.
         auto ctrl = findContext<IR::P4Control>();
         if (ctrl != nullptr && ctrl->name == decl->getName()) {
@@ -3008,7 +3015,11 @@ const IR::Node *TypeInference::postorder(IR::Cast *expression) {
 
 const IR::Node *TypeInference::postorder(IR::PathExpression *expression) {
     if (done()) return expression;
-    auto decl = getDeclaration(expression->path, true);
+    auto decl = getDeclaration(expression->path, !errorOnNullDecls);
+    if (errorOnNullDecls && decl == nullptr) {
+        typeError("%1%: Cannot resolve declaration", expression);
+        return expression;
+    }
     const IR::Type *type = nullptr;
     if (auto tbl = decl->to<IR::P4Table>()) {
         if (auto current = findContext<IR::P4Table>()) {
@@ -4249,7 +4260,12 @@ const IR::ActionListElement *TypeInference::validateActionInitializer(
     auto method = call->method;
     if (!method->is<IR::PathExpression>()) BUG("%1%: unexpected expression", method);
     auto pe = method->to<IR::PathExpression>();
-    auto decl = getDeclaration(pe->path, true);
+    auto decl = getDeclaration(pe->path, !errorOnNullDecls);
+    if (errorOnNullDecls && decl == nullptr) {
+        typeError("%1%: Cannot resolve declaration", pe);
+        return nullptr;
+    }
+
     auto ale = al->actionList.getDeclaration(decl->getName());
     if (ale == nullptr) {
         typeError("%1% not present in action list", call);

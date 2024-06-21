@@ -83,13 +83,14 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
     substitution.populate(callee->parameters, statement->methodCall->arguments);
 
     // evaluate in and inout parameters in order
-    for (auto param : callee->parameters->parameters) {
-        auto argument = substitution.lookup(param);
-        cstring newName = refMap->newName(param->name.name.string_view());
+    for (const auto *param : callee->parameters->parameters) {
+        const auto *argument = substitution.lookup(param);
+        cstring newName =
+            nameGen.newName(param->name.string() + "_inlined_" + callee->name.string());
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
-            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type,
-                                                        argument->expression);
+            const auto *vardecl = new IR::Declaration_Variable(newName, param->annotations,
+                                                               param->type, argument->expression);
             body.push_back(vardecl);
             subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
                                               new IR::PathExpression(newName)));
@@ -104,16 +105,22 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
             subst.add(param, argument);
         } else if (param->direction == IR::Direction::Out) {
             // uninitialized variable
-            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type);
+            const auto *vardecl =
+                new IR::Declaration_Variable(newName, param->annotations, param->type);
             subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
                                               new IR::PathExpression(newName)));
             body.push_back(vardecl);
         }
     }
 
-    SubstituteParameters sp(refMap, &subst, &tvs);
+    // FIXME: SubstituteParameters is a ResolutionContext, but we are recreating
+    // it again and again killing lookup caches. We'd need to have instead some
+    // separate DeclarationLookup that would allow us to perform necessary
+    // lookups in the context of callee. We can probably pre-seed it first for
+    // all possible callees in replMap.
+    SubstituteParameters sp(nullptr, &subst, &tvs);
     sp.setCalledBy(this);
-    auto clone = callee->apply(sp);
+    auto clone = callee->apply(sp, getContext());
     if (::errorCount() > 0) return statement;
     CHECK_NULL(clone);
     BUG_CHECK(clone->is<IR::P4Action>(), "%1%: not an action", clone);
