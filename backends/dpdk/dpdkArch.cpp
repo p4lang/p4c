@@ -1697,12 +1697,12 @@ const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) 
         isHeader = true;
         keyName = keyName.replace('.', '_');
         keyName =
-            keyName.replace("h_"_cs, control->name.toString() + "_" + table->name.toString() + "_");
+            keyName.replace("h_", control->name.toString() + "_" + table->name.toString() + "_");
     } else if (metaCopyNeeded) {
         if (keyName.startsWith("m.")) {
             keyName = keyName.replace('.', '_');
             keyName = keyName.replace(
-                "m_"_cs, control->name.toString() + "_" + table->name.toString() + "_");
+                "m_", control->name.toString() + "_" + table->name.toString() + "_");
         } else {
             keyName = control->name.toString() + "_" + table->name.toString() + "_" + keyName;
         }
@@ -1859,7 +1859,7 @@ const IR::P4Table *SplitP4TableCommon::create_member_table(const IR::P4Table *tb
     hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     auto nameAnnon = tbl->getAnnotation(IR::Annotation::nameAnnotation);
     cstring nameA = nameAnnon->getSingleString();
-    cstring memName = nameA.replace(cstring(nameA.findlast('.')), "."_cs + memberTableName);
+    cstring memName = nameA.replace(nameA.findlast('.'), "." + memberTableName);
     hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(memName), false);
 
     IR::IndexedVector<IR::ActionListElement> memberActionList;
@@ -1894,7 +1894,7 @@ const IR::P4Table *SplitP4TableCommon::create_group_table(const IR::P4Table *tbl
     hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     auto nameAnnon = tbl->getAnnotation(IR::Annotation::nameAnnotation);
     cstring nameA = nameAnnon->getSingleString();
-    cstring selName = nameA.replace(cstring(nameA.findlast('.')), "."_cs + selectorTableName);
+    cstring selName = nameA.replace(nameA.findlast('.'), "." + selectorTableName);
     hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(selName), false);
     IR::IndexedVector<IR::Property> selector_properties;
     selector_properties.push_back(new IR::Property("selector", new IR::Key(selector_keys), false));

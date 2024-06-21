@@ -910,22 +910,21 @@ cstring EBPFTablePSA::addPrefixFunc(bool trace) {
 
     if (trace) {
         addPrefixFunc = addPrefixFunc.replace(
-            "%trace_msg_prefix_map_fail%"_cs,
-            "        bpf_trace_message(\"Prefixes map update failed\\n\");\n"_cs);
+            "%trace_msg_prefix_map_fail%",
+            "        bpf_trace_message(\"Prefixes map update failed\\n\");\n");
         addPrefixFunc = addPrefixFunc.replace(
-            "%trace_msg_tuple_update_fail%"_cs,
-            "                bpf_trace_message(\"Tuple map update failed\\n\");\n"_cs);
+            "%trace_msg_tuple_update_fail%",
+            "                bpf_trace_message(\"Tuple map update failed\\n\");\n");
         addPrefixFunc = addPrefixFunc.replace(
-            "%trace_msg_tuple_update_success%"_cs,
-            "                bpf_trace_message(\"Tuple map update succeed\\n\");\n"_cs);
-        addPrefixFunc =
-            addPrefixFunc.replace("%trace_msg_tuple_not_found%"_cs,
-                                  "        bpf_trace_message(\"Tuple not found\\n\");\n"_cs);
+            "%trace_msg_tuple_update_success%",
+            "                bpf_trace_message(\"Tuple map update succeed\\n\");\n");
+        addPrefixFunc = addPrefixFunc.replace(
+            "%trace_msg_tuple_not_found%", "        bpf_trace_message(\"Tuple not found\\n\");\n");
     } else {
-        addPrefixFunc = addPrefixFunc.replace("%trace_msg_prefix_map_fail%"_cs, ""_cs);
-        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_update_fail%"_cs, ""_cs);
-        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_update_success%"_cs, ""_cs);
-        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_not_found%"_cs, ""_cs);
+        addPrefixFunc = addPrefixFunc.replace("%trace_msg_prefix_map_fail%", "");
+        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_update_fail%", "");
+        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_update_success%", "");
+        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_not_found%", "");
     }
 
     return addPrefixFunc;
