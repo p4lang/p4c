@@ -80,7 +80,9 @@ class TypeInference : public Transform, public ResolutionContext {
     // Output: type map
     TypeMap *typeMap;
     const IR::Node *initialNode;
-    MinimalNameGenerator nameGen;
+    std::shared_ptr<MinimalNameGenerator> nameGen;
+
+    TypeInference(TypeMap *typeMap, std::shared_ptr<MinimalNameGenerator> nameGen);
 
  public:
     // @param readOnly If true it will assert that it behaves like

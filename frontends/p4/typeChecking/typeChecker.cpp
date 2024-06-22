@@ -153,13 +153,23 @@ TypeInference::TypeInference(TypeMap *typeMap, bool readOnly, bool checkArrays,
     visitDagOnce = false;  // the done() method will take care of this
 }
 
+TypeInference::TypeInference(TypeMap *typeMap,
+                             std::shared_ptr<MinimalNameGenerator> inheritedNameGen)
+    : TypeInference(typeMap, true) {
+    nameGen = inheritedNameGen;
+}
+
 Visitor::profile_t TypeInference::init_apply(const IR::Node *node) {
     auto rv = Transform::init_apply(node);
     if (node->is<IR::P4Program>()) {
         LOG2("TypeInference for " << dbp(node));
     }
     initialNode = node;
-    node->apply(nameGen);
+    if (!nameGen) {
+        nameGen = std::make_shared<MinimalNameGenerator>();
+        node->apply(*nameGen);
+    }
+
     return rv;
 }
 
@@ -181,7 +191,7 @@ const IR::Node *TypeInference::apply_visitor(const IR::Node *orig, const char *n
     return transformed;
 }
 
-TypeInference *TypeInference::clone() const { return new TypeInference(this->typeMap, true); }
+TypeInference *TypeInference::clone() const { return new TypeInference(this->typeMap, nameGen); }
 
 bool TypeInference::done() const {
     auto orig = getOriginal();
@@ -981,7 +991,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::che
     }
 
     // will always be bound to Type_Void.
-    auto rettype = new IR::Type_Var(IR::ID(nameGen.newName("R"), "<returned type>"_cs));
+    auto rettype = new IR::Type_Var(IR::ID(nameGen->newName("R"), "<returned type>"_cs));
     auto callType =
         new IR::Type_MethodCall(errorPosition->srcInfo, new IR::Vector<IR::Type>(), rettype, args);
     auto tvs = unify(errorPosition, methodType, callType,
@@ -1217,7 +1227,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::con
         auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType, aarg);
         args->push_back(argInfo);
     }
-    auto rettype = new IR::Type_Var(IR::ID(nameGen.newName("<any>")));
+    auto rettype = new IR::Type_Var(IR::ID(nameGen->newName("<any>")));
     // There are never type arguments at this point; if they exist, they have been folded
     // into the constructor by type specialization.
     auto callType =
@@ -3711,7 +3721,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
 
         // We build a type for the callExpression and unify it with the method expression
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
-        auto rettype = new IR::Type_Var(IR::ID(nameGen.newName("R"), "<returned type>"_cs));
+        auto rettype = new IR::Type_Var(IR::ID(nameGen->newName("R"), "<returned type>"_cs));
         auto args = new IR::Vector<IR::ArgumentInfo>();
         bool constArgs = true;
         for (auto aarg : *expression->arguments) {
