@@ -20,6 +20,8 @@ limitations under the License.
 #include <time.h>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/time/clock.h"
+#include "absl/time/time.h"
 #include "ir/ir-generated.h"
 #include "lib/hash.h"
 
@@ -370,37 +372,24 @@ void Visitor::end_apply() {}
 void Visitor::end_apply(const IR::Node *) {}
 
 static indent_t profile_indent;
-static uint64_t first_start = 0;
+static absl::Time first_start = absl::InfinitePast();
+
 Visitor::profile_t::profile_t(Visitor &v_) : v(v_) {
-    struct timespec ts;
-#ifdef CLOCK_MONOTONIC
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-#else
-    // FIXME -- figure out how to do this on OSX/Mach
-    ts.tv_sec = ts.tv_nsec = 0;
-#endif
-    start = ts.tv_sec * 1000000000UL + ts.tv_nsec + 1;
-    assert(start);
+    start = absl::Now();
     LOG3(profile_indent << v.name() << " statrting at +"
-                        << (first_start ? start - first_start : (first_start = start, 0UL)) /
-                               1000000.0
-                        << " msec");
+                        << (first_start != absl::InfinitePast()
+                                ? start - first_start
+                                : (first_start = start, start - first_start)));
     ++profile_indent;
 }
-Visitor::profile_t::profile_t(profile_t &&a) : v(a.v), start(a.start) { a.start = 0; }
+Visitor::profile_t::profile_t(profile_t &&a) : v(a.v), start(a.start) {
+    a.start = absl::InfinitePast();
+}
 Visitor::profile_t::~profile_t() {
-    if (start) {
+    if (start != absl::InfinitePast()) {
         v.end_apply();
         --profile_indent;
-        struct timespec ts;
-#ifdef CLOCK_MONOTONIC
-        clock_gettime(CLOCK_MONOTONIC, &ts);
-#else
-        // FIXME -- figure out how to do this on OSX/Mach
-        ts.tv_sec = ts.tv_nsec = 0;
-#endif
-        uint64_t end = ts.tv_sec * 1000000000UL + ts.tv_nsec + 1;
-        LOG1(profile_indent << v.name() << ' ' << (end - start) / 1000.0 << " usec");
+        LOG1(profile_indent << v.name() << ' ' << (absl::Now() - start));
     }
 }
 
