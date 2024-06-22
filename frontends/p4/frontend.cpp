@@ -195,11 +195,11 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new DefaultArguments(&typeMap),       // add default argument values to parameters
             new SetStrictStruct(&typeMap, true),  // Next pass uses strict struct checking
             new TypeInference(&typeMap, false),   // more casts may be needed
-            new ResolveReferences(&refMap),
             new SetStrictStruct(&typeMap, false),
-            new SpecializeGenericFunctions(&refMap, &typeMap),
+            new SpecializeGenericFunctions(&typeMap),
         }),
         new CheckCoreMethods(&typeMap),
+        new ResolveReferences(&refMap),
         new StaticAssert(&refMap, &typeMap),
         new RemoveParserIfs(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),

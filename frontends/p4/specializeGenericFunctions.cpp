@@ -21,6 +21,13 @@ limitations under the License.
 
 namespace P4 {
 
+Visitor::profile_t FindFunctionSpecializations::init_apply(const IR::Node *node) {
+    auto rv = Inspector::init_apply(node);
+    node->apply(nameGen);
+
+    return rv;
+}
+
 bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression *mce) {
     if (!mce->typeArguments->size()) return false;
     // We only specialize if the type arguments are not type variables
@@ -36,10 +43,10 @@ bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression *mce) 
     if (!insert) insert = findContext<IR::Declaration_Instance>();
     if (!insert) insert = findContext<IR::P4Action>();
     CHECK_NULL(insert);
-    MethodInstance *mi = MethodInstance::resolve(mce, specMap->refMap, specMap->typeMap);
+    MethodInstance *mi = MethodInstance::resolve(mce, this, specMap->typeMap);
     if (auto func = mi->to<FunctionCall>()) {
         LOG3("Will specialize " << mce);
-        specMap->add(mce, func->function, insert);
+        specMap->add(mce, func->function, insert, &nameGen);
     }
     return false;
 }
