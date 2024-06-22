@@ -11,6 +11,7 @@ on:
 
 env:
   DOXYGEN_VERSION: 1.11.0
+  DOXYGEN_AWESOME_VERSION: 2.3.3
         
 jobs:
     build-and-deploy:
@@ -37,7 +38,12 @@ jobs:
             
             - name: Install graphviz
               run: sudo apt-get install graphviz -y
-    
+
+            - name: Clone Doxygen Awesome CSS Themes
+              working-directory: ./docs/doxygen
+              run: |
+                git clone --depth 1 -b v${{ env.DOXYGEN_AWESOME_VERSION }} https://github.com/jothepro/doxygen-awesome-css
+
             - name: Generate Doxygen Documentation
               run: |
                    cd docs/doxygen
