@@ -77,13 +77,10 @@ state s_join {
  */
 
 class DoRemoveParserControlFlow : public Transform {
-    ReferenceMap *refMap;
+    MinimalNameGenerator nameGen;
 
  public:
-    explicit DoRemoveParserControlFlow(ReferenceMap *refMap) : refMap(refMap) {
-        CHECK_NULL(refMap);
-        setName("DoRemoveParserControlFlow");
-    }
+    DoRemoveParserControlFlow() { setName("DoRemoveParserControlFlow"); }
     const IR::Node *postorder(IR::ParserState *state) override;
     Visitor::profile_t init_apply(const IR::Node *node) override;
 };
@@ -93,7 +90,7 @@ class DoRemoveParserControlFlow : public Transform {
 class RemoveParserControlFlow : public PassRepeated {
  public:
     RemoveParserControlFlow(ReferenceMap *refMap, TypeMap *typeMap) : PassRepeated({}) {
-        passes.emplace_back(new DoRemoveParserControlFlow(refMap));
+        passes.emplace_back(new DoRemoveParserControlFlow());
         passes.emplace_back(new SimplifyControlFlow(refMap, typeMap));
         setName("RemoveParserControlFlow");
     }
