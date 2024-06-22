@@ -18,6 +18,7 @@ limitations under the License.
 #define COMMON_CONSTANTFOLDING_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
@@ -57,7 +58,7 @@ class ConstantFoldingPolicy {
  *      `IR::Declaration_Constant` nodes are initialized with
  *      compile-time known constants.
  */
-class DoConstantFolding : public Transform {
+class DoConstantFolding : public Transform, public ResolutionContext {
  protected:
     ConstantFoldingPolicy *policy;
 
@@ -126,6 +127,11 @@ class DoConstantFolding : public Transform {
         assignmentTarget = false;
     }
 
+    // If DeclarationLookup is not passed, then resolve by our own.
+    explicit DoConstantFolding(const TypeMap *typeMap, bool warnings = true,
+                               ConstantFoldingPolicy *policy = nullptr)
+        : DoConstantFolding(this, typeMap, warnings, policy) {}
+
     const IR::Node *postorder(IR::Declaration_Constant *d) override;
     const IR::Node *postorder(IR::PathExpression *e) override;
     const IR::Node *postorder(IR::Cmpl *e) override;
@@ -186,6 +192,21 @@ class ConstantFolding : public PassManager {
             passes.push_back(typeChecking);
         }
         passes.push_back(new DoConstantFolding(refMap, typeMap, warnings, policy));
+        if (typeMap != nullptr) passes.push_back(new ClearTypeMap(typeMap));
+        setName("ConstantFolding");
+    }
+
+    ConstantFolding(TypeMap *typeMap, ConstantFoldingPolicy *policy)
+        : ConstantFolding(typeMap, true, nullptr, policy) {}
+
+    explicit ConstantFolding(TypeMap *typeMap, bool warnings = true,
+                             TypeChecking *typeChecking = nullptr,
+                             ConstantFoldingPolicy *policy = nullptr) {
+        if (typeMap != nullptr) {
+            if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
+            passes.push_back(typeChecking);
+        }
+        passes.push_back(new DoConstantFolding(typeMap, warnings, policy));
         if (typeMap != nullptr) passes.push_back(new ClearTypeMap(typeMap));
         setName("ConstantFolding");
     }
