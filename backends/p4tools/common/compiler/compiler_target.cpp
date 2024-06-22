@@ -100,7 +100,14 @@ const IR::P4Program *CompilerTarget::runFrontend(const IR::P4Program *program) c
     return program;
 }
 
-P4::FrontEnd CompilerTarget::mkFrontEnd() const { return {}; }
+class P4ToolsFrontEndPolicy : public P4::FrontEndPolicy {
+    [[nodiscard]] bool skipSideEffectOrdering() const override { return true; }
+};
+
+P4::FrontEnd CompilerTarget::mkFrontEnd() const {
+    auto *frontEndPolicy = new P4ToolsFrontEndPolicy();
+    return P4::FrontEnd(frontEndPolicy);
+}
 
 MidEnd CompilerTarget::mkMidEnd(const CompilerOptions &options) const {
     MidEnd midEnd(options);
