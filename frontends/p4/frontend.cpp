@@ -216,8 +216,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new RemoveAllUnusedDeclarations(&refMap, *policy, true),
         new SimplifyParsers(&refMap),
         new ResetHeaders(&refMap, &typeMap),
-        new UniqueNames(&refMap),  // Give each local declaration a unique internal name
-        new MoveDeclarations(),    // Move all local declarations to the beginning
+        new UniqueNames(),       // Give each local declaration a unique internal name
+        new MoveDeclarations(),  // Move all local declarations to the beginning
         new MoveInitializers(&refMap),
         new SideEffectOrdering(&refMap, &typeMap, policy->skipSideEffectOrdering()),
         new SimplifyControlFlow(&refMap, &typeMap),
@@ -241,7 +241,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new Inline(&refMap, &typeMap, evaluator, *policy, options.optimizeParserInlining),
             new InlineActions(&refMap, &typeMap, *policy),
             new LocalizeAllActions(&refMap, *policy),
-            new UniqueNames(&refMap),
+            new UniqueNames(),
             new UniqueParameters(&refMap, &typeMap),
             // Must be done before inlining functions, to allow
             // function calls used as action arguments to be inlined
@@ -255,8 +255,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new SimplifyControlFlow(&refMap, &typeMap),
             // more ifs may have been added to parsers
             new RemoveParserControlFlow(&refMap, &typeMap),
-            new UniqueNames(&refMap),  // needed again after inlining
-            new MoveDeclarations(),    // needed again after inlining
+            new UniqueNames(),       // needed again after inlining
+            new MoveDeclarations(),  // needed again after inlining
             new SimplifyDefUse(&refMap, &typeMap),
             new RemoveAllUnusedDeclarations(&refMap, *policy),
             new SimplifyControlFlow(&refMap, &typeMap),

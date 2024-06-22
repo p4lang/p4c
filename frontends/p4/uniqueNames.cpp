@@ -64,13 +64,11 @@ class FindActionCalls : public Inspector {
 
 }  // namespace
 
-UniqueNames::UniqueNames(ReferenceMap *refMap) : renameMap(new RenameMap) {
+UniqueNames::UniqueNames() : renameMap(new RenameMap) {
     setName("UniqueNames");
     visitDagOnce = false;
-    CHECK_NULL(refMap);
-    passes.emplace_back(new ResolveReferences(refMap));
-    passes.emplace_back(new FindSymbols(refMap, renameMap));
-    passes.emplace_back(new RenameSymbols(refMap, renameMap));
+    passes.emplace_back(new FindSymbols(renameMap));
+    passes.emplace_back(new RenameSymbols(renameMap));
 }
 
 UniqueParameters::UniqueParameters(ReferenceMap *refMap, TypeMap *typeMap)
@@ -81,7 +79,7 @@ UniqueParameters::UniqueParameters(ReferenceMap *refMap, TypeMap *typeMap)
     passes.emplace_back(new TypeChecking(refMap, typeMap));
     passes.emplace_back(new FindActionCalls(refMap, typeMap, renameMap));
     passes.emplace_back(new FindParameters(refMap, renameMap));
-    passes.emplace_back(new RenameSymbols(refMap, renameMap));
+    passes.emplace_back(new RenameSymbols(renameMap));
     passes.emplace_back(new ClearTypeMap(typeMap));
 }
 
@@ -118,7 +116,7 @@ const IR::Node *RenameSymbols::postorder(IR::Parameter *param) {
 }
 
 const IR::Node *RenameSymbols::postorder(IR::PathExpression *expression) {
-    auto decl = refMap->getDeclaration(expression->path, true);
+    auto decl = getDeclaration(expression->path, true);
     if (!renameMap->toRename(decl)) return expression;
     // This should be a local name.
     BUG_CHECK(!expression->path->absolute, "%1%: renaming absolute path", expression);

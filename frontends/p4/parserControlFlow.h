@@ -123,9 +123,8 @@ class RemoveParserIfs : public PassManager {
         passes.push_back(new IfInParser(&found));
         passes.push_back(new PassIf(
             [this] { return found; },
-            {// only do this if we found an 'if' in a parser
-             new ResolveReferences(refMap),
-             new UniqueNames(refMap),     // Give each local declaration a unique internal name
+            {                             // only do this if we found an 'if' in a parser
+             new UniqueNames(),           // Give each local declaration a unique internal name
              new MoveDeclarations(true),  // Move all local declarations to the beginning
              new ResolveReferences(refMap), new RemoveParserControlFlow(refMap, typeMap)}));
     }
