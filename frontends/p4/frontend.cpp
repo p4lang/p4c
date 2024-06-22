@@ -173,7 +173,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ResolveReferences(&refMap, /* checkShadow */ true),
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
-        new ConstantFolding(&refMap, nullptr, constantFoldingPolicy),
+        new ConstantFolding(constantFoldingPolicy),
         // Desugars direct parser and control applications
         // into instantiations followed by application
         new InstantiateDirectCalls(&refMap),
@@ -205,7 +205,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new StructInitializers(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
         new PassRepeated({
-            new ConstantFolding(&refMap, &typeMap, constantFoldingPolicy),
+            new ConstantFolding(&typeMap, constantFoldingPolicy),
             new StrengthReduction(&typeMap, policy->enableSubConstToAddTransform()),
             new Reassociation(),
             new UselessCasts(&typeMap),
@@ -251,7 +251,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new SetHeaders(&refMap, &typeMap),
             // Check for constants only after inlining
             new CheckConstants(&refMap, &typeMap),
-            new ConstantFolding(&refMap, &typeMap, constantFoldingPolicy),
+            new ConstantFolding(&typeMap, constantFoldingPolicy),
             new SimplifyControlFlow(&refMap, &typeMap),
             // more ifs may have been added to parsers
             new RemoveParserControlFlow(&refMap, &typeMap),

@@ -199,6 +199,9 @@ class ConstantFolding : public PassManager {
     ConstantFolding(TypeMap *typeMap, ConstantFoldingPolicy *policy)
         : ConstantFolding(typeMap, true, nullptr, policy) {}
 
+    explicit ConstantFolding(ConstantFoldingPolicy *policy)
+        : ConstantFolding(nullptr, true, nullptr, policy) {}
+
     explicit ConstantFolding(TypeMap *typeMap, bool warnings = true,
                              TypeChecking *typeChecking = nullptr,
                              ConstantFoldingPolicy *policy = nullptr) {
