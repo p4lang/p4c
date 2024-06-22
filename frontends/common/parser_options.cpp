@@ -494,12 +494,11 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
             std::unique_ptr<std::ostream> stream{openFile(fileName, true)};
             if (stream != nullptr) {
                 if (Log::verbose()) std::cerr << "Writing program to " << fileName << std::endl;
-                // FIXME: Accept path here
-                P4::ToP4 toP4(stream.get(), Log::verbose(), cstring(file));
+                P4::ToP4 toP4(stream.get(), Log::verbose(), file);
                 if (noIncludes) {
                     toP4.setnoIncludesArg(true);
                 }
-                if (node) {
+                if (node != nullptr) {
                     node->apply(toP4);
                 } else {
                     *stream << "No P4 program returned by the pass" << std::endl;
