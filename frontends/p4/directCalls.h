@@ -35,26 +35,28 @@ is replaced with
 control c() { apply {} }
 control d() { @name("c") c() c_inst; { c_inst.apply(); }}
 */
-class DoInstantiateCalls : public Transform {
-    ReferenceMap *refMap;
+class DoInstantiateCalls : public Transform, public ResolutionContext {
+    MinimalNameGenerator nameGen;  // used to generate new names
 
     IR::IndexedVector<IR::Declaration> insert;
 
  public:
-    explicit DoInstantiateCalls(ReferenceMap *refMap) : refMap(refMap) {
-        CHECK_NULL(refMap);
-        setName("DoInstantiateCalls");
-    }
+    DoInstantiateCalls() { setName("DoInstantiateCalls"); }
     const IR::Node *postorder(IR::P4Parser *parser) override;
     const IR::Node *postorder(IR::P4Control *control) override;
     const IR::Node *postorder(IR::MethodCallExpression *expression) override;
+
+    profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+        node->apply(nameGen);
+        return rv;
+    }
 };
 
 class InstantiateDirectCalls : public PassManager {
  public:
-    explicit InstantiateDirectCalls(ReferenceMap *refMap) {
-        passes.push_back(new ResolveReferences(refMap));
-        passes.push_back(new DoInstantiateCalls(refMap));
+    InstantiateDirectCalls() {
+        passes.push_back(new DoInstantiateCalls());
         setName("InstantiateDirectCalls");
     }
 };

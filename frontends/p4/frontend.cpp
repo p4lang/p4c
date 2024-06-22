@@ -176,7 +176,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ConstantFolding(constantFoldingPolicy),
         // Desugars direct parser and control applications
         // into instantiations followed by application
-        new InstantiateDirectCalls(&refMap),
+        new InstantiateDirectCalls(),
         new ResolveReferences(&refMap),
         new Deprecated(&refMap),
         new CheckNamedArgs(),
