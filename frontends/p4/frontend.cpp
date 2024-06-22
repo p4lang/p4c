@@ -192,7 +192,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new EntryPriorities(&refMap),
         new PassRepeated({
             new SpecializeGenericTypes(&refMap, &typeMap),
-            new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
+            new DefaultArguments(&typeMap),  // add default argument values to parameters
             new ResolveReferences(&refMap),
             new SetStrictStruct(&typeMap, true),  // Next pass uses strict struct checking
             new TypeInference(&typeMap, false),   // more casts may be needed

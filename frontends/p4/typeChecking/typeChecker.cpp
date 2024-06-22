@@ -95,7 +95,7 @@ TypeChecking::TypeChecking(ReferenceMap *refMap, TypeMap *typeMap, bool updateEx
     addPasses({new P4::TypeInference(typeMap, /* readOnly */ true, /* checkArrays */ true,
                                      /* errorOnNullDecls */ true),
                updateExpressions ? new ApplyTypesToExpressions(typeMap) : nullptr,
-               new P4::ResolveReferences(refMap)});
+               refMap ? new P4::ResolveReferences(refMap) : nullptr});
     setStopOnError(true);
 }
 

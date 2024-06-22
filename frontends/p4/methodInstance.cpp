@@ -73,7 +73,7 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
                 decl = refMap->getDeclaration(th, true);
             } else if (auto pe = mem->expr->to<IR::PathExpression>()) {
                 decl = refMap->getDeclaration(pe->path, true);
-                type = typeMap ? typeMap->getType(decl->getNode()) : pe->type;
+                type = typeMap ? typeMap->getType(decl->getNode(), true) : pe->type;
             } else if (auto mc = mem->expr->to<IR::MethodCallExpression>()) {
                 auto mi = resolve(mc, refMap, typeMap, useExpressionType);
                 decl = mi->object;
