@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef FRONTENDS_P4_CHECKCOREMETHODS_H_
 #define FRONTENDS_P4_CHECKCOREMETHODS_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -24,16 +25,14 @@ limitations under the License.
 namespace P4 {
 
 /// Check types for arguments of core.p4 methods
-class DoCheckCoreMethods : public Inspector {
-    ReferenceMap *refMap;
+class DoCheckCoreMethods : public Inspector, public ResolutionContext {
     TypeMap *typeMap;
 
     void checkEmitType(const IR::Expression *emit, const IR::Type *type) const;
     void checkCorelibMethods(const ExternMethod *em) const;
 
  public:
-    DoCheckCoreMethods(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
+    explicit DoCheckCoreMethods(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DoCheckCoreMethods");
     }
@@ -43,9 +42,9 @@ class DoCheckCoreMethods : public Inspector {
 
 class CheckCoreMethods : public PassManager {
  public:
-    CheckCoreMethods(ReferenceMap *refMap, TypeMap *typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new DoCheckCoreMethods(refMap, typeMap));
+    explicit CheckCoreMethods(TypeMap *typeMap) {
+        passes.push_back(new TypeInference(typeMap, true));
+        passes.push_back(new DoCheckCoreMethods(typeMap));
         setName("CheckCoreMethods");
     }
 };

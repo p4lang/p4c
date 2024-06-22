@@ -199,7 +199,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new SetStrictStruct(&typeMap, false),
             new SpecializeGenericFunctions(&refMap, &typeMap),
         }),
-        new CheckCoreMethods(&refMap, &typeMap),
+        new CheckCoreMethods(&typeMap),
         new StaticAssert(&refMap, &typeMap),
         new RemoveParserIfs(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
