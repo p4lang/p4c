@@ -26,7 +26,7 @@ bool DoEntryPriorities::requiresPriority(const IR::KeyElement *ke) const {
     // may require priorities.  Back-ends should implement additional
     // checks if that's not true.
     auto path = ke->matchType->path;
-    auto mt = refMap->getDeclaration(path, true)->to<IR::Declaration_ID>();
+    auto mt = getDeclaration(path, true)->to<IR::Declaration_ID>();
     BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
     if (mt->name.name == corelib.exactMatch.name || mt->name.name == corelib.lpmMatch.name)
         return false;

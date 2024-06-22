@@ -189,7 +189,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ValidateValueSets(),
         new DefaultValues(&refMap, &typeMap),
         new BindTypeVariables(&refMap, &typeMap),
-        new EntryPriorities(&refMap),
+        new EntryPriorities(),
         new PassRepeated({
             new SpecializeGenericTypes(&refMap, &typeMap),
             new DefaultArguments(&typeMap),  // add default argument values to parameters
