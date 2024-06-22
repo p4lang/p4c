@@ -186,7 +186,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SetStrictStruct(&typeMap, false),
         new ValidateMatchAnnotations(&typeMap),
         new ValidateValueSets(),
-        new DefaultValues(&refMap, &typeMap),
+        new DefaultValues(&typeMap),
         new BindTypeVariables(&refMap, &typeMap),
         new EntryPriorities(),
         new PassRepeated({
