@@ -10,7 +10,7 @@ namespace P4 {
 /// Currently, performs constant folding and strength reduction.
 inline const IR::Expression *optimizeExpression(const IR::Expression *node) {
     auto pass = PassRepeated({
-        new P4::StrengthReduction(nullptr, nullptr, nullptr),
+        new P4::StrengthReduction(nullptr, nullptr),
         new P4::ConstantFolding(nullptr, nullptr, false),
     });
     node = node->apply(pass);

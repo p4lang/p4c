@@ -182,7 +182,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
                 new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsLikeLeftValue())),
             new P4::RemoveExits(&refMap, &typeMap),
             new P4::ConstantFolding(&refMap, &typeMap),
-            new P4::StrengthReduction(&refMap, &typeMap),
+            new P4::StrengthReduction(&typeMap),
             new P4::SimplifySelectCases(&refMap, &typeMap, true),
             // The lookahead implementation in DPDK target supports only a header instance as
             // an operand, we do not expand headers.
@@ -192,7 +192,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::ExpandEmit(&refMap, &typeMap),
             new P4::HandleNoMatch(&refMap),
             new P4::SimplifyParsers(&refMap),
-            new P4::StrengthReduction(&refMap, &typeMap),
+            new P4::StrengthReduction(&typeMap),
             new P4::EliminateTuples(&refMap, &typeMap),
             new P4::SimplifyComparisons(&refMap, &typeMap),
             new P4::CopyStructures(&refMap, &typeMap, false /* errorOnMethodCall */),
@@ -210,8 +210,8 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),
-            new PassRepeated({new P4::ConstantFolding(&refMap, &typeMap),
-                              new P4::StrengthReduction(&refMap, &typeMap)}),
+            new PassRepeated(
+                {new P4::ConstantFolding(&refMap, &typeMap), new P4::StrengthReduction(&typeMap)}),
             new P4::MoveDeclarations(),
             validateTableProperties(options.arch),
             new P4::SimplifyControlFlow(&refMap, &typeMap),

@@ -87,8 +87,8 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
              // accept non-constant keysets
              new P4::SimplifySelectCases(&refMap, &typeMap, false), new P4::HandleNoMatch(&refMap),
              new P4::SimplifyParsers(&refMap),
-             new PassRepeated({new P4::ConstantFolding(&refMap, &typeMap),
-                               new P4::StrengthReduction(&refMap, &typeMap)}),
+             new PassRepeated(
+                 {new P4::ConstantFolding(&refMap, &typeMap), new P4::StrengthReduction(&typeMap)}),
              new P4::SimplifyComparisons(&refMap, &typeMap),
              new P4::CopyStructures(&refMap, &typeMap),
              new P4::LocalCopyPropagation(&refMap, &typeMap),
