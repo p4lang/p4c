@@ -191,11 +191,11 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new BindTypeVariables(&refMap, &typeMap),
         new EntryPriorities(),
         new PassRepeated({
-            new SpecializeGenericTypes(&refMap, &typeMap),
-            new DefaultArguments(&typeMap),  // add default argument values to parameters
-            new ResolveReferences(&refMap),
+            new SpecializeGenericTypes(&typeMap),
+            new DefaultArguments(&typeMap),       // add default argument values to parameters
             new SetStrictStruct(&typeMap, true),  // Next pass uses strict struct checking
             new TypeInference(&typeMap, false),   // more casts may be needed
+            new ResolveReferences(&refMap),
             new SetStrictStruct(&typeMap, false),
             new SpecializeGenericFunctions(&refMap, &typeMap),
         }),
