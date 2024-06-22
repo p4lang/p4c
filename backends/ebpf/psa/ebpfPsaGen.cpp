@@ -231,10 +231,10 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
         "}"_cs;
     if (options.emitTraceMessages) {
         forEachFunc = forEachFunc.replace(
-            "%trace_msg_no_elements%"_cs,
-            "        bpf_trace_message(\"do_for_each: No elements found in list\\n\");\n"_cs);
+            "%trace_msg_no_elements%",
+            "        bpf_trace_message(\"do_for_each: No elements found in list\\n\");\n");
     } else {
-        forEachFunc = forEachFunc.replace("%trace_msg_no_elements%"_cs, ""_cs);
+        forEachFunc = forEachFunc.replace("%trace_msg_no_elements%", "");
     }
     builder->appendLine(forEachFunc);
     builder->newline();
@@ -250,11 +250,11 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
         "}"_cs;
     if (options.emitTraceMessages) {
         cloneFunction = cloneFunction.replace(
-            cstring("%trace_msg_redirect%"),
-            "    bpf_trace_message(\"do_clone: cloning pkt, egress_port=%d, cos=%d\\n\", "_cs
-            "entry->egress_port, entry->class_of_service);\n"_cs);
+            "%trace_msg_redirect%",
+            "    bpf_trace_message(\"do_clone: cloning pkt, egress_port=%d, cos=%d\\n\", "
+            "entry->egress_port, entry->class_of_service);\n");
     } else {
-        cloneFunction = cloneFunction.replace("%trace_msg_redirect%"_cs, ""_cs);
+        cloneFunction = cloneFunction.replace("%trace_msg_redirect%", "");
     }
     builder->appendLine(cloneFunction);
     builder->newline();
@@ -284,24 +284,24 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
         " }"_cs;
     if (options.emitTraceMessages) {
         pktClonesFunc = pktClonesFunc.replace(
-            "%trace_msg_clone_requested%"_cs,
+            "%trace_msg_clone_requested%",
             "    bpf_trace_message(\"Clone#%d: pkt clone requested, session=%d\\n\", "
-            "caller_id, session_id);\n"_cs);
+            "caller_id, session_id);\n");
         pktClonesFunc = pktClonesFunc.replace(
-            "%trace_msg_clone_failed%"_cs,
-            "            bpf_trace_message(\"Clone#%d: failed to clone packet\", caller_id);\n"_cs);
+            "%trace_msg_clone_failed%",
+            "            bpf_trace_message(\"Clone#%d: failed to clone packet\", caller_id);\n");
         pktClonesFunc =
-            pktClonesFunc.replace("%trace_msg_no_session%"_cs,
+            pktClonesFunc.replace("%trace_msg_no_session%",
                                   "        bpf_trace_message(\"Clone#%d: session_id not found, "
-                                  "no clones created\\n\", caller_id);\n"_cs);
+                                  "no clones created\\n\", caller_id);\n");
         pktClonesFunc = pktClonesFunc.replace(
-            "%trace_msg_cloning_done%"_cs,
-            "    bpf_trace_message(\"Clone#%d: packet cloning finished\\n\", caller_id);\n"_cs);
+            "%trace_msg_cloning_done%",
+            "    bpf_trace_message(\"Clone#%d: packet cloning finished\\n\", caller_id);\n");
     } else {
-        pktClonesFunc = pktClonesFunc.replace("%trace_msg_clone_requested%"_cs, cstring::empty);
-        pktClonesFunc = pktClonesFunc.replace("%trace_msg_clone_failed%"_cs, cstring::empty);
-        pktClonesFunc = pktClonesFunc.replace("%trace_msg_no_session%"_cs, cstring::empty);
-        pktClonesFunc = pktClonesFunc.replace("%trace_msg_cloning_done%"_cs, cstring::empty);
+        pktClonesFunc = pktClonesFunc.replace("%trace_msg_clone_requested%", "");
+        pktClonesFunc = pktClonesFunc.replace("%trace_msg_clone_failed%", "");
+        pktClonesFunc = pktClonesFunc.replace("%trace_msg_no_session%", "");
+        pktClonesFunc = pktClonesFunc.replace("%trace_msg_cloning_done%", "");
     }
 
     builder->appendLine(pktClonesFunc);

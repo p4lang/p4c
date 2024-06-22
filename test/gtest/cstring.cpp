@@ -131,10 +131,10 @@ TEST(cstring, substr) {
 
 TEST(cstring, replace) {
     cstring c = "Original"_cs;
-    EXPECT_EQ(c.replace("in"_cs, "out"_cs), "Origoutal");
-    EXPECT_EQ(c.replace(""_cs, "out"_cs), c);
-    EXPECT_EQ(c.replace("i"_cs, "o"_cs), "Orogonal");
-    EXPECT_EQ(c.replace("i"_cs, ""_cs), "Orgnal");
+    EXPECT_EQ(c.replace("in", "out"), "Origoutal");
+    EXPECT_EQ(c.replace("", "out"), c);
+    EXPECT_EQ(c.replace("i", "o"), "Orogonal");
+    EXPECT_EQ(c.replace("i", ""), "Orgnal");
 }
 
 TEST(cstring, literalSuffix) {
