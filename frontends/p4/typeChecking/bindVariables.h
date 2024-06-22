@@ -1,7 +1,6 @@
 #ifndef FRONTENDS_P4_TYPECHECKING_BINDVARIABLES_H_
 #define FRONTENDS_P4_TYPECHECKING_BINDVARIABLES_H_
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -31,11 +30,9 @@ class DoBindTypeVariables : public Transform {
 
 class BindTypeVariables : public PassManager {
  public:
-    BindTypeVariables(ReferenceMap *refMap, TypeMap *typeMap) {
-        CHECK_NULL(refMap);
+    explicit BindTypeVariables(TypeMap *typeMap) {
         CHECK_NULL(typeMap);
         passes.push_back(new ClearTypeMap(typeMap));
-        passes.push_back(new ResolveReferences(refMap));
         passes.push_back(new TypeInference(typeMap, false));  // may insert casts
         passes.push_back(new DoBindTypeVariables(typeMap));
         passes.push_back(new ClearTypeMap(typeMap, true));

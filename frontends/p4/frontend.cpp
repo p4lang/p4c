@@ -187,7 +187,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ValidateMatchAnnotations(&typeMap),
         new ValidateValueSets(),
         new DefaultValues(&typeMap),
-        new BindTypeVariables(&refMap, &typeMap),
+        new BindTypeVariables(&typeMap),
         new EntryPriorities(),
         new PassRepeated({
             new SpecializeGenericTypes(&typeMap),
