@@ -27,14 +27,9 @@ namespace P4 {
  * Checks for the use of symbols that are marked as @deprecated and
  * gives warnings.
  */
-class CheckDeprecated : public Inspector {
-    const ReferenceMap *refMap;
-
+class CheckDeprecated : public Inspector, public ResolutionContext {
  public:
-    explicit CheckDeprecated(const ReferenceMap *refMap) : refMap(refMap) {
-        CHECK_NULL(refMap);
-        setName("CheckDeprecated");
-    }
+    CheckDeprecated() { setName("CheckDeprecated"); }
 
     void warnIfDeprecated(const IR::IAnnotated *declaration, const IR::Node *errorNode);
 
@@ -44,9 +39,8 @@ class CheckDeprecated : public Inspector {
 
 class Deprecated : public PassManager {
  public:
-    explicit Deprecated(ReferenceMap *refMap) {
-        passes.push_back(new ResolveReferences(refMap));
-        passes.push_back(new CheckDeprecated(refMap));
+    Deprecated() {
+        passes.push_back(new CheckDeprecated());
         setName("Deprecated");
     }
 };

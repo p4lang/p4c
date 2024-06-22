@@ -177,8 +177,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // Desugars direct parser and control applications
         // into instantiations followed by application
         new InstantiateDirectCalls(),
-        new ResolveReferences(&refMap),
-        new Deprecated(&refMap),
+        new Deprecated(),
         new CheckNamedArgs(),
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
