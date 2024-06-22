@@ -48,7 +48,7 @@ std::unordered_multimap<cstring, const IR::IDeclaration *> &ResolutionContext::m
 std::vector<const IR::IDeclaration *> ResolutionContext::resolve(const IR::ID &name,
                                                                  P4::ResolutionType type) const {
     const Context *ctxt = nullptr;
-    while (auto scope = findContext<IR::INamespace>(ctxt)) {
+    while (auto scope = findOrigCtxt<IR::INamespace>(ctxt)) {
         auto rv = lookup(scope, name, type);
         if (!rv.empty()) return rv;
     }
@@ -59,7 +59,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::resolve(const IR::ID &n
 std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INamespace *current,
                                                                 const IR::ID &name,
                                                                 P4::ResolutionType type) const {
-    LOG2("Trying to resolve in " << current->toString());
+    LOG2("Trying to resolve in " << dbp(current));
 
     if (const auto *gen = current->to<IR::IGeneralNamespace>()) {
         // FIXME: implement range filtering without enumerator wrappers
@@ -169,7 +169,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
 }
 
 std::vector<const IR::IDeclaration *> ResolutionContext::lookupMatchKind(const IR::ID &name) const {
-    if (const auto *global = findContext<IR::P4Program>()) {
+    if (const auto *global = findOrigCtxt<IR::P4Program>()) {
         for (const auto *obj : global->objects) {
             if (const auto *match_kind = obj->to<IR::Declaration_MatchKind>()) {
                 auto rv = lookup(match_kind, name, ResolutionType::Any);
@@ -246,7 +246,10 @@ const IR::IDeclaration *ResolutionContext::resolveUnique(const IR::ID &name,
         ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", name);
         return nullptr;
     }
-    if (decls.size() == 1) return decls.front();
+    if (decls.size() == 1) {
+        LOG2("Lookup result: " << dbp(decls.front()));
+        return decls.front();
+    }
 
     ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", name);
     for (const auto *a : decls) ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
@@ -257,7 +260,7 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
                                                           bool notNull) const {
     const IR::IDeclaration *result = nullptr;
     const Context *ctxt = nullptr;
-    if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 2) {
+    if (findOrigCtxt<IR::KeyElement>(ctxt) && ctxt->child_index == 2) {
         // looking up a matchType in a key, so need to do a special lookup
         auto decls = lookupMatchKind(path->name);
         if (decls.empty()) {
@@ -273,7 +276,7 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
         if (getParent<IR::Type_Name>() || getOriginal()->is<IR::Type_Name>())
             rtype = ResolutionType::Type;
         const IR::INamespace *ns = nullptr;
-        if (path->absolute) ns = findContext<IR::P4Program>();
+        if (path->absolute) ns = findOrigCtxt<IR::P4Program>();
 
         result = resolveUnique(path->name, rtype, ns);
     }
@@ -283,8 +286,8 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
 
 const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::This *pointer,
                                                           bool notNull) const {
-    auto result = findContext<IR::Declaration_Instance>();
-    if (findContext<IR::Function>() == nullptr || result == nullptr)
+    auto result = findOrigCtxt<IR::Declaration_Instance>();
+    if (findOrigCtxt<IR::Function>() == nullptr || result == nullptr)
         ::error(ErrorType::ERR_INVALID,
                 "%1% can only be used in the definition of an abstract method", pointer);
     if (notNull) BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", pointer);
@@ -307,7 +310,7 @@ ResolveReferences::ResolveReferences(ReferenceMap *refMap, bool checkShadow)
 const IR::IDeclaration *ResolutionContext::resolvePath(const IR::Path *path, bool isType) const {
     LOG2("Resolving path " << path << " " << (isType ? "as type" : "as identifier"));
     const IR::INamespace *ctxt = nullptr;
-    if (path->absolute) ctxt = findContext<IR::P4Program>();
+    if (path->absolute) ctxt = findOrigCtxt<IR::P4Program>();
     ResolutionType k = isType ? ResolutionType::Type : ResolutionType::Any;
     return resolveUnique(path->name, k, ctxt);
 }
