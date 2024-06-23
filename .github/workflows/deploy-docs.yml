@@ -42,7 +42,7 @@ jobs:
             - name: Clone Doxygen Awesome CSS Themes
               working-directory: ./docs/doxygen
               run: |
-                git clone --depth 1 -b v${{ env.DOXYGEN_AWESOME_VERSION }} https://github.com/jothepro/doxygen-awesome-css
+                git clone --depth 1 -b v${{ env.DOXYGEN_AWESOME_VERSION }} https://github.com/jothepro/doxygen-awesome-css awesome_css
 
             - name: Generate Doxygen Documentation
               run: |
