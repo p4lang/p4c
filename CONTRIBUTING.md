@@ -5,6 +5,8 @@ Thank you for considering contributing to the P4 Compiler Project (P4C)! Your co
 ## Contributing License
 The P4 organizations uses [DCO](https://en.wikipedia.org/wiki/Developer_Certificate_of_Origin) for contributions. Please take a look at our [guidelines](https://github.com/p4lang/governance/wiki/P4-DCO-Guidelines).
 
+To sign off the last commit quickly use the `git commit --amend --signoff` command. The failing check will also include instructions on how to sign off all commits in two steps (using `git rebase HEAD~$NUM_COMMITS --signoff`)
+
 ## Coding Standard Philosophy
 
 Please note that this project adheres to the [P4 Coding Standard Philosophy](https://github.com/p4lang/p4c/blob/main/docs/CodingStandardPhilosophy.md). By participating, you are expected to uphold this code. 
