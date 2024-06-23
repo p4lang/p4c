@@ -143,7 +143,7 @@ void IR::Apply::dbprint(std::ostream &out) const {
 }
 
 void IR::BoolLiteral::dbprint(std::ostream &out) const {
-    out << value;
+    out << (value ? "true" : "false");
     if (getprec(out) == 0) out << ';';
 }
 
