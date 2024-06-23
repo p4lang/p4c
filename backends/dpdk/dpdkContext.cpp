@@ -166,9 +166,10 @@ void DpdkContextGenerator::addKeyField(Util::JsonArray *keyJson, const cstring n
                                        const cstring nameAnnotation, const IR::KeyElement *key,
                                        int position) {
     auto *keyField = new Util::JsonObject();
-    cstring fieldName = cstring(name.findlast('.'));
-    auto instanceName = name.replace(fieldName, cstring::empty);
-    fieldName = fieldName.trim(".\t\n\r");
+    const auto *fieldNamePos = name.findlast('.');
+    auto instanceName = name.replace(fieldNamePos, "");
+    // FIXME: trim string_view
+    cstring fieldName = cstring(fieldNamePos).trim(".\t\n\r");
     std::string keyName(nameAnnotation);
     // Replace header stack indices hdr[<index>] with hdr$<index>.
     std::regex hdrStackRegex(R"(\[([0-9]+)\])");

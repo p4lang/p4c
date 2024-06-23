@@ -730,7 +730,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         if (auto member = expr->to<IR::Member>()) {
             if (auto pathExpr = member->expr->to<IR::PathExpression>()) {
                 if (isPointerVariable(pathExpr->path->name.name)) {
-                    exprStr = exprStr.replace("."_cs, "->"_cs);
+                    exprStr = exprStr.replace(".", "->");
                 }
             }
         }

@@ -16,6 +16,9 @@ limitations under the License.
 
 #include "cstring.h"
 
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_replace.h"
+
 #if HAVE_LIBGC
 #include <gc_cpp.h>
 #define IF_HAVE_LIBGC(X) X
@@ -214,32 +217,32 @@ cstring cstring::substr(size_t start, size_t length) const {
 }
 
 cstring cstring::replace(char c, char with) const {
+    if (isNullOrEmpty()) return *this;
     char *dup = strdup(c_str());
     for (char *p = dup; *p; ++p)
         if (*p == c) *p = with;
     return cstring(dup);
 }
 
-cstring cstring::replace(cstring search, cstring replace) const {
-    if (search.isNullOrEmpty() || isNullOrEmpty()) return *this;
+cstring cstring::replace(std::string_view search, std::string_view replace) const {
+    if (search.empty() || isNullOrEmpty()) return *this;
 
-    std::string s_str = str;
-    std::string s_search = search.str;
-    std::string s_replace = replace.str;
+    return cstring(absl::StrReplaceAll(str, {{search, replace}}));
+}
 
-    size_t pos = 0;
-    while ((pos = s_str.find(s_search, pos)) != std::string::npos) {
-        s_str.replace(pos, s_search.length(), s_replace);
-        pos += s_replace.length();
-    }
-    return cstring(s_str);
+cstring cstring::trim(const char *ws) const {
+    if (isNullOrEmpty()) return *this;
+
+    const char *start = str + strspn(str, ws);
+    size_t len = strlen(start);
+    while (len > 0 && strchr(ws, start[len - 1])) --len;
+    return cstring(start, len);
 }
 
 cstring cstring::indent(size_t amount) const {
-    std::string spaces = "";
-    for (size_t i = 0; i < amount; i++) spaces += " ";
-    cstring spc = newline + spaces;
-    return cstring(spaces) + replace(newline, spc);
+    std::string spaces(amount, ' ');
+    std::string spc = "\n" + spaces;
+    return cstring(absl::StrCat(spaces, absl::StrReplaceAll(string_view(), {{"\n", spc}})));
 }
 
 // See https://stackoverflow.com/a/33799784/4538702
@@ -285,20 +288,17 @@ cstring cstring::escapeJson() const {
 cstring cstring::toUpper() const {
     std::string st = str;
     std::transform(st.begin(), st.end(), st.begin(), ::toupper);
-    cstring ret = cstring::to_cstring(st);
-    return ret;
+    return cstring(st);
 }
 
 cstring cstring::toLower() const {
     std::string st = str;
     std::transform(st.begin(), st.end(), st.begin(), ::tolower);
-    cstring ret = cstring::to_cstring(st);
-    return ret;
+    return cstring(st);
 }
 
 cstring cstring::capitalize() const {
     std::string st = str;
     st[0] = ::toupper(st[0]);
-    cstring ret = cstring::to_cstring(st);
-    return ret;
+    return cstring(st);
 }

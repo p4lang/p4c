@@ -412,38 +412,36 @@ cstring EBPFMeterPSA::meterExecuteFunc(bool trace, P4::ReferenceMap *refMap) {
         "}\n"_cs;
 
     if (trace) {
-        meterExecuteFunc = meterExecuteFunc.replace(cstring("%trace_msg_meter_green%"),
+        meterExecuteFunc = meterExecuteFunc.replace("%trace_msg_meter_green%",
                                                     "        bpf_trace_message(\""
-                                                    "Meter: GREEN\\n\");\n"_cs);
-        meterExecuteFunc = meterExecuteFunc.replace(cstring("%trace_msg_meter_yellow%"),
+                                                    "Meter: GREEN\\n\");\n");
+        meterExecuteFunc = meterExecuteFunc.replace("%trace_msg_meter_yellow%",
                                                     "            bpf_trace_message(\""
-                                                    "Meter: YELLOW\\n\");\n"_cs);
-        meterExecuteFunc = meterExecuteFunc.replace(cstring("%trace_msg_meter_red%"),
+                                                    "Meter: YELLOW\\n\");\n");
+        meterExecuteFunc = meterExecuteFunc.replace("%trace_msg_meter_red%",
                                                     "            bpf_trace_message(\""
-                                                    "Meter: RED\\n\");\n"_cs);
+                                                    "Meter: RED\\n\");\n");
         meterExecuteFunc =
-            meterExecuteFunc.replace(cstring("%trace_msg_meter_no_value%"),
+            meterExecuteFunc.replace("%trace_msg_meter_no_value%",
                                      "        bpf_trace_message(\"Meter: No meter value! "
-                                     "Returning default GREEN\\n\");\n"_cs);
+                                     "Returning default GREEN\\n\");\n");
         meterExecuteFunc =
-            meterExecuteFunc.replace(cstring("%trace_msg_meter_execute_bytes%"),
-                                     "    bpf_trace_message(\"Meter: execute BYTES\\n\");\n"_cs);
+            meterExecuteFunc.replace("%trace_msg_meter_execute_bytes%",
+                                     "    bpf_trace_message(\"Meter: execute BYTES\\n\");\n");
         meterExecuteFunc =
-            meterExecuteFunc.replace(cstring("%trace_msg_meter_execute_packets%"),
-                                     "    bpf_trace_message(\"Meter: execute PACKETS\\n\");\n"_cs);
+            meterExecuteFunc.replace("%trace_msg_meter_execute_packets%",
+                                     "    bpf_trace_message(\"Meter: execute PACKETS\\n\");\n");
     } else {
-        meterExecuteFunc = meterExecuteFunc.replace(cstring("%trace_msg_meter_green%"), ""_cs);
-        meterExecuteFunc = meterExecuteFunc.replace(cstring("%trace_msg_meter_yellow%"), ""_cs);
-        meterExecuteFunc = meterExecuteFunc.replace(cstring("%trace_msg_meter_red%"), ""_cs);
-        meterExecuteFunc = meterExecuteFunc.replace(cstring("%trace_msg_meter_no_value%"), ""_cs);
-        meterExecuteFunc =
-            meterExecuteFunc.replace(cstring("%trace_msg_meter_execute_bytes%"), ""_cs);
-        meterExecuteFunc =
-            meterExecuteFunc.replace(cstring("%trace_msg_meter_execute_packets%"), ""_cs);
+        meterExecuteFunc = meterExecuteFunc.replace("%trace_msg_meter_green%", "");
+        meterExecuteFunc = meterExecuteFunc.replace("%trace_msg_meter_yellow%", "");
+        meterExecuteFunc = meterExecuteFunc.replace("%trace_msg_meter_red%", "");
+        meterExecuteFunc = meterExecuteFunc.replace("%trace_msg_meter_no_value%", "");
+        meterExecuteFunc = meterExecuteFunc.replace("%trace_msg_meter_execute_bytes%", "");
+        meterExecuteFunc = meterExecuteFunc.replace("%trace_msg_meter_execute_packets%", "");
     }
 
-    meterExecuteFunc = meterExecuteFunc.replace(cstring("%meter_struct%"),
-                                                cstring("struct ") + getBaseStructName(refMap));
+    meterExecuteFunc =
+        meterExecuteFunc.replace("%meter_struct%", "struct " + getBaseStructName(refMap));
 
     return meterExecuteFunc;
 }
