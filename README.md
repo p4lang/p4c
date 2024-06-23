@@ -304,7 +304,8 @@ sudo apt-get install -y doxygen graphviz texlive-full
 ```
 **Theme** 
 ```bash
-git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css awesome_css
+git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
+
 ```
 
 `P4C` also depends on Google Protocol Buffers (Protobuf). `P4C` requires version
