@@ -46,3 +46,6 @@ bazel-*
 # JetBrains
 .idea/
 docs/doxygen/p4c-doxygen-warn.log
+
+# Local Documentation build files
+docs/doxygen/doxygen-awesome-css/
