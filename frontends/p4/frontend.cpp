@@ -201,7 +201,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new StaticAssert(&typeMap),
         new ResolveReferences(&refMap),
         new RemoveParserIfs(&refMap, &typeMap),
-        new StructInitializers(&refMap, &typeMap),
+        new StructInitializers(&typeMap),
         new TableKeyNames(&refMap, &typeMap),
         new PassRepeated({
             new ConstantFolding(&typeMap, constantFoldingPolicy),
