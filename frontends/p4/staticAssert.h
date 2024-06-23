@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef FRONTENDS_P4_STATICASSERT_H_
 #define FRONTENDS_P4_STATICASSERT_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -29,23 +30,20 @@ using namespace literals;
  * Evaluates static_assert invocations.
  * A successful assertion is constant-folded to 'true'.
  */
-class DoStaticAssert : public Transform {
-    ReferenceMap *refMap;
+class DoStaticAssert : public Transform, public ResolutionContext {
     TypeMap *typeMap;
-    bool removeStatement;
+    bool removeStatement = false;
 
     // Cannot go static here as cstring is not constexpr
     const cstring staticAssertMethodName = "static_assert"_cs;
 
  public:
-    DoStaticAssert(ReferenceMap *refMap, TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap), removeStatement(false) {
-        CHECK_NULL(refMap);
+    explicit DoStaticAssert(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DoStaticAssert");
     }
     const IR::Node *postorder(IR::MethodCallExpression *method) override {
-        MethodInstance *mi = MethodInstance::resolve(method, refMap, typeMap);
+        MethodInstance *mi = MethodInstance::resolve(method, this, typeMap);
         if (auto ef = mi->to<ExternFunction>()) {
             if (ef->method->name == staticAssertMethodName) {
                 auto subst = ef->substitution;
@@ -61,14 +59,14 @@ class DoStaticAssert : public Transform {
                 CHECK_NULL(arg);
                 if (auto bl = arg->expression->to<IR::BoolLiteral>()) {
                     if (!bl->value) {
-                        cstring message = "static_assert failed"_cs;
+                        std::string_view message = "static_assert failed";
                         if (params->moveNext()) {
                             param = params->getCurrent();
                             CHECK_NULL(param);
                             auto msg = subst.lookup(param);
                             CHECK_NULL(msg);
-                            if (auto sl = msg->expression->to<IR::StringLiteral>()) {
-                                message = sl->value;
+                            if (const auto *sl = msg->expression->to<IR::StringLiteral>()) {
+                                message = sl->value.string_view();
                             }
                         }
                         ::error(ErrorType::ERR_EXPECTED, "%1%: %2%", method, message);
@@ -100,9 +98,9 @@ class DoStaticAssert : public Transform {
 
 class StaticAssert : public PassManager {
  public:
-    StaticAssert(ReferenceMap *refMap, TypeMap *typeMap) {
+    explicit StaticAssert(TypeMap *typeMap) {
         passes.push_back(new TypeInference(typeMap));
-        passes.push_back(new DoStaticAssert(refMap, typeMap));
+        passes.push_back(new DoStaticAssert(typeMap));
         setName("StaticAssert");
     }
 };
