@@ -2,6 +2,9 @@
 
 Thank you for considering contributing to the P4 Compiler Project (P4C)! Your contributions are valuable and help improve the project for everyone. Before getting started, please take a moment to review the following guidelines.
 
+## Contributing License
+The P4 organizations uses [DCO](https://en.wikipedia.org/wiki/Developer_Certificate_of_Origin) for contributions. Please take a look at our [guidelines](https://github.com/p4lang/governance/wiki/P4-DCO-Guidelines).
+
 ## Coding Standard Philosophy
 
 Please note that this project adheres to the [P4 Coding Standard Philosophy](https://github.com/p4lang/p4c/blob/main/docs/CodingStandardPhilosophy.md). By participating, you are expected to uphold this code. 
