@@ -215,7 +215,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::MoveDeclarations(),
             validateTableProperties(options.arch),
             new P4::SimplifyControlFlow(&refMap, &typeMap),
-            new P4::SimplifySwitch(&refMap, &typeMap),
+            new P4::SimplifySwitch(&typeMap),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&refMap, &typeMap),
             new P4::RemoveLeftSlices(&refMap, &typeMap),

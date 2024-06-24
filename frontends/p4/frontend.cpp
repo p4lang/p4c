@@ -220,7 +220,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new MoveInitializers(),
         new SideEffectOrdering(&refMap, &typeMap, policy->skipSideEffectOrdering()),
         new SimplifyControlFlow(&refMap, &typeMap),
-        new SimplifySwitch(&refMap, &typeMap),
+        new SimplifySwitch(&typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new SimplifyDefUse(&refMap, &typeMap),
         new UniqueParameters(&refMap, &typeMap),
