@@ -1,8 +1,8 @@
+#include <absl/strings/substitute.h>
 #include <gtest/gtest.h>
 
 #include <optional>
 
-#include "absl/strings/substitute.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/toP4/toP4.h"

@@ -21,11 +21,12 @@ limitations under the License.
 
 #include <unistd.h>
 
+#include <absl/strings/str_cat.h>
+
 #include <exception>
 
 #include <boost/format.hpp>
 
-#include "absl/strings/str_cat.h"
 #include "lib/bug_helper.h"
 
 namespace Util {

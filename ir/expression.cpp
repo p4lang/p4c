@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <absl/container/flat_hash_map.h>
+
 #include <ostream>
 
-#include "absl/container/flat_hash_map.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"

@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef LIB_BUG_HELPER_H_
 #define LIB_BUG_HELPER_H_
 
+#include <absl/strings/str_cat.h>
+
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -24,7 +26,6 @@ limitations under the License.
 
 #include <boost/format.hpp>
 
-#include "absl/strings/str_cat.h"
 #include "cstring.h"
 #include "source_file.h"
 #include "stringify.h"

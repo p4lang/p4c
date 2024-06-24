@@ -3,6 +3,8 @@
 #include <z3++.h>
 #include <z3_api.h>
 
+#include <absl/strings/str_format.h>
+
 #include <algorithm>
 #include <cstdint>
 #include <exception>
@@ -13,7 +15,6 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "absl/strings/str_format.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/json_loader.h"  // IWYU pragma: keep
