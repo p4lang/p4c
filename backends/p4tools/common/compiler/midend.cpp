@@ -103,7 +103,7 @@ void MidEnd::addDefaultPasses() {
         // Make sure that we have no TypeDef left in the program.
         new P4::EliminateTypedef(&refMap, &typeMap),
         // Remove in/inout/out action parameters.
-        new P4::RemoveActionParameters(&refMap, &typeMap),
+        new P4::RemoveActionParameters(&typeMap),
         // Sort call arguments according to the order of the function's parameters.
         new P4::OrderArguments(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),

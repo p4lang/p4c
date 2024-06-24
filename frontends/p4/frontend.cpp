@@ -245,7 +245,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             // Must be done before inlining functions, to allow
             // function calls used as action arguments to be inlined
             // in the proper place.
-            new RemoveActionParameters(&refMap, &typeMap),
+            new RemoveActionParameters(&typeMap),
             new InlineFunctions(&refMap, &typeMap, *policy),
             new SetHeaders(&refMap, &typeMap),
             // Check for constants only after inlining
