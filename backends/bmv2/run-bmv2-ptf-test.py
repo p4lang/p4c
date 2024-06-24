@@ -187,7 +187,11 @@ class NNEnv(PTFTestEnv):
         # Add the tools PTF folder to the python path, it contains the base test.
         pypath = ROOT_DIR.joinpath("tools/ptf")
         # Show list of the tests
-        test_list_cmd = f"ptf --pypath {pypath} --test-dir {self.options.testdir} --list"
+        test_list_cmd = (
+            f"ptf --pypath {pypath} "
+            f"--log-file {self.options.testdir.joinpath('ptf.log')} "
+            f"--test-dir {self.options.testdir} --list"
+        )
         returncode = self.bridge.ns_exec(test_list_cmd)
         if returncode != testutils.SUCCESS:
             return returncode
