@@ -666,41 +666,6 @@ extern T SelectByDirection<T>(
     in T n2h_value,
     in T h2n_value);
 
-
-
-
-// BEGIN:Programmable_blocks
-control PreControlT<PH, PM>(
-    in    PH pre_hdr,
-    inout PM pre_user_meta,
-    in    pna_pre_input_metadata_t  istd,
-    inout pna_pre_output_metadata_t ostd);
-
-parser MainParserT<MH, MM>(
-    packet_in pkt,
-    //in    PM pre_user_meta,
-    out   MH main_hdr,
-    inout MM main_user_meta,
-    in    pna_main_parser_input_metadata_t istd);
-
-control MainControlT<MH, MM>(
-    //in    PM pre_user_meta,
-    inout MH main_hdr,
-    inout MM main_user_meta,
-    in    pna_main_input_metadata_t  istd,
-    inout pna_main_output_metadata_t ostd);
-
-control MainDeparserT<MH, MM>(
-    packet_out pkt,
-    in    MH main_hdr,
-    in    MM main_user_meta,
-    in    pna_main_output_metadata_t ostd);
-
-package PNA_NIC<PH, PM, MH, MM>(
-    MainParserT<MH, MM> main_parser,
-    PreControlT<PH, PM> pre_control,
-    MainControlT<MH, MM> main_control,
-    MainDeparserT<MH, MM> main_deparser);
-// END:Programmable_blocks
+#include <pna/v0_5/blocks.p4>
 
 #endif   // __PNA_P4__
