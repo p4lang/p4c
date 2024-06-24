@@ -34,12 +34,12 @@ This random program generator generates random packages and tries to produce all
 P4Smith supports generating P4 programs for the `v1model` and `psa` architecture on [BMv2](https://github.com/p4lang/behavioral-model).
 
 ### pna.p4 on the DPDK SoftNIC
-[targets/pna](targets/pna)
+[targets/fpga](targets/nic)
 
 The [DPDK-SoftNIC](https://github.com/p4lang/p4-dpdk-target) is a new target implemented using the [Data Plane Development Kit (DPDK)](https://www.dpdk.org/). The SoftNIC can be programmed using the P4 `pna.p4` architecture.
 
 ### tna.p4 on Tofino 1
-[targets/ebpf](targets/ebpf)
+[targets/tna](targets/tofino)
 
 P4Smith can also generate programs for the `tna` architecture on Tofino 1. The programs are intended to be compiled on the proprietary Barefoot Tofino compiler.
 
