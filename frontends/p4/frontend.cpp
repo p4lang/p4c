@@ -247,7 +247,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             // in the proper place.
             new RemoveActionParameters(&typeMap),
             new InlineFunctions(&refMap, &typeMap, *policy),
-            new SetHeaders(&refMap, &typeMap),
+            new SetHeaders(&typeMap),
             // Check for constants only after inlining
             new CheckConstants(&refMap, &typeMap),
             new ConstantFolding(&typeMap, constantFoldingPolicy),
