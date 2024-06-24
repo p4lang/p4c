@@ -1,5 +1,7 @@
 var NAVTREEINDEX18 =
 {
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_action_profile_traits_3_01_arch_1_1_v1_m_o_d_e_l_01_4.html":[31,0,5,0,1,4],
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_action_profile_traits_3_01_arch_1_1_v1_m_o_d_e_l_01_4.html":[32,0,11,1,1,4],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_action_selector.html":[31,0,5,0,1,6],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_action_selector.html":[32,0,11,1,1,6],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_action_selector_traits_3_01_arch_1_1_p_n_a_01_4.html":[31,0,5,0,1,8],
@@ -247,7 +249,5 @@ var NAVTREEINDEX18 =
 "struct_t_c_1_1_table_attributes.html":[32,0,19,39],
 "struct_u_b_p_f_1_1_algorithm___model.html":[32,0,21,0],
 "struct_u_b_p_f_1_1_hash___model.html":[32,0,21,2],
-"struct_u_b_p_f_1_1_pipeline___model.html":[32,0,21,5],
-"struct_u_b_p_f_1_1_register___model.html":[32,0,21,6],
-"struct_util_1_1_detail_1_1_float_hasher.html":[32,0,22,0,0]
+"struct_u_b_p_f_1_1_pipeline___model.html":[32,0,21,5]
 };

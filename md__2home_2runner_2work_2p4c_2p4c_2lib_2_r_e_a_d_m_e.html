@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.11.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: Common Utilities</title>
+<title>P4C: Common P4C utility functions</title>
 <link rel="icon" href="p4-fav.svg" type="image/svg+xml"  />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -115,65 +115,65 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2lib_2_r_e_a_d_m_e.h
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Common Utilities</div></div>
+  <div class="headertitle"><div class="title">Common P4C utility functions</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md190"></a> This directory contains miscellaneous utilities that are generally useful and not specific to any part of the compiler. Most are not even compiler specific. The files in this folder should only depend on each other; they cannot depend on any other compiler files.</p>
-<h4><a class="anchor" id="autotoc_md191"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md199"></a> This directory contains miscellaneous utilities that are generally useful and not specific to any part of the compiler. Most are not even compiler specific. The files in this folder should only depend on each other; they cannot depend on any other compiler files.</p>
+<h4><a class="anchor" id="autotoc_md200"></a>
 algorithm.h</h4>
 <p>wrapper around <code>&lt;algorithm&gt;</code> that contains severla useful additional algorithms</p>
-<h4><a class="anchor" id="autotoc_md192"></a>
+<h4><a class="anchor" id="autotoc_md201"></a>
 bitops.h</h4>
 <p>bit manipulation operations</p>
-<h4><a class="anchor" id="autotoc_md193"></a>
+<h4><a class="anchor" id="autotoc_md202"></a>
 bitvec.h, bitvec.cpp</h4>
 <p>dynamic bitvectors with useful operations. The standard types <code>std::vector&lt;bool&gt;</code> and <code>std::bitsec</code> are missing crucial functionality, making them generally useless.</p>
-<h4><a class="anchor" id="autotoc_md194"></a>
+<h4><a class="anchor" id="autotoc_md203"></a>
 cstring.h, cstring.cpp</h4>
 <p>constant strings. The standard library <code>std::string</code> type is mutable, allowing the string to be changed dynamically. Constant strings are what we would prefer to use in the compiler. <code>cstring</code> keeps the memory for all constant strings in a single global pool, allowing constant time comparisons.</p>
-<h4><a class="anchor" id="autotoc_md195"></a>
+<h4><a class="anchor" id="autotoc_md204"></a>
 default.h</h4>
 <p>Synthesizing default values of various types (e.g., 0 for integers, nullptr for pointers, etc.)</p>
-<h4><a class="anchor" id="autotoc_md196"></a>
+<h4><a class="anchor" id="autotoc_md205"></a>
 enumerator.h, enumerator.cpp</h4>
 <p>C#-like enumerator interface.</p>
-<h4><a class="anchor" id="autotoc_md197"></a>
+<h4><a class="anchor" id="autotoc_md206"></a>
 error.h, error.cpp, expresions.h</h4>
 <p>Error reporting functions.</p>
-<h4><a class="anchor" id="autotoc_md198"></a>
+<h4><a class="anchor" id="autotoc_md207"></a>
 gc.cpp</h4>
 <p>Overrides global <code>operator new</code> and <code>delete</code> to use the Boehm/Demers/Weiser conservative collector, so all memory allocations are garbage collected</p>
-<h4><a class="anchor" id="autotoc_md199"></a>
+<h4><a class="anchor" id="autotoc_md208"></a>
 hex.h, hex.cpp</h4>
 <p>Adaptor for more conveniently printing hexadecimal string with ostreams.</p>
-<h4><a class="anchor" id="autotoc_md200"></a>
+<h4><a class="anchor" id="autotoc_md209"></a>
 indent.h, indent.cpp</h4>
 <p>Adaptor for managing indentation on ostreams</p>
-<h4><a class="anchor" id="autotoc_md201"></a>
+<h4><a class="anchor" id="autotoc_md210"></a>
 log.h, log.cpp</h4>
 <p>Macros and support for logging that can be managed on a per-source-file basis</p>
-<h4><a class="anchor" id="autotoc_md202"></a>
+<h4><a class="anchor" id="autotoc_md211"></a>
 ltbitmatrix.h</h4>
 <p>Adaptor using a <code>bitvec</code> as a lower-triangular bit matrix.</p>
-<h4><a class="anchor" id="autotoc_md203"></a>
+<h4><a class="anchor" id="autotoc_md212"></a>
 map.h</h4>
 <p>Wrapper around <code>map</code>, adding some useful functions that are missing from <code>std::map</code></p>
-<h4><a class="anchor" id="autotoc_md204"></a>
+<h4><a class="anchor" id="autotoc_md213"></a>
 nullstream.h</h4>
 <p>A simple ostream that does nothing.</p>
-<h4><a class="anchor" id="autotoc_md205"></a>
+<h4><a class="anchor" id="autotoc_md214"></a>
 options.h, options.cpp</h4>
 <p>Represents compiler command-line options.</p>
-<h4><a class="anchor" id="autotoc_md206"></a>
+<h4><a class="anchor" id="autotoc_md215"></a>
 range.h</h4>
 <p>Iterators over numeric ranges.</p>
-<h4><a class="anchor" id="autotoc_md207"></a>
+<h4><a class="anchor" id="autotoc_md216"></a>
 source_file.h, source_file.cpp</h4>
 <p>Represents the input source of the compiler and source file position information used for error reporting and generating debugging information.</p>
-<h4><a class="anchor" id="autotoc_md208"></a>
+<h4><a class="anchor" id="autotoc_md217"></a>
 stringify.h, stringify.cppp</h4>
 <p>Conversion of various types to strings.</p>
-<h4><a class="anchor" id="autotoc_md209"></a>
+<h4><a class="anchor" id="autotoc_md218"></a>
 sourceCodeBuilder.h</h4>
 <p>Support for emitting programs in source (works for <a class="el" href="namespace_p4.html">P4</a> and C). </p>
 </div></div><!-- contents -->

@@ -118,8 +118,8 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2
   <div class="headertitle"><div class="title">P4Tools - Testing Tools For P4 Targets</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md156"></a> </p>
-<h1><a class="anchor" id="autotoc_md157"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md164"></a> </p>
+<h1><a class="anchor" id="autotoc_md165"></a>
 Directory Structure</h1>
 <div class="fragment"><div class="line">p4tools</div>
 <div class="line"> ├─ cmake            ── common P4Tools CMake modules.</div>
@@ -131,21 +131,21 @@ Directory Structure</h1>
 <div class="line"> └─  modules         ── P4Tools extensions.</div>
 <div class="line">    ├─ smith       ── P4Smith: a random P4 program generator.</div>
 <div class="line">    └─ testgen       ── P4Testgen: a test-case generator for P4 programs.</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md158"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md166"></a>
 P4Tools</h1>
 <p><a class="el" href="namespace_p4_tools.html">P4Tools</a> is a collection of tools that make testing <a class="el" href="namespace_p4.html">P4</a> targets and programs a little easier. So far the platform supports the following tools and projects:</p>
 <ul>
 <li><a href="https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/testgen">P4Testgen</a>: An input-output test case generator for <a class="el" href="namespace_p4.html">P4</a>.</li>
 <li><a href="https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/smith">P4Smith</a>: A random <a class="el" href="namespace_p4.html">P4</a> program generator in the spirit of Csmith.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md159"></a>
+<h1><a class="anchor" id="autotoc_md167"></a>
 Building</h1>
 <p>Please see the general installation instructions <a href="https://github.com/p4lang/p4c#installing-p4c-from-source">here</a>. <a class="el" href="namespace_p4_tools.html">P4Tools</a> can be built using the following CMAKE configuration in the P4C repository.</p>
 <div class="fragment"><div class="line">mkdir build</div>
 <div class="line">cd build</div>
 <div class="line">cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DENABLE_TEST_TOOLS=ON</div>
 <div class="line">make</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md160"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md168"></a>
 Dependencies</h1>
 <ul>
 <li><a href="https://github.com/Z3Prover/z3">z3</a> SMT solver to compute path constraints.<ul>
@@ -154,7 +154,7 @@ Dependencies</h1>
 </li>
 </ul>
 <p>These dependencies are automatically installed via CMakelist's <a href="https://cmake.org/cmake/help/latest/module/FetchContent.html">FetchContent</a> module.</p>
-<h1><a class="anchor" id="autotoc_md161"></a>
+<h1><a class="anchor" id="autotoc_md169"></a>
 Development Style</h1>
 <p>Currently, each C++ source directory has a few subdirectories, including:</p><ul>
 <li><code>core</code>, containing the core functionality of the submodule; and</li>
@@ -164,7 +164,7 @@ Development Style</h1>
 <li>If it depends on anything in <code>core</code>, it belongs in <code>core</code>.</li>
 <li>If it's something that resembles a general-purpose data structure (e.g., an environment or a symbol table), it's probably in <code>lib</code>.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md162"></a>
+<h2><a class="anchor" id="autotoc_md170"></a>
 C++ Coding style</h2>
 <p><a class="el" href="namespace_p4_tools.html">P4Tools</a> in general follows the <a href="https://github.com/p4lang/p4c/blob/main/docs/README.md#coding-conventions">P4C coding style</a>. Some deviations from the Style Guide are highlighted below.</p>
 <ul>
