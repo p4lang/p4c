@@ -18,7 +18,8 @@ limitations under the License.
 #define FRONTENDS_P4_FUNCTIONSINLINING_H_
 
 #include "commonInlining.h"
-#include "frontends/p4/cloner.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "ir/ir.h"
@@ -29,17 +30,14 @@ typedef SimpleCallInfo<IR::Node, IR::Statement> FunctionCallInfo;
 typedef SimpleInlineWorkList<IR::Node, IR::Statement, FunctionCallInfo> FunctionsInlineWorkList;
 typedef SimpleInlineList<IR::Node, FunctionCallInfo, FunctionsInlineWorkList> FunctionsInlineList;
 
-class DiscoverFunctionsInlining : public Inspector {
+class DiscoverFunctionsInlining : public Inspector, public ResolutionContext {
     FunctionsInlineList *toInline;  // output
-    P4::ReferenceMap *refMap;       // input
     P4::TypeMap *typeMap;           // input
 
  public:
-    DiscoverFunctionsInlining(FunctionsInlineList *toInline, P4::ReferenceMap *refMap,
-                              P4::TypeMap *typeMap)
-        : toInline(toInline), refMap(refMap), typeMap(typeMap) {
+    DiscoverFunctionsInlining(FunctionsInlineList *toInline, P4::TypeMap *typeMap)
+        : toInline(toInline), typeMap(typeMap) {
         CHECK_NULL(toInline);
-        CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DiscoverFunctionsInlining");
     }
@@ -51,7 +49,8 @@ class DiscoverFunctionsInlining : public Inspector {
   This must be executed after SideEffectOrdering and RemoveReturns.
 */
 class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsInlineWorkList> {
-    P4::ReferenceMap *refMap;
+    MinimalNameGenerator nameGen;
+
     // All elements in the replacement map are actually IR::Function objects
     typedef std::map<const IR::Statement *, const IR::Node *> ReplacementMap;
     /// A stack of replacement maps
@@ -72,7 +71,7 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
     void dumpReplacementMap() const;
 
  public:
-    explicit FunctionsInliner(bool isv1) : refMap(new P4::ReferenceMap()) { refMap->setIsV1(isv1); }
+    FunctionsInliner() = default;
     Visitor::profile_t init_apply(const IR::Node *node) override;
     void end_apply(const IR::Node *node) override;
     const IR::Node *preorder(IR::Function *function) override;
@@ -109,10 +108,10 @@ class InlineFunctions : public PassManager {
  public:
     InlineFunctions(ReferenceMap *refMap, TypeMap *typeMap, const RemoveUnusedPolicy &policy) {
         passes.push_back(new PassRepeated(
-            {new TypeChecking(refMap, typeMap),
-             new DiscoverFunctionsInlining(&functionsToInline, refMap, typeMap),
-             new InlineFunctionsDriver(&functionsToInline, new FunctionsInliner(refMap->isV1())),
-             new RemoveAllUnusedDeclarations(refMap, policy)}));
+            {new TypeChecking(nullptr, typeMap),
+             new DiscoverFunctionsInlining(&functionsToInline, typeMap),
+             new InlineFunctionsDriver(&functionsToInline, new FunctionsInliner()),
+             new ResolveReferences(refMap), new RemoveAllUnusedDeclarations(refMap, policy)}));
         passes.push_back(new CloneVariableDeclarations());
         setName("InlineFunctions");
     }
