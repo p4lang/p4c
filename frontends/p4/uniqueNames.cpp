@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "uniqueNames.h"
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
@@ -41,21 +42,19 @@ void RenameMap::markActionCall(const IR::P4Action *action, const IR::MethodCallE
 
 namespace {
 
-class FindActionCalls : public Inspector {
-    ReferenceMap *refMap;
+class FindActionCalls : public Inspector, public ResolutionContext {
     TypeMap *typeMap;
     RenameMap *renameMap;
 
  public:
-    explicit FindActionCalls(ReferenceMap *refMap, TypeMap *typeMap, RenameMap *renameMap)
-        : refMap(refMap), typeMap(typeMap), renameMap(renameMap) {
-        CHECK_NULL(refMap);
+    explicit FindActionCalls(TypeMap *typeMap, RenameMap *renameMap)
+        : typeMap(typeMap), renameMap(renameMap) {
         CHECK_NULL(typeMap);
         CHECK_NULL(renameMap);
     }
 
     void postorder(const IR::MethodCallExpression *expression) {
-        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+        auto mi = MethodInstance::resolve(expression, this, typeMap);
         if (!mi->is<P4::ActionCall>()) return;
         auto ac = mi->to<P4::ActionCall>();
         renameMap->markActionCall(ac->action, getOriginal<IR::MethodCallExpression>());
@@ -64,6 +63,13 @@ class FindActionCalls : public Inspector {
 
 }  // namespace
 
+Visitor::profile_t FindParameters::init_apply(const IR::Node *node) {
+    auto rv = Inspector::init_apply(node);
+    node->apply(nameGen);
+
+    return rv;
+}
+
 UniqueNames::UniqueNames() : renameMap(new RenameMap) {
     setName("UniqueNames");
     visitDagOnce = false;
@@ -71,14 +77,12 @@ UniqueNames::UniqueNames() : renameMap(new RenameMap) {
     passes.emplace_back(new RenameSymbols(renameMap));
 }
 
-UniqueParameters::UniqueParameters(ReferenceMap *refMap, TypeMap *typeMap)
-    : renameMap(new RenameMap) {
+UniqueParameters::UniqueParameters(TypeMap *typeMap) : renameMap(new RenameMap) {
     setName("UniqueParameters");
-    CHECK_NULL(refMap);
     CHECK_NULL(typeMap);
-    passes.emplace_back(new TypeChecking(refMap, typeMap));
-    passes.emplace_back(new FindActionCalls(refMap, typeMap, renameMap));
-    passes.emplace_back(new FindParameters(refMap, renameMap));
+    passes.emplace_back(new TypeChecking(nullptr, typeMap));
+    passes.emplace_back(new FindActionCalls(typeMap, renameMap));
+    passes.emplace_back(new FindParameters(renameMap));
     passes.emplace_back(new RenameSymbols(renameMap));
     passes.emplace_back(new ClearTypeMap(typeMap));
 }

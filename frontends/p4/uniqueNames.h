@@ -165,24 +165,23 @@ class RenameSymbols : public Transform, public ResolutionContext {
 
 /// Finds parameters for actions that will be given unique names
 class FindParameters : public Inspector {
-    ReferenceMap *refMap;  // used to generate new names
+    MinimalNameGenerator nameGen;
     RenameMap *renameMap;
 
     void doParameters(const IR::ParameterList *pl) {
         for (auto p : pl->parameters) {
-            cstring newName = refMap->newName(p->name.name.string_view());
+            cstring newName = nameGen.newName(p->name.name.string_view());
             renameMap->setNewName(p, newName);
         }
     }
 
  public:
-    FindParameters(ReferenceMap *refMap, RenameMap *renameMap)
-        : refMap(refMap), renameMap(renameMap) {
-        CHECK_NULL(refMap);
+    explicit FindParameters(RenameMap *renameMap) : renameMap(renameMap) {
         CHECK_NULL(renameMap);
         setName("FindParameters");
     }
     void postorder(const IR::P4Action *action) override { doParameters(action->parameters); }
+    profile_t init_apply(const IR::Node *node) override;
 };
 
 /// Give each parameter of an action a new unique name
@@ -192,7 +191,7 @@ class UniqueParameters : public PassManager {
     RenameMap *renameMap;
 
  public:
-    UniqueParameters(ReferenceMap *refMap, TypeMap *typeMap);
+    explicit UniqueParameters(TypeMap *typeMap);
 };
 
 }  // namespace P4

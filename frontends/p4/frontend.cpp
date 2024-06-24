@@ -223,7 +223,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifySwitch(&typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new SimplifyDefUse(&refMap, &typeMap),
-        new UniqueParameters(&refMap, &typeMap),
+        new UniqueParameters(&typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new SpecializeAll(&refMap, &typeMap, policy),
         new RemoveParserControlFlow(&refMap, &typeMap),
@@ -241,7 +241,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new InlineActions(&refMap, &typeMap, *policy),
             new LocalizeAllActions(&refMap, *policy),
             new UniqueNames(),
-            new UniqueParameters(&refMap, &typeMap),
+            new UniqueParameters(&typeMap),
             // Must be done before inlining functions, to allow
             // function calls used as action arguments to be inlined
             // in the proper place.
