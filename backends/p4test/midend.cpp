@@ -121,7 +121,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          }),
          new P4::StrengthReduction(&typeMap),
          new P4::MoveDeclarations(),  // more may have been introduced
-         new P4::SimplifyControlFlow(&refMap, &typeMap),
+         new P4::SimplifyControlFlow(&typeMap),
          new P4::CompileTimeOperations(),
          new P4::TableHit(&refMap, &typeMap),
          new P4::EliminateSwitch(&refMap, &typeMap),
@@ -166,7 +166,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          evaluator,
          [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
          new P4::FlattenHeaderUnion(&refMap, &typeMap, options.loopsUnrolling),
-         new P4::SimplifyControlFlow(&refMap, &typeMap),
+         new P4::SimplifyControlFlow(&typeMap),
          new P4::MidEndLast()});
     if (options.listMidendPasses) {
         listPasses(*outStream, cstring::newline);

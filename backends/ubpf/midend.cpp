@@ -79,7 +79,7 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
              new P4::RemoveMiss(&refMap, &typeMap), new P4::ClearTypeMap(&typeMap),
              new P4::EliminateNewtype(&refMap, &typeMap),
              new P4::EliminateInvalidHeaders(&refMap, &typeMap),
-             new P4::SimplifyControlFlow(&refMap, &typeMap),
+             new P4::SimplifyControlFlow(&typeMap),
              new P4::SimplifyKey(
                  &refMap, &typeMap,
                  new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsLikeLeftValue())),
@@ -96,10 +96,9 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
              new P4::MoveDeclarations(),  // more may have been introduced
              new P4::RemoveSelectBooleans(&refMap, &typeMap),
              new P4::SingleArgumentSelect(&refMap, &typeMap),
-             new P4::ConstantFolding(&refMap, &typeMap),
-             new P4::SimplifyControlFlow(&refMap, &typeMap), new P4::TableHit(&refMap, &typeMap),
-             new P4::RemoveLeftSlices(&refMap, &typeMap), new EBPF::Lower(&refMap, &typeMap),
-             evaluator, new P4::MidEndLast()});
+             new P4::ConstantFolding(&refMap, &typeMap), new P4::SimplifyControlFlow(&typeMap),
+             new P4::TableHit(&refMap, &typeMap), new P4::RemoveLeftSlices(&refMap, &typeMap),
+             new EBPF::Lower(&refMap, &typeMap), evaluator, new P4::MidEndLast()});
         if (options.listMidendPasses) {
             midEnd.listPasses(*outStream, cstring::newline);
             *outStream << std::endl;

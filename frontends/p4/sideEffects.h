@@ -63,7 +63,7 @@ class HasTableApply : public Inspector {
  */
 class SideEffects : public Inspector {
  private:
-    ReferenceMap *refMap;
+    DeclarationLookup *refMap;
     TypeMap *typeMap;
 
  public:
@@ -100,20 +100,21 @@ class SideEffects : public Inspector {
 
     /// The @refMap and @typeMap arguments can be null, in which case the check
     /// will be more conservative.
-    SideEffects(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
+    SideEffects(DeclarationLookup *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
         setName("SideEffects");
     }
 
     /// @return true if the expression may have side-effects.
     static bool check(const IR::Expression *expression, const Visitor *calledBy,
-                      ReferenceMap *refMap, TypeMap *typeMap) {
+                      DeclarationLookup *refMap, TypeMap *typeMap,
+                      const Visitor::Context *ctxt = nullptr) {
         SideEffects se(refMap, typeMap);
         se.setCalledBy(calledBy);
-        expression->apply(se);
+        expression->apply(se, ctxt);
         return se.nodeWithSideEffect != nullptr;
     }
     /// @return true if the method call expression may have side-effects.
-    static bool hasSideEffect(const IR::MethodCallExpression *mce, ReferenceMap *refMap,
+    static bool hasSideEffect(const IR::MethodCallExpression *mce, DeclarationLookup *refMap,
                               TypeMap *typeMap) {
         // mce does not produce a side effect in few cases:
         //  * isValid()

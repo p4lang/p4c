@@ -100,7 +100,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::ConstantFolding(&refMap, &typeMap),
          new P4::StrengthReduction(&typeMap),
          new P4::MoveDeclarations(),  // more may have been introduced
-         new P4::SimplifyControlFlow(&refMap, &typeMap),
+         new P4::SimplifyControlFlow(&typeMap),
          new P4::CompileTimeOperations(),
          new P4::TableHit(&refMap, &typeMap),
          new P4::EliminateSwitch(&refMap, &typeMap),

@@ -204,7 +204,7 @@ class FlattenHeaderUnion : public PassManager {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
         passes.push_back(new P4::RemoveAllUnusedDeclarations(refMap, RemoveUnusedPolicy()));
         passes.push_back(new P4::RemoveUnusedHUDeclarations(refMap));
-        passes.push_back(new P4::RemoveParserIfs(refMap, typeMap));
+        passes.push_back(new P4::RemoveParserIfs(typeMap));
     }
 };
 }  // namespace P4

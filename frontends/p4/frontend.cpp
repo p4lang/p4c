@@ -199,8 +199,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         }),
         new CheckCoreMethods(&typeMap),
         new StaticAssert(&typeMap),
-        new ResolveReferences(&refMap),
-        new RemoveParserIfs(&refMap, &typeMap),
+        new RemoveParserIfs(&typeMap),
         new StructInitializers(&typeMap),
         new TableKeyNames(&typeMap),
         new PassRepeated({
@@ -209,7 +208,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new Reassociation(),
             new UselessCasts(&typeMap),
         }),
-        new SimplifyControlFlow(&refMap, &typeMap),
+        new SimplifyControlFlow(&typeMap),
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
         new RemoveAllUnusedDeclarations(&refMap, *policy, true),
@@ -219,14 +218,14 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new MoveInitializers(),
         new SideEffectOrdering(&refMap, &typeMap, policy->skipSideEffectOrdering()),
-        new SimplifyControlFlow(&refMap, &typeMap),
+        new SimplifyControlFlow(&typeMap),
         new SimplifySwitch(&typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new SimplifyDefUse(&refMap, &typeMap),
         new UniqueParameters(&typeMap),
-        new SimplifyControlFlow(&refMap, &typeMap),
+        new SimplifyControlFlow(&typeMap),
         new SpecializeAll(&refMap, &typeMap, policy),
-        new RemoveParserControlFlow(&refMap, &typeMap),
+        new RemoveParserControlFlow(&typeMap),
         new RemoveReturns(),
         new RemoveDontcareArgs(&typeMap),
         new MoveConstructors(),
@@ -251,14 +250,14 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             // Check for constants only after inlining
             new CheckConstants(&typeMap),
             new ConstantFolding(&typeMap, constantFoldingPolicy),
-            new SimplifyControlFlow(&refMap, &typeMap),
+            new SimplifyControlFlow(&typeMap),
             // more ifs may have been added to parsers
-            new RemoveParserControlFlow(&refMap, &typeMap),
+            new RemoveParserControlFlow(&typeMap),
             new UniqueNames(),       // needed again after inlining
             new MoveDeclarations(),  // needed again after inlining
             new SimplifyDefUse(&refMap, &typeMap),
             new RemoveAllUnusedDeclarations(&refMap, *policy),
-            new SimplifyControlFlow(&refMap, &typeMap),
+            new SimplifyControlFlow(&typeMap),
         });
     passes.addPasses({
         // Check for shadowing after all inlining passes. We disable this

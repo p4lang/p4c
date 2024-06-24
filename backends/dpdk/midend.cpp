@@ -205,7 +205,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::HSIndexSimplifier(&refMap, &typeMap),
             new P4::ParsersUnroll(true, &refMap, &typeMap),
             new P4::FlattenHeaderUnion(&refMap, &typeMap),
-            new P4::SimplifyControlFlow(&refMap, &typeMap),
+            new P4::SimplifyControlFlow(&typeMap),
             new P4::ReplaceSelectRange(&refMap, &typeMap),
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
@@ -214,7 +214,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
                 {new P4::ConstantFolding(&refMap, &typeMap), new P4::StrengthReduction(&typeMap)}),
             new P4::MoveDeclarations(),
             validateTableProperties(options.arch),
-            new P4::SimplifyControlFlow(&refMap, &typeMap),
+            new P4::SimplifyControlFlow(&typeMap),
             new P4::SimplifySwitch(&typeMap),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&refMap, &typeMap),
