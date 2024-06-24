@@ -453,6 +453,11 @@ void TCIngressPipelinePNA::emitGlobalMetadataInitializer(EBPF::CodeBuilder *buil
     builder->append("if (compiler_meta__->pass_to_kernel == true) return TC_ACT_OK;");
     builder->newline();
 
+    // Make sure drop starts out false
+    builder->emitIndent();
+    builder->append("compiler_meta__->drop = false;");
+    builder->newline();
+
     // workaround to make TC protocol-independent, DO NOT REMOVE
     builder->emitIndent();
     // replace ether_type only if a packet comes from XDP
