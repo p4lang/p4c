@@ -180,7 +180,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::SimplifyKey(
                 &refMap, &typeMap,
                 new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsLikeLeftValue())),
-            new P4::RemoveExits(&refMap, &typeMap),
+            new P4::RemoveExits(&typeMap),
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::StrengthReduction(&typeMap),
             new P4::SimplifySelectCases(&refMap, &typeMap, true),

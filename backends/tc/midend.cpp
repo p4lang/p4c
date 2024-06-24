@@ -35,7 +35,7 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
          new P4::SimplifyKey(
              &refMap, &typeMap,
              new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsLikeLeftValue())),
-         new P4::RemoveExits(&refMap, &typeMap),
+         new P4::RemoveExits(&typeMap),
          new P4::ConstantFolding(&refMap, &typeMap),
          new P4::SimplifySelectCases(&refMap, &typeMap, false),  // accept non-constant keysets
          new P4::ExpandEmit(&refMap, &typeMap),

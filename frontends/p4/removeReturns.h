@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef FRONTENDS_P4_REMOVERETURNS_H_
 #define FRONTENDS_P4_REMOVERETURNS_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/ternaryBool.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -59,7 +60,7 @@ control c(inout bit x) {
 */
 class DoRemoveReturns : public Transform {
  protected:
-    P4::ReferenceMap *refMap;
+    MinimalNameGenerator nameGen;
     IR::ID returnVar;      // one for each context
     IR::ID returnedValue;  // only for functions that return expressions
     cstring variableName;
@@ -78,11 +79,9 @@ class DoRemoveReturns : public Transform {
     }
 
  public:
-    explicit DoRemoveReturns(P4::ReferenceMap *refMap, cstring varName = "hasReturned"_cs,
-                             cstring retValName = "retval"_cs)
-        : refMap(refMap), variableName(varName), retValName(retValName) {
+    explicit DoRemoveReturns(cstring varName = "hasReturned"_cs, cstring retValName = "retval"_cs)
+        : variableName(varName), retValName(retValName) {
         visitDagOnce = false;
-        CHECK_NULL(refMap);
         setName("DoRemoveReturns");
     }
 
@@ -101,13 +100,13 @@ class DoRemoveReturns : public Transform {
     }
 
     const IR::Node *postorder(IR::LoopStatement *loop) override;
+    profile_t init_apply(const IR::Node *node) override;
 };
 
 class RemoveReturns : public PassManager {
  public:
-    explicit RemoveReturns(ReferenceMap *refMap) {
-        passes.push_back(new ResolveReferences(refMap));
-        passes.push_back(new DoRemoveReturns(refMap));
+    RemoveReturns() {
+        passes.push_back(new DoRemoveReturns());
         setName("RemoveReturns");
     }
 };
