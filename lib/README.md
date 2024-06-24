@@ -1,4 +1,4 @@
-# Common Utilities
+# Common P4C utility functions
 
 This directory contains miscellaneous utilities that are generally useful
 and not specific to any part of the compiler.  Most are not even compiler
