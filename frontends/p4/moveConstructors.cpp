@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "moveConstructors.h"
 
+#include "frontends/common/resolveReferences/referenceMap.h"
+
 namespace P4 {
 
 struct ConstructorMap {
@@ -32,16 +34,21 @@ struct ConstructorMap {
 
 namespace {
 
-class MoveConstructorsImpl : public Transform {
+class DoMoveConstructors : public Transform {
     enum class Region { InParserStateful, InControlStateful, InBody, Outside };
 
-    ReferenceMap *refMap;
+    MinimalNameGenerator nameGen;
     ConstructorMap cmap;
     Region convert;
 
  public:
-    explicit MoveConstructorsImpl(ReferenceMap *refMap) : refMap(refMap), convert(Region::Outside) {
-        setName("MoveConstructorsImpl");
+    DoMoveConstructors() : convert(Region::Outside) { setName("MoveConstructorsImpl"); }
+
+    profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+        node->apply(nameGen);
+
+        return rv;
     }
 
     const IR::Node *preorder(IR::P4Parser *parser) override {
@@ -136,7 +143,7 @@ class MoveConstructorsImpl : public Transform {
 
     const IR::Node *postorder(IR::ConstructorCallExpression *expression) override {
         if (convert == Region::Outside) return expression;
-        auto tmpvar = refMap->newName("tmp");
+        auto tmpvar = nameGen.newName("tmp");
         auto tmpref = new IR::PathExpression(IR::ID(expression->srcInfo, tmpvar));
         cmap.add(expression, tmpvar);
         return tmpref;
@@ -144,10 +151,9 @@ class MoveConstructorsImpl : public Transform {
 };
 }  // namespace
 
-MoveConstructors::MoveConstructors(ReferenceMap *refMap) {
+MoveConstructors::MoveConstructors() {
     setName("MoveConstructors");
-    passes.emplace_back(new P4::ResolveReferences(refMap));
-    passes.emplace_back(new MoveConstructorsImpl(refMap));
+    passes.emplace_back(new DoMoveConstructors());
 }
 
 }  // namespace P4

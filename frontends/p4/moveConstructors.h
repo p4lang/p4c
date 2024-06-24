@@ -52,7 +52,7 @@ namespace P4 {
  */
 class MoveConstructors : public PassManager {
  public:
-    explicit MoveConstructors(ReferenceMap *refMap);
+    MoveConstructors();
 };
 
 }  // namespace P4

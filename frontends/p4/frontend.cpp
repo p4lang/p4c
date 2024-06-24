@@ -229,7 +229,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new RemoveParserControlFlow(&refMap, &typeMap),
         new RemoveReturns(),
         new RemoveDontcareArgs(&typeMap),
-        new MoveConstructors(&refMap),
+        new MoveConstructors(),
         new RemoveAllUnusedDeclarations(&refMap, *policy),
         new RemoveRedundantParsers(&refMap, &typeMap, *policy),
         new ClearTypeMap(&typeMap),
