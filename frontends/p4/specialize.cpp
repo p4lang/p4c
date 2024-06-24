@@ -16,26 +16,31 @@ limitations under the License.
 
 #include "specialize.h"
 
-#include <iostream>
-
+#include "frontends/common/constantFolding.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/frontend.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
-#include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "ir/visitor.h"
 
 namespace P4 {
 
-const IR::Type_Declaration *SpecializationInfo::synthesize(ReferenceMap *refMap) const {
+const IR::Type_Declaration *SpecializationInfo::synthesize(const Visitor::Context *ctxt) const {
     TypeVariableSubstitution tvs;
     ParameterSubstitution subst;
 
     subst.populate(specialized->getConstructorParameters(), constructorArguments);
     tvs.setBindings(invocation, specialized->getTypeParameters(), typeArguments);
-    SubstituteParameters sp(refMap, &subst, &tvs);
-    auto clone = specialized->getNode()->apply(sp);
+    // FIXME: SubstituteParameters is a ResolutionContext, but we are recreating
+    // it again and again killing lookup caches. We'd need to have instead some
+    // separate DeclarationLookup that would allow us to perform necessary
+    // lookups in the context of callee. We can probably pre-seed it first for
+    // all possible callees in specMap.
+    SubstituteParameters sp(nullptr, &subst, &tvs);
+    auto clone = specialized->getNode()->apply(sp, ctxt);
     CHECK_NULL(clone);
     const IR::Type_Declaration *result = nullptr;
     if (auto parser = clone->to<IR::P4Parser>()) {
@@ -59,12 +64,11 @@ const IR::Type_Declaration *SpecializationInfo::synthesize(ReferenceMap *refMap)
     return result;
 }
 
-const IR::Argument *SpecializationMap::convertArgument(const IR::Argument *arg,
-                                                       SpecializationInfo *spec,
-                                                       const IR::Parameter *param) {
+static const IR::Argument *convertArgument(const IR::Argument *arg, SpecializationInfo *spec,
+                                           const IR::Parameter *param, NameGenerator *nameGen) {
     if (arg->expression->is<IR::ConstructorCallExpression>()) {
         auto cce = arg->expression->to<IR::ConstructorCallExpression>();
-        cstring nName = refMap->newName(param->name.name.string_view());
+        cstring nName = nameGen->newName(param->name.name.string_view());
         IR::ID id(param->srcInfo, nName, param->name);
         auto decl =
             new IR::Declaration_Instance(param->srcInfo, id, cce->constructedType, cce->arguments);
@@ -77,22 +81,23 @@ const IR::Argument *SpecializationMap::convertArgument(const IR::Argument *arg,
 }
 
 void SpecializationMap::addSpecialization(const IR::ConstructorCallExpression *invocation,
-                                          const IR::IContainer *cont, const IR::Node *insertion) {
+                                          const IR::IContainer *cont, const IR::Node *insertion,
+                                          DeclarationLookup *declLookup, NameGenerator *nameGen) {
     LOG2("Will specialize " << dbp(invocation) << " of " << dbp(cont->getNode()) << " "
                             << cont->getNode() << " inserted after " << insertion);
 
     auto spec = new SpecializationInfo(invocation, cont, insertion);
     auto declaration = cont->to<IR::IDeclaration>();
     CHECK_NULL(declaration);
-    spec->name = refMap->newName(declaration->getName().name.string_view());
-    auto cc = ConstructorCall::resolve(invocation, refMap, typeMap);
+    spec->name = nameGen->newName(declaration->getName().name.string_view());
+    auto cc = ConstructorCall::resolve(invocation, declLookup, typeMap);
     auto ccc = cc->to<ContainerConstructorCall>();
     CHECK_NULL(ccc);
     spec->constructorArguments = new IR::Vector<IR::Argument>();
     for (auto ca : *invocation->arguments) {
         auto param = cc->substitution.findParameter(ca);
         CHECK_NULL(param);
-        auto arg = convertArgument(ca, spec, param);
+        auto arg = convertArgument(ca, spec, param, nameGen);
         spec->constructorArguments->push_back(arg);
     }
     spec->typeArguments = ccc->typeArguments;
@@ -100,14 +105,15 @@ void SpecializationMap::addSpecialization(const IR::ConstructorCallExpression *i
 }
 
 void SpecializationMap::addSpecialization(const IR::Declaration_Instance *invocation,
-                                          const IR::IContainer *cont, const IR::Node *insertion) {
+                                          const IR::IContainer *cont, const IR::Node *insertion,
+                                          DeclarationLookup *declLookup, NameGenerator *nameGen) {
     LOG2("Will specialize " << dbp(invocation) << " of " << dbp(cont->getNode())
                             << " inserted after " << insertion);
 
     auto spec = new SpecializationInfo(invocation, cont, insertion);
     auto declaration = cont->to<IR::IDeclaration>();
     CHECK_NULL(declaration);
-    spec->name = refMap->newName(declaration->getName().name.string_view());
+    spec->name = nameGen->newName(declaration->getName().name.string_view());
     const IR::Type_Name *type;
     const IR::Vector<IR::Type> *typeArgs;
     if (invocation->type->is<IR::Type_Specialized>()) {
@@ -118,25 +124,26 @@ void SpecializationMap::addSpecialization(const IR::Declaration_Instance *invoca
         type = invocation->type->to<IR::Type_Name>();
         typeArgs = new IR::Vector<IR::Type>();
     }
-    Instantiation *inst = Instantiation::resolve(invocation, refMap, typeMap);
+    Instantiation *inst = Instantiation::resolve(invocation, declLookup, typeMap);
 
     spec->typeArguments = typeArgs;
     CHECK_NULL(type);
     for (auto ca : *invocation->arguments) {
         auto param = inst->substitution.findParameter(ca);
         CHECK_NULL(param);
-        auto arg = convertArgument(ca, spec, param);
+        auto arg = convertArgument(ca, spec, param, nameGen);
         spec->constructorArguments->push_back(arg);
     }
     specializations.emplace(invocation, spec);
 }
 
-IR::Vector<IR::Node> *SpecializationMap::getSpecializations(const IR::Node *insertionPoint) const {
+IR::Vector<IR::Node> *SpecializationMap::getSpecializations(const IR::Node *insertionPoint,
+                                                            const Visitor::Context *ctxt) const {
     IR::Vector<IR::Node> *result = nullptr;
     for (auto s : specializations) {
         if (s.second->insertBefore == insertionPoint) {
             if (result == nullptr) result = new IR::Vector<IR::Node>();
-            auto node = s.second->synthesize(refMap);
+            auto node = s.second->synthesize(ctxt);
             LOG2("Will insert " << node << " before " << insertionPoint);
             result->push_back(node);
         }
@@ -207,7 +214,7 @@ void FindSpecializations::postorder(const IR::ConstructorCallExpression *express
         !expression->constructedType->is<IR::Type_Specialized>())
         return;  // nothing to specialize
 
-    auto cc = ConstructorCall::resolve(expression, specMap->refMap, specMap->typeMap);
+    auto cc = ConstructorCall::resolve(expression, this, specMap->typeMap);
     if (!cc->is<ContainerConstructorCall>()) return;
     for (auto arg : *expression->arguments) {
         if (!isSimpleConstant(arg->expression)) return;
@@ -216,7 +223,7 @@ void FindSpecializations::postorder(const IR::ConstructorCallExpression *express
     auto insert = findInsertionPoint();
     auto decl = cc->to<ContainerConstructorCall>()->container;
     if (decl->is<IR::Type_Package>()) return;
-    specMap->addSpecialization(expression, decl, insert);
+    specMap->addSpecialization(expression, decl, insert, this, &nameGen);
 }
 
 void FindSpecializations::postorder(const IR::Declaration_Instance *decl) {
@@ -241,15 +248,15 @@ void FindSpecializations::postorder(const IR::Declaration_Instance *decl) {
         BUG_CHECK(decl->type->is<IR::Type_Specialized>(), "%1%: unexpected type", decl->type);
         contDecl = decl->type->to<IR::Type_Specialized>()->baseType;
     }
-    auto cont = specMap->refMap->getDeclaration(contDecl->path, true);
+    auto cont = getDeclaration(contDecl->path, true);
     if (!cont->is<IR::P4Parser>() && !cont->is<IR::P4Control>()) return;
     auto insert = findInsertionPoint();
     if (insert == nullptr) insert = decl;
-    specMap->addSpecialization(decl, cont->to<IR::IContainer>(), insert);
+    specMap->addSpecialization(decl, cont->to<IR::IContainer>(), insert, this, &nameGen);
 }
 
-const IR::Node *Specialize::instantiate(const IR::Node *node) {
-    auto specs = specMap->getSpecializations(getOriginal());
+const IR::Node *Specialize::instantiate(const IR::Node *node, const Visitor::Context *ctxt) {
+    auto specs = specMap->getSpecializations(getOriginal(), ctxt);
     if (specs == nullptr) return node;
     LOG2(specs->size() << " instantiations before " << node);
     specs->push_back(node);
@@ -277,19 +284,18 @@ const IR::Node *Specialize::postorder(IR::Declaration_Instance *decl) {
         LOG2("Replaced " << decl << " with " << replacement);
     }
 
-    return instantiate(replacement);
+    return instantiate(replacement, getContext());
 }
 
 SpecializeAll::SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap, FrontEndPolicy *policy)
     : PassRepeated({}) {
-    passes.emplace_back(new ConstantFolding(refMap, typeMap, policy->getConstantFoldingPolicy()));
-    passes.emplace_back(new TypeChecking(refMap, typeMap));
+    passes.emplace_back(new ConstantFolding(typeMap, policy->getConstantFoldingPolicy()));
+    passes.emplace_back(new TypeChecking(nullptr, typeMap));
     passes.emplace_back(new FindSpecializations(&specMap));
     passes.emplace_back(new Specialize(&specMap));
-    passes.emplace_back(new ResolveReferences(refMap));
     passes.emplace_back(new TypeInference(typeMap, false));  // more casts may be needed
+    passes.emplace_back(new ResolveReferences(refMap));
     passes.emplace_back(new RemoveAllUnusedDeclarations(refMap, *policy));
-    specMap.refMap = refMap;
     specMap.typeMap = typeMap;
     setName("SpecializeAll");
 }

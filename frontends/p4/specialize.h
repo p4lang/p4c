@@ -17,10 +17,11 @@ limitations under the License.
 #ifndef FRONTENDS_P4_SPECIALIZE_H_
 #define FRONTENDS_P4_SPECIALIZE_H_
 
-#include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/pass_manager.h"
 
 namespace P4 {
 
@@ -55,19 +56,16 @@ struct SpecializationInfo {
         CHECK_NULL(invocation);
         CHECK_NULL(insertion);
     }
-    const IR::Type_Declaration *synthesize(ReferenceMap *refMap) const;
+    const IR::Type_Declaration *synthesize(const Visitor::Context *ctxt) const;
 };
 
 /// Maintains a map from invocation to a SpecializationInfo object.
 class SpecializationMap {
     /// Maps invocation to specialization info.
     ordered_map<const IR::Node *, SpecializationInfo *> specializations;
-    const IR::Argument *convertArgument(const IR::Argument *arg, SpecializationInfo *info,
-                                        const IR::Parameter *param);
 
  public:
     TypeMap *typeMap = nullptr;
-    ReferenceMap *refMap = nullptr;
     /** Add a specialization instance.
      *
      * @param invocation The constructor invocation.
@@ -75,7 +73,8 @@ class SpecializationMap {
      * @param insertion Where the specialization should be inserted.
      */
     void addSpecialization(const IR::ConstructorCallExpression *invocation,
-                           const IR::IContainer *container, const IR::Node *insertion);
+                           const IR::IContainer *container, const IR::Node *insertion,
+                           DeclarationLookup *declLookup, NameGenerator *nameGen);
     /** Add a specialization instance.
      *
      * @param invocation The constructor invocation.
@@ -83,8 +82,10 @@ class SpecializationMap {
      * @param insertion Where the specialization should be inserted.
      */
     void addSpecialization(const IR::Declaration_Instance *invocation,
-                           const IR::IContainer *container, const IR::Node *insertion);
-    IR::Vector<IR::Node> *getSpecializations(const IR::Node *insertion) const;
+                           const IR::IContainer *container, const IR::Node *insertion,
+                           DeclarationLookup *declLookup, NameGenerator *nameGen);
+    IR::Vector<IR::Node> *getSpecializations(const IR::Node *insertion,
+                                             const Visitor::Context *ctxt) const;
     cstring getName(const IR::Node *insertion) const {
         auto s = ::get(specializations, insertion);
         if (s == nullptr) return nullptr;
@@ -96,8 +97,9 @@ class SpecializationMap {
 /** Builds a SpecializationMap of instantiations with constant values for
  * type and constructor arguments.
  */
-class FindSpecializations : public Inspector {
+class FindSpecializations : public Inspector, public ResolutionContext {
     SpecializationMap *specMap;
+    MinimalNameGenerator nameGen;
 
  public:
     explicit FindSpecializations(SpecializationMap *specMap) : specMap(specMap) {
@@ -108,8 +110,12 @@ class FindSpecializations : public Inspector {
     const IR::Node *findInsertionPoint() const;
     bool isSimpleConstant(const IR::Expression *expression) const;
     Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Inspector::init_apply(node);
+
         specMap->clear();
-        return Inspector::init_apply(node);
+        node->apply(nameGen);
+
+        return rv;
     }
     /// True if this container does not have constructor or type
     /// parameters i.e., we can look inside for invocations to
@@ -166,20 +172,24 @@ cspec() c_inst;
  */
 class Specialize : public Transform {
     SpecializationMap *specMap;
-    const IR::Node *instantiate(const IR::Node *node);
+    const IR::Node *instantiate(const IR::Node *node, const Visitor::Context *ctxt);
 
  public:
     explicit Specialize(SpecializationMap *specMap) : specMap(specMap) {
         CHECK_NULL(specMap);
         setName("Specialize");
     }
-    const IR::Node *postorder(IR::P4Parser *parser) override { return instantiate(parser); }
+    const IR::Node *postorder(IR::P4Parser *parser) override {
+        return instantiate(parser, getContext());
+    }
     // skip packages
     const IR::Node *preorder(IR::Type_Package *package) override {
         prune();
         return package;
     }
-    const IR::Node *postorder(IR::P4Control *control) override { return instantiate(control); }
+    const IR::Node *postorder(IR::P4Control *control) override {
+        return instantiate(control, getContext());
+    }
     const IR::Node *postorder(IR::ConstructorCallExpression *expression) override;
     const IR::Node *postorder(IR::Declaration_Instance *) override;
 };
