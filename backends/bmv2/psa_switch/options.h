@@ -17,12 +17,12 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_
 #define BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_
 
-#include "backends/bmv2/common/options.h"
+#include "backends/bmv2/portable_common/options.h"
 #include "backends/bmv2/psa_switch/midend.h"
 
 namespace BMV2 {
 
-class PsaSwitchOptions : public BMV2Options {
+class PsaSwitchOptions : public PortableOptions {
  public:
     PsaSwitchOptions() {
         registerOption(
@@ -36,9 +36,6 @@ class PsaSwitchOptions : public BMV2Options {
             },
             "[PsaSwitch back-end] Lists exact name of all midend passes.\n");
     }
-
-    /// Process the command line arguments and set options accordingly.
-    std::vector<const char *> *process(int argc, char *const argv[]) override;
 };
 
 using PsaSwitchContext = P4CContextWithOptions<PsaSwitchOptions>;

@@ -14,19 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_BMV2_PNA_NIC_MIDEND_H_
-#define BACKENDS_BMV2_PNA_NIC_MIDEND_H_
+#ifndef BACKENDS_BMV2_PORTABLE_COMMON_OPTIONS_H_
+#define BACKENDS_BMV2_PORTABLE_COMMON_OPTIONS_H_
 
+#include "backends/bmv2/common/options.h"
 #include "backends/bmv2/portable_common/midend.h"
 
 namespace BMV2 {
 
-class PnaNicMidEnd : public PortableMidEnd {
+class PortableOptions : public BMV2Options {
  public:
-    // If p4c is run with option '--listMidendPasses', outStream is used for printing passes names
-    explicit PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
+
+    /// Process the command line arguments and set options accordingly.
+    std::vector<const char *> *process(int argc, char *const argv[]) override;
 };
+
+// using PortableContext = P4CContextWithOptions<PortableOptions>;
 
 }  // namespace BMV2
 
-#endif /* BACKENDS_BMV2_PNA_NIC_MIDEND_H_ */
+#endif /* BACKENDS_BMV2_PORTABLE_COMMON_OPTIONS_H_ */

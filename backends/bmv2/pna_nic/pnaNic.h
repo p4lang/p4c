@@ -17,28 +17,7 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_PNA_NIC_PNANIC_H_
 #define BACKENDS_BMV2_PNA_NIC_PNANIC_H_
 
-#include "backends/bmv2/common/action.h"
-#include "backends/bmv2/common/control.h"
-#include "backends/bmv2/common/deparser.h"
-#include "backends/bmv2/common/extern.h"
-#include "backends/bmv2/common/header.h"
-#include "backends/bmv2/common/helpers.h"
-#include "backends/bmv2/common/lower.h"
-#include "backends/bmv2/common/parser.h"
-#include "backends/bmv2/common/programStructure.h"
-#include "frontends/common/constantFolding.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/enumInstance.h"
-#include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/methodInstance.h"
-#include "frontends/p4/simplify.h"
-#include "frontends/p4/strengthReduction.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/unusedDeclarations.h"
-#include "ir/ir.h"
-#include "lib/big_int_util.h"
-#include "lib/json.h"
+#include "backends/bmv2/portable_common/portable.h"
 #include "pnaProgramStructure.h"
 
 namespace BMV2 {
@@ -46,7 +25,7 @@ namespace BMV2 {
 class PnaNicExpressionConverter : public ExpressionConverter {
  public:
     PnaNicExpressionConverter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                              ProgramStructure *structure, cstring scalarsName)
+                              P4::ProgramStructure *structure, cstring scalarsName)
         : BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) {}
 
     void modelError(const char *format, const cstring field) {
@@ -94,23 +73,15 @@ class PnaNicExpressionConverter : public ExpressionConverter {
     }
 };
 
-class PnaCodeGenerator : public PnaProgramStructure {
+class PnaCodeGenerator : public PortableCodeGenerator {
  public:
-    PnaCodeGenerator(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-        : PnaProgramStructure(refMap, typeMap) {}
+    // PnaCodeGenerator(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
+    //     : PortableCodeGenerator(refMap, typeMap) {}
 
-    void create(ConversionContext *ctxt);
-    void createStructLike(ConversionContext *ctxt, const IR::Type_StructLike *st);
-    void createTypes(ConversionContext *ctxt);
-    void createHeaders(ConversionContext *ctxt);
-    void createScalars(ConversionContext *ctxt);
-    void createParsers(ConversionContext *ctxt);
-    void createExterns();
-    void createActions(ConversionContext *ctxt);
-    void createControls(ConversionContext *ctxt);
-    void createDeparsers(ConversionContext *ctxt);
-    void createGlobals();
-    cstring convertHashAlgorithm(cstring algo);
+    void create(ConversionContext *ctxt, PortableProgramStructure *structure);
+    void createParsers(ConversionContext *ctxt, PortableProgramStructure *structure);
+    void createControls(ConversionContext *ctxt, PortableProgramStructure *structure);
+    void createDeparsers(ConversionContext *ctxt, PortableProgramStructure *structure);
 };
 
 class ConvertPnaToJson : public Inspector {
@@ -119,17 +90,20 @@ class ConvertPnaToJson : public Inspector {
     P4::TypeMap *typeMap;
     const IR::ToplevelBlock *toplevel;
     JsonObjects *json;
-    PnaCodeGenerator *structure;
+    PnaProgramStructure *structure;
+    PnaCodeGenerator *codeGenerator;
 
     ConvertPnaToJson(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                      const IR::ToplevelBlock *toplevel, JsonObjects *json,
-                     PnaCodeGenerator *structure)
+                     PnaProgramStructure *structure)
         : refMap(refMap), typeMap(typeMap), toplevel(toplevel), json(json), structure(structure) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         CHECK_NULL(toplevel);
         CHECK_NULL(json);
         CHECK_NULL(structure);
+        codeGenerator = new PnaCodeGenerator();
+        CHECK_NULL(codeGenerator);
     }
 
     void postorder(UNUSED const IR::P4Program *program) override {
@@ -137,7 +111,7 @@ class ConvertPnaToJson : public Inspector {
         // This visitor is used in multiple passes to convert expression to json
         auto conv = new PnaNicExpressionConverter(refMap, typeMap, structure, scalarsName);
         auto ctxt = new ConversionContext(refMap, typeMap, toplevel, structure, conv, json);
-        structure->create(ctxt);
+        codeGenerator->create(ctxt, structure);
     }
 };
 
@@ -152,17 +126,8 @@ class PnaNicBackend : public Backend {
 };
 
 EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Hash)
-EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Checksum)
 EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(InternetChecksum)
-EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Counter)
-EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(DirectCounter)
-EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Meter)
-EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(DirectMeter)
 EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Register)
-EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Random)
-EXTERN_CONVERTER_W_INSTANCE(ActionProfile)
-EXTERN_CONVERTER_W_INSTANCE(ActionSelector)
-EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Digest)
 
 }  // namespace BMV2
 
