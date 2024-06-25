@@ -19,6 +19,7 @@ limitations under the License.
 #include "frontends/p4/alias.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/tableApply.h"
+#include "ir/visitor.h"
 
 namespace P4 {
 
@@ -711,13 +712,21 @@ void DoSimplifyExpressions::end_apply(const IR::Node *) {
 
 ///////////////////////////////////////////////
 
+Visitor::profile_t KeySideEffect::init_apply(const IR::Node *node) {
+    auto rv = Transform::init_apply(node);
+    node->apply(nameGen);
+
+    return rv;
+}
+
 const IR::Node *KeySideEffect::preorder(IR::Key *key) {
     // If any key field has side effects then pull out all
     // the key field values.
     LOG3("Visiting " << key);
     bool complex = false;
     for (auto k : key->keyElements)
-        complex = complex || P4::SideEffects::check(k->expression, this, refMap, typeMap);
+        complex =
+            complex || P4::SideEffects::check(k->expression, this, this, typeMap, getContext());
     if (!complex)
         // This prune will prevent the postoder(IR::KeyElement*) below from executing
         prune();
@@ -740,7 +749,7 @@ const IR::Node *KeySideEffect::postorder(IR::KeyElement *element) {
         insertions = it->second;
     }
 
-    auto tmp = refMap->newName("key");
+    auto tmp = nameGen.newName("key");
     auto type = typeMap->getType(element->expression, true);
     auto decl = new IR::Declaration_Variable(tmp, type, nullptr);
     insertions->declarations.push_back(decl);
@@ -778,11 +787,12 @@ const IR::Node *KeySideEffect::postorder(IR::P4Table *table) {
 }
 
 const IR::Node *KeySideEffect::doStatement(const IR::Statement *statement,
-                                           const IR::Expression *expression) {
+                                           const IR::Expression *expression,
+                                           const Visitor::Context *ctxt) {
     LOG3("Visiting " << getOriginal());
-    HasTableApply hta(refMap, typeMap);
+    HasTableApply hta(this, typeMap);
     hta.setCalledBy(this);
-    (void)expression->apply(hta);
+    (void)expression->apply(hta, ctxt);
     if (hta.table == nullptr) return statement;
     auto insertions = get(toInsert, hta.table);
     if (insertions == nullptr) return statement;

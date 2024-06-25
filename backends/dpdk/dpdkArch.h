@@ -834,14 +834,14 @@ class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
     CopyMatchKeysToSingleStruct(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                                 std::set<const IR::P4Table *> *invokedInKey,
                                 DpdkProgramStructure *structure)
-        : P4::KeySideEffect(refMap, typeMap, invokedInKey), structure(structure) {
+        : P4::KeySideEffect(typeMap, invokedInKey), structure(structure) {
         setName("CopyMatchKeysToSingleStruct");
     }
 
     const IR::Node *preorder(IR::Key *key) override;
     const IR::Node *postorder(IR::KeyElement *element) override;
-    const IR::Node *doStatement(const IR::Statement *statement,
-                                const IR::Expression *expression) override;
+    const IR::Node *doStatement(const IR::Statement *statement, const IR::Expression *expression,
+                                const Visitor::Context *ctxt) override;
     struct keyInfo *getKeyInfo(IR::Key *keys);
     cstring getTableKeyName(const IR::Expression *e);
     int getFieldSizeBits(const IR::Type *field_type);
