@@ -118,62 +118,62 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2lib_2_r_e_a_d_m_e.h
   <div class="headertitle"><div class="title">Common P4C utility functions</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md198"></a> This directory contains miscellaneous utilities that are generally useful and not specific to any part of the compiler. Most are not even compiler specific. The files in this folder should only depend on each other; they cannot depend on any other compiler files.</p>
-<h4><a class="anchor" id="autotoc_md199"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md197"></a> This directory contains miscellaneous utilities that are generally useful and not specific to any part of the compiler. Most are not even compiler specific. The files in this folder should only depend on each other; they cannot depend on any other compiler files.</p>
+<h4><a class="anchor" id="autotoc_md198"></a>
 algorithm.h</h4>
 <p>wrapper around <code>&lt;algorithm&gt;</code> that contains severla useful additional algorithms</p>
-<h4><a class="anchor" id="autotoc_md200"></a>
+<h4><a class="anchor" id="autotoc_md199"></a>
 bitops.h</h4>
 <p>bit manipulation operations</p>
-<h4><a class="anchor" id="autotoc_md201"></a>
+<h4><a class="anchor" id="autotoc_md200"></a>
 bitvec.h, bitvec.cpp</h4>
 <p>dynamic bitvectors with useful operations. The standard types <code>std::vector&lt;bool&gt;</code> and <code>std::bitsec</code> are missing crucial functionality, making them generally useless.</p>
-<h4><a class="anchor" id="autotoc_md202"></a>
+<h4><a class="anchor" id="autotoc_md201"></a>
 cstring.h, cstring.cpp</h4>
 <p>constant strings. The standard library <code>std::string</code> type is mutable, allowing the string to be changed dynamically. Constant strings are what we would prefer to use in the compiler. <code>cstring</code> keeps the memory for all constant strings in a single global pool, allowing constant time comparisons.</p>
-<h4><a class="anchor" id="autotoc_md203"></a>
+<h4><a class="anchor" id="autotoc_md202"></a>
 default.h</h4>
 <p>Synthesizing default values of various types (e.g., 0 for integers, nullptr for pointers, etc.)</p>
-<h4><a class="anchor" id="autotoc_md204"></a>
+<h4><a class="anchor" id="autotoc_md203"></a>
 enumerator.h, enumerator.cpp</h4>
 <p>C#-like enumerator interface.</p>
-<h4><a class="anchor" id="autotoc_md205"></a>
+<h4><a class="anchor" id="autotoc_md204"></a>
 error.h, error.cpp, expresions.h</h4>
 <p>Error reporting functions.</p>
-<h4><a class="anchor" id="autotoc_md206"></a>
+<h4><a class="anchor" id="autotoc_md205"></a>
 gc.cpp</h4>
 <p>Overrides global <code>operator new</code> and <code>delete</code> to use the Boehm/Demers/Weiser conservative collector, so all memory allocations are garbage collected</p>
-<h4><a class="anchor" id="autotoc_md207"></a>
+<h4><a class="anchor" id="autotoc_md206"></a>
 hex.h, hex.cpp</h4>
 <p>Adaptor for more conveniently printing hexadecimal string with ostreams.</p>
-<h4><a class="anchor" id="autotoc_md208"></a>
+<h4><a class="anchor" id="autotoc_md207"></a>
 indent.h, indent.cpp</h4>
 <p>Adaptor for managing indentation on ostreams</p>
-<h4><a class="anchor" id="autotoc_md209"></a>
+<h4><a class="anchor" id="autotoc_md208"></a>
 log.h, log.cpp</h4>
 <p>Macros and support for logging that can be managed on a per-source-file basis</p>
-<h4><a class="anchor" id="autotoc_md210"></a>
+<h4><a class="anchor" id="autotoc_md209"></a>
 ltbitmatrix.h</h4>
 <p>Adaptor using a <code>bitvec</code> as a lower-triangular bit matrix.</p>
-<h4><a class="anchor" id="autotoc_md211"></a>
+<h4><a class="anchor" id="autotoc_md210"></a>
 map.h</h4>
 <p>Wrapper around <code>map</code>, adding some useful functions that are missing from <code>std::map</code></p>
-<h4><a class="anchor" id="autotoc_md212"></a>
+<h4><a class="anchor" id="autotoc_md211"></a>
 nullstream.h</h4>
 <p>A simple ostream that does nothing.</p>
-<h4><a class="anchor" id="autotoc_md213"></a>
+<h4><a class="anchor" id="autotoc_md212"></a>
 options.h, options.cpp</h4>
 <p>Represents compiler command-line options.</p>
-<h4><a class="anchor" id="autotoc_md214"></a>
+<h4><a class="anchor" id="autotoc_md213"></a>
 range.h</h4>
 <p>Iterators over numeric ranges.</p>
-<h4><a class="anchor" id="autotoc_md215"></a>
+<h4><a class="anchor" id="autotoc_md214"></a>
 source_file.h, source_file.cpp</h4>
 <p>Represents the input source of the compiler and source file position information used for error reporting and generating debugging information.</p>
-<h4><a class="anchor" id="autotoc_md216"></a>
+<h4><a class="anchor" id="autotoc_md215"></a>
 stringify.h, stringify.cppp</h4>
 <p>Conversion of various types to strings.</p>
-<h4><a class="anchor" id="autotoc_md217"></a>
+<h4><a class="anchor" id="autotoc_md216"></a>
 sourceCodeBuilder.h</h4>
 <p>Support for emitting programs in source (works for <a class="el" href="namespace_p4.html">P4</a> and C). </p>
 </div></div><!-- contents -->

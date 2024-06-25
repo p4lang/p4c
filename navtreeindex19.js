@@ -1,7 +1,5 @@
 var NAVTREEINDEX19 =
 {
-"struct_u_b_p_f_1_1_register___model.html":[32,0,21,6],
-"struct_util_1_1_detail_1_1_float_hasher.html":[32,0,22,0,0],
 "struct_util_1_1_detail_1_1_integer_hasher.html":[32,0,22,0,1],
 "struct_util_1_1_detail_1_1_tuple_hasher.html":[32,0,22,0,3],
 "struct_util_1_1_detail_1_1_tuple_hasher_3_010_00_01_types_8_8_8_01_4.html":[32,0,22,0,4],
