@@ -178,8 +178,11 @@ Concurrency</h3>
 <h1><a class="anchor" id="autotoc_md90"></a>
 Compiling P4 to eBPF</h1>
 <p>From the above description it is apparent that the <a class="el" href="namespace_p4.html">P4</a> and eBPF programming languages have different expressive powers. However, there is a significant overlap in their capabilities, in particular, in the domain of network packet processing. The following image illustrates the situation:</p>
-<p><img src="scope.png" alt="P4 and eBPF overlap in capabilities" class="inline"/></p>
-<p>We expect that the overlapping region will grow in size as both <a class="el" href="namespace_p4.html">P4</a> and eBPF continue to mature.</p>
+<div class="image">
+<img src="scope.png" alt=""/>
+<div class="caption">
+P4 and eBPF overlap in capabilities</div></div>
+    <p>We expect that the overlapping region will grow in size as both <a class="el" href="namespace_p4.html">P4</a> and eBPF continue to mature.</p>
 <p>The current version of the <a class="el" href="namespace_p4.html">P4</a> to eBPF compiler translates programs written in the version P4_16 of the programming language to programs written in a restricted subset of C. The subset of C is chosen such that it should be compilable to eBPF using clang and/or <a href="https://github.com/iovisor/bcc">bcc (the BPF Compiler Collection)</a>.</p>
 <div class="fragment"><div class="line">         --------------              -------</div>
 <div class="line">P4 ---&gt;  | P4-to-eBPF | ---&gt; C ----&gt; | clang/BCC | --&gt; eBPF</div>
