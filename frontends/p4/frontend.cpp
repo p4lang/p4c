@@ -217,7 +217,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new UniqueNames(),       // Give each local declaration a unique internal name
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new MoveInitializers(),
-        new SideEffectOrdering(&refMap, &typeMap, policy->skipSideEffectOrdering()),
+        new SideEffectOrdering(&typeMap, policy->skipSideEffectOrdering()),
         new SimplifyControlFlow(&typeMap),
         new SimplifySwitch(&typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning

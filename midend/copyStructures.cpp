@@ -26,8 +26,8 @@ const IR::Node *RemoveAliases::postorder(IR::AssignmentStatement *statement) {
         return statement;
     }
 
-    ReadsWrites rw(refMap);
-    if (!rw.mayAlias(statement->left, statement->right)) {
+    ReadsWrites rw;
+    if (!rw.mayAlias(statement->left, statement->right, getContext())) {
         return statement;
     }
     auto tmp = refMap->newName("tmp");

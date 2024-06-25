@@ -26,9 +26,7 @@ limitations under the License.
  * part of the *same statement*.
  */
 
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/methodInstance.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 
 namespace P4 {
@@ -115,12 +113,11 @@ class SetOfLocations : public IHasDbPrint {
 };
 
 /// Computes the SetOfLocations read and written by an expression.
-class ReadsWrites : public Inspector {
-    const ReferenceMap *refMap;
+class ReadsWrites : public Inspector, public ResolutionContext {
     std::map<const IR::Expression *, const SetOfLocations *> rw;
 
  public:
-    explicit ReadsWrites(const ReferenceMap *refMap) : refMap(refMap) { setName("ReadsWrites"); }
+    ReadsWrites() { setName("ReadsWrites"); }
 
     void postorder(const IR::Operation_Binary *expression) override {
         auto left = ::get(rw, expression->left);
@@ -131,7 +128,7 @@ class ReadsWrites : public Inspector {
     }
 
     void postorder(const IR::PathExpression *expression) override {
-        auto decl = refMap->getDeclaration(expression->path);
+        auto decl = getDeclaration(expression->path);
         auto path = new LocationPath(decl);
         auto locs = new SetOfLocations(path);
         rw.emplace(expression, locs);
@@ -244,17 +241,19 @@ class ReadsWrites : public Inspector {
         rw.emplace(expression, new SetOfLocations());
     }
 
-    const SetOfLocations *get(const IR::Expression *expression) {
-        expression->apply(*this);
+    const SetOfLocations *get(const IR::Expression *expression,
+                              const Visitor::Context *ctxt = nullptr) {
+        expression->apply(*this, ctxt);
         auto result = ::get(rw, expression);
         CHECK_NULL(result);
         LOG3("SetOfLocations(" << expression << ")=" << result);
         return result;
     }
 
-    bool mayAlias(const IR::Expression *left, const IR::Expression *right) {
-        auto llocs = get(left);
-        auto rlocs = get(right);
+    bool mayAlias(const IR::Expression *left, const IR::Expression *right,
+                  const Visitor::Context *ctxt = nullptr) {
+        auto llocs = get(left, ctxt);
+        auto rlocs = get(right, ctxt);
         CHECK_NULL(llocs);
         CHECK_NULL(rlocs);
         LOG3("Checking overlap between " << llocs << " and " << rlocs);

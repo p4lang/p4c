@@ -181,7 +181,7 @@ a[tmp1].x = tmp4;        // assign result of call of f to actual left value
  * first.
  */
 class DoSimplifyExpressions : public Transform, P4WriteContext, public ResolutionContext {
-    ReferenceMap *refMap;
+    MinimalNameGenerator nameGen;
     TypeMap *typeMap;
     // Expressions holding temporaries that are already added.
     std::set<const IR::Expression *> *added;
@@ -195,14 +195,13 @@ class DoSimplifyExpressions : public Transform, P4WriteContext, public Resolutio
     cstring createTemporary(const IR::Type *type);
     const IR::Expression *addAssignment(Util::SourceInfo srcInfo, cstring varName,
                                         const IR::Expression *expression);
-    bool mayAlias(const IR::Expression *left, const IR::Expression *right) const;
+    bool mayAlias(const IR::Expression *left, const IR::Expression *right,
+                  const Visitor::Context *ctxt) const;
     bool containsHeaderType(const IR::Type *type);
 
  public:
-    DoSimplifyExpressions(ReferenceMap *refMap, TypeMap *typeMap,
-                          std::set<const IR::Expression *> *added)
-        : refMap(refMap), typeMap(typeMap), added(added) {
-        CHECK_NULL(refMap);
+    DoSimplifyExpressions(TypeMap *typeMap, std::set<const IR::Expression *> *added)
+        : typeMap(typeMap), added(added) {
         CHECK_NULL(typeMap);
         setName("DoSimplifyExpressions");
     }
@@ -248,6 +247,7 @@ class DoSimplifyExpressions : public Transform, P4WriteContext, public Resolutio
     const IR::Node *preorder(IR::ForStatement *statement) override;
     const IR::Node *preorder(IR::ForInStatement *statement) override;
 
+    profile_t init_apply(const IR::Node *node) override;
     void end_apply(const IR::Node *) override;
 };
 
@@ -401,12 +401,12 @@ class SideEffectOrdering : public PassRepeated {
     std::set<const IR::Expression *> added;
 
  public:
-    SideEffectOrdering(ReferenceMap *refMap, TypeMap *typeMap, bool skipSideEffectOrdering,
+    SideEffectOrdering(TypeMap *typeMap, bool skipSideEffectOrdering,
                        TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         if (!skipSideEffectOrdering) {
-            passes.push_back(new TypeChecking(refMap, typeMap));
-            passes.push_back(new DoSimplifyExpressions(refMap, typeMap, &added));
+            passes.push_back(new TypeChecking(nullptr, typeMap));
+            passes.push_back(new DoSimplifyExpressions(typeMap, &added));
             passes.push_back(typeChecking);
             passes.push_back(new TablesInActions(typeMap));
             passes.push_back(new TablesInKeys(typeMap, &invokedInKey));
