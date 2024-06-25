@@ -62,6 +62,7 @@ set (P4C_EBPF_SRCS
   midend.cpp
   lower.cpp
   ../bmv2/common/programStructure.cpp
+  ../bmv2/portable_common/portableProgramStructure.cpp
   ../bmv2/psa_switch/psaProgramStructure.cpp
   psa/ebpfPsaGen.cpp
   psa/ebpfPipeline.cpp
@@ -96,6 +97,7 @@ set (P4C_EBPF_HDRS
   target.h
   lower.h
   ../bmv2/common/programStructure.h
+  ../bmv2/portable_common/portableProgramStructure.h
   ../bmv2/psa_switch/psaProgramStructure.h
   ../bmv2/psa_switch/psaSwitch.h
   psa/backend.h

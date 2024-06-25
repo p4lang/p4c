@@ -38,6 +38,7 @@ set(P4TC_BACKEND_SOURCES
     ../ebpf/midend.cpp
     ../ebpf/lower.cpp
     ../bmv2/common/programStructure.cpp
+    ../bmv2/portable_common/portableProgramStructure.cpp
     ../bmv2/psa_switch/psaProgramStructure.cpp
     ../ebpf/psa/ebpfPsaGen.cpp
     ../ebpf/psa/ebpfPipeline.cpp
@@ -81,6 +82,7 @@ set(P4TC_BACKEND_HEADERS
    ../ebpf/target.h
    ../ebpf/lower.h
    ../bmv2/common/programStructure.h
+   ../bmv2/portable_common/portableProgramStructure.h
    ../bmv2/psa_switch/psaProgramStructure.h
    ../bmv2/psa_switch/psaSwitch.h
    ../ebpf/psa/backend.h

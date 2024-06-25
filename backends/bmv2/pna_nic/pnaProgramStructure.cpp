@@ -30,16 +30,6 @@ void InspectPnaProgram::postorder(const IR::Declaration_Instance *di) {
     }
 }
 
-bool InspectPnaProgram::isHeaders(const IR::Type_StructLike *st) {
-    bool result = false;
-    for (auto f : st->fields) {
-        if (f->type->is<IR::Type_Header>() || f->type->is<IR::Type_Stack>()) {
-            result = true;
-        }
-    }
-    return result;
-}
-
 void InspectPnaProgram::addHeaderType(const IR::Type_StructLike *st) {
     LOG5("In addHeaderType with struct " << st->toString());
     if (st->is<IR::Type_HeaderUnion>()) {
@@ -216,14 +206,6 @@ void InspectPnaProgram::postorder(const IR::P4Control *c) {
         else if (info == MAIN_DEPARSER)
             pinfo->deparsers.emplace("main_deparser"_cs, c);
     }
-}
-
-bool ParsePnaArchitecture::preorder(const IR::ToplevelBlock *block) {
-    /// Blocks are not in IR tree, use a custom visitor to traverse
-    for (auto it : block->constantValue) {
-        if (it.second->is<IR::Block>()) visit(it.second->getNode());
-    }
-    return false;
 }
 
 bool ParsePnaArchitecture::preorder(const IR::ExternBlock *block) {

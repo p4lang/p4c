@@ -17,12 +17,12 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_PNA_NIC_OPTIONS_H_
 #define BACKENDS_BMV2_PNA_NIC_OPTIONS_H_
 
-#include "backends/bmv2/common/options.h"
+#include "backends/bmv2/portable_common/options.h"
 #include "backends/bmv2/pna_nic/midend.h"
 
 namespace BMV2 {
 
-class PnaNicOptions : public BMV2Options {
+class PnaNicOptions : public PortableOptions {
  public:
     PnaNicOptions() {
         registerOption(
@@ -36,9 +36,6 @@ class PnaNicOptions : public BMV2Options {
             },
             "[PnaNic back-end] Lists exact name of all midend passes.\n");
     }
-
-    /// Process the command line arguments and set options accordingly.
-    std::vector<const char *> *process(int argc, char *const argv[]) override;
 };
 
 using PnaNicContext = P4CContextWithOptions<PnaNicOptions>;
