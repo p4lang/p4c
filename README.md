@@ -296,9 +296,16 @@ tcpdump
 pip3 install --user -r requirements.txt
 ```
 
-For documentation building:
+**For documentation building:**
+
+**Tools**
 ```bash
 sudo apt-get install -y doxygen graphviz texlive-full
+```
+**Theme** 
+```bash
+git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
+
 ```
 
 `P4C` also depends on Google Protocol Buffers (Protobuf). `P4C` requires version
@@ -329,10 +336,15 @@ python3 python3-pip tcpdump
 sudo pip3 install -r requirements.txt
 ```
 
-For documentation building:
+**For documentation building:**
 
+**Tools**
 ```bash
 sudo dnf install -y doxygen graphviz texlive-scheme-full
+```
+**Theme**
+```bash
+git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
 ```
 
 You can also look at the [dependencies installation script](tools/install_fedora_deps.sh)
@@ -377,6 +389,11 @@ Installing on macOS:
   ```
   brew install doxygen graphviz
   ```
+  Optional Documentation theme: 
+  ```
+  git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
+  ```
+
   Homebrew offers a `protobuf` formula. It installs version 3.2, which should
   work for P4C itself but may cause problems with some extensions. It's
   preferable to use the version of Protobuf which is supplied with CMake's fetchcontent (3.25.3).
