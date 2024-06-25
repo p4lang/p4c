@@ -104,6 +104,7 @@ TypeChecking::TypeChecking(ReferenceMap *refMap, TypeMap *typeMap, bool updateEx
 bool TypeInference::learn(const IR::Node *node, Visitor *caller, const Visitor::Context *ctxt) {
     auto *learner = clone();
     learner->setCalledBy(caller);
+    learner->setName("TypeInference learner");
     unsigned previous = ::errorCount();
     (void)node->apply(*learner, ctxt);
     unsigned errCount = ::errorCount();
