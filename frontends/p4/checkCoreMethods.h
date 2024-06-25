@@ -43,7 +43,7 @@ class DoCheckCoreMethods : public Inspector, public ResolutionContext {
 class CheckCoreMethods : public PassManager {
  public:
     explicit CheckCoreMethods(TypeMap *typeMap) {
-        passes.push_back(new TypeInference(typeMap, true));
+        passes.push_back(new TypeChecking(nullptr, typeMap));
         passes.push_back(new DoCheckCoreMethods(typeMap));
         setName("CheckCoreMethods");
     }

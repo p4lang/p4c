@@ -165,13 +165,13 @@ class SpecializeGenericTypes : public PassRepeated {
  public:
     explicit SpecializeGenericTypes(TypeMap *typeMap) {
         passes.emplace_back(new PassRepeated({
-            new TypeInference(typeMap, true),
+            new TypeChecking(nullptr, typeMap),
             new FindTypeSpecializations(&specMap),
             new CreateSpecializedTypes(&specMap),
             // The previous pass has mutated some struct types
             new ClearTypeMap(typeMap, true),
         }));
-        passes.emplace_back(new TypeInference(typeMap, true));
+        passes.emplace_back(new TypeChecking(nullptr, typeMap));
         passes.emplace_back(new ReplaceTypeUses(&specMap));
         // The previous pass has invalidated the types of struct expressions
         passes.emplace_back(new ClearTypeMap(typeMap, true));

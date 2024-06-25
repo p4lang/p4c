@@ -55,7 +55,7 @@ class DefaultArguments : public PassManager {
  public:
     explicit DefaultArguments(TypeMap *typeMap) {
         setName("DefaultArguments");
-        passes.push_back(new TypeInference(typeMap, true));
+        passes.push_back(new TypeChecking(nullptr, typeMap));
         passes.push_back(new DoDefaultArguments(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
         // this may insert casts into the new arguments

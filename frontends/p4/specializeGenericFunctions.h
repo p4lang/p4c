@@ -138,7 +138,7 @@ class SpecializeGenericFunctions : public PassManager {
 
  public:
     explicit SpecializeGenericFunctions(TypeMap *typeMap) {
-        passes.emplace_back(new TypeInference(typeMap, true));
+        passes.emplace_back(new TypeChecking(nullptr, typeMap));
         passes.emplace_back(new FindFunctionSpecializations(&specMap));
         passes.emplace_back(new SpecializeFunctions(&specMap));
         specMap.typeMap = typeMap;
