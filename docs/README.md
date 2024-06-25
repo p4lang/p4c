@@ -18,6 +18,8 @@ p4c
 │   ├── p4tools               -- testing library for different static analysis tools
 │   ├── tc                    -- translates P4 code to Linux TC rules
 │   └── ubpf                  -- translates P4 programs to uBPF code
+├── bazel                     -- bazel files for building p4c
+|   └──example                -- basic Bazel project example using p4c
 ├── control-plane             -- control plane API
 |   └──google/rpc             -- Definitions of Google Protobuf APIs.
 ├── docs                      -- documentation
