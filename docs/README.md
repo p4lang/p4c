@@ -25,8 +25,6 @@ p4c
 |   └──google/rpc             -- Definitions of Google Protobuf APIs.
 ├── docs                      -- documentation
 │   └── doxygen               -- documentation generation support
-├── extensions
-│   └── XXXX                  -- symlinks to custom back-ends
 ├── frontends
 │   ├── common                -- common front end code
 │   ├── parsers               -- parser and lexer code for P4_14 and P4_16
