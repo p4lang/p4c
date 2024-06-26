@@ -23,6 +23,8 @@ p4c
 ├── cmake                     -- CMake support and build systems 
 ├── control-plane             -- control plane API
 |   └──google/rpc             -- Definitions of Google Protobuf APIs.
+├── debian                    -- Debian/Ubuntu packaging files
+│   └── source                -- 
 ├── docs                      -- documentation
 │   └── doxygen               -- documentation generation support
 ├── frontends
@@ -34,6 +36,9 @@ p4c
 ├── lib                       -- common utilities (libp4toolkit.a)
 ├── midend                    -- code that may be useful for writing mid-ends
 ├── p4include                 -- standard P4 files needed by the compiler (e.g., core.p4)
+│   ├── bmv2                  -- bmv2 specific customizations of psa.p4 include file
+│   ├── dpdk                  -- dpdk specific pna.p4 & psa.p4
+│   └── tc                    -- tc specific pna
 ├── test                      -- test code
 │   └── gtest                 -- unit test code written using gtest
 ├── tools                     -- external programs used in the build/test process
