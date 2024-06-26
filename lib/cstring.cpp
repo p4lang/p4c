@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "cstring.h"
 
+#include "absl/container/node_hash_set.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_replace.h"
 
@@ -135,45 +136,54 @@ class table_entry {
         return length() == other.length() && std::memcmp(string(), other.string(), length()) == 0;
     }
 
+    bool operator==(std::string_view other) const {
+        return length() == other.length() && std::memcmp(string(), other.data(), length()) == 0;
+    }
+
  private:
     bool is_inplace() const {
         return (m_flags & table_entry_flags::inplace) == table_entry_flags::inplace;
     }
 };
-}  // namespace
 
-namespace std {
-template <>
-struct hash<table_entry> {
-    std::size_t operator()(const table_entry &entry) const {
+// We'd make Util::Hash to be transparent instead. However, this would enable
+// transparent hashing globally and in some cases in very undesired manner. So
+// for now aim for more fine-grained approach.
+struct TableEntryHash {
+    using is_transparent = void;
+
+    // IMPORTANT: These two hashes MUST match in order for heterogenous
+    // lookup to work properly
+    size_t operator()(const table_entry &entry) const {
         return Util::hash(entry.string(), entry.length());
     }
-};
-}  // namespace std
 
-namespace {
-std::unordered_set<table_entry> &cache() {
-    static std::unordered_set<table_entry> g_cache;
+    size_t operator()(std::string_view entry) const {
+        return Util::hash(entry.data(), entry.length());
+    }
+};
+
+auto &cache() {
+    // We need node_hash_set due to SSO: we return address of embedded string
+    // that should be stable
+    static absl::node_hash_set<table_entry, TableEntryHash, std::equal_to<>> g_cache;
 
     return g_cache;
 }
 
 const char *save_to_cache(const char *string, std::size_t length, table_entry_flags flags) {
-    if ((flags & table_entry_flags::no_need_copy) == table_entry_flags::no_need_copy) {
-        return cache().emplace(string, length, flags).first->string();
-    }
-
-    // temporary table_entry, used for searching only. no need to copy string
-    auto found = cache().find(table_entry(string, length, table_entry_flags::no_need_copy));
-
-    if (found == cache().end()) {
-        return cache().emplace(string, length, flags).first->string();
-    }
-
-    return found->string();
+    // Checks if string is already cached and if not, calls ctor to construct in
+    // place.  As a result, only a single lookup is performed regardless whether
+    // entry is in cache or not.
+    return cache()
+        .lazy_emplace(table_entry(string, length, table_entry_flags::no_need_copy),
+                      [string, length, flags](const auto &ctor) { ctor(string, length, flags); })
+        ->string();
 }
 
 }  // namespace
+
+bool cstring::is_cached(std::string_view s) { return cache().contains(s); }
 
 void cstring::construct_from_shared(const char *string, std::size_t length) {
     str = save_to_cache(string, length, table_entry_flags::none);
