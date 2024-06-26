@@ -45,7 +45,7 @@ class DiscoverActionsInlining : public Inspector, public ResolutionContext {
 
 // General-purpose actions inliner.
 class ActionsInliner : public AbstractInliner<ActionsInlineList, AInlineWorkList> {
-    MinimalNameGenerator nameGen;
+    std::unique_ptr<MinimalNameGenerator> nameGen;
     std::map<const IR::MethodCallStatement *, const IR::P4Action *> *replMap;
 
  public:

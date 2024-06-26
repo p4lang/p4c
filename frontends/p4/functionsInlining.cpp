@@ -48,8 +48,12 @@ void FunctionsInliner::end_apply(const IR::Node *) {
 Visitor::profile_t FunctionsInliner::init_apply(const IR::Node *node) {
     auto rv = Transform::init_apply(node);
 
-    node->apply(nameGen);
     LOG2("FunctionsInliner " << toInline);
+
+    if (!nameGen) {
+        // This would apply nameGen onto node
+        nameGen = std::make_unique<MinimalNameGenerator>(node);
+    }
 
     return rv;
 }
@@ -176,7 +180,7 @@ const IR::Node *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     // evaluate in and inout parameters in order
     for (auto param : callee->type->parameters->parameters) {
         auto argument = substitution.lookup(param);
-        cstring newName = nameGen.newName(param->name.name.string_view());
+        cstring newName = nameGen->newName(param->name.name.string_view());
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
             auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type,

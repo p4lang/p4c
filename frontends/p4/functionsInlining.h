@@ -49,7 +49,7 @@ class DiscoverFunctionsInlining : public Inspector, public ResolutionContext {
   This must be executed after SideEffectOrdering and RemoveReturns.
 */
 class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsInlineWorkList> {
-    MinimalNameGenerator nameGen;
+    std::unique_ptr<MinimalNameGenerator> nameGen;
 
     // All elements in the replacement map are actually IR::Function objects
     typedef std::map<const IR::Statement *, const IR::Node *> ReplacementMap;

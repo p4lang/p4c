@@ -47,7 +47,10 @@ Visitor::profile_t ActionsInliner::init_apply(const IR::Node *node) {
     auto rv = Transform::init_apply(node);
 
     LOG2("ActionsInliner " << toInline);
-    node->apply(nameGen);
+    if (!nameGen) {
+        // This would apply nameGen onto node
+        nameGen = std::make_unique<MinimalNameGenerator>(node);
+    }
 
     return rv;
 }
@@ -86,7 +89,7 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
     // evaluate in and inout parameters in order
     for (const auto *param : callee->parameters->parameters) {
         const auto *argument = substitution.lookup(param);
-        cstring newName = nameGen.newName(param->name.name.string_view());
+        cstring newName = nameGen->newName(param->name.name.string_view());
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
             const auto *vardecl = new IR::Declaration_Variable(newName, param->annotations,
