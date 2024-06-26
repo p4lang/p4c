@@ -26,6 +26,8 @@ const IR::Node *RemoveAliases::postorder(IR::AssignmentStatement *statement) {
         return statement;
     }
 
+    // FIXME: This recreates ReadWrites() over and over again, loosing all
+    // declaration lookup caching
     ReadsWrites rw;
     if (!rw.mayAlias(statement->left, statement->right, getContext())) {
         return statement;
