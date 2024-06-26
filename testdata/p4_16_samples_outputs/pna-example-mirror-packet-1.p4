@@ -1,5 +1,7 @@
 #include <core.p4>
 #include <pna.p4>
+#include <pna/v0_5/types_metadata.p4>
+#include <pna/v0_5/blocks.p4>
 
 const MirrorSlotId_t MIRROR_SLOT_ID = (MirrorSlotId_t)3;
 const MirrorSessionId_t MIRROR_SESSION1 = (MirrorSessionId_t)58;
