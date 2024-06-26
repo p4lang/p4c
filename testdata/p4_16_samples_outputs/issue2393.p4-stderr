@@ -10,7 +10,7 @@ action do_global_action(in bool make_zero, out bool val_undefined) {
 issue2393.p4(11)
 action do_global_action(in bool make_zero, out bool val_undefined) {
        ^^^^^^^^^^^^^^^^
-[--Wwarn=uninitialized_use] warning: val_undefined_0_inlined_do_global_action may be uninitialized
+[--Wwarn=uninitialized_use] warning: val_undefined may be uninitialized
 issue2393.p4(11): [--Wwarn=uninitialized_use] warning: val_undefined may be uninitialized
 action do_global_action(in bool make_zero, out bool val_undefined) {
                                                     ^^^^^^^^^^^^^

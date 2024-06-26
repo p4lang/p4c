@@ -30,12 +30,12 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_0") bit<16> tmp_0;
-    @name("ingress.val_2") bit<16> val_3_inlined_do_action;
-    @name("ingress.val") bit<16> val_0;
+    @name("ingress.val_2") bit<16> val_3;
+    @name("ingress.val") bit<16> val_4;
     @name("ingress.do_action_2") action do_action() {
-        tmp_0 = val_3_inlined_do_action;
-        val_0 = tmp_0;
-        h.h.a = val_0;
+        tmp_0 = val_3;
+        val_4 = tmp_0;
+        h.h.a = val_4;
     }
     apply {
         do_action();

@@ -80,25 +80,25 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name("ingress.meta") psa_ingress_output_metadata_t meta_1_inlined_ingress_drop;
-    @name("ingress.meta") psa_ingress_output_metadata_t meta_0_inlined_send_to_port;
-    @name("ingress.egress_port") PortId_t egress_port_0_inlined_send_to_port;
+    @name("ingress.meta") psa_ingress_output_metadata_t meta_2;
+    @name("ingress.meta") psa_ingress_output_metadata_t meta_3;
+    @name("ingress.egress_port") PortId_t egress_port_1;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.drop") action drop_1() {
-        meta_1_inlined_ingress_drop = ostd;
-        meta_1_inlined_ingress_drop.drop = true;
-        ostd = meta_1_inlined_ingress_drop;
+        meta_2 = ostd;
+        meta_2.drop = true;
+        ostd = meta_2;
     }
     @name("ingress.forward") action forward(@name("port") PortId_t port, @name("srcAddr") bit<32> srcAddr_1) {
         user_meta.fwd_metadata.old_srcAddr = hdr.ipv4.srcAddr;
         hdr.ipv4.srcAddr = srcAddr_1;
-        meta_0_inlined_send_to_port = ostd;
-        egress_port_0_inlined_send_to_port = port;
-        meta_0_inlined_send_to_port.drop = false;
-        meta_0_inlined_send_to_port.multicast_group = (MulticastGroup_t)32w0;
-        meta_0_inlined_send_to_port.egress_port = egress_port_0_inlined_send_to_port;
-        ostd = meta_0_inlined_send_to_port;
+        meta_3 = ostd;
+        egress_port_1 = port;
+        meta_3.drop = false;
+        meta_3.multicast_group = (MulticastGroup_t)32w0;
+        meta_3.egress_port = egress_port_1;
+        ostd = meta_3;
     }
     @name("ingress.route") table route_0 {
         key = {

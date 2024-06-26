@@ -85,25 +85,25 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name("ingress.meta") psa_ingress_output_metadata_t meta_0_inlined_send_to_port;
-    @name("ingress.egress_port") PortId_t egress_port_0_inlined_send_to_port;
-    @name("ingress.meta") psa_ingress_output_metadata_t meta_1_inlined_ingress_drop;
+    @name("ingress.meta") psa_ingress_output_metadata_t meta_2;
+    @name("ingress.egress_port") PortId_t egress_port_1;
+    @name("ingress.meta") psa_ingress_output_metadata_t meta_3;
     @name("ingress.port_bytes_in") Counter<ByteCounter_t, PortId_t>(32w512, PSA_CounterType_t.BYTES) port_bytes_in_0;
     @name("ingress.per_prefix_pkt_byte_count") DirectCounter<PacketByteCounter_t>(PSA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count_0;
     @name("ingress.next_hop") action next_hop(@name("oport") PortId_t oport) {
         per_prefix_pkt_byte_count_0.count();
-        meta_0_inlined_send_to_port = ostd;
-        egress_port_0_inlined_send_to_port = oport;
-        meta_0_inlined_send_to_port.drop = false;
-        meta_0_inlined_send_to_port.multicast_group = (MulticastGroup_t)32w0;
-        meta_0_inlined_send_to_port.egress_port = egress_port_0_inlined_send_to_port;
-        ostd = meta_0_inlined_send_to_port;
+        meta_2 = ostd;
+        egress_port_1 = oport;
+        meta_2.drop = false;
+        meta_2.multicast_group = (MulticastGroup_t)32w0;
+        meta_2.egress_port = egress_port_1;
+        ostd = meta_2;
     }
     @name("ingress.default_route_drop") action default_route_drop() {
         per_prefix_pkt_byte_count_0.count();
-        meta_1_inlined_ingress_drop = ostd;
-        meta_1_inlined_ingress_drop.drop = true;
-        ostd = meta_1_inlined_ingress_drop;
+        meta_3 = ostd;
+        meta_3.drop = true;
+        ostd = meta_3;
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
