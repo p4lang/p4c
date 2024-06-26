@@ -142,12 +142,18 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),
-            new PassRepeated(
-                {new P4::ConstantFolding(&refMap, &typeMap), new P4::StrengthReduction(&typeMap)}),
+            new PassRepeated({
+                new P4::ConstantFolding(&refMap, &typeMap),
+                new P4::StrengthReduction(&typeMap),
+            }),
             new P4::MoveDeclarations(),
-            new P4::ValidateTableProperties({"psa_implementation"_cs, "psa_direct_counter"_cs,
-                                             "psa_direct_meter"_cs, "psa_idle_timeout"_cs,
-                                             "size"_cs}),
+            new P4::ValidateTableProperties({
+                "psa_implementation"_cs,
+                "psa_direct_counter"_cs,
+                "psa_direct_meter"_cs,
+                "psa_idle_timeout"_cs,
+                "size"_cs,
+            }),
             new P4::SimplifyControlFlow(&typeMap),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&refMap, &typeMap),
