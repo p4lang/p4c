@@ -82,7 +82,7 @@ std::string generateLoopInitialization(const std::string &var) {
 std::string generateLoopCondition(const std::string &var) {
     std::stringstream ss;
 
-    // TODO: Add support for other types of conditions.
+    // TODO(zzmic): Add support for other types of conditions.
     int upperBound = Utils::getRandInt(0, 100);
     ss << var << " < " << std::to_string(upperBound);
 
@@ -102,13 +102,13 @@ std::string generateLoopUpdate(const std::string &var) {
 
 /// Generate a random loop body that involves one variable.
 std::string generateLoopBody(const std::string &var) {
-    // TODO: Add actual support for the loop body.
+    // TODO(zzmic): Add actual support for the loop body.
     return "";
 }
 
 /// Generate a random loop body that involves two variables.
 std::string generateLoopBody(const std::string &var1, const std::string &var2) {
-    // TODO: Add actual support for the loop body.
+    // TODO(zzmic): Add actual support for the loop body.
     return "";
 }
 
@@ -175,7 +175,7 @@ std::string generateRangeBasedForLoop(const std::string &start, const std::strin
 
 /// Main/major function to generate a for-loop.
 std::string generateForLoop() {
-    // TODO: Increment the range of the random number generator if more types of for-loop generations are added,
+    // TODO(zzmic): Increment the range of the random number generator if more types of for-loop generations are added,
     int choice = Utils::getRandInt(0, 3);
 
     switch (choice) {
