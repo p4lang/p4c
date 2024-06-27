@@ -414,7 +414,7 @@ IR::Statement *StatementGenerator::genForLoopStatement(bool is_in_func) {
     initExprs.push_back(initExpr);
     updateStmts.push_back(updateStmt);
 
-    // TODO: Decide whether the following pseudo code should be implemented in this function or discarded.
+    // TODO(zzmic): Decide whether the following pseudo code should be implemented in this function or discarded.
     // Pseudo code (implement the body statement generation):
     // If the loop body is some function call, then parse it and generate a corresponding IR node of type `IR::Statement`.
     // The node of type `IR::Statement` may consist of multiple nested node constructions (using, e.g., `IR::MethodCallStatement` and `IR::PathExpression`),

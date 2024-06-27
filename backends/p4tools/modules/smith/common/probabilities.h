@@ -24,6 +24,9 @@ static struct Probabilities {
     uint16_t STATEMENT_RETURN = 2;
     uint16_t STATEMENT_EXIT = 0;
     uint16_t STATEMENT_BLOCK = 2;
+    // Add probability for for-loop statement(s)
+    // TODO(zzmic): Determine the probability for for-loop statement(s)
+    uint16_t STATEMENT_FOR = 20;
 
     // probabilities to pick a slice when requesting an lval
     uint16_t SCOPE_LVAL_PATH = 90;
