@@ -241,8 +241,7 @@ class ReadsWrites : public Inspector, public ResolutionContext {
         rw.emplace(expression, new SetOfLocations());
     }
 
-    const SetOfLocations *get(const IR::Expression *expression,
-                              const Visitor::Context *ctxt = nullptr) {
+    const SetOfLocations *get(const IR::Expression *expression, const Visitor::Context *ctxt) {
         expression->apply(*this, ctxt);
         auto result = ::get(rw, expression);
         CHECK_NULL(result);
@@ -251,7 +250,7 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     }
 
     bool mayAlias(const IR::Expression *left, const IR::Expression *right,
-                  const Visitor::Context *ctxt = nullptr) {
+                  const Visitor::Context *ctxt) {
         auto llocs = get(left, ctxt);
         auto rlocs = get(right, ctxt);
         CHECK_NULL(llocs);
