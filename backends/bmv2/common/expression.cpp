@@ -141,7 +141,7 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression *expression) 
                 result->emplace("type"_cs, "field");
                 auto e = mkArrayField(result, "value"_cs);
                 if (l->is<Util::JsonObject>())
-                    e->append(l->to<Util::JsonObject>()->get("value"_cs));
+                    e->append(l->to<Util::JsonObject>()->get("value"));
                 else
                     e->append(l);
                 e->append(V1ModelProperties::validField);
@@ -299,7 +299,7 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
             if (!l) return;
             cstring nestedField = fieldName;
             if (auto lv = l->to<Util::JsonObject>()) {
-                lv->get("value"_cs);
+                lv->get("value");
                 if (lv->is<Util::JsonValue>()) {
                     // header in union reference ["u", "f"] => "u.f"
                     cstring prefix = lv->to<Util::JsonValue>()->getString();
@@ -362,7 +362,7 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
             result->emplace("type"_cs, "stack_field");
             auto e = mkArrayField(result, "value"_cs);
             if (l->is<Util::JsonObject>())
-                e->append(l->to<Util::JsonObject>()->get("value"_cs));
+                e->append(l->to<Util::JsonObject>()->get("value"));
             else
                 e->append(l);
             e->append(fieldName);
@@ -375,7 +375,7 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
         if (!l) return;
         if (parentType->is<IR::Type_HeaderUnion>()) {
             BUG_CHECK(l->is<Util::JsonObject>(), "Not a JsonObject");
-            auto lv = l->to<Util::JsonObject>()->get("value"_cs);
+            auto lv = l->to<Util::JsonObject>()->get("value");
             if (lv->is<Util::JsonValue>()) {
                 fieldName = lv->to<Util::JsonValue>()->getString() + "." + fieldName;
                 // Each header in a union is allocated a separate header instance.
@@ -410,7 +410,7 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
             }
 
             if (l->is<Util::JsonObject>()) {
-                auto lv = l->to<Util::JsonObject>()->get("value"_cs);
+                auto lv = l->to<Util::JsonObject>()->get("value");
                 if (lv->is<Util::JsonArray>()) {
                     // TODO: is this case still necessary after eliminating nested structs?
                     // nested struct reference [ ["m", "f"], "x" ] => [ "m", "f.x" ]
@@ -469,12 +469,12 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
 Util::IJson *ExpressionConverter::fixLocal(Util::IJson *json) {
     if (!json) return new Util::JsonValue();  // null
     if (auto jo = json->to<Util::JsonObject>()) {
-        auto to = jo->get("type"_cs);
+        auto to = jo->get("type");
         if (to != nullptr && to->to<Util::JsonValue>() != nullptr &&
             (*to->to<Util::JsonValue>()) == "runtime_data") {
             auto result = new Util::JsonObject();
             result->emplace("type"_cs, "local");
-            result->emplace("value"_cs, jo->get("value"_cs));
+            result->emplace("value"_cs, jo->get("value"));
             return result;
         }
     }
@@ -800,7 +800,7 @@ Util::IJson *ExpressionConverter::convert(const IR::Expression *e, bool doFixup,
     // anymore as expressions will be treated in a more uniform way.
     if (wrap) {
         if (auto ro = result->to<Util::JsonObject>()) {
-            if (auto to = ro->get("type"_cs)) {
+            if (auto to = ro->get("type")) {
                 if (auto jv = to->to<Util::JsonValue>()) {
                     if (jv->isString() && to_wrap.find(jv->getString()) != to_wrap.end()) {
                         auto rwrap = new Util::JsonObject();

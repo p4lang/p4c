@@ -60,7 +60,7 @@ void BFRuntimeSchemaGenerator::addMatchActionData(const p4configv1::Table &table
                                                   Util::JsonObject *tableJson,
                                                   Util::JsonArray *dataJson,
                                                   P4Id maxActionParamId) const {
-    cstring tableType = tableJson->get("table_type"_cs)->to<Util::JsonValue>()->getString();
+    cstring tableType = tableJson->get("table_type")->to<Util::JsonValue>()->getString();
     if (tableType == "MatchAction_Direct") {
         tableJson->emplace("action_specs"_cs, makeActionSpecs(table, &maxActionParamId));
     } else if (tableType == "MatchAction_Indirect") {

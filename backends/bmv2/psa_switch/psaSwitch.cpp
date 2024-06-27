@@ -923,7 +923,7 @@ void ExternConverter_DirectMeter::convertExternInstance(UNUSED ConversionContext
     cstring tblname = info->table->controlPlaneName();
     jmtr->emplace("binding"_cs, tblname);
     auto result = ctxt->conv->convert(info->destinationField);
-    jmtr->emplace("result_target"_cs, result->to<Util::JsonObject>()->get("value"_cs));
+    jmtr->emplace("result_target"_cs, result->to<Util::JsonObject>()->get("value"));
     ctxt->json->meter_arrays->append(jmtr);
 }
 

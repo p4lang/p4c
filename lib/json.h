@@ -200,6 +200,7 @@ class JsonObject final : public IJson, public string_map<IJson *> {
         return this;
     }
     IJson *get(cstring label) const { return ::get(*this, label); }
+    IJson *get(std::string_view label) const { return ::get(*this, label); }
 
     DECLARE_TYPEINFO(JsonObject, IJson);
 };

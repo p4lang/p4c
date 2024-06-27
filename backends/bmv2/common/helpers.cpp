@@ -109,11 +109,11 @@ void ConversionContext::addToFieldList(const IR::Expression *expr, Util::JsonArr
     auto j = conv->convert(expr);
     conv->simpleExpressionsOnly = simple;  // restore state
     if (auto jo = j->to<Util::JsonObject>()) {
-        if (auto t = jo->get("type"_cs)) {
+        if (auto t = jo->get("type")) {
             if (auto type = t->to<Util::JsonValue>()) {
                 if (*type == "runtime_data") {
                     // Can't have runtime_data in field lists -- need hexstr instead
-                    auto val = jo->get("value"_cs)->to<Util::JsonValue>();
+                    auto val = jo->get("value")->to<Util::JsonValue>();
                     j = jo = new Util::JsonObject();
                     jo->emplace("type"_cs, "hexstr");
                     jo->emplace("value"_cs, stringRepr(val->getValue()));

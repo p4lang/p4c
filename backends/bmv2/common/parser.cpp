@@ -173,7 +173,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                                         a = j->to<Util::JsonArray>()->clone();
                                     } else if (j->is<Util::JsonObject>()) {
                                         a = new Util::JsonArray();
-                                        a->push_back(j->to<Util::JsonObject>()->get("value"_cs));
+                                        a->push_back(j->to<Util::JsonObject>()->get("value"));
                                     } else {
                                         BUG("unexpected");
                                     }
@@ -191,7 +191,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                     type = "regular"_cs;
                     j = ctxt->conv->convert(arg->expression);
                 }
-                auto value = j->to<Util::JsonObject>()->get("value"_cs);
+                auto value = j->to<Util::JsonObject>()->get("value");
                 param->emplace("type"_cs, type);
                 param->emplace("value"_cs, value);
 
