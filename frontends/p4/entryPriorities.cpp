@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace P4 {
 
-bool DoEntryPriorities::requiresPriority(const IR::KeyElement *ke) const {
+bool EntryPriorities::requiresPriority(const IR::KeyElement *ke) const {
     // Check if the keys support priorities.  Note: since match_kind
     // is extensible, we treat any non-standard match kind as if it
     // may require priorities.  Back-ends should implement additional
@@ -33,7 +33,7 @@ bool DoEntryPriorities::requiresPriority(const IR::KeyElement *ke) const {
     return true;
 }
 
-const IR::Node *DoEntryPriorities::preorder(IR::EntriesList *entries) {
+const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
     auto table = findContext<IR::P4Table>();
     CHECK_NULL(table);
     auto ep = table->properties->getProperty(IR::TableProperties::entriesPropertyName);

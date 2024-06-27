@@ -25,22 +25,14 @@ limitations under the License.
 namespace P4 {
 
 /// Assigns priorities to table entries if they are not 'const'
-class DoEntryPriorities : public Transform, public ResolutionContext {
+class EntryPriorities : public Transform, public ResolutionContext {
     P4::P4CoreLibrary &corelib;
 
     bool requiresPriority(const IR::KeyElement *ke) const;
 
  public:
-    DoEntryPriorities() : corelib(P4::P4CoreLibrary::instance()) { setName("DoEntryPriorities"); }
+    EntryPriorities() : corelib(P4::P4CoreLibrary::instance()) { setName("EntryPriorities"); }
     const IR::Node *preorder(IR::EntriesList *entries) override;
-};
-
-class EntryPriorities : public PassManager {
- public:
-    EntryPriorities() {
-        setName("EntryPriorities");
-        passes.emplace_back(new DoEntryPriorities());
-    }
 };
 
 }  // namespace P4
