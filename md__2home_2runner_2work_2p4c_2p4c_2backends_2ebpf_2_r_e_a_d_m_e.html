@@ -118,17 +118,17 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_
   <div class="headertitle"><div class="title">eBPF Backend</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md81"></a> The back-end accepts only P4_16 code written for the <code>ebpf_model.p4</code> or <code>xdp_model.p4</code> filter models. It generates C code that can be afterwards compiled into <a href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">eBPF (extended Berkeley Packet Filters)</a> using clang/llvm or <a href="https://github.com/iovisor/bcc.git">bcc</a>.</p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md109"></a> The back-end accepts only P4_16 code written for the <code>ebpf_model.p4</code> or <code>xdp_model.p4</code> filter models. It generates C code that can be afterwards compiled into <a href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">eBPF (extended Berkeley Packet Filters)</a> using clang/llvm or <a href="https://github.com/iovisor/bcc.git">bcc</a>.</p>
 <p>An older version of this compiler for compiling P4_14 is available <a href="https://github.com/iovisor/bcc/tree/master/src/cc/frontends/p4">here</a> (historical reference only).</p>
 <p>Identifiers starting with ebpf_ are reserved in <a class="el" href="namespace_p4.html">P4</a> programs, including for structure field names.</p>
-<h1><a class="anchor" id="autotoc_md82"></a>
+<h1><a class="anchor" id="autotoc_md110"></a>
 Target architectures</h1>
 <p>The <code>ebpf_model.p4</code> target is a classifier-only: the program returns a boolean which controls whether the packet is passed or dropped. In <a class="el" href="namespace_p4.html">P4</a> terms, this means there is no deparser.</p>
 <p>The <code>xdp_model.p4</code> target adds packet editing support, and is meant to replicate the capabilities of the Linux kernel's XDP environment. It can be viewed as an extension of the previous model which adds a deparser.</p>
-<h1><a class="anchor" id="autotoc_md83"></a>
+<h1><a class="anchor" id="autotoc_md111"></a>
 Background</h1>
 <p>In this section we give a brief overview of <a class="el" href="namespace_p4.html">P4</a> and <a class="el" href="namespace_e_b_p_f.html">EBPF</a>. A detailed treatment of these topics is outside the scope of this text.</p>
-<h2><a class="anchor" id="autotoc_md84"></a>
+<h2><a class="anchor" id="autotoc_md112"></a>
 P4</h2>
 <p><a href="http://p4.org">P4</a> is a domain-specific programming language for specifying the behavior of the dataplanes of network-forwarding elements. The name of the programming language comes from the title of a paper published in the proceedings of SIGCOMM Computer Communications Review in 2014: <a href="http://www.sigcomm.org/ccr/papers/2014/July/0000000.0000004">Programming Protocol-Independent Packet Processors</a></p>
 <p><a class="el" href="namespace_p4.html">P4</a> itself is protocol-independent but allows programmers to express a rich set of data plane behaviors and protocols. This back-end only supports the newest version of the <a class="el" href="namespace_p4.html">P4</a> programming language, <a href="https://p4.org/specs">P4_16</a>. The core <a class="el" href="namespace_p4.html">P4</a> abstractions are:</p>
@@ -146,9 +146,9 @@ P4</h2>
 <li>Control flow is expressed as an imperative program describing the data-dependent packet processing within a pipeline, including the data-dependent sequence of match-action unit invocations.</li>
 </ul>
 <p><a class="el" href="namespace_p4.html">P4</a> programs describe the behavior of network-processing dataplanes. A <a class="el" href="namespace_p4.html">P4</a> program is designed to operate in concert with a separate <em>control plane</em> program. The control plane is responsible for managing at runtime the contents of the <a class="el" href="namespace_p4.html">P4</a> tables. <a class="el" href="namespace_p4.html">P4</a> cannot be used to specify control-planes; however, a <a class="el" href="namespace_p4.html">P4</a> program implicitly specifies the interface between the data-plane and the control-plane.</p>
-<h2><a class="anchor" id="autotoc_md85"></a>
+<h2><a class="anchor" id="autotoc_md113"></a>
 eBPF</h2>
-<h3><a class="anchor" id="autotoc_md86"></a>
+<h3><a class="anchor" id="autotoc_md114"></a>
 Safe code</h3>
 <p>eBPF is a acronym that stands for Extended Berkeley Packet Filters. In essence eBPF is a low-level programming language (similar to machine code); eBPF programs are traditionally executed by a virtual machine that resides in the Linux kernel. eBPF programs can be inserted and removed from a live kernel using dynamic code instrumentation. The main feature of eBPF programs is their <em>static safety</em>: prior to execution all eBPF programs have to be validated as being safe, and unsafe programs cannot be executed. A safe program provably cannot compromise the machine it is running on:</p>
 <ul>
@@ -156,7 +156,7 @@ Safe code</h3>
 <li>it can run only for a limited amount of time; during execution it cannot block, sleep or take any locks</li>
 <li>it cannot use any kernel resources with the exception of a limited set of kernel services which have been specifically whitelisted, including operations to manipulate tables (described below)</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md87"></a>
+<h3><a class="anchor" id="autotoc_md115"></a>
 Kernel hooks</h3>
 <p>eBPF programs are inserted into the kernel using <em>hooks</em>. There are several types of hooks available:</p>
 <ul>
@@ -165,17 +165,17 @@ Kernel hooks</h3>
 <li>eBPF programs can also be attached to sockets or network interfaces. In this case they can be used for processing packets that flow through the socket/interface.</li>
 </ul>
 <p>eBPF programs can be used for many purposes; the main use cases are dynamic tracing and monitoring, and packet processing. We are mostly interested in the latter use case in this document.</p>
-<h3><a class="anchor" id="autotoc_md88"></a>
+<h3><a class="anchor" id="autotoc_md116"></a>
 eBPF Tables</h3>
 <p>The eBPF runtime exposes a bi-directional kernel-userspace data communication channel, called <em>tables</em> (also called maps in some eBPF documents and code samples). eBPF tables are essentially key-value stores, where keys and values are arbitrary fixed-size bitstrings. The key width, value width and table size (maximum number of entries that can be stored) are declared statically, at table creation time.</p>
 <p>In user-space tables handles are exposed as file descriptors. Both user- and kernel-space programs can manipulate tables, by inserting, deleting, looking up, modifying, and enumerating entries in a table.</p>
 <p>In kernel space the keys and values are exposed as pointers to the raw underlying data stored in the table, whereas in user-space the pointers point to copies of the data.</p>
-<h3><a class="anchor" id="autotoc_md89"></a>
+<h3><a class="anchor" id="autotoc_md117"></a>
 Concurrency</h3>
 <p>An important aspect to understand related to eBPF is the execution model. An eBPF program is triggered by a kernel hook; multiple instances of the same kernel hook can be running simultaneously on different cores.</p>
 <p>Each table however has a single instances across all the cores. A single table may be accessed simultaneously by multiple instances of the same eBPF program running as separate kernel threads on different cores. eBPF tables are native kernel objects, and access to the table contents is protected using the kernel RCU mechanism. This makes access to table entries safe under concurrent execution; for example, the memory associated to a value cannot be accidentally freed while an eBPF program holds a pointer to the respective value. However, accessing tables is prone to data races; since eBPF programs cannot use locks, some of these races often cannot be avoided.</p>
 <p>eBPF and the associated tools are also under active development, and new capabilities are added frequently.</p>
-<h1><a class="anchor" id="autotoc_md90"></a>
+<h1><a class="anchor" id="autotoc_md118"></a>
 Compiling P4 to eBPF</h1>
 <p>From the above description it is apparent that the <a class="el" href="namespace_p4.html">P4</a> and eBPF programming languages have different expressive powers. However, there is a significant overlap in their capabilities, in particular, in the domain of network packet processing. The following image illustrates the situation:</p>
 <div class="image">
@@ -188,7 +188,7 @@ P4 and eBPF overlap in capabilities</div></div>
 <div class="line">P4 ---&gt;  | P4-to-eBPF | ---&gt; C ----&gt; | clang/BCC | --&gt; eBPF</div>
 <div class="line">         --------------              -------</div>
 </div><!-- fragment --><p>The <a class="el" href="namespace_p4.html">P4</a> program only describes the packet processing <em>data plane</em>, that runs in the Linux kernel. The <em>control plane</em> must be separately implemented by the user. BCC tools simplify this task considerably, by generating C and/or Python APIs that expose the dataplane/control-plane APIs.</p>
-<h2><a class="anchor" id="autotoc_md91"></a>
+<h2><a class="anchor" id="autotoc_md119"></a>
 Dependencies</h2>
 <p>Our eBPF programs require a Linux kernel with version 4.15 or newer. The eBPF backend relies on <a href="https://github.com/libbpf/libbpf">libbpf</a>, which provides kernel- and distribution-independent header files. libbpf must be available in order to compile the generated eBPF C code into eBPF byte code. To install libbpf, run <code>python3 backends/ebpf/build_libbpf</code> in the p4c folder.</p>
 <p>In addition the following packages and programs are required to run the full test suite:</p>
@@ -208,7 +208,7 @@ Dependencies</h2>
 </ul>
 <p>You can install these using: </p><div class="fragment"><div class="line">$ sudo apt-get install clang llvm libpcap-dev libelf-dev iproute2 net-tools</div>
 <div class="line">$ pip3 install --user pyroute2 ply==3.8 scapy==2.4.0</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md92"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md120"></a>
 Supported capabilities</h2>
 <p>The current version of the <a class="el" href="namespace_p4.html">P4</a> to eBPF compiler supports a relatively narrow subset of the <a class="el" href="namespace_p4.html">P4</a> language, but still powerful enough to write very complex packet filters and simple packet forwarding engines. We expect that the compiler's capabilities will improve gradually.</p>
 <p>Here are some limitations imposed on the <a class="el" href="namespace_p4.html">P4</a> programs:</p>
@@ -217,11 +217,11 @@ Supported capabilities</h2>
 <li>arithmetic on data wider than 32 bits is not supported</li>
 <li>eBPF does not offer support for ternary table matches</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md93"></a>
+<h2><a class="anchor" id="autotoc_md121"></a>
 Translating P4 to C</h2>
 <p>To simplify the translation, the <a class="el" href="namespace_p4.html">P4</a> programmer should refrain using identifiers whose name starts with <code>ebpf_</code>.</p>
 <p>The following table provides a brief summary of how each <a class="el" href="namespace_p4.html">P4</a> construct is mapped to a corresponding C construct:</p>
-<h3><a class="anchor" id="autotoc_md94"></a>
+<h3><a class="anchor" id="autotoc_md122"></a>
 Translating parsers</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -237,10 +237,10 @@ Translating parsers</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>extract</code>   </td><td class="markdownTableBodyNone">load/shift/mask data from packet buffer   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md95"></a>
+<h3><a class="anchor" id="autotoc_md123"></a>
 Translating match-action pipelines</h3>
-<h1><a class="anchor" id="autotoc_md96"></a>
-autotoc_md96</h1>
+<h1><a class="anchor" id="autotoc_md124"></a>
+autotoc_md124</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone"><a class="el" href="namespace_p4.html">P4</a> Construct   </th><th class="markdownTableHeadNone">C Translation    </th></tr>
@@ -261,25 +261,25 @@ autotoc_md96</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">counters   </td><td class="markdownTableBodyNone">additional eBPF table   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md97"></a>
+<h3><a class="anchor" id="autotoc_md125"></a>
 Generating code from a .p4 file</h3>
 <p>The C code can be generated using the following command:</p>
 <p><code>p4c-ebpf PROGRAM.p4 -o out.c</code></p>
 <p>This will generate the C-file and its corresponding header. The architecture (ebpf_model or xdp_model) is auto-detected.</p>
-<h3><a class="anchor" id="autotoc_md98"></a>
+<h3><a class="anchor" id="autotoc_md126"></a>
 Using the generated code</h3>
 <p>The resulting file contains the complete data structures, tables, and a C function named <code>ebpf_filter</code> that implements the P4-specified data-plane. This C file can be manipulated using clang or BCC tools; please refer to the BCC project documentation and sample test files of the <a class="el" href="namespace_p4.html">P4</a> to eBPF source code for an in-depth understanding.</p>
 <p>The general C-file alone will not compile. It depends on headers specific to the generated target. For the default target, this is the <code>kernel_ebpf.h</code> file which can be found in the <a class="el" href="namespace_p4.html">P4</a> backend under <code>p4c/backends/ebpf/runtime</code>. The <a class="el" href="namespace_p4.html">P4</a> backend also provides a makefile and sample header which allow for quick generation and automatic compilation of the generated file.</p>
 <p><code>make -f p4c/backends/ebpf/runtime/kernel.mk BPFOBJ=out.o P4FILE=PROGRAM.p4</code></p>
 <p>where -f path is the path to the makefile, BPFOBJ is the output ebpf byte code and P4FILE is the input <a class="el" href="namespace_p4.html">P4</a> program. This command sequence will generate an eBPF program, which can be loaded into the kernel using <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a>.</p>
-<h4><a class="anchor" id="autotoc_md99"></a>
+<h4><a class="anchor" id="autotoc_md127"></a>
 Connecting the generated program with the TC</h4>
 <p>The eBPF code that is generated is can be used as a classifier attached to the ingress packet path using the Linux <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> subsystem. The same eBPF code should be attached to all interfaces. Note however that all eBPF code instances share a single set of tables, which are used to control the program behavior.</p>
 <p><code>tc qdisc add dev IFACE clsact</code></p>
 <p>Creates a classifier qdisc on the respective interface. Once created, eBPF programs can be attached to it using the following command:</p>
 <p><code>tc filter add dev IFACE egress bpf da obj YOUREBPFCODE section prog verbose</code></p>
 <p><code>da</code> implies that tc takes action input directly from the return codes provided by the eBPF program. We currently support <code>TC_ACT_SHOT</code> and <code>TC_ACT_OK</code>. More information avaiable <a href="http://docs.cilium.io/en/latest/bpf/#tc-traffic-control">here</a>.</p>
-<h1><a class="anchor" id="autotoc_md100"></a>
+<h1><a class="anchor" id="autotoc_md128"></a>
 How to run the generated eBPF program</h1>
 <p>Once the eBPF program is loaded, various methods exist to manipulate the tables. The easiest and simplest way is to use the <a href="http://docs.cilium.io/en/latest/bpf/#bpftool">bpftool</a> provided by the kernel.</p>
 <p>An alternative is to use explicit syscalls (an example can be found in the <a href="https://github.com/torvalds/linux/blob/master/tools/lib/bpf/bpf.c">kernel tools folder</a>.</p>
@@ -290,26 +290,26 @@ How to run the generated eBPF program</h1>
 <li><code>make check-ebpf-bcc</code>: runs the user-space tests using bcc to compile ebpf</li>
 <li><code>sudo -E make check-ebpf-kernel</code>: runs the kernel-level tests. Requires root privileges to install the ebpf program in the Linux kernel. Note: by default the kernel ebpf tests are disabled; if you want to enable them you can modify the file <code>backends/ebpf/CMakeLists.txt</code> by setting this variable to <code>True</code>: <code>set (SUPPORTS_KERNEL True)</code></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md101"></a>
+<h1><a class="anchor" id="autotoc_md129"></a>
 How to inject custom extern function to the generated eBPF program?</h1>
 <p>The <a class="el" href="namespace_p4.html">P4</a> to eBPF compiler comes with the support for custom C extern functions. It means that a developer can write a custom, eBPF-compatible (acceptable by BPF verifier) C function and call it from the <a class="el" href="namespace_p4.html">P4</a> program as a normal <a class="el" href="namespace_p4.html">P4</a> action. As a result, <a class="el" href="namespace_p4.html">P4</a> program can be extended with functionality, which is not supported natively by the <a class="el" href="namespace_p4.html">P4</a> language. This feature is briefly described below.</p>
-<h2><a class="anchor" id="autotoc_md102"></a>
+<h2><a class="anchor" id="autotoc_md130"></a>
 Basic principles</h2>
 <p>The C extern function can effectively enhance the functionality of <a class="el" href="namespace_p4.html">P4</a> program. A programmer should be able to write own function, declare it in the <a class="el" href="namespace_p4.html">P4</a> program and invoke from within <a class="el" href="namespace_p4.html">P4</a> action or <a class="el" href="namespace_p4.html">P4</a> control block.</p>
 <p>The C extern can use BPF helpers in order to make syscalls to eBPF subsystem. In particular, the C extern can define and have control over its own set of BPF maps. However, the C extern must not read or write to BPF maps implementing <a class="el" href="namespace_p4.html">P4</a> tables and used by the main <a class="el" href="namespace_p4.html">P4</a> program.</p>
 <p>The C extern could be also allowed to access packet’s payload, but this feature is not implemented in the first version of the C Custom Externs feature.</p>
-<h2><a class="anchor" id="autotoc_md103"></a>
+<h2><a class="anchor" id="autotoc_md131"></a>
 Definition</h2>
 <p>The custom C extern function should be explicitly declared in the <a class="el" href="namespace_p4.html">P4</a> program making use of that extern. For example:</p>
 <div class="fragment"><div class="line"> </div>
 <div class="line"><span class="keyword">extern</span> <span class="keywordtype">bool</span> verify_ipv4_checksum(in IPv4_h iphdr);</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md104"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md132"></a>
 Compilation</h2>
 <p>The <code>--emit-externs</code> flag must be appended to the <code>p4c-ebpf</code> compiler to instruct it that there are some C extern functions defined in the <a class="el" href="namespace_p4.html">P4</a> program and compiler should not warn about them.</p>
 <div class="fragment"><div class="line">p4c-ebpf -o OUTPUT.c PROGRAM.p4 --emit-externs</div>
 </div><!-- fragment --><p>Furthermore, the C file including definition of the C extern function should be provided to <code>clang</code>:</p>
 <div class="fragment"><div class="line">clang -O2 -include C-EXTERN-FILE.c -target bpf -c OUTPUT.c -o OUTPUT.o</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md105"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md133"></a>
 Calling convention</h2>
 <ul>
 <li>Basic types are converted from <a class="el" href="namespace_p4.html">P4</a> representation to C representation as follows:<ul>

@@ -118,18 +118,18 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa
   <div class="headertitle"><div class="title">PSA implementation for eBPF backend</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md36"></a> This directory implements PSA (Portable Switch Architecture) for the eBPF backend.</p>
-<h1><a class="anchor" id="autotoc_md37"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md134"></a> This directory implements PSA (Portable Switch Architecture) for the eBPF backend.</p>
+<h1><a class="anchor" id="autotoc_md135"></a>
 Prerequisites</h1>
 <ul>
 <li>Refer to the <a href="https://docs.cilium.io/en/latest/bpf/">Cilium docs</a> to learn more about eBPF.</li>
 <li>This guide assumes at least basic familiarity with <a href="https://p4.org/p4-spec/docs/PSA.html">the PSA specification</a>.</li>
 <li>The PSA implementation inherits some mechanisms (e.g. generation of Parser and Control block) from <code>ebpf_model</code>. Please, get familiar with <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html">the base eBPF backend</a> first.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md38"></a>
+<h1><a class="anchor" id="autotoc_md136"></a>
 Design</h1>
 <p>The PSA to eBPF compiler provides two flavors of generated eBPF code: TC-based design and XDP-based design. The TC-based design leverages eBPF <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> (Traffic Control) hook and is able to implement any PSA program. The XDP-based design offloads packet processing to eBPF XDP (eXpress Data Path) hook and provides better performance than the TC-based flavor. However, the XDP-based design lacks support for packet recirculation, QoS (no integration with <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> qdisc) and CLONE_E2E packet path.</p>
-<h2><a class="anchor" id="autotoc_md39"></a>
+<h2><a class="anchor" id="autotoc_md137"></a>
 TC-based design (default)</h2>
 <p><a class="el" href="namespace_p4.html">P4</a> packet processing is translated into a set of eBPF programs attached to the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> hook. The eBPF programs implement packet processing defined in a <a class="el" href="namespace_p4.html">P4</a> program written according to the PSA model. The <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> hook is used as a main engine, because it enables a full implementation of the PSA specification. The XDP-based version of the PSA implementation does not implement the full specification, but provides better performance.</p>
 <p>The TC-based design of PSA for eBPF is depicted in Figure below.</p>
@@ -142,7 +142,7 @@ TC-based PSA-eBPF design</div></div>
 <li><code>tc-ingress</code> - In the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> Ingress, the PSA Ingress pipeline as well as so-called "Traffic Manager" eBPF program is attached. The Ingress pipeline is composed of Parser, Control block and Deparser. The details of Parser, Control block and Deparser implementation will be explained further in this document. The same eBPF program in <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> contains also the Traffic Manager. The role of Traffic Manager is to redirect traffic between the Ingress (<a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a>) and Egress (<a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a>). It is also responsible for packet replication via clone sessions or multicast groups and sending packet to CPU.</li>
 <li><code>tc-egress</code> - The PSA Egress pipeline (composed of Parser, Control block and Deparser) is attached to the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> Egress hook. As there is no XDP hook in the Egress path, the use of <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> is mandatory for the egress processing. <b>Note!</b> If the PSA Egress pipeline is not used (i.e. it is left empty by a developer), the PSA-eBPF compiler will not generate the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> Egress program. This brings a noticeable performance gain, if the egress pipeline is not used.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md40"></a>
+<h2><a class="anchor" id="autotoc_md138"></a>
 XDP-based design</h2>
 <p>The XDP-based design of PSA for eBPF is depicted in Figure below.</p>
 <div class="image">
@@ -152,22 +152,22 @@ XDP-based PSA-eBPF design</div></div>
     <p><code>xdp-helper</code> does not exist in this design, instead the PSA Ingress pipeline is attached to XDP hook. Since XDP does not provide a hook on the egress path, we mimic the PSA Egress pipeline by using eBPF program attached to <code>BPF_MAP_TYPE_DEVMAP</code>, a special type of BPF map used to perform packet redirection with <code>bpf_redirect_map()</code> helper. Also, XDP hook in the currently supported kernel version (up to 5.13) does not support packet cloning. Therefore, packets to be cloned are passed up to the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> hook, where the Packet Replication Engine is implemented. Once a packet reaches the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> hook, it is further processed by <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> exclusively. Thus, the PSA-eBPF compiler generates a <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> Egress program, which is a mirror reflection of the PSA Egress pipeline attached to the XDP DEVMAP. The packets to be cloned are passed up to <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> with additional metadata. The mechanism used to transfer the metadata depends on the XDP2TC mode, we support <code>cpumap</code> and <code>head</code> modes for XDP-based design (<code>meta</code> mode is not supported).</p>
 <p>There is no difference (comparing to TC-based design) in how PSA externs, <a class="el" href="namespace_p4.html">P4</a> match kinds and parser primitives are implemented for XDP-based design.</p>
 <p>To compile <a class="el" href="namespace_p4.html">P4</a> programs for XDP, use <code>--xdp</code> compiler option.</p>
-<h2><a class="anchor" id="autotoc_md41"></a>
+<h2><a class="anchor" id="autotoc_md139"></a>
 Packet paths</h2>
-<h3><a class="anchor" id="autotoc_md42"></a>
+<h3><a class="anchor" id="autotoc_md140"></a>
 NTK (Normal Packet To Kernel)</h3>
 <p><b>WARNING!</b> The NTK packet path is a custom packet path used for the PSA-eBPF only! It is not a standardized PSA packet path.</p>
 <p>The NTK packet path allows integrating P4/PSA programs for eBPF with the standard Linux kernel stack. The main use case is handling ICMP/ARP requests and sending packet to the userspace process listening on a socket.</p>
 <p>The NTK path is enforced if <code>drop</code> is set to <code>false</code> and <code>egress_port</code> is left unchanged or set to 0 (it's a special implicit port number that forwards packets to the kernel stack). Since packets can be modified in the PSA ingress pipeline before they are sent to the kernel stack, a <a class="el" href="namespace_p4.html">P4</a> programmer should make sure that packets use standard headers and are properly formatted. Otherwise, the kernel stack will drop them.</p>
 <p><b>NOTE!</b> There is no symmetric packet path <em>from kernel</em> - once a packet enters the kernel network stack, it is further processed exclusively by the kernel. As a consequence, all packets that have not been processed by the PSA Ingress pipeline (e.g., packets sent from userspace application) will not be handled by the PSA Egress pipeline!</p>
-<h3><a class="anchor" id="autotoc_md43"></a>
+<h3><a class="anchor" id="autotoc_md141"></a>
 NFP (Normal Packet From Port)</h3>
 <p><b>TC-based design</b></p>
 <p>Packet arriving on an interface is intercepted in the XDP hook by the <code>xdp-helper</code> program. It performs pre-processing and packet is passed for further processing to the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> ingress. Note that there is no P4-related processing done in the <code>xdp-helper</code> program.</p>
 <p>By default, a packet is further passed to the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> subsystem. It is done by <code>XDP_PASS</code> action and packet is further handled by <code>tc-ingress</code> program.</p>
 <p><b>XDP-based design</b></p>
 <p>No specific processing is done. Packets are just received by the eBPF programm attached to XDP.</p>
-<h3><a class="anchor" id="autotoc_md44"></a>
+<h3><a class="anchor" id="autotoc_md142"></a>
 RESUBMIT</h3>
 <p>The purpose of <code>RESUBMIT</code> is to transfer packet processing back to the Ingress Parser from Ingress Deparser.</p>
 <p>We implement packet resubmission by calling main <code>ingress()</code> function (implementing the PSA Ingress pipeline) in a loop. The <code>MAX_RESUBMIT_DEPTH</code> variable specifies maximum number of resubmit operations (the <code>MAX_RESUBMIT_DEPTH</code> value is currently hardcoded and is set to 4). The <code>resubmit</code> flag defines whether the <code>tc-ingress</code> program should enter next iteration (resubmit) or break the loop. The pseudocode looks as follows:</p>
@@ -181,7 +181,7 @@ RESUBMIT</h3>
 <div class="line">    }</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>The same mechanism for RESUBMIT is used in the TC-based and XDP-based design.</p>
-<h3><a class="anchor" id="autotoc_md45"></a>
+<h3><a class="anchor" id="autotoc_md143"></a>
 NU (Normal Unicast), NM (Normal Multicast), CI2E (Clone Ingress to Egress)</h3>
 <p><b>TC-based design</b></p>
 <p>NU, NM and CI2E refer to process of sending packet from the PSA Ingress Pipeline (more specifically from the Traffic Manager) to the PSA Egress pipeline. The NU path is implemented in the eBPF subsystem by invoking the <code>bpf_redirect()</code> helper from the <code>tc-ingress</code> program. This helper sets an output port for a packet and the packet is further intercepted by the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> egress.</p>
@@ -190,35 +190,35 @@ NU (Normal Unicast), NM (Normal Multicast), CI2E (Clone Ingress to Egress)</h3>
 <p>While performing the packet replication, the eBPF program does a lookup to the outer map based on the clone session/multicast group identifier and, then, does another lookup to the inner map to find all members.</p>
 <p><b>XDP-based design</b></p>
 <p>The NU path is implemented by calling <code>bpf_redirect_map()</code> after the ingress processing is completed. The NM and CI2E paths are not possible in the XDP layer. Packets marked to be cloned are sent up to the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> hook with additional metadata (e.g., parsed headers) and they are cloned by the eBPF program attached to the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> Ingress by using <code>bpf_clone_redirect()</code>. The clone sessions and multicast groups are implemented exactly like for the TC-based design.</p>
-<h3><a class="anchor" id="autotoc_md46"></a>
+<h3><a class="anchor" id="autotoc_md144"></a>
 CE2E (Clone Egress to Egress)</h3>
 <p><b>TC-based design</b></p>
 <p>CE2E refers to process of copying a packet that was handled by the Egress pipeline and resubmitting the cloned packet to the Egress Parser.</p>
 <p>CE2E is implemented by invoking <code>bpf_clone_redirect()</code> helper in the Egress path. Output ports are determined based on the <code>clone_session_id</code> and lookup to "clone_session" BPF map, which is shared among <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> ingress and egress (eBPF subsystem allows for map sharing between programs).</p>
 <p><b>XDP-based design</b></p>
 <p>CE2E is not supported by the XDP-based design.</p>
-<h3><a class="anchor" id="autotoc_md47"></a>
+<h3><a class="anchor" id="autotoc_md145"></a>
 Sending packet to CPU</h3>
 <p>The PSA implementation for eBPF backend assumes a special interface called <code>PSA_PORT_CPU</code> that is used for communication between a control plane application and data plane. Sending packet to CPU does not differ significantly from normal packet unicast. A control plane application should listen for new packets on the interface identified by <code>PSA_PORT_CPU</code> in a <a class="el" href="namespace_p4.html">P4</a> program. By redirecting a packet to <code>PSA_PORT_CPU</code> in the Ingress pipeline the packet is forwarded via Traffic Manager to the Egress pipeline and then, sent to the "CPU" interface.</p>
 <p>The mechanism is common for both design options (TC/XDP).</p>
-<h3><a class="anchor" id="autotoc_md48"></a>
+<h3><a class="anchor" id="autotoc_md146"></a>
 NTP (Normal packet to port)</h3>
 <p><b>TC-based design</b></p>
 <p>Packets from <code>tc-egress</code> are sent out to the egress port. The egress port is determined in the Ingress pipeline and is not changed in the Egress pipeline.</p>
 <p>Note that before a packet is sent to the output port, it's processed by <code><a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> qdisc</code> first. The <code><a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> qdisc</code> is the Linux QoS engine. The eBPF programs generated by P4-eBPF compiler sets <code>skb-&gt;priority</code> value based on the PSA <code>class_of_service</code> metadata. The <code>skb-&gt;priority</code> is used to interact between eBPF programs and <code><a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> qdisc</code>. A user can configure different QoS behaviors via <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> CLI and send a packet from PSA pipeline to a specific QoS class identified by <code>skb-&gt;priority</code>.</p>
 <p><b>XDP-based design</b></p>
 <p>Packets from the XDP egress program attached to BPF_DEVMAP are directly sent out to the egress port. There is no equivalent of Buffering &amp; Queueing Engine in the XDP-based design.</p>
-<h3><a class="anchor" id="autotoc_md49"></a>
+<h3><a class="anchor" id="autotoc_md147"></a>
 RECIRCULATE</h3>
 <p><b>TC-based design</b></p>
 <p>The purpose of <code>RECIRCULATE</code> is to transfer packet processing back from the Egress Deparser to the Ingress Parser.</p>
 <p>In order to implement <code>RECIRCULATE</code> we assume the existence of <code>PSA_PORT_RECIRCULATE</code> ports. Therefore, packet recirculation is simply performed by invoking <code>bpf_redirect()</code> to the <code>PSA_PORT_RECIRCULATE</code> port with <code>BPF_F_INGRESS</code> flag to enforce processing a packet by the Ingress pipeline.</p>
 <p><b>XDP-based design</b></p>
 <p>The RECIRCULATE path is not supported by the XDP-based design.</p>
-<h2><a class="anchor" id="autotoc_md50"></a>
+<h2><a class="anchor" id="autotoc_md148"></a>
 Metadata</h2>
 <p>There are some global metadata defined for the PSA architecture. For example, <code>packet_path</code> must be shared among different pipelines. To share a global metadata between pipelines we use <code>skb-&gt;cb</code> (control buffer), which gives us 20B that are free to use.</p>
-<h2><a class="anchor" id="autotoc_md51"></a>
+<h2><a class="anchor" id="autotoc_md149"></a>
 XDP2TC mode</h2>
 <p>The XDP2TC mode determines how the metadata (containing original EtherType) is passed from XDP up to <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a>. By default, PSA-eBPF uses the <code>bpf_xdp_adjust_meta()</code> helper to append the original EtherType to the <code>skb</code>’s <code>data_meta</code> field, which is further read by the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> Ingress to restore the original format of the packet. The way of passing metadata is determined by the user-configurable <code>--xdp2tc</code> compiler flag. We have noticed that some NIC drivers does not support the <code>bpf_xdp_adjust_meta()</code> BPF helper and the default mode cannot be used. Therefore, we come up with a more generic mode called <code>head</code>, which uses <code>bpf_xdp_adjust_head()</code> instead to prepend a packet with metadata. In this mode, the helper must be invoked twice - in the XDP helper program to append the metadata and in the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> Ingress to strip the metadata out of a packet. We also introduce the third mode - <code>cpumap</code>, which is an experimental features and should be used carefully. The <code>cpumap</code> assumes that the single CPU core handles a packet in the run-to-completion mode from XDP up to the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> layer (in other words, for a given packet, the CPU core running the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> program is the same as the one for XDP). If the above condition is met, the <code>cpumap</code> mode uses the per-CPU BPF array map to transfer metadata from XDP to <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a>. Hence, the <code>cpumap</code> mode should only be used, if there is a guarantee that the same CPU core handles the packet in both XDP and <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> hooks. Note that the XDP helper program introduces a constant but noticeable per-packet overhead. Though, it is necessary to implement <a class="el" href="namespace_p4.html">P4</a> processing in the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> layer.</p>
 <p>To sum up, the <code>--xdp2tc</code> compiler flag can take the following values:</p><ul>
@@ -226,7 +226,7 @@ XDP2TC mode</h2>
 <li><code>head</code> - uses the <code>bpf_xdp_adjust_head()</code> BPF helper and should be used if <code>meta</code> is not supported by a NIC driver.</li>
 <li><code>cpumap</code> - uses the BPF per-CPU array map. It should rather be used for testing purposes only.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md52"></a>
+<h2><a class="anchor" id="autotoc_md150"></a>
 Control-plane API</h2>
 <p>The PSA-eBPF compiler assumes that any control plane software managing eBPF programs generated by the <a class="el" href="namespace_p4.html">P4</a> compiler must be in line with the Control-plane API (a kind of contract or set of instructions that must be followed to make use of PSA-eBPF programs). The Control-plane API is summarized below, but we suggest using the <a href="https://github.com/NIKSS-vSwitch/nikss">NIKSS API</a> that already implements the control-plane API and exposes higher level C API.</p>
 <ul>
@@ -234,16 +234,16 @@ Control-plane API</h2>
 <li><b>Table management</b> - a control plane software is responsible for inserting BPF map entries that are in line with types generated by the <a class="el" href="namespace_p4.html">P4</a> compiler. The PSA-eBPF compiler generates C <code>struct</code> for BPF map's key and value. (e.g. <code>ingress_tbl_fwd_key</code> and <code>ingress_tbl_fwd_value</code>). The <code>exact</code> match table is implemented as BPF hash map. The <code>lpm</code> match table is implemented as BPF <code>LPM_TRIE</code>. Both key and value fields must be provided in the host byte order.</li>
 <li><b>Clone sessions or multicast groups management</b> - Clone sessions or multicast groups are represented as a BPF array map of maps (<code>BPF_MAP_TYPE_ARRAY_OF_MAPS</code>) in the eBPF subsystem. Each entry of an outer map represents a single clone session or multicast group. An inner map is a hash map storing clone session/multicast group members, according to the structure defined by <code>struct list_key_t</code> (BPF map key) and <code>struct element</code> (value). To add a new clone session/mutlicast group, a control plane must add a new element to the outer map (indexed by clone session or multicast group identifier referenced by <code>clone_session_id</code> or <code>multicast_group</code> in a PSA program) and initialize an inner map. To add a new clone session/multicast group member, a con1trol plane must add new element to the inner map.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md53"></a>
+<h2><a class="anchor" id="autotoc_md151"></a>
 P4 match kinds</h2>
 <p>The PSA-eBPF compiler currently supports the following <a class="el" href="namespace_p4.html">P4</a> match kinds: <code>exact</code>, <code>lpm</code>, <code>ternary</code>.</p>
-<h3><a class="anchor" id="autotoc_md54"></a>
+<h3><a class="anchor" id="autotoc_md152"></a>
 exact</h3>
 <p>An <code>exact</code> table is implemented using the BPF hash map. A <a class="el" href="namespace_p4.html">P4</a> table is considered an <code>exact</code> table if all its match fields are defined as <code>exact</code>. Then, the PSA-eBPF compiler generates a BPF hash map instance for each <a class="el" href="namespace_p4.html">P4</a> table instance. The hash map key as a concatenation of <a class="el" href="namespace_p4.html">P4</a> match fields translated to eBPF representation. Each <code>apply()</code> operation is translated into a lookup to the BPF hash map. The value is used to determine an action and its parameters.</p>
-<h3><a class="anchor" id="autotoc_md55"></a>
+<h3><a class="anchor" id="autotoc_md153"></a>
 lpm</h3>
 <p>An <code>lpm</code> table is implemented using the BPF <code>LPM_TRIE</code> map. A <a class="el" href="namespace_p4.html">P4</a> table is considered an <code>lpm</code> table if it contains a single <code>lpm</code> field and no <code>ternary</code> fields. The PSA-eBPF compiler generates a BPF <code>LPM_TRIE</code> map instance for each <a class="el" href="namespace_p4.html">P4</a> table instance. The hash map key as a concatenation of <a class="el" href="namespace_p4.html">P4</a> match fields translated to eBPF representation. Moreover, the PSA-eBPF compiler shuffles the match fields and places the <code>lpm</code> field in the last position. Each <code>apply()</code> operation is translated into a lookup to the <code>LPM_TRIE</code> map. A control plane should populate the <code>LPM_TRIE</code> map with entries composed of a value and prefix.</p>
-<h3><a class="anchor" id="autotoc_md56"></a>
+<h3><a class="anchor" id="autotoc_md154"></a>
 ternary</h3>
 <p>There is no built-in BPF map for ternary (wildcard) matching. Hence, the PSA-eBPF compiler leverages the Tuple Space Search (TSS) algorithm for ternary matching (refer to the <a href="https://dl.acm.org/doi/10.1145/316194.316216">research paper</a> to learn more about the TSS algorithm). A <code>ternary</code> table is implemented using a combination of hash and array BPF maps that realizes the TSS algorithm. A <a class="el" href="namespace_p4.html">P4</a> table is considered a <code>ternary</code> table if it contains at least one <code>ternary</code> field (exact and lpm fields are converted to ternary fields with an appropriate mask).</p>
 <p><b>Note!</b> The PSA-eBPF compiler requires match keys in a ternary table to be sorted by size in descending order.</p>
@@ -312,12 +312,12 @@ ternary</h3>
 <li>The priority of an obtained value is compared with a current "best match" entry. An entry that is returned from the ternary classification is the one with the highest priority among different tuples.</li>
 </ol>
 <p>Note that the TSS algorithm has linear O(n) packet classification complexity, where "n" is a number of unique ternary masks.</p>
-<h2><a class="anchor" id="autotoc_md57"></a>
+<h2><a class="anchor" id="autotoc_md155"></a>
 PSA externs</h2>
-<h3><a class="anchor" id="autotoc_md58"></a>
+<h3><a class="anchor" id="autotoc_md156"></a>
 ActionProfile</h3>
 <p><a href="https://p4.org/p4-spec/docs/PSA.html#sec-action-profile">ActionProfile</a> is a table implementation that separates actions (and its parameters) from a <a class="el" href="namespace_p4.html">P4</a> table, introducing a level of indirection. The P4-eBPF compiler generates an additional BPF hash map, if the Action Profile is specified for a <a class="el" href="namespace_p4.html">P4</a> table. The additional BPF map stores the mapping between the ActionProfile member reference and a <a class="el" href="namespace_p4.html">P4</a> action specification. During the lookup to the <a class="el" href="namespace_p4.html">P4</a> table with Action Profile, eBPF program first queries the first BPF map using the match key composed from the packet fields and expects the ActionProfile member reference to be returned. Next, the eBPF programs uses the obtained member reference as a lookup key to a second map to retrieve the action specification. Hence, the eBPF program does one additional lookup to the additional BPF map, if the ActionProfile is specified for a <a class="el" href="namespace_p4.html">P4</a> table.</p>
-<h3><a class="anchor" id="autotoc_md59"></a>
+<h3><a class="anchor" id="autotoc_md157"></a>
 ActionSelector</h3>
 <p><a href="https://p4.org/p4-spec/docs/PSA-v1.1.0.html#sec-action-selector">ActionSelector</a> is a table implementation similar to an ActionProfile, but extends its functionality with support for groups of actions. If a table entry contains a member reference, the ActionSelector behaves in the same way as an ActionProfile. In case of group references, the PSA-eBPF compiler generates additional BPF maps. One of additional BPF maps (hash map of maps) maps a group reference ID to an inner map that contains a group of entries. The inner map (might be created at runtime by <code>nikss-ctl</code>) stores a number of all members in a group as the first element of the inner map. The rest of entries contains members of the ActionSelector group. To choose a member from a group, a checksum is calculated from all <code>selector</code> match keys. Next, the obtained member from the group map is used to get and execute an action.</p>
 <p>The second compiler-created map contains an action for an empty group. For the ActionSelector, there are two fields stored in a table that uses given ActionSelector instance, one is reference, second is marker whether reference points to group or member.</p>
@@ -379,39 +379,39 @@ ActionSelector</h3>
 <li>For an empty group (without members), action data is read from the <code>_defaultActionGroup</code> table.</li>
 </ol>
 <p>To manage the ActionSelector instance (do not confuse with a table that uses this implementation), you can use <code>nikss-ctl action-selector</code> command or C API from NIKSS.</p>
-<h3><a class="anchor" id="autotoc_md60"></a>
+<h3><a class="anchor" id="autotoc_md158"></a>
 Digest</h3>
 <p><a href="https://p4.org/p4-spec/docs/PSA.html#sec-packet-digest">Digests</a> are intended to carry a small piece of user-defined data from the data plane to a control plane. The PSA-eBPF compiler translates each Digest instance into <code>BPF_MAP_TYPE_QUEUE</code> that implements a FIFO queue. If a deparser triggers the <code>pack()</code> method, an eBPF program inserts data defined for a Digest into the BPF queue map using <code>bpf_map_push_elem</code>. A user space application is responsible for performing periodic queries to this map to read a Digest message. It can use either <code>nikss-ctl digest get pipe</code>, <code>nikss_digest_get_next</code> from NIKSS C API or <code>bpf_map_lookup_and_delete_elem</code> from <code>libbpf</code> API.</p>
-<h3><a class="anchor" id="autotoc_md61"></a>
+<h3><a class="anchor" id="autotoc_md159"></a>
 Meters</h3>
 <p><a href="https://p4.org/p4-spec/docs/PSA.html#sec-meters">Meters</a> are a mechanism for "marking" packets that exceed an average packet or bit rate. Meters implement Dual Token Bucket Algorithm with both "color aware" and "color blind" modes. The PSA-eBPF implementation uses a BPF hash map to store a Meter state. The current implementation in eBPF uses BPF spinlocks to make operations on Meters atomic. The <code>bpf_ktime_get_ns()</code> helper is used to get a packet arrival timestamp.</p>
 <p>The best way to configure a Meter is to use <code>nikss-ctl meter</code> tool as in the following example: </p><div class="fragment"><div class="line"># 1Mb/s -&gt; 128 000 bytes/s (132 kbytes/s PIR, 128 kbytes/s CIR), let CBS, PBS -&gt; 10 kbytes</div>
 <div class="line">$ nikss-ctl meter update pipe &quot;$PIPELINE&quot; DemoIngress_meter index 0 132000:10000 128000:10000</div>
 </div><!-- fragment --><p><code>nikss-ctl</code> accepts PIR and CIR values in bytes/s units or packets/s. PBS and CBS in bytes or packets.</p>
-<h4><a class="anchor" id="autotoc_md62"></a>
+<h4><a class="anchor" id="autotoc_md160"></a>
 Direct Meter</h4>
 <p><a href="https://p4.org/p4-spec/docs/PSA.html#sec-direct-meters">Direct Meter</a> is always associated with the table entry that matched. The Direct Meter state is stored within the table entry value.</p>
-<h3><a class="anchor" id="autotoc_md63"></a>
+<h3><a class="anchor" id="autotoc_md161"></a>
 value_set</h3>
 <p><a href="https://p4.org/p4-spec/docs/P4-16-v1.2.2.html#sec-value-set">value_set</a> is a <a class="el" href="namespace_p4.html">P4</a> lang construct allowing to determine next parser state based on runtime values. The P4-eBPF compiler generates additional hash map for each <code>ValueSet</code> instance. In select case expression each <code>select()</code> on <code>ValueSet</code> is translated into a lookup into the BPF hash map to check if an entry for a given key exists. A value of the BPF map is ignored.</p>
-<h3><a class="anchor" id="autotoc_md64"></a>
+<h3><a class="anchor" id="autotoc_md162"></a>
 Random</h3>
 <p>The <a href="https://p4.org/p4-spec/docs/PSA.html#sec-random">Random</a> extern is a mean to retrieve a pseudo-random number in a specified range within a <a class="el" href="namespace_p4.html">P4</a> program. The PSA-eBPF compiler uses the <code>bpf_get_prandom_u32()</code> BPF helper to get a pseudo-random number. Each <code>read()</code> operation on the Random extern in a <a class="el" href="namespace_p4.html">P4</a> program is translated into a call to the BPF helper.</p>
-<h1><a class="anchor" id="autotoc_md65"></a>
+<h1><a class="anchor" id="autotoc_md163"></a>
 Getting started</h1>
-<h2><a class="anchor" id="autotoc_md66"></a>
+<h2><a class="anchor" id="autotoc_md164"></a>
 Installation</h2>
 <p>Follow standard steps for the <a class="el" href="namespace_p4.html">P4</a> compiler to install the eBPF backend with the PSA support.</p>
-<h2><a class="anchor" id="autotoc_md67"></a>
+<h2><a class="anchor" id="autotoc_md165"></a>
 Using PSA-eBPF</h2>
-<h3><a class="anchor" id="autotoc_md68"></a>
+<h3><a class="anchor" id="autotoc_md166"></a>
 Prerequisites</h3>
 <p>The PSA implemented for eBPF backend is verified to work with the kernel version 5.8+ and <code>x86-64</code> CPU architecture. Moreover, make sure that the BPF filesystem is mounted under <code>/sys/fs/bpf</code>.</p>
 <p>Also, make sure you have the following packages installed:</p>
 <div class="fragment"><div class="line">$ sudo apt install -y clang llvm libelf-dev</div>
 </div><!-- fragment --><p>You should also install a static <code>libbpf</code> library. Run the following commands:</p>
 <div class="fragment"><div class="line">$ python3 backends/ebpf/build_libbpf</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md69"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md167"></a>
 Compilation</h3>
 <p>You can compile a P4-16 PSA program for eBPF in a single step using:</p>
 <div class="fragment"><div class="line">make -f backends/ebpf/runtime/kernel.mk BPFOBJ=out.o P4FILE=&lt;P4-PROGRAM&gt;.p4 P4C=p4c-ebpf psa</div>
@@ -421,13 +421,13 @@ Compilation</h3>
 <div class="line">$ llc -march=bpf -mcpu=generic -filetype=obj -o out.o out.bc</div>
 </div><!-- fragment --><p>Note that you can use <code>-mcpu</code> flag to define the eBPF instruction set. Visit <a href="https://pchaigno.github.io/bpf/2021/10/20/ebpf-instruction-sets.html">this blog post</a> to learn more about eBPF instruction sets.</p>
 <p>The above steps generate <code>out.o</code> BPF object file that can be loaded to the kernel.</p>
-<h4><a class="anchor" id="autotoc_md70"></a>
+<h4><a class="anchor" id="autotoc_md168"></a>
 Optional flags</h4>
 <p>Supposing we want to use a packet recirculation we have to specify the <code>PSA_PORT_RECIRCULATE</code> port. We can use <code>-DPSA_PORT_RECIRCULATE=&lt;RECIRCULATE_PORT_IDX&gt;</code> Clang flag via <code>kernel.mk</code> </p><div class="fragment"><div class="line">make -f backends/ebpf/runtime/kernel.mk BPFOBJ=out.o ARGS=&quot;-DPSA_PORT_RECIRCULATE=&lt;RECIRCULATE_PORT_IDX&gt;&quot; P4FILE=&lt;P4-PROGRAM&gt;.p4 P4C=p4c-ebpf psa</div>
 </div><!-- fragment --><p> or directly: <code>clang ... -DPSA_PORT_RECIRCULATE=&lt;RECIRCULATE_PORT_IDX&gt; ...</code>, <br  />
  where <code>RECIRCULATE_PORT_IDX</code> is a number of a <code>psa_recirc</code> interface (this number can be obtained from <code>ip -n switch link</code>).</p>
 <p>By default <code>PSA_PORT_RECIRCULATE</code> is set to 0.</p>
-<h3><a class="anchor" id="autotoc_md71"></a>
+<h3><a class="anchor" id="autotoc_md169"></a>
 NIKSS API and nikss-ctl</h3>
 <p>We provide the <code>NIKSS</code> C API and the <code>nikss-ctl</code> CLI tool that can be used to manage eBPF programs generated by P4-eBPF compiler. To install the CLI tool, follow the guide in <a href="https://github.com/NIKSS-vSwitch/nikss">the NIKSS repository</a>. Use <code>nikss-ctl help</code> to get all possible commands.</p>
 <p><b>Note!</b> Although eBPF objects can be loaded and managed by other tools (e.g. <code>bpftool</code>), we recommend using <code>nikss-ctl</code>. Some features (e.g., default actions) will only work when using <code>nikss-ctl</code>.</p>
@@ -435,7 +435,7 @@ NIKSS API and nikss-ctl</h3>
 <div class="fragment"><div class="line">nikss-ctl pipeline load id &lt;PIPELINE-ID&gt; out.o</div>
 </div><!-- fragment --><p><code>PIPELINE-ID</code> is a user-defined value used to uniquely identify PSA-eBPF pipeline (we are going to support for multiple PSA-eBPF pipelines running in parallel). In the next step, for each interface that should be attached to PSA-eBPF run:</p>
 <div class="fragment"><div class="line">nikss-ctl add-port pipe &lt;PIPELINE-ID&gt; dev &lt;INTF&gt;</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md72"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md170"></a>
 Running PTF tests</h2>
 <p>PSA implementation for eBPF backend is covered by a set of PTF tests that verify a correct behavior of various PSA mechanisms. The test scripts, PTF test cases and test <a class="el" href="namespace_p4.html">P4</a> programs are located under <code>backends/ebpf/tests</code>. The tests must be executed from this directory.</p>
 <p>To run all PTF tests:</p>
@@ -444,7 +444,7 @@ Running PTF tests</h2>
 <div class="fragment"><div class="line">sudo ./test.sh test.BridgedMetadataPSATest</div>
 </div><!-- fragment --><p>It might be also useful to enable tracing for troubleshooting with <code>bpftool prog tracelog</code>:</p>
 <div class="fragment"><div class="line">sudo ./test.sh --trace=on</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md73"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md171"></a>
 Troubleshooting</h2>
 <p>The PSA implementation for eBPF backend generates standard BPF objects that can be inspected using <code>bpftool</code>.</p>
 <p>To troubleshoot PSA-eBPF program you will probably need <code>bpftool</code>. Follow the steps below to install it.</p>
@@ -458,9 +458,9 @@ Troubleshooting</h2>
 <div class="line">         OPTIONS := { {-j|--json} [{-p|--pretty}] | {-f|--bpffs} |</div>
 <div class="line">                      {-m|--mapcompat} | {-n|--nomount} }</div>
 </div><!-- fragment --><p>Refer to <a href="https://manpages.ubuntu.com/manpages/focal/man8/bpftool-prog.8.html">the bpftool guide</a> for more examples how to use it.</p>
-<h1><a class="anchor" id="autotoc_md74"></a>
+<h1><a class="anchor" id="autotoc_md172"></a>
 Performance optimizations</h1>
-<h2><a class="anchor" id="autotoc_md75"></a>
+<h2><a class="anchor" id="autotoc_md173"></a>
 Table caching</h2>
 <p>Table caching optimizes <a class="el" href="namespace_p4.html">P4</a> table lookups by adding a cache with all <code>exact</code> matches for time-consuming lookups including:</p><ul>
 <li>table with <code>ternary</code> (and/or lpm, exact) key - skip slow TSS algorithm if the key was matched earlier.</li>
@@ -469,7 +469,7 @@ Table caching</h2>
 </ul>
 <p>The fast exact-match map is added in front of each instance of a table that contains a <code>lpm</code>, <code>ternary</code> or <code>selector</code> match key. The table cache is implemented with <code>BPF_MAP_TYPE_LRU_HASH</code>, which shares its implementation with the BPF hash map. The LRU map provides a good lookup performance, but lower performance on map updates due to a maintenance process. Thus, this optimization fits into use cases, where a value of table key changes infrequently between packets.</p>
 <p>This optimization may not improve performance in every case, so it must be explicitly enabled by compiler option. To enable table caching pass <code>--table-caching</code> to the compiler.</p>
-<h1><a class="anchor" id="autotoc_md76"></a>
+<h1><a class="anchor" id="autotoc_md174"></a>
 TODO / Limitations</h1>
 <p>We list the known bugs/limitations below. Refer to the Roadmap section for features planned in the near future.</p>
 <ul>
@@ -488,15 +488,15 @@ TODO / Limitations</h1>
 <li>When table cache optimization is enabled for a table, the number of cached entries is determined as a half of table size. This would be more configurable or smart during compilation.</li>
 <li>Updates to tables or ActionSelector with enabled table cache optimization require cache invalidation. <code>nikss</code> library will remove all cached entries if it detects cache.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md77"></a>
+<h1><a class="anchor" id="autotoc_md175"></a>
 Roadmap</h1>
-<h2><a class="anchor" id="autotoc_md78"></a>
+<h2><a class="anchor" id="autotoc_md176"></a>
 Planned features</h2>
 <p>All the below features are already implemented and will be contributed to the <a class="el" href="namespace_p4.html">P4</a> compiler in subsequent pull requests.</p>
 <ul>
 <li><b>Extended ValueSet support.</b> We plan to extend implementation to support other match kinds and multiple fields in the <code>select()</code> expression.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md79"></a>
+<h2><a class="anchor" id="autotoc_md177"></a>
 Long-term goals</h2>
 <p>The below features are not implemented yet, but they are considered for the future extensions:</p>
 <ul>
@@ -506,7 +506,7 @@ Long-term goals</h2>
 <li><b>Meet parity with the latest version of Linux kernel.</b> The latest Linux kernel brings a few improvements/extensions to eBPF subsystem. We plan to incorporate them to the P4-eBPF compiler to extend functionalities or improve performance.</li>
 <li><b>P4Runtime support.</b> Currently, PSA-eBPF programs can only be managed by <code>NIKSS API</code>. We plan to integrate PSA-eBPF with the P4Runtime software stack (e.g., Stratum, TDI or P4-OvS).</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md80"></a>
+<h2><a class="anchor" id="autotoc_md178"></a>
 Support</h2>
 <p>To report any other kind of problem, feel free to open a GitHub Issue or reach out to the project maintainers on the <a class="el" href="namespace_p4.html">P4</a> Community Slack or via email.</p>
 <p>Project maintainers:</p>
