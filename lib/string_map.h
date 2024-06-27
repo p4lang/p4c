@@ -75,7 +75,7 @@ class string_map {
         /* std::list assignment broken by spec if elements are const... */
         if (this != &a) {
             data.clear();
-            data.insert(a.data.begin(), a.data.end(), data.end());
+            data.insert(data.end(), a.data.begin(), a.data.end());
             init_data_map();
         }
         return *this;

@@ -23,8 +23,8 @@ limitations under the License.
 #include "lib/error.h"
 #include "lib/map.h"
 #include "lib/null.h"
-#include "lib/ordered_map.h"
 #include "lib/safe_vector.h"
+#include "lib/string_map.h"
 
 class JSONLoader;
 
@@ -36,7 +36,7 @@ namespace IR {
  */
 template <class T>
 class IndexedVector : public Vector<T> {
-    ordered_map<cstring, const IDeclaration *> declarations;
+    string_map<const IDeclaration *> declarations;
     bool invalid = false;  // set when an error occurs; then we don't
                            // expect the validity check to succeed.
 
@@ -44,13 +44,10 @@ class IndexedVector : public Vector<T> {
         if (a == nullptr || !a->template is<IDeclaration>()) return;
         auto decl = a->template to<IDeclaration>();
         auto name = decl->getName().name;
-        auto previous = declarations.find(name);
-        if (previous != declarations.end()) {
+        auto [it, inserted] = declarations.emplace(name, decl);
+        if (!inserted) {
             invalid = true;
-            ::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicates declaration %2%", a,
-                    previous->second);
-        } else {
-            declarations[name] = decl;
+            ::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicates declaration %2%", a, it->second);
         }
     }
     void removeFromMap(const T *a) {
@@ -70,7 +67,7 @@ class IndexedVector : public Vector<T> {
     IndexedVector() = default;
     IndexedVector(const IndexedVector &) = default;
     IndexedVector(IndexedVector &&) = default;
-    IndexedVector(const std::initializer_list<const T *> &a) : Vector<T>(a) {
+    IndexedVector(std::initializer_list<const T *> a) : Vector<T>(a) {
         for (auto el : *this) insertInMap(el);
     }
     IndexedVector &operator=(const IndexedVector &) = default;

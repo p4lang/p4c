@@ -170,6 +170,17 @@ class JSONLoader {
             v.insert(temp);
         }
     }
+    template <typename V>
+    void unpack_json(string_map<V> &v) {
+        std::pair<cstring, V> temp;
+        for (auto e : json->as<JsonObject>()) {
+            JsonString *k = new JsonString(e.first);
+            load(k, temp.first);
+            load(e.second, temp.second);
+            v.insert(temp);
+        }
+    }
+
     template <typename K, typename V>
     void unpack_json(std::multimap<K, V> &v) {
         std::pair<K, V> temp;
