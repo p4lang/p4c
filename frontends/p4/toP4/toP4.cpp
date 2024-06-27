@@ -167,8 +167,7 @@ bool ToP4::preorder(const IR::P4Program *program) {
             if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
                 if (sourceFile.startsWith(p4includePath)) {
                     // Skip the include if it's an internal system header.
-                    // TODO: This solution is a temporary hack. Need to figure out a better
-                    // solution.
+                    // TODO: This is a temporary hack. Need to figure out a better solution.
                     if (sourceFile.startsWith(p4includeInternalPath)) continue;
 
                     const char *p = sourceFile.c_str() + strlen(p4includePath);
