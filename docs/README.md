@@ -46,15 +46,17 @@ p4c
 │   ├───extern_modules
 │   ├───p4tc_samples
 │   ├───p4tc_samples_outputs
-│   ├───p4_14_errors
-│   ├───p4_14_errors_outputs
+│   ├───p4_14_errors          -- P4_14 negative input test programss
+│   ├───p4_14_errors_outputs  -- Expected outputs from P4_14 negative tests
+│   ├───p4_14_samples         -- P4_14 input test programs
+│   ├───p4_14_samples_outputs -- Expected outputs from P4_14 tests
 |   ├── p4_16_samples         -- P4_16 input test programs
 |   ├── p4_16_samples_outputs -- Expected outputs from P4_16 tests
-│   ├───p4_16_bmv_errors
-│   ├───p4_16_dpdk_errors
-│   ├───p4_16_dpdk_errors_outputs
-│   ├───p4_16_ebpf_errors
-│   ├───p4_16_ebpf_errors_outputs
+│   ├───p4_16_bmv_errors      -- P4_16 negative input tests for the bmv2 backend
+│   ├───p4_16_dpdk_errors     -- P4_16 negative input tests for the dpdk backend
+│   ├───p4_16_dpdk_errors_outputs -- Expected outputs from dpdk negative tests 
+│   ├───p4_16_ebpf_errors     -- P4_16 negative input tests for the ebpf backend
+│   ├───p4_16_ebpf_errors_outputs  -- Expected outputs from edpf negative tests 
 |   ├── p4_16_errors          -- P4_16 negative input test programs
 |   ├── p4_16_errors_outputs  -- Expected outputs from P4_16 negative tests
 │   ├───p4_16_pna_errors
@@ -63,7 +65,7 @@ p4c
 │   ├───p4_16_psa_errors_outputs
 │   ├───p4_16_samples
 │   ├───p4_16_samples_outputs
-│   └───v1_1_samples
+│   └───v1_1_samples          -- P4 v1.1 sample programs
 └── tools                     -- external programs used in the build/test process
     ├── ci-ptf                -- scripts to run PSA PTF tests
     ├── debian-build          -- resources and scripts for creating Ubuntu (or Debian) packages
