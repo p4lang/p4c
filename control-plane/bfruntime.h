@@ -55,7 +55,7 @@ static inline constexpr P4Id getIdPrefix(P4Id id) { return ((id >> 24) & 0xff); 
 static inline Util::JsonObject *findJsonTable(Util::JsonArray *tablesJson, cstring tblName) {
     for (auto *t : *tablesJson) {
         auto *tblObj = t->to<Util::JsonObject>();
-        auto tName = tblObj->get("name")->to<Util::JsonValue>()->getString();
+        auto tName = tblObj->getAs<Util::JsonValue>("name")->getString();
         if (tName == tblName) {
             return tblObj;
         }
