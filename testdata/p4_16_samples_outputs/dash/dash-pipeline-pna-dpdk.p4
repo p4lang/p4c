@@ -5,8 +5,6 @@ error {
 }
 #include <core.p4>
 #include <pna.p4>
-#include <pna/v0_5/types_metadata.p4>
-#include <pna/v0_5/blocks.p4>
 
 typedef bit<48> EthernetAddress;
 typedef bit<32> IPv4Address;

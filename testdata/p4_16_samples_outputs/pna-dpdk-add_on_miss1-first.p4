@@ -1,7 +1,5 @@
 #include <core.p4>
 #include <pna.p4>
-#include <pna/v0_5/types_metadata.p4>
-#include <pna/v0_5/blocks.p4>
 
 const int IPV4_HOST_SIZE = 65536;
 typedef bit<48> EthernetAddress;

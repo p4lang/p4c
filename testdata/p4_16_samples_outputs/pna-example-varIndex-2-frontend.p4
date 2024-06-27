@@ -1,7 +1,5 @@
 #include <core.p4>
 #include <pna.p4>
-#include <pna/v0_5/types_metadata.p4>
-#include <pna/v0_5/blocks.p4>
 
 typedef bit<48> EthernetAddress;
 enum bit<16> ether_type_t {
