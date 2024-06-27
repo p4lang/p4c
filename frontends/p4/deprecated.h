@@ -19,7 +19,6 @@ limitations under the License.
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
-#include "ir/pass_manager.h"
 
 namespace P4 {
 
@@ -27,22 +26,14 @@ namespace P4 {
  * Checks for the use of symbols that are marked as @deprecated and
  * gives warnings.
  */
-class CheckDeprecated : public Inspector, public ResolutionContext {
+class Deprecated : public Inspector, public ResolutionContext {
  public:
-    CheckDeprecated() { setName("CheckDeprecated"); }
+    Deprecated() { setName("Deprecated"); }
 
     void warnIfDeprecated(const IR::IAnnotated *declaration, const IR::Node *errorNode);
 
     bool preorder(const IR::PathExpression *path) override;
     bool preorder(const IR::Type_Name *name) override;
-};
-
-class Deprecated : public PassManager {
- public:
-    Deprecated() {
-        passes.push_back(new CheckDeprecated());
-        setName("Deprecated");
-    }
 };
 
 }  // namespace P4
