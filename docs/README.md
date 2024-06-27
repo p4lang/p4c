@@ -26,6 +26,7 @@ p4c
 ├── debian                    -- Debian/Ubuntu packaging files
 │   └── source                -- 
 ├── docs                      -- documentation
+│   ├── assets                -- p4 logos in PNG and SVG formats
 │   └── doxygen               -- documentation generation support
 ├── frontends
 │   ├── common                -- common front end code
