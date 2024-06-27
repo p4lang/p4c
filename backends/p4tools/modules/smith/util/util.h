@@ -20,6 +20,20 @@ static const cstring ETH_HDR("eth_hdr");
 /// @param len : Ignored when choosing from the wordlist.
 std::string getRandomString(size_t len);
 
+/// @brief The following functions serve to generate random but well-formed for-loops.
+/// @return Each of them return a string representation of each part of a for-loop.
+/// In tandem, they can be used to generate a complete for-loop by calling `generateForLoop()`.
+std::string generateLoopControlVariable();
+std::string generateLoopInitialization(const std::string &var);
+std::string generateLoopCondition(const std::string &var);
+std::string generateLoopUpdate(const std::string &var);
+std::string generateLoopBody(const std::string &var);
+std::string generateLoopBody(const std::string &var1, const std::string &var2);
+std::string generateTrivialForLoop();
+std::string generateHeaderStackForLoop();
+std::string generateMultipleInitUpdateForLoop();
+std::string generateRangeBasedForLoop(const std::string &start, const std::string &end);
+std::string generateForLoop();
 }  // namespace P4Tools::P4Smith
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_UTIL_UTIL_H_ */
