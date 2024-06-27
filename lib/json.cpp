@@ -19,6 +19,7 @@ limitations under the License.
 #include <sstream>
 #include <stdexcept>
 
+#include "absl/strings/str_cat.h"
 #include "indent.h"
 #include "lib/big_int_util.h"
 
@@ -173,6 +174,20 @@ JsonObject *JsonObject::emplace(cstring label, IJson *value) {
         throw std::logic_error(std::string("Attempt to add to json object a value "
                                            "for a label which already exists ") +
                                label.string() + " " + s.string());
+    }
+    base::emplace(label, value);
+    return this;
+}
+
+JsonObject *JsonObject::emplace(std::string_view label, IJson *value) {
+    if (label.empty()) throw std::logic_error("Empty label");
+    auto j = get(label);
+    if (j != nullptr) {
+        cstring s = value->toString();
+        throw std::logic_error(
+            absl::StrCat("Attempt to add to json object a value "
+                         "for a label which already exists ",
+                         label, " ", s.string_view()));
     }
     base::emplace(label, value);
     return this;

@@ -169,36 +169,18 @@ class JsonObject final : public IJson, public string_map<IJson *> {
  public:
     JsonObject() = default;
     void serialize(std::ostream &out) const override;
-    JsonObject *emplace(cstring label, IJson *value);
     JsonObject *emplace_non_null(cstring label, IJson *value);
 
-    JsonObject *emplace(cstring label, big_int v) {
-        emplace(label, new JsonValue(v));
+    JsonObject *emplace(cstring label, IJson *value);
+    JsonObject *emplace(std::string_view label, IJson *value);
+
+    template <class T, class String>
+    auto emplace(String label,
+                 T &&s) -> std::enable_if_t<!std::is_convertible_v<T, IJson *>, JsonObject *> {
+        emplace(label, new JsonValue(std::forward<T>(s)));
         return this;
     }
-    template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-    JsonObject *emplace(cstring label, T v) {
-        emplace(label, new JsonValue(v));
-        return this;
-    }
-    JsonObject *emplace(cstring label, float v) {
-        emplace(label, new JsonValue(v));
-        return this;
-    }
-    JsonObject *emplace(cstring label, cstring s) {
-        emplace(label, new JsonValue(s));
-        return this;
-    }
-    // FIXME: replace these two methods with std::string view, cannot do now as
-    // std::string is implicitly convertible to cstring
-    JsonObject *emplace(cstring label, const char *s) {
-        emplace(label, new JsonValue(s));
-        return this;
-    }
-    JsonObject *emplace(cstring label, const std::string &s) {
-        emplace(label, new JsonValue(s));
-        return this;
-    }
+
     IJson *get(cstring label) const { return ::get(*this, label); }
     IJson *get(std::string_view label) const { return ::get(*this, label); }
     template <class T, class S>

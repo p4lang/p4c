@@ -61,7 +61,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl> *bo
                 auto json = new Util::JsonObject();
                 auto params = mkArrayField(json, "parameters"_cs);
                 auto type = ctxt->typeMap->getType(assign->left, true);
-                json->emplace("op"_cs, "set");
+                json->emplace("op", "set");
                 auto l = ctxt->conv->convertLeftValue(assign->left);
                 bool convertBool = type->is<IR::Type_Boolean>();
                 auto r = ctxt->conv->convert(assign->right, true, true, convertBool);
@@ -132,8 +132,8 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl> *bo
 
 Util::IJson *DeparserConverter::convertDeparser(const IR::P4Control *ctrl) {
     auto result = new Util::JsonObject();
-    result->emplace("name"_cs, name);
-    result->emplace("id"_cs, nextId("deparser"_cs));
+    result->emplace("name", name);
+    result->emplace("id", nextId("deparser"_cs));
     result->emplace_non_null("source_info"_cs, ctrl->sourceInfoJsonObj());
     auto order = mkArrayField(result, "order"_cs);
     auto primitives = mkArrayField(result, "primitives"_cs);
