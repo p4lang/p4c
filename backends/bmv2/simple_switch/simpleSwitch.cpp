@@ -25,6 +25,7 @@ limitations under the License.
 #include "backends/bmv2/simple_switch/options.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "lib/json.h"
 #include "midend/flattenLogMsg.h"
 
 using BMV2::mkArrayField;
@@ -172,9 +173,9 @@ static unsigned getFieldListById(ConversionContext *ctxt, unsigned index) {
     for (auto it : *ctxt->json->field_lists) {
         auto j = it->to<Util::JsonObject>();
         CHECK_NULL(j);
-        auto name = j->get("name")->to<Util::JsonValue>()->getString();
+        auto name = j->getAs<Util::JsonValue>("name")->getString();
         if (name == search) {
-            id = j->get("id")->to<Util::JsonValue>()->getInt();
+            id = j->getAs<Util::JsonValue>("id")->getInt();
             break;
         }
     }
@@ -1061,7 +1062,7 @@ void SimpleSwitchBackend::createRecirculateFieldsList(ConversionContext *ctxt,
                 fl->emplace("name"_cs, listName);
                 elements = mkArrayField(fl, "elements"_cs);
             } else {
-                elements = fl->get("elements")->to<Util::JsonArray>();
+                elements = fl->getAs<Util::JsonArray>("elements");
                 CHECK_NULL(elements);
             }
 

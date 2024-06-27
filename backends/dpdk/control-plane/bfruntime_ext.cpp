@@ -15,6 +15,8 @@ limitations under the License.
 
 #include "bfruntime_ext.h"
 
+#include "lib/json.h"
+
 namespace P4 {
 
 namespace BFRT {
@@ -60,7 +62,7 @@ void BFRuntimeSchemaGenerator::addMatchActionData(const p4configv1::Table &table
                                                   Util::JsonObject *tableJson,
                                                   Util::JsonArray *dataJson,
                                                   P4Id maxActionParamId) const {
-    cstring tableType = tableJson->get("table_type")->to<Util::JsonValue>()->getString();
+    cstring tableType = tableJson->getAs<Util::JsonValue>("table_type")->getString();
     if (tableType == "MatchAction_Direct") {
         tableJson->emplace("action_specs"_cs, makeActionSpecs(table, &maxActionParamId));
     } else if (tableType == "MatchAction_Indirect") {

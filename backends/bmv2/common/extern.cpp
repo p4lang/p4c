@@ -17,6 +17,7 @@ limitations under the License.
 #include "extern.h"
 
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "lib/json.h"
 
 namespace BMV2 {
 
@@ -165,7 +166,7 @@ void ExternConverter::addToFieldList(ConversionContext *ctxt, const IR::Expressi
             if (auto type = t->to<Util::JsonValue>()) {
                 if (*type == "runtime_data") {
                     // Can't have runtime_data in field lists -- need hexstr instead
-                    auto val = jo->get("value")->to<Util::JsonValue>();
+                    auto val = jo->getAs<Util::JsonValue>("value");
                     j = jo = new Util::JsonObject();
                     jo->emplace("type"_cs, "hexstr");
                     jo->emplace("value"_cs, stringRepr(val->getValue()));

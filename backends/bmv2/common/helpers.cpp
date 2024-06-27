@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "helpers.h"
 
+#include "lib/json.h"
+
 namespace BMV2 {
 
 /// constant definition for bmv2
@@ -113,7 +115,7 @@ void ConversionContext::addToFieldList(const IR::Expression *expr, Util::JsonArr
             if (auto type = t->to<Util::JsonValue>()) {
                 if (*type == "runtime_data") {
                     // Can't have runtime_data in field lists -- need hexstr instead
-                    auto val = jo->get("value")->to<Util::JsonValue>();
+                    auto val = jo->getAs<Util::JsonValue>("value");
                     j = jo = new Util::JsonObject();
                     jo->emplace("type"_cs, "hexstr");
                     jo->emplace("value"_cs, stringRepr(val->getValue()));

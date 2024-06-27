@@ -17,6 +17,7 @@ limitations under the License.
 #include <regex>
 
 #include "lib/error.h"
+#include "lib/json.h"
 #include "lib/null.h"
 
 namespace P4 {
@@ -323,7 +324,7 @@ void BFRuntimeGenerator::addKeyField(Util::JsonArray *dataJson, P4Id id, cstring
 }
 
 /* static */ void BFRuntimeGenerator::addToDependsOn(Util::JsonObject *tableJson, P4Id id) {
-    auto *dependsOnJson = tableJson->get("depends_on")->to<Util::JsonArray>();
+    auto *dependsOnJson = tableJson->getAs<Util::JsonArray>("depends_on");
     CHECK_NULL(dependsOnJson);
     // Skip duplicates
     for (auto *d : *dependsOnJson) {
@@ -751,7 +752,7 @@ void BFRuntimeGenerator::addMatchTables(Util::JsonArray *tablesJson) const {
         // will be used as an offset for other P4-dependent fields (e.g. direct
         // register fields).
         P4Id maxActionParamId = 0;
-        cstring tableType = tableJson->get("table_type")->to<Util::JsonValue>()->getString();
+        cstring tableType = tableJson->getAs<Util::JsonValue>("table_type")->getString();
         if (tableType == "MatchAction_Direct") {
             tableJson->emplace("action_specs"_cs, makeActionSpecs(table, &maxActionParamId));
         } else if (tableType == "MatchAction_Indirect") {
