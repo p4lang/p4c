@@ -64,7 +64,7 @@ void BFRuntimeSchemaGenerator::addMatchActionData(const p4configv1::Table &table
                                                   P4Id maxActionParamId) const {
     cstring tableType = tableJson->getAs<Util::JsonValue>("table_type")->getString();
     if (tableType == "MatchAction_Direct") {
-        tableJson->emplace("action_specs"_cs, makeActionSpecs(table, &maxActionParamId));
+        tableJson->emplace("action_specs", makeActionSpecs(table, &maxActionParamId));
     } else if (tableType == "MatchAction_Indirect") {
         auto *f = makeCommonDataField(BF_RT_DATA_ACTION_MEMBER_ID, "$ACTION_MEMBER_ID"_cs,
                                       makeType("uint32"_cs), false /* repeated */);
@@ -96,7 +96,7 @@ void BFRuntimeSchemaGenerator::addActionSelectorGetMemberCommon(
                 true /* mandatory */, "Exact"_cs, makeType("uint64"_cs));
     addKeyField(keyJson, BF_RT_DATA_HASH_VALUE, "hash_value"_cs, true /* mandatory */, "Exact"_cs,
                 makeType("uint64"_cs));
-    tableJson->emplace("key"_cs, keyJson);
+    tableJson->emplace("key", keyJson);
 
     auto *dataJson = new Util::JsonArray();
     {
@@ -104,10 +104,10 @@ void BFRuntimeSchemaGenerator::addActionSelectorGetMemberCommon(
                                       makeType("uint64"_cs), false /* repeated */);
         addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
     }
-    tableJson->emplace("data"_cs, dataJson);
+    tableJson->emplace("data", dataJson);
 
-    tableJson->emplace("supported_operations"_cs, new Util::JsonArray());
-    tableJson->emplace("attributes"_cs, new Util::JsonArray());
+    tableJson->emplace("supported_operations", new Util::JsonArray());
+    tableJson->emplace("attributes", new Util::JsonArray());
     addToDependsOn(tableJson, actionSelector.id);
 
     tablesJson->append(tableJson);
@@ -124,7 +124,7 @@ void BFRuntimeSchemaGenerator::addActionSelectorCommon(Util::JsonArray *tablesJs
     auto *keyJson = new Util::JsonArray();
     addKeyField(keyJson, BF_RT_DATA_SELECTOR_GROUP_ID, "$SELECTOR_GROUP_ID"_cs,
                 true /* mandatory */, "Exact"_cs, makeType("uint32"_cs));
-    tableJson->emplace("key"_cs, keyJson);
+    tableJson->emplace("key", keyJson);
 
     auto *dataJson = new Util::JsonArray();
     {
@@ -143,10 +143,10 @@ void BFRuntimeSchemaGenerator::addActionSelectorCommon(Util::JsonArray *tablesJs
                                       false /* repeated */);
         addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
     }
-    tableJson->emplace("data"_cs, dataJson);
+    tableJson->emplace("data", dataJson);
 
-    tableJson->emplace("supported_operations"_cs, new Util::JsonArray());
-    tableJson->emplace("attributes"_cs, new Util::JsonArray());
+    tableJson->emplace("supported_operations", new Util::JsonArray());
+    tableJson->emplace("attributes", new Util::JsonArray());
     addToDependsOn(tableJson, actionSelector.action_profile_id);
 
     auto oneTableId = actionSelector.tableIds.at(0);
@@ -179,8 +179,8 @@ bool BFRuntimeSchemaGenerator::addActionProfIds(const p4configv1::Table &table,
             actProfId = BFRuntimeSchemaGenerator::ActionProf::makeActProfId(implementationId);
             tableType = "MatchAction_Indirect"_cs;
         }
-        tableJson->erase("table_type"_cs);
-        tableJson->emplace("table_type"_cs, tableType);
+        tableJson->erase("table_type");
+        tableJson->emplace("table_type", tableType);
     }
 
     if (actProfId > 0) addToDependsOn(tableJson, actProfId);
@@ -224,14 +224,14 @@ const Util::JsonObject *BFRuntimeSchemaGenerator::genSchema() const {
 
     if (isTDI) {
         auto progName = options.file.stem();
-        json->emplace("program_name"_cs, progName);
-        json->emplace("build_date"_cs, cstring(options.getBuildDate()));
-        json->emplace("compile_command"_cs, cstring(options.getCompileCommand()));
-        json->emplace("compiler_version"_cs, cstring(options.compilerVersion));
-        json->emplace("schema_version"_cs, tdiSchemaVersion);
-        json->emplace("target"_cs, "DPDK");
+        json->emplace("program_name", progName);
+        json->emplace("build_date", options.getBuildDate());
+        json->emplace("compile_command", options.getCompileCommand());
+        json->emplace("compiler_version", options.compilerVersion);
+        json->emplace("schema_version", tdiSchemaVersion);
+        json->emplace("target", "DPDK");
     } else {
-        json->emplace("schema_version"_cs, bfrtSchemaVersion);
+        json->emplace("schema_version", bfrtSchemaVersion);
     }
 
     auto *tablesJson = new Util::JsonArray();
@@ -244,7 +244,7 @@ const Util::JsonObject *BFRuntimeSchemaGenerator::genSchema() const {
     addRegisters(tablesJson);
 
     auto *learnFiltersJson = new Util::JsonArray();
-    json->emplace("learn_filters"_cs, learnFiltersJson);
+    json->emplace("learn_filters", learnFiltersJson);
     addLearnFilters(learnFiltersJson);
 
     addDPDKExterns(tablesJson, learnFiltersJson);

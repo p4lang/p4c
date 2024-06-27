@@ -67,7 +67,7 @@ static inline Util::JsonObject *transformAnnotation(const cstring &annotation) {
     auto *annotationJson = new Util::JsonObject();
     // TODO(antonin): annotation string will need to be parsed so we can have it
     // in key/value format here.
-    annotationJson->emplace("name"_cs, annotation.escapeJson());
+    annotationJson->emplace("name", annotation.escapeJson());
     return annotationJson;
 }
 
@@ -133,63 +133,64 @@ static inline const p4configv1::DirectMeter *findDirectMeter(const p4configv1::P
 
 static inline Util::JsonObject *makeType(cstring type) {
     auto *typeObj = new Util::JsonObject();
-    typeObj->emplace("type"_cs, type);
+    typeObj->emplace("type", type);
     return typeObj;
 }
 
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
 static inline Util::JsonObject *makeType(cstring type, T defaultValue) {
     auto *typeObj = new Util::JsonObject();
-    typeObj->emplace("type"_cs, type);
-    typeObj->emplace("default_value"_cs, defaultValue);
+    typeObj->emplace("type", type);
+    typeObj->emplace("default_value", defaultValue);
     return typeObj;
 }
 
 static inline Util::JsonObject *makeTypeBool(std::optional<bool> defaultValue = std::nullopt) {
     auto *typeObj = new Util::JsonObject();
-    typeObj->emplace("type"_cs, "bool");
-    if (defaultValue != std::nullopt) typeObj->emplace("default_value"_cs, *defaultValue);
+    typeObj->emplace("type", "bool");
+    if (defaultValue != std::nullopt) typeObj->emplace("default_value", *defaultValue);
     return typeObj;
 }
 
 static inline Util::JsonObject *makeTypeBytes(int width,
                                               std::optional<int64_t> defaultValue = std::nullopt) {
     auto *typeObj = new Util::JsonObject();
-    typeObj->emplace("type"_cs, "bytes");
-    typeObj->emplace("width"_cs, width);
-    if (defaultValue != std::nullopt) typeObj->emplace("default_value"_cs, *defaultValue);
+    typeObj->emplace("type", "bytes");
+    typeObj->emplace("width", width);
+    if (defaultValue != std::nullopt) typeObj->emplace("default_value", *defaultValue);
     return typeObj;
 }
 
 static inline Util::JsonObject *makeTypeEnum(const std::vector<cstring> &choices,
                                              std::optional<cstring> defaultValue = std::nullopt) {
     auto *typeObj = new Util::JsonObject();
-    typeObj->emplace("type"_cs, "string");
+    typeObj->emplace("type", "string");
     auto *choicesArray = new Util::JsonArray();
     for (auto choice : choices) choicesArray->append(choice);
-    typeObj->emplace("choices"_cs, choicesArray);
-    if (defaultValue != std::nullopt) typeObj->emplace("default_value"_cs, *defaultValue);
+    typeObj->emplace("choices", choicesArray);
+    if (defaultValue != std::nullopt) typeObj->emplace("default_value", *defaultValue);
     return typeObj;
 }
 
 static inline void addSingleton(Util::JsonArray *dataJson, Util::JsonObject *dataField,
                                 bool mandatory, bool readOnly) {
     auto *singletonJson = new Util::JsonObject();
-    singletonJson->emplace("mandatory"_cs, mandatory);
-    singletonJson->emplace("read_only"_cs, readOnly);
-    singletonJson->emplace("singleton"_cs, dataField);
+    singletonJson->emplace("mandatory", mandatory);
+    singletonJson->emplace("read_only", readOnly);
+    singletonJson->emplace("singleton", dataField);
     dataJson->append(singletonJson);
 }
 
 static inline void addOneOf(Util::JsonArray *dataJson, Util::JsonArray *choicesJson, bool mandatory,
                             bool readOnly) {
     auto *oneOfJson = new Util::JsonObject();
-    oneOfJson->emplace("mandatory"_cs, mandatory);
-    oneOfJson->emplace("read_only"_cs, readOnly);
-    oneOfJson->emplace("oneof"_cs, choicesJson);
+    oneOfJson->emplace("mandatory", mandatory);
+    oneOfJson->emplace("read_only", readOnly);
+    oneOfJson->emplace("oneof", choicesJson);
     dataJson->append(oneOfJson);
 }
 
+// FIXME: Switch to std::string_view
 static inline std::optional<cstring> transformMatchType(
     p4configv1::MatchField_MatchType matchType) {
     switch (matchType) {
@@ -210,6 +211,7 @@ static inline std::optional<cstring> transformMatchType(
     }
 }
 
+// FIXME: Switch to std::string_view
 static inline std::optional<cstring> transformOtherMatchType(std::string matchType) {
     if (matchType == "atcam_partition_index") return "ATCAM"_cs;
     if (matchType == "dleft_hash") return "DLEFT_HASH"_cs;

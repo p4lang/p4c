@@ -206,6 +206,15 @@ class string_map {
         }
         return 0;
     }
+    size_type erase(std::string_view k) {
+        auto it = find(k);
+        if (it != data.end()) {
+            data_map.erase(it->first);
+            data.erase(it);
+            return 1;
+        }
+        return 0;
+    }
 
     void swap(string_map &other) {
         using std::swap;

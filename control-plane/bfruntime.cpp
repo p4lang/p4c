@@ -250,13 +250,13 @@ Util::JsonObject *BFRuntimeGenerator::makeCommonDataField(P4Id id, cstring name,
                                                           Util::JsonObject *type, bool repeated,
                                                           Util::JsonArray *annotations) {
     auto *dataField = new Util::JsonObject();
-    dataField->emplace("id"_cs, id);
-    dataField->emplace("name"_cs, name);
-    dataField->emplace("repeated"_cs, repeated);
+    dataField->emplace("id", id);
+    dataField->emplace("name", name);
+    dataField->emplace("repeated", repeated);
     if (annotations != nullptr)
-        dataField->emplace("annotations"_cs, annotations);
+        dataField->emplace("annotations", annotations);
     else
-        dataField->emplace("annotations"_cs, new Util::JsonArray());
+        dataField->emplace("annotations", new Util::JsonArray());
     dataField->emplace("type"_cs, type);
     return dataField;
 }
@@ -265,14 +265,14 @@ Util::JsonObject *BFRuntimeGenerator::makeContainerDataField(P4Id id, cstring na
                                                              Util::JsonArray *items, bool repeated,
                                                              Util::JsonArray *annotations) {
     auto *dataField = new Util::JsonObject();
-    dataField->emplace("id"_cs, id);
-    dataField->emplace("name"_cs, name);
-    dataField->emplace("repeated"_cs, repeated);
+    dataField->emplace("id", id);
+    dataField->emplace("name", name);
+    dataField->emplace("repeated", repeated);
     if (annotations != nullptr)
-        dataField->emplace("annotations"_cs, annotations);
+        dataField->emplace("annotations", annotations);
     else
-        dataField->emplace("annotations"_cs, new Util::JsonArray());
-    dataField->emplace("container"_cs, items);
+        dataField->emplace("annotations", new Util::JsonArray());
+    dataField->emplace("container", items);
     return dataField;
 }
 
@@ -280,16 +280,16 @@ void BFRuntimeGenerator::addActionDataField(Util::JsonArray *dataJson, P4Id id,
                                             const std::string &name, bool mandatory, bool read_only,
                                             Util::JsonObject *type, Util::JsonArray *annotations) {
     auto *dataField = new Util::JsonObject();
-    dataField->emplace("id"_cs, id);
-    dataField->emplace("name"_cs, name);
-    dataField->emplace("repeated"_cs, false);
-    dataField->emplace("mandatory"_cs, mandatory);
-    dataField->emplace("read_only"_cs, read_only);
+    dataField->emplace("id", id);
+    dataField->emplace("name", name);
+    dataField->emplace("repeated", false);
+    dataField->emplace("mandatory", mandatory);
+    dataField->emplace("read_only", read_only);
     if (annotations != nullptr)
-        dataField->emplace("annotations"_cs, annotations);
+        dataField->emplace("annotations", annotations);
     else
-        dataField->emplace("annotations"_cs, new Util::JsonArray());
-    dataField->emplace("type"_cs, type);
+        dataField->emplace("annotations", new Util::JsonArray());
+    dataField->emplace("type", type);
     dataJson->append(dataField);
 }
 
@@ -297,16 +297,16 @@ void BFRuntimeGenerator::addKeyField(Util::JsonArray *dataJson, P4Id id, cstring
                                      bool mandatory, cstring matchType, Util::JsonObject *type,
                                      Util::JsonArray *annotations) {
     auto *dataField = new Util::JsonObject();
-    dataField->emplace("id"_cs, id);
-    dataField->emplace("name"_cs, name);
-    dataField->emplace("repeated"_cs, false);
+    dataField->emplace("id", id);
+    dataField->emplace("name", name);
+    dataField->emplace("repeated", false);
     if (annotations != nullptr)
-        dataField->emplace("annotations"_cs, annotations);
+        dataField->emplace("annotations", annotations);
     else
-        dataField->emplace("annotations"_cs, new Util::JsonArray());
-    dataField->emplace("mandatory"_cs, mandatory);
-    dataField->emplace("match_type"_cs, matchType);
-    dataField->emplace("type"_cs, type);
+        dataField->emplace("annotations", new Util::JsonArray());
+    dataField->emplace("mandatory", mandatory);
+    dataField->emplace("match_type", matchType);
+    dataField->emplace("type", type);
     dataJson->append(dataField);
 }
 
@@ -314,12 +314,12 @@ void BFRuntimeGenerator::addKeyField(Util::JsonArray *dataJson, P4Id id, cstring
                                                                  cstring tableType, int64_t size,
                                                                  Util::JsonArray *annotations) {
     auto *tableJson = new Util::JsonObject();
-    tableJson->emplace("name"_cs, name);
-    tableJson->emplace("id"_cs, id);
-    tableJson->emplace("table_type"_cs, tableType);
-    tableJson->emplace("size"_cs, size);
-    if (annotations != nullptr) tableJson->emplace("annotations"_cs, annotations);
-    tableJson->emplace("depends_on"_cs, new Util::JsonArray());
+    tableJson->emplace("name", name);
+    tableJson->emplace("id", id);
+    tableJson->emplace("table_type", tableType);
+    tableJson->emplace("size", size);
+    if (annotations != nullptr) tableJson->emplace("annotations", annotations);
+    tableJson->emplace("depends_on", new Util::JsonArray());
     return tableJson;
 }
 
@@ -550,17 +550,17 @@ Util::JsonArray *BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table &ta
         }
         auto *spec = new Util::JsonObject();
         const auto &pre = action->preamble();
-        spec->emplace("id"_cs, pre.id());
-        spec->emplace("name"_cs, pre.name());
+        spec->emplace("id", pre.id());
+        spec->emplace("name", pre.name());
         switch (action_ref.scope()) {
             case p4configv1::ActionRef::TABLE_AND_DEFAULT:
-                spec->emplace("action_scope"_cs, "TableAndDefault");
+                spec->emplace("action_scope", "TableAndDefault");
                 break;
             case p4configv1::ActionRef::TABLE_ONLY:
-                spec->emplace("action_scope"_cs, "TableOnly");
+                spec->emplace("action_scope", "TableOnly");
                 break;
             case p4configv1::ActionRef::DEFAULT_ONLY:
-                spec->emplace("action_scope"_cs, "DefaultOnly");
+                spec->emplace("action_scope", "DefaultOnly");
                 break;
             default:
                 ::error(ErrorType::ERR_INVALID, "Invalid action ref scope '%1%' in P4Info",
@@ -596,9 +596,9 @@ Util::JsonArray *BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table &ta
 void BFRuntimeGenerator::addLearnFilterCommon(Util::JsonArray *learnFiltersJson,
                                               const BFRuntimeGenerator::Digest &digest) const {
     auto *learnFilterJson = new Util::JsonObject();
-    learnFilterJson->emplace("name"_cs, digest.name);
-    learnFilterJson->emplace("id"_cs, digest.id);
-    learnFilterJson->emplace("annotations"_cs, digest.annotations);
+    learnFilterJson->emplace("name", digest.name);
+    learnFilterJson->emplace("id", digest.id);
+    learnFilterJson->emplace("annotations", digest.annotations);
 
     auto *fieldsJson = new Util::JsonArray();
     transformTypeSpecToDataFields(fieldsJson, digest.typeSpec, "Digest"_cs, digest.name);
@@ -668,7 +668,7 @@ void BFRuntimeGenerator::addMatchTables(Util::JsonArray *tablesJson) const {
 
         if (!addActionProfIds(table, tableJson)) continue;
 
-        tableJson->emplace("has_const_default_action"_cs, table.const_default_action_id() != 0);
+        tableJson->emplace("has_const_default_action", table.const_default_action_id() != 0);
 
         // will be set to true by the for loop if the match key includes a
         // ternary, range or optional match
@@ -705,8 +705,8 @@ void BFRuntimeGenerator::addMatchTables(Util::JsonArray *tablesJson) const {
             std::regex_search(s, sm, sliceRegex);
             if (sm.size() == 3) {
                 auto *isFieldSliceAnnot = new Util::JsonObject();
-                isFieldSliceAnnot->emplace("name"_cs, "isFieldSlice");
-                isFieldSliceAnnot->emplace("value"_cs, "true");
+                isFieldSliceAnnot->emplace("name", "isFieldSlice");
+                isFieldSliceAnnot->emplace("value", "true");
                 annotations->append(isFieldSliceAnnot);
             }
 
@@ -852,10 +852,10 @@ void BFRuntimeGenerator::addRegisters(Util::JsonArray *tablesJson) const {
 const Util::JsonObject *BFRuntimeGenerator::genSchema() const {
     auto *json = new Util::JsonObject();
 
-    json->emplace("schema_version"_cs, "1.0.0"_cs);
+    json->emplace("schema_version", "1.0.0"_cs);
 
     auto *tablesJson = new Util::JsonArray();
-    json->emplace("tables"_cs, tablesJson);
+    json->emplace("tables", tablesJson);
 
     addMatchTables(tablesJson);
     addActionProfs(tablesJson);

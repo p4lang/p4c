@@ -48,8 +48,8 @@ class ControlConverter : public Inspector {
         LOG3("Processing " << dbp(table));
         auto result = new Util::JsonObject();
         cstring name = table->controlPlaneName();
-        result->emplace("name"_cs, name);
-        result->emplace("id"_cs, nextId("tables"_cs));
+        result->emplace("name", name);
+        result->emplace("id", nextId("tables"_cs));
         result->emplace_non_null("source_info"_cs, table->sourceInfoJsonObj());
         cstring table_match_type = corelib.exactMatch.name;
         auto key = table->getKey();
@@ -115,9 +115,9 @@ class ControlConverter : public Inspector {
                 // represented in the BMv2 JSON file the same as a ternary
                 // field would be.
                 if (match_type == BMV2::MatchImplementation::optionalMatchTypeName) {
-                    keyelement->emplace("match_type"_cs, corelib.ternaryMatch.name);
+                    keyelement->emplace("match_type", corelib.ternaryMatch.name);
                 } else {
-                    keyelement->emplace("match_type"_cs, match_type);
+                    keyelement->emplace("match_type", match_type);
                 }
                 if (auto na = ke->getAnnotation(IR::Annotation::nameAnnotation)) {
                     BUG_CHECK(na->expr.size() == 1, "%1%: expected 1 name", na);
@@ -125,21 +125,21 @@ class ControlConverter : public Inspector {
                     BUG_CHECK(name != nullptr, "%1%: expected a string", na);
                     // This is a BMv2 JSON extension: specify a
                     // control-plane name for this key
-                    keyelement->emplace("name"_cs, name->value);
+                    keyelement->emplace("name", name->value);
                 }
 
                 auto jk = ctxt->conv->convert(expr);
-                keyelement->emplace("target"_cs, jk->to<Util::JsonObject>()->get("value"));
+                keyelement->emplace("target", jk->to<Util::JsonObject>()->get("value"));
                 if (mask != 0)
-                    keyelement->emplace("mask"_cs,
+                    keyelement->emplace("mask",
                                         stringRepr(mask, ROUNDUP(expr->type->width_bits(), 8)));
                 else
-                    keyelement->emplace("mask"_cs, Util::JsonValue::null);
+                    keyelement->emplace("mask", Util::JsonValue::null);
                 tkey->append(keyelement);
             }
         }
         LOG3("table_match_type: " << table_match_type);
-        result->emplace("match_type"_cs, table_match_type);
+        result->emplace("match_type", table_match_type);
         ctxt->conv->simpleExpressionsOnly = false;
 
         auto propertyName = Standard::ActionProfileTraits<arch>::propertyName();
@@ -166,7 +166,7 @@ class ControlConverter : public Inspector {
         }
         if (size == 0) size = BMV2::TableAttributes::defaultTableSize;
 
-        result->emplace("max_size"_cs, size);
+        result->emplace("max_size", size);
         auto ctrs = table->properties->getProperty("counters"_cs);
         if (ctrs != nullptr) {
             // The counters attribute should list the counters of the table, accessed in
@@ -194,14 +194,14 @@ class ControlConverter : public Inspector {
                     }
                     auto jctr = new Util::JsonObject();
                     cstring ctrname = ctrs->controlPlaneName("counter"_cs);
-                    jctr->emplace("name"_cs, ctrname);
-                    jctr->emplace("id"_cs, nextId("counter_arrays"_cs));
+                    jctr->emplace("name", ctrname);
+                    jctr->emplace("id", nextId("counter_arrays"_cs));
                     jctr->emplace_non_null("source_info"_cs, ctrs->sourceInfoJsonObj());
                     // TODO(jafingerhut) - what kind of P4_16 code causes this
                     // code to run, if any?
                     bool direct = te->name == "direct_counter";
-                    jctr->emplace("is_direct"_cs, direct);
-                    jctr->emplace("binding"_cs, table->controlPlaneName());
+                    jctr->emplace("is_direct", direct);
+                    jctr->emplace("binding", table->controlPlaneName());
                     ctxt->json->counters->append(jctr);
                 } else if (expr->is<IR::PathExpression>()) {
                     auto pe = expr->to<IR::PathExpression>();
@@ -226,9 +226,9 @@ class ControlConverter : public Inspector {
                     ::error(ErrorType::ERR_EXPECTED, "%1%: expected a counter", ctrs);
                 }
             }
-            result->emplace("with_counters"_cs, true);
+            result->emplace("with_counters", true);
         } else {
-            result->emplace("with_counters"_cs, false);
+            result->emplace("with_counters", false);
         }
 
         bool sup_to = false;
@@ -245,7 +245,7 @@ class ControlConverter : public Inspector {
                 ::error(ErrorType::ERR_EXPECTED, "%1%: expected a Boolean", timeout);
             }
         }
-        result->emplace("support_timeout"_cs, sup_to);
+        result->emplace("support_timeout", sup_to);
 
         auto dm = table->properties->getProperty("meters"_cs);
         if (dm != nullptr) {
@@ -282,13 +282,13 @@ class ControlConverter : public Inspector {
                     BUG_CHECK(decl->is<IR::Declaration_Instance>(), "%1%: expected an instance",
                               decl->getNode());
                     cstring name = decl->controlPlaneName();
-                    result->emplace("direct_meters"_cs, name);
+                    result->emplace("direct_meters", name);
                 }
             } else {
                 ::error(ErrorType::ERR_EXPECTED, "%1%: expected a meter", dm);
             }
         } else {
-            result->emplace("direct_meters"_cs, Util::JsonValue::null);
+            result->emplace("direct_meters", Util::JsonValue::null);
         }
 
         auto action_ids = mkArrayField(result, "action_ids"_cs);
@@ -339,12 +339,12 @@ class ControlConverter : public Inspector {
             BUG_CHECK(nextDestination, "Could not find default destination for %1%",
                       node->invocation);
             nextLabel = nodeName(nextDestination);
-            result->emplace("base_default_next"_cs, nextLabel);
+            result->emplace("base_default_next", nextLabel);
             // So if a "default:" switch case exists we set the nextLabel
             // to be the destination of the default: label.
             if (defaultLabelDestination != nullptr) nextLabel = nodeName(defaultLabelDestination);
         } else {
-            result->emplace("base_default_next"_cs, Util::JsonValue::null);
+            result->emplace("base_default_next", Util::JsonValue::null);
         }
 
         std::set<cstring> labelsDone;
@@ -374,7 +374,7 @@ class ControlConverter : public Inspector {
             }
         }
 
-        result->emplace("next_tables"_cs, next_tables);
+        result->emplace("next_tables", next_tables);
         auto defact =
             table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
         if (defact != nullptr) {
@@ -411,8 +411,8 @@ class ControlConverter : public Inspector {
             unsigned actionid = get(ctxt->structure->ids, action, INVALID_ACTION_ID);
             BUG_CHECK(actionid != INVALID_ACTION_ID, "Could not find id for %1%", action);
             auto entry = new Util::JsonObject();
-            entry->emplace("action_id"_cs, actionid);
-            entry->emplace("action_const"_cs, defact->isConstant);
+            entry->emplace("action_id", actionid);
+            entry->emplace("action_const", defact->isConstant);
             auto fields = mkArrayField(entry, "action_data"_cs);
             if (args != nullptr) {
                 // TODO: use argument names
@@ -427,8 +427,8 @@ class ControlConverter : public Inspector {
                     }
                 }
             }
-            entry->emplace("action_entry_const"_cs, defact->isConstant);
-            result->emplace("default_entry"_cs, entry);
+            entry->emplace("action_entry_const", defact->isConstant);
+            result->emplace("default_entry", entry);
         }
         convertTableEntries(table, result);
         return result;
@@ -456,16 +456,16 @@ class ControlConverter : public Inspector {
                 // represented in the BMv2 JSON file the same as a ternary
                 // field would be.
                 if (matchType == "optional") {
-                    key->emplace("match_type"_cs, "ternary");
+                    key->emplace("match_type", "ternary");
                 } else {
-                    key->emplace("match_type"_cs, matchType);
+                    key->emplace("match_type", matchType);
                 }
                 if (matchType == corelib.exactMatch.name) {
                     if (k->is<IR::Constant>())
-                        key->emplace("key"_cs, stringRepr(k->to<IR::Constant>()->value, k8));
+                        key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
                     else if (k->is<IR::BoolLiteral>())
                         // booleans are converted to ints
-                        key->emplace("key"_cs,
+                        key->emplace("key",
                                      stringRepr(k->to<IR::BoolLiteral>()->value ? 1 : 0, k8));
                     else
                         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupported exact key expression",
@@ -473,15 +473,14 @@ class ControlConverter : public Inspector {
                 } else if (matchType == corelib.ternaryMatch.name) {
                     if (k->is<IR::Mask>()) {
                         auto km = k->to<IR::Mask>();
-                        key->emplace("key"_cs, stringRepr(km->left->to<IR::Constant>()->value, k8));
-                        key->emplace("mask"_cs,
-                                     stringRepr(km->right->to<IR::Constant>()->value, k8));
+                        key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
+                        key->emplace("mask", stringRepr(km->right->to<IR::Constant>()->value, k8));
                     } else if (k->is<IR::Constant>()) {
-                        key->emplace("key"_cs, stringRepr(k->to<IR::Constant>()->value, k8));
-                        key->emplace("mask"_cs, stringRepr(Util::mask(keyWidth), k8));
+                        key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
+                        key->emplace("mask", stringRepr(Util::mask(keyWidth), k8));
                     } else if (k->is<IR::DefaultExpression>()) {
-                        key->emplace("key"_cs, stringRepr(0, k8));
-                        key->emplace("mask"_cs, stringRepr(0, k8));
+                        key->emplace("key", stringRepr(0, k8));
+                        key->emplace("mask", stringRepr(0, k8));
                     } else {
                         ::error(ErrorType::ERR_UNSUPPORTED,
                                 "%1%: unsupported ternary key expression", k);
@@ -489,7 +488,7 @@ class ControlConverter : public Inspector {
                 } else if (matchType == corelib.lpmMatch.name) {
                     if (k->is<IR::Mask>()) {
                         auto km = k->to<IR::Mask>();
-                        key->emplace("key"_cs, stringRepr(km->left->to<IR::Constant>()->value, k8));
+                        key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
                         auto trailing_zeros = [](unsigned long n, unsigned long keyWidth) {
                             return n ? __builtin_ctzl(n) : static_cast<int>(keyWidth);
                         };
@@ -502,13 +501,13 @@ class ControlConverter : public Inspector {
                         if (len + count_ones(mask) != keyWidth)  // any remaining 0s in the prefix?
                             ::error(ErrorType::ERR_INVALID, "%1%: invalid mask for LPM key", k);
                         else
-                            key->emplace("prefix_length"_cs, keyWidth - len);
+                            key->emplace("prefix_length", keyWidth - len);
                     } else if (k->is<IR::Constant>()) {
-                        key->emplace("key"_cs, stringRepr(k->to<IR::Constant>()->value, k8));
-                        key->emplace("prefix_length"_cs, keyWidth);
+                        key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
+                        key->emplace("prefix_length", keyWidth);
                     } else if (k->is<IR::DefaultExpression>()) {
-                        key->emplace("key"_cs, stringRepr(0, k8));
-                        key->emplace("prefix_length"_cs, 0);
+                        key->emplace("key", stringRepr(0, k8));
+                        key->emplace("prefix_length", 0);
                     } else {
                         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupported LPM key expression",
                                 k);
@@ -516,16 +515,14 @@ class ControlConverter : public Inspector {
                 } else if (matchType == "range") {
                     if (k->is<IR::Range>()) {
                         auto kr = k->to<IR::Range>();
-                        key->emplace("start"_cs,
-                                     stringRepr(kr->left->to<IR::Constant>()->value, k8));
-                        key->emplace("end"_cs,
-                                     stringRepr(kr->right->to<IR::Constant>()->value, k8));
+                        key->emplace("start", stringRepr(kr->left->to<IR::Constant>()->value, k8));
+                        key->emplace("end", stringRepr(kr->right->to<IR::Constant>()->value, k8));
                     } else if (k->is<IR::Constant>()) {
-                        key->emplace("start"_cs, stringRepr(k->to<IR::Constant>()->value, k8));
-                        key->emplace("end"_cs, stringRepr(k->to<IR::Constant>()->value, k8));
+                        key->emplace("start", stringRepr(k->to<IR::Constant>()->value, k8));
+                        key->emplace("end", stringRepr(k->to<IR::Constant>()->value, k8));
                     } else if (k->is<IR::DefaultExpression>()) {
-                        key->emplace("start"_cs, stringRepr(0, k8));
-                        key->emplace("end"_cs, stringRepr((1 << keyWidth) - 1, k8));  // 2^N -1
+                        key->emplace("start", stringRepr(0, k8));
+                        key->emplace("end", stringRepr((1 << keyWidth) - 1, k8));  // 2^N -1
                     } else {
                         ::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported range key expression",
                                 k);
@@ -539,11 +536,11 @@ class ControlConverter : public Inspector {
                     // allow exact values or a DefaultExpression (_ or
                     // default), no &&& expression.
                     if (k->is<IR::Constant>()) {
-                        key->emplace("key"_cs, stringRepr(k->to<IR::Constant>()->value, k8));
-                        key->emplace("mask"_cs, stringRepr(Util::mask(keyWidth), k8));
+                        key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
+                        key->emplace("mask", stringRepr(Util::mask(keyWidth), k8));
                     } else if (k->is<IR::DefaultExpression>()) {
-                        key->emplace("key"_cs, stringRepr(0, k8));
-                        key->emplace("mask"_cs, stringRepr(0, k8));
+                        key->emplace("key", stringRepr(0, k8));
+                        key->emplace("mask", stringRepr(0, k8));
                     } else {
                         ::error(ErrorType::ERR_UNSUPPORTED,
                                 "%1%: unsupported optional key expression", k);
@@ -566,12 +563,12 @@ class ControlConverter : public Inspector {
             auto actionDecl = decl->to<IR::P4Action>();
             unsigned id = get(ctxt->structure->ids, actionDecl, INVALID_ACTION_ID);
             BUG_CHECK(id != INVALID_ACTION_ID, "Could not find id for %1%", actionDecl);
-            action->emplace("action_id"_cs, id);
+            action->emplace("action_id", id);
             auto actionData = mkArrayField(action, "action_data"_cs);
             for (auto arg : *actionCall->arguments) {
                 actionData->append(stringRepr(arg->expression->to<IR::Constant>()->value, 0));
             }
-            entry->emplace("action_entry"_cs, action);
+            entry->emplace("action_entry", action);
 
             auto priorityAnnotation = e->getAnnotation("priority"_cs);
             if (priorityAnnotation != nullptr) {
@@ -582,9 +579,9 @@ class ControlConverter : public Inspector {
                 if (!priValue->is<IR::Constant>())
                     ::error(ErrorType::ERR_INVALID, "Invalid priority value %1%; must be constant.",
                             priorityAnnotation->expr);
-                entry->emplace("priority"_cs, priValue->to<IR::Constant>()->value);
+                entry->emplace("priority", priValue->to<IR::Constant>()->value);
             } else {
-                entry->emplace("priority"_cs, entryPriority);
+                entry->emplace("priority", entryPriority);
             }
             entryPriority += 1;
 
@@ -610,7 +607,7 @@ class ControlConverter : public Inspector {
                                    Util::JsonObject *table, Util::JsonArray *action_profiles,
                                    BMV2::SharedActionSelectorCheck<arch> *) {
         if (implementation == nullptr) {
-            table->emplace("type"_cs, "simple");
+            table->emplace("type", "simple");
             return true;
         }
 
@@ -640,8 +637,8 @@ class ControlConverter : public Inspector {
             apname = implementation->controlPlaneName(ctxt->refMap->newName("action_profile"));
             action_profile = new Util::JsonObject();
             action_profiles->append(action_profile);
-            action_profile->emplace("name"_cs, apname);
-            action_profile->emplace("id"_cs, nextId("action_profiles"_cs));
+            action_profile->emplace("name", apname);
+            action_profile->emplace("id", nextId("action_profiles"_cs));
             action_profile->emplace_non_null("source_info"_cs,
                                              propv->expression->sourceInfoJsonObj());
             // TODO(jafingerhut) - add line/col here?
@@ -656,7 +653,7 @@ class ControlConverter : public Inspector {
                 } else {
                     size = size_expr->to<IR::Constant>()->asInt();
                 }
-                action_profile->emplace("max_size"_cs, size);
+                action_profile->emplace("max_size", size);
             };
 
             auto actionSelectorName = Standard::ActionSelectorTraits<arch>::typeName();
@@ -664,7 +661,7 @@ class ControlConverter : public Inspector {
                 BUG_CHECK(arguments->size() == 3, "%1%: expected 3 arguments", arguments);
                 isSimpleTable = false;
                 auto selector = new Util::JsonObject();
-                table->emplace("type"_cs, "indirect_ws");
+                table->emplace("type", "indirect_ws");
                 action_profile->emplace("selector"_cs, selector);
                 add_size(1);
                 auto hash = arguments->at(0)->expression;
@@ -674,7 +671,7 @@ class ControlConverter : public Inspector {
                             hash);
                 } else {
                     cstring algo = ei->name;
-                    selector->emplace("algo"_cs, algo);
+                    selector->emplace("algo", algo);
                 }
                 auto input = mkArrayField(selector, "input"_cs);
                 for (auto ke : key->keyElements) {
@@ -690,7 +687,7 @@ class ControlConverter : public Inspector {
             } else if (implementationType->name ==
                        Standard::ActionProfileTraits<arch>::typeName()) {
                 isSimpleTable = false;
-                table->emplace("type"_cs, "indirect");
+                table->emplace("type", "indirect");
                 add_size(0);
             } else {
                 ::error(ErrorType::ERR_UNEXPECTED, "%1%: expected value for property", propv);
@@ -713,9 +710,9 @@ class ControlConverter : public Inspector {
             auto actionProfileName = Standard::ActionProfileTraits<arch>::typeName();
             auto actionSelectorName = Standard::ActionSelectorTraits<arch>::typeName();
             if (type_extern_name == actionProfileName) {
-                table->emplace("type"_cs, "indirect");
+                table->emplace("type", "indirect");
             } else if (type_extern_name == actionSelectorName) {
-                table->emplace("type"_cs, "indirect_ws");
+                table->emplace("type", "indirect_ws");
             } else {
                 ::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type for implementation",
                         dcltype);
@@ -732,15 +729,15 @@ class ControlConverter : public Inspector {
             ::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected value for property", propv);
             return false;
         }
-        table->emplace("action_profile"_cs, apname);
+        table->emplace("action_profile", apname);
         return isSimpleTable;
     }
 
     Util::IJson *convertIf(const CFG::IfNode *node, cstring prefix) {
         (void)prefix;
         auto result = new Util::JsonObject();
-        result->emplace("name"_cs, node->name);
-        result->emplace("id"_cs, nextId("conditionals"_cs));
+        result->emplace("name", node->name);
+        result->emplace("id", nextId("conditionals"_cs));
         result->emplace_non_null("source_info"_cs, node->statement->condition->sourceInfoJsonObj());
         auto j = ctxt->conv->convert(node->statement->condition, true, false);
         CHECK_NULL(j);
@@ -759,8 +756,8 @@ class ControlConverter : public Inspector {
     bool preorder(const IR::P4Control *cont) override {
         auto result = new Util::JsonObject();
 
-        result->emplace("name"_cs, name);
-        result->emplace("id"_cs, nextId("control"_cs));
+        result->emplace("name", name);
+        result->emplace("id", nextId("control"_cs));
         result->emplace_non_null("source_info"_cs, cont->sourceInfoJsonObj());
 
         auto cfg = new CFG();
@@ -769,12 +766,12 @@ class ControlConverter : public Inspector {
         if (!success) return false;
 
         if (cfg->entryPoint->successors.size() == 0) {
-            result->emplace("init_table"_cs, Util::JsonValue::null);
+            result->emplace("init_table", Util::JsonValue::null);
         } else {
             BUG_CHECK(cfg->entryPoint->successors.size() == 1, "Expected 1 start node for %1%",
                       cont);
             auto start = (*(cfg->entryPoint->successors.edges.begin()))->endpoint;
-            result->emplace("init_table"_cs, nodeName(start));
+            result->emplace("init_table", nodeName(start));
         }
 
         auto tables = mkArrayField(result, "tables"_cs);

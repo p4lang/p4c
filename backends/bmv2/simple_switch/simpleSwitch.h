@@ -112,13 +112,13 @@ class SimpleSwitchExpressionConverter : public ExpressionConverter {
         if (isStandardMetadataParameter(param)) {
             auto result = new Util::JsonObject();
             if (fieldName != "") {
-                result->emplace("type"_cs, "field");
+                result->emplace("type", "field");
                 auto e = BMV2::mkArrayField(result, "value"_cs);
                 e->append("standard_metadata");
                 e->append(fieldName);
             } else {
-                result->emplace("type"_cs, "header");
-                result->emplace("value"_cs, "standard_metadata");
+                result->emplace("type", "header");
+                result->emplace("value", "standard_metadata");
             }
             return result;
         }

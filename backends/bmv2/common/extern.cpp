@@ -63,8 +63,8 @@ Util::IJson *ExternConverter::convertExternObject(ConversionContext *ctxt,
         auto parameters = mkParameters(primitive);
         primitive->emplace_non_null("source_info"_cs, mc->sourceInfoJsonObj());
         auto etr = new Util::JsonObject();
-        etr->emplace("type"_cs, "extern");
-        etr->emplace("value"_cs, em->object->controlPlaneName());
+        etr->emplace("type", "extern");
+        etr->emplace("value", em->object->controlPlaneName());
         parameters->append(etr);
         for (auto arg : *mc->arguments) {
             auto args = ctxt->conv->convert(arg->expression);
@@ -168,8 +168,8 @@ void ExternConverter::addToFieldList(ConversionContext *ctxt, const IR::Expressi
                     // Can't have runtime_data in field lists -- need hexstr instead
                     auto val = jo->getAs<Util::JsonValue>("value");
                     j = jo = new Util::JsonObject();
-                    jo->emplace("type"_cs, "hexstr");
-                    jo->emplace("value"_cs, stringRepr(val->getValue()));
+                    jo->emplace("type", "hexstr");
+                    jo->emplace("value", stringRepr(val->getValue()));
                 }
             }
         }
@@ -183,8 +183,8 @@ int ExternConverter::createFieldList(ConversionContext *ctxt, const IR::Expressi
     auto fl = new Util::JsonObject();
     field_lists->append(fl);
     int id = nextId(group);
-    fl->emplace("id"_cs, id);
-    fl->emplace("name"_cs, listName);
+    fl->emplace("id", id);
+    fl->emplace("name", listName);
     fl->emplace_non_null("source_info"_cs, expr->sourceInfoJsonObj());
     auto elements = mkArrayField(fl, "elements"_cs);
     addToFieldList(ctxt, expr, elements);
@@ -197,11 +197,11 @@ cstring ExternConverter::createCalculation(ConversionContext *ctxt, cstring algo
                                            const IR::Node *sourcePositionNode = nullptr) {
     cstring calcName = ctxt->refMap->newName("calc_");
     auto calc = new Util::JsonObject();
-    calc->emplace("name"_cs, calcName);
-    calc->emplace("id"_cs, nextId("calculations"_cs));
+    calc->emplace("name", calcName);
+    calc->emplace("id", nextId("calculations"_cs));
     if (sourcePositionNode != nullptr)
         calc->emplace_non_null("source_info"_cs, sourcePositionNode->sourceInfoJsonObj());
-    calc->emplace("algo"_cs, algo);
+    calc->emplace("algo", algo);
     fields = convertToList(fields, ctxt->typeMap);
     if (!fields) {
         modelError("%1%: expected a struct", fields);
@@ -212,8 +212,8 @@ cstring ExternConverter::createCalculation(ConversionContext *ctxt, cstring algo
         auto array = jright->to<Util::JsonArray>();
         BUG_CHECK(array, "expected a JSON array");
         auto payload = new Util::JsonObject();
-        payload->emplace("type"_cs, "payload");
-        payload->emplace("value"_cs, (Util::IJson *)nullptr);
+        payload->emplace("type", "payload");
+        payload->emplace("value", (Util::IJson *)nullptr);
         array->append(payload);
     }
     calc->emplace("input"_cs, jright);
