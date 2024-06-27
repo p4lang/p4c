@@ -65,8 +65,9 @@ IR::Statement *StatementGenerator::genStatement(bool is_in_func) {
             stmt = genBlockStatement(is_in_func);
             break;
         }
+        // Add a new case for the for-loop statement generation.
         case 6: {
-            stmt = genForLoopStatement();
+            stmt = genForLoopStatement(is_in_func);
             break;
         }
     }
@@ -392,31 +393,37 @@ IR::ReturnStatement *StatementGenerator::genReturnStatement(const IR::Type *tp) 
     return new IR::ReturnStatement(expr);
 }
 
-IR::Statement *StatementGenerator::genForLoopStatement() {
+IR::Statement *StatementGenerator::genForLoopStatement(bool is_in_func) {
     std::string loopVar = generateLoopControlVariable();
     std::string loopInit = generateLoopInitialization(loopVar);
     std::string loopCond = generateLoopCondition(loopVar);
     std::string loopUpdate = generateLoopUpdate(loopVar);
     std::string loopBody = generateLoopBody(loopVar);
 
-    // Create the IR nodes for the for-loop components.
+    // Create the IR nodes for the for-loop components
     auto *initExpr = new IR::Declaration_Variable(loopVar, IR::Type_Bits::get(8), new IR::Constant(IR::Type_Bits::get(8), 0));  
     auto *condExpr = new IR::Equ(IR::Type_Boolean::get(), new IR::PathExpression(loopVar), new IR::Constant(IR::Type_Bits::get(8), 10));  
     auto *updateStmt = new IR::AssignmentStatement(new IR::PathExpression(loopVar), new IR::Add(IR::Type_Bits::get(8), 
-                            new IR::PathExpression(loopVar), new IR::Constant(IR::Type_Bits::get(8), 1)));
-    // Generate an empty block statement node for the for-loop body first.
-    auto *bodyStmt = new IR::BlockStatement();
+                                                   new IR::PathExpression(loopVar), new IR::Constant(IR::Type_Bits::get(8), 1)));
+    auto *bodyStmt = genBlockStatement(is_in_func);
+    
+    // Fill `initExpr` and `updateStmt` into their corresponding indexed vectors.
+    // This is necessary due to the constructor defintions.
+    IR::IndexedVector<IR::StatOrDecl> initExprs;
+    IR::IndexedVector<IR::StatOrDecl> updateStmts;
+    initExprs.push_back(initExpr);
+    updateStmts.push_back(updateStmt);
 
-    // TODO: Implement the body statement generation.
-    // Pseudo code:
+    // TODO: Decide whether the following pseudo code should be implemented in this function or discarded.
+    // Pseudo code (implement the body statement generation):
     // If the loop body is some function call, then parse it and generate a corresponding IR node of type `IR::Statement`.
     // The node of type `IR::Statement` may consist of multiple nested node constructions (using, e.g., `IR::MethodCallStatement` and `IR::PathExpression`),
     // depending on each statement in the loop body.
     // The node of type `IR::Statement` should be added to the `bodyStmt` block statement node (by calling `push_back`).
 
-    // Create the for-loop IR node (after "filling up" the statement node).
-    // TODO: Need to be fixed since the constructor for `IR::ForStatement` doesn't not support the current arguments.
-    return new IR::ForStatement(initExpr, condExpr, updateStmt, bodyStmt);
+    // Create the for-loop IR node and return it.
+    auto *forStmt = new IR::ForStatement(initExprs, condExpr, updateStmts, bodyStmt);
+    return forStmt;
 }
 
 }  // namespace P4Tools::P4Smith
