@@ -1235,8 +1235,7 @@ const PNAEbpfGenerator *ConvertToEbpfPNA::build(const IR::ToplevelBlock *tlb) {
             !d->is<IR::Type_Error>()) {
             if (d->srcInfo.isValid()) {
                 auto sourceFile = d->srcInfo.getSourceFile();
-                if (sourceFile.endsWith("/pna.p4") ||
-                    (sourceFile.find("p4include/pna/") != nullptr)) {
+                if (sourceFile.endsWith("/pna.p4")) {
                     // do not generate standard PNA types
                     continue;
                 }
