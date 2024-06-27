@@ -172,9 +172,9 @@ static unsigned getFieldListById(ConversionContext *ctxt, unsigned index) {
     for (auto it : *ctxt->json->field_lists) {
         auto j = it->to<Util::JsonObject>();
         CHECK_NULL(j);
-        auto name = j->get("name"_cs)->to<Util::JsonValue>()->getString();
+        auto name = j->get("name")->to<Util::JsonValue>()->getString();
         if (name == search) {
-            id = j->get("id"_cs)->to<Util::JsonValue>()->getInt();
+            id = j->get("id")->to<Util::JsonValue>()->getInt();
             break;
         }
     }
@@ -722,7 +722,7 @@ void ExternConverter_direct_meter::convertExternInstance(ConversionContext *ctxt
     cstring tblname = info->table->controlPlaneName();
     jmtr->emplace("binding"_cs, tblname);
     auto result = ctxt->conv->convert(info->destinationField);
-    jmtr->emplace("result_target"_cs, result->to<Util::JsonObject>()->get("value"_cs));
+    jmtr->emplace("result_target"_cs, result->to<Util::JsonObject>()->get("value"));
     ctxt->json->meter_arrays->append(jmtr);
 }
 
@@ -982,7 +982,7 @@ void SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block,
                     cksum->emplace("id"_cs, nextId("checksums"_cs));
                     cksum->emplace_non_null("source_info"_cs, stat->sourceInfoJsonObj());
                     auto jleft = conv->convert(mi->expr->arguments->at(2)->expression);
-                    cksum->emplace("target"_cs, jleft->to<Util::JsonObject>()->get("value"_cs));
+                    cksum->emplace("target"_cs, jleft->to<Util::JsonObject>()->get("value"));
                     cksum->emplace("type"_cs, "generic");
                     cksum->emplace("calculation"_cs, calcName);
                     cksum->emplace("verify"_cs, verify);
@@ -1061,7 +1061,7 @@ void SimpleSwitchBackend::createRecirculateFieldsList(ConversionContext *ctxt,
                 fl->emplace("name"_cs, listName);
                 elements = mkArrayField(fl, "elements"_cs);
             } else {
-                elements = fl->get("elements"_cs)->to<Util::JsonArray>();
+                elements = fl->get("elements")->to<Util::JsonArray>();
                 CHECK_NULL(elements);
             }
 

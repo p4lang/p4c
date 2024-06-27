@@ -55,9 +55,9 @@ JsonObjects::JsonObjects() {
 Util::JsonArray *JsonObjects::get_field_list_contents(unsigned id) const {
     for (auto e : *field_lists) {
         auto obj = e->to<Util::JsonObject>();
-        auto val = obj->get("id"_cs)->to<Util::JsonValue>();
+        auto val = obj->get("id")->to<Util::JsonValue>();
         if (val != nullptr && val->isNumber() && val->getInt() == static_cast<int>(id)) {
-            return obj->get("elements"_cs)->to<Util::JsonArray>();
+            return obj->get("elements")->to<Util::JsonArray>();
         }
     }
     return nullptr;
@@ -66,7 +66,7 @@ Util::JsonArray *JsonObjects::get_field_list_contents(unsigned id) const {
 Util::JsonObject *JsonObjects::find_object_by_name(Util::JsonArray *array, const cstring &name) {
     for (auto e : *array) {
         auto obj = e->to<Util::JsonObject>();
-        auto val = obj->get("name"_cs)->to<Util::JsonValue>();
+        auto val = obj->get("name")->to<Util::JsonValue>();
         if (val != nullptr && val->isString() && val->getString() == name) {
             return obj;
         }
@@ -169,7 +169,7 @@ unsigned JsonObjects::add_header_type(const cstring &name) {
 void JsonObjects::add_header_field(const cstring &name, Util::JsonArray *&field) {
     CHECK_NULL(field);
     Util::JsonObject *headerType = find_object_by_name(header_types, name);
-    Util::JsonArray *fields = headerType->get("fields"_cs)->to<Util::JsonArray>();
+    Util::JsonArray *fields = headerType->get("fields")->to<Util::JsonArray>();
     BUG_CHECK(fields != nullptr, "header '%1%' not found", name);
     fields->append(field);
 }
@@ -267,7 +267,7 @@ void JsonObjects::add_enum(const cstring &enum_name, const cstring &entry_name,
         enums->append(enum_json);
         LOG3("new enum object: " << enum_name << " " << entry_name << " " << entry_value);
     } else {  // add entry to existing enum
-        auto entries = enum_json->get("entries"_cs)->to<Util::JsonArray>();
+        auto entries = enum_json->get("entries")->to<Util::JsonArray>();
         auto entry = new Util::JsonArray();
         entry->append(entry_name);
         entry->append(entry_value);
@@ -293,7 +293,7 @@ unsigned JsonObjects::add_parser(const cstring &name) {
 unsigned JsonObjects::add_parser_state(const unsigned parser_id, const cstring &state_name) {
     if (map_parser.find(parser_id) == map_parser.end()) BUG("parser %1% not found.", parser_id);
     auto parser = map_parser[parser_id];
-    auto states = parser->get("parse_states"_cs)->to<Util::JsonArray>();
+    auto states = parser->get("parse_states")->to<Util::JsonArray>();
     auto state = new Util::JsonObject();
     unsigned state_id = BMV2::nextId("parse_states"_cs);
     state->emplace("name"_cs, state_name);
@@ -314,7 +314,7 @@ void JsonObjects::add_parser_transition(const unsigned state_id, Util::IJson *tr
     if (map_parser_state.find(state_id) == map_parser_state.end())
         BUG("parser state %1% not found.", state_id);
     auto state = map_parser_state[state_id];
-    auto transitions = state->get("transitions"_cs)->to<Util::JsonArray>();
+    auto transitions = state->get("transitions")->to<Util::JsonArray>();
     CHECK_NULL(transitions);
     auto trans = transition->to<Util::JsonObject>();
     CHECK_NULL(trans);
@@ -325,7 +325,7 @@ void JsonObjects::add_parser_op(const unsigned state_id, Util::IJson *op) {
     if (map_parser_state.find(state_id) == map_parser_state.end())
         BUG("parser state %1% not found.", state_id);
     auto state = map_parser_state[state_id];
-    auto statements = state->get("parser_ops"_cs)->to<Util::JsonArray>();
+    auto statements = state->get("parser_ops")->to<Util::JsonArray>();
     CHECK_NULL(statements);
     statements->append(op);
 }
@@ -333,7 +333,7 @@ void JsonObjects::add_parser_op(const unsigned state_id, Util::IJson *op) {
 void JsonObjects::add_parser_transition_key(const unsigned state_id, Util::IJson *newKey) {
     if (map_parser_state.find(state_id) != map_parser_state.end()) {
         auto state = map_parser_state[state_id];
-        auto keys = state->get("transition_key"_cs)->to<Util::JsonArray>();
+        auto keys = state->get("transition_key")->to<Util::JsonArray>();
         CHECK_NULL(keys);
         auto new_keys = newKey->to<Util::JsonArray>();
         for (auto k : *new_keys) {

@@ -85,7 +85,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl> *bo
                         auto type = ctxt->typeMap->getType(arg, true);
                         if (type->is<IR::Type_Header>()) {
                             auto j = ctxt->conv->convert(arg->expression);
-                            auto val = j->to<Util::JsonObject>()->get("value"_cs);
+                            auto val = j->to<Util::JsonObject>()->get("value");
                             order->append(val);
                         } else {
                             // We don't need to handle other types,

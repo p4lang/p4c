@@ -129,7 +129,7 @@ class ControlConverter : public Inspector {
                 }
 
                 auto jk = ctxt->conv->convert(expr);
-                keyelement->emplace("target"_cs, jk->to<Util::JsonObject>()->get("value"_cs));
+                keyelement->emplace("target"_cs, jk->to<Util::JsonObject>()->get("value"));
                 if (mask != 0)
                     keyelement->emplace("mask"_cs,
                                         stringRepr(mask, ROUNDUP(expr->type->width_bits(), 8)));
