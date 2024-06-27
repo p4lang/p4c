@@ -1,12 +1,12 @@
 #ifndef IR_SOLVER_H_
 #define IR_SOLVER_H_
 
+#include <functional>
 #include <optional>
 #include <vector>
 
-#include <boost/container/flat_map.hpp>
-#include <boost/container/flat_set.hpp>
-
+#include "absl/container/flat_hash_map.h"
+#include "absl/container/flat_hash_set.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
@@ -15,18 +15,11 @@
 // TODO: This should implement AbstractRepCheckedNode<Constraint>.
 using Constraint = IR::Expression;
 
-/// Comparator to compare SymbolicVariable pointers.
-struct SymbolicVarComp {
-    bool operator()(const IR::SymbolicVariable *s1, const IR::SymbolicVariable *s2) const {
-        return s1->operator<(*s2);
-    }
-};
-
 /// This type maps symbolic variables to their value assigned by the solver.
-using SymbolicMapping = boost::container::flat_map<const IR::SymbolicVariable *,
-                                                   const IR::Expression *, SymbolicVarComp>;
-
-using SymbolicSet = boost::container::flat_set<const IR::SymbolicVariable *, SymbolicVarComp>;
+using SymbolicMapping = absl::flat_hash_map<const IR::SymbolicVariable *, const IR::Expression *,
+                                            IR::SymbolicVariableHash, IR::SymbolicVariableEqual>;
+using SymbolicSet = absl::flat_hash_set<const IR::SymbolicVariable *, IR::SymbolicVariableHash,
+                                        IR::SymbolicVariableEqual>;
 
 /// Provides a higher-level interface for an SMT solver.
 class AbstractSolver : public ICastable {

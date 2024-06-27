@@ -29,6 +29,15 @@ class StateVariable : Expression {
     }
 
     /// Implements comparisons so that StateVariables can be used as map keys.
+    /// Note that we ignore the type here.
+    equiv {
+        // We use a custom compare function.
+        // TODO: Is there a faster way to implement this comparison?
+        return compare(ref, a.ref) == 0;
+    }
+
+    /// Implements comparisons so that StateVariables can be used as map keys.
+    /// Note that we ignore the type here.
     bool operator<(const StateVariable &other) const {
         // We use a custom compare function.
         // TODO: Is there a faster way to implement this comparison?
@@ -117,10 +126,83 @@ class StateVariable : Expression {
         return 0;
     }
 
+    uint64_t hash() const {
+        return hash(0, ref);
+    }
+
+    uint64_t hash(uint64_t seed, const IR::Expression *expression) const {
+        // expression is a Member.
+        if (const auto *member = expression->to<IR::Member>()) {
+            return hash(seed, member);
+        }
+        // expression is a PathExpression.
+        if (const auto *pathExpression = expression->to<IR::PathExpression>()) {
+            return hash(seed, pathExpression);
+        }
+        // expression is a ArrayIndex.
+        if (const auto *arrayIndex = expression->to<IR::ArrayIndex>()) {
+            return hash(seed, arrayIndex);
+        }
+        BUG("Either %1% of type %2% is not a valid StateVariable", expression,
+            expression->node_type_name());
+    }
+
+    uint64_t hash(uint64_t seed, const IR::Member *member) const {
+        return hash(Util::hash_combine(seed, std::hash<cstring>()(member->member)), member->expr);
+    }
+
+    uint64_t hash(uint64_t seed, const IR::PathExpression *pathExpression) const {
+        return Util::hash_combine(seed, std::hash<cstring>()(pathExpression->path->name));
+    }
+
+    uint64_t hash(uint64_t seed, const IR::ArrayIndex *arrayIndex) const {
+        const auto *arrayIndexVal = arrayIndex->right->to<IR::Constant>();
+        BUG_CHECK(
+            arrayIndexVal != nullptr,
+            "Value %1% is not a constant. Only constants are supported as part of a state variable.",
+            arrayIndex->right);
+        return hash(Util::hash_combine(seed, std::hash<big_int>()(arrayIndexVal->value)),
+                                 arrayIndex->left);
+    }
+
     toString { return ref->toString(); }
 
     dbprint { ref->dbprint(out); }
 }
+#emit
+namespace IR {
+/// Equals for StateVariable pointers. We only compare the label.
+struct StateVariableEqual {
+    bool operator()(const IR::StateVariable *s1, const IR::StateVariable *s2) const {
+        return s1->equiv(*s2);
+    }
+    bool operator()(const IR::StateVariable &s1, const IR::StateVariable &s2) const {
+        return s1.equiv(s2);
+    }
+};
+
+/// Less for StateVariable pointers. We only compare the label.
+struct StateVariableLess {
+    bool operator()(const IR::StateVariable *s1, const IR::StateVariable *s2) const {
+        return s1->operator<(*s2);
+    }
+    bool operator()(const IR::StateVariable &s1, const IR::StateVariable &s2) const {
+        return s1.operator<(s2);
+    }
+};
+
+/// Hash for StateVariable pointers. We only hash the label.
+struct StateVariableHash {
+    size_t operator()(const IR::StateVariable *s1) const {
+        return Util::Hasher<uint64_t>()(s1->hash());
+    }
+
+    size_t operator()(const IR::StateVariable &s1) const {
+        return Util::Hasher<uint64_t>()(s1.hash());
+    }
+};
+}  // namespace IR
+#end
 
 /// Signifies that a particular expression is tainted.
 /// This tainted expression must be resolved explicitly.
@@ -150,6 +232,40 @@ class SymbolicVariable : Expression {
 
     dbprint { out << "|" + label +"(" << type << ")|"; }
 }
+#emit
+namespace IR {
+/// Equals for SymbolicVariable pointers. We only compare the label.
+struct SymbolicVariableEqual {
+    bool operator()(const IR::SymbolicVariable *s1, const IR::SymbolicVariable *s2) const {
+        return s1->label == s2->label;
+    }
+    bool operator()(const IR::SymbolicVariable &s1, const IR::SymbolicVariable &s2) const {
+        return s1.label == s2.label;
+    }
+};
+
+/// Less for SymbolicVariable pointers. We only compare the label.
+struct SymbolicVariableLess {
+    bool operator()(const IR::SymbolicVariable *s1, const IR::SymbolicVariable *s2) const {
+        return s1->operator<(*s2);
+    }
+    bool operator()(const IR::SymbolicVariable &s1, const IR::SymbolicVariable &s2) const {
+        return s1.operator<(s2);
+    }
+};
+
+/// Hash for SymbolicVariable pointers. We only hash the label.
+struct SymbolicVariableHash {
+    size_t operator()(const IR::SymbolicVariable *s1) const {
+        return std::hash<cstring>()(s1->label);
+    }
+
+    size_t operator()(const IR::SymbolicVariable &s1) const {
+        return std::hash<cstring>()(s1.label);
+    }
+};
+}  // namespace IR
+#end
 
 /// This type replaces Type_Varbits and can store information about the current size
 class Extracted_Varbits : Type_Bits {
