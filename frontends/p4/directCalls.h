@@ -35,13 +35,13 @@ is replaced with
 control c() { apply {} }
 control d() { @name("c") c() c_inst; { c_inst.apply(); }}
 */
-class DoInstantiateCalls : public Transform, public ResolutionContext {
+class InstantiateDirectCalls : public Transform, public ResolutionContext {
     MinimalNameGenerator nameGen;  // used to generate new names
 
     IR::IndexedVector<IR::Declaration> insert;
 
  public:
-    DoInstantiateCalls() { setName("DoInstantiateCalls"); }
+    InstantiateDirectCalls() { setName("InstantiateDirectCalls"); }
     const IR::Node *postorder(IR::P4Parser *parser) override;
     const IR::Node *postorder(IR::P4Control *control) override;
     const IR::Node *postorder(IR::MethodCallExpression *expression) override;
@@ -50,14 +50,6 @@ class DoInstantiateCalls : public Transform, public ResolutionContext {
         auto rv = Transform::init_apply(node);
         node->apply(nameGen);
         return rv;
-    }
-};
-
-class InstantiateDirectCalls : public PassManager {
- public:
-    InstantiateDirectCalls() {
-        passes.push_back(new DoInstantiateCalls());
-        setName("InstantiateDirectCalls");
     }
 };
 
