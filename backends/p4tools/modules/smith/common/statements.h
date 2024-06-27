@@ -37,6 +37,8 @@ class StatementGenerator : public Generator {
     virtual IR::SwitchStatement *genSwitchStatement();
 
     IR::ReturnStatement *genReturnStatement(const IR::Type *tp = nullptr);
+
+    virtual IR::Statement *genForLoopStatement();
 };
 
 }  // namespace P4Tools::P4Smith
