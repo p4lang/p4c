@@ -240,6 +240,10 @@ class ReadsWrites : public Inspector {
         rw.emplace(expression, result);
     }
 
+    void postorder(const IR::DefaultExpression *expression) override {
+        rw.emplace(expression, new SetOfLocations());
+    }
+
     const SetOfLocations *get(const IR::Expression *expression) {
         expression->apply(*this);
         auto result = ::get(rw, expression);
