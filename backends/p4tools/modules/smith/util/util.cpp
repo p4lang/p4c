@@ -14,9 +14,9 @@
 namespace P4Tools::P4Smith {
 
 std::string getRandomString(size_t len) {
-    // Add "for" to the list of P4 keywords.
+    // Add "for" and "in" to the list of P4 keywords.
     static const std::vector<std::string> P4_KEYWORDS = {"if",  "void",    "else",
-                                                         "key", "actions", "true", "for"};  
+                                                         "key", "actions", "true", "for", "in"};  
     static const std::array<char, 53> ALPHANUMERIC_CHARACTERS = {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"};
@@ -61,7 +61,8 @@ std::string getRandomString(size_t len) {
 
 /// Generate an arbitrary variable name for loop control.
 std::string generateLoopControlVariable() {
-    // Generate a random string of length 1 (i.e., a single character variable name, such as i, j, k, etc.).
+    // Generate a random string of length 1 (i.e., a single character variable name, 
+    // such as i, j, k, etc.).
     return getRandomString(1); 
 }
 
@@ -69,9 +70,9 @@ std::string generateLoopControlVariable() {
 std::string generateLoopInitialization(const std::string &var) {
     std::stringstream ss;
 
-    // TOOD: Add support for other types of initialization.
-    int values[] = {8, 16, 32};
-    int bitFieldWidth = values[Utils::getRandInt(0, 2)];
+    // TOOD: Add support for other types of initialization, 
+    // although its quite common to initialize a loop control variable to 0.
+    int bitFieldWidth = Utils::getRandInt(1, 64);
     ss << "bit<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
     
     return ss.str();
@@ -82,7 +83,7 @@ std::string generateLoopCondition(const std::string &var) {
     std::stringstream ss;
 
     // TODO: Add support for other types of conditions.
-    int upperBound = Utils::getRandInt(0, 10);
+    int upperBound = Utils::getRandInt(0, 100);
     ss << var << " < " << std::to_string(upperBound);
 
     return ss.str();
@@ -93,7 +94,8 @@ std::string generateLoopUpdate(const std::string &var) {
     std::stringstream ss;
 
     // TOOD: Add support for other types of updates.
-    ss << var << " = " << var << " + 1";
+    int stepSize = Utils::getRandInt(0, 100);
+    ss << var << " = " << var << " + " << std::to_string(stepSize);
 
     return ss.str();
 }
@@ -110,7 +112,7 @@ std::string generateLoopBody(const std::string &var1, const std::string &var2) {
     return "";
 }
 
-/// Generate a trivial but complete for loop.
+/// Generate a trivial but complete for loop (traditional C-style for-loop).
 /// The generated for-loop will be similar to `testdata/p4_16_samples/forloop5.p4` (except the loop body).
 std::string generateTrivialForLoop() {
     std::string loopControlVar = generateLoopControlVariable();
@@ -146,8 +148,7 @@ std::string generateHeaderStackForLoop() {
 std::string generateMultipleInitUpdateForLoop() {
     std::string loopVar1 = generateLoopControlVariable();
     std::string loopVar2 = generateLoopControlVariable();
-    int values[] = {8, 16, 32};
-    int bitFieldWidth = values[Utils::getRandInt(0, 2)];
+    int bitFieldWidth = Utils::getRandInt(1, 64);
     std::string loopInit = "bit<" + std::to_string(bitFieldWidth) + "> " + loopVar1 + " = 0, " + loopVar2 + " = 1";
     std::string loopCondition = loopVar1 + " < hdrs.head.cnt";
     std::string loopUpdate = loopVar1 + " = " + loopVar1 + " + 1, " + loopVar2 + " = " + loopVar2 + " << 1";
@@ -163,8 +164,7 @@ std::string generateMultipleInitUpdateForLoop() {
 /// Generate a range-based for-loop.
 std::string generateRangeBasedForLoop(const std::string &start, const std::string &end) {
     std::string loopVar = generateLoopControlVariable();
-    int values[] = {8, 16, 32};
-    int bitFieldWidth = values[Utils::getRandInt(0, 2)];
+    int bitFieldWidth = Utils::getRandInt(1, 64);
     
     std::stringstream ss;
     ss << "for (bit<" + std::to_string(bitFieldWidth) + "> " << loopVar << " in " << start << " .. " << end << ") {\n";
@@ -186,7 +186,7 @@ std::string generateForLoop() {
         case 2:
             return generateMultipleInitUpdateForLoop();
         case 3:
-            return generateRangeBasedForLoop("0", std::to_string(Utils::getRandInt(0, 10)));
+            return generateRangeBasedForLoop("0", std::to_string(Utils::getRandInt(0, 100)));
         default:
             return generateTrivialForLoop();
     }
