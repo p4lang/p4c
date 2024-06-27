@@ -21,7 +21,7 @@ static const cstring ETH_HDR("eth_hdr");
 std::string getRandomString(size_t len);
 
 /// @brief The following functions serve to generate random but well-formed for-loops.
-/// @return Each of them return a string representation of each part of a for-loop.
+/// @return Each of them returns a string representation of each part of a for-loop.
 /// In tandem, they can be used to generate a complete for-loop by calling `generateForLoop()`.
 std::string generateLoopControlVariable();
 std::string generateLoopInitialization(const std::string &var);
