@@ -43,9 +43,7 @@ p4c
 ├── test                           -- test code
 │   └── gtest                      -- unit test code written using gtest
 ├── testdata                       -- test inputs and reference outputs
-│   ├───extern_modules             --
-│   ├───p4tc_samples               --
-│   ├───p4tc_samples_outputs       --
+│   ├───extern_modules             -- Extern module input test programs
 │   ├───p4_14_errors               -- P4_14 negative input test programs
 │   ├───p4_14_errors_outputs       -- Expected outputs from P4_14 negative tests
 │   ├───p4_14_samples              -- P4_14 input test programs
@@ -65,6 +63,8 @@ p4c
 │   ├───p4_16_psa_errors_outputs   -- Expected outputs from P4_16 psa negative tests
 │   ├───p4_16_samples              -- P4_16 input test programs
 │   ├───p4_16_samples_outputs      -- Expected outputs from P4_16 tests
+│   ├───p4tc_samples               -- P4 traffic control sample input test programs
+│   ├───p4tc_samples_outputs       -- Expected outputs from P4 traffic control tests
 │   └───v1_1_samples               -- P4 v1.1 sample programs
 └── tools                          -- external programs used in the build/test process
     ├── ci-ptf                     -- scripts to run PSA PTF tests
