@@ -480,7 +480,7 @@ enum PNA_Direction_t {
     HOST_TO_NET
 }
 
-#include <pna/v0_5/types_metadata.p4>
+#include <_internal/pna/v0_5/types_metadata.p4>
 
 // The following extern functions are "forwarding" functions -- they
 // all set the destination of the packet.  Calling one of them
@@ -588,6 +588,6 @@ extern T SelectByDirection<T>(
     in T n2h_value,
     in T h2n_value);
 
-#include <pna/v0_5/blocks.p4>
+#include <_internal/pna/v0_5/blocks.p4>
 
 #endif   // __PNA_P4__

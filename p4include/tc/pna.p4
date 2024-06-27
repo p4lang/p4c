@@ -563,7 +563,7 @@ enum PNA_Source_t {
     FROM_NET
 }
 
-#include <pna/v0_7/types_metadata.p4>
+#include <_internal/pna/v0_7/types_metadata.p4>
 
 // The following extern functions are "forwarding" functions -- they
 // all set the destination of the packet.  Calling one of them
@@ -822,6 +822,6 @@ extern T SelectByDirection<T>(
     in T from_net_value,
     in T from_host_value);
 
-#include <pna/dev/blocks.p4>
+#include <_internal/pna/dev/blocks.p4>
 
 #endif   // __PNA_P4__
