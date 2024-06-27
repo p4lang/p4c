@@ -24,7 +24,7 @@ p4c
 ├── control-plane                  -- control plane API
 |   └──google/rpc                  -- Definitions of Google Protobuf APIs.
 ├── debian                         -- Debian/Ubuntu packaging files
-│   └── source                     -- 
+│   └── source/format              -- Specification of the packaging format
 ├── docs                           -- documentation
 │   ├── assets                     -- p4 logos in PNG and SVG formats
 │   └── doxygen                    -- documentation generation support
