@@ -42,27 +42,28 @@ p4c
 │   └── tc                    -- tc specific pna
 ├── test                      -- test code
 │   └── gtest                 -- unit test code written using gtest
-├── tools                     -- external programs used in the build/test process
-│   ├── ci-ptf                -- scripts to run PSA PTF tests
-│   ├── debian-build          -- resources and scripts for creating Ubuntu (or Debian) packages
-│   ├── driver                -- P4C compiler driver: a script that invokes various compilers
-│   ├── hooks                 -- useful git hooks for development
-|   ├── ir-generator          -- code to generate the P4C IR from .def files
-│   ├── iwyu_mappings         -- mappings used by the Include What You Use (IWYU) tool for analyzing #include directives in C and C++ source files
-│   ├── ptf                   -- utilities for the Packet Test Framework (PTF)
-│   └── stf                   -- utilities for the Simple Test Framework (STF)
-└── testdata                  -- test inputs and reference outputs
-    ├── p4_16_samples         -- P4_16 input test programs
-    ├── p4_16_errors          -- P4_16 negative input test programs
-    ├── p4_16_samples_outputs -- Expected outputs from P4_16 tests
-    ├── p4_16_errors_outputs  -- Expected outputs from P4_16 negative tests
-    ├── p4_16_bmv_errors      -- P4_16 negative input tests for the bmv2 backend
-    ├── v1_1_samples          -- P4 v1.1 sample programs
-    ├── p4_14_errors          -- P4_14 negative input test programs
-    ├── p4_14_errors_outputs  -- Expected outputs from P4_14 negative tests
-    ├── p4_14_samples         -- P4_14 input test programs
-    ├── p4_14_samples_outputs -- Expected outputs from P4_14 tests
-    └── p4_14_errors          -- P4_14 negative input test programs
+├── testdata                  -- test inputs and reference outputs
+|   ├── p4_16_samples         -- P4_16 input test programs
+|   ├── p4_16_errors          -- P4_16 negative input test programs
+|   ├── p4_16_samples_outputs -- Expected outputs from P4_16 tests
+|   ├── p4_16_errors_outputs  -- Expected outputs from P4_16 negative tests
+|   ├── p4_16_bmv_errors      -- P4_16 negative input tests for the bmv2 backend
+|   ├── v1_1_samples          -- P4 v1.1 sample programs
+|   ├── p4_14_errors          -- P4_14 negative input test programs
+|   ├── p4_14_errors_outputs  -- Expected outputs from P4_14 negative tests
+|   ├── p4_14_samples         -- P4_14 input test programs
+|   ├── p4_14_samples_outputs -- Expected outputs from P4_14 tests
+|   └── p4_14_errors          -- P4_14 negative input test programs
+└── tools                     -- external programs used in the build/test process
+    ├── ci-ptf                -- scripts to run PSA PTF tests
+    ├── debian-build          -- resources and scripts for creating Ubuntu (or Debian) packages
+    ├── driver                -- P4C compiler driver: a script that invokes various compilers
+    ├── hooks                 -- useful git hooks for development
+    ├── ir-generator          -- code to generate the P4C IR from .def files
+    ├── iwyu_mappings         -- mappings used by the Include What You Use (IWYU) tool for analyzing #include directives in C and C++ source files
+    ├── ptf                   -- utilities for the Packet Test Framework (PTF)
+    └── stf                   -- utilities for the Simple Test Framework (STF)
+
 ```
 
 # Additional documentation
