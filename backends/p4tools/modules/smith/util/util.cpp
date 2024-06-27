@@ -112,6 +112,14 @@ std::string generateLoopBody(const std::string &var1, const std::string &var2) {
     return "";
 }
 
+/// Generate a random loop body that involves multiple (two or more but undetermined) variables.
+/// TODO(zzmic): Need to figure out whether this is permissible/advisable.
+template <typename... Args>
+std::string generateLoopBody(const std::string &var1, const std::string &var2, const Args&... args) {
+    // TODO(zzmic): Add actual support for the loop body.
+    return "";
+}
+
 /// Generate a trivial but complete for loop (traditional C-style for-loop).
 /// The generated for-loop will be similar to `testdata/p4_16_samples/forloop5.p4` (except the loop body).
 std::string generateTrivialForLoop() {

@@ -29,6 +29,8 @@ std::string generateLoopCondition(const std::string &var);
 std::string generateLoopUpdate(const std::string &var);
 std::string generateLoopBody(const std::string &var);
 std::string generateLoopBody(const std::string &var1, const std::string &var2);
+template <typename... Args>
+std::string generateLoopBody(const std::string &var1, const std::string &var2, const Args&... args);
 std::string generateTrivialForLoop();
 std::string generateHeaderStackForLoop();
 std::string generateMultipleInitUpdateForLoop();
