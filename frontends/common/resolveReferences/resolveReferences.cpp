@@ -48,7 +48,7 @@ std::unordered_multimap<cstring, const IR::IDeclaration *> &ResolutionContext::m
 std::vector<const IR::IDeclaration *> ResolutionContext::resolve(const IR::ID &name,
                                                                  P4::ResolutionType type) const {
     const Context *ctxt = nullptr;
-    while (auto scope = findContext<IR::INamespace>(ctxt)) {
+    while (auto scope = findOrigCtxt<IR::INamespace>(ctxt)) {
         auto rv = lookup(scope, name, type);
         if (!rv.empty()) return rv;
     }
@@ -59,7 +59,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::resolve(const IR::ID &n
 std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INamespace *current,
                                                                 const IR::ID &name,
                                                                 P4::ResolutionType type) const {
-    LOG2("Trying to resolve in " << current->toString());
+    LOG2("Trying to resolve in " << dbp(current));
 
     if (const auto *gen = current->to<IR::IGeneralNamespace>()) {
         // FIXME: implement range filtering without enumerator wrappers
@@ -91,14 +91,14 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
                 LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
 
                 if (type == ResolutionType::Type) {
-                    if (auto *type_decl = findContext<IR::Type_Declaration>())
+                    if (auto *type_decl = findOrigCtxt<IR::Type_Declaration>())
                         if (type_decl->getNode() == d->getNode()) {
                             ::error(ErrorType::ERR_UNSUPPORTED,
                                     "Self-referencing types not supported: '%1%' within '%2%'",
                                     name, d->getNode());
                         }
                 } else if (type == ResolutionType::Any) {
-                    if (auto *decl_ctxt = findContext<IR::Declaration>())
+                    if (auto *decl_ctxt = findOrigCtxt<IR::Declaration>())
                         if (decl_ctxt->getNode() == d->getNode()) before = false;
                 }
 
@@ -143,10 +143,8 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
                 LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
 
                 if (type == ResolutionType::Any)
-                    if (auto *ctxt = findContext<IR::Declaration>()) {
-                        if (ctxt->getNode() == decl->getNode()) {
-                            before = false;
-                        }
+                    if (auto *ctxt = findOrigCtxt<IR::Declaration>()) {
+                        if (ctxt->getNode() == decl->getNode()) before = false;
                     }
 
                 if (!before) decl = nullptr;
@@ -171,7 +169,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
 }
 
 std::vector<const IR::IDeclaration *> ResolutionContext::lookupMatchKind(const IR::ID &name) const {
-    if (const auto *global = findContext<IR::P4Program>()) {
+    if (const auto *global = findOrigCtxt<IR::P4Program>()) {
         for (const auto *obj : global->objects) {
             if (const auto *match_kind = obj->to<IR::Declaration_MatchKind>()) {
                 auto rv = lookup(match_kind, name, ResolutionType::Any);
@@ -185,21 +183,29 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookupMatchKind(const I
 const IR::Vector<IR::Argument> *ResolutionContext::methodArguments(cstring name) const {
     const Context *ctxt = getChildContext();
     while (ctxt) {
-        if (auto mc = ctxt->node->to<IR::MethodCallExpression>()) {
-            if (auto mem = mc->method->to<IR::Member>()) {
+        const auto *node = ctxt->node;
+        const IR::MethodCallExpression *mc = nullptr;
+        if (const auto *mcs = node->to<IR::MethodCallStatement>())
+            mc = mcs->methodCall;
+        else
+            mc = node->to<IR::MethodCallExpression>();
+
+        if (mc) {
+            if (const auto *mem = mc->method->to<IR::Member>()) {
                 if (mem->member == name) return mc->arguments;
             }
-            if (auto path = mc->method->to<IR::PathExpression>()) {
+            if (const auto *path = mc->method->to<IR::PathExpression>()) {
                 if (path->path->name == name) return mc->arguments;
             }
             break;
         }
-        if (auto decl = ctxt->node->to<IR::Declaration_Instance>()) {
+
+        if (const auto *decl = node->to<IR::Declaration_Instance>()) {
             if (decl->name == name) return decl->arguments;
-            if (auto type = decl->type->to<IR::Type_Name>()) {
+            if (const auto *type = decl->type->to<IR::Type_Name>()) {
                 if (type->path->name == name) return decl->arguments;
             }
-            if (auto ts = decl->type->to<IR::Type_Specialized>()) {
+            if (const auto *ts = decl->type->to<IR::Type_Specialized>()) {
                 if (ts->baseType->path->name == name) return decl->arguments;
             }
             break;
@@ -209,16 +215,24 @@ const IR::Vector<IR::Argument> *ResolutionContext::methodArguments(cstring name)
         else
             break;
     }
+    LOG4("No arguments found for calling " << name << " in " << ctxt->node);
+
     return nullptr;
 }
 
 const IR::IDeclaration *ResolutionContext::resolveUnique(const IR::ID &name,
                                                          P4::ResolutionType type,
                                                          const IR::INamespace *ns) const {
+    LOG2("Resolving " << name << " "
+                      << (type == ResolutionType::Type ? "as type" : "as identifier"));
+
     auto decls = ns ? lookup(ns, name, type) : resolve(name, type);
+    LOG3("Lookup resulted in " << decls.size() << " declarations");
+
     // Check overloaded symbols.
     const IR::Vector<IR::Argument> *arguments;
     if (decls.size() > 1 && (arguments = methodArguments(name))) {
+        LOG4("Resolved arguments " << arguments << ". Performing additional overload check");
         decls = Util::enumerate(decls)
                     ->where([arguments](const IR::IDeclaration *d) {
                         auto func = d->to<IR::IFunctional>();
@@ -232,7 +246,10 @@ const IR::IDeclaration *ResolutionContext::resolveUnique(const IR::ID &name,
         ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", name);
         return nullptr;
     }
-    if (decls.size() == 1) return decls.front();
+    if (decls.size() == 1) {
+        LOG2("Lookup result: " << dbp(decls.front()));
+        return decls.front();
+    }
 
     ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", name);
     for (const auto *a : decls) ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
@@ -243,7 +260,7 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
                                                           bool notNull) const {
     const IR::IDeclaration *result = nullptr;
     const Context *ctxt = nullptr;
-    if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 2) {
+    if (findOrigCtxt<IR::KeyElement>(ctxt) && ctxt->child_index == 2) {
         // looking up a matchType in a key, so need to do a special lookup
         auto decls = lookupMatchKind(path->name);
         if (decls.empty()) {
@@ -259,7 +276,8 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
         if (getParent<IR::Type_Name>() || getOriginal()->is<IR::Type_Name>())
             rtype = ResolutionType::Type;
         const IR::INamespace *ns = nullptr;
-        if (path->absolute) ns = findContext<IR::P4Program>();
+        if (path->absolute) ns = findOrigCtxt<IR::P4Program>();
+
         result = resolveUnique(path->name, rtype, ns);
     }
     if (notNull) BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", path);
@@ -268,8 +286,8 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
 
 const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::This *pointer,
                                                           bool notNull) const {
-    auto result = findContext<IR::Declaration_Instance>();
-    if (findContext<IR::Function>() == nullptr || result == nullptr)
+    auto result = findOrigCtxt<IR::Declaration_Instance>();
+    if (findOrigCtxt<IR::Function>() == nullptr || result == nullptr)
         ::error(ErrorType::ERR_INVALID,
                 "%1% can only be used in the definition of an abstract method", pointer);
     if (notNull) BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", pointer);
@@ -290,9 +308,9 @@ ResolveReferences::ResolveReferences(ReferenceMap *refMap, bool checkShadow)
 }
 
 const IR::IDeclaration *ResolutionContext::resolvePath(const IR::Path *path, bool isType) const {
-    LOG2("Resolving " << path << " " << (isType ? "as type" : "as identifier"));
+    LOG2("Resolving path " << path << " " << (isType ? "as type" : "as identifier"));
     const IR::INamespace *ctxt = nullptr;
-    if (path->absolute) ctxt = findContext<IR::P4Program>();
+    if (path->absolute) ctxt = findOrigCtxt<IR::P4Program>();
     ResolutionType k = isType ? ResolutionType::Type : ResolutionType::Any;
     return resolveUnique(path->name, k, ctxt);
 }

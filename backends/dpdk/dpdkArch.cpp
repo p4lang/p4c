@@ -1709,7 +1709,7 @@ const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) 
     }
 
     if (isHeader || metaCopyNeeded) {
-        IR::ID keyNameId(refMap->newName(keyName.string_view()));
+        IR::ID keyNameId(nameGen.newName(keyName.string_view()));
         auto decl = new IR::Declaration_Variable(keyNameId, element->expression->type, nullptr);
         // Store the compiler generated table keys in Program structure. These will be
         // inserted to Metadata by CollectLocalVariables pass.
@@ -1724,11 +1724,12 @@ const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) 
 }
 
 const IR::Node *CopyMatchKeysToSingleStruct::doStatement(const IR::Statement *statement,
-                                                         const IR::Expression *expression) {
+                                                         const IR::Expression *expression,
+                                                         const Visitor::Context *ctxt) {
     LOG3("Visiting " << getOriginal());
-    P4::HasTableApply hta(refMap, typeMap);
+    P4::HasTableApply hta(this, typeMap);
     hta.setCalledBy(this);
-    (void)expression->apply(hta);
+    (void)expression->apply(hta, ctxt);
     if (hta.table == nullptr) return statement;
     auto insertions = get(toInsert, hta.table);
     if (insertions == nullptr) return statement;

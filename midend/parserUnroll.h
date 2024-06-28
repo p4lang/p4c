@@ -298,7 +298,7 @@ class ParsersUnroll : public PassManager {
  public:
     ParsersUnroll(bool unroll, ReferenceMap *refMap, TypeMap *typeMap) {
         // remove block statements
-        passes.push_back(new SimplifyControlFlow(refMap, typeMap));
+        passes.push_back(new SimplifyControlFlow(typeMap));
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new RewriteAllParsers(refMap, typeMap, unroll));
         setName("ParsersUnroll");

@@ -77,13 +77,10 @@ state s_join {
  */
 
 class DoRemoveParserControlFlow : public Transform {
-    ReferenceMap *refMap;
+    MinimalNameGenerator nameGen;
 
  public:
-    explicit DoRemoveParserControlFlow(ReferenceMap *refMap) : refMap(refMap) {
-        CHECK_NULL(refMap);
-        setName("DoRemoveParserControlFlow");
-    }
+    DoRemoveParserControlFlow() { setName("DoRemoveParserControlFlow"); }
     const IR::Node *postorder(IR::ParserState *state) override;
     Visitor::profile_t init_apply(const IR::Node *node) override;
 };
@@ -92,9 +89,9 @@ class DoRemoveParserControlFlow : public Transform {
 /// convergence.
 class RemoveParserControlFlow : public PassRepeated {
  public:
-    RemoveParserControlFlow(ReferenceMap *refMap, TypeMap *typeMap) : PassRepeated({}) {
-        passes.emplace_back(new DoRemoveParserControlFlow(refMap));
-        passes.emplace_back(new SimplifyControlFlow(refMap, typeMap));
+    explicit RemoveParserControlFlow(TypeMap *typeMap) : PassRepeated({}) {
+        passes.emplace_back(new DoRemoveParserControlFlow());
+        passes.emplace_back(new SimplifyControlFlow(typeMap));
         setName("RemoveParserControlFlow");
     }
 };
@@ -119,15 +116,14 @@ class RemoveParserIfs : public PassManager {
     bool found = false;
 
  public:
-    RemoveParserIfs(ReferenceMap *refMap, TypeMap *typeMap) {
+    explicit RemoveParserIfs(TypeMap *typeMap) {
         passes.push_back(new IfInParser(&found));
-        passes.push_back(new PassIf(
-            [this] { return found; },
-            {// only do this if we found an 'if' in a parser
-             new ResolveReferences(refMap),
-             new UniqueNames(refMap),     // Give each local declaration a unique internal name
-             new MoveDeclarations(true),  // Move all local declarations to the beginning
-             new ResolveReferences(refMap), new RemoveParserControlFlow(refMap, typeMap)}));
+        passes.push_back(
+            new PassIf([this] { return found; },
+                       {                    // only do this if we found an 'if' in a parser
+                        new UniqueNames(),  // Give each local declaration a unique internal name
+                        new MoveDeclarations(true),  // Move all local declarations to the beginning
+                        new RemoveParserControlFlow(typeMap)}));
     }
 };
 

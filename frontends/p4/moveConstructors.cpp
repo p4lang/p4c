@@ -18,136 +18,111 @@ limitations under the License.
 
 namespace P4 {
 
-struct ConstructorMap {
-    // Maps a constructor to the temporary used to hold its value.
-    ordered_map<const IR::ConstructorCallExpression *, cstring> tmpName;
+MoveConstructors::MoveConstructors() : convert(Region::Outside) { setName("MoveConstructors"); }
 
-    void clear() { tmpName.clear(); }
-    void add(const IR::ConstructorCallExpression *expression, cstring name) {
-        CHECK_NULL(expression);
-        tmpName[expression] = name;
-    }
-    bool empty() const { return tmpName.empty(); }
-};
+Visitor::profile_t MoveConstructors::init_apply(const IR::Node *node) {
+    auto rv = Transform::init_apply(node);
+    node->apply(nameGen);
 
-namespace {
+    return rv;
+}
 
-class MoveConstructorsImpl : public Transform {
-    enum class Region { InParserStateful, InControlStateful, InBody, Outside };
+const IR::Node *MoveConstructors::preorder(IR::P4Parser *parser) {
+    cmap.clear();
+    convert = Region::InParserStateful;
+    visit(parser->parserLocals, "parserLocals");
+    convert = Region::InBody;
+    visit(parser->states, "states");
+    convert = Region::Outside;
+    prune();
+    return parser;
+}
 
-    ReferenceMap *refMap;
-    ConstructorMap cmap;
-    Region convert;
+const IR::Node *MoveConstructors::preorder(IR::IndexedVector<IR::Declaration> *declarations) {
+    if (convert != Region::InParserStateful) return declarations;
 
- public:
-    explicit MoveConstructorsImpl(ReferenceMap *refMap) : refMap(refMap), convert(Region::Outside) {
-        setName("MoveConstructorsImpl");
-    }
-
-    const IR::Node *preorder(IR::P4Parser *parser) override {
-        cmap.clear();
-        convert = Region::InParserStateful;
-        visit(parser->parserLocals, "parserLocals");
-        convert = Region::InBody;
-        visit(parser->states, "states");
-        convert = Region::Outside;
-        prune();
-        return parser;
-    }
-
-    const IR::Node *preorder(IR::IndexedVector<IR::Declaration> *declarations) override {
-        if (convert != Region::InParserStateful) return declarations;
-
-        bool changes = false;
-        auto result = new IR::Vector<IR::Declaration>();
-        for (auto s : *declarations) {
-            visit(s);
-            for (auto e : cmap.tmpName) {
-                auto cce = e.first;
-                auto decl = new IR::Declaration_Instance(cce->srcInfo, e.second,
-                                                         cce->constructedType, cce->arguments);
-                result->push_back(decl);
-                changes = true;
-            }
-            result->push_back(s);
-            cmap.clear();
-        }
-        prune();
-        if (changes) return result;
-        return declarations;
-    }
-
-    const IR::Node *postorder(IR::P4Parser *parser) override {
-        if (cmap.empty()) return parser;
+    bool changes = false;
+    auto result = new IR::Vector<IR::Declaration>();
+    for (auto s : *declarations) {
+        visit(s);
         for (auto e : cmap.tmpName) {
             auto cce = e.first;
             auto decl = new IR::Declaration_Instance(cce->srcInfo, e.second, cce->constructedType,
                                                      cce->arguments);
-            parser->parserLocals.insert(parser->parserLocals.begin(), decl);
+            result->push_back(decl);
+            changes = true;
         }
-        return parser;
-    }
-
-    const IR::Node *preorder(IR::P4Control *control) override {
+        result->push_back(s);
         cmap.clear();
-        convert = Region::InControlStateful;
-        IR::IndexedVector<IR::Declaration> newDecls;
-        bool changes = false;
-        for (auto decl : control->controlLocals) {
-            visit(decl);
-            for (auto e : cmap.tmpName) {
-                auto cce = e.first;
-                auto inst = new IR::Declaration_Instance(cce->srcInfo, e.second,
-                                                         cce->constructedType, cce->arguments);
-                newDecls.push_back(inst);
-                changes = true;
-            }
-            newDecls.push_back(decl);
-            cmap.clear();
-        }
-        convert = Region::InBody;
-        visit(control->body);
-        convert = Region::Outside;
-        prune();
-        if (changes) {
-            control->controlLocals = newDecls;
-        }
-        return control;
     }
+    prune();
+    if (changes) return result;
+    return declarations;
+}
 
-    const IR::Node *postorder(IR::P4Control *control) override {
-        if (cmap.empty()) return control;
-        IR::IndexedVector<IR::Declaration> newDecls;
+const IR::Node *MoveConstructors::postorder(IR::P4Parser *parser) {
+    if (cmap.empty()) return parser;
+    for (auto e : cmap.tmpName) {
+        auto cce = e.first;
+        auto decl = new IR::Declaration_Instance(cce->srcInfo, e.second, cce->constructedType,
+                                                 cce->arguments);
+        parser->parserLocals.insert(parser->parserLocals.begin(), decl);
+    }
+    return parser;
+}
+
+const IR::Node *MoveConstructors::preorder(IR::P4Control *control) {
+    cmap.clear();
+    convert = Region::InControlStateful;
+    IR::IndexedVector<IR::Declaration> newDecls;
+    bool changes = false;
+    for (auto decl : control->controlLocals) {
+        visit(decl);
         for (auto e : cmap.tmpName) {
             auto cce = e.first;
-            auto decl = new IR::Declaration_Instance(cce->srcInfo, e.second, cce->constructedType,
+            auto inst = new IR::Declaration_Instance(cce->srcInfo, e.second, cce->constructedType,
                                                      cce->arguments);
-            newDecls.push_back(decl);
+            newDecls.push_back(inst);
+            changes = true;
         }
-        newDecls.append(control->controlLocals);
+        newDecls.push_back(decl);
+        cmap.clear();
+    }
+    convert = Region::InBody;
+    visit(control->body);
+    convert = Region::Outside;
+    prune();
+    if (changes) {
         control->controlLocals = newDecls;
-        return control;
     }
+    return control;
+}
 
-    const IR::Node *preorder(IR::P4Table *table) override {
-        prune();
-        return table;
-    }  // skip
-
-    const IR::Node *postorder(IR::ConstructorCallExpression *expression) override {
-        if (convert == Region::Outside) return expression;
-        auto tmpvar = refMap->newName("tmp");
-        auto tmpref = new IR::PathExpression(IR::ID(expression->srcInfo, tmpvar));
-        cmap.add(expression, tmpvar);
-        return tmpref;
+const IR::Node *MoveConstructors::postorder(IR::P4Control *control) {
+    if (cmap.empty()) return control;
+    IR::IndexedVector<IR::Declaration> newDecls;
+    for (auto e : cmap.tmpName) {
+        auto cce = e.first;
+        auto decl = new IR::Declaration_Instance(cce->srcInfo, e.second, cce->constructedType,
+                                                 cce->arguments);
+        newDecls.push_back(decl);
     }
-};
-}  // namespace
+    newDecls.append(control->controlLocals);
+    control->controlLocals = newDecls;
+    return control;
+}
 
-MoveConstructors::MoveConstructors(ReferenceMap *refMap) {
-    setName("MoveConstructors");
-    passes.emplace_back(new P4::ResolveReferences(refMap));
-    passes.emplace_back(new MoveConstructorsImpl(refMap));
+const IR::Node *MoveConstructors::preorder(IR::P4Table *table) {
+    prune();
+    return table;
+}  // skip
+
+const IR::Node *MoveConstructors::postorder(IR::ConstructorCallExpression *expression) {
+    if (convert == Region::Outside) return expression;
+    auto tmpvar = nameGen.newName("tmp");
+    auto tmpref = new IR::PathExpression(IR::ID(expression->srcInfo, tmpvar));
+    cmap.add(expression, tmpvar);
+    return tmpref;
 }
 
 }  // namespace P4

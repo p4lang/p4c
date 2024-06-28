@@ -91,26 +91,31 @@ class MethodInstance : public InstanceBase {
      *  @param incomplete        If true we do not expect to have
      *                           all type arguments.
      */
-    static MethodInstance *resolve(const IR::MethodCallExpression *mce, DeclarationLookup *refMap,
-                                   TypeMap *typeMap, bool useExpressionType = false,
+    static MethodInstance *resolve(const IR::MethodCallExpression *mce,
+                                   const DeclarationLookup *refMap, TypeMap *typeMap,
+                                   bool useExpressionType = false,
                                    const Visitor::Context *ctxt = nullptr, bool incomplete = false);
-    static MethodInstance *resolve(const IR::MethodCallExpression *mce, DeclarationLookup *refMap,
-                                   TypeMap *typeMap, const Visitor::Context *ctxt,
-                                   bool incomplete = false) {
+    static MethodInstance *resolve(const IR::MethodCallExpression *mce,
+                                   const DeclarationLookup *refMap, TypeMap *typeMap,
+                                   const Visitor::Context *ctxt, bool incomplete = false) {
         return resolve(mce, refMap, typeMap, false, ctxt, incomplete);
     }
-    static MethodInstance *resolve(const IR::MethodCallStatement *mcs, DeclarationLookup *refMap,
-                                   TypeMap *typeMap, const Visitor::Context *ctxt = nullptr) {
+    static MethodInstance *resolve(const IR::MethodCallStatement *mcs,
+                                   const DeclarationLookup *refMap, TypeMap *typeMap,
+                                   const Visitor::Context *ctxt = nullptr) {
         return resolve(mcs->methodCall, refMap, typeMap, false, ctxt, false);
     }
-    static MethodInstance *resolve(const IR::MethodCallExpression *mce, DeclarationLookup *refMap,
+    static MethodInstance *resolve(const IR::MethodCallExpression *mce,
+                                   const DeclarationLookup *refMap,
                                    const Visitor::Context *ctxt = nullptr) {
         return resolve(mce, refMap, nullptr, true, ctxt, false);
     }
-    static MethodInstance *resolve(const IR::MethodCallStatement *mcs, DeclarationLookup *refMap,
+    static MethodInstance *resolve(const IR::MethodCallStatement *mcs,
+                                   const DeclarationLookup *refMap,
                                    const Visitor::Context *ctxt = nullptr) {
         return resolve(mcs->methodCall, refMap, nullptr, true, ctxt, false);
     }
+
     const IR::ParameterList *getOriginalParameters() const {
         return originalMethodType->parameters;
     }
@@ -210,7 +215,7 @@ class ActionCall final : public MethodInstance {
     const IR::P4Action *action;
     /// Generate a version of the action where the parameters in the
     /// substitution have been replaced with the arguments.
-    const IR::P4Action *specialize(ReferenceMap *refMap) const;
+    const IR::P4Action *specialize(const DeclarationLookup *refMap) const;
 
     DECLARE_TYPEINFO(ActionCall, MethodInstance);
 };
@@ -282,7 +287,7 @@ class ConstructorCall : public InstanceBase {
     const IR::Vector<IR::Type> *typeArguments = nullptr;
     const IR::ParameterList *constructorParameters = nullptr;
     static ConstructorCall *resolve(const IR::ConstructorCallExpression *cce,
-                                    DeclarationLookup *refMap, TypeMap *typeMap);
+                                    const DeclarationLookup *refMap, TypeMap *typeMap);
     DECLARE_TYPEINFO(ConstructorCall, InstanceBase);
 };
 

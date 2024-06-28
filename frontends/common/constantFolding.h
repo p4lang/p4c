@@ -17,9 +17,10 @@ limitations under the License.
 #ifndef COMMON_CONSTANTFOLDING_H_
 #define COMMON_CONSTANTFOLDING_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
-#include "lib/big_int_util.h"
 
 namespace P4 {
 
@@ -57,13 +58,13 @@ class ConstantFoldingPolicy {
  *      `IR::Declaration_Constant` nodes are initialized with
  *      compile-time known constants.
  */
-class DoConstantFolding : public Transform {
+class DoConstantFolding : public Transform, public ResolutionContext {
  protected:
     ConstantFoldingPolicy *policy;
 
     /// Used to resolve IR nodes to declarations.
     /// If `nullptr`, then `const` values cannot be resolved.
-    const ReferenceMap *refMap;
+    const DeclarationLookup *refMap;
 
     /// Used to resolve nodes to their types.
     /// If `nullptr`, then type information is not available.
@@ -113,7 +114,7 @@ class DoConstantFolding : public Transform {
     Result setContains(const IR::Expression *keySet, const IR::Expression *constant) const;
 
  public:
-    DoConstantFolding(const ReferenceMap *refMap, const TypeMap *typeMap, bool warnings = true,
+    DoConstantFolding(const DeclarationLookup *refMap, const TypeMap *typeMap, bool warnings = true,
                       ConstantFoldingPolicy *policy = nullptr)
         : refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr), warnings(warnings) {
         if (policy) {
@@ -125,6 +126,11 @@ class DoConstantFolding : public Transform {
         setName("DoConstantFolding");
         assignmentTarget = false;
     }
+
+    // If DeclarationLookup is not passed, then resolve by our own.
+    explicit DoConstantFolding(const TypeMap *typeMap, bool warnings = true,
+                               ConstantFoldingPolicy *policy = nullptr)
+        : DoConstantFolding(this, typeMap, warnings, policy) {}
 
     const IR::Node *postorder(IR::Declaration_Constant *d) override;
     const IR::Node *postorder(IR::PathExpression *e) override;
@@ -186,6 +192,24 @@ class ConstantFolding : public PassManager {
             passes.push_back(typeChecking);
         }
         passes.push_back(new DoConstantFolding(refMap, typeMap, warnings, policy));
+        if (typeMap != nullptr) passes.push_back(new ClearTypeMap(typeMap));
+        setName("ConstantFolding");
+    }
+
+    ConstantFolding(TypeMap *typeMap, ConstantFoldingPolicy *policy)
+        : ConstantFolding(typeMap, true, nullptr, policy) {}
+
+    explicit ConstantFolding(ConstantFoldingPolicy *policy)
+        : ConstantFolding(nullptr, true, nullptr, policy) {}
+
+    explicit ConstantFolding(TypeMap *typeMap, bool warnings = true,
+                             TypeChecking *typeChecking = nullptr,
+                             ConstantFoldingPolicy *policy = nullptr) {
+        if (typeMap != nullptr) {
+            if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
+            passes.push_back(typeChecking);
+        }
+        passes.push_back(new DoConstantFolding(typeMap, warnings, policy));
         if (typeMap != nullptr) passes.push_back(new ClearTypeMap(typeMap));
         setName("ConstantFolding");
     }

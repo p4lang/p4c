@@ -72,8 +72,8 @@ class DoResetHeaders : public Transform {
 /// Invokes TypeChecking followed by DoResetHeaders.
 class ResetHeaders : public PassManager {
  public:
-    ResetHeaders(ReferenceMap *refMap, TypeMap *typeMap) {
-        passes.push_back(new P4::TypeChecking(refMap, typeMap));
+    explicit ResetHeaders(TypeMap *typeMap) {
+        passes.push_back(new P4::TypeChecking(nullptr, typeMap));
         passes.push_back(new P4::DoResetHeaders(typeMap));
         setName("ResetHeaders");
     }

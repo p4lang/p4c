@@ -93,7 +93,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap, true),
         new ConvertBinaryOperationTo2Params(refMap),
         new CollectProgramStructure(refMap, typeMap, &structure),
-        new CopyMatchKeysToSingleStruct(refMap, typeMap, &invokedInKey, &structure),
+        new CopyMatchKeysToSingleStruct(typeMap, &invokedInKey, &structure),
         new P4::ResolveReferences(refMap),
         new CollectLocalVariables(refMap, typeMap, &structure),
         new P4::ClearTypeMap(typeMap),

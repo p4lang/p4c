@@ -77,21 +77,21 @@ static const IR::Vector<IR::Argument> *fillDefaults(const TypeMap *typeMap,
 }
 
 const IR::Node *DoDefaultArguments::postorder(IR::MethodCallExpression *mce) {
-    auto mi = MethodInstance::resolve(mce, refMap, typeMap);
+    auto mi = MethodInstance::resolve(mce, this, typeMap);
     auto args = fillDefaults(typeMap, &mi->substitution, &mi->typeSubstitution);
     if (args != nullptr) mce->arguments = args;
     return mce;
 }
 
 const IR::Node *DoDefaultArguments::postorder(IR::ConstructorCallExpression *cce) {
-    auto cc = ConstructorCall::resolve(cce, refMap, typeMap);
+    auto cc = ConstructorCall::resolve(cce, this, typeMap);
     auto args = fillDefaults(typeMap, &cc->substitution, &cc->typeSubstitution);
     if (args != nullptr) cce->arguments = args;
     return cce;
 }
 
 const IR::Node *DoDefaultArguments::postorder(IR::Declaration_Instance *inst) {
-    auto ii = Instantiation::resolve(inst, refMap, typeMap);
+    auto ii = Instantiation::resolve(inst, this, typeMap);
     auto args = fillDefaults(typeMap, &ii->substitution, &ii->typeSubstitution);
     if (args != nullptr) inst->arguments = args;
     return inst;

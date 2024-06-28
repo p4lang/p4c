@@ -42,9 +42,9 @@ class DoDefaultValues final : public Transform {
 
 class DefaultValues : public PassManager {
  public:
-    DefaultValues(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+    explicit DefaultValues(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
         if (typeMap != nullptr) {
-            if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap, true);
+            if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap, true);
             passes.push_back(typeChecking);
         }
         passes.push_back(new DoDefaultValues(typeMap));

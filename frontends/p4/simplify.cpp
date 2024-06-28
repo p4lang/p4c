@@ -65,7 +65,8 @@ const IR::Node *DoSimplifyControlFlow::postorder(IR::IfStatement *statement) {
         statement->ifTrue = e;
     }
 
-    if (SideEffects::check(statement->condition, this, refMap, typeMap)) return statement;
+    if (SideEffects::check(statement->condition, this, this, typeMap, getChildContext()))
+        return statement;
     if (statement->ifTrue->is<IR::EmptyStatement>() &&
         (statement->ifFalse == nullptr || statement->ifFalse->is<IR::EmptyStatement>()))
         return new IR::EmptyStatement(statement->srcInfo);
@@ -87,13 +88,13 @@ const IR::Node *DoSimplifyControlFlow::postorder(IR::SwitchStatement *statement)
     if (statement->cases.empty()) {
         // If this is a table application remove the switch altogether but keep
         // the table application.  Otherwise remove the switch altogether.
-        if (TableApplySolver::isActionRun(statement->expression, refMap, typeMap)) {
+        if (TableApplySolver::isActionRun(statement->expression, this, typeMap)) {
             auto mce = statement->expression->checkedTo<IR::Member>()
                            ->expr->checkedTo<IR::MethodCallExpression>();
             LOG2("Removing switch statement " << statement << " keeping " << mce);
             return new IR::MethodCallStatement(statement->srcInfo, mce);
         }
-        if (SideEffects::check(statement->expression, this, refMap, typeMap))
+        if (SideEffects::check(statement->expression, this, this, typeMap, getChildContext()))
             // This can happen if this pass is run before SideEffectOrdering.
             return statement;
         LOG2("Removing switch statement " << statement);

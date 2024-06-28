@@ -16,8 +16,6 @@ limitations under the License.
 
 #include "functionsInlining.h"
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/callGraph.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
@@ -25,7 +23,7 @@ limitations under the License.
 namespace P4 {
 
 void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression *mce) {
-    auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+    auto mi = P4::MethodInstance::resolve(mce, this, typeMap);
     CHECK_NULL(mi);
     auto ac = mi->to<P4::FunctionCall>();
     if (ac == nullptr) return;
@@ -48,11 +46,16 @@ void FunctionsInliner::end_apply(const IR::Node *) {
 }
 
 Visitor::profile_t FunctionsInliner::init_apply(const IR::Node *node) {
-    P4::ResolveReferences solver(refMap);
-    refMap->clear();
-    node->apply(solver);
+    auto rv = Transform::init_apply(node);
+
     LOG2("FunctionsInliner " << toInline);
-    return Transform::init_apply(node);
+
+    if (!nameGen) {
+        // This would apply nameGen onto node
+        nameGen = std::make_unique<MinimalNameGenerator>(node);
+    }
+
+    return rv;
 }
 
 bool FunctionsInliner::preCaller() {
@@ -177,7 +180,7 @@ const IR::Node *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     // evaluate in and inout parameters in order
     for (auto param : callee->type->parameters->parameters) {
         auto argument = substitution.lookup(param);
-        cstring newName = refMap->newName(param->name.name.string_view());
+        cstring newName = nameGen->newName(param->name.name.string_view());
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
             auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type,
@@ -198,8 +201,13 @@ const IR::Node *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
         }
     }
 
-    SubstituteParameters sp(refMap, &subst, &tvs);
-    auto clone = callee->apply(sp);
+    // FIXME: SubstituteParameters is a ResolutionContext, but we are recreating
+    // it again and again killing lookup caches. We'd need to have instead some
+    // separate DeclarationLookup that would allow us to perform necessary
+    // lookups in the context of callee. We can probably pre-seed it first for
+    // all possible callees in replMap.
+    SubstituteParameters sp(nullptr, &subst, &tvs);
+    auto clone = callee->apply(sp, getChildContext());
     if (::errorCount() > 0) return statement;
     CHECK_NULL(clone);
     BUG_CHECK(clone->is<IR::Function>(), "%1%: not an function", clone);

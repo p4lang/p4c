@@ -831,17 +831,16 @@ class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
     bool metaCopyNeeded = false;
 
  public:
-    CopyMatchKeysToSingleStruct(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                                std::set<const IR::P4Table *> *invokedInKey,
+    CopyMatchKeysToSingleStruct(P4::TypeMap *typeMap, std::set<const IR::P4Table *> *invokedInKey,
                                 DpdkProgramStructure *structure)
-        : P4::KeySideEffect(refMap, typeMap, invokedInKey), structure(structure) {
+        : P4::KeySideEffect(typeMap, invokedInKey), structure(structure) {
         setName("CopyMatchKeysToSingleStruct");
     }
 
     const IR::Node *preorder(IR::Key *key) override;
     const IR::Node *postorder(IR::KeyElement *element) override;
-    const IR::Node *doStatement(const IR::Statement *statement,
-                                const IR::Expression *expression) override;
+    const IR::Node *doStatement(const IR::Statement *statement, const IR::Expression *expression,
+                                const Visitor::Context *ctxt) override;
     struct keyInfo *getKeyInfo(IR::Key *keys);
     cstring getTableKeyName(const IR::Expression *e);
     int getFieldSizeBits(const IR::Type *field_type);
@@ -1184,7 +1183,7 @@ class EliminateHeaderCopy : public PassManager {
     EliminateHeaderCopy(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::ResolveReferences(refMap));
-        passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+        passes.push_back(new P4::TypeInference(typeMap, false));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new ElimHeaderCopy(typeMap));
     }
@@ -1435,13 +1434,13 @@ class CollectLocalStructAndFlatten : public PassManager {
     CollectLocalStructAndFlatten(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::ResolveReferences(refMap));
-        passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+        passes.push_back(new P4::TypeInference(typeMap, false));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new CollectStructLocalVariables(refMap, typeMap));
         passes.push_back(new MoveCollectedStructLocalVariableToMetadata(typeMap));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::ResolveReferences(refMap));
-        passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+        passes.push_back(new P4::TypeInference(typeMap, false));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new P4::FlattenInterfaceStructs(refMap, typeMap));
     }
@@ -1464,7 +1463,7 @@ class CollectIPSecInfo : public Inspector {
           typeMap(typeMap),
           structure(structure) {}
     bool preorder(const IR::MethodCallStatement *mcs) override {
-        auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
+        auto mi = P4::MethodInstance::resolve(mcs, refMap, typeMap);
         if (auto a = mi->to<P4::ExternMethod>()) {
             if (a->originalExternType->getName().name == "ipsec_accelerator") {
                 if (structure->isPSA()) {
@@ -1542,7 +1541,7 @@ struct DpdkHandleIPSec : public PassManager {
         passes.push_back(new InsertReqDeclForIPSec(refMap, structure, is_ipsec_used, sa_id_width));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::ResolveReferences(refMap));
-        passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+        passes.push_back(new P4::TypeInference(typeMap, false));
     }
 };
 

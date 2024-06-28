@@ -20,25 +20,21 @@ limitations under the License.
 #define EVALUATOR_SUBSTITUTEPARAMETERS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 #include "ir/ir.h"
 
 namespace P4 {
 
-class SubstituteParameters : public TypeVariableSubstitutionVisitor {
+class SubstituteParameters : public TypeVariableSubstitutionVisitor, public ResolutionContext {
  protected:
-    // When a PathExpression is cloned, it is added to the RefMap.
-    // It is set to point to the same declaration as the original path.
-    // But running this pass may change some declaration nodes - so
-    // in general the refMap won't be up-to-date at the end.
-    ReferenceMap *refMap;                // input and output
+    const DeclarationLookup *refMap;     // input
     const ParameterSubstitution *subst;  // input
  public:
-    SubstituteParameters(ReferenceMap *refMap, const ParameterSubstitution *subst,
+    SubstituteParameters(const DeclarationLookup *refMap, const ParameterSubstitution *subst,
                          const TypeVariableSubstitution *tvs)
         : TypeVariableSubstitutionVisitor(tvs), refMap(refMap), subst(subst) {
-        CHECK_NULL(refMap);
         CHECK_NULL(subst);
         CHECK_NULL(tvs);
         visitDagOnce = true;

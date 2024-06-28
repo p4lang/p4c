@@ -38,10 +38,10 @@ const IR::Node *DoRemoveParserControlFlow::postorder(IR::ParserState *state) {
 
             states->push_back(currentState);
             auto ifstat = c->to<IR::IfStatement>();
-            joinName = refMap->newName(state->name.name + "_join");
+            joinName = nameGen.newName(state->name.name + "_join");
 
             // s_true
-            cstring trueName = refMap->newName(state->name.name + "_true");
+            cstring trueName = nameGen.newName(state->name.name + "_true");
             auto trueComponents = new IR::IndexedVector<IR::StatOrDecl>();
             trueComponents->push_back(ifstat->ifTrue);
             auto trueState = new IR::ParserState(trueName, *trueComponents,
@@ -51,7 +51,7 @@ const IR::Node *DoRemoveParserControlFlow::postorder(IR::ParserState *state) {
             // s_false
             cstring falseName = joinName;
             if (ifstat->ifFalse != nullptr) {
-                falseName = refMap->newName(state->name.name + "_false");
+                falseName = nameGen.newName(state->name.name + "_false");
                 auto falseComponents = new IR::IndexedVector<IR::StatOrDecl>();
                 falseComponents->push_back(ifstat->ifFalse);
                 auto falseState = new IR::ParserState(
@@ -88,7 +88,11 @@ const IR::Node *DoRemoveParserControlFlow::postorder(IR::ParserState *state) {
 
 Visitor::profile_t DoRemoveParserControlFlow::init_apply(const IR::Node *node) {
     LOG1("DoRemoveControlFlow");
-    return Transform::init_apply(node);
+    auto rv = Transform::init_apply(node);
+
+    node->apply(nameGen);
+
+    return rv;
 }
 
 }  // namespace P4
