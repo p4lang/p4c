@@ -41,14 +41,28 @@ IR::StatOrDecl *DeclarationGenerator::generateRandomStatementOrDeclaration(bool 
         return stmt;
     }
     auto genStmt = target().statementGenerator();
-    auto *stmt = genStmt.genAssignmentOrMethodCallStatement(is_in_func);
-    if (stmt == nullptr) {
-        // it can happen that no statement can be generated
-        // for example in functions without writable values
-        // so declare a variable instead
-        return target().declarationGenerator().genVariableDeclaration();
+    if (val == 2) {
+        auto *stmt = genStmt.genAssignmentOrMethodCallStatement(is_in_func);
+        if (stmt == nullptr) {
+            // it can happen that no statement can be generated
+            // for example in functions without writable values
+            // so declare a variable instead
+            return target().declarationGenerator().genVariableDeclaration();
+        }
+        return stmt;
     }
-    return stmt;
+    if (val == 3) {
+        auto *stmt = genStmt.genForLoopStatement(is_in_func);
+        if (stmt == nullptr) {
+            // it can happen that no statement can be generated
+            // for example in functions without writable values
+            // so declare a variable instead
+            return target().declarationGenerator().genVariableDeclaration();
+        }
+        return stmt;
+    }
+    // Fallback
+    return target().declarationGenerator().genVariableDeclaration();
 }
 
 IR::Annotations *DeclarationGenerator::genAnnotation() {

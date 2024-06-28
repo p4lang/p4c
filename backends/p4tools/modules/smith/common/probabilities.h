@@ -36,6 +36,9 @@ static struct Probabilities {
     uint16_t STATEMENTORDECLARATION_VAR = 10;
     uint16_t STATEMENTORDECLARATION_CONSTANT = 10;
     uint16_t STATEMENTORDECLARATION_STATEMENT = 80;
+    // Add probability for for-loop statement(s) or declaration(s)
+    // TODO(zzmic): Determine the probability for for-loop statement(s) or declaration(s)
+    uint16_t STATEMENT_FOR = 20;
 
     // probabilities for unary bit expressions
     uint16_t EXPRESSION_BIT_UNARY_NEG = 20;
