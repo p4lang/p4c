@@ -83,12 +83,12 @@ std::string generateLoopInitialization(const std::string &var) {
             ss << "bit " << var << " = 0"; 
         // Signed integer (bitstring) of size n (>= 2). 
         case 2:
-            int bitFieldWidth = Utils::getRandInt(2, 64);
+            int bitFieldWidth = Utils::getRandInt(2, 32);
             ss << "int<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
         // Variable-length bitstring.
         case 3:
             int bitFieldWidth = Utils::getRandInt(1, 64);
-            ss << "int<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
+            ss << "varbit<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
     }
     
     return ss.str();
@@ -172,8 +172,7 @@ std::string generateHeaderStackForLoop() {
 std::string generateMultipleInitUpdateForLoop() {
     std::string loopVar1 = generateLoopControlVariable();
     std::string loopVar2 = generateLoopControlVariable();
-    int bitFieldWidth = Utils::getRandInt(1, 64);
-    std::string loopInit = "bit<" + std::to_string(bitFieldWidth) + "> " + loopVar1 + " = 0, " + loopVar2 + " = 1";
+    std::string loopInit = generateLoopInitialization(loopVar1) + ", " + loopVar2 + " = 1";
     std::string loopCondition = loopVar1 + " < hdrs.head.cnt";
     std::string loopUpdate = loopVar1 + " = " + loopVar1 + " + 1, " + loopVar2 + " = " + loopVar2 + " << 1";
     std::string loopBody = generateLoopBody(loopVar1, loopVar2);
@@ -188,10 +187,29 @@ std::string generateMultipleInitUpdateForLoop() {
 /// Generate a range-based for-loop.
 std::string generateRangeBasedForLoop(const std::string &start, const std::string &end) {
     std::string loopVar = generateLoopControlVariable();
-    int bitFieldWidth = Utils::getRandInt(1, 64);
-    
+
     std::stringstream ss;
-    ss << "for (bit<" + std::to_string(bitFieldWidth) + "> " << loopVar << " in " << start << " .. " << end << ") {\n";
+
+    int basicTypeOption = Utils::getRandInt(0, 3);
+    switch (basicTypeOption) {
+        // Unsigned integer (bitstring) of size n.
+        case 0:
+            int bitFieldWidth = Utils::getRandInt(1, 64);
+            ss << "for (bit<" << std::to_string(bitFieldWidth) << ">" << loopVar;
+        // bit is the same as bit<1>.
+        case 1:
+            ss << "for (bit " << loopVar; 
+        // Signed integer (bitstring) of size n (>= 2). 
+        case 2:
+            int bitFieldWidth = Utils::getRandInt(2, 32);
+            ss << "for (int<" << std::to_string(bitFieldWidth) << "> " << loopVar;
+        // Variable-length bitstring.
+        case 3:
+            int bitFieldWidth = Utils::getRandInt(1, 64);
+            ss << "for (varbit<" << std::to_string(bitFieldWidth) << "> " << loopVar;
+    }
+    
+    ss << " in " << start << " .. " << end << ") {\n";
     ss << generateLoopBody(loopVar) << "\n";
     ss << "}";
     return ss.str();
