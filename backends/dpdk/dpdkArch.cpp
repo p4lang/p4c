@@ -1226,7 +1226,7 @@ const IR::Node *CollectLocalVariables::postorder(IR::P4Parser *p) {
 /// This function stores the information about parameters of default action
 /// for each table.
 void DefActionValue::postorder(const IR::P4Table *t) {
-    auto default_action = t->properties->getProperty("default_action"_cs);
+    auto default_action = t->properties->getProperty("default_action");
     if (default_action != nullptr && default_action->value->is<IR::ExpressionValue>()) {
         auto expr = default_action->value->to<IR::ExpressionValue>()->expression;
         auto mi =
@@ -1457,7 +1457,7 @@ const IR::Node *DismantleMuxExpressions::postorder(IR::AssignmentStatement *stat
 
 bool CopyMatchKeysToSingleStruct::isLearnerTable(const IR::P4Table *t) {
     bool use_add_on_miss = false;
-    auto add_on_miss = t->properties->getProperty("add_on_miss"_cs);
+    auto add_on_miss = t->properties->getProperty("add_on_miss");
     if (add_on_miss == nullptr) return false;
     if (add_on_miss->value->is<IR::ExpressionValue>()) {
         auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
@@ -1816,7 +1816,7 @@ std::tuple<const IR::P4Table *, cstring, cstring> SplitP4TableCommon::create_mat
         }
     }
 
-    auto constDefAction = tbl->properties->getProperty("default_action"_cs);
+    auto constDefAction = tbl->properties->getProperty("default_action");
     bool isConstDefAction = constDefAction ? constDefAction->isConstant : false;
 
     IR::IndexedVector<IR::Property> properties;
@@ -1920,15 +1920,13 @@ const IR::Node *SplitActionSelectorTable::postorder(IR::P4Table *tbl) {
     bool isConstructedInPlace = false;
     bool isAsInstanceShared = false;
     cstring externName = cstring::empty;
-    cstring prefix = "psa_"_cs;
 
-    if (structure->isPNA()) {
-        prefix = "pna_"_cs;
-    }
-
-    auto property = tbl->properties->getProperty(prefix + "implementation"_cs);
-    auto counterProperty = tbl->properties->getProperty(prefix + "direct_counter"_cs);
-    auto meterProperty = tbl->properties->getProperty(prefix + "direct_meter"_cs);
+    auto property = tbl->properties->getProperty(structure->isPNA() ? "pna_implementation"
+                                                                    : "psa_implementation");
+    auto counterProperty = tbl->properties->getProperty(structure->isPNA() ? "pna_direct_counter"
+                                                                           : "psa_direct_counter");
+    auto meterProperty =
+        tbl->properties->getProperty(structure->isPNA() ? "pna_direct_meter" : "psa_direct_meter");
 
     if (property != nullptr && (counterProperty != nullptr || meterProperty != nullptr)) {
         ::error(ErrorType::ERR_UNEXPECTED,
@@ -1939,7 +1937,8 @@ const IR::Node *SplitActionSelectorTable::postorder(IR::P4Table *tbl) {
     }
 
     auto instance = Helpers::getExternInstanceFromProperty(
-        tbl, prefix + "implementation", refMap, typeMap, &isConstructedInPlace, externName);
+        tbl, structure->isPNA() ? "pna_implementation"_cs : "psa_implementation"_cs, refMap,
+        typeMap, &isConstructedInPlace, externName);
     if (!instance) return tbl;
     if (instance->type->name != "ActionSelector") return tbl;
 
@@ -2643,7 +2642,7 @@ void ValidateDirectCounterMeter::postorder(const IR::MethodCallStatement *mcs) {
 
 void CollectAddOnMissTable::postorder(const IR::P4Table *t) {
     bool use_add_on_miss = false;
-    auto add_on_miss = t->properties->getProperty("add_on_miss"_cs);
+    auto add_on_miss = t->properties->getProperty("add_on_miss");
     cstring default_actname = "NoAction"_cs;
     if (add_on_miss == nullptr) return;
     if (add_on_miss->value->is<IR::ExpressionValue>()) {
@@ -2659,7 +2658,7 @@ void CollectAddOnMissTable::postorder(const IR::P4Table *t) {
     }
 
     // sanity checks
-    auto default_action = t->properties->getProperty("default_action"_cs);
+    auto default_action = t->properties->getProperty("default_action");
     if (use_add_on_miss && default_action == nullptr) {
         ::error(ErrorType::ERR_UNEXPECTED,
                 "%1%: add_on_miss property is defined, "
@@ -2741,7 +2740,7 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
         bool use_idle_timeout_with_auto_delete = false;
         if (tbl) {
             auto idle_timeout_with_auto_delete =
-                tbl->properties->getProperty("idle_timeout_with_auto_delete"_cs);
+                tbl->properties->getProperty("idle_timeout_with_auto_delete");
             if (idle_timeout_with_auto_delete != nullptr) {
                 propName = "idle_timeout_with_auto_delete"_cs;
                 if (idle_timeout_with_auto_delete->value->is<IR::ExpressionValue>()) {
@@ -2767,7 +2766,7 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
             auto args = mce->arguments;
             auto at = args->at(0)->expression;
             auto an = at->to<IR::StringLiteral>()->value;
-            auto add_on_miss = tbl->properties->getProperty("add_on_miss"_cs);
+            auto add_on_miss = tbl->properties->getProperty("add_on_miss");
             if (add_on_miss != nullptr) {
                 propName = "add_on_miss"_cs;
                 if (add_on_miss->value->is<IR::ExpressionValue>()) {

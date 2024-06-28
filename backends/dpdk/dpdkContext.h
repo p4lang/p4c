@@ -103,12 +103,12 @@ struct SelectionTable {
                        const std::map<const cstring, struct TableAttributes> &tableAttrmap) {
         max_n_groups = 0;
         max_n_members_per_group = 0;
-        auto n_groups = tbl->properties->getProperty("n_groups_max"_cs);
+        auto n_groups = tbl->properties->getProperty("n_groups_max");
         if (n_groups) {
             auto n_groups_expr = n_groups->value->to<IR::ExpressionValue>()->expression;
             max_n_groups = n_groups_expr->to<IR::Constant>()->asInt();
         }
-        auto n_members = tbl->properties->getProperty("n_members_per_group_max"_cs);
+        auto n_members = tbl->properties->getProperty("n_members_per_group_max");
         if (n_members) {
             auto n_members_expr = n_members->value->to<IR::ExpressionValue>()->expression;
             max_n_members_per_group = n_members_expr->to<IR::Constant>()->asInt();

@@ -147,7 +147,7 @@ class ControlConverter : public Inspector {
         bool simple = handleTableImplementation(impl, key, result, action_profiles, selector_check);
 
         unsigned size = 0;
-        auto sz = table->properties->getProperty("size"_cs);
+        auto sz = table->properties->getProperty("size");
         if (sz != nullptr) {
             if (sz->value->is<IR::ExpressionValue>()) {
                 auto expr = sz->value->to<IR::ExpressionValue>()->expression;
@@ -167,7 +167,7 @@ class ControlConverter : public Inspector {
         if (size == 0) size = BMV2::TableAttributes::defaultTableSize;
 
         result->emplace("max_size", size);
-        auto ctrs = table->properties->getProperty("counters"_cs);
+        auto ctrs = table->properties->getProperty("counters");
         if (ctrs != nullptr) {
             // The counters attribute should list the counters of the table, accessed in
             // actions of the table.  We should be checking that this attribute and the
@@ -232,7 +232,7 @@ class ControlConverter : public Inspector {
         }
 
         bool sup_to = false;
-        auto timeout = table->properties->getProperty("support_timeout"_cs);
+        auto timeout = table->properties->getProperty("support_timeout");
         if (timeout != nullptr) {
             if (timeout->value->is<IR::ExpressionValue>()) {
                 auto expr = timeout->value->to<IR::ExpressionValue>()->expression;
@@ -247,7 +247,7 @@ class ControlConverter : public Inspector {
         }
         result->emplace("support_timeout", sup_to);
 
-        auto dm = table->properties->getProperty("meters"_cs);
+        auto dm = table->properties->getProperty("meters");
         if (dm != nullptr) {
             if (dm->value->is<IR::ExpressionValue>()) {
                 auto expr = dm->value->to<IR::ExpressionValue>()->expression;

@@ -270,7 +270,7 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
 }
 
 bool Bmv2V1ModelTableStepper::checkForActionProfile() {
-    const auto *impl = table->properties->getProperty("implementation"_cs);
+    const auto *impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
     }
@@ -312,7 +312,7 @@ bool Bmv2V1ModelTableStepper::checkForActionProfile() {
 }
 
 bool Bmv2V1ModelTableStepper::checkForActionSelector() {
-    const auto *impl = table->properties->getProperty("implementation"_cs);
+    const auto *impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
     }

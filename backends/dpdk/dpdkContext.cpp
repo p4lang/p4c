@@ -53,10 +53,10 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 tblAttr.size = dpdk_default_table_size;
                 if (size) tblAttr.size = size->asUnsigned();
                 auto hidden = tbl->annotations->getSingle(IR::Annotation::hiddenAnnotation);
-                auto selector = tbl->properties->getProperty("selector"_cs);
+                auto selector = tbl->properties->getProperty("selector");
                 tblAttr.is_add_on_miss = false;
                 tblAttr.idle_timeout_with_auto_delete = false;
-                auto add_on_miss = tbl->properties->getProperty("add_on_miss"_cs);
+                auto add_on_miss = tbl->properties->getProperty("add_on_miss");
                 if (add_on_miss != nullptr) {
                     if (add_on_miss->value->is<IR::ExpressionValue>()) {
                         auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
@@ -71,7 +71,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                     }
                 }
                 auto idle_timeout_with_auto_delete =
-                    tbl->properties->getProperty("idle_timeout_with_auto_delete"_cs);
+                    tbl->properties->getProperty("idle_timeout_with_auto_delete");
                 if (idle_timeout_with_auto_delete != nullptr) {
                     if (idle_timeout_with_auto_delete->value->is<IR::ExpressionValue>()) {
                         auto expr = idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()

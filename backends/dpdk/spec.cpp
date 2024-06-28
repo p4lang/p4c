@@ -444,13 +444,13 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
             }
         }
     }
-    auto def = properties->getProperty("default_action"_cs);
+    auto def = properties->getProperty("default_action");
     if (def->isConstant) out << "const";
     out << std::endl;
-    if (auto psa_implementation = properties->getProperty("psa_implementation"_cs)) {
+    if (auto psa_implementation = properties->getProperty("psa_implementation")) {
         out << "\taction_selector " << DPDK::toStr(psa_implementation->value) << std::endl;
     }
-    if (auto size = properties->getProperty("size"_cs)) {
+    if (auto size = properties->getProperty("size")) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
     } else {
         out << "\tsize 0x10000" << std::endl;
@@ -502,7 +502,7 @@ std::ostream &IR::DpdkLearner::toSpec(std::ostream &out) const {
         BUG("non-zero default action arguments not supported yet");
     }
     out << std::endl;
-    if (auto size = properties->getProperty("size"_cs)) {
+    if (auto size = properties->getProperty("size")) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
     } else {
         out << "\tsize 0x" << std::hex << std::uppercase << default_learner_table_size << std::endl;

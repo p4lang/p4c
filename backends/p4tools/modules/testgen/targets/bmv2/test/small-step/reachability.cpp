@@ -83,8 +83,8 @@ auto getNodeByType(const IR::P4Program *program) {
     });
 }
 
-template <class Node>
-const Node *getSpecificNode(const IR::P4Program *program, cstring name) {
+template <class Node, class S>
+const Node *getSpecificNode(const IR::P4Program *program, S name) {
     auto filter = [name](const IR::IDeclaration *d) {
         CHECK_NULL(d);
         if (const auto *element = d->to<Node>()) return element->name.name == name;
@@ -111,13 +111,13 @@ TEST_F(P4CReachability, testParserStatesAndAnnotations) {
     const auto *program = std::get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
-    const auto *parser = getSpecificNode<IR::P4Parser>(program, "ParserI"_cs);
+    const auto *parser = getSpecificNode<IR::P4Parser>(program, "ParserI");
     ASSERT_TRUE(parser);
     // Parser ParserI is reachable.
     ASSERT_TRUE(dcg->isReachable(program, parser));
-    const auto *ingress = getSpecificNode<IR::P4Control>(program, "IngressI"_cs);
+    const auto *ingress = getSpecificNode<IR::P4Control>(program, "IngressI");
     ASSERT_TRUE(ingress);
-    const auto *engress = getSpecificNode<IR::P4Control>(program, "EgressI"_cs);
+    const auto *engress = getSpecificNode<IR::P4Control>(program, "EgressI");
     ASSERT_TRUE(engress);
     // IngressI is reachable.
     ASSERT_TRUE(dcg->isReachable(program, ingress));
@@ -128,10 +128,10 @@ TEST_F(P4CReachability, testParserStatesAndAnnotations) {
     // IgressI is not reachable from EngressI.
     ASSERT_TRUE(!dcg->isReachable(engress, ingress));
     const auto *indirect =
-        ingress->to<IR::P4Control>()->getDeclByName("indirect_0"_cs)->to<IR::P4Table>();
+        ingress->to<IR::P4Control>()->getDeclByName("indirect_0")->to<IR::P4Table>();
     ASSERT_TRUE(indirect);
     const auto *indirectWs =
-        ingress->to<IR::P4Control>()->getDeclByName("indirect_ws_0"_cs)->to<IR::P4Table>();
+        ingress->to<IR::P4Control>()->getDeclByName("indirect_ws_0")->to<IR::P4Table>();
     ASSERT_TRUE(indirectWs);
     // Inderect table is reachable from ingress
     ASSERT_TRUE(dcg->isReachable(ingress, indirect));

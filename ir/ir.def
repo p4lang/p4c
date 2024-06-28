@@ -65,6 +65,8 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
         return components.getDeclarations(); }
     const IDeclaration* getDeclByName(cstring name) const override {
         return components.getDeclaration(name); }
+    const IDeclaration* getDeclByName(std::string_view name) const override {
+        return components.getDeclaration(name); }
 
     static const cstring accept;
     static const cstring reject;
@@ -96,6 +98,11 @@ class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, I
         auto decl = parserLocals.getDeclaration(name);
         if (!decl) decl = states.getDeclaration(name);
         return decl; }
+    IDeclaration getDeclByName(std::string_view name) const override {
+        auto decl = parserLocals.getDeclaration(name);
+        if (!decl) decl = states.getDeclaration(name);
+        return decl; }
+
     Type_Method getApplyMethodType() const override { return type->getApplyMethodType(); }
     ParameterList getApplyParameters() const override { return type->getApplyParameters(); }
     Type_Method getConstructorMethodType() const override;
@@ -132,6 +139,8 @@ class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, 
     Type_Method getConstructorMethodType() const override;
     IDeclaration getDeclByName(cstring name) const override {
         return controlLocals.getDeclaration(name); }
+    IDeclaration getDeclByName(std::string_view name) const override {
+        return controlLocals.getDeclaration(name); }
     ParameterList getConstructorParameters() const override { return constructorParams; }
     Type getType() const override { return this->type; }
 #apply
@@ -152,6 +161,8 @@ class P4Action : Declaration, ISimpleNamespace, IAnnotated, IFunctional {
         return parameters->getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return parameters->getDeclByName(name); }
+    IDeclaration getDeclByName(std::string_view name) const override {
+        return parameters->getDeclByName(name); }
     Annotations getAnnotations() const override { return annotations; }
     ParameterList getParameters() const override { return parameters; }
 }
@@ -163,6 +174,8 @@ class Type_Error : ISimpleNamespace, Type_Declaration {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return members.getDeclaration(name); }
+    IDeclaration getDeclByName(std::string_view name) const override {
+        return members.getDeclaration(name); }
     validate{ members.check_null(); }
 }
 
@@ -172,6 +185,8 @@ class Declaration_MatchKind : ISimpleNamespace {
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
+        return members.getDeclaration(name); }
+    IDeclaration getDeclByName(std::string_view name) const override {
         return members.getDeclaration(name); }
     validate{ members.check_null(); }
 }
@@ -289,6 +304,10 @@ class TableProperties : ISimpleNamespace {
     Property getProperty(cstring name) const {
         return properties.getDeclaration<Property>(name); }
     IDeclaration getDeclByName(cstring name) const override {
+        return properties.getDeclaration(name); }
+    Property getProperty(std::string_view name) const {
+        return properties.getDeclaration<Property>(name); }
+    IDeclaration getDeclByName(std::string_view name) const override {
         return properties.getDeclaration(name); }
     void push_back(Property prop) { properties.push_back(prop); }
 
@@ -473,6 +492,8 @@ class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
     optional inline IndexedVector<StatOrDecl>   components;
     IDeclaration getDeclByName(cstring name) const override {
         return components.getDeclaration(name); }
+    IDeclaration getDeclByName(std::string_view name) const override {
+        return components.getDeclaration(name); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return components.getDeclarations(); }
     void push_back(StatOrDecl st) { components.push_back(st); }
@@ -529,6 +550,8 @@ class ForStatement : LoopStatement {
     Statement                           body;
     IDeclaration getDeclByName(cstring name) const override {
         return init.getDeclaration(name); }
+    IDeclaration getDeclByName(std::string_view name) const override {
+        return init.getDeclaration(name); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return init.getDeclarations(); }
     visit_children;
@@ -551,6 +574,8 @@ class ForInStatement : LoopStatement {
         : LoopStatement(si, a), decl(nullptr), ref(pe), collection(c), body(b) {}
     IDeclaration getDeclByName(cstring name) const override {
         return decl && decl->name == name ? decl : nullptr; }
+    IDeclaration getDeclByName(std::string_view name) const override {
+        return decl && decl->name.name == name ? decl : nullptr; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         if (decl) return new Util::SingleEnumerator<const IDeclaration *>(decl);
         return new Util::EmptyEnumerator<const IDeclaration *>(); }
@@ -573,6 +598,8 @@ class Function : Declaration, IFunctional, IAnnotated, ISimpleNamespace, INested
     Util::Enumerator<IDeclaration> *getDeclarations() const override {
         return type->parameters->getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
+        return type->parameters->getDeclByName(name); }
+    IDeclaration getDeclByName(std::string_view name) const override {
         return type->parameters->getDeclByName(name); }
     std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters }; }
