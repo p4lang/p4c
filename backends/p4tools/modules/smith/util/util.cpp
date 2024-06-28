@@ -72,8 +72,24 @@ std::string generateLoopInitialization(const std::string &var) {
 
     // TOOD: Add support for other types of initialization, 
     // although its quite common to initialize a loop control variable to 0.
-    int bitFieldWidth = Utils::getRandInt(1, 64);
-    ss << "bit<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
+    int basicTypeOption = Utils::getRandInt(0, 3);
+    switch (basicTypeOption) {
+        // Unsigned integer (bitstring) of size n.
+        case 0:
+            int bitFieldWidth = Utils::getRandInt(1, 64);
+            ss << "bit<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
+        // bit is the same as bit<1>.
+        case 1:
+            ss << "bit " << var << " = 0"; 
+        // Signed integer (bitstring) of size n (>= 2). 
+        case 2:
+            int bitFieldWidth = Utils::getRandInt(2, 64);
+            ss << "int<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
+        // Variable-length bitstring.
+        case 3:
+            int bitFieldWidth = Utils::getRandInt(1, 64);
+            ss << "int<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
+    }
     
     return ss.str();
 }
