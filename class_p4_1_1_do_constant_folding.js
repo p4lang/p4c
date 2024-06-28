@@ -12,7 +12,7 @@ var class_p4_1_1_do_constant_folding =
     [ "setContains", "class_p4_1_1_do_constant_folding.html#a92320f78791dd5ec5ad5f47be63a62db", null ],
     [ "shift", "class_p4_1_1_do_constant_folding.html#a459b29cbeb3a5438d30f093ac296f971", null ],
     [ "constants", "class_p4_1_1_do_constant_folding.html#a4c3e1735b06cb02e7c8d60eb4c8fc9a9", null ],
-    [ "refMap", "class_p4_1_1_do_constant_folding.html#a194629e6e4025b15b50be71e830fd757", null ],
+    [ "refMap", "class_p4_1_1_do_constant_folding.html#a37cbd4238cf3d8d4e59d6b56eb2a3531", null ],
     [ "typeMap", "class_p4_1_1_do_constant_folding.html#a699067d48b4fcc0ec993fa5397f2d2c8", null ],
     [ "typesKnown", "class_p4_1_1_do_constant_folding.html#a9e9a9f024f9de951a7a6ffa949c0a2b1", null ],
     [ "warnings", "class_p4_1_1_do_constant_folding.html#a8fda82bf4aa6421c6ea6c76eb4c35957", null ]

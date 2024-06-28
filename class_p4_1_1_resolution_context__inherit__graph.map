@@ -1,15 +1,91 @@
 <map id="P4::ResolutionContext" name="P4::ResolutionContext">
-<area shape="rect" id="Node000001" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="220,92,387,117"/>
-<area shape="rect" id="Node000004" href="$class_p4_1_1_compute_def_use.html" title="Compute defuse info within P4Parser and P4Control blocks in the midend." alt="" coords="443,5,597,31"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="340,83,434,41,471,28,473,33,436,46,342,88"/>
-<area shape="rect" id="Node000005" href="$class_p4_1_1_compute_def_use_1_1_setup_join_points.html" title=" " alt="" coords="439,55,601,95"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="400,89,439,84,440,89,401,94"/>
-<area shape="rect" id="Node000006" href="$class_p4_1_1_resolve_references.html" title=" " alt="" coords="435,120,605,145"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="401,115,435,119,434,124,400,120"/>
-<area shape="rect" id="Node000007" href="$class_p4_1_1_unroll_loops.html" title=" " alt="" coords="459,169,581,195"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="347,120,436,155,472,167,470,172,434,161,345,125"/>
-<area shape="rect" id="Node000002" href="$class_visitor.html" title=" " alt="" coords="57,67,121,92"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,82,220,92,220,97,134,87"/>
-<area shape="rect" id="Node000003" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="5,116,172,141"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="186,115,219,111,220,117,186,120"/>
+<area shape="rect" id="Node000001" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="220,1055,387,1080"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_abstract_inliner.html" title=" " alt="" coords="474,5,622,60"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="302,1041,304,851,310,712,320,561,335,408,358,268,373,205,390,151,410,105,433,70,451,53,472,43,475,47,454,58,437,73,415,107,395,152,378,207,364,269,341,409,325,561,315,713,310,851,307,1041"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_abstract_inliner.html" title=" " alt="" coords="451,84,645,139"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="302,1041,307,864,313,737,324,598,341,459,363,330,394,224,412,182,433,150,449,135,452,139,437,153,417,184,399,225,369,331,346,459,330,598,319,737,312,864,308,1041"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_abstract_inliner.html" title=" " alt="" coords="439,163,657,203"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="302,1041,308,875,326,627,342,498,365,379,395,281,412,243,433,214,447,201,450,205,437,217,417,245,400,283,370,380,348,498,331,627,313,875,308,1041"/>
+<area shape="rect" id="Node000010" href="$class_p4_1_1_abstract_inliner.html" title=" " alt="" coords="449,228,647,283"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="303,1041,311,890,333,666,349,550,371,444,399,355,415,320,433,294,447,280,451,284,437,297,419,323,404,357,376,445,355,551,338,667,317,890,308,1041"/>
+<area shape="rect" id="Node000011" href="$class_p4_1_1_abstract_inliner.html" title=" " alt="" coords="443,307,653,347"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="303,1041,313,900,335,695,352,589,373,492,400,413,416,381,433,358,447,346,450,350,437,361,420,384,405,415,378,494,357,590,340,696,318,900,309,1041"/>
+<area shape="rect" id="Node000012" href="$class_p4_1_1_compute_def_use.html" title="Compute defuse info within P4Parser and P4Control blocks in the midend." alt="" coords="471,372,625,397"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="304,1040,314,908,337,718,354,620,375,531,401,458,416,430,433,408,450,395,470,387,472,392,453,400,437,412,421,433,406,460,380,533,359,621,342,719,319,908,309,1041"/>
+<area shape="rect" id="Node000013" href="$class_p4_1_1_compute_def_use_1_1_setup_join_points.html" title=" " alt="" coords="467,422,629,462"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="304,1040,317,920,342,750,359,662,380,583,404,517,418,492,433,472,448,460,466,451,468,455,451,464,437,476,422,495,409,519,385,584,364,664,347,751,322,921,310,1041"/>
+<area shape="rect" id="Node000014" href="$class_p4_1_1_create_struct_initializers.html" title="Converts some list expressions into struct initializers." alt="" coords="451,487,645,512"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="305,1041,318,928,344,772,361,693,382,621,405,562,433,521,449,510,452,514,437,525,410,564,387,623,366,694,349,773,324,929,310,1041"/>
+<area shape="rect" id="Node000015" href="$class_p4_1_1_deprecated.html" title=" " alt="" coords="487,536,609,561"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="305,1041,320,938,347,796,365,725,385,660,407,607,433,571,458,555,486,547,488,552,460,560,437,575,412,609,390,662,370,726,352,798,326,938,311,1041"/>
+<area shape="rect" id="Node000016" href="$class_p4_1_1_discover_actions_inlining.html" title=" " alt="" coords="449,585,647,611"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="301,1041,304,959,310,905,320,846,336,785,360,725,392,670,433,621,451,609,454,613,436,625,396,673,365,728,342,787,325,847,315,906,309,959,307,1041"/>
+<area shape="rect" id="Node000017" href="$class_p4_1_1_discover_functions_inlining.html" title=" " alt="" coords="441,635,655,660"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="302,1041,308,967,327,867,343,814,366,761,395,713,433,671,452,658,455,662,436,675,400,716,370,764,348,816,332,868,313,968,308,1041"/>
+<area shape="rect" id="Node000018" href="$class_p4_1_1_do_check_constants.html" title=" " alt="" coords="463,684,633,709"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="304,1041,312,976,333,889,350,843,372,798,399,756,433,720,462,703,465,708,436,724,403,759,376,800,355,845,338,890,318,977,309,1041"/>
+<area shape="rect" id="Node000019" href="$class_p4_1_1_do_check_core_methods.html" title="Check types for arguments of core.p4 methods." alt="" coords="453,733,643,759"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="306,1040,317,984,340,910,357,871,378,834,403,799,433,769,454,757,457,761,436,773,407,803,382,837,362,874,345,912,322,985,311,1041"/>
+<area shape="rect" id="Node000020" href="$class_p4_1_1_do_constant_folding.html" title="statically evaluates many constant expressions." alt="" coords="463,783,633,808"/>
+<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="308,1040,323,992,347,932,384,870,407,843,433,818,462,803,464,808,436,823,410,846,388,874,352,934,328,994,313,1042"/>
+<area shape="rect" id="Node000021" href="$class_p4_1_1_do_default_arguments.html" title=" " alt="" coords="457,832,639,857"/>
+<area shape="poly" id="edge20_Node000001_Node000021" title=" " alt="" coords="312,1040,329,1002,355,955,390,907,433,868,458,855,460,860,436,872,394,911,359,958,334,1004,317,1043"/>
+<area shape="rect" id="Node000022" href="$class_p4_1_1_do_remove_exits.html" title=" " alt="" coords="473,881,623,907"/>
+<area shape="poly" id="edge21_Node000001_Node000022" title=" " alt="" coords="317,1041,363,978,396,945,433,917,471,901,473,906,436,922,399,949,367,982,321,1044"/>
+<area shape="rect" id="Node000023" href="$class_p4_1_1_do_simplify_control_flow.html" title="Replace complex control flow nodes with simpler ones where possible." alt="" coords="451,931,645,956"/>
+<area shape="poly" id="edge22_Node000001_Node000023" title=" " alt="" coords="326,1043,373,1004,402,983,434,966,469,954,471,959,436,971,405,988,376,1008,329,1047"/>
+<area shape="rect" id="Node000024" href="$class_p4_1_1_do_simplify_expressions.html" title="Convert expressions so that each expression contains at most one side effect." alt="" coords="451,980,645,1005"/>
+<area shape="poly" id="edge23_Node000001_Node000024" title=" " alt="" coords="346,1047,434,1015,482,1003,484,1008,435,1021,348,1052"/>
+<area shape="rect" id="Node000025" href="$class_p4_1_1_do_static_assert.html" title=" " alt="" coords="477,1029,619,1055"/>
+<area shape="poly" id="edge24_Node000001_Node000025" title=" " alt="" coords="400,1055,476,1047,477,1052,401,1060"/>
+<area shape="rect" id="Node000026" href="$class_p4_1_1_dontcare_args.html" title=" " alt="" coords="481,1079,615,1104"/>
+<area shape="poly" id="edge25_Node000001_Node000026" title=" " alt="" coords="401,1074,481,1082,480,1087,400,1079"/>
+<area shape="rect" id="Node000027" href="$class_p4_1_1_entry_priorities.html" title="Assigns priorities to table entries if they are not &#39;const&#39;." alt="" coords="479,1128,617,1153"/>
+<area shape="poly" id="edge26_Node000001_Node000027" title=" " alt="" coords="347,1083,435,1114,480,1125,479,1131,434,1119,346,1088"/>
+<area shape="rect" id="Node000028" href="$class_p4_1_1_find_action_parameters.html" title=" " alt="" coords="454,1177,642,1203"/>
+<area shape="poly" id="edge27_Node000001_Node000028" title=" " alt="" coords="329,1088,376,1127,405,1147,436,1164,467,1175,465,1180,434,1168,402,1151,373,1131,326,1092"/>
+<area shape="rect" id="Node000029" href="$class_p4_1_1_find_function_specializations.html" title=" " alt="" coords="435,1227,661,1252"/>
+<area shape="poly" id="edge28_Node000001_Node000029" title=" " alt="" coords="321,1090,367,1153,399,1186,436,1213,461,1224,458,1229,433,1218,396,1190,363,1156,317,1093"/>
+<area shape="rect" id="Node000030" href="$class_p4_1_1_find_global_action_uses.html" title=" " alt="" coords="454,1276,642,1301"/>
+<area shape="poly" id="edge29_Node000001_Node000030" title=" " alt="" coords="317,1092,334,1131,359,1177,394,1224,436,1262,457,1273,455,1278,433,1267,390,1227,355,1180,329,1133,312,1094"/>
+<area shape="rect" id="Node000031" href="$class_p4_1_1_find_repeated_action_uses.html" title=" " alt="" coords="444,1325,652,1351"/>
+<area shape="poly" id="edge30_Node000001_Node000031" title=" " alt="" coords="313,1092,327,1140,352,1200,388,1261,410,1288,436,1312,455,1323,453,1327,433,1316,406,1292,383,1264,347,1202,322,1142,308,1094"/>
+<area shape="rect" id="Node000032" href="$class_p4_1_1_find_specializations.html" title=" " alt="" coords="463,1375,633,1400"/>
+<area shape="poly" id="edge31_Node000001_Node000032" title=" " alt="" coords="311,1093,322,1150,345,1223,361,1261,382,1298,407,1332,436,1361,464,1376,461,1381,433,1365,403,1336,377,1301,357,1264,340,1225,317,1151,306,1094"/>
+<area shape="rect" id="Node000033" href="$class_p4_1_1_instantiate_direct_calls.html" title=" " alt="" coords="455,1424,641,1449"/>
+<area shape="poly" id="edge32_Node000001_Node000033" title=" " alt="" coords="309,1093,317,1158,338,1245,354,1290,376,1335,403,1375,436,1411,456,1423,453,1427,433,1415,399,1379,371,1337,350,1292,333,1246,312,1159,304,1094"/>
+<area shape="rect" id="Node000034" href="$class_p4_1_1_key_side_effect.html" title=" " alt="" coords="481,1473,615,1499"/>
+<area shape="poly" id="edge33_Node000001_Node000034" title=" " alt="" coords="308,1094,313,1167,331,1267,348,1319,370,1371,399,1419,436,1460,457,1473,481,1481,480,1486,455,1478,433,1464,395,1422,365,1374,343,1321,326,1268,308,1168,302,1094"/>
+<area shape="rect" id="Node000036" href="$class_p4_1_1_localize_actions.html" title=" " alt="" coords="475,1523,621,1548"/>
+<area shape="poly" id="edge35_Node000001_Node000036" title=" " alt="" coords="306,1094,309,1175,315,1229,325,1288,341,1348,364,1407,396,1462,436,1509,454,1521,475,1529,473,1534,452,1526,433,1513,391,1465,360,1410,336,1350,320,1289,310,1230,304,1176,301,1094"/>
+<area shape="rect" id="Node000037" href="$class_p4_1_1_move_initializers.html" title=" " alt="" coords="473,1572,623,1597"/>
+<area shape="poly" id="edge36_Node000001_Node000037" title=" " alt="" coords="311,1093,326,1196,352,1336,370,1407,390,1472,412,1524,437,1559,453,1571,473,1578,471,1583,451,1575,433,1563,407,1527,385,1474,365,1409,347,1338,320,1197,305,1094"/>
+<area shape="rect" id="Node000038" href="$class_p4_1_1_reads_writes.html" title="Computes the SetOfLocations read and written by an expression." alt="" coords="484,1621,612,1647"/>
+<area shape="poly" id="edge37_Node000001_Node000038" title=" " alt="" coords="310,1093,324,1205,349,1360,366,1439,387,1511,410,1569,437,1608,459,1623,485,1630,483,1635,456,1627,433,1612,405,1572,382,1513,361,1441,344,1361,318,1206,305,1094"/>
+<area shape="rect" id="Node000039" href="$class_p4_1_1_rename_symbols.html" title=" " alt="" coords="470,1671,626,1696"/>
+<area shape="poly" id="edge38_Node000001_Node000039" title=" " alt="" coords="309,1094,322,1215,346,1385,363,1472,384,1550,408,1615,422,1639,437,1657,452,1669,471,1676,469,1681,450,1674,433,1661,418,1642,404,1617,379,1552,358,1473,341,1386,316,1215,304,1094"/>
+<area shape="rect" id="Node000040" href="$class_p4_1_1_resolve_references.html" title=" " alt="" coords="463,1720,633,1745"/>
+<area shape="poly" id="edge39_Node000001_Node000040" title=" " alt="" coords="309,1094,320,1224,343,1409,360,1503,381,1590,406,1660,421,1687,436,1707,464,1724,461,1728,433,1711,416,1690,402,1662,376,1591,354,1504,337,1409,314,1224,304,1094"/>
+<area shape="rect" id="Node000041" href="$class_p4_1_1_substitute_parameters.html" title=" " alt="" coords="455,1769,641,1795"/>
+<area shape="poly" id="edge40_Node000001_Node000041" title=" " alt="" coords="308,1093,318,1232,339,1432,356,1535,378,1628,405,1705,420,1734,437,1756,456,1770,453,1774,433,1760,415,1737,400,1707,373,1630,351,1536,334,1432,312,1232,303,1094"/>
+<area shape="rect" id="Node000042" href="$class_p4_1_1_tables_in_actions.html" title=" " alt="" coords="475,1819,621,1844"/>
+<area shape="poly" id="edge41_Node000001_Node000042" title=" " alt="" coords="308,1094,316,1241,336,1456,353,1566,375,1668,403,1750,419,1782,437,1805,454,1818,475,1826,474,1831,452,1823,433,1809,414,1785,398,1752,370,1669,348,1567,331,1456,311,1241,303,1094"/>
+<area shape="rect" id="Node000043" href="$class_p4_1_1_tables_in_keys.html" title=" " alt="" coords="483,1868,613,1893"/>
+<area shape="poly" id="edge42_Node000001_Node000043" title=" " alt="" coords="308,1094,314,1249,333,1479,350,1598,372,1706,401,1795,418,1829,437,1855,458,1870,483,1877,482,1882,456,1874,433,1859,413,1832,396,1797,367,1708,344,1599,328,1480,309,1250,303,1094"/>
+<area shape="rect" id="Node000044" href="$class_p4_1_1_type_inference.html" title=" " alt="" coords="479,1917,617,1943"/>
+<area shape="poly" id="edge43_Node000001_Node000044" title=" " alt="" coords="308,1094,312,1258,319,1375,330,1502,346,1629,369,1745,399,1841,417,1877,437,1904,456,1918,480,1926,478,1931,454,1923,433,1908,412,1880,394,1843,364,1747,341,1630,325,1503,314,1376,307,1258,302,1094"/>
+<area shape="rect" id="Node000045" href="$class_p4_1_1_unroll_loops.html" title=" " alt="" coords="487,1967,609,1992"/>
+<area shape="poly" id="edge44_Node000001_Node000045" title=" " alt="" coords="307,1094,311,1267,317,1391,327,1526,343,1661,366,1785,380,1839,397,1886,416,1924,437,1953,460,1969,487,1977,486,1982,457,1974,433,1957,411,1927,392,1888,375,1840,361,1786,338,1662,322,1527,311,1391,305,1267,302,1094"/>
+<area shape="rect" id="Node000002" href="$class_visitor.html" title=" " alt="" coords="57,1029,121,1055"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,1045,220,1055,220,1060,134,1050"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="5,1079,172,1104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="186,1078,219,1074,220,1079,186,1083"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_actions_inliner.html" title=" " alt="" coords="755,20,889,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="636,30,754,30,754,35,636,35"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_functions_inliner.html" title=" " alt="" coords="747,99,897,124"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="659,109,747,109,747,114,659,114"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_general_inliner.html" title="Performs actual inlining work." alt="" coords="753,171,891,196"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="671,181,752,181,752,186,671,186"/>
+<area shape="rect" id="Node000035" href="$class_d_p_d_k_1_1_copy_match_keys_to_single_struct.html" title=" " alt="" coords="709,1466,935,1506"/>
+<area shape="poly" id="edge34_Node000034_Node000035" title=" " alt="" coords="629,1483,709,1483,709,1489,629,1489"/>
 </map>

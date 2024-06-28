@@ -1,9 +1,14 @@
 <map id="P4::ActionsInliner" name="P4::ActionsInliner">
-<area shape="rect" id="Node000001" title=" " alt="" coords="12,255,147,280"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_abstract_inliner.html" title=" " alt="" coords="5,152,153,207"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,220,82,254,77,254,77,220"/>
-<area shape="rect" id="Node000003" href="$class_transform.html" title=" " alt="" coords="36,79,123,104"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="82,118,82,152,77,152,77,118"/>
-<area shape="rect" id="Node000004" href="$class_visitor.html" title=" " alt="" coords="47,5,111,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="82,44,82,79,77,79,77,44"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="56,255,191,280"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_abstract_inliner.html" title=" " alt="" coords="49,152,197,207"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,220,126,254,121,254,121,220"/>
+<area shape="rect" id="Node000003" href="$class_transform.html" title=" " alt="" coords="5,79,92,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="70,113,103,150,99,154,66,116"/>
+<area shape="rect" id="Node000004" href="$class_visitor.html" title=" " alt="" coords="22,5,86,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="55,45,52,79,47,78,49,44"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="116,79,283,104"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="91,34,177,76,174,81,88,39"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="182,116,148,154,145,150,178,112"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="116,5,283,31"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="202,44,202,79,197,79,197,44"/>
 </map>

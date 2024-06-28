@@ -480,7 +480,6 @@ var hierarchy =
     [ "P4::ComplexValues", "class_p4_1_1_complex_values.html", null ],
     [ "P4::ComputeDefUse::loc_t", "struct_p4_1_1_compute_def_use_1_1loc__t.html", null ],
     [ "P4::ConstantFoldingPolicy", "class_p4_1_1_constant_folding_policy.html", null ],
-    [ "P4::ConstructorMap", "struct_p4_1_1_constructor_map.html", null ],
     [ "P4::ControlPlaneAPI::ActionRef", "namespace_p4_1_1_control_plane_a_p_i.html#struct_p4_1_1_control_plane_a_p_i_1_1_action_ref", null ],
     [ "P4::ControlPlaneAPI::ControllerType", "struct_p4_1_1_control_plane_a_p_i_1_1_controller_type.html", null ],
     [ "P4::ControlPlaneAPI::DefaultAction", "namespace_p4_1_1_control_plane_a_p_i.html#struct_p4_1_1_control_plane_a_p_i_1_1_default_action", null ],
@@ -572,9 +571,51 @@ var hierarchy =
     [ "P4::DeclarationLookup", "class_p4_1_1_declaration_lookup.html", [
       [ "P4::ReferenceMap", "class_p4_1_1_reference_map.html", null ],
       [ "P4::ResolutionContext", "class_p4_1_1_resolution_context.html", [
+        [ "P4::AbstractInliner< ActionsInlineList, AInlineWorkList >", "class_p4_1_1_abstract_inliner.html", [
+          [ "P4::ActionsInliner", "class_p4_1_1_actions_inliner.html", null ]
+        ] ],
+        [ "P4::AbstractInliner< FunctionsInlineList, FunctionsInlineWorkList >", "class_p4_1_1_abstract_inliner.html", [
+          [ "P4::FunctionsInliner", "class_p4_1_1_functions_inliner.html", null ]
+        ] ],
+        [ "P4::AbstractInliner< InlineList, InlineSummary >", "class_p4_1_1_abstract_inliner.html", [
+          [ "P4::GeneralInliner", "class_p4_1_1_general_inliner.html", null ]
+        ] ],
+        [ "P4::AbstractInliner< P4::InlineList, InlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
+        [ "P4::AbstractInliner< InlineList, InlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
         [ "P4::ComputeDefUse", "class_p4_1_1_compute_def_use.html", null ],
         [ "P4::ComputeDefUse::SetupJoinPoints", "class_p4_1_1_compute_def_use_1_1_setup_join_points.html", null ],
+        [ "P4::CreateStructInitializers", "class_p4_1_1_create_struct_initializers.html", null ],
+        [ "P4::Deprecated", "class_p4_1_1_deprecated.html", null ],
+        [ "P4::DiscoverActionsInlining", "class_p4_1_1_discover_actions_inlining.html", null ],
+        [ "P4::DiscoverFunctionsInlining", "class_p4_1_1_discover_functions_inlining.html", null ],
+        [ "P4::DoCheckConstants", "class_p4_1_1_do_check_constants.html", null ],
+        [ "P4::DoCheckCoreMethods", "class_p4_1_1_do_check_core_methods.html", null ],
+        [ "P4::DoConstantFolding", "class_p4_1_1_do_constant_folding.html", null ],
+        [ "P4::DoDefaultArguments", "class_p4_1_1_do_default_arguments.html", null ],
+        [ "P4::DoRemoveExits", "class_p4_1_1_do_remove_exits.html", null ],
+        [ "P4::DoSimplifyControlFlow", "class_p4_1_1_do_simplify_control_flow.html", null ],
+        [ "P4::DoSimplifyExpressions", "class_p4_1_1_do_simplify_expressions.html", null ],
+        [ "P4::DoStaticAssert", "class_p4_1_1_do_static_assert.html", null ],
+        [ "P4::DontcareArgs", "class_p4_1_1_dontcare_args.html", null ],
+        [ "P4::EntryPriorities", "class_p4_1_1_entry_priorities.html", null ],
+        [ "P4::FindActionParameters", "class_p4_1_1_find_action_parameters.html", null ],
+        [ "P4::FindFunctionSpecializations", "class_p4_1_1_find_function_specializations.html", null ],
+        [ "P4::FindGlobalActionUses", "class_p4_1_1_find_global_action_uses.html", null ],
+        [ "P4::FindRepeatedActionUses", "class_p4_1_1_find_repeated_action_uses.html", null ],
+        [ "P4::FindSpecializations", "class_p4_1_1_find_specializations.html", null ],
+        [ "P4::InstantiateDirectCalls", "class_p4_1_1_instantiate_direct_calls.html", null ],
+        [ "P4::KeySideEffect", "class_p4_1_1_key_side_effect.html", [
+          [ "DPDK::CopyMatchKeysToSingleStruct", "class_d_p_d_k_1_1_copy_match_keys_to_single_struct.html", null ]
+        ] ],
+        [ "P4::LocalizeActions", "class_p4_1_1_localize_actions.html", null ],
+        [ "P4::MoveInitializers", "class_p4_1_1_move_initializers.html", null ],
+        [ "P4::ReadsWrites", "class_p4_1_1_reads_writes.html", null ],
+        [ "P4::RenameSymbols", "class_p4_1_1_rename_symbols.html", null ],
         [ "P4::ResolveReferences", "class_p4_1_1_resolve_references.html", null ],
+        [ "P4::SubstituteParameters", "class_p4_1_1_substitute_parameters.html", null ],
+        [ "P4::TablesInActions", "class_p4_1_1_tables_in_actions.html", null ],
+        [ "P4::TablesInKeys", "class_p4_1_1_tables_in_keys.html", null ],
+        [ "P4::TypeInference", "class_p4_1_1_type_inference.html", null ],
         [ "P4::UnrollLoops", "class_p4_1_1_unroll_loops.html", null ]
       ] ]
     ] ],
@@ -1359,14 +1400,12 @@ var hierarchy =
           [ "P4::ConvertErrors", "class_p4_1_1_convert_errors.html", null ],
           [ "P4::DefaultArguments", "class_p4_1_1_default_arguments.html", null ],
           [ "P4::DefaultValues", "class_p4_1_1_default_values.html", null ],
-          [ "P4::Deprecated", "class_p4_1_1_deprecated.html", null ],
           [ "P4::EliminateInvalidHeaders", "class_p4_1_1_eliminate_invalid_headers.html", null ],
           [ "P4::EliminateNewtype", "class_p4_1_1_eliminate_newtype.html", null ],
           [ "P4::EliminateSerEnums", "class_p4_1_1_eliminate_ser_enums.html", null ],
           [ "P4::EliminateSwitch", "class_p4_1_1_eliminate_switch.html", null ],
           [ "P4::EliminateTuples", "class_p4_1_1_eliminate_tuples.html", null ],
           [ "P4::EliminateTypedef", "class_p4_1_1_eliminate_typedef.html", null ],
-          [ "P4::EntryPriorities", "class_p4_1_1_entry_priorities.html", null ],
           [ "P4::EvaluatorPass", "class_p4_1_1_evaluator_pass.html", null ],
           [ "P4::ExpandEmit", "class_p4_1_1_expand_emit.html", null ],
           [ "P4::ExpandLookahead", "class_p4_1_1_expand_lookahead.html", null ],
@@ -1380,11 +1419,9 @@ var hierarchy =
           [ "P4::InlineActions", "class_p4_1_1_inline_actions.html", null ],
           [ "P4::InlineFunctions", "class_p4_1_1_inline_functions.html", null ],
           [ "P4::InlinePass", "class_p4_1_1_inline_pass.html", null ],
-          [ "P4::InstantiateDirectCalls", "class_p4_1_1_instantiate_direct_calls.html", null ],
           [ "P4::LocalCopyPropagation", "class_p4_1_1_local_copy_propagation.html", null ],
           [ "P4::LocalizeAllActions", "class_p4_1_1_localize_all_actions.html", null ],
           [ "P4::MoveActionsToTables", "class_p4_1_1_move_actions_to_tables.html", null ],
-          [ "P4::MoveConstructors", "class_p4_1_1_move_constructors.html", null ],
           [ "P4::NestedStructs", "class_p4_1_1_nested_structs.html", null ],
           [ "P4::OrderArguments", "class_p4_1_1_order_arguments.html", null ],
           [ "P4::ParseAnnotationBodies", "class_p4_1_1_parse_annotation_bodies.html", null ],
@@ -1548,7 +1585,6 @@ var hierarchy =
         [ "InspectDpdkProgram", "class_inspect_dpdk_program.html", null ],
         [ "P4::AnalyzeParser", "class_p4_1_1_analyze_parser.html", null ],
         [ "P4::ApplyOptionsPragmas", "class_p4_1_1_apply_options_pragmas.html", null ],
-        [ "P4::CheckDeprecated", "class_p4_1_1_check_deprecated.html", null ],
         [ "P4::CheckExternInvocationCommon", "class_p4_1_1_check_extern_invocation_common.html", [
           [ "DPDK::CheckPNAExternInvocation", "class_d_p_d_k_1_1_check_p_n_a_extern_invocation.html", null ]
         ] ],
@@ -1561,6 +1597,7 @@ var hierarchy =
         [ "P4::ContainsType", "class_p4_1_1_contains_type.html", null ],
         [ "P4::ControlPlaneAPI::TypeSpecConverter", "class_p4_1_1_control_plane_a_p_i_1_1_type_spec_converter.html", null ],
         [ "P4::Coverage::CollectNodes", "class_p4_1_1_coverage_1_1_collect_nodes.html", null ],
+        [ "P4::Deprecated", "class_p4_1_1_deprecated.html", null ],
         [ "P4::DiscoverActionsInlining", "class_p4_1_1_discover_actions_inlining.html", null ],
         [ "P4::DiscoverFunctionsInlining", "class_p4_1_1_discover_functions_inlining.html", null ],
         [ "P4::DiscoverInlining", "class_p4_1_1_discover_inlining.html", null ],
@@ -1684,15 +1721,9 @@ var hierarchy =
       ] ],
       [ "PassManager", "class_pass_manager.html", null ],
       [ "Transform", "class_transform.html", [
-        [ "P4::AbstractInliner< ActionsInlineList, AInlineWorkList >", "class_p4_1_1_abstract_inliner.html", [
-          [ "P4::ActionsInliner", "class_p4_1_1_actions_inliner.html", null ]
-        ] ],
-        [ "P4::AbstractInliner< FunctionsInlineList, FunctionsInlineWorkList >", "class_p4_1_1_abstract_inliner.html", [
-          [ "P4::FunctionsInliner", "class_p4_1_1_functions_inliner.html", null ]
-        ] ],
-        [ "P4::AbstractInliner< InlineList, InlineSummary >", "class_p4_1_1_abstract_inliner.html", [
-          [ "P4::GeneralInliner", "class_p4_1_1_general_inliner.html", null ]
-        ] ],
+        [ "P4::AbstractInliner< ActionsInlineList, AInlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
+        [ "P4::AbstractInliner< FunctionsInlineList, FunctionsInlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
+        [ "P4::AbstractInliner< InlineList, InlineSummary >", "class_p4_1_1_abstract_inliner.html", null ],
         [ "P4::AbstractInliner< P4::InlineList, InlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
         [ "BMV2::ArithmeticFixup", "class_b_m_v2_1_1_arithmetic_fixup.html", null ],
         [ "BMV2::LowerExpressions", "class_b_m_v2_1_1_lower_expressions.html", null ],
@@ -1759,7 +1790,6 @@ var hierarchy =
         [ "P4::DoEliminateInvalidHeaders", "class_p4_1_1_do_eliminate_invalid_headers.html", null ],
         [ "P4::DoEliminateSerEnums", "class_p4_1_1_do_eliminate_ser_enums.html", null ],
         [ "P4::DoEliminateSwitch", "class_p4_1_1_do_eliminate_switch.html", null ],
-        [ "P4::DoEntryPriorities", "class_p4_1_1_do_entry_priorities.html", null ],
         [ "P4::DoExpandEmit", "class_p4_1_1_do_expand_emit.html", null ],
         [ "P4::DoExpandLookahead", "class_p4_1_1_do_expand_lookahead.html", null ],
         [ "P4::DoFlattenHeaderUnion", "class_p4_1_1_do_flatten_header_union.html", [
@@ -1767,7 +1797,6 @@ var hierarchy =
         ] ],
         [ "P4::DoGlobalCopyPropagation", "class_p4_1_1_do_global_copy_propagation.html", null ],
         [ "P4::DoHandleNoMatch", "class_p4_1_1_do_handle_no_match.html", null ],
-        [ "P4::DoInstantiateCalls", "class_p4_1_1_do_instantiate_calls.html", null ],
         [ "P4::DoLocalCopyPropagation", "class_p4_1_1_do_local_copy_propagation.html", null ],
         [ "P4::DoLocalCopyPropagation::ElimDead", "class_p4_1_1_do_local_copy_propagation_1_1_elim_dead.html", null ],
         [ "P4::DoLocalCopyPropagation::RewriteTableKeys", "class_p4_1_1_do_local_copy_propagation_1_1_rewrite_table_keys.html", null ],
@@ -1803,16 +1832,17 @@ var hierarchy =
         [ "P4::DontcareArgs", "class_p4_1_1_dontcare_args.html", null ],
         [ "P4::DuplicateActions", "class_p4_1_1_duplicate_actions.html", null ],
         [ "P4::EliminateSubparserCalls", "class_p4_1_1_eliminate_subparser_calls.html", null ],
+        [ "P4::EntryPriorities", "class_p4_1_1_entry_priorities.html", null ],
         [ "P4::FillEnumMap", "class_p4_1_1_fill_enum_map.html", null ],
         [ "P4::HSIndexContretizer", "class_p4_1_1_h_s_index_contretizer.html", null ],
         [ "P4::HSIndexTransform", "class_p4_1_1_h_s_index_transform.html", null ],
         [ "P4::HandleValidityHeaderUnion", "class_p4_1_1_handle_validity_header_union.html", null ],
         [ "P4::HierarchicalNames", "class_p4_1_1_hierarchical_names.html", null ],
-        [ "P4::KeySideEffect", "class_p4_1_1_key_side_effect.html", [
-          [ "DPDK::CopyMatchKeysToSingleStruct", "class_d_p_d_k_1_1_copy_match_keys_to_single_struct.html", null ]
-        ] ],
+        [ "P4::InstantiateDirectCalls", "class_p4_1_1_instantiate_direct_calls.html", null ],
+        [ "P4::KeySideEffect", "class_p4_1_1_key_side_effect.html", null ],
         [ "P4::LocalizeActions", "class_p4_1_1_localize_actions.html", null ],
         [ "P4::MissingIdAssigner", "class_p4_1_1_missing_id_assigner.html", null ],
+        [ "P4::MoveConstructors", "class_p4_1_1_move_constructors.html", null ],
         [ "P4::MoveDeclarations", "class_p4_1_1_move_declarations.html", null ],
         [ "P4::MoveInitializers", "class_p4_1_1_move_initializers.html", null ],
         [ "P4::ParserStructureImpl::ParserStateRewriter", "class_p4_1_1_parser_structure_impl_1_1_parser_state_rewriter.html", null ],

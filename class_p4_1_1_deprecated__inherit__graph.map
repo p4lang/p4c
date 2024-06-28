@@ -1,10 +1,12 @@
 <map id="P4::Deprecated" name="P4::Deprecated">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,127,251"/>
-<area shape="rect" id="Node000002" href="$class_pass_manager.html" title=" " alt="" coords="12,152,120,177"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="69,191,69,225,63,225,63,191"/>
-<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="34,5,98,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="61,44,54,79,56,119,64,151,59,153,51,119,49,78,56,43"/>
-<area shape="rect" id="Node000004" href="$class_backtrack.html" title=" " alt="" coords="64,79,151,104"/>
-<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="82,41,103,77,98,80,77,44"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="96,117,75,153,70,151,91,115"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="61,152,182,177"/>
+<area shape="rect" id="Node000002" href="$class_inspector.html" title=" " alt="" coords="5,79,88,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="70,111,111,150,107,154,67,115"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="20,5,84,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="53,45,50,79,45,78,47,44"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="113,79,279,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="88,34,174,76,171,81,86,39"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="176,115,135,154,132,150,172,111"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="113,5,279,31"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="199,44,199,79,193,79,193,44"/>
 </map>

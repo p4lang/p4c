@@ -133,9 +133,11 @@ Inheritance diagram for P4::DoRemoveReturns:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a29898c9d97d1686d432f6d93e916cdca" id="r_a29898c9d97d1686d432f6d93e916cdca"><td class="memItemLeft" align="right" valign="top"><a id="a29898c9d97d1686d432f6d93e916cdca" name="a29898c9d97d1686d432f6d93e916cdca"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>DoRemoveReturns</b> (<a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="el" href="classcstring.html">cstring</a> varName=&quot;hasReturned&quot;_cs, <a class="el" href="classcstring.html">cstring</a> retValName=&quot;retval&quot;_cs)</td></tr>
-<tr class="separator:a29898c9d97d1686d432f6d93e916cdca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a071acfaa247f1faff950980ae70c3f9a" id="r_a071acfaa247f1faff950980ae70c3f9a"><td class="memItemLeft" align="right" valign="top"><a id="a071acfaa247f1faff950980ae70c3f9a" name="a071acfaa247f1faff950980ae70c3f9a"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>DoRemoveReturns</b> (<a class="el" href="classcstring.html">cstring</a> varName=&quot;hasReturned&quot;_cs, <a class="el" href="classcstring.html">cstring</a> retValName=&quot;retval&quot;_cs)</td></tr>
+<tr class="separator:a071acfaa247f1faff950980ae70c3f9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4759e7935094d08fa7a82ef0b351ca61" id="r_a4759e7935094d08fa7a82ef0b351ca61"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_visitor_1_1profile__t.html">profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4759e7935094d08fa7a82ef0b351ca61">init_apply</a> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *node) override</td></tr>
+<tr class="separator:a4759e7935094d08fa7a82ef0b351ca61"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3e9d34402ea7c2e5b24e96bea57a64a" id="r_ac3e9d34402ea7c2e5b24e96bea57a64a"><td class="memItemLeft" align="right" valign="top"><a id="ac3e9d34402ea7c2e5b24e96bea57a64a" name="ac3e9d34402ea7c2e5b24e96bea57a64a"></a>
 const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (IR::LoopStatement *loop) override</td></tr>
 <tr class="separator:ac3e9d34402ea7c2e5b24e96bea57a64a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -383,9 +385,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>visit_children</b> (c
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a36a1812f0ebc04a51e977bcd6865e096" id="r_a36a1812f0ebc04a51e977bcd6865e096"><td class="memItemLeft" align="right" valign="top"><a id="a36a1812f0ebc04a51e977bcd6865e096" name="a36a1812f0ebc04a51e977bcd6865e096"></a>
-<a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>refMap</b></td></tr>
-<tr class="separator:a36a1812f0ebc04a51e977bcd6865e096"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a415e8f31df4a391080d1d24fb79ab438" id="r_a415e8f31df4a391080d1d24fb79ab438"><td class="memItemLeft" align="right" valign="top"><a id="a415e8f31df4a391080d1d24fb79ab438" name="a415e8f31df4a391080d1d24fb79ab438"></a>
+<a class="el" href="class_p4_1_1_minimal_name_generator.html">MinimalNameGenerator</a>&#160;</td><td class="memItemRight" valign="bottom"><b>nameGen</b></td></tr>
+<tr class="separator:a415e8f31df4a391080d1d24fb79ab438"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a00ca93985edc6fc650dd03b54d6c78c8" id="r_a00ca93985edc6fc650dd03b54d6c78c8"><td class="memItemLeft" align="right" valign="top"><a id="a00ca93985edc6fc650dd03b54d6c78c8" name="a00ca93985edc6fc650dd03b54d6c78c8"></a>
 <a class="el" href="struct_i_r_1_1_i_d.html">IR::ID</a>&#160;</td><td class="memItemRight" valign="bottom"><b>returnedValue</b></td></tr>
 <tr class="separator:a00ca93985edc6fc650dd03b54d6c78c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -444,7 +446,35 @@ const <a class="el" href="class_visitor.html">Visitor</a> *&#160;</td><td class=
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This visitor replaces 'returns' by ifs: e.g. control c(inout bit x) { apply { if (x) return; x = !x; }} becomes: control c(inout bit x) { bool hasReturned; apply { hasReturned = false; if (x) hasReturned = true; if (!hasReturned) x = !x; }} </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a4759e7935094d08fa7a82ef0b351ca61" name="a4759e7935094d08fa7a82ef0b351ca61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4759e7935094d08fa7a82ef0b351ca61">&#9670;&#160;</a></span>init_apply()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_visitor_1_1profile__t.html">Visitor::profile_t</a> P4::DoRemoveReturns::init_apply </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *</td>          <td class="paramname"><span class="paramname"><em>node</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented from <a class="el" href="class_visitor.html">Visitor</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

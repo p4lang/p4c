@@ -1,9 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" title=" " alt="" coords="5,114,117,139"/>
-<area shape="rect" id="Node000001" href="$struct_i_r_1_1has__static__type__name_3_01_t_00_01std_1_1void__t_3_01decltype_07_t_1_1static__type__name_07_08_08_4_01_4.html" title=" " alt="" coords="208,5,369,75"/>
-<area shape="poly" id="edge1050_Node000000_Node000001" title=" " alt="" coords="107,106,164,84,207,68,209,73,166,89,109,111"/>
-<area shape="rect" id="Node000002" href="$struct_util_1_1has__to_string_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01db18fd97bde90a9bd53b0bfce41e6e9b.html" title=" " alt="" coords="165,99,412,154"/>
-<area shape="poly" id="edge1051_Node000000_Node000002" title=" " alt="" coords="131,124,165,124,165,129,131,129"/>
-<area shape="rect" id="Node000003" href="$structhas__dbprint_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01_4_07_08_8d058dfba8a3a311378325dce114a1ecb1.html" title=" " alt="" coords="189,178,388,262"/>
-<area shape="poly" id="edge1052_Node000000_Node000003" title=" " alt="" coords="107,142,190,177,188,182,105,147"/>
+<area shape="rect" id="Node000000" href="$struct_string_ref.html" title=" " alt="" coords="5,5,88,31"/>
 </map>
