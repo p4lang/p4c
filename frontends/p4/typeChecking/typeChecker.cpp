@@ -18,6 +18,7 @@ limitations under the License.
 
 #include <boost/format.hpp>
 
+#include "absl/container/flat_hash_map.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -3486,7 +3487,7 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
     auto params = new IR::ParameterList;
 
     // keep track of parameters that have not been matched yet
-    std::map<cstring, const IR::Parameter *> left;
+    absl::flat_hash_map<cstring, const IR::Parameter *> left;
     for (auto p : baseType->parameters->parameters) left.emplace(p->name, p);
 
     auto paramIt = baseType->parameters->parameters.begin();
@@ -3513,10 +3514,10 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
         }
 
         LOG2("Action parameter " << dbp(param));
-        auto leftIt = left.find(param->name.name);
-        // This should have been checked by the CheckNamedArgs pass.
-        BUG_CHECK(leftIt != left.end(), "%1%: Duplicate argument name?", param->name);
-        left.erase(leftIt);
+        if (!left.erase(param->name)) {
+            // This should have been checked by the CheckNamedArgs pass.
+            BUG("%1%: Duplicate argument name?", param->name);
+        }
 
         auto paramType = getType(param);
         auto argType = getType(arg);
@@ -4082,7 +4083,7 @@ const IR::Node *TypeInference::postorder(IR::SwitchStatement *stat) {
 
     if (auto ae = type->to<IR::Type_ActionEnum>()) {
         // switch (table.apply(...))
-        std::map<cstring, const IR::Node *> foundLabels;
+        absl::flat_hash_map<cstring, const IR::Node *> foundLabels;
         const IR::Node *foundDefault = nullptr;
         for (auto c : stat->cases) {
             if (c->label->is<IR::DefaultExpression>()) {
@@ -4092,10 +4093,9 @@ const IR::Node *TypeInference::postorder(IR::SwitchStatement *stat) {
                 continue;
             } else if (auto pe = c->label->to<IR::PathExpression>()) {
                 cstring label = pe->path->name.name;
-                auto it = foundLabels.find(label);
-                if (it != foundLabels.end())
+                auto [it, inserted] = foundLabels.emplace(label, c->label);
+                if (!inserted)
                     typeError("%1%: 'switch' label duplicates %2%", c->label, it->second);
-                foundLabels.emplace(label, c->label);
                 if (!ae->contains(label))
                     typeError("%1% is not a legal label (action name)", c->label);
             } else {
