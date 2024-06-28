@@ -435,6 +435,7 @@ class AttribLocals : ISimpleNamespace {
     Util::Enumerator<IDeclaration> *getDeclarations() const override {
         return locals.valueEnumerator()->as<const IDeclaration *>(); }
     IDeclaration getDeclByName(cstring name) const override { return locals[name]; }
+    IDeclaration getDeclByName(std::string_view name) const override { return locals[cstring(name)]; }
 }
 
 class Attribute : Declaration {

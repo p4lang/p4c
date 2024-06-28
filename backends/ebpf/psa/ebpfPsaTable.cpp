@@ -395,7 +395,7 @@ cstring ActionTranslationVisitorPSA::getParamName(const IR::PathExpression *expr
 EBPFTablePSA::EBPFTablePSA(const EBPFProgram *program, const IR::TableBlock *table,
                            CodeGenInspector *codeGen)
     : EBPFTable(program, table, codeGen), implementation(nullptr) {
-    auto sizeProperty = table->container->properties->getProperty("size"_cs);
+    auto sizeProperty = table->container->properties->getProperty("size");
     if (keyGenerator == nullptr && sizeProperty != nullptr) {
         ::warning(ErrorType::WARN_IGNORE_PROPERTY,
                   "%1%: property ignored because table does not have a key", sizeProperty);
@@ -459,7 +459,7 @@ void EBPFTablePSA::initImplementation() {
                 "%1%: implementation not found, ActionSelector is required",
                 selectorKey->matchType);
     }
-    auto emptyGroupAction = table->container->properties->getProperty("psa_empty_group_action"_cs);
+    auto emptyGroupAction = table->container->properties->getProperty("psa_empty_group_action");
     if (!hasActionSelector && emptyGroupAction != nullptr) {
         ::warning(ErrorType::WARN_UNUSED, "%1%: unused property (ActionSelector not provided)",
                   emptyGroupAction);

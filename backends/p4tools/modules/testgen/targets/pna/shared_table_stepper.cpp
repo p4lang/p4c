@@ -251,7 +251,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
 }
 
 bool SharedPnaTableStepper::checkForActionProfile() {
-    const auto *impl = table->properties->getProperty("implementation"_cs);
+    const auto *impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
     }
@@ -293,7 +293,7 @@ bool SharedPnaTableStepper::checkForActionProfile() {
 }
 
 bool SharedPnaTableStepper::checkForActionSelector() {
-    const auto *impl = table->properties->getProperty("implementation"_cs);
+    const auto *impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
     }
