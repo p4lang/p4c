@@ -1,0 +1,76 @@
+.card-container {
+  display: flex;
+  gap: 2rem;
+  margin: 40px 0;
+}
+
+.card-item {
+  box-shadow: 0 4px 8px rgb(169, 213, 112);
+  transition: box-shadow 0.3s;
+  border-radius: 10px;
+  flex: 1 1 45%;
+  padding: 16px;
+}
+
+.card-item:hover {
+  box-shadow: 0 8px 16px rgb(114, 86, 185);
+}
+
+.card-content {
+  padding: 20px 16px;
+}
+
+.card-container::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.card-item a {
+  text-decoration: none;
+}
+
+.card-content a.hidden-link {
+  visibility: hidden;
+}
+
+.card-content a.hidden-link svg {
+  display: none;
+}
+
+.card-item h2 {
+  color: var(--page-foreground);
+}
+
+.card-item p {
+  font-size: 0.9rem;
+  color: var(--page-foreground);
+  line-height: 1.6;
+  margin-top: 1em;
+}
+
+.command-section {
+  padding-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.command-section .fragment {
+  padding: 0 3em;
+  margin: 0;
+}
+
+.command-section .fragment .line {
+  text-align: center;
+}
+
+.card-content svg {
+  height: 80px;
+  width: 80px;
+}
+
+.card-content svg path {
+  stroke: var(--page-foreground-color);
+  fill: var(--page-background-color);
+  /* stroke-width: 1.5; */
+}
