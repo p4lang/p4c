@@ -19,6 +19,7 @@ limitations under the License.
 #include <boost/format.hpp>
 
 #include "frontends/common/constantFolding.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
@@ -36,14 +37,13 @@ namespace P4 {
 
 namespace {
 // Used to set the type of Constants after type inference
-class ConstantTypeSubstitution : public Transform {
+class ConstantTypeSubstitution : public Transform, ResolutionContext {
     TypeVariableSubstitution *subst;
     TypeMap *typeMap;
     TypeInference *tc;
 
  public:
-    ConstantTypeSubstitution(TypeVariableSubstitution *subst, ReferenceMap *, TypeMap *typeMap,
-                             TypeInference *tc)
+    ConstantTypeSubstitution(TypeVariableSubstitution *subst, TypeMap *typeMap, TypeInference *tc)
         : subst(subst), typeMap(typeMap), tc(tc) {
         CHECK_NULL(subst);
         CHECK_NULL(typeMap);
@@ -71,38 +71,42 @@ class ConstantTypeSubstitution : public Transform {
         return cst;
     }
 
-    const IR::Expression *convert(const IR::Expression *expr) {
-        auto result = expr->apply(*this)->to<IR::Expression>();
-        if (result != expr && (::errorCount() == 0)) tc->learn(result, this);
+    const IR::Expression *convert(const IR::Expression *expr, const Visitor::Context *ctxt) {
+        auto result = expr->apply(*this, ctxt)->to<IR::Expression>();
+        if (result != expr && (::errorCount() == 0)) tc->learn(result, this, ctxt);
         return result;
     }
-    const IR::Vector<IR::Expression> *convert(const IR::Vector<IR::Expression> *vec) {
-        auto result = vec->apply(*this)->to<IR::Vector<IR::Expression>>();
-        if (result != vec) tc->learn(result, this);
+    const IR::Vector<IR::Expression> *convert(const IR::Vector<IR::Expression> *vec,
+                                              const Visitor::Context *ctxt) {
+        auto result = vec->apply(*this, ctxt)->to<IR::Vector<IR::Expression>>();
+        if (result != vec) tc->learn(result, this, ctxt);
         return result;
     }
-    const IR::Vector<IR::Argument> *convert(const IR::Vector<IR::Argument> *vec) {
-        auto result = vec->apply(*this)->to<IR::Vector<IR::Argument>>();
-        if (result != vec) tc->learn(result, this);
+    const IR::Vector<IR::Argument> *convert(const IR::Vector<IR::Argument> *vec,
+                                            const Visitor::Context *ctxt) {
+        auto result = vec->apply(*this, ctxt)->to<IR::Vector<IR::Argument>>();
+        if (result != vec) tc->learn(result, this, ctxt);
         return result;
     }
 };
 }  // namespace
 
 TypeChecking::TypeChecking(ReferenceMap *refMap, TypeMap *typeMap, bool updateExpressions) {
-    addPasses({new P4::ResolveReferences(refMap), new P4::TypeInference(refMap, typeMap, true),
+    addPasses({new P4::TypeInference(typeMap, /* readOnly */ true, /* checkArrays */ true,
+                                     /* errorOnNullDecls */ true),
                updateExpressions ? new ApplyTypesToExpressions(typeMap) : nullptr,
-               updateExpressions ? new P4::ResolveReferences(refMap) : nullptr});
+               refMap ? new P4::ResolveReferences(refMap) : nullptr});
     setStopOnError(true);
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-bool TypeInference::learn(const IR::Node *node, Visitor *caller) {
+bool TypeInference::learn(const IR::Node *node, Visitor *caller, const Visitor::Context *ctxt) {
     auto *learner = clone();
     learner->setCalledBy(caller);
+    learner->setName("TypeInference learner");
     unsigned previous = ::errorCount();
-    (void)node->apply(*learner);
+    (void)node->apply(*learner, ctxt);
     unsigned errCount = ::errorCount();
     bool result = errCount > previous;
     if (result) typeError("Error while analyzing %1%", node);
@@ -111,9 +115,9 @@ bool TypeInference::learn(const IR::Node *node, Visitor *caller) {
 
 const IR::Expression *TypeInference::constantFold(const IR::Expression *expression) {
     if (readOnly) return expression;
-    DoConstantFolding cf(refMap, typeMap, false);
-    auto result = expression->apply(cf);
-    learn(result, this);
+    DoConstantFolding cf(this, typeMap, false);
+    auto result = expression->apply(cf, getChildContext());
+    learn(result, this, getChildContext());
     LOG3("Folded " << expression << " into " << result);
     return result;
 }
@@ -131,34 +135,43 @@ const IR::Type *TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGener
 
     TypeVariableSubstitutionVisitor sv(&tvs, true);
     sv.setCalledBy(this);
-    auto cl = type->to<IR::Type>()->apply(sv);
+    auto cl = type->to<IR::Type>()->apply(sv, getChildContext());
     CHECK_NULL(cl);
-    learn(cl, this);
+    learn(cl, this, getChildContext());
     LOG3("Cloned for type variables " << type << " into " << cl);
     return cl->to<IR::Type>();
 }
 
-TypeInference::TypeInference(ReferenceMap *refMap, TypeMap *typeMap, bool readOnly,
-                             bool checkArrays)
-    : refMap(refMap),
-      typeMap(typeMap),
+TypeInference::TypeInference(TypeMap *typeMap, bool readOnly, bool checkArrays,
+                             bool errorOnNullDecls)
+    : typeMap(typeMap),
       initialNode(nullptr),
       readOnly(readOnly),
       checkArrays(checkArrays),
+      errorOnNullDecls(errorOnNullDecls),
       currentActionList(nullptr) {
     CHECK_NULL(typeMap);
-    CHECK_NULL(refMap);
     visitDagOnce = false;  // the done() method will take care of this
 }
 
+TypeInference::TypeInference(TypeMap *typeMap,
+                             std::shared_ptr<MinimalNameGenerator> inheritedNameGen)
+    : TypeInference(typeMap, true) {
+    nameGen = inheritedNameGen;
+}
+
 Visitor::profile_t TypeInference::init_apply(const IR::Node *node) {
+    auto rv = Transform::init_apply(node);
     if (node->is<IR::P4Program>()) {
-        LOG3("Reference map for type checker:" << std::endl << refMap);
         LOG2("TypeInference for " << dbp(node));
     }
     initialNode = node;
-    refMap->validateMap(node);
-    return Transform::init_apply(node);
+    if (!nameGen) {
+        nameGen = std::make_shared<MinimalNameGenerator>();
+        node->apply(*nameGen);
+    }
+
+    return rv;
 }
 
 void TypeInference::end_apply(const IR::Node *node) {
@@ -179,9 +192,7 @@ const IR::Node *TypeInference::apply_visitor(const IR::Node *orig, const char *n
     return transformed;
 }
 
-TypeInference *TypeInference::clone() const {
-    return new TypeInference(this->refMap, this->typeMap, true);
-}
+TypeInference *TypeInference::clone() const { return new TypeInference(this->typeMap, nameGen); }
 
 bool TypeInference::done() const {
     auto orig = getOriginal();
@@ -315,7 +326,8 @@ bool TypeInference::checkParameters(const IR::ParameterList *paramList, bool for
  * void _<int<32>>(int<32> data);
  */
 const IR::Type *TypeInference::specialize(const IR::IMayBeGenericType *type,
-                                          const IR::Vector<IR::Type> *arguments) {
+                                          const IR::Vector<IR::Type> *arguments,
+                                          const Visitor::Context *ctxt) {
     TypeVariableSubstitution *bindings = new TypeVariableSubstitution();
     bool success = bindings->setBindings(type->getNode(), type->getTypeParameters(), arguments);
     if (!success) return nullptr;
@@ -323,7 +335,7 @@ const IR::Type *TypeInference::specialize(const IR::IMayBeGenericType *type,
     LOG2("Translation map\n" << bindings);
 
     TypeVariableSubstitutionVisitor tsv(bindings);
-    const IR::Node *result = type->getNode()->apply(tsv);
+    const IR::Node *result = type->getNode()->apply(tsv, ctxt);
     if (result == nullptr) return nullptr;
 
     LOG2("Specialized " << type << "\n\tinto " << result);
@@ -564,12 +576,12 @@ const IR::Type *TypeInference::canonicalize(const IR::Type *type) {
             if (canon == nullptr) return nullptr;
             args->push_back(canon);
         }
-        auto specialized = specialize(gt, args);
+        auto specialized = specialize(gt, args, getChildContext());
 
         auto result =
             new IR::Type_SpecializedCanonical(type->srcInfo, baseCanon, args, specialized);
         LOG2("Scanning the specialized type");
-        learn(result, this);
+        learn(result, this, getChildContext());
         return result;
     } else {
         BUG_CHECK(::errorCount(), "Unexpected type %1%", dbp(type));
@@ -742,8 +754,8 @@ const IR::Expression *TypeInference::assignment(const IR::Node *errorPosition,
         // error already signalled
         return sourceExpression;
     if (!tvs->isIdentity()) {
-        ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-        sourceExpression = cts.convert(sourceExpression);  // sets type
+        ConstantTypeSubstitution cts(tvs, typeMap, this);
+        sourceExpression = cts.convert(sourceExpression, getChildContext());  // sets type
     }
     if (destType->is<IR::Type_SerEnum>() && !typeMap->equivalent(destType, initType) &&
         !initType->is<IR::Type_Any>()) {
@@ -980,7 +992,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::che
     }
 
     // will always be bound to Type_Void.
-    auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "<returned type>"_cs));
+    auto rettype = new IR::Type_Var(IR::ID(nameGen->newName("R"), "<returned type>"_cs));
     auto callType =
         new IR::Type_MethodCall(errorPosition->srcInfo, new IR::Vector<IR::Type>(), rettype, args);
     auto tvs = unify(errorPosition, methodType, callType,
@@ -992,9 +1004,9 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::che
     LOG2("Constructor type before specialization " << methodType << " with " << tvs);
     TypeVariableSubstitutionVisitor substVisitor(tvs);
     substVisitor.setCalledBy(this);
-    auto specMethodType = methodType->apply(substVisitor);
+    auto specMethodType = methodType->apply(substVisitor, getChildContext());
     LOG2("Constructor type after specialization " << specMethodType);
-    learn(specMethodType, this);
+    learn(specMethodType, this, getChildContext());
     auto canon = getType(specMethodType);
     if (canon == nullptr) return none;
 
@@ -1002,7 +1014,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::che
     BUG_CHECK(functionType != nullptr, "Method type is %1%", specMethodType);
     if (!functionType->is<IR::Type_Method>()) BUG("Unexpected type for function %1%", functionType);
 
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
     // Arguments may need to be cast, e.g., list expression to a
     // header type.
     auto paramIt = functionType->parameters->begin();
@@ -1027,7 +1039,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::che
             newExpr = assignment(arg, param->type, arg->expression);
         } else {
             // Insert casts for 'int' values.
-            newExpr = cts.convert(newExpr)->to<IR::Expression>();
+            newExpr = cts.convert(newExpr, getChildContext())->to<IR::Expression>();
         }
         if (::errorCount() > 0) return none;
         if (newExpr != arg->expression) {
@@ -1042,7 +1054,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::che
     if (changed) arguments = newArgs;
     auto objectType = new IR::Type_Extern(ext->srcInfo, ext->name, methodType->typeParameters,
                                           freshExtern->methods);
-    learn(objectType, this);
+    learn(objectType, this, getChildContext());
     return {objectType, arguments};
 }
 
@@ -1155,7 +1167,7 @@ const IR::Node *TypeInference::preorder(IR::Declaration_Instance *decl) {
             prune();
             return decl;
         }
-        learn(type, this);
+        learn(type, this, getChildContext());
         if (args != decl->arguments) decl->arguments = args;
         setType(decl, type);
         setType(orig, type);
@@ -1192,9 +1204,9 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::con
         }
         TypeVariableSubstitutionVisitor sv(&tvs, true);
         sv.setCalledBy(this);
-        constructor = constructor->apply(sv)->to<IR::Type_Method>();
+        constructor = constructor->apply(sv, getChildContext())->to<IR::Type_Method>();
         CHECK_NULL(constructor);
-        learn(constructor, this);
+        learn(constructor, this, getChildContext());
         LOG3("Cloned constructor arguments " << constructor);
     }
 
@@ -1216,7 +1228,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::con
         auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType, aarg);
         args->push_back(argInfo);
     }
-    auto rettype = new IR::Type_Var(IR::ID(refMap->newName("<any>")));
+    auto rettype = new IR::Type_Var(IR::ID(nameGen->newName("<any>")));
     // There are never type arguments at this point; if they exist, they have been folded
     // into the constructor by type specialization.
     auto callType =
@@ -1242,8 +1254,8 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::con
     }
     addSubstitutions(dontCares);
 
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-    auto newArgs = cts.convert(constructorArguments);
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
+    auto newArgs = cts.convert(constructorArguments, getChildContext());
 
     auto returnType = tvs->lookup(rettype);
     BUG_CHECK(returnType != nullptr, "Cannot infer constructor result type %1%", node);
@@ -1304,7 +1316,7 @@ const IR::Type *TypeInference::setTypeType(const IR::Type *type, bool learn) {
     if (canon != nullptr) {
         // Learn the new type
         if (canon != typeToCanonicalize && learn) {
-            bool errs = this->learn(canon, this);
+            bool errs = this->learn(canon, this, getChildContext());
             if (errs) return nullptr;
         }
         auto tt = new IR::Type_Type(canon);
@@ -1418,7 +1430,11 @@ const IR::Node *TypeInference::postorder(IR::Type_Name *typeName) {
         auto t = IR::Type_Dontcare::get();
         type = new IR::Type_Type(t);
     } else {
-        auto decl = refMap->getDeclaration(typeName->path, true);
+        auto decl = getDeclaration(typeName->path, !errorOnNullDecls);
+        if (errorOnNullDecls && decl == nullptr) {
+            typeError("%1%: Cannot resolve type", typeName);
+            return typeName;
+        }
         // Check for references of a control or parser within itself.
         auto ctrl = findContext<IR::P4Control>();
         if (ctrl != nullptr && ctrl->name == decl->getName()) {
@@ -1586,8 +1602,8 @@ const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
         return member;
     if (tvs->isIdentity()) return member;
 
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-    member->value = cts.convert(member->value);  // sets type
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
+    member->value = cts.convert(member->value, getChildContext());  // sets type
     if (!typeMap->getType(member)) setType(member, getTypeType(serEnum));
     return member;
 }
@@ -1598,7 +1614,7 @@ const IR::Node *TypeInference::postorder(IR::P4ValueSet *decl) {
     auto canon = canonicalize(decl->elementType);
     if (canon != nullptr) {
         if (canon != decl->elementType) {
-            bool errs = learn(canon, this);
+            bool errs = learn(canon, this, getChildContext());
             if (errs) return nullptr;
         }
         if (!canon->is<IR::Type_Newtype>() && !canon->is<IR::Type_Bits>() &&
@@ -1888,9 +1904,9 @@ bool TypeInference::compare(const IR::Node *errorPosition, const IR::Type *ltype
         auto tvs = unify(errorPosition, ltype, rtype);
         if (tvs == nullptr) return false;
         if (!tvs->isIdentity()) {
-            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-            compare->left = cts.convert(compare->left);
-            compare->right = cts.convert(compare->right);
+            ConstantTypeSubstitution cts(tvs, typeMap, this);
+            compare->left = cts.convert(compare->left, getChildContext());
+            compare->right = cts.convert(compare->right, getChildContext());
         }
         defined = true;
     } else if (auto se = rtype->to<IR::Type_SerEnum>()) {
@@ -1917,9 +1933,9 @@ bool TypeInference::compare(const IR::Node *errorPosition, const IR::Type *ltype
             }
             if (tvs == nullptr) return false;
             if (!tvs->isIdentity()) {
-                ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-                compare->left = cts.convert(compare->left);
-                compare->right = cts.convert(compare->right);
+                ConstantTypeSubstitution cts(tvs, typeMap, this);
+                compare->left = cts.convert(compare->left, getChildContext());
+                compare->right = cts.convert(compare->right, getChildContext());
             }
 
             if (ls != nullptr) {
@@ -1959,9 +1975,9 @@ bool TypeInference::compare(const IR::Node *errorPosition, const IR::Type *ltype
             auto tvs = unify(errorPosition, ltype, rtype);
             if (tvs == nullptr) return false;
             if (!tvs->isIdentity()) {
-                ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-                compare->left = cts.convert(compare->left);
-                compare->right = cts.convert(compare->right);
+                ConstantTypeSubstitution cts(tvs, typeMap, this);
+                compare->left = cts.convert(compare->left, getChildContext());
+                compare->right = cts.convert(compare->right, getChildContext());
             }
             defined = true;
         }
@@ -2208,8 +2224,8 @@ const IR::Node *TypeInference::postorder(IR::Entry *entry) {
                   "Table entry has type '%1%' which is not the expected type '%2%'",
                   {keyTuple, entryKeyType});
     if (tvs == nullptr) return entry;
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-    auto ks = cts.convert(keyset);
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
+    auto ks = cts.convert(keyset, getChildContext());
     if (::errorCount() > 0) return entry;
 
     if (ks != keyset)
@@ -2309,8 +2325,8 @@ const IR::Node *TypeInference::postorder(IR::P4ListExpression *expression) {
                          {type, elementType});
         if (tvs == nullptr) return expression;
         if (!tvs->isIdentity()) {
-            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-            auto converted = cts.convert(c);
+            ConstantTypeSubstitution cts(tvs, typeMap, this);
+            auto converted = cts.convert(c, getChildContext());
             vec->push_back(converted);
             changed = changed || converted != c;
         } else {
@@ -2352,8 +2368,8 @@ const IR::Node *TypeInference::postorder(IR::HeaderStackExpression *expression) 
                              {type, elementType});
             if (tvs == nullptr) return expression;
             if (!tvs->isIdentity()) {
-                ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-                auto converted = cts.convert(c);
+                ConstantTypeSubstitution cts(tvs, typeMap, this);
+                auto converted = cts.convert(c, getChildContext());
                 vec->push_back(converted);
                 changed = true;
             } else {
@@ -2403,8 +2419,8 @@ const IR::Node *TypeInference::postorder(IR::StructExpression *expression) {
                          {structType, desired});
         if (tvs == nullptr) return expression;
         if (!tvs->isIdentity()) {
-            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-            result = cts.convert(expression);
+            ConstantTypeSubstitution cts(tvs, typeMap, this);
+            result = cts.convert(expression, getChildContext());
         }
         structType = desired;
     }
@@ -2987,8 +3003,8 @@ const IR::Node *TypeInference::postorder(IR::Cast *expression) {
         if (tvs == nullptr) return expression;
         const IR::Expression *rhs = expression->expr;
         if (!tvs->isIdentity()) {
-            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-            rhs = cts.convert(expression->expr);  // sets type
+            ConstantTypeSubstitution cts(tvs, typeMap, this);
+            rhs = cts.convert(expression->expr, getChildContext());  // sets type
         }
         if (rhs != expression->expr) {
             // if we are here we have performed a substitution on the rhs
@@ -3010,7 +3026,11 @@ const IR::Node *TypeInference::postorder(IR::Cast *expression) {
 
 const IR::Node *TypeInference::postorder(IR::PathExpression *expression) {
     if (done()) return expression;
-    auto decl = refMap->getDeclaration(expression->path, true);
+    auto decl = getDeclaration(expression->path, !errorOnNullDecls);
+    if (errorOnNullDecls && decl == nullptr) {
+        typeError("%1%: Cannot resolve declaration", expression);
+        return expression;
+    }
     const IR::Type *type = nullptr;
     if (auto tbl = decl->to<IR::P4Table>()) {
         if (auto current = findContext<IR::P4Table>()) {
@@ -3199,9 +3219,9 @@ const IR::Node *TypeInference::postorder(IR::Mux *expression) {
                      {secondType, thirdType});
     if (tvs != nullptr) {
         if (!tvs->isIdentity()) {
-            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-            auto e1 = cts.convert(expression->e1);
-            auto e2 = cts.convert(expression->e2);
+            ConstantTypeSubstitution cts(tvs, typeMap, this);
+            auto e1 = cts.convert(expression->e1, getChildContext());
+            auto e2 = cts.convert(expression->e2, getChildContext());
             if (::errorCount() > 0) return expression;
             expression->e1 = e1;
             expression->e2 = e2;
@@ -3341,7 +3361,7 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
         if (!canon) return expression;
         methodType = canon->to<IR::Type_Method>();
         if (methodType == nullptr) return expression;
-        learn(methodType, this);
+        learn(methodType, this, getChildContext());
         setType(getOriginal(), methodType);
         setType(expression, methodType);
         return expression;
@@ -3569,8 +3589,9 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
     if (tvs == nullptr || errorCount() > 0) return actionCall;
     addSubstitutions(tvs);
 
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-    actionCall = cts.convert(actionCall)->to<IR::MethodCallExpression>();  // cast arguments
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
+    actionCall = cts.convert(actionCall, getChildContext())
+                     ->to<IR::MethodCallExpression>();  // cast arguments
     if (::errorCount() > 0) return actionCall;
 
     LOG2("Converted action " << actionCall);
@@ -3701,7 +3722,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
 
         // We build a type for the callExpression and unify it with the method expression
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
-        auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "<returned type>"_cs));
+        auto rettype = new IR::Type_Var(IR::ID(nameGen->newName("R"), "<returned type>"_cs));
         auto args = new IR::Vector<IR::ArgumentInfo>();
         bool constArgs = true;
         for (auto aarg : *expression->arguments) {
@@ -3747,7 +3768,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
         substVisitor.setCalledBy(this);
         auto specMethodType = methodType->apply(substVisitor);
         LOG2("Method type after specialization " << specMethodType);
-        learn(specMethodType, this);
+        learn(specMethodType, this, getChildContext());
 
         auto canon = getType(specMethodType);
         if (canon == nullptr) return expression;
@@ -3765,7 +3786,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
         }
         // The return type may also contain type variables
         returnType = returnType->apply(substVisitor)->to<IR::Type>();
-        learn(returnType, this);
+        learn(returnType, this, getChildContext());
         if (returnType->is<IR::Type_Control>() || returnType->is<IR::Type_Parser>() ||
             returnType->is<IR::P4Parser>() || returnType->is<IR::P4Control>() ||
             returnType->is<IR::Type_Package>() ||
@@ -3779,7 +3800,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
         setType(getOriginal(), returnType);
         setType(expression, returnType);
 
-        ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+        ConstantTypeSubstitution cts(tvs, typeMap, this);
         auto result = expression;
         // Arguments may need to be cast, e.g., list expression to a
         // header type.
@@ -3817,7 +3838,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
                 newExpr = assignment(arg, param->type, arg->expression);
             } else {
                 // Insert casts for 'int' values.
-                newExpr = cts.convert(newExpr)->to<IR::Expression>();
+                newExpr = cts.convert(newExpr, getChildContext())->to<IR::Expression>();
             }
             if (::errorCount() > 0) return expression;
             if (newExpr != arg->expression) {
@@ -3835,7 +3856,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
                                                   result->typeArguments, newArgs);
         setType(result, returnType);
 
-        auto mi = MethodInstance::resolve(result, refMap, typeMap, nullptr, true);
+        auto mi = MethodInstance::resolve(result, this, typeMap, getChildContext(), true);
         if (mi->isApply() && findContext<IR::P4Action>()) {
             typeError("%1%: apply cannot be called from actions", expression);
             return expression;
@@ -3940,8 +3961,8 @@ const IR::SelectCase *TypeInference::matchCase(const IR::SelectExpression *selec
         "'match' case label '%1%' has type '%2%' which does not match the expected type '%3%'",
         {selectCase->keyset, caseType, useSelType});
     if (tvs == nullptr) return nullptr;
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-    auto ks = cts.convert(selectCase->keyset);
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
+    auto ks = cts.convert(selectCase->keyset, getChildContext());
     if (::errorCount() > 0) return selectCase;
 
     if (ks != selectCase->keyset)
@@ -4250,7 +4271,12 @@ const IR::ActionListElement *TypeInference::validateActionInitializer(
     auto method = call->method;
     if (!method->is<IR::PathExpression>()) BUG("%1%: unexpected expression", method);
     auto pe = method->to<IR::PathExpression>();
-    auto decl = refMap->getDeclaration(pe->path, true);
+    auto decl = getDeclaration(pe->path, !errorOnNullDecls);
+    if (errorOnNullDecls && decl == nullptr) {
+        typeError("%1%: Cannot resolve declaration", pe);
+        return nullptr;
+    }
+
     auto ale = al->actionList.getDeclaration(decl->getName());
     if (ale == nullptr) {
         typeError("%1% not present in action list", call);
@@ -4260,7 +4286,7 @@ const IR::ActionListElement *TypeInference::validateActionInitializer(
     BUG_CHECK(ale->is<IR::ActionListElement>(), "%1%: expected an ActionListElement", ale);
     auto elem = ale->to<IR::ActionListElement>();
     auto entrypath = elem->getPath();
-    auto entrydecl = refMap->getDeclaration(entrypath, true);
+    auto entrydecl = getDeclaration(entrypath, true);
     if (entrydecl != decl) {
         typeError("%1% and %2% refer to different actions", actionCall, elem);
         return nullptr;
@@ -4282,9 +4308,10 @@ const IR::ActionListElement *TypeInference::validateActionInitializer(
         return nullptr;
     }
 
-    SameExpression se(refMap, typeMap);
-    auto callInstance = MethodInstance::resolve(call, refMap, typeMap, nullptr, true);
-    auto listInstance = MethodInstance::resolve(actionListCall, refMap, typeMap, nullptr, true);
+    SameExpression se(this, typeMap);
+    auto callInstance = MethodInstance::resolve(call, this, typeMap, getChildContext(), true);
+    auto listInstance =
+        MethodInstance::resolve(actionListCall, this, typeMap, getChildContext(), true);
 
     for (auto param : *listInstance->substitution.getParametersInArgumentOrder()) {
         auto aa = listInstance->substitution.lookup(param);

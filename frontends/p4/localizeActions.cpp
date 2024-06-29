@@ -52,13 +52,20 @@ const IR::Node *TagGlobalActions::preorder(IR::P4Action *action) {
     return action;
 }
 
+Visitor::profile_t FindGlobalActionUses::init_apply(const IR::Node *node) {
+    auto rv = Inspector::init_apply(node);
+    node->apply(nameGen);
+
+    return rv;
+}
+
 bool FindGlobalActionUses::preorder(const IR::P4Action *action) {
     if (findContext<IR::P4Control>() == nullptr) globalActions.emplace(action);
     return false;
 }
 
 bool FindGlobalActionUses::preorder(const IR::PathExpression *path) {
-    auto decl = refMap->getDeclaration(path->path, true);
+    auto decl = getDeclaration(path->path, true);
     if (!decl->is<IR::P4Action>()) return false;
 
     auto action = decl->to<IR::P4Action>();
@@ -66,7 +73,7 @@ bool FindGlobalActionUses::preorder(const IR::PathExpression *path) {
     auto control = findContext<IR::P4Control>();
     if (control != nullptr) {
         if (repl->getReplacement(action, control) != nullptr) return false;
-        auto newName = refMap->newName(action->name.name.string_view());
+        auto newName = nameGen.newName(action->name.name.string_view());
         ParamCloner cloner;
         auto replBody = cloner.clone<IR::BlockStatement>(action->body);
         auto params = cloner.clone<IR::ParameterList>(action->parameters);
@@ -101,7 +108,7 @@ const IR::Node *LocalizeActions::postorder(IR::P4Control *control) {
 const IR::Node *LocalizeActions::postorder(IR::PathExpression *expression) {
     auto control = findOrigCtxt<IR::P4Control>();
     if (control == nullptr) return expression;
-    auto decl = refMap->getDeclaration(expression->path);
+    auto decl = getDeclaration(expression->path);
     if (!decl || !decl->is<IR::P4Action>()) return expression;
     auto action = decl->to<IR::P4Action>();
     auto replacement = repl->getReplacement(action, control);
@@ -113,8 +120,15 @@ const IR::Node *LocalizeActions::postorder(IR::PathExpression *expression) {
     return expression;
 }
 
+Visitor::profile_t FindRepeatedActionUses::init_apply(const IR::Node *node) {
+    auto rv = Inspector::init_apply(node);
+    node->apply(nameGen);
+
+    return rv;
+}
+
 bool FindRepeatedActionUses::preorder(const IR::PathExpression *expression) {
-    auto decl = refMap->getDeclaration(expression->path, true);
+    auto decl = getDeclaration(expression->path, true);
     if (!decl->is<IR::P4Action>()) return false;
     auto action = decl->to<IR::P4Action>();
     auto control = findContext<IR::P4Control>();
@@ -141,7 +155,7 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression *expression) {
         auto methmem = method->to<IR::Member>();
         BUG_CHECK(methmem->expr->is<IR::PathExpression>(), "Unexpected table %1%", methmem->expr);
         auto pathe = methmem->expr->to<IR::PathExpression>();
-        auto tbl = refMap->getDeclaration(pathe->path, true);
+        auto tbl = getDeclaration(pathe->path, true);
         BUG_CHECK(tbl->is<IR::P4Table>(), "%1%: expected a table", pathe);
         actionUser = tbl->to<IR::P4Table>();
     }
@@ -149,7 +163,7 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression *expression) {
     LOG1(dbp(expression) << " used by " << dbp(actionUser));
     auto replacement = repl->getActionUser(action, actionUser);
     if (replacement == nullptr) {
-        auto newName = refMap->newName(action->name.name.string_view());
+        auto newName = nameGen.newName(action->name.name.string_view());
         ParamCloner cloner;
         auto replBody = cloner.clone<IR::BlockStatement>(action->body);
         auto annos = action->annotations;

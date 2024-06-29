@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef FRONTENDS_P4_CHECKCONSTANTS_H_
 #define FRONTENDS_P4_CHECKCONSTANTS_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
@@ -25,13 +26,11 @@ namespace P4 {
 /// Makes sure that some methods that expect constant
 /// arguments have constant arguments (e.g., push_front).
 /// Checks that table sizes are constant integers.
-class DoCheckConstants : public Inspector {
-    ReferenceMap *refMap;
+class DoCheckConstants : public Inspector, public ResolutionContext {
     TypeMap *typeMap;
 
  public:
-    DoCheckConstants(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
+    explicit DoCheckConstants(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DoCheckConstants");
     }
@@ -43,9 +42,9 @@ class DoCheckConstants : public Inspector {
 
 class CheckConstants : public PassManager {
  public:
-    CheckConstants(ReferenceMap *refMap, TypeMap *typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new DoCheckConstants(refMap, typeMap));
+    explicit CheckConstants(TypeMap *typeMap) {
+        passes.push_back(new TypeChecking(nullptr, typeMap));
+        passes.push_back(new DoCheckConstants(typeMap));
         setName("CheckConstants");
     }
 };

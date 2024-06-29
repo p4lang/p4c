@@ -2,19 +2,19 @@
 
 namespace P4 {
 
-const IR::Node *DoInstantiateCalls::postorder(IR::P4Parser *parser) {
+const IR::Node *InstantiateDirectCalls::postorder(IR::P4Parser *parser) {
     parser->parserLocals.append(insert);
     insert.clear();
     return parser;
 }
 
-const IR::Node *DoInstantiateCalls::postorder(IR::P4Control *control) {
+const IR::Node *InstantiateDirectCalls::postorder(IR::P4Control *control) {
     control->controlLocals.append(insert);
     insert.clear();
     return control;
 }
 
-const IR::Node *DoInstantiateCalls::postorder(IR::MethodCallExpression *expression) {
+const IR::Node *InstantiateDirectCalls::postorder(IR::MethodCallExpression *expression) {
     // Identify type.apply(...) methods
     auto mem = expression->method->to<IR::Member>();
     if (mem == nullptr) return expression;
@@ -28,10 +28,10 @@ const IR::Node *DoInstantiateCalls::postorder(IR::MethodCallExpression *expressi
         tname = tn->typeName->to<IR::Type_Name>();
     }
     CHECK_NULL(tname);
-    auto ref = refMap->getDeclaration(tname->path, true);
+    auto ref = getDeclaration(tname->path, true);
     if (!ref->is<IR::P4Control>() && !ref->is<IR::P4Parser>()) return expression;
 
-    auto name = refMap->newName(tname->path->name + "_inst");
+    auto name = nameGen.newName(tname->path->name + "_inst");
     LOG3("Inserting instance " << name);
     auto annos = new IR::Annotations();
     annos->add(new IR::Annotation(IR::Annotation::nameAnnotation, tname->path->toString()));

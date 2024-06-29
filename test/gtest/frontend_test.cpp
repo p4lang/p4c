@@ -33,7 +33,7 @@ struct P4CFrontendEnumValidation : P4CFrontend {
     P4CFrontendEnumValidation() {
         addPasses({new P4::ResolveReferences(&refMap), new P4::ConstantFolding(&refMap, nullptr),
                    new P4::ResolveReferences(&refMap),
-                   new P4::TypeInference(&refMap, &typeMap, false, false)});
+                   new P4::TypeInference(&typeMap, false, false)});
     }
 
     P4::ReferenceMap refMap;
@@ -172,11 +172,7 @@ TEST_F(P4CFrontendEnumValidation, InvalidType) {
 
 // Tests for MoveInitializers
 struct P4CFrontendMoveInitializers : P4CFrontend {
-    P4CFrontendMoveInitializers() {
-        addPasses({new P4::ResolveReferences(&refMap), new P4::MoveInitializers(&refMap)});
-    }
-
-    P4::ReferenceMap refMap;
+    P4CFrontendMoveInitializers() { addPasses({new P4::MoveInitializers()}); }
 };
 
 TEST_F(P4CFrontendMoveInitializers, P4ControlSrcInfo) {

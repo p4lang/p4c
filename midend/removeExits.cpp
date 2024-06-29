@@ -16,19 +16,20 @@ limitations under the License.
 
 #include "removeExits.h"
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 
 namespace {
 class CallsExit : public Inspector {
-    ReferenceMap *refMap;
+    DeclarationLookup *refMap;
     TypeMap *typeMap;
     std::set<const IR::Node *> *callers;
 
  public:
     bool callsExit = false;
-    CallsExit(ReferenceMap *refMap, TypeMap *typeMap, std::set<const IR::Node *> *callers)
+    CallsExit(DeclarationLookup *refMap, TypeMap *typeMap, std::set<const IR::Node *> *callers)
         : refMap(refMap), typeMap(typeMap), callers(callers) {}
     void postorder(const IR::MethodCallExpression *expression) override {
         auto mi = MethodInstance::resolve(expression, refMap, typeMap);
@@ -65,7 +66,7 @@ const IR::Node *DoRemoveExits::preorder(IR::ExitStatement *statement) {
 const IR::Node *DoRemoveExits::preorder(IR::P4Table *table) {
     for (auto a : table->getActionList()->actionList) {
         auto path = a->getPath();
-        auto decl = refMap->getDeclaration(path, true);
+        auto decl = getDeclaration(path, true);
         BUG_CHECK(decl->is<IR::P4Action>(), "%1% is not an action", decl);
         if (callsExit.find(decl->getNode()) != callsExit.end()) {
             callExit(getOriginal());
@@ -100,7 +101,7 @@ const IR::Node *DoRemoveExits::preorder(IR::P4Control *control) {
         return control;
     }
 
-    cstring var = refMap->newName(variableName.string_view());
+    cstring var = nameGen.newName(variableName.string_view());
     returnVar = IR::ID(var, nullptr);
     visit(control->controlLocals, "controlLocals");
 
@@ -161,9 +162,9 @@ const IR::Node *DoRemoveExits::preorder(IR::BlockStatement *statement) {
 const IR::Node *DoRemoveExits::preorder(IR::IfStatement *statement) {
     push();
 
-    CallsExit ce(refMap, typeMap, &callsExit);
+    CallsExit ce(this, typeMap, &callsExit);
     ce.setCalledBy(this);
-    (void)statement->condition->apply(ce);
+    (void)statement->condition->apply(ce, getChildContext());
     auto rcond = ce.callsExit ? TernaryBool::Maybe : TernaryBool::No;
 
     visit(statement->ifTrue);
@@ -201,9 +202,9 @@ const IR::Node *DoRemoveExits::preorder(IR::IfStatement *statement) {
 
 const IR::Node *DoRemoveExits::preorder(IR::SwitchStatement *statement) {
     auto r = TernaryBool::No;
-    CallsExit ce(refMap, typeMap, &callsExit);
+    CallsExit ce(this, typeMap, &callsExit);
     ce.setCalledBy(this);
-    (void)statement->expression->apply(ce);
+    (void)statement->expression->apply(ce), getChildContext();
 
     /* FIXME -- alter cases in place rather than allocating a new Vector */
     IR::Vector<IR::SwitchCase> *cases = nullptr;
@@ -237,17 +238,17 @@ const IR::Node *DoRemoveExits::preorder(IR::SwitchStatement *statement) {
 }
 
 const IR::Node *DoRemoveExits::preorder(IR::AssignmentStatement *statement) {
-    CallsExit ce(refMap, typeMap, &callsExit);
+    CallsExit ce(this, typeMap, &callsExit);
     ce.setCalledBy(this);
-    (void)statement->apply(ce);
+    (void)statement->apply(ce, getChildContext());
     if (ce.callsExit) set(TernaryBool::Maybe);
     return statement;
 }
 
 const IR::Node *DoRemoveExits::preorder(IR::MethodCallStatement *statement) {
-    CallsExit ce(refMap, typeMap, &callsExit);
+    CallsExit ce(this, typeMap, &callsExit);
     ce.setCalledBy(this);
-    (void)statement->apply(ce);
+    (void)statement->apply(ce, getChildContext());
     if (ce.callsExit) set(TernaryBool::Maybe);
     return statement;
 }

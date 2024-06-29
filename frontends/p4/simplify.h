@@ -48,14 +48,11 @@ namespace P4 {
  *
  * @pre An up-to-date ReferenceMap and TypeMap.
  */
-class DoSimplifyControlFlow : public Transform {
-    ReferenceMap *refMap;
+class DoSimplifyControlFlow : public Transform, public ResolutionContext {
     TypeMap *typeMap;
 
  public:
-    DoSimplifyControlFlow(ReferenceMap *refMap, TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
+    explicit DoSimplifyControlFlow(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DoSimplifyControlFlow");
         // We may want to replace the same statement with different things
@@ -72,11 +69,10 @@ class DoSimplifyControlFlow : public Transform {
 /// steps enable further simplification.
 class SimplifyControlFlow : public PassRepeated {
  public:
-    SimplifyControlFlow(ReferenceMap *refMap, TypeMap *typeMap,
-                        TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    explicit SimplifyControlFlow(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoSimplifyControlFlow(refMap, typeMap));
+        passes.push_back(new DoSimplifyControlFlow(typeMap));
         setName("SimplifyControlFlow");
     }
 };

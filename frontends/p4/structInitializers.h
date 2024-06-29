@@ -17,21 +17,19 @@ limitations under the License.
 #ifndef FRONTENDS_P4_STRUCTINITIALIZERS_H_
 #define FRONTENDS_P4_STRUCTINITIALIZERS_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
 namespace P4 {
 
 /// Converts some list expressions into struct initializers.
-class CreateStructInitializers : public Transform {
-    ReferenceMap *refMap;
+class CreateStructInitializers : public Transform, public ResolutionContext {
     TypeMap *typeMap;
 
  public:
-    CreateStructInitializers(ReferenceMap *refMap, TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {
+    explicit CreateStructInitializers(TypeMap *typeMap) : typeMap(typeMap) {
         setName("CreateStructInitializers");
-        CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
     }
 
@@ -44,10 +42,10 @@ class CreateStructInitializers : public Transform {
 
 class StructInitializers : public PassManager {
  public:
-    StructInitializers(ReferenceMap *refMap, TypeMap *typeMap) {
+    explicit StructInitializers(TypeMap *typeMap) {
         setName("StructInitializers");
-        passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new CreateStructInitializers(refMap, typeMap));
+        passes.push_back(new TypeChecking(nullptr, typeMap));
+        passes.push_back(new CreateStructInitializers(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
     }
 };

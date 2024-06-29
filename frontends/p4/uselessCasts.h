@@ -39,8 +39,8 @@ class RemoveUselessCasts : public Transform {
 
 class UselessCasts : public PassManager {
  public:
-    UselessCasts(ReferenceMap *refMap, TypeMap *typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
+    explicit UselessCasts(TypeMap *typeMap) {
+        passes.push_back(new TypeChecking(nullptr, typeMap));
         passes.push_back(new RemoveUselessCasts(typeMap));
         setName("UselessCasts");
     }
