@@ -247,7 +247,7 @@ CMAKE_FLAGS+="-DENABLE_GTESTS=${ENABLE_GTESTS} "
 # Toggle the installation of the tools back end.
 CMAKE_FLAGS+="-DENABLE_TEST_TOOLS=${ENABLE_TEST_TOOLS} "
 # RELEASE should be default, but we want to make sure.
-CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=RELEASE "
+CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=Release "
 # Treat warnings as errors.
 CMAKE_FLAGS+="-DENABLE_WERROR=${ENABLE_WERROR} "
 # Enable sanitizers.
