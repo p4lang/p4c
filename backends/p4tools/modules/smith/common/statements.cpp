@@ -70,6 +70,11 @@ IR::Statement *StatementGenerator::genStatement(bool is_in_func) {
             stmt = genForLoopStatement(is_in_func);
             break;
         }
+        // Add a new case for the for-in-loop statement generation.
+        case 7: {
+            stmt = genForInLoopStatement(is_in_func);
+            break;
+        }
     }
     if (useDefaultStmt) {
         stmt = genAssignmentOrMethodCallStatement(is_in_func);
@@ -393,20 +398,32 @@ IR::ReturnStatement *StatementGenerator::genReturnStatement(const IR::Type *tp) 
     return new IR::ReturnStatement(expr);
 }
 
+/// Generate a for-loop statement.
 IR::Statement *StatementGenerator::genForLoopStatement(bool is_in_func) {
     std::string loopVar = generateLoopControlVariable();
-    std::string loopInit = generateLoopInitialization(loopVar);
-    std::string loopCond = generateLoopCondition(loopVar);
-    std::string loopUpdate = generateLoopUpdate(loopVar);
-    std::string loopBody = generateLoopBody(loopVar);
+    int bitFieldWidth = Utils::getRandInt(1, 64);
+    int upperBound = Utils::getRandInt(1, 100);
 
     // Create the IR nodes for the for-loop components
-    auto *initExpr = new IR::Declaration_Variable(loopVar, IR::Type_Bits::get(8), new IR::Constant(IR::Type_Bits::get(8), 0));  
-    auto *condExpr = new IR::Equ(IR::Type_Boolean::get(), new IR::PathExpression(loopVar), new IR::Constant(IR::Type_Bits::get(8), 10));  
-    auto *updateStmt = new IR::AssignmentStatement(new IR::PathExpression(loopVar), new IR::Add(IR::Type_Bits::get(8), 
-                                                   new IR::PathExpression(loopVar), new IR::Constant(IR::Type_Bits::get(8), 1)));
+    auto *initExpr = new IR::Declaration_Variable(
+        loopVar, 
+        IR::Type_Bits::get(bitFieldWidth), 
+        new IR::Constant(IR::Type_Bits::get(bitFieldWidth), 0)
+    );  
+    auto *condExpr = new IR::Lss(
+        IR::Type_Boolean::get(), 
+        new IR::PathExpression(loopVar), 
+        new IR::Constant(IR::Type_Bits::get(bitFieldWidth), upperBound)
+    );  
+    auto *updateStmt = new IR::AssignmentStatement(
+        new IR::PathExpression(loopVar), 
+        new IR::Add(
+            IR::Type_Bits::get(bitFieldWidth), 
+            new IR::PathExpression(loopVar), 
+            new IR::Constant(IR::Type_Bits::get(bitFieldWidth), 1)
+        )
+    );
     auto *bodyStmt = genBlockStatement(is_in_func);
-    
     // Fill `initExpr` and `updateStmt` into their corresponding indexed vectors.
     // This is necessary due to the constructor defintions.
     IR::IndexedVector<IR::StatOrDecl> initExprs;
@@ -414,7 +431,7 @@ IR::Statement *StatementGenerator::genForLoopStatement(bool is_in_func) {
     initExprs.push_back(initExpr);
     updateStmts.push_back(updateStmt);
 
-    // TODO(zzmic): Decide whether the following pseudo code should be implemented in this function or discarded.
+    // TODO(zzmic): Decide whether the following pseudo code should be implemented in this function or discarded other than using `genBlockStatement`.
     // Pseudo code (implement the body statement generation):
     // If the loop body is some function call, then parse it and generate a corresponding IR node of type `IR::Statement`.
     // The node of type `IR::Statement` may consist of multiple nested node constructions (using, e.g., `IR::MethodCallStatement` and `IR::PathExpression`),
@@ -424,6 +441,30 @@ IR::Statement *StatementGenerator::genForLoopStatement(bool is_in_func) {
     // Create the for-loop IR node and return it.
     auto *forStmt = new IR::ForStatement(initExprs, condExpr, updateStmts, bodyStmt);
     return forStmt;
+}
+
+/// Generate a for-in-loop statement.
+IR::Statement *StatementGenerator::genForInLoopStatement(bool is_in_func) {
+    std::string loopVar = generateLoopControlVariable();
+    int bitFieldWidth = Utils::getRandInt(1, 64);
+    int lowerBound = Utils::getRandInt(0, 50);
+    int upperBound = Utils::getRandInt(50, 100);
+
+    // Create the IR nodes for the for-in-loop component expressions.
+    auto declVar = new IR::Declaration_Variable(
+        loopVar, 
+        IR::Type_Bits::get(bitFieldWidth), 
+        new IR::Constant(IR::Type_Bits::get(bitFieldWidth), 0)
+    );   
+    auto collectionExpr = new IR::Range(
+        new IR::Constant(IR::Type_Bits::get(bitFieldWidth), lowerBound),
+        new IR::Constant(IR::Type_Bits::get(bitFieldWidth), upperBound)
+    );
+    auto *bodyStmt = genBlockStatement(is_in_func);
+
+    // Create the for-in-loop IR node and return it.
+    auto *forInStmt = new IR::ForInStatement(declVar, collectionExpr, bodyStmt);
+    return forInStmt;
 }
 
 }  // namespace P4Tools::P4Smith

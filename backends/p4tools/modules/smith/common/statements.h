@@ -39,6 +39,8 @@ class StatementGenerator : public Generator {
     IR::ReturnStatement *genReturnStatement(const IR::Type *tp = nullptr);
 
     virtual IR::Statement *genForLoopStatement(bool is_in_func);
+
+    virtual IR::Statement *genForInLoopStatement(bool is_in_func);
 };
 
 }  // namespace P4Tools::P4Smith

@@ -66,13 +66,11 @@ std::string generateLoopControlVariable() {
     return getRandomString(1); 
 }
 
+/// TODO(zzmic): Consider deprecating the following functions.
 /// Generate a random loop initialization statement.
-std::string generateLoopInitialization(const std::string &var) {
+std::string generateForLoopInitialization(const std::string &var) {
     std::stringstream ss;
-
-    // TOOD: Add support for other types of initialization, 
-    // although its quite common to initialize a loop control variable to 0.
-    int basicTypeOption = Utils::getRandInt(0, 3);
+    int basicTypeOption = Utils::getRandInt(0, 3);     
     switch (basicTypeOption) {
         // Unsigned integer (bitstring) of size n.
         case 0:
@@ -90,148 +88,70 @@ std::string generateLoopInitialization(const std::string &var) {
             int bitFieldWidth = Utils::getRandInt(1, 64);
             ss << "varbit<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
     }
-    
     return ss.str();
 }
 
+/// TODO(zzmic): Consider deprecating the following functions.
 /// Generate a random loop condition statement.
-std::string generateLoopCondition(const std::string &var) {
+std::string generateForLoopCondition(const std::string &var) {
     std::stringstream ss;
-
-    // TODO(zzmic): Add support for other types of conditions.
     int upperBound = Utils::getRandInt(0, 100);
     ss << var << " < " << std::to_string(upperBound);
-
     return ss.str();
 }
 
+/// TODO(zzmic): Consider deprecating the following functions.
 /// Generate a random loop update (only consider increments for now) statement.
-std::string generateLoopUpdate(const std::string &var) {
+std::string generateForLoopUpdate(const std::string &var) {
     std::stringstream ss;
-
-    // TOOD: Add support for other types of updates.
     int stepSize = Utils::getRandInt(0, 100);
     ss << var << " = " << var << " + " << std::to_string(stepSize);
-
     return ss.str();
 }
 
-/// Generate a random loop body that involves one variable.
-std::string generateLoopBody(const std::string &var) {
-    // TODO(zzmic): Add actual support for the loop body.
-    return "";
-}
-
-/// Generate a random loop body that involves two variables.
-std::string generateLoopBody(const std::string &var1, const std::string &var2) {
-    // TODO(zzmic): Add actual support for the loop body.
-    return "";
-}
-
-/// Generate a random loop body that involves multiple (two or more but undetermined) variables.
-/// TODO(zzmic): Need to figure out whether this is permissible/advisable.
-template <typename... Args>
-std::string generateLoopBody(const std::string &var1, const std::string &var2, const Args&... args) {
-    // TODO(zzmic): Add actual support for the loop body.
-    return "";
-}
-
-/// Generate a trivial but complete for loop (traditional C-style for-loop).
-/// The generated for-loop will be similar to `testdata/p4_16_samples/forloop5.p4` (except the loop body).
-std::string generateTrivialForLoop() {
-    std::string loopControlVar = generateLoopControlVariable();
-    std::string loopInit = generateLoopInitialization(loopControlVar);
-    std::string loopCondition = generateLoopCondition(loopControlVar);
-    std::string loopUpdate = generateLoopUpdate(loopControlVar);
-    std::string loopBody = generateLoopBody(loopControlVar);
-
+/// TODO(zzmic): Consider deprecating the following functions.
+/// Generate a random loop progression statement (for for-in loop generation).
+std::string generateForInLoopProgression(const std::string &var, const std::string &start, const std::string &end) {
     std::stringstream ss;
-    ss << "for (" << loopInit << "; " << loopCondition << "; " << loopUpdate << ") {\n";
-    ss << loopBody << "\n";
-    ss << "}";
-    return ss.str();
-}
-
-/// Generate a for-loop iterating over a header stack. 
-// The generated for-loop will be similar to the first for-loop in `testdata/p4_16_samples/forloop1.p4` (except the loop body).
-std::string generateHeaderStackForLoop() {
-    std::string varType = "t2";
-    std::string loopVar = generateLoopControlVariable();
-    std::string stackName = "hdrs.stack";
-    std::string loopBody = generateLoopBody(loopVar);
-
-    std::stringstream ss;
-    ss << "for (" << varType << " " << loopVar << " in " << stackName << ") {\n";
-    ss << loopBody << "\n";
-    ss << "}";
-    return ss.str();
-}
-
-/// Generate a for-loop with multiple initialization and update statements.
-/// The generated for-loop will be similar to the second for-loop in `testdata/p4_16_samples/forloop1.p4` (except the loop body).
-std::string generateMultipleInitUpdateForLoop() {
-    std::string loopVar1 = generateLoopControlVariable();
-    std::string loopVar2 = generateLoopControlVariable();
-    std::string loopInit = generateLoopInitialization(loopVar1) + ", " + loopVar2 + " = 1";
-    std::string loopCondition = loopVar1 + " < hdrs.head.cnt";
-    std::string loopUpdate = loopVar1 + " = " + loopVar1 + " + 1, " + loopVar2 + " = " + loopVar2 + " << 1";
-    std::string loopBody = generateLoopBody(loopVar1, loopVar2);
-
-    std::stringstream ss;
-    ss << "for (" << loopInit << "; " << loopCondition << "; " << loopUpdate << ") {\n";
-    ss << loopBody << "\n";
-    ss << "}";
-    return ss.str();
-}
-
-/// Generate a range-based for-loop.
-std::string generateRangeBasedForLoop(const std::string &start, const std::string &end) {
-    std::string loopVar = generateLoopControlVariable();
-
-    std::stringstream ss;
-
     int basicTypeOption = Utils::getRandInt(0, 3);
     switch (basicTypeOption) {
         // Unsigned integer (bitstring) of size n.
         case 0:
             int bitFieldWidth = Utils::getRandInt(1, 64);
-            ss << "for (bit<" << std::to_string(bitFieldWidth) << ">" << loopVar;
+            ss << "bit<" << std::to_string(bitFieldWidth) << ">" << var;
         // bit is the same as bit<1>.
         case 1:
-            ss << "for (bit " << loopVar; 
+            ss << "bit " << var; 
         // Signed integer (bitstring) of size n (>= 2). 
         case 2:
             int bitFieldWidth = Utils::getRandInt(2, 32);
-            ss << "for (int<" << std::to_string(bitFieldWidth) << "> " << loopVar;
+            ss << "int<" << std::to_string(bitFieldWidth) << "> " << var;
         // Variable-length bitstring.
         case 3:
             int bitFieldWidth = Utils::getRandInt(1, 64);
-            ss << "for (varbit<" << std::to_string(bitFieldWidth) << "> " << loopVar;
+            ss << "varbit<" << std::to_string(bitFieldWidth) << "> " << var;
     }
-    
-    ss << " in " << start << " .. " << end << ") {\n";
-    ss << generateLoopBody(loopVar) << "\n";
-    ss << "}";
+    ss << " in " << start << " .. " << end;
     return ss.str();
 }
 
-/// Main/major function to generate a for-loop.
-std::string generateForLoop() {
-    // TODO(zzmic): Increment the range of the random number generator if more types of for-loop generations are added,
-    int choice = Utils::getRandInt(0, 3);
+/// TODO(zzmic): Consider deprecating the following functions.
+/// Generate a random loop body that involves one variable.
+std::string generateLoopBody(const std::string &var) {
+    return "";
+}
 
-    switch (choice) {
-        case 0:
-            return generateTrivialForLoop();
-        case 1:
-            return generateHeaderStackForLoop();
-        case 2:
-            return generateMultipleInitUpdateForLoop();
-        case 3:
-            return generateRangeBasedForLoop("0", std::to_string(Utils::getRandInt(0, 100)));
-        default:
-            return generateTrivialForLoop();
-    }
+/// TODO(zzmic): Consider deprecating the following functions.
+/// Generate a random loop body that involves two variables.
+std::string generateLoopBody(const std::string &var1, const std::string &var2) {    
+    return "";
+}
+
+/// TODO(zzmic): Consider deprecating the following functions.
+/// Generate a random loop body that involves multiple (two or more but undetermined) variables.
+template <typename... Args>
+std::string generateLoopBody(const std::string &var1, const std::string &var2, const Args&... args) {
+    return "";
 }
 
 }  // namespace P4Tools::P4Smith
