@@ -74,3 +74,21 @@
   fill: var(--page-background-color);
   /* stroke-width: 1.5; */
 }
+
+/* small devices */
+@media (max-width: 700px) {
+ .card-container {
+    flex-direction: column;
+  }
+
+ .card-item {
+    flex: 1 1 100%; /* Take full width on small devices */
+  }
+}
+
+/* Medium devices */
+@media (min-width: 701px) and (max-width: 900px) {
+ .card-item {
+    flex: 1 1 50%; /* width for tablets */
+  }
+}
