@@ -70,23 +70,28 @@ std::string generateLoopControlVariable() {
 /// Generate a random loop initialization statement.
 std::string generateForLoopInitialization(const std::string &var) {
     std::stringstream ss;
-    int basicTypeOption = Utils::getRandInt(0, 3);     
+    int basicTypeOption = Utils::getRandInt(0, 3);    
+    int bitFieldWidth = 0; 
     switch (basicTypeOption) {
         // Unsigned integer (bitstring) of size n.
         case 0:
-            int bitFieldWidth = Utils::getRandInt(1, 64);
+            bitFieldWidth = Utils::getRandInt(1, 64);
             ss << "bit<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
+            break;
         // bit is the same as bit<1>.
         case 1:
-            ss << "bit " << var << " = 0"; 
+            ss << "bit " << var << " = 0";
+            break; 
         // Signed integer (bitstring) of size n (>= 2). 
         case 2:
-            int bitFieldWidth = Utils::getRandInt(2, 32);
+            bitFieldWidth = Utils::getRandInt(2, 32);
             ss << "int<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
+            break;
         // Variable-length bitstring.
         case 3:
-            int bitFieldWidth = Utils::getRandInt(1, 64);
+            bitFieldWidth = Utils::getRandInt(1, 64);
             ss << "varbit<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
+            break;
     }
     return ss.str();
 }
@@ -114,22 +119,27 @@ std::string generateForLoopUpdate(const std::string &var) {
 std::string generateForInLoopProgression(const std::string &var, const std::string &start, const std::string &end) {
     std::stringstream ss;
     int basicTypeOption = Utils::getRandInt(0, 3);
+    int bitFieldWidth = 0;
     switch (basicTypeOption) {
         // Unsigned integer (bitstring) of size n.
         case 0:
-            int bitFieldWidth = Utils::getRandInt(1, 64);
+            bitFieldWidth = Utils::getRandInt(1, 64);
             ss << "bit<" << std::to_string(bitFieldWidth) << ">" << var;
+            break;
         // bit is the same as bit<1>.
         case 1:
-            ss << "bit " << var; 
+            ss << "bit " << var;
+            break; 
         // Signed integer (bitstring) of size n (>= 2). 
         case 2:
-            int bitFieldWidth = Utils::getRandInt(2, 32);
+            bitFieldWidth = Utils::getRandInt(2, 32);
             ss << "int<" << std::to_string(bitFieldWidth) << "> " << var;
+            break;
         // Variable-length bitstring.
         case 3:
-            int bitFieldWidth = Utils::getRandInt(1, 64);
+            bitFieldWidth = Utils::getRandInt(1, 64);
             ss << "varbit<" << std::to_string(bitFieldWidth) << "> " << var;
+            break;
     }
     ss << " in " << start << " .. " << end;
     return ss.str();
