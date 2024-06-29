@@ -6,7 +6,7 @@
 
 .card-item {
   box-shadow: 0 4px 8px rgb(169, 213, 112);
-  transition: box-shadow 0.3s;
+  transition: transform 0.3s ease, box-shadow 0.3s;
   border-radius: 10px;
   flex: 1 1 45%;
   padding: 16px;
@@ -14,6 +14,8 @@
 
 .card-item:hover {
   box-shadow: 0 8px 16px rgb(114, 86, 185);
+  transform: translateY(-5px); /* Slightly lift the card */
+  z-index: 2; /* Ensure it's above other cards */
 }
 
 .card-content {
