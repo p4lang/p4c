@@ -66,7 +66,7 @@ std::string generateLoopControlVariable() {
     return getRandomString(1); 
 }
 
-/// TODO(zzmic): Consider deprecating the following functions.
+/// TODO(zzmic): Consider deprecating the following function.
 /// Generate a random loop initialization statement.
 std::string generateForLoopInitialization(const std::string &var) {
     std::stringstream ss;
@@ -91,7 +91,7 @@ std::string generateForLoopInitialization(const std::string &var) {
     return ss.str();
 }
 
-/// TODO(zzmic): Consider deprecating the following functions.
+/// TODO(zzmic): Consider deprecating the following function.
 /// Generate a random loop condition statement.
 std::string generateForLoopCondition(const std::string &var) {
     std::stringstream ss;
@@ -100,7 +100,7 @@ std::string generateForLoopCondition(const std::string &var) {
     return ss.str();
 }
 
-/// TODO(zzmic): Consider deprecating the following functions.
+/// TODO(zzmic): Consider deprecating the following function.
 /// Generate a random loop update (only consider increments for now) statement.
 std::string generateForLoopUpdate(const std::string &var) {
     std::stringstream ss;
@@ -109,7 +109,7 @@ std::string generateForLoopUpdate(const std::string &var) {
     return ss.str();
 }
 
-/// TODO(zzmic): Consider deprecating the following functions.
+/// TODO(zzmic): Consider deprecating the following function.
 /// Generate a random loop progression statement (for for-in loop generation).
 std::string generateForInLoopProgression(const std::string &var, const std::string &start, const std::string &end) {
     std::stringstream ss;
@@ -135,19 +135,19 @@ std::string generateForInLoopProgression(const std::string &var, const std::stri
     return ss.str();
 }
 
-/// TODO(zzmic): Consider deprecating the following functions.
+/// TODO(zzmic): Consider deprecating the following function.
 /// Generate a random loop body that involves one variable.
 std::string generateLoopBody(const std::string &var) {
     return "";
 }
 
-/// TODO(zzmic): Consider deprecating the following functions.
+/// TODO(zzmic): Consider deprecating the following function.
 /// Generate a random loop body that involves two variables.
 std::string generateLoopBody(const std::string &var1, const std::string &var2) {    
     return "";
 }
 
-/// TODO(zzmic): Consider deprecating the following functions.
+/// TODO(zzmic): Consider deprecating the following function.
 /// Generate a random loop body that involves multiple (two or more but undetermined) variables.
 template <typename... Args>
 std::string generateLoopBody(const std::string &var1, const std::string &var2, const Args&... args) {
