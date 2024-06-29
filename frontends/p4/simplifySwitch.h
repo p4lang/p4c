@@ -41,8 +41,8 @@ class DoSimplifySwitch : public Transform {
 
 class SimplifySwitch : public PassManager {
  public:
-    SimplifySwitch(ReferenceMap *refMap, TypeMap *typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
+    explicit SimplifySwitch(TypeMap *typeMap) {
+        passes.push_back(new TypeChecking(nullptr, typeMap));
         passes.push_back(new DoSimplifySwitch(typeMap));
         setName("SimplifySwitch");
     }

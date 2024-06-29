@@ -18,6 +18,7 @@ limitations under the License.
 #define FRONTENDS_P4_REMOVEPARAMETERS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -70,15 +71,13 @@ class ActionInvocation {
     }
 };
 
-class FindActionParameters : public Inspector {
-    ReferenceMap *refMap;
+class FindActionParameters : public Inspector, public ResolutionContext {
     TypeMap *typeMap;
     ActionInvocation *invocations;
 
  public:
-    FindActionParameters(ReferenceMap *refMap, TypeMap *typeMap, ActionInvocation *invocations)
-        : refMap(refMap), typeMap(typeMap), invocations(invocations) {
-        CHECK_NULL(refMap);
+    FindActionParameters(TypeMap *typeMap, ActionInvocation *invocations)
+        : typeMap(typeMap), invocations(invocations) {
         CHECK_NULL(invocations);
         CHECK_NULL(typeMap);
         setName("FindActionParameters");
@@ -131,8 +130,7 @@ class DoRemoveActionParameters : public Transform {
 
 class RemoveActionParameters : public PassManager {
  public:
-    RemoveActionParameters(ReferenceMap *refMap, TypeMap *typeMap,
-                           TypeChecking *typeChecking = nullptr);
+    explicit RemoveActionParameters(TypeMap *typeMap, TypeChecking *typeChecking = nullptr);
 };
 
 }  // namespace P4

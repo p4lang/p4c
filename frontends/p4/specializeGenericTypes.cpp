@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "specializeGenericTypes.h"
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 
 namespace P4 {
@@ -35,7 +36,7 @@ bool TypeSpecializationMap::same(const TypeSpecialization *spec,
 }
 
 void TypeSpecializationMap::add(const IR::Type_Specialized *t, const IR::Type_StructLike *decl,
-                                const IR::Node *insertion) {
+                                const IR::Node *insertion, NameGenerator *nameGen) {
     auto it = map.find(t);
     if (it != map.end()) return;
 
@@ -49,7 +50,7 @@ void TypeSpecializationMap::add(const IR::Type_Specialized *t, const IR::Type_St
         }
     }
 
-    cstring name = refMap->newName(decl->getName().name.string_view());
+    cstring name = nameGen->newName(decl->getName().string_view());
     LOG3("Found to specialize: " << dbp(t) << "(" << t << ") with name " << name
                                  << " insert before " << dbp(insertion));
     auto argTypes = new IR::Vector<IR::Type>();
@@ -89,6 +90,13 @@ class ContainsTypeVariable : public Inspector {
 
 }  // namespace
 
+Visitor::profile_t FindTypeSpecializations::init_apply(const IR::Node *node) {
+    auto rv = Inspector::init_apply(node);
+    node->apply(nameGen);
+
+    return rv;
+}
+
 void FindTypeSpecializations::postorder(const IR::Type_Specialized *type) {
     auto baseType = specMap->typeMap->getTypeType(type->baseType, true);
     auto st = baseType->to<IR::Type_StructLike>();
@@ -117,7 +125,7 @@ void FindTypeSpecializations::postorder(const IR::Type_Specialized *type) {
     if (!insert) insert = findContext<IR::Declaration_Instance>();
     if (!insert) insert = findContext<IR::P4Action>();
     CHECK_NULL(insert);
-    specMap->add(type, st, insert);
+    specMap->add(type, st, insert, &nameGen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

@@ -79,6 +79,7 @@ class DoStrengthReduction final : public Transform {
 
     explicit DoStrengthReduction(bool enableSubConstToAddTransform)
         : enableSubConstToAddTransform(enableSubConstToAddTransform) {
+        // FIXME: This does not call a constructor
         DoStrengthReduction();
     }
 
@@ -116,19 +117,17 @@ class DoStrengthReduction final : public Transform {
 
 class StrengthReduction : public PassManager {
  public:
-    explicit StrengthReduction(ReferenceMap *refMap, TypeMap *typeMap,
-                               TypeChecking *typeChecking = nullptr,
+    explicit StrengthReduction(TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
                                bool enableSubConstToAddTransform = true) {
         if (typeMap != nullptr) {
-            if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap, true);
+            if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap, true);
             passes.push_back(typeChecking);
         }
         passes.push_back(new DoStrengthReduction(enableSubConstToAddTransform));
     }
 
-    explicit StrengthReduction(ReferenceMap *refMap, TypeMap *typeMap,
-                               bool enableSubConstToAddTransform)
-        : StrengthReduction(refMap, typeMap, nullptr, enableSubConstToAddTransform) {}
+    explicit StrengthReduction(TypeMap *typeMap, bool enableSubConstToAddTransform)
+        : StrengthReduction(typeMap, nullptr, enableSubConstToAddTransform) {}
 };
 
 }  // namespace P4

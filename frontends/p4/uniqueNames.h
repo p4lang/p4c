@@ -17,10 +17,12 @@ limitations under the License.
 #ifndef FRONTENDS_P4_UNIQUENAMES_H_
 #define FRONTENDS_P4_UNIQUENAMES_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
+#include "ir/visitor.h"
 
 namespace P4 {
 
@@ -70,27 +72,32 @@ class UniqueNames : public PassManager {
     RenameMap *renameMap;
 
  public:
-    explicit UniqueNames(ReferenceMap *refMap);
+    UniqueNames();
 };
 
 /// Finds and allocates new names for some symbols:
 /// Declaration_Variable, Declaration_Constant, Declaration_Instance,
 /// P4Table, P4Action.
 class FindSymbols : public Inspector {
-    ReferenceMap *refMap;  // used to generate new names
+    MinimalNameGenerator nameGen;  // used to generate new names
     RenameMap *renameMap;
 
  public:
     bool isTopLevel() const {
         return findContext<IR::P4Parser>() == nullptr && findContext<IR::P4Control>() == nullptr;
     }
-    FindSymbols(ReferenceMap *refMap, RenameMap *renameMap) : refMap(refMap), renameMap(renameMap) {
-        CHECK_NULL(refMap);
+    explicit FindSymbols(RenameMap *renameMap) : renameMap(renameMap) {
         CHECK_NULL(renameMap);
         setName("FindSymbols");
     }
+    profile_t init_apply(const IR::Node *node) override {
+        auto rv = Inspector::init_apply(node);
+        node->apply(nameGen);
+        return rv;
+    }
+
     void doDecl(const IR::Declaration *decl) {
-        cstring newName = refMap->newName(decl->getName().name.string_view());
+        cstring newName = nameGen.newName(decl->getName().name.string_view());
         renameMap->setNewName(decl, newName);
     }
     void postorder(const IR::Declaration_Variable *decl) override { doDecl(decl); }
@@ -113,9 +120,8 @@ class FindSymbols : public Inspector {
     }
 };
 
-class RenameSymbols : public Transform {
+class RenameSymbols : public Transform, public ResolutionContext {
  protected:
-    ReferenceMap *refMap;
     RenameMap *renameMap;
 
     /// Get new name of the current declaration or nullptr if the declaration is not to be renamed.
@@ -141,9 +147,7 @@ class RenameSymbols : public Transform {
     }
 
  public:
-    RenameSymbols(ReferenceMap *refMap, RenameMap *renameMap)
-        : refMap(refMap), renameMap(renameMap) {
-        CHECK_NULL(refMap);
+    explicit RenameSymbols(RenameMap *renameMap) : renameMap(renameMap) {
         CHECK_NULL(renameMap);
         visitDagOnce = false;
         setName("RenameSymbols");
@@ -161,24 +165,23 @@ class RenameSymbols : public Transform {
 
 /// Finds parameters for actions that will be given unique names
 class FindParameters : public Inspector {
-    ReferenceMap *refMap;  // used to generate new names
+    MinimalNameGenerator nameGen;
     RenameMap *renameMap;
 
     void doParameters(const IR::ParameterList *pl) {
         for (auto p : pl->parameters) {
-            cstring newName = refMap->newName(p->name.name.string_view());
+            cstring newName = nameGen.newName(p->name.name.string_view());
             renameMap->setNewName(p, newName);
         }
     }
 
  public:
-    FindParameters(ReferenceMap *refMap, RenameMap *renameMap)
-        : refMap(refMap), renameMap(renameMap) {
-        CHECK_NULL(refMap);
+    explicit FindParameters(RenameMap *renameMap) : renameMap(renameMap) {
         CHECK_NULL(renameMap);
         setName("FindParameters");
     }
     void postorder(const IR::P4Action *action) override { doParameters(action->parameters); }
+    profile_t init_apply(const IR::Node *node) override;
 };
 
 /// Give each parameter of an action a new unique name
@@ -188,7 +191,7 @@ class UniqueParameters : public PassManager {
     RenameMap *renameMap;
 
  public:
-    UniqueParameters(ReferenceMap *refMap, TypeMap *typeMap);
+    explicit UniqueParameters(TypeMap *typeMap);
 };
 
 }  // namespace P4

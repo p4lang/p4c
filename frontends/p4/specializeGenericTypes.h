@@ -59,7 +59,6 @@ struct TypeSpecialization : public IHasDbPrint {
 };
 
 struct TypeSpecializationMap : public IHasDbPrint {
-    ReferenceMap *refMap;
     TypeMap *typeMap;
     // The map can have multiple keys pointing to the same value
     ordered_map<const IR::Type_Specialized *, TypeSpecialization *> map;
@@ -68,7 +67,7 @@ struct TypeSpecializationMap : public IHasDbPrint {
     std::set<TypeSpecialization *> inserted;
 
     void add(const IR::Type_Specialized *t, const IR::Type_StructLike *decl,
-             const IR::Node *insertion);
+             const IR::Node *insertion, NameGenerator *nameGen);
     TypeSpecialization *get(const IR::Type_Specialized *t) const;
     bool same(const TypeSpecialization *left, const IR::Type_Specialized *right) const;
     void dbprint(std::ostream &out) const override {
@@ -97,6 +96,7 @@ struct TypeSpecializationMap : public IHasDbPrint {
  */
 class FindTypeSpecializations : public Inspector {
     TypeSpecializationMap *specMap;
+    MinimalNameGenerator nameGen;
 
  public:
     explicit FindTypeSpecializations(TypeSpecializationMap *specMap) : specMap(specMap) {
@@ -105,6 +105,7 @@ class FindTypeSpecializations : public Inspector {
     }
 
     void postorder(const IR::Type_Specialized *type) override;
+    profile_t init_apply(const IR::Node *node) override;
 };
 
 /**
@@ -162,21 +163,21 @@ class SpecializeGenericTypes : public PassRepeated {
     TypeSpecializationMap specMap;
 
  public:
-    SpecializeGenericTypes(ReferenceMap *refMap, TypeMap *typeMap) {
+    explicit SpecializeGenericTypes(TypeMap *typeMap) {
         passes.emplace_back(new PassRepeated({
-            new TypeChecking(refMap, typeMap),
+            new TypeChecking(nullptr, typeMap),
             new FindTypeSpecializations(&specMap),
             new CreateSpecializedTypes(&specMap),
             // The previous pass has mutated some struct types
             new ClearTypeMap(typeMap, true),
         }));
-        passes.emplace_back(new TypeChecking(refMap, typeMap));
+        passes.emplace_back(new TypeChecking(nullptr, typeMap));
         passes.emplace_back(new ReplaceTypeUses(&specMap));
         // The previous pass has invalidated the types of struct expressions
         passes.emplace_back(new ClearTypeMap(typeMap, true));
-        specMap.refMap = refMap;
         specMap.typeMap = typeMap;
         setName("SpecializeGenericTypes");
+        setStopOnError(true);
     }
 };
 

@@ -1,5 +1,7 @@
 #include "global_copyprop.h"
 
+#include "frontends/p4/methodInstance.h"
+
 namespace P4 {
 
 namespace GlobalCopyProp {

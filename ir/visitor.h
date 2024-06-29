@@ -29,6 +29,7 @@ limitations under the License.
 #include <unordered_map>
 #include <utility>
 
+#include "absl/time/time.h"
 #include "ir/gen-tree-macro.h"
 #include "ir/ir-tree-macros.h"
 #include "ir/node.h"
@@ -76,7 +77,7 @@ class Visitor {
         // for profiling -- a profile_t object is created when a pass
         // starts and destroyed when it ends.  Moveable but not copyable.
         Visitor &v;
-        uint64_t start;
+        absl::Time start;
         explicit profile_t(Visitor &);
         friend class Visitor;
 

@@ -16,7 +16,8 @@ limitations under the License.
 
 #include "constantFolding.h"
 
-#include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/enumInstance.h"
 #include "lib/big_int_util.h"
 #include "lib/log.h"
@@ -240,7 +241,7 @@ const IR::Node *DoConstantFolding::preorder(IR::ArrayIndex *e) {
 namespace {
 
 // Returns true if the given expression is of the form "some_table.apply().action_run."
-bool isActionRun(const IR::Expression *e, const ReferenceMap *refMap) {
+bool isActionRun(const IR::Expression *e, const DeclarationLookup *refMap) {
     const auto *actionRunMem = e->to<IR::Member>();
     if (!actionRunMem) return false;
     if (actionRunMem->member.name != IR::Type_Table::action_run) return false;

@@ -17,6 +17,7 @@ limitations under the License.
 #include "evaluator.h"
 
 #include "frontends/common/constantFolding.h"
+#include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {

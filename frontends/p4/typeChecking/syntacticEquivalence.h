@@ -25,11 +25,11 @@ namespace P4 {
 
 // Check if two expressions are syntactically equivalent
 class SameExpression {
-    const ReferenceMap *refMap;
+    const DeclarationLookup *refMap;
     const TypeMap *typeMap;
 
  public:
-    explicit SameExpression(const ReferenceMap *refMap, const TypeMap *typeMap)
+    explicit SameExpression(const DeclarationLookup *refMap, const TypeMap *typeMap)
         : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);

@@ -160,7 +160,7 @@ static void testReplaceSelectRange(std::vector<Bound> ranges, ExtraTests extraTe
     TypeMap typeMap;
 
     PassManager passes_ = {new P4::ResolveReferences(&refMap),
-                           new P4::TypeInference(&refMap, &typeMap, false),
+                           new P4::TypeInference(&typeMap, false),
                            // properly set types for compound expressions
                            new P4::TypeChecking(&refMap, &typeMap, true),
                            new P4::ReplaceSelectRange(&refMap, &typeMap)};

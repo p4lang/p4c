@@ -89,8 +89,8 @@ class DoTableKeyNames final : public Transform {
 
 class TableKeyNames final : public PassManager {
  public:
-    TableKeyNames(ReferenceMap *refMap, TypeMap *typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
+    explicit TableKeyNames(TypeMap *typeMap) {
+        passes.push_back(new TypeChecking(nullptr, typeMap));
         passes.push_back(new DoTableKeyNames(typeMap));
         setName("TableKeyNames");
     }

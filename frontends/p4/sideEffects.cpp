@@ -16,16 +16,20 @@ limitations under the License.
 
 #include "frontends/p4/sideEffects.h"
 
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/alias.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/tableApply.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
 
 namespace P4 {
 
 cstring DoSimplifyExpressions::createTemporary(const IR::Type *type) {
     type = type->getP4Type();
     BUG_CHECK(type && !type->is<IR::Type_Dontcare>(), "Can't create don't-care temps");
-    auto tmp = refMap->newName("tmp");
+    auto tmp = nameGen.newName("tmp");
     auto decl = new IR::Declaration_Variable(IR::ID(tmp, nullptr), type);
     toInsert.push_back(decl);
     return tmp;
@@ -66,7 +70,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Literal *expression) {
 const IR::Node *DoSimplifyExpressions::preorder(IR::ArrayIndex *expression) {
     LOG3("Visiting " << dbp(expression));
     auto type = typeMap->getType(getOriginal(), true);
-    if (SideEffects::check(getOriginal<IR::Expression>(), this, refMap, typeMap) ||
+    if (SideEffects::check(getOriginal<IR::Expression>(), this, this, typeMap) ||
         // if the expression appears as part of an argument also use a temporary for the index
         findContext<IR::Argument>() != nullptr) {
         visit(expression->left);
@@ -100,7 +104,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Member *expression) {
     LOG3("Visiting " << dbp(expression));
     auto type = typeMap->getType(getOriginal(), true);
     const IR::Expression *rv = expression;
-    if (SideEffects::check(getOriginal<IR::Expression>(), this, refMap, typeMap) ||
+    if (SideEffects::check(getOriginal<IR::Expression>(), this, this, typeMap) ||
         // This may be part of a left-value that is passed as an out argument
         findContext<IR::Argument>() != nullptr) {
         visit(expression->expr);
@@ -108,8 +112,8 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Member *expression) {
 
         // Special case for table.apply().hit/miss, which is not dismantled by
         // the MethodCallExpression.
-        if (TableApplySolver::isHit(expression, refMap, typeMap) ||
-            TableApplySolver::isMiss(expression, refMap, typeMap)) {
+        if (TableApplySolver::isHit(expression, this, typeMap) ||
+            TableApplySolver::isMiss(expression, this, typeMap)) {
             if (isIfContext(getContext())) {
                 /* if the hit/miss test is directly in an "if", don't bother cloning it
                  * as that will just create a redundant table later */
@@ -154,7 +158,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::StructExpression *expression
     LOG3("Visiting " << dbp(expression));
     bool foundEffect = false;
     for (auto v : expression->components) {
-        if (SideEffects::check(v->expression, this, refMap, typeMap)) {
+        if (SideEffects::check(v->expression, this, this, typeMap)) {
             foundEffect = true;
             break;
         }
@@ -182,7 +186,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::ListExpression *expression) 
     LOG3("Visiting " << dbp(expression));
     bool foundEffect = false;
     for (auto v : expression->components) {
-        if (SideEffects::check(v, this, refMap, typeMap)) {
+        if (SideEffects::check(v, this, this, typeMap)) {
             foundEffect = true;
             break;
         }
@@ -207,8 +211,8 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Operation_Binary *expression
     LOG3("Visiting " << dbp(expression));
     auto original = getOriginal<IR::Operation_Binary>();
     auto type = typeMap->getType(original, true);
-    if (SideEffects::check(original, this, refMap, typeMap)) {
-        if (SideEffects::check(original->right, this, refMap, typeMap)) {
+    if (SideEffects::check(original, this, this, typeMap)) {
+        if (SideEffects::check(original->right, this, this, typeMap)) {
             // We are a bit conservative here. We handle this case:
             // T f(inout T val) { ... }
             // val + f(val);
@@ -239,7 +243,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Operation_Binary *expression
 const IR::Node *DoSimplifyExpressions::shortCircuit(IR::Operation_Binary *expression) {
     LOG3("Visiting " << dbp(expression));
     auto type = typeMap->getType(getOriginal(), true);
-    if (SideEffects::check(getOriginal<IR::Expression>(), this, refMap, typeMap)) {
+    if (SideEffects::check(getOriginal<IR::Expression>(), this, this, typeMap)) {
         visit(expression->left);
         CHECK_NULL(expression->left);
 
@@ -314,10 +318,11 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::LOr *expression) {
     return shortCircuit(expression);
 }
 
-bool DoSimplifyExpressions::mayAlias(const IR::Expression *left,
-                                     const IR::Expression *right) const {
-    ReadsWrites rw(refMap);
-    return rw.mayAlias(left, right);
+bool DoSimplifyExpressions::mayAlias(const IR::Expression *left, const IR::Expression *right,
+                                     const Visitor::Context *ctxt) const {
+    // FIXME: This recreates ReadWrites() over and over again, loosing all
+    // declaration lookup caching
+    return ReadsWrites().mayAlias(left, right, ctxt);
 }
 
 /// Returns true if type is a header or a struct containing a header.
@@ -339,8 +344,7 @@ namespace {
 /// modified while evaluating the expression.  This is a list of
 /// left-values.  Also, a table application expression is
 /// assumed to modify everything.
-class GetWrittenExpressions : public Inspector {
-    ReferenceMap *refMap;
+class GetWrittenExpressions : public Inspector, public ResolutionContext {
     TypeMap *typeMap;
 
  public:
@@ -353,14 +357,12 @@ class GetWrittenExpressions : public Inspector {
     static const IR::Expression *everything;
     std::set<const IR::Expression *> written;
 
-    GetWrittenExpressions(ReferenceMap *refMap, TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
+    explicit GetWrittenExpressions(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("GetWrittenExpressions");
     }
     void postorder(const IR::MethodCallExpression *expression) override {
-        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+        auto mi = MethodInstance::resolve(expression, this, typeMap);
         if (auto a = mi->to<ApplyMethod>()) {
             if (a->isTableApply()) {
                 written.emplace(everything);
@@ -389,13 +391,13 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     LOG3("Visiting " << dbp(mce));
     auto orig = getOriginal<IR::MethodCallExpression>();
     auto type = typeMap->getType(orig, true);
-    if (!SideEffects::check(orig, this, refMap, typeMap)) {
+    if (!SideEffects::check(orig, this, this, typeMap)) {
         return mce;
     }
 
     auto copyBack = new IR::IndexedVector<IR::StatOrDecl>();
     auto args = new IR::Vector<IR::Argument>();
-    auto mi = MethodInstance::resolve(orig, refMap, typeMap);
+    auto mi = MethodInstance::resolve(orig, this, typeMap);
 
     // If a parameter is in this set then we use a temporary to
     // copy the corresponding argument.  We could always use
@@ -406,9 +408,11 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     std::set<const IR::Parameter *> useTemporary;
     // Set of expressions modified while evaluating this method call.
     std::set<const IR::Expression *> modifies;
-    GetWrittenExpressions gwe(refMap, typeMap);
+    // FIXME: We need to be able to cache results here and not to recompute over
+    // and over again
+    GetWrittenExpressions gwe(typeMap);
     gwe.setCalledBy(this);
-    mce->apply(gwe);
+    mce->apply(gwe, getContext());
 
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         if (p->direction == IR::Direction::None) continue;
@@ -423,7 +427,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
 
         // If an argument evaluation has side-effects then
         // always use a temporary to hold the argument value.
-        if (SideEffects::check(arg->expression, this, refMap, typeMap)) {
+        if (SideEffects::check(arg->expression, this, this, typeMap)) {
             LOG3("Using temporary for " << dbp(mce) << " param " << dbp(p) << " arg side effect");
             useTemporary.emplace(p);
             continue;
@@ -463,7 +467,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
         for (auto e : modifies) {
             // Here we use just raw equality: equivalent but not equal expressions
             // should be compared.
-            if (e != arg->expression && mayAlias(arg->expression, e)) {
+            if (e != arg->expression && mayAlias(arg->expression, e, getContext())) {
                 LOG3("Using temporary for " << dbp(mce) << " param " << dbp(p) << " aliasing"
                                             << dbp(e));
                 if (p->hasOut())
@@ -535,9 +539,9 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     // dismantle these expressions.
     bool tbl_apply = false;
     if (auto mmbr = getParent<IR::Member>()) {
-        auto tbl = TableApplySolver::isActionRun(mmbr, refMap, typeMap);
-        auto tbl1 = TableApplySolver::isHit(mmbr, refMap, typeMap);
-        auto tbl2 = TableApplySolver::isMiss(mmbr, refMap, typeMap);
+        auto tbl = TableApplySolver::isActionRun(mmbr, this, typeMap);
+        auto tbl1 = TableApplySolver::isHit(mmbr, this, typeMap);
+        auto tbl2 = TableApplySolver::isMiss(mmbr, this, typeMap);
         tbl_apply = tbl != nullptr || tbl1 != nullptr || tbl2 != nullptr;
     }
     // Simplified method call, with arguments substituted
@@ -704,6 +708,13 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::ForInStatement *statement) {
     return rv;
 }
 
+Visitor::profile_t DoSimplifyExpressions::init_apply(const IR::Node *node) {
+    auto rv = Transform::init_apply(node);
+    node->apply(nameGen);
+
+    return rv;
+}
+
 void DoSimplifyExpressions::end_apply(const IR::Node *) {
     BUG_CHECK(toInsert.empty(), "DoSimplifyExpressions::end_apply orphaned declarations");
     BUG_CHECK(statements.empty(), "DoSimplifyExpressions::end_apply orphaned statements");
@@ -711,13 +722,21 @@ void DoSimplifyExpressions::end_apply(const IR::Node *) {
 
 ///////////////////////////////////////////////
 
+Visitor::profile_t KeySideEffect::init_apply(const IR::Node *node) {
+    auto rv = Transform::init_apply(node);
+    node->apply(nameGen);
+
+    return rv;
+}
+
 const IR::Node *KeySideEffect::preorder(IR::Key *key) {
     // If any key field has side effects then pull out all
     // the key field values.
     LOG3("Visiting " << key);
     bool complex = false;
     for (auto k : key->keyElements)
-        complex = complex || P4::SideEffects::check(k->expression, this, refMap, typeMap);
+        complex =
+            complex || P4::SideEffects::check(k->expression, this, this, typeMap, getContext());
     if (!complex)
         // This prune will prevent the postoder(IR::KeyElement*) below from executing
         prune();
@@ -740,7 +759,7 @@ const IR::Node *KeySideEffect::postorder(IR::KeyElement *element) {
         insertions = it->second;
     }
 
-    auto tmp = refMap->newName("key");
+    auto tmp = nameGen.newName("key");
     auto type = typeMap->getType(element->expression, true);
     auto decl = new IR::Declaration_Variable(tmp, type, nullptr);
     insertions->declarations.push_back(decl);
@@ -778,11 +797,12 @@ const IR::Node *KeySideEffect::postorder(IR::P4Table *table) {
 }
 
 const IR::Node *KeySideEffect::doStatement(const IR::Statement *statement,
-                                           const IR::Expression *expression) {
+                                           const IR::Expression *expression,
+                                           const Visitor::Context *ctxt) {
     LOG3("Visiting " << getOriginal());
-    HasTableApply hta(refMap, typeMap);
+    HasTableApply hta(this, typeMap);
     hta.setCalledBy(this);
-    (void)expression->apply(hta);
+    (void)expression->apply(hta, ctxt);
     if (hta.table == nullptr) return statement;
     auto insertions = get(toInsert, hta.table);
     if (insertions == nullptr) return statement;

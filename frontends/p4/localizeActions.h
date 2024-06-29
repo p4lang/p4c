@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef FRONTENDS_P4_LOCALIZEACTIONS_H_
 #define FRONTENDS_P4_LOCALIZEACTIONS_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/callGraph.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
@@ -49,33 +51,29 @@ class GlobalActionReplacements {
 };
 
 // Find global (i.e., declared at toplevel) actions and who uses them.
-class FindGlobalActionUses : public Inspector {
-    ReferenceMap *refMap;
+class FindGlobalActionUses : public Inspector, public ResolutionContext {
+    MinimalNameGenerator nameGen;
     GlobalActionReplacements *repl;
     std::set<const IR::P4Action *> globalActions;
 
  public:
-    FindGlobalActionUses(ReferenceMap *refMap, GlobalActionReplacements *repl)
-        : refMap(refMap), repl(repl) {
-        CHECK_NULL(refMap);
+    explicit FindGlobalActionUses(GlobalActionReplacements *repl) : repl(repl) {
         CHECK_NULL(repl);
         setName("FindGlobalActionUses");
     }
     bool preorder(const IR::PathExpression *path) override;
     bool preorder(const IR::P4Action *action) override;
+    profile_t init_apply(const IR::Node *node) override;
 };
 
 // Global actions are cloned into actions local to the
 // control using them.  One action can produce many copies.
-class LocalizeActions : public Transform {
-    ReferenceMap *refMap;
+class LocalizeActions : public Transform, public ResolutionContext {
     GlobalActionReplacements *repl;
 
  public:
-    LocalizeActions(ReferenceMap *refMap, GlobalActionReplacements *repl)
-        : refMap(refMap), repl(repl) {
+    explicit LocalizeActions(GlobalActionReplacements *repl) : repl(repl) {
         visitDagOnce = false;
-        CHECK_NULL(refMap);
         CHECK_NULL(repl);
         setName("LocalizeActions");
     }
@@ -117,18 +115,17 @@ class ActionReplacement {
 // Find actions that are invoked in multiple places; create a new
 // copy for each invocation and store it in the repl map.  Ignores
 // actions that are not in a control.
-class FindRepeatedActionUses : public Inspector {
-    ReferenceMap *refMap;
+class FindRepeatedActionUses : public Inspector, public ResolutionContext {
+    MinimalNameGenerator nameGen;
     ActionReplacement *repl;
 
  public:
-    FindRepeatedActionUses(ReferenceMap *refMap, ActionReplacement *repl)
-        : refMap(refMap), repl(repl) {
-        CHECK_NULL(refMap);
+    explicit FindRepeatedActionUses(ActionReplacement *repl) : repl(repl) {
         CHECK_NULL(repl);
         setName("FindRepeatedActionUses");
     }
     bool preorder(const IR::PathExpression *expression) override;
+    profile_t init_apply(const IR::Node *node) override;
 };
 
 // Replicates actions for each different user.
@@ -174,13 +171,12 @@ class LocalizeAllActions : public PassManager {
     explicit LocalizeAllActions(ReferenceMap *refMap, const RemoveUnusedPolicy &policy) {
         passes.emplace_back(new TagGlobalActions());
         passes.emplace_back(new PassRepeated{
-            new ResolveReferences(refMap),
-            new FindGlobalActionUses(refMap, &globalReplacements),
-            new LocalizeActions(refMap, &globalReplacements),
+            new FindGlobalActionUses(&globalReplacements),
+            new LocalizeActions(&globalReplacements),
         });
-        passes.emplace_back(new ResolveReferences(refMap));
-        passes.emplace_back(new FindRepeatedActionUses(refMap, &localReplacements));
+        passes.emplace_back(new FindRepeatedActionUses(&localReplacements));
         passes.emplace_back(new DuplicateActions(&localReplacements));
+        passes.emplace_back(new ResolveReferences(refMap));
         passes.emplace_back(new RemoveAllUnusedDeclarations(refMap, policy));
         setName("LocalizeAllActions");
     }

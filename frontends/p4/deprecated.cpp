@@ -16,11 +16,9 @@ limitations under the License.
 
 #include "deprecated.h"
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
-
 namespace P4 {
 
-void CheckDeprecated::warnIfDeprecated(const IR::IAnnotated *annotated, const IR::Node *errorNode) {
+void Deprecated::warnIfDeprecated(const IR::IAnnotated *annotated, const IR::Node *errorNode) {
     if (annotated == nullptr) return;
     auto anno = annotated->getAnnotations()->getSingle(IR::Annotation::deprecatedAnnotation);
     if (anno == nullptr) return;
@@ -33,16 +31,14 @@ void CheckDeprecated::warnIfDeprecated(const IR::IAnnotated *annotated, const IR
               annotated->getNode(), message);
 }
 
-bool CheckDeprecated::preorder(const IR::PathExpression *expression) {
-    auto decl = refMap->getDeclaration(expression->path);
-    CHECK_NULL(decl);
+bool Deprecated::preorder(const IR::PathExpression *expression) {
+    auto decl = getDeclaration(expression->path, true);
     warnIfDeprecated(decl->to<IR::IAnnotated>(), expression);
     return false;
 }
 
-bool CheckDeprecated::preorder(const IR::Type_Name *name) {
-    auto decl = refMap->getDeclaration(name->path);
-    CHECK_NULL(decl);
+bool Deprecated::preorder(const IR::Type_Name *name) {
+    auto decl = getDeclaration(name->path, true);
     warnIfDeprecated(decl->to<IR::IAnnotated>(), name);
     return false;
 }

@@ -110,7 +110,7 @@ const IR::Node *MoveInitializers::preorder(IR::P4Parser *parser) {
         }
     }
     if (someInitializers) {
-        newStartName = refMap->newName(IR::ParserState::start.string_view());
+        newStartName = nameGen.newName(IR::ParserState::start.string_view());
         oldStart = parser->states.getDeclaration(IR::ParserState::start)->to<IR::ParserState>();
         CHECK_NULL(oldStart);
     }
@@ -159,9 +159,16 @@ const IR::Node *MoveInitializers::postorder(IR::P4Control *control) {
 
 const IR::Node *MoveInitializers::postorder(IR::Path *path) {
     if (oldStart == nullptr || path->name != IR::ParserState::start) return path;
-    auto decl = refMap->getDeclaration(getOriginal()->to<IR::Path>());
+    auto decl = getDeclaration(getOriginal()->to<IR::Path>());
     if (!decl->is<IR::ParserState>()) return path;
     return new IR::Path(newStartName);
+}
+
+Visitor::profile_t MoveInitializers::init_apply(const IR::Node *node) {
+    auto rv = Transform::init_apply(node);
+    node->apply(nameGen);
+
+    return rv;
 }
 
 }  // namespace P4
