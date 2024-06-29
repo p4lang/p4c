@@ -51,6 +51,10 @@ IR::StatOrDecl *DeclarationGenerator::generateRandomStatementOrDeclaration(bool 
         }
         return stmt;
     }
+    // Add an option to generate a for-loop statement.
+    // TODO(zzmic): Verify whether this support is needed in this function (or more broadly, in this declaraion file).
+    // As option 2 (`val == 2`) is used for generating assignment or method call statements, I boldly assume that this support may be needed 
+    // since we can't use it for generating for-loop statements.
     if (val == 3) {
         auto *stmt = genStmt.genForLoopStatement(is_in_func);
         if (stmt == nullptr) {
@@ -61,7 +65,7 @@ IR::StatOrDecl *DeclarationGenerator::generateRandomStatementOrDeclaration(bool 
         }
         return stmt;
     }
-    // Fallback
+    // Fallback.
     return target().declarationGenerator().genVariableDeclaration();
 }
 
