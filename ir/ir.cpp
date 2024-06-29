@@ -20,8 +20,6 @@ limitations under the License.
 
 #include <functional>
 #include <list>
-#include <map>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -89,7 +87,7 @@ Util::Enumerator<const IDeclaration *> *INestedNamespace::getDeclarations() cons
 
 bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
     auto paramList = getParameters()->parameters;
-    std::map<cstring, const IR::Parameter *> paramNames;
+    absl::flat_hash_map<cstring, const IR::Parameter *> paramNames;
     for (auto param : paramList) paramNames.emplace(param->name.name, param);
 
     size_t index = 0;
@@ -100,12 +98,10 @@ bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
         cstring argName = arg->name;
         if (argName.isNullOrEmpty()) argName = paramList.at(index)->name.name;
 
-        auto it = paramNames.find(argName);
-        if (it == paramNames.end())
+        if (!paramNames.erase(argName)) {
             // Argument name does not match a parameter
             return false;
-        else
-            paramNames.erase(it);
+        }
         index++;
     }
     // Check if all remaining parameters have default values
@@ -117,16 +113,15 @@ bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
 }
 
 void IGeneralNamespace::checkDuplicateDeclarations() const {
-    std::unordered_map<cstring, ID> seen;
-    for (auto decl : *getDeclarations()) {
+    absl::flat_hash_map<cstring, ID> seen;
+    for (const auto *decl : *getDeclarations()) {
         IR::ID name = decl->getName();
-        auto f = seen.find(name.name);
-        if (f != seen.end()) {
+        auto [it, inserted] = seen.emplace(name.name, name);
+        if (!inserted) {
             ::error(ErrorType::ERR_DUPLICATE,
                     "Duplicate declaration of %1%: previous declaration at %2%", name,
-                    f->second.srcInfo);
+                    it->second.srcInfo);
         }
-        seen.emplace(name.name, name);
     }
 }
 
