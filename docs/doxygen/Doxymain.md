@@ -1,9 +1,11 @@
 # Welcome to p4 Compiler's documentation!
 
-<div style="float: right;">
-<img src ="./arcitecture.svg"  width="600" height="400" >
+@htmlonly
+<div style="float: right;" id="svg-container">
+<img src ="./arcitecture.svg"  width="600" height="400" xmlns="http://www.w3.org/2000/svg" type="image/svg+xml" xmlns:xlink="http://www.w3.org/1999/xlink" >
 </div>
 
+@endhtmlonly
 `p4c` is a reference compiler for the P4 programming language. 
 
 @htmlonly
