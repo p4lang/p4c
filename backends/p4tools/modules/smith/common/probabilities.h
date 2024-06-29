@@ -24,8 +24,8 @@ static struct Probabilities {
     uint16_t STATEMENT_RETURN = 2;
     uint16_t STATEMENT_EXIT = 0;
     uint16_t STATEMENT_BLOCK = 2;
-    // Add probabilities for for-loop and for-in-loop statement(s)
-    // TODO(zzmic): Determine the probability for for-loop and for-in-loop statement(s)
+    // Add probabilities for for-loop and for-in-loop statement(s).
+    // TODO(zzmic): Determine the probability for for-loop and for-in-loop statement(s).
     uint16_t STATEMENT_FOR = 9;
     uint16_t STATEMENT_FOR_IN = 9;
 
