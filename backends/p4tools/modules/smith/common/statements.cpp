@@ -399,7 +399,7 @@ IR::ReturnStatement *StatementGenerator::genReturnStatement(const IR::Type *tp) 
 }
 
 /// Generate a for-loop statement.
-IR::Statement *StatementGenerator::genForLoopStatement(bool is_in_func) {
+IR::ForStatement *StatementGenerator::genForLoopStatement(bool is_in_func) {
     std::string loopVar = generateLoopControlVariable();
     int bitFieldWidth = Utils::getRandInt(1, 64);
     int upperBound = Utils::getRandInt(1, 100);
@@ -444,7 +444,7 @@ IR::Statement *StatementGenerator::genForLoopStatement(bool is_in_func) {
 }
 
 /// Generate a for-in-loop statement.
-IR::Statement *StatementGenerator::genForInLoopStatement(bool is_in_func) {
+IR::ForInStatement *StatementGenerator::genForInLoopStatement(bool is_in_func) {
     std::string loopVar = generateLoopControlVariable();
     int bitFieldWidth = Utils::getRandInt(1, 64);
     int lowerBound = Utils::getRandInt(0, 50);
