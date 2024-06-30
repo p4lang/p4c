@@ -64,106 +64,106 @@ std::string generateLoopControlVariable() {
     // Generate a random string of length 1 (i.e., a single character variable name, 
     // such as i, j, k, etc.).
     const std::string lowerCaseAlphabet = "abcdefghijklmnopqrstuvwxyz";
-    const char randomChar = lowerCaseAlphabet[Utils::getRandInt(0, lowerCaseAlphabet.size() - 1)];
+    const char randomChar = lowerCaseAlphabet[Utils::getRandInt(lowerCaseAlphabet.size()-1)];
     return std::string(1, randomChar);
 }
 
-/// TODO(zzmic): Consider deprecating the following function.
-/// Generate a random loop initialization statement.
-std::string generateForLoopInitialization(const std::string &var) {
-    std::stringstream ss;
-    int basicTypeOption = Utils::getRandInt(0, 3);    
-    int bitFieldWidth = 0; 
-    switch (basicTypeOption) {
-        // Unsigned integer (bitstring) of size n.
-        case 0:
-            bitFieldWidth = Utils::getRandInt(1, 64);
-            ss << "bit<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
-            break;
-        // bit is the same as bit<1>.
-        case 1:
-            ss << "bit " << var << " = 0";
-            break; 
-        // Signed integer (bitstring) of size n (>= 2). 
-        case 2:
-            bitFieldWidth = Utils::getRandInt(2, 32);
-            ss << "int<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
-            break;
-        // Variable-length bitstring.
-        case 3:
-            bitFieldWidth = Utils::getRandInt(1, 64);
-            ss << "varbit<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
-            break;
-    }
-    return ss.str();
-}
+// /// TODO(zzmic): Consider deprecating the following function.
+// /// Generate a random loop initialization statement.
+// std::string generateForLoopInitialization(const std::string &var) {
+//     std::stringstream ss;
+//     int basicTypeOption = Utils::getRandInt(0, 3);    
+//     int bitFieldWidth = 0; 
+//     switch (basicTypeOption) {
+//         // Unsigned integer (bitstring) of size n.
+//         case 0:
+//             bitFieldWidth = Utils::getRandInt(1, 64);
+//             ss << "bit<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
+//             break;
+//         // bit is the same as bit<1>.
+//         case 1:
+//             ss << "bit " << var << " = 0";
+//             break; 
+//         // Signed integer (bitstring) of size n (>= 2). 
+//         case 2:
+//             bitFieldWidth = Utils::getRandInt(2, 32);
+//             ss << "int<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
+//             break;
+//         // Variable-length bitstring.
+//         case 3:
+//             bitFieldWidth = Utils::getRandInt(1, 64);
+//             ss << "varbit<" << std::to_string(bitFieldWidth) << "> " << var << " = 0";
+//             break;
+//     }
+//     return ss.str();
+// }
 
-/// TODO(zzmic): Consider deprecating the following function.
-/// Generate a random loop condition statement.
-std::string generateForLoopCondition(const std::string &var) {
-    std::stringstream ss;
-    int upperBound = Utils::getRandInt(0, 100);
-    ss << var << " < " << std::to_string(upperBound);
-    return ss.str();
-}
+// /// TODO(zzmic): Consider deprecating the following function.
+// /// Generate a random loop condition statement.
+// std::string generateForLoopCondition(const std::string &var) {
+//     std::stringstream ss;
+//     int upperBound = Utils::getRandInt(0, 100);
+//     ss << var << " < " << std::to_string(upperBound);
+//     return ss.str();
+// }
 
-/// TODO(zzmic): Consider deprecating the following function.
-/// Generate a random loop update (only consider increments for now) statement.
-std::string generateForLoopUpdate(const std::string &var) {
-    std::stringstream ss;
-    int stepSize = Utils::getRandInt(0, 100);
-    ss << var << " = " << var << " + " << std::to_string(stepSize);
-    return ss.str();
-}
+// /// TODO(zzmic): Consider deprecating the following function.
+// /// Generate a random loop update (only consider increments for now) statement.
+// std::string generateForLoopUpdate(const std::string &var) {
+//     std::stringstream ss;
+//     int stepSize = Utils::getRandInt(0, 100);
+//     ss << var << " = " << var << " + " << std::to_string(stepSize);
+//     return ss.str();
+// }
 
-/// TODO(zzmic): Consider deprecating the following function.
-/// Generate a random loop progression statement (for for-in loop generation).
-std::string generateForInLoopProgression(const std::string &var, const std::string &start, const std::string &end) {
-    std::stringstream ss;
-    int basicTypeOption = Utils::getRandInt(0, 3);
-    int bitFieldWidth = 0;
-    switch (basicTypeOption) {
-        // Unsigned integer (bitstring) of size n.
-        case 0:
-            bitFieldWidth = Utils::getRandInt(1, 64);
-            ss << "bit<" << std::to_string(bitFieldWidth) << ">" << var;
-            break;
-        // bit is the same as bit<1>.
-        case 1:
-            ss << "bit " << var;
-            break; 
-        // Signed integer (bitstring) of size n (>= 2). 
-        case 2:
-            bitFieldWidth = Utils::getRandInt(2, 32);
-            ss << "int<" << std::to_string(bitFieldWidth) << "> " << var;
-            break;
-        // Variable-length bitstring.
-        case 3:
-            bitFieldWidth = Utils::getRandInt(1, 64);
-            ss << "varbit<" << std::to_string(bitFieldWidth) << "> " << var;
-            break;
-    }
-    ss << " in " << start << " .. " << end;
-    return ss.str();
-}
+// /// TODO(zzmic): Consider deprecating the following function.
+// /// Generate a random loop progression statement (for for-in loop generation).
+// std::string generateForInLoopProgression(const std::string &var, const std::string &start, const std::string &end) {
+//     std::stringstream ss;
+//     int basicTypeOption = Utils::getRandInt(0, 3);
+//     int bitFieldWidth = 0;
+//     switch (basicTypeOption) {
+//         // Unsigned integer (bitstring) of size n.
+//         case 0:
+//             bitFieldWidth = Utils::getRandInt(1, 64);
+//             ss << "bit<" << std::to_string(bitFieldWidth) << ">" << var;
+//             break;
+//         // bit is the same as bit<1>.
+//         case 1:
+//             ss << "bit " << var;
+//             break; 
+//         // Signed integer (bitstring) of size n (>= 2). 
+//         case 2:
+//             bitFieldWidth = Utils::getRandInt(2, 32);
+//             ss << "int<" << std::to_string(bitFieldWidth) << "> " << var;
+//             break;
+//         // Variable-length bitstring.
+//         case 3:
+//             bitFieldWidth = Utils::getRandInt(1, 64);
+//             ss << "varbit<" << std::to_string(bitFieldWidth) << "> " << var;
+//             break;
+//     }
+//     ss << " in " << start << " .. " << end;
+//     return ss.str();
+// }
 
-/// TODO(zzmic): Consider deprecating the following function.
-/// Generate a random loop body that involves one variable.
-std::string generateLoopBody(const std::string &var) {
-    return "";
-}
+// /// TODO(zzmic): Consider deprecating the following function.
+// /// Generate a random loop body that involves one variable.
+// std::string generateLoopBody(const std::string &var) {
+//     return "";
+// }
 
-/// TODO(zzmic): Consider deprecating the following function.
-/// Generate a random loop body that involves two variables.
-std::string generateLoopBody(const std::string &var1, const std::string &var2) {    
-    return "";
-}
+// /// TODO(zzmic): Consider deprecating the following function.
+// /// Generate a random loop body that involves two variables.
+// std::string generateLoopBody(const std::string &var1, const std::string &var2) {    
+//     return "";
+// }
 
-/// TODO(zzmic): Consider deprecating the following function.
-/// Generate a random loop body that involves multiple (two or more but undetermined) variables.
-template <typename... Args>
-std::string generateLoopBody(const std::string &var1, const std::string &var2, const Args&... args) {
-    return "";
-}
+// /// TODO(zzmic): Consider deprecating the following function.
+// /// Generate a random loop body that involves multiple (two or more but undetermined) variables.
+// template <typename... Args>
+// std::string generateLoopBody(const std::string &var1, const std::string &var2, const Args&... args) {
+//     return "";
+// }
 
 }  // namespace P4Tools::P4Smith
