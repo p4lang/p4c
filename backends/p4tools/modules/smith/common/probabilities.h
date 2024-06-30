@@ -18,18 +18,16 @@ static struct Probabilities {
     uint16_t ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_BUILT_IN = 1;
 
     // probabilities for statements
-    uint16_t STATEMENT_SWITCH = 0;
-    uint16_t STATEMENT_ASSIGNMENTORMETHODCALL = 0;
-    uint16_t STATEMENT_IF = 0;
-    uint16_t STATEMENT_RETURN = 0;
+    uint16_t STATEMENT_SWITCH = 5;
+    uint16_t STATEMENT_ASSIGNMENTORMETHODCALL = 70;
+    uint16_t STATEMENT_IF = 3;
+    uint16_t STATEMENT_RETURN = 2;
     uint16_t STATEMENT_EXIT = 0;
-    uint16_t STATEMENT_BLOCK = 0;
+    uint16_t STATEMENT_BLOCK = 2;
     // Add probabilities for for-loop and for-in-loop statement(s).
     // TODO(zzmic): Determine the probability for for-loop and for-in-loop statement(s).
-    // Dramatically decrease the probabilities for other statement generations to intentionally 
-    // test out whether for-loop and for-in-loop statement(s) could be generated.
-    uint16_t STATEMENT_FOR = 50;
-    uint16_t STATEMENT_FOR_IN = 50;
+    uint16_t STATEMENT_FOR = 9;
+    uint16_t STATEMENT_FOR_IN = 9;
 
     // probabilities to pick a slice when requesting an lval
     uint16_t SCOPE_LVAL_PATH = 90;
