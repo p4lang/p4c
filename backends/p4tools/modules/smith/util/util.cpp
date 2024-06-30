@@ -63,7 +63,9 @@ std::string getRandomString(size_t len) {
 std::string generateLoopControlVariable() {
     // Generate a random string of length 1 (i.e., a single character variable name, 
     // such as i, j, k, etc.).
-    return getRandomString(1); 
+    const std::string lowerCaseAlphabet = "abcdefghijklmnopqrstuvwxyz";
+    const char randomChar = lowerCaseAlphabet[Utils::getRandInt(0, lowerCaseAlphabet.size() - 1)];
+    return std::string(1, randomChar);
 }
 
 /// TODO(zzmic): Consider deprecating the following function.
