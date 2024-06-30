@@ -53,6 +53,15 @@ bool ToP4::isSystemFile(cstring file) {
     return false;
 }
 
+// Try to guess whether a file is a "system internal" file
+bool ToP4::isSystemInternalFile(cstring file) {
+    if (noIncludes) return false;
+    if (file.startsWith(p4includeInternalPath) || file.find("p4include/_internal") != nullptr) {
+        return true;
+    }
+    return false;
+}
+
 cstring ToP4::ifSystemFile(const IR::Node *node) {
     if (!node->srcInfo.isValid()) return nullptr;
     auto sourceFile = node->srcInfo.getSourceFile();
@@ -165,10 +174,10 @@ bool ToP4::preorder(const IR::P4Program *program) {
              * non-system header */
 
             if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
-                if (sourceFile.startsWith(p4includePath)) {
+                if (isSystemFile(sourceFile)) {
                     // Skip the include if it's an internal system header.
                     // TODO: This is a temporary hack. Need to figure out a better solution.
-                    if (sourceFile.startsWith(p4includeInternalPath)) continue;
+                    if (isSystemInternalFile(sourceFile)) continue;
 
                     const char *p = sourceFile.c_str() + strlen(p4includePath);
                     if (*p == '/') p++;
