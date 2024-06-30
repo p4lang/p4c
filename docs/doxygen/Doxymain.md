@@ -1,14 +1,12 @@
 # Welcome to p4 Compiler's documentation!
 
-@htmlonly
-<div style="float: right;" id="svg-container">
-<img src ="./arcitecture.svg"  width="600" height="400" xmlns="http://www.w3.org/2000/svg" type="image/svg+xml" xmlns:xlink="http://www.w3.org/1999/xlink" >
-</div>
-
-@endhtmlonly
 `p4c` is a reference compiler for the P4 programming language. 
 
 @htmlonly
+<!-- draw.io diagram -->
+<div class="mxgraph" style="" data-mxgraph="{&quot;highlight&quot;:&quot;#0000ff&quot;,&quot;lightbox&quot;:false,&quot;nav&quot;:true,&quot;edit&quot;:&quot;_blank&quot;,&quot;url&quot;:&quot;https://drive.google.com/uc?id=16X8Z_4-J8mHQPxuxm9HjWppPMTTXZdZ6&amp;export=download&quot;}"></div>
+<script type="text/javascript" src="https://viewer.diagrams.net/embed2.js?&fetch=https%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D16X8Z_4-J8mHQPxuxm9HjWppPMTTXZdZ6%26export%3Ddownload"></script>
+
 <!-- https://www.svgrepo.com/collection/scarlab-oval-line-icons/ -->
 <div class="card-container">
 
