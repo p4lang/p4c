@@ -17,9 +17,61 @@ limitations under the License.
 
 #include "psaProgramStructure.h"
 
+#include "backends/bmv2/common/control.h"
+#include "backends/bmv2/common/deparser.h"
+#include "backends/bmv2/common/parser.h"
+
 namespace BMV2 {
 
 using namespace P4::literals;
+
+void PsaProgramStructure::create(ConversionContext *ctxt) {
+    createTypes(ctxt);
+    createHeaders(ctxt);
+    createScalars(ctxt);
+    createExterns();
+    createParsers(ctxt);
+    createActions(ctxt);
+    createControls(ctxt);
+    createDeparsers(ctxt);
+    createGlobals();
+}
+
+void PsaProgramStructure::createParsers(ConversionContext *ctxt) {
+    {
+        auto cvt = new ParserConverter(ctxt, "ingress_parser"_cs);
+        auto ingress = parsers.at("ingress"_cs);
+        ingress->apply(*cvt);
+    }
+    {
+        auto cvt = new ParserConverter(ctxt, "egress_parser"_cs);
+        auto egress = parsers.at("egress"_cs);
+        egress->apply(*cvt);
+    }
+}
+
+void PsaProgramStructure::createControls(ConversionContext *ctxt) {
+    auto cvt = new BMV2::ControlConverter<Standard::Arch::PSA>(ctxt, "ingress"_cs, true);
+    auto ingress = pipelines.at("ingress"_cs);
+    ingress->apply(*cvt);
+
+    cvt = new BMV2::ControlConverter<Standard::Arch::PSA>(ctxt, "egress"_cs, true);
+    auto egress = pipelines.at("egress"_cs);
+    egress->apply(*cvt);
+}
+
+void PsaProgramStructure::createDeparsers(ConversionContext *ctxt) {
+    {
+        auto cvt = new DeparserConverter(ctxt, "ingress_deparser"_cs);
+        auto ingress = deparsers.at("ingress"_cs);
+        ingress->apply(*cvt);
+    }
+    {
+        auto cvt = new DeparserConverter(ctxt, "egress_deparser"_cs);
+        auto egress = deparsers.at("egress"_cs);
+        egress->apply(*cvt);
+    }
+}
 
 void InspectPsaProgram::postorder(const IR::Declaration_Instance *di) {
     if (!pinfo->resourceMap.count(di)) return;

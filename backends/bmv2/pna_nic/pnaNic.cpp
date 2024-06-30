@@ -23,40 +23,6 @@ namespace BMV2 {
 
 using namespace P4::literals;
 
-void PnaCodeGenerator::create(ConversionContext *ctxt) {
-    createTypes(ctxt);
-    createHeaders(ctxt);
-    createScalars(ctxt);
-    createExterns();
-    createParsers(ctxt);
-    createActions(ctxt);
-    createControls(ctxt);
-    createDeparsers(ctxt);
-    createGlobals();
-}
-
-void PnaCodeGenerator::createParsers(ConversionContext *ctxt) {
-    {
-        auto cvt = new ParserConverter(ctxt, "main_parser"_cs);
-        auto main_control = parsers.at("main_parser"_cs);
-        main_control->apply(*cvt);
-    }
-}
-
-void PnaCodeGenerator::createControls(ConversionContext *ctxt) {
-    auto cvt = new BMV2::ControlConverter<Standard::Arch::PNA>(ctxt, "main_control"_cs, true);
-    auto main_control = pipelines.at("main_control"_cs);
-    main_control->apply(*cvt);
-}
-
-void PnaCodeGenerator::createDeparsers(ConversionContext *ctxt) {
-    {
-        auto cvt = new DeparserConverter(ctxt, "main_deparser"_cs);
-        auto main_control = deparsers.at("main_deparser"_cs);
-        main_control->apply(*cvt);
-    }
-}
-
 void PnaNicBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
     PnaProgramStructure structure(refMap, typeMap);
@@ -83,14 +49,14 @@ void PnaNicBackend::convert(const IR::ToplevelBlock *tlb) {
                                   new SkipControls(&structure.non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
-        new P4::SimplifyControlFlow(refMap, typeMap),
+        new P4::SimplifyControlFlow(typeMap),
         new LowerExpressions(typeMap),
         new PassRepeated(
-            {new P4::ConstantFolding(refMap, typeMap), new P4::StrengthReduction(refMap, typeMap)}),
+            {new P4::ConstantFolding(refMap, typeMap), new P4::StrengthReduction(typeMap)}),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveComplexExpressions(refMap, typeMap,
                                          new ProcessControls(&structure.pipeline_controls)),
-        new P4::SimplifyControlFlow(refMap, typeMap),
+        new P4::SimplifyControlFlow(typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap, P4::RemoveUnusedPolicy()),
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.
@@ -275,7 +241,7 @@ void ExternConverter_Hash::convertExternInstance(ConversionContext *ctxt, const 
                                                  UNUSED const bool &emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
-    auto pnaStructure = static_cast<PnaCodeGenerator *>(ctxt->structure);
+    auto pnaStructure = static_cast<PnaProgramStructure *>(ctxt->structure);
 
     // add hash instance
     auto jhash = new Util::JsonObject();

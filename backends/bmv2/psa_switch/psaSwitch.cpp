@@ -23,54 +23,6 @@ namespace BMV2 {
 
 using namespace P4::literals;
 
-void PsaCodeGenerator::create(ConversionContext *ctxt) {
-    createTypes(ctxt);
-    createHeaders(ctxt);
-    createScalars(ctxt);
-    createExterns();
-    createParsers(ctxt);
-    createActions(ctxt);
-    createControls(ctxt);
-    createDeparsers(ctxt);
-    createGlobals();
-}
-
-void PsaCodeGenerator::createParsers(ConversionContext *ctxt) {
-    {
-        auto cvt = new ParserConverter(ctxt, "ingress_parser"_cs);
-        auto ingress = parsers.at("ingress"_cs);
-        ingress->apply(*cvt);
-    }
-    {
-        auto cvt = new ParserConverter(ctxt, "egress_parser"_cs);
-        auto ingress = parsers.at("egress"_cs);
-        ingress->apply(*cvt);
-    }
-}
-
-void PsaCodeGenerator::createControls(ConversionContext *ctxt) {
-    auto cvt = new BMV2::ControlConverter<Standard::Arch::PSA>(ctxt, "ingress"_cs, true);
-    auto ingress = pipelines.at("ingress"_cs);
-    ingress->apply(*cvt);
-
-    cvt = new BMV2::ControlConverter<Standard::Arch::PSA>(ctxt, "egress"_cs, true);
-    auto egress = pipelines.at("egress"_cs);
-    egress->apply(*cvt);
-}
-
-void PsaCodeGenerator::createDeparsers(ConversionContext *ctxt) {
-    {
-        auto cvt = new DeparserConverter(ctxt, "ingress_deparser"_cs);
-        auto ingress = deparsers.at("ingress"_cs);
-        ingress->apply(*cvt);
-    }
-    {
-        auto cvt = new DeparserConverter(ctxt, "egress_deparser"_cs);
-        auto egress = deparsers.at("egress"_cs);
-        egress->apply(*cvt);
-    }
-}
-
 void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
     PsaProgramStructure structure(refMap, typeMap);
@@ -291,7 +243,7 @@ void ExternConverter_Hash::convertExternInstance(ConversionContext *ctxt, const 
                                                  UNUSED const bool &emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
-    auto psaStructure = static_cast<PsaCodeGenerator *>(ctxt->structure);
+    auto psaStructure = static_cast<PsaProgramStructure *>(ctxt->structure);
 
     // add hash instance
     auto jhash = new Util::JsonObject();

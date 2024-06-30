@@ -16,9 +16,47 @@ limitations under the License.
 
 #include "pnaProgramStructure.h"
 
+#include "backends/bmv2/common/control.h"
+#include "backends/bmv2/common/deparser.h"
+#include "backends/bmv2/common/parser.h"
+
 namespace BMV2 {
 
 using namespace P4::literals;
+
+void PnaProgramStructure::create(ConversionContext *ctxt) {
+    createTypes(ctxt);
+    createHeaders(ctxt);
+    createScalars(ctxt);
+    createExterns();
+    createParsers(ctxt);
+    createActions(ctxt);
+    createControls(ctxt);
+    createDeparsers(ctxt);
+    createGlobals();
+}
+
+void PnaProgramStructure::createParsers(ConversionContext *ctxt) {
+    {
+        auto cvt = new ParserConverter(ctxt, "main_parser"_cs);
+        auto main_control = parsers.at("main_parser"_cs);
+        main_control->apply(*cvt);
+    }
+}
+
+void PnaProgramStructure::createControls(ConversionContext *ctxt) {
+    auto cvt = new BMV2::ControlConverter<Standard::Arch::PNA>(ctxt, "main_control"_cs, true);
+    auto main_control = pipelines.at("main_control"_cs);
+    main_control->apply(*cvt);
+}
+
+void PnaProgramStructure::createDeparsers(ConversionContext *ctxt) {
+    {
+        auto cvt = new DeparserConverter(ctxt, "main_deparser"_cs);
+        auto main_control = deparsers.at("main_deparser"_cs);
+        main_control->apply(*cvt);
+    }
+}
 
 void InspectPnaProgram::postorder(const IR::Declaration_Instance *di) {
     if (!pinfo->resourceMap.count(di)) return;

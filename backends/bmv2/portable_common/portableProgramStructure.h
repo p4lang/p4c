@@ -14,13 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_BMV2_PORTABLECOMMON_PROGRAMSTRUCTURE_H_
-#define BACKENDS_BMV2_PORTABLECOMMON_PROGRAMSTRUCTURE_H_
+#ifndef BACKENDS_BMV2_PORTABLE_COMMON_PORTABLEPROGRAMSTRUCTURE_H_
+#define BACKENDS_BMV2_PORTABLE_COMMON_PORTABLEPROGRAMSTRUCTURE_H_
 
+#include "backends/bmv2/common/action.h"
 #include "backends/bmv2/common/backend.h"
+#include "backends/bmv2/common/control.h"
+#include "backends/bmv2/common/extern.h"
+#include "backends/bmv2/common/header.h"
+#include "backends/bmv2/common/helpers.h"
+#include "backends/bmv2/common/lower.h"
 #include "backends/bmv2/common/programStructure.h"
+#include "frontends/common/constantFolding.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/enumInstance.h"
+#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/simplify.h"
+#include "frontends/p4/strengthReduction.h"
+#include "frontends/p4/typeMap.h"
+#include "frontends/p4/unusedDeclarations.h"
 #include "ir/ir.h"
+#include "lib/big_int_util.h"
 #include "lib/cstring.h"
+#include "lib/json.h"
 
 /// TODO: this is not really specific to BMV2, it should reside somewhere else.
 namespace BMV2 {
@@ -66,20 +84,20 @@ class PortableProgramStructure : public ProgramStructure {
     std::set<cstring> non_pipeline_controls;
     std::set<cstring> pipeline_controls;
 
-    bool hasVisited(const IR::Type_StructLike *st) {
-        if (auto h = st->to<IR::Type_Header>())
-            return header_types.count(h->getName());
-        else if (auto s = st->to<IR::Type_Struct>())
-            return metadata_types.count(s->getName());
-        else if (auto u = st->to<IR::Type_HeaderUnion>())
-            return header_union_types.count(u->getName());
-        return false;
-    }
+    void createStructLike(ConversionContext *ctxt, const IR::Type_StructLike *st);
+    void createTypes(ConversionContext *ctxt);
+    void createHeaders(ConversionContext *ctxt);
+    void createScalars(ConversionContext *ctxt);
+    void createExterns();
+    void createActions(ConversionContext *ctxt);
+    void createGlobals();
+    cstring convertHashAlgorithm(cstring algo);
+
+    bool hasVisited(const IR::Type_StructLike *st);
 };
 
 class ParsePortableArchitecture : public Inspector {
  public:
-
     bool preorder(const IR::ToplevelBlock *block) override;
 };
 
@@ -100,4 +118,4 @@ class InspectPortableProgram : public Inspector {
 
 }  // namespace BMV2
 
-#endif /* BACKENDS_BMV2_PORTABLECOMMON_PROGRAMSTRUCTURE_H_ */
+#endif /* BACKENDS_BMV2_PORTABLE_COMMON_PORTABLEPROGRAMSTRUCTURE_H_ */

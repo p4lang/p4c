@@ -24,7 +24,6 @@ namespace BMV2 {
 
 class PortableOptions : public BMV2Options {
  public:
-
     /// Process the command line arguments and set options accordingly.
     std::vector<const char *> *process(int argc, char *const argv[]) override;
 };

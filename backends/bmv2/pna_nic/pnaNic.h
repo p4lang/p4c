@@ -73,17 +73,6 @@ class PnaNicExpressionConverter : public ExpressionConverter {
     }
 };
 
-class PnaCodeGenerator : public PortableCodeGenerator {
- public:
-    PnaCodeGenerator(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-        : PortableCodeGenerator(refMap, typeMap) {}
-
-    void create(ConversionContext *ctxt);
-    void createParsers(ConversionContext *ctxt);
-    void createControls(ConversionContext *ctxt);
-    void createDeparsers(ConversionContext *ctxt);
-};
-
 class ConvertPnaToJson : public Inspector {
  public:
     P4::ReferenceMap *refMap;
@@ -91,7 +80,6 @@ class ConvertPnaToJson : public Inspector {
     const IR::ToplevelBlock *toplevel;
     JsonObjects *json;
     PnaProgramStructure *structure;
-    PnaCodeGenerator *codeGenerator;
 
     ConvertPnaToJson(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                      const IR::ToplevelBlock *toplevel, JsonObjects *json,
@@ -102,8 +90,6 @@ class ConvertPnaToJson : public Inspector {
         CHECK_NULL(toplevel);
         CHECK_NULL(json);
         CHECK_NULL(structure);
-        codeGenerator = new PnaCodeGenerator(refMap, typeMap);
-        CHECK_NULL(codeGenerator);
     }
 
     void postorder(UNUSED const IR::P4Program *program) override {
@@ -111,7 +97,7 @@ class ConvertPnaToJson : public Inspector {
         // This visitor is used in multiple passes to convert expression to json
         auto conv = new PnaNicExpressionConverter(refMap, typeMap, structure, scalarsName);
         auto ctxt = new ConversionContext(refMap, typeMap, toplevel, structure, conv, json);
-        codeGenerator->create(ctxt);
+        structure->create(ctxt);
     }
 };
 

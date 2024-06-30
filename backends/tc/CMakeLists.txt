@@ -37,6 +37,18 @@ set(P4TC_BACKEND_SOURCES
     ../ebpf/ebpfModel.cpp
     ../ebpf/midend.cpp
     ../ebpf/lower.cpp
+    ../bmv2/common/JsonObjects.cpp
+    ../bmv2/common/action.cpp
+    ../bmv2/common/controlFlowGraph.cpp
+    ../bmv2/common/deparser.cpp
+    ../bmv2/common/expression.cpp
+    ../bmv2/common/extern.cpp
+    ../bmv2/common/globals.cpp
+    ../bmv2/common/header.cpp
+    ../bmv2/common/helpers.cpp
+    ../bmv2/common/lower.cpp
+    ../bmv2/common/metermap.cpp
+    ../bmv2/common/parser.cpp
     ../bmv2/common/programStructure.cpp
     ../bmv2/portable_common/portableProgramStructure.cpp
     ../bmv2/psa_switch/psaProgramStructure.cpp
@@ -81,7 +93,26 @@ set(P4TC_BACKEND_HEADERS
    ../ebpf/midend.h
    ../ebpf/target.h
    ../ebpf/lower.h
+   ../bmv2/common/JsonObjects.h
+   ../bmv2/common/action.h
+   ../bmv2/common/annotations.h
+   ../bmv2/common/backend.h
+   ../bmv2/common/check_unsupported.h
+   ../bmv2/common/control.h
+   ../bmv2/common/controlFlowGraph.h
+   ../bmv2/common/deparser.h
+   ../bmv2/common/expression.h
+   ../bmv2/common/extern.h
+   ../bmv2/common/globals.h
+   ../bmv2/common/header.h
+   ../bmv2/common/helpers.h
+   ../bmv2/common/lower.h
+   ../bmv2/common/metermap.h
+   ../bmv2/common/midend.h
+   ../bmv2/common/options.h
+   ../bmv2/common/parser.h
    ../bmv2/common/programStructure.h
+   ../bmv2/common/sharedActionSelectorCheck.h
    ../bmv2/portable_common/portableProgramStructure.h
    ../bmv2/psa_switch/psaProgramStructure.h
    ../bmv2/psa_switch/psaSwitch.h

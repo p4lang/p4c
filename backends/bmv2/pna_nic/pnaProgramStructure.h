@@ -37,6 +37,11 @@ class PnaProgramStructure : public PortableProgramStructure {
     PnaProgramStructure(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
         : PortableProgramStructure(refMap, typeMap) {}
 
+    void create(ConversionContext *ctxt);
+    void createParsers(ConversionContext *ctxt);
+    void createControls(ConversionContext *ctxt);
+    void createDeparsers(ConversionContext *ctxt);
+
     /// Checks if a string is of type PNA_CounterType_t returns true
     /// if it is, false otherwise.
     static bool isCounterMetadata(cstring ptName) { return !strcmp(ptName, "PNA_CounterType_t"); }
@@ -79,8 +84,7 @@ class InspectPnaProgram : public InspectPortableProgram {
 
  public:
     InspectPnaProgram(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, PnaProgramStructure *pinfo)
-    : InspectPortableProgram(refMap, typeMap),
-      pinfo(pinfo) {
+        : InspectPortableProgram(refMap, typeMap), pinfo(pinfo) {
         CHECK_NULL(pinfo);
         setName("InspectPnaProgram");
     }
