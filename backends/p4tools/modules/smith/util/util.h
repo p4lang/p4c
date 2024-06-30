@@ -25,15 +25,15 @@ std::string getRandomString(size_t len);
 /// In tandem, they can be used to generate a complete for-loop by calling `generateForLoop()`.
 std::string generateLoopControlVariable();
 
-/// TODO(zzmic): Consider deprecating the following functions. 
-std::string generateForLoopInitialization(const std::string &var);
-std::string generateForLoopCondition(const std::string &var);
-std::string generateForLoopUpdate(const std::string &var);
-std::string generateLoopBody(const std::string &var);
-std::string generateLoopBody(const std::string &var1, const std::string &var2);
-template <typename... Args>
-std::string generateLoopBody(const std::string &var1, const std::string &var2, const Args&... args);
-std::string generateForInLoopProgression(const std::string &var, const std::string &start, const std::string &end);
+// /// TODO(zzmic): Consider deprecating the following functions. 
+// std::string generateForLoopInitialization(const std::string &var);
+// std::string generateForLoopCondition(const std::string &var);
+// std::string generateForLoopUpdate(const std::string &var);
+// std::string generateLoopBody(const std::string &var);
+// std::string generateLoopBody(const std::string &var1, const std::string &var2);
+// template <typename... Args>
+// std::string generateLoopBody(const std::string &var1, const std::string &var2, const Args&... args);
+// std::string generateForInLoopProgression(const std::string &var, const std::string &start, const std::string &end);
 
 }  // namespace P4Tools::P4Smith
 
