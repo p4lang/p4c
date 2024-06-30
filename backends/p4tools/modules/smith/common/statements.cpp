@@ -33,7 +33,10 @@ IR::Statement *StatementGenerator::genStatement(bool is_in_func) {
                                     PCT.STATEMENT_IF,
                                     PCT.STATEMENT_RETURN,
                                     pctExit,
-                                    PCT.STATEMENT_BLOCK};
+                                    PCT.STATEMENT_BLOCK,
+                                    // Add the for-loop statement and the for-in-loop statement generation percentages.
+                                    PCT.STATEMENT_FOR,
+                                    PCT.STATEMENT_FOR_IN};
     IR::Statement *stmt = nullptr;
     bool useDefaultStmt = false;
 
@@ -68,11 +71,17 @@ IR::Statement *StatementGenerator::genStatement(bool is_in_func) {
         // Add a new case for the for-loop statement generation.
         case 6: {
             stmt = genForLoopStatement(is_in_func);
+            if (stmt == nullptr) {
+                useDefaultStmt = true;
+            }
             break;
         }
         // Add a new case for the for-in-loop statement generation.
         case 7: {
             stmt = genForInLoopStatement(is_in_func);
+            if (stmt == nullptr) {
+                useDefaultStmt = true;
+            }
             break;
         }
     }
@@ -401,13 +410,15 @@ IR::ReturnStatement *StatementGenerator::genReturnStatement(const IR::Type *tp) 
 /// Generate a for-loop statement.
 IR::ForStatement *StatementGenerator::genForLoopStatement(bool is_in_func) {
     std::string loopVar = generateLoopControlVariable();
+    // TODO(zzmic): Determine the exact range of the bit field width and the upper bound.
     int bitFieldWidth = Utils::getRandInt(1, 64);
     int upperBound = Utils::getRandInt(1, 100);
 
-    // Create the IR nodes for the for-loop components
+    // Create the IR nodes for the for-loop components.
     auto *initExpr = new IR::Declaration_Variable(
-        loopVar, 
+        IR::ID(loopVar), 
         IR::Type_Bits::get(bitFieldWidth), 
+        // TODO(zzmic): Perhaps randomize the initial value.
         new IR::Constant(IR::Type_Bits::get(bitFieldWidth), 0)
     );  
     auto *condExpr = new IR::Lss(
@@ -420,6 +431,7 @@ IR::ForStatement *StatementGenerator::genForLoopStatement(bool is_in_func) {
         new IR::Add(
             IR::Type_Bits::get(bitFieldWidth), 
             new IR::PathExpression(loopVar), 
+            // TODO(zzmic): Perhaps randomize the increment value.
             new IR::Constant(IR::Type_Bits::get(bitFieldWidth), 1)
         )
     );
@@ -446,14 +458,16 @@ IR::ForStatement *StatementGenerator::genForLoopStatement(bool is_in_func) {
 /// Generate a for-in-loop statement.
 IR::ForInStatement *StatementGenerator::genForInLoopStatement(bool is_in_func) {
     std::string loopVar = generateLoopControlVariable();
+    // TODO(zzmic): Determine the exact range of the bit field width, the lower bound, and the upper bound.
     int bitFieldWidth = Utils::getRandInt(1, 64);
     int lowerBound = Utils::getRandInt(0, 50);
     int upperBound = Utils::getRandInt(50, 100);
 
     // Create the IR nodes for the for-in-loop component expressions.
     auto declVar = new IR::Declaration_Variable(
-        loopVar, 
+        IR::ID(loopVar),
         IR::Type_Bits::get(bitFieldWidth), 
+        // TODO(zzmic): Perhaps randomize the initial value.
         new IR::Constant(IR::Type_Bits::get(bitFieldWidth), 0)
     );   
     auto collectionExpr = new IR::Range(
