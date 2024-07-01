@@ -1,5 +1,3 @@
-#include "gtest/gtest.h"
-#include "backends/p4tools/modules/smith/smith.h"
 #include "backends/p4tools/modules/smith/common/declarations.h"
 #include "backends/p4tools/modules/smith/common/expressions.h"
 #include "backends/p4tools/modules/smith/common/generator.h"
@@ -9,14 +7,16 @@
 #include "backends/p4tools/modules/smith/common/statements.h"
 #include "backends/p4tools/modules/smith/common/table.h"
 #include "backends/p4tools/modules/smith/core/target.h"
-#include "ir/ir.h"
+#include "backends/p4tools/modules/smith/smith.h"
+#include "gtest/gtest.h"
 #include "ir/ir-generated.h"
+#include "ir/ir.h"
 
 namespace Test {
 
 class P4SmithForInLoopTest : public ::testing::Test {
-protected:
-    P4Tools::P4Smith::StatementGenerator* generator;
+ protected:
+    P4Tools::P4Smith::StatementGenerator *generator;
 
     // TODO(zzmic): Figure out how to properly initialize and clean up the test object.
     P4SmithForInLoopTest() {}
@@ -38,7 +38,7 @@ TEST_F(P4SmithForInLoopTest, CheckForLoopDeclarationVariable) {
 
     // TODO(zzmic): Figure out whether this "static_cast" is necessary.
     auto forInStmt = forInLoopStmt->to<IR::ForInStatement>();
-    ASSERT_NE(forInStmt->decl, nullptr);    
+    ASSERT_NE(forInStmt->decl, nullptr);
     EXPECT_TRUE(forInStmt->decl->is<IR::Declaration_Variable>());
 }
 
@@ -66,4 +66,4 @@ TEST_F(P4SmithForInLoopTest, CheckForLoopBody) {
     EXPECT_FALSE(forInStmt->body->is<IR::Statement>());
 }
 
-} // namespace Test
+}  // namespace Test

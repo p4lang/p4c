@@ -28,15 +28,12 @@ IR::Statement *StatementGenerator::genStatement(bool is_in_func) {
     if (is_in_func) {
         pctExit = 0;
     }
-    std::vector<int64_t> percent = {PCT.STATEMENT_SWITCH,
-                                    PCT.STATEMENT_ASSIGNMENTORMETHODCALL,
-                                    PCT.STATEMENT_IF,
-                                    PCT.STATEMENT_RETURN,
-                                    pctExit,
+    std::vector<int64_t> percent = {PCT.STATEMENT_SWITCH, PCT.STATEMENT_ASSIGNMENTORMETHODCALL,
+                                    PCT.STATEMENT_IF, PCT.STATEMENT_RETURN, pctExit,
                                     PCT.STATEMENT_BLOCK,
-                                    // Add the for-loop statement and the for-in-loop statement generation percentages.
-                                    PCT.STATEMENT_FOR,
-                                    PCT.STATEMENT_FOR_IN};
+                                    // Add the for-loop statement and
+                                    // the for-in-loop statement generation percentages.
+                                    PCT.STATEMENT_FOR, PCT.STATEMENT_FOR_IN};
     IR::Statement *stmt = nullptr;
     bool useDefaultStmt = false;
 
@@ -410,37 +407,29 @@ IR::ReturnStatement *StatementGenerator::genReturnStatement(const IR::Type *tp) 
 /// Generate a for-loop statement.
 IR::ForStatement *StatementGenerator::genForLoopStatement(bool is_in_func) {
     std::string loopVar = generateLoopControlVariable();
-    // TODO(zzmic): Determine the exact range of the bit field width and the upper bound (keep in mind that buffer overflow should be avoided).
-    int bitFieldWidth = Utils::getRandInt(1, 64); 
+    // TODO(zzmic): Determine the exact range of the bit field width and the upper
+    // bound (keep in mind that buffer overflow should be avoided).
+    int bitFieldWidth = Utils::getRandInt(1, 64);
     // Prevent the potential buffer overflow issue.
     // Fow now, set the upper bound to 100.
-    long long maxValue = (bitFieldWidth < 64) ? ((1LL << bitFieldWidth) - 1) : (std::numeric_limits<int64_t>::max());
+    long long maxValue =
+        (bitFieldWidth < 64) ? ((1LL << bitFieldWidth) - 1) : (std::numeric_limits<int64_t>::max());
     long long upperBound = Utils::getRandInt(1, std::min(100LL, maxValue));
 
     // Debugging statements
-    std::cout << "genForLoopStatement - bitFieldWidth: " << bitFieldWidth 
-              << ", maxValue: " << maxValue 
-              << ", upperBound: " << upperBound << std::endl;
+    std::cout << "genForLoopStatement - bitFieldWidth: " << bitFieldWidth
+              << ", maxValue: " << maxValue << ", upperBound: " << upperBound << std::endl;
 
     // Create the IR nodes for the for-loop components.
-    auto *initExpr = new IR::Declaration_Variable(
-        IR::ID(loopVar), 
-        IR::Type_Bits::get(bitFieldWidth), 
-        new IR::Constant(IR::Type_Bits::get(bitFieldWidth), 0)
-    );  
-    auto *condExpr = new IR::Lss(
-        IR::Type_Boolean::get(), 
-        new IR::PathExpression(loopVar), 
-        new IR::Constant(IR::Type_Bits::get(bitFieldWidth), upperBound)
-    );  
+    auto *initExpr =
+        new IR::Declaration_Variable(IR::ID(loopVar), IR::Type_Bits::get(bitFieldWidth),
+                                     new IR::Constant(IR::Type_Bits::get(bitFieldWidth), 0));
+    auto *condExpr = new IR::Lss(IR::Type_Boolean::get(), new IR::PathExpression(loopVar),
+                                 new IR::Constant(IR::Type_Bits::get(bitFieldWidth), upperBound));
     auto *updateStmt = new IR::AssignmentStatement(
-        new IR::PathExpression(loopVar), 
-        new IR::Add(
-            IR::Type_Bits::get(bitFieldWidth), 
-            new IR::PathExpression(loopVar), 
-            new IR::Constant(IR::Type_Bits::get(bitFieldWidth), 1)
-        )
-    );
+        new IR::PathExpression(loopVar),
+        new IR::Add(IR::Type_Bits::get(bitFieldWidth), new IR::PathExpression(loopVar),
+                    new IR::Constant(IR::Type_Bits::get(bitFieldWidth), 1)));
     auto *bodyStmt = genBlockStatement(is_in_func);
     // Fill `initExpr` and `updateStmt` into their corresponding indexed vectors.
     // This is necessary due to the constructor defintions.
@@ -449,12 +438,16 @@ IR::ForStatement *StatementGenerator::genForLoopStatement(bool is_in_func) {
     initExprs.push_back(initExpr);
     updateStmts.push_back(updateStmt);
 
-    // TODO(zzmic): Decide whether the following pseudo code should be implemented in this function or discarded other than using `genBlockStatement`.
+    // TODO(zzmic): Decide whether the following pseudo code should be implemented in this
+    // function or discarded other than using `genBlockStatement`.
     // Pseudo code (implement the body statement generation):
-    // If the loop body is some function call, then parse it and generate a corresponding IR node of type `IR::Statement`.
-    // The node of type `IR::Statement` may consist of multiple nested node constructions (using, e.g., `IR::MethodCallStatement` and `IR::PathExpression`),
+    // If the loop body is some function call, then parse it and generate a corresponding
+    // IR node of type `IR::Statement`.
+    // The node of type `IR::Statement` may consist of multiple nested node constructions
+    // (using, e.g., `IR::MethodCallStatement` and `IR::PathExpression`),
     // depending on each statement in the loop body.
-    // The node of type `IR::Statement` should be added to the `bodyStmt` block statement node (by calling `push_back`).
+    // The node of type `IR::Statement` should be added to the `bodyStmt` block statement
+    // node (by calling `push_back`).
 
     // Create the for-loop IR node and return it.
     auto *forStmt = new IR::ForStatement(initExprs, condExpr, updateStmts, bodyStmt);
@@ -464,31 +457,30 @@ IR::ForStatement *StatementGenerator::genForLoopStatement(bool is_in_func) {
 /// Generate a for-in-loop statement.
 IR::ForInStatement *StatementGenerator::genForInLoopStatement(bool is_in_func) {
     std::string loopVar = generateLoopControlVariable();
-    // TODO(zzmic): Determine the exact range of the bit field width, the lower bound, 
+    // TODO(zzmic): Determine the exact range of the bit field width, the lower bound,
     // and the upper bound (keep in mind that buffer overflow should be avoided).
     int bitFieldWidth = Utils::getRandInt(1, 64);
     // Prevent the potential buffer overflow issue.
     // Fow now, set the upper bound to 100.
-    long long maxValue = (bitFieldWidth < 64) ? ((1LL << bitFieldWidth) - 1) : std::numeric_limits<int64_t>::max();
-    long long lowerBound = Utils::getRandInt(0, std::min(50LL, maxValue/2));
-    long long upperBound = (lowerBound < maxValue) ? Utils::getRandInt(lowerBound+1, std::min(100LL, maxValue)) : (lowerBound + 1);
+    long long maxValue =
+        (bitFieldWidth < 64) ? ((1LL << bitFieldWidth) - 1) : std::numeric_limits<int64_t>::max();
+    long long lowerBound = Utils::getRandInt(0, std::min(50LL, maxValue / 2));
+    long long upperBound = (lowerBound < maxValue)
+                               ? Utils::getRandInt(lowerBound + 1, std::min(100LL, maxValue))
+                               : (lowerBound + 1);
 
     // Debugging statements
-    std::cout << "genForInLoopStatement - bitFieldWidth: " << bitFieldWidth 
-              << ", maxValue: " << maxValue 
-              << ", lowerBound: " << lowerBound 
+    std::cout << "genForInLoopStatement - bitFieldWidth: " << bitFieldWidth
+              << ", maxValue: " << maxValue << ", lowerBound: " << lowerBound
               << ", upperBound: " << upperBound << std::endl;
 
     // Create the IR nodes for the for-in-loop component expressions.
-    auto declVar = new IR::Declaration_Variable(
-        IR::ID(loopVar),
-        IR::Type_Bits::get(bitFieldWidth), 
-        new IR::Constant(IR::Type_Bits::get(bitFieldWidth), 0)
-    );   
-    auto collectionExpr = new IR::Range(
-        new IR::Constant(IR::Type_Bits::get(bitFieldWidth), lowerBound),
-        new IR::Constant(IR::Type_Bits::get(bitFieldWidth), upperBound)
-    );
+    auto declVar =
+        new IR::Declaration_Variable(IR::ID(loopVar), IR::Type_Bits::get(bitFieldWidth),
+                                     new IR::Constant(IR::Type_Bits::get(bitFieldWidth), 0));
+    auto collectionExpr =
+        new IR::Range(new IR::Constant(IR::Type_Bits::get(bitFieldWidth), lowerBound),
+                      new IR::Constant(IR::Type_Bits::get(bitFieldWidth), upperBound));
     auto *bodyStmt = genBlockStatement(is_in_func);
 
     // Create the for-in-loop IR node and return it.
