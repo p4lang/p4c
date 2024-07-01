@@ -48,6 +48,7 @@ jobs:
         run: |
           COMMIT_MSG=$(cat << EOF
           Release v${{ env.VERSION }}
+          Signed-off-by: rst0git <9142901+rst0git@users.noreply.github.com>
 
           ${{ steps.changelog.outputs.content }}
           EOF
