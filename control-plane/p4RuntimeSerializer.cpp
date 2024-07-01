@@ -674,9 +674,12 @@ class P4RuntimeAnalyzer {
                     [this](cstring anno) { return archHandler->filterAnnotations(anno); });
         table->set_size(tableSize);
 
-        if (defaultAction && defaultAction->isConst) {
+        if (defaultAction) {
             auto id = symbols.getId(P4RuntimeSymbolType::P4RT_ACTION(), defaultAction->name);
-            table->set_const_default_action_id(id);
+            table->set_initial_default_action_id(id);
+            if (defaultAction->isConst) {
+                table->set_const_default_action_id(id);
+            }
         }
 
         for (const auto &action : actions) {
