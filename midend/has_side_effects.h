@@ -18,7 +18,7 @@ limitations under the License.
 #define MIDEND_HAS_SIDE_EFFECTS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 
 /* Should this be a method on IR::Expression?  Maybe after the refMap/typeMap go away */

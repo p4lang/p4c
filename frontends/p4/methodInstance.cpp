@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "methodInstance.h"
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -24,7 +25,7 @@ namespace P4 {
 
 // If useExpressionType is true trust the type in mce->type
 MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
-                                        DeclarationLookup *refMap, TypeMap *typeMap,
+                                        const DeclarationLookup *refMap, TypeMap *typeMap,
                                         bool useExpressionType, const Visitor::Context *ctxt,
                                         bool incomplete) {
     auto mt = typeMap ? typeMap->getType(mce->method) : nullptr;
@@ -34,11 +35,10 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
     auto originalType = mt->to<IR::Type_MethodBase>();
     auto actualType = originalType;
     if (typeMap && !mce->typeArguments->empty()) {
-        auto t = TypeInference::specialize(originalType, mce->typeArguments);
+        auto t = TypeInference::specialize(originalType, mce->typeArguments, ctxt);
         CHECK_NULL(t);
         actualType = t->to<IR::Type_MethodBase>();
-        // FIXME -- currently refMap is always a ReferenceMap, but this arg should soon go away
-        TypeInference tc(dynamic_cast<ReferenceMap *>(refMap), typeMap, true);
+        TypeInference tc(typeMap, /* readOnly */ true);
         (void)actualType->apply(tc, ctxt);  // may need to learn new type components
         CHECK_NULL(actualType);
     }
@@ -73,7 +73,7 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
                 decl = refMap->getDeclaration(th, true);
             } else if (auto pe = mem->expr->to<IR::PathExpression>()) {
                 decl = refMap->getDeclaration(pe->path, true);
-                type = typeMap ? typeMap->getType(decl->getNode()) : pe->type;
+                type = typeMap ? typeMap->getType(decl->getNode(), true) : pe->type;
             } else if (auto mc = mem->expr->to<IR::MethodCallExpression>()) {
                 auto mi = resolve(mc, refMap, typeMap, useExpressionType);
                 decl = mi->object;
@@ -123,14 +123,14 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
     return nullptr;  // unreachable
 }
 
-const IR::P4Action *ActionCall::specialize(ReferenceMap *refMap) const {
+const IR::P4Action *ActionCall::specialize(const DeclarationLookup *refMap) const {
     SubstituteParameters sp(refMap, &substitution, new TypeVariableSubstitution());
     auto result = action->apply(sp);
     return result->to<IR::P4Action>();
 }
 
 ConstructorCall *ConstructorCall::resolve(const IR::ConstructorCallExpression *cce,
-                                          DeclarationLookup *refMap, TypeMap *typeMap) {
+                                          const DeclarationLookup *refMap, TypeMap *typeMap) {
     auto ct = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
     ConstructorCall *result;
     const IR::Vector<IR::Type> *typeArguments;

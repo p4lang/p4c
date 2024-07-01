@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef FRONTENDS_P4_DONTCAREARGS_H_
 #define FRONTENDS_P4_DONTCAREARGS_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
@@ -24,14 +25,13 @@ namespace P4 {
 
 /// This class replaces don't care arguments (_) with
 /// a temporary which is unused.
-class DontcareArgs : public Transform {
-    ReferenceMap *refMap;
+class DontcareArgs : public Transform, public ResolutionContext {
+    MinimalNameGenerator nameGen;
     TypeMap *typeMap;
     IR::IndexedVector<IR::Declaration> toAdd;
 
  public:
-    DontcareArgs(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
+    explicit DontcareArgs(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DontcareArgs");
     }
@@ -56,13 +56,14 @@ class DontcareArgs : public Transform {
         toAdd.clear();
         return control;
     }
+    profile_t init_apply(const IR::Node *node) override;
 };
 
 class RemoveDontcareArgs : public PassManager {
  public:
-    RemoveDontcareArgs(ReferenceMap *refMap, TypeMap *typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new DontcareArgs(refMap, typeMap));
+    explicit RemoveDontcareArgs(TypeMap *typeMap) {
+        passes.push_back(new TypeChecking(nullptr, typeMap));
+        passes.push_back(new DontcareArgs(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
         setName("RemoveDontcareArgs");
     }

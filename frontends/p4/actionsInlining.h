@@ -18,6 +18,7 @@ limitations under the License.
 #define FRONTENDS_P4_ACTIONSINLINING_H_
 
 #include "commonInlining.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "ir/ir.h"
@@ -28,16 +29,13 @@ typedef SimpleCallInfo<IR::P4Action, IR::MethodCallStatement> ActionCallInfo;
 typedef SimpleInlineWorkList<IR::P4Action, IR::MethodCallStatement, ActionCallInfo> AInlineWorkList;
 typedef SimpleInlineList<IR::P4Action, ActionCallInfo, AInlineWorkList> ActionsInlineList;
 
-class DiscoverActionsInlining : public Inspector {
+class DiscoverActionsInlining : public Inspector, public ResolutionContext {
     ActionsInlineList *toInline;  // output
-    P4::ReferenceMap *refMap;     // input
     P4::TypeMap *typeMap;         // input
  public:
-    DiscoverActionsInlining(ActionsInlineList *toInline, P4::ReferenceMap *refMap,
-                            P4::TypeMap *typeMap)
-        : toInline(toInline), refMap(refMap), typeMap(typeMap) {
+    DiscoverActionsInlining(ActionsInlineList *toInline, P4::TypeMap *typeMap)
+        : toInline(toInline), typeMap(typeMap) {
         CHECK_NULL(toInline);
-        CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DiscoverActionsInlining");
     }
@@ -47,11 +45,11 @@ class DiscoverActionsInlining : public Inspector {
 
 // General-purpose actions inliner.
 class ActionsInliner : public AbstractInliner<ActionsInlineList, AInlineWorkList> {
-    P4::ReferenceMap *refMap;
+    std::unique_ptr<MinimalNameGenerator> nameGen;
     std::map<const IR::MethodCallStatement *, const IR::P4Action *> *replMap;
 
  public:
-    explicit ActionsInliner(P4::ReferenceMap *refMap) : refMap(refMap), replMap(nullptr) {}
+    ActionsInliner() : replMap(nullptr) {}
     Visitor::profile_t init_apply(const IR::Node *node) override;
     const IR::Node *preorder(IR::P4Parser *cont) override {
         prune();
@@ -69,9 +67,10 @@ class InlineActions : public PassManager {
 
  public:
     InlineActions(ReferenceMap *refMap, TypeMap *typeMap, const RemoveUnusedPolicy &policy) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new DiscoverActionsInlining(&actionsToInline, refMap, typeMap));
-        passes.push_back(new InlineActionsDriver(&actionsToInline, new ActionsInliner(refMap)));
+        passes.push_back(new TypeChecking(nullptr, typeMap));
+        passes.push_back(new DiscoverActionsInlining(&actionsToInline, typeMap));
+        passes.push_back(new InlineActionsDriver(&actionsToInline, new ActionsInliner()));
+        passes.push_back(new ResolveReferences(refMap));
         passes.push_back(new RemoveAllUnusedDeclarations(refMap, policy));
         setName("InlineActions");
     }

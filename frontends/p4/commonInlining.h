@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef FRONTENDS_P4_COMMONINLINING_H_
 #define FRONTENDS_P4_COMMONINLINING_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #define DEBUG_INLINER 0
 
 #if DEBUG_INLINER
@@ -136,7 +137,7 @@ class SimpleInlineList {
 
 // Base class for inliners
 template <class InlineList, class InlineWorkList>
-class AbstractInliner : public Transform {
+class AbstractInliner : public Transform, public ResolutionContext {
  protected:
     InlineList *list;
     InlineWorkList *toInline;

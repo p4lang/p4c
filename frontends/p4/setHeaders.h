@@ -46,7 +46,6 @@ of tuples passed as arguments to functions expecting headers, reducing
 them to assignments.
 */
 class DoSetHeaders final : public Transform {
-    ReferenceMap *refMap;
     TypeMap *typeMap;
 
     bool containsHeaderType(const IR::Type *type);
@@ -54,8 +53,7 @@ class DoSetHeaders final : public Transform {
                           const IR::Type *destType, IR::Vector<IR::StatOrDecl> *insert);
 
  public:
-    DoSetHeaders(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
+    explicit DoSetHeaders(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DoSetHeaders");
     }
@@ -64,9 +62,9 @@ class DoSetHeaders final : public Transform {
 
 class SetHeaders final : public PassManager {
  public:
-    SetHeaders(ReferenceMap *refMap, TypeMap *typeMap) {
-        passes.push_back(new P4::TypeChecking(refMap, typeMap));
-        passes.push_back(new P4::DoSetHeaders(refMap, typeMap));
+    explicit SetHeaders(TypeMap *typeMap) {
+        passes.push_back(new P4::TypeChecking(nullptr, typeMap));
+        passes.push_back(new P4::DoSetHeaders(typeMap));
         setName("SetHeaders");
     }
 };

@@ -7,55 +7,75 @@ The code and documentation are hosted in the [p4c repository](https://github.com
 
 ```
 p4c
-├── build                     -- recommended place to build binary
+├── build                          -- recommended place to build binary
 ├── backends          
-│   ├── bmv2                  -- behavioral model version 2 (switch simulator) back end
-│   ├── common                -- code shared by multiple back ends
-│   ├── dpdk                  -- translates P4 code to DPDK instructions
-│   ├── ebpf                  -- extended Berkeley Packet Filters back end
-│   ├── graphs                -- backend that can draw graphiz graphs of P4 programs
-│   ├── p4test                -- "fake" back end for testing
-│   ├── p4tools               -- testing library for different static analysis tools
-│   ├── tc                    -- translates P4 code to Linux TC rules
-│   └── ubpf                  -- translates P4 programs to uBPF code
-├── control-plane             -- control plane API
-|   └──google/rpc             -- Definitions of Google Protobuf APIs.
-├── docs                      -- documentation
-│   └── doxygen               -- documentation generation support
-├── extensions
-│   └── XXXX                  -- symlinks to custom back-ends
+│   ├── bmv2                       -- behavioral model version 2 (switch simulator) back end
+│   ├── common                     -- code shared by multiple back ends
+│   ├── dpdk                       -- translates P4 code to DPDK instructions
+│   ├── ebpf                       -- extended Berkeley Packet Filters back end
+│   ├── graphs                     -- backend that can draw graphiz graphs of P4 programs
+│   ├── p4test                     -- "fake" back end for testing
+│   ├── p4tools                    -- testing library for different static analysis tools
+│   ├── tc                         -- translates P4 code to Linux TC rules
+│   └── ubpf                       -- translates P4 programs to uBPF code
+├── bazel                          -- bazel files for building p4c
+|   └──example                     -- basic Bazel project example using p4c
+├── cmake                          -- CMake support and build systems 
+├── control-plane                  -- control plane API
+|   └──google/rpc                  -- Definitions of Google Protobuf APIs.
+├── debian                         -- Debian/Ubuntu packaging files
+│   └── source/format              -- Specification of the packaging format
+├── docs                           -- documentation
+│   ├── assets                     -- p4 logos in PNG and SVG formats
+│   └── doxygen                    -- documentation generation support
 ├── frontends
-│   ├── common                -- common front end code
-│   ├── parsers               -- parser and lexer code for P4_14 and P4_16
-│   ├── p4-14                 -- P4_14 front end
-│   └── p4                    -- P4_16 front end
-├── ir                        -- core internal representation
-├── lib                       -- common utilities (libp4toolkit.a)
-├── midend                    -- code that may be useful for writing mid-ends
-├── p4include                 -- standard P4 files needed by the compiler (e.g., core.p4)
-├── test                      -- test code
-│   └── gtest                 -- unit test code written using gtest
-├── tools                     -- external programs used in the build/test process
-│   ├── ci-ptf                -- scripts to run PSA PTF tests
-│   ├── debian-build          -- resources and scripts for creating Ubuntu (or Debian) packages
-│   ├── driver                -- P4C compiler driver: a script that invokes various compilers
-│   ├── hooks                 -- useful git hooks for development
-|   ├── ir-generator          -- code to generate the P4C IR from .def files
-│   ├── iwyu_mappings         -- mappings used by the Include What You Use (IWYU) tool for analyzing #include directives in C and C++ source files
-│   ├── ptf                   -- utilities for the Packet Test Framework (PTF)
-│   └── stf                   -- utilities for the Simple Test Framework (STF)
-└── testdata                  -- test inputs and reference outputs
-    ├── p4_16_samples         -- P4_16 input test programs
-    ├── p4_16_errors          -- P4_16 negative input test programs
-    ├── p4_16_samples_outputs -- Expected outputs from P4_16 tests
-    ├── p4_16_errors_outputs  -- Expected outputs from P4_16 negative tests
-    ├── p4_16_bmv_errors      -- P4_16 negative input tests for the bmv2 backend
-    ├── v1_1_samples          -- P4 v1.1 sample programs
-    ├── p4_14_errors          -- P4_14 negative input test programs
-    ├── p4_14_errors_outputs  -- Expected outputs from P4_14 negative tests
-    ├── p4_14_samples         -- P4_14 input test programs
-    ├── p4_14_samples_outputs -- Expected outputs from P4_14 tests
-    └── p4_14_errors          -- P4_14 negative input test programs
+│   ├── common                     -- common front end code
+│   ├── p4-14                      -- P4_14 front end
+│   ├── p4                         -- P4_16 front end
+│   └── parsers                    -- parser and lexer code for P4_14 and P4_16
+├── ir                             -- core internal representation
+├── lib                            -- common utilities (libp4toolkit.a)
+├── midend                         -- code that may be useful for writing mid-ends
+├── p4include                      -- standard P4 files needed by the compiler (e.g., core.p4)
+│   ├── bmv2                       -- bmv2 specific customizations of psa.p4 include file
+│   ├── dpdk                       -- dpdk specific pna.p4 & psa.p4
+│   └── tc                         -- tc specific pna
+├── test                           -- test code
+│   └── gtest                      -- unit test code written using gtest
+├── testdata                       -- test inputs and reference outputs
+│   ├───extern_modules             -- Extern module input test programs
+│   ├───p4_14_errors               -- P4_14 negative input test programs
+│   ├───p4_14_errors_outputs       -- Expected outputs from P4_14 negative tests
+│   ├───p4_14_samples              -- P4_14 input test programs
+│   ├───p4_14_samples_outputs      -- Expected outputs from P4_14 tests
+|   ├── p4_16_samples              -- P4_16 input test programs
+|   ├── p4_16_samples_outputs      -- Expected outputs from P4_16 tests
+│   ├───p4_16_bmv_errors           -- P4_16 negative input tests for the bmv2 backend
+│   ├───p4_16_dpdk_errors          -- P4_16 negative input tests for the dpdk backend
+│   ├───p4_16_dpdk_errors_outputs  -- Expected outputs from dpdk negative tests 
+│   ├───p4_16_ebpf_errors          -- P4_16 negative input tests for the ebpf backend
+│   ├───p4_16_ebpf_errors_outputs  -- Expected outputs from edpf negative tests 
+|   ├── p4_16_errors               -- P4_16 negative input test programs
+|   ├── p4_16_errors_outputs       -- Expected outputs from P4_16 negative tests
+│   ├───p4_16_pna_errors           -- P4_16 negative input test programs for pna
+│   ├───p4_16_pna_errors_outputs   -- Expected outputs from P4_16 pna negative tests
+│   ├───p4_16_psa_errors           -- P4_16 negative input test programs for psa
+│   ├───p4_16_psa_errors_outputs   -- Expected outputs from P4_16 psa negative tests
+│   ├───p4_16_samples              -- P4_16 input test programs
+│   ├───p4_16_samples_outputs      -- Expected outputs from P4_16 tests
+│   ├───p4tc_samples               -- P4 traffic control sample input test programs
+│   ├───p4tc_samples_outputs       -- Expected outputs from P4 traffic control tests
+│   └───v1_1_samples               -- P4 v1.1 sample programs
+└── tools                          -- external programs used in the build/test process
+    ├── ci-ptf                     -- scripts to run PSA PTF tests
+    ├── debian-build               -- resources and scripts for creating Ubuntu (or Debian) packages
+    ├── driver                     -- P4C compiler driver: a script that invokes various compilers
+    ├── hooks                      -- useful git hooks for development
+    ├── ir-generator               -- code to generate the P4C IR from .def files
+    ├── iwyu_mappings              -- mappings used by the Include What You Use (IWYU) tool for analyzing #include directives in C and C++ source files
+    ├── ptf                        -- utilities for the Packet Test Framework (PTF)
+    └── stf                        -- utilities for the Simple Test Framework (STF)
+
 ```
 
 # Additional documentation

@@ -18,6 +18,7 @@ limitations under the License.
 #define FRONTENDS_P4_SPECIALIZEGENERICFUNCTIONS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
@@ -50,18 +51,16 @@ struct FunctionSpecialization {
 };
 
 struct FunctionSpecializationMap {
-    ReferenceMap *refMap;
     TypeMap *typeMap;
     ordered_map<const IR::MethodCallExpression *, FunctionSpecialization *> map;
     // Keep track of the values in the above map which are already
     // inserted in the program.
     std::set<FunctionSpecialization *> inserted;
 
-    void add(const IR::MethodCallExpression *mce, const IR::Function *func,
-             const IR::Node *insert) {
-        cstring name = refMap->newName(func->name.name.string_view());
-        FunctionSpecialization *fs = new FunctionSpecialization(name, mce, func, insert);
-        map.emplace(mce, fs);
+    void add(const IR::MethodCallExpression *mce, const IR::Function *func, const IR::Node *insert,
+             NameGenerator *nameGen) {
+        cstring name = nameGen->newName(func->name.string_view());
+        map.emplace(mce, new FunctionSpecialization(name, mce, func, insert));
     }
     FunctionSpecialization *get(const IR::MethodCallExpression *mce) const {
         return ::get(map, mce);
@@ -85,8 +84,9 @@ struct FunctionSpecializationMap {
 /**
  * Find all generic function invocations and their type arguments.
  */
-class FindFunctionSpecializations : public Inspector {
+class FindFunctionSpecializations : public Inspector, public ResolutionContext {
     FunctionSpecializationMap *specMap;
+    MinimalNameGenerator nameGen;
 
  public:
     explicit FindFunctionSpecializations(FunctionSpecializationMap *specMap) : specMap(specMap) {
@@ -95,6 +95,7 @@ class FindFunctionSpecializations : public Inspector {
     }
 
     bool preorder(const IR::MethodCallExpression *call) override;
+    profile_t init_apply(const IR::Node *node) override;
 };
 
 /** @brief Specializes each generic function by substituting type parameters.
@@ -136,11 +137,10 @@ class SpecializeGenericFunctions : public PassManager {
     FunctionSpecializationMap specMap;
 
  public:
-    SpecializeGenericFunctions(ReferenceMap *refMap, TypeMap *typeMap) {
-        passes.emplace_back(new TypeChecking(refMap, typeMap));
+    explicit SpecializeGenericFunctions(TypeMap *typeMap) {
+        passes.emplace_back(new TypeChecking(nullptr, typeMap));
         passes.emplace_back(new FindFunctionSpecializations(&specMap));
         passes.emplace_back(new SpecializeFunctions(&specMap));
-        specMap.refMap = refMap;
         specMap.typeMap = typeMap;
         setName("SpecializeGenericFunctions");
     }

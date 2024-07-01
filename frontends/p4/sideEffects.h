@@ -20,6 +20,7 @@ limitations under the License.
 /* makes explicit side effect ordering */
 
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -28,13 +29,13 @@ namespace P4 {
 
 /// Checks to see whether an IR node includes a table.apply() sub-expression
 class HasTableApply : public Inspector {
-    ReferenceMap *refMap;
+    DeclarationLookup *refMap;
     TypeMap *typeMap;
 
  public:
     const IR::P4Table *table;
     const IR::MethodCallExpression *call;
-    HasTableApply(ReferenceMap *refMap, TypeMap *typeMap)
+    HasTableApply(DeclarationLookup *refMap, TypeMap *typeMap)
         : refMap(refMap), typeMap(typeMap), table(nullptr), call(nullptr) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
@@ -63,7 +64,7 @@ class HasTableApply : public Inspector {
  */
 class SideEffects : public Inspector {
  private:
-    ReferenceMap *refMap;
+    DeclarationLookup *refMap;
     TypeMap *typeMap;
 
  public:
@@ -100,20 +101,21 @@ class SideEffects : public Inspector {
 
     /// The @refMap and @typeMap arguments can be null, in which case the check
     /// will be more conservative.
-    SideEffects(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
+    SideEffects(DeclarationLookup *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
         setName("SideEffects");
     }
 
     /// @return true if the expression may have side-effects.
     static bool check(const IR::Expression *expression, const Visitor *calledBy,
-                      ReferenceMap *refMap, TypeMap *typeMap) {
+                      DeclarationLookup *refMap, TypeMap *typeMap,
+                      const Visitor::Context *ctxt = nullptr) {
         SideEffects se(refMap, typeMap);
         se.setCalledBy(calledBy);
-        expression->apply(se);
+        expression->apply(se, ctxt);
         return se.nodeWithSideEffect != nullptr;
     }
     /// @return true if the method call expression may have side-effects.
-    static bool hasSideEffect(const IR::MethodCallExpression *mce, ReferenceMap *refMap,
+    static bool hasSideEffect(const IR::MethodCallExpression *mce, DeclarationLookup *refMap,
                               TypeMap *typeMap) {
         // mce does not produce a side effect in few cases:
         //  * isValid()
@@ -178,8 +180,8 @@ a[tmp1].x = tmp4;        // assign result of call of f to actual left value
  * For assignment statements ```e = e1;``` the left hand side is evaluated
  * first.
  */
-class DoSimplifyExpressions : public Transform, P4WriteContext {
-    ReferenceMap *refMap;
+class DoSimplifyExpressions : public Transform, P4WriteContext, public ResolutionContext {
+    MinimalNameGenerator nameGen;
     TypeMap *typeMap;
     // Expressions holding temporaries that are already added.
     std::set<const IR::Expression *> *added;
@@ -193,14 +195,13 @@ class DoSimplifyExpressions : public Transform, P4WriteContext {
     cstring createTemporary(const IR::Type *type);
     const IR::Expression *addAssignment(Util::SourceInfo srcInfo, cstring varName,
                                         const IR::Expression *expression);
-    bool mayAlias(const IR::Expression *left, const IR::Expression *right) const;
+    bool mayAlias(const IR::Expression *left, const IR::Expression *right,
+                  const Visitor::Context *ctxt) const;
     bool containsHeaderType(const IR::Type *type);
 
  public:
-    DoSimplifyExpressions(ReferenceMap *refMap, TypeMap *typeMap,
-                          std::set<const IR::Expression *> *added)
-        : refMap(refMap), typeMap(typeMap), added(added) {
-        CHECK_NULL(refMap);
+    DoSimplifyExpressions(TypeMap *typeMap, std::set<const IR::Expression *> *added)
+        : typeMap(typeMap), added(added) {
         CHECK_NULL(typeMap);
         setName("DoSimplifyExpressions");
     }
@@ -246,6 +247,7 @@ class DoSimplifyExpressions : public Transform, P4WriteContext {
     const IR::Node *preorder(IR::ForStatement *statement) override;
     const IR::Node *preorder(IR::ForInStatement *statement) override;
 
+    profile_t init_apply(const IR::Node *node) override;
     void end_apply(const IR::Node *) override;
 };
 
@@ -293,40 +295,42 @@ class TableInsertions {
  * @pre none
  * @post all complex table key expressions are replaced with a simpler expression.
  */
-class KeySideEffect : public Transform {
+class KeySideEffect : public Transform, public ResolutionContext {
  protected:
-    ReferenceMap *refMap;
+    MinimalNameGenerator nameGen;
     TypeMap *typeMap;
     std::map<const IR::P4Table *, TableInsertions *> toInsert;
     std::set<const IR::P4Table *> *invokedInKey;
 
  public:
-    KeySideEffect(ReferenceMap *refMap, TypeMap *typeMap,
-                  std::set<const IR::P4Table *> *invokedInKey)
-        : refMap(refMap), typeMap(typeMap), invokedInKey(invokedInKey) {
-        CHECK_NULL(refMap);
+    KeySideEffect(TypeMap *typeMap, std::set<const IR::P4Table *> *invokedInKey)
+        : typeMap(typeMap), invokedInKey(invokedInKey) {
         CHECK_NULL(typeMap);
         CHECK_NULL(invokedInKey);
         setName("KeySideEffect");
     }
+
+    profile_t init_apply(const IR::Node *node) override;
+
     virtual const IR::Node *doStatement(const IR::Statement *statement,
-                                        const IR::Expression *expression);
+                                        const IR::Expression *expression,
+                                        const Visitor::Context *ctxt);
 
     const IR::Node *preorder(IR::Key *key) override;
 
     // These should be all kinds of statements that may contain a table apply
     // after the program has been simplified
     const IR::Node *postorder(IR::MethodCallStatement *statement) override {
-        return doStatement(statement, statement->methodCall);
+        return doStatement(statement, statement->methodCall, getContext());
     }
     const IR::Node *postorder(IR::IfStatement *statement) override {
-        return doStatement(statement, statement->condition);
+        return doStatement(statement, statement->condition, getContext());
     }
     const IR::Node *postorder(IR::SwitchStatement *statement) override {
-        return doStatement(statement, statement->expression);
+        return doStatement(statement, statement->expression, getContext());
     }
     const IR::Node *postorder(IR::AssignmentStatement *statement) override {
-        return doStatement(statement, statement->right);
+        return doStatement(statement, statement->right, getContext());
     }
     const IR::Node *postorder(IR::KeyElement *element) override;
     const IR::Node *postorder(IR::P4Table *table) override;
@@ -338,15 +342,13 @@ class KeySideEffect : public Transform {
 /// table Y { ... }
 /// table X { key = { ... Y.apply.hit() ... } }
 /// This inserts Y into the map invokedInKey;
-class TablesInKeys : public Inspector {
-    ReferenceMap *refMap;
+class TablesInKeys : public Inspector, ResolutionContext {
     TypeMap *typeMap;
     std::set<const IR::P4Table *> *invokedInKey;
 
  public:
-    TablesInKeys(ReferenceMap *refMap, TypeMap *typeMap,
-                 std::set<const IR::P4Table *> *invokedInKey)
-        : refMap(refMap), typeMap(typeMap), invokedInKey(invokedInKey) {
+    TablesInKeys(TypeMap *typeMap, std::set<const IR::P4Table *> *invokedInKey)
+        : typeMap(typeMap), invokedInKey(invokedInKey) {
         CHECK_NULL(invokedInKey);
         setName("TableInKeys");
     }
@@ -356,9 +358,9 @@ class TablesInKeys : public Inspector {
     }
     void postorder(const IR::MethodCallExpression *mce) override {
         if (!findContext<IR::Key>()) return;
-        HasTableApply hta(refMap, typeMap);
+        HasTableApply hta(this, typeMap);
         hta.setCalledBy(this);
-        (void)mce->apply(hta);
+        (void)mce->apply(hta, getContext());
         if (hta.table != nullptr) {
             LOG2("Table " << hta.table << " invoked in key of another table");
             invokedInKey->emplace(hta.table);
@@ -371,17 +373,16 @@ class TablesInKeys : public Inspector {
 /// table s { ... }
 /// table t {
 ///    actions { a(s.apply().hit ? ... ); }
-class TablesInActions : public Inspector {
-    ReferenceMap *refMap;
+class TablesInActions : public Inspector, ResolutionContext {
     TypeMap *typeMap;
 
  public:
-    TablesInActions(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {}
+    explicit TablesInActions(TypeMap *typeMap) : typeMap(typeMap) {}
     void postorder(const IR::MethodCallExpression *expression) override {
         if (findContext<IR::ActionList>()) {
-            HasTableApply hta(refMap, typeMap);
+            HasTableApply hta(this, typeMap);
             hta.setCalledBy(this);
-            (void)expression->apply(hta);
+            (void)expression->apply(hta, getContext());
             if (hta.table != nullptr) {
                 ::error(ErrorType::ERR_UNSUPPORTED, "%1%: table invocation in action argument",
                         expression);
@@ -400,16 +401,16 @@ class SideEffectOrdering : public PassRepeated {
     std::set<const IR::Expression *> added;
 
  public:
-    SideEffectOrdering(ReferenceMap *refMap, TypeMap *typeMap, bool skipSideEffectOrdering,
+    SideEffectOrdering(TypeMap *typeMap, bool skipSideEffectOrdering,
                        TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         if (!skipSideEffectOrdering) {
-            passes.push_back(new TypeChecking(refMap, typeMap));
-            passes.push_back(new DoSimplifyExpressions(refMap, typeMap, &added));
+            passes.push_back(new TypeChecking(nullptr, typeMap));
+            passes.push_back(new DoSimplifyExpressions(typeMap, &added));
             passes.push_back(typeChecking);
-            passes.push_back(new TablesInActions(refMap, typeMap));
-            passes.push_back(new TablesInKeys(refMap, typeMap, &invokedInKey));
-            passes.push_back(new KeySideEffect(refMap, typeMap, &invokedInKey));
+            passes.push_back(new TablesInActions(typeMap));
+            passes.push_back(new TablesInKeys(typeMap, &invokedInKey));
+            passes.push_back(new KeySideEffect(typeMap, &invokedInKey));
         }
         setName("SideEffectOrdering");
     }

@@ -50,7 +50,7 @@ class RemoveMethodCallArguments : public Transform {
 
 void FindActionParameters::postorder(const IR::ActionListElement *element) {
     auto path = element->getPath();
-    auto decl = refMap->getDeclaration(path, true);
+    auto decl = getDeclaration(path, true);
     BUG_CHECK(decl->is<IR::P4Action>(), "%1%: not an action", element);
     BUG_CHECK(element->expression->is<IR::MethodCallExpression>(), "%1%: expected a method call",
               element->expression);
@@ -59,7 +59,7 @@ void FindActionParameters::postorder(const IR::ActionListElement *element) {
 }
 
 void FindActionParameters::postorder(const IR::MethodCallExpression *expression) {
-    auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+    auto mi = MethodInstance::resolve(expression, this, typeMap);
     if (!mi->is<P4::ActionCall>()) return;
     auto ac = mi->to<P4::ActionCall>();
 
@@ -183,8 +183,7 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::MethodCallExpression *ex
     return expression;
 }
 
-RemoveActionParameters::RemoveActionParameters(ReferenceMap *refMap, TypeMap *typeMap,
-                                               TypeChecking *typeChecking) {
+RemoveActionParameters::RemoveActionParameters(TypeMap *typeMap, TypeChecking *typeChecking) {
     setName("RemoveActionParameters");
     auto ai = new ActionInvocation();
     // MoveDeclarations() is needed because of this case:
@@ -196,9 +195,9 @@ RemoveActionParameters::RemoveActionParameters(ReferenceMap *refMap, TypeMap *ty
     // bit<32> w;
     // table t() { actions = a(); ... }
     passes.emplace_back(new MoveDeclarations());
-    if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
     passes.emplace_back(typeChecking);
-    passes.emplace_back(new FindActionParameters(refMap, typeMap, ai));
+    passes.emplace_back(new FindActionParameters(typeMap, ai));
     passes.emplace_back(new DoRemoveActionParameters(ai));
     passes.emplace_back(new ClearTypeMap(typeMap));
 }

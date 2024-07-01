@@ -103,14 +103,14 @@ void MidEnd::addDefaultPasses() {
         // Make sure that we have no TypeDef left in the program.
         new P4::EliminateTypedef(&refMap, &typeMap),
         // Remove in/inout/out action parameters.
-        new P4::RemoveActionParameters(&refMap, &typeMap),
+        new P4::RemoveActionParameters(&typeMap),
         // Sort call arguments according to the order of the function's parameters.
         new P4::OrderArguments(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         mkConvertKeys(),
         mkConvertEnums(),
         new P4::ConstantFolding(&refMap, &typeMap),
-        new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::SimplifyControlFlow(&typeMap),
         // Eliminate extraneous cases in select statements.
         new P4::SimplifySelectCases(&refMap, &typeMap, false),
         // Expand lookahead assignments into sequences of field assignments.
@@ -125,7 +125,7 @@ void MidEnd::addDefaultPasses() {
         new PassRepeated({
             new P4::CopyStructures(&refMap, &typeMap, false, true, nullptr),
         }),
-        new P4::RemoveParserControlFlow(&refMap, &typeMap),
+        new P4::RemoveParserControlFlow(&typeMap),
         // Flatten nested list expressions.
         new P4::SimplifySelectList(&refMap, &typeMap),
         // Convert booleans in selects into bit<1>.
@@ -147,7 +147,7 @@ void MidEnd::addDefaultPasses() {
             }),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::MoveDeclarations(),
-        new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::SimplifyControlFlow(&typeMap),
         // Replace any slices in the left side of assignments and convert them to casts.
         new P4::RemoveLeftSlices(&refMap, &typeMap),
         // Remove loops from parsers by unrolling them as far as the stack indices allow.
@@ -157,7 +157,7 @@ void MidEnd::addDefaultPasses() {
         // Convert tuples into structs.
         new P4::EliminateTuples(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
-        new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::SimplifyControlFlow(&typeMap),
         // Simplify header stack assignments with runtime indices into conditional statements.
         new P4::HSIndexSimplifier(&refMap, &typeMap),
         // Convert Type_Varbits into a type that contains information about the assigned width.

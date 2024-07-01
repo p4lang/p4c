@@ -74,32 +74,40 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
 
     PassManager midEnd;
     if (options.loadIRFromJson == false) {
-        midEnd.addPasses(
-            {new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
-             new P4::RemoveMiss(&refMap, &typeMap), new P4::ClearTypeMap(&typeMap),
-             new P4::EliminateNewtype(&refMap, &typeMap),
-             new P4::EliminateInvalidHeaders(&refMap, &typeMap),
-             new P4::SimplifyControlFlow(&refMap, &typeMap),
-             new P4::SimplifyKey(
-                 &refMap, &typeMap,
-                 new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsLikeLeftValue())),
-             new P4::ConstantFolding(&refMap, &typeMap),
-             // accept non-constant keysets
-             new P4::SimplifySelectCases(&refMap, &typeMap, false), new P4::HandleNoMatch(&refMap),
-             new P4::SimplifyParsers(&refMap),
-             new PassRepeated({new P4::ConstantFolding(&refMap, &typeMap),
-                               new P4::StrengthReduction(&refMap, &typeMap)}),
-             new P4::SimplifyComparisons(&refMap, &typeMap),
-             new P4::CopyStructures(&refMap, &typeMap),
-             new P4::LocalCopyPropagation(&refMap, &typeMap),
-             new P4::SimplifySelectList(&refMap, &typeMap),
-             new P4::MoveDeclarations(),  // more may have been introduced
-             new P4::RemoveSelectBooleans(&refMap, &typeMap),
-             new P4::SingleArgumentSelect(&refMap, &typeMap),
-             new P4::ConstantFolding(&refMap, &typeMap),
-             new P4::SimplifyControlFlow(&refMap, &typeMap), new P4::TableHit(&refMap, &typeMap),
-             new P4::RemoveLeftSlices(&refMap, &typeMap), new EBPF::Lower(&refMap, &typeMap),
-             evaluator, new P4::MidEndLast()});
+        midEnd.addPasses({
+            new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
+            new P4::RemoveMiss(&refMap, &typeMap),
+            new P4::ClearTypeMap(&typeMap),
+            new P4::EliminateNewtype(&refMap, &typeMap),
+            new P4::EliminateInvalidHeaders(&refMap, &typeMap),
+            new P4::SimplifyControlFlow(&typeMap),
+            new P4::SimplifyKey(
+                &refMap, &typeMap,
+                new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsLikeLeftValue())),
+            new P4::ConstantFolding(&refMap, &typeMap),
+            // accept non-constant keysets
+            new P4::SimplifySelectCases(&refMap, &typeMap, false),
+            new P4::HandleNoMatch(&refMap),
+            new P4::SimplifyParsers(&refMap),
+            new PassRepeated({
+                new P4::ConstantFolding(&refMap, &typeMap),
+                new P4::StrengthReduction(&typeMap),
+            }),
+            new P4::SimplifyComparisons(&refMap, &typeMap),
+            new P4::CopyStructures(&refMap, &typeMap),
+            new P4::LocalCopyPropagation(&refMap, &typeMap),
+            new P4::SimplifySelectList(&refMap, &typeMap),
+            new P4::MoveDeclarations(),  // more may have been introduced
+            new P4::RemoveSelectBooleans(&refMap, &typeMap),
+            new P4::SingleArgumentSelect(&refMap, &typeMap),
+            new P4::ConstantFolding(&refMap, &typeMap),
+            new P4::SimplifyControlFlow(&typeMap),
+            new P4::TableHit(&refMap, &typeMap),
+            new P4::RemoveLeftSlices(&refMap, &typeMap),
+            new EBPF::Lower(&refMap, &typeMap),
+            evaluator,
+            new P4::MidEndLast(),
+        });
         if (options.listMidendPasses) {
             midEnd.listPasses(*outStream, cstring::newline);
             *outStream << std::endl;
@@ -109,8 +117,11 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
             midEnd.removePasses(options.passesToExcludeMidend);
         }
     } else {
-        midEnd.addPasses({new P4::ResolveReferences(&refMap),
-                          new P4::TypeChecking(&refMap, &typeMap), evaluator});
+        midEnd.addPasses({
+            new P4::ResolveReferences(&refMap),
+            new P4::TypeChecking(&refMap, &typeMap),
+            evaluator,
+        });
     }
     midEnd.setName("MidEnd");
     midEnd.addDebugHooks(hooks);

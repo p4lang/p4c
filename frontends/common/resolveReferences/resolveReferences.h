@@ -64,7 +64,7 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
     // does not, so we will resolve names to things declared later only when translating
     // from P4_14 or Type_Vars or ParserStates, or after code transforms that may reorder
     // the code.
-    bool anyOrder;
+    bool anyOrder = false;
 
     ResolutionContext();
     explicit ResolutionContext(bool ao) : anyOrder(ao) {}
