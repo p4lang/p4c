@@ -24,6 +24,7 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
+  initial_default_action_id: 21257015
   size: 65536
 }
 tables {
@@ -55,6 +56,7 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
+  initial_default_action_id: 21257015
   size: 131072
 }
 tables {
@@ -86,6 +88,7 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
+  initial_default_action_id: 21257015
   size: 16384
 }
 tables {
@@ -111,6 +114,7 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
+  initial_default_action_id: 21257015
   size: 32768
 }
 tables {
@@ -133,6 +137,7 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
+  initial_default_action_id: 21257015
   size: 32768
 }
 tables {
@@ -158,6 +163,7 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
+  initial_default_action_id: 21257015
   size: 32768
 }
 actions {
