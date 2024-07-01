@@ -48,7 +48,7 @@ filegroup(
             name = "com_github_p4lang_p4runtime",
             remote = "https://github.com/p4lang/p4runtime",
             # Newest commit on main branch as of May 30, 2024.
-            commit = "62a9bd60599b87497a15feb6c7893b7ec8ba461f",
+            commit = "16b9a7d62de4f9f18c263e2f18d14064f37a65e6",
             shallow_since = "1680213111 -0700",
             strip_prefix = "proto",
         )
