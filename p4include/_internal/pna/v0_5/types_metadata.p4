@@ -1,3 +1,8 @@
+enum PNA_Direction_t {
+    NET_TO_HOST,
+    HOST_TO_NET
+}
+
 // BEGIN:Metadata_types
 enum PNA_PacketPath_t {
     // TBD if this type remains, whether it should be an enum or
