@@ -410,10 +410,12 @@ IR::ReturnStatement *StatementGenerator::genReturnStatement(const IR::Type *tp) 
 /// Generate a for-loop statement.
 IR::ForStatement *StatementGenerator::genForLoopStatement(bool is_in_func) {
     std::string loopVar = generateLoopControlVariable();
-    // TODO(zzmic): Determine the exact range of the bit field width and the upper bound.
+    // TODO(zzmic): Determine the exact range of the bit field width and the upper bound (keep in mind that buffer overflow should be avoided).
     int bitFieldWidth = Utils::getRandInt(1, 64); 
-    int maxValue = (1 << bitFieldWidth) - 1; 
-    int upperBound = (maxValue > 1) ? Utils::getRandInt(1, maxValue) : 1;
+    // Prevent the potential buffer overflow issue.
+    // Fow now, set the upper bound to 100.
+    long long maxValue = (bitFieldWidth < 64) ? ((1LL << bitFieldWidth) - 1) : (std::numeric_limits<int64_t>::max());
+    long long upperBound = Utils::getRandInt(1, std::min(100LL, maxValue));
 
     // Debugging statements
     std::cout << "genForLoopStatement - bitFieldWidth: " << bitFieldWidth 
@@ -463,11 +465,13 @@ IR::ForStatement *StatementGenerator::genForLoopStatement(bool is_in_func) {
 IR::ForInStatement *StatementGenerator::genForInLoopStatement(bool is_in_func) {
     std::string loopVar = generateLoopControlVariable();
     // TODO(zzmic): Determine the exact range of the bit field width, the lower bound, 
-    // the upper bound, and the initial value.
+    // and the upper bound (keep in mind that buffer overflow should be avoided).
     int bitFieldWidth = Utils::getRandInt(1, 64);
-    int maxValue = (1 << bitFieldWidth) - 1;
-    int lowerBound = Utils::getRandInt(0, std::div(maxValue, 2).quot);
-    int upperBound = (lowerBound < maxValue) ? Utils::getRandInt(lowerBound + 1, maxValue) : lowerBound + 1;
+    // Prevent the potential buffer overflow issue.
+    // Fow now, set the upper bound to 100.
+    long long maxValue = (bitFieldWidth < 64) ? ((1LL << bitFieldWidth) - 1) : std::numeric_limits<int64_t>::max();
+    long long lowerBound = Utils::getRandInt(0, std::min(50LL, maxValue/2));
+    long long upperBound = (lowerBound < maxValue) ? Utils::getRandInt(lowerBound+1, std::min(100LL, maxValue)) : (lowerBound + 1);
 
     // Debugging statements
     std::cout << "genForInLoopStatement - bitFieldWidth: " << bitFieldWidth 
