@@ -15,9 +15,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "psaProgramStructure.h"
+#include "backends/common/psaProgramStructure.h"
 
-namespace BMV2 {
+namespace P4 {
 
 using namespace P4::literals;
 
@@ -334,4 +334,4 @@ bool ParsePsaArchitecture::preorder(const IR::PackageBlock *block) {
     return false;
 }
 
-}  // namespace BMV2
+}  // namespace P4

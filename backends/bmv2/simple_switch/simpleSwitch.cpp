@@ -1199,7 +1199,7 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     program->apply(simplify);
 
     // map IR node to compile-time allocated resource blocks.
-    toplevel->apply(*new BMV2::BuildResourceMap(&structure->resourceMap));
+    toplevel->apply(*new P4::BuildResourceMap(&structure->resourceMap));
 
     // field list and learn list ids in bmv2 are not consistent with ids for
     // other objects: they need to start at 1 (not 0) since the id is also used
@@ -1223,7 +1223,7 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     if (!main) return;  // no main
     main->apply(*parseV1Arch);
     program = toplevel->getProgram();
-    program->apply(DiscoverStructure(structure));
+    program->apply(P4::DiscoverStructure(structure));
 
     /// generate error types
     for (const auto &p : structure->errorCodesMap) {

@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_EXPRESSION_H_
 #define BACKENDS_BMV2_COMMON_EXPRESSION_H_
 
+#include "backends/common/programStructure.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
@@ -26,7 +27,6 @@ limitations under the License.
 #include "lib/big_int_util.h"
 #include "lib/json.h"
 #include "lower.h"
-#include "programStructure.h"
 
 namespace BMV2 {
 
@@ -51,7 +51,7 @@ class ArithmeticFixup : public Transform {
 class ExpressionConverter : public Inspector {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
-    ProgramStructure *structure;
+    P4::ProgramStructure *structure;
     P4::P4CoreLibrary &corelib;
     cstring scalarsName;
 
@@ -68,8 +68,8 @@ class ExpressionConverter : public Inspector {
     bool withConstantWidths{false};
 
  public:
-    ExpressionConverter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, ProgramStructure *structure,
-                        cstring scalarsName)
+    ExpressionConverter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                        P4::ProgramStructure *structure, cstring scalarsName)
         : refMap(refMap),
           typeMap(typeMap),
           structure(structure),

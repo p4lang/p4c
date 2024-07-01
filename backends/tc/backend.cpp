@@ -94,7 +94,7 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
     program = program->apply(rewriteToEBPF);
 
     // map IR node to compile-time allocated resource blocks.
-    top->apply(*new BMV2::BuildResourceMap(&structure.resourceMap));
+    top->apply(*new P4::BuildResourceMap(&structure.resourceMap));
 
     main = top->getMain();
     if (!main) return false;  // no main
@@ -104,7 +104,7 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
     EBPF::EBPFTypeFactory::createFactory(typeMapEBPF);
     auto convertToEbpf = new ConvertToEbpfPNA(ebpfOption, refMapEBPF, typeMapEBPF, tcIR);
     PassManager toEBPF = {
-        new BMV2::DiscoverStructure(&structure),
+        new P4::DiscoverStructure(&structure),
         new InspectPnaProgram(refMapEBPF, typeMapEBPF, &structure),
         // convert to EBPF objects
         new VisitFunctor([evaluator, convertToEbpf]() {

@@ -17,14 +17,21 @@ and limitations under the License.
 #ifndef BACKENDS_TC_PNAPROGRAMSTRUCTURE_H_
 #define BACKENDS_TC_PNAPROGRAMSTRUCTURE_H_
 
-#include "backends/bmv2/common/backend.h"
-#include "backends/bmv2/common/programStructure.h"
+#include "backends/common/programStructure.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
 namespace TC {
 
-class PnaProgramStructure : public BMV2::ProgramStructure {
+enum block_t {
+    PARSER,
+    PIPELINE,
+    DEPARSER,
+};
+
+class PnaProgramStructure : public P4::ProgramStructure {
  protected:
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
@@ -38,7 +45,7 @@ class PnaProgramStructure : public BMV2::ProgramStructure {
     unsigned bool_width = 1;
 
     // architecture related information
-    ordered_map<const IR::Node *, BMV2::block_t> block_type;
+    ordered_map<const IR::Node *, block_t> block_type;
 
     ordered_map<cstring, const IR::Type_Header *> header_types;
     ordered_map<cstring, const IR::Type_Struct *> metadata_types;

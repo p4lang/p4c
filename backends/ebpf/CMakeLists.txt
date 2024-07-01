@@ -61,8 +61,6 @@ set (P4C_EBPF_SRCS
   ebpfModel.cpp
   midend.cpp
   lower.cpp
-  ../bmv2/common/programStructure.cpp
-  ../bmv2/psa_switch/psaProgramStructure.cpp
   psa/ebpfPsaGen.cpp
   psa/ebpfPipeline.cpp
   psa/ebpfPsaParser.cpp
@@ -95,9 +93,6 @@ set (P4C_EBPF_HDRS
   midend.h
   target.h
   lower.h
-  ../bmv2/common/programStructure.h
-  ../bmv2/psa_switch/psaProgramStructure.h
-  ../bmv2/psa_switch/psaSwitch.h
   psa/backend.h
   psa/ebpfPsaGen.h
   psa/xdpHelpProgram.h
@@ -122,7 +117,7 @@ set (P4C_EBPF_DIST_HEADERS
 )
 
 add_executable(p4c-ebpf ${P4C_EBPF_SRCS})
-target_link_libraries (p4c-ebpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+target_link_libraries (p4c-ebpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS} backends-common)
 add_dependencies(p4c-ebpf ir-generated frontend)
 
 install (TARGETS p4c-ebpf

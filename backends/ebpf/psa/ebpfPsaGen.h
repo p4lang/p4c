@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EBPFPSAGEN_H_
 #define BACKENDS_EBPF_PSA_EBPFPSAGEN_H_
 
-#include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "backends/ebpf/codeGen.h"
 #include "backends/ebpf/ebpfObject.h"
 #include "backends/ebpf/ebpfOptions.h"

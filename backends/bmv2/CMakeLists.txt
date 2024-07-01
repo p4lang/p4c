@@ -36,8 +36,6 @@ set (BMV2_PSA_SWITCH_SRCS
     psa_switch/midend.h
     psa_switch/psaSwitch.cpp
     psa_switch/psaSwitch.h
-    psa_switch/psaProgramStructure.cpp
-    psa_switch/psaProgramStructure.h
     psa_switch/options.cpp
     psa_switch/options.h
     )
@@ -53,9 +51,7 @@ set (BMV2_BACKEND_COMMON_SRCS
   common/header.cpp
   common/helpers.cpp
   common/lower.cpp
-  common/metermap.cpp
   common/parser.cpp
-  common/programStructure.cpp
   )
 
 set (BMV2_BACKEND_COMMON_HDRS
@@ -73,18 +69,16 @@ set (BMV2_BACKEND_COMMON_HDRS
   common/header.h
   common/helpers.h
   common/lower.h
-  common/metermap.h
   common/midend.h
   common/options.h
   common/parser.h
-  common/programStructure.h
   common/sharedActionSelectorCheck.h
   )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)
 
 add_library(bmv2backend STATIC ${BMV2_BACKEND_COMMON_SRCS})
-target_link_libraries(bmv2backend ir-generated frontend)
+target_link_libraries(bmv2backend ir-generated frontend backends-common)
 
 add_executable(p4c-bm2-ss ${BMV2_SIMPLE_SWITCH_SRCS})
 target_link_libraries (p4c-bm2-ss bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})

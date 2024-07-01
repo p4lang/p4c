@@ -253,7 +253,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
     PsaCodeGenerator structure(refMap, typeMap);
 
-    auto parsePsaArch = new ParsePsaArchitecture(&structure);
+    auto parsePsaArch = new P4::ParsePsaArchitecture(&structure);
     auto main = tlb->getMain();
     if (!main) return;
 
@@ -298,7 +298,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     program->apply(simplify);
 
     // map IR node to compile-time allocated resource blocks.
-    toplevel->apply(*new BMV2::BuildResourceMap(&structure.resourceMap));
+    toplevel->apply(*new P4::BuildResourceMap(&structure.resourceMap));
 
     main = toplevel->getMain();
     if (!main) return;  // no main
@@ -306,8 +306,8 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     if (::errorCount() > 0) return;
     program = toplevel->getProgram();
 
-    PassManager toJson = {new DiscoverStructure(&structure),
-                          new InspectPsaProgram(refMap, typeMap, &structure),
+    PassManager toJson = {new P4::DiscoverStructure(&structure),
+                          new P4::InspectPsaProgram(refMap, typeMap, &structure),
                           new ConvertPsaToJson(refMap, typeMap, toplevel, json, &structure)};
     for (const auto &pEnum : *enumMap) {
         auto name = pEnum.first->getName();
@@ -681,7 +681,7 @@ void ExternConverter_InternetChecksum::convertExternInstance(UNUSED ConversionCo
     cstring name = inst->controlPlaneName();
     auto trim = inst->controlPlaneName().find(".");
     auto block = inst->controlPlaneName().trim(trim);
-    auto psaStructure = static_cast<PsaProgramStructure *>(ctxt->structure);
+    auto psaStructure = static_cast<P4::PsaProgramStructure *>(ctxt->structure);
     auto ingressParser = psaStructure->parsers.at("ingress"_cs)->controlPlaneName();
     auto ingressDeparser = psaStructure->deparsers.at("ingress"_cs)->controlPlaneName();
     auto egressParser = psaStructure->parsers.at("egress"_cs)->controlPlaneName();

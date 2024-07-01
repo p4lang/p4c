@@ -16,7 +16,6 @@ limitations under the License.
 
 #include "ebpfBackend.h"
 
-#include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "ebpfProgram.h"
 #include "ebpfType.h"
 #include "frontends/p4/evaluator/evaluator.h"

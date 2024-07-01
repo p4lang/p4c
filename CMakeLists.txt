@@ -459,6 +459,7 @@ add_subdirectory (control-plane)
 # share the same set of IR classes (frontend and backend). Backends such as the DPDK backend
 # can introduce additional IR classes and cpp sources which need to be added to
 # EXTENSION_IR_SOURCES.
+add_subdirectory(backends/common)
 if (ENABLE_BMV2)
     add_subdirectory (backends/bmv2)
 endif ()

@@ -16,16 +16,18 @@ limitations under the License.
 */
 #include "backend.h"
 
-#include "backends/bmv2/psa_switch/psaSwitch.h"
+#include "backends/common/psaProgramStructure.h"
 
 namespace EBPF {
 
 void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
-    BMV2::PsaProgramStructure structure(refMap, typeMap);
-    auto parsePsaArch = new BMV2::ParsePsaArchitecture(&structure);
-    auto main = tlb->getMain();
-    if (!main) return;
+    P4::PsaProgramStructure structure(refMap, typeMap);
+    auto *parsePsaArch = new P4::ParsePsaArchitecture(&structure);
+    const auto *main = tlb->getMain();
+    if (main == nullptr) {
+        return;
+    }
 
     if (main->type->name != "PSA_Switch") {
         ::warning(ErrorType::WARN_INVALID,
@@ -36,8 +38,8 @@ void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     }
 
     main->apply(*parsePsaArch);
-    auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
-    auto program = tlb->getProgram();
+    auto *evaluator = new P4::EvaluatorPass(refMap, typeMap);
+    const auto *program = tlb->getProgram();
 
     PassManager rewriteToEBPF = {
         evaluator,
@@ -50,21 +52,23 @@ void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     program = program->apply(rewriteToEBPF);
 
     // map IR node to compile-time allocated resource blocks.
-    toplevel->apply(*new BMV2::BuildResourceMap(&structure.resourceMap));
+    toplevel->apply(*new P4::BuildResourceMap(&structure.resourceMap));
 
     main = toplevel->getMain();
-    if (!main) return;  // no main
+    if (main == nullptr) {
+        return;  // no main
+    }
     main->apply(*parsePsaArch);
     program = toplevel->getProgram();
 
     EBPFTypeFactory::createFactory(typeMap);
-    auto convertToEbpfPSA = new ConvertToEbpfPSA(options, refMap, typeMap);
+    auto *convertToEbpfPSA = new ConvertToEbpfPSA(options, refMap, typeMap);
     PassManager toEBPF = {
-        new BMV2::DiscoverStructure(&structure),
-        new BMV2::InspectPsaProgram(refMap, typeMap, &structure),
+        new P4::DiscoverStructure(&structure),
+        new P4::InspectPsaProgram(refMap, typeMap, &structure),
         // convert to EBPF objects
         new VisitFunctor([evaluator, convertToEbpfPSA]() {
-            auto tlb = evaluator->getToplevelBlock();
+            auto *tlb = evaluator->getToplevelBlock();
             tlb->apply(*convertToEbpfPSA);
         }),
     };
