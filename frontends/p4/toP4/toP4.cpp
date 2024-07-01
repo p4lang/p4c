@@ -49,7 +49,7 @@ void ToP4::end_apply(const IR::Node *) {
 // Try to guess whether a file is a "system" file
 bool ToP4::isSystemFile(cstring file) {
     if (noIncludes) return false;
-    if (file.startsWith(p4includePath)) return true;
+    if (file.startsWith(p4includePath) || file.find("p4include") != nullptr) return true;
     return false;
 }
 
