@@ -31,7 +31,7 @@ limitations under the License.
 // #include <_internal/pna/v0_5/types_defns.p4>
 #include <_internal/pna/v0_5/types_defns2.p4>
 #include <_internal/pna/v0_5/funcs_int_to_header.p4>
-#include <_internal/pna/v0_5/types_misc.p4>
+#include <_internal/pna/v0_7/types_misc.p4>
 
 #include <_internal/pna/v0_5/extern_hash.p4>
 #include <_internal/pna/v0_7/extern_checksum.p4>
@@ -111,9 +111,34 @@ extern DirectMeter {
 #include <_internal/pna/v0_7/extern_digest.p4>
 
 #include <_internal/pna/v0_5/types_metadata.p4>
-#include <_internal/pna/v0_5/extern_funcs.p4>
+
+// #include <_internal/pna/v0_5/extern_funcs.p4>
+
+extern void drop_packet();
+
+extern void send_to_port(PortId_t dest_port);
+
+extern void mirror_packet(MirrorSlotId_t mirror_slot_id,
+                          MirrorSessionId_t mirror_session_id);
 
 extern void recirculate();
+
+extern bool add_entry<T>(string action_name,
+                         in T action_params,
+                         in ExpireTimeProfileId_t expire_time_profile_id);
+
+extern FlowId_t allocate_flow_id();
+
+extern void set_entry_expire_time(
+    in ExpireTimeProfileId_t expire_time_profile_id);
+
+extern void restart_expire_timer();
+
+@pure
+extern T SelectByDirection<T>(
+    in PNA_Direction_t direction,
+    in T n2h_value,
+    in T h2n_value);
 
 #include <_internal/pna/v0_5/blocks.p4>
 

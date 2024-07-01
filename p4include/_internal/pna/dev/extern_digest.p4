@@ -1,6 +1,1 @@
-// BEGIN:Digest_extern
-extern Digest<T> {
-  Digest();                       /// define a digest stream to the control plane
-  void pack(in T data);           /// emit data into the stream
-}
-// END:Digest_extern
+#include <_internal/pna/v0_7/extern_digest.p4>
