@@ -14,25 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "programStructure.h"
+#include "backends/common/programStructure.h"
 
 #include "lib/log.h"
 
-namespace BMV2 {
+namespace P4 {
 
 void DiscoverStructure::postorder(const IR::ParameterList *paramList) {
     bool inAction = findContext<IR::P4Action>() != nullptr;
     unsigned index = 0;
-    for (auto p : *paramList->getEnumerator()) {
+    for (const auto *p : *paramList->getEnumerator()) {
         structure->index.emplace(p, index);
-        if (!inAction) structure->nonActionParameters.emplace(p);
+        if (!inAction) {
+            structure->nonActionParameters.emplace(p);
+        }
         index++;
     }
 }
 
 void DiscoverStructure::postorder(const IR::P4Action *action) {
     LOG2("discovered action " << action);
-    auto control = findContext<IR::P4Control>();
+    const auto *control = findContext<IR::P4Control>();
     structure->actions.emplace(action, control);
 }
 
@@ -42,16 +44,16 @@ void DiscoverStructure::postorder(const IR::Declaration_Variable *decl) {
 
 void DiscoverStructure::postorder(const IR::Type_Error *errors) {
     auto &map = structure->errorCodesMap;
-    for (auto m : *errors->getDeclarations()) {
+    for (const auto *m : *errors->getDeclarations()) {
         BUG_CHECK(map.find(m) == map.end(), "Duplicate error");
         map[m] = map.size();
     }
 }
 
 void DiscoverStructure::postorder(const IR::Declaration_MatchKind *kind) {
-    for (auto member : kind->members) {
+    for (const auto *member : kind->members) {
         structure->match_kinds.insert(member->name);
     }
 }
 
-}  // namespace BMV2
+}  // namespace P4

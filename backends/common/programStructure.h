@@ -14,29 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_
-#define BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_
+#ifndef BACKENDS_COMMON_PROGRAMSTRUCTURE_H_
+#define BACKENDS_COMMON_PROGRAMSTRUCTURE_H_
 
+#include "backends/common/metermap.h"
+#include "ir/ir.h"
 #include "ir/visitor.h"
+#include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
-#include "metermap.h"
 
-namespace BMV2 {
+namespace P4 {
 
 using ResourceMap = ordered_map<const IR::Node *, const IR::CompileTimeValue *>;
 
-enum class BlockConverted {
-    None,
-    Parser,
-    Ingress,
-    Egress,
-    Deparser,
-    ChecksumCompute,
-    ChecksumVerify
-};
-
 /// Represents all the compile-time information about a P4-16 program that
-/// is common to all bmv2 targets (simple switch and psa switch).
+/// is common to all P4 targets (in particular simple switch and psa switch).
 class ProgramStructure {
  public:
     /// Map action to parent control.
@@ -52,14 +44,14 @@ class ProgramStructure {
     std::vector<const IR::Declaration_Variable *> variables;
     /// All error codes.
     ordered_map<const IR::IDeclaration *, unsigned int> errorCodesMap;
+    /// All the direct meters. (TODO: This should be PSA-specific or V1MODEL-specific.)
+    DirectMeterMap directMeterMap;
+    /// All the direct counters. (TODO: This should be PSA-specific or V1MODEL-specific.)
+    ordered_map<cstring, const IR::P4Table *> directCounterMap;
     /// We place scalar user metadata fields (i.e., bit<>, bool)
     /// in the scalarsName metadata object, so we may need to rename
     /// these fields.  This map holds the new names.
     std::map<const IR::StructField *, cstring> scalarMetadataFields;
-    /// All the direct meters.
-    DirectMeterMap directMeterMap;
-    /// All the direct counters.
-    ordered_map<cstring, const IR::P4Table *> directCounterMap;
     /// All match kinds
     std::set<cstring> match_kinds;
     /// map IR node to compile-time allocated resource blocks.
@@ -100,7 +92,7 @@ class BuildResourceMap : public Inspector {
             resourceMap->emplace(cv.first, cv.second);
         }
 
-        for (auto c : control->container->controlLocals) {
+        for (const auto *c : control->container->controlLocals) {
             if (c->is<IR::InstantiatedBlock>()) {
                 resourceMap->emplace(c, control->getValue(c));
             }
@@ -117,7 +109,7 @@ class BuildResourceMap : public Inspector {
             }
         }
 
-        for (auto c : parser->container->parserLocals) {
+        for (const auto *c : parser->container->parserLocals) {
             if (c->is<IR::InstantiatedBlock>()) {
                 resourceMap->emplace(c, parser->getValue(c));
             }
@@ -146,12 +138,12 @@ class BuildResourceMap : public Inspector {
     }
 
     bool preorder(const IR::ToplevelBlock *tlb) override {
-        auto package = tlb->getMain();
+        const auto *package = tlb->getMain();
         visit(package);
         return false;
     }
 };
 
-}  // namespace BMV2
+}  // namespace P4
 
-#endif /* BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_ */
+#endif /* BACKENDS_COMMON_PROGRAMSTRUCTURE_H_ */

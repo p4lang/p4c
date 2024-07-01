@@ -15,16 +15,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_BMV2_PSA_SWITCH_PSAPROGRAMSTRUCTURE_H_
-#define BACKENDS_BMV2_PSA_SWITCH_PSAPROGRAMSTRUCTURE_H_
+#ifndef BACKENDS_COMMON_PSAPROGRAMSTRUCTURE_H_
+#define BACKENDS_COMMON_PSAPROGRAMSTRUCTURE_H_
 
-#include "backends/bmv2/common/backend.h"
-#include "backends/bmv2/common/programStructure.h"
+#include "backends/common/programStructure.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-/// TODO: this is not really specific to BMV2, it should reside somewhere else.
-namespace BMV2 {
+namespace P4 {
+
+enum gress_t { INGRESS, EGRESS };
+enum block_t {
+    PARSER,
+    PIPELINE,
+    DEPARSER,
+};
 
 class PsaProgramStructure : public ProgramStructure {
  protected:
@@ -148,6 +155,6 @@ class InspectPsaProgram : public Inspector {
     bool preorder(const IR::Parameter *parameter) override;
 };
 
-}  // namespace BMV2
+}  // namespace P4
 
-#endif /* BACKENDS_BMV2_PSA_SWITCH_PSAPROGRAMSTRUCTURE_H_ */
+#endif /* BACKENDS_COMMON_PSAPROGRAMSTRUCTURE_H_ */

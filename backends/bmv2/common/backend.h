@@ -31,7 +31,6 @@ limitations under the License.
 #include "lib/json.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "metermap.h"
 #include "midend/actionSynthesis.h"
 #include "midend/convertEnums.h"
 #include "midend/removeComplexExpressions.h"
