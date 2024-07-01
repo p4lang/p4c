@@ -15,8 +15,8 @@ namespace P4Tools::P4Smith {
 
 std::string getRandomString(size_t len) {
     // Add "for" and "in" to the list of P4 keywords, even though the wordlist doesn't contain them.
-    static const std::vector<std::string> P4_KEYWORDS = {"if",  "void",    "else",
-                                                         "key", "actions", "true", "for", "in"};  
+    static const std::vector<std::string> P4_KEYWORDS = {"if",      "void", "else", "key",
+                                                         "actions", "true", "for",  "in"};
     static const std::array<char, 53> ALPHANUMERIC_CHARACTERS = {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"};
@@ -61,10 +61,10 @@ std::string getRandomString(size_t len) {
 
 /// Generate an arbitrary variable name for loop control.
 std::string generateLoopControlVariable() {
-    // Generate a random string of length 1 (i.e., a single character variable name, 
+    // Generate a random string of length 1 (i.e., a single character variable name,
     // such as i, j, k, etc.).
     const std::string lowerCaseAlphabet = "abcdefghijklmnopqrstuvwxyz";
-    const char randomChar = lowerCaseAlphabet[Utils::getRandInt(lowerCaseAlphabet.size()-1)];
+    const char randomChar = lowerCaseAlphabet[Utils::getRandInt(lowerCaseAlphabet.size() - 1)];
     return std::string(1, randomChar);
 }
 

@@ -1,5 +1,3 @@
-#include "gtest/gtest.h"
-#include "backends/p4tools/modules/smith/smith.h"
 #include "backends/p4tools/modules/smith/common/declarations.h"
 #include "backends/p4tools/modules/smith/common/expressions.h"
 #include "backends/p4tools/modules/smith/common/generator.h"
@@ -9,14 +7,16 @@
 #include "backends/p4tools/modules/smith/common/statements.h"
 #include "backends/p4tools/modules/smith/common/table.h"
 #include "backends/p4tools/modules/smith/core/target.h"
-#include "ir/ir.h"
+#include "backends/p4tools/modules/smith/smith.h"
+#include "gtest/gtest.h"
 #include "ir/ir-generated.h"
+#include "ir/ir.h"
 
 namespace Test {
 
 class P4SmithForLoopTest : public ::testing::Test {
-protected:
-    P4Tools::P4Smith::StatementGenerator* generator;
+ protected:
+    P4Tools::P4Smith::StatementGenerator *generator;
 
     // TODO(zzmic): Figure out how to properly initialize and clean up the test object.
     P4SmithForLoopTest() {}
@@ -42,7 +42,7 @@ TEST_F(P4SmithForLoopTest, CheckForLoopContainsInitialization) {
     EXPECT_FALSE(forStmt->init.empty());
 }
 
-/// @brief Test the for-loop's condition. 
+/// @brief Test the for-loop's condition.
 TEST_F(P4SmithForLoopTest, CheckForLoopContainsCondition) {
     auto forLoopStmt = generator->genForLoopStatement(false);
     ASSERT_NE(forLoopStmt, nullptr);
@@ -78,4 +78,4 @@ TEST_F(P4SmithForLoopTest, CheckForLoopContainsBody) {
     EXPECT_FALSE(forStmt->body->is<IR::Statement>());
 }
 
-} // namespace Test
+}  // namespace Test
