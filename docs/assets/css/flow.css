@@ -10,3 +10,14 @@
     stroke-dashoffset: -10;
   }
 }
+#toggle {
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  z-index: 999;
+  padding: 25px 70px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  opacity: 0; /* Make the button invisible */
+}
