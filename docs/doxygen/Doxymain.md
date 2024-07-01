@@ -9,7 +9,7 @@
 <script type="text/javascript" src="https://viewer.diagrams.net/embed2.js?&fetch=https%3A%2F%2Fdrive.google.
 com%2Fuc%3Fid%3D16X8Z_4-J8mHQPxuxm9HjWppPMTTXZdZ6%26export%3Ddownload"></script>
 
-<button onclick="toggleFlow()">Toggle Flow Animation</button>
+<button id="toggle" onclick="toggleFlow()">Toggle</button>
 
 <script>
  function toggleFlow() {
