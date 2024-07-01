@@ -30,36 +30,36 @@ limitations under the License.
 #include <utility>
 #include <vector>
 
-#include "lib/error.h"
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpedantic"
+#include "p4/config/v1/p4info.pb.h"
 #include "p4/v1/p4runtime.pb.h"
 #pragma GCC diagnostic pop
 
-// TODO(antonin): this include should go away when we cleanup getMatchFields
-// and tableNeedsPriority implementations.
 #include "control-plane/bytestrings.h"
 #include "control-plane/flattenHeader.h"
+#include "control-plane/p4RuntimeAnnotations.h"
+#include "control-plane/p4RuntimeArchHandler.h"
+#include "control-plane/p4RuntimeArchStandard.h"
+#include "control-plane/p4RuntimeSymbolTable.h"
+#include "control-plane/typeSpecConverter.h"
 #include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/externInstance.h"
+// TODO(antonin): this include should go away when we cleanup getMatchFields
+// and tableNeedsPriority implementations.
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "lib/error.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "p4RuntimeAnnotations.h"
-#include "p4RuntimeArchHandler.h"
-#include "p4RuntimeArchStandard.h"
-#include "p4RuntimeSymbolTable.h"
-#include "typeSpecConverter.h"
 
 namespace p4v1 = ::p4::v1;
 namespace p4configv1 = ::p4::config::v1;
@@ -165,8 +165,12 @@ static bool writeTextTo(const Message &message, std::ostream *destination) {
 
 /// The information about a default action which is needed to serialize it.
 struct DefaultAction {
-    const cstring name;  // The fully qualified external name of this action.
-    const bool isConst;  // Is this a const default action?
+    // The action declaration
+    const IR::P4Action *action;
+    // Is this a const default action?
+    const bool isConst;
+    // The arguments for this action.
+    const IR::Vector<IR::Argument> *arguments;
 };
 
 /// The information about a match field which is needed to serialize it.
@@ -254,25 +258,35 @@ static std::optional<DefaultAction> getDefaultAction(const IR::P4Table *table, R
                                                      TypeMap *typeMap) {
     // not using getDefaultAction() here as I actually need the property IR node
     // to check if the default action is constant.
-    auto defaultActionProperty =
+    const auto *defaultActionProperty =
         table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
-    if (defaultActionProperty == nullptr) return std::nullopt;
+    if (defaultActionProperty == nullptr) {
+        ::P4::error(ErrorType::ERR_EXPECTED, "Expected table %1% to have a default action", table);
+        return std::nullopt;
+    }
+
     if (!defaultActionProperty->value->is<IR::ExpressionValue>()) {
         ::P4::error(ErrorType::ERR_EXPECTED, "Expected an action: %1%", defaultActionProperty);
         return std::nullopt;
     }
 
-    auto expr = defaultActionProperty->value->to<IR::ExpressionValue>()->expression;
+    const auto *expr = defaultActionProperty->value->to<IR::ExpressionValue>()->expression;
     cstring actionName;
+    const IR::Vector<IR::Argument> *arguments = nullptr;
+    const IR::P4Action *action = nullptr;
     if (expr->is<IR::PathExpression>()) {
-        auto decl = refMap->getDeclaration(expr->to<IR::PathExpression>()->path, true);
-        BUG_CHECK(decl->is<IR::P4Action>(), "Expected an action: %1%", expr);
-        actionName = decl->to<IR::P4Action>()->controlPlaneName();
+        const auto *decl = refMap->getDeclaration(expr->to<IR::PathExpression>()->path, true);
+        action = decl->to<IR::P4Action>();
+        BUG_CHECK(action, "Expected an action: %1%", expr);
+        actionName = action->controlPlaneName();
+        arguments = new IR::Vector<IR::Argument>;
     } else if (expr->is<IR::MethodCallExpression>()) {
-        auto callExpr = expr->to<IR::MethodCallExpression>();
-        auto instance = P4::MethodInstance::resolve(callExpr, refMap, typeMap);
+        const auto *callExpr = expr->to<IR::MethodCallExpression>();
+        auto *instance = MethodInstance::resolve(callExpr, refMap, typeMap);
         BUG_CHECK(instance->is<P4::ActionCall>(), "Expected an action: %1%", expr);
         actionName = instance->to<P4::ActionCall>()->action->controlPlaneName();
+        action = instance->to<P4::ActionCall>()->action;
+        arguments = callExpr->arguments;
     } else {
         ::P4::error(ErrorType::ERR_UNEXPECTED,
                     "Unexpected expression in default action for table %1%: %2%",
@@ -280,7 +294,7 @@ static std::optional<DefaultAction> getDefaultAction(const IR::P4Table *table, R
         return std::nullopt;
     }
 
-    return DefaultAction{actionName, defaultActionProperty->isConstant};
+    return DefaultAction{action, defaultActionProperty->isConstant, arguments};
 }
 
 /// @return true if @table has a 'const entries' property.
@@ -347,22 +361,6 @@ static std::optional<MatchField::MatchType> getMatchType(cstring matchTypeName) 
     }
 }
 
-// getTypeWidth returns the width in bits for the @type, except if it is a
-// user-defined type with a @p4runtime_translation annotation, in which case it
-// returns W if the type is bit<W>, and 0 otherwise (i.e. if the type is
-// string).
-static int getTypeWidth(const IR::Type *type, TypeMap *typeMap) {
-    TranslationAnnotation annotation;
-    if (hasTranslationAnnotation(type, &annotation)) {
-        // W if the type is bit<W>, and 0 if the type is string
-        return annotation.controller_type.width;
-    }
-    /* Treat error type as string */
-    if (type->is<IR::Type_Error>()) return 0;
-
-    return typeMap->widthBits(type, type->getNode(), false);
-}
-
 /// @return the header instance fields matched against by @table's key. The
 /// fields are represented as a (fully qualified field name, match type) tuple.
 static std::vector<MatchField> getMatchFields(const IR::P4Table *table, ReferenceMap *refMap,
@@ -395,7 +393,7 @@ static std::vector<MatchField> getMatchFields(const IR::P4Table *table, Referenc
         // the match field has a user-defined type.
         TypeSpecConverter::convert(refMap, typeMap, matchFieldType, p4RtTypeInfo);
         auto type_name = getTypeName(matchFieldType, typeMap);
-        int width = getTypeWidth(matchFieldType, typeMap);
+        int width = getTypeWidth(*matchFieldType, *typeMap);
         matchFields.push_back(MatchField{*matchFieldName, id, *matchType, matchTypeName,
                                          uint32_t(width), keyElement->to<IR::IAnnotated>(),
                                          type_name});
@@ -579,7 +577,7 @@ class P4RuntimeAnalyzer {
                 continue;
             }
             if (!paramType->is<IR::Type_Enum>()) {
-                int w = getTypeWidth(paramType, typeMap);
+                int w = getTypeWidth(*paramType, *typeMap);
                 param->set_bitwidth(w);
             }
             // We ignore the return type on purpose, but the call is required to update p4RtTypeInfo
@@ -637,7 +635,7 @@ class P4RuntimeAnalyzer {
                       "Header field %1% has a type which is not bit<>, "
                       "int<>, type, or serializable enum",
                       headerField);
-            auto w = getTypeWidth(fieldType, typeMap);
+            auto w = getTypeWidth(*fieldType, *typeMap);
             metadata->set_bitwidth(w);
             // We ignore the return type on purpose, but the call is required to update p4RtTypeInfo
             // if the header field has a user-defined type.
@@ -658,6 +656,9 @@ class P4RuntimeAnalyzer {
 
         auto tableSize = Helpers::getTableSize(tableDeclaration);
         auto defaultAction = getDefaultAction(tableDeclaration, refMap, typeMap);
+        if (!defaultAction.has_value()) {
+            return;
+        }
         auto matchFields =
             getMatchFields(tableDeclaration, refMap, typeMap, p4Info->mutable_type_info());
         auto actions = getActionRefs(tableDeclaration, refMap);
@@ -675,9 +676,32 @@ class P4RuntimeAnalyzer {
                     [this](cstring anno) { return archHandler->filterAnnotations(anno); });
         table->set_size(tableSize);
 
-        if (defaultAction && defaultAction->isConst) {
-            auto id = symbols.getId(P4RuntimeSymbolType::P4RT_ACTION(), defaultAction->name);
+        auto id = symbols.getId(P4RuntimeSymbolType::P4RT_ACTION(),
+                                defaultAction->action->controlPlaneName());
+
+        if (defaultAction->isConst) {
             table->set_const_default_action_id(id);
+        }
+
+        table->mutable_initial_default_action()->set_action_id(id);
+        int parameterIndex = 0;
+        int parameterId = 1;
+        for (const auto *argument : *defaultAction->arguments) {
+            auto value = stringRepr(*typeMap, argument->expression);
+            if (!value.has_value()) {
+                continue;
+            }
+            auto *protoParam = table->mutable_initial_default_action()->mutable_arguments()->Add();
+            const auto *parameter =
+                defaultAction->action->parameters->parameters.at(parameterIndex++);
+            const auto *idAnnotation = parameter->getAnnotation("id"_cs);
+            if (idAnnotation != nullptr) {
+                protoParam->set_param_id(idAnnotation->expr[0]->checkedTo<IR::Constant>()->asInt());
+            } else {
+                protoParam->set_param_id(parameterId);
+            }
+            parameterId++;
+            protoParam->set_value(*value);
         }
 
         for (const auto &action : actions) {
@@ -747,7 +771,7 @@ class P4RuntimeAnalyzer {
             // Generate P4Info for any extern functions it may invoke.
             forAllMatching<IR::MethodCallExpression>(
                 action->body, [&](const IR::MethodCallExpression *call) {
-                    auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
+                    auto instance = MethodInstance::resolve(call, refMap, typeMap);
                     if (instance->is<P4::ExternFunction>()) {
                         archHandler->addExternFunction(symbols, p4Info,
                                                        instance->to<P4::ExternFunction>());
@@ -758,7 +782,7 @@ class P4RuntimeAnalyzer {
         // Generate P4Info for any extern function invoked directly from control.
         forAllMatching<IR::MethodCallExpression>(
             control->body, [&](const IR::MethodCallExpression *call) {
-                auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
+                auto instance = MethodInstance::resolve(call, refMap, typeMap);
                 if (instance->is<P4::ExternFunction>()) {
                     archHandler->addExternFunction(symbols, p4Info,
                                                    instance->to<P4::ExternFunction>());
@@ -1127,29 +1151,15 @@ class P4RuntimeEntriesConverter {
 
         auto protoAction = protoEntry->mutable_action()->mutable_action();
         protoAction->set_action_id(actionId);
-        int parameterIndex = 0;
         int parameterId = 1;
         for (auto arg : *actionCall->arguments) {
             auto protoParam = protoAction->add_params();
             protoParam->set_param_id(parameterId++);
-            auto parameter = actionDecl->parameters->parameters.at(parameterIndex++);
-            int width = getTypeWidth(parameter->type, typeMap);
-            auto ei = EnumInstance::resolve(arg->expression, typeMap);
-            if (arg->expression->is<IR::Constant>()) {
-                auto value = stringRepr(arg->expression->to<IR::Constant>(), width);
-                protoParam->set_value(*value);
-            } else if (arg->expression->is<IR::BoolLiteral>()) {
-                auto value = stringRepr(arg->expression->to<IR::BoolLiteral>(), width);
-                protoParam->set_value(*value);
-            } else if (ei != nullptr && ei->is<SerEnumInstance>()) {
-                auto sei = ei->to<SerEnumInstance>();
-                auto value = stringRepr(sei->value->to<IR::Constant>(), width);
-                protoParam->set_value(*value);
-            } else {
-                ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported argument expression",
-                            arg->expression);
+            auto value = stringRepr(*typeMap, arg->expression);
+            if (!value.has_value()) {
                 continue;
             }
+            protoParam->set_value(*value);
         }
     }
 
@@ -1160,7 +1170,7 @@ class P4RuntimeEntriesConverter {
         int fieldId = 1;
         for (auto k : keyset->components) {
             auto tableKey = table->getKey()->keyElements.at(keyIndex++);
-            auto keyWidth = getTypeWidth(tableKey->expression->type, typeMap);
+            auto keyWidth = getTypeWidth(*tableKey->expression->type, *typeMap);
             auto matchType = getKeyMatchType(tableKey, refMap);
 
             if (matchType == P4CoreLibrary::instance().exactMatch.name) {

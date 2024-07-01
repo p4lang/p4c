@@ -47,8 +47,8 @@ filegroup(
         git_repository(
             name = "com_github_p4lang_p4runtime",
             remote = "https://github.com/p4lang/p4runtime",
-            # Newest commit on main branch as of May 30, 2024.
-            commit = "62a9bd60599b87497a15feb6c7893b7ec8ba461f",
+            # Newest commit on main branch as of August 18, 2024.
+            commit = "ec4eb5ef70dbcbcbf2f8357a4b2b8c2f218845a5",
             shallow_since = "1680213111 -0700",
             strip_prefix = "proto",
         )
