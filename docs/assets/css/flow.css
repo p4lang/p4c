@@ -1,0 +1,12 @@
+.flow {
+  stroke-dasharray: 5;
+  animation: flow-animation 2s linear infinite;
+}
+@keyframes flow-animation {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -10;
+  }
+}
