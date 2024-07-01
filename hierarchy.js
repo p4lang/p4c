@@ -1854,7 +1854,6 @@ var hierarchy =
         [ "P4::RemoveComplexExpressions", "class_p4_1_1_remove_complex_expressions.html", [
           [ "BMV2::RemoveComplexExpressions", "class_b_m_v2_1_1_remove_complex_expressions.html", null ]
         ] ],
-        [ "P4::RemoveComplexExpressions", "class_p4_1_1_remove_complex_expressions.html", null ],
         [ "P4::RemoveGenericTypes", "class_p4_1_1_remove_generic_types.html", null ],
         [ "P4::RemoveHidden", "class_p4_1_1_remove_hidden.html", null ],
         [ "P4::RemoveNestedStructs", "class_p4_1_1_remove_nested_structs.html", null ],

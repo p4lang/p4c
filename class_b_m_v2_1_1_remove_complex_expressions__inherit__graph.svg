@@ -58,17 +58,8 @@
 <g id="edge2_Node000002_Node000003" class="edge">
 <title>Node3&#45;&gt;Node2</title>
 <g id="a_edge2_Node000002_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M90.51,-99.66C89.91,-90.93 90.36,-80.99 91.87,-74.09"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="87.06,-100.29 91.83,-109.75 94,-99.38 87.06,-100.29"/>
-</a>
-</g>
-</g>
-<!-- Node3&#45;&gt;Node2 -->
-<g id="edge4_Node000002_Node000003" class="edge">
-<title>Node3&#45;&gt;Node2</title>
-<g id="a_edge4_Node000002_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M103.49,-99.66C104.09,-90.93 103.64,-80.99 102.13,-74.09"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="100,-99.38 102.17,-109.75 106.94,-100.29 100,-99.38"/>
+<path fill="none" stroke="#63b8ff" d="M97,-99.66C97,-90.93 97,-80.99 97,-74.09"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="93.5,-99.75 97,-109.75 100.5,-99.75 93.5,-99.75"/>
 </a>
 </g>
 </g>
