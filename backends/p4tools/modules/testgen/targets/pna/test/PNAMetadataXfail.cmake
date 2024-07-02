@@ -4,7 +4,7 @@
 
 p4tools_add_xfail_reason(
   "testgen-p4c-pna-metadata"
-  "Unknown or unimplemented extern method: recirculate"
+  "Unknown or unimplemented extern method: (.)*.recirculate"
   pna-example-pass.p4
   pna-example-pass-3.p4
   pna-example-recirculate.p4
@@ -12,7 +12,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-pna-metadata"
-  "Unknown or unimplemented extern method: get_hash"
+  "Unknown or unimplemented extern method: (.)*.get_hash"
   pna-dpdk-flatten-local-struct-decl.p4
   pna-dpdk-toeplitz-hash.p4
   pna-dpdk-toeplitz-hash-1.p4
@@ -20,27 +20,27 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-pna-metadata"
-  "Unknown or unimplemented extern method: mirror_packet"
+  "Unknown or unimplemented extern method: (.)*.mirror_packet"
   pna-example-mirror-packet.p4
   pna-example-mirror-packet-1.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-pna-metadata"
-  "Unknown or unimplemented extern method: count"
+  "Unknown or unimplemented extern method: (.)*.count"
   pna-dpdk-direct-counter.p4
   pna-dpdk-direct-counter-learner.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-pna-metadata"
-  "Unknown or unimplemented extern method: from_ipsec"
+  "Unknown or unimplemented extern method: (.)*.from_ipsec"
   pna-example-ipsec.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-pna-metadata"
-  "Unknown or unimplemented extern method: dpdk_execute"
+  "Unknown or unimplemented extern method: (.)*.dpdk_execute"
   pna-dpdk-direct-meter-learner.p4
 )
 

@@ -16,7 +16,6 @@
 #include "ir/node.h"
 #include "ir/solver.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
 #include "lib/null.h"
 #include "lib/source_file.h"
 #include "midend/coverage.h"
@@ -178,7 +177,8 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
                 call->method->type,
                 new IR::PathExpression(new IR::Type_Extern("*method"), new IR::Path("*method")),
                 path->path->name);
-            evalExternMethodCall(call, member->expr, member->member, call->arguments, state);
+            evalExternMethodCall({*call, *member->expr->checkedTo<IR::PathExpression>(),
+                                  member->member, *call->arguments});
             return false;
         }
 
@@ -198,7 +198,8 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
             // Handle extern calls. They may also be of Type_SpecializedCanonical.
             if (method->expr->type->is<IR::Type_Extern>() ||
                 method->expr->type->is<IR::Type_SpecializedCanonical>()) {
-                evalExternMethodCall(call, method->expr, method->member, call->arguments, state);
+                evalExternMethodCall({*call, *method->expr->checkedTo<IR::PathExpression>(),
+                                      method->member, *call->arguments});
                 return false;
             }
 
