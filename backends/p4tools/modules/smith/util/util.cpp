@@ -59,19 +59,4 @@ std::string getRandomString(size_t len) {
     return ret;
 }
 
-/// Generate an arbitrary variable name for loop control.
-std::string generateLoopControlVariable() {
-    // Generate a random string of length 1 (i.e., a single character variable name, such as
-    // i, j, k, etc.).
-    std::string lowerCaseAlphabet = "abcdefghijklmnopqrstuvwxyz";
-    int randomIndex = Utils::getRandInt(0, 25);
-
-    // Debugging print
-    std::cout << "Size of lowerCaseAlphabet: " << std::to_string(lowerCaseAlphabet.size()) << "\n";
-    std::cout << "Random index: " << std::to_string(randomIndex) << "\n";
-
-    char randomChar = lowerCaseAlphabet[randomIndex];
-    return std::string(1, randomChar);
-}
-
 }  // namespace P4Tools::P4Smith
