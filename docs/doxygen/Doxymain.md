@@ -10,17 +10,20 @@
 com%2Fuc%3Fid%3D16X8Z_4-J8mHQPxuxm9HjWppPMTTXZdZ6%26export%3Ddownload"></script>
 </div>
 
-<button id="toggle" onclick="toggleFlow()">Toggle</button>
+<button id="toggle" onclick="animateFlow()">Toggle</button>
 
 <script>
- function toggleFlow() {
+    function animateFlow() {
         const svgDocument = document.querySelector('.mxgraph svg');
         if (svgDocument) {
-            // Select edges
-            const edges = svgDocument.querySelectorAll('path:not([marker-end])'); 
+            const edges = svgDocument.querySelectorAll('path:not([marker-end])');
             edges.forEach(edge => {
-                edge.classList.toggle('flow');
+                edge.classList.add('flow');
             });
+            const toggleButton = document.getElementById('toggle');
+            if (toggleButton) {
+                toggleButton.style.display = 'none';
+            }
         }
     }
 </script>
