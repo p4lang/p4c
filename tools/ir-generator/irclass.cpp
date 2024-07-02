@@ -128,6 +128,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << "#include \"ir/node.h\"            // IWYU pragma: keep\n"
         << "#include \"ir/nodemap.h\"         // IWYU pragma: keep\n"
         << "#include \"ir/vector.h\"          // IWYU pragma: keep\n"
+        << "#include \"lib/ordered_map.h\"    // IWYU pragma: keep\n"
         << std::endl
         << "class JSONLoader;\n"
         << "using NodeFactoryFn = IR::Node*(*)(JSONLoader&);\n"

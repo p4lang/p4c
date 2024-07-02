@@ -83,14 +83,14 @@ void Graph_visitor::forLoopJson(std::vector<Graph *> &graphsArray, PrevType node
         auto *block = new Util::JsonObject();
         programBlocks->emplace_back(block);
 
-        block->emplace("type"_cs, getPrevType(node_type));
-        block->emplace("name"_cs, boost::get_property(*g, boost::graph_name));
+        block->emplace("type", getPrevType(node_type));
+        block->emplace("name", boost::get_property(*g, boost::graph_name));
 
         auto *nodesArray = new Util::JsonArray();
-        block->emplace("nodes"_cs, nodesArray);
+        block->emplace("nodes", nodesArray);
 
         auto *parserEdges = new Util::JsonArray();
-        block->emplace("transitions"_cs, parserEdges);
+        block->emplace("transitions", parserEdges);
 
         auto subg = *g;
 
@@ -98,13 +98,13 @@ void Graph_visitor::forLoopJson(std::vector<Graph *> &graphsArray, PrevType node
         for (auto &vit = vertices.first; vit != vertices.second; ++vit) {
             auto node = new Util::JsonObject();
             nodesArray->emplace_back(node);
-            node->emplace("node_nmb"_cs, *vit);
+            node->emplace("node_nmb", *vit);
 
             const auto &vinfo = subg[*vit];
 
-            node->emplace("name"_cs, vinfo.name.escapeJson());
-            node->emplace("type"_cs, getType(vinfo.type));
-            node->emplace("type_enum"_cs, (unsigned)vinfo.type);
+            node->emplace("name", vinfo.name.escapeJson());
+            node->emplace("type", getType(vinfo.type));
+            node->emplace("type_enum", (unsigned)vinfo.type);
         }
 
         auto edges = boost::edges(subg);
@@ -116,10 +116,10 @@ void Graph_visitor::forLoopJson(std::vector<Graph *> &graphsArray, PrevType node
             auto from = boost::source(*eit, subg);
             auto to = boost::target(*eit, subg);
 
-            edge->emplace("from"_cs, from);
-            edge->emplace("to"_cs, to);
+            edge->emplace("from", from);
+            edge->emplace("to", to);
 
-            edge->emplace("cond"_cs, boost::get(boost::edge_name, subg, *eit).escapeJson());
+            edge->emplace("cond", boost::get(boost::edge_name, subg, *eit).escapeJson());
         }
     }
 }
@@ -199,9 +199,9 @@ void Graph_visitor::process(std::vector<Graph *> &controlGraphsArray,
         json = new Util::JsonObject();
 
         // Remove '.p4' and path from program name.
-        json->emplace("name"_cs, filename.stem());
+        json->emplace("name", filename.stem());
         programBlocks = new Util::JsonArray();
-        json->emplace("nodes"_cs, programBlocks);
+        json->emplace("nodes", programBlocks);
 
         forLoopJson(parserGraphsArray, PrevType::Parser);
         forLoopJson(controlGraphsArray, PrevType::Control);

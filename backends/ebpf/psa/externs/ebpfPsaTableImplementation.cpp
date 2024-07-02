@@ -547,7 +547,7 @@ void EBPFActionSelectorPSA::registerTable(const EBPFTablePSA *instance) {
     if (table == nullptr) {
         selectors = getSelectorsFromTable(instance);
         emptyGroupAction =
-            instance->table->container->properties->getProperty("psa_empty_group_action"_cs);
+            instance->table->container->properties->getProperty("psa_empty_group_action");
         groupsMapSize = instance->size;
     } else {
         verifyTableSelectorKeySet(instance);
@@ -587,7 +587,7 @@ void EBPFActionSelectorPSA::verifyTableSelectorKeySet(const EBPFTablePSA *instan
 }
 
 void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA *instance) {
-    auto iega = instance->table->container->properties->getProperty("psa_empty_group_action"_cs);
+    auto iega = instance->table->container->properties->getProperty("psa_empty_group_action");
 
     if (emptyGroupAction == nullptr && iega == nullptr) return;  // nothing to do here
     if (emptyGroupAction == nullptr && iega != nullptr) {

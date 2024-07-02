@@ -65,6 +65,7 @@ interface INamespace {
 /// Does not allow two declarations with the same name
 interface ISimpleNamespace : INamespace {
     virtual IDeclaration getDeclByName(cstring name) const = 0;
+    virtual IDeclaration getDeclByName(std::string_view name) const = 0;    
 }
 
 /// A general namespace can have multiple declarations with the same name

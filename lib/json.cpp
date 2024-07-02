@@ -19,6 +19,7 @@ limitations under the License.
 #include <sstream>
 #include <stdexcept>
 
+#include "absl/strings/str_cat.h"
 #include "indent.h"
 #include "lib/big_int_util.h"
 
@@ -71,11 +72,18 @@ bool JsonValue::operator==(const cstring &s) const {
     return tag == Kind::String ? s == str : false;
 }
 bool JsonValue::operator==(const std::string &s) const {
-    return tag == Kind::String ? cstring(s) == str : false;
+    // Note that it does not make sense to convert `s` to `cstring` here. Such
+    // conversion involves cstring cache lookup and strcmp() in any case. Here
+    // we just doing strcmp() saving 1-2 map lookups
+    return tag == Kind::String ? str == s : false;
 }
 bool JsonValue::operator==(const char *s) const {
-    return tag == Kind::String ? cstring(s) == str : false;
+    // Note that it does not make sense to convert `s` to `cstring` here. Such
+    // conversion involves cstring cache lookup and strcmp() in any case. Here
+    // we just doing strcmp() saving 1-2 map lookups
+    return tag == Kind::String ? str == s : false;
 }
+
 bool JsonValue::operator==(const JsonValue &other) const {
     if (tag != other.tag) return false;
     switch (tag) {
@@ -167,7 +175,21 @@ JsonObject *JsonObject::emplace(cstring label, IJson *value) {
                                            "for a label which already exists ") +
                                label.string() + " " + s.string());
     }
-    ordered_map<cstring, IJson *>::emplace(label, value);
+    base::emplace(label, value);
+    return this;
+}
+
+JsonObject *JsonObject::emplace(std::string_view label, IJson *value) {
+    if (label.empty()) throw std::logic_error("Empty label");
+    auto j = get(label);
+    if (j != nullptr) {
+        cstring s = value->toString();
+        throw std::logic_error(
+            absl::StrCat("Attempt to add to json object a value "
+                         "for a label which already exists ",
+                         label, " ", s.string_view()));
+    }
+    base::emplace(label, value);
     return this;
 }
 

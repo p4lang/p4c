@@ -21,7 +21,7 @@ namespace P4 {
 bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument> *arguments) {
     bool first = true;
     bool hasName = false;
-    std::map<cstring, const IR::Argument *> found;
+    absl::flat_hash_map<cstring, const IR::Argument *> found;
 
     for (auto arg : *arguments) {
         cstring argName = arg->name.name;

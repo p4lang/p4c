@@ -587,10 +587,10 @@ std::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Table
 bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
     if (!checkTableValid(t)) return false;
 
-    if (t->properties->getProperty("selector"_cs) != nullptr) {
+    if (t->properties->getProperty("selector") != nullptr) {
         auto group_id = getMemExprFromProperty(t, "group_id"_cs);
         auto member_id = getMemExprFromProperty(t, "member_id"_cs);
-        auto selector_key = t->properties->getProperty("selector"_cs);
+        auto selector_key = t->properties->getProperty("selector");
         auto n_groups_max = getNumberFromProperty(t, "n_groups_max"_cs);
         auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max"_cs);
 

@@ -160,7 +160,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                     BUG("%1%: Unexpected built-in method", s);
                 }
                 auto primitive = mkPrimitive(prim, result);
-                primitive->emplace("parameters"_cs, parameters);
+                primitive->emplace("parameters", parameters);
                 primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
                 continue;
             } else if (mi->is<P4::ExternMethod>()) {
@@ -192,14 +192,14 @@ void ActionConverter::convertActionParams(const IR::ParameterList *parameters,
             warn(ErrorType::WARN_UNUSED, "Unused action parameter %1%", p);
 
         auto param = new Util::JsonObject();
-        param->emplace("name"_cs, p->externalName());
+        param->emplace("name", p->externalName());
         auto type = ctxt->typeMap->getType(p, true);
         // TODO: added IR::Type_Enum here to support PSA_MeterColor_t
         // should re-consider how to support action parameters that is neither bit<> nor int<>
         if (!(type->is<IR::Type_Bits>() || type->is<IR::Type_Enum>()))
             ::error(ErrorType::ERR_INVALID,
                     "%1%: action parameters must be bit<> or int<> on this target", p);
-        param->emplace("bitwidth"_cs, type->width_bits());
+        param->emplace("bitwidth", type->width_bits());
         params->append(param);
     }
 }

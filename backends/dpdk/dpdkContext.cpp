@@ -53,10 +53,10 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 tblAttr.size = dpdk_default_table_size;
                 if (size) tblAttr.size = size->asUnsigned();
                 auto hidden = tbl->annotations->getSingle(IR::Annotation::hiddenAnnotation);
-                auto selector = tbl->properties->getProperty("selector"_cs);
+                auto selector = tbl->properties->getProperty("selector");
                 tblAttr.is_add_on_miss = false;
                 tblAttr.idle_timeout_with_auto_delete = false;
-                auto add_on_miss = tbl->properties->getProperty("add_on_miss"_cs);
+                auto add_on_miss = tbl->properties->getProperty("add_on_miss");
                 if (add_on_miss != nullptr) {
                     if (add_on_miss->value->is<IR::ExpressionValue>()) {
                         auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
@@ -71,7 +71,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                     }
                 }
                 auto idle_timeout_with_auto_delete =
-                    tbl->properties->getProperty("idle_timeout_with_auto_delete"_cs);
+                    tbl->properties->getProperty("idle_timeout_with_auto_delete");
                 if (idle_timeout_with_auto_delete != nullptr) {
                     if (idle_timeout_with_auto_delete->value->is<IR::ExpressionValue>()) {
                         auto expr = idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()
@@ -174,16 +174,16 @@ void DpdkContextGenerator::addKeyField(Util::JsonArray *keyJson, const cstring n
     // Replace header stack indices hdr[<index>] with hdr$<index>.
     std::regex hdrStackRegex(R"(\[([0-9]+)\])");
     keyName = std::regex_replace(keyName, hdrStackRegex, "$$$1");
-    keyField->emplace("name"_cs, keyName);
-    keyField->emplace("instance_name"_cs, instanceName);
-    keyField->emplace("field_name"_cs, fieldName);
+    keyField->emplace("name", keyName);
+    keyField->emplace("instance_name", instanceName);
+    keyField->emplace("field_name", fieldName);
     auto match_kind = toStr(key->matchType);
     if (match_kind == "optional" || match_kind == "range") match_kind = "ternary"_cs;
-    keyField->emplace("match_type"_cs, match_kind);
-    keyField->emplace("start_bit"_cs, 0);
-    keyField->emplace("bit_width"_cs, key->expression->type->width_bits());
-    keyField->emplace("bit_width_full"_cs, key->expression->type->width_bits());
-    keyField->emplace("position"_cs, position);
+    keyField->emplace("match_type", match_kind);
+    keyField->emplace("start_bit", 0);
+    keyField->emplace("bit_width", key->expression->type->width_bits());
+    keyField->emplace("bit_width_full", key->expression->type->width_bits());
+    keyField->emplace("position", position);
     keyJson->append(keyField);
 }
 
@@ -192,15 +192,15 @@ Util::JsonObject *DpdkContextGenerator::initTableCommonJson(const cstring name,
                                                             const struct TableAttributes &attr) {
     auto *tableJson = new Util::JsonObject();
     cstring tableName = name;
-    tableJson->emplace("name"_cs, attr.externalName);
-    tableJson->emplace("target_name"_cs, tableName);
-    tableJson->emplace("direction"_cs, attr.direction);
-    tableJson->emplace("handle"_cs, attr.tableHandle);
-    tableJson->emplace("table_type"_cs, attr.tableType);
-    tableJson->emplace("size"_cs, attr.size);
-    tableJson->emplace("p4_hidden"_cs, attr.isHidden);
-    tableJson->emplace("add_on_miss"_cs, attr.is_add_on_miss);
-    tableJson->emplace("idle_timeout_with_auto_delete"_cs, attr.idle_timeout_with_auto_delete);
+    tableJson->emplace("name", attr.externalName);
+    tableJson->emplace("target_name", tableName);
+    tableJson->emplace("direction", attr.direction);
+    tableJson->emplace("handle", attr.tableHandle);
+    tableJson->emplace("table_type", attr.tableType);
+    tableJson->emplace("size", attr.size);
+    tableJson->emplace("p4_hidden", attr.isHidden);
+    tableJson->emplace("add_on_miss", attr.is_add_on_miss);
+    tableJson->emplace("idle_timeout_with_auto_delete", attr.idle_timeout_with_auto_delete);
     return tableJson;
 }
 
@@ -320,9 +320,9 @@ void DpdkContextGenerator::setDefaultActionHandle(const IR::P4Table *table) {
 void DpdkContextGenerator::addImmediateField(Util::JsonArray *paramJson, const cstring name,
                                              int dest_start, int dest_width) {
     auto *oneParam = new Util::JsonObject();
-    oneParam->emplace("param_name"_cs, name);
-    oneParam->emplace("dest_start"_cs, dest_start);
-    oneParam->emplace("dest_width"_cs, dest_width);
+    oneParam->emplace("param_name", name);
+    oneParam->emplace("dest_start", dest_start);
+    oneParam->emplace("dest_width", dest_width);
     paramJson->append(oneParam);
 }
 
@@ -341,8 +341,8 @@ Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *ta
         if (name != "NoAction") {
             name = ctrlName + "." + name;
         }
-        oneAction->emplace("action_name"_cs, name);
-        oneAction->emplace("action_handle"_cs, attr.actionHandle);
+        oneAction->emplace("action_name", name);
+        oneAction->emplace("action_handle", attr.actionHandle);
         auto *immFldArray = new Util::JsonArray();
         if (attr.params) {
             int index = 0;
@@ -371,11 +371,11 @@ Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *ta
 void DpdkContextGenerator::addActionParam(Util::JsonArray *paramJson, const cstring name,
                                           int bitWidth, int position, int byte_array_index) {
     auto *oneParam = new Util::JsonObject();
-    oneParam->emplace("name"_cs, name);
-    oneParam->emplace("start_bit"_cs, 0);
-    oneParam->emplace("bit_width"_cs, bitWidth);
-    oneParam->emplace("position"_cs, position);
-    oneParam->emplace("byte_array_index"_cs, byte_array_index);
+    oneParam->emplace("name", name);
+    oneParam->emplace("start_bit", 0);
+    oneParam->emplace("bit_width", bitWidth);
+    oneParam->emplace("position", position);
+    oneParam->emplace("byte_array_index", byte_array_index);
     paramJson->append(oneParam);
 }
 
@@ -395,14 +395,14 @@ Util::JsonArray *DpdkContextGenerator::addActions(const IR::P4Table *table,
             } else {
                 actName = name;
             }
-            act->emplace("name"_cs, attr.externalName);
-            act->emplace("target_name"_cs, actName);
-            act->emplace("handle"_cs, attr.actionHandle);
+            act->emplace("name", attr.externalName);
+            act->emplace("target_name", actName);
+            act->emplace("handle", attr.actionHandle);
             if (isMatch) {
-                act->emplace("constant_default_action"_cs, attr.constant_default_action);
-                act->emplace("is_compiler_added_action"_cs, attr.is_compiler_added_action);
-                act->emplace("allowed_as_hit_action"_cs, attr.allowed_as_hit_action);
-                act->emplace("allowed_as_default_action"_cs, attr.allowed_as_default_action);
+                act->emplace("constant_default_action", attr.constant_default_action);
+                act->emplace("is_compiler_added_action", attr.is_compiler_added_action);
+                act->emplace("allowed_as_hit_action", attr.allowed_as_hit_action);
+                act->emplace("allowed_as_default_action", attr.allowed_as_default_action);
             }
             auto *paramJson = new Util::JsonArray();
             if (attr.params) {
@@ -436,9 +436,9 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
 
     // Below empty arrays are currently required by the control plane software.
     // May be removed in future.
-    tableJson->emplace("stateful_table_refs"_cs, new Util::JsonArray());
-    tableJson->emplace("statistics_table_refs"_cs, new Util::JsonArray());
-    tableJson->emplace("meter_table_refs"_cs, new Util::JsonArray());
+    tableJson->emplace("stateful_table_refs", new Util::JsonArray());
+    tableJson->emplace("statistics_table_refs", new Util::JsonArray());
+    tableJson->emplace("meter_table_refs", new Util::JsonArray());
 
     // Reference to compiler generated member table in case of action profile and action selector.
     if (structure->member_tables.count(tbl_name)) {
@@ -448,8 +448,8 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
         auto *actionDataField = new Util::JsonObject();
         auto tableAttr = ::get(tableAttrmap, (*memberTable)->name.originalName);
         auto tableName = tableAttr.controlName + "." + (*memberTable)->name.originalName;
-        actionDataField->emplace("name"_cs, tableName);
-        actionDataField->emplace("handle"_cs, tableAttr.tableHandle);
+        actionDataField->emplace("name", tableName);
+        actionDataField->emplace("handle", tableAttr.tableHandle);
         actionDataJson->append(actionDataField);
         tableJson->emplace("action_data_table_refs"_cs, actionDataJson);
     }
@@ -462,14 +462,14 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
         auto *selectField = new Util::JsonObject();
         auto tableAttr = ::get(tableAttrmap, groupTable->name.originalName);
         auto tableName = tableAttr.controlName + "." + groupTable->name.originalName;
-        selectField->emplace("name"_cs, tableName);
-        selectField->emplace("handle"_cs, tableAttr.tableHandle);
+        selectField->emplace("name", tableName);
+        selectField->emplace("handle", tableAttr.tableHandle);
         selectionJson->append(selectField);
-        tableJson->emplace("selection_table_refs"_cs, selectionJson);
+        tableJson->emplace("selection_table_refs", selectionJson);
     }
 
     if (hasActionProfileSelector) {
-        tableJson->emplace("action_profile"_cs, (*memberTable)->name.originalName);
+        tableJson->emplace("action_profile", (*memberTable)->name.originalName);
     }
     return hasActionProfileSelector;
 }
@@ -511,19 +511,18 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray *tablesJson) {
             setDefaultActionHandle(table);
 
             tableAttr = ::get(tableAttrmap, table->name.originalName);
-            tableJson->emplace("actions"_cs,
-                               addActions(table, tableAttr.controlName, isMatchTable));
+            tableJson->emplace("actions", addActions(table, tableAttr.controlName, isMatchTable));
             if (isMatchTable) {
-                tableJson->emplace("match_attributes"_cs,
+                tableJson->emplace("match_attributes",
                                    addMatchAttributes(table, tableAttr.controlName));
             }
-            tableJson->emplace("default_action_handle"_cs, tableAttr.default_action_handle);
+            tableJson->emplace("default_action_handle", tableAttr.default_action_handle);
         } else {
             SelectionTable sel;
             sel.setAttributes(tbl, tableAttrmap);
-            tableJson->emplace("max_n_groups"_cs, sel.max_n_groups);
-            tableJson->emplace("max_n_members_per_group"_cs, sel.max_n_members_per_group);
-            tableJson->emplace("bound_to_action_data_table_handle"_cs,
+            tableJson->emplace("max_n_groups", sel.max_n_groups);
+            tableJson->emplace("max_n_members_per_group", sel.max_n_members_per_group);
+            tableJson->emplace("bound_to_action_data_table_handle",
                                sel.bound_to_action_data_table_handle);
         }
         tablesJson->append(tableJson);
@@ -535,17 +534,17 @@ void DpdkContextGenerator::addExternInfo(Util::JsonArray *externsJson) {
     for (auto t : externs) {
         auto externAttr = ::get(externAttrMap, t->name.name);
         auto *externJson = new Util::JsonObject();
-        externJson->emplace("name"_cs, externAttr.externalName);
-        externJson->emplace("target_name"_cs, t->name.name);
-        externJson->emplace("type"_cs, externAttr.externType);
+        externJson->emplace("name", externAttr.externalName);
+        externJson->emplace("target_name", t->name.name);
+        externJson->emplace("type", externAttr.externType);
         auto *attrJson = new Util::JsonObject();
         if (externAttr.externType == "Counter" || externAttr.externType == "DirectCounter") {
-            attrJson->emplace("type"_cs, externAttr.counterType);
+            attrJson->emplace("type", externAttr.counterType);
         }
         if (externAttr.externType == "DirectCounter" || externAttr.externType == "DirectMeter") {
-            attrJson->emplace("table_id"_cs, externAttr.table_id);
+            attrJson->emplace("table_id", externAttr.table_id);
         }
-        externJson->emplace("attributes"_cs, attrJson);
+        externJson->emplace("attributes", attrJson);
         externsJson->append(externJson);
     }
 }
@@ -556,15 +555,15 @@ const Util::JsonObject *DpdkContextGenerator::genContextJsonObject() {
     auto *externsJson = new Util::JsonArray();
     struct TopLevelCtxt tlinfo;
     tlinfo.initTopLevelCtxt(options);
-    json->emplace("program_name"_cs, tlinfo.progName);
-    json->emplace("build_date"_cs, tlinfo.buildDate);
-    json->emplace("compile_command"_cs, tlinfo.compileCommand);
-    json->emplace("compiler_version"_cs, tlinfo.compilerVersion);
-    json->emplace("schema_version"_cs, "0.1"_cs);
-    json->emplace("target"_cs, "DPDK"_cs);
-    json->emplace("tables"_cs, tablesJson);
+    json->emplace("program_name", tlinfo.progName);
+    json->emplace("build_date", tlinfo.buildDate);
+    json->emplace("compile_command", tlinfo.compileCommand);
+    json->emplace("compiler_version", tlinfo.compilerVersion);
+    json->emplace("schema_version", "0.1");
+    json->emplace("target", "DPDK");
+    json->emplace("tables", tablesJson);
     addMatchTables(tablesJson);
-    json->emplace("externs"_cs, externsJson);
+    json->emplace("externs", externsJson);
     addExternInfo(externsJson);
     return json;
 }

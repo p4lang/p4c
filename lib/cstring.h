@@ -148,6 +148,11 @@ class cstring {
         return result;
     }
 
+    /// @return true if a given string is interned (contained in cstring cache)
+    static bool is_cached(std::string_view s);
+    /// @return corresponding cstring if it was interned, null cstring otherwise
+    static cstring get_cached(std::string_view s);
+
  private:
     // passed string is shared, we not unique owners
     void construct_from_shared(const char *string, std::size_t length);

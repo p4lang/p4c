@@ -49,6 +49,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/p4runtime.cpp
   gtest/source_file_test.cpp
   gtest/strength_reduction.cpp
+  gtest/string_map.cpp
   gtest/transforms.cpp
   gtest/rtti_test.cpp
   gtest/nethash.cpp
