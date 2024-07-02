@@ -6,7 +6,7 @@
 #include "backends/p4tools/modules/smith/common/scope.h"
 #include "backends/p4tools/modules/smith/common/statements.h"
 #include "backends/p4tools/modules/smith/common/table.h"
-#include "backends/p4tools/modules/smith/core/target.h"
+#include "backends/p4tools/modules/smith/targets/generic/target.h"
 #include "backends/p4tools/modules/smith/smith.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
@@ -36,18 +36,17 @@ TEST_F(P4SmithForLoopTest, ForLoopGeneration) {
 }
 
 /// @brief Test the for-loop's initialization.
-TEST_F(P4SmithForLoopTest, CheckForLoopContainsInitialization) {
+TEST_F(P4SmithForLoopTest, CheckForLoopInitialization) {
     auto forLoopStmt = generator->genForLoopStatement(false);
     ASSERT_NE(forLoopStmt, nullptr);
     EXPECT_TRUE(forLoopStmt->is<IR::ForStatement>());
 
     auto forStmt = forLoopStmt->to<IR::ForStatement>();
-    ASSERT_NE(forStmt->init, nullptr);
-    EXPECT_FALSE(forStmt->init.empty());
+    ASSERT_FALSE(forStmt->init.empty());
 }
 
 /// @brief Test the for-loop's condition.
-TEST_F(P4SmithForLoopTest, CheckForLoopContainsCondition) {
+TEST_F(P4SmithForLoopTest, CheckForLoopCondition) {
     auto forLoopStmt = generator->genForLoopStatement(false);
     ASSERT_NE(forLoopStmt, nullptr);
     EXPECT_TRUE(forLoopStmt->is<IR::ForStatement>());
@@ -58,25 +57,24 @@ TEST_F(P4SmithForLoopTest, CheckForLoopContainsCondition) {
 }
 
 /// @brief Test the for-loop's update.
-TEST_F(P4SmithForLoopTest, CheckForLoopContainsUpdate) {
+TEST_F(P4SmithForLoopTest, CheckForLoopUpdate) {
     auto forLoopStmt = generator->genForLoopStatement(false);
     ASSERT_NE(forLoopStmt, nullptr);
     EXPECT_TRUE(forLoopStmt->is<IR::ForStatement>());
 
     auto forStmt = forLoopStmt->to<IR::ForStatement>();
-    ASSERT_NE(forStmt->updates, nullptr);
-    EXPECT_FALSE(forStmt->updates.empty());
+    ASSERT_FALSE(forStmt->updates.empty());
 }
 
 /// @brief Test the for-loop' body.
-TEST_F(P4SmithForLoopTest, CheckForLoopContainsBody) {
+TEST_F(P4SmithForLoopTest, CheckForLoopBody) {
     auto forLoopStmt = generator->genForLoopStatement(false);
     ASSERT_NE(forLoopStmt, nullptr);
     EXPECT_TRUE(forLoopStmt->is<IR::ForStatement>());
 
     auto forStmt = forLoopStmt->to<IR::ForStatement>();
     ASSERT_NE(forStmt->body, nullptr);
-    EXPECT_FALSE(forStmt->body->is<IR::Statement>());
+    EXPECT_FALSE(forStmt->body->is<IR::EmptyStatement>());
 }
 
 }  // namespace Test

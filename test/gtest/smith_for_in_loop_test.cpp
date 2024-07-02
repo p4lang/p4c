@@ -6,7 +6,7 @@
 #include "backends/p4tools/modules/smith/common/scope.h"
 #include "backends/p4tools/modules/smith/common/statements.h"
 #include "backends/p4tools/modules/smith/common/table.h"
-#include "backends/p4tools/modules/smith/core/target.h"
+#include "backends/p4tools/modules/smith/targets/generic/target.h"
 #include "backends/p4tools/modules/smith/smith.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
@@ -65,7 +65,7 @@ TEST_F(P4SmithForInLoopTest, CheckForLoopBody) {
 
     auto forInStmt = forInLoopStmt->to<IR::ForInStatement>();
     ASSERT_NE(forInStmt->body, nullptr);
-    EXPECT_FALSE(forInStmt->body->is<IR::Statement>());
+    EXPECT_FALSE(forInStmt->body->is<IR::EmptyStatement>());
 }
 
 }  // namespace Test
