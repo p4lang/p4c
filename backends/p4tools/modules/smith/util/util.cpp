@@ -63,8 +63,14 @@ std::string getRandomString(size_t len) {
 std::string generateLoopControlVariable() {
     // Generate a random string of length 1 (i.e., a single character variable name,
     // such as i, j, k, etc.).
-    const std::string lowerCaseAlphabet = "abcdefghijklmnopqrstuvwxyz";
-    const char randomChar = lowerCaseAlphabet[Utils::getRandInt(lowerCaseAlphabet.size() - 1)];
+    std::string lowerCaseAlphabet = "abcdefghijklmnopqrstuvwxyz";
+    int randomIndex = Utils::getRandInt(0, 25);
+
+    // Debugging print
+    std::cout << "Size of lowerCaseAlphabet: " << std::to_string(lowerCaseAlphabet.size()) << "\n";
+    std::cout << "Random index: " << std::to_string(randomIndex) << "\n";
+
+    char randomChar = lowerCaseAlphabet[randomIndex];
     return std::string(1, randomChar);
 }
 
