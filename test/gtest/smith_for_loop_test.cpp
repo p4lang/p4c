@@ -9,7 +9,6 @@
 #include "backends/p4tools/modules/smith/core/target.h"
 #include "backends/p4tools/modules/smith/smith.h"
 #include "gtest/gtest.h"
-#include "ir/ir-generated.h"
 #include "ir/ir.h"
 
 namespace Test {
