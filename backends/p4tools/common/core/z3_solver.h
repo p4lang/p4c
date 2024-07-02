@@ -2,6 +2,7 @@
 #define BACKENDS_P4TOOLS_COMMON_CORE_Z3_SOLVER_H_
 
 #include <z3++.h>
+#include <z3.h>
 
 #include <cstddef>
 #include <iosfwd>
