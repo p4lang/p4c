@@ -21,3 +21,26 @@
   cursor: pointer;
   opacity: 0; /* Make the button invisible */
 }
+
+/* Style for diagram container */
+.diagram-container {
+  float: right; /* Float right for larger screens */
+  width: 100%;
+  max-width: 600px;
+  margin-left: 20px; /* Space to the left of the diagram */
+}
+
+.diagram-container .mxgraph {
+  width: 100%; /* Ensure the diagram fills its container */
+  height: auto; /* Allow the height to adjust proportionally */
+}
+
+@media (max-width: 700px) {
+  .diagram-container {
+    float: none; /* Remove float on small screens */
+    clear: both; /* Clear floats */
+    margin: 20px auto; /* Center the diagram horizontally with top and bottom margin */
+    width: 100%; /* Full width on small screens */
+    max-width: 100%; /* Ensure it stretches to the maximum width available */
+  }
+}
