@@ -2,10 +2,13 @@
 #define BACKENDS_P4TOOLS_COMMON_LIB_LOGGING_H_
 
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <utility>
 
-#include "backends/p4tools/common/lib/util.h"
+#include <boost/format.hpp>
+
+#include "lib/log.h"
 
 namespace P4Tools {
 
@@ -24,11 +27,13 @@ std::string logHelper(boost::format &f, T &&t, Args &&...args) {
 template <typename... Arguments>
 void printFeature(const std::string &label, int level, const std::string &fmt,
                   Arguments &&...args) {
+    // Do not print logging messages when logging is not enabled.
+    if (!Log::fileLogLevelIsAtLeast(label.c_str(), level)) {
+        return;
+    }
+
     boost::format f(fmt);
-
-    auto result = logHelper(f, std::forward<Arguments>(args)...);
-
-    LOG_FEATURE(label.c_str(), level, result);
+    LOG_FEATURE(label.c_str(), level, logHelper(f, std::forward<Arguments>(args)...));
 }
 
 /// Helper functions that prints strings associated with basic tool information.
@@ -40,7 +45,7 @@ void printInfo(const std::string &fmt, Arguments &&...args) {
 
 /// Convenience function for printing debug information.
 /// Easier to use then LOG(XX) since we only need one specific log-level across all files.
-/// Can be invoked with "-T 4:tools_debug".
+/// Can be invoked with "-T tools_debug:4".
 template <typename... Arguments>
 void printDebug(const std::string &fmt, Arguments &&...args) {
     printFeature("tools_debug", 4, fmt, std::forward<Arguments>(args)...);

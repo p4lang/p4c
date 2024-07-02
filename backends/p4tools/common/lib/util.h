@@ -9,11 +9,9 @@
 #include <string>
 #include <vector>
 
-#include <boost/format.hpp>
 #include <boost/random/mersenne_twister.hpp>
 
 #include "ir/ir.h"
-#include "lib/cstring.h"
 
 namespace P4Tools {
 

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <unordered_map>
 
+#include "lib/error.h"
 #include "lib/log.h"
 #include "lib/timer.h"
 
