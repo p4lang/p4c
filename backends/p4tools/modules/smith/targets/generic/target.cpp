@@ -88,26 +88,6 @@ IR::P4Parser *GenericCoreSmithTarget::generateParserBlock() const {
 }
 
 IR::P4Control *GenericCoreSmithTarget::generateIngressBlock() const {
-    // start of new scope
-    P4Scope::startLocalScope();
-
-    IR::IndexedVector<IR::Parameter> params;
-    params.push_back(
-        declarationGenerator().genParameter(IR::Direction::InOut, "h"_cs, SYS_HDR_NAME));
-    auto *parList = new IR::ParameterList(params);
-    auto *typeCtrl = new IR::Type_Control("ingress", parList);
-
-    // add to the scope
-    for (const auto *param : parList->parameters) {
-        P4Scope::addToScope(param);
-        // add to the name_2_type
-        // only add values that are !read-only to the modifiable types
-        if (param->direction == IR::Direction::In) {
-            P4Scope::addLval(param->type, param->name.name, true);
-        } else {
-            P4Scope::addLval(param->type, param->name.name, false);
-        }
-    }
 }
 
 IR::Declaration_Instance *GenericCoreSmithTarget::generateMainPackage() {
