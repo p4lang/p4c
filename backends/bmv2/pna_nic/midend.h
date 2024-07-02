@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2024 Marvell Technology, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,19 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_BMV2_PSA_SWITCH_MIDEND_H_
-#define BACKENDS_BMV2_PSA_SWITCH_MIDEND_H_
+#ifndef BACKENDS_BMV2_PNA_NIC_MIDEND_H_
+#define BACKENDS_BMV2_PNA_NIC_MIDEND_H_
 
 #include "backends/bmv2/portable_common/midend.h"
 
 namespace BMV2 {
 
-class PsaSwitchMidEnd : public PortableMidEnd {
+class PnaNicMidEnd : public PortableMidEnd {
  public:
     // If p4c is run with option '--listMidendPasses', outStream is used for printing passes names
-    explicit PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
+    explicit PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
 };
 
 }  // namespace BMV2
 
-#endif /* BACKENDS_BMV2_PSA_SWITCH_MIDEND_H_ */
+#endif /* BACKENDS_BMV2_PNA_NIC_MIDEND_H_ */

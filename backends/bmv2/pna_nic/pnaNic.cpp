@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2024 Marvell Technology, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "psaSwitch.h"
+#include "pnaNic.h"
 
 #include "frontends/common/model.h"
 #include "frontends/p4/cloner.h"
@@ -23,21 +23,21 @@ namespace BMV2 {
 
 using namespace P4::literals;
 
-void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
+void PnaNicBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
-    PsaProgramStructure structure(refMap, typeMap);
+    PnaProgramStructure structure(refMap, typeMap);
 
-    auto parsePsaArch = new ParsePsaArchitecture(&structure);
+    auto parsePnaArch = new ParsePnaArchitecture(&structure);
     auto main = tlb->getMain();
     if (!main) return;
 
-    if (main->type->name != "PSA_Switch")
+    if (main->type->name != "PNA_NIC")
         ::warning(ErrorType::WARN_INVALID,
-                  "%1%: the main package should be called PSA_Switch"
+                  "%1%: the main package should be called PNA_NIC"
                   "; are you using the wrong architecture?",
                   main->type->name);
 
-    main->apply(*parsePsaArch);
+    main->apply(*parsePnaArch);
 
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto program = tlb->getProgram();
@@ -51,10 +51,8 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(typeMap),
         new LowerExpressions(typeMap),
-        new PassRepeated({
-            new P4::ConstantFolding(refMap, typeMap),
-            new P4::StrengthReduction(typeMap),
-        }),
+        new PassRepeated(
+            {new P4::ConstantFolding(refMap, typeMap), new P4::StrengthReduction(typeMap)}),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveComplexExpressions(refMap, typeMap,
                                          new ProcessControls(&structure.pipeline_controls)),
@@ -76,13 +74,13 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
 
     main = toplevel->getMain();
     if (!main) return;  // no main
-    main->apply(*parsePsaArch);
+    main->apply(*parsePnaArch);
     if (::errorCount() > 0) return;
     program = toplevel->getProgram();
 
     PassManager toJson = {new DiscoverStructure(&structure),
-                          new InspectPsaProgram(refMap, typeMap, &structure),
-                          new ConvertPsaToJson(refMap, typeMap, toplevel, json, &structure)};
+                          new InspectPnaProgram(refMap, typeMap, &structure),
+                          new ConvertPnaToJson(refMap, typeMap, toplevel, json, &structure)};
     for (const auto &pEnum : *enumMap) {
         auto name = pEnum.first->getName();
         for (const auto &pEntry : *pEnum.second) {
@@ -207,7 +205,7 @@ Util::IJson *ExternConverter_Register::convertExternObject(
         modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
     } else if (em->method->name == "read" && mc->arguments->size() != 2) {
-        modelError("p4c-psa internally requires 2 arguments for %1%", mc);
+        modelError("p4c-pna internally requires 2 arguments for %1%", mc);
         return nullptr;
     }
     auto reg = new Util::JsonObject();
@@ -243,7 +241,7 @@ void ExternConverter_Hash::convertExternInstance(ConversionContext *ctxt, const 
                                                  UNUSED const bool &emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
-    auto psaStructure = static_cast<PsaProgramStructure *>(ctxt->structure);
+    auto pnaStructure = static_cast<PnaProgramStructure *>(ctxt->structure);
 
     // add hash instance
     auto jhash = new Util::JsonObject();
@@ -268,7 +266,7 @@ void ExternConverter_Hash::convertExternInstance(ConversionContext *ctxt, const 
         return;
     }
     cstring algo_name = algo->to<IR::Declaration_ID>()->name;
-    algo_name = psaStructure->convertHashAlgorithm(algo_name);
+    algo_name = pnaStructure->convertHashAlgorithm(algo_name);
     auto k = new Util::JsonObject();
     k->emplace("name"_cs, "algo");
     k->emplace("type"_cs, "string");
@@ -284,13 +282,10 @@ void ExternConverter_InternetChecksum::convertExternInstance(UNUSED ConversionCo
     cstring name = inst->controlPlaneName();
     auto trim = inst->controlPlaneName().find(".");
     auto block = inst->controlPlaneName().trim(trim);
-    auto psaStructure = static_cast<PsaProgramStructure *>(ctxt->structure);
-    auto ingressParser = psaStructure->parsers.at("ingress"_cs)->controlPlaneName();
-    auto ingressDeparser = psaStructure->deparsers.at("ingress"_cs)->controlPlaneName();
-    auto egressParser = psaStructure->parsers.at("egress"_cs)->controlPlaneName();
-    auto egressDeparser = psaStructure->deparsers.at("egress"_cs)->controlPlaneName();
-    if (block != ingressParser && block != ingressDeparser && block != egressParser &&
-        block != egressDeparser) {
+    auto pnaStructure = static_cast<PnaProgramStructure *>(ctxt->structure);
+    auto mainParser = pnaStructure->parsers.at("main_parser"_cs)->controlPlaneName();
+    auto mainDeparser = pnaStructure->deparsers.at("main_deparser"_cs)->controlPlaneName();
+    if (block != mainParser && block != mainDeparser) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in pipeline on this target", eb);
     }
     // add checksum instance

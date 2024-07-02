@@ -58,3 +58,25 @@ mark_as_advanced(PSA_SWITCH PSA_SWITCH_CLI)
 find_package_handle_standard_args ("BMV2"
   "Program 'psa_switch_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMV2_PSA_SWITCH_SEARCH_PATHS}.\nWill not run PSA BMv2 tests."
   PSA_SWITCH PSA_SWITCH_CLI)
+
+  set(BMV2_PNA_NIC_SEARCH_PATHS
+    ${CMAKE_INSTALL_PREFIX}/bin
+    ${P4C_SOURCE_DIR}/../behavioral-model/build/targets/pna_nic
+    ${P4C_SOURCE_DIR}/../../behavioral-model/build/targets/pna_nic)
+  
+# check for pna_nic
+find_program (PNA_NIC_CLI pna_nic_CLI
+  paths ${BMV2_PNA_NIC_SEARCH_PATHS} )
+if (PNA_NIC_CLI)
+  find_program (PNA_NIC pna_nic
+    PATHS ${BMV2_PNA_NIC_SEARCH_PATHS} )
+  if (PNA_NIC)
+    set (HAVE_PNA_NIC 1)
+  endif (PNA_NIC)
+endif (PNA_NIC_CLI)
+
+mark_as_advanced(PNA_NIC PNA_NIC_CLI)
+
+find_package_handle_standard_args ("BMV2"
+  "Program 'pna_nic_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMv2_PNA_NIC_SEARCH_PATHS}.\nWill not run PNA PNA BMv2 tests."
+  PNA_NIC PNA_NIC_CLI)

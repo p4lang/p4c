@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2024 Marvell Technology, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,28 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_BMV2_PSA_SWITCH_PSASWITCH_H_
-#define BACKENDS_BMV2_PSA_SWITCH_PSASWITCH_H_
+#ifndef BACKENDS_BMV2_PNA_NIC_PNANIC_H_
+#define BACKENDS_BMV2_PNA_NIC_PNANIC_H_
 
 #include "backends/bmv2/portable_common/portable.h"
-#include "psaProgramStructure.h"
+#include "pnaProgramStructure.h"
 
 namespace BMV2 {
 
-class PsaSwitchExpressionConverter : public ExpressionConverter {
+class PnaNicExpressionConverter : public ExpressionConverter {
  public:
-    PsaSwitchExpressionConverter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                                 ProgramStructure *structure, cstring scalarsName)
+    PnaNicExpressionConverter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                              ProgramStructure *structure, cstring scalarsName)
         : BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) {}
 
     void modelError(const char *format, const cstring field) {
         ::error(ErrorType::ERR_MODEL,
-                (cstring(format) + "\nInvalid metadata parameter value for PSA").c_str(), field);
+                (cstring(format) + "\nInvalid metadata parameter value for PNA").c_str(), field);
     }
 
     Util::IJson *convertParam(UNUSED const IR::Parameter *param, cstring fieldName) override {
         cstring ptName = param->type->toString();
-        if (PsaProgramStructure::isCounterMetadata(ptName)) {  // check if its counter metadata
+        if (PnaProgramStructure::isCounterMetadata(ptName)) {  // check if its counter metadata
             auto jsn = new Util::JsonObject();
             jsn->emplace("name"_cs, param->toString());
             jsn->emplace("type"_cs, "hexstr");
@@ -52,11 +52,11 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
                 cstring repr = BMV2::stringRepr(2, ROUNDUP(bitwidth, 32));
                 jsn->emplace("value"_cs, repr);
             } else {
-                modelError("%1%: Exptected a PSA_CounterType_t", fieldName);
+                modelError("%1%: Exptected a PNA_CounterType_t", fieldName);
                 return nullptr;
             }
             return jsn;
-        } else if (PsaProgramStructure::isStandardMetadata(ptName)) {  // check if its psa metadata
+        } else if (PnaProgramStructure::isStandardMetadata(ptName)) {  // check if its pna metadata
             auto jsn = new Util::JsonObject();
 
             // encode the metadata type and field in json
@@ -73,17 +73,17 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
     }
 };
 
-class ConvertPsaToJson : public Inspector {
+class ConvertPnaToJson : public Inspector {
  public:
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     const IR::ToplevelBlock *toplevel;
     JsonObjects *json;
-    PsaProgramStructure *structure;
+    PnaProgramStructure *structure;
 
-    ConvertPsaToJson(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+    ConvertPnaToJson(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                      const IR::ToplevelBlock *toplevel, JsonObjects *json,
-                     PsaProgramStructure *structure)
+                     PnaProgramStructure *structure)
         : refMap(refMap), typeMap(typeMap), toplevel(toplevel), json(json), structure(structure) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
@@ -95,19 +95,19 @@ class ConvertPsaToJson : public Inspector {
     void postorder(UNUSED const IR::P4Program *program) override {
         cstring scalarsName = "scalars"_cs;
         // This visitor is used in multiple passes to convert expression to json
-        auto conv = new PsaSwitchExpressionConverter(refMap, typeMap, structure, scalarsName);
+        auto conv = new PnaNicExpressionConverter(refMap, typeMap, structure, scalarsName);
         auto ctxt = new ConversionContext(refMap, typeMap, toplevel, structure, conv, json);
         structure->create(ctxt);
     }
 };
 
-class PsaSwitchBackend : public Backend {
+class PnaNicBackend : public Backend {
     BMV2Options &options;
 
  public:
     void convert(const IR::ToplevelBlock *tlb) override;
-    PsaSwitchBackend(BMV2Options &options, P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                     P4::ConvertEnums::EnumMapping *enumMap)
+    PnaNicBackend(BMV2Options &options, P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                  P4::ConvertEnums::EnumMapping *enumMap)
         : Backend(options, refMap, typeMap, enumMap), options(options) {}
 };
 
@@ -117,4 +117,4 @@ EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Register)
 
 }  // namespace BMV2
 
-#endif /* BACKENDS_BMV2_PSA_SWITCH_PSASWITCH_H_ */
+#endif /* BACKENDS_BMV2_PNA_NIC_PNANIC_H_ */
