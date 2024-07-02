@@ -23,7 +23,18 @@ limitations under the License.
 #include "absl/container/flat_hash_map.h"
 #include "cstring.h"
 
-// Map is ordered by order of element insertion.
+/// Map with string keys that is ordered by order of element insertion.
+/// Use this map only when stable iteration order is significant. For everything
+/// else consider using some other unordered containers with cstring keys. Never
+/// use std::map<cstring, ...> or ordered_map<cstring, ...> as these maps will
+/// have significant overhead due to lexicographical ordering of the keys.
+///
+/// For this particular implementation:
+///  * Key are stored as cstrings in the underlying abseil hash map.
+///  * Heterogenous lookup (with std::string_view keys) is supported. Special
+///    care is done not to create cstrings in case if they are not in the map
+///    already
+///  * Values are stored in std::list, similar to ordered_map.
 template <class V>
 class string_map {
  public:
@@ -72,7 +83,6 @@ class string_map {
     }
     string_map(string_map &&a) = default;
     string_map &operator=(const string_map &a) {
-        /* std::list assignment broken by spec if elements are const... */
         if (this != &a) {
             data.clear();
             data.insert(data.end(), a.data.begin(), a.data.end());
@@ -99,6 +109,8 @@ class string_map {
     bool empty() const noexcept { return data.empty(); }
     size_type size() const noexcept { return data_map.size(); }
     size_type max_size() const noexcept { return data_map.max_size(); }
+    /// As the map is ordered, two maps are only considered equal if the elements
+    /// are inserted in the same order. Same as with ordered_map though.
     bool operator==(const string_map &a) const { return data == a.data; }
     bool operator!=(const string_map &a) const { return data != a.data; }
     void clear() {
@@ -106,11 +118,11 @@ class string_map {
         data_map.clear();
     }
 
-    // Functions above do have `std::string_view` versions. Here we are having
-    // important special case: if `a` is not something that was interned, we do
-    // not copy / intern it, we know for sure that `a` is not in the map and we
-    // do not need to perform a lookup
     iterator find(cstring a) { return tr_iter(data_map.find(a)); }
+    /// Functions below do have `std::string_view` versions. Here we are having
+    /// important special case: if `a` is not something that was interned, we do
+    /// not copy / intern it, we know for sure that `a` is not in the map and we
+    /// do not need to perform a lookup.
     iterator find(std::string_view a) {
         cstring key = cstring::get_cached(a);
         if (key.isNull()) return data.end();
@@ -145,7 +157,8 @@ class string_map {
     V &operator[](Key &&k) {
         auto it = find(key_type(std::forward<Key>(k)));
         if (it == data.end()) {
-            it = data.emplace(data.end(), k, V());
+            it = data.emplace(data.end(), std::piecewise_construct, std::forward_as_tuple(k),
+                              std::forward_as_tuple());
             data_map.emplace(it->first, it);
         }
         return it->second;
@@ -168,12 +181,12 @@ class string_map {
     std::pair<iterator, bool> emplace(Key &&k, VV &&...v) {
         auto it = find(key_type(std::forward<Key>(k)));
         if (it == data.end()) {
-            it = data.emplace(data.end(), std::piecewise_construct_t(), std::forward_as_tuple(k),
+            it = data.emplace(data.end(), std::piecewise_construct, std::forward_as_tuple(k),
                               std::forward_as_tuple(std::forward<VV>(v)...));
             data_map.emplace(it->first, it);
-            return std::make_pair(it, true);
+            return {it, true};
         }
-        return std::make_pair(it, false);
+        return {it, false};
     }
 
     std::pair<iterator, bool> insert(value_type &&value) {

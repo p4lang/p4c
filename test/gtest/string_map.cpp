@@ -34,8 +34,8 @@ TEST(StringMap, RangeConstructor) {
                                                 {"Three"_cs, 1}, {"Three"_cs, 2}, {"Three"_cs, 3}};
 
     string_map<unsigned> first(std::begin(myMap), std::end(myMap));
-    EXPECT_THAT(first, ElementsAre(std::make_pair("One"_cs, 1), std::make_pair("Two"_cs, 1),
-                                   std::make_pair("Three"_cs, 1)));
+    EXPECT_THAT(first, ElementsAre(std::pair("One"_cs, 1), std::pair("Two"_cs, 1),
+                                   std::pair("Three"_cs, 1)));
 }
 
 TEST(StringMap, InitializerListConstructor) {
@@ -47,27 +47,27 @@ TEST(StringMap, InitializerListConstructor) {
                                 {"One"_cs, 2},
                                 {"Ten"_cs, 10},
                                 {"Eight"_cs, 8}});
-    EXPECT_THAT(myMap, ElementsAre(std::make_pair("One"_cs, 1), std::make_pair("Two"_cs, 2),
-                                   std::make_pair("Three"_cs, 3), std::make_pair("Four"_cs, 4),
-                                   std::make_pair("Five"_cs, 5), std::make_pair("Ten"_cs, 10),
-                                   std::make_pair("Eight"_cs, 8)));
+    EXPECT_THAT(
+        myMap, ElementsAre(std::pair("One"_cs, 1), std::pair("Two"_cs, 2), std::pair("Three"_cs, 3),
+                           std::pair("Four"_cs, 4), std::pair("Five"_cs, 5),
+                           std::pair("Ten"_cs, 10), std::pair("Eight"_cs, 8)));
 }
 
 TEST(StringMap, InitializerListAssignment) {
     string_map<unsigned> myMap;
     myMap = {{"One"_cs, 1}, {"Two"_cs, 2}};
-    EXPECT_THAT(myMap, ElementsAre(std::make_pair("One"_cs, 1), std::make_pair("Two"_cs, 2)));
+    EXPECT_THAT(myMap, ElementsAre(std::pair("One"_cs, 1), std::pair("Two"_cs, 2)));
 }
 
 TEST(StringMap, InsertFindSize) {
     string_map<unsigned> s;
-    s.insert(std::make_pair("One"_cs, 1));
-    s.insert(std::make_pair("One"_cs, 1));
-    s.insert(std::make_pair("Two"_cs, 2));
+    s.insert(std::pair("One"_cs, 1));
+    s.insert(std::pair("One"_cs, 1));
+    s.insert(std::pair("Two"_cs, 2));
 
     EXPECT_EQ(2u, s.size());
-    EXPECT_EQ(std::make_pair("One"_cs, 1u), *s.find("One"_cs));
-    EXPECT_EQ(std::make_pair("Two"_cs, 2u), *s.find("Two"_cs));
+    EXPECT_EQ(std::pair("One"_cs, 1u), *s.find("One"_cs));
+    EXPECT_EQ(std::pair("Two"_cs, 2u), *s.find("Two"_cs));
     EXPECT_EQ(s.end(), s.find("Seven"_cs));
 }
 
@@ -75,18 +75,18 @@ TEST(StringMap, CopySwap) {
     string_map<unsigned> original;
     original.insert({"One"_cs, 1});
     original.insert({"Two"_cs, 2});
-    EXPECT_THAT(original, ElementsAre(std::make_pair("One"_cs, 1), std::make_pair("Two"_cs, 2)));
+    EXPECT_THAT(original, ElementsAre(std::pair("One"_cs, 1), std::pair("Two"_cs, 2)));
 
     string_map<unsigned> copy(original);
-    EXPECT_THAT(copy, ElementsAre(std::make_pair("One"_cs, 1), std::make_pair("Two"_cs, 2)));
+    EXPECT_THAT(copy, ElementsAre(std::pair("One"_cs, 1), std::pair("Two"_cs, 2)));
 
     copy.erase(copy.begin());
     copy.insert({"Ten"_cs, 10});
-    EXPECT_THAT(copy, ElementsAre(std::make_pair("Two"_cs, 2), std::make_pair("Ten"_cs, 10)));
+    EXPECT_THAT(copy, ElementsAre(std::pair("Two"_cs, 2), std::pair("Ten"_cs, 10)));
 
     original.swap(copy);
-    EXPECT_THAT(original, ElementsAre(std::make_pair("Two"_cs, 2), std::make_pair("Ten"_cs, 10)));
-    EXPECT_THAT(copy, ElementsAre(std::make_pair("One"_cs, 1), std::make_pair("Two"_cs, 2)));
+    EXPECT_THAT(original, ElementsAre(std::pair("Two"_cs, 2), std::pair("Ten"_cs, 10)));
+    EXPECT_THAT(copy, ElementsAre(std::pair("One"_cs, 1), std::pair("Two"_cs, 2)));
 }
 
 // operator[](const Key&)
