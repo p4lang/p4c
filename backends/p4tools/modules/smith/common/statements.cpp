@@ -15,8 +15,8 @@
 #include "backends/p4tools/modules/smith/util/util.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir-generated.h"
-#include "ir/vector.h"
 #include "ir/irutils.h"
+#include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
@@ -414,14 +414,12 @@ IR::ForStatement *StatementGenerator::genForLoopStatement(bool is_in_func) {
 
     // Create the IR nodes for the for-loop components.
     auto *initExpr =
-        new IR::Declaration_Variable(IR::ID(loopVar), varType,
-                                     new IR::Constant(varType, 0));
+        new IR::Declaration_Variable(IR::ID(loopVar), varType, new IR::Constant(varType, 0));
     auto *condExpr = new IR::Lss(IR::Type_Boolean::get(), new IR::PathExpression(loopVar),
                                  new IR::Constant(varType, upperBound));
     auto *updateStmt = new IR::AssignmentStatement(
         new IR::PathExpression(loopVar),
-        new IR::Add(varType, new IR::PathExpression(loopVar),
-                    new IR::Constant(varType, 1)));
+        new IR::Add(varType, new IR::PathExpression(loopVar), new IR::Constant(varType, 1)));
     auto *bodyStmt = genBlockStatement(is_in_func);
     // Fill `initExpr` and `updateStmt` into their corresponding indexed vectors.
     // This is necessary due to the constructor defintions.
@@ -443,11 +441,9 @@ IR::ForInStatement *StatementGenerator::genForInLoopStatement(bool is_in_func) {
 
     // Create the IR nodes for the for-in-loop component expressions.
     auto declVar =
-        new IR::Declaration_Variable(IR::ID(loopVar), varType,
-                                     new IR::Constant(varType, 0));
+        new IR::Declaration_Variable(IR::ID(loopVar), varType, new IR::Constant(varType, 0));
     auto collectionExpr =
-        new IR::Range(new IR::Constant(varType, lowerBound),
-                      new IR::Constant(varType, upperBound));
+        new IR::Range(new IR::Constant(varType, lowerBound), new IR::Constant(varType, upperBound));
     auto *bodyStmt = genBlockStatement(is_in_func);
 
     // Create the for-in-loop IR node and return it.
