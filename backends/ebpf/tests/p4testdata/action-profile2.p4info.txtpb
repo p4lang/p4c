@@ -2,7 +2,7 @@
 # proto-message: p4.config.v1.P4Info
 
 pkg_info {
-  arch: "psa"
+  arch: "v1model"
 }
 tables {
   preamble {
@@ -25,7 +25,7 @@ tables {
   action_refs {
     id: 23466264
   }
-  implementation_id: 298015716
+  initial_default_action_id: 21257015
   size: 1024
 }
 tables {
@@ -49,7 +49,7 @@ tables {
   action_refs {
     id: 23466264
   }
-  implementation_id: 298015716
+  initial_default_action_id: 21257015
   size: 1024
 }
 actions {
@@ -91,16 +91,6 @@ actions {
     name: "param"
     bitwidth: 16
   }
-}
-action_profiles {
-  preamble {
-    id: 298015716
-    name: "MyIC.ap"
-    alias: "ap"
-  }
-  table_ids: 39967501
-  table_ids: 47318070
-  size: 1024
 }
 type_info {
 }
