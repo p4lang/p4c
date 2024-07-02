@@ -72,8 +72,7 @@ bool TestBackEnd::run(const FinalState &state) {
             if (!executionState->getProperty<bool>("assertionTriggered"_cs)) {
                 return needsToTerminate(testCount);
             }
-            printFeature("test_info", 4,
-                         "AssertionMode: Found an input that triggers an assertion.");
+            printInfo("AssertionMode: Found an input that triggers an assertion.");
         }
 
         // For long-running tests periodically reset the solver state to free up memory.
@@ -142,18 +141,16 @@ bool TestBackEnd::run(const FinalState &state) {
         testCount++;
         const P4::Coverage::CoverageSet &visitedNodes = symbex.getVisitedNodes();
         if (!testgenOptions.hasCoverageTracking) {
-            printFeature("test_info", 4, "============ Test %1% ============", testCount);
+            printInfo("============ Test %1% ============", testCount);
         } else if (coverableNodes.empty()) {
-            printFeature("test_info", 4,
-                         "============ Test %1%: No coverable nodes ============", testCount);
+            printInfo("============ Test %1%: No coverable nodes ============", testCount);
             // All 0 nodes covered.
             coverage = 1.0;
         } else {
             coverage =
                 static_cast<float>(visitedNodes.size()) / static_cast<float>(coverableNodes.size());
-            printFeature("test_info", 4,
-                         "============ Test %1%: Nodes covered: %2% (%3%/%4%) ============",
-                         testCount, coverage, visitedNodes.size(), coverableNodes.size());
+            printInfo("============ Test %1%: Nodes covered: %2% (%3%/%4%) ============", testCount,
+                      coverage, visitedNodes.size(), coverableNodes.size());
             P4::Coverage::logCoverage(coverableNodes, visitedNodes, executionState->getVisited());
         }
 
@@ -240,9 +237,8 @@ bool TestBackEnd::printTestInfo(const ExecutionState * /*executionState*/, const
     printTraces("=======================================");
     // We have no control over the test, if the output port is tainted. So we abort.
     if (Taint::hasTaint(outputPortExpr)) {
-        printFeature(
-            "test_info", 4,
-            "============ Test %1%: Output port tainted - Aborting Test ============", testCount);
+        printInfo("============ Test %1%: Output port tainted - Aborting Test ============",
+                  testCount);
         return true;
     }
     printTraces("Input packet size: %1%", inputPacketSize);
