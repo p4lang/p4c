@@ -181,7 +181,6 @@ cc_binary(
     deps = [
         ":testgen_lib",
         "//:lib",
-        "@boost//:filesystem",
         "@boost//:multiprecision",
     ],
 )
