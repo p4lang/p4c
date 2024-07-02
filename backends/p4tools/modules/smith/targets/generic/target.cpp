@@ -108,29 +108,6 @@ IR::P4Control *GenericCoreSmithTarget::generateIngressBlock() const {
             P4Scope::addLval(param->type, param->name.name, false);
         }
     }
-
-    IR::IndexedVector<IR::Declaration> localDecls = declarationGenerator().genLocalControlDecls();
-
-    // Generate the body of the control block.
-    IR::IndexedVector<IR::StatOrDecl> statOrDecls;
-    // Insert the generated for-loop and for-in-loop statements within the block
-    // statement.
-    statOrDecls.push_back(statementGenerator().genForLoopStatement(false));
-    statOrDecls.push_back(statementGenerator().genForInLoopStatement(false));
-
-    // apply body
-    // auto *applyBlock = statementGenerator().genBlockStatement(false);
-
-    // Fill the apply block with the generated statements.
-    auto *applyBlock = new IR::BlockStatement(statOrDecls);
-
-    // end of scope
-    P4Scope::endLocalScope();
-
-    // add to the whole scope
-    auto *p4ctrl = new IR::P4Control("ingress", typeCtrl, localDecls, applyBlock);
-    P4Scope::addToScope(p4ctrl);
-    return p4ctrl;
 }
 
 IR::Declaration_Instance *GenericCoreSmithTarget::generateMainPackage() {
