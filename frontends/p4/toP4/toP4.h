@@ -72,6 +72,7 @@ class ToP4 : public Inspector {
         listTerminators.pop_back();
     }
     bool isSystemFile(cstring file);
+    bool isSystemInternalFile(cstring file);
     cstring ifSystemFile(const IR::Node *node);  // return file containing node if system file
     // dump node IR tree up to depth - in the form of a comment
     void dump(unsigned depth, const IR::Node *node = nullptr, unsigned adjDepth = 0);
