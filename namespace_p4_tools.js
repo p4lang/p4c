@@ -68,6 +68,7 @@ var namespace_p4_tools =
     [ "insertSeparators", "namespace_p4_tools.html#a55a958c4ada0186232c693e7e4c39de4", null ],
     [ "logHelper", "namespace_p4_tools.html#ac0010409e8f958ec781a437ddd4e25b9", null ],
     [ "logHelper", "namespace_p4_tools.html#a13ae5b724005c0a422653f83e61e14cb", null ],
+    [ "printDebug", "namespace_p4_tools.html#a692c07534b8097beb8ebbbe2626fa823", null ],
     [ "printFeature", "namespace_p4_tools.html#a7b751196d7971e3d3b51cac30f897c36", null ],
     [ "printInfo", "namespace_p4_tools.html#a85066c6e843e9a4dbfb92300f471109b", null ],
     [ "printPerformanceReport", "namespace_p4_tools.html#a7935d9ee811fd7286a7fa3daee097018", null ],

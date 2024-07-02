@@ -1,5 +1,6 @@
 var NAVTREEINDEX18 =
 {
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder.html#a57242b198d3db1d3defc5b2cd74a354c":[28,0,11,1,1,24,0],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder_for_d_p_d_k.html":[27,0,5,0,1,25],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder_for_d_p_d_k.html":[28,0,11,1,1,25],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder_for_d_p_d_k.html#af3dc2a369f0548902592f72959e1cc99":[27,0,5,0,1,25,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX18 =
 "struct_util_1_1_hasher_3_01bool_01_4.html":[28,0,22,18],
 "struct_util_1_1_hasher_3_01char_01_4.html":[28,0,22,19],
 "struct_util_1_1_hasher_3_01cstring_01_4.html":[28,0,22,21],
-"struct_util_1_1_hasher_3_01double_01_4.html":[28,0,22,22],
-"struct_util_1_1_hasher_3_01float_01_4.html":[28,0,22,23]
+"struct_util_1_1_hasher_3_01double_01_4.html":[28,0,22,22]
 };

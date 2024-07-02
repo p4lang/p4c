@@ -318,6 +318,9 @@ template&lt;class T , class... Args&gt; </td></tr>
 <tr class="memitem:ae76c36059e6834789e70080feb6ab114" id="r_ae76c36059e6834789e70080feb6ab114"><td class="memItemLeft" align="right" valign="top"><a id="ae76c36059e6834789e70080feb6ab114" name="ae76c36059e6834789e70080feb6ab114"></a>
 std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;os, const <a class="el" href="class_p4_tools_1_1_trace_event.html">TraceEvent</a> &amp;event)</td></tr>
 <tr class="separator:ae76c36059e6834789e70080feb6ab114"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a692c07534b8097beb8ebbbe2626fa823" id="r_a692c07534b8097beb8ebbbe2626fa823"><td class="memTemplParams" colspan="2">template&lt;typename... Arguments&gt; </td></tr>
+<tr class="memitem:a692c07534b8097beb8ebbbe2626fa823"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a692c07534b8097beb8ebbbe2626fa823">printDebug</a> (const std::string &amp;fmt, Arguments &amp;&amp;...args)</td></tr>
+<tr class="separator:a692c07534b8097beb8ebbbe2626fa823"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b751196d7971e3d3b51cac30f897c36" id="r_a7b751196d7971e3d3b51cac30f897c36"><td class="memTemplParams" colspan="2">template&lt;typename... Arguments&gt; </td></tr>
 <tr class="memitem:a7b751196d7971e3d3b51cac30f897c36"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a7b751196d7971e3d3b51cac30f897c36">printFeature</a> (const std::string &amp;label, int level, const std::string &amp;fmt, Arguments &amp;&amp;...args)</td></tr>
 <tr class="separator:a7b751196d7971e3d3b51cac30f897c36"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -838,6 +841,30 @@ The name of the command-line option. For example, "--target". </td></tr>
 
 </div>
 </div>
+<a id="a692c07534b8097beb8ebbbe2626fa823" name="a692c07534b8097beb8ebbbe2626fa823"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a692c07534b8097beb8ebbbe2626fa823">&#9670;&#160;</a></span>printDebug()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Arguments&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4Tools::printDebug </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>fmt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Arguments &amp;&amp;...</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Convenience function for printing debug information. Easier to use then LOG(XX) since we only need one specific log-level across all files. Can be invoked with "-T tools_debug:4". </p>
+
+</div>
+</div>
 <a id="a7b751196d7971e3d3b51cac30f897c36" name="a7b751196d7971e3d3b51cac30f897c36"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7b751196d7971e3d3b51cac30f897c36">&#9670;&#160;</a></span>printFeature()</h2>
 
@@ -892,7 +919,7 @@ template&lt;typename... Arguments&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Helper functions that prints strings associated with basic test generation information., for example the covered nodes or tests number. </p>
+<p>Helper functions that prints strings associated with basic tool information. For example, the seed, status of test case generation, etc. </p>
 
 </div>
 </div>
