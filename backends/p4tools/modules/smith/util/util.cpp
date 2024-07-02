@@ -61,8 +61,8 @@ std::string getRandomString(size_t len) {
 
 /// Generate an arbitrary variable name for loop control.
 std::string generateLoopControlVariable() {
-    // Generate a random string of length 1 (i.e., a single character variable name,
-    // such as i, j, k, etc.).
+    // Generate a random string of length 1 (i.e., a single character variable name, such as
+    // i, j, k, etc.).
     std::string lowerCaseAlphabet = "abcdefghijklmnopqrstuvwxyz";
     int randomIndex = Utils::getRandInt(0, 25);
 
