@@ -14,12 +14,18 @@
 namespace Test {
 
 class P4SmithForLoopTest : public ::testing::Test {
- protected:
+protected:
     P4Tools::P4Smith::StatementGenerator *generator;
 
-    // TODO(zzmic): Figure out how to properly initialize and clean up the test object.
-    P4SmithForLoopTest() {}
-    ~P4SmithForLoopTest() override {}
+    // Set up a test fixture, which allows us to reuse the same configuration of objects
+    // for several different tests.
+    void SetUp() override {
+        generator = new P4Tools::P4Smith::StatementGenerator(P4Tools::P4Smith::SmithTarget::get());
+    }
+    void TearDown() override {
+        delete generator;
+        generator = nullptr;
+    }
 };
 
 /// @brief Test the generation of a for-loop statement.
@@ -35,7 +41,6 @@ TEST_F(P4SmithForLoopTest, CheckForLoopContainsInitialization) {
     ASSERT_NE(forLoopStmt, nullptr);
     EXPECT_TRUE(forLoopStmt->is<IR::ForStatement>());
 
-    // TODO(zzmic): Figure out whether this "static_cast" is necessary.
     auto forStmt = forLoopStmt->to<IR::ForStatement>();
     ASSERT_NE(forStmt->init, nullptr);
     EXPECT_FALSE(forStmt->init.empty());
@@ -47,7 +52,6 @@ TEST_F(P4SmithForLoopTest, CheckForLoopContainsCondition) {
     ASSERT_NE(forLoopStmt, nullptr);
     EXPECT_TRUE(forLoopStmt->is<IR::ForStatement>());
 
-    // TODO(zzmic): Figure out whether this "static_cast" is necessary.
     auto forStmt = forLoopStmt->to<IR::ForStatement>();
     ASSERT_NE(forStmt->condition, nullptr);
     EXPECT_TRUE(forStmt->condition->is<IR::Expression>());
@@ -59,7 +63,6 @@ TEST_F(P4SmithForLoopTest, CheckForLoopContainsUpdate) {
     ASSERT_NE(forLoopStmt, nullptr);
     EXPECT_TRUE(forLoopStmt->is<IR::ForStatement>());
 
-    // TODO(zzmic): Figure out whether this "static_cast" is necessary.
     auto forStmt = forLoopStmt->to<IR::ForStatement>();
     ASSERT_NE(forStmt->updates, nullptr);
     EXPECT_FALSE(forStmt->updates.empty());
@@ -71,7 +74,6 @@ TEST_F(P4SmithForLoopTest, CheckForLoopContainsBody) {
     ASSERT_NE(forLoopStmt, nullptr);
     EXPECT_TRUE(forLoopStmt->is<IR::ForStatement>());
 
-    // TODO(zzmic): Figure out whether this "static_cast" is necessary.
     auto forStmt = forLoopStmt->to<IR::ForStatement>();
     ASSERT_NE(forStmt->body, nullptr);
     EXPECT_FALSE(forStmt->body->is<IR::Statement>());

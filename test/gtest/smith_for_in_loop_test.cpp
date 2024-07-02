@@ -14,12 +14,18 @@
 namespace Test {
 
 class P4SmithForInLoopTest : public ::testing::Test {
- protected:
+protected:
     P4Tools::P4Smith::StatementGenerator *generator;
 
-    // TODO(zzmic): Figure out how to properly initialize and clean up the test object.
-    P4SmithForInLoopTest() {}
-    ~P4SmithForInLoopTest() override {}
+    // Set up a test fixture, which allows us to reuse the same configuration of objects
+    // for several different tests.
+    void SetUp() override {
+        generator = new P4Tools::P4Smith::StatementGenerator(P4Tools::P4Smith::SmithTarget::get());
+    }
+    void TearDown() override {
+        delete generator;
+        generator = nullptr;
+    }
 };
 
 /// @brief Test the generation of a for-in-loop statement.
@@ -35,7 +41,6 @@ TEST_F(P4SmithForInLoopTest, CheckForLoopDeclarationVariable) {
     ASSERT_NE(forInLoopStmt, nullptr);
     EXPECT_TRUE(forInLoopStmt->is<IR::ForInStatement>());
 
-    // TODO(zzmic): Figure out whether this "static_cast" is necessary.
     auto forInStmt = forInLoopStmt->to<IR::ForInStatement>();
     ASSERT_NE(forInStmt->decl, nullptr);
     EXPECT_TRUE(forInStmt->decl->is<IR::Declaration_Variable>());
@@ -47,7 +52,6 @@ TEST_F(P4SmithForInLoopTest, CheckForLoopCollection) {
     ASSERT_NE(forInLoopStmt, nullptr);
     EXPECT_TRUE(forInLoopStmt->is<IR::ForInStatement>());
 
-    // TODO(zzmic): Figure out whether this "static_cast" is necessary.
     auto forInStmt = forInLoopStmt->to<IR::ForInStatement>();
     ASSERT_NE(forInStmt, nullptr);
     EXPECT_TRUE(forInStmt->collection->is<IR::PathExpression>());
@@ -59,7 +63,6 @@ TEST_F(P4SmithForInLoopTest, CheckForLoopBody) {
     ASSERT_NE(forInLoopStmt, nullptr);
     EXPECT_TRUE(forInLoopStmt->is<IR::ForInStatement>());
 
-    // TODO(zzmic): Figure out whether this "static_cast" is necessary.
     auto forInStmt = forInLoopStmt->to<IR::ForInStatement>();
     ASSERT_NE(forInStmt->body, nullptr);
     EXPECT_FALSE(forInStmt->body->is<IR::Statement>());
