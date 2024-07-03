@@ -29,12 +29,18 @@ IR::Statement *StatementGenerator::genStatement(bool is_in_func) {
     if (is_in_func) {
         pctExit = 0;
     }
-    std::vector<int64_t> percent = {PCT.STATEMENT_SWITCH, PCT.STATEMENT_ASSIGNMENTORMETHODCALL,
-                                    PCT.STATEMENT_IF, PCT.STATEMENT_RETURN, pctExit,
-                                    PCT.STATEMENT_BLOCK,
-                                    // Add the for-loop statement and
-                                    // the for-in-loop statement generation percentages.
-                                    PCT.STATEMENT_FOR, PCT.STATEMENT_FOR_IN,};
+    std::vector<int64_t> percent = {
+        PCT.STATEMENT_SWITCH,
+        PCT.STATEMENT_ASSIGNMENTORMETHODCALL,
+        PCT.STATEMENT_IF,
+        PCT.STATEMENT_RETURN,
+        pctExit,
+        PCT.STATEMENT_BLOCK,
+        // Add the for-loop statement and
+        // the for-in-loop statement generation percentages.
+        PCT.STATEMENT_FOR,
+        PCT.STATEMENT_FOR_IN,
+    };
     IR::Statement *stmt = nullptr;
     bool useDefaultStmt = false;
 
