@@ -1,0 +1,3 @@
+issue4661_pure_extern_function_const_args.p4(13): [--Wwarn=mismatch] warning: baz(): constant expression in switch
+        switch(baz()) {
+               ^^^^^
