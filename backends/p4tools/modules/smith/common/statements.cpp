@@ -34,7 +34,7 @@ IR::Statement *StatementGenerator::genStatement(bool is_in_func) {
                                     PCT.STATEMENT_BLOCK,
                                     // Add the for-loop statement and
                                     // the for-in-loop statement generation percentages.
-                                    PCT.STATEMENT_FOR, PCT.STATEMENT_FOR_IN};
+                                    PCT.STATEMENT_FOR, PCT.STATEMENT_FOR_IN,};
     IR::Statement *stmt = nullptr;
     bool useDefaultStmt = false;
 
