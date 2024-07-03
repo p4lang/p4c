@@ -3724,7 +3724,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
         auto rettype = new IR::Type_Var(IR::ID(nameGen->newName("R"), "<returned type>"_cs));
         auto args = new IR::Vector<IR::ArgumentInfo>();
-        bool constArgs = !expression->arguments->empty();
+        bool constArgs = true;
         for (auto aarg : *expression->arguments) {
             auto arg = aarg->expression;
             auto argType = getType(arg);
@@ -3862,10 +3862,12 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
             return expression;
         }
 
-        if (mi->is<ExternFunction>() && constArgs) {
-            // extern functions with constant args are compile-time constants
-            setCompileTimeConstant(expression);
-            setCompileTimeConstant(getOriginal<IR::Expression>());
+        if (auto *ef = mi->to<ExternFunction>()) {
+            if (constArgs && ef->method->getAnnotation(IR::Annotation::pureAnnotation)) {
+                // pure extern functions with constant args are compile-time constants
+                setCompileTimeConstant(expression);
+                setCompileTimeConstant(getOriginal<IR::Expression>());
+            }
         }
 
         auto bi = mi->to<BuiltInMethod>();
