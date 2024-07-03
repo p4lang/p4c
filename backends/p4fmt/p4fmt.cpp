@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <iostream>
 
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"
@@ -43,7 +44,7 @@ int main(int argc, char *const argv[]) {
 
     auto top4 = P4::ToP4(out, false);
 
-    *out << "\n############################## INITIAL ##############################\n";
+    std::cerr << "\n############################## INITIAL ##############################\n";
     // Print the program before running front end passes.
     program->apply(top4);
 
