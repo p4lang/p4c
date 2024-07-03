@@ -6,21 +6,22 @@
 #include "backends/p4tools/modules/smith/common/scope.h"
 #include "backends/p4tools/modules/smith/common/statements.h"
 #include "backends/p4tools/modules/smith/common/table.h"
-#include "backends/p4tools/modules/smith/targets/generic/target.h"
 #include "backends/p4tools/modules/smith/smith.h"
+#include "backends/p4tools/modules/smith/targets/generic/target.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 
 namespace Test {
 
 class P4SmithForInLoopTest : public ::testing::Test {
-protected:
+ protected:
     P4Tools::P4Smith::StatementGenerator *generator;
 
     // Set up a test fixture, which allows us to reuse the same configuration of objects
     // for several different tests.
     void SetUp() override {
-        P4Tools::P4Smith::Generic::GenericCoreSmithTarget *target = P4Tools::P4Smith::Generic::GenericCoreSmithTarget::getInstance();
+        P4Tools::P4Smith::Generic::GenericCoreSmithTarget *target =
+            P4Tools::P4Smith::Generic::GenericCoreSmithTarget::getInstance();
         generator = &target->statementGenerator();
     }
     void TearDown() override {
