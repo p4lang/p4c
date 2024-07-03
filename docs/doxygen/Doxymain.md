@@ -1,7 +1,5 @@
 # Welcome to p4 Compiler's documentation!
 
-`p4c` is a reference compiler for the P4 programming language. 
-
 @htmlonly
 <div class="diagram-container">
 <!-- draw.io diagram -->
@@ -27,7 +25,15 @@ com%2Fuc%3Fid%3D16X8Z_4-J8mHQPxuxm9HjWppPMTTXZdZ6%26export%3Ddownload"></script>
         }
     }
 </script>
+@endhtmlonly
 
+Join the future of programmable networking with **p4c**, a tool that is transforming the way we handle network data. As networks evolve, so does the need for flexible and efficient solutions to manage increasing volumes of data. **p4c** stands at the forefront of this evolution, offering a revolutionary approach to network programming.
+
+`p4c` is a open source reference compiler for the [P4 (Programming Protocol-independent Packet Processors)](https://p4.org/) programming language. It supports both P4-14 and P4-16 versions, making it a versatile tool for developers looking to leverage the power of programmable networking.Remarkably, the front-end, mid-end, and P4C-graphs backend of p4c serve as the foundation for at least one commercially supported P4 compiler, testament to its robustness and reliability.
+
+Designed with extensibility in mind, `p4c` features a standard front-end and mid-end that can seamlessly integrate with target-specific backends, enabling the creation of comprehensive P4 compilers.
+
+@htmlonly
 <!-- https://www.svgrepo.com/collection/scarlab-oval-line-icons/ -->
 <div class="card-container">
 
@@ -57,7 +63,6 @@ com%2Fuc%3Fid%3D16X8Z_4-J8mHQPxuxm9HjWppPMTTXZdZ6%26export%3Ddownload"></script>
   </div>
 
   <div class="card-item">
-    <a href=""> <!--todo : Add link to contribute section -->
     <a href="https://p4lang.github.io/p4c/md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html"> 
     <div class="card-content">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M3 9.5C3 9.03534 3 8.80302 3.03843 8.60982C3.19624 7.81644 3.81644 7.19624 4.60982 7.03843C4.80302 7 5.03534 7 5.5 7H12H18.5C18.9647 7 19.197 7 19.3902 7.03843C20.1836 7.19624 20.8038 7.81644 20.9616 8.60982C21 8.80302 21 9.03534 21 9.5V9.5V9.5C21 9.96466 21 10.197 20.9616 10.3902C20.8038 11.1836 20.1836 11.8038 19.3902 11.9616C19.197 12 18.9647 12 18.5 12H12H5.5C5.03534 12 4.80302 12 4.60982 11.9616C3.81644 11.8038 3.19624 11.1836 3.03843 10.3902C3 10.197 3 9.96466 3 9.5V9.5V9.5Z" stroke="#000000" stroke-width="2" stroke-linejoin="round"></path> <path d="M4 12V16C4 17.8856 4 18.8284 4.58579 19.4142C5.17157 20 6.11438 20 8 20H9H15H16C17.8856 20 18.8284 20 19.4142 19.4142C20 18.8284 20 17.8856 20 16V12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 7V20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M11.3753 6.21913L9.3959 3.74487C8.65125 2.81406 7.26102 2.73898 6.41813 3.58187C5.1582 4.8418 6.04662 7 7.82843 7L11 7C11.403 7 11.6271 6.53383 11.3753 6.21913Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12.6247 6.21913L14.6041 3.74487C15.3488 2.81406 16.739 2.73898 17.5819 3.58187C18.8418 4.8418 17.9534 7 16.1716 7L13 7C12.597 7 12.3729 6.53383 12.6247 6.21913Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
