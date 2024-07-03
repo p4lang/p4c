@@ -32,7 +32,7 @@ com%2Fuc%3Fid%3D16X8Z_4-J8mHQPxuxm9HjWppPMTTXZdZ6%26export%3Ddownload"></script>
 <div class="card-container">
 
   <div class="card-item">
-    <a href=""> <!--Todo : Add link to tutorials-->
+    <a href="https://p4lang.github.io/p4c/md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#autotoc_md80"> 
     <div class="card-content">
    <?xml version="1.0" encoding="utf-8"?>
       <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -44,7 +44,7 @@ com%2Fuc%3Fid%3D16X8Z_4-J8mHQPxuxm9HjWppPMTTXZdZ6%26export%3Ddownload"></script>
   </div>
 
   <div class="card-item">
-    <a href=""> <!--Todo : Add link to guide-->
+    <a href="https://p4lang.github.io/p4c/md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#autotoc_md51"> 
     <div class="card-content">
       <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none"  class="card_svg" xmlns="http://www.w3.org/2000/svg">
         <path opacity="0.1" fill-rule="evenodd" clip-rule="evenodd" d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21ZM15.224 13.0171C16.011 12.5674 16.011 11.4326 15.224 10.9829L10.7817 8.44446C10.0992 8.05446 9.25 8.54727 9.25 9.33333L9.25 14.6667C9.25 15.4527 10.0992 15.9455 10.7817 15.5555L15.224 13.0171Z" fill="#323232"/>
