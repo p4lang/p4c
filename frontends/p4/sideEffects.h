@@ -28,7 +28,11 @@ limitations under the License.
 namespace P4 {
 
 /// Checks to see whether an IR node includes a table.apply() sub-expression
-class HasTableApply : public Inspector {
+///
+/// Note: when working without refMap, we need to have a call on the context,
+/// so ResolutionContext could find the original declaration (invoked inside
+/// MethodInstance::resolve).
+class HasTableApply : public Inspector, public ResolutionContext {
     DeclarationLookup *refMap;
     TypeMap *typeMap;
 
@@ -41,6 +45,8 @@ class HasTableApply : public Inspector {
         CHECK_NULL(typeMap);
         setName("HasTableApply");
     }
+
+    explicit HasTableApply(TypeMap *typeMap) : HasTableApply(this, typeMap) {}
 
     void postorder(const IR::MethodCallExpression *expression) override {
         auto mi = MethodInstance::resolve(expression, refMap, typeMap);

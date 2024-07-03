@@ -1727,7 +1727,7 @@ const IR::Node *CopyMatchKeysToSingleStruct::doStatement(const IR::Statement *st
                                                          const IR::Expression *expression,
                                                          const Visitor::Context *ctxt) {
     LOG3("Visiting " << getOriginal());
-    P4::HasTableApply hta(this, typeMap);
+    P4::HasTableApply hta(typeMap);
     hta.setCalledBy(this);
     (void)expression->apply(hta, ctxt);
     if (hta.table == nullptr) return statement;
