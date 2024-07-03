@@ -144,9 +144,20 @@ TEST(cstring, literalSuffix) {
 }
 
 TEST(cstring, is_cached) {
+    cstring test = "test"_cs;
+    (void)test;
     EXPECT_FALSE(
         cstring::is_cached("we really do not expect that this string is already in cstring cache"));
     EXPECT_TRUE(cstring::is_cached("test"));
+}
+
+TEST(cstring, get_cached) {
+    cstring test = "test"_cs;
+    (void)test;
+    EXPECT_TRUE(
+        cstring::get_cached("we really do not expect that this string is already in cstring cache")
+            .isNull());
+    EXPECT_FALSE(cstring::get_cached("test").isNullOrEmpty());
 }
 
 }  // namespace Test

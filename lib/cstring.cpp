@@ -185,6 +185,16 @@ const char *save_to_cache(const char *string, std::size_t length, table_entry_fl
 
 bool cstring::is_cached(std::string_view s) { return cache().contains(s); }
 
+cstring cstring::get_cached(std::string_view s) {
+    auto entry = cache().find(s);
+    if (entry == cache().end()) return nullptr;
+
+    cstring res;
+    res.str = entry->string();
+
+    return res;
+}
+
 void cstring::construct_from_shared(const char *string, std::size_t length) {
     str = save_to_cache(string, length, table_entry_flags::none);
 }
