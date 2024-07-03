@@ -3863,8 +3863,11 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
         }
 
         if (auto *ef = mi->to<ExternFunction>()) {
-            if (constArgs && ef->method->getAnnotation(IR::Annotation::pureAnnotation)) {
-                // pure extern functions with constant args are compile-time constants
+            const bool pureOrStaticAssert = ef->method->name == "static_assert"
+                || ef->method->getAnnotation(IR::Annotation::pureAnnotation);
+            if (constArgs && pureOrStaticAssert) {
+                // pure extern functions with constant args are compile-time constants.
+                // The result of a static_assert call is also a compile-time constant.
                 setCompileTimeConstant(expression);
                 setCompileTimeConstant(getOriginal<IR::Expression>());
             }

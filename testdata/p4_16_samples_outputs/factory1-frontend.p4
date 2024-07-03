@@ -3,7 +3,7 @@
 extern widget {
 }
 
-extern widget createWidget<T, U>(U a, T b);
+@pure extern widget createWidget<T, U>(U a, T b);
 parser P();
 parser p1()(widget w) {
     state start {

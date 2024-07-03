@@ -17,6 +17,7 @@ limitations under the License.
 
 extern widget { }
 
+@pure
 extern widget createWidget<T, U>(U a, T b);
 
 parser P();
