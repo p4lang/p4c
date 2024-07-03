@@ -44,6 +44,14 @@ void GenericCoreSmithTarget::make() {
     }
 }
 
+GenericCoreSmithTarget *GenericCoreSmithTarget::getInstance() {
+    static GenericCoreSmithTarget *INSTANCE = nullptr;
+    if (INSTANCE == nullptr) {
+        INSTANCE = new GenericCoreSmithTarget();
+    }
+    return INSTANCE;
+}
+
 IR::P4Parser *GenericCoreSmithTarget::generateParserBlock() const {
     IR::IndexedVector<IR::Declaration> parserLocals;
 

@@ -39,6 +39,9 @@ class GenericCoreSmithTarget : public AbstractGenericSmithTarget {
     /// Registers this target.
     static void make();
 
+    // Retrieve the singleton instance for the current target.
+    [[nodiscard]] static GenericCoreSmithTarget *getInstance();
+
     [[nodiscard]] int writeTargetPreamble(std::ostream *ostream) const override;
 
     [[nodiscard]] const IR::P4Program *generateP4Program() const override;
