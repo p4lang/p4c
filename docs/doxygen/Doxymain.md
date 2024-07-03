@@ -27,11 +27,11 @@ com%2Fuc%3Fid%3D16X8Z_4-J8mHQPxuxm9HjWppPMTTXZdZ6%26export%3Ddownload"></script>
 </script>
 @endhtmlonly
 
-Join the future of programmable networking with **p4c**, a tool that is transforming the way we handle network data. As networks evolve, so does the need for flexible and efficient solutions to manage increasing volumes of data. **p4c** stands at the forefront of this evolution, offering a revolutionary approach to network programming.
+Join the future of programmable networking with **P4C**, a tool that is transforming the way we handle network data. As networks evolve, so does the need for flexible and efficient solutions to manage increasing volumes of data. **P4C** stands at the forefront of this evolution, offering a revolutionary approach to network programming.
 
-`p4c` is a open source reference compiler for the [P4 (Programming Protocol-independent Packet Processors)](https://p4.org/) programming language. It supports both P4-14 and P4-16 versions, making it a versatile tool for developers looking to leverage the power of programmable networking.Remarkably, the front-end, mid-end, and P4C-graphs backend of p4c serve as the foundation for at least one commercially supported P4 compiler, testament to its robustness and reliability.
+P4C is the official open-source reference compiler for the [P4 (Programming Protocol-independent Packet Processors)](https://p4.org/) programming language. It supports both P4-14 and P4-16.
 
-Designed with extensibility in mind, `p4c` features a standard front-end and mid-end that can seamlessly integrate with target-specific backends, enabling the creation of comprehensive P4 compilers.
+P4C is designed with extensibility in mind. It features a front-end and mid-end that can be extended by target-specific back ends.
 
 @htmlonly
 <!-- https://www.svgrepo.com/collection/scarlab-oval-line-icons/ -->
