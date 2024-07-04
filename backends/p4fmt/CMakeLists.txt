@@ -1,11 +1,13 @@
 set(FMT_SRCS
     p4fmt.cpp
     options.cpp
+    main.cpp
 )
 
 set(REFCHECK_SRCS
     refcheck.cpp
     options.cpp
+    p4fmt.cpp
 )
 
 # p4fmt

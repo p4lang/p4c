@@ -5,8 +5,10 @@
 #include <fstream>
 #include <optional>
 
+#include "backends/p4fmt/p4fmt.h"
 #include "backends/p4tools/common/lib/logging.h"
 #include "options.h"
+#include "p4fmt.h"
 
 namespace P4Fmt {
 
@@ -134,23 +136,10 @@ std::optional<std::filesystem::path> getFilePath(const ReferenceCheckerOptions &
 int run(const ReferenceCheckerOptions &options) {
     auto referenceFileOpt = options.getReferenceFile();
 
-    std::string command = "./build/p4fmt " + options.getInputFile().string();
+    std::stringstream formattedOutput = getFormattedOutput(options.getInputFile());
 
-    FILE *pipe = popen(command.c_str(), "r");
-    if (pipe == nullptr) {
-        ::error("Unable to create pipe to p4fmt command.");
-        return EXIT_FAILURE;
-    }
-
-    std::stringstream formattedOutput;
-
-    char buffer[128];
-    // Read the output of p4fmt and store it in formattedOutput
-    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-        formattedOutput << buffer;
-    }
-    if (pclose(pipe) != 0) {
-        ::error("p4fmt command failed.\n%1%", formattedOutput.str());
+    if (formattedOutput.str().empty()) {
+        ::error("Formatting Failed");
         return EXIT_FAILURE;
     }
 
