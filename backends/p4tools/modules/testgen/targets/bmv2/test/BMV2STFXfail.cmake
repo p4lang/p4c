@@ -101,6 +101,12 @@ p4tools_add_xfail_reason(
   issue907-bmv2.p4
 )
 
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-stf"
+  "Unhandled node type in Bmv2V1ModelCmdStepper: ForStatement"
+  issue4739.p4
+)
+
 ####################################################################################################
 # 3. WONTFIX
 # These are failures that can not be solved by changing P4Testgen

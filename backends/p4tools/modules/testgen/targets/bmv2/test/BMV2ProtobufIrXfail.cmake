@@ -74,6 +74,12 @@ p4tools_add_xfail_reason(
   parser-unroll-test10.p4
 )
 
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-protobuf-ir"
+  "Unhandled node type in Bmv2V1ModelCmdStepper: ForStatement"
+  issue4739.p4
+)
+
 ####################################################################################################
 # 3. WONTFIX
 ####################################################################################################
