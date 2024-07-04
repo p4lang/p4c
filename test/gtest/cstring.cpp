@@ -143,4 +143,19 @@ TEST(cstring, literalSuffix) {
     EXPECT_TRUE((std::is_same_v<cstring, decltype(""_cs)>));
 }
 
+TEST(cstring, is_cached) {
+    [[maybe_unused]] cstring test = "test"_cs;
+    EXPECT_FALSE(
+        cstring::is_cached("we really do not expect that this string is already in cstring cache"));
+    EXPECT_TRUE(cstring::is_cached("test"));
+}
+
+TEST(cstring, get_cached) {
+    [[maybe_unused]] cstring test = "test"_cs;
+    EXPECT_TRUE(
+        cstring::get_cached("we really do not expect that this string is already in cstring cache")
+            .isNull());
+    EXPECT_FALSE(cstring::get_cached("test").isNullOrEmpty());
+}
+
 }  // namespace Test
