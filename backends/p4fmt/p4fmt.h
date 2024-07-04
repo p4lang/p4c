@@ -1,9 +1,9 @@
-#ifndef P4FMT_H
-#define P4FMT_H
+#ifndef BACKENDS_P4FMT_P4FMT_H_
+#define BACKENDS_P4FMT_P4FMT_H_
 
 #include <filesystem>
 #include <sstream>
 
 std::stringstream getFormattedOutput(std::filesystem::path inputFile);
 
-#endif  // P4FMT_H
+#endif /* BACKENDS_P4FMT_P4FMT_H_ */
