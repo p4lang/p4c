@@ -322,6 +322,10 @@ std::string_view&#160;</td><td class="memItemRight" valign="bottom"><b>string_vi
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a5247cc3f2485b28d234500aa20573a3d" id="r_a5247cc3f2485b28d234500aa20573a3d"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5247cc3f2485b28d234500aa20573a3d">cache_size</a> (size_t &amp;count)</td></tr>
 <tr class="separator:a5247cc3f2485b28d234500aa20573a3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8dbbd89c250528c2eb9e1f39164c8a3" id="r_aa8dbbd89c250528c2eb9e1f39164c8a3"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa8dbbd89c250528c2eb9e1f39164c8a3">get_cached</a> (std::string_view s)</td></tr>
+<tr class="separator:aa8dbbd89c250528c2eb9e1f39164c8a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afcaa5e90b7a413b32d6a8703c3ebc87d" id="r_afcaa5e90b7a413b32d6a8703c3ebc87d"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afcaa5e90b7a413b32d6a8703c3ebc87d">is_cached</a> (std::string_view s)</td></tr>
+<tr class="separator:afcaa5e90b7a413b32d6a8703c3ebc87d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53310132edcdfcab8fb6932c9c91f671" id="r_a53310132edcdfcab8fb6932c9c91f671"><td class="memTemplParams" colspan="2"><a id="a53310132edcdfcab8fb6932c9c91f671" name="a53310132edcdfcab8fb6932c9c91f671"></a>
 template&lt;typename Iterator &gt; </td></tr>
 <tr class="memitem:a53310132edcdfcab8fb6932c9c91f671"><td class="memTemplItemLeft" align="right" valign="top">static <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><b>join</b> (Iterator begin, Iterator end, const char *delim=&quot;, &quot;)</td></tr>
@@ -403,6 +407,58 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>a version of the string where all necessary characters are properly escaped to make this into a json string (without the enclosing quotes). </dd></dl>
+
+</div>
+</div>
+<a id="aa8dbbd89c250528c2eb9e1f39164c8a3" name="aa8dbbd89c250528c2eb9e1f39164c8a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8dbbd89c250528c2eb9e1f39164c8a3">&#9670;&#160;</a></span>get_cached()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classcstring.html">cstring</a> cstring::get_cached </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>s</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>corresponding cstring if it was interned, null cstring otherwise </dd></dl>
+
+</div>
+</div>
+<a id="afcaa5e90b7a413b32d6a8703c3ebc87d" name="afcaa5e90b7a413b32d6a8703c3ebc87d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afcaa5e90b7a413b32d6a8703c3ebc87d">&#9670;&#160;</a></span>is_cached()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool cstring::is_cached </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>s</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>true if a given string is interned (contained in cstring cache) </dd></dl>
 
 </div>
 </div>

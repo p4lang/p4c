@@ -1129,7 +1129,6 @@ var hierarchy =
     [ "std::hash< P4::ProgramPoint >", "structstd_1_1hash_3_01_p4_1_1_program_point_01_4.html", null ],
     [ "std::hash< std::pair< T1, T2 > >", "structstd_1_1hash_3_01std_1_1pair_3_01_t1_00_01_t2_01_4_01_4.html", null ],
     [ "std::hash< std::tuple< Types... > >", "structstd_1_1hash_3_01std_1_1tuple_3_01_types_8_8_8_01_4_01_4.html", null ],
-    [ "std::hash< table_entry >", "structstd_1_1hash_3_01table__entry_01_4.html", null ],
     [ "std::ios_base", null, [
       [ "std::basic_ios< Char >", null, [
         [ "std::basic_ostream< Char >", null, [
