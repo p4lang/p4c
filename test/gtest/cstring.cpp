@@ -144,16 +144,14 @@ TEST(cstring, literalSuffix) {
 }
 
 TEST(cstring, is_cached) {
-    cstring test = "test"_cs;
-    (void)test;
+    [[maybe_unused]] cstring test = "test"_cs;
     EXPECT_FALSE(
         cstring::is_cached("we really do not expect that this string is already in cstring cache"));
     EXPECT_TRUE(cstring::is_cached("test"));
 }
 
 TEST(cstring, get_cached) {
-    cstring test = "test"_cs;
-    (void)test;
+    [[maybe_unused]] cstring test = "test"_cs;
     EXPECT_TRUE(
         cstring::get_cached("we really do not expect that this string is already in cstring cache")
             .isNull());
