@@ -1,8 +1,5 @@
 #include "backends/p4fmt/p4fmt.h"
 
-#include <cstdlib>
-#include <iostream>
-
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"
 #include "frontends/p4/toP4/toP4.h"
@@ -20,14 +17,12 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
     std::stringstream formattedOutput;
 
     const IR::P4Program *program = P4::parseP4File(options);
-
     if (program == nullptr && ::errorCount() != 0) {
         std::cerr << "Error: Failed to parse P4 file." << std::endl;
         return formattedOutput;
     }
 
     auto top4 = P4::ToP4(&formattedOutput, false);
-
     // Print the program before running front end passes.
     program->apply(top4);
 
