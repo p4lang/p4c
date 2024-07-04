@@ -14,10 +14,11 @@ $TC p4template update action/indirect_counter_01_example/ingress/send_nh state a
 $TC p4template create action/indirect_counter_01_example/ingress/drop actid 2
 $TC p4template update action/indirect_counter_01_example/ingress/drop state active
 
-$TC p4template create extern/root/Counter extid 0x19000000 numinstances 1 tc_acl 0x1136 has_exec_method 
+$TC p4template create extern/root/Counter extid 0x19000000 numinstances 1 tc_acl 0x1136 has_exec_method
 
 $TC p4template create extern_inst/indirect_counter_01_example/Counter/ingress.global_counter instid 1 \
-tc_numel 2048 constructor param type ptype bit32 0 \
+tc_numel 2048 \
+constructor param type ptype bit32 0 \
 control_path tc_key index ptype bit32 id 1 param pkts ptype bit64 id 2
 
 $TC p4template create table/indirect_counter_01_example/ingress/nh_table \

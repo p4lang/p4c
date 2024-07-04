@@ -117,6 +117,66 @@ class EBPFTablePNADirectCounterPropertyVisitor : public EBPF::EBPFTablePsaProper
     }
 };
 
+class InternetChecksumAlgorithmPNA : public EBPF::EBPFHashAlgorithmPSA {
+ protected:
+    cstring stateVar;
+    cstring csumVar;
+
+    void updateChecksum(EBPF::CodeBuilder *builder, const ArgumentsList &arguments, bool addData);
+
+ public:
+    InternetChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name)
+        : EBPF::EBPFHashAlgorithmPSA(program, name) {}
+
+    void emitVariables(EBPF::CodeBuilder *builder, const IR::Declaration_Instance *decl) override;
+
+    void emitClear(EBPF::CodeBuilder *builder) override;
+    void emitAddData(EBPF::CodeBuilder *builder, const ArgumentsList &arguments) override;
+    void emitGet(EBPF::CodeBuilder *builder) override;
+
+    void emitSubtractData(EBPF::CodeBuilder *builder, const ArgumentsList &arguments) override;
+
+    void emitGetInternalState(EBPF::CodeBuilder *builder) override;
+    void emitSetInternalState(EBPF::CodeBuilder *builder,
+                              const IR::MethodCallExpression *expr) override;
+    cstring getConvertByteOrderFunction(unsigned widthToEmit, cstring byte_order);
+};
+
+class EBPFChecksumPNA : public EBPF::EBPFChecksumPSA {
+ protected:
+    void init(const EBPF::EBPFProgram *program, cstring name, int type);
+
+ public:
+    EBPFChecksumPNA(const EBPF::EBPFProgram *program, const IR::Declaration_Instance *block,
+                    cstring name)
+        : EBPF::EBPFChecksumPSA(program, block, name) {
+        auto di = block->to<IR::Declaration_Instance>();
+        if (di->arguments->size() != 1) {
+            ::error(ErrorType::ERR_UNEXPECTED, "Expected exactly 1 argument %1%", block);
+            return;
+        }
+        int type = di->arguments->at(0)->expression->checkedTo<IR::Constant>()->asInt();
+        init(program, name, type);
+    }
+
+    EBPFChecksumPNA(const EBPF::EBPFProgram *program, const IR::Declaration_Instance *block,
+                    cstring name, int type)
+        : EBPF::EBPFChecksumPSA(program, block, name, type) {
+        init(program, name, type);
+    }
+};
+
+class EBPFInternetChecksumPNA : public EBPFChecksumPNA {
+ public:
+    EBPFInternetChecksumPNA(const EBPF::EBPFProgram *program, const IR::Declaration_Instance *block,
+                            cstring name)
+        : EBPFChecksumPNA(program, block, name,
+                          EBPF::EBPFHashAlgorithmPSA::HashAlgorithm::ONES_COMPLEMENT16) {}
+
+    void processMethod(EBPF::CodeBuilder *builder, cstring method,
+                       const IR::MethodCallExpression *expr, Visitor *visitor) override;
+};
+
 }  // namespace TC
 
 #endif /* BACKENDS_TC_TCEXTERNS_H_ */

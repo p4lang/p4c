@@ -159,11 +159,3 @@ void crc32_update(u32 * reg, const u8 * data, u16 data_size, const u32 poly) {
 static __always_inline u32 crc32_finalize(u32 reg) {
     return reg ^ 0xFFFFFFFF;
 }
-inline u16 csum16_add(u16 csum, u16 addend) {
-    u16 res = csum;
-    res += addend;
-    return (res + (res < addend));
-}
-inline u16 csum16_sub(u16 csum, u16 addend) {
-    return csum16_add(csum, ~addend);
-}

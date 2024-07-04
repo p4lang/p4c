@@ -1,0 +1,30 @@
+#!/bin/bash -x
+
+set -e
+
+TC="tc"
+$TC p4template create pipeline/internetchecksum_01 numtables 1
+
+$TC p4template create action/internetchecksum_01/ingress/set_ipip_internet_checksum actid 1 \
+	param src type ipv4 \
+	param dst type ipv4 \
+	param port type dev
+$TC p4template update action/internetchecksum_01/ingress/set_ipip_internet_checksum state active
+
+$TC p4template create action/internetchecksum_01/ingress/set_nh actid 2 \
+	param dmac type macaddr \
+	param port type dev
+$TC p4template update action/internetchecksum_01/ingress/set_nh state active
+
+$TC p4template create action/internetchecksum_01/ingress/drop actid 3
+$TC p4template update action/internetchecksum_01/ingress/drop state active
+
+$TC p4template create table/internetchecksum_01/ingress/fwd_table \
+	tblid 1 \
+	type exact \
+	keysz 32 nummasks 8 permissions 0x3da4 tentries 1024 \
+	table_acts act name internetchecksum_01/ingress/set_ipip_internet_checksum \
+	act name internetchecksum_01/ingress/set_nh \
+	act name internetchecksum_01/ingress/drop
+$TC p4template update table/internetchecksum_01/ingress/fwd_table default_miss_action action internetchecksum_01/ingress/drop
+$TC p4template update pipeline/internetchecksum_01 state ready

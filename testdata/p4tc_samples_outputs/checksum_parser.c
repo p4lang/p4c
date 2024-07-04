@@ -29,6 +29,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
     {
         u16 tmp_0;
         u16 ck_0_state = 0;
+struct p4tc_ext_csum_params ck_0_csum = {};
         goto start;
         parse_ipv4: {
 /* extract(hdr->ipv4) */
@@ -79,33 +80,36 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
 
 ;
 /* ck_0.clear() */
-            ck_0_state = 0;
+            bpf_p4tc_ext_csum_16bit_complement_clear(&ck_0_csum, sizeof(ck_0_csum));
 ;
 /* ck_0.add((struct tuple_0){.f0 = hdr->ipv4.version, .f1 = hdr->ipv4.ihl, .f2 = hdr->ipv4.diffserv, .f3 = hdr->ipv4.totalLen, .f4 = hdr->ipv4.identification, .f5 = hdr->ipv4.flags, .f6 = hdr->ipv4.fragOffset, .f7 = hdr->ipv4.ttl, .f8 = hdr->ipv4.protocol, .f9 = hdr->ipv4.srcAddr, .f10 = hdr->ipv4.dstAddr}) */
             {
                 u16 ck_0_tmp = 0;
                 ck_0_tmp = (hdr->ipv4.version << 12) | (hdr->ipv4.ihl << 8) | hdr->ipv4.diffserv;
-                ck_0_state = csum16_add(ck_0_state, ck_0_tmp);
+                bpf_p4tc_ext_csum_16bit_complement_add(&ck_0_csum, sizeof(ck_0_csum), &ck_0_tmp, sizeof(ck_0_tmp));
                 ck_0_tmp = hdr->ipv4.totalLen;
-                ck_0_state = csum16_add(ck_0_state, ck_0_tmp);
+                bpf_p4tc_ext_csum_16bit_complement_add(&ck_0_csum, sizeof(ck_0_csum), &ck_0_tmp, sizeof(ck_0_tmp));
                 ck_0_tmp = hdr->ipv4.identification;
-                ck_0_state = csum16_add(ck_0_state, ck_0_tmp);
+                bpf_p4tc_ext_csum_16bit_complement_add(&ck_0_csum, sizeof(ck_0_csum), &ck_0_tmp, sizeof(ck_0_tmp));
                 ck_0_tmp = (hdr->ipv4.flags << 13) | hdr->ipv4.fragOffset;
-                ck_0_state = csum16_add(ck_0_state, ck_0_tmp);
+                bpf_p4tc_ext_csum_16bit_complement_add(&ck_0_csum, sizeof(ck_0_csum), &ck_0_tmp, sizeof(ck_0_tmp));
                 ck_0_tmp = (hdr->ipv4.ttl << 8) | hdr->ipv4.protocol;
-                ck_0_state = csum16_add(ck_0_state, ck_0_tmp);
-                ck_0_tmp = (hdr->ipv4.srcAddr >> 16);
-                ck_0_state = csum16_add(ck_0_state, ck_0_tmp);
-                ck_0_tmp = hdr->ipv4.srcAddr;
-                ck_0_state = csum16_add(ck_0_state, ck_0_tmp);
-                ck_0_tmp = (hdr->ipv4.dstAddr >> 16);
-                ck_0_state = csum16_add(ck_0_state, ck_0_tmp);
-                ck_0_tmp = hdr->ipv4.dstAddr;
-                ck_0_state = csum16_add(ck_0_state, ck_0_tmp);
+                bpf_p4tc_ext_csum_16bit_complement_add(&ck_0_csum, sizeof(ck_0_csum), &ck_0_tmp, sizeof(ck_0_tmp));
+                u32 srcAddr_temp = bpf_ntohl(hdr->ipv4.srcAddr);
+                ck_0_tmp = (srcAddr_temp >> 16);
+                bpf_p4tc_ext_csum_16bit_complement_add(&ck_0_csum, sizeof(ck_0_csum), &ck_0_tmp, sizeof(ck_0_tmp));
+                ck_0_tmp = srcAddr_temp;
+                bpf_p4tc_ext_csum_16bit_complement_add(&ck_0_csum, sizeof(ck_0_csum), &ck_0_tmp, sizeof(ck_0_tmp));
+                u32 dstAddr_temp = bpf_ntohl(hdr->ipv4.dstAddr);
+                ck_0_tmp = (dstAddr_temp >> 16);
+                bpf_p4tc_ext_csum_16bit_complement_add(&ck_0_csum, sizeof(ck_0_csum), &ck_0_tmp, sizeof(ck_0_tmp));
+                ck_0_tmp = dstAddr_temp;
+                bpf_p4tc_ext_csum_16bit_complement_add(&ck_0_csum, sizeof(ck_0_csum), &ck_0_tmp, sizeof(ck_0_tmp));
             }
 ;
             tmp_0 = /* ck_0.get() */
-((u16) (~ck_0_state));/* verify(hdr->ipv4.hdrChecksum == tmp_0, BadIPv4HeaderChecksum) */
+(u16) bpf_p4tc_ext_csum_16bit_complement_get(&ck_0_csum, sizeof(ck_0_csum));
+;/* verify(hdr->ipv4.hdrChecksum == tmp_0, BadIPv4HeaderChecksum) */
             if (!(hdr->ipv4.hdrChecksum == tmp_0)) {
                 ebpf_errorCode = BadIPv4HeaderChecksum;
                 goto reject;

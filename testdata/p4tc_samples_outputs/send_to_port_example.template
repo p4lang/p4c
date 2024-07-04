@@ -15,7 +15,7 @@ $TC p4template update action/send_to_port_example/MainControlImpl/default_route_
 $TC p4template create extern/root/Register extid 0x1 numinstances 1 tc_acl 0x19b6
 
 $TC p4template create extern_inst/send_to_port_example/Register/MainControlImpl.reg1 instid 1 \
-tc_numel 10
+tc_numel 10 \
 control_path tc_key index ptype bit32 id 1 param a_value ptype bit32 id 2
 
 $TC p4template create table/send_to_port_example/MainControlImpl/ipv4_tbl \
