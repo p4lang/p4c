@@ -37,8 +37,6 @@ extern const char *p4_14includePath;
 /// This class contains the options for the front-ends.
 /// Each back-end should subclass this file.
 class ParserOptions : public Util::Options {
-    bool close_input = false;
-
     /// Annotation names that are to be ignored by the compiler.
     std::set<cstring> disabledAnnotations;
 
@@ -54,6 +52,32 @@ class ParserOptions : public Util::Options {
 
     std::vector<const char *> *process(int argc, char *const argv[]) override;
     enum class FrontendVersion { P4_14, P4_16 };
+
+    /// Records the result of the preprocessor.
+    class PreprocessorResult {
+     private:
+        /// The input stream.
+        FILE *_file = nullptr;
+        /// Whether the input stream should be closed.
+        bool _closeInput = false;
+
+        /// Tries to close the input stream associated with the result.
+        void closeFile();
+
+     public:
+        PreprocessorResult() = default;
+        PreprocessorResult(const PreprocessorResult &) = delete;
+        PreprocessorResult(PreprocessorResult &&) = default;
+        PreprocessorResult &operator=(const PreprocessorResult &) = delete;
+        PreprocessorResult &operator=(PreprocessorResult &&) = default;
+        PreprocessorResult(FILE *file, bool closeInput) : _file(file), _closeInput(closeInput) {}
+
+        ~PreprocessorResult() { closeFile(); }
+
+        /// @return the input stream.
+        [[nodiscard]] FILE *file() const { return _file; }
+    };
+
     /// Name of executable that is being run.
     cstring exe_name;
     /// Which language to compile
@@ -77,11 +101,9 @@ class ParserOptions : public Util::Options {
     /// Expect that the only remaining argument is the input file.
     void setInputFile();
     /// Return target specific include path.
-    const char *getIncludePath() override;
+    const char *getIncludePath() const override;
     /// Returns the output of the preprocessor.
-    FILE *preprocess();
-    /// Closes the input stream returned by preprocess.
-    void closePreprocessedInput(FILE *input) const;
+    PreprocessorResult preprocess() const;
     /// True if we are compiling a P4 v1.0 or v1.1 program
     bool isv1() const;
     /// Get a debug hook function suitable for insertion

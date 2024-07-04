@@ -17,7 +17,7 @@ std::vector<const char *> *DpdkOptions::process(int argc, char *const argv[]) {
     return remainingOptions;
 }
 
-const char *DpdkOptions::getIncludePath() {
+const char *DpdkOptions::getIncludePath() const {
     char *driverP4IncludePath =
         isv1() ? getenv("P4C_14_INCLUDE_PATH") : getenv("P4C_16_INCLUDE_PATH");
     cstring path = cstring::empty;

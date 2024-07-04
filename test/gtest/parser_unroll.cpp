@@ -1,11 +1,10 @@
 #include <gtest/gtest.h>
 
 #include <cstdlib>
-#include <fstream>
 
 #include "frontends/common/parseInput.h"
+#include "frontends/p4/frontend.h"
 #include "ir/ir.h"
-#include "lib/log.h"
 #include "test/gtest/env.h"
 #include "test/gtest/helpers.h"
 #include "test/gtest/midend_pass.h"

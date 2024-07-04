@@ -104,7 +104,7 @@ class DpdkOptions : public CompilerOptions {
     /// Process the command line arguments and set options accordingly.
     std::vector<const char *> *process(int argc, char *const argv[]) override;
 
-    const char *getIncludePath() override;
+    const char *getIncludePath() const override;
 };
 
 using DpdkContext = P4CContextWithOptions<DpdkOptions>;

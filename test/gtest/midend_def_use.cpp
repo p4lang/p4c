@@ -20,6 +20,7 @@ limitations under the License.
 #include <string>
 
 #include "frontends/common/parseInput.h"
+#include "frontends/p4/frontend.h"
 #include "helpers.h"
 #include "midend/def_use.h"
 #include "midend_pass.h"

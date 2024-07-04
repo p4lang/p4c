@@ -100,7 +100,7 @@ class Options {
      */
     virtual std::vector<const char *> *process(int argc, char *const argv[]);
 
-    virtual const char *getIncludePath() = 0;
+    [[nodiscard]] virtual const char *getIncludePath() const = 0;
     cstring getCompileCommand() { return compileCommand; }
     cstring getBuildDate() { return buildDate; }
     cstring getBinaryName() { return cstring(binaryName); }
