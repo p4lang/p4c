@@ -66,17 +66,12 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
     return P4_SOURCE(P4Headers::V1MODEL, templateString.str().c_str());
 }
 
-CompilerOptions generateDefaultApiTestCompilerOptions() {
-    auto compilerOptions = P4CContextWithOptions<CompilerOptions>::get().options();
-    compilerOptions.target = "bmv2"_cs;
-    compilerOptions.arch = "v1model"_cs;
-    return compilerOptions;
-}
-
-P4Tools::P4Testgen::TestgenOptions &generateDefaultApiTestTestgenOptions() {
-    auto &testgenOptions = P4Tools::P4Testgen::TestgenOptions::get();
+P4Testgen::TestgenOptions &generateDefaultApiTestTestgenOptions() {
+    auto &testgenOptions = P4Testgen::TestgenOptions::get();
     testgenOptions.testBackend = "PROTOBUF_IR"_cs;
     testgenOptions.testBaseName = "dummy"_cs;
+    testgenOptions.target = "bmv2"_cs;
+    testgenOptions.arch = "v1model"_cs;
     testgenOptions.seed = 1;
     testgenOptions.maxTests = 0;
     // Create a bespoke packet for the Ethernet extract call.
@@ -108,13 +103,11 @@ TEST_F(P4TestgenControlPlaneFilterTest, GeneratesCorrectTests) {
             drop_table.apply();
         }
     })");
-    auto compilerOptions = generateDefaultApiTestCompilerOptions();
     auto &testgenOptions = generateDefaultApiTestTestgenOptions();
 
     // First, we ensure that tests are generated correctly. We expect two tests.
     // One which exercises action acl_drop and one which exercises the default action, NoAction.
-    auto testListOpt =
-        P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
+    auto testListOpt = P4Testgen::Testgen::generateTests(source, testgenOptions);
 
     ASSERT_TRUE(testListOpt.has_value());
     const auto &testList = testListOpt.value();
@@ -156,15 +149,13 @@ TEST_F(P4TestgenControlPlaneFilterTest, FiltersControlPlaneEntities) {
             drop_table.apply();
         }
     })");
-    auto compilerOptions = generateDefaultApiTestCompilerOptions();
     auto &testgenOptions = generateDefaultApiTestTestgenOptions();
 
     // We install a filter.
     // Since we can not generate a config for the table we should only generate one test.
     testgenOptions.skippedControlPlaneEntities = {"ingress.drop_table"_cs};
 
-    auto testListOpt =
-        P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
+    auto testListOpt = P4Testgen::Testgen::generateTests(source, testgenOptions);
 
     ASSERT_TRUE(testListOpt.has_value());
     const auto &testList = testListOpt.value();
@@ -196,15 +187,13 @@ TEST_F(P4TestgenControlPlaneFilterTest, IgnoresBogusControlPlaneEntities) {
             drop_table.apply();
         }
     })");
-    auto compilerOptions = generateDefaultApiTestCompilerOptions();
     auto &testgenOptions = generateDefaultApiTestTestgenOptions();
 
     // This is a bogus control plane element, which is ignored. We expect two tests.
     // One which exercises action acl_drop and one which exercises the default action, NoAction.
     testgenOptions.skippedControlPlaneEntities = {"ingress.bogus_table"_cs};
 
-    auto testListOpt =
-        P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
+    auto testListOpt = P4Testgen::Testgen::generateTests(source, testgenOptions);
 
     ASSERT_TRUE(testListOpt.has_value());
     const auto &testList = testListOpt.value();
@@ -262,7 +251,6 @@ TEST_F(P4TestgenControlPlaneFilterTest, FiltersMultipleControlPlaneEntities) {
             set_eth_table.apply();
         }
     })");
-    auto compilerOptions = generateDefaultApiTestCompilerOptions();
     auto &testgenOptions = generateDefaultApiTestTestgenOptions();
 
     // We install a filter.
@@ -270,8 +258,7 @@ TEST_F(P4TestgenControlPlaneFilterTest, FiltersMultipleControlPlaneEntities) {
     testgenOptions.skippedControlPlaneEntities = {"ingress.drop_table"_cs,
                                                   "ingress.set_eth_table"_cs};
 
-    auto testListOpt =
-        P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
+    auto testListOpt = P4Testgen::Testgen::generateTests(source, testgenOptions);
 
     ASSERT_TRUE(testListOpt.has_value());
     const auto &testList = testListOpt.value();
