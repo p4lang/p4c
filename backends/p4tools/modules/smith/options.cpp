@@ -8,17 +8,12 @@
 #include "backends/p4tools/modules/smith/toolname.h"
 #include "lib/compile_context.h"
 #include "lib/error.h"
-#include "lib/exceptions.h"
 
 namespace P4::P4Tools {
 
 SmithOptions &SmithOptions::get() {
     static SmithOptions INSTANCE;
     return INSTANCE;
-}
-
-const char *SmithOptions::getIncludePath() const {
-    P4C_UNIMPLEMENTED("getIncludePath is not implemented for P4Smith.");
 }
 
 void SmithOptions::processArgs(const std::vector<const char *> &args) {

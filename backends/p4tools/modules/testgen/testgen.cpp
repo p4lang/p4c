@@ -7,6 +7,7 @@
 #include <string>
 #include <utility>
 
+#include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "frontends/common/parser_options.h"
 #include "ir/solver.h"
@@ -104,8 +105,8 @@ int generateAndWriteAbstractTests(const TestgenOptions &testgenOptions,
     /// If the test name is not provided, use the steam of the input file name as test name.
     if (testgenOptions.testBaseName.has_value()) {
         testPath = testgenOptions.testBaseName.value().c_str();
-    } else if (!P4CContext::get().options().file.empty()) {
-        testPath = P4CContext::get().options().file.stem();
+    } else if (!testgenOptions.file.empty()) {
+        testPath = testgenOptions.file.stem();
     } else {
         ::P4::error("Neither a file nor test base name was set. Can not infer a test name.");
     }
@@ -143,24 +144,22 @@ int generateAndWriteAbstractTests(const TestgenOptions &testgenOptions,
 }
 
 std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view> program,
-                                                  const CompilerOptions &compilerOptions,
                                                   const TestgenOptions &testgenOptions,
                                                   bool writeTests) {
-    registerTestgenTargets();
-    P4Tools::Target::init(compilerOptions.target.c_str(), compilerOptions.arch.c_str());
+    P4Tools::Target::init(testgenOptions.target.c_str(), testgenOptions.arch.c_str());
 
     CompilerResultOrError compilerResultOpt;
     if (program.has_value()) {
         // Run the compiler to get an IR and invoke the tool.
-        compilerResultOpt = P4Tools::CompilerTarget::runCompiler(compilerOptions, TOOL_NAME,
+        compilerResultOpt = P4Tools::CompilerTarget::runCompiler(testgenOptions, TOOL_NAME,
                                                                  std::string(program.value()));
     } else {
-        if (compilerOptions.file.empty()) {
+        if (testgenOptions.file.empty()) {
             ::P4::error("Expected a file input.");
             return std::nullopt;
         }
         // Run the compiler to get an IR and invoke the tool.
-        compilerResultOpt = P4Tools::CompilerTarget::runCompiler(compilerOptions, TOOL_NAME);
+        compilerResultOpt = P4Tools::CompilerTarget::runCompiler(testgenOptions, TOOL_NAME);
     }
 
     if (!compilerResultOpt.has_value()) {
@@ -207,10 +206,9 @@ int Testgen::mainImpl(const CompilerResult &compilerResult) {
 }
 
 std::optional<AbstractTestList> Testgen::generateTests(std::string_view program,
-                                                       const CompilerOptions &compilerOptions,
                                                        const TestgenOptions &testgenOptions) {
     try {
-        return generateTestsImpl(program, compilerOptions, testgenOptions, false);
+        return generateTestsImpl(program, testgenOptions, false);
     } catch (const std::exception &e) {
         std::cerr << "Internal error: " << e.what() << "\n";
         return std::nullopt;
@@ -220,10 +218,9 @@ std::optional<AbstractTestList> Testgen::generateTests(std::string_view program,
     return std::nullopt;
 }
 
-std::optional<AbstractTestList> Testgen::generateTests(const CompilerOptions &compilerOptions,
-                                                       const TestgenOptions &testgenOptions) {
+std::optional<AbstractTestList> Testgen::generateTests(const TestgenOptions &testgenOptions) {
     try {
-        return generateTestsImpl(std::nullopt, compilerOptions, testgenOptions, false);
+        return generateTestsImpl(std::nullopt, testgenOptions, false);
     } catch (const std::exception &e) {
         std::cerr << "Internal error: " << e.what() << "\n";
         return std::nullopt;
@@ -233,10 +230,9 @@ std::optional<AbstractTestList> Testgen::generateTests(const CompilerOptions &co
     return std::nullopt;
 }
 
-int Testgen::writeTests(std::string_view program, const CompilerOptions &compilerOptions,
-                        const TestgenOptions &testgenOptions) {
+int Testgen::writeTests(std::string_view program, const TestgenOptions &testgenOptions) {
     try {
-        if (generateTestsImpl(program, compilerOptions, testgenOptions, true).has_value()) {
+        if (generateTestsImpl(program, testgenOptions, true).has_value()) {
             return EXIT_SUCCESS;
         }
     } catch (const std::exception &e) {
@@ -248,10 +244,9 @@ int Testgen::writeTests(std::string_view program, const CompilerOptions &compile
     return EXIT_FAILURE;
 }
 
-int Testgen::writeTests(const CompilerOptions &compilerOptions,
-                        const TestgenOptions &testgenOptions) {
+int Testgen::writeTests(const TestgenOptions &testgenOptions) {
     try {
-        if (generateTestsImpl(std::nullopt, compilerOptions, testgenOptions, true).has_value()) {
+        if (generateTestsImpl(std::nullopt, testgenOptions, true).has_value()) {
             return EXIT_SUCCESS;
         }
     } catch (const std::exception &e) {

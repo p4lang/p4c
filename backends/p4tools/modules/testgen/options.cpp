@@ -8,6 +8,7 @@
 #include <string>
 #include <utility>
 
+#include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/options.h"
 #include "lib/error.h"
@@ -19,14 +20,7 @@ namespace P4::P4Tools::P4Testgen {
 
 using namespace P4::literals;
 
-TestgenOptions &TestgenOptions::get() {
-    static TestgenOptions INSTANCE;
-    return INSTANCE;
-}
-
-const char *TestgenOptions::getIncludePath() const {
-    P4C_UNIMPLEMENTED("getIncludePath not implemented for P4Testgen.");
-}
+TestgenOptions &TestgenOptions::get() { return CompileContext<TestgenOptions>::get().options(); }
 
 const std::set<cstring> TestgenOptions::SUPPORTED_STOP_METRICS = {"MAX_NODE_COVERAGE"_cs};
 

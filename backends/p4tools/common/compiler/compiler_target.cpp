@@ -1,9 +1,7 @@
 #include "backends/p4tools/common/compiler/compiler_target.h"
 
 #include <string>
-#include <vector>
 
-#include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/compiler/midend.h"
 #include "backends/p4tools/common/core/target.h"
 #include "frontends/common/applyOptionsPragmas.h"
@@ -15,15 +13,6 @@
 #include "lib/error.h"
 
 namespace P4::P4Tools {
-
-ICompileContext *CompilerTarget::makeContext(std::string_view toolName) {
-    return get(toolName).makeContextImpl();
-}
-
-std::vector<const char *> *CompilerTarget::initCompiler(std::string_view toolName, int argc,
-                                                        char **argv) {
-    return get(toolName).initCompilerImpl(argc, argv);
-}
 
 CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options,
                                                   std::string_view toolName) {
@@ -65,15 +54,6 @@ CompilerResultOrError CompilerTarget::runCompilerImpl(const CompilerOptions &opt
     }
 
     return *new CompilerResult(*program);
-}
-
-ICompileContext *CompilerTarget::makeContextImpl() const {
-    return new CompileContext<CompilerOptions>();
-}
-
-std::vector<const char *> *CompilerTarget::initCompilerImpl(int argc, char **argv) const {
-    auto *result = CompileContext<CompilerOptions>::get().options().process(argc, argv);
-    return ::P4::errorCount() > 0 ? nullptr : result;
 }
 
 const IR::P4Program *CompilerTarget::runParser(const ParserOptions &options) {

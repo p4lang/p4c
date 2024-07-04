@@ -1,11 +1,13 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_CORE_TARGET_H_
 #define BACKENDS_P4TOOLS_COMMON_CORE_TARGET_H_
 
+#include <cstdlib>
 #include <map>
 #include <optional>
 #include <string>
 
 #include "ir/ir.h"
+#include "lib/compile_context.h"
 #include "lib/exceptions.h"
 
 namespace P4::P4Tools {
@@ -22,7 +24,7 @@ class Target {
         std::string archName;
 
         /// Names provided to this constructor are converted to lower case.
-        Spec(std::string deviceName, std::string archName);
+        Spec(std::string_view deviceName, std::string_view archName);
 
         /// Lexicographic ordering on (deviceName, archName).
         bool operator<(const Spec &) const;
@@ -32,7 +34,7 @@ class Target {
     ///
     /// @returns true on success. If initialization fails, false is returned, and nothing is
     /// changed.
-    static bool init(std::string deviceName, std::string archName);
+    static bool init(std::string_view deviceName, std::string_view archName);
 
     /// Initializes the global target device to @deviceName without changing the architecture. If
     /// no architecture was previously selected, then the first architecture registered for the
@@ -40,7 +42,7 @@ class Target {
     ///
     /// @returns true on success. If initialization fails, false is returned, and nothing is
     /// changed.
-    static bool setDevice(std::string deviceName);
+    static bool setDevice(std::string_view deviceName);
 
     /// Initializes the global target architecture to @archName without changing the device. If no
     /// device was previously selected, then the first device registered for the architecture is
@@ -48,7 +50,7 @@ class Target {
     ///
     /// @returns true on success. If initialization fails, false is returned, and nothing is
     /// changed.
-    static bool setArch(std::string archName);
+    static bool setArch(std::string_view archName);
 
     /// The name of the tool supported by this instance.
     std::string toolName;
@@ -67,10 +69,21 @@ class Target {
     virtual const IR::Expression *createTargetUninitialized(const IR::Type *type,
                                                             bool forceTaint) const;
 
+    /// Initializes the global target device and architecture to @deviceName and @archName.
+    /// Returns 0 on success. If initialization fails, returns -1.
+    static std::optional<ICompileContext *> initializeTarget(std::string_view toolName,
+                                                             const std::vector<const char *> &args);
+    static std::optional<ICompileContext *> initializeTarget(std::string_view toolName,
+                                                             std::string_view target,
+                                                             std::string_view arch);
+
  protected:
     /// Creates and registers a new Target instance for the given @toolName, @deviceName, and
     /// @archName.
     Target(std::string_view toolName, const std::string &deviceName, const std::string &archName);
+
+    /// @returns a new compilation context for the compiler.
+    [[nodiscard]] virtual ICompileContext *makeContext() const = 0;
 
     /// @returns the target instance for the given tool and active target, as selected by @init.
     //

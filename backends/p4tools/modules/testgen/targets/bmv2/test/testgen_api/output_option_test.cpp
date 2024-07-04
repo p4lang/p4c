@@ -59,10 +59,9 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
 )p4";
 
     auto source = P4_SOURCE(P4Headers::V1MODEL, streamTest.str().c_str());
-    auto compilerOptions = P4CContextWithOptions<CompilerOptions>::get().options();
-    compilerOptions.target = "bmv2"_cs;
-    compilerOptions.arch = "v1model"_cs;
-    auto &testgenOptions = P4Tools::P4Testgen::TestgenOptions::get();
+    auto &testgenOptions = P4Testgen::TestgenOptions::get();
+    testgenOptions.target = "bmv2"_cs;
+    testgenOptions.arch = "v1model"_cs;
     testgenOptions.testBackend = "PROTOBUF_IR"_cs;
     testgenOptions.testBaseName = "dummy"_cs;
     testgenOptions.seed = 1;
@@ -75,11 +74,10 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
     {
         testgenOptions.droppedPacketOnly = true;
 
-        auto testListOpt =
-            P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
+        auto testListOpt = P4Testgen::Testgen::generateTests(source, testgenOptions);
 
         ASSERT_TRUE(testListOpt.has_value());
-        auto testList = testListOpt.value();
+        const auto &testList = testListOpt.value();
         ASSERT_EQ(testList.size(), 1);
         const auto *protobufIrTest =
             testList[0]->checkedTo<P4Tools::P4Testgen::Bmv2::ProtobufIrTest>();
@@ -92,11 +90,10 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
         testgenOptions.droppedPacketOnly = false;
         testgenOptions.outputPacketOnly = true;
 
-        auto testListOpt =
-            P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
+        auto testListOpt = P4Testgen::Testgen::generateTests(source, testgenOptions);
 
         ASSERT_TRUE(testListOpt.has_value());
-        auto testList = testListOpt.value();
+        const auto &testList = testListOpt.value();
         ASSERT_EQ(testList.size(), 1);
         const auto *protobufIrTest =
             testList[0]->checkedTo<P4Tools::P4Testgen::Bmv2::ProtobufIrTest>();

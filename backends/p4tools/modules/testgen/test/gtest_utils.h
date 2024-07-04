@@ -3,12 +3,17 @@
 
 #include <gtest/gtest.h>
 
+#include <memory>
 #include <optional>
 #include <string>
 
-#include "backends/p4tools/common/compiler/compiler_result.h"
 #include "frontends/common/options.h"
 #include "ir/ir.h"
+#include "lib/compile_context.h"
+
+#include "backends/p4tools/modules/testgen/core/target.h"
+#include "backends/p4tools/modules/testgen/register.h"
+#include "backends/p4tools/modules/testgen/toolname.h"
 
 namespace P4::P4Tools::Test {
 
@@ -47,7 +52,22 @@ class P4ToolsTestCase {
     static void ensureInit();
 };
 
-class P4TestgenTest : public testing::Test {};
+class P4TestgenTest : public testing::Test {
+ public:
+    [[nodiscard]] static std::optional<std::unique_ptr<AutoCompileContext>> SetUp(
+        std::string_view target, std::string_view archName) {
+        P4Tools::P4Testgen::registerTestgenTargets();
+        /// Set up the appropriate compile context for P4Testgen tests.
+        /// TODO: Remove this once options are not initialized statically anymore.
+        auto ctxOpt = P4Testgen::TestgenTarget::initializeTarget(P4Tools::P4Testgen::TOOL_NAME,
+                                                                 target, archName);
+
+        if (!ctxOpt.has_value()) {
+            return std::nullopt;
+        }
+        return std::make_unique<AutoCompileContext>(ctxOpt.value());
+    }
+};
 
 /// Converts IR::Member into symbolic variables.
 class SymbolicConverter : public Transform {

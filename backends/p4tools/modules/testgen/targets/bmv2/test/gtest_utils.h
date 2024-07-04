@@ -7,14 +7,37 @@
 namespace P4::P4Tools::Test {
 
 /// Sets up the correct context for a P4Testgen BMv2 test.
-class P4TestgenBmv2Test : public P4TestgenTest {};
+class P4TestgenBmv2Test : public P4TestgenTest {
+    std::unique_ptr<AutoCompileContext> compileContext;
+
+ public:
+    void SetUp() override {
+        auto result = P4TestgenTest::SetUp("bmv2", "v1model");
+        if (!result.has_value()) {
+            FAIL() << "Failed to set up P4Testgen BMv2 test";
+            return;
+        }
+        compileContext = std::move(result.value());
+    }
+};
 
 /// Creates a test case with the @hdrFields for stepping on an @expr.
 std::optional<const P4ToolsTestCase> createBmv2V1modelSmallStepExprTest(
     const std::string &hdrFields, const std::string &expr);
 
-/// BMv2-specific version of a small step test.
-class Bmv2SmallStepTest : public SmallStepTest {};
+class Bmv2SmallStepTest : public SmallStepTest {
+    std::unique_ptr<AutoCompileContext> compileContext;
+
+ public:
+    void SetUp() override {
+        auto result = P4TestgenTest::SetUp("bmv2", "v1model");
+        if (!result.has_value()) {
+            FAIL() << "Failed to set up P4Testgen BMv2 test";
+            return;
+        }
+        compileContext = std::move(result.value());
+    }
+};
 
 }  // namespace P4::P4Tools::Test
 

@@ -117,11 +117,11 @@ filegroup(
     srcs =
         glob(
             ["modules/testgen/targets/%s/**/*.h" % target for target in TESTGEN_TARGETS],
-            exclude = ["modules/testgen/targets/%s/test/**" % target for target in TESTGEN_TARGETS],
+            exclude = ["modules/testgen/targets/%s/test/**/*.h" % target for target in TESTGEN_TARGETS],
         ) +
         glob(
             ["modules/testgen/targets/%s/**/*.cpp" % target for target in TESTGEN_TARGETS],
-            exclude = ["modules/testgen/targets/%s/test/**" % target for target in TESTGEN_TARGETS],
+            exclude = ["modules/testgen/targets/%s/test/**/*.cpp" % target for target in TESTGEN_TARGETS],
         ),
 )
 
