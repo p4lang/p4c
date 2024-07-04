@@ -68,7 +68,7 @@ TEST_F(P4SmithForLoopTest, CheckForLoopUpdate) {
     ASSERT_FALSE(forStmt->updates.empty());
 }
 
-/// @brief Test the for-loop' body.
+/// @brief Test the for-loop's body.
 TEST_F(P4SmithForLoopTest, CheckForLoopBody) {
     auto forLoopStmt = generator->genForLoopStatement(false);
     ASSERT_NE(forLoopStmt, nullptr);
