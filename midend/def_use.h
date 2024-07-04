@@ -43,7 +43,14 @@ class ComputeDefUse : public Inspector,
                       public ControlFlowVisitor,
                       public P4WriteContext,
                       public P4::ResolutionContext {
-    ComputeDefUse *clone() const override { return new ComputeDefUse(*this); }
+    static int uid_ctr;
+    int uid = 0;
+    ComputeDefUse *clone() const override {
+        auto *rv = new ComputeDefUse(*this);
+        rv->uid = ++uid_ctr;
+        LOG8("ComputeDefUse::clone " << rv->uid);
+        return rv;
+    }
     void flow_merge(Visitor &) override;
     void flow_copy(ControlFlowVisitor &) override;
     bool operator==(const ControlFlowVisitor &) const override;
@@ -122,6 +129,7 @@ class ComputeDefUse : public Inspector,
     profile_t init_apply(const IR::Node *root) override {
         auto rv = Inspector::init_apply(root);
         LOG3("## Midend ComputeDefUse");
+        uid_ctr = 0;
         state = SKIPPING;
         clear();
         return rv;
@@ -137,6 +145,7 @@ class ComputeDefUse : public Inspector,
     bool preorder(const IR::Type *) override { return false; }
     bool preorder(const IR::Annotations *) override { return false; }
     bool preorder(const IR::KeyElement *) override;
+    bool preorder(const IR::AssignmentStatement *) override;
     const IR::Expression *do_read(def_info_t &, const IR::Expression *, const Context *);
     const IR::Expression *do_write(def_info_t &, const IR::Expression *, const Context *);
     bool preorder(const IR::PathExpression *) override;

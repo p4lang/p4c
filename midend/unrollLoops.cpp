@@ -165,6 +165,29 @@ static long evalLoop(const IR::Expression *exp, cstring index, long val, bool &f
     return 0;
 }
 
+static const IR::PathExpression *incrRecursiveUse(const IR::Expression *e, cstring index) {
+    if (auto *pe = e->to<IR::PathExpression>()) {
+        if (pe->path->name == index) return pe;
+    } else if (auto *bin = e->to<IR::Operation::Binary>()) {
+        if (auto *pe = incrRecursiveUse(bin->left, index)) return pe;
+        if (auto *pe = incrRecursiveUse(bin->right, index)) return pe;
+    } else if (auto *un = e->to<IR::Operation::Unary>()) {
+        if (auto *pe = incrRecursiveUse(un->expr, index)) return pe;
+    }
+    return nullptr;
+}
+
+static bool find_def(const IR::IndexedVector<IR::StatOrDecl> &stmts, const IR::Node *def,
+                     const IR::AssignmentStatement **as = nullptr) {
+    for (auto *a : stmts) {
+        if (a == def) {
+            if (as) *as = a->to<IR::AssignmentStatement>();
+            return true;
+        }
+    }
+    return false;
+}
+
 bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds) {
     Pattern::Match<IR::PathExpression> v;
     Pattern::Match<IR::Constant> k;
@@ -172,29 +195,22 @@ bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds)
         auto d = resolveUnique(v->path->name, P4::ResolutionType::Any);
         bounds.index = d ? d->to<IR::Declaration_Variable>() : nullptr;
         if (!bounds.index) return false;
-        auto &defs = defUse->getDefs(v);
         const IR::AssignmentStatement *init = nullptr, *incr = nullptr;
-        for (auto *d : defs) {
-            bool ok = false;
-            for (auto *a : fstmt->init) {
-                if (a == d->parent->node) {
-                    init = a->to<IR::AssignmentStatement>();
-                    ok = true;
-                    break;
-                }
-            }
-            for (auto *a : fstmt->updates) {
-                if (a == d->parent->node) {
-                    incr = a->to<IR::AssignmentStatement>();
-                    ok = true;
-                    break;
-                }
-            }
-            if (!ok) return false;
+        for (auto *d : defUse->getDefs(v)) {
+            if (!find_def(fstmt->init, d->parent->node, &init) &&
+                !find_def(fstmt->updates, d->parent->node, &incr))
+                return false;
         }
         if (!init || !incr) return false;
         auto initval = init->right->to<IR::Constant>();
         if (!initval) return false;
+        auto *incr_ref = incrRecursiveUse(incr->right, bounds.index->name);
+        if (!incr_ref) return false;
+        for (auto *d : defUse->getDefs(incr_ref)) {
+            if (!find_def(fstmt->init, d->parent->node) &&
+                !find_def(fstmt->updates, d->parent->node))
+                return false;
+        }
         bool fail = false;
         for (long val = initval->asLong();
              evalLoop(fstmt->condition, bounds.index->name, val, fail) && !fail;
@@ -262,7 +278,7 @@ const IR::Statement *UnrollLoops::doUnroll(const loop_bounds_t &bounds, const IR
 const IR::Statement *UnrollLoops::preorder(IR::ForStatement *fstmt) {
     loop_bounds_t bounds;
     if (findLoopBounds(fstmt, bounds)) {
-        LOG4("Unrolling loop" << Log::indent << Log::endl << fstmt << Log::unindent);
+        LOG3("Unrolling loop" << Log::indent << Log::endl << fstmt << Log::unindent);
         auto *rv = new IR::BlockStatement;
         for (auto *i : fstmt->init) rv->append(i);
         rv->append(doUnroll(bounds, fstmt->body, &fstmt->updates));
@@ -275,7 +291,7 @@ const IR::Statement *UnrollLoops::preorder(IR::ForStatement *fstmt) {
 const IR::Statement *UnrollLoops::preorder(IR::ForInStatement *fstmt) {
     loop_bounds_t bounds;
     if (findLoopBounds(fstmt, bounds)) {
-        LOG4("Unrolling loop" << Log::indent << Log::endl << fstmt << Log::unindent);
+        LOG3("Unrolling loop" << Log::indent << Log::endl << fstmt << Log::unindent);
         auto rv = doUnroll(bounds, fstmt->body);
         LOG4("Unrolled loop" << Log::indent << Log::endl << rv << Log::unindent);
         return rv;

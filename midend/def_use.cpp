@@ -18,19 +18,36 @@ limitations under the License.
 
 #include "frontends/p4/methodInstance.h"
 
+struct LogAbbrev {
+    const Util::SourceInfo &si;
+    explicit LogAbbrev(const Util::SourceInfo &si) : si(si) {}
+
+    friend std::ostream &operator<<(std::ostream &out, const LogAbbrev &la) {
+        if (la.si) {
+            unsigned line, col;
+            out << '(' << la.si.toSourcePositionData(&line, &col);
+            out << ':' << line << ':' << (col + 1) << ')';
+        }
+        return out;
+    }
+};
+
 namespace P4 {
 
 using namespace literals;
 
+int ComputeDefUse::uid_ctr = 0;
 const ordered_set<const ComputeDefUse::loc_t *> ComputeDefUse::empty = {};
 
 void ComputeDefUse::flow_merge(Visitor &a_) {
     ComputeDefUse &a = dynamic_cast<ComputeDefUse &>(a_);
+    LOG8("ComputeDefUse::flow_merge(" << a.uid << ") -> " << uid);
     unreachable &= a.unreachable;
     for (auto &di : a.def_info) def_info[di.first].flow_merge(di.second);
 }
 void ComputeDefUse::flow_copy(ControlFlowVisitor &a_) {
     ComputeDefUse &a = dynamic_cast<ComputeDefUse &>(a_);
+    LOG8("ComputeDefUse::flow_copy(" << a.uid << ") -> " << uid);
     BUG_CHECK(state == a.state, "inconsistent state in ComputeDefUse::flow_copy");
     unreachable = a.unreachable;
     def_info = a.def_info;
@@ -264,7 +281,7 @@ void ComputeDefUse::def_info_t::split_slice(le_bitrange range) {
 bool ComputeDefUse::preorder(const IR::P4Control *c) {
     BUG_CHECK(state == SKIPPING, "Nested %s not supported in ComputeDefUse", c);
     IndentCtl::TempIndent indent;
-    LOG5("ComputeDefUse(P4Control " << c->name << ")" << indent);
+    LOG5("ComputeDefUse" << uid << "(P4Control " << c->name << ")" << indent);
     bool is_type_declaration = !c->getTypeParameters()->empty();
     for (auto *p : c->getApplyParameters()->parameters)
         if (p->direction == IR::Direction::In || p->direction == IR::Direction::InOut) {
@@ -293,7 +310,7 @@ bool ComputeDefUse::preorder(const IR::P4Control *c) {
 bool ComputeDefUse::preorder(const IR::P4Table *tbl) {
     if (state == SKIPPING) return false;
     IndentCtl::TempIndent indent;
-    LOG5("ComputeDefUse(P4Table " << tbl->name << ")" << indent);
+    LOG5("ComputeDefUse" << uid << "(P4Table " << tbl->name << ")" << indent);
     if (auto key = tbl->getKey()) visit(key, "key");
     if (auto actions = tbl->getActionList()) {
         parallel_visit(actions->actionList, "actions");
@@ -307,7 +324,7 @@ bool ComputeDefUse::preorder(const IR::P4Action *act) {
     if (state == SKIPPING) return false;
     for (auto *p : *act->parameters) def_info[p].defs.insert(getLoc(p));
     IndentCtl::TempIndent indent;
-    LOG5("ComputeDefUse(P4Action " << act->name << ")" << indent);
+    LOG5("ComputeDefUse" << uid << "(P4Action " << act->name << ")" << indent);
     visit(act->body, "body");
     return false;
 }
@@ -315,7 +332,7 @@ bool ComputeDefUse::preorder(const IR::P4Action *act) {
 bool ComputeDefUse::preorder(const IR::P4Parser *p) {
     BUG_CHECK(state == SKIPPING, "Nested %s not supported in ComputeDefUse", p);
     IndentCtl::TempIndent indent;
-    LOG5("ComputeDefUse(P4Parser " << p->name << ")" << indent);
+    LOG5("ComputeDefUse" << uid << "(P4Parser " << p->name << ")" << indent);
     for (auto *a : p->getApplyParameters()->parameters)
         if (a->direction == IR::Direction::In || a->direction == IR::Direction::InOut)
             def_info[a].defs.insert(getLoc(a));
@@ -333,7 +350,7 @@ bool ComputeDefUse::preorder(const IR::P4Parser *p) {
     return false;
 }
 bool ComputeDefUse::preorder(const IR::ParserState *p) {
-    LOG5("ComputeDefUse(ParserState " << p->name << ")" << Log::indent);
+    LOG5("ComputeDefUse" << uid << "(ParserState " << p->name << ")" << Log::indent);
     return true;
 }
 void ComputeDefUse::revisit(const IR::ParserState *p) { LOG5("  * revisit " << p->name); }
@@ -342,6 +359,13 @@ void ComputeDefUse::postorder(const IR::ParserState *) { LOG5_UNINDENT; }
 
 bool ComputeDefUse::preorder(const IR::KeyElement *ke) {
     visit(ke->expression, "expression");
+    return false;
+}
+
+bool ComputeDefUse::preorder(const IR::AssignmentStatement *as) {
+    // visit RHS of assignment before LHS
+    visit(as->right, "right", 1);
+    visit(as->left, "left", 0);
     return false;
 }
 
@@ -396,6 +420,7 @@ static const IR::Expression *isValid(const IR::Member *m, const Visitor::Context
 
 const IR::Expression *ComputeDefUse::do_read(def_info_t &di, const IR::Expression *e,
                                              const Context *ctxt) {
+    LOG7("do_read(" << *e << "<" << e->id << ">" << LogAbbrev(e->srcInfo) << ")");
     if (!ctxt) {
     } else if (auto *m = ctxt->node->to<IR::Member>()) {
         if (auto *t = isValid(m, ctxt->parent)) {
@@ -471,6 +496,7 @@ static int constIntMethodArg(const Visitor::Context *ctxt) {
 
 const IR::Expression *ComputeDefUse::do_write(def_info_t &di, const IR::Expression *e,
                                               const Context *ctxt) {
+    LOG7("do_write(" << *e << "<" << e->id << ">" << LogAbbrev(e->srcInfo) << ")");
     if (!ctxt) {
     } else if (auto *m = ctxt->node->to<IR::Member>()) {
         if (auto *t = isValid(m, ctxt->parent)) {
@@ -566,7 +592,9 @@ const IR::Expression *ComputeDefUse::do_write(def_info_t &di, const IR::Expressi
 }
 
 bool ComputeDefUse::preorder(const IR::PathExpression *pe) {
-    LOG7("ComputeDefUse(PathExpression " << *pe << ")");
+    Log::TempIndent indent;
+    LOG6("ComputeDefUse" << uid << "(PathExpression " << *pe << '<' << pe->id << '>'
+                         << LogAbbrev(pe->srcInfo) << ")" << indent);
     if (pe->type->is<IR::Type_State>()) {
         auto *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
         BUG_CHECK(d, "failed to resolve %s", pe);
@@ -628,12 +656,18 @@ void ComputeDefUse::end_apply() { LOG5(defuse); }
 
 // Debugging
 std::ostream &operator<<(std::ostream &out, const ComputeDefUse::loc_t &loc) {
-    out << '<' << loc.node->id << '>';
-    if (loc.node->srcInfo) {
-        unsigned line, col;
-        out << '(' << loc.node->srcInfo.toSourcePositionData(&line, &col);
-        out << ':' << line << ':' << (col + 1) << ')';
+    out << '<' << loc.node->id << '>' << LogAbbrev(loc.node->srcInfo);
+    return out;
+}
+
+std::ostream &operator<<(std::ostream &out, const ordered_set<const ComputeDefUse::loc_t *> &s) {
+    out << ": {";
+    const char *sep = " ";
+    for (auto *l : s) {
+        out << sep << *l;
+        sep = ", ";
     }
+    out << (sep + 1) << "}";
     return out;
 }
 
@@ -649,13 +683,7 @@ std::ostream &operator<<(
         out << '(' << p.first->srcInfo.toSourcePositionData(&line, &col);
         out << ':' << line << ':' << (col + 1) << ')';
     }
-    out << ": {";
-    const char *sep = " ";
-    for (auto *l : p.second) {
-        out << sep << *l;
-        sep = ", ";
-    }
-    out << (sep + 1) << "}";
+    out << p.second;
     return out;
 }
 
@@ -669,3 +697,8 @@ std::ostream &operator<<(std::ostream &out, const ComputeDefUse::defuse_t &du) {
 }
 
 }  // namespace P4
+
+void dump(const P4::ComputeDefUse::loc_t &p) { std::cout << p << std::endl; }
+void dump(const ordered_set<const P4::ComputeDefUse::loc_t *> &p) { std::cout << p << std::endl; }
+void dump(const P4::ComputeDefUse &du) { std::cout << du << std::endl; }
+void dump(const P4::ComputeDefUse *du) { std::cout << *du << std::endl; }
