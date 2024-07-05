@@ -838,7 +838,7 @@ var annotated_dup =
         [ "Requirements", "struct_p4_tools_1_1_p4_smith_1_1_requirements.html", null ],
         [ "Smith", "class_p4_tools_1_1_p4_smith_1_1_smith.html", "class_p4_tools_1_1_p4_smith_1_1_smith" ],
         [ "SmithTarget", "class_p4_tools_1_1_p4_smith_1_1_smith_target.html", "class_p4_tools_1_1_p4_smith_1_1_smith_target" ],
-        [ "StatementGenerator", "class_p4_tools_1_1_p4_smith_1_1_statement_generator.html", null ],
+        [ "StatementGenerator", "class_p4_tools_1_1_p4_smith_1_1_statement_generator.html", "class_p4_tools_1_1_p4_smith_1_1_statement_generator" ],
         [ "TableGenerator", "class_p4_tools_1_1_p4_smith_1_1_table_generator.html", null ],
         [ "Wordlist", "class_p4_tools_1_1_p4_smith_1_1_wordlist.html", null ]
       ] ],
@@ -1165,6 +1165,8 @@ var annotated_dup =
       [ "P4CReachability", "class_test_1_1_p4_c_reachability.html", null ],
       [ "P4ReachabilityOptions", "class_test_1_1_p4_reachability_options.html", null ],
       [ "P4RuntimeApiTest", "class_test_1_1_p4_runtime_api_test.html", null ],
+      [ "P4SmithForInLoopTest", "class_test_1_1_p4_smith_for_in_loop_test.html", null ],
+      [ "P4SmithForLoopTest", "class_test_1_1_p4_smith_for_loop_test.html", null ],
       [ "P4TestOptions", "class_test_1_1_p4_test_options.html", null ],
       [ "P4ToolsTest", "class_test_1_1_p4_tools_test.html", null ],
       [ "P4ToolsTestCase", "class_test_1_1_p4_tools_test_case.html", "class_test_1_1_p4_tools_test_case" ],

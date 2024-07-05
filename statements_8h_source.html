@@ -158,16 +158,22 @@ $(function(){initNavTree('statements_8h_source.html',''); initResizable(true); }
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keyword">virtual</span> IR::SwitchStatement *genSwitchStatement();</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    IR::ReturnStatement *genReturnStatement(<span class="keyword">const</span> IR::Type *tp = <span class="keyword">nullptr</span>);</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>};</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keyword">virtual</span> IR::ForStatement *<a class="code hl_function" href="class_p4_tools_1_1_p4_smith_1_1_statement_generator.html#a9feaa6998bd9a49d88752d2b646c18d9">genForLoopStatement</a>(<span class="keywordtype">bool</span> is_in_func);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keyword">virtual</span> IR::ForInStatement *<a class="code hl_function" href="class_p4_tools_1_1_p4_smith_1_1_statement_generator.html#a36991a7914968b207e35cc0ee29b73a6">genForInLoopStatement</a>(<span class="keywordtype">bool</span> is_in_func);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>};</div>
 </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}  <span class="comment">// namespace P4Tools::P4Smith</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_P4TOOLS_MODULES_SMITH_COMMON_STATEMENTS_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>}  <span class="comment">// namespace P4Tools::P4Smith</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_P4TOOLS_MODULES_SMITH_COMMON_STATEMENTS_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_i_r_1_1_indexed_vector_html"><div class="ttname"><a href="class_i_r_1_1_indexed_vector.html">IR::IndexedVector</a></div><div class="ttdef"><b>Definition</b> node.h:50</div></div>
 <div class="ttc" id="aclass_p4_tools_1_1_p4_smith_1_1_generator_html"><div class="ttname"><a href="class_p4_tools_1_1_p4_smith_1_1_generator.html">P4Tools::P4Smith::Generator</a></div><div class="ttdef"><b>Definition</b> generator.h:10</div></div>
 <div class="ttc" id="aclass_p4_tools_1_1_p4_smith_1_1_smith_target_html"><div class="ttname"><a href="class_p4_tools_1_1_p4_smith_1_1_smith_target.html">P4Tools::P4Smith::SmithTarget</a></div><div class="ttdef"><b>Definition</b> p4tools/modules/smith/core/target.h:17</div></div>
 <div class="ttc" id="aclass_p4_tools_1_1_p4_smith_1_1_statement_generator_html"><div class="ttname"><a href="class_p4_tools_1_1_p4_smith_1_1_statement_generator.html">P4Tools::P4Smith::StatementGenerator</a></div><div class="ttdef"><b>Definition</b> statements.h:10</div></div>
+<div class="ttc" id="aclass_p4_tools_1_1_p4_smith_1_1_statement_generator_html_a36991a7914968b207e35cc0ee29b73a6"><div class="ttname"><a href="class_p4_tools_1_1_p4_smith_1_1_statement_generator.html#a36991a7914968b207e35cc0ee29b73a6">P4Tools::P4Smith::StatementGenerator::genForInLoopStatement</a></div><div class="ttdeci">virtual IR::ForInStatement * genForInLoopStatement(bool is_in_func)</div><div class="ttdoc">Generate a for-in-loop statement.</div><div class="ttdef"><b>Definition</b> statements.cpp:441</div></div>
+<div class="ttc" id="aclass_p4_tools_1_1_p4_smith_1_1_statement_generator_html_a9feaa6998bd9a49d88752d2b646c18d9"><div class="ttname"><a href="class_p4_tools_1_1_p4_smith_1_1_statement_generator.html#a9feaa6998bd9a49d88752d2b646c18d9">P4Tools::P4Smith::StatementGenerator::genForLoopStatement</a></div><div class="ttdeci">virtual IR::ForStatement * genForLoopStatement(bool is_in_func)</div><div class="ttdoc">Generate a for-loop statement.</div><div class="ttdef"><b>Definition</b> statements.cpp:415</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

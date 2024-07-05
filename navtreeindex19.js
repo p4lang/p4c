@@ -1,5 +1,9 @@
 var NAVTREEINDEX19 =
 {
+"struct_util_1_1_hasher_3_01bool_01_4.html":[28,0,22,18],
+"struct_util_1_1_hasher_3_01char_01_4.html":[28,0,22,19],
+"struct_util_1_1_hasher_3_01cstring_01_4.html":[28,0,22,21],
+"struct_util_1_1_hasher_3_01double_01_4.html":[28,0,22,22],
 "struct_util_1_1_hasher_3_01float_01_4.html":[28,0,22,23],
 "struct_util_1_1_hasher_3_01signed_01char_01_4.html":[28,0,22,26],
 "struct_util_1_1_hasher_3_01signed_01int_01_4.html":[28,0,22,27],

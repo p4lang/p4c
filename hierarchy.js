@@ -1202,6 +1202,8 @@ var hierarchy =
     [ "Test::P4ToolsTestCase", "class_test_1_1_p4_tools_test_case.html", null ],
     [ "testing::Test", null, [
       [ "Test::P4CReachability", "class_test_1_1_p4_c_reachability.html", null ],
+      [ "Test::P4SmithForInLoopTest", "class_test_1_1_p4_smith_for_in_loop_test.html", null ],
+      [ "Test::P4SmithForLoopTest", "class_test_1_1_p4_smith_for_loop_test.html", null ],
       [ "Test::P4ToolsTest", "class_test_1_1_p4_tools_test.html", [
         [ "Test::FormatTest", "class_test_1_1_format_test.html", null ],
         [ "Test::P4AssertsParserTest", "class_test_1_1_p4_asserts_parser_test.html", null ],
