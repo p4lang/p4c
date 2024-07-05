@@ -40,7 +40,8 @@ class Bmv2V1ModelTestgenTarget : public TestgenTarget {
 
     [[nodiscard]] MidEnd mkMidEnd(const CompilerOptions &options) const override;
 
-    CompilerResultOrError runCompilerImpl(const IR::P4Program *program) const override;
+    CompilerResultOrError runCompilerImpl(const CompilerOptions &options,
+                                          const IR::P4Program *program) const override;
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2
