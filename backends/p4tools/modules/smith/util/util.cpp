@@ -14,8 +14,9 @@
 namespace P4Tools::P4Smith {
 
 std::string getRandomString(size_t len) {
-    static const std::vector<std::string> P4_KEYWORDS = {"if",  "void",    "else",
-                                                         "key", "actions", "true"};
+    // Add "for" and "in" to the list of P4 keywords, even though the wordlist doesn't contain them.
+    static const std::vector<std::string> P4_KEYWORDS = {"if",      "void", "else", "key",
+                                                         "actions", "true", "for",  "in"};
     static const std::array<char, 53> ALPHANUMERIC_CHARACTERS = {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"};

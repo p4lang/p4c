@@ -15,6 +15,7 @@
 #include "backends/p4tools/modules/smith/util/util.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir-generated.h"
+#include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
@@ -28,12 +29,18 @@ IR::Statement *StatementGenerator::genStatement(bool is_in_func) {
     if (is_in_func) {
         pctExit = 0;
     }
-    std::vector<int64_t> percent = {PCT.STATEMENT_SWITCH,
-                                    PCT.STATEMENT_ASSIGNMENTORMETHODCALL,
-                                    PCT.STATEMENT_IF,
-                                    PCT.STATEMENT_RETURN,
-                                    pctExit,
-                                    PCT.STATEMENT_BLOCK};
+    std::vector<int64_t> percent = {
+        PCT.STATEMENT_SWITCH,
+        PCT.STATEMENT_ASSIGNMENTORMETHODCALL,
+        PCT.STATEMENT_IF,
+        PCT.STATEMENT_RETURN,
+        pctExit,
+        PCT.STATEMENT_BLOCK,
+        // Add the for-loop statement and
+        // the for-in-loop statement generation percentages.
+        PCT.STATEMENT_FOR,
+        PCT.STATEMENT_FOR_IN,
+    };
     IR::Statement *stmt = nullptr;
     bool useDefaultStmt = false;
 
@@ -63,6 +70,22 @@ IR::Statement *StatementGenerator::genStatement(bool is_in_func) {
         }
         case 5: {
             stmt = genBlockStatement(is_in_func);
+            break;
+        }
+        // Add a new case for the for-loop statement generation.
+        case 6: {
+            stmt = genForLoopStatement(is_in_func);
+            if (stmt == nullptr) {
+                useDefaultStmt = true;
+            }
+            break;
+        }
+        // Add a new case for the for-in-loop statement generation.
+        case 7: {
+            stmt = genForInLoopStatement(is_in_func);
+            if (stmt == nullptr) {
+                useDefaultStmt = true;
+            }
             break;
         }
     }
@@ -386,6 +409,52 @@ IR::ReturnStatement *StatementGenerator::genReturnStatement(const IR::Type *tp) 
         expr = target().expressionGenerator().genExpression(tp);
     }
     return new IR::ReturnStatement(expr);
+}
+
+/// Generate a for-loop statement.
+IR::ForStatement *StatementGenerator::genForLoopStatement(bool is_in_func) {
+    std::string loopVar = P4Tools::P4Smith::getRandomString(1);
+    int bitFieldWidth = Utils::getRandInt(1, 64);
+    big_int upperBound = IR::getMaxBvVal(bitFieldWidth);
+    const IR::Type *varType = IR::Type_Bits::get(bitFieldWidth);
+
+    // Create the IR nodes for the for-loop components.
+    auto *initExpr =
+        new IR::Declaration_Variable(IR::ID(loopVar), varType, new IR::Constant(varType, 0));
+    auto *condExpr = new IR::Lss(IR::Type_Boolean::get(), new IR::PathExpression(loopVar),
+                                 new IR::Constant(varType, upperBound));
+    auto *updateStmt = new IR::AssignmentStatement(
+        new IR::PathExpression(loopVar),
+        new IR::Add(varType, new IR::PathExpression(loopVar), new IR::Constant(varType, 1)));
+    auto *bodyStmt = genBlockStatement(is_in_func);
+    // Fill `initExpr` and `updateStmt` into their corresponding indexed vectors.
+    // This is necessary due to the constructor defintions.
+    IR::IndexedVector<IR::StatOrDecl> initExprs{initExpr};
+    IR::IndexedVector<IR::StatOrDecl> updateStmts{updateStmt};
+
+    // Create the for-loop IR node and return it.
+    auto *forStmt = new IR::ForStatement(initExprs, condExpr, updateStmts, bodyStmt);
+    return forStmt;
+}
+
+/// Generate a for-in-loop statement.
+IR::ForInStatement *StatementGenerator::genForInLoopStatement(bool is_in_func) {
+    std::string loopVar = P4Tools::P4Smith::getRandomString(1);
+    int bitFieldWidth = Utils::getRandInt(1, 64);
+    const IR::Type *varType = IR::Type_Bits::get(bitFieldWidth);
+    big_int lowerBound = IR::getMinBvVal(varType);
+    big_int upperBound = IR::getMaxBvVal(bitFieldWidth);
+
+    // Create the IR nodes for the for-in-loop component expressions.
+    auto declVar =
+        new IR::Declaration_Variable(IR::ID(loopVar), varType, new IR::Constant(varType, 0));
+    auto collectionExpr =
+        new IR::Range(new IR::Constant(varType, lowerBound), new IR::Constant(varType, upperBound));
+    auto *bodyStmt = genBlockStatement(is_in_func);
+
+    // Create the for-in-loop IR node and return it.
+    auto *forInStmt = new IR::ForInStatement(declVar, collectionExpr, bodyStmt);
+    return forInStmt;
 }
 
 }  // namespace P4Tools::P4Smith
