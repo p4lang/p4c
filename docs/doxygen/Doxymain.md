@@ -1,4 +1,4 @@
-# Welcome to p4 Compiler's documentation!
+# %P4 Compiler Documentation
 
 @htmlonly
 <div class="diagram-container">
@@ -27,11 +27,17 @@ com%2Fuc%3Fid%3D16X8Z_4-J8mHQPxuxm9HjWppPMTTXZdZ6%26export%3Ddownload"></script>
 </script>
 @endhtmlonly
 
-Join the future of programmable networking with **P4C**, a tool that is transforming the way we handle network data. As networks evolve, so does the need for flexible and efficient solutions to manage increasing volumes of data. **P4C** stands at the forefront of this evolution, offering a revolutionary approach to network programming.
+[P4 (Programming Protocol-independent Packet Processors)](https://p4.org/) is a language for expressing how packets are processed by the data-plane of a programmable network element, e.g.(hardware or software switch, Smart-NIC, and network function appliance).
 
-P4C is the official open-source reference compiler for the [P4 (Programming Protocol-independent Packet Processors)](https://p4.org/) programming language. It supports both P4-14 and P4-16.
+P4C is the official open-source reference compiler for the [P4](https://p4.org/) programming language, supporting both P4-14 and P4-16.
 
-P4C is designed with extensibility in mind. It features a front-end and mid-end that can be extended by target-specific back ends.
+## Features of P4C
+
+- Provides compatibility for all versions of %P4.
+- Open-source compiler front end, allows anyone to quickly build a compiler for a new architecture.
+- Supports multiple back-ends for application specific integrated circuits (ASICs), network-interface cards (NICs), field-programmable gate arrays (FPGAs), software switches and other targets.
+- Promotes the expansion of software development tools like debuggers, integrated development environments, %P4 control-planes, testing and formal verification tools.
+- The Compiler has an extensible architecture, making it easy to add new passes and optimizations, and to hook up new back-ends. Furthermore, the front-end and mid-end can be further detailed and extended by target-specific back-end. 
 
 @htmlonly
 <!-- https://www.svgrepo.com/collection/scarlab-oval-line-icons/ -->
