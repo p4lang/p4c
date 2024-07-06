@@ -1,4 +1,4 @@
-# Contributing to the P4 Compiler Project (P4C)
+# Contribute to the P4 Compiler Project
 
 Thank you for considering contributing to the P4 Compiler Project (P4C)! Your contributions are valuable and help improve the project for everyone. Before getting started, please take a moment to review the following guidelines.
 
