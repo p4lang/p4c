@@ -32,6 +32,9 @@ struct Constraints {
     bool const_lshift_count{false};
     bool single_stage_actions{false};
     int max_phv_container_width{0};
+    // This is the maximum bitwidth that
+    // can be specified for different targets.
+    int max_bitwidth{128};
     Constraints()
 
         = default;

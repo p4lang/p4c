@@ -354,6 +354,18 @@ void setBmv2PsaProbabilities() {
     PCT.PARAMETER_NONEDIR_BASETYPE_ERROR = 0;
     PCT.PARAMETER_NONEDIR_BASETYPE_STRING = 0;
     PCT.PARAMETER_NONEDIR_BASETYPE_VARBIT = 0;
+    // Complex types are not supported for function calls.
+    // TODO: Distinguish between actions and functions?
+    PCT.PARAMETER_DERIVED_STRUCT = 0;
+    PCT.PARAMETER_DERIVED_HEADER = 0;
+    PCT.PARAMETER_BASETYPE_BOOL = 0;
+    PCT.PARAMETER_BASETYPE_ERROR = 0;
+    PCT.PARAMETER_BASETYPE_STRING = 0;
+    PCT.PARAMETER_BASETYPE_VARBIT = 0;
+    // V1Model does !support headers that are !multiples of 8
+    PCT.STRUCTTYPEDECLARATION_BASETYPE_BOOL = 0;
+    // V1Model requires headers to be byte-aligned
+    P4Scope::req.byte_align_headers = true;
 }
 
 }  // namespace

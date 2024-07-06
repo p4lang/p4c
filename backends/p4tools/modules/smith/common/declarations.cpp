@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "backends/p4tools/common/lib/util.h"
-#include "backends/p4tools/modules/smith/common/expressions.h"
 #include "backends/p4tools/modules/smith/common/probabilities.h"
 #include "backends/p4tools/modules/smith/common/scope.h"
 #include "backends/p4tools/modules/smith/common/statements.h"
@@ -267,7 +266,7 @@ IR::Type_Enum *DeclarationGenerator::genEnumDeclaration(cstring name) {
 
 IR::Type_SerEnum *DeclarationGenerator::genSerEnumDeclaration(cstring name) {
     auto members = genSpecifiedIdentifierList(3);
-    const auto *tp = ExpressionGenerator::genBitType(false);
+    const auto *tp = target().expressionGenerator().genBitType(false);
 
     auto *ret = new IR::Type_SerEnum(name, tp, members);
 
@@ -580,7 +579,7 @@ const IR::Type *DeclarationGenerator::genType() {
     switch (Utils::getRandInt(percent)) {
         case 0: {
             std::vector<int> bTypes = {1};  // only bit<>
-            tp = P4Tools::P4Smith::ExpressionGenerator::pickRndBaseType(typeProbs);
+            tp = target().expressionGenerator().pickRndBaseType(typeProbs);
             break;
         }
         case 1: {

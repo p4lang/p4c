@@ -23,7 +23,7 @@ const IR::Type_Boolean *ExpressionGenerator::genBoolType() { return IR::Type_Boo
 
 const IR::Type_InfInt *ExpressionGenerator::genIntType() { return IR::Type_InfInt::get(); }
 
-const IR::Type *ExpressionGenerator::pickRndBaseType(const std::vector<int64_t> &type_probs) {
+const IR::Type *ExpressionGenerator::pickRndBaseType(const std::vector<int64_t> &type_probs) const {
     if (type_probs.size() != 7) {
         BUG("pickRndBaseType: Type probabilities must be exact");
     }
@@ -85,12 +85,12 @@ const IR::Type *ExpressionGenerator::pickRndType(TyperefProbs type_probs) {
     switch (idx) {
         case 0: {
             // bit<>
-            tp = ExpressionGenerator::genBitType(false);
+            tp = genBitType(false);
             break;
         }
         case 1: {
             // int<>
-            tp = ExpressionGenerator::genBitType(true);
+            tp = genBitType(true);
             break;
         }
         case 2: {
@@ -98,7 +98,7 @@ const IR::Type *ExpressionGenerator::pickRndType(TyperefProbs type_probs) {
             break;
         }
         case 3: {
-            tp = ExpressionGenerator::genIntType();
+            tp = genIntType();
             break;
         }
         case 4: {
@@ -107,7 +107,7 @@ const IR::Type *ExpressionGenerator::pickRndType(TyperefProbs type_probs) {
         }
         case 5: {
             // bool
-            tp = ExpressionGenerator::genBoolType();
+            tp = genBoolType();
             break;
         }
         case 6: {
@@ -188,10 +188,12 @@ IR::BoolLiteral *ExpressionGenerator::genBoolLiteral() {
     return new IR::BoolLiteral(true);
 }
 
-const IR::Type_Bits *ExpressionGenerator::genBitType(bool isSigned) {
-    auto size = Utils::getRandInt(0, sizeof(BIT_WIDTHS) / sizeof(int) - 1);
+const IR::Type_Bits *ExpressionGenerator::genBitType(bool isSigned) const {
+    auto bitWidths = availableBitWidths();
+    BUG_CHECK(!bitWidths.empty(), "No available bit widths");
+    auto size = Utils::getRandInt(0, bitWidths.size() - 1);
 
-    return IR::Type_Bits::get(BIT_WIDTHS[size], isSigned);
+    return IR::Type_Bits::get(bitWidths.at(size), isSigned);
 }
 
 IR::Constant *ExpressionGenerator::genIntLiteral(size_t bit_width) {
@@ -235,6 +237,20 @@ IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
         expr = constructIntExpr();
     } else if (tp->is<IR::Type_Boolean>()) {
         expr = constructBooleanExpr();
+    } else if (tp->is<IR::Type_Typedef>()) {
+        expr = genExpression(tp->to<IR::Type_Typedef>()->type);
+        // Generically perform explicit castings to all cases.
+        const auto *explicitType = new IR::Type_Name(IR::ID(tp->to<IR::Type_Typedef>()->name));
+        expr = new IR::Cast(explicitType, expr);
+    } else if (const auto *enumType = tp->to<IR::Type_Enum>()) {
+        if (enumType->members.empty()) {
+            BUG("Expression: Enum %s has no members", enumType->name.name);
+        }
+        const auto *enumChoice =
+            enumType->members.at(Utils::getRandInt(enumType->members.size() - 1));
+        expr = new IR::Member(enumType,
+                              new IR::PathExpression(enumType, new IR::Path(enumType->getName())),
+                              enumChoice->getName());
     } else if (const auto *tn = tp->to<IR::Type_Name>()) {
         expr = constructStructExpr(tn);
     } else {
@@ -604,7 +620,7 @@ IR::Expression *ExpressionGenerator::constructTernaryBitExpr(const IR::Type_Bits
             // pick a slice that matches the type
             auto typeWidth = tb->width_bits();
             // TODO(fruffy): this is some arbitrary value...
-            auto newTypeSize = Utils::getRandInt(1, 128) + typeWidth;
+            auto newTypeSize = Utils::getRandInt(typeWidth, P4Scope::constraints.max_bitwidth);
             const auto *sliceType = IR::Type_Bits::get(newTypeSize, false);
             auto *sliceExpr = constructBitExpr(sliceType);
             if (P4Scope::prop.width_unknown) {
@@ -612,7 +628,7 @@ IR::Expression *ExpressionGenerator::constructTernaryBitExpr(const IR::Type_Bits
                 P4Scope::prop.width_unknown = false;
             }
             auto margin = newTypeSize - typeWidth;
-            auto high = Utils::getRandInt(0, margin - 1) + typeWidth;
+            auto high = Utils::getRandInt(0, margin) + typeWidth - 1;
             auto low = high - typeWidth + 1;
             expr = new IR::Slice(sliceExpr, high, low);
             break;
@@ -704,10 +720,9 @@ IR::Expression *ExpressionGenerator::constructBitExpr(const IR::Type_Bits *tb) {
 IR::Expression *ExpressionGenerator::constructCmpExpr() {
     IR::Expression *expr = nullptr;
 
-    // gen some random type
-    // can be either bits, int, bool, or structlike
-    // for now it is just bits
-    auto newTypeSize = Utils::getRandInt(1, 128);
+    // Generate some random type. Can be either bits, int, bool, or structlike
+    // For now it is just bits.
+    auto newTypeSize = Utils::getRandInt(1, P4Scope::constraints.max_bitwidth);
     const auto *newType = IR::Type_Bits::get(newTypeSize, false);
     IR::Expression *left = constructBitExpr(newType);
     IR::Expression *right = constructBitExpr(newType);
@@ -1026,9 +1041,14 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
             for (const auto *sf : tnType->fields) {
                 IR::Expression *expr = nullptr;
                 if (const auto *fieldTn = sf->type->to<IR::Type_Name>()) {
-                    // can!use another type here yet
-                    expr = genStructListExpr(fieldTn);
-                    components.push_back(expr);
+                    if (const auto *typedefType = P4Scope::getTypeByName(fieldTn->path->name.name)
+                                                      ->to<IR::Type_Typedef>()) {
+                        expr = genExpression(typedefType);
+                        components.push_back(expr);
+                    } else {
+                        expr = genStructListExpr(fieldTn);
+                        components.push_back(expr);
+                    }
                 } else if (const auto *fieldTs = sf->type->to<IR::Type_Stack>()) {
                     auto stackSize = fieldTs->getSize();
                     const auto *stackType = fieldTs->elementType;
@@ -1199,6 +1219,7 @@ IR::Expression *ExpressionGenerator::editHdrStack(cstring lval) {
 IR::Expression *ExpressionGenerator::pickLvalOrSlice(const IR::Type *tp) {
     cstring lvalStr = P4Scope::pickLval(tp, true);
     IR::Expression *expr = editHdrStack(lvalStr);
+    expr->type = tp;
 
     if (const auto *tb = tp->to<IR::Type_Bits>()) {
         std::vector<int64_t> percent = {PCT.SCOPE_LVAL_PATH, PCT.SCOPE_LVAL_SLICE};
@@ -1228,14 +1249,15 @@ IR::Expression *ExpressionGenerator::pickLvalOrSlice(const IR::Type *tp) {
                 if (candidates.empty()) {
                     break;
                 }
-                size_t idx = Utils::getRandInt(0, candidates.size() - 1);
+                auto idx = Utils::getRandInt(0, candidates.size() - 1);
                 auto lval = std::begin(candidates);
                 // "advance" the iterator idx times
                 std::advance(lval, idx);
-                size_t candidateSize = lval->first;
-                auto *sliceExpr = new IR::PathExpression(lval->second);
-                size_t low = Utils::getRandInt(0, candidateSize - targetWidth);
-                size_t high = low + targetWidth - 1;
+                auto candidateSize = lval->first;
+                auto *sliceExpr =
+                    new IR::PathExpression(IR::Type_Bits::get(candidateSize), lval->second);
+                auto low = Utils::getRandInt(0, candidateSize - targetWidth);
+                auto high = low + targetWidth - 1;
                 expr = new IR::Slice(sliceExpr, high, low);
             } break;
         }

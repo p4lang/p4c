@@ -40,24 +40,25 @@ class ExpressionGenerator : public Generator {
 
     static constexpr size_t MAX_DEPTH = 3;
 
-    static constexpr int BIT_WIDTHS[6] = {4, 8, 16, 32, 64, 128};
-
     static const IR::Type_Boolean *genBoolType();
 
     static const IR::Type_InfInt *genIntType();
 
     // isSigned, true -> int<>, false -> bit<>
-    static const IR::Type_Bits *genBitType(bool isSigned);
+    [[nodiscard]] const IR::Type_Bits *genBitType(bool isSigned) const;
+    [[nodiscard]] const IR::Type *pickRndBaseType(const std::vector<int64_t> &type_probs) const;
 
-    static const IR::Type *pickRndBaseType(const std::vector<int64_t> &type_probs);
-
-    virtual const IR::Type *pickRndType(TyperefProbs type_probs);
+    [[nodiscard]] virtual const IR::Type *pickRndType(TyperefProbs type_probs);
 
     static IR::BoolLiteral *genBoolLiteral();
 
     static IR::Constant *genIntLiteral(size_t bit_width = INTEGER_WIDTH);
 
     static IR::Constant *genBitLiteral(const IR::Type *tb);
+
+    [[nodiscard]] virtual std::vector<int> availableBitWidths() const {
+        return {4, 8, 16, 32, 64, 128};
+    }
 
  private:
     IR::Expression *constructUnaryExpr(const IR::Type_Bits *tb);

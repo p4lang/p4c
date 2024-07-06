@@ -213,7 +213,7 @@ void ParserGenerator::genState(cstring name) {
 
             IR::Vector<IR::Type> types;
             for (size_t i = 0; i <= keySetLen; i++) {
-                auto *tb = ExpressionGenerator::genBitType(false);
+                const auto *tb = target().expressionGenerator().genBitType(false);
                 types.push_back(tb);
             }
 

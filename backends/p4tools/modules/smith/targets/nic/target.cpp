@@ -43,6 +43,135 @@ void DpdkPnaSmithTarget::make() {
     }
 }
 
+/// This implementation is based on p4include/pna.p4.
+IR::IndexedVector<IR::StructField> generatePnaMainParserInputMetadataFields() {
+    IR::IndexedVector<IR::StructField> retFields;
+    IR::IndexedVector<IR::Declaration_ID> declIds;
+    retFields.push_back(new IR::StructField(
+        "direction",
+        new IR::Type_Enum("PNA_Direction_t", {new IR::Declaration_ID("NET_TO_HOST"),
+                                              new IR::Declaration_ID("HOST_TO_NET")})));
+    retFields.push_back(new IR::StructField("pass", new IR::Type_Name("PassNumber_t")));
+    retFields.push_back(new IR::StructField("loopedback", IR::Type_Boolean::get()));
+    retFields.push_back(new IR::StructField("input_port", new IR::Type_Name("PortId_t")));
+    return retFields;
+}
+
+/// This implementation is based on p4include/pna.p4.
+/// struct pna_pre_input_metadata_t {
+///     PortId_t                 input_port;
+///     ParserError_t            parser_error;
+///     PNA_Direction_t          direction;
+///     PassNumber_t             pass;
+///     bool                     loopedback;
+/// }
+IR::IndexedVector<IR::StructField> generatePnaPreInputMetadataFields() {
+    IR::IndexedVector<IR::StructField> retFields;
+    IR::IndexedVector<IR::Declaration_ID> declIds;
+    retFields.push_back(new IR::StructField("input_port", new IR::Type_Name("PortId_t")));
+    retFields.push_back(new IR::StructField(
+        "parser_error",
+        new IR::Type_Enum("ParserError_t", {
+                                               new IR::Declaration_ID("NoError"),
+                                               new IR::Declaration_ID("PacketTooShort"),
+                                               new IR::Declaration_ID("NoMatch"),
+                                               new IR::Declaration_ID("StackOutOfBounds"),
+                                               new IR::Declaration_ID("HeaderTooShort"),
+                                               new IR::Declaration_ID("ParserTimeout"),
+                                               new IR::Declaration_ID("ParserInvalidArgument"),
+                                           })));
+    retFields.push_back(new IR::StructField(
+        "direction",
+        new IR::Type_Enum("PNA_Direction_t", {new IR::Declaration_ID("NET_TO_HOST"),
+                                              new IR::Declaration_ID("HOST_TO_NET")})));
+    retFields.push_back(new IR::StructField("pass", new IR::Type_Name("PassNumber_t")));
+    retFields.push_back(new IR::StructField("loopedback", IR::Type_Boolean::get()));
+    return retFields;
+}
+
+/// This implementation is based on p4include/pna.p4.
+/// struct pna_pre_output_metadata_t {
+///     bool                     decrypt;  // TBD: or use said==0 to mean no decrypt?
+
+///     // The following things are stored internally within the decrypt
+///     // block, in a table indexed by said:
+
+///     // + The decryption algorithm, e.g. AES256, etc.
+///     // + The decryption key
+///     // + Any read-modify-write state in the data plane used to
+///     //   implement anti-replay attack detection.
+
+///     SecurityAssocId_t        said;
+///     bit<16>                  decrypt_start_offset;  // in bytes?
+
+///     // TBD whether it is important to explicitly pass information to a
+///     // decryption extern in a way visible to a P4 program about where
+///     // headers were parsed and found.  An alternative is to assume
+///     // that the architecture saves the pre parser results somewhere,
+///     // in a way not visible to the P4 program.
+/// }
+IR::IndexedVector<IR::StructField> generatePnaPreOutputMetadataFields() {
+    IR::IndexedVector<IR::StructField> retFields;
+    retFields.push_back(new IR::StructField("decrypt", IR::Type_Boolean::get()));
+    retFields.push_back(
+        new IR::StructField(IR::ID("said"), new IR::Type_Name(IR::ID("SecurityAssocId_t"))));
+    retFields.push_back(new IR::StructField("decrypt_start_offset", IR::Type_Bits::get(16, false)));
+    return retFields;
+}
+
+/// This implementation is based on p4include/pna.p4.
+/// struct pna_main_parser_input_metadata_t {
+///    // common fields initialized for all packets that are input to main
+///    // parser, regardless of direction.
+///    PNA_Direction_t          direction;
+///    PassNumber_t             pass;
+///    bool                     loopedback;
+///    // If this packet has direction NET_TO_HOST, input_port contains
+///    // the id of the network port on which the packet arrived.
+///    // If this packet has direction HOST_TO_NET, input_port contains
+///    // the id of the vport from which the packet came
+///    PortId_t                 input_port;   // network port id
+/// }
+IR::IndexedVector<IR::StructField> generatePnaMainInputMetadataFields() {
+    IR::IndexedVector<IR::StructField> retFields;
+    retFields.push_back(new IR::StructField(
+        "direction",
+        new IR::Type_Enum("PNA_Direction_t", {new IR::Declaration_ID("NET_TO_HOST"),
+                                              new IR::Declaration_ID("HOST_TO_NET")})));
+    retFields.push_back(new IR::StructField("pass", new IR::Type_Name("PassNumber_t")));
+    retFields.push_back(new IR::StructField("loopedback", IR::Type_Boolean::get()));
+    retFields.push_back(new IR::StructField("timestamp", new IR::Type_Name("Timestamp_t")));
+    retFields.push_back(new IR::StructField(
+        "parser_error",
+        new IR::Type_Enum("ParserError_t", {
+                                               new IR::Declaration_ID("NoError"),
+                                               new IR::Declaration_ID("PacketTooShort"),
+                                               new IR::Declaration_ID("NoMatch"),
+                                               new IR::Declaration_ID("StackOutOfBounds"),
+                                               new IR::Declaration_ID("HeaderTooShort"),
+                                               new IR::Declaration_ID("ParserTimeout"),
+                                               new IR::Declaration_ID("ParserInvalidArgument"),
+                                           })));
+    retFields.push_back(
+        new IR::StructField("class_of_service", new IR::Type_Name("ClassOfService_t")));
+    retFields.push_back(new IR::StructField("input_port", new IR::Type_Name("PortId_t")));
+    return retFields;
+}
+
+/// This implementation is based on p4include/pna.p4.
+/// struct pna_main_output_metadata_t {
+///   // common fields used by the architecture to decide what to do with
+///   // the packet next, after the main parser, control, and deparser
+///   // have finished executing one pass, regardless of the direction.
+///   ClassOfService_t         class_of_service; // 0
+/// }
+IR::IndexedVector<IR::StructField> generatePnaMainOutputMetadataFields() {
+    IR::IndexedVector<IR::StructField> retFields;
+    retFields.push_back(new IR::StructField(IR::ID("class_of_service"),
+                                            new IR::Type_Name(IR::ID("ClassOfService_t"))));
+    return retFields;
+}
+
 IR::P4Parser *DpdkPnaSmithTarget::generateMainParserBlock() const {
     IR::IndexedVector<IR::Declaration> parserLocals;
     P4Scope::startLocalScope();
@@ -216,19 +345,19 @@ void generateMainMetadata() {
     IR::IndexedVector<IR::StructField> fields;
 
     name = new IR::ID("pna_main_parser_input_metadata_t");
-    ret = new IR::Type_Struct(*name, fields);
+    ret = new IR::Type_Struct(*name, generatePnaMainParserInputMetadataFields());
     P4Scope::addToScope(ret);
     name = new IR::ID("pna_pre_input_metadata_t");
-    ret = new IR::Type_Struct(*name, fields);
+    ret = new IR::Type_Struct(*name, generatePnaPreInputMetadataFields());
     P4Scope::addToScope(ret);
     name = new IR::ID("pna_pre_output_metadata_t");
-    ret = new IR::Type_Struct(*name, fields);
+    ret = new IR::Type_Struct(*name, generatePnaPreOutputMetadataFields());
     P4Scope::addToScope(ret);
     name = new IR::ID("pna_main_input_metadata_t");
-    ret = new IR::Type_Struct(*name, fields);
+    ret = new IR::Type_Struct(*name, generatePnaMainInputMetadataFields());
     P4Scope::addToScope(ret);
     name = new IR::ID("pna_main_output_metadata_t");
-    ret = new IR::Type_Struct(*name, fields);
+    ret = new IR::Type_Struct(*name, generatePnaMainOutputMetadataFields());
     P4Scope::addToScope(ret);
 }
 
@@ -239,6 +368,16 @@ void setPnaDpdkProbabilities() {
     PCT.PARAMETER_NONEDIR_BASETYPE_ERROR = 0;
     PCT.PARAMETER_NONEDIR_BASETYPE_STRING = 0;
     PCT.PARAMETER_NONEDIR_BASETYPE_VARBIT = 0;
+    // Complex types are not supported for function calls.
+    // TODO: Distinguish between actions and functions?
+    PCT.PARAMETER_DERIVED_STRUCT = 0;
+    PCT.PARAMETER_DERIVED_HEADER = 0;
+    PCT.PARAMETER_BASETYPE_BOOL = 0;
+    PCT.PARAMETER_BASETYPE_ERROR = 0;
+    PCT.PARAMETER_BASETYPE_STRING = 0;
+    PCT.PARAMETER_BASETYPE_VARBIT = 0;
+    P4Scope::req.byte_align_headers = true;
+    P4Scope::constraints.max_bitwidth = 64;
 }
 
 int DpdkPnaSmithTarget::writeTargetPreamble(std::ostream *ostream) const {
@@ -262,6 +401,56 @@ const IR::P4Program *DpdkPnaSmithTarget::generateP4Program() const {
     setPnaDpdkProbabilities();
     // insert some dummy metadata
     generateMainMetadata();
+
+    // typedef bit<32> PortIdUint_t;
+    // typedef bit<32> InterfaceIdUint_t;
+    // typedef bit<32> MulticastGroupUint_t;
+    // typedef bit<16> MirrorSessionIdUint_t;
+    // typedef bit<8>  MirrorSlotIdUint_t;
+    // typedef bit<8>  ClassOfServiceUint_t;
+    // typedef bit<16> PacketLengthUint_t;
+    // typedef bit<16> MulticastInstanceUint_t;
+    // typedef bit<64> TimestampUint_t;
+    // typedef bit<32> FlowIdUint_t;
+    // typedef bit<8>  ExpireTimeProfileIdUint_t;
+    // typedef bit<3>  PassNumberUint_t;
+    // typedef bit<32> SecurityAssocIdUint_t;
+
+    auto *portIdTypedef = new IR::Type_Typedef("PortId_t", IR::Type_Bits::get(32, false));
+    auto *interfaceIdTypedef = new IR::Type_Typedef("InterfaceId_t", IR::Type_Bits::get(32, false));
+    auto *multicastGroupTypedef =
+        new IR::Type_Typedef("MulticastGroup_t", IR::Type_Bits::get(32, false));
+    auto *mirrorSessionIdTypedef =
+        new IR::Type_Typedef("MirrorSessionId_t", IR::Type_Bits::get(16, false));
+    auto *mirrorSlotIdTypedef =
+        new IR::Type_Typedef("MirrorSlotId_t", IR::Type_Bits::get(8, false));
+    auto *classOfServiceTypedef =
+        new IR::Type_Typedef("ClassOfService_t", IR::Type_Bits::get(8, false));
+    auto *packetLengthTypedef =
+        new IR::Type_Typedef("PacketLength_t", IR::Type_Bits::get(16, false));
+    auto *multicastInstanceTypedef =
+        new IR::Type_Typedef("MulticastInstance_t", IR::Type_Bits::get(8, false));
+    auto *timestampTypedef = new IR::Type_Typedef("Timestamp_t", IR::Type_Bits::get(64, false));
+    auto *flowIdTypedef = new IR::Type_Typedef("FlowId_t", IR::Type_Bits::get(32, false));
+    auto *expireTimeProfileIdTypedef =
+        new IR::Type_Typedef("ExpireTimeProfileId_t", IR::Type_Bits::get(8, false));
+    auto *passNumberTypedef = new IR::Type_Typedef("PassNumber_t", IR::Type_Bits::get(3, false));
+    auto *securityAssocIdTypedef =
+        new IR::Type_Typedef("SecurityAssocId_t", IR::Type_Bits::get(32, false));
+
+    P4Scope::addToScope(portIdTypedef);
+    P4Scope::addToScope(interfaceIdTypedef);
+    P4Scope::addToScope(multicastGroupTypedef);
+    P4Scope::addToScope(mirrorSessionIdTypedef);
+    P4Scope::addToScope(mirrorSlotIdTypedef);
+    P4Scope::addToScope(classOfServiceTypedef);
+    P4Scope::addToScope(packetLengthTypedef);
+    P4Scope::addToScope(multicastInstanceTypedef);
+    P4Scope::addToScope(timestampTypedef);
+    P4Scope::addToScope(flowIdTypedef);
+    P4Scope::addToScope(expireTimeProfileIdTypedef);
+    P4Scope::addToScope(passNumberTypedef);
+    P4Scope::addToScope(securityAssocIdTypedef);
 
     // start to assemble the model
     auto *objects = new IR::Vector<IR::Node>();

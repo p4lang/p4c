@@ -4,7 +4,7 @@ include(${P4TOOLS_SOURCE_DIR}/cmake/TestUtils.cmake)
 
 set(SMITH_BMV2_CMD ${smith_SOURCE_DIR}/scripts/compilation-test.sh)
 
-set(SMITH_BMV2_ARGS 100 ${P4SMITH_DRIVER} ${CMAKE_BINARY_DIR}/p4test ${CMAKE_BINARY_DIR} generic core)
+set(SMITH_BMV2_ARGS 100 ${P4SMITH_DRIVER} ${CMAKE_BINARY_DIR}/p4test ${CMAKE_BINARY_DIR} core generic)
 
 # GTest sources for p4smith (generic target).
 set(P4SMITH_GENERIC_TARGET_GTEST_SOURCES

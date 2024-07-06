@@ -40,5 +40,5 @@ jobs:
 
       - name: Run tests (Ubuntu 22.04)
         # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E ctest -R testgen- --output-on-failure --schedule-random
+        run: sudo -E ctest -R "testgen|smith" --output-on-failure --schedule-random
         working-directory: ./build
