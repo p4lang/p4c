@@ -1348,6 +1348,7 @@ var annotated_dup =
     [ "JsonObject", "class_json_object.html", null ],
     [ "JsonString", "class_json_string.html", null ],
     [ "JsonVector", "class_json_vector.html", null ],
+    [ "LogAbbrev", "struct_log_abbrev.html", null ],
     [ "LTBitMatrix", "class_l_t_bit_matrix.html", null ],
     [ "MapForKey", "class_map_for_key.html", null ],
     [ "match_t", "structmatch__t.html", null ],

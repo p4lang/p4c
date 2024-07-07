@@ -304,6 +304,7 @@ var hierarchy =
     [ "JSONLoader", "class_j_s_o_n_loader.html", null ],
     [ "Log::Detail::LevelAndOutput", "struct_log_1_1_detail_1_1_level_and_output.html", null ],
     [ "Log::Detail::OutputLogPrefix", "class_log_1_1_detail_1_1_output_log_prefix.html", null ],
+    [ "LogAbbrev", "struct_log_abbrev.html", null ],
     [ "MapForKey< M >", "class_map_for_key.html", null ],
     [ "match_t", "structmatch__t.html", null ],
     [ "Model::Elem", "struct_model_1_1_elem.html", [
@@ -371,7 +372,7 @@ var hierarchy =
     [ "ordered_map< const IR::Node *, BMV2::block_t >", "classordered__map.html", null ],
     [ "ordered_map< const IR::Node *, const IR::CompileTimeValue * >", "classordered__map.html", null ],
     [ "ordered_map< const IR::Node *, const IR::P4Action * >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::Node *, ordered_set< const P4::ComputeDefUse::loc_t * > >", "classordered__map.html", null ],
+    [ "ordered_map< const IR::Node *, ordered_set >", "classordered__map.html", null ],
     [ "ordered_map< const IR::Node *, P4::SpecializationInfo * >", "classordered__map.html", null ],
     [ "ordered_map< const IR::Node *, std::pair< gress_t, block_t > >", "classordered__map.html", null ],
     [ "ordered_map< const IR::P4Action *, const IR::P4Action * >", "classordered__map.html", null ],
@@ -434,7 +435,7 @@ var hierarchy =
     [ "ordered_set< BMV2::CFG::Node * >", "classordered__set.html", null ],
     [ "ordered_set< const IR::FieldList * >", "classordered__set.html", null ],
     [ "ordered_set< const IR::Parameter * >", "classordered__set.html", null ],
-    [ "ordered_set< const P4::ComputeDefUse::loc_t * >", "classordered__set.html", null ],
+    [ "ordered_set< const loc_t * >", "classordered__set.html", null ],
     [ "ordered_set< const P4::StorageLocation * >", "classordered__set.html", null ],
     [ "ordered_set< cstring >", "classordered__set.html", null ],
     [ "P4::AbstractParserDriver", "class_p4_1_1_abstract_parser_driver.html", [

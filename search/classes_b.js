@@ -8,12 +8,13 @@ var searchData=
   ['localizeallactions_5',['LocalizeAllActions',['../class_p4_1_1_localize_all_actions.html',1,'P4']]],
   ['locationpath_6',['LocationPath',['../struct_p4_1_1_location_path.html',1,'P4']]],
   ['locationset_7',['LocationSet',['../class_p4_1_1_location_set.html',1,'P4']]],
-  ['logicalexpressionunroll_8',['LogicalExpressionUnroll',['../class_d_p_d_k_1_1_logical_expression_unroll.html',1,'DPDK']]],
-  ['lookup_5fcache_9',['lookup_cache',['../structhash__vector__base_1_1lookup__cache.html',1,'hash_vector_base']]],
-  ['loop_10',['Loop',['../class_p4_1_1_call_graph_1_1_loop.html',1,'P4::CallGraph']]],
-  ['loops_11',['Loops',['../struct_p4_1_1_call_graph_1_1_loops.html',1,'P4::CallGraph']]],
-  ['lower_12',['Lower',['../class_e_b_p_f_1_1_lower.html',1,'EBPF']]],
-  ['lowerexpressions_13',['LowerExpressions',['../class_b_m_v2_1_1_lower_expressions.html',1,'BMV2::LowerExpressions'],['../class_e_b_p_f_1_1_lower_expressions.html',1,'EBPF::LowerExpressions']]],
-  ['lpm_14',['LPM',['../class_p4_tools_1_1_p4_testgen_1_1_l_p_m.html',1,'P4Tools::P4Testgen']]],
-  ['ltbitmatrix_15',['LTBitMatrix',['../class_l_t_bit_matrix.html',1,'']]]
+  ['logabbrev_8',['LogAbbrev',['../struct_log_abbrev.html',1,'']]],
+  ['logicalexpressionunroll_9',['LogicalExpressionUnroll',['../class_d_p_d_k_1_1_logical_expression_unroll.html',1,'DPDK']]],
+  ['lookup_5fcache_10',['lookup_cache',['../structhash__vector__base_1_1lookup__cache.html',1,'hash_vector_base']]],
+  ['loop_11',['Loop',['../class_p4_1_1_call_graph_1_1_loop.html',1,'P4::CallGraph']]],
+  ['loops_12',['Loops',['../struct_p4_1_1_call_graph_1_1_loops.html',1,'P4::CallGraph']]],
+  ['lower_13',['Lower',['../class_e_b_p_f_1_1_lower.html',1,'EBPF']]],
+  ['lowerexpressions_14',['LowerExpressions',['../class_b_m_v2_1_1_lower_expressions.html',1,'BMV2::LowerExpressions'],['../class_e_b_p_f_1_1_lower_expressions.html',1,'EBPF::LowerExpressions']]],
+  ['lpm_15',['LPM',['../class_p4_tools_1_1_p4_testgen_1_1_l_p_m.html',1,'P4Tools::P4Testgen']]],
+  ['ltbitmatrix_16',['LTBitMatrix',['../class_l_t_bit_matrix.html',1,'']]]
 ];

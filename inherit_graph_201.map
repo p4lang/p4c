@@ -1,5 +1,15 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$class_p4_1_1_choose_error_representation.html" title=" " alt="" coords="5,5,229,31"/>
-<area shape="rect" id="Node000001" href="$class_d_p_d_k_1_1_error_width.html" title=" " alt="" coords="277,5,413,31"/>
-<area shape="poly" id="edge982_Node000000_Node000001" title=" " alt="" coords="243,15,277,15,277,21,243,21"/>
+<area shape="rect" id="Node000000" href="$class_p4_1_1_choose_enum_representation.html" title=" " alt="" coords="5,129,236,155"/>
+<area shape="rect" id="Node000001" href="$class_b_m_v2_1_1_enum_on32_bits.html" title=" " alt="" coords="295,5,459,31"/>
+<area shape="poly" id="edge976_Node000000_Node000001" title=" " alt="" coords="148,119,208,79,283,40,316,28,318,33,285,44,211,84,151,123"/>
+<area shape="rect" id="Node000002" href="$class_b_m_v2_1_1_psa_enum_on32_bits.html" title=" " alt="" coords="284,55,471,80"/>
+<area shape="poly" id="edge977_Node000000_Node000002" title=" " alt="" coords="173,122,283,89,325,78,326,83,285,94,175,128"/>
+<area shape="rect" id="Node000003" href="$class_d_p_d_k_1_1_enum_on32_bits.html" title=" " alt="" coords="296,104,459,129"/>
+<area shape="poly" id="edge978_Node000000_Node000003" title=" " alt="" coords="250,127,295,122,296,127,250,132"/>
+<area shape="rect" id="Node000004" href="$class_e_b_p_f_1_1_enum_on32_bits.html" title=" " alt="" coords="298,153,457,179"/>
+<area shape="poly" id="edge979_Node000000_Node000004" title=" " alt="" coords="250,151,298,156,298,161,250,157"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_enum_on32_bits.html" title=" " alt="" coords="306,203,449,228"/>
+<area shape="poly" id="edge980_Node000000_Node000005" title=" " alt="" coords="178,156,285,187,330,200,328,205,283,193,176,161"/>
+<area shape="rect" id="Node000006" href="$class_u_b_p_f_1_1_enum_on32_bits.html" title=" " alt="" coords="297,252,457,277"/>
+<area shape="poly" id="edge981_Node000000_Node000006" title=" " alt="" coords="152,160,212,199,285,237,321,249,319,254,283,242,209,203,149,165"/>
 </map>

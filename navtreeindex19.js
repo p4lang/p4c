@@ -1,5 +1,6 @@
 var NAVTREEINDEX19 =
 {
+"struct_util_1_1_hasher_3_01big__int_01_4.html":[28,0,22,17],
 "struct_util_1_1_hasher_3_01bool_01_4.html":[28,0,22,18],
 "struct_util_1_1_hasher_3_01char_01_4.html":[28,0,22,19],
 "struct_util_1_1_hasher_3_01cstring_01_4.html":[28,0,22,21],
@@ -26,14 +27,14 @@ var NAVTREEINDEX19 =
 "struct_util_1_1_source_file_line.html#a28b94d20827b845bb3e588ac8a5469bf":[28,0,22,63,0],
 "struct_util_1_1has__to_string.html":[28,0,22,13],
 "struct_util_1_1has__to_string_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01db18fd97bde90a9bd53b0bfce41e6e9b.html":[28,0,22,14],
-"struct_visitor___context.html":[28,0,145],
+"struct_visitor___context.html":[28,0,146],
 "structgraphs_1_1_parser_graphs_1_1_transition_edge.html":[27,0,3,9,0],
 "structgraphs_1_1_parser_graphs_1_1_transition_edge.html":[28,0,5,9,0],
 "structhas__dbprint.html":[28,0,57],
 "structhas__dbprint_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01_4_07_08_8d058dfba8a3a311378325dce114a1ecb1.html":[28,0,58],
 "structhash__vector__base_1_1lookup__cache.html":[28,0,59,1],
 "structhdr_field_info.html":[28,0,61],
-"structmatch__t.html":[28,0,86],
+"structmatch__t.html":[28,0,87],
 "structstd_1_1hash_3_01_closed_range_3_01_unit_00_01_order_01_4_01_4.html":[27,0,7,0],
 "structstd_1_1hash_3_01_closed_range_3_01_unit_00_01_order_01_4_01_4.html":[28,0,18,0],
 "structstd_1_1hash_3_01_half_open_range_3_01_unit_00_01_order_01_4_01_4.html":[27,0,7,2],
