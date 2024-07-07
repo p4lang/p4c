@@ -948,6 +948,22 @@ class FindUninitialized : public Inspector {
         return setCurrent(statement);
     }
 
+    bool preorder(const IR::ForStatement *statement) override {
+        Log::TempIndent indent;
+        LOG3("FU Visiting " << dbp(statement) << " " << statement << indent);
+        if (!unreachable) {
+            visit(statement->init, "init");
+            // use the live state from the end of the loop, as that jumps to the condition
+            setCurrent(statement);
+            visit(statement->condition, "condition");
+            visit(statement->body, "body");
+            visit(statement->updates, "updates");
+        } else {
+            LOG3("Unreachable");
+        }
+        return setCurrent(statement);
+    }
+
     bool preorder(const IR::ForInStatement *statement) override {
         Log::TempIndent indent;
         LOG3("FU Visiting " << dbp(statement) << " " << statement << indent);

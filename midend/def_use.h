@@ -43,7 +43,14 @@ class ComputeDefUse : public Inspector,
                       public ControlFlowVisitor,
                       public P4WriteContext,
                       public P4::ResolutionContext {
-    ComputeDefUse *clone() const override { return new ComputeDefUse(*this); }
+    static int uid_ctr;
+    int uid = 0;
+    ComputeDefUse *clone() const override {
+        auto *rv = new ComputeDefUse(*this);
+        rv->uid = ++uid_ctr;
+        LOG8("ComputeDefUse::clone " << rv->uid);
+        return rv;
+    }
     void flow_merge(Visitor &) override;
     void flow_copy(ControlFlowVisitor &) override;
     bool operator==(const ControlFlowVisitor &) const override;
@@ -70,6 +77,7 @@ class ComputeDefUse : public Inspector,
             return nullptr;
         }
     };
+    typedef ordered_set<const loc_t *> locset_t;
 
  private:
     std::set<loc_t> &cached_locs;
@@ -83,13 +91,13 @@ class ComputeDefUse : public Inspector,
         // definitions of a symbol (or part of a symbol) visible at this point in the
         // program.  `defs` will be empty if `live` is; if not those defs are visible only
         // for those bits/elements/fields where live is set.
-        ordered_set<const loc_t *> defs;
+        locset_t defs;
         bitvec live;
         // FIXME -- this parent field is never used and is not set consistently, so
         // appears to be useless?
         def_info_t *parent = nullptr;
         // track valid bit access for headers separate from the rest of the header
-        ordered_set<const loc_t *> valid_bit_defs;
+        locset_t valid_bit_defs;
         // one of these maps will always be empty.
         std::map<cstring, def_info_t> fields;
         std::map<le_bitrange, def_info_t> slices;  // also used for arrays
@@ -114,14 +122,15 @@ class ComputeDefUse : public Inspector,
         // defs maps from all uses to their definitions
         // uses maps from all definitions to their uses
         // uses/defs are lvalue expressions, or param declarations.
-        ordered_map<const IR::Node *, ordered_set<const loc_t *>> defs;
-        ordered_map<const IR::Node *, ordered_set<const loc_t *>> uses;
+        ordered_map<const IR::Node *, locset_t> defs;
+        ordered_map<const IR::Node *, locset_t> uses;
     } & defuse;
-    static const ordered_set<const loc_t *> empty;
+    static const locset_t empty;
 
     profile_t init_apply(const IR::Node *root) override {
         auto rv = Inspector::init_apply(root);
         LOG3("## Midend ComputeDefUse");
+        uid_ctr = 0;
         state = SKIPPING;
         clear();
         return rv;
@@ -137,6 +146,7 @@ class ComputeDefUse : public Inspector,
     bool preorder(const IR::Type *) override { return false; }
     bool preorder(const IR::Annotations *) override { return false; }
     bool preorder(const IR::KeyElement *) override;
+    bool preorder(const IR::AssignmentStatement *) override;
     const IR::Expression *do_read(def_info_t &, const IR::Expression *, const Context *);
     const IR::Expression *do_write(def_info_t &, const IR::Expression *, const Context *);
     bool preorder(const IR::PathExpression *) override;
@@ -161,11 +171,11 @@ class ComputeDefUse : public Inspector,
         defuse.uses.clear();
     }
 
-    const ordered_set<const loc_t *> &getDefs(const IR::Node *n) const {
+    const locset_t &getDefs(const IR::Node *n) const {
         auto it = defuse.defs.find(n);
         return it == defuse.defs.end() ? empty : it->second;
     }
-    const ordered_set<const loc_t *> &getUses(const IR::Node *n) const {
+    const locset_t &getUses(const IR::Node *n) const {
         auto it = defuse.uses.find(n);
         return it == defuse.uses.end() ? empty : it->second;
     }

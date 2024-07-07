@@ -57,6 +57,12 @@ p4tools_add_xfail_reason(
   # and more specifically when member is passed to getTypeArray
 )
 
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-metadata"
+  "Unhandled node type in Bmv2V1ModelCmdStepper: ForStatement"
+  issue4739.p4
+)
+
 ####################################################################################################
 # 3. WONTFIX
 ####################################################################################################
