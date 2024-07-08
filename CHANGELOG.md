@@ -7,6 +7,66 @@ We follow a monthly release cadence. Our versioning scheme is as follows:
 > @note
 > The commit history prior to the release [1.2.2.1](https://github.com/p4lang/p4c/pull/3085) is not included here but is available in the [commit history](https://github.com/p4lang/p4c/commits/main/).
 
+## Release v1.2.4.13 [[view](https://github.com/p4lang/p4c/pull/4767)]
+
+### Breaking Changes 🛠
+- Get rid of implicit char* => cstring conversions [[view](https://github.com/p4lang/p4c/pull/4694)].
+- Format-related string fixes and refactorings [[view](https://github.com/p4lang/p4c/pull/4704)].
+- Get rid of custom implementation of Utils::PathName [[view](https://github.com/p4lang/p4c/pull/4721)].
+- cstring-related cleanup, switch to std::string_view for some cstring API [[view](https://github.com/p4lang/p4c/pull/4716)].
+- Remove ReferenceMap recalculation (almost) everywhere and switch to more fine-grained solutions [[view](https://github.com/p4lang/p4c/pull/4757)].
+
+### Changes to the Compiler Core
+- Refactor error_helper and around [[view](https://github.com/p4lang/p4c/pull/4686)].
+- Add freestanding RTTI::to, RTTI::is, RTTI::isAny [[view](https://github.com/p4lang/p4c/pull/4696)].
+- More compilation fixes for C++20: hvec_map and copy_bitref [[view](https://github.com/p4lang/p4c/pull/4703)].
+- Add a constant folding pass after inlining [[view](https://github.com/p4lang/p4c/pull/4727)].
+- [#4006] Remove confusing warning when the same header is extracted multiple times in a parse path [[view](https://github.com/p4lang/p4c/pull/4725)].
+- Emit true and false instead of 1 and 0 for BoolLiteral dbprint. [[view](https://github.com/p4lang/p4c/pull/4741)].
+- [#4760] Create empty SetOfLocations for don't care arguments passed as action out args [[view](https://github.com/p4lang/p4c/pull/4762)].
+- Delete unused RemoveComplexExpressions pass. [[view](https://github.com/p4lang/p4c/pull/4771)].
+
+### Changes to the TC Back End
+- P4TC - Support for DirectCounter extern [[view](https://github.com/p4lang/p4c/pull/4711)].
+- Implementation of Counter extern in p4tc [[view](https://github.com/p4lang/p4c/pull/4734)].
+- Make sure compiler_meta__->drop starts out false [[view](https://github.com/p4lang/p4c/pull/4722)].
+
+### Changes to the DPDK Back End
+- Update some stale DPDK error reference files. [[view](https://github.com/p4lang/p4c/pull/4705)].
+- Fix a nullptr access in the DPDK back end. [[view](https://github.com/p4lang/p4c/pull/4712)].
+
+### Changes to the P4Tools Back End
+- Add P4Smith, a random program generator to the P4Tools framework [[view](https://github.com/p4lang/p4c/pull/4182)].
+- [P4Smith] Fix broken links in Smith README [[view](https://github.com/p4lang/p4c/pull/4754)].
+
+### Other Changes
+- Configure: DOXYGEN for documentation generation [[view](https://github.com/p4lang/p4c/pull/4701)].
+- Add a formatter binary skeleton as P4C back end [[view](https://github.com/p4lang/p4c/pull/4710)].
+- Invalid include fix in p4fmt.cpp [[view](https://github.com/p4lang/p4c/pull/4718)].
+- Test building P4C with ENABLE_GTESTS=OFF in CI [[view](https://github.com/p4lang/p4c/pull/4719)].
+- Fix up the Bazel sed command. [[view](https://github.com/p4lang/p4c/pull/4720)].
+- Docs : Configure Doxygen and GitHub pages deploy Action [[view](https://github.com/p4lang/p4c/pull/4702)].
+- Fix : Compatibility issues with Doxygen version in runner and configuration [[view](https://github.com/p4lang/p4c/pull/4732)].
+- Docs : Update community link from Slack to Zulip [[view](https://github.com/p4lang/p4c/pull/4735)].
+- [Docs] Add initial CHANGELOG.md with changelogs from previous release [[view](https://github.com/p4lang/p4c/pull/4708)].
+- Docs : Configuring Doxygen Awesome CSS [[view](https://github.com/p4lang/p4c/pull/4737)].
+- Minor Fix: Graphs Backend Example Images [[view](https://github.com/p4lang/p4c/pull/4749)].
+- Fix spurious P4Testgen failure occurring because of a problem when running PTF tests in parallel. [[view](https://github.com/p4lang/p4c/pull/4750)].
+- Make different Markdown files have different titles in Doxygen output [[view](https://github.com/p4lang/p4c/pull/4745)].
+- Bump docker/build-push-action from 5 to 6 [[view](https://github.com/p4lang/p4c/pull/4751)].
+- Docs: Fixing diagram paths in generated docs [[view](https://github.com/p4lang/p4c/pull/4755)].
+- Docs: Add theme dependency and instructions [[view](https://github.com/p4lang/p4c/pull/4747)].
+- Add back in heading for P4Smith README file [[view](https://github.com/p4lang/p4c/pull/4756)].
+- Docs: Initial sequence of pages in Documentation [[view](https://github.com/p4lang/p4c/pull/4758)].
+- Docs: Update compiler file structure [[view](https://github.com/p4lang/p4c/pull/4761)].
+- Fix naming of CMake Release configuration. [[view](https://github.com/p4lang/p4c/pull/4765)].
+- Simplify dependabot label generation. [[view](https://github.com/p4lang/p4c/pull/4766)].
+- Add DCO description to the contribution guidelines. [[view](https://github.com/p4lang/p4c/pull/4743)].
+- Add a signature for the release bot for DCO support. [[view](https://github.com/p4lang/p4c/pull/4769)].
+- Automated Release v1.2.4.13 [[view](https://github.com/p4lang/p4c/pull/4767)].
+
+[Click here to find Full Changelog](https://github.com/p4lang/p4c/compare/v1.2.4.12...v1.2.4.13)
+
 ## Release v1.2.4.12 [[view](https://github.com/p4lang/p4c/pull/4699)]
 
 ### Breaking Changes 🛠
