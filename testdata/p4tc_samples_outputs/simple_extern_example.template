@@ -21,11 +21,11 @@ $TC p4template update action/simple_extern_example/ingress/drop state active
 $TC p4template create extern/root/Register extid 0x1 numinstances 2 tc_acl 0x19b6
 
 $TC p4template create extern_inst/simple_extern_example/Register/ingress.reg1 instid 1 \
-tc_numel 10
+tc_numel 10 \
 control_path tc_key index ptype bit32 id 1 param a_value ptype bit32 id 2
 
 $TC p4template create extern_inst/simple_extern_example/Register/ingress.reg3 instid 2 \
-tc_numel 3
+tc_numel 3 \
 control_path tc_key index ptype bit32 id 1 param protocol ptype bit8 id 2 param aux ptype bit8 id 3
 
 $TC p4template create table/simple_extern_example/ingress/nh_table \

@@ -503,12 +503,14 @@ class TCExternInstance {
         
         if (isNumelemns) {
             tcExternInstance += "\ntc_numel " + Util::toString(numelemns);
+            tcExternInstance += " \\";
         }
         if (isTablBindable) {
-            tcExternInstance += " tbl_bindable";
+            tcExternInstance += "\ntbl_bindable";
+            tcExternInstance += " \\";
         }
         if (isConstructorKeys) {
-            tcExternInstance += " constructor";
+            tcExternInstance += "\nconstructor";
             for (auto field : constructorKeys) {
                 tcExternInstance += field->toString();
             }
@@ -560,7 +562,7 @@ class TCExtern {
         tcExtern += " numinstances " + Util::toString(numinstances);
         tcExtern += " tc_acl " + acl_permisson;
         if (has_exec_method) {
-             tcExtern += " has_exec_method ";
+             tcExtern += " has_exec_method";
         }
         for (unsigned iter = 0; iter < numinstances; iter++) {
             tcExtern += "\n\n$TC p4template create extern_inst/" + pipelineName

@@ -11,11 +11,6 @@
 #define bpf_trace_message(fmt, ...)
 
 
-struct metadata_t {
-    u32 src; /* bit<32> */
-    u32 dst; /* bit<32> */
-    u8 push; /* bool */
-};
 struct ethernet_t {
     u64 dstAddr; /* bit<48> */
     u64 srcAddr; /* bit<48> */
@@ -37,15 +32,40 @@ struct ipv4_t {
     u32 dstAddr; /* bit<32> */
     u8 ebpf_valid;
 };
-struct headers_t {
+struct my_ingress_headers_t {
     struct ethernet_t ethernet; /* ethernet_t */
     struct ipv4_t outer; /* ipv4_t */
     struct ipv4_t inner; /* ipv4_t */
 };
+struct my_ingress_metadata_t {
+    u32 src; /* bit<32> */
+    u32 dst; /* bit<32> */
+    u8 push; /* bool */
+};
+struct empty_metadata_t {
+};
+struct tuple_0 {
+    u8 f0; /* bit<4> */
+    u8 f1; /* bit<4> */
+    u8 f2; /* bit<8> */
+    u16 f3; /* bit<16> */
+    u16 f4; /* bit<16> */
+    u8 f5; /* bit<3> */
+    u16 f6; /* bit<13> */
+    u8 f7; /* bit<8> */
+    u8 f8; /* bit<8> */
+    u32 f9; /* bit<32> */
+    u32 f10; /* bit<32> */
+};
+struct tuple_1 {
+    u8 f0; /* bit<8> */
+    u8 f1; /* bit<8> */
+};
+static const ParserError_t BadIPv4HeaderChecksum = 7;
 
 struct hdr_md {
-    struct headers_t cpumap_hdr;
-    struct metadata_t cpumap_usermeta;
+    struct my_ingress_headers_t cpumap_hdr;
+    struct my_ingress_metadata_t cpumap_usermeta;
     unsigned ebpf_packetOffsetInBits;
     __u8 __hook;
 };

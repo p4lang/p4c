@@ -588,6 +588,20 @@ void EBPFPnaParser::emitRejectState(EBPF::CodeBuilder *builder) {
     builder->endOfStatement(true);
 }
 
+void EBPFPnaParser::emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl) {
+    if (auto di = decl->to<IR::Declaration_Instance>()) {
+        cstring name = di->name.name;
+        if (EBPFObject::getTypeName(di) == "InternetChecksum") {
+            auto instance = new EBPFInternetChecksumPNA(program, di, name);
+            checksums.emplace(name, instance);
+            instance->emitVariables(builder);
+            return;
+        }
+    }
+
+    EBPFParser::emitDeclaration(builder, decl);
+}
+
 //  This code is similar to compileExtractField function in PsaStateTranslationVisitor.
 //  Handled TC "macaddr" annotation.
 void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
@@ -1221,6 +1235,21 @@ void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     controlBlock->container->body->apply(*hdrEmitTranslator);
 
     builder->newline();
+}
+
+void IngressDeparserPNA::emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl) {
+    if (auto di = decl->to<IR::Declaration_Instance>()) {
+        cstring name = di->name.name;
+
+        if (EBPF::EBPFObject::getTypeName(di) == "InternetChecksum") {
+            auto instance = new EBPFInternetChecksumPNA(program, di, name);
+            checksums.emplace(name, instance);
+            instance->emitVariables(builder);
+            return;
+        }
+    }
+
+    EBPFDeparser::emitDeclaration(builder, decl);
 }
 
 // =====================ConvertToEbpfPNA=============================
@@ -2275,6 +2304,16 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
     builder->appendFormat("%s += %d", program->offsetVar.c_str(), widthToEmit);
     builder->endOfStatement(true);
     builder->newline();
+}
+
+EBPF::EBPFHashAlgorithmPSA *EBPFHashAlgorithmTypeFactoryPNA::create(
+    int type, const EBPF::EBPFProgram *program, cstring name) {
+    if (type == EBPF::EBPFHashAlgorithmPSA::HashAlgorithm::ONES_COMPLEMENT16 ||
+        type == EBPF::EBPFHashAlgorithmPSA::HashAlgorithm::TARGET_DEFAULT) {
+        return new InternetChecksumAlgorithmPNA(program, name);
+    }
+
+    return nullptr;
 }
 
 void CRCChecksumAlgorithmPNA::emitUpdateMethod(EBPF::CodeBuilder *builder, int crcWidth) {

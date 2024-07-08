@@ -278,32 +278,40 @@ bpf_p4tc_ext_csum_crc16_clear(struct p4tc_ext_csum_params *params) __ksym;
 /* Basic checksums are not implemented in DPDK */
 extern u32
 bpf_p4tc_ext_csum_crc32_add(struct p4tc_ext_csum_params *params,
+                            const u32 params__sz,
                             const void *data, const u32 data__sz) __ksym;
 
 extern u32
-bpf_p4tc_ext_csum_crc32_get(struct p4tc_ext_csum_params *params) __ksym;
+bpf_p4tc_ext_csum_crc32_get(struct p4tc_ext_csum_params *params,
+                            const u32 params__sz) __ksym;
 
 extern void
-bpf_p4tc_ext_csum_crc32_clear(struct p4tc_ext_csum_params *params) __ksym;
+bpf_p4tc_ext_csum_crc32_clear(struct p4tc_ext_csum_params *params,
+                              const u32 params__sz) __ksym;
 
 extern u16
-bpf_p4tc_ext_csum_16bit_complement_get(struct p4tc_ext_csum_params *params) __ksym;
+bpf_p4tc_ext_csum_16bit_complement_get(struct p4tc_ext_csum_params *params,
+                                       const u32 params__sz) __ksym;
 
 /* Equivalent to PNA 16bit complement checksum (incremental checksum) */
 extern __wsum
 bpf_p4tc_ext_csum_16bit_complement_add(struct p4tc_ext_csum_params *params,
+                                       const u32 params__sz,
                                        const void *data, int len) __ksym;
 
 extern int
 bpf_p4tc_ext_csum_16bit_complement_sub(struct p4tc_ext_csum_params *params,
+                                       const u32 params__sz,
                                        const void *data, const u32 data__sz) __ksym;
 
 extern void
-bpf_p4tc_ext_csum_16bit_complement_clear(struct p4tc_ext_csum_params *params) __ksym;
+bpf_p4tc_ext_csum_16bit_complement_clear(struct p4tc_ext_csum_params *params,
+                                         const u32 params__sz) __ksym;
 
 extern void
 bpf_p4tc_ext_csum_16bit_complement_set_state(struct p4tc_ext_csum_params *params,
-					     u16 csum) __ksym;
+                                             const u32 params__sz,
+                                             u16 csum) __ksym;
 
 /* Equivalent to PNA crc16 hash */
 extern u16
