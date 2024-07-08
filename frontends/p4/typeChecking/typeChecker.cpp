@@ -3863,8 +3863,11 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
         }
 
         if (const auto *ef = mi->to<ExternFunction>()) {
+            const IR::Type *baseReturnType = returnType;
+            if (const auto *sc = returnType->to<IR::Type_SpecializedCanonical>())
+                baseReturnType = sc->baseType;
             const bool factoryOrStaticAssert =
-                returnType->is<IR::Type_Extern>() || ef->method->name == "static_assert";
+                baseReturnType->is<IR::Type_Extern>() || ef->method->name == "static_assert";
             if (constArgs && factoryOrStaticAssert) {
                 // factory extern function calls (those that return extern objects) with constant
                 // args are compile-time constants.
