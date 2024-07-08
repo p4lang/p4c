@@ -80,9 +80,9 @@ const IR::Node *DoSimplifyKey::postorder(IR::P4Table *table) {
 const IR::Node *DoSimplifyKey::doStatement(const IR::Statement *statement,
                                            const IR::Expression *expression) {
     LOG3("Visiting " << getOriginal());
-    HasTableApply hta(refMap, typeMap);
+    HasTableApply hta(typeMap);
     hta.setCalledBy(this);
-    (void)expression->apply(hta);
+    (void)expression->apply(hta, getContext());
     if (hta.table == nullptr) return statement;
     auto insertions = get(toInsert, hta.table);
     if (insertions == nullptr) return statement;

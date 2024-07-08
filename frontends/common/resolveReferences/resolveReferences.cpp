@@ -183,7 +183,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookupMatchKind(const I
 const IR::Vector<IR::Argument> *ResolutionContext::methodArguments(cstring name) const {
     const Context *ctxt = getChildContext();
     while (ctxt) {
-        const auto *node = ctxt->node;
+        const auto *node = ctxt->original;
         const IR::MethodCallExpression *mc = nullptr;
         if (const auto *mcs = node->to<IR::MethodCallStatement>())
             mc = mcs->methodCall;

@@ -28,22 +28,19 @@ limitations under the License.
 namespace P4 {
 
 /// Checks to see whether an IR node includes a table.apply() sub-expression
-class HasTableApply : public Inspector {
-    DeclarationLookup *refMap;
+class HasTableApply : public Inspector, public ResolutionContext {
     TypeMap *typeMap;
 
  public:
     const IR::P4Table *table;
     const IR::MethodCallExpression *call;
-    HasTableApply(DeclarationLookup *refMap, TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap), table(nullptr), call(nullptr) {
-        CHECK_NULL(refMap);
+    explicit HasTableApply(TypeMap *typeMap) : typeMap(typeMap), table(nullptr), call(nullptr) {
         CHECK_NULL(typeMap);
         setName("HasTableApply");
     }
 
     void postorder(const IR::MethodCallExpression *expression) override {
-        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+        auto mi = MethodInstance::resolve(expression, this, typeMap);
         if (!mi->isApply()) return;
         auto am = mi->to<P4::ApplyMethod>();
         if (!am->object->is<IR::P4Table>()) return;
@@ -342,7 +339,7 @@ class KeySideEffect : public Transform, public ResolutionContext {
 /// table Y { ... }
 /// table X { key = { ... Y.apply.hit() ... } }
 /// This inserts Y into the map invokedInKey;
-class TablesInKeys : public Inspector, ResolutionContext {
+class TablesInKeys : public Inspector {
     TypeMap *typeMap;
     std::set<const IR::P4Table *> *invokedInKey;
 
@@ -358,7 +355,7 @@ class TablesInKeys : public Inspector, ResolutionContext {
     }
     void postorder(const IR::MethodCallExpression *mce) override {
         if (!findContext<IR::Key>()) return;
-        HasTableApply hta(this, typeMap);
+        HasTableApply hta(typeMap);
         hta.setCalledBy(this);
         (void)mce->apply(hta, getContext());
         if (hta.table != nullptr) {
@@ -373,14 +370,14 @@ class TablesInKeys : public Inspector, ResolutionContext {
 /// table s { ... }
 /// table t {
 ///    actions { a(s.apply().hit ? ... ); }
-class TablesInActions : public Inspector, ResolutionContext {
+class TablesInActions : public Inspector {
     TypeMap *typeMap;
 
  public:
     explicit TablesInActions(TypeMap *typeMap) : typeMap(typeMap) {}
     void postorder(const IR::MethodCallExpression *expression) override {
         if (findContext<IR::ActionList>()) {
-            HasTableApply hta(this, typeMap);
+            HasTableApply hta(typeMap);
             hta.setCalledBy(this);
             (void)expression->apply(hta, getContext());
             if (hta.table != nullptr) {

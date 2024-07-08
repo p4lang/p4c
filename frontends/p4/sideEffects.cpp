@@ -800,8 +800,9 @@ const IR::Node *KeySideEffect::doStatement(const IR::Statement *statement,
                                            const IR::Expression *expression,
                                            const Visitor::Context *ctxt) {
     LOG3("Visiting " << getOriginal());
-    HasTableApply hta(this, typeMap);
+    HasTableApply hta(typeMap);
     hta.setCalledBy(this);
+
     (void)expression->apply(hta, ctxt);
     if (hta.table == nullptr) return statement;
     auto insertions = get(toInsert, hta.table);
