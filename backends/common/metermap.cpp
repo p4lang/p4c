@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "metermap.h"
+#include "backends/common/metermap.h"
 
-namespace BMV2 {
+namespace P4 {
 
 /// @returns direct meter information from the direct meter map.
 DirectMeterMap::DirectMeterInfo *DirectMeterMap::createInfo(const IR::IDeclaration *meter) {
@@ -90,4 +90,4 @@ void DirectMeterMap::setSize(const IR::IDeclaration *meter, unsigned size) {
     info->tableSize = size;
 }
 
-}  // namespace BMV2
+}  // namespace P4

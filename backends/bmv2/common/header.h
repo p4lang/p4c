@@ -21,12 +21,12 @@ limitations under the License.
 
 #include "JsonObjects.h"
 #include "backends/bmv2/common/options.h"
+#include "backends/common/programStructure.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "helpers.h"
 #include "ir/ir.h"
 #include "lib/json.h"
-#include "programStructure.h"
 
 namespace BMV2 {
 

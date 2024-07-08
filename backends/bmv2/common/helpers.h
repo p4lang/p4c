@@ -18,6 +18,7 @@ limitations under the License.
 #define BACKENDS_BMV2_COMMON_HELPERS_H_
 
 #include "JsonObjects.h"
+#include "backends/common/programStructure.h"
 #include "controlFlowGraph.h"
 #include "expression.h"
 #include "frontends/common/model.h"
@@ -26,7 +27,6 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/json.h"
 #include "lib/ordered_map.h"
-#include "programStructure.h"
 
 namespace BMV2 {
 
@@ -56,6 +56,17 @@ class V1ModelProperties {
     /// automatically added by BMV2 to all header types; reading from it tells
     /// you whether the header is valid, just as if you had called isValid().
     static const cstring validField;
+};
+
+// V1Model-specific blocks.
+enum class BlockConverted {
+    None,
+    Parser,
+    Ingress,
+    Egress,
+    Deparser,
+    ChecksumCompute,
+    ChecksumVerify
 };
 
 namespace Standard {
@@ -268,7 +279,7 @@ struct ConversionContext {
     /// Block currently being converted.
     BlockConverted blockConverted;
     /// ProgramStructure pointer.
-    ProgramStructure *structure;
+    P4::ProgramStructure *structure;
     /// Expression converter is used in many places.
     ExpressionConverter *conv;
     /// Final json output.
@@ -286,7 +297,7 @@ struct ConversionContext {
     }
 
     ConversionContext(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                      const IR::ToplevelBlock *toplevel, ProgramStructure *structure,
+                      const IR::ToplevelBlock *toplevel, P4::ProgramStructure *structure,
                       ExpressionConverter *conv, JsonObjects *json)
         : refMap(refMap),
           typeMap(typeMap),

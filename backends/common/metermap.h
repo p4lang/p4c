@@ -14,13 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_BMV2_COMMON_METERMAP_H_
-#define BACKENDS_BMV2_COMMON_METERMAP_H_
+#ifndef BACKENDS_COMMON_METERMAP_H_
+#define BACKENDS_COMMON_METERMAP_H_
 
 #include "ir/ir.h"
 
-namespace BMV2 {
+namespace P4 {
 
+// TODO: This file should be in the BMv2 folder, but ProgramStructure still depends on it.
 class DirectMeterMap final {
  public:
     struct DirectMeterInfo {
@@ -43,6 +44,6 @@ class DirectMeterMap final {
     void setSize(const IR::IDeclaration *meter, unsigned size);
 };
 
-}  // namespace BMV2
+}  // namespace P4
 
-#endif /* BACKENDS_BMV2_COMMON_METERMAP_H_ */
+#endif /* BACKENDS_COMMON_METERMAP_H_ */

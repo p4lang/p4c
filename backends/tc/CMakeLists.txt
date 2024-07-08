@@ -37,8 +37,6 @@ set(P4TC_BACKEND_SOURCES
     ../ebpf/ebpfModel.cpp
     ../ebpf/midend.cpp
     ../ebpf/lower.cpp
-    ../bmv2/common/programStructure.cpp
-    ../bmv2/psa_switch/psaProgramStructure.cpp
     ../ebpf/psa/ebpfPsaGen.cpp
     ../ebpf/psa/ebpfPipeline.cpp
     ../ebpf/psa/ebpfPsaParser.cpp
@@ -80,9 +78,6 @@ set(P4TC_BACKEND_HEADERS
    ../ebpf/midend.h
    ../ebpf/target.h
    ../ebpf/lower.h
-   ../bmv2/common/programStructure.h
-   ../bmv2/psa_switch/psaProgramStructure.h
-   ../bmv2/psa_switch/psaSwitch.h
    ../ebpf/psa/backend.h
    ../ebpf/psa/ebpfPsaGen.h
    ../ebpf/psa/xdpHelpProgram.h
@@ -105,7 +100,7 @@ set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/tc.def PARENT_SCOP
 
 # build
 add_executable(p4c-pna-p4tc ${P4TC_BACKEND_SOURCES})
-target_link_libraries (p4c-pna-p4tc ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+target_link_libraries (p4c-pna-p4tc ${P4C_LIBRARIES} ${P4C_LIB_DEPS} backends-common)
 add_dependencies(p4c-pna-p4tc genIR)
 
 # install

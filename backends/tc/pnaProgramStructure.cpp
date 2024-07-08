@@ -204,16 +204,16 @@ bool InspectPnaProgram::preorder(const IR::Parameter *param) {
 void InspectPnaProgram::postorder(const IR::P4Parser *p) {
     if (pinfo->block_type.count(p)) {
         auto info = pinfo->block_type.at(p);
-        if (info == BMV2::PARSER) pinfo->parsers.emplace(p->name, p);
+        if (info == PARSER) pinfo->parsers.emplace(p->name, p);
     }
 }
 
 void InspectPnaProgram::postorder(const IR::P4Control *c) {
     if (pinfo->block_type.count(c)) {
         auto info = pinfo->block_type.at(c);
-        if (info == BMV2::PIPELINE)
+        if (info == PIPELINE)
             pinfo->pipelines.emplace(c->name, c);
-        else if (info == BMV2::DEPARSER)
+        else if (info == DEPARSER)
             pinfo->deparsers.emplace(c->name, c);
     }
 }
@@ -266,9 +266,9 @@ bool ParsePnaArchitecture::preorder(const IR::PackageBlock *block) {
                        block);
             return false;
         }
-        structure->block_type.emplace(parser->container, BMV2::PARSER);
-        structure->block_type.emplace(pipeline->container, BMV2::PIPELINE);
-        structure->block_type.emplace(deparser->container, BMV2::DEPARSER);
+        structure->block_type.emplace(parser->container, PARSER);
+        structure->block_type.emplace(pipeline->container, PIPELINE);
+        structure->block_type.emplace(deparser->container, DEPARSER);
         structure->pipeline_controls.emplace(pipeline->container->name);
         structure->non_pipeline_controls.emplace(deparser->container->name);
     } else {
