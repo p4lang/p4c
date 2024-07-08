@@ -85,7 +85,7 @@ class Options {
     explicit Options(std::string_view message)
         : binaryName(nullptr), message(message), compileCommand("") {}
 
-    ///  Checks if parsed options make sense with respect to each-other.
+    /// Checks if parsed options make sense with respect to each-other.
     /// @returns true if the validation was successful and false otherwise.
     [[nodiscard]] virtual bool validateOptions() const;
 

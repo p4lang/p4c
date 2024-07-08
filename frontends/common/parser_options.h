@@ -39,10 +39,10 @@ extern const char *p4_14includePath;
 class ParserOptions : public Util::Options {
     bool close_input = false;
 
-    ///  Annotation names that are to be ignored by the compiler.
+    /// Annotation names that are to be ignored by the compiler.
     std::set<cstring> disabledAnnotations;
 
-    ///  Used to generate dump file names.
+    /// Used to generate dump file names.
     mutable size_t dump_uid = 0;
 
  protected:
