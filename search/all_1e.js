@@ -49,7 +49,7 @@ var searchData=
   ['value_5fset_46',['value_set',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html#autotoc_md161',1,'']]],
   ['valuemap_47',['ValueMap',['../class_p4_1_1_value_map.html',1,'P4']]],
   ['variables_48',['Symbolic Variables',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html#autotoc_md221',1,'']]],
-  ['variables_49',['variables',['../class_b_m_v2_1_1_program_structure.html#a9b573116fa9c554b6964cfa0638322a2',1,'BMV2::ProgramStructure']]],
+  ['variables_49',['variables',['../class_p4_1_1_program_structure.html#a9431e58d1bff9b3b0ac9c190c1d1a4fc',1,'P4::ProgramStructure']]],
   ['variablesubstitution_50',['VariableSubstitution',['../class_p4_tools_1_1_p4_testgen_1_1_variable_substitution.html',1,'P4Tools::P4Testgen']]],
   ['vector_51',['Vector',['../class_i_r_1_1_vector.html',1,'IR']]],
   ['vector_20h_52',['vector.h',['../irdefs.html#autotoc_md55',1,'']]],

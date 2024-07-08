@@ -20,9 +20,9 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="class_b_m_v2_1_1_program_structure.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="143,-74 6,-74 6,-55 143,-55 143,-74"/>
-<text text-anchor="middle" x="74.5" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">BMV2::ProgramStructure</text>
+<g id="a_Node000002"><a xlink:href="class_p4_1_1_program_structure.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="134.5,-74 14.5,-74 14.5,-55 134.5,-55 134.5,-74"/>
+<text text-anchor="middle" x="74.5" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">P4::ProgramStructure</text>
 </a>
 </g>
 </g>

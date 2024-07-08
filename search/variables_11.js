@@ -1,8 +1,8 @@
 var searchData=
 [
   ['savestate_0',['saveState',['../class_p4_1_1_abstract_parser_driver.html#a8170e90031d242b1c7e5af482b57e10d',1,'P4::AbstractParserDriver']]],
-  ['scalarmetadatafields_1',['scalarMetadataFields',['../class_b_m_v2_1_1_program_structure.html#a57600829663790ec5f2568dc56423be3',1,'BMV2::ProgramStructure']]],
-  ['scalars_2',['scalars',['../class_b_m_v2_1_1_psa_program_structure.html#acec945a99558191ac604242a39ced43c',1,'BMV2::PsaProgramStructure']]],
+  ['scalarmetadatafields_1',['scalarMetadataFields',['../class_p4_1_1_program_structure.html#adeb3cee6ed7c3da89bf9c651123dc8b4',1,'P4::ProgramStructure']]],
+  ['scalars_2',['scalars',['../class_p4_1_1_psa_program_structure.html#a2d479e2795c682dffd1be514f9457d55',1,'P4::PsaProgramStructure']]],
   ['scope_3',['scope',['../class_p4_tools_1_1_p4_smith_1_1_p4_scope.html#a04a649d1b5adde1f6f7ffd243b603cc7',1,'P4Tools::P4Smith::P4Scope']]],
   ['sectionname_4',['sectionName',['../class_e_b_p_f_1_1_e_b_p_f_pipeline.html#a4bd8876a0556950678e6bbe69a808de3',1,'EBPF::EBPFPipeline']]],
   ['seed_5',['seed',['../class_p4_tools_1_1_abstract_p4c_tool_options.html#a8ad47b8d8cd412344a126b9756ed0d47',1,'P4Tools::AbstractP4cToolOptions::seed'],['../struct_p4_tools_1_1_p4_testgen_1_1_test_backend_configuration.html#ad39ec6d0f9bf95dbeb0992aaf19d5595',1,'P4Tools::P4Testgen::TestBackendConfiguration::seed']]],
@@ -25,7 +25,7 @@ var searchData=
   ['strict_22',['strict',['../class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#ae0b7d8be8959b8d9e696a0ca11a490ba',1,'P4Tools::P4Testgen::TestgenOptions']]],
   ['strictstruct_23',['strictStruct',['../class_p4_1_1_type_map.html#af4acc926aaca8de78a3ec1edc90626f4',1,'P4::TypeMap']]],
   ['stringliteral_24',['stringLiteral',['../class_p4_1_1_p4_parser_driver.html#aeb57bc5fea47bdb995b029d3f8ef13ad',1,'P4::P4ParserDriver']]],
-  ['structure_25',['structure',['../class_p4_1_1_p4_parser_driver.html#a04d165c66c91d9096b61203f104084fe',1,'P4::P4ParserDriver::structure'],['../struct_b_m_v2_1_1_conversion_context.html#ad5d3ac49cf7c72272749c7ac09748212',1,'BMV2::ConversionContext::structure']]],
+  ['structure_25',['structure',['../class_p4_1_1_p4_parser_driver.html#a04d165c66c91d9096b61203f104084fe',1,'P4::P4ParserDriver::structure'],['../struct_b_m_v2_1_1_conversion_context.html#a9ae6f106e6fdd3880e1cf45c4b6f476f',1,'BMV2::ConversionContext::structure']]],
   ['substitution_26',['substitution',['../class_p4_1_1_instance_base.html#a399ebaf2c85626454ff290e7da5d2ed3',1,'P4::InstanceBase']]],
   ['substitutions_27',['substitutions',['../struct_p4_1_1_inline_summary_1_1_per_caller.html#a9265f95d237e30b33bc9cc0f3898b76b',1,'P4::InlineSummary::PerCaller']]],
   ['suffix_28',['suffix',['../struct_error_message.html#aea60e8c0b533f36cd8a6c258289a5682',1,'ErrorMessage']]],

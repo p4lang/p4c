@@ -6,7 +6,7 @@ var searchData=
   ['replacement_3',['replacement',['../struct_p4_1_1_type_specialization.html#a0e615d303222981f78c72f5b88736f39',1,'P4::TypeSpecialization']]],
   ['req_4',['req',['../class_p4_tools_1_1_p4_smith_1_1_p4_scope.html#ae9246e08a15542b4f581ddc62e508d3e',1,'P4Tools::P4Smith::P4Scope']]],
   ['resolvedkeys_5',['resolvedKeys',['../struct_p4_tools_1_1_table_utils_1_1_table_properties.html#a255cd40c13f23244ce85746eed84e8f0',1,'P4Tools::TableUtils::TableProperties']]],
-  ['resourcemap_6',['resourceMap',['../class_b_m_v2_1_1_program_structure.html#a26cba188f4e71940e05d36706db3c96f',1,'BMV2::ProgramStructure']]],
+  ['resourcemap_6',['resourceMap',['../class_p4_1_1_program_structure.html#ac0188eb142e62d18c14ebd8d81e6b171',1,'P4::ProgramStructure']]],
   ['result_7',['result',['../class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html#af6b58f5be8c2ff4d7620131c4d42087e',1,'P4Tools::P4Testgen::AbstractStepper']]],
   ['returneddefinitions_8',['returnedDefinitions',['../class_p4_1_1_compute_write_set.html#a15be09eb5b630a8435a75cd5e1fc84fa',1,'P4::ComputeWriteSet']]]
 ];

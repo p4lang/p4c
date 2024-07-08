@@ -295,7 +295,7 @@ std::optional&lt; const IR::Expression * &gt;&#160;</td><td class="memItemRight"
       </table>
 </div><div class="memdoc">
 <p>Compute the series of nodes corresponding to the in-order execution of top-level pipeline-component instantiations. For a standard v1model, this produces the parser, the checksum verifier, the MAU pipeline, the checksum calculator, and finally the deparser. This sequence also includes nodes that handle transitions between the individual component instantiations.</p>
-<p>Sending a too short packet in <a class="el" href="namespace_b_m_v2.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">BMV2</a> produces nonsense, so we require the packet size to be larger than 32 bits.This number needs to be raised to the size of the ethernet header for the <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_p_t_f.html" title="Extracts information from the @testSpec to emit a PTF test case.">PTF</a> and PROTOBUF back ends.</p>
+<p>Sending a too short packet in BMV2 produces nonsense, so we require the packet size to be larger than 32 bits.This number needs to be raised to the size of the ethernet header for the <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_p_t_f.html" title="Extracts information from the @testSpec to emit a PTF test case.">PTF</a> and PROTOBUF back ends.</p>
 <p>Finally, set the target constraints.</p>
 
 </div>

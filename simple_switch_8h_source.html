@@ -149,8 +149,8 @@ $(function(){initNavTree('simple_switch_8h_source.html',''); initResizable(true)
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;backends/bmv2/common/header.h&quot;</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;backends/bmv2/common/options.h&quot;</span></div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;backends/bmv2/common/parser.h&quot;</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;backends/bmv2/common/programStructure.h&quot;</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;backends/bmv2/common/sharedActionSelectorCheck.h&quot;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;backends/bmv2/common/sharedActionSelectorCheck.h&quot;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;backends/common/programStructure.h&quot;</span></div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;frontends/common/constantFolding.h&quot;</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;frontends/p4/evaluator/evaluator.h&quot;</span></div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &quot;frontends/p4/fromv1.0/v1model.h&quot;</span></div>
@@ -158,10 +158,10 @@ $(function(){initNavTree('simple_switch_8h_source.html',''); initResizable(true)
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#include &quot;frontends/p4/unusedDeclarations.h&quot;</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#include &quot;midend/convertEnums.h&quot;</span></div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_b_m_v2.html">BMV2</a> {</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">namespace </span>BMV2 {</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
 <div class="foldopen" id="foldopen00043" data-start="{" data-end="};">
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="class_b_m_v2_1_1_v1_program_structure.html">   43</a></span><span class="keyword">class </span><a class="code hl_class" href="class_b_m_v2_1_1_v1_program_structure.html">V1ProgramStructure</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_b_m_v2_1_1_program_structure.html">ProgramStructure</a> {</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="class_b_m_v2_1_1_v1_program_structure.html">   43</a></span><span class="keyword">class </span><a class="code hl_class" href="class_b_m_v2_1_1_v1_program_structure.html">V1ProgramStructure</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_program_structure.html">P4::ProgramStructure</a> {</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    std::set&lt;cstring&gt; pipeline_controls;</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    std::set&lt;cstring&gt; non_pipeline_controls;</div>
@@ -315,10 +315,9 @@ $(function(){initNavTree('simple_switch_8h_source.html',''); initResizable(true)
 <div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
 <div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_BMV2_SIMPLE_SWITCH_SIMPLESWITCH_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_b_m_v2_1_1_b_m_v2_options_html"><div class="ttname"><a href="class_b_m_v2_1_1_b_m_v2_options.html">BMV2::BMV2Options</a></div><div class="ttdef"><b>Definition</b> backends/bmv2/common/options.h:26</div></div>
-<div class="ttc" id="aclass_b_m_v2_1_1_backend_html"><div class="ttname"><a href="class_b_m_v2_1_1_backend.html">BMV2::Backend</a></div><div class="ttdoc">Backend is a the base class for SimpleSwitchBackend and PortableSwitchBackend.</div><div class="ttdef"><b>Definition</b> bmv2/common/backend.h:60</div></div>
+<div class="ttc" id="aclass_b_m_v2_1_1_backend_html"><div class="ttname"><a href="class_b_m_v2_1_1_backend.html">BMV2::Backend</a></div><div class="ttdoc">Backend is a the base class for SimpleSwitchBackend and PortableSwitchBackend.</div><div class="ttdef"><b>Definition</b> bmv2/common/backend.h:59</div></div>
 <div class="ttc" id="aclass_b_m_v2_1_1_expression_converter_html"><div class="ttname"><a href="class_b_m_v2_1_1_expression_converter.html">BMV2::ExpressionConverter</a></div><div class="ttdef"><b>Definition</b> expression.h:51</div></div>
 <div class="ttc" id="aclass_b_m_v2_1_1_parse_v1_architecture_html"><div class="ttname"><a href="class_b_m_v2_1_1_parse_v1_architecture.html">BMV2::ParseV1Architecture</a></div><div class="ttdef"><b>Definition</b> simpleSwitch.h:129</div></div>
-<div class="ttc" id="aclass_b_m_v2_1_1_program_structure_html"><div class="ttname"><a href="class_b_m_v2_1_1_program_structure.html">BMV2::ProgramStructure</a></div><div class="ttdef"><b>Definition</b> backends/bmv2/common/programStructure.h:40</div></div>
 <div class="ttc" id="aclass_b_m_v2_1_1_simple_switch_backend_html"><div class="ttname"><a href="class_b_m_v2_1_1_simple_switch_backend.html">BMV2::SimpleSwitchBackend</a></div><div class="ttdef"><b>Definition</b> simpleSwitch.h:140</div></div>
 <div class="ttc" id="aclass_b_m_v2_1_1_simple_switch_backend_html_ac959c22fbbd69f77ab950d537d522c5f"><div class="ttname"><a href="class_b_m_v2_1_1_simple_switch_backend.html#ac959c22fbbd69f77ab950d537d522c5f">BMV2::SimpleSwitchBackend::convert</a></div><div class="ttdeci">void convert(const IR::ToplevelBlock *tlb) override</div><div class="ttdef"><b>Definition</b> simpleSwitch.cpp:1080</div></div>
 <div class="ttc" id="aclass_b_m_v2_1_1_simple_switch_expression_converter_html"><div class="ttname"><a href="class_b_m_v2_1_1_simple_switch_expression_converter.html">BMV2::SimpleSwitchExpressionConverter</a></div><div class="ttdef"><b>Definition</b> simpleSwitch.h:73</div></div>
@@ -326,6 +325,7 @@ $(function(){initNavTree('simple_switch_8h_source.html',''); initResizable(true)
 <div class="ttc" id="aclass_b_m_v2_1_1_v1_program_structure_html"><div class="ttname"><a href="class_b_m_v2_1_1_v1_program_structure.html">BMV2::V1ProgramStructure</a></div><div class="ttdef"><b>Definition</b> simpleSwitch.h:43</div></div>
 <div class="ttc" id="aclass_i_r_1_1_node_html"><div class="ttname"><a href="class_i_r_1_1_node.html">IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:93</div></div>
 <div class="ttc" id="aclass_inspector_html"><div class="ttname"><a href="class_inspector.html">Inspector</a></div><div class="ttdef"><b>Definition</b> visitor.h:396</div></div>
+<div class="ttc" id="aclass_p4_1_1_program_structure_html"><div class="ttname"><a href="class_p4_1_1_program_structure.html">P4::ProgramStructure</a></div><div class="ttdef"><b>Definition</b> backends/common/programStructure.h:32</div></div>
 <div class="ttc" id="aclass_p4_1_1_reference_map_html"><div class="ttname"><a href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a></div><div class="ttdoc">Class used to encode maps from paths to declarations.</div><div class="ttdef"><b>Definition</b> referenceMap.h:66</div></div>
 <div class="ttc" id="aclass_p4_1_1_type_map_html"><div class="ttname"><a href="class_p4_1_1_type_map.html">P4::TypeMap</a></div><div class="ttdef"><b>Definition</b> typeMap.h:41</div></div>
 <div class="ttc" id="aclass_p4_v1_1_1_v1_model_html"><div class="ttname"><a href="class_p4_v1_1_1_v1_model.html">P4V1::V1Model</a></div><div class="ttdef"><b>Definition</b> frontends/p4/fromv1.0/v1model.h:264</div></div>
@@ -333,8 +333,7 @@ $(function(){initNavTree('simple_switch_8h_source.html',''); initResizable(true)
 <div class="ttc" id="aclass_util_1_1_json_array_html"><div class="ttname"><a href="class_util_1_1_json_array.html">Util::JsonArray</a></div><div class="ttdef"><b>Definition</b> json.h:111</div></div>
 <div class="ttc" id="aclass_util_1_1_json_object_html"><div class="ttname"><a href="class_util_1_1_json_object.html">Util::JsonObject</a></div><div class="ttdef"><b>Definition</b> json.h:158</div></div>
 <div class="ttc" id="aclasscstring_html"><div class="ttname"><a href="classcstring.html">cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:80</div></div>
-<div class="ttc" id="anamespace_b_m_v2_html"><div class="ttname"><a href="namespace_b_m_v2.html">BMV2</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> action.cpp:21</div></div>
-<div class="ttc" id="astruct_b_m_v2_1_1_conversion_context_html"><div class="ttname"><a href="struct_b_m_v2_1_1_conversion_context.html">BMV2::ConversionContext</a></div><div class="ttdef"><b>Definition</b> helpers.h:263</div></div>
+<div class="ttc" id="astruct_b_m_v2_1_1_conversion_context_html"><div class="ttname"><a href="struct_b_m_v2_1_1_conversion_context.html">BMV2::ConversionContext</a></div><div class="ttdef"><b>Definition</b> helpers.h:274</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

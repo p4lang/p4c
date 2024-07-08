@@ -11,7 +11,7 @@ var searchData=
   ['enforceassumptions_8',['enforceAssumptions',['../class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a12f6f1b66720ea002a40b06b0a69d854',1,'P4Tools::P4Testgen::TestgenOptions']]],
   ['entries_9',['entries',['../struct_p4_1_1_p4_runtime_a_p_i.html#a96c3017c977cd32fb237116db5690869',1,'P4::P4RuntimeAPI']]],
   ['env_10',['env',['../class_p4_tools_1_1_abstract_execution_state.html#a3359280ed497ee08d2911bfd42b367d9',1,'P4Tools::AbstractExecutionState']]],
-  ['errorcodesmap_11',['errorCodesMap',['../class_b_m_v2_1_1_program_structure.html#a8786b719cfc95f67681f243f2a5306d4',1,'BMV2::ProgramStructure']]],
+  ['errorcodesmap_11',['errorCodesMap',['../class_p4_1_1_program_structure.html#a6d2ae70bf6a002aad26b8aba05905c92',1,'P4::ProgramStructure']]],
   ['errortracker_12',['errorTracker',['../class_error_reporter.html#a2660b04578583c4cffb7858553290729',1,'ErrorReporter']]],
   ['exitdefinitions_13',['exitDefinitions',['../class_p4_1_1_compute_write_set.html#a53207ee4f6fd7d4b3e7de236b79a5de3',1,'P4::ComputeWriteSet']]],
   ['extractssynthesized_14',['extractsSynthesized',['../class_p4_v1_1_1_program_structure.html#a48c3ea89638690d8da1ebde7bccadec9',1,'P4V1::ProgramStructure']]]

@@ -56,7 +56,7 @@ var searchData=
   ['inspectdpdkprogram_53',['InspectDpdkProgram',['../class_inspect_dpdk_program.html',1,'']]],
   ['inspector_54',['Inspector',['../class_inspector.html',1,'']]],
   ['inspectpnaprogram_55',['InspectPnaProgram',['../class_t_c_1_1_inspect_pna_program.html',1,'TC']]],
-  ['inspectpsaprogram_56',['InspectPsaProgram',['../class_b_m_v2_1_1_inspect_psa_program.html',1,'BMV2']]],
+  ['inspectpsaprogram_56',['InspectPsaProgram',['../class_p4_1_1_inspect_psa_program.html',1,'P4']]],
   ['instancebase_57',['InstanceBase',['../class_p4_1_1_instance_base.html',1,'P4']]],
   ['instantiatedirectcalls_58',['InstantiateDirectCalls',['../class_p4_1_1_instantiate_direct_calls.html',1,'P4']]],
   ['instantiation_59',['Instantiation',['../class_p4_1_1_instantiation.html',1,'P4']]],

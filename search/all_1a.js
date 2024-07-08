@@ -131,7 +131,7 @@ var searchData=
   ['resolvetablekeys_128',['resolveTableKeys',['../class_p4_tools_1_1_p4_testgen_1_1_table_stepper.html#af144b0b11eb8f2c96390dc786e84c79b',1,'P4Tools::P4Testgen::TableStepper']]],
   ['resolvetype_129',['resolveType',['../class_p4_1_1_resolution_context.html#a97def7f21070f742509dd15ce1c07a37',1,'P4::ResolutionContext::resolveType()'],['../class_p4_tools_1_1_abstract_execution_state.html#a844d84cb4d6168e233cc9cf5e7692bac',1,'P4Tools::AbstractExecutionState::resolveType()']]],
   ['resolveunique_130',['resolveUnique',['../class_p4_1_1_resolution_context.html#aa12b9915f218ea60f322e45d67b52ddd',1,'P4::ResolutionContext']]],
-  ['resourcemap_131',['resourceMap',['../class_b_m_v2_1_1_program_structure.html#a26cba188f4e71940e05d36706db3c96f',1,'BMV2::ProgramStructure']]],
+  ['resourcemap_131',['resourceMap',['../class_p4_1_1_program_structure.html#ac0188eb142e62d18c14ebd8d81e6b171',1,'P4::ProgramStructure']]],
   ['restricted_20tests_132',['Restricted Tests',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html#autotoc_md226',1,'']]],
   ['resubmit_133',['RESUBMIT',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html#autotoc_md142',1,'']]],
   ['result_134',['Result',['../class_p4_1_1_do_constant_folding.html#a2342289cbde2a320fa9887e509f4a30a',1,'P4::DoConstantFolding']]],

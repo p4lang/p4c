@@ -15,7 +15,7 @@ var searchData=
   ['ordered_5fmap_3c_20const_20ir_3a_3aideclaration_20_2a_2c_20unsigned_20int_20_3e_12',['ordered_map&lt; const IR::IDeclaration *, unsigned int &gt;',['../classordered__map.html',1,'']]],
   ['ordered_5fmap_3c_20const_20ir_3a_3aitypevar_20_2a_2c_20const_20ir_3a_3atype_20_2a_20_3e_13',['ordered_map&lt; const IR::ITypeVar *, const IR::Type * &gt;',['../classordered__map.html',1,'']]],
   ['ordered_5fmap_3c_20const_20ir_3a_3amethodcallexpression_20_2a_2c_20p4_3a_3afunctionspecialization_20_2a_20_3e_14',['ordered_map&lt; const IR::MethodCallExpression *, P4::FunctionSpecialization * &gt;',['../classordered__map.html',1,'']]],
-  ['ordered_5fmap_3c_20const_20ir_3a_3anode_20_2a_2c_20bmv2_3a_3ablock_5ft_20_3e_15',['ordered_map&lt; const IR::Node *, BMV2::block_t &gt;',['../classordered__map.html',1,'']]],
+  ['ordered_5fmap_3c_20const_20ir_3a_3anode_20_2a_2c_20block_5ft_20_3e_15',['ordered_map&lt; const IR::Node *, block_t &gt;',['../classordered__map.html',1,'']]],
   ['ordered_5fmap_3c_20const_20ir_3a_3anode_20_2a_2c_20const_20ir_3a_3acompiletimevalue_20_2a_20_3e_16',['ordered_map&lt; const IR::Node *, const IR::CompileTimeValue * &gt;',['../classordered__map.html',1,'']]],
   ['ordered_5fmap_3c_20const_20ir_3a_3anode_20_2a_2c_20const_20ir_3a_3ap4action_20_2a_20_3e_17',['ordered_map&lt; const IR::Node *, const IR::P4Action * &gt;',['../classordered__map.html',1,'']]],
   ['ordered_5fmap_3c_20const_20ir_3a_3anode_20_2a_2c_20ordered_5fset_20_3e_18',['ordered_map&lt; const IR::Node *, ordered_set &gt;',['../classordered__map.html',1,'']]],

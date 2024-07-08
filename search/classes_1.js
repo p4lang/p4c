@@ -47,7 +47,7 @@ var searchData=
   ['branch_44',['Branch',['../struct_p4_tools_1_1_p4_testgen_1_1_small_step_evaluator_1_1_branch.html',1,'P4Tools::P4Testgen::SmallStepEvaluator']]],
   ['branchinginstructiongeneration_45',['BranchingInstructionGeneration',['../class_d_p_d_k_1_1_branching_instruction_generation.html',1,'DPDK']]],
   ['breaklogicalexpressionparenthesis_46',['BreakLogicalExpressionParenthesis',['../class_d_p_d_k_1_1_break_logical_expression_parenthesis.html',1,'DPDK']]],
-  ['buildresourcemap_47',['BuildResourceMap',['../class_b_m_v2_1_1_build_resource_map.html',1,'BMV2']]],
+  ['buildresourcemap_47',['BuildResourceMap',['../class_p4_1_1_build_resource_map.html',1,'P4']]],
   ['builtinmethod_48',['BuiltInMethod',['../class_p4_1_1_built_in_method.html',1,'P4']]],
   ['bytealignment_49',['ByteAlignment',['../struct_d_p_d_k_1_1_byte_alignment.html',1,'DPDK']]]
 ];

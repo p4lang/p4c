@@ -134,55 +134,56 @@ $(function(){initNavTree('metermap_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">limitations under the License.</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">*/</span></div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#ifndef BACKENDS_BMV2_COMMON_METERMAP_H_</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#define BACKENDS_BMV2_COMMON_METERMAP_H_</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#ifndef BACKENDS_COMMON_METERMAP_H_</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#define BACKENDS_COMMON_METERMAP_H_</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;ir/ir.h&quot;</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_b_m_v2.html">BMV2</a> {</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
-<div class="foldopen" id="foldopen00024" data-start="{" data-end="};">
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="class_b_m_v2_1_1_direct_meter_map.html">   24</a></span><span class="keyword">class </span><a class="code hl_class" href="class_b_m_v2_1_1_direct_meter_map.html">DirectMeterMap</a> final {</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> <span class="keyword">public</span>:</div>
-<div class="foldopen" id="foldopen00026" data-start="{" data-end="};">
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="struct_b_m_v2_1_1_direct_meter_map_1_1_direct_meter_info.html">   26</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="struct_b_m_v2_1_1_direct_meter_map_1_1_direct_meter_info.html">DirectMeterInfo</a> {</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        <span class="keyword">const</span> IR::Expression *destinationField;</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        <span class="keyword">const</span> IR::P4Table *table;</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <span class="keywordtype">unsigned</span> tableSize;</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <a class="code hl_struct" href="struct_b_m_v2_1_1_direct_meter_map_1_1_direct_meter_info.html">DirectMeterInfo</a>() : destinationField(<span class="keyword">nullptr</span>), table(<span class="keyword">nullptr</span>), tableSize(0) {}</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    };</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">// TODO: This file should be in the BMv2 folder, but ProgramStructure still depends on it.</span></div>
+<div class="foldopen" id="foldopen00025" data-start="{" data-end="};">
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="class_p4_1_1_direct_meter_map.html">   25</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_direct_meter_map.html">DirectMeterMap</a> final {</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> <span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00027" data-start="{" data-end="};">
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="struct_p4_1_1_direct_meter_map_1_1_direct_meter_info.html">   27</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="struct_p4_1_1_direct_meter_map_1_1_direct_meter_info.html">DirectMeterInfo</a> {</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        <span class="keyword">const</span> IR::Expression *destinationField;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <span class="keyword">const</span> IR::P4Table *table;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        <span class="keywordtype">unsigned</span> tableSize;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <a class="code hl_struct" href="struct_p4_1_1_direct_meter_map_1_1_direct_meter_info.html">DirectMeterInfo</a>() : destinationField(<span class="keyword">nullptr</span>), table(<span class="keyword">nullptr</span>), tableSize(0) {}</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    };</div>
 </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    std::map&lt;const IR::IDeclaration *, DirectMeterInfo *&gt; directMeter;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <a class="code hl_struct" href="struct_b_m_v2_1_1_direct_meter_map_1_1_direct_meter_info.html">DirectMeterInfo</a> *createInfo(<span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *meter);</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_struct" href="struct_b_m_v2_1_1_direct_meter_map_1_1_direct_meter_info.html">DirectMeterInfo</a> *getInfo(<span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *meter);</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_b_m_v2_1_1_direct_meter_map.html#a00de5d22a9fadee3fa7d26607ef9ebe2">setDestination</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *meter, <span class="keyword">const</span> IR::Expression *destination);</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_b_m_v2_1_1_direct_meter_map.html#a729b4ffe6724377c7d36bdadc3c20eb9">setTable</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *meter, <span class="keyword">const</span> IR::P4Table *table);</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_b_m_v2_1_1_direct_meter_map.html#af8b97de9e43723a7cf58132846ee3ff9">setSize</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *meter, <span class="keywordtype">unsigned</span> size);</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>};</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    std::map&lt;const IR::IDeclaration *, DirectMeterInfo *&gt; directMeter;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <a class="code hl_struct" href="struct_p4_1_1_direct_meter_map_1_1_direct_meter_info.html">DirectMeterInfo</a> *createInfo(<span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *meter);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <a class="code hl_struct" href="struct_p4_1_1_direct_meter_map_1_1_direct_meter_info.html">DirectMeterInfo</a> *getInfo(<span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *meter);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_p4_1_1_direct_meter_map.html#a102769b86ab1e85c0202de351305f25a">setDestination</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *meter, <span class="keyword">const</span> IR::Expression *destination);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_p4_1_1_direct_meter_map.html#a5b36a4f0f1c5f34e9e011c68ba2ab800">setTable</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *meter, <span class="keyword">const</span> IR::P4Table *table);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_p4_1_1_direct_meter_map.html#a02723ad0ce5fec1018e66219486a767c">setSize</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *meter, <span class="keywordtype">unsigned</span> size);</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>};</div>
 </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>}  <span class="comment">// namespace BMV2</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_BMV2_COMMON_METERMAP_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_b_m_v2_1_1_direct_meter_map_html"><div class="ttname"><a href="class_b_m_v2_1_1_direct_meter_map.html">BMV2::DirectMeterMap</a></div><div class="ttdef"><b>Definition</b> metermap.h:24</div></div>
-<div class="ttc" id="aclass_b_m_v2_1_1_direct_meter_map_html_a00de5d22a9fadee3fa7d26607ef9ebe2"><div class="ttname"><a href="class_b_m_v2_1_1_direct_meter_map.html#a00de5d22a9fadee3fa7d26607ef9ebe2">BMV2::DirectMeterMap::setDestination</a></div><div class="ttdeci">void setDestination(const IR::IDeclaration *meter, const IR::Expression *destination)</div><div class="ttdoc">Set the destination that a meter is attached to??</div><div class="ttdef"><b>Definition</b> metermap.cpp:63</div></div>
-<div class="ttc" id="aclass_b_m_v2_1_1_direct_meter_map_html_a729b4ffe6724377c7d36bdadc3c20eb9"><div class="ttname"><a href="class_b_m_v2_1_1_direct_meter_map.html#a729b4ffe6724377c7d36bdadc3c20eb9">BMV2::DirectMeterMap::setTable</a></div><div class="ttdeci">void setTable(const IR::IDeclaration *meter, const IR::P4Table *table)</div><div class="ttdoc">Set the table that a direct meter is attached to.</div><div class="ttdef"><b>Definition</b> metermap.cpp:34</div></div>
-<div class="ttc" id="aclass_b_m_v2_1_1_direct_meter_map_html_af8b97de9e43723a7cf58132846ee3ff9"><div class="ttname"><a href="class_b_m_v2_1_1_direct_meter_map.html#af8b97de9e43723a7cf58132846ee3ff9">BMV2::DirectMeterMap::setSize</a></div><div class="ttdeci">void setSize(const IR::IDeclaration *meter, unsigned size)</div><div class="ttdoc">Set the size of the table that a meter is attached to.</div><div class="ttdef"><b>Definition</b> metermap.cpp:80</div></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_COMMON_METERMAP_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_i_r_1_1_i_declaration_html"><div class="ttname"><a href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a></div><div class="ttdoc">The Declaration interface, representing objects with names.</div><div class="ttdef"><b>Definition</b> declaration.h:26</div></div>
-<div class="ttc" id="anamespace_b_m_v2_html"><div class="ttname"><a href="namespace_b_m_v2.html">BMV2</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> action.cpp:21</div></div>
-<div class="ttc" id="astruct_b_m_v2_1_1_direct_meter_map_1_1_direct_meter_info_html"><div class="ttname"><a href="struct_b_m_v2_1_1_direct_meter_map_1_1_direct_meter_info.html">BMV2::DirectMeterMap::DirectMeterInfo</a></div><div class="ttdef"><b>Definition</b> metermap.h:26</div></div>
+<div class="ttc" id="aclass_p4_1_1_direct_meter_map_html"><div class="ttname"><a href="class_p4_1_1_direct_meter_map.html">P4::DirectMeterMap</a></div><div class="ttdef"><b>Definition</b> metermap.h:25</div></div>
+<div class="ttc" id="aclass_p4_1_1_direct_meter_map_html_a02723ad0ce5fec1018e66219486a767c"><div class="ttname"><a href="class_p4_1_1_direct_meter_map.html#a02723ad0ce5fec1018e66219486a767c">P4::DirectMeterMap::setSize</a></div><div class="ttdeci">void setSize(const IR::IDeclaration *meter, unsigned size)</div><div class="ttdoc">Set the size of the table that a meter is attached to.</div><div class="ttdef"><b>Definition</b> metermap.cpp:80</div></div>
+<div class="ttc" id="aclass_p4_1_1_direct_meter_map_html_a102769b86ab1e85c0202de351305f25a"><div class="ttname"><a href="class_p4_1_1_direct_meter_map.html#a102769b86ab1e85c0202de351305f25a">P4::DirectMeterMap::setDestination</a></div><div class="ttdeci">void setDestination(const IR::IDeclaration *meter, const IR::Expression *destination)</div><div class="ttdoc">Set the destination that a meter is attached to??</div><div class="ttdef"><b>Definition</b> metermap.cpp:63</div></div>
+<div class="ttc" id="aclass_p4_1_1_direct_meter_map_html_a5b36a4f0f1c5f34e9e011c68ba2ab800"><div class="ttname"><a href="class_p4_1_1_direct_meter_map.html#a5b36a4f0f1c5f34e9e011c68ba2ab800">P4::DirectMeterMap::setTable</a></div><div class="ttdeci">void setTable(const IR::IDeclaration *meter, const IR::P4Table *table)</div><div class="ttdoc">Set the table that a direct meter is attached to.</div><div class="ttdef"><b>Definition</b> metermap.cpp:34</div></div>
+<div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
+<div class="ttc" id="astruct_p4_1_1_direct_meter_map_1_1_direct_meter_info_html"><div class="ttname"><a href="struct_p4_1_1_direct_meter_map_1_1_direct_meter_info.html">P4::DirectMeterMap::DirectMeterInfo</a></div><div class="ttdef"><b>Definition</b> metermap.h:27</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_dec21994cd756836ecefab773235960a.html">backends</a></li><li class="navelem"><a class="el" href="dir_0c928694ca31202195ad0b3acacc42f1.html">bmv2</a></li><li class="navelem"><a class="el" href="dir_daf1a9a87496afcb18fc8ff7b0a723fc.html">common</a></li><li class="navelem"><b>metermap.h</b></li>
+    <li class="navelem"><a class="el" href="dir_dec21994cd756836ecefab773235960a.html">backends</a></li><li class="navelem"><a class="el" href="dir_aa16147d65a3d12a548a292d018a97fc.html">common</a></li><li class="navelem"><b>metermap.h</b></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
