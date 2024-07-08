@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['xdp_20based_20design_0',['XDP-based design',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html#autotoc_md138',1,'']]],
-  ['xdp2tc_20mode_1',['XDP2TC mode',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html#autotoc_md149',1,'']]],
+  ['xdp_20based_20design_0',['XDP-based design',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html#autotoc_md145',1,'']]],
+  ['xdp2tc_20mode_1',['XDP2TC mode',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html#autotoc_md156',1,'']]],
   ['xdp_5fmodel_2',['Xdp_Model',['../struct_e_b_p_f_1_1_xdp___model.html',1,'EBPF']]],
   ['xdpegressdeparserpsa_3',['XDPEgressDeparserPSA',['../class_e_b_p_f_1_1_x_d_p_egress_deparser_p_s_a.html',1,'EBPF']]],
   ['xdpegresspipeline_4',['XDPEgressPipeline',['../class_e_b_p_f_1_1_x_d_p_egress_pipeline.html',1,'EBPF']]],

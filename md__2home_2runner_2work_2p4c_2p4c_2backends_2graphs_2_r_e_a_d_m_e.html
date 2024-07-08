@@ -118,19 +118,19 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_
   <div class="headertitle"><div class="title">Graphs Backend</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md179"></a> This backend produces visual representations of a <a class="el" href="namespace_p4.html">P4</a> program as dot files. For now it supports the generation of graphs for top-level control and parser blocks, generation of fullGraph, which merges graphs for top-level program blocks and json representation of fullGraph.</p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md186"></a> This backend produces visual representations of a <a class="el" href="namespace_p4.html">P4</a> program as dot files. For now it supports the generation of graphs for top-level control and parser blocks, generation of fullGraph, which merges graphs for top-level program blocks and json representation of fullGraph.</p>
 <p>dot files can be processed by the <code>dot</code> command from <a href="http://graphviz.org">Graphviz</a>, which can lay out the nodes and edges of the graphs and write the result in many different graphical file formats.</p>
-<h1><a class="anchor" id="autotoc_md180"></a>
+<h1><a class="anchor" id="autotoc_md187"></a>
 Dependencies</h1>
 <p>In addition to other P4C dependencies, this backend requires the Boost graph headers. On a Debian system, they can be installed with <code>sudo apt-get install libboost-graph-dev</code>.</p>
-<h1><a class="anchor" id="autotoc_md181"></a>
+<h1><a class="anchor" id="autotoc_md188"></a>
 Usage</h1>
 <div class="fragment"><div class="line">mkdir out</div>
 <div class="line">p4c-graphs &lt;prog.p4&gt; --graphs-dir out</div>
 <div class="line">cd out</div>
 <div class="line">dot &lt;name&gt;.dot -Tpng &gt; &lt;name&gt;.png</div>
 </div><!-- fragment --><p>For generation of dot fullGraph, use option <code>--fullGraph</code> and for generation of fullGraph represented in json, use option <code>--jsonOut</code>.</p>
-<h1><a class="anchor" id="autotoc_md182"></a>
+<h1><a class="anchor" id="autotoc_md189"></a>
 Format of json output</h1>
 <p>Output in json format is an object with fields:</p>
 <ul>
@@ -158,7 +158,7 @@ Format of json output</h1>
 </li>
 </ul>
 <p>Objects which represent program blocks are ordered in <code>nodes</code>, in the order in which they are defined in the main declaration of <a class="el" href="namespace_p4.html">P4</a> program.</p>
-<h1><a class="anchor" id="autotoc_md183"></a>
+<h1><a class="anchor" id="autotoc_md190"></a>
 Example</h1>
 <p>Here is the graph generated for the ingress control block of the <a href="../../testdata/p4_16_samples/flowlet_switching-bmv2.p4">flowlet_switching-bmv2.p4</a> test program:</p>
 <div class="image">
