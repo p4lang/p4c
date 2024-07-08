@@ -21,7 +21,6 @@ limitations under the License.
 
 #include <filesystem>
 #include <set>
-#include <unordered_map>
 
 #include "ir/configuration.h"
 #include "ir/pass_manager.h"
@@ -29,71 +28,69 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/options.h"
 
-// Standard include paths for .p4 header files. The values are determined by
-// `configure`.
+/// Standard include paths for .p4 header files. The values are determined by
+/// `configure`.
 extern const char *p4includePath;
 extern const char *p4_14includePath;
 
-// Base class for compiler options.
-// This class contains the options for the front-ends.
-// Each back-end should subclass this file.
+/// Base class for compiler options.
+/// This class contains the options for the front-ends.
+/// Each back-end should subclass this file.
 class ParserOptions : public Util::Options {
     bool close_input = false;
-    static const char *defaultMessage;
 
-    // annotation names that are to be ignored by the compiler
+    ///  Annotation names that are to be ignored by the compiler.
     std::set<cstring> disabledAnnotations;
 
-    // used to generate dump file names
+    ///  Used to generate dump file names.
     mutable size_t dump_uid = 0;
 
  protected:
-    // Function that is returned by getDebugHook.
+    /// Function that is returned by getDebugHook.
     void dumpPass(const char *manager, unsigned seq, const char *pass, const IR::Node *node) const;
-    // Checks if parsed options make sense with respect to each-other.
-    virtual void validateOptions() const;
 
  public:
-    ParserOptions();
+    explicit ParserOptions(std::string_view defaultMessage = "Parse a P4 program");
+
     std::vector<const char *> *process(int argc, char *const argv[]) override;
     enum class FrontendVersion { P4_14, P4_16 };
-    // Name of executable that is being run.
+    /// Name of executable that is being run.
     cstring exe_name;
-    // Which language to compile
+    /// Which language to compile
     FrontendVersion langVersion = FrontendVersion::P4_16;
-    // options to pass to preprocessor
+    /// options to pass to preprocessor
     cstring preprocessor_options = cstring::empty;
-    // file to compile (- for stdin)
+    /// file to compile (- for stdin)
     std::filesystem::path file;
-    // if true preprocess only
+    /// if true preprocess only
     bool doNotCompile = false;
-    // Compiler version.
+    /// Compiler version.
     cstring compilerVersion;
-    // if true skip preprocess
+    /// if true skip preprocess
     bool doNotPreprocess = false;
-    // substrings matched against pass names
+    /// substrings matched against pass names
     std::vector<cstring> top4;
-    // debugging dumps of programs written in this folder
+    /// debugging dumps of programs written in this folder
     std::filesystem::path dumpFolder = ".";
-    // If false, optimization of callee parsers (subparsers) inlining is disabled.
+    /// If false, optimization of callee parsers (subparsers) inlining is disabled.
     bool optimizeParserInlining = false;
-    // Expect that the only remaining argument is the input file.
+    /// Expect that the only remaining argument is the input file.
     void setInputFile();
-    // Return target specific include path.
+    /// Return target specific include path.
     const char *getIncludePath() override;
-    // Returns the output of the preprocessor.
+    /// Returns the output of the preprocessor.
     FILE *preprocess();
-    // Closes the input stream returned by preprocess.
+    /// Closes the input stream returned by preprocess.
     void closePreprocessedInput(FILE *input) const;
-    // True if we are compiling a P4 v1.0 or v1.1 program
+    /// True if we are compiling a P4 v1.0 or v1.1 program
     bool isv1() const;
-    // Get a debug hook function suitable for insertion
-    // in the pass managers that are executed.
+    /// Get a debug hook function suitable for insertion
+    /// in the pass managers that are executed.
     DebugHook getDebugHook() const;
-    // Check whether this particular annotation was disabled
+    /// Check whether this particular annotation was disabled
     bool isAnnotationDisabled(const IR::Annotation *a) const;
-    // Search and set 'includePathOut' to be the first valid path from the
-    // list of possible relative paths.
+    /// Search and set 'includePathOut' to be the first valid path from the
+    /// list of possible relative paths.
     bool searchForIncludePath(const char *&includePathOut, std::vector<cstring> relativePaths,
                               const char *);
     /// If true do not generate #include statements.
@@ -192,5 +189,4 @@ class P4CContextWithOptions final : public P4CContext {
     /// Compiler options for this compilation context.
     OptionsType optionsInstance;
 };
-
 #endif /* FRONTENDS_COMMON_PARSER_OPTIONS_H_*/

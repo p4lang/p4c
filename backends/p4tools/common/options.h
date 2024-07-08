@@ -46,9 +46,7 @@ class AbstractP4cToolOptions : protected Util::Options {
     /// Hook for customizing options processing.
     std::vector<const char *> *process(int argc, char *const argv[]) override;
 
-    /// Checks if parsed options make sense with respect to each-other.
-    /// @returns true if the validation was successfull and false otherwise.
-    [[nodiscard]] virtual bool validateOptions() const;
+    [[nodiscard]] bool validateOptions() const override;
 
     /// The name of the tool associated with these options.
     [[nodiscard]] const std::string &getToolName() const;

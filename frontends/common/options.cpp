@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/frontend.h"
 
-CompilerOptions::CompilerOptions() : ParserOptions() {
+CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOptions(defaultMessage) {
     registerOption(
         "--excludeFrontendPasses", "pass1[,pass2]",
         [this](const char *arg) {
@@ -176,7 +176,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
 
 bool CompilerOptions::enable_intrinsic_metadata_fix() { return true; }
 
-void CompilerOptions::validateOptions() const {
+bool CompilerOptions::validateOptions() const {
     if (!p4RuntimeFile.isNullOrEmpty()) {
         ::warning(ErrorType::WARN_DEPRECATED,
                   "'--p4runtime-file' and '--p4runtime-format' are deprecated, "
@@ -187,4 +187,5 @@ void CompilerOptions::validateOptions() const {
                   "'--p4runtime-entries-file' is deprecated, "
                   "consider using '--p4runtime-entries-files' instead");
     }
+    return ParserOptions::validateOptions();
 }
