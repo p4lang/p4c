@@ -139,6 +139,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a7dad3c9f4bcb037160336ca45ec134b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7e6a8e1149a70913b9ea3a4cd1d900e4" id="r_a7e6a8e1149a70913b9ea3a4cd1d900e4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7e6a8e1149a70913b9ea3a4cd1d900e4">emit</a> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *builder) override</td></tr>
 <tr class="separator:a7e6a8e1149a70913b9ea3a4cd1d900e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a318029796c2d55a26c6beb1dd999ab70" id="r_a318029796c2d55a26c6beb1dd999ab70"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a318029796c2d55a26c6beb1dd999ab70">emitDeclaration</a> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *builder, const IR::Declaration *decl)</td></tr>
+<tr class="separator:a318029796c2d55a26c6beb1dd999ab70"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a603216932b89a8aa5787f2dab9e5ef7a" id="r_a603216932b89a8aa5787f2dab9e5ef7a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a603216932b89a8aa5787f2dab9e5ef7a">emitPreDeparser</a> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *builder) override</td></tr>
 <tr class="separator:a603216932b89a8aa5787f2dab9e5ef7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a.html">EBPF::EBPFDeparserPSA</a></td></tr>
@@ -148,8 +150,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ada355f71dece77f316820b6d8f728e6e inherit pub_methods_class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a" id="r_ada355f71dece77f316820b6d8f728e6e"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>DECLARE_TYPEINFO</b> (<a class="el" href="class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a.html">EBPFDeparserPSA</a>, <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_deparser.html">EBPFDeparser</a>)</td></tr>
 <tr class="separator:ada355f71dece77f316820b6d8f728e6e inherit pub_methods_class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a636ee59eb72cc65f8f0c3eb81f429ab4 inherit pub_methods_class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a" id="r_a636ee59eb72cc65f8f0c3eb81f429ab4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a.html#a636ee59eb72cc65f8f0c3eb81f429ab4">emitDeclaration</a> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *builder, const IR::Declaration *decl) override</td></tr>
-<tr class="separator:a636ee59eb72cc65f8f0c3eb81f429ab4 inherit pub_methods_class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a626645179dac44af40dc0a759ea3bdc3 inherit pub_methods_class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a" id="r_a626645179dac44af40dc0a759ea3bdc3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a.html#a626645179dac44af40dc0a759ea3bdc3">emitDeparserExternCalls</a> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *builder) override</td></tr>
 <tr class="separator:a626645179dac44af40dc0a759ea3bdc3 inherit pub_methods_class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2705bc8ca24ce2dfeb42c02e84ea7d33 inherit pub_methods_class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a" id="r_a2705bc8ca24ce2dfeb42c02e84ea7d33"><td class="memItemLeft" align="right" valign="top">
@@ -384,6 +384,37 @@ virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><b>toImp
 </div><div class="memdoc">
 
 <p>Reimplemented from <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_deparser.html">EBPF::EBPFDeparser</a>.</p>
+
+</div>
+</div>
+<a id="a318029796c2d55a26c6beb1dd999ab70" name="a318029796c2d55a26c6beb1dd999ab70"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a318029796c2d55a26c6beb1dd999ab70">&#9670;&#160;</a></span>emitDeclaration()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TC::IngressDeparserPNA::emitDeclaration </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *</td>          <td class="paramname"><span class="paramname"><em>builder</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IR::Declaration *</td>          <td class="paramname"><span class="paramname"><em>decl</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented from <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a.html">EBPF::EBPFDeparserPSA</a>.</p>
 
 </div>
 </div>
