@@ -48,7 +48,7 @@ TARGET=$6
 for i in $(seq 1 $NUM_ITERATIONS); do
     echo "Generating program $i"
     # Generate different programs with different seeds (to inspect the behavior of the generation and compilation process in a finer/smaller granularity).
-    $SMITH_BIN --target $TARGET --arch $ARCH --seed $i $TEST_DIR/out_$i.p4
+    $SMITH_BIN --arch $ARCH --target $TARGET --seed $i $TEST_DIR/out_$i.p4
     # TODO: Do not compile until we have stabilized.
     $COMPILER_BIN $TEST_DIR/out_$i.p4
 done
