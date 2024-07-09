@@ -172,8 +172,8 @@ const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>ge
 <tr class="memitem:a6317805ca731d8a2b89edcacc61b5518" id="r_a6317805ca731d8a2b89edcacc61b5518"><td class="memItemLeft" align="right" valign="top">std::vector&lt; const char * &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6317805ca731d8a2b89edcacc61b5518">process</a> (int argc, char *const argv[]) override</td></tr>
 <tr class="memdesc:a6317805ca731d8a2b89edcacc61b5518"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook for customizing options processing.  <br /></td></tr>
 <tr class="separator:a6317805ca731d8a2b89edcacc61b5518"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a51dffdb8a23120c34ca7cfc428bf0457" id="r_a51dffdb8a23120c34ca7cfc428bf0457"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a51dffdb8a23120c34ca7cfc428bf0457">validateOptions</a> () const</td></tr>
-<tr class="separator:a51dffdb8a23120c34ca7cfc428bf0457"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d283edc568c0df5748b5aa5c94bfb0d" id="r_a3d283edc568c0df5748b5aa5c94bfb0d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3d283edc568c0df5748b5aa5c94bfb0d">validateOptions</a> () const override</td></tr>
+<tr class="separator:a3d283edc568c0df5748b5aa5c94bfb0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_class_util_1_1_options"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_util_1_1_options')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_util_1_1_options.html">Util::Options</a></td></tr>
 <tr class="memitem:a3768ef926e0db98dd9bbb4664daa1662 inherit pro_methods_class_util_1_1_options" id="r_a3768ef926e0db98dd9bbb4664daa1662"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>Options</b> (std::string_view message)</td></tr>
@@ -196,8 +196,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setOutStream</b> (std
 <tr class="memitem:ab26bbb648f37d3a1827c429494c2b293 inherit pro_methods_class_util_1_1_options" id="r_ab26bbb648f37d3a1827c429494c2b293"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getCompileCommand</b> ()</td></tr>
 <tr class="separator:ab26bbb648f37d3a1827c429494c2b293 inherit pro_methods_class_util_1_1_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad869002984bf47adac247696050f47cb inherit pro_methods_class_util_1_1_options" id="r_ad869002984bf47adac247696050f47cb"><td class="memItemLeft" align="right" valign="top">
-virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><b>getIncludePath</b> ()=0</td></tr>
+<tr class="memitem:ad869002984bf47adac247696050f47cb inherit pro_methods_class_util_1_1_options" id="r_ad869002984bf47adac247696050f47cb"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_util_1_1_options.html#ad869002984bf47adac247696050f47cb">getIncludePath</a> ()=0</td></tr>
 <tr class="separator:ad869002984bf47adac247696050f47cb inherit pro_methods_class_util_1_1_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ac5584bb6bf1f68ac5813056624493c inherit pro_methods_class_util_1_1_options" id="r_a2ac5584bb6bf1f68ac5813056624493c"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>usage</b> ()</td></tr>
@@ -256,9 +255,9 @@ Additional Inherited Members</h2></td></tr>
 , <a class="el" href="class_util_1_1_options.html#a7e885cb546ba27712484c084f880e10ea6d85bc9fd5f9fca0061a6bbd7fd6fee2">OptionalArgument</a> = 1 &lt;&lt; 1
  }</td></tr>
 <tr class="separator:a7e885cb546ba27712484c084f880e10e inherit pro_types_class_util_1_1_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a409f3eb14ec4c7ccc02b4fddd9fa8b42 inherit pro_types_class_util_1_1_options" id="r_a409f3eb14ec4c7ccc02b4fddd9fa8b42"><td class="memItemLeft" align="right" valign="top">
-typedef std::function&lt; bool(const char *optarg)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>OptionProcessor</b></td></tr>
-<tr class="separator:a409f3eb14ec4c7ccc02b4fddd9fa8b42 inherit pro_types_class_util_1_1_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab957fd4b6634d6226a66717f145207a4 inherit pro_types_class_util_1_1_options" id="r_ab957fd4b6634d6226a66717f145207a4"><td class="memItemLeft" align="right" valign="top">
+using&#160;</td><td class="memItemRight" valign="bottom"><b>OptionProcessor</b> = std::function&lt;bool(const char *)&gt;</td></tr>
+<tr class="separator:ab957fd4b6634d6226a66717f145207a4 inherit pro_types_class_util_1_1_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Encapsulates and processes command-line options for a compiler-based tool. Implementations should use the singleton pattern and define a static get() for obtaining the singleton instance. </p>
@@ -315,8 +314,8 @@ typedef std::function&lt; bool(const char *optarg)&gt;&#160;</td><td class="memI
 
 </div>
 </div>
-<a id="a51dffdb8a23120c34ca7cfc428bf0457" name="a51dffdb8a23120c34ca7cfc428bf0457"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a51dffdb8a23120c34ca7cfc428bf0457">&#9670;&#160;</a></span>validateOptions()</h2>
+<a id="a3d283edc568c0df5748b5aa5c94bfb0d" name="a3d283edc568c0df5748b5aa5c94bfb0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d283edc568c0df5748b5aa5c94bfb0d">&#9670;&#160;</a></span>validateOptions()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -333,11 +332,13 @@ typedef std::function&lt; bool(const char *optarg)&gt;&#160;</td><td class="memI
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">nodiscard</span><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">nodiscard</span><span class="mlabel">override</span><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Checks if parsed options make sense with respect to each-other. </p><dl class="section return"><dt>Returns</dt><dd>true if the validation was successfull and false otherwise. </dd></dl>
+<p>Checks if parsed options make sense with respect to each-other. </p><dl class="section return"><dt>Returns</dt><dd>true if the validation was successful and false otherwise. </dd></dl>
+
+<p>Reimplemented from <a class="el" href="class_util_1_1_options.html#ac772484b19292a04a739fd665e7f9239">Util::Options</a>.</p>
 
 <p>Reimplemented in <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#abde27b75a7f3fb760ac906b96794442f">P4Tools::P4Testgen::TestgenOptions</a>.</p>
 

@@ -175,7 +175,7 @@ $(function(){initNavTree('backends_2bmv2_2common_2options_8h_source.html',''); i
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>            <span class="stringliteral">&quot;--fromJSON&quot;</span>, <span class="stringliteral">&quot;file&quot;</span>,</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>            [<span class="keyword">this</span>](<span class="keyword">const</span> <span class="keywordtype">char</span> *arg) {</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>                <a class="code hl_variable" href="class_b_m_v2_1_1_b_m_v2_options.html#a842f02b528fe0f67b6c0a6afae53902e">loadIRFromJson</a> = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>                file = arg;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>                <a class="code hl_variable" href="class_parser_options.html#a6462ed7df9925391aae4f353d59d2490">file</a> = arg;</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>                <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>            },</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>            <span class="stringliteral">&quot;Use IR representation from JsonFile dumped previously,&quot;</span></div>
@@ -194,7 +194,8 @@ $(function(){initNavTree('backends_2bmv2_2common_2options_8h_source.html',''); i
 <div class="ttc" id="aclass_b_m_v2_1_1_b_m_v2_options_html_ab256569ada9d5b8960f3892688efc6b6"><div class="ttname"><a href="class_b_m_v2_1_1_b_m_v2_options.html#ab256569ada9d5b8960f3892688efc6b6">BMV2::BMV2Options::outputFile</a></div><div class="ttdeci">std::filesystem::path outputFile</div><div class="ttdoc">File to output to.</div><div class="ttdef"><b>Definition</b> backends/bmv2/common/options.h:31</div></div>
 <div class="ttc" id="aclass_b_m_v2_1_1_b_m_v2_options_html_af0aead2b28d4cd78156b6cf1409ff74f"><div class="ttname"><a href="class_b_m_v2_1_1_b_m_v2_options.html#af0aead2b28d4cd78156b6cf1409ff74f">BMV2::BMV2Options::emitExterns</a></div><div class="ttdeci">bool emitExterns</div><div class="ttdoc">Generate externs.</div><div class="ttdef"><b>Definition</b> backends/bmv2/common/options.h:29</div></div>
 <div class="ttc" id="aclass_compiler_options_html"><div class="ttname"><a href="class_compiler_options.html">CompilerOptions</a></div><div class="ttdef"><b>Definition</b> frontends/common/options.h:28</div></div>
-<div class="ttc" id="aclass_p4_c_context_with_options_html"><div class="ttname"><a href="class_p4_c_context_with_options.html">P4CContextWithOptions</a></div><div class="ttdef"><b>Definition</b> parser_options.h:168</div></div>
+<div class="ttc" id="aclass_p4_c_context_with_options_html"><div class="ttname"><a href="class_p4_c_context_with_options.html">P4CContextWithOptions</a></div><div class="ttdef"><b>Definition</b> parser_options.h:165</div></div>
+<div class="ttc" id="aclass_parser_options_html_a6462ed7df9925391aae4f353d59d2490"><div class="ttname"><a href="class_parser_options.html#a6462ed7df9925391aae4f353d59d2490">ParserOptions::file</a></div><div class="ttdeci">std::filesystem::path file</div><div class="ttdoc">file to compile (- for stdin)</div><div class="ttdef"><b>Definition</b> parser_options.h:64</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

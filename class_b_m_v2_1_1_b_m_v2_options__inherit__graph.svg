@@ -85,7 +85,7 @@
 <g id="Node000003" class="node">
 <title>Node3</title>
 <g id="a_Node000003"><a xlink:href="class_parser_options.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="193,-184 109,-184 109,-165 193,-165 193,-184"/>
+<polygon fill="white" stroke="#666666" points="193,-184 109,-184 109,-165 193,-165 193,-184"/>
 <text text-anchor="middle" x="151" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">ParserOptions</text>
 </a>
 </g>

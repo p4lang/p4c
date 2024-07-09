@@ -207,8 +207,8 @@ $(function(){initNavTree('dpdk_context_8h_source.html',''); initResizable(true);
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keywordtype">void</span> initTopLevelCtxt(<a class="code hl_class" href="class_d_p_d_k_1_1_dpdk_options.html">DpdkOptions</a> &amp;options) {</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        buildDate = options.getBuildDate();</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        compileCommand = options.getCompileCommand();</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        progName = options.file.stem();</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        compilerVersion = options.compilerVersion;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        progName = options.<a class="code hl_variable" href="class_parser_options.html#a6462ed7df9925391aae4f353d59d2490">file</a>.stem();</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        compilerVersion = options.<a class="code hl_variable" href="class_parser_options.html#ac801157bb2013290358dfa7a2a3e19c3">compilerVersion</a>;</div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    }</div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>};</div>
 </div>
@@ -303,6 +303,8 @@ $(function(){initNavTree('dpdk_context_8h_source.html',''); initResizable(true);
 <div class="ttc" id="aclass_i_r_1_1_indexed_vector_html"><div class="ttname"><a href="class_i_r_1_1_indexed_vector.html">IR::IndexedVector</a></div><div class="ttdef"><b>Definition</b> node.h:50</div></div>
 <div class="ttc" id="aclass_inspector_html"><div class="ttname"><a href="class_inspector.html">Inspector</a></div><div class="ttdef"><b>Definition</b> visitor.h:396</div></div>
 <div class="ttc" id="aclass_p4_1_1_reference_map_html"><div class="ttname"><a href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a></div><div class="ttdoc">Class used to encode maps from paths to declarations.</div><div class="ttdef"><b>Definition</b> referenceMap.h:66</div></div>
+<div class="ttc" id="aclass_parser_options_html_a6462ed7df9925391aae4f353d59d2490"><div class="ttname"><a href="class_parser_options.html#a6462ed7df9925391aae4f353d59d2490">ParserOptions::file</a></div><div class="ttdeci">std::filesystem::path file</div><div class="ttdoc">file to compile (- for stdin)</div><div class="ttdef"><b>Definition</b> parser_options.h:64</div></div>
+<div class="ttc" id="aclass_parser_options_html_ac801157bb2013290358dfa7a2a3e19c3"><div class="ttname"><a href="class_parser_options.html#ac801157bb2013290358dfa7a2a3e19c3">ParserOptions::compilerVersion</a></div><div class="ttdeci">cstring compilerVersion</div><div class="ttdoc">Compiler version.</div><div class="ttdef"><b>Definition</b> parser_options.h:68</div></div>
 <div class="ttc" id="aclass_util_1_1_json_array_html"><div class="ttname"><a href="class_util_1_1_json_array.html">Util::JsonArray</a></div><div class="ttdef"><b>Definition</b> json.h:111</div></div>
 <div class="ttc" id="aclass_util_1_1_json_object_html"><div class="ttname"><a href="class_util_1_1_json_object.html">Util::JsonObject</a></div><div class="ttdef"><b>Definition</b> json.h:158</div></div>
 <div class="ttc" id="aclasscstring_html"><div class="ttname"><a href="classcstring.html">cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:80</div></div>

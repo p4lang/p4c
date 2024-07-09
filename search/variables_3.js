@@ -14,6 +14,9 @@ var searchData=
   ['directmetermap_11',['directMeterMap',['../class_p4_1_1_program_structure.html#a6949dff18c1cf68422ead4da855a3b38',1,'P4::ProgramStructure']]],
   ['directmeters_12',['directMeters',['../class_p4_v1_1_1_program_structure.html#a513f0532f2d92cd061fc129c574efc64',1,'P4V1::ProgramStructure']]],
   ['disableinformationlogging_13',['disableInformationLogging',['../class_p4_tools_1_1_abstract_p4c_tool_options.html#ab4a3596445c16f2321461502feeeaa82',1,'P4Tools::AbstractP4cToolOptions']]],
-  ['drop_5fvar_14',['DROP_VAR',['../class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_constants.html#a44972f6bd6a47c2a4f1d512f39787c85',1,'P4Tools::P4Testgen::Pna::PnaConstants']]],
-  ['droppedpacketonly_15',['droppedPacketOnly',['../class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a2b54f41713d74d52028002a76fa444ba',1,'P4Tools::P4Testgen::TestgenOptions']]]
+  ['donotcompile_14',['doNotCompile',['../class_parser_options.html#a8ebe8a4ebed5e09c7be99cd42047db0e',1,'ParserOptions']]],
+  ['donotpreprocess_15',['doNotPreprocess',['../class_parser_options.html#aed40ea3a9a4bdceeb5e2a28df4cc8195',1,'ParserOptions']]],
+  ['drop_5fvar_16',['DROP_VAR',['../class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_constants.html#a44972f6bd6a47c2a4f1d512f39787c85',1,'P4Tools::P4Testgen::Pna::PnaConstants']]],
+  ['droppedpacketonly_17',['droppedPacketOnly',['../class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a2b54f41713d74d52028002a76fa444ba',1,'P4Tools::P4Testgen::TestgenOptions']]],
+  ['dumpfolder_18',['dumpFolder',['../class_parser_options.html#a7bc164a8b80093361ec408fb5b6ab4cb',1,'ParserOptions']]]
 ];

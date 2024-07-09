@@ -398,24 +398,25 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"class_d_p_d_k_1_1_dpdk_backend.html",
+"class_d_p_d_k_1_1_dpdk_asm_optimization.html",
 "class_e_b_p_f_1_1_e_b_p_f_digest_p_s_a_value_visitor.html#a864dfee7d3692324fc53e84fd568ee09",
 "class_e_b_p_f_1_1_p_s_a_ebpf_generator.html#ae389ba18593ad2362e74c36d22db1b43",
-"class_p4_1_1_choose_error_representation.html#aa20a4fa1cbeb9a32f4f956cbf8bbd545",
-"class_p4_1_1_discover_functions_inlining.html",
-"class_p4_1_1_flatten_interface_structs.html",
+"class_p4_1_1_choose_error_representation.html#a62c172ace046806561c64c7206955d61",
+"class_p4_1_1_discover_actions_inlining.html",
+"class_p4_1_1_flatten_headers.html",
 "class_p4_1_1_program_structure.html#a5bc8ec7152ddb5e6fc4dc4b7a8ad390e",
 "class_p4_1_1_storage_location.html",
-"class_p4_tools_1_1_abstract_execution_state.html#a8424247606da28357a59cc3e81a06851",
-"class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_test_framework.html#ace0eec633f57e3fdf9fcb32e32370eb4",
-"class_p4_tools_1_1_p4_testgen_1_1_execution_state.html#afef478eb4ffb7c691f594860bcc165dc",
-"class_p4_tools_1_1_p4_testgen_1_1_test_framework.html#a14a7cebe8d115fc8548fd086bc3d0028",
-"class_p4_tools_1_1_z3_solver.html#abf5b9c62f7b10b38e50ded797d0d7ff5",
-"class_test_1_1_z3_test_1_1_z3_solver_shr_s.html",
-"functions_func_j.html",
-"md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2_r_e_a_d_m_e.html",
-"struct_b_m_v2_1_1_conversion_context.html#a96466543af95997b7d35eb576132e8ca",
-"struct_p4_1_1_direct_meter_map_1_1_direct_meter_info.html"
+"class_p4_tools_1_1_abstract_execution_state.html#a737e2935fffd4f9c3ef371421966fa6f",
+"class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_test_framework.html#a9f9beba1630e09d38639e2c96a96a9a8",
+"class_p4_tools_1_1_p4_testgen_1_1_execution_state.html#afe042f41fe356efba76a43f0121f6fd2",
+"class_p4_tools_1_1_p4_testgen_1_1_test_framework.html",
+"class_p4_tools_1_1_z3_solver.html#aba6970917881f1cb48fe46b6be0e2f16",
+"class_test_1_1_z3_solver_satisfiability_checks.html",
+"classsafe__vector.html",
+"md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html#autotoc_md211",
+"namespace_p4_tools_1_1_control_plane_state.html#a20856e5cff4ffa57852a763df5213113",
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_v1_model_arch_handler_builder.html#a0516186a81eff688f411d2cf46c8175e",
+"structhash__vector__base_1_1lookup__cache.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

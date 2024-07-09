@@ -148,9 +148,9 @@ Public Types</h2></td></tr>
 , <a class="el" href="#a7e885cb546ba27712484c084f880e10ea6d85bc9fd5f9fca0061a6bbd7fd6fee2">OptionalArgument</a> = 1 &lt;&lt; 1
  }</td></tr>
 <tr class="separator:a7e885cb546ba27712484c084f880e10e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a409f3eb14ec4c7ccc02b4fddd9fa8b42" id="r_a409f3eb14ec4c7ccc02b4fddd9fa8b42"><td class="memItemLeft" align="right" valign="top"><a id="a409f3eb14ec4c7ccc02b4fddd9fa8b42" name="a409f3eb14ec4c7ccc02b4fddd9fa8b42"></a>
-typedef std::function&lt; bool(const char *optarg)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>OptionProcessor</b></td></tr>
-<tr class="separator:a409f3eb14ec4c7ccc02b4fddd9fa8b42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab957fd4b6634d6226a66717f145207a4" id="r_ab957fd4b6634d6226a66717f145207a4"><td class="memItemLeft" align="right" valign="top"><a id="ab957fd4b6634d6226a66717f145207a4" name="ab957fd4b6634d6226a66717f145207a4"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>OptionProcessor</b> = std::function&lt;bool(const char *)&gt;</td></tr>
+<tr class="separator:ab957fd4b6634d6226a66717f145207a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -163,8 +163,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab26bbb648f37d3a1827c429494c2b293" id="r_ab26bbb648f37d3a1827c429494c2b293"><td class="memItemLeft" align="right" valign="top"><a id="ab26bbb648f37d3a1827c429494c2b293" name="ab26bbb648f37d3a1827c429494c2b293"></a>
 <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getCompileCommand</b> ()</td></tr>
 <tr class="separator:ab26bbb648f37d3a1827c429494c2b293"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad869002984bf47adac247696050f47cb" id="r_ad869002984bf47adac247696050f47cb"><td class="memItemLeft" align="right" valign="top"><a id="ad869002984bf47adac247696050f47cb" name="ad869002984bf47adac247696050f47cb"></a>
-virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><b>getIncludePath</b> ()=0</td></tr>
+<tr class="memitem:ad869002984bf47adac247696050f47cb" id="r_ad869002984bf47adac247696050f47cb"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad869002984bf47adac247696050f47cb">getIncludePath</a> ()=0</td></tr>
 <tr class="separator:ad869002984bf47adac247696050f47cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ef675f16d91b39a020f518a6637da46" id="r_a5ef675f16d91b39a020f518a6637da46"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; const char * &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5ef675f16d91b39a020f518a6637da46">process</a> (int argc, char *const argv[])</td></tr>
 <tr class="separator:a5ef675f16d91b39a020f518a6637da46"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,6 +185,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>registerUsage</b> (co
 <tr class="memitem:add347f2d46f0c447adc06f1db8a96df3" id="r_add347f2d46f0c447adc06f1db8a96df3"><td class="memItemLeft" align="right" valign="top"><a id="add347f2d46f0c447adc06f1db8a96df3" name="add347f2d46f0c447adc06f1db8a96df3"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setOutStream</b> (std::ostream *out)</td></tr>
 <tr class="separator:add347f2d46f0c447adc06f1db8a96df3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac772484b19292a04a739fd665e7f9239" id="r_ac772484b19292a04a739fd665e7f9239"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac772484b19292a04a739fd665e7f9239">validateOptions</a> () const</td></tr>
+<tr class="separator:ac772484b19292a04a739fd665e7f9239"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -292,6 +293,33 @@ processor</td>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="ad869002984bf47adac247696050f47cb" name="ad869002984bf47adac247696050f47cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad869002984bf47adac247696050f47cb">&#9670;&#160;</a></span>getIncludePath()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual const char * Util::Options::getIncludePath </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="class_parser_options.html#aae8f5065f05eb77542663dfb3b034779">ParserOptions</a>.</p>
+
+</div>
+</div>
 <a id="a5ef675f16d91b39a020f518a6637da46" name="a5ef675f16d91b39a020f518a6637da46"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5ef675f16d91b39a020f518a6637da46">&#9670;&#160;</a></span>process()</h2>
 
@@ -323,6 +351,34 @@ processor</td>
 <dl class="section return"><dt>Returns</dt><dd>'nullptr' if an error is signaled. </dd></dl>
 
 <p>Reimplemented in <a class="el" href="class_b_m_v2_1_1_psa_switch_options.html#ad2aac4803a1e0833b0d697c2c7f2aec4">BMV2::PsaSwitchOptions</a>, <a class="el" href="class_d_p_d_k_1_1_dpdk_options.html#ab78769c0ce66ed9e1953a4d83a180eaa">DPDK::DpdkOptions</a>, <a class="el" href="class_p4_tools_1_1_abstract_p4c_tool_options.html#a6317805ca731d8a2b89edcacc61b5518">P4Tools::AbstractP4cToolOptions</a>, and <a class="el" href="class_parser_options.html#a87e223a04ea129ac64efba80bc915d86">ParserOptions</a>.</p>
+
+</div>
+</div>
+<a id="ac772484b19292a04a739fd665e7f9239" name="ac772484b19292a04a739fd665e7f9239"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac772484b19292a04a739fd665e7f9239">&#9670;&#160;</a></span>validateOptions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Util::Options::validateOptions </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">nodiscard</span><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Checks if parsed options make sense with respect to each-other. </p><dl class="section return"><dt>Returns</dt><dd>true if the validation was successful and false otherwise. </dd></dl>
+
+<p>Reimplemented in <a class="el" href="class_compiler_options.html#afebdc5c1c2f7c6485ee5ceb738f328f1">CompilerOptions</a>, <a class="el" href="class_p4_tools_1_1_abstract_p4c_tool_options.html#a3d283edc568c0df5748b5aa5c94bfb0d">P4Tools::AbstractP4cToolOptions</a>, and <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#abde27b75a7f3fb760ac906b96794442f">P4Tools::P4Testgen::TestgenOptions</a>.</p>
 
 </div>
 </div>

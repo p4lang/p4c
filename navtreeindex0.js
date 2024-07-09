@@ -119,6 +119,7 @@ var NAVTREEINDEX0 =
 "class_base_compile_context.html#af5231dedce1c1fc8110b1e8655519d52":[31,0,31,4],
 "class_check_header_types.html":[31,0,38],
 "class_compiler_options.html":[31,0,42],
+"class_compiler_options.html#afebdc5c1c2f7c6485ee5ceb738f328f1":[31,0,42,0],
 "class_control_flow_visitor.html":[31,0,43],
 "class_control_flow_visitor.html#a4f86bdade5c6bf79ca9adc95753e7924":[31,0,43,6],
 "class_control_flow_visitor.html#a5d515c1f31e8edf330aee71aba43dc64":[31,0,43,5],
@@ -248,6 +249,5 @@ var NAVTREEINDEX0 =
 "class_d_p_d_k_1_1_dpdk_arch_first.html":[31,0,3,42],
 "class_d_p_d_k_1_1_dpdk_arch_last.html":[30,0,0,43],
 "class_d_p_d_k_1_1_dpdk_arch_last.html":[31,0,3,43],
-"class_d_p_d_k_1_1_dpdk_asm_optimization.html":[30,0,0,44],
-"class_d_p_d_k_1_1_dpdk_asm_optimization.html":[31,0,3,44]
+"class_d_p_d_k_1_1_dpdk_asm_optimization.html":[30,0,0,44]
 };

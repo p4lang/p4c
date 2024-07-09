@@ -1309,7 +1309,7 @@ var annotated_dup =
     [ "clone_session_entry", "structclone__session__entry.html", null ],
     [ "ClosedRange", "struct_closed_range.html", "struct_closed_range" ],
     [ "CompileContextStack", "struct_compile_context_stack.html", null ],
-    [ "CompilerOptions", "class_compiler_options.html", null ],
+    [ "CompilerOptions", "class_compiler_options.html", "class_compiler_options" ],
     [ "ControlFlowVisitor", "class_control_flow_visitor.html", "class_control_flow_visitor" ],
     [ "cstring", "classcstring.html", "classcstring" ],
     [ "DefaultP4CConfiguration", "class_default_p4_c_configuration.html", "class_default_p4_c_configuration" ],

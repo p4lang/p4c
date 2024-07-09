@@ -1,5 +1,6 @@
 var NAVTREEINDEX6 =
 {
+"class_p4_1_1_flatten_headers.html":[31,0,11,158],
 "class_p4_1_1_flatten_interface_structs.html":[30,0,4,159],
 "class_p4_1_1_flatten_interface_structs.html":[31,0,11,160],
 "class_p4_1_1_flatten_log_msg.html":[30,0,4,160],
@@ -248,6 +249,5 @@ var NAVTREEINDEX6 =
 "class_p4_1_1_program_structure.html#a302b9fb1f27af58db98aba86955ffc01":[30,0,4,243,5],
 "class_p4_1_1_program_structure.html#a302b9fb1f27af58db98aba86955ffc01":[31,0,11,244,5],
 "class_p4_1_1_program_structure.html#a397081667ea65b1d62f89b6985a920ae":[30,0,4,243,6],
-"class_p4_1_1_program_structure.html#a397081667ea65b1d62f89b6985a920ae":[31,0,11,244,6],
-"class_p4_1_1_program_structure.html#a5bc8ec7152ddb5e6fc4dc4b7a8ad390e":[30,0,4,243,7]
+"class_p4_1_1_program_structure.html#a397081667ea65b1d62f89b6985a920ae":[31,0,11,244,6]
 };
