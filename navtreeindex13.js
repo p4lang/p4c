@@ -115,11 +115,12 @@ var NAVTREEINDEX13 =
 "class_pattern.html":[31,0,112],
 "class_pattern_1_1_match.html":[31,0,112,0],
 "class_range_iter.html":[31,0,129],
-"class_split_flow_visit.html":[31,0,132],
-"class_split_flow_visit__base.html":[31,0,133],
-"class_split_flow_visit_vector.html":[31,0,134],
-"class_string_ref_1_1_split.html":[31,0,135,0],
-"class_sym_bit_matrix.html":[31,0,136],
+"class_ref_check_context.html":[31,0,130],
+"class_split_flow_visit.html":[31,0,133],
+"class_split_flow_visit__base.html":[31,0,134],
+"class_split_flow_visit_vector.html":[31,0,135],
+"class_string_ref_1_1_split.html":[31,0,136,0],
+"class_sym_bit_matrix.html":[31,0,137],
 "class_t_c_1_1_action_translation_visitor_p_n_a.html":[30,0,7,2],
 "class_t_c_1_1_action_translation_visitor_p_n_a.html":[31,0,19,2],
 "class_t_c_1_1_backend.html":[30,0,7,4],
@@ -248,6 +249,5 @@ var NAVTREEINDEX13 =
 "class_test_1_1_s_t_f_test.html":[31,0,20,15],
 "class_test_1_1_small_step_test.html":[31,0,20,14],
 "class_test_1_1_symbolic_converter.html":[31,0,20,16],
-"class_test_1_1_taint_test.html":[31,0,20,17],
-"class_test_1_1_z3_solver_sat_tests.html":[31,0,20,19]
+"class_test_1_1_taint_test.html":[31,0,20,17]
 };

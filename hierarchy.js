@@ -148,7 +148,8 @@ var hierarchy =
         [ "P4CContext", "class_p4_c_context.html", [
           [ "P4CContextWithOptions< OptionsType >", "class_p4_c_context_with_options.html", null ],
           [ "P4Tools::CompileContext< OptionsType >", "class_p4_tools_1_1_compile_context.html", null ]
-        ] ]
+        ] ],
+        [ "RefCheckContext", "class_ref_check_context.html", null ]
       ] ]
     ] ],
     [ "IHasDbPrint", "class_i_has_db_print.html", [

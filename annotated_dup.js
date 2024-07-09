@@ -1397,6 +1397,7 @@ var annotated_dup =
     [ "psa_ingress_parser_input_metadata_t", "structpsa__ingress__parser__input__metadata__t.html", null ],
     [ "PushContext", "struct_push_context.html", null ],
     [ "RangeIter", "class_range_iter.html", null ],
+    [ "RefCheckContext", "class_ref_check_context.html", null ],
     [ "safe_vector", "classsafe__vector.html", null ],
     [ "sk_buff", "structsk__buff.html", null ],
     [ "SplitFlowVisit", "class_split_flow_visit.html", null ],
