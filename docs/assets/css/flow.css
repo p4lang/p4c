@@ -1,6 +1,6 @@
 .flow {
   stroke-dasharray: 5;
-  animation: flow-animation 2s linear infinite;
+  animation: flow-animation 0.75s linear infinite;
 }
 @keyframes flow-animation {
   from {
