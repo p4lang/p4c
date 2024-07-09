@@ -36,6 +36,11 @@
 <script type="text/javascript" src="search/search.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="cards.css" rel="stylesheet" type="text/css"/>
+<link href="flow.css" rel="stylesheet" type="text/css"/>
+<link href="p4c_custom.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -118,22 +123,22 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_r_
   <div class="headertitle"><div class="title">DPDK backend</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md109"></a> The <b>p4c-dpdk</b> backend translates the P4-16 programs to <a class="el" href="namespace_d_p_d_k.html">DPDK</a> API to configure the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> software switch (SWX) pipeline. <a class="el" href="namespace_d_p_d_k.html">DPDK</a> introduced the SWX pipeline in the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> 20.11 LTS release. For more information, please refer to the <a href="https://doc.dpdk.org/guides/rel_notes/release_20_11.html">release note</a>.</p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md143"></a> The <b>p4c-dpdk</b> backend translates the P4-16 programs to <a class="el" href="namespace_d_p_d_k.html">DPDK</a> API to configure the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> software switch (SWX) pipeline. <a class="el" href="namespace_d_p_d_k.html">DPDK</a> introduced the SWX pipeline in the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> 20.11 LTS release. For more information, please refer to the <a href="https://doc.dpdk.org/guides/rel_notes/release_20_11.html">release note</a>.</p>
 <p>The p4c-dpdk compiler accepts P4-16 programs written for the Portable Switch Architecture (PSA) and Portable NIC Architecture (PNA) (see the <a href="https://p4.org/specs">P4.org specifications page</a> for the PSA and PNA specification document).</p>
 <p>The backend for dpdk reuses code from the p4c-bm2 "common" library for handling the PSA/PNA architecture. Internally, it translates the PSA/PNA program to a representation that conforms to the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> SWX pipeline and generates the 'spec' file to configure the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> pipeline.</p>
-<h1><a class="anchor" id="autotoc_md110"></a>
+<h1><a class="anchor" id="autotoc_md144"></a>
 How to use it?</h1>
 <p>A sample <a class="el" href="namespace_p4.html">P4</a> program can be found in the <a href="./examples"><code>examples</code> directory</a>. To generate the 'spec' file: </p><div class="fragment"><div class="line">p4c-dpdk --arch psa vxlan.p4 -o vxlan.spec</div>
 </div><!-- fragment --><p>To load the 'spec' file in dpdk follow the instructions in the <a href="https://doc.dpdk.org/guides/sample_app_ug/pipeline.html">Pipeline Application User Guide</a>.</p>
-<h1><a class="anchor" id="autotoc_md111"></a>
+<h1><a class="anchor" id="autotoc_md145"></a>
 Known issues</h1>
-<h2><a class="anchor" id="autotoc_md112"></a>
+<h2><a class="anchor" id="autotoc_md146"></a>
 Unsupported Language Features</h2>
 <ul>
 <li>Subparsers</li>
 <li>Parser Value Sets</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md113"></a>
+<h2><a class="anchor" id="autotoc_md147"></a>
 Unsupported PSA externs and features</h2>
 <ul>
 <li>egress parser, control, and deparser are not implemented, only ingress parser, control, and deparser. There is no packet replication engine or packet buffer (the combination of which is sometimes called a traffic manager).</li>
@@ -146,7 +151,7 @@ Unsupported PSA externs and features</h2>
 <li>Basic Checksum</li>
 <li>Packet Cloning/Recirculation/Resubmission</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md114"></a>
+<h2><a class="anchor" id="autotoc_md148"></a>
 DPDK target limitations</h2>
 <ul>
 <li>Currently, programs written for <a class="el" href="namespace_d_p_d_k.html">DPDK</a> target should limit the functionality in Ingress blocks, in case non empty Egress blocks are present it will be ignored by default unless Hidden temporary option <code>--enableEgress</code> used. When egress block support gets added to the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> target, and compiler can generate separate spec file for non empty ingress and egress blocks then option <code>--enableEgress</code> will be removed.</li>
@@ -172,7 +177,7 @@ DPDK target limitations</h2>
 </div><!-- fragment --> <div class="fragment"><div class="line">void count(in S index, in bit&lt;32&gt; pkt_len);</div>
 </div><!-- fragment --></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md115"></a>
+<h1><a class="anchor" id="autotoc_md149"></a>
 Contacts</h1>
 <p>Han Wang <a href="#" onclick="location.href='mai'+'lto:'+'han'+'2.'+'wan'+'g@'+'int'+'el'+'.co'+'m'; return false;">han2.<span class="obfuscator">.nosp@m.</span>wang<span class="obfuscator">.nosp@m.</span>@inte<span class="obfuscator">.nosp@m.</span>l.co<span class="obfuscator">.nosp@m.</span>m</a></p>
 <p>Cristian Dumitrescu <a href="#" onclick="location.href='mai'+'lto:'+'cri'+'st'+'ian'+'.d'+'umi'+'tr'+'esc'+'u@'+'int'+'el'+'.co'+'m'; return false;">crist<span class="obfuscator">.nosp@m.</span>ian.<span class="obfuscator">.nosp@m.</span>dumit<span class="obfuscator">.nosp@m.</span>resc<span class="obfuscator">.nosp@m.</span>u@int<span class="obfuscator">.nosp@m.</span>el.c<span class="obfuscator">.nosp@m.</span>om</a> </p>
