@@ -27,11 +27,10 @@ limitations under the License.
 
 class CompilerOptions : public ParserOptions {
  protected:
-    // Checks if parsed options make sense with respect to each-other.
-    void validateOptions() const override;
+    bool validateOptions() const override;
 
  public:
-    CompilerOptions();
+    explicit CompilerOptions(std::string_view defaultMessage = "Compile a P4 program");
 
     // If true, skip frontend passes whose names are contained in
     // passesToExcludeFrontend vector.

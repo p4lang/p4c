@@ -109,6 +109,12 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
         }
     }
 
+    auto result = validateOptions();
+    if (!result) {
+        usage();
+        return nullptr;
+    }
+
     return &remainingOptions;
 }
 
@@ -154,3 +160,5 @@ void Util::Options::usage() {
     }
     for (auto m : additionalUsage) *outStream << m << std::endl;
 }
+
+bool Util::Options::validateOptions() const { return true; }

@@ -43,11 +43,9 @@ limitations under the License.
 const char *p4includePath = CONFIG_PKGDATADIR "/p4include";
 const char *p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
-const char *ParserOptions::defaultMessage = "Compile a P4 program";
-
 using namespace P4::literals;
 
-ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
+ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(defaultMessage) {
     registerOption(
         "--help", nullptr,
         [this](const char *) {
@@ -383,11 +381,11 @@ std::vector<const char *> *ParserOptions::process(int argc, char *const argv[]) 
                          exename(argv[0]));
 
     auto remainingOptions = Util::Options::process(argc, argv);
-    validateOptions();
+    if (!validateOptions()) {
+        return nullptr;
+    }
     return remainingOptions;
 }
-
-void ParserOptions::validateOptions() const {}
 
 const char *ParserOptions::getIncludePath() {
     cstring path = cstring::empty;
@@ -537,5 +535,4 @@ bool P4CContext::isRecognizedDiagnostic(cstring diagnostic) {
 
     return recognizedDiagnostics.count(diagnostic);
 }
-
 const P4CConfiguration &P4CContext::getConfigImpl() { return DefaultP4CConfiguration::get(); }
