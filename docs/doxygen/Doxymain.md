@@ -17,6 +17,10 @@ function animateFlow() {
         edges.forEach(edge => {
             edge.classList.toggle('flow');
         });
+    const toggleButton = document.getElementById('toggle');
+    if (toggleButton) {
+             toggleButton.style.display = 'none';
+                 }
     }
 }
 </script>
