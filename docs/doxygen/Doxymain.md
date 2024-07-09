@@ -42,7 +42,7 @@ P4C is the official open-source reference compiler for the [P4](https://p4.org/)
 - Open-source compiler front end, allows anyone to quickly build a compiler for a new architecture.
 - Supports multiple back-ends for application specific integrated circuits (ASICs), network-interface cards (NICs), field-programmable gate arrays (FPGAs), software switches and other targets.
 - Promotes the expansion of software development tools like debuggers, integrated development environments, %P4 control-planes, testing and formal verification tools.
-- The Compiler has an extensible architecture, making it easy to add new passes and optimizations, and to hook up new back-ends. Furthermore, the front-end and mid-end can be further detailed and extended by target-specific back-end. 
+- The compiler has an extensible architecture, making it easy to add new passes and optimizations, and to hook up new back-ends. Furthermore, the front-end and mid-end can be further detailed and extended by target-specific back-end. 
 
 @htmlonly
 <!-- https://www.svgrepo.com/collection/scarlab-oval-line-icons/ -->
