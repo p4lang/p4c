@@ -23,5 +23,10 @@ Later `p4fmt` executable can be found inside the `p4c/build/` dir, and can be in
 
 Sample Usage:
 
-    ./build/p4fmt/p4fmt sample.p4
-    ./build/p4fmt/p4fmt sample.p4 -o out.p4
+    ./build/p4fmtsample.p4
+    ./build/p4fmt sample.p4 -o out.p4
+
+## Reference Checker for P4Fmt
+
+Sample Usage:
+    `./build/checkfmt --file <p4 source file> --reference-file <p4 reference file>`
