@@ -3,27 +3,22 @@
 @htmlonly
 <div class="diagram-container">
 <!-- draw.io diagram -->
-<div class="mxgraph" style="" data-mxgraph="{&quot;highlight&quot;:&quot;#0000ff&quot;,&quot;lightbox&quot;:false,&quot;nav&quot;:true,&quot;edit&quot;:&quot;_blank&quot;,&quot;url&quot;:&quot;https://drive.google.com/uc?id=16X8Z_4-J8mHQPxuxm9HjWppPMTTXZdZ6&amp;export=download&quot;}"></div>
-<script type="text/javascript" src="https://viewer.diagrams.net/embed2.js?&fetch=https%3A%2F%2Fdrive.google.
-com%2Fuc%3Fid%3D16X8Z_4-J8mHQPxuxm9HjWppPMTTXZdZ6%26export%3Ddownload"></script>
+<iframe id="svgFrame" src="architecture_unanimated.html" width="100%" height="500px" style="border:none;"></iframe>
 </div>
 
 <button id="toggle" onclick="animateFlow()">Toggle</button>
 
 <script>
-    function animateFlow() {
-        const svgDocument = document.querySelector('.mxgraph svg');
-        if (svgDocument) {
-            const edges = svgDocument.querySelectorAll('path:not([marker-end])');
-            edges.forEach(edge => {
-                edge.classList.add('flow');
-            });
-            const toggleButton = document.getElementById('toggle');
-            if (toggleButton) {
-                toggleButton.style.display = 'none';
-            }
-        }
+function animateFlow() {
+    const iframe = document.getElementById('svgFrame');
+    const svgDocument = iframe.contentDocument;
+    if (svgDocument) {
+        const edges = svgDocument.querySelectorAll('path:not([marker-end])');
+        edges.forEach(edge => {
+            edge.classList.toggle('flow');
+        });
     }
+}
 </script>
 @endhtmlonly
 <br>
