@@ -66,10 +66,11 @@ class ParserOptions : public Util::Options {
 
      public:
         PreprocessorResult() = default;
-        PreprocessorResult(const PreprocessorResult &) = delete;
-        PreprocessorResult(PreprocessorResult &&) = default;
-        PreprocessorResult &operator=(const PreprocessorResult &) = delete;
         PreprocessorResult &operator=(PreprocessorResult &&) = default;
+        PreprocessorResult(PreprocessorResult &&) = default;
+        /// There must only be one PreprocessorResult per file handle. Delete the copy constructor.
+        PreprocessorResult(const PreprocessorResult &) = delete;
+        PreprocessorResult &operator=(const PreprocessorResult &) = delete;
         PreprocessorResult(FILE *file, bool closeInput) : _file(file), _closeInput(closeInput) {}
 
         ~PreprocessorResult() { closeFile(); }
