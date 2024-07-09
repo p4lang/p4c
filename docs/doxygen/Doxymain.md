@@ -30,11 +30,9 @@ function animateFlow() {
 [P4 (Programming Protocol-independent Packet Processors)](https://p4.org/) is a language for expressing how packets are processed by the data-plane of a programmable network element, e.g.(hardware or software switch, Smart-NIC, and network function appliance).
 <br>
 
+[P4 (Programming Protocol-independent Packet Processors)](https://p4.org/) is a language for expressing how packets are processed by the data-plane of a programmable network element, e.g.(hardware or software switch, Smart-NIC, and network function appliance).
+<div class="content-spacing"></div>
 P4C is the official open-source reference compiler for the [P4](https://p4.org/) programming language, supporting both P4-14 and P4-16.
-<br>
-<br>
-<br>
-<br>
 ## Features of P4C
 
 - Provides compatibility for all versions of %P4.
