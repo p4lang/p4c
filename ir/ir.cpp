@@ -23,6 +23,8 @@ limitations under the License.
 #include <utility>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
+#include "absl/container/flat_hash_set.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
@@ -87,7 +89,7 @@ Util::Enumerator<const IDeclaration *> *INestedNamespace::getDeclarations() cons
 
 bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
     auto paramList = getParameters()->parameters;
-    absl::flat_hash_map<cstring, const IR::Parameter *> paramNames;
+    absl::flat_hash_map<cstring, const IR::Parameter *, Util::Hash> paramNames;
     for (auto param : paramList) paramNames.emplace(param->name.name, param);
 
     size_t index = 0;
@@ -113,14 +115,13 @@ bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
 }
 
 void IGeneralNamespace::checkDuplicateDeclarations() const {
-    absl::flat_hash_map<cstring, ID> seen;
+    absl::flat_hash_set<ID, Util::Hash> seen;
     for (const auto *decl : *getDeclarations()) {
         IR::ID name = decl->getName();
-        auto [it, inserted] = seen.emplace(name.name, name);
+        auto [it, inserted] = seen.emplace(name);
         if (!inserted) {
             ::error(ErrorType::ERR_DUPLICATE,
-                    "Duplicate declaration of %1%: previous declaration at %2%", name,
-                    it->second.srcInfo);
+                    "Duplicate declaration of %1%: previous declaration at %2%", name, it->srcInfo);
         }
     }
 }

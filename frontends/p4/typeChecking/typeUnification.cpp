@@ -57,7 +57,7 @@ bool TypeUnification::unifyCall(const BinaryConstraint *constraint) {
 
     auto paramIt = dest->parameters->begin();
     // keep track of parameters that have not been matched yet
-    absl::flat_hash_map<cstring, const IR::Parameter *> left;
+    absl::flat_hash_map<cstring, const IR::Parameter *, Util::Hash> left;
     for (auto p : dest->parameters->parameters) left.emplace(p->name, p);
 
     for (auto arg : *src->arguments) {

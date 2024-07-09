@@ -111,7 +111,7 @@ void ValidateParsedProgram::postorder(const IR::P4Table *t) {
 void ValidateParsedProgram::distinctParameters(const IR::TypeParameters *typeParams,
                                                const IR::ParameterList *apply,
                                                const IR::ParameterList *constr) {
-    absl::flat_hash_map<cstring, const IR::Node *> found;
+    absl::flat_hash_map<cstring, const IR::Node *, Util::Hash> found;
 
     for (auto p : typeParams->parameters) found.emplace(p->getName(), p);
     for (auto p : apply->parameters) {

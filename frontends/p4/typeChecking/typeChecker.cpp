@@ -28,6 +28,7 @@ limitations under the License.
 #include "frontends/p4/toP4/toP4.h"
 #include "lib/algorithm.h"
 #include "lib/cstring.h"
+#include "lib/hash.h"
 #include "lib/log.h"
 #include "syntacticEquivalence.h"
 #include "typeConstraints.h"
@@ -3487,7 +3488,7 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
     auto params = new IR::ParameterList;
 
     // keep track of parameters that have not been matched yet
-    absl::flat_hash_map<cstring, const IR::Parameter *> left;
+    absl::flat_hash_map<cstring, const IR::Parameter *, Util::Hash> left;
     for (auto p : baseType->parameters->parameters) left.emplace(p->name, p);
 
     auto paramIt = baseType->parameters->parameters.begin();
@@ -4083,7 +4084,7 @@ const IR::Node *TypeInference::postorder(IR::SwitchStatement *stat) {
 
     if (auto ae = type->to<IR::Type_ActionEnum>()) {
         // switch (table.apply(...))
-        absl::flat_hash_map<cstring, const IR::Node *> foundLabels;
+        absl::flat_hash_map<cstring, const IR::Node *, Util::Hash> foundLabels;
         const IR::Node *foundDefault = nullptr;
         for (auto c : stat->cases) {
             if (c->label->is<IR::DefaultExpression>()) {
