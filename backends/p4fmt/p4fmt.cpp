@@ -8,6 +8,7 @@
 #include "lib/error.h"
 #include "options.h"
 
+/// Formats a P4 program from the input file, returns formatted output
 std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
     AutoCompileContext autoP4FmtContext(new P4Fmt::P4FmtContext);
     auto &options = P4Fmt::P4FmtContext::get().options();
@@ -18,7 +19,7 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
 
     const IR::P4Program *program = P4::parseP4File(options);
     if (program == nullptr && ::errorCount() != 0) {
-        std::cerr << "Error: Failed to parse P4 file." << std::endl;
+        ::error("Failed to parse P4 file.");
         return formattedOutput;
     }
 
@@ -27,7 +28,7 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
     program->apply(top4);
 
     if (::errorCount() > 0) {
-        std::cerr << "Error: Failed to format P4 program." << std::endl;
+        ::error("Failed to format p4 program.");
         return formattedOutput;
     }
 
