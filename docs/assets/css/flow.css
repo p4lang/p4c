@@ -39,8 +39,10 @@
   .diagram-container {
     float: none; /* Remove float on small screens */
     clear: both; /* Clear floats */
-    margin: 20px auto; /* Center the diagram horizontally with top and bottom margin */
     width: 100%; /* Full width on small screens */
     max-width: 100%; /* Ensure it stretches to the maximum width available */
   }
+   .diagram-container iframe {
+        height: 230px; 
+    }
 }
