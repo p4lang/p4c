@@ -9,7 +9,7 @@ To sign off the last commit quickly use the `git commit --amend --signoff` comma
 
 ## Coding Standard Philosophy
 
-Please note that this project adheres to the [P4 Coding Standard Philosophy](https://github.com/p4lang/p4c/blob/main/docs/CodingStandardPhilosophy.md). By participating, you are expected to uphold this code. 
+Please note that this project adheres to the [P4 Coding Standard Philosophy](docs/CodingStandardPhilosophy.md). By participating, you are expected to uphold this code. 
 
 ## How to Contribute
 We welcome and appreciate new contributions. Check out [git usage](https://github.com/p4lang/p4c/tree/main/docs#git-usage) to get started.
