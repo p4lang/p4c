@@ -9,7 +9,6 @@
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"
 #include "frontends/p4/frontend.h"
-#include "lib/compile_context.h"
 #include "lib/error.h"
 
 namespace P4::P4Tools {
@@ -27,7 +26,7 @@ CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options
 CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options,
                                                   std::string_view toolName,
                                                   const std::string &source) {
-    const auto *program = P4::parseP4String(source, options.langVersion);
+    const auto *program = parseP4String(source, options.langVersion);
     if (program == nullptr) {
         return std::nullopt;
     }
@@ -57,7 +56,7 @@ CompilerResultOrError CompilerTarget::runCompilerImpl(const CompilerOptions &opt
 }
 
 const IR::P4Program *CompilerTarget::runParser(const ParserOptions &options) {
-    const auto *program = P4::parseP4File(options);
+    const auto *program = parseP4File(options);
     if (errorCount() > 0) {
         return nullptr;
     }
@@ -66,12 +65,16 @@ const IR::P4Program *CompilerTarget::runParser(const ParserOptions &options) {
 
 const IR::P4Program *CompilerTarget::runFrontend(const CompilerOptions &options,
                                                  const IR::P4Program *program) const {
-    P4::P4COptionPragmaParser optionsPragmaParser;
-    program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
+    P4COptionPragmaParser optionsPragmaParser;
+    program->apply(ApplyOptionsPragmas(optionsPragmaParser));
 
     auto frontEnd = mkFrontEnd();
     frontEnd.addDebugHook(options.getDebugHook());
     program = frontEnd.run(options, program);
+    ReferenceMap refMap;
+    TypeMap typeMap;
+    // Perform a last round of type checking.
+    program = program->apply(TypeChecking(&refMap, &typeMap, true));
     if ((program == nullptr) || errorCount() > 0) {
         return nullptr;
     }

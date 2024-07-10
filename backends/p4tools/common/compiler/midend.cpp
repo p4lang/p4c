@@ -156,9 +156,18 @@ void MidEnd::addDefaultPasses() {
         new P4::EliminateTuples(&typeMap),
         new P4::ConstantFolding(&typeMap),
         new P4::SimplifyControlFlow(&typeMap),
+        // Perform a last round of type-checking before passes which do not type-check begin.
+        new P4::TypeChecking(&refMap, &typeMap, true),
+    });
+    addNonTypeCheckingPasses();
+}
+
+void MidEnd::addNonTypeCheckingPasses() {
+    addPasses({
         // Simplify header stack assignments with runtime indices into conditional statements.
         new P4::HSIndexSimplifier(&typeMap),
-        // Convert Type_Varbits into a type that contains information about the assigned width.
+        // Convert Type_Varbits into a type that contains information about the assigned
+        // width.
         new ConvertVarbits(),
         // Convert any StructExpressions with Type_Header into a HeaderExpression.
         new ConvertStructExpr(&typeMap),
@@ -166,5 +175,4 @@ void MidEnd::addDefaultPasses() {
         new P4::CastBooleanTableKeys(),
     });
 }
-
 }  // namespace P4::P4Tools

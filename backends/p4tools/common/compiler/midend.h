@@ -64,7 +64,11 @@ class MidEnd : public PassManager {
 
     /// Add the list of default passes to the mid end. This is not part of the initializer because
     /// some targets may add their own passes to the beginning of the pass list.
-    void addDefaultPasses();
+    virtual void addDefaultPasses();
+
+    /// Add passes that break type checking. These passes may involve  IR modifications the front
+    /// end type checker does not recognize.
+    virtual void addNonTypeCheckingPasses();
 };
 
 }  // namespace P4::P4Tools
