@@ -220,7 +220,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Operation_Binary *expression
             auto ltype = typeMap->getType(original->left, true);
             auto leftTmp = createTemporary(ltype);
             visit(expression->left);
-            auto leftPath = addAssignment(expression->srcInfo, leftTmp, expression->left);
+            auto leftPath = addAssignment(expression->left->srcInfo, leftTmp, expression->left);
             expression->left = leftPath;
             typeMap->setType(leftPath, ltype);
         } else {
@@ -230,7 +230,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Operation_Binary *expression
         visit(expression->right);
         typeMap->setType(expression, type);
         auto tmp = createTemporary(type);
-        auto path = addAssignment(expression->srcInfo, tmp, expression);
+        auto path = addAssignment(expression->right->srcInfo, tmp, expression);
         typeMap->setType(path, type);
         prune();
         return path;
@@ -263,7 +263,7 @@ const IR::Node *DoSimplifyExpressions::shortCircuit(IR::Operation_Binary *expres
         auto save = statements;
         statements.clear();
         visit(expression->right);
-        auto path = addAssignment(expression->srcInfo, tmp, expression->right);
+        auto path = addAssignment(expression->right->srcInfo, tmp, expression->right);
         auto ifFalse = statements;
         statements = save;
         if (land) {
@@ -272,7 +272,7 @@ const IR::Node *DoSimplifyExpressions::shortCircuit(IR::Operation_Binary *expres
         }
         auto block = new IR::BlockStatement(ifFalse);
         auto ifStatement =
-            new IR::IfStatement(expression->srcInfo, expression->left, ifTrue, block);
+            new IR::IfStatement(expression->left->srcInfo, expression->left, ifTrue, block);
         statements.push_back(ifStatement);
         typeMap->setType(path, type);
         prune();
@@ -294,17 +294,18 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Mux *expression) {
     auto save = statements;
     statements.clear();
     visit(expression->e1);
-    (void)addAssignment(expression->srcInfo, tmp, expression->e1);
+    (void)addAssignment(expression->e1->srcInfo, tmp, expression->e1);
     auto ifTrue = statements;
 
     statements.clear();
     visit(expression->e2);
-    auto path = addAssignment(expression->srcInfo, tmp, expression->e2);
+    auto path = addAssignment(expression->e2->srcInfo, tmp, expression->e2);
     auto ifFalse = statements;
     statements = save;
 
-    auto ifStatement = new IR::IfStatement(expression->e0, new IR::BlockStatement(ifTrue),
-                                           new IR::BlockStatement(ifFalse));
+    auto ifStatement =
+        new IR::IfStatement(expression->srcInfo, expression->e0, new IR::BlockStatement(ifTrue),
+                            new IR::BlockStatement(ifFalse));
     statements.push_back(ifStatement);
     typeMap->setType(path, type);
     prune();
