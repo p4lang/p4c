@@ -17,10 +17,12 @@ limitations under the License.
 #include "toP4.h"
 
 #include <deque>
+#include <filesystem>
 #include <sstream>
 #include <string>
 
 #include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "ir/dump.h"
@@ -46,10 +48,12 @@ void ToP4::end_apply(const IR::Node *) {
               "inconsistent vectorSeparator");
 }
 
-// Try to guess whether a file is a "system" file
+// Try to guess whether a file is an included file.
 bool ToP4::isSystemFile(cstring file) {
     if (noIncludes) return false;
-    if (file.startsWith(p4includePath)) return true;
+    if (file != mainFile) {
+        return true;
+    }
     return false;
 }
 
@@ -148,9 +152,20 @@ void ToP4::dump(unsigned depth, const IR::Node *node, unsigned adjDepth) {
 
 bool ToP4::preorder(const IR::P4Program *program) {
     std::set<cstring> includesEmitted;
-
     bool first = true;
     dump(2);
+
+    // Try to initialize the mainFile from the program source info or the parser options.
+    if (mainFile.empty()) {
+        if (program->getSourceInfo().isValid()) {
+            mainFile = program->getSourceInfo().getSourceFile().c_str();
+        } else if (!P4CContext::get().options().file.empty()) {
+            mainFile = P4CContext::get().options().file;
+        } else {
+            ::warning("No program base file specified. ToP4 might generate incorrect includes.");
+        }
+    }
+
     for (auto a : program->objects) {
         // Check where this declaration originates
         cstring sourceFile = ifSystemFile(a);
@@ -180,8 +195,9 @@ bool ToP4::preorder(const IR::P4Program *program) {
                     builder.append(">");
                     builder.newline();
                 } else {
+                    auto relativPath = std::filesystem::relative(sourceFile.c_str(), mainFile);
                     builder.append("#include \"");
-                    builder.append(sourceFile);
+                    builder.append(relativPath);
                     builder.append("\"");
                     builder.newline();
                 }
