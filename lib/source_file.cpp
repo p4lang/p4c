@@ -17,12 +17,14 @@ limitations under the License.
 #include "source_file.h"
 
 #include <algorithm>
+#include <iostream>
 #include <sstream>
 
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_replace.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/stringify.h"
@@ -69,7 +71,42 @@ void InputSources::addComment(SourceInfo srcInfo, bool singleLine, cstring body)
     if (!singleLine)
         // Drop the "*/"
         body = body.exceptLast(2);
-    comments.push_back(new Comment(srcInfo, singleLine, body));
+    auto srcPos =
+        SourcePosition(srcInfo.getStart());
+
+    // std::cout << srcPos.toString();
+
+    comments.push_back(new Comment(srcPos, singleLine, body));
+}
+
+/**
+ * Retrieve all comments within the range of this SourceInfo.
+ * @return A string containing all comments within the range.
+ */
+std::string SourceInfo::getComments() const {
+    if ((sources == nullptr)) {
+        return "";
+    }
+
+    std::ostringstream oss;
+    uint targetLine = start.getLineNumber();
+    const Comment *closestComment = nullptr;
+
+    for (const auto &comment : sources->comments) {
+        uint commentLine = comment->getSourcePosition().getLineNumber();
+        auto diff = (targetLine - commentLine);
+        if (commentLine < targetLine &&
+            (closestComment == nullptr ||
+             commentLine > closestComment->getSourcePosition().getLineNumber()) &&
+            (diff == 0 || diff == 1)) {
+            closestComment = comment;
+        }
+    }
+
+    if (closestComment != nullptr) {
+        oss << closestComment->toString();
+    }
+    return oss.str();
 }
 
 /// prevent further changes

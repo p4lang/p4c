@@ -201,6 +201,8 @@ class SourceInfo final {
     inline bool operator<=(const SourceInfo &rhs) const { return !this->operator>(rhs); }
     inline bool operator>=(const SourceInfo &rhs) const { return !this->operator<(rhs); }
 
+    std::string getComments() const;
+
  private:
     const InputSources *sources = nullptr;
     SourcePosition start = SourcePosition();
@@ -230,13 +232,17 @@ struct SourceFileLine {
 
 class Comment final : IHasDbPrint {
  private:
-    SourceInfo srcInfo;
+    SourcePosition srcPos;
     bool singleLine;
     cstring body;
 
  public:
-    Comment(SourceInfo srcInfo, bool singleLine, cstring body)
-        : srcInfo(srcInfo), singleLine(singleLine), body(body) {}
+    Comment(SourcePosition srcPos, bool singleLine, cstring body)
+        : srcPos(srcPos), singleLine(singleLine), body(body) {}
+
+    // Retrieve the source position associated with this comment.
+    const SourcePosition &getSourcePosition() const { return srcPos; }
+
     cstring toString() const {
         std::string result;
         if (singleLine)
@@ -267,6 +273,7 @@ class InputSources final {
 
  public:
     InputSources();
+    friend class SourceInfo;
 
     std::string_view getLine(unsigned lineNumber) const;
     /// Original source line that produced the line with the specified number

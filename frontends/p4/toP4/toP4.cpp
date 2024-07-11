@@ -281,6 +281,9 @@ bool ToP4::preorder(const IR::Type_Typedef *t) {
         visit(t->annotations);
         builder.spc();
     }
+    auto cmts = t->srcInfo.getComments();
+    builder.append(cmts);
+    builder.append("\n");
     builder.append("typedef ");
     visit(t->type);
     builder.spc();
