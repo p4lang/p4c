@@ -71,10 +71,7 @@ void InputSources::addComment(SourceInfo srcInfo, bool singleLine, cstring body)
     if (!singleLine)
         // Drop the "*/"
         body = body.exceptLast(2);
-    auto srcPos =
-        SourcePosition(srcInfo.getStart());
-
-    // std::cout << srcPos.toString();
+    auto srcPos = SourcePosition(srcInfo.getStart());
 
     comments.push_back(new Comment(srcPos, singleLine, body));
 }
