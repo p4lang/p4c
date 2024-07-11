@@ -138,7 +138,7 @@ class EBPFPnaParser : public EBPF::EBPFPsaParser {
                   const P4::TypeMap *typeMap);
     void emit(EBPF::CodeBuilder *builder) override;
     void emitRejectState(EBPF::CodeBuilder *) override;
-    void emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl);
+    void emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl) override;
 
     DECLARE_TYPEINFO(EBPFPnaParser, EBPF::EBPFPsaParser);
 };
@@ -189,7 +189,7 @@ class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {
     bool build() override;
     void emit(EBPF::CodeBuilder *builder) override;
     void emitPreDeparser(EBPF::CodeBuilder *builder) override;
-    void emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl);
+    void emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl) override;
 
     DECLARE_TYPEINFO(IngressDeparserPNA, EBPF::EBPFDeparserPSA);
 };
