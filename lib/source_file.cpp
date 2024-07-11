@@ -76,10 +76,6 @@ void InputSources::addComment(SourceInfo srcInfo, bool singleLine, cstring body)
     comments.push_back(new Comment(srcPos, singleLine, body));
 }
 
-/**
- * Retrieve all comments within the range of this SourceInfo.
- * @return A string containing all comments within the range.
- */
 std::string SourceInfo::getComments() const {
     if ((sources == nullptr)) {
         return "";

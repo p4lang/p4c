@@ -241,6 +241,9 @@ bool ToP4::preorder(const IR::Type_Void *) {
 }
 
 bool ToP4::preorder(const IR::Type_Name *t) {
+    auto cmts = t->srcInfo.getComments();
+    builder.append(cmts);
+    builder.append("\n");
     visit(t->path);
     return false;
 }
