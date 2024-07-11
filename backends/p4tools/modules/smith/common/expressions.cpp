@@ -205,6 +205,8 @@ const IR::Type *ExpressionGenerator::pickRndPrimitiveType(PrimitiveTyperefProbs 
             tp = ExpressionGenerator::genIntType();
             break;
         }
+        default:
+            BUG("pickRndPrimitiveType: Chosen type index is out of bounds!");
     }
     if (tp == nullptr) {
         BUG("pickRndPrimitiveType: Chosen primitive type is Null!");

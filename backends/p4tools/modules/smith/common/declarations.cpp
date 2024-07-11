@@ -711,14 +711,14 @@ IR::Parameter *DeclarationGenerator::genParameter(IR::Direction dir, cstring p_n
     return new IR::Parameter(p_name, dir, tp);
 }
 
-/// TODO(zzmic): Make sure that a `Struct` type is not used when generating the parameter list.
 IR::ParameterList *DeclarationGenerator::genParameterList() {
     IR::IndexedVector<IR::Parameter> params;
     size_t totalParams = Utils::getRandInt(0, 3);
     size_t numDirParams = (totalParams != 0U) ? Utils::getRandInt(0, totalParams - 1) : 0;
     size_t numDirectionlessParams = totalParams - numDirParams;
     for (size_t i = 0; i < numDirParams; i++) {
-        // If the target is bmv2, we need to make sure that the parameter type is not a struct.
+        // If the target is bmv2, generate a primitive-type parameter.
+        // Otherwise, generate a (normal) typed parameter (w/ more type options).
         IR::Parameter *param =
             isBmv2Target() ? genPrimitiveTypeParameter(false) : genTypedParameter(false);
         if (param == nullptr) {
@@ -735,6 +735,8 @@ IR::ParameterList *DeclarationGenerator::genParameterList() {
         }
     }
     for (size_t i = 0; i < numDirectionlessParams; i++) {
+        // If the target is bmv2, generate a primitive-type parameter.
+        // Otherwise, generate a (normal) typed parameter (w/ more type options).
         IR::Parameter *param =
             isBmv2Target() ? genPrimitiveTypeParameter(true) : genTypedParameter(true);
 
@@ -750,9 +752,9 @@ IR::ParameterList *DeclarationGenerator::genParameterList() {
     return new IR::ParameterList(params);
 }
 
-/// @brief (Helper function) Check if the target is bmv2.
+/// @brief Check if the target is bmv2.
 bool DeclarationGenerator::isBmv2Target() {
-    if (target().spec.archName.compare("bmv2") == 0) {
+    if (target().get().spec.deviceName.compare("bmv2") == 0) {
         return true;
     }
     return false;
