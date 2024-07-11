@@ -47,8 +47,10 @@ TARGET=$6
 
 for i in $(seq 1 $NUM_ITERATIONS); do
     echo "Generating program $i"
+    # TODO(zzmic): Revert out_$i.p4 to out.p4
     # Generate different programs with different seeds (to inspect the behavior of the generation and compilation process in a finer/smaller granularity).
     $SMITH_BIN --arch $ARCH --target $TARGET --seed $i $TEST_DIR/out_$i.p4
     # TODO: Do not compile until we have stabilized.
+    # TODO(zzmic): Revert out_$i.p4 to out.p4
     $COMPILER_BIN $TEST_DIR/out_$i.p4
 done
