@@ -711,13 +711,16 @@ IR::Parameter *DeclarationGenerator::genParameter(IR::Direction dir, cstring p_n
     return new IR::Parameter(p_name, dir, tp);
 }
 
+/// TODO(zzmic): Make sure that a `Struct` type is not used when generating the parameter list.
 IR::ParameterList *DeclarationGenerator::genParameterList() {
     IR::IndexedVector<IR::Parameter> params;
     size_t totalParams = Utils::getRandInt(0, 3);
     size_t numDirParams = (totalParams != 0U) ? Utils::getRandInt(0, totalParams - 1) : 0;
     size_t numDirectionlessParams = totalParams - numDirParams;
     for (size_t i = 0; i < numDirParams; i++) {
-        IR::Parameter *param = genTypedParameter(false);
+        // If the target is bmv2, we need to make sure that the parameter type is not a struct.
+        IR::Parameter *param =
+            isBmv2Target() ? genPrimitiveTypeParameter(false) : genTypedParameter(false);
         if (param == nullptr) {
             BUG("param is null");
         }
@@ -732,7 +735,8 @@ IR::ParameterList *DeclarationGenerator::genParameterList() {
         }
     }
     for (size_t i = 0; i < numDirectionlessParams; i++) {
-        IR::Parameter *param = genTypedParameter(true);
+        IR::Parameter *param =
+            isBmv2Target() ? genPrimitiveTypeParameter(true) : genTypedParameter(true);
 
         if (param == nullptr) {
             BUG("param is null");
@@ -744,6 +748,56 @@ IR::ParameterList *DeclarationGenerator::genParameterList() {
     }
 
     return new IR::ParameterList(params);
+}
+
+/// @brief (Helper function) Check if the target is bmv2.
+bool DeclarationGenerator::isBmv2Target() {
+    if (target().spec.archName.compare("bmv2") == 0) {
+        return true;
+    }
+    return false;
+}
+
+/// @brief Generate a parameter of some primitive type.
+// TODO(zzmic): Figure out whether "primitive type" is the correct term to use.
+IR::Parameter *DeclarationGenerator::genPrimitiveTypeParameter(bool if_none_dir) {
+    cstring name = getRandomString(4);
+    const IR::Type *tp = nullptr;
+    IR::Direction dir;
+    PrimitiveTyperefProbs typePercent;
+
+    if (if_none_dir) {
+        typePercent = {
+            PCT.PARAMETER_NONEDIR_BASETYPE_BIT,
+            PCT.PARAMETER_NONEDIR_BASETYPE_SIGNED_BIT,
+            PCT.PARAMETER_NONEDIR_BASETYPE_INT,
+        };
+        dir = IR::Direction::None;
+    } else {
+        typePercent = {
+            PCT.PARAMETER_BASETYPE_BIT,
+            PCT.PARAMETER_BASETYPE_SIGNED_BIT,
+            PCT.PARAMETER_BASETYPE_INT,
+        };
+        std::vector<int64_t> dirPercent = {PCT.PARAMETER_DIR_IN, PCT.PARAMETER_DIR_OUT,
+                                           PCT.PARAMETER_DIR_INOUT};
+        switch (Utils::getRandInt(dirPercent)) {
+            case 0:
+                dir = IR::Direction::In;
+                break;
+            case 1:
+                dir = IR::Direction::Out;
+                break;
+            case 2:
+                dir = IR::Direction::InOut;
+                break;
+            default:
+                dir = IR::Direction::None;
+        }
+    }
+    tp = target().expressionGenerator().pickRndPrimitiveType(typePercent);
+
+    return new IR::Parameter(name, dir, tp);
 }
 
 }  // namespace P4Tools::P4Smith

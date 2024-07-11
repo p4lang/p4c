@@ -79,6 +79,10 @@ class DeclarationGenerator : public Generator {
     virtual IR::Parameter *genParameter(IR::Direction dir, cstring p_name, cstring t_name);
 
     virtual IR::ParameterList *genParameterList();
+
+    virtual bool isBmv2Target();
+
+    virtual IR::Parameter *genPrimitiveTypeParameter(bool if_none_dir);
 };
 
 }  // namespace P4Tools::P4Smith
