@@ -33,12 +33,6 @@ using TyperefProbs = struct TyperefProbs {
     int64_t p4_match_kind;
 };
 
-using PrimitiveTyperefProbs = struct PrimitiveTyperefProbs {
-    int64_t p4_bit;
-    int64_t p4_signed_bit;
-    int64_t p4_int;
-};
-
 class ExpressionGenerator : public Generator {
  public:
     virtual ~ExpressionGenerator() = default;
@@ -58,8 +52,6 @@ class ExpressionGenerator : public Generator {
     static const IR::Type *pickRndBaseType(const std::vector<int64_t> &type_probs);
 
     virtual const IR::Type *pickRndType(TyperefProbs type_probs);
-
-    virtual const IR::Type *pickRndPrimitiveType(PrimitiveTyperefProbs type_probs);
 
     static IR::BoolLiteral *genBoolLiteral();
 

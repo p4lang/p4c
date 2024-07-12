@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "backends/p4tools/common/lib/util.h"
-#include "backends/p4tools/modules/smith/common/expressions.h"
 #include "backends/p4tools/modules/smith/common/probabilities.h"
 #include "backends/p4tools/modules/smith/common/scope.h"
 #include "backends/p4tools/modules/smith/common/statements.h"
@@ -655,35 +654,16 @@ IR::Declaration_Variable *DeclarationGenerator::genVariableDeclaration() {
     return ret;
 }
 
-IR::Parameter *DeclarationGenerator::genTypedParameter(bool if_none_dir) {
+IR::Parameter *DeclarationGenerator::genTypedParameter(bool if_none_dir,
+                                                       TyperefProbs type_ref_probs) {
     cstring name = getRandomString(4);
     const IR::Type *tp = nullptr;
     IR::Direction dir;
-    TyperefProbs typePercent;
+    TyperefProbs typePercent = type_ref_probs;
 
     if (if_none_dir) {
-        typePercent = {
-            PCT.PARAMETER_NONEDIR_BASETYPE_BIT,    PCT.PARAMETER_NONEDIR_BASETYPE_SIGNED_BIT,
-            PCT.PARAMETER_NONEDIR_BASETYPE_VARBIT, PCT.PARAMETER_NONEDIR_BASETYPE_INT,
-            PCT.PARAMETER_NONEDIR_BASETYPE_ERROR,  PCT.PARAMETER_NONEDIR_BASETYPE_BOOL,
-            PCT.PARAMETER_NONEDIR_BASETYPE_STRING, PCT.PARAMETER_NONEDIR_DERIVED_ENUM,
-            PCT.PARAMETER_NONEDIR_DERIVED_HEADER,  PCT.PARAMETER_NONEDIR_DERIVED_HEADER_STACK,
-            PCT.PARAMETER_NONEDIR_DERIVED_STRUCT,  PCT.PARAMETER_NONEDIR_DERIVED_HEADER_UNION,
-            PCT.PARAMETER_NONEDIR_DERIVED_TUPLE,   PCT.PARAMETER_NONEDIR_TYPE_VOID,
-            PCT.PARAMETER_NONEDIR_TYPE_MATCH_KIND,
-        };
         dir = IR::Direction::None;
     } else {
-        typePercent = {
-            PCT.PARAMETER_BASETYPE_BIT,    PCT.PARAMETER_BASETYPE_SIGNED_BIT,
-            PCT.PARAMETER_BASETYPE_VARBIT, PCT.PARAMETER_BASETYPE_INT,
-            PCT.PARAMETER_BASETYPE_ERROR,  PCT.PARAMETER_BASETYPE_BOOL,
-            PCT.PARAMETER_BASETYPE_STRING, PCT.PARAMETER_DERIVED_ENUM,
-            PCT.PARAMETER_DERIVED_HEADER,  PCT.PARAMETER_DERIVED_HEADER_STACK,
-            PCT.PARAMETER_DERIVED_STRUCT,  PCT.PARAMETER_DERIVED_HEADER_UNION,
-            PCT.PARAMETER_DERIVED_TUPLE,   PCT.PARAMETER_TYPE_VOID,
-            PCT.PARAMETER_TYPE_MATCH_KIND,
-        };
         std::vector<int64_t> dirPercent = {PCT.PARAMETER_DIR_IN, PCT.PARAMETER_DIR_OUT,
                                            PCT.PARAMETER_DIR_INOUT};
         switch (Utils::getRandInt(dirPercent)) {
@@ -717,10 +697,17 @@ IR::ParameterList *DeclarationGenerator::genParameterList() {
     size_t numDirParams = (totalParams != 0U) ? Utils::getRandInt(0, totalParams - 1) : 0;
     size_t numDirectionlessParams = totalParams - numDirParams;
     for (size_t i = 0; i < numDirParams; i++) {
-        // If the target is bmv2, generate a primitive-type parameter.
-        // Otherwise, generate a (normal) typed parameter (w/ more type options).
-        IR::Parameter *param =
-            isBmv2Target() ? genPrimitiveTypeParameter(false) : genTypedParameter(false);
+        TyperefProbs typePercent = {
+            PCT.PARAMETER_NONEDIR_BASETYPE_BIT,    PCT.PARAMETER_NONEDIR_BASETYPE_SIGNED_BIT,
+            PCT.PARAMETER_NONEDIR_BASETYPE_VARBIT, PCT.PARAMETER_NONEDIR_BASETYPE_INT,
+            PCT.PARAMETER_NONEDIR_BASETYPE_ERROR,  PCT.PARAMETER_NONEDIR_BASETYPE_BOOL,
+            PCT.PARAMETER_NONEDIR_BASETYPE_STRING, PCT.PARAMETER_NONEDIR_DERIVED_ENUM,
+            PCT.PARAMETER_NONEDIR_DERIVED_HEADER,  PCT.PARAMETER_NONEDIR_DERIVED_HEADER_STACK,
+            PCT.PARAMETER_NONEDIR_DERIVED_STRUCT,  PCT.PARAMETER_NONEDIR_DERIVED_HEADER_UNION,
+            PCT.PARAMETER_NONEDIR_DERIVED_TUPLE,   PCT.PARAMETER_NONEDIR_TYPE_VOID,
+            PCT.PARAMETER_NONEDIR_TYPE_MATCH_KIND,
+        };
+        IR::Parameter *param = genTypedParameter(false, typePercent);
         if (param == nullptr) {
             BUG("param is null");
         }
@@ -735,10 +722,17 @@ IR::ParameterList *DeclarationGenerator::genParameterList() {
         }
     }
     for (size_t i = 0; i < numDirectionlessParams; i++) {
-        // If the target is bmv2, generate a primitive-type parameter.
-        // Otherwise, generate a (normal) typed parameter (w/ more type options).
-        IR::Parameter *param =
-            isBmv2Target() ? genPrimitiveTypeParameter(true) : genTypedParameter(true);
+        TyperefProbs typePercent = {
+            PCT.PARAMETER_BASETYPE_BIT,    PCT.PARAMETER_BASETYPE_SIGNED_BIT,
+            PCT.PARAMETER_BASETYPE_VARBIT, PCT.PARAMETER_BASETYPE_INT,
+            PCT.PARAMETER_BASETYPE_ERROR,  PCT.PARAMETER_BASETYPE_BOOL,
+            PCT.PARAMETER_BASETYPE_STRING, PCT.PARAMETER_DERIVED_ENUM,
+            PCT.PARAMETER_DERIVED_HEADER,  PCT.PARAMETER_DERIVED_HEADER_STACK,
+            PCT.PARAMETER_DERIVED_STRUCT,  PCT.PARAMETER_DERIVED_HEADER_UNION,
+            PCT.PARAMETER_DERIVED_TUPLE,   PCT.PARAMETER_TYPE_VOID,
+            PCT.PARAMETER_TYPE_MATCH_KIND,
+        };
+        IR::Parameter *param = genTypedParameter(true, typePercent);
 
         if (param == nullptr) {
             BUG("param is null");
@@ -750,56 +744,6 @@ IR::ParameterList *DeclarationGenerator::genParameterList() {
     }
 
     return new IR::ParameterList(params);
-}
-
-/// @brief Check if the target is bmv2.
-bool DeclarationGenerator::isBmv2Target() {
-    if (target().get().spec.deviceName.compare("bmv2") == 0) {
-        return true;
-    }
-    return false;
-}
-
-/// @brief Generate a parameter of some primitive type.
-// TODO(zzmic): Figure out whether "primitive type" is the correct term to use.
-IR::Parameter *DeclarationGenerator::genPrimitiveTypeParameter(bool if_none_dir) {
-    cstring name = getRandomString(4);
-    const IR::Type *tp = nullptr;
-    IR::Direction dir;
-    PrimitiveTyperefProbs typePercent;
-
-    if (if_none_dir) {
-        typePercent = {
-            PCT.PARAMETER_NONEDIR_BASETYPE_BIT,
-            PCT.PARAMETER_NONEDIR_BASETYPE_SIGNED_BIT,
-            PCT.PARAMETER_NONEDIR_BASETYPE_INT,
-        };
-        dir = IR::Direction::None;
-    } else {
-        typePercent = {
-            PCT.PARAMETER_BASETYPE_BIT,
-            PCT.PARAMETER_BASETYPE_SIGNED_BIT,
-            PCT.PARAMETER_BASETYPE_INT,
-        };
-        std::vector<int64_t> dirPercent = {PCT.PARAMETER_DIR_IN, PCT.PARAMETER_DIR_OUT,
-                                           PCT.PARAMETER_DIR_INOUT};
-        switch (Utils::getRandInt(dirPercent)) {
-            case 0:
-                dir = IR::Direction::In;
-                break;
-            case 1:
-                dir = IR::Direction::Out;
-                break;
-            case 2:
-                dir = IR::Direction::InOut;
-                break;
-            default:
-                dir = IR::Direction::None;
-        }
-    }
-    tp = target().expressionGenerator().pickRndPrimitiveType(typePercent);
-
-    return new IR::Parameter(name, dir, tp);
 }
 
 }  // namespace P4Tools::P4Smith

@@ -3,6 +3,7 @@
 
 #include <cstddef>
 
+#include "backends/p4tools/modules/smith/common/expressions.h"
 #include "backends/p4tools/modules/smith/common/generator.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
@@ -74,15 +75,11 @@ class DeclarationGenerator : public Generator {
 
     virtual IR::Declaration_Variable *genVariableDeclaration();
 
-    virtual IR::Parameter *genTypedParameter(bool if_none_dir);
+    virtual IR::Parameter *genTypedParameter(bool if_none_dir, TyperefProbs type_ref_probs);
 
     virtual IR::Parameter *genParameter(IR::Direction dir, cstring p_name, cstring t_name);
 
     virtual IR::ParameterList *genParameterList();
-
-    virtual bool isBmv2Target();
-
-    virtual IR::Parameter *genPrimitiveTypeParameter(bool if_none_dir);
 };
 
 }  // namespace P4Tools::P4Smith

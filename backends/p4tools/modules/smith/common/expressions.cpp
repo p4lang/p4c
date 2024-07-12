@@ -181,40 +181,6 @@ const IR::Type *ExpressionGenerator::pickRndType(TyperefProbs type_probs) {
     return tp;
 }
 
-const IR::Type *ExpressionGenerator::pickRndPrimitiveType(PrimitiveTyperefProbs type_probs) {
-    const std::vector<int64_t> &typeProbsVector = {type_probs.p4_bit, type_probs.p4_signed_bit,
-                                                   type_probs.p4_int};
-
-    if (typeProbsVector.size() != 3) {
-        BUG("pickRndPrimitiveType: Primitive type probabilities must be exact");
-    }
-    const IR::Type *tp = nullptr;
-    size_t idx = Utils::getRandInt(typeProbsVector);
-    switch (idx) {
-        case 0: {
-            // bit<>
-            tp = ExpressionGenerator::genBitType(false);
-            break;
-        }
-        case 1: {
-            // int<>
-            tp = ExpressionGenerator::genBitType(true);
-            break;
-        }
-        case 2: {
-            tp = ExpressionGenerator::genIntType();
-            break;
-        }
-        default:
-            BUG("pickRndPrimitiveType: Chosen type index is out of bounds!");
-    }
-    if (tp == nullptr) {
-        BUG("pickRndPrimitiveType: Chosen primitive type is Null!");
-    }
-
-    return tp;
-}
-
 IR::BoolLiteral *ExpressionGenerator::genBoolLiteral() {
     if (Utils::getRandInt(0, 1) != 0) {
         return new IR::BoolLiteral(false);

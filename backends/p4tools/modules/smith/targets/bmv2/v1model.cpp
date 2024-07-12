@@ -27,7 +27,13 @@ using namespace P4::literals;
  *  Bmv2V1modelSmithTarget implementation
  * ============================================================================================= */
 
-Bmv2V1modelSmithTarget::Bmv2V1modelSmithTarget() : AbstractBMv2SmithTarget("bmv2", "v1model") {}
+Bmv2V1modelSmithTarget::Bmv2V1modelSmithTarget()
+    : AbstractBMv2SmithTarget("bmv2", "v1model"),
+      _declarationGenerator(new BMv2DeclarationGenerator(*this)),
+      _expressionGenerator(new ExpressionGenerator(*this)),
+      _statementGenerator(new StatementGenerator(*this)),
+      _parserGenerator(new ParserGenerator(*this)),
+      _tableGenerator(new TableGenerator(*this)) {}
 
 void Bmv2V1modelSmithTarget::make() {
     static Bmv2V1modelSmithTarget *INSTANCE = nullptr;
@@ -380,6 +386,76 @@ const IR::P4Program *Bmv2V1modelSmithTarget::generateP4Program() const {
     objects->push_back(generateMainV1ModelPackage());
 
     return new IR::P4Program(*objects);
+}
+
+/// @brief Overriden method to generate a parameter list for the bmv2 target and v1model/psa arch.
+IR::ParameterList *BMv2DeclarationGenerator::genParameterList() {
+    IR::IndexedVector<IR::Parameter> params;
+    size_t totalParams = Utils::getRandInt(0, 3);
+    size_t numDirParams = (totalParams != 0U) ? Utils::getRandInt(0, totalParams - 1) : 0;
+    size_t numDirectionlessParams = totalParams - numDirParams;
+    for (size_t i = 0; i < numDirParams; i++) {
+        TyperefProbs typePercent = {
+            PCT.PARAMETER_NONEDIR_BASETYPE_BIT,
+            PCT.PARAMETER_NONEDIR_BASETYPE_SIGNED_BIT,
+            0,
+            PCT.PARAMETER_NONEDIR_BASETYPE_INT,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        };
+        IR::Parameter *param = this->genTypedParameter(false, typePercent);
+        if (param == nullptr) {
+            BUG("param is null");
+        }
+        params.push_back(param);
+        // add to the scope
+        P4Scope::addToScope(param);
+        // only add values that are not read-only to the modifiable types
+        if (param->direction == IR::Direction::In) {
+            P4Scope::addLval(param->type, param->name.name, true);
+        } else {
+            P4Scope::addLval(param->type, param->name.name, false);
+        }
+    }
+    for (size_t i = 0; i < numDirectionlessParams; i++) {
+        TyperefProbs typePercent = {
+            PCT.PARAMETER_BASETYPE_BIT,
+            PCT.PARAMETER_BASETYPE_SIGNED_BIT,
+            0,
+            PCT.PARAMETER_BASETYPE_INT,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        };
+        IR::Parameter *param = this->genTypedParameter(true, typePercent);
+
+        if (param == nullptr) {
+            BUG("param is null");
+        }
+        params.push_back(param);
+        // add to the scope
+        P4Scope::addToScope(param);
+        P4Scope::addLval(param->type, param->name.name, true);
+    }
+
+    return new IR::ParameterList(params);
 }
 
 }  // namespace P4Tools::P4Smith::BMv2

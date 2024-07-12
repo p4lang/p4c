@@ -13,13 +13,32 @@
 
 namespace P4Tools::P4Smith::BMv2 {
 
+class BMv2DeclarationGenerator;
+class Bmv2V1modelSmithTarget;
+
+class BMv2DeclarationGenerator : public P4Tools::P4Smith::DeclarationGenerator {
+ private:
+    Bmv2V1modelSmithTarget &_target;
+
+ public:
+    // TODO(zzmic): Figure out how to make this contructor right.
+    // Two concerns:
+    // 1. There exists a circular dependency between BMv2DeclarationGenerator and Bmv2V1modelSmithTarget.
+    // 2. The inheritance chain is unclear.
+    // In essenece, all I want is to have a custom genParameterList method for the BMv2 target.
+    explicit BMv2DeclarationGenerator(Bmv2V1modelSmithTarget &target)
+        : DeclarationGenerator(static_cast<SmithTarget &>(target)), _target(target) {}
+
+    IR::ParameterList *genParameterList() override;
+};
+
 class Bmv2V1modelSmithTarget : public AbstractBMv2SmithTarget {
  private:
-    DeclarationGenerator *_declarationGenerator = new DeclarationGenerator(*this);
-    ExpressionGenerator *_expressionGenerator = new ExpressionGenerator(*this);
-    StatementGenerator *_statementGenerator = new StatementGenerator(*this);
-    ParserGenerator *_parserGenerator = new ParserGenerator(*this);
-    TableGenerator *_tableGenerator = new TableGenerator(*this);
+    DeclarationGenerator *_declarationGenerator;
+    ExpressionGenerator *_expressionGenerator;
+    StatementGenerator *_statementGenerator;
+    ParserGenerator *_parserGenerator;
+    TableGenerator *_tableGenerator;
 
     [[nodiscard]] IR::P4Parser *generateParserBlock() const;
     [[nodiscard]] IR::P4Control *generateIngressBlock() const;
@@ -51,6 +70,8 @@ class Bmv2V1modelSmithTarget : public AbstractBMv2SmithTarget {
     [[nodiscard]] ParserGenerator &parserGenerator() const override { return *_parserGenerator; }
 
     [[nodiscard]] TableGenerator &tableGenerator() const override { return *_tableGenerator; }
+
+    friend class BMv2DeclarationGenerator;
 
  private:
     Bmv2V1modelSmithTarget();
