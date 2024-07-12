@@ -66,7 +66,7 @@ class ComputeDefUse : public Inspector,
         const loc_t *parent;
         bool operator<(const loc_t &a) const {
             if (node != a.node) return node->id < a.node->id;
-            if (!a.parent) return parent != nullptr;
+            if (!parent || !a.parent) return parent != nullptr;
             return *parent < *a.parent;
         }
         template <class T>
