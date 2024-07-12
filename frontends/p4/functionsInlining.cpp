@@ -37,6 +37,11 @@ void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression *mce) {
     BUG_CHECK(stat->is<IR::MethodCallStatement>() || stat->is<IR::AssignmentStatement>(),
               "%1%: unexpected statement with call", stat);
 
+    // We can only inline directly into RHS of IR::AssignmentStatement now
+    if (const auto *assign = stat->to<IR::AssignmentStatement>()) {
+        if (assign->right != mce) return;
+    }
+
     auto aci = new FunctionCallInfo(caller, ac->function, stat);
     toInline->add(aci);
 }

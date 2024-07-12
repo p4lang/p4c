@@ -1,0 +1,18 @@
+issue4796.p4(23): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+    state start {
+          ^^^^^
+issue4796.p4(33): [--Wwarn=unused] warning: 'year' is unused
+    action revie(out priceX year, bit<128> orde, bit<128> priv) {
+                            ^^^^
+issue4796.p4(33): [--Wwarn=unused] warning: 'orde' is unused
+    action revie(out priceX year, bit<128> orde, bit<128> priv) {
+                                           ^^^^
+issue4796.p4(33): [--Wwarn=unused] warning: 'priv' is unused
+    action revie(out priceX year, bit<128> orde, bit<128> priv) {
+                                                          ^^^^
+issue4796.p4(22): [--Wwarn=parser-transition] warning: accept state in parser MainParserImpl is unreachable
+parser MainParserImpl(packet_in pkt, out Headers hdr, inout main_metadata_t user_meta, in pna_main_parser_input_metadata_t istd) {
+       ^^^^^^^^^^^^^^
+issue4796.p4(22): [--Wwarn=parser-transition] warning: accept state in parser MainParserImpl is unreachable
+parser MainParserImpl(packet_in pkt, out Headers hdr, inout main_metadata_t user_meta, in pna_main_parser_input_metadata_t istd) {
+       ^^^^^^^^^^^^^^
