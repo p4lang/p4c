@@ -24,14 +24,28 @@ limitations under the License.
 #include "lib/alloc_trace.h"
 #include "lib/hash.h"
 #include "lib/hvec_map.h"
-#include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 #include "typeMap.h"
 
 namespace P4 {
 
+class ComputeWriteSet;
 class StorageFactory;
 class LocationSet;
+
+// A location in the program. Includes the context from the visitor, which needs to
+// be copied out of the Visitor::Context objects, as they are allocated on the stack and
+// will become invalid as the IR traversal continues
+struct loc_t {
+    const IR::Node *node;
+    const loc_t *parent;
+    bool operator==(const loc_t &a) const {
+        if (node != a.node) return false;
+        if (parent && a.parent) return *parent == *a.parent;
+        return parent == a.parent;
+    }
+    std::size_t hash() const;
+};
 
 /// Abstraction for something that is has a left value (variable, parameter)
 class StorageLocation : public IHasDbPrint, public ICastable {
@@ -336,6 +350,14 @@ struct hash<P4::ProgramPoint> {
     typedef std::size_t result_type;
     result_type operator()(argument_type const &s) const { return s.hash(); }
 };
+
+template <>
+struct hash<P4::loc_t> {
+    typedef P4::loc_t argument_type;
+    typedef std::size_t result_type;
+    result_type operator()(argument_type const &loc) const { return loc.hash(); }
+};
+
 }  // namespace std
 
 namespace Util {
@@ -478,19 +500,6 @@ class AllDefinitions : public IHasDbPrint {
 
 class ComputeWriteSet : public Inspector, public IHasDbPrint {
  public:
-    // A location in the program. Includes the context from the visitor, which needs to
-    // be copied out of the Visitor::Context objects, as they are allocated on the stack and
-    // will become invalid as the IR traversal continues
-    struct loc_t {
-        const IR::Node *node;
-        const loc_t *parent;
-        bool operator<(const loc_t &a) const {
-            if (node != a.node) return node->id < a.node->id;
-            if (!parent || !a.parent) return parent != nullptr;
-            return *parent < *a.parent;
-        }
-    };
-
     explicit ComputeWriteSet(AllDefinitions *allDefinitions)
         : allDefinitions(allDefinitions),
           currentDefinitions(nullptr),
@@ -499,7 +508,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
           storageMap(allDefinitions->storageMap),
           lhs(false),
           virtualMethod(false),
-          cached_locs(*new std::set<loc_t>) {
+          cached_locs(*new std::unordered_set<loc_t>) {
         CHECK_NULL(allDefinitions);
         visitDagOnce = false;
     }
@@ -561,7 +570,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     /// if true we are processing an expression on the lhs of an assignment
     bool lhs;
     /// For each program location the location set it writes
-    ordered_map<loc_t, const LocationSet *> writes;
+    hvec_map<loc_t, const LocationSet *> writes;
     bool virtualMethod;  /// True if we are analyzing a virtual method
     AllocTrace memuse;
     alloc_trace_cb_t nested_trace;
@@ -570,7 +579,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     /// Creates new visitor, but with same underlying data structures.
     /// Needed to visit some program fragments repeatedly.
     ComputeWriteSet(const ComputeWriteSet *source, ProgramPoint context, Definitions *definitions,
-                    std::set<loc_t> &cached_locs)
+                    std::unordered_set<loc_t> &cached_locs)
         : allDefinitions(source->allDefinitions),
           currentDefinitions(definitions),
           returnedDefinitions(nullptr),
@@ -648,7 +657,8 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     }
 
  private:
-    std::set<loc_t> &cached_locs;
+    // TODO: Make absl::flat_hash_set instead?
+    std::unordered_set<loc_t> &cached_locs;
 };
 
 }  // namespace P4
