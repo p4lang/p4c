@@ -111,15 +111,12 @@ void ValidateParsedProgram::postorder(const IR::P4Table *t) {
 void ValidateParsedProgram::distinctParameters(const IR::TypeParameters *typeParams,
                                                const IR::ParameterList *apply,
                                                const IR::ParameterList *constr) {
-    std::map<cstring, const IR::Node *> found;
+    absl::flat_hash_map<cstring, const IR::Node *, Util::Hash> found;
 
     for (auto p : typeParams->parameters) found.emplace(p->getName(), p);
     for (auto p : apply->parameters) {
-        auto it = found.find(p->getName());
-        if (it != found.end())
-            ::error(ErrorType::ERR_DUPLICATE, "%1% duplicates %2%.", it->second, p);
-        else
-            found.emplace(p->getName(), p);
+        auto [it, inserted] = found.emplace(p->getName(), p);
+        if (!inserted) ::error(ErrorType::ERR_DUPLICATE, "%1% duplicates %2%.", it->second, p);
     }
     for (auto p : constr->parameters) {
         auto it = found.find(p->getName());

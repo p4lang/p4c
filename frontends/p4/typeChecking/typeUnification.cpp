@@ -57,7 +57,7 @@ bool TypeUnification::unifyCall(const BinaryConstraint *constraint) {
 
     auto paramIt = dest->parameters->begin();
     // keep track of parameters that have not been matched yet
-    std::map<cstring, const IR::Parameter *> left;
+    absl::flat_hash_map<cstring, const IR::Parameter *, Util::Hash> left;
     for (auto p : dest->parameters->parameters) left.emplace(p->name, p);
 
     for (auto arg : *src->arguments) {
@@ -77,10 +77,10 @@ bool TypeUnification::unifyCall(const BinaryConstraint *constraint) {
             param = *paramIt;
         }
 
-        auto leftIt = left.find(param->name.name);
-        // This shold have been checked by the CheckNamedArgs pass.
-        BUG_CHECK(leftIt != left.end(), "%1%: Duplicate argument name?", param->name);
-        left.erase(leftIt);
+        if (!left.erase(param->name)) {
+            // This shold have been checked by the CheckNamedArgs pass.
+            BUG("%1%: Duplicate argument name?", param->name);
+        }
 
         if (arg->type->is<IR::Type_Dontcare>() && param->direction != IR::Direction::Out)
             return constraint->reportError(

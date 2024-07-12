@@ -209,11 +209,14 @@ class ParameterList : ISimpleNamespace {
     bool empty() const { return size() == 0; }
     IR::Parameter getParameter(cstring name) const {
         return parameters.getDeclaration<Parameter>(name); }
+    IR::Parameter getParameter(std::string_view name) const {
+        return parameters.getDeclaration<Parameter>(name); }
     IR::Parameter getParameter(unsigned index) const {
         for (auto &param : parameters)
             if (0 == index--) return param;
         BUG("Only %1% parameters; index #%2% requested", size(), size()+index); }
     IR::IDeclaration getDeclByName(cstring name) const override { return getParameter(name); }
+    IR::IDeclaration getDeclByName(std::string_view name) const override { return getParameter(name); }
     void push_back(const Parameter *p) { parameters.push_back(p); }
     toString {
         std::string result = "";
@@ -311,6 +314,8 @@ class TypeParameters : ISimpleNamespace {
     size_t size() const { return parameters.size(); }
     IR::IDeclaration getDeclByName(cstring name) const override {
         return parameters.getDeclaration(name); }
+    IR::IDeclaration getDeclByName(std::string_view name) const override {
+        return parameters.getDeclaration(name); }
     void push_back(Type_Var tv) { parameters.push_back(tv); }
     validate{ parameters.check_null(); }
     toString {
@@ -351,7 +356,7 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
         for (auto f : fields) {
             if (f->name == name)
                 return index_pos;
-	    index_pos++;
+            index_pos++;
         }
         return -1;
     }
@@ -378,6 +383,8 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
         }
         return rv; }
     IR::IDeclaration getDeclByName(cstring name) const override {
+        return fields.getDeclaration(name); }
+    IR::IDeclaration getDeclByName(std::string_view name) const override {
         return fields.getDeclaration(name); }
     validate{ fields.check_null(); }
     dbprint;
@@ -509,6 +516,8 @@ abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated, ISimp
         return typeParameters->getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return typeParameters->getDeclByName(name); }
+    IDeclaration getDeclByName(std::string_view name) const override {
+        return typeParameters->getDeclByName(name); }
 }
 
 class Type_Package : Type_ArchBlock, IContainer, ISimpleNamespace {
@@ -520,6 +529,10 @@ class Type_Package : Type_ArchBlock, IContainer, ISimpleNamespace {
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return typeParameters->getDeclarations()->concat(constructorParams->getDeclarations()); }
     IDeclaration getDeclByName(cstring name) const override {
+        auto decl = constructorParams->getDeclByName(name);
+        if (!decl) decl = typeParameters->getDeclByName(name);
+        return decl; }
+    IDeclaration getDeclByName(std::string_view name) const override {
         auto decl = constructorParams->getDeclByName(name);
         if (!decl) decl = typeParameters->getDeclByName(name);
         return decl; }
@@ -640,6 +653,8 @@ class Type_Enum : Type_Declaration, ISimpleNamespace, IAnnotated {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return members.getDeclaration(name); }
+    IDeclaration getDeclByName(std::string_view name) const override {
+        return members.getDeclaration(name); }
 #nodbprint
     validate{ members.check_null(); }
 }
@@ -660,6 +675,8 @@ class Type_SerEnum : Type_Declaration, ISimpleNamespace, IAnnotated {
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
+        return members.getDeclaration(name); }
+    IDeclaration getDeclByName(std::string_view name) const override {
         return members.getDeclaration(name); }
 #nodbprint
     validate{ members.check_null(); }
@@ -703,6 +720,10 @@ abstract Type_MethodBase : Type, IMayBeGenericType, ISimpleNamespace {
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return typeParameters->getDeclarations()->concat(parameters->getDeclarations()); }
     IDeclaration getDeclByName(cstring name) const override {
+        auto decl = parameters->getDeclByName(name);
+        if (!decl) decl = typeParameters->getDeclByName(name);
+        return decl; }
+    IDeclaration getDeclByName(std::string_view name) const override {
         auto decl = parameters->getDeclByName(name);
         if (!decl) decl = typeParameters->getDeclByName(name);
         return decl; }
@@ -757,6 +778,8 @@ class Method : Declaration, IAnnotated, IFunctional, ISimpleNamespace {
     ParameterList getParameters() const override { return type->parameters; }
     // annotations can refer to parameters, so need to look them up in scope
     IDeclaration getDeclByName(cstring name) const override {
+        return type->parameters->getDeclByName(name); }
+    IDeclaration getDeclByName(std::string_view name) const override {
         return type->parameters->getDeclByName(name); }
     Util::Enumerator<IDeclaration> *getDeclarations() const override {
         return type->parameters->getDeclarations(); }

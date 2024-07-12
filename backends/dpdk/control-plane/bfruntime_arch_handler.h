@@ -318,7 +318,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
     /// @return true if @table's 'psa_idle_timeout' property exists and is true. This
     /// indicates that @table supports entry ageing.
     static bool getSupportsTimeout(const IR::P4Table *table) {
-        auto timeout = table->properties->getProperty("psa_idle_timeout"_cs);
+        auto timeout = table->properties->getProperty("psa_idle_timeout");
 
         if (timeout == nullptr) return false;
 

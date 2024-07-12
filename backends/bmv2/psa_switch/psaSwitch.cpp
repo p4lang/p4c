@@ -370,24 +370,24 @@ Util::IJson *ExternConverter_Hash::convertExternObject(UNUSED ConversionContext 
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     auto hash = new Util::JsonObject();
-    hash->emplace("type"_cs, "extern");
-    hash->emplace("value"_cs, em->object->controlPlaneName());
+    hash->emplace("type", "extern");
+    hash->emplace("value", em->object->controlPlaneName());
     parameters->append(hash);
     if (mc->arguments->size() == 2) {  // get_hash
         auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
         auto fieldList = new Util::JsonObject();
-        fieldList->emplace("type"_cs, "field_list");
+        fieldList->emplace("type", "field_list");
         auto fieldsJson = ctxt->conv->convert(mc->arguments->at(1)->expression, true, false);
-        fieldList->emplace("value"_cs, fieldsJson);
+        fieldList->emplace("value", fieldsJson);
         parameters->append(dst);
         parameters->append(fieldList);
     } else {  // get_hash with base and mod
         auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
         auto base = ctxt->conv->convert(mc->arguments->at(1)->expression);
         auto fieldList = new Util::JsonObject();
-        fieldList->emplace("type"_cs, "field_list");
+        fieldList->emplace("type", "field_list");
         auto fieldsJson = ctxt->conv->convert(mc->arguments->at(2)->expression, true, false);
-        fieldList->emplace("value"_cs, fieldsJson);
+        fieldList->emplace("value", fieldsJson);
         auto max = ctxt->conv->convert(mc->arguments->at(3)->expression);
         parameters->append(dst);
         parameters->append(base);
@@ -436,14 +436,14 @@ Util::IJson *ExternConverter_InternetChecksum::convertExternObject(
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     auto cksum = new Util::JsonObject();
-    cksum->emplace("type"_cs, "extern");
-    cksum->emplace("value"_cs, em->object->controlPlaneName());
+    cksum->emplace("type", "extern");
+    cksum->emplace("value", em->object->controlPlaneName());
     parameters->append(cksum);
     if (em->method->name == "add" || em->method->name == "subtract") {
         auto fieldList = new Util::JsonObject();
-        fieldList->emplace("type"_cs, "field_list");
+        fieldList->emplace("type", "field_list");
         auto fieldsJson = ctxt->conv->convert(mc->arguments->at(0)->expression, true, false);
-        fieldList->emplace("value"_cs, fieldsJson);
+        fieldList->emplace("value", fieldsJson);
         parameters->append(fieldList);
     } else if (em->method->name != "clear") {
         if (mc->arguments->size() == 2) {  // get_verify
@@ -472,8 +472,8 @@ Util::IJson *ExternConverter_Counter::convertExternObject(UNUSED ConversionConte
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     auto ctr = new Util::JsonObject();
-    ctr->emplace("type"_cs, "extern");
-    ctr->emplace("value"_cs, em->object->controlPlaneName());
+    ctr->emplace("type", "extern");
+    ctr->emplace("value", em->object->controlPlaneName());
     parameters->append(ctr);
     auto index = ctxt->conv->convert(mc->arguments->at(0)->expression);
     parameters->append(index);
@@ -505,8 +505,8 @@ Util::IJson *ExternConverter_Meter::convertExternObject(UNUSED ConversionContext
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     auto mtr = new Util::JsonObject();
-    mtr->emplace("type"_cs, "extern");
-    mtr->emplace("value"_cs, em->object->controlPlaneName());
+    mtr->emplace("type", "extern");
+    mtr->emplace("value", em->object->controlPlaneName());
     parameters->append(mtr);
     if (mc->arguments->size() == 2) {
         auto result = ctxt->conv->convert(mc->arguments->at(1)->expression);
@@ -546,9 +546,9 @@ Util::IJson *ExternConverter_Register::convertExternObject(
         return nullptr;
     }
     auto reg = new Util::JsonObject();
-    reg->emplace("type"_cs, "register_array");
+    reg->emplace("type", "register_array");
     cstring name = em->object->controlPlaneName();
-    reg->emplace("value"_cs, name);
+    reg->emplace("value", name);
     if (em->method->name == "read") {
         auto primitive = mkPrimitive("register_read"_cs);
         auto parameters = mkParameters(primitive);
@@ -639,9 +639,9 @@ void ExternConverter_Hash::convertExternInstance(ConversionContext *ctxt, const 
 
     // add hash instance
     auto jhash = new Util::JsonObject();
-    jhash->emplace("name"_cs, name);
-    jhash->emplace("id"_cs, nextId("extern_instances"_cs));
-    jhash->emplace("type"_cs, eb->getName());
+    jhash->emplace("name", name);
+    jhash->emplace("id", nextId("extern_instances"_cs));
+    jhash->emplace("type", eb->getName());
     jhash->emplace_non_null("source_info"_cs, inst->sourceInfoJsonObj());
     ctxt->json->externs->append(jhash);
 
@@ -662,9 +662,9 @@ void ExternConverter_Hash::convertExternInstance(ConversionContext *ctxt, const 
     cstring algo_name = algo->to<IR::Declaration_ID>()->name;
     algo_name = psaStructure->convertHashAlgorithm(algo_name);
     auto k = new Util::JsonObject();
-    k->emplace("name"_cs, "algo");
-    k->emplace("type"_cs, "string");
-    k->emplace("value"_cs, algo_name);
+    k->emplace("name", "algo");
+    k->emplace("type", "string");
+    k->emplace("value", algo_name);
     arr->append(k);
 }
 
@@ -692,9 +692,9 @@ void ExternConverter_InternetChecksum::convertExternInstance(UNUSED ConversionCo
     }
     // add checksum instance
     auto jcksum = new Util::JsonObject();
-    jcksum->emplace("name"_cs, name);
-    jcksum->emplace("id"_cs, nextId("extern_instances"_cs));
-    jcksum->emplace("type"_cs, eb->getName());
+    jcksum->emplace("name", name);
+    jcksum->emplace("id", nextId("extern_instances"_cs));
+    jcksum->emplace("type", eb->getName());
     jcksum->emplace_non_null("source_info"_cs, inst->sourceInfoJsonObj());
     ctxt->json->externs->append(jcksum);
 }
@@ -714,19 +714,19 @@ void ExternConverter_Counter::convertExternInstance(UNUSED ConversionContext *ct
 
     // adding counter instance to counter_arrays[]
     auto jctr = new Util::JsonObject();
-    jctr->emplace("name"_cs, name);
-    jctr->emplace("id"_cs, nextId("counter_arrays"_cs));
+    jctr->emplace("name", name);
+    jctr->emplace("id", nextId("counter_arrays"_cs));
     jctr->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
-    jctr->emplace("size"_cs, sz->to<IR::Constant>()->value);
-    jctr->emplace("is_direct"_cs, false);
+    jctr->emplace("size", sz->to<IR::Constant>()->value);
+    jctr->emplace("is_direct", false);
     ctxt->json->counters->append(jctr);
 
     // add counter instance to extern_instances
     auto extern_obj = new Util::JsonObject();
-    extern_obj->emplace("name"_cs, name);
-    extern_obj->emplace("id"_cs, nextId("extern_instances"_cs));
-    extern_obj->emplace("type"_cs, eb->getName());
-    extern_obj->emplace("source_info"_cs, inst->sourceInfoJsonObj());
+    extern_obj->emplace("name", name);
+    extern_obj->emplace("id", nextId("extern_instances"_cs));
+    extern_obj->emplace("type", eb->getName());
+    extern_obj->emplace("source_info", inst->sourceInfoJsonObj());
     ctxt->json->externs->append(extern_obj);
     Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "attribute_values"_cs);
 
@@ -741,9 +741,9 @@ void ExternConverter_Counter::convertExternInstance(UNUSED ConversionContext *ct
     auto param1 = eb->getConstructorParameters()->getParameter(0);
     auto bitwidth = ctxt->typeMap->widthBits(arg1->type, sz->getNode(), false);
     cstring repr = BMV2::stringRepr(arg1->value, ROUNDUP(bitwidth, 8));
-    attr_obj->emplace("name"_cs, param1->toString());
-    attr_obj->emplace("type"_cs, "hexstr");
-    attr_obj->emplace("value"_cs, repr);
+    attr_obj->emplace("name", param1->toString());
+    attr_obj->emplace("type", "hexstr");
+    attr_obj->emplace("value", repr);
     arr->append(attr_obj);
 
     // second argument is the counter type, this is psa metadata, the converter
@@ -772,20 +772,20 @@ void ExternConverter_DirectCounter::convertExternInstance(UNUSED ConversionConte
         ::warning(ErrorType::WARN_UNUSED, "%1%: Direct counter not used; ignoring", inst);
     } else {
         auto jctr = new Util::JsonObject();
-        jctr->emplace("name"_cs, name);
-        jctr->emplace("id"_cs, nextId("counter_arrays"_cs));
+        jctr->emplace("name", name);
+        jctr->emplace("id", nextId("counter_arrays"_cs));
         jctr->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
-        jctr->emplace("is_direct"_cs, true);
-        jctr->emplace("binding"_cs, it->second->controlPlaneName());
+        jctr->emplace("is_direct", true);
+        jctr->emplace("binding", it->second->controlPlaneName());
         ctxt->json->counters->append(jctr);
 
         // Adding direct counter to EXTERN_INSTANCES
 
         auto extern_obj = new Util::JsonObject();
-        extern_obj->emplace("name"_cs, name);
-        extern_obj->emplace("id"_cs, nextId("extern_instances"_cs));
-        extern_obj->emplace("type"_cs, eb->getName());
-        extern_obj->emplace("source_info"_cs, inst->sourceInfoJsonObj());
+        extern_obj->emplace("name", name);
+        extern_obj->emplace("id", nextId("extern_instances"_cs));
+        extern_obj->emplace("type", eb->getName());
+        extern_obj->emplace("source_info", inst->sourceInfoJsonObj());
         ctxt->json->externs->append(extern_obj);
         Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "attribute_values"_cs);
 
@@ -823,9 +823,9 @@ void ExternConverter_Meter::convertExternInstance(UNUSED ConversionContext *ctxt
 
     // adding meter instance into extern_instances
     auto jext_mtr = new Util::JsonObject();
-    jext_mtr->emplace("name"_cs, name);
-    jext_mtr->emplace("id"_cs, nextId("extern_instances"_cs));
-    jext_mtr->emplace("type"_cs, eb->getName());
+    jext_mtr->emplace("name", name);
+    jext_mtr->emplace("id", nextId("extern_instances"_cs));
+    jext_mtr->emplace("type", eb->getName());
     jext_mtr->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
     ctxt->json->externs->append(jext_mtr);
 
@@ -834,9 +834,9 @@ void ExternConverter_Meter::convertExternInstance(UNUSED ConversionContext *ctxt
 
     // is_direct
     auto is_direct = new Util::JsonObject();
-    is_direct->emplace("name"_cs, "is_direct");
-    is_direct->emplace("type"_cs, "hexstr");
-    is_direct->emplace("value"_cs, 0);
+    is_direct->emplace("name", "is_direct");
+    is_direct->emplace("type", "hexstr");
+    is_direct->emplace("value", 0);
     arr->append(is_direct);
 
     // meter_array size
@@ -851,16 +851,16 @@ void ExternConverter_Meter::convertExternInstance(UNUSED ConversionContext *ctxt
     auto bitwidth = ctxt->typeMap->widthBits(s->type, sz->getNode(), false);
     cstring val = BMV2::stringRepr(s->value, ROUNDUP(bitwidth, 8));
     auto msz = new Util::JsonObject();
-    msz->emplace("name"_cs, attr_name->toString());
-    msz->emplace("type"_cs, "hexstr");
-    msz->emplace("value"_cs, val);
+    msz->emplace("name", attr_name->toString());
+    msz->emplace("type", "hexstr");
+    msz->emplace("value", val);
     arr->append(msz);
 
     // rate count
     auto rc = new Util::JsonObject();
-    rc->emplace("name"_cs, "rate_count");
-    rc->emplace("type"_cs, "hexstr");
-    rc->emplace("value"_cs, 2);
+    rc->emplace("name", "rate_count");
+    rc->emplace("type", "hexstr");
+    rc->emplace("value", 2);
     arr->append(rc);
 
     // meter kind
@@ -879,9 +879,9 @@ void ExternConverter_Meter::convertExternInstance(UNUSED ConversionContext *ctxt
     else
         ::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected meter type", mkind->getNode());
     auto k = new Util::JsonObject();
-    k->emplace("name"_cs, "type");
-    k->emplace("type"_cs, "string");
-    k->emplace("value"_cs, type);
+    k->emplace("name", "type");
+    k->emplace("type", "string");
+    k->emplace("value", type);
     arr->append(k);
 }
 
@@ -897,11 +897,11 @@ void ExternConverter_DirectMeter::convertExternInstance(UNUSED ConversionContext
     CHECK_NULL(info->destinationField);
 
     auto jmtr = new Util::JsonObject();
-    jmtr->emplace("name"_cs, name);
-    jmtr->emplace("id"_cs, nextId("meter_arrays"_cs));
+    jmtr->emplace("name", name);
+    jmtr->emplace("id", nextId("meter_arrays"_cs));
     jmtr->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
-    jmtr->emplace("is_direct"_cs, true);
-    jmtr->emplace("rate_count"_cs, 2);
+    jmtr->emplace("is_direct", true);
+    jmtr->emplace("rate_count", 2);
     auto mkind = eb->findParameterValue("type"_cs);
     CHECK_NULL(mkind);
     if (!mkind->is<IR::Declaration_ID>()) {
@@ -918,12 +918,12 @@ void ExternConverter_DirectMeter::convertExternInstance(UNUSED ConversionContext
         modelError("%1%: unexpected meter type", mkind->getNode());
         return;
     }
-    jmtr->emplace("type"_cs, type);
-    jmtr->emplace("size"_cs, info->tableSize);
+    jmtr->emplace("type", type);
+    jmtr->emplace("size", info->tableSize);
     cstring tblname = info->table->controlPlaneName();
-    jmtr->emplace("binding"_cs, tblname);
+    jmtr->emplace("binding", tblname);
     auto result = ctxt->conv->convert(info->destinationField);
-    jmtr->emplace("result_target"_cs, result->to<Util::JsonObject>()->get("value"_cs));
+    jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
     ctxt->json->meter_arrays->append(jmtr);
 }
 
@@ -938,8 +938,8 @@ void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext *c
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jreg = new Util::JsonObject();
-    jreg->emplace("name"_cs, name);
-    jreg->emplace("id"_cs, nextId("register_arrays"_cs));
+    jreg->emplace("name", name);
+    jreg->emplace("id", nextId("register_arrays"_cs));
     jreg->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
     auto sz = eb->findParameterValue("size"_cs);
     CHECK_NULL(sz);
@@ -949,7 +949,7 @@ void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext *c
     }
     if (sz->to<IR::Constant>()->value == 0)
         error(ErrorType::ERR_UNSUPPORTED, "%1%: direct registers are not supported", inst);
-    jreg->emplace("size"_cs, sz->to<IR::Constant>()->value);
+    jreg->emplace("size", sz->to<IR::Constant>()->value);
     if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
         modelError("%1%: Expected a generic specialized type", eb->instanceType);
         return;
@@ -970,7 +970,7 @@ void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext *c
         ::error(ErrorType::ERR_UNKNOWN, "%1%: unknown width", st->arguments->at(0));
         return;
     }
-    jreg->emplace("bitwidth"_cs, width);
+    jreg->emplace("bitwidth", width);
     ctxt->json->register_arrays->append(jreg);
 }
 
@@ -989,8 +989,8 @@ void ExternConverter_ActionProfile::convertExternInstance(UNUSED ConversionConte
     // once in a pipeline, so only add it to the action_profiles once
     if (BMV2::JsonObjects::find_object_by_name(ctxt->action_profiles, name)) return;
     auto action_profile = new Util::JsonObject();
-    action_profile->emplace("name"_cs, name);
-    action_profile->emplace("id"_cs, nextId("action_profiles"_cs));
+    action_profile->emplace("name", name);
+    action_profile->emplace("id", nextId("action_profiles"_cs));
     action_profile->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
 
     auto sz = eb->findParameterValue("size"_cs);
@@ -1000,7 +1000,7 @@ void ExternConverter_ActionProfile::convertExternInstance(UNUSED ConversionConte
     if (!sz->is<IR::Constant>()) {
         ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
     }
-    action_profile->emplace("max_size"_cs, sz->to<IR::Constant>()->value);
+    action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
 
     ctxt->action_profiles->append(action_profile);
 }
@@ -1015,8 +1015,8 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
     // once in a pipeline, so only add it to the action_profiles once
     if (BMV2::JsonObjects::find_object_by_name(ctxt->action_profiles, name)) return;
     auto action_profile = new Util::JsonObject();
-    action_profile->emplace("name"_cs, name);
-    action_profile->emplace("id"_cs, nextId("action_profiles"_cs));
+    action_profile->emplace("name", name);
+    action_profile->emplace("id", nextId("action_profiles"_cs));
     action_profile->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
 
     auto sz = eb->findParameterValue("size"_cs);
@@ -1026,7 +1026,7 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
         ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
         return;
     }
-    action_profile->emplace("max_size"_cs, sz->to<IR::Constant>()->value);
+    action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
 
     auto selector = new Util::JsonObject();
     auto hash = eb->findParameterValue("algo"_cs);
@@ -1036,7 +1036,7 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
         return;
     }
     auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
-    selector->emplace("algo"_cs, algo);
+    selector->emplace("algo", algo);
     auto input = ctxt->get_selector_input(c->to<IR::Declaration_Instance>());
     if (input == nullptr) {
         // the selector is never used by any table, we cannot figure out its
@@ -1052,7 +1052,7 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
         auto jk = ctxt->conv->convert(expr);
         j_input->append(jk);
     }
-    action_profile->emplace("selector"_cs, selector);
+    action_profile->emplace("selector", selector);
 
     ctxt->action_profiles->append(action_profile);
 }

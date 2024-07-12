@@ -16,12 +16,14 @@ limitations under the License.
 
 #include "checkNamedArgs.h"
 
+#include "lib/hash.h"
+
 namespace P4 {
 
 bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument> *arguments) {
     bool first = true;
     bool hasName = false;
-    std::map<cstring, const IR::Argument *> found;
+    absl::flat_hash_map<cstring, const IR::Argument *, Util::Hash> found;
 
     for (auto arg : *arguments) {
         cstring argName = arg->name.name;

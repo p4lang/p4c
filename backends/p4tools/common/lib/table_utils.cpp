@@ -8,14 +8,14 @@ using namespace P4::literals;
 
 void checkTableImmutability(const IR::P4Table &table, TableProperties &properties) {
     bool isConstant = false;
-    const auto *entriesAnnotation = table.properties->getProperty("entries"_cs);
+    const auto *entriesAnnotation = table.properties->getProperty("entries");
     if (entriesAnnotation != nullptr) {
         isConstant = entriesAnnotation->isConstant;
     }
     // Also check if the table is invisible to the control plane.
     // This also implies that it cannot be modified.
     properties.tableIsImmutable = isConstant || table.getAnnotation("hidden"_cs) != nullptr;
-    const auto *defaultAction = table.properties->getProperty("default_action"_cs);
+    const auto *defaultAction = table.properties->getProperty("default_action");
     CHECK_NULL(defaultAction);
     properties.defaultIsImmutable = defaultAction->isConstant;
 }

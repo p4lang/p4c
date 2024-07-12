@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/hash.h"
 #include "lib/source_file.h"
 
 namespace IR {
@@ -61,4 +62,12 @@ struct ID : Util::IHasSourceInfo {
 };
 
 }  // namespace IR
+
+namespace Util {
+template <>
+struct Hasher<IR::ID> {
+    size_t operator()(const IR::ID &id) const { return Util::Hash{}(id.name); }
+};
+}  // namespace Util
+
 #endif /* IR_ID_H_ */

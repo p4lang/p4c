@@ -22,7 +22,6 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/enumerator.h"
-#include "lib/exceptions.h"
 
 namespace P4 {
 
@@ -30,16 +29,6 @@ namespace P4 {
    parameter identity is not important, but the parameter name is. */
 class ParameterSubstitution : public IHasDbPrint {
  protected:
-    // Parameter names are unique for a procedure, so each name
-    // should show up only once.
-    std::map<cstring, const IR::Argument *> parameterValues;
-    /// Map from parameter name to parameter.
-    std::map<cstring, const IR::Parameter *> parametersByName;
-    /// Parameters in the order they were added.
-    std::vector<const IR::Parameter *> parameters;
-    /// If created using populate this is non-null.
-    const IR::ParameterList *paramList = nullptr;
-
     bool containsName(cstring name) const {
         return parameterValues.find(name) != parameterValues.end();
     }
@@ -94,6 +83,17 @@ class ParameterSubstitution : public IHasDbPrint {
                 out << dbp(s.second) << "=>" << dbp(lookupByName(s.first)) << std::endl;
         }
     }
+
+ private:
+    // Parameter names are unique for a procedure, so each name
+    // should show up only once.
+    absl::flat_hash_map<cstring, const IR::Argument *> parameterValues;
+    /// Map from parameter name to parameter.
+    absl::flat_hash_map<cstring, const IR::Parameter *> parametersByName;
+    /// Parameters in the order they were added.
+    std::vector<const IR::Parameter *> parameters;
+    /// If created using populate this is non-null.
+    const IR::ParameterList *paramList = nullptr;
 };
 
 }  // namespace P4

@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "helpers.h"
 
+#include "lib/json.h"
+
 namespace BMV2 {
 
 /// constant definition for bmv2
@@ -45,14 +47,14 @@ Util::JsonArray *mkParameters(Util::JsonObject *object) {
 
 Util::JsonObject *mkPrimitive(cstring name, Util::JsonArray *appendTo) {
     auto result = new Util::JsonObject();
-    result->emplace("op"_cs, name);
+    result->emplace("op", name);
     appendTo->append(result);
     return result;
 }
 
 Util::JsonObject *mkPrimitive(cstring name) {
     auto result = new Util::JsonObject();
-    result->emplace("op"_cs, name);
+    result->emplace("op", name);
     return result;
 }
 
@@ -109,14 +111,14 @@ void ConversionContext::addToFieldList(const IR::Expression *expr, Util::JsonArr
     auto j = conv->convert(expr);
     conv->simpleExpressionsOnly = simple;  // restore state
     if (auto jo = j->to<Util::JsonObject>()) {
-        if (auto t = jo->get("type"_cs)) {
+        if (auto t = jo->get("type")) {
             if (auto type = t->to<Util::JsonValue>()) {
                 if (*type == "runtime_data") {
                     // Can't have runtime_data in field lists -- need hexstr instead
-                    auto val = jo->get("value"_cs)->to<Util::JsonValue>();
+                    auto val = jo->getAs<Util::JsonValue>("value");
                     j = jo = new Util::JsonObject();
-                    jo->emplace("type"_cs, "hexstr");
-                    jo->emplace("value"_cs, stringRepr(val->getValue()));
+                    jo->emplace("type", "hexstr");
+                    jo->emplace("value", stringRepr(val->getValue()));
                 }
             }
         }
@@ -135,8 +137,8 @@ int ConversionContext::createFieldList(const IR::Expression *expr, cstring listN
         json->field_lists->append(fl);
     }
     int id = nextId(group);
-    fl->emplace("id"_cs, id);
-    fl->emplace("name"_cs, listName);
+    fl->emplace("id", id);
+    fl->emplace("name", listName);
     fl->emplace_non_null("source_info"_cs, expr->sourceInfoJsonObj());
     auto elements = mkArrayField(fl, "elements"_cs);
     addToFieldList(expr, elements);
@@ -153,11 +155,11 @@ cstring ConversionContext::createCalculation(cstring algo, const IR::Expression 
                                              const IR::Node *sourcePositionNode = nullptr) {
     cstring calcName = refMap->newName("calc_");
     auto calc = new Util::JsonObject();
-    calc->emplace("name"_cs, calcName);
-    calc->emplace("id"_cs, nextId("calculations"_cs));
+    calc->emplace("name", calcName);
+    calc->emplace("id", nextId("calculations"_cs));
     if (sourcePositionNode != nullptr)
         calc->emplace_non_null("source_info"_cs, sourcePositionNode->sourceInfoJsonObj());
-    calc->emplace("algo"_cs, algo);
+    calc->emplace("algo", algo);
     auto listFields = convertToList(fields, typeMap);
     if (!listFields) {
         modelError("%1%: expected a struct", fields);
@@ -168,11 +170,11 @@ cstring ConversionContext::createCalculation(cstring algo, const IR::Expression 
         auto array = jright->to<Util::JsonArray>();
         BUG_CHECK(array, "expected a JSON array");
         auto payload = new Util::JsonObject();
-        payload->emplace("type"_cs, "payload"_cs);
-        payload->emplace("value"_cs, (Util::IJson *)nullptr);
+        payload->emplace("type", "payload");
+        payload->emplace("value", (Util::IJson *)nullptr);
         array->append(payload);
     }
-    calc->emplace("input"_cs, jright);
+    calc->emplace("input", jright);
     calculations->append(calc);
     return calcName;
 }
