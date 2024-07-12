@@ -8,6 +8,13 @@ header ethernet_t {
     bit<16> ether_type;
 }
 
+header vlan_t {
+    bit<3>  priority_code_point;
+    bit<1>  drop_eligible_indicator;
+    bit<12> vlan_id;
+    bit<16> ether_type;
+}
+
 header ipv4_t {
     bit<4>  version;
     bit<4>  ihl;
@@ -62,6 +69,7 @@ header icmp_t {
     bit<8>  type;
     bit<8>  code;
     bit<16> checksum;
+    bit<32> rest_of_header;
 }
 
 header arp_t {
@@ -89,54 +97,27 @@ header gre_t {
     bit<16> protocol;
 }
 
-struct headers_t {
-    ethernet_t erspan_ethernet;
-    ipv4_t     erspan_ipv4;
-    gre_t      erspan_gre;
-    ethernet_t ethernet;
-    ipv6_t     tunnel_encap_ipv6;
-    gre_t      tunnel_encap_gre;
-    ipv4_t     ipv4;
-    ipv6_t     ipv6;
-    icmp_t     icmp;
-    tcp_t      tcp;
-    udp_t      udp;
-    arp_t      arp;
+header ipfix_t {
+    bit<16> version_number;
+    bit<16> length;
+    bit<32> export_time;
+    bit<32> sequence_number;
+    bit<32> observation_domain_id;
 }
 
-struct packet_rewrites_t {
-    bit<48> src_mac;
-    bit<48> dst_mac;
-}
-
-struct local_metadata_t {
-    bool     _admit_to_l30;
-    bit<10>  _vrf_id1;
-    bit<48>  _packet_rewrites_src_mac2;
-    bit<48>  _packet_rewrites_dst_mac3;
-    bit<16>  _l4_src_port4;
-    bit<16>  _l4_dst_port5;
-    bit<16>  _wcmp_selector_input6;
-    bool     _apply_tunnel_encap_at_egress7;
-    bit<128> _tunnel_encap_src_ipv68;
-    bit<128> _tunnel_encap_dst_ipv69;
-    bool     _mirror_session_id_valid10;
-    bit<10>  _mirror_session_id_value11;
-    @field_list(8w1)
-    bit<32>  _mirroring_src_ip12;
-    @field_list(8w1)
-    bit<32>  _mirroring_dst_ip13;
-    @field_list(8w1)
-    bit<48>  _mirroring_src_mac14;
-    @field_list(8w1)
-    bit<48>  _mirroring_dst_mac15;
-    @field_list(8w1)
-    bit<8>   _mirroring_ttl16;
-    @field_list(8w1)
-    bit<8>   _mirroring_tos17;
-    bit<2>   _color18;
-    bit<9>   _ingress_port19;
-    bit<6>   _route_metadata20;
+header psamp_extended_t {
+    bit<16> template_id;
+    bit<16> length;
+    bit<64> observation_time;
+    bit<16> flowset;
+    bit<16> next_hop_index;
+    bit<16> epoch;
+    bit<16> ingress_port;
+    bit<16> egress_port;
+    bit<16> user_meta_field;
+    bit<8>  dlb_id;
+    bit<8>  variable_length;
+    bit<16> packet_sampled_length;
 }
 
 @controller_header("packet_in") header packet_in_header_t {
@@ -151,25 +132,164 @@ struct local_metadata_t {
     bit<9> egress_port;
     @id(2)
     bit<1> submit_to_ingress;
-    @id(3)
-    bit<7> unused_pad;
+    @id(3) @padding
+    bit<6> unused_pad;
+}
+
+struct headers_t {
+    packet_out_header_t packet_out_header;
+    ethernet_t          mirror_encap_ethernet;
+    vlan_t              mirror_encap_vlan;
+    ipv6_t              mirror_encap_ipv6;
+    udp_t               mirror_encap_udp;
+    ipfix_t             ipfix;
+    psamp_extended_t    psamp_extended;
+    ethernet_t          ethernet;
+    vlan_t              vlan;
+    ipv6_t              tunnel_encap_ipv6;
+    gre_t               tunnel_encap_gre;
+    ipv4_t              ipv4;
+    ipv6_t              ipv6;
+    ipv4_t              inner_ipv4;
+    ipv6_t              inner_ipv6;
+    icmp_t              icmp;
+    tcp_t               tcp;
+    udp_t               udp;
+    arp_t               arp;
+}
+
+struct packet_rewrites_t {
+    bit<48> src_mac;
+    bit<48> dst_mac;
+    bit<12> vlan_id;
+}
+
+struct local_metadata_t {
+    @field_list(8w1)
+    bool     _enable_vlan_checks0;
+    bit<12>  _vlan_id1;
+    bool     _admit_to_l32;
+    bit<10>  _vrf_id3;
+    bool     _enable_decrement_ttl4;
+    bool     _enable_src_mac_rewrite5;
+    bool     _enable_dst_mac_rewrite6;
+    bool     _enable_vlan_rewrite7;
+    bit<48>  _packet_rewrites_src_mac8;
+    bit<48>  _packet_rewrites_dst_mac9;
+    bit<12>  _packet_rewrites_vlan_id10;
+    bit<16>  _l4_src_port11;
+    bit<16>  _l4_dst_port12;
+    bit<8>   _wcmp_selector_input13;
+    bool     _apply_tunnel_decap_at_end_of_pre_ingress14;
+    bool     _apply_tunnel_encap_at_egress15;
+    bit<128> _tunnel_encap_src_ipv616;
+    bit<128> _tunnel_encap_dst_ipv617;
+    bool     _marked_to_copy18;
+    bool     _marked_to_mirror19;
+    bit<10>  _mirror_session_id20;
+    bit<9>   _mirror_egress_port21;
+    @field_list(8w1)
+    bit<48>  _mirror_encap_src_mac22;
+    @field_list(8w1)
+    bit<48>  _mirror_encap_dst_mac23;
+    @field_list(8w1)
+    bit<12>  _mirror_encap_vlan_id24;
+    @field_list(8w1)
+    bit<128> _mirror_encap_src_ip25;
+    @field_list(8w1)
+    bit<128> _mirror_encap_dst_ip26;
+    @field_list(8w1)
+    bit<16>  _mirror_encap_udp_src_port27;
+    @field_list(8w1)
+    bit<16>  _mirror_encap_udp_dst_port28;
+    @field_list(8w2)
+    bit<9>   _loopback_port29;
+    @field_list(8w1)
+    bit<9>   _packet_in_ingress_port30;
+    @field_list(8w1)
+    bit<9>   _packet_in_target_egress_port31;
+    bit<2>   _color32;
+    bit<9>   _ingress_port33;
+    bit<6>   _route_metadata34;
+    bit<8>   _acl_metadata35;
+    bool     _bypass_ingress36;
+    bool     _wcmp_group_id_valid37;
+    bit<12>  _wcmp_group_id_value38;
+    bool     _nexthop_id_valid39;
+    bit<10>  _nexthop_id_value40;
+    bool     _ipmc_table_hit41;
+    bool     _acl_drop42;
 }
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     state start {
-        local_metadata._admit_to_l30 = false;
-        local_metadata._vrf_id1 = 10w0;
-        local_metadata._packet_rewrites_src_mac2 = 48w0;
-        local_metadata._packet_rewrites_dst_mac3 = 48w0;
-        local_metadata._l4_src_port4 = 16w0;
-        local_metadata._l4_dst_port5 = 16w0;
-        local_metadata._wcmp_selector_input6 = 16w0;
-        local_metadata._mirror_session_id_valid10 = false;
-        local_metadata._color18 = 2w0;
-        local_metadata._ingress_port19 = standard_metadata.ingress_port;
-        local_metadata._route_metadata20 = 6w0;
+        local_metadata._enable_vlan_checks0 = false;
+        local_metadata._vlan_id1 = 12w0;
+        local_metadata._admit_to_l32 = false;
+        local_metadata._vrf_id3 = 10w0;
+        local_metadata._enable_decrement_ttl4 = false;
+        local_metadata._enable_src_mac_rewrite5 = false;
+        local_metadata._enable_dst_mac_rewrite6 = false;
+        local_metadata._enable_vlan_rewrite7 = false;
+        local_metadata._packet_rewrites_src_mac8 = 48w0;
+        local_metadata._packet_rewrites_dst_mac9 = 48w0;
+        local_metadata._l4_src_port11 = 16w0;
+        local_metadata._l4_dst_port12 = 16w0;
+        local_metadata._wcmp_selector_input13 = 8w0;
+        local_metadata._apply_tunnel_decap_at_end_of_pre_ingress14 = false;
+        local_metadata._apply_tunnel_encap_at_egress15 = false;
+        local_metadata._tunnel_encap_src_ipv616 = 128w0;
+        local_metadata._tunnel_encap_dst_ipv617 = 128w0;
+        local_metadata._marked_to_copy18 = false;
+        local_metadata._marked_to_mirror19 = false;
+        local_metadata._mirror_session_id20 = 10w0;
+        local_metadata._mirror_egress_port21 = 9w0;
+        local_metadata._color32 = 2w0;
+        local_metadata._route_metadata34 = 6w0;
+        local_metadata._bypass_ingress36 = false;
+        local_metadata._wcmp_group_id_valid37 = false;
+        local_metadata._wcmp_group_id_value38 = 12w0;
+        local_metadata._nexthop_id_valid39 = false;
+        local_metadata._nexthop_id_value40 = 10w0;
+        local_metadata._ipmc_table_hit41 = false;
+        local_metadata._acl_drop42 = false;
+        transition select((bit<1>)(standard_metadata.instance_type == 32w4)) {
+            1w1: start_true;
+            1w0: start_false;
+            default: noMatch;
+        }
+    }
+    state start_true {
+        local_metadata._ingress_port33 = local_metadata._loopback_port29;
+        transition start_join;
+    }
+    state start_false {
+        local_metadata._ingress_port33 = standard_metadata.ingress_port;
+        transition start_join;
+    }
+    state start_join {
+        transition select(standard_metadata.ingress_port) {
+            9w510: parse_packet_out_header;
+            default: parse_ethernet;
+        }
+    }
+    state parse_packet_out_header {
+        packet.extract<packet_out_header_t>(headers.packet_out_header);
+        transition parse_ethernet;
+    }
+    state parse_ethernet {
         packet.extract<ethernet_t>(headers.ethernet);
         transition select(headers.ethernet.ether_type) {
+            16w0x800: parse_ipv4;
+            16w0x86dd: parse_ipv6;
+            16w0x806: parse_arp;
+            16w0x8100: parse_8021q_vlan;
+            default: accept;
+        }
+    }
+    state parse_8021q_vlan {
+        packet.extract<vlan_t>(headers.vlan);
+        transition select(headers.vlan.ether_type) {
             16w0x800: parse_ipv4;
             16w0x86dd: parse_ipv6;
             16w0x806: parse_arp;
@@ -179,6 +299,17 @@ parser packet_parser(packet_in packet, out headers_t headers, inout local_metada
     state parse_ipv4 {
         packet.extract<ipv4_t>(headers.ipv4);
         transition select(headers.ipv4.protocol) {
+            8w0x4: parse_ipv4_in_ip;
+            8w0x29: parse_ipv6_in_ip;
+            8w0x1: parse_icmp;
+            8w0x6: parse_tcp;
+            8w0x11: parse_udp;
+            default: accept;
+        }
+    }
+    state parse_ipv4_in_ip {
+        packet.extract<ipv4_t>(headers.inner_ipv4);
+        transition select(headers.inner_ipv4.protocol) {
             8w0x1: parse_icmp;
             8w0x6: parse_tcp;
             8w0x11: parse_udp;
@@ -188,6 +319,17 @@ parser packet_parser(packet_in packet, out headers_t headers, inout local_metada
     state parse_ipv6 {
         packet.extract<ipv6_t>(headers.ipv6);
         transition select(headers.ipv6.next_header) {
+            8w0x4: parse_ipv4_in_ip;
+            8w0x29: parse_ipv6_in_ip;
+            8w0x3a: parse_icmp;
+            8w0x6: parse_tcp;
+            8w0x11: parse_udp;
+            default: accept;
+        }
+    }
+    state parse_ipv6_in_ip {
+        packet.extract<ipv6_t>(headers.inner_ipv6);
+        transition select(headers.inner_ipv6.next_header) {
             8w0x3a: parse_icmp;
             8w0x6: parse_tcp;
             8w0x11: parse_udp;
@@ -196,14 +338,14 @@ parser packet_parser(packet_in packet, out headers_t headers, inout local_metada
     }
     state parse_tcp {
         packet.extract<tcp_t>(headers.tcp);
-        local_metadata._l4_src_port4 = headers.tcp.src_port;
-        local_metadata._l4_dst_port5 = headers.tcp.dst_port;
+        local_metadata._l4_src_port11 = headers.tcp.src_port;
+        local_metadata._l4_dst_port12 = headers.tcp.dst_port;
         transition accept;
     }
     state parse_udp {
         packet.extract<udp_t>(headers.udp);
-        local_metadata._l4_src_port4 = headers.udp.src_port;
-        local_metadata._l4_dst_port5 = headers.udp.dst_port;
+        local_metadata._l4_src_port11 = headers.udp.src_port;
+        local_metadata._l4_dst_port12 = headers.udp.dst_port;
         transition accept;
     }
     state parse_icmp {
@@ -214,18 +356,29 @@ parser packet_parser(packet_in packet, out headers_t headers, inout local_metada
         packet.extract<arp_t>(headers.arp);
         transition accept;
     }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
 }
 
 control packet_deparser(packet_out packet, in headers_t headers) {
     apply {
-        packet.emit<ethernet_t>(headers.erspan_ethernet);
-        packet.emit<ipv4_t>(headers.erspan_ipv4);
-        packet.emit<gre_t>(headers.erspan_gre);
+        packet.emit<packet_out_header_t>(headers.packet_out_header);
+        packet.emit<ethernet_t>(headers.mirror_encap_ethernet);
+        packet.emit<vlan_t>(headers.mirror_encap_vlan);
+        packet.emit<ipv6_t>(headers.mirror_encap_ipv6);
+        packet.emit<udp_t>(headers.mirror_encap_udp);
+        packet.emit<ipfix_t>(headers.ipfix);
+        packet.emit<psamp_extended_t>(headers.psamp_extended);
         packet.emit<ethernet_t>(headers.ethernet);
+        packet.emit<vlan_t>(headers.vlan);
         packet.emit<ipv6_t>(headers.tunnel_encap_ipv6);
         packet.emit<gre_t>(headers.tunnel_encap_gre);
         packet.emit<ipv4_t>(headers.ipv4);
         packet.emit<ipv6_t>(headers.ipv6);
+        packet.emit<ipv4_t>(headers.inner_ipv4);
+        packet.emit<ipv6_t>(headers.inner_ipv6);
         packet.emit<arp_t>(headers.arp);
         packet.emit<icmp_t>(headers.icmp);
         packet.emit<tcp_t>(headers.tcp);
@@ -258,30 +411,45 @@ control verify_ipv4_checksum(inout headers_t headers, inout local_metadata_t loc
 
 control compute_ipv4_checksum(inout headers_t headers, inout local_metadata_t local_metadata) {
     apply {
-        update_checksum<tuple_0, bit<16>>(headers.erspan_ipv4.isValid(), (tuple_0){f0 = headers.erspan_ipv4.version,f1 = headers.erspan_ipv4.ihl,f2 = headers.erspan_ipv4.dscp,f3 = headers.erspan_ipv4.ecn,f4 = headers.erspan_ipv4.total_len,f5 = headers.erspan_ipv4.identification,f6 = headers.erspan_ipv4.reserved,f7 = headers.erspan_ipv4.do_not_fragment,f8 = headers.erspan_ipv4.more_fragments,f9 = headers.erspan_ipv4.frag_offset,f10 = headers.erspan_ipv4.ttl,f11 = headers.erspan_ipv4.protocol,f12 = headers.erspan_ipv4.src_addr,f13 = headers.erspan_ipv4.dst_addr}, headers.erspan_ipv4.header_checksum, HashAlgorithm.csum16);
         update_checksum<tuple_0, bit<16>>(headers.ipv4.isValid(), (tuple_0){f0 = headers.ipv4.version,f1 = headers.ipv4.ihl,f2 = headers.ipv4.dscp,f3 = headers.ipv4.ecn,f4 = headers.ipv4.total_len,f5 = headers.ipv4.identification,f6 = headers.ipv4.reserved,f7 = headers.ipv4.do_not_fragment,f8 = headers.ipv4.more_fragments,f9 = headers.ipv4.frag_offset,f10 = headers.ipv4.ttl,f11 = headers.ipv4.protocol,f12 = headers.ipv4.src_addr,f13 = headers.ipv4.dst_addr}, headers.ipv4.header_checksum, HashAlgorithm.csum16);
     }
 }
 
+struct tuple_1 {
+    bit<32> f0;
+    bit<32> f1;
+    bit<32> f2;
+    bit<16> f3;
+    bit<16> f4;
+}
+
+struct tuple_2 {
+    bit<32>  f0;
+    bit<20>  f1;
+    bit<128> f2;
+    bit<128> f3;
+    bit<16>  f4;
+    bit<16>  f5;
+}
+
 control ingress(inout headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     @name("ingress.acl_pre_ingress.dscp") bit<6> acl_pre_ingress_dscp;
-    @name("ingress.routing.wcmp_group_id_valid") bool routing_wcmp_group_id_valid;
-    @name("ingress.routing.wcmp_group_id_value") bit<12> routing_wcmp_group_id_value;
-    @name("ingress.routing.nexthop_id_valid") bool routing_nexthop_id_valid;
-    @name("ingress.routing.nexthop_id_value") bit<10> routing_nexthop_id_value;
-    @name("ingress.routing.router_interface_id_valid") bool routing_router_interface_id_valid;
-    @name("ingress.routing.router_interface_id_value") bit<10> routing_router_interface_id_value;
-    @name("ingress.routing.neighbor_id_valid") bool routing_neighbor_id_valid;
-    @name("ingress.routing.neighbor_id_value") bit<128> routing_neighbor_id_value;
+    @name("ingress.acl_pre_ingress.ecn") bit<2> acl_pre_ingress_ecn;
     @name("ingress.acl_ingress.ttl") bit<8> acl_ingress_ttl;
     @name("ingress.acl_ingress.dscp") bit<6> acl_ingress_dscp;
     @name("ingress.acl_ingress.ecn") bit<2> acl_ingress_ecn;
     @name("ingress.acl_ingress.ip_protocol") bit<8> acl_ingress_ip_protocol;
-    @name("ingress.mirroring_clone.mirror_port") bit<9> mirroring_clone_mirror_port;
-    @name("ingress.mirroring_clone.pre_session") bit<32> mirroring_clone_pre_session;
-    @name("ingress.standard_metadata") standard_metadata_t standard_metadata_0;
-    bool key_0;
-    bool key_2;
+    @name("ingress.routing_resolution.tunnel_id_valid") bool routing_resolution_tunnel_id_valid;
+    @name("ingress.routing_resolution.tunnel_id_value") bit<10> routing_resolution_tunnel_id_value;
+    @name("ingress.routing_resolution.router_interface_id_valid") bool routing_resolution_router_interface_id_valid;
+    @name("ingress.routing_resolution.router_interface_id_value") bit<10> routing_resolution_router_interface_id_value;
+    @name("ingress.routing_resolution.neighbor_id_valid") bool routing_resolution_neighbor_id_valid;
+    @name("ingress.routing_resolution.neighbor_id_value") bit<128> routing_resolution_neighbor_id_value;
+    bit<1> key_0;
+    bool key_1;
+    bool key_3;
+    bool key_6;
+    bool key_7;
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_3() {
@@ -300,49 +468,82 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     }
     @noWarn("unused") @name(".NoAction") action NoAction_10() {
     }
-    @id(0x01000109) @sai_action(SAI_PACKET_ACTION_DROP) @name(".acl_drop") action acl_drop_1() {
-        standard_metadata_0.ingress_port = standard_metadata.ingress_port;
-        standard_metadata_0.egress_spec = standard_metadata.egress_spec;
-        standard_metadata_0.egress_port = standard_metadata.egress_port;
-        standard_metadata_0.instance_type = standard_metadata.instance_type;
-        standard_metadata_0.packet_length = standard_metadata.packet_length;
-        standard_metadata_0.enq_timestamp = standard_metadata.enq_timestamp;
-        standard_metadata_0.enq_qdepth = standard_metadata.enq_qdepth;
-        standard_metadata_0.deq_timedelta = standard_metadata.deq_timedelta;
-        standard_metadata_0.deq_qdepth = standard_metadata.deq_qdepth;
-        standard_metadata_0.ingress_global_timestamp = standard_metadata.ingress_global_timestamp;
-        standard_metadata_0.egress_global_timestamp = standard_metadata.egress_global_timestamp;
-        standard_metadata_0.mcast_grp = standard_metadata.mcast_grp;
-        standard_metadata_0.egress_rid = standard_metadata.egress_rid;
-        standard_metadata_0.checksum_error = standard_metadata.checksum_error;
-        standard_metadata_0.parser_error = standard_metadata.parser_error;
-        standard_metadata_0.priority = standard_metadata.priority;
-        mark_to_drop(standard_metadata_0);
-        standard_metadata.ingress_port = standard_metadata_0.ingress_port;
-        standard_metadata.egress_spec = standard_metadata_0.egress_spec;
-        standard_metadata.egress_port = standard_metadata_0.egress_port;
-        standard_metadata.instance_type = standard_metadata_0.instance_type;
-        standard_metadata.packet_length = standard_metadata_0.packet_length;
-        standard_metadata.enq_timestamp = standard_metadata_0.enq_timestamp;
-        standard_metadata.enq_qdepth = standard_metadata_0.enq_qdepth;
-        standard_metadata.deq_timedelta = standard_metadata_0.deq_timedelta;
-        standard_metadata.deq_qdepth = standard_metadata_0.deq_qdepth;
-        standard_metadata.ingress_global_timestamp = standard_metadata_0.ingress_global_timestamp;
-        standard_metadata.egress_global_timestamp = standard_metadata_0.egress_global_timestamp;
-        standard_metadata.mcast_grp = standard_metadata_0.mcast_grp;
-        standard_metadata.egress_rid = standard_metadata_0.egress_rid;
-        standard_metadata.checksum_error = standard_metadata_0.checksum_error;
-        standard_metadata.parser_error = standard_metadata_0.parser_error;
-        standard_metadata.priority = standard_metadata_0.priority;
+    @noWarn("unused") @name(".NoAction") action NoAction_11() {
+    }
+    @noWarn("unused") @name(".NoAction") action NoAction_12() {
+    }
+    @noWarn("unused") @name(".NoAction") action NoAction_13() {
+    }
+    @noWarn("unused") @name(".NoAction") action NoAction_14() {
+    }
+    @noWarn("unused") @name(".NoAction") action NoAction_15() {
+    }
+    @noWarn("unused") @name(".NoAction") action NoAction_16() {
+    }
+    @noWarn("unused") @name(".NoAction") action NoAction_17() {
+    }
+    @id(0x01000005) @name(".set_nexthop_id") action set_nexthop_id_1(@id(1) @refers_to(nexthop_table , nexthop_id) @name("nexthop_id") bit<10> nexthop_id) {
+        local_metadata._nexthop_id_valid39 = true;
+        local_metadata._nexthop_id_value40 = nexthop_id;
+    }
+    @id(0x01000005) @name(".set_nexthop_id") action set_nexthop_id_2(@id(1) @refers_to(nexthop_table , nexthop_id) @name("nexthop_id") bit<10> nexthop_id_2) {
+        local_metadata._nexthop_id_valid39 = true;
+        local_metadata._nexthop_id_value40 = nexthop_id_2;
+    }
+    @id(0x01000005) @name(".set_nexthop_id") action set_nexthop_id_3(@id(1) @refers_to(nexthop_table , nexthop_id) @name("nexthop_id") bit<10> nexthop_id_3) {
+        local_metadata._nexthop_id_valid39 = true;
+        local_metadata._nexthop_id_value40 = nexthop_id_3;
+    }
+    @id(0x01000109) @sai_action(SAI_PACKET_ACTION_DROP) @name(".acl_drop") action acl_drop_2() {
+        local_metadata._acl_drop42 = true;
+    }
+    @id(0x01000109) @sai_action(SAI_PACKET_ACTION_DROP) @name(".acl_drop") action acl_drop_3() {
+        local_metadata._acl_drop42 = true;
+    }
+    @id(0x01000016) @name("ingress.tunnel_termination_lookup.mark_for_tunnel_decap_and_set_vrf") action tunnel_termination_lookup_mark_for_tunnel_decap_and_set_vrf_0(@refers_to(vrf_table , vrf_id) @name("vrf_id") bit<10> vrf_id_2) {
+        local_metadata._apply_tunnel_decap_at_end_of_pre_ingress14 = true;
+        local_metadata._vrf_id3 = vrf_id_2;
+    }
+    @unsupported @p4runtime_role("sdn_controller") @id(0x0200004B) @name("ingress.tunnel_termination_lookup.ipv6_tunnel_termination_table") table tunnel_termination_lookup_ipv6_tunnel_termination_table {
+        key = {
+            headers.ipv6.dst_addr: ternary @id(1) @name("dst_ipv6") @format(IPV6_ADDRESS);
+            headers.ipv6.src_addr: ternary @id(2) @name("src_ipv6") @format(IPV6_ADDRESS);
+        }
+        actions = {
+            @proto_id(1) tunnel_termination_lookup_mark_for_tunnel_decap_and_set_vrf_0();
+            @defaultonly NoAction_2();
+        }
+        size = 126;
+        default_action = NoAction_2();
+    }
+    @id(0x0100001A) @name("ingress.vlan_untag.disable_vlan_checks") action vlan_untag_disable_vlan_checks_0() {
+        local_metadata._enable_vlan_checks0 = false;
+    }
+    @p4runtime_role("sdn_controller") @id(0x0200004D) @entry_restriction("
+    // Force the dummy_match to be wildcard.
+    dummy_match::mask == 0;
+  ") @name("ingress.vlan_untag.disable_vlan_checks_table") table vlan_untag_disable_vlan_checks_table {
+        key = {
+            key_0: ternary @id(1) @name("dummy_match");
+        }
+        actions = {
+            @proto_id(1) vlan_untag_disable_vlan_checks_0();
+            @defaultonly NoAction_3();
+        }
+        size = 1;
+        default_action = NoAction_3();
     }
     @id(0x13000101) @name("ingress.acl_pre_ingress.acl_pre_ingress_counter") direct_counter(CounterType.packets_and_bytes) acl_pre_ingress_acl_pre_ingress_counter;
-    @id(0x01000100) @sai_action(SAI_PACKET_ACTION_FORWARD) @name("ingress.acl_pre_ingress.set_vrf") action acl_pre_ingress_set_vrf_0(@sai_action_param(SAI_ACL_ENTRY_ATTR_ACTION_SET_VRF) @refers_to(vrf_table , vrf_id) @id(1) @name("vrf_id") bit<10> vrf_id_1) {
-        local_metadata._vrf_id1 = vrf_id_1;
+    @id(0x13000106) @name("ingress.acl_pre_ingress.acl_pre_ingress_vlan_counter") direct_counter(CounterType.packets_and_bytes) acl_pre_ingress_acl_pre_ingress_vlan_counter;
+    @id(0x13000105) @name("ingress.acl_pre_ingress.acl_pre_ingress_metadata_counter") direct_counter(CounterType.packets_and_bytes) acl_pre_ingress_acl_pre_ingress_metadata_counter;
+    @id(0x01000100) @sai_action(SAI_PACKET_ACTION_FORWARD) @name("ingress.acl_pre_ingress.set_vrf") action acl_pre_ingress_set_vrf_0(@sai_action_param(SAI_ACL_ENTRY_ATTR_ACTION_SET_VRF) @refers_to(vrf_table , vrf_id) @id(1) @name("vrf_id") bit<10> vrf_id_3) {
+        local_metadata._vrf_id3 = vrf_id_3;
         acl_pre_ingress_acl_pre_ingress_counter.count();
     }
-    @p4runtime_role("sdn_controller") @id(0x02000101) @sai_acl(PRE_INGRESS) @entry_restriction("
+    @p4runtime_role("sdn_controller") @id(0x02000101) @sai_acl(PRE_INGRESS) @sai_acl_priority(11) @entry_restriction("
     // Only allow IP field matches for IP packets.
     dscp::mask != 0 -> (is_ip == 1 || is_ipv4 == 1 || is_ipv6 == 1);
+    ecn::mask != 0 -> (is_ip == 1 || is_ipv4 == 1 || is_ipv6 == 1);
     dst_ip::mask != 0 -> is_ipv4 == 1;
     dst_ipv6::mask != 0 -> is_ipv6 == 1;
     // Forbid illegal combinations of IP_TYPE fields.
@@ -352,137 +553,66 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     // Forbid unsupported combinations of IP_TYPE fields.
     is_ipv4::mask != 0 -> (is_ipv4 == 1);
     is_ipv6::mask != 0 -> (is_ipv6 == 1);
+
+
+
+
     // Reserve high priorities for switch-internal use.
     // TODO: Remove once inband workaround is obsolete.
     ::priority < 0x7fffffff;
   ") @name("ingress.acl_pre_ingress.acl_pre_ingress_table") table acl_pre_ingress_acl_pre_ingress_table {
         key = {
-            key_0                         : optional @name("is_ip") @id(1) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
-            headers.ipv4.isValid()        : optional @name("is_ipv4") @id(2) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
-            headers.ipv6.isValid()        : optional @name("is_ipv6") @id(3) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
-            headers.ethernet.src_addr     : ternary @name("src_mac") @id(4) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_SRC_MAC) @format(MAC_ADDRESS);
-            headers.ethernet.dst_addr     : ternary @name("dst_mac") @id(9) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_MAC) @format(MAC_ADDRESS);
-            headers.ipv4.dst_addr         : ternary @name("dst_ip") @id(5) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_IP) @format(IPV4_ADDRESS);
-            headers.ipv6.dst_addr[127:64] : ternary @name("dst_ipv6") @id(6) @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD2 )) @format(IPV6_ADDRESS);
-            acl_pre_ingress_dscp          : ternary @name("dscp") @id(7) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
-            local_metadata._ingress_port19: optional @name("in_port") @id(8) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IN_PORT);
+            key_1                         : optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid()        : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid()        : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            headers.ethernet.src_addr     : ternary @id(4) @name("src_mac") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_SRC_MAC) @format(MAC_ADDRESS);
+            headers.ethernet.dst_addr     : ternary @id(9) @name("dst_mac") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_MAC) @format(MAC_ADDRESS);
+            headers.ipv4.dst_addr         : ternary @id(5) @name("dst_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_IP) @format(IPV4_ADDRESS);
+            headers.ipv6.dst_addr[127:64] : ternary @id(6) @name("dst_ipv6") @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD2 )) @format(IPV6_ADDRESS);
+            acl_pre_ingress_dscp          : ternary @id(7) @name("dscp") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
+            acl_pre_ingress_ecn           : ternary @id(10) @name("ecn") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ECN);
+            local_metadata._ingress_port33: optional @id(8) @name("in_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IN_PORT);
         }
         actions = {
             @proto_id(1) acl_pre_ingress_set_vrf_0();
-            @defaultonly NoAction_2();
+            @defaultonly NoAction_4();
         }
-        const default_action = NoAction_2();
+        const default_action = NoAction_4();
         counters = acl_pre_ingress_acl_pre_ingress_counter;
-        size = 255;
+        size = 254;
     }
     @id(0x01000008) @name("ingress.l3_admit.admit_to_l3") action l3_admit_admit_to_l3_0() {
-        local_metadata._admit_to_l30 = true;
+        local_metadata._admit_to_l32 = true;
     }
     @p4runtime_role("sdn_controller") @id(0x02000047) @name("ingress.l3_admit.l3_admit_table") table l3_admit_l3_admit_table {
         key = {
             headers.ethernet.dst_addr     : ternary @name("dst_mac") @id(1) @format(MAC_ADDRESS);
-            local_metadata._ingress_port19: optional @name("in_port") @id(2);
+            local_metadata._ingress_port33: optional @name("in_port") @id(2);
         }
         actions = {
             @proto_id(1) l3_admit_admit_to_l3_0();
-            @defaultonly NoAction_3();
-        }
-        const default_action = NoAction_3();
-        size = 128;
-    }
-    @id(0x01000001) @name("ingress.routing.set_dst_mac") action routing_set_dst_mac_0(@id(1) @format(MAC_ADDRESS) @name("dst_mac") bit<48> dst_mac_2) {
-        local_metadata._packet_rewrites_dst_mac3 = dst_mac_2;
-    }
-    @p4runtime_role("sdn_controller") @id(0x02000040) @name("ingress.routing.neighbor_table") table routing_neighbor_table {
-        key = {
-            routing_router_interface_id_value: exact @id(1) @name("router_interface_id") @refers_to(router_interface_table , router_interface_id);
-            routing_neighbor_id_value        : exact @id(2) @format(IPV6_ADDRESS) @name("neighbor_id");
-        }
-        actions = {
-            @proto_id(1) routing_set_dst_mac_0();
-            @defaultonly NoAction_4();
-        }
-        const default_action = NoAction_4();
-        size = 1024;
-    }
-    @id(0x01000002) @name("ingress.routing.set_port_and_src_mac") action routing_set_port_and_src_mac_0(@id(1) @name("port") bit<9> port, @id(2) @format(MAC_ADDRESS) @name("src_mac") bit<48> src_mac_2) {
-        standard_metadata.egress_spec = (bit<9>)port;
-        local_metadata._packet_rewrites_src_mac2 = src_mac_2;
-    }
-    @p4runtime_role("sdn_controller") @id(0x02000041) @name("ingress.routing.router_interface_table") table routing_router_interface_table {
-        key = {
-            routing_router_interface_id_value: exact @id(1) @name("router_interface_id");
-        }
-        actions = {
-            @proto_id(1) routing_set_port_and_src_mac_0();
             @defaultonly NoAction_5();
         }
         const default_action = NoAction_5();
-        size = 256;
+        size = 64;
     }
-    @id(0x01000014) @name("ingress.routing.set_ip_nexthop") action routing_set_ip_nexthop_0(@id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("router_interface_id") bit<10> router_interface_id, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("neighbor_id") bit<128> neighbor_id) {
-        routing_router_interface_id_valid = true;
-        routing_router_interface_id_value = router_interface_id;
-        routing_neighbor_id_valid = true;
-        routing_neighbor_id_value = neighbor_id;
+    @sai_hash_seed(0) @id(0x010000A) @name("ingress.hashing.select_ecmp_hash_algorithm") action hashing_select_ecmp_hash_algorithm_0() {
     }
-    @id(0x01000003) @deprecated("Use set_ip_nexthop instead.") @name("ingress.routing.set_nexthop") action routing_set_nexthop_0(@id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("router_interface_id") bit<10> router_interface_id_2, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("neighbor_id") bit<128> neighbor_id_2) {
-        @id(0x01000014) {
-            routing_router_interface_id_valid = true;
-            routing_router_interface_id_value = router_interface_id_2;
-            routing_neighbor_id_valid = true;
-            routing_neighbor_id_value = neighbor_id_2;
-        }
+    @sai_ecmp_hash(SAI_SWITCH_ATTR_ECMP_HASH_IPV4) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_SRC_IPV4) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_DST_IPV4) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_L4_SRC_PORT) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_L4_DST_PORT) @id(0x0100000B) @name("ingress.hashing.compute_ecmp_hash_ipv4") action hashing_compute_ecmp_hash_ipv4_0() {
+        hash<bit<8>, bit<1>, tuple_1, bit<17>>(local_metadata._wcmp_selector_input13, HashAlgorithm.crc32, 1w0, (tuple_1){f0 = 32w0,f1 = headers.ipv4.src_addr,f2 = headers.ipv4.dst_addr,f3 = local_metadata._l4_src_port11,f4 = local_metadata._l4_dst_port12}, 17w0x10000);
+        local_metadata._wcmp_selector_input13 = local_metadata._wcmp_selector_input13 | local_metadata._wcmp_selector_input13 << 8w8;
     }
-    @p4runtime_role("sdn_controller") @id(0x02000042) @name("ingress.routing.nexthop_table") table routing_nexthop_table {
-        key = {
-            routing_nexthop_id_value: exact @id(1) @name("nexthop_id");
-        }
-        actions = {
-            @proto_id(1) routing_set_nexthop_0();
-            @proto_id(3) routing_set_ip_nexthop_0();
-            @defaultonly NoAction_6();
-        }
-        const default_action = NoAction_6();
-        size = 1024;
+    @sai_ecmp_hash(SAI_SWITCH_ATTR_ECMP_HASH_IPV6) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_SRC_IPV6) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_DST_IPV6) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_L4_SRC_PORT) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_L4_DST_PORT) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_IPV6_FLOW_LABEL) @id(0x0100000C) @name("ingress.hashing.compute_ecmp_hash_ipv6") action hashing_compute_ecmp_hash_ipv6_0() {
+        hash<bit<8>, bit<1>, tuple_2, bit<17>>(local_metadata._wcmp_selector_input13, HashAlgorithm.crc32, 1w0, (tuple_2){f0 = 32w0,f1 = headers.ipv6.flow_label,f2 = headers.ipv6.src_addr,f3 = headers.ipv6.dst_addr,f4 = local_metadata._l4_src_port11,f5 = local_metadata._l4_dst_port12}, 17w0x10000);
+        local_metadata._wcmp_selector_input13 = local_metadata._wcmp_selector_input13 | local_metadata._wcmp_selector_input13 << 8w8;
     }
-    @id(0x01000005) @name("ingress.routing.set_nexthop_id") action routing_set_nexthop_id_0(@id(1) @refers_to(nexthop_table , nexthop_id) @name("nexthop_id") bit<10> nexthop_id) {
-        routing_nexthop_id_valid = true;
-        routing_nexthop_id_value = nexthop_id;
+    @sai_hash_algorithm(SAI_HASH_ALGORITHM_CRC) @sai_hash_seed(0) @sai_hash_offset(0) @name("ingress.lag_hashing_config.select_lag_hash_algorithm") action lag_hashing_config_select_lag_hash_algorithm_0() {
     }
-    @id(0x01000005) @name("ingress.routing.set_nexthop_id") action routing_set_nexthop_id_1(@id(1) @refers_to(nexthop_table , nexthop_id) @name("nexthop_id") bit<10> nexthop_id_2) {
-        routing_nexthop_id_valid = true;
-        routing_nexthop_id_value = nexthop_id_2;
+    @sai_lag_hash(SAI_SWITCH_ATTR_LAG_HASH_IPV4) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_SRC_IPV4) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_DST_IPV4) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_L4_SRC_PORT) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_L4_DST_PORT) @id(0x0100000D) @name("ingress.lag_hashing_config.compute_lag_hash_ipv4") action lag_hashing_config_compute_lag_hash_ipv4_0() {
     }
-    @id(0x01000005) @name("ingress.routing.set_nexthop_id") action routing_set_nexthop_id_2(@id(1) @refers_to(nexthop_table , nexthop_id) @name("nexthop_id") bit<10> nexthop_id_3) {
-        routing_nexthop_id_valid = true;
-        routing_nexthop_id_value = nexthop_id_3;
+    @sai_lag_hash(SAI_SWITCH_ATTR_LAG_HASH_IPV6) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_SRC_IPV6) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_DST_IPV6) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_L4_SRC_PORT) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_L4_DST_PORT) @sai_native_hash_field(SAI_NATIVE_HASH_FIELD_IPV6_FLOW_LABEL) @id(0x0100000E) @name("ingress.lag_hashing_config.compute_lag_hash_ipv6") action lag_hashing_config_compute_lag_hash_ipv6_0() {
     }
-    @id(0x01000010) @name("ingress.routing.set_nexthop_id_and_metadata") action routing_set_nexthop_id_and_metadata_0(@id(1) @refers_to(nexthop_table , nexthop_id) @name("nexthop_id") bit<10> nexthop_id_4, @name("route_metadata") bit<6> route_metadata_3) {
-        routing_nexthop_id_valid = true;
-        routing_nexthop_id_value = nexthop_id_4;
-        local_metadata._route_metadata20 = route_metadata_3;
-    }
-    @id(0x01000010) @name("ingress.routing.set_nexthop_id_and_metadata") action routing_set_nexthop_id_and_metadata_1(@id(1) @refers_to(nexthop_table , nexthop_id) @name("nexthop_id") bit<10> nexthop_id_5, @name("route_metadata") bit<6> route_metadata_4) {
-        routing_nexthop_id_valid = true;
-        routing_nexthop_id_value = nexthop_id_5;
-        local_metadata._route_metadata20 = route_metadata_4;
-    }
-    @max_group_size(256) @name("ingress.routing.wcmp_group_selector") action_selector(HashAlgorithm.identity, 32w65536, 32w16) routing_wcmp_group_selector;
-    @p4runtime_role("sdn_controller") @id(0x02000043) @oneshot @name("ingress.routing.wcmp_group_table") table routing_wcmp_group_table {
-        key = {
-            routing_wcmp_group_id_value         : exact @id(1) @name("wcmp_group_id");
-            local_metadata._wcmp_selector_input6: selector @name("local_metadata.wcmp_selector_input");
-        }
-        actions = {
-            @proto_id(1) routing_set_nexthop_id_0();
-            @defaultonly NoAction_7();
-        }
-        const default_action = NoAction_7();
-        @id(0x11DC4EC8) implementation = routing_wcmp_group_selector;
-        size = 3968;
-    }
-    @name("ingress.routing.no_action") action routing_no_action_0() {
+    @id(0x01798B9E) @name("ingress.routing_lookup.no_action") action routing_lookup_no_action_0() {
     }
     @entry_restriction("
     // The VRF ID 0 (or '' in P4Runtime) encodes the default VRF, which cannot
@@ -491,148 +621,201 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     // constraints are a control plane (P4Runtime) concept), but
     // p4-constraints does not currently support strings.
     vrf_id != 0;
-  ") @p4runtime_role("sdn_controller") @id(0x0200004A) @name("ingress.routing.vrf_table") table routing_vrf_table {
+  ") @p4runtime_role("sdn_controller") @id(0x0200004A) @name("ingress.routing_lookup.vrf_table") table routing_lookup_vrf_table {
         key = {
-            local_metadata._vrf_id1: exact @id(1) @name("vrf_id");
+            local_metadata._vrf_id3: exact @id(1) @name("vrf_id");
         }
         actions = {
-            @proto_id(1) routing_no_action_0();
+            @proto_id(1) routing_lookup_no_action_0();
         }
-        const default_action = routing_no_action_0();
+        const default_action = routing_lookup_no_action_0();
         size = 64;
     }
-    @id(0x01000006) @name("ingress.routing.drop") action routing_drop_0() {
+    @id(0x01000006) @name("ingress.routing_lookup.drop") action routing_lookup_drop_0() {
         mark_to_drop(standard_metadata);
     }
-    @id(0x01000006) @name("ingress.routing.drop") action routing_drop_1() {
+    @id(0x01000006) @name("ingress.routing_lookup.drop") action routing_lookup_drop_1() {
         mark_to_drop(standard_metadata);
     }
-    @id(0x01000004) @name("ingress.routing.set_wcmp_group_id") action routing_set_wcmp_group_id_0(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id) {
-        routing_wcmp_group_id_valid = true;
-        routing_wcmp_group_id_value = wcmp_group_id;
+    @id(0x01000004) @name("ingress.routing_lookup.set_wcmp_group_id") action routing_lookup_set_wcmp_group_id_0(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id) {
+        local_metadata._wcmp_group_id_valid37 = true;
+        local_metadata._wcmp_group_id_value38 = wcmp_group_id;
     }
-    @id(0x01000004) @name("ingress.routing.set_wcmp_group_id") action routing_set_wcmp_group_id_1(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_2) {
-        routing_wcmp_group_id_valid = true;
-        routing_wcmp_group_id_value = wcmp_group_id_2;
+    @id(0x01000004) @name("ingress.routing_lookup.set_wcmp_group_id") action routing_lookup_set_wcmp_group_id_1(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_2) {
+        local_metadata._wcmp_group_id_valid37 = true;
+        local_metadata._wcmp_group_id_value38 = wcmp_group_id_2;
     }
-    @id(0x01000011) @name("ingress.routing.set_wcmp_group_id_and_metadata") action routing_set_wcmp_group_id_and_metadata_0(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_3, @name("route_metadata") bit<6> route_metadata_5) {
+    @id(0x01000011) @name("ingress.routing_lookup.set_wcmp_group_id_and_metadata") action routing_lookup_set_wcmp_group_id_and_metadata_0(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_3, @name("route_metadata") bit<6> route_metadata_3) {
         @id(0x01000004) {
-            routing_wcmp_group_id_valid = true;
-            routing_wcmp_group_id_value = wcmp_group_id_3;
+            local_metadata._wcmp_group_id_valid37 = true;
+            local_metadata._wcmp_group_id_value38 = wcmp_group_id_3;
         }
-        local_metadata._route_metadata20 = route_metadata_5;
+        local_metadata._route_metadata34 = route_metadata_3;
     }
-    @id(0x01000011) @name("ingress.routing.set_wcmp_group_id_and_metadata") action routing_set_wcmp_group_id_and_metadata_1(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_4, @name("route_metadata") bit<6> route_metadata_6) {
+    @id(0x01000011) @name("ingress.routing_lookup.set_wcmp_group_id_and_metadata") action routing_lookup_set_wcmp_group_id_and_metadata_1(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_4, @name("route_metadata") bit<6> route_metadata_4) {
         @id(0x01000004) {
-            routing_wcmp_group_id_valid = true;
-            routing_wcmp_group_id_value = wcmp_group_id_4;
+            local_metadata._wcmp_group_id_valid37 = true;
+            local_metadata._wcmp_group_id_value38 = wcmp_group_id_4;
         }
-        local_metadata._route_metadata20 = route_metadata_6;
+        local_metadata._route_metadata34 = route_metadata_4;
     }
-    @id(0x0100000F) @name("ingress.routing.trap") action routing_trap_0() {
-        clone(CloneType.I2E, 32w1024);
+    @id(0x01000015) @name("ingress.routing_lookup.set_metadata_and_drop") action routing_lookup_set_metadata_and_drop_0(@id(1) @name("route_metadata") bit<6> route_metadata_5) {
+        local_metadata._route_metadata34 = route_metadata_5;
         mark_to_drop(standard_metadata);
     }
-    @id(0x0100000F) @name("ingress.routing.trap") action routing_trap_1() {
-        clone(CloneType.I2E, 32w1024);
+    @id(0x01000015) @name("ingress.routing_lookup.set_metadata_and_drop") action routing_lookup_set_metadata_and_drop_1(@id(1) @name("route_metadata") bit<6> route_metadata_6) {
+        local_metadata._route_metadata34 = route_metadata_6;
         mark_to_drop(standard_metadata);
     }
-    @id(0x01000015) @name("ingress.routing.set_metadata_and_drop") action routing_set_metadata_and_drop_0(@id(1) @name("route_metadata") bit<6> route_metadata_7) {
-        local_metadata._route_metadata20 = route_metadata_7;
-        mark_to_drop(standard_metadata);
+    @id(0x01000010) @name("ingress.routing_lookup.set_nexthop_id_and_metadata") action routing_lookup_set_nexthop_id_and_metadata_0(@id(1) @refers_to(nexthop_table , nexthop_id) @name("nexthop_id") bit<10> nexthop_id_4, @name("route_metadata") bit<6> route_metadata_7) {
+        local_metadata._nexthop_id_valid39 = true;
+        local_metadata._nexthop_id_value40 = nexthop_id_4;
+        local_metadata._route_metadata34 = route_metadata_7;
     }
-    @id(0x01000015) @name("ingress.routing.set_metadata_and_drop") action routing_set_metadata_and_drop_1(@id(1) @name("route_metadata") bit<6> route_metadata_8) {
-        local_metadata._route_metadata20 = route_metadata_8;
-        mark_to_drop(standard_metadata);
+    @id(0x01000010) @name("ingress.routing_lookup.set_nexthop_id_and_metadata") action routing_lookup_set_nexthop_id_and_metadata_1(@id(1) @refers_to(nexthop_table , nexthop_id) @name("nexthop_id") bit<10> nexthop_id_5, @name("route_metadata") bit<6> route_metadata_8) {
+        local_metadata._nexthop_id_valid39 = true;
+        local_metadata._nexthop_id_value40 = nexthop_id_5;
+        local_metadata._route_metadata34 = route_metadata_8;
     }
-    @p4runtime_role("sdn_controller") @id(0x02000044) @name("ingress.routing.ipv4_table") table routing_ipv4_table {
+    @id(0x01000018) @action_restriction("
+    // Disallow 0 since it encodes 'no multicast' in V1Model.
+    multicast_group_id != 0;
+  ") @name("ingress.routing_lookup.set_multicast_group_id") action routing_lookup_set_multicast_group_id_0(@id(1) @refers_to(builtin : : multicast_group_table , multicast_group_id) @name("multicast_group_id") bit<16> multicast_group_id) {
+        standard_metadata.mcast_grp = multicast_group_id;
+    }
+    @id(0x01000018) @action_restriction("
+    // Disallow 0 since it encodes 'no multicast' in V1Model.
+    multicast_group_id != 0;
+  ") @name("ingress.routing_lookup.set_multicast_group_id") action routing_lookup_set_multicast_group_id_1(@id(1) @refers_to(builtin : : multicast_group_table , multicast_group_id) @name("multicast_group_id") bit<16> multicast_group_id_1) {
+        standard_metadata.mcast_grp = multicast_group_id_1;
+    }
+    @p4runtime_role("sdn_controller") @id(0x02000044) @name("ingress.routing_lookup.ipv4_table") table routing_lookup_ipv4_table {
         key = {
-            local_metadata._vrf_id1: exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
-            headers.ipv4.dst_addr  : lpm @format(IPV4_ADDRESS) @id(2) @name("ipv4_dst");
+            local_metadata._vrf_id3: exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
+            headers.ipv4.dst_addr  : lpm @id(2) @name("ipv4_dst") @format(IPV4_ADDRESS);
         }
         actions = {
-            @proto_id(1) routing_drop_0();
-            @proto_id(2) routing_set_nexthop_id_1();
-            @proto_id(3) routing_set_wcmp_group_id_0();
-            @proto_id(4) routing_trap_0();
-            @proto_id(5) routing_set_nexthop_id_and_metadata_0();
-            @proto_id(6) routing_set_wcmp_group_id_and_metadata_0();
-            @proto_id(7) routing_set_metadata_and_drop_0();
+            @proto_id(1) routing_lookup_drop_0();
+            @proto_id(2) set_nexthop_id_1();
+            @proto_id(3) routing_lookup_set_wcmp_group_id_0();
+            @proto_id(5) routing_lookup_set_nexthop_id_and_metadata_0();
+            @proto_id(6) routing_lookup_set_wcmp_group_id_and_metadata_0();
+            @proto_id(7) routing_lookup_set_metadata_and_drop_0();
         }
-        const default_action = routing_drop_0();
-        size = 32768;
+        const default_action = routing_lookup_drop_0();
+        size = 131072;
     }
-    @p4runtime_role("sdn_controller") @id(0x02000045) @name("ingress.routing.ipv6_table") table routing_ipv6_table {
+    @p4runtime_role("sdn_controller") @id(0x02000045) @name("ingress.routing_lookup.ipv6_table") table routing_lookup_ipv6_table {
         key = {
-            local_metadata._vrf_id1: exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
-            headers.ipv6.dst_addr  : lpm @format(IPV6_ADDRESS) @id(2) @name("ipv6_dst");
+            local_metadata._vrf_id3: exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
+            headers.ipv6.dst_addr  : lpm @id(2) @name("ipv6_dst") @format(IPV6_ADDRESS);
         }
         actions = {
-            @proto_id(1) routing_drop_1();
-            @proto_id(2) routing_set_nexthop_id_2();
-            @proto_id(3) routing_set_wcmp_group_id_1();
-            @proto_id(4) routing_trap_1();
-            @proto_id(5) routing_set_nexthop_id_and_metadata_1();
-            @proto_id(6) routing_set_wcmp_group_id_and_metadata_1();
-            @proto_id(7) routing_set_metadata_and_drop_1();
+            @proto_id(1) routing_lookup_drop_1();
+            @proto_id(2) set_nexthop_id_2();
+            @proto_id(3) routing_lookup_set_wcmp_group_id_1();
+            @proto_id(5) routing_lookup_set_nexthop_id_and_metadata_1();
+            @proto_id(6) routing_lookup_set_wcmp_group_id_and_metadata_1();
+            @proto_id(7) routing_lookup_set_metadata_and_drop_1();
         }
-        const default_action = routing_drop_1();
-        size = 4096;
+        const default_action = routing_lookup_drop_1();
+        size = 17000;
     }
-    @id(0x15000100) @name("ingress.acl_ingress.acl_ingress_meter") direct_meter<bit<2>>(MeterType.bytes) acl_ingress_acl_ingress_meter;
+    @p4runtime_role("sdn_controller") @id(0x0200004E) @name("ingress.routing_lookup.ipv4_multicast_table") table routing_lookup_ipv4_multicast_table {
+        key = {
+            local_metadata._vrf_id3: exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
+            headers.ipv4.dst_addr  : exact @id(2) @name("ipv4_dst") @format(IPV4_ADDRESS);
+        }
+        actions = {
+            @proto_id(1) routing_lookup_set_multicast_group_id_0();
+            @defaultonly NoAction_6();
+        }
+        size = 1600;
+        default_action = NoAction_6();
+    }
+    @p4runtime_role("sdn_controller") @id(0x0200004F) @name("ingress.routing_lookup.ipv6_multicast_table") table routing_lookup_ipv6_multicast_table {
+        key = {
+            local_metadata._vrf_id3: exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
+            headers.ipv6.dst_addr  : exact @id(2) @name("ipv6_dst") @format(IPV6_ADDRESS);
+        }
+        actions = {
+            @proto_id(1) routing_lookup_set_multicast_group_id_1();
+            @defaultonly NoAction_7();
+        }
+        size = 1600;
+        default_action = NoAction_7();
+    }
+    @id(0x15000100) @mode(single_rate_two_color) @name("ingress.acl_ingress.acl_ingress_meter") direct_meter<bit<2>>(MeterType.bytes) acl_ingress_acl_ingress_meter;
+    @id(0x15000102) @mode(single_rate_two_color) @name("ingress.acl_ingress.acl_ingress_qos_meter") direct_meter<bit<2>>(MeterType.bytes) acl_ingress_acl_ingress_qos_meter;
     @id(0x13000102) @name("ingress.acl_ingress.acl_ingress_counter") direct_counter(CounterType.packets_and_bytes) acl_ingress_acl_ingress_counter;
-    @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) @name("ingress.acl_ingress.acl_copy") action acl_ingress_acl_copy_0(@sai_action_param(QOS_QUEUE) @id(1) @name("qos_queue") bit<8> qos_queue) {
+    @id(0x13000107) @name("ingress.acl_ingress.acl_ingress_qos_counter") direct_counter(CounterType.packets_and_bytes) acl_ingress_acl_ingress_qos_counter;
+    @id(0x13000109) @name("ingress.acl_ingress.acl_ingress_counting_counter") direct_counter(CounterType.packets_and_bytes) acl_ingress_acl_ingress_counting_counter;
+    @id(0x1300010A) @name("ingress.acl_ingress.acl_ingress_security_counter") direct_counter(CounterType.packets_and_bytes) acl_ingress_acl_ingress_security_counter;
+    @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) @name("ingress.acl_ingress.acl_copy") action acl_ingress_acl_copy_0(@sai_action_param(QOS_QUEUE) @id(1) @name("qos_queue") bit<8> qos_queue) {
         acl_ingress_acl_ingress_counter.count();
-        acl_ingress_acl_ingress_meter.read(local_metadata._color18);
-        clone(CloneType.I2E, 32w1024);
+        acl_ingress_acl_ingress_meter.read(local_metadata._color32);
+        local_metadata._marked_to_copy18 = true;
     }
-    @id(0x01000102) @sai_action(SAI_PACKET_ACTION_TRAP , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_RED) @name("ingress.acl_ingress.acl_trap") action acl_ingress_acl_trap_0(@sai_action_param(QOS_QUEUE) @id(1) @name("qos_queue") bit<8> qos_queue_3) {
-        @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) {
+    @id(0x01000102) @sai_action(SAI_PACKET_ACTION_TRAP , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_RED) @name("ingress.acl_ingress.acl_trap") action acl_ingress_acl_trap_0(@sai_action_param(QOS_QUEUE) @id(1) @name("qos_queue") bit<8> qos_queue_3) {
+        @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) {
             acl_ingress_acl_ingress_counter.count();
-            acl_ingress_acl_ingress_meter.read(local_metadata._color18);
-            clone(CloneType.I2E, 32w1024);
+            acl_ingress_acl_ingress_meter.read(local_metadata._color32);
+            local_metadata._marked_to_copy18 = true;
         }
-        mark_to_drop(standard_metadata);
+        local_metadata._acl_drop42 = true;
     }
-    @id(0x01000199) @sai_action(SAI_PACKET_ACTION_TRAP , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_RED) @name("ingress.acl_ingress.acl_experimental_trap") action acl_ingress_acl_experimental_trap_0(@sai_action_param(QOS_QUEUE) @id(1) @name("qos_queue") bit<8> qos_queue_4) {
-        acl_ingress_acl_ingress_meter.read(local_metadata._color18);
-        @id(0x01000102) @sai_action(SAI_PACKET_ACTION_TRAP , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_RED) {
-            @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) {
-                acl_ingress_acl_ingress_counter.count();
-                acl_ingress_acl_ingress_meter.read(local_metadata._color18);
-                clone(CloneType.I2E, 32w1024);
-            }
-            mark_to_drop(standard_metadata);
-        }
+    @id(0x01000103) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_RED) @name("ingress.acl_ingress.acl_forward") action acl_ingress_acl_forward_0() {
+        acl_ingress_acl_ingress_meter.read(local_metadata._color32);
     }
-    @id(0x01000103) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_RED) @name("ingress.acl_ingress.acl_forward") action acl_ingress_acl_forward_0() {
+    @id(0x01000103) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_RED) @name("ingress.acl_ingress.acl_forward") action acl_ingress_acl_forward_1() {
+        acl_ingress_acl_ingress_meter.read(local_metadata._color32);
+    }
+    @id(0x01000105) @sai_action(SAI_PACKET_ACTION_FORWARD) @name("ingress.acl_ingress.acl_count") action acl_ingress_acl_count_0() {
+        acl_ingress_acl_ingress_counting_counter.count();
+    }
+    @id(0x01000104) @sai_action(SAI_PACKET_ACTION_FORWARD) @name("ingress.acl_ingress.acl_mirror") action acl_ingress_acl_mirror_0(@id(1) @refers_to(mirror_session_table , mirror_session_id) @sai_action_param(SAI_ACL_ENTRY_ATTR_ACTION_MIRROR_INGRESS) @name("mirror_session_id") bit<10> mirror_session_id_1) {
         acl_ingress_acl_ingress_counter.count();
-        acl_ingress_acl_ingress_meter.read(local_metadata._color18);
+        local_metadata._marked_to_mirror19 = true;
+        local_metadata._mirror_session_id20 = mirror_session_id_1;
     }
-    @id(0x01000104) @sai_action(SAI_PACKET_ACTION_FORWARD) @name("ingress.acl_ingress.acl_mirror") action acl_ingress_acl_mirror_0(@id(1) @refers_to(mirror_session_table , mirror_session_id) @sai_action_param(SAI_ACL_ENTRY_ATTR_ACTION_MIRROR_INGRESS) @name("mirror_session_id") bit<10> mirror_session_id) {
-        acl_ingress_acl_ingress_counter.count();
-        local_metadata._mirror_session_id_valid10 = true;
-        local_metadata._mirror_session_id_value11 = mirror_session_id;
+    @id(0x0100010C) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_COPY_CANCEL , SAI_PACKET_COLOR_RED) @name("ingress.acl_ingress.set_qos_queue_and_cancel_copy_above_rate_limit") action acl_ingress_set_qos_queue_and_cancel_copy_above_rate_limit_0(@id(1) @sai_action_param(QOS_QUEUE) @name("qos_queue") bit<8> qos_queue_4) {
+        acl_ingress_acl_ingress_qos_meter.read(local_metadata._color32);
     }
-    @p4runtime_role("sdn_controller") @id(0x02000100) @sai_acl(INGRESS) @entry_restriction("
+    @id(0x01000111) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DENY , SAI_PACKET_COLOR_RED) @unsupported @name("ingress.acl_ingress.set_cpu_and_multicast_queues_and_deny_above_rate_limit") action acl_ingress_set_cpu_and_multicast_queues_and_deny_above_rate_limit_0(@id(1) @sai_action_param(QOS_QUEUE) @name("cpu_queue") bit<8> cpu_queue, @id(2) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_GREEN) @name("green_multicast_queue") bit<8> green_multicast_queue, @id(3) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_RED) @name("red_multicast_queue") bit<8> red_multicast_queue) {
+        acl_ingress_acl_ingress_qos_meter.read(local_metadata._color32);
+    }
+    @id(0x0100010E) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DENY , SAI_PACKET_COLOR_RED) @name("ingress.acl_ingress.set_cpu_queue_and_deny_above_rate_limit") action acl_ingress_set_cpu_queue_and_deny_above_rate_limit_0(@id(1) @sai_action_param(QOS_QUEUE) @name("cpu_queue") bit<8> cpu_queue_3) {
+        acl_ingress_acl_ingress_qos_meter.read(local_metadata._color32);
+    }
+    @id(0x01000110) @sai_action(SAI_PACKET_ACTION_FORWARD) @name("ingress.acl_ingress.set_cpu_queue") action acl_ingress_set_cpu_queue_0(@id(1) @sai_action_param(QOS_QUEUE) @name("cpu_queue") bit<8> cpu_queue_4) {
+    }
+    @p4runtime_role("sdn_controller") @id(0x02000100) @sai_acl(INGRESS) @sai_acl_priority(5) @entry_restriction("
     // Forbid using ether_type for IP packets (by convention, use is_ip* instead).
     ether_type != 0x0800 && ether_type != 0x86dd;
     // Only allow IP field matches for IP packets.
     dst_ip::mask != 0 -> is_ipv4 == 1;
+
+    src_ip::mask != 0 -> is_ipv4 == 1;
+
     dst_ipv6::mask != 0 -> is_ipv6 == 1;
+    src_ipv6::mask != 0 -> is_ipv6 == 1;
     ttl::mask != 0 -> (is_ip == 1 || is_ipv4 == 1 || is_ipv6 == 1);
+
     dscp::mask != 0 -> (is_ip == 1 || is_ipv4 == 1 || is_ipv6 == 1);
     ecn::mask != 0 -> (is_ip == 1 || is_ipv4 == 1 || is_ipv6 == 1);
+
     ip_protocol::mask != 0 -> (is_ip == 1 || is_ipv4 == 1 || is_ipv6 == 1);
     // Only allow l4_dst_port and l4_src_port matches for TCP/UDP packets.
+
     l4_src_port::mask != 0 -> (ip_protocol == 6 || ip_protocol == 17);
+
     l4_dst_port::mask != 0 -> (ip_protocol == 6 || ip_protocol == 17);
 
 
 
 
-    // Only allow icmp_type matches for ICMP packets
 
+    // Only allow icmp_type matches for ICMP packets
     icmp_type::mask != 0 -> ip_protocol == 1;
 
     icmpv6_type::mask != 0 -> ip_protocol == 58;
@@ -645,336 +828,45 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     is_ipv6::mask != 0 -> (is_ipv6 == 1);
   ") @name("ingress.acl_ingress.acl_ingress_table") table acl_ingress_acl_ingress_table {
         key = {
-            key_2                           : optional @name("is_ip") @id(1) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
-            headers.ipv4.isValid()          : optional @name("is_ipv4") @id(2) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
-            headers.ipv6.isValid()          : optional @name("is_ipv6") @id(3) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
-            headers.ethernet.ether_type     : ternary @name("ether_type") @id(4) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ETHER_TYPE);
-            headers.ethernet.dst_addr       : ternary @name("dst_mac") @id(5) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_MAC) @format(MAC_ADDRESS);
-            headers.ipv4.src_addr           : ternary @name("src_ip") @id(6) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_SRC_IP) @format(IPV4_ADDRESS);
-            headers.ipv4.dst_addr           : ternary @name("dst_ip") @id(7) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_IP) @format(IPV4_ADDRESS);
-            headers.ipv6.src_addr[127:64]   : ternary @name("src_ipv6") @id(8) @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_SRC_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_SRC_IPV6_WORD2 )) @format(IPV6_ADDRESS);
-            headers.ipv6.dst_addr[127:64]   : ternary @name("dst_ipv6") @id(9) @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD2 )) @format(IPV6_ADDRESS);
-            acl_ingress_ttl                 : ternary @name("ttl") @id(10) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_TTL);
-            acl_ingress_dscp                : ternary @name("dscp") @id(11) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
-            acl_ingress_ecn                 : ternary @name("ecn") @id(12) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ECN);
-            acl_ingress_ip_protocol         : ternary @name("ip_protocol") @id(13) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
-            headers.icmp.type               : ternary @name("icmp_type") @id(19) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ICMP_TYPE);
-            headers.icmp.type               : ternary @name("icmpv6_type") @id(14) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ICMPV6_TYPE);
-            local_metadata._l4_src_port4    : ternary @name("l4_src_port") @id(20) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_SRC_PORT);
-            local_metadata._l4_dst_port5    : ternary @name("l4_dst_port") @id(15) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_DST_PORT);
-            local_metadata._ingress_port19  : optional @name("in_port") @id(17) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IN_PORT);
-            local_metadata._route_metadata20: optional @name("route_metadata") @id(18) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ROUTE_DST_USER_META);
+            key_3                           : optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid()          : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid()          : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            headers.ethernet.ether_type     : ternary @id(4) @name("ether_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ETHER_TYPE);
+            headers.ethernet.dst_addr       : ternary @id(5) @name("dst_mac") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_MAC) @format(MAC_ADDRESS);
+            headers.ipv4.src_addr           : ternary @id(6) @name("src_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_SRC_IP) @format(IPV4_ADDRESS);
+            headers.ipv4.dst_addr           : ternary @id(7) @name("dst_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_IP) @format(IPV4_ADDRESS);
+            headers.ipv6.src_addr[127:64]   : ternary @id(8) @name("src_ipv6") @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_SRC_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_SRC_IPV6_WORD2 )) @format(IPV6_ADDRESS);
+            headers.ipv6.dst_addr[127:64]   : ternary @id(9) @name("dst_ipv6") @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD2 )) @format(IPV6_ADDRESS);
+            acl_ingress_ttl                 : ternary @id(10) @name("ttl") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_TTL);
+            acl_ingress_dscp                : ternary @id(11) @name("dscp") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
+            acl_ingress_ecn                 : ternary @id(12) @name("ecn") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ECN);
+            acl_ingress_ip_protocol         : ternary @id(13) @name("ip_protocol") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
+            headers.icmp.type               : ternary @id(19) @name("icmp_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ICMP_TYPE);
+            headers.icmp.type               : ternary @id(14) @name("icmpv6_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ICMPV6_TYPE);
+            local_metadata._l4_src_port11   : ternary @id(20) @name("l4_src_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_SRC_PORT);
+            local_metadata._l4_dst_port12   : ternary @id(15) @name("l4_dst_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_DST_PORT);
+            local_metadata._ingress_port33  : optional @id(17) @name("in_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IN_PORT);
+            local_metadata._route_metadata34: optional @id(18) @name("route_metadata") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ROUTE_DST_USER_META);
         }
         actions = {
             @proto_id(1) acl_ingress_acl_copy_0();
             @proto_id(2) acl_ingress_acl_trap_0();
             @proto_id(3) acl_ingress_acl_forward_0();
             @proto_id(4) acl_ingress_acl_mirror_0();
-            @proto_id(5) acl_drop_1();
-            @proto_id(99) acl_ingress_acl_experimental_trap_0();
+            @proto_id(5) acl_drop_2();
             @defaultonly NoAction_8();
         }
         const default_action = NoAction_8();
         meters = acl_ingress_acl_ingress_meter;
         counters = acl_ingress_acl_ingress_counter;
-        size = 128;
+        size = 255;
     }
-    @id(0x01000007) @name("ingress.mirroring_clone.mirror_as_ipv4_erspan") action mirroring_clone_mirror_as_ipv4_erspan_0(@id(1) @name("port") bit<9> port_2, @id(2) @format(IPV4_ADDRESS) @name("src_ip") bit<32> src_ip, @id(3) @format(IPV4_ADDRESS) @name("dst_ip") bit<32> dst_ip, @id(4) @format(MAC_ADDRESS) @name("src_mac") bit<48> src_mac_3, @id(5) @format(MAC_ADDRESS) @name("dst_mac") bit<48> dst_mac_3, @id(6) @name("ttl") bit<8> ttl_0, @id(7) @name("tos") bit<8> tos) {
-        mirroring_clone_mirror_port = port_2;
-        local_metadata._mirroring_src_ip12 = src_ip;
-        local_metadata._mirroring_dst_ip13 = dst_ip;
-        local_metadata._mirroring_src_mac14 = src_mac_3;
-        local_metadata._mirroring_dst_mac15 = dst_mac_3;
-        local_metadata._mirroring_ttl16 = ttl_0;
-        local_metadata._mirroring_tos17 = tos;
-    }
-    @p4runtime_role("sdn_controller") @id(0x02000046) @name("ingress.mirroring_clone.mirror_session_table") table mirroring_clone_mirror_session_table {
-        key = {
-            local_metadata._mirror_session_id_value11: exact @id(1) @name("mirror_session_id");
-        }
-        actions = {
-            @proto_id(1) mirroring_clone_mirror_as_ipv4_erspan_0();
-            @defaultonly NoAction_9();
-        }
-        const default_action = NoAction_9();
-        size = 2;
-    }
-    @id(0x01000009) @name("ingress.mirroring_clone.set_pre_session") action mirroring_clone_set_pre_session_0(@name("id") bit<32> id) {
-        mirroring_clone_pre_session = id;
-    }
-    @p4runtime_role("packet_replication_engine_manager") @id(0x02000048) @name("ingress.mirroring_clone.mirror_port_to_pre_session_table") table mirroring_clone_mirror_port_to_pre_session_table {
-        key = {
-            mirroring_clone_mirror_port: exact @id(1) @name("mirror_port");
-        }
-        actions = {
-            @proto_id(1) mirroring_clone_set_pre_session_0();
-            @defaultonly NoAction_10();
-        }
-        const default_action = NoAction_10();
-    }
-    @hidden action pins_fabric798() {
-        acl_pre_ingress_dscp = headers.ipv4.dscp;
-    }
-    @hidden action pins_fabric800() {
-        acl_pre_ingress_dscp = headers.ipv6.dscp;
-    }
-    @hidden action pins_fabric755() {
-        acl_pre_ingress_dscp = 6w0;
-    }
-    @hidden action pins_fabric778() {
-        local_metadata._vrf_id1 = 10w0;
-        key_0 = headers.ipv4.isValid() || headers.ipv6.isValid();
-    }
-    @hidden action pins_fabric809() {
-        local_metadata._admit_to_l30 = headers.ethernet.dst_addr & 48w0x10000000000 == 48w0;
-    }
-    @hidden action pins_fabric262() {
-        routing_wcmp_group_id_valid = false;
-        routing_nexthop_id_valid = false;
-        routing_router_interface_id_valid = false;
-        routing_neighbor_id_valid = false;
-        mark_to_drop(standard_metadata);
-    }
-    @hidden action pins_fabric740() {
-        acl_ingress_ttl = headers.ipv4.ttl;
-        acl_ingress_dscp = headers.ipv4.dscp;
-        acl_ingress_ecn = headers.ipv4.ecn;
-        acl_ingress_ip_protocol = headers.ipv4.protocol;
-    }
-    @hidden action pins_fabric745() {
-        acl_ingress_ttl = headers.ipv6.hop_limit;
-        acl_ingress_dscp = headers.ipv6.dscp;
-        acl_ingress_ecn = headers.ipv6.ecn;
-        acl_ingress_ip_protocol = headers.ipv6.next_header;
-    }
-    @hidden action pins_fabric645() {
-        acl_ingress_ttl = 8w0;
-        acl_ingress_dscp = 6w0;
-        acl_ingress_ecn = 2w0;
-        acl_ingress_ip_protocol = 8w0;
-    }
-    @hidden action pins_fabric704() {
-        key_2 = headers.ipv4.isValid() || headers.ipv6.isValid();
-    }
-    @hidden action pins_fabric563() {
-        mark_to_drop(standard_metadata);
-    }
-    @hidden action pins_fabric565() {
-        headers.ipv4.ttl = headers.ipv4.ttl + 8w255;
-    }
-    @hidden action pins_fabric570() {
-        mark_to_drop(standard_metadata);
-    }
-    @hidden action pins_fabric572() {
-        headers.ipv6.hop_limit = headers.ipv6.hop_limit + 8w255;
-    }
-    @hidden action pins_fabric530() {
-        clone_preserving_field_list(CloneType.I2E, mirroring_clone_pre_session, 8w1);
-    }
-    @hidden table tbl_pins_fabric755 {
-        actions = {
-            pins_fabric755();
-        }
-        const default_action = pins_fabric755();
-    }
-    @hidden table tbl_pins_fabric798 {
-        actions = {
-            pins_fabric798();
-        }
-        const default_action = pins_fabric798();
-    }
-    @hidden table tbl_pins_fabric800 {
-        actions = {
-            pins_fabric800();
-        }
-        const default_action = pins_fabric800();
-    }
-    @hidden table tbl_pins_fabric778 {
-        actions = {
-            pins_fabric778();
-        }
-        const default_action = pins_fabric778();
-    }
-    @hidden table tbl_pins_fabric809 {
-        actions = {
-            pins_fabric809();
-        }
-        const default_action = pins_fabric809();
-    }
-    @hidden table tbl_pins_fabric262 {
-        actions = {
-            pins_fabric262();
-        }
-        const default_action = pins_fabric262();
-    }
-    @hidden table tbl_pins_fabric645 {
-        actions = {
-            pins_fabric645();
-        }
-        const default_action = pins_fabric645();
-    }
-    @hidden table tbl_pins_fabric740 {
-        actions = {
-            pins_fabric740();
-        }
-        const default_action = pins_fabric740();
-    }
-    @hidden table tbl_pins_fabric745 {
-        actions = {
-            pins_fabric745();
-        }
-        const default_action = pins_fabric745();
-    }
-    @hidden table tbl_pins_fabric704 {
-        actions = {
-            pins_fabric704();
-        }
-        const default_action = pins_fabric704();
-    }
-    @hidden table tbl_pins_fabric563 {
-        actions = {
-            pins_fabric563();
-        }
-        const default_action = pins_fabric563();
-    }
-    @hidden table tbl_pins_fabric565 {
-        actions = {
-            pins_fabric565();
-        }
-        const default_action = pins_fabric565();
-    }
-    @hidden table tbl_pins_fabric570 {
-        actions = {
-            pins_fabric570();
-        }
-        const default_action = pins_fabric570();
-    }
-    @hidden table tbl_pins_fabric572 {
-        actions = {
-            pins_fabric572();
-        }
-        const default_action = pins_fabric572();
-    }
-    @hidden table tbl_pins_fabric530 {
-        actions = {
-            pins_fabric530();
-        }
-        const default_action = pins_fabric530();
-    }
-    apply {
-        tbl_pins_fabric755.apply();
-        if (headers.ipv4.isValid()) {
-            tbl_pins_fabric798.apply();
-        } else if (headers.ipv6.isValid()) {
-            tbl_pins_fabric800.apply();
-        }
-        tbl_pins_fabric778.apply();
-        acl_pre_ingress_acl_pre_ingress_table.apply();
-        tbl_pins_fabric809.apply();
-        l3_admit_l3_admit_table.apply();
-        tbl_pins_fabric262.apply();
-        routing_vrf_table.apply();
-        if (local_metadata._admit_to_l30) {
-            if (headers.ipv4.isValid()) {
-                routing_ipv4_table.apply();
-            } else if (headers.ipv6.isValid()) {
-                routing_ipv6_table.apply();
-            }
-            if (routing_wcmp_group_id_valid) {
-                routing_wcmp_group_table.apply();
-            }
-            if (routing_nexthop_id_valid) {
-                routing_nexthop_table.apply();
-                if (routing_router_interface_id_valid && routing_neighbor_id_valid) {
-                    routing_router_interface_table.apply();
-                    routing_neighbor_table.apply();
-                }
-            }
-        }
-        tbl_pins_fabric645.apply();
-        if (headers.ipv4.isValid()) {
-            tbl_pins_fabric740.apply();
-        } else if (headers.ipv6.isValid()) {
-            tbl_pins_fabric745.apply();
-        }
-        tbl_pins_fabric704.apply();
-        acl_ingress_acl_ingress_table.apply();
-        if (local_metadata._admit_to_l30) {
-            if (headers.ipv4.isValid()) {
-                if (headers.ipv4.ttl <= 8w1) {
-                    tbl_pins_fabric563.apply();
-                } else {
-                    tbl_pins_fabric565.apply();
-                }
-            }
-            if (headers.ipv6.isValid()) {
-                if (headers.ipv6.hop_limit <= 8w1) {
-                    tbl_pins_fabric570.apply();
-                } else {
-                    tbl_pins_fabric572.apply();
-                }
-            }
-        }
-        if (local_metadata._mirror_session_id_valid10) {
-            if (mirroring_clone_mirror_session_table.apply().hit) {
-                if (mirroring_clone_mirror_port_to_pre_session_table.apply().hit) {
-                    tbl_pins_fabric530.apply();
-                }
-            }
-        }
-    }
-}
-
-control egress(inout headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @name("egress.acl_egress.dscp") bit<6> acl_egress_dscp;
-    @name("egress.acl_egress.ip_protocol") bit<8> acl_egress_ip_protocol;
-    @name("egress.standard_metadata") standard_metadata_t standard_metadata_3;
-    bool key_5;
-    @id(0x01000109) @sai_action(SAI_PACKET_ACTION_DROP) @name(".acl_drop") action acl_drop_2() {
-        standard_metadata_3.ingress_port = standard_metadata.ingress_port;
-        standard_metadata_3.egress_spec = standard_metadata.egress_spec;
-        standard_metadata_3.egress_port = standard_metadata.egress_port;
-        standard_metadata_3.instance_type = standard_metadata.instance_type;
-        standard_metadata_3.packet_length = standard_metadata.packet_length;
-        standard_metadata_3.enq_timestamp = standard_metadata.enq_timestamp;
-        standard_metadata_3.enq_qdepth = standard_metadata.enq_qdepth;
-        standard_metadata_3.deq_timedelta = standard_metadata.deq_timedelta;
-        standard_metadata_3.deq_qdepth = standard_metadata.deq_qdepth;
-        standard_metadata_3.ingress_global_timestamp = standard_metadata.ingress_global_timestamp;
-        standard_metadata_3.egress_global_timestamp = standard_metadata.egress_global_timestamp;
-        standard_metadata_3.mcast_grp = standard_metadata.mcast_grp;
-        standard_metadata_3.egress_rid = standard_metadata.egress_rid;
-        standard_metadata_3.checksum_error = standard_metadata.checksum_error;
-        standard_metadata_3.parser_error = standard_metadata.parser_error;
-        standard_metadata_3.priority = standard_metadata.priority;
-        mark_to_drop(standard_metadata_3);
-        standard_metadata.ingress_port = standard_metadata_3.ingress_port;
-        standard_metadata.egress_spec = standard_metadata_3.egress_spec;
-        standard_metadata.egress_port = standard_metadata_3.egress_port;
-        standard_metadata.instance_type = standard_metadata_3.instance_type;
-        standard_metadata.packet_length = standard_metadata_3.packet_length;
-        standard_metadata.enq_timestamp = standard_metadata_3.enq_timestamp;
-        standard_metadata.enq_qdepth = standard_metadata_3.enq_qdepth;
-        standard_metadata.deq_timedelta = standard_metadata_3.deq_timedelta;
-        standard_metadata.deq_qdepth = standard_metadata_3.deq_qdepth;
-        standard_metadata.ingress_global_timestamp = standard_metadata_3.ingress_global_timestamp;
-        standard_metadata.egress_global_timestamp = standard_metadata_3.egress_global_timestamp;
-        standard_metadata.mcast_grp = standard_metadata_3.mcast_grp;
-        standard_metadata.egress_rid = standard_metadata_3.egress_rid;
-        standard_metadata.checksum_error = standard_metadata_3.checksum_error;
-        standard_metadata.parser_error = standard_metadata_3.parser_error;
-        standard_metadata.priority = standard_metadata_3.priority;
-    }
-    @noWarn("unused") @name(".NoAction") action NoAction_11() {
-    }
-    @id(0x13000104) @name("egress.acl_egress.acl_egress_counter") direct_counter(CounterType.packets_and_bytes) acl_egress_acl_egress_counter;
-    @p4runtime_role("sdn_controller") @id(0x02000104) @sai_acl(EGRESS) @entry_restriction("
+    @id(0x02000107) @sai_acl(INGRESS) @sai_acl_priority(10) @p4runtime_role("sdn_controller") @entry_restriction("
     // Forbid using ether_type for IP packets (by convention, use is_ip* instead).
     ether_type != 0x0800 && ether_type != 0x86dd;
-    dscp::mask != 0 -> (is_ip == 1 || is_ipv4 == 1 || is_ipv6 == 1);
     // Only allow IP field matches for IP packets.
-    // TODO: Enable once p4-constraints bug is fixed.
-    // ip_protocol::mask != 0 -> (is_ip == 1 || is_ipv4 == 1 || is_ipv6 == 1);
+    ttl::mask != 0 -> (is_ip == 1 || is_ipv4 == 1 || is_ipv6 == 1);
+    ip_protocol::mask != 0 -> (is_ip == 1 || is_ipv4 == 1 || is_ipv6 == 1);
     // Only allow l4_dst_port matches for TCP/UDP packets.
     l4_dst_port::mask != 0 -> (ip_protocol == 6 || ip_protocol == 17);
     // Forbid illegal combinations of IP_TYPE fields.
@@ -984,139 +876,1061 @@ control egress(inout headers_t headers, inout local_metadata_t local_metadata, i
     // Forbid unsupported combinations of IP_TYPE fields.
     is_ipv4::mask != 0 -> (is_ipv4 == 1);
     is_ipv6::mask != 0 -> (is_ipv6 == 1);
-  ") @name("egress.acl_egress.acl_egress_table") table acl_egress_acl_egress_table {
+    // Only allow icmp_type matches for ICMP packets
+    icmpv6_type::mask != 0 -> ip_protocol == 58;
+
+    // Only allow l4_dst_port matches for TCP/UDP packets.
+    l4_src_port::mask != 0 -> (ip_protocol == 6 || ip_protocol == 17);
+    // Only allow icmp_type matches for ICMP packets
+    icmp_type::mask != 0 -> ip_protocol == 1;
+
+
+
+
+
+  ") @name("ingress.acl_ingress.acl_ingress_qos_table") table acl_ingress_acl_ingress_qos_table {
         key = {
-            headers.ethernet.ether_type  : ternary @name("ether_type") @id(1) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ETHER_TYPE);
-            acl_egress_ip_protocol       : ternary @name("ip_protocol") @id(2) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
-            local_metadata._l4_dst_port5 : ternary @name("l4_dst_port") @id(3) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_DST_PORT);
-            standard_metadata.egress_port: optional @name("out_port") @id(4) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_OUT_PORT);
-            key_5                        : optional @name("is_ip") @id(5) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
-            headers.ipv4.isValid()       : optional @name("is_ipv4") @id(6) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
-            headers.ipv6.isValid()       : optional @name("is_ipv6") @id(7) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
-            acl_egress_dscp              : ternary @name("dscp") @id(8) @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
+            key_6                           : optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid()          : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid()          : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            headers.ethernet.ether_type     : ternary @id(4) @name("ether_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ETHER_TYPE);
+            acl_ingress_ttl                 : ternary @id(7) @name("ttl") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_TTL);
+            acl_ingress_ip_protocol         : ternary @id(8) @name("ip_protocol") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
+            headers.icmp.type               : ternary @id(9) @name("icmpv6_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ICMPV6_TYPE);
+            local_metadata._l4_dst_port12   : ternary @id(10) @name("l4_dst_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_DST_PORT);
+            local_metadata._l4_src_port11   : ternary @id(12) @name("l4_src_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_SRC_PORT);
+            headers.icmp.type               : ternary @id(14) @name("icmp_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ICMP_TYPE);
+            local_metadata._route_metadata34: ternary @id(15) @name("route_metadata") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ROUTE_DST_USER_META);
         }
         actions = {
-            @proto_id(1) acl_drop_2();
+            @proto_id(1) acl_ingress_set_qos_queue_and_cancel_copy_above_rate_limit_0();
+            @proto_id(2) acl_ingress_set_cpu_queue_and_deny_above_rate_limit_0();
+            @proto_id(3) acl_ingress_acl_forward_1();
+            @proto_id(4) acl_drop_3();
+            @proto_id(5) acl_ingress_set_cpu_queue_0();
+            @proto_id(6) acl_ingress_set_cpu_and_multicast_queues_and_deny_above_rate_limit_0();
+            @defaultonly NoAction_9();
+        }
+        const default_action = NoAction_9();
+        meters = acl_ingress_acl_ingress_qos_meter;
+        counters = acl_ingress_acl_ingress_qos_counter;
+        size = 511;
+    }
+    @p4runtime_role("sdn_controller") @id(0x02000109) @sai_acl_priority(7) @sai_acl(INGRESS) @entry_restriction("
+    // Only allow IP field matches for IP packets.
+    dscp::mask != 0 -> (is_ip == 1 || is_ipv4 == 1 || is_ipv6 == 1);
+    // Forbid illegal combinations of IP_TYPE fields.
+    is_ip::mask != 0 -> (is_ipv4::mask == 0 && is_ipv6::mask == 0);
+    is_ipv4::mask != 0 -> (is_ip::mask == 0 && is_ipv6::mask == 0);
+    is_ipv6::mask != 0 -> (is_ip::mask == 0 && is_ipv4::mask == 0);
+    // Forbid unsupported combinations of IP_TYPE fields.
+    is_ipv4::mask != 0 -> (is_ipv4 == 1);
+    is_ipv6::mask != 0 -> (is_ipv6 == 1);
+  ") @name("ingress.acl_ingress.acl_ingress_counting_table") table acl_ingress_acl_ingress_counting_table {
+        key = {
+            key_7                           : optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid()          : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid()          : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            acl_ingress_dscp                : ternary @id(11) @name("dscp") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
+            local_metadata._route_metadata34: ternary @id(18) @name("route_metadata") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ROUTE_DST_USER_META);
+        }
+        actions = {
+            @proto_id(3) acl_ingress_acl_count_0();
+            @defaultonly NoAction_10();
+        }
+        const default_action = NoAction_10();
+        counters = acl_ingress_acl_ingress_counting_counter;
+        size = 255;
+    }
+    @id(0x01000001) @name("ingress.routing_resolution.set_dst_mac") action routing_resolution_set_dst_mac_0(@id(1) @format(MAC_ADDRESS) @name("dst_mac") bit<48> dst_mac_2) {
+        local_metadata._packet_rewrites_dst_mac9 = dst_mac_2;
+    }
+    @p4runtime_role("sdn_controller") @id(0x02000040) @name("ingress.routing_resolution.neighbor_table") table routing_resolution_neighbor_table {
+        key = {
+            routing_resolution_router_interface_id_value: exact @id(1) @name("router_interface_id") @refers_to(router_interface_table , router_interface_id);
+            routing_resolution_neighbor_id_value        : exact @id(2) @format(IPV6_ADDRESS) @name("neighbor_id");
+        }
+        actions = {
+            @proto_id(1) routing_resolution_set_dst_mac_0();
             @defaultonly NoAction_11();
         }
         const default_action = NoAction_11();
-        counters = acl_egress_acl_egress_counter;
-        size = 128;
+        size = 1024;
     }
-    @hidden action pins_fabric582() {
-        headers.ethernet.src_addr = local_metadata._packet_rewrites_src_mac2;
-        headers.ethernet.dst_addr = local_metadata._packet_rewrites_dst_mac3;
+    @id(0x0100001B) @unsupported @action_restriction("
+    // Disallow reserved VLAN IDs with implementation-defined semantics.
+    vlan_id != 0 && vlan_id != 4095") @name("ingress.routing_resolution.set_port_and_src_mac_and_vlan_id") action routing_resolution_set_port_and_src_mac_and_vlan_id_0(@id(1) @name("port") bit<9> port, @id(2) @format(MAC_ADDRESS) @name("src_mac") bit<48> src_mac_4, @id(3) @name("vlan_id") bit<12> vlan_id_1) {
+        standard_metadata.egress_spec = (bit<9>)port;
+        local_metadata._packet_rewrites_src_mac8 = src_mac_4;
+        local_metadata._packet_rewrites_vlan_id10 = vlan_id_1;
     }
-    @hidden action pins_fabric455() {
-        headers.erspan_ethernet.setValid();
-        headers.erspan_ethernet.src_addr = local_metadata._mirroring_src_mac14;
-        headers.erspan_ethernet.dst_addr = local_metadata._mirroring_dst_mac15;
-        headers.erspan_ethernet.ether_type = 16w0x800;
-        headers.erspan_ipv4.setValid();
-        headers.erspan_ipv4.src_addr = local_metadata._mirroring_src_ip12;
-        headers.erspan_ipv4.dst_addr = local_metadata._mirroring_dst_ip13;
-        headers.erspan_ipv4.version = 4w4;
-        headers.erspan_ipv4.ihl = 4w5;
-        headers.erspan_ipv4.protocol = 8w0x2f;
-        headers.erspan_ipv4.ttl = local_metadata._mirroring_ttl16;
-        headers.erspan_ipv4.dscp = local_metadata._mirroring_tos17[7:2];
-        headers.erspan_ipv4.ecn = local_metadata._mirroring_tos17[1:0];
-        headers.erspan_ipv4.total_len = 16w24 + (bit<16>)standard_metadata.packet_length;
-        headers.erspan_ipv4.identification = 16w0;
-        headers.erspan_ipv4.reserved = 1w0;
-        headers.erspan_ipv4.do_not_fragment = 1w1;
-        headers.erspan_ipv4.more_fragments = 1w0;
-        headers.erspan_ipv4.frag_offset = 13w0;
-        headers.erspan_ipv4.header_checksum = 16w0;
-        headers.erspan_gre.setValid();
-        headers.erspan_gre.checksum_present = 1w0;
-        headers.erspan_gre.routing_present = 1w0;
-        headers.erspan_gre.key_present = 1w0;
-        headers.erspan_gre.sequence_present = 1w0;
-        headers.erspan_gre.strict_source_route = 1w0;
-        headers.erspan_gre.recursion_control = 3w0;
-        headers.erspan_gre.acknowledgement_present = 1w0;
-        headers.erspan_gre.flags = 4w0;
-        headers.erspan_gre.version = 3w0;
-        headers.erspan_gre.protocol = 16w0x88be;
-    }
-    @hidden action pins_fabric632() {
-        acl_egress_dscp = headers.ipv4.dscp;
-        acl_egress_ip_protocol = headers.ipv4.protocol;
-    }
-    @hidden action pins_fabric635() {
-        acl_egress_dscp = headers.ipv6.dscp;
-        acl_egress_ip_protocol = headers.ipv6.next_header;
-    }
-    @hidden action pins_fabric638() {
-        acl_egress_ip_protocol = 8w0;
-    }
-    @hidden action pins_fabric592() {
-        acl_egress_dscp = 6w0;
-    }
-    @hidden action pins_fabric617() {
-        key_5 = headers.ipv4.isValid() || headers.ipv6.isValid();
-    }
-    @hidden table tbl_pins_fabric582 {
-        actions = {
-            pins_fabric582();
+    @id(0x01000002) @name("ingress.routing_resolution.set_port_and_src_mac") action routing_resolution_set_port_and_src_mac_0(@id(1) @name("port") bit<9> port_3, @id(2) @format(MAC_ADDRESS) @name("src_mac") bit<48> src_mac_5) {
+        @id(0x0100001B) @unsupported @action_restriction("
+    // Disallow reserved VLAN IDs with implementation-defined semantics.
+    vlan_id != 0 && vlan_id != 4095") {
+            standard_metadata.egress_spec = (bit<9>)port_3;
+            local_metadata._packet_rewrites_src_mac8 = src_mac_5;
+            local_metadata._packet_rewrites_vlan_id10 = 12w0xfff;
         }
-        const default_action = pins_fabric582();
     }
-    @hidden table tbl_pins_fabric455 {
-        actions = {
-            pins_fabric455();
+    @p4runtime_role("sdn_controller") @id(0x02000041) @name("ingress.routing_resolution.router_interface_table") table routing_resolution_router_interface_table {
+        key = {
+            routing_resolution_router_interface_id_value: exact @id(1) @name("router_interface_id");
         }
-        const default_action = pins_fabric455();
+        actions = {
+            @proto_id(1) routing_resolution_set_port_and_src_mac_0();
+            @proto_id(2) routing_resolution_set_port_and_src_mac_and_vlan_id_0();
+            @defaultonly NoAction_12();
+        }
+        const default_action = NoAction_12();
+        size = 256;
     }
-    @hidden table tbl_pins_fabric592 {
-        actions = {
-            pins_fabric592();
-        }
-        const default_action = pins_fabric592();
+    @id(0x01000017) @name("ingress.routing_resolution.set_ip_nexthop_and_disable_rewrites") action routing_resolution_set_ip_nexthop_and_disable_rewrites_0(@id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("router_interface_id") bit<10> router_interface_id, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("neighbor_id") bit<128> neighbor_id, @id(3) @name("disable_decrement_ttl") bit<1> disable_decrement_ttl, @id(4) @name("disable_src_mac_rewrite") bit<1> disable_src_mac_rewrite, @id(5) @name("disable_dst_mac_rewrite") bit<1> disable_dst_mac_rewrite, @id(6) @name("disable_vlan_rewrite") bit<1> disable_vlan_rewrite) {
+        routing_resolution_router_interface_id_valid = true;
+        routing_resolution_router_interface_id_value = router_interface_id;
+        routing_resolution_neighbor_id_valid = true;
+        routing_resolution_neighbor_id_value = neighbor_id;
+        local_metadata._enable_decrement_ttl4 = !(bool)disable_decrement_ttl;
+        local_metadata._enable_src_mac_rewrite5 = !(bool)disable_src_mac_rewrite;
+        local_metadata._enable_dst_mac_rewrite6 = !(bool)disable_dst_mac_rewrite;
+        local_metadata._enable_vlan_rewrite7 = !(bool)disable_vlan_rewrite;
     }
-    @hidden table tbl_pins_fabric632 {
-        actions = {
-            pins_fabric632();
+    @id(0x01000014) @name("ingress.routing_resolution.set_ip_nexthop") action routing_resolution_set_ip_nexthop_0(@id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("router_interface_id") bit<10> router_interface_id_4, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("neighbor_id") bit<128> neighbor_id_3) {
+        @id(0x01000017) {
+            routing_resolution_router_interface_id_valid = true;
+            routing_resolution_router_interface_id_value = router_interface_id_4;
+            routing_resolution_neighbor_id_valid = true;
+            routing_resolution_neighbor_id_value = neighbor_id_3;
+            local_metadata._enable_decrement_ttl4 = true;
+            local_metadata._enable_src_mac_rewrite5 = true;
+            local_metadata._enable_dst_mac_rewrite6 = true;
+            local_metadata._enable_vlan_rewrite7 = true;
         }
-        const default_action = pins_fabric632();
     }
-    @hidden table tbl_pins_fabric635 {
-        actions = {
-            pins_fabric635();
+    @id(0x01000003) @deprecated("Use set_ip_nexthop instead.") @name("ingress.routing_resolution.set_nexthop") action routing_resolution_set_nexthop_0(@id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("router_interface_id") bit<10> router_interface_id_5, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("neighbor_id") bit<128> neighbor_id_4) {
+        @id(0x01000014) {
+            @id(0x01000017) {
+                routing_resolution_router_interface_id_valid = true;
+                routing_resolution_router_interface_id_value = router_interface_id_5;
+                routing_resolution_neighbor_id_valid = true;
+                routing_resolution_neighbor_id_value = neighbor_id_4;
+                local_metadata._enable_decrement_ttl4 = true;
+                local_metadata._enable_src_mac_rewrite5 = true;
+                local_metadata._enable_dst_mac_rewrite6 = true;
+                local_metadata._enable_vlan_rewrite7 = true;
+            }
         }
-        const default_action = pins_fabric635();
     }
-    @hidden table tbl_pins_fabric638 {
-        actions = {
-            pins_fabric638();
-        }
-        const default_action = pins_fabric638();
+    @id(0x01000012) @name("ingress.routing_resolution.set_p2p_tunnel_encap_nexthop") action routing_resolution_set_p2p_tunnel_encap_nexthop_0(@id(1) @refers_to(tunnel_table , tunnel_id) @name("tunnel_id") bit<10> tunnel_id) {
+        routing_resolution_tunnel_id_valid = true;
+        routing_resolution_tunnel_id_value = tunnel_id;
     }
-    @hidden table tbl_pins_fabric617 {
-        actions = {
-            pins_fabric617();
+    @p4runtime_role("sdn_controller") @id(0x02000042) @name("ingress.routing_resolution.nexthop_table") table routing_resolution_nexthop_table {
+        key = {
+            local_metadata._nexthop_id_value40: exact @id(1) @name("nexthop_id");
         }
-        const default_action = pins_fabric617();
+        actions = {
+            @proto_id(1) routing_resolution_set_nexthop_0();
+            @proto_id(2) routing_resolution_set_p2p_tunnel_encap_nexthop_0();
+            @proto_id(3) routing_resolution_set_ip_nexthop_0();
+            @proto_id(4) routing_resolution_set_ip_nexthop_and_disable_rewrites_0();
+            @defaultonly NoAction_13();
+        }
+        const default_action = NoAction_13();
+        size = 1024;
+    }
+    @id(0x01000013) @name("ingress.routing_resolution.mark_for_p2p_tunnel_encap") action routing_resolution_mark_for_p2p_tunnel_encap_0(@id(1) @format(IPV6_ADDRESS) @name("encap_src_ip") bit<128> encap_src_ip, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("encap_dst_ip") bit<128> encap_dst_ip, @id(3) @refers_to(neighbor_table , router_interface_id) @refers_to(router_interface_table , router_interface_id) @name("router_interface_id") bit<10> router_interface_id_6) {
+        local_metadata._tunnel_encap_src_ipv616 = encap_src_ip;
+        local_metadata._tunnel_encap_dst_ipv617 = encap_dst_ip;
+        local_metadata._apply_tunnel_encap_at_egress15 = true;
+        @id(0x01000014) {
+            @id(0x01000017) {
+                routing_resolution_router_interface_id_valid = true;
+                routing_resolution_router_interface_id_value = router_interface_id_6;
+                routing_resolution_neighbor_id_valid = true;
+                routing_resolution_neighbor_id_value = encap_dst_ip;
+                local_metadata._enable_decrement_ttl4 = true;
+                local_metadata._enable_src_mac_rewrite5 = true;
+                local_metadata._enable_dst_mac_rewrite6 = true;
+                local_metadata._enable_vlan_rewrite7 = true;
+            }
+        }
+    }
+    @p4runtime_role("sdn_controller") @id(0x02000050) @name("ingress.routing_resolution.tunnel_table") table routing_resolution_tunnel_table {
+        key = {
+            routing_resolution_tunnel_id_value: exact @id(1) @name("tunnel_id");
+        }
+        actions = {
+            @proto_id(1) routing_resolution_mark_for_p2p_tunnel_encap_0();
+            @defaultonly NoAction_14();
+        }
+        const default_action = NoAction_14();
+        size = 2048;
+    }
+    @max_group_size(512) @id(0x11DC4EC8) @name("ingress.routing_resolution.wcmp_group_selector") action_selector(HashAlgorithm.identity, 32w49152, 32w8) routing_resolution_wcmp_group_selector;
+    @p4runtime_role("sdn_controller") @id(0x02000043) @oneshot @name("ingress.routing_resolution.wcmp_group_table") table routing_resolution_wcmp_group_table {
+        key = {
+            local_metadata._wcmp_group_id_value38: exact @id(1) @name("wcmp_group_id");
+            local_metadata._wcmp_selector_input13: selector @name("local_metadata.wcmp_selector_input");
+        }
+        actions = {
+            @proto_id(1) set_nexthop_id_3();
+            @defaultonly NoAction_15();
+        }
+        const default_action = NoAction_15();
+        implementation = routing_resolution_wcmp_group_selector;
+        size = 3968;
+    }
+    @id(0x01000007) @name("ingress.mirror_session_lookup.mirror_as_ipv4_erspan") action mirror_session_lookup_mirror_as_ipv4_erspan_0(@id(1) @name("port") bit<9> port_4, @id(2) @format(IPV4_ADDRESS) @name("src_ip") bit<32> src_ip, @id(3) @format(IPV4_ADDRESS) @name("dst_ip") bit<32> dst_ip, @id(4) @format(MAC_ADDRESS) @name("src_mac") bit<48> src_mac_6, @id(5) @format(MAC_ADDRESS) @name("dst_mac") bit<48> dst_mac_3, @id(6) @name("ttl") bit<8> ttl_1, @id(7) @name("tos") bit<8> tos) {
+    }
+    @id(0x0100001D) @unsupported @name("ingress.mirror_session_lookup.mirror_with_vlan_tag_and_ipfix_encapsulation") action mirror_session_lookup_mirror_with_vlan_tag_and_ipfix_encapsulation_0(@id(1) @name("monitor_port") bit<9> monitor_port, @id(2) @name("monitor_failover_port") bit<9> monitor_failover_port, @id(3) @format(MAC_ADDRESS) @name("mirror_encap_src_mac") bit<48> mirror_encap_src_mac_1, @id(4) @format(MAC_ADDRESS) @name("mirror_encap_dst_mac") bit<48> mirror_encap_dst_mac_1, @id(6) @name("mirror_encap_vlan_id") bit<12> mirror_encap_vlan_id_1, @id(7) @format(IPV6_ADDRESS) @name("mirror_encap_dst_ip") bit<128> mirror_encap_dst_ip_1, @id(8) @format(IPV6_ADDRESS) @name("mirror_encap_src_ip") bit<128> mirror_encap_src_ip_1, @id(9) @name("mirror_encap_udp_src_port") bit<16> mirror_encap_udp_src_port_1, @id(10) @name("mirror_encap_udp_dst_port") bit<16> mirror_encap_udp_dst_port_1) {
+        local_metadata._mirror_egress_port21 = monitor_port;
+        local_metadata._mirror_encap_src_mac22 = mirror_encap_src_mac_1;
+        local_metadata._mirror_encap_dst_mac23 = mirror_encap_dst_mac_1;
+        local_metadata._mirror_encap_vlan_id24 = mirror_encap_vlan_id_1;
+        local_metadata._mirror_encap_src_ip25 = mirror_encap_src_ip_1;
+        local_metadata._mirror_encap_dst_ip26 = mirror_encap_dst_ip_1;
+        local_metadata._mirror_encap_udp_src_port27 = mirror_encap_udp_src_port_1;
+        local_metadata._mirror_encap_udp_dst_port28 = mirror_encap_udp_dst_port_1;
+    }
+    @p4runtime_role("sdn_controller") @id(0x02000046) @name("ingress.mirror_session_lookup.mirror_session_table") table mirror_session_lookup_mirror_session_table {
+        key = {
+            local_metadata._mirror_session_id20: exact @id(1) @name("mirror_session_id");
+        }
+        actions = {
+            @proto_id(1) mirror_session_lookup_mirror_as_ipv4_erspan_0();
+            @proto_id(2) mirror_session_lookup_mirror_with_vlan_tag_and_ipfix_encapsulation_0();
+            @defaultonly NoAction_16();
+        }
+        const default_action = NoAction_16();
+        size = 4;
+    }
+    @id(0x0100001C) @name("ingress.ingress_cloning.ingress_clone") action ingress_cloning_ingress_clone_0(@id(1) @name("clone_session") bit<32> clone_session) {
+        clone_preserving_field_list(CloneType.I2E, clone_session, 8w1);
+    }
+    @unsupported @p4runtime_role("packet_replication_engine_manager") @id(0x02000051) @entry_restriction("
+    // mirror_egress_port is present iff marked_to_mirror is true.
+    // Exact match indicating presence of mirror_egress_port.
+    marked_to_mirror == 1 -> mirror_egress_port::mask == -1;
+    // Wildcard match indicating abscence of mirror_egress_port.
+    marked_to_mirror == 0 -> mirror_egress_port::mask == 0;
+  ") @name("ingress.ingress_cloning.ingress_clone_table") table ingress_cloning_ingress_clone_table {
+        key = {
+            local_metadata._marked_to_copy18    : exact @id(1) @name("marked_to_copy");
+            local_metadata._marked_to_mirror19  : exact @id(2) @name("marked_to_mirror");
+            local_metadata._mirror_egress_port21: optional @id(3) @name("mirror_egress_port");
+        }
+        actions = {
+            @proto_id(1) ingress_cloning_ingress_clone_0();
+            @defaultonly NoAction_17();
+        }
+        default_action = NoAction_17();
+    }
+    @hidden action pins_fabric420() {
+        standard_metadata.egress_spec = (bit<9>)headers.packet_out_header.egress_port;
+        local_metadata._bypass_ingress36 = true;
+    }
+    @hidden action pins_fabric855() {
+        local_metadata._vlan_id1 = headers.vlan.vlan_id;
+        headers.ethernet.ether_type = headers.vlan.ether_type;
+        headers.vlan.setInvalid();
+    }
+    @hidden action pins_fabric859() {
+        local_metadata._vlan_id1 = 12w0xfff;
+    }
+    @hidden action pins_fabric846() {
+        local_metadata._enable_vlan_checks0 = true;
+        key_0 = 1w1;
+    }
+    @hidden action pins_fabric1546() {
+        acl_pre_ingress_dscp = headers.ipv4.dscp;
+        acl_pre_ingress_ecn = headers.ipv4.ecn;
+    }
+    @hidden action pins_fabric1550() {
+        acl_pre_ingress_dscp = headers.ipv6.dscp;
+        acl_pre_ingress_ecn = headers.ipv6.ecn;
+    }
+    @hidden action pins_fabric1425() {
+        acl_pre_ingress_dscp = 6w0;
+        acl_pre_ingress_ecn = 2w0;
+    }
+    @hidden action pins_fabric1465() {
+        key_1 = headers.ipv4.isValid() || headers.ipv6.isValid();
+    }
+    @hidden action pins_fabric869() {
+        mark_to_drop(standard_metadata);
+    }
+    @hidden action pins_fabric1005() {
+        headers.ethernet.ether_type = 16w0x800;
+        headers.ipv4 = headers.inner_ipv4;
+        headers.inner_ipv4.setInvalid();
+    }
+    @hidden action pins_fabric1001() {
+        assert(headers.ipv6.isValid());
+        assert(headers.inner_ipv4.isValid() && !headers.inner_ipv6.isValid() || !headers.inner_ipv4.isValid() && headers.inner_ipv6.isValid());
+        headers.ipv6.setInvalid();
+    }
+    @hidden action pins_fabric1010() {
+        headers.ethernet.ether_type = 16w0x86dd;
+        headers.ipv6 = headers.inner_ipv6;
+        headers.inner_ipv6.setInvalid();
+    }
+    @hidden action pins_fabric797() {
+        local_metadata._admit_to_l32 = false;
+    }
+    @hidden action pins_fabric1560() {
+        local_metadata._admit_to_l32 = headers.ethernet.dst_addr == 48w0x1a11175f80;
+    }
+    @hidden action pins_fabric530() {
+        mark_to_drop(standard_metadata);
+    }
+    @hidden action pins_fabric536() {
+        local_metadata._ipmc_table_hit41 = standard_metadata.mcast_grp != 16w0;
+    }
+    @hidden action pins_fabric540() {
+        local_metadata._ipmc_table_hit41 = standard_metadata.mcast_grp != 16w0;
+    }
+    @hidden action pins_fabric1405() {
+        acl_ingress_ttl = headers.ipv4.ttl;
+        acl_ingress_dscp = headers.ipv4.dscp;
+        acl_ingress_ecn = headers.ipv4.ecn;
+        acl_ingress_ip_protocol = headers.ipv4.protocol;
+    }
+    @hidden action pins_fabric1410() {
+        acl_ingress_ttl = headers.ipv6.hop_limit;
+        acl_ingress_dscp = headers.ipv6.dscp;
+        acl_ingress_ecn = headers.ipv6.ecn;
+        acl_ingress_ip_protocol = headers.ipv6.next_header;
+    }
+    @hidden action pins_fabric1117() {
+        acl_ingress_ttl = 8w0;
+        acl_ingress_dscp = 6w0;
+        acl_ingress_ecn = 2w0;
+        acl_ingress_ip_protocol = 8w0;
+    }
+    @hidden action pins_fabric1202() {
+        key_3 = headers.ipv4.isValid() || headers.ipv6.isValid();
+    }
+    @hidden action pins_fabric1302() {
+        key_7 = headers.ipv4.isValid() || headers.ipv6.isValid();
+    }
+    @hidden action pins_fabric1264() {
+        key_6 = headers.ipv4.isValid() || headers.ipv6.isValid();
+    }
+    @hidden action pins_fabric547() {
+        routing_resolution_tunnel_id_valid = false;
+        routing_resolution_router_interface_id_valid = false;
+        routing_resolution_neighbor_id_valid = false;
+    }
+    @hidden action pins_fabric674() {
+        mark_to_drop(standard_metadata);
+    }
+    @hidden action pins_fabric671() {
+        local_metadata._packet_in_target_egress_port31 = standard_metadata.egress_spec;
+        local_metadata._packet_in_ingress_port30 = standard_metadata.ingress_port;
+    }
+    @hidden action pins_fabric913() {
+        mark_to_drop(standard_metadata);
+    }
+    @hidden action pins_fabric423() {
+        headers.packet_out_header.setInvalid();
+    }
+    @hidden table tbl_pins_fabric420 {
+        actions = {
+            pins_fabric420();
+        }
+        const default_action = pins_fabric420();
+    }
+    @hidden table tbl_pins_fabric423 {
+        actions = {
+            pins_fabric423();
+        }
+        const default_action = pins_fabric423();
+    }
+    @hidden table tbl_pins_fabric855 {
+        actions = {
+            pins_fabric855();
+        }
+        const default_action = pins_fabric855();
+    }
+    @hidden table tbl_pins_fabric859 {
+        actions = {
+            pins_fabric859();
+        }
+        const default_action = pins_fabric859();
+    }
+    @hidden table tbl_pins_fabric846 {
+        actions = {
+            pins_fabric846();
+        }
+        const default_action = pins_fabric846();
+    }
+    @hidden table tbl_pins_fabric1425 {
+        actions = {
+            pins_fabric1425();
+        }
+        const default_action = pins_fabric1425();
+    }
+    @hidden table tbl_pins_fabric1546 {
+        actions = {
+            pins_fabric1546();
+        }
+        const default_action = pins_fabric1546();
+    }
+    @hidden table tbl_pins_fabric1550 {
+        actions = {
+            pins_fabric1550();
+        }
+        const default_action = pins_fabric1550();
+    }
+    @hidden table tbl_pins_fabric1465 {
+        actions = {
+            pins_fabric1465();
+        }
+        const default_action = pins_fabric1465();
+    }
+    @hidden table tbl_pins_fabric869 {
+        actions = {
+            pins_fabric869();
+        }
+        const default_action = pins_fabric869();
+    }
+    @hidden table tbl_pins_fabric1001 {
+        actions = {
+            pins_fabric1001();
+        }
+        const default_action = pins_fabric1001();
+    }
+    @hidden table tbl_pins_fabric1005 {
+        actions = {
+            pins_fabric1005();
+        }
+        const default_action = pins_fabric1005();
+    }
+    @hidden table tbl_pins_fabric1010 {
+        actions = {
+            pins_fabric1010();
+        }
+        const default_action = pins_fabric1010();
+    }
+    @hidden table tbl_pins_fabric1560 {
+        actions = {
+            pins_fabric1560();
+        }
+        const default_action = pins_fabric1560();
+    }
+    @hidden table tbl_pins_fabric797 {
+        actions = {
+            pins_fabric797();
+        }
+        const default_action = pins_fabric797();
+    }
+    @hidden table tbl_hashing_select_ecmp_hash_algorithm {
+        actions = {
+            hashing_select_ecmp_hash_algorithm_0();
+        }
+        const default_action = hashing_select_ecmp_hash_algorithm_0();
+    }
+    @hidden table tbl_hashing_compute_ecmp_hash_ipv4 {
+        actions = {
+            hashing_compute_ecmp_hash_ipv4_0();
+        }
+        const default_action = hashing_compute_ecmp_hash_ipv4_0();
+    }
+    @hidden table tbl_hashing_compute_ecmp_hash_ipv6 {
+        actions = {
+            hashing_compute_ecmp_hash_ipv6_0();
+        }
+        const default_action = hashing_compute_ecmp_hash_ipv6_0();
+    }
+    @hidden table tbl_lag_hashing_config_select_lag_hash_algorithm {
+        actions = {
+            lag_hashing_config_select_lag_hash_algorithm_0();
+        }
+        const default_action = lag_hashing_config_select_lag_hash_algorithm_0();
+    }
+    @hidden table tbl_lag_hashing_config_compute_lag_hash_ipv4 {
+        actions = {
+            lag_hashing_config_compute_lag_hash_ipv4_0();
+        }
+        const default_action = lag_hashing_config_compute_lag_hash_ipv4_0();
+    }
+    @hidden table tbl_lag_hashing_config_compute_lag_hash_ipv6 {
+        actions = {
+            lag_hashing_config_compute_lag_hash_ipv6_0();
+        }
+        const default_action = lag_hashing_config_compute_lag_hash_ipv6_0();
+    }
+    @hidden table tbl_pins_fabric530 {
+        actions = {
+            pins_fabric530();
+        }
+        const default_action = pins_fabric530();
+    }
+    @hidden table tbl_pins_fabric536 {
+        actions = {
+            pins_fabric536();
+        }
+        const default_action = pins_fabric536();
+    }
+    @hidden table tbl_pins_fabric540 {
+        actions = {
+            pins_fabric540();
+        }
+        const default_action = pins_fabric540();
+    }
+    @hidden table tbl_pins_fabric1117 {
+        actions = {
+            pins_fabric1117();
+        }
+        const default_action = pins_fabric1117();
+    }
+    @hidden table tbl_pins_fabric1405 {
+        actions = {
+            pins_fabric1405();
+        }
+        const default_action = pins_fabric1405();
+    }
+    @hidden table tbl_pins_fabric1410 {
+        actions = {
+            pins_fabric1410();
+        }
+        const default_action = pins_fabric1410();
+    }
+    @hidden table tbl_pins_fabric1202 {
+        actions = {
+            pins_fabric1202();
+        }
+        const default_action = pins_fabric1202();
+    }
+    @hidden table tbl_pins_fabric1302 {
+        actions = {
+            pins_fabric1302();
+        }
+        const default_action = pins_fabric1302();
+    }
+    @hidden table tbl_pins_fabric1264 {
+        actions = {
+            pins_fabric1264();
+        }
+        const default_action = pins_fabric1264();
+    }
+    @hidden table tbl_pins_fabric547 {
+        actions = {
+            pins_fabric547();
+        }
+        const default_action = pins_fabric547();
+    }
+    @hidden table tbl_pins_fabric671 {
+        actions = {
+            pins_fabric671();
+        }
+        const default_action = pins_fabric671();
+    }
+    @hidden table tbl_pins_fabric674 {
+        actions = {
+            pins_fabric674();
+        }
+        const default_action = pins_fabric674();
+    }
+    @hidden table tbl_pins_fabric913 {
+        actions = {
+            pins_fabric913();
+        }
+        const default_action = pins_fabric913();
     }
     apply {
-        if (local_metadata._admit_to_l30) {
-            tbl_pins_fabric582.apply();
+        if (headers.packet_out_header.isValid() && headers.packet_out_header.submit_to_ingress == 1w0) {
+            tbl_pins_fabric420.apply();
         }
-        if (standard_metadata.instance_type == 32w1) {
-            tbl_pins_fabric455.apply();
-        }
-        tbl_pins_fabric592.apply();
-        if (headers.ipv4.isValid()) {
-            tbl_pins_fabric632.apply();
-        } else if (headers.ipv6.isValid()) {
-            tbl_pins_fabric635.apply();
+        tbl_pins_fabric423.apply();
+        if (local_metadata._bypass_ingress36) {
+            ;
         } else {
-            tbl_pins_fabric638.apply();
+            if (headers.ipv6.isValid()) {
+                if (headers.ipv6.next_header == 8w0x4 || headers.ipv6.next_header == 8w0x29) {
+                    tunnel_termination_lookup_ipv6_tunnel_termination_table.apply();
+                }
+            }
+            if (headers.vlan.isValid()) {
+                tbl_pins_fabric855.apply();
+            } else {
+                tbl_pins_fabric859.apply();
+            }
+            tbl_pins_fabric846.apply();
+            vlan_untag_disable_vlan_checks_table.apply();
+            tbl_pins_fabric1425.apply();
+            if (headers.ipv4.isValid()) {
+                tbl_pins_fabric1546.apply();
+            } else if (headers.ipv6.isValid()) {
+                tbl_pins_fabric1550.apply();
+            }
+            tbl_pins_fabric1465.apply();
+            acl_pre_ingress_acl_pre_ingress_table.apply();
+            if (local_metadata._enable_vlan_checks0 && !(local_metadata._vlan_id1 == 12w0x0 || local_metadata._vlan_id1 == 12w0xfff)) {
+                tbl_pins_fabric869.apply();
+            }
+            if (local_metadata._apply_tunnel_decap_at_end_of_pre_ingress14) {
+                tbl_pins_fabric1001.apply();
+                if (headers.inner_ipv4.isValid()) {
+                    tbl_pins_fabric1005.apply();
+                }
+                if (headers.inner_ipv6.isValid()) {
+                    tbl_pins_fabric1010.apply();
+                }
+            }
+            tbl_pins_fabric1560.apply();
+            if (local_metadata._enable_vlan_checks0 && !(local_metadata._vlan_id1 == 12w0x0 || local_metadata._vlan_id1 == 12w0xfff)) {
+                tbl_pins_fabric797.apply();
+            } else {
+                l3_admit_l3_admit_table.apply();
+            }
+            tbl_hashing_select_ecmp_hash_algorithm.apply();
+            if (headers.ipv4.isValid()) {
+                tbl_hashing_compute_ecmp_hash_ipv4.apply();
+            } else if (headers.ipv6.isValid()) {
+                tbl_hashing_compute_ecmp_hash_ipv6.apply();
+            }
+            tbl_lag_hashing_config_select_lag_hash_algorithm.apply();
+            if (headers.ipv4.isValid()) {
+                tbl_lag_hashing_config_compute_lag_hash_ipv4.apply();
+            } else if (headers.ipv6.isValid()) {
+                tbl_lag_hashing_config_compute_lag_hash_ipv6.apply();
+            }
+            tbl_pins_fabric530.apply();
+            routing_lookup_vrf_table.apply();
+            if (local_metadata._admit_to_l32) {
+                if (headers.ipv4.isValid()) {
+                    routing_lookup_ipv4_table.apply();
+                    routing_lookup_ipv4_multicast_table.apply();
+                    tbl_pins_fabric536.apply();
+                } else if (headers.ipv6.isValid()) {
+                    routing_lookup_ipv6_table.apply();
+                    routing_lookup_ipv6_multicast_table.apply();
+                    tbl_pins_fabric540.apply();
+                }
+            }
+            tbl_pins_fabric1117.apply();
+            if (headers.ipv4.isValid()) {
+                tbl_pins_fabric1405.apply();
+            } else if (headers.ipv6.isValid()) {
+                tbl_pins_fabric1410.apply();
+            }
+            tbl_pins_fabric1202.apply();
+            acl_ingress_acl_ingress_table.apply();
+            tbl_pins_fabric1302.apply();
+            acl_ingress_acl_ingress_counting_table.apply();
+            tbl_pins_fabric1264.apply();
+            acl_ingress_acl_ingress_qos_table.apply();
+            tbl_pins_fabric547.apply();
+            if (local_metadata._admit_to_l32) {
+                if (local_metadata._wcmp_group_id_valid37) {
+                    routing_resolution_wcmp_group_table.apply();
+                }
+                if (local_metadata._nexthop_id_valid39) {
+                    routing_resolution_nexthop_table.apply();
+                    if (routing_resolution_tunnel_id_valid) {
+                        routing_resolution_tunnel_table.apply();
+                    }
+                    if (routing_resolution_router_interface_id_valid && routing_resolution_neighbor_id_valid) {
+                        routing_resolution_router_interface_table.apply();
+                        routing_resolution_neighbor_table.apply();
+                    }
+                }
+            }
+            tbl_pins_fabric671.apply();
+            if (local_metadata._acl_drop42) {
+                tbl_pins_fabric674.apply();
+            }
+            if (local_metadata._marked_to_mirror19) {
+                mirror_session_lookup_mirror_session_table.apply();
+            }
+            ingress_cloning_ingress_clone_table.apply();
+            if (headers.ipv6.isValid() && (headers.ipv6.src_addr & 128w0xff000000000000000000000000000000 == 128w0xff000000000000000000000000000000 || headers.ipv6.dst_addr & 128w0xff000000000000000000000000000000 == 128w0xff000000000000000000000000000000 || headers.ipv6.src_addr == 128w0x1 || headers.ipv6.dst_addr == 128w0x1) || headers.ipv4.isValid() && (headers.ipv4.src_addr & 32w0xf0000000 == 32w0xe0000000 || headers.ipv4.src_addr == 32w0xffffffff || (headers.ipv4.dst_addr & 32w0xf0000000 == 32w0xe0000000 || headers.ipv4.dst_addr == 32w0xffffffff) || headers.ipv4.src_addr & 32w0xff000000 == 32w0x7f000000 || headers.ipv4.dst_addr & 32w0xff000000 == 32w0x7f000000) || headers.ethernet.isValid() && headers.ethernet.dst_addr & 48w0x10000000000 == 48w0x10000000000) {
+                tbl_pins_fabric913.apply();
+            }
         }
-        tbl_pins_fabric617.apply();
-        acl_egress_acl_egress_table.apply();
     }
 }
 
-@pkginfo(name="fabric_border_router.p4", organization="Google") V1Switch<headers_t, local_metadata_t>(packet_parser(), verify_ipv4_checksum(), ingress(), egress(), compute_ipv4_checksum(), packet_deparser()) main;
+control egress(inout headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
+    @name("egress.acl_egress.dscp") bit<6> acl_egress_dscp;
+    @name("egress.acl_egress.ip_protocol") bit<8> acl_egress_ip_protocol;
+    bool key_8;
+    @noWarn("unused") @name(".NoAction") action NoAction_18() {
+    }
+    @noWarn("unused") @name(".NoAction") action NoAction_19() {
+    }
+    @id(0x01000109) @sai_action(SAI_PACKET_ACTION_DROP) @name(".acl_drop") action acl_drop_4() {
+        local_metadata._acl_drop42 = true;
+    }
+    @id(0x01000019) @name("egress.packet_rewrites.multicast_rewrites.set_multicast_src_mac") action packet_rewrites_multicast_rewrites_set_multicast_src_mac_0(@id(1) @format(MAC_ADDRESS) @name("src_mac") bit<48> src_mac_7) {
+        local_metadata._enable_src_mac_rewrite5 = true;
+        local_metadata._packet_rewrites_src_mac8 = src_mac_7;
+    }
+    @p4runtime_role("sdn_controller") @id(0x0200004C) @name("egress.packet_rewrites.multicast_rewrites.multicast_router_interface_table") table packet_rewrites_multicast_rewrites_multicast_router_interface_table {
+        key = {
+            standard_metadata.egress_port: exact @referenced_by(builtin : : multicast_group_table , replica . port) @id(1) @name("multicast_replica_port");
+            standard_metadata.egress_rid : exact @referenced_by(builtin : : multicast_group_table , replica . instance) @id(2) @name("multicast_replica_instance");
+        }
+        actions = {
+            @proto_id(1) packet_rewrites_multicast_rewrites_set_multicast_src_mac_0();
+            @defaultonly NoAction_18();
+        }
+        size = 110;
+        default_action = NoAction_18();
+    }
+    @id(0x13000104) @name("egress.acl_egress.acl_egress_counter") direct_counter(CounterType.packets_and_bytes) acl_egress_acl_egress_counter;
+    @id(0x13000108) @name("egress.acl_egress.acl_egress_dhcp_to_host_counter") direct_counter(CounterType.packets_and_bytes) acl_egress_acl_egress_dhcp_to_host_counter;
+    @p4runtime_role("sdn_controller") @id(0x02000104) @sai_acl(EGRESS) @entry_restriction("
+
+    // Forbid using ether_type for IP packets (by convention, use is_ip* instead).
+    ether_type != 0x0800 && ether_type != 0x86dd;
+    dscp::mask != 0 -> (is_ip == 1 || is_ipv4 == 1 || is_ipv6 == 1);
+
+    // Only allow IP field matches for IP packets.
+    ip_protocol::mask != 0 -> (is_ip == 1 || is_ipv4 == 1 || is_ipv6 == 1);
+
+
+
+
+    // Only allow l4_dst_port matches for TCP/UDP packets.
+    l4_dst_port::mask != 0 -> (ip_protocol == 6 || ip_protocol == 17);
+
+    // Forbid illegal combinations of IP_TYPE fields.
+    is_ip::mask != 0 -> (is_ipv4::mask == 0 && is_ipv6::mask == 0);
+    is_ipv4::mask != 0 -> (is_ip::mask == 0 && is_ipv6::mask == 0);
+    is_ipv6::mask != 0 -> (is_ip::mask == 0 && is_ipv4::mask == 0);
+    // Forbid unsupported combinations of IP_TYPE fields.
+    is_ipv4::mask != 0 -> (is_ipv4 == 1);
+    is_ipv6::mask != 0 -> (is_ipv6 == 1);
+  ") @name("egress.acl_egress.acl_egress_table") table acl_egress_acl_egress_table {
+        key = {
+            headers.ethernet.ether_type  : ternary @id(1) @name("ether_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ETHER_TYPE);
+            acl_egress_ip_protocol       : ternary @id(2) @name("ip_protocol") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
+            local_metadata._l4_dst_port12: ternary @id(3) @name("l4_dst_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_DST_PORT);
+            standard_metadata.egress_port: optional @id(4) @name("out_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_OUT_PORT);
+            key_8                        : optional @id(5) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid()       : optional @id(6) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid()       : optional @id(7) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            acl_egress_dscp              : ternary @id(8) @name("dscp") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
+        }
+        actions = {
+            @proto_id(1) acl_drop_4();
+            @defaultonly NoAction_19();
+        }
+        const default_action = NoAction_19();
+        counters = acl_egress_acl_egress_counter;
+        size = 127;
+    }
+    @hidden action pins_fabric943() {
+        local_metadata._enable_decrement_ttl4 = true;
+    }
+    @hidden action pins_fabric947() {
+        headers.ethernet.src_addr = local_metadata._packet_rewrites_src_mac8;
+    }
+    @hidden action pins_fabric950() {
+        headers.ethernet.dst_addr = local_metadata._packet_rewrites_dst_mac9;
+    }
+    @hidden action pins_fabric953() {
+        local_metadata._vlan_id1 = local_metadata._packet_rewrites_vlan_id10;
+    }
+    @hidden action pins_fabric957() {
+        headers.ipv4.ttl = headers.ipv4.ttl + 8w255;
+    }
+    @hidden action pins_fabric960() {
+        mark_to_drop(standard_metadata);
+    }
+    @hidden action pins_fabric965() {
+        headers.ipv6.hop_limit = headers.ipv6.hop_limit + 8w255;
+    }
+    @hidden action pins_fabric968() {
+        mark_to_drop(standard_metadata);
+    }
+    @hidden action pins_fabric825() {
+        headers.tunnel_encap_ipv6.dscp = headers.ipv4.dscp;
+        headers.tunnel_encap_ipv6.ecn = headers.ipv4.ecn;
+        headers.tunnel_encap_ipv6.hop_limit = headers.ipv4.ttl;
+    }
+    @hidden action pins_fabric829() {
+        headers.tunnel_encap_ipv6.dscp = headers.ipv6.dscp;
+        headers.tunnel_encap_ipv6.ecn = headers.ipv6.ecn;
+        headers.tunnel_encap_ipv6.hop_limit = headers.ipv6.hop_limit;
+    }
+    @hidden action pins_fabric807() {
+        headers.tunnel_encap_gre.setValid();
+        headers.tunnel_encap_gre.checksum_present = 1w0;
+        headers.tunnel_encap_gre.routing_present = 1w0;
+        headers.tunnel_encap_gre.key_present = 1w0;
+        headers.tunnel_encap_gre.sequence_present = 1w0;
+        headers.tunnel_encap_gre.strict_source_route = 1w0;
+        headers.tunnel_encap_gre.recursion_control = 3w0;
+        headers.tunnel_encap_gre.flags = 4w0;
+        headers.tunnel_encap_gre.version = 3w0;
+        headers.tunnel_encap_gre.protocol = headers.ethernet.ether_type;
+        headers.ethernet.ether_type = 16w0x86dd;
+        headers.tunnel_encap_ipv6.setValid();
+        headers.tunnel_encap_ipv6.version = 4w6;
+        headers.tunnel_encap_ipv6.src_addr = local_metadata._tunnel_encap_src_ipv616;
+        headers.tunnel_encap_ipv6.dst_addr = local_metadata._tunnel_encap_dst_ipv617;
+        headers.tunnel_encap_ipv6.payload_length = (bit<16>)standard_metadata.packet_length + 16w65526;
+        headers.tunnel_encap_ipv6.next_header = 8w0x2f;
+    }
+    @hidden action pins_fabric751() {
+        headers.mirror_encap_ethernet.setValid();
+        headers.mirror_encap_ethernet.src_addr = local_metadata._mirror_encap_src_mac22;
+        headers.mirror_encap_ethernet.dst_addr = local_metadata._mirror_encap_dst_mac23;
+        headers.mirror_encap_ethernet.ether_type = 16w0x8100;
+        headers.mirror_encap_vlan.setValid();
+        headers.mirror_encap_vlan.ether_type = 16w0x86dd;
+        headers.mirror_encap_vlan.vlan_id = local_metadata._mirror_encap_vlan_id24;
+        headers.mirror_encap_ipv6.setValid();
+        headers.mirror_encap_ipv6.version = 4w6;
+        headers.mirror_encap_ipv6.dscp = 6w0;
+        headers.mirror_encap_ipv6.ecn = 2w0;
+        headers.mirror_encap_ipv6.hop_limit = 8w16;
+        headers.mirror_encap_ipv6.flow_label = 20w0;
+        headers.mirror_encap_ipv6.payload_length = (bit<16>)standard_metadata.packet_length + 16w52;
+        headers.mirror_encap_ipv6.next_header = 8w0x11;
+        headers.mirror_encap_ipv6.src_addr = local_metadata._mirror_encap_src_ip25;
+        headers.mirror_encap_ipv6.dst_addr = local_metadata._mirror_encap_dst_ip26;
+        headers.mirror_encap_udp.setValid();
+        headers.mirror_encap_udp.src_port = local_metadata._mirror_encap_udp_src_port27;
+        headers.mirror_encap_udp.dst_port = local_metadata._mirror_encap_udp_dst_port28;
+        headers.mirror_encap_udp.hdr_length = (bit<16>)standard_metadata.packet_length + 16w52;
+        headers.mirror_encap_udp.checksum = 16w0;
+        headers.ipfix.setValid();
+        headers.psamp_extended.setValid();
+    }
+    @hidden action pins_fabric878() {
+        mark_to_drop(standard_metadata);
+    }
+    @hidden action pins_fabric880() {
+        mark_to_drop(standard_metadata);
+    }
+    @hidden action pins_fabric889() {
+        headers.vlan.setValid();
+        headers.vlan.priority_code_point = 3w0;
+        headers.vlan.drop_eligible_indicator = 1w0;
+        headers.vlan.vlan_id = local_metadata._vlan_id1;
+        headers.vlan.ether_type = headers.ethernet.ether_type;
+        headers.ethernet.ether_type = 16w0x8100;
+    }
+    @hidden action pins_fabric1101() {
+        acl_egress_dscp = headers.ipv4.dscp;
+        acl_egress_ip_protocol = headers.ipv4.protocol;
+    }
+    @hidden action pins_fabric1104() {
+        acl_egress_dscp = headers.ipv6.dscp;
+        acl_egress_ip_protocol = headers.ipv6.next_header;
+    }
+    @hidden action pins_fabric1107() {
+        acl_egress_ip_protocol = 8w0;
+    }
+    @hidden action pins_fabric1022() {
+        acl_egress_dscp = 6w0;
+    }
+    @hidden action pins_fabric1057() {
+        key_8 = headers.ipv4.isValid() || headers.ipv6.isValid();
+    }
+    @hidden action pins_fabric1111() {
+        mark_to_drop(standard_metadata);
+    }
+    @hidden table tbl_pins_fabric943 {
+        actions = {
+            pins_fabric943();
+        }
+        const default_action = pins_fabric943();
+    }
+    @hidden table tbl_pins_fabric947 {
+        actions = {
+            pins_fabric947();
+        }
+        const default_action = pins_fabric947();
+    }
+    @hidden table tbl_pins_fabric950 {
+        actions = {
+            pins_fabric950();
+        }
+        const default_action = pins_fabric950();
+    }
+    @hidden table tbl_pins_fabric953 {
+        actions = {
+            pins_fabric953();
+        }
+        const default_action = pins_fabric953();
+    }
+    @hidden table tbl_pins_fabric957 {
+        actions = {
+            pins_fabric957();
+        }
+        const default_action = pins_fabric957();
+    }
+    @hidden table tbl_pins_fabric960 {
+        actions = {
+            pins_fabric960();
+        }
+        const default_action = pins_fabric960();
+    }
+    @hidden table tbl_pins_fabric965 {
+        actions = {
+            pins_fabric965();
+        }
+        const default_action = pins_fabric965();
+    }
+    @hidden table tbl_pins_fabric968 {
+        actions = {
+            pins_fabric968();
+        }
+        const default_action = pins_fabric968();
+    }
+    @hidden table tbl_pins_fabric807 {
+        actions = {
+            pins_fabric807();
+        }
+        const default_action = pins_fabric807();
+    }
+    @hidden table tbl_pins_fabric825 {
+        actions = {
+            pins_fabric825();
+        }
+        const default_action = pins_fabric825();
+    }
+    @hidden table tbl_pins_fabric829 {
+        actions = {
+            pins_fabric829();
+        }
+        const default_action = pins_fabric829();
+    }
+    @hidden table tbl_pins_fabric751 {
+        actions = {
+            pins_fabric751();
+        }
+        const default_action = pins_fabric751();
+    }
+    @hidden table tbl_pins_fabric878 {
+        actions = {
+            pins_fabric878();
+        }
+        const default_action = pins_fabric878();
+    }
+    @hidden table tbl_pins_fabric880 {
+        actions = {
+            pins_fabric880();
+        }
+        const default_action = pins_fabric880();
+    }
+    @hidden table tbl_pins_fabric889 {
+        actions = {
+            pins_fabric889();
+        }
+        const default_action = pins_fabric889();
+    }
+    @hidden table tbl_pins_fabric1022 {
+        actions = {
+            pins_fabric1022();
+        }
+        const default_action = pins_fabric1022();
+    }
+    @hidden table tbl_pins_fabric1101 {
+        actions = {
+            pins_fabric1101();
+        }
+        const default_action = pins_fabric1101();
+    }
+    @hidden table tbl_pins_fabric1104 {
+        actions = {
+            pins_fabric1104();
+        }
+        const default_action = pins_fabric1104();
+    }
+    @hidden table tbl_pins_fabric1107 {
+        actions = {
+            pins_fabric1107();
+        }
+        const default_action = pins_fabric1107();
+    }
+    @hidden table tbl_pins_fabric1057 {
+        actions = {
+            pins_fabric1057();
+        }
+        const default_action = pins_fabric1057();
+    }
+    @hidden table tbl_pins_fabric1111 {
+        actions = {
+            pins_fabric1111();
+        }
+        const default_action = pins_fabric1111();
+    }
+    apply {
+        if (standard_metadata.instance_type == 32w1 && standard_metadata.egress_rid == 16w1) {
+            ;
+        } else {
+            if (standard_metadata.instance_type == 32w5) {
+                tbl_pins_fabric943.apply();
+                packet_rewrites_multicast_rewrites_multicast_router_interface_table.apply();
+            }
+            if (local_metadata._enable_src_mac_rewrite5) {
+                tbl_pins_fabric947.apply();
+            }
+            if (local_metadata._enable_dst_mac_rewrite6) {
+                tbl_pins_fabric950.apply();
+            }
+            if (local_metadata._enable_vlan_rewrite7) {
+                tbl_pins_fabric953.apply();
+            }
+            if (headers.ipv4.isValid()) {
+                if (headers.ipv4.ttl > 8w0 && local_metadata._enable_decrement_ttl4) {
+                    tbl_pins_fabric957.apply();
+                }
+                if (headers.ipv4.ttl == 8w0) {
+                    tbl_pins_fabric960.apply();
+                }
+            }
+            if (headers.ipv6.isValid()) {
+                if (headers.ipv6.hop_limit > 8w0 && local_metadata._enable_decrement_ttl4) {
+                    tbl_pins_fabric965.apply();
+                }
+                if (headers.ipv6.hop_limit == 8w0) {
+                    tbl_pins_fabric968.apply();
+                }
+            }
+            if (local_metadata._apply_tunnel_encap_at_egress15) {
+                tbl_pins_fabric807.apply();
+                if (headers.ipv4.isValid()) {
+                    tbl_pins_fabric825.apply();
+                } else if (headers.ipv6.isValid()) {
+                    tbl_pins_fabric829.apply();
+                }
+            }
+            if (standard_metadata.instance_type == 32w1 && standard_metadata.egress_rid == 16w2) {
+                tbl_pins_fabric751.apply();
+            }
+            if (local_metadata._enable_vlan_checks0) {
+                if (standard_metadata.instance_type == 32w1 && standard_metadata.egress_rid == 16w2 && !(local_metadata._mirror_encap_vlan_id24 == 12w0x0 || local_metadata._mirror_encap_vlan_id24 == 12w0xfff)) {
+                    tbl_pins_fabric878.apply();
+                } else if (!(standard_metadata.instance_type == 32w1 && standard_metadata.egress_rid == 16w1) && !(local_metadata._vlan_id1 == 12w0x0 || local_metadata._vlan_id1 == 12w0xfff)) {
+                    tbl_pins_fabric880.apply();
+                }
+            }
+            if (!(local_metadata._vlan_id1 == 12w0x0 || local_metadata._vlan_id1 == 12w0xfff) && !(standard_metadata.instance_type == 32w1 && standard_metadata.egress_rid == 16w2)) {
+                tbl_pins_fabric889.apply();
+            }
+            tbl_pins_fabric1022.apply();
+            if (headers.ipv4.isValid()) {
+                tbl_pins_fabric1101.apply();
+            } else if (headers.ipv6.isValid()) {
+                tbl_pins_fabric1104.apply();
+            } else {
+                tbl_pins_fabric1107.apply();
+            }
+            tbl_pins_fabric1057.apply();
+            acl_egress_acl_egress_table.apply();
+            if (local_metadata._acl_drop42) {
+                tbl_pins_fabric1111.apply();
+            }
+        }
+    }
+}
+
+@pkginfo(name="fabric_border_router.p4", organization="Google", version="1.6.1") V1Switch<headers_t, local_metadata_t>(packet_parser(), verify_ipv4_checksum(), ingress(), egress(), compute_ipv4_checksum(), packet_deparser()) main;
