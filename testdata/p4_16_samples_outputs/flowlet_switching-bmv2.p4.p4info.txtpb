@@ -25,6 +25,7 @@ tables {
   action_refs {
     id: 21257015
   }
+  initial_default_action_id: 21257015
   size: 1024
 }
 tables {
@@ -48,6 +49,7 @@ tables {
   action_refs {
     id: 21257015
   }
+  initial_default_action_id: 21257015
   size: 16384
 }
 tables {
@@ -62,6 +64,7 @@ tables {
   action_refs {
     id: 21257015
   }
+  initial_default_action_id: 21257015
   size: 1024
 }
 tables {
@@ -85,6 +88,7 @@ tables {
   action_refs {
     id: 21257015
   }
+  initial_default_action_id: 21257015
   size: 512
 }
 tables {
@@ -99,6 +103,7 @@ tables {
   action_refs {
     id: 21257015
   }
+  initial_default_action_id: 21257015
   size: 1024
 }
 tables {
@@ -122,6 +127,7 @@ tables {
   action_refs {
     id: 21257015
   }
+  initial_default_action_id: 21257015
   size: 256
 }
 actions {

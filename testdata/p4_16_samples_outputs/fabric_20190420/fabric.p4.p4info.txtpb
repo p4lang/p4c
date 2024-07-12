@@ -38,6 +38,7 @@ tables {
     id: 24266015
   }
   const_default_action_id: 17164167
+  initial_default_action_id: 17164167
   direct_resource_ids: 326221069
   size: 1024
 }
@@ -69,6 +70,7 @@ tables {
     id: 25032921
   }
   const_default_action_id: 25032921
+  initial_default_action_id: 25032921
   direct_resource_ids: 335473470
   size: 1024
 }
@@ -99,6 +101,7 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 28485346
+  initial_default_action_id: 28485346
   direct_resource_ids: 330959985
   size: 1024
 }
@@ -123,6 +126,7 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 28485346
+  initial_default_action_id: 28485346
   direct_resource_ids: 318961579
   size: 1024
 }
@@ -150,6 +154,7 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 28485346
+  initial_default_action_id: 28485346
   direct_resource_ids: 333425635
   size: 1024
 }
@@ -247,6 +252,7 @@ tables {
     id: 29607214
   }
   const_default_action_id: 29607214
+  initial_default_action_id: 29607214
   direct_resource_ids: 319194241
   size: 1024
 }
@@ -271,6 +277,7 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 28485346
+  initial_default_action_id: 28485346
   direct_resource_ids: 326370320
   size: 1024
 }
@@ -304,6 +311,7 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 28485346
+  initial_default_action_id: 28485346
   direct_resource_ids: 321989420
   size: 1024
 }
@@ -334,6 +342,7 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 28485346
+  initial_default_action_id: 28485346
   implementation_id: 291115404
   direct_resource_ids: 322798228
   size: 1024
@@ -359,6 +368,7 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 28485346
+  initial_default_action_id: 28485346
   direct_resource_ids: 319194968
   size: 1024
 }
@@ -383,6 +393,7 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 28485346
+  initial_default_action_id: 28485346
   direct_resource_ids: 334575698
   size: 1024
 }
@@ -402,6 +413,7 @@ tables {
     id: 28485346
   }
   const_default_action_id: 28485346
+  initial_default_action_id: 28485346
   size: 1024
 }
 tables {
@@ -431,6 +443,7 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 28485346
+  initial_default_action_id: 28485346
   direct_resource_ids: 318892680
   size: 1024
 }

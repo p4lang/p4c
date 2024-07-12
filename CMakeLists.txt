@@ -420,7 +420,7 @@ set(FETCHCONTENT_QUIET OFF)
 FetchContent_Declare(
   p4runtime
   GIT_REPOSITORY https://github.com/p4lang/p4runtime.git
-  GIT_TAG        62a9bd60599b87497a15feb6c7893b7ec8ba461f
+  GIT_TAG        ac790a2cbb01d991d580f7c26ab3fd5c3f6f5920
   GIT_PROGRESS TRUE
 )
 FetchContent_MakeAvailable(p4runtime)

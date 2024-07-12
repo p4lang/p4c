@@ -253,15 +253,19 @@ static std::optional<DefaultAction> getDefaultAction(const IR::P4Table *table, R
                                                      TypeMap *typeMap) {
     // not using getDefaultAction() here as I actually need the property IR node
     // to check if the default action is constant.
-    auto defaultActionProperty =
+    const auto *defaultActionProperty =
         table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
-    if (defaultActionProperty == nullptr) return std::nullopt;
+    if (defaultActionProperty == nullptr) {
+        ::error(ErrorType::ERR_EXPECTED, "Expected table %1% to have a default action", table);
+        return std::nullopt;
+    }
+
     if (!defaultActionProperty->value->is<IR::ExpressionValue>()) {
         ::error(ErrorType::ERR_EXPECTED, "Expected an action: %1%", defaultActionProperty);
         return std::nullopt;
     }
 
-    auto expr = defaultActionProperty->value->to<IR::ExpressionValue>()->expression;
+    const auto *expr = defaultActionProperty->value->to<IR::ExpressionValue>()->expression;
     cstring actionName;
     if (expr->is<IR::PathExpression>()) {
         auto decl = refMap->getDeclaration(expr->to<IR::PathExpression>()->path, true);
@@ -657,6 +661,9 @@ class P4RuntimeAnalyzer {
 
         auto tableSize = Helpers::getTableSize(tableDeclaration);
         auto defaultAction = getDefaultAction(tableDeclaration, refMap, typeMap);
+        if (!defaultAction.has_value()) {
+            return;
+        }
         auto matchFields =
             getMatchFields(tableDeclaration, refMap, typeMap, p4Info->mutable_type_info());
         auto actions = getActionRefs(tableDeclaration, refMap);
@@ -674,9 +681,12 @@ class P4RuntimeAnalyzer {
                     [this](cstring anno) { return archHandler->filterAnnotations(anno); });
         table->set_size(tableSize);
 
-        if (defaultAction && defaultAction->isConst) {
+        if (defaultAction) {
             auto id = symbols.getId(P4RuntimeSymbolType::P4RT_ACTION(), defaultAction->name);
-            table->set_const_default_action_id(id);
+            table->set_initial_default_action_id(id);
+            if (defaultAction->isConst) {
+                table->set_const_default_action_id(id);
+            }
         }
 
         for (const auto &action : actions) {

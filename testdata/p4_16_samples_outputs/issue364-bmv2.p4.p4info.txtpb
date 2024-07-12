@@ -14,6 +14,7 @@ tables {
     id: 32530319
   }
   const_default_action_id: 32530319
+  initial_default_action_id: 32530319
   direct_resource_ids: 330698586
   size: 1024
 }
