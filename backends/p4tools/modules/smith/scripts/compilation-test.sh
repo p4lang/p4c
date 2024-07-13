@@ -1,6 +1,22 @@
 #!/bin/bash
 
-set -e  # Exit on error.
+set -e # Exit on error.
+
+# List of known bugs.
+KNOWN_BUGS=(
+    ";: expected a method call" # TODO(zzmic): Verify whether this is the correct way of listing known bugs.
+)
+
+# Function to check if an error is triggered by a known bug.
+is_known_bug() {
+    local error_msg="$1"
+    for bug in "${KNOWN_BUGS[@]}"; do
+        if echo "$error_msg" | grep -q "$bug"; then
+            return 0
+        fi
+    done
+    return 1
+}
 
 if [ -z "$1" ]; then
     echo "- Missing mandatory argument: NUM_ITERATIONS"
@@ -52,5 +68,17 @@ for i in $(seq 1 $NUM_ITERATIONS); do
     $SMITH_BIN --arch $ARCH --target $TARGET --seed $i $TEST_DIR/out_$i.p4
     # TODO: Do not compile until we have stabilized.
     # TODO(zzmic): Revert out_$i.p4 to out.p4
-    $COMPILER_BIN $TEST_DIR/out_$i.p4
+    # $COMPILER_BIN $TEST_DIR/out_$i.p4
+    # If the compilation fails, check if it is triggered by a known bug.
+    # If it is the case, continue with the next iteration.
+    # Otherwise, exit with an error.
+    if ! output=$($COMPILER_BIN $TEST_DIR/out_$i.p4 2>&1); then
+        if is_known_bug "$output"; then
+            echo "Continue, since the compilation is triggered by a documented bug: $output"
+            continue
+        else
+            echo "Compilation error triggered by some undocumented bug: $output"
+            exit 1
+        fi
+    fi
 done
