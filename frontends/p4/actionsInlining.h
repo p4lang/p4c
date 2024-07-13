@@ -25,9 +25,9 @@ limitations under the License.
 
 namespace P4 {
 
-typedef SimpleCallInfo<IR::P4Action, IR::MethodCallStatement> ActionCallInfo;
-typedef SimpleInlineWorkList<IR::P4Action, IR::MethodCallStatement, ActionCallInfo> AInlineWorkList;
-typedef SimpleInlineList<IR::P4Action, ActionCallInfo, AInlineWorkList> ActionsInlineList;
+using ActionCallInfo = SimpleCallInfo<IR::P4Action, IR::MethodCallStatement>;
+using AInlineWorkList = SimpleInlineWorkList<ActionCallInfo>;
+using ActionsInlineList = SimpleInlineList<IR::P4Action, ActionCallInfo, AInlineWorkList>;
 
 class DiscoverActionsInlining : public Inspector, public ResolutionContext {
     ActionsInlineList *toInline;  // output
@@ -46,7 +46,7 @@ class DiscoverActionsInlining : public Inspector, public ResolutionContext {
 // General-purpose actions inliner.
 class ActionsInliner : public AbstractInliner<ActionsInlineList, AInlineWorkList> {
     std::unique_ptr<MinimalNameGenerator> nameGen;
-    std::map<const IR::MethodCallStatement *, const IR::P4Action *> *replMap;
+    AInlineWorkList::ReplacementMap *replMap;
 
  public:
     ActionsInliner() : replMap(nullptr) {}

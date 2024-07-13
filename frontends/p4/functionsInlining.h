@@ -25,10 +25,9 @@ limitations under the License.
 #include "ir/ir.h"
 
 namespace P4 {
-
-typedef SimpleCallInfo<IR::Node, IR::Statement> FunctionCallInfo;
-typedef SimpleInlineWorkList<IR::Node, IR::Statement, FunctionCallInfo> FunctionsInlineWorkList;
-typedef SimpleInlineList<IR::Node, FunctionCallInfo, FunctionsInlineWorkList> FunctionsInlineList;
+using FunctionCallInfo = SimpleCallInfo<IR::Node, IR::StatOrDecl>;
+using FunctionsInlineWorkList = SimpleInlineWorkList<FunctionCallInfo>;
+using FunctionsInlineList = SimpleInlineList<IR::Node, FunctionCallInfo, FunctionsInlineWorkList>;
 
 class DiscoverFunctionsInlining : public Inspector, public ResolutionContext {
     FunctionsInlineList *toInline;  // output
@@ -41,6 +40,7 @@ class DiscoverFunctionsInlining : public Inspector, public ResolutionContext {
         CHECK_NULL(typeMap);
         setName("DiscoverFunctionsInlining");
     }
+    Visitor::profile_t init_apply(const IR::Node *node) override;
     void postorder(const IR::MethodCallExpression *mce) override;
 };
 
@@ -52,9 +52,12 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
     std::unique_ptr<MinimalNameGenerator> nameGen;
 
     // All elements in the replacement map are actually IR::Function objects
-    typedef std::map<const IR::Statement *, const IR::Node *> ReplacementMap;
+    using ReplacementMap = FunctionsInlineWorkList::ReplacementMap;
     /// A stack of replacement maps
     std::vector<ReplacementMap *> replacementStack;
+    /// Pending replacements for subexpressions
+    std::unordered_map<const IR::MethodCallExpression *, const IR::Expression *>
+        pendingReplacements;
 
     /// Clones the body of a function without the return statement;
     /// returns the expression of a return statement.  This assumes
@@ -63,8 +66,9 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
     const IR::Expression *cloneBody(const IR::IndexedVector<IR::StatOrDecl> &src,
                                     IR::IndexedVector<IR::StatOrDecl> &dest);
     /// Returns a block statement that will replace the statement
-    const IR::Node *inlineBefore(const IR::Node *calleeNode, const IR::MethodCallExpression *call,
-                                 const IR::Statement *before);
+    const IR::Statement *inlineBefore(const IR::Node *calleeNode,
+                                      const IR::MethodCallExpression *call,
+                                      const IR::Statement *before);
     bool preCaller();
     const IR::Node *postCaller(const IR::Node *caller);
     const ReplacementMap *getReplacementMap() const;
@@ -79,7 +83,9 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
     const IR::Node *preorder(IR::P4Parser *parser) override;
     const IR::Node *preorder(IR::P4Action *action) override;
     const IR::Node *preorder(IR::MethodCallStatement *statement) override;
+    const IR::Node *preorder(IR::MethodCallExpression *expr) override;
     const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::Declaration_Variable *decl) override;
 };
 
 typedef InlineDriver<FunctionsInlineList, FunctionsInlineWorkList> InlineFunctionsDriver;

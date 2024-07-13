@@ -1,15 +1,6 @@
 #include <core.p4>
 #include <dpdk/pna.p4>
 
-bit<3> max(in bit<3> val, in bit<3> bound) {
-    @name("tmp") bit<3> tmp;
-    if (val < bound) {
-        tmp = val;
-    } else {
-        tmp = bound;
-    }
-    return tmp;
-}
 header ethernet_t {
     bit<16> eth_type;
 }
@@ -25,9 +16,6 @@ struct Headers {
 struct main_metadata_t {
 }
 
-bit<8> shouldr() {
-    return 8w0;
-}
 parser MainParserImpl(packet_in pkt, out Headers hdr, inout main_metadata_t user_meta, in pna_main_parser_input_metadata_t istd) {
     state start {
         transition reject;
@@ -40,23 +28,13 @@ control PreControlImpl(in Headers hdr, inout main_metadata_t user_meta, in pna_p
 }
 
 control MainControlImpl(inout Headers hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("MainControlImpl.tmp_0") bool tmp_0;
-    @name("MainControlImpl.tmp_1") bit<16> tmp_1;
+    @name("MainControlImpl.tmp_0") bool tmp;
+    @name("MainControlImpl.tmp_1") bit<16> tmp_0;
     @name("MainControlImpl.year") priceX year_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    bit<3> hsiVar;
     @name("MainControlImpl.revie") action revie(@name("orde") bit<128> orde, @name("priv") bit<128> priv) {
-        hsiVar = max((bit<3>)shouldr(), 3w3);
-        if (hsiVar == 3w0) {
-            hdr.heal[3w0] = year_0;
-        } else if (hsiVar == 3w1) {
-            hdr.heal[3w1] = year_0;
-        } else if (hsiVar == 3w2) {
-            hdr.heal[3w2] = year_0;
-        } else if (hsiVar == 3w3) {
-            hdr.heal[3w3] = year_0;
-        }
+        hdr.heal[3w0] = year_0;
     }
     @name("MainControlImpl.greatY") table greatY_0 {
         actions = {
@@ -66,19 +44,19 @@ control MainControlImpl(inout Headers hdr, inout main_metadata_t user_meta, in p
         default_action = NoAction_1();
     }
     @hidden action act() {
-        tmp_0 = true;
+        tmp = true;
     }
     @hidden action act_0() {
-        tmp_0 = false;
+        tmp = false;
     }
     @hidden action issue4796l47() {
-        tmp_1 = 16w48951;
+        tmp_0 = 16w48951;
     }
     @hidden action issue4796l47_0() {
-        tmp_1 = 16w0;
+        tmp_0 = 16w0;
     }
     @hidden action issue4796l47_1() {
-        hdr.eth_hdr.eth_type = tmp_1;
+        hdr.eth_hdr.eth_type = tmp_0;
     }
     @hidden table tbl_act {
         actions = {
@@ -116,7 +94,7 @@ control MainControlImpl(inout Headers hdr, inout main_metadata_t user_meta, in p
         } else {
             tbl_act_0.apply();
         }
-        if (tmp_0) {
+        if (tmp) {
             tbl_issue4796l47.apply();
         } else {
             tbl_issue4796l47_0.apply();
