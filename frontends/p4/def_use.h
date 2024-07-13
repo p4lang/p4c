@@ -41,8 +41,9 @@ struct loc_t {
     const loc_t *parent;
     bool operator==(const loc_t &a) const {
         if (node != a.node) return false;
-        if (parent && a.parent) return *parent == *a.parent;
-        return parent == a.parent;
+        if (parent == a.parent) return true;
+        if (!parent || !a.parent) return false;
+        return *parent == *a.parent;
     }
     std::size_t hash() const;
 };
