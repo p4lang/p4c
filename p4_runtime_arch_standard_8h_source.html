@@ -1222,7 +1222,7 @@ $(function(){initNavTree('p4_runtime_arch_standard_8h_source.html',''); initResi
 <div class="line"><a id="l01057" name="l01057"></a><span class="lineno"> 1057</span> </div>
 <div class="foldopen" id="foldopen01060" data-start="{" data-end="}">
 <div class="line"><a id="l01060" name="l01060"></a><span class="lineno"><a class="line" href="class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_p_s_a_p_n_a.html#a40da44bf75e33e6de2ec6a1d8421449c"> 1060</a></span>    <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_p_s_a_p_n_a.html#a40da44bf75e33e6de2ec6a1d8421449c">getSupportsTimeout</a>(<span class="keyword">const</span> IR::P4Table *table) {</div>
-<div class="line"><a id="l01061" name="l01061"></a><span class="lineno"> 1061</span>        <span class="keyword">auto</span> timeout = table-&gt;properties-&gt;getProperty(<span class="stringliteral">&quot;psa_idle_timeout&quot;</span>_cs);</div>
+<div class="line"><a id="l01061" name="l01061"></a><span class="lineno"> 1061</span>        <span class="keyword">auto</span> timeout = table-&gt;properties-&gt;getProperty(<span class="stringliteral">&quot;psa_idle_timeout&quot;</span>);</div>
 <div class="line"><a id="l01062" name="l01062"></a><span class="lineno"> 1062</span> </div>
 <div class="line"><a id="l01063" name="l01063"></a><span class="lineno"> 1063</span>        <span class="keywordflow">if</span> (timeout == <span class="keyword">nullptr</span>) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l01064" name="l01064"></a><span class="lineno"> 1064</span> </div>

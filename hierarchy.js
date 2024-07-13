@@ -379,7 +379,6 @@ var hierarchy =
     [ "ordered_map< const IR::Type_Specialized *, P4::TypeSpecialization * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, const IR::Declaration_Instance * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, const IR::Declaration_Variable * >", "classordered__map.html", null ],
-    [ "ordered_map< cstring, const IR::IDeclaration * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, const IR::Member * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, const IR::P4Action * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, const IR::P4Control * >", "classordered__map.html", null ],
@@ -396,9 +395,6 @@ var hierarchy =
     [ "ordered_map< cstring, const TestObject * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, cstring >", "classordered__map.html", null ],
     [ "ordered_map< cstring, enum InternalTableType >", "classordered__map.html", null ],
-    [ "ordered_map< cstring, IJson * >", "classordered__map.html", [
-      [ "Util::JsonObject", "class_util_1_1_json_object.html", null ]
-    ] ],
     [ "ordered_map< cstring, int >", "classordered__map.html", null ],
     [ "ordered_map< cstring, IR::ParameterList * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, ordered_map< uint, std::list< std::pair< std::vector< cstring >, MethodImpl > > > >", "classordered__map.html", null ],
@@ -1189,6 +1185,11 @@ var hierarchy =
       [ "Util::JsonArray", "class_util_1_1_json_array.html", null ],
       [ "safe_vector< T, Alloc >", "classsafe__vector.html", null ]
     ] ],
+    [ "string_map< V >", "classstring__map.html", null ],
+    [ "string_map< const IR::IDeclaration * >", "classstring__map.html", null ],
+    [ "string_map< IJson * >", "classstring__map.html", [
+      [ "Util::JsonObject", "class_util_1_1_json_object.html", null ]
+    ] ],
     [ "StringRef", "struct_string_ref.html", null ],
     [ "StringRef::Split", "class_string_ref_1_1_split.html", null ],
     [ "SymbolicVarComp", "struct_symbolic_var_comp.html", null ],
@@ -1325,6 +1326,7 @@ var hierarchy =
     [ "Util::Hasher< ClosedRange< Unit, Order > >", "struct_util_1_1_hasher_3_01_closed_range_3_01_unit_00_01_order_01_4_01_4.html", null ],
     [ "Util::Hasher< cstring >", "struct_util_1_1_hasher_3_01cstring_01_4.html", null ],
     [ "Util::Hasher< HalfOpenRange< Unit, Order > >", "struct_util_1_1_hasher_3_01_half_open_range_3_01_unit_00_01_order_01_4_01_4.html", null ],
+    [ "Util::Hasher< IR::ID >", "struct_util_1_1_hasher_3_01_i_r_1_1_i_d_01_4.html", null ],
     [ "Util::Hasher< P4::ProgramPoint >", "struct_util_1_1_hasher_3_01_p4_1_1_program_point_01_4.html", null ],
     [ "Util::Hasher< std::pair< T1, T2 > >", "struct_util_1_1_hasher_3_01std_1_1pair_3_01_t1_00_01_t2_01_4_01_4.html", null ],
     [ "Util::Hasher< std::shared_ptr< T > >", "struct_util_1_1_hasher_3_01std_1_1shared__ptr_3_01_t_01_4_01_4.html", null ],

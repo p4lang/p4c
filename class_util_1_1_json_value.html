@@ -234,7 +234,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const std::string &amp;s) const</td></tr>
 <tr class="separator:a6b36ce257cb78e678b4f536939fe1ec2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add385fdc6219b4398b63a5b6c31ae7a9" id="r_add385fdc6219b4398b63a5b6c31ae7a9"><td class="memTemplParams" colspan="2"><a id="add385fdc6219b4398b63a5b6c31ae7a9" name="add385fdc6219b4398b63a5b6c31ae7a9"></a>
-template&lt;typename T , typename std::enable_if&lt; std::is_integral&lt; T &gt;::value, int &gt;::type  = 0&gt; </td></tr>
+template&lt;typename T , typename std::enable_if_t&lt; std::is_integral_v&lt; T &gt;, int &gt;  = 0&gt; </td></tr>
 <tr class="memitem:add385fdc6219b4398b63a5b6c31ae7a9"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>operator==</b> (const T &amp;v) const</td></tr>
 <tr class="separator:add385fdc6219b4398b63a5b6c31ae7a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf6ff9b7bbe3301e3e4b931cca81a973" id="r_acf6ff9b7bbe3301e3e4b931cca81a973"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acf6ff9b7bbe3301e3e4b931cca81a973">serialize</a> (std::ostream &amp;out) const override</td></tr>

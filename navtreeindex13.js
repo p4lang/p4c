@@ -1,11 +1,5 @@
 var NAVTREEINDEX13 =
 {
-"class_p4_tools_1_1_z3_solver.html#aba6970917881f1cb48fe46b6be0e2f16":[31,0,15,34,12],
-"class_p4_tools_1_1_z3_solver.html#abf5b9c62f7b10b38e50ded797d0d7ff5":[30,0,5,32,15],
-"class_p4_tools_1_1_z3_solver.html#abf5b9c62f7b10b38e50ded797d0d7ff5":[31,0,15,34,15],
-"class_p4_tools_1_1_z3_solver.html#ac9d82af9ed27f3aa69c390d5e19c197e":[30,0,5,32,14],
-"class_p4_tools_1_1_z3_solver.html#ac9d82af9ed27f3aa69c390d5e19c197e":[31,0,15,34,14],
-"class_p4_tools_1_1_z3_solver.html#ad4b2712ee57ae4abc1af280e4455fa58":[30,0,5,32,10],
 "class_p4_tools_1_1_z3_solver.html#ad4b2712ee57ae4abc1af280e4455fa58":[31,0,15,34,10],
 "class_p4_tools_1_1_z3_solver.html#ae94c8eec8139637de9d41d01acb45eeb":[30,0,5,32,4],
 "class_p4_tools_1_1_z3_solver.html#ae94c8eec8139637de9d41d01acb45eeb":[31,0,15,34,4],
@@ -119,8 +113,8 @@ var NAVTREEINDEX13 =
 "class_split_flow_visit.html":[31,0,133],
 "class_split_flow_visit__base.html":[31,0,134],
 "class_split_flow_visit_vector.html":[31,0,135],
-"class_string_ref_1_1_split.html":[31,0,136,0],
-"class_sym_bit_matrix.html":[31,0,137],
+"class_string_ref_1_1_split.html":[31,0,137,0],
+"class_sym_bit_matrix.html":[31,0,138],
 "class_t_c_1_1_action_translation_visitor_p_n_a.html":[30,0,7,2],
 "class_t_c_1_1_action_translation_visitor_p_n_a.html":[31,0,19,2],
 "class_t_c_1_1_backend.html":[30,0,7,4],
@@ -249,5 +243,11 @@ var NAVTREEINDEX13 =
 "class_test_1_1_s_t_f_test.html":[31,0,20,15],
 "class_test_1_1_small_step_test.html":[31,0,20,14],
 "class_test_1_1_symbolic_converter.html":[31,0,20,16],
-"class_test_1_1_taint_test.html":[31,0,20,17]
+"class_test_1_1_taint_test.html":[31,0,20,17],
+"class_test_1_1_z3_solver_sat_tests.html":[31,0,20,19],
+"class_test_1_1_z3_solver_satisfiability_checks.html":[31,0,20,18],
+"class_test_1_1_z3_solver_satisfiability_checks.html#a233792c5f7d959ac110ca67216a37382":[31,0,20,18,0],
+"class_test_1_1_z3_solver_test.html":[31,0,20,20],
+"class_test_1_1_z3_solver_tests.html":[31,0,20,21],
+"class_test_1_1_z3_test_1_1_z3_solver_add.html":[31,0,20,1,0]
 };

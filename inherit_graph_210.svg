@@ -11,12 +11,12 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="struct_p4_1_1_control_plane_a_p_i_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_counter_ebb50c582c5dd33c5846215ba73dfabae.html" target="_top" xlink:title="CounterlikeTraits&lt;&gt; specialization for CounterExtern for PNA">
+<g id="a_Node000000"><a xlink:href="struct_p4_1_1_control_plane_a_p_i_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_counter_e6437b271dee81710718c4ad614e8af47.html" target="_top" xlink:title="CounterlikeTraits&lt;&gt; specialization for CounterExtern for PSA">
 <polygon fill="white" stroke="#666666" points="148,-52 0,-52 0,0 148,0 148,-52"/>
 <text text-anchor="start" x="8" y="-40" font-family="Helvetica,sans-Serif" font-size="10.00">P4::ControlPlaneAPI</text>
 <text text-anchor="start" x="8" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">::Helpers::CounterlikeTraits</text>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; Standard::CounterExtern</text>
-<text text-anchor="middle" x="74" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; Standard::Arch::PNA &gt; &gt;</text>
+<text text-anchor="middle" x="74" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; Standard::Arch::PSA &gt; &gt;</text>
 </a>
 </g>
 </g>

@@ -1,8 +1,5 @@
 var NAVTREEINDEX17 =
 {
-"namespace_p4_tools_1_1_control_plane_state.html":[30,0,5,0],
-"namespace_p4_tools_1_1_control_plane_state.html#a1664e5798444cc3cbc80301a2a1d1a60":[30,0,5,0,3],
-"namespace_p4_tools_1_1_control_plane_state.html#a20856e5cff4ffa57852a763df5213113":[30,0,5,0,1],
 "namespace_p4_tools_1_1_control_plane_state.html#a4b62c4f0ba104a9b408607a052f115c3":[30,0,5,0,4],
 "namespace_p4_tools_1_1_control_plane_state.html#a84d620b3055ab8625fe7b9b2859d1c8d":[30,0,5,0,0],
 "namespace_p4_tools_1_1_control_plane_state.html#a91178d707f61532a7c0b05fa126e9806":[30,0,5,0,5],
@@ -249,5 +246,8 @@ var NAVTREEINDEX17 =
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_u_b_p_f_arch_handler_builder.html":[30,0,4,0,1,36],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_u_b_p_f_arch_handler_builder.html":[31,0,11,1,1,36],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_u_b_p_f_arch_handler_builder.html#a37738c93f3dd2ceb168438126308ac5b":[30,0,4,0,1,36,0],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_u_b_p_f_arch_handler_builder.html#a37738c93f3dd2ceb168438126308ac5b":[31,0,11,1,1,36,0]
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_u_b_p_f_arch_handler_builder.html#a37738c93f3dd2ceb168438126308ac5b":[31,0,11,1,1,36,0],
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_v1_model_arch_handler_builder.html":[30,0,4,0,1,37],
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_v1_model_arch_handler_builder.html":[31,0,11,1,1,37],
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_v1_model_arch_handler_builder.html#a0516186a81eff688f411d2cf46c8175e":[30,0,4,0,1,37,0]
 };

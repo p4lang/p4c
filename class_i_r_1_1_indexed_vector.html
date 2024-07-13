@@ -164,9 +164,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a851f5c70961f0ddee90836d58120ee6a" id="r_a851f5c70961f0ddee90836d58120ee6a"><td class="memItemLeft" align="right" valign="top"><a id="a851f5c70961f0ddee90836d58120ee6a" name="a851f5c70961f0ddee90836d58120ee6a"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>IndexedVector</b> (const <a class="el" href="classsafe__vector.html">safe_vector</a>&lt; const T * &gt; &amp;a)</td></tr>
 <tr class="separator:a851f5c70961f0ddee90836d58120ee6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afd3d54a733f5a3949e3bc4666dcb93a7" id="r_afd3d54a733f5a3949e3bc4666dcb93a7"><td class="memItemLeft" align="right" valign="top"><a id="afd3d54a733f5a3949e3bc4666dcb93a7" name="afd3d54a733f5a3949e3bc4666dcb93a7"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>IndexedVector</b> (const std::initializer_list&lt; const T * &gt; &amp;a)</td></tr>
-<tr class="separator:afd3d54a733f5a3949e3bc4666dcb93a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a1eb2c37c04db9c5887839dc3d99df1" id="r_a8a1eb2c37c04db9c5887839dc3d99df1"><td class="memItemLeft" align="right" valign="top"><a id="a8a1eb2c37c04db9c5887839dc3d99df1" name="a8a1eb2c37c04db9c5887839dc3d99df1"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>IndexedVector</b> (const T *a)</td></tr>
 <tr class="separator:a8a1eb2c37c04db9c5887839dc3d99df1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -179,6 +176,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a83a026a61513969db4e9bccfbf7a7dfb" id="r_a83a026a61513969db4e9bccfbf7a7dfb"><td class="memItemLeft" align="right" valign="top"><a id="a83a026a61513969db4e9bccfbf7a7dfb" name="a83a026a61513969db4e9bccfbf7a7dfb"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>IndexedVector</b> (<a class="el" href="class_j_s_o_n_loader.html">JSONLoader</a> &amp;json)</td></tr>
 <tr class="separator:a83a026a61513969db4e9bccfbf7a7dfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0b628c482ead504df0a3702f396996e" id="r_aa0b628c482ead504df0a3702f396996e"><td class="memItemLeft" align="right" valign="top"><a id="aa0b628c482ead504df0a3702f396996e" name="aa0b628c482ead504df0a3702f396996e"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>IndexedVector</b> (std::initializer_list&lt; const T * &gt; a)</td></tr>
+<tr class="separator:aa0b628c482ead504df0a3702f396996e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acfabc939e390de8cda8fb98dc8ecfb42" id="r_acfabc939e390de8cda8fb98dc8ecfb42"><td class="memTemplParams" colspan="2"><a id="acfabc939e390de8cda8fb98dc8ecfb42" name="acfabc939e390de8cda8fb98dc8ecfb42"></a>
 template&lt;typename Container &gt; </td></tr>
 <tr class="memitem:acfabc939e390de8cda8fb98dc8ecfb42"><td class="memTemplItemLeft" align="right" valign="top">iterator&#160;</td><td class="memTemplItemRight" valign="bottom"><b>append</b> (const Container &amp;toAppend)</td></tr>
@@ -203,6 +203,13 @@ const <a class="el" href="class_i_r_1_1_i_declaration.html">IDeclaration</a> *&#
 template&lt;class U &gt; </td></tr>
 <tr class="memitem:a2b8916fd1458e69be0e130a76d8af44a"><td class="memTemplItemLeft" align="right" valign="top">const U *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>getDeclaration</b> (<a class="el" href="classcstring.html">cstring</a> name) const</td></tr>
 <tr class="separator:a2b8916fd1458e69be0e130a76d8af44a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6ffdae58bb4eff9121dcb5ee505242c" id="r_ad6ffdae58bb4eff9121dcb5ee505242c"><td class="memItemLeft" align="right" valign="top"><a id="ad6ffdae58bb4eff9121dcb5ee505242c" name="ad6ffdae58bb4eff9121dcb5ee505242c"></a>
+const <a class="el" href="class_i_r_1_1_i_declaration.html">IDeclaration</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getDeclaration</b> (std::string_view name) const</td></tr>
+<tr class="separator:ad6ffdae58bb4eff9121dcb5ee505242c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a9a12cd90b74ec4bfd1bfda8f3bcf05" id="r_a7a9a12cd90b74ec4bfd1bfda8f3bcf05"><td class="memTemplParams" colspan="2"><a id="a7a9a12cd90b74ec4bfd1bfda8f3bcf05" name="a7a9a12cd90b74ec4bfd1bfda8f3bcf05"></a>
+template&lt;class U &gt; </td></tr>
+<tr class="memitem:a7a9a12cd90b74ec4bfd1bfda8f3bcf05"><td class="memTemplItemLeft" align="right" valign="top">const U *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>getDeclaration</b> (std::string_view name) const</td></tr>
+<tr class="separator:a7a9a12cd90b74ec4bfd1bfda8f3bcf05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae968a49856f454e715d2dfd26bebb43e" id="r_ae968a49856f454e715d2dfd26bebb43e"><td class="memItemLeft" align="right" valign="top"><a id="ae968a49856f454e715d2dfd26bebb43e" name="ae968a49856f454e715d2dfd26bebb43e"></a>
 <a class="el" href="class_util_1_1_enumerator.html">Util::Enumerator</a>&lt; const <a class="el" href="class_i_r_1_1_i_declaration.html">IDeclaration</a> * &gt; *&#160;</td><td class="memItemRight" valign="bottom"><b>getDeclarations</b> () const</td></tr>
 <tr class="separator:ae968a49856f454e715d2dfd26bebb43e"><td class="memSeparator" colspan="2">&#160;</td></tr>

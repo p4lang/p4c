@@ -191,7 +191,7 @@ $(function(){initNavTree('shared_action_selector_check_8h_source.html',''); init
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    }</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::P4Table *table)<span class="keyword"> override </span>{</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keyword">auto</span> implementation = table-&gt;properties-&gt;getProperty(<span class="stringliteral">&quot;implementation&quot;</span>_cs);</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keyword">auto</span> implementation = table-&gt;properties-&gt;getProperty(<span class="stringliteral">&quot;implementation&quot;</span>);</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        <span class="keywordflow">if</span> (implementation == <span class="keyword">nullptr</span>) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordflow">if</span> (!implementation-&gt;value-&gt;is&lt;IR::ExpressionValue&gt;()) {</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>            ::error(ErrorType::ERR_EXPECTED, <span class="stringliteral">&quot;%1%: expected expression for property&quot;</span>,</div>
