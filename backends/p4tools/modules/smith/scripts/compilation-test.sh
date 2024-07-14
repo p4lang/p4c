@@ -5,6 +5,7 @@ set -e # Exit on error.
 # List of known bugs.
 KNOWN_BUGS=(
     ";: expected a method call"
+    "error: Arch '<null>' not supported by P4Runtime serializer"
 )
 
 # Function to check if an error is triggered by a known bug.
