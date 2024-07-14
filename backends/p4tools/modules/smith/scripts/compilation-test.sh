@@ -4,7 +4,7 @@ set -e # Exit on error.
 
 # List of known bugs.
 KNOWN_BUGS=(
-    ";: expected a method call" # TODO(zzmic): Verify whether this is the correct way of listing known bugs.
+    ";: expected a method call"
 )
 
 # Function to check if an error is triggered by a known bug.
@@ -74,11 +74,13 @@ for i in $(seq 1 $NUM_ITERATIONS); do
     # Otherwise, exit with an error.
     if ! output=$($COMPILER_BIN $TEST_DIR/out_$i.p4 2>&1); then
         if is_known_bug "$output"; then
-            echo "Continue, since the compilation is triggered by a documented bug: $output"
+            echo "Continue, as the compilation error is triggered by a documented compiler bug: $output"
             continue
         else
-            echo "Compilation error triggered by some undocumented bug: $output"
+            echo "Abort, as the compilation error is triggered by an undocumented compiler bug: $output"
             exit 1
         fi
+    else
+        echo "$output"
     fi
 done
