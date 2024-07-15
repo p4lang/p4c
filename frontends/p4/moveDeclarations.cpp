@@ -79,7 +79,7 @@ const IR::Node *MoveDeclarations::postorder(IR::Declaration_Variable *decl) {
         auto varRef = new IR::PathExpression(decl->name);
         auto keep = new IR::AssignmentStatement(decl->srcInfo, varRef, decl->initializer);
         return keep;
-    } else {
+    } else if (!parent->is<IR::ForInStatement>()) {  // never move loop index decl out of for .. in
         LOG1("Moving " << decl);
         addMove(decl);
         return nullptr;
