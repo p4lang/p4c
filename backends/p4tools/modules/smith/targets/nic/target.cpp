@@ -48,16 +48,13 @@ IR::IndexedVector<IR::StructField> generatePnaPreOutputMetadataFields() {
     IR::IndexedVector<IR::StructField> retFields;
 
     retFields.push_back(new IR::StructField("decrypt", IR::Type_Boolean::get()));
+
     // `typedef bit<32> SecurityAssocIdUint_t;` && type SecurityAssocIdUint_t SecurityAssocId_t;
     // => `typedef bit<32> SecurityAssocId_t;`
     // TODO(zzmic): Figure out a proper casting mechanism
-    /*
-     *   ---- Actual error:
-        /home/zzmic/p4c/compilation-test-support-build/p4include/dpdk/pna.p4(91): Cannot cast implicitly type 'bit<32>' to type 'SecurityAssocId_t'
-        type SecurityAssocIdUint_t SecurityAssocId_t;
-                                   ^^^^^^^^^^^^^^^^^
-     */
-    retFields.push_back(new IR::StructField("said", IR::Type_Bits::get(32, false)));
+    // retFields.push_back(new IR::StructField("said", IR::Type_Bits::get(32, false)));
+    retFields.push_back(new IR::StructField("said", new IR::Type_Name("SecurityAssocId_t")));
+
     retFields.push_back(new IR::StructField("decrypt_start_offset", IR::Type_Bits::get(16, false)));
 
     return retFields;
