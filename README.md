@@ -263,9 +263,8 @@ use them, but YMMV.
 
 - Python 3 for scripting and running tests
 
-- Optional: Documentation generation (enabled when configuring with
-  --enable-doxygen-doc) requires Doxygen (1.8.10 or higher) and Graphviz
-  (2.38.0 or higher).
+- Optional: Documentation generation requires Doxygen (1.8.10 or
+  higher) and Graphviz (2.38.0 or higher).
 
 Backends may have additional dependencies. The dependencies for the backends
 included with `P4C` are documented here:
@@ -290,7 +289,7 @@ pip3 install --user -r requirements.txt
 
 **Tools**
 ```bash
-sudo apt-get install -y doxygen graphviz texlive-full
+sudo apt-get install -y doxygen graphviz
 ```
 **Theme** 
 ```bash
@@ -330,7 +329,7 @@ sudo pip3 install -r requirements.txt
 
 **Tools**
 ```bash
-sudo dnf install -y doxygen graphviz texlive-scheme-full
+sudo dnf install -y doxygen graphviz
 ```
 **Theme**
 ```bash
@@ -434,10 +433,16 @@ etags` generate tags for vi and Emacs respectively.  (Make sure that you are
 using the correct version of ctags; there are several competing programs with
 the same name in existence.)
 
-To enable building code documentation, please run `cmake
-.. -DENABLE_DOCS=ON`.  This enables the `make docs` rule to generate
-documentation. The HTML output is available in
-`build/doxygen-out/html/index.html`.
+To build code documentation, after installing Doxygen and the other
+required packages:
+
+```bash
+# Starting from root directory of your copy of p4c repo
+cd docs/doxygen
+doxygen doxygen.cfg
+```
+The HTML output is available in
+`docs/doxygen/build/html/index.html`.
 
 ### Git setup
 
