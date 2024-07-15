@@ -13,6 +13,7 @@ is_known_bug() {
     local error_msg="$1"
     for bug in "${KNOWN_BUGS[@]}"; do
         if echo "$error_msg" | grep -q "$bug"; then
+            echo "Bug encountered: $bug"
             return 0
         fi
     done
