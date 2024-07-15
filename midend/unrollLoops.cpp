@@ -26,6 +26,8 @@ static IR::AssignmentStatement *setFlag(cstring name, bool val) {
 
 namespace P4 {
 
+using namespace literals;
+
 /** transform to remove break and continue statements from the body of a loop
  * This pass is designed to run on just the body of a loop, generally returning a
  * new BlockStatement with the break and continue statements removed and replaced
@@ -257,7 +259,9 @@ const IR::Statement *UnrollLoops::doUnroll(const loop_bounds_t &bounds, const IR
 
 const IR::Statement *UnrollLoops::preorder(IR::ForStatement *fstmt) {
     loop_bounds_t bounds;
-    if (findLoopBounds(fstmt, bounds)) {
+    bool canUnroll = findLoopBounds(fstmt, bounds);
+    bool shouldUnroll = policy(fstmt, canUnroll, bounds);
+    if (canUnroll && shouldUnroll) {
         LOG3("Unrolling loop" << Log::indent << Log::endl << fstmt << Log::unindent);
         auto *rv = new IR::BlockStatement;
         for (auto *i : fstmt->init) rv->append(i);
@@ -270,7 +274,9 @@ const IR::Statement *UnrollLoops::preorder(IR::ForStatement *fstmt) {
 
 const IR::Statement *UnrollLoops::preorder(IR::ForInStatement *fstmt) {
     loop_bounds_t bounds;
-    if (findLoopBounds(fstmt, bounds)) {
+    bool canUnroll = findLoopBounds(fstmt, bounds);
+    bool shouldUnroll = policy(fstmt, canUnroll, bounds);
+    if (canUnroll && shouldUnroll) {
         LOG3("Unrolling loop" << Log::indent << Log::endl << fstmt << Log::unindent);
         auto rv = doUnroll(bounds, fstmt->body);
         LOG4("Unrolled loop" << Log::indent << Log::endl << rv << Log::unindent);
@@ -278,4 +284,18 @@ const IR::Statement *UnrollLoops::preorder(IR::ForInStatement *fstmt) {
     }
     return fstmt;
 }
+
+UnrollLoops::Policy UnrollLoops::default_unroll(true);
+UnrollLoops::Policy UnrollLoops::default_nounroll(false);
+
+bool UnrollLoops::Policy::operator()(const IR::LoopStatement *loop, bool canUnroll,
+                                     const loop_bounds_t &) {
+    if (loop->getAnnotation("unroll"_cs)) {
+        if (!canUnroll) warning(ErrorType::WARN_UNSUPPORTED, "Can't unroll loop: %1%", loop);
+        return true;
+    }
+    if (loop->getAnnotation("nounroll"_cs)) return false;
+    return unroll_default;
+}
+
 }  // namespace P4
