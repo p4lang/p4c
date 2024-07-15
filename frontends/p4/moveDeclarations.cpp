@@ -84,6 +84,7 @@ const IR::Node *MoveDeclarations::postorder(IR::Declaration_Variable *decl) {
         addMove(decl);
         return nullptr;
     }
+    return decl;
 }
 
 const IR::Node *MoveDeclarations::postorder(IR::Declaration_Constant *decl) {
