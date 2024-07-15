@@ -76,10 +76,10 @@ for i in $(seq 1 $NUM_ITERATIONS); do
     # Otherwise, exit with an error.
     if ! output=$($COMPILER_BIN $TEST_DIR/out_$i.p4 2>&1); then
         if is_known_bug "$output"; then
-            echo "Continue, as the compilation error is triggered by a documented compiler bug: $output"
+            echo "Continue, as the compilation error is triggered by a documented bug: $output"
             continue
         else
-            echo "Abort, as the compilation error is triggered by an undocumented compiler bug: $output"
+            echo "Abort, as the compilation error is triggered by an undocumented bug: $output"
             exit 1
         fi
     else
