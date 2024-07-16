@@ -28,7 +28,7 @@ namespace P4 {
 
 /// Creates a string that describes the values of current type variables
 class Explain : public Inspector {
-    std::set<const IR::ITypeVar *> explained;
+    absl::flat_hash_set<const IR::ITypeVar *, Util::Hash> explained;
     const TypeVariableSubstitution *subst;
 
  public:
@@ -39,10 +39,10 @@ class Explain : public Inspector {
         return Inspector::init_apply(node);
     }
     void postorder(const IR::Type_Var *tv) override {
-        if (explained.find(tv) != explained.end())
+        auto [_, inserted] = explained.emplace(tv);
+        if (!inserted)
             // Do not repeat explanations.
             return;
-        explained.emplace(tv);
         auto val = subst->lookup(tv);
         if (!val) return;
         explanation += "Where '" + tv->toString() + "' is bound to '" + val->toString() + "'\n";
@@ -191,7 +191,7 @@ class TypeConstraints final : public IHasDbPrint {
      * This example should not typecheck: because T cannot be constrained in the invocation of f.
      * While typechecking the f(data) call, T is not a type variable that can be unified.
      */
-    std::set<const IR::ITypeVar *> unifiableTypeVariables;
+    absl::flat_hash_set<const IR::ITypeVar *, Util::Hash> unifiableTypeVariables;
     std::vector<const TypeConstraint *> constraints;
     TypeUnification *unification;
     const TypeVariableSubstitution *definedVariables;
