@@ -1,5 +1,5 @@
-<map id="P4::SimpleInlineWorkList&lt; Callable, CallNode, CallInfo &gt;" name="P4::SimpleInlineWorkList&lt; Callable, CallNode, CallInfo &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,236,119"/>
-<area shape="rect" id="Node000002" href="$class_i_has_db_print.html" title=" " alt="" coords="71,5,170,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,44,123,79,118,79,118,44"/>
+<map id="P4::SimpleInlineWorkList&lt; CallInfo &gt;" name="P4::SimpleInlineWorkList&lt; CallInfo &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,188,119"/>
+<area shape="rect" id="Node000002" href="$class_i_has_db_print.html" title=" " alt="" coords="47,5,146,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,44,99,79,94,79,94,44"/>
 </map>

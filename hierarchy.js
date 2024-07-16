@@ -237,8 +237,8 @@ var hierarchy =
       [ "P4::ProgramPoint", "class_p4_1_1_program_point.html", null ],
       [ "P4::ProgramPoints", "class_p4_1_1_program_points.html", null ],
       [ "P4::SetOfLocations", "class_p4_1_1_set_of_locations.html", null ],
-      [ "P4::SimpleCallInfo< Callable, CallNode >", "class_p4_1_1_simple_call_info.html", null ],
-      [ "P4::SimpleInlineWorkList< Callable, CallNode, CallInfo >", "class_p4_1_1_simple_inline_work_list.html", null ],
+      [ "P4::SimpleCallInfo< CallableT, CallNodeT, CallExpressionT >", "class_p4_1_1_simple_call_info.html", null ],
+      [ "P4::SimpleInlineWorkList< CallInfo >", "class_p4_1_1_simple_inline_work_list.html", null ],
       [ "P4::StorageLocation", "class_p4_1_1_storage_location.html", [
         [ "P4::BaseLocation", "class_p4_1_1_base_location.html", null ],
         [ "P4::IndexedLocation", "class_p4_1_1_indexed_location.html", [
