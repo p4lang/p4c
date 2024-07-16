@@ -16,15 +16,11 @@ limitations under the License.
 
 #include "typeChecker.h"
 
-#include <boost/format.hpp>
-
-#include "absl/container/flat_hash_map.h"
 #include "constantTypeSubstitution.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "lib/cstring.h"
-#include "lib/hash.h"
 #include "lib/log.h"
 #include "typeConstraints.h"
 #include "typeSubstitution.h"
