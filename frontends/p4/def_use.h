@@ -547,6 +547,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     bool preorder(const IR::ForStatement *statement) override;
     bool preorder(const IR::ForInStatement *statement) override;
     bool preorder(const IR::BlockStatement *statement) override;
+    bool preorder(const IR::SwitchCase *c) override;
     bool preorder(const IR::SwitchStatement *statement) override;
     bool preorder(const IR::EmptyStatement *statement) override;
     bool preorder(const IR::MethodCallStatement *statement) override;
