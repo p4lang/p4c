@@ -241,7 +241,8 @@ IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
         expr = constructBooleanExpr();
     } else if (const auto *tn = tp->to<IR::Type_Name>()) {
         expr = constructStructExpr(tn);
-    } else {
+    }
+    else {
         BUG("Expression: Type %s not yet supported", tp->node_type_name());
     }
     // reset the expression depth, just to be safe...
@@ -1026,6 +1027,8 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
     cstring tnName = tn->path->name.name;
 
     if (const auto *td = P4Scope::getTypeByName(tnName)) {
+        std::cout << "td->node_type_name() in func `genStructListExpr`: " << td->node_type_name() << "\n";
+
         if (const auto *tnType = td->to<IR::Type_StructLike>()) {
             for (const auto *sf : tnType->fields) {
                 IR::Expression *expr = nullptr;
@@ -1050,16 +1053,28 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
                     components.push_back(expr);
                 }
             }
-        } else {
+        }
+
+        // TODO(zzmic): Figure out how to resolve the infinite loop that is probably triggered by `ExpressionGenerator::constructStructExpr(tnType)`
+        // else if (const auto *tnType = td->to<IR::Type_Name>()) {
+        //     std::cout << "... in else-if ..." << "\n";
+        //     IR::Expression *expr = nullptr;
+        //     expr = ExpressionGenerator::constructStructExpr(tnType);
+        //     components.push_back(expr);
+        //     std::cout << "... finishing else-if ..." << "\n";
+        //     return new IR::ListExpression(components);
+        // }
+
+        else {
             BUG("genStructListExpr: Requested Type %s not a struct-like type", tnName);
         }
     }
 
-    else if (tnName == "SecurityAssocId_t") {
-        const auto *expr = genExpression(ExpressionGenerator::genBitType(32, false));
-        std::cout << "SecurityAssocId_t: " << expr << "\n";
-        components.push_back(expr);
-    }
+    // else if (tnName == "SecurityAssocId_t") {
+    //     const auto *expr = genExpression(ExpressionGenerator::genBitType(32, false));
+    //     std::cout << "SecurityAssocId_t: " << expr << "\n";
+    //     components.push_back(expr);
+    // }
 
     else {
         BUG("genStructListExpr: Requested Type %s not found", tnName);
