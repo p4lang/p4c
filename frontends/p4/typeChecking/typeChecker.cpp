@@ -192,9 +192,9 @@ TypeVariableSubstitution *TypeInference::unifyBase(
     return tvs;
 }
 
-const IR::Type *TypeInference::canonicalizeFields(
-    const IR::Type_StructLike *type,
-    std::function<const IR::Type *(const IR::IndexedVector<IR::StructField> *)> constructor) {
+template <class Ctor>
+const IR::Type *TypeInference::canonicalizeFields(const IR::Type_StructLike *type,
+                                                  Ctor constructor) {
     bool changes = false;
     auto fields = new IR::IndexedVector<IR::StructField>();
     for (auto field : type->fields) {
