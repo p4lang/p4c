@@ -1833,53 +1833,6 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
     return actionCall;
 }
 
-bool hasVarbitsOrUnions(const TypeMap *typeMap, const IR::Type *type) {
-    // called for a canonical type
-    if (type->is<IR::Type_HeaderUnion>() || type->is<IR::Type_Varbits>()) {
-        return true;
-    } else if (auto ht = type->to<IR::Type_StructLike>()) {
-        const IR::StructField *varbit = nullptr;
-        for (auto f : ht->fields) {
-            auto ftype = typeMap->getType(f);
-            if (ftype == nullptr) continue;
-            if (ftype->is<IR::Type_Varbits>()) {
-                if (varbit == nullptr) {
-                    varbit = f;
-                } else {
-                    typeError("%1% and %2%: multiple varbit fields in a header", varbit, f);
-                    return type;
-                }
-            }
-        }
-        return varbit != nullptr;
-    } else if (auto at = type->to<IR::Type_Stack>()) {
-        return hasVarbitsOrUnions(typeMap, at->elementType);
-    } else if (auto tpl = type->to<IR::Type_Tuple>()) {
-        for (auto f : tpl->components) {
-            if (hasVarbitsOrUnions(typeMap, f)) return true;
-        }
-    }
-    return false;
-}
-
-bool TypeInference::onlyBitsOrBitStructs(const IR::Type *type) const {
-    // called for a canonical type
-    if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>() || type->is<IR::Type_SerEnum>()) {
-        return true;
-    } else if (auto ht = type->to<IR::Type_Struct>()) {
-        for (auto f : ht->fields) {
-            auto ftype = typeMap->getType(f);
-            BUG_CHECK((ftype != nullptr),
-                      "onlyBitsOrBitStructs check could not find type "
-                      "for %1%",
-                      f);
-            if (!onlyBitsOrBitStructs(ftype)) return false;
-        }
-        return true;
-    }
-    return false;
-}
-
 const IR::Node *TypeInference::postorder(IR::MethodCallStatement *mcs) {
     // Remove mcs if child methodCall resolves to a compile-time constant.
     return !mcs->methodCall ? nullptr : mcs;
