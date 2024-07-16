@@ -1,36 +1,102 @@
-pins_fabric.p4(645): [--Wwarn=shadow] warning: 'ttl' shadows 'control ttl'
-    bit<8> ttl = 0;
-    ^^^^^^^^^^^^^^
-pins_fabric.p4(558)
-control ttl(inout headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-        ^^^
-pins_fabric.p4(314): [--Wwarn=deprecated] warning: set_nexthop: Using deprecated feature set_nexthop. Use set_ip_nexthop instead.
+pins_fabric.p4(615): [--Wwarn=deprecated] warning: set_nexthop: Using deprecated feature set_nexthop. Use set_ip_nexthop instead.
             @proto_id(1) set_nexthop;
                          ^^^^^^^^^^^
-pins_fabric.p4(306)
+pins_fabric.p4(603)
     @id(0x01000003) @deprecated("Use set_ip_nexthop instead.") action set_nexthop(@id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) router_interface_id_t router_interface_id, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) ipv6_addr_t neighbor_id) {
                                                                       ^^^^^^^^^^^
-pins_fabric.p4(651): [--Wwarn=unused] warning: 'qos_queue' is unused
-    @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) action acl_copy(@sai_action_param(QOS_QUEUE) @id(1) qos_queue_t qos_queue) {
-                                                                                                                                                                                                                                                                                ^^^^^^^^^
-pins_fabric.p4(333): [--Wwarn=uninitialized_use] warning: wcmp_group_id_value may not be completely initialized
-            wcmp_group_id_value : exact @id(1) @name("wcmp_group_id");
-            ^^^^^^^^^^^^^^^^^^^
-pins_fabric.p4(311): [--Wwarn=uninitialized_use] warning: nexthop_id_value may not be completely initialized
-            nexthop_id_value: exact @id(1) @name("nexthop_id");
-            ^^^^^^^^^^^^^^^^
-pins_fabric.p4(291): [--Wwarn=uninitialized_use] warning: router_interface_id_value may not be completely initialized
+pins_fabric.p4(846): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            1w1: ternary @id(1) @name("dummy_match");
+            ^^^
+pins_fabric.p4(717): [--Wwarn=unused] warning: 'port' is unused
+    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
+                                                                  ^^^^
+pins_fabric.p4(717): [--Wwarn=unused] warning: 'src_ip' is unused
+    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
+                                                                                                                 ^^^^^^
+pins_fabric.p4(717): [--Wwarn=unused] warning: 'dst_ip' is unused
+    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
+                                                                                                                                                                  ^^^^^^
+pins_fabric.p4(717): [--Wwarn=unused] warning: 'src_mac' is unused
+    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
+                                                                                                                                                                                                                      ^^^^^^^
+pins_fabric.p4(717): [--Wwarn=unused] warning: 'dst_mac' is unused
+    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
+                                                                                                                                                                                                                                                                           ^^^^^^^
+pins_fabric.p4(717): [--Wwarn=unused] warning: 'ttl' is unused
+    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
+                                                                                                                                                                                                                                                                                                  ^^^
+pins_fabric.p4(717): [--Wwarn=unused] warning: 'tos' is unused
+    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
+                                                                                                                                                                                                                                                                                                                     ^^^
+pins_fabric.p4(719): [--Wwarn=unused] warning: 'monitor_failover_port' is unused
+    @id(0x0100001D) @unsupported action mirror_with_vlan_tag_and_ipfix_encapsulation(@id(1) port_id_t monitor_port, @id(2) port_id_t monitor_failover_port, @id(3) @format(MAC_ADDRESS) ethernet_addr_t mirror_encap_src_mac, @id(4) @format(MAC_ADDRESS) ethernet_addr_t mirror_encap_dst_mac, @id(6) vlan_id_t mirror_encap_vlan_id, @id(7) @format(IPV6_ADDRESS) ipv6_addr_t mirror_encap_dst_ip, @id(8) @format(IPV6_ADDRESS) ipv6_addr_t mirror_encap_src_ip, @id(9) bit<16> mirror_encap_udp_src_port, @id(10) bit<16> mirror_encap_udp_dst_port) {
+                                                                                                                                     ^^^^^^^^^^^^^^^^^^^^^
+pins_fabric.p4(1082): [--Wwarn=unused] warning: Table acl_egress_dhcp_to_host_table is not used; removing
+  ") table acl_egress_dhcp_to_host_table {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_fabric.p4(1128): [--Wwarn=unused] warning: 'qos_queue' is unused
+    @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) action acl_copy(@sai_action_param(QOS_QUEUE) @id(1) qos_queue_t qos_queue) {
+                                                                                                                                                                                                               ^^^^^^^^^
+pins_fabric.p4(1148): [--Wwarn=unused] warning: 'qos_queue' is unused
+    @id(0x0100010C) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_COPY_CANCEL , SAI_PACKET_COLOR_RED) action set_qos_queue_and_cancel_copy_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t qos_queue) {
+                                                                                                                                                                                                                                                            ^^^^^^^^^
+pins_fabric.p4(1151): [--Wwarn=unused] warning: 'cpu_queue' is unused
+    @id(0x01000111) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DENY , SAI_PACKET_COLOR_RED) @unsupported action set_cpu_and_multicast_queues_and_deny_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue, @id(2) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_GREEN) qos_queue_t green_multicast_queue, @id(3) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_RED) qos_queue_t red_multicast_queue) {
+                                                                                                                                                                                                                                                                          ^^^^^^^^^
+pins_fabric.p4(1151): [--Wwarn=unused] warning: 'green_multicast_queue' is unused
+    @id(0x01000111) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DENY , SAI_PACKET_COLOR_RED) @unsupported action set_cpu_and_multicast_queues_and_deny_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue, @id(2) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_GREEN) qos_queue_t green_multicast_queue, @id(3) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_RED) qos_queue_t red_multicast_queue) {
+                                                                                                                                                                                                                                                                                                                                                                        ^^^^^^^^^^^^^^^^^^^^^
+pins_fabric.p4(1151): [--Wwarn=unused] warning: 'red_multicast_queue' is unused
+    @id(0x01000111) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DENY , SAI_PACKET_COLOR_RED) @unsupported action set_cpu_and_multicast_queues_and_deny_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue, @id(2) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_GREEN) qos_queue_t green_multicast_queue, @id(3) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_RED) qos_queue_t red_multicast_queue) {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ^^^^^^^^^^^^^^^^^^^
+pins_fabric.p4(1154): [--Wwarn=unused] warning: 'cpu_queue' is unused
+    @id(0x0100010E) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DENY , SAI_PACKET_COLOR_RED) action set_cpu_queue_and_deny_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue) {
+                                                                                                                                                                                                                                              ^^^^^^^^^
+pins_fabric.p4(1157): [--Wwarn=unused] warning: 'cpu_queue' is unused
+    @id(0x01000110) @sai_action(SAI_PACKET_ACTION_FORWARD) action set_cpu_queue(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue) {
+                                                                                                                                ^^^^^^^^^
+pins_fabric.p4(1341): [--Wwarn=unused] warning: Table acl_ingress_mirror_and_redirect_table is not used; removing
+  ") table acl_ingress_mirror_and_redirect_table {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_fabric.p4(1386): [--Wwarn=unused] warning: Table acl_ingress_security_table is not used; removing
+  ") table acl_ingress_security_table {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_fabric.p4(1497): [--Wwarn=unused] warning: Table acl_pre_ingress_vlan_table is not used; removing
+  ") table acl_pre_ingress_vlan_table {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_fabric.p4(1526): [--Wwarn=unused] warning: Table acl_pre_ingress_metadata_table is not used; removing
+  ") table acl_pre_ingress_metadata_table {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_fabric.p4(1025): [--Wwarn=unused] warning: acl_egress_dhcp_to_host_counter: unused instance
+    @id(0x13000108) direct_counter(CounterType.packets_and_bytes) acl_egress_dhcp_to_host_counter;
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_fabric.p4(1127): [--Wwarn=unused] warning: acl_ingress_security_counter: unused instance
+    @id(0x1300010A) direct_counter(CounterType.packets_and_bytes) acl_ingress_security_counter;
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_fabric.p4(1429): [--Wwarn=unused] warning: acl_pre_ingress_vlan_counter: unused instance
+    @id(0x13000106) direct_counter(CounterType.packets_and_bytes) acl_pre_ingress_vlan_counter;
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_fabric.p4(1430): [--Wwarn=unused] warning: acl_pre_ingress_metadata_counter: unused instance
+    @id(0x13000105) direct_counter(CounterType.packets_and_bytes) acl_pre_ingress_metadata_counter;
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_fabric.p4(632): [--Wwarn=uninitialized_use] warning: tunnel_id_value may not be completely initialized
+            tunnel_id_value: exact @id(1) @name("tunnel_id");
+            ^^^^^^^^^^^^^^^
+pins_fabric.p4(580): [--Wwarn=uninitialized_use] warning: router_interface_id_value may not be completely initialized
             router_interface_id_value: exact @id(1) @name("router_interface_id");
             ^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_fabric.p4(275): [--Wwarn=uninitialized_use] warning: router_interface_id_value may not be completely initialized
+pins_fabric.p4(558): [--Wwarn=uninitialized_use] warning: router_interface_id_value may not be completely initialized
             router_interface_id_value: exact @id(1) @name("router_interface_id") @refers_to(router_interface_table , router_interface_id);
             ^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_fabric.p4(276): [--Wwarn=uninitialized_use] warning: neighbor_id_value may be uninitialized
+pins_fabric.p4(559): [--Wwarn=uninitialized_use] warning: neighbor_id_value may be uninitialized
             neighbor_id_value : exact @id(2) @format(IPV6_ADDRESS) @name("neighbor_id");
             ^^^^^^^^^^^^^^^^^
-pins_fabric.p4(518): [--Wwarn=uninitialized_use] warning: mirror_port may not be completely initialized
-            mirror_port: exact @id(1);
-            ^^^^^^^^^^^
-pins_fabric.p4(530): [--Wwarn=uninitialized_use] warning: pre_session may be uninitialized
-                    clone_preserving_field_list(CloneType.I2E, pre_session, (bit<8>)PreservedFieldList.CLONE_I2E);
-                                                               ^^^^^^^^^^^
+pins_fabric.p4(846): [--Wwarn=mismatch] warning: 1w1: Constant key field
+            1w1: ternary @id(1) @name("dummy_match");
+            ^^^
+pins_fabric.p4(1572): [--Wwarn=overflow] warning: local_metadata._wcmp_selector_input13 << 8: shifting value with 8 bits by 8
+        local_metadata.wcmp_selector_input = local_metadata.wcmp_selector_input >> offset | local_metadata.wcmp_selector_input << 8 - offset;
+                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_fabric.p4(1576): [--Wwarn=overflow] warning: local_metadata._wcmp_selector_input13 << 8: shifting value with 8 bits by 8
+        local_metadata.wcmp_selector_input = local_metadata.wcmp_selector_input >> offset | local_metadata.wcmp_selector_input << 8 - offset;
+                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
