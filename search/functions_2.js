@@ -30,7 +30,7 @@ var searchData=
   ['clearmemory_27',['clearMemory',['../class_p4_tools_1_1_z3_solver.html#a2b5a61f842f7c78c017b779f5d72620e',1,'P4Tools::Z3Solver']]],
   ['clearpragmas_28',['clearPragmas',['../class_v1_1_1_v1_parser_driver.html#a191e2160d60ea597354ddec98d29c485',1,'V1::V1ParserDriver']]],
   ['clone_29',['clone',['../class_p4_tools_1_1_abstract_execution_state.html#af248cb027ee72a595b5c974258f187c2',1,'P4Tools::AbstractExecutionState::clone()'],['../class_p4_tools_1_1_p4_testgen_1_1_execution_state.html#a4ed86e281acf98c0838465454d5c20ce',1,'P4Tools::P4Testgen::ExecutionState::clone()']]],
-  ['closepreprocessedinput_30',['closePreprocessedInput',['../class_parser_options.html#ab7bf8dc1ff6ac4b6106a7afce12430ce',1,'ParserOptions']]],
+  ['closefile_30',['closeFile',['../class_parser_options.html#a860cbaa65a0cef11774af1edc74e5dda',1,'ParserOptions']]],
   ['codegeninspector_31',['CodeGenInspector',['../class_e_b_p_f_1_1_code_gen_inspector.html#a90dded50450a4969c1ca4fe97dff7021',1,'EBPF::CodeGenInspector']]],
   ['collectactionprofiledeclarations_32',['collectActionProfileDeclarations',['../class_p4_tools_1_1_p4_testgen_1_1_test_framework.html#a953375ecf816f93f658c165a80568109',1,'P4Tools::P4Testgen::TestFramework']]],
   ['collectassignmentstatement_33',['collectAssignmentStatement',['../class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_iface.html#af5870a3cb33cbbd87fec83621a1b8044',1,'P4::ControlPlaneAPI::P4RuntimeArchHandlerIface::collectAssignmentStatement()'],['../class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html#ae7a7d7f407ed6bf4050fd481e7debcb6',1,'P4::ControlPlaneAPI::Standard::P4RuntimeArchHandlerCommon::collectAssignmentStatement()']]],

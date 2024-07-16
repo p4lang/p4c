@@ -402,7 +402,7 @@ var namespace_p4 =
     [ "isTerminalState", "namespace_p4.html#a7126d7f873055d1e56b3e47815f520f4", null ],
     [ "names_overlap", "namespace_p4.html#a40d702272373686a775f7d00ba2bfae4", null ],
     [ "optimizeExpression", "namespace_p4.html#ab5986f06761937322ed5c5734479328b", null ],
-    [ "parseP4File", "namespace_p4.html#aac6915a8c883484ef76a27c9e88f66fb", null ],
+    [ "parseP4File", "namespace_p4.html#a8b04e94ccedd5a789db5e569db80b56e", null ],
     [ "parseP4String", "namespace_p4.html#a1ad6d6057de241ec7cb27bd1e9dd11ff", null ],
     [ "serializeP4RuntimeIfRequired", "group__control__plane.html#gac5908e4f7cec045505a846602d39b5a6", null ],
     [ "outOfBoundsStateName", "namespace_p4.html#a132e88585329b8dba66c10b61d5bab01", null ]

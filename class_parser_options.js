@@ -1,12 +1,12 @@
 var class_parser_options =
 [
-    [ "closePreprocessedInput", "class_parser_options.html#ab7bf8dc1ff6ac4b6106a7afce12430ce", null ],
+    [ "PreprocessorResult", "class_parser_options.html#ac77a08a8e2ae65be691c00bfa0ccd673", null ],
     [ "dumpPass", "class_parser_options.html#a960e9343daefc1813c518182a6c4e0a8", null ],
     [ "getDebugHook", "class_parser_options.html#a0edff4f9e296491f6cc02e26726f8f54", null ],
-    [ "getIncludePath", "class_parser_options.html#aae8f5065f05eb77542663dfb3b034779", null ],
+    [ "getIncludePath", "class_parser_options.html#aac527390c1cba6eb2acc56a0a5409498", null ],
     [ "isAnnotationDisabled", "class_parser_options.html#a2c76c62af617df9d342c24af62c97745", null ],
     [ "isv1", "class_parser_options.html#ae745bb3ffe299b76df915b1c1450df2d", null ],
-    [ "preprocess", "class_parser_options.html#a6a5e2442c9f5162a58e3f431ab659d64", null ],
+    [ "preprocess", "class_parser_options.html#a1049e85c2be8e9470582c46c652abb53", null ],
     [ "process", "class_parser_options.html#a87e223a04ea129ac64efba80bc915d86", null ],
     [ "searchForIncludePath", "class_parser_options.html#a7ef29c0c7313a2873078362910497ba3", null ],
     [ "setInputFile", "class_parser_options.html#a35fc95dff17db348b7aa7cd96c30d5f4", null ],

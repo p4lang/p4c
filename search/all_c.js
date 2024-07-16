@@ -84,7 +84,7 @@ var searchData=
   ['clonetype_5fmodel_81',['CloneType_Model',['../struct_p4_v1_1_1_clone_type___model.html',1,'P4V1']]],
   ['clonevariabledeclarations_82',['CloneVariableDeclarations',['../class_p4_1_1_clone_variable_declarations.html',1,'P4']]],
   ['closedrange_83',['ClosedRange',['../struct_closed_range.html',1,'']]],
-  ['closepreprocessedinput_84',['closePreprocessedInput',['../class_parser_options.html#ab7bf8dc1ff6ac4b6106a7afce12430ce',1,'ParserOptions']]],
+  ['closefile_84',['closeFile',['../class_parser_options.html#a860cbaa65a0cef11774af1edc74e5dda',1,'ParserOptions']]],
   ['clrflag_85',['clrflag',['../struct_d_b_print_1_1clrflag.html',1,'DBPrint']]],
   ['cmake_86',['CMake',['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#autotoc_md19',1,'']]],
   ['cmake_20files_87',['CMake Files',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2targets_2bmv2_2test_2_r_e_a_d_m_e.html#autotoc_md278',1,'']]],
