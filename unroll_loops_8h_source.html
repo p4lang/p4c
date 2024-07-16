@@ -152,35 +152,51 @@ $(function(){initNavTree('unroll_loops_8h_source.html',''); initResizable(true);
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <a class="code hl_class" href="class_p4_1_1_name_generator.html">NameGenerator</a> &amp;nameGen;</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_compute_def_use.html">ComputeDefUse</a> *defUse;</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keyword">struct </span>loop_bounds_t {</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        <span class="keyword">const</span> IR::Declaration_Variable *index = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        std::vector&lt;long&gt; indexes;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    };</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordtype">long</span> evalLoop(<span class="keyword">const</span> IR::Expression *, <span class="keywordtype">long</span>, <span class="keyword">const</span> <a class="code hl_class" href="classordered__set.html">ComputeDefUse::locset_t</a> &amp;, <span class="keywordtype">bool</span> &amp;);</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keywordtype">bool</span> findLoopBounds(IR::ForStatement *, loop_bounds_t &amp;);</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keywordtype">bool</span> findLoopBounds(IR::ForInStatement *, loop_bounds_t &amp;);</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">const</span> IR::Statement *doUnroll(<span class="keyword">const</span> loop_bounds_t &amp;, <span class="keyword">const</span> IR::Statement *,</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>                                  <span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_indexed_vector.html">IR::IndexedVector&lt;IR::StatOrDecl&gt;</a> * = <span class="keyword">nullptr</span>);</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">const</span> IR::Statement *preorder(IR::ForStatement *) <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keyword">const</span> IR::Statement *preorder(IR::ForInStatement *) <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keyword">explicit</span> <a class="code hl_class" href="class_p4_1_1_unroll_loops.html">UnrollLoops</a>(<a class="code hl_class" href="class_p4_1_1_name_generator.html">NameGenerator</a> &amp;ng, <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_compute_def_use.html">ComputeDefUse</a> *du) : nameGen(ng), defUse(du) {}</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>};</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> <span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00030" data-start="{" data-end="};">
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="class_p4_1_1_unroll_loops.html">   30</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="class_p4_1_1_unroll_loops.html#struct_p4_1_1_unroll_loops_1_1loop__bounds__t">loop_bounds_t</a> {</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <span class="keyword">const</span> IR::Declaration_Variable *index = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        std::vector&lt;long&gt; indexes;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    };</div>
 </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>}  <span class="comment">// namespace P4</span></div>
+<div class="foldopen" id="foldopen00034" data-start="{" data-end="};">
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="struct_p4_1_1_unroll_loops_1_1_policy.html">   34</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="struct_p4_1_1_unroll_loops_1_1_policy.html">Policy</a> {</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <span class="keywordtype">bool</span> unroll_default;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> operator()(<span class="keyword">const</span> IR::LoopStatement *, <span class="keywordtype">bool</span>, <span class="keyword">const</span> <a class="code hl_struct" href="class_p4_1_1_unroll_loops.html#struct_p4_1_1_unroll_loops_1_1loop__bounds__t">loop_bounds_t</a> &amp;);</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <span class="keyword">explicit</span> <a class="code hl_struct" href="struct_p4_1_1_unroll_loops_1_1_policy.html">Policy</a>(<span class="keywordtype">bool</span> ud) : unroll_default(ud) {}</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    } &amp; policy;</div>
+</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">static</span> <a class="code hl_struct" href="struct_p4_1_1_unroll_loops_1_1_policy.html">Policy</a> default_unroll, default_nounroll;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordtype">long</span> evalLoop(<span class="keyword">const</span> IR::Expression *, <span class="keywordtype">long</span>, <span class="keyword">const</span> <a class="code hl_class" href="classordered__set.html">ComputeDefUse::locset_t</a> &amp;, <span class="keywordtype">bool</span> &amp;);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordtype">bool</span> findLoopBounds(IR::ForStatement *, <a class="code hl_struct" href="class_p4_1_1_unroll_loops.html#struct_p4_1_1_unroll_loops_1_1loop__bounds__t">loop_bounds_t</a> &amp;);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordtype">bool</span> findLoopBounds(IR::ForInStatement *, <a class="code hl_struct" href="class_p4_1_1_unroll_loops.html#struct_p4_1_1_unroll_loops_1_1loop__bounds__t">loop_bounds_t</a> &amp;);</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keyword">const</span> IR::Statement *doUnroll(<span class="keyword">const</span> <a class="code hl_struct" href="class_p4_1_1_unroll_loops.html#struct_p4_1_1_unroll_loops_1_1loop__bounds__t">loop_bounds_t</a> &amp;, <span class="keyword">const</span> IR::Statement *,</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>                                  <span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_indexed_vector.html">IR::IndexedVector&lt;IR::StatOrDecl&gt;</a> * = <span class="keyword">nullptr</span>);</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_UNROLLLOOPS_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keyword">const</span> IR::Statement *preorder(IR::ForStatement *) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keyword">const</span> IR::Statement *preorder(IR::ForInStatement *) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keyword">explicit</span> <a class="code hl_class" href="class_p4_1_1_unroll_loops.html">UnrollLoops</a>(<a class="code hl_class" href="class_p4_1_1_name_generator.html">NameGenerator</a> &amp;ng, <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_compute_def_use.html">ComputeDefUse</a> *du, <a class="code hl_struct" href="struct_p4_1_1_unroll_loops_1_1_policy.html">Policy</a> &amp;p = default_unroll)</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        : nameGen(ng), defUse(du), policy(p) {}</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>};</div>
+</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_UNROLLLOOPS_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_i_r_1_1_indexed_vector_html"><div class="ttname"><a href="class_i_r_1_1_indexed_vector.html">IR::IndexedVector</a></div><div class="ttdef"><b>Definition</b> node.h:50</div></div>
 <div class="ttc" id="aclass_p4_1_1_compute_def_use_html"><div class="ttname"><a href="class_p4_1_1_compute_def_use.html">P4::ComputeDefUse</a></div><div class="ttdoc">Compute defuse info within P4Parser and P4Control blocks in the midend.</div><div class="ttdef"><b>Definition</b> midend/def_use.h:45</div></div>
 <div class="ttc" id="aclass_p4_1_1_name_generator_html"><div class="ttname"><a href="class_p4_1_1_name_generator.html">P4::NameGenerator</a></div><div class="ttdef"><b>Definition</b> referenceMap.h:29</div></div>
 <div class="ttc" id="aclass_p4_1_1_resolution_context_html"><div class="ttname"><a href="class_p4_1_1_resolution_context.html">P4::ResolutionContext</a></div><div class="ttdoc">Visitor mixin for looking up names in enclosing scopes from the Visitor::Context.</div><div class="ttdef"><b>Definition</b> resolveReferences.h:32</div></div>
 <div class="ttc" id="aclass_p4_1_1_unroll_loops_html"><div class="ttname"><a href="class_p4_1_1_unroll_loops.html">P4::UnrollLoops</a></div><div class="ttdef"><b>Definition</b> unrollLoops.h:25</div></div>
+<div class="ttc" id="aclass_p4_1_1_unroll_loops_html_struct_p4_1_1_unroll_loops_1_1loop__bounds__t"><div class="ttname"><a href="class_p4_1_1_unroll_loops.html#struct_p4_1_1_unroll_loops_1_1loop__bounds__t">P4::UnrollLoops::loop_bounds_t</a></div><div class="ttdef"><b>Definition</b> unrollLoops.h:30</div></div>
 <div class="ttc" id="aclass_transform_html"><div class="ttname"><a href="class_transform.html">Transform</a></div><div class="ttdef"><b>Definition</b> visitor.h:420</div></div>
 <div class="ttc" id="aclassordered__set_html"><div class="ttname"><a href="classordered__set.html">ordered_set&lt; const loc_t * &gt;</a></div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
+<div class="ttc" id="astruct_p4_1_1_unroll_loops_1_1_policy_html"><div class="ttname"><a href="struct_p4_1_1_unroll_loops_1_1_policy.html">P4::UnrollLoops::Policy</a></div><div class="ttdef"><b>Definition</b> unrollLoops.h:34</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

@@ -12,9 +12,10 @@ var searchData=
   ['logicalexpressionunroll_9',['LogicalExpressionUnroll',['../class_d_p_d_k_1_1_logical_expression_unroll.html',1,'DPDK']]],
   ['lookup_5fcache_10',['lookup_cache',['../structhash__vector__base_1_1lookup__cache.html',1,'hash_vector_base']]],
   ['loop_11',['Loop',['../class_p4_1_1_call_graph_1_1_loop.html',1,'P4::CallGraph']]],
-  ['loops_12',['Loops',['../struct_p4_1_1_call_graph_1_1_loops.html',1,'P4::CallGraph']]],
-  ['lower_13',['Lower',['../class_e_b_p_f_1_1_lower.html',1,'EBPF']]],
-  ['lowerexpressions_14',['LowerExpressions',['../class_b_m_v2_1_1_lower_expressions.html',1,'BMV2::LowerExpressions'],['../class_e_b_p_f_1_1_lower_expressions.html',1,'EBPF::LowerExpressions']]],
-  ['lpm_15',['LPM',['../class_p4_tools_1_1_p4_testgen_1_1_l_p_m.html',1,'P4Tools::P4Testgen']]],
-  ['ltbitmatrix_16',['LTBitMatrix',['../class_l_t_bit_matrix.html',1,'']]]
+  ['loop_5fbounds_5ft_12',['loop_bounds_t',['../class_p4_1_1_unroll_loops.html#struct_p4_1_1_unroll_loops_1_1loop__bounds__t',1,'P4::UnrollLoops']]],
+  ['loops_13',['Loops',['../struct_p4_1_1_call_graph_1_1_loops.html',1,'P4::CallGraph']]],
+  ['lower_14',['Lower',['../class_e_b_p_f_1_1_lower.html',1,'EBPF']]],
+  ['lowerexpressions_15',['LowerExpressions',['../class_b_m_v2_1_1_lower_expressions.html',1,'BMV2::LowerExpressions'],['../class_e_b_p_f_1_1_lower_expressions.html',1,'EBPF::LowerExpressions']]],
+  ['lpm_16',['LPM',['../class_p4_tools_1_1_p4_testgen_1_1_l_p_m.html',1,'P4Tools::P4Testgen']]],
+  ['ltbitmatrix_17',['LTBitMatrix',['../class_l_t_bit_matrix.html',1,'']]]
 ];

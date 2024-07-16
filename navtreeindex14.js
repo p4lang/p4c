@@ -1,5 +1,7 @@
 var NAVTREEINDEX14 =
 {
+"class_test_1_1_z3_solver_tests.html":[31,0,20,21],
+"class_test_1_1_z3_test_1_1_z3_solver_add.html":[31,0,20,1,0],
 "class_test_1_1_z3_test_1_1_z3_solver_b_and.html":[31,0,20,1,1],
 "class_test_1_1_z3_test_1_1_z3_solver_b_o_r.html":[31,0,20,1,2],
 "class_test_1_1_z3_test_1_1_z3_solver_b_xor.html":[31,0,20,1,3],
@@ -247,7 +249,5 @@ var NAVTREEINDEX14 =
 "classordered__set_1_1sorted__iterator.html":[31,0,94,0],
 "classsafe__vector.html":[31,0,131],
 "classstring__map.html":[31,0,136],
-"classstring__map.html#aac04ead533b1bc752ca4331c882e58be":[31,0,136,0],
-"classstring__map.html#addbadad77f4631fc2cb4d450979c1ad7":[31,0,136,1],
-"deprecated.html":[27]
+"classstring__map.html#aac04ead533b1bc752ca4331c882e58be":[31,0,136,0]
 };

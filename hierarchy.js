@@ -603,6 +603,7 @@ var hierarchy =
         [ "P4::RenameSymbols", "class_p4_1_1_rename_symbols.html", null ],
         [ "P4::ResolveReferences", "class_p4_1_1_resolve_references.html", null ],
         [ "P4::SubstituteParameters", "class_p4_1_1_substitute_parameters.html", null ],
+        [ "P4::ToP4", "class_p4_1_1_to_p4.html", null ],
         [ "P4::TypeInference", "class_p4_1_1_type_inference.html", null ],
         [ "P4::UnrollLoops", "class_p4_1_1_unroll_loops.html", null ]
       ] ]
@@ -682,6 +683,8 @@ var hierarchy =
     [ "P4::TableInsertions", "namespace_p4.html#class_p4_1_1_table_insertions", null ],
     [ "P4::TypeInference::Comparison", "class_p4_1_1_type_inference.html#struct_p4_1_1_type_inference_1_1_comparison", null ],
     [ "P4::TypeUnification", "class_p4_1_1_type_unification.html", null ],
+    [ "P4::UnrollLoops::loop_bounds_t", "class_p4_1_1_unroll_loops.html#struct_p4_1_1_unroll_loops_1_1loop__bounds__t", null ],
+    [ "P4::UnrollLoops::Policy", "struct_p4_1_1_unroll_loops_1_1_policy.html", null ],
     [ "P4::VisitedKey", "struct_p4_1_1_visited_key.html", null ],
     [ "P4CConfiguration", "class_p4_c_configuration.html", [
       [ "DefaultP4CConfiguration", "class_default_p4_c_configuration.html", [

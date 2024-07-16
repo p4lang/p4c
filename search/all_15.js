@@ -43,13 +43,14 @@ var searchData=
   ['lookupcontrolplanename_40',['lookUpControlPlaneName',['../class_p4_1_1_control_plane_a_p_i_1_1_p4_info_maps.html#a86e1122034c7cfce19194f0f3a48641c',1,'P4::ControlPlaneAPI::P4InfoMaps']]],
   ['lookupp4runtimeid_41',['lookUpP4RuntimeId',['../class_p4_1_1_control_plane_a_p_i_1_1_p4_info_maps.html#a906a59a9170c1ae6fcccab61f006cac7',1,'P4::ControlPlaneAPI::P4InfoMaps']]],
   ['loop_42',['Loop',['../class_p4_1_1_call_graph_1_1_loop.html',1,'P4::CallGraph']]],
-  ['loops_43',['Loops',['../struct_p4_1_1_call_graph_1_1_loops.html',1,'P4::CallGraph']]],
-  ['lower_44',['Lower',['../class_e_b_p_f_1_1_lower.html',1,'EBPF']]],
-  ['lowerexpressions_45',['LowerExpressions',['../class_b_m_v2_1_1_lower_expressions.html',1,'BMV2::LowerExpressions'],['../class_e_b_p_f_1_1_lower_expressions.html',1,'EBPF::LowerExpressions']]],
-  ['lpm_46',['LPM',['../class_p4_tools_1_1_p4_testgen_1_1_l_p_m.html',1,'P4Tools::P4Testgen']]],
-  ['lpm_47',['lpm',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html#autotoc_md194',1,'']]],
-  ['ltbitmatrix_48',['LTBitMatrix',['../class_l_t_bit_matrix.html',1,'']]],
-  ['ltbitmatrix_20h_49',['ltbitmatrix.h',['../md__2home_2runner_2work_2p4c_2p4c_2lib_2_r_e_a_d_m_e.html#autotoc_md72',1,'']]],
-  ['lvalmap_50',['lvalMap',['../class_p4_tools_1_1_p4_smith_1_1_p4_scope.html#a791d5d3970ef0b9f11be4c78ca59e561',1,'P4Tools::P4Smith::P4Scope']]],
-  ['lvalmaprw_51',['lvalMapRw',['../class_p4_tools_1_1_p4_smith_1_1_p4_scope.html#aad8a3176a9424c68def7a78d703483a1',1,'P4Tools::P4Smith::P4Scope']]]
+  ['loop_5fbounds_5ft_43',['loop_bounds_t',['../class_p4_1_1_unroll_loops.html#struct_p4_1_1_unroll_loops_1_1loop__bounds__t',1,'P4::UnrollLoops']]],
+  ['loops_44',['Loops',['../struct_p4_1_1_call_graph_1_1_loops.html',1,'P4::CallGraph']]],
+  ['lower_45',['Lower',['../class_e_b_p_f_1_1_lower.html',1,'EBPF']]],
+  ['lowerexpressions_46',['LowerExpressions',['../class_b_m_v2_1_1_lower_expressions.html',1,'BMV2::LowerExpressions'],['../class_e_b_p_f_1_1_lower_expressions.html',1,'EBPF::LowerExpressions']]],
+  ['lpm_47',['LPM',['../class_p4_tools_1_1_p4_testgen_1_1_l_p_m.html',1,'P4Tools::P4Testgen']]],
+  ['lpm_48',['lpm',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html#autotoc_md194',1,'']]],
+  ['ltbitmatrix_49',['LTBitMatrix',['../class_l_t_bit_matrix.html',1,'']]],
+  ['ltbitmatrix_20h_50',['ltbitmatrix.h',['../md__2home_2runner_2work_2p4c_2p4c_2lib_2_r_e_a_d_m_e.html#autotoc_md72',1,'']]],
+  ['lvalmap_51',['lvalMap',['../class_p4_tools_1_1_p4_smith_1_1_p4_scope.html#a791d5d3970ef0b9f11be4c78ca59e561',1,'P4Tools::P4Smith::P4Scope']]],
+  ['lvalmaprw_52',['lvalMapRw',['../class_p4_tools_1_1_p4_smith_1_1_p4_scope.html#aad8a3176a9424c68def7a78d703483a1',1,'P4Tools::P4Smith::P4Scope']]]
 ];

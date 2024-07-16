@@ -1,5 +1,7 @@
 var NAVTREEINDEX13 =
 {
+"class_p4_tools_1_1_z3_solver.html#ac9d82af9ed27f3aa69c390d5e19c197e":[31,0,15,34,14],
+"class_p4_tools_1_1_z3_solver.html#ad4b2712ee57ae4abc1af280e4455fa58":[30,0,5,32,10],
 "class_p4_tools_1_1_z3_solver.html#ad4b2712ee57ae4abc1af280e4455fa58":[31,0,15,34,10],
 "class_p4_tools_1_1_z3_solver.html#ae94c8eec8139637de9d41d01acb45eeb":[30,0,5,32,4],
 "class_p4_tools_1_1_z3_solver.html#ae94c8eec8139637de9d41d01acb45eeb":[31,0,15,34,4],
@@ -247,7 +249,5 @@ var NAVTREEINDEX13 =
 "class_test_1_1_z3_solver_sat_tests.html":[31,0,20,19],
 "class_test_1_1_z3_solver_satisfiability_checks.html":[31,0,20,18],
 "class_test_1_1_z3_solver_satisfiability_checks.html#a233792c5f7d959ac110ca67216a37382":[31,0,20,18,0],
-"class_test_1_1_z3_solver_test.html":[31,0,20,20],
-"class_test_1_1_z3_solver_tests.html":[31,0,20,21],
-"class_test_1_1_z3_test_1_1_z3_solver_add.html":[31,0,20,1,0]
+"class_test_1_1_z3_solver_test.html":[31,0,20,20]
 };

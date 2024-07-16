@@ -789,7 +789,7 @@ var annotated_dup =
       [ "UniqueNames", "class_p4_1_1_unique_names.html", null ],
       [ "UniqueParameters", "class_p4_1_1_unique_parameters.html", null ],
       [ "UnnestSelectList", "class_p4_1_1_unnest_select_list.html", null ],
-      [ "UnrollLoops", "class_p4_1_1_unroll_loops.html", null ],
+      [ "UnrollLoops", "class_p4_1_1_unroll_loops.html", "class_p4_1_1_unroll_loops" ],
       [ "UselessCasts", "class_p4_1_1_useless_casts.html", null ],
       [ "ValidateMatchAnnotations", "class_p4_1_1_validate_match_annotations.html", null ],
       [ "ValidateParsedProgram", "class_p4_1_1_validate_parsed_program.html", "class_p4_1_1_validate_parsed_program" ],
