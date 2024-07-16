@@ -38,6 +38,17 @@ const IR::Type *TypeInference::setTypeType(const IR::Type *type, bool learn) {
     return canon;
 }
 
+const IR::Node *TypeInference::postorder(IR::Type_Error *decl) {
+    (void)setTypeType(decl);
+    for (auto id : *decl->getDeclarations()) setType(id->getNode(), decl);
+    return decl;
+}
+
+const IR::Node *TypeInference::postorder(IR::Type_Table *type) {
+    (void)setTypeType(type);
+    return type;
+}
+
 const IR::Node *TypeInference::postorder(IR::Type_Type *type) {
     BUG("Should never be found in IR: %1%", type);
 }
