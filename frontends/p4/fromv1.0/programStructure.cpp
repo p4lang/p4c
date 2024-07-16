@@ -681,9 +681,9 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
     options.file = path;
     if (::errorCount() == 0U) {
         auto preprocessorResult = options.preprocess();
-        if (preprocessorResult.file() != nullptr) {
+        if (preprocessorResult.has_value()) {
             const auto *code =
-                P4::P4ParserDriver::parse(preprocessorResult.file(), options.file.string());
+                P4::P4ParserDriver::parse(preprocessorResult.value().get(), options.file.string());
             if ((code != nullptr) && (::errorCount() == 0U)) {
                 for (const auto *decl : code->objects) {
                     declarations->push_back(decl);

@@ -18,6 +18,7 @@ limitations under the License.
 #define FRONTENDS_COMMON_PARSEINPUT_H_
 
 #include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
 #include "frontends/p4/fromv1.0/converters.h"
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
@@ -77,14 +78,15 @@ const IR::P4Program *parseP4File(const ParserOptions &options) {
         fclose(file);
     } else {
         auto preprocessorResult = options.preprocess();
-        if (::errorCount() > 0 || preprocessorResult.file() == nullptr) {
+        if (::errorCount() > 0 || !preprocessorResult.has_value()) {
             return nullptr;
         }
         // Need to assign file here because the parser requires an lvalue.
-        result = options.isv1()
-                     ? parseV1Program<FILE *, C>(preprocessorResult.file(), options.file.string(),
-                                                 1, options.getDebugHook())
-                     : P4ParserDriver::parse(preprocessorResult.file(), options.file.string());
+        result =
+            options.isv1()
+                ? parseV1Program<FILE *, C>(preprocessorResult.value().get(), options.file.string(),
+                                            1, options.getDebugHook())
+                : P4ParserDriver::parse(preprocessorResult.value().get(), options.file.string());
     }
 
     if (::errorCount() > 0) {

@@ -19,6 +19,7 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_PARSER_OPTIONS_H_
 #define FRONTENDS_COMMON_PARSER_OPTIONS_H_
 
+#include <cstdio>
 #include <filesystem>
 #include <set>
 
@@ -53,31 +54,10 @@ class ParserOptions : public Util::Options {
     std::vector<const char *> *process(int argc, char *const argv[]) override;
     enum class FrontendVersion { P4_14, P4_16 };
 
+    /// Tries to close the input stream associated with the result.
+    static void closeFile(FILE *file);
     /// Records the result of the preprocessor.
-    class PreprocessorResult {
-     private:
-        /// The input stream.
-        FILE *_file = nullptr;
-        /// Whether the input stream should be closed.
-        bool _closeInput = false;
-
-        /// Tries to close the input stream associated with the result.
-        void closeFile();
-
-     public:
-        PreprocessorResult() = default;
-        PreprocessorResult &operator=(PreprocessorResult &&) = default;
-        PreprocessorResult(PreprocessorResult &&) = default;
-        /// There must only be one PreprocessorResult per file handle. Delete the copy constructor.
-        PreprocessorResult(const PreprocessorResult &) = delete;
-        PreprocessorResult &operator=(const PreprocessorResult &) = delete;
-        PreprocessorResult(FILE *file, bool closeInput) : _file(file), _closeInput(closeInput) {}
-
-        ~PreprocessorResult() { closeFile(); }
-
-        /// @return the input stream.
-        [[nodiscard]] FILE *file() const { return _file; }
-    };
+    using PreprocessorResult = std::unique_ptr<FILE, decltype(&closeFile)>;
 
     /// Name of executable that is being run.
     cstring exe_name;
@@ -104,7 +84,7 @@ class ParserOptions : public Util::Options {
     /// Return target specific include path.
     const char *getIncludePath() const override;
     /// Returns the output of the preprocessor.
-    PreprocessorResult preprocess() const;
+    std::optional<ParserOptions::PreprocessorResult> preprocess() const;
     /// True if we are compiling a P4 v1.0 or v1.1 program
     bool isv1() const;
     /// Get a debug hook function suitable for insertion

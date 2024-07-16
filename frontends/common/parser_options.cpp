@@ -23,6 +23,7 @@ limitations under the License.
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <memory>
 #include <regex>
 #include <unordered_set>
 
@@ -45,11 +46,11 @@ const char *p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
 using namespace P4::literals;
 
-void ParserOptions::PreprocessorResult::closeFile() {
-    if (!_closeInput || _file == nullptr) {
+void ParserOptions::closeFile(FILE *file) {
+    if (file == nullptr) {
         return;
     }
-    int exitCode = pclose(_file);
+    int exitCode = pclose(file);
     if (WIFEXITED(exitCode) && WEXITSTATUS(exitCode) == 4) {
         ::error(ErrorType::ERR_IO, "input file does not exist");
         return;
@@ -416,9 +417,8 @@ const char *ParserOptions::getIncludePath() const {
     return path.c_str();
 }
 
-ParserOptions::PreprocessorResult ParserOptions::preprocess() const {
+std::optional<ParserOptions::PreprocessorResult> ParserOptions::preprocess() const {
     FILE *in = nullptr;
-    bool closeInput = false;
 
     if (file == "-") {
         in = stdin;
@@ -437,9 +437,8 @@ ParserOptions::PreprocessorResult ParserOptions::preprocess() const {
         if (in == nullptr) {
             ::error(ErrorType::ERR_IO, "Error invoking preprocessor");
             perror("");
-            return {};
+            return std::nullopt;
         }
-        closeInput = true;
     }
 
     if (doNotCompile) {
@@ -450,9 +449,9 @@ ParserOptions::PreprocessorResult ParserOptions::preprocess() const {
         while ((read = getline(&line, &len, in)) != -1) {
             printf("%s", line);
         }
-        return {};
+        return std::nullopt;
     }
-    return {in, closeInput};
+    return ParserOptions::PreprocessorResult(in, &closeFile);
 }
 
 // From (folder, file.ext, suffix)  returns
