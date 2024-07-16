@@ -194,7 +194,7 @@ const IR::Type_Bits *ExpressionGenerator::genBitType(bool isSigned) {
     return IR::Type_Bits::get(BIT_WIDTHS[size], isSigned);
 }
 
-const IR::Type_Bits *ExpressionGenerator::genBitType(size_t bit_width, bool isSigned) {
+const IR::Type_Bits *ExpressionGenerator::genBitType(int64_t bit_width, bool isSigned) {
     return IR::Type_Bits::get(bit_width, isSigned);
 }
 
@@ -1025,7 +1025,6 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
     IR::Vector<IR::Expression> components;
     cstring tnName = tn->path->name.name;
 
-    // `td` is now of type `const IR::Type *`
     if (const auto *td = P4Scope::getTypeByName(tnName)) {
         if (const auto *tnType = td->to<IR::Type_StructLike>()) {
             for (const auto *sf : tnType->fields) {
@@ -1058,6 +1057,7 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
 
     else if (tnName == "SecurityAssocId_t") {
         const auto *expr = genExpression(ExpressionGenerator::genBitType(32, false));
+        std::cout << "SecurityAssocId_t: " << expr << "\n";
         components.push_back(expr);
     }
 
