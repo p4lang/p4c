@@ -25,7 +25,7 @@ limitations under the License.
 #include "ir/ir.h"
 
 namespace P4 {
-using FunctionCallInfo = SimpleCallInfo<IR::Node, IR::StatOrDecl>;
+using FunctionCallInfo = SimpleCallInfo<IR::Node, IR::Statement>;
 using FunctionsInlineWorkList = SimpleInlineWorkList<FunctionCallInfo>;
 using FunctionsInlineList = SimpleInlineList<IR::Node, FunctionCallInfo, FunctionsInlineWorkList>;
 
@@ -85,7 +85,6 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
     const IR::Node *preorder(IR::MethodCallStatement *statement) override;
     const IR::Node *preorder(IR::MethodCallExpression *expr) override;
     const IR::Node *preorder(IR::AssignmentStatement *statement) override;
-    const IR::Node *preorder(IR::Declaration_Variable *decl) override;
 };
 
 typedef InlineDriver<FunctionsInlineList, FunctionsInlineWorkList> InlineFunctionsDriver;

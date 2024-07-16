@@ -34,14 +34,11 @@ void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression *mce) {
     if (caller == nullptr) caller = findContext<IR::P4Parser>();
     CHECK_NULL(caller);
 
-    auto stat = findContext<IR::StatOrDecl>();
+    auto stat = findContext<IR::Statement>();
     CHECK_NULL(stat);
 
-    BUG_CHECK(
-        bool(
-            RTTI::isAny<IR::MethodCallStatement, IR::AssignmentStatement, IR::Declaration_Variable>(
-                stat)),
-        "%1%: unexpected statement with call", stat);
+    BUG_CHECK(bool(RTTI::isAny<IR::MethodCallStatement, IR::AssignmentStatement>(stat)),
+              "%1%: unexpected statement with call", stat);
 
     auto aci = new FunctionCallInfo(caller, ac->function, stat, mce);
     toInline->add(aci);
@@ -141,31 +138,6 @@ const IR::Node *FunctionsInliner::preorder(IR::AssignmentStatement *statement) {
     return inlineBefore(callee, callExpr, statement);
 }
 
-const IR::Node *FunctionsInliner::preorder(IR::Declaration_Variable *decl) {
-    auto orig = getOriginal<IR::Declaration_Variable>();
-    LOG2("Visiting " << dbp(orig));
-
-    auto replMap = getReplacementMap();
-    if (replMap == nullptr) return decl;
-
-    auto [callee, callExpr] = get(*replMap, orig);
-    if (callee == nullptr) return decl;
-
-    BUG_CHECK(callExpr != nullptr, "%1%: expected a method call to initialize", decl);
-
-    // To simplify the implementation we are cloning the variable w/o
-    // initializer and pretending that there is explicit assignment there.
-    auto *newDecl =
-        new IR::Declaration_Variable(decl->srcInfo, decl->getName(), decl->annotations, decl->type);
-    LOG3("Cloned " << dbp(newDecl));
-
-    auto *assign = new IR::AssignmentStatement(
-        decl->srcInfo, new IR::PathExpression(newDecl->getName()), decl->initializer);
-    auto *res = inlineBefore(callee, callExpr, assign);
-
-    return new IR::Vector<IR::StatOrDecl>{newDecl, res};
-}
-
 const IR::Node *FunctionsInliner::preorder(IR::P4Parser *parser) {
     if (preCaller()) {
         parser->visit_children(*this);
@@ -236,9 +208,11 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
         cstring newName = nameGen->newName(param->name.name.string_view());
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
-            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type,
-                                                        argument->expression);
+            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type);
             body.push_back(vardecl);
+            auto copyin =
+                new IR::AssignmentStatement(new IR::PathExpression(newName), argument->expression);
+            body.push_back(copyin);
             subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
                                               new IR::PathExpression(newName)));
         } else if (param->direction == IR::Direction::None) {
