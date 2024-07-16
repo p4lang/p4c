@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef P4_TOP4_TOP4_H_
 #define P4_TOP4_TOP4_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
 #include "lib/sourceCodeBuilder.h"
@@ -27,7 +28,7 @@ namespace P4 {
 This pass converts a P4-16 IR into a P4 source (text) program.
 It can optionally emit as comments a representation of the program IR.
 */
-class ToP4 : public Inspector {
+class ToP4 : public Inspector, ResolutionContext {
     int expressionPrecedence;  /// precedence of current IR::Operation
     bool isDeclaration;        /// current type is a declaration
     bool showIR;               /// if true dump IR as comments

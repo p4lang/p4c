@@ -22,7 +22,7 @@ control c(inout headers_t hdrs) {
         hasReturned = false;
         n_0 = 64w0;
         v_0 = val;
-        for (popcnti_0 in 64w1 .. 64w63) {
+        for (@name("c.popcnti") bit<64> popcnti_0 in 64w1 .. 64w63) {
             if (v_0 == 64w0) {
                 hasReturned = true;
                 retval = n_0;
