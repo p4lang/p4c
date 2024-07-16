@@ -49,6 +49,8 @@ class ExpressionGenerator : public Generator {
     // isSigned, true -> int<>, false -> bit<>
     static const IR::Type_Bits *genBitType(bool isSigned);
 
+    static const IR::Type_Bits *genBitType(size_t bit_width, bool isSigned);
+
     static const IR::Type *pickRndBaseType(const std::vector<int64_t> &type_probs);
 
     virtual const IR::Type *pickRndType(TyperefProbs type_probs);
