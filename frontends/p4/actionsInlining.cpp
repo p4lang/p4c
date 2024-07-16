@@ -39,7 +39,7 @@ void DiscoverActionsInlining::postorder(const IR::MethodCallStatement *mcs) {
         return;
     }
 
-    auto aci = new ActionCallInfo(caller, ac->action, mcs);
+    auto aci = new ActionCallInfo(caller, ac->action, mcs, mcs->methodCall);
     toInline->add(aci);
 }
 
@@ -74,7 +74,7 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
     LOG2("Visiting " << orig);
     if (replMap == nullptr) return statement;
 
-    auto callee = get(*replMap, orig);
+    auto [callee, _] = get(*replMap, orig);
     if (callee == nullptr) return statement;
 
     LOG2("Inlining: " << callee);

@@ -35,40 +35,53 @@ namespace P4 {
 
 using namespace literals;
 
-template <class Callable, class CallNode>
+template <class CallableT, class CallNodeT, class CallExpressionT = IR::MethodCallExpression>
 class SimpleCallInfo : public IHasDbPrint {
     // Callable can be P4Action, Function, P4Control, P4Parser
  public:
+    using Callable = CallableT;
+    using CallNode = CallNodeT;
+    using CallExpression = CallExpressionT;
+
     const Callable *caller;  // object that performs the call
     const Callable *callee;  // object that is called
     const CallNode *call;
+    const CallExpression *callExpr;
 
-    SimpleCallInfo(const Callable *caller, const Callable *callee, const CallNode *call)
-        : caller(caller), callee(callee), call(call) {
+    SimpleCallInfo(const Callable *caller, const Callable *callee, const CallNode *call,
+                   const CallExpression *expr)
+        : caller(caller), callee(callee), call(call), callExpr(expr) {
         CHECK_NULL(caller);
         CHECK_NULL(callee);
         CHECK_NULL(call);
+        CHECK_NULL(callExpr);
     }
     void dbprint(std::ostream &out) const {
-        out << dbp(callee) << " into " << dbp(caller) << " at " << dbp(call);
+        out << dbp(callee) << " into " << dbp(caller) << " at " << dbp(call) << " via "
+            << dbp(callExpr);
     }
 };
 
-template <class Callable, class CallNode, class CallInfo>
+template <class CallInfo>
 class SimpleInlineWorkList : public IHasDbPrint {
  public:
+    using ReplacementMap = std::map<
+        const typename CallInfo::CallNode *,
+        std::pair<const typename CallInfo::Callable *, const typename CallInfo::CallExpression *>>;
     // Map caller -> statement -> callee
-    std::map<const Callable *, std::map<const CallNode *, const Callable *>> sites;
+    std::map<const typename CallInfo::Callable *, ReplacementMap> sites;
     void add(CallInfo *info) {
         CHECK_NULL(info);
         LOG3(info);
-        sites[info->caller][info->call] = info->callee;
+        sites[info->caller][info->call] = {info->callee, info->callExpr};
     }
     void dbprint(std::ostream &out) const {
         for (auto t : sites) {
             out << dbp(t.first);
             for (auto c : t.second) {
-                out << std::endl << "\t" << dbp(c.first) << " => " << dbp(c.second);
+                out << std::endl
+                    << "\t" << dbp(c.first) << " => " << dbp(c.second.first) << " via "
+                    << dbp(c.second.second);
             }
         }
     }
@@ -101,6 +114,10 @@ class SimpleInlineList {
     }
 
     size_t size() const { return toInline.size(); }
+    void clear() {
+        toInline.clear();
+        inlineOrder.clear();
+    }
 
     /// Get next batch of objects to inline
     InlineWorkList *next() {

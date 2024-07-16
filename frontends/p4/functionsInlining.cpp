@@ -19,6 +19,7 @@ limitations under the License.
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
+#include "lib/rtti_utils.h"
 
 namespace P4 {
 
@@ -32,17 +33,27 @@ void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression *mce) {
     if (caller == nullptr) caller = findContext<IR::P4Control>();
     if (caller == nullptr) caller = findContext<IR::P4Parser>();
     CHECK_NULL(caller);
+
     auto stat = findContext<IR::Statement>();
     CHECK_NULL(stat);
-    BUG_CHECK(stat->is<IR::MethodCallStatement>() || stat->is<IR::AssignmentStatement>(),
+
+    BUG_CHECK(bool(RTTI::isAny<IR::MethodCallStatement, IR::AssignmentStatement>(stat)),
               "%1%: unexpected statement with call", stat);
 
-    auto aci = new FunctionCallInfo(caller, ac->function, stat);
+    auto aci = new FunctionCallInfo(caller, ac->function, stat, mce);
     toInline->add(aci);
+}
+
+Visitor::profile_t DiscoverFunctionsInlining::init_apply(const IR::Node *node) {
+    auto rv = Inspector::init_apply(node);
+    toInline->clear();
+
+    return rv;
 }
 
 void FunctionsInliner::end_apply(const IR::Node *) {
     BUG_CHECK(replacementStack.empty(), "Non-empty replacement stack");
+    pendingReplacements.clear();
 }
 
 Visitor::profile_t FunctionsInliner::init_apply(const IR::Node *node) {
@@ -83,9 +94,22 @@ const IR::Node *FunctionsInliner::preorder(IR::MethodCallStatement *statement) {
     auto replMap = getReplacementMap();
     if (replMap == nullptr) return statement;
 
-    auto callee = get(*replMap, orig);
+    auto [callee, _] = get(*replMap, orig);
     if (callee == nullptr) return statement;
     return inlineBefore(callee, statement->methodCall, statement);
+}
+
+const IR::Node *FunctionsInliner::preorder(IR::MethodCallExpression *expr) {
+    auto orig = getOriginal<IR::MethodCallExpression>();
+    LOG2("Visiting " << dbp(orig));
+
+    auto it = pendingReplacements.find(orig);
+    if (it != pendingReplacements.end()) {
+        LOG2("Performing pending replacement of " << dbp(expr) << " with " << dbp(it->second));
+        return it->second;
+    }
+
+    return expr;
 }
 
 const FunctionsInliner::ReplacementMap *FunctionsInliner::getReplacementMap() const {
@@ -97,20 +121,21 @@ void FunctionsInliner::dumpReplacementMap() const {
     auto replMap = getReplacementMap();
     LOG2("Replacement map contents");
     if (replMap == nullptr) return;
-    for (auto it : *replMap) LOG2("\t" << it.first << " with " << it.second);
+    for (auto it : *replMap)
+        LOG2("\t" << it.first << " with " << it.second.first << " via " << it.second.second);
 }
 
 const IR::Node *FunctionsInliner::preorder(IR::AssignmentStatement *statement) {
     auto orig = getOriginal<IR::AssignmentStatement>();
     LOG2("Visiting " << dbp(orig));
+
     auto replMap = getReplacementMap();
     if (replMap == nullptr) return statement;
 
-    auto callee = get(*replMap, orig);
+    auto [callee, callExpr] = get(*replMap, orig);
     if (callee == nullptr) return statement;
-    auto call = statement->right->to<IR::MethodCallExpression>();
-    BUG_CHECK(call != nullptr, "%1%: expected a method call", statement->right);
-    return inlineBefore(callee, call, statement);
+    BUG_CHECK(callExpr != nullptr, "%1%: expected a method call", statement->right);
+    return inlineBefore(callee, callExpr, statement);
 }
 
 const IR::Node *FunctionsInliner::preorder(IR::P4Parser *parser) {
@@ -161,9 +186,9 @@ const IR::Expression *FunctionsInliner::cloneBody(const IR::IndexedVector<IR::St
     return retVal;
 }
 
-const IR::Node *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
-                                               const IR::MethodCallExpression *mce,
-                                               const IR::Statement *statement) {
+const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
+                                                    const IR::MethodCallExpression *mce,
+                                                    const IR::Statement *statement) {
     LOG2("Inlining: " << dbp(calleeNode) << " before " << dbp(statement));
 
     auto callee = calleeNode->to<IR::Function>();
@@ -183,9 +208,11 @@ const IR::Node *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
         cstring newName = nameGen->newName(param->name.name.string_view());
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
-            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type,
-                                                        argument->expression);
+            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type);
             body.push_back(vardecl);
+            auto copyin =
+                new IR::AssignmentStatement(new IR::PathExpression(newName), argument->expression);
+            body.push_back(copyin);
             subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
                                               new IR::PathExpression(newName)));
         } else if (param->direction == IR::Direction::None) {
@@ -228,8 +255,15 @@ const IR::Node *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     if (auto assign = statement->to<IR::AssignmentStatement>()) {
         // copy the return value
         CHECK_NULL(retExpr);
-        auto setRetval = new IR::AssignmentStatement(assign->srcInfo, assign->left, retExpr);
-        body.push_back(setRetval);
+        // If we can replace RHS immediately, do it here, otherwise add return
+        // value to pending list
+        if (assign->right == mce)
+            body.push_back(new IR::AssignmentStatement(assign->srcInfo, assign->left, retExpr));
+        else {
+            body.push_back(assign->clone());
+            auto [it, inserted] = pendingReplacements.emplace(mce, retExpr);
+            BUG_CHECK(inserted, "%1%: duplicate value for pending replacements", it->first);
+        }
     } else {
         BUG_CHECK(statement->is<IR::MethodCallStatement>(), "%1%: expected a method call",
                   statement);
