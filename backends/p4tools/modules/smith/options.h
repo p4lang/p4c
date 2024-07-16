@@ -11,7 +11,7 @@ class SmithOptions : public AbstractP4cToolOptions {
     ~SmithOptions() override = default;
     static SmithOptions &get();
 
-    const char *getIncludePath() override;
+    const char *getIncludePath() const override;
     void processArgs(const std::vector<const char *> &args);
 
  private:

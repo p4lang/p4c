@@ -18,11 +18,10 @@ limitations under the License.
 #define FRONTENDS_COMMON_PARSEINPUT_H_
 
 #include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
 #include "frontends/p4/fromv1.0/converters.h"
-#include "frontends/p4/frontend.h"
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
-#include "lib/source_file.h"
 
 namespace IR {
 class P4Program;
@@ -31,7 +30,7 @@ class P4Program;
 namespace P4 {
 
 template <typename Input, typename C = P4V1::Converter>
-static const IR::P4Program *parseV1Program(Input &stream, std::string_view sourceFile,
+static const IR::P4Program *parseV1Program(Input stream, std::string_view sourceFile,
                                            unsigned sourceLine,
                                            std::optional<DebugHook> debugHook = std::nullopt) {
     // We load the model before parsing the input file, so that the SourceInfo
@@ -61,29 +60,33 @@ static const IR::P4Program *parseV1Program(Input &stream, std::string_view sourc
  * on failure. If failure occurs, an error will also be reported.
  */
 template <typename C = P4V1::Converter>
-const IR::P4Program *parseP4File(ParserOptions &options) {
+const IR::P4Program *parseP4File(const ParserOptions &options) {
     BUG_CHECK(&options == &P4CContext::get().options(),
               "Parsing using options that don't match the current "
               "compiler context");
-    FILE *in = nullptr;
+
+    const IR::P4Program *result = nullptr;
     if (options.doNotPreprocess) {
-        in = fopen(options.file.c_str(), "r");
-        if (in == nullptr) {
+        auto *file = fopen(options.file.c_str(), "r");
+        if (file == nullptr) {
             ::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file or directory.", options.file);
             return nullptr;
         }
+        result = options.isv1() ? parseV1Program<FILE *, C>(file, options.file.string(), 1,
+                                                            options.getDebugHook())
+                                : P4ParserDriver::parse(file, options.file.string());
+        fclose(file);
     } else {
-        in = options.preprocess();
-        if (::errorCount() > 0 || in == nullptr) return nullptr;
-    }
-
-    auto result = options.isv1() ? parseV1Program<FILE *, C>(in, options.file.string(), 1,
-                                                             options.getDebugHook())
-                                 : P4ParserDriver::parse(in, options.file.string());
-    if (options.doNotPreprocess) {
-        fclose(in);
-    } else {
-        options.closePreprocessedInput(in);
+        auto preprocessorResult = options.preprocess();
+        if (::errorCount() > 0 || !preprocessorResult.has_value()) {
+            return nullptr;
+        }
+        // Need to assign file here because the parser requires an lvalue.
+        result =
+            options.isv1()
+                ? parseV1Program<FILE *, C>(preprocessorResult.value().get(), options.file.string(),
+                                            1, options.getDebugHook())
+                : P4ParserDriver::parse(preprocessorResult.value().get(), options.file.string());
     }
 
     if (::errorCount() > 0) {

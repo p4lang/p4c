@@ -24,7 +24,7 @@ TestgenOptions &TestgenOptions::get() {
     return INSTANCE;
 }
 
-const char *TestgenOptions::getIncludePath() {
+const char *TestgenOptions::getIncludePath() const {
     P4C_UNIMPLEMENTED("getIncludePath not implemented for P4Testgen.");
 }
 

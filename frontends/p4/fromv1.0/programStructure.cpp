@@ -661,28 +661,34 @@ void ProgramStructure::createParser() {
 }
 
 void ProgramStructure::include(cstring filename, cstring ppoptions) {
-    if (included_files.count(filename)) return;
+    if (included_files.count(filename) != 0U) {
+        return;
+    }
     included_files.insert(filename);
     // the p4c driver sets environment variables for include
     // paths.  check the environment and add these to the command
-    // line for the preporicessor
+    // line for the preprocessor
     char *drvP4IncludePath = getenv("P4C_16_INCLUDE_PATH");
-    std::filesystem::path path(drvP4IncludePath ? drvP4IncludePath : p4includePath);
+    std::filesystem::path path((drvP4IncludePath != nullptr) ? drvP4IncludePath : p4includePath);
     path /= std::string(filename);
 
     CompilerOptions options;
-    if (ppoptions) {
+    if (ppoptions != nullptr) {
         options.preprocessor_options += " ";
         options.preprocessor_options += ppoptions;
     }
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.file = path;
-    if (!::errorCount()) {
-        if (FILE *file = options.preprocess()) {
-            auto code = P4::P4ParserDriver::parse(file, options.file.string());
-            if (code && !::errorCount())
-                for (auto decl : code->objects) declarations->push_back(decl);
-            options.closePreprocessedInput(file);
+    if (::errorCount() == 0U) {
+        auto preprocessorResult = options.preprocess();
+        if (preprocessorResult.has_value()) {
+            const auto *code =
+                P4::P4ParserDriver::parse(preprocessorResult.value().get(), options.file.string());
+            if ((code != nullptr) && (::errorCount() == 0U)) {
+                for (const auto *decl : code->objects) {
+                    declarations->push_back(decl);
+                }
+            }
         }
     }
 }

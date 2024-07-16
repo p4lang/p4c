@@ -102,7 +102,7 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// Defaults to the name of the input program, if provided.
     std::optional<cstring> testBaseName;
 
-    const char *getIncludePath() override;
+    const char *getIncludePath() const override;
 
  protected:
     bool validateOptions() const override;

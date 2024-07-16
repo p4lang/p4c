@@ -19,6 +19,7 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_PARSER_OPTIONS_H_
 #define FRONTENDS_COMMON_PARSER_OPTIONS_H_
 
+#include <cstdio>
 #include <filesystem>
 #include <set>
 
@@ -37,8 +38,6 @@ extern const char *p4_14includePath;
 /// This class contains the options for the front-ends.
 /// Each back-end should subclass this file.
 class ParserOptions : public Util::Options {
-    bool close_input = false;
-
     /// Annotation names that are to be ignored by the compiler.
     std::set<cstring> disabledAnnotations;
 
@@ -54,6 +53,12 @@ class ParserOptions : public Util::Options {
 
     std::vector<const char *> *process(int argc, char *const argv[]) override;
     enum class FrontendVersion { P4_14, P4_16 };
+
+    /// Tries to close the input stream associated with the result.
+    static void closeFile(FILE *file);
+    /// Records the result of the preprocessor.
+    using PreprocessorResult = std::unique_ptr<FILE, decltype(&closeFile)>;
+
     /// Name of executable that is being run.
     cstring exe_name;
     /// Which language to compile
@@ -77,11 +82,9 @@ class ParserOptions : public Util::Options {
     /// Expect that the only remaining argument is the input file.
     void setInputFile();
     /// Return target specific include path.
-    const char *getIncludePath() override;
+    const char *getIncludePath() const override;
     /// Returns the output of the preprocessor.
-    FILE *preprocess();
-    /// Closes the input stream returned by preprocess.
-    void closePreprocessedInput(FILE *input) const;
+    std::optional<ParserOptions::PreprocessorResult> preprocess() const;
     /// True if we are compiling a P4 v1.0 or v1.1 program
     bool isv1() const;
     /// Get a debug hook function suitable for insertion

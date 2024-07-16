@@ -17,7 +17,7 @@ SmithOptions &SmithOptions::get() {
     return INSTANCE;
 }
 
-const char *SmithOptions::getIncludePath() {
+const char *SmithOptions::getIncludePath() const {
     P4C_UNIMPLEMENTED("getIncludePath is not implemented for P4Smith.");
 }
 

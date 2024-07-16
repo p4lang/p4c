@@ -17,15 +17,11 @@ limitations under the License.
 #include "parseInput.h"
 
 #include <cstdio>
-#include <iostream>
-#include <optional>
 #include <sstream>
 
 #include "frontends/p4/fromv1.0/converters.h"
-#include "frontends/p4/frontend.h"
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
-#include "lib/source_file.h"
 
 namespace P4 {
 
@@ -33,9 +29,9 @@ const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
                                    const std::string &input,
                                    CompilerOptions::FrontendVersion version) {
     std::istringstream stream(input);
-    auto result =
+    const auto *result =
         version == CompilerOptions::FrontendVersion::P4_14
-            ? parseV1Program<std::istringstream, P4V1::Converter>(stream, sourceFile, sourceLine)
+            ? parseV1Program<std::istringstream &, P4V1::Converter>(stream, sourceFile, sourceLine)
             : P4ParserDriver::parse(stream, sourceFile, sourceLine);
 
     if (::errorCount() > 0) {

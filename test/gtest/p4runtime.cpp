@@ -19,7 +19,6 @@ limitations under the License.
 #include <google/protobuf/util/message_differencer.h>
 #include <gtest/gtest.h>
 
-#include <iterator>
 #include <optional>
 #include <string>
 #include <vector>
@@ -36,6 +35,7 @@ limitations under the License.
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/frontend.h"
 #include "frontends/p4/parseAnnotations.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
