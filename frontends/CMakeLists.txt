@@ -72,6 +72,7 @@ set (P4_FRONTEND_SRCS
   p4/typeChecking/syntacticEquivalence.cpp
   p4/typeChecking/typeChecker.cpp
   p4/typeChecking/typeCheckExpr.cpp
+  p4/typeChecking/typeCheckStmt.cpp
   p4/typeChecking/typeCheckTypes.cpp
   p4/typeChecking/typeConstraints.cpp
   p4/typeChecking/typeSubstitution.cpp
