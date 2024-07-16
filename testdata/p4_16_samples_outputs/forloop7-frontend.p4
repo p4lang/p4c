@@ -21,9 +21,9 @@ control c(inout headers_t hdrs) {
     }
     @name("c.a0") action a0(@name("m") bit<8> m_1) {
         hasReturned = false;
-        for (a_0 in 16w1 .. 16w2) {
+        for (@name("c.a") bit<16> a_0 in 16w1 .. 16w2) {
             fn(a_0, 16w0);
-            for (b_0 in 16w1 .. 16w2) {
+            for (@name("c.b") bit<16> b_0 in 16w1 .. 16w2) {
                 tmp = fn(a_0, b_0);
                 if (tmp) {
                     continue;

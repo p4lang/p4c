@@ -1261,7 +1261,13 @@ bool ToP4::preorder(const IR::ForInStatement *s) {
         builder.supressStatementSemi();
         visit(s->decl, "decl");
     } else {
-        visit(s->ref, "ref");
+        auto *decl = resolveUnique(s->ref->path->name, ResolutionType::Any);
+        if (auto *di = decl->to<IR::Declaration_Variable>()) {
+            builder.supressStatementSemi();
+            visit(di, "decl");
+        } else {
+            visit(s->ref, "ref");
+        }
     }
     builder.append(" in ");
     visit(s->collection);

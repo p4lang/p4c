@@ -23,7 +23,7 @@ control c(inout headers_t hdrs) {
     @name("c.v") bit<8> v_1;
     @name("c.x") bit<16> x_0;
     apply {
-        for (v_0 in hdrs.stack) {
+        for (@name("c.v") t2 v_0 in hdrs.stack) {
             hdrs.head.f1 = hdrs.head.f1 + v_0.x;
         }
         for (v_1 = 8w0, x_0 = 16w1; v_1 < hdrs.head.cnt; v_1 = v_1 + 8w1, x_0 = x_0 << 1) {
