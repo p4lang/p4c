@@ -1021,7 +1021,8 @@ IR::Expression *ExpressionGenerator::constructIntExpr() {
     return expr;
 }
 
-IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *tn) {
+// TODO(zzmic): Validate whether `IR::ListExpression` -> `IR::Expression` is allowed.
+IR::Expression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *tn) {
     IR::Vector<IR::Expression> components;
     cstring tnName = tn->path->name.name;
 
@@ -1055,27 +1056,21 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
             }
         }
 
-        // TODO(zzmic): Figure out how to resolve the infinite loop that is probably triggered by
-        // `ExpressionGenerator::constructStructExpr(tnType)` else if (const auto *tnType =
-        // td->to<IR::Type_Name>()) {
-        //     std::cout << "... in else-if ..." << "\n";
-        //     IR::Expression *expr = nullptr;
-        //     expr = ExpressionGenerator::constructStructExpr(tnType);
-        //     components.push_back(expr);
-        //     std::cout << "... finishing else-if ..." << "\n";
-        //     return new IR::ListExpression(components);
-        // }
+        else if (const auto *tnType = td->to<IR::Type_Name>()) {
+            std::cout << "Hit line 1059\n";
+            if (tnType->path->name.name == "SecurityAssocId_t") {
+                std::cout << "Hit line 1061\n";
+                IR::Expression *expr;
+                expr = genExpression(IR::Type_Bits::get(32, false));
+                return expr;
+                // components.push_back(expr);
+            }
+        }
 
         else {
             BUG("genStructListExpr: Requested Type %s not a struct-like type", tnName);
         }
     }
-
-    // else if (tnName == "SecurityAssocId_t") {
-    //     const auto *expr = genExpression(ExpressionGenerator::genBitType(32, false));
-    //     std::cout << "SecurityAssocId_t: " << expr << "\n";
-    //     components.push_back(expr);
-    // }
 
     else {
         BUG("genStructListExpr: Requested Type %s not found", tnName);

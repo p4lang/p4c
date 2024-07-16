@@ -328,20 +328,17 @@ std::vector<const IR::Type_Declaration *> P4Scope::getFilteredDecls(std::set<cst
 std::set<const IR::P4Table *> *P4Scope::getCallableTables() { return &callableTables; }
 
 const IR::Type *P4Scope::getTypeByName(cstring name) {
-    if (name == "SecurityAssocId_t") {
-        // const IR::Path* path = new IR::Path("p4.org/pna/v1/SecurityAssocId_t");
-        return new IR::Type_Name(IR::ID(name));
-    }
-
     for (auto *subScope : scope) {
         for (const auto *node : *subScope) {
             if (const auto *decl = node->to<IR::Type_Declaration>()) {
+                std::cout << "decl->name.name: " << decl->name.name << "\n";
                 if (decl->name.name == name) {
                     return decl;
                 }
-            }
-            if (const auto *nameNode = node->to<IR::Type_Name>()) {
+            } else if (const auto *nameNode = node->to<IR::Type_Name>()) {
                 if (nameNode->path->name.name == name) {
+                    std::cout << "nameNode->path->name.name (== name): "
+                              << nameNode->path->name.name << "\n";
                     return nameNode;
                 }
             }

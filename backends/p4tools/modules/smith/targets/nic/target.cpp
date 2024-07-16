@@ -281,6 +281,9 @@ const IR::P4Program *DpdkPnaSmithTarget::generateP4Program() const {
     // insert some dummy metadata
     generateMainMetadata();
 
+    // Add type "SecurityAssocId_t" of type `Type_Name` to the scope
+    P4Scope::addToScope(new IR::Type_Name("SecurityAssocId_t"));
+
     // start to assemble the model
     auto *objects = new IR::Vector<IR::Node>();
 

@@ -92,7 +92,8 @@ class ExpressionGenerator : public Generator {
     IR::Expression *constructIntExpr();
 
  private:
-    IR::ListExpression *genStructListExpr(const IR::Type_Name *tn);
+    // TODO(zzmic): Validate whether `IR::ListExpression` -> `IR::Expression` is allowed.
+    IR::Expression *genStructListExpr(const IR::Type_Name *tn);
 
     IR::Expression *editHdrStack(cstring lval);
 
