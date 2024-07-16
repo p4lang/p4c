@@ -26,10 +26,19 @@ class UnrollLoops : public Transform, public P4::ResolutionContext {
     NameGenerator &nameGen;
     const ComputeDefUse *defUse;
 
+ public:
     struct loop_bounds_t {
         const IR::Declaration_Variable *index = nullptr;
         std::vector<long> indexes;
     };
+    struct Policy {
+        bool unroll_default;
+        virtual bool operator()(const IR::LoopStatement *, bool, const loop_bounds_t &);
+        explicit Policy(bool ud) : unroll_default(ud) {}
+    } & policy;
+    static Policy default_unroll, default_nounroll;
+
+ private:
     long evalLoop(const IR::Expression *, long, const ComputeDefUse::locset_t &, bool &);
     bool findLoopBounds(IR::ForStatement *, loop_bounds_t &);
     bool findLoopBounds(IR::ForInStatement *, loop_bounds_t &);
@@ -40,7 +49,8 @@ class UnrollLoops : public Transform, public P4::ResolutionContext {
     const IR::Statement *preorder(IR::ForInStatement *) override;
 
  public:
-    explicit UnrollLoops(NameGenerator &ng, const ComputeDefUse *du) : nameGen(ng), defUse(du) {}
+    explicit UnrollLoops(NameGenerator &ng, const ComputeDefUse *du, Policy &p = default_unroll)
+        : nameGen(ng), defUse(du), policy(p) {}
 };
 
 }  // namespace P4
