@@ -15,5 +15,7 @@ var searchData=
   ['errortracker_12',['errorTracker',['../class_error_reporter.html#a2660b04578583c4cffb7858553290729',1,'ErrorReporter']]],
   ['exe_5fname_13',['exe_name',['../class_parser_options.html#ad0ee07f9e5e35022fce21baa30a638b1',1,'ParserOptions']]],
   ['exitdefinitions_14',['exitDefinitions',['../class_p4_1_1_compute_write_set.html#a53207ee4f6fd7d4b3e7de236b79a5de3',1,'P4::ComputeWriteSet']]],
-  ['extractssynthesized_15',['extractsSynthesized',['../class_p4_v1_1_1_program_structure.html#a48c3ea89638690d8da1ebde7bccadec9',1,'P4V1::ProgramStructure']]]
+  ['externarguments_15',['externArguments',['../class_p4_tools_1_1_p4_testgen_1_1_extern_info.html#ad1be16d5312aa5e351317c86726b98f3',1,'P4Tools::P4Testgen::ExternInfo']]],
+  ['externobjectref_16',['externObjectRef',['../class_p4_tools_1_1_p4_testgen_1_1_extern_info.html#a6bd337d180e37ae4e0dc8bb8a4517015',1,'P4Tools::P4Testgen::ExternInfo']]],
+  ['extractssynthesized_17',['extractsSynthesized',['../class_p4_v1_1_1_program_structure.html#a48c3ea89638690d8da1ebde7bccadec9',1,'P4V1::ProgramStructure']]]
 ];

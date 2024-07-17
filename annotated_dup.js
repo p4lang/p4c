@@ -929,7 +929,7 @@ var annotated_dup =
         [ "Exact", "class_p4_tools_1_1_p4_testgen_1_1_exact.html", "class_p4_tools_1_1_p4_testgen_1_1_exact" ],
         [ "ExecutionState", "class_p4_tools_1_1_p4_testgen_1_1_execution_state.html", "class_p4_tools_1_1_p4_testgen_1_1_execution_state" ],
         [ "ExprStepper", "class_p4_tools_1_1_p4_testgen_1_1_expr_stepper.html", "class_p4_tools_1_1_p4_testgen_1_1_expr_stepper" ],
-        [ "ExternMethodImpls", "class_p4_tools_1_1_p4_testgen_1_1_extern_method_impls.html", "class_p4_tools_1_1_p4_testgen_1_1_extern_method_impls" ],
+        [ "ExternInfo", "class_p4_tools_1_1_p4_testgen_1_1_extern_info.html", "class_p4_tools_1_1_p4_testgen_1_1_extern_info" ],
         [ "FinalState", "class_p4_tools_1_1_p4_testgen_1_1_final_state.html", "class_p4_tools_1_1_p4_testgen_1_1_final_state" ],
         [ "GreedyNodeSelection", "class_p4_tools_1_1_p4_testgen_1_1_greedy_node_selection.html", "class_p4_tools_1_1_p4_testgen_1_1_greedy_node_selection" ],
         [ "LPM", "class_p4_tools_1_1_p4_testgen_1_1_l_p_m.html", "class_p4_tools_1_1_p4_testgen_1_1_l_p_m" ],
