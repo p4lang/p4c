@@ -303,38 +303,39 @@ const IR::ActionListElement *TypeInference::validateActionInitializer(
 
 const IR::Node *TypeInference::postorder(IR::Property *prop) {
     // Handle the default_action
-    if (prop->name == IR::TableProperties::defaultActionPropertyName) {
-        auto pv = prop->value->to<IR::ExpressionValue>();
-        if (pv == nullptr) {
-            typeError("%1% table property should be an action", prop);
-        } else {
-            auto type = getType(pv->expression);
-            if (type == nullptr) return prop;
-            if (!type->is<IR::Type_Action>()) {
-                typeError("%1% table property should be an action", prop);
-                return prop;
-            }
-            auto at = type->to<IR::Type_Action>();
-            if (at->parameters->size() != 0) {
-                typeError("%1%: parameter %2% does not have a corresponding argument", prop->value,
-                          at->parameters->parameters.at(0));
-                return prop;
-            }
+    if (prop->name != IR::TableProperties::defaultActionPropertyName) return prop;
 
-            // Check that the default action appears in the list of actions.
-            BUG_CHECK(prop->value->is<IR::ExpressionValue>(), "%1% not an expression", prop);
-            auto def = prop->value->to<IR::ExpressionValue>()->expression;
-            auto ale = validateActionInitializer(def);
-            if (ale != nullptr) {
-                auto anno = ale->getAnnotation(IR::Annotation::tableOnlyAnnotation);
-                if (anno != nullptr) {
-                    typeError("%1%: Action marked with %2% used as default action", prop,
-                              IR::Annotation::tableOnlyAnnotation);
-                    return prop;
-                }
+    auto pv = prop->value->to<IR::ExpressionValue>();
+    if (pv == nullptr) {
+        typeError("%1% table property should be an action", prop);
+    } else {
+        auto type = getType(pv->expression);
+        if (type == nullptr) return prop;
+        if (!type->is<IR::Type_Action>()) {
+            typeError("%1% table property should be an action", prop);
+            return prop;
+        }
+        auto at = type->to<IR::Type_Action>();
+        if (at->parameters->size() != 0) {
+            typeError("%1%: parameter %2% does not have a corresponding argument", prop->value,
+                      at->parameters->parameters.at(0));
+            return prop;
+        }
+
+        // Check that the default action appears in the list of actions.
+        BUG_CHECK(prop->value->is<IR::ExpressionValue>(), "%1% not an expression", prop);
+        auto def = prop->value->to<IR::ExpressionValue>()->expression;
+        auto ale = validateActionInitializer(def);
+        if (ale != nullptr) {
+            auto anno = ale->getAnnotation(IR::Annotation::tableOnlyAnnotation);
+            if (anno != nullptr) {
+                typeError("%1%: Action marked with %2% used as default action", prop,
+                          IR::Annotation::tableOnlyAnnotation);
+                return prop;
             }
         }
     }
+
     return prop;
 }
 
