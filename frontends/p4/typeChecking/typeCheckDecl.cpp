@@ -12,6 +12,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "constantTypeSubstitution.h"
 #include "typeChecker.h"
 
 namespace P4 {
@@ -312,6 +313,104 @@ const IR::Node *TypeInference::postorder(IR::Method *method) {
     setType(getOriginal(), type);
     setType(method, type);
     return method;
+}
+
+/// get size int bits required to represent given constant
+static int getConstantsRepresentationSize(big_int val, bool isSigned) {
+    if (val < 0) {
+        val = -val;
+    }
+    int cnt = 0;
+    while (val > 0) {
+        ++cnt;
+        val >>= 1;
+    }
+    return cnt + int(isSigned);
+}
+
+/// Check if the value initializer fits into the underlying enum type. Emits error and returns false
+/// if it does not fit. Returns true if it fits.
+static bool checkEnumValueInitializer(const IR::Type_Bits *type, const IR::Expression *initializer,
+                                      const IR::Type_SerEnum *serEnum,
+                                      const IR::SerEnumMember *member) {
+    // validate the constant fits -- non-fitting enum constants should produce error
+    if (const auto *constant = initializer->to<IR::Constant>()) {
+        // signed values are two's complement, so [-2^(n-1)..2^(n-1)-1]
+        big_int low = type->isSigned ? -(big_int(1) << type->size - 1) : big_int(0);
+        big_int high = (big_int(1) << (type->isSigned ? type->size - 1 : type->size)) - 1;
+
+        if (constant->value < low || constant->value > high) {
+            int required = getConstantsRepresentationSize(constant->value, type->isSigned);
+            std::string extraMsg;
+            if (!type->isSigned && constant->value < low) {
+                extraMsg =
+                    str(boost::format(
+                            "the value %1% is negative, but the underlying type %2% is unsigned") %
+                        constant->value % type->toString());
+            } else {
+                extraMsg =
+                    str(boost::format("the value %1% requires %2% bits but the underlying "
+                                      "%3% type %4% only contains %5% bits") %
+                        constant->value % required % (type->isSigned ? "signed" : "unsigned") %
+                        type->toString() % type->size);
+            }
+            P4::error(ErrorType::ERR_TYPE_ERROR,
+                      "%1%: Serialized enum constant value %2% is out of bounds of the underlying "
+                      "type %3%; %4%",
+                      member, constant->value, serEnum->type, extraMsg);
+            return false;
+        }
+    }
+    return true;
+}
+
+const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
+    /*
+      The type of the member is initially set in the Type_SerEnum preorder visitor.
+      Here we check additional constraints and we may correct the member.
+      if (done()) return member;
+    */
+    const auto *serEnum = findContext<IR::Type_SerEnum>();
+    CHECK_NULL(serEnum);
+    const auto *type = checkUnderlyingEnumType(serEnum->type);
+    if (!type || !checkEnumValueInitializer(type, member->value, serEnum, member)) {
+        return member;
+    }
+    const auto *exprType = getType(member->value);
+    auto *tvs = unifyCast(member, type, exprType,
+                          "Enum member '%1%' has type '%2%' and not the expected type '%3%'",
+                          {member, exprType, type});
+    if (tvs == nullptr)
+        // error already signalled
+        return member;
+    if (tvs->isIdentity()) return member;
+
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
+    member->value = cts.convert(member->value, getChildContext());  // sets type
+    if (!typeMap->getType(member)) setType(member, getTypeType(serEnum));
+    return member;
+}
+
+const IR::Node *TypeInference::postorder(IR::P4ValueSet *decl) {
+    if (done()) return decl;
+    // This is a specialized version of setTypeType
+    auto canon = canonicalize(decl->elementType);
+    if (canon != nullptr) {
+        if (canon != decl->elementType) {
+            bool errs = learn(canon, this, getChildContext());
+            if (errs) return nullptr;
+        }
+        if (!canon->is<IR::Type_Newtype>() && !canon->is<IR::Type_Bits>() &&
+            !canon->is<IR::Type_SerEnum>() && !canon->is<IR::Type_Boolean>() &&
+            !canon->is<IR::Type_Enum>() && !canon->is<IR::Type_Struct>() &&
+            !canon->is<IR::Type_Tuple>())
+            typeError("%1%: Illegal type for value_set element type", decl->elementType);
+
+        auto tt = new IR::Type_Set(canon);
+        setType(getOriginal(), tt);
+        setType(decl, tt);
+    }
+    return decl;
 }
 
 }  // namespace P4
