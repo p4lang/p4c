@@ -79,6 +79,8 @@ set (P4_FRONTEND_SRCS
   p4/typeChecking/typeSubstitution.cpp
   p4/typeChecking/typeSubstitutionVisitor.cpp
   p4/typeChecking/typeUnification.cpp
+  p4/typeChecking/typeInference.cpp
+  p4/typeChecking/readOnlyTypeInference.cpp
   p4/typeMap.cpp
   p4/uniqueNames.cpp
   p4/unusedDeclarations.cpp

@@ -28,6 +28,7 @@ limitations under the License.
 
 namespace P4 {
 
+#if DEBUG_TYPES
 TypeChecking::TypeChecking(ReferenceMap *refMap, TypeMap *typeMap, bool updateExpressions) {
     addPasses({new P4::TypeInference(typeMap, /* readOnly */ true, /* checkArrays */ true,
                                      /* errorOnNullDecls */ true),
@@ -35,11 +36,21 @@ TypeChecking::TypeChecking(ReferenceMap *refMap, TypeMap *typeMap, bool updateEx
                refMap ? new P4::ResolveReferences(refMap) : nullptr});
     setStopOnError(true);
 }
+#else
+
+TypeChecking::TypeChecking(ReferenceMap *refMap, TypeMap *typeMap, bool updateExpressions) {
+    addPasses({new P4::ReadOnlyTypeInference(typeMap, /* checkArrays */ true,
+                                             /* errorOnNullDecls */ true),
+               updateExpressions ? new ApplyTypesToExpressions(typeMap) : nullptr,
+               refMap ? new P4::ResolveReferences(refMap) : nullptr});
+    setStopOnError(true);
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 
-bool TypeInference::learn(const IR::Node *node, Visitor *caller, const Visitor::Context *ctxt) {
-    auto *learner = clone();
+bool TypeInferenceBase::learn(const IR::Node *node, Visitor *caller, const Visitor::Context *ctxt) {
+    auto *learner = readOnlyClone();
     learner->setCalledBy(caller);
     learner->setName("TypeInference learner");
     unsigned previous = ::P4::errorCount();
@@ -50,7 +61,7 @@ bool TypeInference::learn(const IR::Node *node, Visitor *caller, const Visitor::
     return result;
 }
 
-const IR::Expression *TypeInference::constantFold(const IR::Expression *expression) {
+const IR::Expression *TypeInferenceBase::constantFold(const IR::Expression *expression) {
     if (readOnly) return expression;
     DoConstantFolding cf(this, typeMap, false);
     auto result = expression->apply(cf, getChildContext());
@@ -62,7 +73,7 @@ const IR::Expression *TypeInference::constantFold(const IR::Expression *expressi
 // Make a clone of the type where all type variables in
 // the type parameters are replaced with fresh ones.
 // This should only be applied to canonical types.
-const IR::Type *TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGenericType *type) {
+const IR::Type *TypeInferenceBase::cloneWithFreshTypeVariables(const IR::IMayBeGenericType *type) {
     TypeVariableSubstitution tvs;
     for (auto v : type->getTypeParameters()->parameters) {
         auto tv = new IR::Type_Var(v->srcInfo, v->getName());
@@ -79,8 +90,8 @@ const IR::Type *TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGener
     return cl->to<IR::Type>();
 }
 
-TypeInference::TypeInference(TypeMap *typeMap, bool readOnly, bool checkArrays,
-                             bool errorOnNullDecls)
+TypeInferenceBase::TypeInferenceBase(TypeMap *typeMap, bool readOnly, bool checkArrays,
+                                     bool errorOnNullDecls)
     : typeMap(typeMap),
       initialNode(nullptr),
       readOnly(readOnly),
@@ -91,14 +102,13 @@ TypeInference::TypeInference(TypeMap *typeMap, bool readOnly, bool checkArrays,
     visitDagOnce = false;  // the done() method will take care of this
 }
 
-TypeInference::TypeInference(TypeMap *typeMap,
-                             std::shared_ptr<MinimalNameGenerator> inheritedNameGen)
-    : TypeInference(typeMap, true) {
+TypeInferenceBase::TypeInferenceBase(TypeMap *typeMap,
+                                     std::shared_ptr<MinimalNameGenerator> inheritedNameGen)
+    : TypeInferenceBase(typeMap, true) {
     nameGen = inheritedNameGen;
 }
 
-Visitor::profile_t TypeInference::init_apply(const IR::Node *node) {
-    auto rv = Transform::init_apply(node);
+void TypeInferenceBase::start(const IR::Node *node) {
     if (node->is<IR::P4Program>()) {
         LOG2("TypeInference for " << dbp(node));
     }
@@ -107,38 +117,25 @@ Visitor::profile_t TypeInference::init_apply(const IR::Node *node) {
         nameGen = std::make_shared<MinimalNameGenerator>();
         node->apply(*nameGen);
     }
-
-    return rv;
 }
 
-void TypeInference::end_apply(const IR::Node *node) {
-    BUG_CHECK(!readOnly || node == initialNode,
-              "At this point in the compilation typechecking should not infer new types anymore, "
-              "but it did.");
+void TypeInferenceBase::finish(const IR::Node *node) {
     typeMap->updateMap(node);
     if (node->is<IR::P4Program>()) LOG3("Typemap: " << std::endl << typeMap);
-    Transform::end_apply(node);
 }
 
-const IR::Node *TypeInference::apply_visitor(const IR::Node *orig, const char *name) {
-    const auto *transformed = Transform::apply_visitor(orig, name);
-    BUG_CHECK(!readOnly || orig == transformed,
-              "At this point in the compilation typechecking should not infer new types anymore, "
-              "but it did: node %1% changed to %2%",
-              orig, transformed);
-    return transformed;
+ReadOnlyTypeInference *TypeInferenceBase::readOnlyClone() const {
+    return new ReadOnlyTypeInference(this->typeMap, nameGen);
 }
 
-TypeInference *TypeInference::clone() const { return new TypeInference(this->typeMap, nameGen); }
-
-bool TypeInference::done() const {
+bool TypeInferenceBase::done() const {
     auto orig = getOriginal();
     bool done = typeMap->contains(orig);
     LOG3("TI Visiting " << dbp(orig) << (done ? " done" : ""));
     return done;
 }
 
-const IR::Type *TypeInference::getType(const IR::Node *element) const {
+const IR::Type *TypeInferenceBase::getType(const IR::Node *element) const {
     const IR::Type *result = typeMap->getType(element);
     // This should be happening only when type-checking already failed
     // for some node; we are now just trying to typecheck a parent node.
@@ -148,7 +145,7 @@ const IR::Type *TypeInference::getType(const IR::Node *element) const {
     return result;
 }
 
-const IR::Type *TypeInference::getTypeType(const IR::Node *element) const {
+const IR::Type *TypeInferenceBase::getTypeType(const IR::Node *element) const {
     const IR::Type *result = typeMap->getType(element);
     // See comment in getType() above.
     if (result == nullptr) {
@@ -159,15 +156,15 @@ const IR::Type *TypeInference::getTypeType(const IR::Node *element) const {
     return result->to<IR::Type_Type>()->type;
 }
 
-void TypeInference::setType(const IR::Node *element, const IR::Type *type) {
+void TypeInferenceBase::setType(const IR::Node *element, const IR::Type *type) {
     typeMap->setType(element, type);
 }
 
-void TypeInference::addSubstitutions(const TypeVariableSubstitution *tvs) {
+void TypeInferenceBase::addSubstitutions(const TypeVariableSubstitution *tvs) {
     typeMap->addSubstitutions(tvs);
 }
 
-TypeVariableSubstitution *TypeInference::unifyBase(
+TypeVariableSubstitution *TypeInferenceBase::unifyBase(
     bool allowCasts, const IR::Node *errorPosition, const IR::Type *destType,
     const IR::Type *srcType, std::string_view errorFormat,
     std::initializer_list<const IR::Node *> errorArgs) {
@@ -189,8 +186,8 @@ TypeVariableSubstitution *TypeInference::unifyBase(
 }
 
 template <class Ctor>
-const IR::Type *TypeInference::canonicalizeFields(const IR::Type_StructLike *type,
-                                                  Ctor constructor) {
+const IR::Type *TypeInferenceBase::canonicalizeFields(const IR::Type_StructLike *type,
+                                                      Ctor constructor) {
     bool changes = false;
     auto fields = new IR::IndexedVector<IR::StructField>();
     for (auto field : type->fields) {
@@ -214,9 +211,9 @@ const IR::Type *TypeInference::canonicalizeFields(const IR::Type_StructLike *typ
  * it can be specialized to
  * void _<int<32>>(int<32> data);
  */
-const IR::Type *TypeInference::specialize(const IR::IMayBeGenericType *type,
-                                          const IR::Vector<IR::Type> *arguments,
-                                          const Visitor::Context *ctxt) {
+const IR::Type *TypeInferenceBase::specialize(const IR::IMayBeGenericType *type,
+                                              const IR::Vector<IR::Type> *arguments,
+                                              const Visitor::Context *ctxt) {
     TypeVariableSubstitution *bindings = new TypeVariableSubstitution();
     bool success = bindings->setBindings(type->getNode(), type->getTypeParameters(), arguments);
     if (!success) return nullptr;
@@ -232,7 +229,7 @@ const IR::Type *TypeInference::specialize(const IR::IMayBeGenericType *type,
 }
 
 // May return nullptr if a type error occurs.
-const IR::Type *TypeInference::canonicalize(const IR::Type *type) {
+const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
     if (type == nullptr) return nullptr;
 
     auto exists = typeMap->getType(type);
@@ -483,22 +480,22 @@ const IR::Type *TypeInference::canonicalize(const IR::Type *type) {
 
 ///////////////////////////////////// Visitor methods
 
-const IR::Node *TypeInference::preorder(IR::P4Program *program) {
+TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(const IR::P4Program *program) {
     currentActionList = nullptr;
     if (typeMap->checkMap(getOriginal()) && readOnly) {
         LOG2("No need to typecheck");
-        prune();
+        return {program, true};
     }
-    return program;
+    return {program, false};
 }
 
-const IR::Node *TypeInference::postorder(IR::Declaration_MatchKind *decl) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Declaration_MatchKind *decl) {
     if (done()) return decl;
     for (auto id : *decl->getDeclarations()) setType(id->getNode(), IR::Type_MatchKind::get());
     return decl;
 }
 
-bool TypeInference::canCastBetween(const IR::Type *dest, const IR::Type *src) const {
+bool TypeInferenceBase::canCastBetween(const IR::Type *dest, const IR::Type *src) const {
     if (src->is<IR::Type_Action>()) return false;
     if (typeMap->equivalent(src, dest)) return true;
 
@@ -542,9 +539,9 @@ bool TypeInference::canCastBetween(const IR::Type *dest, const IR::Type *src) co
     return false;
 }
 
-const IR::Expression *TypeInference::assignment(const IR::Node *errorPosition,
-                                                const IR::Type *destType,
-                                                const IR::Expression *sourceExpression) {
+const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPosition,
+                                                    const IR::Type *destType,
+                                                    const IR::Expression *sourceExpression) {
     if (destType->is<IR::Type_Unknown>()) BUG("Unknown destination type");
     if (destType->is<IR::Type_Dontcare>()) return sourceExpression;
     const IR::Type *initType = getType(sourceExpression);
@@ -696,7 +693,7 @@ const IR::Expression *TypeInference::assignment(const IR::Node *errorPosition,
     return sourceExpression;
 }
 
-const IR::Node *TypeInference::postorder(IR::Annotation *annotation) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Annotation *annotation) {
     auto checkAnnotation = [this](const IR::Expression *e) {
         if (!isCompileTimeConstant(e))
             typeError("%1%: structured annotation must be compile-time constant values", e);
@@ -722,9 +719,9 @@ const IR::Node *TypeInference::postorder(IR::Annotation *annotation) {
 
 // Returns the type of the constructed object and
 // new arguments for constructor, which may have inserted casts.
-std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::checkExternConstructor(
-    const IR::Node *errorPosition, const IR::Type_Extern *ext,
-    const IR::Vector<IR::Argument> *arguments) {
+std::pair<const IR::Type *, const IR::Vector<IR::Argument> *>
+TypeInferenceBase::checkExternConstructor(const IR::Node *errorPosition, const IR::Type_Extern *ext,
+                                          const IR::Vector<IR::Argument> *arguments) {
     auto none = std::pair<const IR::Type *, const IR::Vector<IR::Argument> *>(nullptr, nullptr);
     auto freshExtern = cloneWithFreshTypeVariables(ext)->to<IR::Type_Extern>();
     auto constructor = freshExtern->lookupConstructor(arguments);
@@ -842,7 +839,8 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::che
 
 /// @returns: A pair containing the type returned by the constructor and the new arguments
 ///           (which may change due to insertion of casts).
-std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::containerInstantiation(
+std::pair<const IR::Type *, const IR::Vector<IR::Argument> *>
+TypeInferenceBase::containerInstantiation(
     const IR::Node *node,  // can be Declaration_Instance or ConstructorCallExpression
     const IR::Vector<IR::Argument> *constructorArguments, const IR::IContainer *container) {
     CHECK_NULL(node);
@@ -924,7 +922,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::con
     return std::pair<const IR::Type *, const IR::Vector<IR::Argument> *>(returnType, newArgs);
 }
 
-const IR::Node *TypeInference::postorder(IR::Argument *arg) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Argument *arg) {
     if (done()) return arg;
     auto type = getType(arg->expression);
     if (type == nullptr) return arg;

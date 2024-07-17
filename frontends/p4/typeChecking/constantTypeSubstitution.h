@@ -28,10 +28,11 @@ namespace P4 {
 class ConstantTypeSubstitution : public Transform, ResolutionContext {
     TypeVariableSubstitution *subst;
     TypeMap *typeMap;
-    TypeInference *tc;
+    TypeInferenceBase *tc;
 
  public:
-    ConstantTypeSubstitution(TypeVariableSubstitution *subst, TypeMap *typeMap, TypeInference *tc)
+    ConstantTypeSubstitution(TypeVariableSubstitution *subst, TypeMap *typeMap,
+                             TypeInferenceBase *tc)
         : subst(subst), typeMap(typeMap), tc(tc) {
         CHECK_NULL(subst);
         CHECK_NULL(typeMap);

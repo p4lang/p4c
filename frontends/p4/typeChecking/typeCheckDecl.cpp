@@ -19,7 +19,7 @@ namespace P4 {
 
 using namespace literals;
 
-const IR::Node *TypeInference::postorder(IR::P4Table *table) {
+const IR::Node *TypeInferenceBase::postorder(const IR::P4Table *table) {
     currentActionList = nullptr;
     if (done()) return table;
     auto type = new IR::Type_Table(table);
@@ -28,8 +28,8 @@ const IR::Node *TypeInference::postorder(IR::P4Table *table) {
     return table;
 }
 
-bool TypeInference::checkParameters(const IR::ParameterList *paramList, bool forbidModules,
-                                    bool forbidPackage) const {
+bool TypeInferenceBase::checkParameters(const IR::ParameterList *paramList, bool forbidModules,
+                                        bool forbidPackage) const {
     for (auto p : paramList->parameters) {
         auto type = getType(p);
         if (type == nullptr) return false;
@@ -53,7 +53,8 @@ bool TypeInference::checkParameters(const IR::ParameterList *paramList, bool for
     return true;
 }
 
-const IR::ParameterList *TypeInference::canonicalizeParameters(const IR::ParameterList *params) {
+const IR::ParameterList *TypeInferenceBase::canonicalizeParameters(
+    const IR::ParameterList *params) {
     if (params == nullptr) return params;
 
     bool changes = false;
@@ -76,7 +77,7 @@ const IR::ParameterList *TypeInference::canonicalizeParameters(const IR::Paramet
     return params;
 }
 
-const IR::Node *TypeInference::postorder(IR::P4Action *action) {
+const IR::Node *TypeInferenceBase::postorder(const IR::P4Action *action) {
     if (done()) return action;
     auto pl = canonicalizeParameters(action->parameters);
     if (pl == nullptr) return action;
@@ -99,7 +100,7 @@ const IR::Node *TypeInference::postorder(IR::P4Action *action) {
     return action;
 }
 
-const IR::Node *TypeInference::postorder(IR::Declaration_Variable *decl) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Declaration_Variable *decl) {
     if (done()) return decl;
     auto type = getTypeType(decl->type);
     if (type == nullptr) return decl;
@@ -141,7 +142,7 @@ const IR::Node *TypeInference::postorder(IR::Declaration_Variable *decl) {
     return decl;
 }
 
-const IR::Node *TypeInference::postorder(IR::Declaration_Constant *decl) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Declaration_Constant *decl) {
     if (done()) return decl;
     auto type = getTypeType(decl->type);
     if (type == nullptr) return decl;
@@ -164,8 +165,8 @@ const IR::Node *TypeInference::postorder(IR::Declaration_Constant *decl) {
 }
 
 // Return true on success
-bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance *inst,
-                                         const IR::Type_Extern *type) {
+bool TypeInferenceBase::checkAbstractMethods(const IR::Declaration_Instance *inst,
+                                             const IR::Type_Extern *type) {
     // Make a list of the abstract methods
     string_map<const IR::Method *> virt;
     for (auto m : type->methods) {
@@ -219,19 +220,38 @@ bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance *inst,
     return rv;
 }
 
-const IR::Node *TypeInference::preorder(IR::Declaration_Instance *decl) {
+TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(
+    const IR::Declaration_Instance *decl) {
     // We need to control the order of the type-checking: we want to do first
     // the declaration, and then typecheck the initializer if present.
-    if (done()) return decl;
-    visit(decl->type, "type");
-    visit(decl->arguments, "arguments");
-    visit(decl->annotations, "annotations");
+    if (done()) return {decl, false};
+    // FIXME: this `cloned` dance is very ugly
+    IR::Declaration_Instance *cloned = nullptr;
+    auto *t = apply_visitor(decl->type, "type")->checkedTo<IR::Type>();
+    if (t != decl->type) {
+        cloned = decl->clone();
+        cloned->type = t;
+        decl = cloned;
+    }
+    auto *args = apply_visitor(decl->arguments, "arguments")->checkedTo<IR::Vector<IR::Argument>>();
+    if (args != decl->arguments) {
+        cloned = cloned ? cloned : decl->clone();
+        cloned->arguments = args;
+        decl = cloned;
+    }
+
+    auto *annot = apply_visitor(decl->annotations, "annotations")->checkedTo<IR::Annotations>();
+    if (annot != decl->annotations) {
+        cloned = cloned ? cloned : decl->clone();
+        cloned->annotations = annot;
+        decl = cloned;
+    }
+
     visit(decl->properties, "properties");
 
     auto type = getTypeType(decl->type);
     if (type == nullptr) {
-        prune();
-        return decl;
+        return {decl, true};
     }
     auto orig = getOriginal<IR::Declaration_Instance>();
 
@@ -241,8 +261,7 @@ const IR::Node *TypeInference::preorder(IR::Declaration_Instance *decl) {
     if (auto et = simpleType->to<IR::Type_Extern>()) {
         auto [newType, newArgs] = checkExternConstructor(decl, et, decl->arguments);
         if (newArgs == nullptr) {
-            prune();
-            return decl;
+            return {decl, true};
         }
         // type can be Type_Extern or Type_SpecializedCanonical.  If it is already
         // specialized, the type arguments were specified explicitly.
@@ -253,63 +272,86 @@ const IR::Node *TypeInference::preorder(IR::Declaration_Instance *decl) {
         setType(decl, type);
 
         // These two checks will need the decl type to be already known
-        if (decl->initializer != nullptr) visit(decl->initializer);
+        if (decl->initializer != nullptr) {
+            auto *init =
+                apply_visitor(decl->initializer, "initializer")->checkedTo<IR::BlockStatement>();
+            if (init != decl->initializer) {
+                cloned = cloned ? cloned : decl->clone();
+                cloned->initializer = init;
+                decl = cloned;
+            }
+        }
 
         if (!checkAbstractMethods(decl, et)) {
-            prune();
-            return decl;
+            return {decl, true};
         }
 
         if (newArgs != decl->arguments) {
-            decl = new IR::Declaration_Instance(decl->srcInfo, decl->name, decl->annotations,
-                                                decl->type, newArgs, decl->initializer);
+            cloned = cloned ? cloned : decl->clone();
+            cloned->arguments = newArgs;
+            decl = cloned;
+
             setType(decl, type);
         }
     } else if (simpleType->is<IR::IContainer>()) {
         if (decl->initializer != nullptr) {
             typeError("%1%: initializers only allowed for extern instances", decl->initializer);
-            prune();
-            return decl;
+            return {decl, true};
         }
         if (!simpleType->is<IR::Type_Package>() && (findContext<IR::IContainer>() == nullptr)) {
-            ::P4::error(ErrorType::ERR_INVALID, "%1%: cannot instantiate at top-level", decl);
-            return decl;
+            P4::error(ErrorType::ERR_INVALID, "%1%: cannot instantiate at top-level", decl);
+            return {decl, false};
         }
         auto typeAndArgs =
             containerInstantiation(decl, decl->arguments, simpleType->to<IR::IContainer>());
         auto type = typeAndArgs.first;
-        auto args = typeAndArgs.second;
-        if (type == nullptr || args == nullptr) {
-            prune();
-            return decl;
+        auto newArgs = typeAndArgs.second;
+        if (type == nullptr || newArgs == nullptr) {
+            return {decl, true};
         }
         learn(type, this, getChildContext());
-        if (args != decl->arguments)
-            decl = new IR::Declaration_Instance(decl->srcInfo, decl->name, decl->annotations,
-                                                decl->type, args, decl->initializer);
+        if (newArgs != decl->arguments) {
+            cloned = cloned ? cloned : decl->clone();
+            cloned->arguments = newArgs;
+            decl = cloned;
+        }
 
         setType(decl, type);
         setType(orig, type);
     } else {
         typeError("%1%: cannot allocate objects of type %2%", decl, type);
     }
-    prune();
-    return decl;
+    return {decl, true};
 }
 
-const IR::Node *TypeInference::preorder(IR::Function *function) {
-    if (done()) return function;
-    visit(function->type);
-    auto type = getTypeType(function->type);
-    if (type == nullptr) return function;
+TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(const IR::Function *function) {
+    if (done()) return {function, false};
+
+    IR::Function *cloned = nullptr;
+    const auto *t = apply_visitor(function->type, "type")->checkedTo<IR::Type_Method>();
+    if (t != function->type) {
+        cloned = function->clone();
+        cloned->type = t;
+    }
+
+    auto type = getTypeType(t);
+    if (type == nullptr) return {function, false};
     setType(getOriginal(), type);
     setType(function, type);
-    visit(function->body);
-    prune();
-    return function;
+    const auto *b = apply_visitor(function->body, "body")->checkedTo<IR::BlockStatement>();
+    if (b != function->body) {
+        cloned = cloned ? cloned : function->clone();
+        cloned->body = b;
+    }
+    if (cloned) {
+        function = cloned;
+        setType(function, type);
+    }
+
+    return {function, true};
 }
 
-const IR::Node *TypeInference::postorder(IR::Method *method) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Method *method) {
     if (done()) return method;
     auto type = getTypeType(method->type);
     if (type == nullptr) return method;
@@ -378,7 +420,7 @@ static bool checkEnumValueInitializer(const IR::Type_Bits *type, const IR::Expre
     return true;
 }
 
-const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
+const IR::Node *TypeInferenceBase::postorder(const IR::SerEnumMember *member) {
     /*
       The type of the member is initially set in the Type_SerEnum preorder visitor.
       Here we check additional constraints and we may correct the member.
@@ -407,7 +449,7 @@ const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
     return member;
 }
 
-const IR::Node *TypeInference::postorder(IR::P4ValueSet *decl) {
+const IR::Node *TypeInferenceBase::postorder(const IR::P4ValueSet *decl) {
     if (done()) return decl;
     // This is a specialized version of setTypeType
     auto canon = canonicalize(decl->elementType);
