@@ -154,7 +154,8 @@ const IR::Node *TypeInference::postorder(IR::ForInStatement *forin) {
         rclone->left = assignment(forin, ltype, rclone->left);
         rclone->right = assignment(forin, ltype, rclone->right);
         if (*range != *rclone)
-            forin->collection = rclone;
+            forin = new IR::ForInStatement(forin->srcInfo, forin->annotations, forin->decl, rclone,
+                                           forin->body);
         else
             delete rclone;
     } else if (auto *stack = ctype->to<IR::Type_Stack>()) {
