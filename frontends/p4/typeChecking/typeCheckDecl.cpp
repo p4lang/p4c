@@ -70,10 +70,10 @@ const IR::ParameterList *TypeInference::canonicalizeParameters(const IR::Paramet
         setType(p, paramType);
         vec->push_back(p);
     }
-    if (changes)
-        return new IR::ParameterList(params->srcInfo, *vec);
-    else
-        return params;
+
+    if (changes) params = new IR::ParameterList(params->srcInfo, *vec);
+
+    return params;
 }
 
 const IR::Node *TypeInference::postorder(IR::P4Action *action) {
@@ -167,9 +167,15 @@ const IR::Node *TypeInference::postorder(IR::Declaration_Constant *decl) {
 bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance *inst,
                                          const IR::Type_Extern *type) {
     // Make a list of the abstract methods
-    IR::NameMap<IR::Method, ordered_map> virt;
-    for (auto m : type->methods)
-        if (m->isAbstract) virt.addUnique(m->name, m);
+    string_map<const IR::Method *> virt;
+    for (auto m : type->methods) {
+        if (m->isAbstract) {
+            auto [it, inserted] = virt.emplace(m->name, m);
+            if (!inserted)
+                ::error(ErrorType::ERR_DUPLICATE, "%1%: duplicated name (%2% is previous instance)",
+                        m->name, it->second);
+        }
+    }
     if (virt.size() == 0 && inst->initializer == nullptr) return true;
     if (virt.size() == 0 && inst->initializer != nullptr) {
         typeError("%1%: instance initializers for extern without abstract methods",
@@ -204,7 +210,7 @@ bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance *inst,
         }
     }
     bool rv = true;
-    for (auto &vm : virt) {
+    for (const auto &vm : virt) {
         if (!vm.second->annotations->getSingle("optional"_cs)) {
             typeError("%1%: %2% abstract method not implemented", inst, vm.second);
             rv = false;
