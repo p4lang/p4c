@@ -131,8 +131,8 @@ const IR::Node *TypeInference::postorder(IR::Declaration_Variable *decl) {
         auto init = assignment(decl, type, decl->initializer);
         if (decl->initializer != init) {
             auto declType = type->getP4Type();
-            decl->type = declType;
-            decl->initializer = init;
+            decl = new IR::Declaration_Variable(decl->srcInfo, decl->name, decl->annotations,
+                                                declType, init);
             LOG2("Created new declaration " << decl);
         }
     }
