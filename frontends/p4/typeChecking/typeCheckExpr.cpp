@@ -1457,8 +1457,9 @@ const IR::Node *TypeInference::postorder(IR::Mux *expression) {
             auto e1 = cts.convert(expression->e1, getChildContext());
             auto e2 = cts.convert(expression->e2, getChildContext());
             if (::errorCount() > 0) return expression;
-            expression->e1 = e1;
-            expression->e2 = e2;
+            if (expression->e1 != e1 || expression->e2 != e2)
+                expression =
+                    new IR::Mux(expression->srcInfo, expression->type, expression->e0, e1, e2);
             secondType = typeMap->getType(e1);
         }
         setType(expression, secondType);
