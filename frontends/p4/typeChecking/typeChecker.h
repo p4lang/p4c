@@ -19,7 +19,6 @@ limitations under the License.
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/typeChecking/typeSubstitution.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
@@ -152,9 +151,8 @@ class TypeInference : public Transform, public ResolutionContext {
      *  Made virtual to enable private midend passes to extend standard IR with custom IR classes.
      */
     virtual const IR::Type *canonicalize(const IR::Type *type);
-    const IR::Type *canonicalizeFields(
-        const IR::Type_StructLike *type,
-        std::function<const IR::Type *(const IR::IndexedVector<IR::StructField> *)> constructor);
+    template <class Ctor>
+    const IR::Type *canonicalizeFields(const IR::Type_StructLike *type, Ctor constructor);
     virtual const IR::ParameterList *canonicalizeParameters(const IR::ParameterList *params);
 
     // various helpers
