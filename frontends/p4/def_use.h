@@ -347,16 +347,12 @@ class ProgramPoint : public IHasDbPrint {
 namespace std {
 template <>
 struct hash<P4::ProgramPoint> {
-    typedef P4::ProgramPoint argument_type;
-    typedef std::size_t result_type;
-    result_type operator()(argument_type const &s) const { return s.hash(); }
+    std::size_t operator()(const P4::ProgramPoint &s) const { return s.hash(); }
 };
 
 template <>
 struct hash<P4::loc_t> {
-    typedef P4::loc_t argument_type;
-    typedef std::size_t result_type;
-    result_type operator()(argument_type const &loc) const { return loc.hash(); }
+    std::size_t operator()(const P4::loc_t &loc) const { return loc.hash(); }
 };
 
 }  // namespace std
@@ -658,7 +654,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     }
 
  private:
-    // TODO: Make absl::flat_hash_set instead?
+    // TODO: Make absl::node_hash_set instead?
     std::unordered_set<loc_t> &cached_locs;
 };
 
