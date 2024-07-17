@@ -40,9 +40,16 @@ void P4Scope::addToScope(const IR::Node *node) {
         addLval(dc->type, dc->name.name, true);
     } else if (const auto *td = node->to<IR::Type_Typedef>()) {
         lScope->push_back(td);
-        if (td->name == "SecurityAssocIdUint_t") {
+
+        // // Resolve the type if it's an indirect type.
+        // const auto *resolvedType = getTypeByName(td->name.name);
+        // std::cout << "Type after resolved: " << resolvedType->node_type_name() << "\n";
+
+        if (td->name.name == "SecurityAssocIdUint_t") {
+            std::cout << "SecurityAssocIdUint_t <--> SecurityAssocId_t" << "\n";
             auto *aliasType = new IR::Type_Name(new IR::Path(IR::ID("SecurityAssocId_t")));
-            auto *aliasTypedef = new IR::Type_Typedef(aliasType->path->name.name, td->type);
+            auto *aliasTypedef = new IR::Type_Typedef(aliasType->path->name, td->type);
+            // auto *aliasTypedef = new IR::Type_Typedef(aliasType->path->name, new IR::Type_Name(new IR::Path(IR::ID("SecurityAssocIdUint_t"))));
             lScope->push_back(aliasTypedef);
         }
     }
@@ -341,16 +348,25 @@ const IR::Type *P4Scope::getTypeByName(cstring name) {
                 if (decl->name.name == name) {
                     return decl;
                 }
-            } else if (const auto *nameNode = node->to<IR::Type_Name>()) {
-                if (nameNode->path->name.name == name) {
-                    return nameNode;
-                }
             }
+
+            // else if (const auto *typeDef = node->to<IR::Type_Typedef>()) {
+            //     std::cout << "typeDef->name: " << typeDef->name << "\n";
+            //     if (typeDef->name == name) {
+            //         std::cout << "typeDef->name (== name): " << typeDef->name << "\n";
+            //         if (const auto *typeName = typeDef->type->to<IR::Type_Name>()) {
+            //             return getTypeByName(typeName->path->name.name);
+            //         }
+            //         return typeDef->type;
+            //     }
+            // }
         }
     }
     return nullptr;
 }
 
+
+/// TODO(zzmic): Figure out whether this requires recursive type resolving.
 const IR::Type *P4Scope::resolveType(const IR::Type *type) {
     if (const auto *typedefType = type->to<IR::Type_Typedef>()) {
         return typedefType->type;

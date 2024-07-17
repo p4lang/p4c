@@ -1054,7 +1054,14 @@ IR::Expression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *tn) 
                 }
             }
         } else if (const auto *typedefType = td->to<IR::Type_Typedef>()) {
-            IR::Expression *expr = genExpression(typedefType->type);
+            IR::Expression *expr;
+            if (typedefType->name == "SecurityAssocId_t" || typedefType->name == "SecurityAssocIdUint_t") {
+                std::cout << "Start constructing ..." << "\n";
+                expr = genExpression(typedefType->type);
+            }
+            else {
+                expr = genExpression(typedefType->type);
+            }
             return expr;
         } else {
             BUG("genStructListExpr: Requested Type %s not a struct-like type", tnName);
