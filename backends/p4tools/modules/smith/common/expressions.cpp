@@ -1053,19 +1053,13 @@ IR::Expression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *tn) 
                     components.push_back(expr);
                 }
             }
-        }
-
-        else if (const auto *typedefType = td->to<IR::Type_Typedef>()) {
+        } else if (const auto *typedefType = td->to<IR::Type_Typedef>()) {
             IR::Expression *expr = genExpression(typedefType->type);
             return expr;
-        }
-
-        else {
+        } else {
             BUG("genStructListExpr: Requested Type %s not a struct-like type", tnName);
         }
-    }
-
-    else {
+    } else {
         BUG("genStructListExpr: Requested Type %s not found", tnName);
     }
     return new IR::ListExpression(components);

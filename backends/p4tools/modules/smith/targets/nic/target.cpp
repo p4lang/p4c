@@ -52,6 +52,8 @@ IR::IndexedVector<IR::StructField> generatePnaPreOutputMetadataFields() {
     // `typedef bit<32> SecurityAssocIdUint_t;` && type SecurityAssocIdUint_t SecurityAssocId_t;
     // => `typedef bit<32> SecurityAssocId_t;`
     // TODO(zzmic): Figure out a proper casting mechanism
+    // Note that if `typedef bit<32> SecurityAssocId_t;` is defined, this works (together with other
+    // components).
     retFields.push_back(
         new IR::StructField("said", new IR::Type_Name(IR::ID("SecurityAssocId_t"))));
 
