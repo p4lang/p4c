@@ -148,6 +148,7 @@ set (P4_FRONTEND_HDRS
   p4/ternaryBool.h
   p4/toP4/toP4.h
   p4/typeChecking/bindVariables.h
+  p4/typeChecking/constantTypeSubstitution.h
   p4/typeChecking/syntacticEquivalence.h
   p4/typeChecking/typeChecker.h
   p4/typeChecking/typeConstraints.h
