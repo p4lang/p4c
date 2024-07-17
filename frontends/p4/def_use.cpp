@@ -764,9 +764,13 @@ void ComputeWriteSet::visitVirtualMethods(const IR::IndexedVector<IR::Declaratio
 }
 
 std::size_t P4::loc_t::hash() const {
-    if (!parent) return Util::Hash{}(node->id);
-
-    return Util::Hash{}(node->id, parent->hash());
+    if (!computedHash) {
+        if (!parent)
+            computedHash = Util::Hash{}(node->id);
+        else
+            computedHash = Util::Hash{}(node->id, parent->hash());
+    }
+    return computedHash;
 }
 
 // Returns program location of n, given the program location of n's direct parent.
