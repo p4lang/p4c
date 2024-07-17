@@ -1476,9 +1476,10 @@ const IR::Node *TypeInference::postorder(IR::Mux *expression) {
             ConstantTypeSubstitution cts(tvs, typeMap, this);
             auto e1 = cts.convert(expression->e1, getChildContext());
             auto e2 = cts.convert(expression->e2, getChildContext());
-            if (::P4::errorCount() > 0) return expression;
-            expression->e1 = e1;
-            expression->e2 = e2;
+            if (P4::errorCount() > 0) return expression;
+            if (expression->e1 != e1 || expression->e2 != e2)
+                expression =
+                    new IR::Mux(expression->srcInfo, expression->type, expression->e0, e1, e2);
             secondType = typeMap->getType(e1);
         }
         setType(expression, secondType);
