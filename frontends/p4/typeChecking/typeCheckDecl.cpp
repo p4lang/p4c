@@ -249,16 +249,21 @@ const IR::Node *TypeInference::preorder(IR::Declaration_Instance *decl) {
         // Otherwise, we use the type received from checkExternConstructor, which
         // has substituted the type variables with fresh ones.
         if (type->is<IR::Type_Extern>()) type = newType;
-        decl->arguments = newArgs;
         setType(orig, type);
         setType(decl, type);
 
+        // These two checks will need the decl type to be already known
         if (decl->initializer != nullptr) visit(decl->initializer);
-        // This will need the decl type to be already known
-        bool s = checkAbstractMethods(decl, et);
-        if (!s) {
+
+        if (!checkAbstractMethods(decl, et)) {
             prune();
             return decl;
+        }
+
+        if (newArgs != decl->arguments) {
+            decl = new IR::Declaration_Instance(decl->srcInfo, decl->name, decl->annotations,
+                                                decl->type, newArgs, decl->initializer);
+            setType(decl, type);
         }
     } else if (simpleType->is<IR::IContainer>()) {
         if (decl->initializer != nullptr) {
@@ -279,7 +284,10 @@ const IR::Node *TypeInference::preorder(IR::Declaration_Instance *decl) {
             return decl;
         }
         learn(type, this, getChildContext());
-        if (args != decl->arguments) decl->arguments = args;
+        if (args != decl->arguments)
+            decl = new IR::Declaration_Instance(decl->srcInfo, decl->name, decl->annotations,
+                                                decl->type, args, decl->initializer);
+
         setType(decl, type);
         setType(orig, type);
     } else {
