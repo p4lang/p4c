@@ -61,7 +61,9 @@ const IR::Node *TypeInference::postorder(IR::SwitchStatement *stat) {
         if (isCompileTimeConstant(stat->expression))
             warn(ErrorType::WARN_MISMATCH, "%1%: constant expression in switch", stat->expression);
 
-        for (auto &c : stat->cases) {
+        auto *sclone = stat->clone();
+        bool changed = false;
+        for (auto &c : sclone->cases) {
             if (!isCompileTimeConstant(c->label))
                 typeError("%1%: must be a compile-time constant", c->label);
             auto lt = getType(c->label);
@@ -71,6 +73,7 @@ const IR::Node *TypeInference::postorder(IR::SwitchStatement *stat) {
                                        c->statement);
                 setType(c->label, type);
                 setCompileTimeConstant(c->label);
+                changed = true;
                 continue;
             } else if (c->label->is<IR::DefaultExpression>()) {
                 continue;
@@ -80,8 +83,10 @@ const IR::Node *TypeInference::postorder(IR::SwitchStatement *stat) {
             if (b && comp.right != c->label) {
                 c = new IR::SwitchCase(c->srcInfo, comp.right, c->statement);
                 setCompileTimeConstant(c->label);
+                changed = true;
             }
         }
+        if (changed) stat = sclone;
     }
     return stat;
 }
