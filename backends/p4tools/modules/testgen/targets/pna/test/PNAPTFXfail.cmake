@@ -13,13 +13,13 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
         "testgen-p4c-pna-ptf"
-        "Unknown or unimplemented extern method: dpdk_execute"
+        "Unknown or unimplemented extern method: .*[.]dpdk_execute"
         pna-dpdk-direct-meter-learner.p4
 )
 
 p4tools_add_xfail_reason(
         "testgen-p4c-pna-ptf"
-        "Unknown or unimplemented extern method: get_hash"
+        "Unknown or unimplemented extern method: .*[.]get_hash"
         pna-dpdk-flatten-local-struct-decl.p4
         pna-dpdk-toeplitz-hash-1.p4
         pna-dpdk-toeplitz-hash.p4
@@ -27,7 +27,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
         "testgen-p4c-pna-ptf"
-        "Unknown or unimplemented extern method: from_ipsec"
+        "Unknown or unimplemented extern method: .*[.]from_ipsec"
         pna-example-ipsec.p4
 )
 

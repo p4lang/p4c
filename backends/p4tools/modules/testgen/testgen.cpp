@@ -174,7 +174,6 @@ std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view
 
     const auto *testgenCompilerResult =
         compilerResultOpt.value().get().checkedTo<TestgenCompilerResult>();
-
     const auto *programInfo = TestgenTarget::produceProgramInfo(*testgenCompilerResult);
     if (programInfo == nullptr || ::errorCount() > 0) {
         ::error("P4Testgen encountered errors during preprocessing.");
