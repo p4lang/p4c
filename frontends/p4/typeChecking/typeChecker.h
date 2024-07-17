@@ -65,6 +65,8 @@ void typeError(const char *format, Args &&...args) {
 /// True if the type contains any varbit or header_union subtypes
 bool hasVarbitsOrUnions(const TypeMap *typeMap, const IR::Type *type);
 
+class ReadOnlyTypeInference;
+
 // Actual type checking algorithm.
 // In general this pass should not be called directly; call TypeChecking instead.
 // It is a transform because it may convert implicit casts into explicit casts.
@@ -75,25 +77,26 @@ bool hasVarbitsOrUnions(const TypeMap *typeMap, const IR::Type *type);
 // In fact, several passes do modify the program such that types are invalidated.
 // For example, enum elimination converts enum values into integers.  After such
 // changes the typemap has to be cleared and types must be recomputed from scratch.
-class TypeInference : public Transform, public ResolutionContext {
+class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     // Output: type map
     TypeMap *typeMap;
     const IR::Node *initialNode;
     std::shared_ptr<MinimalNameGenerator> nameGen;
 
-    TypeInference(TypeMap *typeMap, std::shared_ptr<MinimalNameGenerator> nameGen);
-
  public:
     // @param readOnly If true it will assert that it behaves like
     //        an Inspector.
-    explicit TypeInference(TypeMap *typeMap, bool readOnly = false, bool checkArrays = true,
-                           bool errorOnNullDecls = false);
+    explicit TypeInferenceBase(TypeMap *typeMap, bool readOnly = false, bool checkArrays = true,
+                               bool errorOnNullDecls = false);
 
  protected:
+    TypeInferenceBase(TypeMap *typeMap, std::shared_ptr<MinimalNameGenerator> nameGen);
+
     // If true we expect to leave the program unchanged
     bool readOnly = false;
     bool checkArrays = true;
     bool errorOnNullDecls = false;
+    const IR::Node *getInitialNode() const { return initialNode; }
     const IR::Type *getType(const IR::Node *element) const;
     const IR::Type *getTypeType(const IR::Node *element) const;
     void setType(const IR::Node *element, const IR::Type *type);
@@ -197,31 +200,297 @@ class TypeInference : public Transform, public ResolutionContext {
     //////////////////////////////////////////////////////////////
 
  public:
-    using Transform::postorder;
-    using Transform::preorder;
-
     static const IR::Type *specialize(const IR::IMayBeGenericType *type,
                                       const IR::Vector<IR::Type> *arguments,
                                       const Visitor::Context *ctxt);
-    const IR::Node *pruneIfDone(const IR::Node *node) {
-        if (done()) {
-            prune();
-        }
-        return node;
-    }
-    const IR::Node *preorder(IR::Expression *expression) override {
-        return pruneIfDone(expression);
-    }
-    const IR::Node *preorder(IR::Type *type) override { return pruneIfDone(type); }
 
     struct Comparison {
         const IR::Expression *left;
         const IR::Expression *right;
     };
 
+    using PreorderResult = std::pair<const IR::Node *, bool>;
+
     // Helper function to handle comparisons
     bool compare(const IR::Node *errorPosition, const IR::Type *ltype, const IR::Type *rtype,
                  Comparison *compare);
+
+    // do functions pre-order so we can check the prototype
+    // before the returns
+    PreorderResult preorder(const IR::Function *function);
+    PreorderResult preorder(const IR::P4Program *program);
+    PreorderResult preorder(const IR::Declaration_Instance *decl);
+    // check invariants for entire list before checking the entries
+    PreorderResult preorder(const IR::EntriesList *el);
+    PreorderResult preorder(const IR::Type_SerEnum *type);
+
+    const IR::Node *postorder(const IR::Declaration_MatchKind *decl);
+    const IR::Node *postorder(const IR::Declaration_Variable *decl);
+    const IR::Node *postorder(const IR::Declaration_Constant *constant);
+    const IR::Node *postorder(const IR::P4Control *cont);
+    const IR::Node *postorder(const IR::P4Parser *cont);
+    const IR::Node *postorder(const IR::Method *method);
+
+    const IR::Node *postorder(const IR::Type_Type *type);
+    const IR::Node *postorder(const IR::Type_Table *type);
+    const IR::Node *postorder(const IR::Type_Error *decl);
+    const IR::Node *postorder(const IR::Type_InfInt *type);
+    const IR::Node *postorder(const IR::Type_Method *type);
+    const IR::Node *postorder(const IR::Type_Action *type);
+    const IR::Node *postorder(const IR::Type_Name *type);
+    const IR::Node *postorder(const IR::Type_Base *type);
+    const IR::Node *postorder(const IR::Type_Var *type);
+    const IR::Node *postorder(const IR::Type_Enum *type);
+    const IR::Node *postorder(const IR::Type_Extern *type);
+    const IR::Node *postorder(const IR::StructField *field);
+    const IR::Node *postorder(const IR::Type_Header *type);
+    const IR::Node *postorder(const IR::Type_Stack *type);
+    const IR::Node *postorder(const IR::Type_Struct *type);
+    const IR::Node *postorder(const IR::Type_HeaderUnion *type);
+    const IR::Node *postorder(const IR::Type_Typedef *type);
+    const IR::Node *postorder(const IR::Type_Specialized *type);
+    const IR::Node *postorder(const IR::Type_SpecializedCanonical *type);
+    const IR::Node *postorder(const IR::Type_Tuple *type);
+    const IR::Node *postorder(const IR::Type_P4List *type);
+    const IR::Node *postorder(const IR::Type_List *type);
+    const IR::Node *postorder(const IR::Type_Set *type);
+    const IR::Node *postorder(const IR::Type_ArchBlock *type);
+    const IR::Node *postorder(const IR::Type_Newtype *type);
+    const IR::Node *postorder(const IR::Type_Package *type);
+    const IR::Node *postorder(const IR::Type_ActionEnum *type);
+    const IR::Node *postorder(const IR::P4Table *type);
+    const IR::Node *postorder(const IR::P4Action *type);
+    const IR::Node *postorder(const IR::P4ValueSet *type);
+    const IR::Node *postorder(const IR::Key *key);
+    const IR::Node *postorder(const IR::Entry *e);
+
+    const IR::Node *postorder(const IR::Dots *expression);
+    const IR::Node *postorder(const IR::Argument *arg);
+    const IR::Node *postorder(const IR::SerEnumMember *member);
+    const IR::Node *postorder(const IR::Parameter *param);
+    const IR::Node *postorder(const IR::Constant *expression);
+    const IR::Node *postorder(const IR::BoolLiteral *expression);
+    const IR::Node *postorder(const IR::StringLiteral *expression);
+    const IR::Node *postorder(const IR::Operation_Relation *expression);
+    const IR::Node *postorder(const IR::Concat *expression);
+    const IR::Node *postorder(const IR::ArrayIndex *expression);
+    const IR::Node *postorder(const IR::LAnd *expression) { return binaryBool(expression); }
+    const IR::Node *postorder(const IR::LOr *expression) { return binaryBool(expression); }
+    const IR::Node *postorder(const IR::Add *expression) { return binaryArith(expression); }
+    const IR::Node *postorder(const IR::Sub *expression) { return binaryArith(expression); }
+    const IR::Node *postorder(const IR::AddSat *expression) { return binaryArith(expression); }
+    const IR::Node *postorder(const IR::SubSat *expression) { return binaryArith(expression); }
+    const IR::Node *postorder(const IR::Mul *expression) { return binaryArith(expression); }
+    const IR::Node *postorder(const IR::Div *expression) { return unsBinaryArith(expression); }
+    const IR::Node *postorder(const IR::Mod *expression) { return unsBinaryArith(expression); }
+    const IR::Node *postorder(const IR::Shl *expression) { return shift(expression); }
+    const IR::Node *postorder(const IR::Shr *expression) { return shift(expression); }
+    const IR::Node *postorder(const IR::BXor *expression) { return binaryArith(expression); }
+    const IR::Node *postorder(const IR::BAnd *expression) { return binaryArith(expression); }
+    const IR::Node *postorder(const IR::BOr *expression) { return binaryArith(expression); }
+    const IR::Node *postorder(const IR::Mask *expression) { return typeSet(expression); }
+    const IR::Node *postorder(const IR::Range *expression) { return typeSet(expression); }
+    const IR::Node *postorder(const IR::LNot *expression);
+    const IR::Node *postorder(const IR::Neg *expression);
+    const IR::Node *postorder(const IR::UPlus *expression);
+    const IR::Node *postorder(const IR::Cmpl *expression);
+    const IR::Node *postorder(const IR::Cast *expression);
+    const IR::Node *postorder(const IR::Mux *expression);
+    const IR::Node *postorder(const IR::Slice *expression);
+    const IR::Node *postorder(const IR::PathExpression *expression);
+    const IR::Node *postorder(const IR::Member *expression);
+    const IR::Node *postorder(const IR::TypeNameExpression *expression);
+    const IR::Node *postorder(const IR::ListExpression *expression);
+    const IR::Node *postorder(const IR::InvalidHeader *expression);
+    const IR::Node *postorder(const IR::InvalidHeaderUnion *expression);
+    const IR::Node *postorder(const IR::Invalid *expression);
+    const IR::Node *postorder(const IR::P4ListExpression *expression);
+    const IR::Node *postorder(const IR::StructExpression *expression);
+    const IR::Node *postorder(const IR::HeaderStackExpression *expression);
+    const IR::Node *postorder(const IR::MethodCallStatement *mcs);
+    const IR::Node *postorder(const IR::MethodCallExpression *expression);
+    const IR::Node *postorder(const IR::ConstructorCallExpression *expression);
+    const IR::Node *postorder(const IR::SelectExpression *expression);
+    const IR::Node *postorder(const IR::DefaultExpression *expression);
+    const IR::Node *postorder(const IR::This *expression);
+    const IR::Node *postorder(const IR::AttribLocal *local);
+    const IR::Node *postorder(const IR::ActionList *al);
+
+    const IR::Node *postorder(const IR::ReturnStatement *stat);
+    const IR::Node *postorder(const IR::IfStatement *stat);
+    const IR::Node *postorder(const IR::SwitchStatement *stat);
+    const IR::Node *postorder(const IR::AssignmentStatement *stat);
+    const IR::Node *postorder(const IR::ForInStatement *stat);
+    const IR::Node *postorder(const IR::ActionListElement *elem);
+    const IR::Node *postorder(const IR::KeyElement *elem);
+    const IR::Node *postorder(const IR::Property *elem);
+    const IR::Node *postorder(const IR::SelectCase *elem);
+    const IR::Node *postorder(const IR::Annotation *annotation);
+
+    void start(const IR::Node *node);
+    void finish(const IR::Node *Node);
+
+    ReadOnlyTypeInference *readOnlyClone() const;
+    // Apply recursively the typechecker to the newly created node
+    // to add all component subtypes in the typemap.
+    // Return 'true' if errors were discovered in the learning process.
+    bool learn(const IR::Node *node, Visitor *caller, const Visitor::Context *ctxt);
+};
+
+class ReadOnlyTypeInference : public virtual Inspector, public TypeInferenceBase {
+    friend class TypeInferenceBase;
+
+    ReadOnlyTypeInference(TypeMap *typeMap, std::shared_ptr<MinimalNameGenerator> nameGen)
+        : TypeInferenceBase(typeMap, std::move(nameGen)) {}
+
+ public:
+    using Inspector::postorder;
+    using Inspector::preorder;
+
+    explicit ReadOnlyTypeInference(TypeMap *typeMap, bool checkArrays = true,
+                                   bool errorOnNullDecls = false)
+        : TypeInferenceBase(typeMap, true, checkArrays, errorOnNullDecls) {}
+
+    Visitor::profile_t init_apply(const IR::Node *node) override;
+    void end_apply(const IR::Node *Node) override;
+
+    bool preorder(const IR::Expression *) override { return !done(); }
+    bool preorder(const IR::Type *) override { return !done(); }
+
+    // do functions pre-order so we can check the prototype
+    // before the returns
+    bool preorder(const IR::Function *function) override;
+    bool preorder(const IR::P4Program *program) override;
+    bool preorder(const IR::Declaration_Instance *decl) override;
+    // check invariants for entire list before checking the entries
+    bool preorder(const IR::EntriesList *el) override;
+    bool preorder(const IR::Type_SerEnum *type) override;
+
+    void postorder(const IR::Declaration_MatchKind *decl) override;
+    void postorder(const IR::Declaration_Variable *decl) override;
+    void postorder(const IR::Declaration_Constant *constant) override;
+    void postorder(const IR::P4Control *cont) override;
+    void postorder(const IR::P4Parser *cont) override;
+    void postorder(const IR::Method *method) override;
+
+    void postorder(const IR::Type_Type *type) override;
+    void postorder(const IR::Type_Table *type) override;
+    void postorder(const IR::Type_Error *decl) override;
+    void postorder(const IR::Type_InfInt *type) override;
+    void postorder(const IR::Type_Method *type) override;
+    void postorder(const IR::Type_Action *type) override;
+    void postorder(const IR::Type_Name *type) override;
+    void postorder(const IR::Type_Base *type) override;
+    void postorder(const IR::Type_Var *type) override;
+    void postorder(const IR::Type_Enum *type) override;
+    void postorder(const IR::Type_Extern *type) override;
+    void postorder(const IR::StructField *field) override;
+    void postorder(const IR::Type_Header *type) override;
+    void postorder(const IR::Type_Stack *type) override;
+    void postorder(const IR::Type_Struct *type) override;
+    void postorder(const IR::Type_HeaderUnion *type) override;
+    void postorder(const IR::Type_Typedef *type) override;
+    void postorder(const IR::Type_Specialized *type) override;
+    void postorder(const IR::Type_SpecializedCanonical *type) override;
+    void postorder(const IR::Type_Tuple *type) override;
+    void postorder(const IR::Type_P4List *type) override;
+    void postorder(const IR::Type_List *type) override;
+    void postorder(const IR::Type_Set *type) override;
+    void postorder(const IR::Type_ArchBlock *type) override;
+    void postorder(const IR::Type_Newtype *type) override;
+    void postorder(const IR::Type_Package *type) override;
+    void postorder(const IR::Type_ActionEnum *type) override;
+    void postorder(const IR::P4Table *type) override;
+    void postorder(const IR::P4Action *type) override;
+    void postorder(const IR::P4ValueSet *type) override;
+    void postorder(const IR::Key *key) override;
+    void postorder(const IR::Entry *e) override;
+
+    void postorder(const IR::Dots *expression) override;
+    void postorder(const IR::Argument *arg) override;
+    void postorder(const IR::SerEnumMember *member) override;
+    void postorder(const IR::Parameter *param) override;
+    void postorder(const IR::Constant *expression) override;
+    void postorder(const IR::BoolLiteral *expression) override;
+    void postorder(const IR::StringLiteral *expression) override;
+    void postorder(const IR::Operation_Relation *expression) override;
+    void postorder(const IR::Concat *expression) override;
+    void postorder(const IR::ArrayIndex *expression) override;
+    void postorder(const IR::LAnd *expression) override;
+    void postorder(const IR::LOr *expression) override;
+    void postorder(const IR::Add *expression) override;
+    void postorder(const IR::Sub *expression) override;
+    void postorder(const IR::AddSat *expression) override;
+    void postorder(const IR::SubSat *expression) override;
+    void postorder(const IR::Mul *expression) override;
+    void postorder(const IR::Div *expression) override;
+    void postorder(const IR::Mod *expression) override;
+    void postorder(const IR::Shl *expression) override;
+    void postorder(const IR::Shr *expression) override;
+    void postorder(const IR::BXor *expression) override;
+    void postorder(const IR::BAnd *expression) override;
+    void postorder(const IR::BOr *expression) override;
+    void postorder(const IR::Mask *expression) override;
+    void postorder(const IR::Range *expression) override;
+    void postorder(const IR::LNot *expression) override;
+    void postorder(const IR::Neg *expression) override;
+    void postorder(const IR::UPlus *expression) override;
+    void postorder(const IR::Cmpl *expression) override;
+    void postorder(const IR::Cast *expression) override;
+    void postorder(const IR::Mux *expression) override;
+    void postorder(const IR::Slice *expression) override;
+    void postorder(const IR::PathExpression *expression) override;
+    void postorder(const IR::Member *expression) override;
+    void postorder(const IR::TypeNameExpression *expression) override;
+    void postorder(const IR::ListExpression *expression) override;
+    void postorder(const IR::InvalidHeader *expression) override;
+    void postorder(const IR::InvalidHeaderUnion *expression) override;
+    void postorder(const IR::Invalid *expression) override;
+    void postorder(const IR::P4ListExpression *expression) override;
+    void postorder(const IR::StructExpression *expression) override;
+    void postorder(const IR::HeaderStackExpression *expression) override;
+    void postorder(const IR::MethodCallStatement *mcs) override;
+    void postorder(const IR::MethodCallExpression *expression) override;
+    void postorder(const IR::ConstructorCallExpression *expression) override;
+    void postorder(const IR::SelectExpression *expression) override;
+    void postorder(const IR::DefaultExpression *expression) override;
+    void postorder(const IR::This *expression) override;
+    void postorder(const IR::AttribLocal *local) override;
+    void postorder(const IR::ActionList *al) override;
+
+    void postorder(const IR::ReturnStatement *stat) override;
+    void postorder(const IR::IfStatement *stat) override;
+    void postorder(const IR::SwitchStatement *stat) override;
+    void postorder(const IR::AssignmentStatement *stat) override;
+    void postorder(const IR::ForInStatement *stat) override;
+    void postorder(const IR::ActionListElement *elem) override;
+    void postorder(const IR::KeyElement *elem) override;
+    void postorder(const IR::Property *elem) override;
+    void postorder(const IR::SelectCase *elem) override;
+    void postorder(const IR::Annotation *annotation) override;
+};
+
+class TypeInference : public virtual Transform, public TypeInferenceBase {
+ public:
+    using Transform::postorder;
+    using Transform::preorder;
+
+    explicit TypeInference(TypeMap *typeMap, bool readOnly = true, bool checkArrays = true,
+                           bool errorOnNullDecls = false)
+        : TypeInferenceBase(typeMap, readOnly, checkArrays, errorOnNullDecls) {}
+
+    Visitor::profile_t init_apply(const IR::Node *node) override;
+    const IR::Node *apply_visitor(const IR::Node *, const char *name = nullptr) override;
+    void end_apply(const IR::Node *Node) override;
+
+    const IR::Node *pruneIfDone(const IR::Node *node) {
+        if (done()) Transform::prune();
+        return node;
+    }
+    const IR::Node *preorder(IR::Expression *expression) override {
+        return pruneIfDone(expression);
+    }
+    const IR::Node *preorder(IR::Type *type) override { return pruneIfDone(type); }
 
     // do functions pre-order so we can check the prototype
     // before the returns
@@ -282,22 +551,22 @@ class TypeInference : public Transform, public ResolutionContext {
     const IR::Node *postorder(IR::Operation_Relation *expression) override;
     const IR::Node *postorder(IR::Concat *expression) override;
     const IR::Node *postorder(IR::ArrayIndex *expression) override;
-    const IR::Node *postorder(IR::LAnd *expression) override { return binaryBool(expression); }
-    const IR::Node *postorder(IR::LOr *expression) override { return binaryBool(expression); }
-    const IR::Node *postorder(IR::Add *expression) override { return binaryArith(expression); }
-    const IR::Node *postorder(IR::Sub *expression) override { return binaryArith(expression); }
-    const IR::Node *postorder(IR::AddSat *expression) override { return binaryArith(expression); }
-    const IR::Node *postorder(IR::SubSat *expression) override { return binaryArith(expression); }
-    const IR::Node *postorder(IR::Mul *expression) override { return binaryArith(expression); }
-    const IR::Node *postorder(IR::Div *expression) override { return unsBinaryArith(expression); }
-    const IR::Node *postorder(IR::Mod *expression) override { return unsBinaryArith(expression); }
-    const IR::Node *postorder(IR::Shl *expression) override { return shift(expression); }
-    const IR::Node *postorder(IR::Shr *expression) override { return shift(expression); }
-    const IR::Node *postorder(IR::BXor *expression) override { return binaryArith(expression); }
-    const IR::Node *postorder(IR::BAnd *expression) override { return binaryArith(expression); }
-    const IR::Node *postorder(IR::BOr *expression) override { return binaryArith(expression); }
-    const IR::Node *postorder(IR::Mask *expression) override { return typeSet(expression); }
-    const IR::Node *postorder(IR::Range *expression) override { return typeSet(expression); }
+    const IR::Node *postorder(IR::LAnd *expression) override;
+    const IR::Node *postorder(IR::LOr *expression) override;
+    const IR::Node *postorder(IR::Add *expression) override;
+    const IR::Node *postorder(IR::Sub *expression) override;
+    const IR::Node *postorder(IR::AddSat *expression) override;
+    const IR::Node *postorder(IR::SubSat *expression) override;
+    const IR::Node *postorder(IR::Mul *expression) override;
+    const IR::Node *postorder(IR::Div *expression) override;
+    const IR::Node *postorder(IR::Mod *expression) override;
+    const IR::Node *postorder(IR::Shl *expression) override;
+    const IR::Node *postorder(IR::Shr *expression) override;
+    const IR::Node *postorder(IR::BXor *expression) override;
+    const IR::Node *postorder(IR::BAnd *expression) override;
+    const IR::Node *postorder(IR::BOr *expression) override;
+    const IR::Node *postorder(IR::Mask *expression) override;
+    const IR::Node *postorder(IR::Range *expression) override;
     const IR::Node *postorder(IR::LNot *expression) override;
     const IR::Node *postorder(IR::Neg *expression) override;
     const IR::Node *postorder(IR::UPlus *expression) override;
@@ -334,16 +603,6 @@ class TypeInference : public Transform, public ResolutionContext {
     const IR::Node *postorder(IR::Property *elem) override;
     const IR::Node *postorder(IR::SelectCase *elem) override;
     const IR::Node *postorder(IR::Annotation *annotation) override;
-
-    Visitor::profile_t init_apply(const IR::Node *node) override;
-    void end_apply(const IR::Node *Node) override;
-    const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;
-
-    TypeInference *clone() const override;
-    // Apply recursively the typechecker to the newly created node
-    // to add all component subtypes in the typemap.
-    // Return 'true' if errors were discovered in the learning process.
-    bool learn(const IR::Node *node, Visitor *caller, const Visitor::Context *ctxt);
 };
 
 // Copy types from the typeMap to expressions.  Updates the typeMap with newly created nodes

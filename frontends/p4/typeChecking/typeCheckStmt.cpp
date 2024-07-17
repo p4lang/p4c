@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node *TypeInference::postorder(IR::IfStatement *conditional) {
+const IR::Node *TypeInferenceBase::postorder(const IR::IfStatement *conditional) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto type = getType(conditional->condition);
     if (type == nullptr) return conditional;
@@ -28,7 +28,7 @@ const IR::Node *TypeInference::postorder(IR::IfStatement *conditional) {
     return conditional;
 }
 
-const IR::Node *TypeInference::postorder(IR::SwitchStatement *stat) {
+const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto type = getType(stat->expression);
     if (type == nullptr) return stat;
@@ -91,7 +91,7 @@ const IR::Node *TypeInference::postorder(IR::SwitchStatement *stat) {
     return stat;
 }
 
-const IR::Node *TypeInference::postorder(IR::ReturnStatement *statement) {
+const IR::Node *TypeInferenceBase::postorder(const IR::ReturnStatement *statement) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto func = findOrigCtxt<IR::Function>();
     if (func == nullptr) {
@@ -125,7 +125,7 @@ const IR::Node *TypeInference::postorder(IR::ReturnStatement *statement) {
     return statement;
 }
 
-const IR::Node *TypeInference::postorder(IR::AssignmentStatement *assign) {
+const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assign) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto ltype = getType(assign->left);
     if (ltype == nullptr) return assign;
@@ -142,7 +142,7 @@ const IR::Node *TypeInference::postorder(IR::AssignmentStatement *assign) {
     return assign;
 }
 
-const IR::Node *TypeInference::postorder(IR::ForInStatement *forin) {
+const IR::Node *TypeInferenceBase::postorder(const IR::ForInStatement *forin) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto ltype = getType(forin->ref);
     if (ltype == nullptr) return forin;
@@ -177,7 +177,7 @@ const IR::Node *TypeInference::postorder(IR::ForInStatement *forin) {
     return forin;
 }
 
-const IR::Node *TypeInference::postorder(IR::ActionListElement *elem) {
+const IR::Node *TypeInferenceBase::postorder(const IR::ActionListElement *elem) {
     if (done()) return elem;
     auto type = getType(elem->expression);
     if (type == nullptr) return elem;
@@ -187,13 +187,13 @@ const IR::Node *TypeInference::postorder(IR::ActionListElement *elem) {
     return elem;
 }
 
-const IR::Node *TypeInference::postorder(IR::SelectCase *sc) {
+const IR::Node *TypeInferenceBase::postorder(const IR::SelectCase *sc) {
     auto type = getType(sc->state);
     if (type != nullptr && type != IR::Type_State::get()) typeError("%1% must be state", sc);
     return sc;
 }
 
-const IR::Node *TypeInference::postorder(IR::KeyElement *elem) {
+const IR::Node *TypeInferenceBase::postorder(const IR::KeyElement *elem) {
     auto ktype = getType(elem->expression);
     if (ktype == nullptr) return elem;
     while (ktype->is<IR::Type_Newtype>()) ktype = getTypeType(ktype->to<IR::Type_Newtype>()->type);
@@ -211,14 +211,14 @@ const IR::Node *TypeInference::postorder(IR::KeyElement *elem) {
     return elem;
 }
 
-const IR::Node *TypeInference::postorder(IR::ActionList *al) {
+const IR::Node *TypeInferenceBase::postorder(const IR::ActionList *al) {
     LOG3("TI Visited " << dbp(al));
     BUG_CHECK(currentActionList == nullptr, "%1%: nested action list?", al);
     currentActionList = al;
     return al;
 }
 
-const IR::ActionListElement *TypeInference::validateActionInitializer(
+const IR::ActionListElement *TypeInferenceBase::validateActionInitializer(
     const IR::Expression *actionCall) {
     // We cannot retrieve the action list from the table, because the
     // table has not been modified yet.  We want the latest version of
@@ -306,7 +306,7 @@ const IR::ActionListElement *TypeInference::validateActionInitializer(
     return elem;
 }
 
-const IR::Node *TypeInference::postorder(IR::Property *prop) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Property *prop) {
     // Handle the default_action
     if (prop->name != IR::TableProperties::defaultActionPropertyName) return prop;
 
