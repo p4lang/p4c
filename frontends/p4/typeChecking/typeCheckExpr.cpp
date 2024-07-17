@@ -2108,7 +2108,10 @@ const IR::Node *TypeInference::postorder(IR::ConstructorCallExpression *expressi
     if (auto *e = simpleType->to<IR::Type_Extern>()) {
         auto [contType, newArgs] = checkExternConstructor(expression, e, expression->arguments);
         if (newArgs == nullptr) return expression;
-        expression->arguments = newArgs;
+        if (expression->arguments != newArgs)
+            expression = new IR::ConstructorCallExpression(expression->srcInfo,
+                                                           expression->constructedType, newArgs);
+
         setType(getOriginal(), contType);
         setType(expression, contType);
     } else if (auto *c = simpleType->to<IR::IContainer>()) {
@@ -2120,7 +2123,10 @@ const IR::Node *TypeInference::postorder(IR::ConstructorCallExpression *expressi
             contType = new IR::Type_SpecializedCanonical(type->srcInfo, st->baseType, st->arguments,
                                                          contType);
         }
-        expression->arguments = args;
+        if (expression->arguments != args)
+            expression = new IR::ConstructorCallExpression(expression->srcInfo,
+                                                           expression->constructedType, args);
+
         setType(expression, contType);
         setType(getOriginal(), contType);
     } else {
