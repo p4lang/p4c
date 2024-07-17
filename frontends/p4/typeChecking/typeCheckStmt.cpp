@@ -115,7 +115,8 @@ const IR::Node *TypeInference::postorder(IR::ReturnStatement *statement) {
     }
 
     auto init = assignment(statement, returnType, statement->expression);
-    if (init != statement->expression) statement->expression = init;
+    if (init != statement->expression)
+        statement = new IR::ReturnStatement(statement->srcInfo, init);
     return statement;
 }
 
