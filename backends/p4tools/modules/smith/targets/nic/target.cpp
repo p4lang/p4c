@@ -52,8 +52,8 @@ IR::IndexedVector<IR::StructField> generatePnaPreOutputMetadataFields() {
     // `typedef bit<32> SecurityAssocIdUint_t;` && type SecurityAssocIdUint_t SecurityAssocId_t;
     // => `typedef bit<32> SecurityAssocId_t;`
     // TODO(zzmic): Figure out a proper casting mechanism
-    // retFields.push_back(new IR::StructField("said", IR::Type_Bits::get(32, false)));
-    retFields.push_back(new IR::StructField("said", new IR::Type_Name("SecurityAssocId_t")));
+    retFields.push_back(
+        new IR::StructField("said", new IR::Type_Name(IR::ID("SecurityAssocId_t"))));
 
     retFields.push_back(new IR::StructField("decrypt_start_offset", IR::Type_Bits::get(16, false)));
 
@@ -281,8 +281,12 @@ const IR::P4Program *DpdkPnaSmithTarget::generateP4Program() const {
     // insert some dummy metadata
     generateMainMetadata();
 
-    // Add type "SecurityAssocId_t" of type `Type_Name` to the scope
-    P4Scope::addToScope(new IR::Type_Name("SecurityAssocId_t"));
+    const IR::Type_Bits *securityAssocIdType = IR::Type_Bits::get(32, false);
+    IR::Path *securityAssocIdPath = new IR::Path("SecurityAssocId_t");
+    IR::Type_Name *securityAssocIdAlias = new IR::Type_Name(securityAssocIdPath);
+    IR::Type_Typedef *securityAssocIdTypedef =
+        new IR::Type_Typedef(securityAssocIdAlias->path->name, securityAssocIdType);
+    P4Scope::addToScope(securityAssocIdTypedef);
 
     // start to assemble the model
     auto *objects = new IR::Vector<IR::Node>();

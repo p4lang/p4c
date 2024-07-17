@@ -230,6 +230,9 @@ IR::Constant *ExpressionGenerator::genBitLiteral(const IR::Type *tb) {
 IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
     IR::Expression *expr = nullptr;
 
+    // Resolve the type if it's a `Type_Typedef` object.
+    tp = P4Scope::resolveType(tp);
+
     // reset the expression depth
     P4Scope::prop.depth = 0;
 
@@ -1021,15 +1024,11 @@ IR::Expression *ExpressionGenerator::constructIntExpr() {
     return expr;
 }
 
-// TODO(zzmic): Validate whether `IR::ListExpression` -> `IR::Expression` is allowed.
 IR::Expression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *tn) {
     IR::Vector<IR::Expression> components;
     cstring tnName = tn->path->name.name;
 
     if (const auto *td = P4Scope::getTypeByName(tnName)) {
-        std::cout << "td->node_type_name() in func `genStructListExpr`: " << td->node_type_name()
-                  << "\n";
-
         if (const auto *tnType = td->to<IR::Type_StructLike>()) {
             for (const auto *sf : tnType->fields) {
                 IR::Expression *expr = nullptr;
@@ -1056,15 +1055,9 @@ IR::Expression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *tn) 
             }
         }
 
-        else if (const auto *tnType = td->to<IR::Type_Name>()) {
-            std::cout << "Hit line 1059\n";
-            if (tnType->path->name.name == "SecurityAssocId_t") {
-                std::cout << "Hit line 1061\n";
-                IR::Expression *expr;
-                expr = genExpression(IR::Type_Bits::get(32, false));
-                return expr;
-                // components.push_back(expr);
-            }
+        else if (const auto *typedefType = td->to<IR::Type_Typedef>()) {
+            IR::Expression *expr = genExpression(typedefType->type);
+            return expr;
         }
 
         else {

@@ -38,6 +38,13 @@ void P4Scope::addToScope(const IR::Node *node) {
         addLval(dv->type, dv->name.name);
     } else if (const auto *dc = node->to<IR::Declaration_Constant>()) {
         addLval(dc->type, dc->name.name, true);
+    } else if (const auto *td = node->to<IR::Type_Typedef>()) {
+        lScope->push_back(td);
+        if (td->name == "SecurityAssocIdUint_t") {
+            auto *aliasType = new IR::Type_Name(new IR::Path(IR::ID("SecurityAssocId_t")));
+            auto *aliasTypedef = new IR::Type_Typedef(aliasType->path->name.name, td->type);
+            lScope->push_back(aliasTypedef);
+        }
     }
 }
 
@@ -331,20 +338,24 @@ const IR::Type *P4Scope::getTypeByName(cstring name) {
     for (auto *subScope : scope) {
         for (const auto *node : *subScope) {
             if (const auto *decl = node->to<IR::Type_Declaration>()) {
-                std::cout << "decl->name.name: " << decl->name.name << "\n";
                 if (decl->name.name == name) {
                     return decl;
                 }
             } else if (const auto *nameNode = node->to<IR::Type_Name>()) {
                 if (nameNode->path->name.name == name) {
-                    std::cout << "nameNode->path->name.name (== name): "
-                              << nameNode->path->name.name << "\n";
                     return nameNode;
                 }
             }
         }
     }
     return nullptr;
+}
+
+const IR::Type *P4Scope::resolveType(const IR::Type *type) {
+    if (const auto *typedefType = type->to<IR::Type_Typedef>()) {
+        return typedefType->type;
+    }
+    return type;
 }
 
 }  // namespace P4Tools::P4Smith

@@ -100,6 +100,8 @@ class P4Scope {
 
     static const IR::Type *getTypeByName(cstring name);
 
+    static const IR::Type *resolveType(const IR::Type *type);
+
     // template to get all declarations
     // C++ is so shit... templates must be inlined to be generally usable.
     template <typename T>
