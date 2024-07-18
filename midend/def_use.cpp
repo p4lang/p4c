@@ -329,6 +329,17 @@ bool ComputeDefUse::preorder(const IR::P4Action *act) {
     return false;
 }
 
+bool ComputeDefUse::preorder(const IR::Function *fn) {
+    IndentCtl::TempIndent indent;
+    LOG5("ComputeDefUse" << uid << "(Function " << fn->name << ")" << indent);
+    auto oldstate = state;
+    if (state == SKIPPING) state = NORMAL;
+    for (auto *p : *fn->type->parameters) def_info[p].defs.insert(getLoc(p));
+    visit(fn->body, "body");
+    state = oldstate;
+    return false;
+}
+
 bool ComputeDefUse::preorder(const IR::P4Parser *p) {
     BUG_CHECK(state == SKIPPING, "Nested %s not supported in ComputeDefUse", p);
     IndentCtl::TempIndent indent;

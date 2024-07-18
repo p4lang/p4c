@@ -139,6 +139,7 @@ class ComputeDefUse : public Inspector,
     bool preorder(const IR::P4Table *) override;
     bool preorder(const IR::P4Action *) override;
     bool preorder(const IR::P4Parser *) override;
+    bool preorder(const IR::Function *) override;
     bool preorder(const IR::ParserState *) override;
     void revisit(const IR::ParserState *) override;
     void loop_revisit(const IR::ParserState *) override;
