@@ -462,6 +462,7 @@ var annotated_dup =
       [ "ComputeWriteSet", "class_p4_1_1_compute_write_set.html", "class_p4_1_1_compute_write_set" ],
       [ "ConstantFolding", "class_p4_1_1_constant_folding.html", null ],
       [ "ConstantFoldingPolicy", "class_p4_1_1_constant_folding_policy.html", "class_p4_1_1_constant_folding_policy" ],
+      [ "ConstantTypeSubstitution", "class_p4_1_1_constant_type_substitution.html", null ],
       [ "ConstructorCall", "class_p4_1_1_constructor_call.html", null ],
       [ "ContainerConstructorCall", "class_p4_1_1_container_constructor_call.html", null ],
       [ "ContainsType", "class_p4_1_1_contains_type.html", null ],

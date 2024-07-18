@@ -1,5 +1,7 @@
 var NAVTREEINDEX19 =
 {
+"struct_util_1_1_hasher_3_01unsigned_01long_01long_01_4.html":[31,0,22,42],
+"struct_util_1_1_hasher_3_01unsigned_01short_01_4.html":[31,0,22,43],
 "struct_util_1_1_scoped_timer_ctx.html":[31,0,22,60],
 "struct_util_1_1_source_file_line.html":[31,0,22,64],
 "struct_util_1_1_source_file_line.html#a28b94d20827b845bb3e588ac8a5469bf":[31,0,22,64,0],
