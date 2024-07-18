@@ -60,6 +60,7 @@ void IR::MethodCallStatement::dbprint(std::ostream &out) const {
 }
 
 void IR::Function::dbprint(std::ostream &out) const {
+    out << annotations;
     if (type->returnType) out << type->returnType << ' ';
     out << name;
     if (type->typeParameters && !type->typeParameters->empty()) out << type->typeParameters;
@@ -87,7 +88,7 @@ void IR::SwitchStatement::dbprint(std::ostream &out) const {
 
 void IR::ForStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
-    out << Prec_Low << "for (";
+    out << annotations << Prec_Low << "for (";
     bool first = true;
     for (auto *sd : init) {
         if (!first) out << ", ";
@@ -106,7 +107,7 @@ void IR::ForStatement::dbprint(std::ostream &out) const {
 
 void IR::ForInStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
-    out << Prec_Low << "for (";
+    out << annotations << Prec_Low << "for (";
     if (decl) {
         out << decl;
     } else {

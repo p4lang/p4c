@@ -1313,7 +1313,7 @@ forStatement
               expression ";"
 	      forUpdateStatements ")"
       statement
-    { $$ = new IR::ForStatement(@2+@9, *$4, $6, *$8, $10); }
+    { $$ = new IR::ForStatement(@2+@9, $1, *$4, $6, *$8, $10); }
     | optAnnotations FOR "(" typeRef name IN forCollectionExpr ")" statement
     { auto decl = new IR::Declaration_Variable(@4+@5, *$5, $4);
       $$ = new IR::ForInStatement(@2+@7, $1, decl, $7, $9); }
