@@ -55,6 +55,7 @@ const IR::Expression *DoConstantFolding::getConstant(const IR::Expression *expr)
     CHECK_NULL(expr);
     if (expr->is<IR::Constant>()) return expr;
     if (expr->is<IR::BoolLiteral>()) return expr;
+    if (expr->is<IR::StringLiteral>()) return expr;
     if (auto list = expr->to<IR::ListExpression>()) {
         for (auto e : list->components)
             if (getConstant(e) == nullptr) return nullptr;
@@ -436,6 +437,15 @@ const IR::Node *DoConstantFolding::compare(const IR::Operation_Binary *e) {
         auto right = eright->to<IR::BoolLiteral>();
         if (left == nullptr || right == nullptr) {
             ::error(ErrorType::ERR_INVALID, "%1%: both operands must be Boolean", e);
+            return e;
+        }
+        bool bresult = (left->value == right->value) == eqTest;
+        return new IR::BoolLiteral(e->srcInfo, IR::Type_Boolean::get(), bresult);
+    } else if (eleft->is<IR::StringLiteral>()) {
+        const auto *left = eleft->to<IR::StringLiteral>();
+        const auto *right = eright->to<IR::StringLiteral>();
+        if (left == nullptr || right == nullptr) {
+            ::error(ErrorType::ERR_INVALID, "%1%: both operands must be String", e);
             return e;
         }
         bool bresult = (left->value == right->value) == eqTest;
