@@ -37,7 +37,20 @@ namespace P4 {
 using namespace literals;
 
 int ComputeDefUse::uid_ctr = 0;
-const ordered_set<const ComputeDefUse::loc_t *> ComputeDefUse::empty = {};
+const hvec_set<const ComputeDefUse::loc_t *> ComputeDefUse::empty;
+
+ComputeDefUse::ComputeDefUse()
+    : ResolutionContext(true), cached_locs(*new std::unordered_set<loc_t>), defuse(*new defuse_t) {
+    joinFlows = true;
+    visitDagOnce = false;
+}
+
+void ComputeDefUse::clear() {
+    cached_locs.clear();
+    def_info.clear();
+    defuse.defs.clear();
+    defuse.uses.clear();
+}
 
 void ComputeDefUse::flow_merge(Visitor &a_) {
     ComputeDefUse &a = dynamic_cast<ComputeDefUse &>(a_);
@@ -84,6 +97,31 @@ ComputeDefUse::def_info_t::def_info_t(def_info_t &&a)
       slices(std::move(a.slices)) {
     for (auto &v : Values(fields)) v.parent = this;
     for (auto &v : Values(slices)) v.parent = this;
+}
+
+ComputeDefUse::def_info_t &ComputeDefUse::def_info_t::operator=(
+    const ComputeDefUse::def_info_t &a) {
+    defs = a.defs;
+    live = a.live;
+    parent = a.parent;
+    valid_bit_defs = a.valid_bit_defs;
+    fields = a.fields;
+    slices = a.slices;
+    for (auto &v : Values(fields)) v.parent = this;
+    for (auto &v : Values(slices)) v.parent = this;
+    return *this;
+}
+
+ComputeDefUse::def_info_t &ComputeDefUse::def_info_t::operator=(ComputeDefUse::def_info_t &&a) {
+    defs = std::move(a.defs);
+    live = std::move(a.live);
+    parent = std::move(a.parent);
+    valid_bit_defs = std::move(a.valid_bit_defs);
+    fields = std::move(a.fields);
+    slices = std::move(a.slices);
+    for (auto &v : Values(fields)) v.parent = this;
+    for (auto &v : Values(slices)) v.parent = this;
+    return *this;
 }
 
 void ComputeDefUse::def_info_t::flow_merge(def_info_t &a) {
@@ -671,7 +709,7 @@ std::ostream &operator<<(std::ostream &out, const ComputeDefUse::loc_t &loc) {
     return out;
 }
 
-std::ostream &operator<<(std::ostream &out, const ordered_set<const ComputeDefUse::loc_t *> &s) {
+std::ostream &operator<<(std::ostream &out, const hvec_set<const ComputeDefUse::loc_t *> &s) {
     out << ": {";
     const char *sep = " ";
     for (auto *l : s) {
@@ -684,7 +722,7 @@ std::ostream &operator<<(std::ostream &out, const ordered_set<const ComputeDefUs
 
 std::ostream &operator<<(
     std::ostream &out,
-    const std::pair<const IR::Node *, const ordered_set<const ComputeDefUse::loc_t *>> &p) {
+    const std::pair<const IR::Node *, const hvec_set<const ComputeDefUse::loc_t *>> &p) {
     out << Log::endl;
     out << DBPrint::setprec(DBPrint::Prec_Low);
     p.first->dbprint(out);
@@ -710,6 +748,6 @@ std::ostream &operator<<(std::ostream &out, const ComputeDefUse::defuse_t &du) {
 }  // namespace P4
 
 void dump(const P4::ComputeDefUse::loc_t &p) { std::cout << p << std::endl; }
-void dump(const ordered_set<const P4::ComputeDefUse::loc_t *> &p) { std::cout << p << std::endl; }
+void dump(const hvec_set<const P4::ComputeDefUse::loc_t *> &p) { std::cout << p << std::endl; }
 void dump(const P4::ComputeDefUse &du) { std::cout << du << std::endl; }
 void dump(const P4::ComputeDefUse *du) { std::cout << *du << std::endl; }
