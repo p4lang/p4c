@@ -4,8 +4,6 @@ set -e # Exit on error.
 
 # List of known bugs.
 KNOWN_BUGS=(
-    ";: expected a method call"
-    "Arch '<null>' not supported by P4Runtime serializer"
 )
 
 # Function to check if an error is triggered by a known bug.
@@ -71,11 +69,20 @@ for i in $(seq 1 $NUM_ITERATIONS); do
     $SMITH_BIN --arch $ARCH --target $TARGET --seed $i $TEST_DIR/out_$i.p4
     # TODO: Do not compile until we have stabilized.
     # TODO(zzmic): Revert out_$i.p4 to out.p4
-    # $COMPILER_BIN $TEST_DIR/out_$i.p4
+    # If the arch is "pna", the arch itself shall be specified.
+    # Otherwise, the compilation would trigger
+    # "Arch '<null>' not supported by P4Runtime serializer"
+    if [ "$ARCH" == "pna" ]; then
+        CMD="$COMPILER_BIN --arch $ARCH $TEST_DIR/out_$i.p4"
+    else
+        CMD="$COMPILER_BIN $TEST_DIR/out_$i.p4"
+    fi
+    echo "$CMD"
+
     # If the compilation fails, check if it is triggered by a known bug.
     # If it is the case, continue with the next iteration.
     # Otherwise, exit with an error.
-    if ! output=$($COMPILER_BIN $TEST_DIR/out_$i.p4 2>&1); then
+    if ! output=$($CMD 2>&1); then
         if is_known_bug "$output"; then
             echo "Continue, as the compilation error is triggered by a documented bug: $output"
             continue
