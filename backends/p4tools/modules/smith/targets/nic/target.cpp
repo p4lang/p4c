@@ -284,19 +284,21 @@ const IR::P4Program *DpdkPnaSmithTarget::generateP4Program() const {
     // insert some dummy metadata
     generateMainMetadata();
 
-    // const IR::Type_Bits *securityAssocIdType = IR::Type_Bits::get(32, false);
-    // IR::Path *securityAssocIdPath = new IR::Path(IR::ID("SecurityAssocId_t"));
-    // IR::Type_Name *securityAssocIdAlias = new IR::Type_Name(securityAssocIdPath);
-    // IR::Type_Typedef *securityAssocIdTypedef =
-    //     new IR::Type_Typedef(securityAssocIdAlias->path->name, securityAssocIdType);
-    // P4Scope::addToScope(securityAssocIdTypedef);
-
+    // Define a type `SecurityAssocIdUint_t` as an alias for the type `bit<32>`.
     const IR::Type_Bits *SecurityAssocIdUintType = IR::Type_Bits::get(32, false);
     IR::Path *SecurityAssocIdUintPath = new IR::Path(IR::ID("SecurityAssocIdUint_t"));
     IR::Type_Name *SecurityAssocIdUintAlias = new IR::Type_Name(SecurityAssocIdUintPath);
     IR::Type_Typedef *SecurityAssocIdUintTypedef =
         new IR::Type_Typedef(SecurityAssocIdUintAlias->path->name, SecurityAssocIdUintType);
     P4Scope::addToScope(SecurityAssocIdUintTypedef);
+
+    // Define a new typedef `SecurityAssocId_t` that references ("links to") the previously defined
+    // type `SecurityAssocIdUint_t`, making `SecurityAssocId_t` an alias to `SecurityAssocIdUint_t`.
+    IR::Path *SecurityAssocIdPath = new IR::Path(IR::ID("SecurityAssocId_t"));
+    IR::Type_Name *SecurityAssocIdAlias = new IR::Type_Name(SecurityAssocIdPath);
+    IR::Type_Typedef *SecurityAssocIdTypedef =
+        new IR::Type_Typedef(SecurityAssocIdAlias->path->name, SecurityAssocIdUintAlias);
+    P4Scope::addToScope(SecurityAssocIdTypedef);
 
     // start to assemble the model
     auto *objects = new IR::Vector<IR::Node>();
