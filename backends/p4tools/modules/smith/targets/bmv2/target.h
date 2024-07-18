@@ -34,9 +34,7 @@ using namespace P4::literals;
 
 class Bmv2V1ModelDeclarationGenerator : public DeclarationGenerator {
  public:
-    explicit Bmv2V1ModelDeclarationGenerator(
-        P4Tools::P4Smith::BMv2::AbstractBMv2SmithTarget &parent)
-        : DeclarationGenerator(static_cast<P4Tools::P4Smith::SmithTarget &>(parent)) {}
+    explicit Bmv2V1ModelDeclarationGenerator(SmithTarget &parent) : DeclarationGenerator(parent) {}
 
     IR::ParameterList *genParameterList() override {
         IR::IndexedVector<IR::Parameter> params;
