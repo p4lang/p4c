@@ -803,16 +803,17 @@ const IR::Node *DoConstantFolding::shift(const IR::Operation_Binary *e) {
     if (overflowWidth(e, shift)) return e;
 
     auto tb = left->type->to<IR::Type_Bits>();
-    if (tb != nullptr) {
-        if (((unsigned)tb->width_bits() <= shift) && warnings)
-            ::warning(ErrorType::WARN_OVERFLOW, "%1%: Shifting %2%-bit value with %3%", e,
-                      tb->width_bits(), shift);
-    }
-
     if (e->is<IR::Shl>())
         value = Util::shift_left(value, shift);
     else
         value = Util::shift_right(value, shift);
+    if (tb != nullptr) {
+        if (((unsigned)tb->width_bits() <= shift) && warnings)
+            ::warning(ErrorType::WARN_OVERFLOW, "%1%: Shifting %2%-bit value with %3%", e,
+                      tb->width_bits(), shift);
+        value = value & (pow(big_int{2}, tb->width_bits()) - 1);
+    }
+
     return new IR::Constant(e->srcInfo, left->type, value, cl->base);
 }
 
