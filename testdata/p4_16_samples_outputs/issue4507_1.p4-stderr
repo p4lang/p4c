@@ -1,0 +1,6 @@
+issue4507_1.p4(9): [--Wwarn=uninitialized_use] warning: x may be uninitialized
+                __e(x);
+                    ^
+issue4507_1.p4(13): [--Wwarn=uninitialized_use] warning: y may be uninitialized
+                __e2(y);
+                     ^
