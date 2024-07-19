@@ -158,7 +158,7 @@ git push -f
 * After committing changes, create a pull request (using the github web UI)
 
 * Follow these
-  [guidelines](CodingStandardPhilosophy.md#Git-commits-and-pull-requests)
+  [guidelines](CodingStandardPhilosophy.md#git-commits-and-pull-requests)
   to write commit messages and open pull requests.
 
 ## Debugging
@@ -297,7 +297,7 @@ To add a new input test with a sample P4 code file (under `testdata/p4_16_sample
     informative error message.
 
   * Use `::error()` and `::warning()` for error reporting. See the
-    [guidelines](CodingStandardPhilosophy.md#Handling-errors) for more
+    [guidelines](CodingStandardPhilosophy.md#handling-errors) for more
     details.
 
   * Use `LOGn()` for log messages -- the `n` is an integer constant for
