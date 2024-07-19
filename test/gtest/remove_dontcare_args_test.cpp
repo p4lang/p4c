@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
 #include "frontends/common/parseInput.h"
-#include "frontends/p4/frontend.h"
 #include "frontends/p4/dontcareArgs.h"
+#include "frontends/p4/frontend.h"
 #include "helpers.h"
 #include "ir/ir.h"
 
@@ -28,22 +28,19 @@ struct RemoveDontcareArgsTest : P4CTest {
 
 class CollectActionAndControlLocals : public Inspector {
  public:
-
     unsigned actionDecls = 0;
     unsigned controlDecls = 0;
 
     bool preorder(const IR::P4Action *action) override {
         for (const auto *c : action->body->components) {
-            if (c->is<IR::Declaration_Variable>())
-                ++actionDecls;
+            if (c->is<IR::Declaration_Variable>()) ++actionDecls;
         }
         return true;
     }
 
     bool preorder(const IR::P4Control *control) override {
         for (const auto *c : control->controlLocals) {
-            if (c->is<IR::Declaration_Variable>())
-                ++controlDecls;
+            if (c->is<IR::Declaration_Variable>()) ++controlDecls;
         }
         return true;
     }
@@ -81,7 +78,6 @@ top(C()) main;
     const auto *program = parseAndProcess(program_source);
     ASSERT_TRUE(program);
     ASSERT_EQ(::errorCount(), 0);
-
 
     CollectActionAndControlLocals collect;
     program->apply(collect);
