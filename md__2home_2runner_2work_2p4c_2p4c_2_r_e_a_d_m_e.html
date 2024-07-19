@@ -264,7 +264,7 @@ Dependencies</h1>
 <li>Google Protocol Buffers v3.25.3 or higher for control plane API generation</li>
 <li>C++ boost library</li>
 <li>Python 3 for scripting and running tests</li>
-<li>Optional: Documentation generation (enabled when configuring with &ndash;enable-doxygen-doc) requires Doxygen (1.8.10 or higher) and Graphviz (2.38.0 or higher).</li>
+<li>Optional: Documentation generation requires Doxygen (1.8.10 or higher) and Graphviz (2.38.0 or higher).</li>
 </ul>
 <p>Backends may have additional dependencies. The dependencies for the backends included with <code>P4C</code> are documented here:</p><ul>
 <li><a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html">BMv2</a></li>
@@ -281,7 +281,7 @@ Ubuntu dependencies</h2>
 <div class="line"> </div>
 <div class="line">pip3 install --user -r requirements.txt</div>
 </div><!-- fragment --><p><b>For documentation building:</b></p>
-<p><b>Tools</b> </p><div class="fragment"><div class="line">sudo apt-get install -y doxygen graphviz texlive-full</div>
+<p><b>Tools</b> </p><div class="fragment"><div class="line">sudo apt-get install -y doxygen graphviz</div>
 </div><!-- fragment --><p> <b>Theme</b> </p><div class="fragment"><div class="line">git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css</div>
 </div><!-- fragment --><p><code>P4C</code> also depends on Google Protocol Buffers (Protobuf). <code>P4C</code> requires version 3.0 or higher, so the packaged version provided in Ubuntu 20.04 <b>should</b> work. However, P4C typically installs its own version of Protobuf using CMake's <code>FetchContent</code> module (at the moment, 3.25.3). If you are experiencing issues with the Protobuf version shipped with your OS distribution, we recommend that to install Protobuf 3.25.3 from source. You can find instructions <a href="https://github.com/protocolbuffers/protobuf/blob/v3.25.3/src/README.md">here</a>. After cloning Protobuf and before you build, check-out version 3.25.3:</p>
 <p><code>git checkout v3.25.3</code></p>
@@ -298,7 +298,7 @@ Fedora dependencies</h2>
 <div class="line"> </div>
 <div class="line">sudo pip3 install -r requirements.txt</div>
 </div><!-- fragment --><p><b>For documentation building:</b></p>
-<p><b>Tools</b> </p><div class="fragment"><div class="line">sudo dnf install -y doxygen graphviz texlive-scheme-full</div>
+<p><b>Tools</b> </p><div class="fragment"><div class="line">sudo dnf install -y doxygen graphviz</div>
 </div><!-- fragment --><p> <b>Theme</b> </p><div class="fragment"><div class="line">git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css</div>
 </div><!-- fragment --><p>You can also look at the <a href="tools/install_fedora_deps.sh">dependencies installation script</a> for a fresh Fedora instance.</p>
 <h2><a class="anchor" id="autotoc_md21"></a>
@@ -335,7 +335,11 @@ Development tools</h1>
 <p>We recommend using <code>clang++</code> with no optimizations for speeding up compilation and simplifying debugging.</p>
 <p>We recommend installing a new version of <a href="http://ftp.gnu.org/gnu/gdb">gdb</a>, because older gdb versions do not always handle C++11 or newer correctly.</p>
 <p>We recommend exuberant ctags for navigating source code in Emacs and vi. <code>sudo apt-get install exuberant-ctags.</code> The Makefile targets <code>make ctags</code> and <code>make etags</code> generate tags for vi and Emacs respectively. (Make sure that you are using the correct version of ctags; there are several competing programs with the same name in existence.)</p>
-<p>To enable building code documentation, please run <code>cmake .. -DENABLE_DOCS=ON</code>. This enables the <code>make docs</code> rule to generate documentation. The HTML output is available in <code>build/doxygen-out/html/index.html</code>.</p>
+<p>To build code documentation, after installing Doxygen and the other required packages:</p>
+<div class="fragment"><div class="line"># Starting from root directory of your copy of p4c repo</div>
+<div class="line">cd docs/doxygen</div>
+<div class="line">doxygen doxygen.cfg</div>
+</div><!-- fragment --><p> The HTML output is available in <code>docs/doxygen/build/html/index.html</code>.</p>
 <h2><a class="anchor" id="autotoc_md25"></a>
 Git setup</h2>
 <p>Occasionally formatting commits are applied to P4C. These pollute the git history. To ignore these commits in git blame, run this command </p><div class="fragment"><div class="line">config blame.ignoreRevsFile .git-blame-ignore-revs</div>
