@@ -28,7 +28,7 @@ namespace P4 {
 
 /// Creates a string that describes the values of current type variables
 class Explain : public Inspector {
-    absl::flat_hash_set<const IR::ITypeVar *, Util::Hash> explained;
+    absl::flat_hash_set<const IR::Type_Var *, Util::Hash> explained;
     const TypeVariableSubstitution *subst;
 
  public:
