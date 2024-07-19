@@ -638,8 +638,10 @@ bool ComputeWriteSet::preorder(const IR::SelectExpression *expression) {
     visit(expression->select);
     visit(&expression->selectCases);
     auto l = getWrites(expression->select);
-    for (auto c : expression->selectCases) {
-        auto s = getWrites(c->keyset);
+    const loc_t *selectCasesLoc = getLoc(&expression->selectCases, getChildContext());
+    for (auto *c : expression->selectCases) {
+        const loc_t *selectCaseLoc = getLoc(c, selectCasesLoc);
+        auto s = getWrites(c->keyset, selectCaseLoc);
         l = l->join(s);
     }
     expressionWrites(expression, l);
@@ -673,7 +675,8 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression *expression) {
     lhs = save;
     auto mi = MethodInstance::resolve(expression, storageMap->refMap, storageMap->typeMap);
     if (auto bim = mi->to<BuiltInMethod>()) {
-        auto base = getWrites(bim->appliedTo);
+        const loc_t *methodLoc = getLoc(expression->method, getChildContext());
+        auto base = getWrites(bim->appliedTo, methodLoc);
         cstring name = bim->name.name;
         if (name == IR::Type_Header::setInvalid || name == IR::Type_Header::setValid) {
             // modifies only the valid field.
@@ -712,7 +715,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression *expression) {
         LOG3("Analyzing callees of " << expression << DBPrint::Brief << callees << DBPrint::Reset
                                      << indent);
         ProgramPoint pt(callingContext, expression);
-        ComputeWriteSet cw(this, pt, currentDefinitions);
+        ComputeWriteSet cw(this, pt, currentDefinitions, cached_locs);
         cw.setCalledBy(this);
         for (auto c : callees) (void)c->getNode()->apply(cw);
         currentDefinitions = cw.currentDefinitions;
@@ -735,7 +738,8 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression *expression) {
         visit(arg);
         lhs = save;
         if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
-            auto val = getWrites(arg->expression);
+            const loc_t *argLoc = getLoc(arg, getChildContext());
+            auto val = getWrites(arg->expression, argLoc);
             result = result->join(val);
         }
     }
@@ -757,6 +761,43 @@ void ComputeWriteSet::visitVirtualMethods(const IR::IndexedVector<IR::Declaratio
             }
         }
     }
+}
+
+std::size_t P4::loc_t::hash() const {
+    if (!computedHash) {
+        if (!parent)
+            computedHash = Util::Hash{}(node->id);
+        else
+            computedHash = Util::Hash{}(node->id, parent->hash());
+    }
+    return computedHash;
+}
+
+// Returns program location of n, given the program location of n's direct parent.
+// Use to get loc if n is indirect child (e.g. grandchild) of currently being visited node.
+// In this case parentLoc is the loc of n's direct parent.
+const P4::loc_t *ComputeWriteSet::getLoc(const IR::Node *n, const loc_t *parentLoc) {
+    loc_t tmp{n, parentLoc};
+    return &*cached_locs.insert(tmp).first;
+}
+
+// Returns program location given the context of the currently being visited node.
+// Use to get loc of currently being visited node.
+const P4::loc_t *ComputeWriteSet::getLoc(const Visitor::Context *ctxt) {
+    if (!ctxt) return nullptr;
+    loc_t tmp{ctxt->node, getLoc(ctxt->parent)};
+    return &*cached_locs.insert(tmp).first;
+}
+
+// Returns program location of a child node n, given the context of the
+// currently being visited node.
+// Use to get loc if n is direct child of currently being visited node.
+const P4::loc_t *ComputeWriteSet::getLoc(const IR::Node *n, const Visitor::Context *ctxt) {
+    for (auto *p = ctxt; p; p = p->parent)
+        if (p->node == n) return getLoc(p);
+    auto rv = getLoc(ctxt);
+    loc_t tmp{n, rv};
+    return &*cached_locs.insert(tmp).first;
 }
 
 // Symbolic execution of the parser
@@ -784,7 +825,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser *parser) {
         // but we use the same data structures
         ProgramPoint pt(state);
         currentDefinitions = allDefinitions->getDefinitions(pt);
-        ComputeWriteSet cws(this, pt, currentDefinitions);
+        ComputeWriteSet cws(this, pt, currentDefinitions, cached_locs);
         cws.setCalledBy(this);
         (void)state->apply(cws);
 
