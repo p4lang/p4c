@@ -132,7 +132,7 @@ var hierarchy =
     [ "HalfOpenRange< Unit, Order >", "struct_half_open_range.html", null ],
     [ "hash_vector_base", "classhash__vector__base.html", [
       [ "hvec_map< P4::ProgramPoint, P4::Definitions * >", "classhvec__map.html", null ],
-      [ "hvec_map< const IR::Expression *, const P4::LocationSet * >", "classhvec__map.html", null ],
+      [ "hvec_map< P4::loc_t, const P4::LocationSet * >", "classhvec__map.html", null ],
       [ "hvec_map< const P4::BaseLocation *, const P4::ProgramPoints * >", "classhvec__map.html", null ],
       [ "hvec_map< const IR::IDeclaration *, P4::StorageLocation * >", "classhvec__map.html", null ],
       [ "hvec_map< cstring, const P4::StorageLocation * >", "classhvec__map.html", null ],
@@ -640,6 +640,7 @@ var hierarchy =
       [ "P4::IsValid", "class_p4_1_1_is_valid.html", null ],
       [ "P4::OrPolicy", "class_p4_1_1_or_policy.html", null ]
     ] ],
+    [ "P4::loc_t", "struct_p4_1_1loc__t.html", null ],
     [ "P4::NameGenerator", "class_p4_1_1_name_generator.html", [
       [ "P4::MinimalNameGenerator", "class_p4_1_1_minimal_name_generator.html", null ],
       [ "P4::ReferenceMap", "class_p4_1_1_reference_map.html", null ]
@@ -1133,6 +1134,7 @@ var hierarchy =
     [ "std::hash< ClosedRange< Unit, Order > >", "structstd_1_1hash_3_01_closed_range_3_01_unit_00_01_order_01_4_01_4.html", null ],
     [ "std::hash< cstring >", "structstd_1_1hash_3_01cstring_01_4.html", null ],
     [ "std::hash< HalfOpenRange< Unit, Order > >", "structstd_1_1hash_3_01_half_open_range_3_01_unit_00_01_order_01_4_01_4.html", null ],
+    [ "std::hash< P4::loc_t >", "structstd_1_1hash_3_01_p4_1_1loc__t_01_4.html", null ],
     [ "std::hash< P4::ProgramPoint >", "structstd_1_1hash_3_01_p4_1_1_program_point_01_4.html", null ],
     [ "std::hash< std::pair< T1, T2 > >", "structstd_1_1hash_3_01std_1_1pair_3_01_t1_00_01_t2_01_4_01_4.html", null ],
     [ "std::hash< std::tuple< Types... > >", "structstd_1_1hash_3_01std_1_1tuple_3_01_types_8_8_8_01_4_01_4.html", null ],

@@ -2,7 +2,7 @@ var searchData=
 [
   ['levelandoutput_0',['LevelAndOutput',['../struct_log_1_1_detail_1_1_level_and_output.html',1,'Log::Detail']]],
   ['lexer_1',['Lexer',['../class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_lexer.html',1,'P4Tools::P4Testgen::Bmv2']]],
-  ['loc_5ft_2',['loc_t',['../struct_p4_1_1_compute_def_use_1_1loc__t.html',1,'P4::ComputeDefUse']]],
+  ['loc_5ft_2',['loc_t',['../struct_p4_1_1_compute_def_use_1_1loc__t.html',1,'P4::ComputeDefUse::loc_t'],['../struct_p4_1_1loc__t.html',1,'P4::loc_t']]],
   ['localcopypropagation_3',['LocalCopyPropagation',['../class_p4_1_1_local_copy_propagation.html',1,'P4']]],
   ['localizeactions_4',['LocalizeActions',['../class_p4_1_1_localize_actions.html',1,'P4']]],
   ['localizeallactions_5',['LocalizeAllActions',['../class_p4_1_1_localize_all_actions.html',1,'P4']]],

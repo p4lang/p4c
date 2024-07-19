@@ -204,6 +204,7 @@ var namespace_p4 =
     [ "KeyIsSimple", "class_p4_1_1_key_is_simple.html", null ],
     [ "KeyNameGenerator", "class_p4_1_1_key_name_generator.html", null ],
     [ "KeySideEffect", "class_p4_1_1_key_side_effect.html", null ],
+    [ "loc_t", "struct_p4_1_1loc__t.html", null ],
     [ "LocalCopyPropagation", "class_p4_1_1_local_copy_propagation.html", null ],
     [ "LocalizeActions", "class_p4_1_1_localize_actions.html", null ],
     [ "LocalizeAllActions", "class_p4_1_1_localize_all_actions.html", null ],

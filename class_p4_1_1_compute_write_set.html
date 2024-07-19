@@ -440,8 +440,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>print</b> () const</t
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a7fcd69f4a8bf1824f851e4d5965d2b23" id="r_a7fcd69f4a8bf1824f851e4d5965d2b23"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7fcd69f4a8bf1824f851e4d5965d2b23">ComputeWriteSet</a> (const <a class="el" href="class_p4_1_1_compute_write_set.html">ComputeWriteSet</a> *source, <a class="el" href="class_p4_1_1_program_point.html">ProgramPoint</a> context, <a class="el" href="class_p4_1_1_definitions.html">Definitions</a> *definitions)</td></tr>
-<tr class="separator:a7fcd69f4a8bf1824f851e4d5965d2b23"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58be15419a805d0df91fef4a0419ca09" id="r_a58be15419a805d0df91fef4a0419ca09"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a58be15419a805d0df91fef4a0419ca09">ComputeWriteSet</a> (const <a class="el" href="class_p4_1_1_compute_write_set.html">ComputeWriteSet</a> *source, <a class="el" href="class_p4_1_1_program_point.html">ProgramPoint</a> context, <a class="el" href="class_p4_1_1_definitions.html">Definitions</a> *definitions, std::unordered_set&lt; <a class="el" href="struct_p4_1_1loc__t.html">loc_t</a> &gt; &amp;cached_locs)</td></tr>
+<tr class="separator:a58be15419a805d0df91fef4a0419ca09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a101d879ae626db0d9ebb8a77272ede28" id="r_a101d879ae626db0d9ebb8a77272ede28"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a101d879ae626db0d9ebb8a77272ede28">dbprint</a> (std::ostream &amp;out) const override</td></tr>
 <tr class="separator:a101d879ae626db0d9ebb8a77272ede28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2478c9e8837e019bebd15e9c95fe2920" id="r_a2478c9e8837e019bebd15e9c95fe2920"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2478c9e8837e019bebd15e9c95fe2920">end_apply</a> () override</td></tr>
@@ -458,12 +458,24 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>expressionWrites</b> 
 <tr class="memitem:a64edf0ae31ba4da366560156b4fae32d" id="r_a64edf0ae31ba4da366560156b4fae32d"><td class="memItemLeft" align="right" valign="top"><a id="a64edf0ae31ba4da366560156b4fae32d" name="a64edf0ae31ba4da366560156b4fae32d"></a>
 <a class="el" href="class_p4_1_1_definitions.html">Definitions</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getDefinitionsAfter</b> (const IR::ParserState *state)</td></tr>
 <tr class="separator:a64edf0ae31ba4da366560156b4fae32d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02b6682c0a196544cdb09822cfb7540c" id="r_a02b6682c0a196544cdb09822cfb7540c"><td class="memItemLeft" align="right" valign="top"><a id="a02b6682c0a196544cdb09822cfb7540c" name="a02b6682c0a196544cdb09822cfb7540c"></a>
+const <a class="el" href="struct_p4_1_1loc__t.html">loc_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getLoc</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *n, const <a class="el" href="struct_p4_1_1loc__t.html">loc_t</a> *parentLoc)</td></tr>
+<tr class="separator:a02b6682c0a196544cdb09822cfb7540c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35fd5788a176000814d7bcc5fd67fe26" id="r_a35fd5788a176000814d7bcc5fd67fe26"><td class="memItemLeft" align="right" valign="top"><a id="a35fd5788a176000814d7bcc5fd67fe26" name="a35fd5788a176000814d7bcc5fd67fe26"></a>
+const <a class="el" href="struct_p4_1_1loc__t.html">loc_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getLoc</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *n, const <a class="el" href="struct_visitor___context.html">Visitor::Context</a> *ctxt)</td></tr>
+<tr class="separator:a35fd5788a176000814d7bcc5fd67fe26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae86ad130aaa9c831b2ec345447827971" id="r_ae86ad130aaa9c831b2ec345447827971"><td class="memItemLeft" align="right" valign="top"><a id="ae86ad130aaa9c831b2ec345447827971" name="ae86ad130aaa9c831b2ec345447827971"></a>
+const <a class="el" href="struct_p4_1_1loc__t.html">loc_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getLoc</b> (const <a class="el" href="struct_visitor___context.html">Visitor::Context</a> *ctxt)</td></tr>
+<tr class="separator:ae86ad130aaa9c831b2ec345447827971"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42fc5f7b7f8ce215c83db848e03f8050" id="r_a42fc5f7b7f8ce215c83db848e03f8050"><td class="memItemLeft" align="right" valign="top"><a id="a42fc5f7b7f8ce215c83db848e03f8050" name="a42fc5f7b7f8ce215c83db848e03f8050"></a>
 <a class="el" href="class_p4_1_1_program_point.html">ProgramPoint</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getProgramPoint</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *node=nullptr) const</td></tr>
 <tr class="separator:a42fc5f7b7f8ce215c83db848e03f8050"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b521f91937066325ead3a79a8c5bada" id="r_a5b521f91937066325ead3a79a8c5bada"><td class="memItemLeft" align="right" valign="top"><a id="a5b521f91937066325ead3a79a8c5bada" name="a5b521f91937066325ead3a79a8c5bada"></a>
-const <a class="el" href="class_p4_1_1_location_set.html">LocationSet</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getWrites</b> (const IR::Expression *expression) const</td></tr>
-<tr class="separator:a5b521f91937066325ead3a79a8c5bada"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a288ce95f3231a0c6e18d5ea4863d9214" id="r_a288ce95f3231a0c6e18d5ea4863d9214"><td class="memItemLeft" align="right" valign="top"><a id="a288ce95f3231a0c6e18d5ea4863d9214" name="a288ce95f3231a0c6e18d5ea4863d9214"></a>
+const <a class="el" href="class_p4_1_1_location_set.html">LocationSet</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getWrites</b> (const IR::Expression *expression)</td></tr>
+<tr class="separator:a288ce95f3231a0c6e18d5ea4863d9214"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e6e62226f93ee946fcd6d071217dfd3" id="r_a1e6e62226f93ee946fcd6d071217dfd3"><td class="memItemLeft" align="right" valign="top"><a id="a1e6e62226f93ee946fcd6d071217dfd3" name="a1e6e62226f93ee946fcd6d071217dfd3"></a>
+const <a class="el" href="class_p4_1_1_location_set.html">LocationSet</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getWrites</b> (const IR::Expression *expression, const <a class="el" href="struct_p4_1_1loc__t.html">loc_t</a> *parentLoc)</td></tr>
+<tr class="separator:a1e6e62226f93ee946fcd6d071217dfd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e05b0f535b8d61ea7af8e28c159038a" id="r_a8e05b0f535b8d61ea7af8e28c159038a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_visitor_1_1profile__t.html">profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e05b0f535b8d61ea7af8e28c159038a">init_apply</a> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *root) override</td></tr>
 <tr class="separator:a8e05b0f535b8d61ea7af8e28c159038a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a223ea9f75bd33ed4161bf366b125946a" id="r_a223ea9f75bd33ed4161bf366b125946a"><td class="memItemLeft" align="right" valign="top"><a id="a223ea9f75bd33ed4161bf366b125946a" name="a223ea9f75bd33ed4161bf366b125946a"></a>
@@ -531,10 +543,10 @@ const <a class="el" href="class_p4_1_1_storage_map.html">StorageMap</a> *&#160;<
 <tr class="memitem:aa3187a375075cd04fc6d43f75572b312" id="r_aa3187a375075cd04fc6d43f75572b312"><td class="memItemLeft" align="right" valign="top"><a id="aa3187a375075cd04fc6d43f75572b312" name="aa3187a375075cd04fc6d43f75572b312"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>virtualMethod</b></td></tr>
 <tr class="separator:aa3187a375075cd04fc6d43f75572b312"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaebc1bc32749fb9b823408f7b24e3a04" id="r_aaebc1bc32749fb9b823408f7b24e3a04"><td class="memItemLeft" align="right" valign="top"><a id="aaebc1bc32749fb9b823408f7b24e3a04" name="aaebc1bc32749fb9b823408f7b24e3a04"></a>
-<a class="el" href="classhvec__map.html">hvec_map</a>&lt; const IR::Expression *, const <a class="el" href="class_p4_1_1_location_set.html">LocationSet</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>writes</b></td></tr>
-<tr class="memdesc:aaebc1bc32749fb9b823408f7b24e3a04"><td class="mdescLeft">&#160;</td><td class="mdescRight">For each expression the location set it writes. <br /></td></tr>
-<tr class="separator:aaebc1bc32749fb9b823408f7b24e3a04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb02d16c7cb96eb00cedc32d918ba59d" id="r_acb02d16c7cb96eb00cedc32d918ba59d"><td class="memItemLeft" align="right" valign="top"><a id="acb02d16c7cb96eb00cedc32d918ba59d" name="acb02d16c7cb96eb00cedc32d918ba59d"></a>
+<a class="el" href="classhvec__map.html">hvec_map</a>&lt; <a class="el" href="struct_p4_1_1loc__t.html">loc_t</a>, const <a class="el" href="class_p4_1_1_location_set.html">LocationSet</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>writes</b></td></tr>
+<tr class="memdesc:acb02d16c7cb96eb00cedc32d918ba59d"><td class="mdescLeft">&#160;</td><td class="mdescRight">For each program location the location set it writes. <br /></td></tr>
+<tr class="separator:acb02d16c7cb96eb00cedc32d918ba59d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_class_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_visitor')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_visitor.html">Visitor</a></td></tr>
 <tr class="memitem:aa100e3aac31216dccef1f6c1b4ce6e01 inherit pro_attribs_class_visitor" id="r_aa100e3aac31216dccef1f6c1b4ce6e01"><td class="memItemLeft" align="right" valign="top">
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>dontForwardChildrenBeforePreorder</b> = false</td></tr>
@@ -583,8 +595,8 @@ const <a class="el" href="class_visitor.html">Visitor</a> *&#160;</td><td class=
 <p>This pass is run for each parser and control separately. It controls precisely the visit order &mdash; to simulate a symbolic execution of the program.</p>
 <dl class="section pre"><dt>Precondition</dt><dd>Must be executed after variable initializers have been removed. </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a7fcd69f4a8bf1824f851e4d5965d2b23" name="a7fcd69f4a8bf1824f851e4d5965d2b23"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7fcd69f4a8bf1824f851e4d5965d2b23">&#9670;&#160;</a></span>ComputeWriteSet()</h2>
+<a id="a58be15419a805d0df91fef4a0419ca09" name="a58be15419a805d0df91fef4a0419ca09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58be15419a805d0df91fef4a0419ca09">&#9670;&#160;</a></span>ComputeWriteSet()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -605,7 +617,12 @@ const <a class="el" href="class_visitor.html">Visitor</a> *&#160;</td><td class=
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="class_p4_1_1_definitions.html">Definitions</a> *</td>          <td class="paramname"><span class="paramname"><em>definitions</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="class_p4_1_1_definitions.html">Definitions</a> *</td>          <td class="paramname"><span class="paramname"><em>definitions</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::unordered_set&lt; <a class="el" href="struct_p4_1_1loc__t.html">loc_t</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cached_locs</em></span>&#160;)</td>
         </tr>
       </table>
   </td>

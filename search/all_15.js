@@ -22,7 +22,7 @@ var searchData=
   ['lo_19',['lo',['../struct_half_open_range.html#a655f6c015ca1a87704b5c1db3b6e3ae3',1,'HalfOpenRange::lo'],['../struct_closed_range.html#a3c147ff5035de2d106a4ebbbd41602de',1,'ClosedRange::lo']]],
   ['loadirfromjson_20',['loadIRFromJson',['../class_b_m_v2_1_1_b_m_v2_options.html#a842f02b528fe0f67b6c0a6afae53902e',1,'BMV2::BMV2Options::loadIRFromJson'],['../class_d_p_d_k_1_1_dpdk_options.html#a062e835131b82e62c97cae4c43155de2',1,'DPDK::DpdkOptions::loadIRFromJson'],['../class_ebpf_options.html#a91e59ea6232c38818daf0259bc43f54a',1,'EbpfOptions::loadIRFromJson']]],
   ['lobyte_21',['loByte',['../struct_half_open_range.html#af30531d17fda05e0f73f46b91ccee216',1,'HalfOpenRange::loByte()'],['../struct_closed_range.html#aa3a3a7564820b0c7155311d901f6d51d',1,'ClosedRange::loByte()']]],
-  ['loc_5ft_22',['loc_t',['../struct_p4_1_1_compute_def_use_1_1loc__t.html',1,'P4::ComputeDefUse']]],
+  ['loc_5ft_22',['loc_t',['../struct_p4_1_1_compute_def_use_1_1loc__t.html',1,'P4::ComputeDefUse::loc_t'],['../struct_p4_1_1loc__t.html',1,'P4::loc_t']]],
   ['localcopypropagation_23',['LocalCopyPropagation',['../class_p4_1_1_local_copy_propagation.html',1,'P4']]],
   ['localcopyproppolicy_24',['localCopyPropPolicy',['../class_p4_tools_1_1_mid_end.html#a558cf633752c114ba3ffec9e2ac0dc12',1,'P4Tools::MidEnd']]],
   ['localinstances_25',['localInstances',['../class_p4_v1_1_1_program_structure.html#ac5591a14a8d99acf72d246f787a9a0cd',1,'P4V1::ProgramStructure']]],

@@ -1,15 +1,15 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classhash__vector__base.html" title=" " alt="" coords="5,203,144,229"/>
+<area shape="rect" id="Node000000" href="$classhash__vector__base.html" title=" " alt="" coords="5,189,144,214"/>
 <area shape="rect" id="Node000001" href="$classhvec__map.html" title=" " alt="" coords="192,5,412,45"/>
-<area shape="poly" id="edge31_Node000000_Node000001" title=" " alt="" coords="86,189,126,122,155,86,190,55,212,43,214,48,194,60,159,90,130,126,90,192"/>
-<area shape="rect" id="Node000002" href="$classhvec__map.html" title=" " alt="" coords="224,70,380,125"/>
-<area shape="poly" id="edge32_Node000000_Node000002" title=" " alt="" coords="101,193,142,163,191,134,223,119,225,124,193,138,145,167,104,197"/>
-<area shape="rect" id="Node000003" href="$classhvec__map.html" title=" " alt="" coords="217,149,387,203"/>
-<area shape="poly" id="edge33_Node000000_Node000003" title=" " alt="" coords="157,199,216,188,217,194,158,204"/>
-<area shape="rect" id="Node000004" href="$classhvec__map.html" title=" " alt="" coords="221,227,383,282"/>
-<area shape="poly" id="edge34_Node000000_Node000004" title=" " alt="" coords="158,227,221,238,221,244,157,233"/>
-<area shape="rect" id="Node000005" href="$classhvec__map.html" title=" " alt="" coords="192,307,412,347"/>
-<area shape="poly" id="edge35_Node000000_Node000005" title=" " alt="" coords="104,235,145,264,193,291,226,304,224,309,191,296,142,268,101,239"/>
-<area shape="rect" id="Node000006" href="$classhvec__map.html" title=" " alt="" coords="217,371,387,411"/>
-<area shape="poly" id="edge36_Node000000_Node000006" title=" " alt="" coords="92,239,133,298,161,330,193,356,218,369,215,374,191,361,157,334,128,302,87,242"/>
+<area shape="poly" id="edge31_Node000000_Node000001" title=" " alt="" coords="87,175,128,115,157,83,191,55,213,43,215,48,193,60,161,87,132,118,92,178"/>
+<area shape="rect" id="Node000002" href="$classhvec__map.html" title=" " alt="" coords="207,69,397,109"/>
+<area shape="poly" id="edge32_Node000000_Node000002" title=" " alt="" coords="100,178,141,148,191,119,220,107,222,112,193,124,144,152,103,182"/>
+<area shape="rect" id="Node000003" href="$classhvec__map.html" title=" " alt="" coords="217,134,387,189"/>
+<area shape="poly" id="edge33_Node000000_Node000003" title=" " alt="" coords="157,184,216,174,217,179,158,190"/>
+<area shape="rect" id="Node000004" href="$classhvec__map.html" title=" " alt="" coords="221,213,383,267"/>
+<area shape="poly" id="edge34_Node000000_Node000004" title=" " alt="" coords="158,213,221,224,221,229,157,218"/>
+<area shape="rect" id="Node000005" href="$classhvec__map.html" title=" " alt="" coords="192,292,412,332"/>
+<area shape="poly" id="edge35_Node000000_Node000005" title=" " alt="" coords="104,220,145,249,193,276,226,289,224,294,191,281,142,253,101,225"/>
+<area shape="rect" id="Node000006" href="$classhvec__map.html" title=" " alt="" coords="217,356,387,396"/>
+<area shape="poly" id="edge36_Node000000_Node000006" title=" " alt="" coords="92,224,133,284,161,315,193,342,218,354,215,359,191,346,157,319,128,287,87,227"/>
 </map>

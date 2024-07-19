@@ -417,7 +417,7 @@ var NAVTREEINDEX =
 "md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html#autotoc_md203",
 "namespace_p4_tools.html#ac0010409e8f958ec781a437ddd4e25b9",
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_v1_m_o_d_e_l2020_01_4.html",
-"struct_util_1_1_hasher_3_01unsigned_01long_01long_01_4.html"
+"struct_util_1_1_hasher_3_01unsigned_01int_01_4.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
