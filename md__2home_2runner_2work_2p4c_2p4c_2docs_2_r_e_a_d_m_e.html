@@ -123,8 +123,8 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.
   <div class="headertitle"><div class="title">Repository</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md0"></a> This folder contains documentation for the P4_16 prototype compiler. The code and documentation are hosted in the <a href="https://github.com/p4lang/p4c">p4c repository</a>.</p>
-<h1><a class="anchor" id="autotoc_md1"></a>
+<div class="textblock"><p><a class="anchor" id="repository"></a> This folder contains documentation for the P4_16 prototype compiler. The code and documentation are hosted in the <a href="https://github.com/p4lang/p4c">p4c repository</a>.</p>
+<h1><a class="anchor" id="compiler-source-code-organization"></a>
 Compiler source code organization</h1>
 <div class="fragment"><div class="line">p4c</div>
 <div class="line">├── build                          -- recommended place to build binary</div>
@@ -195,13 +195,13 @@ Compiler source code organization</h1>
 <div class="line">    ├── iwyu_mappings              -- mappings used by the Include What You Use (IWYU) tool for analyzing #include directives in C and C++ source files</div>
 <div class="line">    ├── ptf                        -- utilities for the Packet Test Framework (PTF)</div>
 <div class="line">    └── stf                        -- utilities for the Simple Test Framework (STF)</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md2"></a>
+</div><!-- fragment --><h1><a class="anchor" id="additional-documentation"></a>
 Additional documentation</h1>
 <ul>
 <li>the P4_14 and P4_16 languages are described in their respective specifications, available <a href="https://p4.org/specs">here</a>.</li>
 <li>the core design of the compiler intermediate representation (IR) and the visitor patterns are briefly described in <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html">IR</a></li>
-<li>The <a href="migration-guide.pptx">migration guide</a> describes how P4_14 (v1.0) programs are translated into P4_16 programs</li>
-<li>The <a href="compiler-design.pptx">compiler design</a> describes the salient features of the compiler design and implementation; this document has several subsections:<ul>
+<li>The <a href="https://github.com/p4lang/p4c/blob/main/docs/migration-guide.pptx">migration guide</a> describes how P4_14 (v1.0) programs are translated into P4_16 programs</li>
+<li>The <a href="https://github.com/p4lang/p4c/blob/main/docs/compiler-design.pptx">compiler design</a> describes the salient features of the compiler design and implementation; this document has several subsections:<ul>
 <li>Compiler goals</li>
 <li>Compiler architecture</li>
 <li>Source code organization</li>
@@ -218,14 +218,14 @@ Additional documentation</h1>
 </li>
 <li>Check out the <a href="https://github.com/TakeshiTseng/IntelliJ-P4-Plugin">IntelliJ P4 plugin</a></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md3"></a>
+<h1><a class="anchor" id="writing-documentation"></a>
 Writing documentation</h1>
 <p>Documenting the workings of the compiler is a never-ending (many times overlooked) job. We can always write better documentation!</p>
 <p>In P4C, documentation is generated using Doxygen. The generated documentation depends on <a href="https://github.com/jothepro/doxygen-awesome-css">Doxygen Awesome CSS</a>. The documentation is dynamically updated and deployed on <a href="https://p4lang.github.io/p4c/">GitHub Pages</a>.</p>
 <p>There are two main sources from which we generate documentation: comments in the code and markup documents in the docs/doxygen directory.</p>
 <p>Code comments should capture the main intent of the implementation and the "why", rather than the "how". The how can be read from the code, however, documenting the reasons why a certain implementation was chosen will help other contributors understand the design choices and enable them to reuse your code. Also important in the context of the compiler is to document the invariants for each pass (or groups of passes), since it is likely that other developers will need to insert additional passes, and they should understand the effects that the pass ordering has on the AST.</p>
 <p>Documentation in the markup documents is intended for higher level design documentation. The files will be automatically captured in the documentation in the order implied by their naming: XX_my_doc.md where XX is a number between 02-99. Currently, 00_revision_history.md contains the documentation revision history, and 01_overview.md is the overview of the compiler goals and architecture.</p>
-<h2><a class="anchor" id="autotoc_md4"></a>
+<h2><a class="anchor" id="documentation-comments-style-guide"></a>
 Documentation Comments Style Guide</h2>
 <ul>
 <li>Use triple slashes <code>///</code> for documenting functions and classes in files.</li>
@@ -237,7 +237,7 @@ Documentation Comments Style Guide</h2>
 <li>Each comment should end with a period.</li>
 </ul>
 <p>Happy writing! Should you have any questions, please don't hesitate to ask.</p>
-<h2><a class="anchor" id="autotoc_md5"></a>
+<h2><a class="anchor" id="git-usage"></a>
 Git usage</h2>
 <ul>
 <li>To contribute: fork the p4lang/p4c repository on github. <a href="https://help.github.com/articles/fork-a-repo/">Detailed instructions on forking a repository</a>.</li>
@@ -248,9 +248,9 @@ Git usage</h2>
 <div class="line">git push -f</div>
 </div><!-- fragment --><ul>
 <li>After committing changes, create a pull request (using the github web UI)</li>
-<li>Follow these <a href="CodingStandardPhilosophy.md#Git-commits-and-pull-requests">guidelines</a> to write commit messages and open pull requests.</li>
+<li>Follow these <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_coding_standard_philosophy.html#git-commits-and-pull-requests">guidelines</a> to write commit messages and open pull requests.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md6"></a>
+<h2><a class="anchor" id="debugging"></a>
 Debugging</h2>
 <ul>
 <li>To debug the build process you can run <code>make V=1</code></li>
@@ -268,7 +268,7 @@ Debugging</h2>
 <p class="startli">To execute LOG statements in a header file you must supply the complete name of the header file, e.g.: <code>-TfunctionsInlining.h:3</code>.</p>
 </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md7"></a>
+<h2><a class="anchor" id="testing"></a>
 Testing</h2>
 <p>The testing infrastructure is based on small python and shell scripts.</p>
 <ul>
@@ -287,7 +287,7 @@ Testing</h2>
 <ul>
 <li><a href="https://hub.docker.com/r/p4lang/behavioral-model/builds">https://hub.docker.com/r/p4lang/behavioral-model/builds</a></li>
 </ul>
-<h3><a class="anchor" id="autotoc_md8"></a>
+<h3><a class="anchor" id="adding-new-test-data"></a>
 Adding new test data</h3>
 <p>To add a new input test with a sample <a class="el" href="namespace_p4.html">P4</a> code file (under <code>testdata/p4_16_samples/</code> for example), one needs to:</p>
 <ul>
@@ -304,12 +304,12 @@ Adding new test data</h3>
 </li>
 <li>The reference files for each test will be updated after running the tests.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md9"></a>
+<h2><a class="anchor" id="coding-conventions"></a>
 Coding conventions</h2>
 <ul>
-<li>Coding style is guided by the following rules.</li>
+<li>Coding style is guided by the <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_coding_standard_philosophy.html">following rules</a>.</li>
 <li>We generally follow the <a href="https://google.github.io/styleguide/cppguide.html">Google C++ Style Guide</a>. This is partially enforced by <code>cpplint</code> and <code>clang-format</code> and their respective configuration files. We have customized Google's <code>cpplint.py</code> tool for our purposes. The tool can be invoked with <code>make cpplint</code>. To be able to run <code>clang-format</code> on Ubuntu 20.04, install it with <code>pip3 install --user clang-format</code>. Do not use the Debian package. Both tools run in a git hook and as part of CI.</li>
-<li>Commenting Style is guided by the following rules.</li>
+<li>Commenting Style is guided by the <a class="el" href="#documentation-comments-style-guide">following rules</a>.</li>
 <li>Watch out for <code>const</code>; it is very important.</li>
 <li>Use <code>override</code> whenever possible (new GCC versions enforce this).</li>
 <li>Never use <code>const_cast</code> and <code>reinterpret_cast</code>.</li>
@@ -324,14 +324,14 @@ Coding conventions</h2>
 <li>Use the <code>BUG()</code> macro to signal an exception. This macro is guaranteed to throw an exception.</li>
 <li>Use <code>CHECK_NULL()</code> to validate that pointers are not nullptr.</li>
 <li>Use <code>BUG_CHECK()</code> instead of <code>assert</code>, and always supply an informative error message.</li>
-<li>Use <code>error()</code> and <code>warning()</code> for error reporting. See the <a href="CodingStandardPhilosophy.md#Handling-errors">guidelines</a> for more details.</li>
+<li>Use <code>error()</code> and <code>warning()</code> for error reporting. See the <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_coding_standard_philosophy.html#handling-errors">guidelines</a> for more details.</li>
 <li>Use <code>LOGn()</code> for log messages &ndash; the <code>n</code> is an integer constant for verbosity level. These can be controlled on a per-source-file basis with the -T option. LOG1 should be used for general messages, so that running with -T*:1 (turning on all LOG1 messages) is not too overwhelming. LOG2 should be used to print information about the results of a module that later passes may need to debug them. Details of what a module or pass is doing and looking at (only of interest when debugging that code) should be at LOG4 or higher.</li>
 <li>Use the <code>vector</code> and <code>array</code> wrappers for <code>std::vector</code> and <code>std::array</code> (these do bounds checking on all accesses).</li>
 <li>Use <code><a class="el" href="classordered__map.html">ordered_map</a></code> and <code><a class="el" href="classordered__set.html">ordered_set</a></code> when you need to iterate; they provide deterministic iterators.</li>
 </ul>
 </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md10"></a>
+<h2><a class="anchor" id="compiler-driver"></a>
 Compiler Driver</h2>
 <p><b>p4c</b> is a compiler driver. The goal is to provide a consistent user interface across different p4 backends and work flows. The compiler driver is written in Python. It can be extended for custom backends.</p>
 <p>The usage of the driver is as follows: </p><div class="fragment"><div class="line">usage: p4c [-h] [-V] [-v] [-###] [-Xpreprocessor &lt;arg&gt;] [-Xp4c &lt;arg&gt;]</div>

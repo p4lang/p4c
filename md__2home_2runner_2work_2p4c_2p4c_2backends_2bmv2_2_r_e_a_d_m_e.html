@@ -123,16 +123,16 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_
   <div class="headertitle"><div class="title">Behavioral Model Backend</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md140"></a> This is a back-end which generates code for the <a href="https://github.com/p4lang/behavioral-model.git">Behavioral Model version 2 (BMv2)</a>.</p>
+<div class="textblock"><p><a class="anchor" id="behavioral-model-backend"></a> This is a back-end which generates code for the <a href="https://github.com/p4lang/behavioral-model.git">Behavioral Model version 2 (BMv2)</a>.</p>
 <p>It can accept either P4_14 programs, or P4_16 programs written for the <code>v1model.p4</code> switch model.</p>
-<h1><a class="anchor" id="autotoc_md141"></a>
+<h1><a class="anchor" id="dependencies-1"></a>
 Dependencies</h1>
 <p>To run and test this back-end you need some additional tools:</p>
 <ul>
 <li>the BMv2 behavioral model itself. Installation instructions are available <a href="https://github.com/p4lang/behavioral-model#installing-bmv2">here</a>. You may need to update your dynamic libraries after installing bmv2: <code>sudo ldconfig</code></li>
 <li>the Python scapy library <code>sudo pip3 install scapy</code></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md142"></a>
+<h1><a class="anchor" id="unsupported-p4_16-language-features"></a>
 Unsupported P4_16 language features</h1>
 <p>Here are some unsupported features we are aware of. We will update this list as more features get supported in the bmv2 compiler backend and as we discover more issues.</p>
 <ul>

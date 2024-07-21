@@ -1,4 +1,4 @@
 var index =
 [
-    [ "Features of P4C", "index.html#autotoc_md47", null ]
+    [ "Features of P4C", "index.html#features-of-p4c", null ]
 ];
