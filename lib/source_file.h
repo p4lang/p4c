@@ -37,7 +37,7 @@ namespace Test {
 class UtilSourceFile;
 }
 
-namespace Util {
+namespace p4c::Util {
 using namespace P4::literals;
 
 struct SourceFileLine;
@@ -316,7 +316,7 @@ class InputSources final {
     std::vector<Comment *> comments;
 };
 
-}  // namespace Util
+}  // namespace p4c::Util
 
 namespace p4c {
 

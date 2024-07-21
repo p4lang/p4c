@@ -23,9 +23,9 @@ namespace IR {
 class Constant;
 }  // namespace IR
 
-namespace Util {
+namespace p4c::Util {
 class SourceInfo;
-}  // namespace Util
+}  // namespace p4c::Util
 
 /**
  * An unparsed numeric constant. We produce these as token values during

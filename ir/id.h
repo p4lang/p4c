@@ -63,11 +63,11 @@ struct ID : Util::IHasSourceInfo {
 
 }  // namespace IR
 
-namespace Util {
+namespace p4c::Util {
 template <>
 struct Hasher<IR::ID> {
     size_t operator()(const IR::ID &id) const { return Util::Hash{}(id.name); }
 };
-}  // namespace Util
+}  // namespace p4c::Util
 
 #endif /* IR_ID_H_ */

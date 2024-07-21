@@ -18,7 +18,7 @@ limitations under the License.
 #include <iterator>
 #include <utility>
 
-namespace Util {
+namespace p4c::Util {
 namespace Detail {
 using std::begin;
 using std::end;
@@ -67,6 +67,6 @@ class iterator_range {
 template <typename Container>
 iterator_range(Container &&) -> iterator_range<typename Detail::IterOfContainer<Container>>;
 
-}  // namespace Util
+}  // namespace p4c::Util
 
 #endif /*  LIB_ITERATOR_RANGE_H_ */

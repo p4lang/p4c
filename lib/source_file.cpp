@@ -37,7 +37,7 @@ void IHasDbPrint::print() const {
 }
 
 
-namespace Util {
+namespace p4c::Util {
 SourcePosition::SourcePosition(unsigned lineNumber, unsigned columnNumber)
     : lineNumber(lineNumber), columnNumber(columnNumber) {
     if (lineNumber == 0) BUG("Line numbering should start at one");
@@ -318,7 +318,7 @@ cstring SourceFileLine::toString() const {
     return absl::StrFormat("%s(%d)", fileName.string_view(), sourceLine);
 }
 
-}  // namespace Util
+}  // namespace p4c::Util
 
 ////////////////////////////////////////////////////////
 

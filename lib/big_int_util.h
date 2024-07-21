@@ -26,7 +26,7 @@ limitations under the License.
 #include "big_int.h"
 #include "hash.h"
 
-namespace Util {
+namespace p4c::Util {
 
 // Useful functions for manipulating GMP values
 // (arbitrary-precision values)
@@ -69,7 +69,7 @@ inline unsigned scan1(const boost::multiprecision::cpp_int &val, unsigned pos) {
     return scan1_positive(val, pos);
 }
 
-}  // namespace Util
+}  // namespace p4c::Util
 
 namespace p4c {
 

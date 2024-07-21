@@ -358,12 +358,12 @@ struct hash<P4::loc_t> {
 
 }  // namespace std
 
-namespace Util {
+namespace p4c::Util {
 template <>
 struct Hasher<P4::ProgramPoint> {
     size_t operator()(const P4::ProgramPoint &p) const { return p.hash(); }
 };
-}  // namespace Util
+}  // namespace p4c::Util
 
 namespace P4 {
 class ProgramPoints : public IHasDbPrint {

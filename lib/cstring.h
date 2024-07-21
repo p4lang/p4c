@@ -417,12 +417,12 @@ struct hash<cstring> {
 };
 }  // namespace std
 
-namespace Util {
+namespace p4c::Util {
 template <>
 struct Hasher<cstring> {
     size_t operator()(const cstring &c) const { return Util::Hash{}(c.c_str()); }
 };
 
-}  // namespace Util
+}  // namespace p4c::Util
 
 #endif /* LIB_CSTRING_H_ */

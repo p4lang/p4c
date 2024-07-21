@@ -34,9 +34,9 @@ class Transform;
 class JSONGenerator;
 class JSONLoader;
 
-namespace Util {
+namespace p4c::Util {
 class JsonObject;
-}  // namespace Util
+}  // namespace p4c::Util
 
 namespace IR {
 

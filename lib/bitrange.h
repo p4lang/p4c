@@ -799,7 +799,7 @@ struct hash<ClosedRange<Unit, Order>> {
 };
 }  // namespace std
 
-namespace Util {
+namespace p4c::Util {
 template <RangeUnit Unit, Endian Order>
 struct Hasher<HalfOpenRange<Unit, Order>> {
     size_t operator()(const HalfOpenRange<Unit, Order> &r) const {
@@ -811,6 +811,6 @@ template <RangeUnit Unit, Endian Order>
 struct Hasher<ClosedRange<Unit, Order>> {
     size_t operator()(const ClosedRange<Unit, Order> &r) const { return Util::Hash{}(r.lo, r.hi); }
 };
-}  // namespace Util
+}  // namespace p4c::Util
 
 #endif /* LIB_BITRANGE_H_ */

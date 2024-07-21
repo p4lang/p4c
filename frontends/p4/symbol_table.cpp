@@ -23,7 +23,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/log.h"
 
-namespace Util {
+namespace p4c::Util {
 
 using namespace P4::literals;
 
@@ -288,4 +288,4 @@ void ProgramStructure::clear() {
     currentNamespace = rootNamespace;
     debugStream = stderr;
 }
-}  // namespace Util
+}  // namespace p4c::Util

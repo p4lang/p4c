@@ -35,7 +35,7 @@ namespace Test {
 class TestJson;
 }
 
-namespace Util {
+namespace p4c::Util {
 
 class IJson : public ICastable {
  public:
@@ -191,6 +191,6 @@ class JsonObject final : public IJson, public string_map<IJson *> {
     DECLARE_TYPEINFO(JsonObject, IJson);
 };
 
-}  // namespace Util
+}  // namespace p4c::Util
 
 #endif /* LIB_JSON_H_ */

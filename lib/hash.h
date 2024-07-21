@@ -11,7 +11,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace Util {
+namespace p4c::Util {
 
 namespace Detail {
 constexpr uint32_t PRIME32_1 = UINT32_C(0x9E3779B1);
@@ -278,7 +278,7 @@ struct TupleHasher<0, Types...> {
     }
 };
 }  // namespace Detail
-}  // namespace Util
+}  // namespace p4c::Util
 
 namespace std {
 template <typename T1, typename T2>

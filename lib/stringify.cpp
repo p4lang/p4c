@@ -24,7 +24,7 @@ limitations under the License.
 #include "cstring.h"
 #include "exceptions.h"
 
-namespace Util {
+namespace p4c::Util {
 cstring toString(bool value) {
     return value ? cstring::literal("true") : cstring::literal("false");
 }
@@ -128,4 +128,4 @@ cstring toString(cstring value) {
 
 cstring toString(std::string_view value) { return cstring(value); }
 
-}  // namespace Util
+}  // namespace p4c::Util

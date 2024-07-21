@@ -28,7 +28,7 @@ limitations under the License.
 #include "absl/strings/str_cat.h"
 #include "lib/bug_helper.h"
 
-namespace Util {
+namespace p4c::Util {
 
 // colors to pretty print messages
 // \e is non-standard escape sequence, use codepoint \33 instead
@@ -147,7 +147,7 @@ class CompilationError : public P4CExceptionBase {
         throw Util::CompilerUnimplemented(__LINE__, __FILE__, __VA_ARGS__); \
     } while (0)
 
-}  // namespace Util
+}  // namespace p4c::Util
 
 /// Report an error and exit
 #define FATAL_ERROR(...)                           \
