@@ -20,6 +20,8 @@ limitations under the License.
 
 #include "lib/error.h"
 
+namespace p4c {
+
 std::ostream *openFile(const std::filesystem::path &name, bool nullOnError) {
     if (name.empty()) {
         if (nullOnError) return new nullstream();
@@ -34,3 +36,5 @@ std::ostream *openFile(const std::filesystem::path &name, bool nullOnError) {
     }
     return file;
 }
+
+}  // namespace p4c

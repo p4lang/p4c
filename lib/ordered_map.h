@@ -24,6 +24,8 @@ limitations under the License.
 #include <map>
 #include <utility>
 
+namespace p4c {
+
 // Map is ordered by order of element insertion.
 template <class K, class V, class COMP = std::less<K>,
           class ALLOC = std::allocator<std::pair<const K, V>>>
@@ -253,5 +255,7 @@ class ordered_map {
         data.sort(comp);
     }
 };
+
+}  // namespace p4c
 
 #endif /* LIB_ORDERED_MAP_H_ */

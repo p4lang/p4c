@@ -318,6 +318,10 @@ class InputSources final {
 
 }  // namespace Util
 
+namespace p4c {
+
 void dbprint(const IHasDbPrint *o);
+
+}  // namespace p4c
 
 #endif /* LIB_SOURCE_FILE_H_ */

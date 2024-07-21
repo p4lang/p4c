@@ -17,7 +17,11 @@ limitations under the License.
 #ifndef LIB_CRASH_H_
 #define LIB_CRASH_H_
 
+namespace p4c {
+
 void setup_signals();
 const char *addr2line(void *addr, const char *text);
+
+}  // namespace p4c
 
 #endif /* LIB_CRASH_H_ */

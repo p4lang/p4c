@@ -22,6 +22,8 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/rtti.h"
 
+namespace p4c {
+
 /// Handy type conversion methods that can be inherited by various base classes.
 /// In order to use ICastable one also need to provide intrusive lightweight RTTI
 /// metadata for the given class hierarchy. See `docs/C++.md` for more information,
@@ -63,5 +65,7 @@ class ICastable : public virtual RTTI::Base {
         return result;
     }
 };
+
+}  // namespace p4c
 
 #endif /* LIB_CASTABLE_H_ */

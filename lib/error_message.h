@@ -21,6 +21,8 @@ limitations under the License.
 
 #include "lib/source_file.h"
 
+namespace p4c {
+
 /**
  *  Structure populated via error_helper functions
  *
@@ -74,5 +76,7 @@ struct ParserErrorMessage {
 
     std::string toString() const;
 };
+
+}  // namespace p4c
 
 #endif /* LIB_ERROR_MESSAGE_H_ */

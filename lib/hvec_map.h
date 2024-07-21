@@ -24,6 +24,8 @@ limitations under the License.
 #include "exceptions.h"
 #include "hashvec.h"
 
+namespace p4c {
+
 template <class KEY, class VAL, class HASH = std::hash<KEY>, class PRED = std::equal_to<KEY>,
           class ALLOC = std::allocator<std::pair<const KEY, VAL>>>
 class hvec_map : hash_vector_base {
@@ -342,5 +344,7 @@ template <class K, class T, class V, class Comp, class Alloc>
 inline const V *getref(const hvec_map<K, V, Comp, Alloc> *m, T key) {
     return m ? getref(*m, key) : 0;
 }
+
+}  // namespace p4c
 
 #endif /* LIB_HVEC_MAP_H_ */

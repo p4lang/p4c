@@ -111,6 +111,8 @@ big_int cvtInt(const char *s, unsigned base) {
 
 }  // namespace Util
 
+namespace p4c {
+
 void dump(const big_int &i) {
     std::cout << i << " (";
     // DANGER -- printing a negative big_int in hex crashes...
@@ -121,3 +123,5 @@ void dump(const big_int &i) {
     std::cout << ")" << std::endl;
 }
 void dump(const big_int *i) { dump(*i); }
+
+}  // namespace p4c

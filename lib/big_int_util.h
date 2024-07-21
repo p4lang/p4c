@@ -71,6 +71,8 @@ inline unsigned scan1(const boost::multiprecision::cpp_int &val, unsigned pos) {
 
 }  // namespace Util
 
+namespace p4c {
+
 static inline unsigned bitcount(big_int v) {
     if (v < 0) return ~0U;
     unsigned rv = 0;
@@ -99,5 +101,7 @@ static inline int ceil_log2(big_int v) { return v ? floor_log2(v - 1) + 1 : -1; 
 
 template <>
 struct Util::Hasher<big_int> : Detail::StdHasher {};
+
+}  // namespace p4c
 
 #endif /* LIB_BIG_INT_UTIL_H_ */

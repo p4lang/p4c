@@ -19,7 +19,6 @@ limitations under the License.
 #include <stdarg.h>
 #if HAVE_LIBBACKTRACE
 #include <backtrace.h>
-extern struct backtrace_state *global_backtrace_state;
 #endif
 
 #include <functional>
@@ -32,7 +31,11 @@ extern struct backtrace_state *global_backtrace_state;
 #include "exename.h"
 #include "hex.h"
 
+namespace p4c {
+
 #if HAVE_LIBBACKTRACE
+extern struct backtrace_state *global_backtrace_state;
+
 int append_message(void *msg_, uintptr_t pc, const char *file, int line, const char *func) {
     std::string &msg = *static_cast<std::string *>(msg_);
     std::stringstream tmp;
@@ -71,6 +74,8 @@ void backtrace_fill_stacktrace(std::string &msg, void *const *backtrace, int siz
     (void)size;
 #endif
 }
+
+}  // namespace p4c
 
 #ifdef __GLIBC__
 /* DANGER -- overrides for glibc++ exception throwers to include a stack trace.

@@ -31,6 +31,8 @@ limitations under the License.
 #include "error_helper.h"
 #include "exceptions.h"
 
+namespace p4c {
+
 /// An action to take when a diagnostic message is triggered.
 enum class DiagnosticAction {
     Ignore,  /// Take no action and continue compilation.
@@ -275,5 +277,7 @@ class ErrorReporter {
     /// allow filtering of diagnostic actions
     std::unordered_map<cstring, DiagnosticAction> diagnosticActions;
 };
+
+}  // namespace p4c
 
 #endif /* LIB_ERROR_REPORTER_H_ */

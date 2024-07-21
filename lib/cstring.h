@@ -77,6 +77,7 @@ namespace P4::literals {
 inline cstring operator""_cs(const char *str, std::size_t len);
 }
 
+namespace p4c {
 class cstring {
     const char *str = nullptr;
 
@@ -388,6 +389,8 @@ cstring cstring::make_unique(const T &inuse, cstring base, char sep) {
 inline std::ostream &operator<<(std::ostream &out, cstring s) {
     return out << (s ? s.c_str() : "<null>");
 }
+
+}  // namespace p4c
 
 /// Let's prevent literal clashes. A user wishing to use the literal can do using namespace
 /// P4::literals, similarly as they can do using namespace std::literals for the standard once.

@@ -26,6 +26,8 @@ limitations under the License.
 // This should eventually be turned to 0 when all the code is converted
 #define LEGACY 1
 
+namespace p4c {
+
 /// @return the number of errors encountered so far in the current compilation
 /// context.
 inline unsigned errorCount() { return BaseCompileContext::get().errorReporter().getErrorCount(); }
@@ -180,5 +182,7 @@ inline void diagnose(DiagnosticAction defaultAction, const char *diagnosticName,
     context.errorReporter().diagnose(action, diagnosticName, format, suffix,
                                      std::forward<Args>(args)...);
 }
+
+}  // namespace p4c
 
 #endif /* LIB_ERROR_H_ */

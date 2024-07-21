@@ -23,6 +23,8 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/error_reporter.h"
 
+namespace p4c {
+
 /// An interface for objects which represent compiler settings and state for a
 /// translation unit. The compilation context might include things like compiler
 /// options which apply to the translation unit or errors and warnings generated
@@ -112,5 +114,7 @@ class BaseCompileContext : public ICompileContext {
     /// Error and warning tracking facilities for this compilation context.
     ErrorReporter errorReporterInstance;
 };
+
+}  // namespace p4c
 
 #endif /* LIB_COMPILE_CONTEXT_H_ */

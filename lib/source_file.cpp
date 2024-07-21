@@ -27,10 +27,15 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/stringify.h"
 
+namespace p4c {
+
 void IHasDbPrint::print() const {
     dbprint(std::cout);
     std::cout << std::endl;
 }
+
+}
+
 
 namespace Util {
 SourcePosition::SourcePosition(unsigned lineNumber, unsigned columnNumber)
@@ -317,8 +322,12 @@ cstring SourceFileLine::toString() const {
 
 ////////////////////////////////////////////////////////
 
+namespace p4c {
+
 [[gnu::used]]  // ensure linker will not drop function even if unused
 void dbprint(const IHasDbPrint *o) {
     o->dbprint(std::cout);
     std::cout << std::endl << std::flush;
 }
+
+}  // namespace p4c

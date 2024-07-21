@@ -19,6 +19,8 @@ limitations under the License.
 #include <iostream>
 #include <utility>
 
+namespace p4c {
+
 std::ostream &toStream(std::ostream &out, RangeUnit unit, Endian order, int lo, int hi,
                        bool closed) {
     if (unit == RangeUnit::Bit)
@@ -39,3 +41,5 @@ std::ostream &toStream(std::ostream &out, RangeUnit unit, Endian order, int lo, 
 
     return out;
 }
+
+}  // namespace p4c

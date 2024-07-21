@@ -44,6 +44,8 @@ limitations under the License.
 #include "hex.h"
 #include "log.h"
 
+namespace p4c {
+
 static const char *signames[] = {
     "NONE", "HUP",  "INT",  "QUIT", "ILL",    "TRAP",   "ABRT",  "BUS",  "FPE",  "KILL", "USR1",
     "SEGV", "USR2", "PIPE", "ALRM", "TERM",   "STKFLT", "CHLD",  "CONT", "STOP", "TSTP", "TTIN",
@@ -321,3 +323,5 @@ void setup_signals() {
     if (LOGGING(1)) global_backtrace_state = backtrace_create_state(exename(), 1, nullptr, nullptr);
 #endif
 }
+
+}  // namespace p4c

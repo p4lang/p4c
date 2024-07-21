@@ -670,4 +670,5 @@ auto concat(Args &&...inputs) {
 }
 
 }  // namespace Util
+
 #endif /* LIB_ENUMERATOR_H_ */

@@ -24,6 +24,8 @@ limitations under the License.
 #include "lib/error_message.h"
 #include "lib/exceptions.h"
 
+namespace p4c {
+
 using MessageType = ErrorMessage::MessageType;
 
 /// enumerate supported errors
@@ -154,5 +156,7 @@ class ErrorCatalog {
     /// map from errorCode to name
     static std::map<int, cstring> errorCatalog;
 };
+
+}  // namespace p4c
 
 #endif /* LIB_ERROR_CATALOG_H_ */

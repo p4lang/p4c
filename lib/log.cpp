@@ -37,6 +37,7 @@ limitations under the License.
 #include <mutex>
 #endif  // MULTITHREAD
 
+namespace p4c {
 namespace Log {
 namespace Detail {
 
@@ -358,3 +359,4 @@ void increaseVerbosity() {
 }
 
 }  // namespace Log
+}  // namespace p4c

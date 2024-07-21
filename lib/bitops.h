@@ -21,6 +21,8 @@ limitations under the License.
 
 #include "bitvec.h"
 
+namespace p4c {
+
 static inline unsigned bitcount(unsigned v) {
 #if defined(__GNUC__) || defined(__clang__)
     unsigned rv = __builtin_popcount(v);
@@ -57,5 +59,7 @@ static inline unsigned bitmask2bytemask(const bitvec &a) {
         if (a.getrange(i * 8, 8)) rv |= 1 << i;
     return rv;
 }
+
+}  // namespace p4c
 
 #endif /* LIB_BITOPS_H_ */

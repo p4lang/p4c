@@ -19,15 +19,20 @@ limitations under the License.
 
 #include <cstddef>
 
+#define ALLOC_TRACE_DEPTH 5
+
+namespace p4c {
+
 void setup_gc_logging();
 size_t gc_mem_inuse(size_t *max = 0);  // trigger GC, return inuse after
 
-#define ALLOC_TRACE_DEPTH 5
 struct alloc_trace_cb_t {
     void (*fn)(void *, void **, size_t);
     void *arg;
 };
 alloc_trace_cb_t set_alloc_trace(alloc_trace_cb_t cb);
 alloc_trace_cb_t set_alloc_trace(void (*fn)(void *, void **, size_t), void *arg);
+
+}  // namespace p4c
 
 #endif /* LIB_GC_H_ */

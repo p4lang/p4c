@@ -28,6 +28,8 @@ limitations under the License.
 #include "exceptions.h"
 #include "hash.h"
 
+namespace p4c {
+
 /* iterate over ranges of contiguous bits in a bitvector */
 class bitranges {
     bitvec tmp;
@@ -777,6 +779,8 @@ template <RangeUnit Unit, Endian Order>
 std::ostream &operator<<(std::ostream &out, const ClosedRange<Unit, Order> &range) {
     return toStream(out, Unit, Order, range.lo, range.hi, true);
 }
+
+}  // namespace p4c
 
 // Hashing specializations
 namespace std {

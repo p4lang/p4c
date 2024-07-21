@@ -24,7 +24,7 @@ limitations under the License.
 
 #include "rtti.h"
 
-namespace RTTI {
+namespace p4c::RTTI {
 
 /// A trait that check T is custom-RTTI-enabled. Works just like standard property type traits.
 /// One would normally use the _v variant.
@@ -142,6 +142,6 @@ inline const Detail::IsType<Target> is;
 template <typename... Targets>
 inline const Detail::IsType<Targets...> isAny;
 
-}  // namespace RTTI
+}  // namespace p4c::RTTI
 
 #endif  // LIB_RTTI_UTILS_H_

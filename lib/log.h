@@ -31,6 +31,7 @@ limitations under the License.
 #define __attribute__(X)
 #endif
 
+namespace p4c {
 namespace Log {
 namespace Detail {
 // The global verbosity level.
@@ -100,6 +101,7 @@ inline bool enableLogging() {
 void increaseVerbosity();
 
 }  // namespace Log
+}  // namespace p4c
 
 #ifndef MAX_LOGGING_LEVEL
 // can be set on build command line and disables higher logging levels at compile time
@@ -147,6 +149,8 @@ void increaseVerbosity();
 #define P4C_WARNING(X) (::Log::verbose() ? std::clog << "WARNING: " << X << std::endl : std::clog)
 #define ERRWARN(C, X) ((C) ? P4C_ERROR(X) : P4C_WARNING(X))
 // NOLINTEND(bugprone-macro-parentheses)
+
+namespace p4c {
 
 static inline std::ostream &operator<<(std::ostream &out,
                                        std::function<std::ostream &(std::ostream &)> fn) {
@@ -199,5 +203,7 @@ template <class T>
 std::ostream &operator<<(std::ostream &out, const std::set<T> &set) {
     return format_container(out, set, '(', ')');
 }
+
+}  // namespace p4c
 
 #endif /* LIB_LOG_H_ */
