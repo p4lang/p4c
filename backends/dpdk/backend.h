@@ -35,7 +35,7 @@ namespace p4configv1 = ::p4::config::v1;
 #include "lib/json.h"
 #include "options.h"
 
-namespace DPDK {
+namespace p4c::DPDK {
 class DpdkBackend {
     DpdkOptions &options;
     P4::ReferenceMap *refMap;
@@ -51,6 +51,6 @@ class DpdkBackend {
     void codegen(std::ostream &) const;
 };
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK
 
 #endif /* BACKENDS_DPDK_BACKEND_H_ */

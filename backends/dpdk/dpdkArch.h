@@ -29,7 +29,7 @@ limitations under the License.
 #include "midend/flattenInterfaceStructs.h"
 #include "midend/removeLeftSlices.h"
 
-namespace DPDK {
+namespace p4c::DPDK {
 
 using namespace p4c::P4::literals;
 
@@ -1545,5 +1545,5 @@ struct DpdkHandleIPSec : public PassManager {
     }
 };
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK
 #endif /* BACKENDS_DPDK_DPDKARCH_H_ */

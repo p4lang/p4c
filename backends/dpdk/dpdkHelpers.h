@@ -35,7 +35,7 @@ limitations under the License.
 
 #define TOSTR_DECLA(NAME) std::ostream &toStr(std::ostream &, IR::NAME *)
 
-namespace DPDK {
+namespace p4c::DPDK {
 
 /// @brief Name of the metadata used as output port.
 ///
@@ -201,5 +201,5 @@ class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     }
 };
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK
 #endif /* BACKENDS_DPDK_DPDKHELPERS_H_ */

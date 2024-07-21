@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "dpdkUtils.h"
 
-namespace DPDK {
+namespace p4c::DPDK {
 /// The assumption is compiler can only produce forward jumps.
 const IR::IndexedVector<IR::DpdkAsmStatement> *RemoveRedundantLabel::removeRedundantLabel(
     const IR::IndexedVector<IR::DpdkAsmStatement> &s) {
@@ -640,4 +640,4 @@ void EmitDpdkTableConfig::postorder(const IR::DpdkTable *table) {
     dpdkTableConfigFile.close();
 }
 size_t ShortenTokenLength::count = 0;
-}  // namespace DPDK
+}  // namespace p4c::DPDK

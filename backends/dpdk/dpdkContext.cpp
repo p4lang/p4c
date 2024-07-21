@@ -20,7 +20,7 @@ limitations under the License.
 #include "control-plane/bfruntime_ext.h"
 #include "dpdkUtils.h"
 #include "printUtils.h"
-namespace DPDK {
+namespace p4c::DPDK {
 
 cstring DpdkContextGenerator::removePipePrefix(cstring tableName) {
     if (!options.bfRtSchema.empty() || !options.tdiFile.empty()) {
@@ -576,4 +576,4 @@ void DpdkContextGenerator::serializeContextJson(std::ostream *destination) {
     destination->flush();
 }
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK

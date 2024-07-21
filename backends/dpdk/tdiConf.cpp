@@ -19,7 +19,7 @@ limitations under the License.
 #include <fstream>
 #include <iostream>
 
-namespace DPDK {
+namespace p4c::DPDK {
 
 using namespace p4c::P4::literals;
 
@@ -155,4 +155,4 @@ void TdiBfrtConf::generate(const IR::P4Program *prog, DPDK::DpdkOptions &options
     }
     out.close();
 }
-}  // namespace DPDK
+}  // namespace p4c::DPDK

@@ -33,7 +33,7 @@ limitations under the License.
 #include "lib/json.h"
 #include "options.h"
 
-namespace DPDK {
+namespace p4c::DPDK {
 
 using namespace p4c::P4::literals;
 
@@ -174,5 +174,5 @@ class EliminateUnusedAction : public PassManager {
     }
 };
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK
 #endif /* BACKENDS_DPDK_DPDKPROGRAM_H_ */

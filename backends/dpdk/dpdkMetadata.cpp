@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "dpdkUtils.h"
 
-namespace DPDK {
+namespace p4c::DPDK {
 
 using namespace p4c::P4::literals;
 
@@ -137,4 +137,4 @@ IR::IndexedVector<IR::DpdkAsmStatement> PrependPassRecircId::prependPassWithReci
     return newStmts;
 }
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK

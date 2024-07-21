@@ -35,7 +35,7 @@ limitations under the License.
 
 #define DPDK_TABLE_MAX_KEY_SIZE 64 * 8
 
-namespace DPDK {
+namespace p4c::DPDK {
 
 using namespace p4c::P4::literals;
 
@@ -653,5 +653,5 @@ class DpdkAsmOptimization : public PassRepeated {
     }
 };
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK
 #endif /* BACKENDS_DPDK_DPDKASMOPT_H_ */

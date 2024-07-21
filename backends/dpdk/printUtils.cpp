@@ -15,7 +15,7 @@ limitations under the License.
 
 #include "printUtils.h"
 
-namespace DPDK {
+namespace p4c::DPDK {
 
 bool ConvertToString::preorder(const IR::Expression *e) {
     BUG("%1% not implemented", e);
@@ -120,4 +120,4 @@ cstring toStr(const IR::Node *const n) {
         BUG("not implemented type");
     }
 }
-}  // namespace DPDK
+}  // namespace p4c::DPDK

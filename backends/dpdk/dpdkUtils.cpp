@@ -15,7 +15,7 @@ limitations under the License.
 
 #include "dpdkUtils.h"
 
-namespace DPDK {
+namespace p4c::DPDK {
 using namespace p4c::P4::literals;
 
 bool isSimpleExpression(const IR::Expression *e) {
@@ -170,4 +170,4 @@ int getMetadataFieldWidth(int width) {
     return width;
 }
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK

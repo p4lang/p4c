@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/stringify.h"
 
-namespace DPDK {
+namespace p4c::DPDK {
 /// Insert the metadata structure updated with tmp variables created during parser conversion
 /// Add all the structures to DPDK structtype.
 IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata(
@@ -640,4 +640,4 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
 
     return true;
 }
-}  // namespace DPDK
+}  // namespace p4c::DPDK

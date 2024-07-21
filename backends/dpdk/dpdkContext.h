@@ -35,7 +35,7 @@ namespace p4configv1 = ::p4::config::v1;
 /// actions. It contains all relevant information regarding the tables and actions.
 /// The context JSON is based on the JSON Schema defined in DPDK_context_schema.json.
 
-namespace DPDK {
+namespace p4c::DPDK {
 
 using namespace p4c::P4::literals;
 
@@ -166,6 +166,6 @@ class DpdkContextGenerator : public Inspector {
     cstring removePipePrefix(cstring);
 };
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK
 
 #endif /* BACKENDS_DPDK_DPDKCONTEXT_H_ */

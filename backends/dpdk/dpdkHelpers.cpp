@@ -22,7 +22,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace DPDK {
+namespace p4c::DPDK {
 
 using namespace p4c::P4::literals;
 
@@ -1457,4 +1457,4 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     return false;
 }
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK

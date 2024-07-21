@@ -31,7 +31,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "lib/cstring.h"
 
-namespace DPDK {
+namespace p4c::DPDK {
 
 cstring TypeStruct2Name(const cstring s) {
     if (isStandardMetadata(s)) {
@@ -3362,4 +3362,4 @@ const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Control *c) {
     return c;
 }
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK

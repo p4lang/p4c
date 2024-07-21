@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "backends/dpdk/midend.h"
 
-namespace DPDK {
+namespace p4c::DPDK {
 
 class DpdkOptions : public CompilerOptions {
  public:
@@ -109,6 +109,6 @@ class DpdkOptions : public CompilerOptions {
 
 using DpdkContext = P4CContextWithOptions<DpdkOptions>;
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK
 
 #endif /* BACKENDS_DPDK_OPTIONS_H_ */

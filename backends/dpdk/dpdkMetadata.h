@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 
-namespace DPDK {
+namespace p4c::DPDK {
 
 class IsDirectionMetadataUsed : public Inspector {
     bool &is_direction_used;
@@ -93,5 +93,5 @@ class PrependPassRecircId : public Transform {
         IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 };
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK
 #endif  // BACKENDS_DPDK_DPDKMETADATA_H_

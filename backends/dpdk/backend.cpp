@@ -33,7 +33,7 @@ limitations under the License.
 #include "midend/removeComplexExpressions.h"
 #include "midend/simplifyKey.h"
 
-namespace DPDK {
+namespace p4c::DPDK {
 
 void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
@@ -166,4 +166,4 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
 
 void DpdkBackend::codegen(std::ostream &out) const { dpdk_program->toSpec(out) << std::endl; }
 
-}  // namespace DPDK
+}  // namespace p4c::DPDK
