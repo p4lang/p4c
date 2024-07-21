@@ -27,16 +27,16 @@ namespace p4c::UBPF {
 
 using namespace ::p4c::P4::literals;
 
-struct Pipeline_Model : public ::Model::Elem {
+struct Pipeline_Model : public ::p4c::Model::Elem {
     Pipeline_Model()
         : Elem("Pipeline"_cs), parser("prs"_cs), control("p"_cs), deparser("dprs"_cs) {}
 
-    ::Model::Elem parser;
-    ::Model::Elem control;
-    ::Model::Elem deparser;
+    ::p4c::Model::Elem parser;
+    ::p4c::Model::Elem control;
+    ::p4c::Model::Elem deparser;
 };
 
-struct Register_Model : public ::Model::Extern_Model {
+struct Register_Model : public ::p4c::Model::Extern_Model {
     Register_Model()
         : Extern_Model("Register"_cs),
           sizeParam("size"_cs),
@@ -46,25 +46,25 @@ struct Register_Model : public ::Model::Extern_Model {
           index("index"_cs),
           value("value"_cs) {}
 
-    ::Model::Elem sizeParam;
-    ::Model::Elem read;
-    ::Model::Elem write;
-    ::Model::Elem initial_value;
-    ::Model::Elem index;
-    ::Model::Elem value;
+    ::p4c::Model::Elem sizeParam;
+    ::p4c::Model::Elem read;
+    ::p4c::Model::Elem write;
+    ::p4c::Model::Elem initial_value;
+    ::p4c::Model::Elem index;
+    ::p4c::Model::Elem value;
 };
 
-struct Algorithm_Model : public ::Model::Enum_Model {
-    Algorithm_Model() : ::Model::Enum_Model("HashAlgorithm"_cs), lookup3("lookup3"_cs) {}
+struct Algorithm_Model : public ::p4c::Model::Enum_Model {
+    Algorithm_Model() : ::p4c::Model::Enum_Model("HashAlgorithm"_cs), lookup3("lookup3"_cs) {}
 
-    ::Model::Elem lookup3;
+    ::p4c::Model::Elem lookup3;
 };
 
-struct Hash_Model : public ::Model::Elem {
-    Hash_Model() : ::Model::Elem("hash"_cs) {}
+struct Hash_Model : public ::p4c::Model::Elem {
+    Hash_Model() : ::p4c::Model::Elem("hash"_cs) {}
 };
 
-class UBPFModel : public ::Model::Model {
+class UBPFModel : public ::p4c::Model::Model {
  protected:
     UBPFModel()
         : CPacketName("pkt"_cs),
@@ -84,16 +84,16 @@ class UBPFModel : public ::Model::Model {
     static UBPFModel instance;
     static cstring reservedPrefix;
 
-    ::Model::Elem CPacketName;
-    ::Model::Param_Model packet;
+    ::p4c::Model::Elem CPacketName;
+    ::p4c::Model::Param_Model packet;
     Pipeline_Model pipeline;
     Register_Model registerModel;
-    ::Model::Elem drop;
-    ::Model::Elem pass;
-    ::Model::Elem ubpf_time_get_ns;
-    ::Model::Elem truncate;
-    ::Model::Extern_Model csum_replace2;
-    ::Model::Extern_Model csum_replace4;
+    ::p4c::Model::Elem drop;
+    ::p4c::Model::Elem pass;
+    ::p4c::Model::Elem ubpf_time_get_ns;
+    ::p4c::Model::Elem truncate;
+    ::p4c::Model::Extern_Model csum_replace2;
+    ::p4c::Model::Extern_Model csum_replace4;
     Algorithm_Model hashAlgorithm;
     Hash_Model hash;
     unsigned version = 20200515;

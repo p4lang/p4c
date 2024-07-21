@@ -4,6 +4,8 @@
 #include "frontends/parsers/p4/p4lexer_internal.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
 
+using namespace ::p4c;
+
 using Parser = P4::P4Parser;
 
 #undef  YY_DECL

@@ -38,10 +38,10 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "midend/eliminateTypedefs.h"
 
-using P4::ReferenceMap;
-using P4::TypeMap;
-using P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
-using P4::ControlPlaneAPI::Helpers::isExternPropertyConstructedInPlace;
+using ::p4c::P4::ReferenceMap;
+using ::p4c::P4::TypeMap;
+using ::p4c::P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
+using ::p4c::P4::ControlPlaneAPI::Helpers::isExternPropertyConstructedInPlace;
 
 namespace p4configv1 = ::p4::config::v1;
 

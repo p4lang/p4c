@@ -347,13 +347,13 @@ class ProgramPoint : public IHasDbPrint {
 // inject hash into std namespace so it is picked up by std::unordered_set
 namespace std {
 template <>
-struct hash<P4::ProgramPoint> {
-    std::size_t operator()(const P4::ProgramPoint &s) const { return s.hash(); }
+struct hash<p4c::P4::ProgramPoint> {
+    std::size_t operator()(const p4c::P4::ProgramPoint &s) const { return s.hash(); }
 };
 
 template <>
-struct hash<P4::loc_t> {
-    std::size_t operator()(const P4::loc_t &loc) const { return loc.hash(); }
+struct hash<p4c::P4::loc_t> {
+    std::size_t operator()(const p4c::P4::loc_t &loc) const { return loc.hash(); }
 };
 
 }  // namespace std

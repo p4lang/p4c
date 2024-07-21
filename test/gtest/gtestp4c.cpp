@@ -18,6 +18,8 @@ limitations under the License.
 
 #include "helpers.h"
 
+using namespace ::p4c;
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     AutoCompileContext autoGTestContext(new GTestContext);

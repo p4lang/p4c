@@ -10,6 +10,8 @@
 #include "options.h"
 #include "p4fmt.h"
 
+using namespace ::p4c;
+
 namespace p4c::P4Fmt {
 
 namespace {

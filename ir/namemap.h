@@ -27,9 +27,7 @@ limitations under the License.
 #include "lib/map.h"
 
 namespace p4c {
-
 class JSONLoader;
-
 }  // namespace p4c
 
 namespace p4c::IR {

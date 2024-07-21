@@ -20,7 +20,7 @@ namespace p4c::P4 {
 
 using namespace literals;
 
-void KeyNameGenerator::p4c::error(const IR::Expression *expression) {
+void KeyNameGenerator::error(const IR::Expression *expression) {
     ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: Complex key expression requires a @name annotation",
             expression);
 }

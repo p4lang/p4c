@@ -784,25 +784,17 @@ std::ostream &operator<<(std::ostream &out, const ClosedRange<Unit, Order> &rang
 
 // Hashing specializations
 namespace std {
-
-namespace Util = ::p4c::Util;
-
-using ::p4c::ClosedRange;
-using ::p4c::Endian;
-using ::p4c::HalfOpenRange;
-using ::p4c::RangeUnit;
-
-template <RangeUnit Unit, Endian Order>
-struct hash<HalfOpenRange<Unit, Order>> {
-    std::size_t operator()(const HalfOpenRange<Unit, Order> &r) const {
-        return Util::Hash{}(r.lo, r.hi);
+template <p4c::RangeUnit Unit, p4c::Endian Order>
+struct hash<p4c::HalfOpenRange<Unit, Order>> {
+    std::size_t operator()(const p4c::HalfOpenRange<Unit, Order> &r) const {
+        return p4c::Util::Hash{}(r.lo, r.hi);
     }
 };
 
-template <RangeUnit Unit, Endian Order>
-struct hash<ClosedRange<Unit, Order>> {
-    std::size_t operator()(const ClosedRange<Unit, Order> &r) const {
-        return Util::Hash{}(r.lo, r.hi);
+template <p4c::RangeUnit Unit, p4c::Endian Order>
+struct hash<p4c::ClosedRange<Unit, Order>> {
+    std::size_t operator()(const p4c::ClosedRange<Unit, Order> &r) const {
+        return p4c::Util::Hash{}(r.lo, r.hi);
     }
 };
 }  // namespace std

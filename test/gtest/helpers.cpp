@@ -87,6 +87,8 @@ std::string makeP4Source(const char *file, unsigned line, const char *rawSource)
 
 }  // namespace p4c::TestDetail
 
+namespace p4c {
+
 /* static */ P4CTestEnvironment *P4CTestEnvironment::get() {
     static P4CTestEnvironment *instance = new P4CTestEnvironment;
     return instance;
@@ -152,6 +154,8 @@ std::filesystem::path P4CTestEnvironment::getProjectRoot() {
     return std::filesystem::path(__FILE__).parent_path().parent_path().parent_path();
 }
 
+}  // namespace p4c
+
 namespace p4c::Test {
 
 /* static */ std::optional<FrontendTestCase> FrontendTestCase::create(
@@ -168,8 +172,8 @@ namespace p4c::Test {
         std::cerr << "Couldn't parse test case source" << std::endl;
         return std::nullopt;
     }
-    if (::diagnosticCount() > 0) {
-        std::cerr << "Encountered " << ::diagnosticCount() << " errors while parsing test case"
+    if (::p4c::diagnosticCount() > 0) {
+        std::cerr << "Encountered " << ::p4c::diagnosticCount() << " errors while parsing test case"
                   << std::endl;
         return std::nullopt;
     }
@@ -177,8 +181,8 @@ namespace p4c::Test {
     P4::P4COptionPragmaParser optionsPragmaParser;
     program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
     if (::p4c::errorCount() > 0) {
-        std::cerr << "Encountered " << ::p4c::errorCount() << " errors while collecting options pragmas"
-                  << std::endl;
+        std::cerr << "Encountered " << ::p4c::errorCount()
+                  << " errors while collecting options pragmas" << std::endl;
         return std::nullopt;
     }
 

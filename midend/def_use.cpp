@@ -702,7 +702,11 @@ std::ostream &operator<<(std::ostream &out, const ComputeDefUse::defuse_t &du) {
 
 }  // namespace p4c::P4
 
+namespace p4c {
+
 void dump(const P4::ComputeDefUse::loc_t &p) { std::cout << p << std::endl; }
 void dump(const ordered_set<const P4::ComputeDefUse::loc_t *> &p) { std::cout << p << std::endl; }
 void dump(const P4::ComputeDefUse &du) { std::cout << du << std::endl; }
 void dump(const P4::ComputeDefUse *du) { std::cout << *du << std::endl; }
+
+}  // namespace p4c

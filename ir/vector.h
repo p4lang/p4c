@@ -22,7 +22,9 @@ limitations under the License.
 #include "lib/null.h"
 #include "lib/safe_vector.h"
 
+namespace p4c {
 class JSONLoader;
+}  // namespace p4c
 
 namespace p4c::IR {
 
@@ -216,7 +218,8 @@ class Vector : public VectorBase {
 // called on a type in the global namespace, even if the number of arguments
 // doesn't match up, which can trigger template instantiations that cause
 // errors.
-namespace p4c::GetImpl {
+namespace p4c {
+namespace GetImpl {
 
 template <class T, class U>
 const T *get(const IR::Vector<T> &vec, U name) {
@@ -233,6 +236,8 @@ const T *get(const IR::Vector<T> *vec, U name) {
 }
 
 }  // namespace GetImpl
-using namespace ::p4c::GetImpl;  // NOLINT(build/namespaces)
+using namespace GetImpl;  // NOLINT(build/namespaces)
+
+}  // namespace p4c
 
 #endif /* IR_VECTOR_H_ */

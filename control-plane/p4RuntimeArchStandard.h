@@ -25,8 +25,8 @@ limitations under the License.
 
 namespace p4configv1 = ::p4::config::v1;
 
-using ::P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
-using ::P4::ControlPlaneAPI::Helpers::setPreamble;
+using ::p4c::P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
+using ::p4c::P4::ControlPlaneAPI::Helpers::setPreamble;
 
 namespace p4c::P4 {
 

@@ -20,6 +20,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 
+using namespace ::p4c;
 using namespace ::p4c::P4::literals;
 
 TEST(expr_uses, expr_uses) {

@@ -281,13 +281,10 @@ struct TupleHasher<0, Types...> {
 }  // namespace p4c::Util
 
 namespace std {
-
-namespace Util = ::p4c::Util;
-
 template <typename T1, typename T2>
 struct hash<std::pair<T1, T2>> {
     size_t operator()(const std::pair<T1, T2> &x) const {
-        return Util::hash_combine(x.first, x.second);
+        return p4c::Util::hash_combine(x.first, x.second);
     }
 };
 
@@ -295,7 +292,7 @@ template <typename... Types>
 struct hash<std::tuple<Types...>> {
  public:
     size_t operator()(std::tuple<Types...> const &key) const {
-        Util::Detail::TupleHasher<sizeof...(Types) - 1, Types...> hasher;
+        p4c::Util::Detail::TupleHasher<sizeof...(Types) - 1, Types...> hasher;
 
         return hasher(key);
     }

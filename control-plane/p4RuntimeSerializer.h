@@ -44,7 +44,9 @@ namespace p4c::IR {
 class P4Program;
 }  // namespace p4c::IR
 
+namespace p4c {
 class CompilerOptions;
+}  // namespace p4c
 
 namespace p4c::P4 {
 

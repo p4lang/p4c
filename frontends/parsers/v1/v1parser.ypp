@@ -20,9 +20,10 @@ limitations under the License.
 
 // Set up names.
 %defines
-%define api.namespace {V1}
+%define api.namespace {p4c::V1}
 // TODO: Update, once we drop Ubuntu 18.04 support.
-%define parser_class_name {V1Parser}
+%define api.parser.class {V1Parser}
+// %define parser_class_name {V1Parser}
 
 // Use the C++-native variant representation of tokens.
 %define api.token.constructor
@@ -96,6 +97,8 @@ inline std::ostream& operator<<(std::ostream& out, const CaseValue& caseValue) {
 // forbidden in C++. We avoid the problem using a typedef.
 typedef const IR::Type ConstType;
 
+}  // namespace p4c
+
 #ifndef YYDEBUG
 #define YYDEBUG 1
 #endif
@@ -108,12 +111,12 @@ typedef const IR::Type ConstType;
 #include "lib/source_file.h"
 }
 
-%param { V1::V1ParserDriver& driver }
-%parse-param { V1::V1Lexer& lexer }
+%param { p4c::V1::V1ParserDriver& driver }
+%parse-param { p4c::V1::V1Lexer& lexer }
 
 // Use location tracking with our custom location type.
 %locations
-%define api.location.type {Util::SourceInfo}
+%define api.location.type {p4c::Util::SourceInfo}
 
 %{ /* -*-C++-*- */
 #include <iostream>  // NOLINT(build/include_order)
@@ -123,13 +126,21 @@ typedef const IR::Type ConstType;
 #include "frontends/parsers/v1/v1parser.hpp"
 #include "ir/ir.h"
 
+using namespace ::p4c;
+
 #define YYLLOC_DEFAULT(Cur, Rhs, N)                                             \
     ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                          \
                  : Util::SourceInfo(driver.sources, YYRHSLOC(Rhs, 0).getEnd()))
 
 #undef yylex
 #define yylex lexer.yylex
+
+namespace p4c {
+
 static const IR::Expression *removeRedundantValid(const IR::Expression *e);
+
+}  // namespace p4c
+
 %}
 
 // Use iostreams to print all values. We have a number of semantic actions that
@@ -1128,7 +1139,9 @@ name: IDENTIFIER { $$ = IR::ID(@1, $1); }
 
 %%
 
-void V1::V1Parser::p4c::error(const Util::SourceInfo& location,
+namespace p4c {
+
+void V1::V1Parser::error(const Util::SourceInfo& location,
                          const std::string& message) {
     driver.onParseError(location, message);
 }

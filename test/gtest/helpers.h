@@ -72,6 +72,8 @@ std::string makeP4Source(const char *file, unsigned line, const char *rawSource)
 // makeP4Source for more information and parameter details.
 #define P4_SOURCE(...) TestDetail::makeP4Source(__FILE__, __LINE__, __VA_ARGS__)
 
+namespace p4c {
+
 class P4CTestEnvironment {
     // XXX(seth): Ideally this would be a ::testing::Environment subclass, but
     // if you register a global test environment with GTest it tries to tear it
@@ -105,6 +107,8 @@ class P4CTestEnvironment {
 };
 
 using GTestContext = P4CContextWithOptions<CompilerOptions>;
+
+}  // namespace p4c
 
 namespace p4c::Test {
 

@@ -411,16 +411,12 @@ inline cstring operator""_cs(const char *str, std::size_t len) {
 }  // namespace p4c::P4::literals
 
 namespace std {
-
-namespace Util = ::p4c::Util;
-using ::p4c::cstring;
-
 template <>
-struct hash<cstring> {
-    std::size_t operator()(const cstring &c) const {
+struct hash<p4c::cstring> {
+    std::size_t operator()(const p4c::cstring &c) const {
         // cstrings are internalized, therefore their addresses are unique; we
         // can just use their address to produce hash.
-        return Util::Hash{}(c.c_str());
+        return p4c::Util::Hash{}(c.c_str());
     }
 };
 }  // namespace std

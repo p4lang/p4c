@@ -87,10 +87,10 @@ class PacketOut : public Model::Extern_Model {
     Model::Elem emit;
 };
 
-class P4Exception_Model : public ::Model::Elem {
+class P4Exception_Model : public ::p4c::Model::Elem {
  public:
     const StandardExceptions exc;
-    explicit P4Exception_Model(StandardExceptions exc) : ::Model::Elem(cstring::empty), exc(exc) {
+    explicit P4Exception_Model(StandardExceptions exc) : ::p4c::Model::Elem(cstring::empty), exc(exc) {
         std::stringstream str;
         str << exc;
         name = str.str();
@@ -99,7 +99,7 @@ class P4Exception_Model : public ::Model::Elem {
 
 // Model of P4 core library
 // To be kept in sync with core.p4
-class P4CoreLibrary : public ::Model::Model {
+class P4CoreLibrary : public ::p4c::Model::Model {
  protected:
     // NOLINTBEGIN(bugprone-throw-keyword-missing)
     P4CoreLibrary()
@@ -119,11 +119,11 @@ class P4CoreLibrary : public ::Model::Model {
         static P4CoreLibrary *corelib = new P4CoreLibrary();
         return *corelib;
     }
-    ::Model::Elem noAction;
+    ::p4c::Model::Elem noAction;
 
-    ::Model::Elem exactMatch;
-    ::Model::Elem ternaryMatch;
-    ::Model::Elem lpmMatch;
+    ::p4c::Model::Elem exactMatch;
+    ::p4c::Model::Elem ternaryMatch;
+    ::p4c::Model::Elem lpmMatch;
 
     PacketIn packetIn;
     PacketOut packetOut;

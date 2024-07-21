@@ -16,7 +16,7 @@ int main(int argc, char *const argv[]) {
     }
     options.setInputFile();
 
-    std::stringstream formattedOutput = getFormattedOutput(options.file);
+    std::stringstream formattedOutput = P4Fmt::getFormattedOutput(options.file);
     if (formattedOutput.str().empty()) {
         return EXIT_FAILURE;
     };

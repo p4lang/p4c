@@ -32,7 +32,9 @@ class ComputeDefUse;
 class ToplevelBlock;
 }  // namespace p4c::P4
 
+namespace p4c {
 class CompilerOptions;
+}  // namespace p4c
 
 namespace p4c::Test {
 

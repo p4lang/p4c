@@ -28,11 +28,11 @@ limitations under the License.
 #include "lib/json.h"
 #include "midend/flattenLogMsg.h"
 
-using BMV2::mkArrayField;
-using BMV2::mkParameters;
-using BMV2::mkPrimitive;
-using BMV2::nextId;
-using BMV2::stringRepr;
+using ::p4c::BMV2::mkArrayField;
+using ::p4c::BMV2::mkParameters;
+using ::p4c::BMV2::mkPrimitive;
+using ::p4c::BMV2::nextId;
+using ::p4c::BMV2::stringRepr;
 
 namespace p4c::BMV2 {
 
