@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "extern.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 using namespace p4c::P4::literals;
 
@@ -215,4 +215,4 @@ void ActionConverter::postorder(const IR::P4Action *action) {
     ctxt->structure->ids.emplace(action, id);
 }
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2

@@ -28,7 +28,7 @@ limitations under the License.
 #include "lib/json.h"
 #include "lower.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 /// Inserts casts and narrowing operations to implement correctly the semantics of
 /// P4-16 arithmetic on top of unbounded precision arithmetic.  For example,
@@ -134,6 +134,6 @@ class ExpressionConverter : public Inspector {
     void saturated_binary(const IR::Operation_Binary *expression);
 };
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_EXPRESSION_H_ */

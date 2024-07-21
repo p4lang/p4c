@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "lib/big_int_util.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 /// We make an effort to update the typeMap as we proceed
 /// since parent expression trees may need the information
@@ -218,4 +218,4 @@ const IR::Node *RemoveComplexExpressions::postorder(IR::MethodCallExpression *ex
     return expression;
 }
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2

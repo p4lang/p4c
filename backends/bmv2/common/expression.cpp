@@ -18,7 +18,7 @@ limitations under the License.
 #include "helpers.h"
 #include "lib/algorithm.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 class ArithmeticFixup;
 
@@ -837,4 +837,4 @@ Util::IJson *ExpressionConverter::convertWithConstantWidths(const IR::Expression
     return result;
 }
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2

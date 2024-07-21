@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "lib/json.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 /// constant definition for bmv2
 const cstring MatchImplementation::selectorMatchTypeName = "selector"_cs;
@@ -205,4 +205,4 @@ const IR::ListExpression *convertToList(const IR::Expression *expr, P4::TypeMap 
     return list;
 }
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2

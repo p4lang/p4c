@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "lib/algorithm.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 cstring ParserConverter::jsonAssignment(const IR::Type *type) {
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union"_cs;
@@ -602,4 +602,4 @@ bool ParserConverter::preorder(const IR::P4Parser *parser) {
     return false;
 }
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2

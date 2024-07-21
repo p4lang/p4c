@@ -41,7 +41,7 @@ limitations under the License.
 #include "lib/big_int_util.h"
 #include "lib/json.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 class PsaSwitchExpressionConverter : public ExpressionConverter {
  public:
@@ -165,6 +165,6 @@ EXTERN_CONVERTER_W_INSTANCE(ActionProfile)
 EXTERN_CONVERTER_W_INSTANCE(ActionSelector)
 EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Digest)
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2
 
 #endif /* BACKENDS_BMV2_PSA_SWITCH_PSASWITCH_H_ */

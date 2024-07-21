@@ -3,7 +3,7 @@
 #include "frontends/common/parser_options.h"
 #include "lib/exename.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 using namespace p4c::P4::literals;
 
@@ -17,4 +17,4 @@ std::vector<const char *> *PsaSwitchOptions::process(int argc, char *const argv[
     return remainingOptions;
 }
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2

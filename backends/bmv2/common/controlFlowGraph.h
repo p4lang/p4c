@@ -23,7 +23,7 @@ limitations under the License.
 #include "lib/castable.h"
 #include "lib/ordered_set.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 /// This CFG models the BMV2 notion of control-flow graph.
 /// In BMv2 there are only 2 types of nodes: If and Table.
@@ -192,6 +192,6 @@ class CFG final : public IHasDbPrint {
     bool checkMergeable(std::set<TableNode *> nodes) const;
 };
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_CONTROLFLOWGRAPH_H_ */

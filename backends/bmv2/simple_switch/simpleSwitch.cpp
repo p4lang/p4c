@@ -34,7 +34,7 @@ using BMV2::mkPrimitive;
 using BMV2::nextId;
 using BMV2::stringRepr;
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 void ParseV1Architecture::modelError(const char *format, const IR::Node *node) {
     ::error(ErrorType::ERR_MODEL,
@@ -1271,4 +1271,4 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     (void)toplevel->apply(ConvertGlobals(ctxt, options.emitExterns));
 }
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2

@@ -25,7 +25,7 @@ limitations under the License.
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 using namespace p4c::P4::literals;
 
@@ -310,4 +310,4 @@ void CFG::build(const IR::P4Control *cc, P4::ReferenceMap *refMap, P4::TypeMap *
     LOG2(this);
 }
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2

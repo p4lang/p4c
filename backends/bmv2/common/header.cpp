@@ -19,7 +19,7 @@ limitations under the License.
 #include "backend.h"
 #include "ir/ir.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 /// TODO(hanw): remove.
 Util::JsonArray *HeaderConverter::pushNewArray(Util::JsonArray *parent) {
@@ -458,4 +458,4 @@ bool HeaderConverter::preorder(const IR::Parameter *param) {
     return false;
 }
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2

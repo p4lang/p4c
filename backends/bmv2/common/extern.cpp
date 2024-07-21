@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "lib/json.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 std::map<cstring, ExternConverter *> *ExternConverter::cvtForType = nullptr;
 
@@ -270,4 +270,4 @@ Util::IJson *ExternConverter_assume::convertExternFunction(
     return ExternConverter::convertAssertAssume(ctxt, mc, ef);
 }
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2

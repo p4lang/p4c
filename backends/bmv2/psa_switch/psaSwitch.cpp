@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/common/model.h"
 #include "frontends/p4/cloner.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 using namespace p4c::P4::literals;
 
@@ -1062,4 +1062,4 @@ void ExternConverter_Digest::convertExternInstance(UNUSED ConversionContext *ctx
                                                    UNUSED const IR::ExternBlock *eb,
                                                    UNUSED const bool &emitExterns) { /* TODO */ }
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2

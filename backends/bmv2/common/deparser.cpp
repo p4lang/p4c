@@ -19,7 +19,7 @@ limitations under the License.
 #include "backend.h"
 #include "extern.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl> *body,
                                             Util::JsonArray *order, Util::JsonArray *primitives) {
@@ -162,4 +162,4 @@ bool DeparserConverter::preorder(const IR::P4Control *control) {
     return false;
 }
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2

@@ -66,7 +66,7 @@ limitations under the License.
 #include "midend/tableHit.h"
 #include "midend/validateProperties.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 using namespace p4c::P4::literals;
 
@@ -161,4 +161,4 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
     }
 }
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2

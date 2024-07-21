@@ -29,7 +29,7 @@ limitations under the License.
 #include "lib/error.h"
 #include "lib/json.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 using SelectorInput = std::vector<const IR::Expression *>;
 
@@ -123,6 +123,6 @@ class SharedActionSelectorCheck : public Inspector {
     }
 };
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_SHAREDACTIONSELECTORCHECK_H_ */

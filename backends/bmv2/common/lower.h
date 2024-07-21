@@ -22,7 +22,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "midend/removeComplexExpressions.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 /// This pass rewrites expressions which are not supported natively on BMv2.
 class LowerExpressions : public Transform {
@@ -61,6 +61,6 @@ class RemoveComplexExpressions : public P4::RemoveComplexExpressions {
     const IR::Node *postorder(IR::MethodCallExpression *expression) override;
 };
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_LOWER_H_ */

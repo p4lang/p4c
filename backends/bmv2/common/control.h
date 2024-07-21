@@ -31,7 +31,7 @@ limitations under the License.
 #include "midend/convertEnums.h"
 #include "sharedActionSelectorCheck.h"
 
-namespace BMV2 {
+namespace p4c::BMV2 {
 
 static constexpr unsigned INVALID_ACTION_ID = 0xffffffff;
 
@@ -837,6 +837,6 @@ class ControlConverter : public Inspector {
     }
 };
 
-}  // namespace BMV2
+}  // namespace p4c::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_CONTROL_H_ */
