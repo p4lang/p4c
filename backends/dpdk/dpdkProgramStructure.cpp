@@ -3,6 +3,8 @@
 #include "ir/ir.h"
 #include "options.h"
 
+namespace p4c {
+
 using namespace ::p4c::P4::literals;
 
 bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock *block) {
@@ -298,3 +300,5 @@ bool InspectDpdkProgram::preorder(const IR::P4Action *action) {
     structure->actions.emplace(action->name, action);
     return false;
 }
+
+}  // namespace p4c

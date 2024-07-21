@@ -37,6 +37,8 @@ limitations under the License.
 #include "ubpfBackend.h"
 #include "ubpfModel.h"
 
+using namespace ::p4c;
+
 void compile(EbpfOptions &options) {
     auto hook = options.getDebugHook();
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;

@@ -4,6 +4,9 @@
 #include "dpdkHelpers.h"
 #include "ir/dbprint.h"
 #include "printUtils.h"
+
+namespace p4c {
+
 using namespace ::p4c::DBPrint;
 
 ordered_map<cstring, int> DPDK::CollectDirectCounterMeter::directMeterCounterSizeMap = {};
@@ -655,3 +658,5 @@ std::ostream &IR::DpdkDropStatement::toSpec(std::ostream &out) const {
     out << "drop";
     return out;
 }
+
+}  // namespace p4c

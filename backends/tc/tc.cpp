@@ -29,6 +29,8 @@ and limitations under the License.
 #include "options.h"
 #include "version.h"
 
+using namespace ::p4c;
+
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
     AutoCompileContext autoTCContext(new TC::TCContext);

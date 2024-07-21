@@ -19,6 +19,8 @@ limitations under the License.
 
 #include "lib/cstring.h"
 
+namespace p4c {
+
 /// Unique handle for action and table.
 const unsigned table_handle_prefix = 0x00010000;
 const unsigned action_handle_prefix = 0x00020000;
@@ -61,5 +63,7 @@ const unsigned initial_group_id = 0xFFFFFFFF;
 
 /// Maximum operand size for unary, binary and ternary operations
 const int dpdk_max_operand_size = 64;
+
+}  // namespace p4c
 
 #endif /* BACKENDS_DPDK_CONSTANTS_H_ */

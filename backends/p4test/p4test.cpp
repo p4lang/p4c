@@ -35,6 +35,8 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "midend.h"
 
+using namespace ::p4c;
+
 class P4TestOptions : public CompilerOptions {
  public:
     bool parseOnly = false;

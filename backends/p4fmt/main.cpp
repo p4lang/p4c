@@ -6,6 +6,8 @@
 #include "options.h"
 #include "p4fmt.h"
 
+using namespace ::p4c;
+
 int main(int argc, char *const argv[]) {
     AutoCompileContext autoP4FmtContext(new P4Fmt::P4FmtContext);
     auto &options = P4Fmt::P4FmtContext::get().options();

@@ -8,6 +8,8 @@
 #include "lib/error.h"
 #include "options.h"
 
+namespace p4c::P4Fmt {
+
 std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
     AutoCompileContext autoP4FmtContext(new P4Fmt::P4FmtContext);
     auto &options = P4Fmt::P4FmtContext::get().options();
@@ -33,3 +35,5 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
 
     return formattedOutput;
 }
+
+}  // namespace p4c::P4Fmt

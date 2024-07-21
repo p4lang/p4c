@@ -1,5 +1,7 @@
 #include "ir/ir.h"
 
+namespace p4c {
+
 void IR::DpdkJmpLabelStatement::dbprint(std::ostream &out) const {
     out << "jmp " << label << std::endl;
 }
@@ -67,3 +69,5 @@ void IR::DpdkJmpEqualStatement::dbprint(std::ostream &out) const {
 void IR::DpdkMovStatement::dbprint(std::ostream &out) const {
     out << "mov " << dst << " " << src << std::endl;
 }
+
+}  // namespace p4c

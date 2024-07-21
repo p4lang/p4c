@@ -122,6 +122,8 @@ using GraphsContext = P4CContextWithOptions<Options>;
 
 }  // namespace p4c::graphs
 
+using namespace ::p4c;
+
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();

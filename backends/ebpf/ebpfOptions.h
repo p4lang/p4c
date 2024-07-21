@@ -19,6 +19,8 @@ limitations under the License.
 
 #include "frontends/common/options.h"
 
+namespace p4c {
+
 enum XDP2TC { XDP2TC_NONE, XDP2TC_META, XDP2TC_HEAD, XDP2TC_CPUMAP };
 
 class EbpfOptions : public CompilerOptions {
@@ -68,5 +70,7 @@ class EbpfOptions : public CompilerOptions {
 };
 
 using EbpfContext = P4CContextWithOptions<EbpfOptions>;
+
+}  // namespace p4c
 
 #endif /* BACKENDS_EBPF_EBPFOPTIONS_H_ */

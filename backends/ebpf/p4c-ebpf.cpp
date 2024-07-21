@@ -36,6 +36,8 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "midend.h"
 
+using namespace ::p4c;
+
 void compile(EbpfOptions &options) {
     auto hook = options.getDebugHook();
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
