@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "graphs.h"
 
-namespace graphs {
+namespace p4c::graphs {
 
 class ControlGraphs : public Graphs {
  public:
@@ -66,6 +66,6 @@ class ControlGraphs : public Graphs {
     std::optional<cstring> instanceName{};
 };
 
-}  // namespace graphs
+}  // namespace p4c::graphs
 
 #endif /* BACKENDS_GRAPHS_CONTROLS_H_ */

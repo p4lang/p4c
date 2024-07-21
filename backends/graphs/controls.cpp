@@ -27,7 +27,7 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
-namespace graphs {
+namespace p4c::graphs {
 
 using Graph = ControlGraphs::Graph;
 
@@ -328,4 +328,4 @@ bool ControlGraphs::preorder(const IR::P4Table *table) {
     return false;
 }
 
-}  // namespace graphs
+}  // namespace p4c::graphs

@@ -46,7 +46,7 @@ class TypeMap;
 
 }  // namespace p4c::P4
 
-namespace graphs {
+namespace p4c::graphs {
 
 using namespace p4c::P4::literals;
 
@@ -224,6 +224,6 @@ class Graphs : public Inspector {
     void limitStringSize(std::stringstream &sstream, std::stringstream &helper_sstream);
 };
 
-}  // namespace graphs
+}  // namespace p4c::graphs
 
 #endif /* BACKENDS_GRAPHS_GRAPHS_H_ */

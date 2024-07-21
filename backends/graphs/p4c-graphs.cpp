@@ -33,7 +33,7 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "parsers.h"
 
-namespace graphs {
+namespace p4c::graphs {
 
 class MidEnd : public PassManager {
  public:
@@ -120,7 +120,7 @@ class Options : public CompilerOptions {
 
 using GraphsContext = P4CContextWithOptions<Options>;
 
-}  // namespace graphs
+}  // namespace p4c::graphs
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();

@@ -23,7 +23,7 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
-namespace graphs {
+namespace p4c::graphs {
 
 Graphs::vertex_t Graphs::add_vertex(const cstring &name, VertexType type) {
     auto v = boost::add_vertex(*g);
@@ -93,4 +93,4 @@ Graphs::vertex_t Graphs::add_and_connect_vertex(const cstring &name, VertexType 
     return v;
 }
 
-}  // namespace graphs
+}  // namespace p4c::graphs

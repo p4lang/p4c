@@ -19,7 +19,7 @@
 #include "graphs.h"
 #include "lib/nullstream.h"
 
-namespace graphs {
+namespace p4c::graphs {
 
 void Graph_visitor::writeGraphToFile(const Graph &g, const std::string &name) {
     auto path = graphsDir / (name + ".dot");
@@ -212,4 +212,4 @@ void Graph_visitor::process(std::vector<Graph *> &controlGraphsArray,
     }
 }
 
-}  // namespace graphs
+}  // namespace p4c::graphs

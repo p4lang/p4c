@@ -25,7 +25,7 @@
 #ifndef BACKENDS_GRAPHS_GRAPH_VISITOR_H_
 #define BACKENDS_GRAPHS_GRAPH_VISITOR_H_
 
-namespace graphs {
+namespace p4c::graphs {
 
 /// "process" function of class is dependent on previous aplication of visitor
 /// classes Controls and Parsers onto IR, and can only be run after them.
@@ -123,6 +123,6 @@ class Graph_visitor : public Graphs {
     const std::filesystem::path filename;
 };
 
-}  // namespace graphs
+}  // namespace p4c::graphs
 
 #endif /* BACKENDS_GRAPHS_GRAPH_VISITOR_H_ */
