@@ -80,7 +80,7 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::pa
     auto *diagnosticAction = pragmaArgs->at(1)->to<IR::StringLiteral>();
     if (!diagnosticName || !diagnosticAction) {
         ::p4c::warning(ErrorType::WARN_MISSING, "@diagnostic arguments must be strings: %1%",
-                  annotation);
+                       annotation);
         return std::nullopt;
     }
 
@@ -93,9 +93,9 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::pa
         diagnosticOption = "--Werror="_cs;
     } else {
         ::p4c::warning(ErrorType::WARN_MISMATCH,
-                  "@diagnostic's second argument must be 'disable', "
-                  "'warn', or 'error': %1%",
-                  annotation);
+                       "@diagnostic's second argument must be 'disable', "
+                       "'warn', or 'error': %1%",
+                       annotation);
         return std::nullopt;
     }
 

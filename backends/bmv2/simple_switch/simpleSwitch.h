@@ -79,8 +79,8 @@ class SimpleSwitchExpressionConverter : public ExpressionConverter {
         : ExpressionConverter(refMap, typeMap, structure, scalarsName), structure(structure) {}
 
     void modelError(const char *format, const IR::Node *node) {
-        ::p4c::errorWithSuffix(ErrorType::ERR_MODEL, format, "\nAre you using an up-to-date v1model.p4?",
-                          node);
+        ::p4c::errorWithSuffix(ErrorType::ERR_MODEL, format,
+                               "\nAre you using an up-to-date v1model.p4?", node);
     }
 
     bool isStandardMetadataParameter(const IR::Parameter *param) {

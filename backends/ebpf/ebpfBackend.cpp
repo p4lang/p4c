@@ -61,7 +61,8 @@ void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
     auto main = toplevel->getMain();
     if (main == nullptr) {
         ::p4c::warning(ErrorType::WARN_MISSING,
-                  "Could not locate top-level block; is there a %1% module?", IR::P4Program::main);
+                       "Could not locate top-level block; is there a %1% module?",
+                       IR::P4Program::main);
         return;
     }
 
@@ -80,7 +81,8 @@ void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
         target = new TestTarget();
     } else {
         ::p4c::error(ErrorType::ERR_UNKNOWN,
-                "Unknown target %s; legal choices are 'bcc', 'kernel', and test", options.target);
+                     "Unknown target %s; legal choices are 'bcc', 'kernel', and test",
+                     options.target);
         return;
     }
 
@@ -99,7 +101,8 @@ void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
         cstream->flush();
     } else {
         ::p4c::error(ErrorType::ERR_UNKNOWN,
-                "Unknown architecture %s; legal choices are 'filter', and 'psa'", options.arch);
+                     "Unknown architecture %s; legal choices are 'filter', and 'psa'",
+                     options.arch);
         return;
     }
 }

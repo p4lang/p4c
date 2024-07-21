@@ -213,7 +213,7 @@ const IR::Node *ExpressionConverter::postorder(IR::HeaderStackItemRef *ref) {
     }
 
     ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-            "Illegal array index %1%: must be a constant, 'last', or 'next'.", ref);
+                 "Illegal array index %1%: must be a constant, 'last', or 'next'.", ref);
     return ref;
 }
 
@@ -315,7 +315,8 @@ const IR::Node *StatementConverter::preorder(IR::Apply *apply) {
         }
 
         if ((hit != nullptr || miss != nullptr) && otherLabels)
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: Cannot mix 'hit'/'miss' and other labels", apply);
+            ::p4c::error(ErrorType::ERR_INVALID, "%1%: Cannot mix 'hit'/'miss' and other labels",
+                         apply);
 
         if (!otherLabels) {
             StatementConverter conv(structure, renameMap);
@@ -444,9 +445,10 @@ class ValidateLenExpr : public Inspector {
         BUG_CHECK(!expression->path->absolute, "%1%: absolute path", expression);
         cstring name = expression->path->name.name;
         if (prior.find(name) == prior.end())
-            ::p4c::error(ErrorType::ERR_INVALID,
-                    "%1%: header length must depend only on fields prior to the varbit field %2%",
-                    expression, varbitField);
+            ::p4c::error(
+                ErrorType::ERR_INVALID,
+                "%1%: header length must depend only on fields prior to the varbit field %2%",
+                expression, varbitField);
     }
 };
 

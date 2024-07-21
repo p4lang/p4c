@@ -174,8 +174,8 @@ class ParserStateRewriter : public Transform {
         auto *value = ev.evaluate(expression->right, false);
         if (!value->is<SymbolicInteger>()) return expression;
         if (!value->to<SymbolicInteger>()->isKnown()) {
-            ::p4c::warning(ErrorType::ERR_INVALID, "Uninitialized value prevents loop unrolling:\n%1%",
-                      expression->right);
+            ::p4c::warning(ErrorType::ERR_INVALID,
+                           "Uninitialized value prevents loop unrolling:\n%1%", expression->right);
             wasError = true;
             return expression;
         }
@@ -183,7 +183,8 @@ class ParserStateRewriter : public Transform {
         newExpression->right = res;
         if (!res->fitsInt64()) {
             // we need to leave expression as is.
-            ::p4c::warning(ErrorType::ERR_EXPRESSION, "Index can't be concretized : %1%", expression);
+            ::p4c::warning(ErrorType::ERR_EXPRESSION, "Index can't be concretized : %1%",
+                           expression);
             return expression;
         }
         const auto *arrayType = basetype->to<IR::Type_Stack>();
@@ -393,7 +394,7 @@ class ParserSymbolicInterpreter {
             if (value == nullptr) value = factory->create(type, true);
             if (value && value->is<SymbolicError>()) {
                 ::p4c::warning(ErrorType::ERR_EXPRESSION, "%1%: %2%", d,
-                          value->to<SymbolicError>()->message());
+                               value->to<SymbolicError>()->message());
                 return nullptr;
             }
             if (value != nullptr) result->set(d, value);
@@ -447,7 +448,7 @@ class ParserSymbolicInterpreter {
             if (!stateClone)
                 // errors in the original state are signalled
                 ::p4c::warning(ErrorType::ERR_EXPRESSION, "%1%: error %2% will be triggered\n%3%",
-                          exc->errorPosition, exc->message(), stateChain(state));
+                               exc->errorPosition, exc->message(), stateChain(state));
             // else this error will occur in a clone of the state produced
             // by unrolling - if the state is reached.  So we don't give an error.
             return false;
@@ -505,8 +506,8 @@ class ParserSymbolicInterpreter {
             }
             std::stringstream errorStr;
             errorStr << errorValue;
-            ::p4c::warning(ErrorType::WARN_IGNORE_PROPERTY, "Result of '%1%' is not defined: %2%", sord,
-                      errorStr.str());
+            ::p4c::warning(ErrorType::WARN_IGNORE_PROPERTY, "Result of '%1%' is not defined: %2%",
+                           sord, errorStr.str());
         }
         ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
                                      visitedStates);
@@ -682,9 +683,9 @@ class ParserSymbolicInterpreter {
                     }
                     if (equStackVariableMap(crt->statesIndexes, state->statesIndexes)) {
                         ::p4c::warning(ErrorType::ERR_INVALID,
-                                  "Parser cycle can't be unrolled, because ParserUnroll can't "
-                                  "detect the number of loop iterations:\n%1%",
-                                  stateChain(state));
+                                       "Parser cycle can't be unrolled, because ParserUnroll can't "
+                                       "detect the number of loop iterations:\n%1%",
+                                       stateChain(state));
                         wasError = true;
                     }
                     return true;
@@ -694,9 +695,9 @@ class ParserSymbolicInterpreter {
                 if (!headerValidityChange(crt->before, state->before)) {
                     if (equStackVariableMap(crt->statesIndexes, state->statesIndexes)) {
                         ::p4c::warning(ErrorType::ERR_INVALID,
-                                  "Parser cycle can't be unrolled, because ParserUnroll can't "
-                                  "detect the number of loop iterations:\n%1%",
-                                  stateChain(state));
+                                       "Parser cycle can't be unrolled, because ParserUnroll can't "
+                                       "detect the number of loop iterations:\n%1%",
+                                       stateChain(state));
                         wasError = true;
                     }
                     return true;

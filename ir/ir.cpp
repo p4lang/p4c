@@ -121,7 +121,8 @@ void IGeneralNamespace::checkDuplicateDeclarations() const {
         auto [it, inserted] = seen.emplace(name);
         if (!inserted) {
             ::p4c::error(ErrorType::ERR_DUPLICATE,
-                    "Duplicate declaration of %1%: previous declaration at %2%", name, it->srcInfo);
+                         "Duplicate declaration of %1%: previous declaration at %2%", name,
+                         it->srcInfo);
         }
     }
 }
@@ -275,13 +276,13 @@ const IR::PackageBlock *ToplevelBlock::getMain() const {
     auto mainDecls = program->getDeclsByName(IR::P4Program::main)->toVector();
     if (mainDecls.empty()) {
         ::p4c::warning(ErrorType::WARN_MISSING, "Program does not contain a `%s' module",
-                  IR::P4Program::main);
+                       IR::P4Program::main);
         return nullptr;
     }
     auto main = mainDecls[0];
     if (mainDecls.size() > 1) {
         ::p4c::error(ErrorType::ERR_DUPLICATE, "Program has multiple `%s' instances: %1%, %2%",
-                IR::P4Program::main, main->getNode(), mainDecls[1]->getNode());
+                     IR::P4Program::main, main->getNode(), mainDecls[1]->getNode());
         return nullptr;
     }
     if (!main->is<IR::Declaration_Instance>()) {

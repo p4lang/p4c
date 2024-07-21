@@ -629,7 +629,8 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
                 std::string sInt = annoVal->text.substr(2).c_str();
                 unsigned int width = std::stoi(sInt);
                 if (widthToExtract != width) {
-                    ::p4c::error("Width of the field doesnt match the annotation width. '%1%'", field);
+                    ::p4c::error("Width of the field doesnt match the annotation width. '%1%'",
+                                 field);
                 }
                 noEndiannessConversion = true;
                 break;
@@ -698,10 +699,11 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             // To correctly insert that padding, the length of field must be known, but tools like
             // nikss-ctl (and the nikss library) don't consume P4info.txt to have such knowledge.
             // There is also a bug in (de)parser causing such fields to be deparsed incorrectly.
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "%1%: fields wider than 64 bits must have a size multiple of 8 bits (1 byte) "
-                    "due to ambiguous padding in the LSB byte when the condition is not met",
-                    field);
+            ::p4c::error(
+                ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%1%: fields wider than 64 bits must have a size multiple of 8 bits (1 byte) "
+                "due to ambiguous padding in the LSB byte when the condition is not met",
+                field);
         }
 
         // wide values; read all bytes one by one.
@@ -817,7 +819,7 @@ void EBPFTablePNA::emitKeyType(EBPF::CodeBuilder *builder) {
 
             if (!isMatchTypeSupported(matchType)) {
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Match of type %1% not supported",
-                        c->matchType);
+                             c->matchType);
             }
 
             auto ebpfType = ::p4c::get(keyTypes, c);
@@ -1340,7 +1342,7 @@ bool ConvertToEBPFParserPNA::preorder(const IR::ParserBlock *prsr) {
 
     if (pl->size() != numOfParams) {
         ::p4c::error(ErrorType::ERR_EXPECTED, "Expected parser to have exactly %1% parameters",
-                numOfParams);
+                     numOfParams);
         return false;
     }
 
@@ -1387,7 +1389,7 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ControlBlock *ctrl) {
     unsigned numOfParams = 4;
     if (pl->size() != numOfParams) {
         ::p4c::error(ErrorType::ERR_EXPECTED, "Expected control to have exactly %1% parameters",
-                numOfParams);
+                     numOfParams);
         return false;
     }
     auto it = pl->parameters.begin();
@@ -1488,7 +1490,8 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ExternBlock *instance) {
         auto ctr = new EBPFCounterPNA(program, di, name, control->codeGen);
         control->counters.emplace(name, ctr);
     } else {
-        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control", instance);
+        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
+                     instance);
     }
 
     return false;
@@ -1548,7 +1551,7 @@ bool ControlBodyTranslatorPNA::preorder(const IR::Member *m) {
                     return false;
                 } else {
                     ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                            "%1%: this metadata field is not supported", m);
+                                 "%1%: this metadata field is not supported", m);
                 }
             }
         }
@@ -1584,23 +1587,23 @@ const IR::P4Action *ControlBodyTranslatorPNA::GetAddOnMissHitAction(cstring acti
             auto annotations = a->getAnnotations();
             if (annotations && annotations->getSingle("defaultonly"_cs)) {
                 ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                        "add_entry hit action %1% cannot be annotated with defaultonly.",
-                        actionName);
+                             "add_entry hit action %1% cannot be annotated with defaultonly.",
+                             actionName);
             }
             return action;
         }
     }
     ::p4c::error(ErrorType::ERR_UNEXPECTED,
-            "add_entry extern can only be applied for one of the hit action of table "
-            "%1%. %2% is not hit action of table.",
-            table->instanceName, actionName);
+                 "add_entry extern can only be applied for one of the hit action of table "
+                 "%1%. %2% is not hit action of table.",
+                 table->instanceName, actionName);
     return nullptr;
 }
 
 void ControlBodyTranslatorPNA::ValidateAddOnMissMissAction(const IR::P4Action *act) {
     if (!act) {
-        ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1% add_entry extern can only be used in an action",
-                act);
+        ::p4c::error(ErrorType::ERR_UNEXPECTED,
+                     "%1% add_entry extern can only be used in an action", act);
     }
     const IR::P4Table *t = table->table->container;
     const IR::Expression *defaultAction = t->getDefaultAction();
@@ -1609,12 +1612,12 @@ void ControlBodyTranslatorPNA::ValidateAddOnMissMissAction(const IR::P4Action *a
     CHECK_NULL(defaultActionName);
     if (defaultActionName->path->name.originalName != act->name.originalName) {
         ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                "add_entry extern can only be applied in default action of the table.");
+                     "add_entry extern can only be applied in default action of the table.");
     }
     if (!IsTableAddOnMiss(t)) {
         ::p4c::warning(ErrorType::WARN_MISSING,
-                  "add_entry extern can only be used in an action"
-                  " of a table with property add_on_miss equals to true.");
+                       "add_entry extern can only be used in an action"
+                       " of a table with property add_on_miss equals to true.");
     }
     ((ConvertToBackendIR *)tcIR)->updateAddOnMissTable(t);
 }
@@ -1699,9 +1702,9 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
                 auto components = param->to<IR::StructExpression>()->components;
                 if (paramList->parameters.size() != components.size()) {
                     ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                            "Action params in add_entry should be same as no of action "
-                            "parameters. %1%",
-                            action);
+                                 "Action params in add_entry should be same as no of action "
+                                 "parameters. %1%",
+                                 action);
                 }
                 if (paramList->parameters.size() != 0) {
                     builder->emitIndent();
@@ -1715,9 +1718,9 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
                         auto param = paramList->getParameter(index);
                         if (param->direction != IR::Direction::None) {
                             ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                                    "Parameters of action called from add_entry should be "
-                                    "directionless. %1%",
-                                    actionName);
+                                         "Parameters of action called from add_entry should be "
+                                         "directionless. %1%",
+                                         actionName);
                         }
                         builder->emitIndent();
                         builder->appendFormat("update_act_bpf_val->u.%s.%s = ", actionExtName,
@@ -1738,9 +1741,9 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
                 }
 
             } else {
-                ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                        "action parameters of add_entry extern should be a structure only. %1%",
-                        param);
+                ::p4c::error(
+                    ErrorType::ERR_UNEXPECTED,
+                    "action parameters of add_entry extern should be a structure only. %1%", param);
             }
         }
         builder->newline();
@@ -1967,7 +1970,8 @@ void ControlBodyTranslatorPNA::processMethod(const P4::ExternMethod *method) {
         if (method->method->type->name == "write") {
             reg->emitRegisterWrite(builder, method, this);
         } else if (method->method->type->name == "read") {
-            ::p4c::warning(ErrorType::WARN_UNUSED, "This Register(%1%) read value is not used!", name);
+            ::p4c::warning(ErrorType::WARN_UNUSED, "This Register(%1%) read value is not used!",
+                           name);
             reg->emitRegisterRead(builder, method, this, nullptr);
         }
         return;
@@ -1981,7 +1985,8 @@ void ControlBodyTranslatorPNA::processMethod(const P4::ExternMethod *method) {
         hash->processMethod(builder, method->method->name.name, method->expr, this);
         return;
     } else {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unexpected method call", method->expr);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unexpected method call",
+                     method->expr);
     }
 }
 
@@ -2076,8 +2081,9 @@ void ActionTranslationVisitorPNA::processMethod(const P4::ExternMethod *method) 
         if (pna_ctr != nullptr)
             pna_ctr->emitDirectMethodInvocation(builder, method, this->tcIR);
         else
-            ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: Table %2% does not own DirectCounter named %3%",
-                    method->expr, table->table->container, instanceName);
+            ::p4c::error(ErrorType::ERR_NOT_FOUND,
+                         "%1%: Table %2% does not own DirectCounter named %3%", method->expr,
+                         table->table->container, instanceName);
     } else {
         ControlBodyTranslatorPNA::processMethod(method);
     }
@@ -2101,8 +2107,8 @@ void EBPFTablePNA::validateKeys() const {
         auto matchType = mtdecl->getNode()->checkedTo<IR::Declaration_ID>();
         if (matchType->name.name == P4::P4CoreLibrary::instance().lpmMatch.name) {
             if (it != *lastKey) {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1% field key must be at the end of whole key",
-                        it->matchType);
+                ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+                             "%1% field key must be at the end of whole key", it->matchType);
             }
         }
     }
@@ -2125,8 +2131,8 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
             auto exprType = deparser->program->typeMap->getType(expr);
             auto headerToEmit = exprType->to<IR::Type_Header>();
             if (headerToEmit == nullptr) {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot emit a non-header type %1%",
-                        expr);
+                ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                             "Cannot emit a non-header type %1%", expr);
             }
 
             cstring msgStr;
@@ -2162,7 +2168,7 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                 auto et = etype->to<EBPF::IHasWidth>();
                 if (et == nullptr) {
                     ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                            "Only headers with fixed widths supported %1%", f);
+                                 "Only headers with fixed widths supported %1%", f);
                     return;
                 }
                 bool noEndiannessConversion = false;
@@ -2197,7 +2203,7 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
     auto et = type->to<EBPF::IHasWidth>();
     if (et == nullptr) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "Only headers with fixed widths supported %1%", hdrExpr);
+                     "Only headers with fixed widths supported %1%", hdrExpr);
         return;
     }
     unsigned widthToEmit = et->widthInBits();

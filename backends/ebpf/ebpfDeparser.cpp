@@ -73,15 +73,15 @@ void DeparserPrepareBufferTranslator::processMethod(const P4::ExternMethod *meth
         if (decl == deparser->packet_out) {
             if (method->expr->arguments->size() != 1) {
                 ::p4c::error(ErrorType::ERR_MODEL,
-                        "Not enough arguments to emit() method, exactly 1 required");
+                             "Not enough arguments to emit() method, exactly 1 required");
             }
 
             auto expr = method->expr->arguments->at(0)->expression;
             auto exprType = deparser->program->typeMap->getType(expr);
             auto headerToEmit = exprType->to<IR::Type_Header>();
             if (headerToEmit == nullptr) {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot emit a non-header type %1%",
-                        expr);
+                ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                             "Cannot emit a non-header type %1%", expr);
                 return;
             }
 
@@ -115,8 +115,8 @@ void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
             auto exprType = deparser->program->typeMap->getType(expr);
             auto headerToEmit = exprType->to<IR::Type_Header>();
             if (headerToEmit == nullptr) {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot emit a non-header type %1%",
-                        expr);
+                ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                             "Cannot emit a non-header type %1%", expr);
             }
 
             cstring msgStr;
@@ -130,7 +130,7 @@ void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
             unsigned width = headerToEmit->width_bits();
             if ((width % 8) != 0) {
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                        "Header %1% size %2% is not a multiple of 8 bits.", expr, width);
+                             "Header %1% size %2% is not a multiple of 8 bits.", expr, width);
                 return;
             }
             msgStr = absl::StrFormat("Deparser: emitting header %s", expr->toString().c_str());
@@ -157,7 +157,7 @@ void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
                 auto et = etype->to<IHasWidth>();
                 if (et == nullptr) {
                     ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                            "Only headers with fixed widths supported %1%", f);
+                                 "Only headers with fixed widths supported %1%", f);
                     return;
                 }
                 emitField(builder, f->name, expr, hdrOffsetBits, etype);
@@ -185,7 +185,7 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder *builder, cstring field,
     auto et = type->to<IHasWidth>();
     if (et == nullptr) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "Only headers with fixed widths supported %1%", hdrExpr);
+                     "Only headers with fixed widths supported %1%", hdrExpr);
         return;
     }
     unsigned widthToEmit = et->widthInBits();
@@ -295,7 +295,8 @@ bool EBPFDeparser::build() {
     hitVariable = program->refMap->newName("hit");
     auto pl = controlBlock->container->type->applyParams;
     if (pl->size() != 2) {
-        ::p4c::error(ErrorType::ERR_EXPECTED, "Expected deparser block to have exactly 2 parameters");
+        ::p4c::error(ErrorType::ERR_EXPECTED,
+                     "Expected deparser block to have exactly 2 parameters");
         return false;
     }
 

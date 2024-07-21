@@ -1016,7 +1016,8 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              if (stepper.state.hasProperty("recirculate_count"_cs)) {
                  if (stepper.state.getProperty<uint64_t>("recirculate_count"_cs) > 0) {
                      auto &nextState = stepper.state.clone();
-                     ::p4c::warning("Only single recirculation supported for now. Dropping packet.");
+                     ::p4c::warning(
+                         "Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState.replaceTopBody(dropStmt);
@@ -1031,7 +1032,8 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              }
              // If any of the input arguments is tainted, the entire extern is unreliable.
              if (argsAreTainted) {
-                 ::p4c::warning("clone args are tainted and not predictable. Skipping clone execution.");
+                 ::p4c::warning(
+                     "clone args are tainted and not predictable. Skipping clone execution.");
                  auto &nextState = stepper.state.clone();
                  nextState.popBody();
                  stepper.result->emplace_back(nextState);
@@ -1164,7 +1166,8 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              if (stepper.state.hasProperty("recirculate_count"_cs)) {
                  recirculateCount = stepper.state.getProperty<uint64_t>("recirculate_count"_cs);
                  if (recirculateCount > 0) {
-                     ::p4c::warning("Only single recirculation supported for now. Dropping packet.");
+                     ::p4c::warning(
+                         "Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState.replaceTopBody(dropStmt);
@@ -1207,7 +1210,8 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              if (stepper.state.hasProperty("recirculate_count"_cs)) {
                  if (stepper.state.getProperty<uint64_t>("recirculate_count"_cs) > 0) {
                      auto &nextState = stepper.state.clone();
-                     ::p4c::warning("Only single recirculation supported for now. Dropping packet.");
+                     ::p4c::warning(
+                         "Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState.replaceTopBody(dropStmt);
@@ -1222,7 +1226,8 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              }
              // If any of the input arguments is tainted, the entire extern is unreliable.
              if (argsAreTainted) {
-                 ::p4c::warning("clone args are tainted and not predictable. Skipping clone execution.");
+                 ::p4c::warning(
+                     "clone args are tainted and not predictable. Skipping clone execution.");
                  auto &nextState = stepper.state.clone();
                  nextState.popBody();
                  stepper.result->emplace_back(nextState);

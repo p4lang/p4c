@@ -34,8 +34,7 @@ void IHasDbPrint::print() const {
     std::cout << std::endl;
 }
 
-}
-
+}  // namespace p4c
 
 namespace p4c::Util {
 SourcePosition::SourcePosition(unsigned lineNumber, unsigned columnNumber)

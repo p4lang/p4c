@@ -19,7 +19,8 @@ void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock *block) {
     structure->p4arch = "pna"_cs;
     auto p = block->findParameterValue("main_parser"_cs);
     if (p == nullptr) {
-        ::p4c::error(ErrorType::ERR_MODEL, "Package %1% has no parameter named 'main_parser'", block);
+        ::p4c::error(ErrorType::ERR_MODEL, "Package %1% has no parameter named 'main_parser'",
+                     block);
         return;
     }
     auto parser = p->to<IR::ParserBlock>();
@@ -48,7 +49,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         auto p = ingress->findParameterValue("ip"_cs);
         if (!p) {
             ::p4c::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'ip'",
-                    block);
+                         block);
             return;
         }
         auto parser = p->to<IR::ParserBlock>();
@@ -56,7 +57,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         p = ingress->findParameterValue("ig"_cs);
         if (!p) {
             ::p4c::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'ig'",
-                    block);
+                         block);
             return;
         }
         auto pipeline = p->to<IR::ControlBlock>();
@@ -65,7 +66,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         p = ingress->findParameterValue("id"_cs);
         if (!p) {
             ::p4c::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'id'",
-                    block);
+                         block);
             return;
         }
         auto deparser = p->to<IR::ControlBlock>();
@@ -77,7 +78,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         auto p = egress->findParameterValue("ep"_cs);
         if (!p) {
             ::p4c::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'ep'",
-                    block);
+                         block);
             return;
         }
         auto parser = p->to<IR::ParserBlock>();
@@ -85,7 +86,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         p = egress->findParameterValue("eg"_cs);
         if (!p) {
             ::p4c::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'eg'",
-                    block);
+                         block);
             return;
         }
         auto pipeline = p->to<IR::ControlBlock>();
@@ -94,7 +95,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         p = egress->findParameterValue("ed"_cs);
         if (!p) {
             ::p4c::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'ed'",
-                    block);
+                         block);
             return;
         }
         auto deparser = p->to<IR::ControlBlock>();
@@ -166,9 +167,9 @@ void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike *type, b
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
             if (isHeader && ft->is<IR::Type_Struct>()) {
-                ::p4c::error(ErrorType::ERR_INVALID,
-                        "Type %1% should only contain headers, header stacks, or header unions",
-                        type);
+                ::p4c::error(
+                    ErrorType::ERR_INVALID,
+                    "Type %1% should only contain headers, header stacks, or header unions", type);
                 return;
             }
             auto st = ft->to<IR::Type_StructLike>();
@@ -190,7 +191,7 @@ void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike *type, b
                         addHeaderInstance(h_type, uf->controlPlaneName());
                     } else {
                         ::p4c::error(ErrorType::ERR_INVALID, "Type %1% cannot contain type %2%", ft,
-                                uft);
+                                     uft);
                         return;
                     }
                 }

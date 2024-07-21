@@ -382,7 +382,7 @@ class TablesInActions : public Inspector {
             (void)expression->apply(hta, getContext());
             if (hta.table != nullptr) {
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: table invocation in action argument",
-                        expression);
+                             expression);
             }
         }
     }

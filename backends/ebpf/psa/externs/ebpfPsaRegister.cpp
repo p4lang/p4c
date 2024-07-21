@@ -32,7 +32,8 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program, cstring instanceNam
     auto ts = di->type->to<IR::Type_Specialized>();
 
     if (ts->arguments->size() != 2) {
-        ::p4c::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%", ts);
+        ::p4c::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%",
+                     ts);
         return;
     }
 

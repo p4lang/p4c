@@ -94,8 +94,8 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         /// position where the analysis started.
         boost::format fmt(format);
         return reportErrorImpl(
-            subst,
-            "  ---- Actual error:\n" + ::p4c::error_helper(fmt, std::forward<Args>(args)...).toString());
+            subst, "  ---- Actual error:\n" +
+                       ::p4c::error_helper(fmt, std::forward<Args>(args)...).toString());
     }
     // Default error message; returns 'false'
     virtual bool reportError(const TypeVariableSubstitution *subst) const = 0;

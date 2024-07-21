@@ -96,7 +96,7 @@ const IR::Node *ReplaceStructs::postorder(IR::Member *expression) {
             return expression;
         if (isWrite()) {
             ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                    "%1%: writing to a structure is not supported on this target", expression);
+                         "%1%: writing to a structure is not supported on this target", expression);
             return expression;
         }
         // Prefix is a reference to a field of the original struct whose

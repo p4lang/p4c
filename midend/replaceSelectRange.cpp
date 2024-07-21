@@ -66,7 +66,7 @@ std::vector<const IR::Mask *> *DoReplaceSelectRange::rangeToMasks(const IR::Rang
     auto l = r->left->to<IR::Constant>();
     if (!l) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: Range boundaries must be a compile-time constants.", r->left);
+                     "%1%: Range boundaries must be a compile-time constants.", r->left);
         return nullptr;
     }
     auto left = l->value;
@@ -74,7 +74,7 @@ std::vector<const IR::Mask *> *DoReplaceSelectRange::rangeToMasks(const IR::Rang
     auto ri = r->right->to<IR::Constant>();
     if (!ri) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: Range boundaries must be a compile-time constants.", r->right);
+                     "%1%: Range boundaries must be a compile-time constants.", r->right);
         return nullptr;
     }
 
@@ -82,9 +82,9 @@ std::vector<const IR::Mask *> *DoReplaceSelectRange::rangeToMasks(const IR::Rang
     auto right = ri->value;
     if (right < left) {
         ::p4c::warning(ErrorType::WARN_INVALID,
-                  "%1%-%2%: Range with end less than start is "
-                  "treated as an empty range",
-                  r->left, r->right);
+                       "%1%-%2%: Range with end less than start is "
+                       "treated as an empty range",
+                       r->left, r->right);
         return masks;
     }
 

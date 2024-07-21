@@ -67,7 +67,7 @@ std::optional<ICompileContext *> AbstractP4cToolOptions::process(
     // compiler.
     if (remainingArgs->size() > 1) {
         ::p4c::error("Only one input file can be specified. Duplicate args:\n%1%",
-                cstring::join(remainingArgs->begin(), remainingArgs->end(), "\n  "));
+                     cstring::join(remainingArgs->begin(), remainingArgs->end(), "\n  "));
         usage();
         return std::nullopt;
     }

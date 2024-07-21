@@ -270,12 +270,12 @@ void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expres
                                       IR::Expression **leftExpr, IR::Expression **rightExpr) {
     if (sv->is<IR::Constant>() && sv->type->width_bits() > 32) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%, Constant expression wider than 32-bit is not permitted", sv);
+                     "%1%, Constant expression wider than 32-bit is not permitted", sv);
         return;
     }
     if (sv->type->width_bits() > 64) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%, Select expression wider than 64-bit is not permitted", sv);
+                     "%1%, Select expression wider than 64-bit is not permitted", sv);
         return;
     }
     auto width = sv->type->width_bits();
@@ -528,15 +528,15 @@ bool ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
 
     if (lpmCount > 1) {
         ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                "Only one LPM match field is permitted per table, "
-                "more than one lpm field found in table (%1%)",
-                a->name.toString());
+                     "Only one LPM match field is permitted per table, "
+                     "more than one lpm field found in table (%1%)",
+                     a->name.toString());
         return false;
     } else if (lpmCount == 1 && nonExactCount > 0) {
         ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                "Non 'exact' match kind not permitted in table (%1%) "
-                "with 'lpm' match kind",
-                a->name.toString());
+                     "Non 'exact' match kind not permitted in table (%1%) "
+                     "with 'lpm' match kind",
+                     a->name.toString());
         return false;
     }
     return true;
@@ -548,15 +548,15 @@ std::optional<const IR::Member *> ConvertToDpdkControl::getMemExprFromProperty(
     if (property == nullptr) return std::nullopt;
     if (!property->value->is<IR::ExpressionValue>()) {
         ::p4c::error(ErrorType::ERR_EXPECTED,
-                "Expected %1% property value for table %2% to be an expression: %3%", propertyName,
-                table->controlPlaneName(), property);
+                     "Expected %1% property value for table %2% to be an expression: %3%",
+                     propertyName, table->controlPlaneName(), property);
         return std::nullopt;
     }
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
     if (!expr->is<IR::Member>()) {
         ::p4c::error(ErrorType::ERR_EXPECTED,
-                "Exprected %1% property value for table %2% to be a member", propertyName,
-                table->controlPlaneName());
+                     "Exprected %1% property value for table %2% to be a member", propertyName,
+                     table->controlPlaneName());
         return std::nullopt;
     }
 
@@ -569,15 +569,15 @@ std::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Table
     if (property == nullptr) return std::nullopt;
     if (!property->value->is<IR::ExpressionValue>()) {
         ::p4c::error(ErrorType::ERR_EXPECTED,
-                "Expected %1% property value for table %2% to be an expression: %3%", propertyName,
-                table->controlPlaneName(), property);
+                     "Expected %1% property value for table %2% to be an expression: %3%",
+                     propertyName, table->controlPlaneName(), property);
         return std::nullopt;
     }
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
     if (!expr->is<IR::Constant>()) {
         ::p4c::error(ErrorType::ERR_EXPECTED,
-                "Exprected %1% property value for table %2% to be a constant", propertyName,
-                table->controlPlaneName());
+                     "Exprected %1% property value for table %2% to be a constant", propertyName,
+                     table->controlPlaneName());
         return std::nullopt;
     }
 

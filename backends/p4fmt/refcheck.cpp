@@ -32,7 +32,8 @@ class ReferenceCheckerOptions : protected P4fmtOptions {
             [this](const char *arg) {
                 inputFile = arg;
                 if (!std::filesystem::exists(inputFile.value())) {
-                    ::p4c::error("The input P4 program '%s' does not exist.", inputFile.value().c_str());
+                    ::p4c::error("The input P4 program '%s' does not exist.",
+                                 inputFile.value().c_str());
                     return false;
                 }
                 return true;

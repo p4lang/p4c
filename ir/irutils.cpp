@@ -126,7 +126,7 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
                           type->node_type_name());
     }
     ::p4c::error(ErrorType::ERR_INVALID, "%1%: No default value for type %2% (%3%)", srcInfo, type,
-            type->node_type_name());
+                 type->node_type_name());
     return nullptr;
 }
 

@@ -51,7 +51,7 @@ EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance *di)
             }
         } else {
             ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Must be constant value: %1%",
-                    di->arguments->at(i)->expression);
+                         di->arguments->at(i)->expression);
         }
     }
 
@@ -65,9 +65,9 @@ EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance *di)
     }
     if (minValue == maxValue) {
         ::p4c::warning(ErrorType::WARN_IGNORE,
-                  "%1%: No randomness, will always return the same value "
-                  "due to that the min value is equal to the max value",
-                  di);
+                       "%1%: No randomness, will always return the same value "
+                       "due to that the min value is equal to the max value",
+                       di);
     }
 }
 

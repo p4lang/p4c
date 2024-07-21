@@ -50,10 +50,12 @@ EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram *program, const IR::Declaration
     }
 
     if (isDirect && ts->arguments->size() != 1) {
-        ::p4c::error(ErrorType::ERR_MODEL, "Expected a type specialized with one argument: %1%", ts);
+        ::p4c::error(ErrorType::ERR_MODEL, "Expected a type specialized with one argument: %1%",
+                     ts);
         return;
     } else if (!isDirect && ts->arguments->size() != 2) {
-        ::p4c::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%", ts);
+        ::p4c::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%",
+                     ts);
         return;
     }
 
@@ -68,14 +70,14 @@ EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram *program, const IR::Declaration
     unsigned dataplaneWidth = dpwtype->width_bits();
     if (dataplaneWidth > 64) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                "Counters dataplane width up to 64 bits are supported: %1%", dpwtype);
+                     "Counters dataplane width up to 64 bits are supported: %1%", dpwtype);
         return;
     }
     if (dataplaneWidth < 8 || (dataplaneWidth & (dataplaneWidth - 1)) != 0) {
         ::p4c::warning(ErrorType::WARN_UNSUPPORTED,
-                  "Counter dataplane width will be extended to "
-                  "nearest type (8, 16, 32 or 64 bits): %1%",
-                  dpwtype);
+                       "Counter dataplane width will be extended to "
+                       "nearest type (8, 16, 32 or 64 bits): %1%",
+                       dpwtype);
     }
 
     // By default, use BPF array map for Counter
@@ -94,7 +96,7 @@ EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram *program, const IR::Declaration
         if (!isHash && istype->width_bits() != 32) {
             // ARRAY_MAP can have only 32 bits key, so assume this and warn user
             ::p4c::warning(ErrorType::WARN_UNSUPPORTED,
-                      "Up to 32-bit type for index is supported, using 32 bit: %1%", istype);
+                           "Up to 32-bit type for index is supported, using 32 bit: %1%", istype);
         }
 
         if (isHash) {

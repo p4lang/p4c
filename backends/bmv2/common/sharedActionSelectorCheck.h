@@ -73,7 +73,7 @@ class SharedActionSelectorCheck : public Inspector {
         if (implementation == nullptr) return false;
         if (!implementation->value->is<IR::ExpressionValue>()) {
             ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected expression for property",
-                    implementation);
+                         implementation);
             return false;
         }
         auto propv = implementation->value->to<IR::ExpressionValue>();
@@ -81,12 +81,14 @@ class SharedActionSelectorCheck : public Inspector {
         auto pathe = propv->expression->to<IR::PathExpression>();
         auto decl = refMap->getDeclaration(pathe->path, true);
         if (!decl->is<IR::Declaration_Instance>()) {
-            ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected a reference to an instance", pathe);
+            ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected a reference to an instance",
+                         pathe);
             return false;
         }
         auto dcltype = typeMap->getType(pathe, true);
         if (!dcltype->is<IR::Type_Extern>()) {
-            ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type for implementation", dcltype);
+            ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type for implementation",
+                         dcltype);
             return false;
         }
         auto type_extern_name = dcltype->to<IR::Type_Extern>()->name;
@@ -114,9 +116,10 @@ class SharedActionSelectorCheck : public Inspector {
         };
 
         if (!cmp_inputs(it->second, input)) {
-            ::p4c::error(ErrorType::ERR_INVALID,
-                    "Action selector %1% is used by multiple tables with different selector inputs",
-                    decl);
+            ::p4c::error(
+                ErrorType::ERR_INVALID,
+                "Action selector %1% is used by multiple tables with different selector inputs",
+                decl);
         }
 
         return false;

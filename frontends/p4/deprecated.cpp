@@ -28,7 +28,7 @@ void Deprecated::warnIfDeprecated(const IR::IAnnotated *annotated, const IR::Nod
         if (const auto *str = a->to<IR::StringLiteral>()) message += str->value;
     }
     ::p4c::warning(ErrorType::WARN_DEPRECATED, "%1%: Using deprecated feature %2%. %3%", errorNode,
-              annotated->getNode(), message);
+                   annotated->getNode(), message);
 }
 
 bool Deprecated::preorder(const IR::PathExpression *expression) {

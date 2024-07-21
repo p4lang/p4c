@@ -92,7 +92,8 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
     template <typename Func>
     void forAllPipeBlocks(const IR::ToplevelBlock *evaluatedProgram, Func function) {
         auto main = evaluatedProgram->getMain();
-        if (!main) ::p4c::error(ErrorType::ERR_NOT_FOUND, "Program does not contain a `main` module");
+        if (!main)
+            ::p4c::error(ErrorType::ERR_NOT_FOUND, "Program does not contain a `main` module");
         auto cparams = main->getConstructorParameters();
         int index = -1;
         for (auto param : main->constantValue) {
@@ -332,20 +333,20 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                     }
                 } else if (expr->is<IR::PathExpression>()) {
                     ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                            "Unresolved value %1% for psa_idle_timeout "
-                            "property on table %2%. Must be a constant and one of "
-                            "{ NOTIFY_CONTROL, NO_TIMEOUT }",
-                            timeout, table);
+                                 "Unresolved value %1% for psa_idle_timeout "
+                                 "property on table %2%. Must be a constant and one of "
+                                 "{ NOTIFY_CONTROL, NO_TIMEOUT }",
+                                 timeout, table);
                     return false;
                 }
             }
         }
 
         ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                "Unexpected value %1% for psa_idle_timeout "
-                "property on table %2%. Supported values are "
-                "{ NOTIFY_CONTROL, NO_TIMEOUT }",
-                timeout, table);
+                     "Unexpected value %1% for psa_idle_timeout "
+                     "property on table %2%. Supported values are "
+                     "{ NOTIFY_CONTROL, NO_TIMEOUT }",
+                     timeout, table);
         return false;
     }
 };

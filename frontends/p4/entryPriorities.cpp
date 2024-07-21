@@ -50,7 +50,7 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
     if (ep->isConstant) {
         if (withPriority)
             ::p4c::error(ErrorType::ERR_INVALID,
-                    "%1%: Table with 'const' entries cannot have priorities", withPriority);
+                         "%1%: Table with 'const' entries cannot have priorities", withPriority);
         return entries;
     }
 
@@ -80,7 +80,8 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
             entries->entries[index] = newEntry;
             size_t nextPriority = currentPriority + priorityDelta;
             if (nextPriority < currentPriority) {
-                ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation", table);
+                ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation",
+                             table);
                 return entries;
             }
             currentPriority = nextPriority;
@@ -99,7 +100,7 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
     }
     if (!requiresPriorities) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                "%1% key match type does not require priorities, but some are specified", key);
+                     "%1% key match type does not require priorities, but some are specified", key);
         return entries;
     }
 
@@ -143,7 +144,8 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
 
             nextPriority = currentPriority - priorityDelta;
             if (nextPriority > currentPriority) {
-                ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation", table);
+                ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation",
+                             table);
                 return entries;
             }
         } else {
@@ -156,7 +158,8 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
 
             nextPriority = currentPriority + priorityDelta;
             if (nextPriority < currentPriority) {
-                ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation", table);
+                ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation",
+                             table);
                 return entries;
             }
         }

@@ -151,8 +151,8 @@ void EBPFMeterPSA::emitInstance(CodeBuilder *builder) const {
                                                "struct " + getIndirectStructName(), size);
     } else {
         ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                "Direct meter belongs to table "
-                "and cannot have own instance");
+                     "Direct meter belongs to table "
+                     "and cannot have own instance");
     }
 }
 

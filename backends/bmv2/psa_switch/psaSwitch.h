@@ -51,7 +51,8 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
 
     void modelError(const char *format, const cstring field) {
         ::p4c::error(ErrorType::ERR_MODEL,
-                (cstring(format) + "\nInvalid metadata parameter value for PSA").c_str(), field);
+                     (cstring(format) + "\nInvalid metadata parameter value for PSA").c_str(),
+                     field);
     }
 
     Util::IJson *convertParam(UNUSED const IR::Parameter *param, cstring fieldName) override {

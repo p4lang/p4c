@@ -35,15 +35,15 @@ void DirectMeterMap::setTable(const IR::IDeclaration *meter, const IR::P4Table *
     auto info = getInfo(meter);
     if (info == nullptr) {
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1%: table with direct meter %2% must have"
-                " at least one action with a read method call",
-                table, meter);
+                     "%1%: table with direct meter %2% must have"
+                     " at least one action with a read method call",
+                     table, meter);
         return;
     }
     if (info->table != nullptr)
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1%: Direct meters cannot be attached to multiple tables %2% and %3%", meter,
-                table, info->table);
+                     "%1%: Direct meters cannot be attached to multiple tables %2% and %3%", meter,
+                     table, info->table);
     info->table = table;
 }
 /// Helper function to check if two expressions are syntactically identical.
@@ -70,9 +70,9 @@ void DirectMeterMap::setDestination(const IR::IDeclaration *meter,
         bool same = checkSame(destination, info->destinationField);
         if (!same)
             ::p4c::error(ErrorType::ERR_INVALID,
-                    "all meter operations must write to the same destination,"
-                    " however %1% and %2% are different",
-                    destination, info->destinationField);
+                         "all meter operations must write to the same destination,"
+                         " however %1% and %2% are different",
+                         destination, info->destinationField);
     }
 }
 

@@ -180,10 +180,11 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype *type) {
             TranslationAnnotation ann;
             bool isTranslatedType = hasTranslationAnnotation(type, &ann);
             if (isTranslatedType && !underlyingType->is<IR::Type_Bits>()) {
-                ::p4c::error(ErrorType::ERR_INVALID,
-                        "%1%: P4Runtime requires the underlying type for a user-defined type with "
-                        "the @p4runtime_translation annotation to be bit<W>; it cannot be '%2%'",
-                        type, underlyingType);
+                ::p4c::error(
+                    ErrorType::ERR_INVALID,
+                    "%1%: P4Runtime requires the underlying type for a user-defined type with "
+                    "the @p4runtime_translation annotation to be bit<W>; it cannot be '%2%'",
+                    type, underlyingType);
                 // no need to return early here
             }
             visit(underlyingType);
@@ -360,7 +361,7 @@ bool TypeSpecConverter::preorder(const IR::Type_SerEnum *type) {
                 member->set_name(m->controlPlaneName());
                 if (!m->value->is<IR::Constant>()) {
                     ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported SerEnum member value",
-                            m->value);
+                                 m->value);
                     continue;
                 }
                 auto value = stringRepr(m->value->to<IR::Constant>(), width);

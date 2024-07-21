@@ -94,8 +94,8 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
                     if (auto *type_decl = findOrigCtxt<IR::Type_Declaration>())
                         if (type_decl->getNode() == d->getNode()) {
                             ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                                    "Self-referencing types not supported: '%1%' within '%2%'",
-                                    name, d->getNode());
+                                         "Self-referencing types not supported: '%1%' within '%2%'",
+                                         name, d->getNode());
                         }
                 } else if (type == ResolutionType::Any) {
                     if (auto *decl_ctxt = findOrigCtxt<IR::Declaration>())
@@ -266,7 +266,8 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
         if (decls.empty()) {
             ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", path->name);
         } else if (decls.size() != 1) {
-            ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", path->name);
+            ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations",
+                         path->name);
             for (const auto *a : decls) ::p4c::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
         } else {
             result = decls.front();
@@ -289,7 +290,7 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::This *pointe
     auto result = findOrigCtxt<IR::Declaration_Instance>();
     if (findOrigCtxt<IR::Function>() == nullptr || result == nullptr)
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1% can only be used in the definition of an abstract method", pointer);
+                     "%1% can only be used in the definition of an abstract method", pointer);
     if (notNull) BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", pointer);
     return result;
 }
@@ -341,7 +342,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
 
         if (prev_in_scope.count(decl->getName()))
             ::p4c::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node,
-                      prev_in_scope.at(decl->getName()));
+                           prev_in_scope.at(decl->getName()));
         else if (!node->is<IR::Method>() && !node->is<IR::Function>())
             prev_in_scope[decl->getName()] = node;
         auto prev = resolve(decl->getName(), ResolutionType::Any);
@@ -367,7 +368,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
                 if (const auto *param = pnode->to<IR::Parameter>())
                     if (decl_node->name.name == param->name.name)
                         ::p4c::error(ErrorType::WARN_SHADOWING,
-                                "declaration of '%1%' shadows a parameter '%2%'", node, pnode);
+                                     "declaration of '%1%' shadows a parameter '%2%'", node, pnode);
             }
 
             ::p4c::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node, pnode);
@@ -397,7 +398,7 @@ bool ResolveReferences::preorder(const IR::This *pointer) {
     auto decl = findContext<IR::Declaration_Instance>();
     if (findContext<IR::Function>() == nullptr || decl == nullptr) {
         ::p4c::error(ErrorType::ERR_INVALID,
-                "'%1%' can only be used in the definition of an abstract method", pointer);
+                     "'%1%' can only be used in the definition of an abstract method", pointer);
         return false;
     }
     refMap->setDeclaration(pointer, decl);
@@ -409,11 +410,12 @@ bool ResolveReferences::preorder(const IR::KeyElement *ke) {
     visit(ke->expression, "expression");
     auto decls = lookupMatchKind(ke->matchType->path->name);
     if (decls.empty()) {
-        ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", ke->matchType->path->name);
+        ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found",
+                     ke->matchType->path->name);
         refMap->usedName(ke->matchType->path->name.name);
     } else if (decls.size() != 1) {
         ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations",
-                ke->matchType->path->name);
+                     ke->matchType->path->name);
         for (const auto *a : decls) ::p4c::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
     } else {
         refMap->setDeclaration(ke->matchType->path, decls.front());

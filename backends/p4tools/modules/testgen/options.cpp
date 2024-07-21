@@ -51,7 +51,8 @@ TestgenOptions::TestgenOptions()
                     throw std::invalid_argument("Invalid input.");
                 }
             } catch (std::invalid_argument &) {
-                ::p4c::error("Invalid input value %1% for --max-tests. Expected positive integer.", arg);
+                ::p4c::error("Invalid input value %1% for --max-tests. Expected positive integer.",
+                             arg);
                 return false;
             }
             return true;

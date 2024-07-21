@@ -60,7 +60,7 @@ void UBPFControlBodyTranslator::processFunction(const P4::ExternFunction *functi
                                   hashKeyInstanceName);
         } else {
             ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: Not supported hash algorithm type",
-                    algorithmType);
+                         algorithmType);
         }
 
         return;
@@ -107,7 +107,7 @@ cstring UBPFControlBodyTranslator::createHashKeyInstance(const P4::ExternFunctio
     auto atype = UBPFTypeFactory::instance->create(dataArgument->type);
     if (!atype->is<UBPFListType>()) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unsupported argument type",
-                dataArgument->type);
+                     dataArgument->type);
     }
     auto ubpfList = atype->to<UBPFListType>();
     ubpfList->name = this->refMap->newName("tuple");
@@ -148,8 +148,8 @@ void UBPFControlBodyTranslator::processMethod(const P4::ExternMethod *method) {
 
     if (declType->name.name == p4lib.packetOut.name) {
         if (method->method->name.name == p4lib.packetOut.emit.name) {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: Emit extern not supported in control block",
-                    method->expr);
+            ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+                         "%1%: Emit extern not supported in control block", method->expr);
             return;
         }
     } else if (declType->name.name == UBPFModel::instance.registerModel.name) {
@@ -582,7 +582,7 @@ void UBPFControl::scanConstants() {
             continue;
         } else {
             ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
-                    b->toString());
+                         b->toString());
         }
     }
 }
@@ -639,7 +639,7 @@ bool UBPFControl::build() {
     size_t numberOfArgs = UBPFModel::instance.numberOfControlBlockArguments();
     if (pl->size() != numberOfArgs) {
         ::p4c::error(ErrorType::ERR_EXPECTED, "Expected control block to have exactly %d parameter",
-                numberOfArgs);
+                     numberOfArgs);
         return false;
     }
 

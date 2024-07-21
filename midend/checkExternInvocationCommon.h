@@ -142,10 +142,10 @@ class CheckExternInvocationCommon : public Inspector {
         if (!bv.empty() && constraint.empty()) {
             if (extName != "")
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%s %s %s cannot be used in the %s %s",
-                        expr->srcInfo, extType, extName, pipe, extractBlock(bv));
+                             expr->srcInfo, extType, extName, pipe, extractBlock(bv));
             else
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%s %s cannot be used in the %s %s",
-                        expr->srcInfo, extType, pipe, extractBlock(bv));
+                             expr->srcInfo, extType, pipe, extractBlock(bv));
         }
     }
 

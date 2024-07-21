@@ -51,8 +51,8 @@ class PSAErrorCodesGen : public Inspector {
 
             // Type ParserError_t is u8, which can have values from 0 to 255.
             if (id > 255) {
-                ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1%: Reached maximum number of possible errors",
-                        decl);
+                ::p4c::error(ErrorType::ERR_OVERLIMIT,
+                             "%1%: Reached maximum number of possible errors", decl);
             }
         }
         builder->newline();
@@ -758,7 +758,7 @@ bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock *prsr) {
 
     if (pl->size() != numOfParams) {
         ::p4c::error(ErrorType::ERR_EXPECTED, "Expected parser to have exactly %1% parameters",
-                numOfParams);
+                     numOfParams);
         return false;
     }
 
@@ -901,7 +901,8 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock *instance) {
         auto met = new EBPFMeterPSA(program, name, di, control->codeGen);
         control->meters.emplace(name, met);
     } else {
-        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control", instance);
+        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
+                     instance);
     }
 
     return false;
@@ -948,7 +949,7 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::Declaration_Instance *di) {
         if (typeName == "Digest") {
             if (pipelineType == TC_EGRESS || pipelineType == XDP_EGRESS) {
                 ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                        "Digests are only supported at ingress, got an instance at egress");
+                             "Digests are only supported at ingress, got an instance at egress");
             }
             cstring instance = EBPFObject::externalName(di);
             auto digest = new EBPFDigestPSA(program, di);

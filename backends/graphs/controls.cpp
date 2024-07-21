@@ -204,7 +204,8 @@ bool ControlGraphs::preorder(const IR::MethodCallStatement *statement) {
         } else if (am->applyObject->is<IR::Type_Control>()) {
             if (am->object->is<IR::Parameter>()) {
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                        "%1%: control parameters are not supported by this target", am->object);
+                             "%1%: control parameters are not supported by this target",
+                             am->object);
                 return false;
             }
             BUG_CHECK(am->object->is<IR::Declaration_Instance>(),

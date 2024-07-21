@@ -89,8 +89,8 @@ void IR::Constant::handleOverflow(bool noWarning) {
         big_int min = -(one << (width - 1));
         if (value < min || value > max) {
             if (!noWarning)
-                ::p4c::warning(ErrorType::WARN_OVERFLOW, "%1%: signed value does not fit in %2% bits",
-                          this, width);
+                ::p4c::warning(ErrorType::WARN_OVERFLOW,
+                               "%1%: signed value does not fit in %2% bits", this, width);
             LOG2("value=" << value << ", min=" << min << ", max=" << max << ", masked="
                           << (value & mask) << ", adj=" << ((value & mask) - (one << width)));
             value = value & mask;
@@ -99,11 +99,12 @@ void IR::Constant::handleOverflow(bool noWarning) {
     } else {
         if (value < 0) {
             if (!noWarning)
-                ::p4c::warning(ErrorType::WARN_MISMATCH, "%1%: negative value with unsigned type", this);
+                ::p4c::warning(ErrorType::WARN_MISMATCH, "%1%: negative value with unsigned type",
+                               this);
         } else if ((value & mask) != value) {
             if (!noWarning)
-                ::p4c::warning(ErrorType::WARN_MISMATCH, "%1%: value does not fit in %2% bits", this,
-                          width);
+                ::p4c::warning(ErrorType::WARN_MISMATCH, "%1%: value does not fit in %2% bits",
+                               this, width);
         }
 
         value = value & mask;

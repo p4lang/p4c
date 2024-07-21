@@ -129,8 +129,8 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
             if (extmeth->method->name.name == corelib.packetIn.extract.name) {
                 int argCount = mce->arguments->size();
                 if (argCount < 1 || argCount > 2) {
-                    ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: unknown extract method",
-                            mce);
+                    ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                 "%1%: unknown extract method", mce);
                     return result;
                 }
 
@@ -140,8 +140,8 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 auto argtype = ctxt->typeMap->getType(arg->expression, true);
                 if (!argtype->is<IR::Type_Header>()) {
                     ::p4c::error(ErrorType::ERR_INVALID,
-                            "%1%: extract only accepts arguments with header types, not %2%", arg,
-                            argtype);
+                                 "%1%: extract only accepts arguments with header types, not %2%",
+                                 arg, argtype);
                     return result;
                 }
                 auto param = new Util::JsonObject();
@@ -337,12 +337,12 @@ void ParserConverter::convertSimpleKey(const IR::Expression *keySet, big_int &va
         auto mk = keySet->to<IR::Mask>();
         if (!mk->left->is<IR::Constant>()) {
             ::p4c::error(ErrorType::ERR_INVALID, "%1%: must evaluate to a compile-time constant",
-                    mk->left);
+                         mk->left);
             return;
         }
         if (!mk->right->is<IR::Constant>()) {
             ::p4c::error(ErrorType::ERR_INVALID, "%1%: must evaluate to a compile-time constant",
-                    mk->right);
+                         mk->right);
             return;
         }
         value = mk->left->to<IR::Constant>()->value;
@@ -357,7 +357,8 @@ void ParserConverter::convertSimpleKey(const IR::Expression *keySet, big_int &va
         value = 0;
         mask = 0;
     } else {
-        ::p4c::error(ErrorType::ERR_INVALID, "%1%: must evaluate to a compile-time constant", keySet);
+        ::p4c::error(ErrorType::ERR_INVALID, "%1%: must evaluate to a compile-time constant",
+                     keySet);
         value = 0;
         mask = 0;
     }
@@ -442,7 +443,7 @@ Util::IJson *ParserConverter::stateName(IR::ID state) {
         return Util::JsonValue::null;
     } else if (state.name == IR::ParserState::reject) {
         ::p4c::warning(ErrorType::WARN_UNSUPPORTED,
-                  "Explicit transition to %1% not supported on this target", state);
+                       "Explicit transition to %1% not supported on this target", state);
         return Util::JsonValue::null;
     } else {
         return new Util::JsonValue(state.name);
@@ -531,10 +532,11 @@ void ParserConverter::addValueSets(const IR::P4Parser *parser) {
         if (auto st = etype->to<IR::Type_Struct>()) {
             for (auto f : st->fields) {
                 if (isExactMatch(f)) continue;
-                ::p4c::warning(ErrorType::WARN_UNSUPPORTED,
-                          "This backend only supports exact matches in value_sets but the match "
-                          "on '%1%' is not exact; the annotation will be ignored",
-                          f);
+                ::p4c::warning(
+                    ErrorType::WARN_UNSUPPORTED,
+                    "This backend only supports exact matches in value_sets but the match "
+                    "on '%1%' is not exact; the annotation will be ignored",
+                    f);
             }
         }
 

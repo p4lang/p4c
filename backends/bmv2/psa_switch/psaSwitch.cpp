@@ -64,7 +64,7 @@ void PsaCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::Type_
             field->append("*");
             if (varbitFound)
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                        "%1%: headers with multiple varbit fields are not supported", st);
+                             "%1%: headers with multiple varbit fields are not supported", st);
             varbitFound = true;
         } else if (ftype->is<IR::Type_Error>()) {
             field->append(f->name.name);
@@ -259,9 +259,9 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
 
     if (main->type->name != "PSA_Switch")
         ::p4c::warning(ErrorType::WARN_INVALID,
-                  "%1%: the main package should be called PSA_Switch"
-                  "; are you using the wrong architecture?",
-                  main->type->name);
+                       "%1%: the main package should be called PSA_Switch"
+                       "; are you using the wrong architecture?",
+                       main->type->name);
 
     main->apply(*parsePsaArch);
 
@@ -688,7 +688,8 @@ void ExternConverter_InternetChecksum::convertExternInstance(UNUSED ConversionCo
     auto egressDeparser = psaStructure->deparsers.at("egress"_cs)->controlPlaneName();
     if (block != ingressParser && block != ingressDeparser && block != egressParser &&
         block != egressDeparser) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in pipeline on this target", eb);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in pipeline on this target",
+                     eb);
     }
     // add checksum instance
     auto jcksum = new Util::JsonObject();
@@ -962,7 +963,7 @@ void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext *c
     auto regType = st->arguments->at(0);
     if (!regType->is<IR::Type_Bits>()) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                "%1%: registers with types other than bit<> or int<> are not suppoted", eb);
+                     "%1%: registers with types other than bit<> or int<> are not suppoted", eb);
         return;
     }
     unsigned width = regType->width_bits();
@@ -1042,9 +1043,9 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
         // the selector is never used by any table, we cannot figure out its
         // input and therefore cannot include it in the JSON
         ::p4c::warning(ErrorType::WARN_UNUSED,
-                  "Action selector '%1%' is never referenced by a table "
-                  "and cannot be included in bmv2 JSON",
-                  c);
+                       "Action selector '%1%' is never referenced by a table "
+                       "and cannot be included in bmv2 JSON",
+                       c);
         return;
     }
     auto j_input = mkArrayField(selector, "input"_cs);

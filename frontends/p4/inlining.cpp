@@ -343,9 +343,9 @@ void InlineList::analyze() {
             ++it;
             auto second = *it;
             ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "Multiple invocations of the same object "
-                    "not supported on this target: %1%, %2%",
-                    first, second);
+                         "Multiple invocations of the same object "
+                         "not supported on this target: %1%, %2%",
+                         first, second);
             continue;
         }
         cg.calls(inl->caller, inl->callee);
@@ -409,7 +409,8 @@ void DiscoverInlining::visit_all(const IR::Block *block) {
 bool DiscoverInlining::preorder(const IR::ControlBlock *block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ParserBlock>()) {
-        ::p4c::error(ErrorType::ERR_INVALID, "%1%: instantiation of control in parser", block->node);
+        ::p4c::error(ErrorType::ERR_INVALID, "%1%: instantiation of control in parser",
+                     block->node);
         return false;
     } else if (getContext()->node->is<IR::ControlBlock>() && allowControls) {
         auto parent = getContext()->node->to<IR::ControlBlock>();
@@ -428,7 +429,8 @@ bool DiscoverInlining::preorder(const IR::ControlBlock *block) {
 bool DiscoverInlining::preorder(const IR::ParserBlock *block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ControlBlock>()) {
-        ::p4c::error(ErrorType::ERR_INVALID, "%1%: instantiation of parser in control", block->node);
+        ::p4c::error(ErrorType::ERR_INVALID, "%1%: instantiation of parser in control",
+                     block->node);
         return false;
     } else if (getContext()->node->is<IR::ParserBlock>()) {
         auto parent = getContext()->node->to<IR::ParserBlock>();
@@ -653,10 +655,10 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
                 // This is a compile-time constant, since this is a non-directional
                 // parameter, so the value should be independent on the context.
                 ::p4c::error(ErrorType::ERR_INVALID,
-                        "%1%: non-directional parameters must be substitued with the "
-                        "same value in all invocations; two different substitutions are "
-                        "%2% and %3%",
-                        param, initializer, prev);
+                             "%1%: non-directional parameters must be substitued with the "
+                             "same value in all invocations; two different substitutions are "
+                             "%2% and %3%",
+                             param, initializer, prev);
             continue;
         }
     }
@@ -819,10 +821,10 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
                     // This is a compile-time constant, since this is a non-directional
                     // parameter, so the value should be independent on the context.
                     ::p4c::error(ErrorType::ERR_INVALID,
-                            "%1%: non-directional parameters must be substitued with the "
-                            "same value in all invocations; two different substitutions are "
-                            "%2% and %3%",
-                            param, initializer, prev);
+                                 "%1%: non-directional parameters must be substitued with the "
+                                 "same value in all invocations; two different substitutions are "
+                                 "%2% and %3%",
+                                 param, initializer, prev);
                 continue;
             }
         }

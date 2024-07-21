@@ -129,8 +129,8 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
             result->push_back(decl);
             auto arg = substitution.lookup(p);
             if (arg == nullptr) {
-                ::p4c::error(ErrorType::ERR_UNINITIALIZED, "action %1%: parameter %2% must be bound",
-                        invocation, p);
+                ::p4c::error(ErrorType::ERR_UNINITIALIZED,
+                             "action %1%: parameter %2% must be bound", invocation, p);
                 continue;
             }
 

@@ -73,8 +73,8 @@ class Target {
         (void)keyType;
         (void)valueType;
         (void)size;
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "emitTableDeclSpinlock is not supported on %1% target",
-                name);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+                     "emitTableDeclSpinlock is not supported on %1% target", name);
     }
     /// map-in-map requires declaration of both inner and outer map,
     /// thus we define them together in a single method.
@@ -94,7 +94,7 @@ class Target {
         (void)outerKeyType;
         (void)outerSize;
         ::p4c::error(ErrorType::ERR_UNSUPPORTED, "emitMapInMapDecl is not supported on %1% target",
-                name);
+                     name);
     }
     virtual void emitMain(Util::SourceCodeBuilder *builder, cstring functionName,
                           cstring argName) const = 0;

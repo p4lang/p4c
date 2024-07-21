@@ -30,7 +30,8 @@ std::ostream *openFile(const std::filesystem::path &name, bool nullOnError) {
     }
     std::ofstream *file = new std::ofstream(name);
     if (!file->good()) {
-        ::p4c::error(ErrorType::ERR_IO, "Error writing output to file %1%: %2%", name, strerror(errno));
+        ::p4c::error(ErrorType::ERR_IO, "Error writing output to file %1%: %2%", name,
+                     strerror(errno));
         if (nullOnError) return new nullstream();
         return nullptr;
     }

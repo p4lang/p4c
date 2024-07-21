@@ -72,8 +72,8 @@ Util::IJson *ExternConverter::convertExternObject(ConversionContext *ctxt,
         }
         return primitive;
     } else {
-        ::p4c::error(ErrorType::ERR_UNKNOWN, "Unknown extern method %1% from type %2%", em->method->name,
-                em->originalExternType->name);
+        ::p4c::error(ErrorType::ERR_UNKNOWN, "Unknown extern method %1% from type %2%",
+                     em->method->name, em->originalExternType->name);
         return nullptr;
     }
 }

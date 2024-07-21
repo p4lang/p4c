@@ -198,7 +198,7 @@ void ActionConverter::convertActionParams(const IR::ParameterList *parameters,
         // should re-consider how to support action parameters that is neither bit<> nor int<>
         if (!(type->is<IR::Type_Bits>() || type->is<IR::Type_Enum>()))
             ::p4c::error(ErrorType::ERR_INVALID,
-                    "%1%: action parameters must be bit<> or int<> on this target", p);
+                         "%1%: action parameters must be bit<> or int<> on this target", p);
         param->emplace("bitwidth", type->width_bits());
         params->append(param);
     }

@@ -106,9 +106,9 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
             if (it == autoNames.end()) {
                 controlPlaneName = "digest_" + cstring::to_cstring(autoNames.size());
                 ::p4c::warning(ErrorType::WARN_MISMATCH,
-                          "Cannot find a good name for %1% method call, using "
-                          "auto-generated name '%2%'",
-                          call, controlPlaneName);
+                               "Cannot find a good name for %1% method call, using "
+                               "auto-generated name '%2%'",
+                               call, controlPlaneName);
                 autoNames.emplace(call, controlPlaneName);
             } else {
                 controlPlaneName = it->second;
@@ -131,16 +131,16 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
         if (timeout == nullptr) return false;
         if (!timeout->value->is<IR::ExpressionValue>()) {
             ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                    "Unexpected value %1% for supports_timeout on table %2%", timeout, table);
+                         "Unexpected value %1% for supports_timeout on table %2%", timeout, table);
             return false;
         }
 
         auto expr = timeout->value->to<IR::ExpressionValue>()->expression;
         if (!expr->is<IR::BoolLiteral>()) {
             ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                    "Unexpected non-boolean value %1% for supports_timeout "
-                    "property on table %2%",
-                    timeout, table);
+                         "Unexpected non-boolean value %1% for supports_timeout "
+                         "property on table %2%",
+                         timeout, table);
             return false;
         }
 

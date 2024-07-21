@@ -32,7 +32,7 @@ void DiscoverActionsInlining::postorder(const IR::MethodCallStatement *mcs) {
     if (caller == nullptr) {
         if (findContext<IR::P4Parser>() != nullptr) {
             ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: action invocation in parser not allowed",
-                    mcs);
+                         mcs);
         } else if (findContext<IR::P4Control>() == nullptr) {
             BUG("%1%: unexpected action invocation", mcs);
         }
@@ -102,7 +102,7 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
             // argument.
             if (!argument) {
                 ::p4c::error(ErrorType::ERR_UNINITIALIZED, "%1%: No argument supplied for %2%",
-                        statement, param);
+                             statement, param);
                 continue;
             }
             subst.add(param, argument);

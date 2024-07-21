@@ -526,7 +526,7 @@ class FindUninitialized : public Inspector {
             // not executed a 'return' on all possible paths.
             if (!defs->isUnreachable())
                 ::p4c::error(ErrorType::ERR_INSUFFICIENT,
-                        "Function '%1%' does not return a value on all paths", func);
+                             "Function '%1%' does not return a value on all paths", func);
         }
 
         currentPoint = point.after();

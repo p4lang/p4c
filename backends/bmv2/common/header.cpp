@@ -43,9 +43,9 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike *type, bool
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
             if (!meta && ft->is<IR::Type_Struct>()) {
-                ::p4c::error(ErrorType::ERR_INVALID,
-                        "%1%: type should only contain headers, header stacks, or header unions",
-                        type);
+                ::p4c::error(
+                    ErrorType::ERR_INVALID,
+                    "%1%: type should only contain headers, header stacks, or header unions", type);
                 return;
             }
             auto st = ft->to<IR::Type_StructLike>();
@@ -237,7 +237,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
             field->append("*");
             if (varbitFound)
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                        "%1%: headers with multiple varbit fields not supported", st);
+                             "%1%: headers with multiple varbit fields not supported", st);
             varbitFound = true;
         } else if (ftype->is<IR::Type_Error>()) {
             // treat as bit<32>
@@ -258,10 +258,10 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
     if (padding != 0) {
         if (st->is<IR::Type_Header>()) {
             ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "%1%: Found header with fields totaling %2% bits."
-                    "  BMv2 target only supports headers with fields"
-                    " totaling a multiple of 8 bits.",
-                    st, max_length);
+                         "%1%: Found header with fields totaling %2% bits."
+                         "  BMv2 target only supports headers with fields"
+                         " totaling a multiple of 8 bits.",
+                         st, max_length);
         } else if (st->is<IR::Type_Struct>()) {
             cstring name = ctxt->refMap->newName("_padding");
             auto field = pushNewArray(fields);
@@ -299,7 +299,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
                 } else {
                     // aliasAnnotation->body is empty or not saved correctly
                     ::p4c::error(ErrorType::ERR_INVALID,
-                            "There is no saved data for aliases target_name.");
+                                 "There is no saved data for aliases target_name.");
                 }
             }
             LOG2("field alias " << target_name);

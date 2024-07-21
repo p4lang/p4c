@@ -161,12 +161,12 @@ bool TypeMap::equivalent(const IR::Type *left, const IR::Type *right, bool stric
         auto rs = right->to<IR::Type_Stack>();
         if (!ls->sizeKnown()) {
             ::p4c::error(ErrorType::ERR_TYPE_ERROR,
-                    "%1%: Size of header stack type should be a constant", left);
+                         "%1%: Size of header stack type should be a constant", left);
             return false;
         }
         if (!rs->sizeKnown()) {
             ::p4c::error(ErrorType::ERR_TYPE_ERROR,
-                    "%1%: Size of header stack type should be a constant", right);
+                         "%1%: Size of header stack type should be a constant", right);
             return false;
         }
         return equivalent(ls->elementType, rs->elementType, strict) &&
@@ -396,7 +396,7 @@ int TypeMap::widthBits(const IR::Type *type, const IR::Node *errorPosition, bool
         return w * ths->getSize();
     }
     ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: width not well-defined for values of type %2%",
-            errorPosition, t);
+                 errorPosition, t);
     return -1;
 }
 

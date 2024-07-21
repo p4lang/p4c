@@ -253,10 +253,10 @@ void CRCChecksumAlgorithm::emitAddData(CodeBuilder *builder, const ArgumentsList
             concatenateBits = true;
             if (width > remainingBits) {
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                        "Unable to concatenate fields into one byte. "
-                        "Last field(%1%) overflows one byte. "
-                        "There are %2% remaining bits but field (%1%) has %3% bits width.",
-                        field, remainingBits, width);
+                             "Unable to concatenate fields into one byte. "
+                             "Last field(%1%) overflows one byte. "
+                             "There are %2% remaining bits but field (%1%) has %3% bits width.",
+                             field, remainingBits, width);
                 return;
             }
             if (remainingBits == 8) {
@@ -285,7 +285,7 @@ void CRCChecksumAlgorithm::emitAddData(CodeBuilder *builder, const ArgumentsList
             // fields larger than 8 bits
             if (width % 8 != 0) {
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                        "Fields larger than 8 bits have to be aligned to bytes %1%", field);
+                             "Fields larger than 8 bits have to be aligned to bytes %1%", field);
                 return;
             }
             builder->emitIndent();
@@ -379,15 +379,17 @@ void InternetChecksumAlgorithm::updateChecksum(CodeBuilder *builder, const Argum
 
         if (width > 64) {
             if (remainingBits != 16) {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                        "%1%: field wider than 64 bits must be aligned to 16 bits in input data",
-                        field);
+                ::p4c::error(
+                    ErrorType::ERR_UNSUPPORTED,
+                    "%1%: field wider than 64 bits must be aligned to 16 bits in input data",
+                    field);
                 continue;
             }
             if (width % 16 != 0) {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                        "%1%: field wider than 64 bits must have size in bits multiply of 16 bits",
-                        field);
+                ::p4c::error(
+                    ErrorType::ERR_UNSUPPORTED,
+                    "%1%: field wider than 64 bits must have size in bits multiply of 16 bits",
+                    field);
                 continue;
             }
 

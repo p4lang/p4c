@@ -29,8 +29,8 @@ const IR::Node *DoEliminateSwitch::postorder(IR::P4Program *program) {
         }
     }
     ::p4c::error(ErrorType::ERR_NOT_FOUND,
-            "Could not find declaration for 'match_kind.exact', which is needed to implement "
-            "switch statements; did you include core.p4?");
+                 "Could not find declaration for 'match_kind.exact', which is needed to implement "
+                 "switch statements; did you include core.p4?");
     return program;
 }
 

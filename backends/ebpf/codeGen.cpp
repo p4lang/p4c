@@ -468,10 +468,10 @@ void CodeGenInspector::widthCheck(const IR::Node *node) const {
     if (tb->size <= 64) {
         if (!tb->isSigned) return;
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: Computations on signed %2% bits not yet supported", node, tb->size);
+                     "%1%: Computations on signed %2% bits not yet supported", node, tb->size);
     }
-    ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Computations on %2% bits not supported",
-            node, tb->size);
+    ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                 "%1%: Computations on %2% bits not supported", node, tb->size);
 }
 
 void CodeGenInspector::emitAndConvertByteOrder(const IR::Expression *expr, cstring byte_order) {

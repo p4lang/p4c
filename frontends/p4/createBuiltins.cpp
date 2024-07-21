@@ -28,7 +28,7 @@ const IR::Node *CreateBuiltins::preorder(IR::P4Program *program) {
     if (vec.empty()) return program;
     if (vec.size() > 1) {
         ::p4c::error(ErrorType::ERR_MODEL, "Multiple declarations of %1%: %2% %3%",
-                P4::P4CoreLibrary::instance().noAction.str(), vec[0], vec[1]);
+                     P4::P4CoreLibrary::instance().noAction.str(), vec[0], vec[1]);
     }
     globalNoAction = vec[0];
     return program;
@@ -45,26 +45,26 @@ void CreateBuiltins::checkGlobalAction() {
     checked = true;
     if (globalNoAction == nullptr) {
         ::p4c::error(ErrorType::ERR_MODEL,
-                "Declaration of the action %1% not found; did you include core.p4?",
-                P4::P4CoreLibrary::instance().noAction.str());
+                     "Declaration of the action %1% not found; did you include core.p4?",
+                     P4::P4CoreLibrary::instance().noAction.str());
         return;
     }
     if (auto action = globalNoAction->to<IR::P4Action>()) {
         if (!action->parameters->empty()) {
             ::p4c::error(ErrorType::ERR_MODEL,
-                    "%1%: Expected an action with no parameters; did you include core.p4?",
-                    globalNoAction);
+                         "%1%: Expected an action with no parameters; did you include core.p4?",
+                         globalNoAction);
             return;
         }
         if (!action->body->empty()) {
             ::p4c::error(ErrorType::ERR_MODEL,
-                    "%1%: Expected an action with no body; did you include core.p4?",
-                    globalNoAction);
+                         "%1%: Expected an action with no body; did you include core.p4?",
+                         globalNoAction);
             return;
         }
     } else {
-        ::p4c::error(ErrorType::ERR_MODEL, "%1%: expected to be an action; did you include core.p4?",
-                globalNoAction);
+        ::p4c::error(ErrorType::ERR_MODEL,
+                     "%1%: expected to be an action; did you include core.p4?", globalNoAction);
         return;
     }
 }

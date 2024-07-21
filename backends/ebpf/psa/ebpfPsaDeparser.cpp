@@ -93,7 +93,8 @@ bool IngressDeparserPSA::build() {
     auto pl = controlBlock->container->type->applyParams;
 
     if (pl->size() != 7) {
-        ::p4c::error(ErrorType::ERR_EXPECTED, "Expected ingress deparser to have exactly 7 parameters");
+        ::p4c::error(ErrorType::ERR_EXPECTED,
+                     "Expected ingress deparser to have exactly 7 parameters");
         return false;
     }
 

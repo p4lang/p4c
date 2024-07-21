@@ -60,7 +60,7 @@ int postProcess(const TestgenOptions &testgenOptions, const TestBackEnd &testBac
     }
     if (testBackend.getCoverage() < testgenOptions.minCoverage) {
         ::p4c::error("The tests did not achieve requested coverage of %1%, the coverage is %2%.",
-                testgenOptions.minCoverage, testBackend.getCoverage());
+                     testgenOptions.minCoverage, testBackend.getCoverage());
     }
 
     return ::p4c::errorCount() == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

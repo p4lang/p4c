@@ -64,9 +64,9 @@ class ControlConverter : public Inspector {
                 if (!ket->is<IR::Type_Bits>() && !ket->is<IR::Type_Boolean>() &&
                     !ket->is<IR::Type_Error>())
                     ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                            "%1%: unsupporded key type %2%. "
-                            "Supported key types are be bit<> or boolean, or error.",
-                            expr, ket);
+                                 "%1%: unsupporded key type %2%. "
+                                 "Supported key types are be bit<> or boolean, or error.",
+                                 expr, ket);
 
                 auto match_type = getKeyMatchType(ke);
                 if (match_type == BMV2::MatchImplementation::selectorMatchTypeName) continue;
@@ -79,7 +79,7 @@ class ControlConverter : public Inspector {
                 if (match_type == corelib.lpmMatch.name) count_lpm++;
                 if (count_lpm > 1)
                     ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                            "multiple LPM keys in table %1% not supported", table);
+                                 "multiple LPM keys in table %1% not supported", table);
                 if (match_type != table_match_type) {
                     if (match_type == BMV2::MatchImplementation::rangeMatchTypeName)
                         table_match_type = BMV2::MatchImplementation::rangeMatchTypeName;
@@ -179,17 +179,17 @@ class ControlConverter : public Inspector {
                     if (type == nullptr) return result;
                     if (!type->is<IR::Type_Extern>()) {
                         ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                                "%1%: Unexpected type %2% for property. "
-                                "Must be extern.",
-                                ctrs, type);
+                                     "%1%: Unexpected type %2% for property. "
+                                     "Must be extern.",
+                                     ctrs, type);
                         return result;
                     }
                     auto te = type->to<IR::Type_Extern>();
                     if (te->name != "direct_counter" && te->name != "counter") {
                         ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                                "%1%: Unexpected type %2% for property. "
-                                "Must be 'counter' or 'direct_counter'.",
-                                ctrs, type);
+                                     "%1%: Unexpected type %2% for property. "
+                                     "Must be 'counter' or 'direct_counter'.",
+                                     ctrs, type);
                         return result;
                     }
                     auto jctr = new Util::JsonObject();
@@ -208,7 +208,7 @@ class ControlConverter : public Inspector {
                     auto decl = ctxt->refMap->getDeclaration(pe->path, true);
                     if (!decl->is<IR::Declaration_Instance>()) {
                         ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected an instance",
-                                decl->getNode());
+                                     decl->getNode());
                         return result;
                     }
                     cstring ctrname = decl->controlPlaneName();
@@ -216,9 +216,9 @@ class ControlConverter : public Inspector {
                     LOG3("Looking up " << ctrname);
                     if (it != ctxt->structure->directCounterMap.end()) {
                         ::p4c::error(ErrorType::ERR_INVALID,
-                                "%1%: Direct counters cannot be attached to multiple tables"
-                                " %2% and %3%",
-                                decl, it->second, table);
+                                     "%1%: Direct counters cannot be attached to multiple tables"
+                                     " %2% and %3%",
+                                     decl, it->second, table);
                         return result;
                     }
                     ctxt->structure->directCounterMap.emplace(ctrname, table);
@@ -253,7 +253,7 @@ class ControlConverter : public Inspector {
                 auto expr = dm->value->to<IR::ExpressionValue>()->expression;
                 if (!expr->is<IR::PathExpression>()) {
                     ::p4c::error(ErrorType::ERR_EXPECTED,
-                            "%1%: expected a reference to a meter declaration", expr);
+                                 "%1%: expected a reference to a meter declaration", expr);
                 } else {
                     auto pe = expr->to<IR::PathExpression>();
                     auto decl = ctxt->refMap->getDeclaration(pe->path, true);
@@ -262,19 +262,19 @@ class ControlConverter : public Inspector {
                     if (type->is<IR::Type_SpecializedCanonical>())
                         type = type->to<IR::Type_SpecializedCanonical>()->baseType;
                     if (!type->is<IR::Type_Extern>()) {
-                        ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: Unexpected type %2% for property",
-                                dm, type);
+                        ::p4c::error(ErrorType::ERR_UNEXPECTED,
+                                     "%1%: Unexpected type %2% for property", dm, type);
                         return result;
                     }
                     auto te = type->to<IR::Type_Extern>();
                     if (te->name != "direct_meter") {
-                        ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: Unexpected type %2% for property",
-                                dm, type);
+                        ::p4c::error(ErrorType::ERR_UNEXPECTED,
+                                     "%1%: Unexpected type %2% for property", dm, type);
                         return result;
                     }
                     if (!decl->is<IR::Declaration_Instance>()) {
                         ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected an instance",
-                                decl->getNode());
+                                     decl->getNode());
                         return result;
                     }
                     ctxt->structure->directMeterMap.setTable(decl, table);
@@ -301,7 +301,7 @@ class ControlConverter : public Inspector {
                 auto mce = a->expression->to<IR::MethodCallExpression>();
                 if (mce->arguments->size() > 0)
                     ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                            "%1%: actions in action list with arguments not supported", a);
+                                 "%1%: actions in action list with arguments not supported", a);
             }
             auto decl = ctxt->refMap->getDeclaration(a->getPath(), true);
             BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", a);
@@ -379,9 +379,10 @@ class ControlConverter : public Inspector {
             table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
         if (defact != nullptr) {
             if (!simple) {
-                ::p4c::warning(ErrorType::WARN_UNSUPPORTED,
-                          "Target does not support default_action for %1% (due to action profiles)",
-                          table);
+                ::p4c::warning(
+                    ErrorType::WARN_UNSUPPORTED,
+                    "Target does not support default_action for %1% (due to action profiles)",
+                    table);
                 return result;
             }
 
@@ -422,7 +423,7 @@ class ControlConverter : public Inspector {
                         fields->append(repr);
                     } else {
                         ::p4c::error(ErrorType::ERR_EXPECTED,
-                                "%1%: argument must evaluate to a constant integer", a);
+                                     "%1%: argument must evaluate to a constant integer", a);
                         return result;
                     }
                 }
@@ -468,8 +469,8 @@ class ControlConverter : public Inspector {
                         key->emplace("key",
                                      stringRepr(k->to<IR::BoolLiteral>()->value ? 1 : 0, k8));
                     else
-                        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupported exact key expression",
-                                k);
+                        ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+                                     "%1%: unsupported exact key expression", k);
                 } else if (matchType == corelib.ternaryMatch.name) {
                     if (k->is<IR::Mask>()) {
                         auto km = k->to<IR::Mask>();
@@ -483,7 +484,7 @@ class ControlConverter : public Inspector {
                         key->emplace("mask", stringRepr(0, k8));
                     } else {
                         ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                                "%1%: unsupported ternary key expression", k);
+                                     "%1%: unsupported ternary key expression", k);
                     }
                 } else if (matchType == corelib.lpmMatch.name) {
                     if (k->is<IR::Mask>()) {
@@ -499,7 +500,8 @@ class ControlConverter : public Inspector {
                             static_cast<unsigned long>(km->right->to<IR::Constant>()->value);
                         auto len = trailing_zeros(mask, keyWidth);
                         if (len + count_ones(mask) != keyWidth)  // any remaining 0s in the prefix?
-                            ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid mask for LPM key", k);
+                            ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid mask for LPM key",
+                                         k);
                         else
                             key->emplace("prefix_length", keyWidth - len);
                     } else if (k->is<IR::Constant>()) {
@@ -509,8 +511,8 @@ class ControlConverter : public Inspector {
                         key->emplace("key", stringRepr(0, k8));
                         key->emplace("prefix_length", 0);
                     } else {
-                        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupported LPM key expression",
-                                k);
+                        ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+                                     "%1%: unsupported LPM key expression", k);
                     }
                 } else if (matchType == "range") {
                     if (k->is<IR::Range>()) {
@@ -524,8 +526,8 @@ class ControlConverter : public Inspector {
                         key->emplace("start", stringRepr(0, k8));
                         key->emplace("end", stringRepr((1 << keyWidth) - 1, k8));  // 2^N -1
                     } else {
-                        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported range key expression",
-                                k);
+                        ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+                                     "%1% unsupported range key expression", k);
                     }
                 } else if (matchType == "optional") {
                     // Table key fields with match_kind optional with
@@ -543,11 +545,11 @@ class ControlConverter : public Inspector {
                         key->emplace("mask", stringRepr(0, k8));
                     } else {
                         ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                                "%1%: unsupported optional key expression", k);
+                                     "%1%: unsupported optional key expression", k);
                     }
                 } else {
-                    ::p4c::error(ErrorType::ERR_UNKNOWN, "unknown key match type '%2%' for key %1%", k,
-                            matchType);
+                    ::p4c::error(ErrorType::ERR_UNKNOWN, "unknown key match type '%2%' for key %1%",
+                                 k, matchType);
                 }
                 matchKeys->append(key);
                 keyIndex++;
@@ -556,7 +558,8 @@ class ControlConverter : public Inspector {
             auto action = new Util::JsonObject();
             auto actionRef = e->getAction();
             if (!actionRef->is<IR::MethodCallExpression>())
-                ::p4c::error(ErrorType::ERR_INVALID, "Invalid action '%1%' in entries list.", actionRef);
+                ::p4c::error(ErrorType::ERR_INVALID, "Invalid action '%1%' in entries list.",
+                             actionRef);
             auto actionCall = actionRef->to<IR::MethodCallExpression>();
             auto method = actionCall->method->to<IR::PathExpression>()->path;
             auto decl = ctxt->refMap->getDeclaration(method, true);
@@ -574,11 +577,12 @@ class ControlConverter : public Inspector {
             if (priorityAnnotation != nullptr) {
                 if (priorityAnnotation->expr.size() > 1)
                     ::p4c::error(ErrorType::ERR_INVALID, "Invalid priority value %1%",
-                            priorityAnnotation->expr);
+                                 priorityAnnotation->expr);
                 auto priValue = priorityAnnotation->expr.front();
                 if (!priValue->is<IR::Constant>())
-                    ::p4c::error(ErrorType::ERR_INVALID, "Invalid priority value %1%; must be constant.",
-                            priorityAnnotation->expr);
+                    ::p4c::error(ErrorType::ERR_INVALID,
+                                 "Invalid priority value %1%; must be constant.",
+                                 priorityAnnotation->expr);
                 entry->emplace("priority", priValue->to<IR::Constant>()->value);
             } else {
                 entry->emplace("priority", entryPriority);
@@ -599,7 +603,8 @@ class ControlConverter : public Inspector {
             return mt->name.name;
         }
 
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: match type not supported on this target", mt);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: match type not supported on this target",
+                     mt);
         return "invalid"_cs;
     }
     /// Return 'true' if the table is 'simple'
@@ -613,7 +618,7 @@ class ControlConverter : public Inspector {
 
         if (!implementation->value->is<IR::ExpressionValue>()) {
             ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected expression for property",
-                    implementation);
+                         implementation);
             return false;
         }
         auto propv = implementation->value->to<IR::ExpressionValue>();
@@ -628,7 +633,7 @@ class ControlConverter : public Inspector {
                                              ctxt->refMap, ctxt->typeMap);
             if (!cc->is<P4::ExternConstructorCall>()) {
                 ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected extern object for property",
-                        implementation);
+                             implementation);
                 return false;
             }
             auto ecc = cc->to<P4::ExternConstructorCall>();
@@ -667,8 +672,8 @@ class ControlConverter : public Inspector {
                 auto hash = arguments->at(0)->expression;
                 auto ei = P4::EnumInstance::resolve(hash, ctxt->typeMap);
                 if (ei == nullptr) {
-                    ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: hash must be a constant on this target",
-                            hash);
+                    ::p4c::error(ErrorType::ERR_EXPECTED,
+                                 "%1%: hash must be a constant on this target", hash);
                 } else {
                     cstring algo = ei->name;
                     selector->emplace("algo", algo);
@@ -696,14 +701,15 @@ class ControlConverter : public Inspector {
             auto pathe = propv->expression->to<IR::PathExpression>();
             auto decl = ctxt->refMap->getDeclaration(pathe->path, true);
             if (!decl->is<IR::Declaration_Instance>()) {
-                ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected a reference to an instance", pathe);
+                ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected a reference to an instance",
+                             pathe);
                 return false;
             }
             apname = decl->controlPlaneName();
             auto dcltype = ctxt->typeMap->getType(pathe, true);
             if (!dcltype->is<IR::Type_Extern>()) {
                 ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type for implementation",
-                        dcltype);
+                             dcltype);
                 return false;
             }
             auto type_extern_name = dcltype->to<IR::Type_Extern>()->name;
@@ -715,7 +721,7 @@ class ControlConverter : public Inspector {
                 table->emplace("type", "indirect_ws");
             } else {
                 ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type for implementation",
-                        dcltype);
+                             dcltype);
                 return false;
             }
             isSimpleTable = false;

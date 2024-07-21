@@ -38,7 +38,7 @@ class ValidateMatchAnnotations final : public Inspector {
         if (!findContext<IR::StructField>()) return;
         if (annotation->expr.size() != 1)
             ::p4c::error(ErrorType::ERR_INVALID, "%1%: annotation must have exactly 1 argument",
-                    annotation);
+                         annotation);
         auto e0 = annotation->expr.at(0);
         auto type = typeMap->getType(e0, true);
         if (type == nullptr) return;

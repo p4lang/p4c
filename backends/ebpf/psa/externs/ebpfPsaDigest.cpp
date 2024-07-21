@@ -144,7 +144,7 @@ void EBPFDigestPSA::processMethod(CodeBuilder *builder, cstring method,
         arg->apply(dg);
     } else {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupported method call for Digest",
-                expr->method);
+                     expr->method);
     }
 }
 

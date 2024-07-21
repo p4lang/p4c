@@ -181,13 +181,13 @@ bool CompilerOptions::enable_intrinsic_metadata_fix() { return true; }
 bool CompilerOptions::validateOptions() const {
     if (!p4RuntimeFile.isNullOrEmpty()) {
         ::p4c::warning(ErrorType::WARN_DEPRECATED,
-                  "'--p4runtime-file' and '--p4runtime-format' are deprecated, "
-                  "consider using '--p4runtime-files' instead");
+                       "'--p4runtime-file' and '--p4runtime-format' are deprecated, "
+                       "consider using '--p4runtime-files' instead");
     }
     if (!p4RuntimeEntriesFile.isNullOrEmpty()) {
         ::p4c::warning(ErrorType::WARN_DEPRECATED,
-                  "'--p4runtime-entries-file' is deprecated, "
-                  "consider using '--p4runtime-entries-files' instead");
+                       "'--p4runtime-entries-file' is deprecated, "
+                       "consider using '--p4runtime-entries-files' instead");
     }
     return ParserOptions::validateOptions();
 }

@@ -81,10 +81,11 @@ bool CFG::dfs(Node *node, std::set<Node *> &visited, std::set<const IR::P4Table 
     if (node->is<TableNode>()) {
         table = node->to<TableNode>()->table;
         if (stack.find(table) != stack.end()) {
-            ::p4c::error(ErrorType::ERR_INVALID,
-                    "Program can not be implemented on this target since it contains a path from "
-                    "table %1% back to itself",
-                    table);
+            ::p4c::error(
+                ErrorType::ERR_INVALID,
+                "Program can not be implemented on this target since it contains a path from "
+                "table %1% back to itself",
+                table);
             return false;
         }
     }
@@ -135,9 +136,9 @@ bool CFG::checkMergeable(std::set<TableNode *> nodes) const {
         bool same = first->successors.checkSame(tn->successors);
         if (!same) {
             ::p4c::error(ErrorType::ERR_INVALID,
-                    "Program is not supported by this target, because "
-                    "table %1% has multiple successors",
-                    tn->table);
+                         "Program is not supported by this target, because "
+                         "table %1% has multiple successors",
+                         tn->table);
             return false;
         }
     }

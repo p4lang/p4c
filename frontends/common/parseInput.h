@@ -91,7 +91,7 @@ const IR::P4Program *parseP4File(const ParserOptions &options) {
 
     if (::p4c::errorCount() > 0) {
         ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1% errors encountered, aborting compilation",
-                ::p4c::errorCount());
+                     ::p4c::errorCount());
         return nullptr;
     }
     BUG_CHECK(result != nullptr, "Parsing failed, but we didn't report an error");

@@ -87,7 +87,8 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                     LOG3(log_indent << "heap after " << v->name() << ": in use " << n4(mem)
                                     << "B, max " << n4(maxmem) << "B");
                 }
-                if (stop_on_error && ::p4c::errorCount() > initial_error_count) early_exit_flag = true;
+                if (stop_on_error && ::p4c::errorCount() > initial_error_count)
+                    early_exit_flag = true;
                 if (program == nullptr) early_exit_flag = true;
             } catch (Backtrack::trigger::type_t &trig_type) {
                 throw Backtrack::trigger(trig_type);

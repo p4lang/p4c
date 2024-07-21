@@ -59,7 +59,7 @@ void ParserOptions::closeFile(FILE *file) {
     }
     if (exitCode != 0) {
         ::p4c::error(ErrorType::ERR_IO, "Preprocessor returned exit code %d; aborting compilation",
-                exitCode);
+                     exitCode);
         return;
     }
 }
@@ -213,7 +213,8 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
         [](const char *diagnostic) {
             if (diagnostic) {
                 if (ErrorCatalog::getCatalog().isError(diagnostic)) {
-                    ::p4c::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
+                    ::p4c::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.",
+                                 diagnostic);
                     return false;
                 }
                 P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Ignore);
@@ -231,7 +232,8 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
         [](const char *diagnostic) {
             if (diagnostic) {
                 if (ErrorCatalog::getCatalog().isError(diagnostic)) {
-                    ::p4c::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
+                    ::p4c::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.",
+                                 diagnostic);
                     return false;
                 }
                 P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Info);
@@ -244,7 +246,8 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
         [](const char *diagnostic) {
             if (diagnostic) {
                 if (ErrorCatalog::getCatalog().isError(diagnostic)) {
-                    ::p4c::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
+                    ::p4c::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.",
+                                 diagnostic);
                     return false;
                 }
                 P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Warn);
@@ -341,7 +344,7 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
 void ParserOptions::setInputFile() {
     if (remainingOptions.size() > 1) {
         ::p4c::error(ErrorType::ERR_OVERLIMIT, "Only one input file must be specified: %s",
-                cstring::join(remainingOptions.begin(), remainingOptions.end(), ","));
+                     cstring::join(remainingOptions.begin(), remainingOptions.end(), ","));
         usage();
         exit(1);
     } else if (remainingOptions.size() == 0) {
@@ -486,9 +489,9 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
             match = std::regex_search(name.begin(), name.end(), s_regex);
         } catch (const std::regex_error &e) {
             ::p4c::error(ErrorType::ERR_INVALID,
-                    "Malformed toP4 regex string \"%s\".\n"
-                    "The regex matcher follows ECMAScript syntax.",
-                    s);
+                         "Malformed toP4 regex string \"%s\".\n"
+                         "The regex matcher follows ECMAScript syntax.",
+                         s);
             exit(1);
         }
         if (match) {
@@ -517,7 +520,8 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
 
 bool ParserOptions::isAnnotationDisabled(const IR::Annotation *a) const {
     if (disabledAnnotations.count(a->name.name) > 0) {
-        ::p4c::warning(ErrorType::WARN_IGNORE, "%1% is ignored because it was explicitly disabled", a);
+        ::p4c::warning(ErrorType::WARN_IGNORE, "%1% is ignored because it was explicitly disabled",
+                       a);
         return true;
     }
     return false;

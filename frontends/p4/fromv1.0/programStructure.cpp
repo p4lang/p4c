@@ -315,7 +315,8 @@ void ProgramStructure::createStructures() {
         auto h = headers.get(it.first->name);
         if (h != nullptr)
             ::p4c::warning(ErrorType::ERR_DUPLICATE,
-                      "%1%: header and metadata instances %2% with the same name", it.first, h);
+                           "%1%: header and metadata instances %2% with the same name", it.first,
+                           h);
         auto ht = type->to<IR::Type_StructLike>();
         auto path = new IR::Path(type_name);
         auto tn = new IR::Type_Name(ht->name.srcInfo, path);
@@ -404,8 +405,9 @@ const IR::Statement *ProgramStructure::convertParserStatement(const IR::Expressi
             auto destType = dest->type;
             CHECK_NULL(destType);
             if (!destType->is<IR::Type_Header>()) {
-                ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid argument. Expected a header not %2%",
-                        primitive, destType->toString());
+                ::p4c::error(ErrorType::ERR_INVALID,
+                             "%1%: invalid argument. Expected a header not %2%", primitive,
+                             destType->toString());
                 return nullptr;
             }
             auto finalDestType =
@@ -450,8 +452,8 @@ const IR::PathExpression *ProgramStructure::getState(IR::ID dest) {
             if (ingress != nullptr) {
                 if (ingress != ctrl)
                     ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                            "Parser exits to two different control blocks: %1% and %2%", dest,
-                            ingressReference);
+                                 "Parser exits to two different control blocks: %1% and %2%", dest,
+                                 ingressReference);
             } else {
                 ingress = ctrl;
                 ingressReference = dest;
@@ -546,8 +548,8 @@ const IR::ParserState *ProgramStructure::convertParser(
                 auto value_set = value_sets.get(first->path->name);
                 if (!value_set) {
                     ::p4c::error(ErrorType::ERR_NOT_FOUND,
-                            "Unable to find declaration for parser_value_set %s",
-                            first->path->name);
+                                 "Unable to find declaration for parser_value_set %s",
+                                 first->path->name);
                     return nullptr;
                 }
 
@@ -560,20 +562,20 @@ const IR::ParserState *ProgramStructure::convertParser(
                 if (sizeAnnotation) {
                     if (sizeAnnotation->expr.size() != 1) {
                         ::p4c::error(ErrorType::ERR_INVALID,
-                                "@size should be an integer for declaration %1%", value_set);
+                                     "@size should be an integer for declaration %1%", value_set);
                         return nullptr;
                     }
                     sizeConstant = sizeAnnotation->expr[0]->to<IR::Constant>();
                     if (sizeConstant == nullptr || !sizeConstant->fitsInt()) {
                         ::p4c::error(ErrorType::ERR_INVALID,
-                                "@size should be an integer for declaration %1%", value_set);
+                                     "@size should be an integer for declaration %1%", value_set);
                         return nullptr;
                     }
                 } else {
                     ::p4c::warning(ErrorType::WARN_MISSING,
-                              "%1%: parser_value_set has no @parser_value_set_size annotation."
-                              "Using default size 4.",
-                              c);
+                                   "%1%: parser_value_set has no @parser_value_set_size annotation."
+                                   "Using default size 4.",
+                                   c);
                     sizeConstant = new IR::Constant(4);
                 }
                 auto annos = addGlobalNameAnnotation(value_set->name, value_set->annotations);
@@ -589,8 +591,8 @@ const IR::ParserState *ProgramStructure::convertParser(
                     auto c = v.second->to<IR::Constant>();
                     CHECK_NULL(c);  // this is enforced elsewhere
                     if (!c->fitsInt() || c->asInt() != -1) {
-                        ::p4c::error(ErrorType::ERR_INVALID, "%1%: masks not supported for value sets",
-                                c);
+                        ::p4c::error(ErrorType::ERR_INVALID,
+                                     "%1%: masks not supported for value sets", c);
                         continue;
                     }
                     auto sc = new IR::SelectCase(c->srcInfo, v.first, deststate);
@@ -657,7 +659,7 @@ void ProgramStructure::createParser() {
 
     if (ingressReference.name.isNullOrEmpty())
         ::p4c::error(ErrorType::ERR_INSUFFICIENT,
-                "No transition from a parser to ingress pipeline found");
+                     "No transition from a parser to ingress pipeline found");
 }
 
 void ProgramStructure::include(cstring filename, cstring ppoptions) {
@@ -741,7 +743,8 @@ class HeaderRepresentation {
                         stackNextElement[hdr] = new IR::Member(hdr, IR::ID("next"));
                     return stackNextElement[hdr];
                 } else {
-                    ::p4c::error(ErrorType::ERR_EXPRESSION, "%1%: Illegal extract stack expression", pe);
+                    ::p4c::error(ErrorType::ERR_EXPRESSION, "%1%: Illegal extract stack expression",
+                                 pe);
                     return hdr;
                 }
             }
@@ -825,9 +828,10 @@ void ProgramStructure::createDeparserInternal(
     std::vector<const IR::Expression *> sortedHeaders;
     bool loop = headerOrder.sccSort(startHeader, sortedHeaders);
     if (loop)
-        ::p4c::warning(ErrorType::WARN_ORDERING,
-                  "%1%: the order of headers in deparser is not uniquely determined by parser!",
-                  startHeader);
+        ::p4c::warning(
+            ErrorType::WARN_ORDERING,
+            "%1%: the order of headers in deparser is not uniquely determined by parser!",
+            startHeader);
 
     auto params = new IR::ParameterList;
     params->push_back(packetOut);
@@ -886,7 +890,7 @@ const IR::Declaration_Instance *ProgramStructure::convertActionProfile(
     auto *action_selector = action_selectors.get(action_profile->selector.name);
     if (!action_profile->selector.name.isNullOrEmpty() && !action_selector)
         ::p4c::error(ErrorType::ERR_NOT_FOUND, "Cannot locate action selector %1%",
-                action_profile->selector);
+                     action_profile->selector);
     const IR::Type *type = nullptr;
     auto args = new IR::Vector<IR::Argument>();
     auto annos = addGlobalNameAnnotation(action_profile->name);
@@ -993,7 +997,7 @@ const IR::P4Table *ProgramStructure::convertTable(const IR::V1Table *table, cstr
             auto flc = field_list_calculations.get(action_selector->key.name);
             if (flc == nullptr) {
                 ::p4c::error(ErrorType::ERR_NOT_FOUND, "Cannot locate field list %1%",
-                        action_selector->key);
+                             action_selector->key);
             } else {
                 auto fl = getFieldLists(flc);
                 if (fl != nullptr) {
@@ -1117,9 +1121,9 @@ const IR::Expression *ProgramStructure::convertHashAlgorithms(const IR::NameList
     if (algorithm->names.size() > 1) {
 #if 1
         ::p4c::warning(ErrorType::WARN_UNSUPPORTED,
-                  "%s: Multiple algorithms in a field list not supported in P4_16 -- using "
-                  "only the first",
-                  algorithm->names[0].srcInfo);
+                       "%s: Multiple algorithms in a field list not supported in P4_16 -- using "
+                       "only the first",
+                       algorithm->names[0].srcInfo);
 #else
         auto rv = new IR::ListExpression({});
         for (auto &alg : algorithm->names) rv->push_back(convertHashAlgorithm(alg));
@@ -1135,7 +1139,7 @@ static bool sameBitsType(const IR::Node *errorPosition, const IR::Type *left,
     if (const auto *leftBitsType = left->to<IR::Type_Bits>())
         return leftBitsType->operator==(right->as<IR::Type_Bits>());
     ::p4c::error(ErrorType::ERR_TYPE_ERROR, "%1%: operation only defined for bit/int types",
-            errorPosition);
+                 errorPosition);
     return true;  // to prevent inserting a cast
 }
 
@@ -1500,14 +1504,15 @@ static const IR::Constant *push_pop_size(ExpressionConverter &conv, const IR::Pr
     auto op1 = prim->operands.at(1);
     auto count = conv.convert(op1);
     if (!count->is<IR::Constant>()) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: Only %2% with a constant value is supported", op1,
-                prim->name);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: Only %2% with a constant value is supported",
+                     op1, prim->name);
         return new IR::Constant(1);
     }
     auto cst = count->to<IR::Constant>();
     auto number = cst->asInt();
     if (number < 0) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: %2% requires a positive amount", op1, prim->name);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: %2% requires a positive amount", op1,
+                     prim->name);
         return new IR::Constant(1);
     }
     if (number > 0xFFFF) {
@@ -1714,8 +1719,8 @@ CONVERT_PRIMITIVE(execute_meter, ) {  // NOLINT(whitespace/parens), remove with 
         return nullptr;
     }
     if (!meter->implementation.name.isNullOrEmpty())
-        ::p4c::warning(ErrorType::WARN_IGNORE_PROPERTY, "Ignoring `implementation' field of meter %1%",
-                  meter);
+        ::p4c::warning(ErrorType::WARN_IGNORE_PROPERTY,
+                       "Ignoring `implementation' field of meter %1%", meter);
     auto newname = structure->meters.get(meter);
     auto meterref = new IR::PathExpression(newname);
     auto methodName = structure->v1model.meter.executeMeter.Id(primitive->srcInfo, primitive->name);
@@ -1743,7 +1748,7 @@ CONVERT_PRIMITIVE(modify_field_with_hash_based_offset, ) {  // NOLINT(whitespace
     auto flc = structure->getFieldListCalculation(primitive->operands.at(2));
     if (flc == nullptr) {
         ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: Expected a field_list_calculation",
-                primitive->operands.at(2));
+                     primitive->operands.at(2));
         return nullptr;
     }
     auto ttype = IR::Type_Bits::get(flc->output_width);
@@ -1947,8 +1952,8 @@ const IR::P4Action *ProgramStructure::convertAction(const IR::ActionFunction *ac
             direction = p->write ? IR::Direction::InOut : IR::Direction::None;
         auto type = p->type;
         if (type == IR::Type_Unknown::get()) {
-            ::p4c::warning(ErrorType::WARN_TYPE_INFERENCE, "Could not infer type for %1%, using bit<8>",
-                      p);
+            ::p4c::warning(ErrorType::WARN_TYPE_INFERENCE,
+                           "Could not infer type for %1%, using bit<8>", p);
             type = IR::Type_Bits::get(8);
         } else if (type->is<IR::Type_StructLike>()) {
             auto path = new IR::Path(type->to<IR::Type_StructLike>()->name);
@@ -2051,7 +2056,7 @@ const IR::Declaration_Instance *ProgramStructure::convert(const IR::Register *re
         regElementType = new IR::Type_Name(new IR::Path(newName));
     } else {
         ::p4c::warning(ErrorType::WARN_MISSING, "%1%: Register width unspecified; using %2%", reg,
-                  defaultRegisterWidth);
+                       defaultRegisterWidth);
         regElementType = IR::Type_Bits::get(defaultRegisterWidth);
     }
 
@@ -2192,7 +2197,8 @@ const IR::P4Control *ProgramStructure::convertControl(const IR::V1Control *contr
             }
             auto tbl = tables.get(c.first->table.name);
             if (tbl == nullptr) {
-                ::p4c::error(ErrorType::ERR_NOT_FOUND, "Cannot locate table %1%", c.first->table.name);
+                ::p4c::error(ErrorType::ERR_NOT_FOUND, "Cannot locate table %1%",
+                             c.first->table.name);
                 return nullptr;
             }
             if (std::find(usedTables.begin(), usedTables.end(), tbl) != usedTables.end()) {
@@ -2222,7 +2228,8 @@ const IR::P4Control *ProgramStructure::convertControl(const IR::V1Control *contr
             }
             auto tbl = tables.get(m.first->table.name);
             if (tbl == nullptr) {
-                ::p4c::error(ErrorType::ERR_NOT_FOUND, "Cannot locate table %1%", m.first->table.name);
+                ::p4c::error(ErrorType::ERR_NOT_FOUND, "Cannot locate table %1%",
+                             m.first->table.name);
                 return nullptr;
             }
             if (std::find(usedTables.begin(), usedTables.end(), tbl) != usedTables.end()) {
@@ -2430,7 +2437,8 @@ const IR::FieldListCalculation *ProgramStructure::getFieldListCalculation(const 
 const IR::FieldList *ProgramStructure::getFieldLists(const IR::FieldListCalculation *flc) {
     // FIXME -- this duplicates P4_14::TypeCheck.  Why not just use flc->input_fields?
     if (flc->input->names.size() == 0) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: field_list_calculation with zero inputs", flc);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: field_list_calculation with zero inputs",
+                     flc);
         return nullptr;
     }
     if (flc->input->names.size() == 1) {

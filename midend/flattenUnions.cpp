@@ -262,10 +262,11 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::ArrayIndex *e) {
         unsigned stackSize = stack->size->to<IR::Constant>()->asUnsigned();
         if (stack->elementType->is<IR::Type_HeaderUnion>()) {
             if (!e->right->is<IR::Constant>())
-                ::p4c::error(ErrorType::ERR_INVALID,
-                        "Target expects constant array indices for accessing header union stack "
-                        "elements, %1% is not a constant",
-                        e->right);
+                ::p4c::error(
+                    ErrorType::ERR_INVALID,
+                    "Target expects constant array indices for accessing header union stack "
+                    "elements, %1% is not a constant",
+                    e->right);
             unsigned cst = e->right->to<IR::Constant>()->asUnsigned();
             if (cst >= stackSize)
                 ::p4c::error(ErrorType::ERR_OVERLIMIT, "Array index out of bound for %1%", e);

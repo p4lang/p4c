@@ -60,7 +60,7 @@ const IR::Type *DoBindTypeVariables::getVarValue(const IR::Type_Var *var,
     auto type = typeMap->getSubstitution(var);
     if (type == nullptr) {
         ::p4c::error(ErrorType::ERR_TYPE_ERROR, "%1%: could not infer a type for variable %2%",
-                errorPosition, var);
+                     errorPosition, var);
         return nullptr;
     }
     auto result = validateType(type, typeMap, errorPosition, this);

@@ -129,7 +129,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Type_Varbits *type) {
         if (auto cst = type->expression->to<IR::Constant>()) {
             type->size = cst->asInt();
             type->expression = nullptr;
-            if (type->size < 0) ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
+            if (type->size < 0)
+                ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
         } else {
             ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", type->expression);
         }
@@ -142,7 +143,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Declaration_Constant *d) {
     if (init == nullptr) {
         if (typesKnown)
             ::p4c::error(ErrorType::ERR_INVALID, "%1%: Cannot evaluate initializer for constant",
-                    d->initializer);
+                         d->initializer);
         return d;
     }
     if (!typesKnown) {
@@ -154,8 +155,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Declaration_Constant *d) {
             if (auto dtype = d->type->to<IR::Type_Bits>()) {
                 auto cstBits = cst->type->to<IR::Type_Bits>();
                 if (cstBits && !(*dtype == *cstBits))
-                    ::p4c::error(ErrorType::ERR_TYPE_ERROR, "%1%: initializer has wrong type %2%", d,
-                            cst->type);
+                    ::p4c::error(ErrorType::ERR_TYPE_ERROR, "%1%: initializer has wrong type %2%",
+                                 d, cst->type);
                 else if (cst->type->is<IR::Type_InfInt>())
                     init = new IR::Constant(init->srcInfo, d->type, cst->value, cst->base);
             } else if (!d->type->is<IR::Type_InfInt>()) {
@@ -211,7 +212,8 @@ const IR::Node *DoConstantFolding::preorder(IR::ArrayIndex *e) {
         auto init = getConstant(e->right);
         if (init == nullptr) {
             if (typesKnown)
-                ::p4c::error(ErrorType::ERR_INVALID, "%1%: Index must evaluate to a constant", e->right);
+                ::p4c::error(ErrorType::ERR_INVALID, "%1%: Index must evaluate to a constant",
+                             e->right);
             return e;
         }
         if (auto cst = init->to<IR::Constant>()) {
@@ -287,9 +289,9 @@ const IR::Node *DoConstantFolding::postorder(IR::Cmpl *e) {
     const IR::Type *t = op->type;
     if (t->is<IR::Type_InfInt>()) {
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1%: Operation cannot be applied to values with unknown width;\n"
-                "please specify width explicitly",
-                e);
+                     "%1%: Operation cannot be applied to values with unknown width;\n"
+                     "please specify width explicitly",
+                     e);
         return e;
     }
     auto tb = t->to<IR::Type_Bits>();
@@ -396,7 +398,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Geq *e) {
 const IR::Node *DoConstantFolding::postorder(IR::Div *e) {
     return binary(e, [e](big_int a, big_int b) -> big_int {
         if (a < 0 || b < 0) {
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: Division is not defined for negative numbers", e);
+            ::p4c::error(ErrorType::ERR_INVALID,
+                         "%1%: Division is not defined for negative numbers", e);
             return 0;
         }
         if (b == 0) {
@@ -410,7 +413,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Div *e) {
 const IR::Node *DoConstantFolding::postorder(IR::Mod *e) {
     return binary(e, [e](big_int a, big_int b) -> big_int {
         if (a < 0 || b < 0) {
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: Modulo is not defined for negative numbers", e);
+            ::p4c::error(ErrorType::ERR_INVALID, "%1%: Modulo is not defined for negative numbers",
+                         e);
             return 0;
         }
         if (b == 0) {
@@ -525,8 +529,8 @@ const IR::Node *DoConstantFolding::binary(const IR::Operation_Binary *e,
     if (!lunk && !runk) {
         // both typed
         if (!ltb->operator==(*rtb)) {
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: operands have different types: %2% and %3%", e,
-                    ltb->toString(), rtb->toString());
+            ::p4c::error(ErrorType::ERR_INVALID, "%1%: operands have different types: %2% and %3%",
+                         e, ltb->toString(), rtb->toString());
             return e;
         }
         resultType = rtb;
@@ -597,8 +601,8 @@ const IR::Node *DoConstantFolding::postorder(IR::LOr *e) {
 
 static bool overflowWidth(const IR::Node *node, int width) {
     if (width > P4CContext::getConfig().maximumWidthSupported()) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%", node,
-                P4CContext::getConfig().maximumWidthSupported());
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%",
+                     node, P4CContext::getConfig().maximumWidthSupported());
         return true;
     }
     return false;
@@ -609,14 +613,14 @@ const IR::Node *DoConstantFolding::postorder(IR::Slice *e) {
     const IR::Expression *lsb = getConstant(e->e2);
     if (msb == nullptr) {
         if (typesKnown)
-            ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: slice indexes must be compile-time constants",
-                    e->e1);
+            ::p4c::error(ErrorType::ERR_EXPECTED,
+                         "%1%: slice indexes must be compile-time constants", e->e1);
         return e;
     }
     if (lsb == nullptr) {
         if (typesKnown)
-            ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: slice indexes must be compile-time constants",
-                    e->e2);
+            ::p4c::error(ErrorType::ERR_EXPECTED,
+                         "%1%: slice indexes must be compile-time constants", e->e2);
         return e;
     }
 
@@ -642,11 +646,13 @@ const IR::Node *DoConstantFolding::postorder(IR::Slice *e) {
     int m = cmsb->asInt();
     int l = clsb->asInt();
     if (m < l) {
-        ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: bit slicing should be specified as [msb:lsb]", e);
+        ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: bit slicing should be specified as [msb:lsb]",
+                     e);
         return e;
     }
     if (l < 0) {
-        ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected slice indexes to be non-negative", e->e2);
+        ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected slice indexes to be non-negative",
+                     e->e2);
         return e;
     }
     if (overflowWidth(e, m) || overflowWidth(e, l)) return e;
@@ -783,7 +789,8 @@ const IR::Node *DoConstantFolding::shift(const IR::Operation_Binary *e) {
 
     CHECK_NULL(shift_amt);
     if (shift_amt->value < 0) {
-        ::p4c::error(ErrorType::ERR_INVALID, "%1%: Shifts with negative amounts are not permitted", e);
+        ::p4c::error(ErrorType::ERR_INVALID, "%1%: Shifts with negative amounts are not permitted",
+                     e);
         return e;
     }
 
@@ -806,7 +813,7 @@ const IR::Node *DoConstantFolding::shift(const IR::Operation_Binary *e) {
     if (tb != nullptr) {
         if (((unsigned)tb->width_bits() <= shift) && warnings)
             ::p4c::warning(ErrorType::WARN_OVERFLOW, "%1%: Shifting %2%-bit value with %3%", e,
-                      tb->width_bits(), shift);
+                           tb->width_bits(), shift);
     }
 
     if (e->is<IR::Shl>())
@@ -849,8 +856,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
         if (const auto *constant = expr->to<IR::Constant>()) {
             const auto *ctype = constant->type;
             if (!ctype->is<IR::Type_Bits>() && !ctype->is<IR::Type_InfInt>()) {
-                ::p4c::error(ErrorType::ERR_INVALID, "%1%: Cannot cast %1% to arbitrary presion integer",
-                        ctype);
+                ::p4c::error(ErrorType::ERR_INVALID,
+                             "%1%: Cannot cast %1% to arbitrary presion integer", ctype);
                 return e;
             }
             return new IR::Constant(e->srcInfo, etype, constant->value, constant->base);
@@ -863,12 +870,13 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
             if (ctype->is<IR::Type_Bits>()) {
                 auto tb = ctype->to<IR::Type_Bits>();
                 if (tb->isSigned) {
-                    ::p4c::error(ErrorType::ERR_INVALID, "%1%: Cannot cast signed value to boolean", e);
+                    ::p4c::error(ErrorType::ERR_INVALID, "%1%: Cannot cast signed value to boolean",
+                                 e);
                     return e;
                 }
                 if (tb->width_bits() != 1) {
-                    ::p4c::error(ErrorType::ERR_INVALID, "%1%: Only bit<1> values can be cast to bool",
-                            e);
+                    ::p4c::error(ErrorType::ERR_INVALID,
+                                 "%1%: Only bit<1> values can be cast to bool", e);
                     return e;
                 }
             } else {
@@ -878,7 +886,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
 
             int v = cst->asInt();
             if (v < 0 || v > 1) {
-                ::p4c::error(ErrorType::ERR_INVALID, "%1%: Only 0 and 1 can be cast to booleans", e);
+                ::p4c::error(ErrorType::ERR_INVALID, "%1%: Only 0 and 1 can be cast to booleans",
+                             e);
                 return e;
             }
             return new IR::BoolLiteral(e->srcInfo, IR::Type_Boolean::get(), v == 1);
@@ -911,7 +920,7 @@ DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression *k
         auto key = getConstant(keySet);
         if (key == nullptr) {
             ::p4c::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant",
-                    keySet);
+                         keySet);
             return Result::No;
         }
         BUG_CHECK(key->is<IR::BoolLiteral>(), "%1%: expected a boolean", key);
@@ -925,7 +934,7 @@ DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression *k
         auto key = getConstant(keySet);
         if (key == nullptr) {
             ::p4c::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant",
-                    keySet);
+                         keySet);
             return Result::No;
         }
         auto sel = getConstant(select);
@@ -945,13 +954,13 @@ DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression *k
         auto left = getConstant(range->left);
         if (left == nullptr) {
             ::p4c::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
-                    range->left);
+                         range->left);
             return Result::DontKnow;
         }
         auto right = getConstant(range->right);
         if (right == nullptr) {
             ::p4c::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
-                    range->right);
+                         range->right);
             return Result::DontKnow;
         }
         if (left->to<IR::Constant>()->value <= cst->value &&
@@ -963,13 +972,13 @@ DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression *k
         auto left = getConstant(mask->left);
         if (left == nullptr) {
             ::p4c::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
-                    mask->left);
+                         mask->left);
             return Result::DontKnow;
         }
         auto right = getConstant(mask->right);
         if (right == nullptr) {
             ::p4c::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
-                    mask->right);
+                         mask->right);
             return Result::DontKnow;
         }
         if ((left->to<IR::Constant>()->value & right->to<IR::Constant>()->value) ==

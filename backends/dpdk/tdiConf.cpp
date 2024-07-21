@@ -69,8 +69,9 @@ std::optional<cstring> TdiBfrtConf::findPipeName(const IR::P4Program *prog,
 
 void TdiBfrtConf::generate(const IR::P4Program *prog, DPDK::DpdkOptions &options) {
     if (options.outputFile.empty()) {
-        ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                "No output file provided. Unable to generate correct TDI builder config file.");
+        ::p4c::error(
+            ErrorType::ERR_UNEXPECTED,
+            "No output file provided. Unable to generate correct TDI builder config file.");
         return;
     }
     auto inputFile = std::filesystem::absolute(options.file);

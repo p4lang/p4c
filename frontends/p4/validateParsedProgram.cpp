@@ -33,17 +33,18 @@ void ValidateParsedProgram::postorder(const IR::Method *m) {
         ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid method/function name.", m->name);
     if (auto ext = findContext<IR::Type_Extern>()) {
         if (m->name == ext->name && m->type->returnType != nullptr)
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid constructor; cannot have a return type.",
-                    m);
+            ::p4c::error(ErrorType::ERR_INVALID,
+                         "%1%: invalid constructor; cannot have a return type.", m);
         if (m->type->returnType == nullptr) {
             if (m->name != ext->name) {
-                ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid type; method has no return type.", m);
+                ::p4c::error(ErrorType::ERR_INVALID,
+                             "%1%: invalid type; method has no return type.", m);
                 return;
             }
             for (auto p : *m->type->parameters)
                 if (p->direction != IR::Direction::None)
                     ::p4c::error(ErrorType::ERR_INVALID,
-                            "%1%: Constructor parameters cannot have a direction.", p);
+                                 "%1%: Constructor parameters cannot have a direction.", p);
         }
     }
 }
@@ -56,13 +57,15 @@ void ValidateParsedProgram::postorder(const IR::Annotations *annotations) {
     for (auto a : annotations->annotations) {
         if (!a->structured) continue;
         if (namesUsed.count(a->name) > 1)
-            ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: duplicate name for structured annotation", a);
+            ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: duplicate name for structured annotation",
+                         a);
     }
 }
 
 /// Struct field names cannot be underscore
 void ValidateParsedProgram::postorder(const IR::StructField *f) {
-    if (f->name.isDontCare()) ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid field name", f->name);
+    if (f->name.isDontCare())
+        ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid field name", f->name);
 }
 
 /// Width of a bit<> or int<> type is greater than 0
@@ -86,7 +89,8 @@ void ValidateParsedProgram::postorder(const IR::Type_Varbits *type) {
 void ValidateParsedProgram::postorder(const IR::ParserState *s) {
     if (s->name == IR::ParserState::accept || s->name == IR::ParserState::reject)
         ::p4c::error(ErrorType::ERR_INVALID,
-                "Invalid parser state: %1% should not be implemented, it is built-in", s->name);
+                     "Invalid parser state: %1% should not be implemented, it is built-in",
+                     s->name);
 }
 
 /// All parameters of a constructor must be directionless.
@@ -95,7 +99,8 @@ void ValidateParsedProgram::container(const IR::IContainer *type) {
     for (auto p : type->getConstructorParameters()->parameters)
         if (p->direction != IR::Direction::None)
             ::p4c::error(ErrorType::ERR_INVALID,
-                    "%1%: invalid direction. Constructor parameters cannot have a direction", p);
+                         "%1%: invalid direction. Constructor parameters cannot have a direction",
+                         p);
 }
 
 /// Tables must have an 'actions' property.
@@ -103,7 +108,7 @@ void ValidateParsedProgram::postorder(const IR::P4Table *t) {
     auto ac = t->getActionList();
     if (ac == nullptr)
         ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected '%2%' property", t->name,
-                IR::TableProperties::actionsPropertyName);
+                     IR::TableProperties::actionsPropertyName);
 }
 
 /// Checks that the names of the three parameter lists for some constructs
@@ -130,7 +135,7 @@ void ValidateParsedProgram::postorder(const IR::ConstructorCallExpression *expre
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1%: invalid call. Constructor calls not allowed in actions.", expression);
+                     "%1%: invalid call. Constructor calls not allowed in actions.", expression);
 }
 
 /// Variable names cannot be underscore
@@ -150,21 +155,21 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Instance *decl) {
     if (findContext<IR::BlockStatement>() &&         // we're looking for the apply block
         findContext<IR::P4Control>() &&              // of a control
         !findContext<IR::Declaration_Instance>()) {  // but not in an instance initializer
-        ::p4c::error(ErrorType::ERR_INVALID,
-                "%1%: invalid declaration. Instantiations cannot be in a control 'apply' block.",
-                decl);
+        ::p4c::error(
+            ErrorType::ERR_INVALID,
+            "%1%: invalid declaration. Instantiations cannot be in a control 'apply' block.", decl);
     }
     if (findContext<IR::ParserState>())
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1%: invalid declaration. Instantiations cannot be in a parser state.", decl);
+                     "%1%: invalid declaration. Instantiations cannot be in a parser state.", decl);
     if (findContext<IR::Function>() || findContext<IR::Method>())
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1%: invalid declaration. Instantiations cannot be in a function or method.",
-                decl);
+                     "%1%: invalid declaration. Instantiations cannot be in a function or method.",
+                     decl);
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
-        ::p4c::error(ErrorType::ERR_INVALID, "%1%: declaration. Instantiations not allowed in actions.",
-                decl);
+        ::p4c::error(ErrorType::ERR_INVALID,
+                     "%1%: declaration. Instantiations not allowed in actions.", decl);
 }
 
 /// Constant names cannot be underscore
@@ -177,7 +182,7 @@ void ValidateParsedProgram::postorder(const IR::EntriesList *l) {
     auto table = findContext<IR::P4Table>();
     if (table == nullptr) {
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1%: invalid entries list. Table entries must belong to a table.", l);
+                     "%1%: invalid entries list. Table entries must belong to a table.", l);
         return;
     }
 }
@@ -188,8 +193,9 @@ void ValidateParsedProgram::postorder(const IR::SwitchStatement *statement) {
     for (auto c : statement->cases) {
         if (defaultFound != nullptr) {
             if (c->label->is<IR::DefaultExpression>())
-                ::p4c::error(ErrorType::ERR_INVALID, "%1% has multiple 'default' labels: %2% and %3%.",
-                        statement, defaultFound->label, c->label);
+                ::p4c::error(ErrorType::ERR_INVALID,
+                             "%1% has multiple 'default' labels: %2% and %3%.", statement,
+                             defaultFound->label, c->label);
             else
                 warn(ErrorType::WARN_ORDERING, "%1%: label following 'default' %2% label.",
                      c->label, defaultFound->label);
@@ -205,8 +211,8 @@ void ValidateParsedProgram::postorder(const IR::ReturnStatement *statement) {
         auto inParser = findContext<IR::P4Parser>();
         if (inParser != nullptr)
             ::p4c::error(ErrorType::ERR_INVALID,
-                    "%1%: invalid statement. 'return' statements not allowed in parsers.",
-                    statement);
+                         "%1%: invalid statement. 'return' statements not allowed in parsers.",
+                         statement);
     }
 }
 
@@ -215,10 +221,12 @@ void ValidateParsedProgram::postorder(const IR::ExitStatement *statement) {
     auto inParser = findContext<IR::P4Parser>();
     if (inParser != nullptr)
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1%: invalid statement. 'exit' statements not allowed in parsers.", statement);
+                     "%1%: invalid statement. 'exit' statements not allowed in parsers.",
+                     statement);
     if (findContext<IR::Function>())
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1% invalid statement. 'exit' statements not allowed in functions.", statement);
+                     "%1% invalid statement. 'exit' statements not allowed in functions.",
+                     statement);
 }
 
 void ValidateParsedProgram::postorder(const IR::P4Program *program) {
@@ -230,7 +238,7 @@ void ValidateParsedProgram::postorder(const IR::P4Program *program) {
             if (!existing->is<IR::IFunctional>() || !decl->is<IR::IFunctional>() ||
                 existing->typeId() != decl->typeId() || decl->is<IR::P4Action>()) {
                 ::p4c::error(ErrorType::ERR_DUPLICATE, "%1% duplicates %2%.", decl->getName(),
-                        existing->getName());
+                             existing->getName());
             }
         } else {
             declarations.push_back(decl->getNode());
@@ -252,13 +260,13 @@ void ValidateParsedProgram::postorder(const IR::Dots *dots) {
 void ValidateParsedProgram::postorder(const IR::BreakStatement *s) {
     if (!findContext<IR::ForStatement>() && !findContext<IR::ForInStatement>())
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1%: break statement must be used in the context of a for statement.", s);
+                     "%1%: break statement must be used in the context of a for statement.", s);
 }
 
 void ValidateParsedProgram::postorder(const IR::ContinueStatement *s) {
     if (!findContext<IR::ForStatement>() && !findContext<IR::ForInStatement>())
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1%: continue statement must be used in the context of a for statement.", s);
+                     "%1%: continue statement must be used in the context of a for statement.", s);
 }
 
 }  // namespace p4c::P4

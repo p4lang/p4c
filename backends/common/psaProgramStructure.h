@@ -114,8 +114,8 @@ class ParsePsaArchitecture : public Inspector {
 
     void modelError(const char *format, const IR::INode *node) {
         ::p4c::error(ErrorType::ERR_MODEL,
-                (cstring(format) + "\nAre you using an up-to-date 'psa.p4'?").c_str(),
-                node->getNode());
+                     (cstring(format) + "\nAre you using an up-to-date 'psa.p4'?").c_str(),
+                     node->getNode());
     }
 
     bool preorder(const IR::ToplevelBlock *block) override;

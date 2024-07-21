@@ -148,7 +148,7 @@ std::string TypeConstraint::localError(Explain *explainer) const {
             absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer),
                             explain(2, explainer), explain(3, explainer));
             message = ::p4c::error_helper(fmt, errArguments.at(0), errArguments.at(1),
-                                     errArguments.at(2), errArguments.at(3))
+                                          errArguments.at(2), errArguments.at(3))
                           .toString();
             break;
         default:

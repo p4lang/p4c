@@ -287,8 +287,8 @@ void UBPFStateTranslationVisitor::compileExtract(const IR::Expression *destinati
     auto ht = type->to<IR::Type_StructLike>();
 
     if (ht == nullptr) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot extract to a non-struct type %1%",
-                destination);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                     "Cannot extract to a non-struct type %1%", destination);
         return;
     }
 
@@ -302,7 +302,7 @@ void UBPFStateTranslationVisitor::compileExtract(const IR::Expression *destinati
         auto et = etype->to<EBPF::IHasWidth>();
         if (et == nullptr) {
             ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "Only headers with fixed widths supported %1%", f);
+                         "Only headers with fixed widths supported %1%", f);
             return;
         }
         compileExtractField(destination, f->name, hdrOffsetBits, etype);
@@ -388,7 +388,7 @@ bool UBPFStateTranslationVisitor::preorder(const IR::MethodCallExpression *expre
             if (extMethod->method->name.name == p4lib.packetIn.extract.name) {
                 if (expression->arguments->size() != 1) {
                     ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                            "Variable-sized header fields not yet supported %1%", expression);
+                                 "Variable-sized header fields not yet supported %1%", expression);
                     return false;
                 }
                 compileExtract(expression->arguments->at(0)->expression);
@@ -428,7 +428,8 @@ bool UBPFStateTranslationVisitor::preorder(const IR::AssignmentStatement *stat) 
                 return false;
             }
         }
-        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call in parser %1%", stat->right);
+        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call in parser %1%",
+                     stat->right);
     } else {
         builder->emitIndent();
         visit(stat->left);
@@ -464,7 +465,7 @@ bool UBPFParser::build() {
     size_t numberOfArgs = UBPFModel::instance.numberOfParserArguments();
     if (pl->size() != numberOfArgs) {
         ::p4c::error(ErrorType::ERR_EXPECTED, "Expected parser to have exactly %d parameters",
-                numberOfArgs);
+                     numberOfArgs);
         return false;
     }
 

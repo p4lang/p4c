@@ -171,9 +171,9 @@ const IR::Node *ReplaceTypeUses::postorder(IR::StructExpression *expression) {
     auto st = getOriginal<IR::StructExpression>()->structType;
     if (!st) {
         ::p4c::error(ErrorType::ERR_TYPE_ERROR,
-                "%1%: could not infer a type for expression; "
-                "please specify it explicitly",
-                expression);
+                     "%1%: could not infer a type for expression; "
+                     "please specify it explicitly",
+                     expression);
         return expression;
     }
     auto spec = st->to<IR::Type_Specialized>();

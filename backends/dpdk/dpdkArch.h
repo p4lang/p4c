@@ -639,7 +639,7 @@ class CollectExternDeclaration : public Inspector {
             if (externTypeName == "DirectMeter") {
                 if (d->arguments->size() != 1) {
                     ::p4c::error(ErrorType::ERR_EXPECTED,
-                            "%1%: expected type of meter as the only argument", d);
+                                 "%1%: expected type of meter as the only argument", d);
                 } else {
                     /* Check if the Direct meter is of PACKETS (0) type */
                     if (d->arguments->at(0)->expression->to<IR::Constant>()->asUnsigned() == 0)
@@ -658,7 +658,8 @@ class CollectExternDeclaration : public Inspector {
             if (externTypeName == "Meter") {
                 if (d->arguments->size() != 2) {
                     ::p4c::error(ErrorType::ERR_EXPECTED,
-                            "%1%: expected number of meters and type of meter as arguments", d);
+                                 "%1%: expected number of meters and type of meter as arguments",
+                                 d);
                 } else {
                     /* Check if the meter is of PACKETS (0) type */
                     if (d->arguments->at(1)->expression->to<IR::Constant>()->asUnsigned() == 0)
@@ -669,23 +670,24 @@ class CollectExternDeclaration : public Inspector {
                 }
             } else if (externTypeName == "Counter") {
                 if (d->arguments->size() != 2) {
-                    ::p4c::error(ErrorType::ERR_EXPECTED,
-                            "%1%: expected number of counters and type of counter as arguments", d);
+                    ::p4c::error(
+                        ErrorType::ERR_EXPECTED,
+                        "%1%: expected number of counters and type of counter as arguments", d);
                 }
             } else if (externTypeName == "DirectCounter") {
                 if (d->arguments->size() != 1) {
                     ::p4c::error(ErrorType::ERR_EXPECTED,
-                            "%1%: expected type of counter as the only argument", d);
+                                 "%1%: expected type of counter as the only argument", d);
                 }
             } else if (externTypeName == "Register") {
                 if (d->arguments->size() != 1 && d->arguments->size() != 2) {
                     ::p4c::error(ErrorType::ERR_EXPECTED,
-                            "%1%: expected size and optionally init_val as arguments", d);
+                                 "%1%: expected size and optionally init_val as arguments", d);
                 }
             } else if (externTypeName == "Hash") {
                 if (d->arguments->size() != 1) {
                     ::p4c::error(ErrorType::ERR_EXPECTED,
-                            "%1%: expected hash algorithm as the only argument", d);
+                                 "%1%: expected hash algorithm as the only argument", d);
                 }
             } else {
                 // unsupported extern type
@@ -1092,8 +1094,8 @@ class ValidateOperandSize : public Inspector {
     void isValidOperandSize(const IR::Expression *e) {
         if (auto t = e->type->to<IR::Type_Bits>()) {
             if (t->width_bits() > dpdk_max_operand_size) {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Unsupported bitwidth %1% in %2%",
-                        t->width_bits(), e);
+                ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                             "Unsupported bitwidth %1% in %2%", t->width_bits(), e);
                 return;
             }
         }
@@ -1390,8 +1392,8 @@ class CollectProgramStructure : public PassManager {
             auto main = toplevel->getMain();
             if (main == nullptr) {
                 ::p4c::error(ErrorType::ERR_NOT_FOUND,
-                        "Could not locate top-level block; is there a %1% module?",
-                        IR::P4Program::main);
+                             "Could not locate top-level block; is there a %1% module?",
+                             IR::P4Program::main);
                 return;
             }
             main->apply(*parseDpdk);
@@ -1468,7 +1470,7 @@ class CollectIPSecInfo : public Inspector {
             if (a->originalExternType->getName().name == "ipsec_accelerator") {
                 if (structure->isPSA()) {
                     ::p4c::error(ErrorType::ERR_MODEL, "%1% is not available for PSA programs",
-                            a->originalExternType->getName().name);
+                                 a->originalExternType->getName().name);
                     return false;
                 }
                 if (a->method->getName().name == "enable") {
@@ -1476,14 +1478,15 @@ class CollectIPSecInfo : public Inspector {
                 } else if (a->method->getName().name == "set_sa_index") {
                     auto typeArgs = a->expr->typeArguments;
                     if (typeArgs->size() != 1) {
-                        ::p4c::error(ErrorType::ERR_MODEL, "Unexpected number of type arguments for %1%",
-                                a->method->name);
+                        ::p4c::error(ErrorType::ERR_MODEL,
+                                     "Unexpected number of type arguments for %1%",
+                                     a->method->name);
                         return false;
                     }
                     auto width = typeArgs->at(0);
                     if (!width->is<IR::Type_Bits>()) {
                         ::p4c::error(ErrorType::ERR_MODEL, "Unexpected width type %1% for sa_index",
-                                width);
+                                     width);
                         return false;
                     }
                     sa_id_width = width->to<IR::Type_Bits>()->width_bits();

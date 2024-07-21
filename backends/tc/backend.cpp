@@ -74,9 +74,9 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
 
     if (main->type->name != "PNA_NIC") {
         ::p4c::warning(ErrorType::WARN_INVALID,
-                  "%1%: the main package should be called PNA_NIC"
-                  "; are you using the wrong architecture?",
-                  main->type->name);
+                       "%1%: the main package should be called PNA_NIC"
+                       "; are you using the wrong architecture?",
+                       main->type->name);
         return false;
     }
 
@@ -232,13 +232,14 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
                 tcActionParam->setParamName(param->name.originalName);
                 if (!paramType->is<IR::Type_Bits>()) {
                     ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                            "%1% parameter with type other than bit is not supported", param);
+                                 "%1% parameter with type other than bit is not supported", param);
                     return;
                 } else {
                     auto paramTypeName = paramType->to<IR::Type_Bits>()->baseName();
                     if (paramTypeName != "bit") {
                         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                                "%1% parameter with type other than bit is not supported", param);
+                                     "%1% parameter with type other than bit is not supported",
+                                     param);
                         return;
                     }
                     tcActionParam->setDataType(TC::BIT_TYPE);
@@ -255,11 +256,11 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
                             tcActionParam->setDataType(val);
                         } else {
                             ::p4c::error(ErrorType::ERR_INVALID,
-                                    "tc_type annotation cannot have '%1%' as value", expr);
+                                         "tc_type annotation cannot have '%1%' as value", expr);
                         }
                     } else {
                         ::p4c::error(ErrorType::ERR_INVALID,
-                                "tc_type annotation cannot have '%1%' as value", expr);
+                                     "tc_type annotation cannot have '%1%' as value", expr);
                     }
                 }
                 auto direction = param->direction;
@@ -296,7 +297,7 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
         auto keyset = e->getKeys();
         if (keyset->components.size() != keys->keyElements.size()) {
             ::p4c::error(ErrorType::ERR_INVALID,
-                    "No of keys in const_entries should be same as no of keys in the table.");
+                         "No of keys in const_entries should be same as no of keys in the table.");
             return;
         }
         ordered_map<cstring, cstring> keyList;
@@ -398,10 +399,11 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                     auto i = 0;
                     if (isTCMayOverrideMiss) {
                         if (paramList->parameters.empty())
-                            ::p4c::warning(ErrorType::WARN_INVALID,
-                                      "%1% annotation cannot be used with default_action without "
-                                      "parameters",
-                                      overrideAnno);
+                            ::p4c::warning(
+                                ErrorType::WARN_INVALID,
+                                "%1% annotation cannot be used with default_action without "
+                                "parameters",
+                                overrideAnno);
                         else
                             tabledef->setTcMayOverrideMiss();
                     }
@@ -423,9 +425,9 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                 } else {
                     if (isTCMayOverrideMiss)
                         ::p4c::warning(ErrorType::WARN_INVALID,
-                                  "%1% annotation cannot be used with default_action with "
-                                  "directional parameters",
-                                  overrideAnno);
+                                       "%1% annotation cannot be used with default_action with "
+                                       "directional parameters",
+                                       overrideAnno);
                 }
             }
         }
@@ -467,44 +469,44 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
             }
             if (isTableOnly && isDefaultHit && isDefaultHitConst) {
                 ::p4c::error(ErrorType::ERR_INVALID,
-                        "Table '%1%' has an action reference '%2%' which is "
-                        "annotated with '@tableonly', '@default_hit' and '@default_hit_const'",
-                        t->name.originalName, action->getName().originalName);
+                             "Table '%1%' has an action reference '%2%' which is "
+                             "annotated with '@tableonly', '@default_hit' and '@default_hit_const'",
+                             t->name.originalName, action->getName().originalName);
                 break;
             } else if (isTableOnly && isDefaultHit) {
                 ::p4c::error(ErrorType::ERR_INVALID,
-                        "Table '%1%' has an action reference '%2%' which is "
-                        "annotated with '@tableonly' and '@default_hit'",
-                        t->name.originalName, action->getName().originalName);
+                             "Table '%1%' has an action reference '%2%' which is "
+                             "annotated with '@tableonly' and '@default_hit'",
+                             t->name.originalName, action->getName().originalName);
                 break;
             } else if (isTableOnly && isDefaultHitConst) {
                 ::p4c::error(ErrorType::ERR_INVALID,
-                        "Table '%1%' has an action reference '%2%' which is "
-                        "annotated with '@tableonly' and '@default_hit_const'",
-                        t->name.originalName, action->getName().originalName);
+                             "Table '%1%' has an action reference '%2%' which is "
+                             "annotated with '@tableonly' and '@default_hit_const'",
+                             t->name.originalName, action->getName().originalName);
                 break;
             } else if (isDefaultHit && isDefaultHitConst) {
                 ::p4c::error(ErrorType::ERR_INVALID,
-                        "Table '%1%' has an action reference '%2%' which is "
-                        "annotated with '@default_hit' and '@default_hit_const'",
-                        t->name.originalName, action->getName().originalName);
+                             "Table '%1%' has an action reference '%2%' which is "
+                             "annotated with '@default_hit' and '@default_hit_const'",
+                             t->name.originalName, action->getName().originalName);
                 break;
             } else if (isTcMayOverrideHit) {
                 auto adecl = refMap->getDeclaration(action->getPath(), true);
                 auto p4Action = adecl->getNode()->checkedTo<IR::P4Action>();
                 if (!isDefaultHit && !isDefaultHitConst) {
                     ::p4c::warning(ErrorType::WARN_INVALID,
-                              "Table '%1%' has an action reference '%2%' which is "
-                              "annotated with '@tc_may_override' without '@default_hit' or "
-                              "'@default_hit_const'",
-                              t->name.originalName, action->getName().originalName);
+                                   "Table '%1%' has an action reference '%2%' which is "
+                                   "annotated with '@tc_may_override' without '@default_hit' or "
+                                   "'@default_hit_const'",
+                                   t->name.originalName, action->getName().originalName);
                     isTcMayOverrideHit = false;
                     break;
                 } else if (p4Action->getParameters()->parameters.empty()) {
                     ::p4c::warning(ErrorType::WARN_INVALID,
-                              " '@tc_may_override' cannot be used for %1%  action "
-                              " without parameters",
-                              action->getName().originalName);
+                                   " '@tc_may_override' cannot be used for %1%  action "
+                                   " without parameters",
+                                   action->getName().originalName);
                     isTcMayOverrideHit = false;
                     break;
                 }
@@ -516,18 +518,19 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
         }
         if ((defaultHit > 0) && (defaultHitConst > 0)) {
             ::p4c::error(ErrorType::ERR_INVALID,
-                    "Table '%1%' cannot have both '@default_hit' action "
-                    "and '@default_hit_const' action",
-                    t->name.originalName);
+                         "Table '%1%' cannot have both '@default_hit' action "
+                         "and '@default_hit_const' action",
+                         t->name.originalName);
             return;
         } else if (defaultHit > 1) {
-            ::p4c::error(ErrorType::ERR_INVALID, "Table '%1%' can have only one '@default_hit' action",
-                    t->name.originalName);
+            ::p4c::error(ErrorType::ERR_INVALID,
+                         "Table '%1%' can have only one '@default_hit' action",
+                         t->name.originalName);
             return;
         } else if (defaultHitConst > 1) {
             ::p4c::error(ErrorType::ERR_INVALID,
-                    "Table '%1%' can have only one '@default_hit_const' action",
-                    t->name.originalName);
+                         "Table '%1%' can have only one '@default_hit_const' action",
+                         t->name.originalName);
             return;
         }
         if (defaultActionName != nullptr &&
@@ -568,9 +571,9 @@ void ConvertToBackendIR::updatePnaDirectCounter(const IR::P4Table *t, IR::TCTabl
     auto externInstance = P4::ExternInstance::resolve(expr, refMap, typeMap);
     if (!externInstance) {
         ::p4c::error(ErrorType::ERR_INVALID,
-                "Expected %1% property value for table %2% to resolve to an "
-                "extern instance: %3%",
-                propertyName, t->name.originalName, property);
+                     "Expected %1% property value for table %2% to resolve to an "
+                     "extern instance: %3%",
+                     propertyName, t->name.originalName, property);
         return;
     }
     for (auto ext : externsInfo) {
@@ -627,7 +630,7 @@ unsigned ConvertToBackendIR::GetAccessNumericValue(std::string_view access) {
                 break;
             default:
                 ::p4c::error(ErrorType::ERR_INVALID,
-                        "tc_acl annotation cannot have '%1%' in access permisson", s);
+                             "tc_acl annotation cannot have '%1%' in access permisson", s);
         }
         value |= mask;
     }
@@ -708,7 +711,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                 tEntriesCount = sizeProperty->asUint64();
             } else {
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                        "table with size %1% cannot be supported", t->getSizeProperty());
+                             "table with size %1% cannot be supported", t->getSizeProperty());
                 return;
             }
         }
@@ -737,9 +740,9 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                     tableDefinition->setNumMask(val->asUint64());
                 } else {
                     ::p4c::error(ErrorType::ERR_INVALID,
-                            "nummask annotation cannot have '%1%' as value. Only integer "
-                            "constants are allowed",
-                            expr);
+                                 "nummask annotation cannot have '%1%' as value. Only integer "
+                                 "constants are allowed",
+                                 expr);
                 }
             }
         }
@@ -1130,7 +1133,7 @@ unsigned int ConvertToBackendIR::findMappedKernelMeta(const IR::Member *mem) {
                         return TC::SKBTSTAMP;
                     case TC::INPUT_PARSER_ERROR:
                         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                                "%1% is not supported in this target", mem);
+                                     "%1% is not supported in this target", mem);
                         return TC::UNSUPPORTED;
                     case TC::INPUT_CLASS_OF_SERVICE:
                         return TC::SKBPRIO;
@@ -1237,8 +1240,8 @@ void ConvertToBackendIR::updateMatchType(const IR::P4Table *t, IR::TCTable *tabl
                 tableMatchType = TC::TERNARY_TYPE;
             } else {
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                        "match type %1% is not supported in this target",
-                        key->keyElements[0]->matchType);
+                             "match type %1% is not supported in this target",
+                             key->keyElements[0]->matchType);
                 return;
             }
         } else {
@@ -1271,7 +1274,7 @@ void ConvertToBackendIR::updateMatchType(const IR::P4Table *t, IR::TCTable *tabl
                     ternaryKey++;
                 } else {
                     ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                            "match type %1% is not supported in this target", k->matchType);
+                                 "match type %1% is not supported in this target", k->matchType);
                     return;
                 }
                 keyCount++;

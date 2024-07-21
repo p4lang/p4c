@@ -50,7 +50,7 @@ class DoStaticAssert : public Transform, public ResolutionContext {
                 auto params = subst.getParametersInOrder();
                 if (!params->moveNext()) {
                     ::p4c::warning(ErrorType::WARN_INVALID, "static_assert with no arguments: %1%",
-                              method);
+                                   method);
                     return method;
                 }
                 auto param = params->getCurrent();
@@ -79,7 +79,7 @@ class DoStaticAssert : public Transform, public ResolutionContext {
                     return new IR::BoolLiteral(method->srcInfo, true);
                 } else {
                     ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                            "Could not evaluate static_assert to a constant: %1%", arg);
+                                 "Could not evaluate static_assert to a constant: %1%", arg);
                     return method;
                 }
             }

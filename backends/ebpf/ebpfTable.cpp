@@ -90,7 +90,8 @@ void EBPFTable::initKey() {
             auto type = program->typeMap->getType(c->expression);
             auto ebpfType = EBPFTypeFactory::instance->create(type);
             if (!ebpfType->is<IHasWidth>()) {
-                ::p4c::error(ErrorType::ERR_TYPE_ERROR, "%1%: illegal type %2% for key field", c, type);
+                ::p4c::error(ErrorType::ERR_TYPE_ERROR, "%1%: illegal type %2% for key field", c,
+                             type);
                 return;
             }
 
@@ -122,9 +123,9 @@ void EBPFTable::validateKeys() const {
             unsigned width = ebpfType->to<IHasWidth>()->widthInBits();
             if (width > last_key_size) {
                 ::p4c::error(ErrorType::WARN_ORDERING,
-                        "%1%: key field larger than previous key, move it before previous key "
-                        "to avoid padding between these keys",
-                        it->expression);
+                             "%1%: key field larger than previous key, move it before previous key "
+                             "to avoid padding between these keys",
+                             it->expression);
                 return;
             }
             last_key_size = width;
@@ -142,7 +143,7 @@ void EBPFTable::validateKeys() const {
             if (matchType->name.name == P4::P4CoreLibrary::instance().lpmMatch.name) {
                 if (it != *lastKey) {
                     ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                            "%1% field key must be at the end of whole key", it->matchType);
+                                 "%1% field key must be at the end of whole key", it->matchType);
                 }
             }
         }
@@ -173,7 +174,7 @@ void EBPFTable::emitKeyType(CodeBuilder *builder) {
 
             if (!isMatchTypeSupported(matchType)) {
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Match of type %1% not supported",
-                        c->matchType);
+                             c->matchType);
             }
 
             if (matchType->name.name == "selector") {
@@ -366,28 +367,28 @@ void EBPFTable::emitInstance(CodeBuilder *builder) {
                 table->container->properties->getProperty(program->model.tableImplProperty.name);
             if (impl == nullptr) {
                 ::p4c::error(ErrorType::ERR_EXPECTED, "Table %1% does not have an %2% property",
-                        table->container, program->model.tableImplProperty.name);
+                             table->container, program->model.tableImplProperty.name);
                 return;
             }
 
             // Some type checking...
             if (!impl->value->is<IR::ExpressionValue>()) {
-                ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: Expected property to be an `extern` block",
-                        impl);
+                ::p4c::error(ErrorType::ERR_EXPECTED,
+                             "%1%: Expected property to be an `extern` block", impl);
                 return;
             }
 
             auto expr = impl->value->to<IR::ExpressionValue>()->expression;
             if (!expr->is<IR::ConstructorCallExpression>()) {
-                ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: Expected property to be an `extern` block",
-                        impl);
+                ::p4c::error(ErrorType::ERR_EXPECTED,
+                             "%1%: Expected property to be an `extern` block", impl);
                 return;
             }
 
             auto block = table->getValue(expr);
             if (block == nullptr || !block->is<IR::ExternBlock>()) {
-                ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: Expected property to be an `extern` block",
-                        impl);
+                ::p4c::error(ErrorType::ERR_EXPECTED,
+                             "%1%: Expected property to be an `extern` block", impl);
                 return;
             }
 
@@ -398,8 +399,9 @@ void EBPFTable::emitInstance(CodeBuilder *builder) {
             } else if (extBlock->type->name.name == program->model.hash_table.name) {
                 tableKind = TableHash;
             } else {
-                ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: implementation must be one of %2% or %3%",
-                        impl, program->model.array_table.name, program->model.hash_table.name);
+                ::p4c::error(ErrorType::ERR_EXPECTED,
+                             "%1%: implementation must be one of %2% or %3%", impl,
+                             program->model.array_table.name, program->model.hash_table.name);
                 return;
             }
 
@@ -410,7 +412,7 @@ void EBPFTable::emitInstance(CodeBuilder *builder) {
                 if (matchType->name.name == P4::P4CoreLibrary::instance().lpmMatch.name) {
                     if (tableKind == TableLPMTrie) {
                         ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: only one LPM field allowed",
-                                it->matchType);
+                                     it->matchType);
                         return;
                     }
                     tableKind = TableLPMTrie;
@@ -420,7 +422,7 @@ void EBPFTable::emitInstance(CodeBuilder *builder) {
             auto sz = extBlock->getParameterValue(program->model.array_table.size.name);
             if (sz == nullptr || !sz->is<IR::Constant>()) {
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                        "%1%: Expected an integer argument; is the model corrupted?", expr);
+                             "%1%: Expected an integer argument; is the model corrupted?", expr);
                 return;
             }
             auto cst = sz->to<IR::Constant>();
@@ -483,7 +485,7 @@ void EBPFTable::emitKey(CodeBuilder *builder, cstring keyName) {
                 // TODO: handle width > 64 bits for filter model
                 if (program->options.arch.isNullOrEmpty() || program->options.arch == "filter") {
                     ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                            "%1%: fields wider than 64 bits are not supported yet", fieldName);
+                                 "%1%: fields wider than 64 bits are not supported yet", fieldName);
                 }
             }
         }
@@ -906,8 +908,8 @@ EBPFCounterTable::EBPFCounterTable(const EBPFProgram *program, const IR::ExternB
     auto sz = block->getParameterValue(program->model.counterArray.max_index.name);
     if (sz == nullptr || !sz->is<IR::Constant>()) {
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1% (%2%): expected an integer argument; is the model corrupted?",
-                program->model.counterArray.max_index, name);
+                     "%1% (%2%): expected an integer argument; is the model corrupted?",
+                     program->model.counterArray.max_index, name);
         return;
     }
     auto cst = sz->to<IR::Constant>();
@@ -924,8 +926,8 @@ EBPFCounterTable::EBPFCounterTable(const EBPFProgram *program, const IR::ExternB
     auto sprs = block->getParameterValue(program->model.counterArray.sparse.name);
     if (sprs == nullptr || !sprs->is<IR::BoolLiteral>()) {
         ::p4c::error(ErrorType::ERR_INVALID,
-                "%1% (%2%): Expected an integer argument; is the model corrupted?",
-                program->model.counterArray.sparse, name);
+                     "%1% (%2%): Expected an integer argument; is the model corrupted?",
+                     program->model.counterArray.sparse, name);
         return;
     }
 
@@ -1061,7 +1063,7 @@ void EBPFCounterTable::emitMethodInvocation(CodeBuilder *builder, const P4::Exte
         return;
     }
     ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1% for %2%", method->expr,
-            program->model.counterArray.name);
+                 program->model.counterArray.name);
 }
 
 void EBPFCounterTable::emitTypes(CodeBuilder *builder) {
@@ -1089,10 +1091,11 @@ EBPFValueSet::EBPFValueSet(const EBPFProgram *program, const IR::P4ValueSet *p4v
         if (sc->fitsUint()) size = sc->asUnsigned();
         if (size == 0)
             ::p4c::error(ErrorType::ERR_OVERLIMIT,
-                    "Size must be a positive value less than 2^32, got %1% entries", pvs->size);
+                         "Size must be a positive value less than 2^32, got %1% entries",
+                         pvs->size);
     } else {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "Size of value_set must be know at compilation time: %1%", pvs->size);
+                     "Size of value_set must be know at compilation time: %1%", pvs->size);
     }
 
     // validate type
@@ -1108,7 +1111,7 @@ EBPFValueSet::EBPFValueSet(const EBPFProgram *program, const IR::P4ValueSet *p4v
         ::p4c::warning("Header defined here: %1%", h);
     } else {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Unsupported type with value_set: %1%",
-                pvs->elementType);
+                     pvs->elementType);
     }
 
     keyTypeName = "struct " + keyTypeName;
@@ -1164,7 +1167,8 @@ void EBPFValueSet::emitKeyInitializer(CodeBuilder *builder, const IR::SelectExpr
                                       cstring varName) {
     if (fieldNames.size() != expression->select->components.size()) {
         ::p4c::error(ErrorType::ERR_EXPECTED,
-                "Fields number of value_set do not match number of arguments: %1%", expression);
+                     "Fields number of value_set do not match number of arguments: %1%",
+                     expression);
         return;
     }
     keyVarName = varName;
@@ -1182,9 +1186,10 @@ void EBPFValueSet::emitKeyInitializer(CodeBuilder *builder, const IR::SelectExpr
         auto keyExpr = expression->select->components.at(i);
         if (useMemcpy) {
             if (keyExpr->is<IR::Mask>()) {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                        "%1%: mask not supported for fields larger than 64 bits within value_set",
-                        keyExpr);
+                ::p4c::error(
+                    ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "%1%: mask not supported for fields larger than 64 bits within value_set",
+                    keyExpr);
                 continue;
             }
 

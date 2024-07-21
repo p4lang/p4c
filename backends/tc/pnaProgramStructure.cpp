@@ -79,9 +79,9 @@ void InspectPnaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
             if (isHeader && ft->is<IR::Type_Struct>()) {
-                ::p4c::error(ErrorType::ERR_INVALID,
-                        "Type %1% should only contain headers, header stacks, or header unions",
-                        type);
+                ::p4c::error(
+                    ErrorType::ERR_INVALID,
+                    "Type %1% should only contain headers, header stacks, or header unions", type);
                 return;
             }
             auto st = ft->to<IR::Type_StructLike>();
@@ -103,7 +103,7 @@ void InspectPnaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
                         addHeaderInstance(h_type, uf->controlPlaneName());
                     } else {
                         ::p4c::error(ErrorType::ERR_INVALID, "Type %1% cannot contain type %2%", ft,
-                                uft);
+                                     uft);
                         return;
                     }
                 }

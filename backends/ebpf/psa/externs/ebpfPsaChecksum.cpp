@@ -28,7 +28,7 @@ void EBPFChecksumPSA::init(const EBPFProgram *program, cstring name, int type) {
             ::p4c::error(ErrorType::ERR_UNSUPPORTED, "InternetChecksum not yet implemented");
         else
             ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Hash algorithm not yet implemented: %1%",
-                    declaration->arguments->at(0));
+                         declaration->arguments->at(0));
     }
 }
 

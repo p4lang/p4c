@@ -44,8 +44,8 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info &p4info,
             auto typeEnum = enums.find(e);
             if (typeEnum == enums.end()) {
                 ::p4c::error(ErrorType::ERR_NOT_FOUND,
-                        "Enum type '%1%' not found in typeInfo for '%2%' '%3%'", e, instanceType,
-                        instanceName);
+                             "Enum type '%1%' not found in typeInfo for '%2%' '%3%'", e,
+                             instanceType, instanceName);
                 return;
             }
             type = makeTypeBytes(typeEnum->second.underlying_type().bitwidth());
@@ -64,8 +64,8 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info &p4info,
             auto newType = newtypes.find(typeName);
             if (newType == newtypes.end()) {
                 ::p4c::error(ErrorType::ERR_NOT_FOUND,
-                        "New type '%1%' not found in typeInfo for '%2%' '%3%'", typeName,
-                        instanceType, instanceName);
+                             "New type '%1%' not found in typeInfo for '%2%' '%3%'", typeName,
+                             instanceType, instanceName);
                 return;
             }
             type = makeTypeBytes(newType->second.translated_type().sdn_bitwidth());
@@ -73,9 +73,9 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info &p4info,
 
         if (!type) {
             ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                    "Error when generating BF-RT info for '%1%' '%2%': "
-                    "packed type is too complex",
-                    instanceType, instanceName);
+                         "Error when generating BF-RT info for '%1%' '%2%': "
+                         "packed type is too complex",
+                         instanceType, instanceName);
             return;
         }
 
@@ -140,10 +140,10 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info &p4info,
         }
     } else {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                "Error when generating BF-RT info for '%1%' '%2%': "
-                "only structs, headers, tuples, bitstrings and "
-                "serializable enums are currently supported types",
-                instanceType, instanceName);
+                     "Error when generating BF-RT info for '%1%' '%2%': "
+                     "only structs, headers, tuples, bitstrings and "
+                     "serializable enums are currently supported types",
+                     instanceType, instanceName);
     }
 
     return TypeSpecParser(std::move(fields));
@@ -508,7 +508,8 @@ void BFRuntimeGenerator::addActionProfCommon(
     tableJson->emplace("key"_cs, keyJson);
 
     if (actionProf.tableIds.empty()) {
-        ::p4c::warning("Action profile '%1%' is not used by any table, skipping it", actionProf.name);
+        ::p4c::warning("Action profile '%1%' is not used by any table, skipping it",
+                       actionProf.name);
         return;
     }
     auto oneTableId = actionProf.tableIds.at(0);
@@ -564,7 +565,7 @@ Util::JsonArray *BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table &ta
                 break;
             default:
                 ::p4c::error(ErrorType::ERR_INVALID, "Invalid action ref scope '%1%' in P4Info",
-                        int(action_ref.scope()));
+                             int(action_ref.scope()));
                 break;
         }
         auto *annotations =
@@ -689,7 +690,7 @@ void BFRuntimeGenerator::addMatchTables(Util::JsonArray *tablesJson) const {
             }
             if (matchType == std::nullopt) {
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Unsupported match type for BF-RT: %1%",
-                        int(mf.match_type()));
+                             int(mf.match_type()));
                 continue;
             }
             needsPriority |= addMatchTypePriority(matchType);
@@ -725,10 +726,10 @@ void BFRuntimeGenerator::addMatchTables(Util::JsonArray *tablesJson) const {
             // Control plane requires there's no duplicate key in one table.
             if (dupKey.count(keyName) != 0) {
                 ::p4c::error(ErrorType::ERR_DUPLICATE,
-                        "Key \"%s\" is duplicate in Table \"%s\". It doesn't meet BFRT's "
-                        "requirements.\n"
-                        "Please using @name annotation for the duplicate key names",
-                        keyName, pre.name());
+                             "Key \"%s\" is duplicate in Table \"%s\". It doesn't meet BFRT's "
+                             "requirements.\n"
+                             "Please using @name annotation for the duplicate key names",
+                             keyName, pre.name());
                 return;
             } else {
                 dupKey.insert(keyName);

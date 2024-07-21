@@ -93,7 +93,7 @@ Util::IJson *ExpressionConverter::get(const IR::Expression *expression) const {
     }
     if (result == nullptr)
         ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: could not convert expression to Json",
-                expression);
+                     expression);
     return result;
 }
 
@@ -110,7 +110,8 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression *expression) 
         if (em->originalExternType->name == corelib.packetIn.name &&
             em->method->name == corelib.packetIn.lookahead.name) {
             if (expression->typeArguments->size() != 1)
-                ::p4c::error(ErrorType::ERR_INVALID, "Expected 1 type parameter for %1%", em->method);
+                ::p4c::error(ErrorType::ERR_INVALID, "Expected 1 type parameter for %1%",
+                             em->method);
             auto targ = expression->typeArguments->at(0);
             auto typearg = typeMap->getTypeType(targ, true);
             int width = typearg->width_bits();
@@ -432,9 +433,9 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
                     if (st) {
                         if (index_pos < 0) {
                             ::p4c::error(ErrorType::ERR_INVALID,
-                                    "BMV2: Struct has no field "
-                                    "for runtime index computation %1%",
-                                    st);
+                                         "BMV2: Struct has no field "
+                                         "for runtime index computation %1%",
+                                         st);
                         }
                         result->emplace("type", "expression");
                         auto e = new Util::JsonObject();
@@ -485,8 +486,8 @@ void ExpressionConverter::postorder(const IR::Mux *expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: expression too complex for this target",
-                expression);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                     "%1%: expression too complex for this target", expression);
         return;
     }
 
@@ -528,8 +529,8 @@ void ExpressionConverter::binary(const IR::Operation_Binary *expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: expression too complex for this target",
-                expression);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                     "%1%: expression too complex for this target", expression);
         return;
     }
 
@@ -586,8 +587,8 @@ void ExpressionConverter::postorder(const IR::ListExpression *expression) {
     auto result = new Util::JsonArray();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: expression too complex for this target",
-                expression);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                     "%1%: expression too complex for this target", expression);
         return;
     }
 
@@ -603,8 +604,8 @@ void ExpressionConverter::postorder(const IR::StructExpression *expression) {
     auto result = new Util::JsonArray();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: expression too complex for this target",
-                expression);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                     "%1%: expression too complex for this target", expression);
         return;
     }
 
@@ -619,8 +620,8 @@ void ExpressionConverter::postorder(const IR::Operation_Unary *expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: expression too complex for this target",
-                expression);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                     "%1%: expression too complex for this target", expression);
         return;
     }
 
@@ -777,8 +778,8 @@ Util::IJson *ExpressionConverter::convert(const IR::Expression *e, bool doFixup,
     expr->apply(*this);
     auto result = ::p4c::get(map, expr->to<IR::Expression>());
     if (result == nullptr) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Could not generate code for expression",
-                e);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                     "%1%: Could not generate code for expression", e);
         return new Util::JsonValue();
     }
 

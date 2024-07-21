@@ -34,8 +34,8 @@ class EBPFTablePSADirectCounterPropertyVisitor : public EBPFTablePsaPropertyVisi
         auto di = decl->to<IR::Declaration_Instance>();
         CHECK_NULL(di);
         if (EBPFObject::getSpecializedTypeName(di) != "DirectCounter") {
-            ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: not a DirectCounter, see declaration of %2%",
-                    pe, decl);
+            ::p4c::error(ErrorType::ERR_UNEXPECTED,
+                         "%1%: not a DirectCounter, see declaration of %2%", pe, decl);
             return false;
         }
 
@@ -61,8 +61,8 @@ class EBPFTablePSADirectMeterPropertyVisitor : public EBPFTablePsaPropertyVisito
         auto di = decl->to<IR::Declaration_Instance>();
         CHECK_NULL(di);
         if (EBPFObject::getTypeName(di) != "DirectMeter") {
-            ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: not a DirectMeter, see declaration of %2%", pe,
-                    decl);
+            ::p4c::error(ErrorType::ERR_UNEXPECTED,
+                         "%1%: not a DirectMeter, see declaration of %2%", pe, decl);
             return false;
         }
 
@@ -92,7 +92,7 @@ class EBPFTablePSAImplementationPropertyVisitor : public EBPFTablePsaPropertyVis
 
         if (table->implementation != nullptr) {
             ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                    "%1%: Up to one implementation is supported in a table", pe);
+                         "%1%: Up to one implementation is supported in a table", pe);
             return false;
         }
 
@@ -362,15 +362,17 @@ void ActionTranslationVisitorPSA::processMethod(const P4::ExternMethod *method) 
         if (ctr != nullptr)
             ctr->emitDirectMethodInvocation(builder, method, valueName);
         else
-            ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: Table %2% does not own DirectCounter named %3%",
-                    method->expr, table->table->container, instanceName);
+            ::p4c::error(ErrorType::ERR_NOT_FOUND,
+                         "%1%: Table %2% does not own DirectCounter named %3%", method->expr,
+                         table->table->container, instanceName);
     } else if (declType->name.name == "DirectMeter") {
         auto met = table->getMeter(instanceName);
         if (met != nullptr) {
             met->emitDirectExecute(builder, method, valueName);
         } else {
-            ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: Table %2% does not own DirectMeter named %3%",
-                    method->expr, table->table->container, instanceName);
+            ::p4c::error(ErrorType::ERR_NOT_FOUND,
+                         "%1%: Table %2% does not own DirectMeter named %3%", method->expr,
+                         table->table->container, instanceName);
         }
     } else {
         ControlBodyTranslatorPSA::processMethod(method);
@@ -398,14 +400,14 @@ EBPFTablePSA::EBPFTablePSA(const EBPFProgram *program, const IR::TableBlock *tab
     auto sizeProperty = table->container->properties->getProperty("size");
     if (keyGenerator == nullptr && sizeProperty != nullptr) {
         ::p4c::warning(ErrorType::WARN_IGNORE_PROPERTY,
-                  "%1%: property ignored because table does not have a key", sizeProperty);
+                       "%1%: property ignored because table does not have a key", sizeProperty);
     }
 
     if (keyFieldNames.empty() && size != 1) {
         if (sizeProperty != nullptr) {
             ::p4c::warning(ErrorType::WARN_IGNORE,
-                      "%1%: only one entry allowed with empty key or selector-only key",
-                      sizeProperty);
+                           "%1%: only one entry allowed with empty key or selector-only key",
+                           sizeProperty);
         }
         this->size = 1;
     }
@@ -452,17 +454,17 @@ void EBPFTablePSA::initImplementation() {
 
     if (hasActionSelector && selectorKey == nullptr) {
         ::p4c::error(ErrorType::ERR_NOT_FOUND,
-                "%1%: ActionSelector provided but there is no selector key", table->container);
+                     "%1%: ActionSelector provided but there is no selector key", table->container);
     }
     if (!hasActionSelector && selectorKey != nullptr) {
         ::p4c::error(ErrorType::ERR_NOT_FOUND,
-                "%1%: implementation not found, ActionSelector is required",
-                selectorKey->matchType);
+                     "%1%: implementation not found, ActionSelector is required",
+                     selectorKey->matchType);
     }
     auto emptyGroupAction = table->container->properties->getProperty("psa_empty_group_action");
     if (!hasActionSelector && emptyGroupAction != nullptr) {
         ::p4c::warning(ErrorType::WARN_UNUSED, "%1%: unused property (ActionSelector not provided)",
-                  emptyGroupAction);
+                       emptyGroupAction);
     }
 }
 
@@ -935,8 +937,8 @@ void EBPFTablePSA::tryEnableTableCache() {
     if (!isLPMTable() && !isTernaryTable()) return;
     if (!counters.empty() || !meters.empty()) {
         ::p4c::warning(ErrorType::WARN_UNSUPPORTED,
-                  "%1%: table cache can't be enabled due to direct extern(s)",
-                  table->container->name);
+                       "%1%: table cache can't be enabled due to direct extern(s)",
+                       table->container->name);
         return;
     }
 

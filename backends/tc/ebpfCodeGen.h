@@ -80,8 +80,8 @@ class PNAErrorCodesGen : public Inspector {
 
             // type ParserError_t is u8, which can have values from 0 to 255
             if (id > 255) {
-                ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1%: Reached maximum number of possible errors",
-                        decl);
+                ::p4c::error(ErrorType::ERR_OVERLIMIT,
+                             "%1%: Reached maximum number of possible errors", decl);
             }
         }
         builder->newline();

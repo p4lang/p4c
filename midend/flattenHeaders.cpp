@@ -91,7 +91,8 @@ const IR::Node *ReplaceHeaders::postorder(IR::Member *expression) {
             return expression;
         if (isWrite()) {
             ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                    "%1%: writing to a structure nested in a header is not supported", expression);
+                         "%1%: writing to a structure nested in a header is not supported",
+                         expression);
             return expression;
         }
         result = repl->explode(e, prefix);

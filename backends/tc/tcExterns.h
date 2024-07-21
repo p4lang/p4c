@@ -71,8 +71,8 @@ class EBPFRegisterPNA : public EBPF::EBPFTableBase {
         auto ts = di->type->to<IR::Type_Specialized>();
 
         if (ts->arguments->size() != PARAM_INDEX_2) {
-            ::p4c::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%",
-                    ts);
+            ::p4c::error(ErrorType::ERR_MODEL,
+                         "Expected a type specialized with two arguments: %1%", ts);
             return;
         }
 
@@ -101,8 +101,8 @@ class EBPFTablePNADirectCounterPropertyVisitor : public EBPF::EBPFTablePsaProper
         auto di = decl->to<IR::Declaration_Instance>();
         CHECK_NULL(di);
         if (EBPF::EBPFObject::getSpecializedTypeName(di) != "DirectCounter") {
-            ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: not a DirectCounter, see declaration of %2%",
-                    pe, decl);
+            ::p4c::error(ErrorType::ERR_UNEXPECTED,
+                         "%1%: not a DirectCounter, see declaration of %2%", pe, decl);
             return false;
         }
         auto counterName = EBPF::EBPFObject::externalName(di);

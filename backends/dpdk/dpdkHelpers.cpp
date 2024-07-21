@@ -242,7 +242,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 auto declArgs = di->arguments;
                 if (declArgs->size() == 0) {
                     ::p4c::error(ErrorType::ERR_UNEXPECTED, "Expected 1 argument for %1%",
-                            e->object->getName());
+                                 e->object->getName());
                     return false;
                 }
                 auto hash_alg = declArgs->at(0)->expression;
@@ -305,11 +305,12 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     // If not, throw an error.
                     if (auto b = base->expression->to<IR::Expression>()) {
                         if (!b->is<IR::Constant>())
-                            ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                                    "Expecting const expression '%1%'"
-                                    " for 'base' value in get_hash method of Hash extern in DPDK "
-                                    "Target",
-                                    base);
+                            ::p4c::error(
+                                ErrorType::ERR_UNEXPECTED,
+                                "Expecting const expression '%1%'"
+                                " for 'base' value in get_hash method of Hash extern in DPDK "
+                                "Target",
+                                base);
                     }
 
                     if (auto b = max_val->expression->to<IR::Expression>()) {
@@ -318,9 +319,9 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                             // Check whether max value is power of 2 or not
                             if (maxValue == 0 || ((maxValue & (maxValue - 1)) != 0)) {
                                 ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                                        "Invalid Max value '%1%'. DPDK"
-                                        " Target expect 'Max' value to be power of 2",
-                                        maxValue);
+                                             "Invalid Max value '%1%'. DPDK"
+                                             " Target expect 'Max' value to be power of 2",
+                                             maxValue);
                                 return false;
                             }
                         } else {
@@ -359,9 +360,9 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             } else if (e->originalExternType->getName().name == "Meter") {
                 if (e->method->getName().name == "execute") {
                     ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                            "use dpdk specific `dpdk_execute` method, `%1%`"
-                            " not supported by dpdk",
-                            e->method->getName());
+                                 "use dpdk specific `dpdk_execute` method, `%1%`"
+                                 " not supported by dpdk",
+                                 e->method->getName());
                     return false;
                 }
                 if (e->method->getName().name == "dpdk_execute") {
@@ -369,8 +370,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
 
                     // DPDK target needs index and packet length as mandatory parameters
                     if (argSize < 2) {
-                        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 2 arguments for %1%",
-                                e->object->getName());
+                        ::p4c::error(ErrorType::ERR_UNEXPECTED,
+                                     "Expected atleast 2 arguments for %1%", e->object->getName());
                         return false;
                     }
                     const IR::Expression *color_in = nullptr;
@@ -393,9 +394,9 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     // DPDK target needs packet length as mandatory parameters
                     if (argSize < 1) {
                         ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                                "Expected atleast 1 argument "
-                                "(packet length) for %1%",
-                                e->object->getName());
+                                     "Expected atleast 1 argument "
+                                     "(packet length) for %1%",
+                                     e->object->getName());
                         return false;
                     }
                     const IR::Expression *color_in = nullptr;
@@ -427,8 +428,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     auto argSize = e->expr->arguments->size();
                     if (argSize != 1) {
                         ::p4c::error(ErrorType::ERR_MODEL,
-                                "Expected 1 argument for status of ipsec encryption",
-                                e->object->getName());
+                                     "Expected 1 argument for status of ipsec encryption",
+                                     e->object->getName());
                         return false;
                     }
                     auto status = (*e->expr->arguments)[0]->expression;
@@ -577,7 +578,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         } else if (auto n = right->to<IR::Cmpl>()) {
             if (!n->expr->type->is<IR::Type_Bits>()) {
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                        "Negate operation is only supported on BIT types");
+                             "Negate operation is only supported on BIT types");
                 return false;
             }
             BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
@@ -1123,18 +1124,18 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 auto args = a->expr->arguments;
                 if (args->size() > 1) {
                     ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                            "Expected at most 1 argument for %1%,"
-                            "provided %2%",
-                            a->method->getName(), args->size());
+                                 "Expected at most 1 argument for %1%,"
+                                 "provided %2%",
+                                 a->method->getName(), args->size());
                 } else {
                     const IR::Expression *incr = nullptr;
                     auto counter = a->object->getName();
                     if (args->size() == 1) incr = args->at(0)->expression;
                     if (!incr && value > 0) {
                         ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                                "Expected packet length argument for %1% "
-                                "method of direct counter",
-                                a->method->getName());
+                                     "Expected packet length argument for %1% "
+                                     "method of direct counter",
+                                     a->method->getName());
                         return false;
                     }
                     auto metaIndex = new IR::Member(new IR::PathExpression(IR::ID("m")),
@@ -1166,7 +1167,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 auto args = a->expr->arguments;
                 if (args->size() < 1) {
                     ::p4c::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 1 arguments for %1%",
-                            a->method->getName());
+                                 a->method->getName());
                 } else {
                     const IR::Expression *incr = nullptr;
                     auto index = args->at(0)->expression;
@@ -1174,9 +1175,9 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                     if (args->size() == 2) incr = args->at(1)->expression;
                     if (!incr && value > 0) {
                         ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                                "Expected packet length argument for %1% "
-                                "method of indirect counter",
-                                a->method->getName());
+                                     "Expected packet length argument for %1% "
+                                     "method of indirect counter",
+                                     a->method->getName());
                         return false;
                     }
                     if (value == 2) {
@@ -1207,8 +1208,8 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             } else if (a->method->getName().name == "set_sa_index") {
                 auto args = a->expr->arguments;
                 if (args->size() != 1) {
-                    ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected number of arguments for %1%",
-                            a->method->name);
+                    ::p4c::error(ErrorType::ERR_UNEXPECTED,
+                                 "Unexpected number of arguments for %1%", a->method->name);
                     return false;
                 }
                 auto index = args->at(0)->expression;
@@ -1258,7 +1259,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             auto argSize = args->size();
             if (argSize != 3) {
                 ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected number of arguments for %1%",
-                        a->method->name);
+                             a->method->name);
                 return false;
             }
             auto action = a->expr->arguments->at(0)->expression;
@@ -1303,7 +1304,8 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         } else if (a->method->name == "set_entry_expire_time") {
             auto args = a->expr->arguments;
             if (args->size() != 1) {
-                ::p4c::error(ErrorType::ERR_UNEXPECTED, "Expected 1 argument for %1%", a->method->name);
+                ::p4c::error(ErrorType::ERR_UNEXPECTED, "Expected 1 argument for %1%",
+                             a->method->name);
                 return false;
             }
             auto timeout = a->expr->arguments->at(0)->expression;
@@ -1321,7 +1323,8 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         } else if (a->method->name == "mirror_packet") {
             auto args = a->expr->arguments;
             if (args->size() != 2) {
-                ::p4c::error(ErrorType::ERR_UNEXPECTED, "Expected 2 arguments for %1%", a->method->name);
+                ::p4c::error(ErrorType::ERR_UNEXPECTED, "Expected 2 arguments for %1%",
+                             a->method->name);
                 return false;
             }
             auto slotId = a->expr->arguments->at(0)->expression;
@@ -1341,7 +1344,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                     unsigned value = sessionId->to<IR::Constant>()->asUnsigned();
                     if (value == 0) {
                         ::p4c::error(ErrorType::ERR_INVALID,
-                                "Mirror session ID 0 is reserved for use by Architecture");
+                                     "Mirror session ID 0 is reserved for use by Architecture");
                         return false;
                     }
                 }

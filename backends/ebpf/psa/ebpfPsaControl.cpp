@@ -82,12 +82,14 @@ void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
         if (method->method->type->name == "write") {
             reg->emitRegisterWrite(builder, method, this);
         } else if (method->method->type->name == "read") {
-            ::p4c::warning(ErrorType::WARN_UNUSED, "This Register(%1%) read value is not used!", name);
+            ::p4c::warning(ErrorType::WARN_UNUSED, "This Register(%1%) read value is not used!",
+                           name);
             reg->emitRegisterRead(builder, method, this, nullptr);
         }
         return;
     } else {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unexpected method call", method->expr);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unexpected method call",
+                     method->expr);
     }
 }
 

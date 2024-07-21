@@ -264,7 +264,7 @@ void P4::ControlPlaneAPI::P4RuntimeSymbolTable::computeIdsForSymbols(P4RuntimeSy
 
         if (!id) {
             ::p4c::error(ErrorType::ERR_OVERLIMIT, "No available id to represent %1% in P4Runtime",
-                    name);
+                         name);
             return;
         }
 

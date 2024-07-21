@@ -33,8 +33,8 @@ class CompileTimeOperations : public Inspector {
  public:
     CompileTimeOperations() { setName("CompileTimeOperations"); }
     void err(const IR::Node *expression) {
-        ::p4c::error(ErrorType::ERR_INVALID, "%1%: could not evaluate expression at compilation time",
-                expression);
+        ::p4c::error(ErrorType::ERR_INVALID,
+                     "%1%: could not evaluate expression at compilation time", expression);
     }
     void postorder(const IR::Mod *expression) override { err(expression); }
     void postorder(const IR::Div *expression) override { err(expression); }

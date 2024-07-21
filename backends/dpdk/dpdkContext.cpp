@@ -62,8 +62,8 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                         auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
                         if (!expr->is<IR::BoolLiteral>()) {
                             ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                                    "%1%: expected boolean for 'add_on_miss' property",
-                                    add_on_miss);
+                                         "%1%: expected boolean for 'add_on_miss' property",
+                                         add_on_miss);
                             return;
                         } else {
                             tblAttr.is_add_on_miss = expr->to<IR::BoolLiteral>()->value;
@@ -77,10 +77,11 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                         auto expr = idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()
                                         ->expression;
                         if (!expr->is<IR::BoolLiteral>()) {
-                            ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                                    "%1%: expected boolean for 'idle_timeout_with_auto_delete' "
-                                    "property",
-                                    idle_timeout_with_auto_delete);
+                            ::p4c::error(
+                                ErrorType::ERR_UNEXPECTED,
+                                "%1%: expected boolean for 'idle_timeout_with_auto_delete' "
+                                "property",
+                                idle_timeout_with_auto_delete);
                             return;
                         } else {
                             tblAttr.idle_timeout_with_auto_delete =
@@ -94,8 +95,9 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 } else {
                     tblAttr.isHidden = false;
                     tblAttr.tableType = "match"_cs;
-                    tblAttr.tableKeys = ::p4c::get(structure->key_map, kv.second->name.originalName +
-                                                                      "_" + tbl->name.originalName);
+                    tblAttr.tableKeys =
+                        ::p4c::get(structure->key_map,
+                                   kv.second->name.originalName + "_" + tbl->name.originalName);
                 }
                 if (!hidden)
                     tables.push_back(d);
@@ -127,9 +129,9 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 int typeArgNum = maxArgNum - 1;
                 if (ed->arguments->size() != maxArgNum) {
                     ::p4c::error(ErrorType::ERR_UNEXPECTED,
-                            "%1%: expected %2% arguments, number of counters and type"
-                            "of counter",
-                            ed, maxArgNum);
+                                 "%1%: expected %2% arguments, number of counters and type"
+                                 "of counter",
+                                 ed, maxArgNum);
                 }
                 auto counter_type = ed->arguments->at(typeArgNum)->expression;
                 BUG_CHECK(counter_type->is<IR::Constant>(), "Expected counter type to be constant");

@@ -237,7 +237,7 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument> *args) {
     unsigned width = ht->width_bits();
     if (width % 8 != 0) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "Header %1% size %2% is not a multiple of 8 bits.", expr, width);
+                     "Header %1% size %2% is not a multiple of 8 bits.", expr, width);
         return;
     }
 
@@ -262,7 +262,7 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument> *args) {
         auto et = etype->to<IHasWidth>();
         if (et == nullptr) {
             ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "Only headers with fixed widths supported %1%", f);
+                         "Only headers with fixed widths supported %1%", f);
             return;
         }
         compileEmitField(expr, f->name, hdrOffsetBits, etype);
@@ -535,7 +535,7 @@ void EBPFControl::scanConstants() {
             }
         } else {
             ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
-                    b->toString());
+                         b->toString());
         }
     }
 }
@@ -548,8 +548,8 @@ bool EBPFControl::build() {
     if (program->model.arch == ModelArchitecture::XdpSwitch) {
         if (pl->size() != 3) {
             ::p4c::error(ErrorType::ERR_EXPECTED,
-                    "Expected control block %s to have exactly 3 parameters",
-                    controlBlock->getName());
+                         "Expected control block %s to have exactly 3 parameters",
+                         controlBlock->getName());
             return false;
         }
         headers = *it;
@@ -559,7 +559,8 @@ bool EBPFControl::build() {
         xdpOutputMeta = *it;
     } else {
         if (pl->size() != 2) {
-            ::p4c::error(ErrorType::ERR_EXPECTED, "Expected control block to have exactly 2 parameters");
+            ::p4c::error(ErrorType::ERR_EXPECTED,
+                         "Expected control block to have exactly 2 parameters");
             return false;
         }
         headers = *it;

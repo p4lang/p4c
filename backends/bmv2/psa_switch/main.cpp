@@ -99,7 +99,8 @@ int main(int argc, char *const argv[]) {
     midEnd.addDebugHook(hook);
     try {
         toplevel = midEnd.process(program);
-        if (::p4c::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr) return 1;
+        if (::p4c::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr)
+            return 1;
         if (!options.dumpJsonFile.empty())
             JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
     } catch (const std::exception &bug) {

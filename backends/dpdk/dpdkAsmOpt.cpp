@@ -450,7 +450,8 @@ void EmitDpdkTableConfig::addAction(const IR::Expression *actionRef, P4::Referen
                     auto argValue = sei->value->to<IR::Constant>();
                     argVals.push_back(argValue->value);
                 } else {
-                    ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported argument expression", arg);
+                    ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported argument expression",
+                                 arg);
                     continue;
                 }
             }
@@ -493,9 +494,9 @@ void EmitDpdkTableConfig::addLpm(const IR::Expression *k, int keyWidth, P4::Type
         }
         if ((value & mask) != value) {
             ::p4c::warning(ErrorType::WARN_MISMATCH,
-                      "P4Runtime requires that LPM matches have masked-off bits set to 0, "
-                      "updating value %1% to conform to the P4Runtime specification",
-                      km->left);
+                           "P4Runtime requires that LPM matches have masked-off bits set to 0, "
+                           "updating value %1% to conform to the P4Runtime specification",
+                           km->left);
             value &= mask;
         }
         valueStr = value;
@@ -518,9 +519,9 @@ void EmitDpdkTableConfig::addTernary(const IR::Expression *k, int keyWidth, P4::
         auto mask = convertSimpleKeyExpressionToBigInt(km->right, keyWidth, typeMap);
         if ((value & mask) != value) {
             ::p4c::warning(ErrorType::WARN_MISMATCH,
-                      "P4Runtime requires that Ternary matches have masked-off bits set to 0, "
-                      "updating value %1% to conform to the P4Runtime specification",
-                      km->left);
+                           "P4Runtime requires that Ternary matches have masked-off bits set to 0, "
+                           "updating value %1% to conform to the P4Runtime specification",
+                           km->left);
             value &= mask;
         }
         valueStr = value;
@@ -591,7 +592,7 @@ void EmitDpdkTableConfig::addMatchKey(const IR::DpdkTable *table, const IR::List
         } else {
             if (!k->is<IR::DefaultExpression>())
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                        "%1%: match type not supported by P4Runtime serializer", matchType);
+                             "%1%: match type not supported by P4Runtime serializer", matchType);
             continue;
         }
     }

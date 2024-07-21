@@ -81,7 +81,8 @@ class OutHeaderSize final : public EBPF::CodeGenInspector {
         auto type = typeMap->getType(h);
         auto ht = type->to<IR::Type_Header>();
         if (ht == nullptr) {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot emit a non-header type %1%", h);
+            ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot emit a non-header type %1%",
+                         h);
             return false;
         }
         unsigned width = ht->width_bits();
@@ -113,7 +114,7 @@ void UBPFDeparserTranslationVisitor::compileEmitField(const IR::Expression *expr
     auto et = type->to<EBPF::IHasWidth>();
     if (et == nullptr) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "Only headers with fixed widths supported %1%", expr);
+                     "Only headers with fixed widths supported %1%", expr);
         return;
     }
 
@@ -221,7 +222,8 @@ void UBPFDeparserTranslationVisitor::compileEmit(const IR::Vector<IR::Argument> 
     auto type = typeMap->getType(expr);
     auto ht = type->to<IR::Type_Header>();
     if (ht == nullptr) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot emit a non-header type %1%", expr);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot emit a non-header type %1%",
+                     expr);
         return;
     }
 
@@ -252,7 +254,7 @@ void UBPFDeparserTranslationVisitor::compileEmit(const IR::Vector<IR::Argument> 
         auto et = etype->to<EBPF::IHasWidth>();
         if (et == nullptr) {
             ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "Only headers with fixed widths supported %1%", f);
+                         "Only headers with fixed widths supported %1%", f);
             return;
         }
         compileEmitField(expr, f->name, alignment, etype);
@@ -286,7 +288,7 @@ bool UBPFDeparser::build() {
     auto pl = controlBlock->container->type->applyParams;
     if (pl->size() != 2) {
         ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: Expected deparser to have exactly 2 parameters",
-                controlBlock->getNode());
+                     controlBlock->getNode());
         return false;
     }
 

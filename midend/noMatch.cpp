@@ -58,13 +58,13 @@ const IR::Node *DoHandleNoMatch::postorder(IR::P4Program *program) {
     auto vec = decls->toVector();
     if (vec.empty()) {
         ::p4c::error(ErrorType::ERR_MODEL,
-                "Declaration of function '%1%' not found; did you include core.p4?",
-                IR::ParserState::verify);
+                     "Declaration of function '%1%' not found; did you include core.p4?",
+                     IR::ParserState::verify);
         return program;
     }
     if (vec.size() > 1) {
         ::p4c::error(ErrorType::ERR_MODEL, "Multiple declarations of %1%: %2% %3%",
-                IR::ParserState::verify, vec[0], vec[1]);
+                     IR::ParserState::verify, vec[0], vec[1]);
     }
     return program;
 }

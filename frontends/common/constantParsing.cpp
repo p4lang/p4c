@@ -38,7 +38,8 @@ static IR::Constant *parseConstantWithWidth(Util::SourceInfo srcInfo, const char
     sep += strspn(sep, " \t\r\n");
     if (!*sep) BUG("Expected to find separator %1%", text);
     if (size < 0) {
-        ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid width; %2% must be positive", srcInfo, size);
+        ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid width; %2% must be positive", srcInfo,
+                     size);
         return nullptr;
     }
     if (size > P4CContext::getConfig().maximumWidthSupported()) {
@@ -71,7 +72,7 @@ int parseConstantChecked(const Util::SourceInfo &srcInfo, const UnparsedConstant
     auto cst = parseConstant(srcInfo, constant, 0);
     if (!cst->fitsInt()) {
         ::p4c::error(ErrorType::ERR_OVERLIMIT,
-                "%1$x: this implementation does not support bitstrings this large", cst);
+                     "%1$x: this implementation does not support bitstrings this large", cst);
         return 8;  // this is a fine value for a width; compilation will stop anyway
     }
     return cst->asInt();

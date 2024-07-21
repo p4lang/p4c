@@ -76,11 +76,11 @@ void IntrospectionGenerator::collectKeyInfo(const IR::Key *key, struct TableAttr
                         keyField->type = val;
                     } else {
                         ::p4c::error(ErrorType::ERR_INVALID,
-                                "tc_type annotation cannot have '%1%' as value", expr);
+                                     "tc_type annotation cannot have '%1%' as value", expr);
                     }
                 } else {
-                    ::p4c::error(ErrorType::ERR_INVALID, "tc_type annotation cannot have '%1%' as value",
-                            expr);
+                    ::p4c::error(ErrorType::ERR_INVALID,
+                                 "tc_type annotation cannot have '%1%' as value", expr);
                 }
             }
             if (anno->name == IR::Annotation::nameAnnotation) {

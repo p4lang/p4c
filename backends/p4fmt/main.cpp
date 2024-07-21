@@ -29,7 +29,7 @@ int main(int argc, char *const argv[]) {
         out = openFile(options.outputFile(), false);
         if ((out == nullptr) || !(*out)) {
             ::p4c::error(ErrorType::ERR_NOT_FOUND, "%2%: No such file or directory.",
-                    options.outputFile().string());
+                         options.outputFile().string());
             options.usage();
             return EXIT_FAILURE;
         }

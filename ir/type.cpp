@@ -83,8 +83,8 @@ const Type_Bits *Type_Bits::get(int width, bool isSigned) {
     auto &result = (*type_map)[std::make_pair(width, isSigned)];
     if (!result) result = new Type_Bits(width, isSigned);
     if (width > P4CContext::getConfig().maximumWidthSupported())
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%", result,
-                P4CContext::getConfig().maximumWidthSupported());
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%",
+                     result, P4CContext::getConfig().maximumWidthSupported());
     return result;
 }
 

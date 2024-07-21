@@ -34,12 +34,13 @@ bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument> *arguments) {
         } else {
             if (argHasName != hasName)
                 ::p4c::error(ErrorType::ERR_INVALID,
-                        "%1%: either all or none of the arguments of a call must be named", arg);
+                             "%1%: either all or none of the arguments of a call must be named",
+                             arg);
             if (argHasName) {
                 auto it = found.find(argName);
                 if (it != found.end())
-                    ::p4c::error(ErrorType::ERR_DUPLICATE, "%1% and %2%: same argument name", it->second,
-                            arg);
+                    ::p4c::error(ErrorType::ERR_DUPLICATE, "%1% and %2%: same argument name",
+                                 it->second, arg);
             }
         }
         if (argHasName) found.emplace(argName, arg);
@@ -50,7 +51,8 @@ bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument> *arguments) {
 bool CheckNamedArgs::checkOptionalParameters(const IR::ParameterList *parameters) {
     for (auto parameter : parameters->parameters) {
         if (parameter->isOptional())
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: optional parameter not allowed here", parameter);
+            ::p4c::error(ErrorType::ERR_INVALID, "%1%: optional parameter not allowed here",
+                         parameter);
     }
     return true;
 }
@@ -58,11 +60,11 @@ bool CheckNamedArgs::checkOptionalParameters(const IR::ParameterList *parameters
 bool CheckNamedArgs::preorder(const IR::Parameter *parameter) {
     if (parameter->defaultValue != nullptr) {
         if (parameter->isOptional())
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: optional parameters cannot have default values",
-                    parameter);
+            ::p4c::error(ErrorType::ERR_INVALID,
+                         "%1%: optional parameters cannot have default values", parameter);
         if (parameter->hasOut())
             ::p4c::error(ErrorType::ERR_INVALID, "%1%: out parameters cannot have default values",
-                    parameter);
+                         parameter);
     }
     return true;
 }

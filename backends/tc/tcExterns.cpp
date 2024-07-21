@@ -187,7 +187,7 @@ void EBPFChecksumPNA::init(const EBPF::EBPFProgram *program, cstring name, int t
             ::p4c::error(ErrorType::ERR_UNSUPPORTED, "InternetChecksum not yet implemented");
         else
             ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Hash algorithm not yet implemented: %1%",
-                    declaration->arguments->at(0));
+                         declaration->arguments->at(0));
     }
 }
 
@@ -302,15 +302,17 @@ void InternetChecksumAlgorithmPNA::updateChecksum(EBPF::CodeBuilder *builder,
         }
         if (width > 64) {
             if (remainingBits != 16) {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                        "%1%: field wider than 64 bits must be aligned to 16 bits in input data",
-                        field);
+                ::p4c::error(
+                    ErrorType::ERR_UNSUPPORTED,
+                    "%1%: field wider than 64 bits must be aligned to 16 bits in input data",
+                    field);
                 continue;
             }
             if (width % 16 != 0) {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                        "%1%: field wider than 64 bits must have size in bits multiply of 16 bits",
-                        field);
+                ::p4c::error(
+                    ErrorType::ERR_UNSUPPORTED,
+                    "%1%: field wider than 64 bits must have size in bits multiply of 16 bits",
+                    field);
                 continue;
             }
 

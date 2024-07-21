@@ -64,7 +64,8 @@ void DoSingleArgumentSelect::checkExpressionType(const IR::Expression *expressio
         }
     } else {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED,
-                "%1%: expression type %2% not supported in select expression", expression, type);
+                     "%1%: expression type %2% not supported in select expression", expression,
+                     type);
     }
 }
 

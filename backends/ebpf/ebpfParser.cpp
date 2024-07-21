@@ -58,14 +58,14 @@ void StateTranslationVisitor::compileAdvance(const P4::ExternMethod *extMethod) 
                                           offsetStr.c_str());
     } else {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "packet_in.advance() method with non-constant argument is not supported yet");
+                     "packet_in.advance() method with non-constant argument is not supported yet");
         return;
     }
 
     int advanceVal = cnst->asInt();
     if (advanceVal % 8 != 0) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "packet_in.advance(%1%) must be byte-aligned in eBPF backend", advanceVal);
+                     "packet_in.advance(%1%) must be byte-aligned in eBPF backend", advanceVal);
         return;
     }
 
@@ -100,7 +100,8 @@ void StateTranslationVisitor::compileVerify(const IR::MethodCallExpression *expr
     auto errorMember = errorExpr->to<IR::Member>();
     auto type = typeMap->getType(errorExpr, true);
     if (!type->is<IR::Type_Error>() || errorMember == nullptr) {
-        ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: not accessing a member error type", errorExpr);
+        ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: not accessing a member error type",
+                     errorExpr);
         return;
     }
 
@@ -209,7 +210,8 @@ bool StateTranslationVisitor::preorder(const IR::SelectExpression *expression) {
             if (pvs != nullptr)
                 pvs->emitKeyInitializer(builder, expression, pvsKeyVarName);
             else
-                ::p4c::error(ErrorType::ERR_UNKNOWN, "%1%: expected a value_set instance", e->keyset);
+                ::p4c::error(ErrorType::ERR_UNKNOWN, "%1%: expected a value_set instance",
+                             e->keyset);
         }
     }
 
@@ -338,10 +340,11 @@ void StateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             // To correctly insert that padding, the length of field must be known, but tools like
             // nikss-ctl (and the nikss library) don't consume P4info.txtpb to have such knowledge.
             // There is also a bug in (de)parser causing such fields to be deparsed incorrectly.
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "%1%: fields wider than 64 bits must have a size multiple of 8 bits (1 byte) "
-                    "due to ambiguous padding in the LSB byte when the condition is not met",
-                    field);
+            ::p4c::error(
+                ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%1%: fields wider than 64 bits must have a size multiple of 8 bits (1 byte) "
+                "due to ambiguous padding in the LSB byte when the condition is not met",
+                field);
         }
 
         // wide values; read all bytes one by one.
@@ -405,8 +408,8 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
     auto type = state->parser->typeMap->getType(destination);
     auto ht = type->to<IR::Type_StructLike>();
     if (ht == nullptr) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot extract to a non-struct type %1%",
-                destination);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                     "Cannot extract to a non-struct type %1%", destination);
         return;
     }
 
@@ -414,7 +417,7 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
     unsigned width = ht->width_bits();
     if ((width % 8) != 0) {
         ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "Header %1% size %2% is not a multiple of 8 bits.", destination, width);
+                     "Header %1% size %2% is not a multiple of 8 bits.", destination, width);
         return;
     }
 
@@ -475,7 +478,7 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
         auto et = etype->to<IHasWidth>();
         if (et == nullptr) {
             ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "Only headers with fixed widths supported %1%", f);
+                         "Only headers with fixed widths supported %1%", f);
             return;
         }
         compileExtractField(destination, f, hdrOffsetBits, etype);
@@ -505,7 +508,7 @@ void StateTranslationVisitor::processFunction(const P4::ExternFunction *function
         compileVerify(function->expr);
     } else {
         ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected extern function call in parser %1%",
-                function->expr);
+                     function->expr);
     }
 }
 
@@ -517,7 +520,7 @@ void StateTranslationVisitor::processMethod(const P4::ExternMethod *method) {
         if (method->method->name.name == p4lib.packetIn.extract.name) {
             if (expression->arguments->size() != 1) {
                 ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                        "Variable-sized header fields not yet supported %1%", expression);
+                             "Variable-sized header fields not yet supported %1%", expression);
                 return;
             }
             compileExtract(expression->arguments->at(0)->expression);
@@ -532,7 +535,8 @@ void StateTranslationVisitor::processMethod(const P4::ExternMethod *method) {
         BUG("Unhandled packet method %1%", expression->method);
     }
 
-    ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected extern method call in parser %1%", expression);
+    ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected extern method call in parser %1%",
+                 expression);
 }
 
 bool StateTranslationVisitor::preorder(const IR::MethodCallExpression *expression) {

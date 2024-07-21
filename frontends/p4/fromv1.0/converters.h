@@ -186,8 +186,8 @@ class DiscoverStructure : public Inspector {
         auto it = reserved_names.find(nodeName);
         if (it == reserved_names.end()) return;
         if (it->second != kind)
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid name; it can only be used for %2%", node,
-                    it->second);
+            ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid name; it can only be used for %2%",
+                         node, it->second);
     }
     void checkReserved(const IR::Node *node, cstring nodeName) const {
         checkReserved(node, nodeName, nullptr);
@@ -421,7 +421,8 @@ class ComputeTableCallGraph : public Inspector {
         }
         auto parent = findContext<IR::V1Control>();
         if (!parent) {
-            ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: Apply not within a control block?", apply);
+            ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: Apply not within a control block?",
+                         apply);
             return;
         }
 
@@ -436,8 +437,8 @@ class ComputeTableCallGraph : public Inspector {
         if (ctrl != nullptr && ctrl != parent) {
             auto previous = get(structure->tableInvocation, tbl);
             ::p4c::error(ErrorType::ERR_INVALID,
-                    "%1%: Table invoked from two different controls: %2% and %3%", tbl, apply,
-                    previous);
+                         "%1%: Table invoked from two different controls: %2% and %3%", tbl, apply,
+                         previous);
         }
         LOG3("Invoking " << tbl << " in " << parent->name);
         structure->tableMapping.emplace(tbl, parent);
@@ -541,8 +542,8 @@ class FixExtracts final : public Transform {
                 cstring hname = structure->makeUniqueName(type->name.name);
                 if (fixedHeaderType != nullptr) {
                     ::p4c::error(ErrorType::ERR_INVALID,
-                            "%1%: header types with multiple varbit fields are not supported",
-                            type);
+                                 "%1%: header types with multiple varbit fields are not supported",
+                                 type);
                     return nullptr;
                 }
                 fixedHeaderType = new IR::Type_Header(IR::ID(hname), fields);
@@ -749,8 +750,8 @@ class DetectDuplicates : public Inspector {
                             ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: same name as %2%", e1, e2);
                         else
                             // This name is probably standard_metadata_t, a built-in declaration
-                            ::p4c::error(ErrorType::ERR_INVALID, "%1% is invalid; name %2% is reserved",
-                                    e2, key);
+                            ::p4c::error(ErrorType::ERR_INVALID,
+                                         "%1% is invalid; name %2% is reserved", e2, key);
                     }
                 }
             }
@@ -958,8 +959,8 @@ class MoveIntrinsicMetadata : public Transform {
             if (intrType != nullptr) {
                 for (auto f : intrType->fields) {
                     if (type->fields.getDeclaration(f->name) == nullptr) {
-                        ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: no such field in standard_metadata",
-                                f->name);
+                        ::p4c::error(ErrorType::ERR_NOT_FOUND,
+                                     "%1%: no such field in standard_metadata", f->name);
                         LOG2("standard_metadata: " << type);
                     }
                 }
@@ -967,8 +968,8 @@ class MoveIntrinsicMetadata : public Transform {
             if (queueType != nullptr) {
                 for (auto f : queueType->fields) {
                     if (type->fields.getDeclaration(f->name) == nullptr) {
-                        ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: no such field in standard_metadata",
-                                f->name);
+                        ::p4c::error(ErrorType::ERR_NOT_FOUND,
+                                     "%1%: no such field in standard_metadata", f->name);
                         LOG2("standard_metadata: " << type);
                     }
                 }
