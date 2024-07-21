@@ -32,9 +32,9 @@ class WriteRequest;
 }  // namespace v1
 }  // namespace p4
 
-namespace IR {
+namespace p4c::IR {
 class P4Program;
-}  // namespace IR
+}  // namespace p4c::IR
 
 namespace P4 {
 

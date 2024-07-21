@@ -23,7 +23,7 @@ limitations under the License.
 #include "lib/error_catalog.h"
 #include "lib/exceptions.h"
 
-namespace IR {
+namespace p4c::IR {
 
 cstring Annotation::getName() const {
     BUG_CHECK(name == IR::Annotation::nameAnnotation, "%1%: Only works on name annotations", this);
@@ -61,4 +61,4 @@ cstring IDeclaration::controlPlaneName(cstring replace /* = cstring() */) const 
     return name.startsWith(".") ? name.substr(1) : name;
 }
 
-}  // namespace IR
+}  // namespace p4c::IR

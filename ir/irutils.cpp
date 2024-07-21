@@ -9,7 +9,7 @@
 #include "ir/visitor.h"
 #include "lib/exceptions.h"
 
-namespace IR {
+namespace p4c::IR {
 
 using namespace P4::literals;
 
@@ -261,4 +261,4 @@ const IR::Node *inlineBlock(const Transform &t, IR::IndexedVector<IR::StatOrDecl
     return inlineBlockImpl(t, std::move(stmts));
 }
 
-}  // namespace IR
+}  // namespace p4c::IR

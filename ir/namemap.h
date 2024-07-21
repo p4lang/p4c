@@ -28,7 +28,7 @@ limitations under the License.
 
 class JSONLoader;
 
-namespace IR {
+namespace p4c::IR {
 
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP = std::map,
           class COMP = std::less<cstring>,
@@ -161,6 +161,6 @@ class NameMap : public Node {
     DECLARE_TYPEINFO(NameMap, Node);
 };
 
-}  // namespace IR
+}  // namespace p4c::IR
 
 #endif /* IR_NAMEMAP_H_ */

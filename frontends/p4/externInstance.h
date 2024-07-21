@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/parameterSubstitution.h"
 #include "lib/cstring.h"
 
-namespace IR {
+namespace p4c::IR {
 class ConstructorCallExpression;
 class Expression;
 class IAnnotated;
@@ -31,7 +31,7 @@ class Type_Extern;
 class TypeMap;
 template <typename T>
 class Vector;
-}  // namespace IR
+}  // namespace p4c::IR
 
 namespace P4 {
 

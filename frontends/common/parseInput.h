@@ -23,9 +23,9 @@ limitations under the License.
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
 
-namespace IR {
+namespace p4c::IR {
 class P4Program;
-}  // namespace IR
+}  // namespace p4c::IR
 
 namespace P4 {
 

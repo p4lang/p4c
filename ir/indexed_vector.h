@@ -28,7 +28,7 @@ limitations under the License.
 
 class JSONLoader;
 
-namespace IR {
+namespace p4c::IR {
 
 /**
  * A Vector which holds objects which are instances of IDeclaration, and keeps
@@ -223,6 +223,6 @@ class IndexedVector : public Vector<T> {
                                         Vector<T>);
 };
 
-}  // namespace IR
+}  // namespace p4c::IR
 
 #endif /* IR_INDEXED_VECTOR_H_ */

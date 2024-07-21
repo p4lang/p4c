@@ -38,7 +38,7 @@ namespace p4c::Util {
 class JsonObject;
 }  // namespace p4c::Util
 
-namespace IR {
+namespace p4c::IR {
 
 using namespace P4::literals;
 
@@ -223,6 +223,6 @@ inline bool equiv(const INode *a, const INode *b) {
         return tmp;                                                                          \
     }
 
-}  // namespace IR
+}  // namespace p4c::IR
 
 #endif /* IR_NODE_H_ */

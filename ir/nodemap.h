@@ -20,7 +20,7 @@ limitations under the License.
 #include "ir/node.h"
 #include "lib/cstring.h"
 
-namespace IR {
+namespace p4c::IR {
 
 template <class KEY, class VALUE,
           template <class K, class V, class COMP, class ALLOC> class MAP = std::map,
@@ -97,6 +97,6 @@ class NodeMap : public Node {
     DECLARE_TYPEINFO(NodeMap, Node);
 };
 
-}  // namespace IR
+}  // namespace p4c::IR
 
 #endif /* IR_NODEMAP_H_ */

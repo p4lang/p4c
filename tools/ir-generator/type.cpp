@@ -127,7 +127,7 @@ NamedType &NamedType::SourceInfo() {
 
 cstring NamedType::toString() const {
     if (resolved) return resolved->fullName();
-    if (!lookup && name == "ID") return "IR::ID"_cs;  // hack -- ID is in namespace IR
+    if (!lookup && name == "ID") return "IR::ID"_cs;  // hack -- ID is in namespace p4c::IR
     if (lookup) return lookup->toString() + name;
     if (foundin) return LookupScope(foundin).toString() + name;
     return name;

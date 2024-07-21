@@ -39,7 +39,7 @@ limitations under the License.
 #include "lib/null.h"
 #include "lib/ordered_map.h"
 
-namespace IR {
+namespace p4c::IR {
 
 const cstring ParserState::accept = "accept"_cs;
 const cstring ParserState::reject = "reject"_cs;
@@ -297,4 +297,4 @@ const IR::PackageBlock *ToplevelBlock::getMain() const {
     return block->to<IR::PackageBlock>();
 }
 
-}  // namespace IR
+}  // namespace p4c::IR

@@ -8,7 +8,7 @@
   * @{
   */
 #emit
-namespace IR {
+namespace p4c::IR {
 enum class CounterType { NONE, PACKETS, BYTES, BOTH };
 }
 

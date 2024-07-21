@@ -24,7 +24,7 @@ limitations under the License.
 
 class JSONLoader;
 
-namespace IR {
+namespace p4c::IR {
 
 // Specialization of vector which
 // - only stores const IR::Node* objects inside (T should derive from Node)
@@ -209,7 +209,7 @@ class Vector : public VectorBase {
     DECLARE_TYPEINFO_WITH_DISCRIMINATOR(Vector<T>, NodeDiscriminator::VectorT, T, VectorBase);
 };
 
-}  // namespace IR
+}  // namespace p4c::IR
 
 // XXX(seth): We use this namespace to hide our get() overloads from ADL. GCC
 // 4.8 has a bug which causes these overloads to be considered when get() is

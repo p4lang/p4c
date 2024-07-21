@@ -133,7 +133,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << "class JSONLoader;\n"
         << "using NodeFactoryFn = IR::Node*(*)(JSONLoader&);\n"
         << std::endl
-        << "namespace IR {\n"
+        << "namespace p4c::IR {\n"
         << "extern std::map<cstring, NodeFactoryFn> unpacker_table;\n"
         << "using namespace P4::literals;\n"
         << "}\n";
@@ -217,7 +217,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     }
     t << std::endl;
 
-    t << "namespace IR {" << std::endl;
+    t << "namespace p4c::IR {" << std::endl;
 
     // Emit forward declarations
     for (auto *cls : *getClasses()) {
@@ -268,7 +268,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
          "RTTI::TypeId(rhs); }\n"
       << " inline bool operator!=(NodeDiscriminator lhs, RTTI::TypeId rhs) { return "
          "RTTI::TypeId(lhs) != rhs; }\n";
-    t << "}  // namespace IR" << std::endl;
+    t << "}  // namespace p4c::IR" << std::endl;
 }
 
 void IrClass::generateTreeMacro(std::ostream &out) const {
@@ -403,7 +403,7 @@ cstring IrClass::qualified_name(const IrNamespace *in) const {
 
 void IrClass::generate_hdr(std::ostream &out) const {
     if (kind != NodeKind::Nested) {
-        out << "namespace IR {" << std::endl;
+        out << "namespace p4c::IR {" << std::endl;
         enter_namespace(out, containedIn);
     }
     for (auto cblock : comments) cblock->generate_hdr(out);
@@ -453,7 +453,7 @@ void IrClass::generate_hdr(std::ostream &out) const {
     out << "};" << std::endl;
     if (kind != NodeKind::Nested) {
         exit_namespace(out, containedIn);
-        out << "}  // namespace IR" << std::endl;
+        out << "}  // namespace p4c::IR" << std::endl;
     }
 }
 

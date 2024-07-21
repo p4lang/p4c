@@ -19,9 +19,9 @@ limitations under the License.
 
 #include "lib/cstring.h"
 
-namespace IR {
+namespace p4c::IR {
 class Constant;
-}  // namespace IR
+}  // namespace p4c::IR
 
 namespace p4c::Util {
 class SourceInfo;

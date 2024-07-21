@@ -9,7 +9,7 @@
 */
 
 #emit
-namespace IR {
+namespace p4c::IR {
 enum class Direction {
     None,
     In,
@@ -31,7 +31,7 @@ inline cstring directionToString(IR::Direction direction) {
             BUG("Unhandled case");
     }
 }
-}  // namespace IR
+}  // namespace p4c::IR
 
 inline std::ostream& operator<<(std::ostream &out, IR::Direction d) {
     switch (d) {

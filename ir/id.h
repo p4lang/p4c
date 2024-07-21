@@ -22,7 +22,7 @@ limitations under the License.
 #include "lib/hash.h"
 #include "lib/source_file.h"
 
-namespace IR {
+namespace p4c::IR {
 
 // An identifier.
 struct ID : Util::IHasSourceInfo {
@@ -61,7 +61,7 @@ struct ID : Util::IHasSourceInfo {
     cstring toString() const override { return originalName.isNullOrEmpty() ? name : originalName; }
 };
 
-}  // namespace IR
+}  // namespace p4c::IR
 
 namespace p4c::Util {
 template <>

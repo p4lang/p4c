@@ -30,7 +30,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/source_file.h"
 
-namespace IR {
+namespace p4c::IR {
 
 const cstring IR::Type_Stack::next = "next"_cs;
 const cstring IR::Type_Stack::last = "last"_cs;
@@ -282,4 +282,4 @@ const Type *Type_SpecializedCanonical::getP4Type() const {
     return new IR::Type_Specialized(srcInfo, new IR::Type_Name(st->getName()), args);
 }
 
-}  // namespace IR
+}  // namespace p4c::IR
