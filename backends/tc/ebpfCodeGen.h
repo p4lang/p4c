@@ -21,7 +21,7 @@ and limitations under the License.
 #include "backend.h"
 #include "tcExterns.h"
 
-namespace TC {
+namespace p4c::TC {
 
 using namespace p4c::P4::literals;
 
@@ -452,6 +452,6 @@ class EBPFHashAlgorithmTypeFactoryPNA : public EBPF::EBPFHashAlgorithmTypeFactor
     EBPF::EBPFHashAlgorithmPSA *create(int type, const EBPF::EBPFProgram *program, cstring name);
 };
 
-}  // namespace TC
+}  // namespace p4c::TC
 
 #endif /* BACKENDS_TC_EBPFCODEGEN_H_ */

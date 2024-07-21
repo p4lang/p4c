@@ -16,7 +16,7 @@ and limitations under the License.
 
 #include "tcAnnotations.h"
 
-namespace TC {
+namespace p4c::TC {
 
 using namespace p4c::P4::literals;
 
@@ -36,4 +36,4 @@ const cstring ParseTCAnnotations::tc_init_val = "tc_init_val"_cs;
 const cstring ParseTCAnnotations::tc_numel = "tc_numel"_cs;
 const cstring ParseTCAnnotations::tc_acl = "tc_acl"_cs;
 
-}  // namespace TC
+}  // namespace p4c::TC

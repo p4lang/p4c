@@ -23,7 +23,7 @@ and limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace TC {
+namespace p4c::TC {
 
 enum block_t {
     PARSER,
@@ -153,6 +153,6 @@ class InspectPnaProgram : public Inspector {
     bool preorder(const IR::Parameter *parameter) override;
 };
 
-}  // namespace TC
+}  // namespace p4c::TC
 
 #endif /* BACKENDS_TC_PNAPROGRAMSTRUCTURE_H_ */

@@ -16,7 +16,7 @@ and limitations under the License.
 
 #include "tcExterns.h"
 
-namespace TC {
+namespace p4c::TC {
 
 void EBPFRegisterPNA::emitInitializer(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
                                       ControlBodyTranslatorPNA *translator) {
@@ -433,4 +433,4 @@ cstring InternetChecksumAlgorithmPNA::getConvertByteOrderFunction(unsigned width
     return emit;
 }
 
-}  // namespace TC
+}  // namespace p4c::TC

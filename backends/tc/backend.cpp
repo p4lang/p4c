@@ -21,7 +21,7 @@ and limitations under the License.
 #include "backends/ebpf/ebpfOptions.h"
 #include "backends/ebpf/target.h"
 
-namespace TC {
+namespace p4c::TC {
 
 using namespace p4c::P4::literals;
 
@@ -1302,4 +1302,4 @@ bool ConvertToBackendIR::checkParameterDirection(const IR::TCAction *tcAction) {
     return dirParam;
 }
 
-}  // namespace TC
+}  // namespace p4c::TC

@@ -17,7 +17,7 @@ and limitations under the License.
 #include "backend.h"
 #include "ebpfCodeGen.h"
 
-namespace TC {
+namespace p4c::TC {
 
 using namespace p4c::P4::literals;
 
@@ -177,6 +177,6 @@ class EBPFInternetChecksumPNA : public EBPFChecksumPNA {
                        const IR::MethodCallExpression *expr, Visitor *visitor) override;
 };
 
-}  // namespace TC
+}  // namespace p4c::TC
 
 #endif /* BACKENDS_TC_TCEXTERNS_H_ */

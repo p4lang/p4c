@@ -16,7 +16,7 @@ and limitations under the License.
 
 #include "midend.h"
 
-namespace TC {
+namespace p4c::TC {
 
 const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *program,
                                      std::ostream *outStream) {
@@ -76,4 +76,4 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
     return evaluator->getToplevelBlock();
 }
 
-}  // namespace TC
+}  // namespace p4c::TC

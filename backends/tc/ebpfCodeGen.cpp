@@ -16,7 +16,7 @@ and limitations under the License.
 
 #include "ebpfCodeGen.h"
 
-namespace TC {
+namespace p4c::TC {
 
 // =====================PNAEbpfGenerator=============================
 void PNAEbpfGenerator::emitPNAIncludes(EBPF::CodeBuilder *builder) const {
@@ -2464,4 +2464,4 @@ void CRC32ChecksumAlgorithmPNA::emitGlobals(EBPF::CodeBuilder *builder) {
     builder->appendLine(code);
 }
 
-}  // namespace TC
+}  // namespace p4c::TC

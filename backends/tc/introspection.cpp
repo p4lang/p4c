@@ -18,7 +18,7 @@ and limitations under the License.
 
 /// This file defines functions for the pass to generate the introspection file
 
-namespace TC {
+namespace p4c::TC {
 
 void IntrospectionGenerator::postorder(const IR::P4Table *t) {
     p4tables.emplace(t->name.originalName, t);
@@ -360,4 +360,4 @@ std::optional<cstring> IntrospectionGenerator::checkValidTcType(const IR::String
     return std::nullopt;
 }
 
-}  // namespace TC
+}  // namespace p4c::TC

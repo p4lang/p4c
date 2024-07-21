@@ -35,7 +35,7 @@ and limitations under the License.
 #include "tcAnnotations.h"
 #include "tc_defines.h"
 
-namespace TC {
+namespace p4c::TC {
 
 extern cstring PnaMainParserInputMetaFields[TC::MAX_PNA_PARSER_META];
 extern cstring PnaMainInputMetaFields[TC::MAX_PNA_INPUT_META];
@@ -173,6 +173,6 @@ class Backend : public PassManager {
     bool emitCFile();
 };
 
-}  // namespace TC
+}  // namespace p4c::TC
 
 #endif /* BACKENDS_TC_BACKEND_H_ */

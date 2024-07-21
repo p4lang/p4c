@@ -16,7 +16,7 @@ and limitations under the License.
 
 #include "pnaProgramStructure.h"
 
-namespace TC {
+namespace p4c::TC {
 
 using namespace p4c::P4::literals;
 
@@ -278,4 +278,4 @@ bool ParsePnaArchitecture::preorder(const IR::PackageBlock *block) {
     return false;
 }
 
-}  // namespace TC
+}  // namespace p4c::TC
