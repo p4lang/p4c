@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "flattenInterfaceStructs.h"
 
-namespace P4 {
+namespace p4c::P4 {
 using namespace literals;
 
 namespace {
@@ -137,4 +137,4 @@ const IR::Node *ReplaceStructs::preorder(IR::P4Control *control) {
     return control;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

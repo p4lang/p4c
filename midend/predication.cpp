@@ -16,7 +16,7 @@ limitations under the License.
 #include "predication.h"
 
 #include "frontends/p4/cloner.h"
-namespace P4 {
+namespace p4c::P4 {
 
 namespace Pred {
 
@@ -346,4 +346,4 @@ const IR::Node *Predication::postorder(IR::P4Action *action) {
     return action;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

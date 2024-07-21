@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "eliminateInvalidHeaders.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 const IR::Node *DoEliminateInvalidHeaders::postorder(IR::P4Control *control) {
     control->controlLocals.prepend(variables);
@@ -85,4 +85,4 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeaderUnion *exp
     return new IR::PathExpression(src, new IR::Path(name));
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

@@ -13,7 +13,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/toolname.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 TestgenTarget::TestgenTarget(const std::string &deviceName, const std::string &archName)
     : CompilerTarget(TOOL_NAME, deviceName, archName) {}
@@ -87,4 +87,4 @@ CompilerResultOrError TestgenTarget::runCompilerImpl(const IR::P4Program *progra
         *new TestgenCompilerResult(CompilerResult(*program), coverage.getCoverableNodes(), dcg)};
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen

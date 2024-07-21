@@ -21,7 +21,7 @@ limitations under the License.
 #include "p4RuntimeArchHandler.h"
 #include "typeSpecConverter.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 namespace ControlPlaneAPI {
 
@@ -372,4 +372,4 @@ void P4::ControlPlaneAPI::P4SymbolSuffixSet::addSymbol(const cstring &symbol) {
 
 }  // namespace ControlPlaneAPI
 
-}  // namespace P4
+}  // namespace p4c::P4

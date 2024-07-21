@@ -14,7 +14,7 @@
 #include "lib/null.h"
 #include "lib/source_file.h"
 
-namespace P4Tools::TraceEvents {
+namespace p4c::P4Tools::TraceEvents {
 
 /* =============================================================================================
  *   Generic
@@ -366,4 +366,4 @@ void ParserState::print(std::ostream &os) const { os << "[State] " << state->con
 
 const IR::ParserState *ParserState::getParserState() const { return state; }
 
-}  // namespace P4Tools::TraceEvents
+}  // namespace p4c::P4Tools::TraceEvents

@@ -6,7 +6,7 @@
 #include "ir/node.h"
 #include "ir/visitor.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 /// This pass does two things. First, it converts any type member of struct expression that is a
 /// Type_Name into a Tupe_StructLike. Second, if the type is a Type_Header, it converts the
@@ -21,6 +21,6 @@ class ConvertStructExpr : public Transform {
     const IR::Node *postorder(IR::StructExpression *expr) override;
 };
 
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_CONVERT_STRUCT_EXPR_H_ */

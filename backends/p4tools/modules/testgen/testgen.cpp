@@ -29,7 +29,7 @@
 #include "backends/p4tools/modules/testgen/register.h"
 #include "backends/p4tools/modules/testgen/toolname.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 namespace {
 
@@ -267,4 +267,4 @@ int Testgen::writeTests(const CompilerOptions &compilerOptions,
     return EXIT_FAILURE;
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen

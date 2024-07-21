@@ -10,7 +10,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/map_direct_externs.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
 /// Extends the CompilerResult with information specific to the V1Model running on BMv2.
 class BMv2V1ModelCompilerResult : public TestgenCompilerResult {
@@ -44,6 +44,6 @@ class BMv2V1ModelCompilerResult : public TestgenCompilerResult {
     DECLARE_TYPEINFO(BMv2V1ModelCompilerResult, TestgenCompilerResult);
 };
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_COMPILER_RESULT_H_ */

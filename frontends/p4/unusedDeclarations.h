@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class RemoveUnusedDeclarations;
 
@@ -158,6 +158,6 @@ class RemoveAllUnusedDeclarations : public PassRepeated {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* P4_UNUSEDDECLARATIONS_H_ */

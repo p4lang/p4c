@@ -23,7 +23,7 @@
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace p4c::P4Tools::P4Testgen::Pna {
 
 PTF::PTF(const TestBackendConfiguration &testBackendConfiguration)
     : TestFramework(testBackendConfiguration) {}
@@ -416,4 +416,4 @@ void PTF::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, si
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace p4c::P4Tools::P4Testgen::Pna

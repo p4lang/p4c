@@ -32,9 +32,9 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 const IR::Expression *Bmv2V1ModelTableStepper::computeTargetMatchType(
     const TableUtils::KeyProperties &keyProperties, TableMatchMap *matches,
@@ -465,4 +465,4 @@ Bmv2V1ModelTableStepper::Bmv2V1ModelTableStepper(Bmv2V1ModelExprStepper *stepper
                                                  const IR::P4Table *table)
     : TableStepper(stepper, table) {}
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2

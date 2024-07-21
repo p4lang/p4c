@@ -3,7 +3,7 @@
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
  * Replaces typedef by the type it was defined to represent.
@@ -29,6 +29,6 @@ class EliminateTypedef final : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_ELIMINATETYPEDEFS_H_ */

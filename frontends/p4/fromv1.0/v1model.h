@@ -24,9 +24,9 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/json.h"
 
-namespace P4V1 {
+namespace p4c::P4V1 {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 // This should be kept in sync with p4includes/v1model.p4
 // In a perfect world this would be generated automatically from
@@ -369,6 +369,6 @@ class getV1ModelVersion : public Inspector {
     unsigned version = 0;
 };
 
-}  // namespace P4V1
+}  // namespace p4c::P4V1
 
 #endif /* FRONTENDS_P4_FROMV1_0_V1MODEL_H_ */

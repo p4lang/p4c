@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -130,6 +130,6 @@ class StrengthReduction : public PassManager {
         : StrengthReduction(typeMap, nullptr, enableSubConstToAddTransform) {}
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* P4_STRENGTHREDUCTION_H_ */

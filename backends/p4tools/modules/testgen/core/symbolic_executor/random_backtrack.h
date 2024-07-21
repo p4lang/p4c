@@ -8,7 +8,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 /// A simple random traversal strategy.
 /// If this selection strategy hits a branch point, it will choose a path at random and continue
@@ -45,6 +45,6 @@ class RandomBacktrack : public SymbolicExecutor {
     [[nodiscard]] std::optional<ExecutionStateReference> pickSuccessor(StepResult successors);
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_RANDOM_BACKTRACK_H_ */

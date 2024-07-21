@@ -22,7 +22,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class IHasBlock {
  public:
@@ -119,6 +119,6 @@ class EvaluatorPass final : public PassManager, public IHasBlock {
     EvaluatorPass(ReferenceMap *refMap, TypeMap *typeMap);
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* EVALUATOR_EVALUATOR_H_ */

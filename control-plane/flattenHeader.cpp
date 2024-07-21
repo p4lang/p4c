@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/typeMap.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 namespace ControlPlaneAPI {
 
@@ -86,4 +86,4 @@ const IR::Type_Header *FlattenHeader::flatten(P4::TypeMap *typeMap,
 
 }  // namespace ControlPlaneAPI
 
-}  // namespace P4
+}  // namespace p4c::P4

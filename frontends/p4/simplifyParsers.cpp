@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "simplifyParsers.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 namespace {
 // All the classes in this namespace are invoked on each parser
@@ -200,4 +200,4 @@ const IR::Node *DoSimplifyParsers::preorder(IR::P4Parser *parser) {
     return parser->apply(simpl);
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

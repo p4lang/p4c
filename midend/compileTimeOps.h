@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
  * Check that operations which are only defined at compile-time
@@ -40,6 +40,6 @@ class CompileTimeOperations : public Inspector {
     void postorder(const IR::Div *expression) override { err(expression); }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_COMPILETIMEOPS_H_ */

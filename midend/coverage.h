@@ -14,7 +14,7 @@
 /// track which percentage of nodes they have visited.
 /// The p4tools (backends/p4tools) framework uses this coverage visitor.
 
-namespace P4::Coverage {
+namespace p4c::P4::Coverage {
 
 /// Utility function to compare IR nodes in a set. We use their source info.
 struct SourceIdCmp {
@@ -71,6 +71,6 @@ void printCoverageReport(const CoverageSet &all, const CoverageSet &visited);
 /// Logs nodes from @p new_ which have not yet been visited (are not members of @p visited).
 void logCoverage(const CoverageSet &all, const CoverageSet &visited, const CoverageSet &new_);
 
-}  // namespace P4::Coverage
+}  // namespace p4c::P4::Coverage
 
 #endif /* MIDEND_COVERAGE_H_ */

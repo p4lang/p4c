@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/coreLibrary.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 const IR::Node *DoEliminateSwitch::postorder(IR::P4Program *program) {
     if (!exactNeeded) return program;
@@ -140,4 +140,4 @@ const IR::Node *DoEliminateSwitch::postorder(IR::SwitchStatement *statement) {
     return new IR::BlockStatement(src, contents);
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

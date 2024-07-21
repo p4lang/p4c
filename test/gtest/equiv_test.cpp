@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 TEST(IR, Equiv) {
     auto *t = IR::Type::Bits::get(16);

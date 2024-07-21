@@ -18,7 +18,7 @@ limitations under the License.
 #include "typeChecker.h"
 #include "typeConstraints.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -2250,4 +2250,4 @@ const IR::Node *TypeInference::postorder(IR::AttribLocal *local) {
     return local;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

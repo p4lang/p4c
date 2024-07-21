@@ -63,7 +63,7 @@ struct AutoStdioInputStream {
 
 #endif
 
-namespace P4 {
+namespace p4c::P4 {
 
 AbstractParserDriver::AbstractParserDriver() : sources(new Util::InputSources) {}
 
@@ -278,7 +278,7 @@ void P4ParserDriver::onReadErrorDeclaration(IR::Type_Error *error) {
     allErrors->members.append(error->members);
 }
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 namespace V1 {
 

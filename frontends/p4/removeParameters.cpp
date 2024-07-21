@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 namespace {
 // Remove arguments from any embedded MethodCallExpression
@@ -202,4 +202,4 @@ RemoveActionParameters::RemoveActionParameters(TypeMap *typeMap, TypeChecking *t
     passes.emplace_back(new ClearTypeMap(typeMap));
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

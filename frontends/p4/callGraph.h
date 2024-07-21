@@ -29,7 +29,7 @@ limitations under the License.
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 // I could not get Util::toString() to work properly
 cstring cgMakeString(cstring s);
@@ -355,6 +355,6 @@ class CallGraph {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_CALLGRAPH_H_ */

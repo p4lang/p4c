@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
  * Replaces switch statements that operate on arbitrary scalars with
@@ -104,6 +104,6 @@ class EliminateSwitch final : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_ELIMINATESWITCH_H_ */

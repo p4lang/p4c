@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "strengthReduction.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /// @section Helper methods
 
@@ -448,4 +448,4 @@ const IR::Node *DoStrengthReduction::postorder(IR::Slice *expr) {
     return expr;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

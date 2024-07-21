@@ -21,7 +21,7 @@ limitations under the License.
 #include "lib/ordered_set.h"
 #include "parserCallGraph.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -1132,7 +1132,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallStatement *statement) {
     return setDefinitions(defs, statement, true);  // overwrite
 }
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 // functions for calling from gdb
 void dump(const P4::StorageLocation *s) { std::cout << *s << Log::endl; }

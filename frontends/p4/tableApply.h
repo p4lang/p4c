@@ -25,7 +25,7 @@ limitations under the License.
 // such as table.apply().action_run
 // and table.apply().hit
 
-namespace P4 {
+namespace p4c::P4 {
 
 // These are used to figure out whether an expression has the form:
 // table.apply().hit,
@@ -42,6 +42,6 @@ class TableApplySolver {
                                           DeclarationLookup *refMap, TypeMap *typeMap);
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_TABLEAPPLY_H_ */

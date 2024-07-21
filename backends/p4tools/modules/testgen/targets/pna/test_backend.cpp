@@ -28,7 +28,7 @@
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace p4c::P4Tools::P4Testgen::Pna {
 
 const std::set<std::string> PnaTestBackend::SUPPORTED_BACKENDS = {"METADATA", "PTF"};
 
@@ -129,4 +129,4 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
     return testSpec;
 }
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace p4c::P4Tools::P4Testgen::Pna

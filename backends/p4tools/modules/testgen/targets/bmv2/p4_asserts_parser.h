@@ -13,7 +13,7 @@
 #include "ir/visitor.h"
 #include "lib/cstring.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
 /// Maps control plane identifiers to their corresponding IR type.
 /// Once we have resolved the tokens in the annotation, we can then lookup the corresponding type.
@@ -119,6 +119,6 @@ class Lexer {
     char prev() noexcept;
     char get() noexcept;
 };
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_P4_ASSERTS_PARSER_H_ */

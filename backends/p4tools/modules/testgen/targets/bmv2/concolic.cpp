@@ -26,9 +26,9 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 static big_int checksum(Bmv2HashAlgorithm algo, const uint8_t *buf, size_t len) {
     // Pick a checksum according to the algorithm value.
@@ -294,4 +294,4 @@ std::ostream &operator<<(std::ostream &os, Bmv2HashAlgorithm algo) {
     return os << "INVALID [" << int(algo) << "]";
 }
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2

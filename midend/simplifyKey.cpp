@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/sideEffects.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 bool IsValid::isSimple(const IR::Expression *expression, const Visitor::Context *) {
     if (!expression->is<IR::MethodCallExpression>()) return false;
@@ -94,4 +94,4 @@ const IR::Node *DoSimplifyKey::doStatement(const IR::Statement *statement,
     return block;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

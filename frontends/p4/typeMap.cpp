@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "typeMap.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 bool TypeMap::typeIsEmpty(const IR::Type *type) const {
     if (auto bt = type->to<IR::Type_Bits>()) {
@@ -400,4 +400,4 @@ int TypeMap::widthBits(const IR::Type *type, const IR::Node *errorPosition, bool
     return -1;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

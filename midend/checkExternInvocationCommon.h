@@ -22,7 +22,7 @@ limitations under the License.
 #include "ir/visitor.h"
 #include "lib/bitvec.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class ReferenceMap;
 class TypeMap;
@@ -164,6 +164,6 @@ class CheckExternInvocationCommon : public Inspector {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_CHECKEXTERNINVOCATIONCOMMON_H_ */

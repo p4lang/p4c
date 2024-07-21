@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
 Policy which selects the control blocks where action
@@ -183,6 +183,6 @@ class MoveActionsToTables : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_ACTIONSYNTHESIS_H_ */

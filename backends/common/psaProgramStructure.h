@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 enum gress_t { INGRESS, EGRESS };
 enum block_t {
@@ -155,6 +155,6 @@ class InspectPsaProgram : public Inspector {
     bool preorder(const IR::Parameter *parameter) override;
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* BACKENDS_COMMON_PSAPROGRAMSTRUCTURE_H_ */

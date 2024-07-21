@@ -3,7 +3,7 @@
 #include <array>
 #include <cstddef>
 
-namespace P4Tools::P4Smith {
+namespace p4c::P4Tools::P4Smith {
 
 std::size_t Wordlist::counter = 0;
 
@@ -700,4 +700,4 @@ const char *P4Tools::P4Smith::Wordlist::getFromWordlist() {
     return "";
 }
 
-}  // namespace P4Tools::P4Smith
+}  // namespace p4c::P4Tools::P4Smith

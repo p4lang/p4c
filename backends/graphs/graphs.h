@@ -39,16 +39,16 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class ReferenceMap;
 class TypeMap;
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 namespace graphs {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 class EdgeTypeIface {
  public:

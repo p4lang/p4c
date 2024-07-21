@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
    This pass replaces direct invocations of controls or parsers
@@ -53,6 +53,6 @@ class InstantiateDirectCalls : public Transform, public ResolutionContext {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_DIRECTCALLS_H_ */

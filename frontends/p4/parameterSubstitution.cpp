@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "lib/log.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 void ParameterSubstitution::add(const IR::Parameter *parameter, const IR::Argument *value) {
     CHECK_NULL(value);
@@ -56,4 +56,4 @@ void ParameterSubstitution::populate(const IR::ParameterList *params,
     }
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "lib/hash.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument> *arguments) {
     bool first = true;
@@ -67,4 +67,4 @@ bool CheckNamedArgs::preorder(const IR::Parameter *parameter) {
     return true;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

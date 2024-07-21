@@ -4,7 +4,7 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/ir.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 class Taint {
  public:
@@ -26,6 +26,6 @@ class Taint {
                                              const IR::Expression *programPacket);
 };
 
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_TAINT_H_ */

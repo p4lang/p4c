@@ -56,7 +56,7 @@ struct primitive_info_t {
     unsigned type_match_operands;  // bitset -- 1 bit per operand
 };
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 static const std::map<cstring, primitive_info_t> prim_info = {
     {"add"_cs, {3, 3, 0x1, 0x7}},

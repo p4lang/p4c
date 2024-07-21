@@ -21,7 +21,7 @@ limitations under the License.
 #include "absl/strings/str_split.h"
 #include "typeUnification.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 int TypeConstraint::crtid = 0;
 
@@ -184,4 +184,4 @@ bool TypeConstraint::reportErrorImpl(const TypeVariableSubstitution *subst,
     return false;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

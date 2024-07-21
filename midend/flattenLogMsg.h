@@ -4,7 +4,7 @@
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using TypeLogMsgParams = std::pair<IR::IndexedVector<IR::NamedExpression>, std::string>;
 
@@ -93,6 +93,6 @@ class FlattenLogMsg final : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_FLATTENLOGMSG_H_ */

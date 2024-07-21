@@ -5,7 +5,7 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 // Insert explicit type specializations where they are missing
 class DoBindTypeVariables : public Transform {
@@ -40,6 +40,6 @@ class BindTypeVariables : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_TYPECHECKING_BINDVARIABLES_H_ */

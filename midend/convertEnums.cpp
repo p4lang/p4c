@@ -2,7 +2,7 @@
 
 #include "frontends/p4/enumInstance.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 const IR::Node *DoConvertEnums::preorder(IR::Type_Enum *type) {
     bool convert = policy->convert(type);
@@ -48,4 +48,4 @@ const IR::Node *DoConvertEnums::postorder(IR::Member *expression) {
     return expression;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

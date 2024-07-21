@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/methodInstance.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 static IR::Vector<IR::Argument> *reorder(const ParameterSubstitution &substitution) {
     auto reordered = new IR::Vector<IR::Argument>();
@@ -57,4 +57,4 @@ const IR::Node *DoOrderArguments::postorder(IR::Declaration_Instance *instance) 
     return instance;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

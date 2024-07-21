@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
  * Replaces serializable enum constants with their values.
@@ -50,6 +50,6 @@ class EliminateSerEnums final : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_ELIMINATESERENUMS_H_ */

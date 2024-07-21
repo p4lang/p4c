@@ -17,7 +17,7 @@ limitations under the License.
 
 #include "lib/json.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 namespace BFRT {
 
@@ -269,4 +269,4 @@ void BFRuntimeSchemaGenerator::addDPDKExterns(Util::JsonArray *tablesJson,
 
 }  // namespace BFRT
 
-}  // namespace P4
+}  // namespace p4c::P4

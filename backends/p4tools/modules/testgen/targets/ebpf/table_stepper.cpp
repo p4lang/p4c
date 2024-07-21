@@ -11,7 +11,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/expr_stepper.h"
 
-namespace P4Tools::P4Testgen::EBPF {
+namespace p4c::P4Tools::P4Testgen::EBPF {
 
 void EBPFTableStepper::checkTargetProperties(
     const std::vector<const IR::ActionListElement *> & /*tableActionList*/) {
@@ -70,4 +70,4 @@ void EBPFTableStepper::evalTargetTable(
 EBPFTableStepper::EBPFTableStepper(EBPFExprStepper *stepper, const IR::P4Table *table)
     : TableStepper(stepper, table) {}
 
-}  // namespace P4Tools::P4Testgen::EBPF
+}  // namespace p4c::P4Tools::P4Testgen::EBPF

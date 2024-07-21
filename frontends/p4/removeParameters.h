@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
  * For each action that is invoked keep the list of arguments that
@@ -133,6 +133,6 @@ class RemoveActionParameters : public PassManager {
     explicit RemoveActionParameters(TypeMap *typeMap, TypeChecking *typeChecking = nullptr);
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_REMOVEPARAMETERS_H_ */

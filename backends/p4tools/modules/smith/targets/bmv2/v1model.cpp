@@ -19,9 +19,9 @@
 #include "ir/node.h"
 #include "ir/vector.h"
 
-namespace P4Tools::P4Smith::BMv2 {
+namespace p4c::P4Tools::P4Smith::BMv2 {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 /* =============================================================================================
  *  Bmv2V1modelSmithTarget implementation
@@ -382,4 +382,4 @@ const IR::P4Program *Bmv2V1modelSmithTarget::generateP4Program() const {
     return new IR::P4Program(*objects);
 }
 
-}  // namespace P4Tools::P4Smith::BMv2
+}  // namespace p4c::P4Tools::P4Smith::BMv2

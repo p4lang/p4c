@@ -14,7 +14,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 void SelectedBranches::runImpl(const Callback &callBack, ExecutionStateReference executionState) {
     try {
@@ -106,4 +106,4 @@ ExecutionState *SelectedBranches::chooseBranch(const std::vector<Branch> &branch
     return nullptr;
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen

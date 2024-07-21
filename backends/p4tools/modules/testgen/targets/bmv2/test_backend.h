@@ -17,7 +17,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
 class Bmv2TestBackend : public TestBackEnd {
  private:
@@ -45,6 +45,6 @@ class Bmv2TestBackend : public TestBackEnd {
                                    const TestInfo &testInfo) override;
 };
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_H_ */

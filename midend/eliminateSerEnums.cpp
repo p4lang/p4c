@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/enumInstance.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 const IR::Node *DoEliminateSerEnums::preorder(IR::Type_SerEnum *serEnum) {
     if (getParent<IR::P4Program>()) return nullptr;  // delete the declaration
@@ -47,4 +47,4 @@ const IR::Node *DoEliminateSerEnums::postorder(IR::Member *expression) {
     return expression;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

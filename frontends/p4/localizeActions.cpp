@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/cloner.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -214,4 +214,4 @@ const IR::Node *DuplicateActions::postorder(IR::PathExpression *expression) {
     return expression;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

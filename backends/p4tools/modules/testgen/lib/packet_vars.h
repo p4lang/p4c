@@ -3,7 +3,7 @@
 
 #include "ir/ir.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 /// Contains utility functions and variables related to the creation and manipulation of input
 /// packets.
@@ -33,6 +33,6 @@ class PacketVars {
     static const IR::SymbolicVariable PAYLOAD_SYMBOL;
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_PACKET_VARS_H_ */

@@ -5,7 +5,7 @@
 #include "frontends/p4/methodInstance.h"
 #include "lib/exceptions.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 unsigned SymbolicValue::crtid = 0;
 
@@ -1192,4 +1192,4 @@ SymbolicValue *ExpressionEvaluator::evaluate(const IR::Expression *expression, b
     auto result = get(expression);
     return result;
 }
-}  // namespace P4
+}  // namespace p4c::P4

@@ -24,7 +24,7 @@ static IR::AssignmentStatement *setFlag(cstring name, bool val) {
     return new IR::AssignmentStatement(var, new IR::BoolLiteral(val));
 }
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -298,4 +298,4 @@ bool UnrollLoops::Policy::operator()(const IR::LoopStatement *loop, bool canUnro
     return unroll_default;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

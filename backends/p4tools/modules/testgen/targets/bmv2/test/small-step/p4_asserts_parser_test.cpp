@@ -31,7 +31,7 @@ extern const char *sourcePath;
 extern const char *buildPath;
 
 namespace p4c::Test {
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 class P4AssertsParserTest : public P4ToolsTest {};
 class P4TestOptions : public CompilerOptions {

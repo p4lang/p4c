@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
 Policy which selects the control blocks where remove
@@ -103,6 +103,6 @@ class RemoveComplexExpressions : public Transform {
     const IR::Node *postorder(IR::MethodCallStatement *statement) override;
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_REMOVECOMPLEXEXPRESSIONS_H_ */

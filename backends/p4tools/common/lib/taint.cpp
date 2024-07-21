@@ -19,7 +19,7 @@
 #include "lib/log.h"
 #include "lib/null.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 const IR::StringLiteral Taint::TAINTED_STRING_LITERAL = IR::StringLiteral("Taint"_cs);
 
@@ -268,4 +268,4 @@ const IR::Expression *Taint::propagateTaint(const IR::Expression *expr) {
     return expr->apply(TaintPropagator());
 }
 
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools

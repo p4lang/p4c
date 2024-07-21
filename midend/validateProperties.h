@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
  * Checks to see if there are any unknown properties.
@@ -48,6 +48,6 @@ class ValidateTableProperties : public Inspector {
     bool preorder(const IR::Declaration_Instance * /*instance*/) override { return false; }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_VALIDATEPROPERTIES_H_ */

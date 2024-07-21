@@ -4,7 +4,7 @@
 #include "lib/exceptions.h"
 #include "lib/null.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 bool SaturationElim::isSaturationOperation(const IR::Expression *expr) {
     CHECK_NULL(expr);
@@ -116,4 +116,4 @@ const IR::Mux *SaturationElim::eliminate(const IR::Operation_Binary *binary) {
                        new IR::Mux(binary->type, underflowCondition, underflowNumber, expr));
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

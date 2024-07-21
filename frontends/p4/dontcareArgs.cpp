@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/methodInstance.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 Visitor::profile_t DontcareArgs::init_apply(const IR::Node *node) {
     auto rv = Transform::init_apply(node);
@@ -54,4 +54,4 @@ const IR::Node *DontcareArgs::postorder(IR::MethodCallExpression *expression) {
     return expression;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

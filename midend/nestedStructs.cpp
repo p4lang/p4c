@@ -2,7 +2,7 @@
 
 #include "frontends/p4/methodInstance.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -112,4 +112,4 @@ const IR::Node *RemoveNestedStructs::postorder(IR::PathExpression *expression) {
     return list;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

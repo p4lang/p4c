@@ -10,7 +10,7 @@
 #include "lib/exceptions.h"
 #include "lib/map.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 const IR::Node *DoConvertErrors::preorder(IR::Type_Error *type) {
     bool convert = policy->convert(type);
@@ -78,4 +78,4 @@ IR::IndexedVector<IR::SerEnumMember> *ChooseErrorRepresentation::assignValues(
     return members;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

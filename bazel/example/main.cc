@@ -9,7 +9,7 @@
 using ::google::protobuf::TextFormat;
 using ::p4::config::v1::P4Info;
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 const char kP4InfoFile[] = "program.p4info.txt";
 

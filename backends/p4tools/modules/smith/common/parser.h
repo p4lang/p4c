@@ -7,7 +7,7 @@
 #include "ir/vector.h"
 #include "lib/cstring.h"
 
-namespace P4Tools::P4Smith {
+namespace p4c::P4Tools::P4Smith {
 
 class ParserGenerator : public Generator {
  private:
@@ -30,6 +30,6 @@ class ParserGenerator : public Generator {
     [[nodiscard]] IR::IndexedVector<IR::ParserState> getStates() const { return state_list; }
 };
 
-}  // namespace P4Tools::P4Smith
+}  // namespace p4c::P4Tools::P4Smith
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_COMMON_PARSER_H_ */

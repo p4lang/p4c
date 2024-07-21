@@ -25,7 +25,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class SubstituteParameters : public TypeVariableSubstitutionVisitor, public ResolutionContext {
  protected:
@@ -47,6 +47,6 @@ class SubstituteParameters : public TypeVariableSubstitutionVisitor, public Reso
     const IR::Node *postorder(IR::This *t) override;
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* EVALUATOR_SUBSTITUTEPARAMETERS_H_ */

@@ -14,7 +14,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 /// Implements small-step operational semantics for tables.
 class TableStepper {
@@ -151,6 +151,6 @@ class TableStepper {
     virtual ~TableStepper() = default;
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_TABLE_STEPPER_H_ */

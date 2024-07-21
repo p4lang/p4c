@@ -30,7 +30,7 @@ limitations under the License.
 // This only works correctly after local variable initializers have been removed,
 // and after the SideEffectOrdering pass has been executed.
 
-namespace P4 {
+namespace p4c::P4 {
 
 /// Describes information about a caller-callee pair
 struct CallInfo : public IHasDbPrint {
@@ -466,6 +466,6 @@ class Inline : public PassRepeated {
     static bool isAnnotationNoPropagate(cstring name) { return noPropagateAnnotations.count(name); }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_INLINING_H_ */

@@ -22,7 +22,7 @@ limitations under the License.
 #include "typeChecker.h"
 #include "typeSubstitution.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 // Used to set the type of Constants after type inference
 class ConstantTypeSubstitution : public Transform, ResolutionContext {
@@ -78,6 +78,6 @@ class ConstantTypeSubstitution : public Transform, ResolutionContext {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif  // FRONTENDS_P4_TYPECHECKING_CONSTANTTYPESUBSTITUTION_H_

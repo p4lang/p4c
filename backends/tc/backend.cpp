@@ -23,7 +23,7 @@ and limitations under the License.
 
 namespace TC {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 const cstring Extern::dropPacket = "drop_packet"_cs;
 const cstring Extern::sendToPort = "send_to_port"_cs;

@@ -36,7 +36,7 @@ namespace p4configv1 = ::p4::config::v1;
 using p4configv1::P4DataTypeSpec;
 using p4configv1::P4TypeInfo;
 
-namespace P4 {
+namespace p4c::P4 {
 
 namespace ControlPlaneAPI {
 
@@ -393,4 +393,4 @@ const P4DataTypeSpec *TypeSpecConverter::convert(const P4::ReferenceMap *refMap,
 
 }  // namespace ControlPlaneAPI
 
-}  // namespace P4
+}  // namespace p4c::P4

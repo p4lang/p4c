@@ -20,7 +20,7 @@
 #include "lib/error.h"
 #include "lib/nullstream.h"
 
-namespace P4Tools::P4Smith {
+namespace p4c::P4Tools::P4Smith {
 
 void Smith::registerTarget() { registerSmithTargets(); }
 
@@ -90,4 +90,4 @@ int Smith::mainImpl(const CompilerResult & /*result*/) {
     return EXIT_SUCCESS;
 }
 
-}  // namespace P4Tools::P4Smith
+}  // namespace p4c::P4Tools::P4Smith

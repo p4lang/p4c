@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 bool TypeSpecializationMap::same(const TypeSpecialization *spec,
                                  const IR::Type_Specialized *right) const {
@@ -187,4 +187,4 @@ const IR::Node *ReplaceTypeUses::postorder(IR::StructExpression *expression) {
     return expression;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

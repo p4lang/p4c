@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "resetHeaders.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 void DoResetHeaders::generateResets(const TypeMap *typeMap, const IR::Type *type,
                                     const IR::Expression *expr,
@@ -89,4 +89,4 @@ const IR::Node *DoResetHeaders::postorder(IR::ParserState *state) {
     return state;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

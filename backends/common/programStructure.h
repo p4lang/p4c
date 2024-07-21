@@ -23,7 +23,7 @@ limitations under the License.
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using ResourceMap = ordered_map<const IR::Node *, const IR::CompileTimeValue *>;
 
@@ -144,6 +144,6 @@ class BuildResourceMap : public Inspector {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* BACKENDS_COMMON_PROGRAMSTRUCTURE_H_ */

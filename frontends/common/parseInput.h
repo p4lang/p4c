@@ -27,7 +27,7 @@ namespace p4c::IR {
 class P4Program;
 }  // namespace p4c::IR
 
-namespace P4 {
+namespace p4c::P4 {
 
 template <typename Input, typename C = P4V1::Converter>
 static const IR::P4Program *parseV1Program(Input stream, std::string_view sourceFile,
@@ -114,6 +114,6 @@ const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
 const IR::P4Program *parseP4String(const std::string &input,
                                    CompilerOptions::FrontendVersion version);
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_COMMON_PARSEINPUT_H_ */

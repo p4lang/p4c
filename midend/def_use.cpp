@@ -32,7 +32,7 @@ struct LogAbbrev {
     }
 };
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -696,7 +696,7 @@ std::ostream &operator<<(std::ostream &out, const ComputeDefUse::defuse_t &du) {
     return out;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 void dump(const P4::ComputeDefUse::loc_t &p) { std::cout << p << std::endl; }
 void dump(const ordered_set<const P4::ComputeDefUse::loc_t *> &p) { std::cout << p << std::endl; }

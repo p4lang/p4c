@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 // TODO: This file should be in the BMv2 folder, but ProgramStructure still depends on it.
 class DirectMeterMap final {
@@ -44,6 +44,6 @@ class DirectMeterMap final {
     void setSize(const IR::IDeclaration *meter, unsigned size);
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* BACKENDS_COMMON_METERMAP_H_ */

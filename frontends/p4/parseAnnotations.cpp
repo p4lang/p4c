@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "parseAnnotations.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
     return {
@@ -146,4 +146,4 @@ void ParseAnnotations::postorder(IR::Annotation *annotation) {
     annotation->needsParsing = !handlers[name](annotation);
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

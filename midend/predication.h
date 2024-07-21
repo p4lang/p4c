@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
 This pass operates on action bodies.  It converts 'if' statements to
@@ -143,6 +143,6 @@ class Predication final : public Transform {
     const IR::Node *postorder(IR::ExitStatement *statement) override { return error(statement); }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_PREDICATION_H_ */

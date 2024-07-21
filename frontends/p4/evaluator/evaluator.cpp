@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 Visitor::profile_t Evaluator::init_apply(const IR::Node *node) {
     BUG_CHECK(node->is<IR::P4Program>(), "Evaluation should be invoked on a program, not a %1%",
@@ -357,4 +357,4 @@ EvaluatorPass::EvaluatorPass(ReferenceMap *refMap, TypeMap *typeMap) {
     passes.emplace_back(evaluator);
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

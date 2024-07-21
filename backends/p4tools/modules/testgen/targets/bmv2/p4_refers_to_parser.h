@@ -5,7 +5,7 @@
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
 class RefersToParser : public Inspector {
  private:
@@ -45,6 +45,6 @@ class RefersToParser : public Inspector {
     [[nodiscard]] ConstraintsVector getRestrictionsVector() const;
 };
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_P4_REFERS_TO_PARSER_H_ */

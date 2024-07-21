@@ -18,7 +18,7 @@
 
 #include "replaceSelectRange.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 // expands subranges that do not cross over zero
 static void expandRange(const IR::Range *r, std::vector<const IR::Mask *> *masks,
@@ -221,4 +221,4 @@ const IR::Node *DoReplaceSelectRange::postorder(IR::SelectCase *sc) {
     return sc;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

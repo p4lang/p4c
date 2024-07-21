@@ -40,7 +40,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/table_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
 std::string Bmv2V1ModelExprStepper::getClassName() { return "Bmv2V1ModelExprStepper"; }
 
@@ -1644,4 +1644,4 @@ bool Bmv2V1ModelExprStepper::preorder(const IR::P4Table *table) {
     return tableStepper.eval();
 }
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2

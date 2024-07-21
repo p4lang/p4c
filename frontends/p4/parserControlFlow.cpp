@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "parserControlFlow.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 const IR::Node *DoRemoveParserControlFlow::postorder(IR::ParserState *state) {
     LOG1("Visiting " << dbp(state));
@@ -95,4 +95,4 @@ Visitor::profile_t DoRemoveParserControlFlow::init_apply(const IR::Node *node) {
     return rv;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

@@ -11,7 +11,7 @@
 #include "backends/p4tools/modules/testgen/targets/pna/shared_expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace p4c::P4Tools::P4Testgen::Pna {
 
 class SharedPnaTableStepper : public TableStepper {
  protected:
@@ -69,6 +69,6 @@ class SharedPnaTableStepper : public TableStepper {
     explicit SharedPnaTableStepper(SharedPnaExprStepper *stepper, const IR::P4Table *table);
 };
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace p4c::P4Tools::P4Testgen::Pna
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_SHARED_TABLE_STEPPER_H_ */

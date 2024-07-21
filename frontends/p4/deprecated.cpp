@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "deprecated.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 void Deprecated::warnIfDeprecated(const IR::IAnnotated *annotated, const IR::Node *errorNode) {
     if (annotated == nullptr) return;
@@ -43,4 +43,4 @@ bool Deprecated::preorder(const IR::Type_Name *name) {
     return false;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

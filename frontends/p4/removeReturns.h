@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 using namespace literals;
 
 /**
@@ -111,6 +111,6 @@ class RemoveReturns : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_REMOVERETURNS_H_ */

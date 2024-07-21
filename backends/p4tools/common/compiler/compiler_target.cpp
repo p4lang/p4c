@@ -16,7 +16,7 @@
 #include "lib/compile_context.h"
 #include "lib/error.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 ICompileContext *CompilerTarget::makeContext(std::string_view toolName) {
     return get(toolName).makeContextImpl();
@@ -126,4 +126,4 @@ const CompilerTarget &CompilerTarget::get(std::string_view toolName) {
     return Target::get<CompilerTarget>(toolName);
 }
 
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools

@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "tableKeyNames.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -142,4 +142,4 @@ const IR::Node *DoTableKeyNames::postorder(IR::KeyElement *keyElement) {
     return keyElement;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

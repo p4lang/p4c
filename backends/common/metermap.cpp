@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "backends/common/metermap.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /// @returns direct meter information from the direct meter map.
 DirectMeterMap::DirectMeterInfo *DirectMeterMap::createInfo(const IR::IDeclaration *meter) {
@@ -90,4 +90,4 @@ void DirectMeterMap::setSize(const IR::IDeclaration *meter, unsigned size) {
     info->tableSize = size;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

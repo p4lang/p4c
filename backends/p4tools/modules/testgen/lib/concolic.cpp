@@ -11,7 +11,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 bool ConcolicMethodImpls::matches(const std::vector<cstring> &paramNames,
                                   const IR::Vector<IR::Argument> *args) {
@@ -131,4 +131,4 @@ const ConcolicMethodImpls::ImplList *Concolic::getCoreConcolicMethodImpls() {
     return &CORE_CONCOLIC_METHOD_IMPLS;
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen

@@ -25,7 +25,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/ordered_set.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class GlobalActionReplacements {
  public:
@@ -182,6 +182,6 @@ class LocalizeAllActions : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_LOCALIZEACTIONS_H_ */

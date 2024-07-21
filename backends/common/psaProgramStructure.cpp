@@ -17,9 +17,9 @@ limitations under the License.
 
 #include "backends/common/psaProgramStructure.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 void InspectPsaProgram::postorder(const IR::Declaration_Instance *di) {
     if (!pinfo->resourceMap.count(di)) return;
@@ -334,4 +334,4 @@ bool ParsePsaArchitecture::preorder(const IR::PackageBlock *block) {
     return false;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

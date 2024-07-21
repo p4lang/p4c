@@ -27,7 +27,7 @@ limitations under the License.
 #include "lib/map.h"
 #include "v1model.h"
 
-namespace P4V1 {
+namespace p4c::P4V1 {
 
 class ConversionContext {
  public:
@@ -326,6 +326,6 @@ class ProgramStructure {
     virtual const IR::P4Program *create(Util::SourceInfo info);
 };
 
-}  // namespace P4V1
+}  // namespace p4c::P4V1
 
 #endif /* FRONTENDS_P4_FROMV1_0_PROGRAMSTRUCTURE_H_ */

@@ -2,7 +2,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 TestFramework::TestFramework(const TestBackendConfiguration &testBackendConfiguration)
     : testBackendConfiguration(testBackendConfiguration) {}
@@ -22,4 +22,4 @@ AbstractTestReferenceOrError TestFramework::produceTest(const TestSpec * /*spec*
     TESTGEN_UNIMPLEMENTED("produceTest() not implemented for this test framework.");
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen

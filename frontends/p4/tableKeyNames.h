@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /** Generate control plane names for simple expressions that appear in table
  * keys without `@name` annotations.
@@ -96,6 +96,6 @@ class TableKeyNames final : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_TABLEKEYNAMES_H_ */

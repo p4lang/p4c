@@ -22,7 +22,7 @@ limitations under the License.
 #include "./frontends/p4/unusedDeclarations.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
-namespace P4 {
+namespace p4c::P4 {
 
 /**
  * Flatten header union into its individual element. All occurrences of the header union
@@ -207,6 +207,6 @@ class FlattenHeaderUnion : public PassManager {
         passes.push_back(new P4::RemoveParserIfs(typeMap));
     }
 };
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_FLATTENUNIONS_H_ */

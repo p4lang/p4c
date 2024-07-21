@@ -73,7 +73,7 @@ limitations under the License.
 
 class cstring;
 
-namespace P4::literals {
+namespace p4c::P4::literals {
 inline cstring operator""_cs(const char *str, std::size_t len);
 }
 
@@ -394,7 +394,7 @@ inline std::ostream &operator<<(std::ostream &out, cstring s) {
 
 /// Let's prevent literal clashes. A user wishing to use the literal can do using namespace
 /// P4::literals, similarly as they can do using namespace std::literals for the standard once.
-namespace P4::literals {
+namespace p4c::P4::literals {
 
 /// A user-provided literal suffix to allow creation of cstring from literals: "foo"_cs.
 /// Note that the C++ standard mandates that all user-defined literal suffixes defined outside of
@@ -404,7 +404,7 @@ inline cstring operator""_cs(const char *str, std::size_t len) {
     result.construct_from_literal(str, len);
     return result;
 }
-}  // namespace P4::literals
+}  // namespace p4c::P4::literals
 
 namespace std {
 template <>

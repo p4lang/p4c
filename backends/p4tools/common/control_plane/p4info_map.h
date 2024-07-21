@@ -19,7 +19,7 @@
 /// functions. However, these functions are tied to the P4RuntimeTableIface, which is fairly
 /// inflexible. We just need an API that can perform lookup operations on a P4Info or P4RuntimeAPI
 /// object.
-namespace P4::ControlPlaneAPI {
+namespace p4c::P4::ControlPlaneAPI {
 
 /// Computes a unique pairing of two input numbers. We use this to generate unique P4Runtime IDs
 /// for combinations of tables and key elements, or actions and parameters.
@@ -61,6 +61,6 @@ class P4InfoMaps {
     [[nodiscard]] std::optional<cstring> lookUpControlPlaneName(uint64_t id) const;
 };
 
-}  // namespace P4::ControlPlaneAPI
+}  // namespace p4c::P4::ControlPlaneAPI
 
 #endif /* BACKENDS_P4TOOLS_COMMON_CONTROL_PLANE_P4INFO_MAP_H_ */

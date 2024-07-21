@@ -11,7 +11,7 @@
 #include "ir/ir.h"
 #include "lib/sourceCodeBuilder.h"
 
-using namespace P4;
+using namespace p4c::P4;
 
 namespace p4c::Test {
 

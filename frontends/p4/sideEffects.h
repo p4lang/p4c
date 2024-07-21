@@ -25,7 +25,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /// Checks to see whether an IR node includes a table.apply() sub-expression
 class HasTableApply : public Inspector, public ResolutionContext {
@@ -413,6 +413,6 @@ class SideEffectOrdering : public PassRepeated {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_SIDEEFFECTS_H_ */

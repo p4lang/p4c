@@ -25,7 +25,7 @@ limitations under the License.
 #include "lib/indent.h"
 #include "lib/source_file.h"
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 namespace {
 class IRDumper : public Inspector {

@@ -5,7 +5,7 @@
 #include "lib/hash.h"
 #include "lib/stringify.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 StackVariable::StackVariable(const IR::Expression *expr) : variable(expr) {
     CHECK_NULL(expr);
@@ -908,4 +908,4 @@ void ParserStructure::addStateHSUsage(const IR::ParserState *state,
     }
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

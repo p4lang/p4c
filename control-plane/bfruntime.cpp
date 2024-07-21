@@ -20,7 +20,7 @@ limitations under the License.
 #include "lib/json.h"
 #include "lib/null.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 namespace BFRT {
 
@@ -878,4 +878,4 @@ void BFRuntimeGenerator::serializeBFRuntimeSchema(std::ostream *destination) {
 
 }  // namespace BFRT
 
-}  // namespace P4
+}  // namespace p4c::P4

@@ -37,7 +37,7 @@ limitations under the License.
 
 namespace DPDK {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 /// This pass removes label that no jmps jump to
 class RemoveRedundantLabel : public Transform {

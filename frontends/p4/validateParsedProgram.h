@@ -20,7 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -96,6 +96,6 @@ class ValidateParsedProgram final : public Inspector {
     void postorder(const IR::ContinueStatement *s) override;
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* P4_VALIDATEPARSEDPROGRAM_H_ */

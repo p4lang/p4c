@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "typeSubstitutionVisitor.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 bool TypeOccursVisitor::preorder(const IR::Type_Var *typeVariable) {
     if (*typeVariable == *(toFind->asType())) occurs = true;
@@ -64,4 +64,4 @@ const IR::Node *TypeVariableSubstitutionVisitor::replacement(const IR::ITypeVar 
     return replacement;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

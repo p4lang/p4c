@@ -23,7 +23,7 @@ limitations under the License.
 
 // Symbolic P4 program evaluation.
 
-namespace P4 {
+namespace p4c::P4 {
 
 class SymbolicValueFactory;
 
@@ -594,6 +594,6 @@ class SymbolicPacketIn final : public SymbolicExtern {
     DECLARE_TYPEINFO(SymbolicPacketIn, SymbolicExtern);
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_INTERPRETER_H_ */

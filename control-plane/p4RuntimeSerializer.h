@@ -46,7 +46,7 @@ class P4Program;
 
 class CompilerOptions;
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -147,6 +147,6 @@ P4RuntimeAPI generateP4Runtime(const IR::P4Program *program, cstring arch = "v1m
 /// P4RuntimeSerializer singleton.
 void serializeP4RuntimeIfRequired(const IR::P4Program *program, const CompilerOptions &options);
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* CONTROL_PLANE_P4RUNTIMESERIALIZER_H_ */

@@ -25,7 +25,7 @@ limitations under the License.
 #include "programStructure.h"
 #include "v1model.h"
 
-namespace P4V1 {
+namespace p4c::P4V1 {
 
 const IR::Type *ExpressionConverter::getFieldType(const IR::Type_StructLike *ht,
                                                   cstring fieldName) {
@@ -674,4 +674,4 @@ Visitor::profile_t Converter::init_apply(const IR::Node *node) {
     return PassManager::init_apply(node);
 }
 
-}  // namespace P4V1
+}  // namespace p4c::P4V1

@@ -64,7 +64,7 @@ limitations under the License.
 namespace p4v1 = ::p4::v1;
 namespace p4configv1 = ::p4::config::v1;
 
-namespace P4 {
+namespace p4c::P4 {
 
 /** \defgroup control_plane Control Plane API Generation */
 /** \addtogroup control_plane
@@ -1664,4 +1664,4 @@ void serializeP4RuntimeIfRequired(const IR::P4Program *program, const CompilerOp
 }
 
 /** @} */ /* end group control_plane */
-}  // namespace P4
+}  // namespace p4c::P4

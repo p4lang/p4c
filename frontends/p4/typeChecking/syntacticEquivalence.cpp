@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "syntacticEquivalence.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 bool SameExpression::sameType(const IR::Type *left, const IR::Type *right) const {
     auto lt = typeMap->getType(left, true);
@@ -105,4 +105,4 @@ bool SameExpression::sameExpression(const IR::Expression *left, const IR::Expres
     }
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

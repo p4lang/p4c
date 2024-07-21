@@ -11,7 +11,7 @@
 #include "ir/visitor.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 const IR::Expression *SymbolicEnv::get(const IR::StateVariable &var) const {
     auto it = map.find(var);
@@ -153,4 +153,4 @@ bool SymbolicEnv::isSymbolicValue(const IR::Node *node) {
     return false;
 }
 
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools

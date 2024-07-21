@@ -1,6 +1,6 @@
 #include "bindVariables.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 namespace {
 // Reports errors for all sub-expressions which have type InfInt.
@@ -145,4 +145,4 @@ const IR::Node *DoBindTypeVariables::insertTypes(const IR::Node *node) {
     return result;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

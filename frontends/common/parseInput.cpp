@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
                                    const std::string &input,
@@ -48,4 +48,4 @@ const IR::P4Program *parseP4String(const std::string &input,
     return parseP4String("(string)", 1, input, version);
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

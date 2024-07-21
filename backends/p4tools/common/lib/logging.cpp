@@ -7,7 +7,7 @@
 #include "lib/log.h"
 #include "lib/timer.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 void enableInformationLogging() { ::Log::addDebugSpec("tools_info:4"); }
 
@@ -58,4 +58,4 @@ void printPerformanceReport(const std::optional<std::filesystem::path> &basePath
         perfFile.close();
     }
 }
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools

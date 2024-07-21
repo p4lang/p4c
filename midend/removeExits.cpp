@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 namespace {
 class CallsExit : public Inspector {
@@ -253,4 +253,4 @@ const IR::Node *DoRemoveExits::preorder(IR::MethodCallStatement *statement) {
     return statement;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

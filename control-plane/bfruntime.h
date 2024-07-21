@@ -34,11 +34,11 @@ limitations under the License.
 
 namespace p4configv1 = ::p4::config::v1;
 
-namespace P4 {
+namespace p4c::P4 {
 struct P4RuntimeAPI;
-}  // namespace P4
+}  // namespace p4c::P4
 
-namespace P4 {
+namespace p4c::P4 {
 
 namespace BFRT {
 
@@ -463,6 +463,6 @@ class BFRuntimeGenerator {
 
 }  // namespace BFRT
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* CONTROL_PLANE_BFRUNTIME_H_ */

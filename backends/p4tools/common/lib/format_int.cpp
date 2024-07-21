@@ -15,7 +15,7 @@
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 std::string formatBin(const big_int &value, int width, const FormatOptions &formatOptions) {
     std::stringstream out;
@@ -352,4 +352,4 @@ std::optional<std::string> convertToMacString(const std::vector<uint8_t> &byteAr
     }
     return ss.str();
 }
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools

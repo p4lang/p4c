@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "validateParsedProgram.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /// Check that the type of a constant is either bit<>, int<> or int
 void ValidateParsedProgram::postorder(const IR::Constant *c) {
@@ -261,4 +261,4 @@ void ValidateParsedProgram::postorder(const IR::ContinueStatement *s) {
                 "%1%: continue statement must be used in the context of a for statement.", s);
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

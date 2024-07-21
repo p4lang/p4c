@@ -25,12 +25,12 @@ limitations under the License.
 #include "ir/ir.h"
 #include "midend/actionSynthesis.h"
 
-namespace P4 {
+namespace p4c::P4 {
 class ReferenceMap;
 class TypeMap;
 class ComputeDefUse;
 class ToplevelBlock;
-}  // namespace P4
+}  // namespace p4c::P4
 
 class CompilerOptions;
 

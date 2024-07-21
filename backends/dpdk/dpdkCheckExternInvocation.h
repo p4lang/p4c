@@ -26,14 +26,14 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "midend/checkExternInvocationCommon.h"
 
-namespace P4 {
+namespace p4c::P4 {
 class ReferenceMap;
 class TypeMap;
-}  // namespace P4
+}  // namespace p4c::P4
 
 namespace DPDK {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 /// @brief Class for checking constraints for invocations of PNA architecture extern
 ///        methods and functions.

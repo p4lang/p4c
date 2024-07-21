@@ -19,7 +19,7 @@ limitations under the License.
 #include "ir/dump.h"
 #include "lib/log.h"
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 /// P4-14 (v1.0 and v1.1) type checking algorithm
 /// Initial type setting based on immediate context:

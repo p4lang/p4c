@@ -24,7 +24,7 @@ limitations under the License.
 /*
  * Parses known/predefined annotations used by the compiler.
  */
-namespace P4 {
+namespace p4c::P4 {
 
 // A no-op handler. Useful for avoiding warnings about ignored annotations.
 #define PARSE_SKIP(aname) \
@@ -180,6 +180,6 @@ class ParseAnnotationBodies final : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* P4_PARSEANNOTATIONS_H_ */

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-namespace P4 {
+namespace p4c::P4 {
 
 #ifndef FRONTENDS_COMMON_COPYSRCINFO_H_
 #define FRONTENDS_COMMON_COPYSRCINFO_H_
@@ -37,6 +37,6 @@ class CopySrcInfo : public Transform {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif  // FRONTENDS_COMMON_COPYSRCINFO_H_

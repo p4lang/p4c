@@ -27,7 +27,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "lib/nullstream.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -939,4 +939,4 @@ const IR::Node *GeneralInliner::preorder(IR::P4Parser *caller) {
 // set of annotations to _not_ propagate during inlining
 std::set<cstring> Inline::noPropagateAnnotations = {"name"_cs};
 
-}  // namespace P4
+}  // namespace p4c::P4

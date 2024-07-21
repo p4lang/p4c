@@ -23,7 +23,7 @@
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/pna/shared_cmd_stepper.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace p4c::P4Tools::P4Testgen::Pna {
 
 std::string PnaDpdkCmdStepper::getClassName() { return "PnaDpdkCmdStepper"; }
 
@@ -90,4 +90,4 @@ std::map<Continuation::Exception, Continuation> PnaDpdkCmdStepper::getExceptionH
     return result;
 }
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace p4c::P4Tools::P4Testgen::Pna

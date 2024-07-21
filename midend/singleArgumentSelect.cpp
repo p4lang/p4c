@@ -1,6 +1,6 @@
 #include "singleArgumentSelect.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 DoSingleArgumentSelect::Pair::Pair(const IR::Expression *e, const IR::Type *type) {
     auto srcInfo = e->srcInfo;
@@ -83,4 +83,4 @@ bool DoSingleArgumentSelect::preorder(IR::SelectCase *selCase) {
     return false;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

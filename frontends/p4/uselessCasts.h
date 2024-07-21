@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
 Removes casts where the input expression has the exact same type
@@ -46,6 +46,6 @@ class UselessCasts : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_USELESSCASTS_H_ */

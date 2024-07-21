@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class TypeConstraints;
 class BinaryConstraint;
@@ -58,6 +58,6 @@ class TypeUnification final {
     bool unify(const BinaryConstraint *constraint);
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* TYPECHECKING_TYPEUNIFICATION_H_ */

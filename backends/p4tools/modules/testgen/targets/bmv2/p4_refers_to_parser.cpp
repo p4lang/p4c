@@ -13,7 +13,7 @@
 #include "lib/exceptions.h"
 #include "lib/null.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
 RefersToParser::RefersToParser() { setName("RefersToParser"); }
 
@@ -180,4 +180,4 @@ bool RefersToParser::preorder(const IR::P4Table *tableContext) {
 
 ConstraintsVector RefersToParser::getRestrictionsVector() const { return restrictionsVector; }
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2

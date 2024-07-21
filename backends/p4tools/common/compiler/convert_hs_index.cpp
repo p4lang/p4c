@@ -6,7 +6,7 @@
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 const IR::Node *HSIndexToMember::postorder(IR::ArrayIndex *curArrayIndex) {
     if (const auto *arrayConst = curArrayIndex->right->to<IR::Constant>()) {
@@ -22,4 +22,4 @@ const IR::ArrayIndex *HSIndexToMember::produceStackIndex(const IR::Type *type,
                               IR::Constant::get(IR::Type_Bits::get(32), arrayIndex));
 }
 
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools

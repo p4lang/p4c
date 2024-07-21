@@ -25,7 +25,7 @@ limitations under the License.
 #include "midend/def_use.h"
 #include "midend_pass.h"
 
-using namespace P4;
+using namespace p4c::P4;
 
 namespace p4c::Test {
 

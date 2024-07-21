@@ -19,7 +19,7 @@
 #include "lib/exceptions.h"
 #include "lib/null.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 /* =========================================================================================
  *  Seeds, timestamps, randomness.
@@ -196,4 +196,4 @@ const IR::Type_Declaration *resolveProgramType(const IR::IGeneralNamespace *ns,
     return decl;
 }
 
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools

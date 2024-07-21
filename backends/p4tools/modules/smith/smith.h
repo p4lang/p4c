@@ -7,7 +7,7 @@
 #include "backends/p4tools/common/p4ctool.h"
 #include "backends/p4tools/modules/smith/options.h"
 
-namespace P4Tools::P4Smith {
+namespace p4c::P4Tools::P4Smith {
 
 class Smith : public AbstractP4cTool<SmithOptions> {
  protected:
@@ -20,6 +20,6 @@ class Smith : public AbstractP4cTool<SmithOptions> {
     int main(const std::vector<const char *> &args);
 };
 
-}  // namespace P4Tools::P4Smith
+}  // namespace p4c::P4Tools::P4Smith
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_SMITH_H_ */

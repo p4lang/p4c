@@ -30,7 +30,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
 Bmv2V1ModelCmdStepper::Bmv2V1ModelCmdStepper(ExecutionState &state, AbstractSolver &solver,
                                              const ProgramInfo &programInfo)
@@ -152,4 +152,4 @@ std::map<Continuation::Exception, Continuation> Bmv2V1ModelCmdStepper::getExcept
     return result;
 }
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2

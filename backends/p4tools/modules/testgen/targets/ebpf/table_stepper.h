@@ -10,7 +10,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/expr_stepper.h"
 
-namespace P4Tools::P4Testgen::EBPF {
+namespace p4c::P4Tools::P4Testgen::EBPF {
 
 class EBPFTableStepper : public TableStepper {
  private:
@@ -38,6 +38,6 @@ class EBPFTableStepper : public TableStepper {
     explicit EBPFTableStepper(EBPFExprStepper *stepper, const IR::P4Table *table);
 };
 
-}  // namespace P4Tools::P4Testgen::EBPF
+}  // namespace p4c::P4Tools::P4Testgen::EBPF
 
 #endif /* TESTGEN_TARGETS_EBPF_TABLE_STEPPER_H_ */

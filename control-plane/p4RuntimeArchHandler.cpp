@@ -29,7 +29,7 @@ limitations under the License.
 
 namespace p4configv1 = ::p4::config::v1;
 
-namespace P4 {
+namespace p4c::P4 {
 
 /** \addtogroup control_plane
  *  @{
@@ -183,4 +183,4 @@ void serializeOneStructuredAnnotation(const IR::Annotation *annotation,
 }  // namespace ControlPlaneAPI
 
 /** @} */ /* end group control_plane */
-}  // namespace P4
+}  // namespace p4c::P4

@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /** @brief Replace complex control flow nodes with simpler ones where possible.
  *
@@ -77,6 +77,6 @@ class SimplifyControlFlow : public PassRepeated {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_SIMPLIFY_H_ */

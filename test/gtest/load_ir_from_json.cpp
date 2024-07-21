@@ -30,7 +30,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/log.h"
 
-using namespace P4;
+using namespace p4c::P4;
 using namespace std;
 
 namespace p4c::Test {

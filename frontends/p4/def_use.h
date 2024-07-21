@@ -27,7 +27,7 @@ limitations under the License.
 #include "lib/ordered_set.h"
 #include "typeMap.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class ComputeWriteSet;
 class StorageFactory;
@@ -342,7 +342,7 @@ class ProgramPoint : public IHasDbPrint {
     ProgramPoint &operator=(const ProgramPoint &) = default;
     ProgramPoint &operator=(ProgramPoint &&) = default;
 };
-}  // namespace P4
+}  // namespace p4c::P4
 
 // inject hash into std namespace so it is picked up by std::unordered_set
 namespace std {
@@ -365,7 +365,7 @@ struct Hasher<P4::ProgramPoint> {
 };
 }  // namespace p4c::Util
 
-namespace P4 {
+namespace p4c::P4 {
 class ProgramPoints : public IHasDbPrint {
     typedef absl::flat_hash_set<ProgramPoint, Util::Hash> Points;
     Points points;
@@ -659,6 +659,6 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     std::unordered_set<loc_t> &cached_locs;
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_DEF_USE_H_ */

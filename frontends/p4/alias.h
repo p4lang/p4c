@@ -29,7 +29,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -260,6 +260,6 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_ALIAS_H_ */

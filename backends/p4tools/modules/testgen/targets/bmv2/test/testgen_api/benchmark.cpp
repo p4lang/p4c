@@ -10,7 +10,7 @@
 
 namespace p4c::Test {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 TEST(P4TestgenBenchmark, SuccessfullyGenerate1000Tests) {
     auto compilerOptions = P4CContextWithOptions<CompilerOptions>::get().options();

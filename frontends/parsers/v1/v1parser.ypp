@@ -42,7 +42,7 @@ namespace V1 {
 class V1Lexer;
 class V1ParserDriver;
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 struct BBoxType {
     IR::Vector<IR::Method>* methods;

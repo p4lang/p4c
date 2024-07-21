@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
  * Expand the 'default values' initializer ...
@@ -51,6 +51,6 @@ class DefaultValues : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* P4_DEFAULTVALUES_H_ */

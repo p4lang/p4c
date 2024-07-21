@@ -23,7 +23,7 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/enumerator.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /* Maps Parameters to Arguments via their name.  Note that
    parameter identity is not important, but the parameter name is. */
@@ -96,6 +96,6 @@ class ParameterSubstitution : public IHasDbPrint {
     const IR::ParameterList *paramList = nullptr;
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_PARAMETERSUBSTITUTION_H_ */

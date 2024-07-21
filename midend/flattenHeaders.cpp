@@ -17,7 +17,7 @@ limitations under the License.
 
 #include "flattenHeaders.h"
 
-namespace P4 {
+namespace p4c::P4 {
 using namespace literals;
 
 void FindHeaderTypesToReplace::createReplacement(const IR::Type_Header *type,
@@ -102,4 +102,4 @@ const IR::Node *ReplaceHeaders::postorder(IR::Member *expression) {
     return result;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

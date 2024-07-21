@@ -28,7 +28,7 @@ namespace p4configv1 = ::p4::config::v1;
 using ::P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
 using ::P4::ControlPlaneAPI::Helpers::setPreamble;
 
-namespace P4 {
+namespace p4c::P4 {
 
 /** \addtogroup control_plane
  *  @{
@@ -1120,6 +1120,6 @@ class P4RuntimeArchHandlerPNA final : public P4RuntimeArchHandlerPSAPNA<Arch::PN
 }  // namespace ControlPlaneAPI
 
 /** @} */ /* end group control_plane */
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* CONTROL_PLANE_P4RUNTIMEARCHSTANDARD_H_ */

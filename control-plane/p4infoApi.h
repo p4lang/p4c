@@ -13,7 +13,7 @@
 #include "p4/config/v1/p4info.pb.h"
 #pragma GCC diagnostic pop
 
-namespace P4::ControlPlaneAPI {
+namespace p4c::P4::ControlPlaneAPI {
 
 /// Generic meta function which searches an object by @name in the given range
 /// and @returns the P4Runtime representation, or nullptr if none is found.
@@ -180,6 +180,6 @@ const p4::config::v1::Extern *findP4RuntimeExtern(const p4::config::v1::P4Info &
 std::optional<p4rt_id_t> getP4RuntimeId(const p4::config::v1::P4Info &p4Info,
                                         const P4RuntimeSymbolType &type, cstring controlPlaneName);
 
-}  // namespace P4::ControlPlaneAPI
+}  // namespace p4c::P4::ControlPlaneAPI
 
 #endif /* CONTROL_PLANE_P4INFOAPI_H_ */

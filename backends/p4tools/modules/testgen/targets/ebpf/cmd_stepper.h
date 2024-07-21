@@ -14,7 +14,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/program_info.h"
 
-namespace P4Tools::P4Testgen::EBPF {
+namespace p4c::P4Tools::P4Testgen::EBPF {
 
 class EBPFCmdStepper : public CmdStepper {
  protected:
@@ -36,6 +36,6 @@ class EBPFCmdStepper : public CmdStepper {
                    const ProgramInfo &programInfo);
 };
 
-}  // namespace P4Tools::P4Testgen::EBPF
+}  // namespace p4c::P4Tools::P4Testgen::EBPF
 
 #endif /* TESTGEN_TARGETS_EBPF_CMD_STEPPER_H_ */

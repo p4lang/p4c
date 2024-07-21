@@ -28,7 +28,7 @@ limitations under the License.
 #include "p4RuntimeArchHandler.h"
 #include "typeSpecConverter.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /** \addtogroup control_plane
  *  @{
@@ -173,4 +173,4 @@ P4RuntimeArchHandlerIface *UBPFArchHandlerBuilder::operator()(
 }  // namespace ControlPlaneAPI
 
 /** @} */ /* end group control_plane */
-}  // namespace P4
+}  // namespace p4c::P4

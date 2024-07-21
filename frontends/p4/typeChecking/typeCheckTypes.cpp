@@ -15,7 +15,7 @@ limitations under the License.
 #include "constantTypeSubstitution.h"
 #include "typeChecker.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 bool hasVarbitsOrUnions(const TypeMap *typeMap, const IR::Type *type) {
     // called for a canonical type
@@ -556,4 +556,4 @@ const IR::Node *TypeInference::postorder(IR::Type_HeaderUnion *type) {
     return type;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

@@ -16,7 +16,7 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
 static const std::vector<std::string> NAMES{
     "Priority",    "Text",           "True",         "False",       "LineStatementClose",
@@ -695,4 +695,4 @@ Token Lexer::next() noexcept {
             return atom(Token::Kind::Mul);
     }
 }
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2

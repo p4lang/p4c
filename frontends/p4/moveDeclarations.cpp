@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "moveDeclarations.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 const IR::Node *MoveDeclarations::postorder(IR::P4Action *action) {
     if (findContext<IR::P4Control>() == nullptr) {
@@ -171,4 +171,4 @@ Visitor::profile_t MoveInitializers::init_apply(const IR::Node *node) {
     return rv;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

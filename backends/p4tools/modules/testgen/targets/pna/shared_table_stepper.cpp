@@ -30,9 +30,9 @@
 #include "backends/p4tools/modules/testgen/targets/pna/shared_expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace p4c::P4Tools::P4Testgen::Pna {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
     const TableUtils::KeyProperties &keyProperties, TableMatchMap *matches,
@@ -444,4 +444,4 @@ SharedPnaTableStepper::SharedPnaTableStepper(SharedPnaExprStepper *stepper,
                                              const IR::P4Table *table)
     : TableStepper(stepper, table) {}
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace p4c::P4Tools::P4Testgen::Pna

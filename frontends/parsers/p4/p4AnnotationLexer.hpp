@@ -4,7 +4,7 @@
 #include "frontends/parsers/p4/abstractP4Lexer.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class P4AnnotationLexer : public AbstractP4Lexer {
  public:
@@ -56,6 +56,6 @@ class P4AnnotationLexer : public AbstractP4Lexer {
     Token yylex(P4::P4ParserDriver& driver);
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif  /* FRONTENDS_PARSERS_P4_P4ANNOTATIONLEXER_HPP_ */

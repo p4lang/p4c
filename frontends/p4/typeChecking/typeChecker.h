@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/pass_manager.h"
 #include "ir/visitor.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 // This pass only clears the typeMap if the program has changed
 // or the 'force' flag is set.
@@ -373,6 +373,6 @@ class ApplyTypesToExpressions : public Transform {
     explicit ApplyTypesToExpressions(TypeMap *typeMap) : typeMap(typeMap) {}
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* TYPECHECKING_TYPECHECKER_H_ */

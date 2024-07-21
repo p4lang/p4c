@@ -10,7 +10,7 @@
 #include "options.h"
 #include "p4fmt.h"
 
-namespace P4Fmt {
+namespace p4c::P4Fmt {
 
 namespace {
 class ReferenceCheckerOptions : protected P4fmtOptions {
@@ -162,7 +162,7 @@ int run(const ReferenceCheckerOptions &options) {
     ::error("Reference file has not been specified.");
     return EXIT_FAILURE;
 }
-}  // namespace P4Fmt
+}  // namespace p4c::P4Fmt
 
 class RefCheckContext : public BaseCompileContext {};
 

@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "removeSelectBooleans.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 // cast all boolean values to bit values, but only at the top-level
 const IR::Expression *DoRemoveSelectBooleans::addToplevelCasts(const IR::Expression *expression) {
@@ -57,4 +57,4 @@ const IR::Node *DoRemoveSelectBooleans::postorder(IR::SelectCase *selectCase) {
     return selectCase;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

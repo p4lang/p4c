@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "methodInstance.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 void DoCheckConstants::postorder(const IR::MethodCallExpression *expression) {
     auto mi = MethodInstance::resolve(expression, this, typeMap);
@@ -43,4 +43,4 @@ void DoCheckConstants::postorder(const IR::P4Table *table) {
     (void)table->getSizeProperty();
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

@@ -31,7 +31,7 @@ limitations under the License.
   Inlining these is simpler than inlining controls and parsers
 */
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -207,6 +207,6 @@ class InlineDriver : public Visitor {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_COMMONINLINING_H_ */

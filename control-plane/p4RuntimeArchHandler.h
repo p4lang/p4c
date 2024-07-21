@@ -42,7 +42,7 @@ limitations under the License.
 #include "lib/ordered_set.h"
 #include "typeSpecConverter.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -500,6 +500,6 @@ std::optional<Counterlike<Kind>> getDirectCounterlike(const IR::P4Table *table,
 }  // namespace ControlPlaneAPI
 
 /** @} */ /* end group control_plane */
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* CONTROL_PLANE_P4RUNTIMEARCHHANDLER_H_ */

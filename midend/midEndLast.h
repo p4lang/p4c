@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class MidEndLast : public Inspector {
  public:
@@ -27,6 +27,6 @@ class MidEndLast : public Inspector {
     bool preorder(const IR::P4Program *) override { return false; }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_MIDENDLAST_H_ */

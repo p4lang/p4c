@@ -10,7 +10,7 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 SmithOptions &SmithOptions::get() {
     static SmithOptions INSTANCE;
@@ -42,4 +42,4 @@ void SmithOptions::processArgs(const std::vector<const char *> &args) {
 
 SmithOptions::SmithOptions() : AbstractP4cToolOptions(P4Smith::TOOL_NAME, "P4Smith options.") {}
 
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools

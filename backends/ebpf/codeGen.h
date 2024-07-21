@@ -22,7 +22,7 @@ limitations under the License.
 #include "lib/sourceCodeBuilder.h"
 #include "target.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class ReferenceMap;
 

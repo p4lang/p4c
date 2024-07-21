@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/alias.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 const IR::Node *RemoveAliases::postorder(IR::AssignmentStatement *statement) {
     const auto *type = typeMap->getType(statement->left);
@@ -171,4 +171,4 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
     return new IR::BlockStatement(statement->srcInfo, *retval);
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

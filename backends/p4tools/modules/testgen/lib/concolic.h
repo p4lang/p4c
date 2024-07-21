@@ -19,7 +19,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 /// TODO: This is a very ugly data structure. Essentially, you can store both state variables
 /// and entire expression as keys. State variables can actually compared, expressions are always
@@ -88,6 +88,6 @@ class Concolic {
     static const ConcolicMethodImpls::ImplList *getCoreConcolicMethodImpls();
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_CONCOLIC_H_ */

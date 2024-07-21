@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/enumInstance.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression *expr) const {
     CHECK_NULL(expr);
@@ -76,4 +76,4 @@ const IR::Node *DoSimplifySelectCases::preorder(IR::SelectExpression *expression
     return expression;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

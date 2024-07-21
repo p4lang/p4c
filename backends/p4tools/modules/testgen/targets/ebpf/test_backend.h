@@ -19,7 +19,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools::P4Testgen::EBPF {
+namespace p4c::P4Tools::P4Testgen::EBPF {
 
 class EBPFTestBackend : public TestBackEnd {
  private:
@@ -47,6 +47,6 @@ class EBPFTestBackend : public TestBackEnd {
                                    const TestInfo &testInfo) override;
 };
 
-}  // namespace P4Tools::P4Testgen::EBPF
+}  // namespace p4c::P4Tools::P4Testgen::EBPF
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_TEST_BACKEND_H_ */

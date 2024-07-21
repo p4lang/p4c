@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
  * Policy to select which annotations of the nested struct to attach
@@ -262,6 +262,6 @@ class FlattenInterfaceStructs final : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_FLATTENINTERFACESTRUCTS_H_ */

@@ -4,7 +4,7 @@
 
 #include "backends/p4tools/common/options.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 class SmithOptions : public AbstractP4cToolOptions {
  public:
@@ -20,6 +20,6 @@ class SmithOptions : public AbstractP4cToolOptions {
 
 // using P4toZ3Context = P4CContextWithOptions<SmithOptions>;
 
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_OPTIONS_H_ */

@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace P4 {
+namespace p4c::P4 {
 bool FindRedundantParsers::preorder(const IR::P4Parser *parser) {
     for (const IR::ParserState *state : parser->states) {
         if (state->name != IR::ParserState::start) {
@@ -59,4 +59,4 @@ const IR::Node *EliminateSubparserCalls::postorder(IR::MethodCallStatement *mcs)
     LOG4("Removing apply call to redundant parser " << parser->getName() << ": " << *mcs);
     return nullptr;
 }
-}  // namespace P4
+}  // namespace p4c::P4

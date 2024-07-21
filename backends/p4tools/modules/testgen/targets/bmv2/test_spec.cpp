@@ -5,9 +5,9 @@
 
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 /* =========================================================================================
  *  IndexExpression
@@ -330,4 +330,4 @@ void MetadataCollection::addMetaDataField(cstring name, const IR::Literal *metad
 
 cstring Range::getObjectName() const { return "Range"_cs; }
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2

@@ -22,7 +22,7 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/test_backend.h"
 
-namespace P4Tools::P4Testgen::EBPF {
+namespace p4c::P4Tools::P4Testgen::EBPF {
 
 /* =============================================================================================
  *  EBPFTestgenTarget implementation
@@ -93,4 +93,4 @@ MidEnd EBPFTestgenTarget::mkMidEnd(const CompilerOptions &options) const {
     return midEnd;
 }
 
-}  // namespace P4Tools::P4Testgen::EBPF
+}  // namespace p4c::P4Tools::P4Testgen::EBPF

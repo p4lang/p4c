@@ -15,7 +15,7 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 std::tuple<int, char **> AbstractP4cToolOptions::convertArgs(
     const std::vector<const char *> &args) {
@@ -214,4 +214,4 @@ bool AbstractP4cToolOptions::validateOptions() const { return true; }
 
 const std::string &AbstractP4cToolOptions::getToolName() const { return _toolName; }
 
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools

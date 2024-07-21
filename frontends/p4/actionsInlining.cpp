@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 void DiscoverActionsInlining::postorder(const IR::MethodCallStatement *mcs) {
     auto mi = P4::MethodInstance::resolve(mcs, this, typeMap);
@@ -150,4 +150,4 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
     return result;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

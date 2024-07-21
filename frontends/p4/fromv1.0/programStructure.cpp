@@ -29,8 +29,8 @@ limitations under the License.
 #include "lib/big_int_util.h"
 #include "lib/bitops.h"
 
-namespace P4V1 {
-using namespace P4::literals;
+namespace p4c::P4V1 {
+using namespace p4c::P4::literals;
 
 static const IR::IDeclaration *getFirstDeclaration(const IR::Vector<IR::Node> *nodes,
                                                    cstring name) {
@@ -2654,4 +2654,4 @@ void ProgramStructure::populateOutputNames() {
     ;
 }
 
-}  // namespace P4V1
+}  // namespace p4c::P4V1

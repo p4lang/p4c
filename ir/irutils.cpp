@@ -11,7 +11,7 @@
 
 namespace p4c::IR {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 /* =============================================================================================
  *  Types

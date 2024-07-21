@@ -21,7 +21,7 @@ limitations under the License.
 #include "typeConstraints.h"
 #include "typeSubstitutionVisitor.h"
 
-namespace P4 {
+namespace p4c::P4 {
 using namespace literals;
 
 // FIXME: see if we can not return format string as cstring here
@@ -144,4 +144,4 @@ void TypeVariableSubstitution::debugValidate() {
 void dump(P4::TypeVariableSubstitution &tvs) { std::cout << tvs << std::endl; }
 void dump(P4::TypeVariableSubstitution *tvs) { std::cout << *tvs << std::endl; }
 
-}  // namespace P4
+}  // namespace p4c::P4

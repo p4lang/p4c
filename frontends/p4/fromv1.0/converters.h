@@ -27,7 +27,7 @@ limitations under the License.
 #include "lib/safe_vector.h"
 #include "programStructure.h"
 
-namespace P4V1 {
+namespace p4c::P4V1 {
 
 // Converts expressions from P4-14 to P4-16
 // However, the type in each expression is still a P4-14 type.
@@ -1057,6 +1057,6 @@ class Converter : public PassManager {
     Visitor::profile_t init_apply(const IR::Node *node) override;
 };
 
-}  // namespace P4V1
+}  // namespace p4c::P4V1
 
 #endif /* FRONTENDS_P4_FROMV1_0_CONVERTERS_H_ */

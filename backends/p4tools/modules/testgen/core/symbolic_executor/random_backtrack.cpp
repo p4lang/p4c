@@ -13,7 +13,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 RandomBacktrack::RandomBacktrack(AbstractSolver &solver, const ProgramInfo &programInfo)
     : SymbolicExecutor(solver, programInfo) {}
@@ -78,4 +78,4 @@ void RandomBacktrack::runImpl(const Callback &callBack, ExecutionStateReference 
     }
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen

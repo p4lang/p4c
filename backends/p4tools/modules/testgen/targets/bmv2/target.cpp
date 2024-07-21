@@ -25,7 +25,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
 /* =============================================================================================
  *  Bmv2V1ModelTestgenTarget implementation
@@ -169,4 +169,4 @@ Bmv2V1ModelExprStepper *Bmv2V1ModelTestgenTarget::getExprStepperImpl(
     return new Bmv2V1ModelExprStepper(state, solver, programInfo);
 }
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2

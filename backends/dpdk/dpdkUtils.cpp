@@ -16,7 +16,7 @@ limitations under the License.
 #include "dpdkUtils.h"
 
 namespace DPDK {
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 bool isSimpleExpression(const IR::Expression *e) {
     if (e->is<IR::Member>() || e->is<IR::PathExpression>() || e->is<IR::Constant>() ||

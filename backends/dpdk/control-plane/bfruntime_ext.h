@@ -21,7 +21,7 @@ limitations under the License.
 #include "backends/dpdk/p4/config/p4info.pb.h"
 #include "control-plane/bfruntime.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 namespace BFRT {
 
@@ -95,6 +95,6 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
 
 }  // namespace BFRT
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif  // DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_

@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 void DoExpandLookahead::expand(
     const IR::PathExpression *bitvector,          // source value containing all bits
@@ -123,4 +123,4 @@ const IR::Node *DoExpandLookahead::postorder(IR::AssignmentStatement *statement)
     return result;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

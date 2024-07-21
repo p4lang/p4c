@@ -21,7 +21,7 @@ limitations under the License.
 #include "lib/error.h"
 #include "lib/log.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 ApplyOptionsPragmas::ApplyOptionsPragmas(IOptionPragmaParser &parser) : parser(parser) {
     // Add an initial "option" which will ultimately be ignored.
@@ -104,4 +104,4 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::pa
     return newOptions;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

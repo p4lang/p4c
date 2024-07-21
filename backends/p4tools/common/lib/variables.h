@@ -7,9 +7,9 @@
 /// Variables internal to P4Tools. These variables do not exist in the P4
 /// program itself, but are generated and added to the environment by the P4Tools tooling. These
 /// variables are also used for SMT solvers as symbolic variables.
-namespace P4Tools {
+namespace p4c::P4Tools {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 /// A list of constraints. These constraints may take the form of "x == 8w1","x != y", where "x" and
 /// "y" are symbolic variables. They are expressed in P4C IR form and may be consumed by SMT or
@@ -52,6 +52,6 @@ IR::StateVariable convertReference(const IR::Expression *ref);
 
 }  // namespace ToolsVariables
 
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_VARIABLES_H_ */

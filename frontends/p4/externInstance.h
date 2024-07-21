@@ -33,7 +33,7 @@ template <typename T>
 class Vector;
 }  // namespace p4c::IR
 
-namespace P4 {
+namespace p4c::P4 {
 
 class ReferenceMap;
 class TypeMap;
@@ -90,6 +90,6 @@ struct ExternInstance final {
         TypeMap *typeMap, const std::optional<cstring> &name = std::nullopt);
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_EXTERNINSTANCE_H_ */

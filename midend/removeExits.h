@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/removeReturns.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
 This visitor removes "exit" calls.  It is significantly more involved than return removal,
@@ -68,6 +68,6 @@ class RemoveExits : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_REMOVEEXITS_H_ */

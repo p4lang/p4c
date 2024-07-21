@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/node.h"
 #include "ir/visitor.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 cstring DoSimplifyExpressions::createTemporary(const IR::Type *type) {
     type = type->getP4Type();
@@ -818,4 +818,4 @@ const IR::Node *KeySideEffect::doStatement(const IR::Statement *statement,
     return block;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

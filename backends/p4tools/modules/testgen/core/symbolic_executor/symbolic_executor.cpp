@@ -20,7 +20,7 @@
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 SymbolicExecutor::StepResult SymbolicExecutor::step(ExecutionState &state) {
     StepResult successors = nullptr;
@@ -126,4 +126,4 @@ void SymbolicExecutor::printCurrentTraceAndBranches(std::ostream &out,
     out << strBranches << ")";
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen

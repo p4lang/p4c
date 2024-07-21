@@ -24,7 +24,7 @@ limitations under the License.
 #include "frontends/p4/unusedDeclarations.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 using FunctionCallInfo = SimpleCallInfo<IR::Node, IR::Statement>;
 using FunctionsInlineWorkList = SimpleInlineWorkList<FunctionCallInfo>;
 using FunctionsInlineList = SimpleInlineList<IR::Node, FunctionCallInfo, FunctionsInlineWorkList>;
@@ -122,6 +122,6 @@ class InlineFunctions : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_FUNCTIONSINLINING_H_ */

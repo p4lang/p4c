@@ -20,7 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/error.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 const IR::Node *CreateBuiltins::preorder(IR::P4Program *program) {
     auto decls = program->getDeclsByName(P4::P4CoreLibrary::instance().noAction.toString());
@@ -162,4 +162,4 @@ const IR::Node *CreateBuiltins::postorder(IR::TableProperties *properties) {
     return properties;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

@@ -4,7 +4,7 @@
 
 #include "lib/exceptions.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 ArchSpec::ArchSpec(cstring packageName, const std::vector<ArchMember> &archVectorInput)
     : packageName(packageName) {
@@ -50,4 +50,4 @@ const ArchSpec::ArchMember *ArchSpec::getArchMember(size_t blockIndex) const {
 size_t ArchSpec::getArchVectorSize() const { return archVector.size(); }
 
 cstring ArchSpec::getPackageName() const { return packageName; }
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools

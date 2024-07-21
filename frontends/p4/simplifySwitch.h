@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /** @brief Simplify select and switch statements that have constant arguments.
  */
@@ -48,6 +48,6 @@ class SimplifySwitch : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_SIMPLIFYSWITCH_H_ */

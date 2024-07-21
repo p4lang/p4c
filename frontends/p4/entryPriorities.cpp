@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "coreLibrary.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 bool EntryPriorities::requiresPriority(const IR::KeyElement *ke) const {
     // Check if the keys support priorities.  Note: since match_kind
@@ -166,4 +166,4 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
     return entries;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

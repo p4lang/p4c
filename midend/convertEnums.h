@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
  * Policy function: given a number of enum values should return
@@ -144,6 +144,6 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     unsigned enumSize(unsigned) const override { return 32; }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_CONVERTENUMS_H_ */

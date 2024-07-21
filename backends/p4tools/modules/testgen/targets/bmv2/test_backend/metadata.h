@@ -14,7 +14,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/common.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
 /// Extracts information from the @testSpec to emit a Metadata test case.
 class Metadata : public Bmv2TestFramework {
@@ -50,6 +50,6 @@ class Metadata : public Bmv2TestFramework {
     static std::string getTestCaseTemplate();
 };
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_METADATA_H_ */

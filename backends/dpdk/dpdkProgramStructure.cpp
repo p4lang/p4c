@@ -3,7 +3,7 @@
 #include "ir/ir.h"
 #include "options.h"
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock *block) {
     // Blocks are not in IR tree, use a custom visitor to traverse.

@@ -13,7 +13,7 @@
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 /// Represents the final state after execution.
 class FinalState {
@@ -75,6 +75,6 @@ class FinalState {
     [[nodiscard]] const P4::Coverage::CoverageSet &getVisited() const;
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_FINAL_STATE_H_ */

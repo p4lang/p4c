@@ -25,7 +25,7 @@ limitations under the License.
 #include "frontends/p4/ternaryBool.h"
 #include "lib/hash.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 namespace {
 
@@ -1549,4 +1549,4 @@ const IR::Node *DoSimplifyDefUse::process(const IR::Node *node) {
     return node->apply(process);
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

@@ -24,7 +24,7 @@ limitations under the License.
 #include "has_side_effects.h"
 #include "ir/ir-generated.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -936,4 +936,4 @@ Visitor::profile_t DoLocalCopyPropagation::init_apply(const IR::Node *node) {
     return rv;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

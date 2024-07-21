@@ -45,7 +45,7 @@ using P4::ControlPlaneAPI::Helpers::isExternPropertyConstructedInPlace;
 
 namespace p4configv1 = ::p4::config::v1;
 
-namespace P4 {
+namespace p4c::P4 {
 
 /// \addtogroup control_plane
 ///  @{
@@ -389,6 +389,6 @@ struct PNAArchHandlerBuilderForDPDK : public P4::ControlPlaneAPI::P4RuntimeArchH
 }  // namespace ControlPlaneAPI
 
 /** @} */ /* end group control_plane */
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_ */

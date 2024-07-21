@@ -22,7 +22,7 @@ limitations under the License.
 #include "lib/big_int_util.h"
 #include "lib/log.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class CloneConstants : public Transform {
  public:
@@ -1041,4 +1041,4 @@ const IR::Node *DoConstantFolding::postorder(IR::IfStatement *ifstmt) {
     return ifstmt;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

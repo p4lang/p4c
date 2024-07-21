@@ -24,7 +24,7 @@ limitations under the License.
 #include "typeSubstitutionVisitor.h"
 #include "typeUnification.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /// Creates a string that describes the values of current type variables
 class Explain : public Inspector {
@@ -234,6 +234,6 @@ class TypeConstraints final : public IHasDbPrint {
     void dbprint(std::ostream &out) const;
     const TypeVariableSubstitution *getCurrentSubstitution() const { return currentSubstitution; }
 };
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* TYPECHECKING_TYPECONSTRAINTS_H_ */

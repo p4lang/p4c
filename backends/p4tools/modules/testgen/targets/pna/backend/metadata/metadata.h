@@ -17,7 +17,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace p4c::P4Tools::P4Testgen::Pna {
 
 /// Extracts information from the @testSpec to emit a Metadata test case.
 class Metadata : public TestFramework {
@@ -69,6 +69,6 @@ class Metadata : public TestFramework {
     static std::vector<std::pair<size_t, size_t>> getIgnoreMasks(const IR::Constant *mask);
 };
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace p4c::P4Tools::P4Testgen::Pna
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_BACKEND_METADATA_METADATA_H_ */

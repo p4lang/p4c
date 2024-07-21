@@ -12,7 +12,7 @@
 #include "backends/p4tools/modules/smith/core/target.h"
 #include "ir/ir.h"
 
-namespace P4Tools::P4Smith::Tofino {
+namespace p4c::P4Tools::P4Smith::Tofino {
 
 class AbstractTofinoSmithTarget : public SmithTarget {
  protected:
@@ -62,6 +62,6 @@ class TofinoTnaSmithTarget : public AbstractTofinoSmithTarget {
     TofinoTnaSmithTarget();
 };
 
-}  // namespace P4Tools::P4Smith::Tofino
+}  // namespace p4c::P4Tools::P4Smith::Tofino
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_TOFINO_TARGET_H_ */

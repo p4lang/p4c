@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace P4 {
+namespace p4c::P4 {
 enum class StandardExceptions {
     NoError,
     PacketTooShort,
@@ -30,7 +30,7 @@ enum class StandardExceptions {
     HeaderTooShort,
     ParserTimeout,
 };
-}  // namespace P4
+}  // namespace p4c::P4
 
 inline std::ostream &operator<<(std::ostream &out, P4::StandardExceptions e) {
     switch (e) {
@@ -58,7 +58,7 @@ inline std::ostream &operator<<(std::ostream &out, P4::StandardExceptions e) {
     return out;
 }
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -131,6 +131,6 @@ class P4CoreLibrary : public ::Model::Model {
     P4Exception_Model headerTooShort;
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_CORELIBRARY_H_ */

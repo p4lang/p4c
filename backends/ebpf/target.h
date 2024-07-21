@@ -29,7 +29,7 @@ limitations under the License.
 
 namespace EBPF {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 enum TableKind {
     TableHash,

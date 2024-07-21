@@ -14,7 +14,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
 class Bmv2V1ModelCmdStepper : public CmdStepper {
  protected:
@@ -36,6 +36,6 @@ class Bmv2V1ModelCmdStepper : public CmdStepper {
                           const ProgramInfo &programInfo);
 };
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_CMD_STEPPER_H_ */

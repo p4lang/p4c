@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/error.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
  * Checks that match annotations only have 1 argument which is of type match_kind.
@@ -47,6 +47,6 @@ class ValidateMatchAnnotations final : public Inspector {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* P4_VALIDATEMATCHANNOTATIONS_H_ */

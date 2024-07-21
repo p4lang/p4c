@@ -7,7 +7,7 @@
 #include "ir/ir.h"
 #include "ir/vector.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 /// This class defines parameters useful for the invocation of P4 extern and P4Testgen-internal
 /// functions.
@@ -35,6 +35,6 @@ class ExternInfo {
     ExternInfo &operator=(ExternInfo &&) = delete;
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXTERN_INFO_H_ */

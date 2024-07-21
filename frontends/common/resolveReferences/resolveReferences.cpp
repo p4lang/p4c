@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/common/parser_options.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 ResolutionContext::ResolutionContext() { anyOrder = P4CContext::get().options().isv1(); }
 
@@ -510,4 +510,4 @@ bool ResolveReferences::preorder(const IR::Declaration_Instance *decl) {
 
 #undef PROCESS_NAMESPACE
 
-}  // namespace P4
+}  // namespace p4c::P4

@@ -17,7 +17,7 @@
 #include "lib/rtti.h"
 #include "lib/safe_vector.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 /// A stack of maps, which map Z3-internal expression IDs of declared Z3 variables to their
 /// corresponding P4 state variable. The maps are pushed and pop according to the solver push() and
@@ -244,6 +244,6 @@ class Z3Translator : public virtual Inspector {
     std::reference_wrapper<Z3Solver> solver;
 };
 
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_CORE_Z3_SOLVER_H_ */

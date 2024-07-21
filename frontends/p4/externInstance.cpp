@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 std::optional<ExternInstance> ExternInstance::resolve(const IR::Expression *expr,
                                                       ReferenceMap *refMap, TypeMap *typeMap,
@@ -86,4 +86,4 @@ std::optional<ExternInstance> ExternInstance::resolve(
                           constructorCallExpr->to<IR::IAnnotated>()};
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

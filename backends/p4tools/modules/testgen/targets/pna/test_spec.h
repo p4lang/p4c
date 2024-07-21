@@ -14,7 +14,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace p4c::P4Tools::P4Testgen::Pna {
 
 /* =========================================================================================
  *  PnaDpdkRegister
@@ -232,6 +232,6 @@ class Range : public TableMatch {
     DECLARE_TYPEINFO(Range, TableMatch);
 };
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace p4c::P4Tools::P4Testgen::Pna
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_TEST_SPEC_H_ */

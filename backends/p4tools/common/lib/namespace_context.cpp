@@ -7,7 +7,7 @@
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools {
+namespace p4c::P4Tools {
 
 const NamespaceContext *NamespaceContext::Empty = new NamespaceContext(nullptr, nullptr);
 
@@ -112,4 +112,4 @@ cstring NamespaceContext::genName(cstring name, char sep) const {
     return cstring::make_unique(getUsedNames(), name, sep);
 }
 
-}  // namespace P4Tools
+}  // namespace p4c::P4Tools

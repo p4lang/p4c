@@ -30,7 +30,7 @@
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 std::vector<std::pair<IR::StateVariable, const IR::Expression *>> ExprStepper::setFields(
     ExecutionState &nextState, const std::vector<IR::StateVariable> &flatFields,
@@ -925,4 +925,4 @@ void ExprStepper::evalExternMethodCall(const ExternInfo &externInfo) {
     return evalInternalExternMethodCall(externInfo);
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen

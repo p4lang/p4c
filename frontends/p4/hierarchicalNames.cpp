@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "lib/log.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 cstring HierarchicalNames::getName(const IR::IDeclaration *decl) { return decl->getName(); }
 
@@ -35,4 +35,4 @@ const IR::Node *HierarchicalNames::postorder(IR::Annotation *annotation) {
     return annotation;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

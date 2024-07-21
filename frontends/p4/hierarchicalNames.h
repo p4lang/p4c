@@ -20,7 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
  * This transform will adjust the @name annotations on objects
@@ -97,6 +97,6 @@ class HierarchicalNames : public Transform {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_HIERARCHICALNAMES_H_ */

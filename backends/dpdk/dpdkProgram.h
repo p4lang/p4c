@@ -35,7 +35,7 @@ limitations under the License.
 
 namespace DPDK {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 class ConvertToDpdkProgram : public Transform {
     P4::TypeMap *typemap;

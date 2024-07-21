@@ -23,7 +23,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class FrontEndPolicy;  // full definition not needed here
 
@@ -225,6 +225,6 @@ class SpecializeAll : public PassRepeated {
     SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap, FrontEndPolicy *policy);
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_SPECIALIZE_H_ */

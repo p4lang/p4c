@@ -11,7 +11,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
 class Bmv2V1ModelTableStepper : public TableStepper {
  private:
@@ -70,6 +70,6 @@ class Bmv2V1ModelTableStepper : public TableStepper {
     explicit Bmv2V1ModelTableStepper(Bmv2V1ModelExprStepper *stepper, const IR::P4Table *table);
 };
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TABLE_STEPPER_H_ */

@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "ir/irutils.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 const IR::Expression *DoDefaultValues::defaultValue(const IR::Expression *expression,
                                                     const IR::Type *type) {
@@ -103,4 +103,4 @@ const IR::Node *DoDefaultValues::postorder(IR::HeaderStackExpression *expression
     return expression;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

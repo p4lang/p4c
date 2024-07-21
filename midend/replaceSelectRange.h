@@ -27,7 +27,7 @@
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
   Find the types to replace and insert them in the range-mask map.
@@ -67,5 +67,5 @@ class ReplaceSelectRange final : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 #endif /* MIDEND_REPLACESELECTRANGE_H_ */

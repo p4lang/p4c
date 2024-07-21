@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "lib/cstring.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -35,4 +35,4 @@ cstring toString(const TernaryBool &c) {
     return cstring::empty;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

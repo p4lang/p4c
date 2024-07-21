@@ -4,7 +4,7 @@
 
 #include "lib/log.h"
 
-namespace P4::Coverage {
+namespace p4c::P4::Coverage {
 
 bool SourceIdCmp::operator()(const IR::Node *s1, const IR::Node *s2) const {
     // We use source information as comparison operator since we want to trace coverage back to the
@@ -90,4 +90,4 @@ void logCoverage(const CoverageSet &all, const CoverageSet &visited, const Cover
 
 const CoverageSet &CollectNodes::getCoverableNodes() { return coverableNodes; }
 
-}  // namespace P4::Coverage
+}  // namespace p4c::P4::Coverage

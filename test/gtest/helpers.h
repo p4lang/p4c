@@ -30,9 +30,9 @@ namespace p4c::IR {
 class P4Program;
 }  // namespace p4c::IR
 
-namespace P4 {
+namespace p4c::P4 {
 class FrontEndPolicy;
-}  // namespace P4
+}  // namespace p4c::P4
 
 /// Specifies which standard headers should be included by a GTest.
 enum class P4Headers {

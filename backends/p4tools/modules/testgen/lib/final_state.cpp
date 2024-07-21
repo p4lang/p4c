@@ -21,7 +21,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 FinalState::FinalState(AbstractSolver &solver, const ExecutionState &finalState)
     : solver(solver),
@@ -118,4 +118,4 @@ const std::vector<std::reference_wrapper<const TraceEvent>> *FinalState::getTrac
 }
 
 const P4::Coverage::CoverageSet &FinalState::getVisited() const { return state.get().getVisited(); }
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen

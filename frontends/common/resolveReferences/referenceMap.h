@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/visitor.h"
 #include "lib/cstring.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class NameGenerator {
  public:
@@ -121,6 +121,6 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     void usedName(cstring name) { usedNames.emplace(name, 0); }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_ */

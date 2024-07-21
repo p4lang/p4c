@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/coreLibrary.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 const IR::Node *DoHandleNoMatch::postorder(IR::SelectExpression *expression) {
     for (auto c : expression->selectCases) {
@@ -69,4 +69,4 @@ const IR::Node *DoHandleNoMatch::postorder(IR::P4Program *program) {
     return program;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

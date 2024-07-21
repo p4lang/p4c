@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace UBPF {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 EBPF::EBPFTypeFactory *instance = UBPFTypeFactory::getInstance();
 

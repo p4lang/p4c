@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
 Find the types to replace and insert them in the nested struct map.
@@ -149,6 +149,6 @@ class FlattenHeaders final : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_FLATTENHEADERS_H_ */

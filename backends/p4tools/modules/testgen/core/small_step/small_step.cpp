@@ -28,7 +28,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 SmallStepEvaluator::Branch::Branch(ExecutionState &nextState)
     : constraint(IR::BoolLiteral::get(true)), nextState(nextState) {}
@@ -244,4 +244,4 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
     return new std::vector<Branch>({Branch(state)});
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen

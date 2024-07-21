@@ -19,7 +19,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/table_stepper.h"
 
-namespace P4Tools::P4Testgen::EBPF {
+namespace p4c::P4Tools::P4Testgen::EBPF {
 
 EBPFExprStepper::EBPFExprStepper(ExecutionState &state, AbstractSolver &solver,
                                  const ProgramInfo &programInfo)
@@ -195,4 +195,4 @@ bool EBPFExprStepper::preorder(const IR::P4Table *table) {
     return tableStepper.eval();
 }
 
-}  // namespace P4Tools::P4Testgen::EBPF
+}  // namespace p4c::P4Tools::P4Testgen::EBPF

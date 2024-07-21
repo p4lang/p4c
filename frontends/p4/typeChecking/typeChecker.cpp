@@ -26,7 +26,7 @@ limitations under the License.
 #include "typeSubstitution.h"
 #include "typeUnification.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 TypeChecking::TypeChecking(ReferenceMap *refMap, TypeMap *typeMap, bool updateExpressions) {
     addPasses({new P4::TypeInference(typeMap, /* readOnly */ true, /* checkArrays */ true,
@@ -933,4 +933,4 @@ const IR::Node *TypeInference::postorder(IR::Argument *arg) {
     return arg;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

@@ -14,7 +14,7 @@ limitations under the License.
 
 #include "typeChecker.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 using namespace literals;
 
@@ -314,4 +314,4 @@ const IR::Node *TypeInference::postorder(IR::Method *method) {
     return method;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

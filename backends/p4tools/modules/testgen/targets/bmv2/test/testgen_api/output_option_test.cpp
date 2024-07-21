@@ -9,7 +9,7 @@
 
 namespace p4c::Test {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 TEST(P4TestgenOutputOptionTest, GenerateOuputsCorrectly) {
     std::stringstream streamTest;

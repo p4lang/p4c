@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
  * Removes action parameters which are never referenced.
@@ -59,6 +59,6 @@ class RemoveUnusedActionParameters : public Transform {
     ReferenceMap *refMap;
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_REMOVEUNUSEDPARAMETERS_H_ */

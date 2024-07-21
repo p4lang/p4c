@@ -25,7 +25,7 @@
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/backend/stf/stf.h"
 
-namespace P4Tools::P4Testgen::EBPF {
+namespace p4c::P4Tools::P4Testgen::EBPF {
 
 const big_int EBPFTestBackend::ZERO_PKT_VAL = 0x2000000;
 const big_int EBPFTestBackend::ZERO_PKT_MAX = 0xffffffff;
@@ -104,4 +104,4 @@ const TestSpec *EBPFTestBackend::createTestSpec(const ExecutionState *executionS
     return testSpec;
 }
 
-}  // namespace P4Tools::P4Testgen::EBPF
+}  // namespace p4c::P4Tools::P4Testgen::EBPF

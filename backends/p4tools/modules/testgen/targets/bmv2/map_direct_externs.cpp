@@ -6,7 +6,7 @@
 #include "ir/ir.h"
 #include "lib/error.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
 bool MapDirectExterns::preorder(const IR::Declaration_Instance *declInstance) {
     declaredExterns[declInstance->name] = declInstance;
@@ -64,4 +64,4 @@ bool MapDirectExterns::preorder(const IR::P4Table *table) {
 
 const DirectExternMap &MapDirectExterns::getDirectExternMap() { return directExternMap; }
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace p4c::P4Tools::P4Testgen::Bmv2

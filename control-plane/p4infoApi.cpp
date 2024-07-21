@@ -9,7 +9,7 @@
 #include "p4/config/v1/p4info.pb.h"
 #pragma GCC diagnostic pop
 
-namespace P4::ControlPlaneAPI {
+namespace p4c::P4::ControlPlaneAPI {
 
 const p4::config::v1::Table *findP4RuntimeTable(const p4::config::v1::P4Info &p4Info,
                                                 cstring controlPlaneName) {
@@ -282,4 +282,4 @@ std::optional<p4rt_id_t> getP4RuntimeId(const p4::config::v1::P4Info &p4Info,
     return std::nullopt;
 }
 
-}  // namespace P4::ControlPlaneAPI
+}  // namespace p4c::P4::ControlPlaneAPI

@@ -3,9 +3,9 @@
 #include "ir/id.h"
 #include "lib/cstring.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace p4c::P4Tools::P4Testgen::Pna {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 const IR::Member PnaConstants::DROP_VAR =
     IR::Member(IR::Type_Boolean::get(), new IR::PathExpression("*pna_internal"), "drop_var");
@@ -18,4 +18,4 @@ const IR::Member PnaConstants::PARSER_ERROR =
 const IR::SymbolicVariable PnaSymbolicVars::DIRECTION =
     IR::SymbolicVariable(IR::Type_Bits::get(32), "direction"_cs);
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace p4c::P4Tools::P4Testgen::Pna

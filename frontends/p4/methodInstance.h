@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 class InstanceBase : public ICastable {
  protected:
@@ -412,6 +412,6 @@ class ControlInstantiation : public Instantiation {
     DECLARE_TYPEINFO(ControlInstantiation, Instantiation);
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_METHODINSTANCE_H_ */

@@ -23,7 +23,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/exceptions.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /* Maps objects of type T to types. */
 template <class T>
@@ -91,6 +91,6 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* TYPECHECKING_TYPESUBSTITUTION_H_ */

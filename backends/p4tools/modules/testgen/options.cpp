@@ -15,9 +15,9 @@
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 #include "backends/p4tools/modules/testgen/toolname.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 TestgenOptions &TestgenOptions::get() {
     static TestgenOptions INSTANCE;
@@ -436,4 +436,4 @@ bool TestgenOptions::validateOptions() const {
     return true;
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen

@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "lib/ordered_set.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 void SwitchAddDefault::postorder(IR::SwitchStatement *sw) {
     ordered_set<cstring> case_tags;
@@ -52,4 +52,4 @@ void SwitchAddDefault::postorder(IR::SwitchStatement *sw) {
     }
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

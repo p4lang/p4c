@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/unusedDeclarations.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /** Find parsers that have an unconditional "accept" in their start
  *  state, and put them in redundantParsers.
@@ -63,6 +63,6 @@ class RemoveRedundantParsers : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* FRONTENDS_P4_REDUNDANTPARSERS_H_ */

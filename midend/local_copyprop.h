@@ -21,7 +21,7 @@ limitations under the License.
 #include "has_side_effects.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /**
 Local copy propagation and dead code elimination within a single pass.
@@ -176,6 +176,6 @@ class LocalCopyPropagation : public PassManager {
         : LocalCopyPropagation(refMap, typeMap, nullptr, policy) {}
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_LOCAL_COPYPROP_H_ */

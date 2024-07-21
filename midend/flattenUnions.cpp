@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "flattenUnions.h"
 
-namespace P4 {
+namespace p4c::P4 {
 const IR::MethodCallStatement *HandleValidityHeaderUnion::processValidityForStr(
     const IR::Statement *s, const IR::Member *m, cstring headerElement, cstring setValid) {
     auto method = new IR::Member(s->srcInfo, new IR::Member(m->expr, IR::ID(headerElement)),
@@ -413,4 +413,4 @@ const IR::Node *DoFlattenHeaderUnion::postorder(IR::P4Control *control) {
     control->controlLocals = controldecls;
     return control;
 }
-}  // namespace P4
+}  // namespace p4c::P4

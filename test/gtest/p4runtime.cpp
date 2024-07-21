@@ -46,7 +46,7 @@ limitations under the License.
 namespace p4v1 = ::p4::v1;
 namespace p4configv1 = ::p4::config::v1;
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 namespace p4c::Test {
 

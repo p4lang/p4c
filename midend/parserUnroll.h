@@ -27,7 +27,7 @@ limitations under the License.
 #include "interpreter.h"
 #include "ir/ir.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /// Name of out of bound state
 const char outOfBoundsStateName[] = "stateOutOfBound";
@@ -305,6 +305,6 @@ class ParsersUnroll : public PassManager {
     }
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* MIDEND_PARSERUNROLL_H_ */

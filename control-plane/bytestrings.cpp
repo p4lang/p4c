@@ -19,7 +19,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/algorithm.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 namespace ControlPlaneAPI {
 
@@ -68,4 +68,4 @@ std::optional<std::string> stringRepr(const IR::BoolLiteral *constant, int width
 
 }  // namespace ControlPlaneAPI
 
-}  // namespace P4
+}  // namespace p4c::P4

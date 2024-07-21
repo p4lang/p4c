@@ -23,7 +23,7 @@ limitations under the License.
 #include "lib/iterator_range.h"
 #include "referenceMap.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 /// Helper class to indicate types of nodes that may be returned during resolution.
 enum class ResolutionType { Any, Type, TypeVariable };
@@ -167,6 +167,6 @@ class ResolveReferences : public Inspector, private ResolutionContext {
     void checkShadowing(const IR::INamespace *ns) const;
 };
 
-}  // namespace P4
+}  // namespace p4c::P4
 
 #endif /* COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_ */

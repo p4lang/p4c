@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/parameterSubstitution.h"
 #include "lib/rtti_utils.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression *mce) {
     auto mi = P4::MethodInstance::resolve(mce, this, typeMap);
@@ -275,4 +275,4 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     return result;
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "setHeaders.h"
 
-namespace P4 {
+namespace p4c::P4 {
 
 void DoSetHeaders::generateSetValid(const IR::Expression *dest, const IR::Expression *src,
                                     const IR::Type *destType, IR::Vector<IR::StatOrDecl> *insert) {
@@ -71,4 +71,4 @@ const IR::Node *DoSetHeaders::postorder(IR::AssignmentStatement *statement) {
     return new IR::BlockStatement(statement->srcInfo, *vec);
 }
 
-}  // namespace P4
+}  // namespace p4c::P4

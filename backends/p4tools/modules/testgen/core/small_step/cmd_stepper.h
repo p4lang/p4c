@@ -14,7 +14,7 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools::P4Testgen {
+namespace p4c::P4Tools::P4Testgen {
 
 /// Implements small-step operational semantics for commands.
 class CmdStepper : public AbstractStepper {
@@ -57,6 +57,6 @@ class CmdStepper : public AbstractStepper {
         const ExecutionState &state) const = 0;
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace p4c::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_CMD_STEPPER_H_ */

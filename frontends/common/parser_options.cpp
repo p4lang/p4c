@@ -44,7 +44,7 @@ limitations under the License.
 const char *p4includePath = CONFIG_PKGDATADIR "/p4include";
 const char *p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
-using namespace P4::literals;
+using namespace p4c::P4::literals;
 
 void ParserOptions::closeFile(FILE *file) {
     if (file == nullptr) {
