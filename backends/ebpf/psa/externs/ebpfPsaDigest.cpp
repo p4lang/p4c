@@ -19,7 +19,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfType.h"
 #include "backends/ebpf/psa/ebpfPsaDeparser.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 class EBPFDigestPSAValueVisitor : public CodeGenInspector {
  protected:
@@ -163,4 +163,4 @@ void EBPFDigestPSA::emitPushElement(CodeBuilder *builder, cstring elem) const {
     builder->endOfStatement(true);
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

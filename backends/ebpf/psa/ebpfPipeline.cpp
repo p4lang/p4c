@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "backends/ebpf/ebpfParser.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 bool EBPFPipeline::isEmpty() const {
     // Check if parser doesn't have any state
@@ -889,4 +889,4 @@ void TCTrafficManagerForXDP::emitReadXDP2TCMetadataFromCPUMAP(CodeBuilder *build
     builder->emitIndent();
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

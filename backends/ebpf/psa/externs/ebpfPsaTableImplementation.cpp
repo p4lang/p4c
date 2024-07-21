@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/ebpf/psa/ebpfPsaControl.h"
 #include "ebpfPsaHashAlgorithm.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 EBPFTableImplementationPSA::EBPFTableImplementationPSA(const EBPFProgram *program,
                                                        CodeGenInspector *codeGen,
@@ -788,4 +788,4 @@ void EBPFActionSelectorPSA::emitCacheUpdate(CodeBuilder *builder, cstring key, c
     builder->blockEnd(true);
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

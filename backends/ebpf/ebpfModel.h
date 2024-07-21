@@ -22,7 +22,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 using namespace p4c::P4::literals;
 
@@ -99,6 +99,6 @@ class EBPFModel : public ::Model::Model {
     static cstring reserved(cstring name) { return reservedPrefix + name; }
 };
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF
 
 #endif /* BACKENDS_EBPF_EBPFMODEL_H_ */

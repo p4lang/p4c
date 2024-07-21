@@ -19,7 +19,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfProgram.h"
 #include "backends/ebpf/ebpfType.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 EBPFHashAlgorithmPSA::ArgumentsList EBPFHashAlgorithmPSA::unpackArguments(
     const IR::MethodCallExpression *expr, int dataPos) {
@@ -525,4 +525,4 @@ void InternetChecksumAlgorithm::emitSetInternalState(CodeBuilder *builder,
     builder->endOfStatement(true);
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

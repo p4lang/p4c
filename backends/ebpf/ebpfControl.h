@@ -21,7 +21,7 @@ limitations under the License.
 #include "ebpfTable.h"
 #include "ebpfType.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 class EBPFControl;
 
@@ -97,6 +97,6 @@ class EBPFControl : public EBPFObject {
     DECLARE_TYPEINFO(EBPFControl, EBPFObject);
 };
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF
 
 #endif /* BACKENDS_EBPF_EBPFCONTROL_H_ */

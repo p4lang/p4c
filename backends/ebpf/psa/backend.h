@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ebpfPsaGen.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 class PSASwitchBackend {
  public:
@@ -51,6 +51,6 @@ class PSASwitchBackend {
     }
 };
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_BACKEND_H_ */

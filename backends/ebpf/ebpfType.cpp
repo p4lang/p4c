@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "ebpfType.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 EBPFTypeFactory *EBPFTypeFactory::instance;
 
@@ -382,4 +382,4 @@ void EBPFMethodDeclaration::emit(CodeBuilder *builder) {
     builder->newline();
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

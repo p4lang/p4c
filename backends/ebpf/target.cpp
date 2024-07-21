@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "ebpfType.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 void Target::emitPreamble(Util::SourceCodeBuilder *builder) const { (void)builder; }
 
@@ -281,4 +281,4 @@ void BccTarget::emitMain(Util::SourceCodeBuilder *builder, cstring functionName,
     builder->appendFormat("int %s(struct __sk_buff* %s)", functionName.c_str(), argName.c_str());
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "ebpfPsaHashAlgorithm.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 void EBPFChecksumPSA::init(const EBPFProgram *program, cstring name, int type) {
     engine = EBPFHashAlgorithmTypeFactoryPSA::instance()->create(type, program, name);
@@ -130,4 +130,4 @@ void EBPFHashPSA::emitGetMethod(CodeBuilder *builder, const IR::MethodCallExpres
     }
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

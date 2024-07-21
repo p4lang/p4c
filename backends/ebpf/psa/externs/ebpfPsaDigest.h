@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfObject.h"
 #include "backends/ebpf/ebpfProgram.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 class DeparserBodyTranslatorPSA;
 
@@ -48,6 +48,6 @@ class EBPFDigestPSA : public EBPFObject {
     void emitPushElement(CodeBuilder *builder, cstring elem) const;
 };
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EXTERNS_EBPFPSADIGEST_H_ */

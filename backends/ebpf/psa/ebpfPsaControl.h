@@ -23,7 +23,7 @@ limitations under the License.
 #include "backends/ebpf/psa/externs/ebpfPsaRegister.h"
 #include "ebpfPsaTable.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 class EBPFControlPSA;
 
@@ -105,6 +105,6 @@ class EBPFControlPSA : public EBPFControl {
     DECLARE_TYPEINFO(EBPFControlPSA, EBPFControl);
 };
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EBPFPSACONTROL_H_ */

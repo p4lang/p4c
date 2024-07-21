@@ -27,7 +27,7 @@ limitations under the License.
 #include "externs/ebpfPsaTableImplementation.h"
 #include "xdpHelpProgram.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 class PSAErrorCodesGen : public Inspector {
     CodeBuilder *builder;
@@ -959,4 +959,4 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::Declaration_Instance *di) {
     return false;
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

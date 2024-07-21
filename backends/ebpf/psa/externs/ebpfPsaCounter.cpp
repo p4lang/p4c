@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfType.h"
 #include "backends/ebpf/psa/ebpfPipeline.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram *program, const IR::Declaration_Instance *di,
                                cstring name, CodeGenInspector *codeGen)
@@ -315,4 +315,4 @@ void EBPFCounterPSA::emitCounterInitializer(CodeBuilder *builder) {
     builder->blockEnd(false);
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

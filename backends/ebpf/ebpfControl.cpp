@@ -25,7 +25,7 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/error.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 ControlBodyTranslator::ControlBodyTranslator(const EBPFControl *control)
     : CodeGenInspector(control->program->refMap, control->program->typeMap),
@@ -639,4 +639,4 @@ void EBPFControl::emitTableInitializers(CodeBuilder *builder) {
     for (auto it : tables) it.second->emitInitializer(builder);
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

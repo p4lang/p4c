@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 void StateTranslationVisitor::compileLookahead(const IR::Expression *destination) {
     cstring msgStr = absl::StrFormat("Parser: lookahead for %s %s",
@@ -713,4 +713,4 @@ void EBPFParser::emitRejectState(CodeBuilder *builder) {
     builder->newline();
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

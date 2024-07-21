@@ -22,7 +22,7 @@ limitations under the License.
 #include "ebpfPipeline.h"
 #include "externs/ebpfPsaTableImplementation.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 class EBPFTablePSADirectCounterPropertyVisitor : public EBPFTablePsaPropertyVisitor {
  public:
@@ -1056,4 +1056,4 @@ void EBPFTablePSA::emitCacheUpdate(CodeBuilder *builder, cstring key, cstring va
     builder->blockEnd(true);
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

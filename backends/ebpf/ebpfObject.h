@@ -25,7 +25,7 @@ limitations under the License.
 #include "lib/castable.h"
 #include "target.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 /// Base class for EBPF objects.
 class EBPFObject : public ICastable {
@@ -58,6 +58,6 @@ class EBPFObject : public ICastable {
     DECLARE_TYPEINFO(EBPFObject);
 };
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF
 
 #endif /* BACKENDS_EBPF_EBPFOBJECT_H_ */

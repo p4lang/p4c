@@ -25,7 +25,7 @@ limitations under the License.
 #include "psa/ebpfPsaGen.h"
 #include "target.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 void emitFilterModel(const EbpfOptions &options, Target *target, const IR::ToplevelBlock *toplevel,
                      P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
@@ -104,4 +104,4 @@ void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
     }
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

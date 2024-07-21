@@ -13,7 +13,7 @@ limitations under the License.
 */
 #include "ebpfPsaRandom.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance *di)
     : minValue(0), maxValue(0), range(0) {
@@ -100,4 +100,4 @@ void EBPFRandomPSA::emitRead(CodeBuilder *builder) const {
     if (minValue != 0) builder->append(")");
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

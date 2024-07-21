@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "backends/ebpf/psa/ebpfPsaControl.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program, cstring instanceName,
                                  const IR::Declaration_Instance *di, CodeGenInspector *codeGen)
@@ -236,4 +236,4 @@ void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder *builder, const P4::ExternMe
     builder->blockEnd(true);
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

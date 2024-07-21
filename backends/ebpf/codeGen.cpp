@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 void CodeGenInspector::substitute(const IR::Parameter *p, const IR::Parameter *with) {
     substitution.emplace(p, with);
@@ -640,4 +640,4 @@ cstring EBPFInitializerUtils::genHexStr(const big_int &value, unsigned width,
     return str;
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

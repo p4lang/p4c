@@ -24,7 +24,7 @@ limitations under the License.
 #include "ebpfPsaParser.h"
 #include "xdpHelpProgram.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 enum pipeline_type { TC_INGRESS, TC_EGRESS, XDP_INGRESS, XDP_EGRESS, TC_TRAFFIC_MANAGER };
 
@@ -227,6 +227,6 @@ class ConvertToEBPFDeparserPSA : public Inspector {
     EBPF::EBPFDeparserPSA *getEBPFDeparser() { return deparser; }
 };
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EBPFPSAGEN_H_ */

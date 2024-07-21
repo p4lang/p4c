@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 class EBPFParser;
 class EBPFParserState;
@@ -106,6 +106,6 @@ class EBPFParser : public EBPFObject {
     DECLARE_TYPEINFO(EBPFParser, EBPFObject);
 };
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF
 
 #endif /* BACKENDS_EBPF_EBPFPARSER_H_ */

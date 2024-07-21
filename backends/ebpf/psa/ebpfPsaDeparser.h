@@ -24,7 +24,7 @@ limitations under the License.
 #include "ebpfPsaControl.h"
 #include "lib/rtti.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 class EBPFDeparserPSA;
 
@@ -154,6 +154,6 @@ class XDPEgressDeparserPSA : public EgressDeparserPSA {
     DECLARE_TYPEINFO(XDPEgressDeparserPSA, EgressDeparserPSA);
 };
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EBPFPSADEPARSER_H_ */

@@ -22,7 +22,7 @@ limitations under the License.
 #include "backends/ebpf/psa/ebpfPsaTable.h"
 #include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 class EBPFPsaParser;
 
@@ -59,6 +59,6 @@ class EBPFPsaParser : public EBPFParser {
     DECLARE_TYPEINFO(EBPFPsaParser, EBPFParser);
 };
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EBPFPSAPARSER_H_ */

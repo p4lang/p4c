@@ -15,7 +15,7 @@ limitations under the License.
 
 #include "backends/ebpf/psa/ebpfPipeline.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 EBPFMeterPSA::EBPFMeterPSA(const EBPFProgram *program, cstring instanceName,
                            const IR::Declaration_Instance *di, CodeGenInspector *codeGen)
@@ -446,4 +446,4 @@ cstring EBPFMeterPSA::meterExecuteFunc(bool trace, P4::ReferenceMap *refMap) {
     return meterExecuteFunc;
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

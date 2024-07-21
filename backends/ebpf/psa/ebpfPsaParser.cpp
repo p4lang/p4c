@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/ebpf/psa/ebpfPipeline.h"
 #include "frontends/p4/enumInstance.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 void PsaStateTranslationVisitor::processMethod(const P4::ExternMethod *ext) {
     auto externName = ext->originalExternType->name.name;
@@ -113,4 +113,4 @@ void EBPFPsaParser::emitRejectState(CodeBuilder *builder) {
     builder->appendFormat("goto %s", IR::ParserState::accept.c_str());
     builder->endOfStatement(true);
 }
-}  // namespace EBPF
+}  // namespace p4c::EBPF

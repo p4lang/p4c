@@ -16,9 +16,9 @@ limitations under the License.
 
 #include "ebpfModel.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 cstring EBPFModel::reservedPrefix = "ebpf_"_cs;
 EBPFModel EBPFModel::instance;
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

@@ -22,7 +22,7 @@ limitations under the License.
 #include "backends/ebpf/psa/externs/ebpfPsaMeter.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 class EBPFTableImplementationPSA;
 
@@ -143,6 +143,6 @@ class EBPFTablePsaPropertyVisitor : public Inspector {
     }
 };
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EBPFPSATABLE_H_ */

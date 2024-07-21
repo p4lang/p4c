@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "ebpfPipeline.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 DeparserBodyTranslatorPSA::DeparserBodyTranslatorPSA(const EBPFDeparserPSA *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
@@ -297,4 +297,4 @@ void XDPEgressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->blockEnd(true);
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

@@ -17,7 +17,7 @@ limitations under the License.
 
 #include "ebpfPsaControl.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 ControlBodyTranslatorPSA::ControlBodyTranslatorPSA(const EBPFControlPSA *control)
     : CodeGenInspector(control->program->refMap, control->program->typeMap),
@@ -128,4 +128,4 @@ void EBPFControlPSA::emitTableInitializers(CodeBuilder *builder) {
     }
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

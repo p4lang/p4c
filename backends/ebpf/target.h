@@ -27,7 +27,7 @@ limitations under the License.
 /// We are prepared to support code generation using multiple styles
 /// (e.g., using BCC or using CLANG).
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 using namespace p4c::P4::literals;
 
@@ -316,6 +316,6 @@ class TestTarget : public EBPF::KernelSamplesTarget {
     cstring packetDescriptorType() const override { return "struct __sk_buff"_cs; }
 };
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF
 
 #endif /* BACKENDS_EBPF_TARGET_H_ */

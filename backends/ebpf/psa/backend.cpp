@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "backends/common/psaProgramStructure.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
@@ -79,4 +79,4 @@ void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     ebpf_program = convertToEbpfPSA->getPSAArchForEBPF();
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

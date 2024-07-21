@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "lower.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 const IR::Expression *LowerExpressions::shift(const IR::Operation_Binary *expression) const {
     auto rhs = expression->right;
@@ -116,4 +116,4 @@ const IR::Node *LowerExpressions::postorder(IR::Cast *expression) {
     return expression;
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

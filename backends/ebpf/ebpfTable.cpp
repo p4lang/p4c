@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 bool ActionTranslationVisitor::preorder(const IR::PathExpression *expression) {
     if (isActionParameter(expression)) {
@@ -1214,4 +1214,4 @@ void EBPFValueSet::emitLookup(CodeBuilder *builder) {
     builder->target->emitTableLookup(builder, instanceName, keyVarName, cstring::empty);
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

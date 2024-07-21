@@ -27,7 +27,7 @@ limitations under the License.
 #include "frontends/common/options.h"
 #include "frontends/p4/coreLibrary.h"
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 bool EBPFProgram::build() {
     auto pack = toplevel->getMain();
@@ -357,4 +357,4 @@ bool EBPFProgram::isLibraryMethod(cstring methodName) {
     return XDP_METHODS.find(methodName) != XDP_METHODS.end();
 }
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF

@@ -28,7 +28,7 @@ class ReferenceMap;
 
 }
 
-namespace EBPF {
+namespace p4c::EBPF {
 
 class CodeBuilder : public Util::SourceCodeBuilder {
  public:
@@ -141,6 +141,6 @@ class EBPFInitializerUtils {
     static cstring genHexStr(const big_int &value, unsigned width, const IR::Expression *expr);
 };
 
-}  // namespace EBPF
+}  // namespace p4c::EBPF
 
 #endif /* BACKENDS_EBPF_CODEGEN_H_ */
