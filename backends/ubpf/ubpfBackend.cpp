@@ -24,7 +24,7 @@ limitations under the License.
 #include "ubpfProgram.h"
 #include "ubpfType.h"
 
-namespace UBPF {
+namespace p4c::UBPF {
 
 void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
                       P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
@@ -74,4 +74,4 @@ void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
     hstream->flush();
 }
 
-}  // namespace UBPF
+}  // namespace p4c::UBPF

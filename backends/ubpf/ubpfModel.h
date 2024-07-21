@@ -23,7 +23,7 @@ limitations under the License.
 #include "ir/pass_manager.h"
 #include "lib/cstring.h"
 
-namespace UBPF {
+namespace p4c::UBPF {
 
 using namespace p4c::P4::literals;
 
@@ -128,6 +128,6 @@ class UBPFModel : public ::Model::Model {
     }
 };
 
-}  // namespace UBPF
+}  // namespace p4c::UBPF
 
 #endif /* BACKENDS_UBPF_UBPFMODEL_H_ */

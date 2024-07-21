@@ -5,7 +5,7 @@
 #include "lib/sourceCodeBuilder.h"
 #include "target.h"
 
-namespace UBPF {
+namespace p4c::UBPF {
 
 class UbpfCodeBuilder : public EBPF::CodeBuilder {
  public:
@@ -14,6 +14,6 @@ class UbpfCodeBuilder : public EBPF::CodeBuilder {
         : EBPF::CodeBuilder(target), target(target) {}
 };
 
-}  // namespace UBPF
+}  // namespace p4c::UBPF
 
 #endif /* BACKENDS_UBPF_CODEGEN_H_ */

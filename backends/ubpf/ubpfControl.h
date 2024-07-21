@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfControl.h"
 #include "ubpfRegister.h"
 
-namespace UBPF {
+namespace p4c::UBPF {
 
 class UBPFControl;
 
@@ -96,6 +96,6 @@ class UBPFControl : public EBPF::EBPFControl {
     void scanConstants();
 };
 
-}  // namespace UBPF
+}  // namespace p4c::UBPF
 
 #endif /* BACKENDS_UBPF_UBPFCONTROL_H_ */

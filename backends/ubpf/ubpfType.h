@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfType.h"
 #include "lib/sourceCodeBuilder.h"
 
-namespace UBPF {
+namespace p4c::UBPF {
 
 class UBPFTypeFactory : public EBPF::EBPFTypeFactory {
  public:
@@ -141,6 +141,6 @@ class UBPFListType : public EBPF::EBPFType, public EBPF::IHasWidth {
     DECLARE_TYPEINFO(UBPFListType, EBPF::EBPFType, EBPF::IHasWidth);
 };
 
-}  // namespace UBPF
+}  // namespace p4c::UBPF
 
 #endif /* BACKENDS_UBPF_UBPFTYPE_H_ */

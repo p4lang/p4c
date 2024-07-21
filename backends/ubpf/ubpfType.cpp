@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "ubpfHelpers.h"
 
-namespace UBPF {
+namespace p4c::UBPF {
 
 using namespace p4c::P4::literals;
 
@@ -278,4 +278,4 @@ void UBPFListType::emit(EBPF::CodeBuilder *builder) {
     }
 }
 
-}  // namespace UBPF
+}  // namespace p4c::UBPF

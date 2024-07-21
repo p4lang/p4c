@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "ubpfType.h"
 
-namespace UBPF {
+namespace p4c::UBPF {
 
 class OutHeaderSize final : public EBPF::CodeGenInspector {
     P4::ReferenceMap *refMap;
@@ -348,4 +348,4 @@ void UBPFDeparser::emit(EBPF::CodeBuilder *builder) {
     codeGen->setBuilder(builder);
     controlBlock->container->body->apply(*codeGen);
 }
-}  // namespace UBPF
+}  // namespace p4c::UBPF

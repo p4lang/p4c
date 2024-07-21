@@ -24,7 +24,7 @@ limitations under the License.
 #include "ubpfParser.h"
 #include "ubpfType.h"
 
-namespace UBPF {
+namespace p4c::UBPF {
 
 namespace {
 
@@ -502,4 +502,4 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
     }
 }
 
-}  // namespace UBPF
+}  // namespace p4c::UBPF

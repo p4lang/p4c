@@ -22,7 +22,7 @@ limitations under the License.
 #include "ubpfHelpers.h"
 #include "ubpfProgram.h"
 
-namespace UBPF {
+namespace p4c::UBPF {
 
 class UBPFDeparser;
 
@@ -76,6 +76,6 @@ class UBPFDeparser : public EBPF::EBPFObject {
     bool build();
     void emit(EBPF::CodeBuilder *builder);
 };
-}  // namespace UBPF
+}  // namespace p4c::UBPF
 
 #endif /* BACKENDS_UBPF_UBPFDEPARSER_H_ */

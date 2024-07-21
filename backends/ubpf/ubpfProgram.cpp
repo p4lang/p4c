@@ -22,7 +22,7 @@ limitations under the License.
 #include "ubpfParser.h"
 #include "ubpfType.h"
 
-namespace UBPF {
+namespace p4c::UBPF {
 
 bool UBPFProgram::build() {
     bool success = true;
@@ -298,4 +298,4 @@ void UBPFProgram::emitPipeline(EBPF::CodeBuilder *builder) {
     builder->blockEnd(true);
 }
 
-}  // namespace UBPF
+}  // namespace p4c::UBPF

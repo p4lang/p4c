@@ -22,7 +22,7 @@ limitations under the License.
 #include "ubpfModel.h"
 #include "ubpfType.h"
 
-namespace UBPF {
+namespace p4c::UBPF {
 
 namespace {
 class UBPFStateTranslationVisitor : public EBPF::CodeGenInspector {
@@ -489,4 +489,4 @@ bool UBPFParser::build() {
     return true;
 }
 
-}  // namespace UBPF
+}  // namespace p4c::UBPF

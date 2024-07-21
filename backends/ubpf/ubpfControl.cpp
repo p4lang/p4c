@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "lib/error.h"
 
-namespace UBPF {
+namespace p4c::UBPF {
 
 UBPFControlBodyTranslator::UBPFControlBodyTranslator(const UBPFControl *control)
     : EBPF::CodeGenInspector(control->program->refMap, control->program->typeMap),
@@ -653,4 +653,4 @@ bool UBPFControl::build() {
     return ::errorCount() == 0;
 }
 
-}  // namespace UBPF
+}  // namespace p4c::UBPF

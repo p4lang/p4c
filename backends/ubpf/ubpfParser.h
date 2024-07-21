@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ubpfType.h"
 
-namespace UBPF {
+namespace p4c::UBPF {
 
 class UBPFParserState : public EBPF::EBPFParserState {
  public:
@@ -44,6 +44,6 @@ class UBPFParser : public EBPF::EBPFParser {
     bool build();
 };
 
-}  // namespace UBPF
+}  // namespace p4c::UBPF
 
 #endif /* BACKENDS_UBPF_UBPFPARSER_H_ */
