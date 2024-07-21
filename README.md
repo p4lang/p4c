@@ -179,7 +179,7 @@ sudo dpkg -i /path/to/package.deb
 2.  Install [dependencies](#dependencies). You can find specific instructions
     for Ubuntu 20.04 [here](#ubuntu-dependencies) and for macOS 11
     [here](#macos-dependencies).  You can also look at the
-    [CI installation script](tools/ci-build.sh).
+    [CI installation script](https://github.com/p4lang/p4c/blob/main/tools/ci-build.sh).
 
 3.  Build. Building should also take place in a subdirectory named `build`.
     ```
@@ -336,7 +336,7 @@ sudo dnf install -y doxygen graphviz
 git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
 ```
 
-You can also look at the [dependencies installation script](tools/install_fedora_deps.sh)
+You can also look at the [dependencies installation script](https://github.com/p4lang/p4c/blob/main/tools/install_fedora_deps.sh)
 for a fresh Fedora instance.
 
 ### macOS dependencies
@@ -478,10 +478,10 @@ bazel build //...
 We run continuous integration to ensure this works with the latest version of
 Bazel.
 
-We also provide a [`p4_library` rule](bazel/p4_library.bzl) for invoking
+We also provide a [`p4_library` rule](https://github.com/p4lang/p4c/blob/main/bazel/p4_library.bzl) for invoking
 P4C during the build process of 3rd party Bazel projects.
 
-See [bazel/example](bazel/example) for an example of how to use or extend P4C in
+See [bazel/example](https://github.com/p4lang/p4c/tree/main/bazel/example) for an example of how to use or extend P4C in
 your own Bazel project. You may use it as a template to get you started.
 
 ## Build system

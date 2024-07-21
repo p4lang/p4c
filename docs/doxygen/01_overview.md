@@ -19,5 +19,5 @@ The P4C compiler is a compiler infrastructure for the P4 compiler designed with 
 * the core design of the compiler intermediate representation (IR) and
   the visitor patterns are briefly described in [IR](../IR.md)
 
-* The [migration guide](../migration-guide.pptx) describes how P4_14 (v1.0)
+* The [migration guide](https://github.com/p4lang/p4c/blob/main/docs/migration-guide.pptx) describes how P4_14 (v1.0)
   programs are translated into P4_16 programs

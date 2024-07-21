@@ -86,10 +86,10 @@ p4c
 * the core design of the compiler intermediate representation (IR) and
   the visitor patterns are briefly described in [IR](IR.md)
 
-* The [migration guide](migration-guide.pptx) describes how P4_14 (v1.0)
+* The [migration guide](https://github.com/p4lang/p4c/blob/main/docs/migration-guide.pptx) describes how P4_14 (v1.0)
   programs are translated into P4_16 programs
 
-* The [compiler design](compiler-design.pptx) describes the salient
+* The [compiler design](https://github.com/p4lang/p4c/blob/main/docs/compiler-design.pptx) describes the salient
   features of the compiler design and implementation; this document has several subsections:
   * Compiler goals
   * Compiler architecture
@@ -158,7 +158,7 @@ git push -f
 * After committing changes, create a pull request (using the github web UI)
 
 * Follow these
-  [guidelines](CodingStandardPhilosophy.md#Git-commits-and-pull-requests)
+  [guidelines](CodingStandardPhilosophy.md#git-commits-and-pull-requests)
   to write commit messages and open pull requests.
 
 ## Debugging
