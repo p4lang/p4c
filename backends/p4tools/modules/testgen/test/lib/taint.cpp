@@ -15,7 +15,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/test/small-step/util.h"
 
-namespace Test {
+namespace p4c::Test {
 
 namespace {
 
@@ -309,4 +309,4 @@ TEST_F(TaintTest, Taint10) {
 
 }  // anonymous namespace
 
-}  // namespace Test
+}  // namespace p4c::Test

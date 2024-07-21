@@ -48,7 +48,7 @@ namespace p4configv1 = ::p4::config::v1;
 
 using namespace P4::literals;
 
-namespace Test {
+namespace p4c::Test {
 
 namespace {
 
@@ -2119,4 +2119,4 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeValidTranslationAnnotations) {
     }
 }
 
-}  // namespace Test
+}  // namespace p4c::Test

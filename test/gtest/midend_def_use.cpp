@@ -27,7 +27,7 @@ limitations under the License.
 
 using namespace P4;
 
-namespace Test {
+namespace p4c::Test {
 
 using P4TestContext = P4CContextWithOptions<CompilerOptions>;
 
@@ -413,4 +413,4 @@ TEST_F(P4CMidendDefUse, slice_1) {
     EXPECT_TRUE(check_def_use(uses, "inout ParsedHeaders h", 0, {0, 2, 3, 10, 11, 14}));
 }
 
-}  // namespace Test
+}  // namespace p4c::Test

@@ -7,7 +7,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf_ir.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace Test {
+namespace p4c::Test {
 
 using namespace P4::literals;
 
@@ -102,4 +102,4 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
     }
 }
 
-}  // namespace Test
+}  // namespace p4c::Test

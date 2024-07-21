@@ -2,7 +2,7 @@
 
 #include "backends/p4tools/common/control_plane/p4info_map.h"
 
-namespace Test {
+namespace p4c::Test {
 
 namespace {
 
@@ -22,4 +22,4 @@ TEST_F(P4RuntimeApiTest, SzudzikPairingisCorrect) {
 
 }  // namespace
 
-}  // namespace Test
+}  // namespace p4c::Test

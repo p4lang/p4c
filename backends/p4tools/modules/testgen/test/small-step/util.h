@@ -27,7 +27,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
-namespace Test {
+namespace p4c::Test {
 
 using Body = P4Tools::P4Testgen::Continuation::Body;
 using Continuation = P4Tools::P4Testgen::Continuation;
@@ -167,6 +167,6 @@ void stepAndExamineOp(
 
 }  // namespace SmallStepUtil
 
-}  // namespace Test
+}  // namespace p4c::Test
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_SMALL_STEP_UTIL_H_ */

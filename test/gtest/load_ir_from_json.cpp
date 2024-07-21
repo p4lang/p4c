@@ -33,7 +33,7 @@ limitations under the License.
 using namespace P4;
 using namespace std;
 
-namespace Test {
+namespace p4c::Test {
 
 class FromJSONTest : public P4CTest {};
 
@@ -58,4 +58,4 @@ TEST_F(FromJSONTest, load_ir_from_json) {
     ASSERT_FALSE(exitCode);
 }
 
-}  // namespace Test
+}  // namespace p4c::Test

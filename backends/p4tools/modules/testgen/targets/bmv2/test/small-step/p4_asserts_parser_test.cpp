@@ -30,7 +30,7 @@
 extern const char *sourcePath;
 extern const char *buildPath;
 
-namespace Test {
+namespace p4c::Test {
 using namespace P4::literals;
 
 class P4AssertsParserTest : public P4ToolsTest {};
@@ -146,4 +146,4 @@ TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInAction) {
     ASSERT_TRUE(parsingResult[1]->equiv(*operation));
 }
 
-}  // namespace Test
+}  // namespace p4c::Test

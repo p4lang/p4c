@@ -33,7 +33,7 @@ limitations under the License.
 #include "gtest/gtest_prod.h"
 #endif
 
-namespace Test {
+namespace p4c::Test {
 class UtilSourceFile;
 }
 

@@ -34,7 +34,7 @@ class ToplevelBlock;
 
 class CompilerOptions;
 
-namespace Test {
+namespace p4c::Test {
 
 class SkipControls : public P4::ActionSynthesisPolicy {
     const std::set<cstring> *skip;
@@ -59,6 +59,6 @@ class MidEnd : public PassManager {
     IR::ToplevelBlock *process(const IR::P4Program *&program);
 };
 
-}  // namespace Test
+}  // namespace p4c::Test
 
 #endif /* TEST_GTEST_MIDEND_PASS_H_ */

@@ -4,7 +4,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/stf.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
-namespace Test {
+namespace p4c::Test {
 
 using TestBackendConfiguration = P4Tools::P4Testgen::TestBackendConfiguration;
 using Packet = P4Tools::P4Testgen::Packet;
@@ -28,6 +28,6 @@ class STFTest : public P4ToolsTest {
     TableConfig gettest1TableConfig2();
 };
 
-}  // namespace Test
+}  // namespace p4c::Test
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_TEST_BACKEND_STF_H_ */

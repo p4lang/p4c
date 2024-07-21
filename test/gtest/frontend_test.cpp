@@ -11,7 +11,7 @@
 #include "ir/pass_manager.h"
 #include "lib/log.h"
 
-namespace Test {
+namespace p4c::Test {
 
 struct P4CFrontend : P4CTest {
     void addPasses(std::initializer_list<PassManager::VisitorRef> passes) { pm.addPasses(passes); }
@@ -197,4 +197,4 @@ TEST_F(P4CFrontendMoveInitializers, P4ControlSrcInfo) {
     }
 }
 
-}  // namespace Test
+}  // namespace p4c::Test

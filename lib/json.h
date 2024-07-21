@@ -31,7 +31,7 @@ limitations under the License.
 #include "lib/map.h"
 #include "lib/string_map.h"
 
-namespace Test {
+namespace p4c::Test {
 class TestJson;
 }
 

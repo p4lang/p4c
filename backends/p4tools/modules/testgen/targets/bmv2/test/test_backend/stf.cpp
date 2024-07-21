@@ -13,7 +13,7 @@
 #include "ir/irutils.h"
 #include "lib/exceptions.h"
 
-namespace Test {
+namespace p4c::Test {
 
 using namespace P4::literals;
 
@@ -239,4 +239,4 @@ TEST_F(STFTest, Stf04) {
     }
 }
 
-}  // namespace Test
+}  // namespace p4c::Test

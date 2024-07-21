@@ -29,7 +29,7 @@ limitations under the License.
 
 using namespace P4;
 
-namespace Test {
+namespace p4c::Test {
 
 namespace {
 
@@ -288,4 +288,4 @@ TEST_F(P4CMidend, replaceSelectRangeSigned5) {
         {{0, 15}}, [](CollectRangesAndMasks collect) { ASSERT_EQ(collect.masks.size(), 1u); });
 }
 
-}  // namespace Test
+}  // namespace p4c::Test

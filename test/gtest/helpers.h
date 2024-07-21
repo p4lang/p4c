@@ -42,7 +42,7 @@ enum class P4Headers {
     PSA       // Both core.p4 and psa.p4
 };
 
-namespace TestDetail {
+namespace p4c::TestDetail {
 
 /**
  * Transforms the P4 program (or program fragment) in @rawSource to turn it into
@@ -65,7 +65,7 @@ std::string makeP4Source(const char *file, unsigned line, P4Headers headers, con
 /// `makeP4Source(file, line, P4Headers::NONE, rawSource);`.
 std::string makeP4Source(const char *file, unsigned line, const char *rawSource);
 
-}  // namespace TestDetail
+}  // namespace p4c::TestDetail
 
 // A macro which should be used by unit tests to define P4 source code. It adds
 // additional information to the source code to aid in debugging; see
@@ -106,7 +106,7 @@ class P4CTestEnvironment {
 
 using GTestContext = P4CContextWithOptions<CompilerOptions>;
 
-namespace Test {
+namespace p4c::Test {
 
 /// A test fixture base class that automatically creates a new compilation
 /// context for the test to run in.
@@ -163,6 +163,6 @@ struct RedirectStderr {
     std::streambuf *old = nullptr;
 };
 
-}  // namespace Test
+}  // namespace p4c::Test
 
 #endif /* TEST_GTEST_HELPERS_H_ */

@@ -4,7 +4,7 @@
 
 #include "ir/ir.h"
 
-namespace Test {
+namespace p4c::Test {
 
 using namespace IR;
 
@@ -95,4 +95,4 @@ TEST(IndexedVector, Vector_ctor) {
     EXPECT_EQ(vec[1]->name.name, "bar");
 }
 
-}  // namespace Test
+}  // namespace p4c::Test

@@ -28,7 +28,7 @@ limitations under the License.
 // disable these tests for GCC-4.9, which for some reason
 // do not link with std::optional
 #if (__GNUC__ > 4) || defined(__clang__)
-namespace Test {
+namespace p4c::Test {
 
 using namespace BitRange;
 using namespace BitRange::Detail;
@@ -1480,5 +1480,5 @@ TEST_F(IntegerMathUtilsTest, ModuloFloor) {
     }
 }
 
-}  // namespace Test
+}  // namespace p4c::Test
 #endif  // (__GNUC__ > 4) || defined(__clang__)

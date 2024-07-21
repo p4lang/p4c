@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/common/applyOptionsPragmas.h"
 #include "test/gtest/helpers.h"
 
-namespace Test {
+namespace p4c::Test {
 
 namespace {
 
@@ -247,4 +247,4 @@ TEST_F(Diagnostics, CompilerOptions) {
     }
 }
 
-}  // namespace Test
+}  // namespace p4c::Test

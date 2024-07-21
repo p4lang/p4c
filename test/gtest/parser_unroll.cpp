@@ -11,7 +11,7 @@
 
 using namespace P4;
 
-namespace Test {
+namespace p4c::Test {
 
 using P4TestContext = P4CContextWithOptions<CompilerOptions>;
 
@@ -148,4 +148,4 @@ TEST_F(P4CParserUnroll, header_union) {
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size());
 }
 
-}  // namespace Test
+}  // namespace p4c::Test

@@ -28,7 +28,7 @@ limitations under the License.
 
 using namespace P4;
 
-namespace Test {
+namespace p4c::Test {
 
 class P4CArchitecture : public P4CTest {};
 
@@ -336,4 +336,4 @@ TEST_F(P4CArchitecture, clone_as_extern_method) {
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 }
 
-}  // namespace Test
+}  // namespace p4c::Test

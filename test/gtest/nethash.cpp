@@ -5,7 +5,7 @@
 #include <initializer_list>
 #include <string_view>
 
-namespace Test {
+namespace p4c::Test {
 
 using namespace p4c::NetHash;
 
@@ -110,4 +110,4 @@ TEST(NetHash, identity) {
               0x4500'0073'0000'4000_u64);
 }
 
-}  // namespace Test
+}  // namespace p4c::Test

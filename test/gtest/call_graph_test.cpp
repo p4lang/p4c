@@ -20,7 +20,7 @@ limitations under the License.
 
 #include "frontends/p4/callGraph.h"
 
-namespace Test {
+namespace p4c::Test {
 
 template <class T>
 static void sameSet(std::unordered_set<T> &set, std::vector<T> vector) {
@@ -51,4 +51,4 @@ TEST(CallGraph, Acyclic) {
     EXPECT_EQ('a', sorted.at(2));
 }
 
-}  // namespace Test
+}  // namespace p4c::Test
