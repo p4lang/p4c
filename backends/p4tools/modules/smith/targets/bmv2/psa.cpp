@@ -21,7 +21,7 @@
 
 namespace p4c::P4Tools::P4Smith::BMv2 {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 /* =============================================================================================
  *  Bmv2PsaSmithTarget implementation

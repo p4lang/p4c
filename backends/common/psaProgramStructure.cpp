@@ -19,7 +19,7 @@ limitations under the License.
 
 namespace p4c::P4 {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 void InspectPsaProgram::postorder(const IR::Declaration_Instance *di) {
     if (!pinfo->resourceMap.count(di)) return;

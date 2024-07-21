@@ -46,7 +46,7 @@ class SmallStepTest : public P4ToolsTest {
 
 namespace SmallStepUtil {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 /// Creates a test case with the given header fields for
 /// stepping on a given expression.

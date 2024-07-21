@@ -5,7 +5,7 @@
 
 namespace p4c::BMV2 {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 std::vector<const char *> *PsaSwitchOptions::process(int argc, char *const argv[]) {
     searchForIncludePath(p4includePath,

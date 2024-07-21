@@ -4,7 +4,7 @@
 #include "dpdkHelpers.h"
 #include "ir/dbprint.h"
 #include "printUtils.h"
-using namespace p4c::DBPrint;
+using namespace ::p4c::DBPrint;
 
 ordered_map<cstring, int> DPDK::CollectDirectCounterMeter::directMeterCounterSizeMap = {};
 auto &directMeterCounterSizeMap = DPDK::CollectDirectCounterMeter::directMeterCounterSizeMap;

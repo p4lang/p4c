@@ -233,6 +233,6 @@ const T *get(const IR::Vector<T> *vec, U name) {
 }
 
 }  // namespace GetImpl
-using namespace p4c::GetImpl;  // NOLINT(build/namespaces)
+using namespace ::p4c::GetImpl;  // NOLINT(build/namespaces)
 
 #endif /* IR_VECTOR_H_ */

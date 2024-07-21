@@ -25,7 +25,7 @@ limitations under the License.
 class IrClass;
 class IrNamespace;
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 #define ALL_TYPES(M) \
     M(NamedType)     \

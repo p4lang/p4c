@@ -48,7 +48,7 @@ class TypeMap;
 
 namespace p4c::graphs {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 class EdgeTypeIface {
  public:

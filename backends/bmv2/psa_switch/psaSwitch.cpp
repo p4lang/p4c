@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace p4c::BMV2 {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 void PsaCodeGenerator::create(ConversionContext *ctxt) {
     createTypes(ctxt);

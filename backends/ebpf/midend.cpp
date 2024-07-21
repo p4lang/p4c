@@ -53,7 +53,7 @@ limitations under the License.
 
 namespace p4c::EBPF {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum *type) const override {

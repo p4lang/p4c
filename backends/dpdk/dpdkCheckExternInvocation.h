@@ -33,7 +33,7 @@ class TypeMap;
 
 namespace p4c::DPDK {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 /// @brief Class for checking constraints for invocations of PNA architecture extern
 ///        methods and functions.

@@ -18,7 +18,7 @@ and limitations under the License.
 
 namespace p4c::TC {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 const cstring ParseTCAnnotations::defaultHit = "default_hit"_cs;
 const cstring ParseTCAnnotations::defaultHitConst = "default_hit_const"_cs;

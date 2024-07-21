@@ -18,7 +18,7 @@ and limitations under the License.
 
 namespace p4c::TC {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 void InspectPnaProgram::postorder(const IR::Declaration_Instance *di) {
     if (!pinfo->resourceMap.count(di)) return;

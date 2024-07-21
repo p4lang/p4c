@@ -24,7 +24,7 @@ limitations under the License.
 
 namespace p4c::EBPF {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 struct TableImpl_Model : public ::Model::Extern_Model {
     explicit TableImpl_Model(cstring name) : Extern_Model(name), size("size"_cs) {}

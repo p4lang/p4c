@@ -4,7 +4,7 @@
 
 namespace p4c::P4Tools::TableUtils {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 void checkTableImmutability(const IR::P4Table &table, TableProperties &properties) {
     bool isConstant = false;

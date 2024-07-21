@@ -34,7 +34,7 @@ limitations under the License.
 
 namespace p4c {
 
-using namespace p4c::DBPrint;
+using namespace ::p4c::DBPrint;
 using namespace IndentCtl;
 
 static int dbprint_index = -1;

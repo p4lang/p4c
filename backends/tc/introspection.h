@@ -30,7 +30,7 @@ and limitations under the License.
 /// control plane programming by P4TC in Linux kernel
 namespace p4c::TC {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 struct IntrospectionInfo {
     cstring schemaVersion;

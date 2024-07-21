@@ -30,7 +30,7 @@ limitations under the License.
 #include "lib/bitops.h"
 
 namespace p4c::P4V1 {
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 static const IR::IDeclaration *getFirstDeclaration(const IR::Vector<IR::Node> *nodes,
                                                    cstring name) {

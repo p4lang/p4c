@@ -9,7 +9,7 @@
 /// variables are also used for SMT solvers as symbolic variables.
 namespace p4c::P4Tools {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 /// A list of constraints. These constraints may take the form of "x == 8w1","x != y", where "x" and
 /// "y" are symbolic variables. They are expressed in P4C IR form and may be consumed by SMT or

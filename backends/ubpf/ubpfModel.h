@@ -25,7 +25,7 @@ limitations under the License.
 
 namespace p4c::UBPF {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 struct Pipeline_Model : public ::Model::Elem {
     Pipeline_Model()

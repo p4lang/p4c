@@ -28,7 +28,7 @@
 
 namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 static big_int checksum(Bmv2HashAlgorithm algo, const uint8_t *buf, size_t len) {
     // Pick a checksum according to the algorithm value.

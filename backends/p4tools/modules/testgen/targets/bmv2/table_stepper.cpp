@@ -34,7 +34,7 @@
 
 namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 const IR::Expression *Bmv2V1ModelTableStepper::computeTargetMatchType(
     const TableUtils::KeyProperties &keyProperties, TableMatchMap *matches,

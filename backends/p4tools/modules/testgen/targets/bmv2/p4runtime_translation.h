@@ -8,7 +8,7 @@
 
 namespace p4c::P4Tools::P4Testgen::Bmv2 {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 /// Propagates P4Runtime annotations attached to type definitions to the nodes which use these type
 /// definitions. For now, this is restricted to key elements and action parameters.

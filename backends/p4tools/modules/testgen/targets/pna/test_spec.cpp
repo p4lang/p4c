@@ -7,7 +7,7 @@
 
 namespace p4c::P4Tools::P4Testgen::Pna {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 /* =========================================================================================
  *  PnaDpdkRegister

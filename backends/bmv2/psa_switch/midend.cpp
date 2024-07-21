@@ -64,7 +64,7 @@ limitations under the License.
 
 namespace p4c::BMV2 {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 /// This class implements a policy suitable for the ConvertEnums pass.
 /// The policy is: convert all enums that are not part of the psa.

@@ -24,7 +24,7 @@
 
 namespace p4c::Test {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 class P4ReachabilityOptions : public CompilerOptions {
  public:

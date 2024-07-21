@@ -40,7 +40,7 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOptions &options) {
     auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();

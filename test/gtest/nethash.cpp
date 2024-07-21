@@ -7,7 +7,7 @@
 
 namespace p4c::Test {
 
-using namespace p4c::NetHash;
+using namespace ::p4c::NetHash;
 
 template <typename T>
 struct Hex {

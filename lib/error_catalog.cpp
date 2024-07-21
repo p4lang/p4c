@@ -22,7 +22,7 @@ limitations under the License.
 
 namespace p4c {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 // -------- Errors -------------
 const int ErrorType::LEGACY_ERROR = 0;

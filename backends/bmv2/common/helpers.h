@@ -30,7 +30,7 @@ limitations under the License.
 
 namespace p4c::BMV2 {
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 #ifndef UNUSED
 #define UNUSED __attribute__((__unused__))
