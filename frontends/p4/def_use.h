@@ -280,7 +280,7 @@ class StorageMap : public IHasDbPrint {
     }
     StorageLocation *getStorage(const IR::IDeclaration *decl) const {
         CHECK_NULL(decl);
-        auto result = ::get(storage, decl);
+        auto result = ::p4c::get(storage, decl);
         return result;
     }
     void dbprint(std::ostream &out) const override {
@@ -422,7 +422,7 @@ class Definitions : public IHasDbPrint {
         return definitions.find(location) != definitions.end();
     }
     const ProgramPoints *getPoints(const BaseLocation *location) const {
-        auto r = ::get(definitions, location);
+        auto r = ::p4c::get(definitions, location);
         BUG_CHECK(r != nullptr, "no definitions found for %1%", location);
         return r;
     }
@@ -606,7 +606,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     // Get writes of a node that is a direct child of the currently being visited node.
     const LocationSet *getWrites(const IR::Expression *expression) {
         const loc_t &exprLoc = *getLoc(expression, getChildContext());
-        auto result = ::get(writes, exprLoc);
+        auto result = ::p4c::get(writes, exprLoc);
         BUG_CHECK(result != nullptr, "No location set known for %1%", expression);
         return result;
     }
@@ -614,7 +614,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     // In this case, parentLoc is the loc of expression's direct parent node.
     const LocationSet *getWrites(const IR::Expression *expression, const loc_t *parentLoc) {
         const loc_t &exprLoc = *getLoc(expression, parentLoc);
-        auto result = ::get(writes, exprLoc);
+        auto result = ::p4c::get(writes, exprLoc);
         BUG_CHECK(result != nullptr, "No location set known for %1%", expression);
         return result;
     }

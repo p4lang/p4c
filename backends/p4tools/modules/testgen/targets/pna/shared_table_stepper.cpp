@@ -346,7 +346,7 @@ void SharedPnaTableStepper::checkTargetProperties(
         properties.tableIsTainted = properties.tableIsTainted || keyIsTainted;
         // If the key expression is tainted, do not bother resolving the remaining keys.
         if (properties.tableIsTainted) {
-            ::warning("Key %1% of table %2% is tainted.", keyElement->expression, table);
+            ::p4c::warning("Key %1% of table %2% is tainted.", keyElement->expression, table);
             return;
         }
     }
@@ -377,7 +377,7 @@ void SharedPnaTableStepper::evalTargetTable(
             return;
         }
         if (!properties.defaultIsImmutable) {
-            ::warning(
+            ::p4c::warning(
                 "Table %1%: Overriding default actions not supported for test back end %2%. "
                 "Choosing default action",
                 properties.tableName, testBackend);
@@ -403,7 +403,7 @@ void SharedPnaTableStepper::evalTargetTable(
                 evalTableActionSelector(tableActionList);
             } else {
                 // We can only generate profile entries for PTF and Protobuf tests.
-                ::warning(
+                ::p4c::warning(
                     "Action selector control plane entries are not implemented. Using default "
                     "action.");
             }
@@ -416,7 +416,7 @@ void SharedPnaTableStepper::evalTargetTable(
                 evalTableActionProfile(tableActionList);
             } else {
                 // We can only generate profile entries for PTF and Protobuf tests.
-                ::warning(
+                ::p4c::warning(
                     "Action profile control plane entries are not implemented. Using default "
                     "action.");
             }

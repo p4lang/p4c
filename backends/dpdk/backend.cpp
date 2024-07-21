@@ -121,7 +121,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
                     genContextJson->serializeContextJson(out);
                     out->flush();
                 } else
-                    ::error(ErrorType::ERR_IO, "Could not open file: %1%", options.ctxtFile);
+                    ::p4c::error(ErrorType::ERR_IO, "Could not open file: %1%", options.ctxtFile);
             }
         }),
         new ReplaceHdrMetaField(),

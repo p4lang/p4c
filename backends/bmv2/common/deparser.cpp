@@ -91,7 +91,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl> *bo
                             // We don't need to handle other types,
                             // like header unions or stacks; they were
                             // expanded by the expandEmit pass.
-                            ::error(ErrorType::ERR_UNSUPPORTED,
+                            ::p4c::error(ErrorType::ERR_UNSUPPORTED,
                                     "%1%: emit only supports header arguments, not %2%", arg, type);
                         }
                     }
@@ -124,7 +124,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl> *bo
                 continue;
             }
         }
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported within a deparser on this target",
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported within a deparser on this target",
                 s);
     }
     ctxt->conv->simpleExpressionsOnly = false;

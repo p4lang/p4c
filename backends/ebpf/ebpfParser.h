@@ -101,7 +101,7 @@ class EBPFParser : public EBPFObject {
     virtual void emitValueSetInstances(CodeBuilder *builder);
     virtual void emitRejectState(CodeBuilder *builder);
 
-    EBPFValueSet *getValueSet(cstring name) const { return ::get(valueSets, name); }
+    EBPFValueSet *getValueSet(cstring name) const { return ::p4c::get(valueSets, name); }
 
     DECLARE_TYPEINFO(EBPFParser, EBPFObject);
 };

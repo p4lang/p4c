@@ -78,7 +78,7 @@ TEST_F(Diagnostics, P4_16_Warn) {
     )"));
     EXPECT_TRUE(test);
     EXPECT_EQ(1u, ::diagnosticCount());
-    EXPECT_EQ(0u, ::errorCount());
+    EXPECT_EQ(0u, ::p4c::errorCount());
 }
 
 TEST_F(Diagnostics, P4_16_Error) {
@@ -87,7 +87,7 @@ TEST_F(Diagnostics, P4_16_Error) {
     )"));
     EXPECT_FALSE(test);
     EXPECT_EQ(1u, ::diagnosticCount());
-    EXPECT_EQ(1u, ::errorCount());
+    EXPECT_EQ(1u, ::p4c::errorCount());
 }
 
 TEST_F(Diagnostics, DISABLED_P4_14_Disable) {
@@ -104,7 +104,7 @@ TEST_F(Diagnostics, DISABLED_P4_14_Warn) {
     )"));
     EXPECT_TRUE(test);
     EXPECT_EQ(1u, ::diagnosticCount());
-    EXPECT_EQ(0u, ::errorCount());
+    EXPECT_EQ(0u, ::p4c::errorCount());
 }
 
 TEST_F(Diagnostics, DISABLED_P4_14_Error) {
@@ -113,7 +113,7 @@ TEST_F(Diagnostics, DISABLED_P4_14_Error) {
     )"));
     EXPECT_FALSE(test);
     EXPECT_EQ(1u, ::diagnosticCount());
-    EXPECT_EQ(1u, ::errorCount());
+    EXPECT_EQ(1u, ::p4c::errorCount());
 }
 
 TEST_F(Diagnostics, NestedCompileContexts) {
@@ -132,7 +132,7 @@ TEST_F(Diagnostics, NestedCompileContexts) {
             )"));
             EXPECT_FALSE(test);
             EXPECT_EQ(1u, ::diagnosticCount());
-            EXPECT_EQ(1u, ::errorCount());
+            EXPECT_EQ(1u, ::p4c::errorCount());
         }
 
         // Run a test with `uninitialized_out_param` disabled. The error from
@@ -150,7 +150,7 @@ TEST_F(Diagnostics, NestedCompileContexts) {
     auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"()"));
     EXPECT_TRUE(test);
     EXPECT_EQ(1u, ::diagnosticCount());
-    EXPECT_EQ(0u, ::errorCount());
+    EXPECT_EQ(0u, ::p4c::errorCount());
 }
 
 TEST_F(Diagnostics, CompilerOptions) {
@@ -178,7 +178,7 @@ TEST_F(Diagnostics, CompilerOptions) {
         auto test = parseWithCompilerOptions({"(test)", "--Wwarn"});
         EXPECT_TRUE(test);
         EXPECT_EQ(1u, ::diagnosticCount());
-        EXPECT_EQ(0u, ::errorCount());
+        EXPECT_EQ(0u, ::p4c::errorCount());
     }
 
     {
@@ -186,7 +186,7 @@ TEST_F(Diagnostics, CompilerOptions) {
         auto test = parseWithCompilerOptions({"(test)", "--Werror"});
         EXPECT_FALSE(test);
         EXPECT_EQ(1u, ::diagnosticCount());
-        EXPECT_EQ(1u, ::errorCount());
+        EXPECT_EQ(1u, ::p4c::errorCount());
     }
 
     // Check that `--Wdisable`, `--Wwarn`, and `--Werror`, when used with an
@@ -204,7 +204,7 @@ TEST_F(Diagnostics, CompilerOptions) {
         auto test = parseWithCompilerOptions({"(test)", "--Wdisable=unknown_diagnostic"});
         EXPECT_TRUE(test);
         EXPECT_EQ(1u, ::diagnosticCount());
-        EXPECT_EQ(0u, ::errorCount());
+        EXPECT_EQ(0u, ::p4c::errorCount());
     }
 
     {
@@ -212,7 +212,7 @@ TEST_F(Diagnostics, CompilerOptions) {
         auto test = parseWithCompilerOptions({"(test)", "--Wwarn=uninitialized_out_param"});
         EXPECT_TRUE(test);
         EXPECT_EQ(1u, ::diagnosticCount());
-        EXPECT_EQ(0u, ::errorCount());
+        EXPECT_EQ(0u, ::p4c::errorCount());
     }
 
     {
@@ -220,7 +220,7 @@ TEST_F(Diagnostics, CompilerOptions) {
         auto test = parseWithCompilerOptions({"(test)", "--Werror=uninitialized_out_param"});
         EXPECT_FALSE(test);
         EXPECT_EQ(1u, ::diagnosticCount());
-        EXPECT_EQ(1u, ::errorCount());
+        EXPECT_EQ(1u, ::p4c::errorCount());
     }
 
     {
@@ -228,7 +228,7 @@ TEST_F(Diagnostics, CompilerOptions) {
         auto test = parseWithCompilerOptions({"(test)", "--Werror=unknown_diagnostic"});
         EXPECT_TRUE(test);
         EXPECT_EQ(1u, ::diagnosticCount());
-        EXPECT_EQ(0u, ::errorCount());
+        EXPECT_EQ(0u, ::p4c::errorCount());
     }
 
     // Check that e.g. `--Wdisable foo` is treated as two arguments, rather than

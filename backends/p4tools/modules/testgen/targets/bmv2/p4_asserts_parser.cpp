@@ -314,7 +314,7 @@ std::vector<Token> combineTokensToNames(const std::vector<Token> &inputVector) {
         if (input.is(Token::Kind::Text)) {
             auto strtmp = std::string(input.lexeme());
             if (strtmp == "." && prevToken.is(Token::Kind::Number)) {
-                ::error(
+                ::p4c::error(
                     "Syntax error, unexpected INTEGER. P4 does not support floating point values. "
                     "Exiting");
             }
@@ -562,7 +562,7 @@ const IR::Node *AssertsParser::postorder(IR::P4Table *tableContext) {
                                    restrictions.end());
             continue;
         }
-        ::warning(
+        ::p4c::warning(
             "Restriction %1% is not feasible. Not generating entries for table %2% and instead "
             "using default action.",
             restrStr, tableContext);

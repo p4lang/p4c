@@ -176,8 +176,8 @@ namespace p4c::Test {
 
     P4::P4COptionPragmaParser optionsPragmaParser;
     program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
-    if (::errorCount() > 0) {
-        std::cerr << "Encountered " << ::errorCount() << " errors while collecting options pragmas"
+    if (::p4c::errorCount() > 0) {
+        std::cerr << "Encountered " << ::p4c::errorCount() << " errors while collecting options pragmas"
                   << std::endl;
         return std::nullopt;
     }
@@ -189,14 +189,14 @@ namespace p4c::Test {
         std::cerr << "Frontend failed" << std::endl;
         return std::nullopt;
     }
-    if (::errorCount() > 0) {
-        std::cerr << "Encountered " << ::errorCount() << " errors while executing frontend"
+    if (::p4c::errorCount() > 0) {
+        std::cerr << "Encountered " << ::p4c::errorCount() << " errors while executing frontend"
                   << std::endl;
         return std::nullopt;
     }
 
-    if (::errorCount() > 0) {
-        std::cerr << "Encountered " << ::errorCount()
+    if (::p4c::errorCount() > 0) {
+        std::cerr << "Encountered " << ::p4c::errorCount()
                   << " errors while parsing back-end annotations" << std::endl;
         return std::nullopt;
     }

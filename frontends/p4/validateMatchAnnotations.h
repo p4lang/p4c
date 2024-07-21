@@ -37,13 +37,13 @@ class ValidateMatchAnnotations final : public Inspector {
         if (annotation->name != IR::Annotation::matchAnnotation) return;
         if (!findContext<IR::StructField>()) return;
         if (annotation->expr.size() != 1)
-            ::error(ErrorType::ERR_INVALID, "%1%: annotation must have exactly 1 argument",
+            ::p4c::error(ErrorType::ERR_INVALID, "%1%: annotation must have exactly 1 argument",
                     annotation);
         auto e0 = annotation->expr.at(0);
         auto type = typeMap->getType(e0, true);
         if (type == nullptr) return;
         if (!type->is<IR::Type_MatchKind>())
-            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: value must be a match_kind", e0);
+            ::p4c::error(ErrorType::ERR_TYPE_ERROR, "%1%: value must be a match_kind", e0);
     }
 };
 

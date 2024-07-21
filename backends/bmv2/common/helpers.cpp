@@ -146,8 +146,8 @@ int ConversionContext::createFieldList(const IR::Expression *expr, cstring listN
 }
 
 void ConversionContext::modelError(const char *format, const IR::Node *node) {
-    ::error(format, node);
-    ::error("Are you using an up-to-date v1model.p4?");
+    ::p4c::error(format, node);
+    ::p4c::error("Are you using an up-to-date v1model.p4?");
 }
 
 cstring ConversionContext::createCalculation(cstring algo, const IR::Expression *fields,

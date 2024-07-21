@@ -51,7 +51,7 @@ class IndexedVector : public Vector<T> {
         auto [it, inserted] = declarations.emplace(name, decl);
         if (!inserted) {
             invalid = true;
-            ::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicates declaration %2%", a, it->second);
+            ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicates declaration %2%", a, it->second);
         }
     }
     void removeFromMap(const T *a) {

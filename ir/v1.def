@@ -8,9 +8,10 @@
   * @{
   */
 #emit
-namespace p4c::IR {
+namespace p4c {
+namespace IR {
 enum class CounterType { NONE, PACKETS, BYTES, BOTH };
-}
+}  // namespace IR
 
 inline std::ostream& operator<<(std::ostream &out, IR::CounterType d) {
     switch (d) {
@@ -40,6 +41,8 @@ inline bool operator>>(cstring s, IR::CounterType &ctr) {
     else return false;
     return true;
 }
+
+}  // namespace p4c
 #end
 
 class Type_Block : Type_Base {

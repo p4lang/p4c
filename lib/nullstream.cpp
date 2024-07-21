@@ -25,12 +25,12 @@ namespace p4c {
 std::ostream *openFile(const std::filesystem::path &name, bool nullOnError) {
     if (name.empty()) {
         if (nullOnError) return new nullstream();
-        ::error(ErrorType::ERR_INVALID, "Empty name for openFile");
+        ::p4c::error(ErrorType::ERR_INVALID, "Empty name for openFile");
         return nullptr;
     }
     std::ofstream *file = new std::ofstream(name);
     if (!file->good()) {
-        ::error(ErrorType::ERR_IO, "Error writing output to file %1%: %2%", name, strerror(errno));
+        ::p4c::error(ErrorType::ERR_IO, "Error writing output to file %1%: %2%", name, strerror(errno));
         if (nullOnError) return new nullstream();
         return nullptr;
     }

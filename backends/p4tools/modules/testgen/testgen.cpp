@@ -54,22 +54,22 @@ SymbolicExecutor *pickExecutionEngine(const TestgenOptions &testgenOptions,
 int postProcess(const TestgenOptions &testgenOptions, const TestBackEnd &testBackend) {
     // Do not print this warning if assertion mode is enabled.
     if (testBackend.getTestCount() == 0 && !testgenOptions.assertionModeEnabled) {
-        ::warning(
+        ::p4c::warning(
             "Unable to generate tests with given inputs. Double-check provided options and "
             "parameters.\n");
     }
     if (testBackend.getCoverage() < testgenOptions.minCoverage) {
-        ::error("The tests did not achieve requested coverage of %1%, the coverage is %2%.",
+        ::p4c::error("The tests did not achieve requested coverage of %1%, the coverage is %2%.",
                 testgenOptions.minCoverage, testBackend.getCoverage());
     }
 
-    return ::errorCount() == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+    return ::p4c::errorCount() == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 std::optional<AbstractTestList> generateAndCollectAbstractTests(
     const TestgenOptions &testgenOptions, const ProgramInfo &programInfo) {
     if (!testgenOptions.testBaseName.has_value()) {
-        ::error(
+        ::p4c::error(
             "Test collection requires a test name. No name was provided as part of the "
             "P4Testgen options.");
         return std::nullopt;
@@ -108,7 +108,7 @@ int generateAndWriteAbstractTests(const TestgenOptions &testgenOptions,
     } else if (!P4CContext::get().options().file.empty()) {
         testPath = P4CContext::get().options().file.stem();
     } else {
-        ::error("Neither a file nor test base name was set. Can not infer a test name.");
+        ::p4c::error("Neither a file nor test base name was set. Can not infer a test name.");
     }
 
     // Create the directory, if the directory string is valid and if it does not exist.
@@ -117,7 +117,7 @@ int generateAndWriteAbstractTests(const TestgenOptions &testgenOptions,
         try {
             std::filesystem::create_directories(testDir);
         } catch (const std::exception &err) {
-            ::error("Unable to create directory %1%: %2%", testDir.c_str(), err.what());
+            ::p4c::error("Unable to create directory %1%: %2%", testDir.c_str(), err.what());
             return EXIT_FAILURE;
         }
         testPath = testDir / testPath;
@@ -160,7 +160,7 @@ std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view
             P4Tools::CompilerTarget::runCompiler(TOOL_NAME, std::string(program.value()));
     } else {
         if (compilerOptions.file.empty()) {
-            ::error("Expected a file input.");
+            ::p4c::error("Expected a file input.");
             return std::nullopt;
         }
         // Run the compiler to get an IR and invoke the tool.
@@ -168,15 +168,15 @@ std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view
     }
 
     if (!compilerResultOpt.has_value()) {
-        ::error("Failed to run the compiler.");
+        ::p4c::error("Failed to run the compiler.");
         return std::nullopt;
     }
 
     const auto *testgenCompilerResult =
         compilerResultOpt.value().get().checkedTo<TestgenCompilerResult>();
     const auto *programInfo = TestgenTarget::produceProgramInfo(*testgenCompilerResult);
-    if (programInfo == nullptr || ::errorCount() > 0) {
-        ::error("P4Testgen encountered errors during preprocessing.");
+    if (programInfo == nullptr || ::p4c::errorCount() > 0) {
+        ::p4c::error("P4Testgen encountered errors during preprocessing.");
         return std::nullopt;
     }
 
@@ -203,8 +203,8 @@ int Testgen::mainImpl(const CompilerResult &compilerResult) {
     const auto *testgenCompilerResult = compilerResult.checkedTo<TestgenCompilerResult>();
 
     const auto *programInfo = TestgenTarget::produceProgramInfo(*testgenCompilerResult);
-    if (programInfo == nullptr || ::errorCount() > 0) {
-        ::error("P4Testgen encountered errors during preprocessing.");
+    if (programInfo == nullptr || ::p4c::errorCount() > 0) {
+        ::p4c::error("P4Testgen encountered errors during preprocessing.");
         return EXIT_FAILURE;
     }
     return generateAndWriteAbstractTests(TestgenOptions::get(), *programInfo);

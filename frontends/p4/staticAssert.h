@@ -49,7 +49,7 @@ class DoStaticAssert : public Transform, public ResolutionContext {
                 auto subst = ef->substitution;
                 auto params = subst.getParametersInOrder();
                 if (!params->moveNext()) {
-                    ::warning(ErrorType::WARN_INVALID, "static_assert with no arguments: %1%",
+                    ::p4c::warning(ErrorType::WARN_INVALID, "static_assert with no arguments: %1%",
                               method);
                     return method;
                 }
@@ -69,7 +69,7 @@ class DoStaticAssert : public Transform, public ResolutionContext {
                                 message = sl->value.string_view();
                             }
                         }
-                        ::error(ErrorType::ERR_EXPECTED, "%1%: %2%", method, message);
+                        ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: %2%", method, message);
                         return method;
                     }
                     if (getContext()->node->is<IR::MethodCallStatement>()) {
@@ -78,7 +78,7 @@ class DoStaticAssert : public Transform, public ResolutionContext {
                     }
                     return new IR::BoolLiteral(method->srcInfo, true);
                 } else {
-                    ::error(ErrorType::ERR_UNEXPECTED,
+                    ::p4c::error(ErrorType::ERR_UNEXPECTED,
                             "Could not evaluate static_assert to a constant: %1%", arg);
                     return method;
                 }

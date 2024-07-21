@@ -120,8 +120,8 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     ReadsWrites() { setName("ReadsWrites"); }
 
     void postorder(const IR::Operation_Binary *expression) override {
-        auto left = ::get(rw, expression->left);
-        auto right = ::get(rw, expression->right);
+        auto left = ::p4c::get(rw, expression->left);
+        auto right = ::p4c::get(rw, expression->right);
         CHECK_NULL(left);
         CHECK_NULL(right);
         rw.emplace(expression, left->join(right));
@@ -135,27 +135,27 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     }
 
     void postorder(const IR::Operation_Unary *expression) override {
-        auto e = ::get(rw, expression->expr);
+        auto e = ::p4c::get(rw, expression->expr);
         CHECK_NULL(e);
         rw.emplace(expression, e);
     }
 
     void postorder(const IR::Member *expression) override {
-        auto e = ::get(rw, expression->expr);
+        auto e = ::p4c::get(rw, expression->expr);
         CHECK_NULL(e);
         auto result = e->append(expression->member);
         rw.emplace(expression, result);
     }
 
     void postorder(const IR::ArrayIndex *expression) override {
-        auto e = ::get(rw, expression->left);
+        auto e = ::p4c::get(rw, expression->left);
         CHECK_NULL(e);
         const SetOfLocations *result;
         if (expression->right->is<IR::Constant>()) {
             int index = expression->right->to<IR::Constant>()->asInt();
             result = e->append(Util::toString(index));
         } else {
-            auto index = ::get(rw, expression->right);
+            auto index = ::p4c::get(rw, expression->right);
             result = e->append("*"_cs)->join(index);
         }
         rw.emplace(expression, result);
@@ -182,9 +182,9 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     }
 
     void postorder(const IR::Operation_Ternary *expression) override {
-        auto e0 = ::get(rw, expression->e0);
-        auto e1 = ::get(rw, expression->e1);
-        auto e2 = ::get(rw, expression->e2);
+        auto e0 = ::p4c::get(rw, expression->e0);
+        auto e1 = ::p4c::get(rw, expression->e1);
+        auto e2 = ::p4c::get(rw, expression->e2);
         CHECK_NULL(e0);
         CHECK_NULL(e1);
         CHECK_NULL(e2);
@@ -192,15 +192,15 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     }
 
     void postorder(const IR::Slice *expression) override {
-        auto e = ::get(rw, expression->e0);
+        auto e = ::p4c::get(rw, expression->e0);
         CHECK_NULL(e);
         rw.emplace(expression, e);
     }
 
     void postorder(const IR::MethodCallExpression *expression) override {
-        auto e = ::get(rw, expression->method);
+        auto e = ::p4c::get(rw, expression->method);
         for (auto a : *expression->arguments) {
-            auto s = ::get(rw, a->expression);
+            auto s = ::p4c::get(rw, a->expression);
             CHECK_NULL(s);
             e = e->join(s);
         }
@@ -210,7 +210,7 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     void postorder(const IR::ConstructorCallExpression *expression) override {
         const SetOfLocations *result = new SetOfLocations();
         for (auto e : *expression->arguments) {
-            auto s = ::get(rw, e->expression);
+            auto s = ::p4c::get(rw, e->expression);
             CHECK_NULL(s);
             result = result->join(s);
         }
@@ -220,7 +220,7 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     void postorder(const IR::StructExpression *expression) override {
         const SetOfLocations *result = new SetOfLocations();
         for (auto e : expression->components) {
-            auto s = ::get(rw, e->expression);
+            auto s = ::p4c::get(rw, e->expression);
             CHECK_NULL(s);
             result = result->join(s);
         }
@@ -230,7 +230,7 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     void postorder(const IR::ListExpression *expression) override {
         const SetOfLocations *result = new SetOfLocations();
         for (auto e : expression->components) {
-            auto s = ::get(rw, e);
+            auto s = ::p4c::get(rw, e);
             CHECK_NULL(s);
             result = result->join(s);
         }
@@ -243,7 +243,7 @@ class ReadsWrites : public Inspector, public ResolutionContext {
 
     const SetOfLocations *get(const IR::Expression *expression, const Visitor::Context *ctxt) {
         expression->apply(*this, ctxt);
-        auto result = ::get(rw, expression);
+        auto result = ::p4c::get(rw, expression);
         CHECK_NULL(result);
         LOG3("SetOfLocations(" << expression << ")=" << result);
         return result;

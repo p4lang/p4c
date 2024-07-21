@@ -129,7 +129,7 @@ std::map<Continuation::Exception, Continuation> Bmv2V1ModelCmdStepper::getExcept
             // Would also need to augment ProgramInfo to detect whether the ingress MAU refers
             // to parser_err.
 
-            ::warning("Ingress parser exception handler not fully implemented");
+            ::p4c::warning("Ingress parser exception handler not fully implemented");
             result.emplace(Continuation::Exception::Reject, Continuation::Body({}));
             result.emplace(
                 Continuation::Exception::PacketTooShort,

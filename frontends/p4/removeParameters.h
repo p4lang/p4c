@@ -50,14 +50,14 @@ class ActionInvocation {
     void bindDefaultAction(const IR::P4Action *action,
                            const IR::MethodCallExpression *defaultInvocation) {
         // We must have a binding for this action already.
-        auto actionCallInvocation = ::get(invocations, action);
+        auto actionCallInvocation = ::p4c::get(invocations, action);
         CHECK_NULL(actionCallInvocation);
         // We must remove all arguments which are bound in the action list.
         unsigned boundArgs = actionCallInvocation->arguments->size();
         defaultActions.emplace(defaultInvocation, boundArgs);
     }
     const IR::MethodCallExpression *get(const IR::P4Action *action) const {
-        return ::get(invocations, action);
+        return ::p4c::get(invocations, action);
     }
     bool removeAllParameters(const IR::P4Action *action) const {
         return all.find(action) != all.end();
@@ -67,7 +67,7 @@ class ActionInvocation {
     }
     unsigned argsToRemove(const IR::MethodCallExpression *defaultCall) const {
         if (defaultActions.find(defaultCall) == defaultActions.end()) return 0;
-        return ::get(defaultActions, defaultCall);
+        return ::p4c::get(defaultActions, defaultCall);
     }
 };
 

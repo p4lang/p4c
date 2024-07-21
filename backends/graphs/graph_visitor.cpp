@@ -25,7 +25,7 @@ void Graph_visitor::writeGraphToFile(const Graph &g, const std::string &name) {
     auto path = graphsDir / (name + ".dot");
     auto out = openFile(path, false);
     if (out == nullptr) {
-        ::error(ErrorType::ERR_IO, "Failed to open file %1%", path);
+        ::p4c::error(ErrorType::ERR_IO, "Failed to open file %1%", path);
         return;
     }
     // Custom label writers not supported with subgraphs, so we populate

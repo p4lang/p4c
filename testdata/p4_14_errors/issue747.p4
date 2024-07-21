@@ -27,7 +27,7 @@ parser start {
 
 // This test passes local_port (an untyped variable) to recirculate
 // which expects a field list. It exposed issue #747, where the code
-// expected that calling ::error will exit out of the function.
+// expected that calling ::p4c::error will exit out of the function.
 action local_recirc(local_port) {
     resubmit( local_port );
 }

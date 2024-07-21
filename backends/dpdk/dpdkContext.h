@@ -115,7 +115,7 @@ struct SelectionTable {
         }
         // Fetch associated member table handle
         cstring actionDataTableName = tbl->name.originalName.replace("_sel", "");
-        auto actionTableAttr = ::get(tableAttrmap, actionDataTableName);
+        auto actionTableAttr = ::p4c::get(tableAttrmap, actionDataTableName);
         bound_to_action_data_table_handle = actionTableAttr.tableHandle;
     }
 };

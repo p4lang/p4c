@@ -34,7 +34,7 @@ void SelectedBranches::runImpl(const Callback &callBack, ExecutionStateReference
             }
             if (selectedBranches.empty()) {
                 // Not enough steps in the input selected branches string, cannot continue.
-                ::warning("The selected path is incomplete, not emitting a testcase.");
+                ::p4c::warning("The selected path is incomplete, not emitting a testcase.");
                 break;
             }
             // If there are multiple, pop one branch decision from the input list and pick
@@ -51,7 +51,7 @@ void SelectedBranches::runImpl(const Callback &callBack, ExecutionStateReference
             // We've reached the end of the program. Call back and end execution.
             handleTerminalState(callBack, executionState);
             if (!selectedBranches.empty()) {
-                ::warning(
+                ::p4c::warning(
                     "Execution reached a final state before executing whole "
                     "selected path!");
             }
@@ -101,7 +101,7 @@ ExecutionState *SelectedBranches::chooseBranch(const std::vector<Branch> &branch
         }
     }
     // If not found, the input selected branch list is invalid.
-    ::error("The selected branches string doesn't match any branch.");
+    ::p4c::error("The selected branches string doesn't match any branch.");
 
     return nullptr;
 }

@@ -32,12 +32,12 @@ EBPFMeterPSA::EBPFMeterPSA(const EBPFProgram *program, cstring instanceName,
 
         auto declaredSize = di->arguments->at(0)->expression->to<IR::Constant>();
         if (!declaredSize->fitsUint()) {
-            ::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", declaredSize);
+            ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", declaredSize);
             return;
         }
         size = declaredSize->asUnsigned();
     } else {
-        ::error(ErrorType::ERR_INVALID, "Not known Meter type: %1%", di);
+        ::p4c::error(ErrorType::ERR_INVALID, "Not known Meter type: %1%", di);
         return;
     }
 
@@ -150,7 +150,7 @@ void EBPFMeterPSA::emitInstance(CodeBuilder *builder) const {
         builder->target->emitTableDeclSpinlock(builder, instanceName, TableHash, this->keyTypeName,
                                                "struct " + getIndirectStructName(), size);
     } else {
-        ::error(ErrorType::ERR_UNEXPECTED,
+        ::p4c::error(ErrorType::ERR_UNEXPECTED,
                 "Direct meter belongs to table "
                 "and cannot have own instance");
     }

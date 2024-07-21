@@ -94,7 +94,7 @@ void Predication::ExpressionReplacer::visitBranch(IR::Mux *mux, bool then) {
     auto elseExprName = Pred::lvalueName(mux->e2);
 
     if (leftName.isNullOrEmpty()) {
-        ::error(ErrorType::ERR_EXPRESSION,
+        ::p4c::error(ErrorType::ERR_EXPRESSION,
                 "%1%: Assignment inside if statement can't be transformed to condition expression",
                 statement);
     }

@@ -69,7 +69,7 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
         if (valueRequired) {
             P4C_UNIMPLEMENTED("%1%: No default value for varbit types.", srcInfo);
         }
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1% default values for varbit types", srcInfo);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1% default values for varbit types", srcInfo);
         return nullptr;
     }
     if (const auto *ht = type->to<IR::Type_Header>()) {
@@ -125,7 +125,7 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
         P4C_UNIMPLEMENTED("%1%: No default value for type %2% (%3%).", srcInfo, type,
                           type->node_type_name());
     }
-    ::error(ErrorType::ERR_INVALID, "%1%: No default value for type %2% (%3%)", srcInfo, type,
+    ::p4c::error(ErrorType::ERR_INVALID, "%1%: No default value for type %2% (%3%)", srcInfo, type,
             type->node_type_name());
     return nullptr;
 }

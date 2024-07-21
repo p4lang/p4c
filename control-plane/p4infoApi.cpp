@@ -277,7 +277,7 @@ std::optional<p4rt_id_t> getP4RuntimeId(const p4::config::v1::P4Info &p4Info,
         return p4RuntimeExternOpt->extern_type_id();
     }
 
-    ::error("Unsupported P4Runtime ID type");
+    ::p4c::error("Unsupported P4Runtime ID type");
 
     return std::nullopt;
 }

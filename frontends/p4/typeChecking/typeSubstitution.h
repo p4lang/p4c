@@ -38,8 +38,8 @@ class TypeSubstitution : public IHasDbPrint {
 
     /** True if this is the empty substitution, which does not replace anything. */
     bool isIdentity() const { return binding.size() == 0; }
-    const IR::Type *lookup(T t) const { return ::get(binding, t); }
-    const IR::Type *get(T t) const { return ::get(binding, t); }
+    const IR::Type *lookup(T t) const { return ::p4c::get(binding, t); }
+    const IR::Type *get(T t) const { return ::p4c::get(binding, t); }
 
     bool containsKey(T key) const { return binding.find(key) != binding.end(); }
 

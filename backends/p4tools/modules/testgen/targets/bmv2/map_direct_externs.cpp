@@ -17,7 +17,7 @@ std::optional<const IR::Declaration_Instance *> MapDirectExterns::getExternFromT
     const IR::Property *tableImplementation) {
     const auto *selectorExpr = tableImplementation->value->to<IR::ExpressionValue>();
     if (selectorExpr == nullptr) {
-        ::error("Extern property is not an expression %1%", tableImplementation->value);
+        ::p4c::error("Extern property is not an expression %1%", tableImplementation->value);
         return std::nullopt;
     }
     // If the extern expression is a constructor call it is not relevant.
@@ -27,19 +27,19 @@ std::optional<const IR::Declaration_Instance *> MapDirectExterns::getExternFromT
     // Try to find the extern in the declared instances.
     const auto *implPath = selectorExpr->expression->to<IR::PathExpression>();
     if (implPath == nullptr) {
-        ::error("Invalid extern path %1%", selectorExpr->expression);
+        ::p4c::error("Invalid extern path %1%", selectorExpr->expression);
         return std::nullopt;
     }
     // If the extern is not in the list of declared instances, move on.
     auto it = declaredExterns.find(implPath->path->name.name);
     if (it == declaredExterns.end()) {
-        ::error("Cannot find direct extern declaration %1%", implPath);
+        ::p4c::error("Cannot find direct extern declaration %1%", implPath);
         return std::nullopt;
     }
     // BMv2 does not support direct externs attached to multiple tables.
     auto mappedTable = directExternMap.find(it->second->controlPlaneName());
     if (mappedTable != directExternMap.end()) {
-        ::error(
+        ::p4c::error(
             "Direct extern %1% was already mapped to table %2%. It can not be "
             "attached to two tables.",
             it->second, mappedTable->second);

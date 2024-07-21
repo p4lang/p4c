@@ -32,7 +32,7 @@ void DirectionToRegRead::uniqueNames(IR::DpdkAsmProgram *p) {
     }
 
     if (usedNames.count(registerInstanceName))
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "decl name %s is reserved for dpdk pna",
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "decl name %s is reserved for dpdk pna",
                 registerInstanceName);
 }
 

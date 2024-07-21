@@ -25,9 +25,9 @@ void EBPFChecksumPSA::init(const EBPFProgram *program, cstring name, int type) {
 
     if (engine == nullptr) {
         if (declaration->arguments->empty())
-            ::error(ErrorType::ERR_UNSUPPORTED, "InternetChecksum not yet implemented");
+            ::p4c::error(ErrorType::ERR_UNSUPPORTED, "InternetChecksum not yet implemented");
         else
-            ::error(ErrorType::ERR_UNSUPPORTED, "Hash algorithm not yet implemented: %1%",
+            ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Hash algorithm not yet implemented: %1%",
                     declaration->arguments->at(0));
     }
 }
@@ -37,7 +37,7 @@ EBPFChecksumPSA::EBPFChecksumPSA(const EBPFProgram *program, const IR::Declarati
     : engine(nullptr), declaration(block) {
     auto di = block->to<IR::Declaration_Instance>();
     if (di->arguments->size() != 1) {
-        ::error(ErrorType::ERR_UNEXPECTED, "Expected exactly 1 argument %1%", block);
+        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Expected exactly 1 argument %1%", block);
         return;
     }
     int type = di->arguments->at(0)->expression->checkedTo<IR::Constant>()->asInt();
@@ -63,7 +63,7 @@ void EBPFChecksumPSA::processMethod(CodeBuilder *builder, cstring method,
     } else if (method == "get") {
         engine->emitGet(builder);
     } else {
-        ::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call %1%", expr);
+        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call %1%", expr);
     }
 }
 
@@ -92,7 +92,7 @@ void EBPFHashPSA::processMethod(CodeBuilder *builder, cstring method,
     if (method == "get_hash") {
         emitGetMethod(builder, expr, visitor);
     } else {
-        ::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call %1%", expr);
+        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call %1%", expr);
     }
 }
 

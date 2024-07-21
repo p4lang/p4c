@@ -43,7 +43,7 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike *type, bool
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
             if (!meta && ft->is<IR::Type_Struct>()) {
-                ::error(ErrorType::ERR_INVALID,
+                ::p4c::error(ErrorType::ERR_INVALID,
                         "%1%: type should only contain headers, header stacks, or header unions",
                         type);
                 return;
@@ -236,7 +236,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
             max_length += type->size;
             field->append("*");
             if (varbitFound)
-                ::error(ErrorType::ERR_UNSUPPORTED,
+                ::p4c::error(ErrorType::ERR_UNSUPPORTED,
                         "%1%: headers with multiple varbit fields not supported", st);
             varbitFound = true;
         } else if (ftype->is<IR::Type_Error>()) {
@@ -257,7 +257,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
     unsigned padding = max_length % 8;
     if (padding != 0) {
         if (st->is<IR::Type_Header>()) {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+            ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "%1%: Found header with fields totaling %2% bits."
                     "  BMv2 target only supports headers with fields"
                     " totaling a multiple of 8 bits.",
@@ -298,7 +298,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
                     target_name = aliasAnnotation->body.at(0)->text;
                 } else {
                     // aliasAnnotation->body is empty or not saved correctly
-                    ::error(ErrorType::ERR_INVALID,
+                    ::p4c::error(ErrorType::ERR_INVALID,
                             "There is no saved data for aliases target_name.");
                 }
             }

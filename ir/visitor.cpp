@@ -824,7 +824,7 @@ void Backtrack::trigger::register_for_gc(size_t
 
 Backtrack::trigger::~trigger() {
 #if HAVE_LIBGC
-    if (auto sz = ::get(trigger_gc_roots, this)) {
+    if (auto sz = ::p4c::get(trigger_gc_roots, this)) {
         GC_remove_roots(this, reinterpret_cast<char *>(this) + sz);
         trigger_gc_roots.erase(this);
     }

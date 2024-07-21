@@ -82,7 +82,7 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
         const auto &pre = externInstance.preamble();
         p4configv1::ActionProfile actionProfile;
         if (!externInstance.info().UnpackTo(&actionProfile)) {
-            ::error(ErrorType::ERR_NOT_FOUND,
+            ::p4c::error(ErrorType::ERR_NOT_FOUND,
                     "Extern instance %1% does not pack an ActionProfile object", pre.name());
             return std::nullopt;
         }

@@ -51,7 +51,7 @@ class EBPFPsaParser : public EBPFParser {
     void emitRejectState(CodeBuilder *builder) override;
 
     EBPFChecksumPSA *getChecksum(cstring name) const {
-        auto result = ::get(checksums, name);
+        auto result = ::p4c::get(checksums, name);
         BUG_CHECK(result != nullptr, "No checksum named %1%", name);
         return result;
     }

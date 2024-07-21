@@ -14,7 +14,7 @@ inline const IR::Expression *optimizeExpression(const IR::Expression *node) {
         new P4::ConstantFolding(nullptr, nullptr, false),
     });
     node = node->apply(pass);
-    BUG_CHECK(::errorCount() == 0, "Encountered errors while trying to optimize expressions.");
+    BUG_CHECK(::p4c::errorCount() == 0, "Encountered errors while trying to optimize expressions.");
     return node;
 }
 

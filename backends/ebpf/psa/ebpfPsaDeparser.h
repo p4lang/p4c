@@ -55,13 +55,13 @@ class EBPFDeparserPSA : public EBPFDeparser {
     void emitDeclaration(CodeBuilder *builder, const IR::Declaration *decl) override;
 
     EBPFChecksumPSA *getChecksum(cstring name) const {
-        auto result = ::get(checksums, name);
+        auto result = ::p4c::get(checksums, name);
         BUG_CHECK(result != nullptr, "No checksum named %1%", name);
         return result;
     }
 
     EBPFDigestPSA *getDigest(cstring name) const {
-        auto result = ::get(digests, name);
+        auto result = ::p4c::get(digests, name);
         BUG_CHECK(result != nullptr, "No digest named %1%", name);
         return result;
     }

@@ -41,7 +41,7 @@ class FindHeaderTypesToReplace : public Inspector {
     bool preorder(const IR::Type_Header *type) override;
     void createReplacement(const IR::Type_Header *type, AnnotationSelectionPolicy *policy);
     StructTypeReplacement<IR::Type_StructLike> *getReplacement(const cstring name) const {
-        return ::get(replacement, name);
+        return ::p4c::get(replacement, name);
     }
     bool empty() const { return replacement.empty(); }
 };

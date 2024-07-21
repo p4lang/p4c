@@ -50,7 +50,7 @@ int main(int argc, char *const argv[]) {
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false) options.setInputFile();
     }
-    if (::errorCount() > 0) return 1;
+    if (::p4c::errorCount() > 0) return 1;
 
     auto hook = options.getDebugHook();
 
@@ -63,7 +63,7 @@ int main(int argc, char *const argv[]) {
     if (options.loadIRFromJson == false) {
         program = P4::parseP4File(options);
 
-        if (program == nullptr || ::errorCount() > 0) return 1;
+        if (program == nullptr || ::p4c::errorCount() > 0) return 1;
         try {
             P4::P4COptionPragmaParser optionsPragmaParser;
             program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
@@ -75,17 +75,17 @@ int main(int argc, char *const argv[]) {
             std::cerr << bug.what() << std::endl;
             return 1;
         }
-        if (program == nullptr || ::errorCount() > 0) return 1;
+        if (program == nullptr || ::p4c::errorCount() > 0) return 1;
     } else {
         std::filebuf fb;
         if (fb.open(options.file, std::ios::in) == nullptr) {
-            ::error(ErrorType::ERR_IO, "%s: No such file or directory.", options.file);
+            ::p4c::error(ErrorType::ERR_IO, "%s: No such file or directory.", options.file);
             return 1;
         }
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
         if (jsonFileLoader.json == nullptr) {
-            ::error(ErrorType::ERR_IO, "%s: Not valid input file", options.file);
+            ::p4c::error(ErrorType::ERR_IO, "%s: Not valid input file", options.file);
             return 1;
         }
         program = new IR::P4Program(jsonFileLoader);
@@ -93,20 +93,20 @@ int main(int argc, char *const argv[]) {
     }
 
     P4::serializeP4RuntimeIfRequired(program, options);
-    if (::errorCount() > 0) return 1;
+    if (::p4c::errorCount() > 0) return 1;
 
     BMV2::PsaSwitchMidEnd midEnd(options);
     midEnd.addDebugHook(hook);
     try {
         toplevel = midEnd.process(program);
-        if (::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr) return 1;
+        if (::p4c::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr) return 1;
         if (!options.dumpJsonFile.empty())
             JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
-    if (::errorCount() > 0) return 1;
+    if (::p4c::errorCount() > 0) return 1;
 
     auto backend =
         new BMV2::PsaSwitchBackend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
@@ -119,7 +119,7 @@ int main(int argc, char *const argv[]) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
-    if (::errorCount() > 0) return 1;
+    if (::p4c::errorCount() > 0) return 1;
 
     if (!options.outputFile.empty()) {
         std::ostream *out = openFile(options.outputFile, false);
@@ -129,5 +129,5 @@ int main(int argc, char *const argv[]) {
         }
     }
 
-    return ::errorCount() > 0;
+    return ::p4c::errorCount() > 0;
 }

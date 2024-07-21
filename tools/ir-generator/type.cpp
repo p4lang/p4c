@@ -18,6 +18,8 @@ limitations under the License.
 
 #include "irclass.h"
 
+namespace p4c {
+
 LookupScope::LookupScope(const IrNamespace *ns)
     : in((ns && ns->name) ? new LookupScope(ns->parent) : nullptr),
       global(!ns || !ns->name),
@@ -191,3 +193,5 @@ cstring FunctionType::toString() const {
     result += ")";
     return result;
 }
+
+}  // namespace p4c

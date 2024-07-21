@@ -65,13 +65,13 @@ class EBPFRegisterPNA : public EBPF::EBPFTableBase {
         CHECK_NULL(di);
         this->instanceName = di->toString();
         if (!di->type->is<IR::Type_Specialized>()) {
-            ::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
+            ::p4c::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
             return;
         }
         auto ts = di->type->to<IR::Type_Specialized>();
 
         if (ts->arguments->size() != PARAM_INDEX_2) {
-            ::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%",
+            ::p4c::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%",
                     ts);
             return;
         }
@@ -101,7 +101,7 @@ class EBPFTablePNADirectCounterPropertyVisitor : public EBPF::EBPFTablePsaProper
         auto di = decl->to<IR::Declaration_Instance>();
         CHECK_NULL(di);
         if (EBPF::EBPFObject::getSpecializedTypeName(di) != "DirectCounter") {
-            ::error(ErrorType::ERR_UNEXPECTED, "%1%: not a DirectCounter, see declaration of %2%",
+            ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: not a DirectCounter, see declaration of %2%",
                     pe, decl);
             return false;
         }
@@ -152,7 +152,7 @@ class EBPFChecksumPNA : public EBPF::EBPFChecksumPSA {
         : EBPF::EBPFChecksumPSA(program, block, name) {
         auto di = block->to<IR::Declaration_Instance>();
         if (di->arguments->size() != 1) {
-            ::error(ErrorType::ERR_UNEXPECTED, "Expected exactly 1 argument %1%", block);
+            ::p4c::error(ErrorType::ERR_UNEXPECTED, "Expected exactly 1 argument %1%", block);
             return;
         }
         int type = di->arguments->at(0)->expression->checkedTo<IR::Constant>()->asInt();

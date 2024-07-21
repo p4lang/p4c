@@ -231,7 +231,7 @@ bool CodeGenInspector::preorder(const IR::PathExpression *expression) {
 }
 
 bool CodeGenInspector::preorder(const IR::Path *p) {
-    if (p->absolute) ::error(ErrorType::ERR_EXPECTED, "%1%: Unexpected absolute path", p);
+    if (p->absolute) ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: Unexpected absolute path", p);
     builder->append(p->name);
     return false;
 }
@@ -467,10 +467,10 @@ void CodeGenInspector::widthCheck(const IR::Node *node) const {
 
     if (tb->size <= 64) {
         if (!tb->isSigned) return;
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "%1%: Computations on signed %2% bits not yet supported", node, tb->size);
     }
-    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Computations on %2% bits not supported",
+    ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Computations on %2% bits not supported",
             node, tb->size);
 }
 

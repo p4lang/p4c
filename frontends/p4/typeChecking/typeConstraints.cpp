@@ -131,23 +131,23 @@ std::string TypeConstraint::localError(Explain *explainer) const {
             break;
         case 1:
             absl::StrAppend(&explanation, explain(0, explainer));
-            message = ::error_helper(fmt, errArguments.at(0)).toString();
+            message = ::p4c::error_helper(fmt, errArguments.at(0)).toString();
             break;
         case 2:
             absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer));
-            message = ::error_helper(fmt, errArguments.at(0), errArguments.at(1)).toString();
+            message = ::p4c::error_helper(fmt, errArguments.at(0), errArguments.at(1)).toString();
             break;
         case 3:
             absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer),
                             explain(2, explainer));
             message =
-                ::error_helper(fmt, errArguments.at(0), errArguments.at(1), errArguments.at(2))
+                ::p4c::error_helper(fmt, errArguments.at(0), errArguments.at(1), errArguments.at(2))
                     .toString();
             break;
         case 4:
             absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer),
                             explain(2, explainer), explain(3, explainer));
-            message = ::error_helper(fmt, errArguments.at(0), errArguments.at(1),
+            message = ::p4c::error_helper(fmt, errArguments.at(0), errArguments.at(1),
                                      errArguments.at(2), errArguments.at(3))
                           .toString();
             break;
@@ -180,7 +180,7 @@ bool TypeConstraint::reportErrorImpl(const TypeVariableSubstitution *subst,
     if (lastIsEmpty) message += "\n";
 
     CHECK_NULL(o);
-    ::errorWithSuffix(ErrorType::ERR_TYPE_ERROR, "'%1%'", message.c_str(), o);
+    ::p4c::errorWithSuffix(ErrorType::ERR_TYPE_ERROR, "'%1%'", message.c_str(), o);
     return false;
 }
 

@@ -99,13 +99,13 @@ class ErrorReporter {
         boost::format fmt(format);
         // FIXME: This will implicitly take location of the first argument having
         // SourceInfo. Not sure if this always desireable or not.
-        return ::bug_helper(fmt, "", "", std::forward<Args>(args)...);
+        return ::p4c::bug_helper(fmt, "", "", std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     std::string format_message(const char *format, Args &&...args) {
         boost::format fmt(format);
-        return ::error_helper(fmt, std::forward<Args>(args)...).toString();
+        return ::p4c::error_helper(fmt, std::forward<Args>(args)...).toString();
     }
 
     template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, typename... Args>
@@ -167,7 +167,7 @@ class ErrorReporter {
 
         boost::format fmt(format);
         ErrorMessage msg(msgType, diagnosticName ? diagnosticName : "", suffix);
-        msg = ::error_helper(fmt, msg, std::forward<Args>(args)...);
+        msg = ::p4c::error_helper(fmt, msg, std::forward<Args>(args)...);
         emit_message(msg);
 
         if (errorCount > maxErrorCount)
@@ -251,27 +251,27 @@ class ErrorReporter {
         diagnosticActions[cstring(diagnostic)] = action;
     }
 
-    /// @return the default diagnostic action for calls to `::warning()`.
+    /// @return the default diagnostic action for calls to `::p4c::warning()`.
     DiagnosticAction getDefaultWarningDiagnosticAction() { return defaultWarningDiagnosticAction; }
 
-    /// set the default diagnostic action for calls to `::warning()`.
+    /// set the default diagnostic action for calls to `::p4c::warning()`.
     void setDefaultWarningDiagnosticAction(DiagnosticAction action) {
         defaultWarningDiagnosticAction = action;
     }
 
-    /// @return the default diagnostic action for calls to `::info()`.
+    /// @return the default diagnostic action for calls to `::p4c::info()`.
     DiagnosticAction getDefaultInfoDiagnosticAction() { return defaultInfoDiagnosticAction; }
 
-    /// set the default diagnostic action for calls to `::info()`.
+    /// set the default diagnostic action for calls to `::p4c::info()`.
     void setDefaultInfoDiagnosticAction(DiagnosticAction action) {
         defaultInfoDiagnosticAction = action;
     }
 
  private:
-    /// The default diagnostic action for calls to `::info()`.
+    /// The default diagnostic action for calls to `::p4c::info()`.
     DiagnosticAction defaultInfoDiagnosticAction;
 
-    /// The default diagnostic action for calls to `::warning()`.
+    /// The default diagnostic action for calls to `::p4c::warning()`.
     DiagnosticAction defaultWarningDiagnosticAction;
 
     /// allow filtering of diagnostic actions

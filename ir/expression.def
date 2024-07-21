@@ -233,25 +233,25 @@ class Constant : Literal {
     bool fitsInt64() const { return value >= INT64_MIN && value <= INT64_MAX; }
     long asLong() const {
         if (!fitsLong())
-            ::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for long", this);
+            ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for long", this);
         return static_cast<long>(value); }
     int asInt() const {
         if (!fitsInt())
-            ::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for int", this);
+            ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for int", this);
         return static_cast<int>(value); }
     unsigned asUnsigned() const {
         if (!fitsUint())
-            ::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for unsigned int", this);
+            ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for unsigned int", this);
         return static_cast<unsigned>(value);
     }
     uint64_t asUint64() const {
         if (!fitsUint64())
-            ::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for uint64", this);
+            ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for uint64", this);
         return static_cast<uint64_t>(value);
     }
     int64_t asInt64() const {
         if (!fitsInt64())
-            ::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for int64", this);
+            ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for int64", this);
         return static_cast<int64_t>(value);
     }
     // The following operators are only used in special circumstances.

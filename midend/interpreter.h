@@ -89,7 +89,7 @@ class ValueMap final : public IHasDbPrint {
     }
     SymbolicValue *get(const IR::IDeclaration *left) const {
         CHECK_NULL(left);
-        return ::get(map, left);
+        return ::p4c::get(map, left);
     }
 
     void dbprint(std::ostream &out) const {
@@ -166,7 +166,7 @@ class ExpressionEvaluator : public Inspector {
     SymbolicValue *evaluate(const IR::Expression *expression, bool leftValue);
 
     SymbolicValue *get(const IR::Expression *expression) const {
-        auto r = ::get(value, expression);
+        auto r = ::p4c::get(value, expression);
         BUG_CHECK(r != nullptr, "no evaluation for %1%", expression);
         return r;
     }
@@ -397,7 +397,7 @@ class SymbolicStruct : public SymbolicValue {
     SymbolicStruct(const IR::Type_StructLike *type, bool uninitialized,
                    const SymbolicValueFactory *factory);
     virtual SymbolicValue *get(const IR::Node *, cstring field) const {
-        auto r = ::get(fieldValue, field);
+        auto r = ::p4c::get(fieldValue, field);
         CHECK_NULL(r);
         return r;
     }

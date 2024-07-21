@@ -51,7 +51,7 @@ TestgenOptions::TestgenOptions()
                     throw std::invalid_argument("Invalid input.");
                 }
             } catch (std::invalid_argument &) {
-                ::error("Invalid input value %1% for --max-tests. Expected positive integer.", arg);
+                ::p4c::error("Invalid input value %1% for --max-tests. Expected positive integer.", arg);
                 return false;
             }
             return true;
@@ -64,7 +64,7 @@ TestgenOptions::TestgenOptions()
         [this](const char *arg) {
             stopMetric = cstring(arg).toUpper();
             if (SUPPORTED_STOP_METRICS.count(stopMetric) == 0) {
-                ::error(
+                ::p4c::error(
                     "Stop metric %1% not supported. Supported stop metrics are "
                     "%2%.",
                     stopMetric, Utils::containerToString(SUPPORTED_STOP_METRICS));
@@ -84,20 +84,20 @@ TestgenOptions::TestgenOptions()
                 auto minPacketLenStr = rangeStr.substr(0, packetLenStr);
                 minPktSize = std::stoi(minPacketLenStr);
                 if (minPktSize < 0) {
-                    ::error(
+                    ::p4c::error(
                         "Invalid minimum packet size %1%. Minimum packet size must be at least 0.",
                         minPktSize);
                 }
                 auto maxPacketLenStr = rangeStr.substr(packetLenStr + 1);
                 maxPktSize = std::stoi(maxPacketLenStr);
                 if (maxPktSize < minPktSize) {
-                    ::error(
+                    ::p4c::error(
                         "Invalid packet size range %1%:%2%.  The maximum packet size must be at "
                         "least the size of the minimum packet size.",
                         minPktSize, maxPktSize);
                 }
             } catch (std::invalid_argument &) {
-                ::error(
+                ::p4c::error(
                     "Invalid packet size range %1%. Expected format is [min]:[max], where [min] "
                     "and [max] are integers.",
                     arg);
@@ -123,7 +123,7 @@ TestgenOptions::TestgenOptions()
                     auto loPortStr = rangeStr.substr(0, portStr);
                     auto loPortRange = std::stoi(loPortStr);
                     if (loPortRange < 0) {
-                        ::error(
+                        ::p4c::error(
                             "Invalid low port value %1%. low port value must be at "
                             "least "
                             "0.",
@@ -132,7 +132,7 @@ TestgenOptions::TestgenOptions()
                     auto hiPortStr = rangeStr.substr(portStr + 1);
                     auto hiPortRange = std::stoi(hiPortStr);
                     if (hiPortRange < loPortRange) {
-                        ::error(
+                        ::p4c::error(
                             "Invalid permitted port range %1%:%2%.  The high port value must "
                             "be "
                             "at "
@@ -141,7 +141,7 @@ TestgenOptions::TestgenOptions()
                     }
                     permittedPortRanges.emplace_back(loPortRange, hiPortRange);
                 } catch (std::invalid_argument &) {
-                    ::error(
+                    ::p4c::error(
                         "Invalid permitted port range %1%. Expected format is [lo]:[hi], where "
                         "[lo] "
                         "and [hi] are integers.",
@@ -197,7 +197,7 @@ TestgenOptions::TestgenOptions()
             selectedBranches = arg;
             // These options are mutually exclusive.
             if (trackBranches) {
-                ::error(
+                ::p4c::error(
                     "--input-branches and --track-branches are mutually exclusive. Choose "
                     "one or the other.");
                 return false;
@@ -212,7 +212,7 @@ TestgenOptions::TestgenOptions()
             trackBranches = true;
             // These options are mutually exclusive.
             if (!selectedBranches.empty()) {
-                ::error(
+                ::p4c::error(
                     "--input-branches and --track-branches are mutually exclusive. Choose "
                     "one or the other.");
                 return false;
@@ -227,7 +227,7 @@ TestgenOptions::TestgenOptions()
         [this](const char *) {
             outputPacketOnly = true;
             if (!selectedBranches.empty()) {
-                ::error(
+                ::p4c::error(
                     "--input-branches cannot guarantee --output-packet-only."
                     " Aborting.");
                 return false;
@@ -241,7 +241,7 @@ TestgenOptions::TestgenOptions()
         [this](const char *) {
             droppedPacketOnly = true;
             if (!selectedBranches.empty()) {
-                ::error(
+                ::p4c::error(
                     "--input-branches cannot guarantee --dropped-packet-only."
                     " Aborting.");
                 return false;
@@ -272,7 +272,7 @@ TestgenOptions::TestgenOptions()
                            [](const std::pair<cstring, PathSelectionPolicy> &mapTuple) {
                                return mapTuple.first;
                            });
-            ::error(
+            ::p4c::error(
                 "Path selection policy %1% not supported. Supported path selection policies are "
                 "%2%.",
                 selectionString, Utils::containerToString(printSet));
@@ -304,7 +304,7 @@ TestgenOptions::TestgenOptions()
                     return true;
                 }
             }
-            ::error(
+            ::p4c::error(
                 "Coverage tracking for label %1% not supported. Supported coverage tracking "
                 "options are "
                 "%2%.",
@@ -334,7 +334,7 @@ TestgenOptions::TestgenOptions()
                     throw std::invalid_argument("Invalid input.");
                 }
             } catch (std::invalid_argument &) {
-                ::error(
+                ::p4c::error(
                     "Invalid input value %1% for --assert-min-coverage. "
                     "Expected float in range [0, 1].",
                     arg);
@@ -426,7 +426,7 @@ TestgenOptions::TestgenOptions()
 
 bool TestgenOptions::validateOptions() const {
     if (minCoverage > 0 && !hasCoverageTracking) {
-        ::error(
+        ::p4c::error(
             ErrorType::ERR_INVALID,
             "It is not allowed to have --assert-min-coverage set to non-zero without a coverage "
             "tracking enabled with --track-coverage option. Without coverage tracking, the "

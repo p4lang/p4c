@@ -93,7 +93,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
                 if (type == ResolutionType::Type) {
                     if (auto *type_decl = findOrigCtxt<IR::Type_Declaration>())
                         if (type_decl->getNode() == d->getNode()) {
-                            ::error(ErrorType::ERR_UNSUPPORTED,
+                            ::p4c::error(ErrorType::ERR_UNSUPPORTED,
                                     "Self-referencing types not supported: '%1%' within '%2%'",
                                     name, d->getNode());
                         }
@@ -243,7 +243,7 @@ const IR::IDeclaration *ResolutionContext::resolveUnique(const IR::ID &name,
     }
 
     if (decls.empty()) {
-        ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", name);
+        ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", name);
         return nullptr;
     }
     if (decls.size() == 1) {
@@ -251,8 +251,8 @@ const IR::IDeclaration *ResolutionContext::resolveUnique(const IR::ID &name,
         return decls.front();
     }
 
-    ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", name);
-    for (const auto *a : decls) ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
+    ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", name);
+    for (const auto *a : decls) ::p4c::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
     return nullptr;
 }
 
@@ -264,10 +264,10 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
         // looking up a matchType in a key, so need to do a special lookup
         auto decls = lookupMatchKind(path->name);
         if (decls.empty()) {
-            ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", path->name);
+            ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", path->name);
         } else if (decls.size() != 1) {
-            ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", path->name);
-            for (const auto *a : decls) ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
+            ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", path->name);
+            for (const auto *a : decls) ::p4c::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
         } else {
             result = decls.front();
         }
@@ -288,7 +288,7 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::This *pointe
                                                           bool notNull) const {
     auto result = findOrigCtxt<IR::Declaration_Instance>();
     if (findOrigCtxt<IR::Function>() == nullptr || result == nullptr)
-        ::error(ErrorType::ERR_INVALID,
+        ::p4c::error(ErrorType::ERR_INVALID,
                 "%1% can only be used in the definition of an abstract method", pointer);
     if (notNull) BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", pointer);
     return result;
@@ -340,7 +340,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
             continue;
 
         if (prev_in_scope.count(decl->getName()))
-            ::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node,
+            ::p4c::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node,
                       prev_in_scope.at(decl->getName()));
         else if (!node->is<IR::Method>() && !node->is<IR::Function>())
             prev_in_scope[decl->getName()] = node;
@@ -366,11 +366,11 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
                 const auto *decl_node = node->to<IR::Declaration>();
                 if (const auto *param = pnode->to<IR::Parameter>())
                     if (decl_node->name.name == param->name.name)
-                        ::error(ErrorType::WARN_SHADOWING,
+                        ::p4c::error(ErrorType::WARN_SHADOWING,
                                 "declaration of '%1%' shadows a parameter '%2%'", node, pnode);
             }
 
-            ::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node, pnode);
+            ::p4c::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node, pnode);
         }
     }
 }
@@ -396,7 +396,7 @@ void ResolveReferences::postorder(const IR::P4Program *) { LOG2("Reference map "
 bool ResolveReferences::preorder(const IR::This *pointer) {
     auto decl = findContext<IR::Declaration_Instance>();
     if (findContext<IR::Function>() == nullptr || decl == nullptr) {
-        ::error(ErrorType::ERR_INVALID,
+        ::p4c::error(ErrorType::ERR_INVALID,
                 "'%1%' can only be used in the definition of an abstract method", pointer);
         return false;
     }
@@ -409,12 +409,12 @@ bool ResolveReferences::preorder(const IR::KeyElement *ke) {
     visit(ke->expression, "expression");
     auto decls = lookupMatchKind(ke->matchType->path->name);
     if (decls.empty()) {
-        ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", ke->matchType->path->name);
+        ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", ke->matchType->path->name);
         refMap->usedName(ke->matchType->path->name.name);
     } else if (decls.size() != 1) {
-        ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations",
+        ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations",
                 ke->matchType->path->name);
-        for (const auto *a : decls) ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
+        for (const auto *a : decls) ::p4c::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
     } else {
         refMap->setDeclaration(ke->matchType->path, decls.front());
     }

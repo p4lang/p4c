@@ -80,7 +80,7 @@ class PNAErrorCodesGen : public Inspector {
 
             // type ParserError_t is u8, which can have values from 0 to 255
             if (id > 255) {
-                ::error(ErrorType::ERR_OVERLIMIT, "%1%: Reached maximum number of possible errors",
+                ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1%: Reached maximum number of possible errors",
                         decl);
             }
         }
@@ -274,7 +274,7 @@ class EBPFControlPNA : public EBPF::EBPFControlPSA {
         : EBPF::EBPFControlPSA(program, control, parserHeaders) {}
 
     EBPFRegisterPNA *getRegister(cstring name) const {
-        auto result = ::get(pna_registers, name);
+        auto result = ::p4c::get(pna_registers, name);
         BUG_CHECK(result != nullptr, "No register named %1%", name);
         return result;
     }

@@ -110,12 +110,12 @@ void increaseVerbosity();
 
 // NOLINTBEGIN(bugprone-macro-parentheses)
 #define LOGGING(N)                                                            \
-    ((N) <= MAX_LOGGING_LEVEL && ::Log::fileLogLevelIsAtLeast(__FILE__, N) && \
-     ::Log::enableLogging())
+    ((N) <= MAX_LOGGING_LEVEL && ::p4c::Log::fileLogLevelIsAtLeast(__FILE__, N) && \
+     ::p4c::Log::enableLogging())
 #define LOGN(N, X)                                                        \
-    (LOGGING(N) ? ::Log::Detail::fileLogOutput(__FILE__)                  \
-                      << ::Log::Detail::OutputLogPrefix(__FILE__, N) << X \
-                      << ::Log::Detail::clearPrefix << std::endl          \
+    (LOGGING(N) ? ::p4c::Log::Detail::fileLogOutput(__FILE__)                  \
+                      << ::p4c::Log::Detail::OutputLogPrefix(__FILE__, N) << X \
+                      << ::p4c::Log::Detail::clearPrefix << std::endl          \
                 : std::clog)
 #define LOG1(X) LOGN(1, X)
 #define LOG2(X) LOGN(2, X)
@@ -128,7 +128,7 @@ void increaseVerbosity();
 #define LOG9(X) LOGN(9, X)
 
 #define LOGN_UNINDENT(N) \
-    (LOGGING(N) ? ::Log::Detail::fileLogOutput(__FILE__) << IndentCtl::unindent : std::clog)
+    (LOGGING(N) ? ::p4c::Log::Detail::fileLogOutput(__FILE__) << IndentCtl::unindent : std::clog)
 #define LOG1_UNINDENT LOGN_UNINDENT(1)
 #define LOG2_UNINDENT LOGN_UNINDENT(2)
 #define LOG3_UNINDENT LOGN_UNINDENT(3)
@@ -140,13 +140,13 @@ void increaseVerbosity();
 #define LOG9_UNINDENT LOGN_UNINDENT(9)
 
 #define LOG_FEATURE(TAG, N, X)                                             \
-    ((N) <= MAX_LOGGING_LEVEL && ::Log::fileLogLevelIsAtLeast(TAG, N)      \
-         ? ::Log::Detail::fileLogOutput(TAG)                               \
-               << ::Log::Detail::OutputLogPrefix(TAG, N) << X << std::endl \
+    ((N) <= MAX_LOGGING_LEVEL && ::p4c::Log::fileLogLevelIsAtLeast(TAG, N)      \
+         ? ::p4c::Log::Detail::fileLogOutput(TAG)                               \
+               << ::p4c::Log::Detail::OutputLogPrefix(TAG, N) << X << std::endl \
          : std::clog)
 
 #define P4C_ERROR(X) (std::clog << "ERROR: " << X << std::endl)
-#define P4C_WARNING(X) (::Log::verbose() ? std::clog << "WARNING: " << X << std::endl : std::clog)
+#define P4C_WARNING(X) (::p4c::Log::verbose() ? std::clog << "WARNING: " << X << std::endl : std::clog)
 #define ERRWARN(C, X) ((C) ? P4C_ERROR(X) : P4C_WARNING(X))
 // NOLINTEND(bugprone-macro-parentheses)
 

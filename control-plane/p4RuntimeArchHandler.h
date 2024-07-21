@@ -401,7 +401,7 @@ struct Counterlike {
         // P4Info.
         auto unit = instance->getParameterValue("type"_cs);
         if (!unit->is<IR::Declaration_ID>()) {
-            ::error(ErrorType::ERR_INVALID,
+            ::p4c::error(ErrorType::ERR_INVALID,
                     "%1% '%2%' has a unit type which is not an enum constant: %3%",
                     CounterlikeTraits<Kind>::name(), declaration, unit);
             return std::nullopt;
@@ -415,7 +415,7 @@ struct Counterlike {
             auto sem = size->template to<IR::SerEnumMember>();
             val = sem->value->template to<IR::Constant>()->value;
         } else {
-            ::error(ErrorType::ERR_INVALID, "%1% '%2%' has a non-constant size: %3%",
+            ::p4c::error(ErrorType::ERR_INVALID, "%1% '%2%' has a non-constant size: %3%",
                     CounterlikeTraits<Kind>::name(), declaration, size);
             return std::nullopt;
         }
@@ -455,20 +455,20 @@ struct Counterlike {
         BUG_CHECK(instance.name != std::nullopt, "Caller should've ensured we have a name");
 
         if (instance.type->name != CounterlikeTraits<Kind>::directTypeName()) {
-            ::error(ErrorType::ERR_EXPECTED, "Expected a direct %1%: %2%",
+            ::p4c::error(ErrorType::ERR_EXPECTED, "Expected a direct %1%: %2%",
                     CounterlikeTraits<Kind>::name(), instance.expression);
             return std::nullopt;
         }
 
         auto unitArgument = instance.substitution.lookupByName("type"_cs)->expression;
         if (unitArgument == nullptr) {
-            ::error(ErrorType::ERR_EXPECTED,
+            ::p4c::error(ErrorType::ERR_EXPECTED,
                     "Direct %1% instance %2% should take a constructor argument",
                     CounterlikeTraits<Kind>::name(), instance.expression);
             return std::nullopt;
         }
         if (!unitArgument->is<IR::Member>()) {
-            ::error(ErrorType::ERR_UNEXPECTED,
+            ::p4c::error(ErrorType::ERR_UNEXPECTED,
                     "Direct %1% instance %2% has an unexpected constructor argument",
                     CounterlikeTraits<Kind>::name(), instance.expression);
             return std::nullopt;

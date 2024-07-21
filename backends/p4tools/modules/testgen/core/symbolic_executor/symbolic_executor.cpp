@@ -47,12 +47,12 @@ bool SymbolicExecutor::handleTerminalState(const Callback &callback,
     // a warning and continue on a different path.
     auto solverResult = solver.checkSat(terminalState.getPathConstraint());
     if (!solverResult) {
-        ::warning("Solver timed out");
+        ::p4c::warning("Solver timed out");
         return false;
     }
 
     if (!*solverResult) {
-        ::warning("Path constraints unsatisfiable");
+        ::p4c::warning("Path constraints unsatisfiable");
         return false;
     }
 
@@ -74,7 +74,7 @@ bool SymbolicExecutor::evaluateBranch(const SymbolicExecutor::Branch &branch,
     // Check the consistency of the path constraints asserted so far.
     auto solverResult = solver.checkSat(branch.nextState.get().getPathConstraint());
     if (solverResult == std::nullopt) {
-        ::warning("Solver timed out");
+        ::p4c::warning("Solver timed out");
     }
     return solverResult.value_or(false);
 }

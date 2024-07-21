@@ -22,6 +22,8 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 
+namespace p4c {
+
 class IrClass;
 class IrNamespace;
 
@@ -218,5 +220,7 @@ class FunctionType : public Type {
         return true;
     }
 };
+
+}  // namespace p4c
 
 #endif /* TOOLS_IR_GENERATOR_TYPE_H_ */

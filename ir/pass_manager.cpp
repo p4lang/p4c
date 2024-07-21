@@ -69,7 +69,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
     } nest_log_indent(log_indent);
 
     early_exit_flag = false;
-    unsigned initial_error_count = ::errorCount();
+    unsigned initial_error_count = ::p4c::errorCount();
     BUG_CHECK(running, "not calling apply properly");
     for (auto it = passes.begin(); it != passes.end();) {
         Visitor *v = *it;
@@ -87,7 +87,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                     LOG3(log_indent << "heap after " << v->name() << ": in use " << n4(mem)
                                     << "B, max " << n4(maxmem) << "B");
                 }
-                if (stop_on_error && ::errorCount() > initial_error_count) early_exit_flag = true;
+                if (stop_on_error && ::p4c::errorCount() > initial_error_count) early_exit_flag = true;
                 if (program == nullptr) early_exit_flag = true;
             } catch (Backtrack::trigger::type_t &trig_type) {
                 throw Backtrack::trigger(trig_type);
@@ -148,13 +148,13 @@ void PassManager::runDebugHooks(const char *visitorName, const IR::Node *program
 const IR::Node *PassRepeated::apply_visitor(const IR::Node *program, const char *name) {
     bool done = false;
     unsigned iterations = 0;
-    unsigned initial_error_count = ::errorCount();
+    unsigned initial_error_count = ::p4c::errorCount();
     while (!done) {
         LOG5("PassRepeated state is:\n" << dumpToString(program));
         running = true;
         auto newprogram = PassManager::apply_visitor(program, name);
         if (program == newprogram || newprogram == nullptr) done = true;
-        if (stop_on_error && ::errorCount() > initial_error_count) return program;
+        if (stop_on_error && ::p4c::errorCount() > initial_error_count) return program;
         iterations++;
         if (repeats != 0 && iterations > repeats) done = true;
         program = newprogram;

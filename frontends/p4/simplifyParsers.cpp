@@ -42,7 +42,7 @@ class RemoveUnreachableStates : public Transform {
     const IR::Node *preorder(IR::P4Parser *parser) override {
         auto start = parser->getDeclByName(IR::ParserState::start);
         if (start == nullptr) {
-            ::error(ErrorType::ERR_NOT_FOUND, "%1%: parser does not have a `start' state", parser);
+            ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: parser does not have a `start' state", parser);
         } else {
             transitions->reachable(start->to<IR::ParserState>(), reachable);
             // Remove unreachable states from call-graph
@@ -59,7 +59,7 @@ class RemoveUnreachableStates : public Transform {
                     acceptReachable = true;
             }
             if (!rejectReachable && !acceptReachable)
-                ::error(ErrorType::ERR_UNREACHABLE,
+                ::p4c::error(ErrorType::ERR_UNREACHABLE,
                         "%1%: Parser never reaches accept or reject state", parser);
             LOG1("Parser " << dbp(parser) << " has " << transitions->size() << " reachable states");
         }
@@ -164,7 +164,7 @@ class CollapseChains : public Transform {
                 while (true) {
                     components->append(crt->components);
                     select = crt->selectExpression;
-                    crt = ::get(chain, crt);
+                    crt = ::p4c::get(chain, crt);
                     if (crt == nullptr) break;
                     LOG1("Adding " << dbp(crt) << " to chain");
                 }

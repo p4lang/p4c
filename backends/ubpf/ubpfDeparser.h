@@ -38,12 +38,12 @@ class UBPFDeparserTranslationVisitor : public EBPF::CodeGenInspector {
     virtual void compileEmit(const IR::Vector<IR::Argument> *args);
 
     bool notSupported(const IR::Expression *expression) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: not supported in Deparser", expression);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: not supported in Deparser", expression);
         return false;
     }
 
     bool notSupported(const IR::StatOrDecl *statOrDecl) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: not supported in Deparser", statOrDecl);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: not supported in Deparser", statOrDecl);
         return false;
     }
 

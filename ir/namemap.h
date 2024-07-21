@@ -114,7 +114,7 @@ class NameMap : public Node {
     void addUnique(cstring name, const T *n) {
         auto prev = symbols.find(name);
         if (prev != symbols.end())
-            ::error(ErrorType::ERR_DUPLICATE, "%1%: duplicated name (%2% is previous instance)", n,
+            ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: duplicated name (%2% is previous instance)", n,
                     prev->second);
         symbols.emplace(std::move(name), std::move(n));
     }

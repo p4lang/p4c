@@ -299,13 +299,13 @@ class Visitor {
     static bool warning_enabled(const Visitor *visitor, int warning_kind);
     template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
     void warn(const int kind, const char *format, const T *node, Args &&...args) {
-        if (warning_enabled(kind)) ::warning(kind, format, node, std::forward<Args>(args)...);
+        if (warning_enabled(kind)) ::p4c::warning(kind, format, node, std::forward<Args>(args)...);
     }
 
     /// The const ref variant of the above
     template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
     void warn(const int kind, const char *format, const T &node, Args &&...args) {
-        if (warning_enabled(kind)) ::warning(kind, format, node, std::forward<Args>(args)...);
+        if (warning_enabled(kind)) ::p4c::warning(kind, format, node, std::forward<Args>(args)...);
     }
 
  protected:

@@ -65,7 +65,7 @@ class bitranges {
 class JSONGenerator;
 class JSONLoader;
 
-namespace p4c::BitRange {
+namespace BitRange {
 
 namespace Detail {
 /**
@@ -212,7 +212,7 @@ struct MinToMax {};
 void rangeToJSON(JSONGenerator &json, int lo, int hi);
 std::pair<int, int> rangeFromJSON(JSONLoader &json);
 
-}  // namespace p4c::BitRange
+}  // namespace BitRange
 
 /// Units in which a range can be specified.
 enum class RangeUnit : uint8_t {
@@ -784,6 +784,14 @@ std::ostream &operator<<(std::ostream &out, const ClosedRange<Unit, Order> &rang
 
 // Hashing specializations
 namespace std {
+
+namespace Util = ::p4c::Util;
+
+using ::p4c::ClosedRange;
+using ::p4c::Endian;
+using ::p4c::HalfOpenRange;
+using ::p4c::RangeUnit;
+
 template <RangeUnit Unit, Endian Order>
 struct hash<HalfOpenRange<Unit, Order>> {
     std::size_t operator()(const HalfOpenRange<Unit, Order> &r) const {

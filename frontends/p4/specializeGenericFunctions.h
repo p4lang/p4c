@@ -63,7 +63,7 @@ struct FunctionSpecializationMap {
         map.emplace(mce, new FunctionSpecialization(name, mce, func, insert));
     }
     FunctionSpecialization *get(const IR::MethodCallExpression *mce) const {
-        return ::get(map, mce);
+        return ::p4c::get(map, mce);
     }
     IR::Vector<IR::Node> *getInsertions(const IR::Node *insertionPoint) {
         IR::Vector<IR::Node> *result = nullptr;

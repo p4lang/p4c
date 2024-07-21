@@ -19,8 +19,8 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
     std::stringstream formattedOutput;
 
     const IR::P4Program *program = P4::parseP4File(options);
-    if (program == nullptr && ::errorCount() != 0) {
-        ::error("Failed to parse P4 file.");
+    if (program == nullptr && ::p4c::errorCount() != 0) {
+        ::p4c::error("Failed to parse P4 file.");
         return formattedOutput;
     }
 
@@ -28,8 +28,8 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
     // Print the program before running front end passes.
     program->apply(top4);
 
-    if (::errorCount() > 0) {
-        ::error("Failed to format p4 program.");
+    if (::p4c::errorCount() > 0) {
+        ::p4c::error("Failed to format p4 program.");
         return formattedOutput;
     }
 

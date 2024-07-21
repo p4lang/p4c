@@ -9,7 +9,8 @@
 */
 
 #emit
-namespace p4c::IR {
+namespace p4c {
+namespace IR {
 enum class Direction {
     None,
     In,
@@ -31,7 +32,7 @@ inline cstring directionToString(IR::Direction direction) {
             BUG("Unhandled case");
     }
 }
-}  // namespace p4c::IR
+}  // namespace IR
 
 inline std::ostream& operator<<(std::ostream &out, IR::Direction d) {
     switch (d) {
@@ -61,6 +62,8 @@ inline bool operator>>(cstring s, IR::Direction &d) {
     else return false;
     return true;
 }
+
+}  // namespace p4c
 #end
 
 /// This represents a type that can unify with any other type.

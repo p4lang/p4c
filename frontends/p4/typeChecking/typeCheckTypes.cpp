@@ -341,7 +341,7 @@ static bool checkEnumValueInitializer(const IR::Type_Bits *type, const IR::Expre
                         constant->value % required % (type->isSigned ? "signed" : "unsigned") %
                         type->toString() % type->size);
             }
-            ::error(ErrorType::ERR_TYPE_ERROR,
+            ::p4c::error(ErrorType::ERR_TYPE_ERROR,
                     "%1%: Serialized enum constant value %2% is out of bounds of the underlying "
                     "type %3%; %4%",
                     member, constant->value, serEnum->type, extraMsg);

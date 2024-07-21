@@ -71,14 +71,14 @@ ICompileContext *CompilerTarget::makeContextImpl() const {
 
 std::vector<const char *> *CompilerTarget::initCompilerImpl(int argc, char **argv) const {
     auto *result = P4CContext::get().options().process(argc, argv);
-    return ::errorCount() > 0 ? nullptr : result;
+    return ::p4c::errorCount() > 0 ? nullptr : result;
 }
 
 const IR::P4Program *CompilerTarget::runParser() {
     auto &options = P4CContext::get().options();
 
     const auto *program = P4::parseP4File(options);
-    if (::errorCount() > 0) {
+    if (::p4c::errorCount() > 0) {
         return nullptr;
     }
     return program;
@@ -94,7 +94,7 @@ const IR::P4Program *CompilerTarget::runFrontend(const IR::P4Program *program) c
     auto frontEnd = mkFrontEnd();
     frontEnd.addDebugHook(options.getDebugHook());
     program = frontEnd.run(options, program);
-    if ((program == nullptr) || ::errorCount() > 0) {
+    if ((program == nullptr) || ::p4c::errorCount() > 0) {
         return nullptr;
     }
     return program;

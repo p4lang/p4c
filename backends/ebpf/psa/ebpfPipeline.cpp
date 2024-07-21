@@ -95,7 +95,7 @@ void EBPFPipeline::emitUserMetadataInstance(CodeBuilder *builder) {
     builder->emitIndent();
     auto user_md_type = typeMap->getType(control->user_metadata);
     if (user_md_type == nullptr) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "cannot emit user metadata");
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "cannot emit user metadata");
     }
     auto userMetadataType = EBPFTypeFactory::instance->create(user_md_type);
     userMetadataType->declare(builder, control->user_metadata->name.name, true);

@@ -19,6 +19,8 @@ limitations under the License.
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
 
+namespace p4c {
+
 const char *IrClass::indent = "    ";
 IrNamespace &IrNamespace::global() {
     static IrNamespace irn({}, {});
@@ -115,6 +117,8 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
          << "#include \"ir/visitor.h\"         // IWYU pragma: keep\n"
          << "#include \"lib/algorithm.h\"      // IWYU pragma: keep\n"
          << "#include \"lib/log.h\"            // IWYU pragma: keep\n"
+         << std::endl
+         << "using namespace ::p4c;\n"
          << std::endl;
 
     out << "#include <functional>\n"
@@ -130,10 +134,12 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << "#include \"ir/vector.h\"          // IWYU pragma: keep\n"
         << "#include \"lib/ordered_map.h\"    // IWYU pragma: keep\n"
         << std::endl
+        << "namespace p4c {\n"
+        << std::endl
         << "class JSONLoader;\n"
         << "using NodeFactoryFn = IR::Node*(*)(JSONLoader&);\n"
         << std::endl
-        << "namespace p4c::IR {\n"
+        << "namespace IR {\n"
         << "extern std::map<cstring, NodeFactoryFn> unpacker_table;\n"
         << "using namespace ::p4c::P4::literals;\n"
         << "}\n";
@@ -172,6 +178,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
                 << ">;" << std::endl;
         }
     }
+    out << "}  // namespace p4c" << std::endl;
 
     for (auto e : elements) {
         e->generate_hdr(out);
@@ -660,3 +667,5 @@ void ConstFieldInitializer::generate_hdr(std::ostream &out) const {
     else
         throw Util::CompilationError("Unexpected constant field %1%", this);
 }
+
+}  // namespace p4c

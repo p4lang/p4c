@@ -126,7 +126,7 @@ void warning(const int kind, const char *format, const T *node, Args &&...args) 
 /// The const ref variant of the above
 template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
 void warning(const int kind, const char *format, const T &node, Args &&...args) {
-    ::warning(kind, format, &node, std::forward<Args>(args)...);
+    ::p4c::warning(kind, format, &node, std::forward<Args>(args)...);
 }
 
 /// Report warnings of type kind, for messages that do not have a node.
@@ -149,7 +149,7 @@ void info(const int kind, const char *format, const T *node, Args &&...args) {
 /// The const ref variant of the above
 template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
 void info(const int kind, const char *format, const T &node, Args &&...args) {
-    ::info(kind, format, &node, std::forward<Args>(args)...);
+    ::p4c::info(kind, format, &node, std::forward<Args>(args)...);
 }
 
 /// Report info messages of type kind, for messages that do not have a node.
@@ -171,7 +171,7 @@ void info(const int kind, const char *format, Args &&...args) {
  *                        generally use only lower-case letters and underscores
  *                        so the diagnostic name is a valid P4 identifier.
  * @param format  A format for the diagnostic message, using the same style as
- *                '::warning' or '::error'.
+ *                '::p4c::warning' or '::p4c::error'.
  * @param suffix  A message that is appended at the end.
  */
 template <typename... Args>

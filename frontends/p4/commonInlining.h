@@ -194,7 +194,7 @@ class InlineDriver : public Visitor {
             LOG2("Processing " << todo);
             inliner->prepare(toInline, todo);
             program = program->apply(*inliner);
-            if (::errorCount() > 0) break;
+            if (::p4c::errorCount() > 0) break;
 
 #if DEBUG_INLINER
             // debugging code; we don't have an easy way to dump the program here,

@@ -83,7 +83,7 @@ class CodeGenInspector : public Inspector {
     bool isPointerVariable(cstring name) { return asPointerVariables.count(name) > 0; }
 
     bool notSupported(const IR::Expression *expression) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not yet implemented", expression);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: not yet implemented", expression);
         return false;
     }
 

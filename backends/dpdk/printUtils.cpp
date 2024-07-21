@@ -66,7 +66,7 @@ bool ConvertToString::preorder(const IR::MethodCallExpression *e) {
     if (auto path = e->method->to<IR::PathExpression>()) {
         out << path->path->name.name;
     } else {
-        ::error(ErrorType::ERR_INVALID, "%1% is not a PathExpression", e->toString());
+        ::p4c::error(ErrorType::ERR_INVALID, "%1% is not a PathExpression", e->toString());
     }
     return false;
 }
@@ -80,7 +80,7 @@ bool ConvertToString::preorder(const IR::ArrayIndex *e) {
     if (auto cst = e->right->to<IR::Constant>()) {
         out << toStr(e->left) << "_" << cst->value;
     } else {
-        ::error(ErrorType::ERR_INVALID, "%1% is not a constant", e->right);
+        ::p4c::error(ErrorType::ERR_INVALID, "%1% is not a constant", e->right);
     }
     return false;
 }

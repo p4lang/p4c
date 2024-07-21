@@ -75,11 +75,11 @@ void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstrin
     if (keyType != "u32" && (tableKind == TablePerCPUArray || tableKind == TableArray)) {
         // it's more safe to overwrite user-provided key type,
         // as array map must have u32 key type.
-        ::warning(ErrorType::WARN_INVALID,
+        ::p4c::warning(ErrorType::WARN_INVALID,
                   "Invalid key type (%1%) for table kind %2%, replacing with u32", keyType, kind);
         keyType = "u32"_cs;
     } else if (tableKind == TableProgArray && (keyType != "u32" || valueType != "u32")) {
-        ::warning(ErrorType::WARN_INVALID,
+        ::p4c::warning(ErrorType::WARN_INVALID,
                   "Invalid key type (%1%) or value type (%2%) for table kind %3%, "
                   "replacing with u32",
                   keyType, valueType, kind);

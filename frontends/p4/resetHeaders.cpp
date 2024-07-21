@@ -38,7 +38,7 @@ void DoResetHeaders::generateResets(const TypeMap *typeMap, const IR::Type *type
     } else if (type->is<IR::Type_Stack>()) {
         auto tstack = type->to<IR::Type_Stack>();
         if (!tstack->sizeKnown()) {
-            ::error(ErrorType::ERR_UNSUPPORTED, "%1%: stack size is not a compile-time constant",
+            ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: stack size is not a compile-time constant",
                     tstack);
             return;
         }

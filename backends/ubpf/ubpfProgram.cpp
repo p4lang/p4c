@@ -28,13 +28,13 @@ bool UBPFProgram::build() {
     bool success = true;
     auto pack = toplevel->getMain();
     if (pack->type->name != "ubpf")
-        ::warning(ErrorType::WARN_INVALID,
+        ::p4c::warning(ErrorType::WARN_INVALID,
                   "%1%: the main ubpf package should be called ubpf"
                   "; are you using the wrong architecture?",
                   pack->type->name);
 
     if (pack->getConstructorParameters()->size() != 3) {
-        ::error(ErrorType::ERR_MODEL, "Expected toplevel package %1% to have 3 parameters",
+        ::p4c::error(ErrorType::ERR_MODEL, "Expected toplevel package %1% to have 3 parameters",
                 pack->type);
         return false;
     }

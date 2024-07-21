@@ -99,9 +99,9 @@ class ProgramStructure {
             objectToNewName.emplace(obj, newName);
         }
         /// Lookup using the original name
-        T get(cstring name) const { return ::get(nameToObject, name); }
+        T get(cstring name) const { return ::p4c::get(nameToObject, name); }
         /// Get the new name
-        cstring get(T object) const { return ::get(objectToNewName, object, object->name.name); }
+        cstring get(T object) const { return ::p4c::get(objectToNewName, object, object->name.name); }
         /// Get the new name from the old name
         cstring newname(cstring name) const { return get(get(name)); }
         bool contains(cstring name) const { return nameToObject.find(name) != nameToObject.end(); }

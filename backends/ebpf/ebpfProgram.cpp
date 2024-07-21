@@ -33,7 +33,7 @@ bool EBPFProgram::build() {
     auto pack = toplevel->getMain();
     if (pack->type->name == "xdp") {
         if (pack->getConstructorParameters()->size() != 3) {
-            ::error(ErrorType::ERR_EXPECTED,
+            ::p4c::error(ErrorType::ERR_EXPECTED,
                     "Expected toplevel xdp package %1% to have 3 parameters", pack->type);
             return false;
         }
@@ -41,13 +41,13 @@ bool EBPFProgram::build() {
         progTarget = new XdpTarget(options.emitTraceMessages);
     } else {
         if (pack->type->name != "ebpfFilter")
-            ::warning(ErrorType::WARN_INVALID,
+            ::p4c::warning(ErrorType::WARN_INVALID,
                       "%1%: the main ebpf package should be called ebpfFilter or xdp"
                       "; are you using the wrong architecture?",
                       pack->type->name);
 
         if (pack->getConstructorParameters()->size() != 2) {
-            ::error(ErrorType::ERR_EXPECTED,
+            ::p4c::error(ErrorType::ERR_EXPECTED,
                     "Expected toplevel ebpfFilter package %1% to have 2 parameters", pack->type);
             return false;
         }

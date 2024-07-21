@@ -206,21 +206,21 @@ class JSONLoader {
     template <typename T, typename U>
     void unpack_json(std::pair<T, U> &v) {
         const JsonObject *obj = json->checkedTo<JsonObject>();
-        load(::get(obj, "first"), v.first);
-        load(::get(obj, "second"), v.second);
+        load(::p4c::get(obj, "first"), v.first);
+        load(::p4c::get(obj, "second"), v.second);
     }
 
     template <typename T>
     void unpack_json(std::optional<T> &v) {
         const JsonObject *obj = json->checkedTo<JsonObject>();
         bool isValid = false;
-        load(::get(obj, "valid"), isValid);
+        load(::p4c::get(obj, "valid"), isValid);
         if (!isValid) {
             v = std::nullopt;
             return;
         }
         T value;
-        load(::get(obj, "value"), value), v = std::move(value);
+        load(::p4c::get(obj, "value"), value), v = std::move(value);
     }
 
     void unpack_json(bool &v) { v = json->as<JsonBoolean>(); }

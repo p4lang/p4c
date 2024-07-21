@@ -39,7 +39,7 @@ bool ControlBodyTranslator::preorder(const IR::PathExpression *expression) {
     auto param = decl->getNode()->to<IR::Parameter>();
     if (param != nullptr) {
         if (toDereference.count(param) > 0) builder->append("*");
-        auto subst = ::get(substitution, param);
+        auto subst = ::p4c::get(substitution, param);
         if (subst != nullptr) {
             builder->append(subst->name);
             return false;
@@ -52,7 +52,7 @@ bool ControlBodyTranslator::preorder(const IR::PathExpression *expression) {
 void ControlBodyTranslator::processCustomExternFunction(const P4::ExternFunction *function,
                                                         EBPFTypeFactory *typeFactory) {
     if (!control->emitExterns)
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Not supported", function->method);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: Not supported", function->method);
 
     visit(function->expr->method);
     builder->append("(");
@@ -149,7 +149,7 @@ bool ControlBodyTranslator::preorder(const IR::MethodCallExpression *expression)
         return false;
     }
 
-    ::error(ErrorType::ERR_UNSUPPORTED, "Unsupported method invocation %1%", expression);
+    ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Unsupported method invocation %1%", expression);
     return false;
 }
 
@@ -222,7 +222,7 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument> *args) {
     auto type = typeMap->getType(expr);
     auto ht = type->to<IR::Type_Header>();
     if (ht == nullptr) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "Cannot emit a non-header type %1%", expr);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Cannot emit a non-header type %1%", expr);
         return;
     }
 
@@ -236,7 +236,7 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument> *args) {
     // We expect all headers to start on a byte boundary.
     unsigned width = ht->width_bits();
     if (width % 8 != 0) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "Header %1% size %2% is not a multiple of 8 bits.", expr, width);
         return;
     }
@@ -261,7 +261,7 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument> *args) {
         auto etype = EBPFTypeFactory::instance->create(ftype);
         auto et = etype->to<IHasWidth>();
         if (et == nullptr) {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+            ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "Only headers with fixed widths supported %1%", f);
             return;
         }
@@ -295,7 +295,7 @@ void ControlBodyTranslator::processMethod(const P4::ExternMethod *method) {
             return;
         }
     }
-    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unexpected method call", method->expr);
+    ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unexpected method call", method->expr);
 }
 
 void ControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
@@ -534,7 +534,7 @@ void EBPFControl::scanConstants() {
                 counters.emplace(name, ctr);
             }
         } else {
-            ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
+            ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
                     b->toString());
         }
     }
@@ -547,7 +547,7 @@ bool EBPFControl::build() {
 
     if (program->model.arch == ModelArchitecture::XdpSwitch) {
         if (pl->size() != 3) {
-            ::error(ErrorType::ERR_EXPECTED,
+            ::p4c::error(ErrorType::ERR_EXPECTED,
                     "Expected control block %s to have exactly 3 parameters",
                     controlBlock->getName());
             return false;
@@ -559,7 +559,7 @@ bool EBPFControl::build() {
         xdpOutputMeta = *it;
     } else {
         if (pl->size() != 2) {
-            ::error(ErrorType::ERR_EXPECTED, "Expected control block to have exactly 2 parameters");
+            ::p4c::error(ErrorType::ERR_EXPECTED, "Expected control block to have exactly 2 parameters");
             return false;
         }
         headers = *it;
@@ -571,7 +571,7 @@ bool EBPFControl::build() {
     codeGen->substitute(headers, parserHeaders);
 
     scanConstants();
-    return ::errorCount() == 0;
+    return ::p4c::errorCount() == 0;
 }
 
 void EBPFControl::emitDeclaration(CodeBuilder *builder, const IR::Declaration *decl) {

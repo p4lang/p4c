@@ -51,7 +51,7 @@ class EnumRepresentation {
         type = IR::Type_Bits::get(srcInfo, width, false);
     }
     void add(cstring decl) { repr.emplace(decl, repr.size()); }
-    unsigned get(cstring decl) const { return ::get(repr, decl); }
+    unsigned get(cstring decl) const { return ::p4c::get(repr, decl); }
 
     using iterator = decltype(repr)::iterator;
     using const_iterator = decltype(repr)::const_iterator;

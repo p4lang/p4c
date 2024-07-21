@@ -28,10 +28,10 @@ class FindTypesInLogMsgInvocationToReplace : public Inspector {
     const IR::MethodCallStatement *prepareLogMsgStatement(
         const IR::MethodCallStatement *methodCallStatement);
     const IR::Type_StructLike *getReplacement(const cstring name) const {
-        return ::get(replacement, name);
+        return ::p4c::get(replacement, name);
     }
     const IR::MethodCallStatement *getReplacementMethodCall(unsigned id) const {
-        return ::get(logMsgReplacement, id);
+        return ::p4c::get(logMsgReplacement, id);
     }
     bool empty() const { return replacement.empty(); }
     bool hasStructInParameter(const IR::MethodCallStatement *methodCallStatement);

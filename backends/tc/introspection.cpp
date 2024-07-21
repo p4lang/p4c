@@ -75,11 +75,11 @@ void IntrospectionGenerator::collectKeyInfo(const IR::Key *key, struct TableAttr
                         auto val = std::move(*tcVal);
                         keyField->type = val;
                     } else {
-                        ::error(ErrorType::ERR_INVALID,
+                        ::p4c::error(ErrorType::ERR_INVALID,
                                 "tc_type annotation cannot have '%1%' as value", expr);
                     }
                 } else {
-                    ::error(ErrorType::ERR_INVALID, "tc_type annotation cannot have '%1%' as value",
+                    ::p4c::error(ErrorType::ERR_INVALID, "tc_type annotation cannot have '%1%' as value",
                             expr);
                 }
             }
@@ -121,7 +121,7 @@ void IntrospectionGenerator::collectActionInfo(const IR::ActionList *actionlist,
                 actionInfo->annotations.push_back(actionAnno);
             }
             if (isTableOnly && isDefaultOnly) {
-                ::error(
+                ::p4c::error(
                     "Table '%1%' has an action reference '%2%' which is "
                     "annotated with both '@tableonly' and '@defaultonly'",
                     p4table->getName().originalName, action->getName().originalName);
@@ -344,7 +344,7 @@ const Util::JsonObject *IntrospectionGenerator::genIntrospectionJson() {
 
 bool IntrospectionGenerator::serializeIntrospectionJson(std::ostream &destination) {
     auto *json = genIntrospectionJson();
-    if (::errorCount() > 0) {
+    if (::p4c::errorCount() > 0) {
         return false;
     }
     json->serialize(destination);

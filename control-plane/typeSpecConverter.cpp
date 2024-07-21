@@ -93,7 +93,7 @@ TypeSpecConverter::TypeSpecConverter(const P4::ReferenceMap *refMap, P4::TypeMap
 }
 
 bool TypeSpecConverter::preorder(const IR::Type *type) {
-    ::error(ErrorType::ERR_UNEXPECTED, "Unexpected type %1%", type);
+    ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected type %1%", type);
     map.emplace(type, new P4DataTypeSpec());
     return false;
 }
@@ -180,7 +180,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype *type) {
             TranslationAnnotation ann;
             bool isTranslatedType = hasTranslationAnnotation(type, &ann);
             if (isTranslatedType && !underlyingType->is<IR::Type_Bits>()) {
-                ::error(ErrorType::ERR_INVALID,
+                ::p4c::error(ErrorType::ERR_INVALID,
                         "%1%: P4Runtime requires the underlying type for a user-defined type with "
                         "the @p4runtime_translation annotation to be bit<W>; it cannot be '%2%'",
                         type, underlyingType);
@@ -359,7 +359,7 @@ bool TypeSpecConverter::preorder(const IR::Type_SerEnum *type) {
                 auto member = enumTypeSpec->add_members();
                 member->set_name(m->controlPlaneName());
                 if (!m->value->is<IR::Constant>()) {
-                    ::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported SerEnum member value",
+                    ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported SerEnum member value",
                             m->value);
                     continue;
                 }

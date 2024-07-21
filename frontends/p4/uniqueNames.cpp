@@ -32,7 +32,7 @@ void RenameMap::setNewName(const IR::IDeclaration *decl, cstring name, bool allo
 
 const IR::P4Action *RenameMap::actionCalled(const IR::MethodCallExpression *expression) const {
     CHECK_NULL(expression);
-    return ::get(actionCall, expression);
+    return ::p4c::get(actionCall, expression);
 }
 
 void RenameMap::markActionCall(const IR::P4Action *action, const IR::MethodCallExpression *call) {

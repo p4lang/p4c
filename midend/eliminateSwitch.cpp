@@ -28,7 +28,7 @@ const IR::Node *DoEliminateSwitch::postorder(IR::P4Program *program) {
                 return program;
         }
     }
-    ::error(ErrorType::ERR_NOT_FOUND,
+    ::p4c::error(ErrorType::ERR_NOT_FOUND,
             "Could not find declaration for 'match_kind.exact', which is needed to implement "
             "switch statements; did you include core.p4?");
     return program;
@@ -42,7 +42,7 @@ const IR::Node *DoEliminateSwitch::postorder(IR::P4Control *control) {
 
 const IR::Node *DoEliminateSwitch::postorder(IR::SwitchStatement *statement) {
     if (findContext<IR::P4Action>()) {
-        ::error("%1%: switch statements not supported in actions on this target", statement);
+        ::p4c::error("%1%: switch statements not supported in actions on this target", statement);
         return statement;
     }
     auto type = typeMap->getType(statement->expression);

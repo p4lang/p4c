@@ -132,7 +132,7 @@ class EBPFTablePsaPropertyVisitor : public Inspector {
     /// precedence over it and throw error for whole list.
     bool preorder(const IR::ListExpression *) override { return true; }
     bool preorder(const IR::Expression *expr) override {
-        ::error(ErrorType::ERR_UNSUPPORTED,
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED,
                 "%1%: unsupported expression, expected a named instance", expr);
         return false;
     }

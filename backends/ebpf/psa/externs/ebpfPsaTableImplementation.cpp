@@ -81,7 +81,7 @@ void EBPFTableImplementationPSA::verifyTableActionList(const EBPFTablePSA *insta
     }
 
     if (printError) {
-        ::error(ErrorType::ERR_EXPECTED,
+        ::p4c::error(ErrorType::ERR_EXPECTED,
                 "%1%: Action list differs from previous %2% "
                 "(tables use the same implementation %3%)",
                 instance->table->container->getActionList(), table->container->getActionList(),
@@ -100,7 +100,7 @@ void EBPFTableImplementationPSA::verifyTableNoDefaultAction(const EBPFTablePSA *
     BUG_CHECK(ac != nullptr, "%1%: expected an action call", mi);
 
     if (ac->action->name.originalName != P4::P4CoreLibrary::instance().noAction.name) {
-        ::error(ErrorType::ERR_UNSUPPORTED,
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED,
                 "%1%: Default action cannot be defined for table %2% with implementation %3%",
                 defaultAction, instance->table->container->name, declaration);
     }
@@ -108,7 +108,7 @@ void EBPFTableImplementationPSA::verifyTableNoDefaultAction(const EBPFTablePSA *
 
 void EBPFTableImplementationPSA::verifyTableNoDirectObjects(const EBPFTablePSA *instance) {
     if (!instance->counters.empty() || !instance->meters.empty()) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "%1%: DirectCounter and DirectMeter externs are not supported "
                 "with table implementation %2%",
                 instance->table->container->name, declaration->type->toString());
@@ -121,7 +121,7 @@ void EBPFTableImplementationPSA::verifyTableNoEntries(const EBPFTablePSA *instan
     // I believe that this sentence forbids (const) entries in a table in P4 code at all.
     auto entries = instance->table->container->getEntries();
     if (entries != nullptr) {
-        ::error(ErrorType::ERR_UNSUPPORTED,
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED,
                 "%1%: entries directly specified in a table %2% "
                 "with implementation %3% are not supported",
                 entries, instance->table->container->name, declaration);
@@ -131,12 +131,12 @@ void EBPFTableImplementationPSA::verifyTableNoEntries(const EBPFTablePSA *instan
 unsigned EBPFTableImplementationPSA::getUintFromExpression(const IR::Expression *expr,
                                                            unsigned defaultValue) {
     if (!expr->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "Must be constant value: %1%", expr);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Must be constant value: %1%", expr);
         return defaultValue;
     }
     auto c = expr->to<IR::Constant>();
     if (!c->fitsUint()) {
-        ::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", c);
+        ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", c);
         return defaultValue;
     }
     return c->asUnsigned();
@@ -214,7 +214,7 @@ EBPFActionSelectorPSA::EBPFActionSelectorPSA(const EBPFProgram *program, CodeGen
     if (hashEngine != nullptr) {
         hashEngine->setVisitor(codeGen);
     } else {
-        ::error(ErrorType::ERR_UNSUPPORTED, "Algorithm not yet implemented: %1%",
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Algorithm not yet implemented: %1%",
                 decl->arguments->at(0));
     }
 
@@ -222,15 +222,15 @@ EBPFActionSelectorPSA::EBPFActionSelectorPSA(const EBPFProgram *program, CodeGen
 
     unsigned outputHashWidth = getUintFromExpression(decl->arguments->at(2)->expression, 0);
     if (hashEngine != nullptr && outputHashWidth > hashEngine->getOutputWidth()) {
-        ::error(ErrorType::ERR_INVALID, "%1%: more bits requested than hash provides (%2%)",
+        ::p4c::error(ErrorType::ERR_INVALID, "%1%: more bits requested than hash provides (%2%)",
                 decl->arguments->at(2)->expression, hashEngine->getOutputWidth());
     }
     if (outputHashWidth > 64) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: supported up to 64 bits",
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: supported up to 64 bits",
                 decl->arguments->at(2)->expression);
     }
     if (outputHashWidth < 1) {
-        ::error(ErrorType::ERR_INVALID,
+        ::p4c::error(ErrorType::ERR_INVALID,
                 "%1%: invalid output width used for checksum "
                 "value truncation, must be at least 1 bit",
                 decl->arguments->at(2)->expression);
@@ -266,7 +266,7 @@ void EBPFActionSelectorPSA::emitInitializer(CodeBuilder *builder) {
         BUG_CHECK(action != nullptr, "%1%: not an action", ev);
 
         if (!action->getParameters()->empty()) {
-            ::error(ErrorType::ERR_UNINITIALIZED, "%1%: missing value for action parameters: %2%",
+            ::p4c::error(ErrorType::ERR_UNINITIALIZED, "%1%: missing value for action parameters: %2%",
                     ev, action->getParameters());
             return;
         }
@@ -579,7 +579,7 @@ void EBPFActionSelectorPSA::verifyTableSelectorKeySet(const EBPFTablePSA *instan
     }
 
     if (printError) {
-        ::error(ErrorType::ERR_EXPECTED,
+        ::p4c::error(ErrorType::ERR_EXPECTED,
                 "%1%: selector type keys list differs from previous %2% "
                 "(tables use the same implementation %3%)",
                 instance->table->container, table->container, declaration);
@@ -591,14 +591,14 @@ void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA *inst
 
     if (emptyGroupAction == nullptr && iega == nullptr) return;  // nothing to do here
     if (emptyGroupAction == nullptr && iega != nullptr) {
-        ::error(ErrorType::ERR_UNEXPECTED,
+        ::p4c::error(ErrorType::ERR_UNEXPECTED,
                 "%1%: property not specified in previous table %2% "
                 "(tables use the same implementation %3%)",
                 iega, table->container, declaration);
         return;
     }
     if (emptyGroupAction != nullptr && iega == nullptr) {
-        ::error(ErrorType::ERR_EXPECTED,
+        ::p4c::error(ErrorType::ERR_EXPECTED,
                 "%1%: missing property %2%, defined in previous table %3% "
                 "(tables use the same implementation %4%)",
                 instance->table->container, emptyGroupAction, table->container->toString(),
@@ -647,7 +647,7 @@ void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA *inst
     }
 
     if (!same) {
-        ::error(ErrorType::ERR_EXPECTED,
+        ::p4c::error(ErrorType::ERR_EXPECTED,
                 "%1%: defined property value is different from %2%, defined in "
                 "previous table %3% (tables use the same implementation %4%)%5%",
                 rev, lev, table->container->toString(), declaration, additionalNote);

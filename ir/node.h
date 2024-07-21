@@ -26,6 +26,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/source_file.h"
 
+namespace p4c {
 class Visitor;
 struct Visitor_Context;
 class Inspector;
@@ -33,6 +34,7 @@ class Modifier;
 class Transform;
 class JSONGenerator;
 class JSONLoader;
+}  // namespace p4c
 
 namespace p4c::Util {
 class JsonObject;
@@ -110,10 +112,10 @@ class Node : public virtual INode {
  protected:
     static int currentId;
     void traceVisit(const char *visitor) const;
-    friend class ::Visitor;
-    friend class ::Inspector;
-    friend class ::Modifier;
-    friend class ::Transform;
+    friend class ::p4c::Visitor;
+    friend class ::p4c::Inspector;
+    friend class ::p4c::Modifier;
+    friend class ::p4c::Transform;
     cstring prepareSourceInfoForJSON(Util::SourceInfo &si, unsigned *lineNumber,
                                      unsigned *columnNumber) const;
 

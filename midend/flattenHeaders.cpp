@@ -80,7 +80,7 @@ const IR::Node *ReplaceHeaders::postorder(IR::Member *expression) {
     }
     // At this point we know that e is an expression of the form
     // param.field1.etc.hdr, where hdr needs to be replaced.
-    auto newFieldName = ::get(repl->fieldNameRemap, prefix);
+    auto newFieldName = ::p4c::get(repl->fieldNameRemap, prefix);
     const IR::Expression *result;
     if (newFieldName.isNullOrEmpty()) {
         auto type = typeMap->getType(getOriginal(), true);
@@ -90,7 +90,7 @@ const IR::Node *ReplaceHeaders::postorder(IR::Member *expression) {
             // We only want to process the outermost Member
             return expression;
         if (isWrite()) {
-            ::error(ErrorType::ERR_UNSUPPORTED,
+            ::p4c::error(ErrorType::ERR_UNSUPPORTED,
                     "%1%: writing to a structure nested in a header is not supported", expression);
             return expression;
         }

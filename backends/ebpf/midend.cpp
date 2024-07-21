@@ -135,7 +135,7 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
     midEnd.setName("MidEnd");
     midEnd.addDebugHooks(hooks);
     program = program->apply(midEnd);
-    if (::errorCount() > 0) return nullptr;
+    if (::p4c::errorCount() > 0) return nullptr;
 
     return evaluator->getToplevelBlock();
 }

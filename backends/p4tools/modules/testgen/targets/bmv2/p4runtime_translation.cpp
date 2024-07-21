@@ -8,7 +8,7 @@ P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation::lookupP4RuntimeAnnotati
     if (typeName != nullptr) {
         type = typeMap.getType(typeName);
         if (type == nullptr) {
-            ::error("Type %1% not found in the type map.", typeName);
+            ::p4c::error("Type %1% not found in the type map.", typeName);
             return p4RuntimeAnnotations;
         }
         type = type->getP4Type();

@@ -42,7 +42,7 @@ const IR::Node *DoConvertErrors::postorder(IR::Type_Name *type) {
         return type;
     }
     auto errorType = canontype->to<IR::Type_Error>()->name;
-    auto *r = ::get(repr, errorType);
+    auto *r = ::p4c::get(repr, errorType);
     if (r == nullptr) {
         return type;
     }
@@ -54,7 +54,7 @@ const IR::Node *DoConvertErrors::postorder(IR::Member *member) {
     if (!typeErr) {
         return member;
     }
-    auto *r = ::get(repr, typeErr->name);
+    auto *r = ::p4c::get(repr, typeErr->name);
     CHECK_NULL(r);
     if (!member->expr->is<IR::TypeNameExpression>()) {
         // variable

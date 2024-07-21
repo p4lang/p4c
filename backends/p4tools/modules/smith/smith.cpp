@@ -60,7 +60,7 @@ int Smith::mainImpl(const CompilerResult & /*result*/) {
     }
     auto *ostream = openFile(outputFile, false);
     if (ostream == nullptr) {
-        ::error("must have [file]");
+        ::p4c::error("must have [file]");
         exit(EXIT_FAILURE);
     }
     if (smithOptions.seed.has_value()) {

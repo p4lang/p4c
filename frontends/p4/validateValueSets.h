@@ -31,7 +31,7 @@ class ValidateValueSets final : public Inspector {
     ValidateValueSets() { setName("ValidateValueSets"); }
     void postorder(const IR::P4ValueSet *valueSet) override {
         if (!valueSet->size->is<IR::Constant>()) {
-            ::error(ErrorType::ERR_EXPECTED, "%1%: value_set size must be constant",
+            ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: value_set size must be constant",
                     valueSet->size);
         }
     }

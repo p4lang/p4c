@@ -329,7 +329,7 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
         if (type->is<IR::Type::Unknown>() || type->is<IR::Type::Bits>() ||
             type->is<IR::Type_InfInt>())
             return true;
-        ::error(ErrorType::ERR_TYPE_ERROR, "%1%: not defined on operands of type %2%", node, type);
+        ::p4c::error(ErrorType::ERR_TYPE_ERROR, "%1%: not defined on operands of type %2%", node, type);
         return false;
     }
 

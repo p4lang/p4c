@@ -26,13 +26,13 @@ namespace p4c {
 /**
  *  Structure populated via error_helper functions
  *
- *  Typically, calls to ::error/::warning have many parameters, some of them
- *  might have SourceInfo attribute. ::error_helper parse those parameters, format
+ *  Typically, calls to ::p4c::error/::p4c::warning have many parameters, some of them
+ *  might have SourceInfo attribute. ::p4c::error_helper parse those parameters, format
  *  parameters to output message and extracts SourceInfo wherever possible.
  *
  *  Populated structure can be serialized to canonical error message with toString() method.
  *
- *  This structure is mainly used inside ErrorReporter, but some uses invoke ::error_helper
+ *  This structure is mainly used inside ErrorReporter, but some uses invoke ::p4c::error_helper
  *  directly and those uses need to call toString() on returned object.
  */
 struct ErrorMessage {

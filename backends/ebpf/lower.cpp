@@ -25,13 +25,13 @@ const IR::Expression *LowerExpressions::shift(const IR::Operation_Binary *expres
         auto cst = rhs->to<IR::Constant>();
         big_int maxShift = Util::shift_left(1, LowerExpressions::maxShiftWidth);
         if (cst->value > maxShift)
-            ::error(ErrorType::ERR_OVERLIMIT, "%1%: shift amount limited to %2% on this target",
+            ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1%: shift amount limited to %2% on this target",
                     expression, maxShift);
     } else {
         BUG_CHECK(rhstype->is<IR::Type_Bits>(), "%1%: expected a bit<> type", rhstype);
         auto bs = rhstype->to<IR::Type_Bits>();
         if (bs->size > LowerExpressions::maxShiftWidth)
-            ::error(ErrorType::ERR_OVERLIMIT,
+            ::p4c::error(ErrorType::ERR_OVERLIMIT,
                     "%1%: shift amount limited to %2% bits on this target", expression,
                     LowerExpressions::maxShiftWidth);
     }

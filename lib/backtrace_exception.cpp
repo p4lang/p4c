@@ -84,6 +84,8 @@ void backtrace_fill_stacktrace(std::string &msg, void *const *backtrace, int siz
 
 namespace std {
 
+using ::p4c::backtrace_exception;
+
 void __throw_bad_alloc() { throw backtrace_exception<bad_alloc>(); }
 
 void __throw_bad_cast() { throw backtrace_exception<bad_cast>(); }

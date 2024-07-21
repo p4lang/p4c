@@ -1702,7 +1702,7 @@ r_angle : ">" | R_ANGLE_SHIFT ;
 
 %%
 
-void P4::P4Parser::error(const Util::SourceInfo& location,
+void P4::P4Parser::p4c::error(const Util::SourceInfo& location,
                          const std::string& message) {
     driver.onParseError(location, message);
 }

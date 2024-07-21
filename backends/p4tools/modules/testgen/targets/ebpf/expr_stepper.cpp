@@ -41,7 +41,7 @@ const EBPFExprStepper::ExternMethodImpls<EBPFExprStepper> EBPFExprStepper::EBPF_
         {"CounterArray.add"_cs,
          {"index"_cs, "value"_cs},
          [](const ExternInfo & /*externInfo*/, EBPFExprStepper &stepper) {
-             ::warning("CounterArray.add not fully implemented.");
+             ::p4c::warning("CounterArray.add not fully implemented.");
              auto &nextState = stepper.state.clone();
              nextState.popBody();
              stepper.result->emplace_back(nextState);
@@ -60,7 +60,7 @@ const EBPFExprStepper::ExternMethodImpls<EBPFExprStepper> EBPFExprStepper::EBPF_
         {"CounterArray.increment"_cs,
          {"index"_cs},
          [](const ExternInfo & /*externInfo*/, EBPFExprStepper &stepper) {
-             ::warning("CounterArray.increment not fully implemented.");
+             ::p4c::warning("CounterArray.increment not fully implemented.");
              auto &nextState = stepper.state.clone();
              nextState.popBody();
              stepper.result->emplace_back(nextState);

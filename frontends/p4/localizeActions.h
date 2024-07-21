@@ -35,7 +35,7 @@ class GlobalActionReplacements {
 
     const IR::P4Action *getReplacement(const IR::P4Action *action,
                                        const IR::P4Control *control) const {
-        auto map = ::get(repl, control);
+        auto map = ::p4c::get(repl, control);
         if (map == nullptr) return nullptr;
         if (map->find(action) != map->end()) return (*map)[action];
         return nullptr;

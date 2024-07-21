@@ -76,7 +76,7 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
     if (DPDK::toStr(getType()) == "Hash") {
         auto args = arguments;
         if (args->size() == 0) {
-            ::error(ErrorType::ERR_INVALID,
+            ::p4c::error(ErrorType::ERR_INVALID,
                     "Hash extern declaration %1% must contain hash algorithm \n", Name());
         } else {
             auto hashAlg = args->at(0)->expression;
@@ -92,7 +92,7 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
     } else if (DPDK::toStr(getType()) == "Register") {
         auto args = arguments;
         if (args->size() == 0) {
-            ::error(ErrorType::ERR_INVALID,
+            ::p4c::error(ErrorType::ERR_INVALID,
                     "Register extern declaration %1% must contain a size parameter\n", Name());
         } else {
             auto size = args->at(0)->expression;
@@ -104,7 +104,7 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
         auto args = arguments;
         unsigned value = 0;
         if (args->size() < 2) {
-            ::error(ErrorType::ERR_INVALID,
+            ::p4c::error(ErrorType::ERR_INVALID,
                     "Counter extern declaration %1% must contain 2 parameters\n", Name());
         } else {
             auto n_counters = args->at(0)->expression;
@@ -130,7 +130,7 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
         auto args = arguments;
         unsigned value = 0;
         if (args->size() != 1) {
-            ::error(ErrorType::ERR_INVALID,
+            ::p4c::error(ErrorType::ERR_INVALID,
                     "Counter extern declaration %1% must contain 1 parameters\n", Name());
         } else {
             IR::Expression *n_counters = nullptr;
@@ -161,7 +161,7 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
     } else if (DPDK::toStr(getType()) == "Meter") {
         auto args = arguments;
         if (args->size() < 2) {
-            ::error(ErrorType::ERR_INVALID,
+            ::p4c::error(ErrorType::ERR_INVALID,
                     "Meter extern declaration %1% must contain a size parameter"
                     " and meter type parameter",
                     Name());
@@ -173,7 +173,7 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
     } else if (DPDK::toStr(getType()) == "DirectMeter") {
         auto args = arguments;
         if (args->size() < 1) {
-            ::error(ErrorType::ERR_INVALID,
+            ::p4c::error(ErrorType::ERR_INVALID,
                     "Meter extern declaration %1% must have "
                     "meter type parameter",
                     Name());
@@ -574,7 +574,7 @@ std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
             out << " " << DPDK::toStr(l->components.at(l->components.size() - 1));
         }
     } else {
-        ::error(ErrorType::ERR_INVALID, "%1%: get_hash's arg is not a ListExpression.", this);
+        ::p4c::error(ErrorType::ERR_INVALID, "%1%: get_hash's arg is not a ListExpression.", this);
     }
     return out;
 }

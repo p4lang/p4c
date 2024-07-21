@@ -26,13 +26,13 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program, cstring instanceNam
     : EBPFTableBase(program, instanceName, codeGen) {
     CHECK_NULL(di);
     if (!di->type->is<IR::Type_Specialized>()) {
-        ::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
+        ::p4c::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
         return;
     }
     auto ts = di->type->to<IR::Type_Specialized>();
 
     if (ts->arguments->size() != 2) {
-        ::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%", ts);
+        ::p4c::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%", ts);
         return;
     }
 
@@ -42,7 +42,7 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program, cstring instanceNam
     this->valueType = EBPFTypeFactory::instance->create(valueArg);
 
     if (di->arguments->size() < 1) {
-        ::error(ErrorType::ERR_MODEL, "Expected at least 1 argument: %1%", di);
+        ::p4c::error(ErrorType::ERR_MODEL, "Expected at least 1 argument: %1%", di);
         return;
     }
 
@@ -50,7 +50,7 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program, cstring instanceNam
     CHECK_NULL(declaredSize);
 
     if (!declaredSize->fitsUint()) {
-        ::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", declaredSize);
+        ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", declaredSize);
         return;
     }
     size = declaredSize->asUnsigned();
@@ -71,7 +71,7 @@ bool EBPFRegisterPSA::shouldUseArrayMap() {
         return (keyWidth > 0 && keyWidth <= 32);
     }
 
-    ::error(ErrorType::ERR_MODEL, "Unexpected key type: %1%", this->keyType->type);
+    ::p4c::error(ErrorType::ERR_MODEL, "Unexpected key type: %1%", this->keyType->type);
 
     return false;
 }

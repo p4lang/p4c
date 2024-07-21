@@ -50,7 +50,7 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
         : BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) {}
 
     void modelError(const char *format, const cstring field) {
-        ::error(ErrorType::ERR_MODEL,
+        ::p4c::error(ErrorType::ERR_MODEL,
                 (cstring(format) + "\nInvalid metadata parameter value for PSA").c_str(), field);
     }
 

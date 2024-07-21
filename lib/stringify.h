@@ -51,7 +51,7 @@ template <class T>
 inline constexpr bool has_dbprint_v = has_dbprint<T>::value;
 
 // convert values to cstrings
-namespace p4c::Util {
+namespace Util {
 
 /// SFINAE helper to check if given class has a `toString` method.
 template <class, class = void>
@@ -98,7 +98,7 @@ cstring toString(const big_int &value, unsigned width, bool sign, unsigned int b
 cstring toString(const void *value);
 
 char DigitToChar(int digit);
-}  // namespace p4c::Util
+}  // namespace Util
 
 template <typename T>
 auto operator<<(std::ostream &out, const T &value)

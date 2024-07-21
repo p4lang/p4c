@@ -109,7 +109,7 @@ void GreedyNodeSelection::runImpl(const Callback &callBack,
                 throw;
             }
             // Otherwise we try to roll back as we typically do.
-            ::warning("Path encountered unimplemented feature. Message: %1%\n", e.what());
+            ::p4c::warning("Path encountered unimplemented feature. Message: %1%\n", e.what());
         }
 
         // Roll back to a previous branch and continue execution from there, but if there are no

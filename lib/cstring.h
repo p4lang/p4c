@@ -71,7 +71,11 @@ limitations under the License.
  * that mixing the two types of strings can trigger a lot of implicit copies.
  */
 
+namespace p4c {
+
 class cstring;
+
+}  // namespace p4c
 
 namespace p4c::P4::literals {
 inline cstring operator""_cs(const char *str, std::size_t len);
@@ -407,6 +411,10 @@ inline cstring operator""_cs(const char *str, std::size_t len) {
 }  // namespace p4c::P4::literals
 
 namespace std {
+
+namespace Util = ::p4c::Util;
+using ::p4c::cstring;
+
 template <>
 struct hash<cstring> {
     std::size_t operator()(const cstring &c) const {

@@ -124,7 +124,7 @@ void StructLocation::addLastIndexField(LocationSet *result) const {
 }
 
 void StructLocation::addField(cstring field, LocationSet *result) const {
-    auto f = ::get(fieldLocations, field);
+    auto f = ::p4c::get(fieldLocations, field);
     CHECK_NULL(f);
     result->add(f);
 }
@@ -304,7 +304,7 @@ Definitions *Definitions::joinDefinitions(const Definitions *other) const {
     for (auto d : other->definitions) {
         auto loc = d.first;
         auto defs = d.second;
-        auto current = ::get(definitions, loc);
+        auto current = ::p4c::get(definitions, loc);
         if (current != nullptr) {
             auto merged = current->merge(defs);
             result->definitions.emplace(loc, merged);
@@ -315,7 +315,7 @@ Definitions *Definitions::joinDefinitions(const Definitions *other) const {
     for (auto d : definitions) {
         auto loc = d.first;
         auto defs = d.second;
-        auto current = ::get(other->definitions, loc);
+        auto current = ::p4c::get(other->definitions, loc);
         if (current == nullptr) result->definitions.emplace(loc, defs);
         // otherwise have have already done it in the loop above
     }
@@ -364,7 +364,7 @@ Definitions *Definitions::writes(ProgramPoint point, const LocationSet *location
 bool Definitions::operator==(const Definitions &other) const {
     if (definitions.size() != other.definitions.size()) return false;
     for (auto d : definitions) {
-        auto od = ::get(other.definitions, d.first);
+        auto od = ::p4c::get(other.definitions, d.first);
         if (od == nullptr) return false;
         if (!d.second->operator==(*od)) return false;
     }

@@ -29,7 +29,7 @@ namespace ControlPlaneAPI {
 std::optional<std::string> stringReprConstant(big_int value, int width) {
     // TODO(antonin): support negative values
     if (value < 0) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Negative values not supported yet", value);
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: Negative values not supported yet", value);
         return std::nullopt;
     }
     BUG_CHECK(width > 0, "Unexpected width 0");

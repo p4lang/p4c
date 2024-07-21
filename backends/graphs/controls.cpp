@@ -203,7 +203,7 @@ bool ControlGraphs::preorder(const IR::MethodCallStatement *statement) {
             visit(am->object->to<IR::P4Table>());
         } else if (am->applyObject->is<IR::Type_Control>()) {
             if (am->object->is<IR::Parameter>()) {
-                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                         "%1%: control parameters are not supported by this target", am->object);
                 return false;
             }

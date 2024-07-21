@@ -40,7 +40,7 @@ P4::ComputeDefUse *computeDefUse(std::string source, CompilerOptions::FrontendVe
 
     auto *program = P4::parseP4String(source, langVersion);
     CHECK_NULL(program);
-    BUG_CHECK(::errorCount() == 0, "Unexpected errors");
+    BUG_CHECK(::p4c::errorCount() == 0, "Unexpected errors");
 
     auto &options = P4TestContext::get().options();
     const char *argv = "./gtestp4c";

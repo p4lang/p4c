@@ -61,7 +61,7 @@ class ConstantTypeSubstitution : public Transform, ResolutionContext {
 
     const IR::Expression *convert(const IR::Expression *expr, const Visitor::Context *ctxt) {
         auto result = expr->apply(*this, ctxt)->to<IR::Expression>();
-        if (result != expr && (::errorCount() == 0)) tc->learn(result, this, ctxt);
+        if (result != expr && (::p4c::errorCount() == 0)) tc->learn(result, this, ctxt);
         return result;
     }
     const IR::Vector<IR::Expression> *convert(const IR::Vector<IR::Expression> *vec,

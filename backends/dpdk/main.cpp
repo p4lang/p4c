@@ -57,7 +57,7 @@ void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOpt
     auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info, isTDI, options);
     std::ostream *out = openFile(filename, false);
     if (!out) {
-        ::error(ErrorType::ERR_IO, "Could not open file: %1%", filename);
+        ::p4c::error(ErrorType::ERR_IO, "Could not open file: %1%", filename);
         return;
     }
     p4rt->serializeBFRuntimeSchema(out);
@@ -74,7 +74,7 @@ int main(int argc, char *const argv[]) {
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false) options.setInputFile();
     }
-    if (::errorCount() > 0) return 1;
+    if (::p4c::errorCount() > 0) return 1;
 
     auto hook = options.getDebugHook();
 
@@ -84,7 +84,7 @@ int main(int argc, char *const argv[]) {
     if (options.loadIRFromJson == false) {
         program = P4::parseP4File(options);
 
-        if (program == nullptr || ::errorCount() > 0) return 1;
+        if (program == nullptr || ::p4c::errorCount() > 0) return 1;
         try {
             P4::P4COptionPragmaParser optionsPragmaParser;
             program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
@@ -96,17 +96,17 @@ int main(int argc, char *const argv[]) {
             std::cerr << bug.what() << std::endl;
             return 1;
         }
-        if (program == nullptr || ::errorCount() > 0) return 1;
+        if (program == nullptr || ::p4c::errorCount() > 0) return 1;
     } else {
         std::filebuf fb;
         if (fb.open(options.file, std::ios::in) == nullptr) {
-            ::error(ErrorType::ERR_NOT_FOUND, "%s: No such file or directory.", options.file);
+            ::p4c::error(ErrorType::ERR_NOT_FOUND, "%s: No such file or directory.", options.file);
             return 1;
         }
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
         if (jsonFileLoader.json == nullptr) {
-            ::error(ErrorType::ERR_INVALID, "Not valid input file");
+            ::p4c::error(ErrorType::ERR_INVALID, "Not valid input file");
             return 1;
         }
         program = new IR::P4Program(jsonFileLoader);
@@ -114,7 +114,7 @@ int main(int argc, char *const argv[]) {
     }
 
     P4::serializeP4RuntimeIfRequired(program, options);
-    if (::errorCount() > 0) return 1;
+    if (::p4c::errorCount() > 0) return 1;
 
     if (!options.tdiBuilderConf.empty()) {
         DPDK::TdiBfrtConf::generate(program, options);
@@ -127,25 +127,25 @@ int main(int argc, char *const argv[]) {
         generateTDIBfrtJson(true, program, options);
     }
 
-    if (::errorCount() > 0) return 1;
+    if (::p4c::errorCount() > 0) return 1;
     auto p4info = *P4::generateP4Runtime(program, options.arch).p4Info;
     DPDK::DpdkMidEnd midEnd(options);
     midEnd.addDebugHook(hook);
     try {
         toplevel = midEnd.process(program);
-        if (::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr) return 1;
+        if (::p4c::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr) return 1;
         if (!options.dumpJsonFile.empty())
             JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
-    if (::errorCount() > 0) return 1;
+    if (::p4c::errorCount() > 0) return 1;
 
     auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap, &midEnd.typeMap, p4info);
 
     backend->convert(toplevel);
-    if (::errorCount() > 0) return 1;
+    if (::p4c::errorCount() > 0) return 1;
 
     if (!options.outputFile.empty()) {
         std::ostream *out = openFile(options.outputFile, false);
@@ -155,5 +155,5 @@ int main(int argc, char *const argv[]) {
         }
     }
 
-    return ::errorCount() > 0;
+    return ::p4c::errorCount() > 0;
 }

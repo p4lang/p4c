@@ -9,9 +9,9 @@
 
 namespace p4c::P4Tools {
 
-void enableInformationLogging() { ::Log::addDebugSpec("tools_info:4"); }
+void enableInformationLogging() { ::p4c::Log::addDebugSpec("tools_info:4"); }
 
-void enablePerformanceLogging() { ::Log::addDebugSpec("tools_performance:4"); }
+void enablePerformanceLogging() { ::p4c::Log::addDebugSpec("tools_performance:4"); }
 
 void printPerformanceReport(const std::optional<std::filesystem::path> &basePath) {
     // Do not emit a report if performance logging is not enabled.
@@ -46,7 +46,7 @@ void printPerformanceReport(const std::optional<std::filesystem::path> &basePath
         perfFilePath.replace_extension(".csv");
         auto perfFile = std::ofstream(perfFilePath, std::ios::out | std::ios::app);
         if (!perfFile.is_open()) {
-            ::error("Failed to open the performance report file %1%", perfFilePath.c_str());
+            ::p4c::error("Failed to open the performance report file %1%", perfFilePath.c_str());
             return;
         }
 

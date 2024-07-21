@@ -96,13 +96,13 @@ class BaseCompileContext : public ICompileContext {
     /// @return the error reporter for this compilation context.
     virtual ErrorReporter &errorReporter();
 
-    /// @return the default diagnostic action for calls to `::info()`.
+    /// @return the default diagnostic action for calls to `::p4c::info()`.
     virtual DiagnosticAction getDefaultInfoDiagnosticAction();
 
-    /// @return the default diagnostic action for calls to `::warning()`.
+    /// @return the default diagnostic action for calls to `::p4c::warning()`.
     virtual DiagnosticAction getDefaultWarningDiagnosticAction();
 
-    /// @return the default diagnostic action for calls to `::error()`.
+    /// @return the default diagnostic action for calls to `::p4c::error()`.
     virtual DiagnosticAction getDefaultErrorDiagnosticAction();
 
     /// @return the diagnostic action to use for @diagnosticName, or

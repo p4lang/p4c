@@ -465,7 +465,7 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
             }
         }
         if ((size_sum_so_far & 0x7) != 0) {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "'%1%' is not 8-bit aligned",
+            ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "'%1%' is not 8-bit aligned",
                     st->name.name);
             return st;
         }
@@ -559,7 +559,7 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
     }
     // Throw error if there is non-aligned field present at the end in header.
     if (size_sum_so_far != 0) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "8-bit Alignment for Header Structure '%1%' is not possible as no more header"
                 " fields available in header to combine. DPDK does not support non-aligned"
                 " header fields.",
@@ -1462,7 +1462,7 @@ bool CopyMatchKeysToSingleStruct::isLearnerTable(const IR::P4Table *t) {
     if (add_on_miss->value->is<IR::ExpressionValue>()) {
         auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
         if (!expr->is<IR::BoolLiteral>()) {
-            ::error(ErrorType::ERR_UNEXPECTED, "%1%: expected boolean for 'add_on_miss' property",
+            ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: expected boolean for 'add_on_miss' property",
                     add_on_miss);
             return false;
         } else {
@@ -1547,7 +1547,7 @@ cstring CopyMatchKeysToSingleStruct::getTableKeyName(const IR::Expression *e) {
                 keyName = "m." + mem->member;
             }
         } else {
-            ::error(ErrorType::ERR_INVALID, "Invalid member expression '%1%' used as table key",
+            ::p4c::error(ErrorType::ERR_INVALID, "Invalid member expression '%1%' used as table key",
                     mem);
         }
     } else if (auto m = e->to<IR::MethodCallExpression>()) {
@@ -1560,7 +1560,7 @@ cstring CopyMatchKeysToSingleStruct::getTableKeyName(const IR::Expression *e) {
         CHECK_NULL(mem);
         keyName = "h." + mem->expr->to<IR::Member>()->member + "." + IR::Type_Header::isValid;
     } else {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Unsupported key expression %1%",
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Unsupported key expression %1%",
                 e->toString());
     }
     return keyName;
@@ -1641,7 +1641,7 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
 
     if (keyInfoInstance->isLearner) {
         if (!keyInfoInstance->isExact) {
-            ::error(ErrorType::ERR_EXPECTED, "Learner table %1% must have all exact match keys",
+            ::p4c::error(ErrorType::ERR_EXPECTED, "Learner table %1% must have all exact match keys",
                     table->name);
             return keys;
         }
@@ -1664,7 +1664,7 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
         // This prune will prevent the postorder(IR::KeyElement*) below from executing
         prune();
     } else {
-        ::warning(ErrorType::WARN_MISMATCH,
+        ::p4c::warning(ErrorType::WARN_MISMATCH,
                   "Mismatched header/metadata struct for key "
                   "elements in table %1%. Copying all match fields to metadata",
                   findOrigCtxt<IR::P4Table>()->name.toString());
@@ -1748,7 +1748,7 @@ std::optional<P4::ExternInstance> getExternInstanceFromProperty(
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return std::nullopt;
     if (!property->value->is<IR::ExpressionValue>()) {
-        ::error(ErrorType::ERR_EXPECTED,
+        ::p4c::error(ErrorType::ERR_EXPECTED,
                 "Expected %1% property value for table %2% to be an expression: %3%", propertyName,
                 table->controlPlaneName(), property);
         return std::nullopt;
@@ -1759,7 +1759,7 @@ std::optional<P4::ExternInstance> getExternInstanceFromProperty(
     if (isConstructedInPlace) *isConstructedInPlace = expr->is<IR::ConstructorCallExpression>();
     if (expr->is<IR::ConstructorCallExpression>() &&
         property->getAnnotation(IR::Annotation::nameAnnotation) == nullptr) {
-        ::error(ErrorType::ERR_UNSUPPORTED,
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED,
                 "Table '%1%' has an anonymous table property '%2%' with no name annotation, "
                 "which is not supported by P4Runtime",
                 table->controlPlaneName(), propertyName);
@@ -1768,7 +1768,7 @@ std::optional<P4::ExternInstance> getExternInstanceFromProperty(
     auto name = property->controlPlaneName();
     auto externInstance = P4::ExternInstance::resolve(expr, refMap, typeMap, name);
     if (!externInstance) {
-        ::error(ErrorType::ERR_INVALID,
+        ::p4c::error(ErrorType::ERR_INVALID,
                 "Expected %1% property value for table %2% to resolve to an "
                 "extern instance: %3%",
                 propertyName, table->controlPlaneName(), property);
@@ -1929,7 +1929,7 @@ const IR::Node *SplitActionSelectorTable::postorder(IR::P4Table *tbl) {
         tbl->properties->getProperty(structure->isPNA() ? "pna_direct_meter" : "psa_direct_meter");
 
     if (property != nullptr && (counterProperty != nullptr || meterProperty != nullptr)) {
-        ::error(ErrorType::ERR_UNEXPECTED,
+        ::p4c::error(ErrorType::ERR_UNEXPECTED,
                 "implementation property cannot co-exist with direct counter and direct meter "
                 "property for table %1%",
                 tbl->name);
@@ -1943,27 +1943,27 @@ const IR::Node *SplitActionSelectorTable::postorder(IR::P4Table *tbl) {
     if (instance->type->name != "ActionSelector") return tbl;
 
     if (instance->arguments->size() != 3) {
-        ::error(ErrorType::ERR_UNEXPECTED, "Incorrect number of argument on action selector %1%",
+        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Incorrect number of argument on action selector %1%",
                 *instance->name);
         return tbl;
     }
 
     if (!instance->arguments->at(1)->expression->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_UNEXPECTED,
+        ::p4c::error(ErrorType::ERR_UNEXPECTED,
                 "The 'size' argument of ActionSelector %1% must be a constant", *instance->name);
         return tbl;
     }
 
     int n_groups_max = instance->arguments->at(1)->expression->to<IR::Constant>()->asUnsigned();
     if (!instance->arguments->at(2)->expression->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_UNEXPECTED,
+        ::p4c::error(ErrorType::ERR_UNEXPECTED,
                 "The 'outputWidth' argument of ActionSelector %1% must be a constant",
                 *instance->name);
         return tbl;
     }
     auto outputWidth = instance->arguments->at(2)->expression->to<IR::Constant>()->asUnsigned();
     if (outputWidth >= 32) {
-        ::error(ErrorType::ERR_UNEXPECTED,
+        ::p4c::error(ErrorType::ERR_UNEXPECTED,
                 "The 'outputWidth' argument of ActionSelector %1% must be smaller than 32",
                 *instance->name);
         return tbl;
@@ -2060,13 +2060,13 @@ const IR::Node *SplitActionProfileTable::postorder(IR::P4Table *tbl) {
     if (!instance || instance->type->name != "ActionProfile") return tbl;
 
     if (instance->arguments->size() != 1) {
-        ::error(ErrorType::ERR_MODEL, "Incorrect number of argument on action profile %1%",
+        ::p4c::error(ErrorType::ERR_MODEL, "Incorrect number of argument on action profile %1%",
                 *instance->name);
         return tbl;
     }
 
     if (!instance->arguments->at(0)->expression->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_UNEXPECTED,
+        ::p4c::error(ErrorType::ERR_UNEXPECTED,
                 "The 'size' argument of ActionProfile %1% must be a constant", *instance->name);
         return tbl;
     }
@@ -2175,7 +2175,7 @@ const IR::Node *SplitP4TableCommon::postorder(IR::MethodCallStatement *statement
         auto tableName = apply->object->getName().name;
         group_id_expr = initializeMemberAndGroupId(tableName, decls);
         if (member_tables.count(tableName) == 0) {
-            ::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
+            ::p4c::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
             return statement;
         }
         // an action selector t.apply() is converted to
@@ -2192,7 +2192,7 @@ const IR::Node *SplitP4TableCommon::postorder(IR::MethodCallStatement *statement
         IR::Expression *t0stat = nullptr;
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             if (group_tables.count(tableName) == 0) {
-                ::error(ErrorType::ERR_NOT_FOUND, "Unable to find group table %1%", tableName);
+                ::p4c::error(ErrorType::ERR_NOT_FOUND, "Unable to find group table %1%", tableName);
                 return statement;
             }
             auto selectorTable = group_tables.at(tableName);
@@ -2259,7 +2259,7 @@ const IR::Node *SplitP4TableCommon::postorder(IR::IfStatement *statement) {
         auto tableName = apply->object->getName().name;
         group_id_expr = initializeMemberAndGroupId(tableName, decls);
         if (member_tables.count(tableName) == 0) {
-            ::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
+            ::p4c::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
             return statement;
         }
         if (member_tables.count(tableName) == 0) return statement;
@@ -2364,7 +2364,7 @@ const IR::Node *SplitP4TableCommon::postorder(IR::SwitchStatement *statement) {
 
         group_id_expr = initializeMemberAndGroupId(tableName, decls);
         if (member_tables.count(tableName) == 0) {
-            ::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
+            ::p4c::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
             return statement;
         }
         auto ifBaseTableHit = new IR::IndexedVector<IR::StatOrDecl>();
@@ -2376,7 +2376,7 @@ const IR::Node *SplitP4TableCommon::postorder(IR::SwitchStatement *statement) {
 
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             if (group_tables.count(tableName) == 0) {
-                ::error(ErrorType::ERR_NOT_FOUND, "Unable to find group table %1%", tableName);
+                ::p4c::error(ErrorType::ERR_NOT_FOUND, "Unable to find group table %1%", tableName);
                 return statement;
             }
             auto selectorTable = group_tables.at(tableName);
@@ -2458,7 +2458,7 @@ void CollectDirectCounterMeter::checkMethodCallInAction(const P4::ExternMethod *
 
             // error if more than one count method found with different instance name
             if (oneInstance != instanceName) {
-                ::error(ErrorType::ERR_UNEXPECTED,
+                ::p4c::error(ErrorType::ERR_UNEXPECTED,
                         "%1% method for different %2% "
                         "instances (%3% and %4%) called within same action",
                         method, externName, oneInstance, instanceName);
@@ -2524,11 +2524,11 @@ bool CollectDirectCounterMeter::preorder(const IR::P4Table *tbl) {
     auto meterInstance = Helpers::getExternInstanceFromProperty(
         tbl, direct_meter, refMap, typeMap, &isConstructedInPlace, meterExternName);
     int table_size = getTableSize(tbl);
-    auto table_type = ::get(structure->table_type_map, tbl->name.name);
+    auto table_type = ::p4c::get(structure->table_type_map, tbl->name.name);
 
     // Direct Counter and Meter are not supported with Wildcard match tables.
     if (table_type == InternalTableType::WILDCARD && (counterInstance || meterInstance)) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "Direct counters and direct meters are"
                 " unsupported for wildcard match table %1%",
                 tbl->name);
@@ -2549,7 +2549,7 @@ bool CollectDirectCounterMeter::preorder(const IR::P4Table *tbl) {
             if (defaultActionDecl->name.originalName != "NoAction") {
                 if (!ifMethodFound(defaultActionDecl, "count"_cs, counterExternName)) {
                     if (counterInstance) {
-                        ::error(ErrorType::ERR_EXPECTED,
+                        ::p4c::error(ErrorType::ERR_EXPECTED,
                                 "Expected default action %1% to have "
                                 "'count' method call for DirectCounter extern instance %2%",
                                 defaultActionDecl->name, *counterInstance->name);
@@ -2558,7 +2558,7 @@ bool CollectDirectCounterMeter::preorder(const IR::P4Table *tbl) {
                 }
                 if (!ifMethodFound(defaultActionDecl, "dpdk_execute"_cs, meterExternName)) {
                     if (meterInstance) {
-                        ::error(ErrorType::ERR_EXPECTED,
+                        ::p4c::error(ErrorType::ERR_EXPECTED,
                                 "Expected default action %1% to have "
                                 "'dpdk_execute' method call for DirectMeter extern instance %2%",
                                 defaultActionDecl->name, *meterInstance->name);
@@ -2589,17 +2589,17 @@ void ValidateDirectCounterMeter::validateMethodInvocation(P4::ExternMethod *a) {
 
     if ((externName == "DirectCounter" && methodName != "count") ||
         (externName == "DirectMeter" && methodName != "dpdk_execute")) {
-        ::error(ErrorType::ERR_UNEXPECTED, "%1% method not supported for %2% extern", methodName,
+        ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1% method not supported for %2% extern", methodName,
                 externName);
         return;
     }
 
     if (auto di = a->object->to<IR::Declaration_Instance>()) {
-        auto ownerTable = ::get(structure->direct_resource_map, di->name.name);
+        auto ownerTable = ::p4c::get(structure->direct_resource_map, di->name.name);
         bool invokedFromOwnerTable = false;
         auto act = findOrigCtxt<IR::P4Action>();
         if (!act) {
-            ::error(ErrorType::ERR_UNEXPECTED,
+            ::p4c::error(ErrorType::ERR_UNEXPECTED,
                     "%1% method of %2% extern "
                     "must only be called from within an action",
                     a->method->getName().name, di->name.originalName);
@@ -2615,7 +2615,7 @@ void ValidateDirectCounterMeter::validateMethodInvocation(P4::ExternMethod *a) {
         }
 
         if (!invokedFromOwnerTable) {
-            ::error(ErrorType::ERR_UNEXPECTED,
+            ::p4c::error(ErrorType::ERR_UNEXPECTED,
                     "%1% method of %2% extern "
                     "can only be invoked from within action of ownertable",
                     a->method->getName(), di->name.originalName);
@@ -2648,7 +2648,7 @@ void CollectAddOnMissTable::postorder(const IR::P4Table *t) {
     if (add_on_miss->value->is<IR::ExpressionValue>()) {
         auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
         if (!expr->is<IR::BoolLiteral>()) {
-            ::error(ErrorType::ERR_UNEXPECTED, "%1%: expected boolean for 'add_on_miss' property",
+            ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: expected boolean for 'add_on_miss' property",
                     add_on_miss);
             return;
         } else {
@@ -2660,7 +2660,7 @@ void CollectAddOnMissTable::postorder(const IR::P4Table *t) {
     // sanity checks
     auto default_action = t->properties->getProperty("default_action");
     if (use_add_on_miss && default_action == nullptr) {
-        ::error(ErrorType::ERR_UNEXPECTED,
+        ::p4c::error(ErrorType::ERR_UNEXPECTED,
                 "%1%: add_on_miss property is defined, "
                 "but default_action not specificed for table %2%",
                 add_on_miss, t->name);
@@ -2676,7 +2676,7 @@ void CollectAddOnMissTable::postorder(const IR::P4Table *t) {
                   default_action);
         auto ac = mi->to<P4::ActionCall>()->action;
         if (mi->to<P4::ActionCall>()->action->parameters->parameters.size() != 0) {
-            ::error(ErrorType::ERR_UNEXPECTED,
+            ::p4c::error(ErrorType::ERR_UNEXPECTED,
                     "%1%: action cannot have action argument when used with add_on_miss",
                     default_action);
         }
@@ -2735,7 +2735,7 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
         return;
     auto act = findOrigCtxt<IR::P4Action>();
     BUG_CHECK(act != nullptr, "%1%: %2% extern can only be used in an action", mcs, externFuncName);
-    auto tbl = ::get(structure->learner_action_table, act->externalName());
+    auto tbl = ::p4c::get(structure->learner_action_table, act->externalName());
     if (externFuncName == "restart_expire_timer" || externFuncName == "set_entry_expire_time") {
         bool use_idle_timeout_with_auto_delete = false;
         if (tbl) {
@@ -2747,7 +2747,7 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
                     auto expr =
                         idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()->expression;
                     if (!expr->is<IR::BoolLiteral>()) {
-                        ::error(
+                        ::p4c::error(
                             ErrorType::ERR_UNEXPECTED,
                             "%1%: expected boolean for 'idle_timeout_with_auto_delete' property",
                             idle_timeout_with_auto_delete);
@@ -2772,7 +2772,7 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
                 if (add_on_miss->value->is<IR::ExpressionValue>()) {
                     auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
                     if (!expr->is<IR::BoolLiteral>()) {
-                        ::error(ErrorType::ERR_UNEXPECTED,
+                        ::p4c::error(ErrorType::ERR_UNEXPECTED,
                                 "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
                         return;
                     } else {
@@ -2781,12 +2781,12 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
                             isValidExternCall = true;
                             cstring st = getDefActionName(tbl);
                             if (st != act->name.name) {  // checks caller
-                                ::error(ErrorType::ERR_UNEXPECTED,
+                                ::p4c::error(ErrorType::ERR_UNEXPECTED,
                                         "%1% is not called from a default action: %2% ", mcs,
                                         act->name.name);
                                 return;
                             } else if (st == an) {  // checks arg0
-                                ::error(ErrorType::ERR_UNEXPECTED,
+                                ::p4c::error(ErrorType::ERR_UNEXPECTED,
                                         "%1% action cannot be default action: %2%:", mcs, an);
                                 return;
                             }
@@ -2794,7 +2794,7 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
                                 if (action->getName().originalName == an) found = true;
                             }
                             if (!found) {
-                                ::error(
+                                ::p4c::error(
                                     ErrorType::ERR_UNEXPECTED,
                                     "%1% first arg action name %2% is not any action in table %3%",
                                     mcs, an, tbl->name.name);
@@ -2807,7 +2807,7 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
         }
     }
     if (!isValidExternCall) {
-        ::error(ErrorType::ERR_UNEXPECTED,
+        ::p4c::error(ErrorType::ERR_UNEXPECTED,
                 "%1% must only be called from within an action with '%2% %3%'"
                 " property equal to true",
                 mcs, propName, act->name.name);
@@ -2969,7 +2969,7 @@ const IR::Node *MoveNonHeaderFieldsToPseudoHeader::postorder(IR::AssignmentState
         if (auto base = assn->right->to<IR::Cast>()) expr = base->expr;
         if (auto cst = assn->right->to<IR::Constant>()) {
             if (!cst->fitsUint64()) {
-                ::error(ErrorType::ERR_OVERLIMIT,
+                ::p4c::error(ErrorType::ERR_OVERLIMIT,
                         "DPDK target supports up-to 64-bit immediate values, %1% exceeds the limit",
                         cst);
                 return assn;
@@ -3232,7 +3232,7 @@ const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Program *program) {
     if (!is_ipsec_used) return program;
     cstring resName = cstring::empty;
     if (!reservedNames(refMap, registerInstanceNames, resName)) {
-        ::error(ErrorType::ERR_RESERVED, "%1% name is reserved for DPDK IPSec port register",
+        ::p4c::error(ErrorType::ERR_RESERVED, "%1% name is reserved for DPDK IPSec port register",
                 resName);
         return program;
     }
@@ -3246,7 +3246,7 @@ const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Program *program) {
     newHeaderFields.push_back(
         new IR::StructField(newHeaderFieldName, IR::Type_Bits::get(sa_id_width)));
     if (!reservedNames(refMap, {newHeaderName}, resName)) {
-        ::error(ErrorType::ERR_RESERVED, "%1% type name is reserved for DPDK platform header",
+        ::p4c::error(ErrorType::ERR_RESERVED, "%1% type name is reserved for DPDK platform header",
                 newHeaderName);
         return program;
     }
