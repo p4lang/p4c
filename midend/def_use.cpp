@@ -18,6 +18,8 @@ limitations under the License.
 
 #include "frontends/p4/methodInstance.h"
 
+namespace p4c {
+
 struct LogAbbrev {
     const Util::SourceInfo &si;
     explicit LogAbbrev(const Util::SourceInfo &si) : si(si) {}
@@ -31,6 +33,8 @@ struct LogAbbrev {
         return out;
     }
 };
+
+}  // namespace p4c
 
 namespace p4c::P4 {
 

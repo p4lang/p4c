@@ -19,6 +19,8 @@ limitations under the License.
 
 #include "ir/ir.h"
 
+namespace p4c {
+
 /* Should this be a method on IR::Expression? */
 
 /// Functor to check if an expression uses an lvalue.  The lvalue is specified as a
@@ -80,5 +82,7 @@ class exprUses : public Inspector {
     }
     explicit operator bool() const { return result; }
 };
+
+}  // namespace p4c
 
 #endif /* MIDEND_EXPR_USES_H_ */
