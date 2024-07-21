@@ -20,6 +20,8 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "ir/ir.h"
 
+namespace p4c {
+
 class InlineControlFlow : public Transform {
  public:
     explicit InlineControlFlow(const IR::V1Program *gl) : global(gl) {
@@ -51,5 +53,7 @@ class InlineControlFlow : public Transform {
         return p;
     }
 };
+
+}  // namespace p4c
 
 #endif /* FRONTENDS_P4_14_INLINE_CONTROL_FLOW_H_ */

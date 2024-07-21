@@ -20,6 +20,8 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 
+namespace p4c {
+
 /* This is the P4 v1.0/v1.1 typechecker/type inference algorithm */
 class TypeCheck : public PassManager {
     std::map<const IR::Node *, const IR::Type *> actionArgUseTypes;
@@ -36,5 +38,7 @@ class TypeCheck : public PassManager {
     TypeCheck();
     const IR::Node *apply_visitor(const IR::Node *, const char *) override;
 };
+
+}  // namespace p4c
 
 #endif /* FRONTENDS_P4_14_TYPECHECK_H_ */

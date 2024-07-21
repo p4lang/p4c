@@ -38,11 +38,12 @@ limitations under the License.
 %code requires {
 #include "ir/ir.h"
 
+namespace p4c {
 namespace V1 {
 class V1Lexer;
 class V1ParserDriver;
 
-using namespace p4c::P4::literals;
+using namespace ::p4c::P4::literals;
 
 struct BBoxType {
     IR::Vector<IR::Method>* methods;
@@ -1138,3 +1139,5 @@ static const IR::Expression *removeRedundantValid(const IR::Expression *e) {
             return prim->operands.at(0); }
     return e;
 }
+
+}  // namespace p4c

@@ -43,8 +43,6 @@ struct AutoStdioInputStream {
     std::istream stream;
 };
 
-}  // anonymous namespace
-
 #else
 
 /// A RAII helper class that provides an istream wrapper for a stdio FILE*. This
@@ -62,6 +60,8 @@ struct AutoStdioInputStream {
 };
 
 #endif
+
+}  // anonymous namespace
 
 namespace p4c::P4 {
 
@@ -280,7 +280,7 @@ void P4ParserDriver::onReadErrorDeclaration(IR::Type_Error *error) {
 
 }  // namespace p4c::P4
 
-namespace V1 {
+namespace p4c::V1 {
 
 V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
 
@@ -343,4 +343,4 @@ const IR::Annotations *V1ParserDriver::takePragmasAsAnnotations() {
     return rv;
 }
 
-}  // namespace V1
+}  // namespace p4c::V1

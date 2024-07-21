@@ -18,6 +18,8 @@ limitations under the License.
 
 #include "frontends/p4/frontend.h"
 
+namespace p4c {
+
 CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOptions(defaultMessage) {
     registerOption(
         "--excludeFrontendPasses", "pass1[,pass2]",
@@ -189,3 +191,5 @@ bool CompilerOptions::validateOptions() const {
     }
     return ParserOptions::validateOptions();
 }
+
+}  // namespace p4c

@@ -27,6 +27,8 @@ namespace p4c::Util {
 class SourceInfo;
 }  // namespace p4c::Util
 
+namespace p4c {
+
 /**
  * An unparsed numeric constant. We produce these as token values during
  * lexing. The parser is responsible for actually interpreting the raw text as a
@@ -85,5 +87,7 @@ IR::Constant *parseConstant(const Util::SourceInfo &srcInfo, const UnparsedConst
  * Reports an error if it does not.
  */
 int parseConstantChecked(const Util::SourceInfo &srcInfo, const UnparsedConstant &constant);
+
+}  // namespace p4c
 
 #endif /* FRONTENDS_COMMON_CONSTANTPARSING_H_ */

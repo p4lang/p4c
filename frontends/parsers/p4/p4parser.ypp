@@ -56,7 +56,8 @@ limitations under the License.
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 
-namespace p4c::P4 {
+namespace p4c {
+namespace P4 {
 class AbstractP4Lexer;
 class P4ParserDriver;
 
@@ -73,7 +74,7 @@ struct OptionalConst {
     explicit OptionalConst(bool isConst) : isConst(isConst) { }
     bool isConst = false;
 };
-}  // namespace p4c::P4
+}  // namespace P4
 
 inline std::ostream& operator<<(std::ostream& out, const P4::OptionalConst& oc) {
     out << "OptionalConst(" << oc.isConst << ')';
@@ -93,7 +94,7 @@ typedef const IR::Type ConstType;
 
 #define YY_NULLPTR nullptr
 
-namespace p4c::P4 {
+namespace P4 {
 using namespace literals;
 
 class Token {
@@ -114,7 +115,7 @@ class Token {
             : type(type), text(text), unparsedConstant(unparsedConstant) { }
 };
 
-} // namespace p4c::P4
+} // namespace P4
 
 inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
     out << t.text;
@@ -1705,3 +1706,5 @@ void P4::P4Parser::error(const Util::SourceInfo& location,
                          const std::string& message) {
     driver.onParseError(location, message);
 }
+
+}  // namespace p4c

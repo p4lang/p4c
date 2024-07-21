@@ -32,6 +32,8 @@ enum class StandardExceptions {
 };
 }  // namespace p4c::P4
 
+namespace p4c {
+
 inline std::ostream &operator<<(std::ostream &out, P4::StandardExceptions e) {
     switch (e) {
         case P4::StandardExceptions::NoError:
@@ -57,6 +59,8 @@ inline std::ostream &operator<<(std::ostream &out, P4::StandardExceptions e) {
     }
     return out;
 }
+
+}  // namespace p4c
 
 namespace p4c::P4 {
 

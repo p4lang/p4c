@@ -21,6 +21,8 @@ limitations under the License.
 #include "lib/big_int_util.h"
 #include "lib/source_file.h"
 
+namespace p4c {
+
 std::ostream &operator<<(std::ostream &out, const UnparsedConstant &constant) {
     out << "UnparsedConstant(" << constant.text << ',' << constant.skip << ',' << constant.base
         << ',' << constant.hasWidth << ')';
@@ -74,3 +76,5 @@ int parseConstantChecked(const Util::SourceInfo &srcInfo, const UnparsedConstant
     }
     return cst->asInt();
 }
+
+}  // namespace p4c

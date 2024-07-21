@@ -36,6 +36,8 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
+namespace p4c {
+
 /* CONFIG_PKGDATADIR is defined by cmake at compile time to be the same as
  * CMAKE_INSTALL_PREFIX This is only valid when the compiler is built and
  * installed from source locally. If the compiled binary is moved to another
@@ -541,3 +543,5 @@ bool P4CContext::isRecognizedDiagnostic(cstring diagnostic) {
     return recognizedDiagnostics.count(diagnostic);
 }
 const P4CConfiguration &P4CContext::getConfigImpl() { return DefaultP4CConfiguration::get(); }
+
+}  // namespace p4c

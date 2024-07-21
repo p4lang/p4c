@@ -20,6 +20,8 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
+namespace p4c {
+
 class CheckHeaderTypes : public Modifier {
     const IR::V1Program *global = nullptr;
 
@@ -50,5 +52,7 @@ class HeaderTypeMaxLengthCalculator : public Modifier {
  public:
     bool preorder(IR::Type_StructLike *hdr_type) override;
 };
+
+}  // namespace p4c
 
 #endif /* FRONTENDS_P4_14_HEADER_TYPE_H_ */

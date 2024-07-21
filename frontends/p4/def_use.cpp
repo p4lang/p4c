@@ -1134,6 +1134,8 @@ bool ComputeWriteSet::preorder(const IR::MethodCallStatement *statement) {
 
 }  // namespace p4c::P4
 
+namespace p4c {
+
 // functions for calling from gdb
 void dump(const P4::StorageLocation *s) { std::cout << *s << Log::endl; }
 void dump(const P4::StorageMap *s) { std::cout << *s << Log::endl; }
@@ -1144,3 +1146,5 @@ void dump(const P4::ProgramPoints *p) { std::cout << *p << Log::endl; }
 void dump(const P4::ProgramPoints &p) { std::cout << p << Log::endl; }
 void dump(const P4::Definitions *d) { std::cout << *d << Log::endl; }
 void dump(const P4::AllDefinitions *d) { std::cout << *d << Log::endl; }
+
+}  // namespace p4c

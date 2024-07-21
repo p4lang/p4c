@@ -29,6 +29,8 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/options.h"
 
+namespace p4c {
+
 /// Standard include paths for .p4 header files. The values are determined by
 /// `configure`.
 extern const char *p4includePath;
@@ -192,4 +194,7 @@ class P4CContextWithOptions final : public P4CContext {
     /// Compiler options for this compilation context.
     OptionsType optionsInstance;
 };
+
+}  // namespace p4c
+
 #endif /* FRONTENDS_COMMON_PARSER_OPTIONS_H_*/

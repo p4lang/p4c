@@ -19,7 +19,9 @@ limitations under the License.
 #include "ir/dump.h"
 #include "lib/log.h"
 
-using namespace p4c::P4::literals;
+namespace p4c {
+
+using namespace ::p4c::P4::literals;
 
 /// P4-14 (v1.0 and v1.1) type checking algorithm
 /// Initial type setting based on immediate context:
@@ -610,3 +612,5 @@ const IR::Node *TypeCheck::apply_visitor(const IR::Node *n, const char *name) {
     LOG5("After Typecheck:\n" << dumpToString(rv));
     return rv;
 }
+
+}  // namespace p4c
