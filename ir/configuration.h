@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef IR_CONFIGURATION_H_
 #define IR_CONFIGURATION_H_
 
+namespace p4c {
+
 /// A P4CConfiguration is a set of parameters to the compiler that cannot be changed via user
 /// options. Implementations should be singleton classes.
 class P4CConfiguration {
@@ -42,5 +44,7 @@ class DefaultP4CConfiguration : public P4CConfiguration {
  protected:
     DefaultP4CConfiguration() {}
 };
+
+}  // namespace p4c
 
 #endif /* IR_CONFIGURATION_H_ */

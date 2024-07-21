@@ -21,6 +21,8 @@ limitations under the License.
 #include <list>
 #include <utility>
 
+namespace p4c {
+
 int JsonObject::get_id() const {
     auto it = find("Node_ID");
     if (it == end()) return -1;
@@ -222,3 +224,5 @@ std::istream &operator>>(std::istream &in, JsonData *&json) {
     }
     return in;
 }
+
+}  // namespace p4c

@@ -10,6 +10,8 @@
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
 
+namespace p4c {
+
 class JsonData : public ICastable {
  public:
     JsonData() {}
@@ -95,5 +97,7 @@ std::string getIndent(int l);
 
 std::ostream &operator<<(std::ostream &out, JsonData *json);
 std::istream &operator>>(std::istream &in, JsonData *&json);
+
+}  // namespace p4c
 
 #endif /* IR_JSON_PARSER_H_ */

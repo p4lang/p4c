@@ -24,6 +24,8 @@ limitations under the License.
 #include "lib/indent.h"
 #include "lib/log.h"
 
+namespace p4c {
+
 #define ALL_UNARY_OPS(M, ...)  \
     M(UPlus, +, ##__VA_ARGS__) \
     M(Neg, -, ##__VA_ARGS__) M(Cmpl, ~, ##__VA_ARGS__) M(LNot, !, ##__VA_ARGS__)
@@ -304,3 +306,5 @@ void IR::SelectExpression::dbprint(std::ostream &out) const {
     for (auto c : selectCases) out << Log::endl << c;
     out << " }" << unindent << setprec(prec);
 }
+
+}  // namespace p4c

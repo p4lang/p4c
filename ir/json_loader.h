@@ -33,6 +33,8 @@ limitations under the License.
 #include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
 
+namespace p4c {
+
 class JSONLoader {
     template <typename T>
     class has_fromJSON {
@@ -384,5 +386,7 @@ template <class T, template <class K, class V, class COMP, class ALLOC> class MA
 IR::NameMap<T, MAP, COMP, ALLOC> *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(JSONLoader &json) {
     return new IR::NameMap<T, MAP, COMP, ALLOC>(json);
 }
+
+}  // namespace p4c
 
 #endif /* IR_JSON_LOADER_H_ */

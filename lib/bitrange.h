@@ -65,7 +65,7 @@ class bitranges {
 class JSONGenerator;
 class JSONLoader;
 
-namespace BitRange {
+namespace p4c::BitRange {
 
 namespace Detail {
 /**
@@ -212,7 +212,7 @@ struct MinToMax {};
 void rangeToJSON(JSONGenerator &json, int lo, int hi);
 std::pair<int, int> rangeFromJSON(JSONLoader &json);
 
-}  // namespace BitRange
+}  // namespace p4c::BitRange
 
 /// Units in which a range can be specified.
 enum class RangeUnit : uint8_t {

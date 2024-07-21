@@ -39,6 +39,8 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/map.h"
 
+namespace p4c {
+
 enum class VisitStatus : unsigned { New, Revisit, Busy, Done };
 
 /** @class Visitor::ChangeTracker
@@ -833,7 +835,7 @@ std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_
     if (info.vclone) out << Visitor::demangle(typeid(*info.vclone).name()) << " ";
     out << "count=" << info.count << "  done=" << info.done;
 #if DEBUG_FLOW_JOIN
-    using namespace DBPrint;
+    using namespace p4c::DBPrint;
     auto flags = dbgetflags(out);
     out << Brief;
     for (auto &i : info.parents) {
@@ -847,7 +849,7 @@ std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_
 }
 
 std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_points_t &fjp) {
-    using namespace DBPrint;
+    using namespace p4c::DBPrint;
     auto flags = dbgetflags(out);
     out << Brief;
     bool first = true;
@@ -870,3 +872,5 @@ void dump(const SplitFlowVisit_base *split) {
         split = split->prev;
     }
 }
+
+}  // namespace p4c

@@ -31,6 +31,8 @@ limitations under the License.
 #include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
 
+namespace p4c {
+
 class JSONGenerator {
     std::unordered_set<int> node_refs;
     std::ostream &out;
@@ -285,5 +287,7 @@ class JSONGenerator {
         return *this;
     }
 };
+
+}  // namespace p4c
 
 #endif /* IR_JSON_GENERATOR_H_ */

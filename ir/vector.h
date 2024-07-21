@@ -216,7 +216,7 @@ class Vector : public VectorBase {
 // called on a type in the global namespace, even if the number of arguments
 // doesn't match up, which can trigger template instantiations that cause
 // errors.
-namespace GetImpl {
+namespace p4c::GetImpl {
 
 template <class T, class U>
 const T *get(const IR::Vector<T> &vec, U name) {
@@ -233,6 +233,6 @@ const T *get(const IR::Vector<T> *vec, U name) {
 }
 
 }  // namespace GetImpl
-using namespace GetImpl;  // NOLINT(build/namespaces)
+using namespace p4c::GetImpl;  // NOLINT(build/namespaces)
 
 #endif /* IR_VECTOR_H_ */

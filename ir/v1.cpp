@@ -29,6 +29,8 @@ limitations under the License.
 #include "lib/error_catalog.h"
 #include "lib/source_file.h"
 
+namespace p4c {
+
 #define SINGLETON_TYPE(NAME)                                               \
     const IR::Type_##NAME *IR::Type_##NAME::get() {                        \
         static const Type_##NAME *singleton;                               \
@@ -211,3 +213,5 @@ IR::V1Program::V1Program() {
     scope.add("standard_metadata_t"_cs, new IR::v1HeaderType(standard_metadata_t));
     scope.add("standard_metadata"_cs, new IR::Metadata("standard_metadata", standard_metadata_t));
 }
+
+}  // namespace p4c

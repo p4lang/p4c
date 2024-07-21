@@ -29,6 +29,8 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/safe_vector.h"
 
+namespace p4c {
+
 /// A hook called by pass manager after a pass finishes.
 /// @param node a result of the last pass, which can be the (transformed) node, or a nullptr.
 typedef std::function<void(const char *manager, unsigned seqNo, const char *pass,
@@ -217,5 +219,7 @@ class DynamicVisitor : virtual public Visitor {
     void setVisitor(Visitor *v) { visitor = v; }
     DynamicVisitor *clone() const override { return new DynamicVisitor(*this); }
 };
+
+}  // namespace p4c
 
 #endif /* IR_PASS_MANAGER_H_ */

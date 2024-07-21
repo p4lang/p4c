@@ -19,6 +19,8 @@ limitations under the License.
 #include "ir/node.h"
 #include "ir/visitor.h"
 
+namespace p4c {
+
 /* Determine from the Visitor context whether the currently being visited IR node
  * denotes something that might be written to by the code.  This is always conservative
  * (we don't know for certain that it is written) since even if it is, it might be
@@ -98,3 +100,5 @@ bool P4WriteContext::isRead(bool root_value) {
     if (ctxt->node->is<IR::IfStatement>()) return ctxt->child_index == 0;
     return true;
 }
+
+}  // namespace p4c

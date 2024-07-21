@@ -26,6 +26,8 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/log.h"
 
+namespace p4c {
+
 const IR::Expression *IR::Slice::make(const IR::Expression *e, unsigned lo, unsigned hi) {
     if (auto k = e->to<IR::Constant>()) {
         auto rv = ((*k >> lo) & IR::Constant((1U << (hi - lo + 1)) - 1)).clone();
@@ -185,3 +187,5 @@ const IR::StringLiteral *IR::StringLiteral::get(cstring value, const IR::Type *t
     }
     return result;
 }
+
+}  // namespace p4c

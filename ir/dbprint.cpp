@@ -32,7 +32,9 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/ordered_map.h"
 
-using namespace DBPrint;
+namespace p4c {
+
+using namespace p4c::DBPrint;
 using namespace IndentCtl;
 
 static int dbprint_index = -1;
@@ -113,3 +115,5 @@ void dbprint(const std::set<const IR::Expression *> s) {
     for (auto el : s) std::cout << Log::endl << '[' << i++ << "] " << el;
     std::cout << " }" << unindent << Log::endl;
 }
+
+}  // namespace p4c

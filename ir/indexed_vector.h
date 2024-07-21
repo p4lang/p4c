@@ -26,7 +26,11 @@ limitations under the License.
 #include "lib/safe_vector.h"
 #include "lib/string_map.h"
 
+namespace p4c {
+
 class JSONLoader;
+
+}  // namespace p4c
 
 namespace p4c::IR {
 

@@ -32,6 +32,8 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/n4.h"
 
+namespace p4c {
+
 void PassManager::removePasses(const std::vector<cstring> &exclude) {
     for (auto it : exclude) {
         bool excluded = false;
@@ -175,3 +177,5 @@ const IR::Node *PassIf::apply_visitor(const IR::Node *program, const char *name)
     }
     return program;
 }
+
+}  // namespace p4c

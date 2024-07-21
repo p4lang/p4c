@@ -41,6 +41,8 @@ limitations under the License.
 #include "lib/null.h"
 #include "lib/source_file.h"
 
+namespace p4c {
+
 // declare this outside of Visitor so it can be forward declared in node.h
 struct Visitor_Context {
     // We maintain a linked list of Context structures on the stack
@@ -832,5 +834,7 @@ const IR::Node *transformAllMatching(const IR::Node *root, Func &&function) {
     };
     return root->apply(NodeVisitor(std::forward<Func>(function)));
 }
+
+}  // namespace p4c
 
 #endif /* IR_VISITOR_H_ */

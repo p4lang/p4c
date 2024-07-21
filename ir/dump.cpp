@@ -25,7 +25,9 @@ limitations under the License.
 #include "lib/indent.h"
 #include "lib/source_file.h"
 
-using namespace p4c::P4::literals;
+namespace p4c {
+
+using namespace ::p4c::P4::literals;
 
 namespace {
 class IRDumper : public Inspector {
@@ -134,3 +136,5 @@ std::string dumpToString(const IR::Node *n) {
     dump(str, n);
     return str.str();
 }
+
+}  // namespace p4c
