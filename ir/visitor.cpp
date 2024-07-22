@@ -16,10 +16,13 @@ limitations under the License.
 
 #include "visitor.h"
 
-#include <map>
-#include <ostream>
 #include <stdlib.h>
 #include <time.h>
+
+#include <map>
+#include <memory>
+#include <ostream>
+#include <type_traits>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/time/clock.h"
