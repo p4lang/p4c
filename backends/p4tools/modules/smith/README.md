@@ -24,22 +24,22 @@ P4Smith is available as part of the [official P4C docker image](https://hub.dock
 P4Smith extensions are instantiations of a particular combination of P4 architecture and the target that executes the P4 code. For example, the `v1model.p4` architecture can be executed on the behavioral model. P4Smith extension make use of the core P4Smith framework to generate programs. Several open-source extensions are available.
 
 ### core.p4 using the test compiler p4test
-[targets/generic](targets/generic)
+[targets/generic](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/smith/targets/generic)
 
 This random program generator generates random packages and tries to produce all valid P4 code according to the latest P4 specification. Programs should be compiled using [p4test](https://github.com/p4lang/p4c/tree/main/backends/p4est).
 
 ### v1model.p4 and psa.p4 on BMv2
-[targets/bmv2](targets/bmv2)
+[targets/bmv2](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/smith/targets/bmv2)
 
 P4Smith supports generating P4 programs for the `v1model` and `psa` architecture on [BMv2](https://github.com/p4lang/behavioral-model).
 
 ### pna.p4 on the DPDK SoftNIC
-[targets/fpga](targets/nic)
+[targets/fpga](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/smith/targets/nic)
 
 The [DPDK-SoftNIC](https://github.com/p4lang/p4-dpdk-target) is a new target implemented using the [Data Plane Development Kit (DPDK)](https://www.dpdk.org/). The SoftNIC can be programmed using the P4 `pna.p4` architecture.
 
 ### tna.p4 on Tofino 1
-[targets/tna](targets/tofino)
+[targets/tna](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/smith/targets/tofino)
 
 P4Smith can also generate programs for the `tna` architecture on Tofino 1. The programs are intended to be compiled on the proprietary Barefoot Tofino compiler.
 
