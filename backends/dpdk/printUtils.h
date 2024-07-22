@@ -22,7 +22,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace p4c::DPDK {
+namespace P4C::DPDK {
 /// This function translates nodes of different subclass of Expression, Type
 /// and PropertyValue in desired format. For example, for PathExpression, it returns
 /// PathExpression->path->name For Member, it returns toStr(Member->expr).Member->member etc.
@@ -48,6 +48,6 @@ class ConvertToString : public Inspector {
     bool preorder(const IR::Type_Bits *type);
     bool preorder(const IR::ExpressionValue *property);
 };
-}  // namespace p4c::DPDK
+}  // namespace P4C::DPDK
 
 #endif /* BACKENDS_DPDK_PRINTUTILS_H_ */

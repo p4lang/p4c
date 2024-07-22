@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /**
  * Policy used to decide whether a key expression is simple enough
@@ -192,6 +192,6 @@ class SimplifyKey : public PassManager {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_SIMPLIFYKEY_H_ */

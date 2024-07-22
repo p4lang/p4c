@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /// This transform converts identical PathExpression or Member nodes in a DAG
 /// into distinct nodes.
@@ -48,6 +48,6 @@ class CloneExpressions : public Transform {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_CLONER_H_ */

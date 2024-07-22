@@ -3,7 +3,7 @@
 
 #include <set>
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 enum class PathSelectionPolicy {
     DepthFirst,
@@ -16,6 +16,6 @@ inline bool requiresLookahead(PathSelectionPolicy &pathSelectionPolicy) {
     return LOOKAHEAD_STRATEGYIES.find(pathSelectionPolicy) != LOOKAHEAD_STRATEGYIES.end();
 }
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_PATH_SELECTION_H_ */

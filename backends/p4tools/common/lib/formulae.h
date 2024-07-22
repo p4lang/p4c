@@ -8,7 +8,7 @@
 #include "ir/node.h"
 #include "lib/exceptions.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 /// Provides common functionality for implementing a thin wrapper around a 'const Node*' to enforce
 /// invariants on which forms of IR nodes can inhabit implementations of this type. Implementations
@@ -32,6 +32,6 @@ class AbstractRepCheckedNode : public ICastable {
     DECLARE_TYPEINFO(AbstractRepCheckedNode);
 };
 
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_FORMULAE_H_ */

@@ -20,7 +20,7 @@ limitations under the License.
 
 // Set up names.
 %defines
-%define api.namespace {p4c::V1}
+%define api.namespace {P4C::V1}
 // TODO: Update, once we drop Ubuntu 18.04 support.
 %define api.parser.class {V1Parser}
 // %define parser_class_name {V1Parser}
@@ -39,12 +39,12 @@ limitations under the License.
 %code requires {
 #include "ir/ir.h"
 
-namespace p4c {
+namespace P4C {
 namespace V1 {
 class V1Lexer;
 class V1ParserDriver;
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 struct BBoxType {
     IR::Vector<IR::Method>* methods;
@@ -97,7 +97,7 @@ inline std::ostream& operator<<(std::ostream& out, const CaseValue& caseValue) {
 // forbidden in C++. We avoid the problem using a typedef.
 typedef const IR::Type ConstType;
 
-}  // namespace p4c
+}  // namespace P4C
 
 #ifndef YYDEBUG
 #define YYDEBUG 1
@@ -111,12 +111,12 @@ typedef const IR::Type ConstType;
 #include "lib/source_file.h"
 }
 
-%param { p4c::V1::V1ParserDriver& driver }
-%parse-param { p4c::V1::V1Lexer& lexer }
+%param { P4C::V1::V1ParserDriver& driver }
+%parse-param { P4C::V1::V1Lexer& lexer }
 
 // Use location tracking with our custom location type.
 %locations
-%define api.location.type {p4c::Util::SourceInfo}
+%define api.location.type {P4C::Util::SourceInfo}
 
 %{ /* -*-C++-*- */
 #include <iostream>  // NOLINT(build/include_order)
@@ -126,7 +126,7 @@ typedef const IR::Type ConstType;
 #include "frontends/parsers/v1/v1parser.hpp"
 #include "ir/ir.h"
 
-using namespace ::p4c;
+using namespace ::P4C;
 
 #define YYLLOC_DEFAULT(Cur, Rhs, N)                                             \
     ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                          \
@@ -135,11 +135,11 @@ using namespace ::p4c;
 #undef yylex
 #define yylex lexer.yylex
 
-namespace p4c {
+namespace P4C {
 
 static const IR::Expression *removeRedundantValid(const IR::Expression *e);
 
-}  // namespace p4c
+}  // namespace P4C
 
 %}
 
@@ -442,21 +442,21 @@ field_list_calculation_body: /* epsilon */
       { $$ = new IR::FieldListCalculation(driver.takePragmasAsAnnotations()); }
     | field_list_calculation_body INPUT "{" field_list_list "}"
       { if ($1->input)
-           ::p4c::error(ErrorType::ERR_INVALID, "%s: multiple 'input' in field_list_calculation", @2);
+           ::P4C::error(ErrorType::ERR_INVALID, "%s: multiple 'input' in field_list_calculation", @2);
         ($$=$1)->input = $4; }
     | field_list_calculation_body ALGORITHM ":" name ";"
       { if ($1->algorithm)
-            ::p4c::error(ErrorType::ERR_INVALID,
+            ::P4C::error(ErrorType::ERR_INVALID,
                     "%s: multiple 'algorithm' in field_list_calculation", @2);
         ($$=$1)->algorithm = new IR::NameList(@4, IR::ID(@4, $4)); }
     | field_list_calculation_body ALGORITHM "{" action_list "}"
       { if ($1->algorithm)
-            ::p4c::error(ErrorType::ERR_INVALID,
+            ::P4C::error(ErrorType::ERR_INVALID,
                     "%s: multiple 'algorithm' in field_list_calculation", @2);
         ($$=$1)->algorithm = $4; }
     | field_list_calculation_body OUTPUT_WIDTH ":" const_expression ";"
       { if ($1->output_width)
-            ::p4c::error(ErrorType::ERR_INVALID,
+            ::P4C::error(ErrorType::ERR_INVALID,
                     "%s: multiple 'output_width' in field_list_calculation", @2);
         ($$=$1)->output_width = $4 ? $4->asInt() : 0; }
     | field_list_calculation_body error ";" { $$ = $1; }
@@ -557,7 +557,7 @@ case_value:
 parser_exception_declaration:
       PARSER_EXCEPTION name "{" parser_statement_list "}" {
           driver.clearPragmas();
-          ::p4c::warning(ErrorType::WARN_UNSUPPORTED,
+          ::P4C::warning(ErrorType::WARN_UNSUPPORTED,
                     "%1%: parser exception is not translated to P4-16", $1);
       }
     | PARSER_EXCEPTION name "{" parser_statement_list error END
@@ -577,12 +577,12 @@ counter_spec_list:
       { ($$ = new IR::Counter(driver.takePragmasAsAnnotations()))->settype($3); }
     | counter_spec_list DIRECT ":" name ";"
       { if (($$=$1)->table)
-            ::p4c::error(ErrorType::ERR_INVALID, "%s: Can't attach counter to two tables", @2+@4);
+            ::P4C::error(ErrorType::ERR_INVALID, "%s: Can't attach counter to two tables", @2+@4);
         $$->table = IR::ID(@4, $4);
         $$->direct = true; }
     | counter_spec_list STATIC ":" name ";"
       { if (($$=$1)->table)
-            ::p4c::error(ErrorType::ERR_INVALID, "%s: Can't attach counter to two tables", @2+@4);
+            ::P4C::error(ErrorType::ERR_INVALID, "%s: Can't attach counter to two tables", @2+@4);
         $$->table = IR::ID(@4, $4);
         $$->direct = false; }
     | counter_spec_list INSTANCE_COUNT ":" const_expression ";"
@@ -616,12 +616,12 @@ meter_spec_list:
       { ($$=$1)->pre_color = $4; }
     | meter_spec_list DIRECT ":" name ";"
       { if (($$=$1)->table)
-            ::p4c::error(ErrorType::ERR_INVALID, "%s: Can't attach meter to two tables", @2+@4);
+            ::P4C::error(ErrorType::ERR_INVALID, "%s: Can't attach meter to two tables", @2+@4);
         $$->table = IR::ID(@4, $4);
         $$->direct = true; }
     | meter_spec_list STATIC ":" name ";"
       { if (($$=$1)->table)
-            ::p4c::error(ErrorType::ERR_INVALID, "%s: Can't attach meter to two tables", @2+@4);
+            ::P4C::error(ErrorType::ERR_INVALID, "%s: Can't attach meter to two tables", @2+@4);
         $$->table = IR::ID(@4, $4);
         $$->direct = false; }
     | meter_spec_list INSTANCE_COUNT ":" const_expression ";"
@@ -653,12 +653,12 @@ register_spec_list:
         $$->layout = IR::ID(@3, $3); }
     | register_spec_list DIRECT ":" name ";"
       { if (($$=$1)->table)
-            ::p4c::error(ErrorType::ERR_INVALID, "%s: Can't attach register to two tables", @2+@4);
+            ::P4C::error(ErrorType::ERR_INVALID, "%s: Can't attach register to two tables", @2+@4);
         $$->table = IR::ID(@4, $4);
         $$->direct = true; }
     | register_spec_list STATIC ":" name ";"
       { if (($$=$1)->table)
-            ::p4c::error(ErrorType::ERR_INVALID, "%s: Can't attach register to two tables", @2+@4);
+            ::P4C::error(ErrorType::ERR_INVALID, "%s: Can't attach register to two tables", @2+@4);
         $$->table = IR::ID(@4, $4);
         $$->direct = false; }
     | register_spec_list INSTANCE_COUNT ":" const_expression ";"
@@ -1053,7 +1053,7 @@ field_ref: header_ref "." name
 
 const_expression: expression
         { if (!($$ = driver.constantFold(&*$1)))
-                ::p4c::error(ErrorType::ERR_INVALID, "%s: Non constant expression", @1); }
+                ::P4C::error(ErrorType::ERR_INVALID, "%s: Non constant expression", @1); }
 ;
 
 expression_list:
@@ -1139,7 +1139,7 @@ name: IDENTIFIER { $$ = IR::ID(@1, $1); }
 
 %%
 
-namespace p4c {
+namespace P4C {
 
 void V1::V1Parser::error(const Util::SourceInfo& location,
                          const std::string& message) {
@@ -1153,4 +1153,4 @@ static const IR::Expression *removeRedundantValid(const IR::Expression *e) {
     return e;
 }
 
-}  // namespace p4c
+}  // namespace P4C

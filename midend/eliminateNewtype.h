@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /**
  * Replaces newtype by the type it was defined to represent.
@@ -52,6 +52,6 @@ class EliminateNewtype final : public PassManager {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_ELIMINATENEWTYPE_H_ */

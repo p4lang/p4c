@@ -22,9 +22,9 @@
 #include "lib/exceptions.h"
 #include "test/gtest/env.h"
 
-namespace p4c::Test {
+namespace P4C::Test {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 class P4ReachabilityOptions : public CompilerOptions {
  public:
@@ -453,4 +453,4 @@ TEST_F(P4CReachability, testReachabilityEngineNegTable2) {
     ASSERT_TRUE(!checkResultingSTF(ids, "tmp"));
 }
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test

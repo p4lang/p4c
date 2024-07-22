@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/pass_manager.h"
 #include "ir/visitor.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 class RenameMap {
     /// Internal declaration name
@@ -194,6 +194,6 @@ class UniqueParameters : public PassManager {
     explicit UniqueParameters(TypeMap *typeMap);
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_UNIQUENAMES_H_ */

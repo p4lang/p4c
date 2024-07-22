@@ -18,7 +18,7 @@ limitations under the License.
 #include "lib/algorithm.h"
 #include "lib/enumerator.h"
 
-namespace p4c {
+namespace P4C {
 
 enum flags {
     // flags that control the creation of auto-created methods
@@ -391,4 +391,4 @@ void IrClass::generateMethods() {
     }
 }
 
-}  // namespace p4c
+}  // namespace P4C

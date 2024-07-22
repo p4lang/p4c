@@ -1,6 +1,6 @@
 #include "directCalls.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Node *InstantiateDirectCalls::postorder(IR::P4Parser *parser) {
     parser->parserLocals.append(insert);
@@ -45,4 +45,4 @@ const IR::Node *InstantiateDirectCalls::postorder(IR::MethodCallExpression *expr
     return expression;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

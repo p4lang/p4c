@@ -25,7 +25,7 @@ limitations under the License.
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "ir/dump.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 Visitor::profile_t ToP4::init_apply(const IR::Node *node) {
     LOG4("Program dump:" << std::endl << dumpToString(node));
@@ -1667,4 +1667,4 @@ void dumpP4(const IR::INode *node) {
     std::cout << s;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

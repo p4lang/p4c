@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/coreLibrary.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Node *DoEliminateSwitch::postorder(IR::P4Program *program) {
     if (!exactNeeded) return program;
@@ -28,7 +28,7 @@ const IR::Node *DoEliminateSwitch::postorder(IR::P4Program *program) {
                 return program;
         }
     }
-    ::p4c::error(ErrorType::ERR_NOT_FOUND,
+    ::P4C::error(ErrorType::ERR_NOT_FOUND,
                  "Could not find declaration for 'match_kind.exact', which is needed to implement "
                  "switch statements; did you include core.p4?");
     return program;
@@ -42,7 +42,7 @@ const IR::Node *DoEliminateSwitch::postorder(IR::P4Control *control) {
 
 const IR::Node *DoEliminateSwitch::postorder(IR::SwitchStatement *statement) {
     if (findContext<IR::P4Action>()) {
-        ::p4c::error("%1%: switch statements not supported in actions on this target", statement);
+        ::P4C::error("%1%: switch statements not supported in actions on this target", statement);
         return statement;
     }
     auto type = typeMap->getType(statement->expression);
@@ -140,4 +140,4 @@ const IR::Node *DoEliminateSwitch::postorder(IR::SwitchStatement *statement) {
     return new IR::BlockStatement(src, contents);
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

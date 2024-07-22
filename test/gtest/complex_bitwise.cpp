@@ -13,9 +13,9 @@
 #include "lib/sourceCodeBuilder.h"
 #include "midend/simplifyBitwise.h"
 
-using namespace ::p4c::P4;
+using namespace ::P4C::P4;
 
-namespace p4c::Test {
+namespace P4C::Test {
 
 namespace {
 
@@ -161,4 +161,4 @@ TEST_F(SimplifyBitwiseTest, SplitWithZero) {
     EXPECT_FALSE(program_string.find(value3) == std::string::npos);
 }
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test

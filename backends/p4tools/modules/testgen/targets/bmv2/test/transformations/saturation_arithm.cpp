@@ -20,9 +20,9 @@
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
-namespace p4c::Test {
+namespace P4C::Test {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 using P4::SaturationElim;
 using P4Tools::Model;
@@ -247,4 +247,4 @@ TEST_F(Z3SolverSubSat05, SubSat05) { test(expression, variableValue); }
 
 }  // namespace ArithmTest
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test

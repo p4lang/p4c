@@ -22,19 +22,19 @@ limitations under the License.
 #include "ubpfParser.h"
 #include "ubpfType.h"
 
-namespace p4c::UBPF {
+namespace P4C::UBPF {
 
 bool UBPFProgram::build() {
     bool success = true;
     auto pack = toplevel->getMain();
     if (pack->type->name != "ubpf")
-        ::p4c::warning(ErrorType::WARN_INVALID,
+        ::P4C::warning(ErrorType::WARN_INVALID,
                        "%1%: the main ubpf package should be called ubpf"
                        "; are you using the wrong architecture?",
                        pack->type->name);
 
     if (pack->getConstructorParameters()->size() != 3) {
-        ::p4c::error(ErrorType::ERR_MODEL, "Expected toplevel package %1% to have 3 parameters",
+        ::P4C::error(ErrorType::ERR_MODEL, "Expected toplevel package %1% to have 3 parameters",
                      pack->type);
         return false;
     }
@@ -298,4 +298,4 @@ void UBPFProgram::emitPipeline(EBPF::CodeBuilder *builder) {
     builder->blockEnd(true);
 }
 
-}  // namespace p4c::UBPF
+}  // namespace P4C::UBPF

@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "backends/ebpf/ebpfObject.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 class EBPFProgram;
 
@@ -195,6 +195,6 @@ class EBPFHashAlgorithmTypeFactoryPSA {
     }
 };
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EXTERNS_EBPFPSAHASHALGORITHM_H_ */

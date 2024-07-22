@@ -23,7 +23,7 @@ and limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace p4c::TC {
+namespace P4C::TC {
 
 enum block_t {
     PARSER,
@@ -111,7 +111,7 @@ class ParsePnaArchitecture : public Inspector {
     }
 
     void modelError(const char *format, const IR::INode *node) {
-        ::p4c::error(ErrorType::ERR_MODEL,
+        ::P4C::error(ErrorType::ERR_MODEL,
                      (cstring(format) + "\nAre you using an up-to-date 'pna.p4'?").c_str(),
                      node->getNode());
     }
@@ -153,6 +153,6 @@ class InspectPnaProgram : public Inspector {
     bool preorder(const IR::Parameter *parameter) override;
 };
 
-}  // namespace p4c::TC
+}  // namespace P4C::TC
 
 #endif /* BACKENDS_TC_PNAPROGRAMSTRUCTURE_H_ */

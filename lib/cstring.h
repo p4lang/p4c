@@ -71,17 +71,15 @@ limitations under the License.
  * that mixing the two types of strings can trigger a lot of implicit copies.
  */
 
-namespace p4c {
-
+namespace P4C {
 class cstring;
+}  // namespace P4C
 
-}  // namespace p4c
-
-namespace p4c::P4::literals {
+namespace P4C::P4::literals {
 inline cstring operator""_cs(const char *str, std::size_t len);
 }
 
-namespace p4c {
+namespace P4C {
 class cstring {
     const char *str = nullptr;
 
@@ -394,11 +392,11 @@ inline std::ostream &operator<<(std::ostream &out, cstring s) {
     return out << (s ? s.c_str() : "<null>");
 }
 
-}  // namespace p4c
+}  // namespace P4C
 
 /// Let's prevent literal clashes. A user wishing to use the literal can do using namespace
 /// P4::literals, similarly as they can do using namespace std::literals for the standard once.
-namespace p4c::P4::literals {
+namespace P4C::P4::literals {
 
 /// A user-provided literal suffix to allow creation of cstring from literals: "foo"_cs.
 /// Note that the C++ standard mandates that all user-defined literal suffixes defined outside of
@@ -408,25 +406,25 @@ inline cstring operator""_cs(const char *str, std::size_t len) {
     result.construct_from_literal(str, len);
     return result;
 }
-}  // namespace p4c::P4::literals
+}  // namespace P4C::P4::literals
 
 namespace std {
 template <>
-struct hash<p4c::cstring> {
-    std::size_t operator()(const p4c::cstring &c) const {
+struct hash<P4C::cstring> {
+    std::size_t operator()(const P4C::cstring &c) const {
         // cstrings are internalized, therefore their addresses are unique; we
         // can just use their address to produce hash.
-        return p4c::Util::Hash{}(c.c_str());
+        return P4C::Util::Hash{}(c.c_str());
     }
 };
 }  // namespace std
 
-namespace p4c::Util {
+namespace P4C::Util {
 template <>
 struct Hasher<cstring> {
     size_t operator()(const cstring &c) const { return Util::Hash{}(c.c_str()); }
 };
 
-}  // namespace p4c::Util
+}  // namespace P4C::Util
 
 #endif /* LIB_CSTRING_H_ */

@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "methodInstance.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::P4Table *TableApplySolver::isHit(const IR::Expression *expression,
                                            DeclarationLookup *refMap, TypeMap *typeMap) {
@@ -65,4 +65,4 @@ const IR::P4Table *TableApplySolver::isActionRun(const IR::Expression *expressio
     return am->object->to<IR::P4Table>();
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

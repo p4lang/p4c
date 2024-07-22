@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /**
  * Check that operations which are only defined at compile-time
@@ -33,13 +33,13 @@ class CompileTimeOperations : public Inspector {
  public:
     CompileTimeOperations() { setName("CompileTimeOperations"); }
     void err(const IR::Node *expression) {
-        ::p4c::error(ErrorType::ERR_INVALID,
+        ::P4C::error(ErrorType::ERR_INVALID,
                      "%1%: could not evaluate expression at compilation time", expression);
     }
     void postorder(const IR::Mod *expression) override { err(expression); }
     void postorder(const IR::Div *expression) override { err(expression); }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_COMPILETIMEOPS_H_ */

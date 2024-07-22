@@ -21,7 +21,7 @@ limitations under the License.
 #include <iostream>
 #include <vector>
 
-namespace p4c {
+namespace P4C {
 
 class indent_t {
     int indent;
@@ -121,6 +121,6 @@ class TempIndent {
 };
 
 }  // namespace IndentCtl
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* LIB_INDENT_H_ */

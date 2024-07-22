@@ -22,7 +22,7 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/test_backend.h"
 
-namespace p4c::P4Tools::P4Testgen::EBPF {
+namespace P4C::P4Tools::P4Testgen::EBPF {
 
 /* =============================================================================================
  *  EBPFTestgenTarget implementation
@@ -60,7 +60,7 @@ const EBPFProgramInfo *EBPFTestgenTarget::produceProgramInfoImpl(
     // packets. There might be a bug in the framework
     auto &testgenOptions = TestgenOptions::get();
     if (testgenOptions.maxPktSize > 12000) {
-        ::p4c::warning("Max packet size %1% larger than 12000 bits. Bounding size to 12000 bits.",
+        ::P4C::warning("Max packet size %1% larger than 12000 bits. Bounding size to 12000 bits.",
                        testgenOptions.maxPktSize);
         testgenOptions.maxPktSize = 12000;
     }
@@ -93,4 +93,4 @@ MidEnd EBPFTestgenTarget::mkMidEnd(const CompilerOptions &options) const {
     return midEnd;
 }
 
-}  // namespace p4c::P4Tools::P4Testgen::EBPF
+}  // namespace P4C::P4Tools::P4Testgen::EBPF

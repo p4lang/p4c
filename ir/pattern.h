@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 
-namespace p4c {
+namespace P4C {
 
 /**
  * Pattern matcher for IR::Expression trees.
@@ -206,6 +206,6 @@ inline Pattern operator^(int v, const Pattern &a) { return Pattern(v) ^ a; }
 inline Pattern operator&&(int v, const Pattern &a) { return Pattern(v) && a; }
 inline Pattern operator||(int v, const Pattern &a) { return Pattern(v) || a; }
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* IR_PATTERN_H_ */

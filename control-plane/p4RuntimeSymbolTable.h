@@ -32,11 +32,11 @@ class WriteRequest;
 }  // namespace v1
 }  // namespace p4
 
-namespace p4c::IR {
+namespace P4C::IR {
 class P4Program;
-}  // namespace p4c::IR
+}  // namespace P4C::IR
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 namespace ControlPlaneAPI {
 
@@ -220,6 +220,6 @@ void collectParserSymbols(P4RuntimeSymbolTable &symbols, const IR::ParserBlock *
 
 }  // namespace ControlPlaneAPI
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* CONTROL_PLANE_P4RUNTIMESYMBOLTABLE_H_ */

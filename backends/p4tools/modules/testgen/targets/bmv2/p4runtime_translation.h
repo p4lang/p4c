@@ -6,9 +6,9 @@
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace p4c::P4Tools::P4Testgen::Bmv2 {
+namespace P4C::P4Tools::P4Testgen::Bmv2 {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 /// Propagates P4Runtime annotations attached to type definitions to the nodes which use these type
 /// definitions. For now, this is restricted to key elements and action parameters.
@@ -28,6 +28,6 @@ class PropagateP4RuntimeTranslation : public Transform {
     explicit PropagateP4RuntimeTranslation(const P4::TypeMap &typeMap);
 };
 
-}  // namespace p4c::P4Tools::P4Testgen::Bmv2
+}  // namespace P4C::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_P4RUNTIME_TRANSLATION_H_ */

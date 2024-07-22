@@ -17,12 +17,12 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_UBPFHELPERS_H_
 #define BACKENDS_UBPF_UBPFHELPERS_H_
 
-namespace p4c::UBPF {
+namespace P4C::UBPF {
 
 #ifndef UNUSED
 #define UNUSED __attribute__((__unused__))
 #endif
 
-}  // namespace p4c::UBPF
+}  // namespace P4C::UBPF
 
 #endif  // BACKENDS_UBPF_UBPFHELPERS_H_

@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /// Checks some possible misuses of the table size property
 class CheckTableSize : public Modifier {
@@ -53,6 +53,6 @@ class CheckTableSize : public Modifier {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_CHECKSIZE_H_ */

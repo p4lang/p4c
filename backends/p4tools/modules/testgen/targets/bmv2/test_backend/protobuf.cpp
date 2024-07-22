@@ -26,7 +26,7 @@
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace p4c::P4Tools::P4Testgen::Bmv2 {
+namespace P4C::P4Tools::P4Testgen::Bmv2 {
 
 Protobuf::Protobuf(const TestBackendConfiguration &testBackendConfiguration,
                    P4::P4RuntimeAPI p4RuntimeApi)
@@ -369,4 +369,4 @@ AbstractTestReferenceOrError Protobuf::produceTest(const TestSpec *testSpec,
     return new ProtobufTest(inja::render(getTestCaseTemplate(), dataJson));
 }
 
-}  // namespace p4c::P4Tools::P4Testgen::Bmv2
+}  // namespace P4C::P4Tools::P4Testgen::Bmv2

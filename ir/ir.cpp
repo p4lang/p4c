@@ -39,7 +39,7 @@ limitations under the License.
 #include "lib/null.h"
 #include "lib/ordered_map.h"
 
-namespace p4c::IR {
+namespace P4C::IR {
 
 const cstring ParserState::accept = "accept"_cs;
 const cstring ParserState::reject = "reject"_cs;
@@ -120,7 +120,7 @@ void IGeneralNamespace::checkDuplicateDeclarations() const {
         IR::ID name = decl->getName();
         auto [it, inserted] = seen.emplace(name);
         if (!inserted) {
-            ::p4c::error(ErrorType::ERR_DUPLICATE,
+            ::P4C::error(ErrorType::ERR_DUPLICATE,
                          "Duplicate declaration of %1%: previous declaration at %2%", name,
                          it->srcInfo);
         }
@@ -131,7 +131,7 @@ void P4Parser::checkDuplicates() const {
     for (auto decl : states) {
         auto prev = parserLocals.getDeclaration(decl->getName().name);
         if (prev != nullptr)
-            ::p4c::error(ErrorType::ERR_DUPLICATE, "State %1% has same name as %2%", decl, prev);
+            ::P4C::error(ErrorType::ERR_DUPLICATE, "State %1% has same name as %2%", decl, prev);
     }
 }
 
@@ -141,12 +141,12 @@ size_t Type_Stack::getSize() const {
     if (!sizeKnown()) BUG("%1%: Size not yet known", size);
     auto cst = size->to<IR::Constant>();
     if (!cst->fitsInt()) {
-        ::p4c::error(ErrorType::ERR_OVERLIMIT, "Index too large: %1%", cst);
+        ::P4C::error(ErrorType::ERR_OVERLIMIT, "Index too large: %1%", cst);
         return 0;
     }
     auto size = cst->asInt();
     if (size < 0) {
-        ::p4c::error(ErrorType::ERR_OVERLIMIT, "Illegal array size: %1%", cst);
+        ::P4C::error(ErrorType::ERR_OVERLIMIT, "Illegal array size: %1%", cst);
         return 0;
     }
     return static_cast<size_t>(size);
@@ -161,12 +161,12 @@ const Method *Type_Extern::lookupMethod(IR::ID name, const Vector<Argument> *arg
             if (result == nullptr) {
                 result = m;
             } else {
-                ::p4c::error(ErrorType::ERR_DUPLICATE, "Ambiguous method %1%", name);
+                ::P4C::error(ErrorType::ERR_DUPLICATE, "Ambiguous method %1%", name);
                 if (!reported) {
-                    ::p4c::error(ErrorType::ERR_DUPLICATE, "Candidate is %1%", result);
+                    ::P4C::error(ErrorType::ERR_DUPLICATE, "Candidate is %1%", result);
                     reported = true;
                 }
-                ::p4c::error(ErrorType::ERR_DUPLICATE, "Candidate is %1%", m);
+                ::P4C::error(ErrorType::ERR_DUPLICATE, "Candidate is %1%", m);
                 return nullptr;
             }
         }
@@ -193,7 +193,7 @@ const Type_Method *P4Table::getApplyMethodType() const {
     // Synthesize a new type for the return
     auto actions = properties->getProperty(IR::TableProperties::actionsPropertyName);
     if (actions == nullptr) {
-        ::p4c::error(ErrorType::ERR_INVALID, "%1%: table does not contain a list of actions", this);
+        ::P4C::error(ErrorType::ERR_INVALID, "%1%: table does not contain a list of actions", this);
         return nullptr;
     }
     if (!actions->value->is<IR::ActionList>())
@@ -275,27 +275,27 @@ const IR::PackageBlock *ToplevelBlock::getMain() const {
     auto program = getProgram();
     auto mainDecls = program->getDeclsByName(IR::P4Program::main)->toVector();
     if (mainDecls.empty()) {
-        ::p4c::warning(ErrorType::WARN_MISSING, "Program does not contain a `%s' module",
+        ::P4C::warning(ErrorType::WARN_MISSING, "Program does not contain a `%s' module",
                        IR::P4Program::main);
         return nullptr;
     }
     auto main = mainDecls[0];
     if (mainDecls.size() > 1) {
-        ::p4c::error(ErrorType::ERR_DUPLICATE, "Program has multiple `%s' instances: %1%, %2%",
+        ::P4C::error(ErrorType::ERR_DUPLICATE, "Program has multiple `%s' instances: %1%, %2%",
                      IR::P4Program::main, main->getNode(), mainDecls[1]->getNode());
         return nullptr;
     }
     if (!main->is<IR::Declaration_Instance>()) {
-        ::p4c::error(ErrorType::ERR_INVALID, "%1%: must be a package declaration", main->getNode());
+        ::P4C::error(ErrorType::ERR_INVALID, "%1%: must be a package declaration", main->getNode());
         return nullptr;
     }
     auto block = getValue(main->getNode());
     if (block == nullptr) return nullptr;
     if (!block->is<IR::PackageBlock>()) {
-        ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected package declaration", block);
+        ::P4C::error(ErrorType::ERR_EXPECTED, "%1%: expected package declaration", block);
         return nullptr;
     }
     return block->to<IR::PackageBlock>();
 }
 
-}  // namespace p4c::IR
+}  // namespace P4C::IR

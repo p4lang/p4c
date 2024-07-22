@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /**
  * For each action that is invoked keep the list of arguments that
@@ -50,14 +50,14 @@ class ActionInvocation {
     void bindDefaultAction(const IR::P4Action *action,
                            const IR::MethodCallExpression *defaultInvocation) {
         // We must have a binding for this action already.
-        auto actionCallInvocation = ::p4c::get(invocations, action);
+        auto actionCallInvocation = ::P4C::get(invocations, action);
         CHECK_NULL(actionCallInvocation);
         // We must remove all arguments which are bound in the action list.
         unsigned boundArgs = actionCallInvocation->arguments->size();
         defaultActions.emplace(defaultInvocation, boundArgs);
     }
     const IR::MethodCallExpression *get(const IR::P4Action *action) const {
-        return ::p4c::get(invocations, action);
+        return ::P4C::get(invocations, action);
     }
     bool removeAllParameters(const IR::P4Action *action) const {
         return all.find(action) != all.end();
@@ -67,7 +67,7 @@ class ActionInvocation {
     }
     unsigned argsToRemove(const IR::MethodCallExpression *defaultCall) const {
         if (defaultActions.find(defaultCall) == defaultActions.end()) return 0;
-        return ::p4c::get(defaultActions, defaultCall);
+        return ::P4C::get(defaultActions, defaultCall);
     }
 };
 
@@ -133,6 +133,6 @@ class RemoveActionParameters : public PassManager {
     explicit RemoveActionParameters(TypeMap *typeMap, TypeChecking *typeChecking = nullptr);
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_REMOVEPARAMETERS_H_ */

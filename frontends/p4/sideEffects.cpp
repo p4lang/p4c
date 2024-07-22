@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/node.h"
 #include "ir/visitor.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 cstring DoSimplifyExpressions::createTemporary(const IR::Type *type) {
     type = type->getP4Type();
@@ -787,7 +787,7 @@ const IR::Node *KeySideEffect::preorder(IR::P4Table *table) {
 }
 
 const IR::Node *KeySideEffect::postorder(IR::P4Table *table) {
-    auto insertions = ::p4c::get(toInsert, getOriginal<IR::P4Table>());
+    auto insertions = ::P4C::get(toInsert, getOriginal<IR::P4Table>());
     if (insertions == nullptr) return table;
 
     auto result = new IR::IndexedVector<IR::Declaration>();
@@ -818,4 +818,4 @@ const IR::Node *KeySideEffect::doStatement(const IR::Statement *statement,
     return block;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

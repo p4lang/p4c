@@ -5,7 +5,7 @@
 
 #include "lib/cstring.h"
 
-namespace p4c::P4Tools::P4Smith {
+namespace P4C::P4Tools::P4Smith {
 
 static constexpr int INTEGER_WIDTH(32);
 
@@ -20,6 +20,6 @@ static const cstring ETH_HDR("eth_hdr");
 /// @param len : Ignored when choosing from the wordlist.
 std::string getRandomString(size_t len);
 
-}  // namespace p4c::P4Tools::P4Smith
+}  // namespace P4C::P4Tools::P4Smith
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_UTIL_UTIL_H_ */

@@ -32,13 +32,13 @@ limitations under the License.
 #include "p4/config/v1/p4info.pb.h"
 #pragma GCC diagnostic pop
 
-namespace p4configv1 = ::p4::config::v1;
+namespace P4Configv1 = ::p4::config::v1;
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 struct P4RuntimeAPI;
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 namespace BFRT {
 
@@ -226,7 +226,7 @@ static std::vector<P4Id> collectTableIds(const p4configv1::P4Info &p4info, const
     for (auto it = first; it != last; it++) {
         auto *table = Standard::findTable(p4info, *it);
         if (table == nullptr) {
-            ::p4c::error(ErrorType::ERR_INVALID, "Invalid table id '%1%'", *it);
+            ::P4C::error(ErrorType::ERR_INVALID, "Invalid table id '%1%'", *it);
             continue;
         }
         tableIds.push_back(*it);
@@ -463,6 +463,6 @@ class BFRuntimeGenerator {
 
 }  // namespace BFRT
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* CONTROL_PLANE_BFRUNTIME_H_ */

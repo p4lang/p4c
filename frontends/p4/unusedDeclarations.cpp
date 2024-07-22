@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/common/parser_options.h"
 #include "sideEffects.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 RemoveUnusedDeclarations *RemoveUnusedPolicy::getRemoveUnusedDeclarationsPass(
     const ReferenceMap *refMap, bool warn) const {
@@ -171,4 +171,4 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::ParserState *state) {
 // backend may synthesize code to use the extern functions.
 const IR::Node *RemoveUnusedDeclarations::preorder(IR::Method *method) { return method; }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

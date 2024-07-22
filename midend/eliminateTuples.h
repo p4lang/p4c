@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /**
  * Maintains for each type that may contain a tuple (or is a tuple) the
@@ -130,6 +130,6 @@ class EliminateTuples final : public PassManager {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_ELIMINATETUPLES_H_ */

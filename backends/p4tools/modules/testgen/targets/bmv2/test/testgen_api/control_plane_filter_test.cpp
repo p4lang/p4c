@@ -11,9 +11,9 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf_ir.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace p4c::Test {
+namespace P4C::Test {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 using testing::Contains;
 using testing::HasSubstr;
@@ -280,4 +280,4 @@ TEST(P4TestgenControlPlaneFilterTest, FiltersMultipleControlPlaneEntities) {
 
 }  // namespace
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test

@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/node.h"
 #include "ir/visitor.h"
 
-namespace p4c {
+namespace P4C {
 
 /* overloads rather than optional arguments to make it easier to call from the debugger */
 void dump(std::ostream &out, const IR::Node *n);
@@ -65,6 +65,6 @@ inline std::ostream &operator<<(std::ostream &out, const Dump &d) {
     return out;
 }
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* IR_DUMP_H_ */

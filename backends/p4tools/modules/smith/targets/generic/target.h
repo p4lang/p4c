@@ -12,7 +12,7 @@
 #include "backends/p4tools/modules/smith/core/target.h"
 #include "ir/ir.h"
 
-namespace p4c::P4Tools::P4Smith::Generic {
+namespace P4C::P4Tools::P4Smith::Generic {
 
 class AbstractGenericSmithTarget : public SmithTarget {
  protected:
@@ -66,6 +66,6 @@ class GenericCoreSmithTarget : public AbstractGenericSmithTarget {
     GenericCoreSmithTarget();
 };
 
-}  // namespace p4c::P4Tools::P4Smith::Generic
+}  // namespace P4C::P4Tools::P4Smith::Generic
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_GENERIC_TARGET_H_ */

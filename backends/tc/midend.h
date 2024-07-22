@@ -57,7 +57,7 @@ and limitations under the License.
 #include "midend/validateProperties.h"
 #include "options.h"
 
-namespace p4c::TC {
+namespace P4C::TC {
 
 class MidEnd {
  public:
@@ -70,6 +70,6 @@ class MidEnd {
     const IR::ToplevelBlock *run(TCOptions &options, const IR::P4Program *program,
                                  std::ostream *outStream = nullptr);
 };
-}  // namespace p4c::TC
+}  // namespace P4C::TC
 
 #endif /* BACKENDS_TC_MIDEND_H_ */

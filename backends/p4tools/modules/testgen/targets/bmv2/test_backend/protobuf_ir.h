@@ -13,7 +13,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/common.h"
 
-namespace p4c::P4Tools::P4Testgen::Bmv2 {
+namespace P4C::P4Tools::P4Testgen::Bmv2 {
 
 struct ProtobufIrTest : public AbstractTest {
  private:
@@ -98,6 +98,6 @@ class ProtobufIr : public Bmv2TestFramework {
                                inja::json &rulesJson);
 };
 
-}  // namespace p4c::P4Tools::P4Testgen::Bmv2
+}  // namespace P4C::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_PROTOBUF_IR_H_ */

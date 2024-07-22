@@ -14,7 +14,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 void SelectedBranches::runImpl(const Callback &callBack, ExecutionStateReference executionState) {
     try {
@@ -34,7 +34,7 @@ void SelectedBranches::runImpl(const Callback &callBack, ExecutionStateReference
             }
             if (selectedBranches.empty()) {
                 // Not enough steps in the input selected branches string, cannot continue.
-                ::p4c::warning("The selected path is incomplete, not emitting a testcase.");
+                ::P4C::warning("The selected path is incomplete, not emitting a testcase.");
                 break;
             }
             // If there are multiple, pop one branch decision from the input list and pick
@@ -51,7 +51,7 @@ void SelectedBranches::runImpl(const Callback &callBack, ExecutionStateReference
             // We've reached the end of the program. Call back and end execution.
             handleTerminalState(callBack, executionState);
             if (!selectedBranches.empty()) {
-                ::p4c::warning(
+                ::P4C::warning(
                     "Execution reached a final state before executing whole "
                     "selected path!");
             }
@@ -101,9 +101,9 @@ ExecutionState *SelectedBranches::chooseBranch(const std::vector<Branch> &branch
         }
     }
     // If not found, the input selected branch list is invalid.
-    ::p4c::error("The selected branches string doesn't match any branch.");
+    ::P4C::error("The selected branches string doesn't match any branch.");
 
     return nullptr;
 }
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen

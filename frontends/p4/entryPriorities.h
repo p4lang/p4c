@@ -22,7 +22,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /// Assigns priorities to table entries if they are not 'const'
 class EntryPriorities : public Transform, public ResolutionContext {
@@ -35,6 +35,6 @@ class EntryPriorities : public Transform, public ResolutionContext {
     const IR::Node *preorder(IR::EntriesList *entries) override;
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_ENTRYPRIORITIES_H_ */

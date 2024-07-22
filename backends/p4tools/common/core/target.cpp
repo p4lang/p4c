@@ -11,7 +11,7 @@
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 Target::Spec::Spec(std::string deviceName, std::string archName)
     : deviceName(std::move(deviceName)), archName(std::move(archName)) {
@@ -93,4 +93,4 @@ Target::Target(std::string_view toolName, const std::string &deviceName,
     }
 }
 
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools

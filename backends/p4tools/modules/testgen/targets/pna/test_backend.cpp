@@ -28,7 +28,7 @@
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
-namespace p4c::P4Tools::P4Testgen::Pna {
+namespace P4C::P4Tools::P4Testgen::Pna {
 
 const std::set<std::string> PnaTestBackend::SUPPORTED_BACKENDS = {"METADATA", "PTF"};
 
@@ -38,7 +38,7 @@ PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo,
     : TestBackEnd(programInfo, testBackendConfiguration, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
     if (testBackendString.isNullOrEmpty()) {
-        ::p4c::error(
+        ::P4C::error(
             "No test back end provided. Please provide a test back end using the --test-backend "
             "parameter. Supported back ends are %1%.",
             Utils::containerToString(SUPPORTED_BACKENDS));
@@ -129,4 +129,4 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
     return testSpec;
 }
 
-}  // namespace p4c::P4Tools::P4Testgen::Pna
+}  // namespace P4C::P4Tools::P4Testgen::Pna

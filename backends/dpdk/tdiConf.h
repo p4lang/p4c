@@ -19,7 +19,7 @@ limitations under the License.
 #include <string>
 
 #include "backends/dpdk/options.h"
-namespace p4c::DPDK {
+namespace P4C::DPDK {
 
 class TdiBfrtConf {
  private:
@@ -36,6 +36,6 @@ class TdiBfrtConf {
     static void generate(const IR::P4Program *prog, DPDK::DpdkOptions &options);
 };
 
-}  // namespace p4c::DPDK
+}  // namespace P4C::DPDK
 
 #endif /* BACKENDS_DPDK_TDICONF_H_ */

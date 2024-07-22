@@ -16,7 +16,7 @@ and limitations under the License.
 
 #include "midend.h"
 
-namespace p4c::TC {
+namespace P4C::TC {
 
 const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *program,
                                      std::ostream *outStream) {
@@ -71,9 +71,9 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
     midEnd.setName("MidEnd");
     midEnd.addDebugHooks(hooks);
     program = program->apply(midEnd);
-    if (::p4c::errorCount() > 0) return nullptr;
+    if (::P4C::errorCount() > 0) return nullptr;
 
     return evaluator->getToplevelBlock();
 }
 
-}  // namespace p4c::TC
+}  // namespace P4C::TC

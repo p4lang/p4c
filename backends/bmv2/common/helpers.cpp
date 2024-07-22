@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "lib/json.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 /// constant definition for bmv2
 const cstring MatchImplementation::selectorMatchTypeName = "selector"_cs;
@@ -146,8 +146,8 @@ int ConversionContext::createFieldList(const IR::Expression *expr, cstring listN
 }
 
 void ConversionContext::modelError(const char *format, const IR::Node *node) {
-    ::p4c::error(format, node);
-    ::p4c::error("Are you using an up-to-date v1model.p4?");
+    ::P4C::error(format, node);
+    ::P4C::error("Are you using an up-to-date v1model.p4?");
 }
 
 cstring ConversionContext::createCalculation(cstring algo, const IR::Expression *fields,
@@ -205,4 +205,4 @@ const IR::ListExpression *convertToList(const IR::Expression *expr, P4::TypeMap 
     return list;
 }
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2

@@ -30,7 +30,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/stf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace p4c::P4Tools::P4Testgen::Bmv2 {
+namespace P4C::P4Tools::P4Testgen::Bmv2 {
 
 const big_int Bmv2TestBackend::ZERO_PKT_VAL = 0x2000000;
 const big_int Bmv2TestBackend::ZERO_PKT_MAX = 0xffffffff;
@@ -43,7 +43,7 @@ Bmv2TestBackend::Bmv2TestBackend(const Bmv2V1ModelProgramInfo &programInfo,
     : TestBackEnd(programInfo, testBackendConfiguration, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
     if (testBackendString.isNullOrEmpty()) {
-        ::p4c::error(
+        ::P4C::error(
             "No test back end provided. Please provide a test back end using the --test-backend "
             "parameter. Supported back ends are %1%.",
             Utils::containerToString(SUPPORTED_BACKENDS));
@@ -164,4 +164,4 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     return testSpec;
 }
 
-}  // namespace p4c::P4Tools::P4Testgen::Bmv2
+}  // namespace P4C::P4Tools::P4Testgen::Bmv2

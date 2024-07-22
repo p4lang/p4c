@@ -16,12 +16,12 @@ limitations under the License.
 #ifndef LIB_EXENAME_H_
 #define LIB_EXENAME_H_
 
-namespace p4c {
+namespace P4C {
 
 /** Attempt to determine the executable name and return a static path to it.  Will use
  * argv0 if provided and nothing better can be found */
 const char *exename(const char *argv0 = nullptr);
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* LIB_EXENAME_H_ */

@@ -20,9 +20,9 @@
 #include "ir/vector.h"
 #include "lib/cstring.h"
 
-namespace p4c::P4Tools::P4Smith::Tofino {
+namespace P4C::P4Tools::P4Smith::Tofino {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 /* =============================================================================================
  *  AbstractTofinoSmithTarget implementation
@@ -616,4 +616,4 @@ const IR::P4Program *TofinoTnaSmithTarget::generateP4Program() const {
 
     return new IR::P4Program(*objects);
 }
-}  // namespace p4c::P4Tools::P4Smith::Tofino
+}  // namespace P4C::P4Tools::P4Smith::Tofino

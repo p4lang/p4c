@@ -28,7 +28,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 SmallStepEvaluator::Branch::Branch(ExecutionState &nextState)
     : constraint(IR::BoolLiteral::get(true)), nextState(nextState) {}
@@ -218,7 +218,7 @@ class CommandVisitor {
         if (solverResult == std::nullopt || !solverResult.value()) {
             std::stringstream condStream;
             guard.cond->dbprint(condStream);
-            ::p4c::warning(
+            ::P4C::warning(
                 "Guard %1% was not satisfiable."
                 " Incrementing number of guard violations.",
                 condStream.str().c_str());
@@ -244,4 +244,4 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
     return new std::vector<Branch>({Branch(state)});
 }
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen

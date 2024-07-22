@@ -33,7 +33,7 @@ limitations under the License.
 #include "midend/removeComplexExpressions.h"
 #include "midend/simplifyKey.h"
 
-namespace p4c::DPDK {
+namespace P4C::DPDK {
 
 void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
@@ -121,7 +121,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
                     genContextJson->serializeContextJson(out);
                     out->flush();
                 } else
-                    ::p4c::error(ErrorType::ERR_IO, "Could not open file: %1%", options.ctxtFile);
+                    ::P4C::error(ErrorType::ERR_IO, "Could not open file: %1%", options.ctxtFile);
             }
         }),
         new ReplaceHdrMetaField(),
@@ -166,4 +166,4 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
 
 void DpdkBackend::codegen(std::ostream &out) const { dpdk_program->toSpec(out) << std::endl; }
 
-}  // namespace p4c::DPDK
+}  // namespace P4C::DPDK

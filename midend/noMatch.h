@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /// Convert
 /// state s { transition select (e) { ... } }
@@ -51,6 +51,6 @@ class HandleNoMatch : public PassManager {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_NOMATCH_H_ */

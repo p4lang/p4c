@@ -25,18 +25,18 @@ limitations under the License.
 #include "ir/ir.h"
 #include "midend/actionSynthesis.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 class ReferenceMap;
 class TypeMap;
 class ComputeDefUse;
 class ToplevelBlock;
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
-namespace p4c {
+namespace P4C {
 class CompilerOptions;
-}  // namespace p4c
+}  // namespace P4C
 
-namespace p4c::Test {
+namespace P4C::Test {
 
 class SkipControls : public P4::ActionSynthesisPolicy {
     const std::set<cstring> *skip;
@@ -61,6 +61,6 @@ class MidEnd : public PassManager {
     IR::ToplevelBlock *process(const IR::P4Program *&program);
 };
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test
 
 #endif /* TEST_GTEST_MIDEND_PASS_H_ */

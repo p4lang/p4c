@@ -12,7 +12,7 @@
 #include "ir/vector.h"
 #include "lib/cstring.h"
 
-namespace p4c::P4Tools::P4Smith {
+namespace P4C::P4Tools::P4Smith {
 
 using TyperefProbs = struct TyperefProbs {
     int64_t p4_bit;
@@ -114,6 +114,6 @@ class ExpressionGenerator : public Generator {
     virtual bool checkInputArg(const IR::Parameter *param);
 };
 
-}  // namespace p4c::P4Tools::P4Smith
+}  // namespace P4C::P4Tools::P4Smith
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_COMMON_EXPRESSIONS_H_ */

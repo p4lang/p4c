@@ -24,9 +24,9 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/concolic.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/constants.h"
 
-namespace p4c::P4Tools::P4Testgen::EBPF {
+namespace P4C::P4Tools::P4Testgen::EBPF {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 const IR::Type_Bits EBPFProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
 
@@ -129,4 +129,4 @@ const ArchSpec EBPFProgramInfo::ARCH_SPEC =
                                // control filter<H>(inout H headers, out bool accept);
                                {"filter"_cs, {"*hdr"_cs, "*accept"_cs}}});
 
-}  // namespace p4c::P4Tools::P4Testgen::EBPF
+}  // namespace P4C::P4Tools::P4Testgen::EBPF

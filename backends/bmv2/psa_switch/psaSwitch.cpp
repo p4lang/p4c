@@ -19,9 +19,9 @@ limitations under the License.
 #include "frontends/common/model.h"
 #include "frontends/p4/cloner.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 void PsaCodeGenerator::create(ConversionContext *ctxt) {
     createTypes(ctxt);
@@ -63,7 +63,7 @@ void PsaCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::Type_
             max_length += type->size;
             field->append("*");
             if (varbitFound)
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+                ::P4C::error(ErrorType::ERR_UNSUPPORTED,
                              "%1%: headers with multiple varbit fields are not supported", st);
             varbitFound = true;
         } else if (ftype->is<IR::Type_Error>()) {
@@ -258,7 +258,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     if (!main) return;
 
     if (main->type->name != "PSA_Switch")
-        ::p4c::warning(ErrorType::WARN_INVALID,
+        ::P4C::warning(ErrorType::WARN_INVALID,
                        "%1%: the main package should be called PSA_Switch"
                        "; are you using the wrong architecture?",
                        main->type->name);
@@ -303,7 +303,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     main = toplevel->getMain();
     if (!main) return;  // no main
     main->apply(*parsePsaArch);
-    if (::p4c::errorCount() > 0) return;
+    if (::P4C::errorCount() > 0) return;
     program = toplevel->getProgram();
 
     PassManager toJson = {new P4::DiscoverStructure(&structure),
@@ -688,7 +688,7 @@ void ExternConverter_InternetChecksum::convertExternInstance(UNUSED ConversionCo
     auto egressDeparser = psaStructure->deparsers.at("egress"_cs)->controlPlaneName();
     if (block != ingressParser && block != ingressDeparser && block != egressParser &&
         block != egressDeparser) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in pipeline on this target",
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in pipeline on this target",
                      eb);
     }
     // add checksum instance
@@ -770,7 +770,7 @@ void ExternConverter_DirectCounter::convertExternInstance(UNUSED ConversionConte
     cstring name = inst->controlPlaneName();
     auto it = ctxt->structure->directCounterMap.find(name);
     if (it == ctxt->structure->directCounterMap.end()) {
-        ::p4c::warning(ErrorType::WARN_UNUSED, "%1%: Direct counter not used; ignoring", inst);
+        ::P4C::warning(ErrorType::WARN_UNUSED, "%1%: Direct counter not used; ignoring", inst);
     } else {
         auto jctr = new Util::JsonObject();
         jctr->emplace("name", name);
@@ -878,7 +878,7 @@ void ExternConverter_Meter::convertExternInstance(UNUSED ConversionContext *ctxt
     else if (mkind_name == "BYTES")
         type = "bytes"_cs;
     else
-        ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected meter type", mkind->getNode());
+        ::P4C::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected meter type", mkind->getNode());
     auto k = new Util::JsonObject();
     k->emplace("name", "type");
     k->emplace("type", "string");
@@ -962,13 +962,13 @@ void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext *c
     }
     auto regType = st->arguments->at(0);
     if (!regType->is<IR::Type_Bits>()) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED,
                      "%1%: registers with types other than bit<> or int<> are not suppoted", eb);
         return;
     }
     unsigned width = regType->width_bits();
     if (width == 0) {
-        ::p4c::error(ErrorType::ERR_UNKNOWN, "%1%: unknown width", st->arguments->at(0));
+        ::P4C::error(ErrorType::ERR_UNKNOWN, "%1%: unknown width", st->arguments->at(0));
         return;
     }
     jreg->emplace("bitwidth", width);
@@ -999,7 +999,7 @@ void ExternConverter_ActionProfile::convertExternInstance(UNUSED ConversionConte
               eb->constructor->srcInfo);
 
     if (!sz->is<IR::Constant>()) {
-        ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
+        ::P4C::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
     }
     action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
 
@@ -1024,7 +1024,7 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
     BUG_CHECK(sz, "%1%Invalid declaration of extern ActionSelector: no size param",
               eb->constructor->srcInfo);
     if (!sz->is<IR::Constant>()) {
-        ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
+        ::P4C::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
         return;
     }
     action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
@@ -1042,7 +1042,7 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
     if (input == nullptr) {
         // the selector is never used by any table, we cannot figure out its
         // input and therefore cannot include it in the JSON
-        ::p4c::warning(ErrorType::WARN_UNUSED,
+        ::P4C::warning(ErrorType::WARN_UNUSED,
                        "Action selector '%1%' is never referenced by a table "
                        "and cannot be included in bmv2 JSON",
                        c);
@@ -1063,4 +1063,4 @@ void ExternConverter_Digest::convertExternInstance(UNUSED ConversionContext *ctx
                                                    UNUSED const IR::ExternBlock *eb,
                                                    UNUSED const bool &emitExterns) { /* TODO */ }
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2

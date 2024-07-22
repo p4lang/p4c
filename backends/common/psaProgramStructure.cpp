@@ -17,9 +17,9 @@ limitations under the License.
 
 #include "backends/common/psaProgramStructure.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 void InspectPsaProgram::postorder(const IR::Declaration_Instance *di) {
     if (!pinfo->resourceMap.count(di)) return;
@@ -80,7 +80,7 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
             if (isHeader && ft->is<IR::Type_Struct>()) {
-                ::p4c::error(
+                ::P4C::error(
                     ErrorType::ERR_INVALID,
                     "Type %1% should only contain headers, header stacks, or header unions", type);
                 return;
@@ -103,7 +103,7 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
                     if (auto h_type = uft->to<IR::Type_Header>()) {
                         addHeaderInstance(h_type, uf->controlPlaneName());
                     } else {
-                        ::p4c::error(ErrorType::ERR_INVALID, "Type %1% cannot contain type %2%", ft,
+                        ::P4C::error(ErrorType::ERR_INVALID, "Type %1% cannot contain type %2%", ft,
                                      uft);
                         return;
                     }
@@ -334,4 +334,4 @@ bool ParsePsaArchitecture::preorder(const IR::PackageBlock *block) {
     return false;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

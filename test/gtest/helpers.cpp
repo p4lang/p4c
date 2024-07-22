@@ -29,7 +29,7 @@ limitations under the License.
 #include "frontends/p4/frontend.h"
 #include "frontends/p4/parseAnnotations.h"
 
-namespace p4c::TestDetail {
+namespace P4C::TestDetail {
 
 std::string makeP4Source(const char *file, unsigned line, P4Headers headers,
                          const char *rawSource) {
@@ -85,9 +85,9 @@ std::string makeP4Source(const char *file, unsigned line, const char *rawSource)
     return makeP4Source(file, line, P4Headers::NONE, rawSource);
 }
 
-}  // namespace p4c::TestDetail
+}  // namespace P4C::TestDetail
 
-namespace p4c {
+namespace P4C {
 
 /* static */ P4CTestEnvironment *P4CTestEnvironment::get() {
     static P4CTestEnvironment *instance = new P4CTestEnvironment;
@@ -154,9 +154,9 @@ std::filesystem::path P4CTestEnvironment::getProjectRoot() {
     return std::filesystem::path(__FILE__).parent_path().parent_path().parent_path();
 }
 
-}  // namespace p4c
+}  // namespace P4C
 
-namespace p4c::Test {
+namespace P4C::Test {
 
 /* static */ std::optional<FrontendTestCase> FrontendTestCase::create(
     const std::string &source,
@@ -172,16 +172,16 @@ namespace p4c::Test {
         std::cerr << "Couldn't parse test case source" << std::endl;
         return std::nullopt;
     }
-    if (::p4c::diagnosticCount() > 0) {
-        std::cerr << "Encountered " << ::p4c::diagnosticCount() << " errors while parsing test case"
+    if (::P4C::diagnosticCount() > 0) {
+        std::cerr << "Encountered " << ::P4C::diagnosticCount() << " errors while parsing test case"
                   << std::endl;
         return std::nullopt;
     }
 
     P4::P4COptionPragmaParser optionsPragmaParser;
     program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
-    if (::p4c::errorCount() > 0) {
-        std::cerr << "Encountered " << ::p4c::errorCount()
+    if (::P4C::errorCount() > 0) {
+        std::cerr << "Encountered " << ::P4C::errorCount()
                   << " errors while collecting options pragmas" << std::endl;
         return std::nullopt;
     }
@@ -193,14 +193,14 @@ namespace p4c::Test {
         std::cerr << "Frontend failed" << std::endl;
         return std::nullopt;
     }
-    if (::p4c::errorCount() > 0) {
-        std::cerr << "Encountered " << ::p4c::errorCount() << " errors while executing frontend"
+    if (::P4C::errorCount() > 0) {
+        std::cerr << "Encountered " << ::P4C::errorCount() << " errors while executing frontend"
                   << std::endl;
         return std::nullopt;
     }
 
-    if (::p4c::errorCount() > 0) {
-        std::cerr << "Encountered " << ::p4c::errorCount()
+    if (::P4C::errorCount() > 0) {
+        std::cerr << "Encountered " << ::P4C::errorCount()
                   << " errors while parsing back-end annotations" << std::endl;
         return std::nullopt;
     }
@@ -208,4 +208,4 @@ namespace p4c::Test {
     return FrontendTestCase{program};
 }
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test

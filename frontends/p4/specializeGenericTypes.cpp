@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 bool TypeSpecializationMap::same(const TypeSpecialization *spec,
                                  const IR::Type_Specialized *right) const {
@@ -170,7 +170,7 @@ const IR::Node *ReplaceTypeUses::postorder(IR::Type_Specialized *type) {
 const IR::Node *ReplaceTypeUses::postorder(IR::StructExpression *expression) {
     auto st = getOriginal<IR::StructExpression>()->structType;
     if (!st) {
-        ::p4c::error(ErrorType::ERR_TYPE_ERROR,
+        ::P4C::error(ErrorType::ERR_TYPE_ERROR,
                      "%1%: could not infer a type for expression; "
                      "please specify it explicitly",
                      expression);
@@ -187,4 +187,4 @@ const IR::Node *ReplaceTypeUses::postorder(IR::StructExpression *expression) {
     return expression;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

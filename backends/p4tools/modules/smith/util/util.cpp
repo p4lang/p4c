@@ -11,7 +11,7 @@
 #include "backends/p4tools/modules/smith/common/scope.h"
 #include "backends/p4tools/modules/smith/util/wordlist.h"
 
-namespace p4c::P4Tools::P4Smith {
+namespace P4C::P4Tools::P4Smith {
 
 std::string getRandomString(size_t len) {
     // Add "for" and "in" to the list of P4 keywords, even though the wordlist doesn't contain them.
@@ -59,4 +59,4 @@ std::string getRandomString(size_t len) {
     return ret;
 }
 
-}  // namespace p4c::P4Tools::P4Smith
+}  // namespace P4C::P4Tools::P4Smith

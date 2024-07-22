@@ -20,7 +20,7 @@
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 SymbolicExecutor::StepResult SymbolicExecutor::step(ExecutionState &state) {
     StepResult successors = nullptr;
@@ -47,12 +47,12 @@ bool SymbolicExecutor::handleTerminalState(const Callback &callback,
     // a warning and continue on a different path.
     auto solverResult = solver.checkSat(terminalState.getPathConstraint());
     if (!solverResult) {
-        ::p4c::warning("Solver timed out");
+        ::P4C::warning("Solver timed out");
         return false;
     }
 
     if (!*solverResult) {
-        ::p4c::warning("Path constraints unsatisfiable");
+        ::P4C::warning("Path constraints unsatisfiable");
         return false;
     }
 
@@ -74,7 +74,7 @@ bool SymbolicExecutor::evaluateBranch(const SymbolicExecutor::Branch &branch,
     // Check the consistency of the path constraints asserted so far.
     auto solverResult = solver.checkSat(branch.nextState.get().getPathConstraint());
     if (solverResult == std::nullopt) {
-        ::p4c::warning("Solver timed out");
+        ::P4C::warning("Solver timed out");
     }
     return solverResult.value_or(false);
 }
@@ -126,4 +126,4 @@ void SymbolicExecutor::printCurrentTraceAndBranches(std::ostream &out,
     out << strBranches << ")";
 }
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen

@@ -6,7 +6,7 @@
 #include <vector>
 
 /// A collection of hashing functions commonly used in network protocols.
-namespace p4c::NetHash {
+namespace P4C::NetHash {
 
 /// CRC-16 used in BMv2 (parameters: bit-reflection, polynomial 0x8005, init = 0 and xor_out = 0).
 uint16_t crc16(const uint8_t *buf, size_t len);
@@ -35,6 +35,6 @@ uint16_t xor16(const uint8_t *buf, size_t len);
 /// Identity hash -- the first (up to) 64bits of the values (i.e. indexes 0 to 7).
 uint64_t identity(const uint8_t *buf, size_t len);
 
-}  // namespace p4c::NetHash
+}  // namespace P4C::NetHash
 
 #endif /* LIB_NETHASH_H_ */

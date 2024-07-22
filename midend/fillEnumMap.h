@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "convertEnums.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 class FillEnumMap : public Transform {
  public:
@@ -35,6 +35,6 @@ class FillEnumMap : public Transform {
     const IR::Node *preorder(IR::Type_Enum *type) override;
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_FILLENUMMAP_H_ */

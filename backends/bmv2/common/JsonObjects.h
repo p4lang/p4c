@@ -22,7 +22,7 @@ limitations under the License.
 #include "lib/json.h"
 #include "lib/ordered_map.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 class JsonObjects {
  public:
@@ -227,6 +227,6 @@ class JsonObjects {
     Util::JsonArray *field_aliases;
 };
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_JSONOBJECTS_H_ */

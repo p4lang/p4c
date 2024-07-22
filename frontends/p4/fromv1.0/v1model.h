@@ -24,15 +24,15 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/json.h"
 
-namespace p4c::P4V1 {
+namespace P4C::P4V1 {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 // This should be kept in sync with p4includes/v1model.p4
 // In a perfect world this would be generated automatically from
 // p4includes/v1model.p4
 
-struct Parser_Model : public ::p4c::Model::Elem {
+struct Parser_Model : public ::P4C::Model::Elem {
     Parser_Model(Model::Type_Model headersType, Model::Type_Model userMetaType,
                  Model::Type_Model standardMetadataType)
         : Model::Elem("ParserImpl"_cs),
@@ -40,68 +40,68 @@ struct Parser_Model : public ::p4c::Model::Elem {
           headersParam("hdr"_cs, headersType, 1),
           metadataParam("meta"_cs, userMetaType, 2),
           standardMetadataParam("standard_metadata"_cs, standardMetadataType, 3) {}
-    ::p4c::Model::Param_Model packetParam;
-    ::p4c::Model::Param_Model headersParam;
-    ::p4c::Model::Param_Model metadataParam;
-    ::p4c::Model::Param_Model standardMetadataParam;
+    ::P4C::Model::Param_Model packetParam;
+    ::P4C::Model::Param_Model headersParam;
+    ::P4C::Model::Param_Model metadataParam;
+    ::P4C::Model::Param_Model standardMetadataParam;
 };
 
-struct Deparser_Model : public ::p4c::Model::Elem {
+struct Deparser_Model : public ::P4C::Model::Elem {
     explicit Deparser_Model(Model::Type_Model headersType)
         : Model::Elem("DeparserImpl"_cs),
           packetParam("packet"_cs, P4::P4CoreLibrary::instance().packetOut, 0),
           headersParam("hdr"_cs, headersType, 1) {}
-    ::p4c::Model::Param_Model packetParam;
-    ::p4c::Model::Param_Model headersParam;
+    ::P4C::Model::Param_Model packetParam;
+    ::P4C::Model::Param_Model headersParam;
 };
 
 // Models ingress and egress
-struct Control_Model : public ::p4c::Model::Elem {
+struct Control_Model : public ::P4C::Model::Elem {
     Control_Model(cstring name, Model::Type_Model headersType, Model::Type_Model metadataType,
                   Model::Type_Model standardMetadataType)
         : Model::Elem(name),
           headersParam("hdr"_cs, headersType, 0),
           metadataParam("meta"_cs, metadataType, 1),
           standardMetadataParam("standard_metadata"_cs, standardMetadataType, 2) {}
-    ::p4c::Model::Param_Model headersParam;
-    ::p4c::Model::Param_Model metadataParam;
-    ::p4c::Model::Param_Model standardMetadataParam;
+    ::P4C::Model::Param_Model headersParam;
+    ::P4C::Model::Param_Model metadataParam;
+    ::P4C::Model::Param_Model standardMetadataParam;
 };
 
-struct VerifyUpdate_Model : public ::p4c::Model::Elem {
+struct VerifyUpdate_Model : public ::P4C::Model::Elem {
     VerifyUpdate_Model(cstring name, Model::Type_Model headersType)
         : Model::Elem(name), headersParam("hdr"_cs, headersType, 0) {}
-    ::p4c::Model::Param_Model headersParam;
+    ::P4C::Model::Param_Model headersParam;
 };
 
-struct CounterType_Model : public ::p4c::Model::Enum_Model {
+struct CounterType_Model : public ::P4C::Model::Enum_Model {
     CounterType_Model()
-        : ::p4c::Model::Enum_Model("CounterType"_cs),
+        : ::P4C::Model::Enum_Model("CounterType"_cs),
           packets("packets"_cs),
           bytes("bytes"_cs),
           both("packets_and_bytes"_cs) {}
-    ::p4c::Model::Elem packets;
-    ::p4c::Model::Elem bytes;
-    ::p4c::Model::Elem both;
+    ::P4C::Model::Elem packets;
+    ::P4C::Model::Elem bytes;
+    ::P4C::Model::Elem both;
 };
 
-struct MeterType_Model : public ::p4c::Model::Enum_Model {
+struct MeterType_Model : public ::P4C::Model::Enum_Model {
     MeterType_Model()
-        : ::p4c::Model::Enum_Model("MeterType"_cs), packets("packets"_cs), bytes("bytes"_cs) {}
-    ::p4c::Model::Elem packets;
-    ::p4c::Model::Elem bytes;
+        : ::P4C::Model::Enum_Model("MeterType"_cs), packets("packets"_cs), bytes("bytes"_cs) {}
+    ::P4C::Model::Elem packets;
+    ::P4C::Model::Elem bytes;
 };
 
-struct ActionProfile_Model : public ::p4c::Model::Extern_Model {
+struct ActionProfile_Model : public ::P4C::Model::Extern_Model {
     ActionProfile_Model()
         : Extern_Model("action_profile"_cs),
           sizeType(IR::Type_Bits::get(32)),
           sizeParam("size"_cs) {}
     const IR::Type *sizeType;
-    ::p4c::Model::Elem sizeParam;
+    ::P4C::Model::Elem sizeParam;
 };
 
-struct ActionSelector_Model : public ::p4c::Model::Extern_Model {
+struct ActionSelector_Model : public ::P4C::Model::Extern_Model {
     ActionSelector_Model()
         : Extern_Model("action_selector"_cs),
           sizeType(IR::Type_Bits::get(32)),
@@ -109,14 +109,14 @@ struct ActionSelector_Model : public ::p4c::Model::Extern_Model {
           widthType(IR::Type_Bits::get(32)),
           algorithmParam("algorithm"_cs) {}
     const IR::Type *sizeType;
-    ::p4c::Model::Elem sizeParam;
+    ::P4C::Model::Elem sizeParam;
     const IR::Type *widthType;
-    ::p4c::Model::Elem algorithmParam;
+    ::P4C::Model::Elem algorithmParam;
 };
 
-struct Random_Model : public ::p4c::Model::Elem {
+struct Random_Model : public ::P4C::Model::Elem {
     Random_Model() : Elem("random"_cs), modify_field_rng_uniform("modify_field_rng_uniform"_cs) {}
-    ::p4c::Model::Elem modify_field_rng_uniform;
+    ::P4C::Model::Elem modify_field_rng_uniform;
 };
 
 class Truncate : public Model::Extern_Model {
@@ -125,77 +125,77 @@ class Truncate : public Model::Extern_Model {
     const IR::Type *length_type;
 };
 
-struct CounterOrMeter_Model : public ::p4c::Model::Extern_Model {
+struct CounterOrMeter_Model : public ::P4C::Model::Extern_Model {
     explicit CounterOrMeter_Model(cstring name)
         : Extern_Model(name),
           sizeParam("size"_cs),
           typeParam("type"_cs),
           size_type(IR::Type_Bits::get(32)) {}
-    ::p4c::Model::Elem sizeParam;
-    ::p4c::Model::Elem typeParam;
+    ::P4C::Model::Elem sizeParam;
+    ::P4C::Model::Elem typeParam;
     const IR::Type *size_type;
     CounterType_Model counterType;
     MeterType_Model meterType;
 };
 
-struct Register_Model : public ::p4c::Model::Extern_Model {
+struct Register_Model : public ::P4C::Model::Extern_Model {
     Register_Model()
         : Extern_Model("register"_cs),
           sizeParam("size"_cs),
           read("read"_cs),
           write("write"_cs),
           size_type(IR::Type_Bits::get(32)) {}
-    ::p4c::Model::Elem sizeParam;
-    ::p4c::Model::Elem read;
-    ::p4c::Model::Elem write;
+    ::P4C::Model::Elem sizeParam;
+    ::P4C::Model::Elem read;
+    ::P4C::Model::Elem write;
     const IR::Type *size_type;
 };
 
-struct DigestReceiver_Model : public ::p4c::Model::Elem {
+struct DigestReceiver_Model : public ::P4C::Model::Elem {
     DigestReceiver_Model() : Elem("digest"_cs), receiverType(IR::Type_Bits::get(32)) {}
     const IR::Type *receiverType;
 };
 
 struct Counter_Model : public CounterOrMeter_Model {
     Counter_Model() : CounterOrMeter_Model("counter"_cs), increment("count"_cs) {}
-    ::p4c::Model::Elem increment;
+    ::P4C::Model::Elem increment;
 };
 
 struct Meter_Model : public CounterOrMeter_Model {
     Meter_Model() : CounterOrMeter_Model("meter"_cs), executeMeter("execute_meter"_cs) {}
-    ::p4c::Model::Elem executeMeter;
+    ::P4C::Model::Elem executeMeter;
 };
 
 struct DirectMeter_Model : public CounterOrMeter_Model {
     DirectMeter_Model() : CounterOrMeter_Model("direct_meter"_cs), read("read"_cs) {}
-    ::p4c::Model::Elem read;
+    ::P4C::Model::Elem read;
 };
 
 struct DirectCounter_Model : public CounterOrMeter_Model {
     DirectCounter_Model() : CounterOrMeter_Model("direct_counter"_cs), count("count"_cs) {}
-    ::p4c::Model::Elem count;
+    ::P4C::Model::Elem count;
 };
 
-struct StandardMetadataType_Model : public ::p4c::Model::Type_Model {
+struct StandardMetadataType_Model : public ::P4C::Model::Type_Model {
     explicit StandardMetadataType_Model(cstring name)
-        : ::p4c::Model::Type_Model(name),
+        : ::P4C::Model::Type_Model(name),
           dropBit("drop"_cs),
           recirculate("recirculate_port"_cs),
           egress_spec("egress_spec"_cs) {}
-    ::p4c::Model::Elem dropBit;
-    ::p4c::Model::Elem recirculate;
-    ::p4c::Model::Elem egress_spec;
+    ::P4C::Model::Elem dropBit;
+    ::P4C::Model::Elem recirculate;
+    ::P4C::Model::Elem egress_spec;
 };
 
-struct CloneType_Model : public ::p4c::Model::Enum_Model {
-    CloneType_Model() : ::p4c::Model::Enum_Model("CloneType"_cs), i2e("I2E"_cs), e2e("E2E"_cs) {}
-    ::p4c::Model::Elem i2e;
-    ::p4c::Model::Elem e2e;
+struct CloneType_Model : public ::P4C::Model::Enum_Model {
+    CloneType_Model() : ::P4C::Model::Enum_Model("CloneType"_cs), i2e("I2E"_cs), e2e("E2E"_cs) {}
+    ::P4C::Model::Elem i2e;
+    ::P4C::Model::Elem e2e;
 };
 
-struct Algorithm_Model : public ::p4c::Model::Enum_Model {
+struct Algorithm_Model : public ::P4C::Model::Enum_Model {
     Algorithm_Model()
-        : ::p4c::Model::Enum_Model("HashAlgorithm"_cs),
+        : ::P4C::Model::Enum_Model("HashAlgorithm"_cs),
           crc32("crc32"_cs),
           crc32_custom("crc32_custom"_cs),
           crc16("crc16"_cs),
@@ -204,32 +204,32 @@ struct Algorithm_Model : public ::p4c::Model::Enum_Model {
           identity("identity"_cs),
           csum16("csum16"_cs),
           xor16("xor16"_cs) {}
-    ::p4c::Model::Elem crc32;
-    ::p4c::Model::Elem crc32_custom;
-    ::p4c::Model::Elem crc16;
-    ::p4c::Model::Elem crc16_custom;
-    ::p4c::Model::Elem random;
-    ::p4c::Model::Elem identity;
-    ::p4c::Model::Elem csum16;
-    ::p4c::Model::Elem xor16;
+    ::P4C::Model::Elem crc32;
+    ::P4C::Model::Elem crc32_custom;
+    ::P4C::Model::Elem crc16;
+    ::P4C::Model::Elem crc16_custom;
+    ::P4C::Model::Elem random;
+    ::P4C::Model::Elem identity;
+    ::P4C::Model::Elem csum16;
+    ::P4C::Model::Elem xor16;
 };
 
-struct Hash_Model : public ::p4c::Model::Elem {
-    Hash_Model() : ::p4c::Model::Elem("hash"_cs) {}
+struct Hash_Model : public ::P4C::Model::Elem {
+    Hash_Model() : ::P4C::Model::Elem("hash"_cs) {}
 };
 
-struct Cloner_Model : public ::p4c::Model::Extern_Model {
+struct Cloner_Model : public ::P4C::Model::Extern_Model {
     Cloner_Model()
         : Extern_Model("clone"_cs),
           clone3("clone_preserving_field_list"_cs),
 
           sessionType(IR::Type_Bits::get(32)) {}
-    ::p4c::Model::Elem clone3;
+    ::P4C::Model::Elem clone3;
     CloneType_Model cloneType;
     const IR::Type *sessionType;
 };
 
-struct Switch_Model : public ::p4c::Model::Elem {
+struct Switch_Model : public ::P4C::Model::Elem {
     Switch_Model()
         : Model::Elem("V1Switch"_cs),
           parser("p"_cs),
@@ -238,12 +238,12 @@ struct Switch_Model : public ::p4c::Model::Elem {
           egress("eg"_cs),
           compute("ck"_cs),
           deparser("dep"_cs) {}
-    ::p4c::Model::Elem parser;  // names of the package arguments
-    ::p4c::Model::Elem verify;
-    ::p4c::Model::Elem ingress;
-    ::p4c::Model::Elem egress;
-    ::p4c::Model::Elem compute;
-    ::p4c::Model::Elem deparser;
+    ::P4C::Model::Elem parser;  // names of the package arguments
+    ::P4C::Model::Elem verify;
+    ::P4C::Model::Elem ingress;
+    ::P4C::Model::Elem egress;
+    ::P4C::Model::Elem compute;
+    ::P4C::Model::Elem deparser;
 };
 
 struct TableAttributes_Model {
@@ -253,11 +253,11 @@ struct TableAttributes_Model {
           meters("meters"_cs),
           size("size"_cs),
           supportTimeout("support_timeout"_cs) {}
-    ::p4c::Model::Elem tableImplementation;
-    ::p4c::Model::Elem counters;
-    ::p4c::Model::Elem meters;
-    ::p4c::Model::Elem size;
-    ::p4c::Model::Elem supportTimeout;
+    ::P4C::Model::Elem tableImplementation;
+    ::P4C::Model::Elem counters;
+    ::P4C::Model::Elem meters;
+    ::P4C::Model::Elem size;
+    ::P4C::Model::Elem supportTimeout;
     const unsigned defaultTableSize = 1024;
 };
 
@@ -306,12 +306,12 @@ class V1Model : public Model::Model {
           directCounter() {}
 
  public:
-    const ::p4c::Model::Elem file;
-    const ::p4c::Model::Elem standardMetadata;
-    const ::p4c::Model::Elem intrinsicMetadata;
-    const ::p4c::Model::Elem queueingMetadata;
-    const ::p4c::Model::Type_Model headersType;
-    const ::p4c::Model::Type_Model metadataType;
+    const ::P4C::Model::Elem file;
+    const ::P4C::Model::Elem standardMetadata;
+    const ::P4C::Model::Elem intrinsicMetadata;
+    const ::P4C::Model::Elem queueingMetadata;
+    const ::P4C::Model::Type_Model headersType;
+    const ::P4C::Model::Type_Model metadataType;
     const StandardMetadataType_Model standardMetadataType;
     const Parser_Model parser;
     const Deparser_Model deparser;
@@ -326,24 +326,24 @@ class V1Model : public Model::Model {
     const ActionProfile_Model action_profile;
     const ActionSelector_Model action_selector;
     const Cloner_Model clone;
-    const ::p4c::Model::Elem resubmit;
+    const ::P4C::Model::Elem resubmit;
     const TableAttributes_Model tableAttributes;
-    const ::p4c::Model::Elem rangeMatchType;
-    const ::p4c::Model::Elem optionalMatchType;
-    const ::p4c::Model::Elem selectorMatchType;
+    const ::P4C::Model::Elem rangeMatchType;
+    const ::P4C::Model::Elem optionalMatchType;
+    const ::P4C::Model::Elem selectorMatchType;
     const VerifyUpdate_Model verify;
     const VerifyUpdate_Model compute;
     const DigestReceiver_Model digest_receiver;
     const Hash_Model hash;
     const Algorithm_Model algorithm;
     const Register_Model registers;
-    const ::p4c::Model::Elem drop;
-    const ::p4c::Model::Elem recirculate;
-    const ::p4c::Model::Elem verify_checksum;
-    const ::p4c::Model::Elem update_checksum;
-    const ::p4c::Model::Elem verify_checksum_with_payload;
-    const ::p4c::Model::Elem update_checksum_with_payload;
-    const ::p4c::Model::Elem log_msg;
+    const ::P4C::Model::Elem drop;
+    const ::P4C::Model::Elem recirculate;
+    const ::P4C::Model::Elem verify_checksum;
+    const ::P4C::Model::Elem update_checksum;
+    const ::P4C::Model::Elem verify_checksum_with_payload;
+    const ::P4C::Model::Elem update_checksum_with_payload;
+    const ::P4C::Model::Elem log_msg;
     const DirectMeter_Model directMeter;
     const DirectCounter_Model directCounter;
 
@@ -369,6 +369,6 @@ class getV1ModelVersion : public Inspector {
     unsigned version = 0;
 };
 
-}  // namespace p4c::P4V1
+}  // namespace P4C::P4V1
 
 #endif /* FRONTENDS_P4_FROMV1_0_V1MODEL_H_ */

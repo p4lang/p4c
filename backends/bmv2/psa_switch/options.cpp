@@ -3,9 +3,9 @@
 #include "frontends/common/parser_options.h"
 #include "lib/exename.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 std::vector<const char *> *PsaSwitchOptions::process(int argc, char *const argv[]) {
     searchForIncludePath(p4includePath,
@@ -17,4 +17,4 @@ std::vector<const char *> *PsaSwitchOptions::process(int argc, char *const argv[
     return remainingOptions;
 }
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2

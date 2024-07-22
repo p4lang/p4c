@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "lib/error.h"
 
-namespace p4c::UBPF {
+namespace P4C::UBPF {
 
 UBPFControlBodyTranslator::UBPFControlBodyTranslator(const UBPFControl *control)
     : EBPF::CodeGenInspector(control->program->refMap, control->program->typeMap),
@@ -59,7 +59,7 @@ void UBPFControlBodyTranslator::processFunction(const P4::ExternFunction *functi
             builder->appendFormat(" = ubpf_hash(&%s, sizeof(%s))", hashKeyInstanceName,
                                   hashKeyInstanceName);
         } else {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: Not supported hash algorithm type",
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1%: Not supported hash algorithm type",
                          algorithmType);
         }
 
@@ -70,7 +70,7 @@ void UBPFControlBodyTranslator::processFunction(const P4::ExternFunction *functi
             visit(function->expr->arguments->at(0)->expression);
             builder->append(")");
         } else {
-            ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: One argument expected", function->expr);
+            ::P4C::error(ErrorType::ERR_EXPECTED, "%1%: One argument expected", function->expr);
         }
         return;
     }
@@ -106,7 +106,7 @@ cstring UBPFControlBodyTranslator::createHashKeyInstance(const P4::ExternFunctio
 
     auto atype = UBPFTypeFactory::instance->create(dataArgument->type);
     if (!atype->is<UBPFListType>()) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unsupported argument type",
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unsupported argument type",
                      dataArgument->type);
     }
     auto ubpfList = atype->to<UBPFListType>();
@@ -148,7 +148,7 @@ void UBPFControlBodyTranslator::processMethod(const P4::ExternMethod *method) {
 
     if (declType->name.name == p4lib.packetOut.name) {
         if (method->method->name.name == p4lib.packetOut.emit.name) {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED,
                          "%1%: Emit extern not supported in control block", method->expr);
             return;
         }
@@ -163,7 +163,7 @@ void UBPFControlBodyTranslator::processMethod(const P4::ExternMethod *method) {
         pRegister->emitMethodInvocation(builder, method);
         return;
     }
-    ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: Unexpected method call", method->expr);
+    ::P4C::error(ErrorType::ERR_UNEXPECTED, "%1%: Unexpected method call", method->expr);
 }
 
 void UBPFControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
@@ -258,7 +258,7 @@ bool UBPFControlBodyTranslator::preorder(const IR::PathExpression *expression) {
     auto param = decl->getNode()->to<IR::Parameter>();
     if (param != nullptr) {
         if (toDereference.count(param) > 0) builder->append("*");
-        auto subst = ::p4c::get(substitution, param);
+        auto subst = ::P4C::get(substitution, param);
         if (subst != nullptr) {
             builder->append(subst->name);
             return false;
@@ -318,7 +318,7 @@ bool UBPFControlBodyTranslator::preorder(const IR::MethodCallExpression *express
         return false;
     }
 
-    ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unsupported method invocation %1%", expression);
+    ::P4C::error(ErrorType::ERR_UNEXPECTED, "Unsupported method invocation %1%", expression);
     return false;
 }
 
@@ -581,7 +581,7 @@ void UBPFControl::scanConstants() {
         } else if (!b->is<IR::Block>()) {
             continue;
         } else {
-            ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
+            ::P4C::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
                          b->toString());
         }
     }
@@ -638,7 +638,7 @@ bool UBPFControl::build() {
     auto pl = controlBlock->container->type->applyParams;
     size_t numberOfArgs = UBPFModel::instance.numberOfControlBlockArguments();
     if (pl->size() != numberOfArgs) {
-        ::p4c::error(ErrorType::ERR_EXPECTED, "Expected control block to have exactly %d parameter",
+        ::P4C::error(ErrorType::ERR_EXPECTED, "Expected control block to have exactly %d parameter",
                      numberOfArgs);
         return false;
     }
@@ -650,7 +650,7 @@ bool UBPFControl::build() {
     codeGen->substitute(headers, parserHeaders);
 
     scanConstants();
-    return ::p4c::errorCount() == 0;
+    return ::P4C::errorCount() == 0;
 }
 
-}  // namespace p4c::UBPF
+}  // namespace P4C::UBPF

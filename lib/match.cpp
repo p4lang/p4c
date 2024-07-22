@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "match.h"
 
-namespace p4c {
+namespace P4C {
 
 static int chkmask(const match_t &m, int maskbits) {
     big_int mask = (big_int(1) << maskbits) - 1;
@@ -136,4 +136,4 @@ void dump(const match_t *m) {
     std::cout << std::endl;
 }
 
-}  // namespace p4c
+}  // namespace P4C

@@ -25,7 +25,7 @@ limitations under the License.
 #include "config.h"
 #include "cstring.h"
 
-namespace p4c {
+namespace P4C {
 
 #if !HAVE_MEMRCHR
 static inline void *memrchr(const char *s, int c, size_t n) {
@@ -313,6 +313,6 @@ class StringRef::Split {
 inline StringRef::Split StringRef::split(char ch) const { return Split(*this, nullptr, find(ch)); }
 inline StringRef::Split StringRef::split(const char *s) const { return Split(*this, s, find(s)); }
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* LIB_STRINGREF_H_ */

@@ -36,7 +36,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 const ExecutionState *TableStepper::getExecutionState() { return &stepper->state; }
 
@@ -580,4 +580,4 @@ TableStepper::TableStepper(ExprStepper *stepper, const IR::P4Table *table)
     }
 }
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen

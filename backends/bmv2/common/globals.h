@@ -20,7 +20,7 @@ limitations under the License.
 #include "backend.h"
 #include "ir/ir.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 class ConvertGlobals : public Inspector {
     ConversionContext *ctxt;
@@ -42,6 +42,6 @@ class ConvertGlobals : public Inspector {
     }
 };
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_GLOBALS_H_ */

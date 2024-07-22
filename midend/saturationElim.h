@@ -3,7 +3,7 @@
 
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /// Contains utility functions for eliminating saturating arithmetic.
 class SaturationElim {
@@ -19,6 +19,6 @@ class SaturationElim {
     static const IR::Mux *eliminate(const IR::Operation_Binary *binary);
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_SATURATIONELIM_H_ */

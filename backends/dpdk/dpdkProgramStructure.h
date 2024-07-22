@@ -5,7 +5,7 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace p4c {
+namespace P4C {
 
 /// DPDK target implementation treats tables with keys lying non-contiguous in underlying
 /// structure as wildcard even if all keys are exact match keys.
@@ -163,6 +163,6 @@ class InspectDpdkProgram : public Inspector {
     bool isStandardMetadata(cstring);
 };
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* BACKENDS_DPDK_DPDKPROGRAMSTRUCTURE_H_ */

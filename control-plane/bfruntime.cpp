@@ -20,7 +20,7 @@ limitations under the License.
 #include "lib/json.h"
 #include "lib/null.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 namespace BFRT {
 
@@ -43,7 +43,7 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info &p4info,
             auto e = fSpec.serializable_enum().name();
             auto typeEnum = enums.find(e);
             if (typeEnum == enums.end()) {
-                ::p4c::error(ErrorType::ERR_NOT_FOUND,
+                ::P4C::error(ErrorType::ERR_NOT_FOUND,
                              "Enum type '%1%' not found in typeInfo for '%2%' '%3%'", e,
                              instanceType, instanceName);
                 return;
@@ -63,7 +63,7 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info &p4info,
             auto typeName = fSpec.new_type().name();
             auto newType = newtypes.find(typeName);
             if (newType == newtypes.end()) {
-                ::p4c::error(ErrorType::ERR_NOT_FOUND,
+                ::P4C::error(ErrorType::ERR_NOT_FOUND,
                              "New type '%1%' not found in typeInfo for '%2%' '%3%'", typeName,
                              instanceType, instanceName);
                 return;
@@ -72,7 +72,7 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info &p4info,
         }
 
         if (!type) {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED,
                          "Error when generating BF-RT info for '%1%' '%2%': "
                          "packed type is too complex",
                          instanceType, instanceName);
@@ -139,7 +139,7 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info &p4info,
             fields.push_back({prefix + member.name() + suffix, id++, type});
         }
     } else {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED,
                      "Error when generating BF-RT info for '%1%' '%2%': "
                      "only structs, headers, tuples, bitstrings and "
                      "serializable enums are currently supported types",
@@ -508,7 +508,7 @@ void BFRuntimeGenerator::addActionProfCommon(
     tableJson->emplace("key"_cs, keyJson);
 
     if (actionProf.tableIds.empty()) {
-        ::p4c::warning("Action profile '%1%' is not used by any table, skipping it",
+        ::P4C::warning("Action profile '%1%' is not used by any table, skipping it",
                        actionProf.name);
         return;
     }
@@ -546,7 +546,7 @@ Util::JsonArray *BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table &ta
     for (const auto &action_ref : table.action_refs()) {
         auto *action = Standard::findAction(p4info, action_ref.id());
         if (action == nullptr) {
-            ::p4c::error(ErrorType::ERR_INVALID, "Invalid action id '%1%'", action_ref.id());
+            ::P4C::error(ErrorType::ERR_INVALID, "Invalid action id '%1%'", action_ref.id());
             continue;
         }
         auto *spec = new Util::JsonObject();
@@ -564,7 +564,7 @@ Util::JsonArray *BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table &ta
                 spec->emplace("action_scope", "DefaultOnly");
                 break;
             default:
-                ::p4c::error(ErrorType::ERR_INVALID, "Invalid action ref scope '%1%' in P4Info",
+                ::P4C::error(ErrorType::ERR_INVALID, "Invalid action ref scope '%1%' in P4Info",
                              int(action_ref.scope()));
                 break;
         }
@@ -629,7 +629,7 @@ void BFRuntimeGenerator::addDirectResources(const p4configv1::Table &table,
             addMeterDataFields(dataJson, *meter);
             attributesJson->append("MeterByteCountAdjust");
         } else {
-            ::p4c::error(ErrorType::ERR_UNKNOWN, "Unknown direct resource id '%1%'", directResId);
+            ::P4C::error(ErrorType::ERR_UNKNOWN, "Unknown direct resource id '%1%'", directResId);
             continue;
         }
     }
@@ -689,7 +689,7 @@ void BFRuntimeGenerator::addMatchTables(Util::JsonArray *tablesJson) const {
                     break;
             }
             if (matchType == std::nullopt) {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Unsupported match type for BF-RT: %1%",
+                ::P4C::error(ErrorType::ERR_UNSUPPORTED, "Unsupported match type for BF-RT: %1%",
                              int(mf.match_type()));
                 continue;
             }
@@ -725,7 +725,7 @@ void BFRuntimeGenerator::addMatchTables(Util::JsonArray *tablesJson) const {
 
             // Control plane requires there's no duplicate key in one table.
             if (dupKey.count(keyName) != 0) {
-                ::p4c::error(ErrorType::ERR_DUPLICATE,
+                ::P4C::error(ErrorType::ERR_DUPLICATE,
                              "Key \"%s\" is duplicate in Table \"%s\". It doesn't meet BFRT's "
                              "requirements.\n"
                              "Please using @name annotation for the duplicate key names",
@@ -879,4 +879,4 @@ void BFRuntimeGenerator::serializeBFRuntimeSchema(std::ostream *destination) {
 
 }  // namespace BFRT
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

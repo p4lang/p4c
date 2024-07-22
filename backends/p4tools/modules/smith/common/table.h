@@ -6,7 +6,7 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace p4c::P4Tools::P4Smith {
+namespace P4C::P4Tools::P4Smith {
 
 class TableGenerator : public Generator {
  public:
@@ -32,6 +32,6 @@ class TableGenerator : public Generator {
     IR::Property *genActionListProperty();
 };
 
-}  // namespace p4c::P4Tools::P4Smith
+}  // namespace P4C::P4Tools::P4Smith
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_COMMON_TABLE_H_ */

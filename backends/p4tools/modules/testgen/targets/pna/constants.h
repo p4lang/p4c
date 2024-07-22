@@ -3,7 +3,7 @@
 
 #include "ir/ir.h"
 
-namespace p4c::P4Tools::P4Testgen::Pna {
+namespace P4C::P4Tools::P4Testgen::Pna {
 
 enum PacketDirection { NET_TO_HOST, HOST_TO_NET };
 
@@ -33,6 +33,6 @@ class PnaSymbolicVars {
     static const IR::SymbolicVariable DIRECTION;
 };
 
-}  // namespace p4c::P4Tools::P4Testgen::Pna
+}  // namespace P4C::P4Tools::P4Testgen::Pna
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_CONSTANTS_H_ */

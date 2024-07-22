@@ -18,9 +18,9 @@ limitations under the License.
 
 #include "ubpfHelpers.h"
 
-namespace p4c::UBPF {
+namespace P4C::UBPF {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 EBPF::EBPFTypeFactory *instance = UBPFTypeFactory::getInstance();
 
@@ -52,7 +52,7 @@ EBPF::EBPFType *UBPFTypeFactory::create(const IR::Type *type) {
     } else if (auto tpl = type->to<IR::Type_List>()) {
         result = new UBPFListType(tpl);
     } else {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Type %1% not supported", type);
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Type %1% not supported", type);
     }
     return result;
 }
@@ -197,7 +197,7 @@ UBPFListType::UBPFListType(const IR::Type_List *lst) : EBPFType(lst) {
         auto ltype = UBPFTypeFactory::instance->create(el);
         auto wt = ltype->to<EBPF::IHasWidth>();
         if (wt == nullptr) {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                          "UBPF: Unsupported type in Type_List: %s", el->getP4Type());
         } else {
             width += wt->widthInBits();
@@ -227,7 +227,7 @@ UBPFListType::UBPFListType(const IR::Type_List *lst) : EBPFType(lst) {
                 elements.push_back(pad);
                 paddingIndex++;
             } else {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Not supported bitwidth in %1%",
+                ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Not supported bitwidth in %1%",
                              this->type->getNode());
             }
         }
@@ -278,4 +278,4 @@ void UBPFListType::emit(EBPF::CodeBuilder *builder) {
     }
 }
 
-}  // namespace p4c::UBPF
+}  // namespace P4C::UBPF

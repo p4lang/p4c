@@ -15,7 +15,7 @@ limitations under the License.
 
 #include "backends/ebpf/psa/ebpfPipeline.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 EBPFMeterPSA::EBPFMeterPSA(const EBPFProgram *program, cstring instanceName,
                            const IR::Declaration_Instance *di, CodeGenInspector *codeGen)
@@ -32,12 +32,12 @@ EBPFMeterPSA::EBPFMeterPSA(const EBPFProgram *program, cstring instanceName,
 
         auto declaredSize = di->arguments->at(0)->expression->to<IR::Constant>();
         if (!declaredSize->fitsUint()) {
-            ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", declaredSize);
+            ::P4C::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", declaredSize);
             return;
         }
         size = declaredSize->asUnsigned();
     } else {
-        ::p4c::error(ErrorType::ERR_INVALID, "Not known Meter type: %1%", di);
+        ::P4C::error(ErrorType::ERR_INVALID, "Not known Meter type: %1%", di);
         return;
     }
 
@@ -150,7 +150,7 @@ void EBPFMeterPSA::emitInstance(CodeBuilder *builder) const {
         builder->target->emitTableDeclSpinlock(builder, instanceName, TableHash, this->keyTypeName,
                                                "struct " + getIndirectStructName(), size);
     } else {
-        ::p4c::error(ErrorType::ERR_UNEXPECTED,
+        ::P4C::error(ErrorType::ERR_UNEXPECTED,
                      "Direct meter belongs to table "
                      "and cannot have own instance");
     }
@@ -446,4 +446,4 @@ cstring EBPFMeterPSA::meterExecuteFunc(bool trace, P4::ReferenceMap *refMap) {
     return meterExecuteFunc;
 }
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF

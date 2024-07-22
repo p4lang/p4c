@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/parseAnnotations.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 namespace ControlPlaneAPI {
 
@@ -59,6 +59,6 @@ class ParseP4RuntimeAnnotations : public ParseAnnotations {
 
 }  // namespace ControlPlaneAPI
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif  // CONTROL_PLANE_P4RUNTIMEANNOTATIONS_H_

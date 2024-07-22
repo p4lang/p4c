@@ -8,9 +8,9 @@
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace p4c::Test {
+namespace P4C::Test {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 TEST(P4TestgenBenchmark, SuccessfullyGenerate1000Tests) {
     auto compilerOptions = P4CContextWithOptions<CompilerOptions>::get().options();
@@ -40,4 +40,4 @@ TEST(P4TestgenBenchmark, SuccessfullyGenerate1000Tests) {
     // Print the report.
     P4Tools::printPerformanceReport();
 }
-}  // namespace p4c::Test
+}  // namespace P4C::Test

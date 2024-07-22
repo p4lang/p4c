@@ -4,7 +4,7 @@
 #include "frontends/common/options.h"
 #include "frontends/common/parser_options.h"
 
-namespace p4c::P4Fmt {
+namespace P4C::P4Fmt {
 
 class P4fmtOptions : public CompilerOptions {
  public:
@@ -24,6 +24,6 @@ class P4fmtOptions : public CompilerOptions {
 
 using P4FmtContext = P4CContextWithOptions<P4fmtOptions>;
 
-}  // namespace p4c::P4Fmt
+}  // namespace P4C::P4Fmt
 
 #endif /* BACKENDS_P4FMT_OPTIONS_H_ */

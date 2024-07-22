@@ -7,7 +7,7 @@
 
 #include "lib/cstring.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 /// Specifies a canonical representation of the target pipeline as documented in P4 code.
 class ArchSpec {
@@ -56,6 +56,6 @@ class ArchSpec {
     [[nodiscard]] cstring getPackageName() const;
 };
 
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_ARCH_SPEC_H_ */

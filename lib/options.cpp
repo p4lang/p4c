@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "lib/null.h"
 
-namespace p4c {
+namespace P4C {
 
 void Util::Options::registerOption(const char *option, const char *argName,
                                    OptionProcessor processor, const char *description,
@@ -67,7 +67,7 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
             option = get(options, opt);
             if (!option && (arg = opt.find('='))) option = get(options, opt.before(arg++));
             if (option == nullptr) {
-                ::p4c::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
+                ::P4C::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
                 usage();
                 return nullptr;
             }
@@ -82,7 +82,7 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
                 option = get(options, opt);
             }
             if (option == nullptr) {
-                ::p4c::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
+                ::P4C::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
                 usage();
                 return nullptr;
             }
@@ -96,7 +96,7 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
             if (option->argName != nullptr && arg == nullptr &&
                 !(option->flags & OptionFlags::OptionalArgument)) {
                 if (i == argc - 1) {
-                    ::p4c::error(ErrorType::ERR_EXPECTED,
+                    ::P4C::error(ErrorType::ERR_EXPECTED,
                                  "Option %1% is missing required argument %2%", opt,
                                  option->argName);
                     usage();
@@ -166,4 +166,4 @@ void Util::Options::usage() {
 
 bool Util::Options::validateOptions() const { return true; }
 
-}  // namespace p4c
+}  // namespace P4C

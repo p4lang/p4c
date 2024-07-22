@@ -2,7 +2,7 @@
 
 #include "frontends/p4/methodInstance.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 namespace GlobalCopyProp {
 
@@ -391,4 +391,4 @@ const IR::Node *DoGlobalCopyPropagation::preorder(IR::AssignmentStatement *stat)
     return stat;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

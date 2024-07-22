@@ -33,9 +33,9 @@ limitations under the License.
 #include "lib/json.h"
 #include "options.h"
 
-namespace p4c::DPDK {
+namespace P4C::DPDK {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 class ConvertToDpdkProgram : public Transform {
     P4::TypeMap *typemap;
@@ -174,5 +174,5 @@ class EliminateUnusedAction : public PassManager {
     }
 };
 
-}  // namespace p4c::DPDK
+}  // namespace P4C::DPDK
 #endif /* BACKENDS_DPDK_DPDKPROGRAM_H_ */

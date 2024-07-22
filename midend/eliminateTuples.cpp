@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 using namespace literals;
 
@@ -101,4 +101,4 @@ const IR::Node *DoReplaceTuples::postorder(IR::ArrayIndex *expression) {
     return expression;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

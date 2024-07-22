@@ -20,7 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 using namespace literals;
 
@@ -85,7 +85,7 @@ class ValidateParsedProgram final : public Inspector {
     void postorder(const IR::P4Parser *parser) override {
         auto start = parser->states.getDeclaration(IR::ParserState::start);
         if (!start) {
-            ::p4c::error(ErrorType::ERR_INVALID, "Parser %1% has no 'start' state", parser);
+            ::P4C::error(ErrorType::ERR_INVALID, "Parser %1% has no 'start' state", parser);
         }
         container(parser);
         distinctParameters(parser->getTypeParameters(), parser->getApplyParameters(),
@@ -96,6 +96,6 @@ class ValidateParsedProgram final : public Inspector {
     void postorder(const IR::ContinueStatement *s) override;
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* P4_VALIDATEPARSEDPROGRAM_H_ */

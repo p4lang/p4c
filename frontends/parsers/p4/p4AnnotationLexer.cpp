@@ -2,7 +2,7 @@
 
 #include "frontends/common/constantParsing.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 UnparsedConstant unparsedConstant(const IR::AnnotationToken *token) {
     UnparsedConstant result{token->constInfo->text, token->constInfo->skip, token->constInfo->base,
@@ -39,4 +39,4 @@ P4AnnotationLexer::Token P4AnnotationLexer::yylex(P4::P4ParserDriver &) {
     }
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 namespace {
 /**
@@ -189,4 +189,4 @@ const IR::Node *RemoveComplexExpressions::postorder(IR::MethodCallStatement *sta
     return simpleStatement(statement);
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

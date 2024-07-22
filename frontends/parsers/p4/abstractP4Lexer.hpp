@@ -3,7 +3,7 @@
 
 #include "frontends/parsers/p4/p4parser.hpp"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 class AbstractP4Lexer {
  protected:
@@ -25,6 +25,6 @@ class AbstractP4Lexer {
     virtual Token yylex(P4::P4ParserDriver& driver) = 0;
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif  /* FRONTENDS_PARSERS_P4_ABSTRACTP4LEXER_HPP_ */

@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "lib/big_int_util.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 /// We make an effort to update the typeMap as we proceed
 /// since parent expression trees may need the information
@@ -33,13 +33,13 @@ const IR::Expression *LowerExpressions::shift(const IR::Operation_Binary *expres
         auto cst = rhs->checkedTo<IR::Constant>();
         big_int maxShift = Util::shift_left(1, LowerExpressions::maxShiftWidth);
         if (cst->value > maxShift)
-            ::p4c::error(ErrorType::ERR_OVERLIMIT,
+            ::P4C::error(ErrorType::ERR_OVERLIMIT,
                          "%1%: shift amount limited to %2% on this target", expression, maxShift);
     } else {
         BUG_CHECK(rhstype->is<IR::Type_Bits>(), "%1%: expected a bit<> type", rhstype);
         auto bs = rhstype->to<IR::Type_Bits>();
         if (bs->size > LowerExpressions::maxShiftWidth)
-            ::p4c::error(ErrorType::ERR_OVERLIMIT,
+            ::P4C::error(ErrorType::ERR_OVERLIMIT,
                          "%1%: shift amount limited to %2% bits on this target", expression,
                          LowerExpressions::maxShiftWidth);
     }
@@ -186,7 +186,7 @@ const IR::Node *RemoveComplexExpressions::postorder(IR::MethodCallExpression *ex
             // one knew of this feature, since it was not very clearly
             // documented.
             if (expression->arguments->size() != 2) {
-                ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected 2 arguments", expression);
+                ::P4C::error(ErrorType::ERR_EXPECTED, "%1%: expected 2 arguments", expression);
                 return expression;
             }
             auto vec = new IR::Vector<IR::Argument>();
@@ -218,4 +218,4 @@ const IR::Node *RemoveComplexExpressions::postorder(IR::MethodCallExpression *ex
     return expression;
 }
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2

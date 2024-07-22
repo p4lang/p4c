@@ -9,7 +9,7 @@
 #include "backends/p4tools/modules/testgen/testgen.h"
 #include "backends/p4tools/modules/testgen/toolname.h"
 
-using namespace ::p4c;
+using namespace ::P4C;
 
 std::string updateErrorMsg(std::string errorMsg) {
     for (const std::string_view toReplace : {"Compiler", "compiler"}) {

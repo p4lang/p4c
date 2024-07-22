@@ -20,7 +20,7 @@ limitations under the License.
 #include "lib/error.h"
 #include "lib/stringify.h"
 
-namespace p4c::Util {
+namespace P4C::Util {
 
 TEST(Util, Format) {
     auto &context = BaseCompileContext::get();
@@ -55,4 +55,4 @@ TEST(Util, Format) {
     EXPECT_EQ("x 5\n", message);
 }
 
-}  // namespace p4c::Util
+}  // namespace P4C::Util

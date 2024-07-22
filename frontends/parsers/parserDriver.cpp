@@ -63,7 +63,7 @@ struct AutoStdioInputStream {
 
 }  // anonymous namespace
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 AbstractParserDriver::AbstractParserDriver() : sources(new Util::InputSources) {}
 
@@ -278,9 +278,9 @@ void P4ParserDriver::onReadErrorDeclaration(IR::Type_Error *error) {
     allErrors->members.append(error->members);
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
-namespace p4c::V1 {
+namespace P4C::V1 {
 
 V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
 
@@ -343,4 +343,4 @@ const IR::Annotations *V1ParserDriver::takePragmasAsAnnotations() {
     return rv;
 }
 
-}  // namespace p4c::V1
+}  // namespace P4C::V1

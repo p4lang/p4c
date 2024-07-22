@@ -27,7 +27,7 @@ limitations under the License.
 #include "lib/ordered_set.h"
 #include "typeMap.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 class ComputeWriteSet;
 class StorageFactory;
@@ -280,7 +280,7 @@ class StorageMap : public IHasDbPrint {
     }
     StorageLocation *getStorage(const IR::IDeclaration *decl) const {
         CHECK_NULL(decl);
-        auto result = ::p4c::get(storage, decl);
+        auto result = ::P4C::get(storage, decl);
         return result;
     }
     void dbprint(std::ostream &out) const override {
@@ -342,30 +342,30 @@ class ProgramPoint : public IHasDbPrint {
     ProgramPoint &operator=(const ProgramPoint &) = default;
     ProgramPoint &operator=(ProgramPoint &&) = default;
 };
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 // inject hash into std namespace so it is picked up by std::unordered_set
 namespace std {
 template <>
-struct hash<p4c::P4::ProgramPoint> {
-    std::size_t operator()(const p4c::P4::ProgramPoint &s) const { return s.hash(); }
+struct hash<P4C::P4::ProgramPoint> {
+    std::size_t operator()(const P4C::P4::ProgramPoint &s) const { return s.hash(); }
 };
 
 template <>
-struct hash<p4c::P4::loc_t> {
-    std::size_t operator()(const p4c::P4::loc_t &loc) const { return loc.hash(); }
+struct hash<P4C::P4::loc_t> {
+    std::size_t operator()(const P4C::P4::loc_t &loc) const { return loc.hash(); }
 };
 
 }  // namespace std
 
-namespace p4c::Util {
+namespace P4C::Util {
 template <>
 struct Hasher<P4::ProgramPoint> {
     size_t operator()(const P4::ProgramPoint &p) const { return p.hash(); }
 };
-}  // namespace p4c::Util
+}  // namespace P4C::Util
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 class ProgramPoints : public IHasDbPrint {
     typedef absl::flat_hash_set<ProgramPoint, Util::Hash> Points;
     Points points;
@@ -422,7 +422,7 @@ class Definitions : public IHasDbPrint {
         return definitions.find(location) != definitions.end();
     }
     const ProgramPoints *getPoints(const BaseLocation *location) const {
-        auto r = ::p4c::get(definitions, location);
+        auto r = ::P4C::get(definitions, location);
         BUG_CHECK(r != nullptr, "no definitions found for %1%", location);
         return r;
     }
@@ -606,7 +606,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     // Get writes of a node that is a direct child of the currently being visited node.
     const LocationSet *getWrites(const IR::Expression *expression) {
         const loc_t &exprLoc = *getLoc(expression, getChildContext());
-        auto result = ::p4c::get(writes, exprLoc);
+        auto result = ::P4C::get(writes, exprLoc);
         BUG_CHECK(result != nullptr, "No location set known for %1%", expression);
         return result;
     }
@@ -614,7 +614,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     // In this case, parentLoc is the loc of expression's direct parent node.
     const LocationSet *getWrites(const IR::Expression *expression, const loc_t *parentLoc) {
         const loc_t &exprLoc = *getLoc(expression, parentLoc);
-        auto result = ::p4c::get(writes, exprLoc);
+        auto result = ::P4C::get(writes, exprLoc);
         BUG_CHECK(result != nullptr, "No location set known for %1%", expression);
         return result;
     }
@@ -659,6 +659,6 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     std::unordered_set<loc_t> &cached_locs;
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_DEF_USE_H_ */

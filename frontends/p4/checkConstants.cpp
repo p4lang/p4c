@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "methodInstance.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 void DoCheckConstants::postorder(const IR::MethodCallExpression *expression) {
     auto mi = MethodInstance::resolve(expression, this, typeMap);
@@ -28,7 +28,7 @@ void DoCheckConstants::postorder(const IR::MethodCallExpression *expression) {
                       expression);
             auto arg0 = expression->arguments->at(0)->expression;
             if (!arg0->is<IR::Constant>())
-                ::p4c::error(ErrorType::ERR_INVALID, "%1%: argument must be a constant", arg0);
+                ::P4C::error(ErrorType::ERR_INVALID, "%1%: argument must be a constant", arg0);
         }
     }
 }
@@ -43,4 +43,4 @@ void DoCheckConstants::postorder(const IR::P4Table *table) {
     (void)table->getSizeProperty();
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 class MidEnd {
  public:
@@ -36,6 +36,6 @@ class MidEnd {
                                  std::ostream *outStream = nullptr);
 };
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF
 
 #endif /* BACKENDS_EBPF_MIDEND_H_ */

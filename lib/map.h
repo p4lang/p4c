@@ -20,7 +20,7 @@ limitations under the License.
 #include <iterator>
 #include <optional>
 
-namespace p4c {
+namespace P4C {
 
 /// Given a map and a key, return the value corresponding to the key in the map,
 /// or a given default value if the key doesn't exist in the map.
@@ -249,6 +249,6 @@ MapForKey<M> ValuesForKey(M &m, typename M::key_type k) {
     return MapForKey<M>(m, k);
 }
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* LIB_MAP_H_ */

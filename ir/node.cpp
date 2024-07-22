@@ -31,7 +31,7 @@ limitations under the License.
 #include "lib/json.h"
 #include "lib/log.h"
 
-namespace p4c {
+namespace P4C {
 
 void IR::Node::traceVisit(const char *visitor) const {
     LOG3("Visiting " << visitor << " " << id << ":" << node_type_name());
@@ -160,4 +160,4 @@ void IR::Node::sourceInfoToJSON(JSONGenerator &json) const {
 
 IRNODE_DEFINE_APPLY_OVERLOAD(Node, , )
 
-}  // namespace p4c
+}  // namespace P4C

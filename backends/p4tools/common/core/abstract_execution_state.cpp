@@ -5,7 +5,7 @@
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 /* =========================================================================================
  *  Constructors
@@ -395,4 +395,4 @@ const IR::P4Table *AbstractExecutionState::findTable(const IR::Member *member) c
     return nullptr;
 }
 
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools

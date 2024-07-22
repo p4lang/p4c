@@ -7,7 +7,7 @@
 #include "frontends/parsers/v1/v1parser.hpp"
 #include "lib/source_file.h"
 
-namespace p4c::V1 {
+namespace P4C::V1 {
 
 class V1ParserDriver;
 
@@ -49,6 +49,6 @@ class V1Lexer : public v1FlexLexer {
     int yylex() override { return v1FlexLexer::yylex(); }
 };
 
-}  // namespace p4c::V1
+}  // namespace P4C::V1
 
 #endif /* FRONTENDS_PARSERS_V1_V1LEXER_INTERNAL_HPP_ */

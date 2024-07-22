@@ -5,7 +5,7 @@
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "midend/coverage.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 /// Extends the CompilerResult with the associated P4RuntimeApi
 class TestgenCompilerResult : public CompilerResult {
@@ -32,6 +32,6 @@ class TestgenCompilerResult : public CompilerResult {
     DECLARE_TYPEINFO(TestgenCompilerResult, CompilerResult);
 };
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_COMPILER_RESULT_H_ */

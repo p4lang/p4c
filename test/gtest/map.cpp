@@ -20,7 +20,7 @@ limitations under the License.
 
 #include <algorithm>
 
-namespace p4c::Test {
+namespace P4C::Test {
 
 TEST(ValuesForKey, set_equal) {
     std::multimap<int, int> a;
@@ -50,4 +50,4 @@ TEST(ValuesForKey, set_equal) {
     EXPECT_TRUE(a == b);
 }
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test

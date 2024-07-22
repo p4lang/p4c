@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 using namespace literals;
 
@@ -49,7 +49,7 @@ class DoStaticAssert : public Transform, public ResolutionContext {
                 auto subst = ef->substitution;
                 auto params = subst.getParametersInOrder();
                 if (!params->moveNext()) {
-                    ::p4c::warning(ErrorType::WARN_INVALID, "static_assert with no arguments: %1%",
+                    ::P4C::warning(ErrorType::WARN_INVALID, "static_assert with no arguments: %1%",
                                    method);
                     return method;
                 }
@@ -69,7 +69,7 @@ class DoStaticAssert : public Transform, public ResolutionContext {
                                 message = sl->value.string_view();
                             }
                         }
-                        ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: %2%", method, message);
+                        ::P4C::error(ErrorType::ERR_EXPECTED, "%1%: %2%", method, message);
                         return method;
                     }
                     if (getContext()->node->is<IR::MethodCallStatement>()) {
@@ -78,7 +78,7 @@ class DoStaticAssert : public Transform, public ResolutionContext {
                     }
                     return new IR::BoolLiteral(method->srcInfo, true);
                 } else {
-                    ::p4c::error(ErrorType::ERR_UNEXPECTED,
+                    ::P4C::error(ErrorType::ERR_UNEXPECTED,
                                  "Could not evaluate static_assert to a constant: %1%", arg);
                     return method;
                 }
@@ -105,6 +105,6 @@ class StaticAssert : public PassManager {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_STATICASSERT_H_ */

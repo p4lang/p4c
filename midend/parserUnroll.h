@@ -27,7 +27,7 @@ limitations under the License.
 #include "interpreter.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /// Name of out of bound state
 const char outOfBoundsStateName[] = "stateOutOfBound";
@@ -156,7 +156,7 @@ class ParserStructure {
         start = nullptr;
     }
     void addState(const IR::ParserState *state) { stateMap.emplace(state->name, state); }
-    const IR::ParserState *get(cstring state) const { return ::p4c::get(stateMap, state); }
+    const IR::ParserState *get(cstring state) const { return ::P4C::get(stateMap, state); }
     void calls(const IR::ParserState *caller, const IR::ParserState *callee) {
         callGraph->calls(caller, callee);
     }
@@ -305,6 +305,6 @@ class ParsersUnroll : public PassManager {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_PARSERUNROLL_H_ */

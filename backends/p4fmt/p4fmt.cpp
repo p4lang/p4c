@@ -8,7 +8,7 @@
 #include "lib/error.h"
 #include "options.h"
 
-namespace p4c::P4Fmt {
+namespace P4C::P4Fmt {
 
 std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
     AutoCompileContext autoP4FmtContext(new P4Fmt::P4FmtContext);
@@ -19,8 +19,8 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
     std::stringstream formattedOutput;
 
     const IR::P4Program *program = P4::parseP4File(options);
-    if (program == nullptr && ::p4c::errorCount() != 0) {
-        ::p4c::error("Failed to parse P4 file.");
+    if (program == nullptr && ::P4C::errorCount() != 0) {
+        ::P4C::error("Failed to parse P4 file.");
         return formattedOutput;
     }
 
@@ -28,12 +28,12 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
     // Print the program before running front end passes.
     program->apply(top4);
 
-    if (::p4c::errorCount() > 0) {
-        ::p4c::error("Failed to format p4 program.");
+    if (::P4C::errorCount() > 0) {
+        ::P4C::error("Failed to format p4 program.");
         return formattedOutput;
     }
 
     return formattedOutput;
 }
 
-}  // namespace p4c::P4Fmt
+}  // namespace P4C::P4Fmt

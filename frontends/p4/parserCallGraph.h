@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/callGraph.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 typedef CallGraph<const IR::ParserState *> ParserCallGraph;
 
@@ -42,6 +42,6 @@ class ComputeParserCG : public Inspector {
     void postorder(const IR::SelectExpression *expression) override;
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_PARSERCALLGRAPH_H_ */

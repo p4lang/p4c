@@ -35,7 +35,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 /* =============================================================================================
  *  Constructors
@@ -549,4 +549,4 @@ const IR::SymbolicVariable *ExecutionState::createPacketVariable(const IR::Type 
     return variable;
 }
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen

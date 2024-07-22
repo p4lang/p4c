@@ -2,7 +2,7 @@
 
 #include "flattenLogMsg.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 bool FindTypesInLogMsgInvocationToReplace::hasStructInParameter(
     const IR::MethodCallStatement *methodCallStatement) {
@@ -194,4 +194,4 @@ const IR::Node *ReplaceLogMsg::postorder(IR::MethodCallStatement *methodCallStat
     return methodCallStatement;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

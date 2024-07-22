@@ -25,7 +25,7 @@ limitations under the License.
 // for p4::P4RuntimeFormat definition
 #include "control-plane/p4RuntimeTypes.h"
 
-namespace p4c {
+namespace P4C {
 
 class CompilerOptions : public ParserOptions {
  protected:
@@ -89,6 +89,6 @@ class CompilerOptions : public ParserOptions {
     virtual bool enable_intrinsic_metadata_fix();
 };
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* FRONTENDS_COMMON_OPTIONS_H_ */

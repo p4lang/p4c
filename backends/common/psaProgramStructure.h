@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 enum gress_t { INGRESS, EGRESS };
 enum block_t {
@@ -113,7 +113,7 @@ class ParsePsaArchitecture : public Inspector {
     }
 
     void modelError(const char *format, const IR::INode *node) {
-        ::p4c::error(ErrorType::ERR_MODEL,
+        ::P4C::error(ErrorType::ERR_MODEL,
                      (cstring(format) + "\nAre you using an up-to-date 'psa.p4'?").c_str(),
                      node->getNode());
     }
@@ -155,6 +155,6 @@ class InspectPsaProgram : public Inspector {
     bool preorder(const IR::Parameter *parameter) override;
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* BACKENDS_COMMON_PSAPROGRAMSTRUCTURE_H_ */

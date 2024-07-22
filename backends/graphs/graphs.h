@@ -39,16 +39,16 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 class ReferenceMap;
 class TypeMap;
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
-namespace p4c::graphs {
+namespace P4C::graphs {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 class EdgeTypeIface {
  public:
@@ -224,6 +224,6 @@ class Graphs : public Inspector {
     void limitStringSize(std::stringstream &sstream, std::stringstream &helper_sstream);
 };
 
-}  // namespace p4c::graphs
+}  // namespace P4C::graphs
 
 #endif /* BACKENDS_GRAPHS_GRAPHS_H_ */

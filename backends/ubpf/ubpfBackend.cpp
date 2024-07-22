@@ -24,7 +24,7 @@ limitations under the License.
 #include "ubpfProgram.h"
 #include "ubpfType.h"
 
-namespace p4c::UBPF {
+namespace P4C::UBPF {
 
 void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
                       P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
@@ -32,7 +32,7 @@ void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
 
     auto main = toplevel->getMain();
     if (main == nullptr) {
-        ::p4c::warning(ErrorType::WARN_MISSING,
+        ::P4C::warning(ErrorType::WARN_MISSING,
                        "Could not locate top-level block; is there a %1% module?",
                        IR::P4Program::main);
         return;
@@ -42,7 +42,7 @@ void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
     if (options.target.isNullOrEmpty() || options.target == "ubpf") {
         target = new UbpfTarget();
     } else {
-        ::p4c::error(ErrorType::ERR_INVALID, "Unknown target %s; legal choice is 'ubpf'",
+        ::P4C::error(ErrorType::ERR_INVALID, "Unknown target %s; legal choice is 'ubpf'",
                      options.target);
         return;
     }
@@ -75,4 +75,4 @@ void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
     hstream->flush();
 }
 
-}  // namespace p4c::UBPF
+}  // namespace P4C::UBPF

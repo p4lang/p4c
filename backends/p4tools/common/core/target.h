@@ -8,7 +8,7 @@
 #include "ir/ir.h"
 #include "lib/exceptions.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 /// Encapsulates the details of a target device and architecture for a single tool. Implementations
 /// are singletons and must provide a default constructor. Instances are automatically registered
@@ -108,6 +108,6 @@ class Target {
     static std::map<std::string, std::string, std::less<>> defaultDeviceByArch;
 };
 
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_CORE_TARGET_H_ */

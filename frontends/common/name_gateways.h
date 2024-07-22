@@ -19,13 +19,13 @@ limitations under the License.
 
 #include "ir/ir.h"
 
-namespace p4c {
+namespace P4C {
 
 class NameGateways : public Transform {
     const IR::Node *preorder(IR::If *n) override { return new IR::NamedCond(*n); }
     const IR::Node *preorder(IR::NamedCond *n) override { return n; }
 };
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* FRONTENDS_COMMON_NAME_GATEWAYS_H_ */

@@ -29,7 +29,7 @@ limitations under the License.
 #include "source_file.h"
 #include "stringify.h"
 
-namespace p4c {
+namespace P4C {
 namespace detail {
 
 static inline std::pair<std::string_view, std::string> getPositionTail(const Util::SourceInfo &info,
@@ -121,6 +121,6 @@ std::string bug_helper(boost::format &f, std::string_view position, std::string_
     return detail::bug_helper(f, position, tail, std::forward<Args>(args)...);
 }
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* LIB_BUG_HELPER_H_ */

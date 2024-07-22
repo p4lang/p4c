@@ -6,7 +6,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 /// This is main implementation of the P4Testgen tool.
 class Testgen : public AbstractP4cTool<TestgenOptions> {
@@ -48,6 +48,6 @@ class Testgen : public AbstractP4cTool<TestgenOptions> {
     virtual ~Testgen() = default;
 };
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TESTGEN_H_ */

@@ -22,7 +22,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/rtti.h"
 
-namespace p4c {
+namespace P4C {
 
 /// Handy type conversion methods that can be inherited by various base classes.
 /// In order to use ICastable one also need to provide intrusive lightweight RTTI
@@ -66,6 +66,6 @@ class ICastable : public virtual RTTI::Base {
     }
 };
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* LIB_CASTABLE_H_ */

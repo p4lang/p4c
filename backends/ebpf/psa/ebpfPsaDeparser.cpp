@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "ebpfPipeline.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 DeparserBodyTranslatorPSA::DeparserBodyTranslatorPSA(const EBPFDeparserPSA *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
@@ -93,7 +93,7 @@ bool IngressDeparserPSA::build() {
     auto pl = controlBlock->container->type->applyParams;
 
     if (pl->size() != 7) {
-        ::p4c::error(ErrorType::ERR_EXPECTED,
+        ::P4C::error(ErrorType::ERR_EXPECTED,
                      "Expected ingress deparser to have exactly 7 parameters");
         return false;
     }
@@ -298,4 +298,4 @@ void XDPEgressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->blockEnd(true);
 }
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF

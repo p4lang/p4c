@@ -21,7 +21,7 @@ limitations under the License.
 #include "has_side_effects.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /**
 Local copy propagation and dead code elimination within a single pass.
@@ -99,7 +99,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     void forOverlapAvail(cstring, std::function<void(cstring, VarInfo *)>);
     void dropValuesUsing(cstring);
     bool hasSideEffects(const IR::Expression *e) {
-        return bool(::p4c::hasSideEffects(refMap, typeMap, e));
+        return bool(::P4C::hasSideEffects(refMap, typeMap, e));
     }
     bool isHeaderUnionIsValid(const IR::Expression *e);
 
@@ -176,6 +176,6 @@ class LocalCopyPropagation : public PassManager {
         : LocalCopyPropagation(refMap, typeMap, nullptr, policy) {}
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_LOCAL_COPYPROP_H_ */

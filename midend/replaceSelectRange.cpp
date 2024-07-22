@@ -18,7 +18,7 @@
 
 #include "replaceSelectRange.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 // expands subranges that do not cross over zero
 static void expandRange(const IR::Range *r, std::vector<const IR::Mask *> *masks,
@@ -65,7 +65,7 @@ std::vector<const IR::Mask *> *DoReplaceSelectRange::rangeToMasks(const IR::Rang
                                                                   size_t keyIndex) {
     auto l = r->left->to<IR::Constant>();
     if (!l) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                      "%1%: Range boundaries must be a compile-time constants.", r->left);
         return nullptr;
     }
@@ -73,7 +73,7 @@ std::vector<const IR::Mask *> *DoReplaceSelectRange::rangeToMasks(const IR::Rang
 
     auto ri = r->right->to<IR::Constant>();
     if (!ri) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                      "%1%: Range boundaries must be a compile-time constants.", r->right);
         return nullptr;
     }
@@ -81,7 +81,7 @@ std::vector<const IR::Mask *> *DoReplaceSelectRange::rangeToMasks(const IR::Rang
     auto masks = new std::vector<const IR::Mask *>();
     auto right = ri->value;
     if (right < left) {
-        ::p4c::warning(ErrorType::WARN_INVALID,
+        ::P4C::warning(ErrorType::WARN_INVALID,
                        "%1%-%2%: Range with end less than start is "
                        "treated as an empty range",
                        r->left, r->right);
@@ -221,4 +221,4 @@ const IR::Node *DoReplaceSelectRange::postorder(IR::SelectCase *sc) {
     return sc;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

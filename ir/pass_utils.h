@@ -23,7 +23,7 @@ limitations under the License.
 /// @file
 /// @brief Utilities for passes and pass managers.
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 inline const char *DIAGNOSTIC_COUNT_IN_PASS_TAG = "diagnosticCountInPass";
 
@@ -95,6 +95,6 @@ struct DiagnosticCountInfo {
     std::shared_ptr<DiagnosticCountInfoState> state;
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif  // IR_PASS_UTILS_H_

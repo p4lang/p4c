@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "uselessCasts.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Node *RemoveUselessCasts::postorder(IR::Cast *cast) {
     auto orig = getOriginal<IR::Cast>();
@@ -29,4 +29,4 @@ const IR::Node *RemoveUselessCasts::postorder(IR::Cast *cast) {
     return cast;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

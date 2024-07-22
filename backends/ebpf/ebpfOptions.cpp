@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "midend.h"
 
-namespace p4c {
+namespace P4C {
 
 EbpfOptions::EbpfOptions() {
     langVersion = CompilerOptions::FrontendVersion::P4_16;
@@ -102,4 +102,4 @@ EbpfOptions::EbpfOptions() {
         "[psa only] Compile and generate the P4 prog for XDP hook");
 }
 
-}  // namespace p4c
+}  // namespace P4C

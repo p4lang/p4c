@@ -71,7 +71,7 @@ limitations under the License.
 #include "midend/validateProperties.h"
 #include "options.h"
 
-namespace p4c::DPDK {
+namespace P4C::DPDK {
 
 /// This class implements a policy suitable for the ConvertEnums pass.
 /// The policy is: convert all enums to bit<32>
@@ -249,4 +249,4 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
     }
 }
 
-}  // namespace p4c::DPDK
+}  // namespace P4C::DPDK

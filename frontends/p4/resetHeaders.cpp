@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "resetHeaders.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 void DoResetHeaders::generateResets(const TypeMap *typeMap, const IR::Type *type,
                                     const IR::Expression *expr,
@@ -38,7 +38,7 @@ void DoResetHeaders::generateResets(const TypeMap *typeMap, const IR::Type *type
     } else if (type->is<IR::Type_Stack>()) {
         auto tstack = type->to<IR::Type_Stack>();
         if (!tstack->sizeKnown()) {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED,
                          "%1%: stack size is not a compile-time constant", tstack);
             return;
         }
@@ -89,4 +89,4 @@ const IR::Node *DoResetHeaders::postorder(IR::ParserState *state) {
     return state;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

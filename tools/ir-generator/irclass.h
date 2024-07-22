@@ -30,12 +30,12 @@ limitations under the License.
 #include "lib/source_file.h"
 #include "type.h"
 
-namespace p4c {
+namespace P4C {
 
 class IrClass;
 class IrField;
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 class IrNamespace {
     std::map<cstring, IrClass *> classes;
@@ -54,8 +54,8 @@ class IrNamespace {
     cstring name;
     static IrNamespace *get(IrNamespace *, cstring);
     static void add_class(IrClass *);
-    IrNamespace *lookupChild(cstring name) const { return ::p4c::get(children, name); }
-    IrClass *lookupClass(cstring name) const { return ::p4c::get(classes, name); }
+    IrNamespace *lookupChild(cstring name) const { return ::P4C::get(children, name); }
+    IrClass *lookupClass(cstring name) const { return ::P4C::get(classes, name); }
     bool lookupOther(cstring name) const { return othertypes.count(name) > 0; }
     void addOther(cstring name) { othertypes.insert(name); }
     cstring qualified_name(const IrNamespace *ctxt = nullptr) const;
@@ -392,6 +392,6 @@ inline std::ostream &operator<<(std::ostream &out, const LineDirective &l) {
     return out;
 }
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* TOOLS_IR_GENERATOR_IRCLASS_H_ */

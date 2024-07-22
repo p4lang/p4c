@@ -23,7 +23,7 @@ limitations under the License.
 #include "lib/indent.h"
 #include "lib/log.h"
 
-namespace p4c {
+namespace P4C {
 
 using namespace DBPrint;
 using namespace IndentCtl;
@@ -179,4 +179,4 @@ void IR::Type_MethodCall::dbprint(std::ostream &out) const {
 
 void IR::Type_ActionEnum::dbprint(std::ostream &out) const { Node::dbprint(out); }
 
-}  // namespace p4c
+}  // namespace P4C

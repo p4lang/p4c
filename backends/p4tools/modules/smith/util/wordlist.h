@@ -5,7 +5,7 @@
 
 #define WORDLIST_LENGTH 10000
 
-namespace p4c::P4Tools::P4Smith {
+namespace P4C::P4Tools::P4Smith {
 
 /// This class is a wrapper around an underlying array of words, which is currently being
 /// used to aid random name generation.
@@ -27,6 +27,6 @@ class Wordlist {
     static const std::array<const char *, WORDLIST_LENGTH> WORDS;
 };
 
-}  // namespace p4c::P4Tools::P4Smith
+}  // namespace P4C::P4Tools::P4Smith
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_UTIL_WORDLIST_H_ */

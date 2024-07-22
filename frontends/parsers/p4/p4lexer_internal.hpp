@@ -5,7 +5,7 @@
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "lib/source_file.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 class P4ParserDriver;
 
@@ -21,6 +21,6 @@ class P4Lexer : public AbstractP4Lexer, public p4FlexLexer {
     int yylex() override { return p4FlexLexer::yylex(); }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif  /* FRONTENDS_P4_LEXER_INTERNAL_H_ */

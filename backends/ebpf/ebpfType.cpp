@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "ebpfType.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 EBPFTypeFactory *EBPFTypeFactory::instance;
 
@@ -53,7 +53,7 @@ EBPFType *EBPFTypeFactory::create(const IR::Type *type) {
         // Implement error type as scalar of width 8 bits
         result = new EBPFScalarType(IR::Type_Bits::get(8, false));
     } else {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Type %1% not supported", type);
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Type %1% not supported", type);
     }
 
     return result;
@@ -183,7 +183,7 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike *strct) : EBPFType(strc
         auto type = EBPFTypeFactory::instance->create(f->type);
         auto wt = type->to<IHasWidth>();
         if (wt == nullptr) {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                          "EBPF: Unsupported type in struct: %s", f->type);
         } else {
             width += wt->widthInBits();
@@ -282,7 +282,7 @@ void EBPFTypeName::emitInitializer(CodeBuilder *builder) {
 unsigned EBPFTypeName::widthInBits() const {
     auto wt = canonical->to<IHasWidth>();
     if (wt == nullptr) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Type %1% does not have a fixed witdh",
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Type %1% does not have a fixed witdh",
                      type);
         return 0;
     }
@@ -292,7 +292,7 @@ unsigned EBPFTypeName::widthInBits() const {
 unsigned EBPFTypeName::implementationWidthInBits() const {
     auto wt = canonical->to<IHasWidth>();
     if (wt == nullptr) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Type %1% does not have a fixed witdh",
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Type %1% does not have a fixed witdh",
                      type);
         return 0;
     }
@@ -384,4 +384,4 @@ void EBPFMethodDeclaration::emit(CodeBuilder *builder) {
     builder->newline();
 }
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF

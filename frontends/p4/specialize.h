@@ -23,7 +23,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 class FrontEndPolicy;  // full definition not needed here
 
@@ -87,7 +87,7 @@ class SpecializationMap {
     IR::Vector<IR::Node> *getSpecializations(const IR::Node *insertion,
                                              const Visitor::Context *ctxt) const;
     cstring getName(const IR::Node *insertion) const {
-        auto s = ::p4c::get(specializations, insertion);
+        auto s = ::P4C::get(specializations, insertion);
         if (s == nullptr) return nullptr;
         return s->name;
     }
@@ -225,6 +225,6 @@ class SpecializeAll : public PassRepeated {
     SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap, FrontEndPolicy *policy);
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_SPECIALIZE_H_ */

@@ -31,7 +31,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 ExprStepper::ExprStepper(ExecutionState &state, AbstractSolver &solver,
                          const ProgramInfo &programInfo)
@@ -520,4 +520,4 @@ void ExprStepper::stepNoMatch(std::string traceLog, const IR::Expression *condit
     }
 }
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen

@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "backends/ebpf/ebpfTable.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 class ControlBodyTranslatorPSA;
 
@@ -55,6 +55,6 @@ class EBPFCounterPSA : public EBPFCounterTable {
     DECLARE_TYPEINFO(EBPFCounterPSA, EBPFCounterTable);
 };
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EXTERNS_EBPFPSACOUNTER_H_ */

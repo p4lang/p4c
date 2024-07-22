@@ -10,9 +10,9 @@
 #include "options.h"
 #include "p4fmt.h"
 
-using namespace ::p4c;
+using namespace ::P4C;
 
-namespace p4c::P4Fmt {
+namespace P4C::P4Fmt {
 
 namespace {
 class ReferenceCheckerOptions : protected P4fmtOptions {
@@ -32,7 +32,7 @@ class ReferenceCheckerOptions : protected P4fmtOptions {
             [this](const char *arg) {
                 inputFile = arg;
                 if (!std::filesystem::exists(inputFile.value())) {
-                    ::p4c::error("The input P4 program '%s' does not exist.",
+                    ::P4C::error("The input P4 program '%s' does not exist.",
                                  inputFile.value().c_str());
                     return false;
                 }
@@ -61,17 +61,17 @@ class ReferenceCheckerOptions : protected P4fmtOptions {
 
         if (unprocessedOptions != nullptr && !unprocessedOptions->empty()) {
             for (const auto &option : *unprocessedOptions) {
-                ::p4c::error("Unprocessed input: %s", option);
+                ::P4C::error("Unprocessed input: %s", option);
             }
             return EXIT_FAILURE;
         }
 
         if (!inputFile.has_value()) {
-            ::p4c::error("No input file specified.");
+            ::P4C::error("No input file specified.");
             return EXIT_FAILURE;
         }
         if (!referenceFile.has_value()) {
-            ::p4c::error(
+            ::P4C::error(
                 "Reference file has not been specified. Use "
                 "--reference-file.");
             return EXIT_FAILURE;
@@ -103,7 +103,7 @@ int compareAgainstReference(const std::stringstream &formattedOutput,
     P4Tools::printInfo("Running diff command: \"%s\"", command.str());
     FILE *pipe = popen(command.str().c_str(), "r");
     if (pipe == nullptr) {
-        ::p4c::error("Unable to create pipe to diff command.");
+        ::P4C::error("Unable to create pipe to diff command.");
         return EXIT_FAILURE;
     }
     // Read and print the output of the diff command.
@@ -113,7 +113,7 @@ int compareAgainstReference(const std::stringstream &formattedOutput,
         result << buffer;
     }
     if (pclose(pipe) != 0) {
-        ::p4c::error("Diff command failed.\n%1%", result.str());
+        ::P4C::error("Diff command failed.\n%1%", result.str());
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
@@ -128,7 +128,7 @@ std::optional<std::filesystem::path> getFilePath(const ReferenceCheckerOptions &
         // If a reference file is explicitly provided, just overwrite this file.
         referencePath = referenceFileOpt.value();
     } else {
-        ::p4c::error("Reference file has not been specified.");
+        ::P4C::error("Reference file has not been specified.");
         return std::nullopt;
     }
     return referencePath.replace_extension(suffix);
@@ -142,7 +142,7 @@ int run(const ReferenceCheckerOptions &options) {
     std::stringstream formattedOutput = getFormattedOutput(options.getInputFile());
 
     if (formattedOutput.str().empty()) {
-        ::p4c::error("Formatting Failed");
+        ::P4C::error("Formatting Failed");
         return EXIT_FAILURE;
     }
 
@@ -162,10 +162,10 @@ int run(const ReferenceCheckerOptions &options) {
         auto referenceFile = std::filesystem::absolute(referenceFileOpt.value());
         return compareAgainstReference(formattedOutput, referenceFile);
     }
-    ::p4c::error("Reference file has not been specified.");
+    ::P4C::error("Reference file has not been specified.");
     return EXIT_FAILURE;
 }
-}  // namespace p4c::P4Fmt
+}  // namespace P4C::P4Fmt
 
 class RefCheckContext : public BaseCompileContext {};
 
@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
     AutoCompileContext autoP4RefCheckContext(new RefCheckContext);
     P4Fmt::ReferenceCheckerOptions options;
 
-    if (options.processOptions(argc, argv) == EXIT_FAILURE || ::p4c::errorCount() != 0) {
+    if (options.processOptions(argc, argv) == EXIT_FAILURE || ::P4C::errorCount() != 0) {
         return EXIT_FAILURE;
     }
 
@@ -181,5 +181,5 @@ int main(int argc, char *argv[]) {
     if (result == EXIT_FAILURE) {
         return EXIT_FAILURE;
     }
-    return ::p4c::errorCount() == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+    return ::P4C::errorCount() == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

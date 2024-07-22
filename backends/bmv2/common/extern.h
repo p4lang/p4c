@@ -22,7 +22,7 @@ limitations under the License.
 #include "helpers.h"
 #include "ir/ir.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 class ExternConverter {
     static std::map<cstring, ExternConverter *> *cvtForType;
@@ -142,6 +142,6 @@ class ExternConverter {
 EXTERN_CONVERTER_W_FUNCTION(assert)
 EXTERN_CONVERTER_W_FUNCTION(assume)
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_EXTERN_H_ */

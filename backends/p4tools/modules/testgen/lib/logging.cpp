@@ -3,12 +3,12 @@
 
 #include "lib/log.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
-void enableTraceLogging() { ::p4c::Log::addDebugSpec("test_traces:4"); }
+void enableTraceLogging() { ::P4C::Log::addDebugSpec("test_traces:4"); }
 
-void enableStepLogging() { ::p4c::Log::addDebugSpec("small_step:4"); }
+void enableStepLogging() { ::P4C::Log::addDebugSpec("small_step:4"); }
 
-void enableCoverageLogging() { ::p4c::Log::addDebugSpec("coverage:4"); }
+void enableCoverageLogging() { ::P4C::Log::addDebugSpec("coverage:4"); }
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen

@@ -26,11 +26,11 @@ limitations under the License.
 #include "lib/safe_vector.h"
 #include "lib/string_map.h"
 
-namespace p4c {
+namespace P4C {
 class JSONLoader;
-}  // namespace p4c
+}  // namespace P4C
 
-namespace p4c::IR {
+namespace P4C::IR {
 
 /**
  * A Vector which holds objects which are instances of IDeclaration, and keeps
@@ -49,7 +49,7 @@ class IndexedVector : public Vector<T> {
         auto [it, inserted] = declarations.emplace(name, decl);
         if (!inserted) {
             invalid = true;
-            ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicates declaration %2%", a,
+            ::P4C::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicates declaration %2%", a,
                          it->second);
         }
     }
@@ -226,6 +226,6 @@ class IndexedVector : public Vector<T> {
                                         Vector<T>);
 };
 
-}  // namespace p4c::IR
+}  // namespace P4C::IR
 
 #endif /* IR_INDEXED_VECTOR_H_ */

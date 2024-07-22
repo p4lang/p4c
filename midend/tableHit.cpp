@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/tableApply.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Node *DoTableHit::postorder(IR::AssignmentStatement *statement) {
     LOG3("Visiting " << getOriginal());
@@ -40,4 +40,4 @@ const IR::Node *DoTableHit::postorder(IR::AssignmentStatement *statement) {
         return new IR::IfStatement(right, tstat, fstat);
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

@@ -9,9 +9,9 @@
 #include "test/gtest/helpers.h"
 #include "test/gtest/midend_pass.h"
 
-using namespace ::p4c::P4;
+using namespace ::P4C::P4;
 
-namespace p4c::Test {
+namespace P4C::Test {
 
 using P4TestContext = P4CContextWithOptions<CompilerOptions>;
 
@@ -148,4 +148,4 @@ TEST_F(P4CParserUnroll, header_union) {
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size());
 }
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test

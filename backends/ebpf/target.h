@@ -27,9 +27,9 @@ limitations under the License.
 /// We are prepared to support code generation using multiple styles
 /// (e.g., using BCC or using CLANG).
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 enum TableKind {
     TableHash,
@@ -73,7 +73,7 @@ class Target {
         (void)keyType;
         (void)valueType;
         (void)size;
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED,
                      "emitTableDeclSpinlock is not supported on %1% target", name);
     }
     /// map-in-map requires declaration of both inner and outer map,
@@ -93,7 +93,7 @@ class Target {
         (void)outerTableKind;
         (void)outerKeyType;
         (void)outerSize;
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "emitMapInMapDecl is not supported on %1% target",
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "emitMapInMapDecl is not supported on %1% target",
                      name);
     }
     virtual void emitMain(Util::SourceCodeBuilder *builder, cstring functionName,
@@ -316,6 +316,6 @@ class TestTarget : public EBPF::KernelSamplesTarget {
     cstring packetDescriptorType() const override { return "struct __sk_buff"_cs; }
 };
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF
 
 #endif /* BACKENDS_EBPF_TARGET_H_ */

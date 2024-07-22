@@ -15,7 +15,7 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 std::tuple<int, char **> AbstractP4cToolOptions::convertArgs(
     const std::vector<const char *> &args) {
@@ -37,7 +37,7 @@ std::optional<ICompileContext *> AbstractP4cToolOptions::process(
     char **argv = nullptr;
     std::tie(argc, argv) = convertArgs(args);
 
-    // Establish a dummy compilation context so that we can use ::p4c::error to report errors while
+    // Establish a dummy compilation context so that we can use ::P4C::error to report errors while
     // processing command-line options.
     class DummyCompileContext : public BaseCompileContext {
     } dummyContext;
@@ -45,7 +45,7 @@ std::optional<ICompileContext *> AbstractP4cToolOptions::process(
 
     // Delegate to the hook.
     auto *remainingArgs = process(argc, argv);
-    if ((remainingArgs == nullptr) || ::p4c::errorCount() > 0) {
+    if ((remainingArgs == nullptr) || ::P4C::errorCount() > 0) {
         return std::nullopt;
     }
 
@@ -57,7 +57,7 @@ std::optional<ICompileContext *> AbstractP4cToolOptions::process(
     std::tie(argc, argv) = convertArgs(compilerArgs);
     auto *unprocessedCompilerArgs = P4Tools::CompilerTarget::initCompiler(_toolName, argc, argv);
 
-    if ((unprocessedCompilerArgs == nullptr) || ::p4c::errorCount() > 0) {
+    if ((unprocessedCompilerArgs == nullptr) || ::P4C::errorCount() > 0) {
         return std::nullopt;
     }
     BUG_CHECK(unprocessedCompilerArgs->empty(), "Compiler did not process all of its arguments: %s",
@@ -66,13 +66,13 @@ std::optional<ICompileContext *> AbstractP4cToolOptions::process(
     // Remaining arguments should be source files. Ensure we have exactly one and send it to the
     // compiler.
     if (remainingArgs->size() > 1) {
-        ::p4c::error("Only one input file can be specified. Duplicate args:\n%1%",
+        ::P4C::error("Only one input file can be specified. Duplicate args:\n%1%",
                      cstring::join(remainingArgs->begin(), remainingArgs->end(), "\n  "));
         usage();
         return std::nullopt;
     }
     if (remainingArgs->empty()) {
-        ::p4c::error("No input files specified");
+        ::P4C::error("No input files specified");
         usage();
         return std::nullopt;
     }
@@ -149,7 +149,7 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(std::string_view toolName, std::s
         {"--target", "target", "Specifies the device targeted by the program.",
          std::optional<std::function<bool(const char *)>>{[](const char *arg) {
              if (!P4Tools::Target::setDevice(arg)) {
-                 ::p4c::error("Unsupported target device: %s", arg);
+                 ::P4C::error("Unsupported target device: %s", arg);
                  return false;
              }
              return true;
@@ -157,7 +157,7 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(std::string_view toolName, std::s
         {"--arch", "arch", "Specifies the architecture targeted by the program.",
          std::optional<std::function<bool(const char *)>>{[](const char *arg) {
              if (!P4Tools::Target::setArch(arg)) {
-                 ::p4c::error("Unsupported architecture: %s", arg);
+                 ::P4C::error("Unsupported architecture: %s", arg);
                  return false;
              }
              return true;
@@ -214,4 +214,4 @@ bool AbstractP4cToolOptions::validateOptions() const { return true; }
 
 const std::string &AbstractP4cToolOptions::getToolName() const { return _toolName; }
 
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools

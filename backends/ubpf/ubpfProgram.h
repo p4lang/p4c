@@ -26,7 +26,7 @@ limitations under the License.
 #include "target.h"
 #include "ubpfModel.h"
 
-namespace p4c::UBPF {
+namespace P4C::UBPF {
 
 class UBPFControl;
 class UBPFParser;
@@ -84,6 +84,6 @@ class UBPFProgram : public EBPF::EBPFProgram {
     }
 };
 
-}  // namespace p4c::UBPF
+}  // namespace P4C::UBPF
 
 #endif /* BACKENDS_UBPF_UBPFPROGRAM_H_ */

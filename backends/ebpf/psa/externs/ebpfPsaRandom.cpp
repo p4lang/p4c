@@ -13,7 +13,7 @@ limitations under the License.
 */
 #include "ebpfPsaRandom.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance *di)
     : minValue(0), maxValue(0), range(0) {
@@ -21,22 +21,22 @@ EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance *di)
 
     // verify type
     if (!di->type->is<IR::Type_Specialized>()) {
-        ::p4c::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
+        ::P4C::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
         return;
     }
     auto ts = di->type->to<IR::Type_Specialized>();
     BUG_CHECK(ts->arguments->size() == 1, "%1%, Lack of specialization argument", ts);
     auto type = ts->arguments->at(0);
     if (!type->is<IR::Type_Bits>()) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Must be bit or int type: %1%", ts);
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "Must be bit or int type: %1%", ts);
         return;
     }
     if (type->width_bits() > 32) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: up to 32 bits width is supported", ts);
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1%: up to 32 bits width is supported", ts);
     }
 
     if (di->arguments->size() != 2) {
-        ::p4c::error(ErrorType::ERR_MODEL, "Expected 2 arguments to: %1%", di);
+        ::P4C::error(ErrorType::ERR_MODEL, "Expected 2 arguments to: %1%", di);
         return;
     }
 
@@ -47,10 +47,10 @@ EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance *di)
             if (expr->fitsUint()) {
                 tmp[i] = expr->asUnsigned();
             } else {
-                ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", expr);
+                ::P4C::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", expr);
             }
         } else {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Must be constant value: %1%",
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED, "Must be constant value: %1%",
                          di->arguments->at(i)->expression);
         }
     }
@@ -61,10 +61,10 @@ EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance *di)
 
     // verify constructor parameters
     if (minValue > maxValue) {
-        ::p4c::error(ErrorType::ERR_INVALID, "%1%: Max value lower than min value", di);
+        ::P4C::error(ErrorType::ERR_INVALID, "%1%: Max value lower than min value", di);
     }
     if (minValue == maxValue) {
-        ::p4c::warning(ErrorType::WARN_IGNORE,
+        ::P4C::warning(ErrorType::WARN_IGNORE,
                        "%1%: No randomness, will always return the same value "
                        "due to that the min value is equal to the max value",
                        di);
@@ -75,7 +75,7 @@ void EBPFRandomPSA::processMethod(CodeBuilder *builder, const P4::ExternMethod *
     if (method->method->type->name == "read") {
         emitRead(builder);
     } else {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: Method not implemented yet", method->expr);
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1%: Method not implemented yet", method->expr);
     }
 }
 
@@ -100,4 +100,4 @@ void EBPFRandomPSA::emitRead(CodeBuilder *builder) const {
     if (minValue != 0) builder->append(")");
 }
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF

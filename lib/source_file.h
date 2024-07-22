@@ -33,12 +33,12 @@ limitations under the License.
 #include "gtest/gtest_prod.h"
 #endif
 
-namespace p4c::Test {
+namespace P4C::Test {
 class UtilSourceFile;
 }
 
-namespace p4c::Util {
-using namespace ::p4c::P4::literals;
+namespace P4C::Util {
+using namespace ::P4C::P4::literals;
 
 struct SourceFileLine;
 /**
@@ -316,12 +316,12 @@ class InputSources final {
     std::vector<Comment *> comments;
 };
 
-}  // namespace p4c::Util
+}  // namespace P4C::Util
 
-namespace p4c {
+namespace P4C {
 
 void dbprint(const IHasDbPrint *o);
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* LIB_SOURCE_FILE_H_ */

@@ -21,7 +21,7 @@ limitations under the License.
 #include "backends/dpdk/p4/config/p4info.pb.h"
 #include "control-plane/bfruntime.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 namespace BFRT {
 
@@ -82,7 +82,7 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
         const auto &pre = externInstance.preamble();
         p4configv1::ActionProfile actionProfile;
         if (!externInstance.info().UnpackTo(&actionProfile)) {
-            ::p4c::error(ErrorType::ERR_NOT_FOUND,
+            ::P4C::error(ErrorType::ERR_NOT_FOUND,
                          "Extern instance %1% does not pack an ActionProfile object", pre.name());
             return std::nullopt;
         }
@@ -95,6 +95,6 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
 
 }  // namespace BFRT
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif  // DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_

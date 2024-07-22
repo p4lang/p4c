@@ -63,7 +63,7 @@ limitations under the License.
 ///  of clang. Some of them likely would need to be marked as `consteval` when C++20
 ///  would be used across the codebase.
 
-namespace p4c::RTTI {
+namespace P4C::RTTI {
 
 using TypeId = std::uint64_t;
 static constexpr TypeId InvalidTypeId = UINT64_C(0);
@@ -237,7 +237,7 @@ struct Base {
     [[nodiscard]] virtual const void *toImpl(TypeId typeId) const noexcept = 0;
 };
 
-}  // namespace p4c::RTTI
+}  // namespace P4C::RTTI
 
 /// Declare typeinfo for a given class `T`.
 ///

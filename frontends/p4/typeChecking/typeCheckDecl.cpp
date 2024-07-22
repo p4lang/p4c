@@ -14,7 +14,7 @@ limitations under the License.
 
 #include "typeChecker.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 using namespace literals;
 
@@ -260,7 +260,7 @@ const IR::Node *TypeInference::preorder(IR::Declaration_Instance *decl) {
             return decl;
         }
         if (!simpleType->is<IR::Type_Package>() && (findContext<IR::IContainer>() == nullptr)) {
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: cannot instantiate at top-level", decl);
+            ::P4C::error(ErrorType::ERR_INVALID, "%1%: cannot instantiate at top-level", decl);
             return decl;
         }
         auto typeAndArgs =
@@ -314,4 +314,4 @@ const IR::Node *TypeInference::postorder(IR::Method *method) {
     return method;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

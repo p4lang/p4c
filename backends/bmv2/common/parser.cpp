@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "lib/algorithm.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 cstring ParserConverter::jsonAssignment(const IR::Type *type) {
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union"_cs;
@@ -129,7 +129,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
             if (extmeth->method->name.name == corelib.packetIn.extract.name) {
                 int argCount = mce->arguments->size();
                 if (argCount < 1 || argCount > 2) {
-                    ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                                  "%1%: unknown extract method", mce);
                     return result;
                 }
@@ -139,7 +139,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 auto arg = mce->arguments->at(0);
                 auto argtype = ctxt->typeMap->getType(arg->expression, true);
                 if (!argtype->is<IR::Type_Header>()) {
-                    ::p4c::error(ErrorType::ERR_INVALID,
+                    ::P4C::error(ErrorType::ERR_INVALID,
                                  "%1%: extract only accepts arguments with header types, not %2%",
                                  arg, argtype);
                     return result;
@@ -213,7 +213,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 return nullptr;
             } else if (extmeth->method->name.name == corelib.packetIn.advance.name) {
                 if (mce->arguments->size() != 1) {
-                    ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: expected 1 argument", mce);
+                    ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1%: expected 1 argument", mce);
                     return result;
                 }
                 auto arg = mce->arguments->at(0);
@@ -326,7 +326,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
             return result;
         }
     }
-    ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in parser on this target", stat);
+    ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in parser on this target", stat);
     return result;
 }
 
@@ -336,12 +336,12 @@ void ParserConverter::convertSimpleKey(const IR::Expression *keySet, big_int &va
     if (keySet->is<IR::Mask>()) {
         auto mk = keySet->to<IR::Mask>();
         if (!mk->left->is<IR::Constant>()) {
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: must evaluate to a compile-time constant",
+            ::P4C::error(ErrorType::ERR_INVALID, "%1%: must evaluate to a compile-time constant",
                          mk->left);
             return;
         }
         if (!mk->right->is<IR::Constant>()) {
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: must evaluate to a compile-time constant",
+            ::P4C::error(ErrorType::ERR_INVALID, "%1%: must evaluate to a compile-time constant",
                          mk->right);
             return;
         }
@@ -357,7 +357,7 @@ void ParserConverter::convertSimpleKey(const IR::Expression *keySet, big_int &va
         value = 0;
         mask = 0;
     } else {
-        ::p4c::error(ErrorType::ERR_INVALID, "%1%: must evaluate to a compile-time constant",
+        ::P4C::error(ErrorType::ERR_INVALID, "%1%: must evaluate to a compile-time constant",
                      keySet);
         value = 0;
         mask = 0;
@@ -442,7 +442,7 @@ Util::IJson *ParserConverter::stateName(IR::ID state) {
     if (state.name == IR::ParserState::accept) {
         return Util::JsonValue::null;
     } else if (state.name == IR::ParserState::reject) {
-        ::p4c::warning(ErrorType::WARN_UNSUPPORTED,
+        ::P4C::warning(ErrorType::WARN_UNSUPPORTED,
                        "Explicit transition to %1% not supported on this target", state);
         return Util::JsonValue::null;
     } else {
@@ -532,7 +532,7 @@ void ParserConverter::addValueSets(const IR::P4Parser *parser) {
         if (auto st = etype->to<IR::Type_Struct>()) {
             for (auto f : st->fields) {
                 if (isExactMatch(f)) continue;
-                ::p4c::warning(
+                ::P4C::warning(
                     ErrorType::WARN_UNSUPPORTED,
                     "This backend only supports exact matches in value_sets but the match "
                     "on '%1%' is not exact; the annotation will be ignored",
@@ -604,4 +604,4 @@ bool ParserConverter::preorder(const IR::P4Parser *parser) {
     return false;
 }
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2

@@ -8,7 +8,7 @@
 #include "ir/visitor.h"
 #include "lib/null.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 /// Converts all existing Type_Varbit types in the program into a custom Extracted_Varbit type.
 /// Extracted_Varbit also contains information about the width that was assigned to the type by
@@ -22,6 +22,6 @@ class ConvertVarbits : public Transform {
     const IR::Node *postorder(IR::Expression *expr) override;
 };
 
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_CONVERT_VARBITS_H_ */

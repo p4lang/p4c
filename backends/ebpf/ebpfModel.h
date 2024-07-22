@@ -22,26 +22,26 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
-struct TableImpl_Model : public ::p4c::Model::Extern_Model {
+struct TableImpl_Model : public ::P4C::Model::Extern_Model {
     explicit TableImpl_Model(cstring name) : Extern_Model(name), size("size"_cs) {}
-    ::p4c::Model::Elem size;
+    ::P4C::Model::Elem size;
 };
 
-struct CounterArray_Model : public ::p4c::Model::Extern_Model {
+struct CounterArray_Model : public ::P4C::Model::Extern_Model {
     CounterArray_Model()
         : Extern_Model("CounterArray"_cs),
           increment("increment"_cs),
           add("add"_cs),
           max_index("max_index"_cs),
           sparse("sparse"_cs) {}
-    ::p4c::Model::Elem increment;
-    ::p4c::Model::Elem add;
-    ::p4c::Model::Elem max_index;
-    ::p4c::Model::Elem sparse;
+    ::P4C::Model::Elem increment;
+    ::P4C::Model::Elem add;
+    ::P4C::Model::Elem max_index;
+    ::P4C::Model::Elem sparse;
 };
 
 enum ModelArchitecture {
@@ -49,21 +49,21 @@ enum ModelArchitecture {
     XdpSwitch,
 };
 
-struct Xdp_Model : public ::p4c::Model::Elem {
+struct Xdp_Model : public ::P4C::Model::Elem {
     Xdp_Model() : Elem("xdp"_cs), parser("p"_cs), switch_("s"_cs), deparser("d"_cs) {}
-    ::p4c::Model::Elem parser;
-    ::p4c::Model::Elem switch_;
-    ::p4c::Model::Elem deparser;
+    ::P4C::Model::Elem parser;
+    ::P4C::Model::Elem switch_;
+    ::P4C::Model::Elem deparser;
 };
 
-struct Filter_Model : public ::p4c::Model::Elem {
+struct Filter_Model : public ::P4C::Model::Elem {
     Filter_Model() : Elem("ebpf_filter"_cs), parser("prs"_cs), filter("filt"_cs) {}
-    ::p4c::Model::Elem parser;
-    ::p4c::Model::Elem filter;
+    ::P4C::Model::Elem parser;
+    ::P4C::Model::Elem filter;
 };
 
 /// Keep this in sync with ebpf_model.p4 and xdp_model.p4
-class EBPFModel : public ::p4c::Model::Model {
+class EBPFModel : public ::P4C::Model::Model {
  protected:
     EBPFModel()
         : counterArray(),
@@ -85,9 +85,9 @@ class EBPFModel : public ::p4c::Model::Model {
     CounterArray_Model counterArray;
     TableImpl_Model array_table;
     TableImpl_Model hash_table;
-    ::p4c::Model::Elem tableImplProperty;
-    ::p4c::Model::Elem CPacketName;
-    ::p4c::Model::Param_Model packet;
+    ::P4C::Model::Elem tableImplProperty;
+    ::P4C::Model::Elem CPacketName;
+    ::P4C::Model::Param_Model packet;
     ModelArchitecture arch;
     /// Only one of these should be used, depending on arch value.
     Filter_Model filter;
@@ -99,6 +99,6 @@ class EBPFModel : public ::p4c::Model::Model {
     static cstring reserved(cstring name) { return reservedPrefix + name; }
 };
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF
 
 #endif /* BACKENDS_EBPF_EBPFMODEL_H_ */

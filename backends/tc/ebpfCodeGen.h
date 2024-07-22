@@ -21,9 +21,9 @@ and limitations under the License.
 #include "backend.h"
 #include "tcExterns.h"
 
-namespace p4c::TC {
+namespace P4C::TC {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 class ConvertToBackendIR;
 class EBPFPnaParser;
@@ -80,7 +80,7 @@ class PNAErrorCodesGen : public Inspector {
 
             // type ParserError_t is u8, which can have values from 0 to 255
             if (id > 255) {
-                ::p4c::error(ErrorType::ERR_OVERLIMIT,
+                ::P4C::error(ErrorType::ERR_OVERLIMIT,
                              "%1%: Reached maximum number of possible errors", decl);
             }
         }
@@ -274,7 +274,7 @@ class EBPFControlPNA : public EBPF::EBPFControlPSA {
         : EBPF::EBPFControlPSA(program, control, parserHeaders) {}
 
     EBPFRegisterPNA *getRegister(cstring name) const {
-        auto result = ::p4c::get(pna_registers, name);
+        auto result = ::P4C::get(pna_registers, name);
         BUG_CHECK(result != nullptr, "No register named %1%", name);
         return result;
     }
@@ -452,6 +452,6 @@ class EBPFHashAlgorithmTypeFactoryPNA : public EBPF::EBPFHashAlgorithmTypeFactor
     EBPF::EBPFHashAlgorithmPSA *create(int type, const EBPF::EBPFProgram *program, cstring name);
 };
 
-}  // namespace p4c::TC
+}  // namespace P4C::TC
 
 #endif /* BACKENDS_TC_EBPFCODEGEN_H_ */

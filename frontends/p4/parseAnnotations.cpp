@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "parseAnnotations.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
     return {
@@ -57,7 +57,7 @@ bool ParseAnnotations::parseSkip(IR::Annotation *) { return false; }
 
 bool ParseAnnotations::parseEmpty(IR::Annotation *annotation) {
     if (!annotation->body.empty()) {
-        ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1% should not have any arguments", annotation);
+        ::P4C::error(ErrorType::ERR_OVERLIMIT, "%1% should not have any arguments", annotation);
         return false;
     }
 
@@ -146,4 +146,4 @@ void ParseAnnotations::postorder(IR::Annotation *annotation) {
     annotation->needsParsing = !handlers[name](annotation);
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

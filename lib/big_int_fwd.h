@@ -19,10 +19,10 @@ limitations under the License.
 
 #include <boost/multiprecision/fwd.hpp>
 
-namespace p4c {
+namespace P4C {
 
 using big_int = boost::multiprecision::cpp_int;
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* LIB_BIG_INT_FWD_H_ */

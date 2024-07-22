@@ -1,6 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4runtime_translation.h"
 
-namespace p4c {
+namespace P4C {
 
 std::vector<const IR::Annotation *>
 P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation::lookupP4RuntimeAnnotations(
@@ -10,7 +10,7 @@ P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation::lookupP4RuntimeAnnotati
     if (typeName != nullptr) {
         type = typeMap.getType(typeName);
         if (type == nullptr) {
-            ::p4c::error("Type %1% not found in the type map.", typeName);
+            ::P4C::error("Type %1% not found in the type map.", typeName);
             return p4RuntimeAnnotations;
         }
         type = type->getP4Type();
@@ -70,4 +70,4 @@ P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation::PropagateP4RuntimeTrans
     setName("PropagateP4RuntimeTranslation");
 }
 
-}  // namespace p4c
+}  // namespace P4C

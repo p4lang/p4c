@@ -6,7 +6,7 @@
 #include "ir/vector.h"
 #include "lib/exceptions.h"
 
-namespace p4c::P4Tools::GenEq {
+namespace P4C::P4Tools::GenEq {
 
 /// Recursively resolve lists of size 1 by returning the expression contained within.
 const IR::Expression *resolveSingletonList(const IR::Expression *expr) {
@@ -88,4 +88,4 @@ const IR::Expression *equate(const IR::Expression *left, const IR::Expression *r
     return mkEq(left, right);
 }
 
-}  // namespace p4c::P4Tools::GenEq
+}  // namespace P4C::P4Tools::GenEq

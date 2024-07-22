@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "lib/log.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 void ParameterSubstitution::add(const IR::Parameter *parameter, const IR::Argument *value) {
     CHECK_NULL(value);
@@ -44,7 +44,7 @@ void ParameterSubstitution::populate(const IR::ParameterList *params,
         if (a->name) {
             p = params->getParameter(a->name);
             if (p == nullptr) {
-                ::p4c::error(ErrorType::ERR_NOT_FOUND, "No parameter named %1%", a->name);
+                ::P4C::error(ErrorType::ERR_NOT_FOUND, "No parameter named %1%", a->name);
                 continue;
             }
         } else {
@@ -56,4 +56,4 @@ void ParameterSubstitution::populate(const IR::ParameterList *params,
     }
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "reservedWords.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 using namespace literals;
 
@@ -35,4 +35,4 @@ const std::set<cstring> reservedWords = {
     "NoAction"_cs  // core.p4
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

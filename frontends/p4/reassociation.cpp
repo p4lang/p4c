@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "reassociation.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Node *Reassociation::reassociate(IR::Operation_Binary *root) {
     const auto *right = root->right->to<IR::Constant>();
@@ -33,4 +33,4 @@ const IR::Node *Reassociation::reassociate(IR::Operation_Binary *root) {
     return root;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

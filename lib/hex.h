@@ -22,7 +22,7 @@ limitations under the License.
 #include <iostream>
 #include <vector>
 
-namespace p4c {
+namespace P4C {
 
 class hex {
     std::intmax_t val;
@@ -62,6 +62,6 @@ class hexvec {
 
 std::ostream &operator<<(std::ostream &os, const hexvec &h);
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* LIB_HEX_H_ */

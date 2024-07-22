@@ -20,7 +20,7 @@ limitations under the License.
 #include "ubpfTable.h"
 #include "ubpfType.h"
 
-namespace p4c::UBPF {
+namespace P4C::UBPF {
 
 class UBPFRegister final : public UBPFTableBase {
  public:
@@ -35,6 +35,6 @@ class UBPFRegister final : public UBPFTableBase {
     cstring emitValueInstanceIfNeeded(EBPF::CodeBuilder *builder, const IR::Argument *arg_value);
 };
 
-}  // namespace p4c::UBPF
+}  // namespace P4C::UBPF
 
 #endif /* BACKENDS_UBPF_UBPFREGISTER_H_ */

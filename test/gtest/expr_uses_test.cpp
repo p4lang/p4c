@@ -20,8 +20,8 @@ limitations under the License.
 
 #include "ir/ir.h"
 
-using namespace ::p4c;
-using namespace ::p4c::P4::literals;
+using namespace ::P4C;
+using namespace ::P4C::P4::literals;
 
 TEST(expr_uses, expr_uses) {
     auto obj1 = new IR::PathExpression("obj1");

@@ -12,7 +12,7 @@
 #include "backends/p4tools/modules/smith/common/table.h"
 #include "ir/ir.h"
 
-namespace p4c::P4Tools::P4Smith {
+namespace P4C::P4Tools::P4Smith {
 
 class SmithTarget : public CompilerTarget {
  public:
@@ -37,6 +37,6 @@ class SmithTarget : public CompilerTarget {
  private:
 };
 
-}  // namespace p4c::P4Tools::P4Smith
+}  // namespace P4C::P4Tools::P4Smith
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_CORE_TARGET_H_ */

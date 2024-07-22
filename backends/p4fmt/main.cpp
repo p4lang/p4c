@@ -6,7 +6,7 @@
 #include "options.h"
 #include "p4fmt.h"
 
-using namespace ::p4c;
+using namespace ::P4C;
 
 int main(int argc, char *const argv[]) {
     AutoCompileContext autoP4FmtContext(new P4Fmt::P4FmtContext);
@@ -28,7 +28,7 @@ int main(int argc, char *const argv[]) {
     } else {
         out = openFile(options.outputFile(), false);
         if ((out == nullptr) || !(*out)) {
-            ::p4c::error(ErrorType::ERR_NOT_FOUND, "%2%: No such file or directory.",
+            ::P4C::error(ErrorType::ERR_NOT_FOUND, "%2%: No such file or directory.",
                          options.outputFile().string());
             options.usage();
             return EXIT_FAILURE;
@@ -38,7 +38,7 @@ int main(int argc, char *const argv[]) {
     (*out) << formattedOutput.str();
     out->flush();
     if (!(*out)) {
-        ::p4c::error(ErrorType::ERR_IO, "Failed to write to output file.");
+        ::P4C::error(ErrorType::ERR_IO, "Failed to write to output file.");
         return EXIT_FAILURE;
     }
 

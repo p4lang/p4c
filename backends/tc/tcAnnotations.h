@@ -20,7 +20,7 @@ and limitations under the License.
 #include "frontends/p4/parseAnnotations.h"
 #include "ir/ir.h"
 
-namespace p4c::TC {
+namespace P4C::TC {
 
 class ParseTCAnnotations : public P4::ParseAnnotations {
  public:
@@ -52,6 +52,6 @@ class ParseTCAnnotations : public P4::ParseAnnotations {
                PARSE_EMPTY(tc_numel)}) {}
 };
 
-}  // namespace p4c::TC
+}  // namespace P4C::TC
 
 #endif /* BACKENDS_TC_TCANNOTATIONS_H_ */

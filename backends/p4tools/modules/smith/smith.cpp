@@ -20,7 +20,7 @@
 #include "lib/error.h"
 #include "lib/nullstream.h"
 
-namespace p4c::P4Tools::P4Smith {
+namespace P4C::P4Tools::P4Smith {
 
 void Smith::registerTarget() { registerSmithTargets(); }
 
@@ -60,7 +60,7 @@ int Smith::mainImpl(const CompilerResult & /*result*/) {
     }
     auto *ostream = openFile(outputFile, false);
     if (ostream == nullptr) {
-        ::p4c::error("must have [file]");
+        ::P4C::error("must have [file]");
         exit(EXIT_FAILURE);
     }
     if (smithOptions.seed.has_value()) {
@@ -90,4 +90,4 @@ int Smith::mainImpl(const CompilerResult & /*result*/) {
     return EXIT_SUCCESS;
 }
 
-}  // namespace p4c::P4Tools::P4Smith
+}  // namespace P4C::P4Tools::P4Smith

@@ -20,7 +20,7 @@ limitations under the License.
 #include "control-plane/bfruntime_ext.h"
 #include "dpdkUtils.h"
 #include "printUtils.h"
-namespace p4c::DPDK {
+namespace P4C::DPDK {
 
 cstring DpdkContextGenerator::removePipePrefix(cstring tableName) {
     if (!options.bfRtSchema.empty() || !options.tdiFile.empty()) {
@@ -61,7 +61,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                     if (add_on_miss->value->is<IR::ExpressionValue>()) {
                         auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
                         if (!expr->is<IR::BoolLiteral>()) {
-                            ::p4c::error(ErrorType::ERR_UNEXPECTED,
+                            ::P4C::error(ErrorType::ERR_UNEXPECTED,
                                          "%1%: expected boolean for 'add_on_miss' property",
                                          add_on_miss);
                             return;
@@ -77,7 +77,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                         auto expr = idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()
                                         ->expression;
                         if (!expr->is<IR::BoolLiteral>()) {
-                            ::p4c::error(
+                            ::P4C::error(
                                 ErrorType::ERR_UNEXPECTED,
                                 "%1%: expected boolean for 'idle_timeout_with_auto_delete' "
                                 "property",
@@ -96,7 +96,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                     tblAttr.isHidden = false;
                     tblAttr.tableType = "match"_cs;
                     tblAttr.tableKeys =
-                        ::p4c::get(structure->key_map,
+                        ::P4C::get(structure->key_map,
                                    kv.second->name.originalName + "_" + tbl->name.originalName);
                 }
                 if (!hidden)
@@ -128,7 +128,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 unsigned maxArgNum = externTypeName == "Counter" ? 2 : 1;
                 int typeArgNum = maxArgNum - 1;
                 if (ed->arguments->size() != maxArgNum) {
-                    ::p4c::error(ErrorType::ERR_UNEXPECTED,
+                    ::P4C::error(ErrorType::ERR_UNEXPECTED,
                                  "%1%: expected %2% arguments, number of counters and type"
                                  "of counter",
                                  ed, maxArgNum);
@@ -149,8 +149,8 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 }
             }
             if (externTypeName == "DirectMeter" || externTypeName == "DirectCounter") {
-                auto ownerTable = ::p4c::get(structure->direct_resource_map, ed->name.name);
-                auto tableAttr = ::p4c::get(tableAttrmap, ownerTable->name.originalName);
+                auto ownerTable = ::P4C::get(structure->direct_resource_map, ed->name.name);
+                auto tableAttr = ::P4C::get(tableAttrmap, ownerTable->name.originalName);
                 externAttr.table_id = tableAttr.tableHandle;
             }
             externAttrMap.emplace(ed->name.name, externAttr);
@@ -284,7 +284,7 @@ void DpdkContextGenerator::setActionAttributes(const IR::P4Table *tbl) {
 
         // DPDK target takes a structure as parameter for Actions. So, all action
         // parameters are collected into a structure by an earlier pass.
-        auto params = ::p4c::get(structure->args_struct_map, act->getPath()->name.name + "_arg_t");
+        auto params = ::P4C::get(structure->args_struct_map, act->getPath()->name.name + "_arg_t");
         if (params)
             attr.params = params->clone();
         else
@@ -306,9 +306,9 @@ void DpdkContextGenerator::setDefaultActionHandle(const IR::P4Table *table) {
     cstring default_action_name = cstring::empty;
     if (table->getDefaultAction()) default_action_name = toStr(table->getDefaultAction());
 
-    auto tableAttr = ::p4c::get(tableAttrmap, table->name.originalName);
+    auto tableAttr = ::P4C::get(tableAttrmap, table->name.originalName);
     for (auto action : table->getActionList()->actionList) {
-        struct actionAttributes attr = ::p4c::get(actionAttrMap, action->getName());
+        struct actionAttributes attr = ::P4C::get(actionAttrMap, action->getName());
         if (toStr(action->expression) == default_action_name) {
             tableAttr.default_action_handle = attr.actionHandle;
             // Update default table handle in existing table attribute map
@@ -331,14 +331,14 @@ void DpdkContextGenerator::addImmediateField(Util::JsonArray *paramJson, const c
 /// This functions creates JSON object for match attributes of a table.
 Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *table,
                                                            const cstring ctrlName) {
-    auto tableAttr = ::p4c::get(tableAttrmap, table->name.originalName);
+    auto tableAttr = ::P4C::get(tableAttrmap, table->name.originalName);
     auto *match_attributes = new Util::JsonObject();
     auto *actFmtArray = new Util::JsonArray();
     auto *stageTblArray = new Util::JsonArray();
     auto *oneStageTbl = new Util::JsonObject();
     for (auto action : table->getActionList()->actionList) {
         auto *oneAction = new Util::JsonObject();
-        struct actionAttributes attr = ::p4c::get(actionAttrMap, action->getName());
+        struct actionAttributes attr = ::P4C::get(actionAttrMap, action->getName());
         auto name = action->externalName();
         if (name != "NoAction") {
             name = ctrlName + "." + name;
@@ -386,7 +386,7 @@ Util::JsonArray *DpdkContextGenerator::addActions(const IR::P4Table *table,
                                                   const cstring controlName, bool isMatch) {
     auto *actArray = new Util::JsonArray();
     for (auto action : table->getActionList()->actionList) {
-        struct actionAttributes attr = ::p4c::get(actionAttrMap, action->getName());
+        struct actionAttributes attr = ::P4C::get(actionAttrMap, action->getName());
         // Printing compiler added actions is curently not required
         if (!attr.is_compiler_added_action) {
             auto *act = new Util::JsonObject();
@@ -448,7 +448,7 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
         hasActionProfileSelector = true;
         *memberTable = structure->member_tables.at(tbl_name);
         auto *actionDataField = new Util::JsonObject();
-        auto tableAttr = ::p4c::get(tableAttrmap, (*memberTable)->name.originalName);
+        auto tableAttr = ::P4C::get(tableAttrmap, (*memberTable)->name.originalName);
         auto tableName = tableAttr.controlName + "." + (*memberTable)->name.originalName;
         actionDataField->emplace("name", tableName);
         actionDataField->emplace("handle", tableAttr.tableHandle);
@@ -462,7 +462,7 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
         hasActionProfileSelector = true;
         auto groupTable = structure->group_tables.at(tbl_name);
         auto *selectField = new Util::JsonObject();
-        auto tableAttr = ::p4c::get(tableAttrmap, groupTable->name.originalName);
+        auto tableAttr = ::P4C::get(tableAttrmap, groupTable->name.originalName);
         auto tableName = tableAttr.controlName + "." + groupTable->name.originalName;
         selectField->emplace("name", tableName);
         selectField->emplace("handle", tableAttr.tableHandle);
@@ -480,7 +480,7 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
 void DpdkContextGenerator::addMatchTables(Util::JsonArray *tablesJson) {
     for (auto t : tables) {
         auto tbl = t->to<IR::P4Table>();
-        auto tableAttr = ::p4c::get(tableAttrmap, tbl->name.originalName);
+        auto tableAttr = ::P4C::get(tableAttrmap, tbl->name.originalName);
         auto *tableJson = initTableCommonJson(tbl->name.originalName, tableAttr);
         bool hasActionProfileSelector = false;
         bool isMatchTable = tableAttr.tableType == "match";
@@ -512,7 +512,7 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray *tablesJson) {
             setActionAttributes(table);
             setDefaultActionHandle(table);
 
-            tableAttr = ::p4c::get(tableAttrmap, table->name.originalName);
+            tableAttr = ::P4C::get(tableAttrmap, table->name.originalName);
             tableJson->emplace("actions", addActions(table, tableAttr.controlName, isMatchTable));
             if (isMatchTable) {
                 tableJson->emplace("match_attributes",
@@ -534,7 +534,7 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray *tablesJson) {
 /// Add extern information to the context json.
 void DpdkContextGenerator::addExternInfo(Util::JsonArray *externsJson) {
     for (auto t : externs) {
-        auto externAttr = ::p4c::get(externAttrMap, t->name.name);
+        auto externAttr = ::P4C::get(externAttrMap, t->name.name);
         auto *externJson = new Util::JsonObject();
         externJson->emplace("name", externAttr.externalName);
         externJson->emplace("target_name", t->name.name);
@@ -578,4 +578,4 @@ void DpdkContextGenerator::serializeContextJson(std::ostream *destination) {
     destination->flush();
 }
 
-}  // namespace p4c::DPDK
+}  // namespace P4C::DPDK

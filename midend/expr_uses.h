@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 
-namespace p4c {
+namespace P4C {
 
 /* Should this be a method on IR::Expression? */
 
@@ -83,6 +83,6 @@ class exprUses : public Inspector {
     explicit operator bool() const { return result; }
 };
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* MIDEND_EXPR_USES_H_ */

@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /**
 Find the types to replace and insert them in the nested struct map.
@@ -41,7 +41,7 @@ class FindHeaderTypesToReplace : public Inspector {
     bool preorder(const IR::Type_Header *type) override;
     void createReplacement(const IR::Type_Header *type, AnnotationSelectionPolicy *policy);
     StructTypeReplacement<IR::Type_StructLike> *getReplacement(const cstring name) const {
-        return ::p4c::get(replacement, name);
+        return ::P4C::get(replacement, name);
     }
     bool empty() const { return replacement.empty(); }
 };
@@ -149,6 +149,6 @@ class FlattenHeaders final : public PassManager {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_FLATTENHEADERS_H_ */

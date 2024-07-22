@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "helpers.h"
 
-using namespace ::p4c;
+using namespace ::P4C;
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

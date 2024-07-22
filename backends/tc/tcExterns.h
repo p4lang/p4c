@@ -17,9 +17,9 @@ and limitations under the License.
 #include "backend.h"
 #include "ebpfCodeGen.h"
 
-namespace p4c::TC {
+namespace P4C::TC {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 class ControlBodyTranslatorPNA;
 class ConvertToBackendIR;
@@ -65,13 +65,13 @@ class EBPFRegisterPNA : public EBPF::EBPFTableBase {
         CHECK_NULL(di);
         this->instanceName = di->toString();
         if (!di->type->is<IR::Type_Specialized>()) {
-            ::p4c::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
+            ::P4C::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
             return;
         }
         auto ts = di->type->to<IR::Type_Specialized>();
 
         if (ts->arguments->size() != PARAM_INDEX_2) {
-            ::p4c::error(ErrorType::ERR_MODEL,
+            ::P4C::error(ErrorType::ERR_MODEL,
                          "Expected a type specialized with two arguments: %1%", ts);
             return;
         }
@@ -101,7 +101,7 @@ class EBPFTablePNADirectCounterPropertyVisitor : public EBPF::EBPFTablePsaProper
         auto di = decl->to<IR::Declaration_Instance>();
         CHECK_NULL(di);
         if (EBPF::EBPFObject::getSpecializedTypeName(di) != "DirectCounter") {
-            ::p4c::error(ErrorType::ERR_UNEXPECTED,
+            ::P4C::error(ErrorType::ERR_UNEXPECTED,
                          "%1%: not a DirectCounter, see declaration of %2%", pe, decl);
             return false;
         }
@@ -152,7 +152,7 @@ class EBPFChecksumPNA : public EBPF::EBPFChecksumPSA {
         : EBPF::EBPFChecksumPSA(program, block, name) {
         auto di = block->to<IR::Declaration_Instance>();
         if (di->arguments->size() != 1) {
-            ::p4c::error(ErrorType::ERR_UNEXPECTED, "Expected exactly 1 argument %1%", block);
+            ::P4C::error(ErrorType::ERR_UNEXPECTED, "Expected exactly 1 argument %1%", block);
             return;
         }
         int type = di->arguments->at(0)->expression->checkedTo<IR::Constant>()->asInt();
@@ -177,6 +177,6 @@ class EBPFInternetChecksumPNA : public EBPFChecksumPNA {
                        const IR::MethodCallExpression *expr, Visitor *visitor) override;
 };
 
-}  // namespace p4c::TC
+}  // namespace P4C::TC
 
 #endif /* BACKENDS_TC_TCEXTERNS_H_ */

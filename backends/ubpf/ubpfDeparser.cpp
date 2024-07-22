@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "ubpfType.h"
 
-namespace p4c::UBPF {
+namespace P4C::UBPF {
 
 class OutHeaderSize final : public EBPF::CodeGenInspector {
     P4::ReferenceMap *refMap;
@@ -29,7 +29,7 @@ class OutHeaderSize final : public EBPF::CodeGenInspector {
     std::map<const IR::Parameter *, const IR::Parameter *> substitution;
 
     bool illegal(const IR::Statement *statement) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in deparser", statement);
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in deparser", statement);
         return false;
     }
 
@@ -48,7 +48,7 @@ class OutHeaderSize final : public EBPF::CodeGenInspector {
         auto decl = refMap->getDeclaration(expression->path, true);
         auto param = decl->getNode()->to<IR::Parameter>();
         if (param != nullptr) {
-            auto subst = ::p4c::get(substitution, param);
+            auto subst = ::P4C::get(substitution, param);
             if (subst != nullptr) {
                 builder->append(subst->name);
                 return false;
@@ -81,7 +81,7 @@ class OutHeaderSize final : public EBPF::CodeGenInspector {
         auto type = typeMap->getType(h);
         auto ht = type->to<IR::Type_Header>();
         if (ht == nullptr) {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot emit a non-header type %1%",
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot emit a non-header type %1%",
                          h);
             return false;
         }
@@ -113,7 +113,7 @@ void UBPFDeparserTranslationVisitor::compileEmitField(const IR::Expression *expr
                                                       unsigned alignment, EBPF::EBPFType *type) {
     auto et = type->to<EBPF::IHasWidth>();
     if (et == nullptr) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                      "Only headers with fixed widths supported %1%", expr);
         return;
     }
@@ -222,7 +222,7 @@ void UBPFDeparserTranslationVisitor::compileEmit(const IR::Vector<IR::Argument> 
     auto type = typeMap->getType(expr);
     auto ht = type->to<IR::Type_Header>();
     if (ht == nullptr) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot emit a non-header type %1%",
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot emit a non-header type %1%",
                      expr);
         return;
     }
@@ -253,7 +253,7 @@ void UBPFDeparserTranslationVisitor::compileEmit(const IR::Vector<IR::Argument> 
         auto etype = UBPFTypeFactory::instance->create(ftype);
         auto et = etype->to<EBPF::IHasWidth>();
         if (et == nullptr) {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                          "Only headers with fixed widths supported %1%", f);
             return;
         }
@@ -280,14 +280,14 @@ bool UBPFDeparserTranslationVisitor::preorder(const IR::MethodCallExpression *ex
         }
     }
 
-    ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call in deparser %1%", expression);
+    ::P4C::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call in deparser %1%", expression);
     return false;
 }
 
 bool UBPFDeparser::build() {
     auto pl = controlBlock->container->type->applyParams;
     if (pl->size() != 2) {
-        ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: Expected deparser to have exactly 2 parameters",
+        ::P4C::error(ErrorType::ERR_EXPECTED, "%1%: Expected deparser to have exactly 2 parameters",
                      controlBlock->getNode());
         return false;
     }
@@ -300,7 +300,7 @@ bool UBPFDeparser::build() {
     codeGen = new UBPFDeparserTranslationVisitor(this);
     codeGen->substitute(headers, parserHeaders);
 
-    return ::p4c::errorCount() == 0;
+    return ::P4C::errorCount() == 0;
 }
 
 void UBPFDeparser::emit(EBPF::CodeBuilder *builder) {
@@ -350,4 +350,4 @@ void UBPFDeparser::emit(EBPF::CodeBuilder *builder) {
     codeGen->setBuilder(builder);
     controlBlock->container->body->apply(*codeGen);
 }
-}  // namespace p4c::UBPF
+}  // namespace P4C::UBPF

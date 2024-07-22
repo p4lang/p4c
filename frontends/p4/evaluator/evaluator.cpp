@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 Visitor::profile_t Evaluator::init_apply(const IR::Node *node) {
     BUG_CHECK(node->is<IR::P4Program>(), "Evaluation should be invoked on a program, not a %1%",
@@ -129,7 +129,7 @@ std::vector<const IR::CompileTimeValue *> *Evaluator::evaluateArguments(
         CHECK_NULL(folded);
         visit(folded);  // recursive evaluation
         if (!hasValue(folded)) {
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: Cannot evaluate to a compile-time constant",
+            ::P4C::error(ErrorType::ERR_INVALID, "%1%: Cannot evaluate to a compile-time constant",
                          arg->expression);
             popBlock(context);
             return nullptr;
@@ -357,4 +357,4 @@ EvaluatorPass::EvaluatorPass(ReferenceMap *refMap, TypeMap *typeMap) {
     passes.emplace_back(evaluator);
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

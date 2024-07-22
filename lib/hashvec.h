@@ -24,7 +24,7 @@ limitations under the License.
 #include <iostream>
 #endif
 
-namespace p4c {
+namespace P4C {
 
 class hash_vector_base {
     struct internal;
@@ -90,6 +90,6 @@ class hash_vector_base {
     void redo_hash();
 };
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* LIB_HASHVEC_H_ */

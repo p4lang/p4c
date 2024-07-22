@@ -26,7 +26,7 @@ limitations under the License.
 #include "frontends/p4/unusedDeclarations.h"
 #include "ir/visitor.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Type_Declaration *SpecializationInfo::synthesize(const Visitor::Context *ctxt) const {
     TypeVariableSubstitution tvs;
@@ -300,4 +300,4 @@ SpecializeAll::SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap, FrontEndPol
     setName("SpecializeAll");
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

@@ -15,7 +15,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 /// The main class that implements small-step operational semantics. Delegates to implementations
 /// of AbstractStepper.
@@ -79,6 +79,6 @@ class SmallStepEvaluator {
     SmallStepEvaluator(AbstractSolver &solver, const ProgramInfo &programInfo);
 };
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_SMALL_STEP_H_ */

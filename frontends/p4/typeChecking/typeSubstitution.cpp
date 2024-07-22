@@ -21,7 +21,7 @@ limitations under the License.
 #include "typeConstraints.h"
 #include "typeSubstitutionVisitor.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 using namespace literals;
 
 // FIXME: see if we can not return format string as cstring here
@@ -107,7 +107,7 @@ bool TypeVariableSubstitution::setBindings(const IR::Node *errorLocation,
     if (params == nullptr || args == nullptr) BUG("Nullptr argument to setBindings");
 
     if (params->parameters.size() != args->size()) {
-        ::p4c::error(ErrorType::ERR_TYPE_ERROR, "%1% has %2% type parameters, invoked with %3%",
+        ::P4C::error(ErrorType::ERR_TYPE_ERROR, "%1% has %2% type parameters, invoked with %3%",
                      errorLocation, params->parameters.size(), args->size());
         return false;
     }
@@ -119,7 +119,7 @@ bool TypeVariableSubstitution::setBindings(const IR::Node *errorLocation,
 
         bool success = setBinding(tp, t);
         if (!success) {
-            ::p4c::error(ErrorType::ERR_TYPE_ERROR, "%1%: Cannot bind %2% to %3%", errorLocation,
+            ::P4C::error(ErrorType::ERR_TYPE_ERROR, "%1%: Cannot bind %2% to %3%", errorLocation,
                          tp, t);
             return false;
         }
@@ -145,4 +145,4 @@ void TypeVariableSubstitution::debugValidate() {
 void dump(P4::TypeVariableSubstitution &tvs) { std::cout << tvs << std::endl; }
 void dump(P4::TypeVariableSubstitution *tvs) { std::cout << *tvs << std::endl; }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

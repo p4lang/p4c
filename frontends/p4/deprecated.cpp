@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "deprecated.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 void Deprecated::warnIfDeprecated(const IR::IAnnotated *annotated, const IR::Node *errorNode) {
     if (annotated == nullptr) return;
@@ -27,7 +27,7 @@ void Deprecated::warnIfDeprecated(const IR::IAnnotated *annotated, const IR::Nod
     for (const auto *a : anno->expr) {
         if (const auto *str = a->to<IR::StringLiteral>()) message += str->value;
     }
-    ::p4c::warning(ErrorType::WARN_DEPRECATED, "%1%: Using deprecated feature %2%. %3%", errorNode,
+    ::P4C::warning(ErrorType::WARN_DEPRECATED, "%1%: Using deprecated feature %2%. %3%", errorNode,
                    annotated->getNode(), message);
 }
 
@@ -43,4 +43,4 @@ bool Deprecated::preorder(const IR::Type_Name *name) {
     return false;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

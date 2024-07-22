@@ -31,7 +31,7 @@ limitations under the License.
 #include "exename.h"
 #include "hex.h"
 
-namespace p4c {
+namespace P4C {
 
 #if HAVE_LIBBACKTRACE
 extern struct backtrace_state *global_backtrace_state;
@@ -75,7 +75,7 @@ void backtrace_fill_stacktrace(std::string &msg, void *const *backtrace, int siz
 #endif
 }
 
-}  // namespace p4c
+}  // namespace P4C
 
 #ifdef __GLIBC__
 /* DANGER -- overrides for glibc++ exception throwers to include a stack trace.
@@ -84,7 +84,7 @@ void backtrace_fill_stacktrace(std::string &msg, void *const *backtrace, int siz
 
 namespace std {
 
-using ::p4c::backtrace_exception;
+using ::P4C::backtrace_exception;
 
 void __throw_bad_alloc() { throw backtrace_exception<bad_alloc>(); }
 

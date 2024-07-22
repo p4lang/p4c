@@ -20,7 +20,7 @@ limitations under the License.
 #include "def_use.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 class UnrollLoops : public Transform, public P4::ResolutionContext {
     NameGenerator &nameGen;
@@ -53,6 +53,6 @@ class UnrollLoops : public Transform, public P4::ResolutionContext {
         : nameGen(ng), defUse(du), policy(p) {}
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_UNROLLLOOPS_H_ */

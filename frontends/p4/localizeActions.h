@@ -25,7 +25,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/ordered_set.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 class GlobalActionReplacements {
  public:
@@ -35,7 +35,7 @@ class GlobalActionReplacements {
 
     const IR::P4Action *getReplacement(const IR::P4Action *action,
                                        const IR::P4Control *control) const {
-        auto map = ::p4c::get(repl, control);
+        auto map = ::P4C::get(repl, control);
         if (map == nullptr) return nullptr;
         if (map->find(action) != map->end()) return (*map)[action];
         return nullptr;
@@ -182,6 +182,6 @@ class LocalizeAllActions : public PassManager {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_LOCALIZEACTIONS_H_ */

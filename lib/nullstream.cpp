@@ -20,17 +20,17 @@ limitations under the License.
 
 #include "lib/error.h"
 
-namespace p4c {
+namespace P4C {
 
 std::ostream *openFile(const std::filesystem::path &name, bool nullOnError) {
     if (name.empty()) {
         if (nullOnError) return new nullstream();
-        ::p4c::error(ErrorType::ERR_INVALID, "Empty name for openFile");
+        ::P4C::error(ErrorType::ERR_INVALID, "Empty name for openFile");
         return nullptr;
     }
     std::ofstream *file = new std::ofstream(name);
     if (!file->good()) {
-        ::p4c::error(ErrorType::ERR_IO, "Error writing output to file %1%: %2%", name,
+        ::P4C::error(ErrorType::ERR_IO, "Error writing output to file %1%: %2%", name,
                      strerror(errno));
         if (nullOnError) return new nullstream();
         return nullptr;
@@ -38,4 +38,4 @@ std::ostream *openFile(const std::filesystem::path &name, bool nullOnError) {
     return file;
 }
 
-}  // namespace p4c
+}  // namespace P4C

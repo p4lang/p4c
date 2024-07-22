@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "strengthReduction.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /// @section Helper methods
 
@@ -257,7 +257,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::Mul *expr) {
 
 const IR::Node *DoStrengthReduction::postorder(IR::Div *expr) {
     if (isZero(expr->right)) {
-        ::p4c::error(ErrorType::ERR_EXPRESSION, "%1%: Division by zero", expr);
+        ::P4C::error(ErrorType::ERR_EXPRESSION, "%1%: Division by zero", expr);
         return expr;
     }
     if (isOne(expr->right)) return expr->left;
@@ -273,7 +273,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::Div *expr) {
 
 const IR::Node *DoStrengthReduction::postorder(IR::Mod *expr) {
     if (isZero(expr->right)) {
-        ::p4c::error(ErrorType::ERR_EXPRESSION, "%1%: Modulo by zero", expr);
+        ::P4C::error(ErrorType::ERR_EXPRESSION, "%1%: Modulo by zero", expr);
         return expr;
     }
     if (isZero(expr->left) && !hasSideEffects(expr->right)) return expr->left;
@@ -336,7 +336,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::ArrayIndex *expr) {
         if (auto cst = expr->right->to<IR::Constant>()) {
             auto index = cst->asInt();
             if (index < 0 || static_cast<size_t>(index) >= hse->components.size()) {
-                ::p4c::error(ErrorType::ERR_EXPRESSION, "%1%: Index %2% out of bounds", index,
+                ::P4C::error(ErrorType::ERR_EXPRESSION, "%1%: Index %2% out of bounds", index,
                              expr);
                 return expr;
             }
@@ -449,4 +449,4 @@ const IR::Node *DoStrengthReduction::postorder(IR::Slice *expr) {
     return expr;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

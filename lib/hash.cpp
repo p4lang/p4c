@@ -38,7 +38,7 @@
 #include <cstdint>
 #include <cstring>
 
-namespace p4c::Util {
+namespace P4C::Util {
 
 namespace {
 using namespace Detail;
@@ -343,4 +343,4 @@ uint64_t hash(const void *in, size_t len) {
     if (len <= XXH3_MIDSIZE_MAX) return XXH3_len_129to240_64b(data, len, kSecret, 0);
     return XXH3_hashLong_64b(data, len, kSecret, sizeof(kSecret));
 }
-}  // namespace p4c::Util
+}  // namespace P4C::Util

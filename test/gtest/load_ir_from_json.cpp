@@ -30,10 +30,10 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/log.h"
 
-using namespace ::p4c::P4;
+using namespace ::P4C::P4;
 using namespace std;
 
-namespace p4c::Test {
+namespace P4C::Test {
 
 class FromJSONTest : public P4CTest {};
 
@@ -58,4 +58,4 @@ TEST_F(FromJSONTest, load_ir_from_json) {
     ASSERT_FALSE(exitCode);
 }
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test

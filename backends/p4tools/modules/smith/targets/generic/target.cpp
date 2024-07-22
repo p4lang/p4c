@@ -19,9 +19,9 @@
 #include "ir/node.h"
 #include "ir/vector.h"
 
-namespace p4c::P4Tools::P4Smith::Generic {
+namespace P4C::P4Tools::P4Smith::Generic {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 /* =============================================================================================
  *  AbstractGenericSmithTarget implementation
@@ -230,4 +230,4 @@ const IR::P4Program *GenericCoreSmithTarget::generateP4Program() const {
     return new IR::P4Program(*objects);
 }
 
-}  // namespace p4c::P4Tools::P4Smith::Generic
+}  // namespace P4C::P4Tools::P4Smith::Generic

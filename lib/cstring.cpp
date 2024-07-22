@@ -36,7 +36,7 @@ limitations under the License.
 
 #include "hash.h"
 
-namespace p4c {
+namespace P4C {
 namespace {
 enum class table_entry_flags {
     none,
@@ -324,4 +324,4 @@ cstring cstring::capitalize() const {
     return cstring(st);
 }
 
-}  // namespace p4c
+}  // namespace P4C

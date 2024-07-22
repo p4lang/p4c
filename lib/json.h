@@ -31,11 +31,11 @@ limitations under the License.
 #include "lib/map.h"
 #include "lib/string_map.h"
 
-namespace p4c::Test {
+namespace P4C::Test {
 class TestJson;
 }
 
-namespace p4c::Util {
+namespace P4C::Util {
 
 class IJson : public ICastable {
  public:
@@ -181,8 +181,8 @@ class JsonObject final : public IJson, public string_map<IJson *> {
         return this;
     }
 
-    IJson *get(cstring label) const { return ::p4c::get(*this, label); }
-    IJson *get(std::string_view label) const { return ::p4c::get(*this, label); }
+    IJson *get(cstring label) const { return ::P4C::get(*this, label); }
+    IJson *get(std::string_view label) const { return ::P4C::get(*this, label); }
     template <class T, class S>
     T *getAs(S label) const {
         return get(label)->template to<T>();
@@ -191,6 +191,6 @@ class JsonObject final : public IJson, public string_map<IJson *> {
     DECLARE_TYPEINFO(JsonObject, IJson);
 };
 
-}  // namespace p4c::Util
+}  // namespace P4C::Util
 
 #endif /* LIB_JSON_H_ */

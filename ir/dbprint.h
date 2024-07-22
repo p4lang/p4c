@@ -22,7 +22,7 @@ limitations under the License.
 
 #include "lib/log.h"
 
-namespace p4c::DBPrint {
+namespace P4C::DBPrint {
 
 // Support for debug print, needed by the LOG* macros.
 // TODO: These should be part of a def file
@@ -93,6 +93,6 @@ inline std::ostream &operator<<(std::ostream &out, const DBPrint::dbprint_flags 
     return out;
 }
 
-}  // end namespace p4c::DBPrint
+}  // end namespace P4C::DBPrint
 
 #endif /* IR_DBPRINT_H_ */

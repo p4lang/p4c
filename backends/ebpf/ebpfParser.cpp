@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 void StateTranslationVisitor::compileLookahead(const IR::Expression *destination) {
     cstring msgStr = absl::StrFormat("Parser: lookahead for %s %s",
@@ -57,14 +57,14 @@ void StateTranslationVisitor::compileAdvance(const P4::ExternMethod *extMethod) 
                                           2, state->parser->program->lengthVar.c_str(),
                                           offsetStr.c_str());
     } else {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                      "packet_in.advance() method with non-constant argument is not supported yet");
         return;
     }
 
     int advanceVal = cnst->asInt();
     if (advanceVal % 8 != 0) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                      "packet_in.advance(%1%) must be byte-aligned in eBPF backend", advanceVal);
         return;
     }
@@ -100,7 +100,7 @@ void StateTranslationVisitor::compileVerify(const IR::MethodCallExpression *expr
     auto errorMember = errorExpr->to<IR::Member>();
     auto type = typeMap->getType(errorExpr, true);
     if (!type->is<IR::Type_Error>() || errorMember == nullptr) {
-        ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: not accessing a member error type",
+        ::P4C::error(ErrorType::ERR_UNEXPECTED, "%1%: not accessing a member error type",
                      errorExpr);
         return;
     }
@@ -210,7 +210,7 @@ bool StateTranslationVisitor::preorder(const IR::SelectExpression *expression) {
             if (pvs != nullptr)
                 pvs->emitKeyInitializer(builder, expression, pvsKeyVarName);
             else
-                ::p4c::error(ErrorType::ERR_UNKNOWN, "%1%: expected a value_set instance",
+                ::P4C::error(ErrorType::ERR_UNKNOWN, "%1%: expected a value_set instance",
                              e->keyset);
         }
     }
@@ -340,7 +340,7 @@ void StateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             // To correctly insert that padding, the length of field must be known, but tools like
             // nikss-ctl (and the nikss library) don't consume P4info.txtpb to have such knowledge.
             // There is also a bug in (de)parser causing such fields to be deparsed incorrectly.
-            ::p4c::error(
+            ::P4C::error(
                 ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "%1%: fields wider than 64 bits must have a size multiple of 8 bits (1 byte) "
                 "due to ambiguous padding in the LSB byte when the condition is not met",
@@ -408,7 +408,7 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
     auto type = state->parser->typeMap->getType(destination);
     auto ht = type->to<IR::Type_StructLike>();
     if (ht == nullptr) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                      "Cannot extract to a non-struct type %1%", destination);
         return;
     }
@@ -416,7 +416,7 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
     // We expect all headers to start on a byte boundary.
     unsigned width = ht->width_bits();
     if ((width % 8) != 0) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                      "Header %1% size %2% is not a multiple of 8 bits.", destination, width);
         return;
     }
@@ -477,7 +477,7 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
         auto etype = EBPFTypeFactory::instance->create(ftype);
         auto et = etype->to<IHasWidth>();
         if (et == nullptr) {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                          "Only headers with fixed widths supported %1%", f);
             return;
         }
@@ -507,7 +507,7 @@ void StateTranslationVisitor::processFunction(const P4::ExternFunction *function
     if (function->method->name.name == IR::ParserState::verify) {
         compileVerify(function->expr);
     } else {
-        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected extern function call in parser %1%",
+        ::P4C::error(ErrorType::ERR_UNEXPECTED, "Unexpected extern function call in parser %1%",
                      function->expr);
     }
 }
@@ -519,7 +519,7 @@ void StateTranslationVisitor::processMethod(const P4::ExternMethod *method) {
     if (decl == state->parser->packet) {
         if (method->method->name.name == p4lib.packetIn.extract.name) {
             if (expression->arguments->size() != 1) {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                              "Variable-sized header fields not yet supported %1%", expression);
                 return;
             }
@@ -535,7 +535,7 @@ void StateTranslationVisitor::processMethod(const P4::ExternMethod *method) {
         BUG("Unhandled packet method %1%", expression->method);
     }
 
-    ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected extern method call in parser %1%",
+    ::P4C::error(ErrorType::ERR_UNEXPECTED, "Unexpected extern method call in parser %1%",
                  expression);
 }
 
@@ -592,7 +592,7 @@ bool StateTranslationVisitor::preorder(const IR::MethodCallExpression *expressio
         }
     }
 
-    ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call in parser %1%", expression);
+    ::P4C::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call in parser %1%", expression);
     return false;
 }
 
@@ -671,7 +671,7 @@ void EBPFParser::emit(CodeBuilder *builder) {
 bool EBPFParser::build() {
     auto pl = parserBlock->container->type->applyParams;
     if (pl->size() != 2) {
-        ::p4c::error(ErrorType::ERR_EXPECTED, "Expected parser to have exactly 2 parameters");
+        ::P4C::error(ErrorType::ERR_EXPECTED, "Expected parser to have exactly 2 parameters");
         return false;
     }
 
@@ -717,4 +717,4 @@ void EBPFParser::emitRejectState(CodeBuilder *builder) {
     builder->newline();
 }
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF

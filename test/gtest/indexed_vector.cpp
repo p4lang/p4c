@@ -4,9 +4,9 @@
 
 #include "ir/ir.h"
 
-namespace p4c::Test {
+namespace P4C::Test {
 
-using namespace ::p4c::IR;
+using namespace ::P4C::IR;
 
 using TestVector = IndexedVector<StructField>;
 
@@ -95,4 +95,4 @@ TEST(IndexedVector, Vector_ctor) {
     EXPECT_EQ(vec[1]->name.name, "bar");
 }
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test

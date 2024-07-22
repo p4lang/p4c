@@ -4,7 +4,7 @@
 #include "backends/p4tools/common/compiler/configuration.h"
 #include "frontends/common/options.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 /// A compilation context for P4Tools that provides a custom compiler configuration.
 template <typename OptionsType>
@@ -31,6 +31,6 @@ class CompileContext : public virtual P4CContext {
     OptionsType optionsInstance;
 };
 
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_CONTEXT_H_ */

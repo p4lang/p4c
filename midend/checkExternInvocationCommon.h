@@ -22,7 +22,7 @@ limitations under the License.
 #include "ir/visitor.h"
 #include "lib/bitvec.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 class ReferenceMap;
 class TypeMap;
@@ -141,10 +141,10 @@ class CheckExternInvocationCommon : public Inspector {
         auto constraint = pipeConstraints.at(extType) & bv;
         if (!bv.empty() && constraint.empty()) {
             if (extName != "")
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%s %s %s cannot be used in the %s %s",
+                ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%s %s %s cannot be used in the %s %s",
                              expr->srcInfo, extType, extName, pipe, extractBlock(bv));
             else
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%s %s cannot be used in the %s %s",
+                ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%s %s cannot be used in the %s %s",
                              expr->srcInfo, extType, pipe, extractBlock(bv));
         }
     }
@@ -164,6 +164,6 @@ class CheckExternInvocationCommon : public Inspector {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_CHECKEXTERNINVOCATIONCOMMON_H_ */

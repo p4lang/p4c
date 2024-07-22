@@ -2,7 +2,7 @@
 
 #include "frontends/p4/enumInstance.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Node *DoConvertEnums::preorder(IR::Type_Enum *type) {
     bool convert = policy->convert(type);
@@ -27,7 +27,7 @@ const IR::Node *DoConvertEnums::postorder(IR::Type_Name *type) {
         // This will be resolved by the caller.
         return type;
     auto enumType = canontype->to<IR::Type_Enum>();
-    auto r = ::p4c::get(repr, enumType);
+    auto r = ::P4C::get(repr, enumType);
     if (r == nullptr) return type;
     return r->type;
 }
@@ -38,7 +38,7 @@ const IR::Node *DoConvertEnums::postorder(IR::Member *expression) {
     if (!ei) return expression;
     if (ei->is<SimpleEnumInstance>()) {
         auto type = ei->type->to<IR::Type_Enum>();
-        auto r = ::p4c::get(repr, type);
+        auto r = ::P4C::get(repr, type);
         if (r == nullptr) return expression;
         unsigned value = r->get(ei->name.name);
         unsigned encoded_value = policy->encoding(type, value);
@@ -48,4 +48,4 @@ const IR::Node *DoConvertEnums::postorder(IR::Member *expression) {
     return expression;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

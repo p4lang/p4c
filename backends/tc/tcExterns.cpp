@@ -16,7 +16,7 @@ and limitations under the License.
 
 #include "tcExterns.h"
 
-namespace p4c::TC {
+namespace P4C::TC {
 
 void EBPFRegisterPNA::emitInitializer(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
                                       ControlBodyTranslatorPNA *translator) {
@@ -89,7 +89,7 @@ void EBPFCounterPNA::emitDirectMethodInvocation(EBPF::CodeBuilder *builder,
                                                 const P4::ExternMethod *method,
                                                 const ConvertToBackendIR *tcIR) {
     if (method->method->name.name != "count") {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
         return;
     }
     BUG_CHECK(isDirect, "Bad Counter invocation");
@@ -130,7 +130,7 @@ void EBPFCounterPNA::emitMethodInvocation(EBPF::CodeBuilder *builder,
                                           const P4::ExternMethod *method,
                                           ControlBodyTranslatorPNA *translator) {
     if (method->method->name.name != "count") {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
         return;
     }
     BUG_CHECK(!isDirect, "DirectCounter used outside of table");
@@ -184,9 +184,9 @@ void EBPFChecksumPNA::init(const EBPF::EBPFProgram *program, cstring name, int t
 
     if (engine == nullptr) {
         if (declaration->arguments->empty())
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED, "InternetChecksum not yet implemented");
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED, "InternetChecksum not yet implemented");
         else
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Hash algorithm not yet implemented: %1%",
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED, "Hash algorithm not yet implemented: %1%",
                          declaration->arguments->at(0));
     }
 }
@@ -208,7 +208,7 @@ void EBPFInternetChecksumPNA::processMethod(EBPF::CodeBuilder *builder, cstring 
     } else if (method == "get") {
         engine->emitGet(builder);
     } else {
-        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call %1%", expr);
+        ::P4C::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call %1%", expr);
     }
 }
 
@@ -254,7 +254,7 @@ void InternetChecksumAlgorithmPNA::emitGetInternalState(EBPF::CodeBuilder *build
 void InternetChecksumAlgorithmPNA::emitSetInternalState(EBPF::CodeBuilder *builder,
                                                         const IR::MethodCallExpression *expr) {
     if (expr->arguments->size() != 1) {
-        ::p4c::error(ErrorType::ERR_UNEXPECTED, "Expected exactly 1 argument %1%", expr);
+        ::P4C::error(ErrorType::ERR_UNEXPECTED, "Expected exactly 1 argument %1%", expr);
         return;
     }
     builder->emitIndent();
@@ -283,7 +283,7 @@ void InternetChecksumAlgorithmPNA::updateChecksum(EBPF::CodeBuilder *builder,
     for (auto field : arguments) {
         auto fieldType = field->type->to<IR::Type_Bits>();
         if (fieldType == nullptr) {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED, "Unsupported field type: %1%", field->type);
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED, "Unsupported field type: %1%", field->type);
             return;
         }
         const int width = fieldType->width_bits();
@@ -302,14 +302,14 @@ void InternetChecksumAlgorithmPNA::updateChecksum(EBPF::CodeBuilder *builder,
         }
         if (width > 64) {
             if (remainingBits != 16) {
-                ::p4c::error(
+                ::P4C::error(
                     ErrorType::ERR_UNSUPPORTED,
                     "%1%: field wider than 64 bits must be aligned to 16 bits in input data",
                     field);
                 continue;
             }
             if (width % 16 != 0) {
-                ::p4c::error(
+                ::P4C::error(
                     ErrorType::ERR_UNSUPPORTED,
                     "%1%: field wider than 64 bits must have size in bits multiply of 16 bits",
                     field);
@@ -435,4 +435,4 @@ cstring InternetChecksumAlgorithmPNA::getConvertByteOrderFunction(unsigned width
     return emit;
 }
 
-}  // namespace p4c::TC
+}  // namespace P4C::TC

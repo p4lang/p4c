@@ -19,7 +19,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfType.h"
 #include "backends/ebpf/psa/ebpfPsaDeparser.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 class EBPFDigestPSAValueVisitor : public CodeGenInspector {
  protected:
@@ -143,7 +143,7 @@ void EBPFDigestPSA::processMethod(CodeBuilder *builder, cstring method,
         dg.setBuilder(builder);
         arg->apply(dg);
     } else {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupported method call for Digest",
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupported method call for Digest",
                      expr->method);
     }
 }
@@ -163,4 +163,4 @@ void EBPFDigestPSA::emitPushElement(CodeBuilder *builder, cstring elem) const {
     builder->endOfStatement(true);
 }
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF

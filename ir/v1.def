@@ -8,7 +8,7 @@
   * @{
   */
 #emit
-namespace p4c {
+namespace P4C {
 namespace IR {
 enum class CounterType { NONE, PACKETS, BYTES, BOTH };
 }  // namespace IR
@@ -42,7 +42,7 @@ inline bool operator>>(cstring s, IR::CounterType &ctr) {
     return true;
 }
 
-}  // namespace p4c
+}  // namespace P4C
 #end
 
 class Type_Block : Type_Base {

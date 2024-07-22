@@ -23,7 +23,7 @@ limitations under the License.
 #include "irclass.h"
 #include "lib/nullstream.h"
 
-using namespace ::p4c;
+using namespace ::P4C;
 
 void usage(const char *progname) {
     fprintf(stderr,

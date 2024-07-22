@@ -19,7 +19,7 @@ limitations under the License.
 #include "helpers.h"
 #include "lib/json.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 const int JSON_MAJOR_VERSION = 2;
 const int JSON_MINOR_VERSION = 23;
@@ -387,4 +387,4 @@ void JsonObjects::add_extern(const cstring &name, const cstring &type,
     externs->append(extn);
 }
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2

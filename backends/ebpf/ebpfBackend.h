@@ -22,11 +22,11 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "ir/ir.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
                       P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF
 
 #endif /* BACKENDS_EBPF_EBPFBACKEND_H_ */

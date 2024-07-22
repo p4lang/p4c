@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/bmv2/common/options.h"
 #include "backends/bmv2/simple_switch/midend.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 class SimpleSwitchOptions : public BMV2Options {
  public:
@@ -40,6 +40,6 @@ class SimpleSwitchOptions : public BMV2Options {
 
 using SimpleSwitchContext = P4CContextWithOptions<SimpleSwitchOptions>;
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2
 
 #endif /* BACKENDS_BMV2_SIMPLE_SWITCH_OPTIONS_H_ */

@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /**
  * Policy function: given a number of enum values should return
@@ -51,7 +51,7 @@ class EnumRepresentation {
         type = IR::Type_Bits::get(srcInfo, width, false);
     }
     void add(cstring decl) { repr.emplace(decl, repr.size()); }
-    unsigned get(cstring decl) const { return ::p4c::get(repr, decl); }
+    unsigned get(cstring decl) const { return ::P4C::get(repr, decl); }
 
     using iterator = decltype(repr)::iterator;
     using const_iterator = decltype(repr)::const_iterator;
@@ -144,6 +144,6 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     unsigned enumSize(unsigned) const override { return 32; }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_CONVERTENUMS_H_ */

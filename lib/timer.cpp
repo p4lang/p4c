@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <utility>
 
-namespace p4c::Util {
+namespace P4C::Util {
 
 namespace {
 
@@ -140,4 +140,4 @@ std::vector<TimerEntry> getTimers() {
     return ret;
 }
 
-}  // namespace p4c::Util
+}  // namespace P4C::Util

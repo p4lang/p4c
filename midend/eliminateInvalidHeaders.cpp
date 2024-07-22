@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "eliminateInvalidHeaders.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Node *DoEliminateInvalidHeaders::postorder(IR::P4Control *control) {
     control->controlLocals.prepend(variables);
@@ -54,7 +54,7 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeader *expressi
     if (!findContext<IR::BlockStatement>() && !findContext<IR::P4Action>() &&
         !findContext<IR::ParserState>()) {
         // We need some place to insert the setInvalid call.
-        ::p4c::error("%1%: Cannot eliminate invalid header", expression);
+        ::P4C::error("%1%: Cannot eliminate invalid header", expression);
         return expression;
     }
     cstring name = refMap->newName("ih");
@@ -74,7 +74,7 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeaderUnion *exp
     if (!findContext<IR::BlockStatement>() && !findContext<IR::P4Action>() &&
         !findContext<IR::ParserState>()) {
         // We need some place to insert the setInvalid call.
-        ::p4c::error("%1%: Cannot eliminate invalid header union", expression);
+        ::P4C::error("%1%: Cannot eliminate invalid header union", expression);
         return expression;
     }
     cstring name = refMap->newName("ih");
@@ -85,4 +85,4 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeaderUnion *exp
     return new IR::PathExpression(src, new IR::Path(name));
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

@@ -23,7 +23,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "midend/convertEnums.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 class PsaSwitchMidEnd : public MidEnd {
  public:
@@ -31,6 +31,6 @@ class PsaSwitchMidEnd : public MidEnd {
     explicit PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
 };
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2
 
 #endif /* BACKENDS_BMV2_PSA_SWITCH_MIDEND_H_ */

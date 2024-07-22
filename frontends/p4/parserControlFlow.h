@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/p4/uniqueNames.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /** @brief Converts if statements in parsers into transitions.
  *
@@ -127,6 +127,6 @@ class RemoveParserIfs : public PassManager {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_PARSERCONTROLFLOW_H_ */

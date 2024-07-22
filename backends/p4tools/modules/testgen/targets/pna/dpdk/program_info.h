@@ -11,7 +11,7 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/targets/pna/shared_program_info.h"
 
-namespace p4c::P4Tools::P4Testgen::Pna {
+namespace P4C::P4Tools::P4Testgen::Pna {
 
 class PnaDpdkProgramInfo : public SharedPnaProgramInfo {
  private:
@@ -33,6 +33,6 @@ class PnaDpdkProgramInfo : public SharedPnaProgramInfo {
     DECLARE_TYPEINFO(PnaDpdkProgramInfo, SharedPnaProgramInfo);
 };
 
-}  // namespace p4c::P4Tools::P4Testgen::Pna
+}  // namespace P4C::P4Tools::P4Testgen::Pna
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_DPDK_PROGRAM_INFO_H_ */

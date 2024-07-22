@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "backends/common/psaProgramStructure.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
@@ -30,7 +30,7 @@ void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     }
 
     if (main->type->name != "PSA_Switch") {
-        ::p4c::warning(ErrorType::WARN_INVALID,
+        ::P4C::warning(ErrorType::WARN_INVALID,
                        "%1%: the main package should be called PSA_Switch"
                        "; are you using the wrong architecture?",
                        main->type->name);
@@ -79,4 +79,4 @@ void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     ebpf_program = convertToEbpfPSA->getPSAArchForEBPF();
 }
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF

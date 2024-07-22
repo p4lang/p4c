@@ -20,7 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/log.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 // Base class for various maps.
 // A map is computed on a certain P4Program.
@@ -63,6 +63,6 @@ class ProgramMap : public IHasDbPrint {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_COMMON_PROGRAMMAP_H_ */

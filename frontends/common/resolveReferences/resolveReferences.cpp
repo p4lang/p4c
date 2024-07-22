@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/common/parser_options.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 ResolutionContext::ResolutionContext() { anyOrder = P4CContext::get().options().isv1(); }
 
@@ -93,7 +93,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
                 if (type == ResolutionType::Type) {
                     if (auto *type_decl = findOrigCtxt<IR::Type_Declaration>())
                         if (type_decl->getNode() == d->getNode()) {
-                            ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+                            ::P4C::error(ErrorType::ERR_UNSUPPORTED,
                                          "Self-referencing types not supported: '%1%' within '%2%'",
                                          name, d->getNode());
                         }
@@ -243,7 +243,7 @@ const IR::IDeclaration *ResolutionContext::resolveUnique(const IR::ID &name,
     }
 
     if (decls.empty()) {
-        ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", name);
+        ::P4C::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", name);
         return nullptr;
     }
     if (decls.size() == 1) {
@@ -251,8 +251,8 @@ const IR::IDeclaration *ResolutionContext::resolveUnique(const IR::ID &name,
         return decls.front();
     }
 
-    ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", name);
-    for (const auto *a : decls) ::p4c::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
+    ::P4C::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", name);
+    for (const auto *a : decls) ::P4C::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
     return nullptr;
 }
 
@@ -264,11 +264,11 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
         // looking up a matchType in a key, so need to do a special lookup
         auto decls = lookupMatchKind(path->name);
         if (decls.empty()) {
-            ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", path->name);
+            ::P4C::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", path->name);
         } else if (decls.size() != 1) {
-            ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations",
+            ::P4C::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations",
                          path->name);
-            for (const auto *a : decls) ::p4c::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
+            for (const auto *a : decls) ::P4C::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
         } else {
             result = decls.front();
         }
@@ -289,7 +289,7 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::This *pointe
                                                           bool notNull) const {
     auto result = findOrigCtxt<IR::Declaration_Instance>();
     if (findOrigCtxt<IR::Function>() == nullptr || result == nullptr)
-        ::p4c::error(ErrorType::ERR_INVALID,
+        ::P4C::error(ErrorType::ERR_INVALID,
                      "%1% can only be used in the definition of an abstract method", pointer);
     if (notNull) BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", pointer);
     return result;
@@ -341,7 +341,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
             continue;
 
         if (prev_in_scope.count(decl->getName()))
-            ::p4c::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node,
+            ::P4C::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node,
                            prev_in_scope.at(decl->getName()));
         else if (!node->is<IR::Method>() && !node->is<IR::Function>())
             prev_in_scope[decl->getName()] = node;
@@ -367,11 +367,11 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
                 const auto *decl_node = node->to<IR::Declaration>();
                 if (const auto *param = pnode->to<IR::Parameter>())
                     if (decl_node->name.name == param->name.name)
-                        ::p4c::error(ErrorType::WARN_SHADOWING,
+                        ::P4C::error(ErrorType::WARN_SHADOWING,
                                      "declaration of '%1%' shadows a parameter '%2%'", node, pnode);
             }
 
-            ::p4c::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node, pnode);
+            ::P4C::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node, pnode);
         }
     }
 }
@@ -397,7 +397,7 @@ void ResolveReferences::postorder(const IR::P4Program *) { LOG2("Reference map "
 bool ResolveReferences::preorder(const IR::This *pointer) {
     auto decl = findContext<IR::Declaration_Instance>();
     if (findContext<IR::Function>() == nullptr || decl == nullptr) {
-        ::p4c::error(ErrorType::ERR_INVALID,
+        ::P4C::error(ErrorType::ERR_INVALID,
                      "'%1%' can only be used in the definition of an abstract method", pointer);
         return false;
     }
@@ -410,13 +410,13 @@ bool ResolveReferences::preorder(const IR::KeyElement *ke) {
     visit(ke->expression, "expression");
     auto decls = lookupMatchKind(ke->matchType->path->name);
     if (decls.empty()) {
-        ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found",
+        ::P4C::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found",
                      ke->matchType->path->name);
         refMap->usedName(ke->matchType->path->name.name);
     } else if (decls.size() != 1) {
-        ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations",
+        ::P4C::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations",
                      ke->matchType->path->name);
-        for (const auto *a : decls) ::p4c::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
+        for (const auto *a : decls) ::P4C::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
     } else {
         refMap->setDeclaration(ke->matchType->path, decls.front());
     }
@@ -512,4 +512,4 @@ bool ResolveReferences::preorder(const IR::Declaration_Instance *decl) {
 
 #undef PROCESS_NAMESPACE
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

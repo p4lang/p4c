@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/alias.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Node *RemoveAliases::postorder(IR::AssignmentStatement *statement) {
     const auto *type = typeMap->getType(statement->left);
@@ -80,7 +80,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
     // Do not copy structures for method calls.
     if (statement->right->is<IR::MethodCallExpression>()) {
         if (errorOnMethodCall) {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                          "%1%: functions or methods returning structures "
                          "are not supported on this target",
                          statement->right);
@@ -171,4 +171,4 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
     return new IR::BlockStatement(statement->srcInfo, *retval);
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

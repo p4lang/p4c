@@ -21,7 +21,7 @@ limitations under the License.
 
 #include "frontends/common/options.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 class BMV2Options : public CompilerOptions {
  public:
@@ -62,6 +62,6 @@ class BMV2Options : public CompilerOptions {
 
 using BMV2Context = P4CContextWithOptions<BMV2Options>;
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_OPTIONS_H_ */

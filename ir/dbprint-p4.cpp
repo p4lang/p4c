@@ -24,7 +24,7 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/map.h"
 
-namespace p4c {
+namespace P4C {
 
 using namespace DBPrint;
 using namespace IndentCtl;
@@ -269,4 +269,4 @@ void IR::Declaration_Instance::dbprint(std::ostream &out) const {
     }
 }
 
-}  // namespace p4c
+}  // namespace P4C

@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 namespace {
 class TypeNameSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
@@ -97,4 +97,4 @@ const IR::Node *DoDefaultArguments::postorder(IR::Declaration_Instance *inst) {
     return inst;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

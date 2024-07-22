@@ -62,7 +62,7 @@ limitations under the License.
 #include "midend/tableHit.h"
 #include "midend/unrollLoops.h"
 
-namespace p4c::P4Test {
+namespace P4C::P4Test {
 
 class SkipControls : public P4::ActionSynthesisPolicy {
     const std::set<cstring> *skip;
@@ -179,4 +179,4 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
     addDebugHooks(hooks, true);
 }
 
-}  // namespace p4c::P4Test
+}  // namespace P4C::P4Test

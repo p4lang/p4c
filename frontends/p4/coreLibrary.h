@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 enum class StandardExceptions {
     NoError,
     PacketTooShort,
@@ -30,9 +30,9 @@ enum class StandardExceptions {
     HeaderTooShort,
     ParserTimeout,
 };
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
-namespace p4c {
+namespace P4C {
 
 inline std::ostream &operator<<(std::ostream &out, P4::StandardExceptions e) {
     switch (e) {
@@ -60,9 +60,9 @@ inline std::ostream &operator<<(std::ostream &out, P4::StandardExceptions e) {
     return out;
 }
 
-}  // namespace p4c
+}  // namespace P4C
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 using namespace literals;
 
@@ -87,11 +87,11 @@ class PacketOut : public Model::Extern_Model {
     Model::Elem emit;
 };
 
-class P4Exception_Model : public ::p4c::Model::Elem {
+class P4Exception_Model : public ::P4C::Model::Elem {
  public:
     const StandardExceptions exc;
     explicit P4Exception_Model(StandardExceptions exc)
-        : ::p4c::Model::Elem(cstring::empty), exc(exc) {
+        : ::P4C::Model::Elem(cstring::empty), exc(exc) {
         std::stringstream str;
         str << exc;
         name = str.str();
@@ -100,7 +100,7 @@ class P4Exception_Model : public ::p4c::Model::Elem {
 
 // Model of P4 core library
 // To be kept in sync with core.p4
-class P4CoreLibrary : public ::p4c::Model::Model {
+class P4CoreLibrary : public ::P4C::Model::Model {
  protected:
     // NOLINTBEGIN(bugprone-throw-keyword-missing)
     P4CoreLibrary()
@@ -120,11 +120,11 @@ class P4CoreLibrary : public ::p4c::Model::Model {
         static P4CoreLibrary *corelib = new P4CoreLibrary();
         return *corelib;
     }
-    ::p4c::Model::Elem noAction;
+    ::P4C::Model::Elem noAction;
 
-    ::p4c::Model::Elem exactMatch;
-    ::p4c::Model::Elem ternaryMatch;
-    ::p4c::Model::Elem lpmMatch;
+    ::P4C::Model::Elem exactMatch;
+    ::P4C::Model::Elem ternaryMatch;
+    ::P4C::Model::Elem lpmMatch;
 
     PacketIn packetIn;
     PacketOut packetOut;
@@ -136,6 +136,6 @@ class P4CoreLibrary : public ::p4c::Model::Model {
     P4Exception_Model headerTooShort;
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_CORELIBRARY_H_ */

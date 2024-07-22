@@ -35,7 +35,7 @@ limitations under the License.
 
 #define TOSTR_DECLA(NAME) std::ostream &toStr(std::ostream &, IR::NAME *)
 
-namespace p4c::DPDK {
+namespace P4C::DPDK {
 
 /// @brief Name of the metadata used as output port.
 ///
@@ -136,7 +136,7 @@ class TypeWidthValidator : public Inspector {
     void postorder(const IR::Type_Varbits *type) override {
         LOG3("Validating Type_Varbits: " << type);
         if (type->size % 8 != 0) {
-            ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1% varbit width (%2%) not aligned to 8 bits",
+            ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1% varbit width (%2%) not aligned to 8 bits",
                          type->srcInfo, type->size);
         }
     }
@@ -201,5 +201,5 @@ class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     }
 };
 
-}  // namespace p4c::DPDK
+}  // namespace P4C::DPDK
 #endif /* BACKENDS_DPDK_DPDKHELPERS_H_ */

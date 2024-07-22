@@ -5,7 +5,7 @@
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
 
-namespace p4c::P4Tools::P4Smith {
+namespace P4C::P4Tools::P4Smith {
 
 class StatementGenerator : public Generator {
  public:
@@ -43,6 +43,6 @@ class StatementGenerator : public Generator {
     virtual IR::ForInStatement *genForInLoopStatement(bool is_in_func);
 };
 
-}  // namespace p4c::P4Tools::P4Smith
+}  // namespace P4C::P4Tools::P4Smith
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_COMMON_STATEMENTS_H_ */

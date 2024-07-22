@@ -38,7 +38,7 @@
 #include "midend/simplifySelectCases.h"
 #include "midend/simplifySelectList.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 MidEnd::MidEnd(const CompilerOptions &options) {
     setName("MidEnd");
@@ -169,4 +169,4 @@ void MidEnd::addDefaultPasses() {
     });
 }
 
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools

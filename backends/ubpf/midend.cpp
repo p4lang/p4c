@@ -49,7 +49,7 @@ limitations under the License.
 #include "midend/tableHit.h"
 #include "midend/validateProperties.h"
 
-namespace p4c::UBPF {
+namespace P4C::UBPF {
 
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum *type) const override {
@@ -126,8 +126,8 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
     midEnd.setName("MidEnd");
     midEnd.addDebugHooks(hooks);
     program = program->apply(midEnd);
-    if (::p4c::errorCount() > 0) return nullptr;
+    if (::P4C::errorCount() > 0) return nullptr;
 
     return evaluator->getToplevelBlock();
 }
-}  // namespace p4c::UBPF
+}  // namespace P4C::UBPF

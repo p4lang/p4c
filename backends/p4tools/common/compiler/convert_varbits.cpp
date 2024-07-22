@@ -2,7 +2,7 @@
 
 #include "lib/log.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 const IR::Node *ConvertVarbits::postorder(IR::Type_Varbits *varbit) {
     // At this point, we do not know the future size of the varbit. We assume 0 for now.
@@ -20,4 +20,4 @@ ConvertVarbits::ConvertVarbits() {
     setName("ConvertVarbits");
     visitDagOnce = false;
 }
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools

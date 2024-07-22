@@ -21,7 +21,7 @@ limitations under the License.
 #include "lib/big_int_util.h"
 #include "lib/source_file.h"
 
-namespace p4c {
+namespace P4C {
 
 std::ostream &operator<<(std::ostream &out, const UnparsedConstant &constant) {
     out << "UnparsedConstant(" << constant.text << ',' << constant.skip << ',' << constant.base
@@ -38,12 +38,12 @@ static IR::Constant *parseConstantWithWidth(Util::SourceInfo srcInfo, const char
     sep += strspn(sep, " \t\r\n");
     if (!*sep) BUG("Expected to find separator %1%", text);
     if (size < 0) {
-        ::p4c::error(ErrorType::ERR_INVALID, "%1%: invalid width; %2% must be positive", srcInfo,
+        ::P4C::error(ErrorType::ERR_INVALID, "%1%: invalid width; %2% must be positive", srcInfo,
                      size);
         return nullptr;
     }
     if (size > P4CContext::getConfig().maximumWidthSupported()) {
-        ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1%: %2% size too large", srcInfo, size);
+        ::P4C::error(ErrorType::ERR_OVERLIMIT, "%1%: %2% size too large", srcInfo, size);
         return nullptr;
     }
 
@@ -71,11 +71,11 @@ IR::Constant *parseConstant(const Util::SourceInfo &srcInfo, const UnparsedConst
 int parseConstantChecked(const Util::SourceInfo &srcInfo, const UnparsedConstant &constant) {
     auto cst = parseConstant(srcInfo, constant, 0);
     if (!cst->fitsInt()) {
-        ::p4c::error(ErrorType::ERR_OVERLIMIT,
+        ::P4C::error(ErrorType::ERR_OVERLIMIT,
                      "%1$x: this implementation does not support bitstrings this large", cst);
         return 8;  // this is a fine value for a width; compilation will stop anyway
     }
     return cst->asInt();
 }
 
-}  // namespace p4c
+}  // namespace P4C

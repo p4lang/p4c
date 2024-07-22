@@ -22,11 +22,11 @@ limitations under the License.
 #include "lib/null.h"
 #include "lib/safe_vector.h"
 
-namespace p4c {
+namespace P4C {
 class JSONLoader;
-}  // namespace p4c
+}  // namespace P4C
 
-namespace p4c::IR {
+namespace P4C::IR {
 
 // Specialization of vector which
 // - only stores const IR::Node* objects inside (T should derive from Node)
@@ -211,14 +211,14 @@ class Vector : public VectorBase {
     DECLARE_TYPEINFO_WITH_DISCRIMINATOR(Vector<T>, NodeDiscriminator::VectorT, T, VectorBase);
 };
 
-}  // namespace p4c::IR
+}  // namespace P4C::IR
 
 // XXX(seth): We use this namespace to hide our get() overloads from ADL. GCC
 // 4.8 has a bug which causes these overloads to be considered when get() is
 // called on a type in the global namespace, even if the number of arguments
 // doesn't match up, which can trigger template instantiations that cause
 // errors.
-namespace p4c {
+namespace P4C {
 namespace GetImpl {
 
 template <class T, class U>
@@ -238,6 +238,6 @@ const T *get(const IR::Vector<T> *vec, U name) {
 }  // namespace GetImpl
 using namespace GetImpl;  // NOLINT(build/namespaces)
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* IR_VECTOR_H_ */

@@ -18,7 +18,7 @@ limitations under the License.
 
 #include <stdexcept>
 
-namespace p4c::Util {
+namespace P4C::Util {
 
 using namespace boost::multiprecision;
 
@@ -109,9 +109,9 @@ big_int cvtInt(const char *s, unsigned base) {
     return rv;
 }
 
-}  // namespace p4c::Util
+}  // namespace P4C::Util
 
-namespace p4c {
+namespace P4C {
 
 void dump(const big_int &i) {
     std::cout << i << " (";
@@ -124,4 +124,4 @@ void dump(const big_int &i) {
 }
 void dump(const big_int *i) { dump(*i); }
 
-}  // namespace p4c
+}  // namespace P4C

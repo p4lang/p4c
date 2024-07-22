@@ -13,9 +13,9 @@
 #include "ir/irutils.h"
 #include "lib/exceptions.h"
 
-namespace p4c::Test {
+namespace P4C::Test {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 using ::testing::HasSubstr;
 
@@ -239,4 +239,4 @@ TEST_F(STFTest, Stf04) {
     }
 }
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test

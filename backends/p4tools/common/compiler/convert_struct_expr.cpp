@@ -2,7 +2,7 @@
 
 #include "ir/irutils.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 const IR::Node *ConvertStructExpr::postorder(IR::StructExpression *structExpr) {
     const auto *structType = structExpr->type;
@@ -26,4 +26,4 @@ ConvertStructExpr::ConvertStructExpr(const P4::TypeMap *typeMap) : typeMap(typeM
     setName("ConvertStructExpr");
     visitDagOnce = false;
 }
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools

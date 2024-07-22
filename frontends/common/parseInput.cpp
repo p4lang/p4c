@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
                                    const std::string &input,
@@ -34,9 +34,9 @@ const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
             ? parseV1Program<std::istringstream &, P4V1::Converter>(stream, sourceFile, sourceLine)
             : P4ParserDriver::parse(stream, sourceFile, sourceLine);
 
-    if (::p4c::errorCount() > 0) {
-        ::p4c::error(ErrorType::ERR_OVERLIMIT, "%1% errors encountered, aborting compilation",
-                     ::p4c::errorCount());
+    if (::P4C::errorCount() > 0) {
+        ::P4C::error(ErrorType::ERR_OVERLIMIT, "%1% errors encountered, aborting compilation",
+                     ::P4C::errorCount());
         return nullptr;
     }
     BUG_CHECK(result != nullptr, "Parsing failed, but we didn't report an error");
@@ -48,4 +48,4 @@ const IR::P4Program *parseP4String(const std::string &input,
     return parseP4String("(string)", 1, input, version);
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

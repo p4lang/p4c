@@ -22,7 +22,7 @@ limitations under the License.
 #include "backends/ebpf/psa/ebpfPsaTable.h"
 #include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 class EBPFPsaParser;
 
@@ -51,7 +51,7 @@ class EBPFPsaParser : public EBPFParser {
     void emitRejectState(CodeBuilder *builder) override;
 
     EBPFChecksumPSA *getChecksum(cstring name) const {
-        auto result = ::p4c::get(checksums, name);
+        auto result = ::P4C::get(checksums, name);
         BUG_CHECK(result != nullptr, "No checksum named %1%", name);
         return result;
     }
@@ -59,6 +59,6 @@ class EBPFPsaParser : public EBPFParser {
     DECLARE_TYPEINFO(EBPFPsaParser, EBPFParser);
 };
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EBPFPSAPARSER_H_ */

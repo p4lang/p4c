@@ -29,7 +29,7 @@ limitations under the License.
 #include "lib/error.h"
 #include "lib/json.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 using SelectorInput = std::vector<const IR::Expression *>;
 
@@ -72,7 +72,7 @@ class SharedActionSelectorCheck : public Inspector {
         auto implementation = table->properties->getProperty("implementation");
         if (implementation == nullptr) return false;
         if (!implementation->value->is<IR::ExpressionValue>()) {
-            ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected expression for property",
+            ::P4C::error(ErrorType::ERR_EXPECTED, "%1%: expected expression for property",
                          implementation);
             return false;
         }
@@ -81,13 +81,13 @@ class SharedActionSelectorCheck : public Inspector {
         auto pathe = propv->expression->to<IR::PathExpression>();
         auto decl = refMap->getDeclaration(pathe->path, true);
         if (!decl->is<IR::Declaration_Instance>()) {
-            ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: expected a reference to an instance",
+            ::P4C::error(ErrorType::ERR_EXPECTED, "%1%: expected a reference to an instance",
                          pathe);
             return false;
         }
         auto dcltype = typeMap->getType(pathe, true);
         if (!dcltype->is<IR::Type_Extern>()) {
-            ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type for implementation",
+            ::P4C::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type for implementation",
                          dcltype);
             return false;
         }
@@ -116,7 +116,7 @@ class SharedActionSelectorCheck : public Inspector {
         };
 
         if (!cmp_inputs(it->second, input)) {
-            ::p4c::error(
+            ::P4C::error(
                 ErrorType::ERR_INVALID,
                 "Action selector %1% is used by multiple tables with different selector inputs",
                 decl);
@@ -126,6 +126,6 @@ class SharedActionSelectorCheck : public Inspector {
     }
 };
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_SHAREDACTIONSELECTORCHECK_H_ */

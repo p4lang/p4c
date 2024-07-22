@@ -27,7 +27,7 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
-namespace p4c::graphs {
+namespace P4C::graphs {
 
 using Graph = ControlGraphs::Graph;
 
@@ -203,7 +203,7 @@ bool ControlGraphs::preorder(const IR::MethodCallStatement *statement) {
             visit(am->object->to<IR::P4Table>());
         } else if (am->applyObject->is<IR::Type_Control>()) {
             if (am->object->is<IR::Parameter>()) {
-                ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                              "%1%: control parameters are not supported by this target",
                              am->object);
                 return false;
@@ -329,4 +329,4 @@ bool ControlGraphs::preorder(const IR::P4Table *table) {
     return false;
 }
 
-}  // namespace p4c::graphs
+}  // namespace P4C::graphs

@@ -18,7 +18,7 @@ limitations under the License.
 #define BACKENDS_DPDK_BACKEND_H_
 #include "p4/config/v1/p4info.pb.h"
 
-namespace p4configv1 = ::p4::config::v1;
+namespace P4Configv1 = ::p4::config::v1;
 #undef setbit
 
 #include "frontends/common/constantFolding.h"
@@ -35,7 +35,7 @@ namespace p4configv1 = ::p4::config::v1;
 #include "lib/json.h"
 #include "options.h"
 
-namespace p4c::DPDK {
+namespace P4C::DPDK {
 class DpdkBackend {
     DpdkOptions &options;
     P4::ReferenceMap *refMap;
@@ -51,6 +51,6 @@ class DpdkBackend {
     void codegen(std::ostream &) const;
 };
 
-}  // namespace p4c::DPDK
+}  // namespace P4C::DPDK
 
 #endif /* BACKENDS_DPDK_BACKEND_H_ */

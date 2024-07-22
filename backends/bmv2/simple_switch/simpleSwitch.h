@@ -38,7 +38,7 @@ limitations under the License.
 #include "frontends/p4/unusedDeclarations.h"
 #include "midend/convertEnums.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 class V1ProgramStructure : public P4::ProgramStructure {
  public:
@@ -79,7 +79,7 @@ class SimpleSwitchExpressionConverter : public ExpressionConverter {
         : ExpressionConverter(refMap, typeMap, structure, scalarsName), structure(structure) {}
 
     void modelError(const char *format, const IR::Node *node) {
-        ::p4c::errorWithSuffix(ErrorType::ERR_MODEL, format,
+        ::P4C::errorWithSuffix(ErrorType::ERR_MODEL, format,
                                "\nAre you using an up-to-date v1model.p4?", node);
     }
 
@@ -181,6 +181,6 @@ EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE_AND_MODEL(direct_meter, P4V1::V1Model, v1
 EXTERN_CONVERTER_W_INSTANCE_AND_MODEL(action_profile, P4V1::V1Model, v1model)
 EXTERN_CONVERTER_W_INSTANCE_AND_MODEL(action_selector, P4V1::V1Model, v1model)
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2
 
 #endif /* BACKENDS_BMV2_SIMPLE_SWITCH_SIMPLESWITCH_H_ */

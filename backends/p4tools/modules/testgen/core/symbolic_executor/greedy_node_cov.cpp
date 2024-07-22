@@ -16,7 +16,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 GreedyNodeSelection::GreedyNodeSelection(AbstractSolver &solver, const ProgramInfo &programInfo)
     : SymbolicExecutor(solver, programInfo) {}
@@ -109,7 +109,7 @@ void GreedyNodeSelection::runImpl(const Callback &callBack,
                 throw;
             }
             // Otherwise we try to roll back as we typically do.
-            ::p4c::warning("Path encountered unimplemented feature. Message: %1%\n", e.what());
+            ::P4C::warning("Path encountered unimplemented feature. Message: %1%\n", e.what());
         }
 
         // Roll back to a previous branch and continue execution from there, but if there are no
@@ -135,4 +135,4 @@ void GreedyNodeSelection::runImpl(const Callback &callBack,
     }
 }
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen

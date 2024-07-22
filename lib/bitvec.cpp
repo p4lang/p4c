@@ -20,7 +20,7 @@ limitations under the License.
 
 #include "hex.h"
 
-namespace p4c {
+namespace P4C {
 
 std::ostream &operator<<(std::ostream &os, const bitvec &bv) {
     if (bv.size == 1) {
@@ -211,4 +211,4 @@ bitvec bitvec::rotate_right_copy(size_t start_bit, size_t rotation_idx, size_t e
     return rv;
 }
 
-}  // namespace p4c
+}  // namespace P4C

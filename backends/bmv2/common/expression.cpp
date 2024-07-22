@@ -18,7 +18,7 @@ limitations under the License.
 #include "helpers.h"
 #include "lib/algorithm.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 class ArithmeticFixup;
 
@@ -84,7 +84,7 @@ void ExpressionConverter::mapExpression(const IR::Expression *expression, Util::
 }
 
 Util::IJson *ExpressionConverter::get(const IR::Expression *expression) const {
-    auto result = ::p4c::get(map, expression);
+    auto result = ::P4C::get(map, expression);
     if (result == nullptr) {
         LOG3("Looking up " << expression);
         for (auto it : map) {
@@ -92,7 +92,7 @@ Util::IJson *ExpressionConverter::get(const IR::Expression *expression) const {
         }
     }
     if (result == nullptr)
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: could not convert expression to Json",
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1%: could not convert expression to Json",
                      expression);
     return result;
 }
@@ -110,7 +110,7 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression *expression) 
         if (em->originalExternType->name == corelib.packetIn.name &&
             em->method->name == corelib.packetIn.lookahead.name) {
             if (expression->typeArguments->size() != 1)
-                ::p4c::error(ErrorType::ERR_INVALID, "Expected 1 type parameter for %1%",
+                ::P4C::error(ErrorType::ERR_INVALID, "Expected 1 type parameter for %1%",
                              em->method);
             auto targ = expression->typeArguments->at(0);
             auto typearg = typeMap->getTypeType(targ, true);
@@ -164,7 +164,7 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression *expression) 
         }
     }
 
-    ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: not supported", expression);
+    ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: not supported", expression);
 }
 
 void ExpressionConverter::postorder(const IR::Cast *expression) {
@@ -205,7 +205,7 @@ void ExpressionConverter::postorder(const IR::ArrayIndex *expression) {
 
     if (!expression->right->is<IR::Constant>()) {
         const IR::Expression *ex = expression->right;
-        auto fresult = ::p4c::get(map, ex);
+        auto fresult = ::P4C::get(map, ex);
         if (fresult == nullptr) {
             LOG2("Looking up " << ex);
             for (auto it : map) {
@@ -315,7 +315,7 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
             auto field = parentType->to<IR::Type_StructLike>()->getField(expression->member);
             LOG3("looking up field " << field);
             CHECK_NULL(field);
-            auto name = ::p4c::get(structure->scalarMetadataFields, field);
+            auto name = ::P4C::get(structure->scalarMetadataFields, field);
             BUG_CHECK((name != nullptr), "NULL name: %1%", field->name);
             if (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() || leftValue ||
                 simpleExpressionsOnly) {
@@ -355,7 +355,7 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
         auto mem = expression->expr->to<IR::Member>();
         auto memtype = typeMap->getType(mem->expr, true);
         if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::next)
-            ::p4c::error(ErrorType::ERR_UNINITIALIZED, "%1% uninitialized: next field read", mem);
+            ::P4C::error(ErrorType::ERR_UNINITIALIZED, "%1% uninitialized: next field read", mem);
         // array.last.field => type: "stack_field", value: [ array, field ]
         if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::last) {
             auto l = get(mem->expr);
@@ -432,7 +432,7 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
                 } else if (auto jo = l->to<Util::JsonObject>()) {
                     if (st) {
                         if (index_pos < 0) {
-                            ::p4c::error(ErrorType::ERR_INVALID,
+                            ::P4C::error(ErrorType::ERR_INVALID,
                                          "BMV2: Struct has no field "
                                          "for runtime index computation %1%",
                                          st);
@@ -486,7 +486,7 @@ void ExpressionConverter::postorder(const IR::Mux *expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                      "%1%: expression too complex for this target", expression);
         return;
     }
@@ -529,7 +529,7 @@ void ExpressionConverter::binary(const IR::Operation_Binary *expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                      "%1%: expression too complex for this target", expression);
         return;
     }
@@ -587,7 +587,7 @@ void ExpressionConverter::postorder(const IR::ListExpression *expression) {
     auto result = new Util::JsonArray();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                      "%1%: expression too complex for this target", expression);
         return;
     }
@@ -604,7 +604,7 @@ void ExpressionConverter::postorder(const IR::StructExpression *expression) {
     auto result = new Util::JsonArray();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                      "%1%: expression too complex for this target", expression);
         return;
     }
@@ -620,7 +620,7 @@ void ExpressionConverter::postorder(const IR::Operation_Unary *expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                      "%1%: expression too complex for this target", expression);
         return;
     }
@@ -659,7 +659,7 @@ void ExpressionConverter::postorder(const IR::PathExpression *expression) {
         }
         auto result = new Util::JsonObject();
         result->emplace("type", "runtime_data");
-        unsigned paramIndex = ::p4c::get(&structure->index, param);
+        unsigned paramIndex = ::P4C::get(&structure->index, param);
         result->emplace("value", paramIndex);
         mapExpression(expression, result);
     } else if (auto var = decl->to<IR::Declaration_Variable>()) {
@@ -776,9 +776,9 @@ Util::IJson *ExpressionConverter::convert(const IR::Expression *e, bool doFixup,
         CHECK_NULL(expr);
     }
     expr->apply(*this);
-    auto result = ::p4c::get(map, expr->to<IR::Expression>());
+    auto result = ::P4C::get(map, expr->to<IR::Expression>());
     if (result == nullptr) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                      "%1%: Could not generate code for expression", e);
         return new Util::JsonValue();
     }
@@ -825,7 +825,7 @@ Util::IJson *ExpressionConverter::convertLeftValue(const IR::Expression *e) {
     expr = r->to<IR::Expression>();
     CHECK_NULL(expr);
     expr->apply(*this);
-    auto result = ::p4c::get(map, expr->to<IR::Expression>());
+    auto result = ::P4C::get(map, expr->to<IR::Expression>());
     if (result == nullptr) BUG("%1%: Could not convert expression", e);
     leftValue = false;
     return result;
@@ -838,4 +838,4 @@ Util::IJson *ExpressionConverter::convertWithConstantWidths(const IR::Expression
     return result;
 }
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2

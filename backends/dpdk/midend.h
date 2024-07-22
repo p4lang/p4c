@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "midend/convertEnums.h"
 
-namespace p4c::DPDK {
+namespace P4C::DPDK {
 
 class DpdkMidEnd : public PassManager {
  public:
@@ -41,6 +41,6 @@ class DpdkMidEnd : public PassManager {
     }
 };
 
-}  // namespace p4c::DPDK
+}  // namespace P4C::DPDK
 
 #endif /* BACKENDS_DPDK_MIDEND_H_ */

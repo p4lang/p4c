@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/enumInstance.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression *expr) const {
     CHECK_NULL(expr);
@@ -46,7 +46,7 @@ void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression *expr) cons
             return;
         }
     }
-    ::p4c::error(ErrorType::ERR_INVALID, "%1%: must be a compile-time constant", expr);
+    ::P4C::error(ErrorType::ERR_INVALID, "%1%: must be a compile-time constant", expr);
 }
 
 const IR::Node *DoSimplifySelectCases::preorder(IR::SelectExpression *expression) {
@@ -76,4 +76,4 @@ const IR::Node *DoSimplifySelectCases::preorder(IR::SelectExpression *expression
     return expression;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

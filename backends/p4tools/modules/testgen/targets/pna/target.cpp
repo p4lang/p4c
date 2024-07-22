@@ -20,7 +20,7 @@
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_backend.h"
 
-namespace p4c::P4Tools::P4Testgen::Pna {
+namespace P4C::P4Tools::P4Testgen::Pna {
 
 /* =============================================================================================
  *  PnaDpdkTestgenTarget implementation
@@ -85,4 +85,4 @@ MidEnd PnaDpdkTestgenTarget::mkMidEnd(const CompilerOptions &options) const {
     return midEnd;
 }
 
-}  // namespace p4c::P4Tools::P4Testgen::Pna
+}  // namespace P4C::P4Tools::P4Testgen::Pna

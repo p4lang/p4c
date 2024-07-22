@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/coreLibrary.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Node *DoHandleNoMatch::postorder(IR::SelectExpression *expression) {
     for (auto c : expression->selectCases) {
@@ -57,16 +57,16 @@ const IR::Node *DoHandleNoMatch::postorder(IR::P4Program *program) {
     auto decls = program->getDeclsByName(IR::ParserState::verify);
     auto vec = decls->toVector();
     if (vec.empty()) {
-        ::p4c::error(ErrorType::ERR_MODEL,
+        ::P4C::error(ErrorType::ERR_MODEL,
                      "Declaration of function '%1%' not found; did you include core.p4?",
                      IR::ParserState::verify);
         return program;
     }
     if (vec.size() > 1) {
-        ::p4c::error(ErrorType::ERR_MODEL, "Multiple declarations of %1%: %2% %3%",
+        ::P4C::error(ErrorType::ERR_MODEL, "Multiple declarations of %1%: %2% %3%",
                      IR::ParserState::verify, vec[0], vec[1]);
     }
     return program;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

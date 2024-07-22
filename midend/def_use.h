@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/bitrange.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /**
  * @brief Compute defuse info within P4Parser and P4Control blocks in the midend.
@@ -188,6 +188,6 @@ class ComputeDefUse : public Inspector,
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_DEF_USE_H_ */

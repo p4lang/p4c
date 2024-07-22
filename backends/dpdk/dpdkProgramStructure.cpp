@@ -3,9 +3,9 @@
 #include "ir/ir.h"
 #include "options.h"
 
-namespace p4c {
+namespace P4C {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock *block) {
     // Blocks are not in IR tree, use a custom visitor to traverse.
@@ -19,7 +19,7 @@ void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock *block) {
     structure->p4arch = "pna"_cs;
     auto p = block->findParameterValue("main_parser"_cs);
     if (p == nullptr) {
-        ::p4c::error(ErrorType::ERR_MODEL, "Package %1% has no parameter named 'main_parser'",
+        ::P4C::error(ErrorType::ERR_MODEL, "Package %1% has no parameter named 'main_parser'",
                      block);
         return;
     }
@@ -42,13 +42,13 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
     structure->p4arch = "psa"_cs;
     auto pkg = block->findParameterValue("ingress"_cs);
     if (pkg == nullptr) {
-        ::p4c::error(ErrorType::ERR_MODEL, "Package %1% has no parameter named 'ingress'", block);
+        ::P4C::error(ErrorType::ERR_MODEL, "Package %1% has no parameter named 'ingress'", block);
         return;
     }
     if (auto ingress = pkg->to<IR::PackageBlock>()) {
         auto p = ingress->findParameterValue("ip"_cs);
         if (!p) {
-            ::p4c::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'ip'",
+            ::P4C::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'ip'",
                          block);
             return;
         }
@@ -56,7 +56,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         structure->parsers.emplace("IngressParser"_cs, parser->container);
         p = ingress->findParameterValue("ig"_cs);
         if (!p) {
-            ::p4c::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'ig'",
+            ::P4C::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'ig'",
                          block);
             return;
         }
@@ -65,7 +65,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         structure->pipeline_controls.emplace(pipeline->container->name);
         p = ingress->findParameterValue("id"_cs);
         if (!p) {
-            ::p4c::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'id'",
+            ::P4C::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'id'",
                          block);
             return;
         }
@@ -77,7 +77,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
     if (auto egress = pkg->to<IR::PackageBlock>()) {
         auto p = egress->findParameterValue("ep"_cs);
         if (!p) {
-            ::p4c::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'ep'",
+            ::P4C::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'ep'",
                          block);
             return;
         }
@@ -85,7 +85,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         structure->parsers.emplace("EgressParser"_cs, parser->container);
         p = egress->findParameterValue("eg"_cs);
         if (!p) {
-            ::p4c::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'eg'",
+            ::P4C::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'eg'",
                          block);
             return;
         }
@@ -94,7 +94,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         structure->pipeline_controls.emplace(pipeline->container->name);
         p = egress->findParameterValue("ed"_cs);
         if (!p) {
-            ::p4c::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'ed'",
+            ::P4C::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'ed'",
                          block);
             return;
         }
@@ -113,7 +113,7 @@ bool ParseDpdkArchitecture::preorder(const IR::PackageBlock *block) {
                block->instanceType->to<IR::Type_Package>()->name == "PNA_NIC") {
         parse_pna_block(block);
     } else {
-        ::p4c::error(ErrorType::ERR_MODEL, "Unknown architecture %1%", options.arch);
+        ::P4C::error(ErrorType::ERR_MODEL, "Unknown architecture %1%", options.arch);
     }
     return false;
 }
@@ -167,7 +167,7 @@ void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike *type, b
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
             if (isHeader && ft->is<IR::Type_Struct>()) {
-                ::p4c::error(
+                ::P4C::error(
                     ErrorType::ERR_INVALID,
                     "Type %1% should only contain headers, header stacks, or header unions", type);
                 return;
@@ -190,7 +190,7 @@ void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike *type, b
                     if (auto h_type = uft->to<IR::Type_Header>()) {
                         addHeaderInstance(h_type, uf->controlPlaneName());
                     } else {
-                        ::p4c::error(ErrorType::ERR_INVALID, "Type %1% cannot contain type %2%", ft,
+                        ::P4C::error(ErrorType::ERR_INVALID, "Type %1% cannot contain type %2%", ft,
                                      uft);
                         return;
                     }
@@ -302,4 +302,4 @@ bool InspectDpdkProgram::preorder(const IR::P4Action *action) {
     return false;
 }
 
-}  // namespace p4c
+}  // namespace P4C

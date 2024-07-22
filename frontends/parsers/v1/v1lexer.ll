@@ -4,7 +4,7 @@
 #include "frontends/parsers/v1/v1lexer_internal.hpp"
 #include "frontends/parsers/v1/v1parser.hpp"
 
-using namespace ::p4c;
+using namespace ::P4C;
 
 using Parser = V1::V1Parser;
 

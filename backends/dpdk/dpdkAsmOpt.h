@@ -35,9 +35,9 @@ limitations under the License.
 
 #define DPDK_TABLE_MAX_KEY_SIZE 64 * 8
 
-namespace p4c::DPDK {
+namespace P4C::DPDK {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 /// This pass removes label that no jmps jump to
 class RemoveRedundantLabel : public Transform {
@@ -653,5 +653,5 @@ class DpdkAsmOptimization : public PassRepeated {
     }
 };
 
-}  // namespace p4c::DPDK
+}  // namespace P4C::DPDK
 #endif /* BACKENDS_DPDK_DPDKASMOPT_H_ */

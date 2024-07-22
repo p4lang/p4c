@@ -13,7 +13,7 @@
 
 #include "ir/ir.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 /// General utility functions that are not present in the compiler framework.
 class Utils {
@@ -124,6 +124,6 @@ const IR::IDeclaration *findProgramDecl(const IR::IGeneralNamespace *ns,
 const IR::Type_Declaration *resolveProgramType(const IR::IGeneralNamespace *ns,
                                                const IR::Type_Name *type);
 
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_UTIL_H_ */

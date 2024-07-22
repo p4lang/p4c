@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/tableApply.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Node *DoRemoveMiss::preorder(IR::Member *expression) {
     if (!TableApplySolver::isMiss(expression, refMap, typeMap)) return expression;
@@ -38,4 +38,4 @@ const IR::Node *DoRemoveMiss::preorder(IR::IfStatement *statement) {
     return statement;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

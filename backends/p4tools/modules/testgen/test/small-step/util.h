@@ -27,7 +27,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
-namespace p4c::Test {
+namespace P4C::Test {
 
 using Body = P4Tools::P4Testgen::Continuation::Body;
 using Continuation = P4Tools::P4Testgen::Continuation;
@@ -46,7 +46,7 @@ class SmallStepTest : public P4ToolsTest {
 
 namespace SmallStepUtil {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 /// Creates a test case with the given header fields for
 /// stepping on a given expression.
@@ -167,6 +167,6 @@ void stepAndExamineOp(
 
 }  // namespace SmallStepUtil
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_SMALL_STEP_UTIL_H_ */

@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 void DoExpandLookahead::expand(
     const IR::PathExpression *bitvector,          // source value containing all bits
@@ -59,7 +59,7 @@ void DoExpandLookahead::expand(
             expand(bitvector, etype, offset, member, output);
         }
     } else {
-        ::p4c::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type in lookahead argument", type);
+        ::P4C::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type in lookahead argument", type);
     }
 }
 
@@ -123,4 +123,4 @@ const IR::Node *DoExpandLookahead::postorder(IR::AssignmentStatement *statement)
     return result;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

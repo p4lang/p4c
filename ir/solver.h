@@ -11,7 +11,7 @@
 #include "lib/castable.h"
 #include "lib/cstring.h"
 
-namespace p4c {
+namespace P4C {
 
 /// Represents a constraint that can be shipped to and asserted within a solver.
 // TODO: This should implement AbstractRepCheckedNode<Constraint>.
@@ -68,6 +68,6 @@ class AbstractSolver : public ICastable {
     DECLARE_TYPEINFO(AbstractSolver);
 };
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* IR_SOLVER_H_ */

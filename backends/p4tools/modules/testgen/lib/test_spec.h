@@ -13,7 +13,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 /// This file defines a series of test objects which, in sum, produce an abstract test
 /// specification.
@@ -355,6 +355,6 @@ class TestSpec {
     static constexpr int TTL = 0;
 };
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_SPEC_H_ */

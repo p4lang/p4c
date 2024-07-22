@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "target.h"
 
-namespace p4c::UBPF {
+namespace P4C::UBPF {
 
 void UbpfTarget::emitIncludes(Util::SourceCodeBuilder *builder) const {
     builder->append(
@@ -181,4 +181,4 @@ void UbpfTarget::emitChecksumHelpers(EBPF::CodeBuilder *builder) const {
         "}");
 }
 
-}  // namespace p4c::UBPF
+}  // namespace P4C::UBPF

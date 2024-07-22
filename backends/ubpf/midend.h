@@ -21,7 +21,7 @@ limitations under the License.
 #include "backends/ebpf/midend.h"
 #include "ir/ir.h"
 
-namespace p4c::UBPF {
+namespace P4C::UBPF {
 
 class MidEnd : public EBPF::MidEnd {
  public:
@@ -30,6 +30,6 @@ class MidEnd : public EBPF::MidEnd {
                                  std::ostream *outStream = nullptr);
 };
 
-}  // namespace p4c::UBPF
+}  // namespace P4C::UBPF
 
 #endif /* BACKENDS_UBPF_MIDEND_H_ */

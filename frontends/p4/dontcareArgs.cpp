@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/methodInstance.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 Visitor::profile_t DontcareArgs::init_apply(const IR::Node *node) {
     auto rv = Transform::init_apply(node);
@@ -38,7 +38,7 @@ const IR::Node *DontcareArgs::postorder(IR::MethodCallExpression *expression) {
             cstring name = nameGen.newName("arg");
             auto ptype = p->type;
             if (ptype->is<IR::Type_Dontcare>()) {
-                ::p4c::error(ErrorType::ERR_TYPE_ERROR, "Could not infer type for %1%", a);
+                ::P4C::error(ErrorType::ERR_TYPE_ERROR, "Could not infer type for %1%", a);
                 return expression;
             }
             auto decl = new IR::Declaration_Variable(IR::ID(name), ptype, nullptr);
@@ -54,4 +54,4 @@ const IR::Node *DontcareArgs::postorder(IR::MethodCallExpression *expression) {
     return expression;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

@@ -7,7 +7,7 @@
 #include "backends/p4tools/common/lib/logging.h"  // IWYU pragma: export
 #include "backends/p4tools/common/lib/util.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 /// Helper functions that prints strings associated with verbose test information, for example
 /// traces, or the test values themselves.
@@ -25,6 +25,6 @@ void enableStepLogging();
 /// Enable printing of the statement coverage statistics the interpreter collects.
 void enableCoverageLogging();
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_LOGGING_H_ */

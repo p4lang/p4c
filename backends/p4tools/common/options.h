@@ -11,7 +11,7 @@
 #include "lib/cstring.h"
 #include "lib/options.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 /// Encapsulates and processes command-line options for a compiler-based tool. Implementations
 /// should use the singleton pattern and define a static get() for obtaining the singleton
@@ -57,6 +57,6 @@ class AbstractP4cToolOptions : protected Util::Options {
     explicit AbstractP4cToolOptions(std::string_view toolName, std::string_view message);
 };
 
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_OPTIONS_H_ */

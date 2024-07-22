@@ -5,7 +5,7 @@
 #include "ir/node.h"
 #include "ir/visitor.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /// Adds a bit<1> cast to all boolean keys. This is because these keys need to be converted into bit
 /// expressions for the control plane. Also replaces all the corresponding entries in the table with
@@ -53,6 +53,6 @@ class CastBooleanTableKeys : public Transform {
     const IR::Node *postorder(IR::Entry *entry) override;
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* MIDEND_BOOLEANKEYS_H_ */

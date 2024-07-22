@@ -1,6 +1,6 @@
 #include "eliminateNewtype.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Node *DoReplaceNewtype::postorder(IR::Cast *expression) {
     auto orig = getOriginal<IR::Cast>();
@@ -16,4 +16,4 @@ const IR::Node *DoReplaceNewtype::postorder(IR::Cast *expression) {
     return expression;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

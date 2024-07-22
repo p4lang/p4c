@@ -62,9 +62,9 @@ limitations under the License.
 #include "midend/tableHit.h"
 #include "midend/validateProperties.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 /// This class implements a policy suitable for the ConvertEnums pass.
 /// The policy is: convert all enums that are not part of the psa.
@@ -187,4 +187,4 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
     }
 }
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2

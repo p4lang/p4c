@@ -36,7 +36,7 @@ limitations under the License.
 #define YYDEBUG 1
 #endif
 
-namespace p4c {
+namespace P4C {
 
 #define YYLTYPE Util::SourceInfo
 #define YYLLOC_DEFAULT(Cur, Rhs, N)                                     \
@@ -436,7 +436,7 @@ IrDefinitions *parse(char** files, int count) {
         yydebug = atoi(p);
 #endif
     if (count <= 0) {
-        ::p4c::error(ErrorType::ERR_EXPECTED, "No input files specified");
+        ::P4C::error(ErrorType::ERR_EXPECTED, "No input files specified");
         errors = 1; }
 
     for (int i = 0; i < count; i++) {
@@ -450,11 +450,11 @@ IrDefinitions *parse(char** files, int count) {
                 error(ErrorType::ERR_OVERLIMIT, "out of memory");
                 break; }
         } else {
-            ::p4c::error(ErrorType::ERR_IO, "Cannot open file %s", files[i]);
+            ::P4C::error(ErrorType::ERR_IO, "Cannot open file %s", files[i]);
             perror("");
             errors |= 1; } }
 
     return errors ? nullptr : new IrDefinitions(global);
 }
 
-}  // namespace p4c
+}  // namespace P4C

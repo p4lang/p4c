@@ -19,7 +19,7 @@ limitations under the License.
 
 #include <gtest/gtest.h>
 
-namespace p4c::Test {
+namespace P4C::Test {
 
 TEST(Bitvec, Shift) {
     bitvec simple(0, 1);
@@ -141,4 +141,4 @@ TEST(Bitvec, io) {
     EXPECT_EQ(a, b);
 }
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test

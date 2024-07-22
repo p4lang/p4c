@@ -6,10 +6,10 @@
 #include "backends/p4tools/modules/testgen/core/small_step/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace p4c::P4Tools::P4Testgen::Pna {
+namespace P4C::P4Tools::P4Testgen::Pna {
 
 SharedPnaCmdStepper::SharedPnaCmdStepper(ExecutionState &state, AbstractSolver &solver,
                                          const ProgramInfo &programInfo)
     : CmdStepper(state, solver, programInfo) {}
 
-}  // namespace p4c::P4Tools::P4Testgen::Pna
+}  // namespace P4C::P4Tools::P4Testgen::Pna

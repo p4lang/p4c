@@ -5,7 +5,7 @@
 #include "ir/irutils.h"
 #include "ir/vector.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Node *CastBooleanTableKeys::postorder(IR::KeyElement *key) {
     if (key->expression->type->is<IR::Type_Boolean>()) {
@@ -28,4 +28,4 @@ const IR::Node *CastBooleanTableKeys::postorder(IR::Entry *entry) {
     return entry;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

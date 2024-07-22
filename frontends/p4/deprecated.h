@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /**
  * Checks for the use of symbols that are marked as @deprecated and
@@ -36,6 +36,6 @@ class Deprecated : public Inspector, public ResolutionContext {
     bool preorder(const IR::Type_Name *name) override;
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_DEPRECATED_H_ */

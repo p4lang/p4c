@@ -4,7 +4,7 @@
 #include "p4RuntimeAnnotations.h"
 #include "p4RuntimeArchStandard.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::P4Program *MissingIdAssigner::preorder(IR::P4Program *program) {
     auto evaluator = P4::EvaluatorPass(refMap, typeMap);
@@ -165,4 +165,4 @@ AddMissingIdAnnotations::AddMissingIdAnnotations(
     setName("AddMissingIdAnnotations");
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

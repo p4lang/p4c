@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/methodInstance.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /// Given an expression and a destination type, convert ListExpressions
 /// that occur within expression to StructExpression if the
@@ -148,4 +148,4 @@ const IR::Node *CreateStructInitializers::postorder(IR::Operation_Relation *expr
     return expression;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

@@ -21,7 +21,7 @@ limitations under the License.
 #include "absl/strings/str_split.h"
 #include "typeUnification.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 int TypeConstraint::crtid = 0;
 
@@ -131,23 +131,23 @@ std::string TypeConstraint::localError(Explain *explainer) const {
             break;
         case 1:
             absl::StrAppend(&explanation, explain(0, explainer));
-            message = ::p4c::error_helper(fmt, errArguments.at(0)).toString();
+            message = ::P4C::error_helper(fmt, errArguments.at(0)).toString();
             break;
         case 2:
             absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer));
-            message = ::p4c::error_helper(fmt, errArguments.at(0), errArguments.at(1)).toString();
+            message = ::P4C::error_helper(fmt, errArguments.at(0), errArguments.at(1)).toString();
             break;
         case 3:
             absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer),
                             explain(2, explainer));
             message =
-                ::p4c::error_helper(fmt, errArguments.at(0), errArguments.at(1), errArguments.at(2))
+                ::P4C::error_helper(fmt, errArguments.at(0), errArguments.at(1), errArguments.at(2))
                     .toString();
             break;
         case 4:
             absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer),
                             explain(2, explainer), explain(3, explainer));
-            message = ::p4c::error_helper(fmt, errArguments.at(0), errArguments.at(1),
+            message = ::P4C::error_helper(fmt, errArguments.at(0), errArguments.at(1),
                                           errArguments.at(2), errArguments.at(3))
                           .toString();
             break;
@@ -180,8 +180,8 @@ bool TypeConstraint::reportErrorImpl(const TypeVariableSubstitution *subst,
     if (lastIsEmpty) message += "\n";
 
     CHECK_NULL(o);
-    ::p4c::errorWithSuffix(ErrorType::ERR_TYPE_ERROR, "'%1%'", message.c_str(), o);
+    ::P4C::errorWithSuffix(ErrorType::ERR_TYPE_ERROR, "'%1%'", message.c_str(), o);
     return false;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

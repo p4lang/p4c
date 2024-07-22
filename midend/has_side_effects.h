@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 
-namespace p4c {
+namespace P4C {
 
 /* Should this be a method on IR::Expression?  Maybe after the refMap/typeMap go away */
 
@@ -75,6 +75,6 @@ class hasSideEffects : public Inspector {
     explicit operator bool() { return result; }
 };
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* MIDEND_HAS_SIDE_EFFECTS_H_ */

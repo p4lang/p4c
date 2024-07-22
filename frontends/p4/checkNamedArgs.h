@@ -20,7 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /// A method call must have either all or none of the arguments named.
 /// We also check that no argument appears twice.
@@ -51,6 +51,6 @@ class CheckNamedArgs : public Inspector {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_CHECKNAMEDARGS_H_ */

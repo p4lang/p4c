@@ -15,7 +15,7 @@ limitations under the License.
 */
 #include "ir/ir.h"
 
-namespace p4c {
+namespace P4C {
 
 template <class THIS>
 void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
@@ -96,4 +96,4 @@ void IR::ContinueStatement::visit_children(Visitor &v) {
     return const_cast<const IR::ContinueStatement *>(this)->visit_children(v);
 }
 
-}  // namespace p4c
+}  // namespace P4C

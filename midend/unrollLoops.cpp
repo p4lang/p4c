@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "ir/pattern.h"
 
-namespace p4c {
+namespace P4C {
 
 /** helper function to create a simple assignment to a boolean flag variable */
 static IR::AssignmentStatement *setFlag(cstring name, bool val) {
@@ -26,9 +26,9 @@ static IR::AssignmentStatement *setFlag(cstring name, bool val) {
     return new IR::AssignmentStatement(var, new IR::BoolLiteral(val));
 }
 
-}  // namespace p4c
+}  // namespace P4C
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 using namespace literals;
 
@@ -302,4 +302,4 @@ bool UnrollLoops::Policy::operator()(const IR::LoopStatement *loop, bool canUnro
     return unroll_default;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

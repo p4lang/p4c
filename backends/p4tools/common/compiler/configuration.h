@@ -5,7 +5,7 @@
 
 #include "ir/configuration.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 /// A P4CConfiguration implementation that increases the maximum width for a bit field or
 /// integer.
@@ -24,6 +24,6 @@ class CompilerConfiguration : public DefaultP4CConfiguration {
     CompilerConfiguration() = default;
 };
 
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_CONFIGURATION_H_ */

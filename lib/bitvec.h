@@ -45,7 +45,7 @@ limitations under the License.
 #undef clrbit
 #endif
 
-namespace p4c {
+namespace P4C {
 namespace bv {
 #if defined(__GNUC__) || defined(__clang__)
 /* use builtin count leading/trailing bits of type-approprite size */
@@ -684,6 +684,6 @@ inline bitvec operator-(bitvec &&a, const bitvec &b) {
     return rv;
 }
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* LIB_BITVEC_H_ */

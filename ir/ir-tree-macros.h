@@ -21,7 +21,7 @@ limitations under the License.
  * whenever a new IR Node subclass is added, it MUST be added to this table.  Target
  * specific subclasses might be broken out into a separate table and included here
  * Because we want to be able to forward-declare all these types, the class type MUST
- * be a simple identifier that will be declared in namespace p4c::IR.  Aliases can be defined
+ * be a simple identifier that will be declared in namespace P4C::IR.  Aliases can be defined
  * in other namespaces if desired.
  * When there's a templated subclass of Node, all of its instantiations need to appear in this
  * table, and it also needs to be in the IRNODE_ALL_TEMPLATES_AND_DIRECT_AND_INDIRECT_BASES

@@ -29,7 +29,7 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 class P4Lexer;
 class P4Parser;
@@ -217,9 +217,9 @@ class P4ParserDriver final : public AbstractParserDriver {
     IR::Type_Error *allErrors = nullptr;
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
-namespace p4c::V1 {
+namespace P4C::V1 {
 
 class V1Lexer;
 class V1Parser;
@@ -290,6 +290,6 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
     V1ParserDriver();
 };
 
-}  // namespace p4c::V1
+}  // namespace P4C::V1
 
 #endif /* FRONTENDS_PARSERS_PARSERDRIVER_H_ */

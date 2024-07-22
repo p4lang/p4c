@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "frontends/p4/simplifySwitch.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 bool DoSimplifySwitch::matches(const IR::Expression *left, const IR::Expression *right) const {
     // We know that left and right have matching types
@@ -52,4 +52,4 @@ const IR::Node *DoSimplifySwitch::postorder(IR::SwitchStatement *stat) {
     return new IR::EmptyStatement(stat->srcInfo);
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

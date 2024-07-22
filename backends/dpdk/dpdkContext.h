@@ -28,16 +28,16 @@ limitations under the License.
 #include "options.h"
 #include "p4/config/v1/p4info.pb.h"
 
-namespace p4configv1 = ::p4::config::v1;
+namespace P4Configv1 = ::p4::config::v1;
 
 /// Passes defined in this file are used for generating Context JSON output for DPDK
 /// Context JSON is a JSON file used by the control plane software for manipulating tables and
 /// actions. It contains all relevant information regarding the tables and actions.
 /// The context JSON is based on the JSON Schema defined in DPDK_context_schema.json.
 
-namespace p4c::DPDK {
+namespace P4C::DPDK {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 /// This structure holds table attributes required for context JSON which are not
 /// part of P4Table.
@@ -115,7 +115,7 @@ struct SelectionTable {
         }
         // Fetch associated member table handle
         cstring actionDataTableName = tbl->name.originalName.replace("_sel", "");
-        auto actionTableAttr = ::p4c::get(tableAttrmap, actionDataTableName);
+        auto actionTableAttr = ::P4C::get(tableAttrmap, actionDataTableName);
         bound_to_action_data_table_handle = actionTableAttr.tableHandle;
     }
 };
@@ -166,6 +166,6 @@ class DpdkContextGenerator : public Inspector {
     cstring removePipePrefix(cstring);
 };
 
-}  // namespace p4c::DPDK
+}  // namespace P4C::DPDK
 
 #endif /* BACKENDS_DPDK_DPDKCONTEXT_H_ */

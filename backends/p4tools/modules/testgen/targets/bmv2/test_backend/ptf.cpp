@@ -18,7 +18,7 @@
 
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace p4c::P4Tools::P4Testgen::Bmv2 {
+namespace P4C::P4Tools::P4Testgen::Bmv2 {
 
 PTF::PTF(const TestBackendConfiguration &testBackendConfiguration)
     : Bmv2TestFramework(testBackendConfiguration) {}
@@ -310,4 +310,4 @@ void PTF::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, si
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }
 
-}  // namespace p4c::P4Tools::P4Testgen::Bmv2
+}  // namespace P4C::P4Tools::P4Testgen::Bmv2

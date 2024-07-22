@@ -21,7 +21,7 @@ limitations under the License.
 #include "lib/error.h"
 #include "lib/log.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 ApplyOptionsPragmas::ApplyOptionsPragmas(IOptionPragmaParser &parser) : parser(parser) {
     // Add an initial "option" which will ultimately be ignored.
@@ -72,14 +72,14 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::pa
     }
 
     if (pragmaArgs->size() != 2) {
-        ::p4c::warning(ErrorType::WARN_MISSING, "@diagnostic takes two arguments: %1%", annotation);
+        ::P4C::warning(ErrorType::WARN_MISSING, "@diagnostic takes two arguments: %1%", annotation);
         return std::nullopt;
     }
 
     auto *diagnosticName = pragmaArgs->at(0)->to<IR::StringLiteral>();
     auto *diagnosticAction = pragmaArgs->at(1)->to<IR::StringLiteral>();
     if (!diagnosticName || !diagnosticAction) {
-        ::p4c::warning(ErrorType::WARN_MISSING, "@diagnostic arguments must be strings: %1%",
+        ::P4C::warning(ErrorType::WARN_MISSING, "@diagnostic arguments must be strings: %1%",
                        annotation);
         return std::nullopt;
     }
@@ -92,7 +92,7 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::pa
     } else if (diagnosticAction->value == "error") {
         diagnosticOption = "--Werror="_cs;
     } else {
-        ::p4c::warning(ErrorType::WARN_MISMATCH,
+        ::P4C::warning(ErrorType::WARN_MISMATCH,
                        "@diagnostic's second argument must be 'disable', "
                        "'warn', or 'error': %1%",
                        annotation);
@@ -104,4 +104,4 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::pa
     return newOptions;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

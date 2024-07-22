@@ -16,7 +16,7 @@
 #include <cxxabi.h>
 #endif
 
-namespace p4c {
+namespace P4C {
 
 extern const char *addr2line(void *addr, const char *text);
 
@@ -113,4 +113,4 @@ std::ostream &operator<<(std::ostream &out, const AllocTrace &at) {
     return out;
 }
 
-}  // namespace p4c
+}  // namespace P4C

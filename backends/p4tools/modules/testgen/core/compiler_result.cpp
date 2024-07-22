@@ -5,7 +5,7 @@
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "midend/coverage.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
 TestgenCompilerResult::TestgenCompilerResult(CompilerResult compilerResult,
                                              P4::Coverage::CoverageSet coverableNodes,
@@ -23,4 +23,4 @@ const P4::Coverage::CoverageSet &TestgenCompilerResult::getCoverableNodes() cons
     return coverableNodes;
 }
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen

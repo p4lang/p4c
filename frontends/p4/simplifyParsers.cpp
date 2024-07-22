@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "simplifyParsers.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 namespace {
 // All the classes in this namespace are invoked on each parser
@@ -42,7 +42,7 @@ class RemoveUnreachableStates : public Transform {
     const IR::Node *preorder(IR::P4Parser *parser) override {
         auto start = parser->getDeclByName(IR::ParserState::start);
         if (start == nullptr) {
-            ::p4c::error(ErrorType::ERR_NOT_FOUND, "%1%: parser does not have a `start' state",
+            ::P4C::error(ErrorType::ERR_NOT_FOUND, "%1%: parser does not have a `start' state",
                          parser);
         } else {
             transitions->reachable(start->to<IR::ParserState>(), reachable);
@@ -60,7 +60,7 @@ class RemoveUnreachableStates : public Transform {
                     acceptReachable = true;
             }
             if (!rejectReachable && !acceptReachable)
-                ::p4c::error(ErrorType::ERR_UNREACHABLE,
+                ::P4C::error(ErrorType::ERR_UNREACHABLE,
                              "%1%: Parser never reaches accept or reject state", parser);
             LOG1("Parser " << dbp(parser) << " has " << transitions->size() << " reachable states");
         }
@@ -165,7 +165,7 @@ class CollapseChains : public Transform {
                 while (true) {
                     components->append(crt->components);
                     select = crt->selectExpression;
-                    crt = ::p4c::get(chain, crt);
+                    crt = ::P4C::get(chain, crt);
                     if (crt == nullptr) break;
                     LOG1("Adding " << dbp(crt) << " to chain");
                 }
@@ -201,4 +201,4 @@ const IR::Node *DoSimplifyParsers::preorder(IR::P4Parser *parser) {
     return parser->apply(simpl);
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

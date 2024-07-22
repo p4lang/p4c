@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /// Describes how a generic function is specialized.
 struct FunctionSpecialization {
@@ -63,7 +63,7 @@ struct FunctionSpecializationMap {
         map.emplace(mce, new FunctionSpecialization(name, mce, func, insert));
     }
     FunctionSpecialization *get(const IR::MethodCallExpression *mce) const {
-        return ::p4c::get(map, mce);
+        return ::P4C::get(map, mce);
     }
     IR::Vector<IR::Node> *getInsertions(const IR::Node *insertionPoint) {
         IR::Vector<IR::Node> *result = nullptr;
@@ -146,6 +146,6 @@ class SpecializeGenericFunctions : public PassManager {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_SPECIALIZEGENERICFUNCTIONS_H_ */

@@ -11,7 +11,7 @@
 #include "backends/p4tools/modules/smith/targets/bmv2/target.h"
 #include "ir/ir.h"
 
-namespace p4c::P4Tools::P4Smith::BMv2 {
+namespace P4C::P4Tools::P4Smith::BMv2 {
 
 class Bmv2PsaSmithTarget : public AbstractBMv2SmithTarget {
  private:
@@ -56,6 +56,6 @@ class Bmv2PsaSmithTarget : public AbstractBMv2SmithTarget {
     Bmv2PsaSmithTarget();
 };
 
-}  // namespace p4c::P4Tools::P4Smith::BMv2
+}  // namespace P4C::P4Tools::P4Smith::BMv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_BMV2_PSA_H_ */

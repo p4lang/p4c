@@ -4,7 +4,7 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace p4c::P4Tools::TableUtils {
+namespace P4C::P4Tools::TableUtils {
 
 /// KeyProperties define properties of table keys that are useful for execution.
 struct KeyProperties {
@@ -77,6 +77,6 @@ const IR::PathExpression *getDefaultActionName(const IR::P4Table &table);
 const IR::Expression *computeEntryMatch(const IR::P4Table &table, const IR::Entry &entry,
                                         const IR::Key &key);
 
-}  // namespace p4c::P4Tools::TableUtils
+}  // namespace P4C::P4Tools::TableUtils
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_TABLE_UTILS_H_ */

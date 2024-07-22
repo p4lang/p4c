@@ -18,7 +18,7 @@ and limitations under the License.
 
 /// This file defines functions for the pass to generate the introspection file
 
-namespace p4c::TC {
+namespace P4C::TC {
 
 void IntrospectionGenerator::postorder(const IR::P4Table *t) {
     p4tables.emplace(t->name.originalName, t);
@@ -75,11 +75,11 @@ void IntrospectionGenerator::collectKeyInfo(const IR::Key *key, struct TableAttr
                         auto val = std::move(*tcVal);
                         keyField->type = val;
                     } else {
-                        ::p4c::error(ErrorType::ERR_INVALID,
+                        ::P4C::error(ErrorType::ERR_INVALID,
                                      "tc_type annotation cannot have '%1%' as value", expr);
                     }
                 } else {
-                    ::p4c::error(ErrorType::ERR_INVALID,
+                    ::P4C::error(ErrorType::ERR_INVALID,
                                  "tc_type annotation cannot have '%1%' as value", expr);
                 }
             }
@@ -121,7 +121,7 @@ void IntrospectionGenerator::collectActionInfo(const IR::ActionList *actionlist,
                 actionInfo->annotations.push_back(actionAnno);
             }
             if (isTableOnly && isDefaultOnly) {
-                ::p4c::error(
+                ::P4C::error(
                     "Table '%1%' has an action reference '%2%' which is "
                     "annotated with both '@tableonly' and '@defaultonly'",
                     p4table->getName().originalName, action->getName().originalName);
@@ -344,7 +344,7 @@ const Util::JsonObject *IntrospectionGenerator::genIntrospectionJson() {
 
 bool IntrospectionGenerator::serializeIntrospectionJson(std::ostream &destination) {
     auto *json = genIntrospectionJson();
-    if (::p4c::errorCount() > 0) {
+    if (::P4C::errorCount() > 0) {
         return false;
     }
     json->serialize(destination);
@@ -360,4 +360,4 @@ std::optional<cstring> IntrospectionGenerator::checkValidTcType(const IR::String
     return std::nullopt;
 }
 
-}  // namespace p4c::TC
+}  // namespace P4C::TC

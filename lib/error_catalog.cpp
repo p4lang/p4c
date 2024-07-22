@@ -20,9 +20,9 @@ limitations under the License.
 
 #include "lib/cstring.h"
 
-namespace p4c {
+namespace P4C {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 // -------- Errors -------------
 const int ErrorType::LEGACY_ERROR = 0;
@@ -125,4 +125,4 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::INFO_INFERRED, "inferred"_cs},
     {ErrorType::INFO_PROGRESS, "progress"_cs}};
 
-}  // namespace p4c
+}  // namespace P4C

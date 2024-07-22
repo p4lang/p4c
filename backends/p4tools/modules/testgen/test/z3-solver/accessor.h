@@ -5,7 +5,7 @@
 
 #include "backends/p4tools/common/core/z3_solver.h"
 
-namespace p4c::P4Tools {
+namespace P4C::P4Tools {
 
 // The main class for access to a private members
 class Z3SolverAccessor {
@@ -38,6 +38,6 @@ class Z3SolverAccessor {
     Z3Solver &solver;
 };
 
-}  // namespace p4c::P4Tools
+}  // namespace P4C::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_Z3_SOLVER_ACCESSOR_H_ */

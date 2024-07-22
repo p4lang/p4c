@@ -26,11 +26,11 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/map.h"
 
-namespace p4c {
+namespace P4C {
 class JSONLoader;
-}  // namespace p4c
+}  // namespace P4C
 
-namespace p4c::IR {
+namespace P4C::IR {
 
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP = std::map,
           class COMP = std::less<cstring>,
@@ -112,7 +112,7 @@ class NameMap : public Node {
     void addUnique(cstring name, const T *n) {
         auto prev = symbols.find(name);
         if (prev != symbols.end())
-            ::p4c::error(ErrorType::ERR_DUPLICATE,
+            ::P4C::error(ErrorType::ERR_DUPLICATE,
                          "%1%: duplicated name (%2% is previous instance)", n, prev->second);
         symbols.emplace(std::move(name), std::move(n));
     }
@@ -163,6 +163,6 @@ class NameMap : public Node {
     DECLARE_TYPEINFO(NameMap, Node);
 };
 
-}  // namespace p4c::IR
+}  // namespace P4C::IR
 
 #endif /* IR_NAMEMAP_H_ */

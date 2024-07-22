@@ -27,7 +27,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "target.h"
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 class EBPFProgram;
 class EBPFParser;
@@ -111,6 +111,6 @@ class EBPFProgram : public EBPFObject {
     DECLARE_TYPEINFO(EBPFProgram, EBPFObject);
 };
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF
 
 #endif /* BACKENDS_EBPF_EBPFPROGRAM_H_ */

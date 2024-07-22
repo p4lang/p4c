@@ -15,7 +15,7 @@ limitations under the License.
 #include "constantTypeSubstitution.h"
 #include "typeChecker.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 bool hasVarbitsOrUnions(const TypeMap *typeMap, const IR::Type *type) {
     // called for a canonical type
@@ -341,7 +341,7 @@ static bool checkEnumValueInitializer(const IR::Type_Bits *type, const IR::Expre
                         constant->value % required % (type->isSigned ? "signed" : "unsigned") %
                         type->toString() % type->size);
             }
-            ::p4c::error(
+            ::P4C::error(
                 ErrorType::ERR_TYPE_ERROR,
                 "%1%: Serialized enum constant value %2% is out of bounds of the underlying "
                 "type %3%; %4%",
@@ -557,4 +557,4 @@ const IR::Node *TypeInference::postorder(IR::Type_HeaderUnion *type) {
     return type;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

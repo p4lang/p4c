@@ -26,13 +26,13 @@ limitations under the License.
 #include "frontends/common/options.h"
 #include "frontends/p4/parseAnnotations.h"
 
-namespace p4c::IR {
+namespace P4C::IR {
 class P4Program;
-}  // namespace p4c::IR
+}  // namespace P4C::IR
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 class FrontEndPolicy;
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 /// Specifies which standard headers should be included by a GTest.
 enum class P4Headers {
@@ -42,7 +42,7 @@ enum class P4Headers {
     PSA       // Both core.p4 and psa.p4
 };
 
-namespace p4c::TestDetail {
+namespace P4C::TestDetail {
 
 /**
  * Transforms the P4 program (or program fragment) in @rawSource to turn it into
@@ -65,14 +65,14 @@ std::string makeP4Source(const char *file, unsigned line, P4Headers headers, con
 /// `makeP4Source(file, line, P4Headers::NONE, rawSource);`.
 std::string makeP4Source(const char *file, unsigned line, const char *rawSource);
 
-}  // namespace p4c::TestDetail
+}  // namespace P4C::TestDetail
 
 // A macro which should be used by unit tests to define P4 source code. It adds
 // additional information to the source code to aid in debugging; see
 // makeP4Source for more information and parameter details.
 #define P4_SOURCE(...) TestDetail::makeP4Source(__FILE__, __LINE__, __VA_ARGS__)
 
-namespace p4c {
+namespace P4C {
 
 class P4CTestEnvironment {
     // XXX(seth): Ideally this would be a ::testing::Environment subclass, but
@@ -108,9 +108,9 @@ class P4CTestEnvironment {
 
 using GTestContext = P4CContextWithOptions<CompilerOptions>;
 
-}  // namespace p4c
+}  // namespace P4C
 
-namespace p4c::Test {
+namespace P4C::Test {
 
 /// A test fixture base class that automatically creates a new compilation
 /// context for the test to run in.
@@ -167,6 +167,6 @@ struct RedirectStderr {
     std::streambuf *old = nullptr;
 };
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test
 
 #endif /* TEST_GTEST_HELPERS_H_ */

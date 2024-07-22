@@ -25,7 +25,7 @@ limitations under the License.
 #include "programStructure.h"
 #include "v1model.h"
 
-namespace p4c::P4V1 {
+namespace P4C::P4V1 {
 
 const IR::Type *ExpressionConverter::getFieldType(const IR::Type_StructLike *ht,
                                                   cstring fieldName) {
@@ -37,7 +37,7 @@ const IR::Type *ExpressionConverter::getFieldType(const IR::Type_StructLike *ht,
 // These can only come from the key of a table.
 const IR::Node *ExpressionConverter::postorder(IR::Mask *expression) {
     if (!expression->right->is<IR::Constant>()) {
-        ::p4c::error(ErrorType::ERR_INVALID, "%1%: Mask must be a constant", expression->right);
+        ::P4C::error(ErrorType::ERR_INVALID, "%1%: Mask must be a constant", expression->right);
         return expression;
     }
 
@@ -94,13 +94,13 @@ const IR::Node *ExpressionConverter::postorder(IR::Primitive *primitive) {
         auto a = primitive->operands.at(0);
         auto b = primitive->operands.at(1);
         if (!a->is<IR::Constant>() || !b->is<IR::Constant>()) {
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: must have constant arguments", primitive);
+            ::P4C::error(ErrorType::ERR_INVALID, "%1%: must have constant arguments", primitive);
             return primitive;
         }
         auto aval = a->to<IR::Constant>()->asInt();
         auto bval = b->to<IR::Constant>()->asInt();
         if (aval < 0 || bval <= 0) {
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: negative offsets?", primitive);
+            ::P4C::error(ErrorType::ERR_INVALID, "%1%: negative offsets?", primitive);
             return primitive;
         }
 
@@ -133,7 +133,7 @@ const IR::Node *ExpressionConverter::postorder(IR::Primitive *primitive) {
 const IR::Node *ExpressionConverter::postorder(IR::PathExpression *ref) {
     if (ref->path->name.name == "latest") {
         if (structure->latest == nullptr) {
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: latest not yet defined", ref);
+            ::P4C::error(ErrorType::ERR_INVALID, "%1%: latest not yet defined", ref);
             return ref;
         }
         return structure->latest;
@@ -212,7 +212,7 @@ const IR::Node *ExpressionConverter::postorder(IR::HeaderStackItemRef *ref) {
         return result;
     }
 
-    ::p4c::error(ErrorType::ERR_UNSUPPORTED,
+    ::P4C::error(ErrorType::ERR_UNSUPPORTED,
                  "Illegal array index %1%: must be a constant, 'last', or 'next'.", ref);
     return ref;
 }
@@ -303,11 +303,11 @@ const IR::Node *StatementConverter::preorder(IR::Apply *apply) {
         for (auto a : apply->actions) {
             if (a.first == "hit") {
                 if (hit != nullptr)
-                    ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicate 'hit' label", hit);
+                    ::P4C::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicate 'hit' label", hit);
                 hit = a.second;
             } else if (a.first == "miss") {
                 if (miss != nullptr)
-                    ::p4c::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicate 'miss' label", hit);
+                    ::P4C::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicate 'miss' label", hit);
                 miss = a.second;
             } else {
                 otherLabels = true;
@@ -315,7 +315,7 @@ const IR::Node *StatementConverter::preorder(IR::Apply *apply) {
         }
 
         if ((hit != nullptr || miss != nullptr) && otherLabels)
-            ::p4c::error(ErrorType::ERR_INVALID, "%1%: Cannot mix 'hit'/'miss' and other labels",
+            ::P4C::error(ErrorType::ERR_INVALID, "%1%: Cannot mix 'hit'/'miss' and other labels",
                          apply);
 
         if (!otherLabels) {
@@ -365,7 +365,7 @@ const IR::Node *StatementConverter::preorder(IR::Apply *apply) {
 const IR::Node *StatementConverter::preorder(IR::Primitive *primitive) {
     auto control = structure->controls.get(primitive->name);
     if (control != nullptr) {
-        auto instanceName = ::p4c::get(renameMap, control->name);
+        auto instanceName = ::P4C::get(renameMap, control->name);
         auto ctrl = new IR::PathExpression(IR::ID(instanceName));
         auto method = new IR::Member(ctrl, IR::ID(IR::IApply::applyMethodName));
         auto args = structure->createApplyArguments(control->name);
@@ -445,7 +445,7 @@ class ValidateLenExpr : public Inspector {
         BUG_CHECK(!expression->path->absolute, "%1%: absolute path", expression);
         cstring name = expression->path->name.name;
         if (prior.find(name) == prior.end())
-            ::p4c::error(
+            ::P4C::error(
                 ErrorType::ERR_INVALID,
                 "%1%: header length must depend only on fields prior to the varbit field %2%",
                 expression, varbitField);
@@ -676,4 +676,4 @@ Visitor::profile_t Converter::init_apply(const IR::Node *node) {
     return PassManager::init_apply(node);
 }
 
-}  // namespace p4c::P4V1
+}  // namespace P4C::P4V1

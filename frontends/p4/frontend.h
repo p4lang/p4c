@@ -22,7 +22,7 @@ limitations under the License.
 #include "parseAnnotations.h"
 #include "unusedDeclarations.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 class ConstantFoldingPolicy;  // forward declare to avoid having to include
 
@@ -80,6 +80,6 @@ class FrontEnd {
                              std::ostream *outStream = nullptr);
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* P4_FRONTEND_H_ */

@@ -20,7 +20,7 @@ limitations under the License.
 
 #include "lib/map.h"
 
-namespace p4c::Test {
+namespace P4C::Test {
 
 TEST(OrderedMap, MapEqual) {
     ordered_map<unsigned, unsigned> a;
@@ -165,4 +165,4 @@ TEST(OrderedMap, NonExistingKey) {
     EXPECT_EQ(get(myMap, 4), "");
 }
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test

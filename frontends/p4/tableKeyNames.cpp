@@ -16,12 +16,12 @@ limitations under the License.
 
 #include "tableKeyNames.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 using namespace literals;
 
 void KeyNameGenerator::error(const IR::Expression *expression) {
-    ::p4c::error(ErrorType::ERR_EXPECTED, "%1%: Complex key expression requires a @name annotation",
+    ::P4C::error(ErrorType::ERR_EXPECTED, "%1%: Complex key expression requires a @name annotation",
                  expression);
 }
 
@@ -142,4 +142,4 @@ const IR::Node *DoTableKeyNames::postorder(IR::KeyElement *keyElement) {
     return keyElement;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

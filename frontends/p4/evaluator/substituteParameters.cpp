@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "substituteParameters.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 const IR::Node *SubstituteParameters::postorder(IR::This *t) {
     auto result = new IR::This(t->srcInfo);
@@ -59,4 +59,4 @@ const IR::Node *SubstituteParameters::postorder(IR::Type_Name *type) {
     return result;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

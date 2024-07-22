@@ -2,7 +2,7 @@
 
 #include "ir/pattern.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 void SimplifyBitwise::assignSlices(const IR::Expression *expr, big_int mask) {
     int one_pos = Util::scan1(mask, 0);
@@ -36,4 +36,4 @@ const IR::Node *SimplifyBitwise::preorder(IR::AssignmentStatement *as) {
     return slice_statements;
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

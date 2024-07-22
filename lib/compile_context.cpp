@@ -19,7 +19,7 @@ limitations under the License.
 #include "lib/error.h"
 #include "lib/exceptions.h"
 
-namespace p4c {
+namespace P4C {
 
 ICompileContext::~ICompileContext() {}
 
@@ -81,4 +81,4 @@ DiagnosticAction BaseCompileContext::getDiagnosticAction(cstring /* diagnostic *
     return defaultAction;
 }
 
-}  // namespace p4c
+}  // namespace P4C

@@ -33,7 +33,7 @@ limitations under the License.
 #include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
 
-namespace p4c {
+namespace P4C {
 
 class JSONLoader {
     template <typename T>
@@ -206,21 +206,21 @@ class JSONLoader {
     template <typename T, typename U>
     void unpack_json(std::pair<T, U> &v) {
         const JsonObject *obj = json->checkedTo<JsonObject>();
-        load(::p4c::get(obj, "first"), v.first);
-        load(::p4c::get(obj, "second"), v.second);
+        load(::P4C::get(obj, "first"), v.first);
+        load(::P4C::get(obj, "second"), v.second);
     }
 
     template <typename T>
     void unpack_json(std::optional<T> &v) {
         const JsonObject *obj = json->checkedTo<JsonObject>();
         bool isValid = false;
-        load(::p4c::get(obj, "valid"), isValid);
+        load(::P4C::get(obj, "valid"), isValid);
         if (!isValid) {
             v = std::nullopt;
             return;
         }
         T value;
-        load(::p4c::get(obj, "value"), value), v = std::move(value);
+        load(::P4C::get(obj, "value"), value), v = std::move(value);
     }
 
     void unpack_json(bool &v) { v = json->as<JsonBoolean>(); }
@@ -387,6 +387,6 @@ IR::NameMap<T, MAP, COMP, ALLOC> *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(JSO
     return new IR::NameMap<T, MAP, COMP, ALLOC>(json);
 }
 
-}  // namespace p4c
+}  // namespace P4C
 
 #endif /* IR_JSON_LOADER_H_ */

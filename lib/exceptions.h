@@ -28,7 +28,7 @@ limitations under the License.
 #include "absl/strings/str_cat.h"
 #include "lib/bug_helper.h"
 
-namespace p4c::Util {
+namespace P4C::Util {
 
 // colors to pretty print messages
 // \e is non-standard escape sequence, use codepoint \33 instead
@@ -79,7 +79,7 @@ class P4CExceptionBase : public std::exception {
         boost::format fmt(format);
         // FIXME: This will implicitly take location of the first argument having
         // SourceInfo. Not sure if this always desireable or not.
-        message = ::p4c::bug_helper(fmt, "", "", std::forward<Args>(args)...);
+        message = ::P4C::bug_helper(fmt, "", "", std::forward<Args>(args)...);
     }
 
     const char *what() const noexcept { return message.c_str(); }
@@ -147,7 +147,7 @@ class CompilationError : public P4CExceptionBase {
         throw Util::CompilerUnimplemented(__LINE__, __FILE__, __VA_ARGS__); \
     } while (0)
 
-}  // namespace p4c::Util
+}  // namespace P4C::Util
 
 /// Report an error and exit
 #define FATAL_ERROR(...)                           \

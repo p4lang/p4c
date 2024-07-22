@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/json.h"
 
-namespace p4c::BMV2 {
+namespace P4C::BMV2 {
 
 class DeparserConverter : public Inspector {
     ConversionContext *ctxt;
@@ -45,6 +45,6 @@ class DeparserConverter : public Inspector {
     }
 };
 
-}  // namespace p4c::BMV2
+}  // namespace P4C::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_DEPARSER_H_ */

@@ -54,7 +54,7 @@ limitations under the License.
 #include "midend/simplifySelectList.h"
 #include "midend/tableHit.h"
 
-namespace p4c::Test {
+namespace P4C::Test {
 
 MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
@@ -151,4 +151,4 @@ IR::ToplevelBlock *MidEnd::process(const IR::P4Program *&program) {
     return toplevel;
 }
 
-}  // namespace p4c::Test
+}  // namespace P4C::Test

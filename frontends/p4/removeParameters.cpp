@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 namespace {
 // Remove arguments from any embedded MethodCallExpression
@@ -129,7 +129,7 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
             result->push_back(decl);
             auto arg = substitution.lookup(p);
             if (arg == nullptr) {
-                ::p4c::error(ErrorType::ERR_UNINITIALIZED,
+                ::P4C::error(ErrorType::ERR_UNINITIALIZED,
                              "action %1%: parameter %2% must be bound", invocation, p);
                 continue;
             }
@@ -202,4 +202,4 @@ RemoveActionParameters::RemoveActionParameters(TypeMap *typeMap, TypeChecking *t
     passes.emplace_back(new ClearTypeMap(typeMap));
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

@@ -2,9 +2,9 @@
 
 #include "ir/id.h"
 
-namespace p4c::P4Tools::P4Testgen {
+namespace P4C::P4Tools::P4Testgen {
 
-using namespace ::p4c::P4::literals;
+using namespace ::P4C::P4::literals;
 
 // The methods in P4's packet_in uses 32-bit values. Conform with this to make it easier to produce
 // well-typed expressions when manipulating the parser cursor.
@@ -22,4 +22,4 @@ const IR::Member PacketVars::EMIT_BUFFER_LABEL =
 const IR::SymbolicVariable PacketVars::PAYLOAD_SYMBOL =
     IR::SymbolicVariable(&PacketVars::PACKET_SIZE_VAR_TYPE, "*payload"_cs);
 
-}  // namespace p4c::P4Tools::P4Testgen
+}  // namespace P4C::P4Tools::P4Testgen

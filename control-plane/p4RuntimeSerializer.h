@@ -40,15 +40,15 @@ class WriteRequest;
 }  // namespace v1
 }  // namespace p4
 
-namespace p4c::IR {
+namespace P4C::IR {
 class P4Program;
-}  // namespace p4c::IR
+}  // namespace P4C::IR
 
-namespace p4c {
+namespace P4C {
 class CompilerOptions;
-}  // namespace p4c
+}  // namespace P4C
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 using namespace literals;
 
@@ -149,6 +149,6 @@ P4RuntimeAPI generateP4Runtime(const IR::P4Program *program, cstring arch = "v1m
 /// P4RuntimeSerializer singleton.
 void serializeP4RuntimeIfRequired(const IR::P4Program *program, const CompilerOptions &options);
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* CONTROL_PLANE_P4RUNTIMESERIALIZER_H_ */

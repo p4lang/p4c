@@ -9,7 +9,7 @@
 #include "lib/exceptions.h"
 #include "lib/timer.h"
 
-using namespace ::p4c;
+using namespace ::P4C;
 
 int main(int argc, char **argv) {
     setup_signals();

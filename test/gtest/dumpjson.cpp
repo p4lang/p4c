@@ -22,7 +22,7 @@ limitations under the License.
 #include "ir/json_loader.h"
 #include "ir/visitor.h"
 
-using namespace ::p4c;
+using namespace ::P4C;
 
 TEST(IR, DumpJSON) {
     auto c = new IR::Constant(2);

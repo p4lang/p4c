@@ -22,13 +22,13 @@ limitations under the License.
 #include "lib/sourceCodeBuilder.h"
 #include "target.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 class ReferenceMap;
 
 }
 
-namespace p4c::EBPF {
+namespace P4C::EBPF {
 
 class CodeBuilder : public Util::SourceCodeBuilder {
  public:
@@ -83,7 +83,7 @@ class CodeGenInspector : public Inspector {
     bool isPointerVariable(cstring name) { return asPointerVariables.count(name) > 0; }
 
     bool notSupported(const IR::Expression *expression) {
-        ::p4c::error(ErrorType::ERR_UNSUPPORTED, "%1%: not yet implemented", expression);
+        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1%: not yet implemented", expression);
         return false;
     }
 
@@ -141,6 +141,6 @@ class EBPFInitializerUtils {
     static cstring genHexStr(const big_int &value, unsigned width, const IR::Expression *expr);
 };
 
-}  // namespace p4c::EBPF
+}  // namespace P4C::EBPF
 
 #endif /* BACKENDS_EBPF_CODEGEN_H_ */

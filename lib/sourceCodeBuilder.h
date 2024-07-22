@@ -25,7 +25,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/stringify.h"
 
-namespace p4c::Util {
+namespace P4C::Util {
 class SourceCodeBuilder {
     int indentLevel;  // current indent level
     unsigned indentAmount;
@@ -115,6 +115,6 @@ class SourceCodeBuilder {
     void commentEnd() { append(" */"); }
     bool lastIsSpace() const { return endsInSpace; }
 };
-}  // namespace p4c::Util
+}  // namespace P4C::Util
 
 #endif /* LIB_SOURCECODEBUILDER_H_ */

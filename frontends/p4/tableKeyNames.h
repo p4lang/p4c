@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 /** Generate control plane names for simple expressions that appear in table
  * keys without `@name` annotations.
@@ -46,7 +46,7 @@ class KeyNameGenerator : public Inspector {
     void postorder(const IR::Slice *expression) override;
     void postorder(const IR::BAnd *expression) override;
     void postorder(const IR::MethodCallExpression *expression) override;
-    cstring getName(const IR::Expression *expression) { return ::p4c::get(name, expression); }
+    cstring getName(const IR::Expression *expression) { return ::P4C::get(name, expression); }
 };
 
 /** Adds a "@name" annotation to each table key that does not have a name.
@@ -96,6 +96,6 @@ class TableKeyNames final : public PassManager {
     }
 };
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4
 
 #endif /* FRONTENDS_P4_TABLEKEYNAMES_H_ */

@@ -5,7 +5,7 @@
 
 #include "midend/simplifyKey.h"
 
-namespace p4c::P4 {
+namespace P4C::P4 {
 
 void HSIndexFinder::postorder(const IR::ArrayIndex *curArrayIndex) {
     if (arrayIndex == nullptr && !curArrayIndex->right->is<IR::Constant>()) {
@@ -226,4 +226,4 @@ IR::Node *HSIndexContretizer::preorder(IR::SwitchStatement *switchStatement) {
     return eliminateArrayIndexes(aiFinder, switchStatement, nullptr);
 }
 
-}  // namespace p4c::P4
+}  // namespace P4C::P4

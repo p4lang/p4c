@@ -26,7 +26,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/log.h"
 
-namespace p4c {
+namespace P4C {
 
 const IR::Expression *IR::Slice::make(const IR::Expression *e, unsigned lo, unsigned hi) {
     if (auto k = e->to<IR::Constant>()) {
@@ -89,7 +89,7 @@ void IR::Constant::handleOverflow(bool noWarning) {
         big_int min = -(one << (width - 1));
         if (value < min || value > max) {
             if (!noWarning)
-                ::p4c::warning(ErrorType::WARN_OVERFLOW,
+                ::P4C::warning(ErrorType::WARN_OVERFLOW,
                                "%1%: signed value does not fit in %2% bits", this, width);
             LOG2("value=" << value << ", min=" << min << ", max=" << max << ", masked="
                           << (value & mask) << ", adj=" << ((value & mask) - (one << width)));
@@ -99,11 +99,11 @@ void IR::Constant::handleOverflow(bool noWarning) {
     } else {
         if (value < 0) {
             if (!noWarning)
-                ::p4c::warning(ErrorType::WARN_MISMATCH, "%1%: negative value with unsigned type",
+                ::P4C::warning(ErrorType::WARN_MISMATCH, "%1%: negative value with unsigned type",
                                this);
         } else if ((value & mask) != value) {
             if (!noWarning)
-                ::p4c::warning(ErrorType::WARN_MISMATCH, "%1%: value does not fit in %2% bits",
+                ::P4C::warning(ErrorType::WARN_MISMATCH, "%1%: value does not fit in %2% bits",
                                this, width);
         }
 
@@ -189,4 +189,4 @@ const IR::StringLiteral *IR::StringLiteral::get(cstring value, const IR::Type *t
     return result;
 }
 
-}  // namespace p4c
+}  // namespace P4C
