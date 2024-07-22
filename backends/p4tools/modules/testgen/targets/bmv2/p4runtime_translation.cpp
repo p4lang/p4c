@@ -1,5 +1,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4runtime_translation.h"
 
+namespace p4c {
+
 std::vector<const IR::Annotation *>
 P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation::lookupP4RuntimeAnnotations(
     const P4::TypeMap &typeMap, const IR::Type *type) {
@@ -67,3 +69,5 @@ P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation::PropagateP4RuntimeTrans
     : _typeMap(typeMap) {
     setName("PropagateP4RuntimeTranslation");
 }
+
+}  // namespace p4c
