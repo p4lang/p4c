@@ -31,7 +31,7 @@ limitations under the License.
 #include "lib/null.h"
 #include "p4RuntimeArchHandler.h"
 
-namespace P4Configv1 = ::p4::config::v1;
+namespace p4configv1 = ::p4::config::v1;
 
 using p4configv1::P4DataTypeSpec;
 using p4configv1::P4TypeInfo;

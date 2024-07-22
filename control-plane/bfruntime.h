@@ -32,7 +32,7 @@ limitations under the License.
 #include "p4/config/v1/p4info.pb.h"
 #pragma GCC diagnostic pop
 
-namespace P4Configv1 = ::p4::config::v1;
+namespace p4configv1 = ::p4::config::v1;
 
 namespace P4C::P4 {
 struct P4RuntimeAPI;

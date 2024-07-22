@@ -18,7 +18,7 @@ limitations under the License.
 #define BACKENDS_DPDK_BACKEND_H_
 #include "p4/config/v1/p4info.pb.h"
 
-namespace P4Configv1 = ::p4::config::v1;
+namespace p4configv1 = ::p4::config::v1;
 #undef setbit
 
 #include "frontends/common/constantFolding.h"

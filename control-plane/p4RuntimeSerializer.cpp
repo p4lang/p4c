@@ -62,7 +62,7 @@ limitations under the License.
 #include "typeSpecConverter.h"
 
 namespace p4v1 = ::p4::v1;
-namespace P4Configv1 = ::p4::config::v1;
+namespace p4configv1 = ::p4::config::v1;
 
 namespace P4C::P4 {
 

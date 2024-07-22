@@ -43,7 +43,7 @@ using ::P4C::P4::TypeMap;
 using ::P4C::P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
 using ::P4C::P4::ControlPlaneAPI::Helpers::isExternPropertyConstructedInPlace;
 
-namespace P4Configv1 = ::p4::config::v1;
+namespace p4configv1 = ::p4::config::v1;
 
 namespace P4C::P4 {
 

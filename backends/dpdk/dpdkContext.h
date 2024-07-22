@@ -28,7 +28,7 @@ limitations under the License.
 #include "options.h"
 #include "p4/config/v1/p4info.pb.h"
 
-namespace P4Configv1 = ::p4::config::v1;
+namespace p4configv1 = ::p4::config::v1;
 
 /// Passes defined in this file are used for generating Context JSON output for DPDK
 /// Context JSON is a JSON file used by the control plane software for manipulating tables and
