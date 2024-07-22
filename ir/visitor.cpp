@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "visitor.h"
 
+#include <map>
+#include <ostream>
 #include <stdlib.h>
 #include <time.h>
 
