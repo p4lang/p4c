@@ -206,8 +206,8 @@ class ComputeDefUse : public Inspector,
 
 namespace std {
 template <>
-struct hash<P4::ComputeDefUse::loc_t> {
-    std::size_t operator()(const P4::ComputeDefUse::loc_t &loc) const { return loc.hash(); }
+struct hash<P4C::P4::ComputeDefUse::loc_t> {
+    std::size_t operator()(const P4C::P4::ComputeDefUse::loc_t &loc) const { return loc.hash(); }
 };
 
 }  // namespace std
