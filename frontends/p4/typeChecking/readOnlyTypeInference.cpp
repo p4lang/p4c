@@ -158,4 +158,7 @@ void ReadOnlyTypeInference::end_apply(const IR::Node *node) {
     Inspector::end_apply(node);
 }
 
+#undef DEFINE_POSTORDER
+#undef DEFINE_PREORDER
+
 }  // namespace P4
