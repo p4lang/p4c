@@ -195,7 +195,7 @@ class hvec_set : hash_vector_base {
         size_t idx = hv_insert(&v);
         if (idx >= data.size()) {
             idx = data.size();
-            data.push_back(v);
+            data.push_back(std::move(v));
             new_key = true;
         } else if ((new_key = erased[idx])) {
             erased[idx] = 0;
