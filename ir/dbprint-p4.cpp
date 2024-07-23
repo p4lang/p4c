@@ -149,7 +149,7 @@ void IR::P4Action::dbprint(std::ostream &out) const {
 }
 
 void IR::BlockStatement::dbprint(std::ostream &out) const {
-    out << "{" << indent;
+    out << annotations << "{" << indent;
     bool first = true;
     for (auto p : components) {
         if (first) {

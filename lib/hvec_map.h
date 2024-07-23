@@ -175,6 +175,19 @@ class hvec_map : hash_vector_base {
         return idx > 0;
     }
 
+    VAL &at(const KEY &k) {
+        hash_vector_base::lookup_cache cache;
+        size_t idx = hash_vector_base::find(&k, &cache);
+        if (!idx || erased[idx - 1]) throw std::out_of_range("hvec_map::at");
+        return data[idx - 1].second;
+    }
+    const VAL &at(const KEY &k) const {
+        hash_vector_base::lookup_cache cache;
+        size_t idx = hash_vector_base::find(&k, &cache);
+        if (!idx || erased[idx - 1]) throw std::out_of_range("hvec_map::at");
+        return data[idx - 1].second;
+    }
+
     // FIXME -- how to do this without duplicating the code for lvalue/rvalue?
     VAL &operator[](const KEY &k) {
         size_t idx = hv_insert(&k);
