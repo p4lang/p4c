@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-namespace P4C::P4 {
-
 #ifndef FRONTENDS_COMMON_COPYSRCINFO_H_
 #define FRONTENDS_COMMON_COPYSRCINFO_H_
 
 #include "ir/ir.h"
+
+namespace P4C::P4 {
 
 /// This simple visitor copies the specified source information
 /// to the root node of the IR tree that it is invoked on.

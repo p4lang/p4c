@@ -23,6 +23,7 @@ limitations under the License.
 #include "ir/namemap.h"
 #include "ir/nodemap.h"
 #include "ir/visitor.h"
+#include "lib/ordered_map.h"
 
 namespace P4C {
 
@@ -201,7 +202,6 @@ void IR::IndexedVector<T>::toJSON(JSONGenerator &json) const {
 }
 IRNODE_DEFINE_APPLY_OVERLOAD(IndexedVector, template <class T>, <T>)
 
-#include "lib/ordered_map.h"
 template <class MAP>
 static inline void namemap_insert_helper(typename MAP::iterator, typename MAP::key_type k,
                                          typename MAP::mapped_type v, MAP &, MAP &new_symbols) {

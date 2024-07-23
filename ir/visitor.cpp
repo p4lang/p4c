@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "visitor.h"
 
+#include <config.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -24,6 +25,10 @@ limitations under the License.
 #include "absl/time/time.h"
 #include "ir/ir-generated.h"
 #include "lib/hash.h"
+
+#if HAVE_CXXABI_H
+#include <cxxabi.h>
+#endif
 
 #if HAVE_LIBGC
 #include <gc.h>
@@ -772,10 +777,7 @@ std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> *v)
     return v ? out << *v : out << "<null>";
 }
 
-#include <config.h>
 #if HAVE_CXXABI_H
-#include <cxxabi.h>
-
 cstring Visitor::demangle(const char *str) {
     int status;
     cstring rv;

@@ -39,6 +39,12 @@ limitations under the License.
 
 #include <iostream>
 
+#ifdef MULTITHREAD
+#include <pthread.h>
+
+#include <mutex>
+#endif
+
 #include "exceptions.h"
 #include "exename.h"
 #include "hex.h"
@@ -52,9 +58,6 @@ static const char *signames[] = {
     "TTOU", "URG",  "XCPU", "XFSZ", "VTALRM", "PROF",   "WINCH", "POLL", "PWR",  "SYS"};
 
 #ifdef MULTITHREAD
-#include <pthread.h>
-
-#include <mutex>
 std::vector<pthread_t> thread_ids;
 __thread int my_id;
 

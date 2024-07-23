@@ -1,5 +1,10 @@
 #include <gtest/gtest.h>
 
+// #define PARSER_UNROLL_TIME_CHECKING
+
+#ifdef PARSER_UNROLL_TIME_CHECKING
+#include <chrono>
+#endif
 #include <cstdlib>
 
 #include "frontends/common/parseInput.h"
@@ -16,12 +21,6 @@ namespace P4C::Test {
 using P4TestContext = P4CContextWithOptions<CompilerOptions>;
 
 class P4CParserUnroll : public P4CTest {};
-
-// #define PARSER_UNROLL_TIME_CHECKING
-
-#ifdef PARSER_UNROLL_TIME_CHECKING
-#include <chrono>
-#endif
 
 const IR::P4Parser *getParser(const IR::P4Program *program) {
     // FIXME: This certainly should be improved, it should be possible to check

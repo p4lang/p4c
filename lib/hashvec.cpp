@@ -16,6 +16,10 @@ limitations under the License.
 
 #include "hashvec.h"
 
+#ifdef DEBUG
+#include <iomanip>
+#endif
+
 #include "exceptions.h"
 
 namespace P4C {
@@ -460,8 +464,6 @@ void *hash_vector_base::lookup_cache::getval(hash_vector_base *ht) {
 }
 
 #ifdef DEBUG
-#include <iomanip>
-
 void hash_vector_base::dump(std::ostream &out) {
     int fs = 4, ls = 18;
     out << "hash_vector " << (void *)this << ": " << (info->ismap ? "map" : "set")
