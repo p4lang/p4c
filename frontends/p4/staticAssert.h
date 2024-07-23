@@ -99,7 +99,7 @@ class DoStaticAssert : public Transform, public ResolutionContext {
 class StaticAssert : public PassManager {
  public:
     explicit StaticAssert(TypeMap *typeMap) {
-        passes.push_back(new TypeInference(typeMap));
+        passes.push_back(new ReadOnlyTypeInference(typeMap));
         passes.push_back(new DoStaticAssert(typeMap));
         setName("StaticAssert");
     }
