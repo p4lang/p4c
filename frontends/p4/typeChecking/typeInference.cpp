@@ -160,4 +160,7 @@ const IR::Node *TypeInference::apply_visitor(const IR::Node *orig, const char *n
     return transformed;
 }
 
+#undef DEFINE_POSTORDER
+#undef DEFINE_PREORDER
+
 }  // namespace P4
