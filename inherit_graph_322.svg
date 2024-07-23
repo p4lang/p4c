@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="class_p4_tools_1_1_p4_testgen_1_1_command_visitor.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="class_p4_tools_1_1_p4_testgen_1_1_continuation.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="109,-30 0,-30 0,0 109,0 109,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">P4Tools::P4Testgen</text>
-<text text-anchor="middle" x="54.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::CommandVisitor</text>
+<text text-anchor="middle" x="54.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::Continuation</text>
 </a>
 </g>
 </g>

@@ -1,5 +1,6 @@
 var NAVTREEINDEX17 =
 {
+"namespace_p4_tools.html#a937e208f74ad1f4d660f8a2bd27bf217":[31,0,5,37],
 "namespace_p4_tools.html#a95c693f6605f51aa8b20533b23bb6d20":[31,0,5,40],
 "namespace_p4_tools.html#a9cb398ee3b769285ddff849649e15c3a":[31,0,5,47],
 "namespace_p4_tools.html#aa5eaf5d46ae3293b504ec9bf8f5802d3":[31,0,5,51],
@@ -141,7 +142,7 @@ var NAVTREEINDEX17 =
 "struct_i_r_1_1_i_d.html":[32,0,7,2],
 "struct_i_r_1_1has__static__type__name.html":[32,0,7,0],
 "struct_i_r_1_1has__static__type__name_3_01_t_00_01std_1_1void__t_3_01decltype_07_t_1_1static__type__name_07_08_08_4_01_4.html":[32,0,7,1],
-"struct_log_abbrev.html":[32,0,84],
+"struct_log_abbrev.html":[32,0,85],
 "struct_model_1_1_elem.html":[32,0,9,0],
 "struct_model_1_1_enum___model.html":[32,0,9,1],
 "struct_model_1_1_extern___model.html":[32,0,9,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX17 =
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder_for_d_p_d_k.html#a1f034a5d35783b5e49d90cf37f1f5254":[31,0,4,0,1,27,0],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder_for_d_p_d_k.html#a1f034a5d35783b5e49d90cf37f1f5254":[32,0,11,1,1,27,0],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register.html":[31,0,4,0,1,28],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register.html":[32,0,11,1,1,28],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_n_a_01_4.html":[31,0,4,0,1,30]
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register.html":[32,0,11,1,1,28]
 };
