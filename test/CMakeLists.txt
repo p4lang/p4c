@@ -35,6 +35,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/helpers.cpp
   gtest/hash.cpp
   gtest/hvec_map.cpp
+  gtest/hvec_set.cpp
   gtest/indexed_vector.cpp
   gtest/json_test.cpp
   gtest/map.cpp

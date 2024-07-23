@@ -320,7 +320,7 @@ void hash_vector_base::redo_hash() {
                 while (find_next(k, &cache)) {
                 }
             } else {
-                BUG("dupliacte keys in hash_vector_base::redo_hash");
+                BUG("duplicate keys in hash_vector_base::redo_hash");
             }
         }
         if (j != i) {

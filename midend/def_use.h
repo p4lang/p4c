@@ -20,6 +20,8 @@ limitations under the License.
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 #include "lib/bitrange.h"
+#include "lib/hvec_map.h"
+#include "lib/hvec_set.h"
 
 namespace P4C::P4 {
 
@@ -64,11 +66,28 @@ class ComputeDefUse : public Inspector,
     struct loc_t {
         const IR::Node *node;
         const loc_t *parent;
+        mutable size_t computedHash = 0;
         bool operator<(const loc_t &a) const {
             if (node != a.node) return node->id < a.node->id;
             if (!parent || !a.parent) return parent != nullptr;
             return *parent < *a.parent;
         }
+        bool operator==(const loc_t &a) const {
+            if (node != a.node) return false;
+            if (parent == a.parent) return true;
+            if (!parent || !a.parent) return false;
+            return *parent == *a.parent;
+        }
+        std::size_t hash() const {
+            if (!computedHash) {
+                if (!parent)
+                    computedHash = Util::Hash{}(node->id);
+                else
+                    computedHash = Util::Hash{}(node->id, parent->hash());
+            }
+            return computedHash;
+        }
+
         template <class T>
         const T *find() const {
             for (auto *p = this; p; p = p->parent) {
@@ -77,10 +96,11 @@ class ComputeDefUse : public Inspector,
             return nullptr;
         }
     };
-    typedef ordered_set<const loc_t *> locset_t;
+    typedef hvec_set<const loc_t *> locset_t;
 
  private:
-    std::set<loc_t> &cached_locs;
+    // DANGER -- pointers to elements of this set must be stable
+    std::unordered_set<loc_t> &cached_locs;
     const loc_t *getLoc(const Visitor::Context *ctxt);
     const loc_t *getLoc() { return getLoc(getChildContext()); }
     const loc_t *getLoc(const IR::Node *, const Visitor::Context *);
@@ -112,8 +132,10 @@ class ComputeDefUse : public Inspector,
         def_info_t() = default;
         def_info_t(const def_info_t &);
         def_info_t(def_info_t &&);
+        def_info_t &operator=(const def_info_t &);
+        def_info_t &operator=(def_info_t &&);
     };
-    ordered_map<const IR::IDeclaration *, def_info_t> def_info;
+    hvec_map<const IR::IDeclaration *, def_info_t> def_info;
     void add_uses(const loc_t *, def_info_t &);
     void set_live_from_type(def_info_t &di, const IR::Type *type);
 
@@ -122,8 +144,8 @@ class ComputeDefUse : public Inspector,
         // defs maps from all uses to their definitions
         // uses maps from all definitions to their uses
         // uses/defs are lvalue expressions, or param declarations.
-        ordered_map<const IR::Node *, locset_t> defs;
-        ordered_map<const IR::Node *, locset_t> uses;
+        hvec_map<const IR::Node *, locset_t> defs;
+        hvec_map<const IR::Node *, locset_t> uses;
     } & defuse;
     static const locset_t empty;
 
@@ -139,6 +161,7 @@ class ComputeDefUse : public Inspector,
     bool preorder(const IR::P4Table *) override;
     bool preorder(const IR::P4Action *) override;
     bool preorder(const IR::P4Parser *) override;
+    bool preorder(const IR::Function *) override;
     bool preorder(const IR::ParserState *) override;
     void revisit(const IR::ParserState *) override;
     void loop_revisit(const IR::ParserState *) override;
@@ -159,17 +182,8 @@ class ComputeDefUse : public Inspector,
     bool filter_join_point(const IR::Node *) override;
 
  public:
-    ComputeDefUse()
-        : ResolutionContext(true), cached_locs(*new std::set<loc_t>), defuse(*new defuse_t) {
-        joinFlows = true;
-        visitDagOnce = false;
-    }
-    void clear() {
-        cached_locs.clear();
-        def_info.clear();
-        defuse.defs.clear();
-        defuse.uses.clear();
-    }
+    ComputeDefUse();
+    void clear();
 
     const locset_t &getDefs(const IR::Node *n) const {
         auto it = defuse.defs.find(n);
@@ -189,5 +203,13 @@ class ComputeDefUse : public Inspector,
 };
 
 }  // namespace P4C::P4
+
+namespace std {
+template <>
+struct hash<P4::ComputeDefUse::loc_t> {
+    std::size_t operator()(const P4::ComputeDefUse::loc_t &loc) const { return loc.hash(); }
+};
+
+}  // namespace std
 
 #endif /* MIDEND_DEF_USE_H_ */
