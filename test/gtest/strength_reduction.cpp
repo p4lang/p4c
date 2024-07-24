@@ -80,9 +80,6 @@ struct StrengthReductionPolicy : public P4::FrontEndPolicy {
 TEST_F(StrengthReductionTest, Default) {
     auto test = createStrengthReductionTestCase(P4_SOURCE(R"(headers.h.f1 = headers.h.f1 - 1;)"));
 
-    ReferenceMap refMap;
-    TypeMap typeMap;
-
     Util::SourceCodeBuilder builder;
     ToP4 top4(builder, false);
     test->program->apply(top4);
@@ -98,9 +95,6 @@ TEST_F(StrengthReductionTest, DisableSubConstToAddConst) {
     StrengthReductionPolicy policy(false);
     auto test =
         createStrengthReductionTestCase(P4_SOURCE(R"(headers.h.f1 = headers.h.f1 - 1;)"), &policy);
-
-    ReferenceMap refMap;
-    TypeMap typeMap;
 
     Util::SourceCodeBuilder builder;
     ToP4 top4(builder, false);

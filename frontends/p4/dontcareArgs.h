@@ -44,6 +44,14 @@ class DontcareArgs : public Transform, public ResolutionContext {
         toAdd.clear();
         return function;
     }
+    const IR::Node *postorder(IR::P4Action *action) override {
+        IR::IndexedVector<IR::StatOrDecl> body;
+        for (auto d : toAdd) body.push_back(d);
+        body.append(action->body->components);
+        action->body = new IR::BlockStatement(action->body->srcInfo, body);
+        toAdd.clear();
+        return action;
+    }
     const IR::Node *postorder(IR::P4Parser *parser) override {
         toAdd.append(parser->parserLocals);
         parser->parserLocals = toAdd;
