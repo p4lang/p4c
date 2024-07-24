@@ -196,17 +196,17 @@ class Enumerator {
 
 /// A generic iterator returning elements of type T.
 template <typename Iter>
-class IteratorEnumerator : public Enumerator<typename Iter::value_type> {
+class IteratorEnumerator : public Enumerator<typename std::iterator_traits<Iter>::value_type> {
  protected:
     Iter begin;
     Iter end;
     Iter current;
     const char *name;
-    friend class Enumerator<typename Iter::value_type>;
+    friend class Enumerator<typename std::iterator_traits<Iter>::value_type>;
 
  public:
     IteratorEnumerator(Iter begin, Iter end, const char *name)
-        : Enumerator<typename Iter::value_type>(),
+        : Enumerator<typename std::iterator_traits<Iter>::value_type>(),
           begin(begin),
           end(end),
           current(begin),
@@ -241,7 +241,7 @@ class IteratorEnumerator : public Enumerator<typename Iter::value_type> {
         throw std::runtime_error("Unexpected enumerator state");
     }
 
-    typename Iter::value_type getCurrent() const {
+    typename std::iterator_traits<Iter>::value_type getCurrent() const {
         switch (this->state) {
             case EnumeratorState::NotStarted:
                 throw std::logic_error("You cannot call 'getCurrent' before 'moveNext'");
@@ -638,12 +638,12 @@ bool EnumeratorHandle<T>::operator!=(const EnumeratorHandle<T> &other) const {
 }
 
 template <typename Iter>
-Enumerator<typename Iter::value_type> *enumerate(Iter begin, Iter end) {
+Enumerator<typename std::iterator_traits<Iter>::value_type> *enumerate(Iter begin, Iter end) {
     return new IteratorEnumerator(begin, end, "iterator");
 }
 
 template <typename Iter>
-Enumerator<typename Iter::value_type> *enumerate(iterator_range<Iter> range) {
+Enumerator<typename std::iterator_traits<Iter>::value_type> *enumerate(iterator_range<Iter> range) {
     return new IteratorEnumerator(range.begin(), range.end(), "range");
 }
 

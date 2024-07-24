@@ -18,6 +18,7 @@ limitations under the License.
 #define COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/container/inlined_vector.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/iterator_range.h"
@@ -36,17 +37,17 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
     const std::vector<const IR::IDeclaration *> &memoizeDeclarations(
         const IR::INamespace *ns) const;
 
+    using DeclsVector = absl::InlinedVector<const IR::IDeclaration *, 2>;
+    using NamespaceDeclsByName = absl::flat_hash_map<cstring, DeclsVector, Util::Hash>;
+
     // Returns a mapping from name -> decl for the given namespace, and caches the result for
     // future lookups.
-    std::unordered_multimap<cstring, const IR::IDeclaration *> &memoizeDeclsByName(
-        const IR::INamespace *ns) const;
+    NamespaceDeclsByName &memoizeDeclsByName(const IR::INamespace *ns) const;
 
     mutable absl::flat_hash_map<const IR::INamespace *, std::vector<const IR::IDeclaration *>,
                                 Util::Hash>
         namespaceDecls;
-    mutable absl::flat_hash_map<const IR::INamespace *,
-                                std::unordered_multimap<cstring, const IR::IDeclaration *>,
-                                Util::Hash>
+    mutable absl::flat_hash_map<const IR::INamespace *, NamespaceDeclsByName, Util::Hash>
         namespaceDeclNames;
 
  protected:
@@ -100,11 +101,13 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
     /// Returns the set of decls with the given name that exist in the given namespace.
     auto getDeclsByName(const IR::INamespace *ns, cstring name) const {
         auto nsIt = namespaceDeclNames.find(ns);
-        auto &namesToDecls =
+        const auto &namesToDecls =
             nsIt != namespaceDeclNames.end() ? nsIt->second : memoizeDeclsByName(ns);
 
-        auto decls = Values(namesToDecls.equal_range(name));
-        return Util::iterator_range(decls.begin(), decls.end());
+        auto decls = namesToDecls.find(name);
+        if (decls == namesToDecls.end())
+            return Util::Enumerator<const IR::IDeclaration *>::emptyEnumerator();
+        return Util::enumerate(decls->second);
     }
 };
 

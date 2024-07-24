@@ -38,10 +38,10 @@ const std::vector<const IR::IDeclaration *> &ResolutionContext::memoizeDeclarati
     return (namespaceDecls[ns] = std::move(decls));
 }
 
-std::unordered_multimap<cstring, const IR::IDeclaration *> &ResolutionContext::memoizeDeclsByName(
+ResolutionContext::NamespaceDeclsByName &ResolutionContext::memoizeDeclsByName(
     const IR::INamespace *ns) const {
     auto &namesToDecls = namespaceDeclNames[ns];
-    for (const auto *d : getDeclarations(ns)) namesToDecls.emplace(d->getName().name, d);
+    for (const auto *d : getDeclarations(ns)) namesToDecls[d->getName().name].push_back(d);
     return namesToDecls;
 }
 
@@ -63,7 +63,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
 
     if (const auto *gen = current->to<IR::IGeneralNamespace>()) {
         // FIXME: implement range filtering without enumerator wrappers
-        auto *decls = Util::enumerate(getDeclsByName(gen, name));
+        auto *decls = getDeclsByName(gen, name);
         switch (type) {
             case P4::ResolutionType::Any:
                 break;
