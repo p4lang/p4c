@@ -611,7 +611,7 @@ IR::Expression *ExpressionGenerator::constructTernaryBitExpr(const IR::Type_Bits
             // pick a slice that matches the type
             auto typeWidth = tb->width_bits();
             // TODO(fruffy): this is some arbitrary value...
-            auto newTypeSize = Utils::getRandInt(1, 128) + typeWidth;
+            auto newTypeSize = Utils::getRandInt(1, 64) + typeWidth;
             const auto *sliceType = IR::Type_Bits::get(newTypeSize, false);
             auto *sliceExpr = constructBitExpr(sliceType);
             if (P4Scope::prop.width_unknown) {
@@ -714,7 +714,7 @@ IR::Expression *ExpressionGenerator::constructCmpExpr() {
     // gen some random type
     // can be either bits, int, bool, or structlike
     // for now it is just bits
-    auto newTypeSize = Utils::getRandInt(1, 128);
+    auto newTypeSize = Utils::getRandInt(1, 64);
     const auto *newType = IR::Type_Bits::get(newTypeSize, false);
     IR::Expression *left = constructBitExpr(newType);
     IR::Expression *right = constructBitExpr(newType);
