@@ -1322,12 +1322,12 @@ var hierarchy =
       [ "Util::FilterEnumerator< T, Filter >", "class_util_1_1_filter_enumerator.html", null ],
       [ "Util::SingleEnumerator< T >", "class_util_1_1_single_enumerator.html", null ]
     ] ],
-    [ "Util::Enumerator< Iter::value_type >", "class_util_1_1_enumerator.html", [
-      [ "Util::IteratorEnumerator< Iter >", "class_util_1_1_iterator_enumerator.html", null ]
-    ] ],
     [ "Util::Enumerator< S >", "class_util_1_1_enumerator.html", [
       [ "Util::AsEnumerator< T, S >", "class_util_1_1_as_enumerator.html", null ],
       [ "Util::MapEnumerator< T, S, Mapper >", "class_util_1_1_map_enumerator.html", null ]
+    ] ],
+    [ "Util::Enumerator< std::iterator_traits< Iter >::value_type >", "class_util_1_1_enumerator.html", [
+      [ "Util::IteratorEnumerator< Iter >", "class_util_1_1_iterator_enumerator.html", null ]
     ] ],
     [ "Util::EnumeratorHandle< T >", "class_util_1_1_enumerator_handle.html", null ],
     [ "Util::Hash", "struct_util_1_1_hash.html", null ],
