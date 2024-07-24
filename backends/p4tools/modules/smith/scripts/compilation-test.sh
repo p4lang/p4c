@@ -4,6 +4,7 @@ set -e # Exit on error.
 
 # List of known bugs.
 KNOWN_BUGS=(
+    "terminate called after throwing an instance of 'Util::CompilerBug'"
 )
 
 # Function to check if an error is triggered by a known bug.
