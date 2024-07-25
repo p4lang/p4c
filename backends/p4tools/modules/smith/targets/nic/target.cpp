@@ -46,14 +46,10 @@ void DpdkPnaSmithTarget::make() {
 /// This implementation is based on p4include/pna.p4.
 IR::IndexedVector<IR::StructField> generatePnaPreOutputMetadataFields() {
     IR::IndexedVector<IR::StructField> retFields;
-
     retFields.push_back(new IR::StructField("decrypt", IR::Type_Boolean::get()));
-
     retFields.push_back(
         new IR::StructField(IR::ID("said"), new IR::Type_Name(IR::ID("SecurityAssocId_t"))));
-
     retFields.push_back(new IR::StructField("decrypt_start_offset", IR::Type_Bits::get(16, false)));
-
     return retFields;
 }
 
@@ -236,7 +232,6 @@ void generateMainMetadata() {
     ret = new IR::Type_Struct(*name, fields);
     P4Scope::addToScope(ret);
     name = new IR::ID("pna_pre_output_metadata_t");
-    // ret = new IR::Type_Struct(*name, fields);
     ret = new IR::Type_Struct(*name, generatePnaPreOutputMetadataFields());
     P4Scope::addToScope(ret);
     name = new IR::ID("pna_main_input_metadata_t");
