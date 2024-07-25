@@ -22,8 +22,8 @@ limitations under the License.
 %defines
 %define api.namespace {P4::V1}
 // TODO: Update, once we drop Ubuntu 18.04 support.
-%define api.parser.class {V1Parser}
-// %define parser_class_name {V1Parser}
+// %define api.parser.class {V1Parser}
+%define parser_class_name {V1Parser}
 
 // Use the C++-native variant representation of tokens.
 %define api.token.constructor
