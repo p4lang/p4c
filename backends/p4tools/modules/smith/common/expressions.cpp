@@ -1053,15 +1053,9 @@ IR::Expression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *tn) 
                     components.push_back(expr);
                 }
             }
-        } else if (const auto *bitsType = td->to<IR::Type_Bits>()) {
-            IR::Expression *expr;
-            expr = genExpression(bitsType);
-            return expr;
+        } else if (const auto *bitsType = td->to<IR::Type_Typedef>()) {
+            components.push_back(genExpression(tnType->getP4Type()));
         } else {
-            std::cout << "td->is<IR::Type_Name>(): " << td->is<IR::Type_Name>() << "\n";
-            std::cout << "td->is<IR::Type_Bits>(): " << td->is<IR::Type_Bits>() << "\n";
-            std::cout << "td->is<IR::Type_Declaration>(): " << td->is<IR::Type_Declaration>()
-                      << "\n";
             BUG("genStructListExpr: Requested Type %s not a struct-like type", tnName);
         }
     } else {
