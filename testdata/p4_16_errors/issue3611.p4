@@ -9,11 +9,10 @@ control c()
   }
   apply {
    switch(t.apply().action_run) {
-      default: {}
       1: {} // { dg-error "" }
+      a: {}
+      a: {}
       default: {}
-      a: {}
-      a: {}
     }
   }
 }
