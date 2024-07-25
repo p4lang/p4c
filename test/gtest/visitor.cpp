@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "midend_pass.h"
 
-namespace P4C::Test {
+namespace P4::Test {
 
 using P4TestContext = P4CContextWithOptions<CompilerOptions>;
 
@@ -160,4 +160,4 @@ TEST_F(P4CVisitor, MultiVisitModifierLoop) {
     ASSERT_TRUE(program != nullptr);
 }
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

@@ -11,7 +11,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 
-namespace P4C::P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 /// Greedy path selection strategy, which, at branch points, picks the first execution state which
 /// has covered or potentially will cover program nodes which have not been visited yet.
@@ -77,6 +77,6 @@ class GreedyNodeSelection : public SymbolicExecutor {
     [[nodiscard]] std::optional<ExecutionStateReference> pickSuccessor(StepResult successors);
 };
 
-}  // namespace P4C::P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_GREEDY_NODE_COV_H_ */

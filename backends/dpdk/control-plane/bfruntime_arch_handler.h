@@ -38,14 +38,14 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "midend/eliminateTypedefs.h"
 
-using ::P4C::P4::ReferenceMap;
-using ::P4C::P4::TypeMap;
-using ::P4C::P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
-using ::P4C::P4::ControlPlaneAPI::Helpers::isExternPropertyConstructedInPlace;
+using ::P4::ReferenceMap;
+using ::P4::TypeMap;
+using ::P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
+using ::P4::ControlPlaneAPI::Helpers::isExternPropertyConstructedInPlace;
 
 namespace p4configv1 = ::p4::config::v1;
 
-namespace P4C::P4 {
+namespace P4 {
 
 /// \addtogroup control_plane
 ///  @{
@@ -93,7 +93,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
     void forAllPipeBlocks(const IR::ToplevelBlock *evaluatedProgram, Func function) {
         auto main = evaluatedProgram->getMain();
         if (!main)
-            ::P4C::error(ErrorType::ERR_NOT_FOUND, "Program does not contain a `main` module");
+            ::P4::error(ErrorType::ERR_NOT_FOUND, "Program does not contain a `main` module");
         auto cparams = main->getConstructorParameters();
         int index = -1;
         for (auto param : main->constantValue) {
@@ -332,21 +332,21 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                         return false;
                     }
                 } else if (expr->is<IR::PathExpression>()) {
-                    ::P4C::error(ErrorType::ERR_UNEXPECTED,
-                                 "Unresolved value %1% for psa_idle_timeout "
-                                 "property on table %2%. Must be a constant and one of "
-                                 "{ NOTIFY_CONTROL, NO_TIMEOUT }",
-                                 timeout, table);
+                    ::P4::error(ErrorType::ERR_UNEXPECTED,
+                                "Unresolved value %1% for psa_idle_timeout "
+                                "property on table %2%. Must be a constant and one of "
+                                "{ NOTIFY_CONTROL, NO_TIMEOUT }",
+                                timeout, table);
                     return false;
                 }
             }
         }
 
-        ::P4C::error(ErrorType::ERR_UNEXPECTED,
-                     "Unexpected value %1% for psa_idle_timeout "
-                     "property on table %2%. Supported values are "
-                     "{ NOTIFY_CONTROL, NO_TIMEOUT }",
-                     timeout, table);
+        ::P4::error(ErrorType::ERR_UNEXPECTED,
+                    "Unexpected value %1% for psa_idle_timeout "
+                    "property on table %2%. Supported values are "
+                    "{ NOTIFY_CONTROL, NO_TIMEOUT }",
+                    timeout, table);
         return false;
     }
 };
@@ -390,6 +390,6 @@ struct PNAArchHandlerBuilderForDPDK : public P4::ControlPlaneAPI::P4RuntimeArchH
 }  // namespace ControlPlaneAPI
 
 /** @} */ /* end group control_plane */
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_ */

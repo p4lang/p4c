@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
  * Add arguments for parameters that have default values but no corresponding argument.
@@ -63,6 +63,6 @@ class DefaultArguments : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_DEFAULTARGUMENTS_H_ */

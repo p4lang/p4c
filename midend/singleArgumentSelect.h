@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
    Converts select(a, b, c) into select(a ++ b ++ c) &&& (maska ++ maskb ++ maskc).
@@ -66,6 +66,6 @@ class SingleArgumentSelect : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_SINGLEARGUMENTSELECT_H_ */

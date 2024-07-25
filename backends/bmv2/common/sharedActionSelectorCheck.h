@@ -29,7 +29,7 @@ limitations under the License.
 #include "lib/error.h"
 #include "lib/json.h"
 
-namespace P4C::BMV2 {
+namespace P4::BMV2 {
 
 using SelectorInput = std::vector<const IR::Expression *>;
 
@@ -72,8 +72,8 @@ class SharedActionSelectorCheck : public Inspector {
         auto implementation = table->properties->getProperty("implementation");
         if (implementation == nullptr) return false;
         if (!implementation->value->is<IR::ExpressionValue>()) {
-            ::P4C::error(ErrorType::ERR_EXPECTED, "%1%: expected expression for property",
-                         implementation);
+            ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected expression for property",
+                        implementation);
             return false;
         }
         auto propv = implementation->value->to<IR::ExpressionValue>();
@@ -81,14 +81,13 @@ class SharedActionSelectorCheck : public Inspector {
         auto pathe = propv->expression->to<IR::PathExpression>();
         auto decl = refMap->getDeclaration(pathe->path, true);
         if (!decl->is<IR::Declaration_Instance>()) {
-            ::P4C::error(ErrorType::ERR_EXPECTED, "%1%: expected a reference to an instance",
-                         pathe);
+            ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected a reference to an instance", pathe);
             return false;
         }
         auto dcltype = typeMap->getType(pathe, true);
         if (!dcltype->is<IR::Type_Extern>()) {
-            ::P4C::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type for implementation",
-                         dcltype);
+            ::P4::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type for implementation",
+                        dcltype);
             return false;
         }
         auto type_extern_name = dcltype->to<IR::Type_Extern>()->name;
@@ -116,7 +115,7 @@ class SharedActionSelectorCheck : public Inspector {
         };
 
         if (!cmp_inputs(it->second, input)) {
-            ::P4C::error(
+            ::P4::error(
                 ErrorType::ERR_INVALID,
                 "Action selector %1% is used by multiple tables with different selector inputs",
                 decl);
@@ -126,6 +125,6 @@ class SharedActionSelectorCheck : public Inspector {
     }
 };
 
-}  // namespace P4C::BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_SHAREDACTIONSELECTORCHECK_H_ */

@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/parameterSubstitution.h"
 #include "lib/rtti_utils.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression *mce) {
     auto mi = P4::MethodInstance::resolve(mce, this, typeMap);
@@ -235,7 +235,7 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     // all possible callees in replMap.
     SubstituteParameters sp(nullptr, &subst, &tvs);
     auto clone = callee->apply(sp, getChildContext());
-    if (::P4C::errorCount() > 0) return statement;
+    if (::P4::errorCount() > 0) return statement;
     CHECK_NULL(clone);
     BUG_CHECK(clone->is<IR::Function>(), "%1%: not an function", clone);
     auto funclone = clone->to<IR::Function>();
@@ -245,7 +245,7 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     for (auto param : callee->type->parameters->parameters) {
         auto left = substitution.lookup(param);
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
-            cstring newName = ::P4C::get(paramRename, param);
+            cstring newName = ::P4::get(paramRename, param);
             auto right = new IR::PathExpression(newName);
             auto copyout = new IR::AssignmentStatement(left->expression, right);
             body.push_back(copyout);
@@ -275,4 +275,4 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     return result;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

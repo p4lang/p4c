@@ -22,7 +22,7 @@ limitations under the License.
 
 #include "exceptions.h"
 
-namespace P4C {
+namespace P4 {
 
 /* FIXME -- there are almost certainly problems when the hashtable size
  * FIXME -- exceeds INT_MAX elements.  That requires 16GB+ memory... */
@@ -492,4 +492,4 @@ void hash_vector_base::dump(std::ostream &out) {
 }
 #endif /* DEBUG */
 
-}  // namespace P4C
+}  // namespace P4

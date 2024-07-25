@@ -16,11 +16,11 @@ limitations under the License.
 
 #include "backends/common/metermap.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /// @returns direct meter information from the direct meter map.
 DirectMeterMap::DirectMeterInfo *DirectMeterMap::createInfo(const IR::IDeclaration *meter) {
-    auto prev = ::P4C::get(directMeter, meter);
+    auto prev = ::P4::get(directMeter, meter);
     BUG_CHECK(prev == nullptr, "Already created");
     auto result = new DirectMeterMap::DirectMeterInfo();
     directMeter.emplace(meter, result);
@@ -28,22 +28,22 @@ DirectMeterMap::DirectMeterInfo *DirectMeterMap::createInfo(const IR::IDeclarati
 }
 
 DirectMeterMap::DirectMeterInfo *DirectMeterMap::getInfo(const IR::IDeclaration *meter) {
-    return ::P4C::get(directMeter, meter);
+    return ::P4::get(directMeter, meter);
 }
 /// Set the table that a direct meter is attached to.
 void DirectMeterMap::setTable(const IR::IDeclaration *meter, const IR::P4Table *table) {
     auto info = getInfo(meter);
     if (info == nullptr) {
-        ::P4C::error(ErrorType::ERR_INVALID,
-                     "%1%: table with direct meter %2% must have"
-                     " at least one action with a read method call",
-                     table, meter);
+        ::P4::error(ErrorType::ERR_INVALID,
+                    "%1%: table with direct meter %2% must have"
+                    " at least one action with a read method call",
+                    table, meter);
         return;
     }
     if (info->table != nullptr)
-        ::P4C::error(ErrorType::ERR_INVALID,
-                     "%1%: Direct meters cannot be attached to multiple tables %2% and %3%", meter,
-                     table, info->table);
+        ::P4::error(ErrorType::ERR_INVALID,
+                    "%1%: Direct meters cannot be attached to multiple tables %2% and %3%", meter,
+                    table, info->table);
     info->table = table;
 }
 /// Helper function to check if two expressions are syntactically identical.
@@ -69,10 +69,10 @@ void DirectMeterMap::setDestination(const IR::IDeclaration *meter,
     } else {
         bool same = checkSame(destination, info->destinationField);
         if (!same)
-            ::P4C::error(ErrorType::ERR_INVALID,
-                         "all meter operations must write to the same destination,"
-                         " however %1% and %2% are different",
-                         destination, info->destinationField);
+            ::P4::error(ErrorType::ERR_INVALID,
+                        "all meter operations must write to the same destination,"
+                        " however %1% and %2% are different",
+                        destination, info->destinationField);
     }
 }
 
@@ -90,4 +90,4 @@ void DirectMeterMap::setSize(const IR::IDeclaration *meter, unsigned size) {
     info->tableSize = size;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

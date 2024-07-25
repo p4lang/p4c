@@ -9,7 +9,7 @@
 #include "p4/config/v1/p4info.pb.h"
 #pragma GCC diagnostic pop
 
-namespace P4C::P4::ControlPlaneAPI {
+namespace P4::ControlPlaneAPI {
 
 const p4::config::v1::Table *findP4RuntimeTable(const p4::config::v1::P4Info &p4Info,
                                                 cstring controlPlaneName) {
@@ -277,9 +277,9 @@ std::optional<p4rt_id_t> getP4RuntimeId(const p4::config::v1::P4Info &p4Info,
         return p4RuntimeExternOpt->extern_type_id();
     }
 
-    ::P4C::error("Unsupported P4Runtime ID type");
+    ::P4::error("Unsupported P4Runtime ID type");
 
     return std::nullopt;
 }
 
-}  // namespace P4C::P4::ControlPlaneAPI
+}  // namespace P4::ControlPlaneAPI

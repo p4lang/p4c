@@ -9,7 +9,7 @@
 
 class Transform;
 
-namespace P4C::IR {
+namespace P4::IR {
 
 // Forward-declare some IR classes that are used in function declarations.
 class BoolLiteral;
@@ -128,6 +128,6 @@ const IR::Node *inlineBlock(const Transform &, std::initializer_list<const IR::S
 const IR::Node *inlineBlock(const Transform &, const IR::IndexedVector<IR::StatOrDecl> &);
 const IR::Node *inlineBlock(const Transform &, IR::IndexedVector<IR::StatOrDecl> &&);
 
-}  // namespace P4C::IR
+}  // namespace P4::IR
 
 #endif /* IR_IRUTILS_H_ */

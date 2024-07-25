@@ -5,7 +5,7 @@
 #include "ir/visitor.h"
 #include "lib/ordered_set.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
  * The purpose of this pass is to simplify the translation of the p4-16 translation of the
@@ -33,6 +33,6 @@ class SimplifyBitwise : public Transform {
     const IR::Node *preorder(IR::AssignmentStatement *as) override;
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_SIMPLIFYBITWISE_H_ */

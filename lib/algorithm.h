@@ -26,7 +26,7 @@ limitations under the License.
 #define ELEMENTS(a) (sizeof(a) / sizeof(a[0]))
 
 /* these should all be in <algorithm>, but are missing... */
-namespace P4C {
+namespace P4 {
 
 template <class C, class T>
 inline bool contains(C &c, const T &val) {
@@ -93,6 +93,6 @@ Iter end(std::pair<Iter, Iter> pr) {
     return pr.second;
 }
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_ALGORITHM_H_ */

@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::EBPF {
+namespace P4::EBPF {
 
 /// This pass rewrites expressions which are not supported natively on EBPF.
 class LowerExpressions : public Transform {
@@ -53,6 +53,6 @@ class Lower : public PassManager {
     }
 };
 
-}  // namespace P4C::EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_LOWER_H_ */

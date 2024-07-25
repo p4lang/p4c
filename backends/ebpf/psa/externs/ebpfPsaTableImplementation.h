@@ -22,7 +22,7 @@ limitations under the License.
 #include "backends/ebpf/psa/ebpfPsaTable.h"
 #include "backends/ebpf/psa/externs/ebpfPsaHashAlgorithm.h"
 
-namespace P4C::EBPF {
+namespace P4::EBPF {
 
 /// Base class for ActionProfile and ActionSelector.
 class EBPFTableImplementationPSA : public EBPFTablePSA {
@@ -109,6 +109,6 @@ class EBPFActionSelectorPSA : public EBPFTableImplementationPSA {
     DECLARE_TYPEINFO(EBPFActionSelectorPSA, EBPFTableImplementationPSA);
 };
 
-}  // namespace P4C::EBPF
+}  // namespace P4::EBPF
 
 #endif  // BACKENDS_EBPF_PSA_EXTERNS_EBPFPSATABLEIMPLEMENTATION_H_

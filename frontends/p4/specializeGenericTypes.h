@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 struct TypeSpecialization : public IHasDbPrint {
     /// Name to use for specialized type.
@@ -196,6 +196,6 @@ class RemoveGenericTypes : public Transform {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_SPECIALIZEGENERICTYPES_H_ */

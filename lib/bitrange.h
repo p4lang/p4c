@@ -28,7 +28,7 @@ limitations under the License.
 #include "exceptions.h"
 #include "hash.h"
 
-namespace P4C {
+namespace P4 {
 
 /* iterate over ranges of contiguous bits in a bitvector */
 class bitranges {
@@ -780,26 +780,26 @@ std::ostream &operator<<(std::ostream &out, const ClosedRange<Unit, Order> &rang
     return toStream(out, Unit, Order, range.lo, range.hi, true);
 }
 
-}  // namespace P4C
+}  // namespace P4
 
 // Hashing specializations
 namespace std {
-template <P4C::RangeUnit Unit, P4C::Endian Order>
-struct hash<P4C::HalfOpenRange<Unit, Order>> {
-    std::size_t operator()(const P4C::HalfOpenRange<Unit, Order> &r) const {
-        return P4C::Util::Hash{}(r.lo, r.hi);
+template <P4::RangeUnit Unit, P4::Endian Order>
+struct hash<P4::HalfOpenRange<Unit, Order>> {
+    std::size_t operator()(const P4::HalfOpenRange<Unit, Order> &r) const {
+        return P4::Util::Hash{}(r.lo, r.hi);
     }
 };
 
-template <P4C::RangeUnit Unit, P4C::Endian Order>
-struct hash<P4C::ClosedRange<Unit, Order>> {
-    std::size_t operator()(const P4C::ClosedRange<Unit, Order> &r) const {
-        return P4C::Util::Hash{}(r.lo, r.hi);
+template <P4::RangeUnit Unit, P4::Endian Order>
+struct hash<P4::ClosedRange<Unit, Order>> {
+    std::size_t operator()(const P4::ClosedRange<Unit, Order> &r) const {
+        return P4::Util::Hash{}(r.lo, r.hi);
     }
 };
 }  // namespace std
 
-namespace P4C::Util {
+namespace P4::Util {
 template <RangeUnit Unit, Endian Order>
 struct Hasher<HalfOpenRange<Unit, Order>> {
     size_t operator()(const HalfOpenRange<Unit, Order> &r) const {
@@ -811,6 +811,6 @@ template <RangeUnit Unit, Endian Order>
 struct Hasher<ClosedRange<Unit, Order>> {
     size_t operator()(const ClosedRange<Unit, Order> &r) const { return Util::Hash{}(r.lo, r.hi); }
 };
-}  // namespace P4C::Util
+}  // namespace P4::Util
 
 #endif /* LIB_BITRANGE_H_ */

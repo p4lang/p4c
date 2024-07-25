@@ -23,9 +23,9 @@
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/test/z3-solver/accessor.h"
 
-namespace P4C::Test {
+namespace P4::Test {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 using P4Tools::Model;
 using P4Tools::Z3Solver;
@@ -206,4 +206,4 @@ TEST_F(Z3SolverTest, Assertion2Model) {
 
 }  // anonymous namespace
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

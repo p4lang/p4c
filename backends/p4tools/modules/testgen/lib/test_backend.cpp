@@ -25,7 +25,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4C::P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 TestBackEnd::TestBackEnd(const ProgramInfo &programInfo,
                          const TestBackendConfiguration &testBackendConfiguration,
@@ -282,4 +282,4 @@ bool TestBackEnd::needsToTerminate(int64_t testCount) const {
     // possible.
     return maxTests != 0 && testCount >= maxTests;
 }
-}  // namespace P4C::P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen

@@ -21,7 +21,7 @@ limitations under the License.
 #include "ebpfProgram.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace P4C::EBPF {
+namespace P4::EBPF {
 
 class ActionTranslationVisitor : public virtual CodeGenInspector {
  protected:
@@ -188,6 +188,6 @@ class EBPFValueSet : public EBPFTableBase {
     DECLARE_TYPEINFO(EBPFValueSet, EBPFTableBase);
 };
 
-}  // namespace P4C::EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_EBPFTABLE_H_ */

@@ -17,7 +17,7 @@
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
-namespace P4C::P4Tools::P4Smith {
+namespace P4::P4Tools::P4Smith {
 
 IR::P4Table *TableGenerator::genTableDeclaration() {
     IR::TableProperties *tbProperties = genTablePropertyList();
@@ -156,4 +156,4 @@ IR::Property *TableGenerator::genActionListProperty() {
     return new IR::Property(name, acts, false);
 }
 
-}  // namespace P4C::P4Tools::P4Smith
+}  // namespace P4::P4Tools::P4Smith

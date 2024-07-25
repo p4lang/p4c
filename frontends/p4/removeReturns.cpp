@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/methodInstance.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 const IR::Node *DoRemoveReturns::preorder(IR::P4Action *action) {
     HasExits he;
@@ -236,4 +236,4 @@ Visitor::profile_t DoRemoveReturns::init_apply(const IR::Node *node) {
     return rv;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

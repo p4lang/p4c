@@ -20,7 +20,7 @@ limitations under the License.
 
 #include "lib/enumerator.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 const IR::Node *RemoveUnusedActionParameters::postorder(IR::P4Action *action) {
     auto params = action->parameters;
@@ -37,4 +37,4 @@ const IR::Node *RemoveUnusedActionParameters::postorder(IR::P4Action *action) {
     return action;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

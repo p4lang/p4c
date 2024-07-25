@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/sideEffects.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 bool IsValid::isSimple(const IR::Expression *expression, const Visitor::Context *) {
     if (!expression->is<IR::MethodCallExpression>()) return false;
@@ -68,7 +68,7 @@ const IR::Node *DoSimplifyKey::postorder(IR::KeyElement *element) {
 }
 
 const IR::Node *DoSimplifyKey::postorder(IR::P4Table *table) {
-    auto insertions = ::P4C::get(toInsert, getOriginal<IR::P4Table>());
+    auto insertions = ::P4::get(toInsert, getOriginal<IR::P4Table>());
     if (insertions == nullptr) return table;
 
     auto result = new IR::IndexedVector<IR::Declaration>();
@@ -94,4 +94,4 @@ const IR::Node *DoSimplifyKey::doStatement(const IR::Statement *statement,
     return block;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

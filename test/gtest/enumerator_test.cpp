@@ -21,7 +21,7 @@ limitations under the License.
 #include <exception>
 #include <vector>
 
-namespace P4C::Util {
+namespace P4::Util {
 
 class UtilEnumerator : public ::testing::Test {
  protected:
@@ -218,4 +218,4 @@ TEST_F(UtilEnumerator, Linq) {
     }
 }
 
-}  // namespace P4C::Util
+}  // namespace P4::Util

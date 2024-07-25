@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "enumInstance.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 // static
 EnumInstance *EnumInstance::resolve(const IR::Expression *expression, const P4::TypeMap *typeMap) {
@@ -37,4 +37,4 @@ EnumInstance *EnumInstance::resolve(const IR::Expression *expression, const P4::
     return nullptr;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "bitvec.h"
 
-namespace P4C {
+namespace P4 {
 
 /* A lower-triangular bit matrix, held in a bit vector */
 class LTBitMatrix : private bitvec {
@@ -114,6 +114,6 @@ inline bool operator>>(const char *p, LTBitMatrix &bm) {
     return true;
 }
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_LTBITMATRIX_H_ */

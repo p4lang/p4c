@@ -22,7 +22,7 @@ limitations under the License.
 #include "lower.h"
 #include "midend/convertEnums.h"
 
-namespace P4C::BMV2 {
+namespace P4::BMV2 {
 
 class CheckUnsupported : public Inspector {
     bool preorder(const IR::ForStatement *fs) override {
@@ -35,6 +35,6 @@ class CheckUnsupported : public Inspector {
     }
 };
 
-}  // namespace P4C::BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_CHECK_UNSUPPORTED_H_ */

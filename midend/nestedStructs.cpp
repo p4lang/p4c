@@ -2,7 +2,7 @@
 
 #include "frontends/p4/methodInstance.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 using namespace literals;
 
@@ -90,7 +90,7 @@ const IR::Node *RemoveNestedStructs::postorder(IR::MethodCallExpression *express
     for (auto p : mi->getActualParameters()->parameters) {
         if (!p->hasOut()) continue;
         if (values->isNestedStruct(p->type)) {
-            ::P4C::error(
+            ::P4::error(
                 ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "%1%: extern functions with 'out' nested struct argument (%2%) not supported",
                 expression, p);
@@ -113,4 +113,4 @@ const IR::Node *RemoveNestedStructs::postorder(IR::PathExpression *expression) {
     return list;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

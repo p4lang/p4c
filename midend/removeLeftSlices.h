@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
  * This pass removes Slices on the lhs of an assignment
@@ -52,6 +52,6 @@ class RemoveLeftSlices : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_REMOVELEFTSLICES_H_ */

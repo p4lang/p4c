@@ -20,7 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /*
  * find switch statements that do not cover all possible cases in their case list (no
@@ -32,6 +32,6 @@ class SwitchAddDefault : public Modifier {
     void postorder(IR::SwitchStatement *) override;
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_SWITCHADDDEFAULT_H_ */

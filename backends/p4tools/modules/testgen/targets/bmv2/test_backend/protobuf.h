@@ -16,7 +16,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/common.h"
 
-namespace P4C::P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 using P4::ControlPlaneAPI::p4rt_id_t;
 
@@ -90,6 +90,6 @@ class Protobuf : public Bmv2TestFramework {
                                                      const std::vector<ActionArg> &args) const;
 };
 
-}  // namespace P4C::P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_PROTOBUF_H_ */

@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfObject.h"
 #include "ebpfPsaHashAlgorithm.h"
 
-namespace P4C::EBPF {
+namespace P4::EBPF {
 
 class EBPFChecksumPSA : public EBPFObject {
  protected:
@@ -70,6 +70,6 @@ class EBPFHashPSA : public EBPFChecksumPSA {
                        Visitor *visitor);
 };
 
-}  // namespace P4C::EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EXTERNS_EBPFPSACHECKSUM_H_ */

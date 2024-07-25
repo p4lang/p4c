@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/error.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
  * Checks that match annotations only have 1 argument which is of type match_kind.
@@ -37,16 +37,16 @@ class ValidateMatchAnnotations final : public Inspector {
         if (annotation->name != IR::Annotation::matchAnnotation) return;
         if (!findContext<IR::StructField>()) return;
         if (annotation->expr.size() != 1)
-            ::P4C::error(ErrorType::ERR_INVALID, "%1%: annotation must have exactly 1 argument",
-                         annotation);
+            ::P4::error(ErrorType::ERR_INVALID, "%1%: annotation must have exactly 1 argument",
+                        annotation);
         auto e0 = annotation->expr.at(0);
         auto type = typeMap->getType(e0, true);
         if (type == nullptr) return;
         if (!type->is<IR::Type_MatchKind>())
-            ::P4C::error(ErrorType::ERR_TYPE_ERROR, "%1%: value must be a match_kind", e0);
+            ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: value must be a match_kind", e0);
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* P4_VALIDATEMATCHANNOTATIONS_H_ */

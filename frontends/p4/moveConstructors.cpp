@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "moveConstructors.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 MoveConstructors::MoveConstructors() : convert(Region::Outside) { setName("MoveConstructors"); }
 
@@ -125,4 +125,4 @@ const IR::Node *MoveConstructors::postorder(IR::ConstructorCallExpression *expre
     return tmpref;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

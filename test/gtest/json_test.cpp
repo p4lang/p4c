@@ -20,7 +20,7 @@ limitations under the License.
 
 #include <sstream>
 
-namespace P4C::Util {
+namespace P4::Util {
 
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
 static cstring getNumStringRepr(T v) {
@@ -72,4 +72,4 @@ TEST(Util, Json) {
               obj->toString());
 }
 
-}  // namespace P4C::Util
+}  // namespace P4::Util

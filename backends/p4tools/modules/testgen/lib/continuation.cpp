@@ -9,7 +9,7 @@
 #include "ir/visitor.h"
 #include "lib/exceptions.h"
 
-namespace P4C::P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 Continuation::Return::Return(const IR::Node *expr) : expr(expr) {}
 
@@ -169,4 +169,4 @@ const Continuation::Parameter *Continuation::genParameter(const IR::Type *type, 
     return new Parameter(new IR::PathExpression(type, new IR::Path(varName)));
 }
 
-}  // namespace P4C::P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen

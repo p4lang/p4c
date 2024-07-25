@@ -6,7 +6,7 @@
 #include "ir/ir.h"
 #include "p4RuntimeSymbolTable.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 class MissingIdAssigner : public Transform {
     /// The reference map. This is needed to identify the correct references for
@@ -59,6 +59,6 @@ class AddMissingIdAnnotations final : public PassManager {
                             const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface *archBuilder);
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* CONTROL_PLANE_ADDMISSINGIDS_H_ */

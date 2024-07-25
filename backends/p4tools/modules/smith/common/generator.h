@@ -3,7 +3,7 @@
 
 #include <functional>
 
-namespace P4C::P4Tools::P4Smith {
+namespace P4::P4Tools::P4Smith {
 
 class SmithTarget;
 
@@ -15,6 +15,6 @@ class Generator {
 
     const SmithTarget &target() { return _target; }
 };
-}  // namespace P4C::P4Tools::P4Smith
+}  // namespace P4::P4Tools::P4Smith
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_COMMON_GENERATOR_H_ */

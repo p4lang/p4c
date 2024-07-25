@@ -3,7 +3,7 @@
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"
 
-namespace P4C::P4Tools {
+namespace P4::P4Tools {
 
 namespace ControlPlaneState {
 
@@ -62,4 +62,4 @@ std::pair<const IR::SymbolicVariable *, const IR::SymbolicVariable *> getTableRa
 
 }  // namespace Bmv2ControlPlaneState
 
-}  // namespace P4C::P4Tools
+}  // namespace P4::P4Tools

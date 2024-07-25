@@ -13,7 +13,7 @@
 #include "backends/p4tools/modules/testgen/register.h"
 #include "backends/p4tools/modules/testgen/toolname.h"
 
-namespace P4C::Test {
+namespace P4::Test {
 
 P4ToolsTestCase::P4ToolsTestCase(const P4Tools::CompilerResult &compilerResults)
     : compilerResults(compilerResults) {}
@@ -74,4 +74,4 @@ const IR::SymbolicVariable *SymbolicConverter::preorder(IR::Member *member) {
     return P4Tools::ToolsVariables::getSymbolicVariable(member->type, member->toString());
 }
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

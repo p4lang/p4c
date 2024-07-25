@@ -17,7 +17,7 @@ and limitations under the License.
 #ifndef BACKENDS_TC_TC_DEFINES_H_
 #define BACKENDS_TC_TC_DEFINES_H_
 
-namespace P4C::TC {
+namespace P4::TC {
 
 inline constexpr auto DEFAULT_TABLE_ENTRIES = 1024;
 inline constexpr auto DEFAULT_KEY_MASK = 8;
@@ -91,6 +91,6 @@ inline constexpr auto NONE = 0;
 inline constexpr auto IN = 1;
 inline constexpr auto OUT = 2;
 inline constexpr auto INOUT = 3;
-}  // namespace P4C::TC
+}  // namespace P4::TC
 
 #endif /* BACKENDS_TC_TC_DEFINES_H_ */

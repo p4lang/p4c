@@ -22,7 +22,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /** @brief Remove unreachable parser states, and collapse simple chains of
  * states.
@@ -58,6 +58,6 @@ class SimplifyParsers : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_SIMPLIFYPARSERS_H_ */

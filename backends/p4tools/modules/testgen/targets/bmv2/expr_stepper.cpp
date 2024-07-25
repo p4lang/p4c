@@ -40,7 +40,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/table_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4C::P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 std::string Bmv2V1ModelExprStepper::getClassName() { return "Bmv2V1ModelExprStepper"; }
 
@@ -777,7 +777,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              const IR::StateVariable &meterResult =
                  ToolsVariables::convertReference(externInfo.externArguments.at(1)->expression);
              if (testBackend != "PTF") {
-                 ::P4C::warning(
+                 ::P4::warning(
                      "meter.execute_meter not implemented for %1%. Choosing default value (GREEN).",
                      testBackend);
                  auto &nextState = stepper.state.clone();
@@ -886,7 +886,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              // configuring the extern. We just set the default value (green).
              auto testBackend = TestgenOptions::get().testBackend;
              if (testBackend != "PTF" || tableEntry == nullptr) {
-                 ::P4C::warning(
+                 ::P4::warning(
                      "direct_meter.read configuration not possible for %1%. Choosing default value "
                      "(GREEN).",
                      testBackend);
@@ -966,7 +966,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
         {"*method.digest"_cs,
          {"receiver"_cs, "data"_cs},
          [](const ExternInfo & /*externInfo*/, Bmv2V1ModelExprStepper &stepper) {
-             ::P4C::warning("digest not fully implemented.");
+             ::P4::warning("digest not fully implemented.");
              auto &nextState = stepper.state.clone();
              nextState.popBody();
              stepper.result->emplace_back(nextState);
@@ -1016,8 +1016,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              if (stepper.state.hasProperty("recirculate_count"_cs)) {
                  if (stepper.state.getProperty<uint64_t>("recirculate_count"_cs) > 0) {
                      auto &nextState = stepper.state.clone();
-                     ::P4C::warning(
-                         "Only single recirculation supported for now. Dropping packet.");
+                     ::P4::warning("Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState.replaceTopBody(dropStmt);
@@ -1032,7 +1031,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              }
              // If any of the input arguments is tainted, the entire extern is unreliable.
              if (argsAreTainted) {
-                 ::P4C::warning(
+                 ::P4::warning(
                      "clone args are tainted and not predictable. Skipping clone execution.");
                  auto &nextState = stepper.state.clone();
                  nextState.popBody();
@@ -1105,7 +1104,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              if (stepper.state.hasProperty("recirculate_count"_cs)) {
                  recirculateCount = stepper.state.getProperty<uint64_t>("recirculate_count"_cs);
                  if (recirculateCount > 0) {
-                     ::P4C::warning("Only single resubmit supported for now. Dropping packet.");
+                     ::P4::warning("Only single resubmit supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState.replaceTopBody(dropStmt);
@@ -1166,8 +1165,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              if (stepper.state.hasProperty("recirculate_count"_cs)) {
                  recirculateCount = stepper.state.getProperty<uint64_t>("recirculate_count"_cs);
                  if (recirculateCount > 0) {
-                     ::P4C::warning(
-                         "Only single recirculation supported for now. Dropping packet.");
+                     ::P4::warning("Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState.replaceTopBody(dropStmt);
@@ -1210,8 +1208,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              if (stepper.state.hasProperty("recirculate_count"_cs)) {
                  if (stepper.state.getProperty<uint64_t>("recirculate_count"_cs) > 0) {
                      auto &nextState = stepper.state.clone();
-                     ::P4C::warning(
-                         "Only single recirculation supported for now. Dropping packet.");
+                     ::P4::warning("Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState.replaceTopBody(dropStmt);
@@ -1226,7 +1223,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              }
              // If any of the input arguments is tainted, the entire extern is unreliable.
              if (argsAreTainted) {
-                 ::P4C::warning(
+                 ::P4::warning(
                      "clone args are tainted and not predictable. Skipping clone execution.");
                  auto &nextState = stepper.state.clone();
                  nextState.popBody();
@@ -1649,4 +1646,4 @@ bool Bmv2V1ModelExprStepper::preorder(const IR::P4Table *table) {
     return tableStepper.eval();
 }
 
-}  // namespace P4C::P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2

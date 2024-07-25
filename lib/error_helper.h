@@ -24,7 +24,7 @@ limitations under the License.
 #include "lib/source_file.h"
 #include "lib/stringify.h"
 
-namespace P4C {
+namespace P4 {
 namespace priv {
 
 // All these methods return std::string because this is the native format of boost::format
@@ -106,6 +106,6 @@ ErrorMessage error_helper(boost::format &f, const std::string &prefix, const Uti
     return priv::error_helper(f, ErrorMessage(prefix, info, suffix), std::forward<Args>(args)...);
 }
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_ERROR_HELPER_H_ */

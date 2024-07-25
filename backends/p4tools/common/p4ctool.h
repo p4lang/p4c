@@ -9,7 +9,7 @@
 #include "backends/p4tools/common/lib/logging.h"
 #include "backends/p4tools/common/options.h"
 
-namespace P4C::P4Tools {
+namespace P4::P4Tools {
 
 /// Abstract class for all compiler-based tools. Implementations should instantiate this template
 /// on a subclass of AbstractP4cToolOptions.
@@ -62,6 +62,6 @@ class AbstractP4cTool {
     }
 };
 
-}  // namespace P4C::P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_P4CTOOL_H_ */

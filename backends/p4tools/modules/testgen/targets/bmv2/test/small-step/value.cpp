@@ -8,7 +8,7 @@
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/test/small-step/util.h"
 
-namespace P4C::Test {
+namespace P4::Test {
 
 using SmallStepUtil::createSmallStepExprTest;
 using SmallStepUtil::extractExpr;
@@ -42,4 +42,4 @@ TEST_F(SmallStepTest, Value02) {
 
 }  // anonymous namespace
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

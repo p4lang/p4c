@@ -18,9 +18,9 @@ limitations under the License.
 
 #include "dpdkUtils.h"
 
-namespace P4C::DPDK {
+namespace P4::DPDK {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 /// Make sure new decls and fields name are unique.
 void DirectionToRegRead::uniqueNames(IR::DpdkAsmProgram *p) {
@@ -32,8 +32,8 @@ void DirectionToRegRead::uniqueNames(IR::DpdkAsmProgram *p) {
     }
 
     if (usedNames.count(registerInstanceName))
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "decl name %s is reserved for dpdk pna",
-                     registerInstanceName);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "decl name %s is reserved for dpdk pna",
+                    registerInstanceName);
 }
 
 const IR::Node *DirectionToRegRead::preorder(IR::DpdkAsmProgram *p) {
@@ -137,4 +137,4 @@ IR::IndexedVector<IR::DpdkAsmStatement> PrependPassRecircId::prependPassWithReci
     return newStmts;
 }
 
-}  // namespace P4C::DPDK
+}  // namespace P4::DPDK

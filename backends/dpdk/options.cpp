@@ -3,9 +3,9 @@
 #include "frontends/common/parser_options.h"
 #include "lib/exename.h"
 
-namespace P4C::DPDK {
+namespace P4::DPDK {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 std::vector<const char *> *DpdkOptions::process(int argc, char *const argv[]) {
     searchForIncludePath(p4includePath,
@@ -28,4 +28,4 @@ const char *DpdkOptions::getIncludePath() const {
     return path.c_str();
 }
 
-}  // namespace P4C::DPDK
+}  // namespace P4::DPDK

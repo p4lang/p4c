@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /// This simple visitor copies the specified source information
 /// to the root node of the IR tree that it is invoked on.
@@ -37,6 +37,6 @@ class CopySrcInfo : public Transform {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif  // FRONTENDS_COMMON_COPYSRCINFO_H_

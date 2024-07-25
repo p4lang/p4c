@@ -30,7 +30,7 @@ limitations under the License.
 // This only works correctly after local variable initializers have been removed,
 // and after the SideEffectOrdering pass has been executed.
 
-namespace P4C::P4 {
+namespace P4 {
 
 /// Describes information about a caller-callee pair
 struct CallInfo : public IHasDbPrint {
@@ -70,13 +70,13 @@ class SymRenameMap {
     cstring getName(const IR::IDeclaration *decl) const {
         CHECK_NULL(decl);
         BUG_CHECK(internalName.find(decl) != internalName.end(), "%1%: no new name", decl);
-        auto result = ::P4C::get(internalName, decl);
+        auto result = ::P4::get(internalName, decl);
         return result;
     }
     cstring getExtName(const IR::IDeclaration *decl) const {
         CHECK_NULL(decl);
         BUG_CHECK(externalName.find(decl) != externalName.end(), "%1%: no external name", decl);
-        auto result = ::P4C::get(externalName, decl);
+        auto result = ::P4::get(externalName, decl);
         return result;
     }
     bool isRenamed(const IR::IDeclaration *decl) const {
@@ -466,6 +466,6 @@ class Inline : public PassRepeated {
     static bool isAnnotationNoPropagate(cstring name) { return noPropagateAnnotations.count(name); }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_INLINING_H_ */

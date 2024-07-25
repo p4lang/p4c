@@ -22,7 +22,7 @@ limitations under the License.
 #include "ir/visitor.h"
 #include "lib/ordered_map.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
  * This pass converts constructor call expressions that appear
@@ -84,6 +84,6 @@ class MoveConstructors : public Transform {
     const IR::Node *postorder(IR::ConstructorCallExpression *expression) override;
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_MOVECONSTRUCTORS_H_ */

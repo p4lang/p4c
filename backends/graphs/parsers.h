@@ -25,7 +25,7 @@
 #include "lib/nullstream.h"
 #include "lib/safe_vector.h"
 
-namespace P4C::graphs {
+namespace P4::graphs {
 
 class ParserGraphs : public Graphs {
  protected:
@@ -58,6 +58,6 @@ class ParserGraphs : public Graphs {
     std::optional<cstring> instanceName{};
 };
 
-}  // namespace P4C::graphs
+}  // namespace P4::graphs
 
 #endif /* BACKENDS_GRAPHS_PARSERS_H_ */

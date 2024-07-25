@@ -21,10 +21,10 @@ limitations under the License.
 
 #include "lib/cstring.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 extern const std::set<cstring> reservedWords;
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* P4_RESERVEDWORDS_H_ */

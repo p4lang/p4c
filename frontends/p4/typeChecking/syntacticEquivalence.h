@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 // Check if two expressions are syntactically equivalent
 class SameExpression {
@@ -42,6 +42,6 @@ class SameExpression {
                          const IR::Vector<IR::Argument> *right) const;
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* TYPECHECKING_SYNTACTICEQUIVALENCE_H_ */

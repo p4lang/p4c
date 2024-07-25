@@ -16,9 +16,9 @@ limitations under the License.
 
 #include "header_type.h"
 
-namespace P4C {
+namespace P4 {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 bool HeaderTypeMaxLengthCalculator::preorder(IR::Type_StructLike *hdr_type) {
     IR::Annotations *annot = nullptr;
@@ -40,4 +40,4 @@ bool HeaderTypeMaxLengthCalculator::preorder(IR::Type_StructLike *hdr_type) {
     return false;
 }
 
-}  // namespace P4C
+}  // namespace P4

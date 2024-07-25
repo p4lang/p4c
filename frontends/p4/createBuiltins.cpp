@@ -20,15 +20,15 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/error.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 const IR::Node *CreateBuiltins::preorder(IR::P4Program *program) {
     auto decls = program->getDeclsByName(P4::P4CoreLibrary::instance().noAction.toString());
     auto vec = decls->toVector();
     if (vec.empty()) return program;
     if (vec.size() > 1) {
-        ::P4C::error(ErrorType::ERR_MODEL, "Multiple declarations of %1%: %2% %3%",
-                     P4::P4CoreLibrary::instance().noAction.str(), vec[0], vec[1]);
+        ::P4::error(ErrorType::ERR_MODEL, "Multiple declarations of %1%: %2% %3%",
+                    P4::P4CoreLibrary::instance().noAction.str(), vec[0], vec[1]);
     }
     globalNoAction = vec[0];
     return program;
@@ -44,27 +44,27 @@ void CreateBuiltins::checkGlobalAction() {
     if (checked) return;
     checked = true;
     if (globalNoAction == nullptr) {
-        ::P4C::error(ErrorType::ERR_MODEL,
-                     "Declaration of the action %1% not found; did you include core.p4?",
-                     P4::P4CoreLibrary::instance().noAction.str());
+        ::P4::error(ErrorType::ERR_MODEL,
+                    "Declaration of the action %1% not found; did you include core.p4?",
+                    P4::P4CoreLibrary::instance().noAction.str());
         return;
     }
     if (auto action = globalNoAction->to<IR::P4Action>()) {
         if (!action->parameters->empty()) {
-            ::P4C::error(ErrorType::ERR_MODEL,
-                         "%1%: Expected an action with no parameters; did you include core.p4?",
-                         globalNoAction);
+            ::P4::error(ErrorType::ERR_MODEL,
+                        "%1%: Expected an action with no parameters; did you include core.p4?",
+                        globalNoAction);
             return;
         }
         if (!action->body->empty()) {
-            ::P4C::error(ErrorType::ERR_MODEL,
-                         "%1%: Expected an action with no body; did you include core.p4?",
-                         globalNoAction);
+            ::P4::error(ErrorType::ERR_MODEL,
+                        "%1%: Expected an action with no body; did you include core.p4?",
+                        globalNoAction);
             return;
         }
     } else {
-        ::P4C::error(ErrorType::ERR_MODEL,
-                     "%1%: expected to be an action; did you include core.p4?", globalNoAction);
+        ::P4::error(ErrorType::ERR_MODEL, "%1%: expected to be an action; did you include core.p4?",
+                    globalNoAction);
         return;
     }
 }
@@ -142,7 +142,7 @@ const IR::Node *CreateBuiltins::postorder(IR::Property *property) {
     if (auto key = property->value->to<IR::Key>()) {
         if (key->keyElements.size() == 0) return nullptr;
     } else {
-        ::P4C::error(ErrorType::ERR_INVALID, "%1%: must be a key", property->value);
+        ::P4::error(ErrorType::ERR_INVALID, "%1%: must be a key", property->value);
         return nullptr;
     }
     return property;
@@ -162,4 +162,4 @@ const IR::Node *CreateBuiltins::postorder(IR::TableProperties *properties) {
     return properties;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

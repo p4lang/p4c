@@ -14,7 +14,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4C::P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 DepthFirstSearch::DepthFirstSearch(AbstractSolver &solver, const ProgramInfo &programInfo)
     : SymbolicExecutor(solver, programInfo) {}
@@ -67,7 +67,7 @@ void DepthFirstSearch::runImpl(const Callback &callBack, ExecutionStateReference
                 throw;
             }
             // Otherwise we try to roll back as we typically do.
-            ::P4C::warning("Path encountered unimplemented feature. Message: %1%\n", e.what());
+            ::P4::warning("Path encountered unimplemented feature. Message: %1%\n", e.what());
         }
 
         // Roll back to a previous branch and continue execution from there, but if there are no
@@ -84,4 +84,4 @@ void DepthFirstSearch::runImpl(const Callback &callBack, ExecutionStateReference
     }
 }
 
-}  // namespace P4C::P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen

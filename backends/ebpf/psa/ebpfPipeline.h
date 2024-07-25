@@ -22,7 +22,7 @@ limitations under the License.
 #include "ebpfPsaControl.h"
 #include "ebpfPsaDeparser.h"
 
-namespace P4C::EBPF {
+namespace P4::EBPF {
 
 /// EBPFPipeline represents a single eBPF program in the TC/XDP hook.
 class EBPFPipeline : public EBPFProgram {
@@ -279,6 +279,6 @@ class TCTrafficManagerForXDP : public TCIngressPipeline {
     DECLARE_TYPEINFO(TCTrafficManagerForXDP, TCIngressPipeline);
 };
 
-}  // namespace P4C::EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EBPFPIPELINE_H_ */

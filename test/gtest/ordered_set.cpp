@@ -20,7 +20,7 @@ limitations under the License.
 
 #include <algorithm>
 
-namespace P4C::Test {
+namespace P4::Test {
 
 TEST(ordered_set, set_equal) {
     ordered_set<unsigned> a;
@@ -133,4 +133,4 @@ TEST(ordered_set, x_is_strict_prefix_of_y) {
     EXPECT_FALSE(y < x);
 }
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

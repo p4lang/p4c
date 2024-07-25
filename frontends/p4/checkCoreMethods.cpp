@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 void DoCheckCoreMethods::checkEmitType(const IR::Expression *emit, const IR::Type *type) const {
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() ||
@@ -127,4 +127,4 @@ void DoCheckCoreMethods::postorder(const IR::MethodCallExpression *expression) {
     }
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

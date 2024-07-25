@@ -21,18 +21,18 @@ limitations under the License.
 
 #include "lib/source_file.h"
 
-namespace P4C {
+namespace P4 {
 
 /**
  *  Structure populated via error_helper functions
  *
- *  Typically, calls to ::P4C::error/::P4C::warning have many parameters, some of them
- *  might have SourceInfo attribute. ::P4C::error_helper parse those parameters, format
+ *  Typically, calls to ::P4::error/::P4::warning have many parameters, some of them
+ *  might have SourceInfo attribute. ::P4::error_helper parse those parameters, format
  *  parameters to output message and extracts SourceInfo wherever possible.
  *
  *  Populated structure can be serialized to canonical error message with toString() method.
  *
- *  This structure is mainly used inside ErrorReporter, but some uses invoke ::P4C::error_helper
+ *  This structure is mainly used inside ErrorReporter, but some uses invoke ::P4::error_helper
  *  directly and those uses need to call toString() on returned object.
  */
 struct ErrorMessage {
@@ -77,6 +77,6 @@ struct ParserErrorMessage {
     std::string toString() const;
 };
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_ERROR_MESSAGE_H_ */

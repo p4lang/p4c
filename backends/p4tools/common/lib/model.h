@@ -11,7 +11,7 @@
 #include "ir/solver.h"
 #include "ir/visitor.h"
 
-namespace P4C::P4Tools {
+namespace P4::P4Tools {
 
 /// Symbolic maps map a state variable to a IR::Expression.
 using SymbolicMapType = boost::container::flat_map<IR::StateVariable, const IR::Expression *>;
@@ -94,6 +94,6 @@ class Model {
     [[nodiscard]] const SymbolicMapping &getSymbolicMap() const;
 };
 
-}  // namespace P4C::P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_MODEL_H_ */

@@ -10,7 +10,7 @@
 
 #include "lib/log.h"
 
-namespace P4C::P4Tools {
+namespace P4::P4Tools {
 
 /// Helper function for @printFeature
 inline std::string logHelper(boost::format &f) { return f.str(); }
@@ -61,6 +61,6 @@ void enablePerformanceLogging();
 /// If a file is provided, it will be written to the file.
 void printPerformanceReport(const std::optional<std::filesystem::path> &basePath = std::nullopt);
 
-}  // namespace P4C::P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_LOGGING_H_ */

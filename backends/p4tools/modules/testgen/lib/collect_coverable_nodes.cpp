@@ -15,7 +15,7 @@
 
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4C::P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 bool CoverableNodesScanner::preorder(const IR::ParserState *parserState) {
     // Already have seen this executionState. We might be in a loop.
@@ -155,4 +155,4 @@ void CoverableNodesScanner::updateNodeCoverage(const IR::Node *node,
 
 CoverableNodesScanner::CoverableNodesScanner(const ExecutionState &state)
     : state(state), coverageOptions(TestgenOptions::get().coverageOptions) {}
-}  // namespace P4C::P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen

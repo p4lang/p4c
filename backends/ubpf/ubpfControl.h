@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfControl.h"
 #include "ubpfRegister.h"
 
-namespace P4C::UBPF {
+namespace P4::UBPF {
 
 class UBPFControl;
 
@@ -81,13 +81,13 @@ class UBPFControl : public EBPF::EBPFControl {
     bool build();
 
     UBPFTable *getTable(cstring name) const {
-        auto result = ::P4C::get(tables, name);
+        auto result = ::P4::get(tables, name);
         BUG_CHECK(result != nullptr, "No table named %1%", name);
         return result;
     }
 
     UBPFRegister *getRegister(cstring name) const {
-        auto result = ::P4C::get(registers, name);
+        auto result = ::P4::get(registers, name);
         BUG_CHECK(result != nullptr, "No register named %1%", name);
         return result;
     }
@@ -96,6 +96,6 @@ class UBPFControl : public EBPF::EBPFControl {
     void scanConstants();
 };
 
-}  // namespace P4C::UBPF
+}  // namespace P4::UBPF
 
 #endif /* BACKENDS_UBPF_UBPFCONTROL_H_ */

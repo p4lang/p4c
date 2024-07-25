@@ -16,7 +16,7 @@
 #include "backends/p4tools/modules/testgen/targets/pna/concolic.h"
 #include "backends/p4tools/modules/testgen/targets/pna/constants.h"
 
-namespace P4C::P4Tools::P4Testgen::Pna {
+namespace P4::P4Tools::P4Testgen::Pna {
 
 const IR::Type_Bits SharedPnaProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
 
@@ -69,4 +69,4 @@ const IR::PathExpression *SharedPnaProgramInfo::getBlockParam(cstring blockLabel
     return new IR::PathExpression(paramType, new IR::Path(archRef));
 }
 
-}  // namespace P4C::P4Tools::P4Testgen::Pna
+}  // namespace P4::P4Tools::P4Testgen::Pna

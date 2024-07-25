@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 /**
 Assigning a list expression to a header should also
 set the header validity bit.  For example, given:
@@ -69,6 +69,6 @@ class SetHeaders final : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_SETHEADERS_H_ */

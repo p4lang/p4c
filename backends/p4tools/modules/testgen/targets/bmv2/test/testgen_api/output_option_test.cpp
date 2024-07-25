@@ -7,9 +7,9 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf_ir.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace P4C::Test {
+namespace P4::Test {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 TEST(P4TestgenOutputOptionTest, GenerateOuputsCorrectly) {
     std::stringstream streamTest;
@@ -102,4 +102,4 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
     }
 }
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

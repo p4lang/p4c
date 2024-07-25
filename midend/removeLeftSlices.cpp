@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "removeLeftSlices.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 const IR::Node *DoRemoveLeftSlices::postorder(IR::AssignmentStatement *stat) {
     if (!stat->left->is<IR::Slice>()) return stat;
@@ -41,4 +41,4 @@ const IR::Node *DoRemoveLeftSlices::postorder(IR::AssignmentStatement *stat) {
     return result;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

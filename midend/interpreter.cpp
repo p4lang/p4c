@@ -5,7 +5,7 @@
 #include "frontends/p4/methodInstance.h"
 #include "lib/exceptions.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 unsigned SymbolicValue::crtid = 0;
 
@@ -1141,7 +1141,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
                 BUG_CHECK(hdr->is<SymbolicHeader>(), "%1%: Not a header?", hdr);
                 auto sh = hdr->to<SymbolicHeader>();
                 if (sh->valid->isKnown() && sh->valid->value) {
-                    ::P4C::warning(
+                    ::P4::warning(
                         ErrorType::WARN_MULTI_HDR_EXTRACT,
                         "%1%: Performing an extraction more than once on the same header will "
                         "nearly always cause all but the last extracted header to be deleted "
@@ -1192,4 +1192,4 @@ SymbolicValue *ExpressionEvaluator::evaluate(const IR::Expression *expression, b
     auto result = get(expression);
     return result;
 }
-}  // namespace P4C::P4
+}  // namespace P4

@@ -10,7 +10,7 @@
 #include "lib/exceptions.h"
 #include "lib/map.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 const IR::Node *DoConvertErrors::preorder(IR::Type_Error *type) {
     bool convert = policy->convert(type);
@@ -42,7 +42,7 @@ const IR::Node *DoConvertErrors::postorder(IR::Type_Name *type) {
         return type;
     }
     auto errorType = canontype->to<IR::Type_Error>()->name;
-    auto *r = ::P4C::get(repr, errorType);
+    auto *r = ::P4::get(repr, errorType);
     if (r == nullptr) {
         return type;
     }
@@ -54,7 +54,7 @@ const IR::Node *DoConvertErrors::postorder(IR::Member *member) {
     if (!typeErr) {
         return member;
     }
-    auto *r = ::P4C::get(repr, typeErr->name);
+    auto *r = ::P4::get(repr, typeErr->name);
     CHECK_NULL(r);
     if (!member->expr->is<IR::TypeNameExpression>()) {
         // variable
@@ -78,4 +78,4 @@ IR::IndexedVector<IR::SerEnumMember> *ChooseErrorRepresentation::assignValues(
     return members;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

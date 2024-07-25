@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ebpfControl.h"
 
-namespace P4C::EBPF {
+namespace P4::EBPF {
 
 class EBPFDeparser;
 
@@ -91,6 +91,6 @@ class EBPFDeparser : public EBPFControl {
     DECLARE_TYPEINFO(EBPFDeparser, EBPFControl);
 };
 
-}  // namespace P4C::EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_EBPFDEPARSER_H_ */

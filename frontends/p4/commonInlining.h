@@ -31,7 +31,7 @@ limitations under the License.
   Inlining these is simpler than inlining controls and parsers
 */
 
-namespace P4C::P4 {
+namespace P4 {
 
 using namespace literals;
 
@@ -194,7 +194,7 @@ class InlineDriver : public Visitor {
             LOG2("Processing " << todo);
             inliner->prepare(toInline, todo);
             program = program->apply(*inliner);
-            if (::P4C::errorCount() > 0) break;
+            if (::P4::errorCount() > 0) break;
 
 #if DEBUG_INLINER
             // debugging code; we don't have an easy way to dump the program here,
@@ -207,6 +207,6 @@ class InlineDriver : public Visitor {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_COMMONINLINING_H_ */

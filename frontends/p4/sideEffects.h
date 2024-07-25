@@ -25,7 +25,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /// Checks to see whether an IR node includes a table.apply() sub-expression
 class HasTableApply : public Inspector, public ResolutionContext {
@@ -381,8 +381,8 @@ class TablesInActions : public Inspector {
             hta.setCalledBy(this);
             (void)expression->apply(hta, getContext());
             if (hta.table != nullptr) {
-                ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1%: table invocation in action argument",
-                             expression);
+                ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1%: table invocation in action argument",
+                            expression);
             }
         }
     }
@@ -413,6 +413,6 @@ class SideEffectOrdering : public PassRepeated {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_SIDEEFFECTS_H_ */

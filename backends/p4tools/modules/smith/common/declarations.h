@@ -8,7 +8,7 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace P4C::P4Tools::P4Smith {
+namespace P4::P4Tools::P4Smith {
 
 class DeclarationGenerator : public Generator {
  public:
@@ -81,6 +81,6 @@ class DeclarationGenerator : public Generator {
     virtual IR::ParameterList *genParameterList();
 };
 
-}  // namespace P4C::P4Tools::P4Smith
+}  // namespace P4::P4Tools::P4Smith
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_COMMON_DECLARATIONS_H_ */

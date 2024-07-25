@@ -24,7 +24,7 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4C::P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 AbstractStepper::AbstractStepper(ExecutionState &state, AbstractSolver &solver,
                                  const ProgramInfo &programInfo)
@@ -388,4 +388,4 @@ void AbstractStepper::declareBaseType(ExecutionState &nextState, const IR::State
     nextState.set(paramPath, programInfo.createTargetUninitialized(baseType, false));
 }
 
-}  // namespace P4C::P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen

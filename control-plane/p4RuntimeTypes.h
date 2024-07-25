@@ -17,11 +17,11 @@ limitations under the License.
 #ifndef CONTROL_PLANE_P4RUNTIMETYPES_H_
 #define CONTROL_PLANE_P4RUNTIMETYPES_H_
 
-namespace P4C::P4 {
+namespace P4 {
 
 /// P4Runtime serialization formats.
 enum class P4RuntimeFormat { BINARY, JSON, TEXT, TEXT_PROTOBUF };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* CONTROL_PLANE_P4RUNTIMETYPES_H_ */

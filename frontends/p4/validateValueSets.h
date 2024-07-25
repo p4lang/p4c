@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/error.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
  * Checks that match annotations only have 1 argument which is of type match_kind.
@@ -31,12 +31,12 @@ class ValidateValueSets final : public Inspector {
     ValidateValueSets() { setName("ValidateValueSets"); }
     void postorder(const IR::P4ValueSet *valueSet) override {
         if (!valueSet->size->is<IR::Constant>()) {
-            ::P4C::error(ErrorType::ERR_EXPECTED, "%1%: value_set size must be constant",
-                         valueSet->size);
+            ::P4::error(ErrorType::ERR_EXPECTED, "%1%: value_set size must be constant",
+                        valueSet->size);
         }
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* P4_VALIDATEVALUESETS_H_ */

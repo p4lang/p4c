@@ -6,7 +6,7 @@
 
 #include "lib/cstring.h"
 
-namespace P4C::P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 /// A file path which may not be set.
 using OptionalFilePath = std::optional<std::filesystem::path>;
@@ -28,6 +28,6 @@ struct TestBackendConfiguration {
     std::optional<unsigned int> seed;
 };
 
-}  // namespace P4C::P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_BACKEND_CONFIGURATION_H_ */

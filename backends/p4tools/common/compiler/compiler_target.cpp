@@ -16,7 +16,7 @@
 #include "lib/compile_context.h"
 #include "lib/error.h"
 
-namespace P4C::P4Tools {
+namespace P4::P4Tools {
 
 ICompileContext *CompilerTarget::makeContext(std::string_view toolName) {
     return get(toolName).makeContextImpl();
@@ -71,14 +71,14 @@ ICompileContext *CompilerTarget::makeContextImpl() const {
 
 std::vector<const char *> *CompilerTarget::initCompilerImpl(int argc, char **argv) const {
     auto *result = P4CContext::get().options().process(argc, argv);
-    return ::P4C::errorCount() > 0 ? nullptr : result;
+    return ::P4::errorCount() > 0 ? nullptr : result;
 }
 
 const IR::P4Program *CompilerTarget::runParser() {
     auto &options = P4CContext::get().options();
 
     const auto *program = P4::parseP4File(options);
-    if (::P4C::errorCount() > 0) {
+    if (::P4::errorCount() > 0) {
         return nullptr;
     }
     return program;
@@ -94,7 +94,7 @@ const IR::P4Program *CompilerTarget::runFrontend(const IR::P4Program *program) c
     auto frontEnd = mkFrontEnd();
     frontEnd.addDebugHook(options.getDebugHook());
     program = frontEnd.run(options, program);
-    if ((program == nullptr) || ::P4C::errorCount() > 0) {
+    if ((program == nullptr) || ::P4::errorCount() > 0) {
         return nullptr;
     }
     return program;
@@ -126,4 +126,4 @@ const CompilerTarget &CompilerTarget::get(std::string_view toolName) {
     return Target::get<CompilerTarget>(toolName);
 }
 
-}  // namespace P4C::P4Tools
+}  // namespace P4::P4Tools

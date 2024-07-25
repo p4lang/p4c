@@ -27,16 +27,16 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/stringify.h"
 
-namespace P4C {
+namespace P4 {
 
 void IHasDbPrint::print() const {
     dbprint(std::cout);
     std::cout << std::endl;
 }
 
-}  // namespace P4C
+}  // namespace P4
 
-namespace P4C::Util {
+namespace P4::Util {
 SourcePosition::SourcePosition(unsigned lineNumber, unsigned columnNumber)
     : lineNumber(lineNumber), columnNumber(columnNumber) {
     if (lineNumber == 0) BUG("Line numbering should start at one");
@@ -317,11 +317,11 @@ cstring SourceFileLine::toString() const {
     return absl::StrFormat("%s(%d)", fileName.string_view(), sourceLine);
 }
 
-}  // namespace P4C::Util
+}  // namespace P4::Util
 
 ////////////////////////////////////////////////////////
 
-namespace P4C {
+namespace P4 {
 
 [[gnu::used]]  // ensure linker will not drop function even if unused
 void dbprint(const IHasDbPrint *o) {
@@ -329,4 +329,4 @@ void dbprint(const IHasDbPrint *o) {
     std::cout << std::endl << std::flush;
 }
 
-}  // namespace P4C
+}  // namespace P4

@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "irclass.h"
 
-namespace P4C {
+namespace P4 {
 
 LookupScope::LookupScope(const IrNamespace *ns)
     : in((ns && ns->name) ? new LookupScope(ns->parent) : nullptr),
@@ -129,7 +129,7 @@ NamedType &NamedType::SourceInfo() {
 
 cstring NamedType::toString() const {
     if (resolved) return resolved->fullName();
-    if (!lookup && name == "ID") return "IR::ID"_cs;  // hack -- ID is in namespace P4C::IR
+    if (!lookup && name == "ID") return "IR::ID"_cs;  // hack -- ID is in namespace P4::IR
     if (lookup) return lookup->toString() + name;
     if (foundin) return LookupScope(foundin).toString() + name;
     return name;
@@ -194,4 +194,4 @@ cstring FunctionType::toString() const {
     return result;
 }
 
-}  // namespace P4C
+}  // namespace P4

@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "coreLibrary.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 bool EntryPriorities::requiresPriority(const IR::KeyElement *ke) const {
     // Check if the keys support priorities.  Note: since match_kind
@@ -49,8 +49,8 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
 
     if (ep->isConstant) {
         if (withPriority)
-            ::P4C::error(ErrorType::ERR_INVALID,
-                         "%1%: Table with 'const' entries cannot have priorities", withPriority);
+            ::P4::error(ErrorType::ERR_INVALID,
+                        "%1%: Table with 'const' entries cannot have priorities", withPriority);
         return entries;
     }
 
@@ -61,7 +61,7 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
     auto deltaProp = table->getConstantProperty("priority_delta"_cs);
     if (deltaProp) {
         if (!deltaProp->fitsUint()) {
-            ::P4C::error(ErrorType::ERR_INVALID, "%1% must be a positive value", deltaProp);
+            ::P4::error(ErrorType::ERR_INVALID, "%1% must be a positive value", deltaProp);
             return entries;
         }
         priorityDelta = deltaProp->asUnsigned();
@@ -80,8 +80,8 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
             entries->entries[index] = newEntry;
             size_t nextPriority = currentPriority + priorityDelta;
             if (nextPriority < currentPriority) {
-                ::P4C::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation",
-                             table);
+                ::P4::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation",
+                            table);
                 return entries;
             }
             currentPriority = nextPriority;
@@ -99,8 +99,8 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
         }
     }
     if (!requiresPriorities) {
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED,
-                     "%1% key match type does not require priorities, but some are specified", key);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1% key match type does not require priorities, but some are specified", key);
         return entries;
     }
 
@@ -112,13 +112,13 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
             if (auto value = entry->priority->to<IR::Constant>()) {
                 currentPriority = value->asUnsigned();
             } else {
-                ::P4C::error(ErrorType::ERR_INVALID, "%1% must be a constant", entry->priority);
+                ::P4::error(ErrorType::ERR_INVALID, "%1% must be a constant", entry->priority);
                 return entries;
             }
         } else {
             // First entry must have a priority.
             if (i == 0) {
-                ::P4C::error(ErrorType::ERR_EXPECTED, "%1% entry must have a priority", entry);
+                ::P4::error(ErrorType::ERR_EXPECTED, "%1% entry must have a priority", entry);
                 return entries;
             }
             auto priority = new IR::Constant((uint64_t)currentPriority);
@@ -144,8 +144,8 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
 
             nextPriority = currentPriority - priorityDelta;
             if (nextPriority > currentPriority) {
-                ::P4C::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation",
-                             table);
+                ::P4::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation",
+                            table);
                 return entries;
             }
         } else {
@@ -158,8 +158,8 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
 
             nextPriority = currentPriority + priorityDelta;
             if (nextPriority < currentPriority) {
-                ::P4C::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation",
-                             table);
+                ::P4::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation",
+                            table);
                 return entries;
             }
         }
@@ -169,4 +169,4 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
     return entries;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
 Casts boolean expressions in a select or a select case keyset
@@ -58,6 +58,6 @@ class RemoveSelectBooleans : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_REMOVESELECTBOOLEANS_H_ */

@@ -1,6 +1,6 @@
 #include "backends/p4tools/common/control_plane/p4info_map.h"
 
-namespace P4C::P4::ControlPlaneAPI {
+namespace P4::ControlPlaneAPI {
 
 P4InfoMaps::P4InfoMaps(const p4::config::v1::P4Info &p4Info) { buildP4InfoMaps(p4Info); }
 
@@ -90,4 +90,4 @@ std::optional<cstring> P4InfoMaps::lookUpControlPlaneName(uint64_t id) const {
     return it->second;
 }
 
-}  // namespace P4C::P4::ControlPlaneAPI
+}  // namespace P4::ControlPlaneAPI

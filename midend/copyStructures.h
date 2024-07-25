@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
  * Convert assignments between structures to assignments between fields
@@ -127,6 +127,6 @@ class CopyStructures : public PassRepeated {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_COPYSTRUCTURES_H_ */

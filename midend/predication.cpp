@@ -16,7 +16,7 @@ limitations under the License.
 #include "predication.h"
 
 #include "frontends/p4/cloner.h"
-namespace P4C::P4 {
+namespace P4 {
 
 namespace Pred {
 
@@ -94,7 +94,7 @@ void Predication::ExpressionReplacer::visitBranch(IR::Mux *mux, bool then) {
     auto elseExprName = Pred::lvalueName(mux->e2);
 
     if (leftName.isNullOrEmpty()) {
-        ::P4C::error(
+        ::P4::error(
             ErrorType::ERR_EXPRESSION,
             "%1%: Assignment inside if statement can't be transformed to condition expression",
             statement);
@@ -347,4 +347,4 @@ const IR::Node *Predication::postorder(IR::P4Action *action) {
     return action;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

@@ -76,7 +76,7 @@ limitations under the License.
 #include "validateParsedProgram.h"
 #include "validateValueSets.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 namespace {
 
@@ -283,4 +283,4 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     return result;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

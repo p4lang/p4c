@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
  * This pass analyzes reachability of select cases.
@@ -60,6 +60,6 @@ class SimplifySelectCases : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_SIMPLIFYSELECTCASES_H_ */

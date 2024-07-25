@@ -20,7 +20,7 @@ limitations under the License.
 
 #include "frontends/p4/reservedWords.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 MinimalNameGenerator::MinimalNameGenerator() {
     for (auto &reserved : P4::reservedWords) usedNames.insert({reserved, 0});
@@ -137,4 +137,4 @@ cstring MinimalNameGenerator::newName(std::string_view base) {
     return name;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

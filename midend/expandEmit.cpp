@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 bool DoExpandEmit::expandArg(const IR::Type *type, const IR::Argument *arg,
                              std::vector<const IR::Argument *> *result,
@@ -66,8 +66,8 @@ const IR::Node *DoExpandEmit::postorder(IR::MethodCallStatement *statement) {
         if (em->originalExternType->name.name == P4::P4CoreLibrary::instance().packetOut.name &&
             em->method->name.name == P4::P4CoreLibrary::instance().packetOut.emit.name) {
             if (em->expr->arguments->size() != 1) {
-                ::P4C::error(ErrorType::ERR_UNEXPECTED, "%1%: expected exactly 1 argument",
-                             statement);
+                ::P4::error(ErrorType::ERR_UNEXPECTED, "%1%: expected exactly 1 argument",
+                            statement);
                 return statement;
             }
 
@@ -98,4 +98,4 @@ const IR::Node *DoExpandEmit::postorder(IR::MethodCallStatement *statement) {
     return statement;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

@@ -20,7 +20,7 @@ limitations under the License.
 
 // Set up names.
 %defines
-%define api.namespace {P4C::P4}
+%define api.namespace {P4}
 // TODO: Update, once we drop Ubuntu 18.04 support.
 %define api.parser.class {P4Parser}
 // %define parser_class_name {P4Parser}
@@ -56,7 +56,6 @@ limitations under the License.
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 
-namespace P4C {
 namespace P4 {
 class AbstractP4Lexer;
 class P4ParserDriver;
@@ -74,9 +73,8 @@ struct OptionalConst {
     explicit OptionalConst(bool isConst) : isConst(isConst) { }
     bool isConst = false;
 };
-}  // namespace P4
 
-inline std::ostream& operator<<(std::ostream& out, const P4::OptionalConst& oc) {
+inline std::ostream& operator<<(std::ostream& out, const OptionalConst& oc) {
     out << "OptionalConst(" << oc.isConst << ')';
     return out;
 }
@@ -87,6 +85,8 @@ inline std::ostream& operator<<(std::ostream& out, const P4::OptionalConst& oc) 
 // the symbol type we want is itself const, since duplicate const qualifiers are
 // forbidden in C++. We avoid the problem using a typedef.
 typedef const IR::Type ConstType;
+
+}  // namespace P4
 
 #ifndef YYDEBUG
 #define YYDEBUG 1
@@ -115,14 +115,12 @@ class Token {
             : type(type), text(text), unparsedConstant(unparsedConstant) { }
 };
 
-} // namespace P4
-
-inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
+inline std::ostream& operator<<(std::ostream& out, const Token& t) {
     out << t.text;
     return out;
 }
 
-}  // namespace P4C
+}  // namespace P4
 
 }
 
@@ -138,7 +136,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 #include "frontends/parsers/p4/p4lexer.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
 
-using namespace ::P4C;
+using namespace ::P4;
 
 #define YYLLOC_DEFAULT(Cur, Rhs, N)                                             \
     ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                          \
@@ -1707,11 +1705,11 @@ r_angle : ">" | R_ANGLE_SHIFT ;
 
 %%
 
-namespace P4C {
+namespace P4 {
 
-void P4::P4Parser::error(const Util::SourceInfo& location,
-                         const std::string& message) {
+void P4Parser::error(const Util::SourceInfo& location,
+                     const std::string& message) {
     driver.onParseError(location, message);
 }
 
-}  // namespace P4C
+}  // namespace P4

@@ -26,7 +26,7 @@ limitations under the License.
 
 #include "exceptions.h"
 
-namespace P4C {
+namespace P4 {
 
 template <size_t N>
 static void convertToAbsPath(const char *const relPath, char (&output)[N]) {
@@ -70,4 +70,4 @@ const char *exename(const char *argv0) {
     return buffer;
 }
 
-}  // namespace P4C
+}  // namespace P4

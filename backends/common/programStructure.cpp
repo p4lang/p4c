@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "lib/log.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 void DiscoverStructure::postorder(const IR::ParameterList *paramList) {
     bool inAction = findContext<IR::P4Action>() != nullptr;
@@ -56,4 +56,4 @@ void DiscoverStructure::postorder(const IR::Declaration_MatchKind *kind) {
     }
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

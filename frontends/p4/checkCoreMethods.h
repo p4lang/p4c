@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /// Check types for arguments of core.p4 methods
 class DoCheckCoreMethods : public Inspector, public ResolutionContext {
@@ -49,6 +49,6 @@ class CheckCoreMethods : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_CHECKCOREMETHODS_H_ */

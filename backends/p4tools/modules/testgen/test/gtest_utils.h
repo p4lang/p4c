@@ -11,7 +11,7 @@
 #include "frontends/common/options.h"
 #include "ir/ir.h"
 
-namespace P4C::Test {
+namespace P4::Test {
 
 /// Encapsulates functionality for running the front- and mid-ends of the compiler in a test.
 class P4ToolsTestCase {
@@ -57,6 +57,6 @@ class SymbolicConverter : public Transform {
     const IR::SymbolicVariable *preorder(IR::Member *member) override;
 };
 
-}  // namespace P4C::Test
+}  // namespace P4::Test
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_GTEST_UTILS_H_ */

@@ -19,7 +19,7 @@ limitations under the License.
 #include "backend.h"
 #include "extern.h"
 
-namespace P4C::BMV2 {
+namespace P4::BMV2 {
 
 void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl> *body,
                                             Util::JsonArray *order, Util::JsonArray *primitives) {
@@ -91,9 +91,9 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl> *bo
                             // We don't need to handle other types,
                             // like header unions or stacks; they were
                             // expanded by the expandEmit pass.
-                            ::P4C::error(ErrorType::ERR_UNSUPPORTED,
-                                         "%1%: emit only supports header arguments, not %2%", arg,
-                                         type);
+                            ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                                        "%1%: emit only supports header arguments, not %2%", arg,
+                                        type);
                         }
                     }
                     continue;
@@ -125,8 +125,8 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl> *bo
                 continue;
             }
         }
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED,
-                     "%1%: not supported within a deparser on this target", s);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: not supported within a deparser on this target", s);
     }
     ctxt->conv->simpleExpressionsOnly = false;
 }
@@ -163,4 +163,4 @@ bool DeparserConverter::preorder(const IR::P4Control *control) {
     return false;
 }
 
-}  // namespace P4C::BMV2
+}  // namespace P4::BMV2

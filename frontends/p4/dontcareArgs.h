@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /// This class replaces don't care arguments (_) with
 /// a temporary which is unused.
@@ -77,6 +77,6 @@ class RemoveDontcareArgs : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_DONTCAREARGS_H_ */

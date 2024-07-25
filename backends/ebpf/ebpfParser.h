@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 
-namespace P4C::EBPF {
+namespace P4::EBPF {
 
 class EBPFParser;
 class EBPFParserState;
@@ -101,11 +101,11 @@ class EBPFParser : public EBPFObject {
     virtual void emitValueSetInstances(CodeBuilder *builder);
     virtual void emitRejectState(CodeBuilder *builder);
 
-    EBPFValueSet *getValueSet(cstring name) const { return ::P4C::get(valueSets, name); }
+    EBPFValueSet *getValueSet(cstring name) const { return ::P4::get(valueSets, name); }
 
     DECLARE_TYPEINFO(EBPFParser, EBPFObject);
 };
 
-}  // namespace P4C::EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_EBPFPARSER_H_ */

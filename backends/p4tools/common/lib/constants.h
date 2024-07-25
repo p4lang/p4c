@@ -1,7 +1,7 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_CONSTANTS_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_CONSTANTS_H_
 
-namespace P4C::P4Tools {
+namespace P4::P4Tools {
 
 class P4Constants {
  public:
@@ -29,6 +29,6 @@ class P4Constants {
     static constexpr const char *MATCH_KIND_LPM = "lpm";
 };
 
-}  // namespace P4C::P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_CONSTANTS_H_ */

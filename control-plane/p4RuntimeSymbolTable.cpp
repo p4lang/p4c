@@ -21,7 +21,7 @@ limitations under the License.
 #include "p4RuntimeArchHandler.h"
 #include "typeSpecConverter.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 namespace ControlPlaneAPI {
 
@@ -39,7 +39,7 @@ std::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node) {
     const auto *idConstant = idAnnotation->expr[0]->to<IR::Constant>();
     CHECK_NULL(idConstant);
     if (!idConstant->fitsUint()) {
-        ::P4C::error(ErrorType::ERR_INVALID, "%1%: @id should be an unsigned integer", node);
+        ::P4::error(ErrorType::ERR_INVALID, "%1%: @id should be an unsigned integer", node);
         return std::nullopt;
     }
     return static_cast<p4rt_id_t>(idConstant->value);
@@ -67,7 +67,7 @@ static std::optional<p4rt_id_t> externalId(const P4RuntimeSymbolType &type,
     const auto typePrefix = static_cast<p4rt_id_t>(type) << 24;
     const auto prefixMask = static_cast<p4rt_id_t>(0xff) << 24;
     if ((id & prefixMask) != 0 && (id & prefixMask) != typePrefix) {
-        ::P4C::error(ErrorType::ERR_INVALID, "%1%: @id has the wrong 8-bit prefix", declaration);
+        ::P4::error(ErrorType::ERR_INVALID, "%1%: @id has the wrong 8-bit prefix", declaration);
         return std::nullopt;
     }
     id |= typePrefix;
@@ -222,7 +222,7 @@ P4::ControlPlaneAPI::p4rt_id_t P4::ControlPlaneAPI::P4RuntimeSymbolTable::tryToA
     }
 
     if (assignedIds.find(*id) != assignedIds.end()) {
-        ::P4C::error(ErrorType::ERR_INVALID, "@id %1% is assigned to multiple declarations", *id);
+        ::P4::error(ErrorType::ERR_INVALID, "@id %1% is assigned to multiple declarations", *id);
         return INVALID_ID;
     }
 
@@ -263,8 +263,8 @@ void P4::ControlPlaneAPI::P4RuntimeSymbolTable::computeIdsForSymbols(P4RuntimeSy
             nameId, [=](uint32_t nameId) { return (resourceType << 24) | (nameId & 0xffffff); });
 
         if (!id) {
-            ::P4C::error(ErrorType::ERR_OVERLIMIT, "No available id to represent %1% in P4Runtime",
-                         name);
+            ::P4::error(ErrorType::ERR_OVERLIMIT, "No available id to represent %1% in P4Runtime",
+                        name);
             return;
         }
 
@@ -372,4 +372,4 @@ void P4::ControlPlaneAPI::P4SymbolSuffixSet::addSymbol(const cstring &symbol) {
 
 }  // namespace ControlPlaneAPI
 
-}  // namespace P4C::P4
+}  // namespace P4

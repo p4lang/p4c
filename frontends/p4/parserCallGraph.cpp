@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "parserCallGraph.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 bool ComputeParserCG::preorder(const IR::PathExpression *expression) {
     auto state = findContext<IR::ParserState>();
@@ -45,4 +45,4 @@ void ComputeParserCG::postorder(const IR::SelectExpression *expression) {
     transitions->calls(state, reject->to<IR::ParserState>());
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

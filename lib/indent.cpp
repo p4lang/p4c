@@ -23,7 +23,7 @@ limitations under the License.
 #endif /* HAVE_LIBGC */
 #include "indent.h"
 
-namespace P4C {
+namespace P4 {
 
 int indent_t::tabsz = 2;
 
@@ -54,4 +54,4 @@ indent_t &indent_t::getindent(std::ostream &out) {
     return *static_cast<indent_t *>(p);
 }
 
-}  // namespace P4C
+}  // namespace P4

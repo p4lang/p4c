@@ -17,7 +17,7 @@
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
-namespace P4C::P4Tools::P4Smith {
+namespace P4::P4Tools::P4Smith {
 
 std::vector<IR::Vector<IR::Node> *> P4Scope::scope;
 std::set<cstring> P4Scope::usedNames;
@@ -339,4 +339,4 @@ const IR::Type_Declaration *P4Scope::getTypeByName(cstring name) {
     }
     return nullptr;
 }
-}  // namespace P4C::P4Tools::P4Smith
+}  // namespace P4::P4Tools::P4Smith

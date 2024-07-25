@@ -21,7 +21,7 @@ limitations under the License.
 #include "lib/ordered_set.h"
 #include "parserCallGraph.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 using namespace literals;
 
@@ -124,7 +124,7 @@ void StructLocation::addLastIndexField(LocationSet *result) const {
 }
 
 void StructLocation::addField(cstring field, LocationSet *result) const {
-    auto f = ::P4C::get(fieldLocations, field);
+    auto f = ::P4::get(fieldLocations, field);
     CHECK_NULL(f);
     result->add(f);
 }
@@ -304,7 +304,7 @@ Definitions *Definitions::joinDefinitions(const Definitions *other) const {
     for (auto d : other->definitions) {
         auto loc = d.first;
         auto defs = d.second;
-        auto current = ::P4C::get(definitions, loc);
+        auto current = ::P4::get(definitions, loc);
         if (current != nullptr) {
             auto merged = current->merge(defs);
             result->definitions.emplace(loc, merged);
@@ -315,7 +315,7 @@ Definitions *Definitions::joinDefinitions(const Definitions *other) const {
     for (auto d : definitions) {
         auto loc = d.first;
         auto defs = d.second;
-        auto current = ::P4C::get(other->definitions, loc);
+        auto current = ::P4::get(other->definitions, loc);
         if (current == nullptr) result->definitions.emplace(loc, defs);
         // otherwise have have already done it in the loop above
     }
@@ -364,7 +364,7 @@ Definitions *Definitions::writes(ProgramPoint point, const LocationSet *location
 bool Definitions::operator==(const Definitions &other) const {
     if (definitions.size() != other.definitions.size()) return false;
     for (auto d : definitions) {
-        auto od = ::P4C::get(other.definitions, d.first);
+        auto od = ::P4::get(other.definitions, d.first);
         if (od == nullptr) return false;
         if (!d.second->operator==(*od)) return false;
     }
@@ -1132,9 +1132,9 @@ bool ComputeWriteSet::preorder(const IR::MethodCallStatement *statement) {
     return setDefinitions(defs, statement, true);  // overwrite
 }
 
-}  // namespace P4C::P4
+}  // namespace P4
 
-namespace P4C {
+namespace P4 {
 
 // functions for calling from gdb
 void dump(const P4::StorageLocation *s) { std::cout << *s << Log::endl; }
@@ -1147,4 +1147,4 @@ void dump(const P4::ProgramPoints &p) { std::cout << p << Log::endl; }
 void dump(const P4::Definitions *d) { std::cout << *d << Log::endl; }
 void dump(const P4::AllDefinitions *d) { std::cout << *d << Log::endl; }
 
-}  // namespace P4C
+}  // namespace P4

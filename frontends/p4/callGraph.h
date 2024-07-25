@@ -29,7 +29,7 @@ limitations under the License.
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 // I could not get Util::toString() to work properly
 cstring cgMakeString(cstring s);
@@ -101,11 +101,11 @@ class CallGraph {
     // Graph querying
 
     bool isCallee(T callee) const {
-        auto callees = ::P4C::get(in_edges, callee);
+        auto callees = ::P4::get(in_edges, callee);
         return callees != nullptr && !callees->empty();
     }
     bool isCaller(T caller) const {
-        auto edges = ::P4C::get(out_edges, caller);
+        auto edges = ::P4::get(out_edges, caller);
         if (edges == nullptr) return false;
         return !edges->empty();
     }
@@ -355,6 +355,6 @@ class CallGraph {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_CALLGRAPH_H_ */

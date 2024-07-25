@@ -1,6 +1,6 @@
 #include "error_message.h"
 
-namespace P4C {
+namespace P4 {
 
 std::string ErrorMessage::getPrefix() const {
     std::string p = prefix;
@@ -48,4 +48,4 @@ std::string ParserErrorMessage::toString() const {
            location.toSourceFragment().c_str();
 }
 
-}  // namespace P4C
+}  // namespace P4

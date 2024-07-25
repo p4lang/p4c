@@ -19,13 +19,13 @@
 #include "graphs.h"
 #include "lib/nullstream.h"
 
-namespace P4C::graphs {
+namespace P4::graphs {
 
 void Graph_visitor::writeGraphToFile(const Graph &g, const std::string &name) {
     auto path = graphsDir / (name + ".dot");
     auto out = openFile(path, false);
     if (out == nullptr) {
-        ::P4C::error(ErrorType::ERR_IO, "Failed to open file %1%", path);
+        ::P4::error(ErrorType::ERR_IO, "Failed to open file %1%", path);
         return;
     }
     // Custom label writers not supported with subgraphs, so we populate
@@ -212,4 +212,4 @@ void Graph_visitor::process(std::vector<Graph *> &controlGraphsArray,
     }
 }
 
-}  // namespace P4C::graphs
+}  // namespace P4::graphs

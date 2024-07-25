@@ -27,7 +27,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "lib/nullstream.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 using namespace literals;
 
@@ -38,7 +38,7 @@ class FindLocationSets : public Inspector {
     std::map<const IR::Expression *, const LocationSet *> loc;
 
     const LocationSet *get(const IR::Expression *expression) const {
-        auto result = ::P4C::get(loc, expression);
+        auto result = ::P4::get(loc, expression);
         BUG_CHECK(result != nullptr, "No location set known for %1%", expression);
         return result;
     }
@@ -342,10 +342,10 @@ void InlineList::analyze() {
         if (!allowMultipleCalls && inl->invocations.size() > 1) {
             ++it;
             auto second = *it;
-            ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                         "Multiple invocations of the same object "
-                         "not supported on this target: %1%, %2%",
-                         first, second);
+            ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "Multiple invocations of the same object "
+                        "not supported on this target: %1%, %2%",
+                        first, second);
             continue;
         }
         cg.calls(inl->caller, inl->callee);
@@ -402,15 +402,14 @@ void DiscoverInlining::visit_all(const IR::Block *block) {
         if (it.second->is<IR::Block>()) {
             visit(it.second->getNode());
         }
-        if (::P4C::errorCount() > 0) return;
+        if (::P4::errorCount() > 0) return;
     }
 }
 
 bool DiscoverInlining::preorder(const IR::ControlBlock *block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ParserBlock>()) {
-        ::P4C::error(ErrorType::ERR_INVALID, "%1%: instantiation of control in parser",
-                     block->node);
+        ::P4::error(ErrorType::ERR_INVALID, "%1%: instantiation of control in parser", block->node);
         return false;
     } else if (getContext()->node->is<IR::ControlBlock>() && allowControls) {
         auto parent = getContext()->node->to<IR::ControlBlock>();
@@ -421,7 +420,7 @@ bool DiscoverInlining::preorder(const IR::ControlBlock *block) {
     }
 
     visit_all(block);
-    if (::P4C::errorCount() > 0) return false;
+    if (::P4::errorCount() > 0) return false;
     visit(block->container->body);
     return false;
 }
@@ -429,8 +428,7 @@ bool DiscoverInlining::preorder(const IR::ControlBlock *block) {
 bool DiscoverInlining::preorder(const IR::ParserBlock *block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ControlBlock>()) {
-        ::P4C::error(ErrorType::ERR_INVALID, "%1%: instantiation of parser in control",
-                     block->node);
+        ::P4::error(ErrorType::ERR_INVALID, "%1%: instantiation of parser in control", block->node);
         return false;
     } else if (getContext()->node->is<IR::ParserBlock>()) {
         auto parent = getContext()->node->to<IR::ParserBlock>();
@@ -440,7 +438,7 @@ bool DiscoverInlining::preorder(const IR::ParserBlock *block) {
         inlineList->addInstantiation(parent->container, callee, instance);
     }
     visit_all(block);
-    if (::P4C::errorCount() > 0) return false;
+    if (::P4::errorCount() > 0) return false;
     visit(block->container->states, "states");
     return false;
 }
@@ -540,10 +538,10 @@ void GeneralInliner::inline_subst(P4Block *caller,
                 }
 
                 for (auto param1 : *mi->substitution.getParametersInArgumentOrder()) {
-                    auto ls1 = ::P4C::get(locationSets, param1);
+                    auto ls1 = ::P4::get(locationSets, param1);
                     for (auto param2 : *mi->substitution.getParametersInArgumentOrder()) {
                         if (param1 == param2) continue;
-                        auto ls2 = ::P4C::get(locationSets, param2);
+                        auto ls2 = ::P4::get(locationSets, param2);
                         if (ls1->overlaps(ls2)) {
                             LOG4("Arg for " << dbp(param1) << " aliases with arg for "
                                             << dbp(param2) << ": using temp");
@@ -654,11 +652,11 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
             if (!initializer->equiv(*prev))
                 // This is a compile-time constant, since this is a non-directional
                 // parameter, so the value should be independent on the context.
-                ::P4C::error(ErrorType::ERR_INVALID,
-                             "%1%: non-directional parameters must be substitued with the "
-                             "same value in all invocations; two different substitutions are "
-                             "%2% and %3%",
-                             param, initializer, prev);
+                ::P4::error(ErrorType::ERR_INVALID,
+                            "%1%: non-directional parameters must be substitued with the "
+                            "same value in all invocations; two different substitutions are "
+                            "%2% and %3%",
+                            param, initializer, prev);
             continue;
         }
     }
@@ -733,7 +731,7 @@ class RenameStates : public Transform {
     }
     const IR::Node *preorder(IR::Path *path) override {
         // This is certainly a state name, by the way we organized the visitors
-        cstring newName = ::P4C::get(stateRenameMap, path->name);
+        cstring newName = ::P4::get(stateRenameMap, path->name);
         path->name = IR::ID(path->name.srcInfo, newName, path->name.originalName);
         return path;
     }
@@ -753,7 +751,7 @@ class RenameStates : public Transform {
             prune();
             return state;
         }
-        cstring newName = ::P4C::get(stateRenameMap, state->name.name);
+        cstring newName = ::P4::get(stateRenameMap, state->name.name);
         state->name.name = newName;
         if (state->selectExpression != nullptr) visit(state->selectExpression);
         prune();
@@ -820,11 +818,11 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
                 if (!initializer->equiv(*prev))
                     // This is a compile-time constant, since this is a non-directional
                     // parameter, so the value should be independent on the context.
-                    ::P4C::error(ErrorType::ERR_INVALID,
-                                 "%1%: non-directional parameters must be substitued with the "
-                                 "same value in all invocations; two different substitutions are "
-                                 "%2% and %3%",
-                                 param, initializer, prev);
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "%1%: non-directional parameters must be substitued with the "
+                                "same value in all invocations; two different substitutions are "
+                                "%2% and %3%",
+                                param, initializer, prev);
                 continue;
             }
         }
@@ -862,7 +860,7 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
         RenameStates rs(&renameMap);
         rs.setCalledBy(this);
         auto renamed = callee->apply(rs);
-        IR::ID newStartName(::P4C::get(renameMap, IR::ParserState::start), IR::ParserState::start);
+        IR::ID newStartName(::P4::get(renameMap, IR::ParserState::start), IR::ParserState::start);
         auto newState = new IR::ParserState(srcInfo, name, annotations, current,
                                             new IR::PathExpression(newStartName));
         states->push_back(newState);
@@ -941,4 +939,4 @@ const IR::Node *GeneralInliner::preorder(IR::P4Parser *caller) {
 // set of annotations to _not_ propagate during inlining
 std::set<cstring> Inline::noPropagateAnnotations = {"name"_cs};
 
-}  // namespace P4C::P4
+}  // namespace P4

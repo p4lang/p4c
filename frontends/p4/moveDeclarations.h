@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /** Moves all local declarations in a control or parser to the "top", including
  * the ones in the control body and parser states.  Also, if the control has
@@ -119,6 +119,6 @@ class MoveInitializers : public Transform, public ResolutionContext {
     const IR::Node *postorder(IR::Path *path) override;
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_MOVEDECLARATIONS_H_ */

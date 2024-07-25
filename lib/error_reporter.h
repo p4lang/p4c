@@ -31,7 +31,7 @@ limitations under the License.
 #include "error_helper.h"
 #include "exceptions.h"
 
-namespace P4C {
+namespace P4 {
 
 /// An action to take when a diagnostic message is triggered.
 enum class DiagnosticAction {
@@ -99,13 +99,13 @@ class ErrorReporter {
         boost::format fmt(format);
         // FIXME: This will implicitly take location of the first argument having
         // SourceInfo. Not sure if this always desireable or not.
-        return ::P4C::bug_helper(fmt, "", "", std::forward<Args>(args)...);
+        return ::P4::bug_helper(fmt, "", "", std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     std::string format_message(const char *format, Args &&...args) {
         boost::format fmt(format);
-        return ::P4C::error_helper(fmt, std::forward<Args>(args)...).toString();
+        return ::P4::error_helper(fmt, std::forward<Args>(args)...).toString();
     }
 
     template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, typename... Args>
@@ -167,7 +167,7 @@ class ErrorReporter {
 
         boost::format fmt(format);
         ErrorMessage msg(msgType, diagnosticName ? diagnosticName : "", suffix);
-        msg = ::P4C::error_helper(fmt, msg, std::forward<Args>(args)...);
+        msg = ::P4::error_helper(fmt, msg, std::forward<Args>(args)...);
         emit_message(msg);
 
         if (errorCount > maxErrorCount)
@@ -251,33 +251,33 @@ class ErrorReporter {
         diagnosticActions[cstring(diagnostic)] = action;
     }
 
-    /// @return the default diagnostic action for calls to `::P4C::warning()`.
+    /// @return the default diagnostic action for calls to `::P4::warning()`.
     DiagnosticAction getDefaultWarningDiagnosticAction() { return defaultWarningDiagnosticAction; }
 
-    /// set the default diagnostic action for calls to `::P4C::warning()`.
+    /// set the default diagnostic action for calls to `::P4::warning()`.
     void setDefaultWarningDiagnosticAction(DiagnosticAction action) {
         defaultWarningDiagnosticAction = action;
     }
 
-    /// @return the default diagnostic action for calls to `::P4C::info()`.
+    /// @return the default diagnostic action for calls to `::P4::info()`.
     DiagnosticAction getDefaultInfoDiagnosticAction() { return defaultInfoDiagnosticAction; }
 
-    /// set the default diagnostic action for calls to `::P4C::info()`.
+    /// set the default diagnostic action for calls to `::P4::info()`.
     void setDefaultInfoDiagnosticAction(DiagnosticAction action) {
         defaultInfoDiagnosticAction = action;
     }
 
  private:
-    /// The default diagnostic action for calls to `::P4C::info()`.
+    /// The default diagnostic action for calls to `::P4::info()`.
     DiagnosticAction defaultInfoDiagnosticAction;
 
-    /// The default diagnostic action for calls to `::P4C::warning()`.
+    /// The default diagnostic action for calls to `::P4::warning()`.
     DiagnosticAction defaultWarningDiagnosticAction;
 
     /// allow filtering of diagnostic actions
     std::unordered_map<cstring, DiagnosticAction> diagnosticActions;
 };
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_ERROR_REPORTER_H_ */

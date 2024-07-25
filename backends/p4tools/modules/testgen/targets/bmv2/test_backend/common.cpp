@@ -17,7 +17,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4C::P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 Bmv2TestFramework::Bmv2TestFramework(const TestBackendConfiguration &testBackendConfiguration)
     : TestFramework(testBackendConfiguration) {}
@@ -202,4 +202,4 @@ inja::json Bmv2TestFramework::getExpectedPacket(const TestSpec *testSpec) const 
     return verifyData;
 }
 
-}  // namespace P4C::P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2

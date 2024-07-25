@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 class DoSimplifyDefUse : public Transform {
     ReferenceMap *refMap;
@@ -107,6 +107,6 @@ class SimplifyDefUse : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_SIMPLIFYDEFUSE_H_ */

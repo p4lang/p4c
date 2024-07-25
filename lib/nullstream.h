@@ -22,7 +22,7 @@ limitations under the License.
 #include <ostream>
 #include <streambuf>
 
-namespace P4C {
+namespace P4 {
 
 template <class cT, class traits = std::char_traits<cT>>
 class basic_nullbuf final : public std::basic_streambuf<cT, traits> {
@@ -49,6 +49,6 @@ typedef onullstream<char> nullstream;
 // FIXME: This should return unique_ptr instead to track lifetime
 std::ostream *openFile(const std::filesystem::path &name, bool nullOnError);
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_NULLSTREAM_H_ */

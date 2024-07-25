@@ -296,8 +296,8 @@ To add a new input test with a sample P4 code file (under `testdata/p4_16_sample
   * Use `BUG_CHECK()` instead of `assert`, and always supply an
     informative error message.
 
-  * Use `::P4C::error()` and `::P4C::warning()` for error reporting. See the
-    [guidelines](CodingStandardPhilosophy.md#Handling-errors) for more
+  * Use `::P4::error()` and `::P4::warning()` for error reporting. See the
+    [guidelines](CodingStandardPhilosophy.md#handling-errors) for more
     details.
 
   * Use `LOGn()` for log messages -- the `n` is an integer constant for

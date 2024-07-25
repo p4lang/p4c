@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "lib/hash.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument> *arguments) {
     bool first = true;
@@ -33,14 +33,14 @@ bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument> *arguments) {
             first = false;
         } else {
             if (argHasName != hasName)
-                ::P4C::error(ErrorType::ERR_INVALID,
-                             "%1%: either all or none of the arguments of a call must be named",
-                             arg);
+                ::P4::error(ErrorType::ERR_INVALID,
+                            "%1%: either all or none of the arguments of a call must be named",
+                            arg);
             if (argHasName) {
                 auto it = found.find(argName);
                 if (it != found.end())
-                    ::P4C::error(ErrorType::ERR_DUPLICATE, "%1% and %2%: same argument name",
-                                 it->second, arg);
+                    ::P4::error(ErrorType::ERR_DUPLICATE, "%1% and %2%: same argument name",
+                                it->second, arg);
             }
         }
         if (argHasName) found.emplace(argName, arg);
@@ -51,8 +51,8 @@ bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument> *arguments) {
 bool CheckNamedArgs::checkOptionalParameters(const IR::ParameterList *parameters) {
     for (auto parameter : parameters->parameters) {
         if (parameter->isOptional())
-            ::P4C::error(ErrorType::ERR_INVALID, "%1%: optional parameter not allowed here",
-                         parameter);
+            ::P4::error(ErrorType::ERR_INVALID, "%1%: optional parameter not allowed here",
+                        parameter);
     }
     return true;
 }
@@ -60,13 +60,13 @@ bool CheckNamedArgs::checkOptionalParameters(const IR::ParameterList *parameters
 bool CheckNamedArgs::preorder(const IR::Parameter *parameter) {
     if (parameter->defaultValue != nullptr) {
         if (parameter->isOptional())
-            ::P4C::error(ErrorType::ERR_INVALID,
-                         "%1%: optional parameters cannot have default values", parameter);
+            ::P4::error(ErrorType::ERR_INVALID,
+                        "%1%: optional parameters cannot have default values", parameter);
         if (parameter->hasOut())
-            ::P4C::error(ErrorType::ERR_INVALID, "%1%: out parameters cannot have default values",
-                         parameter);
+            ::P4::error(ErrorType::ERR_INVALID, "%1%: out parameters cannot have default values",
+                        parameter);
     }
     return true;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

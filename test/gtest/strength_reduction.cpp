@@ -11,9 +11,9 @@
 #include "ir/ir.h"
 #include "lib/sourceCodeBuilder.h"
 
-using namespace ::P4C::P4;
+using namespace ::P4;
 
-namespace P4C::Test {
+namespace P4::Test {
 
 namespace {
 
@@ -107,4 +107,4 @@ TEST_F(StrengthReductionTest, DisableSubConstToAddConst) {
     EXPECT_FALSE(program_string.find(value2) == std::string::npos);
 }
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

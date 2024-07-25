@@ -30,7 +30,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 
-namespace P4C::P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 Bmv2V1ModelCmdStepper::Bmv2V1ModelCmdStepper(ExecutionState &state, AbstractSolver &solver,
                                              const ProgramInfo &programInfo)
@@ -129,7 +129,7 @@ std::map<Continuation::Exception, Continuation> Bmv2V1ModelCmdStepper::getExcept
             // Would also need to augment ProgramInfo to detect whether the ingress MAU refers
             // to parser_err.
 
-            ::P4C::warning("Ingress parser exception handler not fully implemented");
+            ::P4::warning("Ingress parser exception handler not fully implemented");
             result.emplace(Continuation::Exception::Reject, Continuation::Body({}));
             result.emplace(
                 Continuation::Exception::PacketTooShort,
@@ -152,4 +152,4 @@ std::map<Continuation::Exception, Continuation> Bmv2V1ModelCmdStepper::getExcept
     return result;
 }
 
-}  // namespace P4C::P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2

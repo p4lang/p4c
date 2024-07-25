@@ -25,7 +25,7 @@ limitations under the License.
 #include "ir/visitor.h"
 #include "lib/ordered_map.h"
 
-namespace P4C {
+namespace P4 {
 
 #define DEFINE_APPLY_FUNCTIONS(CLASS, TEMPLATE, TT, INLINE)                                       \
     TEMPLATE INLINE bool IR::CLASS TT::apply_visitor_preorder(Modifier &v) {                      \
@@ -329,6 +329,6 @@ void IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::visit_children(Visitor &v) const
     }
 }
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* IR_IR_INLINE_H_ */

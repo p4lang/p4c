@@ -17,7 +17,7 @@
 #include "ir/vector.h"
 #include "lib/exceptions.h"
 
-namespace P4C::P4Tools::P4Smith {
+namespace P4::P4Tools::P4Smith {
 
 const IR::Type_Boolean *ExpressionGenerator::genBoolType() { return IR::Type_Boolean::get(); }
 
@@ -1243,4 +1243,4 @@ IR::Expression *ExpressionGenerator::pickLvalOrSlice(const IR::Type *tp) {
     return expr;
 }
 
-}  // namespace P4C::P4Tools::P4Smith
+}  // namespace P4::P4Tools::P4Smith

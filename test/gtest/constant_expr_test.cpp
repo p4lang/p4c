@@ -19,7 +19,7 @@ limitations under the License.
 #include "helpers.h"
 #include "ir/ir.h"
 
-namespace P4C::Test {
+namespace P4::Test {
 
 class ConstantExpr : public P4CTest {};
 
@@ -142,4 +142,4 @@ TEST_F(ConstantExpr, TestIntegerFuncs) {
     EXPECT_EQ(neg_res.asInt(), -123);
 }
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

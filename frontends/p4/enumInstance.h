@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "methodInstance.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 // helps resolving references to compile-time enum fields, e.g., X.a
 class EnumInstance : public InstanceBase {
@@ -65,6 +65,6 @@ class SerEnumInstance : public EnumInstance {
     DECLARE_TYPEINFO(SerEnumInstance, EnumInstance);
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_ENUMINSTANCE_H_ */

@@ -19,7 +19,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/algorithm.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 namespace ControlPlaneAPI {
 
@@ -29,7 +29,7 @@ namespace ControlPlaneAPI {
 std::optional<std::string> stringReprConstant(big_int value, int width) {
     // TODO(antonin): support negative values
     if (value < 0) {
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1%: Negative values not supported yet", value);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1%: Negative values not supported yet", value);
         return std::nullopt;
     }
     BUG_CHECK(width > 0, "Unexpected width 0");
@@ -68,4 +68,4 @@ std::optional<std::string> stringRepr(const IR::BoolLiteral *constant, int width
 
 }  // namespace ControlPlaneAPI
 
-}  // namespace P4C::P4
+}  // namespace P4

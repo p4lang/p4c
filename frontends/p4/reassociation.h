@@ -20,7 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 using namespace literals;
 
@@ -48,6 +48,6 @@ class Reassociation final : public Transform {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* P4_REASSOCIATION_H_ */

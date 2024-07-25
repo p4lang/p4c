@@ -26,7 +26,7 @@ limitations under the License.
 #include "big_int.h"
 #include "hash.h"
 
-namespace P4C::Util {
+namespace P4::Util {
 
 // Useful functions for manipulating GMP values
 // (arbitrary-precision values)
@@ -69,9 +69,9 @@ inline unsigned scan1(const boost::multiprecision::cpp_int &val, unsigned pos) {
     return scan1_positive(val, pos);
 }
 
-}  // namespace P4C::Util
+}  // namespace P4::Util
 
-namespace P4C {
+namespace P4 {
 
 static inline unsigned bitcount(big_int v) {
     if (v < 0) return ~0U;
@@ -102,6 +102,6 @@ static inline int ceil_log2(big_int v) { return v ? floor_log2(v - 1) + 1 : -1; 
 template <>
 struct Util::Hasher<big_int> : Detail::StdHasher {};
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_BIG_INT_UTIL_H_ */

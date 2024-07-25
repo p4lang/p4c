@@ -25,10 +25,10 @@ limitations under the License.
 
 namespace p4configv1 = ::p4::config::v1;
 
-using ::P4C::P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
-using ::P4C::P4::ControlPlaneAPI::Helpers::setPreamble;
+using ::P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
+using ::P4::ControlPlaneAPI::Helpers::setPreamble;
 
-namespace P4C::P4 {
+namespace P4 {
 
 /** \addtogroup control_plane
  *  @{
@@ -450,14 +450,14 @@ struct Register {
 
         auto size = instance->getParameterValue("size"_cs)->to<IR::Constant>();
         if (!size->is<IR::Constant>()) {
-            ::P4C::error(ErrorType::ERR_UNSUPPORTED, "Register '%1%' has a non-constant size: %2%",
-                         declaration, size);
+            ::P4::error(ErrorType::ERR_UNSUPPORTED, "Register '%1%' has a non-constant size: %2%",
+                        declaration, size);
             return std::nullopt;
         }
         if (!size->to<IR::Constant>()->fitsInt()) {
-            ::P4C::error(ErrorType::ERR_UNSUPPORTED,
-                         "Register '%1%' has a size that doesn't fit in an integer: %2%",
-                         declaration, size);
+            ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                        "Register '%1%' has a size that doesn't fit in an integer: %2%",
+                        declaration, size);
             return std::nullopt;
         }
 
@@ -551,9 +551,9 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             if (instance) {
                 if (instance->type->name != ActionProfileTraits<arch>::typeName() &&
                     instance->type->name != ActionSelectorTraits<arch>::typeName()) {
-                    ::P4C::error(ErrorType::ERR_EXPECTED,
-                                 "Expected an action profile or action selector: %1%",
-                                 instance->expression);
+                    ::P4::error(ErrorType::ERR_EXPECTED,
+                                "Expected an action profile or action selector: %1%",
+                                instance->expression);
                 } else if (isConstructedInPlace) {
                     symbols->add(SymbolType::P4RT_ACTION_PROFILE(), *instance->name);
                 }
@@ -564,8 +564,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                 table, CounterTraits::directPropertyName(), refMap, typeMap, &isConstructedInPlace);
             if (instance) {
                 if (instance->type->name != CounterTraits::directTypeName()) {
-                    ::P4C::error(ErrorType::ERR_EXPECTED, "Expected a direct counter: %1%",
-                                 instance->expression);
+                    ::P4::error(ErrorType::ERR_EXPECTED, "Expected a direct counter: %1%",
+                                instance->expression);
                 } else if (isConstructedInPlace) {
                     symbols->add(SymbolType::P4RT_DIRECT_COUNTER(), *instance->name);
                 }
@@ -576,8 +576,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                                                           refMap, typeMap, &isConstructedInPlace);
             if (instance) {
                 if (instance->type->name != MeterTraits::directTypeName()) {
-                    ::P4C::error(ErrorType::ERR_EXPECTED, "Expected a direct meter: %1%",
-                                 instance->expression);
+                    ::P4::error(ErrorType::ERR_EXPECTED, "Expected a direct meter: %1%",
+                                instance->expression);
                 } else if (isConstructedInPlace) {
                     symbols->add(SymbolType::P4RT_DIRECT_METER(), *instance->name);
                 }
@@ -739,8 +739,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         auto size = instance->substitution.lookupByName(ActionProfileTraits<arch>::sizeParamName())
                         ->expression;
         if (!size->template is<IR::Constant>()) {
-            ::P4C::error(ErrorType::ERR_INVALID, "Action profile '%1%' has non-constant size '%2%'",
-                         *instance->name, size);
+            ::P4::error(ErrorType::ERR_INVALID, "Action profile '%1%' has non-constant size '%2%'",
+                        *instance->name, size);
             return std::nullopt;
         }
         return getActionProfile(*instance->name, instance->type,
@@ -753,8 +753,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         auto decl = instance->node->to<IR::IDeclaration>();
         auto size = instance->getParameterValue(ActionProfileTraits<arch>::sizeParamName());
         if (!size->template is<IR::Constant>()) {
-            ::P4C::error(ErrorType::ERR_INVALID, "Action profile '%1%' has non-constant size '%2%'",
-                         decl->controlPlaneName(), size);
+            ::P4::error(ErrorType::ERR_INVALID, "Action profile '%1%' has non-constant size '%2%'",
+                        decl->controlPlaneName(), size);
             return std::nullopt;
         }
         return getActionProfile(decl->controlPlaneName(), instance->type,
@@ -784,10 +784,10 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                 CHECK_NULL(maxGroupSizeConstant);
                 profile->set_max_group_size(maxGroupSizeConstant->asInt());
             } else {
-                ::P4C::warning(ErrorType::WARN_IGNORE,
-                               "Ignoring annotation @max_group_size on action profile '%1%', "
-                               "which does not have a selector",
-                               actionProfile.annotations);
+                ::P4::warning(ErrorType::WARN_IGNORE,
+                              "Ignoring annotation @max_group_size on action profile '%1%', "
+                              "which does not have a selector",
+                              actionProfile.annotations);
             }
         }
 
@@ -806,16 +806,16 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                 } else if (selectorSizeSemantics->value.toUpper() == "SUM_OF_MEMBERS") {
                     profile->mutable_sum_of_members();
                 } else {
-                    ::P4C::error(ErrorType::ERR_INVALID,
-                                 "Expected selector_size_semantics value \"sum_of_weights\" or "
-                                 "\"sum_of_members\", but got '%1%'",
-                                 selectorSizeSemantics);
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "Expected selector_size_semantics value \"sum_of_weights\" or "
+                                "\"sum_of_members\", but got '%1%'",
+                                selectorSizeSemantics);
                 }
             } else {
-                ::P4C::warning(ErrorType::WARN_IGNORE,
-                               "Ignoring annotation @selector_size_semantics on action "
-                               "profile '%1%', which does not have a selector ",
-                               actionProfile.annotations);
+                ::P4::warning(ErrorType::WARN_IGNORE,
+                              "Ignoring annotation @selector_size_semantics on action "
+                              "profile '%1%', which does not have a selector ",
+                              actionProfile.annotations);
             }
         }
 
@@ -831,15 +831,15 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                 profile->mutable_sum_of_members()->set_max_member_weight(
                     maxMemberWeightConstant->asInt());
             } else if (actionProfile.type != ActionProfileType::INDIRECT_WITH_SELECTOR) {
-                ::P4C::warning(ErrorType::WARN_IGNORE,
-                               "Ignoring annotation @max_member_weight on action profile "
-                               "'%1%', which does not have a selector",
-                               actionProfile.annotations);
+                ::P4::warning(ErrorType::WARN_IGNORE,
+                              "Ignoring annotation @max_member_weight on action profile "
+                              "'%1%', which does not have a selector",
+                              actionProfile.annotations);
             } else {
-                ::P4C::warning(ErrorType::WARN_IGNORE,
-                               "Ignoring annotation @max_member_weight on action profile '%1%', "
-                               "which does not use 'sum_of_members' as its SelectorSizeSemantics",
-                               actionProfile.annotations);
+                ::P4::warning(ErrorType::WARN_IGNORE,
+                              "Ignoring annotation @max_member_weight on action profile '%1%', "
+                              "which does not use 'sum_of_members' as its SelectorSizeSemantics",
+                              actionProfile.annotations);
             }
         }
 
@@ -965,7 +965,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         const IR::Property *impl = getTableImplementationProperty(table);
         if (impl == nullptr) return std::nullopt;
         if (!impl->value->is<IR::ExpressionValue>()) {
-            ::P4C::error(
+            ::P4::error(
                 ErrorType::ERR_EXPECTED,
                 "Expected implementation property value for table %1% to be an expression: %2%",
                 table->controlPlaneName(), impl);
@@ -1072,21 +1072,21 @@ class P4RuntimeArchHandlerPSAPNA : public P4RuntimeArchHandlerCommon<arch> {
                         return false;
                     }
                 } else if (expr->is<IR::PathExpression>()) {
-                    ::P4C::error(ErrorType::ERR_UNEXPECTED,
-                                 "Unresolved value %1% for psa_idle_timeout "
-                                 "property on table %2%. Must be a constant and one of "
-                                 "{ NOTIFY_CONTROL, NO_TIMEOUT }",
-                                 timeout, table);
+                    ::P4::error(ErrorType::ERR_UNEXPECTED,
+                                "Unresolved value %1% for psa_idle_timeout "
+                                "property on table %2%. Must be a constant and one of "
+                                "{ NOTIFY_CONTROL, NO_TIMEOUT }",
+                                timeout, table);
                     return false;
                 }
             }
         }
 
-        ::P4C::error(ErrorType::ERR_UNEXPECTED,
-                     "Unexpected value %1% for psa_idle_timeout "
-                     "property on table %2%. Supported values are "
-                     "{ NOTIFY_CONTROL, NO_TIMEOUT }",
-                     timeout, table);
+        ::P4::error(ErrorType::ERR_UNEXPECTED,
+                    "Unexpected value %1% for psa_idle_timeout "
+                    "property on table %2%. Supported values are "
+                    "{ NOTIFY_CONTROL, NO_TIMEOUT }",
+                    timeout, table);
         return false;
     }
 };
@@ -1121,6 +1121,6 @@ class P4RuntimeArchHandlerPNA final : public P4RuntimeArchHandlerPSAPNA<Arch::PN
 }  // namespace ControlPlaneAPI
 
 /** @} */ /* end group control_plane */
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* CONTROL_PLANE_P4RUNTIMEARCHSTANDARD_H_ */

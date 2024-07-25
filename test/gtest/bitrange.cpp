@@ -28,10 +28,10 @@ limitations under the License.
 // disable these tests for GCC-4.9, which for some reason
 // do not link with std::optional
 #if (__GNUC__ > 4) || defined(__clang__)
-namespace P4C::Test {
+namespace P4::Test {
 
-using namespace ::P4C::BitRange;
-using namespace ::P4C::BitRange::Detail;
+using namespace ::P4::BitRange;
+using namespace ::P4::BitRange::Detail;
 
 /// A GTest fixture base class for backend targets.
 class BitrangeTestBase : public ::testing::Test {
@@ -1480,5 +1480,5 @@ TEST_F(IntegerMathUtilsTest, ModuloFloor) {
     }
 }
 
-}  // namespace P4C::Test
+}  // namespace P4::Test
 #endif  // (__GNUC__ > 4) || defined(__clang__)

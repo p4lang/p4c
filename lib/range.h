@@ -19,7 +19,7 @@ limitations under the License.
 
 #include <iostream>
 
-namespace P4C {
+namespace P4 {
 
 template <class T>
 class RangeIter {
@@ -63,6 +63,6 @@ std::ostream &operator<<(std::ostream &out, const RangeIter<T> &r) {
     return out;
 }
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_RANGE_H_ */

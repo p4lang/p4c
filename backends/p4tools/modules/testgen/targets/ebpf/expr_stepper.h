@@ -10,7 +10,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4C::P4Tools::P4Testgen::EBPF {
+namespace P4::P4Tools::P4Testgen::EBPF {
 
 class EBPFExprStepper : public ExprStepper {
  private:
@@ -30,6 +30,6 @@ class EBPFExprStepper : public ExprStepper {
     /// @returns a method call statement that calls packet_out.emit on the provided input label.
     static const IR::MethodCallStatement *produceEmitCall(const IR::Member *fieldLabel);
 };
-}  // namespace P4C::P4Tools::P4Testgen::EBPF
+}  // namespace P4::P4Tools::P4Testgen::EBPF
 
 #endif /* TESTGEN_TARGETS_EBPF_EXPR_STEPPER_H_ */

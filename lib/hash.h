@@ -11,7 +11,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace P4C::Util {
+namespace P4::Util {
 
 namespace Detail {
 constexpr uint32_t PRIME32_1 = UINT32_C(0x9E3779B1);
@@ -278,13 +278,13 @@ struct TupleHasher<0, Types...> {
     }
 };
 }  // namespace Detail
-}  // namespace P4C::Util
+}  // namespace P4::Util
 
 namespace std {
 template <typename T1, typename T2>
 struct hash<std::pair<T1, T2>> {
     size_t operator()(const std::pair<T1, T2> &x) const {
-        return P4C::Util::hash_combine(x.first, x.second);
+        return P4::Util::hash_combine(x.first, x.second);
     }
 };
 
@@ -292,7 +292,7 @@ template <typename... Types>
 struct hash<std::tuple<Types...>> {
  public:
     size_t operator()(std::tuple<Types...> const &key) const {
-        P4C::Util::Detail::TupleHasher<sizeof...(Types) - 1, Types...> hasher;
+        P4::Util::Detail::TupleHasher<sizeof...(Types) - 1, Types...> hasher;
 
         return hasher(key);
     }

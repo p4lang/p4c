@@ -30,7 +30,7 @@ limitations under the License.
 #include "lib/safe_vector.h"
 #include "midend/convertEnums.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
  * Policy function: given a number of error values should return
@@ -94,6 +94,6 @@ class ConvertErrors : public PassManager {
 
     ErrorMapping getErrorMapping() const { return convertErrors->repr; }
 };
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_CONVERTERRORS_H_ */

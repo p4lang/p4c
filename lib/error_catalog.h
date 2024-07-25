@@ -24,7 +24,7 @@ limitations under the License.
 #include "lib/error_message.h"
 #include "lib/exceptions.h"
 
-namespace P4C {
+namespace P4 {
 
 using MessageType = ErrorMessage::MessageType;
 
@@ -127,7 +127,7 @@ class ErrorCatalog {
 
     /// retrieve the name for errorCode
     cstring getName(int errorCode) {
-        using namespace ::P4C::P4::literals;
+        using namespace ::P4::literals;
 
         if (errorCatalog.count(errorCode)) return errorCatalog.at(errorCode);
         return "--unknown--"_cs;
@@ -157,6 +157,6 @@ class ErrorCatalog {
     static std::map<int, cstring> errorCatalog;
 };
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_ERROR_CATALOG_H_ */

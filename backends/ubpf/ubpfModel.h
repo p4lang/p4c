@@ -23,20 +23,20 @@ limitations under the License.
 #include "ir/pass_manager.h"
 #include "lib/cstring.h"
 
-namespace P4C::UBPF {
+namespace P4::UBPF {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
-struct Pipeline_Model : public ::P4C::Model::Elem {
+struct Pipeline_Model : public ::P4::Model::Elem {
     Pipeline_Model()
         : Elem("Pipeline"_cs), parser("prs"_cs), control("p"_cs), deparser("dprs"_cs) {}
 
-    ::P4C::Model::Elem parser;
-    ::P4C::Model::Elem control;
-    ::P4C::Model::Elem deparser;
+    ::P4::Model::Elem parser;
+    ::P4::Model::Elem control;
+    ::P4::Model::Elem deparser;
 };
 
-struct Register_Model : public ::P4C::Model::Extern_Model {
+struct Register_Model : public ::P4::Model::Extern_Model {
     Register_Model()
         : Extern_Model("Register"_cs),
           sizeParam("size"_cs),
@@ -46,25 +46,25 @@ struct Register_Model : public ::P4C::Model::Extern_Model {
           index("index"_cs),
           value("value"_cs) {}
 
-    ::P4C::Model::Elem sizeParam;
-    ::P4C::Model::Elem read;
-    ::P4C::Model::Elem write;
-    ::P4C::Model::Elem initial_value;
-    ::P4C::Model::Elem index;
-    ::P4C::Model::Elem value;
+    ::P4::Model::Elem sizeParam;
+    ::P4::Model::Elem read;
+    ::P4::Model::Elem write;
+    ::P4::Model::Elem initial_value;
+    ::P4::Model::Elem index;
+    ::P4::Model::Elem value;
 };
 
-struct Algorithm_Model : public ::P4C::Model::Enum_Model {
-    Algorithm_Model() : ::P4C::Model::Enum_Model("HashAlgorithm"_cs), lookup3("lookup3"_cs) {}
+struct Algorithm_Model : public ::P4::Model::Enum_Model {
+    Algorithm_Model() : ::P4::Model::Enum_Model("HashAlgorithm"_cs), lookup3("lookup3"_cs) {}
 
-    ::P4C::Model::Elem lookup3;
+    ::P4::Model::Elem lookup3;
 };
 
-struct Hash_Model : public ::P4C::Model::Elem {
-    Hash_Model() : ::P4C::Model::Elem("hash"_cs) {}
+struct Hash_Model : public ::P4::Model::Elem {
+    Hash_Model() : ::P4::Model::Elem("hash"_cs) {}
 };
 
-class UBPFModel : public ::P4C::Model::Model {
+class UBPFModel : public ::P4::Model::Model {
  protected:
     UBPFModel()
         : CPacketName("pkt"_cs),
@@ -84,16 +84,16 @@ class UBPFModel : public ::P4C::Model::Model {
     static UBPFModel instance;
     static cstring reservedPrefix;
 
-    ::P4C::Model::Elem CPacketName;
-    ::P4C::Model::Param_Model packet;
+    ::P4::Model::Elem CPacketName;
+    ::P4::Model::Param_Model packet;
     Pipeline_Model pipeline;
     Register_Model registerModel;
-    ::P4C::Model::Elem drop;
-    ::P4C::Model::Elem pass;
-    ::P4C::Model::Elem ubpf_time_get_ns;
-    ::P4C::Model::Elem truncate;
-    ::P4C::Model::Extern_Model csum_replace2;
-    ::P4C::Model::Extern_Model csum_replace4;
+    ::P4::Model::Elem drop;
+    ::P4::Model::Elem pass;
+    ::P4::Model::Elem ubpf_time_get_ns;
+    ::P4::Model::Elem truncate;
+    ::P4::Model::Extern_Model csum_replace2;
+    ::P4::Model::Extern_Model csum_replace4;
     Algorithm_Model hashAlgorithm;
     Hash_Model hash;
     unsigned version = 20200515;
@@ -128,6 +128,6 @@ class UBPFModel : public ::P4C::Model::Model {
     }
 };
 
-}  // namespace P4C::UBPF
+}  // namespace P4::UBPF
 
 #endif /* BACKENDS_UBPF_UBPFMODEL_H_ */

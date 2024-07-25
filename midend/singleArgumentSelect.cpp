@@ -1,6 +1,6 @@
 #include "singleArgumentSelect.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 DoSingleArgumentSelect::Pair::Pair(const IR::Expression *e, const IR::Type *type) {
     auto srcInfo = e->srcInfo;
@@ -63,9 +63,9 @@ void DoSingleArgumentSelect::checkExpressionType(const IR::Expression *expressio
             checkExpressionType(c);
         }
     } else {
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED,
-                     "%1%: expression type %2% not supported in select expression", expression,
-                     type);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: expression type %2% not supported in select expression", expression,
+                    type);
     }
 }
 
@@ -84,4 +84,4 @@ bool DoSingleArgumentSelect::preorder(IR::SelectCase *selCase) {
     return false;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

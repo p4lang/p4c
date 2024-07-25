@@ -17,7 +17,7 @@ limitations under the License.
 #include "ir/json_generator.h"
 #include "ir/json_loader.h"
 
-namespace P4C::BitRange {
+namespace P4::BitRange {
 
 void rangeToJSON(JSONGenerator &json, int lo, int hi) { json.toJSON(std::make_pair(lo, hi)); }
 
@@ -27,4 +27,4 @@ std::pair<int, int> rangeFromJSON(JSONLoader &json) {
     return endpoints;
 }
 
-}  // namespace P4C::BitRange
+}  // namespace P4::BitRange

@@ -21,7 +21,7 @@ limitations under the License.
 
 #include "lib/cstring.h"
 
-namespace P4C::Test {
+namespace P4::Test {
 
 TEST(Hash, SimpleHashCombine) {
     constexpr uint64_t upper = UINT64_C(0xDEADBEEF12345678);
@@ -290,4 +290,4 @@ TEST(Hash, SharedPtr) { pointerTestWithHash<std::shared_ptr>(); }
 
 TEST(Hash, Pointer) { pointerTestWithHash<Pointer>(); }
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

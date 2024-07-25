@@ -25,7 +25,7 @@ limitations under the License.
 #include "psa/ebpfPsaGen.h"
 #include "target.h"
 
-namespace P4C::EBPF {
+namespace P4::EBPF {
 
 void emitFilterModel(const EbpfOptions &options, Target *target, const IR::ToplevelBlock *toplevel,
                      P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
@@ -60,9 +60,9 @@ void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
 
     auto main = toplevel->getMain();
     if (main == nullptr) {
-        ::P4C::warning(ErrorType::WARN_MISSING,
-                       "Could not locate top-level block; is there a %1% module?",
-                       IR::P4Program::main);
+        ::P4::warning(ErrorType::WARN_MISSING,
+                      "Could not locate top-level block; is there a %1% module?",
+                      IR::P4Program::main);
         return;
     }
 
@@ -80,9 +80,9 @@ void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
     } else if (options.target == "test") {
         target = new TestTarget();
     } else {
-        ::P4C::error(ErrorType::ERR_UNKNOWN,
-                     "Unknown target %s; legal choices are 'bcc', 'kernel', and test",
-                     options.target);
+        ::P4::error(ErrorType::ERR_UNKNOWN,
+                    "Unknown target %s; legal choices are 'bcc', 'kernel', and test",
+                    options.target);
         return;
     }
 
@@ -100,11 +100,10 @@ void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
         backend->codegen(*cstream);
         cstream->flush();
     } else {
-        ::P4C::error(ErrorType::ERR_UNKNOWN,
-                     "Unknown architecture %s; legal choices are 'filter', and 'psa'",
-                     options.arch);
+        ::P4::error(ErrorType::ERR_UNKNOWN,
+                    "Unknown architecture %s; legal choices are 'filter', and 'psa'", options.arch);
         return;
     }
 }
 
-}  // namespace P4C::EBPF
+}  // namespace P4::EBPF

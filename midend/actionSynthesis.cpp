@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 using namespace literals;
 
@@ -230,4 +230,4 @@ const IR::Node *DoSynthesizeActions::preorder(IR::ExitStatement *statement) {
     return createAction(statement);
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

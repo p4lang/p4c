@@ -29,7 +29,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/safe_vector.h"
 
-namespace P4C {
+namespace P4 {
 
 /// A hook called by pass manager after a pass finishes.
 /// @param node a result of the last pass, which can be the (transformed) node, or a nullptr.
@@ -220,6 +220,6 @@ class DynamicVisitor : virtual public Visitor {
     DynamicVisitor *clone() const override { return new DynamicVisitor(*this); }
 };
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* IR_PASS_MANAGER_H_ */

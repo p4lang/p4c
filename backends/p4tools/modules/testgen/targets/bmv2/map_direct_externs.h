@@ -9,7 +9,7 @@
 #include "ir/visitor.h"
 #include "lib/cstring.h"
 
-namespace P4C::P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 /// A mapping of the control plane name of extern declarations which are associated with a table.
 /// Such an extern is referred to as direct extern. There can only be one extern associated with a
@@ -45,6 +45,6 @@ class MapDirectExterns : public Inspector {
     const DirectExternMap &getDirectExternMap();
 };
 
-}  // namespace P4C::P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2
 
 #endif /*BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_MAP_DIRECT_EXTERNS_H_*/

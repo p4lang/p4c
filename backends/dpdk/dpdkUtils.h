@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 
-namespace P4C::DPDK {
+namespace P4::DPDK {
 bool isSimpleExpression(const IR::Expression *e);
 bool isNonConstantSimpleExpression(const IR::Expression *e);
 bool isCommutativeBinaryOperation(const IR::Operation_Binary *bin);
@@ -41,5 +41,5 @@ bool reservedNames(P4::ReferenceMap *refMap, const std::vector<cstring> &names, 
 /// Creates Register extern declaration for holding persistent information.
 IR::Declaration_Instance *createRegDeclarationInstance(cstring instanceName, int regSize,
                                                        int indexBitWidth, int initValBitwidth);
-}  // namespace P4C::DPDK
+}  // namespace P4::DPDK
 #endif /* BACKENDS_DPDK_DPDKUTILS_H_ */

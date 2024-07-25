@@ -7,7 +7,7 @@
 
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
-namespace P4C::Test {
+namespace P4::Test {
 
 namespace SmallStepUtil {
 
@@ -64,4 +64,4 @@ V1Switch(parse(), verifyChecksum(), mau(), mau(), computeChecksum(), deparse()) 
 
 }  // namespace SmallStepUtil
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

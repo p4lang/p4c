@@ -26,7 +26,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/source_file.h"
 
-namespace P4C {
+namespace P4 {
 class Visitor;
 struct Visitor_Context;
 class Inspector;
@@ -34,15 +34,15 @@ class Modifier;
 class Transform;
 class JSONGenerator;
 class JSONLoader;
-}  // namespace P4C
+}  // namespace P4
 
-namespace P4C::Util {
+namespace P4::Util {
 class JsonObject;
-}  // namespace P4C::Util
+}  // namespace P4::Util
 
-namespace P4C::IR {
+namespace P4::IR {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 class Node;
 class Annotation;  // IWYU pragma: keep
@@ -112,10 +112,10 @@ class Node : public virtual INode {
  protected:
     static int currentId;
     void traceVisit(const char *visitor) const;
-    friend class ::P4C::Visitor;
-    friend class ::P4C::Inspector;
-    friend class ::P4C::Modifier;
-    friend class ::P4C::Transform;
+    friend class ::P4::Visitor;
+    friend class ::P4::Inspector;
+    friend class ::P4::Modifier;
+    friend class ::P4::Transform;
     cstring prepareSourceInfoForJSON(Util::SourceInfo &si, unsigned *lineNumber,
                                      unsigned *columnNumber) const;
 
@@ -225,6 +225,6 @@ inline bool equiv(const INode *a, const INode *b) {
         return tmp;                                                                          \
     }
 
-}  // namespace P4C::IR
+}  // namespace P4::IR
 
 #endif /* IR_NODE_H_ */

@@ -30,9 +30,9 @@
 #include "backends/p4tools/modules/testgen/targets/pna/shared_expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
-namespace P4C::P4Tools::P4Testgen::Pna {
+namespace P4::P4Tools::P4Testgen::Pna {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
     const TableUtils::KeyProperties &keyProperties, TableMatchMap *matches,
@@ -346,7 +346,7 @@ void SharedPnaTableStepper::checkTargetProperties(
         properties.tableIsTainted = properties.tableIsTainted || keyIsTainted;
         // If the key expression is tainted, do not bother resolving the remaining keys.
         if (properties.tableIsTainted) {
-            ::P4C::warning("Key %1% of table %2% is tainted.", keyElement->expression, table);
+            ::P4::warning("Key %1% of table %2% is tainted.", keyElement->expression, table);
             return;
         }
     }
@@ -377,7 +377,7 @@ void SharedPnaTableStepper::evalTargetTable(
             return;
         }
         if (!properties.defaultIsImmutable) {
-            ::P4C::warning(
+            ::P4::warning(
                 "Table %1%: Overriding default actions not supported for test back end %2%. "
                 "Choosing default action",
                 properties.tableName, testBackend);
@@ -403,7 +403,7 @@ void SharedPnaTableStepper::evalTargetTable(
                 evalTableActionSelector(tableActionList);
             } else {
                 // We can only generate profile entries for PTF and Protobuf tests.
-                ::P4C::warning(
+                ::P4::warning(
                     "Action selector control plane entries are not implemented. Using default "
                     "action.");
             }
@@ -416,7 +416,7 @@ void SharedPnaTableStepper::evalTargetTable(
                 evalTableActionProfile(tableActionList);
             } else {
                 // We can only generate profile entries for PTF and Protobuf tests.
-                ::P4C::warning(
+                ::P4::warning(
                     "Action profile control plane entries are not implemented. Using default "
                     "action.");
             }
@@ -444,4 +444,4 @@ SharedPnaTableStepper::SharedPnaTableStepper(SharedPnaExprStepper *stepper,
                                              const IR::P4Table *table)
     : TableStepper(stepper, table) {}
 
-}  // namespace P4C::P4Tools::P4Testgen::Pna
+}  // namespace P4::P4Tools::P4Testgen::Pna

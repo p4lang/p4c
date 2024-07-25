@@ -22,7 +22,7 @@ limitations under the License.
 #include "ir/vector.h"
 #include "lib/rtti_utils.h"
 
-namespace P4C::Test {
+namespace P4::Test {
 
 TEST(RTTI, TypeId) {
     auto *c = new IR::Constant(2);
@@ -170,4 +170,4 @@ TEST(RttiUtils, isAny) {
     EXPECT_EQ(*it, from[1]);
 }
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

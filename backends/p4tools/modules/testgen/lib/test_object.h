@@ -6,7 +6,7 @@
 #include "lib/castable.h"
 #include "lib/cstring.h"
 
-namespace P4C::P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 /* =========================================================================================
  *  Abstract Test Object Class
@@ -34,6 +34,6 @@ class TestObject : public ICastable {
 /// A map of test objects.
 using TestObjectMap = ordered_map<cstring, const TestObject *>;
 
-}  // namespace P4C::P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_OBJECT_H_ */

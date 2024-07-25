@@ -22,14 +22,14 @@ limitations under the License.
 
 #include "lib/big_int_util.h"
 
-namespace P4C::IR {
+namespace P4::IR {
 
 class Constant;
 class BoolLiteral;
 
-}  // namespace P4C::IR
+}  // namespace P4::IR
 
-namespace P4C::P4 {
+namespace P4 {
 
 namespace ControlPlaneAPI {
 
@@ -41,6 +41,6 @@ std::optional<std::string> stringReprConstant(big_int value, int width);
 
 }  // namespace ControlPlaneAPI
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif  // CONTROL_PLANE_BYTESTRINGS_H_

@@ -23,7 +23,7 @@ limitations under the License.
 #include "lib/hvec_map.h"
 #include "lib/hvec_set.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
  * @brief Compute defuse info within P4Parser and P4Control blocks in the midend.
@@ -202,12 +202,12 @@ class ComputeDefUse : public Inspector,
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 namespace std {
 template <>
-struct hash<P4C::P4::ComputeDefUse::loc_t> {
-    std::size_t operator()(const P4C::P4::ComputeDefUse::loc_t &loc) const { return loc.hash(); }
+struct hash<P4::ComputeDefUse::loc_t> {
+    std::size_t operator()(const P4::ComputeDefUse::loc_t &loc) const { return loc.hash(); }
 };
 
 }  // namespace std

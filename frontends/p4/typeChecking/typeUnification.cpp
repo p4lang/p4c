@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "typeConstraints.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 using namespace literals;
 
@@ -497,4 +497,4 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
     return constraint->reportError(constraints->getCurrentSubstitution());
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

@@ -5,9 +5,9 @@
 #include <initializer_list>
 #include <string_view>
 
-namespace P4C::Test {
+namespace P4::Test {
 
-using namespace ::P4C::NetHash;
+using namespace ::P4::NetHash;
 
 template <typename T>
 struct Hex {
@@ -110,4 +110,4 @@ TEST(NetHash, identity) {
               0x4500'0073'0000'4000_u64);
 }
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

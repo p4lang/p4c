@@ -24,7 +24,7 @@
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4C::P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 STF::STF(const TestBackendConfiguration &testBackendConfiguration)
     : Bmv2TestFramework(testBackendConfiguration) {}
@@ -249,4 +249,4 @@ void STF::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, si
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }
 
-}  // namespace P4C::P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2

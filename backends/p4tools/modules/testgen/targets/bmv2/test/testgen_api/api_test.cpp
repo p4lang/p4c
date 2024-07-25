@@ -8,9 +8,9 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf_ir.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace P4C::Test {
+namespace P4::Test {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 TEST(P4TestgenLibrary, GeneratesCorrectProtobufIrTest) {
     std::stringstream streamTest;
@@ -92,4 +92,4 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
     const auto *protobufTest = testList[0]->checkedTo<P4Tools::P4Testgen::Bmv2::ProtobufTest>();
     EXPECT_THAT(protobufTest->getFormattedTest(), ::testing::HasSubstr(R"(input_packet)"));
 }
-}  // namespace P4C::Test
+}  // namespace P4::Test

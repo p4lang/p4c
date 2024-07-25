@@ -22,7 +22,7 @@ limitations under the License.
 #include "backends/ebpf/psa/externs/ebpfPsaMeter.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace P4C::EBPF {
+namespace P4::EBPF {
 
 class EBPFTableImplementationPSA;
 
@@ -132,8 +132,8 @@ class EBPFTablePsaPropertyVisitor : public Inspector {
     /// precedence over it and throw error for whole list.
     bool preorder(const IR::ListExpression *) override { return true; }
     bool preorder(const IR::Expression *expr) override {
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED,
-                     "%1%: unsupported expression, expected a named instance", expr);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: unsupported expression, expected a named instance", expr);
         return false;
     }
 
@@ -143,6 +143,6 @@ class EBPFTablePsaPropertyVisitor : public Inspector {
     }
 };
 
-}  // namespace P4C::EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EBPFPSATABLE_H_ */

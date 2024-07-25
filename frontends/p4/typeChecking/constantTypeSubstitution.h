@@ -22,7 +22,7 @@ limitations under the License.
 #include "typeChecker.h"
 #include "typeSubstitution.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 // Used to set the type of Constants after type inference
 class ConstantTypeSubstitution : public Transform, ResolutionContext {
@@ -61,7 +61,7 @@ class ConstantTypeSubstitution : public Transform, ResolutionContext {
 
     const IR::Expression *convert(const IR::Expression *expr, const Visitor::Context *ctxt) {
         auto result = expr->apply(*this, ctxt)->to<IR::Expression>();
-        if (result != expr && (::P4C::errorCount() == 0)) tc->learn(result, this, ctxt);
+        if (result != expr && (::P4::errorCount() == 0)) tc->learn(result, this, ctxt);
         return result;
     }
     const IR::Vector<IR::Expression> *convert(const IR::Vector<IR::Expression> *vec,
@@ -78,6 +78,6 @@ class ConstantTypeSubstitution : public Transform, ResolutionContext {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif  // FRONTENDS_P4_TYPECHECKING_CONSTANTTYPESUBSTITUTION_H_

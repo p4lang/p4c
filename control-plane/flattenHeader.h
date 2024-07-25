@@ -21,7 +21,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 class TypeMap;
 
@@ -52,6 +52,6 @@ class FlattenHeader {
 
 }  // namespace ControlPlaneAPI
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif  // CONTROL_PLANE_FLATTENHEADER_H_

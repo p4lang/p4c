@@ -11,7 +11,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 
-namespace P4C::P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 enum class Bmv2HashAlgorithm {
     crc32,
@@ -52,6 +52,6 @@ class Bmv2Concolic : public Concolic {
     static const ConcolicMethodImpls::ImplList *getBmv2ConcolicMethodImpls();
 };
 
-}  // namespace P4C::P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_CONCOLIC_H_ */

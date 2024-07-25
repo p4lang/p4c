@@ -26,7 +26,7 @@ limitations under the License.
 /// @file
 /// @brief Utilities for passes and pass managers.
 
-namespace P4C::P4 {
+namespace P4 {
 
 // The state needs to be shared between all hook copies as the hook is copied in the pass manager.
 struct DiagnosticCountInfoState {
@@ -103,4 +103,4 @@ DiagnosticCountInfoGuard DiagnosticCountInfo::getInfoGuard(std::string_view comp
     return {componentInfo, state};
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

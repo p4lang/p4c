@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 Visitor::profile_t FindFunctionSpecializations::init_apply(const IR::Node *node) {
     auto rv = Inspector::init_apply(node);
@@ -88,4 +88,4 @@ const IR::Node *SpecializeFunctions::postorder(IR::MethodCallExpression *mce) {
     return mce;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

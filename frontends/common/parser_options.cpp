@@ -36,7 +36,7 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
-namespace P4C {
+namespace P4 {
 
 /* CONFIG_PKGDATADIR is defined by cmake at compile time to be the same as
  * CMAKE_INSTALL_PREFIX This is only valid when the compiler is built and
@@ -46,7 +46,7 @@ namespace P4C {
 const char *p4includePath = CONFIG_PKGDATADIR "/p4include";
 const char *p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 void ParserOptions::closeFile(FILE *file) {
     if (file == nullptr) {
@@ -54,12 +54,12 @@ void ParserOptions::closeFile(FILE *file) {
     }
     int exitCode = pclose(file);
     if (WIFEXITED(exitCode) && WEXITSTATUS(exitCode) == 4) {
-        ::P4C::error(ErrorType::ERR_IO, "input file does not exist");
+        ::P4::error(ErrorType::ERR_IO, "input file does not exist");
         return;
     }
     if (exitCode != 0) {
-        ::P4C::error(ErrorType::ERR_IO, "Preprocessor returned exit code %d; aborting compilation",
-                     exitCode);
+        ::P4::error(ErrorType::ERR_IO, "Preprocessor returned exit code %d; aborting compilation",
+                    exitCode);
         return;
     }
 }
@@ -169,7 +169,7 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
             } else if (!strcmp(arg, "1.2") || !strcmp(arg, "16")) {
                 langVersion = ParserOptions::FrontendVersion::P4_16;
             } else {
-                ::P4C::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
+                ::P4::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
                 return false;
             }
             return true;
@@ -183,7 +183,7 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
             } else if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
                 langVersion = ParserOptions::FrontendVersion::P4_16;
             } else {
-                ::P4C::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
+                ::P4::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
                 return false;
             }
             return true;
@@ -213,8 +213,7 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
         [](const char *diagnostic) {
             if (diagnostic) {
                 if (ErrorCatalog::getCatalog().isError(diagnostic)) {
-                    ::P4C::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.",
-                                 diagnostic);
+                    ::P4::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
                     return false;
                 }
                 P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Ignore);
@@ -232,8 +231,7 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
         [](const char *diagnostic) {
             if (diagnostic) {
                 if (ErrorCatalog::getCatalog().isError(diagnostic)) {
-                    ::P4C::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.",
-                                 diagnostic);
+                    ::P4::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
                     return false;
                 }
                 P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Info);
@@ -246,8 +244,7 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
         [](const char *diagnostic) {
             if (diagnostic) {
                 if (ErrorCatalog::getCatalog().isError(diagnostic)) {
-                    ::P4C::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.",
-                                 diagnostic);
+                    ::P4::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
                     return false;
                 }
                 P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Warn);
@@ -343,12 +340,12 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
 
 void ParserOptions::setInputFile() {
     if (remainingOptions.size() > 1) {
-        ::P4C::error(ErrorType::ERR_OVERLIMIT, "Only one input file must be specified: %s",
-                     cstring::join(remainingOptions.begin(), remainingOptions.end(), ","));
+        ::P4::error(ErrorType::ERR_OVERLIMIT, "Only one input file must be specified: %s",
+                    cstring::join(remainingOptions.begin(), remainingOptions.end(), ","));
         usage();
         exit(1);
     } else if (remainingOptions.size() == 0) {
-        ::P4C::error(ErrorType::ERR_EXPECTED, "No input files specified");
+        ::P4::error(ErrorType::ERR_EXPECTED, "No input files specified");
         usage();
         exit(1);
     } else {
@@ -440,7 +437,7 @@ std::optional<ParserOptions::PreprocessorResult> ParserOptions::preprocess() con
         if (Log::verbose()) std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;
         in = popen(cmd.c_str(), "r");
         if (in == nullptr) {
-            ::P4C::error(ErrorType::ERR_IO, "Error invoking preprocessor");
+            ::P4::error(ErrorType::ERR_IO, "Error invoking preprocessor");
             perror("");
             return std::nullopt;
         }
@@ -488,10 +485,10 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
             // regex_search checks if the regex is contained as substring
             match = std::regex_search(name.begin(), name.end(), s_regex);
         } catch (const std::regex_error &e) {
-            ::P4C::error(ErrorType::ERR_INVALID,
-                         "Malformed toP4 regex string \"%s\".\n"
-                         "The regex matcher follows ECMAScript syntax.",
-                         s);
+            ::P4::error(ErrorType::ERR_INVALID,
+                        "Malformed toP4 regex string \"%s\".\n"
+                        "The regex matcher follows ECMAScript syntax.",
+                        s);
             exit(1);
         }
         if (match) {
@@ -520,8 +517,8 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
 
 bool ParserOptions::isAnnotationDisabled(const IR::Annotation *a) const {
     if (disabledAnnotations.count(a->name.name) > 0) {
-        ::P4C::warning(ErrorType::WARN_IGNORE, "%1% is ignored because it was explicitly disabled",
-                       a);
+        ::P4::warning(ErrorType::WARN_IGNORE, "%1% is ignored because it was explicitly disabled",
+                      a);
         return true;
     }
     return false;
@@ -548,4 +545,4 @@ bool P4CContext::isRecognizedDiagnostic(cstring diagnostic) {
 }
 const P4CConfiguration &P4CContext::getConfigImpl() { return DefaultP4CConfiguration::get(); }
 
-}  // namespace P4C
+}  // namespace P4

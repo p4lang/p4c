@@ -16,7 +16,7 @@ limitations under the License.
 #include "syntacticEquivalence.h"
 #include "typeChecker.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 const IR::Node *TypeInference::postorder(IR::IfStatement *conditional) {
     LOG3("TI Visiting " << dbp(getOriginal()));
@@ -336,4 +336,4 @@ const IR::Node *TypeInference::postorder(IR::Property *prop) {
     return prop;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

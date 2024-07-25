@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/visitor.h"
 #include "lib/cstring.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /// An interface for compiler option pragma parsers; used to customize the
 /// behavior of ApplyOptionsPragmas.
@@ -83,6 +83,6 @@ class P4COptionPragmaParser : public IOptionPragmaParser {
     std::optional<CommandLineOptions> parseDiagnostic(const IR::Annotation *annotation);
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_COMMON_APPLYOPTIONSPRAGMAS_H_ */

@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/common/programMap.h"
 #include "frontends/p4/typeChecking/typeSubstitution.h"
 
-namespace P4C::P4 {
+namespace P4 {
 /**
 Maps nodes to their canonical types.
 Not all Node objects have types.
@@ -109,6 +109,6 @@ class TypeMap final : public ProgramMap {
     /// True is type occupies no storage.
     bool typeIsEmpty(const IR::Type *type) const;
 };
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_TYPEMAP_H_ */

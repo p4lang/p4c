@@ -4,7 +4,7 @@
 #include <set>
 
 /* stuff that should be in std::set but is missing... */
-namespace P4C {
+namespace P4 {
 
 template <class T, class C1, class A1, class U>
 inline auto operator|=(std::set<T, C1, A1> &a, U &b) -> decltype(b.begin(), a) {
@@ -40,6 +40,6 @@ inline auto intersects(std::set<T, C1, A1> &a, U &b) -> decltype(b.begin(), true
     return false;
 }
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_SET_H_ */

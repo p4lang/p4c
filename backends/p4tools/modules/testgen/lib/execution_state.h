@@ -28,7 +28,7 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
 
-namespace P4C::P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 /// Represents state of execution after having reached a program point.
 class ExecutionState : public AbstractExecutionState {
@@ -408,6 +408,6 @@ class ExecutionState : public AbstractExecutionState {
 
 using ExecutionStateReference = std::reference_wrapper<ExecutionState>;
 
-}  // namespace P4C::P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_EXECUTION_STATE_H_ */

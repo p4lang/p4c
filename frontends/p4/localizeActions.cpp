@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/cloner.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 using namespace literals;
 
@@ -91,7 +91,7 @@ bool FindGlobalActionUses::preorder(const IR::PathExpression *path) {
 }
 
 const IR::Node *LocalizeActions::postorder(IR::P4Control *control) {
-    auto actions = ::P4C::get(repl->repl, getOriginal<IR::P4Control>());
+    auto actions = ::P4::get(repl->repl, getOriginal<IR::P4Control>());
     if (actions == nullptr) return control;
     IR::IndexedVector<IR::Declaration> newDecls;
     for (auto pair : *actions) {
@@ -205,7 +205,7 @@ const IR::Node *DuplicateActions::postorder(IR::P4Control *control) {
 }
 
 const IR::Node *DuplicateActions::postorder(IR::PathExpression *expression) {
-    auto replacement = ::P4C::get(repl->repl, getOriginal<IR::PathExpression>());
+    auto replacement = ::P4::get(repl->repl, getOriginal<IR::PathExpression>());
     if (replacement != nullptr) {
         LOG1("Rewriting " << dbp(expression) << " to " << dbp(replacement));
         expression = new IR::PathExpression(
@@ -214,4 +214,4 @@ const IR::Node *DuplicateActions::postorder(IR::PathExpression *expression) {
     return expression;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

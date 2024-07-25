@@ -24,7 +24,7 @@ limitations under the License.
 #include "exceptions.h"
 #include "gc.h"
 
-namespace P4C {
+namespace P4 {
 
 class AllocTrace {
     struct backtrace {
@@ -78,6 +78,6 @@ class PauseTrace {
 #endif
 };
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_ALLOC_TRACE_H_ */

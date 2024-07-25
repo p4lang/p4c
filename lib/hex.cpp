@@ -19,7 +19,7 @@ limitations under the License.
 #include <assert.h>
 #include <stdint.h>
 
-namespace P4C {
+namespace P4 {
 
 std::ostream &operator<<(std::ostream &os, const hexvec &h) {
     auto save = os.flags();
@@ -53,4 +53,4 @@ std::ostream &operator<<(std::ostream &os, const hexvec &h) {
     return os;
 }
 
-}  // namespace P4C
+}  // namespace P4

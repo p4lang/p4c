@@ -8,7 +8,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4C::P4Tools::P4Testgen::Pna {
+namespace P4::P4Tools::P4Testgen::Pna {
 
 class SharedPnaExprStepper : public ExprStepper {
  private:
@@ -23,6 +23,6 @@ class SharedPnaExprStepper : public ExprStepper {
 
     bool preorder(const IR::P4Table * /*table*/) override;
 };
-}  // namespace P4C::P4Tools::P4Testgen::Pna
+}  // namespace P4::P4Tools::P4Testgen::Pna
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_SHARED_EXPR_STEPPER_H_ */

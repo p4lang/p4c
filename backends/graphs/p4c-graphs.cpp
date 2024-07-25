@@ -33,7 +33,7 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "parsers.h"
 
-namespace P4C::graphs {
+namespace P4::graphs {
 
 class MidEnd : public PassManager {
  public:
@@ -120,9 +120,9 @@ class Options : public CompilerOptions {
 
 using GraphsContext = P4CContextWithOptions<Options>;
 
-}  // namespace P4C::graphs
+}  // namespace P4::graphs
 
-using namespace ::P4C;
+using namespace ::P4;
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
@@ -136,7 +136,7 @@ int main(int argc, char *const argv[]) {
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false) options.setInputFile();
     }
-    if (::P4C::errorCount() > 0) return 1;
+    if (::P4::errorCount() > 0) return 1;
 
     auto hook = options.getDebugHook();
 
@@ -145,21 +145,21 @@ int main(int argc, char *const argv[]) {
     if (options.loadIRFromJson) {
         std::filebuf fb;
         if (fb.open(options.file, std::ios::in) == nullptr) {
-            ::P4C::error(ErrorType::ERR_IO, "%s: No such file or directory.", options.file);
+            ::P4::error(ErrorType::ERR_IO, "%s: No such file or directory.", options.file);
             return 1;
         }
 
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
         if (jsonFileLoader.json == nullptr) {
-            ::P4C::error(ErrorType::ERR_IO, "Not valid input file");
+            ::P4::error(ErrorType::ERR_IO, "Not valid input file");
             return 1;
         }
         program = new IR::P4Program(jsonFileLoader);
         fb.close();
     } else {
         program = P4::parseP4File(options);
-        if (program == nullptr || ::P4C::errorCount() > 0) return 1;
+        if (program == nullptr || ::P4::errorCount() > 0) return 1;
 
         try {
             P4::P4COptionPragmaParser optionsPragmaParser;
@@ -172,7 +172,7 @@ int main(int argc, char *const argv[]) {
             std::cerr << bug.what() << std::endl;
             return 1;
         }
-        if (program == nullptr || ::P4C::errorCount() > 0) return 1;
+        if (program == nullptr || ::P4::errorCount() > 0) return 1;
     }
 
     graphs::MidEnd midEnd(options);
@@ -186,7 +186,7 @@ int main(int argc, char *const argv[]) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
-    if (::P4C::errorCount() > 0) return 1;
+    if (::P4::errorCount() > 0) return 1;
 
     LOG2("Generating graphs under " << options.graphsDir);
     LOG2("Generating control graphs");
@@ -201,5 +201,5 @@ int main(int argc, char *const argv[]) {
 
     gvs.process(cgen.controlGraphsArray, pgg.parserGraphsArray);
 
-    return ::P4C::errorCount() > 0;
+    return ::P4::errorCount() > 0;
 }

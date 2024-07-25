@@ -3,7 +3,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 
-namespace P4C::P4Tools::P4Testgen::EBPF {
+namespace P4::P4Tools::P4Testgen::EBPF {
 
 class EBPFConcolic : public Concolic {
  private:
@@ -15,6 +15,6 @@ class EBPFConcolic : public Concolic {
     static const ConcolicMethodImpls::ImplList *getEBPFConcolicMethodImpls();
 };
 
-}  // namespace P4C::P4Tools::P4Testgen::EBPF
+}  // namespace P4::P4Tools::P4Testgen::EBPF
 
 #endif /* TESTGEN_TARGETS_EBPF_CONCOLIC_H_ */

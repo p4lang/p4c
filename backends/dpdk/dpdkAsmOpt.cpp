@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "dpdkUtils.h"
 
-namespace P4C::DPDK {
+namespace P4::DPDK {
 /// The assumption is compiler can only produce forward jumps.
 const IR::IndexedVector<IR::DpdkAsmStatement> *RemoveRedundantLabel::removeRedundantLabel(
     const IR::IndexedVector<IR::DpdkAsmStatement> &s) {
@@ -400,10 +400,10 @@ big_int EmitDpdkTableConfig::convertSimpleKeyExpressionToBigInt(const IR::Expres
             BUG_CHECK(w == keyWidth, "SerEnum bitwidth mismatch");
             return type->value;
         }
-        ::P4C::error(ErrorType::ERR_INVALID, "%1% invalid Member key expression", k);
+        ::P4::error(ErrorType::ERR_INVALID, "%1% invalid Member key expression", k);
         return -1;
     } else {
-        ::P4C::error(ErrorType::ERR_INVALID, "%1% invalid key expression", k);
+        ::P4::error(ErrorType::ERR_INVALID, "%1% invalid key expression", k);
         return -1;
     }
 }
@@ -450,8 +450,8 @@ void EmitDpdkTableConfig::addAction(const IR::Expression *actionRef, P4::Referen
                     auto argValue = sei->value->to<IR::Constant>();
                     argVals.push_back(argValue->value);
                 } else {
-                    ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported argument expression",
-                                 arg);
+                    ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported argument expression",
+                                arg);
                     continue;
                 }
             }
@@ -489,14 +489,14 @@ void EmitDpdkTableConfig::addLpm(const IR::Expression *k, int keyWidth, P4::Type
         mask = km->right->to<IR::Constant>()->value;
         auto len = trailing_zeros(mask);
         if (len + count_ones(mask) != keyWidth) {  // any remaining 0s in the prefix?
-            ::P4C::error(ErrorType::ERR_INVALID, "%1% invalid mask for LPM key", k);
+            ::P4::error(ErrorType::ERR_INVALID, "%1% invalid mask for LPM key", k);
             return;
         }
         if ((value & mask) != value) {
-            ::P4C::warning(ErrorType::WARN_MISMATCH,
-                           "P4Runtime requires that LPM matches have masked-off bits set to 0, "
-                           "updating value %1% to conform to the P4Runtime specification",
-                           km->left);
+            ::P4::warning(ErrorType::WARN_MISMATCH,
+                          "P4Runtime requires that LPM matches have masked-off bits set to 0, "
+                          "updating value %1% to conform to the P4Runtime specification",
+                          km->left);
             value &= mask;
         }
         valueStr = value;
@@ -518,10 +518,10 @@ void EmitDpdkTableConfig::addTernary(const IR::Expression *k, int keyWidth, P4::
         auto value = convertSimpleKeyExpressionToBigInt(km->left, keyWidth, typeMap);
         auto mask = convertSimpleKeyExpressionToBigInt(km->right, keyWidth, typeMap);
         if ((value & mask) != value) {
-            ::P4C::warning(ErrorType::WARN_MISMATCH,
-                           "P4Runtime requires that Ternary matches have masked-off bits set to 0, "
-                           "updating value %1% to conform to the P4Runtime specification",
-                           km->left);
+            ::P4::warning(ErrorType::WARN_MISMATCH,
+                          "P4Runtime requires that Ternary matches have masked-off bits set to 0, "
+                          "updating value %1% to conform to the P4Runtime specification",
+                          km->left);
             value &= mask;
         }
         valueStr = value;
@@ -552,7 +552,7 @@ void EmitDpdkTableConfig::addRange(const IR::Expression *k, int keyWidth, P4::Ty
         // For e.g. 16 bit key has a max value of 65535, Range of (1..65536)
         // will be converted to (1..0) and will fail below check.
         if (start > end)
-            ::P4C::error(ErrorType::ERR_INVALID, "%s Invalid range for table entry", kr->srcInfo);
+            ::P4::error(ErrorType::ERR_INVALID, "%s Invalid range for table entry", kr->srcInfo);
         startStr = start;
         endStr = end;
     } else {
@@ -591,8 +591,8 @@ void EmitDpdkTableConfig::addMatchKey(const IR::DpdkTable *table, const IR::List
             addOptional(k, keyWidth, typeMap);
         } else {
             if (!k->is<IR::DefaultExpression>())
-                ::P4C::error(ErrorType::ERR_UNSUPPORTED,
-                             "%1%: match type not supported by P4Runtime serializer", matchType);
+                ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                            "%1%: match type not supported by P4Runtime serializer", matchType);
             continue;
         }
     }
@@ -641,4 +641,4 @@ void EmitDpdkTableConfig::postorder(const IR::DpdkTable *table) {
     dpdkTableConfigFile.close();
 }
 size_t ShortenTokenLength::count = 0;
-}  // namespace P4C::DPDK
+}  // namespace P4::DPDK

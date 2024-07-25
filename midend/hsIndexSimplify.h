@@ -6,7 +6,7 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 using GeneratedVariablesMap = std::map<cstring, const IR::PathExpression *>;
 
@@ -102,6 +102,6 @@ class HSIndexSimplifier : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_HSINDEXSIMPLIFY_H_ */

@@ -35,7 +35,7 @@ class P4TypeInfo;
 
 }  // namespace p4
 
-namespace P4C::P4 {
+namespace P4 {
 
 class TypeMap;
 class ReferenceMap;
@@ -113,6 +113,6 @@ cstring getTypeName(const IR::Type *type, TypeMap *typeMap);
 
 }  // namespace ControlPlaneAPI
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif  // CONTROL_PLANE_TYPESPECCONVERTER_H_

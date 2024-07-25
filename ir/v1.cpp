@@ -29,7 +29,7 @@ limitations under the License.
 #include "lib/error_catalog.h"
 #include "lib/source_file.h"
 
-namespace P4C {
+namespace P4 {
 
 #define SINGLETON_TYPE(NAME)                                               \
     const IR::Type_##NAME *IR::Type_##NAME::get() {                        \
@@ -58,7 +58,7 @@ struct primitive_info_t {
     unsigned type_match_operands;  // bitset -- 1 bit per operand
 };
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 static const std::map<cstring, primitive_info_t> prim_info = {
     {"add"_cs, {3, 3, 0x1, 0x7}},
@@ -214,4 +214,4 @@ IR::V1Program::V1Program() {
     scope.add("standard_metadata"_cs, new IR::Metadata("standard_metadata", standard_metadata_t));
 }
 
-}  // namespace P4C
+}  // namespace P4

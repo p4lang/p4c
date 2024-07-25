@@ -28,7 +28,7 @@ limitations under the License.
 #include "p4RuntimeArchHandler.h"
 #include "typeSpecConverter.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /** \addtogroup control_plane
  *  @{
@@ -105,10 +105,10 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
             auto it = autoNames.find(call);
             if (it == autoNames.end()) {
                 controlPlaneName = "digest_" + cstring::to_cstring(autoNames.size());
-                ::P4C::warning(ErrorType::WARN_MISMATCH,
-                               "Cannot find a good name for %1% method call, using "
-                               "auto-generated name '%2%'",
-                               call, controlPlaneName);
+                ::P4::warning(ErrorType::WARN_MISMATCH,
+                              "Cannot find a good name for %1% method call, using "
+                              "auto-generated name '%2%'",
+                              call, controlPlaneName);
                 autoNames.emplace(call, controlPlaneName);
             } else {
                 controlPlaneName = it->second;
@@ -130,17 +130,17 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
             P4V1::V1Model::instance.tableAttributes.supportTimeout.name);
         if (timeout == nullptr) return false;
         if (!timeout->value->is<IR::ExpressionValue>()) {
-            ::P4C::error(ErrorType::ERR_UNEXPECTED,
-                         "Unexpected value %1% for supports_timeout on table %2%", timeout, table);
+            ::P4::error(ErrorType::ERR_UNEXPECTED,
+                        "Unexpected value %1% for supports_timeout on table %2%", timeout, table);
             return false;
         }
 
         auto expr = timeout->value->to<IR::ExpressionValue>()->expression;
         if (!expr->is<IR::BoolLiteral>()) {
-            ::P4C::error(ErrorType::ERR_UNEXPECTED,
-                         "Unexpected non-boolean value %1% for supports_timeout "
-                         "property on table %2%",
-                         timeout, table);
+            ::P4::error(ErrorType::ERR_UNEXPECTED,
+                        "Unexpected non-boolean value %1% for supports_timeout "
+                        "property on table %2%",
+                        timeout, table);
             return false;
         }
 
@@ -173,4 +173,4 @@ P4RuntimeArchHandlerIface *UBPFArchHandlerBuilder::operator()(
 }  // namespace ControlPlaneAPI
 
 /** @} */ /* end group control_plane */
-}  // namespace P4C::P4
+}  // namespace P4

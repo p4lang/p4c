@@ -5,7 +5,7 @@
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 /**
 Global copy propagation, currently only operationg on control blocks where it optimizes the bodies
 of actions by propagating literal values for variables used in those actions. Pass is limited
@@ -150,6 +150,6 @@ class GlobalCopyPropagation : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_GLOBAL_COPYPROP_H_ */

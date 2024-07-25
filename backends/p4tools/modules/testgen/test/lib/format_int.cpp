@@ -12,7 +12,7 @@
 #include "ir/ir.h"
 #include "ir/irutils.h"
 
-namespace P4C::Test {
+namespace P4::Test {
 
 namespace {
 
@@ -378,4 +378,4 @@ TEST_F(FormatTest, TestMACConversion) {
 
 }  // anonymous namespace
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

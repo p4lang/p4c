@@ -22,7 +22,7 @@ limitations under the License.
 #include "ir/visitor.h"
 #include "lib/sourceCodeBuilder.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
 This pass converts a P4-16 IR into a P4 source (text) program.
@@ -275,6 +275,6 @@ class ToP4 : public Inspector, ResolutionContext {
 std::string toP4(const IR::INode *node);
 void dumpP4(const IR::INode *node);
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* P4_TOP4_TOP4_H_ */

@@ -5,9 +5,9 @@
 
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4C::P4Tools::P4Testgen::Pna {
+namespace P4::P4Tools::P4Testgen::Pna {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 /* =========================================================================================
  *  PnaDpdkRegister
@@ -217,4 +217,4 @@ void MetadataCollection::addMetaDataField(cstring name, const IR::Literal *metad
 
 cstring Range::getObjectName() const { return "Range"_cs; }
 
-}  // namespace P4C::P4Tools::P4Testgen::Pna
+}  // namespace P4::P4Tools::P4Testgen::Pna

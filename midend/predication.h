@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
 This pass operates on action bodies.  It converts 'if' statements to
@@ -115,9 +115,9 @@ class Predication final : public Transform {
     std::map<cstring, bool> isStatementDependent;
     const IR::Statement *error(const IR::Statement *statement) const {
         if (inside_action && ifNestingLevel > 0)
-            ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                         "%1%: Conditional execution in actions unsupported on this target",
-                         statement);
+            ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: Conditional execution in actions unsupported on this target",
+                        statement);
         return statement;
     }
 
@@ -144,6 +144,6 @@ class Predication final : public Transform {
     const IR::Node *postorder(IR::ExitStatement *statement) override { return error(statement); }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_PREDICATION_H_ */

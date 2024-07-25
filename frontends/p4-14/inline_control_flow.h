@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "ir/ir.h"
 
-namespace P4C {
+namespace P4 {
 
 class InlineControlFlow : public Transform {
  public:
@@ -54,6 +54,6 @@ class InlineControlFlow : public Transform {
     }
 };
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_14_INLINE_CONTROL_FLOW_H_ */

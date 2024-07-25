@@ -5,7 +5,7 @@
 #include "ir/ir.h"
 #include "ir/node.h"
 
-namespace P4C::P4Tools {
+namespace P4::P4Tools {
 
 /// A symbolic environment maps variables to their symbolic value. A symbolic value is just an
 /// expression on the program's initial state.
@@ -38,6 +38,6 @@ class SymbolicEnv {
     static bool isSymbolicValue(const IR::Node *);
 };
 
-}  // namespace P4C::P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_SYMBOLIC_ENV_H_ */

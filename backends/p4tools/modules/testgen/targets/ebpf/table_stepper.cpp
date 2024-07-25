@@ -11,7 +11,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/expr_stepper.h"
 
-namespace P4C::P4Tools::P4Testgen::EBPF {
+namespace P4::P4Tools::P4Testgen::EBPF {
 
 void EBPFTableStepper::checkTargetProperties(
     const std::vector<const IR::ActionListElement *> & /*tableActionList*/) {
@@ -24,7 +24,7 @@ void EBPFTableStepper::checkTargetProperties(
         properties.tableIsTainted = properties.tableIsTainted || keyIsTainted;
         // If the key expression is tainted, do not bother resolving the remaining keys.
         if (properties.tableIsTainted) {
-            ::P4C::warning("Key %1% of table %2% is tainted.", keyElement->expression, table);
+            ::P4::warning("Key %1% of table %2% is tainted.", keyElement->expression, table);
             return;
         }
     }
@@ -70,4 +70,4 @@ void EBPFTableStepper::evalTargetTable(
 EBPFTableStepper::EBPFTableStepper(EBPFExprStepper *stepper, const IR::P4Table *table)
     : TableStepper(stepper, table) {}
 
-}  // namespace P4C::P4Tools::P4Testgen::EBPF
+}  // namespace P4::P4Tools::P4Testgen::EBPF

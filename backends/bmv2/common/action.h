@@ -20,7 +20,7 @@ limitations under the License.
 #include "helpers.h"
 #include "ir/ir.h"
 
-namespace P4C::BMV2 {
+namespace P4::BMV2 {
 
 class ActionConverter : public Inspector {
     ConversionContext *ctxt;
@@ -38,6 +38,6 @@ class ActionConverter : public Inspector {
     }
 };
 
-}  // namespace P4C::BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_ACTION_H_ */

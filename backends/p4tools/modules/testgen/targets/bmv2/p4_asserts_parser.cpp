@@ -16,7 +16,7 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 
-namespace P4C::P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 static const std::vector<std::string> NAMES{
     "Priority",    "Text",           "True",         "False",       "LineStatementClose",
@@ -314,7 +314,7 @@ std::vector<Token> combineTokensToNames(const std::vector<Token> &inputVector) {
         if (input.is(Token::Kind::Text)) {
             auto strtmp = std::string(input.lexeme());
             if (strtmp == "." && prevToken.is(Token::Kind::Number)) {
-                ::P4C::error(
+                ::P4::error(
                     "Syntax error, unexpected INTEGER. P4 does not support floating point values. "
                     "Exiting");
             }
@@ -562,7 +562,7 @@ const IR::Node *AssertsParser::postorder(IR::P4Table *tableContext) {
                                    restrictions.end());
             continue;
         }
-        ::P4C::warning(
+        ::P4::warning(
             "Restriction %1% is not feasible. Not generating entries for table %2% and instead "
             "using default action.",
             restrStr, tableContext);
@@ -695,4 +695,4 @@ Token Lexer::next() noexcept {
             return atom(Token::Kind::Mul);
     }
 }
-}  // namespace P4C::P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2

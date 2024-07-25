@@ -22,7 +22,7 @@ limitations under the License.
 #include "lib/hash.h"
 #include "lib/source_file.h"
 
-namespace P4C::IR {
+namespace P4::IR {
 
 // An identifier.
 struct ID : Util::IHasSourceInfo {
@@ -61,13 +61,13 @@ struct ID : Util::IHasSourceInfo {
     cstring toString() const override { return originalName.isNullOrEmpty() ? name : originalName; }
 };
 
-}  // namespace P4C::IR
+}  // namespace P4::IR
 
-namespace P4C::Util {
+namespace P4::Util {
 template <>
 struct Hasher<IR::ID> {
     size_t operator()(const IR::ID &id) const { return Util::Hash{}(id.name); }
 };
-}  // namespace P4C::Util
+}  // namespace P4::Util
 
 #endif /* IR_ID_H_ */

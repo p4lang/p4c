@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
  * Replaces invalid header expressions by variables
@@ -56,6 +56,6 @@ class EliminateInvalidHeaders final : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_ELIMINATEINVALIDHEADERS_H_ */

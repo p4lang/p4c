@@ -20,7 +20,7 @@ limitations under the License.
 #include "ir/visitor.h"
 #include "lib/exceptions.h"
 
-using namespace ::P4C;
+using namespace ::P4;
 
 TEST(IR, OperatorEq) {
     auto *t = IR::Type::Bits::get(16);

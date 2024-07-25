@@ -19,7 +19,7 @@ limitations under the License.
 #include <iostream>
 #include <utility>
 
-namespace P4C {
+namespace P4 {
 
 std::ostream &toStream(std::ostream &out, RangeUnit unit, Endian order, int lo, int hi,
                        bool closed) {
@@ -42,4 +42,4 @@ std::ostream &toStream(std::ostream &out, RangeUnit unit, Endian order, int lo, 
     return out;
 }
 
-}  // namespace P4C
+}  // namespace P4

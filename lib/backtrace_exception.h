@@ -26,7 +26,7 @@ limitations under the License.
 #include <execinfo.h>
 #endif
 
-namespace P4C {
+namespace P4 {
 
 void backtrace_fill_stacktrace(std::string &msg, void *const *backtrace, int size);
 
@@ -59,6 +59,6 @@ class backtrace_exception : public E {
     }
 };
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_BACKTRACE_EXCEPTION_H_ */

@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/p4/unusedDeclarations.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 using ActionCallInfo = SimpleCallInfo<IR::P4Action, IR::MethodCallStatement>;
 using AInlineWorkList = SimpleInlineWorkList<ActionCallInfo>;
@@ -76,9 +76,9 @@ class InlineActions : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
-namespace P4C::P4_14 {
+namespace P4::P4_14 {
 
 /// Special inliner which works directly on P4-14 representation
 class InlineActions : public Transform {
@@ -108,6 +108,6 @@ class InlineActions : public Transform {
     }
 };
 
-}  // namespace P4C::P4_14
+}  // namespace P4::P4_14
 
 #endif /* FRONTENDS_P4_ACTIONSINLINING_H_ */

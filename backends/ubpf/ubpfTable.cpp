@@ -24,7 +24,7 @@ limitations under the License.
 #include "ubpfParser.h"
 #include "ubpfType.h"
 
-namespace P4C::UBPF {
+namespace P4::UBPF {
 
 namespace {
 
@@ -204,8 +204,8 @@ void UBPFTable::setTableKind() {
         auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
         if (matchType->name.name == P4::P4CoreLibrary::instance().lpmMatch.name) {
             if (tableKind == EBPF::TableLPMTrie) {
-                ::P4C::error(ErrorType::ERR_UNSUPPORTED, "only one LPM field allowed",
-                             it->matchType);
+                ::P4::error(ErrorType::ERR_UNSUPPORTED, "only one LPM field allowed",
+                            it->matchType);
                 return;
             }
             tableKind = EBPF::TableLPMTrie;
@@ -224,14 +224,14 @@ void UBPFTable::setTableSize(const IR::TableBlock *table) {
 
     auto pConstant = sz->to<IR::Constant>();
     if (pConstant->asInt() <= 0) {
-        ::P4C::error(ErrorType::ERR_INVALID, "negative size", pConstant);
+        ::P4::error(ErrorType::ERR_INVALID, "negative size", pConstant);
         return;
     }
 
     this->size = pConstant->asInt();
     if (this->size > UINT16_MAX) {
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "size too large. Using default value (%2%).",
-                     pConstant, UINT16_MAX);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED, "size too large. Using default value (%2%).",
+                    pConstant, UINT16_MAX);
         return;
     }
 }
@@ -252,8 +252,7 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
             auto ebpfType = UBPFTypeFactory::instance->create(type);
             cstring fieldName = c->expression->toString().replace('.', '_');
             if (!ebpfType->is<EBPF::IHasWidth>()) {
-                ::P4C::error(ErrorType::ERR_INVALID, "%1%: illegal type %2% for key field", c,
-                             type);
+                ::P4::error(ErrorType::ERR_INVALID, "%1%: illegal type %2% for key field", c, type);
                 return;
             }
             unsigned width = ebpfType->to<EBPF::IHasWidth>()->widthInBits();
@@ -271,9 +270,9 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
                 builder->appendFormat("uint32_t prefix_len%d;", key_idx);
                 builder->newline();
             }
-            auto ebpfType = ::P4C::get(keyTypes, c);
+            auto ebpfType = ::P4::get(keyTypes, c);
             builder->emitIndent();
-            cstring fieldName = ::P4C::get(keyFieldNames, c);
+            cstring fieldName = ::P4::get(keyFieldNames, c);
             ebpfType->declare(builder, fieldName, false);
             builder->append("; /* ");
             c->expression->apply(commentGen);
@@ -284,8 +283,8 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
             if (matchType->name.name != P4::P4CoreLibrary::instance().exactMatch.name &&
                 matchType->name.name != P4::P4CoreLibrary::instance().lpmMatch.name)
-                ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                             "Match of type %1% not supported", c->matchType);
+                ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Match of type %1% not supported",
+                            c->matchType);
             key_idx++;
         }
     }
@@ -378,8 +377,8 @@ void UBPFTable::emitTypes(EBPF::CodeBuilder *builder) {
 void UBPFTable::emitKey(EBPF::CodeBuilder *builder, cstring keyName) {
     if (keyGenerator == nullptr) return;
     for (auto c : keyGenerator->keyElements) {
-        auto ebpfType = ::P4C::get(keyTypes, c);
-        cstring fieldName = ::P4C::get(keyFieldNames, c);
+        auto ebpfType = ::P4::get(keyTypes, c);
+        cstring fieldName = ::P4::get(keyFieldNames, c);
         CHECK_NULL(fieldName);
         bool memcpy = false;
         EBPF::EBPFScalarType *scalar = nullptr;
@@ -450,10 +449,10 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
     // Default action must be set from a control plane and 'const' qualifier
     // does not permit to modify default action by a control plane.
     if (defact->isConstant) {
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                     "%1%: uBPF target does not allow 'const default_action'. "
-                     "Use `default_action` instead.",
-                     defact);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "%1%: uBPF target does not allow 'const default_action'. "
+                    "Use `default_action` instead.",
+                    defact);
     }
     auto ac = mi->to<P4::ActionCall>();
     BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
@@ -497,11 +496,11 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
     // Check if there are const entries.
     auto entries = t->getEntries();
     if (entries != nullptr) {
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                     "%1%: Immutable table entries cannot be configured by the uBPF target "
-                     "and should not be used.",
-                     entries);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "%1%: Immutable table entries cannot be configured by the uBPF target "
+                    "and should not be used.",
+                    entries);
     }
 }
 
-}  // namespace P4C::UBPF
+}  // namespace P4::UBPF

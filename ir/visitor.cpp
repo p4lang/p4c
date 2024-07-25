@@ -44,7 +44,7 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/map.h"
 
-namespace P4C {
+namespace P4 {
 
 enum class VisitStatus : unsigned { New, Revisit, Busy, Done };
 
@@ -826,7 +826,7 @@ void Backtrack::trigger::register_for_gc(size_t
 
 Backtrack::trigger::~trigger() {
 #if HAVE_LIBGC
-    if (auto sz = ::P4C::get(trigger_gc_roots, this)) {
+    if (auto sz = ::P4::get(trigger_gc_roots, this)) {
         GC_remove_roots(this, reinterpret_cast<char *>(this) + sz);
         trigger_gc_roots.erase(this);
     }
@@ -837,7 +837,7 @@ std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_
     if (info.vclone) out << Visitor::demangle(typeid(*info.vclone).name()) << " ";
     out << "count=" << info.count << "  done=" << info.done;
 #if DEBUG_FLOW_JOIN
-    using namespace ::P4C::DBPrint;
+    using namespace ::P4::DBPrint;
     auto flags = dbgetflags(out);
     out << Brief;
     for (auto &i : info.parents) {
@@ -851,7 +851,7 @@ std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_
 }
 
 std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_points_t &fjp) {
-    using namespace ::P4C::DBPrint;
+    using namespace ::P4::DBPrint;
     auto flags = dbgetflags(out);
     out << Brief;
     bool first = true;
@@ -875,4 +875,4 @@ void dump(const SplitFlowVisit_base *split) {
     }
 }
 
-}  // namespace P4C
+}  // namespace P4

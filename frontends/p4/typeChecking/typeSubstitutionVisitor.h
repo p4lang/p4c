@@ -23,7 +23,7 @@ limitations under the License.
 #include "lib/log.h"
 #include "typeSubstitution.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
  * See if a variable occurs in a Type.
@@ -92,5 +92,6 @@ class TypeSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
+
 #endif /* TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_ */

@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "ubpfRegister.h"
 
-namespace P4C::UBPF {
+namespace P4::UBPF {
 
 static cstring last_key_name;
 
@@ -144,4 +144,4 @@ void UBPFRegister::emitKeyInstance(EBPF::CodeBuilder *builder,
     last_key_name = keyName;
 }
 
-}  // namespace P4C::UBPF
+}  // namespace P4::UBPF

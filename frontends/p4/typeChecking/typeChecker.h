@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/pass_manager.h"
 #include "ir/visitor.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 // This pass only clears the typeMap if the program has changed
 // or the 'force' flag is set.
@@ -60,7 +60,7 @@ class TypeChecking : public PassManager {
 
 template <typename... Args>
 void typeError(const char *format, Args &&...args) {
-    ::P4C::error(ErrorType::ERR_TYPE_ERROR, format, std::forward<Args>(args)...);
+    ::P4::error(ErrorType::ERR_TYPE_ERROR, format, std::forward<Args>(args)...);
 }
 /// True if the type contains any varbit or header_union subtypes
 bool hasVarbitsOrUnions(const TypeMap *typeMap, const IR::Type *type);
@@ -373,6 +373,6 @@ class ApplyTypesToExpressions : public Transform {
     explicit ApplyTypesToExpressions(TypeMap *typeMap) : typeMap(typeMap) {}
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* TYPECHECKING_TYPECHECKER_H_ */

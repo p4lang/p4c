@@ -18,9 +18,9 @@
 #include "backends/p4tools/modules/testgen/targets/pna/concolic.h"
 #include "backends/p4tools/modules/testgen/targets/pna/constants.h"
 
-namespace P4C::P4Tools::P4Testgen::Pna {
+namespace P4::P4Tools::P4Testgen::Pna {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 PnaDpdkProgramInfo::PnaDpdkProgramInfo(
     const TestgenCompilerResult &compilerResult,
@@ -143,4 +143,4 @@ const ArchSpec PnaDpdkProgramInfo::ARCH_SPEC = ArchSpec(
         {"MainDeparserT"_cs, {nullptr, "*main_hdr"_cs, "*main_user_meta"_cs, "*ostd"_cs}},
     });
 
-}  // namespace P4C::P4Tools::P4Testgen::Pna
+}  // namespace P4::P4Tools::P4Testgen::Pna

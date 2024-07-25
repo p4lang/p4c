@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 void RenameMap::setNewName(const IR::IDeclaration *decl, cstring name, bool allowOverride) {
     CHECK_NULL(decl);
@@ -32,7 +32,7 @@ void RenameMap::setNewName(const IR::IDeclaration *decl, cstring name, bool allo
 
 const IR::P4Action *RenameMap::actionCalled(const IR::MethodCallExpression *expression) const {
     CHECK_NULL(expression);
-    return ::P4C::get(actionCall, expression);
+    return ::P4::get(actionCall, expression);
 }
 
 void RenameMap::markActionCall(const IR::P4Action *action, const IR::MethodCallExpression *call) {
@@ -165,4 +165,4 @@ const IR::Node *RenameSymbols::postorder(IR::Argument *arg) {
     return arg;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

@@ -6,7 +6,7 @@
 #include "ir/ir.h"
 #include "lib/error.h"
 
-namespace P4C::P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 bool MapDirectExterns::preorder(const IR::Declaration_Instance *declInstance) {
     declaredExterns[declInstance->name] = declInstance;
@@ -17,7 +17,7 @@ std::optional<const IR::Declaration_Instance *> MapDirectExterns::getExternFromT
     const IR::Property *tableImplementation) {
     const auto *selectorExpr = tableImplementation->value->to<IR::ExpressionValue>();
     if (selectorExpr == nullptr) {
-        ::P4C::error("Extern property is not an expression %1%", tableImplementation->value);
+        ::P4::error("Extern property is not an expression %1%", tableImplementation->value);
         return std::nullopt;
     }
     // If the extern expression is a constructor call it is not relevant.
@@ -27,19 +27,19 @@ std::optional<const IR::Declaration_Instance *> MapDirectExterns::getExternFromT
     // Try to find the extern in the declared instances.
     const auto *implPath = selectorExpr->expression->to<IR::PathExpression>();
     if (implPath == nullptr) {
-        ::P4C::error("Invalid extern path %1%", selectorExpr->expression);
+        ::P4::error("Invalid extern path %1%", selectorExpr->expression);
         return std::nullopt;
     }
     // If the extern is not in the list of declared instances, move on.
     auto it = declaredExterns.find(implPath->path->name.name);
     if (it == declaredExterns.end()) {
-        ::P4C::error("Cannot find direct extern declaration %1%", implPath);
+        ::P4::error("Cannot find direct extern declaration %1%", implPath);
         return std::nullopt;
     }
     // BMv2 does not support direct externs attached to multiple tables.
     auto mappedTable = directExternMap.find(it->second->controlPlaneName());
     if (mappedTable != directExternMap.end()) {
-        ::P4C::error(
+        ::P4::error(
             "Direct extern %1% was already mapped to table %2%. It can not be "
             "attached to two tables.",
             it->second, mappedTable->second);
@@ -64,4 +64,4 @@ bool MapDirectExterns::preorder(const IR::P4Table *table) {
 
 const DirectExternMap &MapDirectExterns::getDirectExternMap() { return directExternMap; }
 
-}  // namespace P4C::P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2

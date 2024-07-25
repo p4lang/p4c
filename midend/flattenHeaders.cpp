@@ -17,7 +17,7 @@ limitations under the License.
 
 #include "flattenHeaders.h"
 
-namespace P4C::P4 {
+namespace P4 {
 using namespace literals;
 
 void FindHeaderTypesToReplace::createReplacement(const IR::Type_Header *type,
@@ -80,7 +80,7 @@ const IR::Node *ReplaceHeaders::postorder(IR::Member *expression) {
     }
     // At this point we know that e is an expression of the form
     // param.field1.etc.hdr, where hdr needs to be replaced.
-    auto newFieldName = ::P4C::get(repl->fieldNameRemap, prefix);
+    auto newFieldName = ::P4::get(repl->fieldNameRemap, prefix);
     const IR::Expression *result;
     if (newFieldName.isNullOrEmpty()) {
         auto type = typeMap->getType(getOriginal(), true);
@@ -90,9 +90,9 @@ const IR::Node *ReplaceHeaders::postorder(IR::Member *expression) {
             // We only want to process the outermost Member
             return expression;
         if (isWrite()) {
-            ::P4C::error(ErrorType::ERR_UNSUPPORTED,
-                         "%1%: writing to a structure nested in a header is not supported",
-                         expression);
+            ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1%: writing to a structure nested in a header is not supported",
+                        expression);
             return expression;
         }
         result = repl->explode(e, prefix);
@@ -103,4 +103,4 @@ const IR::Node *ReplaceHeaders::postorder(IR::Member *expression) {
     return result;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

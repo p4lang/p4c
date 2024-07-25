@@ -20,9 +20,9 @@ limitations under the License.
 #include "frontends/p4/parseAnnotations.h"
 #include "ir/ir.h"
 
-namespace P4C::BMV2 {
+namespace P4::BMV2 {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 /// Parses BMV2-specific annotations.
 class ParseAnnotations : public P4::ParseAnnotations {
@@ -39,6 +39,6 @@ class ParseAnnotations : public P4::ParseAnnotations {
                                }) {}
 };
 
-}  // namespace P4C::BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_ANNOTATIONS_H_ */

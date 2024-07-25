@@ -25,7 +25,7 @@ limitations under the License.
 #include <set>
 #include <utility>
 
-namespace P4C {
+namespace P4 {
 
 // Remembers items in insertion order
 template <class T, class COMP = std::less<T>, class ALLOC = std::allocator<T>>
@@ -313,6 +313,6 @@ inline auto intersects(const ordered_set<T, C1, A1> &a, const U &b) -> decltype(
     return false;
 }
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_ORDERED_SET_H_ */

@@ -23,7 +23,7 @@ limitations under the License.
 #include "lib/error_catalog.h"
 #include "lib/exceptions.h"
 
-namespace P4C::IR {
+namespace P4::IR {
 
 cstring Annotation::getName() const {
     BUG_CHECK(name == IR::Annotation::nameAnnotation, "%1%: Only works on name annotations", this);
@@ -36,12 +36,12 @@ cstring Annotation::getName() const {
 
 cstring Annotation::getSingleString() const {
     if (expr.size() != 1) {
-        ::P4C::error(ErrorType::ERR_INVALID, "%1%: should contain a string", this);
+        ::P4::error(ErrorType::ERR_INVALID, "%1%: should contain a string", this);
         return cstring::empty;
     }
     auto str = expr[0]->to<IR::StringLiteral>();
     if (str == nullptr) {
-        ::P4C::error(ErrorType::ERR_INVALID, "%1%: should contain a string", this);
+        ::P4::error(ErrorType::ERR_INVALID, "%1%: should contain a string", this);
         return cstring::empty;
     }
     return str->value;
@@ -61,4 +61,4 @@ cstring IDeclaration::controlPlaneName(cstring replace /* = cstring() */) const 
     return name.startsWith(".") ? name.substr(1) : name;
 }
 
-}  // namespace P4C::IR
+}  // namespace P4::IR

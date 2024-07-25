@@ -23,7 +23,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/exceptions.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /* Maps objects of type T to types. */
 template <class T>
@@ -38,8 +38,8 @@ class TypeSubstitution : public IHasDbPrint {
 
     /** True if this is the empty substitution, which does not replace anything. */
     bool isIdentity() const { return binding.size() == 0; }
-    const IR::Type *lookup(T t) const { return ::P4C::get(binding, t); }
-    const IR::Type *get(T t) const { return ::P4C::get(binding, t); }
+    const IR::Type *lookup(T t) const { return ::P4::get(binding, t); }
+    const IR::Type *get(T t) const { return ::P4::get(binding, t); }
 
     bool containsKey(T key) const { return binding.find(key) != binding.end(); }
 
@@ -91,6 +91,6 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* TYPECHECKING_TYPESUBSTITUTION_H_ */

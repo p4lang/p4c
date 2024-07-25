@@ -14,7 +14,7 @@
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/pna/shared_cmd_stepper.h"
 
-namespace P4C::P4Tools::P4Testgen::Pna {
+namespace P4::P4Tools::P4Testgen::Pna {
 
 class PnaDpdkCmdStepper : public SharedPnaCmdStepper {
  protected:
@@ -36,6 +36,6 @@ class PnaDpdkCmdStepper : public SharedPnaCmdStepper {
                       const ProgramInfo &programInfo);
 };
 
-}  // namespace P4C::P4Tools::P4Testgen::Pna
+}  // namespace P4::P4Tools::P4Testgen::Pna
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_DPDK_CMD_STEPPER_H_ */

@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "ubpfProgram.h"
 
-namespace P4C::UBPF {
+namespace P4::UBPF {
 
 class UBPFTableBase : public EBPF::EBPFObject {
  public:
@@ -79,6 +79,6 @@ class UBPFTable final : public UBPFTableBase {
     void emitInitializer(EBPF::CodeBuilder *builder);
 };
 
-}  // namespace P4C::UBPF
+}  // namespace P4::UBPF
 
 #endif  // BACKENDS_UBPF_UBPFTABLE_H_

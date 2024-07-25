@@ -28,7 +28,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/concolic.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 
-namespace P4C::P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 const IR::Type_Bits Bmv2V1ModelProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
 
@@ -272,4 +272,4 @@ const ArchSpec Bmv2V1ModelProgramInfo::ARCH_SPEC = ArchSpec(
                     // control Deparser<H>(packet_out b, in H hdr);
                     {"Deparser"_cs, {nullptr, "*hdr"_cs}}});
 
-}  // namespace P4C::P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2

@@ -15,9 +15,9 @@
 #include "lib/exceptions.h"
 #include "lib/log.h"
 
-namespace P4C::P4Tools {
+namespace P4::P4Tools {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 P4ProgramDCGCreator::P4ProgramDCGCreator(NodesCallGraph *dcg) : dcg(dcg), p4program(nullptr) {
     CHECK_NULL(dcg);
@@ -565,4 +565,4 @@ const IR::Expression *ReachabilityEngine::stringToNode(std::string /*name*/) {
     P4C_UNIMPLEMENTED("Converting a string into an IR::Expression");
 }
 
-}  // namespace P4C::P4Tools
+}  // namespace P4::P4Tools

@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /**
 Replace a reference to a structure with a list of all its fields
@@ -94,6 +94,6 @@ class SimplifySelectList : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_SIMPLIFYSELECTLIST_H_ */

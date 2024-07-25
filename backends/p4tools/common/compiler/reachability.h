@@ -17,7 +17,7 @@
 #include "lib/cstring.h"
 #include "lib/null.h"
 
-namespace P4C::P4Tools {
+namespace P4::P4Tools {
 
 using DCGVertexType = const IR::Node;
 using DCGVertexTypeSet = std::unordered_set<const DCGVertexType *>;
@@ -202,6 +202,6 @@ class ReachabilityEngine {
     void addEdge(const DCGVertexType *vertex, IR::ID vertexName = IR::ID());
 };
 
-}  // namespace P4C::P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* COMMON_COMPILER_REACHABILITY_H_ */

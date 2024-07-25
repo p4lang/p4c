@@ -24,7 +24,7 @@ limitations under the License.
 #include "typeSubstitutionVisitor.h"
 #include "typeUnification.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /// Creates a string that describes the values of current type variables
 class Explain : public Inspector {
@@ -93,9 +93,9 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         /// has no 'derivedFrom' field, and it contains the actual source
         /// position where the analysis started.
         boost::format fmt(format);
-        return reportErrorImpl(
-            subst, "  ---- Actual error:\n" +
-                       ::P4C::error_helper(fmt, std::forward<Args>(args)...).toString());
+        return reportErrorImpl(subst,
+                               "  ---- Actual error:\n" +
+                                   ::P4::error_helper(fmt, std::forward<Args>(args)...).toString());
     }
     // Default error message; returns 'false'
     virtual bool reportError(const TypeVariableSubstitution *subst) const = 0;
@@ -234,6 +234,6 @@ class TypeConstraints final : public IHasDbPrint {
     void dbprint(std::ostream &out) const;
     const TypeVariableSubstitution *getCurrentSubstitution() const { return currentSubstitution; }
 };
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* TYPECHECKING_TYPECONSTRAINTS_H_ */

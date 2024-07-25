@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /// Makes sure that some methods that expect constant
 /// arguments have constant arguments (e.g., push_front).
@@ -49,6 +49,6 @@ class CheckConstants : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_CHECKCONSTANTS_H_ */

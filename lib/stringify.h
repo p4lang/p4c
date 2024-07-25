@@ -28,7 +28,7 @@ limitations under the License.
 #include "big_int.h"
 #include "cstring.h"
 
-namespace P4C {
+namespace P4 {
 
 class IHasDbPrint {
  public:
@@ -135,6 +135,6 @@ inline auto operator<<(std::ostream &out,
     return out;
 }
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_STRINGIFY_H_ */

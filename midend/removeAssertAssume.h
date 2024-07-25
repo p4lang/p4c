@@ -6,7 +6,7 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 // Removes assert and assume statements if it is not in debug mode
 class DoRemoveAssertAssume : public Transform {
     P4::ReferenceMap *refMap;
@@ -34,6 +34,6 @@ class RemoveAssertAssume final : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_REMOVEASSERTASSUME_H_ */

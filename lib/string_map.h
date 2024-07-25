@@ -23,7 +23,7 @@ limitations under the License.
 #include "absl/container/flat_hash_map.h"
 #include "cstring.h"
 
-namespace P4C {
+namespace P4 {
 
 /// Map with string keys that is ordered by order of element insertion.
 /// Use this map only when stable iteration order is significant. For everything
@@ -238,6 +238,6 @@ class string_map {
     }
 };
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* LIB_STRING_MAP_H_ */

@@ -19,7 +19,7 @@ limitations under the License.
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
 
-namespace P4C {
+namespace P4 {
 
 const char *IrClass::indent = "    ";
 IrNamespace &IrNamespace::global() {
@@ -118,7 +118,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
          << "#include \"lib/algorithm.h\"      // IWYU pragma: keep\n"
          << "#include \"lib/log.h\"            // IWYU pragma: keep\n"
          << std::endl
-         << "using namespace ::P4C;\n"
+         << "using namespace ::P4;\n"
          << std::endl;
 
     out << "#include <functional>\n"
@@ -134,14 +134,14 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << "#include \"ir/vector.h\"          // IWYU pragma: keep\n"
         << "#include \"lib/ordered_map.h\"    // IWYU pragma: keep\n"
         << std::endl
-        << "namespace P4C {\n"
+        << "namespace P4 {\n"
         << std::endl
         << "class JSONLoader;\n"
         << "using NodeFactoryFn = IR::Node*(*)(JSONLoader&);\n"
         << std::endl
         << "namespace IR {\n"
         << "extern std::map<cstring, NodeFactoryFn> unpacker_table;\n"
-        << "using namespace ::P4C::P4::literals;\n"
+        << "using namespace ::P4::literals;\n"
         << "}\n";
 
     impl << "std::map<cstring, NodeFactoryFn> IR::unpacker_table = {\n";
@@ -178,7 +178,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
                 << ">;" << std::endl;
         }
     }
-    out << "}  // namespace P4C" << std::endl;
+    out << "}  // namespace P4" << std::endl;
 
     for (auto e : elements) {
         e->generate_hdr(out);
@@ -224,7 +224,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     }
     t << std::endl;
 
-    t << "namespace P4C::IR {" << std::endl;
+    t << "namespace P4::IR {" << std::endl;
 
     // Emit forward declarations
     for (auto *cls : *getClasses()) {
@@ -275,7 +275,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
          "RTTI::TypeId(rhs); }\n"
       << " inline bool operator!=(NodeDiscriminator lhs, RTTI::TypeId rhs) { return "
          "RTTI::TypeId(lhs) != rhs; }\n";
-    t << "}  // namespace P4C::IR" << std::endl;
+    t << "}  // namespace P4::IR" << std::endl;
 }
 
 void IrClass::generateTreeMacro(std::ostream &out) const {
@@ -410,7 +410,7 @@ cstring IrClass::qualified_name(const IrNamespace *in) const {
 
 void IrClass::generate_hdr(std::ostream &out) const {
     if (kind != NodeKind::Nested) {
-        out << "namespace P4C::IR {" << std::endl;
+        out << "namespace P4::IR {" << std::endl;
         enter_namespace(out, containedIn);
     }
     for (auto cblock : comments) cblock->generate_hdr(out);
@@ -460,7 +460,7 @@ void IrClass::generate_hdr(std::ostream &out) const {
     out << "};" << std::endl;
     if (kind != NodeKind::Nested) {
         exit_namespace(out, containedIn);
-        out << "}  // namespace P4C::IR" << std::endl;
+        out << "}  // namespace P4::IR" << std::endl;
     }
 }
 
@@ -668,4 +668,4 @@ void ConstFieldInitializer::generate_hdr(std::ostream &out) const {
         throw Util::CompilationError("Unexpected constant field %1%", this);
 }
 
-}  // namespace P4C
+}  // namespace P4

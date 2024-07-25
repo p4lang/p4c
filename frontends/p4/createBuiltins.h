@@ -26,7 +26,7 @@ limitations under the License.
     e.g., actions = { a; } becomes actions = { a(); }
  * Parser states without selects will transition to reject.
  */
-namespace P4C::P4 {
+namespace P4 {
 class CreateBuiltins final : public Transform {
     bool addNoAction = false;
     /// toplevel declaration of NoAction.
@@ -51,6 +51,6 @@ class CreateBuiltins final : public Transform {
     const IR::Node *postorder(IR::Property *property) override;
     const IR::Node *preorder(IR::P4Program *program) override;
 };
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* P4_CREATEBUILTINS_H_ */

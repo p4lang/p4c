@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "complexComparison.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 const IR::Expression *RemoveComplexComparisons::explode(Util::SourceInfo srcInfo,
                                                         const IR::Type *leftType,
@@ -161,4 +161,4 @@ const IR::Node *RemoveComplexComparisons::postorder(IR::Operation_Binary *expres
     return result;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

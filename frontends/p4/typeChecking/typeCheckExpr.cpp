@@ -18,7 +18,7 @@ limitations under the License.
 #include "typeChecker.h"
 #include "typeConstraints.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 using namespace literals;
 
@@ -460,7 +460,7 @@ const IR::Node *TypeInference::postorder(IR::Entry *entry) {
     if (tvs == nullptr) return entry;
     ConstantTypeSubstitution cts(tvs, typeMap, this);
     auto ks = cts.convert(keyset, getChildContext());
-    if (::P4C::errorCount() > 0) return entry;
+    if (::P4::errorCount() > 0) return entry;
 
     if (ks != keyset)
         entry = new IR::Entry(entry->srcInfo, entry->annotations, entry->isConst, entry->priority,
@@ -1456,7 +1456,7 @@ const IR::Node *TypeInference::postorder(IR::Mux *expression) {
             ConstantTypeSubstitution cts(tvs, typeMap, this);
             auto e1 = cts.convert(expression->e1, getChildContext());
             auto e2 = cts.convert(expression->e2, getChildContext());
-            if (::P4C::errorCount() > 0) return expression;
+            if (::P4::errorCount() > 0) return expression;
             expression->e1 = e1;
             expression->e2 = e2;
             secondType = typeMap->getType(e1);
@@ -1790,7 +1790,7 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
             // This is like an assignment; may make additional conversions.
             newExpr = assignment(arg, param->type, arg->expression);
         }
-        if (::P4C::errorCount() > 0) return actionCall;
+        if (::P4::errorCount() > 0) return actionCall;
         if (newExpr != arg->expression) {
             LOG2("Changing action argument to " << newExpr);
             changed = true;
@@ -1826,7 +1826,7 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
     ConstantTypeSubstitution cts(tvs, typeMap, this);
     actionCall = cts.convert(actionCall, getChildContext())
                      ->to<IR::MethodCallExpression>();  // cast arguments
-    if (::P4C::errorCount() > 0) return actionCall;
+    if (::P4::errorCount() > 0) return actionCall;
 
     LOG2("Converted action " << actionCall);
     setType(actionCall, resultType);
@@ -2027,7 +2027,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
                 // Insert casts for 'int' values.
                 newExpr = cts.convert(newExpr, getChildContext())->to<IR::Expression>();
             }
-            if (::P4C::errorCount() > 0) return expression;
+            if (::P4::errorCount() > 0) return expression;
             if (newExpr != arg->expression) {
                 LOG2("Changing method argument to " << newExpr);
                 changed = true;
@@ -2159,7 +2159,7 @@ const IR::SelectCase *TypeInference::matchCase(const IR::SelectExpression *selec
     if (tvs == nullptr) return nullptr;
     ConstantTypeSubstitution cts(tvs, typeMap, this);
     auto ks = cts.convert(selectCase->keyset, getChildContext());
-    if (::P4C::errorCount() > 0) return selectCase;
+    if (::P4::errorCount() > 0) return selectCase;
 
     if (ks != selectCase->keyset)
         selectCase = new IR::SelectCase(selectCase->srcInfo, ks, selectCase->state);
@@ -2250,4 +2250,4 @@ const IR::Node *TypeInference::postorder(IR::AttribLocal *local) {
     return local;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

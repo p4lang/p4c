@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 // If useExpressionType is true trust the type in mce->type
 MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
@@ -224,4 +224,4 @@ std::vector<const IR::IDeclaration *> ExternMethod::mayCall() const {
     return rv;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

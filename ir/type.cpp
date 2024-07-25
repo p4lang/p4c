@@ -30,7 +30,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/source_file.h"
 
-namespace P4C::IR {
+namespace P4::IR {
 
 const cstring IR::Type_Stack::next = "next"_cs;
 const cstring IR::Type_Stack::last = "last"_cs;
@@ -83,19 +83,19 @@ const Type_Bits *Type_Bits::get(int width, bool isSigned) {
     auto &result = (*type_map)[std::make_pair(width, isSigned)];
     if (!result) result = new Type_Bits(width, isSigned);
     if (width > P4CContext::getConfig().maximumWidthSupported())
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%",
-                     result, P4CContext::getConfig().maximumWidthSupported());
+        ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%",
+                    result, P4CContext::getConfig().maximumWidthSupported());
     return result;
 }
 
 const Type_Bits *Type_Bits::get(const Util::SourceInfo &si, int sz, bool isSigned) {
     if (sz < 0) {
-        ::P4C::error(ErrorType::ERR_INVALID, "%1%Width %2% of type cannot be negative", si, sz);
+        ::P4::error(ErrorType::ERR_INVALID, "%1%Width %2% of type cannot be negative", si, sz);
         // Return a value that will not cause crashes later on
         return new IR::Type_Bits(si, 1024, isSigned);
     }
     if (sz == 0 && isSigned) {
-        ::P4C::error(ErrorType::ERR_INVALID, "%1%Width of signed type cannot be zero", si);
+        ::P4::error(ErrorType::ERR_INVALID, "%1%Width of signed type cannot be zero", si);
         // Return a value that will not cause crashes later on
         return new IR::Type_Bits(si, 1024, isSigned);
     }
@@ -147,7 +147,7 @@ const Type_Varbits *Type_Varbits::get(const Util::SourceInfo &si, const IR::Expr
 const Type_Varbits *Type_Varbits::get(const Util::SourceInfo &si, int sz) {
     auto result = new Type_Varbits(si, sz);
     if (sz < 0) {
-        ::P4C::error(ErrorType::ERR_INVALID, "%1%: Width cannot be negative or zero", result);
+        ::P4::error(ErrorType::ERR_INVALID, "%1%: Width cannot be negative or zero", result);
         // Return a value that will not cause crashes later on
         return new IR::Type_Varbits(si, 1024);
     }
@@ -282,4 +282,4 @@ const Type *Type_SpecializedCanonical::getP4Type() const {
     return new IR::Type_Specialized(srcInfo, new IR::Type_Name(st->getName()), args);
 }
 
-}  // namespace P4C::IR
+}  // namespace P4::IR

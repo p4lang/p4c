@@ -4,7 +4,7 @@
 #include "ir/ir.h"
 #include "ir/irutils.h"
 
-namespace P4C::P4Tools {
+namespace P4::P4Tools {
 
 /// Defines accessors and utility functions for state that is managed by the control plane.
 /// This class can be extended by targets to customize initialization behavior and add
@@ -62,6 +62,6 @@ std::pair<const IR::SymbolicVariable *, const IR::SymbolicVariable *> getTableRa
 
 }  // namespace Bmv2ControlPlaneState
 
-}  // namespace P4C::P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_CONTROL_PLANE_SYMBOLIC_VARIABLES_H_ */

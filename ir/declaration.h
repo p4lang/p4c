@@ -20,7 +20,7 @@ limitations under the License.
 #include "ir/id.h"
 #include "ir/node.h"
 
-namespace P4C::IR {
+namespace P4::IR {
 
 /// The Declaration interface, representing objects with names.
 class IDeclaration : public virtual INode {
@@ -51,6 +51,6 @@ class IDeclaration : public virtual INode {
     DECLARE_TYPEINFO_WITH_TYPEID(IDeclaration, NodeKind::IDeclaration, INode);
 };
 
-}  // namespace P4C::IR
+}  // namespace P4::IR
 
 #endif /* IR_DECLARATION_H_ */

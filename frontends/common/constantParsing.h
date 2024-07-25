@@ -19,15 +19,15 @@ limitations under the License.
 
 #include "lib/cstring.h"
 
-namespace P4C::IR {
+namespace P4::IR {
 class Constant;
-}  // namespace P4C::IR
+}  // namespace P4::IR
 
-namespace P4C::Util {
+namespace P4::Util {
 class SourceInfo;
-}  // namespace P4C::Util
+}  // namespace P4::Util
 
-namespace P4C {
+namespace P4 {
 
 /**
  * An unparsed numeric constant. We produce these as token values during
@@ -88,6 +88,6 @@ IR::Constant *parseConstant(const Util::SourceInfo &srcInfo, const UnparsedConst
  */
 int parseConstantChecked(const Util::SourceInfo &srcInfo, const UnparsedConstant &constant);
 
-}  // namespace P4C
+}  // namespace P4
 
 #endif /* FRONTENDS_COMMON_CONSTANTPARSING_H_ */

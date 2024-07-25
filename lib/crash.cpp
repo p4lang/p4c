@@ -50,7 +50,7 @@ limitations under the License.
 #include "hex.h"
 #include "log.h"
 
-namespace P4C {
+namespace P4 {
 
 static const char *signames[] = {
     "NONE", "HUP",  "INT",  "QUIT", "ILL",    "TRAP",   "ABRT",  "BUS",  "FPE",  "KILL", "USR1",
@@ -327,4 +327,4 @@ void setup_signals() {
 #endif
 }
 
-}  // namespace P4C
+}  // namespace P4

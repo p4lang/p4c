@@ -10,7 +10,7 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 
-namespace P4C::P4Tools {
+namespace P4::P4Tools {
 
 SmithOptions &SmithOptions::get() {
     static SmithOptions INSTANCE;
@@ -27,7 +27,7 @@ void SmithOptions::processArgs(const std::vector<const char *> &args) {
     char **argv = nullptr;
     std::tie(argc, argv) = convertArgs(args);
 
-    // Establish a dummy compilation context so that we can use ::P4C::error to report errors while
+    // Establish a dummy compilation context so that we can use ::P4::error to report errors while
     // processing command-line options.
     class DummyCompileContext : public BaseCompileContext {
     } dummyContext;
@@ -35,11 +35,11 @@ void SmithOptions::processArgs(const std::vector<const char *> &args) {
 
     // Delegate to the hook.
     auto *remainingArgs = P4Tools::AbstractP4cToolOptions::process(argc, argv);
-    if ((remainingArgs == nullptr) || ::P4C::errorCount() > 0) {
+    if ((remainingArgs == nullptr) || ::P4::errorCount() > 0) {
         return;
     }
 }
 
 SmithOptions::SmithOptions() : AbstractP4cToolOptions(P4Smith::TOOL_NAME, "P4Smith options.") {}
 
-}  // namespace P4C::P4Tools
+}  // namespace P4::P4Tools

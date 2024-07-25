@@ -4,7 +4,7 @@
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 using TypeLogMsgParams = std::pair<IR::IndexedVector<IR::NamedExpression>, std::string>;
 
@@ -28,10 +28,10 @@ class FindTypesInLogMsgInvocationToReplace : public Inspector {
     const IR::MethodCallStatement *prepareLogMsgStatement(
         const IR::MethodCallStatement *methodCallStatement);
     const IR::Type_StructLike *getReplacement(const cstring name) const {
-        return ::P4C::get(replacement, name);
+        return ::P4::get(replacement, name);
     }
     const IR::MethodCallStatement *getReplacementMethodCall(unsigned id) const {
-        return ::P4C::get(logMsgReplacement, id);
+        return ::P4::get(logMsgReplacement, id);
     }
     bool empty() const { return replacement.empty(); }
     bool hasStructInParameter(const IR::MethodCallStatement *methodCallStatement);
@@ -93,6 +93,6 @@ class FlattenLogMsg final : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_FLATTENLOGMSG_H_ */

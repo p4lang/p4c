@@ -40,7 +40,7 @@
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4C::P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 CmdStepper::CmdStepper(ExecutionState &state, AbstractSolver &solver,
                        const ProgramInfo &programInfo)
@@ -548,4 +548,4 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     return false;
 }
 
-}  // namespace P4C::P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen

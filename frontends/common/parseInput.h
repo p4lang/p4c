@@ -23,11 +23,11 @@ limitations under the License.
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
 
-namespace P4C::IR {
+namespace P4::IR {
 class P4Program;
-}  // namespace P4C::IR
+}  // namespace P4::IR
 
-namespace P4C::P4 {
+namespace P4 {
 
 template <typename Input, typename C = P4V1::Converter>
 static const IR::P4Program *parseV1Program(Input stream, std::string_view sourceFile,
@@ -41,12 +41,12 @@ static const IR::P4Program *parseV1Program(Input stream, std::string_view source
 
     // Parse.
     const IR::Node *v1 = V1::V1ParserDriver::parse(stream, sourceFile, sourceLine);
-    if (::P4C::errorCount() > 0 || v1 == nullptr) return nullptr;
+    if (::P4::errorCount() > 0 || v1 == nullptr) return nullptr;
 
     // Convert to P4-16.
     if (Log::verbose()) std::cerr << "Converting to P4-16" << std::endl;
     v1 = v1->apply(converter);
-    if (::P4C::errorCount() > 0 || v1 == nullptr) return nullptr;
+    if (::P4::errorCount() > 0 || v1 == nullptr) return nullptr;
     BUG_CHECK(v1->is<IR::P4Program>(), "Conversion returned %1%", v1);
     return v1->to<IR::P4Program>();
 }
@@ -69,7 +69,7 @@ const IR::P4Program *parseP4File(const ParserOptions &options) {
     if (options.doNotPreprocess) {
         auto *file = fopen(options.file.c_str(), "r");
         if (file == nullptr) {
-            ::P4C::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file or directory.", options.file);
+            ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file or directory.", options.file);
             return nullptr;
         }
         result = options.isv1() ? parseV1Program<FILE *, C>(file, options.file.string(), 1,
@@ -78,7 +78,7 @@ const IR::P4Program *parseP4File(const ParserOptions &options) {
         fclose(file);
     } else {
         auto preprocessorResult = options.preprocess();
-        if (::P4C::errorCount() > 0 || !preprocessorResult.has_value()) {
+        if (::P4::errorCount() > 0 || !preprocessorResult.has_value()) {
             return nullptr;
         }
         // Need to assign file here because the parser requires an lvalue.
@@ -89,9 +89,9 @@ const IR::P4Program *parseP4File(const ParserOptions &options) {
                 : P4ParserDriver::parse(preprocessorResult.value().get(), options.file.string());
     }
 
-    if (::P4C::errorCount() > 0) {
-        ::P4C::error(ErrorType::ERR_OVERLIMIT, "%1% errors encountered, aborting compilation",
-                     ::P4C::errorCount());
+    if (::P4::errorCount() > 0) {
+        ::P4::error(ErrorType::ERR_OVERLIMIT, "%1% errors encountered, aborting compilation",
+                    ::P4::errorCount());
         return nullptr;
     }
     BUG_CHECK(result != nullptr, "Parsing failed, but we didn't report an error");
@@ -114,6 +114,6 @@ const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
 const IR::P4Program *parseP4String(const std::string &input,
                                    CompilerOptions::FrontendVersion version);
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_COMMON_PARSEINPUT_H_ */

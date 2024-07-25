@@ -22,7 +22,7 @@ limitations under the License.
 #include "ebpfPipeline.h"
 #include "externs/ebpfPsaTableImplementation.h"
 
-namespace P4C::EBPF {
+namespace P4::EBPF {
 
 class EBPFTablePSADirectCounterPropertyVisitor : public EBPFTablePsaPropertyVisitor {
  public:
@@ -34,8 +34,8 @@ class EBPFTablePSADirectCounterPropertyVisitor : public EBPFTablePsaPropertyVisi
         auto di = decl->to<IR::Declaration_Instance>();
         CHECK_NULL(di);
         if (EBPFObject::getSpecializedTypeName(di) != "DirectCounter") {
-            ::P4C::error(ErrorType::ERR_UNEXPECTED,
-                         "%1%: not a DirectCounter, see declaration of %2%", pe, decl);
+            ::P4::error(ErrorType::ERR_UNEXPECTED,
+                        "%1%: not a DirectCounter, see declaration of %2%", pe, decl);
             return false;
         }
 
@@ -61,8 +61,8 @@ class EBPFTablePSADirectMeterPropertyVisitor : public EBPFTablePsaPropertyVisito
         auto di = decl->to<IR::Declaration_Instance>();
         CHECK_NULL(di);
         if (EBPFObject::getTypeName(di) != "DirectMeter") {
-            ::P4C::error(ErrorType::ERR_UNEXPECTED,
-                         "%1%: not a DirectMeter, see declaration of %2%", pe, decl);
+            ::P4::error(ErrorType::ERR_UNEXPECTED, "%1%: not a DirectMeter, see declaration of %2%",
+                        pe, decl);
             return false;
         }
 
@@ -91,8 +91,8 @@ class EBPFTablePSAImplementationPropertyVisitor : public EBPFTablePsaPropertyVis
         cstring type = di->type->toString();
 
         if (table->implementation != nullptr) {
-            ::P4C::error(ErrorType::ERR_UNSUPPORTED,
-                         "%1%: Up to one implementation is supported in a table", pe);
+            ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1%: Up to one implementation is supported in a table", pe);
             return false;
         }
 
@@ -104,7 +104,7 @@ class EBPFTablePSAImplementationPropertyVisitor : public EBPFTablePsaPropertyVis
         if (table->implementation != nullptr)
             table->implementation->registerTable(table);
         else
-            ::P4C::error(ErrorType::ERR_UNKNOWN, "%1%: unknown table implementation %2%", pe, decl);
+            ::P4::error(ErrorType::ERR_UNKNOWN, "%1%: unknown table implementation %2%", pe, decl);
 
         return false;
     }
@@ -175,7 +175,7 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
         return true;
     }
     bool preorder(const IR::KeyElement *key) override {
-        cstring fieldName = ::P4C::get(table->keyFieldNames, key);
+        cstring fieldName = ::P4::get(table->keyFieldNames, key);
         cstring matchType = key->matchType->path->name.name;
         auto expr = currentEntry->keys->components[currentKeyEntryIndex];
         unsigned width = EBPFInitializerUtils::ebpfTypeWidth(typeMap, key->expression);
@@ -211,7 +211,7 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
                 auto mask = km->right->to<IR::Constant>()->value;
                 auto len = trailing_zeros(mask);
                 if (len + count_ones(mask) != width) {  // any remaining 0s in the prefix?
-                    ::P4C::error(ErrorType::ERR_INVALID, "%1% invalid mask for LPM key", key);
+                    ::P4::error(ErrorType::ERR_INVALID, "%1% invalid mask for LPM key", key);
                     return false;
                 }
                 prefixLen = width - len;
@@ -362,17 +362,17 @@ void ActionTranslationVisitorPSA::processMethod(const P4::ExternMethod *method) 
         if (ctr != nullptr)
             ctr->emitDirectMethodInvocation(builder, method, valueName);
         else
-            ::P4C::error(ErrorType::ERR_NOT_FOUND,
-                         "%1%: Table %2% does not own DirectCounter named %3%", method->expr,
-                         table->table->container, instanceName);
+            ::P4::error(ErrorType::ERR_NOT_FOUND,
+                        "%1%: Table %2% does not own DirectCounter named %3%", method->expr,
+                        table->table->container, instanceName);
     } else if (declType->name.name == "DirectMeter") {
         auto met = table->getMeter(instanceName);
         if (met != nullptr) {
             met->emitDirectExecute(builder, method, valueName);
         } else {
-            ::P4C::error(ErrorType::ERR_NOT_FOUND,
-                         "%1%: Table %2% does not own DirectMeter named %3%", method->expr,
-                         table->table->container, instanceName);
+            ::P4::error(ErrorType::ERR_NOT_FOUND,
+                        "%1%: Table %2% does not own DirectMeter named %3%", method->expr,
+                        table->table->container, instanceName);
         }
     } else {
         ControlBodyTranslatorPSA::processMethod(method);
@@ -399,15 +399,15 @@ EBPFTablePSA::EBPFTablePSA(const EBPFProgram *program, const IR::TableBlock *tab
     : EBPFTable(program, table, codeGen), implementation(nullptr) {
     auto sizeProperty = table->container->properties->getProperty("size");
     if (keyGenerator == nullptr && sizeProperty != nullptr) {
-        ::P4C::warning(ErrorType::WARN_IGNORE_PROPERTY,
-                       "%1%: property ignored because table does not have a key", sizeProperty);
+        ::P4::warning(ErrorType::WARN_IGNORE_PROPERTY,
+                      "%1%: property ignored because table does not have a key", sizeProperty);
     }
 
     if (keyFieldNames.empty() && size != 1) {
         if (sizeProperty != nullptr) {
-            ::P4C::warning(ErrorType::WARN_IGNORE,
-                           "%1%: only one entry allowed with empty key or selector-only key",
-                           sizeProperty);
+            ::P4::warning(ErrorType::WARN_IGNORE,
+                          "%1%: only one entry allowed with empty key or selector-only key",
+                          sizeProperty);
         }
         this->size = 1;
     }
@@ -453,18 +453,18 @@ void EBPFTablePSA::initImplementation() {
     }
 
     if (hasActionSelector && selectorKey == nullptr) {
-        ::P4C::error(ErrorType::ERR_NOT_FOUND,
-                     "%1%: ActionSelector provided but there is no selector key", table->container);
+        ::P4::error(ErrorType::ERR_NOT_FOUND,
+                    "%1%: ActionSelector provided but there is no selector key", table->container);
     }
     if (!hasActionSelector && selectorKey != nullptr) {
-        ::P4C::error(ErrorType::ERR_NOT_FOUND,
-                     "%1%: implementation not found, ActionSelector is required",
-                     selectorKey->matchType);
+        ::P4::error(ErrorType::ERR_NOT_FOUND,
+                    "%1%: implementation not found, ActionSelector is required",
+                    selectorKey->matchType);
     }
     auto emptyGroupAction = table->container->properties->getProperty("psa_empty_group_action");
     if (!hasActionSelector && emptyGroupAction != nullptr) {
-        ::P4C::warning(ErrorType::WARN_UNUSED, "%1%: unused property (ActionSelector not provided)",
-                       emptyGroupAction);
+        ::P4::warning(ErrorType::WARN_UNUSED, "%1%: unused property (ActionSelector not provided)",
+                      emptyGroupAction);
     }
 }
 
@@ -936,9 +936,9 @@ void EBPFTablePSA::tryEnableTableCache() {
     if (!program->options.enableTableCache) return;
     if (!isLPMTable() && !isTernaryTable()) return;
     if (!counters.empty() || !meters.empty()) {
-        ::P4C::warning(ErrorType::WARN_UNSUPPORTED,
-                       "%1%: table cache can't be enabled due to direct extern(s)",
-                       table->container->name);
+        ::P4::warning(ErrorType::WARN_UNSUPPORTED,
+                      "%1%: table cache can't be enabled due to direct extern(s)",
+                      table->container->name);
         return;
     }
 
@@ -1058,4 +1058,4 @@ void EBPFTablePSA::emitCacheUpdate(CodeBuilder *builder, cstring key, cstring va
     builder->blockEnd(true);
 }
 
-}  // namespace P4C::EBPF
+}  // namespace P4::EBPF

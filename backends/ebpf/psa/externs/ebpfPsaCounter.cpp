@@ -20,14 +20,14 @@ limitations under the License.
 #include "backends/ebpf/ebpfType.h"
 #include "backends/ebpf/psa/ebpfPipeline.h"
 
-namespace P4C::EBPF {
+namespace P4::EBPF {
 
 EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram *program, const IR::Declaration_Instance *di,
                                cstring name, CodeGenInspector *codeGen)
     : EBPFCounterTable(program, name, codeGen, 1, false) {
     CHECK_NULL(di);
     if (!di->type->is<IR::Type_Specialized>()) {
-        ::P4C::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
+        ::P4::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
         return;
     }
     auto ts = di->type->to<IR::Type_Specialized>();
@@ -37,47 +37,46 @@ EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram *program, const IR::Declaration
     } else if (ts->baseType->toString() == "DirectCounter") {
         isDirect = true;
     } else {
-        ::P4C::error(ErrorType::ERR_UNKNOWN, "Unknown counter type extern: %1%", di);
+        ::P4::error(ErrorType::ERR_UNKNOWN, "Unknown counter type extern: %1%", di);
         return;
     }
 
     if (isDirect && di->arguments->size() != 1) {
-        ::P4C::error(ErrorType::ERR_MODEL, "Expected 1 argument: %1%", di);
+        ::P4::error(ErrorType::ERR_MODEL, "Expected 1 argument: %1%", di);
         return;
     } else if (!isDirect && di->arguments->size() != 2) {
-        ::P4C::error(ErrorType::ERR_MODEL, "Expected 2 arguments: %1%", di);
+        ::P4::error(ErrorType::ERR_MODEL, "Expected 2 arguments: %1%", di);
         return;
     }
 
     if (isDirect && ts->arguments->size() != 1) {
-        ::P4C::error(ErrorType::ERR_MODEL, "Expected a type specialized with one argument: %1%",
-                     ts);
+        ::P4::error(ErrorType::ERR_MODEL, "Expected a type specialized with one argument: %1%", ts);
         return;
     } else if (!isDirect && ts->arguments->size() != 2) {
-        ::P4C::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%",
-                     ts);
+        ::P4::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%",
+                    ts);
         return;
     }
 
     // check dataplane counter width
     auto dpwtype = ts->arguments->at(0);
     if (!dpwtype->is<IR::Type_Bits>()) {
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "Must be bit or int type: %1%", dpwtype);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED, "Must be bit or int type: %1%", dpwtype);
         return;
     }
 
     dataplaneWidthType = EBPFTypeFactory::instance->create(dpwtype);
     unsigned dataplaneWidth = dpwtype->width_bits();
     if (dataplaneWidth > 64) {
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED,
-                     "Counters dataplane width up to 64 bits are supported: %1%", dpwtype);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                    "Counters dataplane width up to 64 bits are supported: %1%", dpwtype);
         return;
     }
     if (dataplaneWidth < 8 || (dataplaneWidth & (dataplaneWidth - 1)) != 0) {
-        ::P4C::warning(ErrorType::WARN_UNSUPPORTED,
-                       "Counter dataplane width will be extended to "
-                       "nearest type (8, 16, 32 or 64 bits): %1%",
-                       dpwtype);
+        ::P4::warning(ErrorType::WARN_UNSUPPORTED,
+                      "Counter dataplane width will be extended to "
+                      "nearest type (8, 16, 32 or 64 bits): %1%",
+                      dpwtype);
     }
 
     // By default, use BPF array map for Counter
@@ -89,14 +88,14 @@ EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram *program, const IR::Declaration
     if (!isDirect) {
         auto istype = ts->arguments->at(1);
         if (!dpwtype->is<IR::Type_Bits>()) {
-            ::P4C::error(ErrorType::ERR_UNSUPPORTED, "Must be bit or int type: %1%", istype);
+            ::P4::error(ErrorType::ERR_UNSUPPORTED, "Must be bit or int type: %1%", istype);
             return;
         }
 
         if (!isHash && istype->width_bits() != 32) {
             // ARRAY_MAP can have only 32 bits key, so assume this and warn user
-            ::P4C::warning(ErrorType::WARN_UNSUPPORTED,
-                           "Up to 32-bit type for index is supported, using 32 bit: %1%", istype);
+            ::P4::warning(ErrorType::WARN_UNSUPPORTED,
+                          "Up to 32-bit type for index is supported, using 32 bit: %1%", istype);
         }
 
         if (isHash) {
@@ -107,7 +106,7 @@ EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram *program, const IR::Declaration
 
         auto declaredSize = di->arguments->at(0)->expression->to<IR::Constant>();
         if (!declaredSize->fitsUint()) {
-            ::P4C::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", declaredSize);
+            ::P4::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", declaredSize);
             return;
         }
         size = declaredSize->asUnsigned();
@@ -176,7 +175,7 @@ void EBPFCounterPSA::emitInstance(CodeBuilder *builder) {
 void EBPFCounterPSA::emitMethodInvocation(CodeBuilder *builder, const P4::ExternMethod *method,
                                           CodeGenInspector *codeGen) {
     if (method->method->name.name != "count") {
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
         return;
     }
     BUG_CHECK(!isDirect, "DirectCounter used outside of table");
@@ -191,7 +190,7 @@ void EBPFCounterPSA::emitMethodInvocation(CodeBuilder *builder, const P4::Extern
 void EBPFCounterPSA::emitDirectMethodInvocation(CodeBuilder *builder,
                                                 const P4::ExternMethod *method, cstring valuePtr) {
     if (method->method->name.name != "count") {
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
         return;
     }
     BUG_CHECK(isDirect, "Bad Counter invocation");
@@ -317,4 +316,4 @@ void EBPFCounterPSA::emitCounterInitializer(CodeBuilder *builder) {
     builder->blockEnd(false);
 }
 
-}  // namespace P4C::EBPF
+}  // namespace P4::EBPF

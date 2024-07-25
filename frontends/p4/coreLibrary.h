@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace P4C::P4 {
+namespace P4 {
 enum class StandardExceptions {
     NoError,
     PacketTooShort,
@@ -30,9 +30,9 @@ enum class StandardExceptions {
     HeaderTooShort,
     ParserTimeout,
 };
-}  // namespace P4C::P4
+}  // namespace P4
 
-namespace P4C {
+namespace P4 {
 
 inline std::ostream &operator<<(std::ostream &out, P4::StandardExceptions e) {
     switch (e) {
@@ -60,9 +60,9 @@ inline std::ostream &operator<<(std::ostream &out, P4::StandardExceptions e) {
     return out;
 }
 
-}  // namespace P4C
+}  // namespace P4
 
-namespace P4C::P4 {
+namespace P4 {
 
 using namespace literals;
 
@@ -87,11 +87,11 @@ class PacketOut : public Model::Extern_Model {
     Model::Elem emit;
 };
 
-class P4Exception_Model : public ::P4C::Model::Elem {
+class P4Exception_Model : public ::P4::Model::Elem {
  public:
     const StandardExceptions exc;
     explicit P4Exception_Model(StandardExceptions exc)
-        : ::P4C::Model::Elem(cstring::empty), exc(exc) {
+        : ::P4::Model::Elem(cstring::empty), exc(exc) {
         std::stringstream str;
         str << exc;
         name = str.str();
@@ -100,7 +100,7 @@ class P4Exception_Model : public ::P4C::Model::Elem {
 
 // Model of P4 core library
 // To be kept in sync with core.p4
-class P4CoreLibrary : public ::P4C::Model::Model {
+class P4CoreLibrary : public ::P4::Model::Model {
  protected:
     // NOLINTBEGIN(bugprone-throw-keyword-missing)
     P4CoreLibrary()
@@ -120,11 +120,11 @@ class P4CoreLibrary : public ::P4C::Model::Model {
         static P4CoreLibrary *corelib = new P4CoreLibrary();
         return *corelib;
     }
-    ::P4C::Model::Elem noAction;
+    ::P4::Model::Elem noAction;
 
-    ::P4C::Model::Elem exactMatch;
-    ::P4C::Model::Elem ternaryMatch;
-    ::P4C::Model::Elem lpmMatch;
+    ::P4::Model::Elem exactMatch;
+    ::P4::Model::Elem ternaryMatch;
+    ::P4::Model::Elem lpmMatch;
 
     PacketIn packetIn;
     PacketOut packetOut;
@@ -136,6 +136,6 @@ class P4CoreLibrary : public ::P4C::Model::Model {
     P4Exception_Model headerTooShort;
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_CORELIBRARY_H_ */

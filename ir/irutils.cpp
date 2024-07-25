@@ -9,9 +9,9 @@
 #include "ir/visitor.h"
 #include "lib/exceptions.h"
 
-namespace P4C::IR {
+namespace P4::IR {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 /* =============================================================================================
  *  Types
@@ -69,7 +69,7 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
         if (valueRequired) {
             P4C_UNIMPLEMENTED("%1%: No default value for varbit types.", srcInfo);
         }
-        ::P4C::error(ErrorType::ERR_UNSUPPORTED, "%1% default values for varbit types", srcInfo);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1% default values for varbit types", srcInfo);
         return nullptr;
     }
     if (const auto *ht = type->to<IR::Type_Header>()) {
@@ -125,8 +125,8 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
         P4C_UNIMPLEMENTED("%1%: No default value for type %2% (%3%).", srcInfo, type,
                           type->node_type_name());
     }
-    ::P4C::error(ErrorType::ERR_INVALID, "%1%: No default value for type %2% (%3%)", srcInfo, type,
-                 type->node_type_name());
+    ::P4::error(ErrorType::ERR_INVALID, "%1%: No default value for type %2% (%3%)", srcInfo, type,
+                type->node_type_name());
     return nullptr;
 }
 
@@ -261,4 +261,4 @@ const IR::Node *inlineBlock(const Transform &t, IR::IndexedVector<IR::StatOrDecl
     return inlineBlockImpl(t, std::move(stmts));
 }
 
-}  // namespace P4C::IR
+}  // namespace P4::IR

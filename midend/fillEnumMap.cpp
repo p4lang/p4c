@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/enumInstance.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 const IR::Node *FillEnumMap::preorder(IR::Type_Enum *type) {
     if (strstr(type->srcInfo.filename, "v1model") == nullptr) {
@@ -34,4 +34,4 @@ const IR::Node *FillEnumMap::preorder(IR::Type_Enum *type) {
     return type;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

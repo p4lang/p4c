@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "flattenInterfaceStructs.h"
 
-namespace P4C::P4 {
+namespace P4 {
 using namespace literals;
 
 namespace {
@@ -32,7 +32,7 @@ static const IR::Type_Struct *isNestedStruct(const P4::TypeMap *typeMap, const I
 }  // namespace
 
 void NestedStructMap::createReplacement(const IR::Type_Struct *type) {
-    auto repl = ::P4C::get(replacement, type);
+    auto repl = ::P4::get(replacement, type);
     if (repl != nullptr) return;
     repl =
         new StructTypeReplacement<IR::Type_Struct>(typeMap, type, new AnnotationSelectionPolicy());
@@ -83,9 +83,9 @@ const IR::Node *ReplaceStructs::postorder(IR::Member *expression) {
     auto decl = replacementMap->refMap->getDeclaration(pe->path, true);
     auto param = decl->to<IR::Parameter>();
     if (param == nullptr) return expression;
-    auto repl = ::P4C::get(toReplace, param);
+    auto repl = ::P4::get(toReplace, param);
     if (repl == nullptr) return expression;
-    auto newFieldName = ::P4C::get(repl->fieldNameRemap, prefix);
+    auto newFieldName = ::P4::get(repl->fieldNameRemap, prefix);
     const IR::Expression *result;
     if (newFieldName.isNullOrEmpty()) {
         auto type = replacementMap->typeMap->getType(getOriginal(), true);
@@ -95,8 +95,8 @@ const IR::Node *ReplaceStructs::postorder(IR::Member *expression) {
             // We only want to process the outermost Member
             return expression;
         if (isWrite()) {
-            ::P4C::error(ErrorType::ERR_UNSUPPORTED,
-                         "%1%: writing to a structure is not supported on this target", expression);
+            ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1%: writing to a structure is not supported on this target", expression);
             return expression;
         }
         // Prefix is a reference to a field of the original struct whose
@@ -137,4 +137,4 @@ const IR::Node *ReplaceStructs::preorder(IR::P4Control *control) {
     return control;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

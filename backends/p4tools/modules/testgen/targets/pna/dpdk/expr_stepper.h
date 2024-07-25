@@ -10,7 +10,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/pna/shared_expr_stepper.h"
 
-namespace P4C::P4Tools::P4Testgen::Pna {
+namespace P4::P4Tools::P4Testgen::Pna {
 
 class PnaDpdkExprStepper : public SharedPnaExprStepper {
  protected:
@@ -28,6 +28,6 @@ class PnaDpdkExprStepper : public SharedPnaExprStepper {
 
     bool preorder(const IR::P4Table * /*table*/) override;
 };
-}  // namespace P4C::P4Tools::P4Testgen::Pna
+}  // namespace P4::P4Tools::P4Testgen::Pna
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_DPDK_EXPR_STEPPER_H_ */

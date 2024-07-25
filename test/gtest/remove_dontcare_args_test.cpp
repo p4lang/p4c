@@ -6,9 +6,9 @@
 #include "helpers.h"
 #include "ir/ir.h"
 
-using namespace P4;
+using namespace ::P4;
 
-namespace Test {
+namespace P4::Test {
 
 struct RemoveDontcareArgsTest : P4CTest {
     const IR::Node *parseAndProcess(std::string program) {
@@ -112,4 +112,4 @@ top(C()) main;
     ASSERT_EQ(collect.controlDecls, 0);
 }
 
-}  // namespace Test
+}  // namespace P4::Test

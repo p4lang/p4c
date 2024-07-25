@@ -19,21 +19,21 @@ limitations under the License.
 
 #include "backends/ebpf/psa/ebpfPsaControl.h"
 
-namespace P4C::EBPF {
+namespace P4::EBPF {
 
 EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program, cstring instanceName,
                                  const IR::Declaration_Instance *di, CodeGenInspector *codeGen)
     : EBPFTableBase(program, instanceName, codeGen) {
     CHECK_NULL(di);
     if (!di->type->is<IR::Type_Specialized>()) {
-        ::P4C::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
+        ::P4::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
         return;
     }
     auto ts = di->type->to<IR::Type_Specialized>();
 
     if (ts->arguments->size() != 2) {
-        ::P4C::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%",
-                     ts);
+        ::P4::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%",
+                    ts);
         return;
     }
 
@@ -43,7 +43,7 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program, cstring instanceNam
     this->valueType = EBPFTypeFactory::instance->create(valueArg);
 
     if (di->arguments->size() < 1) {
-        ::P4C::error(ErrorType::ERR_MODEL, "Expected at least 1 argument: %1%", di);
+        ::P4::error(ErrorType::ERR_MODEL, "Expected at least 1 argument: %1%", di);
         return;
     }
 
@@ -51,7 +51,7 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program, cstring instanceNam
     CHECK_NULL(declaredSize);
 
     if (!declaredSize->fitsUint()) {
-        ::P4C::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", declaredSize);
+        ::P4::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", declaredSize);
         return;
     }
     size = declaredSize->asUnsigned();
@@ -72,7 +72,7 @@ bool EBPFRegisterPSA::shouldUseArrayMap() {
         return (keyWidth > 0 && keyWidth <= 32);
     }
 
-    ::P4C::error(ErrorType::ERR_MODEL, "Unexpected key type: %1%", this->keyType->type);
+    ::P4::error(ErrorType::ERR_MODEL, "Unexpected key type: %1%", this->keyType->type);
 
     return false;
 }
@@ -237,4 +237,4 @@ void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder *builder, const P4::ExternMe
     builder->blockEnd(true);
 }
 
-}  // namespace P4C::EBPF
+}  // namespace P4::EBPF

@@ -23,9 +23,9 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/log.h"
 
-namespace P4C::Util {
+namespace P4::Util {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 class NamedSymbol : public ICastable {
  protected:
@@ -76,16 +76,16 @@ class Namespace : public NamedSymbol {
         if (it != contents.end()) {
             // Check that both declarations have the same type
             if (!it->second->sameType(symbol)) {
-                ::P4C::error(ErrorType::ERR_DUPLICATE,
-                             "Re-declaration of %1%%2% with different type: %3%", symbol->getName(),
-                             symbol->getSourceInfo(), it->second->getSourceInfo());
+                ::P4::error(ErrorType::ERR_DUPLICATE,
+                            "Re-declaration of %1%%2% with different type: %3%", symbol->getName(),
+                            symbol->getSourceInfo(), it->second->getSourceInfo());
                 return;
             }
 
             if (!allowDuplicates) {
-                ::P4C::error(ErrorType::ERR_DUPLICATE,
-                             "Duplicate declaration of %1%%2%; previous at %3%", symbol->getName(),
-                             symbol->getSourceInfo(), it->second->getSourceInfo());
+                ::P4::error(ErrorType::ERR_DUPLICATE,
+                            "Duplicate declaration of %1%%2%; previous at %3%", symbol->getName(),
+                            symbol->getSourceInfo(), it->second->getSourceInfo());
                 return;
             }
         }
@@ -288,4 +288,4 @@ void ProgramStructure::clear() {
     currentNamespace = rootNamespace;
     debugStream = stderr;
 }
-}  // namespace P4C::Util
+}  // namespace P4::Util

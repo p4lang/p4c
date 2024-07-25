@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "lib/cstring.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 void SubstituteStructures::explode(const IR::Expression *expression, const IR::Type *type,
                                    IR::Vector<IR::Expression> *output) {
@@ -114,4 +114,4 @@ const IR::Node *UnnestSelectList::preorder(IR::SelectExpression *expression) {
     return expression;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

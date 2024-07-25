@@ -28,9 +28,9 @@ limitations under the License.
 #include "lib/json.h"
 #include "lib/ordered_map.h"
 
-namespace P4C::BMV2 {
+namespace P4::BMV2 {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 #ifndef UNUSED
 #define UNUSED __attribute__((__unused__))
@@ -324,6 +324,6 @@ unsigned nextId(cstring group);
 /// Converts expr into a ListExpression or returns nullptr if not possible
 const IR::ListExpression *convertToList(const IR::Expression *expr, P4::TypeMap *typeMap);
 
-}  // namespace P4C::BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_HELPERS_H_ */

@@ -2,7 +2,7 @@
 
 #include "frontends/p4/methodInstance.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 const IR::Node *DoRemoveAssertAssume::preorder(IR::MethodCallStatement *statement) {
     auto instance = P4::MethodInstance::resolve(statement->methodCall, refMap, typeMap);
@@ -19,4 +19,4 @@ const IR::Node *DoRemoveAssertAssume::preorder(IR::MethodCallStatement *statemen
     return statement;
 }
 
-}  // namespace P4C::P4
+}  // namespace P4

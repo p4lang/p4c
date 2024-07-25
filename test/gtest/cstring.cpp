@@ -18,9 +18,9 @@ limitations under the License.
 
 #include <gtest/gtest.h>
 
-namespace P4C::Test {
+namespace P4::Test {
 
-using namespace ::P4C::P4::literals;
+using namespace ::P4::literals;
 
 TEST(cstring, construct) {
     cstring c(nullptr);
@@ -158,4 +158,4 @@ TEST(cstring, get_cached) {
     EXPECT_FALSE(cstring::get_cached("test").isNullOrEmpty());
 }
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

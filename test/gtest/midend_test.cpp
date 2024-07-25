@@ -27,9 +27,9 @@ limitations under the License.
 #include "midend/convertEnums.h"
 #include "midend/replaceSelectRange.h"
 
-using namespace ::P4C::P4;
+using namespace ::P4;
 
-namespace P4C::Test {
+namespace P4::Test {
 
 namespace {
 
@@ -51,7 +51,7 @@ TEST_F(P4CMidend, convertEnums_pass) {
         control m() { C(E.A) ctr; apply{} }
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
-    ASSERT_TRUE(pgm != nullptr && ::P4C::errorCount() == 0);
+    ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     // Example to enable logging in source
     // Log::addDebugSpec("convertEnums:0");
@@ -70,7 +70,7 @@ TEST_F(P4CMidend, convertEnums_used_before_declare) {
     )");
     P4CContext::get().options().langVersion = CompilerOptions::FrontendVersion::P4_16;
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
-    ASSERT_TRUE(pgm && ::P4C::errorCount() == 0);
+    ASSERT_TRUE(pgm && ::P4::errorCount() == 0);
 
     ReferenceMap refMap;
     TypeMap typeMap;
@@ -78,7 +78,7 @@ TEST_F(P4CMidend, convertEnums_used_before_declare) {
     PassManager passes = {convertEnums};
     pgm = pgm->apply(passes);
     // use enum before declaration should fail
-    ASSERT_GT(::P4C::errorCount(), 0U);
+    ASSERT_GT(::P4::errorCount(), 0U);
 }
 
 // use enumMap in convertEnums directly
@@ -96,7 +96,7 @@ TEST_F(P4CMidend, getEnumMapping) {
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
     PassManager passes_ = {convertEnums};
     auto result = pgm->apply(passes_);
-    ASSERT_TRUE(result != nullptr && ::P4C::errorCount() == 0);
+    ASSERT_TRUE(result != nullptr && ::P4::errorCount() == 0);
 
     enumMap = convertEnums->getEnumMapping();
     ASSERT_EQ(enumMap.size(), (unsigned long)1);
@@ -166,7 +166,7 @@ static void testReplaceSelectRange(std::vector<Bound> ranges, ExtraTests extraTe
                            new P4::ReplaceSelectRange(&refMap, &typeMap)};
     auto result = pgm->apply(passes_);
     ASSERT_TRUE(result != nullptr);
-    ASSERT_EQ(::P4C::errorCount(), 0u);
+    ASSERT_EQ(::P4::errorCount(), 0u);
 
     CollectRangesAndMasks collect;
     result->apply(collect);
@@ -288,4 +288,4 @@ TEST_F(P4CMidend, replaceSelectRangeSigned5) {
         {{0, 15}}, [](CollectRangesAndMasks collect) { ASSERT_EQ(collect.masks.size(), 1u); });
 }
 
-}  // namespace P4C::Test
+}  // namespace P4::Test

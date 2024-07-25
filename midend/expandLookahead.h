@@ -22,7 +22,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
-namespace P4C::P4 {
+namespace P4 {
 
 /// Given an assignment like
 /// a = lookahead<T>();
@@ -96,6 +96,6 @@ class ExpandLookahead : public PassManager {
     }
 };
 
-}  // namespace P4C::P4
+}  // namespace P4
 
 #endif /* MIDEND_EXPANDLOOKAHEAD_H_ */
