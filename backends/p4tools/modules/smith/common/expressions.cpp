@@ -1053,8 +1053,8 @@ IR::Expression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *tn) 
                     components.push_back(expr);
                 }
             }
-        } else if (const auto *bitsType = td->to<IR::Type_Typedef>()) {
-            components.push_back(genExpression(tnType->getP4Type()));
+        } else if (const auto *tnType = td->to<IR::Type_Typedef>()) {
+            components.push_back(genExpression(tnType->type));
         } else {
             BUG("genStructListExpr: Requested Type %s not a struct-like type", tnName);
         }
