@@ -230,9 +230,6 @@ IR::Constant *ExpressionGenerator::genBitLiteral(const IR::Type *tb) {
 IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
     IR::Expression *expr = nullptr;
 
-    // Resolve the type if it's a `Type_Typedef` object.
-    tp = P4Scope::resolveType(tp);
-
     // reset the expression depth
     P4Scope::prop.depth = 0;
 
@@ -1054,7 +1051,9 @@ IR::Expression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *tn) 
                 }
             }
         } else if (const auto *tnType = td->to<IR::Type_Typedef>()) {
-            components.push_back(genExpression(tnType->type));
+            std::cout << "tnType->type: " << tnType->type << std::endl;
+            std::cout << "tnType->name: " << tnType->name << std::endl;
+            return genExpression(tnType->type);
         } else {
             BUG("genStructListExpr: Requested Type %s not a struct-like type", tnName);
         }

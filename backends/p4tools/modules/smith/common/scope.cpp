@@ -38,19 +38,6 @@ void P4Scope::addToScope(const IR::Node *node) {
         addLval(dv->type, dv->name.name);
     } else if (const auto *dc = node->to<IR::Declaration_Constant>()) {
         addLval(dc->type, dc->name.name, true);
-    } else if (const auto *td = node->to<IR::Type_Typedef>()) {
-        // Retrieve the underlying type of the typedef.
-        const IR::Type *underlyingType = td->type;
-        cstring typeName = td->name.name;
-        std::cout << "underlyingType->print(): " << underlyingType->node_type_name() << "\n";
-        std::cout << "typeName: " << typeName << "\n";
-
-        // Check if the underlying type is a named type that needs further resolving.
-        // `getTypeByName` is expected to recurse when the retrived type is another indirect type.
-        if (const auto *tn = getTypeByName(typeName)) {
-            // Push the indirect type (if it is not a `nullptr`)
-            lScope->push_back(tn);
-        }
     }
 }
 
@@ -347,27 +334,7 @@ std::set<const IR::P4Table *> *P4Scope::getCallableTables() { return &callableTa
 const IR::Type *P4Scope::getTypeByName(cstring name) {
     for (auto *subScope : scope) {
         for (const auto *node : *subScope) {
-            // Since `Type_Declaration` is a superclass of `Type_Typedef`, reverse the order of
-            // branching (i.e., check whether the node can be casted to `Type_Typedef` first).
-            if (const auto *typeDef = node->to<IR::Type_Typedef>()) {
-                if (typeDef->name == name) {
-                    std::cout << "typeDef->name (== name): " << typeDef->name << "\n";
-                    std::cout << "typeDef->type->node_type_name(): "
-                              << typeDef->type->node_type_name() << "\n";
-                    std::cout << "typeDef->type->is<IR::Type_Name>(): "
-                              << typeDef->type->is<IR::Type_Name>() << "\n";
-                    std::cout << "typeDef->type->is<IR::Type_Bits>(): "
-                              << typeDef->type->is<IR::Type_Bits>() << "\n";
-                    std::cout << "typeDef->type->is<IR::Type_Declaration>(): "
-                              << typeDef->type->is<IR::Type_Declaration>() << "\n";
-                    // If the referenced type is also a `Type_Name`, recursively resolving it.
-                    if (const auto *typeName = typeDef->type->to<IR::Type_Name>()) {
-                        std::cout << "Further resolving...\n";
-                        return getTypeByName(typeName->path->name.name);
-                    }
-                    return typeDef->type;
-                }
-            } else if (const auto *decl = node->to<IR::Type_Declaration>()) {
+            if (const auto *decl = node->to<IR::Type_Declaration>()) {
                 if (decl->name.name == name) {
                     return decl;
                 }
@@ -375,14 +342,6 @@ const IR::Type *P4Scope::getTypeByName(cstring name) {
         }
     }
     return nullptr;
-}
-
-/// TODO(zzmic): Figure out whether this requires recursive type resolving.
-const IR::Type *P4Scope::resolveType(const IR::Type *type) {
-    if (const auto *typedefType = type->to<IR::Type_Typedef>()) {
-        return typedefType->type;
-    }
-    return type;
 }
 
 }  // namespace P4Tools::P4Smith

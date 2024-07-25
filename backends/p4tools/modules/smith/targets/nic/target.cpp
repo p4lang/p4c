@@ -49,14 +49,8 @@ IR::IndexedVector<IR::StructField> generatePnaPreOutputMetadataFields() {
 
     retFields.push_back(new IR::StructField("decrypt", IR::Type_Boolean::get()));
 
-    // `typedef bit<32> SecurityAssocIdUint_t;` && type SecurityAssocIdUint_t SecurityAssocId_t;
-    // => `typedef bit<32> SecurityAssocId_t;`
-    // TODO(zzmic): Figure out a proper casting mechanism
-    // Note that if `typedef bit<32> SecurityAssocId_t;` is defined, this works (together with other
-    // components).
-    IR::Path *securityAssocIdPath = new IR::Path(IR::ID("SecurityAssocId_t"));
-    IR::Type_Name *securityAssocIdName = new IR::Type_Name(securityAssocIdPath);
-    retFields.push_back(new IR::StructField("said", securityAssocIdName));
+    retFields.push_back(
+        new IR::StructField(IR::ID("said"), new IR::Type_Name(IR::ID("SecurityAssocId_t"))));
 
     retFields.push_back(new IR::StructField("decrypt_start_offset", IR::Type_Bits::get(16, false)));
 
@@ -284,20 +278,9 @@ const IR::P4Program *DpdkPnaSmithTarget::generateP4Program() const {
     // insert some dummy metadata
     generateMainMetadata();
 
-    // Define a type `SecurityAssocIdUint_t` as an alias for the type `bit<32>`.
-    const IR::Type_Bits *SecurityAssocIdUintType = IR::Type_Bits::get(32, false);
-    IR::Path *SecurityAssocIdUintPath = new IR::Path(IR::ID("SecurityAssocIdUint_t"));
-    IR::Type_Name *SecurityAssocIdUintAlias = new IR::Type_Name(SecurityAssocIdUintPath);
-    IR::Type_Typedef *SecurityAssocIdUintTypedef =
-        new IR::Type_Typedef(SecurityAssocIdUintAlias->path->name, SecurityAssocIdUintType);
-    P4Scope::addToScope(SecurityAssocIdUintTypedef);
-
-    // Define a new typedef `SecurityAssocId_t` that references ("links to") the previously defined
-    // type `SecurityAssocIdUint_t`, making `SecurityAssocId_t` an alias to `SecurityAssocIdUint_t`.
-    IR::Path *SecurityAssocIdPath = new IR::Path(IR::ID("SecurityAssocId_t"));
-    IR::Type_Name *SecurityAssocIdAlias = new IR::Type_Name(SecurityAssocIdPath);
+    // Define a type `SecurityAssocId_t` as an alias for the type `bit<32>` (directly).
     IR::Type_Typedef *SecurityAssocIdTypedef =
-        new IR::Type_Typedef(SecurityAssocIdAlias->path->name, SecurityAssocIdUintAlias);
+        new IR::Type_Typedef(IR::ID("SecurityAssocId_t"), IR::Type_Bits::get(32, false));
     P4Scope::addToScope(SecurityAssocIdTypedef);
 
     // start to assemble the model
