@@ -343,5 +343,4 @@ const IR::Type_Declaration *P4Scope::getTypeByName(cstring name) {
     }
     return nullptr;
 }
-
 }  // namespace P4Tools::P4Smith
