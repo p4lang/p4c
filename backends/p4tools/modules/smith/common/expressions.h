@@ -92,7 +92,7 @@ class ExpressionGenerator : public Generator {
     IR::Expression *constructIntExpr();
 
  private:
-    IR::Expression *genStructListExpr(const IR::Type_Name *tn);
+    IR::ListExpression *genStructListExpr(const IR::Type_Name *tn);
 
     IR::Expression *editHdrStack(cstring lval);
 
