@@ -4,7 +4,7 @@ set -e # Exit on error.
 
 # List of known bugs.
 KNOWN_BUGS=(
-    "h.eth_hdr.src_addr \* 36646024123162"
+    "h.eth_hdr.src_addr \* 36646024123162; not implemented"
 )
 
 # Function to check if an error is triggered by a known bug.
