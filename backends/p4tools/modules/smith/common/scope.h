@@ -98,7 +98,7 @@ class P4Scope {
 
     static const IR::Type_Bits *pickDeclaredBitType(bool must_write = false);
 
-    static const IR::Type *getTypeByName(cstring name);
+    static const IR::Type_Declaration *getTypeByName(cstring name);
 
     // template to get all declarations
     // C++ is so shit... templates must be inlined to be generally usable.

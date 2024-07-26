@@ -331,7 +331,7 @@ std::vector<const IR::Type_Declaration *> P4Scope::getFilteredDecls(std::set<cst
 
 std::set<const IR::P4Table *> *P4Scope::getCallableTables() { return &callableTables; }
 
-const IR::Type *P4Scope::getTypeByName(cstring name) {
+const IR::Type_Declaration *P4Scope::getTypeByName(cstring name) {
     for (auto *subScope : scope) {
         for (const auto *node : *subScope) {
             if (const auto *decl = node->to<IR::Type_Declaration>()) {
