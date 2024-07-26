@@ -194,10 +194,6 @@ const IR::Type_Bits *ExpressionGenerator::genBitType(bool isSigned) {
     return IR::Type_Bits::get(BIT_WIDTHS[size], isSigned);
 }
 
-const IR::Type_Bits *ExpressionGenerator::genBitType(int64_t bit_width, bool isSigned) {
-    return IR::Type_Bits::get(bit_width, isSigned);
-}
-
 IR::Constant *ExpressionGenerator::genIntLiteral(size_t bit_width) {
     big_int min = -((big_int(1) << bit_width - 1));
     if (P4Scope::req.not_negative) {
