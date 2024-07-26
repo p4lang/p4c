@@ -240,7 +240,12 @@ IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
     } else if (tp->is<IR::Type_Boolean>()) {
         expr = constructBooleanExpr();
     } else if (const auto *tn = tp->to<IR::Type_Name>()) {
-        expr = constructStructExpr(tn);
+        // Check if `tn`'s contained alias type is `Type_StructLike` or `Type_Typedef`.
+        if (const auto *tnType = tn->to<IR::Type_Typedef>()) {
+            expr = genExpression(tnType->type);
+        } else {
+            expr = constructStructExpr(tn);
+        }
     } else {
         BUG("Expression: Type %s not yet supported", tp->node_type_name());
     }
@@ -1053,13 +1058,10 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
         } else if (const auto *tnType = td->to<IR::Type_Typedef>()) {
             IR::Expression *expr = nullptr;
             expr = genExpression(tnType->type);
-            if (tnType->name == "SecurityAssocId_t") {
-                const auto *type = new IR::Type_Name(IR::ID("SecurityAssocId_t"));
-                expr = new IR::Cast(type, expr);
-            }
-            std::cout << expr->type << std::endl;
+            // Generically Perform explicit castings to all cases.
+            const auto *explicitType = new IR::Type_Name(IR::ID(tnType->name.toString()));
+            expr = new IR::Cast(explicitType, expr);
             components.push_back(expr);
-            // return expr;
         } else {
             BUG("genStructListExpr: Requested Type %s not a struct-like type", tnName);
         }
