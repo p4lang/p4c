@@ -1021,7 +1021,7 @@ IR::Expression *ExpressionGenerator::constructIntExpr() {
     return expr;
 }
 
-IR::Expression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *tn) {
+IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *tn) {
     IR::Vector<IR::Expression> components;
     cstring tnName = tn->path->name.name;
 
@@ -1058,7 +1058,8 @@ IR::Expression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *tn) 
                 expr = new IR::Cast(type, expr);
             }
             std::cout << expr->type << std::endl;
-            return expr;
+            components.push_back(expr);
+            // return expr;
         } else {
             BUG("genStructListExpr: Requested Type %s not a struct-like type", tnName);
         }
