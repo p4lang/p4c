@@ -28,28 +28,33 @@
 #include "lib/nullstream.h"
 
 int parse(const IR::P4Program *program, cstring pipe) {
+    int succes = -1;
     IR::P4Program *program_ptr_cpy = const_cast<IR::P4Program*>(program);
     IR::Vector<IR::Node> &nodes = program_ptr_cpy->objects;
 
     for(unsigned int i = 0; i<nodes.size(); i++) {
-        if (auto *T = nodes.at(i)->to<IR::Declaration_Instance>()) {
-            const IR::Annotations *annotations = T->getAnnotations();
+        if (auto *declaration_instance = nodes.at(i)->to<IR::Declaration_Instance>()) {
+            const IR::Annotations *annotations = declaration_instance->getAnnotations();
             if(annotations->size() == 1) {
                 const IR::Vector<IR::Annotation> annotationsVector = annotations->annotations;
                 const IR::Annotation *annotation = annotationsVector.at(0);
-                const IR::Vector<IR::AnnotationToken> body = annotation->body;
-                const IR::AnnotationToken *token = body.at(0);
-                const cstring text = token->text;
-                if(text == pipe) {
-                    auto *D = nodes.at(i)->to<IR::Declaration>();
-                    IR::ID *id = new IR::ID("main");
-                    IR::ID *name = const_cast<IR::ID*>(&(D->name));
-                    *name = *id;
+                const IR::Vector<IR::AnnotationToken> tokenVector = annotation->body;
+                if(tokenVector.size() == 1) {
+                    const IR::AnnotationToken *token = tokenVector.at(0);
+                    const cstring text = token->text;
+                    if(text == pipe) {
+                        auto *D = nodes.at(i)->to<IR::Declaration>();
+                        IR::ID *id = new IR::ID("main");
+                        IR::ID *name = const_cast<IR::ID*>(&(D->name));
+                        *name = *id;
+                        succes = 0;
+                    }
                 }
+                
             }
         }
     }
     
-    return 0;
+    return succes;
 }
 

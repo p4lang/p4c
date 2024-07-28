@@ -69,7 +69,10 @@ int main(int argc, char *const argv[]) {
         if (options.loadIRFromJson == false) {
             program = P4::parseP4File(options);
             
-            parse(program, pipe);
+            if(parse(program, pipe) == -1) {
+                std::cerr << "Pipeline " << pipe << " not found in P4 file\n";
+                return 1;
+            }
 
             if (program == nullptr || ::errorCount() > 0) return 1;
             try {
@@ -102,12 +105,8 @@ int main(int argc, char *const argv[]) {
             fb.close();
         }
 
-        
-
         P4::serializeP4RuntimeIfRequired(program, options);
         if (::errorCount() > 0) return 1;
-
-        parse(program, pipe);
 
         BMV2::SimpleSwitchMidEnd midEnd(options);
         midEnd.addDebugHook(hook);
