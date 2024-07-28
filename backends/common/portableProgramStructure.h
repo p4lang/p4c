@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_BMV2_PORTABLECOMMON_PROGRAMSTRUCTURE_H_
-#define BACKENDS_BMV2_PORTABLECOMMON_PROGRAMSTRUCTURE_H_
+#ifndef BACKENDS_COMMON_PORTABLEPROGRAMSTRUCTURE_H_
+#define BACKENDS_COMMON_PORTABLEPROGRAMSTRUCTURE_H_
 
 #include "backends/bmv2/common/backend.h"
 #include "backends/common/programStructure.h"
@@ -23,18 +23,18 @@ limitations under the License.
 #include "lib/cstring.h"
 
 /// TODO: this is not really specific to BMV2, it should reside somewhere else.
-namespace BMV2 {
+namespace P4 {
 
 class PortableProgramStructure : public P4::ProgramStructure {
  public:
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
-    
+
     /// We place scalar user metadata fields (i.e., bit<>, bool)
     /// in the scalars map.
     ordered_map<cstring, const IR::Declaration_Variable *> scalars;
     unsigned scalars_width = 0;
-    unsigned error_width = 32;
+    // unsigned error_width = 32;
     unsigned bool_width = 1;
 
     ordered_map<cstring, const IR::Type_Header *> header_types;
@@ -78,7 +78,6 @@ class PortableProgramStructure : public P4::ProgramStructure {
 
 class ParsePortableArchitecture : public Inspector {
  public:
-
     bool preorder(const IR::ToplevelBlock *block) override;
 };
 
@@ -97,6 +96,6 @@ class InspectPortableProgram : public Inspector {
     bool isHeaders(const IR::Type_StructLike *st);
 };
 
-}  // namespace BMV2
+}  // namespace P4
 
-#endif /* BACKENDS_BMV2_PORTABLECOMMON_PROGRAMSTRUCTURE_H_ */
+#endif /* BACKENDS_COMMON_PORTABLEPROGRAMSTRUCTURE_H_ */

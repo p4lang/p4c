@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "portableProgramStructure.h"
 
-namespace BMV2 {
+namespace P4 {
 
 using namespace P4::literals;
 
@@ -38,4 +38,4 @@ bool ParsePortableArchitecture::preorder(const IR::ToplevelBlock *block) {
     return false;
 }
 
-}  // namespace BMV2
+}  // namespace P4

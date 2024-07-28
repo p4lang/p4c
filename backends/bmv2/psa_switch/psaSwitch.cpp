@@ -23,7 +23,7 @@ namespace BMV2 {
 
 using namespace P4::literals;
 
-void PsaCodeGenerator::create(ConversionContext *ctxt, PortableProgramStructure *structure) {
+void PsaCodeGenerator::create(ConversionContext *ctxt, P4::PortableProgramStructure *structure) {
     createTypes(ctxt, structure);
     createHeaders(ctxt, structure);
     createScalars(ctxt, structure);
@@ -35,7 +35,8 @@ void PsaCodeGenerator::create(ConversionContext *ctxt, PortableProgramStructure 
     createGlobals();
 }
 
-void PsaCodeGenerator::createParsers(ConversionContext *ctxt, PortableProgramStructure *structure) {
+void PsaCodeGenerator::createParsers(ConversionContext *ctxt,
+                                     P4::PortableProgramStructure *structure) {
     {
         auto cvt = new ParserConverter(ctxt, "ingress_parser"_cs);
         auto ingress = structure->parsers.at("ingress"_cs);
@@ -48,7 +49,8 @@ void PsaCodeGenerator::createParsers(ConversionContext *ctxt, PortableProgramStr
     }
 }
 
-void PsaCodeGenerator::createControls(ConversionContext *ctxt, PortableProgramStructure *structure) {
+void PsaCodeGenerator::createControls(ConversionContext *ctxt,
+                                      P4::PortableProgramStructure *structure) {
     auto cvt = new BMV2::ControlConverter<Standard::Arch::PSA>(ctxt, "ingress"_cs, true);
     auto ingress = structure->pipelines.at("ingress"_cs);
     ingress->apply(*cvt);
@@ -58,7 +60,8 @@ void PsaCodeGenerator::createControls(ConversionContext *ctxt, PortableProgramSt
     egress->apply(*cvt);
 }
 
-void PsaCodeGenerator::createDeparsers(ConversionContext *ctxt, PortableProgramStructure *structure) {
+void PsaCodeGenerator::createDeparsers(ConversionContext *ctxt,
+                                       P4::PortableProgramStructure *structure) {
     {
         auto cvt = new DeparserConverter(ctxt, "ingress_deparser"_cs);
         auto ingress = structure->deparsers.at("ingress"_cs);

@@ -79,10 +79,10 @@ class PsaCodeGenerator : public PortableCodeGenerator {
     // PsaCodeGenerator(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
     //     : PortableCodeGenerator(refMap, typeMap) {}
 
-    void create(ConversionContext *ctxt, PortableProgramStructure *structure);
-    void createParsers(ConversionContext *ctxt, PortableProgramStructure *structure);
-    void createControls(ConversionContext *ctxt, PortableProgramStructure *structure);
-    void createDeparsers(ConversionContext *ctxt, PortableProgramStructure *structure);
+    void create(ConversionContext *ctxt, P4::PortableProgramStructure *structure);
+    void createParsers(ConversionContext *ctxt, P4::PortableProgramStructure *structure);
+    void createControls(ConversionContext *ctxt, P4::PortableProgramStructure *structure);
+    void createDeparsers(ConversionContext *ctxt, P4::PortableProgramStructure *structure);
 };
 
 class ConvertPsaToJson : public Inspector {

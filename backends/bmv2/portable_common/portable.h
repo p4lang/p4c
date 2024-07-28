@@ -25,6 +25,7 @@ limitations under the License.
 #include "backends/bmv2/common/helpers.h"
 #include "backends/bmv2/common/lower.h"
 #include "backends/bmv2/common/parser.h"
+#include "backends/common/portableProgramStructure.h"
 #include "backends/common/programStructure.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -39,24 +40,23 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
 #include "lib/json.h"
-#include "portableProgramStructure.h"
 
 namespace BMV2 {
 
 class PortableCodeGenerator {
  public:
     // PortableCodeGenerator() {}
-        // : PortableProgramStructure(refMap, typeMap) {}
-    
+    // : PortableProgramStructure(refMap, typeMap) {}
+
     unsigned error_width = 32;
 
     void createStructLike(ConversionContext *ctxt, const IR::Type_StructLike *st,
-                            PortableProgramStructure *structure);
-    void createTypes(ConversionContext *ctxt, PortableProgramStructure *structure);
-    void createHeaders(ConversionContext *ctxt, PortableProgramStructure *structure);
-    void createScalars(ConversionContext *ctxt, PortableProgramStructure *structure);
+                          P4::PortableProgramStructure *structure);
+    void createTypes(ConversionContext *ctxt, P4::PortableProgramStructure *structure);
+    void createHeaders(ConversionContext *ctxt, P4::PortableProgramStructure *structure);
+    void createScalars(ConversionContext *ctxt, P4::PortableProgramStructure *structure);
     void createExterns();
-    void createActions(ConversionContext *ctxt, PortableProgramStructure *structure);
+    void createActions(ConversionContext *ctxt, P4::PortableProgramStructure *structure);
     void createGlobals();
     cstring convertHashAlgorithm(cstring algo);
 };

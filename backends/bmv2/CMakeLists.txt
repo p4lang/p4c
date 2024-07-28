@@ -39,8 +39,6 @@ set (PORTABLE_COMMON
     portable_common/options.h    
     portable_common/midend.cpp
     portable_common/midend.h
-    portable_common/portableProgramStructure.cpp
-    portable_common/portableProgramStructure.h
     )
 
 set (BMV2_PSA_SWITCH_SRCS

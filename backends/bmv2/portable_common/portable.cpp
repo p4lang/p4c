@@ -24,7 +24,7 @@ namespace BMV2 {
 using namespace P4::literals;
 
 void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::Type_StructLike *st,
-                                            PortableProgramStructure *structure) {
+                                             P4::PortableProgramStructure *structure) {
     CHECK_NULL(st);
     cstring name = st->controlPlaneName();
     unsigned max_length = 0;  // for variable-sized headers
@@ -87,7 +87,8 @@ void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::
     ctxt->json->add_header_type(name, fields, max_length_bytes);
 }
 
-void PortableCodeGenerator::createTypes(ConversionContext *ctxt, PortableProgramStructure *structure) {
+void PortableCodeGenerator::createTypes(ConversionContext *ctxt,
+                                        P4::PortableProgramStructure *structure) {
     for (auto kv : structure->header_types) createStructLike(ctxt, kv.second, structure);
     for (auto kv : structure->metadata_types) createStructLike(ctxt, kv.second, structure);
     for (auto kv : structure->header_union_types) {
@@ -108,7 +109,8 @@ void PortableCodeGenerator::createTypes(ConversionContext *ctxt, PortableProgram
     // add enums to json
 }
 
-void PortableCodeGenerator::createScalars(ConversionContext *ctxt, PortableProgramStructure *structure) {
+void PortableCodeGenerator::createScalars(ConversionContext *ctxt,
+                                          P4::PortableProgramStructure *structure) {
     auto name = structure->scalars.begin()->first;
     ctxt->json->add_header("scalars_t"_cs, name);
     ctxt->json->add_header_type("scalars_t"_cs);
@@ -144,7 +146,8 @@ void PortableCodeGenerator::createScalars(ConversionContext *ctxt, PortableProgr
     }
 }
 
-void PortableCodeGenerator::createHeaders(ConversionContext *ctxt, PortableProgramStructure *structure) {
+void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
+                                          P4::PortableProgramStructure *structure) {
     for (auto kv : structure->headers) {
         auto type = kv.second->type->to<IR::Type_StructLike>();
         ctxt->json->add_header(type->controlPlaneName(), kv.second->name);
@@ -187,7 +190,8 @@ void PortableCodeGenerator::createExterns() {
     // add extern_instances to json
 }
 
-void PortableCodeGenerator::createActions(ConversionContext *ctxt, PortableProgramStructure *structure) {
+void PortableCodeGenerator::createActions(ConversionContext *ctxt,
+                                          P4::PortableProgramStructure *structure) {
     auto cvt = new ActionConverter(ctxt, true);
     for (auto it : structure->actions) {
         auto action = it.first;

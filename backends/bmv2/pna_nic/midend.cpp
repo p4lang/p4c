@@ -90,7 +90,8 @@ class PnaEnumOn32Bits : public P4::ChooseEnumRepresentation {
     explicit PnaEnumOn32Bits(cstring filename) : filename(filename) {}
 };
 
-PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream) : PortableMidEnd(options) {
+PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
+    : PortableMidEnd(options) {
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PnaEnumOn32Bits("pna.p4"_cs));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::function<bool(const Context *, const IR::Expression *)> policy =
@@ -141,8 +142,8 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream) : 
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),
-            new PassRepeated({new P4::ConstantFolding(&refMap, &typeMap),
-                              new P4::StrengthReduction(&typeMap)}),
+            new PassRepeated(
+                {new P4::ConstantFolding(&refMap, &typeMap), new P4::StrengthReduction(&typeMap)}),
             new P4::MoveDeclarations(),
             new P4::ValidateTableProperties({"pna_implementation"_cs, "pna_direct_counter"_cs,
                                              "pna_direct_meter"_cs, "pna_idle_timeout"_cs,

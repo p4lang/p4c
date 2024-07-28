@@ -1,7 +1,7 @@
 set(BACKENDS_COMMON_SRCS
     metermap.cpp
     programStructure.cpp
-    ../bmv2/portable_common/portableProgramStructure.cpp
+    portableProgramStructure.cpp
     psaProgramStructure.cpp
 )
 

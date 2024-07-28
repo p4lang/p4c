@@ -18,7 +18,7 @@ limitations under the License.
 #ifndef BACKENDS_COMMON_PSAPROGRAMSTRUCTURE_H_
 #define BACKENDS_COMMON_PSAPROGRAMSTRUCTURE_H_
 
-#include "backends/bmv2/portable_common/portableProgramStructure.h"
+#include "portableProgramStructure.h"
 
 namespace P4 {
 
@@ -29,7 +29,7 @@ enum block_t {
     DEPARSER,
 };
 
-class PsaProgramStructure : public BMV2::PortableProgramStructure {
+class PsaProgramStructure : public PortableProgramStructure {
  public:
     /// Architecture related information.
     ordered_map<const IR::Node *, std::pair<gress_t, block_t>> block_type;
@@ -55,7 +55,7 @@ class PsaProgramStructure : public BMV2::PortableProgramStructure {
     }
 };
 
-class ParsePsaArchitecture : public BMV2::ParsePortableArchitecture {
+class ParsePsaArchitecture : public ParsePortableArchitecture {
     PsaProgramStructure *structure;
 
  public:
@@ -79,13 +79,12 @@ class ParsePsaArchitecture : public BMV2::ParsePortableArchitecture {
     }
 };
 
-class InspectPsaProgram : public BMV2::InspectPortableProgram {
+class InspectPsaProgram : public InspectPortableProgram {
     PsaProgramStructure *pinfo;
 
  public:
     InspectPsaProgram(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, PsaProgramStructure *pinfo)
-    : InspectPortableProgram(refMap, typeMap),
-      pinfo(pinfo) {
+        : InspectPortableProgram(refMap, typeMap), pinfo(pinfo) {
         CHECK_NULL(pinfo);
         setName("InspectPsaProgram");
     }

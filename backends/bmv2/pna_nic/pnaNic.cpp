@@ -23,7 +23,7 @@ namespace BMV2 {
 
 using namespace P4::literals;
 
-void PnaCodeGenerator::create(ConversionContext *ctxt, PortableProgramStructure *structure) {
+void PnaCodeGenerator::create(ConversionContext *ctxt, P4::PortableProgramStructure *structure) {
     createTypes(ctxt, structure);
     createHeaders(ctxt, structure);
     createScalars(ctxt, structure);
@@ -35,7 +35,8 @@ void PnaCodeGenerator::create(ConversionContext *ctxt, PortableProgramStructure 
     createGlobals();
 }
 
-void PnaCodeGenerator::createParsers(ConversionContext *ctxt, PortableProgramStructure *structure) {
+void PnaCodeGenerator::createParsers(ConversionContext *ctxt,
+                                     P4::PortableProgramStructure *structure) {
     {
         auto cvt = new ParserConverter(ctxt, "main_parser"_cs);
         auto main_control = structure->parsers.at("main_parser"_cs);
@@ -43,13 +44,15 @@ void PnaCodeGenerator::createParsers(ConversionContext *ctxt, PortableProgramStr
     }
 }
 
-void PnaCodeGenerator::createControls(ConversionContext *ctxt, PortableProgramStructure *structure) {
+void PnaCodeGenerator::createControls(ConversionContext *ctxt,
+                                      P4::PortableProgramStructure *structure) {
     auto cvt = new BMV2::ControlConverter<Standard::Arch::PNA>(ctxt, "main_control"_cs, true);
     auto main_control = structure->pipelines.at("main_control"_cs);
     main_control->apply(*cvt);
 }
 
-void PnaCodeGenerator::createDeparsers(ConversionContext *ctxt, PortableProgramStructure *structure) {
+void PnaCodeGenerator::createDeparsers(ConversionContext *ctxt,
+                                       P4::PortableProgramStructure *structure) {
     {
         auto cvt = new DeparserConverter(ctxt, "main_deparser"_cs);
         auto main_control = structure->deparsers.at("main_deparser"_cs);

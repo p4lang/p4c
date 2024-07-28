@@ -17,7 +17,7 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_PNA_NIC_PNAPROGRAMSTRUCTURE_H_
 #define BACKENDS_BMV2_PNA_NIC_PNAPROGRAMSTRUCTURE_H_
 
-#include "backends/bmv2/portable_common/portableProgramStructure.h"
+#include "backends/common/portableProgramStructure.h"
 
 /// TODO: this is not really specific to BMV2, it should reside somewhere else
 namespace BMV2 {
@@ -28,7 +28,7 @@ enum pna_block_t {
     MAIN_DEPARSER,
 };
 
-class PnaProgramStructure : public PortableProgramStructure {
+class PnaProgramStructure : public P4::PortableProgramStructure {
  public:
     /// Architecture related information
     ordered_map<const IR::Node *, pna_block_t> block_type;
@@ -50,7 +50,7 @@ class PnaProgramStructure : public PortableProgramStructure {
     }
 };
 
-class ParsePnaArchitecture : public ParsePortableArchitecture {
+class ParsePnaArchitecture : public P4::ParsePortableArchitecture {
     PnaProgramStructure *structure;
 
  public:
@@ -74,13 +74,12 @@ class ParsePnaArchitecture : public ParsePortableArchitecture {
     }
 };
 
-class InspectPnaProgram : public InspectPortableProgram {
+class InspectPnaProgram : public P4::InspectPortableProgram {
     PnaProgramStructure *pinfo;
 
  public:
     InspectPnaProgram(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, PnaProgramStructure *pinfo)
-    : InspectPortableProgram(refMap, typeMap),
-      pinfo(pinfo) {
+        : InspectPortableProgram(refMap, typeMap), pinfo(pinfo) {
         CHECK_NULL(pinfo);
         setName("InspectPnaProgram");
     }
