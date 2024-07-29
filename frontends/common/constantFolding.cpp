@@ -817,17 +817,27 @@ const IR::Node *DoConstantFolding::shift(const IR::Operation_Binary *e) {
     unsigned shift = static_cast<unsigned>(shift_amt->asInt());
     if (overflowWidth(e, shift)) return e;
 
-    auto tb = left->type->to<IR::Type_Bits>();
-    if (tb != nullptr) {
-        if (((unsigned)tb->width_bits() <= shift) && warnings)
-            ::warning(ErrorType::WARN_OVERFLOW, "%1%: Shifting %2%-bit value with %3%", e,
-                      tb->width_bits(), shift);
-    }
-
-    if (e->is<IR::Shl>())
+    if (e->is<IR::Shl>()) {
         value = Util::shift_left(value, shift);
-    else
+    } else {
         value = Util::shift_right(value, shift);
+    }
+    if (const auto *tb = left->type->to<IR::Type_Bits>()) {
+        if ((static_cast<unsigned>(tb->width_bits()) <= shift)) {
+            if (warnings) {
+                ::warning(ErrorType::WARN_OVERFLOW, "%1%: Shifting %2%-bit value with %3%", e,
+                          tb->width_bits(), shift);
+            }
+            // According to the P4 specification, the result of a left-shift that is larger than the
+            // width of the bit type is 0. For a right-shift of a negative signed value that is
+            // larger than the width of the bit type the result is -1.
+            if (e->is<IR::Shr>() && tb->isSigned && value < 0) {
+                value = -1;
+            } else {
+                value = 0;
+            }
+        }
+    }
     return new IR::Constant(e->srcInfo, left->type, value, cl->base);
 }
 
