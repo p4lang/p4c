@@ -20,6 +20,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/enumInstance.h"
 #include "lib/big_int_util.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
 
 namespace P4 {
@@ -427,30 +428,34 @@ const IR::Node *DoConstantFolding::postorder(IR::Shr *e) { return shift(e); }
 const IR::Node *DoConstantFolding::postorder(IR::Shl *e) { return shift(e); }
 
 const IR::Node *DoConstantFolding::compare(const IR::Operation_Binary *e) {
-    auto eleft = getConstant(e->left);
-    auto eright = getConstant(e->right);
-    if (eleft == nullptr || eright == nullptr) return e;
+    const auto *eleft = getConstant(e->left);
+    const auto *eright = getConstant(e->right);
+    if (eleft == nullptr || eright == nullptr) {
+        return e;
+    }
 
     bool eqTest = e->is<IR::Equ>();
-    if (eleft->is<IR::BoolLiteral>()) {
-        auto left = eleft->to<IR::BoolLiteral>();
-        auto right = eright->to<IR::BoolLiteral>();
-        if (left == nullptr || right == nullptr) {
+    BUG_CHECK(eqTest || e->is<IR::Neq>(),
+              "compare only supports IR::Eq or IR::Neq operators, got %1%", e->node_type_name());
+    if (const auto *left = eleft->to<IR::BoolLiteral>()) {
+        const auto *right = eright->to<IR::BoolLiteral>();
+        if (right == nullptr) {
             ::error(ErrorType::ERR_INVALID, "%1%: both operands must be Boolean", e);
             return e;
         }
         bool bresult = (left->value == right->value) == eqTest;
         return new IR::BoolLiteral(e->srcInfo, IR::Type_Boolean::get(), bresult);
-    } else if (eleft->is<IR::StringLiteral>()) {
-        const auto *left = eleft->to<IR::StringLiteral>();
+    }
+    if (const auto *left = eleft->to<IR::StringLiteral>()) {
         const auto *right = eright->to<IR::StringLiteral>();
-        if (left == nullptr || right == nullptr) {
+        if (right == nullptr) {
             ::error(ErrorType::ERR_INVALID, "%1%: both operands must be String", e);
             return e;
         }
         bool bresult = (left->value == right->value) == eqTest;
         return new IR::BoolLiteral(e->srcInfo, IR::Type_Boolean::get(), bresult);
-    } else if (typesKnown) {
+    }
+    if (typesKnown) {
         auto le = EnumInstance::resolve(eleft, typeMap);
         auto re = EnumInstance::resolve(eright, typeMap);
         if (le != nullptr && re != nullptr) {
