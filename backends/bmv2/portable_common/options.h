@@ -28,8 +28,6 @@ class PortableOptions : public BMV2Options {
     std::vector<const char *> *process(int argc, char *const argv[]) override;
 };
 
-// using PortableContext = P4CContextWithOptions<PortableOptions>;
-
 }  // namespace BMV2
 
 #endif /* BACKENDS_BMV2_PORTABLE_COMMON_OPTIONS_H_ */

@@ -45,9 +45,6 @@ namespace BMV2 {
 
 class PortableCodeGenerator {
  public:
-    // PortableCodeGenerator() {}
-    // : PortableProgramStructure(refMap, typeMap) {}
-
     unsigned error_width = 32;
 
     void createStructLike(ConversionContext *ctxt, const IR::Type_StructLike *st,

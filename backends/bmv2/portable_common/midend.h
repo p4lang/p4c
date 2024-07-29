@@ -27,7 +27,6 @@ namespace BMV2 {
 
 class PortableMidEnd : public MidEnd {
  public:
-    // If p4c is run with option '--listMidendPasses', outStream is used for printing passes names
     explicit PortableMidEnd(CompilerOptions &options) : MidEnd(options) {}
 };
 

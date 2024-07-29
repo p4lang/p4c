@@ -34,7 +34,6 @@ class PortableProgramStructure : public P4::ProgramStructure {
     /// in the scalars map.
     ordered_map<cstring, const IR::Declaration_Variable *> scalars;
     unsigned scalars_width = 0;
-    // unsigned error_width = 32;
     unsigned bool_width = 1;
 
     ordered_map<cstring, const IR::Type_Header *> header_types;
