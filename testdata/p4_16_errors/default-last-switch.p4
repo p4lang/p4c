@@ -9,8 +9,8 @@ control ctrl() {
 
     apply {
         switch (t.apply().action_run) {
-            b:
-            default: { return; }
+            default:
+            b: { return; }
         }
     }
 }

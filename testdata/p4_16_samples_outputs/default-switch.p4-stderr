@@ -1,9 +1,3 @@
-default-switch.p4(13): [--Wwarn=ordering] warning: b: label following 'default' DefaultExpression label.
-            b: { return; }
-            ^
-default-switch.p4(12)
-            default:
-            ^^^^^^^
 default-switch.p4(1): [--Wwarn=unused] warning: Control ctrl is not used; removing
 control ctrl() {
         ^^^^
