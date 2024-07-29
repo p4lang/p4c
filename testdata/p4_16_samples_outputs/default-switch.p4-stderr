@@ -1,0 +1,4 @@
+default-switch.p4(1): [--Wwarn=unused] warning: Control ctrl is not used; removing
+control ctrl() {
+        ^^^^
+[--Wwarn=missing] warning: Program does not contain a `main' module

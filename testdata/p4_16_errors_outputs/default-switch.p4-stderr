@@ -1,9 +1,0 @@
-default-switch.p4(11): [--Werror=invalid] error: switch label b follows 'default' label, which is not allowed.
-        switch (t.apply().action_run) {
-        ^^^^^^
-default-switch.p4(13)
-            b: { return; }
-            ^
-default-switch.p4(12)
-            default:
-            ^^^^^^^
