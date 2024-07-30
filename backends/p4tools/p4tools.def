@@ -131,30 +131,6 @@ class StateVariable : Expression {
     dbprint { ref->dbprint(out); }
 }
 
-#emit
-namespace IR {
-/// Equals for StateVariable pointers. We only compare the label.
-struct StateVariableEqual {
-    bool operator()(const IR::StateVariable *s1, const IR::StateVariable *s2) const {
-        return s1->equiv(*s2);
-    }
-    bool operator()(const IR::StateVariable &s1, const IR::StateVariable &s2) const {
-        return s1.equiv(s2);
-    }
-};
-
-/// Less for StateVariable pointers. We only compare the label.
-struct StateVariableLess {
-    bool operator()(const IR::StateVariable *s1, const IR::StateVariable *s2) const {
-        return s1->operator<(*s2);
-    }
-    bool operator()(const IR::StateVariable &s1, const IR::StateVariable &s2) const {
-        return s1.operator<(s2);
-    }
-};
-}  // namespace IR
-#end
-
 /// Signifies that a particular expression is tainted.
 /// This tainted expression must be resolved explicitly.
 class TaintExpression : Expression {

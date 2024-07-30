@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "absl/container/btree_map.h"
+#include "backends/p4tools/common/lib/ir_compare.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
@@ -13,16 +14,9 @@
 // TODO: This should implement AbstractRepCheckedNode<Constraint>.
 using Constraint = IR::Expression;
 
-/// Comparator to compare SymbolicVariable pointers.
-struct SymbolicVarComp {
-    bool operator()(const IR::SymbolicVariable *s1, const IR::SymbolicVariable *s2) const {
-        return s1->operator<(*s2);
-    }
-};
-
 /// This type maps symbolic variables to their value assigned by the solver.
 using SymbolicMapping =
-    absl::btree_map<const IR::SymbolicVariable *, const IR::Expression *, SymbolicVarComp>;
+    absl::btree_map<const IR::SymbolicVariable *, const IR::Expression *, IR::SymbolicVariableLess>;
 
 /// Provides a higher-level interface for an SMT solver.
 class AbstractSolver : public ICastable {
