@@ -125,7 +125,6 @@ $(function(){initNavTree('class_p4_tools_1_1_abstract_p4c_tool_options.html','')
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
-<a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="class_p4_tools_1_1_abstract_p4c_tool_options-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::AbstractP4cToolOptions Class Reference</div></div>
 </div><!--header-->
@@ -140,17 +139,18 @@ Inheritance diagram for P4Tools::AbstractP4cToolOptions:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ae43842ff9b42c71533720c09258ee742" id="r_ae43842ff9b42c71533720c09258ee742"><td class="memItemLeft" align="right" valign="top"><a id="ae43842ff9b42c71533720c09258ee742" name="ae43842ff9b42c71533720c09258ee742"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>AbstractP4cToolOptions</b> (const <a class="el" href="class_p4_tools_1_1_abstract_p4c_tool_options.html">AbstractP4cToolOptions</a> &amp;)=delete</td></tr>
-<tr class="separator:ae43842ff9b42c71533720c09258ee742"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a24b50930c1db40272f1f3c53ae19c6d8" id="r_a24b50930c1db40272f1f3c53ae19c6d8"><td class="memItemLeft" align="right" valign="top"><a id="a24b50930c1db40272f1f3c53ae19c6d8" name="a24b50930c1db40272f1f3c53ae19c6d8"></a>
-<a class="el" href="class_p4_tools_1_1_abstract_p4c_tool_options.html">AbstractP4cToolOptions</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="class_p4_tools_1_1_abstract_p4c_tool_options.html">AbstractP4cToolOptions</a> &amp;)=delete</td></tr>
-<tr class="separator:a24b50930c1db40272f1f3c53ae19c6d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae7e5b3aa5cc1bdc631e435ce8a6b29e" id="r_aae7e5b3aa5cc1bdc631e435ce8a6b29e"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="class_i_compile_context.html">ICompileContext</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aae7e5b3aa5cc1bdc631e435ce8a6b29e">process</a> (const std::vector&lt; const char * &gt; &amp;args)</td></tr>
 <tr class="separator:aae7e5b3aa5cc1bdc631e435ce8a6b29e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6317805ca731d8a2b89edcacc61b5518" id="r_a6317805ca731d8a2b89edcacc61b5518"><td class="memItemLeft" align="right" valign="top">std::vector&lt; const char * &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6317805ca731d8a2b89edcacc61b5518">process</a> (int argc, char *const argv[]) override</td></tr>
+<tr class="memdesc:a6317805ca731d8a2b89edcacc61b5518"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook for customizing options processing.  <br /></td></tr>
+<tr class="separator:a6317805ca731d8a2b89edcacc61b5518"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:a52bfb2d232245e98e027420d1ee176b7" id="r_a52bfb2d232245e98e027420d1ee176b7"><td class="memItemLeft" align="right" valign="top"><a id="a52bfb2d232245e98e027420d1ee176b7" name="a52bfb2d232245e98e027420d1ee176b7"></a>
+std::vector&lt; const char * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>compilerArgs</b></td></tr>
+<tr class="memdesc:a52bfb2d232245e98e027420d1ee176b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Command-line arguments to be sent to the compiler. Populated by @process. <br /></td></tr>
+<tr class="separator:a52bfb2d232245e98e027420d1ee176b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4a3596445c16f2321461502feeeaa82" id="r_ab4a3596445c16f2321461502feeeaa82"><td class="memItemLeft" align="right" valign="top"><a id="ab4a3596445c16f2321461502feeeaa82" name="ab4a3596445c16f2321461502feeeaa82"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>disableInformationLogging</b> = false</td></tr>
 <tr class="memdesc:ab4a3596445c16f2321461502feeeaa82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disable information logging. <br /></td></tr>
@@ -162,6 +162,12 @@ std::optional&lt; uint32_t &gt;&#160;</td><td class="memItemRight" valign="botto
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
+<tr class="memitem:a9ef762920e46aded3647b95139e44795" id="r_a9ef762920e46aded3647b95139e44795"><td class="memItemLeft" align="right" valign="top"><a id="a9ef762920e46aded3647b95139e44795" name="a9ef762920e46aded3647b95139e44795"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>AbstractP4cToolOptions</b> (<a class="el" href="class_p4_tools_1_1_abstract_p4c_tool_options.html">AbstractP4cToolOptions</a> &amp;&amp;)=default</td></tr>
+<tr class="separator:a9ef762920e46aded3647b95139e44795"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b92df8aa65cbca12945560e63ae053a" id="r_a7b92df8aa65cbca12945560e63ae053a"><td class="memItemLeft" align="right" valign="top"><a id="a7b92df8aa65cbca12945560e63ae053a" name="a7b92df8aa65cbca12945560e63ae053a"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>AbstractP4cToolOptions</b> (const <a class="el" href="class_p4_tools_1_1_abstract_p4c_tool_options.html">AbstractP4cToolOptions</a> &amp;)=default</td></tr>
+<tr class="separator:a7b92df8aa65cbca12945560e63ae053a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a313318e6f0e282a5231bc0eab08603e6" id="r_a313318e6f0e282a5231bc0eab08603e6"><td class="memItemLeft" align="right" valign="top"><a id="a313318e6f0e282a5231bc0eab08603e6" name="a313318e6f0e282a5231bc0eab08603e6"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>AbstractP4cToolOptions</b> (std::string_view toolName, std::string_view message)</td></tr>
 <tr class="separator:a313318e6f0e282a5231bc0eab08603e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -169,9 +175,9 @@ Protected Member Functions</h2></td></tr>
 const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getToolName</b> () const</td></tr>
 <tr class="memdesc:ae38edbab8e605eae1b578df498621db3"><td class="mdescLeft">&#160;</td><td class="mdescRight">The name of the tool associated with these options. <br /></td></tr>
 <tr class="separator:ae38edbab8e605eae1b578df498621db3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6317805ca731d8a2b89edcacc61b5518" id="r_a6317805ca731d8a2b89edcacc61b5518"><td class="memItemLeft" align="right" valign="top">std::vector&lt; const char * &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6317805ca731d8a2b89edcacc61b5518">process</a> (int argc, char *const argv[]) override</td></tr>
-<tr class="memdesc:a6317805ca731d8a2b89edcacc61b5518"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook for customizing options processing.  <br /></td></tr>
-<tr class="separator:a6317805ca731d8a2b89edcacc61b5518"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64820d9228832d921b609d4745739e10" id="r_a64820d9228832d921b609d4745739e10"><td class="memItemLeft" align="right" valign="top"><a id="a64820d9228832d921b609d4745739e10" name="a64820d9228832d921b609d4745739e10"></a>
+<a class="el" href="class_p4_tools_1_1_abstract_p4c_tool_options.html">AbstractP4cToolOptions</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="class_p4_tools_1_1_abstract_p4c_tool_options.html">AbstractP4cToolOptions</a> &amp;)=default</td></tr>
+<tr class="separator:a64820d9228832d921b609d4745739e10"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d283edc568c0df5748b5aa5c94bfb0d" id="r_a3d283edc568c0df5748b5aa5c94bfb0d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3d283edc568c0df5748b5aa5c94bfb0d">validateOptions</a> () const override</td></tr>
 <tr class="separator:a3d283edc568c0df5748b5aa5c94bfb0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_class_util_1_1_options"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_util_1_1_options')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_util_1_1_options.html">Util::Options</a></td></tr>
@@ -209,12 +215,17 @@ static std::tuple&lt; int, char ** &gt;&#160;</td><td class="memItemRight" valig
 <tr class="memdesc:a75511f9d8cb67be093e5c68e5c221b6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a vector of command-line arguments into the traditional (argc, argv) format. <br /></td></tr>
 <tr class="separator:a75511f9d8cb67be093e5c68e5c221b6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
-Protected Attributes</h2></td></tr>
-<tr class="memitem:a52bfb2d232245e98e027420d1ee176b7" id="r_a52bfb2d232245e98e027420d1ee176b7"><td class="memItemLeft" align="right" valign="top"><a id="a52bfb2d232245e98e027420d1ee176b7" name="a52bfb2d232245e98e027420d1ee176b7"></a>
-std::vector&lt; const char * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>compilerArgs</b></td></tr>
-<tr class="memdesc:a52bfb2d232245e98e027420d1ee176b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Command-line arguments to be sent to the compiler. Populated by @process. <br /></td></tr>
-<tr class="separator:a52bfb2d232245e98e027420d1ee176b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pro_types_class_util_1_1_options"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_types_class_util_1_1_options')"><img src="closed.png" alt="-"/>&#160;Protected Types inherited from <a class="el" href="class_util_1_1_options.html">Util::Options</a></td></tr>
+<tr class="memitem:a7e885cb546ba27712484c084f880e10e inherit pro_types_class_util_1_1_options" id="r_a7e885cb546ba27712484c084f880e10e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_util_1_1_options.html#a7e885cb546ba27712484c084f880e10e">OptionFlags</a> { <a class="el" href="class_util_1_1_options.html#a7e885cb546ba27712484c084f880e10ea3d973efa72ae10bace2baad6610f2504">Default</a> = 0
+, <a class="el" href="class_util_1_1_options.html#a7e885cb546ba27712484c084f880e10eaff7df71c5a44921525babfaa85d7a9e5">Hide</a> = 1 &lt;&lt; 0
+, <a class="el" href="class_util_1_1_options.html#a7e885cb546ba27712484c084f880e10ea6d85bc9fd5f9fca0061a6bbd7fd6fee2">OptionalArgument</a> = 1 &lt;&lt; 1
+ }</td></tr>
+<tr class="separator:a7e885cb546ba27712484c084f880e10e inherit pro_types_class_util_1_1_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab957fd4b6634d6226a66717f145207a4 inherit pro_types_class_util_1_1_options" id="r_ab957fd4b6634d6226a66717f145207a4"><td class="memItemLeft" align="right" valign="top">
+using&#160;</td><td class="memItemRight" valign="bottom"><b>OptionProcessor</b> = std::function&lt;bool(const char *)&gt;</td></tr>
+<tr class="separator:ab957fd4b6634d6226a66717f145207a4 inherit pro_types_class_util_1_1_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_class_util_1_1_options"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_util_1_1_options')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_util_1_1_options.html">Util::Options</a></td></tr>
 <tr class="memitem:a231761380e502cf9055ded1f6a28ffb0 inherit pro_attribs_class_util_1_1_options" id="r_a231761380e502cf9055ded1f6a28ffb0"><td class="memItemLeft" align="right" valign="top">
 std::vector&lt; const char * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>additionalUsage</b></td></tr>
@@ -246,18 +257,6 @@ std::ostream *&#160;</td><td class="memItemRight" valign="bottom"><b>outStream</
 <tr class="memitem:a2914f27d6a0cef44fd8dc00500b5b02f inherit pro_attribs_class_util_1_1_options" id="r_a2914f27d6a0cef44fd8dc00500b5b02f"><td class="memItemLeft" align="right" valign="top">
 std::vector&lt; const char * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>remainingOptions</b></td></tr>
 <tr class="separator:a2914f27d6a0cef44fd8dc00500b5b02f inherit pro_attribs_class_util_1_1_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
-Additional Inherited Members</h2></td></tr>
-<tr class="inherit_header pro_types_class_util_1_1_options"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_types_class_util_1_1_options')"><img src="closed.png" alt="-"/>&#160;Protected Types inherited from <a class="el" href="class_util_1_1_options.html">Util::Options</a></td></tr>
-<tr class="memitem:a7e885cb546ba27712484c084f880e10e inherit pro_types_class_util_1_1_options" id="r_a7e885cb546ba27712484c084f880e10e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_util_1_1_options.html#a7e885cb546ba27712484c084f880e10e">OptionFlags</a> { <a class="el" href="class_util_1_1_options.html#a7e885cb546ba27712484c084f880e10ea3d973efa72ae10bace2baad6610f2504">Default</a> = 0
-, <a class="el" href="class_util_1_1_options.html#a7e885cb546ba27712484c084f880e10eaff7df71c5a44921525babfaa85d7a9e5">Hide</a> = 1 &lt;&lt; 0
-, <a class="el" href="class_util_1_1_options.html#a7e885cb546ba27712484c084f880e10ea6d85bc9fd5f9fca0061a6bbd7fd6fee2">OptionalArgument</a> = 1 &lt;&lt; 1
- }</td></tr>
-<tr class="separator:a7e885cb546ba27712484c084f880e10e inherit pro_types_class_util_1_1_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab957fd4b6634d6226a66717f145207a4 inherit pro_types_class_util_1_1_options" id="r_ab957fd4b6634d6226a66717f145207a4"><td class="memItemLeft" align="right" valign="top">
-using&#160;</td><td class="memItemRight" valign="bottom"><b>OptionProcessor</b> = std::function&lt;bool(const char *)&gt;</td></tr>
-<tr class="separator:ab957fd4b6634d6226a66717f145207a4 inherit pro_types_class_util_1_1_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Encapsulates and processes command-line options for a compiler-based tool. Implementations should use the singleton pattern and define a static get() for obtaining the singleton instance. </p>
@@ -303,7 +302,7 @@ using&#160;</td><td class="memItemRight" valign="bottom"><b>OptionProcessor</b> 
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
