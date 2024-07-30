@@ -41,8 +41,8 @@ void Bmv2V1ModelTestgenTarget::make() {
 }
 
 CompilerResultOrError Bmv2V1ModelTestgenTarget::runCompilerImpl(
-    const IR::P4Program *program) const {
-    program = runFrontend(program);
+    const CompilerOptions &options, const IR::P4Program *program) const {
+    program = runFrontend(options, program);
     if (program == nullptr) {
         return std::nullopt;
     }
@@ -54,7 +54,7 @@ CompilerResultOrError Bmv2V1ModelTestgenTarget::runCompilerImpl(
         return std::nullopt;
     }
 
-    program = runMidEnd(program);
+    program = runMidEnd(options, program);
     if (program == nullptr) {
         return std::nullopt;
     }
