@@ -51,7 +51,7 @@ class ExtendedCallGraph : public P4::CallGraph<T> {
             cstring newName = name.name.before(prev);
             i = hash.find(newName);
             if (i == hash.end()) {
-                addToHash(vertex, ((newName.size() != 0U) ? IR::ID(newName) : IR::ID()));
+                addToHash(vertex, (!newName.isNullOrEmpty() ? IR::ID(newName) : IR::ID()));
             }
         }
     }

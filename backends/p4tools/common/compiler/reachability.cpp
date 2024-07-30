@@ -104,15 +104,16 @@ bool P4ProgramDCGCreator::preorder(const IR::MethodCallExpression *call) {
             // Handle calls to header methods.
             if (method->expr->type->is<IR::Type_Header>() ||
                 method->expr->type->is<IR::Type_HeaderUnion>()) {
-                if (method->member == "isValid" || method->member == "setInvalid" ||
-                    method->member == "setValid") {
+                if (method->member == IR::Type_Header::isValid || IR::Type_Header::setInvalid ||
+                    method->member == IR::Type_Header::setValid) {
                     return false;
                 }
                 BUG("Unknown method call on header instance: %1%", call);
             }
 
             if (method->expr->type->is<IR::Type_Stack>()) {
-                if (method->member == "push_front" || method->member == "pop_front") {
+                if (method->member == IR::Type_Stack::push_front ||
+                    method->member == IR::Type_Stack::pop_front) {
                     return false;
                 }
                 BUG("Unknown method call on stack instance: %1%", call);
