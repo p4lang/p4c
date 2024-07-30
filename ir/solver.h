@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "absl/container/btree_map.h"
-#include "backends/p4tools/common/lib/ir_compare.h"
+#include "ir/compare.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
