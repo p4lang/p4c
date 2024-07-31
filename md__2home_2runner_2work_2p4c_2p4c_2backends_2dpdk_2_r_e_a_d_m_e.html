@@ -128,7 +128,7 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_r_
 <p>The backend for dpdk reuses code from the p4c-bm2 "common" library for handling the PSA/PNA architecture. Internally, it translates the PSA/PNA program to a representation that conforms to the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> SWX pipeline and generates the 'spec' file to configure the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> pipeline.</p>
 <h1><a class="anchor" id="how-to-use-it"></a>
 How to use it?</h1>
-<p>A sample <a class="el" href="namespace_p4.html">P4</a> program can be found in the <a href="./examples"><code>examples</code> directory</a>. To generate the 'spec' file: </p><div class="fragment"><div class="line">p4c-dpdk --arch psa vxlan.p4 -o vxlan.spec</div>
+<p>A sample <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program can be found in the <a href="./examples"><code>examples</code> directory</a>. To generate the 'spec' file: </p><div class="fragment"><div class="line">p4c-dpdk --arch psa vxlan.p4 -o vxlan.spec</div>
 </div><!-- fragment --><p>To load the 'spec' file in dpdk follow the instructions in the <a href="https://doc.dpdk.org/guides/sample_app_ug/pipeline.html">Pipeline Application User Guide</a>.</p>
 <h1><a class="anchor" id="known-issues-1"></a>
 Known issues</h1>
@@ -172,7 +172,7 @@ DPDK target limitations</h2>
 </div><!-- fragment --><ul>
 <li>Size of all structure fields to be multiple of 8 bits and should not be greater than 64-bit. (This limitation is planned to be removed by grouping fields into fields which are multiple of 8-bits)</li>
 <li>Combination of header and metadata as table key is not allowed. (This limitation is removed by P4C by copying the differing match key fields to metadata)</li>
-<li>Extract instruction in <a class="el" href="namespace_d_p_d_k.html">DPDK</a> target with 2 arguments expects the second argument to be the number of bytes to be extracted into the varbit field of the header. In <a class="el" href="namespace_p4.html">P4</a> the second argument of the extract method is the number of bits. Compiler generates instructions which compute the size in bytes from the value in bits. If the value in bits is not a multiple of 8, the value is rounded down to the lower multiple of 8 bits.</li>
+<li>Extract instruction in <a class="el" href="namespace_d_p_d_k.html">DPDK</a> target with 2 arguments expects the second argument to be the number of bytes to be extracted into the varbit field of the header. In <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> the second argument of the extract method is the number of bits. Compiler generates instructions which compute the size in bytes from the value in bits. If the value in bits is not a multiple of 8, the value is rounded down to the lower multiple of 8 bits.</li>
 <li>Currently dpdk target does not support standard count and execute methods for Counter and Meter externs as defined in PSA and PNA specifications. It requires packet length as parameter in count and execute methods. <div class="fragment"><div class="line">PNA_MeterColor_t dpdk_execute(in S index, in PNA_MeterColor_t color, in bit&lt;32&gt; pkt_len);</div>
 </div><!-- fragment --> <div class="fragment"><div class="line">void count(in S index, in bit&lt;32&gt; pkt_len);</div>
 </div><!-- fragment --></li>

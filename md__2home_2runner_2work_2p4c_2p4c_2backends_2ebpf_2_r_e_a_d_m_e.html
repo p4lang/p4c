@@ -125,22 +125,22 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="ebpf-backend"></a> The back-end accepts only P4_16 code written for the <code>ebpf_model.p4</code> or <code>xdp_model.p4</code> filter models. It generates C code that can be afterwards compiled into <a href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">eBPF (extended Berkeley Packet Filters)</a> using clang/llvm or <a href="https://github.com/iovisor/bcc.git">bcc</a>.</p>
 <p>An older version of this compiler for compiling P4_14 is available <a href="https://github.com/iovisor/bcc/tree/master/src/cc/frontends/p4">here</a> (historical reference only).</p>
-<p>Identifiers starting with ebpf_ are reserved in <a class="el" href="namespace_p4.html">P4</a> programs, including for structure field names.</p>
+<p>Identifiers starting with ebpf_ are reserved in <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs, including for structure field names.</p>
 <h1><a class="anchor" id="target-architectures"></a>
 Target architectures</h1>
-<p>The <code>ebpf_model.p4</code> target is a classifier-only: the program returns a boolean which controls whether the packet is passed or dropped. In <a class="el" href="namespace_p4.html">P4</a> terms, this means there is no deparser.</p>
+<p>The <code>ebpf_model.p4</code> target is a classifier-only: the program returns a boolean which controls whether the packet is passed or dropped. In <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> terms, this means there is no deparser.</p>
 <p>The <code>xdp_model.p4</code> target adds packet editing support, and is meant to replicate the capabilities of the Linux kernel's XDP environment. It can be viewed as an extension of the previous model which adds a deparser.</p>
 <h1><a class="anchor" id="background"></a>
 Background</h1>
-<p>In this section we give a brief overview of <a class="el" href="namespace_p4.html">P4</a> and <a class="el" href="namespace_e_b_p_f.html">EBPF</a>. A detailed treatment of these topics is outside the scope of this text.</p>
+<p>In this section we give a brief overview of <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> and <a class="el" href="namespace_e_b_p_f.html">EBPF</a>. A detailed treatment of these topics is outside the scope of this text.</p>
 <h2><a class="anchor" id="p4"></a>
 P4</h2>
 <p><a href="http://p4.org">P4</a> is a domain-specific programming language for specifying the behavior of the dataplanes of network-forwarding elements. The name of the programming language comes from the title of a paper published in the proceedings of SIGCOMM Computer Communications Review in 2014: <a href="http://www.sigcomm.org/ccr/papers/2014/July/0000000.0000004">Programming Protocol-Independent Packet Processors</a></p>
-<p><a class="el" href="namespace_p4.html">P4</a> itself is protocol-independent but allows programmers to express a rich set of data plane behaviors and protocols. This back-end only supports the newest version of the <a class="el" href="namespace_p4.html">P4</a> programming language, <a href="https://p4.org/specs">P4_16</a>. The core <a class="el" href="namespace_p4.html">P4</a> abstractions are:</p>
+<p><a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> itself is protocol-independent but allows programmers to express a rich set of data plane behaviors and protocols. This back-end only supports the newest version of the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programming language, <a href="https://p4.org/specs">P4_16</a>. The core <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> abstractions are:</p>
 <ul>
 <li>Headers describe the format (the set of fields and their sizes) of each header within a packet.</li>
 <li>Parser (finite-state machines) describe the permitted header sequences within received packets.</li>
-<li>Tables associate keys to actions. <a class="el" href="namespace_p4.html">P4</a> tables generalize traditional forwarding tables; they can be used to implement routing tables, flow lookup tables, access-control lists, etc.</li>
+<li>Tables associate keys to actions. <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> tables generalize traditional forwarding tables; they can be used to implement routing tables, flow lookup tables, access-control lists, etc.</li>
 <li>Actions describe how packet header fields and metadata are manipulated.</li>
 <li>Match-action units stitch together tables and actions, and perform the following sequence of operations:<ul>
 <li>Construct lookup keys from packet fields or computed metadata,</li>
@@ -150,7 +150,7 @@ P4</h2>
 </li>
 <li>Control flow is expressed as an imperative program describing the data-dependent packet processing within a pipeline, including the data-dependent sequence of match-action unit invocations.</li>
 </ul>
-<p><a class="el" href="namespace_p4.html">P4</a> programs describe the behavior of network-processing dataplanes. A <a class="el" href="namespace_p4.html">P4</a> program is designed to operate in concert with a separate <em>control plane</em> program. The control plane is responsible for managing at runtime the contents of the <a class="el" href="namespace_p4.html">P4</a> tables. <a class="el" href="namespace_p4.html">P4</a> cannot be used to specify control-planes; however, a <a class="el" href="namespace_p4.html">P4</a> program implicitly specifies the interface between the data-plane and the control-plane.</p>
+<p><a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs describe the behavior of network-processing dataplanes. A <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program is designed to operate in concert with a separate <em>control plane</em> program. The control plane is responsible for managing at runtime the contents of the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> tables. <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> cannot be used to specify control-planes; however, a <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program implicitly specifies the interface between the data-plane and the control-plane.</p>
 <h2><a class="anchor" id="ebpf"></a>
 eBPF</h2>
 <h3><a class="anchor" id="safe-code"></a>
@@ -182,17 +182,17 @@ Concurrency</h3>
 <p>eBPF and the associated tools are also under active development, and new capabilities are added frequently.</p>
 <h1><a class="anchor" id="compiling-p4-to-ebpf"></a>
 Compiling P4 to eBPF</h1>
-<p>From the above description it is apparent that the <a class="el" href="namespace_p4.html">P4</a> and eBPF programming languages have different expressive powers. However, there is a significant overlap in their capabilities, in particular, in the domain of network packet processing. The following image illustrates the situation:</p>
+<p>From the above description it is apparent that the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> and eBPF programming languages have different expressive powers. However, there is a significant overlap in their capabilities, in particular, in the domain of network packet processing. The following image illustrates the situation:</p>
 <div class="image">
 <img src="scope.png" alt=""/>
 <div class="caption">
 P4 and eBPF overlap in capabilities</div></div>
-    <p>We expect that the overlapping region will grow in size as both <a class="el" href="namespace_p4.html">P4</a> and eBPF continue to mature.</p>
-<p>The current version of the <a class="el" href="namespace_p4.html">P4</a> to eBPF compiler translates programs written in the version P4_16 of the programming language to programs written in a restricted subset of C. The subset of C is chosen such that it should be compilable to eBPF using clang and/or <a href="https://github.com/iovisor/bcc">bcc (the BPF Compiler Collection)</a>.</p>
+    <p>We expect that the overlapping region will grow in size as both <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> and eBPF continue to mature.</p>
+<p>The current version of the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> to eBPF compiler translates programs written in the version P4_16 of the programming language to programs written in a restricted subset of C. The subset of C is chosen such that it should be compilable to eBPF using clang and/or <a href="https://github.com/iovisor/bcc">bcc (the BPF Compiler Collection)</a>.</p>
 <div class="fragment"><div class="line">         --------------              -------</div>
 <div class="line">P4 ---&gt;  | P4-to-eBPF | ---&gt; C ----&gt; | clang/BCC | --&gt; eBPF</div>
 <div class="line">         --------------              -------</div>
-</div><!-- fragment --><p>The <a class="el" href="namespace_p4.html">P4</a> program only describes the packet processing <em>data plane</em>, that runs in the Linux kernel. The <em>control plane</em> must be separately implemented by the user. BCC tools simplify this task considerably, by generating C and/or Python APIs that expose the dataplane/control-plane APIs.</p>
+</div><!-- fragment --><p>The <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program only describes the packet processing <em>data plane</em>, that runs in the Linux kernel. The <em>control plane</em> must be separately implemented by the user. BCC tools simplify this task considerably, by generating C and/or Python APIs that expose the dataplane/control-plane APIs.</p>
 <h2><a class="anchor" id="dependencies-2"></a>
 Dependencies</h2>
 <p>Our eBPF programs require a Linux kernel with version 4.15 or newer. The eBPF backend relies on <a href="https://github.com/libbpf/libbpf">libbpf</a>, which provides kernel- and distribution-independent header files. libbpf must be available in order to compile the generated eBPF C code into eBPF byte code. To install libbpf, run <code>python3 backends/ebpf/build_libbpf</code> in the p4c folder.</p>
@@ -215,8 +215,8 @@ Dependencies</h2>
 <div class="line">$ pip3 install --user pyroute2 ply==3.8 scapy==2.4.0</div>
 </div><!-- fragment --><h2><a class="anchor" id="supported-capabilities"></a>
 Supported capabilities</h2>
-<p>The current version of the <a class="el" href="namespace_p4.html">P4</a> to eBPF compiler supports a relatively narrow subset of the <a class="el" href="namespace_p4.html">P4</a> language, but still powerful enough to write very complex packet filters and simple packet forwarding engines. We expect that the compiler's capabilities will improve gradually.</p>
-<p>Here are some limitations imposed on the <a class="el" href="namespace_p4.html">P4</a> programs:</p>
+<p>The current version of the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> to eBPF compiler supports a relatively narrow subset of the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> language, but still powerful enough to write very complex packet filters and simple packet forwarding engines. We expect that the compiler's capabilities will improve gradually.</p>
+<p>Here are some limitations imposed on the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs:</p>
 <ul>
 <li>arbitrary parsers can be compiled, but the BCC compiler will reject parsers that contain cycles</li>
 <li>arithmetic on data wider than 32 bits is not supported</li>
@@ -224,13 +224,13 @@ Supported capabilities</h2>
 </ul>
 <h2><a class="anchor" id="translating-p4-to-c"></a>
 Translating P4 to C</h2>
-<p>To simplify the translation, the <a class="el" href="namespace_p4.html">P4</a> programmer should refrain using identifiers whose name starts with <code>ebpf_</code>.</p>
-<p>The following table provides a brief summary of how each <a class="el" href="namespace_p4.html">P4</a> construct is mapped to a corresponding C construct:</p>
+<p>To simplify the translation, the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programmer should refrain using identifiers whose name starts with <code>ebpf_</code>.</p>
+<p>The following table provides a brief summary of how each <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> construct is mapped to a corresponding C construct:</p>
 <h3><a class="anchor" id="translating-parsers"></a>
 Translating parsers</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
-<th class="markdownTableHeadNone"><a class="el" href="namespace_p4.html">P4</a> Construct   </th><th class="markdownTableHeadNone">C Translation    </th></tr>
+<th class="markdownTableHeadNone"><a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> Construct   </th><th class="markdownTableHeadNone">C Translation    </th></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>header</code>   </td><td class="markdownTableBodyNone"><code>struct</code> type with an additional <code>valid</code> bit    </td></tr>
 <tr class="markdownTableRowEven">
@@ -248,7 +248,7 @@ Translating match-action pipelines</h3>
 autotoc_md0</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
-<th class="markdownTableHeadNone"><a class="el" href="namespace_p4.html">P4</a> Construct   </th><th class="markdownTableHeadNone">C Translation    </th></tr>
+<th class="markdownTableHeadNone"><a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> Construct   </th><th class="markdownTableHeadNone">C Translation    </th></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">table   </td><td class="markdownTableBodyNone">2 eBPF tables: second one used just for the default action    </td></tr>
 <tr class="markdownTableRowEven">
@@ -273,10 +273,10 @@ Generating code from a .p4 file</h3>
 <p>This will generate the C-file and its corresponding header. The architecture (ebpf_model or xdp_model) is auto-detected.</p>
 <h3><a class="anchor" id="using-the-generated-code"></a>
 Using the generated code</h3>
-<p>The resulting file contains the complete data structures, tables, and a C function named <code>ebpf_filter</code> that implements the P4-specified data-plane. This C file can be manipulated using clang or BCC tools; please refer to the BCC project documentation and sample test files of the <a class="el" href="namespace_p4.html">P4</a> to eBPF source code for an in-depth understanding.</p>
-<p>The general C-file alone will not compile. It depends on headers specific to the generated target. For the default target, this is the <code>kernel_ebpf.h</code> file which can be found in the <a class="el" href="namespace_p4.html">P4</a> backend under <code>p4c/backends/ebpf/runtime</code>. The <a class="el" href="namespace_p4.html">P4</a> backend also provides a makefile and sample header which allow for quick generation and automatic compilation of the generated file.</p>
+<p>The resulting file contains the complete data structures, tables, and a C function named <code>ebpf_filter</code> that implements the P4-specified data-plane. This C file can be manipulated using clang or BCC tools; please refer to the BCC project documentation and sample test files of the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> to eBPF source code for an in-depth understanding.</p>
+<p>The general C-file alone will not compile. It depends on headers specific to the generated target. For the default target, this is the <code>kernel_ebpf.h</code> file which can be found in the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> backend under <code>p4c/backends/ebpf/runtime</code>. The <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> backend also provides a makefile and sample header which allow for quick generation and automatic compilation of the generated file.</p>
 <p><code>make -f p4c/backends/ebpf/runtime/kernel.mk BPFOBJ=out.o P4FILE=PROGRAM.p4</code></p>
-<p>where -f path is the path to the makefile, BPFOBJ is the output ebpf byte code and P4FILE is the input <a class="el" href="namespace_p4.html">P4</a> program. This command sequence will generate an eBPF program, which can be loaded into the kernel using <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a>.</p>
+<p>where -f path is the path to the makefile, BPFOBJ is the output ebpf byte code and P4FILE is the input <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program. This command sequence will generate an eBPF program, which can be loaded into the kernel using <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a>.</p>
 <h4><a class="anchor" id="connecting-the-generated-program-with-the-tc"></a>
 Connecting the generated program with the TC</h4>
 <p>The eBPF code that is generated is can be used as a classifier attached to the ingress packet path using the Linux <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> subsystem. The same eBPF code should be attached to all interfaces. Note however that all eBPF code instances share a single set of tables, which are used to control the program behavior.</p>
@@ -288,7 +288,7 @@ Connecting the generated program with the TC</h4>
 How to run the generated eBPF program</h1>
 <p>Once the eBPF program is loaded, various methods exist to manipulate the tables. The easiest and simplest way is to use the <a href="http://docs.cilium.io/en/latest/bpf/#bpftool">bpftool</a> provided by the kernel.</p>
 <p>An alternative is to use explicit syscalls (an example can be found in the <a href="https://github.com/torvalds/linux/blob/master/tools/lib/bpf/bpf.c">kernel tools folder</a>.</p>
-<p>The <a class="el" href="namespace_p4.html">P4</a> compiler automatically provides a set of table initializers, which may also serve as example, in the header of the generated C-file.</p>
+<p>The <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> compiler automatically provides a set of table initializers, which may also serve as example, in the header of the generated C-file.</p>
 <p>The following tests run ebpf programs:</p>
 <ul>
 <li><code>make check-ebpf</code>: runs the basic ebpf user-space tests</li>
@@ -297,27 +297,27 @@ How to run the generated eBPF program</h1>
 </ul>
 <h1><a class="anchor" id="how-to-inject-custom-extern-function-to-the-generated-ebpf-program"></a>
 How to inject custom extern function to the generated eBPF program?</h1>
-<p>The <a class="el" href="namespace_p4.html">P4</a> to eBPF compiler comes with the support for custom C extern functions. It means that a developer can write a custom, eBPF-compatible (acceptable by BPF verifier) C function and call it from the <a class="el" href="namespace_p4.html">P4</a> program as a normal <a class="el" href="namespace_p4.html">P4</a> action. As a result, <a class="el" href="namespace_p4.html">P4</a> program can be extended with functionality, which is not supported natively by the <a class="el" href="namespace_p4.html">P4</a> language. This feature is briefly described below.</p>
+<p>The <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> to eBPF compiler comes with the support for custom C extern functions. It means that a developer can write a custom, eBPF-compatible (acceptable by BPF verifier) C function and call it from the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program as a normal <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> action. As a result, <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program can be extended with functionality, which is not supported natively by the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> language. This feature is briefly described below.</p>
 <h2><a class="anchor" id="basic-principles"></a>
 Basic principles</h2>
-<p>The C extern function can effectively enhance the functionality of <a class="el" href="namespace_p4.html">P4</a> program. A programmer should be able to write own function, declare it in the <a class="el" href="namespace_p4.html">P4</a> program and invoke from within <a class="el" href="namespace_p4.html">P4</a> action or <a class="el" href="namespace_p4.html">P4</a> control block.</p>
-<p>The C extern can use BPF helpers in order to make syscalls to eBPF subsystem. In particular, the C extern can define and have control over its own set of BPF maps. However, the C extern must not read or write to BPF maps implementing <a class="el" href="namespace_p4.html">P4</a> tables and used by the main <a class="el" href="namespace_p4.html">P4</a> program.</p>
+<p>The C extern function can effectively enhance the functionality of <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program. A programmer should be able to write own function, declare it in the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program and invoke from within <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> action or <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> control block.</p>
+<p>The C extern can use BPF helpers in order to make syscalls to eBPF subsystem. In particular, the C extern can define and have control over its own set of BPF maps. However, the C extern must not read or write to BPF maps implementing <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> tables and used by the main <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program.</p>
 <p>The C extern could be also allowed to access packet’s payload, but this feature is not implemented in the first version of the C Custom Externs feature.</p>
 <h2><a class="anchor" id="definition"></a>
 Definition</h2>
-<p>The custom C extern function should be explicitly declared in the <a class="el" href="namespace_p4.html">P4</a> program making use of that extern. For example:</p>
+<p>The custom C extern function should be explicitly declared in the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program making use of that extern. For example:</p>
 <div class="fragment"><div class="line"> </div>
 <div class="line"><span class="keyword">extern</span> <span class="keywordtype">bool</span> verify_ipv4_checksum(in IPv4_h iphdr);</div>
 </div><!-- fragment --><h2><a class="anchor" id="compilation"></a>
 Compilation</h2>
-<p>The <code>--emit-externs</code> flag must be appended to the <code>p4c-ebpf</code> compiler to instruct it that there are some C extern functions defined in the <a class="el" href="namespace_p4.html">P4</a> program and compiler should not warn about them.</p>
+<p>The <code>--emit-externs</code> flag must be appended to the <code>p4c-ebpf</code> compiler to instruct it that there are some C extern functions defined in the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program and compiler should not warn about them.</p>
 <div class="fragment"><div class="line">p4c-ebpf -o OUTPUT.c PROGRAM.p4 --emit-externs</div>
 </div><!-- fragment --><p>Furthermore, the C file including definition of the C extern function should be provided to <code>clang</code>:</p>
 <div class="fragment"><div class="line">clang -O2 -include C-EXTERN-FILE.c -target bpf -c OUTPUT.c -o OUTPUT.o</div>
 </div><!-- fragment --><h2><a class="anchor" id="calling-convention"></a>
 Calling convention</h2>
 <ul>
-<li>Basic types are converted from <a class="el" href="namespace_p4.html">P4</a> representation to C representation as follows:<ul>
+<li>Basic types are converted from <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> representation to C representation as follows:<ul>
 <li>fields shorter than 64 bits are rounded up to the nearest C unsigned integer (e.g. bit&lt;1&gt; → u8, bit&lt;48&gt; → u64).</li>
 <li>fields wider than 64 bits are converted to the array of u8. If the field has custom width (e.g. 123 bits) the last element of the array is also u8 (according to the first rule). For example, IPv6 address is converted from bit&lt;128&gt; to u8[16].</li>
 <li><b>Boolean (bool)</b> type is converted to u8.</li>
@@ -338,7 +338,7 @@ Calling convention</h2>
 <div class="line">REGISTER_TABLE(&lt;NAME&gt;, BPF_MAP_TYPE_HASH, &lt;KEY-SIZE&gt;, &lt;VALUE-SIZE&gt;&gt;, &lt;MAX_ENTRIES&gt;)</div>
 <div class="line">REGISTER_END()</div>
 </div><!-- fragment --><ul>
-<li>The C extern function must not access BPF maps that are used to implement <a class="el" href="namespace_p4.html">P4</a> tables and defined in the main C program generated from the <a class="el" href="namespace_p4.html">P4</a> language. </li>
+<li>The C extern function must not access BPF maps that are used to implement <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> tables and defined in the main C program generated from the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> language. </li>
 </ul>
 </li>
 </ul>

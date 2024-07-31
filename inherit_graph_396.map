@@ -1,3 +1,13 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$structstd_1_1hash_3_01_closed_range_3_01_unit_00_01_order_01_4_01_4.html" title=" " alt="" coords="5,5,187,45"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,95,120,121"/>
+<area shape="rect" id="Node000001" href="$class_util_1_1_p4_c_exception_base.html" title=" " alt="" coords="168,95,343,121"/>
+<area shape="poly" id="edge1096_Node000000_Node000001" title=" " alt="" coords="134,105,168,105,168,111,134,111"/>
+<area shape="rect" id="Node000002" href="$class_p4_tools_1_1_p4_testgen_1_1_testgen_unimplemented.html" title=" " alt="" coords="407,5,592,45"/>
+<area shape="poly" id="edge1097_Node000001_Node000002" title=" " alt="" coords="300,88,390,55,427,43,429,48,392,60,302,93"/>
+<area shape="rect" id="Node000003" href="$class_util_1_1_compilation_error.html" title=" " alt="" coords="418,70,581,95"/>
+<area shape="poly" id="edge1098_Node000001_Node000003" title=" " alt="" coords="356,95,418,88,418,94,356,100"/>
+<area shape="rect" id="Node000004" href="$class_util_1_1_compiler_bug.html" title="This class indicates a bug in the compiler." alt="" coords="431,119,568,145"/>
+<area shape="poly" id="edge1099_Node000001_Node000004" title=" " alt="" coords="356,115,431,123,430,128,356,121"/>
+<area shape="rect" id="Node000005" href="$class_util_1_1_compiler_unimplemented.html" title="This class indicates an unimplemented feature in the compiler." alt="" coords="391,169,608,194"/>
+<area shape="poly" id="edge1100_Node000001_Node000005" title=" " alt="" coords="302,123,391,153,439,166,438,171,390,159,301,128"/>
 </map>

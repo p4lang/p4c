@@ -17,6 +17,7 @@ var hierarchy =
     [ "bitvec::copy_bitref", "classbitvec_1_1copy__bitref.html", null ],
     [ "bitvec::nonconst_bitref", "classbitvec_1_1nonconst__bitref.html", null ],
     [ "BMV2::Backend", "class_b_m_v2_1_1_backend.html", [
+      [ "BMV2::PnaNicBackend", "class_b_m_v2_1_1_pna_nic_backend.html", null ],
       [ "BMV2::PsaSwitchBackend", "class_b_m_v2_1_1_psa_switch_backend.html", null ],
       [ "BMV2::SimpleSwitchBackend", "class_b_m_v2_1_1_simple_switch_backend.html", null ]
     ] ],
@@ -24,17 +25,28 @@ var hierarchy =
     [ "BMV2::ConversionContext", "struct_b_m_v2_1_1_conversion_context.html", null ],
     [ "BMV2::ExternConverter", "class_b_m_v2_1_1_extern_converter.html", null ],
     [ "BMV2::Helpers::CounterlikeTraits< Kind >", "struct_b_m_v2_1_1_helpers_1_1_counterlike_traits.html", null ],
-    [ "BMV2::Helpers::CounterlikeTraits< Standard::CounterExtern< Standard::Arch::PSA > >", "struct_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_counter_extern_3_01_standard_1_1_arch_1_1_p_s_a_01_4_01_4.html", null ],
+    [ "BMV2::Helpers::CounterlikeTraits< Standard::CounterExtern< Standard::Arch::PSA > >", "struct_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_counter_extern_3_01_standard_1_1_arch_1_1_p_s_a_01_4_01_4.html", [
+      [ "BMV2::Helpers::CounterlikeTraits< Standard::CounterExtern< Standard::Arch::PNA > >", "struct_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_counter_extern_3_01_standard_1_1_arch_1_1_p_n_a_01_4_01_4.html", null ]
+    ] ],
     [ "BMV2::Helpers::CounterlikeTraits< Standard::CounterExtern< Standard::Arch::V1MODEL > >", "struct_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_counter_extern_3_01_standard_d981fdf8d12f5c250b806454059141e9.html", null ],
     [ "BMV2::Helpers::CounterlikeTraits< Standard::CounterExtern< Standard::Arch::V1MODEL2020 > >", "struct_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_counter_extern_3_01_standard_1302367763c70aeb3488060364f42ba5.html", null ],
-    [ "BMV2::Helpers::CounterlikeTraits< Standard::MeterExtern< Standard::Arch::PSA > >", "struct_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_meter_extern_3_01_standard_1_1_arch_1_1_p_s_a_01_4_01_4.html", null ],
+    [ "BMV2::Helpers::CounterlikeTraits< Standard::MeterExtern< Standard::Arch::PSA > >", "struct_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_meter_extern_3_01_standard_1_1_arch_1_1_p_s_a_01_4_01_4.html", [
+      [ "BMV2::Helpers::CounterlikeTraits< Standard::MeterExtern< Standard::Arch::PNA > >", "struct_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_meter_extern_3_01_standard_1_1_arch_1_1_p_n_a_01_4_01_4.html", null ]
+    ] ],
     [ "BMV2::Helpers::CounterlikeTraits< Standard::MeterExtern< Standard::Arch::V1MODEL > >", "struct_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_meter_extern_3_01_standard_1_3319495aeae719e9179706c80458698a.html", null ],
     [ "BMV2::Helpers::CounterlikeTraits< Standard::MeterExtern< Standard::Arch::V1MODEL2020 > >", "struct_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_meter_extern_3_01_standard_1_ca99f14e6e28c57a50cf669fc916988e.html", null ],
     [ "BMV2::JsonObjects", "class_b_m_v2_1_1_json_objects.html", null ],
     [ "BMV2::MatchImplementation", "class_b_m_v2_1_1_match_implementation.html", null ],
+    [ "BMV2::PortableCodeGenerator", "class_b_m_v2_1_1_portable_code_generator.html", [
+      [ "BMV2::PnaCodeGenerator", "class_b_m_v2_1_1_pna_code_generator.html", null ],
+      [ "BMV2::PsaCodeGenerator", "class_b_m_v2_1_1_psa_code_generator.html", null ]
+    ] ],
     [ "BMV2::Standard::ActionProfileTraits< arch >", "struct_b_m_v2_1_1_standard_1_1_action_profile_traits.html", null ],
     [ "BMV2::Standard::ActionProfileTraits< Arch::PSA >", "struct_b_m_v2_1_1_standard_1_1_action_profile_traits_3_01_arch_1_1_p_s_a_01_4.html", [
-      [ "BMV2::Standard::ActionSelectorTraits< Arch::PSA >", "struct_b_m_v2_1_1_standard_1_1_action_selector_traits_3_01_arch_1_1_p_s_a_01_4.html", null ]
+      [ "BMV2::Standard::ActionProfileTraits< Arch::PNA >", "struct_b_m_v2_1_1_standard_1_1_action_profile_traits_3_01_arch_1_1_p_n_a_01_4.html", null ],
+      [ "BMV2::Standard::ActionSelectorTraits< Arch::PSA >", "struct_b_m_v2_1_1_standard_1_1_action_selector_traits_3_01_arch_1_1_p_s_a_01_4.html", [
+        [ "BMV2::Standard::ActionSelectorTraits< Arch::PNA >", "struct_b_m_v2_1_1_standard_1_1_action_selector_traits_3_01_arch_1_1_p_n_a_01_4.html", null ]
+      ] ]
     ] ],
     [ "BMV2::Standard::ActionProfileTraits< Arch::V1MODEL >", "struct_b_m_v2_1_1_standard_1_1_action_profile_traits_3_01_arch_1_1_v1_m_o_d_e_l_01_4.html", [
       [ "BMV2::Standard::ActionProfileTraits< Arch::V1MODEL2020 >", "struct_b_m_v2_1_1_standard_1_1_action_profile_traits_3_01_arch_1_1_v1_m_o_d_e_l2020_01_4.html", [
@@ -46,7 +58,9 @@ var hierarchy =
     [ "BMV2::Standard::CounterExtern< arch >", "struct_b_m_v2_1_1_standard_1_1_counter_extern.html", null ],
     [ "BMV2::Standard::MeterExtern< arch >", "struct_b_m_v2_1_1_standard_1_1_meter_extern.html", null ],
     [ "BMV2::Standard::RegisterTraits< arch >", "struct_b_m_v2_1_1_standard_1_1_register_traits.html", null ],
-    [ "BMV2::Standard::RegisterTraits< Arch::PSA >", "struct_b_m_v2_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_s_a_01_4.html", null ],
+    [ "BMV2::Standard::RegisterTraits< Arch::PSA >", "struct_b_m_v2_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_s_a_01_4.html", [
+      [ "BMV2::Standard::RegisterTraits< Arch::PNA >", "struct_b_m_v2_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_n_a_01_4.html", null ]
+    ] ],
     [ "BMV2::Standard::RegisterTraits< Arch::V1MODEL >", "struct_b_m_v2_1_1_standard_1_1_register_traits_3_01_arch_1_1_v1_m_o_d_e_l_01_4.html", [
       [ "BMV2::Standard::RegisterTraits< Arch::V1MODEL2020 >", "struct_b_m_v2_1_1_standard_1_1_register_traits_3_01_arch_1_1_v1_m_o_d_e_l2020_01_4.html", null ]
     ] ],
@@ -368,6 +382,7 @@ var hierarchy =
     [ "ordered_map< const IR::Node *, const IR::CompileTimeValue * >", "classordered__map.html", null ],
     [ "ordered_map< const IR::Node *, const IR::P4Action * >", "classordered__map.html", null ],
     [ "ordered_map< const IR::Node *, P4::SpecializationInfo * >", "classordered__map.html", null ],
+    [ "ordered_map< const IR::Node *, pna_block_t >", "classordered__map.html", null ],
     [ "ordered_map< const IR::Node *, std::pair< gress_t, block_t > >", "classordered__map.html", null ],
     [ "ordered_map< const IR::P4Action *, const IR::P4Action * >", "classordered__map.html", null ],
     [ "ordered_map< const IR::P4Action *, const IR::P4Control * >", "classordered__map.html", null ],
@@ -458,6 +473,7 @@ var hierarchy =
     [ "P4::CallGraph< cstring >", "class_p4_1_1_call_graph.html", null ],
     [ "P4::ChooseEnumRepresentation", "class_p4_1_1_choose_enum_representation.html", [
       [ "BMV2::EnumOn32Bits", "class_b_m_v2_1_1_enum_on32_bits.html", null ],
+      [ "BMV2::PnaEnumOn32Bits", "class_b_m_v2_1_1_pna_enum_on32_bits.html", null ],
       [ "BMV2::PsaEnumOn32Bits", "class_b_m_v2_1_1_psa_enum_on32_bits.html", null ],
       [ "DPDK::EnumOn32Bits", "class_d_p_d_k_1_1_enum_on32_bits.html", null ],
       [ "EBPF::EnumOn32Bits", "class_e_b_p_f_1_1_enum_on32_bits.html", null ],
@@ -656,8 +672,9 @@ var hierarchy =
     [ "P4::PerInstanceSubstitutions", "struct_p4_1_1_per_instance_substitutions.html", null ],
     [ "P4::ProgramStructure", "class_p4_1_1_program_structure.html", [
       [ "BMV2::V1ProgramStructure", "class_b_m_v2_1_1_v1_program_structure.html", null ],
-      [ "P4::PsaProgramStructure", "class_p4_1_1_psa_program_structure.html", [
-        [ "BMV2::PsaCodeGenerator", "class_b_m_v2_1_1_psa_code_generator.html", null ]
+      [ "P4::PortableProgramStructure", "class_p4_1_1_portable_program_structure.html", [
+        [ "BMV2::PnaProgramStructure", "class_b_m_v2_1_1_pna_program_structure.html", null ],
+        [ "P4::PsaProgramStructure", "class_p4_1_1_psa_program_structure.html", null ]
       ] ],
       [ "TC::PnaProgramStructure", "class_t_c_1_1_pna_program_structure.html", null ]
     ] ],
@@ -1359,7 +1376,10 @@ var hierarchy =
       [ "ParserOptions", "class_parser_options.html", [
         [ "CompilerOptions", "class_compiler_options.html", [
           [ "BMV2::BMV2Options", "class_b_m_v2_1_1_b_m_v2_options.html", [
-            [ "BMV2::PsaSwitchOptions", "class_b_m_v2_1_1_psa_switch_options.html", null ],
+            [ "BMV2::PortableOptions", "class_b_m_v2_1_1_portable_options.html", [
+              [ "BMV2::PnaNicOptions", "class_b_m_v2_1_1_pna_nic_options.html", null ],
+              [ "BMV2::PsaSwitchOptions", "class_b_m_v2_1_1_psa_switch_options.html", null ]
+            ] ],
             [ "BMV2::SimpleSwitchOptions", "class_b_m_v2_1_1_simple_switch_options.html", null ]
           ] ],
           [ "DPDK::DpdkOptions", "class_d_p_d_k_1_1_dpdk_options.html", null ],
@@ -1391,7 +1411,10 @@ var hierarchy =
         [ "OnBacktrack< T >", "class_on_backtrack.html", null ],
         [ "PassManager", "class_pass_manager.html", [
           [ "BMV2::MidEnd", "class_b_m_v2_1_1_mid_end.html", [
-            [ "BMV2::PsaSwitchMidEnd", "class_b_m_v2_1_1_psa_switch_mid_end.html", null ],
+            [ "BMV2::PortableMidEnd", "class_b_m_v2_1_1_portable_mid_end.html", [
+              [ "BMV2::PnaNicMidEnd", "class_b_m_v2_1_1_pna_nic_mid_end.html", null ],
+              [ "BMV2::PsaSwitchMidEnd", "class_b_m_v2_1_1_psa_switch_mid_end.html", null ]
+            ] ],
             [ "BMV2::SimpleSwitchMidEnd", "class_b_m_v2_1_1_simple_switch_mid_end.html", null ]
           ] ],
           [ "DPDK::ByteAlignment", "struct_d_p_d_k_1_1_byte_alignment.html", null ],
@@ -1509,9 +1532,11 @@ var hierarchy =
         [ "BMV2::CheckUnsupported", "class_b_m_v2_1_1_check_unsupported.html", null ],
         [ "BMV2::ControlConverter< arch >", "class_b_m_v2_1_1_control_converter.html", null ],
         [ "BMV2::ConvertGlobals", "class_b_m_v2_1_1_convert_globals.html", null ],
+        [ "BMV2::ConvertPnaToJson", "class_b_m_v2_1_1_convert_pna_to_json.html", null ],
         [ "BMV2::ConvertPsaToJson", "class_b_m_v2_1_1_convert_psa_to_json.html", null ],
         [ "BMV2::DeparserConverter", "class_b_m_v2_1_1_deparser_converter.html", null ],
         [ "BMV2::ExpressionConverter", "class_b_m_v2_1_1_expression_converter.html", [
+          [ "BMV2::PnaNicExpressionConverter", "class_b_m_v2_1_1_pna_nic_expression_converter.html", null ],
           [ "BMV2::PsaSwitchExpressionConverter", "class_b_m_v2_1_1_psa_switch_expression_converter.html", null ],
           [ "BMV2::SimpleSwitchExpressionConverter", "class_b_m_v2_1_1_simple_switch_expression_converter.html", null ]
         ] ],
@@ -1639,13 +1664,19 @@ var hierarchy =
         [ "P4::HasExits", "class_p4_1_1_has_exits.html", null ],
         [ "P4::HasTableApply", "class_p4_1_1_has_table_apply.html", null ],
         [ "P4::IfInParser", "class_p4_1_1_if_in_parser.html", null ],
-        [ "P4::InspectPsaProgram", "class_p4_1_1_inspect_psa_program.html", null ],
+        [ "P4::InspectPortableProgram", "class_p4_1_1_inspect_portable_program.html", [
+          [ "BMV2::InspectPnaProgram", "class_b_m_v2_1_1_inspect_pna_program.html", null ],
+          [ "P4::InspectPsaProgram", "class_p4_1_1_inspect_psa_program.html", null ]
+        ] ],
         [ "P4::IsLikeLeftValue", "class_p4_1_1_is_like_left_value.html", null ],
         [ "P4::IsNonConstantArrayIndex", "class_p4_1_1_is_non_constant_array_index.html", null ],
         [ "P4::KeyNameGenerator", "class_p4_1_1_key_name_generator.html", null ],
         [ "P4::MidEndLast", "class_p4_1_1_mid_end_last.html", null ],
         [ "P4::MinimalNameGenerator", "class_p4_1_1_minimal_name_generator.html", null ],
-        [ "P4::ParsePsaArchitecture", "class_p4_1_1_parse_psa_architecture.html", null ],
+        [ "P4::ParsePortableArchitecture", "class_p4_1_1_parse_portable_architecture.html", [
+          [ "BMV2::ParsePnaArchitecture", "class_b_m_v2_1_1_parse_pna_architecture.html", null ],
+          [ "P4::ParsePsaArchitecture", "class_p4_1_1_parse_psa_architecture.html", null ]
+        ] ],
         [ "P4::ReadsWrites", "class_p4_1_1_reads_writes.html", null ],
         [ "P4::RemoveModifiedValues", "class_p4_1_1_remove_modified_values.html", null ],
         [ "P4::ResolveReferences", "class_p4_1_1_resolve_references.html", null ],

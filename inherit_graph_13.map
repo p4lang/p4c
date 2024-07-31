@@ -1,7 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$class_b_m_v2_1_1_backend.html" title="Backend is a the base class for SimpleSwitchBackend and PortableSwitchBackend." alt="" coords="5,31,128,56"/>
-<area shape="rect" id="Node000001" href="$class_b_m_v2_1_1_psa_switch_backend.html" title=" " alt="" coords="187,5,376,31"/>
-<area shape="poly" id="edge3_Node000000_Node000001" title=" " alt="" coords="141,32,186,27,187,32,142,37"/>
-<area shape="rect" id="Node000002" href="$class_b_m_v2_1_1_simple_switch_backend.html" title=" " alt="" coords="176,55,387,80"/>
-<area shape="poly" id="edge4_Node000000_Node000002" title=" " alt="" coords="142,49,176,53,176,58,141,54"/>
+<area shape="rect" id="Node000000" href="$class_b_m_v2_1_1_backend.html" title="Backend is a the base class for SimpleSwitchBackend and PortableSwitchBackend." alt="" coords="5,55,128,80"/>
+<area shape="rect" id="Node000001" href="$class_b_m_v2_1_1_pna_nic_backend.html" title=" " alt="" coords="197,5,365,31"/>
+<area shape="poly" id="edge3_Node000000_Node000001" title=" " alt="" coords="135,49,175,39,224,28,226,33,177,45,136,54"/>
+<area shape="rect" id="Node000002" href="$class_b_m_v2_1_1_psa_switch_backend.html" title=" " alt="" coords="187,55,376,80"/>
+<area shape="poly" id="edge4_Node000000_Node000002" title=" " alt="" coords="142,65,186,65,186,70,142,70"/>
+<area shape="rect" id="Node000003" href="$class_b_m_v2_1_1_simple_switch_backend.html" title=" " alt="" coords="176,104,387,129"/>
+<area shape="poly" id="edge5_Node000000_Node000003" title=" " alt="" coords="137,81,226,101,225,107,135,86"/>
 </map>

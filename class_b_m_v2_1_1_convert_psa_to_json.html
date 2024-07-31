@@ -135,9 +135,9 @@ Inheritance diagram for BMV2::ConvertPsaToJson:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a6f9429e9b114bd9653a681de34b28691" id="r_a6f9429e9b114bd9653a681de34b28691"><td class="memItemLeft" align="right" valign="top"><a id="a6f9429e9b114bd9653a681de34b28691" name="a6f9429e9b114bd9653a681de34b28691"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ConvertPsaToJson</b> (<a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, const IR::ToplevelBlock *toplevel, <a class="el" href="class_b_m_v2_1_1_json_objects.html">JsonObjects</a> *json, <a class="el" href="class_b_m_v2_1_1_psa_code_generator.html">PsaCodeGenerator</a> *structure)</td></tr>
-<tr class="separator:a6f9429e9b114bd9653a681de34b28691"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfe94fb6a97867b5126c681aa167ca21" id="r_adfe94fb6a97867b5126c681aa167ca21"><td class="memItemLeft" align="right" valign="top"><a id="adfe94fb6a97867b5126c681aa167ca21" name="adfe94fb6a97867b5126c681aa167ca21"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ConvertPsaToJson</b> (<a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, const IR::ToplevelBlock *toplevel, <a class="el" href="class_b_m_v2_1_1_json_objects.html">JsonObjects</a> *json, <a class="el" href="class_p4_1_1_psa_program_structure.html">P4::PsaProgramStructure</a> *structure)</td></tr>
+<tr class="separator:adfe94fb6a97867b5126c681aa167ca21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c1e8329159ad2aafffd75266b00393b" id="r_a2c1e8329159ad2aafffd75266b00393b"><td class="memItemLeft" align="right" valign="top"><a id="a2c1e8329159ad2aafffd75266b00393b" name="a2c1e8329159ad2aafffd75266b00393b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (UNUSED const IR::P4Program *program) override</td></tr>
 <tr class="separator:a2c1e8329159ad2aafffd75266b00393b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -325,15 +325,18 @@ template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:ab6541b7e8b314abe940a93e34855881d" id="r_ab6541b7e8b314abe940a93e34855881d"><td class="memItemLeft" align="right" valign="top"><a id="ab6541b7e8b314abe940a93e34855881d" name="ab6541b7e8b314abe940a93e34855881d"></a>
+<a class="el" href="class_b_m_v2_1_1_psa_code_generator.html">PsaCodeGenerator</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>codeGenerator</b></td></tr>
+<tr class="separator:ab6541b7e8b314abe940a93e34855881d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a29b62171af5a44df2881e0ebadcc65e0" id="r_a29b62171af5a44df2881e0ebadcc65e0"><td class="memItemLeft" align="right" valign="top"><a id="a29b62171af5a44df2881e0ebadcc65e0" name="a29b62171af5a44df2881e0ebadcc65e0"></a>
 <a class="el" href="class_b_m_v2_1_1_json_objects.html">JsonObjects</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>json</b></td></tr>
 <tr class="separator:a29b62171af5a44df2881e0ebadcc65e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac144da17d1729c8285d73c25a66550f0" id="r_ac144da17d1729c8285d73c25a66550f0"><td class="memItemLeft" align="right" valign="top"><a id="ac144da17d1729c8285d73c25a66550f0" name="ac144da17d1729c8285d73c25a66550f0"></a>
 <a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>refMap</b></td></tr>
 <tr class="separator:ac144da17d1729c8285d73c25a66550f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7474995ec3f74dfbc0990116ad3275ed" id="r_a7474995ec3f74dfbc0990116ad3275ed"><td class="memItemLeft" align="right" valign="top"><a id="a7474995ec3f74dfbc0990116ad3275ed" name="a7474995ec3f74dfbc0990116ad3275ed"></a>
-<a class="el" href="class_b_m_v2_1_1_psa_code_generator.html">PsaCodeGenerator</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>structure</b></td></tr>
-<tr class="separator:a7474995ec3f74dfbc0990116ad3275ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c158ab0cc440b9e1efe555d0b026772" id="r_a7c158ab0cc440b9e1efe555d0b026772"><td class="memItemLeft" align="right" valign="top"><a id="a7c158ab0cc440b9e1efe555d0b026772" name="a7c158ab0cc440b9e1efe555d0b026772"></a>
+<a class="el" href="class_p4_1_1_psa_program_structure.html">P4::PsaProgramStructure</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>structure</b></td></tr>
+<tr class="separator:a7c158ab0cc440b9e1efe555d0b026772"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac58bb10cadfab779736f53488b6b39a8" id="r_ac58bb10cadfab779736f53488b6b39a8"><td class="memItemLeft" align="right" valign="top"><a id="ac58bb10cadfab779736f53488b6b39a8" name="ac58bb10cadfab779736f53488b6b39a8"></a>
 const IR::ToplevelBlock *&#160;</td><td class="memItemRight" valign="bottom"><b>toplevel</b></td></tr>
 <tr class="separator:ac58bb10cadfab779736f53488b6b39a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -394,7 +397,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><b>BMV2</b></li><li class="navelem"><a class="el" href="class_b_m_v2_1_1_convert_psa_to_json.html">ConvertPsaToJson</a></li>
+    <li class="navelem"><a class="el" href="namespace_b_m_v2.html">BMV2</a></li><li class="navelem"><a class="el" href="class_b_m_v2_1_1_convert_psa_to_json.html">ConvertPsaToJson</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>

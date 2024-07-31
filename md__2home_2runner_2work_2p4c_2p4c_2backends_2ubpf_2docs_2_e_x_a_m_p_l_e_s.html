@@ -123,7 +123,7 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2doc
   <div class="headertitle"><div class="title">uBPF Backend test programs</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="ubpf-backend-test-programs"></a> This file contains description of the basic <a class="el" href="namespace_p4.html">P4</a> programs, which were used to test the functionality of the P4-to-uBPF compiler. All tests have been run on the <a href="https://github.com/Orange-OpenSource/p4rt-ovs">P4rt-OVS</a> switch. You can use <a href="../tests/environment/Vagrantfile">Vagrantfile</a> to set up a test environment.</p>
+<div class="textblock"><p><a class="anchor" id="ubpf-backend-test-programs"></a> This file contains description of the basic <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs, which were used to test the functionality of the P4-to-uBPF compiler. All tests have been run on the <a href="https://github.com/Orange-OpenSource/p4rt-ovs">P4rt-OVS</a> switch. You can use <a href="../tests/environment/Vagrantfile">Vagrantfile</a> to set up a test environment.</p>
 <p>Before any experiment the following commands need to be invoked:</p>
 <div class="fragment"><div class="line"># compile P4 program to C code</div>
 <div class="line">$ p4c-ubpf -o test.c PROGRAM.p4 </div>
@@ -141,7 +141,7 @@ Examples</h1>
 <p>This section presents how to run and test the P4-uBPF compiler.</p>
 <h2><a class="anchor" id="packet-modification"></a>
 Packet modification</h2>
-<p>This section presents a <a class="el" href="namespace_p4.html">P4</a> program, which modifies the packet's fields.</p>
+<p>This section presents a <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program, which modifies the packet's fields.</p>
 <h3><a class="anchor" id="ipv4--mpls-simple-actionsp4"></a>
 IPv4 + MPLS (simple-actions.p4)</h3>
 <p><b>Key:</b> Source IPv4 address</p>
@@ -172,7 +172,7 @@ IPv4 + MPLS (simple-actions.p4)</h3>
 </div><!-- fragment --><h3><a class="anchor" id="ipv6-ipv6-actionsp4"></a>
 IPv6 (ipv6-actions.p4)</h3>
 <p>The aim of this example is to test modification of wider packet's fields. Thus, we have used the IPv6 headers.</p>
-<p>The match key is source IPv6 address. The <a class="el" href="namespace_p4.html">P4</a> program implements three actions:</p>
+<p>The match key is source IPv6 address. The <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program implements three actions:</p>
 <ul>
 <li>ipv6_modify_dstAddr - modifies IPv6 destination address;</li>
 <li>ipv6_swap_addr - swaps IPv6 addresses.</li>
@@ -186,7 +186,7 @@ IPv6 (ipv6-actions.p4)</h3>
 <div class="line">$ sudo ovs-ofctl update-bpf-map br0 1 0 key 254 128 0 0 0 0 0 0 10 0 39 255 254 21 180 17 value 2 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</div>
 </div><!-- fragment --><h2><a class="anchor" id="registers"></a>
 Registers</h2>
-<p>This section presents <a class="el" href="namespace_p4.html">P4</a> programs, which use registers. Register can be declared this way:</p>
+<p>This section presents <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs, which use registers. Register can be declared this way:</p>
 <p><code>Register&lt;value_type, key_type&gt;(number_of_elements) register_t;</code> <br  />
 </p>
 <p>The parameters are as follows:</p>
@@ -238,7 +238,7 @@ Simple firewall (simple-firewall.p4)</h3>
 </div><!-- fragment --><p>To test simple firewall you can use as an example <code>ptf/simple-firewall-test.py</code> test.</p>
 <h2><a class="anchor" id="tunneling"></a>
 Tunneling</h2>
-<p>This section presents more complex examples of packet tunneling operations. There are two <a class="el" href="namespace_p4.html">P4</a> programs used:</p>
+<p>This section presents more complex examples of packet tunneling operations. There are two <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs used:</p>
 <ul>
 <li><code>tunneling.p4</code>, which implements MPLS tunneling,</li>
 <li><code>vxlan.p4</code>, which implements more complex packet tunneling: VXLAN.</li>

@@ -1,3 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$structp4tc__ext__bpf__val.html" title=" " alt="" coords="5,5,139,31"/>
+<area shape="rect" id="Node000000" href="$class_p4_c_configuration.html" title=" " alt="" coords="5,5,140,31"/>
+<area shape="rect" id="Node000001" href="$class_default_p4_c_configuration.html" title=" " alt="" coords="188,5,371,31"/>
+<area shape="poly" id="edge1043_Node000000_Node000001" title=" " alt="" coords="154,15,188,15,188,21,154,21"/>
+<area shape="rect" id="Node000002" href="$class_p4_tools_1_1_compiler_configuration.html" title=" " alt="" coords="419,5,644,31"/>
+<area shape="poly" id="edge1044_Node000001_Node000002" title=" " alt="" coords="384,15,418,15,418,21,384,21"/>
 </map>

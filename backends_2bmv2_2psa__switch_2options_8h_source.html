@@ -142,13 +142,13 @@ $(function(){initNavTree('backends_2bmv2_2psa__switch_2options_8h_source.html','
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#ifndef BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#define BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;backends/bmv2/common/options.h&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;backends/bmv2/portable_common/options.h&quot;</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;backends/bmv2/psa_switch/midend.h&quot;</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">namespace </span>BMV2 {</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_b_m_v2.html">BMV2</a> {</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
 <div class="foldopen" id="foldopen00025" data-start="{" data-end="};">
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="class_b_m_v2_1_1_psa_switch_options.html">   25</a></span><span class="keyword">class </span><a class="code hl_class" href="class_b_m_v2_1_1_psa_switch_options.html">PsaSwitchOptions</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_b_m_v2_1_1_b_m_v2_options.html">BMV2Options</a> {</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="class_b_m_v2_1_1_psa_switch_options.html">   25</a></span><span class="keyword">class </span><a class="code hl_class" href="class_b_m_v2_1_1_psa_switch_options.html">PsaSwitchOptions</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_b_m_v2_1_1_portable_options.html">PortableOptions</a> {</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <a class="code hl_class" href="class_b_m_v2_1_1_psa_switch_options.html">PsaSwitchOptions</a>() {</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        registerOption(</div>
@@ -162,22 +162,20 @@ $(function(){initNavTree('backends_2bmv2_2psa__switch_2options_8h_source.html','
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>            },</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>            <span class="stringliteral">&quot;[PsaSwitch back-end] Lists exact name of all midend passes.\n&quot;</span>);</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    }</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    std::vector&lt;const char *&gt; *<a class="code hl_function" href="class_b_m_v2_1_1_psa_switch_options.html#ad2aac4803a1e0833b0d697c2c7f2aec4">process</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *<span class="keyword">const</span> argv[]) <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>};</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>};</div>
 </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="keyword">using </span><a class="code hl_class" href="class_p4_c_context_with_options.html">PsaSwitchContext</a> = <a class="code hl_class" href="class_p4_c_context_with_options.html">P4CContextWithOptions&lt;PsaSwitchOptions&gt;</a>;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>}  <span class="comment">// namespace BMV2</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_b_m_v2_1_1_b_m_v2_options_html"><div class="ttname"><a href="class_b_m_v2_1_1_b_m_v2_options.html">BMV2::BMV2Options</a></div><div class="ttdef"><b>Definition</b> backends/bmv2/common/options.h:26</div></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">using </span><a class="code hl_class" href="class_p4_c_context_with_options.html">PsaSwitchContext</a> = <a class="code hl_class" href="class_p4_c_context_with_options.html">P4CContextWithOptions&lt;PsaSwitchOptions&gt;</a>;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>}  <span class="comment">// namespace BMV2</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_b_m_v2_1_1_b_m_v2_options_html_a842f02b528fe0f67b6c0a6afae53902e"><div class="ttname"><a href="class_b_m_v2_1_1_b_m_v2_options.html#a842f02b528fe0f67b6c0a6afae53902e">BMV2::BMV2Options::loadIRFromJson</a></div><div class="ttdeci">bool loadIRFromJson</div><div class="ttdoc">Read from json.</div><div class="ttdef"><b>Definition</b> backends/bmv2/common/options.h:33</div></div>
-<div class="ttc" id="aclass_b_m_v2_1_1_psa_switch_mid_end_html"><div class="ttname"><a href="class_b_m_v2_1_1_psa_switch_mid_end.html">BMV2::PsaSwitchMidEnd</a></div><div class="ttdef"><b>Definition</b> bmv2/psa_switch/midend.h:28</div></div>
+<div class="ttc" id="aclass_b_m_v2_1_1_portable_options_html"><div class="ttname"><a href="class_b_m_v2_1_1_portable_options.html">BMV2::PortableOptions</a></div><div class="ttdef"><b>Definition</b> backends/bmv2/portable_common/options.h:25</div></div>
+<div class="ttc" id="aclass_b_m_v2_1_1_psa_switch_mid_end_html"><div class="ttname"><a href="class_b_m_v2_1_1_psa_switch_mid_end.html">BMV2::PsaSwitchMidEnd</a></div><div class="ttdef"><b>Definition</b> bmv2/psa_switch/midend.h:24</div></div>
 <div class="ttc" id="aclass_b_m_v2_1_1_psa_switch_options_html"><div class="ttname"><a href="class_b_m_v2_1_1_psa_switch_options.html">BMV2::PsaSwitchOptions</a></div><div class="ttdef"><b>Definition</b> backends/bmv2/psa_switch/options.h:25</div></div>
-<div class="ttc" id="aclass_b_m_v2_1_1_psa_switch_options_html_ad2aac4803a1e0833b0d697c2c7f2aec4"><div class="ttname"><a href="class_b_m_v2_1_1_psa_switch_options.html#ad2aac4803a1e0833b0d697c2c7f2aec4">BMV2::PsaSwitchOptions::process</a></div><div class="ttdeci">std::vector&lt; const char * &gt; * process(int argc, char *const argv[]) override</div><div class="ttdoc">Process the command line arguments and set options accordingly.</div><div class="ttdef"><b>Definition</b> backends/bmv2/psa_switch/options.cpp:10</div></div>
 <div class="ttc" id="aclass_p4_c_context_with_options_html"><div class="ttname"><a href="class_p4_c_context_with_options.html">P4CContextWithOptions</a></div><div class="ttdef"><b>Definition</b> parser_options.h:168</div></div>
+<div class="ttc" id="anamespace_b_m_v2_html"><div class="ttname"><a href="namespace_b_m_v2.html">BMV2</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> action.cpp:21</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

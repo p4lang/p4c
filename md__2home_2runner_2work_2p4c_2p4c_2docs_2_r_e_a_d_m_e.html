@@ -258,7 +258,7 @@ Debugging</h2>
 <li>To debug the compiler parser you can set the environment variable <code>YYDEBUG</code> to 1</li>
 <li>The following <code><a class="el" href="class_i_r_1_1_node.html">IR::Node</a></code> methods can be used to print nice representations of compiler data structures:<ul>
 <li><code>void dbprint(std::ostream&amp; out) const</code>: this method is used when logging information. It should print useful debug information, intended for consumption by compiler writers.</li>
-<li><code>cstring toString() const</code>: this method is used when reporting error messages to compiler users. It should only display information that is related to the <a class="el" href="namespace_p4.html">P4</a> user program, and never internal compiler data structures.</li>
+<li><code>cstring toString() const</code>: this method is used when reporting error messages to compiler users. It should only display information that is related to the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> user program, and never internal compiler data structures.</li>
 </ul>
 </li>
 <li>Use the LOG* macros for writing debug messages. gdb misbehaves frequently, so log messages are the best way to debug your programs. The number in the function name is the debug verbosity. The higher, the less important the message. This macro invokes the <code>dbprint</code> method on objects that provide it. Here is an example usage: <code>LOG1("Replacing " &lt;&lt; id &lt;&lt; " with " &lt;&lt; newid);</code></li>
@@ -289,7 +289,7 @@ Testing</h2>
 </ul>
 <h3><a class="anchor" id="adding-new-test-data"></a>
 Adding new test data</h3>
-<p>To add a new input test with a sample <a class="el" href="namespace_p4.html">P4</a> code file (under <code>testdata/p4_16_samples/</code> for example), one needs to:</p>
+<p>To add a new input test with a sample <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code file (under <code>testdata/p4_16_samples/</code> for example), one needs to:</p>
 <ul>
 <li>Add the <code>*.p4</code> file to the <code>testdata/p4_16_samples/</code> directory. The file name might determine which test suite this test belongs to. Those are determined by cmake commands.<ul>
 <li>For example, <a href="https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/p4test/CMakeLists.txt#L63">any P4 file under <code>testdata/p4_16_samples/</code></a> belongs to the <a href="https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/p4test/CMakeLists.txt#L113"><code>p4</code> test suite</a> (meaning it will run with <code>make check-p4</code>).</li>

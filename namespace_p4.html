@@ -130,6 +130,9 @@ $(function(){initNavTree('namespace_p4.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">P4 Namespace Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>TODO: this is not really specific to <a class="el" href="namespace_b_m_v2.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">BMV2</a>, it should reside somewhere else.  
+<a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
@@ -547,6 +550,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_p4_1_1_inline_summary.html">InlineSummary</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Summarizes all inline operations to be performed.  <a href="struct_p4_1_1_inline_summary.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_inspect_portable_program.html">InspectPortableProgram</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_inspect_psa_program.html">InspectPsaProgram</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_instance_base.html">InstanceBase</a></td></tr>
@@ -637,6 +642,8 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_parse_annotations.html">ParseAnnotations</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_parse_portable_architecture.html">ParsePortableArchitecture</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_parse_psa_architecture.html">ParsePsaArchitecture</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_parser_info.html">ParserInfo</a></td></tr>
@@ -655,6 +662,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_parsers_unroll.html">ParsersUnroll</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_p4_1_1_per_instance_substitutions.html">PerInstanceSubstitutions</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_portable_program_structure.html">PortableProgramStructure</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_predication.html">Predication</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1160,7 +1169,8 @@ const char&#160;</td><td class="memItemRight" valign="bottom"><b>outOfBoundsStat
 <tr class="separator:a619f0cd778a7ab6b11736a0f77fe492b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>This file has common data structures used for inlining functions and actions. Inlining these is simpler than inlining controls and parsers</p>
+<div class="textblock"><p>TODO: this is not really specific to <a class="el" href="namespace_b_m_v2.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">BMV2</a>, it should reside somewhere else. </p>
+<p>This file has common data structures used for inlining functions and actions. Inlining these is simpler than inlining controls and parsers</p>
 <p>Shouldn't happen as cmake will not try to build this backend if the boost graph headers couldn't be found. </p>
 </div><hr/><h2 class="groupheader">Class Documentation</h2>
 <a name="class_p4_1_1_table_insertions" id="class_p4_1_1_table_insertions"></a>
@@ -1303,7 +1313,7 @@ template&lt;typename C  = P4V1::Converter&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Parse <a class="el" href="namespace_p4.html">P4</a> source from a file. The filename and language version are specified by @options. If the language version is not P4-16, then the program is converted to P4-16 before being returned.</p>
+<p>Parse <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> source from a file. The filename and language version are specified by @options. If the language version is not P4-16, then the program is converted to P4-16 before being returned.</p>
 <dl class="section return"><dt>Returns</dt><dd>a P4-16 IR tree representing the contents of the given file, or null on failure. If failure occurs, an error will also be reported. </dd></dl>
 
 </div>
@@ -1336,7 +1346,7 @@ template&lt;typename C  = P4V1::Converter&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Parse <a class="el" href="namespace_p4.html">P4</a> source from the string @input, interpreting it as having language version </p><dl class="section version"><dt>Version</dt><dd>. The source is not preprocessed before being parsed; the initial source location is derived from @sourceFile and @sourceLine. If the language version is not P4-16, then the program is converted to P4-16 before being returned.</dd></dl>
+<p>Parse <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> source from the string @input, interpreting it as having language version </p><dl class="section version"><dt>Version</dt><dd>. The source is not preprocessed before being parsed; the initial source location is derived from @sourceFile and @sourceLine. If the language version is not P4-16, then the program is converted to P4-16 before being returned.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>a P4-16 IR tree representing the contents of the given string, or null on failure. If failure occurs, an error will also be reported. </dd></dl>
 
 </div>

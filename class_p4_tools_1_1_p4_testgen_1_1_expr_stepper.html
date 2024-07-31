@@ -404,7 +404,7 @@ template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;
 Static Public Attributes</h2></td></tr>
 <tr class="memitem:a442cff0b71db48c66d8b572934d2921a" id="r_a442cff0b71db48c66d8b572934d2921a"><td class="memItemLeft" align="right" valign="top"><a id="a442cff0b71db48c66d8b572934d2921a" name="a442cff0b71db48c66d8b572934d2921a"></a>
 static const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_expr_stepper_1_1_extern_method_impls.html">ExprStepper::ExternMethodImpls</a>&lt; <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_expr_stepper.html">ExprStepper</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>CORE_EXTERN_METHOD_IMPLS</b></td></tr>
-<tr class="memdesc:a442cff0b71db48c66d8b572934d2921a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides implementations of all known extern methods built into <a class="el" href="namespace_p4.html">P4</a> core. <br /></td></tr>
+<tr class="memdesc:a442cff0b71db48c66d8b572934d2921a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides implementations of all known extern methods built into <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> core. <br /></td></tr>
 <tr class="separator:a442cff0b71db48c66d8b572934d2921a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6581739e04377d4fa20f236489b21c71" id="r_a6581739e04377d4fa20f236489b21c71"><td class="memItemLeft" align="right" valign="top"><a id="a6581739e04377d4fa20f236489b21c71" name="a6581739e04377d4fa20f236489b21c71"></a>
 static const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_expr_stepper_1_1_extern_method_impls.html">ExprStepper::ExternMethodImpls</a>&lt; <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_expr_stepper.html">ExprStepper</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>INTERNAL_EXTERN_METHOD_IMPLS</b></td></tr>
@@ -535,7 +535,7 @@ const <a class="el" href="class_visitor.html">Visitor</a> *&#160;</td><td class=
 <tr class="inherit_header pro_attribs_class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html">P4Tools::P4Testgen::AbstractStepper</a></td></tr>
 <tr class="memitem:a75ac740842f5f24e6d47e96fd00be20b inherit pro_attribs_class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper" id="r_a75ac740842f5f24e6d47e96fd00be20b"><td class="memItemLeft" align="right" valign="top">
 const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_program_info.html">ProgramInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>programInfo</b></td></tr>
-<tr class="memdesc:a75ac740842f5f24e6d47e96fd00be20b inherit pro_attribs_class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target-specific information about the <a class="el" href="namespace_p4.html">P4</a> program being evaluated. <br /></td></tr>
+<tr class="memdesc:a75ac740842f5f24e6d47e96fd00be20b inherit pro_attribs_class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target-specific information about the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program being evaluated. <br /></td></tr>
 <tr class="separator:a75ac740842f5f24e6d47e96fd00be20b inherit pro_attribs_class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6b58f5be8c2ff4d7620131c4d42087e inherit pro_attribs_class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper" id="r_af6b58f5be8c2ff4d7620131c4d42087e"><td class="memItemLeft" align="right" valign="top">
 Result&#160;</td><td class="memItemRight" valign="bottom"><b>result</b></td></tr>
@@ -767,7 +767,7 @@ How much the parser cursor will be advanced in a successful parsing case. </td><
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Evaluates a call to an extern method that only exists in the interpreter. These are helper functions used to execute custom operations and specific control flow. They do not exist as <a class="el" href="namespace_p4.html">P4</a> code or call.</p>
+<p>Evaluates a call to an extern method that only exists in the interpreter. These are helper functions used to execute custom operations and specific control flow. They do not exist as <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code or call.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">call</td><td>the original method call expression, can be used for stepInto calls. </td></tr>
@@ -803,7 +803,7 @@ How much the parser cursor will be advanced in a successful parsing case. </td><
   </tr>
 </table>
 </div><div class="memdoc">
-<p>This function call is used in member expressions to cleanly resolve hit, miss, and action run expressions. These are return values of a table.apply() call, and fairly special in <a class="el" href="namespace_p4.html">P4</a>. We have to use this rewrite to execute the table, and then return the corresponding values for hit, miss and action_run after that. </p>
+<p>This function call is used in member expressions to cleanly resolve hit, miss, and action run expressions. These are return values of a table.apply() call, and fairly special in <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a>. We have to use this rewrite to execute the table, and then return the corresponding values for hit, miss and action_run after that. </p>
 
 </div>
 </div>

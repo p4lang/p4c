@@ -123,7 +123,7 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2tc_2_r_e_
   <div class="headertitle"><div class="title">TC backend</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="tc-backend"></a> <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> backend aims to generate files for the P4TC implementation in Linux kernel (from 6.3.x version). P4TC is an implementation of the Programming Protocol-independent Packet Processors (<a class="el" href="namespace_p4.html">P4</a>) that is kernel based, building on top of Linux <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a>.</p>
+<div class="textblock"><p><a class="anchor" id="tc-backend"></a> <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> backend aims to generate files for the P4TC implementation in Linux kernel (from 6.3.x version). P4TC is an implementation of the Programming Protocol-independent Packet Processors (<a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a>) that is kernel based, building on top of Linux <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a>.</p>
 <p>For more info on P4TC, Please refer:</p>
 <ul>
 <li><a href="https://github.com/p4tc-dev/docs/blob/main/why-p4tc.md">What Is P4TC</a></li>
@@ -133,7 +133,7 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2tc_2_r_e_
 <p>The p4c-pna-p4tc compiler accepts the P4-16 programs written for the pna.p4 architecture model.</p>
 <p>This backend generates three different outputs as explained below:</p>
 <ul>
-<li>A 'template' file which is a shell script that form template definitions for the different <a class="el" href="namespace_p4.html">P4</a> objects (tables, registers, actions etc).</li>
+<li>A 'template' file which is a shell script that form template definitions for the different <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> objects (tables, registers, actions etc).</li>
 <li>A 'c' file that has parser and the rest of the software datapath generated in ebpf and need to be compiled into binaries.</li>
 <li>A 'json' introspection file used for control plane.</li>
 </ul>

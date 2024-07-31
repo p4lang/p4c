@@ -2,7 +2,7 @@ var searchData=
 [
   ['savestate_0',['saveState',['../class_p4_1_1_abstract_parser_driver.html#a8170e90031d242b1c7e5af482b57e10d',1,'P4::AbstractParserDriver']]],
   ['scalarmetadatafields_1',['scalarMetadataFields',['../class_p4_1_1_program_structure.html#adeb3cee6ed7c3da89bf9c651123dc8b4',1,'P4::ProgramStructure']]],
-  ['scalars_2',['scalars',['../class_p4_1_1_psa_program_structure.html#a2d479e2795c682dffd1be514f9457d55',1,'P4::PsaProgramStructure']]],
+  ['scalars_2',['scalars',['../class_p4_1_1_portable_program_structure.html#a6c0ecb853f3567d912548c3f5ac25ccf',1,'P4::PortableProgramStructure']]],
   ['scope_3',['scope',['../class_p4_tools_1_1_p4_smith_1_1_p4_scope.html#a04a649d1b5adde1f6f7ffd243b603cc7',1,'P4Tools::P4Smith::P4Scope']]],
   ['sectionname_4',['sectionName',['../class_e_b_p_f_1_1_e_b_p_f_pipeline.html#a4bd8876a0556950678e6bbe69a808de3',1,'EBPF::EBPFPipeline']]],
   ['seed_5',['seed',['../class_p4_tools_1_1_abstract_p4c_tool_options.html#a8ad47b8d8cd412344a126b9756ed0d47',1,'P4Tools::AbstractP4cToolOptions::seed'],['../struct_p4_tools_1_1_p4_testgen_1_1_test_backend_configuration.html#ad39ec6d0f9bf95dbeb0992aaf19d5595',1,'P4Tools::P4Testgen::TestBackendConfiguration::seed']]],
