@@ -17,7 +17,7 @@ using namespace P4::literals;
 
 TEST(P4TestgenBenchmark, SuccessfullyGenerate1000Tests) {
     // Set the compiler options.
-    auto *context = new P4Tools::CompileContext<CompilerOptions>;
+    auto *context = new P4Tools::CompileContext<CompilerOptions>();
     AutoCompileContext autoContext(context);
     auto &compilerOptions = context->options();
     compilerOptions.target = "bmv2"_cs;
