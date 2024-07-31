@@ -4,14 +4,17 @@
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/options.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf_ir.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
 using namespace P4::literals;
 
-TEST(P4TestgenOutputOptionTest, GenerateOuputsCorrectly) {
+class P4TestgenOutputOptionTest : public P4TestgenBmv2Test {};
+
+TEST_F(P4TestgenOutputOptionTest, GenerateOuputsCorrectly) {
     std::stringstream streamTest;
     streamTest << R"p4(
 header ethernet_t {
@@ -102,4 +105,4 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
     }
 }
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

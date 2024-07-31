@@ -13,21 +13,20 @@
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/core/target.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
 using namespace P4::literals;
-
-using P4Tools::Z3Solver;
-using P4Tools::P4Testgen::TestgenTarget;
 using Value = IR::Literal;
 
-class Z3SolverTests : public ::testing::Test {
+class Z3SolverTests : public P4TestgenBmv2Test {
  protected:
     Z3SolverTests(const char *condition, const char *equation)
         : condition(condition), equation(equation) {}
-    virtual void SetUp() {
+    void SetUp() override {
+        P4TestgenBmv2Test::SetUp();
         expression = nullptr;
         variableValue = nullptr;
         std::stringstream streamTest;
@@ -310,4 +309,4 @@ TEST_F(Z3SolverCastBit2Bool, Cast) { test(expression, variableValue); }
 
 }  // namespace Z3Test
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

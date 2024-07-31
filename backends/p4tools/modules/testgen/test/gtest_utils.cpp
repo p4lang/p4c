@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
+#include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/core/target.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "frontends/common/options.h"
@@ -10,10 +11,11 @@
 #include "lib/compile_context.h"
 #include "lib/exceptions.h"
 
+#include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/register.h"
 #include "backends/p4tools/modules/testgen/toolname.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
 P4ToolsTestCase::P4ToolsTestCase(const P4Tools::CompilerResult &compilerResults)
     : compilerResults(compilerResults) {}
@@ -75,4 +77,4 @@ const IR::SymbolicVariable *SymbolicConverter::preorder(IR::Member *member) {
     return P4Tools::ToolsVariables::getSymbolicVariable(member->type, member->toString());
 }
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

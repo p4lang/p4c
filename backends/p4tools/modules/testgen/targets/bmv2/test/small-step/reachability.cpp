@@ -6,13 +6,13 @@
 #include <filesystem>
 #include <fstream>
 
+#include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/compiler/midend.h"
 #include "frontends/common/options.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/frontend.h"
-#include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/declaration.h"
@@ -23,7 +23,7 @@
 #include "lib/exceptions.h"
 #include "test/gtest/env.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
 using namespace P4::literals;
 
@@ -37,7 +37,7 @@ class P4ReachabilityOptions : public CompilerOptions {
     P4ReachabilityOptions &operator=(P4ReachabilityOptions &&) = delete;
 };
 
-using P4ReachabilityContext = P4CContextWithOptions<P4ReachabilityOptions>;
+using P4ReachabilityContext = P4Tools::CompileContext<P4ReachabilityOptions>;
 
 class P4CReachability : public ::testing::Test {};
 
@@ -458,4 +458,4 @@ TEST_F(P4CReachability, testReachabilityEngineNegTable2) {
     ASSERT_TRUE(!checkResultingSTF(ids, "tmp"));
 }
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

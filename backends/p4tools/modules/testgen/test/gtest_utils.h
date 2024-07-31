@@ -3,15 +3,14 @@
 
 #include <gtest/gtest.h>
 
-#include <functional>
 #include <optional>
 #include <string>
 
-#include "backends/p4tools/common/compiler/compiler_target.h"
+#include "backends/p4tools/common/compiler/compiler_result.h"
 #include "frontends/common/options.h"
 #include "ir/ir.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
 /// Encapsulates functionality for running the front- and mid-ends of the compiler in a test.
 class P4ToolsTestCase {
@@ -48,8 +47,7 @@ class P4ToolsTestCase {
     static void ensureInit();
 };
 
-/// GTest for P4 Tools tests.
-class P4ToolsTest : public ::testing::Test {};
+class P4TestgenTest : public ::testing::Test {};
 
 /// Converts IR::Member into symbolic variables.
 class SymbolicConverter : public Transform {
@@ -57,6 +55,6 @@ class SymbolicConverter : public Transform {
     const IR::SymbolicVariable *preorder(IR::Member *member) override;
 };
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_GTEST_UTILS_H_ */

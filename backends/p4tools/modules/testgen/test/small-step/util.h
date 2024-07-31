@@ -17,7 +17,6 @@
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
-#include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/enumerator.h"
 
@@ -27,18 +26,18 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
-using Body = P4Tools::P4Testgen::Continuation::Body;
-using Continuation = P4Tools::P4Testgen::Continuation;
-using ExecutionState = P4Tools::P4Testgen::ExecutionState;
-using NamespaceContext = P4Tools::NamespaceContext;
-using Return = P4Tools::P4Testgen::Continuation::Return;
-using SmallStepEvaluator = P4Tools::P4Testgen::SmallStepEvaluator;
-using TestgenTarget = P4Tools::P4Testgen::TestgenTarget;
-using Z3Solver = P4Tools::Z3Solver;
+using Body = P4Testgen::Continuation::Body;
+using Continuation = P4Testgen::Continuation;
+using ExecutionState = P4Testgen::ExecutionState;
+using NamespaceContext = NamespaceContext;
+using Return = P4Testgen::Continuation::Return;
+using SmallStepEvaluator = P4Testgen::SmallStepEvaluator;
+using TestgenTarget = P4Testgen::TestgenTarget;
+using Z3Solver = Z3Solver;
 
-class SmallStepTest : public P4ToolsTest {
+class SmallStepTest : public P4TestgenTest {
  public:
     /// Creates an execution state out of a continuation body.
     static ExecutionState mkState(Body body) { return ExecutionState(std::move(body)); }
@@ -47,11 +46,6 @@ class SmallStepTest : public P4ToolsTest {
 namespace SmallStepUtil {
 
 using namespace P4::literals;
-
-/// Creates a test case with the given header fields for
-/// stepping on a given expression.
-std::optional<const P4ToolsTestCase> createSmallStepExprTest(const std::string &,
-                                                             const std::string &);
 
 /// Extract the expression from the P4Program.
 template <class T>
@@ -82,7 +76,7 @@ const T *extractExpr(const IR::P4Program &program) {
 
 /// Step on the @value, and examine the resulting state in the @program.
 template <class T>
-void stepAndExamineValue(const T *value, const P4Tools::CompilerResult &compilerResult) {
+void stepAndExamineValue(const T *value, const CompilerResult &compilerResult) {
     // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
     const auto *progInfo = TestgenTarget::produceProgramInfo(compilerResult);
     ASSERT_TRUE(progInfo);
@@ -126,7 +120,7 @@ void stepAndExamineValue(const T *value, const P4Tools::CompilerResult &compiler
 ///     Rebuilds the pushed continuation body with the given parameter.
 template <class T>
 void stepAndExamineOp(
-    const T *op, const IR::Expression *subexpr, const P4Tools::CompilerResult &compilerResult,
+    const T *op, const IR::Expression *subexpr, const CompilerResult &compilerResult,
     std::function<const IR::Expression *(const IR::PathExpression *)> rebuildNode) {
     // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
     const auto *progInfo = TestgenTarget::produceProgramInfo(compilerResult);
@@ -167,6 +161,6 @@ void stepAndExamineOp(
 
 }  // namespace SmallStepUtil
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_SMALL_STEP_UTIL_H_ */

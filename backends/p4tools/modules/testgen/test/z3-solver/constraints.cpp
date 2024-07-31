@@ -9,7 +9,8 @@
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
+
 using namespace P4::literals;
 using ConstraintVector = const std::vector<const Constraint *>;
 
@@ -188,4 +189,4 @@ TEST_F(Z3SolverSatisfiabilityChecks, Bools) {
     }
 }
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

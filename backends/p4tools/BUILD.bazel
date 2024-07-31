@@ -196,6 +196,30 @@ build_test(
     ],
 )
 
+cc_library(
+    name = "testgen_test_lib",
+    srcs = [
+        "modules/testgen/targets/bmv2/test/gtest_utils.cpp",
+        "modules/testgen/test/gtest_utils.cpp",
+        "modules/testgen/test/small-step/util.cpp",
+    ],
+    hdrs = [
+        "modules/testgen/targets/bmv2/test/gtest_utils.h",
+        "modules/testgen/test/gtest_utils.h",
+        "modules/testgen/test/small-step/util.h",
+    ],
+    copts = [
+        "-fexceptions",
+        "-w",
+    ],
+    deps = [
+        ":testgen_lib",
+        "//:test_helpers",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_test(
     name = "p4testgen_api_test",
     srcs = [
@@ -206,8 +230,7 @@ cc_test(
         "-w",
     ],
     deps = [
-        ":testgen_lib",
-        "//:test_helpers",
-        "@com_google_googletest//:gtest_main",
+        ":testgen_test_lib",
+        "@com_google_absl//absl/strings",
     ],
 )

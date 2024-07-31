@@ -4,15 +4,18 @@
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/options.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf_ir.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
 using namespace P4::literals;
 
-TEST(P4TestgenLibrary, GeneratesCorrectProtobufIrTest) {
+class P4TestgenLibrary : public P4TestgenBmv2Test {};
+
+TEST_F(P4TestgenLibrary, GeneratesCorrectProtobufIrTest) {
     std::stringstream streamTest;
     streamTest << R"p4(
 header ethernet_t {
@@ -92,4 +95,4 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
     const auto *protobufTest = testList[0]->checkedTo<P4Tools::P4Testgen::Bmv2::ProtobufTest>();
     EXPECT_THAT(protobufTest->getFormattedTest(), ::testing::HasSubstr(R"(input_packet)"));
 }
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

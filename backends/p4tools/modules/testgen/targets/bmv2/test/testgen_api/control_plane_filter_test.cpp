@@ -8,10 +8,11 @@
 
 #include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/options.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf_ir.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
 using namespace P4::literals;
 
@@ -20,6 +21,8 @@ using testing::HasSubstr;
 using testing::Not;
 
 namespace {
+
+class P4TestgenControlPlaneFilterTest : public P4TestgenBmv2Test {};
 
 std::string generateTestProgram(const char *ingressBlock) {
     std::stringstream templateString;
@@ -83,7 +86,7 @@ P4Tools::P4Testgen::TestgenOptions &generateDefaultApiTestTestgenOptions() {
     return testgenOptions;
 }
 
-TEST(P4TestgenControlPlaneFilterTest, GeneratesCorrectTests) {
+TEST_F(P4TestgenControlPlaneFilterTest, GeneratesCorrectTests) {
     auto source = generateTestProgram(R"(
     // Drop the packet.
     action acl_drop() {
@@ -114,7 +117,7 @@ TEST(P4TestgenControlPlaneFilterTest, GeneratesCorrectTests) {
         P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
 
     ASSERT_TRUE(testListOpt.has_value());
-    auto testList = testListOpt.value();
+    const auto &testList = testListOpt.value();
     ASSERT_EQ(testList.size(), 2);
     auto protobufIrTests = P4Tools::P4Testgen::convertAbstractTestsToConcreteTests<
         P4Tools::P4Testgen::Bmv2::ProtobufIrTest>(testList);
@@ -131,7 +134,7 @@ TEST(P4TestgenControlPlaneFilterTest, GeneratesCorrectTests) {
     EXPECT_THAT(protobufIrTestStrings, Contains(HasSubstr(R"(expected_output_packet)")));
 }
 
-TEST(P4TestgenControlPlaneFilterTest, FiltersControlPlaneEntities) {
+TEST_F(P4TestgenControlPlaneFilterTest, FiltersControlPlaneEntities) {
     auto source = generateTestProgram(R"(
     // Drop the packet.
     action acl_drop() {
@@ -164,14 +167,14 @@ TEST(P4TestgenControlPlaneFilterTest, FiltersControlPlaneEntities) {
         P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
 
     ASSERT_TRUE(testListOpt.has_value());
-    auto testList = testListOpt.value();
+    const auto &testList = testListOpt.value();
     ASSERT_EQ(testList.size(), 1);
     const auto *test = testList[0];
     const auto *protobufIrTest = test->checkedTo<P4Tools::P4Testgen::Bmv2::ProtobufIrTest>();
     EXPECT_THAT(protobufIrTest->getFormattedTest(), Not(HasSubstr(R"(expected_packet)")));
 }
 
-TEST(P4TestgenControlPlaneFilterTest, IgnoresBogusControlPlaneEntities) {
+TEST_F(P4TestgenControlPlaneFilterTest, IgnoresBogusControlPlaneEntities) {
     auto source = generateTestProgram(R"(
     // Drop the packet.
     action acl_drop() {
@@ -204,7 +207,7 @@ TEST(P4TestgenControlPlaneFilterTest, IgnoresBogusControlPlaneEntities) {
         P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
 
     ASSERT_TRUE(testListOpt.has_value());
-    auto testList = testListOpt.value();
+    const auto &testList = testListOpt.value();
     ASSERT_EQ(testList.size(), 2);
     auto protobufIrTests = P4Tools::P4Testgen::convertAbstractTestsToConcreteTests<
         P4Tools::P4Testgen::Bmv2::ProtobufIrTest>(testList);
@@ -221,7 +224,7 @@ TEST(P4TestgenControlPlaneFilterTest, IgnoresBogusControlPlaneEntities) {
     EXPECT_THAT(protobufIrTestStrings, Contains(HasSubstr(R"(expected_output_packet)")));
 }
 
-TEST(P4TestgenControlPlaneFilterTest, FiltersMultipleControlPlaneEntities) {
+TEST_F(P4TestgenControlPlaneFilterTest, FiltersMultipleControlPlaneEntities) {
     auto source = generateTestProgram(R"(
     // Drop the packet.
     action acl_drop() {
@@ -271,7 +274,7 @@ TEST(P4TestgenControlPlaneFilterTest, FiltersMultipleControlPlaneEntities) {
         P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
 
     ASSERT_TRUE(testListOpt.has_value());
-    auto testList = testListOpt.value();
+    const auto &testList = testListOpt.value();
     ASSERT_EQ(testList.size(), 1);
     const auto *test = testList[0];
     const auto *protobufIrTest = test->checkedTo<P4Tools::P4Testgen::Bmv2::ProtobufIrTest>();
@@ -280,4 +283,4 @@ TEST(P4TestgenControlPlaneFilterTest, FiltersMultipleControlPlaneEntities) {
 
 }  // namespace
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

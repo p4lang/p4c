@@ -10,22 +10,12 @@
 #include "ir/ir.h"
 #include "ir/irutils.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
 namespace {
 
-using P4Tools::convertBigIntToBytes;
-using P4Tools::convertToIpv4String;
-using P4Tools::convertToIpv6String;
-using P4Tools::convertToMacString;
-using P4Tools::formatBinExpr;
-using P4Tools::formatHexExpr;
-using P4Tools::formatOctalExpr;
-using P4Tools::insertHexSeparators;
-using P4Tools::insertOctalSeparators;
-using P4Tools::insertSeparators;
-
-TEST_F(FormatTest, FormatHex) {
+// Tests for formatHexExpr
+TEST_F(FormatTest, Format01) {
     {
         const auto *typeBits = IR::Type_Bits::get(16);
         const auto *sixteenBits = IR::Constant::get(typeBits, 0x10);
@@ -415,4 +405,4 @@ TEST_F(FormatTest, TestMACConversion) {
 
 }  // anonymous namespace
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

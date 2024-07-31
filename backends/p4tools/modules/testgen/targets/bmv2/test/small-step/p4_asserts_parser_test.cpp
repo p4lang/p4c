@@ -9,6 +9,7 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/compiler/midend.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "frontends/common/options.h"
@@ -23,17 +24,17 @@
 #include "lib/null.h"
 
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
-#include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
 /// Variables are declared in "test/gtest/env.h" which is already included in reachability.cpp
 // FIXME: Make these Util::Path
 extern const char *sourcePath;
 extern const char *buildPath;
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
+
 using namespace P4::literals;
 
-class P4AssertsParserTest : public P4ToolsTest {};
+class P4AssertsParserTest : public ::testing::Test {};
 class P4TestOptions : public CompilerOptions {
  public:
     virtual ~P4TestOptions() = default;
@@ -44,7 +45,7 @@ class P4TestOptions : public CompilerOptions {
     P4TestOptions &operator=(P4TestOptions &&) = delete;
 };
 /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
-using P4TestContext = P4CContextWithOptions<P4TestOptions>;
+using P4TestContext = P4Tools::CompileContext<P4TestOptions>;
 using P4Tools::ConstraintsVector;
 
 ConstraintsVector loadExample(const char *curFile, bool flag) {
@@ -146,4 +147,4 @@ TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInAction) {
     ASSERT_TRUE(parsingResult[1]->equiv(*operation));
 }
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test
