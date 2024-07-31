@@ -1,6 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-Copyright 2022 VMware Inc.
+Copyright 2024 Marvell Technology, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "backends/common/psaProgramStructure.h"
+#include "pnaProgramStructure.h"
 
-namespace P4 {
+namespace BMV2 {
 
 using namespace P4::literals;
 
-void InspectPsaProgram::postorder(const IR::Declaration_Instance *di) {
+void InspectPnaProgram::postorder(const IR::Declaration_Instance *di) {
     if (!pinfo->resourceMap.count(di)) return;
     auto blk = pinfo->resourceMap.at(di);
     if (blk->is<IR::ExternBlock>()) {
@@ -31,7 +30,7 @@ void InspectPsaProgram::postorder(const IR::Declaration_Instance *di) {
     }
 }
 
-void InspectPsaProgram::addHeaderType(const IR::Type_StructLike *st) {
+void InspectPnaProgram::addHeaderType(const IR::Type_StructLike *st) {
     LOG5("In addHeaderType with struct " << st->toString());
     if (st->is<IR::Type_HeaderUnion>()) {
         LOG5("Struct is Type_HeaderUnion");
@@ -52,7 +51,7 @@ void InspectPsaProgram::addHeaderType(const IR::Type_StructLike *st) {
     }
 }
 
-void InspectPsaProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring name) {
+void InspectPnaProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring name) {
     auto inst = new IR::Declaration_Variable(name, st);
     if (st->is<IR::Type_Header>())
         pinfo->headers.emplace(name, inst);
@@ -62,7 +61,7 @@ void InspectPsaProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring
         pinfo->header_unions.emplace(name, inst);
 }
 
-void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bool isHeader) {
+void InspectPnaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bool isHeader) {
     LOG5("Adding type " << type->toString() << " and isHeader " << isHeader);
     for (auto f : type->fields) {
         LOG5("Iterating through field " << f->toString());
@@ -149,7 +148,7 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
     }
 }
 
-bool InspectPsaProgram::preorder(const IR::Declaration_Variable *dv) {
+bool InspectPnaProgram::preorder(const IR::Declaration_Variable *dv) {
     auto ft = typeMap->getType(dv->getNode(), true);
     cstring scalarsName = refMap->newName("scalars");
 
@@ -164,8 +163,8 @@ bool InspectPsaProgram::preorder(const IR::Declaration_Variable *dv) {
     return false;
 }
 
-/// This visitor only visits the parameter in the statement from architecture.
-bool InspectPsaProgram::preorder(const IR::Parameter *param) {
+// This visitor only visits the parameter in the statement from architecture.
+bool InspectPnaProgram::preorder(const IR::Parameter *param) {
     auto ft = typeMap->getType(param->getNode(), true);
     LOG3("add param " << ft);
     // only convert parameters that are IR::Type_StructLike
@@ -173,15 +172,15 @@ bool InspectPsaProgram::preorder(const IR::Parameter *param) {
         return false;
     }
     auto st = ft->to<IR::Type_StructLike>();
-    // check if it is psa specific standard metadata
+    // check if it is pna specific standard metadata
     cstring ptName = param->type->toString();
     // parameter must be a type that we have not seen before
     if (pinfo->hasVisited(st)) {
         LOG5("Parameter is visited, returning");
         return false;
     }
-    if (PsaProgramStructure::isStandardMetadata(ptName)) {
-        LOG5("Parameter is psa standard metadata");
+    if (PnaProgramStructure::isStandardMetadata(ptName)) {
+        LOG5("Parameter is pna standard metadata");
         addHeaderType(st);
         // remove _t from type name
         cstring headerName = ptName.exceptLast(2);
@@ -192,128 +191,68 @@ bool InspectPsaProgram::preorder(const IR::Parameter *param) {
     return false;
 }
 
-void InspectPsaProgram::postorder(const IR::P4Parser *p) {
+void InspectPnaProgram::postorder(const IR::P4Parser *p) {
     if (pinfo->block_type.count(p)) {
         auto info = pinfo->block_type.at(p);
-        if (info.first == INGRESS && info.second == PARSER)
-            pinfo->parsers.emplace("ingress"_cs, p);
-        else if (info.first == EGRESS && info.second == PARSER)
-            pinfo->parsers.emplace("egress"_cs, p);
+        if (info == MAIN_PARSER) pinfo->parsers.emplace("main_parser"_cs, p);
     }
 }
 
-void InspectPsaProgram::postorder(const IR::P4Control *c) {
+void InspectPnaProgram::postorder(const IR::P4Control *c) {
     if (pinfo->block_type.count(c)) {
         auto info = pinfo->block_type.at(c);
-        if (info.first == INGRESS && info.second == PIPELINE)
-            pinfo->pipelines.emplace("ingress"_cs, c);
-        else if (info.first == EGRESS && info.second == PIPELINE)
-            pinfo->pipelines.emplace("egress"_cs, c);
-        else if (info.first == INGRESS && info.second == DEPARSER)
-            pinfo->deparsers.emplace("ingress"_cs, c);
-        else if (info.first == EGRESS && info.second == DEPARSER)
-            pinfo->deparsers.emplace("egress"_cs, c);
+        if (info == MAIN_CONTROL)
+            pinfo->pipelines.emplace("main_control"_cs, c);
+        else if (info == MAIN_DEPARSER)
+            pinfo->deparsers.emplace("main_deparser"_cs, c);
     }
 }
 
-bool ParsePsaArchitecture::preorder(const IR::ExternBlock *block) {
+bool ParsePnaArchitecture::preorder(const IR::ExternBlock *block) {
     if (block->node->is<IR::Declaration>()) structure->globals.push_back(block);
     return false;
 }
 
-bool ParsePsaArchitecture::preorder(const IR::PackageBlock *block) {
-    auto pkg = block->findParameterValue("ingress"_cs);
+bool ParsePnaArchitecture::preorder(const IR::PackageBlock *block) {
+    auto pkg = block->findParameterValue("main_parser"_cs);
     if (pkg == nullptr) {
-        modelError("Package %1% has no parameter named 'ingress'", block);
+        modelError("Package %1% has no parameter named 'main_parser'", block);
         return false;
     }
-    if (auto ingress = pkg->to<IR::PackageBlock>()) {
-        auto p = ingress->findParameterValue("ip"_cs);
-        if (p == nullptr) {
-            modelError("'ingress' package %1% has no parameter named 'ip'", block);
-            return false;
-        }
-        auto parser = p->to<IR::ParserBlock>();
-        if (parser == nullptr) {
-            modelError("%1%: 'ip' argument of 'ingress' should be bound to a parser", block);
-            return false;
-        }
-        p = ingress->findParameterValue("ig"_cs);
-        if (p == nullptr) {
-            modelError("'ingress' package %1% has no parameter named 'ig'", block);
-            return false;
-        }
-        auto pipeline = p->to<IR::ControlBlock>();
-        if (pipeline == nullptr) {
-            modelError("%1%: 'ig' argument of 'ingress' should be bound to a control", block);
-            return false;
-        }
-        p = ingress->findParameterValue("id"_cs);
-        if (p == nullptr) {
-            modelError("'ingress' package %1% has no parameter named 'id'", block);
-            return false;
-        }
-        auto deparser = p->to<IR::ControlBlock>();
-        if (deparser == nullptr) {
-            modelError("'%1%: id' argument of 'ingress' should be bound to a control", block);
-            return false;
-        }
-        structure->block_type.emplace(parser->container, std::make_pair(INGRESS, PARSER));
-        structure->block_type.emplace(pipeline->container, std::make_pair(INGRESS, PIPELINE));
-        structure->block_type.emplace(deparser->container, std::make_pair(INGRESS, DEPARSER));
-        structure->pipeline_controls.emplace(pipeline->container->name);
-        structure->non_pipeline_controls.emplace(deparser->container->name);
-    } else {
-        modelError("'ingress' %1% is not bound to a package", pkg);
+    auto main_parser = pkg->to<IR::ParserBlock>();
+    if (main_parser == nullptr) {
+        modelError("%1%: 'main_parser' argument should be in bound", block);
         return false;
     }
-    pkg = block->findParameterValue("egress"_cs);
+
+    pkg = block->findParameterValue("main_control"_cs);
     if (pkg == nullptr) {
-        modelError("Package %1% has no parameter named 'egress'", block);
+        modelError("Package %1% has no parameter named 'main_control'", block);
         return false;
     }
-    if (auto egress = pkg->to<IR::PackageBlock>()) {
-        auto p = egress->findParameterValue("ep"_cs);
-        if (p == nullptr) {
-            modelError("'egress' package %1% has no parameter named 'ep'", block);
-            return false;
-        }
-        auto parser = p->to<IR::ParserBlock>();
-        if (parser == nullptr) {
-            modelError("%1%: 'ep' argument of 'egress' should be bound to a parser", block);
-            return false;
-        }
-        p = egress->findParameterValue("eg"_cs);
-        if (p == nullptr) {
-            modelError("'egress' package %1% has no parameter named 'eg'", block);
-            return false;
-        }
-        auto pipeline = p->to<IR::ControlBlock>();
-        if (pipeline == nullptr) {
-            modelError("%1%: 'ig' argument of 'egress' should be bound to a control", block);
-            return false;
-        }
-        p = egress->findParameterValue("ed"_cs);
-        if (p == nullptr) {
-            modelError("'egress' package %1% has no parameter named 'ed'", block);
-            return false;
-        }
-        auto deparser = p->to<IR::ControlBlock>();
-        if (deparser == nullptr) {
-            modelError("%1%: 'ed' argument of 'egress' should be bound to a control", block);
-            return false;
-        }
-        structure->block_type.emplace(parser->container, std::make_pair(EGRESS, PARSER));
-        structure->block_type.emplace(pipeline->container, std::make_pair(EGRESS, PIPELINE));
-        structure->block_type.emplace(deparser->container, std::make_pair(EGRESS, DEPARSER));
-        structure->pipeline_controls.emplace(pipeline->container->name);
-        structure->non_pipeline_controls.emplace(deparser->container->name);
-    } else {
-        modelError("'egress' is not bound to a package", pkg);
+    auto main_control = pkg->to<IR::ControlBlock>();
+    if (main_control == nullptr) {
+        modelError("%1%: 'main_control' argument should be in bound", block);
         return false;
     }
+
+    pkg = block->findParameterValue("main_deparser"_cs);
+    if (pkg == nullptr) {
+        modelError("Package %1% has no parameter named 'main_deparser'", block);
+        return false;
+    }
+    auto main_deparser = pkg->to<IR::ControlBlock>();
+    if (main_deparser == nullptr) {
+        modelError("%1%: 'main_deparser' argument should be in bound", block);
+        return false;
+    }
+    structure->block_type.emplace(main_parser->container, MAIN_PARSER);
+    structure->block_type.emplace(main_control->container, MAIN_CONTROL);
+    structure->block_type.emplace(main_deparser->container, MAIN_DEPARSER);
+    structure->pipeline_controls.emplace(main_control->container->name);
+    structure->non_pipeline_controls.emplace(main_deparser->container->name);
 
     return false;
 }
 
-}  // namespace P4
+}  // namespace BMV2

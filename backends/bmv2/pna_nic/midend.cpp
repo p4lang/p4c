@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2024 Marvell Technology, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ limitations under the License.
 #include "midend.h"
 
 #include "backends/bmv2/common/check_unsupported.h"
-#include "backends/bmv2/psa_switch/options.h"
+#include "backends/bmv2/pna_nic/options.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -69,13 +69,13 @@ using namespace P4::literals;
 /// This class implements a policy suitable for the ConvertEnums pass.
 /// The policy is: convert all enums that are not part of the psa.
 /// Use 32-bit values for all enums.
-/// Also convert PSA_PacketPath_t to bit<32>
-class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
+/// Also convert PNA_PacketPath_t to bit<32>
+class PnaEnumOn32Bits : public P4::ChooseEnumRepresentation {
     cstring filename;
 
     bool convert(const IR::Type_Enum *type) const override {
-        if (type->name == "PSA_PacketPath_t") return true;
-        if (type->name == "PSA_MeterColor_t") return true;
+        if (type->name == "PNA_PacketPath_t") return true;
+        if (type->name == "PNA_MeterColor_t") return true;
         if (type->srcInfo.isValid()) {
             auto sourceFile = type->srcInfo.getSourceFile();
             if (sourceFile.endsWith(filename.string_view()))
@@ -87,12 +87,12 @@ class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
     unsigned enumSize(unsigned) const override { return 32; }
 
  public:
-    explicit PsaEnumOn32Bits(cstring filename) : filename(filename) {}
+    explicit PnaEnumOn32Bits(cstring filename) : filename(filename) {}
 };
 
-PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStream)
+PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
     : PortableMidEnd(options) {
-    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PsaEnumOn32Bits("psa.p4"_cs));
+    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PnaEnumOn32Bits("pna.p4"_cs));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::function<bool(const Context *, const IR::Expression *)> policy =
         [=](const Context *, const IR::Expression *e) -> bool {
@@ -107,7 +107,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             return false;
         return true;
     };
-    if (BMV2::PsaSwitchContext::get().options().loadIRFromJson == false) {
+    if (BMV2::PnaNicContext::get().options().loadIRFromJson == false) {
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new CheckUnsupported(),
@@ -142,18 +142,12 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),
-            new PassRepeated({
-                new P4::ConstantFolding(&refMap, &typeMap),
-                new P4::StrengthReduction(&typeMap),
-            }),
+            new PassRepeated(
+                {new P4::ConstantFolding(&refMap, &typeMap), new P4::StrengthReduction(&typeMap)}),
             new P4::MoveDeclarations(),
-            new P4::ValidateTableProperties({
-                "psa_implementation"_cs,
-                "psa_direct_counter"_cs,
-                "psa_direct_meter"_cs,
-                "psa_idle_timeout"_cs,
-                "size"_cs,
-            }),
+            new P4::ValidateTableProperties({"pna_implementation"_cs, "pna_direct_counter"_cs,
+                                             "pna_direct_meter"_cs, "pna_idle_timeout"_cs,
+                                             "size"_cs}),
             new P4::SimplifyControlFlow(&typeMap),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&refMap, &typeMap),
@@ -174,7 +168,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             removePasses(options.passesToExcludeMidend);
         }
     } else {
-        auto fillEnumMap = new P4::FillEnumMap(new PsaEnumOn32Bits("psa.p4"_cs), &typeMap);
+        auto fillEnumMap = new P4::FillEnumMap(new PnaEnumOn32Bits("pna.p4"_cs), &typeMap);
         addPasses({
             new P4::ResolveReferences(&refMap),
             new P4::TypeChecking(&refMap, &typeMap),

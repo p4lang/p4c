@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2024 Marvell Technology, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "psaSwitch.h"
+#include "pnaNic.h"
 
 #include "frontends/common/model.h"
 #include "frontends/p4/cloner.h"
@@ -23,7 +23,7 @@ namespace BMV2 {
 
 using namespace P4::literals;
 
-void PsaCodeGenerator::create(ConversionContext *ctxt, P4::PortableProgramStructure *structure) {
+void PnaCodeGenerator::create(ConversionContext *ctxt, P4::PortableProgramStructure *structure) {
     createTypes(ctxt, structure);
     createHeaders(ctxt, structure);
     createScalars(ctxt, structure);
@@ -35,60 +35,46 @@ void PsaCodeGenerator::create(ConversionContext *ctxt, P4::PortableProgramStruct
     createGlobals();
 }
 
-void PsaCodeGenerator::createParsers(ConversionContext *ctxt,
+void PnaCodeGenerator::createParsers(ConversionContext *ctxt,
                                      P4::PortableProgramStructure *structure) {
     {
-        auto cvt = new ParserConverter(ctxt, "ingress_parser"_cs);
-        auto ingress = structure->parsers.at("ingress"_cs);
-        ingress->apply(*cvt);
-    }
-    {
-        auto cvt = new ParserConverter(ctxt, "egress_parser"_cs);
-        auto ingress = structure->parsers.at("egress"_cs);
-        ingress->apply(*cvt);
+        auto cvt = new ParserConverter(ctxt, "main_parser"_cs);
+        auto main_control = structure->parsers.at("main_parser"_cs);
+        main_control->apply(*cvt);
     }
 }
 
-void PsaCodeGenerator::createControls(ConversionContext *ctxt,
+void PnaCodeGenerator::createControls(ConversionContext *ctxt,
                                       P4::PortableProgramStructure *structure) {
-    auto cvt = new BMV2::ControlConverter<Standard::Arch::PSA>(ctxt, "ingress"_cs, true);
-    auto ingress = structure->pipelines.at("ingress"_cs);
-    ingress->apply(*cvt);
-
-    cvt = new BMV2::ControlConverter<Standard::Arch::PSA>(ctxt, "egress"_cs, true);
-    auto egress = structure->pipelines.at("egress"_cs);
-    egress->apply(*cvt);
+    auto cvt = new BMV2::ControlConverter<Standard::Arch::PNA>(ctxt, "main_control"_cs, true);
+    auto main_control = structure->pipelines.at("main_control"_cs);
+    main_control->apply(*cvt);
 }
 
-void PsaCodeGenerator::createDeparsers(ConversionContext *ctxt,
+void PnaCodeGenerator::createDeparsers(ConversionContext *ctxt,
                                        P4::PortableProgramStructure *structure) {
     {
-        auto cvt = new DeparserConverter(ctxt, "ingress_deparser"_cs);
-        auto ingress = structure->deparsers.at("ingress"_cs);
-        ingress->apply(*cvt);
-    }
-    {
-        auto cvt = new DeparserConverter(ctxt, "egress_deparser"_cs);
-        auto egress = structure->deparsers.at("egress"_cs);
-        egress->apply(*cvt);
+        auto cvt = new DeparserConverter(ctxt, "main_deparser"_cs);
+        auto main_control = structure->deparsers.at("main_deparser"_cs);
+        main_control->apply(*cvt);
     }
 }
 
-void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
+void PnaNicBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
-    P4::PsaProgramStructure structure(refMap, typeMap);
+    PnaProgramStructure structure(refMap, typeMap);
 
-    auto parsePsaArch = new P4::ParsePsaArchitecture(&structure);
+    auto parsePnaArch = new ParsePnaArchitecture(&structure);
     auto main = tlb->getMain();
     if (!main) return;
 
-    if (main->type->name != "PSA_Switch")
+    if (main->type->name != "PNA_NIC")
         ::warning(ErrorType::WARN_INVALID,
-                  "%1%: the main package should be called PSA_Switch"
+                  "%1%: the main package should be called PNA_NIC"
                   "; are you using the wrong architecture?",
                   main->type->name);
 
-    main->apply(*parsePsaArch);
+    main->apply(*parsePnaArch);
 
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto program = tlb->getProgram();
@@ -102,10 +88,8 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(typeMap),
         new LowerExpressions(typeMap),
-        new PassRepeated({
-            new P4::ConstantFolding(refMap, typeMap),
-            new P4::StrengthReduction(typeMap),
-        }),
+        new PassRepeated(
+            {new P4::ConstantFolding(refMap, typeMap), new P4::StrengthReduction(typeMap)}),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveComplexExpressions(refMap, typeMap,
                                          new ProcessControls(&structure.pipeline_controls)),
@@ -127,13 +111,13 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
 
     main = toplevel->getMain();
     if (!main) return;  // no main
-    main->apply(*parsePsaArch);
+    main->apply(*parsePnaArch);
     if (::errorCount() > 0) return;
     program = toplevel->getProgram();
 
     PassManager toJson = {new P4::DiscoverStructure(&structure),
-                          new P4::InspectPsaProgram(refMap, typeMap, &structure),
-                          new ConvertPsaToJson(refMap, typeMap, toplevel, json, &structure)};
+                          new InspectPnaProgram(refMap, typeMap, &structure),
+                          new ConvertPnaToJson(refMap, typeMap, toplevel, json, &structure)};
     for (const auto &pEnum : *enumMap) {
         auto name = pEnum.first->getName();
         for (const auto &pEntry : *pEnum.second) {
@@ -166,24 +150,24 @@ Util::IJson *ExternConverter_Hash::convertExternObject(UNUSED ConversionContext 
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     auto hash = new Util::JsonObject();
-    hash->emplace("type", "extern");
-    hash->emplace("value", em->object->controlPlaneName());
+    hash->emplace("type"_cs, "extern");
+    hash->emplace("value"_cs, em->object->controlPlaneName());
     parameters->append(hash);
     if (mc->arguments->size() == 2) {  // get_hash
         auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
         auto fieldList = new Util::JsonObject();
-        fieldList->emplace("type", "field_list");
+        fieldList->emplace("type"_cs, "field_list");
         auto fieldsJson = ctxt->conv->convert(mc->arguments->at(1)->expression, true, false);
-        fieldList->emplace("value", fieldsJson);
+        fieldList->emplace("value"_cs, fieldsJson);
         parameters->append(dst);
         parameters->append(fieldList);
     } else {  // get_hash with base and mod
         auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
         auto base = ctxt->conv->convert(mc->arguments->at(1)->expression);
         auto fieldList = new Util::JsonObject();
-        fieldList->emplace("type", "field_list");
+        fieldList->emplace("type"_cs, "field_list");
         auto fieldsJson = ctxt->conv->convert(mc->arguments->at(2)->expression, true, false);
-        fieldList->emplace("value", fieldsJson);
+        fieldList->emplace("value"_cs, fieldsJson);
         auto max = ctxt->conv->convert(mc->arguments->at(3)->expression);
         parameters->append(dst);
         parameters->append(base);
@@ -224,14 +208,14 @@ Util::IJson *ExternConverter_InternetChecksum::convertExternObject(
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     auto cksum = new Util::JsonObject();
-    cksum->emplace("type", "extern");
-    cksum->emplace("value", em->object->controlPlaneName());
+    cksum->emplace("type"_cs, "extern");
+    cksum->emplace("value"_cs, em->object->controlPlaneName());
     parameters->append(cksum);
     if (em->method->name == "add" || em->method->name == "subtract") {
         auto fieldList = new Util::JsonObject();
-        fieldList->emplace("type", "field_list");
+        fieldList->emplace("type"_cs, "field_list");
         auto fieldsJson = ctxt->conv->convert(mc->arguments->at(0)->expression, true, false);
-        fieldList->emplace("value", fieldsJson);
+        fieldList->emplace("value"_cs, fieldsJson);
         parameters->append(fieldList);
     } else if (em->method->name != "clear") {
         if (mc->arguments->size() == 2) {  // get_verify
@@ -258,13 +242,13 @@ Util::IJson *ExternConverter_Register::convertExternObject(
         modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
     } else if (em->method->name == "read" && mc->arguments->size() != 2) {
-        modelError("p4c-psa internally requires 2 arguments for %1%", mc);
+        modelError("p4c-pna internally requires 2 arguments for %1%", mc);
         return nullptr;
     }
     auto reg = new Util::JsonObject();
-    reg->emplace("type", "register_array");
+    reg->emplace("type"_cs, "register_array");
     cstring name = em->object->controlPlaneName();
-    reg->emplace("value", name);
+    reg->emplace("value"_cs, name);
     if (em->method->name == "read") {
         auto primitive = mkPrimitive("register_read"_cs);
         auto parameters = mkParameters(primitive);
@@ -294,14 +278,14 @@ void ExternConverter_Hash::convertExternInstance(ConversionContext *ctxt, const 
                                                  UNUSED const bool &emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
-    // auto psaStructure = static_cast<PsaCodeGenerator *>(ctxt->structure);
-    auto psaStructure = new PsaCodeGenerator();
+    // auto pnaStructure = static_cast<PnaCodeGenerator *>(ctxt->structure);
+    auto pnaStructure = new PnaCodeGenerator();
 
     // add hash instance
     auto jhash = new Util::JsonObject();
-    jhash->emplace("name", name);
-    jhash->emplace("id", nextId("extern_instances"_cs));
-    jhash->emplace("type", eb->getName());
+    jhash->emplace("name"_cs, name);
+    jhash->emplace("id"_cs, nextId("extern_instances"_cs));
+    jhash->emplace("type"_cs, eb->getName());
     jhash->emplace_non_null("source_info"_cs, inst->sourceInfoJsonObj());
     ctxt->json->externs->append(jhash);
 
@@ -320,11 +304,11 @@ void ExternConverter_Hash::convertExternInstance(ConversionContext *ctxt, const 
         return;
     }
     cstring algo_name = algo->to<IR::Declaration_ID>()->name;
-    algo_name = psaStructure->convertHashAlgorithm(algo_name);
+    algo_name = pnaStructure->convertHashAlgorithm(algo_name);
     auto k = new Util::JsonObject();
-    k->emplace("name", "algo");
-    k->emplace("type", "string");
-    k->emplace("value", algo_name);
+    k->emplace("name"_cs, "algo");
+    k->emplace("type"_cs, "string");
+    k->emplace("value"_cs, algo_name);
     arr->append(k);
 }
 
@@ -336,20 +320,17 @@ void ExternConverter_InternetChecksum::convertExternInstance(UNUSED ConversionCo
     cstring name = inst->controlPlaneName();
     auto trim = inst->controlPlaneName().find(".");
     auto block = inst->controlPlaneName().trim(trim);
-    auto psaStructure = static_cast<P4::PsaProgramStructure *>(ctxt->structure);
-    auto ingressParser = psaStructure->parsers.at("ingress"_cs)->controlPlaneName();
-    auto ingressDeparser = psaStructure->deparsers.at("ingress"_cs)->controlPlaneName();
-    auto egressParser = psaStructure->parsers.at("egress"_cs)->controlPlaneName();
-    auto egressDeparser = psaStructure->deparsers.at("egress"_cs)->controlPlaneName();
-    if (block != ingressParser && block != ingressDeparser && block != egressParser &&
-        block != egressDeparser) {
+    auto pnaStructure = static_cast<PnaProgramStructure *>(ctxt->structure);
+    auto mainParser = pnaStructure->parsers.at("main_parser"_cs)->controlPlaneName();
+    auto mainDeparser = pnaStructure->deparsers.at("main_deparser"_cs)->controlPlaneName();
+    if (block != mainParser && block != mainDeparser) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in pipeline on this target", eb);
     }
     // add checksum instance
     auto jcksum = new Util::JsonObject();
-    jcksum->emplace("name", name);
-    jcksum->emplace("id", nextId("extern_instances"_cs));
-    jcksum->emplace("type", eb->getName());
+    jcksum->emplace("name"_cs, name);
+    jcksum->emplace("id"_cs, nextId("extern_instances"_cs));
+    jcksum->emplace("type"_cs, eb->getName());
     jcksum->emplace_non_null("source_info"_cs, inst->sourceInfoJsonObj());
     ctxt->json->externs->append(jcksum);
 }
@@ -365,8 +346,8 @@ void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext *c
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jreg = new Util::JsonObject();
-    jreg->emplace("name", name);
-    jreg->emplace("id", nextId("register_arrays"_cs));
+    jreg->emplace("name"_cs, name);
+    jreg->emplace("id"_cs, nextId("register_arrays"_cs));
     jreg->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
     auto sz = eb->findParameterValue("size"_cs);
     CHECK_NULL(sz);
@@ -376,7 +357,7 @@ void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext *c
     }
     if (sz->to<IR::Constant>()->value == 0)
         error(ErrorType::ERR_UNSUPPORTED, "%1%: direct registers are not supported", inst);
-    jreg->emplace("size", sz->to<IR::Constant>()->value);
+    jreg->emplace("size"_cs, sz->to<IR::Constant>()->value);
     if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
         modelError("%1%: Expected a generic specialized type", eb->instanceType);
         return;
@@ -397,7 +378,7 @@ void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext *c
         ::error(ErrorType::ERR_UNKNOWN, "%1%: unknown width", st->arguments->at(0));
         return;
     }
-    jreg->emplace("bitwidth", width);
+    jreg->emplace("bitwidth"_cs, width);
     ctxt->json->register_arrays->append(jreg);
 }
 
