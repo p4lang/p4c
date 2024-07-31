@@ -1,5 +1,17 @@
 var NAVTREEINDEX19 =
 {
+"struct_p4_1_1_parser_state_info.html":[34,0,11,240],
+"struct_p4_1_1_per_instance_substitutions.html":[33,0,5,242],
+"struct_p4_1_1_per_instance_substitutions.html":[34,0,11,243],
+"struct_p4_1_1_specialization_info.html":[33,0,5,314],
+"struct_p4_1_1_specialization_info.html":[34,0,11,315],
+"struct_p4_1_1_specialization_info.html#a099f057972bd7fefe90f8e4f51cf03e2":[33,0,5,314,5],
+"struct_p4_1_1_specialization_info.html#a099f057972bd7fefe90f8e4f51cf03e2":[34,0,11,315,5],
+"struct_p4_1_1_specialization_info.html#a10c17f9072791bdea35d8cec64a1eb5e":[33,0,5,314,4],
+"struct_p4_1_1_specialization_info.html#a10c17f9072791bdea35d8cec64a1eb5e":[34,0,11,315,4],
+"struct_p4_1_1_specialization_info.html#a11ee63dff17360463db405c581e979f2":[33,0,5,314,2],
+"struct_p4_1_1_specialization_info.html#a11ee63dff17360463db405c581e979f2":[34,0,11,315,2],
+"struct_p4_1_1_specialization_info.html#a42eb56dce3bd0c0f9630c3e003526b89":[33,0,5,314,1],
 "struct_p4_1_1_specialization_info.html#a42eb56dce3bd0c0f9630c3e003526b89":[34,0,11,315,1],
 "struct_p4_1_1_specialization_info.html#a6b31fa3c61b974d54e51cba63e5d8554":[33,0,5,314,3],
 "struct_p4_1_1_specialization_info.html#a6b31fa3c61b974d54e51cba63e5d8554":[34,0,11,315,3],

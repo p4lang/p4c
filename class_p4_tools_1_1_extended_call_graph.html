@@ -138,8 +138,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a788078d114562297e86c05dd5dedf18f" id="r_a788078d114562297e86c05dd5dedf18f"><td class="memItemLeft" align="right" valign="top"><a id="a788078d114562297e86c05dd5dedf18f" name="a788078d114562297e86c05dd5dedf18f"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>ExtendedCallGraph</b> (std::string_view name)</td></tr>
 <tr class="separator:a788078d114562297e86c05dd5dedf18f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d60573a447f39d515be7a7c8799d20b" id="r_a6d60573a447f39d515be7a7c8799d20b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d60573a447f39d515be7a7c8799d20b">addToHash</a> (T vertex, <a class="el" href="struct_i_r_1_1_i_d.html">IR::ID</a> name)</td></tr>
-<tr class="separator:a6d60573a447f39d515be7a7c8799d20b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fe9ab6109858067debcff49b6b96e16" id="r_a5fe9ab6109858067debcff49b6b96e16"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5fe9ab6109858067debcff49b6b96e16">addToHash</a> (T vertex, const <a class="el" href="struct_i_r_1_1_i_d.html">IR::ID</a> &amp;name)</td></tr>
+<tr class="separator:a5fe9ab6109858067debcff49b6b96e16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada9432982cd598d449641eccb1a8775c" id="r_ada9432982cd598d449641eccb1a8775c"><td class="memItemLeft" align="right" valign="top"><a id="ada9432982cd598d449641eccb1a8775c" name="ada9432982cd598d449641eccb1a8775c"></a>
 const ReachabilityHashType &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getHash</b> () const</td></tr>
 <tr class="separator:ada9432982cd598d449641eccb1a8775c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -165,6 +165,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>calls</b> (T caller, 
 <tr class="memitem:a7f3a0748a846d3066794834b8c503998 inherit pub_methods_class_p4_1_1_call_graph" id="r_a7f3a0748a846d3066794834b8c503998"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>dominators</b> (T start, std::map&lt; T, Set &gt; &amp;dominators)</td></tr>
 <tr class="separator:a7f3a0748a846d3066794834b8c503998 inherit pub_methods_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adeef202fce85fecfc54d9161147684a6 inherit pub_methods_class_p4_1_1_call_graph" id="r_adeef202fce85fecfc54d9161147684a6"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>empty</b> () const</td></tr>
+<tr class="memdesc:adeef202fce85fecfc54d9161147684a6 inherit pub_methods_class_p4_1_1_call_graph"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the graph is empty. <br /></td></tr>
+<tr class="separator:adeef202fce85fecfc54d9161147684a6 inherit pub_methods_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad7333c589e1c4f4531cbee2a8c3989b inherit pub_methods_class_p4_1_1_call_graph" id="r_aad7333c589e1c4f4531cbee2a8c3989b"><td class="memItemLeft" align="right" valign="top">
 const_iterator&#160;</td><td class="memItemRight" valign="bottom"><b>end</b> () const</td></tr>
 <tr class="separator:aad7333c589e1c4f4531cbee2a8c3989b inherit pub_methods_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -177,9 +181,22 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>getCallees</b> (T cal
 <tr class="memitem:a9930d913a51b676b6220f906938b79df inherit pub_methods_class_p4_1_1_call_graph" id="r_a9930d913a51b676b6220f906938b79df"><td class="memItemLeft" align="right" valign="top">
 std::vector&lt; T &gt; *&#160;</td><td class="memItemRight" valign="bottom"><b>getCallers</b> (T callee)</td></tr>
 <tr class="separator:a9930d913a51b676b6220f906938b79df inherit pub_methods_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3f17536dbe2a71723c20988de51d3ab inherit pub_methods_class_p4_1_1_call_graph" id="r_af3f17536dbe2a71723c20988de51d3ab"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="classordered__map.html">ordered_map</a>&lt; T, std::vector&lt; T &gt; * &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInEdges</b> () const</td></tr>
+<tr class="memdesc:af3f17536dbe2a71723c20988de51d3ab inherit pub_methods_class_p4_1_1_call_graph"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of incoming edges. <br /></td></tr>
+<tr class="separator:af3f17536dbe2a71723c20988de51d3ab inherit pub_methods_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee6f729c40f0ba507652585163e38bfb inherit pub_methods_class_p4_1_1_call_graph" id="r_aee6f729c40f0ba507652585163e38bfb"><td class="memItemLeft" align="right" valign="top">
 const <a class="el" href="classcstring.html">cstring</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getName</b> () const</td></tr>
+<tr class="memdesc:aee6f729c40f0ba507652585163e38bfb inherit pub_methods_class_p4_1_1_call_graph"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the name of the graph. <br /></td></tr>
 <tr class="separator:aee6f729c40f0ba507652585163e38bfb inherit pub_methods_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c7bcd54f1f0899e98cf23e1f809ea92 inherit pub_methods_class_p4_1_1_call_graph" id="r_a1c7bcd54f1f0899e98cf23e1f809ea92"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="classordered__set.html">ordered_set</a>&lt; T &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getNodes</b> () const</td></tr>
+<tr class="memdesc:a1c7bcd54f1f0899e98cf23e1f809ea92 inherit pub_methods_class_p4_1_1_call_graph"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the set of nodes. <br /></td></tr>
+<tr class="separator:a1c7bcd54f1f0899e98cf23e1f809ea92 inherit pub_methods_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64414091ba56fd901e3db82034ac258a inherit pub_methods_class_p4_1_1_call_graph" id="r_a64414091ba56fd901e3db82034ac258a"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="classordered__map.html">ordered_map</a>&lt; T, std::vector&lt; T &gt; * &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getOutEdges</b> () const</td></tr>
+<tr class="memdesc:a64414091ba56fd901e3db82034ac258a inherit pub_methods_class_p4_1_1_call_graph"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of outgoing edges. <br /></td></tr>
+<tr class="separator:a64414091ba56fd901e3db82034ac258a inherit pub_methods_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a87f5024a0f142ac67cc824ac84f893 inherit pub_methods_class_p4_1_1_call_graph" id="r_a0a87f5024a0f142ac67cc824ac84f893"><td class="memItemLeft" align="right" valign="top">
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isCallee</b> (T callee) const</td></tr>
 <tr class="separator:a0a87f5024a0f142ac67cc824ac84f893 inherit pub_methods_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -200,6 +217,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>sccSort</b> (T start,
 <tr class="separator:aaf1ca615784234a6555cc4e1901a4420 inherit pub_methods_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4843d2195e352e5702ed88adb6232fab inherit pub_methods_class_p4_1_1_call_graph" id="r_a4843d2195e352e5702ed88adb6232fab"><td class="memItemLeft" align="right" valign="top">
 size_t&#160;</td><td class="memItemRight" valign="bottom"><b>size</b> () const</td></tr>
+<tr class="memdesc:a4843d2195e352e5702ed88adb6232fab inherit pub_methods_class_p4_1_1_call_graph"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of nodes. <br /></td></tr>
 <tr class="separator:a4843d2195e352e5702ed88adb6232fab inherit pub_methods_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf353555d1e7b980cb04ff3467df9861 inherit pub_methods_class_p4_1_1_call_graph" id="r_adf353555d1e7b980cb04ff3467df9861"><td class="memItemLeft" align="right" valign="top">
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>sort</b> (std::vector&lt; T &gt; &amp;out)</td></tr>
@@ -217,12 +235,12 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>P4ProgramDCGCreator<
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pub_types_class_p4_1_1_call_graph"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_types_class_p4_1_1_call_graph')"><img src="closed.png" alt="-"/>&#160;Public Types inherited from <a class="el" href="class_p4_1_1_call_graph.html">P4::CallGraph&lt; T &gt;</a></td></tr>
-<tr class="memitem:a670667d612e9f7cc724e3174ed66ee22 inherit pub_types_class_p4_1_1_call_graph" id="r_a670667d612e9f7cc724e3174ed66ee22"><td class="memItemLeft" align="right" valign="top">
-typedef <a class="el" href="classordered__map.html">ordered_map</a>&lt; T, std::vector&lt; T &gt; * &gt;::const_iterator&#160;</td><td class="memItemRight" valign="bottom"><b>const_iterator</b></td></tr>
-<tr class="separator:a670667d612e9f7cc724e3174ed66ee22 inherit pub_types_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1c19c6c82740ddad91d9ee50f749e3d inherit pub_types_class_p4_1_1_call_graph" id="r_ab1c19c6c82740ddad91d9ee50f749e3d"><td class="memItemLeft" align="right" valign="top">
-typedef std::unordered_set&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>Set</b></td></tr>
-<tr class="separator:ab1c19c6c82740ddad91d9ee50f749e3d inherit pub_types_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a669dc5cb20169d156fb153bcc1fc5af7 inherit pub_types_class_p4_1_1_call_graph" id="r_a669dc5cb20169d156fb153bcc1fc5af7"><td class="memItemLeft" align="right" valign="top">
+using&#160;</td><td class="memItemRight" valign="bottom"><b>const_iterator</b> = typename <a class="el" href="classordered__map.html">ordered_map</a>&lt;T, std::vector&lt;T&gt; *&gt;::const_iterator</td></tr>
+<tr class="separator:a669dc5cb20169d156fb153bcc1fc5af7 inherit pub_types_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4812a2d0dddf828df17c6a3d2961a4dd inherit pub_types_class_p4_1_1_call_graph" id="r_a4812a2d0dddf828df17c6a3d2961a4dd"><td class="memItemLeft" align="right" valign="top">
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Set</b> = std::unordered_set&lt;T&gt;</td></tr>
+<tr class="separator:a4812a2d0dddf828df17c6a3d2961a4dd inherit pub_types_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_attribs_class_p4_1_1_call_graph"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_attribs_class_p4_1_1_call_graph')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="class_p4_1_1_call_graph.html">P4::CallGraph&lt; T &gt;</a></td></tr>
 <tr class="memitem:ae261228e9d1e06bc02db227891ddc281 inherit pub_attribs_class_p4_1_1_call_graph" id="r_ae261228e9d1e06bc02db227891ddc281"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="classordered__set.html">ordered_set</a>&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>nodes</b></td></tr>
@@ -247,8 +265,8 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>insersectWith<
 <tr class="separator:a22f9a9bc8076eac85bbd6a904c5d833b inherit pro_attribs_class_p4_1_1_call_graph"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a6d60573a447f39d515be7a7c8799d20b" name="a6d60573a447f39d515be7a7c8799d20b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6d60573a447f39d515be7a7c8799d20b">&#9670;&#160;</a></span>addToHash()</h2>
+<a id="a5fe9ab6109858067debcff49b6b96e16" name="a5fe9ab6109858067debcff49b6b96e16"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5fe9ab6109858067debcff49b6b96e16">&#9670;&#160;</a></span>addToHash()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -266,7 +284,7 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="struct_i_r_1_1_i_d.html">IR::ID</a></td>          <td class="paramname"><span class="paramname"><em>name</em></span>&#160;)</td>
+          <td class="paramtype">const <a class="el" href="struct_i_r_1_1_i_d.html">IR::ID</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em></span>&#160;)</td>
         </tr>
       </table>
   </td>

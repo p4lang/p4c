@@ -623,7 +623,8 @@ var hierarchy =
         [ "P4::SubstituteParameters", "class_p4_1_1_substitute_parameters.html", null ],
         [ "P4::ToP4", "class_p4_1_1_to_p4.html", null ],
         [ "P4::TypeInference", "class_p4_1_1_type_inference.html", null ],
-        [ "P4::UnrollLoops", "class_p4_1_1_unroll_loops.html", null ]
+        [ "P4::UnrollLoops", "class_p4_1_1_unroll_loops.html", null ],
+        [ "P4Tools::P4ProgramDCGCreator", "class_p4_tools_1_1_p4_program_d_c_g_creator.html", null ]
       ] ]
     ] ],
     [ "P4::DiagnosticCountInfo", "struct_p4_1_1_diagnostic_count_info.html", null ],

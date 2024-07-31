@@ -149,12 +149,12 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a670667d612e9f7cc724e3174ed66ee22" id="r_a670667d612e9f7cc724e3174ed66ee22"><td class="memItemLeft" align="right" valign="top"><a id="a670667d612e9f7cc724e3174ed66ee22" name="a670667d612e9f7cc724e3174ed66ee22"></a>
-typedef <a class="el" href="classordered__map.html">ordered_map</a>&lt; T, std::vector&lt; T &gt; * &gt;::const_iterator&#160;</td><td class="memItemRight" valign="bottom"><b>const_iterator</b></td></tr>
-<tr class="separator:a670667d612e9f7cc724e3174ed66ee22"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1c19c6c82740ddad91d9ee50f749e3d" id="r_ab1c19c6c82740ddad91d9ee50f749e3d"><td class="memItemLeft" align="right" valign="top"><a id="ab1c19c6c82740ddad91d9ee50f749e3d" name="ab1c19c6c82740ddad91d9ee50f749e3d"></a>
-typedef std::unordered_set&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>Set</b></td></tr>
-<tr class="separator:ab1c19c6c82740ddad91d9ee50f749e3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a669dc5cb20169d156fb153bcc1fc5af7" id="r_a669dc5cb20169d156fb153bcc1fc5af7"><td class="memItemLeft" align="right" valign="top"><a id="a669dc5cb20169d156fb153bcc1fc5af7" name="a669dc5cb20169d156fb153bcc1fc5af7"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>const_iterator</b> = typename <a class="el" href="classordered__map.html">ordered_map</a>&lt;T, std::vector&lt;T&gt; *&gt;::const_iterator</td></tr>
+<tr class="separator:a669dc5cb20169d156fb153bcc1fc5af7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4812a2d0dddf828df17c6a3d2961a4dd" id="r_a4812a2d0dddf828df17c6a3d2961a4dd"><td class="memItemLeft" align="right" valign="top"><a id="a4812a2d0dddf828df17c6a3d2961a4dd" name="a4812a2d0dddf828df17c6a3d2961a4dd"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Set</b> = std::unordered_set&lt;T&gt;</td></tr>
+<tr class="separator:a4812a2d0dddf828df17c6a3d2961a4dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -176,6 +176,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>calls</b> (T caller, 
 <tr class="memitem:a7f3a0748a846d3066794834b8c503998" id="r_a7f3a0748a846d3066794834b8c503998"><td class="memItemLeft" align="right" valign="top"><a id="a7f3a0748a846d3066794834b8c503998" name="a7f3a0748a846d3066794834b8c503998"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>dominators</b> (T start, std::map&lt; T, Set &gt; &amp;dominators)</td></tr>
 <tr class="separator:a7f3a0748a846d3066794834b8c503998"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adeef202fce85fecfc54d9161147684a6" id="r_adeef202fce85fecfc54d9161147684a6"><td class="memItemLeft" align="right" valign="top"><a id="adeef202fce85fecfc54d9161147684a6" name="adeef202fce85fecfc54d9161147684a6"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>empty</b> () const</td></tr>
+<tr class="memdesc:adeef202fce85fecfc54d9161147684a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the graph is empty. <br /></td></tr>
+<tr class="separator:adeef202fce85fecfc54d9161147684a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad7333c589e1c4f4531cbee2a8c3989b" id="r_aad7333c589e1c4f4531cbee2a8c3989b"><td class="memItemLeft" align="right" valign="top"><a id="aad7333c589e1c4f4531cbee2a8c3989b" name="aad7333c589e1c4f4531cbee2a8c3989b"></a>
 const_iterator&#160;</td><td class="memItemRight" valign="bottom"><b>end</b> () const</td></tr>
 <tr class="separator:aad7333c589e1c4f4531cbee2a8c3989b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -188,9 +192,22 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>getCallees</b> (T cal
 <tr class="memitem:a9930d913a51b676b6220f906938b79df" id="r_a9930d913a51b676b6220f906938b79df"><td class="memItemLeft" align="right" valign="top"><a id="a9930d913a51b676b6220f906938b79df" name="a9930d913a51b676b6220f906938b79df"></a>
 std::vector&lt; T &gt; *&#160;</td><td class="memItemRight" valign="bottom"><b>getCallers</b> (T callee)</td></tr>
 <tr class="separator:a9930d913a51b676b6220f906938b79df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3f17536dbe2a71723c20988de51d3ab" id="r_af3f17536dbe2a71723c20988de51d3ab"><td class="memItemLeft" align="right" valign="top"><a id="af3f17536dbe2a71723c20988de51d3ab" name="af3f17536dbe2a71723c20988de51d3ab"></a>
+const <a class="el" href="classordered__map.html">ordered_map</a>&lt; T, std::vector&lt; T &gt; * &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInEdges</b> () const</td></tr>
+<tr class="memdesc:af3f17536dbe2a71723c20988de51d3ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of incoming edges. <br /></td></tr>
+<tr class="separator:af3f17536dbe2a71723c20988de51d3ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee6f729c40f0ba507652585163e38bfb" id="r_aee6f729c40f0ba507652585163e38bfb"><td class="memItemLeft" align="right" valign="top"><a id="aee6f729c40f0ba507652585163e38bfb" name="aee6f729c40f0ba507652585163e38bfb"></a>
 const <a class="el" href="classcstring.html">cstring</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getName</b> () const</td></tr>
+<tr class="memdesc:aee6f729c40f0ba507652585163e38bfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the name of the graph. <br /></td></tr>
 <tr class="separator:aee6f729c40f0ba507652585163e38bfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c7bcd54f1f0899e98cf23e1f809ea92" id="r_a1c7bcd54f1f0899e98cf23e1f809ea92"><td class="memItemLeft" align="right" valign="top"><a id="a1c7bcd54f1f0899e98cf23e1f809ea92" name="a1c7bcd54f1f0899e98cf23e1f809ea92"></a>
+const <a class="el" href="classordered__set.html">ordered_set</a>&lt; T &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getNodes</b> () const</td></tr>
+<tr class="memdesc:a1c7bcd54f1f0899e98cf23e1f809ea92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the set of nodes. <br /></td></tr>
+<tr class="separator:a1c7bcd54f1f0899e98cf23e1f809ea92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64414091ba56fd901e3db82034ac258a" id="r_a64414091ba56fd901e3db82034ac258a"><td class="memItemLeft" align="right" valign="top"><a id="a64414091ba56fd901e3db82034ac258a" name="a64414091ba56fd901e3db82034ac258a"></a>
+const <a class="el" href="classordered__map.html">ordered_map</a>&lt; T, std::vector&lt; T &gt; * &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getOutEdges</b> () const</td></tr>
+<tr class="memdesc:a64414091ba56fd901e3db82034ac258a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of outgoing edges. <br /></td></tr>
+<tr class="separator:a64414091ba56fd901e3db82034ac258a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a87f5024a0f142ac67cc824ac84f893" id="r_a0a87f5024a0f142ac67cc824ac84f893"><td class="memItemLeft" align="right" valign="top"><a id="a0a87f5024a0f142ac67cc824ac84f893" name="a0a87f5024a0f142ac67cc824ac84f893"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isCallee</b> (T callee) const</td></tr>
 <tr class="separator:a0a87f5024a0f142ac67cc824ac84f893"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -211,6 +228,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>sccSort</b> (T start,
 <tr class="separator:aaf1ca615784234a6555cc4e1901a4420"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4843d2195e352e5702ed88adb6232fab" id="r_a4843d2195e352e5702ed88adb6232fab"><td class="memItemLeft" align="right" valign="top"><a id="a4843d2195e352e5702ed88adb6232fab" name="a4843d2195e352e5702ed88adb6232fab"></a>
 size_t&#160;</td><td class="memItemRight" valign="bottom"><b>size</b> () const</td></tr>
+<tr class="memdesc:a4843d2195e352e5702ed88adb6232fab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of nodes. <br /></td></tr>
 <tr class="separator:a4843d2195e352e5702ed88adb6232fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf353555d1e7b980cb04ff3467df9861" id="r_adf353555d1e7b980cb04ff3467df9861"><td class="memItemLeft" align="right" valign="top"><a id="adf353555d1e7b980cb04ff3467df9861" name="adf353555d1e7b980cb04ff3467df9861"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>sort</b> (std::vector&lt; T &gt; &amp;out)</td></tr>

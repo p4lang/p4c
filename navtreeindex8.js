@@ -1,5 +1,17 @@
 var NAVTREEINDEX8 =
 {
+"class_p4_1_1_remove_unused_h_u_declarations.html":[33,0,5,276],
+"class_p4_1_1_remove_unused_h_u_declarations.html":[34,0,11,277],
+"class_p4_1_1_remove_unused_policy.html":[33,0,5,277],
+"class_p4_1_1_remove_unused_policy.html":[34,0,11,278],
+"class_p4_1_1_remove_unused_policy.html#aafd121df24eabff13a490c67369798e6":[33,0,5,277,0],
+"class_p4_1_1_remove_unused_policy.html#aafd121df24eabff13a490c67369798e6":[34,0,11,278,0],
+"class_p4_1_1_remove_useless_casts.html":[33,0,5,278],
+"class_p4_1_1_remove_useless_casts.html":[34,0,11,279],
+"class_p4_1_1_rename_map.html":[33,0,5,279],
+"class_p4_1_1_rename_map.html":[34,0,11,280],
+"class_p4_1_1_rename_map.html#a11dec2774b6bc15323dde03ed9778e92":[33,0,5,279,2],
+"class_p4_1_1_rename_map.html#a11dec2774b6bc15323dde03ed9778e92":[34,0,11,280,2],
 "class_p4_1_1_rename_map.html#ac823dc12bb693aa485023d0864804d09":[33,0,5,279,0],
 "class_p4_1_1_rename_map.html#ac823dc12bb693aa485023d0864804d09":[34,0,11,280,0],
 "class_p4_1_1_rename_map.html#ad0edab42acd96345ae18a305a7d64a5f":[33,0,5,279,1],
@@ -237,17 +249,5 @@ var NAVTREEINDEX8 =
 "class_p4_1_1_type_inference.html#a8257037caea2981f6801518783eb3dd0":[33,0,5,365,4],
 "class_p4_1_1_type_inference.html#a8257037caea2981f6801518783eb3dd0":[34,0,11,366,4],
 "class_p4_1_1_type_inference.html#abc2ef9bb3a691d1e59a721be11cd0499":[33,0,5,365,8],
-"class_p4_1_1_type_inference.html#abc2ef9bb3a691d1e59a721be11cd0499":[34,0,11,366,8],
-"class_p4_1_1_type_inference.html#abda500d19fdb4a79735326edc0625b67":[33,0,5,365,3],
-"class_p4_1_1_type_inference.html#abda500d19fdb4a79735326edc0625b67":[34,0,11,366,3],
-"class_p4_1_1_type_inference.html#ac8e801dbd3ef4d0cdd40ca8cfab1fbe5":[33,0,5,365,2],
-"class_p4_1_1_type_inference.html#ac8e801dbd3ef4d0cdd40ca8cfab1fbe5":[34,0,11,366,2],
-"class_p4_1_1_type_inference.html#ae400de0e7aa89fa679fae462929910a6":[33,0,5,365,7],
-"class_p4_1_1_type_inference.html#ae400de0e7aa89fa679fae462929910a6":[34,0,11,366,7],
-"class_p4_1_1_type_inference.html#afc4fb1b9059ab14a3180b0f3b2a9f638":[33,0,5,365,5],
-"class_p4_1_1_type_inference.html#afc4fb1b9059ab14a3180b0f3b2a9f638":[34,0,11,366,5],
-"class_p4_1_1_type_inference.html#afec02e8299991195e70651f4ba25d3c4":[33,0,5,365,1],
-"class_p4_1_1_type_inference.html#afec02e8299991195e70651f4ba25d3c4":[34,0,11,366,1],
-"class_p4_1_1_type_inference.html#struct_p4_1_1_type_inference_1_1_comparison":[33,0,5,365,0],
-"class_p4_1_1_type_inference.html#struct_p4_1_1_type_inference_1_1_comparison":[34,0,11,366,0]
+"class_p4_1_1_type_inference.html#abc2ef9bb3a691d1e59a721be11cd0499":[34,0,11,366,8]
 };

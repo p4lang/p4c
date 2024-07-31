@@ -1,5 +1,17 @@
 var NAVTREEINDEX6 =
 {
+"class_p4_1_1_do_replace_tuples.html":[34,0,11,104],
+"class_p4_1_1_do_replace_typedef.html":[33,0,5,104],
+"class_p4_1_1_do_replace_typedef.html":[34,0,11,105],
+"class_p4_1_1_do_reset_headers.html":[33,0,5,105],
+"class_p4_1_1_do_reset_headers.html":[34,0,11,106],
+"class_p4_1_1_do_set_headers.html":[33,0,5,106],
+"class_p4_1_1_do_set_headers.html":[34,0,11,107],
+"class_p4_1_1_do_simplify_control_flow.html":[33,0,5,107],
+"class_p4_1_1_do_simplify_control_flow.html":[34,0,11,108],
+"class_p4_1_1_do_simplify_def_use.html":[33,0,5,108],
+"class_p4_1_1_do_simplify_def_use.html":[34,0,11,109],
+"class_p4_1_1_do_simplify_expressions.html":[33,0,5,109],
 "class_p4_1_1_do_simplify_expressions.html":[34,0,11,110],
 "class_p4_1_1_do_simplify_key.html":[33,0,5,110],
 "class_p4_1_1_do_simplify_key.html":[34,0,11,111],
@@ -237,17 +249,5 @@ var NAVTREEINDEX6 =
 "class_p4_1_1_local_copy_propagation.html":[34,0,11,205],
 "class_p4_1_1_localize_actions.html":[33,0,5,205],
 "class_p4_1_1_localize_actions.html":[34,0,11,206],
-"class_p4_1_1_localize_all_actions.html":[33,0,5,206],
-"class_p4_1_1_localize_all_actions.html":[34,0,11,207],
-"class_p4_1_1_location_set.html":[33,0,5,208],
-"class_p4_1_1_location_set.html":[34,0,11,209],
-"class_p4_1_1_location_set.html#ae4591c22590a2de50e249a936f490458":[33,0,5,208,0],
-"class_p4_1_1_location_set.html#ae4591c22590a2de50e249a936f490458":[34,0,11,209,0],
-"class_p4_1_1_method_instance.html":[33,0,5,209],
-"class_p4_1_1_method_instance.html":[34,0,11,210],
-"class_p4_1_1_method_instance.html#a653648c4a516374246d360db27ea8f2b":[33,0,5,209,0],
-"class_p4_1_1_method_instance.html#a653648c4a516374246d360db27ea8f2b":[34,0,11,210,0],
-"class_p4_1_1_method_instance.html#aa2c67c8591b9d135b4277c6560d725b9":[33,0,5,209,2],
-"class_p4_1_1_method_instance.html#aa2c67c8591b9d135b4277c6560d725b9":[34,0,11,210,2],
-"class_p4_1_1_method_instance.html#af69ff9ec3a921b6742f93d5b6039b08c":[33,0,5,209,1]
+"class_p4_1_1_localize_all_actions.html":[33,0,5,206]
 };
