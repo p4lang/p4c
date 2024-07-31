@@ -14,7 +14,6 @@
 #include "backends/p4tools/modules/smith/core/target.h"
 #include "backends/p4tools/modules/smith/util/util.h"
 #include "ir/indexed_vector.h"
-#include "ir/ir-generated.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
