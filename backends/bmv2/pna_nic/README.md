@@ -1,4 +1,4 @@
-# BMv2 `pna_nic` Backend
+# BMv2 "pna_nic" Backend
 
 This directory contains components specific to the BMv2's PNA NIC (Portable NIC Architecture) backend in the P4C compiler. The files in this folder depend on each other, on the files in the `bmv2/common` and  `portable_common` directories. Most of the classes are inherited from the classes in the `portable_common` directory.
 
