@@ -1,7 +1,5 @@
 #include "backends/p4tools/modules/testgen/test/lib/format_int.h"
 
-#include <stdint.h>
-
 #include <gtest/gtest.h>
 
 #include <string>
@@ -12,20 +10,9 @@
 #include "ir/ir.h"
 #include "ir/irutils.h"
 
-namespace Test {
+namespace P4Tools::Test {
 
 namespace {
-
-using P4Tools::convertBigIntToBytes;
-using P4Tools::convertToIpv4String;
-using P4Tools::convertToIpv6String;
-using P4Tools::convertToMacString;
-using P4Tools::formatBinExpr;
-using P4Tools::formatHexExpr;
-using P4Tools::formatOctalExpr;
-using P4Tools::insertHexSeparators;
-using P4Tools::insertOctalSeparators;
-using P4Tools::insertSeparators;
 
 // Tests for formatHexExpr
 TEST_F(FormatTest, Format01) {
@@ -378,4 +365,4 @@ TEST_F(FormatTest, TestMACConversion) {
 
 }  // anonymous namespace
 
-}  // namespace Test
+}  // namespace P4Tools::Test
