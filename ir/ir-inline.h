@@ -17,12 +17,15 @@ limitations under the License.
 #ifndef IR_IR_INLINE_H_
 #define IR_IR_INLINE_H_
 
+#include <unordered_set>
+
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/json_generator.h"
 #include "ir/namemap.h"
 #include "ir/nodemap.h"
 #include "ir/visitor.h"
+
 #define DEFINE_APPLY_FUNCTIONS(CLASS, TEMPLATE, TT, INLINE)                                       \
     TEMPLATE INLINE bool IR::CLASS TT::apply_visitor_preorder(Modifier &v) {                      \
         Node::traceVisit("Mod pre");                                                              \
@@ -131,6 +134,17 @@ template <class T>
 void IR::Vector<T>::parallel_visit_children(Visitor &v) const {
     SplitFlowVisitVector<T>(v, *this).run_visit();
 }
+template <class T>
+void IR::Vector<T>::visit_unique_children(Visitor &v) const {
+    std::unordered_set<const T *> visited;
+    for (const auto *node : vec) {
+        // Visit each child component only once.
+        if (visited.find(node) != visited.end()) continue;
+        v.visit(node);
+        visited.emplace(node);
+    }
+}
+
 IRNODE_DEFINE_APPLY_OVERLOAD(Vector, template <class T>, <T>)
 template <class T>
 void IR::Vector<T>::toJSON(JSONGenerator &json) const {
