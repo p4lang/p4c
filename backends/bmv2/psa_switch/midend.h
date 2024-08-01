@@ -17,15 +17,11 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_PSA_SWITCH_MIDEND_H_
 #define BACKENDS_BMV2_PSA_SWITCH_MIDEND_H_
 
-#include "backends/bmv2/common/midend.h"
-#include "backends/bmv2/common/options.h"
-#include "frontends/common/options.h"
-#include "ir/ir.h"
-#include "midend/convertEnums.h"
+#include "backends/bmv2/portable_common/midend.h"
 
 namespace P4::BMV2 {
 
-class PsaSwitchMidEnd : public MidEnd {
+class PsaSwitchMidEnd : public PortableMidEnd {
  public:
     // If p4c is run with option '--listMidendPasses', outStream is used for printing passes names
     explicit PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);

@@ -63,7 +63,8 @@ class TestgenTarget : public CompilerTarget {
 
     explicit TestgenTarget(const std::string &deviceName, const std::string &archName);
 
-    CompilerResultOrError runCompilerImpl(const IR::P4Program *program) const override;
+    CompilerResultOrError runCompilerImpl(const CompilerOptions &options,
+                                          const IR::P4Program *program) const override;
 };
 
 }  // namespace P4::P4Tools::P4Testgen

@@ -7,7 +7,6 @@
 #include <string>
 #include <utility>
 
-#include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "frontends/common/parser_options.h"
 #include "ir/solver.h"
@@ -150,22 +149,18 @@ std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view
     registerTestgenTargets();
     P4Tools::Target::init(compilerOptions.target.c_str(), compilerOptions.arch.c_str());
 
-    // Set up the compilation context.
-    auto *compileContext = new CompileContext<CompilerOptions>();
-    compileContext->options() = compilerOptions;
-    AutoCompileContext autoContext(compileContext);
     CompilerResultOrError compilerResultOpt;
     if (program.has_value()) {
         // Run the compiler to get an IR and invoke the tool.
-        compilerResultOpt =
-            P4Tools::CompilerTarget::runCompiler(TOOL_NAME, std::string(program.value()));
+        compilerResultOpt = P4Tools::CompilerTarget::runCompiler(compilerOptions, TOOL_NAME,
+                                                                 std::string(program.value()));
     } else {
         if (compilerOptions.file.empty()) {
             ::P4::error("Expected a file input.");
             return std::nullopt;
         }
         // Run the compiler to get an IR and invoke the tool.
-        compilerResultOpt = P4Tools::CompilerTarget::runCompiler(TOOL_NAME);
+        compilerResultOpt = P4Tools::CompilerTarget::runCompiler(compilerOptions, TOOL_NAME);
     }
 
     if (!compilerResultOpt.has_value()) {

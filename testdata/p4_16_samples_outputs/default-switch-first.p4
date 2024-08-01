@@ -12,8 +12,8 @@ control ctrl() {
     }
     apply {
         switch (t.apply().action_run) {
-            default: 
-            b: {
+            b: 
+            default: {
                 return;
             }
         }

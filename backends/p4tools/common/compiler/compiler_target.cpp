@@ -1,8 +1,6 @@
 #include "backends/p4tools/common/compiler/compiler_target.h"
 
-#include <functional>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "backends/p4tools/common/compiler/context.h"
@@ -27,37 +25,41 @@ std::vector<const char *> *CompilerTarget::initCompiler(std::string_view toolNam
     return get(toolName).initCompilerImpl(argc, argv);
 }
 
-CompilerResultOrError CompilerTarget::runCompiler(std::string_view toolName) {
-    const auto *program = P4Tools::CompilerTarget::runParser();
+CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options,
+                                                  std::string_view toolName) {
+    const auto *program = P4Tools::CompilerTarget::runParser(options);
     if (program == nullptr) {
         return std::nullopt;
     }
 
-    return runCompiler(toolName, program);
+    return runCompiler(options, toolName, program);
 }
 
-CompilerResultOrError CompilerTarget::runCompiler(std::string_view toolName,
+CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options,
+                                                  std::string_view toolName,
                                                   const std::string &source) {
-    const auto *program = P4::parseP4String(source, P4CContext::get().options().langVersion);
+    const auto *program = P4::parseP4String(source, options.langVersion);
     if (program == nullptr) {
         return std::nullopt;
     }
 
-    return runCompiler(toolName, program);
+    return runCompiler(options, toolName, program);
 }
 
-CompilerResultOrError CompilerTarget::runCompiler(std::string_view toolName,
+CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options,
+                                                  std::string_view toolName,
                                                   const IR::P4Program *program) {
-    return get(toolName).runCompilerImpl(program);
+    return get(toolName).runCompilerImpl(options, program);
 }
 
-CompilerResultOrError CompilerTarget::runCompilerImpl(const IR::P4Program *program) const {
-    program = runFrontend(program);
+CompilerResultOrError CompilerTarget::runCompilerImpl(const CompilerOptions &options,
+                                                      const IR::P4Program *program) const {
+    program = runFrontend(options, program);
     if (program == nullptr) {
         return std::nullopt;
     }
 
-    program = runMidEnd(program);
+    program = runMidEnd(options, program);
     if (program == nullptr) {
         return std::nullopt;
     }
@@ -70,13 +72,11 @@ ICompileContext *CompilerTarget::makeContextImpl() const {
 }
 
 std::vector<const char *> *CompilerTarget::initCompilerImpl(int argc, char **argv) const {
-    auto *result = P4CContext::get().options().process(argc, argv);
+    auto *result = CompileContext<CompilerOptions>::get().options().process(argc, argv);
     return ::P4::errorCount() > 0 ? nullptr : result;
 }
 
-const IR::P4Program *CompilerTarget::runParser() {
-    auto &options = P4CContext::get().options();
-
+const IR::P4Program *CompilerTarget::runParser(const ParserOptions &options) {
     const auto *program = P4::parseP4File(options);
     if (::P4::errorCount() > 0) {
         return nullptr;
@@ -84,10 +84,8 @@ const IR::P4Program *CompilerTarget::runParser() {
     return program;
 }
 
-const IR::P4Program *CompilerTarget::runFrontend(const IR::P4Program *program) const {
-    // Dynamic cast to get the CompilerOptions from ParserOptions
-    auto &options = dynamic_cast<CompilerOptions &>(P4CContext::get().options());
-
+const IR::P4Program *CompilerTarget::runFrontend(const CompilerOptions &options,
+                                                 const IR::P4Program *program) const {
     P4::P4COptionPragmaParser optionsPragmaParser;
     program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
 
@@ -109,10 +107,8 @@ MidEnd CompilerTarget::mkMidEnd(const CompilerOptions &options) const {
     return midEnd;
 }
 
-const IR::P4Program *CompilerTarget::runMidEnd(const IR::P4Program *program) const {
-    // Dynamic cast to get the CompilerOptions from ParserOptions
-    auto &options = dynamic_cast<CompilerOptions &>(P4CContext::get().options());
-
+const IR::P4Program *CompilerTarget::runMidEnd(const CompilerOptions &options,
+                                               const IR::P4Program *program) const {
     auto midEnd = mkMidEnd(options);
     midEnd.addDebugHook(options.getDebugHook(), true);
     return program->apply(midEnd);

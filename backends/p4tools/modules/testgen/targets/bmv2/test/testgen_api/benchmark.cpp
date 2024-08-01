@@ -1,7 +1,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/lib/logging.h"
+#include "frontends/common/options.h"
+#include "lib/compile_context.h"
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
@@ -13,7 +16,10 @@ namespace P4::Test {
 using namespace ::P4::literals;
 
 TEST(P4TestgenBenchmark, SuccessfullyGenerate1000Tests) {
-    auto compilerOptions = P4CContextWithOptions<CompilerOptions>::get().options();
+    // Set the compiler options.
+    auto *context = new P4Tools::CompileContext<CompilerOptions>();
+    AutoCompileContext autoContext(context);
+    auto &compilerOptions = context->options();
     compilerOptions.target = "bmv2"_cs;
     compilerOptions.arch = "v1model"_cs;
     auto includePath = P4CTestEnvironment::getProjectRoot() / "p4include";

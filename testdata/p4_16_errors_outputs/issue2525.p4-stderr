@@ -1,4 +1,4 @@
-issue2525.p4(64): [--Werror=invalid] error: SwitchStatement has multiple 'default' labels: DefaultExpression and DefaultExpression.
+issue2525.p4(64): [--Werror=invalid] error: switch has multiple 'default' labels:
         switch (t.apply().action_run) {
         ^^^^^^
 issue2525.p4(66)

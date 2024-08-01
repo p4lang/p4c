@@ -31,8 +31,9 @@ std::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
         P4Tools::CompilerTarget::makeContext(P4Tools::P4Testgen::TOOL_NAME));
     P4CContext::get().options().langVersion = langVersion;
 
-    auto compilerResults =
-        P4Tools::CompilerTarget::runCompiler(P4Tools::P4Testgen::TOOL_NAME, source);
+    auto compilerResults = P4Tools::CompilerTarget::runCompiler(
+        P4Tools::CompileContext<CompilerOptions>::get().options(), P4Tools::P4Testgen::TOOL_NAME,
+        source);
     if (!compilerResults.has_value()) {
         return std::nullopt;
     }

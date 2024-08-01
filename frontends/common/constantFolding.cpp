@@ -20,6 +20,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/enumInstance.h"
 #include "lib/big_int_util.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
 
 namespace P4 {
@@ -55,6 +56,7 @@ const IR::Expression *DoConstantFolding::getConstant(const IR::Expression *expr)
     CHECK_NULL(expr);
     if (expr->is<IR::Constant>()) return expr;
     if (expr->is<IR::BoolLiteral>()) return expr;
+    if (expr->is<IR::StringLiteral>()) return expr;
     if (auto list = expr->to<IR::ListExpression>()) {
         for (auto e : list->components)
             if (getConstant(e) == nullptr) return nullptr;
@@ -429,21 +431,34 @@ const IR::Node *DoConstantFolding::postorder(IR::Shr *e) { return shift(e); }
 const IR::Node *DoConstantFolding::postorder(IR::Shl *e) { return shift(e); }
 
 const IR::Node *DoConstantFolding::compare(const IR::Operation_Binary *e) {
-    auto eleft = getConstant(e->left);
-    auto eright = getConstant(e->right);
-    if (eleft == nullptr || eright == nullptr) return e;
+    const auto *eleft = getConstant(e->left);
+    const auto *eright = getConstant(e->right);
+    if (eleft == nullptr || eright == nullptr) {
+        return e;
+    }
 
     bool eqTest = e->is<IR::Equ>();
-    if (eleft->is<IR::BoolLiteral>()) {
-        auto left = eleft->to<IR::BoolLiteral>();
-        auto right = eright->to<IR::BoolLiteral>();
-        if (left == nullptr || right == nullptr) {
+    BUG_CHECK(eqTest || e->is<IR::Neq>(),
+              "compare only supports IR::Eq or IR::Neq operators, got %1%", e->node_type_name());
+    if (const auto *left = eleft->to<IR::BoolLiteral>()) {
+        const auto *right = eright->to<IR::BoolLiteral>();
+        if (right == nullptr) {
             ::P4::error(ErrorType::ERR_INVALID, "%1%: both operands must be Boolean", e);
             return e;
         }
         bool bresult = (left->value == right->value) == eqTest;
         return new IR::BoolLiteral(e->srcInfo, IR::Type_Boolean::get(), bresult);
-    } else if (typesKnown) {
+    }
+    if (const auto *left = eleft->to<IR::StringLiteral>()) {
+        const auto *right = eright->to<IR::StringLiteral>();
+        if (right == nullptr) {
+            ::error(ErrorType::ERR_INVALID, "%1%: both operands must be String", e);
+            return e;
+        }
+        bool bresult = (left->value == right->value) == eqTest;
+        return new IR::BoolLiteral(e->srcInfo, IR::Type_Boolean::get(), bresult);
+    }
+    if (typesKnown) {
         auto le = EnumInstance::resolve(eleft, typeMap);
         auto re = EnumInstance::resolve(eright, typeMap);
         if (le != nullptr && re != nullptr) {
@@ -808,17 +823,27 @@ const IR::Node *DoConstantFolding::shift(const IR::Operation_Binary *e) {
     unsigned shift = static_cast<unsigned>(shift_amt->asInt());
     if (overflowWidth(e, shift)) return e;
 
-    auto tb = left->type->to<IR::Type_Bits>();
-    if (tb != nullptr) {
-        if (((unsigned)tb->width_bits() <= shift) && warnings)
-            ::P4::warning(ErrorType::WARN_OVERFLOW, "%1%: Shifting %2%-bit value with %3%", e,
-                          tb->width_bits(), shift);
-    }
-
-    if (e->is<IR::Shl>())
+    if (e->is<IR::Shl>()) {
         value = Util::shift_left(value, shift);
-    else
+    } else {
         value = Util::shift_right(value, shift);
+    }
+    if (const auto *tb = left->type->to<IR::Type_Bits>()) {
+        if ((static_cast<unsigned>(tb->width_bits()) <= shift)) {
+            if (warnings) {
+                ::warning(ErrorType::WARN_OVERFLOW, "%1%: Shifting %2%-bit value with %3%", e,
+                          tb->width_bits(), shift);
+            }
+            // According to the P4 specification, the result of a left-shift that is larger than the
+            // width of the bit type is 0. For a right-shift of a negative signed value that is
+            // larger than the width of the bit type the result is -1.
+            if (e->is<IR::Shr>() && tb->isSigned && value < 0) {
+                value = -1;
+            } else {
+                value = 0;
+            }
+        }
+    }
     return new IR::Constant(e->srcInfo, left->type, value, cl->base);
 }
 

@@ -19,6 +19,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/simple_switch/version.h.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/simple_switch/version.h" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/psa_switch/version.h.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/psa_switch/version.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/pna_nic/version.h.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/pna_nic/version.h" @ONLY)
 
 # sources for backend executable
 set (BMV2_SIMPLE_SWITCH_SRCS
@@ -29,6 +31,15 @@ set (BMV2_SIMPLE_SWITCH_SRCS
     simple_switch/simpleSwitch.h
     simple_switch/options.h
     )
+    
+set (PORTABLE_COMMON
+    portable_common/portable.cpp
+    portable_common/portable.h  
+    portable_common/options.cpp
+    portable_common/options.h    
+    portable_common/midend.cpp
+    portable_common/midend.h
+    )
 
 set (BMV2_PSA_SWITCH_SRCS
     psa_switch/main.cpp
@@ -38,6 +49,18 @@ set (BMV2_PSA_SWITCH_SRCS
     psa_switch/psaSwitch.h
     psa_switch/options.cpp
     psa_switch/options.h
+    )
+
+set (BMV2_PNA_NIC_SRCS
+    pna_nic/main.cpp
+    pna_nic/midend.cpp
+    pna_nic/midend.h
+    pna_nic/pnaNic.cpp
+    pna_nic/pnaNic.h
+    pna_nic/pnaProgramStructure.cpp
+    pna_nic/pnaProgramStructure.h
+    pna_nic/options.cpp
+    pna_nic/options.h
     )
 
 set (BMV2_BACKEND_COMMON_SRCS
@@ -85,9 +108,16 @@ target_link_libraries (p4c-bm2-ss bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 
 install(TARGETS p4c-bm2-ss RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
+add_library(portable-common STATIC ${PORTABLE_COMMON})
+target_link_libraries(portable-common bmv2backend)
+
 add_executable(p4c-bm2-psa ${BMV2_PSA_SWITCH_SRCS})
-target_link_libraries (p4c-bm2-psa bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+target_link_libraries (p4c-bm2-psa portable-common ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 install(TARGETS p4c-bm2-psa RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
+
+add_executable(p4c-bm2-pna ${BMV2_PNA_NIC_SRCS})
+target_link_libraries (p4c-bm2-pna portable-common ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+install(TARGETS p4c-bm2-pna RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
 file(RELATIVE_PATH
     CURRENT_BINARY_DIR_PATH_REL
@@ -107,6 +137,7 @@ file(RELATIVE_PATH
 add_custom_target(linkbmv2
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-ss ${P4C_BINARY_DIR}/p4c-bm2-ss
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-psa ${P4C_BINARY_DIR}/p4c-bm2-psa
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-pna ${P4C_BINARY_DIR}/p4c-bm2-pna
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
   DEPENDS update_includes
