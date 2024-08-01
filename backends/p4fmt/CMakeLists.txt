@@ -2,6 +2,7 @@ set(FMT_SRCS
     p4fmt.cpp
     options.cpp
     main.cpp
+    attach.cpp
 )
 
 set(REFCHECK_SRCS

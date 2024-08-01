@@ -1,5 +1,6 @@
 #include "backends/p4fmt/p4fmt.h"
 
+#include "attach.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"
 #include "frontends/p4/toP4/toP4.h"
@@ -23,6 +24,9 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
     }
 
     auto top4 = P4::ToP4(&formattedOutput, false);
+    auto attach = P4::Attach(&formattedOutput, false);
+    // attach comments to nodes
+    program->apply(attach);
     // Print the program before running front end passes.
     program->apply(top4);
 

@@ -58,6 +58,22 @@ cstring SourceInfo::toString() const {
                            end.toString().string_view());
 }
 
+void SourceInfo::addBefore(Util::Comment *comment) const { before.push_back(comment); }
+
+void SourceInfo::addAfter(Util::Comment *comment) const { after.push_back(comment); }
+
+const std::vector<Util::Comment *> &SourceInfo::accessBefore() const { return before; }
+
+const std::vector<Util::Comment *> &SourceInfo::accessAfter() const { return after; }
+
+const std::vector<Comment *> &SourceInfo::getAllComments() const {
+    if (sources == nullptr) {
+        static std::vector<Comment *> EMPTY;
+        return EMPTY;
+    }
+    return sources->getAllComments();
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 
 InputSources::InputSources() : sealed(false) {
@@ -71,6 +87,8 @@ void InputSources::addComment(SourceInfo srcInfo, bool singleLine, cstring body)
         body = body.exceptLast(2);
     comments.push_back(new Comment(srcInfo, singleLine, body));
 }
+
+const std::vector<Comment *> &InputSources::getAllComments() const { return comments; }
 
 /// prevent further changes
 void InputSources::seal() {
