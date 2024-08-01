@@ -17,12 +17,12 @@
 #include "frontends/parsers/v1/v1parser.hpp"
 #include "lib/error.h"
 
-namespace {
-
 #ifdef HAVE_LIBBOOST_IOSTREAMS
 
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
+
+namespace {
 
 /// A RAII helper class that provides an istream wrapper for a stdio FILE*. This
 /// is the efficient implementation for users with boost::iostreams installed.
@@ -43,7 +43,11 @@ struct AutoStdioInputStream {
     std::istream stream;
 };
 
+}  // namespace
+
 #else
+
+namespace {
 
 /// A RAII helper class that provides an istream wrapper for a stdio FILE*. This
 /// is an inefficient fallback implementation.
@@ -59,9 +63,9 @@ struct AutoStdioInputStream {
     std::stringstream stream;
 };
 
-#endif
+}  // namespace
 
-}  // anonymous namespace
+#endif
 
 namespace P4 {
 
