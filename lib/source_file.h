@@ -110,6 +110,7 @@ class SourcePosition final {
 };
 
 class InputSources;
+class Comment;
 
 /**
 Information about the source position of a language element -
@@ -195,6 +196,8 @@ class SourceInfo final {
 
     const SourcePosition &getEnd() const { return this->end; }
 
+    [[nodiscard]] const std::vector<Comment *> getAllFileComments() const;
+
     /**
        True if this comes 'before' this source position.
        'invalid' source positions come first.
@@ -268,6 +271,10 @@ class Comment final : IHasDbPrint {
         out << body;
         if (!singleLine) out << "*/";
     }
+
+    // Retrieve the source position associated with this comment.
+    [[nodiscard]] const SourcePosition &getStartPosition() const { return srcInfo.getStart(); }
+    [[nodiscard]] const SourcePosition &getEndPosition() const { return srcInfo.getEnd(); }
 };
 
 /**
@@ -287,7 +294,6 @@ class InputSources final {
 
  public:
     InputSources();
-
     std::string_view getLine(unsigned lineNumber) const;
     /// Original source line that produced the line with the specified number
     SourceFileLine getSourceLine(unsigned line) const;
@@ -318,6 +324,9 @@ class InputSources final {
 
     cstring toDebugString() const;
     void addComment(SourceInfo srcInfo, bool singleLine, cstring body);
+
+    // Returns a list of all the comments found in the file, stored as a part of `InputSources`
+    const std::vector<Comment *> &getAllComments() const;
 
  private:
     /// Append this text to the last line; must not contain newlines
