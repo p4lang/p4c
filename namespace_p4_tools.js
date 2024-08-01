@@ -44,7 +44,7 @@ var namespace_p4_tools =
     [ "Z3Translator", "class_p4_tools_1_1_z3_translator.html", "class_p4_tools_1_1_z3_translator" ],
     [ "CompilerResultOrError", "namespace_p4_tools.html#a13fdc77c87c7de9e4a842aa897793c5f", null ],
     [ "ConstraintsVector", "namespace_p4_tools.html#ac8da1190931edee3539ca77b1e01586d", null ],
-    [ "SymbolicMapType", "namespace_p4_tools.html#a937e208f74ad1f4d660f8a2bd27bf217", null ],
+    [ "SymbolicMapType", "namespace_p4_tools.html#a6559e56230ad33b7d4b9bf4fe7111547", null ],
     [ "Z3DeclaredVariablesMap", "namespace_p4_tools.html#a097f99da5bfcceb51f171a14efd9100f", null ],
     [ "argumentsToTypeDeclarations", "namespace_p4_tools.html#a16d1e36006f9d781002b87c3f394e040", null ],
     [ "convertBigIntToBytes", "namespace_p4_tools.html#a95c693f6605f51aa8b20533b23bb6d20", null ],

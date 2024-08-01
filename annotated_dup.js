@@ -329,6 +329,10 @@ var annotated_dup =
       [ "NameMap", "class_i_r_1_1_name_map.html", null ],
       [ "Node", "class_i_r_1_1_node.html", null ],
       [ "NodeMap", "class_i_r_1_1_node_map.html", null ],
+      [ "StateVariableEqual", "struct_i_r_1_1_state_variable_equal.html", null ],
+      [ "StateVariableLess", "struct_i_r_1_1_state_variable_less.html", null ],
+      [ "SymbolicVariableEqual", "struct_i_r_1_1_symbolic_variable_equal.html", null ],
+      [ "SymbolicVariableLess", "struct_i_r_1_1_symbolic_variable_less.html", null ],
       [ "Vector", "class_i_r_1_1_vector.html", "class_i_r_1_1_vector" ],
       [ "VectorBase", "class_i_r_1_1_vector_base.html", null ]
     ] ],
@@ -1433,7 +1437,6 @@ var annotated_dup =
     [ "string_map", "classstring__map.html", "classstring__map" ],
     [ "StringRef", "struct_string_ref.html", "struct_string_ref" ],
     [ "SymBitMatrix", "class_sym_bit_matrix.html", null ],
-    [ "SymbolicVarComp", "struct_symbolic_var_comp.html", null ],
     [ "Transform", "class_transform.html", null ],
     [ "TypeCheck", "class_type_check.html", "class_type_check" ],
     [ "UnparsedConstant", "struct_unparsed_constant.html", "struct_unparsed_constant" ],
