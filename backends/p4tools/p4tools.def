@@ -130,27 +130,6 @@ class TaintExpression : Expression {
     dbprint { out << "TaintedExpression(" << type << ")"; }
 }
 
-/// Signifies that a particular expression is a symbolic variable with a label.
-/// These variables are intended to be consumed by SMT/SAT solvers.
-class SymbolicVariable : Expression {
-#noconstructor
-
-    /// The label of the symbolic variable.
-    cstring label;
-
-    /// A symbolic variable always has a type and no source info.
-    SymbolicVariable(Type type, cstring label) : Expression(type), label(label) {}
-
-    /// Implements comparisons so that SymbolicVariables can be used as map keys.
-    bool operator<(const SymbolicVariable &other) const {
-        return label < other.label;
-    }
-
-    toString { return "|" + label +"(" + type->toString() + ")|"; }
-
-    dbprint { out << "|" + label +"(" << type << ")|"; }
-}
-
 /// This type replaces Type_Varbits and can store information about the current size
 class Extracted_Varbits : Type_Bits {
  public:
