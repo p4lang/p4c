@@ -23,12 +23,21 @@ class StateVariable : Expression {
     StateVariable(ArrayIndex arr) : Expression(arr->getSourceInfo(), arr->type), ref(arr) {}
 
     /// Implements comparisons so that StateVariables can be used as map keys.
+    // Delegate to IR's notion of equality.
     bool operator==(const StateVariable &other) const override {
-        // Delegate to IR's notion of equality.
         return *ref == *other.ref;
     }
 
     /// Implements comparisons so that StateVariables can be used as map keys.
+    /// Note that we ignore the type of the variable in the comparison.
+    equiv {
+        // We use a custom compare function.
+        // TODO: Is there a faster way to implement this comparison?
+        return compare(ref, a.ref) == 0;
+    }
+
+    /// Implements comparisons so that StateVariables can be used as map keys.
+    /// Note that we ignore the type of the variable in the comparison.
     bool operator<(const StateVariable &other) const {
         // We use a custom compare function.
         // TODO: Is there a faster way to implement this comparison?

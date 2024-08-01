@@ -11,7 +11,6 @@
 #include <variant>
 #include <vector>
 
-#include <boost/container/vector.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
