@@ -19,10 +19,8 @@ limitations under the License.
 
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
-#include "lib/json.h"
 
 namespace P4V1 {
 
@@ -351,22 +349,6 @@ class V1Model : public ::Model::Model {
     // The following match constants appearing in v1model.p4
     static const char *versionInitial;  // 20180101
     static const char *versionCurrent;  // 20200408
-};
-
-/// Stores the version of the global constant __v1model_version used
-/// in the 'version' public instance variable.
-class getV1ModelVersion : public Inspector {
-    bool preorder(const IR::Declaration_Constant *dc) override {
-        if (dc->name == "__v1model_version") {
-            auto val = dc->initializer->to<IR::Constant>();
-            version = static_cast<unsigned>(val->value);
-        }
-        return false;
-    }
-    bool preorder(const IR::Declaration *) override { return false; }
-
- public:
-    unsigned version = 0;
 };
 
 }  // namespace P4V1

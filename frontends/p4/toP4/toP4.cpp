@@ -20,8 +20,8 @@ limitations under the License.
 #include <sstream>
 #include <string>
 
-#include "frontends/common/options.h"
-#include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/common/parser_options.h"
+#include "frontends/p4/getV1ModelVersion.h"
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "ir/dump.h"
 
@@ -168,8 +168,10 @@ bool ToP4::preorder(const IR::P4Program *program) {
                 if (sourceFile.startsWith(p4includePath)) {
                     const char *p = sourceFile.c_str() + strlen(p4includePath);
                     if (*p == '/') p++;
-                    if (P4V1::V1Model::instance.file.name == p) {
-                        P4V1::getV1ModelVersion g;
+                    // TODO: This is v1model-specific code. This should be not part of the core
+                    // pass.
+                    if ("v1model.p4"_cs == p) {
+                        P4V1::GetV1ModelVersion g;
                         program->apply(g);
                         builder.append("#define V1MODEL_VERSION ");
                         builder.append(g.version);
