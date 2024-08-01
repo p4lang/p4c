@@ -18,7 +18,7 @@ macro(p4tools_obtain_z3)
 
   if(TOOLS_USE_PREINSTALLED_Z3)
     # We need a fairly recent version of Z3.
-    set(Z3_MIN_VERSION "4.8.12")
+    set(Z3_MIN_VERSION "4.8.14")
     # But 4.12+ is currently broken with libGC
     set(Z3_MAX_VERSION_EXCL "4.12")
     find_package(Z3 ${Z3_MIN_VERSION} REQUIRED)
