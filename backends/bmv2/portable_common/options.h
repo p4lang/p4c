@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/bmv2/common/options.h"
 #include "backends/bmv2/portable_common/midend.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 class PortableOptions : public BMV2Options {
  public:
@@ -28,6 +28,6 @@ class PortableOptions : public BMV2Options {
     std::vector<const char *> *process(int argc, char *const argv[]) override;
 };
 
-}  // namespace BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_PORTABLE_COMMON_OPTIONS_H_ */

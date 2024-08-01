@@ -452,7 +452,7 @@ const IR::Node *DoConstantFolding::compare(const IR::Operation_Binary *e) {
     if (const auto *left = eleft->to<IR::StringLiteral>()) {
         const auto *right = eright->to<IR::StringLiteral>();
         if (right == nullptr) {
-            ::error(ErrorType::ERR_INVALID, "%1%: both operands must be String", e);
+            ::P4::error(ErrorType::ERR_INVALID, "%1%: both operands must be String", e);
             return e;
         }
         bool bresult = (left->value == right->value) == eqTest;
@@ -831,8 +831,8 @@ const IR::Node *DoConstantFolding::shift(const IR::Operation_Binary *e) {
     if (const auto *tb = left->type->to<IR::Type_Bits>()) {
         if ((static_cast<unsigned>(tb->width_bits()) <= shift)) {
             if (warnings) {
-                ::warning(ErrorType::WARN_OVERFLOW, "%1%: Shifting %2%-bit value with %3%", e,
-                          tb->width_bits(), shift);
+                ::P4::warning(ErrorType::WARN_OVERFLOW, "%1%: Shifting %2%-bit value with %3%", e,
+                              tb->width_bits(), shift);
             }
             // According to the P4 specification, the result of a left-shift that is larger than the
             // width of the bit type is 0. For a right-shift of a negative signed value that is

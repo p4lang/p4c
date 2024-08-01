@@ -14,7 +14,7 @@ struct RemoveDontcareArgsTest : P4CTest {
     const IR::Node *parseAndProcess(std::string program) {
         const auto *pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
         EXPECT_TRUE(pgm);
-        EXPECT_EQ(::errorCount(), 0);
+        EXPECT_EQ(::P4::errorCount(), 0);
         if (!pgm) {
             return nullptr;
         }
@@ -77,7 +77,7 @@ top(C()) main;
 
     const auto *program = parseAndProcess(program_source);
     ASSERT_TRUE(program);
-    ASSERT_EQ(::errorCount(), 0);
+    ASSERT_EQ(::P4::errorCount(), 0);
 
     CollectActionAndControlLocals collect;
     program->apply(collect);

@@ -23,13 +23,13 @@ limitations under the License.
 #include "ir/ir.h"
 #include "midend/convertEnums.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 class PortableMidEnd : public MidEnd {
  public:
     explicit PortableMidEnd(CompilerOptions &options) : MidEnd(options) {}
 };
 
-}  // namespace BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_PORTABLE_COMMON_MIDEND_H_ */

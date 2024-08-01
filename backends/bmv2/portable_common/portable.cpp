@@ -19,9 +19,9 @@ limitations under the License.
 #include "frontends/common/model.h"
 #include "frontends/p4/cloner.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
-using namespace P4::literals;
+using namespace ::P4::literals;
 
 void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::Type_StructLike *st,
                                              P4::PortableProgramStructure *structure) {
@@ -52,8 +52,8 @@ void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::
             max_length += type->size;
             field->append("*");
             if (varbitFound)
-                ::error(ErrorType::ERR_UNSUPPORTED,
-                        "%1%: headers with multiple varbit fields are not supported", st);
+                ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                            "%1%: headers with multiple varbit fields are not supported", st);
             varbitFound = true;
         } else if (ftype->is<IR::Type_Error>()) {
             field->append(f->name.name);
@@ -448,7 +448,7 @@ void ExternConverter_DirectCounter::convertExternInstance(UNUSED ConversionConte
     cstring name = inst->controlPlaneName();
     auto it = ctxt->structure->directCounterMap.find(name);
     if (it == ctxt->structure->directCounterMap.end()) {
-        ::warning(ErrorType::WARN_UNUSED, "%1%: Direct counter not used; ignoring", inst);
+        ::P4::warning(ErrorType::WARN_UNUSED, "%1%: Direct counter not used; ignoring", inst);
     } else {
         auto jctr = new Util::JsonObject();
         jctr->emplace("name"_cs, name);
@@ -556,7 +556,7 @@ void ExternConverter_Meter::convertExternInstance(UNUSED ConversionContext *ctxt
     else if (mkind_name == "BYTES")
         type = "bytes"_cs;
     else
-        ::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected meter type", mkind->getNode());
+        ::P4::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected meter type", mkind->getNode());
     auto k = new Util::JsonObject();
     k->emplace("name"_cs, "type");
     k->emplace("type"_cs, "string");
@@ -630,7 +630,7 @@ void ExternConverter_ActionProfile::convertExternInstance(UNUSED ConversionConte
               eb->constructor->srcInfo);
 
     if (!sz->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
+        ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
     }
     action_profile->emplace("max_size"_cs, sz->to<IR::Constant>()->value);
 
@@ -655,7 +655,7 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
     BUG_CHECK(sz, "%1%Invalid declaration of extern ActionSelector: no size param",
               eb->constructor->srcInfo);
     if (!sz->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
+        ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
         return;
     }
     action_profile->emplace("max_size"_cs, sz->to<IR::Constant>()->value);
@@ -673,10 +673,10 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
     if (input == nullptr) {
         // the selector is never used by any table, we cannot figure out its
         // input and therefore cannot include it in the JSON
-        ::warning(ErrorType::WARN_UNUSED,
-                  "Action selector '%1%' is never referenced by a table "
-                  "and cannot be included in bmv2 JSON",
-                  c);
+        ::P4::warning(ErrorType::WARN_UNUSED,
+                      "Action selector '%1%' is never referenced by a table "
+                      "and cannot be included in bmv2 JSON",
+                      c);
         return;
     }
     auto j_input = mkArrayField(selector, "input"_cs);
@@ -694,4 +694,4 @@ void ExternConverter_Digest::convertExternInstance(UNUSED ConversionContext *ctx
                                                    UNUSED const IR::ExternBlock *eb,
                                                    UNUSED const bool &emitExterns) { /* TODO */ }
 
-}  // namespace BMV2
+}  // namespace P4::BMV2

@@ -62,9 +62,9 @@ limitations under the License.
 #include "midend/tableHit.h"
 #include "midend/validateProperties.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
-using namespace P4::literals;
+using namespace ::P4::literals;
 
 /// This class implements a policy suitable for the ConvertEnums pass.
 /// The policy is: convert all enums that are not part of the psa.
@@ -181,4 +181,4 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
     }
 }
 
-}  // namespace BMV2
+}  // namespace P4::BMV2

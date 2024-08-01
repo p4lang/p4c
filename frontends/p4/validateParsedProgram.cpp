@@ -192,8 +192,9 @@ void ValidateParsedProgram::postorder(const IR::SwitchStatement *statement) {
     for (auto c : statement->cases) {
         if (defaultFound != nullptr) {
             if (c->label->is<IR::DefaultExpression>())
-                ::P4::error(ErrorType::ERR_INVALID, "%1%switch has multiple 'default' labels:%2%%3%",
-                            statement->srcInfo, defaultFound->label->srcInfo, c->label->srcInfo);
+                ::P4::error(ErrorType::ERR_INVALID,
+                            "%1%switch has multiple 'default' labels:%2%%3%", statement->srcInfo,
+                            defaultFound->label->srcInfo, c->label->srcInfo);
             else
                 ::P4::error(ErrorType::ERR_INVALID,
                             "%1%switch label %2% follows 'default' label, which is not allowed.%3%",
