@@ -66,7 +66,6 @@ jobs:
           body: |
             **Deployment of preview started...** ${{ env.DEPLOYMENT }}
             ${{ env.COMMENT_IDENTIFIER }}
-          reactions: rocket
 
       - name: Update Comment to In-Progress
         if: ${{ github.event_name == 'pull_request_target' && steps.check-label.outputs.result == 'true' && steps.find-comment.outputs.comment-id != '' }}
