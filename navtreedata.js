@@ -357,7 +357,7 @@ var NAVTREE =
       [ "Steps to run tests", "md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2tests_2_r_e_a_d_m_e.html#steps-to-run-tests", null ]
     ] ],
     [ "BMv2 \"pna_nic\" Backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2pna__nic_2_r_e_a_d_m_e.html", null ],
-    [ "<tt>portable_common</tt>", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2portable__common_2_r_e_a_d_m_e.html", null ],
+    [ "portable_common", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2portable__common_2_r_e_a_d_m_e.html", null ],
     [ "Contribute to the P4 Compiler Project", "md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html", [
       [ "Contributing License", "md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html#contributing-license", null ],
       [ "Coding Standard Philosophy", "md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html#coding-standard-philosophy", null ],
