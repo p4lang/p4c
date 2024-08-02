@@ -37,3 +37,5 @@ If you encounter any issues or have suggestions for improvement, please [open an
 We welcome feature requests! Please open an issue and provide as much detail as possible about the requested feature and its use case.
 
 Happy coding!
+
+\include{doc} "../docs/CodingStandardPhilosophy.md"
