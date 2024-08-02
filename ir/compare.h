@@ -3,7 +3,7 @@
 
 #include "ir/ir.h"
 
-namespace IR {
+namespace P4::IR {
 
 /// Equals for SymbolicVariable pointers. We only compare the label.
 struct SymbolicVariableEqual {
@@ -25,5 +25,6 @@ struct SymbolicVariableLess {
     }
 };
 
-}  // namespace IR
+}  // namespace P4::IR
+
 #endif /* IR_COMPARE_H_ */
