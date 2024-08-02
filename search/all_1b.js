@@ -188,7 +188,7 @@ var searchData=
   ['specializegenericfunctions_185',['SpecializeGenericFunctions',['../class_p4_1_1_specialize_generic_functions.html',1,'P4']]],
   ['specializegenerictypes_186',['SpecializeGenericTypes',['../class_p4_1_1_specialize_generic_types.html',1,'P4']]],
   ['specific_20tests_187',['Generating Specific Tests',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html#generating-specific-tests',1,'']]],
-  ['specification_20implementation_188',['P4 Specification Implementation',['../md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#p4-specification-implementation',1,'']]],
+  ['specification_20implementation_188',['Specification Implementation',['../md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#p4-specification-implementation',1,'P4 Specification Implementation'],['../md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#p4-specification-implementation-1',1,'P4 Specification Implementation']]],
   ['split_189',['Split',['../class_string_ref_1_1_split.html',1,'StringRef']]],
   ['splitactionprofiletable_190',['SplitActionProfileTable',['../class_d_p_d_k_1_1_split_action_profile_table.html',1,'DPDK']]],
   ['splitactionselectortable_191',['SplitActionSelectorTable',['../class_d_p_d_k_1_1_split_action_selector_table.html',1,'DPDK']]],
