@@ -5,8 +5,6 @@
 #include <variant>
 #include <vector>
 
-#include <boost/container/vector.hpp>
-
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event.h"

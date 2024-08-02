@@ -85,6 +85,8 @@ cc_library(
         "@boost//:multiprecision",
         "@com_github_p4lang_p4runtime//:p4info_cc_proto",
         "@com_github_z3prover_z3//:api",
+        "@com_google_absl//absl/container:btree",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -163,6 +165,8 @@ cc_library(
         "//:lib",
         "@boost//:multiprecision",
         "@com_github_pantor_inja//:inja",
+        "@com_google_absl//absl/container:btree",
+        "@com_google_absl//absl/strings",
         "@nlohmann_json//:json",
     ],
 )
@@ -181,7 +185,6 @@ cc_binary(
     deps = [
         ":testgen_lib",
         "//:lib",
-        "@boost//:filesystem",
         "@boost//:multiprecision",
     ],
 )

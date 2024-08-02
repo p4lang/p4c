@@ -7,6 +7,69 @@ We follow a monthly release cadence. Our versioning scheme is as follows:
 > @note
 > The commit history prior to the release [1.2.2.1](https://github.com/p4lang/p4c/pull/3085) is not included here but is available in the [commit history](https://github.com/p4lang/p4c/commits/main/).
 
+## Release v1.2.4.14 [[view](https://github.com/p4lang/p4c/pull/4844)] 
+
+### Breaking Changes 🛠
+- P4C Options cleanup [[view](https://github.com/p4lang/p4c/pull/4790)] (Fabian Ruffy)
+- Make preprocess and getIncludePath const functions. [[view](https://github.com/p4lang/p4c/pull/4785)] (Fabian Ruffy)
+
+### P4 Specification Implementation
+- Forbid case-after-default, tweak error messages [[view](https://github.com/p4lang/p4c/pull/4831)] (Vladimír Štill)
+  
+### Changes to the Compiler Core
+- Improve cstring cache internals [[view](https://github.com/p4lang/p4c/pull/4780)] (Anton Korobeynikov)
+- Fix loop unrolling bugs related to issue4739 [[view](https://github.com/p4lang/p4c/pull/4783)] (Chris Dodd)
+- Make HasTableApply a resolution context, so it could resolve declarations on its own if desired [[view](https://github.com/p4lang/p4c/pull/4781)] (Anton Korobeynikov)
+- [#4661] Do not unconditionally mark extern method calls as compile-time constants. [[view](https://github.com/p4lang/p4c/pull/4726)] (Kyle Cripps)
+- Fix `loc_t::operator<` when `parent` is `nullptr` [[view](https://github.com/p4lang/p4c/pull/4798)] (Kyle Cripps)
+- Introduce string map class and switch to it [[view](https://github.com/p4lang/p4c/pull/4774)] (Anton Korobeynikov)
+- Require type decl in for..in loops [[view](https://github.com/p4lang/p4c/pull/4808)] (Chris Dodd)
+- Add UnrollLoops::Policy to control unrolling per backend [[view](https://github.com/p4lang/p4c/pull/4809)] (Chris Dodd)
+- Extend & fix FunctionInliner [[view](https://github.com/p4lang/p4c/pull/4801)] (Anton Korobeynikov)
+- [NFC] Split TypeInference [[view](https://github.com/p4lang/p4c/pull/4814)] (Anton Korobeynikov)
+- Map written `LocationSet`s to program locations (`loc_t`) instead of `IR::Expression*`s [[view](https://github.com/p4lang/p4c/pull/4797)] (Kyle Cripps)
+- Store exact type, not one of the base class to inhibit assertion [[view](https://github.com/p4lang/p4c/pull/4818)] (Anton Korobeynikov)
+- misc fixes/additions [[view](https://github.com/p4lang/p4c/pull/4820)] (Chris Dodd)
+- Remove multimap usage from `memoizeDeclsByName` [[view](https://github.com/p4lang/p4c/pull/4821)] (Anton Korobeynikov)
+- Make don't care args action-local when used in actions [[view](https://github.com/p4lang/p4c/pull/4817)] (Kyle Cripps)
+- Add string literal support in constant folding. [[view](https://github.com/p4lang/p4c/pull/4837)] (Fabian Ruffy)
+- Truncate shifts to the maximum constant bit-width in the constant folding pass. [[view](https://github.com/p4lang/p4c/pull/4836)] (Fabian Ruffy)   
+- Make SymbolicVariable part of the core IR. [[view](https://github.com/p4lang/p4c/pull/4840)] (Fabian Ruffy)
+
+### Changes to the BMv2 Back Ends
+- Move ProgramStructure out the BMv2 folder such that it can be used in other back ends. [[view](https://github.com/p4lang/p4c/pull/4770)] (Fabian Ruffy)
+- Add skeleton implementation for BMv2 PNA Backend [[view](https://github.com/p4lang/p4c/pull/4729)] (rupesh-chiluka-marvell)
+
+### Changes to the TC Back End
+- Support of InternetChecksum in P4TC [[view](https://github.com/p4lang/p4c/pull/4782)] (Komal Jain)
+- Fix broken CI runs because missing override in TC code. [[view](https://github.com/p4lang/p4c/pull/4794)] (Fabian Ruffy)
+
+
+### Changes to the P4Tools Back End
+
+- P4Testgen logging cleanups. [[view](https://github.com/p4lang/p4c/pull/4684)] (Fabian Ruffy)
+- For-loop and for-in-loop support for P4Smith [[view](https://github.com/p4lang/p4c/pull/4772)] (zzmic)
+- [P4Testgen] Refactor the P4Testgen extern implementation. [[view](https://github.com/p4lang/p4c/pull/4728)] (Fabian Ruffy)
+- [P4Testgen] Initialize the testgen targets when invoking the library API [[view](https://github.com/p4lang/p4c/pull/4706)] (Fabian Ruffy)
+- [P4Testgen] Pass compiler options as argument instead of retrieving them from the context. [[view](https://github.com/p4lang/p4c/pull/4833)] (Fabian Ruffy) 
+- [P4Testgen] Hotfix for failing P4Testgen benchmark test. [[view](https://github.com/p4lang/p4c/pull/4839)] (Fabian Ruffy)
+- [P4Testgen] Fix problems with the reachability pass. [[view](https://github.com/p4lang/p4c/pull/4789)] (Fabian Ruffy)
+- Replace boost::container::flat_map with absl::btree_map in P4Tools. [[view](https://github.com/p4lang/p4c/pull/4768)] (Fabian Ruffy)
+
+### Other Changes
+- Docs : Changelogs release update for v1.2.4.13 [[view](https://github.com/p4lang/p4c/pull/4788)] (Adarsh Rawat)
+- Docs :  Add Home page for documentation  [[view](https://github.com/p4lang/p4c/pull/4764)] (Adarsh Rawat)
+- P4Fmt reference checker [[view](https://github.com/p4lang/p4c/pull/4778)] (Nitish Kumar)
+- Update the PINS programs. [[view](https://github.com/p4lang/p4c/pull/4799)] (Fabian Ruffy)
+- Add test program to verify compile-time error if no type in for-in loop [[view](https://github.com/p4lang/p4c/pull/4812)] (Andy Fingerhut)
+- Add tests from issue 4507 [[view](https://github.com/p4lang/p4c/pull/4816)] (Kyle Cripps)
+- Update README.md instructions for running doxygen [[view](https://github.com/p4lang/p4c/pull/4807)] (Andy Fingerhut)
+- Fix: Links in Generated Documentation [[view](https://github.com/p4lang/p4c/pull/4793)] (Adarsh Rawat)
+- Minor Fix: links in P4Smith page [[view](https://github.com/p4lang/p4c/pull/4828)] (Adarsh Rawat)
+- Add missing BUILD file dependencies. [[view](https://github.com/p4lang/p4c/pull/4846)] (Matthew Lam)
+- Minor fix : Heading of portable_common [[view](https://github.com/p4lang/p4c/pull/4847)] (Adarsh Rawat)
+- Automated Release v1.2.4.14 [[view](https://github.com/p4lang/p4c/pull/4844)]  (github-actions)
+
 ## Release v1.2.4.13 [[view](https://github.com/p4lang/p4c/pull/4767)]
 
 ### Breaking Changes 🛠

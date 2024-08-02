@@ -23,12 +23,21 @@ class StateVariable : Expression {
     StateVariable(ArrayIndex arr) : Expression(arr->getSourceInfo(), arr->type), ref(arr) {}
 
     /// Implements comparisons so that StateVariables can be used as map keys.
+    // Delegate to IR's notion of equality.
     bool operator==(const StateVariable &other) const override {
-        // Delegate to IR's notion of equality.
         return *ref == *other.ref;
     }
 
     /// Implements comparisons so that StateVariables can be used as map keys.
+    /// Note that we ignore the type of the variable in the comparison.
+    equiv {
+        // We use a custom compare function.
+        // TODO: Is there a faster way to implement this comparison?
+        return compare(ref, a.ref) == 0;
+    }
+
+    /// Implements comparisons so that StateVariables can be used as map keys.
+    /// Note that we ignore the type of the variable in the comparison.
     bool operator<(const StateVariable &other) const {
         // We use a custom compare function.
         // TODO: Is there a faster way to implement this comparison?
@@ -128,27 +137,6 @@ class TaintExpression : Expression {
     toString { return "TaintedExpression(" + type->toString() + ")"; }
 
     dbprint { out << "TaintedExpression(" << type << ")"; }
-}
-
-/// Signifies that a particular expression is a symbolic variable with a label.
-/// These variables are intended to be consumed by SMT/SAT solvers.
-class SymbolicVariable : Expression {
-#noconstructor
-
-    /// The label of the symbolic variable.
-    cstring label;
-
-    /// A symbolic variable always has a type and no source info.
-    SymbolicVariable(Type type, cstring label) : Expression(type), label(label) {}
-
-    /// Implements comparisons so that SymbolicVariables can be used as map keys.
-    bool operator<(const SymbolicVariable &other) const {
-        return label < other.label;
-    }
-
-    toString { return "|" + label +"(" + type->toString() + ")|"; }
-
-    dbprint { out << "|" + label +"(" << type << ")|"; }
 }
 
 /// This type replaces Type_Varbits and can store information about the current size
