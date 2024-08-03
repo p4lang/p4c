@@ -12,7 +12,14 @@ TESTGEN_TARGETS = ["bmv2"]
 
 filegroup(
     name = "ir_extension",
-    srcs = ["p4tools.def"],
+    srcs = ["common/ir.def"],
+    visibility = ["//visibility:public"],  # So p4c can compile these.
+)
+
+# Sources for IR definitions in P4Tools. Need to be compiled in the top-level.
+filegroup(
+    name = "ir_extension_sources",
+    srcs = ["common/ir.cpp"],
     visibility = ["//visibility:public"],  # So p4c can compile these.
 )
 

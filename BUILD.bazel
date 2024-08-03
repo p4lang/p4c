@@ -212,9 +212,11 @@ cc_library(
         "frontends/parsers/p4/p4lexer.cc",
         "frontends/parsers/v1/v1lexer.cc",
         "ir/ir-generated.cpp",
+        # TODO: These should be compiled in their respective folder.
         "backends/dpdk/spec.cpp",
         "backends/dpdk/dbprint-dpdk.cpp",
         "backends/dpdk/printUtils.cpp",
+        "//backends/p4tools:ir_extension_sources",
     ],
     copts = [
         # Where p4c should look for p4include at runtime.
