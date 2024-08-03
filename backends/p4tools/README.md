@@ -20,7 +20,7 @@ p4tools
  └─  modules         ── P4Tools extensions.
     ├─ smith       ── P4Smith: a random P4 program generator.
     └─ testgen       ── P4Testgen: a test-case generator for P4 programs.
-``
+```
 
 ## Building
 Please see the general installation instructions [here](https://github.com/p4lang/p4c#installing-p4c-from-source). P4Tools can be built using the following CMAKE configuration in the P4C repository.
