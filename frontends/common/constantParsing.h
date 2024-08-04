@@ -71,6 +71,8 @@ struct UnparsedConstant {
 
 std::ostream &operator<<(std::ostream &out, const UnparsedConstant &constant);
 
+bool operator<(const UnparsedConstant &a, const UnparsedConstant &b);
+
 /**
  * Parses an UnparsedConstant @constant into an IR::Constant object, with
  * location information taken from @srcInfo. If parsing fails, an IR::Constant
