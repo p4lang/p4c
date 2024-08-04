@@ -322,10 +322,14 @@ void IrClass::generateMethods() {
                 }
             }
         }
-        for (auto *parent = getParent(); parent; parent = parent->getParent()) {
-            auto eq_overload = new IrMethod("operator=="_cs, "{ return a == *this; }"_cs);
+        for (const auto *parent = getParent(); parent != nullptr; parent = parent->getParent()) {
+            if (hasNoDirective("operator=="_cs)) {
+                continue;
+            }
+            auto *eq_overload = new IrMethod("operator=="_cs, "{ return a == *this; }"_cs);
             eq_overload->clss = this;
             eq_overload->isOverride = true;
+            eq_overload->inImpl = true;
             eq_overload->rtype = &NamedType::Bool();
             eq_overload->args.push_back(
                 new IrField(new ReferenceType(new NamedType(parent), true), "a"_cs));
