@@ -654,6 +654,8 @@ install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/driver/p4c.mybackend.cfg
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4c_src)
 ```
 
+\include{doc} "../lib/README.md"
+
 ## Known issues
 
 Issues with the compiler are tracked on
