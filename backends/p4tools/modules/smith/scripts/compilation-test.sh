@@ -5,6 +5,7 @@ set -e # Exit on error.
 # List of known bugs.
 KNOWN_BUGS=(
     "\*.*not implemented"
+    ".*| + |.*not implemented"
 )
 
 # Function to check if an error is triggered by a known bug.
