@@ -80,10 +80,6 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "Expected packet was not received on device"
-  # BMv2 has the incorrect HU invalidation implementation.
-  bmv2_invalid_hu_1.p4
-  bmv2_invalid_hu_2.p4
-  union4-bmv2.p4
 )
 
 ####################################################################################################

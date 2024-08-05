@@ -38,7 +38,7 @@ class ParserConverter : public Inspector {
     unsigned combine(const IR::Expression *keySet, const IR::ListExpression *select, big_int &value,
                      big_int &mask, bool &is_vset, cstring &vset_name) const;
     Util::IJson *stateName(IR::ID state);
-    Util::IJson *convertParserStatement(const IR::StatOrDecl *stat);
+    Util::JsonArray *convertParserStatement(const IR::StatOrDecl *stat);
     Util::IJson *convertSelectKey(const IR::SelectExpression *expr);
     Util::IJson *convertPathExpression(const IR::PathExpression *expr);
     Util::IJson *createDefaultTransition();
