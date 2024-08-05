@@ -241,16 +241,6 @@ IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
         const auto *explicitType = new IR::Type_Name(IR::ID(tp->to<IR::Type_Typedef>()->name));
         expr = new IR::Cast(explicitType, expr);
     } else if (const auto *tn = tp->to<IR::Type_Name>()) {
-        // // Check if `tn`'s contained alias type is `Type_StructLike` or `Type_Typedef`.
-        // if (const auto *tnType = tn->to<IR::Type_Typedef>()) {
-        //     std::cout << "tnType->name: " << tnType->name << std::endl;
-        //     std::cout << "tnType->node_type_name(): " << tnType->node_type_name() << std::endl;
-        //     expr = genExpression(tnType->type);
-        // } else {
-        //     std::cout << "tn->path->name.name: " << tn->path->name.name << std::endl;
-        //     std::cout << "tn->node_type_name(): " << tn->node_type_name() << std::endl;
-        //     expr = constructStructExpr(tn);
-        // }
         expr = constructStructExpr(tn);
     } else {
         BUG("Expression: Type %s not yet supported", tp->node_type_name());
@@ -1042,8 +1032,14 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
                 IR::Expression *expr = nullptr;
                 if (const auto *fieldTn = sf->type->to<IR::Type_Name>()) {
                     // can!use another type here yet
-                    expr = genStructListExpr(fieldTn);
-                    components.push_back(expr);
+                    if (const auto *typedefType = P4Scope::getTypeByName(fieldTn->path->name.name)
+                                                      ->to<IR::Type_Typedef>()) {
+                        expr = genExpression(typedefType);
+                        components.push_back(expr);
+                    } else {
+                        expr = genStructListExpr(fieldTn);
+                        components.push_back(expr);
+                    }
                 } else if (const auto *fieldTs = sf->type->to<IR::Type_Stack>()) {
                     auto stackSize = fieldTs->getSize();
                     const auto *stackType = fieldTs->elementType;
@@ -1061,14 +1057,6 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
                     components.push_back(expr);
                 }
             }
-        } else if (const auto *tnType = td->to<IR::Type_Typedef>()) {
-            IR::Expression *expr = nullptr;
-            expr = genExpression(tnType);
-            // expr = genExpression(tnType->type);
-            // // Generically Perform explicit castings to all cases.
-            // const auto *explicitType = new IR::Type_Name(IR::ID(tnType->name.toString()));
-            // expr = new IR::Cast(explicitType, expr);
-            components.push_back(expr);
         } else {
             BUG("genStructListExpr: Requested Type %s not a struct-like type", tnName);
         }
