@@ -237,7 +237,7 @@ IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
         expr = constructBooleanExpr();
     } else if (tp->is<IR::Type_Typedef>()) {
         expr = genExpression(tp->to<IR::Type_Typedef>()->type);
-        // Generically Perform explicit castings to all cases.
+        // Generically perform explicit castings to all cases.
         const auto *explicitType = new IR::Type_Name(IR::ID(tp->to<IR::Type_Typedef>()->name));
         expr = new IR::Cast(explicitType, expr);
     } else if (const auto *tn = tp->to<IR::Type_Name>()) {
