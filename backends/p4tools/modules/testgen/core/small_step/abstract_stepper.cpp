@@ -210,38 +210,48 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::StateVariable &headerRef) 
     return false;
 }
 
-void AbstractStepper::setHeaderValidity(const IR::StateVariable &headerRef, bool validity,
-                                        ExecutionState &nextState) {
+namespace {
+
+void setHeaderValidityHelper(const IR::StateVariable &headerRef, bool validity,
+                             const ProgramInfo &programInfo, ExecutionState &nextState) {
     const auto &headerRefValidity = ToolsVariables::getHeaderValidity(headerRef);
     nextState.set(headerRefValidity, IR::BoolLiteral::get(validity));
 
-    // In some cases, the header may be `part of a union.
-    if (validity) {
-        const auto *headerBaseMember = headerRef.ref->to<IR::Member>();
-        if (headerBaseMember == nullptr) {
-            return;
+    // The header is going to be invalid. Set all fields to taint constants.
+    // TODO: Should we make this target specific? Some targets set the header fields to 0...
+    if (!validity) {
+        std::vector<IR::StateVariable> validityVector;
+        auto fieldsVector = nextState.getFlatFields(headerRef, &validityVector);
+        for (const auto &field : validityVector) {
+            nextState.set(field, IR::BoolLiteral::get(false));
         }
-        const auto *headerBase = headerBaseMember->expr;
+        for (const auto &field : fieldsVector) {
+            nextState.set(field, programInfo.createTargetUninitialized(field->type, true));
+        }
+    }
+}
+
+}  // namespace
+
+void AbstractStepper::setHeaderValidity(const IR::StateVariable &headerRef, bool validity,
+                                        ExecutionState &nextState) {
+    setHeaderValidityHelper(headerRef, validity, programInfo, nextState);
+
+    // In some cases, the header may be nested.
+    if (const auto *headerBase = headerRef.ref->to<IR::Member>()) {
         // In the case of header unions, we need to set all other union members invalid.
-        if (const auto *hdrUnion = headerBase->type->to<IR::Type_HeaderUnion>()) {
+        CHECK_NULL(headerBase->expr->type);
+        if (const auto *hdrUnion = headerBase->expr->type->to<IR::Type_HeaderUnion>()) {
             for (const auto *field : hdrUnion->fields) {
-                auto *member = new IR::Member(field->type, headerBase, field->name);
-                // Ignore the member we are setting to valid.
-                if (headerRef->equiv(*member)) {
+                // Ignore the member we are setting.
+                if (headerBase->member == field->name) {
                     continue;
                 }
                 // Set all other members to invalid.
-                setHeaderValidity(member, false, nextState);
+                setHeaderValidityHelper(new IR::Member(field->type, headerBase->expr, field->name),
+                                        false, programInfo, nextState);
             }
         }
-        return;
-    }
-    std::vector<IR::StateVariable> validityVector;
-    auto fieldsVector = nextState.getFlatFields(headerRef, &validityVector);
-    // The header is going to be invalid. Set all fields to taint constants.
-    // TODO: Should we make this target specific? Some targets set the header fields to 0.
-    for (const auto &field : fieldsVector) {
-        nextState.set(field, programInfo.createTargetUninitialized(field->type, true));
     }
 }
 
