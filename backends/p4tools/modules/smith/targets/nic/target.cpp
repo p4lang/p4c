@@ -249,6 +249,7 @@ void setPnaDpdkProbabilities() {
     PCT.PARAMETER_NONEDIR_BASETYPE_ERROR = 0;
     PCT.PARAMETER_NONEDIR_BASETYPE_STRING = 0;
     PCT.PARAMETER_NONEDIR_BASETYPE_VARBIT = 0;
+    P4Scope::req.byte_align_headers = true;
 }
 
 int DpdkPnaSmithTarget::writeTargetPreamble(std::ostream *ostream) const {
