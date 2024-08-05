@@ -8,15 +8,16 @@
 #include "backends/p4tools/modules/smith/common/parser.h"
 #include "backends/p4tools/modules/smith/common/statements.h"
 #include "backends/p4tools/modules/smith/common/table.h"
+#include "backends/p4tools/modules/smith/targets/bmv2/declarations.h"
 #include "backends/p4tools/modules/smith/targets/bmv2/target.h"
 #include "ir/ir.h"
-#include "backends/p4tools/modules/smith/targets/bmv2/declarations.h"
 
 namespace P4Tools::P4Smith::BMv2 {
 
 class Bmv2V1modelSmithTarget : public AbstractBMv2SmithTarget {
  private:
-    DeclarationGenerator *_declarationGenerator = new P4Tools::P4Smith::Bmv2V1ModelDeclarationGenerator(*this);
+    DeclarationGenerator *_declarationGenerator =
+        new P4Tools::P4Smith::Bmv2V1ModelDeclarationGenerator(*this);
     ExpressionGenerator *_expressionGenerator = new ExpressionGenerator(*this);
     StatementGenerator *_statementGenerator = new StatementGenerator(*this);
     ParserGenerator *_parserGenerator = new ParserGenerator(*this);

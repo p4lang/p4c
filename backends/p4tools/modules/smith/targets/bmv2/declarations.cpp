@@ -74,4 +74,4 @@ IR::ParameterList *Bmv2V1ModelDeclarationGenerator::genParameterList() {
     return new IR::ParameterList(params);
 }
 
-}
+}  // namespace P4Tools::P4Smith
