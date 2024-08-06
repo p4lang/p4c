@@ -167,15 +167,10 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
 
                 if (builtin->name == IR::Type_Header::setValid) {
                     prim = "add_header"_cs;
-                    // If setValid is called on a header union, we need to invalidate all other
-                    // headers in the union.
-                    if (const auto *parentStructure = builtin->appliedTo->to<IR::Member>()) {
-                        invalidateOtherHeaderUnionHeaders(parentStructure, *ctxt, result, s);
-                    }
                 } else if (builtin->name == IR::Type_Header::setInvalid) {
                     prim = "remove_header"_cs;
-                    // If setInvalid is called on a header union, we need to invalidate all other
-                    // headers in the union.
+                    // If setInvalid is called on any header in a  header union, we need to
+                    // invalidate all other headers in the union.
                     if (const auto *parentStructure = builtin->appliedTo->to<IR::Member>()) {
                         invalidateOtherHeaderUnionHeaders(parentStructure, *ctxt, result, s);
                     }
