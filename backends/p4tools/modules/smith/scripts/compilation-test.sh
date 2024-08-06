@@ -3,6 +3,7 @@
 set -e # Exit on error.
 
 # List of known bugs.
+# Catch bugs generically.
 KNOWN_BUGS=(
     "\*.*not implemented"
     ".*| + |.*not implemented"
