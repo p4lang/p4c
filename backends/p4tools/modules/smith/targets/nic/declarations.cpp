@@ -1,11 +1,11 @@
-#include "backends/p4tools/modules/smith/targets/bmv2/declarations.h"
+#include "backends/p4tools/modules/smith/targets/nic/declarations.h"
 
 #include <cstdlib>
 #include <string>
 
 namespace P4Tools::P4Smith {
 
-IR::ParameterList *Bmv2V1ModelDeclarationGenerator::genParameterList() {
+IR::ParameterList *NicDeclarationGenerator::genParameterList() {
     IR::IndexedVector<IR::Parameter> params;
     size_t totalParams = Utils::getRandInt(0, 3);
     size_t numDirParams = (totalParams != 0U) ? Utils::getRandInt(0, totalParams - 1) : 0;
@@ -16,9 +16,9 @@ IR::ParameterList *Bmv2V1ModelDeclarationGenerator::genParameterList() {
         0,
         PCT.PARAMETER_NONEDIR_BASETYPE_INT,
         0,
+        PCT.PARAMETER_NONEDIR_BASETYPE_BOOL,
         0,
-        0,
-        0,
+        PCT.PARAMETER_NONEDIR_DERIVED_ENUM,
         0,
         0,
         0,
@@ -48,9 +48,9 @@ IR::ParameterList *Bmv2V1ModelDeclarationGenerator::genParameterList() {
         0,
         PCT.PARAMETER_BASETYPE_INT,
         0,
+        PCT.PARAMETER_BASETYPE_BOOL,
         0,
-        0,
-        0,
+        PCT.PARAMETER_DERIVED_ENUM,
         0,
         0,
         0,
