@@ -1262,6 +1262,8 @@ var annotated_dup =
       [ "Enumerator", "class_util_1_1_enumerator.html", "class_util_1_1_enumerator" ],
       [ "EnumeratorHandle", "class_util_1_1_enumerator_handle.html", null ],
       [ "FilterEnumerator", "class_util_1_1_filter_enumerator.html", "class_util_1_1_filter_enumerator" ],
+      [ "has_SourceInfo", "struct_util_1_1has___source_info.html", null ],
+      [ "has_SourceInfo< T, std::void_t< decltype(std::declval< T >().getSourceInfo())> >", "struct_util_1_1has___source_info_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_tca7b1f9663a78a5476838ff7466d2519.html", null ],
       [ "has_toString", "struct_util_1_1has__to_string.html", null ],
       [ "has_toString< T, std::void_t< decltype(std::declval< T >().toString())> >", "struct_util_1_1has__to_string_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01db18fd97bde90a9bd53b0bfce41e6e9b.html", null ],
       [ "Hash", "struct_util_1_1_hash.html", null ],

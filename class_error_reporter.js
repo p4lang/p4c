@@ -2,7 +2,7 @@ var class_error_reporter =
 [
     [ "diagnose", "class_error_reporter.html#a483b07057d0fbc318ebdf410db36e83c", null ],
     [ "emit_message", "class_error_reporter.html#a7a0bbfdbede71a883547c9f0682ed422", null ],
-    [ "error_reported", "class_error_reporter.html#a77cb3661de3039fd8c9fdb70a1d10d47", null ],
+    [ "error_reported", "class_error_reporter.html#a51317346ed9dafbe1a89611fe3c36d9e", null ],
     [ "get_error_name", "class_error_reporter.html#a7647b55af333280297a406599fc8faf4", null ],
     [ "getDefaultInfoDiagnosticAction", "class_error_reporter.html#a6dd474b8225361158990290f2431984c", null ],
     [ "getDefaultWarningDiagnosticAction", "class_error_reporter.html#adedc43a468b6708de66c6a146069aced", null ],
