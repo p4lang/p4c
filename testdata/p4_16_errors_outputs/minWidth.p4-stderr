@@ -10,12 +10,6 @@ const int xw = x.minWidthInBits();
 minWidth.p4(8): [--Werror=type-error] error: error.minWidthInBits: Invalid enum tag
 const int ew = error.minWidthInBits();
                ^^^^^^^^^^^^^^^^^^^^
-minWidth.p4(8): [--Werror=type-error] error: error.minWidthInBits() is not a method
-const int ew = error.minWidthInBits();
-               ^^^^^^^^^^^^^^^^^^^^^^
-minWidth.p4(8): [--Werror=type-error] error: error.minWidthInBits(): Cannot evaluate initializer to a compile-time constant
-const int ew = error.minWidthInBits();
-               ^^^^^^^^^^^^^^^^^^^^^^
 minWidth.p4(9): [--Werror=type-error] error: Cannot extract field minWidthInBits from S which has type Type(string)
 const int sw = S.minWidthInBits();
                  ^^^^^^^^^^^^^^
