@@ -88,6 +88,7 @@ var NAVTREE =
         [ "Contact", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#contact", null ]
       ] ]
     ] ],
+    [ "Common P4C utility functions", "md__2home_2runner_2work_2p4c_2p4c_2lib_2_r_e_a_d_m_e.html", null ],
     [ "P4 Compiler Intermediate representation", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html", [
       [ "Introduction", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#introduction", null ],
       [ "Visitors and Transforms", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#visitors-and-transforms", null ],
