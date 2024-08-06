@@ -554,9 +554,14 @@ extern ActionSelector {
 // BEGIN:Digest_extern
 extern Digest<T> {
   Digest();                       /// define a digest stream to the control plane
-  void pack(in T data);           /// emit data into the stream
+  @tc_md_exec void pack(in T data);           /// emit data into the stream
 }
 // END:Digest_extern
+
+struct tc_ControlPath_Digest<T> {
+  @tc_key bit<32> index;
+  @tc_data T data;
+}
 
 enum PNA_Source_t {
     FROM_HOST,
