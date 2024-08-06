@@ -187,10 +187,6 @@ IR::Statement *StatementGenerator::genAssignmentStatement() {
                 removeLval(left, bitType);
             }
             right = target().expressionGenerator().genExpression(bitType);
-            if (left->toString().find("said")) {
-                const auto *type = new IR::Type_Name(IR::ID("SecurityAssocId_t"));
-                right = new IR::Cast(type, right);
-            }
             return new IR::AssignmentStatement(left, right);
         }
         case 1:
