@@ -73,7 +73,7 @@ class ErrorReporter {
     /// and source info.
     /// If the error has been reported, return true. Otherwise, insert add the error to the
     /// list of seen errors, and return false.
-    bool error_reported(int err, const Util::SourceInfo source) {
+    bool error_reported(int err, Util::SourceInfo source) {
         if (!source.isValid()) return false;
         auto p = errorTracker.emplace(err, source);
         return !p.second;  // if insertion took place, then we have not seen the error.
@@ -108,32 +108,24 @@ class ErrorReporter {
         return ::P4::error_helper(fmt, std::forward<Args>(args)...).toString();
     }
 
-    template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, typename... Args>
+    template <class T, typename = decltype(std::declval<T>()->getSourceInfo()), typename... Args>
     void diagnose(DiagnosticAction action, const int errorCode, const char *format,
-                  const char *suffix, const T *node, Args &&...args) {
-        if (node && !error_reported(errorCode, node->getSourceInfo())) {
-            cstring name = get_error_name(errorCode);
-            auto da = getDiagnosticAction(name, action);
-            if (name)
-                diagnose(da, name, format, suffix, node, std::forward<Args>(args)...);
-            else
-                diagnose(action, nullptr, format, suffix, node, std::forward<Args>(args)...);
-        }
-    }
+                  const char *suffix, T node, Args &&...args) {
+        if (!node || error_reported(errorCode, node->getSourceInfo())) return;
 
-    template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, typename... Args>
-    void diagnose(DiagnosticAction action, const int errorCode, const char *format,
-                  const char *suffix, const T &node, Args &&...args) {
-        diagnose(action, errorCode, format, suffix, &node, std::forward<Args>(args)...);
+        if (cstring name = get_error_name(errorCode))
+            diagnose(getDiagnosticAction(name, action), name, format, suffix, node,
+                     std::forward<Args>(args)...);
+        else
+            diagnose(action, nullptr, format, suffix, node, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     void diagnose(DiagnosticAction action, const int errorCode, const char *format,
                   const char *suffix, Args &&...args) {
-        cstring name = get_error_name(errorCode);
-        auto da = getDiagnosticAction(name, action);
-        if (name)
-            diagnose(da, name, format, suffix, std::forward<Args>(args)...);
+        if (cstring name = get_error_name(errorCode))
+            diagnose(getDiagnosticAction(name, action), name, format, suffix,
+                     std::forward<Args>(args)...);
         else
             diagnose(action, nullptr, format, suffix, std::forward<Args>(args)...);
     }
