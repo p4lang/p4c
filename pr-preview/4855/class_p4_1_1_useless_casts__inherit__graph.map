@@ -1,0 +1,10 @@
+<map id="P4::UselessCasts" name="P4::UselessCasts">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,139,251"/>
+<area shape="rect" id="Node000002" href="$class_pass_manager.html" title=" " alt="" coords="18,152,126,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="75,191,75,225,69,225,69,191"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="40,5,104,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="67,44,60,79,62,119,70,151,65,153,57,119,55,78,62,43"/>
+<area shape="rect" id="Node000004" href="$class_backtrack.html" title=" " alt="" coords="70,79,157,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="88,41,109,77,104,80,83,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="102,117,81,153,76,151,97,115"/>
+</map>

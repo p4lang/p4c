@@ -1,0 +1,18 @@
+<map id="BMV2::MidEnd" name="BMV2::MidEnd">
+<area shape="rect" id="Node000001" title=" " alt="" coords="231,225,347,251"/>
+<area shape="rect" id="Node000005" href="$class_b_m_v2_1_1_portable_mid_end.html" title=" " alt="" coords="98,299,269,324"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="262,261,202,301,199,296,259,256"/>
+<area shape="rect" id="Node000008" href="$class_b_m_v2_1_1_simple_switch_mid_end.html" title=" " alt="" coords="293,299,497,324"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="318,256,379,296,376,301,316,260"/>
+<area shape="rect" id="Node000002" href="$class_pass_manager.html" title=" " alt="" coords="235,152,343,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="291,191,291,225,286,225,286,191"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="257,5,321,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="284,44,277,79,279,119,287,151,282,153,273,119,271,78,279,43"/>
+<area shape="rect" id="Node000004" href="$class_backtrack.html" title=" " alt="" coords="287,79,373,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="305,41,326,77,321,80,300,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="319,117,298,153,293,151,314,115"/>
+<area shape="rect" id="Node000006" href="$class_b_m_v2_1_1_pna_nic_mid_end.html" title=" " alt="" coords="5,372,167,397"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="158,334,103,374,100,370,155,330"/>
+<area shape="rect" id="Node000007" href="$class_b_m_v2_1_1_psa_switch_mid_end.html" title=" " alt="" coords="191,372,373,397"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="212,330,267,370,264,374,208,334"/>
+</map>

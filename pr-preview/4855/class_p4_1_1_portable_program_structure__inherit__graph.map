@@ -1,0 +1,9 @@
+<map id="P4::PortableProgramStructure" name="P4::PortableProgramStructure">
+<area shape="rect" id="Node000001" title=" " alt="" coords="111,79,325,104"/>
+<area shape="rect" id="Node000003" href="$class_b_m_v2_1_1_pna_program_structure.html" title=" " alt="" coords="5,152,212,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="190,114,128,154,125,150,188,109"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_psa_program_structure.html" title=" " alt="" coords="236,152,419,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="248,109,311,150,308,154,246,114"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_program_structure.html" title=" " alt="" coords="138,5,298,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,44,221,79,215,79,215,44"/>
+</map>

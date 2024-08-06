@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['dcg_0',['dcg',['../class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a7442031100213c4c7518535912e62bdd',1,'P4Tools::P4Testgen::TestgenOptions']]],
+  ['declaration_1',['declaration',['../struct_p4_1_1_type_specialization.html#a9048f2a01577432158410009998aab6d',1,'P4::TypeSpecialization']]],
+  ['declarations_2',['declarations',['../struct_p4_1_1_specialization_info.html#a42eb56dce3bd0c0f9630c3e003526b89',1,'P4::SpecializationInfo']]],
+  ['decltocallee_3',['declToCallee',['../struct_p4_1_1_inline_summary_1_1_per_caller.html#a389ebb63e1408de17c1a32de48a6cc00',1,'P4::InlineSummary::PerCaller']]],
+  ['defaultisimmutable_4',['defaultIsImmutable',['../struct_p4_tools_1_1_table_utils_1_1_table_properties.html#a27a22de255074b945e829f98c37deb75',1,'P4Tools::TableUtils::TableProperties']]],
+  ['deparser_5',['deparser',['../class_e_b_p_f_1_1_e_b_p_f_program.html#ab6435cdc74dd8001290cdc45a25482e9',1,'EBPF::EBPFProgram']]],
+  ['derivedfrom_6',['derivedFrom',['../class_p4_1_1_type_constraint.html#ad8c58d1c90ae8899160e039aa4eae327',1,'P4::TypeConstraint']]],
+  ['description_7',['description',['../namespace_p4_tools.html#a274903dabdae46870dd7b3c03620e864',1,'P4Tools::InheritedCompilerOptionSpec']]],
+  ['directcountermap_8',['directCounterMap',['../class_p4_1_1_program_structure.html#a263ea065d4deaaaff97260b120d18754',1,'P4::ProgramStructure']]],
+  ['direction_9',['DIRECTION',['../class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_symbolic_vars.html#a04ce10ed948902d50ec2c1d42b1772fe',1,'P4Tools::P4Testgen::Pna::PnaSymbolicVars']]],
+  ['direction_10',['direction',['../namespace_d_p_d_k.html#a82fba1d9f1609edea45872a05a75b707',1,'DPDK::TableAttributes']]],
+  ['directmetermap_11',['directMeterMap',['../class_p4_1_1_program_structure.html#a6949dff18c1cf68422ead4da855a3b38',1,'P4::ProgramStructure']]],
+  ['directmeters_12',['directMeters',['../class_p4_v1_1_1_program_structure.html#a513f0532f2d92cd061fc129c574efc64',1,'P4V1::ProgramStructure']]],
+  ['disableinformationlogging_13',['disableInformationLogging',['../class_p4_tools_1_1_abstract_p4c_tool_options.html#ab4a3596445c16f2321461502feeeaa82',1,'P4Tools::AbstractP4cToolOptions']]],
+  ['donotcompile_14',['doNotCompile',['../class_parser_options.html#a8ebe8a4ebed5e09c7be99cd42047db0e',1,'ParserOptions']]],
+  ['donotpreprocess_15',['doNotPreprocess',['../class_parser_options.html#aed40ea3a9a4bdceeb5e2a28df4cc8195',1,'ParserOptions']]],
+  ['drop_5fvar_16',['DROP_VAR',['../class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_constants.html#a44972f6bd6a47c2a4f1d512f39787c85',1,'P4Tools::P4Testgen::Pna::PnaConstants']]],
+  ['droppedpacketonly_17',['droppedPacketOnly',['../class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a2b54f41713d74d52028002a76fa444ba',1,'P4Tools::P4Testgen::TestgenOptions']]],
+  ['dumpfolder_18',['dumpFolder',['../class_parser_options.html#a7bc164a8b80093361ec408fb5b6ab4cb',1,'ParserOptions']]]
+];

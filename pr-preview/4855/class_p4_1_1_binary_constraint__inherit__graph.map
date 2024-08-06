@@ -1,0 +1,15 @@
+<map id="P4::BinaryConstraint" name="P4::BinaryConstraint">
+<area shape="rect" id="Node000001" title="Base class for EqualityConstraint and CanBeImplicitlyCastConstraint." alt="" coords="165,225,320,251"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_can_be_implicitly_cast_constraint.html" title="The right type can be implicitly cast to the left type." alt="" coords="5,299,251,324"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="214,260,148,301,145,296,211,255"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_equality_constraint.html" title="Requires two types to be equal." alt="" coords="275,299,442,324"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="274,255,341,296,338,301,271,260"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_type_constraint.html" title=" " alt="" coords="171,152,314,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="245,191,245,225,240,225,240,191"/>
+<area shape="rect" id="Node000003" href="$class_i_has_db_print.html" title=" " alt="" coords="136,79,235,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="205,113,235,150,231,154,201,116"/>
+<area shape="rect" id="Node000004" href="$class_i_castable.html" title=" " alt="" coords="259,79,341,104"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="284,116,254,154,250,150,280,113"/>
+<area shape="rect" id="Node000005" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="255,5,345,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="303,44,303,79,297,79,297,44"/>
+</map>
