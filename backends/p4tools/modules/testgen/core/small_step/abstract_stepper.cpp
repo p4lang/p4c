@@ -220,10 +220,10 @@ void setHeaderValidityHelper(const IR::StateVariable &headerRef, bool validity,
     // TODO: Should we make this target specific? Some targets set the header fields to 0...
     if (!validity) {
         std::vector<IR::StateVariable> validityVector;
+        auto fieldsVector = nextState.getFlatFields(headerRef, &validityVector);
         for (const auto &field : validityVector) {
             nextState.set(field, IR::BoolLiteral::get(false));
         }
-        auto fieldsVector = nextState.getFlatFields(headerRef, &validityVector);
         for (const auto &field : fieldsVector) {
             nextState.set(field, programInfo.createTargetUninitialized(field->type, true));
         }
@@ -242,13 +242,13 @@ void AbstractStepper::setHeaderValidity(const IR::StateVariable &headerRef, bool
         CHECK_NULL(headerBase->expr->type);
         if (const auto *hdrUnion = headerBase->expr->type->to<IR::Type_HeaderUnion>()) {
             for (const auto *field : hdrUnion->fields) {
-                auto *member = new IR::Member(field->type, headerBase->expr, field->name);
                 // Ignore the member we are setting.
-                if (headerRef->equiv(*member)) {
+                if (headerBase->member == field->name) {
                     continue;
                 }
                 // Set all other members to invalid.
-                setHeaderValidityHelper(member, false, programInfo, nextState);
+                setHeaderValidityHelper(new IR::Member(field->type, headerBase->expr, field->name),
+                                        false, programInfo, nextState);
             }
         }
     }

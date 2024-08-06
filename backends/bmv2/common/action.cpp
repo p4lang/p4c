@@ -45,7 +45,7 @@ void invalidateOtherHeaderUnionHeaders(const IR::Member *sourceHeader,
     const auto *type = ctxt.typeMap->getType(sourceHeader->expr, true);
     if (const auto *headerUnionType = type->to<IR::Type_HeaderUnion>()) {
         for (const auto *field : headerUnionType->fields) {
-            // Ignore the member we are setting to valid.
+            // Do not set the source member invalid.
             if (sourceHeader->member == field->name) {
                 continue;
             }
@@ -169,7 +169,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                     prim = "add_header"_cs;
                 } else if (builtin->name == IR::Type_Header::setInvalid) {
                     prim = "remove_header"_cs;
-                    // If setInvalid is called on any header in a  header union, we need to
+                    // If setInvalid is called on any header in a header union, we need to
                     // invalidate all other headers in the union.
                     if (const auto *parentStructure = builtin->appliedTo->to<IR::Member>()) {
                         invalidateOtherHeaderUnionHeaders(parentStructure, *ctxt, result, s);
