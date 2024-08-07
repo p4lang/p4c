@@ -393,6 +393,14 @@ extern int xdp_p4tc_extern_md_write(struct xdp_md *xdp_ctx,
 				    struct p4tc_ext_bpf_val *val,
 				    const u32 val__sz) __ksym;
 
+int bpf_p4tc_extern_digest_pack(struct __sk_buff *skb,
+				struct p4tc_ext_bpf_params *params,
+				const u32 params__sz) __ksym;
+
+int xdp_p4tc_extern_digest_pack(struct xdp_md *xdp_ctx,
+				struct p4tc_ext_bpf_params *params,
+				const u32 params__sz) __ksym;
+
 /* Timestamp  PNA extern */
 static inline u64 bpf_p4tc_extern_timestamp() {
 	return bpf_ktime_get_ns();

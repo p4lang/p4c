@@ -186,11 +186,18 @@ class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {
                        const IR::Parameter *parserHeaders, const IR::Parameter *istd)
         : EBPF::EBPFDeparserPSA(program, control, parserHeaders, istd) {}
 
+    bool addExternDeclaration = false;
     bool build() override;
     void emit(EBPF::CodeBuilder *builder) override;
     void emitPreDeparser(EBPF::CodeBuilder *builder) override;
     void emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl) override;
 
+    void emitExternDefinition(EBPF::CodeBuilder *builder) {
+        if (addExternDeclaration) {
+            builder->emitIndent();
+            builder->appendLine("struct p4tc_ext_bpf_params ext_params = {};");
+        }
+    }
     DECLARE_TYPEINFO(IngressDeparserPNA, EBPF::EBPFDeparserPSA);
 };
 
@@ -329,12 +336,17 @@ class ConvertToEBPFDeparserPNA : public Inspector {
     EBPF::EBPFProgram *program;
     const IR::Parameter *parserHeaders;
     const IR::Parameter *istd;
+    const ConvertToBackendIR *tcIR;
     TC::IngressDeparserPNA *deparser;
 
  public:
     ConvertToEBPFDeparserPNA(EBPF::EBPFProgram *program, const IR::Parameter *parserHeaders,
-                             const IR::Parameter *istd)
-        : program(program), parserHeaders(parserHeaders), istd(istd), deparser(nullptr) {}
+                             const IR::Parameter *istd, const ConvertToBackendIR *tcIR)
+        : program(program),
+          parserHeaders(parserHeaders),
+          istd(istd),
+          tcIR(tcIR),
+          deparser(nullptr) {}
 
     bool preorder(const IR::ControlBlock *) override;
     bool preorder(const IR::Declaration_Instance *) override;
