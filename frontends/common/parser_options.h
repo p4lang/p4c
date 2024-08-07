@@ -32,6 +32,7 @@ limitations under the License.
 /// Standard include paths for .p4 header files. The values are determined by
 /// `configure`.
 extern const char *p4includePath;
+extern const char *p4includeInternalPath;
 extern const char *p4_14includePath;
 
 /// Base class for compiler options.

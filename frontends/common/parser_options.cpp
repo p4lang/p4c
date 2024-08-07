@@ -42,6 +42,7 @@ limitations under the License.
  * machine, the 'p4includePath' would contain the path on the original machine.
  */
 const char *p4includePath = CONFIG_PKGDATADIR "/p4include";
+const char *p4includeInternalPath = CONFIG_PKGDATADIR "/p4include/_internal";
 const char *p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
 using namespace P4::literals;

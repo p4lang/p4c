@@ -1264,7 +1264,10 @@ const PNAEbpfGenerator *ConvertToEbpfPNA::build(const IR::ToplevelBlock *tlb) {
             !d->is<IR::Type_Error>()) {
             if (d->srcInfo.isValid()) {
                 auto sourceFile = d->srcInfo.getSourceFile();
-                if (sourceFile.endsWith("/pna.p4")) {
+                // TODO: Similar logic exists in frontends/p4/toP4/toP4.cpp. Consider replacing
+                // the hard-coding here with a better long term solution.
+                if (sourceFile.endsWith("/pna.p4") ||
+                    sourceFile.find("p4include/_internal") != nullptr) {
                     // do not generate standard PNA types
                     continue;
                 }
