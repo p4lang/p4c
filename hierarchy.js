@@ -907,7 +907,9 @@ var hierarchy =
             ] ],
             [ "UBPF::UBPFControl", "class_u_b_p_f_1_1_u_b_p_f_control.html", null ]
           ] ],
-          [ "EBPF::EBPFDigestPSA", "class_e_b_p_f_1_1_e_b_p_f_digest_p_s_a.html", null ],
+          [ "EBPF::EBPFDigestPSA", "class_e_b_p_f_1_1_e_b_p_f_digest_p_s_a.html", [
+            [ "TC::EBPFDigestPNA", "class_t_c_1_1_e_b_p_f_digest_p_n_a.html", null ]
+          ] ],
           [ "EBPF::EBPFHashAlgorithmPSA", "class_e_b_p_f_1_1_e_b_p_f_hash_algorithm_p_s_a.html", [
             [ "EBPF::CRCChecksumAlgorithm", "class_e_b_p_f_1_1_c_r_c_checksum_algorithm.html", [
               [ "EBPF::CRC16ChecksumAlgorithm", "class_e_b_p_f_1_1_c_r_c16_checksum_algorithm.html", null ],

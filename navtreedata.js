@@ -429,11 +429,11 @@ var NAVTREEINDEX =
 "class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_register_value.html#a9344233f5d94f5bc59fa9d3bb67ef3a4",
 "class_p4_tools_1_1_symbolic_env.html#a5a4fea2189fac9005cbc6e87d5a35477",
 "class_parser_options.html#aac527390c1cba6eb2acc56a0a5409498",
-"class_util_1_1_input_sources.html",
-"md_01__overview.html#additional-documentation-1",
-"md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2docs_2_e_x_a_m_p_l_e_s.html#packet-modification",
-"struct_closed_range.html#adb3dfcc466b7c6cacafa6583607ca969",
-"struct_p4_1_1_location_path.html"
+"class_util_1_1_i_has_source_info.html",
+"md_00__revision__history.html",
+"md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2docs_2_e_x_a_m_p_l_e_s.html#ipv6-ipv6-actionsp4",
+"struct_closed_range.html#acbd529d25d50502cc83eec7527697d2b",
+"struct_p4_1_1_inline_summary_1_1_per_caller_1_1key__hash.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
