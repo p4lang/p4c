@@ -102,7 +102,12 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
          options.keepTuples ? nullptr : new P4::EliminateTuples(&typeMap),
          new P4::FlattenLogMsg(&typeMap),
          new P4::SimplifyComparisons(&typeMap),
-         new P4::CopyStructures(&typeMap, false, false, options.keepTuples),
+         new P4::CopyStructures(&typeMap, P4::CopyStructuresConfig{
+                                              /*errorOnMethodCall*/ false,
+                                              /*copyHeaders*/ false,
+                                              /*expandUnions*/ true,
+                                              /*copyTuples*/ options.keepTuples,
+                                          }),
          new P4::NestedStructs(&typeMap),
          new P4::StrengthReduction(&typeMap),
          new P4::SimplifySelectList(&typeMap),
