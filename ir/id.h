@@ -48,12 +48,15 @@ struct ID : Util::IHasSourceInfo, public IHasDbPrint {
     }
     bool operator==(const ID &a) const { return name == a.name; }
     bool operator!=(const ID &a) const { return name != a.name; }
+    /// Defer to cstring's notion of less, which is a lexicographical and not a pointer comparison.
     bool operator<(const ID &a) const { return name < a.name; }
     bool operator==(cstring a) const { return name == a; }
     bool operator!=(cstring a) const { return name != a; }
+    /// Defer to cstring's notion of less, which is a lexicographical and not a pointer comparison.
     bool operator<(cstring a) const { return name < a; }
     bool operator==(const char *a) const { return name == a; }
     bool operator!=(const char *a) const { return name != a; }
+    /// Defer to cstring's notion of less, which is a lexicographical and not a pointer comparison.
     bool operator<(const char *a) const { return name < a; }
     explicit operator bool() const { return name; }
     operator cstring() const { return name; }
