@@ -37,7 +37,7 @@ limitations under the License.
 #include "ubpfBackend.h"
 #include "ubpfModel.h"
 
-using namespace ::P4;
+using namespace P4;
 
 void compile(EbpfOptions &options) {
     auto hook = options.getDebugHook();

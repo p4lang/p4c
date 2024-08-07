@@ -17,7 +17,7 @@
 
 namespace P4::P4Tools {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 P4ProgramDCGCreator::P4ProgramDCGCreator(NodesCallGraph *dcg) : dcg(dcg), p4program(nullptr) {
     CHECK_NULL(dcg);

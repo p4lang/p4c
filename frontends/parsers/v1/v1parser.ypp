@@ -44,7 +44,7 @@ namespace V1 {
 class V1Lexer;
 class V1ParserDriver;
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 struct BBoxType {
     IR::Vector<IR::Method>* methods;
@@ -126,7 +126,7 @@ typedef const IR::Type ConstType;
 #include "frontends/parsers/v1/v1parser.hpp"
 #include "ir/ir.h"
 
-using namespace ::P4;
+using namespace P4;
 
 #define YYLLOC_DEFAULT(Cur, Rhs, N)                                             \
     ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                          \

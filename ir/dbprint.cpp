@@ -34,7 +34,7 @@ limitations under the License.
 
 namespace P4 {
 
-using namespace ::P4::DBPrint;
+using namespace P4::DBPrint;
 using namespace IndentCtl;
 
 static int dbprint_index = -1;

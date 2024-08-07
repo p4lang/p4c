@@ -14,7 +14,7 @@
 #include "test/gtest/helpers.h"
 #include "test/gtest/midend_pass.h"
 
-using namespace ::P4;
+using namespace P4;
 
 namespace P4::Test {
 

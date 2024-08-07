@@ -17,7 +17,7 @@
 
 namespace P4::Test {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 using P4Tools::Z3Solver;
 using P4Tools::P4Testgen::TestgenTarget;

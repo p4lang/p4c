@@ -7,7 +7,7 @@
 
 namespace P4::P4Tools::P4Testgen::Bmv2 {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 /* =========================================================================================
  *  IndexExpression

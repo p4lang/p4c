@@ -31,7 +31,7 @@ limitations under the License.
 
 namespace P4::DPDK {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 cstring TypeStruct2Name(const cstring *s);
 bool isSimpleExpression(const IR::Expression *e);

@@ -10,7 +10,7 @@
 #include "lib/cstring.h"
 
 namespace P4::Test {
-using namespace ::P4::literals;
+using namespace P4::literals;
 using ConstraintVector = const std::vector<const Constraint *>;
 
 class Z3SolverSatisfiabilityChecks : public ::testing::Test {

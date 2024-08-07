@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace P4::DPDK {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 std::vector<cstring> TdiBfrtConf::getPipeNames(const IR::Declaration_Instance *main) {
     std::vector<cstring> pipeNames;

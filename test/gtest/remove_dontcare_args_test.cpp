@@ -6,7 +6,7 @@
 #include "helpers.h"
 #include "ir/ir.h"
 
-using namespace ::P4;
+using namespace P4;
 
 namespace P4::Test {
 

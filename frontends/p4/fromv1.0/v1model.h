@@ -26,7 +26,7 @@ limitations under the License.
 
 namespace P4::P4V1 {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 // This should be kept in sync with p4includes/v1model.p4
 // In a perfect world this would be generated automatically from

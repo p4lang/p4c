@@ -23,7 +23,7 @@
 
 namespace P4::P4Tools::P4Testgen {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 /// Type definitions for abstract tests.
 struct AbstractTest : ICastable {};

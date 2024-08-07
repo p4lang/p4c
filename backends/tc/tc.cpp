@@ -29,7 +29,7 @@ and limitations under the License.
 #include "options.h"
 #include "version.h"
 
-using namespace ::P4;
+using namespace P4;
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();

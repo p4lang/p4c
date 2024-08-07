@@ -27,7 +27,7 @@ namespace P4 {
 class IrClass;
 class IrNamespace;
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 #define ALL_TYPES(M) \
     M(NamedType)     \

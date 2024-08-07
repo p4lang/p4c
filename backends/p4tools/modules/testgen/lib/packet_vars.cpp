@@ -4,7 +4,7 @@
 
 namespace P4::P4Tools::P4Testgen {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 // The methods in P4's packet_in uses 32-bit values. Conform with this to make it easier to produce
 // well-typed expressions when manipulating the parser cursor.

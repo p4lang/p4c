@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace P4::Test {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 TEST(cstring, construct) {
     cstring c(nullptr);

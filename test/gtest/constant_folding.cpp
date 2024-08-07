@@ -9,7 +9,7 @@
 #include "ir/pass_manager.h"
 #include "lib/log.h"
 
-using namespace ::P4;
+using namespace P4;
 
 namespace P4::Test {
 

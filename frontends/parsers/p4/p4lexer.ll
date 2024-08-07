@@ -4,7 +4,7 @@
 #include "frontends/parsers/p4/p4lexer_internal.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
 
-using namespace ::P4;
+using namespace P4;
 
 using Parser = P4::P4Parser;
 

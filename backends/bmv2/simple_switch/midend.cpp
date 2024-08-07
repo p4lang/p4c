@@ -68,7 +68,7 @@ limitations under the License.
 
 namespace P4::BMV2 {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *outStream)
     : MidEnd(options) {

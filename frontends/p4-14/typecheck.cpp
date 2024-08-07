@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace P4 {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 /// P4-14 (v1.0 and v1.1) type checking algorithm
 /// Initial type setting based on immediate context:

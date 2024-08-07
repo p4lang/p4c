@@ -837,7 +837,7 @@ std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_
     if (info.vclone) out << Visitor::demangle(typeid(*info.vclone).name()) << " ";
     out << "count=" << info.count << "  done=" << info.done;
 #if DEBUG_FLOW_JOIN
-    using namespace ::P4::DBPrint;
+    using namespace P4::DBPrint;
     auto flags = dbgetflags(out);
     out << Brief;
     for (auto &i : info.parents) {
@@ -851,7 +851,7 @@ std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_
 }
 
 std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_points_t &fjp) {
-    using namespace ::P4::DBPrint;
+    using namespace P4::DBPrint;
     auto flags = dbgetflags(out);
     out << Brief;
     bool first = true;

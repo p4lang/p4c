@@ -27,7 +27,7 @@ limitations under the License.
 
 namespace P4 {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 namespace {
 class IRDumper : public Inspector {

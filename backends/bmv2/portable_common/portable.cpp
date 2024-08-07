@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace P4::BMV2 {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::Type_StructLike *st,
                                              P4::PortableProgramStructure *structure) {

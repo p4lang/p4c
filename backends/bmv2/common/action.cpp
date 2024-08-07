@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace P4::BMV2 {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 cstring ActionConverter::jsonAssignment(const IR::Type *type) {
     if (type->is<IR::Type_Varbits>()) return "assign_VL"_cs;

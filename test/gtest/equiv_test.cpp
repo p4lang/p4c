@@ -18,8 +18,8 @@ limitations under the License.
 
 #include "ir/ir.h"
 
-using namespace ::P4;
-using namespace ::P4::literals;
+using namespace P4;
+using namespace P4::literals;
 
 TEST(IR, Equiv) {
     auto *t = IR::Type::Bits::get(16);

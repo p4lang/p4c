@@ -136,7 +136,7 @@ inline std::ostream& operator<<(std::ostream& out, const Token& t) {
 #include "frontends/parsers/p4/p4lexer.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
 
-using namespace ::P4;
+using namespace P4;
 
 #define YYLLOC_DEFAULT(Cur, Rhs, N)                                             \
     ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                          \

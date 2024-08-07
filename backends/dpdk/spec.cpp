@@ -7,7 +7,7 @@
 
 namespace P4 {
 
-using namespace ::P4::DBPrint;
+using namespace P4::DBPrint;
 
 ordered_map<cstring, int> DPDK::CollectDirectCounterMeter::directMeterCounterSizeMap = {};
 auto &directMeterCounterSizeMap = DPDK::CollectDirectCounterMeter::directMeterCounterSizeMap;

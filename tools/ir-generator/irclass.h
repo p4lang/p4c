@@ -35,7 +35,7 @@ namespace P4 {
 class IrClass;
 class IrField;
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 class IrNamespace {
     std::map<cstring, IrClass *> classes;

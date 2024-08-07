@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 bool InspectPortableProgram::isHeaders(const IR::Type_StructLike *st) {
     bool result = false;

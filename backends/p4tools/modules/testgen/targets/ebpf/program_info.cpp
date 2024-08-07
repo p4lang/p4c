@@ -26,7 +26,7 @@
 
 namespace P4::P4Tools::P4Testgen::EBPF {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 const IR::Type_Bits EBPFProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
 

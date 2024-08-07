@@ -22,7 +22,7 @@
 
 namespace P4::Test {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 using P4::SaturationElim;
 using P4Tools::Model;

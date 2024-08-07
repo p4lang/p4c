@@ -22,7 +22,7 @@ limitations under the License.
 
 namespace P4::BMV2 {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 /// Parses BMV2-specific annotations.
 class ParseAnnotations : public P4::ParseAnnotations {

@@ -21,7 +21,7 @@
 
 namespace P4::P4Tools::P4Smith::Generic {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 /* =============================================================================================
  *  AbstractGenericSmithTarget implementation

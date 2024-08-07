@@ -64,7 +64,7 @@ limitations under the License.
 
 namespace P4::BMV2 {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 /// This class implements a policy suitable for the ConvertEnums pass.
 /// The policy is: convert all enums that are not part of the psa.

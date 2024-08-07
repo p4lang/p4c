@@ -20,7 +20,7 @@
 
 namespace P4::P4Tools::P4Testgen::Pna {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 PnaDpdkProgramInfo::PnaDpdkProgramInfo(
     const TestgenCompilerResult &compilerResult,

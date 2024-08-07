@@ -22,7 +22,7 @@
 
 namespace P4::P4Tools::P4Smith::Tofino {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 /* =============================================================================================
  *  AbstractTofinoSmithTarget implementation

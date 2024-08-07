@@ -5,7 +5,7 @@
 
 namespace P4::P4Tools::P4Testgen::Pna {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 const IR::Member PnaConstants::DROP_VAR =
     IR::Member(IR::Type_Boolean::get(), new IR::PathExpression("*pna_internal"), "drop_var");

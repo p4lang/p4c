@@ -127,7 +127,7 @@ class ErrorCatalog {
 
     /// retrieve the name for errorCode
     cstring getName(int errorCode) {
-        using namespace ::P4::literals;
+        using namespace P4::literals;
 
         if (errorCatalog.count(errorCode)) return errorCatalog.at(errorCode);
         return "--unknown--"_cs;

@@ -6,7 +6,7 @@
 #include "options.h"
 #include "p4fmt.h"
 
-using namespace ::P4;
+using namespace P4;
 
 int main(int argc, char *const argv[]) {
     AutoCompileContext autoP4FmtContext(new P4Fmt::P4FmtContext);

@@ -30,8 +30,8 @@ limitations under the License.
 #if (__GNUC__ > 4) || defined(__clang__)
 namespace P4::Test {
 
-using namespace ::P4::BitRange;
-using namespace ::P4::BitRange::Detail;
+using namespace P4::BitRange;
+using namespace P4::BitRange::Detail;
 
 /// A GTest fixture base class for backend targets.
 class BitrangeTestBase : public ::testing::Test {

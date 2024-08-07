@@ -27,7 +27,7 @@ limitations under the License.
 #include "midend/convertEnums.h"
 #include "midend/replaceSelectRange.h"
 
-using namespace ::P4;
+using namespace P4;
 
 namespace P4::Test {
 

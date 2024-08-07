@@ -122,7 +122,7 @@ using GraphsContext = P4CContextWithOptions<Options>;
 
 }  // namespace P4::graphs
 
-using namespace ::P4;
+using namespace P4;
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();

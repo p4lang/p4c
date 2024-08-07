@@ -19,7 +19,7 @@ and limitations under the License.
 
 namespace P4::TC {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 class ControlBodyTranslatorPNA;
 class ConvertToBackendIR;

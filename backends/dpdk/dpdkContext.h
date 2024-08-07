@@ -37,7 +37,7 @@ namespace p4configv1 = ::p4::config::v1;
 
 namespace P4::DPDK {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 /// This structure holds table attributes required for context JSON which are not
 /// part of P4Table.

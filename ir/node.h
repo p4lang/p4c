@@ -42,7 +42,7 @@ class JsonObject;
 
 namespace P4::IR {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 class Node;
 class Annotation;  // IWYU pragma: keep

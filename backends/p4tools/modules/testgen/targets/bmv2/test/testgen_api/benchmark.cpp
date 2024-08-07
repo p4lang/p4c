@@ -13,7 +13,7 @@
 
 namespace P4::Test {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 TEST(P4TestgenBenchmark, SuccessfullyGenerate1000Tests) {
     // Set the compiler options.

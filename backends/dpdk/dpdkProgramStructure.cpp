@@ -5,7 +5,7 @@
 
 namespace P4 {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock *block) {
     // Blocks are not in IR tree, use a custom visitor to traverse.

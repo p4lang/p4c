@@ -20,7 +20,7 @@
 
 namespace P4::P4Tools::P4Smith::Nic {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 /* =============================================================================================
  *  AbstractNicSmithTarget implementation

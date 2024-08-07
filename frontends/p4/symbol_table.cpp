@@ -25,7 +25,7 @@ limitations under the License.
 
 namespace P4::Util {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 class NamedSymbol : public ICastable {
  protected:

@@ -17,7 +17,7 @@
 
 namespace P4::P4Tools::P4Testgen {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 TestgenOptions &TestgenOptions::get() {
     static TestgenOptions INSTANCE;

@@ -37,7 +37,7 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
-using namespace ::P4;
+using namespace P4;
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();

@@ -35,7 +35,7 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "midend.h"
 
-using namespace ::P4;
+using namespace P4;
 
 class P4TestOptions : public CompilerOptions {
  public:

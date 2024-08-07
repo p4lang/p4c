@@ -6,7 +6,7 @@
 
 namespace P4::Test {
 
-using namespace ::P4::IR;
+using namespace P4::IR;
 
 using TestVector = IndexedVector<StructField>;
 

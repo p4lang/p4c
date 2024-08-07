@@ -10,7 +10,7 @@
 
 namespace P4::Test {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 TEST(P4TestgenLibrary, GeneratesCorrectProtobufIrTest) {
     std::stringstream streamTest;

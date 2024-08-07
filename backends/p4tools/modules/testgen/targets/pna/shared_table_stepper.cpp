@@ -32,7 +32,7 @@
 
 namespace P4::P4Tools::P4Testgen::Pna {
 
-using namespace ::P4::literals;
+using namespace P4::literals;
 
 const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
     const TableUtils::KeyProperties &keyProperties, TableMatchMap *matches,
