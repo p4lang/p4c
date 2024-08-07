@@ -135,6 +135,13 @@ const IR::Node *DoBindTypeVariables::postorder(IR::ConstructorCallExpression *ex
     return expression;
 }
 
+const IR::Node *DoBindTypeVariables::preorder(IR::Annotation *annotation) {
+    if (!annotation->structured) {
+        prune();
+    }
+    return annotation;
+}
+
 const IR::Node *DoBindTypeVariables::insertTypes(const IR::Node *node) {
     CHECK_NULL(node);
     CHECK_NULL(newTypes);
