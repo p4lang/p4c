@@ -75,7 +75,8 @@ TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
                                                  outputPortExpr, programTraces);
     // This is a hack to deal with a behavioral model quirk.
     // Packets that are too small are truncated to 02000000 (in hex) with width 32 bit.
-    if (testInfo.outputPacket->type->width_bits() == 0) {
+    if (testInfo.outputPacket->type->width_bits() == 0 &&
+        TestgenOptions::get().testBackend == "STF") {
         int outPktSize = ZERO_PKT_WIDTH;
         testInfo.outputPacket =
             IR::Constant::get(IR::Type_Bits::get(outPktSize), Bmv2TestBackend::ZERO_PKT_VAL);
