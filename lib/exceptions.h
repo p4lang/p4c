@@ -134,25 +134,25 @@ class CompilationError : public P4CExceptionBase {
         : P4CExceptionBase(format, std::forward<Args>(args)...) {}
 };
 
-#define BUG(...)                                                  \
-    do {                                                          \
-        throw Util::CompilerBug(__LINE__, __FILE__, __VA_ARGS__); \
+#define BUG(...)                                                      \
+    do {                                                              \
+        throw P4::Util::CompilerBug(__LINE__, __FILE__, __VA_ARGS__); \
     } while (0)
 #define BUG_CHECK(e, ...)           \
     do {                            \
         if (!(e)) BUG(__VA_ARGS__); \
     } while (0)
-#define P4C_UNIMPLEMENTED(...)                                              \
-    do {                                                                    \
-        throw Util::CompilerUnimplemented(__LINE__, __FILE__, __VA_ARGS__); \
+#define P4C_UNIMPLEMENTED(...)                                                  \
+    do {                                                                        \
+        throw P4::Util::CompilerUnimplemented(__LINE__, __FILE__, __VA_ARGS__); \
     } while (0)
 
 }  // namespace P4::Util
 
 /// Report an error and exit
-#define FATAL_ERROR(...)                           \
-    do {                                           \
-        throw Util::CompilationError(__VA_ARGS__); \
+#define FATAL_ERROR(...)                               \
+    do {                                               \
+        throw P4::Util::CompilationError(__VA_ARGS__); \
     } while (0)
 
 #endif /* LIB_EXCEPTIONS_H_ */

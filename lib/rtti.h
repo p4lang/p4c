@@ -256,9 +256,9 @@ struct Base {
 ///   ...
 ///   DECLARE_TYPEINFO(Derived, Base1, Base2);
 /// };
-#define DECLARE_TYPEINFO(T, ...)                                                  \
- private:                                                                         \
-    static constexpr RTTI::TypeId static_typeId() { return RTTI::InvalidTypeId; } \
+#define DECLARE_TYPEINFO(T, ...)                                                          \
+ private:                                                                                 \
+    static constexpr P4::RTTI::TypeId static_typeId() { return P4::RTTI::InvalidTypeId; } \
     DECLARE_TYPEINFO_COMMON(T, ##__VA_ARGS__)
 // static_typeId is private above in order to hide explicit typeId from the base
 // class, as in e.g.
@@ -277,9 +277,9 @@ struct Base {
 ///   ...
 ///   DECLARE_TYPEINFO_WITH_TYPEID(Base, 42);
 /// };
-#define DECLARE_TYPEINFO_WITH_TYPEID(T, Id, ...)                               \
- public:                                                                       \
-    static constexpr RTTI::TypeId static_typeId() { return RTTI::TypeId(Id); } \
+#define DECLARE_TYPEINFO_WITH_TYPEID(T, Id, ...)                                       \
+ public:                                                                               \
+    static constexpr P4::RTTI::TypeId static_typeId() { return P4::RTTI::TypeId(Id); } \
     DECLARE_TYPEINFO_COMMON(T, ##__VA_ARGS__)
 
 /// Declare typinfo for a given class `T` combining discriminator value and
@@ -288,26 +288,26 @@ struct Base {
 /// Use with caution, no checks for typeid clashes, etc. are
 /// performed. Discriminator from inner typeid is stripped off.  Examples of
 /// usage include `Vector<T>` and `IndexedVector<T>`.
-#define DECLARE_TYPEINFO_WITH_DISCRIMINATOR(T, Discriminator, InnerT, ...)         \
- public:                                                                           \
-    static constexpr RTTI::TypeId static_typeId() {                                \
-        return RTTI::combineTypeIdWithDiscriminator(RTTI::TypeId(Discriminator),   \
-                                                    RTTI::TypeInfo<InnerT>::id()); \
-    };                                                                             \
+#define DECLARE_TYPEINFO_WITH_DISCRIMINATOR(T, Discriminator, InnerT, ...)                 \
+ public:                                                                                   \
+    static constexpr P4::RTTI::TypeId static_typeId() {                                    \
+        return P4::RTTI::combineTypeIdWithDiscriminator(P4::RTTI::TypeId(Discriminator),   \
+                                                        P4::RTTI::TypeInfo<InnerT>::id()); \
+    };                                                                                     \
     DECLARE_TYPEINFO_COMMON(T, ##__VA_ARGS__)
 
-#define DECLARE_TYPEINFO_COMMON(T, ...)                                                    \
- public:                                                                                   \
-    static constexpr T *rttiEnabledMarker(T *);                                            \
-    using TypeInfo = RTTI::TypeInfo<T, ##__VA_ARGS__>;                                     \
-    [[nodiscard]] RTTI::TypeId typeId() const noexcept override { return TypeInfo::id(); } \
-    [[nodiscard]] bool isA(RTTI::TypeId typeId) const noexcept override {                  \
-        return TypeInfo::isA(typeId);                                                      \
-    }                                                                                      \
-                                                                                           \
- protected:                                                                                \
-    [[nodiscard]] const void *toImpl(RTTI::TypeId typeId) const noexcept override {        \
-        return TypeInfo::isA(typeId) ? TypeInfo::dyn_cast(typeId, this) : nullptr;         \
+#define DECLARE_TYPEINFO_COMMON(T, ...)                                                        \
+ public:                                                                                       \
+    static constexpr T *rttiEnabledMarker(T *);                                                \
+    using TypeInfo = P4::RTTI::TypeInfo<T, ##__VA_ARGS__>;                                     \
+    [[nodiscard]] P4::RTTI::TypeId typeId() const noexcept override { return TypeInfo::id(); } \
+    [[nodiscard]] bool isA(P4::RTTI::TypeId typeId) const noexcept override {                  \
+        return TypeInfo::isA(typeId);                                                          \
+    }                                                                                          \
+                                                                                               \
+ protected:                                                                                    \
+    [[nodiscard]] const void *toImpl(P4::RTTI::TypeId typeId) const noexcept override {        \
+        return TypeInfo::isA(typeId) ? TypeInfo::dyn_cast(typeId, this) : nullptr;             \
     }
 
 #endif /* LIB_RTTI_H_ */
