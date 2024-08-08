@@ -907,7 +907,9 @@ var hierarchy =
             ] ],
             [ "UBPF::UBPFControl", "class_u_b_p_f_1_1_u_b_p_f_control.html", null ]
           ] ],
-          [ "EBPF::EBPFDigestPSA", "class_e_b_p_f_1_1_e_b_p_f_digest_p_s_a.html", null ],
+          [ "EBPF::EBPFDigestPSA", "class_e_b_p_f_1_1_e_b_p_f_digest_p_s_a.html", [
+            [ "TC::EBPFDigestPNA", "class_t_c_1_1_e_b_p_f_digest_p_n_a.html", null ]
+          ] ],
           [ "EBPF::EBPFHashAlgorithmPSA", "class_e_b_p_f_1_1_e_b_p_f_hash_algorithm_p_s_a.html", [
             [ "EBPF::CRCChecksumAlgorithm", "class_e_b_p_f_1_1_c_r_c_checksum_algorithm.html", [
               [ "EBPF::CRC16ChecksumAlgorithm", "class_e_b_p_f_1_1_c_r_c16_checksum_algorithm.html", null ],
@@ -1151,6 +1153,7 @@ var hierarchy =
     ] ],
     [ "std::false_type", null, [
       [ "IR::has_static_type_name< class, class >", "struct_i_r_1_1has__static__type__name.html", null ],
+      [ "Util::has_SourceInfo< class, class >", "struct_util_1_1has___source_info.html", null ],
       [ "Util::has_toString< class, class >", "struct_util_1_1has__to_string.html", null ],
       [ "has_dbprint< class, class >", "structhas__dbprint.html", null ]
     ] ],
@@ -1177,6 +1180,7 @@ var hierarchy =
     ] ],
     [ "std::true_type", null, [
       [ "IR::has_static_type_name< T, std::void_t< decltype(T::static_type_name())> >", "struct_i_r_1_1has__static__type__name_3_01_t_00_01std_1_1void__t_3_01decltype_07_t_1_1static__type__name_07_08_08_4_01_4.html", null ],
+      [ "Util::has_SourceInfo< T, std::void_t< decltype(std::declval< T >().getSourceInfo())> >", "struct_util_1_1has___source_info_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_tca7b1f9663a78a5476838ff7466d2519.html", null ],
       [ "Util::has_toString< T, std::void_t< decltype(std::declval< T >().toString())> >", "struct_util_1_1has__to_string_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01db18fd97bde90a9bd53b0bfce41e6e9b.html", null ],
       [ "has_dbprint< T, std::void_t< decltype(std::declval< T >().dbprint(std::declval< std::ostream & >()))> >", "structhas__dbprint_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01_4_07_08_8d058dfba8a3a311378325dce114a1ecb1.html", null ]
     ] ],

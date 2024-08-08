@@ -1,5 +1,7 @@
 var NAVTREEINDEX18 =
 {
+"struct_closed_range.html#acbd529d25d50502cc83eec7527697d2b":[34,0,40,3],
+"struct_closed_range.html#ada8c0be97c7e970cfe3d7a38d411993e":[34,0,40,20],
 "struct_closed_range.html#adb3dfcc466b7c6cacafa6583607ca969":[34,0,40,16],
 "struct_compile_context_stack.html":[34,0,41],
 "struct_d_b_print_1_1clrflag.html":[34,0,2,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX18 =
 "struct_p4_1_1_inline_summary_1_1_per_caller.html#af3c973a40484f0dc64e2e3a12127c769":[34,0,11,190,0,2],
 "struct_p4_1_1_inline_summary_1_1_per_caller_1_1key__equal.html":[33,0,5,189,0,0],
 "struct_p4_1_1_inline_summary_1_1_per_caller_1_1key__equal.html":[34,0,11,190,0,0],
-"struct_p4_1_1_inline_summary_1_1_per_caller_1_1key__hash.html":[33,0,5,189,0,1],
-"struct_p4_1_1_inline_summary_1_1_per_caller_1_1key__hash.html":[34,0,11,190,0,1],
-"struct_p4_1_1_location_path.html":[33,0,5,207]
+"struct_p4_1_1_inline_summary_1_1_per_caller_1_1key__hash.html":[33,0,5,189,0,1]
 };

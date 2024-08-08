@@ -142,14 +142,10 @@ template&lt;typename... Args&gt; </td></tr>
 template&lt;typename... Args&gt; </td></tr>
 <tr class="memitem:a98c22069cbb17f2d37124e4e518a5e81"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>diagnose</b> (DiagnosticAction action, const int errorCode, const char *format, const char *suffix, Args &amp;&amp;...args)</td></tr>
 <tr class="separator:a98c22069cbb17f2d37124e4e518a5e81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82c38f0c44432818687e9dfffc08c20c" id="r_a82c38f0c44432818687e9dfffc08c20c"><td class="memTemplParams" colspan="2"><a id="a82c38f0c44432818687e9dfffc08c20c" name="a82c38f0c44432818687e9dfffc08c20c"></a>
-template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt;&gt;, typename... Args&gt; </td></tr>
-<tr class="memitem:a82c38f0c44432818687e9dfffc08c20c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>diagnose</b> (DiagnosticAction action, const int errorCode, const char *format, const char *suffix, const T &amp;node, Args &amp;&amp;...args)</td></tr>
-<tr class="separator:a82c38f0c44432818687e9dfffc08c20c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac60148ba57c6745aba037584a5bab2eb" id="r_ac60148ba57c6745aba037584a5bab2eb"><td class="memTemplParams" colspan="2"><a id="ac60148ba57c6745aba037584a5bab2eb" name="ac60148ba57c6745aba037584a5bab2eb"></a>
-template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt;&gt;, typename... Args&gt; </td></tr>
-<tr class="memitem:ac60148ba57c6745aba037584a5bab2eb"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>diagnose</b> (DiagnosticAction action, const int errorCode, const char *format, const char *suffix, const T *node, Args &amp;&amp;...args)</td></tr>
-<tr class="separator:ac60148ba57c6745aba037584a5bab2eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71999c9cb7549a90566c0949dade00ff" id="r_a71999c9cb7549a90566c0949dade00ff"><td class="memTemplParams" colspan="2"><a id="a71999c9cb7549a90566c0949dade00ff" name="a71999c9cb7549a90566c0949dade00ff"></a>
+template&lt;class T , typename  = decltype(std::declval&lt;T&gt;()-&gt;getSourceInfo()), typename... Args&gt; </td></tr>
+<tr class="memitem:a71999c9cb7549a90566c0949dade00ff"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>diagnose</b> (DiagnosticAction action, const int errorCode, const char *format, const char *suffix, T node, Args &amp;&amp;...args)</td></tr>
+<tr class="separator:a71999c9cb7549a90566c0949dade00ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8d2465f7dd18a7abbf342b7a0bb61d4f" id="r_a8d2465f7dd18a7abbf342b7a0bb61d4f"><td class="memTemplParams" colspan="2"><a id="a8d2465f7dd18a7abbf342b7a0bb61d4f" name="a8d2465f7dd18a7abbf342b7a0bb61d4f"></a>
 template&lt;typename... Args&gt; </td></tr>
 <tr class="memitem:a8d2465f7dd18a7abbf342b7a0bb61d4f"><td class="memTemplItemLeft" align="right" valign="top">std::string&#160;</td><td class="memTemplItemRight" valign="bottom"><b>format_message</b> (const char *format, Args &amp;&amp;...args)</td></tr>
@@ -212,8 +208,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>emit_message<
 <tr class="memitem:ad39988bc5d9f54121fb7348093f6dc35" id="r_ad39988bc5d9f54121fb7348093f6dc35"><td class="memItemLeft" align="right" valign="top"><a id="ad39988bc5d9f54121fb7348093f6dc35" name="ad39988bc5d9f54121fb7348093f6dc35"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>emit_message</b> (const <a class="el" href="struct_parser_error_message.html">ParserErrorMessage</a> &amp;msg)</td></tr>
 <tr class="separator:ad39988bc5d9f54121fb7348093f6dc35"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77cb3661de3039fd8c9fdb70a1d10d47" id="r_a77cb3661de3039fd8c9fdb70a1d10d47"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a77cb3661de3039fd8c9fdb70a1d10d47">error_reported</a> (int err, const <a class="el" href="class_util_1_1_source_info.html">Util::SourceInfo</a> source)</td></tr>
-<tr class="separator:a77cb3661de3039fd8c9fdb70a1d10d47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51317346ed9dafbe1a89611fe3c36d9e" id="r_a51317346ed9dafbe1a89611fe3c36d9e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a51317346ed9dafbe1a89611fe3c36d9e">error_reported</a> (int err, <a class="el" href="class_util_1_1_source_info.html">Util::SourceInfo</a> source)</td></tr>
+<tr class="separator:a51317346ed9dafbe1a89611fe3c36d9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7647b55af333280297a406599fc8faf4" id="r_a7647b55af333280297a406599fc8faf4"><td class="memItemLeft" align="right" valign="top"><a id="a7647b55af333280297a406599fc8faf4" name="a7647b55af333280297a406599fc8faf4"></a>
 <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>get_error_name</b> (int errorCode)</td></tr>
 <tr class="memdesc:a7647b55af333280297a406599fc8faf4"><td class="mdescLeft">&#160;</td><td class="mdescRight">retrieve the format from the error catalog <br /></td></tr>
@@ -290,8 +286,8 @@ template&lt;typename... Args&gt; </div>
 
 </div>
 </div>
-<a id="a77cb3661de3039fd8c9fdb70a1d10d47" name="a77cb3661de3039fd8c9fdb70a1d10d47"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a77cb3661de3039fd8c9fdb70a1d10d47">&#9670;&#160;</a></span>error_reported()</h2>
+<a id="a51317346ed9dafbe1a89611fe3c36d9e" name="a51317346ed9dafbe1a89611fe3c36d9e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51317346ed9dafbe1a89611fe3c36d9e">&#9670;&#160;</a></span>error_reported()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -307,7 +303,7 @@ template&lt;typename... Args&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="class_util_1_1_source_info.html">Util::SourceInfo</a></td>          <td class="paramname"><span class="paramname"><em>source</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="class_util_1_1_source_info.html">Util::SourceInfo</a></td>          <td class="paramname"><span class="paramname"><em>source</em></span>&#160;)</td>
         </tr>
       </table>
   </td>

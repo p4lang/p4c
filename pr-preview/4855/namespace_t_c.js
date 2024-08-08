@@ -19,6 +19,7 @@ var namespace_t_c =
     [ "EBPFChecksumPNA", "class_t_c_1_1_e_b_p_f_checksum_p_n_a.html", null ],
     [ "EBPFControlPNA", "class_t_c_1_1_e_b_p_f_control_p_n_a.html", null ],
     [ "EBPFCounterPNA", "class_t_c_1_1_e_b_p_f_counter_p_n_a.html", null ],
+    [ "EBPFDigestPNA", "class_t_c_1_1_e_b_p_f_digest_p_n_a.html", null ],
     [ "EBPFHashAlgorithmTypeFactoryPNA", "class_t_c_1_1_e_b_p_f_hash_algorithm_type_factory_p_n_a.html", null ],
     [ "EBPFInternetChecksumPNA", "class_t_c_1_1_e_b_p_f_internet_checksum_p_n_a.html", null ],
     [ "EBPFPnaParser", "class_t_c_1_1_e_b_p_f_pna_parser.html", null ],
