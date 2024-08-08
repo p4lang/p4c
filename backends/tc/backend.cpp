@@ -844,7 +844,8 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(
             } else {
                 /* If a parameter is not annoated by tc_init or tc_numel then it is emitted as
                 constructor parameters.*/
-                IR::TCKey *key = new IR::TCKey(0, parameter->type->width_bits(),
+                cstring ptype = absl::StrCat("bit", parameter->type->width_bits());
+                IR::TCKey *key = new IR::TCKey(0, parameter->type->width_bits(), ptype,
                                                parameter->toString(), "param"_cs, false);
                 keys.push_back(key);
                 if (exp->is<IR::Constant>()) {
@@ -913,8 +914,9 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processCounterControlPathKeys
             auto temp_keys = HandleTypeNameStructField(field, extn, decl, kId, annoName);
             keys.insert(keys.end(), temp_keys.begin(), temp_keys.end());
         } else {
-            IR::TCKey *key =
-                new IR::TCKey(kId++, field->type->width_bits(), field->toString(), annoName, true);
+            cstring ptype = absl::StrCat("bit", field->type->width_bits());
+            IR::TCKey *key = new IR::TCKey(kId++, field->type->width_bits(), ptype,
+                                           field->toString(), annoName, true);
             keys.push_back(key);
         }
     }
@@ -945,8 +947,9 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternControlPath(
                 auto temp_keys = HandleTypeNameStructField(field, extn, decl, kId, annoName);
                 keys.insert(keys.end(), temp_keys.begin(), temp_keys.end());
             } else {
-                IR::TCKey *key = new IR::TCKey(kId++, field->type->width_bits(), field->toString(),
-                                               annoName, true);
+                cstring ptype = absl::StrCat("bit", field->type->width_bits());
+                IR::TCKey *key = new IR::TCKey(kId++, field->type->width_bits(), ptype,
+                                               field->toString(), annoName, true);
                 keys.push_back(key);
             }
         }
@@ -968,13 +971,27 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::HandleTypeNameStructField(
             /* If 'T' is of Type_Struct, extract all fields of structure*/
             if (auto param_struct = param_val->to<IR::Type_Struct>()) {
                 for (auto f : param_struct->fields) {
-                    IR::TCKey *key =
-                        new IR::TCKey(kId++, f->type->width_bits(), f->toString(), annoName, true);
+                    cstring ptype = absl::StrCat("bit", f->type->width_bits());
+                    if (auto anno = f->getAnnotations()->getSingle(ParseTCAnnotations::tcType)) {
+                        auto expr = anno->expr[0];
+                        if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
+                            ptype = typeLiteral->value;
+                        }
+                    }
+                    IR::TCKey *key = new IR::TCKey(kId++, f->type->width_bits(), ptype,
+                                                   f->toString(), annoName, true);
                     keys.push_back(key);
                 }
             } else {
-                IR::TCKey *key = new IR::TCKey(kId++, param_val->width_bits(), field->toString(),
-                                               annoName, true);
+                cstring ptype = absl::StrCat("bit", param_val->width_bits());
+                if (auto anno = field->getAnnotations()->getSingle(ParseTCAnnotations::tcType)) {
+                    auto expr = anno->expr[0];
+                    if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
+                        ptype = typeLiteral->value;
+                    }
+                }
+                IR::TCKey *key = new IR::TCKey(kId++, param_val->width_bits(), ptype,
+                                               field->toString(), annoName, true);
                 keys.push_back(key);
             }
             break;
@@ -1028,6 +1045,10 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
                     eb->externId = "0x1A000000"_cs;
                 } else if (eName == "Counter") {
                     eb->externId = "0x19000000"_cs;
+                } else if (eName == "Digest") {
+                    eb->externId = "0x05000000"_cs;
+                    instance->is_num_elements = true;
+                    instance->num_elements = 0;
                 } else {
                     externCount += 1;
                     std::stringstream value;

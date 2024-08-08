@@ -168,7 +168,7 @@ void IntrospectionGenerator::collectExternInfo() {
                 keyField->id = control_field->keyID;
                 keyField->name = control_field->keyName;
                 keyField->attribute = control_field->keyAttribute;
-                keyField->type = "bit" + Util::toString(control_field->bitwidth);
+                keyField->type = control_field->type;
                 keyField->bitwidth = control_field->bitwidth;
                 externInstanceInfo->keyFields.push_back(keyField);
             }

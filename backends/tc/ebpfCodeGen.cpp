@@ -160,7 +160,6 @@ void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
 
 void PNAEbpfGenerator::emitPipelineInstances(EBPF::CodeBuilder *builder) const {
     pipeline->parser->emitValueSetInstances(builder);
-    pipeline->deparser->emitDigestInstances(builder);
 
     builder->target->emitTableDecl(builder, "hdr_md_cpumap"_cs, EBPF::TablePerCPUArray, "u32"_cs,
                                    "struct hdr_md"_cs, 2);
@@ -1187,7 +1186,7 @@ void IngressDeparserPNA::emitPreDeparser(EBPF::CodeBuilder *builder) {
 
 void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     codeGen->setBuilder(builder);
-
+    emitExternDefinition(builder);
     for (auto a : controlBlock->container->controlLocals) {
         if (a->is<IR::Declaration_Variable>()) {
             auto vd = a->to<IR::Declaration_Variable>();
@@ -1326,7 +1325,7 @@ bool ConvertToEbpfPipelineTC::preorder(const IR::PackageBlock *block) {
     CHECK_NULL(pipeline->control);
 
     auto deparser_converter = new ConvertToEBPFDeparserPNA(
-        pipeline, pipeline->parser->headers, pipeline->control->outputStandardMetadata);
+        pipeline, pipeline->parser->headers, pipeline->control->outputStandardMetadata, tcIR);
     deparserBlock->apply(*deparser_converter);
     pipeline->deparser = deparser_converter->getEBPFDeparser();
     CHECK_NULL(pipeline->deparser);
@@ -1519,8 +1518,9 @@ bool ConvertToEBPFDeparserPNA::preorder(const IR::Declaration_Instance *di) {
         auto baseType = typeSpec->baseType;
         auto typeName = baseType->to<IR::Type_Name>()->path->name.name;
         if (typeName == "Digest") {
+            deparser->addExternDeclaration = true;
             cstring instance = EBPF::EBPFObject::externalName(di);
-            auto digest = new EBPF::EBPFDigestPSA(program, di);
+            auto digest = new EBPFDigestPNA(program, di, typeName, tcIR);
             deparser->digests.emplace(instance, digest);
         }
     }
