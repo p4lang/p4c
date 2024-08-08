@@ -109,6 +109,7 @@ class SourcePosition final {
 };
 
 class InputSources;
+class Comment;
 
 /**
 Information about the source position of a language element -
@@ -126,6 +127,14 @@ class SourceInfo final {
     int line = -1;
     int column = -1;
     cstring srcBrief = ""_cs;
+
+    // add a comment to 'before' or 'after' array of comments
+    void addBefore(Util::Comment *comment) const;
+    void addAfter(Util::Comment *comment) const;
+
+    [[nodiscard]] const std::vector<Util::Comment *> &accessBefore() const;
+    [[nodiscard]] const std::vector<Util::Comment *> &accessAfter() const;
+
     SourceInfo(cstring filename, int line, int column, cstring srcBrief) {
         this->filename = filename;
         this->line = line;
@@ -187,6 +196,8 @@ class SourceInfo final {
 
     const SourcePosition &getEnd() const { return this->end; }
 
+    const std::vector<Comment *> &getAllComments() const;
+
     /**
        True if this comes 'before' this source position.
        'invalid' source positions come first.
@@ -205,6 +216,8 @@ class SourceInfo final {
     const InputSources *sources = nullptr;
     SourcePosition start = SourcePosition();
     SourcePosition end = SourcePosition();
+    mutable std::vector<Util::Comment *> before;
+    mutable std::vector<Util::Comment *> after;
 };
 
 class IHasSourceInfo {
@@ -243,7 +256,7 @@ class Comment final : IHasDbPrint {
     cstring body;
 
  public:
-    Comment(SourceInfo srcInfo, bool singleLine, cstring body)
+    Comment(const SourceInfo &srcInfo, bool singleLine, cstring body)
         : srcInfo(srcInfo), singleLine(singleLine), body(body) {}
     cstring toString() const {
         std::string result;
@@ -255,6 +268,11 @@ class Comment final : IHasDbPrint {
         if (!singleLine) result += "*/";
         return result;
     }
+
+    // Retrieve the source position associated with this comment.
+    const SourcePosition &getStartPosition() const { return srcInfo.getStart(); }
+    const SourcePosition &getEndPosition() const { return srcInfo.getEnd(); }
+
     void dbprint(std::ostream &out) const { out << toString(); }
 };
 
@@ -275,7 +293,6 @@ class InputSources final {
 
  public:
     InputSources();
-
     std::string_view getLine(unsigned lineNumber) const;
     /// Original source line that produced the line with the specified number
     SourceFileLine getSourceLine(unsigned line) const;
@@ -306,6 +323,7 @@ class InputSources final {
 
     cstring toDebugString() const;
     void addComment(SourceInfo srcInfo, bool singleLine, cstring body);
+    const std::vector<Comment *> &getAllComments() const;
 
  private:
     /// Append this text to the last line; must not contain newlines
