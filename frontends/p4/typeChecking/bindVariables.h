@@ -21,7 +21,7 @@ class DoBindTypeVariables : public Transform {
         newTypes = new IR::IndexedVector<IR::Node>();
     }
 
-    /// Don't descend to unstructured annotations, the are not type checked, so we can't process
+    /// Don't descend to unstructured annotations, they are not type checked, so we can't process
     /// them here either.
     const IR::Node *preorder(IR::Annotation *annotation) override;
 
