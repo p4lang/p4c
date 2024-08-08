@@ -1,0 +1,6 @@
+spec-issue1297-string-cat.p4(44): [--Wwarn=deprecated] warning: depr: Using deprecated feature depr. function depr is deprecated
+        depr(4);
+        ^^^^
+spec-issue1297-string-cat.p4(11)
+void depr (int<4> x) { }
+     ^^^^

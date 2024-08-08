@@ -32,10 +32,11 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
         PARSE_EMPTY("unroll"_cs),
         PARSE_EMPTY("nounroll"_cs),
 
-        // string literal argument.
-        PARSE(IR::Annotation::nameAnnotation, StringLiteral),
-        PARSE(IR::Annotation::deprecatedAnnotation, StringLiteral),
-        PARSE(IR::Annotation::noWarnAnnotation, StringLiteral),
+        // String arguments. These are allowed to contain concatenation which will be
+        // constant-folded, so just parse them as expressions.
+        PARSE(IR::Annotation::nameAnnotation, Expression),
+        PARSE(IR::Annotation::deprecatedAnnotation, Expression),
+        PARSE(IR::Annotation::noWarnAnnotation, Expression),
 
         // @length has an expression argument.
         PARSE(IR::Annotation::lengthAnnotation, Expression),
