@@ -30,7 +30,8 @@ std::ostream &operator<<(std::ostream &out, const UnparsedConstant &constant) {
 }
 
 bool operator<(const UnparsedConstant &a, const UnparsedConstant &b) {
-    return a.text < b.text || a.skip < b.skip || a.base < b.base || (!a.hasWidth && b.hasWidth);
+    return std::tie(a.text, a.skip, a.base, a.hasWidth) <
+           std::tie(b.text, b.skip, b.base, b.hasWidth);
 }
 
 /// A helper to parse constants which have an explicit width;

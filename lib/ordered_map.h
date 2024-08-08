@@ -131,6 +131,8 @@ class ordered_map {
         // two ordered_maps where !(a < b) && !(b < a) && !(a == b) -- such sets have the
         // same elements but in a different order.  This is generally what you want if you
         // have a set of ordered_maps (or use ordered_map as a map key).
+        // For individual element comparison, we defer to COMP, which is 'operator<' in the
+        // common case.
         auto it = a.data_map.begin();
         for (auto &el : data_map) {
             if (it == a.data_map.end()) return false;
