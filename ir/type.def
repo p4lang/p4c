@@ -182,6 +182,7 @@ class Type_Varbits : Type_Base {
     static Type_Varbits get();
     toString{ return "varbit<"_cs + Util::toString(size) + ">"_cs; }
     dbprint { out << "varbit<" << size << ">"; }
+    int width_bits() const override { return size; }
 }
 
 class Parameter : Declaration, IAnnotated {
@@ -268,6 +269,7 @@ class Type_InfInt : Type, ITypeVar {
         return true; /* ignore declid */
     }
     const Type* getP4Type() const override { return this; }
+    int width_bits() const override { return 0; }
 }
 
 class Type_Dontcare : Type_Base {
@@ -583,6 +585,7 @@ class Type_Stack : Type_Indexed, Type {
     static const cstring pop_front;
     const Type* getP4Type() const override
     { return new IR::Type_Stack(srcInfo, elementType->getP4Type(), size); }
+    int width_bits() const override { return getSize() * elementType->width_bits(); }
 }
 
 /** Given a declaration
@@ -680,6 +683,7 @@ class Type_SerEnum : Type_Declaration, ISimpleNamespace, IAnnotated {
         return members.getDeclaration(name); }
 #nodbprint
     validate{ members.check_null(); }
+    int width_bits() const override { return type->width_bits(); }
 }
 
 class Type_Table : Type, IApply {

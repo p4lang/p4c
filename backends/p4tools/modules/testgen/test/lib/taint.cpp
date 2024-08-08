@@ -285,7 +285,8 @@ TEST_F(TaintTest, Taint09) {
 
     // (32w0 ++ Taint64b ++ 32w0) & 128w0
     // The bitwise and should not have any effect on taint.
-    const auto *taint128bMiddleQ2 = new IR::BAnd(taint128bMiddleQ, new IR::Constant(128));
+    const auto *taint128bMiddleQ2 =
+        new IR::BAnd(taint128bMiddleQ, IR::Constant::get(IR::Type::Bits::get(128), 0));
     ASSERT_TRUE(!Taint::hasTaint(new IR::Slice(taint128bMiddleQ2, 127, 96)));
     ASSERT_TRUE(Taint::hasTaint(new IR::Slice(taint128bMiddleQ2, 95, 32)));
     ASSERT_TRUE(!Taint::hasTaint(new IR::Slice(taint128bMiddleQ2, 31, 0)));
