@@ -20,7 +20,7 @@ IncludeBlocks: Regroup
 # Force pointers to the type for C++.
 DerivePointerAlignment: false
 PointerAlignment: Right
-Standard: c++17
+Standard: c++20
 IncludeCategories:
 # Matches common headers first and sorts them before project includes
 - Regex: '^<.+/.*\.h>'
