@@ -1,5 +1,5 @@
-#ifndef P4_TRANSFORM_H_
-#define P4_TRANSFORM_H_
+#ifndef BACKENDS_P4FMT_ATTACH_H_
+#define BACKENDS_P4FMT_ATTACH_H_
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -111,4 +111,4 @@ class Attach : public Inspector {
 
 }  // namespace P4
 
-#endif /* P4_TRANSFORM_H_ */
+#endif /* BACKENDS_P4FMT_ATTACH_H_ */
