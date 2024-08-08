@@ -322,95 +322,104 @@ $(function(){initNavTree('source__file_8h_source.html',''); initResizable(true);
 <div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>};</div>
 </div>
 <div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span> </div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> has_SourceInfo_v = std::is_base_of_v&lt;Util::IHasSourceInfo, T&gt;;</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span> </div>
-<div class="foldopen" id="foldopen00221" data-start="{" data-end="};">
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno"><a class="line" href="struct_util_1_1_source_file_line.html">  221</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_util_1_1_source_file_line.html">SourceFileLine</a> {</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno"><a class="line" href="struct_util_1_1_source_file_line.html#a28b94d20827b845bb3e588ac8a5469bf">  223</a></span>    <a class="code hl_class" href="classcstring.html">cstring</a> <a class="code hl_variable" href="struct_util_1_1_source_file_line.html#a28b94d20827b845bb3e588ac8a5469bf">fileName</a>;</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    <span class="keywordtype">unsigned</span> sourceLine;</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    <a class="code hl_struct" href="struct_util_1_1_source_file_line.html">SourceFileLine</a>(std::string_view file, <span class="keywordtype">unsigned</span> line) : <a class="code hl_variable" href="struct_util_1_1_source_file_line.html#a28b94d20827b845bb3e588ac8a5469bf">fileName</a>(file), sourceLine(line) {}</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span><span class="keyword">template</span> &lt;<span class="keyword">class</span>, <span class="keyword">class</span> = <span class="keywordtype">void</span>&gt;</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno"><a class="line" href="struct_util_1_1has___source_info.html">  219</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_util_1_1has___source_info.html">has_SourceInfo</a> : std::false_type {};</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span> </div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="foldopen" id="foldopen00222" data-start="{" data-end="};">
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno"><a class="line" href="struct_util_1_1has___source_info_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_tca7b1f9663a78a5476838ff7466d2519.html">  222</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_util_1_1has___source_info.html">has_SourceInfo</a>&lt;T, <a class="code hl_namespace" href="namespacestd.html">std</a>::void_t&lt;decltype(std::declval&lt;T&gt;().getSourceInfo())&gt;&gt;</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>    : std::true_type {};</div>
+</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span> </div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> has_SourceInfo_v = <a class="code hl_struct" href="struct_util_1_1has___source_info.html">has_SourceInfo&lt;T&gt;::value</a>;</div>
 <div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <a class="code hl_class" href="classcstring.html">cstring</a> toString() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>};</div>
+<div class="foldopen" id="foldopen00229" data-start="{" data-end="};">
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno"><a class="line" href="struct_util_1_1_source_file_line.html">  229</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_util_1_1_source_file_line.html">SourceFileLine</a> {</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno"><a class="line" href="struct_util_1_1_source_file_line.html#a28b94d20827b845bb3e588ac8a5469bf">  231</a></span>    <a class="code hl_class" href="classcstring.html">cstring</a> <a class="code hl_variable" href="struct_util_1_1_source_file_line.html#a28b94d20827b845bb3e588ac8a5469bf">fileName</a>;</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <span class="keywordtype">unsigned</span> sourceLine;</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    <a class="code hl_struct" href="struct_util_1_1_source_file_line.html">SourceFileLine</a>(std::string_view file, <span class="keywordtype">unsigned</span> line) : <a class="code hl_variable" href="struct_util_1_1_source_file_line.html#a28b94d20827b845bb3e588ac8a5469bf">fileName</a>(file), sourceLine(line) {}</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>    <a class="code hl_class" href="classcstring.html">cstring</a> toString() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>};</div>
 </div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span> </div>
-<div class="foldopen" id="foldopen00231" data-start="{" data-end="};">
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno"><a class="line" href="class_util_1_1_comment.html">  231</a></span><span class="keyword">class </span><a class="code hl_class" href="class_util_1_1_comment.html">Comment</a> final : <a class="code hl_class" href="class_i_has_db_print.html">IHasDbPrint</a> {</div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>    <a class="code hl_class" href="class_util_1_1_source_info.html">SourceInfo</a> srcInfo;</div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    <span class="keywordtype">bool</span> singleLine;</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    <a class="code hl_class" href="classcstring.html">cstring</a> body;</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span> </div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <a class="code hl_class" href="class_util_1_1_comment.html">Comment</a>(<a class="code hl_class" href="class_util_1_1_source_info.html">SourceInfo</a> srcInfo, <span class="keywordtype">bool</span> singleLine, <a class="code hl_class" href="classcstring.html">cstring</a> body)</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        : srcInfo(srcInfo), singleLine(singleLine), body(body) {}</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    <a class="code hl_class" href="classcstring.html">cstring</a> toString()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        std::string result;</div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>        <span class="keywordflow">if</span> (singleLine)</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>            result = <span class="stringliteral">&quot;//&quot;</span>;</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>        <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>            result = <span class="stringliteral">&quot;/*&quot;</span>;</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        result += body;</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>        <span class="keywordflow">if</span> (!singleLine) result += <span class="stringliteral">&quot;*/&quot;</span>;</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>        <span class="keywordflow">return</span> result;</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>    }</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>    <span class="keywordtype">void</span> dbprint(std::ostream &amp;out)<span class="keyword"> const </span>{ out &lt;&lt; toString(); }</div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>};</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span> </div>
+<div class="foldopen" id="foldopen00239" data-start="{" data-end="};">
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno"><a class="line" href="class_util_1_1_comment.html">  239</a></span><span class="keyword">class </span><a class="code hl_class" href="class_util_1_1_comment.html">Comment</a> final : <a class="code hl_class" href="class_i_has_db_print.html">IHasDbPrint</a> {</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    <a class="code hl_class" href="class_util_1_1_source_info.html">SourceInfo</a> srcInfo;</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    <span class="keywordtype">bool</span> singleLine;</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    <a class="code hl_class" href="classcstring.html">cstring</a> body;</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>    <a class="code hl_class" href="class_util_1_1_comment.html">Comment</a>(<a class="code hl_class" href="class_util_1_1_source_info.html">SourceInfo</a> srcInfo, <span class="keywordtype">bool</span> singleLine, <a class="code hl_class" href="classcstring.html">cstring</a> body)</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>        : srcInfo(srcInfo), singleLine(singleLine), body(body) {}</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    <a class="code hl_class" href="classcstring.html">cstring</a> toString()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        std::string result;</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        <span class="keywordflow">if</span> (singleLine)</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>            result = <span class="stringliteral">&quot;//&quot;</span>;</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>            result = <span class="stringliteral">&quot;/*&quot;</span>;</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>        result += body;</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keywordflow">if</span> (!singleLine) result += <span class="stringliteral">&quot;*/&quot;</span>;</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        <span class="keywordflow">return</span> result;</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>    }</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    <span class="keywordtype">void</span> dbprint(std::ostream &amp;out)<span class="keyword"> const </span>{ out &lt;&lt; toString(); }</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>};</div>
 </div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span> </div>
-<div class="foldopen" id="foldopen00263" data-start="{" data-end="};">
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno"><a class="line" href="class_util_1_1_input_sources.html">  263</a></span><span class="keyword">class </span><a class="code hl_class" href="class_util_1_1_input_sources.html">InputSources</a> final {</div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span><span class="preprocessor">#ifdef P4C_GTEST_ENABLED</span></div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    FRIEND_TEST(UtilSourceFile, <a class="code hl_class" href="class_util_1_1_input_sources.html">InputSources</a>);</div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span> </div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    <a class="code hl_class" href="class_util_1_1_input_sources.html">InputSources</a>();</div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    std::string_view getLine(<span class="keywordtype">unsigned</span> lineNumber) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>    <a class="code hl_struct" href="struct_util_1_1_source_file_line.html">SourceFileLine</a> <a class="code hl_function" href="class_util_1_1_input_sources.html#ae9fbf246302f50732d150828b7ec8591">getSourceLine</a>(<span class="keywordtype">unsigned</span> line) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    <span class="keywordtype">unsigned</span> lineCount() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    <a class="code hl_class" href="class_util_1_1_source_position.html">SourcePosition</a> getCurrentPosition() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    <span class="keywordtype">unsigned</span> getCurrentLineNumber() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span> </div>
+<div class="foldopen" id="foldopen00271" data-start="{" data-end="};">
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno"><a class="line" href="class_util_1_1_input_sources.html">  271</a></span><span class="keyword">class </span><a class="code hl_class" href="class_util_1_1_input_sources.html">InputSources</a> final {</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span><span class="preprocessor">#ifdef P4C_GTEST_ENABLED</span></div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>    FRIEND_TEST(UtilSourceFile, <a class="code hl_class" href="class_util_1_1_input_sources.html">InputSources</a>);</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span> </div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    <a class="code hl_class" href="class_util_1_1_input_sources.html">InputSources</a>();</div>
 <div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_util_1_1_input_sources.html#a6721d43eb91bfd290a7dd46f7d186945">seal</a>();</div>
-<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span> </div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_util_1_1_input_sources.html#ad4d861b5a485bc7950ec69b989097522">appendText</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *text);</div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span> </div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_util_1_1_input_sources.html#ad6723697e72ef7ef25c5b099effdea00">mapLine</a>(std::string_view file, <span class="keywordtype">unsigned</span> originalSourceLineNo);</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>    std::string_view getLine(<span class="keywordtype">unsigned</span> lineNumber) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>    <a class="code hl_struct" href="struct_util_1_1_source_file_line.html">SourceFileLine</a> <a class="code hl_function" href="class_util_1_1_input_sources.html#ae9fbf246302f50732d150828b7ec8591">getSourceLine</a>(<span class="keywordtype">unsigned</span> line) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span> </div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>    <span class="keywordtype">unsigned</span> lineCount() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>    <a class="code hl_class" href="class_util_1_1_source_position.html">SourcePosition</a> getCurrentPosition() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>    <span class="keywordtype">unsigned</span> getCurrentLineNumber() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span> </div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_util_1_1_input_sources.html#a6721d43eb91bfd290a7dd46f7d186945">seal</a>();</div>
 <div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span> </div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>    <a class="code hl_class" href="classcstring.html">cstring</a> <a class="code hl_function" href="class_util_1_1_input_sources.html#ae4e3f773c915c2d31768df156995c1ec">getSourceFragment</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_util_1_1_source_position.html">SourcePosition</a> &amp;position, <span class="keywordtype">bool</span> useMarker) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>    <a class="code hl_class" href="classcstring.html">cstring</a> <a class="code hl_function" href="class_util_1_1_input_sources.html#ae4e3f773c915c2d31768df156995c1ec">getSourceFragment</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_util_1_1_source_info.html">SourceInfo</a> &amp;position, <span class="keywordtype">bool</span> useMarker) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    <a class="code hl_class" href="classcstring.html">cstring</a> getBriefSourceFragment(<span class="keyword">const</span> <a class="code hl_class" href="class_util_1_1_source_info.html">SourceInfo</a> &amp;position) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span> </div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>    <a class="code hl_class" href="classcstring.html">cstring</a> toDebugString() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>    <span class="keywordtype">void</span> addComment(<a class="code hl_class" href="class_util_1_1_source_info.html">SourceInfo</a> srcInfo, <span class="keywordtype">bool</span> singleLine, <a class="code hl_class" href="classcstring.html">cstring</a> body);</div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span> <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    <span class="keywordtype">void</span> appendToLastLine(std::string_view text);</div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>    <span class="keywordtype">void</span> appendNewline(std::string_view newline);</div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span> </div>
-<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>    <span class="keywordtype">bool</span> sealed;</div>
-<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span> </div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>    std::map&lt;unsigned, SourceFileLine&gt; line_file_map;</div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span> </div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>    std::vector&lt;std::string&gt; contents;</div>
-<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>    std::vector&lt;Comment *&gt; comments;</div>
-<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>};</div>
-</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_util_1_1_input_sources.html#ad4d861b5a485bc7950ec69b989097522">appendText</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *text);</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span> </div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_util_1_1_input_sources.html#ad6723697e72ef7ef25c5b099effdea00">mapLine</a>(std::string_view file, <span class="keywordtype">unsigned</span> originalSourceLineNo);</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span> </div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>    <a class="code hl_class" href="classcstring.html">cstring</a> <a class="code hl_function" href="class_util_1_1_input_sources.html#ae4e3f773c915c2d31768df156995c1ec">getSourceFragment</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_util_1_1_source_position.html">SourcePosition</a> &amp;position, <span class="keywordtype">bool</span> useMarker) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    <a class="code hl_class" href="classcstring.html">cstring</a> <a class="code hl_function" href="class_util_1_1_input_sources.html#ae4e3f773c915c2d31768df156995c1ec">getSourceFragment</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_util_1_1_source_info.html">SourceInfo</a> &amp;position, <span class="keywordtype">bool</span> useMarker) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>    <a class="code hl_class" href="classcstring.html">cstring</a> getBriefSourceFragment(<span class="keyword">const</span> <a class="code hl_class" href="class_util_1_1_source_info.html">SourceInfo</a> &amp;position) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span> </div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    <a class="code hl_class" href="classcstring.html">cstring</a> toDebugString() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>    <span class="keywordtype">void</span> addComment(<a class="code hl_class" href="class_util_1_1_source_info.html">SourceInfo</a> srcInfo, <span class="keywordtype">bool</span> singleLine, <a class="code hl_class" href="classcstring.html">cstring</a> body);</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span> </div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>    <span class="keywordtype">void</span> appendToLastLine(std::string_view text);</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>    <span class="keywordtype">void</span> appendNewline(std::string_view newline);</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span> </div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>    <span class="keywordtype">bool</span> sealed;</div>
 <div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span> </div>
-<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>}  <span class="comment">// namespace Util</span></div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>    std::map&lt;unsigned, SourceFileLine&gt; line_file_map;</div>
 <div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span> </div>
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span><span class="keywordtype">void</span> dbprint(<span class="keyword">const</span> <a class="code hl_class" href="class_i_has_db_print.html">IHasDbPrint</a> *o);</div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span> </div>
-<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_SOURCE_FILE_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>    std::vector&lt;std::string&gt; contents;</div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>    std::vector&lt;Comment *&gt; comments;</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>};</div>
+</div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span> </div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>}  <span class="comment">// namespace Util</span></div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span> </div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span><span class="keywordtype">void</span> dbprint(<span class="keyword">const</span> <a class="code hl_class" href="class_i_has_db_print.html">IHasDbPrint</a> *o);</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span> </div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_SOURCE_FILE_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_i_has_db_print_html"><div class="ttname"><a href="class_i_has_db_print.html">IHasDbPrint</a></div><div class="ttdef"><b>Definition</b> stringify.h:31</div></div>
-<div class="ttc" id="aclass_util_1_1_comment_html"><div class="ttname"><a href="class_util_1_1_comment.html">Util::Comment</a></div><div class="ttdef"><b>Definition</b> source_file.h:231</div></div>
+<div class="ttc" id="aclass_util_1_1_comment_html"><div class="ttname"><a href="class_util_1_1_comment.html">Util::Comment</a></div><div class="ttdef"><b>Definition</b> source_file.h:239</div></div>
 <div class="ttc" id="aclass_util_1_1_i_has_source_info_html"><div class="ttname"><a href="class_util_1_1_i_has_source_info.html">Util::IHasSourceInfo</a></div><div class="ttdef"><b>Definition</b> source_file.h:210</div></div>
-<div class="ttc" id="aclass_util_1_1_input_sources_html"><div class="ttname"><a href="class_util_1_1_input_sources.html">Util::InputSources</a></div><div class="ttdef"><b>Definition</b> source_file.h:263</div></div>
+<div class="ttc" id="aclass_util_1_1_input_sources_html"><div class="ttname"><a href="class_util_1_1_input_sources.html">Util::InputSources</a></div><div class="ttdef"><b>Definition</b> source_file.h:271</div></div>
 <div class="ttc" id="aclass_util_1_1_input_sources_html_a6721d43eb91bfd290a7dd46f7d186945"><div class="ttname"><a href="class_util_1_1_input_sources.html#a6721d43eb91bfd290a7dd46f7d186945">Util::InputSources::seal</a></div><div class="ttdeci">void seal()</div><div class="ttdoc">Prevents further changes; currently not used.</div><div class="ttdef"><b>Definition</b> source_file.cpp:76</div></div>
 <div class="ttc" id="aclass_util_1_1_input_sources_html_ad4d861b5a485bc7950ec69b989097522"><div class="ttname"><a href="class_util_1_1_input_sources.html#ad4d861b5a485bc7950ec69b989097522">Util::InputSources::appendText</a></div><div class="ttdeci">void appendText(const char *text)</div><div class="ttdoc">Append this text; it is either a newline or a text with no newlines.</div><div class="ttdef"><b>Definition</b> source_file.cpp:110</div></div>
 <div class="ttc" id="aclass_util_1_1_input_sources_html_ad6723697e72ef7ef25c5b099effdea00"><div class="ttname"><a href="class_util_1_1_input_sources.html#ad6723697e72ef7ef25c5b099effdea00">Util::InputSources::mapLine</a></div><div class="ttdeci">void mapLine(std::string_view file, unsigned originalSourceLineNo)</div><div class="ttdef"><b>Definition</b> source_file.cpp:152</div></div>
@@ -426,8 +435,10 @@ $(function(){initNavTree('source__file_8h_source.html',''); initResizable(true);
 <div class="ttc" id="aclass_util_1_1_source_position_html_a5ac38aeb26cbe3ae7e2f27e2f87b7a03"><div class="ttname"><a href="class_util_1_1_source_position.html#a5ac38aeb26cbe3ae7e2f27e2f87b7a03">Util::SourcePosition::operator--</a></div><div class="ttdeci">SourcePosition &amp; operator--()</div><div class="ttdoc">Move one column back. This never moves one line back.</div><div class="ttdef"><b>Definition</b> source_file.h:77</div></div>
 <div class="ttc" id="aclasscstring_html"><div class="ttname"><a href="classcstring.html">cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:80</div></div>
 <div class="ttc" id="anamespace_p4_1_1literals_html"><div class="ttname"><a href="namespace_p4_1_1literals.html">P4::literals</a></div><div class="ttdef"><b>Definition</b> cstring.h:76</div></div>
-<div class="ttc" id="astruct_util_1_1_source_file_line_html"><div class="ttname"><a href="struct_util_1_1_source_file_line.html">Util::SourceFileLine</a></div><div class="ttdef"><b>Definition</b> source_file.h:221</div></div>
-<div class="ttc" id="astruct_util_1_1_source_file_line_html_a28b94d20827b845bb3e588ac8a5469bf"><div class="ttname"><a href="struct_util_1_1_source_file_line.html#a28b94d20827b845bb3e588ac8a5469bf">Util::SourceFileLine::fileName</a></div><div class="ttdeci">cstring fileName</div><div class="ttdoc">an empty filename indicates stdin</div><div class="ttdef"><b>Definition</b> source_file.h:223</div></div>
+<div class="ttc" id="anamespacestd_html"><div class="ttname"><a href="namespacestd.html">std</a></div><div class="ttdoc">STL namespace.</div></div>
+<div class="ttc" id="astruct_util_1_1_source_file_line_html"><div class="ttname"><a href="struct_util_1_1_source_file_line.html">Util::SourceFileLine</a></div><div class="ttdef"><b>Definition</b> source_file.h:229</div></div>
+<div class="ttc" id="astruct_util_1_1_source_file_line_html_a28b94d20827b845bb3e588ac8a5469bf"><div class="ttname"><a href="struct_util_1_1_source_file_line.html#a28b94d20827b845bb3e588ac8a5469bf">Util::SourceFileLine::fileName</a></div><div class="ttdeci">cstring fileName</div><div class="ttdoc">an empty filename indicates stdin</div><div class="ttdef"><b>Definition</b> source_file.h:231</div></div>
+<div class="ttc" id="astruct_util_1_1has___source_info_html"><div class="ttname"><a href="struct_util_1_1has___source_info.html">Util::has_SourceInfo</a></div><div class="ttdoc">SFINAE helper to check if given class has a getSourceInfo method.</div><div class="ttdef"><b>Definition</b> source_file.h:219</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
