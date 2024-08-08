@@ -23,8 +23,12 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
         return formattedOutput;
     }
 
-    PassManager passes({P4::Attach(), P4::ToP4(&formattedOutput, false)});
-    program = program->apply(passes);
+    auto top4 = P4::ToP4(&formattedOutput, false);
+    auto attach = P4::Attach();
+    // attach comments to nodes
+    program->apply(attach);
+    // Print the program before running front end passes.
+    program->apply(top4);
 
     if (::errorCount() > 0) {
         ::error("Failed to format p4 program.");

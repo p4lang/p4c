@@ -9,6 +9,7 @@ set(REFCHECK_SRCS
     refcheck.cpp
     options.cpp
     p4fmt.cpp
+    attach.cpp
 )
 
 # p4fmt

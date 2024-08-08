@@ -9,11 +9,7 @@ namespace P4 {
 class Attach : public Inspector {
  public:
     Attach();
-    Attach(const Attach &) = default;
-    Attach(Attach &&) = delete;
-    Attach &operator=(const Attach &) = delete;
-    Attach &operator=(Attach &&) = delete;
-    ~Attach() override;
+    ~Attach();
 
     template <typename T>
     bool preorderImpl(const T *node);

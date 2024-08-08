@@ -37,8 +37,8 @@ void Attach::attachCommentsToNode(const IR::Node *node) {
     }
 }
 
-Attach::Attach(){};
-Attach::~Attach(){};
+Attach::Attach() = default;
+Attach::~Attach() = default;
 
 template <typename T>
 bool Attach::preorderImpl(const T *node) {
