@@ -27,16 +27,6 @@ void Attach::attachCommentsToNode(const IR::Node *node) {
         const auto &commentStart = comment->getStartPosition();
         const auto &commentEnd = comment->getEndPosition();
 
-        try {
-            std::cout << "Comment: " << *comment << '\n';
-            std::cout << "Comment start line: " << commentStart.getLineNumber() << '\n';
-            std::cout << "Comment end line: " << commentEnd.getLineNumber() << '\n';
-            std::cout << "Node line: " << nodeLineNumber << '\n';
-        } catch (const std::exception &e) {
-            std::cerr << "Error printing comment: " << e.what() << '\n';
-            continue;
-        }
-
         if (commentEnd.getLineNumber() == nodeLineNumber - 1) {
             node->srcInfo.addBefore(comment);
             attachedComments.insert(comment);
