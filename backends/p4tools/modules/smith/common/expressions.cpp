@@ -1034,7 +1034,6 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
             for (const auto *sf : tnType->fields) {
                 IR::Expression *expr = nullptr;
                 if (const auto *fieldTn = sf->type->to<IR::Type_Name>()) {
-                    // can!use another type here yet
                     if (const auto *typedefType = P4Scope::getTypeByName(fieldTn->path->name.name)
                                                       ->to<IR::Type_Typedef>()) {
                         expr = genExpression(typedefType);
