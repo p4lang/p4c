@@ -120,9 +120,138 @@ $(function(){initNavTree('class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_table_iface-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::ControlPlaneAPI::P4RuntimeSymbolTableIface Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="p4_runtime_arch_handler_8h_source.html">p4RuntimeArchHandler.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for P4::ControlPlaneAPI::P4RuntimeSymbolTableIface:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_table_iface__inherit__graph.svg" width="227" height="139"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:ab46f248f8fe56a4c164334c84721b1bf" id="r_ab46f248f8fe56a4c164334c84721b1bf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab46f248f8fe56a4c164334c84721b1bf">add</a> (<a class="el" href="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_type.html">P4RuntimeSymbolType</a> type, const <a class="el" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *declaration)=0</td></tr>
+<tr class="memdesc:ab46f248f8fe56a4c164334c84721b1bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a @type symbol, extracting the name and id from @declaration.  <br /></td></tr>
+<tr class="separator:ab46f248f8fe56a4c164334c84721b1bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">and possibly an explicit P4 '@id'.</div></td></tr>
+<tr><td colspan="2"><div class="groupText"><p>Add a @type symbol with </p>
+</div></td></tr>
+<tr class="memitem:a9dc4e4465df5006aa36af7fee8bed9bf" id="r_a9dc4e4465df5006aa36af7fee8bed9bf"><td class="memItemLeft" align="right" valign="top"><a id="a9dc4e4465df5006aa36af7fee8bed9bf" name="a9dc4e4465df5006aa36af7fee8bed9bf"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>add</b> (<a class="el" href="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_type.html">P4RuntimeSymbolType</a> type, <a class="el" href="classcstring.html">cstring</a> name, std::optional&lt; p4rt_id_t &gt; id=std::nullopt)=0</td></tr>
+<tr class="separator:a9dc4e4465df5006aa36af7fee8bed9bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66debc15e2ff480d2d56d5edbd140baa" id="r_a66debc15e2ff480d2d56d5edbd140baa"><td class="memItemLeft" align="right" valign="top">virtual p4rt_id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a66debc15e2ff480d2d56d5edbd140baa">getId</a> (<a class="el" href="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_type.html">P4RuntimeSymbolType</a> type, const <a class="el" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *declaration) const =0</td></tr>
+<tr class="separator:a66debc15e2ff480d2d56d5edbd140baa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">.</div></td></tr>
+<tr><td colspan="2"><div class="groupText"><dl class="section return"><dt>Returns</dt><dd>the P4Runtime id for the symbol of @type with name </dd></dl>
+</div></td></tr>
+<tr class="memitem:ab55db1ca858f87f165c0bedaddf66be5" id="r_ab55db1ca858f87f165c0bedaddf66be5"><td class="memItemLeft" align="right" valign="top"><a id="ab55db1ca858f87f165c0bedaddf66be5" name="ab55db1ca858f87f165c0bedaddf66be5"></a>
+virtual p4rt_id_t&#160;</td><td class="memItemRight" valign="bottom"><b>getId</b> (<a class="el" href="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_type.html">P4RuntimeSymbolType</a> type, <a class="el" href="classcstring.html">cstring</a> name) const =0</td></tr>
+<tr class="separator:ab55db1ca858f87f165c0bedaddf66be5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d08a3829bc07da4358fd0676ed14dc7" id="r_a9d08a3829bc07da4358fd0676ed14dc7"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9d08a3829bc07da4358fd0676ed14dc7">getAlias</a> (<a class="el" href="classcstring.html">cstring</a> name) const =0</td></tr>
+<tr class="separator:a9d08a3829bc07da4358fd0676ed14dc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A table which tracks the symbols which are visible to P4Runtime and their ids. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="ab46f248f8fe56a4c164334c84721b1bf" name="ab46f248f8fe56a4c164334c84721b1bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab46f248f8fe56a4c164334c84721b1bf">&#9670;&#160;</a></span>add()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void P4::ControlPlaneAPI::P4RuntimeSymbolTableIface::add </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_type.html">P4RuntimeSymbolType</a></td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *</td>          <td class="paramname"><span class="paramname"><em>declaration</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add a @type symbol, extracting the name and id from @declaration. </p>
+
+<p>Implemented in <a class="el" href="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_table.html#a5c0caf9a03a7beb2652654cf9fb9daf0">P4::ControlPlaneAPI::P4RuntimeSymbolTable</a>.</p>
+
+</div>
+</div>
+<a id="a9d08a3829bc07da4358fd0676ed14dc7" name="a9d08a3829bc07da4358fd0676ed14dc7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d08a3829bc07da4358fd0676ed14dc7">&#9670;&#160;</a></span>getAlias()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classcstring.html">cstring</a> P4::ControlPlaneAPI::P4RuntimeSymbolTableIface::getAlias </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the alias for the given fully qualified external name. P4Runtime defines an alias for each object to make referring to objects easier. By default, the alias is the shortest unique suffix of path components in the name. </dd></dl>
+
+<p>Implemented in <a class="el" href="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_table.html#aed48cafcbb683bb084286a0cf49b0a17">P4::ControlPlaneAPI::P4RuntimeSymbolTable</a>.</p>
+
+</div>
+</div>
+<a id="a66debc15e2ff480d2d56d5edbd140baa" name="a66debc15e2ff480d2d56d5edbd140baa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66debc15e2ff480d2d56d5edbd140baa">&#9670;&#160;</a></span>getId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual p4rt_id_t P4::ControlPlaneAPI::P4RuntimeSymbolTableIface::getId </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_type.html">P4RuntimeSymbolType</a></td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *</td>          <td class="paramname"><span class="paramname"><em>declaration</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the P4Runtime id for the symbol of @type corresponding to @declaration. </dd></dl>
+
+<p>Implemented in <a class="el" href="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_table.html#a0f01d2566f5b3d6612e085fd26bae7a8">P4::ControlPlaneAPI::P4RuntimeSymbolTable</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

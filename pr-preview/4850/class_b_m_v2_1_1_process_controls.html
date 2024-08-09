@@ -120,9 +120,59 @@ $(function(){initNavTree('class_b_m_v2_1_1_process_controls.html',''); initResiz
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_b_m_v2_1_1_process_controls-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">BMV2::ProcessControls Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="bmv2_2common_2backend_8h_source.html">backend.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for BMV2::ProcessControls:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_b_m_v2_1_1_process_controls__inherit__graph.svg" width="247" height="124"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:acadf63a7ee71280df62914db8ebc3435" id="r_acadf63a7ee71280df62914db8ebc3435"><td class="memItemLeft" align="right" valign="top"><a id="acadf63a7ee71280df62914db8ebc3435" name="acadf63a7ee71280df62914db8ebc3435"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ProcessControls</b> (const std::set&lt; <a class="el" href="classcstring.html">cstring</a> &gt; *process)</td></tr>
+<tr class="separator:acadf63a7ee71280df62914db8ebc3435"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a588e2a2d67706159e1e7865f6111085b" id="r_a588e2a2d67706159e1e7865f6111085b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a588e2a2d67706159e1e7865f6111085b">convert</a> (const IR::P4Control *control) const</td></tr>
+<tr class="separator:a588e2a2d67706159e1e7865f6111085b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>This class implements a policy suitable for the RemoveComplexExpression pass. The policy is: only remove complex expression for the controls whose names are in the specified set. For example, we expect that the code in ingress and egress will have complex expression removed. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a588e2a2d67706159e1e7865f6111085b" name="a588e2a2d67706159e1e7865f6111085b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a588e2a2d67706159e1e7865f6111085b">&#9670;&#160;</a></span>convert()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool BMV2::ProcessControls::convert </td>
+          <td>(</td>
+          <td class="paramtype">const IR::P4Control *</td>          <td class="paramname"><span class="paramname"><em>control</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>If the policy returns true the control block is processed, otherwise it is left unchanged. </p>
+
+<p>Implements <a class="el" href="class_p4_1_1_remove_complex_expressions_policy.html#a5cbb68359555b5c4036c39f5a28449ed">P4::RemoveComplexExpressionsPolicy</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

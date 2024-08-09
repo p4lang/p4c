@@ -120,10 +120,41 @@ $(function(){initNavTree('struct_bit_range_1_1_from_to.html',''); initResizable(
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="struct_bit_range_1_1_from_to-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">BitRange::FromTo Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="bitrange_8h_source.html">bitrange.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a3a39f6ccaec1ec935f65aee92dc0ae3c" id="r_a3a39f6ccaec1ec935f65aee92dc0ae3c"><td class="memItemLeft" align="right" valign="top"><a id="a3a39f6ccaec1ec935f65aee92dc0ae3c" name="a3a39f6ccaec1ec935f65aee92dc0ae3c"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>FromTo</b> (const <a class="el" href="struct_bit_range_1_1_from_to.html">FromTo</a> &amp;)=delete</td></tr>
+<tr class="separator:a3a39f6ccaec1ec935f65aee92dc0ae3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab767195cc16e48c2e4b7bc01ebc7fdbc" id="r_ab767195cc16e48c2e4b7bc01ebc7fdbc"><td class="memItemLeft" align="right" valign="top"><a id="ab767195cc16e48c2e4b7bc01ebc7fdbc" name="ab767195cc16e48c2e4b7bc01ebc7fdbc"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>FromTo</b> (int from, int to)</td></tr>
+<tr class="separator:ab767195cc16e48c2e4b7bc01ebc7fdbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac05f5b661bbc3585ec32d84b7de8c32" id="r_aac05f5b661bbc3585ec32d84b7de8c32"><td class="memItemLeft" align="right" valign="top"><a id="aac05f5b661bbc3585ec32d84b7de8c32" name="aac05f5b661bbc3585ec32d84b7de8c32"></a>
+<a class="el" href="struct_bit_range_1_1_from_to.html">FromTo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="struct_bit_range_1_1_from_to.html">FromTo</a> &amp;)=delete</td></tr>
+<tr class="separator:aac05f5b661bbc3585ec32d84b7de8c32"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a248a6f26a838148759a0d42421ed2d66" id="r_a248a6f26a838148759a0d42421ed2d66"><td class="memItemLeft" align="right" valign="top"><a id="a248a6f26a838148759a0d42421ed2d66" name="a248a6f26a838148759a0d42421ed2d66"></a>
+const int&#160;</td><td class="memItemRight" valign="bottom"><b>from</b></td></tr>
+<tr class="separator:a248a6f26a838148759a0d42421ed2d66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a4f8e77561a19038b31128661546741" id="r_a9a4f8e77561a19038b31128661546741"><td class="memItemLeft" align="right" valign="top"><a id="a9a4f8e77561a19038b31128661546741" name="a9a4f8e77561a19038b31128661546741"></a>
+const int&#160;</td><td class="memItemRight" valign="bottom"><b>to</b></td></tr>
+<tr class="separator:a9a4f8e77561a19038b31128661546741"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A helper type used to construct a range, specified as the closed interval between two bit indices. For example, <code>FromTo(6, 8)</code> denotes a range containing three bits: bit 6, bit 7, and bit 8.</p>
+<p>FromTo is only intended to be used as a constructor parameter, to allow creation of ranges in a more readable manner; use it to construct a HalfOpenRange or ClosedRange. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

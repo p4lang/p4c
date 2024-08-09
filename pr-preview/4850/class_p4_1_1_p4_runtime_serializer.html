@@ -120,10 +120,42 @@ $(function(){initNavTree('class_p4_1_1_p4_runtime_serializer.html',''); initResi
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="class_p4_1_1_p4_runtime_serializer-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::P4RuntimeSerializer Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p>Public APIs to generate P4Info message. Uses the singleton pattern.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="p4_runtime_serializer_8h_source.html">p4RuntimeSerializer.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:gab59a801e20e0f2bd44cb018dff756ece" id="r_gab59a801e20e0f2bd44cb018dff756ece"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_p4_1_1_p4_runtime_a_p_i.html">P4RuntimeAPI</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__control__plane.html#gab59a801e20e0f2bd44cb018dff756ece">generateP4Runtime</a> (const IR::P4Program *program, <a class="el" href="classcstring.html">cstring</a> arch)</td></tr>
+<tr class="separator:gab59a801e20e0f2bd44cb018dff756ece"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3bf77d218c0d2261fefb7942d83887af" id="r_ga3bf77d218c0d2261fefb7942d83887af"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>registerArch</b> (const <a class="el" href="classcstring.html">cstring</a> archName, const <a class="el" href="struct_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_builder_iface.html">ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface</a> *builder)</td></tr>
+<tr class="separator:ga3bf77d218c0d2261fefb7942d83887af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaadf17e235b0196f328a96cd9903e4698" id="r_gaadf17e235b0196f328a96cd9903e4698"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__control__plane.html#gaadf17e235b0196f328a96cd9903e4698">serializeP4RuntimeIfRequired</a> (const IR::P4Program *program, const <a class="el" href="class_compiler_options.html">CompilerOptions</a> &amp;options)</td></tr>
+<tr class="separator:gaadf17e235b0196f328a96cd9903e4698"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafaec7221d97d1f6e5954d0e0086a2949" id="r_gafaec7221d97d1f6e5954d0e0086a2949"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__control__plane.html#gafaec7221d97d1f6e5954d0e0086a2949">serializeP4RuntimeIfRequired</a> (const <a class="el" href="struct_p4_1_1_p4_runtime_a_p_i.html">P4RuntimeAPI</a> &amp;p4Runtime, const <a class="el" href="class_compiler_options.html">CompilerOptions</a> &amp;options)</td></tr>
+<tr class="separator:gafaec7221d97d1f6e5954d0e0086a2949"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:gacaf37f3d28666d6b3e5a6ade22963824" id="r_gacaf37f3d28666d6b3e5a6ade22963824"><td class="memItemLeft" align="right" valign="top">
+static <a class="el" href="class_p4_1_1_p4_runtime_serializer.html">P4RuntimeSerializer</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>get</b> ()</td></tr>
+<tr class="separator:gacaf37f3d28666d6b3e5a6ade22963824"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0e23dbab92b3b90285e1d7ffec8c2a34" id="r_ga0e23dbab92b3b90285e1d7ffec8c2a34"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__control__plane.html#ga0e23dbab92b3b90285e1d7ffec8c2a34">resolveArch</a> (const <a class="el" href="class_compiler_options.html">CompilerOptions</a> &amp;options)</td></tr>
+<tr class="separator:ga0e23dbab92b3b90285e1d7ffec8c2a34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Public APIs to generate P4Info message. Uses the singleton pattern. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

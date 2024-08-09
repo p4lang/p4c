@@ -120,9 +120,76 @@ $(function(){initNavTree('class_p4_tools_1_1_p4_testgen_1_1_small_step_evaluator
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#pub-types">Public Types</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
+<a href="#friends">Friends</a> &#124;
+<a href="class_p4_tools_1_1_p4_testgen_1_1_small_step_evaluator-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::P4Testgen::SmallStepEvaluator Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="small__step_8h_source.html">small_step.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_p4_tools_1_1_p4_testgen_1_1_small_step_evaluator_1_1_branch.html">Branch</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:adb2df28c59601cd2812f4c09b36aa54f" id="r_adb2df28c59601cd2812f4c09b36aa54f"><td class="memItemLeft" align="right" valign="top"><a id="adb2df28c59601cd2812f4c09b36aa54f" name="adb2df28c59601cd2812f4c09b36aa54f"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Result</b> = std::vector&lt;<a class="el" href="struct_p4_tools_1_1_p4_testgen_1_1_small_step_evaluator_1_1_branch.html">Branch</a>&gt; *</td></tr>
+<tr class="separator:adb2df28c59601cd2812f4c09b36aa54f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:ac8f8d442262de56641d20fb0c4790745" id="r_ac8f8d442262de56641d20fb0c4790745"><td class="memItemLeft" align="right" valign="top"><a id="ac8f8d442262de56641d20fb0c4790745" name="ac8f8d442262de56641d20fb0c4790745"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>SmallStepEvaluator</b> (<a class="el" href="class_abstract_solver.html">AbstractSolver</a> &amp;solver, const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_program_info.html">ProgramInfo</a> &amp;programInfo)</td></tr>
+<tr class="separator:ac8f8d442262de56641d20fb0c4790745"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a086bedfa295370a702a2772f97c79313" id="r_a086bedfa295370a702a2772f97c79313"><td class="memItemLeft" align="right" valign="top"><a id="a086bedfa295370a702a2772f97c79313" name="a086bedfa295370a702a2772f97c79313"></a>
+Result&#160;</td><td class="memItemRight" valign="bottom"><b>step</b> (<a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_execution_state.html">ExecutionState</a> &amp;state)</td></tr>
+<tr class="separator:a086bedfa295370a702a2772f97c79313"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:a5d678eda40cc54c90cb440586525d73b" id="r_a5d678eda40cc54c90cb440586525d73b"><td class="memItemLeft" align="right" valign="top">static constexpr uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5d678eda40cc54c90cb440586525d73b">MAX_GUARD_VIOLATIONS</a> = 100</td></tr>
+<tr class="separator:a5d678eda40cc54c90cb440586525d73b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:a9a67f40d2bf94a0faef7c5b87b74c493" id="r_a9a67f40d2bf94a0faef7c5b87b74c493"><td class="memItemLeft" align="right" valign="top"><a id="a9a67f40d2bf94a0faef7c5b87b74c493" name="a9a67f40d2bf94a0faef7c5b87b74c493"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>CommandVisitor</b></td></tr>
+<tr class="separator:a9a67f40d2bf94a0faef7c5b87b74c493"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>The main class that implements small-step operational semantics. Delegates to implementations of AbstractStepper. </p>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a5d678eda40cc54c90cb440586525d73b" name="a5d678eda40cc54c90cb440586525d73b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d678eda40cc54c90cb440586525d73b">&#9670;&#160;</a></span>MAX_GUARD_VIOLATIONS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t P4Tools::P4Testgen::SmallStepEvaluator::MAX_GUARD_VIOLATIONS = 100</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Specifies how many times a guard can be violated in the interpreter until it throws an error. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

@@ -120,9 +120,762 @@ $(function(){initNavTree('struct_half_open_range.html',''); initResizable(true);
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
+<a href="#friends">Friends</a> &#124;
+<a href="struct_half_open_range-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">HalfOpenRange&lt; Unit, Order &gt; Struct Template Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="bitrange_8h_source.html">bitrange.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:a8c4850cbea47400968bdad21e62bb140" id="r_a8c4850cbea47400968bdad21e62bb140"><td class="memItemLeft" align="right" valign="top"><a id="a8c4850cbea47400968bdad21e62bb140" name="a8c4850cbea47400968bdad21e62bb140"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>FromTo</b> = <a class="el" href="struct_bit_range_1_1_from_to.html">BitRange::FromTo</a></td></tr>
+<tr class="separator:a8c4850cbea47400968bdad21e62bb140"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac49bbced1e47c75305c0ba79819244f5" id="r_ac49bbced1e47c75305c0ba79819244f5"><td class="memItemLeft" align="right" valign="top"><a id="ac49bbced1e47c75305c0ba79819244f5" name="ac49bbced1e47c75305c0ba79819244f5"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>MinToMax</b> = <a class="el" href="struct_bit_range_1_1_min_to_max.html">BitRange::MinToMax</a></td></tr>
+<tr class="separator:ac49bbced1e47c75305c0ba79819244f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d5e9e4b29b1f23a754cefc2fb5198e1" id="r_a1d5e9e4b29b1f23a754cefc2fb5198e1"><td class="memItemLeft" align="right" valign="top"><a id="a1d5e9e4b29b1f23a754cefc2fb5198e1" name="a1d5e9e4b29b1f23a754cefc2fb5198e1"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>StartLen</b> = <a class="el" href="struct_bit_range_1_1_start_len.html">BitRange::StartLen</a></td></tr>
+<tr class="separator:a1d5e9e4b29b1f23a754cefc2fb5198e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12d018d33aa54e08b3cd18c03050afdc" id="r_a12d018d33aa54e08b3cd18c03050afdc"><td class="memItemLeft" align="right" valign="top"><a id="a12d018d33aa54e08b3cd18c03050afdc" name="a12d018d33aa54e08b3cd18c03050afdc"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>ZeroToMax</b> = <a class="el" href="struct_bit_range_1_1_zero_to_max.html">BitRange::ZeroToMax</a></td></tr>
+<tr class="separator:a12d018d33aa54e08b3cd18c03050afdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a60d82aa754fccd279469d057efc9f82c" id="r_a60d82aa754fccd279469d057efc9f82c"><td class="memItemLeft" align="right" valign="top"><a id="a60d82aa754fccd279469d057efc9f82c" name="a60d82aa754fccd279469d057efc9f82c"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>HalfOpenRange</b> (<a class="el" href="struct_bit_range_1_1_from_to.html">FromTo</a> &amp;&amp;fromTo)</td></tr>
+<tr class="separator:a60d82aa754fccd279469d057efc9f82c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a54c3fff7e5ca43e94c832ed56a5702" id="r_a1a54c3fff7e5ca43e94c832ed56a5702"><td class="memItemLeft" align="right" valign="top"><a id="a1a54c3fff7e5ca43e94c832ed56a5702" name="a1a54c3fff7e5ca43e94c832ed56a5702"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>HalfOpenRange</b> (int <a class="el" href="#a655f6c015ca1a87704b5c1db3b6e3ae3">lo</a>, int <a class="el" href="#a9200300d57790da2da1fefe0cb7a0628">hi</a>)</td></tr>
+<tr class="separator:a1a54c3fff7e5ca43e94c832ed56a5702"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1655160fdaf662f2b4bd4e51747b515b" id="r_a1655160fdaf662f2b4bd4e51747b515b"><td class="memItemLeft" align="right" valign="top"><a id="a1655160fdaf662f2b4bd4e51747b515b" name="a1655160fdaf662f2b4bd4e51747b515b"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>HalfOpenRange</b> (<a class="el" href="struct_bit_range_1_1_min_to_max.html">MinToMax</a> &amp;&amp;)</td></tr>
+<tr class="separator:a1655160fdaf662f2b4bd4e51747b515b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67416a9429d552f3bc467cb77e7e54ce" id="r_a67416a9429d552f3bc467cb77e7e54ce"><td class="memItemLeft" align="right" valign="top"><a id="a67416a9429d552f3bc467cb77e7e54ce" name="a67416a9429d552f3bc467cb77e7e54ce"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>HalfOpenRange</b> (<a class="el" href="struct_bit_range_1_1_start_len.html">StartLen</a> &amp;&amp;startLen)</td></tr>
+<tr class="separator:a67416a9429d552f3bc467cb77e7e54ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32999dc2b7892ad0711cdc5fe4348137" id="r_a32999dc2b7892ad0711cdc5fe4348137"><td class="memItemLeft" align="right" valign="top"><a id="a32999dc2b7892ad0711cdc5fe4348137" name="a32999dc2b7892ad0711cdc5fe4348137"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>HalfOpenRange</b> (std::pair&lt; int, int &gt; range)</td></tr>
+<tr class="separator:a32999dc2b7892ad0711cdc5fe4348137"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ac7cc4bb344c96b3464b63f6966c98a" id="r_a5ac7cc4bb344c96b3464b63f6966c98a"><td class="memItemLeft" align="right" valign="top"><a id="a5ac7cc4bb344c96b3464b63f6966c98a" name="a5ac7cc4bb344c96b3464b63f6966c98a"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>HalfOpenRange</b> (<a class="el" href="struct_bit_range_1_1_zero_to_max.html">ZeroToMax</a> &amp;&amp;)</td></tr>
+<tr class="separator:a5ac7cc4bb344c96b3464b63f6966c98a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acff93e7e7f96bf3abeb1291a34a9b3ca" id="r_acff93e7e7f96bf3abeb1291a34a9b3ca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acff93e7e7f96bf3abeb1291a34a9b3ca">canonicalize</a> () const</td></tr>
+<tr class="separator:acff93e7e7f96bf3abeb1291a34a9b3ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c37adea9ef8de1f9f2c52ea73c754e4" id="r_a7c37adea9ef8de1f9f2c52ea73c754e4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7c37adea9ef8de1f9f2c52ea73c754e4">contains</a> (<a class="el" href="struct_half_open_range.html">HalfOpenRange</a> other) const</td></tr>
+<tr class="separator:a7c37adea9ef8de1f9f2c52ea73c754e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a328cf13ba10067ee5e27e169368f9233" id="r_a328cf13ba10067ee5e27e169368f9233"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a328cf13ba10067ee5e27e169368f9233">contains</a> (int index) const</td></tr>
+<tr class="separator:a328cf13ba10067ee5e27e169368f9233"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4ecdee52e4f6015d03db9e12b865dac" id="r_ae4ecdee52e4f6015d03db9e12b865dac"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae4ecdee52e4f6015d03db9e12b865dac">empty</a> () const</td></tr>
+<tr class="separator:ae4ecdee52e4f6015d03db9e12b865dac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6acc2b730a759ff33784bd46a8e53c0" id="r_aa6acc2b730a759ff33784bd46a8e53c0"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa6acc2b730a759ff33784bd46a8e53c0">hiByte</a> () const</td></tr>
+<tr class="separator:aa6acc2b730a759ff33784bd46a8e53c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa823fd3673e10f45cbb4606763411f77" id="r_aa823fd3673e10f45cbb4606763411f77"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa823fd3673e10f45cbb4606763411f77">intersectWith</a> (<a class="el" href="struct_half_open_range.html">HalfOpenRange</a> a) const</td></tr>
+<tr class="separator:aa823fd3673e10f45cbb4606763411f77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d7407741f6defdf9e7732ed446989b0" id="r_a6d7407741f6defdf9e7732ed446989b0"><td class="memItemLeft" align="right" valign="top"><a id="a6d7407741f6defdf9e7732ed446989b0" name="a6d7407741f6defdf9e7732ed446989b0"></a>
+<a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&#160;</td><td class="memItemRight" valign="bottom"><b>intersectWith</b> (int l, int h) const</td></tr>
+<tr class="separator:a6d7407741f6defdf9e7732ed446989b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9435c1d2c6490f3f3e8a441d355c2ac1" id="r_a9435c1d2c6490f3f3e8a441d355c2ac1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9435c1d2c6490f3f3e8a441d355c2ac1">isHiAligned</a> () const</td></tr>
+<tr class="separator:a9435c1d2c6490f3f3e8a441d355c2ac1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5402ffffab4f6549ca01ae72326f13f3" id="r_a5402ffffab4f6549ca01ae72326f13f3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5402ffffab4f6549ca01ae72326f13f3">isLoAligned</a> () const</td></tr>
+<tr class="separator:a5402ffffab4f6549ca01ae72326f13f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af30531d17fda05e0f73f46b91ccee216" id="r_af30531d17fda05e0f73f46b91ccee216"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af30531d17fda05e0f73f46b91ccee216">loByte</a> () const</td></tr>
+<tr class="separator:af30531d17fda05e0f73f46b91ccee216"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa53726a09442e73591b72790505e40d" id="r_aaa53726a09442e73591b72790505e40d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaa53726a09442e73591b72790505e40d">nextByte</a> () const</td></tr>
+<tr class="separator:aaa53726a09442e73591b72790505e40d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4deec696d2931a1952e179b32fdfc51b" id="r_a4deec696d2931a1952e179b32fdfc51b"><td class="memItemLeft" align="right" valign="top"><a id="a4deec696d2931a1952e179b32fdfc51b" name="a4deec696d2931a1952e179b32fdfc51b"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator!=</b> (<a class="el" href="struct_half_open_range.html">HalfOpenRange</a> other) const</td></tr>
+<tr class="separator:a4deec696d2931a1952e179b32fdfc51b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab972198c1184b521f56291f8147f2dff" id="r_ab972198c1184b521f56291f8147f2dff"><td class="memItemLeft" align="right" valign="top"><a id="ab972198c1184b521f56291f8147f2dff" name="ab972198c1184b521f56291f8147f2dff"></a>
+<a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&#160;</td><td class="memItemRight" valign="bottom"><b>operator&amp;</b> (<a class="el" href="struct_half_open_range.html">HalfOpenRange</a> a) const</td></tr>
+<tr class="separator:ab972198c1184b521f56291f8147f2dff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae76b039864235c3be4b5ca7f1053e1c3" id="r_ae76b039864235c3be4b5ca7f1053e1c3"><td class="memItemLeft" align="right" valign="top"><a id="ae76b039864235c3be4b5ca7f1053e1c3" name="ae76b039864235c3be4b5ca7f1053e1c3"></a>
+<a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&#160;</td><td class="memItemRight" valign="bottom"><b>operator&amp;=</b> (<a class="el" href="struct_half_open_range.html">HalfOpenRange</a> a)</td></tr>
+<tr class="separator:ae76b039864235c3be4b5ca7f1053e1c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44fcc8cd975fe7e886af4fb8460ce05c" id="r_a44fcc8cd975fe7e886af4fb8460ce05c"><td class="memItemLeft" align="right" valign="top"><a id="a44fcc8cd975fe7e886af4fb8460ce05c" name="a44fcc8cd975fe7e886af4fb8460ce05c"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;</b> (const <a class="el" href="struct_half_open_range.html">HalfOpenRange</a> &amp;other) const</td></tr>
+<tr class="memdesc:a44fcc8cd975fe7e886af4fb8460ce05c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total ordering, first by lo, then by hi. <br /></td></tr>
+<tr class="separator:a44fcc8cd975fe7e886af4fb8460ce05c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3de90857ceb8ea7080d9e6c30c6de52" id="r_ae3de90857ceb8ea7080d9e6c30c6de52"><td class="memItemLeft" align="right" valign="top"><a id="ae3de90857ceb8ea7080d9e6c30c6de52" name="ae3de90857ceb8ea7080d9e6c30c6de52"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (<a class="el" href="struct_half_open_range.html">HalfOpenRange</a> other) const</td></tr>
+<tr class="separator:ae3de90857ceb8ea7080d9e6c30c6de52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50c58fb6ca04c58d67f863805196a4bc" id="r_a50c58fb6ca04c58d67f863805196a4bc"><td class="memItemLeft" align="right" valign="top"><a id="a50c58fb6ca04c58d67f863805196a4bc" name="a50c58fb6ca04c58d67f863805196a4bc"></a>
+<a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&#160;</td><td class="memItemRight" valign="bottom"><b>operator|</b> (<a class="el" href="struct_half_open_range.html">HalfOpenRange</a> a) const</td></tr>
+<tr class="separator:a50c58fb6ca04c58d67f863805196a4bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6213d49e7e55f0423153c2265a41a86" id="r_ad6213d49e7e55f0423153c2265a41a86"><td class="memItemLeft" align="right" valign="top"><a id="ad6213d49e7e55f0423153c2265a41a86" name="ad6213d49e7e55f0423153c2265a41a86"></a>
+<a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&#160;</td><td class="memItemRight" valign="bottom"><b>operator|=</b> (<a class="el" href="struct_half_open_range.html">HalfOpenRange</a> a)</td></tr>
+<tr class="separator:ad6213d49e7e55f0423153c2265a41a86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9b3a39d1c3dce06af76391fc5181ec0" id="r_ac9b3a39d1c3dce06af76391fc5181ec0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac9b3a39d1c3dce06af76391fc5181ec0">overlaps</a> (<a class="el" href="struct_half_open_range.html">HalfOpenRange</a> a) const</td></tr>
+<tr class="separator:ac9b3a39d1c3dce06af76391fc5181ec0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c8aba253e171c05b2fb4b646e58ba19" id="r_a8c8aba253e171c05b2fb4b646e58ba19"><td class="memItemLeft" align="right" valign="top"><a id="a8c8aba253e171c05b2fb4b646e58ba19" name="a8c8aba253e171c05b2fb4b646e58ba19"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>overlaps</b> (int l, int h) const</td></tr>
+<tr class="separator:a8c8aba253e171c05b2fb4b646e58ba19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa14754aee362e88e4966be2d4a8b4b5e" id="r_aa14754aee362e88e4966be2d4a8b4b5e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; RangeUnit::Bit, Order &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa14754aee362e88e4966be2d4a8b4b5e">resizedToBits</a> (int <a class="el" href="#a0b7c732bd05b0d46fc44716be9205bd5">size</a>) const</td></tr>
+<tr class="separator:aa14754aee362e88e4966be2d4a8b4b5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5da5cba2495aa277e2c4428d9fe6db6a" id="r_a5da5cba2495aa277e2c4428d9fe6db6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5da5cba2495aa277e2c4428d9fe6db6a">resizedToBytes</a> (int <a class="el" href="#a0b7c732bd05b0d46fc44716be9205bd5">size</a>) const</td></tr>
+<tr class="separator:a5da5cba2495aa277e2c4428d9fe6db6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f34cab503959ebf2f7cded63eb4b7bb" id="r_a3f34cab503959ebf2f7cded63eb4b7bb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; RangeUnit::Bit, Order &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3f34cab503959ebf2f7cded63eb4b7bb">shiftedByBits</a> (int offset) const</td></tr>
+<tr class="separator:a3f34cab503959ebf2f7cded63eb4b7bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ecc7315fa52e24ed06acd5eec07be17" id="r_a0ecc7315fa52e24ed06acd5eec07be17"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0ecc7315fa52e24ed06acd5eec07be17">shiftedByBytes</a> (int offset) const</td></tr>
+<tr class="separator:a0ecc7315fa52e24ed06acd5eec07be17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b7c732bd05b0d46fc44716be9205bd5" id="r_a0b7c732bd05b0d46fc44716be9205bd5"><td class="memItemLeft" align="right" valign="top">ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0b7c732bd05b0d46fc44716be9205bd5">size</a> () const</td></tr>
+<tr class="separator:a0b7c732bd05b0d46fc44716be9205bd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8efb394d9bd5930957b8172df71ef5e" id="r_ae8efb394d9bd5930957b8172df71ef5e"><td class="memItemLeft" align="right" valign="top"><a id="ae8efb394d9bd5930957b8172df71ef5e" name="ae8efb394d9bd5930957b8172df71ef5e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>toJSON</b> (<a class="el" href="class_j_s_o_n_generator.html">JSONGenerator</a> &amp;json) const</td></tr>
+<tr class="memdesc:ae8efb394d9bd5930957b8172df71ef5e"><td class="mdescLeft">&#160;</td><td class="mdescRight">JSON serialization/deserialization. <br /></td></tr>
+<tr class="separator:ae8efb394d9bd5930957b8172df71ef5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45fdc30da34a90c723a2d627b1a9725c" id="r_a45fdc30da34a90c723a2d627b1a9725c"><td class="memTemplParams" colspan="2">template&lt;Endian DestOrder&gt; </td></tr>
+<tr class="memitem:a45fdc30da34a90c723a2d627b1a9725c"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, DestOrder &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a45fdc30da34a90c723a2d627b1a9725c">toOrder</a> (int spaceSize) const</td></tr>
+<tr class="separator:a45fdc30da34a90c723a2d627b1a9725c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a871e14edbd0ecea28b688a8d35fa9de3" id="r_a871e14edbd0ecea28b688a8d35fa9de3"><td class="memTemplParams" colspan="2">template&lt;RangeUnit DestUnit&gt; </td></tr>
+<tr class="memitem:a871e14edbd0ecea28b688a8d35fa9de3"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; DestUnit, Order &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a871e14edbd0ecea28b688a8d35fa9de3">toUnit</a> () const</td></tr>
+<tr class="separator:a871e14edbd0ecea28b688a8d35fa9de3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0c35948cd096b4d823326e137024495" id="r_ae0c35948cd096b4d823326e137024495"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae0c35948cd096b4d823326e137024495">unionWith</a> (<a class="el" href="struct_half_open_range.html">HalfOpenRange</a> a) const</td></tr>
+<tr class="separator:ae0c35948cd096b4d823326e137024495"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38751077143b13ee5e5152a9fd451738" id="r_a38751077143b13ee5e5152a9fd451738"><td class="memItemLeft" align="right" valign="top"><a id="a38751077143b13ee5e5152a9fd451738" name="a38751077143b13ee5e5152a9fd451738"></a>
+<a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&#160;</td><td class="memItemRight" valign="bottom"><b>unionWith</b> (int l, int h) const</td></tr>
+<tr class="separator:a38751077143b13ee5e5152a9fd451738"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a0039164c4f4bee80e0006b68124e49dd" id="r_a0039164c4f4bee80e0006b68124e49dd"><td class="memItemLeft" align="right" valign="top"><a id="a0039164c4f4bee80e0006b68124e49dd" name="a0039164c4f4bee80e0006b68124e49dd"></a>
+static <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fromJSON</b> (<a class="el" href="class_j_s_o_n_loader.html">JSONLoader</a> &amp;json)</td></tr>
+<tr class="separator:a0039164c4f4bee80e0006b68124e49dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a9200300d57790da2da1fefe0cb7a0628" id="r_a9200300d57790da2da1fefe0cb7a0628"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9200300d57790da2da1fefe0cb7a0628">hi</a></td></tr>
+<tr class="separator:a9200300d57790da2da1fefe0cb7a0628"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a655f6c015ca1a87704b5c1db3b6e3ae3" id="r_a655f6c015ca1a87704b5c1db3b6e3ae3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a655f6c015ca1a87704b5c1db3b6e3ae3">lo</a></td></tr>
+<tr class="separator:a655f6c015ca1a87704b5c1db3b6e3ae3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:a5fb9543f13ffc5b64dfca2751e905367" id="r_a5fb9543f13ffc5b64dfca2751e905367"><td class="memItemLeft" align="right" valign="top"><a id="a5fb9543f13ffc5b64dfca2751e905367" name="a5fb9543f13ffc5b64dfca2751e905367"></a>
+static constexpr Endian&#160;</td><td class="memItemRight" valign="bottom"><b>order</b> = Order</td></tr>
+<tr class="separator:a5fb9543f13ffc5b64dfca2751e905367"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ca24669438ed71147f4a280aa3bbff5" id="r_a0ca24669438ed71147f4a280aa3bbff5"><td class="memItemLeft" align="right" valign="top"><a id="a0ca24669438ed71147f4a280aa3bbff5" name="a0ca24669438ed71147f4a280aa3bbff5"></a>
+static constexpr RangeUnit&#160;</td><td class="memItemRight" valign="bottom"><b>unit</b> = Unit</td></tr>
+<tr class="separator:a0ca24669438ed71147f4a280aa3bbff5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:a4c2d67c084de022862c6d94aa3d549bb" id="r_a4c2d67c084de022862c6d94aa3d549bb"><td class="memItemLeft" align="right" valign="top"><a id="a4c2d67c084de022862c6d94aa3d549bb" name="a4c2d67c084de022862c6d94aa3d549bb"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><b>hash_value</b> (const <a class="el" href="struct_half_open_range.html">HalfOpenRange</a> &amp;r)</td></tr>
+<tr class="separator:a4c2d67c084de022862c6d94aa3d549bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;RangeUnit Unit, Endian Order&gt;<br />
+struct HalfOpenRange&lt; Unit, Order &gt;</div><p>A half-open range of bits or bytes - <code>[lo, hi)</code> - specified in terms of a specific endian order. Half-open ranges include <code>lo</code> but do not include <code>hi</code>, so <code>HalfOpenRange(3, 5)</code> contains <code>3</code> and <code>4</code> but not <code>5</code>.</p>
+<p>Use a half-open range when you want to allow for the possibility that the range may be empty, which may be represented by setting <code>lo</code> and <code>hi</code> to the same value. Using a half-open range may also make some algorithms more natural to express, and it may make working with external code easier since half-open ranges are idiomatic in C++.</p>
+<p>Note that there are many ways to represent an empty range - <code>(1, 1)</code> is empty, for example, but so is <code>(2, 2)</code>. Many operations on HalfOpenRanges will canonicalize the empty range representation, so don't rely on it - just call <code>empty()</code> to determine if a range is empty.</p>
+<p>XXX: Currently, for backwards compatibility, it's possible to construct ranges where <code>lo</code> is greater than <code>hi</code>. We should enforce that ranges are consistent; we'll add the necessary checks after the existing code has been audited.</p>
+<p>XXX: We should also add checks to avoid integer overflow. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="acff93e7e7f96bf3abeb1291a34a9b3ca" name="acff93e7e7f96bf3abeb1291a34a9b3ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acff93e7e7f96bf3abeb1291a34a9b3ca">&#9670;&#160;</a></span>canonicalize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a> <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::canonicalize </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>a canonicalized version of this range. This only has an effect for empty ranges, which will all be mapped to (0, 0). </dd></dl>
+
+</div>
+</div>
+<a id="a7c37adea9ef8de1f9f2c52ea73c754e4" name="a7c37adea9ef8de1f9f2c52ea73c754e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c37adea9ef8de1f9f2c52ea73c754e4">&#9670;&#160;</a></span>contains() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::contains </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;</td>          <td class="paramname"><span class="paramname"><em>other</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>true if this range includes the provided range - i.e., if this range contains a superset of the provided range's bits. </dd></dl>
+
+</div>
+</div>
+<a id="a328cf13ba10067ee5e27e169368f9233" name="a328cf13ba10067ee5e27e169368f9233"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a328cf13ba10067ee5e27e169368f9233">&#9670;&#160;</a></span>contains() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::contains </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>index</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>true if this range includes the provided index. </dd></dl>
+
+</div>
+</div>
+<a id="ae4ecdee52e4f6015d03db9e12b865dac" name="ae4ecdee52e4f6015d03db9e12b865dac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4ecdee52e4f6015d03db9e12b865dac">&#9670;&#160;</a></span>empty()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::empty </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>true if this range is empty - i.e., it contains no elements. </dd></dl>
+
+</div>
+</div>
+<a id="aa6acc2b730a759ff33784bd46a8e53c0" name="aa6acc2b730a759ff33784bd46a8e53c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6acc2b730a759ff33784bd46a8e53c0">&#9670;&#160;</a></span>hiByte()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::hiByte </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the byte containing the highest-numbered bit in this interval. </dd></dl>
+
+</div>
+</div>
+<a id="aa823fd3673e10f45cbb4606763411f77" name="aa823fd3673e10f45cbb4606763411f77"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa823fd3673e10f45cbb4606763411f77">&#9670;&#160;</a></span>intersectWith()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a> <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::intersectWith </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;</td>          <td class="paramname"><span class="paramname"><em>a</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>a range which contains all the bits which are included in both this range and the provided range, or an empty range if there are no bits in common. </dd></dl>
+
+</div>
+</div>
+<a id="a9435c1d2c6490f3f3e8a441d355c2ac1" name="a9435c1d2c6490f3f3e8a441d355c2ac1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9435c1d2c6490f3f3e8a441d355c2ac1">&#9670;&#160;</a></span>isHiAligned()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::isHiAligned </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>true if the highest-numbered bit in this range is byte-aligned (meaning that this range stops right before the beginning of a new byte). </dd></dl>
+
+</div>
+</div>
+<a id="a5402ffffab4f6549ca01ae72326f13f3" name="a5402ffffab4f6549ca01ae72326f13f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5402ffffab4f6549ca01ae72326f13f3">&#9670;&#160;</a></span>isLoAligned()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::isLoAligned </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>true if the lowest-numbered bit in this range is byte-aligned. </dd></dl>
+
+</div>
+</div>
+<a id="af30531d17fda05e0f73f46b91ccee216" name="af30531d17fda05e0f73f46b91ccee216"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af30531d17fda05e0f73f46b91ccee216">&#9670;&#160;</a></span>loByte()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::loByte </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the byte containing the lowest-numbered bit in this interval. </dd></dl>
+
+</div>
+</div>
+<a id="aaa53726a09442e73591b72790505e40d" name="aaa53726a09442e73591b72790505e40d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa53726a09442e73591b72790505e40d">&#9670;&#160;</a></span>nextByte()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::nextByte </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the next byte that starts after the end of this interval. May result in integer overflow if used with ZeroToMax or MinToMax-sized ranges. </dd></dl>
+
+</div>
+</div>
+<a id="ac9b3a39d1c3dce06af76391fc5181ec0" name="ac9b3a39d1c3dce06af76391fc5181ec0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9b3a39d1c3dce06af76391fc5181ec0">&#9670;&#160;</a></span>overlaps()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::overlaps </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;</td>          <td class="paramname"><span class="paramname"><em>a</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>true if this range has some bits in common with the provided range. Note that an empty range never overlaps with any other range, so <code>rangeA == rangeB</code> does not imply that <code>rangeA.overlaps(rangeB)</code>. </dd></dl>
+
+</div>
+</div>
+<a id="aa14754aee362e88e4966be2d4a8b4b5e" name="aa14754aee362e88e4966be2d4a8b4b5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa14754aee362e88e4966be2d4a8b4b5e">&#9670;&#160;</a></span>resizedToBits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; RangeUnit::Bit, Order &gt; <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::resizedToBits </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>size</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>a new range with the same starting index, but expanded or contracted so that it has the provided size in bits. The end result is always in bits. </dd></dl>
+
+</div>
+</div>
+<a id="a5da5cba2495aa277e2c4428d9fe6db6a" name="a5da5cba2495aa277e2c4428d9fe6db6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5da5cba2495aa277e2c4428d9fe6db6a">&#9670;&#160;</a></span>resizedToBytes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a> <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::resizedToBytes </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>size</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>a new range with the same starting index, but expanded or contracted so that it has the provided size in bytes. </dd></dl>
+
+</div>
+</div>
+<a id="a3f34cab503959ebf2f7cded63eb4b7bb" name="a3f34cab503959ebf2f7cded63eb4b7bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f34cab503959ebf2f7cded63eb4b7bb">&#9670;&#160;</a></span>shiftedByBits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; RangeUnit::Bit, Order &gt; <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::shiftedByBits </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>offset</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>a new range with the same size, but shifted towards the high-numbered bits by the provided amount. No rotation or clamping to zero is applied. The result is always in bits. </dd></dl>
+
+</div>
+</div>
+<a id="a0ecc7315fa52e24ed06acd5eec07be17" name="a0ecc7315fa52e24ed06acd5eec07be17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ecc7315fa52e24ed06acd5eec07be17">&#9670;&#160;</a></span>shiftedByBytes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt; <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::shiftedByBytes </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>offset</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>a new range with the same size, but shifted towards the high-numbered bytes by the provided amount. No rotation or clamping to zero is applied. </dd></dl>
+
+</div>
+</div>
+<a id="a0b7c732bd05b0d46fc44716be9205bd5" name="a0b7c732bd05b0d46fc44716be9205bd5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b7c732bd05b0d46fc44716be9205bd5">&#9670;&#160;</a></span>size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ssize_t <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::size </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the number of elements in this range. </dd></dl>
+
+</div>
+</div>
+<a id="a45fdc30da34a90c723a2d627b1a9725c" name="a45fdc30da34a90c723a2d627b1a9725c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45fdc30da34a90c723a2d627b1a9725c">&#9670;&#160;</a></span>toOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<div class="memtemplate">
+template&lt;Endian DestOrder&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, DestOrder &gt; <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::toOrder </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>spaceSize</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Convert this range to a range with the specified endian order.</p>
+<p>Making this conversion requires specifying the size of the larger space that this range is embedded in. That's because the place we start numbering indices from (the origin, in other words) is changing. For example, given a space with 10 elements, a range of 3 indices within that space may be numbered in two ways as follows: Space: [o o o o o o o o o o] Big endian range: --&gt; [2 3 4] Little endian range: [7 6 5] &lt;-----&mdash; We couldn't switch between those numberings without knowing that the space has 10 elements.</p>
+<p>Note that this operation may result in integer overflow when dealing with very large ranges. It's generally safe for ZeroToMax as long as the space size is not also near INT_MAX. It's never safe for MinToMax.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">DestOrder</td><td>The endian order to convert to. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">spaceSize</td><td>The size of the space this range is embedded in. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>this range, but converted to the specified endian ordering. </dd></dl>
+
+</div>
+</div>
+<a id="a871e14edbd0ecea28b688a8d35fa9de3" name="a871e14edbd0ecea28b688a8d35fa9de3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a871e14edbd0ecea28b688a8d35fa9de3">&#9670;&#160;</a></span>toUnit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<div class="memtemplate">
+template&lt;RangeUnit DestUnit&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; DestUnit, Order &gt; <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::toUnit </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Convert this range to the smallest enclosing range with the specified unit.</p>
+<p>Conversion from bytes to bits is exact, but conversion from bits to bytes is lossy and may cause the size of the range to grow if the bits aren't byte-aligned. If that would be problematic, use <code>isLoAligned()</code> and <code>isHiAligned()</code> to check before converting, or just check that converting the result back to bits yields the original range.</p>
+<p>This operation will result in integer overflow when dealing with ZeroToMax or MinToMax-sized ranges.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">DestUnit</td><td>The unit to convert to. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>this range, but converted to the specified unit. </dd></dl>
+
+</div>
+</div>
+<a id="ae0c35948cd096b4d823326e137024495" name="ae0c35948cd096b4d823326e137024495"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0c35948cd096b4d823326e137024495">&#9670;&#160;</a></span>unionWith()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a> <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::unionWith </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;</td>          <td class="paramname"><span class="paramname"><em>a</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the smallest range that contains all of the bits in both this range and the provided range. Note that because ranges are contiguous, the result may contain bits that are not in either of the original ranges. </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a9200300d57790da2da1fefe0cb7a0628" name="a9200300d57790da2da1fefe0cb7a0628"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9200300d57790da2da1fefe0cb7a0628">&#9670;&#160;</a></span>hi</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::hi</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The highest numbered index in the range. For Endian::Network, this is the least significant bit or byte; for Endian::Little, it's the most significant. Because this is a half-open range, the range element this index identifies is not included in the range. </p>
+
+</div>
+</div>
+<a id="a655f6c015ca1a87704b5c1db3b6e3ae3" name="a655f6c015ca1a87704b5c1db3b6e3ae3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a655f6c015ca1a87704b5c1db3b6e3ae3">&#9670;&#160;</a></span>lo</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;RangeUnit Unit, Endian Order&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="struct_half_open_range.html">HalfOpenRange</a>&lt; Unit, Order &gt;::lo</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The lowest numbered index in the range. For Endian::Network, this is the most significant bit or byte; for Endian::Little, it's the least significant. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

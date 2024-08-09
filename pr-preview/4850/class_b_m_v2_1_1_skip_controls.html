@@ -120,9 +120,70 @@ $(function(){initNavTree('class_b_m_v2_1_1_skip_controls.html',''); initResizabl
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_b_m_v2_1_1_skip_controls-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">BMV2::SkipControls Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>This class implements a policy suitable for the SynthesizeActions pass.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="bmv2_2common_2backend_8h_source.html">backend.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for BMV2::SkipControls:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_b_m_v2_1_1_skip_controls__inherit__graph.svg" width="200" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a7eea3339b8aad9b9a3b590e1c2e75a84" id="r_a7eea3339b8aad9b9a3b590e1c2e75a84"><td class="memItemLeft" align="right" valign="top"><a id="a7eea3339b8aad9b9a3b590e1c2e75a84" name="a7eea3339b8aad9b9a3b590e1c2e75a84"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>SkipControls</b> (const std::set&lt; <a class="el" href="classcstring.html">cstring</a> &gt; *skip)</td></tr>
+<tr class="separator:a7eea3339b8aad9b9a3b590e1c2e75a84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a037e2356e5a0979cc3ee667569506db3" id="r_a037e2356e5a0979cc3ee667569506db3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a037e2356e5a0979cc3ee667569506db3">convert</a> (const <a class="el" href="struct_visitor___context.html">Visitor::Context</a> *, const IR::P4Control *control) override</td></tr>
+<tr class="separator:a037e2356e5a0979cc3ee667569506db3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_p4_1_1_action_synthesis_policy"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_p4_1_1_action_synthesis_policy')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_p4_1_1_action_synthesis_policy.html">P4::ActionSynthesisPolicy</a></td></tr>
+<tr class="memitem:a4ea1d68cca758ace7de8c9b3ca80fa86 inherit pub_methods_class_p4_1_1_action_synthesis_policy" id="r_a4ea1d68cca758ace7de8c9b3ca80fa86"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_action_synthesis_policy.html#a4ea1d68cca758ace7de8c9b3ca80fa86">can_combine</a> (const <a class="el" href="struct_visitor___context.html">Visitor::Context</a> *, const IR::BlockStatement *, const IR::StatOrDecl *)</td></tr>
+<tr class="separator:a4ea1d68cca758ace7de8c9b3ca80fa86 inherit pub_methods_class_p4_1_1_action_synthesis_policy"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>This class implements a policy suitable for the SynthesizeActions pass. </p>
+<p>are in the specified set. For example, we expect that the code in the deparser will not use any tables or actions. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a037e2356e5a0979cc3ee667569506db3" name="a037e2356e5a0979cc3ee667569506db3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a037e2356e5a0979cc3ee667569506db3">&#9670;&#160;</a></span>convert()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool BMV2::SkipControls::convert </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_visitor___context.html">Visitor::Context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctxt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IR::P4Control *</td>          <td class="paramname"><span class="paramname"><em>control</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>If the policy returns true the control block is processed, otherwise it is left unchanged. </p>
+
+<p>Implements <a class="el" href="class_p4_1_1_action_synthesis_policy.html#ab81bf4db8b9f40b05968952e4f3901d3">P4::ActionSynthesisPolicy</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

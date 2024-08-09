@@ -120,9 +120,99 @@ $(function(){initNavTree('class_test_1_1_p4_tools_test_case.html',''); initResiz
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="class_test_1_1_p4_tools_test_case-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Test::P4ToolsTestCase Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Encapsulates functionality for running the front- and mid-ends of the compiler in a test.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="gtest__utils_8h_source.html">gtest_utils.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a33bf700082c502398646dc1ac6f501b0" id="r_a33bf700082c502398646dc1ac6f501b0"><td class="memItemLeft" align="right" valign="top"><a id="a33bf700082c502398646dc1ac6f501b0" name="a33bf700082c502398646dc1ac6f501b0"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>P4ToolsTestCase</b> (const <a class="el" href="class_p4_tools_1_1_compiler_result.html">P4Tools::CompilerResult</a> &amp;compilerResults)</td></tr>
+<tr class="separator:a33bf700082c502398646dc1ac6f501b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5101dbc63e15bc679f9b5a8757a23ff0" id="r_a5101dbc63e15bc679f9b5a8757a23ff0"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_tools_1_1_compiler_result.html">P4Tools::CompilerResult</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5101dbc63e15bc679f9b5a8757a23ff0">getCompilerResult</a> () const</td></tr>
+<tr class="separator:a5101dbc63e15bc679f9b5a8757a23ff0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a742df489ae6369bd497d9cb0723eebe9" id="r_a742df489ae6369bd497d9cb0723eebe9"><td class="memItemLeft" align="right" valign="top">const IR::P4Program &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a742df489ae6369bd497d9cb0723eebe9">getProgram</a> () const</td></tr>
+<tr class="separator:a742df489ae6369bd497d9cb0723eebe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a420d1df8d9a4abccdc598f3411fff309" id="r_a420d1df8d9a4abccdc598f3411fff309"><td class="memItemLeft" align="right" valign="top"><a id="a420d1df8d9a4abccdc598f3411fff309" name="a420d1df8d9a4abccdc598f3411fff309"></a>
+static std::optional&lt; const <a class="el" href="class_test_1_1_p4_tools_test_case.html">P4ToolsTestCase</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>create</b> (std::string deviceName, std::string archName, CompilerOptions::FrontendVersion langVersion, const std::string &amp;source)</td></tr>
+<tr class="memdesc:a420d1df8d9a4abccdc598f3411fff309"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method for producing a test case from a P4 program source. <br /></td></tr>
+<tr class="separator:a420d1df8d9a4abccdc598f3411fff309"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac343b8c3f131bf0575bc283bc7d3a2d5" id="r_ac343b8c3f131bf0575bc283bc7d3a2d5"><td class="memItemLeft" align="right" valign="top"><a id="ac343b8c3f131bf0575bc283bc7d3a2d5" name="ac343b8c3f131bf0575bc283bc7d3a2d5"></a>
+static std::optional&lt; const <a class="el" href="class_test_1_1_p4_tools_test_case.html">P4ToolsTestCase</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>create_14</b> (std::string deviceName, std::string archName, const std::string &amp;source)</td></tr>
+<tr class="memdesc:ac343b8c3f131bf0575bc283bc7d3a2d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method for producing a test case from a P4_14 program source. <br /></td></tr>
+<tr class="separator:ac343b8c3f131bf0575bc283bc7d3a2d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21d9c7cb308a1412da87e5f6687166bd" id="r_a21d9c7cb308a1412da87e5f6687166bd"><td class="memItemLeft" align="right" valign="top"><a id="a21d9c7cb308a1412da87e5f6687166bd" name="a21d9c7cb308a1412da87e5f6687166bd"></a>
+static std::optional&lt; const <a class="el" href="class_test_1_1_p4_tools_test_case.html">P4ToolsTestCase</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>create_16</b> (std::string deviceName, std::string archName, const std::string &amp;source)</td></tr>
+<tr class="memdesc:a21d9c7cb308a1412da87e5f6687166bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method for producing a test case from a P4_16 program source. <br /></td></tr>
+<tr class="separator:a21d9c7cb308a1412da87e5f6687166bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Encapsulates functionality for running the front- and mid-ends of the compiler in a test. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a5101dbc63e15bc679f9b5a8757a23ff0" name="a5101dbc63e15bc679f9b5a8757a23ff0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5101dbc63e15bc679f9b5a8757a23ff0">&#9670;&#160;</a></span>getCompilerResult()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="class_p4_tools_1_1_compiler_result.html">P4Tools::CompilerResult</a> &amp; Test::P4ToolsTestCase::getCompilerResult </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the compiler result that was produced by running the compiler on the input P4 Program. </dd></dl>
+
+</div>
+</div>
+<a id="a742df489ae6369bd497d9cb0723eebe9" name="a742df489ae6369bd497d9cb0723eebe9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a742df489ae6369bd497d9cb0723eebe9">&#9670;&#160;</a></span>getProgram()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::P4Program &amp; Test::P4ToolsTestCase::getProgram </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the P4 program associated with this test case. </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

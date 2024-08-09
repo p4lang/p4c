@@ -120,10 +120,24 @@ $(function(){initNavTree('struct_auto_compile_context.html',''); initResizable(t
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="struct_auto_compile_context-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">AutoCompileContext Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="compile__context_8h_source.html">compile_context.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a77c6b100d9d4e3280ae7a5b11e6318b5" id="r_a77c6b100d9d4e3280ae7a5b11e6318b5"><td class="memItemLeft" align="right" valign="top"><a id="a77c6b100d9d4e3280ae7a5b11e6318b5" name="a77c6b100d9d4e3280ae7a5b11e6318b5"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>AutoCompileContext</b> (<a class="el" href="class_i_compile_context.html">ICompileContext</a> *context)</td></tr>
+<tr class="separator:a77c6b100d9d4e3280ae7a5b11e6318b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A RAII helper which pushes a compilation context onto the stack when it's created and pops it off when it's destroyed. To ensure the compilation stack is always nested correctly, this is the only interface for pushing or popping compilation contexts. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

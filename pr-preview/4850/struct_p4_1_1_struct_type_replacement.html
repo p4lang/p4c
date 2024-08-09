@@ -120,9 +120,118 @@ $(function(){initNavTree('struct_p4_1_1_struct_type_replacement.html',''); initR
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="struct_p4_1_1_struct_type_replacement-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::StructTypeReplacement&lt; T &gt; Struct Template Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="flatten_interface_structs_8h_source.html">flattenInterfaceStructs.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for P4::StructTypeReplacement&lt; T &gt;:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="struct_p4_1_1_struct_type_replacement__inherit__graph.svg" width="250" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:abedb895885e10cbf169ec13ad9a46027" id="r_abedb895885e10cbf169ec13ad9a46027"><td class="memItemLeft" align="right" valign="top"><a id="abedb895885e10cbf169ec13ad9a46027" name="abedb895885e10cbf169ec13ad9a46027"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>StructTypeReplacement</b> (const <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, const IR::Type_StructLike *type, <a class="el" href="class_p4_1_1_annotation_selection_policy.html">AnnotationSelectionPolicy</a> *policy)</td></tr>
+<tr class="separator:abedb895885e10cbf169ec13ad9a46027"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53e45c2f1b2b564fe9f88d0397e40af1" id="r_a53e45c2f1b2b564fe9f88d0397e40af1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a53e45c2f1b2b564fe9f88d0397e40af1">dbprint</a> (std::ostream &amp;out) const</td></tr>
+<tr class="separator:a53e45c2f1b2b564fe9f88d0397e40af1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab726ca045e7d9f7708f2ee34cbf01f42" id="r_ab726ca045e7d9f7708f2ee34cbf01f42"><td class="memItemLeft" align="right" valign="top">const IR::StructExpression *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab726ca045e7d9f7708f2ee34cbf01f42">explode</a> (const IR::Expression *root, <a class="el" href="classcstring.html">cstring</a> prefix)</td></tr>
+<tr class="separator:ab726ca045e7d9f7708f2ee34cbf01f42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a181a7aeac47284513c36d86744ddd2b4" id="r_a181a7aeac47284513c36d86744ddd2b4"><td class="memItemLeft" align="right" valign="top"><a id="a181a7aeac47284513c36d86744ddd2b4" name="a181a7aeac47284513c36d86744ddd2b4"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>flatten</b> (const <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, <a class="el" href="classcstring.html">cstring</a> prefix, const IR::Type *type, const IR::Annotations *annotations, <a class="el" href="class_i_r_1_1_indexed_vector.html">IR::IndexedVector</a>&lt; IR::StructField &gt; *fields, <a class="el" href="class_p4_1_1_annotation_selection_policy.html">AnnotationSelectionPolicy</a> *policy)</td></tr>
+<tr class="separator:a181a7aeac47284513c36d86744ddd2b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_i_has_db_print"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_i_has_db_print')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_i_has_db_print.html">IHasDbPrint</a></td></tr>
+<tr class="memitem:a4d93ba087be0ae3c7e665e3b1f24fef8 inherit pub_methods_class_i_has_db_print" id="r_a4d93ba087be0ae3c7e665e3b1f24fef8"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>print</b> () const</td></tr>
+<tr class="separator:a4d93ba087be0ae3c7e665e3b1f24fef8 inherit pub_methods_class_i_has_db_print"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a6b4f84d9fb9d4ed11b5897f43419c22d" id="r_a6b4f84d9fb9d4ed11b5897f43419c22d"><td class="memItemLeft" align="right" valign="top"><a id="a6b4f84d9fb9d4ed11b5897f43419c22d" name="a6b4f84d9fb9d4ed11b5897f43419c22d"></a>
+std::map&lt; <a class="el" href="classcstring.html">cstring</a>, <a class="el" href="classcstring.html">cstring</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>fieldNameRemap</b></td></tr>
+<tr class="separator:a6b4f84d9fb9d4ed11b5897f43419c22d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43374c664783dbfb582812afccd0a257" id="r_a43374c664783dbfb582812afccd0a257"><td class="memItemLeft" align="right" valign="top"><a id="a43374c664783dbfb582812afccd0a257" name="a43374c664783dbfb582812afccd0a257"></a>
+const IR::Type *&#160;</td><td class="memItemRight" valign="bottom"><b>replacementType</b></td></tr>
+<tr class="separator:a43374c664783dbfb582812afccd0a257"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae59a723639204b5901607454346ae379" id="r_ae59a723639204b5901607454346ae379"><td class="memItemLeft" align="right" valign="top"><a id="ae59a723639204b5901607454346ae379" name="ae59a723639204b5901607454346ae379"></a>
+std::map&lt; <a class="el" href="classcstring.html">cstring</a>, const IR::Type_StructLike * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>structFieldMap</b></td></tr>
+<tr class="separator:ae59a723639204b5901607454346ae379"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
+struct P4::StructTypeReplacement&lt; T &gt;</div><p>Describes how a nested struct type is replaced: the new type to replace it and how each field is renamed. For example, consider the following:</p>
+<p>struct S { bit a; bool b; }</p>
+<p>struct T { S s; bit&lt;6&gt; y; }</p>
+<p>struct M { T t; bit&lt;3&gt; x; } </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a53e45c2f1b2b564fe9f88d0397e40af1" name="a53e45c2f1b2b564fe9f88d0397e40af1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53e45c2f1b2b564fe9f88d0397e40af1">&#9670;&#160;</a></span>dbprint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void <a class="el" href="struct_p4_1_1_struct_type_replacement.html">P4::StructTypeReplacement</a>&lt; T &gt;::dbprint </td>
+          <td>(</td>
+          <td class="paramtype">std::ostream &amp;</td>          <td class="paramname"><span class="paramname"><em>out</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implements <a class="el" href="class_i_has_db_print.html">IHasDbPrint</a>.</p>
+
+</div>
+</div>
+<a id="ab726ca045e7d9f7708f2ee34cbf01f42" name="ab726ca045e7d9f7708f2ee34cbf01f42"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab726ca045e7d9f7708f2ee34cbf01f42">&#9670;&#160;</a></span>explode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::StructExpression * <a class="el" href="struct_p4_1_1_struct_type_replacement.html">P4::StructTypeReplacement</a>&lt; T &gt;::explode </td>
+          <td>(</td>
+          <td class="paramtype">const IR::Expression *</td>          <td class="paramname"><span class="paramname"><em>root</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>prefix</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns a StructExpression suitable for initializing a struct for the fields that start with the given prefix. For example, for prefix .t and root R this returns { .s = { .a = R._t_s_a0, .b = R._t_s_b1 }, .y = R._t_y2 } </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

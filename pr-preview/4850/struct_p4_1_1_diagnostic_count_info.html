@@ -120,9 +120,116 @@ $(function(){initNavTree('struct_p4_1_1_diagnostic_count_info.html',''); initRes
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="struct_p4_1_1_diagnostic_count_info-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::DiagnosticCountInfo Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="pass__utils_8h_source.html">pass_utils.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:afd8795dc3d740785fdd73c245e5337d1" id="r_afd8795dc3d740785fdd73c245e5337d1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afd8795dc3d740785fdd73c245e5337d1">DiagnosticCountInfo</a> (<a class="el" href="class_base_compile_context.html">BaseCompileContext</a> &amp;ctxt=<a class="el" href="class_base_compile_context.html#a509f42fd27b2deac994b07d49f5df60c">BaseCompileContext::get</a>())</td></tr>
+<tr class="separator:afd8795dc3d740785fdd73c245e5337d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f9e7a1f3f84ec8e9be2fee20edab056" id="r_a8f9e7a1f3f84ec8e9be2fee20edab056"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8f9e7a1f3f84ec8e9be2fee20edab056">emitInfo</a> (std::string_view componentInfo)</td></tr>
+<tr class="separator:a8f9e7a1f3f84ec8e9be2fee20edab056"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acaf3b45197bbc9a88a223bbb894f659d" id="r_acaf3b45197bbc9a88a223bbb894f659d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_p4_1_1_diagnostic_count_info_guard.html">DiagnosticCountInfoGuard</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acaf3b45197bbc9a88a223bbb894f659d">getInfoGuard</a> (std::string_view componentInfo)</td></tr>
+<tr class="separator:acaf3b45197bbc9a88a223bbb894f659d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ef3639182cd95e75114d3f3fde77535" id="r_a9ef3639182cd95e75114d3f3fde77535"><td class="memItemLeft" align="right" valign="top">DebugHook&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9ef3639182cd95e75114d3f3fde77535">getPassManagerHook</a> ()</td></tr>
+<tr class="separator:a9ef3639182cd95e75114d3f3fde77535"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>An alternative interface to the diagnostic count info that allows using it outside of pass manager (but can also generate a pass manager hook). All copies of one object and all hooks and guards derived from it share the same diagnostic message counts so they can provide consistent logs.</p>
+<dl class="section see"><dt>See also</dt><dd>getDiagnosticCountInPassHook </dd></dl>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="afd8795dc3d740785fdd73c245e5337d1" name="afd8795dc3d740785fdd73c245e5337d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd8795dc3d740785fdd73c245e5337d1">&#9670;&#160;</a></span>DiagnosticCountInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">P4::DiagnosticCountInfo::DiagnosticCountInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_base_compile_context.html">BaseCompileContext</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>ctxt</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="class_base_compile_context.html#a509f42fd27b2deac994b07d49f5df60c">BaseCompileContext::get</a>()</span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctxt</td><td>Optionally, you can provide a compilation context to take the diagnostic counts from. If not provied BaseCompileContext::get() is used. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a8f9e7a1f3f84ec8e9be2fee20edab056" name="a8f9e7a1f3f84ec8e9be2fee20edab056"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f9e7a1f3f84ec8e9be2fee20edab056">&#9670;&#160;</a></span>emitInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4::DiagnosticCountInfo::emitInfo </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>componentInfo</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Emits the information like printed by the debug hook, except using componentInfo as the info at the beginning of the line: the line will be in form "&lt;componentInfo&gt; emitted &lt;counts&gt;". This is useful e.g. for printing info about diagnostics in parser. </p>
+
+</div>
+</div>
+<a id="acaf3b45197bbc9a88a223bbb894f659d" name="acaf3b45197bbc9a88a223bbb894f659d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acaf3b45197bbc9a88a223bbb894f659d">&#9670;&#160;</a></span>getInfoGuard()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_p4_1_1_diagnostic_count_info_guard.html">DiagnosticCountInfoGuard</a> P4::DiagnosticCountInfo::getInfoGuard </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>componentInfo</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Similar to <a class="el" href="#a8f9e7a1f3f84ec8e9be2fee20edab056">emitInfo</a>, but prints the info at the moment the returned guard is destructed. </p>
+
+</div>
+</div>
+<a id="a9ef3639182cd95e75114d3f3fde77535" name="a9ef3639182cd95e75114d3f3fde77535"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ef3639182cd95e75114d3f3fde77535">&#9670;&#160;</a></span>getPassManagerHook()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">DebugHook P4::DiagnosticCountInfo::getPassManagerHook </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Very similar to <a class="el" href="namespace_p4.html#a0ecde0f8c93733cae0b10931f380e2cc">getDiagnosticCountInPassHook</a>, but the state is tied with this instance so that calling the hook and the emitInfo/ getInfoGuard during one compilation will produce the correct counts. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

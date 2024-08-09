@@ -120,9 +120,167 @@ $(function(){initNavTree('class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_token.html'
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_token-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::P4Testgen::Bmv2::Token Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:a256562efc93b536a58c9118d84b42a42" id="r_a256562efc93b536a58c9118d84b42a42"><td class="memItemLeft" align="right" valign="top"><a id="a256562efc93b536a58c9118d84b42a42" name="a256562efc93b536a58c9118d84b42a42"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><b>Kind</b> { <br />
+&#160;&#160;<b>Priority</b>
+, <b>Text</b>
+, <b>True</b>
+, <b>False</b>
+, <br />
+&#160;&#160;<b>LineStatementClose</b>
+, <b>Id</b>
+, <b>Number</b>
+, <b>Minus</b>
+, <br />
+&#160;&#160;<b>Plus</b>
+, <b>Dot</b>
+, <b>FieldAcces</b>
+, <b>MetadataAccess</b>
+, <br />
+&#160;&#160;<b>LeftParen</b>
+, <b>RightParen</b>
+, <b>Equal</b>
+, <b>NotEqual</b>
+, <br />
+&#160;&#160;<b>GreaterThan</b>
+, <b>GreaterEqual</b>
+, <b>LessThan</b>
+, <b>LessEqual</b>
+, <br />
+&#160;&#160;<b>LNot</b>
+, <b>Colon</b>
+, <b>Semicolon</b>
+, <b>Conjunction</b>
+, <br />
+&#160;&#160;<b>Disjunction</b>
+, <b>Implication</b>
+, <b>Slash</b>
+, <b>Percent</b>
+, <br />
+&#160;&#160;<b>Shr</b>
+, <b>Shl</b>
+, <b>Mul</b>
+, <b>Comment</b>
+, <br />
+&#160;&#160;<b>Unknown</b>
+, <b>EndString</b>
+, <b>End</b>
+<br />
+ }</td></tr>
+<tr class="separator:a256562efc93b536a58c9118d84b42a42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a95d0f73b8c8bc84dd0d7c1f96145a145" id="r_a95d0f73b8c8bc84dd0d7c1f96145a145"><td class="memItemLeft" align="right" valign="top"><a id="a95d0f73b8c8bc84dd0d7c1f96145a145" name="a95d0f73b8c8bc84dd0d7c1f96145a145"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Token</b> (Kind <a class="el" href="#ae1239f703e23ac0fc8099b72231d7e34">kind</a>) noexcept</td></tr>
+<tr class="separator:a95d0f73b8c8bc84dd0d7c1f96145a145"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc1f32cbede427c80c14cd3906dd291a" id="r_adc1f32cbede427c80c14cd3906dd291a"><td class="memItemLeft" align="right" valign="top"><a id="adc1f32cbede427c80c14cd3906dd291a" name="adc1f32cbede427c80c14cd3906dd291a"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Token</b> (Kind <a class="el" href="#ae1239f703e23ac0fc8099b72231d7e34">kind</a>, const char *beg, const char *end) noexcept</td></tr>
+<tr class="separator:adc1f32cbede427c80c14cd3906dd291a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca2196f813296b7accad9bd2dd0c3ba9" id="r_aca2196f813296b7accad9bd2dd0c3ba9"><td class="memItemLeft" align="right" valign="top"><a id="aca2196f813296b7accad9bd2dd0c3ba9" name="aca2196f813296b7accad9bd2dd0c3ba9"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Token</b> (Kind <a class="el" href="#ae1239f703e23ac0fc8099b72231d7e34">kind</a>, const char *beg, std::size_t len) noexcept</td></tr>
+<tr class="separator:aca2196f813296b7accad9bd2dd0c3ba9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa40158ba296ea5f5a7039882609bc62b" id="r_aa40158ba296ea5f5a7039882609bc62b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa40158ba296ea5f5a7039882609bc62b">is</a> (Kind <a class="el" href="#ae1239f703e23ac0fc8099b72231d7e34">kind</a>) const noexcept</td></tr>
+<tr class="separator:aa40158ba296ea5f5a7039882609bc62b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c7186be0fe1c5c46edf2cf65f5a8541" id="r_a2c7186be0fe1c5c46edf2cf65f5a8541"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c7186be0fe1c5c46edf2cf65f5a8541">isNot</a> (Kind <a class="el" href="#ae1239f703e23ac0fc8099b72231d7e34">kind</a>) const noexcept</td></tr>
+<tr class="separator:a2c7186be0fe1c5c46edf2cf65f5a8541"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aade21485cadcbda7b2d99530431c81a5" id="r_aade21485cadcbda7b2d99530431c81a5"><td class="memItemLeft" align="right" valign="top"><a id="aade21485cadcbda7b2d99530431c81a5" name="aade21485cadcbda7b2d99530431c81a5"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isOneOf</b> (Kind k1, Kind k2) const noexcept</td></tr>
+<tr class="memdesc:aade21485cadcbda7b2d99530431c81a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions for multiple comparison kind. <br /></td></tr>
+<tr class="separator:aade21485cadcbda7b2d99530431c81a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d3d42c040d203ae2a1ab40219c0db63" id="r_a1d3d42c040d203ae2a1ab40219c0db63"><td class="memTemplParams" colspan="2"><a id="a1d3d42c040d203ae2a1ab40219c0db63" name="a1d3d42c040d203ae2a1ab40219c0db63"></a>
+template&lt;typename... Ts&gt; </td></tr>
+<tr class="memitem:a1d3d42c040d203ae2a1ab40219c0db63"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>isOneOf</b> (Kind k1, Kind k2, Ts... ks) const noexcept</td></tr>
+<tr class="separator:a1d3d42c040d203ae2a1ab40219c0db63"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1239f703e23ac0fc8099b72231d7e34" id="r_ae1239f703e23ac0fc8099b72231d7e34"><td class="memItemLeft" align="right" valign="top"><a id="ae1239f703e23ac0fc8099b72231d7e34" name="ae1239f703e23ac0fc8099b72231d7e34"></a>
+Kind&#160;</td><td class="memItemRight" valign="bottom"><b>kind</b> () const noexcept</td></tr>
+<tr class="memdesc:ae1239f703e23ac0fc8099b72231d7e34"><td class="mdescLeft">&#160;</td><td class="mdescRight">The function to get kind from token. <br /></td></tr>
+<tr class="separator:ae1239f703e23ac0fc8099b72231d7e34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af47078ac1f5b0679167d9b7a2cc0f7fc" id="r_af47078ac1f5b0679167d9b7a2cc0f7fc"><td class="memItemLeft" align="right" valign="top"><a id="af47078ac1f5b0679167d9b7a2cc0f7fc" name="af47078ac1f5b0679167d9b7a2cc0f7fc"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>kind</b> (Kind kind) noexcept</td></tr>
+<tr class="memdesc:af47078ac1f5b0679167d9b7a2cc0f7fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">The function to replace the token kind with another kind. <br /></td></tr>
+<tr class="separator:af47078ac1f5b0679167d9b7a2cc0f7fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a669a11818f725f1accb85bbbd6a94a9a" id="r_a669a11818f725f1accb85bbbd6a94a9a"><td class="memItemLeft" align="right" valign="top"><a id="a669a11818f725f1accb85bbbd6a94a9a" name="a669a11818f725f1accb85bbbd6a94a9a"></a>
+std::string_view&#160;</td><td class="memItemRight" valign="bottom"><b>lexeme</b> () const noexcept</td></tr>
+<tr class="memdesc:a669a11818f725f1accb85bbbd6a94a9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">The function to get lexeme from token. <br /></td></tr>
+<tr class="separator:a669a11818f725f1accb85bbbd6a94a9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a657046c2e3dc39b9b17b8f750f7a44b4" id="r_a657046c2e3dc39b9b17b8f750f7a44b4"><td class="memItemLeft" align="right" valign="top"><a id="a657046c2e3dc39b9b17b8f750f7a44b4" name="a657046c2e3dc39b9b17b8f750f7a44b4"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>lexeme</b> (std::string_view lexeme) noexcept</td></tr>
+<tr class="memdesc:a657046c2e3dc39b9b17b8f750f7a44b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The function to replace the token lexeme with another lexeme. <br /></td></tr>
+<tr class="separator:a657046c2e3dc39b9b17b8f750f7a44b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a63e32abeb8362e11bc53653b15deccc5" id="r_a63e32abeb8362e11bc53653b15deccc5"><td class="memItemLeft" align="right" valign="top"><a id="a63e32abeb8362e11bc53653b15deccc5" name="a63e32abeb8362e11bc53653b15deccc5"></a>
+Kind&#160;</td><td class="memItemRight" valign="bottom"><b>m_kind</b> {}</td></tr>
+<tr class="separator:a63e32abeb8362e11bc53653b15deccc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23aca3e478bce8e1aefab4defe584553" id="r_a23aca3e478bce8e1aefab4defe584553"><td class="memItemLeft" align="right" valign="top"><a id="a23aca3e478bce8e1aefab4defe584553" name="a23aca3e478bce8e1aefab4defe584553"></a>
+std::string_view&#160;</td><td class="memItemRight" valign="bottom"><b>m_lexeme</b> {}</td></tr>
+<tr class="separator:a23aca3e478bce8e1aefab4defe584553"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="aa40158ba296ea5f5a7039882609bc62b" name="aa40158ba296ea5f5a7039882609bc62b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa40158ba296ea5f5a7039882609bc62b">&#9670;&#160;</a></span>is()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool P4Tools::P4Testgen::Bmv2::Token::is </td>
+          <td>(</td>
+          <td class="paramtype">Token::Kind</td>          <td class="paramname"><span class="paramname"><em>kind</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">nodiscard</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Kind comparison function. Allows you to compare token kind with the specified kind and return bool values, replacement for == </p>
+
+</div>
+</div>
+<a id="a2c7186be0fe1c5c46edf2cf65f5a8541" name="a2c7186be0fe1c5c46edf2cf65f5a8541"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c7186be0fe1c5c46edf2cf65f5a8541">&#9670;&#160;</a></span>isNot()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool P4Tools::P4Testgen::Bmv2::Token::isNot </td>
+          <td>(</td>
+          <td class="paramtype">Token::Kind</td>          <td class="paramname"><span class="paramname"><em>kind</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">nodiscard</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Kind comparison function. Allows you to compare token kind with the specified kind and return bool values, replacement for != </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

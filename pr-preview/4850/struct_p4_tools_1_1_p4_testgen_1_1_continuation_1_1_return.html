@@ -120,10 +120,35 @@ $(function(){initNavTree('struct_p4_tools_1_1_p4_testgen_1_1_continuation_1_1_re
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="struct_p4_tools_1_1_p4_testgen_1_1_continuation_1_1_return-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::P4Testgen::Continuation::Return Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="continuation_8h_source.html">continuation.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a855a03eddd6c7397366db110fad0ab82" id="r_a855a03eddd6c7397366db110fad0ab82"><td class="memItemLeft" align="right" valign="top"><a id="a855a03eddd6c7397366db110fad0ab82" name="a855a03eddd6c7397366db110fad0ab82"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Return</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *expr)</td></tr>
+<tr class="separator:a855a03eddd6c7397366db110fad0ab82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23a6042a7d0d7cea76c93cebc5256e92" id="r_a23a6042a7d0d7cea76c93cebc5256e92"><td class="memItemLeft" align="right" valign="top"><a id="a23a6042a7d0d7cea76c93cebc5256e92" name="a23a6042a7d0d7cea76c93cebc5256e92"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const <a class="el" href="struct_p4_tools_1_1_p4_testgen_1_1_continuation_1_1_return.html">Return</a> &amp;other) const</td></tr>
+<tr class="memdesc:a23a6042a7d0d7cea76c93cebc5256e92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delegates to IR equality. <br /></td></tr>
+<tr class="separator:a23a6042a7d0d7cea76c93cebc5256e92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a9a1b1bc0db8fe50667c5b77651831f28" id="r_a9a1b1bc0db8fe50667c5b77651831f28"><td class="memItemLeft" align="right" valign="top"><a id="a9a1b1bc0db8fe50667c5b77651831f28" name="a9a1b1bc0db8fe50667c5b77651831f28"></a>
+std::optional&lt; const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>expr</b></td></tr>
+<tr class="separator:a9a1b1bc0db8fe50667c5b77651831f28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Represents a command that invokes the topmost continuation on the continuation stack. If a node is provided, it is first evaluated as an expression, and the result is used as an argument for the invocation. Note that the node doesn't necessarily need to be an instance of IR::Expression; other IR nodes may be treated as expressions in the metalanguage, even though they are not P4 expressions. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

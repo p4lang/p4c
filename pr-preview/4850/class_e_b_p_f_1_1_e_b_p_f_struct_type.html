@@ -120,9 +120,362 @@ $(function(){initNavTree('class_e_b_p_f_1_1_e_b_p_f_struct_type.html',''); initR
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="class_e_b_p_f_1_1_e_b_p_f_struct_type-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">EBPF::EBPFStructType Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Also represents headers and unions.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="ebpf_type_8h_source.html">ebpfType.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for EBPF::EBPFStructType:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_e_b_p_f_1_1_e_b_p_f_struct_type__inherit__graph.svg" width="288" height="403"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a49d6471a4a35e489bd749c6bccf06418" id="r_a49d6471a4a35e489bd749c6bccf06418"><td class="memItemLeft" align="right" valign="top"><a id="a49d6471a4a35e489bd749c6bccf06418" name="a49d6471a4a35e489bd749c6bccf06418"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>EBPFStructType</b> (const IR::Type_StructLike *strct)</td></tr>
+<tr class="separator:a49d6471a4a35e489bd749c6bccf06418"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a132b44e8f34311dfd4941f86449dab21" id="r_a132b44e8f34311dfd4941f86449dab21"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a132b44e8f34311dfd4941f86449dab21">declare</a> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *builder, <a class="el" href="classcstring.html">cstring</a> id, bool asPointer) override</td></tr>
+<tr class="separator:a132b44e8f34311dfd4941f86449dab21"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d1eb9c256c6ebd4b8c916a38eb6adde" id="r_a8d1eb9c256c6ebd4b8c916a38eb6adde"><td class="memItemLeft" align="right" valign="top"><a id="a8d1eb9c256c6ebd4b8c916a38eb6adde" name="a8d1eb9c256c6ebd4b8c916a38eb6adde"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>DECLARE_TYPEINFO</b> (<a class="el" href="class_e_b_p_f_1_1_e_b_p_f_struct_type.html">EBPFStructType</a>, <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type.html">EBPFType</a>, <a class="el" href="class_e_b_p_f_1_1_i_has_width.html">IHasWidth</a>)</td></tr>
+<tr class="separator:a8d1eb9c256c6ebd4b8c916a38eb6adde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33f54b4a3f0c067124867258f3cdee44" id="r_a33f54b4a3f0c067124867258f3cdee44"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a33f54b4a3f0c067124867258f3cdee44">declareArray</a> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *builder, <a class="el" href="classcstring.html">cstring</a> id, unsigned size) override</td></tr>
+<tr class="separator:a33f54b4a3f0c067124867258f3cdee44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87e4a3859a9dac7112214402f5df807b" id="r_a87e4a3859a9dac7112214402f5df807b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a87e4a3859a9dac7112214402f5df807b">declareInit</a> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *builder, <a class="el" href="classcstring.html">cstring</a> id, bool asPointer) override</td></tr>
+<tr class="separator:a87e4a3859a9dac7112214402f5df807b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac46193fe83a9c21af9f83dae23b31bc2" id="r_ac46193fe83a9c21af9f83dae23b31bc2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac46193fe83a9c21af9f83dae23b31bc2">emit</a> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *builder) override</td></tr>
+<tr class="separator:ac46193fe83a9c21af9f83dae23b31bc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad68d3c38d89d4fafd53c50cf7cc8df50" id="r_ad68d3c38d89d4fafd53c50cf7cc8df50"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad68d3c38d89d4fafd53c50cf7cc8df50">emitInitializer</a> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *builder) override</td></tr>
+<tr class="separator:ad68d3c38d89d4fafd53c50cf7cc8df50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a756ebd44af699621d711cc15a2d39e92" id="r_a756ebd44af699621d711cc15a2d39e92"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a756ebd44af699621d711cc15a2d39e92">implementationWidthInBits</a> () const override</td></tr>
+<tr class="separator:a756ebd44af699621d711cc15a2d39e92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c5329b9acbbd2d6da0496d9b2ae5546" id="r_a5c5329b9acbbd2d6da0496d9b2ae5546"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5c5329b9acbbd2d6da0496d9b2ae5546">widthInBits</a> () const override</td></tr>
+<tr class="memdesc:a5c5329b9acbbd2d6da0496d9b2ae5546"><td class="mdescLeft">&#160;</td><td class="mdescRight">P4 width.  <br /></td></tr>
+<tr class="separator:a5c5329b9acbbd2d6da0496d9b2ae5546"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_e_b_p_f_1_1_e_b_p_f_type"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_e_b_p_f_1_1_e_b_p_f_type')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type.html">EBPF::EBPFType</a></td></tr>
+<tr class="memitem:a2f24f8dac9a6342ac0a131cc332dd034 inherit pub_methods_class_e_b_p_f_1_1_e_b_p_f_type" id="r_a2f24f8dac9a6342ac0a131cc332dd034"><td class="memItemLeft" align="right" valign="top">
+&#160;</td><td class="memItemRight" valign="bottom"><b>DECLARE_TYPEINFO</b> (<a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type.html">EBPFType</a>, <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_object.html">EBPFObject</a>)</td></tr>
+<tr class="separator:a2f24f8dac9a6342ac0a131cc332dd034 inherit pub_methods_class_e_b_p_f_1_1_e_b_p_f_type"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_e_b_p_f_1_1_e_b_p_f_object"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_e_b_p_f_1_1_e_b_p_f_object')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_object.html">EBPF::EBPFObject</a></td></tr>
+<tr class="memitem:ae1b50eb1a7fc1853cdfee85d3189b47c inherit pub_methods_class_e_b_p_f_1_1_e_b_p_f_object" id="r_ae1b50eb1a7fc1853cdfee85d3189b47c"><td class="memItemLeft" align="right" valign="top">
+&#160;</td><td class="memItemRight" valign="bottom"><b>DECLARE_TYPEINFO</b> (<a class="el" href="class_e_b_p_f_1_1_e_b_p_f_object.html">EBPFObject</a>)</td></tr>
+<tr class="separator:ae1b50eb1a7fc1853cdfee85d3189b47c inherit pub_methods_class_e_b_p_f_1_1_e_b_p_f_object"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_i_castable"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_i_castable')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_i_castable.html">ICastable</a></td></tr>
+<tr class="memitem:a88c3b2d9d52f83909582425b471aa23b inherit pub_methods_class_i_castable" id="r_a88c3b2d9d52f83909582425b471aa23b"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a88c3b2d9d52f83909582425b471aa23b inherit pub_methods_class_i_castable"><td class="memTemplItemLeft" align="right" valign="top">T &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>as</b> ()</td></tr>
+<tr class="memdesc:a88c3b2d9d52f83909582425b471aa23b inherit pub_methods_class_i_castable"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries to convert the class to type T. A BUG occurs if the cast fails. <br /></td></tr>
+<tr class="separator:a88c3b2d9d52f83909582425b471aa23b inherit pub_methods_class_i_castable"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa37d586a3dbb4df73346dc5d3803ff20 inherit pub_methods_class_i_castable" id="r_aa37d586a3dbb4df73346dc5d3803ff20"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aa37d586a3dbb4df73346dc5d3803ff20 inherit pub_methods_class_i_castable"><td class="memTemplItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>as</b> () const</td></tr>
+<tr class="memdesc:aa37d586a3dbb4df73346dc5d3803ff20 inherit pub_methods_class_i_castable"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries to convert the class to type T. A BUG occurs if the cast fails. <br /></td></tr>
+<tr class="separator:aa37d586a3dbb4df73346dc5d3803ff20 inherit pub_methods_class_i_castable"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6defaa45e11c0a3d9164814695c69a8 inherit pub_methods_class_i_castable" id="r_af6defaa45e11c0a3d9164814695c69a8"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:af6defaa45e11c0a3d9164814695c69a8 inherit pub_methods_class_i_castable"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>checkedTo</b> ()</td></tr>
+<tr class="memdesc:af6defaa45e11c0a3d9164814695c69a8 inherit pub_methods_class_i_castable"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs a checked cast. A BUG occurs if the cast fails. <br /></td></tr>
+<tr class="separator:af6defaa45e11c0a3d9164814695c69a8 inherit pub_methods_class_i_castable"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdbd28b81119a33a898fa8511bf2ef6b inherit pub_methods_class_i_castable" id="r_afdbd28b81119a33a898fa8511bf2ef6b"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:afdbd28b81119a33a898fa8511bf2ef6b inherit pub_methods_class_i_castable"><td class="memTemplItemLeft" align="right" valign="top">const T *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>checkedTo</b> () const</td></tr>
+<tr class="memdesc:afdbd28b81119a33a898fa8511bf2ef6b inherit pub_methods_class_i_castable"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs a checked cast. A BUG occurs if the cast fails. <br /></td></tr>
+<tr class="separator:afdbd28b81119a33a898fa8511bf2ef6b inherit pub_methods_class_i_castable"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_struct_r_t_t_i_1_1_base"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_struct_r_t_t_i_1_1_base')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="struct_r_t_t_i_1_1_base.html">RTTI::Base</a></td></tr>
+<tr class="memitem:ad54f648738287d21b2b1aafa2bc63f8c inherit pub_methods_struct_r_t_t_i_1_1_base" id="r_ad54f648738287d21b2b1aafa2bc63f8c"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ad54f648738287d21b2b1aafa2bc63f8c inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="struct_r_t_t_i_1_1_base.html#ad54f648738287d21b2b1aafa2bc63f8c">is</a> () const noexcept</td></tr>
+<tr class="separator:ad54f648738287d21b2b1aafa2bc63f8c inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ec65d7575c8913d0c3fcf542a1c9f22 inherit pub_methods_struct_r_t_t_i_1_1_base" id="r_a0ec65d7575c8913d0c3fcf542a1c9f22"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_r_t_t_i_1_1_base.html#a0ec65d7575c8913d0c3fcf542a1c9f22">isA</a> (TypeId <a class="el" href="struct_r_t_t_i_1_1_base.html#aa3eedc64ebb92c6f17f94d8589d672d2">typeId</a>) const noexcept=0</td></tr>
+<tr class="separator:a0ec65d7575c8913d0c3fcf542a1c9f22 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab35786f9cf561dd2329b86200fdc3aa7 inherit pub_methods_struct_r_t_t_i_1_1_base" id="r_ab35786f9cf561dd2329b86200fdc3aa7"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ab35786f9cf561dd2329b86200fdc3aa7 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memTemplItemLeft" align="right" valign="top">const T *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>to</b> () const noexcept</td></tr>
+<tr class="memdesc:ab35786f9cf561dd2329b86200fdc3aa7 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <code>to</code>, but returns const pointer to T. <br /></td></tr>
+<tr class="separator:ab35786f9cf561dd2329b86200fdc3aa7 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60ec2358ab44340b7fa2a17f1b2f3a59 inherit pub_methods_struct_r_t_t_i_1_1_base" id="r_a60ec2358ab44340b7fa2a17f1b2f3a59"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a60ec2358ab44340b7fa2a17f1b2f3a59 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="struct_r_t_t_i_1_1_base.html#a60ec2358ab44340b7fa2a17f1b2f3a59">to</a> () noexcept</td></tr>
+<tr class="separator:a60ec2358ab44340b7fa2a17f1b2f3a59 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3eedc64ebb92c6f17f94d8589d672d2 inherit pub_methods_struct_r_t_t_i_1_1_base" id="r_aa3eedc64ebb92c6f17f94d8589d672d2"><td class="memItemLeft" align="right" valign="top">virtual TypeId&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_r_t_t_i_1_1_base.html#aa3eedc64ebb92c6f17f94d8589d672d2">typeId</a> () const noexcept=0</td></tr>
+<tr class="separator:aa3eedc64ebb92c6f17f94d8589d672d2 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_e_b_p_f_1_1_i_has_width"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_e_b_p_f_1_1_i_has_width')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_e_b_p_f_1_1_i_has_width.html">EBPF::IHasWidth</a></td></tr>
+<tr class="memitem:a4ad31571093d7f009fdcd737b1e5a23c inherit pub_methods_class_e_b_p_f_1_1_i_has_width" id="r_a4ad31571093d7f009fdcd737b1e5a23c"><td class="memItemLeft" align="right" valign="top">
+&#160;</td><td class="memItemRight" valign="bottom"><b>DECLARE_TYPEINFO</b> (<a class="el" href="class_e_b_p_f_1_1_i_has_width.html">IHasWidth</a>)</td></tr>
+<tr class="separator:a4ad31571093d7f009fdcd737b1e5a23c inherit pub_methods_class_e_b_p_f_1_1_i_has_width"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a77ae3b114fc875e00f7fd076561c0bd1" id="r_a77ae3b114fc875e00f7fd076561c0bd1"><td class="memItemLeft" align="right" valign="top"><a id="a77ae3b114fc875e00f7fd076561c0bd1" name="a77ae3b114fc875e00f7fd076561c0bd1"></a>
+std::vector&lt; EBPFField * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>fields</b></td></tr>
+<tr class="separator:a77ae3b114fc875e00f7fd076561c0bd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace7ebb9f18673246fe0adfb295686eb4" id="r_ace7ebb9f18673246fe0adfb295686eb4"><td class="memItemLeft" align="right" valign="top"><a id="ace7ebb9f18673246fe0adfb295686eb4" name="ace7ebb9f18673246fe0adfb295686eb4"></a>
+unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>implWidth</b></td></tr>
+<tr class="separator:ace7ebb9f18673246fe0adfb295686eb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72d1491c3fec4639a774ec4bf7d8f116" id="r_a72d1491c3fec4639a774ec4bf7d8f116"><td class="memItemLeft" align="right" valign="top"><a id="a72d1491c3fec4639a774ec4bf7d8f116" name="a72d1491c3fec4639a774ec4bf7d8f116"></a>
+<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>kind</b></td></tr>
+<tr class="separator:a72d1491c3fec4639a774ec4bf7d8f116"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf94d3b3fc877db5142b23cccf261cd3" id="r_acf94d3b3fc877db5142b23cccf261cd3"><td class="memItemLeft" align="right" valign="top"><a id="acf94d3b3fc877db5142b23cccf261cd3" name="acf94d3b3fc877db5142b23cccf261cd3"></a>
+<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>name</b></td></tr>
+<tr class="separator:acf94d3b3fc877db5142b23cccf261cd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a721f2e63865928f54ebf53257925073d" id="r_a721f2e63865928f54ebf53257925073d"><td class="memItemLeft" align="right" valign="top"><a id="a721f2e63865928f54ebf53257925073d" name="a721f2e63865928f54ebf53257925073d"></a>
+unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>width</b></td></tr>
+<tr class="separator:a721f2e63865928f54ebf53257925073d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_attribs_class_e_b_p_f_1_1_e_b_p_f_type"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_attribs_class_e_b_p_f_1_1_e_b_p_f_type')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type.html">EBPF::EBPFType</a></td></tr>
+<tr class="memitem:aab7a92ca739dd7fdc656b0aa652aac2d inherit pub_attribs_class_e_b_p_f_1_1_e_b_p_f_type" id="r_aab7a92ca739dd7fdc656b0aa652aac2d"><td class="memItemLeft" align="right" valign="top">
+const IR::Type *&#160;</td><td class="memItemRight" valign="bottom"><b>type</b></td></tr>
+<tr class="separator:aab7a92ca739dd7fdc656b0aa652aac2d inherit pub_attribs_class_e_b_p_f_1_1_e_b_p_f_type"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pub_static_methods_class_e_b_p_f_1_1_e_b_p_f_object"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_static_methods_class_e_b_p_f_1_1_e_b_p_f_object')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_object.html">EBPF::EBPFObject</a></td></tr>
+<tr class="memitem:a75c158b87b451234887f088e28d52512 inherit pub_static_methods_class_e_b_p_f_1_1_e_b_p_f_object" id="r_a75c158b87b451234887f088e28d52512"><td class="memItemLeft" align="right" valign="top">
+static <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>externalName</b> (const <a class="el" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *declaration)</td></tr>
+<tr class="separator:a75c158b87b451234887f088e28d52512 inherit pub_static_methods_class_e_b_p_f_1_1_e_b_p_f_object"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb1380cb33450aac76b0fbba7c89379d inherit pub_static_methods_class_e_b_p_f_1_1_e_b_p_f_object" id="r_adb1380cb33450aac76b0fbba7c89379d"><td class="memItemLeft" align="right" valign="top">
+static <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getSpecializedTypeName</b> (const IR::Declaration_Instance *di)</td></tr>
+<tr class="separator:adb1380cb33450aac76b0fbba7c89379d inherit pub_static_methods_class_e_b_p_f_1_1_e_b_p_f_object"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad584b56c1076b168ce54ad14ec1e3623 inherit pub_static_methods_class_e_b_p_f_1_1_e_b_p_f_object" id="r_ad584b56c1076b168ce54ad14ec1e3623"><td class="memItemLeft" align="right" valign="top">
+static <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getTypeName</b> (const IR::Declaration_Instance *di)</td></tr>
+<tr class="separator:ad584b56c1076b168ce54ad14ec1e3623 inherit pub_static_methods_class_e_b_p_f_1_1_e_b_p_f_object"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_methods_class_e_b_p_f_1_1_e_b_p_f_type"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_e_b_p_f_1_1_e_b_p_f_type')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type.html">EBPF::EBPFType</a></td></tr>
+<tr class="memitem:a79f0f43864284387865c2d5780bdd8cc inherit pro_methods_class_e_b_p_f_1_1_e_b_p_f_type" id="r_a79f0f43864284387865c2d5780bdd8cc"><td class="memItemLeft" align="right" valign="top">
+&#160;</td><td class="memItemRight" valign="bottom"><b>EBPFType</b> (const IR::Type *type)</td></tr>
+<tr class="separator:a79f0f43864284387865c2d5780bdd8cc inherit pro_methods_class_e_b_p_f_1_1_e_b_p_f_type"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_methods_struct_r_t_t_i_1_1_base"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_struct_r_t_t_i_1_1_base')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="struct_r_t_t_i_1_1_base.html">RTTI::Base</a></td></tr>
+<tr class="memitem:a5cf4c478663694b67738ae0498cfb31e inherit pro_methods_struct_r_t_t_i_1_1_base" id="r_a5cf4c478663694b67738ae0498cfb31e"><td class="memItemLeft" align="right" valign="top">
+virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><b>toImpl</b> (TypeId <a class="el" href="struct_r_t_t_i_1_1_base.html#aa3eedc64ebb92c6f17f94d8589d672d2">typeId</a>) const noexcept=0</td></tr>
+<tr class="separator:a5cf4c478663694b67738ae0498cfb31e inherit pro_methods_struct_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Also represents headers and unions. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a132b44e8f34311dfd4941f86449dab21" name="a132b44e8f34311dfd4941f86449dab21"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a132b44e8f34311dfd4941f86449dab21">&#9670;&#160;</a></span>declare()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBPF::EBPFStructType::declare </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *</td>          <td class="paramname"><span class="paramname"><em>builder</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>asPointer</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implements <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type.html">EBPF::EBPFType</a>.</p>
+
+</div>
+</div>
+<a id="a33f54b4a3f0c067124867258f3cdee44" name="a33f54b4a3f0c067124867258f3cdee44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33f54b4a3f0c067124867258f3cdee44">&#9670;&#160;</a></span>declareArray()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBPF::EBPFStructType::declareArray </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *</td>          <td class="paramname"><span class="paramname"><em>builder</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>size</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented from <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type.html">EBPF::EBPFType</a>.</p>
+
+</div>
+</div>
+<a id="a87e4a3859a9dac7112214402f5df807b" name="a87e4a3859a9dac7112214402f5df807b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87e4a3859a9dac7112214402f5df807b">&#9670;&#160;</a></span>declareInit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBPF::EBPFStructType::declareInit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *</td>          <td class="paramname"><span class="paramname"><em>builder</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>asPointer</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implements <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type.html">EBPF::EBPFType</a>.</p>
+
+</div>
+</div>
+<a id="ac46193fe83a9c21af9f83dae23b31bc2" name="ac46193fe83a9c21af9f83dae23b31bc2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac46193fe83a9c21af9f83dae23b31bc2">&#9670;&#160;</a></span>emit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBPF::EBPFStructType::emit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *</td>          <td class="paramname"><span class="paramname"><em>builder</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implements <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type.html">EBPF::EBPFType</a>.</p>
+
+</div>
+</div>
+<a id="ad68d3c38d89d4fafd53c50cf7cc8df50" name="ad68d3c38d89d4fafd53c50cf7cc8df50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad68d3c38d89d4fafd53c50cf7cc8df50">&#9670;&#160;</a></span>emitInitializer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EBPF::EBPFStructType::emitInitializer </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *</td>          <td class="paramname"><span class="paramname"><em>builder</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implements <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type.html">EBPF::EBPFType</a>.</p>
+
+</div>
+</div>
+<a id="a756ebd44af699621d711cc15a2d39e92" name="a756ebd44af699621d711cc15a2d39e92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a756ebd44af699621d711cc15a2d39e92">&#9670;&#160;</a></span>implementationWidthInBits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned EBPF::EBPFStructType::implementationWidthInBits </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Width in the target implementation. Currently a multiple of 8. </p>
+
+<p>Implements <a class="el" href="class_e_b_p_f_1_1_i_has_width.html#a1de43768b17e2a6b91ba30c3bd174fa4">EBPF::IHasWidth</a>.</p>
+
+</div>
+</div>
+<a id="a5c5329b9acbbd2d6da0496d9b2ae5546" name="a5c5329b9acbbd2d6da0496d9b2ae5546"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c5329b9acbbd2d6da0496d9b2ae5546">&#9670;&#160;</a></span>widthInBits()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned EBPF::EBPFStructType::widthInBits </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>P4 width. </p>
+
+<p>Implements <a class="el" href="class_e_b_p_f_1_1_i_has_width.html#a03973da10cc22aaf4d051cfea6f9721a">EBPF::IHasWidth</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

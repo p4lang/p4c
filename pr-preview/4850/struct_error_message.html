@@ -120,10 +120,75 @@ $(function(){initNavTree('struct_error_message.html',''); initResizable(true); }
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="struct_error_message-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">ErrorMessage Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="error__message_8h_source.html">error_message.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:a44db4e19ea2643f8ef743e2aa4f63d8e" id="r_a44db4e19ea2643f8ef743e2aa4f63d8e"><td class="memItemLeft" align="right" valign="top"><a id="a44db4e19ea2643f8ef743e2aa4f63d8e" name="a44db4e19ea2643f8ef743e2aa4f63d8e"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><b>MessageType</b> : std::size_t { <b>None</b>
+, <b>Error</b>
+, <b>Warning</b>
+, <b>Info</b>
+ }</td></tr>
+<tr class="separator:a44db4e19ea2643f8ef743e2aa4f63d8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a851ceaeac351c2c6d8d2dae5ef8e50c1" id="r_a851ceaeac351c2c6d8d2dae5ef8e50c1"><td class="memItemLeft" align="right" valign="top"><a id="a851ceaeac351c2c6d8d2dae5ef8e50c1" name="a851ceaeac351c2c6d8d2dae5ef8e50c1"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ErrorMessage</b> ()</td></tr>
+<tr class="memdesc:a851ceaeac351c2c6d8d2dae5ef8e50c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used by errorWithSuffix. <br /></td></tr>
+<tr class="separator:a851ceaeac351c2c6d8d2dae5ef8e50c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f3a79857b3e64c2b4de206b31e72219" id="r_a0f3a79857b3e64c2b4de206b31e72219"><td class="memItemLeft" align="right" valign="top"><a id="a0f3a79857b3e64c2b4de206b31e72219" name="a0f3a79857b3e64c2b4de206b31e72219"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ErrorMessage</b> (MessageType type, std::string prefix, std::string <a class="el" href="#a891809daa9afcfba5edf5900588710c3">message</a>, const std::vector&lt; <a class="el" href="class_util_1_1_source_info.html">Util::SourceInfo</a> &gt; &amp;<a class="el" href="#a330ed3a60ef2067d5e4888dd713fbb0d">locations</a>, std::string <a class="el" href="#aea60e8c0b533f36cd8a6c258289a5682">suffix</a>)</td></tr>
+<tr class="separator:a0f3a79857b3e64c2b4de206b31e72219"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a350ae6c37ec1d265f5cb0eaa3e08738c" id="r_a350ae6c37ec1d265f5cb0eaa3e08738c"><td class="memItemLeft" align="right" valign="top"><a id="a350ae6c37ec1d265f5cb0eaa3e08738c" name="a350ae6c37ec1d265f5cb0eaa3e08738c"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ErrorMessage</b> (MessageType type, std::string prefix, std::string <a class="el" href="#aea60e8c0b533f36cd8a6c258289a5682">suffix</a>)</td></tr>
+<tr class="separator:a350ae6c37ec1d265f5cb0eaa3e08738c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3b225f1c4ffcb78f125a6453c407c3d" id="r_ad3b225f1c4ffcb78f125a6453c407c3d"><td class="memItemLeft" align="right" valign="top"><a id="ad3b225f1c4ffcb78f125a6453c407c3d" name="ad3b225f1c4ffcb78f125a6453c407c3d"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ErrorMessage</b> (std::string prefix, <a class="el" href="class_util_1_1_source_info.html">Util::SourceInfo</a> info, std::string <a class="el" href="#aea60e8c0b533f36cd8a6c258289a5682">suffix</a>)</td></tr>
+<tr class="separator:ad3b225f1c4ffcb78f125a6453c407c3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d18c9c6574ca87ce953bade42cdbc50" id="r_a2d18c9c6574ca87ce953bade42cdbc50"><td class="memItemLeft" align="right" valign="top"><a id="a2d18c9c6574ca87ce953bade42cdbc50" name="a2d18c9c6574ca87ce953bade42cdbc50"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>getPrefix</b> () const</td></tr>
+<tr class="separator:a2d18c9c6574ca87ce953bade42cdbc50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af48e2e5bc0b64e00370e626f351136c4" id="r_af48e2e5bc0b64e00370e626f351136c4"><td class="memItemLeft" align="right" valign="top"><a id="af48e2e5bc0b64e00370e626f351136c4" name="af48e2e5bc0b64e00370e626f351136c4"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>toString</b> () const</td></tr>
+<tr class="separator:af48e2e5bc0b64e00370e626f351136c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a330ed3a60ef2067d5e4888dd713fbb0d" id="r_a330ed3a60ef2067d5e4888dd713fbb0d"><td class="memItemLeft" align="right" valign="top"><a id="a330ed3a60ef2067d5e4888dd713fbb0d" name="a330ed3a60ef2067d5e4888dd713fbb0d"></a>
+std::vector&lt; <a class="el" href="class_util_1_1_source_info.html">Util::SourceInfo</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>locations</b> = {}</td></tr>
+<tr class="memdesc:a330ed3a60ef2067d5e4888dd713fbb0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particular formatted message. <br /></td></tr>
+<tr class="separator:a330ed3a60ef2067d5e4888dd713fbb0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a891809daa9afcfba5edf5900588710c3" id="r_a891809daa9afcfba5edf5900588710c3"><td class="memItemLeft" align="right" valign="top"><a id="a891809daa9afcfba5edf5900588710c3" name="a891809daa9afcfba5edf5900588710c3"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>message</b></td></tr>
+<tr class="memdesc:a891809daa9afcfba5edf5900588710c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Typically error/warning type from catalog. <br /></td></tr>
+<tr class="separator:a891809daa9afcfba5edf5900588710c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7bda1f4b174d6fdf2a2052a8000fcf9a" id="r_a7bda1f4b174d6fdf2a2052a8000fcf9a"><td class="memItemLeft" align="right" valign="top"><a id="a7bda1f4b174d6fdf2a2052a8000fcf9a" name="a7bda1f4b174d6fdf2a2052a8000fcf9a"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>prefix</b></td></tr>
+<tr class="separator:a7bda1f4b174d6fdf2a2052a8000fcf9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea60e8c0b533f36cd8a6c258289a5682" id="r_aea60e8c0b533f36cd8a6c258289a5682"><td class="memItemLeft" align="right" valign="top"><a id="aea60e8c0b533f36cd8a6c258289a5682" name="aea60e8c0b533f36cd8a6c258289a5682"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>suffix</b></td></tr>
+<tr class="memdesc:aea60e8c0b533f36cd8a6c258289a5682"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relevant source locations for this error. <br /></td></tr>
+<tr class="separator:aea60e8c0b533f36cd8a6c258289a5682"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac0de2e8b1a8a8c4b504a9459b711a02" id="r_aac0de2e8b1a8a8c4b504a9459b711a02"><td class="memItemLeft" align="right" valign="top"><a id="aac0de2e8b1a8a8c4b504a9459b711a02" name="aac0de2e8b1a8a8c4b504a9459b711a02"></a>
+MessageType&#160;</td><td class="memItemRight" valign="bottom"><b>type</b> = MessageType::None</td></tr>
+<tr class="separator:aac0de2e8b1a8a8c4b504a9459b711a02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Structure populated via error_helper functions</p>
+<p>Typically, calls to error/warning have many parameters, some of them might have SourceInfo attribute. error_helper parse those parameters, format parameters to output message and extracts SourceInfo wherever possible.</p>
+<p>Populated structure can be serialized to canonical error message with toString() method.</p>
+<p>This structure is mainly used inside ErrorReporter, but some uses invoke error_helper directly and those uses need to call toString() on returned object. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

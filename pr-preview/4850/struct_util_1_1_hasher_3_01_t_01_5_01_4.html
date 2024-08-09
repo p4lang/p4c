@@ -120,10 +120,25 @@ $(function(){initNavTree('struct_util_1_1_hasher_3_01_t_01_5_01_4.html',''); ini
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="struct_util_1_1_hasher_3_01_t_01_5_01_4-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Util::Hasher&lt; T * &gt; Struct Template Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="hash_8h_source.html">hash.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a165fee43e78d6728d1cc2d187de7763b" id="r_a165fee43e78d6728d1cc2d187de7763b"><td class="memItemLeft" align="right" valign="top"><a id="a165fee43e78d6728d1cc2d187de7763b" name="a165fee43e78d6728d1cc2d187de7763b"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><b>operator()</b> (T *val) const</td></tr>
+<tr class="separator:a165fee43e78d6728d1cc2d187de7763b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
+struct Util::Hasher&lt; T * &gt;</div><p>In general, pointers are bad hashes: their low 2-3 bits are zero, likewise for the upper bits depending on the ABI. Also, the middle bits might not have enough entropy as addresses come from some common pool. To solve this problem we just use a single iteration of hash_avalanche to improve mixing (see Detail::IntegerHasher). </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

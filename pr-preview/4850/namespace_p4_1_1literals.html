@@ -120,9 +120,50 @@ $(function(){initNavTree('namespace_p4_1_1literals.html',''); initResizable(true
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">P4::literals Namespace Reference</div></div>
 </div><!--header-->
 <div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a41de57cd942d16bef1f63b84eb2592ef" id="r_a41de57cd942d16bef1f63b84eb2592ef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a41de57cd942d16bef1f63b84eb2592ef">operator&quot;&quot;_cs</a> (const char *str, std::size_t len)</td></tr>
+<tr class="separator:a41de57cd942d16bef1f63b84eb2592ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Let's prevent literal clashes. A user wishing to use the literal can do using namespace P4::literals, similarly as they can do using namespace std::literals for the standard once. </p>
+</div><h2 class="groupheader">Function Documentation</h2>
+<a id="a41de57cd942d16bef1f63b84eb2592ef" name="a41de57cd942d16bef1f63b84eb2592ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41de57cd942d16bef1f63b84eb2592ef">&#9670;&#160;</a></span>operator&quot;&quot;_cs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classcstring.html">cstring</a> P4::literals::operator&quot;&quot;_cs </td>
+          <td>(</td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>str</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>A user-provided literal suffix to allow creation of cstring from literals: "foo"_cs. Note that the C++ standard mandates that all user-defined literal suffixes defined outside of the standard library must start with underscore. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

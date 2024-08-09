@@ -88,7 +88,6 @@ var NAVTREE =
         [ "Contact", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#contact", null ]
       ] ]
     ] ],
-    [ "Common P4C utility functions", "md__2home_2runner_2work_2p4c_2p4c_2lib_2_r_e_a_d_m_e.html", null ],
     [ "P4 Compiler Intermediate representation", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html", [
       [ "Introduction", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#introduction", null ],
       [ "Visitors and Transforms", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#visitors-and-transforms", null ],
@@ -267,7 +266,10 @@ var NAVTREE =
       [ "Usage", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4fmt_2_r_e_a_d_m_e.html#usage-1", null ],
       [ "Reference Checker for P4Fmt", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4fmt_2_r_e_a_d_m_e.html#reference-checker-for-p4fmt", null ]
     ] ],
-    [ "P4test Backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4test_2_r_e_a_d_m_e.html", null ],
+    [ "P4test Backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4test_2_r_e_a_d_m_e.html", [
+      [ "Auto-translate P4_14 source to P4_16 source:", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4test_2_r_e_a_d_m_e.html#auto-translate-p4_14-source-to-p4_16-source", null ],
+      [ "Check syntax of P4_16 or P4_14 source code", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4test_2_r_e_a_d_m_e.html#check-syntax-of-p4_16-or-p4_14-source-code", null ]
+    ] ],
     [ "P4Tools", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2_r_e_a_d_m_e.html", [
       [ "Directory Structure", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2_r_e_a_d_m_e.html#directory-structure", null ],
       [ "Building", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2_r_e_a_d_m_e.html#building", null ],
@@ -378,14 +380,56 @@ var NAVTREE =
         [ "Git commits and pull requests", "md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html#git-commits-and-pull-requests", null ]
       ] ]
     ] ],
-    [ "Topics", "topics.html", "topics" ]
+    [ "Topics", "topics.html", "topics" ],
+    [ "Namespaces", "namespaces.html", [
+      [ "Namespace List", "namespaces.html", "namespaces_dup" ],
+      [ "Namespace Members", "namespacemembers.html", [
+        [ "All", "namespacemembers.html", null ],
+        [ "Functions", "namespacemembers_func.html", null ],
+        [ "Variables", "namespacemembers_vars.html", null ],
+        [ "Typedefs", "namespacemembers_type.html", null ],
+        [ "Enumerations", "namespacemembers_enum.html", null ]
+      ] ]
+    ] ],
+    [ "Classes", "annotated.html", [
+      [ "Class List", "annotated.html", "annotated_dup" ],
+      [ "Class Index", "classes.html", null ],
+      [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
+      [ "Class Members", "functions.html", [
+        [ "All", "functions.html", "functions_dup" ],
+        [ "Functions", "functions_func.html", "functions_func" ],
+        [ "Variables", "functions_vars.html", "functions_vars" ],
+        [ "Typedefs", "functions_type.html", null ],
+        [ "Enumerations", "functions_enum.html", null ],
+        [ "Enumerator", "functions_eval.html", null ],
+        [ "Related Symbols", "functions_rela.html", null ]
+      ] ]
+    ] ]
   ] ]
 ];
 
 var NAVTREEINDEX =
 [
-"group__control__plane.html",
-"md__2home_2runner_2work_2p4c_2p4c_2backends_2tc_2_r_e_a_d_m_e.html#contacts-1"
+"annotated.html",
+"class_control_flow_visitor.html#a5d515c1f31e8edf330aee71aba43dc64",
+"class_d_p_d_k_1_1_shorten_token_length.html",
+"class_e_b_p_f_1_1_e_b_p_f_register_p_s_a.html",
+"class_json_number.html",
+"class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_iface.html#ab0802484a38a3541c7b0b0ef646d4441",
+"class_p4_1_1_do_replace_tuples.html",
+"class_p4_1_1_localize_all_actions.html",
+"class_p4_1_1_remove_unused_h_u_declarations.html",
+"class_p4_1_1_type_inference.html#abda500d19fdb4a79735326edc0625b67",
+"class_p4_tools_1_1_compiler_target.html#ad484e1d0e41d71477d7832e0635fc0f9",
+"class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_range.html#a82f3fd491137f3a9bafaa2373e459408",
+"class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_register_value.html#a9344233f5d94f5bc59fa9d3bb67ef3a4",
+"class_p4_tools_1_1_symbolic_env.html#a5a4fea2189fac9005cbc6e87d5a35477",
+"class_parser_options.html#aac527390c1cba6eb2acc56a0a5409498",
+"class_util_1_1_i_has_source_info.html",
+"md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#breaking-changes-",
+"md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2_r_e_a_d_m_e.html#p4-1",
+"struct_closed_range.html#adb3dfcc466b7c6cacafa6583607ca969",
+"struct_p4_1_1_location_path.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

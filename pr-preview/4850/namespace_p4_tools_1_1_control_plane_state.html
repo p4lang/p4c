@@ -120,9 +120,179 @@ $(function(){initNavTree('namespace_p4_tools_1_1_control_plane_state.html',''); 
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::ControlPlaneState Namespace Reference</div></div>
 </div><!--header-->
 <div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a84d620b3055ab8625fe7b9b2859d1c8d" id="r_a84d620b3055ab8625fe7b9b2859d1c8d"><td class="memItemLeft" align="right" valign="top">const IR::SymbolicVariable *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a84d620b3055ab8625fe7b9b2859d1c8d">getTableActionArgument</a> (<a class="el" href="classcstring.html">cstring</a> tableName, <a class="el" href="classcstring.html">cstring</a> actionName, <a class="el" href="classcstring.html">cstring</a> parameterName, const IR::Type *type)</td></tr>
+<tr class="separator:a84d620b3055ab8625fe7b9b2859d1c8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20856e5cff4ffa57852a763df5213113" id="r_a20856e5cff4ffa57852a763df5213113"><td class="memItemLeft" align="right" valign="top">const IR::SymbolicVariable *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a20856e5cff4ffa57852a763df5213113">getTableActionChoice</a> (<a class="el" href="classcstring.html">cstring</a> tableName)</td></tr>
+<tr class="separator:a20856e5cff4ffa57852a763df5213113"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5ffef5f41000079314511aef6b4155f" id="r_ad5ffef5f41000079314511aef6b4155f"><td class="memItemLeft" align="right" valign="top">const IR::SymbolicVariable *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad5ffef5f41000079314511aef6b4155f">getTableActive</a> (<a class="el" href="classcstring.html">cstring</a> tableName)</td></tr>
+<tr class="separator:ad5ffef5f41000079314511aef6b4155f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1664e5798444cc3cbc80301a2a1d1a60" id="r_a1664e5798444cc3cbc80301a2a1d1a60"><td class="memItemLeft" align="right" valign="top">const IR::SymbolicVariable *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1664e5798444cc3cbc80301a2a1d1a60">getTableKey</a> (<a class="el" href="classcstring.html">cstring</a> tableName, <a class="el" href="classcstring.html">cstring</a> keyFieldName, const IR::Type *type)</td></tr>
+<tr class="separator:a1664e5798444cc3cbc80301a2a1d1a60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b62c4f0ba104a9b408607a052f115c3" id="r_a4b62c4f0ba104a9b408607a052f115c3"><td class="memItemLeft" align="right" valign="top">const IR::SymbolicVariable *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4b62c4f0ba104a9b408607a052f115c3">getTableMatchLpmPrefix</a> (<a class="el" href="classcstring.html">cstring</a> tableName, <a class="el" href="classcstring.html">cstring</a> keyFieldName, const IR::Type *type)</td></tr>
+<tr class="separator:a4b62c4f0ba104a9b408607a052f115c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91178d707f61532a7c0b05fa126e9806" id="r_a91178d707f61532a7c0b05fa126e9806"><td class="memItemLeft" align="right" valign="top">const IR::SymbolicVariable *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a91178d707f61532a7c0b05fa126e9806">getTableTernaryMask</a> (<a class="el" href="classcstring.html">cstring</a> tableName, <a class="el" href="classcstring.html">cstring</a> keyFieldName, const IR::Type *type)</td></tr>
+<tr class="separator:a91178d707f61532a7c0b05fa126e9806"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Defines accessors and utility functions for state that is managed by the control plane. This class can be extended by targets to customize initialization behavior and add target-specific utility functions. </p>
+</div><h2 class="groupheader">Function Documentation</h2>
+<a id="a84d620b3055ab8625fe7b9b2859d1c8d" name="a84d620b3055ab8625fe7b9b2859d1c8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84d620b3055ab8625fe7b9b2859d1c8d">&#9670;&#160;</a></span>getTableActionArgument()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::SymbolicVariable * P4Tools::ControlPlaneState::getTableActionArgument </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>tableName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>actionName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>parameterName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IR::Type *</td>          <td class="paramname"><span class="paramname"><em>type</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the symbolic variable describing an action argument as part of a match-action call. The table, action and argument name are needed to generate a unique variable. </dd></dl>
+
+</div>
+</div>
+<a id="a20856e5cff4ffa57852a763df5213113" name="a20856e5cff4ffa57852a763df5213113"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20856e5cff4ffa57852a763df5213113">&#9670;&#160;</a></span>getTableActionChoice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::SymbolicVariable * P4Tools::ControlPlaneState::getTableActionChoice </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>tableName</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the symbolic variable listing the chosen action for a particular table. </dd></dl>
+
+</div>
+</div>
+<a id="ad5ffef5f41000079314511aef6b4155f" name="ad5ffef5f41000079314511aef6b4155f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5ffef5f41000079314511aef6b4155f">&#9670;&#160;</a></span>getTableActive()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::SymbolicVariable * P4Tools::ControlPlaneState::getTableActive </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>tableName</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the symbolic boolean variable describing whether a table is configured by the control plane. </dd></dl>
+
+</div>
+</div>
+<a id="a1664e5798444cc3cbc80301a2a1d1a60" name="a1664e5798444cc3cbc80301a2a1d1a60"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1664e5798444cc3cbc80301a2a1d1a60">&#9670;&#160;</a></span>getTableKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::SymbolicVariable * P4Tools::ControlPlaneState::getTableKey </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>tableName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>keyFieldName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IR::Type *</td>          <td class="paramname"><span class="paramname"><em>type</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the symbolic variable describing a table match key. The table and field name are needed to generate a unique variable. </dd></dl>
+
+</div>
+</div>
+<a id="a4b62c4f0ba104a9b408607a052f115c3" name="a4b62c4f0ba104a9b408607a052f115c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b62c4f0ba104a9b408607a052f115c3">&#9670;&#160;</a></span>getTableMatchLpmPrefix()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::SymbolicVariable * P4Tools::ControlPlaneState::getTableMatchLpmPrefix </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>tableName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>keyFieldName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IR::Type *</td>          <td class="paramname"><span class="paramname"><em>type</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the symbolic variable describing a table LPM prefix match. The symbolic prefix may be applied to the left and right-hand side of a key match (|x| &lt;&lt; |lpm_prefix| == |y| &lt;&lt; |lpm_prefix|). The table and field name are needed to generate a unique variable. </dd></dl>
+
+</div>
+</div>
+<a id="a91178d707f61532a7c0b05fa126e9806" name="a91178d707f61532a7c0b05fa126e9806"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91178d707f61532a7c0b05fa126e9806">&#9670;&#160;</a></span>getTableTernaryMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::SymbolicVariable * P4Tools::ControlPlaneState::getTableTernaryMask </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>tableName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>keyFieldName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IR::Type *</td>          <td class="paramname"><span class="paramname"><em>type</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the symbolic variable representing the mask for a table ternary match. The symbolic mask may be applied to the left and right-hand side of a key match (|x| &amp; |mask|== |y| &amp; |mask|). The table and field name are needed to generate a unique variable. </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

@@ -120,9 +120,64 @@ $(function(){initNavTree('struct_p4_tools_1_1_table_utils_1_1_key_properties.htm
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="struct_p4_tools_1_1_table_utils_1_1_key_properties-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::TableUtils::KeyProperties Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>KeyProperties define properties of table keys that are useful for execution.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="table__utils_8h_source.html">table_utils.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a2983b7fca2452372f96c677000552820" id="r_a2983b7fca2452372f96c677000552820"><td class="memItemLeft" align="right" valign="top"><a id="a2983b7fca2452372f96c677000552820" name="a2983b7fca2452372f96c677000552820"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>KeyProperties</b> (IR::KeyElement const *<a class="el" href="#a86374545db775aada134644b0bfea707">key</a>, <a class="el" href="classcstring.html">cstring</a> <a class="el" href="#ac11f9d900928b81285c2d94155674b42">name</a>, size_t <a class="el" href="#a67c4dcbcc81b775c6ad15dd52a9d4c28">index</a>, <a class="el" href="classcstring.html">cstring</a> <a class="el" href="#a5c82b9464ac8f7da9746f637417c1692">matchType</a>, bool <a class="el" href="#ad27abbd4e7a982b78ebd33d0306401f4">isTainted</a>)</td></tr>
+<tr class="separator:a2983b7fca2452372f96c677000552820"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a67c4dcbcc81b775c6ad15dd52a9d4c28" id="r_a67c4dcbcc81b775c6ad15dd52a9d4c28"><td class="memItemLeft" align="right" valign="top"><a id="a67c4dcbcc81b775c6ad15dd52a9d4c28" name="a67c4dcbcc81b775c6ad15dd52a9d4c28"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><b>index</b></td></tr>
+<tr class="memdesc:a67c4dcbcc81b775c6ad15dd52a9d4c28"><td class="mdescLeft">&#160;</td><td class="mdescRight">The index of this key within the current table. <br /></td></tr>
+<tr class="separator:a67c4dcbcc81b775c6ad15dd52a9d4c28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad27abbd4e7a982b78ebd33d0306401f4" id="r_ad27abbd4e7a982b78ebd33d0306401f4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad27abbd4e7a982b78ebd33d0306401f4">isTainted</a></td></tr>
+<tr class="separator:ad27abbd4e7a982b78ebd33d0306401f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86374545db775aada134644b0bfea707" id="r_a86374545db775aada134644b0bfea707"><td class="memItemLeft" align="right" valign="top"><a id="a86374545db775aada134644b0bfea707" name="a86374545db775aada134644b0bfea707"></a>
+IR::KeyElement const  *&#160;</td><td class="memItemRight" valign="bottom"><b>key</b></td></tr>
+<tr class="memdesc:a86374545db775aada134644b0bfea707"><td class="mdescLeft">&#160;</td><td class="mdescRight">The original key element. <br /></td></tr>
+<tr class="separator:a86374545db775aada134644b0bfea707"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c82b9464ac8f7da9746f637417c1692" id="r_a5c82b9464ac8f7da9746f637417c1692"><td class="memItemLeft" align="right" valign="top"><a id="a5c82b9464ac8f7da9746f637417c1692" name="a5c82b9464ac8f7da9746f637417c1692"></a>
+<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>matchType</b></td></tr>
+<tr class="memdesc:a5c82b9464ac8f7da9746f637417c1692"><td class="mdescLeft">&#160;</td><td class="mdescRight">The match type of this key (exact, ternary, lpm, etc...) <br /></td></tr>
+<tr class="separator:a5c82b9464ac8f7da9746f637417c1692"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac11f9d900928b81285c2d94155674b42" id="r_ac11f9d900928b81285c2d94155674b42"><td class="memItemLeft" align="right" valign="top"><a id="ac11f9d900928b81285c2d94155674b42" name="ac11f9d900928b81285c2d94155674b42"></a>
+<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>name</b></td></tr>
+<tr class="memdesc:ac11f9d900928b81285c2d94155674b42"><td class="mdescLeft">&#160;</td><td class="mdescRight">The control plane name of the key. <br /></td></tr>
+<tr class="separator:ac11f9d900928b81285c2d94155674b42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>KeyProperties define properties of table keys that are useful for execution. </p>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="ad27abbd4e7a982b78ebd33d0306401f4" name="ad27abbd4e7a982b78ebd33d0306401f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad27abbd4e7a982b78ebd33d0306401f4">&#9670;&#160;</a></span>isTainted</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool P4Tools::TableUtils::KeyProperties::isTainted</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Whether the key is tainted. For matches such as LPM and ternary, we can still generate a match. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

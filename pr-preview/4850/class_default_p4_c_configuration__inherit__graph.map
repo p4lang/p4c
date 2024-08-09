@@ -1,0 +1,7 @@
+<map id="DefaultP4CConfiguration" name="DefaultP4CConfiguration">
+<area shape="rect" id="Node000001" title=" " alt="" coords="27,79,209,104"/>
+<area shape="rect" id="Node000003" href="$class_p4_tools_1_1_compiler_configuration.html" title=" " alt="" coords="5,152,231,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="121,118,121,152,115,152,115,118"/>
+<area shape="rect" id="Node000002" href="$class_p4_c_configuration.html" title=" " alt="" coords="51,5,185,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,44,121,79,115,79,115,44"/>
+</map>

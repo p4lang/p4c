@@ -120,9 +120,44 @@ $(function(){initNavTree('class_p4_1_1_type_unification.html',''); initResizable
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_p4_1_1_type_unification-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::TypeUnification Class Reference<span class="mlabels"><span class="mlabel">final</span></span></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="type_unification_8h_source.html">typeUnification.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:aef7bb3d2a69a53519d942e690cad6465" id="r_aef7bb3d2a69a53519d942e690cad6465"><td class="memItemLeft" align="right" valign="top"><a id="aef7bb3d2a69a53519d942e690cad6465" name="aef7bb3d2a69a53519d942e690cad6465"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>TypeUnification</b> (<a class="el" href="class_p4_1_1_type_constraints.html">TypeConstraints</a> *constraints, const <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap)</td></tr>
+<tr class="separator:aef7bb3d2a69a53519d942e690cad6465"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a323df5de0794b2ed417822de869f467b" id="r_a323df5de0794b2ed417822de869f467b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a323df5de0794b2ed417822de869f467b">unify</a> (const <a class="el" href="class_p4_1_1_binary_constraint.html">BinaryConstraint</a> *constraint)</td></tr>
+<tr class="separator:a323df5de0794b2ed417822de869f467b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Hindley-Milner type unification algorithm (See for example, <a href="http://cs.brown.edu/~sk/Publications/Books/ProgLangs/2007-04-26/plai-2007-04-26.pdf">http://cs.brown.edu/~sk/Publications/Books/ProgLangs/2007-04-26/plai-2007-04-26.pdf</a>, page 280.) Attempts to unify two types. As a consequence it generates constraints on other sub-types. Constraints are solved at the end. Solving a constraint generates type-variable substitutions (where a type variable is replaced with another type - which could still contain type variables inside). All substitutions are composed together. Constraint solving can fail, which means that the program does not type-check. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a323df5de0794b2ed417822de869f467b" name="a323df5de0794b2ed417822de869f467b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a323df5de0794b2ed417822de869f467b">&#9670;&#160;</a></span>unify()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool P4::TypeUnification::unify </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_binary_constraint.html">BinaryConstraint</a> *</td>          <td class="paramname"><span class="paramname"><em>constraint</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Return false if unification fails right away. Generates a set of type constraints. If it returns true unification could still fail later. </p><dl class="section return"><dt>Returns</dt><dd>False if unification fails immediately. </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

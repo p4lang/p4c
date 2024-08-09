@@ -123,7 +123,10 @@ $(function(){initNavTree('struct_util_1_1_hasher.html',''); initResizable(true);
   <div class="headertitle"><div class="title">Util::Hasher&lt; Key, Enable &gt; Struct Template Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;class Key, class Enable = void&gt;<br />
+struct Util::Hasher&lt; Key, Enable &gt;</div><p>The implementation below decouples generic hash interface provider from a particular implementation for a given class <code>T</code>. One should partially-specialize Util::Hasher&lt;T&gt; to provide a hash value for <code>T</code>. Util::Hash is intended to be used instead of std::hash&lt;T&gt; in various associative containers. For example <code>std::unordered_set&lt;K, Util::Hash&gt;</code> would work as soon as there is an implementation of Util::Hasher&lt;K&gt;. The code below provides some default specializations for certain built-in types and theirs combinations (pairs and tuples). Additionally, hashes could be combined either directly (Hash::operator() is variadic) or via dedicated <code>hash_combine</code> / <code>hash_combine_generic</code> functions. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

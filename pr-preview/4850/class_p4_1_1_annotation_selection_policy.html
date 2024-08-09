@@ -120,9 +120,50 @@ $(function(){initNavTree('class_p4_1_1_annotation_selection_policy.html',''); in
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_p4_1_1_annotation_selection_policy-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::AnnotationSelectionPolicy Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="flatten_interface_structs_8h_source.html">flattenInterfaceStructs.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:adbb93f90ad02b2c8f3e5887ce7bb99c2" id="r_adbb93f90ad02b2c8f3e5887ce7bb99c2"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adbb93f90ad02b2c8f3e5887ce7bb99c2">keep</a> (const IR::Annotation *)</td></tr>
+<tr class="separator:adbb93f90ad02b2c8f3e5887ce7bb99c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Policy to select which annotations of the nested struct to attach to the struct fields after the nest struct is flattened. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="adbb93f90ad02b2c8f3e5887ce7bb99c2" name="adbb93f90ad02b2c8f3e5887ce7bb99c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adbb93f90ad02b2c8f3e5887ce7bb99c2">&#9670;&#160;</a></span>keep()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool P4::AnnotationSelectionPolicy::keep </td>
+          <td>(</td>
+          <td class="paramtype">const IR::Annotation *</td>          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Call for each nested struct to check if the annotation of the nested struct should be kept on its fields.</p>
+<dl class="section return"><dt>Returns</dt><dd>true if the annotation should be kept on the field. false if the annotation should be discarded. </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

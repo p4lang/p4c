@@ -120,9 +120,445 @@ $(function(){initNavTree('class_p4_tools_1_1_z3_solver.html',''); initResizable(
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#friends">Friends</a> &#124;
+<a href="class_p4_tools_1_1_z3_solver-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::Z3Solver Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>A Z3-based implementation of AbstractSolver. Encapsulates a z3::solver and a z3::context.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="z3__solver_8h_source.html">z3_solver.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for P4Tools::Z3Solver:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_tools_1_1_z3_solver__inherit__graph.svg" width="148" height="256"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a8941f9ef6e6bdc9e56b20af7ef0cf0eb" id="r_a8941f9ef6e6bdc9e56b20af7ef0cf0eb"><td class="memItemLeft" align="right" valign="top"><a id="a8941f9ef6e6bdc9e56b20af7ef0cf0eb" name="a8941f9ef6e6bdc9e56b20af7ef0cf0eb"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Z3Solver</b> (bool isIncremental=true, std::optional&lt; std::istream * &gt; inOpt=std::nullopt)</td></tr>
+<tr class="separator:a8941f9ef6e6bdc9e56b20af7ef0cf0eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aadd1138a966a3341092af10c7ba8b8df" id="r_aadd1138a966a3341092af10c7ba8b8df"><td class="memItemLeft" align="right" valign="top"><a id="aadd1138a966a3341092af10c7ba8b8df" name="aadd1138a966a3341092af10c7ba8b8df"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>asrt</b> (const Constraint *assertion)</td></tr>
+<tr class="memdesc:aadd1138a966a3341092af10c7ba8b8df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inserts an assertion into the topmost solver context. <br /></td></tr>
+<tr class="separator:aadd1138a966a3341092af10c7ba8b8df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af070c70be7eb7abef047128a1310e896" id="r_af070c70be7eb7abef047128a1310e896"><td class="memItemLeft" align="right" valign="top"><a id="af070c70be7eb7abef047128a1310e896" name="af070c70be7eb7abef047128a1310e896"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>asrt</b> (const z3::expr &amp;assert)</td></tr>
+<tr class="memdesc:af070c70be7eb7abef047128a1310e896"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a Z3 assertion to the solver context. <br /></td></tr>
+<tr class="separator:af070c70be7eb7abef047128a1310e896"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09094d1d28a3408141321824ab4e9cea" id="r_a09094d1d28a3408141321824ab4e9cea"><td class="memItemLeft" align="right" valign="top">std::optional&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a09094d1d28a3408141321824ab4e9cea">checkSat</a> ()</td></tr>
+<tr class="separator:a09094d1d28a3408141321824ab4e9cea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed2cb4ac5763c0a359f3c80b013cb948" id="r_aed2cb4ac5763c0a359f3c80b013cb948"><td class="memItemLeft" align="right" valign="top">std::optional&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aed2cb4ac5763c0a359f3c80b013cb948">checkSat</a> (const std::vector&lt; const Constraint * &gt; &amp;asserts) override</td></tr>
+<tr class="separator:aed2cb4ac5763c0a359f3c80b013cb948"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae94c8eec8139637de9d41d01acb45eeb" id="r_ae94c8eec8139637de9d41d01acb45eeb"><td class="memItemLeft" align="right" valign="top">std::optional&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae94c8eec8139637de9d41d01acb45eeb">checkSat</a> (const z3::expr_vector &amp;asserts)</td></tr>
+<tr class="separator:ae94c8eec8139637de9d41d01acb45eeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b5a61f842f7c78c017b779f5d72620e" id="r_a2b5a61f842f7c78c017b779f5d72620e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2b5a61f842f7c78c017b779f5d72620e">clearMemory</a> ()</td></tr>
+<tr class="separator:a2b5a61f842f7c78c017b779f5d72620e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e1ef9497787e07c2b048ecf1524c252" id="r_a6e1ef9497787e07c2b048ecf1524c252"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6e1ef9497787e07c2b048ecf1524c252">comment</a> (<a class="el" href="classcstring.html">cstring</a> comment) override</td></tr>
+<tr class="separator:a6e1ef9497787e07c2b048ecf1524c252"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bfa7f0b5c8231dba115a35c4fc60967" id="r_a8bfa7f0b5c8231dba115a35c4fc60967"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsafe__vector.html">safe_vector</a>&lt; const Constraint * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8bfa7f0b5c8231dba115a35c4fc60967">getAssertions</a> () const</td></tr>
+<tr class="separator:a8bfa7f0b5c8231dba115a35c4fc60967"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af188b55d9757cd1d0009b23e6aac5830" id="r_af188b55d9757cd1d0009b23e6aac5830"><td class="memItemLeft" align="right" valign="top">const SymbolicMapping &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af188b55d9757cd1d0009b23e6aac5830">getSymbolicMapping</a> () const override</td></tr>
+<tr class="separator:af188b55d9757cd1d0009b23e6aac5830"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a658ecbd58127afa1013df70549e31b27" id="r_a658ecbd58127afa1013df70549e31b27"><td class="memItemLeft" align="right" valign="top"><a id="a658ecbd58127afa1013df70549e31b27" name="a658ecbd58127afa1013df70549e31b27"></a>
+const z3::context &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getZ3Ctx</b> () const</td></tr>
+<tr class="memdesc:a658ecbd58127afa1013df70549e31b27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the actual Z3 context that this class uses. <br /></td></tr>
+<tr class="separator:a658ecbd58127afa1013df70549e31b27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4b2712ee57ae4abc1af280e4455fa58" id="r_ad4b2712ee57ae4abc1af280e4455fa58"><td class="memItemLeft" align="right" valign="top"><a id="ad4b2712ee57ae4abc1af280e4455fa58" name="ad4b2712ee57ae4abc1af280e4455fa58"></a>
+const z3::solver &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getZ3Solver</b> () const</td></tr>
+<tr class="memdesc:ad4b2712ee57ae4abc1af280e4455fa58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the actual Z3 solver backing this class. <br /></td></tr>
+<tr class="separator:ad4b2712ee57ae4abc1af280e4455fa58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06ce8502d1d7db6e905b443a86cb6888" id="r_a06ce8502d1d7db6e905b443a86cb6888"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a06ce8502d1d7db6e905b443a86cb6888">isInIncrementalMode</a> () const override</td></tr>
+<tr class="separator:a06ce8502d1d7db6e905b443a86cb6888"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba6970917881f1cb48fe46b6be0e2f16" id="r_aba6970917881f1cb48fe46b6be0e2f16"><td class="memItemLeft" align="right" valign="top"><a id="aba6970917881f1cb48fe46b6be0e2f16" name="aba6970917881f1cb48fe46b6be0e2f16"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>pop</b> ()</td></tr>
+<tr class="memdesc:aba6970917881f1cb48fe46b6be0e2f16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes the last solver context. <br /></td></tr>
+<tr class="separator:aba6970917881f1cb48fe46b6be0e2f16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab56cc0b62e87a935bbc1bbfb7e2758b4" id="r_ab56cc0b62e87a935bbc1bbfb7e2758b4"><td class="memItemLeft" align="right" valign="top"><a id="ab56cc0b62e87a935bbc1bbfb7e2758b4" name="ab56cc0b62e87a935bbc1bbfb7e2758b4"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>push</b> ()</td></tr>
+<tr class="memdesc:ab56cc0b62e87a935bbc1bbfb7e2758b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pushes new (empty) solver context. <br /></td></tr>
+<tr class="separator:ab56cc0b62e87a935bbc1bbfb7e2758b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9d82af9ed27f3aa69c390d5e19c197e" id="r_ac9d82af9ed27f3aa69c390d5e19c197e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac9d82af9ed27f3aa69c390d5e19c197e">reset</a> ()</td></tr>
+<tr class="separator:ac9d82af9ed27f3aa69c390d5e19c197e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf5b9c62f7b10b38e50ded797d0d7ff5" id="r_abf5b9c62f7b10b38e50ded797d0d7ff5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abf5b9c62f7b10b38e50ded797d0d7ff5">seed</a> (unsigned seed) override</td></tr>
+<tr class="separator:abf5b9c62f7b10b38e50ded797d0d7ff5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e050a748a5fb2e69b1d7a3925ac007f" id="r_a6e050a748a5fb2e69b1d7a3925ac007f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6e050a748a5fb2e69b1d7a3925ac007f">timeout</a> (unsigned tm) override</td></tr>
+<tr class="memdesc:a6e050a748a5fb2e69b1d7a3925ac007f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets timeout for solver in milliseconds.  <br /></td></tr>
+<tr class="separator:a6e050a748a5fb2e69b1d7a3925ac007f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46e899b2459df16919931047fa00fdab" id="r_a46e899b2459df16919931047fa00fdab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a46e899b2459df16919931047fa00fdab">toJSON</a> (<a class="el" href="class_j_s_o_n_generator.html">JSONGenerator</a> &amp;) const override</td></tr>
+<tr class="memdesc:a46e899b2459df16919931047fa00fdab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves solver state to the given JSON generator.  <br /></td></tr>
+<tr class="separator:a46e899b2459df16919931047fa00fdab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_abstract_solver"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_abstract_solver')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_abstract_solver.html">AbstractSolver</a></td></tr>
+<tr class="memitem:ab0afc125dcb9f62b7186c554271f3d12 inherit pub_methods_class_abstract_solver" id="r_ab0afc125dcb9f62b7186c554271f3d12"><td class="memItemLeft" align="right" valign="top">
+&#160;</td><td class="memItemRight" valign="bottom"><b>DECLARE_TYPEINFO</b> (<a class="el" href="class_abstract_solver.html">AbstractSolver</a>)</td></tr>
+<tr class="separator:ab0afc125dcb9f62b7186c554271f3d12 inherit pub_methods_class_abstract_solver"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_i_castable"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_i_castable')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_i_castable.html">ICastable</a></td></tr>
+<tr class="memitem:a88c3b2d9d52f83909582425b471aa23b inherit pub_methods_class_i_castable" id="r_a88c3b2d9d52f83909582425b471aa23b"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a88c3b2d9d52f83909582425b471aa23b inherit pub_methods_class_i_castable"><td class="memTemplItemLeft" align="right" valign="top">T &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>as</b> ()</td></tr>
+<tr class="memdesc:a88c3b2d9d52f83909582425b471aa23b inherit pub_methods_class_i_castable"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries to convert the class to type T. A BUG occurs if the cast fails. <br /></td></tr>
+<tr class="separator:a88c3b2d9d52f83909582425b471aa23b inherit pub_methods_class_i_castable"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa37d586a3dbb4df73346dc5d3803ff20 inherit pub_methods_class_i_castable" id="r_aa37d586a3dbb4df73346dc5d3803ff20"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aa37d586a3dbb4df73346dc5d3803ff20 inherit pub_methods_class_i_castable"><td class="memTemplItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>as</b> () const</td></tr>
+<tr class="memdesc:aa37d586a3dbb4df73346dc5d3803ff20 inherit pub_methods_class_i_castable"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries to convert the class to type T. A BUG occurs if the cast fails. <br /></td></tr>
+<tr class="separator:aa37d586a3dbb4df73346dc5d3803ff20 inherit pub_methods_class_i_castable"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6defaa45e11c0a3d9164814695c69a8 inherit pub_methods_class_i_castable" id="r_af6defaa45e11c0a3d9164814695c69a8"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:af6defaa45e11c0a3d9164814695c69a8 inherit pub_methods_class_i_castable"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>checkedTo</b> ()</td></tr>
+<tr class="memdesc:af6defaa45e11c0a3d9164814695c69a8 inherit pub_methods_class_i_castable"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs a checked cast. A BUG occurs if the cast fails. <br /></td></tr>
+<tr class="separator:af6defaa45e11c0a3d9164814695c69a8 inherit pub_methods_class_i_castable"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdbd28b81119a33a898fa8511bf2ef6b inherit pub_methods_class_i_castable" id="r_afdbd28b81119a33a898fa8511bf2ef6b"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:afdbd28b81119a33a898fa8511bf2ef6b inherit pub_methods_class_i_castable"><td class="memTemplItemLeft" align="right" valign="top">const T *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>checkedTo</b> () const</td></tr>
+<tr class="memdesc:afdbd28b81119a33a898fa8511bf2ef6b inherit pub_methods_class_i_castable"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs a checked cast. A BUG occurs if the cast fails. <br /></td></tr>
+<tr class="separator:afdbd28b81119a33a898fa8511bf2ef6b inherit pub_methods_class_i_castable"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_struct_r_t_t_i_1_1_base"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_struct_r_t_t_i_1_1_base')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="struct_r_t_t_i_1_1_base.html">RTTI::Base</a></td></tr>
+<tr class="memitem:ad54f648738287d21b2b1aafa2bc63f8c inherit pub_methods_struct_r_t_t_i_1_1_base" id="r_ad54f648738287d21b2b1aafa2bc63f8c"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ad54f648738287d21b2b1aafa2bc63f8c inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="struct_r_t_t_i_1_1_base.html#ad54f648738287d21b2b1aafa2bc63f8c">is</a> () const noexcept</td></tr>
+<tr class="separator:ad54f648738287d21b2b1aafa2bc63f8c inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ec65d7575c8913d0c3fcf542a1c9f22 inherit pub_methods_struct_r_t_t_i_1_1_base" id="r_a0ec65d7575c8913d0c3fcf542a1c9f22"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_r_t_t_i_1_1_base.html#a0ec65d7575c8913d0c3fcf542a1c9f22">isA</a> (TypeId <a class="el" href="struct_r_t_t_i_1_1_base.html#aa3eedc64ebb92c6f17f94d8589d672d2">typeId</a>) const noexcept=0</td></tr>
+<tr class="separator:a0ec65d7575c8913d0c3fcf542a1c9f22 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab35786f9cf561dd2329b86200fdc3aa7 inherit pub_methods_struct_r_t_t_i_1_1_base" id="r_ab35786f9cf561dd2329b86200fdc3aa7"><td class="memTemplParams" colspan="2">
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ab35786f9cf561dd2329b86200fdc3aa7 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memTemplItemLeft" align="right" valign="top">const T *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>to</b> () const noexcept</td></tr>
+<tr class="memdesc:ab35786f9cf561dd2329b86200fdc3aa7 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <code>to</code>, but returns const pointer to T. <br /></td></tr>
+<tr class="separator:ab35786f9cf561dd2329b86200fdc3aa7 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60ec2358ab44340b7fa2a17f1b2f3a59 inherit pub_methods_struct_r_t_t_i_1_1_base" id="r_a60ec2358ab44340b7fa2a17f1b2f3a59"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a60ec2358ab44340b7fa2a17f1b2f3a59 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="struct_r_t_t_i_1_1_base.html#a60ec2358ab44340b7fa2a17f1b2f3a59">to</a> () noexcept</td></tr>
+<tr class="separator:a60ec2358ab44340b7fa2a17f1b2f3a59 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3eedc64ebb92c6f17f94d8589d672d2 inherit pub_methods_struct_r_t_t_i_1_1_base" id="r_aa3eedc64ebb92c6f17f94d8589d672d2"><td class="memItemLeft" align="right" valign="top">virtual TypeId&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_r_t_t_i_1_1_base.html#aa3eedc64ebb92c6f17f94d8589d672d2">typeId</a> () const noexcept=0</td></tr>
+<tr class="separator:aa3eedc64ebb92c6f17f94d8589d672d2 inherit pub_methods_struct_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:ae8242f0c8f540b8c7e974c3c558c0c58" id="r_ae8242f0c8f540b8c7e974c3c558c0c58"><td class="memItemLeft" align="right" valign="top"><a id="ae8242f0c8f540b8c7e974c3c558c0c58" name="ae8242f0c8f540b8c7e974c3c558c0c58"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>Z3JSON</b></td></tr>
+<tr class="separator:ae8242f0c8f540b8c7e974c3c558c0c58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9a334f4525212797dcd10b4130f7cc8" id="r_ab9a334f4525212797dcd10b4130f7cc8"><td class="memItemLeft" align="right" valign="top"><a id="ab9a334f4525212797dcd10b4130f7cc8" name="ab9a334f4525212797dcd10b4130f7cc8"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>Z3SolverAccessor</b></td></tr>
+<tr class="separator:ab9a334f4525212797dcd10b4130f7cc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36ca8f963c412c41fbcb3d6d54413cda" id="r_a36ca8f963c412c41fbcb3d6d54413cda"><td class="memItemLeft" align="right" valign="top"><a id="a36ca8f963c412c41fbcb3d6d54413cda" name="a36ca8f963c412c41fbcb3d6d54413cda"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>Z3Translator</b></td></tr>
+<tr class="separator:a36ca8f963c412c41fbcb3d6d54413cda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pro_methods_struct_r_t_t_i_1_1_base"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_struct_r_t_t_i_1_1_base')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="struct_r_t_t_i_1_1_base.html">RTTI::Base</a></td></tr>
+<tr class="memitem:a5cf4c478663694b67738ae0498cfb31e inherit pro_methods_struct_r_t_t_i_1_1_base" id="r_a5cf4c478663694b67738ae0498cfb31e"><td class="memItemLeft" align="right" valign="top">
+virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><b>toImpl</b> (TypeId <a class="el" href="struct_r_t_t_i_1_1_base.html#aa3eedc64ebb92c6f17f94d8589d672d2">typeId</a>) const noexcept=0</td></tr>
+<tr class="separator:a5cf4c478663694b67738ae0498cfb31e inherit pro_methods_struct_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A Z3-based implementation of AbstractSolver. Encapsulates a z3::solver and a z3::context. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a09094d1d28a3408141321824ab4e9cea" name="a09094d1d28a3408141321824ab4e9cea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09094d1d28a3408141321824ab4e9cea">&#9670;&#160;</a></span>checkSat() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; bool &gt; P4Tools::Z3Solver::checkSat </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Z3Solver specific checkSat function. Calls check on the solver. Only useful in incremental mode. </p>
+
+</div>
+</div>
+<a id="aed2cb4ac5763c0a359f3c80b013cb948" name="aed2cb4ac5763c0a359f3c80b013cb948"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed2cb4ac5763c0a359f3c80b013cb948">&#9670;&#160;</a></span>checkSat() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; bool &gt; P4Tools::Z3Solver::checkSat </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; const Constraint * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>asserts</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Determines whether the set of assertions given to the solver are consistent.</p>
+<dl class="section return"><dt>Returns</dt><dd>true if the given assertions are consistent. </dd>
+<dd>
+false if the given assertions are inconsistent. </dd>
+<dd>
+std::nullopt if the solver times out, or is otherwise unable to provide an answer. </dd></dl>
+
+<p>Implements <a class="el" href="class_abstract_solver.html#aa2b7bf28ca31ee5db915d9bb005a783a">AbstractSolver</a>.</p>
+
+</div>
+</div>
+<a id="ae94c8eec8139637de9d41d01acb45eeb" name="ae94c8eec8139637de9d41d01acb45eeb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae94c8eec8139637de9d41d01acb45eeb">&#9670;&#160;</a></span>checkSat() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; bool &gt; P4Tools::Z3Solver::checkSat </td>
+          <td>(</td>
+          <td class="paramtype">const z3::expr_vector &amp;</td>          <td class="paramname"><span class="paramname"><em>asserts</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Z3Solver specific checkSat function. Calls check on the input z3::expr_vector. Only relies on the incrementality mode of the Z3 solver. </p>
+
+</div>
+</div>
+<a id="a2b5a61f842f7c78c017b779f5d72620e" name="a2b5a61f842f7c78c017b779f5d72620e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b5a61f842f7c78c017b779f5d72620e">&#9670;&#160;</a></span>clearMemory()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4Tools::Z3Solver::clearMemory </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Reset the internal Z3 solver state (memory and active assertions). In incremental state, all active assertions are reapplied after resetting. </p>
+
+</div>
+</div>
+<a id="a6e1ef9497787e07c2b048ecf1524c252" name="a6e1ef9497787e07c2b048ecf1524c252"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e1ef9497787e07c2b048ecf1524c252">&#9670;&#160;</a></span>comment()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4Tools::Z3Solver::comment </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>comment</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Adds a comment to any log file that might be produced. Useful for understanding the sequence of calls made to the solver when debugging. </p>
+
+<p>Implements <a class="el" href="class_abstract_solver.html#a034582fdc6850b85afb976a24df3be7e">AbstractSolver</a>.</p>
+
+</div>
+</div>
+<a id="a8bfa7f0b5c8231dba115a35c4fc60967" name="a8bfa7f0b5c8231dba115a35c4fc60967"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8bfa7f0b5c8231dba115a35c4fc60967">&#9670;&#160;</a></span>getAssertions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classsafe__vector.html">safe_vector</a>&lt; const Constraint * &gt; P4Tools::Z3Solver::getAssertions </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the list of active assertions on this solver. </dd></dl>
+
+</div>
+</div>
+<a id="af188b55d9757cd1d0009b23e6aac5830" name="af188b55d9757cd1d0009b23e6aac5830"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af188b55d9757cd1d0009b23e6aac5830">&#9670;&#160;</a></span>getSymbolicMapping()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const SymbolicMapping &amp; P4Tools::Z3Solver::getSymbolicMapping </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">nodiscard</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Obtains the first solution found by the solver in the last call to @checkSat.</p>
+<p>A BUG occurs if the solver has no available solution. This can happen if the last call to @checkSat returned anything other than true, if there was no such previous call, or if the state in the solver has changed since the last such call (e.g., more assertions have been made). </p>
+
+<p>Implements <a class="el" href="class_abstract_solver.html#ab6ddf58be50152aef20a6c6ab48e689b">AbstractSolver</a>.</p>
+
+</div>
+</div>
+<a id="a06ce8502d1d7db6e905b443a86cb6888" name="a06ce8502d1d7db6e905b443a86cb6888"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06ce8502d1d7db6e905b443a86cb6888">&#9670;&#160;</a></span>isInIncrementalMode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool P4Tools::Z3Solver::isInIncrementalMode </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">nodiscard</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>whether this solver is incremental. </dd></dl>
+
+<p>Implements <a class="el" href="class_abstract_solver.html#a3c7c89959e32c671351b6bfb49433386">AbstractSolver</a>.</p>
+
+</div>
+</div>
+<a id="ac9d82af9ed27f3aa69c390d5e19c197e" name="ac9d82af9ed27f3aa69c390d5e19c197e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9d82af9ed27f3aa69c390d5e19c197e">&#9670;&#160;</a></span>reset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4Tools::Z3Solver::reset </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Resets the internal state: pops all assertions from previous solver invocation, removes variable declarations. </p>
+
+</div>
+</div>
+<a id="abf5b9c62f7b10b38e50ded797d0d7ff5" name="abf5b9c62f7b10b38e50ded797d0d7ff5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf5b9c62f7b10b38e50ded797d0d7ff5">&#9670;&#160;</a></span>seed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4Tools::Z3Solver::seed </td>
+          <td>(</td>
+          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>seed</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Seeds the pseudo-random number generator in the solver. The solver's PRNG is used to randomize the models produced by @getModel. </p>
+
+<p>Implements <a class="el" href="class_abstract_solver.html#a59e9f213832786b8cf89b85c5f8df207">AbstractSolver</a>.</p>
+
+</div>
+</div>
+<a id="a6e050a748a5fb2e69b1d7a3925ac007f" name="a6e050a748a5fb2e69b1d7a3925ac007f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e050a748a5fb2e69b1d7a3925ac007f">&#9670;&#160;</a></span>timeout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4Tools::Z3Solver::timeout </td>
+          <td>(</td>
+          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>tm</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Sets timeout for solver in milliseconds. </p>
+
+<p>Implements <a class="el" href="class_abstract_solver.html#af822474be1f133d4a13077999d993e46">AbstractSolver</a>.</p>
+
+</div>
+</div>
+<a id="a46e899b2459df16919931047fa00fdab" name="a46e899b2459df16919931047fa00fdab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46e899b2459df16919931047fa00fdab">&#9670;&#160;</a></span>toJSON()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4Tools::Z3Solver::toJSON </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_j_s_o_n_generator.html">JSONGenerator</a> &amp;</td>          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Saves solver state to the given JSON generator. </p>
+
+<p>Implements <a class="el" href="class_abstract_solver.html#af62bf0c29650c8d8fdc7945cdb13abb9">AbstractSolver</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

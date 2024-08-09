@@ -120,10 +120,483 @@ $(function(){initNavTree('class_e_b_p_f_1_1_deparser_body_translator.html',''); 
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="class_e_b_p_f_1_1_deparser_body_translator-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">EBPF::DeparserBodyTranslator Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p>This translator emits deparser externs.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="ebpf_deparser_8h_source.html">ebpfDeparser.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for EBPF::DeparserBodyTranslator:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_e_b_p_f_1_1_deparser_body_translator__inherit__graph.svg" width="255" height="403"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:ab2bd226f73fe555c2085788efd8d235b" id="r_ab2bd226f73fe555c2085788efd8d235b"><td class="memItemLeft" align="right" valign="top"><a id="ab2bd226f73fe555c2085788efd8d235b" name="ab2bd226f73fe555c2085788efd8d235b"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>DeparserBodyTranslator</b> (const <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_deparser.html">EBPFDeparser</a> *deparser)</td></tr>
+<tr class="separator:ab2bd226f73fe555c2085788efd8d235b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95fe7553900cc39cb73a6b05fdae1f9f" id="r_a95fe7553900cc39cb73a6b05fdae1f9f"><td class="memItemLeft" align="right" valign="top"><a id="a95fe7553900cc39cb73a6b05fdae1f9f" name="a95fe7553900cc39cb73a6b05fdae1f9f"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::MethodCallExpression *expression) override</td></tr>
+<tr class="separator:a95fe7553900cc39cb73a6b05fdae1f9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_e_b_p_f_1_1_control_body_translator"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_e_b_p_f_1_1_control_body_translator')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_e_b_p_f_1_1_control_body_translator.html">EBPF::ControlBodyTranslator</a></td></tr>
+<tr class="memitem:aca3229436acd1e05a7d59fadd9bdbf59 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_aca3229436acd1e05a7d59fadd9bdbf59"><td class="memItemLeft" align="right" valign="top">
+&#160;</td><td class="memItemRight" valign="bottom"><b>ControlBodyTranslator</b> (const <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_control.html">EBPFControl</a> *control)</td></tr>
+<tr class="separator:aca3229436acd1e05a7d59fadd9bdbf59 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e6e4ae18429da3a9cbc358dc3476d71 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_a6e6e4ae18429da3a9cbc358dc3476d71"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>compileEmit</b> (const <a class="el" href="class_i_r_1_1_vector.html">IR::Vector</a>&lt; IR::Argument &gt; *args)</td></tr>
+<tr class="separator:a6e6e4ae18429da3a9cbc358dc3476d71 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0a95cbb71d655c588cb5295d00837c0 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_aa0a95cbb71d655c588cb5295d00837c0"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>compileEmitField</b> (const IR::Expression *expr, <a class="el" href="classcstring.html">cstring</a> field, unsigned alignment, <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type.html">EBPFType</a> *type)</td></tr>
+<tr class="memdesc:aa0a95cbb71d655c588cb5295d00837c0 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle the packet_out.emit method. <br /></td></tr>
+<tr class="separator:aa0a95cbb71d655c588cb5295d00837c0 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8e6ea2d24b07320340df944707d9fa8 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_ac8e6ea2d24b07320340df944707d9fa8"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::ExitStatement *) override</td></tr>
+<tr class="separator:ac8e6ea2d24b07320340df944707d9fa8 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ecd211e0356da5e4c73c2226282d7a5 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_a7ecd211e0356da5e4c73c2226282d7a5"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::IfStatement *statement) override</td></tr>
+<tr class="separator:a7ecd211e0356da5e4c73c2226282d7a5 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04be78cc8cfb91bd061bb55bc88dec3b inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_a04be78cc8cfb91bd061bb55bc88dec3b"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::MethodCallExpression *expression) override</td></tr>
+<tr class="separator:a04be78cc8cfb91bd061bb55bc88dec3b inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa47bc792aa694cbc399593d017c72b0 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_afa47bc792aa694cbc399593d017c72b0"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::PathExpression *expression) override</td></tr>
+<tr class="separator:afa47bc792aa694cbc399593d017c72b0 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f46b4548e7298b8aa3121591a7d26f1 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_a1f46b4548e7298b8aa3121591a7d26f1"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::ReturnStatement *) override</td></tr>
+<tr class="separator:a1f46b4548e7298b8aa3121591a7d26f1 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fb13d8aafebd3a97167fb698fff9f10 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_a4fb13d8aafebd3a97167fb698fff9f10"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::StructExpression *expr) override</td></tr>
+<tr class="separator:a4fb13d8aafebd3a97167fb698fff9f10 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac61588d2097486040382afecf269599d inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_ac61588d2097486040382afecf269599d"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::SwitchStatement *statement) override</td></tr>
+<tr class="separator:ac61588d2097486040382afecf269599d inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5aa0f2ec353f3f8c11808a42f727c6b1 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_a5aa0f2ec353f3f8c11808a42f727c6b1"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>processApply</b> (const <a class="el" href="class_p4_1_1_apply_method.html">P4::ApplyMethod</a> *method)</td></tr>
+<tr class="separator:a5aa0f2ec353f3f8c11808a42f727c6b1 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7cad70e726bfa303e32762171978f055 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_a7cad70e726bfa303e32762171978f055"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>processCustomExternFunction</b> (const <a class="el" href="class_p4_1_1_extern_function.html">P4::ExternFunction</a> *function, <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type_factory.html">EBPFTypeFactory</a> *typeFactory)</td></tr>
+<tr class="separator:a7cad70e726bfa303e32762171978f055 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd39cdcd76eef7538de7fc1f88bc845f inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_afd39cdcd76eef7538de7fc1f88bc845f"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>processFunction</b> (const <a class="el" href="class_p4_1_1_extern_function.html">P4::ExternFunction</a> *function)</td></tr>
+<tr class="separator:afd39cdcd76eef7538de7fc1f88bc845f inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f14d310756286e67b0ea482a4cdfa24 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator" id="r_a6f14d310756286e67b0ea482a4cdfa24"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>processMethod</b> (const <a class="el" href="class_p4_1_1_extern_method.html">P4::ExternMethod</a> *method)</td></tr>
+<tr class="separator:a6f14d310756286e67b0ea482a4cdfa24 inherit pub_methods_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_e_b_p_f_1_1_code_gen_inspector')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_e_b_p_f_1_1_code_gen_inspector.html">EBPF::CodeGenInspector</a></td></tr>
+<tr class="memitem:a90dded50450a4969c1ca4fe97dff7021 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a90dded50450a4969c1ca4fe97dff7021"><td class="memItemLeft" align="right" valign="top">
+&#160;</td><td class="memItemRight" valign="bottom"><b>CodeGenInspector</b> (<a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap)</td></tr>
+<tr class="memdesc:a90dded50450a4969c1ca4fe97dff7021 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="mdescLeft">&#160;</td><td class="mdescRight">precedence of current IR::Operation <br /></td></tr>
+<tr class="separator:a90dded50450a4969c1ca4fe97dff7021 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2313806f2baee71534e6d0c15133d84e inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a2313806f2baee71534e6d0c15133d84e"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>comparison</b> (const IR::Operation_Relation *comp)</td></tr>
+<tr class="separator:a2313806f2baee71534e6d0c15133d84e inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05b099f17d4027fca72b9327d467ecc4 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a05b099f17d4027fca72b9327d467ecc4"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>copyPointerVariables</b> (<a class="el" href="class_e_b_p_f_1_1_code_gen_inspector.html">CodeGenInspector</a> *other)</td></tr>
+<tr class="separator:a05b099f17d4027fca72b9327d467ecc4 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cacda2caf1d30a07a0d3ee2a6201d8f inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a2cacda2caf1d30a07a0d3ee2a6201d8f"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>copySubstitutions</b> (<a class="el" href="class_e_b_p_f_1_1_code_gen_inspector.html">CodeGenInspector</a> *other)</td></tr>
+<tr class="separator:a2cacda2caf1d30a07a0d3ee2a6201d8f inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a68f837d18cc033d7f586fd18804265 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a6a68f837d18cc033d7f586fd18804265"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>emitAndConvertByteOrder</b> (const IR::Expression *expr, <a class="el" href="classcstring.html">cstring</a> byte_order)</td></tr>
+<tr class="separator:a6a68f837d18cc033d7f586fd18804265 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f3ff99ba3e48f905e464b6e38f75c77 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a4f3ff99ba3e48f905e464b6e38f75c77"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>emitAssignStatement</b> (const IR::Type *ltype, const IR::Expression *lexpr, <a class="el" href="classcstring.html">cstring</a> lpath, const IR::Expression *rexpr)</td></tr>
+<tr class="separator:a4f3ff99ba3e48f905e464b6e38f75c77 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a249e25d9627dc01e3802c829db72fef6 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a249e25d9627dc01e3802c829db72fef6"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>emitTCAssignmentEndianessConversion</b> (const IR::Expression *lexpr, const IR::Expression *rexpr)</td></tr>
+<tr class="separator:a249e25d9627dc01e3802c829db72fef6 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82738f092472256db3fdf7077a1cdfae inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a82738f092472256db3fdf7077a1cdfae"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>emitTCBinaryOperation</b> (const IR::Operation_Binary *b, bool isScalar)</td></tr>
+<tr class="separator:a82738f092472256db3fdf7077a1cdfae inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a581d83d33cc35964620b769df0f39bf2 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a581d83d33cc35964620b769df0f39bf2"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isPointerVariable</b> (<a class="el" href="classcstring.html">cstring</a> name)</td></tr>
+<tr class="separator:a581d83d33cc35964620b769df0f39bf2 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80c2ab6bb236f2fff3f4e8a193e4762c inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a80c2ab6bb236f2fff3f4e8a193e4762c"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>notSupported</b> (const IR::Expression *expression)</td></tr>
+<tr class="separator:a80c2ab6bb236f2fff3f4e8a193e4762c inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b15bd023e669ba7c5e5dca0bbaf0ece inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a6b15bd023e669ba7c5e5dca0bbaf0ece"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::ArrayIndex *a) override</td></tr>
+<tr class="separator:a6b15bd023e669ba7c5e5dca0bbaf0ece inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56250e68e7b6f6792ab2681c3d56c004 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a56250e68e7b6f6792ab2681c3d56c004"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::AssignmentStatement *s) override</td></tr>
+<tr class="separator:a56250e68e7b6f6792ab2681c3d56c004 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90089a041eabd2b04145eb95524457e4 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a90089a041eabd2b04145eb95524457e4"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::BlockStatement *s) override</td></tr>
+<tr class="separator:a90089a041eabd2b04145eb95524457e4 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61f0b11401cae2a5a3d1ffb275de939d inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a61f0b11401cae2a5a3d1ffb275de939d"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::BoolLiteral *b) override</td></tr>
+<tr class="separator:a61f0b11401cae2a5a3d1ffb275de939d inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fcdaa50acdf5ef1617a44cf68ef625a inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a5fcdaa50acdf5ef1617a44cf68ef625a"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Cast *c) override</td></tr>
+<tr class="separator:a5fcdaa50acdf5ef1617a44cf68ef625a inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1935ca74b7353d2e4e2e9dc404b8057 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_ab1935ca74b7353d2e4e2e9dc404b8057"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Constant *expression) override</td></tr>
+<tr class="separator:ab1935ca74b7353d2e4e2e9dc404b8057 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bd2e451f7b9ffdefd25efd73509f7ec inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a9bd2e451f7b9ffdefd25efd73509f7ec"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Declaration_Variable *decl) override</td></tr>
+<tr class="separator:a9bd2e451f7b9ffdefd25efd73509f7ec inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1c78582520ff6b9d458250d3b8f77c6 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_ae1c78582520ff6b9d458250d3b8f77c6"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::EmptyStatement *s) override</td></tr>
+<tr class="separator:ae1c78582520ff6b9d458250d3b8f77c6 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03440465d2dc057764cc40be9b889dd1 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a03440465d2dc057764cc40be9b889dd1"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Equ *e) override</td></tr>
+<tr class="separator:a03440465d2dc057764cc40be9b889dd1 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70ba5cb4a16d14d600ef1619f30031b8 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a70ba5cb4a16d14d600ef1619f30031b8"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::ExitStatement *s) override</td></tr>
+<tr class="memdesc:a70ba5cb4a16d14d600ef1619f30031b8 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is correct only after inlining. <br /></td></tr>
+<tr class="separator:a70ba5cb4a16d14d600ef1619f30031b8 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2764061769ce0dcdad07ef322d8d55d inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_ab2764061769ce0dcdad07ef322d8d55d"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Expression *expression) override</td></tr>
+<tr class="separator:ab2764061769ce0dcdad07ef322d8d55d inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a900e2d29615660a19934e3c06bc603d1 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a900e2d29615660a19934e3c06bc603d1"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::IfStatement *s) override</td></tr>
+<tr class="separator:a900e2d29615660a19934e3c06bc603d1 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d4e588c8b692c4b9bfebefb227b2a95 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a3d4e588c8b692c4b9bfebefb227b2a95"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::ListExpression *expression) override</td></tr>
+<tr class="separator:a3d4e588c8b692c4b9bfebefb227b2a95 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25b5558f57b6f164c8b2a2bc974abcf3 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a25b5558f57b6f164c8b2a2bc974abcf3"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Mask *expression) override</td></tr>
+<tr class="separator:a25b5558f57b6f164c8b2a2bc974abcf3 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1db097bb00b3067a3d555ea993a049be inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a1db097bb00b3067a3d555ea993a049be"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Member *e) override</td></tr>
+<tr class="separator:a1db097bb00b3067a3d555ea993a049be inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23ec5f4d6ef07b248afc7559f9dc0034 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a23ec5f4d6ef07b248afc7559f9dc0034"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::MethodCallExpression *expression) override</td></tr>
+<tr class="separator:a23ec5f4d6ef07b248afc7559f9dc0034 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afac504ce5b4f426b806f15bda5c5778e inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_afac504ce5b4f426b806f15bda5c5778e"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::MethodCallStatement *s) override</td></tr>
+<tr class="separator:afac504ce5b4f426b806f15bda5c5778e inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa78492e54a23bf734850cb57efdff4fc inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_aa78492e54a23bf734850cb57efdff4fc"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Mux *a) override</td></tr>
+<tr class="separator:aa78492e54a23bf734850cb57efdff4fc inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23008c1f7258445aa58988bb2798aeac inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a23008c1f7258445aa58988bb2798aeac"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Neq *e) override</td></tr>
+<tr class="separator:a23008c1f7258445aa58988bb2798aeac inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca24c580ded1a47cbe9cc2a00cf779b1 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_aca24c580ded1a47cbe9cc2a00cf779b1"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Operation_Binary *b) override</td></tr>
+<tr class="separator:aca24c580ded1a47cbe9cc2a00cf779b1 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5972079a3e8f5e8e71ef80debd2e09e3 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a5972079a3e8f5e8e71ef80debd2e09e3"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Operation_Unary *u) override</td></tr>
+<tr class="separator:a5972079a3e8f5e8e71ef80debd2e09e3 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afeca2b057caae529ddfd923e4fa54344 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_afeca2b057caae529ddfd923e4fa54344"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Path *path) override</td></tr>
+<tr class="separator:afeca2b057caae529ddfd923e4fa54344 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6226cba1845961edc1f1dcd956d258f inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_ae6226cba1845961edc1f1dcd956d258f"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::PathExpression *expression) override</td></tr>
+<tr class="separator:ae6226cba1845961edc1f1dcd956d258f inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd0c9be25867a19397df9218aa90d76b inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_abd0c9be25867a19397df9218aa90d76b"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Range *expression) override</td></tr>
+<tr class="separator:abd0c9be25867a19397df9218aa90d76b inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97a5fbd89c24e2f89e988800a9f36a46 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a97a5fbd89c24e2f89e988800a9f36a46"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::ReturnStatement *s) override</td></tr>
+<tr class="separator:a97a5fbd89c24e2f89e988800a9f36a46 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92ea3d6a72c8d3b3182ddad3c0a6a63a inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a92ea3d6a72c8d3b3182ddad3c0a6a63a"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Slice *expression) override</td></tr>
+<tr class="separator:a92ea3d6a72c8d3b3182ddad3c0a6a63a inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8cdcebb935da97e2c35decdfe93bd0b inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_ae8cdcebb935da97e2c35decdfe93bd0b"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::StringLiteral *expression) override</td></tr>
+<tr class="separator:ae8cdcebb935da97e2c35decdfe93bd0b inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afda1333b66a6314670c9c227e836d0b7 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_afda1333b66a6314670c9c227e836d0b7"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::StructExpression *expr) override</td></tr>
+<tr class="separator:afda1333b66a6314670c9c227e836d0b7 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e014cc70492e8c81d7b1b321e20b59c inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a1e014cc70492e8c81d7b1b321e20b59c"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Type_Enum *type) override</td></tr>
+<tr class="separator:a1e014cc70492e8c81d7b1b321e20b59c inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac58ad11a0237c2a103f7caa74fb573a1 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_ac58ad11a0237c2a103f7caa74fb573a1"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Type_Typedef *type) override</td></tr>
+<tr class="separator:ac58ad11a0237c2a103f7caa74fb573a1 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa68f07a3e45bfbcda0384c0372f850e5 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_aa68f07a3e45bfbcda0384c0372f850e5"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setBuilder</b> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *builder)</td></tr>
+<tr class="separator:aa68f07a3e45bfbcda0384c0372f850e5 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0eb358b28f705fe2fe995792e1e9632c inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a0eb358b28f705fe2fe995792e1e9632c"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>substitute</b> (const IR::Parameter *p, const IR::Parameter *with)</td></tr>
+<tr class="separator:a0eb358b28f705fe2fe995792e1e9632c inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a7148fd3b327c19738038f5b0cdda24 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a0a7148fd3b327c19738038f5b0cdda24"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>useAsPointerVariable</b> (<a class="el" href="classcstring.html">cstring</a> name)</td></tr>
+<tr class="separator:a0a7148fd3b327c19738038f5b0cdda24 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fe4dc776d7a6de28af5060ed3ad6c98 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector" id="r_a1fe4dc776d7a6de28af5060ed3ad6c98"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>widthCheck</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *node) const</td></tr>
+<tr class="separator:a1fe4dc776d7a6de28af5060ed3ad6c98 inherit pub_methods_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_inspector"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_inspector')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_inspector.html">Inspector</a></td></tr>
+<tr class="memitem:a6b8ae65e8f2f29da879711e4c0455c58 inherit pub_methods_class_inspector" id="r_a6b8ae65e8f2f29da879711e4c0455c58"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_inspector.html#a6b8ae65e8f2f29da879711e4c0455c58">apply_visitor</a> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *, const char *name=0) override</td></tr>
+<tr class="separator:a6b8ae65e8f2f29da879711e4c0455c58 inherit pub_methods_class_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4329f6948ed92b92fdc0b124578da80d inherit pub_methods_class_inspector" id="r_a4329f6948ed92b92fdc0b124578da80d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_visitor_1_1profile__t.html">profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_inspector.html#a4329f6948ed92b92fdc0b124578da80d">init_apply</a> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *root) override</td></tr>
+<tr class="separator:a4329f6948ed92b92fdc0b124578da80d inherit pub_methods_class_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4730f7d7c7ffe48ae0b300168f0c3cdb inherit pub_methods_class_inspector" id="r_a4730f7d7c7ffe48ae0b300168f0c3cdb"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>loop_revisit</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
+<tr class="separator:a4730f7d7c7ffe48ae0b300168f0c3cdb inherit pub_methods_class_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa134ecba3bc6e2a7af2f72efbdfac0c9 inherit pub_methods_class_inspector" id="r_aa134ecba3bc6e2a7af2f72efbdfac0c9"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
+<tr class="separator:aa134ecba3bc6e2a7af2f72efbdfac0c9 inherit pub_methods_class_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a053db572031b435b663d455249643f7c inherit pub_methods_class_inspector" id="r_a053db572031b435b663d455249643f7c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_inspector.html#a053db572031b435b663d455249643f7c">preorder</a> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
+<tr class="separator:a053db572031b435b663d455249643f7c inherit pub_methods_class_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87d5eab575ea1dd79bd80ebf7842ba66 inherit pub_methods_class_inspector" id="r_a87d5eab575ea1dd79bd80ebf7842ba66"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>revisit</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
+<tr class="separator:a87d5eab575ea1dd79bd80ebf7842ba66 inherit pub_methods_class_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a746cd9ac08979f74160255ca9c6203ac inherit pub_methods_class_inspector" id="r_a746cd9ac08979f74160255ca9c6203ac"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>revisit_visited</b> ()</td></tr>
+<tr class="separator:a746cd9ac08979f74160255ca9c6203ac inherit pub_methods_class_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05e30dcad259606d59172c06c9a55bbf inherit pub_methods_class_inspector" id="r_a05e30dcad259606d59172c06c9a55bbf"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>visit_in_progress</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *n) const</td></tr>
+<tr class="separator:a05e30dcad259606d59172c06c9a55bbf inherit pub_methods_class_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a4c7d236f5097ec048e16ff1dbf46b0 inherit pub_methods_class_inspector" id="r_a1a4c7d236f5097ec048e16ff1dbf46b0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_inspector.html#a1a4c7d236f5097ec048e16ff1dbf46b0">visitAgain</a> () const override</td></tr>
+<tr class="separator:a1a4c7d236f5097ec048e16ff1dbf46b0 inherit pub_methods_class_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01b4a620808c637197a58034b2a1847e inherit pub_methods_class_inspector" id="r_a01b4a620808c637197a58034b2a1847e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_inspector.html#a01b4a620808c637197a58034b2a1847e">visitOnce</a> () const override</td></tr>
+<tr class="separator:a01b4a620808c637197a58034b2a1847e inherit pub_methods_class_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_visitor')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_visitor.html">Visitor</a></td></tr>
+<tr class="memitem:ae48b8e9d0b78c7e06f70927808d71495 inherit pub_methods_class_visitor" id="r_ae48b8e9d0b78c7e06f70927808d71495"><td class="memItemLeft" align="right" valign="top">
+virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>check_global</b> (<a class="el" href="classcstring.html">cstring</a>)</td></tr>
+<tr class="separator:ae48b8e9d0b78c7e06f70927808d71495 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff9d10898376b455dc7bc4c40b854ce1 inherit pub_methods_class_visitor" id="r_aff9d10898376b455dc7bc4c40b854ce1"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>clear_globals</b> ()</td></tr>
+<tr class="separator:aff9d10898376b455dc7bc4c40b854ce1 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6cb372d0dfa554738fa84412fbdb39e2 inherit pub_methods_class_visitor" id="r_a6cb372d0dfa554738fa84412fbdb39e2"><td class="memItemLeft" align="right" valign="top">
+virtual <a class="el" href="class_visitor.html">Visitor</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>clone</b> () const</td></tr>
+<tr class="separator:a6cb372d0dfa554738fa84412fbdb39e2 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71b2a465f985329514f26083db17accc inherit pub_methods_class_visitor" id="r_a71b2a465f985329514f26083db17accc"><td class="memItemLeft" align="right" valign="top">
+virtual <a class="el" href="class_control_flow_visitor.html">ControlFlowVisitor</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>controlFlowVisitor</b> ()</td></tr>
+<tr class="separator:a71b2a465f985329514f26083db17accc inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac996ab6a36e91852205737c6a0c31b07 inherit pub_methods_class_visitor" id="r_ac996ab6a36e91852205737c6a0c31b07"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>end_apply</b> ()</td></tr>
+<tr class="separator:ac996ab6a36e91852205737c6a0c31b07 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a404f3e8285e6275b774e83544ff04360 inherit pub_methods_class_visitor" id="r_a404f3e8285e6275b774e83544ff04360"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>end_apply</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *root)</td></tr>
+<tr class="separator:a404f3e8285e6275b774e83544ff04360 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3e8b1fcab0b871ebbedb511266ca295 inherit pub_methods_class_visitor" id="r_ad3e8b1fcab0b871ebbedb511266ca295"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>erase_global</b> (<a class="el" href="classcstring.html">cstring</a>)</td></tr>
+<tr class="separator:ad3e8b1fcab0b871ebbedb511266ca295 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bd18602def4641bdf69778967bfb33d inherit pub_methods_class_visitor" id="r_a3bd18602def4641bdf69778967bfb33d"><td class="memTemplParams" colspan="2">
+template&lt;class T &gt; </td></tr>
+<tr class="memitem:a3bd18602def4641bdf69778967bfb33d inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">const T *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>findContext</b> () const</td></tr>
+<tr class="separator:a3bd18602def4641bdf69778967bfb33d inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d042bf5c1e85bef6881ade621c6c9fa inherit pub_methods_class_visitor" id="r_a2d042bf5c1e85bef6881ade621c6c9fa"><td class="memTemplParams" colspan="2">
+template&lt;class T &gt; </td></tr>
+<tr class="memitem:a2d042bf5c1e85bef6881ade621c6c9fa inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">const T *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>findContext</b> (const <a class="el" href="struct_visitor___context.html">Context</a> *&amp;c) const</td></tr>
+<tr class="separator:a2d042bf5c1e85bef6881ade621c6c9fa inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1dccdeee125e11bb63730c8bb0a350d5 inherit pub_methods_class_visitor" id="r_a1dccdeee125e11bb63730c8bb0a350d5"><td class="memTemplParams" colspan="2">
+template&lt;class T &gt; </td></tr>
+<tr class="memitem:a1dccdeee125e11bb63730c8bb0a350d5 inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">const T *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>findOrigCtxt</b> () const</td></tr>
+<tr class="separator:a1dccdeee125e11bb63730c8bb0a350d5 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfd3252a2145e9b9c5544a3ca7cd74ee inherit pub_methods_class_visitor" id="r_adfd3252a2145e9b9c5544a3ca7cd74ee"><td class="memTemplParams" colspan="2">
+template&lt;class T &gt; </td></tr>
+<tr class="memitem:adfd3252a2145e9b9c5544a3ca7cd74ee inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">const T *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>findOrigCtxt</b> (const <a class="el" href="struct_visitor___context.html">Context</a> *&amp;c) const</td></tr>
+<tr class="separator:adfd3252a2145e9b9c5544a3ca7cd74ee inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7f12a1725648a7d9edfeef08e454809 inherit pub_methods_class_visitor" id="r_ab7f12a1725648a7d9edfeef08e454809"><td class="memItemLeft" align="right" valign="top">
+virtual <a class="el" href="class_visitor.html">Visitor</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>flow_clone</b> ()</td></tr>
+<tr class="separator:ab7f12a1725648a7d9edfeef08e454809 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4049369f706cb1993d2e5c61f7eafc6b inherit pub_methods_class_visitor" id="r_a4049369f706cb1993d2e5c61f7eafc6b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_visitor.html#a4049369f706cb1993d2e5c61f7eafc6b">flow_merge</a> (<a class="el" href="class_visitor.html">Visitor</a> &amp;)</td></tr>
+<tr class="separator:a4049369f706cb1993d2e5c61f7eafc6b inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac8b2823d4c0db98334703177333381d inherit pub_methods_class_visitor" id="r_aac8b2823d4c0db98334703177333381d"><td class="memItemLeft" align="right" valign="top">
+virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>flow_merge_closure</b> (<a class="el" href="class_visitor.html">Visitor</a> &amp;)</td></tr>
+<tr class="separator:aac8b2823d4c0db98334703177333381d inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad84bd47ae20cba1d5707c816c34201d9 inherit pub_methods_class_visitor" id="r_ad84bd47ae20cba1d5707c816c34201d9"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>flow_merge_global_from</b> (<a class="el" href="classcstring.html">cstring</a>)</td></tr>
+<tr class="separator:ad84bd47ae20cba1d5707c816c34201d9 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59bcd438662899fd2f7e3f32869d9553 inherit pub_methods_class_visitor" id="r_a59bcd438662899fd2f7e3f32869d9553"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_visitor.html#a59bcd438662899fd2f7e3f32869d9553">flow_merge_global_to</a> (<a class="el" href="classcstring.html">cstring</a>)</td></tr>
+<tr class="separator:a59bcd438662899fd2f7e3f32869d9553 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f2767e5fe209af30596eb77a1475bac inherit pub_methods_class_visitor" id="r_a8f2767e5fe209af30596eb77a1475bac"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="struct_visitor___context.html">Context</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getChildContext</b> () const</td></tr>
+<tr class="separator:a8f2767e5fe209af30596eb77a1475bac inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a753491b9c3502c2be0b996adf86c1d49 inherit pub_methods_class_visitor" id="r_a753491b9c3502c2be0b996adf86c1d49"><td class="memItemLeft" align="right" valign="top">
+int&#160;</td><td class="memItemRight" valign="bottom"><b>getChildrenVisited</b> () const</td></tr>
+<tr class="separator:a753491b9c3502c2be0b996adf86c1d49 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45ed310ee1bbc91163ec9b6aa56fb63a inherit pub_methods_class_visitor" id="r_a45ed310ee1bbc91163ec9b6aa56fb63a"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="struct_visitor___context.html">Context</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getContext</b> () const</td></tr>
+<tr class="separator:a45ed310ee1bbc91163ec9b6aa56fb63a inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a895a0548b4360f9bba8c7b7d7c1b3995 inherit pub_methods_class_visitor" id="r_a895a0548b4360f9bba8c7b7d7c1b3995"><td class="memItemLeft" align="right" valign="top">
+int&#160;</td><td class="memItemRight" valign="bottom"><b>getContextDepth</b> () const</td></tr>
+<tr class="separator:a895a0548b4360f9bba8c7b7d7c1b3995 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a523f1f13cfc445cf26ce43f792a886b9 inherit pub_methods_class_visitor" id="r_a523f1f13cfc445cf26ce43f792a886b9"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_visitor.html#a523f1f13cfc445cf26ce43f792a886b9">getCurrentNode</a> () const</td></tr>
+<tr class="separator:a523f1f13cfc445cf26ce43f792a886b9 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a034eee2026e85ef9d96bd57c500361ed inherit pub_methods_class_visitor" id="r_a034eee2026e85ef9d96bd57c500361ed"><td class="memTemplParams" colspan="2">
+template&lt;class T &gt; </td></tr>
+<tr class="memitem:a034eee2026e85ef9d96bd57c500361ed inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">const T *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>getCurrentNode</b> () const</td></tr>
+<tr class="separator:a034eee2026e85ef9d96bd57c500361ed inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a7fabb28ea947d2a03932e60ea8ba53 inherit pub_methods_class_visitor" id="r_a5a7fabb28ea947d2a03932e60ea8ba53"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getOriginal</b> () const</td></tr>
+<tr class="separator:a5a7fabb28ea947d2a03932e60ea8ba53 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82c141b6b8233dca66ad5903289fad7c inherit pub_methods_class_visitor" id="r_a82c141b6b8233dca66ad5903289fad7c"><td class="memTemplParams" colspan="2">
+template&lt;class T &gt; </td></tr>
+<tr class="memitem:a82c141b6b8233dca66ad5903289fad7c inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">const T *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>getOriginal</b> () const</td></tr>
+<tr class="separator:a82c141b6b8233dca66ad5903289fad7c inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefa958d12446029eb5d1a6300dbf900d inherit pub_methods_class_visitor" id="r_aefa958d12446029eb5d1a6300dbf900d"><td class="memTemplParams" colspan="2">
+template&lt;class T &gt; </td></tr>
+<tr class="memitem:aefa958d12446029eb5d1a6300dbf900d inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">const T *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>getParent</b> () const</td></tr>
+<tr class="separator:aefa958d12446029eb5d1a6300dbf900d inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8edda1cbd9c7db1bdad9d4e2eaa4d149 inherit pub_methods_class_visitor" id="r_a8edda1cbd9c7db1bdad9d4e2eaa4d149"><td class="memItemLeft" align="right" valign="top">
+virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_flow_joins</b> () const</td></tr>
+<tr class="separator:a8edda1cbd9c7db1bdad9d4e2eaa4d149 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0f2f7e8614d27ed28400a7e57653c70 inherit pub_methods_class_visitor" id="r_af0f2f7e8614d27ed28400a7e57653c70"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="class_visitor_1_1profile__t.html">profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>init_apply</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *root, const <a class="el" href="struct_visitor___context.html">Context</a> *parent_context)</td></tr>
+<tr class="separator:af0f2f7e8614d27ed28400a7e57653c70 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8b7a4c83756813bf2efe1c1a82f4a64 inherit pub_methods_class_visitor" id="r_ac8b7a4c83756813bf2efe1c1a82f4a64"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isInContext</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *n) const</td></tr>
+<tr class="separator:ac8b7a4c83756813bf2efe1c1a82f4a64 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a399a2e9b70457266bc156104d7c85b7b inherit pub_methods_class_visitor" id="r_a399a2e9b70457266bc156104d7c85b7b"><td class="memItemLeft" align="right" valign="top">
+virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><b>name</b> () const</td></tr>
+<tr class="separator:a399a2e9b70457266bc156104d7c85b7b inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8b37bc2c4a65b6c83c7fbb51a66a068 inherit pub_methods_class_visitor" id="r_ad8b37bc2c4a65b6c83c7fbb51a66a068"><td class="memTemplParams" colspan="2">
+template&lt;class T &gt; </td></tr>
+<tr class="memitem:ad8b37bc2c4a65b6c83c7fbb51a66a068 inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>parallel_visit</b> (const <a class="el" href="class_i_r_1_1_vector.html">IR::Vector</a>&lt; T &gt; &amp;v, const char *name, int cidx)</td></tr>
+<tr class="separator:ad8b37bc2c4a65b6c83c7fbb51a66a068 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a703d530dfc0db290b57981f186da1b52 inherit pub_methods_class_visitor" id="r_a703d530dfc0db290b57981f186da1b52"><td class="memTemplParams" colspan="2">
+template&lt;class T &gt; </td></tr>
+<tr class="memitem:a703d530dfc0db290b57981f186da1b52 inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>parallel_visit</b> (const <a class="el" href="class_i_r_1_1_vector.html">IR::Vector</a>&lt; T &gt; &amp;v, const char *name=0)</td></tr>
+<tr class="separator:a703d530dfc0db290b57981f186da1b52 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3187c647045a97c00707989f83592e9c inherit pub_methods_class_visitor" id="r_a3187c647045a97c00707989f83592e9c"><td class="memTemplParams" colspan="2">
+template&lt;class T &gt; </td></tr>
+<tr class="memitem:a3187c647045a97c00707989f83592e9c inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>parallel_visit</b> (<a class="el" href="class_i_r_1_1_vector.html">IR::Vector</a>&lt; T &gt; &amp;v, const char *name, int cidx)</td></tr>
+<tr class="separator:a3187c647045a97c00707989f83592e9c inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a896545f6f8a1358c99238db291666292 inherit pub_methods_class_visitor" id="r_a896545f6f8a1358c99238db291666292"><td class="memTemplParams" colspan="2">
+template&lt;class T &gt; </td></tr>
+<tr class="memitem:a896545f6f8a1358c99238db291666292 inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>parallel_visit</b> (<a class="el" href="class_i_r_1_1_vector.html">IR::Vector</a>&lt; T &gt; &amp;v, const char *name=0)</td></tr>
+<tr class="separator:a896545f6f8a1358c99238db291666292 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9205d8245569eb020cc3639295817a6 inherit pub_methods_class_visitor" id="r_ad9205d8245569eb020cc3639295817a6"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>print_context</b> () const</td></tr>
+<tr class="separator:ad9205d8245569eb020cc3639295817a6 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d4f703880b564588e6a609c3a5ea600 inherit pub_methods_class_visitor" id="r_a5d4f703880b564588e6a609c3a5ea600"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="class_visitor.html">Visitor</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>setCalledBy</b> (const <a class="el" href="class_visitor.html">Visitor</a> *visitor)</td></tr>
+<tr class="separator:a5d4f703880b564588e6a609c3a5ea600 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5767f8a55cab13f6f048b454d89261e8 inherit pub_methods_class_visitor" id="r_a5767f8a55cab13f6f048b454d89261e8"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setName</b> (const char *name)</td></tr>
+<tr class="separator:a5767f8a55cab13f6f048b454d89261e8 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d0d2d2d9d88a65092836b1de19a3ca6 inherit pub_methods_class_visitor" id="r_a8d0d2d2d9d88a65092836b1de19a3ca6"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>visit</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> &amp;n, const char *name, int cidx)</td></tr>
+<tr class="separator:a8d0d2d2d9d88a65092836b1de19a3ca6 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbdd94dd0eb5ff935fc39130b8da9655 inherit pub_methods_class_visitor" id="r_adbdd94dd0eb5ff935fc39130b8da9655"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>visit</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> &amp;n, const char *name=0)</td></tr>
+<tr class="separator:adbdd94dd0eb5ff935fc39130b8da9655 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f66ffedcbe7a04d30c4df24f59f7f52 inherit pub_methods_class_visitor" id="r_a8f66ffedcbe7a04d30c4df24f59f7f52"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>visit</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *&amp;n, const char *name, int cidx)</td></tr>
+<tr class="separator:a8f66ffedcbe7a04d30c4df24f59f7f52 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70f23004501a2ef291cb604f2e01deff inherit pub_methods_class_visitor" id="r_a70f23004501a2ef291cb604f2e01deff"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>visit</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *&amp;n, const char *name=0)</td></tr>
+<tr class="separator:a70f23004501a2ef291cb604f2e01deff inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a539dcff0b332e47e8f346cade059b181 inherit pub_methods_class_visitor" id="r_a539dcff0b332e47e8f346cade059b181"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>visit</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *const &amp;n, const char *name, int cidx)</td></tr>
+<tr class="separator:a539dcff0b332e47e8f346cade059b181 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40ddaee0f36868e4c8319f8982a43db7 inherit pub_methods_class_visitor" id="r_a40ddaee0f36868e4c8319f8982a43db7"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>visit</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *const &amp;n, const char *name=0)</td></tr>
+<tr class="separator:a40ddaee0f36868e4c8319f8982a43db7 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01333b6a80a846d49c0e68015b788eca inherit pub_methods_class_visitor" id="r_a01333b6a80a846d49c0e68015b788eca"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>visit</b> (<a class="el" href="class_i_r_1_1_node.html">IR::Node</a> &amp;n, const char *name, int cidx)</td></tr>
+<tr class="separator:a01333b6a80a846d49c0e68015b788eca inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7a83a185f9ee8a63907c7cc5837de4f inherit pub_methods_class_visitor" id="r_af7a83a185f9ee8a63907c7cc5837de4f"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>visit</b> (<a class="el" href="class_i_r_1_1_node.html">IR::Node</a> &amp;n, const char *name=0)</td></tr>
+<tr class="separator:af7a83a185f9ee8a63907c7cc5837de4f inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a886b979b83a985249db26b76e8451455 inherit pub_methods_class_visitor" id="r_a886b979b83a985249db26b76e8451455"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>visit</b> (<a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *&amp;, const char *=0, int=0)</td></tr>
+<tr class="separator:a886b979b83a985249db26b76e8451455 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa03ee9aa1ea4ddcbc4a31f993e90bacf inherit pub_methods_class_visitor" id="r_aa03ee9aa1ea4ddcbc4a31f993e90bacf"><td class="memTemplParams" colspan="2">
+template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt;&gt;, class... Args&gt; </td></tr>
+<tr class="memitem:aa03ee9aa1ea4ddcbc4a31f993e90bacf inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>warn</b> (const int kind, const char *format, const T &amp;node, Args &amp;&amp;...args)</td></tr>
+<tr class="memdesc:aa03ee9aa1ea4ddcbc4a31f993e90bacf inherit pub_methods_class_visitor"><td class="mdescLeft">&#160;</td><td class="mdescRight">The const ref variant of the above. <br /></td></tr>
+<tr class="separator:aa03ee9aa1ea4ddcbc4a31f993e90bacf inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9220f398c498220611990ad73431c31 inherit pub_methods_class_visitor" id="r_ad9220f398c498220611990ad73431c31"><td class="memTemplParams" colspan="2">
+template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt;&gt;, class... Args&gt; </td></tr>
+<tr class="memitem:ad9220f398c498220611990ad73431c31 inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>warn</b> (const int kind, const char *format, const T *node, Args &amp;&amp;...args)</td></tr>
+<tr class="separator:ad9220f398c498220611990ad73431c31 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d965ec82111dd4cb5b46c60ea721b82 inherit pub_methods_class_visitor" id="r_a2d965ec82111dd4cb5b46c60ea721b82"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_visitor.html#a2d965ec82111dd4cb5b46c60ea721b82">warning_enabled</a> (int warning_kind) const</td></tr>
+<tr class="separator:a2d965ec82111dd4cb5b46c60ea721b82 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
+Protected Attributes</h2></td></tr>
+<tr class="memitem:a59ff83d29771e7ee035270cd9b337e21" id="r_a59ff83d29771e7ee035270cd9b337e21"><td class="memItemLeft" align="right" valign="top"><a id="a59ff83d29771e7ee035270cd9b337e21" name="a59ff83d29771e7ee035270cd9b337e21"></a>
+const <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_deparser.html">EBPFDeparser</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>deparser</b></td></tr>
+<tr class="separator:a59ff83d29771e7ee035270cd9b337e21"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_class_e_b_p_f_1_1_control_body_translator"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_e_b_p_f_1_1_control_body_translator')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_e_b_p_f_1_1_control_body_translator.html">EBPF::ControlBodyTranslator</a></td></tr>
+<tr class="memitem:a26798244de235cc3459c12cf4f62ee0e inherit pro_attribs_class_e_b_p_f_1_1_control_body_translator" id="r_a26798244de235cc3459c12cf4f62ee0e"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_control.html">EBPFControl</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>control</b></td></tr>
+<tr class="separator:a26798244de235cc3459c12cf4f62ee0e inherit pro_attribs_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5db00d43caf0a2c4509c08588247175a inherit pro_attribs_class_e_b_p_f_1_1_control_body_translator" id="r_a5db00d43caf0a2c4509c08588247175a"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="class_p4_1_1_p4_core_library.html">P4::P4CoreLibrary</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>p4lib</b></td></tr>
+<tr class="separator:a5db00d43caf0a2c4509c08588247175a inherit pro_attribs_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb83985c62f17a3477035c0bbde9d3dc inherit pro_attribs_class_e_b_p_f_1_1_control_body_translator" id="r_acb83985c62f17a3477035c0bbde9d3dc"><td class="memItemLeft" align="right" valign="top">
+std::vector&lt; <a class="el" href="classcstring.html">cstring</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>saveAction</b></td></tr>
+<tr class="separator:acb83985c62f17a3477035c0bbde9d3dc inherit pro_attribs_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79187fe2715e677da08e069c762bb0e7 inherit pro_attribs_class_e_b_p_f_1_1_control_body_translator" id="r_a79187fe2715e677da08e069c762bb0e7"><td class="memItemLeft" align="right" valign="top">
+std::set&lt; const IR::Parameter * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>toDereference</b></td></tr>
+<tr class="separator:a79187fe2715e677da08e069c762bb0e7 inherit pro_attribs_class_e_b_p_f_1_1_control_body_translator"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_class_e_b_p_f_1_1_code_gen_inspector"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_e_b_p_f_1_1_code_gen_inspector')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_e_b_p_f_1_1_code_gen_inspector.html">EBPF::CodeGenInspector</a></td></tr>
+<tr class="memitem:ac72fa28316cc4a25e3c1749f28208118 inherit pro_attribs_class_e_b_p_f_1_1_code_gen_inspector" id="r_ac72fa28316cc4a25e3c1749f28208118"><td class="memItemLeft" align="right" valign="top">std::set&lt; <a class="el" href="classcstring.html">cstring</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_e_b_p_f_1_1_code_gen_inspector.html#ac72fa28316cc4a25e3c1749f28208118">asPointerVariables</a></td></tr>
+<tr class="separator:ac72fa28316cc4a25e3c1749f28208118 inherit pro_attribs_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9728b7024c49f7bb6269751d8127d85f inherit pro_attribs_class_e_b_p_f_1_1_code_gen_inspector" id="r_a9728b7024c49f7bb6269751d8127d85f"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>builder</b></td></tr>
+<tr class="separator:a9728b7024c49f7bb6269751d8127d85f inherit pro_attribs_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a966a1352d6b05706293ad4fce64b62ef inherit pro_attribs_class_e_b_p_f_1_1_code_gen_inspector" id="r_a966a1352d6b05706293ad4fce64b62ef"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_e_b_p_f_1_1_code_gen_inspector.html#a966a1352d6b05706293ad4fce64b62ef">commentDescriptionDepth</a> = 0</td></tr>
+<tr class="separator:a966a1352d6b05706293ad4fce64b62ef inherit pro_attribs_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae740038e18ed208980d873340a0e26c0 inherit pro_attribs_class_e_b_p_f_1_1_code_gen_inspector" id="r_ae740038e18ed208980d873340a0e26c0"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>refMap</b></td></tr>
+<tr class="separator:ae740038e18ed208980d873340a0e26c0 inherit pro_attribs_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c0f8f0647ca876cecbc0eda4c10c49e inherit pro_attribs_class_e_b_p_f_1_1_code_gen_inspector" id="r_a2c0f8f0647ca876cecbc0eda4c10c49e"><td class="memItemLeft" align="right" valign="top">
+std::map&lt; const IR::Parameter *, const IR::Parameter * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>substitution</b></td></tr>
+<tr class="separator:a2c0f8f0647ca876cecbc0eda4c10c49e inherit pro_attribs_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa81da56121d6bbeb21070e36d5479058 inherit pro_attribs_class_e_b_p_f_1_1_code_gen_inspector" id="r_aa81da56121d6bbeb21070e36d5479058"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>typeMap</b></td></tr>
+<tr class="separator:aa81da56121d6bbeb21070e36d5479058 inherit pro_attribs_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_class_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_visitor')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_visitor.html">Visitor</a></td></tr>
+<tr class="memitem:aa100e3aac31216dccef1f6c1b4ce6e01 inherit pro_attribs_class_visitor" id="r_aa100e3aac31216dccef1f6c1b4ce6e01"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>dontForwardChildrenBeforePreorder</b> = false</td></tr>
+<tr class="separator:aa100e3aac31216dccef1f6c1b4ce6e01 inherit pro_attribs_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c235e8b96ae22237a0664809aa689fd inherit pro_attribs_class_visitor" id="r_a8c235e8b96ae22237a0664809aa689fd"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>joinFlows</b> = false</td></tr>
+<tr class="separator:a8c235e8b96ae22237a0664809aa689fd inherit pro_attribs_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3eccf99a7f1eb191dd42aa6a3f29d467 inherit pro_attribs_class_visitor" id="r_a3eccf99a7f1eb191dd42aa6a3f29d467"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = true</td></tr>
+<tr class="separator:a3eccf99a7f1eb191dd42aa6a3f29d467 inherit pro_attribs_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pub_types_class_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_types_class_visitor')"><img src="closed.png" alt="-"/>&#160;Public Types inherited from <a class="el" href="class_visitor.html">Visitor</a></td></tr>
+<tr class="memitem:ad2b03986b39cf6a666139b7f6784ec6e inherit pub_types_class_visitor" id="r_ad2b03986b39cf6a666139b7f6784ec6e"><td class="memItemLeft" align="right" valign="top">
+typedef <a class="el" href="struct_visitor___context.html">Visitor_Context</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Context</b></td></tr>
+<tr class="separator:ad2b03986b39cf6a666139b7f6784ec6e inherit pub_types_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_static_methods_class_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_static_methods_class_visitor')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="class_visitor.html">Visitor</a></td></tr>
+<tr class="memitem:acc1e5976fdbd48c1d087e5b037325978 inherit pub_static_methods_class_visitor" id="r_acc1e5976fdbd48c1d087e5b037325978"><td class="memItemLeft" align="right" valign="top">
+static <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>demangle</b> (const char *)</td></tr>
+<tr class="separator:acc1e5976fdbd48c1d087e5b037325978 inherit pub_static_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade6b7d83c083c4fbfb1b9cd414abdc67 inherit pub_static_methods_class_visitor" id="r_ade6b7d83c083c4fbfb1b9cd414abdc67"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_visitor.html#ade6b7d83c083c4fbfb1b9cd414abdc67">warning_enabled</a> (const <a class="el" href="class_visitor.html">Visitor</a> *visitor, int warning_kind)</td></tr>
+<tr class="separator:ade6b7d83c083c4fbfb1b9cd414abdc67 inherit pub_static_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_attribs_class_e_b_p_f_1_1_code_gen_inspector"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_attribs_class_e_b_p_f_1_1_code_gen_inspector')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="class_e_b_p_f_1_1_code_gen_inspector.html">EBPF::CodeGenInspector</a></td></tr>
+<tr class="memitem:a8101914cbec62c78cf36996dfb68a906 inherit pub_attribs_class_e_b_p_f_1_1_code_gen_inspector" id="r_a8101914cbec62c78cf36996dfb68a906"><td class="memItemLeft" align="right" valign="top">
+int&#160;</td><td class="memItemRight" valign="bottom"><b>expressionPrecedence</b></td></tr>
+<tr class="separator:a8101914cbec62c78cf36996dfb68a906 inherit pub_attribs_class_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_attribs_class_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_attribs_class_visitor')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="class_visitor.html">Visitor</a></td></tr>
+<tr class="memitem:a21c334a596758251a1764db4c46549e3 inherit pub_attribs_class_visitor" id="r_a21c334a596758251a1764db4c46549e3"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="class_visitor.html">Visitor</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>called_by</b> = nullptr</td></tr>
+<tr class="separator:a21c334a596758251a1764db4c46549e3 inherit pub_attribs_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0f3a27644c4d0446606b9e14af26f5e inherit pub_attribs_class_visitor" id="r_ad0f3a27644c4d0446606b9e14af26f5e"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>internalName</b></td></tr>
+<tr class="separator:ad0f3a27644c4d0446606b9e14af26f5e inherit pub_attribs_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae67d801245a2bd4f402e37479249392d inherit pub_attribs_class_visitor" id="r_ae67d801245a2bd4f402e37479249392d"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="class_split_flow_visit__base.html">SplitFlowVisit_base</a> *&amp;&#160;</td><td class="memItemRight" valign="bottom"><b>split_link</b></td></tr>
+<tr class="separator:ae67d801245a2bd4f402e37479249392d inherit pub_attribs_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae407f2a8cf0aef8237e905418690ab63 inherit pub_attribs_class_visitor" id="r_ae407f2a8cf0aef8237e905418690ab63"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="class_split_flow_visit__base.html">SplitFlowVisit_base</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>split_link_mem</b> = nullptr</td></tr>
+<tr class="separator:ae407f2a8cf0aef8237e905418690ab63 inherit pub_attribs_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_methods_class_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_visitor')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_visitor.html">Visitor</a></td></tr>
+<tr class="memitem:ac1f50b60bdf180fd75ab6246ece0abb7 inherit pro_methods_class_visitor" id="r_ac1f50b60bdf180fd75ab6246ece0abb7"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>init_join_flows</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
+<tr class="separator:ac1f50b60bdf180fd75ab6246ece0abb7 inherit pro_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9823f2885dd4bacbe7ba87cc4bf71de3 inherit pro_methods_class_visitor" id="r_a9823f2885dd4bacbe7ba87cc4bf71de3"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_visitor.html#a9823f2885dd4bacbe7ba87cc4bf71de3">join_flows</a> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
+<tr class="separator:a9823f2885dd4bacbe7ba87cc4bf71de3 inherit pro_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f7691c588193090f8a4a4aa0960d19b inherit pro_methods_class_visitor" id="r_a0f7691c588193090f8a4a4aa0960d19b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_visitor.html#a0f7691c588193090f8a4a4aa0960d19b">post_join_flows</a> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *, const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
+<tr class="separator:a0f7691c588193090f8a4a4aa0960d19b inherit pro_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3643723eae0b64dde95323eb7e450c42 inherit pro_methods_class_visitor" id="r_a3643723eae0b64dde95323eb7e450c42"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>visit_children</b> (const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *, std::function&lt; void()&gt; fn)</td></tr>
+<tr class="separator:a3643723eae0b64dde95323eb7e450c42 inherit pro_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>This translator emits deparser externs. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

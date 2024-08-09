@@ -120,10 +120,28 @@ $(function(){initNavTree('struct_p4_1_1_control_plane_a_p_i_1_1_p4_symbol_suffix
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="struct_p4_1_1_control_plane_a_p_i_1_1_p4_symbol_suffix_set-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::ControlPlaneAPI::P4SymbolSuffixSet Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="p4_runtime_symbol_table_8h_source.html">p4RuntimeSymbolTable.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a0dea86d37cb14fbef0f3f1527678a406" id="r_a0dea86d37cb14fbef0f3f1527678a406"><td class="memItemLeft" align="right" valign="top"><a id="a0dea86d37cb14fbef0f3f1527678a406" name="a0dea86d37cb14fbef0f3f1527678a406"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>addSymbol</b> (const <a class="el" href="classcstring.html">cstring</a> &amp;symbol)</td></tr>
+<tr class="memdesc:a0dea86d37cb14fbef0f3f1527678a406"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds @symbol's suffixes to the set if it's not already present. <br /></td></tr>
+<tr class="separator:a0dea86d37cb14fbef0f3f1527678a406"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a850500fa24c34fbb01f20076d5882ab1" id="r_a850500fa24c34fbb01f20076d5882ab1"><td class="memItemLeft" align="right" valign="top"><a id="a850500fa24c34fbb01f20076d5882ab1" name="a850500fa24c34fbb01f20076d5882ab1"></a>
+<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>shortestUniqueSuffix</b> (const <a class="el" href="classcstring.html">cstring</a> &amp;symbol) const</td></tr>
+<tr class="separator:a850500fa24c34fbb01f20076d5882ab1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Stores a set of P4 symbol suffixes. Symbols consist of path components separated by '.'; the suffixes this set stores consist of these components rather than individual characters. The information in this set can be used determine the shortest unique suffix for a P4 symbol. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

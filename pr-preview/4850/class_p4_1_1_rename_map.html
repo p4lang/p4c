@@ -120,9 +120,99 @@ $(function(){initNavTree('class_p4_1_1_rename_map.html',''); initResizable(true)
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_p4_1_1_rename_map-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::RenameMap Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a5ea46e7735570897cc97806511301c76" id="r_a5ea46e7735570897cc97806511301c76"><td class="memItemLeft" align="right" valign="top"><a id="a5ea46e7735570897cc97806511301c76" name="a5ea46e7735570897cc97806511301c76"></a>
+const IR::P4Action *&#160;</td><td class="memItemRight" valign="bottom"><b>actionCalled</b> (const IR::MethodCallExpression *expression) const</td></tr>
+<tr class="separator:a5ea46e7735570897cc97806511301c76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59c7380acc6c572d0561a79d6a4c48ec" id="r_a59c7380acc6c572d0561a79d6a4c48ec"><td class="memItemLeft" align="right" valign="top"><a id="a59c7380acc6c572d0561a79d6a4c48ec" name="a59c7380acc6c572d0561a79d6a4c48ec"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>foundInTable</b> (const IR::P4Action *action)</td></tr>
+<tr class="separator:a59c7380acc6c572d0561a79d6a4c48ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac823dc12bb693aa485023d0864804d09" id="r_ac823dc12bb693aa485023d0864804d09"><td class="memItemLeft" align="right" valign="top"><a id="ac823dc12bb693aa485023d0864804d09" name="ac823dc12bb693aa485023d0864804d09"></a>
+std::optional&lt; <a class="el" href="classcstring.html">cstring</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>get</b> (const <a class="el" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *decl) const</td></tr>
+<tr class="memdesc:ac823dc12bb693aa485023d0864804d09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get new name for the declaration (wrapped in optional), or std::nullopt if there is none. <br /></td></tr>
+<tr class="separator:ac823dc12bb693aa485023d0864804d09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0edab42acd96345ae18a305a7d64a5f" id="r_ad0edab42acd96345ae18a305a7d64a5f"><td class="memItemLeft" align="right" valign="top"><a id="ad0edab42acd96345ae18a305a7d64a5f" name="ad0edab42acd96345ae18a305a7d64a5f"></a>
+<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getName</b> (const <a class="el" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *decl) const</td></tr>
+<tr class="memdesc:ad0edab42acd96345ae18a305a7d64a5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get new name for the declaration, fails if none exists. <br /></td></tr>
+<tr class="separator:ad0edab42acd96345ae18a305a7d64a5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1d05df1c458a2104151da222b643dea" id="r_ae1d05df1c458a2104151da222b643dea"><td class="memItemLeft" align="right" valign="top"><a id="ae1d05df1c458a2104151da222b643dea" name="ae1d05df1c458a2104151da222b643dea"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>markActionCall</b> (const IR::P4Action *action, const IR::MethodCallExpression *call)</td></tr>
+<tr class="separator:ae1d05df1c458a2104151da222b643dea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11dec2774b6bc15323dde03ed9778e92" id="r_a11dec2774b6bc15323dde03ed9778e92"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a11dec2774b6bc15323dde03ed9778e92">setNewName</a> (const <a class="el" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *decl, <a class="el" href="classcstring.html">cstring</a> name, bool allowOverride=false)</td></tr>
+<tr class="memdesc:a11dec2774b6bc15323dde03ed9778e92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add rename entry for the declaration to be named with the given name.  <br /></td></tr>
+<tr class="separator:a11dec2774b6bc15323dde03ed9778e92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5c6b89d8a767d13d35aa4667f0c4cbe" id="r_af5c6b89d8a767d13d35aa4667f0c4cbe"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af5c6b89d8a767d13d35aa4667f0c4cbe">toRename</a> (const <a class="el" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *decl) const</td></tr>
+<tr class="separator:af5c6b89d8a767d13d35aa4667f0c4cbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a11dec2774b6bc15323dde03ed9778e92" name="a11dec2774b6bc15323dde03ed9778e92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a11dec2774b6bc15323dde03ed9778e92">&#9670;&#160;</a></span>setNewName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4::RenameMap::setNewName </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *</td>          <td class="paramname"><span class="paramname"><em>decl</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>name</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>allowOverride</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add rename entry for the declaration to be named with the given name. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">allowOverride</td><td>If set to true, don't fail if a new name was already set but replace it instead. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af5c6b89d8a767d13d35aa4667f0c4cbe" name="af5c6b89d8a767d13d35aa4667f0c4cbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5c6b89d8a767d13d35aa4667f0c4cbe">&#9670;&#160;</a></span>toRename()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool P4::RenameMap::toRename </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *</td>          <td class="paramname"><span class="paramname"><em>decl</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>true if there is a new name for the declaration, false otherwise. </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

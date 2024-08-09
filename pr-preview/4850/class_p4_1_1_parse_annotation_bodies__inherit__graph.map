@@ -1,0 +1,10 @@
+<map id="P4::ParseAnnotationBodies" name="P4::ParseAnnotationBodies">
+<area shape="rect" id="Node000001" title="Clears a type map after calling a ParseAnnotations instance." alt="" coords="5,225,201,251"/>
+<area shape="rect" id="Node000002" href="$class_pass_manager.html" title=" " alt="" coords="49,152,157,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,191,106,225,101,225,101,191"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="71,5,135,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="98,44,91,79,93,119,102,151,97,153,88,119,86,78,93,43"/>
+<area shape="rect" id="Node000004" href="$class_backtrack.html" title=" " alt="" coords="101,79,188,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="119,41,140,77,136,80,115,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="133,117,112,153,108,151,129,115"/>
+</map>

@@ -120,9 +120,62 @@ $(function(){initNavTree('class_d_p_d_k_1_1_branching_instruction_generation.htm
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="class_d_p_d_k_1_1_branching_instruction_generation-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">DPDK::BranchingInstructionGeneration Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a62be6de86e97d7f437dea8c91a6f84ea" id="r_a62be6de86e97d7f437dea8c91a6f84ea"><td class="memItemLeft" align="right" valign="top"><a id="a62be6de86e97d7f437dea8c91a6f84ea" name="a62be6de86e97d7f437dea8c91a6f84ea"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>BranchingInstructionGeneration</b> (<a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap)</td></tr>
+<tr class="separator:a62be6de86e97d7f437dea8c91a6f84ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82d4c1baca167ab05317a0d465adb5a7" id="r_a82d4c1baca167ab05317a0d465adb5a7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a82d4c1baca167ab05317a0d465adb5a7">generate</a> (const IR::Expression *, <a class="el" href="classcstring.html">cstring</a>, <a class="el" href="classcstring.html">cstring</a>, bool)</td></tr>
+<tr class="separator:a82d4c1baca167ab05317a0d465adb5a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:aab2df5a6abe6970295b2978d27419906" id="r_aab2df5a6abe6970295b2978d27419906"><td class="memItemLeft" align="right" valign="top"><a id="aab2df5a6abe6970295b2978d27419906" name="aab2df5a6abe6970295b2978d27419906"></a>
+<a class="el" href="class_i_r_1_1_indexed_vector.html">IR::IndexedVector</a>&lt; IR::DpdkAsmStatement &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>instructions</b></td></tr>
+<tr class="separator:aab2df5a6abe6970295b2978d27419906"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a82d4c1baca167ab05317a0d465adb5a7" name="a82d4c1baca167ab05317a0d465adb5a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82d4c1baca167ab05317a0d465adb5a7">&#9670;&#160;</a></span>generate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool DPDK::BranchingInstructionGeneration::generate </td>
+          <td>(</td>
+          <td class="paramtype">const IR::Expression *</td>          <td class="paramname"><span class="paramname"><em>expr</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>true_label</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>false_label</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>is_and</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This recursion requires the pass of ConvertLogicalExpression. This pass will transform the logical experssion to a form that this function use as presumption. The presumption of this function is that the left side of the logical expression can be a simple expression(expression that is not
+LAnd or LOr) or a nested expression(LAnd or LOr). The right side can be a nested expression or {simple one if left side is simple as well}. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

@@ -120,9 +120,106 @@ $(function(){initNavTree('class_p4_tools_1_1_abstract_p4c_tool.html',''); initRe
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="class_p4_tools_1_1_abstract_p4c_tool-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::AbstractP4cTool&lt; Options, typename &gt; Class Template Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="p4ctool_8h_source.html">p4ctool.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a7a0d37dee290964f64bfef84cbb499bd" id="r_a7a0d37dee290964f64bfef84cbb499bd"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7a0d37dee290964f64bfef84cbb499bd">main</a> (std::string_view toolName, const std::vector&lt; const char * &gt; &amp;args)</td></tr>
+<tr class="separator:a7a0d37dee290964f64bfef84cbb499bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:ae261253445e5b7ff40ca24cec88b3a9f" id="r_ae261253445e5b7ff40ca24cec88b3a9f"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae261253445e5b7ff40ca24cec88b3a9f">mainImpl</a> (const <a class="el" href="class_p4_tools_1_1_compiler_result.html">CompilerResult</a> &amp;compilerResult)=0</td></tr>
+<tr class="separator:ae261253445e5b7ff40ca24cec88b3a9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a565f5a997066d0a7a2797d162cb3c08a" id="r_a565f5a997066d0a7a2797d162cb3c08a"><td class="memItemLeft" align="right" valign="top"><a id="a565f5a997066d0a7a2797d162cb3c08a" name="a565f5a997066d0a7a2797d162cb3c08a"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>registerTarget</b> ()=0</td></tr>
+<tr class="separator:a565f5a997066d0a7a2797d162cb3c08a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;class Options, typename = std::enable_if_t&lt;std::is_base_of_v&lt;AbstractP4cToolOptions, Options&gt;&gt;&gt;<br />
+class P4Tools::AbstractP4cTool&lt; Options, typename &gt;</div><p>Abstract class for all compiler-based tools. Implementations should instantiate this template on a subclass of AbstractP4cToolOptions. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a7a0d37dee290964f64bfef84cbb499bd" name="a7a0d37dee290964f64bfef84cbb499bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a0d37dee290964f64bfef84cbb499bd">&#9670;&#160;</a></span>main()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Options , typename  = std::enable_if_t&lt;std::is_base_of_v&lt;AbstractP4cToolOptions, Options&gt;&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="class_p4_tools_1_1_abstract_p4c_tool.html">P4Tools::AbstractP4cTool</a>&lt; Options, typename &gt;::main </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>toolName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; const char * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">args</td><td>Contains the path to the executable, followed by the command-line arguments for this tool. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae261253445e5b7ff40ca24cec88b3a9f" name="ae261253445e5b7ff40ca24cec88b3a9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae261253445e5b7ff40ca24cec88b3a9f">&#9670;&#160;</a></span>mainImpl()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Options , typename  = std::enable_if_t&lt;std::is_base_of_v&lt;AbstractP4cToolOptions, Options&gt;&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int <a class="el" href="class_p4_tools_1_1_abstract_p4c_tool.html">P4Tools::AbstractP4cTool</a>&lt; Options, typename &gt;::mainImpl </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_p4_tools_1_1_compiler_result.html">CompilerResult</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>compilerResult</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Provides the implementation of the tool.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">program</td><td>The P4 program after mid-end processing. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implemented in <a class="el" href="class_p4_tools_1_1_p4_smith_1_1_smith.html#aa1dfa1f6924153ed4a6057ca4e0bb79c">P4Tools::P4Smith::Smith</a>, and <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_testgen.html#ac9945785627d561b71aa2a201326fff4">P4Tools::P4Testgen::Testgen</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

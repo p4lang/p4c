@@ -120,9 +120,80 @@ $(function(){initNavTree('class_p4_1_1_saturation_elim.html',''); initResizable(
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="class_p4_1_1_saturation_elim-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::SaturationElim Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Contains utility functions for eliminating saturating arithmetic.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="saturation_elim_8h_source.html">saturationElim.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a5701ab48d56d48d7c016b84d51d0d201" id="r_a5701ab48d56d48d7c016b84d51d0d201"><td class="memItemLeft" align="right" valign="top">static const IR::Mux *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5701ab48d56d48d7c016b84d51d0d201">eliminate</a> (const IR::Operation_Binary *binary)</td></tr>
+<tr class="separator:a5701ab48d56d48d7c016b84d51d0d201"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04a1a853a06cc0182f48d9c0a21be5c1" id="r_a04a1a853a06cc0182f48d9c0a21be5c1"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a04a1a853a06cc0182f48d9c0a21be5c1">isSaturationOperation</a> (const IR::Expression *expr)</td></tr>
+<tr class="separator:a04a1a853a06cc0182f48d9c0a21be5c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Contains utility functions for eliminating saturating arithmetic. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a5701ab48d56d48d7c016b84d51d0d201" name="a5701ab48d56d48d7c016b84d51d0d201"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5701ab48d56d48d7c016b84d51d0d201">&#9670;&#160;</a></span>eliminate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::Mux * P4::SaturationElim::eliminate </td>
+          <td>(</td>
+          <td class="paramtype">const IR::Operation_Binary *</td>          <td class="paramname"><span class="paramname"><em>binary</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Eliminates saturating arithmetic by rewriting the given binary expression into a conditional ternary expression. The two operands in the given expression are assumed to be pure expressions (i.e., they have no side effects), and may be evaluated multiple times in the resulting expression. No checks are made to determine whether this assumption holds. </p>
+
+</div>
+</div>
+<a id="a04a1a853a06cc0182f48d9c0a21be5c1" name="a04a1a853a06cc0182f48d9c0a21be5c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04a1a853a06cc0182f48d9c0a21be5c1">&#9670;&#160;</a></span>isSaturationOperation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool P4::SaturationElim::isSaturationOperation </td>
+          <td>(</td>
+          <td class="paramtype">const IR::Expression *</td>          <td class="paramname"><span class="paramname"><em>expr</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>true when the given expression is a saturating addition or a saturating subtraction. Otherwise, returns false. </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

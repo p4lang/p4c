@@ -120,10 +120,51 @@ $(function(){initNavTree('class_p4_tools_1_1_p4_testgen_1_1_extern_info.html',''
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="class_p4_tools_1_1_p4_testgen_1_1_extern_info-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::P4Testgen::ExternInfo Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="extern__info_8h_source.html">extern_info.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a20c2deb97b2e1494557108393e56d099" id="r_a20c2deb97b2e1494557108393e56d099"><td class="memItemLeft" align="right" valign="top"><a id="a20c2deb97b2e1494557108393e56d099" name="a20c2deb97b2e1494557108393e56d099"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ExternInfo</b> (const IR::MethodCallExpression &amp;<a class="el" href="#a836551c3562642e0ae0707893e42d1a0">originalCall</a>, const IR::PathExpression &amp;<a class="el" href="#a6bd337d180e37ae4e0dc8bb8a4517015">externObjectRef</a>, const <a class="el" href="struct_i_r_1_1_i_d.html">IR::ID</a> &amp;<a class="el" href="#a728702594e4987b842d54086ea1d4e5a">methodName</a>, const <a class="el" href="class_i_r_1_1_vector.html">IR::Vector</a>&lt; IR::Argument &gt; &amp;<a class="el" href="#ad1be16d5312aa5e351317c86726b98f3">externArguments</a>)</td></tr>
+<tr class="separator:a20c2deb97b2e1494557108393e56d099"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c73d3647b6c35afb989d44f89c941f8" id="r_a1c73d3647b6c35afb989d44f89c941f8"><td class="memItemLeft" align="right" valign="top"><a id="a1c73d3647b6c35afb989d44f89c941f8" name="a1c73d3647b6c35afb989d44f89c941f8"></a>
+<a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_extern_info.html">ExternInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_extern_info.html">ExternInfo</a> &amp;)=delete</td></tr>
+<tr class="memdesc:a1c73d3647b6c35afb989d44f89c941f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do not accidentally copy-assign the extern info. It is only passed as reference. <br /></td></tr>
+<tr class="separator:a1c73d3647b6c35afb989d44f89c941f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba4f92f461d8b6fba515322884e813bb" id="r_aba4f92f461d8b6fba515322884e813bb"><td class="memItemLeft" align="right" valign="top"><a id="aba4f92f461d8b6fba515322884e813bb" name="aba4f92f461d8b6fba515322884e813bb"></a>
+<a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_extern_info.html">ExternInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_extern_info.html">ExternInfo</a> &amp;&amp;)=delete</td></tr>
+<tr class="separator:aba4f92f461d8b6fba515322884e813bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:ad1be16d5312aa5e351317c86726b98f3" id="r_ad1be16d5312aa5e351317c86726b98f3"><td class="memItemLeft" align="right" valign="top"><a id="ad1be16d5312aa5e351317c86726b98f3" name="ad1be16d5312aa5e351317c86726b98f3"></a>
+const <a class="el" href="class_i_r_1_1_vector.html">IR::Vector</a>&lt; IR::Argument &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>externArguments</b></td></tr>
+<tr class="memdesc:ad1be16d5312aa5e351317c86726b98f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Arguments to the extern method. <br /></td></tr>
+<tr class="separator:ad1be16d5312aa5e351317c86726b98f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bd337d180e37ae4e0dc8bb8a4517015" id="r_a6bd337d180e37ae4e0dc8bb8a4517015"><td class="memItemLeft" align="right" valign="top"><a id="a6bd337d180e37ae4e0dc8bb8a4517015" name="a6bd337d180e37ae4e0dc8bb8a4517015"></a>
+const IR::PathExpression &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>externObjectRef</b></td></tr>
+<tr class="memdesc:a6bd337d180e37ae4e0dc8bb8a4517015"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of the extern object the call was a member of, if any. <br /></td></tr>
+<tr class="separator:a6bd337d180e37ae4e0dc8bb8a4517015"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a728702594e4987b842d54086ea1d4e5a" id="r_a728702594e4987b842d54086ea1d4e5a"><td class="memItemLeft" align="right" valign="top"><a id="a728702594e4987b842d54086ea1d4e5a" name="a728702594e4987b842d54086ea1d4e5a"></a>
+const <a class="el" href="struct_i_r_1_1_i_d.html">IR::ID</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>methodName</b></td></tr>
+<tr class="memdesc:a728702594e4987b842d54086ea1d4e5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of the extern method. <br /></td></tr>
+<tr class="separator:a728702594e4987b842d54086ea1d4e5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a836551c3562642e0ae0707893e42d1a0" id="r_a836551c3562642e0ae0707893e42d1a0"><td class="memItemLeft" align="right" valign="top"><a id="a836551c3562642e0ae0707893e42d1a0" name="a836551c3562642e0ae0707893e42d1a0"></a>
+const IR::MethodCallExpression &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>originalCall</b></td></tr>
+<tr class="memdesc:a836551c3562642e0ae0707893e42d1a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to the original P4 extern call. <br /></td></tr>
+<tr class="separator:a836551c3562642e0ae0707893e42d1a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>This class defines parameters useful for the invocation of P4 extern and P4Testgen-internal functions. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

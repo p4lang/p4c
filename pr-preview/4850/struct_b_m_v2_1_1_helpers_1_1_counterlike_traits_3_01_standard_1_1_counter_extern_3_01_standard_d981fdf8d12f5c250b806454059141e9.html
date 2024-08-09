@@ -120,10 +120,44 @@ $(function(){initNavTree('struct_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="struct_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_counter_extern_3_01_standard_194e252cc1bc4dd744ea7b0cb53cd53c.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">BMV2::Helpers::CounterlikeTraits&lt; Standard::CounterExtern&lt; Standard::Arch::V1MODEL &gt; &gt; Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p>CounterlikeTraits&lt;&gt; specialization for CounterExtern for v1model  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="helpers_8h_source.html">helpers.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a0e3a16a32a4dc7983065d2fa76d612fc" id="r_a0e3a16a32a4dc7983065d2fa76d612fc"><td class="memItemLeft" align="right" valign="top"><a id="a0e3a16a32a4dc7983065d2fa76d612fc" name="a0e3a16a32a4dc7983065d2fa76d612fc"></a>
+static const <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>directPropertyName</b> ()</td></tr>
+<tr class="separator:a0e3a16a32a4dc7983065d2fa76d612fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab32dd96e74740869865f53255b5880c6" id="r_ab32dd96e74740869865f53255b5880c6"><td class="memItemLeft" align="right" valign="top"><a id="ab32dd96e74740869865f53255b5880c6" name="ab32dd96e74740869865f53255b5880c6"></a>
+static const <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>directTypeName</b> ()</td></tr>
+<tr class="separator:ab32dd96e74740869865f53255b5880c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff94642af8ec02f8392cb9cc0e1dca83" id="r_aff94642af8ec02f8392cb9cc0e1dca83"><td class="memItemLeft" align="right" valign="top"><a id="aff94642af8ec02f8392cb9cc0e1dca83" name="aff94642af8ec02f8392cb9cc0e1dca83"></a>
+static std::optional&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>indexTypeParamIdx</b> ()</td></tr>
+<tr class="separator:aff94642af8ec02f8392cb9cc0e1dca83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1854adcc8334c563d3a869d5ccd5547" id="r_ae1854adcc8334c563d3a869d5ccd5547"><td class="memItemLeft" align="right" valign="top"><a id="ae1854adcc8334c563d3a869d5ccd5547" name="ae1854adcc8334c563d3a869d5ccd5547"></a>
+static const <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>name</b> ()</td></tr>
+<tr class="separator:ae1854adcc8334c563d3a869d5ccd5547"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a8e172a39a35a3f43a76934a70c694c" id="r_a3a8e172a39a35a3f43a76934a70c694c"><td class="memItemLeft" align="right" valign="top"><a id="a3a8e172a39a35a3f43a76934a70c694c" name="a3a8e172a39a35a3f43a76934a70c694c"></a>
+static const <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>sizeParamName</b> ()</td></tr>
+<tr class="separator:a3a8e172a39a35a3f43a76934a70c694c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa362869c27168e19edaf2a7810b63f4b" id="r_aa362869c27168e19edaf2a7810b63f4b"><td class="memItemLeft" align="right" valign="top"><a id="aa362869c27168e19edaf2a7810b63f4b" name="aa362869c27168e19edaf2a7810b63f4b"></a>
+static const <a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>typeName</b> ()</td></tr>
+<tr class="separator:aa362869c27168e19edaf2a7810b63f4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>CounterlikeTraits&lt;&gt; specialization for CounterExtern for v1model </p>
+<p>According to the C++11 standard: An explicit specialization shall be declared in a namespace enclosing the specialized template. An explicit specialization whose declarator-id is not qualified shall be declared in the nearest enclosing namespace of the template, or, if the namespace is inline (7.3.1), any namespace from its enclosing namespace set. Such a declaration may also be a definition. If the declaration is not a definition, the specialization may be defined later (7.3.1.2).</p>
+<p>GCC reports an error when trying so specialize CounterlikeTraits&lt;&gt; for Standard::CounterExtern &amp; Standard::MeterExtern outside of the Helpers namespace, even when qualifying CounterlikeTraits&lt;&gt; with Helpers::. It seems to be related to this bug: <a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56480">https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56480</a>. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

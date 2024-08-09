@@ -112,7 +112,7 @@ var searchData=
   ['frontendpolicy_109',['FrontEndPolicy',['../class_p4_1_1_front_end_policy.html',1,'P4']]],
   ['function_20to_20the_20generated_20ebpf_20program_110',['How to inject custom extern function to the generated eBPF program?',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#how-to-inject-custom-extern-function-to-the-generated-ebpf-program',1,'']]],
   ['functioncall_111',['FunctionCall',['../class_p4_1_1_function_call.html',1,'P4']]],
-  ['functions_112',['functions',['../md__2home_2runner_2work_2p4c_2p4c_2lib_2_r_e_a_d_m_e.html',1,'Common P4C utility functions'],['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#common-p4c-utility-functions',1,'Common P4C utility functions'],['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2_r_e_a_d_m_e.html#custom-c-extern-functions',1,'Custom C extern functions']]],
+  ['functions_112',['functions',['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#common-p4c-utility-functions',1,'Common P4C utility functions'],['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2_r_e_a_d_m_e.html#custom-c-extern-functions',1,'Custom C extern functions']]],
   ['functionsinliner_113',['FunctionsInliner',['../class_p4_1_1_functions_inliner.html',1,'P4']]],
   ['functionspecialization_114',['FunctionSpecialization',['../struct_p4_1_1_function_specialization.html',1,'P4']]],
   ['functionspecializationmap_115',['FunctionSpecializationMap',['../struct_p4_1_1_function_specialization_map.html',1,'P4']]],

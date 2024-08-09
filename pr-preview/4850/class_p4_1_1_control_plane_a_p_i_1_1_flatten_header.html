@@ -120,9 +120,56 @@ $(function(){initNavTree('class_p4_1_1_control_plane_a_p_i_1_1_flatten_header.ht
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="class_p4_1_1_control_plane_a_p_i_1_1_flatten_header-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::ControlPlaneAPI::FlattenHeader Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Flattens a header type "locally", without modifying the IR.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="flatten_header_8h_source.html">flattenHeader.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a9c85feef337ee8c22e2313ac70634931" id="r_a9c85feef337ee8c22e2313ac70634931"><td class="memItemLeft" align="right" valign="top">static const IR::Type_Header *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9c85feef337ee8c22e2313ac70634931">flatten</a> (<a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, const IR::Type_Header *headerType)</td></tr>
+<tr class="separator:a9c85feef337ee8c22e2313ac70634931"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Flattens a header type "locally", without modifying the IR. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a9c85feef337ee8c22e2313ac70634931" name="a9c85feef337ee8c22e2313ac70634931"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c85feef337ee8c22e2313ac70634931">&#9670;&#160;</a></span>flatten()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::Type_Header * P4::ControlPlaneAPI::FlattenHeader::flatten </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *</td>          <td class="paramname"><span class="paramname"><em>typeMap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IR::Type_Header *</td>          <td class="paramname"><span class="paramname"><em>headerType</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>If the @headerType needs flattening, creates a clone of the IR node with a new flattened field list. Otherwise returns @headerType. This does not modify the IR. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

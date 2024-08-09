@@ -120,10 +120,49 @@ $(function(){initNavTree('classsafe__vector.html',''); initResizable(true); });
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="classsafe__vector-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">safe_vector&lt; T, Alloc &gt; Class Template Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="safe__vector_8h_source.html">safe_vector.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for safe_vector&lt; T, Alloc &gt;:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classsafe__vector__inherit__graph.svg" width="187" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:af7b5d827a0006bf84d973b2a3d1b5f7c" id="r_af7b5d827a0006bf84d973b2a3d1b5f7c"><td class="memItemLeft" align="right" valign="top"><a id="af7b5d827a0006bf84d973b2a3d1b5f7c" name="af7b5d827a0006bf84d973b2a3d1b5f7c"></a>
+typedef std::vector&lt; T &gt;::const_iterator&#160;</td><td class="memItemRight" valign="bottom"><b>const_iterator</b></td></tr>
+<tr class="separator:af7b5d827a0006bf84d973b2a3d1b5f7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0b36ae87a3c1b4b197b8d1ed79800b9" id="r_aa0b36ae87a3c1b4b197b8d1ed79800b9"><td class="memItemLeft" align="right" valign="top"><a id="aa0b36ae87a3c1b4b197b8d1ed79800b9" name="aa0b36ae87a3c1b4b197b8d1ed79800b9"></a>
+typedef std::vector&lt; T, Alloc &gt;::const_reference&#160;</td><td class="memItemRight" valign="bottom"><b>const_reference</b></td></tr>
+<tr class="separator:aa0b36ae87a3c1b4b197b8d1ed79800b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c00a810346706589c9eab3df1ae7004" id="r_a2c00a810346706589c9eab3df1ae7004"><td class="memItemLeft" align="right" valign="top"><a id="a2c00a810346706589c9eab3df1ae7004" name="a2c00a810346706589c9eab3df1ae7004"></a>
+typedef std::vector&lt; T, Alloc &gt;::reference&#160;</td><td class="memItemRight" valign="bottom"><b>reference</b></td></tr>
+<tr class="separator:a2c00a810346706589c9eab3df1ae7004"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c5e5951190ae4c866f050d1d785b893" id="r_a8c5e5951190ae4c866f050d1d785b893"><td class="memItemLeft" align="right" valign="top"><a id="a8c5e5951190ae4c866f050d1d785b893" name="a8c5e5951190ae4c866f050d1d785b893"></a>
+typedef std::vector&lt; T, Alloc &gt;::size_type&#160;</td><td class="memItemRight" valign="bottom"><b>size_type</b></td></tr>
+<tr class="separator:a8c5e5951190ae4c866f050d1d785b893"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a87def828a413293961ec0607b3dd3c9a" id="r_a87def828a413293961ec0607b3dd3c9a"><td class="memItemLeft" align="right" valign="top"><a id="a87def828a413293961ec0607b3dd3c9a" name="a87def828a413293961ec0607b3dd3c9a"></a>
+reference&#160;</td><td class="memItemRight" valign="bottom"><b>operator[]</b> (size_type n)</td></tr>
+<tr class="separator:a87def828a413293961ec0607b3dd3c9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0c587cd42b1e9df01f14a11954d43b3" id="r_ad0c587cd42b1e9df01f14a11954d43b3"><td class="memItemLeft" align="right" valign="top"><a id="ad0c587cd42b1e9df01f14a11954d43b3" name="ad0c587cd42b1e9df01f14a11954d43b3"></a>
+const_reference&#160;</td><td class="memItemRight" valign="bottom"><b>operator[]</b> (size_type n) const</td></tr>
+<tr class="separator:ad0c587cd42b1e9df01f14a11954d43b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;class T, class Alloc = std::allocator&lt;T&gt;&gt;<br />
+class safe_vector&lt; T, Alloc &gt;</div><p>An enhanced version of std::vector that performs bounds checking for operator[]. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

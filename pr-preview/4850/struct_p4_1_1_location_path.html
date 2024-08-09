@@ -120,9 +120,79 @@ $(function(){initNavTree('struct_p4_1_1_location_path.html',''); initResizable(t
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="struct_p4_1_1_location_path-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::LocationPath Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="alias_8h_source.html">alias.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for P4::LocationPath:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="struct_p4_1_1_location_path__inherit__graph.svg" width="140" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a36f057fe400a7e1efc42efff4c8b9319" id="r_a36f057fe400a7e1efc42efff4c8b9319"><td class="memItemLeft" align="right" valign="top"><a id="a36f057fe400a7e1efc42efff4c8b9319" name="a36f057fe400a7e1efc42efff4c8b9319"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>LocationPath</b> (const <a class="el" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *root)</td></tr>
+<tr class="separator:a36f057fe400a7e1efc42efff4c8b9319"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a0ae9918827e59b3a7ee02a829195de" id="r_a5a0ae9918827e59b3a7ee02a829195de"><td class="memItemLeft" align="right" valign="top"><a id="a5a0ae9918827e59b3a7ee02a829195de" name="a5a0ae9918827e59b3a7ee02a829195de"></a>
+const <a class="el" href="struct_p4_1_1_location_path.html">LocationPath</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>append</b> (<a class="el" href="classcstring.html">cstring</a> suffix) const</td></tr>
+<tr class="separator:a5a0ae9918827e59b3a7ee02a829195de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6e921982a00f5a625c737f780cdfdcb" id="r_ac6e921982a00f5a625c737f780cdfdcb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac6e921982a00f5a625c737f780cdfdcb">dbprint</a> (std::ostream &amp;out) const override</td></tr>
+<tr class="separator:ac6e921982a00f5a625c737f780cdfdcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5866c9f57cedc8da6f9b8ad2fff5cdd" id="r_ab5866c9f57cedc8da6f9b8ad2fff5cdd"><td class="memItemLeft" align="right" valign="top"><a id="ab5866c9f57cedc8da6f9b8ad2fff5cdd" name="ab5866c9f57cedc8da6f9b8ad2fff5cdd"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isPrefix</b> (const <a class="el" href="struct_p4_1_1_location_path.html">LocationPath</a> *other) const</td></tr>
+<tr class="memdesc:ab5866c9f57cedc8da6f9b8ad2fff5cdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if this path is a prefix of other or the other way around. <br /></td></tr>
+<tr class="separator:ab5866c9f57cedc8da6f9b8ad2fff5cdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_i_has_db_print"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_i_has_db_print')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_i_has_db_print.html">IHasDbPrint</a></td></tr>
+<tr class="memitem:a4d93ba087be0ae3c7e665e3b1f24fef8 inherit pub_methods_class_i_has_db_print" id="r_a4d93ba087be0ae3c7e665e3b1f24fef8"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>print</b> () const</td></tr>
+<tr class="separator:a4d93ba087be0ae3c7e665e3b1f24fef8 inherit pub_methods_class_i_has_db_print"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a48f571ec6288ebdb9d1b1a61a0cebd78" id="r_a48f571ec6288ebdb9d1b1a61a0cebd78"><td class="memItemLeft" align="right" valign="top"><a id="a48f571ec6288ebdb9d1b1a61a0cebd78" name="a48f571ec6288ebdb9d1b1a61a0cebd78"></a>
+std::vector&lt; <a class="el" href="classcstring.html">cstring</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>path</b></td></tr>
+<tr class="separator:a48f571ec6288ebdb9d1b1a61a0cebd78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0713791891dbda815934645042e95cfc" id="r_a0713791891dbda815934645042e95cfc"><td class="memItemLeft" align="right" valign="top"><a id="a0713791891dbda815934645042e95cfc" name="a0713791891dbda815934645042e95cfc"></a>
+const <a class="el" href="class_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>root</b></td></tr>
+<tr class="separator:a0713791891dbda815934645042e95cfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>This class represents the path to a location. Given a struct S { bit a; bit b; } and a variable S x; a path can be x.a, or just x. An array index is represented as a number (encoded as a string) or as "*", denoting an unknown index. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="ac6e921982a00f5a625c737f780cdfdcb" name="ac6e921982a00f5a625c737f780cdfdcb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6e921982a00f5a625c737f780cdfdcb">&#9670;&#160;</a></span>dbprint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4::LocationPath::dbprint </td>
+          <td>(</td>
+          <td class="paramtype">std::ostream &amp;</td>          <td class="paramname"><span class="paramname"><em>out</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implements <a class="el" href="class_i_has_db_print.html">IHasDbPrint</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

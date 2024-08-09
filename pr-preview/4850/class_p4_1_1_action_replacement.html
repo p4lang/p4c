@@ -120,9 +120,35 @@ $(function(){initNavTree('class_p4_1_1_action_replacement.html',''); initResizab
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="class_p4_1_1_action_replacement-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::ActionReplacement Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:ae1fb4fe8f7be8a45f29145cbc4502883" id="r_ae1fb4fe8f7be8a45f29145cbc4502883"><td class="memItemLeft" align="right" valign="top"><a id="ae1fb4fe8f7be8a45f29145cbc4502883" name="ae1fb4fe8f7be8a45f29145cbc4502883"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>createReplacement</b> (const IR::P4Action *original, const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *user, const IR::P4Action *replacement)</td></tr>
+<tr class="separator:ae1fb4fe8f7be8a45f29145cbc4502883"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1916e2af1932bfddaf50fe74cd5d4c4" id="r_ac1916e2af1932bfddaf50fe74cd5d4c4"><td class="memItemLeft" align="right" valign="top"><a id="ac1916e2af1932bfddaf50fe74cd5d4c4" name="ac1916e2af1932bfddaf50fe74cd5d4c4"></a>
+const IR::P4Action *&#160;</td><td class="memItemRight" valign="bottom"><b>getActionUser</b> (const IR::P4Action *action, const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *user)</td></tr>
+<tr class="separator:ac1916e2af1932bfddaf50fe74cd5d4c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82ec6502a2b1c62920a0ce20011bc51f" id="r_a82ec6502a2b1c62920a0ce20011bc51f"><td class="memItemLeft" align="right" valign="top"><a id="a82ec6502a2b1c62920a0ce20011bc51f" name="a82ec6502a2b1c62920a0ce20011bc51f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setRefReplacement</b> (const IR::PathExpression *path, const IR::P4Action *replacement)</td></tr>
+<tr class="separator:a82ec6502a2b1c62920a0ce20011bc51f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a518d18320ed16fdb53857c66277ac8ad" id="r_a518d18320ed16fdb53857c66277ac8ad"><td class="memItemLeft" align="right" valign="top"><a id="a518d18320ed16fdb53857c66277ac8ad" name="a518d18320ed16fdb53857c66277ac8ad"></a>
+std::map&lt; const IR::PathExpression *, const IR::P4Action * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>repl</b></td></tr>
+<tr class="separator:a518d18320ed16fdb53857c66277ac8ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a039ecd050b73e177a82515ab01173d83" id="r_a039ecd050b73e177a82515ab01173d83"><td class="memItemLeft" align="right" valign="top"><a id="a039ecd050b73e177a82515ab01173d83" name="a039ecd050b73e177a82515ab01173d83"></a>
+std::map&lt; const IR::P4Action *, <a class="el" href="classordered__map.html">ordered_map</a>&lt; const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *, const IR::P4Action * &gt; * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>toInsert</b></td></tr>
+<tr class="separator:a039ecd050b73e177a82515ab01173d83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

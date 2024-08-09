@@ -120,9 +120,68 @@ $(function(){initNavTree('struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_v1_
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_v1_model_arch_handler_builder-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::ControlPlaneAPI::Standard::V1ModelArchHandlerBuilder Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>The architecture handler builder implementation for v1model.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="p4_runtime_arch_standard_8h_source.html">p4RuntimeArchStandard.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for P4::ControlPlaneAPI::Standard::V1ModelArchHandlerBuilder:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_v1_model_arch_handler_builder__inherit__graph.svg" width="244" height="168"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a0516186a81eff688f411d2cf46c8175e" id="r_a0516186a81eff688f411d2cf46c8175e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_iface.html">P4RuntimeArchHandlerIface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0516186a81eff688f411d2cf46c8175e">operator()</a> (<a class="el" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, const IR::ToplevelBlock *evaluatedProgram) const override</td></tr>
+<tr class="separator:a0516186a81eff688f411d2cf46c8175e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>The architecture handler builder implementation for v1model. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a0516186a81eff688f411d2cf46c8175e" name="a0516186a81eff688f411d2cf46c8175e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0516186a81eff688f411d2cf46c8175e">&#9670;&#160;</a></span>operator()()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_iface.html">P4RuntimeArchHandlerIface</a> * P4::ControlPlaneAPI::Standard::V1ModelArchHandlerBuilder::operator() </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *</td>          <td class="paramname"><span class="paramname"><em>refMap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *</td>          <td class="paramname"><span class="paramname"><em>typeMap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IR::ToplevelBlock *</td>          <td class="paramname"><span class="paramname"><em>evaluatedProgram</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Called by the <a class="el" href="class_p4_1_1_p4_runtime_serializer.html">P4RuntimeSerializer</a> to build an instance of the appropriate <a class="el" href="class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_iface.html">P4RuntimeArchHandlerIface</a> implementation for the architecture, with the appropriate @refMap, @typeMap and @evaluatedProgram. </p>
+
+<p>Implements <a class="el" href="struct_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_builder_iface.html#a21b092c70f9fc11c2c36992185eac351">P4::ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

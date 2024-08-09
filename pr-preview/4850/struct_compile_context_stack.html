@@ -120,9 +120,62 @@ $(function(){initNavTree('struct_compile_context_stack.html',''); initResizable(
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#friends">Friends</a> &#124;
+<a href="struct_compile_context_stack-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">CompileContextStack Struct Reference<span class="mlabels"><span class="mlabel">final</span></span></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="compile__context_8h_source.html">compile_context.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a778e772f54a689a4fb3e86fd82edbc73" id="r_a778e772f54a689a4fb3e86fd82edbc73"><td class="memItemLeft" align="right" valign="top"><a id="a778e772f54a689a4fb3e86fd82edbc73" name="a778e772f54a689a4fb3e86fd82edbc73"></a>
+static bool&#160;</td><td class="memItemRight" valign="bottom"><b>isEmpty</b> ()</td></tr>
+<tr class="separator:a778e772f54a689a4fb3e86fd82edbc73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89655357b458775fdfc14d0f4d99f690" id="r_a89655357b458775fdfc14d0f4d99f690"><td class="memTemplParams" colspan="2">template&lt;typename CompileContextType &gt; </td></tr>
+<tr class="memitem:a89655357b458775fdfc14d0f4d99f690"><td class="memTemplItemLeft" align="right" valign="top">static CompileContextType &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a89655357b458775fdfc14d0f4d99f690">top</a> ()</td></tr>
+<tr class="separator:a89655357b458775fdfc14d0f4d99f690"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:a5e465fd5249a27af7aa8b367ae0af306" id="r_a5e465fd5249a27af7aa8b367ae0af306"><td class="memItemLeft" align="right" valign="top"><a id="a5e465fd5249a27af7aa8b367ae0af306" name="a5e465fd5249a27af7aa8b367ae0af306"></a>
+struct&#160;</td><td class="memItemRight" valign="bottom"><b>AutoCompileContext</b></td></tr>
+<tr class="separator:a5e465fd5249a27af7aa8b367ae0af306"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A stack of active compilation contexts. Only the top context is accessible. Compilation contexts can be nested to allow composing programs without intermingling their stack. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a89655357b458775fdfc14d0f4d99f690" name="a89655357b458775fdfc14d0f4d99f690"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89655357b458775fdfc14d0f4d99f690">&#9670;&#160;</a></span>top()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename CompileContextType &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static CompileContextType &amp; CompileContextStack::top </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the current compilation context (i.e., the top of the compilation context stack), cast to the requested type. If the current compilation context is of the wrong type, or the stack is empty, an assertion fires. </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

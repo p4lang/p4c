@@ -120,9 +120,67 @@ $(function(){initNavTree('class_p4_1_1_p4_c_option_pragma_parser.html',''); init
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_p4_1_1_p4_c_option_pragma_parser-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::P4COptionPragmaParser Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="apply_options_pragmas_8h_source.html">applyOptionsPragmas.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for P4::P4COptionPragmaParser:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_p4_c_option_pragma_parser__inherit__graph.svg" width="215" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a622eb360ab7dd06db11530deff697929" id="r_a622eb360ab7dd06db11530deff697929"><td class="memItemLeft" align="right" valign="top">std::optional&lt; CommandLineOptions &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a622eb360ab7dd06db11530deff697929">tryToParse</a> (const IR::Annotation *annotation) override</td></tr>
+<tr class="separator:a622eb360ab7dd06db11530deff697929"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pub_types_class_p4_1_1_i_option_pragma_parser"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_types_class_p4_1_1_i_option_pragma_parser')"><img src="closed.png" alt="-"/>&#160;Public Types inherited from <a class="el" href="class_p4_1_1_i_option_pragma_parser.html">P4::IOptionPragmaParser</a></td></tr>
+<tr class="memitem:a70e1863920d5d541244e42ece13c54f8 inherit pub_types_class_p4_1_1_i_option_pragma_parser" id="r_a70e1863920d5d541244e42ece13c54f8"><td class="memItemLeft" align="right" valign="top">
+using&#160;</td><td class="memItemRight" valign="bottom"><b>CommandLineOptions</b> = std::vector&lt;const char *&gt;</td></tr>
+<tr class="separator:a70e1863920d5d541244e42ece13c54f8 inherit pub_types_class_p4_1_1_i_option_pragma_parser"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>An IOptionPragmaParser implementation that supports basic pragmas that all backends can support.</p>
+<p>P4COptionPragmaParser recognizes:</p><ul>
+<li><code>pragma diagnostic [diagnostic name] [disable|warn|error]</code></li>
+<li><code>@diagnostic([diagnostic name], ["disable"|"warn"|"error"])</code></li>
+</ul>
+<p>Backends that want to add support for additional pragmas will usually want to inherit from this class and delegate <code>tryToParse()</code> to the superclass if they're unable to parse a pragma. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a622eb360ab7dd06db11530deff697929" name="a622eb360ab7dd06db11530deff697929"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a622eb360ab7dd06db11530deff697929">&#9670;&#160;</a></span>tryToParse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; IOptionPragmaParser::CommandLineOptions &gt; P4::P4COptionPragmaParser::tryToParse </td>
+          <td>(</td>
+          <td class="paramtype">const IR::Annotation *</td>          <td class="paramname"><span class="paramname"><em>annotation</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implements <a class="el" href="class_p4_1_1_i_option_pragma_parser.html">P4::IOptionPragmaParser</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

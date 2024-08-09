@@ -120,9 +120,126 @@ $(function(){initNavTree('class_p4_tools_1_1_p4_testgen_1_1_execution_state_1_1_
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_p4_tools_1_1_p4_testgen_1_1_execution_state_1_1_stack_frame-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::P4Testgen::ExecutionState::StackFrame Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:af68c8decea430a13f80dde06ba701fc9" id="r_af68c8decea430a13f80dde06ba701fc9"><td class="memItemLeft" align="right" valign="top"><a id="af68c8decea430a13f80dde06ba701fc9" name="af68c8decea430a13f80dde06ba701fc9"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>ExceptionHandlers</b> = std::map&lt;<a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_continuation.html#abf987646a8aeb7258e38692c57b52942">Continuation::Exception</a>, <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_continuation.html">Continuation</a>&gt;</td></tr>
+<tr class="separator:af68c8decea430a13f80dde06ba701fc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a9cd59df2562c345ce756cbd32742a97d" id="r_a9cd59df2562c345ce756cbd32742a97d"><td class="memItemLeft" align="right" valign="top"><a id="a9cd59df2562c345ce756cbd32742a97d" name="a9cd59df2562c345ce756cbd32742a97d"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>StackFrame</b> (const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_execution_state_1_1_stack_frame.html">StackFrame</a> &amp;)=default</td></tr>
+<tr class="separator:a9cd59df2562c345ce756cbd32742a97d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a516ef81407f203ed7ce50a86b26f9d11" id="r_a516ef81407f203ed7ce50a86b26f9d11"><td class="memItemLeft" align="right" valign="top"><a id="a516ef81407f203ed7ce50a86b26f9d11" name="a516ef81407f203ed7ce50a86b26f9d11"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>StackFrame</b> (<a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_continuation.html">Continuation</a> normalContinuation, const <a class="el" href="class_p4_tools_1_1_namespace_context.html">NamespaceContext</a> *namespaces)</td></tr>
+<tr class="separator:a516ef81407f203ed7ce50a86b26f9d11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc88d2e283fd8e8ee448241d54374af2" id="r_abc88d2e283fd8e8ee448241d54374af2"><td class="memItemLeft" align="right" valign="top"><a id="abc88d2e283fd8e8ee448241d54374af2" name="abc88d2e283fd8e8ee448241d54374af2"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>StackFrame</b> (<a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_continuation.html">Continuation</a> normalContinuation, ExceptionHandlers exceptionHandlers, const <a class="el" href="class_p4_tools_1_1_namespace_context.html">NamespaceContext</a> *namespaces)</td></tr>
+<tr class="separator:abc88d2e283fd8e8ee448241d54374af2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a536ca8e1ed5435c0ef859291996477ce" id="r_a536ca8e1ed5435c0ef859291996477ce"><td class="memItemLeft" align="right" valign="top"><a id="a536ca8e1ed5435c0ef859291996477ce" name="a536ca8e1ed5435c0ef859291996477ce"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>StackFrame</b> (<a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_execution_state_1_1_stack_frame.html">StackFrame</a> &amp;&amp;) noexcept=default</td></tr>
+<tr class="separator:a536ca8e1ed5435c0ef859291996477ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a200a8df9f4d03ddc033cc8bc567cdacf" id="r_a200a8df9f4d03ddc033cc8bc567cdacf"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_continuation.html">Continuation</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a200a8df9f4d03ddc033cc8bc567cdacf">getContinuation</a> () const</td></tr>
+<tr class="separator:a200a8df9f4d03ddc033cc8bc567cdacf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2fd94e5d87cea2becb1a5198947ad87a" id="r_a2fd94e5d87cea2becb1a5198947ad87a"><td class="memItemLeft" align="right" valign="top">const ExceptionHandlers &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2fd94e5d87cea2becb1a5198947ad87a">getExceptionHandlers</a> () const</td></tr>
+<tr class="separator:a2fd94e5d87cea2becb1a5198947ad87a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb7fcbabc9c728495a968ce9d9381dfe" id="r_afb7fcbabc9c728495a968ce9d9381dfe"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_tools_1_1_namespace_context.html">NamespaceContext</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afb7fcbabc9c728495a968ce9d9381dfe">getNameSpaces</a> () const</td></tr>
+<tr class="separator:afb7fcbabc9c728495a968ce9d9381dfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04175b1d2acbb87988c722c149268715" id="r_a04175b1d2acbb87988c722c149268715"><td class="memItemLeft" align="right" valign="top"><a id="a04175b1d2acbb87988c722c149268715" name="a04175b1d2acbb87988c722c149268715"></a>
+<a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_execution_state_1_1_stack_frame.html">StackFrame</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_execution_state_1_1_stack_frame.html">StackFrame</a> &amp;)=default</td></tr>
+<tr class="separator:a04175b1d2acbb87988c722c149268715"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57eb1fc261e84e6207041ef06343abc7" id="r_a57eb1fc261e84e6207041ef06343abc7"><td class="memItemLeft" align="right" valign="top"><a id="a57eb1fc261e84e6207041ef06343abc7" name="a57eb1fc261e84e6207041ef06343abc7"></a>
+<a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_execution_state_1_1_stack_frame.html">StackFrame</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_execution_state_1_1_stack_frame.html">StackFrame</a> &amp;&amp;)=default</td></tr>
+<tr class="separator:a57eb1fc261e84e6207041ef06343abc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a200a8df9f4d03ddc033cc8bc567cdacf" name="a200a8df9f4d03ddc033cc8bc567cdacf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a200a8df9f4d03ddc033cc8bc567cdacf">&#9670;&#160;</a></span>getContinuation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_continuation.html">Continuation</a> &amp; P4Tools::P4Testgen::ExecutionState::StackFrame::getContinuation </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the top-level continuation of this particular stack frame. </dd></dl>
+
+</div>
+</div>
+<a id="a2fd94e5d87cea2becb1a5198947ad87a" name="a2fd94e5d87cea2becb1a5198947ad87a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2fd94e5d87cea2becb1a5198947ad87a">&#9670;&#160;</a></span>getExceptionHandlers()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const ExecutionState::StackFrame::ExceptionHandlers &amp; P4Tools::P4Testgen::ExecutionState::StackFrame::getExceptionHandlers </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the exception handlers contained within this stack frame. </dd></dl>
+
+</div>
+</div>
+<a id="afb7fcbabc9c728495a968ce9d9381dfe" name="afb7fcbabc9c728495a968ce9d9381dfe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb7fcbabc9c728495a968ce9d9381dfe">&#9670;&#160;</a></span>getNameSpaces()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="class_p4_tools_1_1_namespace_context.html">NamespaceContext</a> * P4Tools::P4Testgen::ExecutionState::StackFrame::getNameSpaces </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the namespaces contained within this stack frame. </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

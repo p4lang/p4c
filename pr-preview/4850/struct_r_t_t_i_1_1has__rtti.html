@@ -123,7 +123,17 @@ $(function(){initNavTree('struct_r_t_t_i_1_1has__rtti.html',''); initResizable(t
   <div class="headertitle"><div class="title">RTTI::has_rtti&lt; T &gt; Struct Template Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="rtti__utils_8h_source.html">rtti_utils.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for RTTI::has_rtti&lt; T &gt;:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="struct_r_t_t_i_1_1has__rtti__inherit__graph.svg" width="174" height="124"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
+struct RTTI::has_rtti&lt; T &gt;</div><p>A trait that check T is custom-RTTI-enabled. Works just like standard property type traits. One would normally use the _v variant. NOTE: Custom-RTTI-enabled classes should not only derive from RTTI::Base, but should also declare typeId properly. However, not doing so would be a bug and use of such class in RTTI-related operations would lead to static_assert failuire in RTTI::TypeInfo, so we just check the base. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

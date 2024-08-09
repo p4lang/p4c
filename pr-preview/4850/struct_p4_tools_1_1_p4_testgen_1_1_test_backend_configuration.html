@@ -120,9 +120,98 @@ $(function(){initNavTree('struct_p4_tools_1_1_p4_testgen_1_1_test_backend_config
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="struct_p4_tools_1_1_p4_testgen_1_1_test_backend_configuration-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::P4Testgen::TestBackendConfiguration Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="test__backend__configuration_8h_source.html">test_backend_configuration.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a85b763b7c0001f047133851bb68e8f31" id="r_a85b763b7c0001f047133851bb68e8f31"><td class="memItemLeft" align="right" valign="top">OptionalFilePath&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a85b763b7c0001f047133851bb68e8f31">fileBasePath</a></td></tr>
+<tr class="separator:a85b763b7c0001f047133851bb68e8f31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f7c16976531e58dd8ed636e887a8336" id="r_a6f7c16976531e58dd8ed636e887a8336"><td class="memItemLeft" align="right" valign="top"><a id="a6f7c16976531e58dd8ed636e887a8336" name="a6f7c16976531e58dd8ed636e887a8336"></a>
+int64_t&#160;</td><td class="memItemRight" valign="bottom"><b>maxTests</b> = 1</td></tr>
+<tr class="memdesc:a6f7c16976531e58dd8ed636e887a8336"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum number of tests to produce. Defaults to one test. <br /></td></tr>
+<tr class="separator:a6f7c16976531e58dd8ed636e887a8336"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad39ec6d0f9bf95dbeb0992aaf19d5595" id="r_ad39ec6d0f9bf95dbeb0992aaf19d5595"><td class="memItemLeft" align="right" valign="top"><a id="ad39ec6d0f9bf95dbeb0992aaf19d5595" name="ad39ec6d0f9bf95dbeb0992aaf19d5595"></a>
+std::optional&lt; unsigned int &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>seed</b></td></tr>
+<tr class="memdesc:ad39ec6d0f9bf95dbeb0992aaf19d5595"><td class="mdescLeft">&#160;</td><td class="mdescRight">The initial seed used to generate tests. If it is not set, no seed was used. <br /></td></tr>
+<tr class="separator:ad39ec6d0f9bf95dbeb0992aaf19d5595"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa76e0a95764568708221ff326c66dd99" id="r_aa76e0a95764568708221ff326c66dd99"><td class="memItemLeft" align="right" valign="top"><a id="aa76e0a95764568708221ff326c66dd99" name="aa76e0a95764568708221ff326c66dd99"></a>
+<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>testBaseName</b></td></tr>
+<tr class="memdesc:aa76e0a95764568708221ff326c66dd99"><td class="mdescLeft">&#160;</td><td class="mdescRight">The base name of the test. <br /></td></tr>
+<tr class="separator:aa76e0a95764568708221ff326c66dd99"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Configuration parameters for P4Testgen test back ends. These parameters may influence how tests are generated. </p>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a85b763b7c0001f047133851bb68e8f31" name="a85b763b7c0001f047133851bb68e8f31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85b763b7c0001f047133851bb68e8f31">&#9670;&#160;</a></span>fileBasePath</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">OptionalFilePath P4Tools::P4Testgen::TestBackendConfiguration::fileBasePath</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The base path to be used when writing out tests. May not be set, which means no tests are written to file. </p>
+
+</div>
+</div>
+<a id="a6f7c16976531e58dd8ed636e887a8336" name="a6f7c16976531e58dd8ed636e887a8336"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f7c16976531e58dd8ed636e887a8336">&#9670;&#160;</a></span>maxTests</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int64_t P4Tools::P4Testgen::TestBackendConfiguration::maxTests = 1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The maximum number of tests to produce. Defaults to one test. </p>
+
+</div>
+</div>
+<a id="ad39ec6d0f9bf95dbeb0992aaf19d5595" name="ad39ec6d0f9bf95dbeb0992aaf19d5595"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad39ec6d0f9bf95dbeb0992aaf19d5595">&#9670;&#160;</a></span>seed</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;unsigned int&gt; P4Tools::P4Testgen::TestBackendConfiguration::seed</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The initial seed used to generate tests. If it is not set, no seed was used. </p>
+
+</div>
+</div>
+<a id="aa76e0a95764568708221ff326c66dd99" name="aa76e0a95764568708221ff326c66dd99"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa76e0a95764568708221ff326c66dd99">&#9670;&#160;</a></span>testBaseName</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classcstring.html">cstring</a> P4Tools::P4Testgen::TestBackendConfiguration::testBaseName</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The base name of the test. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

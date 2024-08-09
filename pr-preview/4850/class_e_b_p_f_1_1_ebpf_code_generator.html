@@ -120,9 +120,79 @@ $(function(){initNavTree('class_e_b_p_f_1_1_ebpf_code_generator.html',''); initR
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="class_e_b_p_f_1_1_ebpf_code_generator-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">EBPF::EbpfCodeGenerator Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
 </div><!--header-->
 <div class="contents">
+<div class="dynheader">
+Inheritance diagram for EBPF::EbpfCodeGenerator:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_e_b_p_f_1_1_ebpf_code_generator__inherit__graph.svg" width="502" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:adf6b09e55e156b984a971bce6b431ac7" id="r_adf6b09e55e156b984a971bce6b431ac7"><td class="memItemLeft" align="right" valign="top"><a id="adf6b09e55e156b984a971bce6b431ac7" name="adf6b09e55e156b984a971bce6b431ac7"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>EbpfCodeGenerator</b> (const <a class="el" href="class_ebpf_options.html">EbpfOptions</a> &amp;options, std::vector&lt; <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type.html">EBPF::EBPFType</a> * &gt; &amp;ebpfTypes)</td></tr>
+<tr class="separator:adf6b09e55e156b984a971bce6b431ac7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9121c40a4a59db47c991ddf41f569a48" id="r_a9121c40a4a59db47c991ddf41f569a48"><td class="memItemLeft" align="right" valign="top"><a id="a9121c40a4a59db47c991ddf41f569a48" name="a9121c40a4a59db47c991ddf41f569a48"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>emitCommonPreamble</b> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *builder) const =0</td></tr>
+<tr class="separator:a9121c40a4a59db47c991ddf41f569a48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ce8073914ab9714c16a058cdd974f73" id="r_a1ce8073914ab9714c16a058cdd974f73"><td class="memItemLeft" align="right" valign="top"><a id="a1ce8073914ab9714c16a058cdd974f73" name="a1ce8073914ab9714c16a058cdd974f73"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>emitGlobalHeadersMetadata</b> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *builder) const =0</td></tr>
+<tr class="separator:a1ce8073914ab9714c16a058cdd974f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae034a00070c9853409e83301e17669e0" id="r_ae034a00070c9853409e83301e17669e0"><td class="memItemLeft" align="right" valign="top"><a id="ae034a00070c9853409e83301e17669e0" name="ae034a00070c9853409e83301e17669e0"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>emitInternalStructures</b> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *pBuilder) const =0</td></tr>
+<tr class="separator:ae034a00070c9853409e83301e17669e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3607a16980a8fe0050eae9f41598a9c" id="r_ac3607a16980a8fe0050eae9f41598a9c"><td class="memItemLeft" align="right" valign="top"><a id="ac3607a16980a8fe0050eae9f41598a9c" name="ac3607a16980a8fe0050eae9f41598a9c"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>emitPipelineInstances</b> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *builder) const =0</td></tr>
+<tr class="separator:ac3607a16980a8fe0050eae9f41598a9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7e5a5f781635cc1b0f1b50d9e011216" id="r_aa7e5a5f781635cc1b0f1b50d9e011216"><td class="memItemLeft" align="right" valign="top"><a id="aa7e5a5f781635cc1b0f1b50d9e011216" name="aa7e5a5f781635cc1b0f1b50d9e011216"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>emitPreamble</b> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *builder) const =0</td></tr>
+<tr class="separator:aa7e5a5f781635cc1b0f1b50d9e011216"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac25d12e99b60ce4557b24e7634869bff" id="r_ac25d12e99b60ce4557b24e7634869bff"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac25d12e99b60ce4557b24e7634869bff">emitTypes</a> (<a class="el" href="class_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *builder) const =0</td></tr>
+<tr class="separator:ac25d12e99b60ce4557b24e7634869bff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:acd1632734e8ff5857784554adb72f714" id="r_acd1632734e8ff5857784554adb72f714"><td class="memItemLeft" align="right" valign="top"><a id="acd1632734e8ff5857784554adb72f714" name="acd1632734e8ff5857784554adb72f714"></a>
+std::vector&lt; <a class="el" href="class_e_b_p_f_1_1_e_b_p_f_type.html">EBPF::EBPFType</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>ebpfTypes</b></td></tr>
+<tr class="separator:acd1632734e8ff5857784554adb72f714"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87118f7bef6dc9b2e084a8f8241b6497" id="r_a87118f7bef6dc9b2e084a8f8241b6497"><td class="memItemLeft" align="right" valign="top"><a id="a87118f7bef6dc9b2e084a8f8241b6497" name="a87118f7bef6dc9b2e084a8f8241b6497"></a>
+const <a class="el" href="class_ebpf_options.html">EbpfOptions</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>options</b></td></tr>
+<tr class="separator:a87118f7bef6dc9b2e084a8f8241b6497"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="ac25d12e99b60ce4557b24e7634869bff" name="ac25d12e99b60ce4557b24e7634869bff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac25d12e99b60ce4557b24e7634869bff">&#9670;&#160;</a></span>emitTypes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void EBPF::EbpfCodeGenerator::emitTypes </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *</td>          <td class="paramname"><span class="paramname"><em>builder</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="class_e_b_p_f_1_1_p_s_a_ebpf_generator.html#ae389ba18593ad2362e74c36d22db1b43">EBPF::PSAEbpfGenerator</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

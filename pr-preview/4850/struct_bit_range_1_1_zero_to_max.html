@@ -123,7 +123,15 @@ $(function(){initNavTree('struct_bit_range_1_1_zero_to_max.html',''); initResiza
   <div class="headertitle"><div class="title">BitRange::ZeroToMax Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="bitrange_8h_source.html">bitrange.h</a>&gt;</code></p>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A helper type used to construct a range that starts at zero and ends at the maximum index that is safely representable without overflow. Only meant to be used when constructing a HalfOpenRange or ClosedRange.</p>
+<p>ZeroToMax ranges are useful as an identity when intersecting ranges. If you have a loop where you intersect ranges over and over, you may find ZeroToMax useful.</p>
+<p>A caveat: "safely representable" above means that basic bitrange getters, queries, comparisons, and set operations work. It does <em>not</em> mean that any computation you do with the bitrange will be safe; operations that increase the size of very large bitranges, that shift them, or that change their units may result in integer overflow.</p>
+<p>It's generally safe to change the endianness of ZeroToMax, as long as the space it lives inside is safe. If you try to treat it as living in a space which also has a very large size, you may encounter integer overflow.</p>
+<p>XXX: There's no substitute for checking unsafe conversions before performing them, but we don't do that right now, so be cautious with very large ranges, just as you would be with storing very large values into a primitive type. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

@@ -120,9 +120,593 @@ $(function(){initNavTree('class_p4_tools_1_1_p4_testgen_1_1_table_stepper.html',
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
+<a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="class_p4_tools_1_1_p4_testgen_1_1_table_stepper-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::P4Testgen::TableStepper Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Implements small-step operational semantics for tables.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="core_2small__step_2table__stepper_8h_source.html">table_stepper.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for P4Tools::P4Testgen::TableStepper:</div>
+<div class="dyncontent">
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="class_p4_tools_1_1_p4_testgen_1_1_table_stepper__inherit__graph.svg" width="100%" height="434"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a27bd753623ca3b0ab081696891e0d6cc" id="r_a27bd753623ca3b0ab081696891e0d6cc"><td class="memItemLeft" align="right" valign="top"><a id="a27bd753623ca3b0ab081696891e0d6cc" name="a27bd753623ca3b0ab081696891e0d6cc"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>TableStepper</b> (<a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_expr_stepper.html">ExprStepper</a> *<a class="el" href="#a16f873dfa8e2bc7f778b746c3a67244a">stepper</a>, const IR::P4Table *<a class="el" href="#a77ab7e4884645a72e8b7d36bebfb3ac1">table</a>)</td></tr>
+<tr class="separator:a27bd753623ca3b0ab081696891e0d6cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada8c0d1dfc8e99bde4635f86741790dc" id="r_ada8c0d1dfc8e99bde4635f86741790dc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ada8c0d1dfc8e99bde4635f86741790dc">eval</a> ()</td></tr>
+<tr class="separator:ada8c0d1dfc8e99bde4635f86741790dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:ad00e87b1fcd127cc1f21500ad29f5b96" id="r_ad00e87b1fcd127cc1f21500ad29f5b96"><td class="memItemLeft" align="right" valign="top">static const IR::StateVariable &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad00e87b1fcd127cc1f21500ad29f5b96">getTableActionVar</a> (const IR::P4Table *<a class="el" href="#a77ab7e4884645a72e8b7d36bebfb3ac1">table</a>)</td></tr>
+<tr class="separator:ad00e87b1fcd127cc1f21500ad29f5b96"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35169582aa43e52b8634ad989bfdbea4" id="r_a35169582aa43e52b8634ad989bfdbea4"><td class="memItemLeft" align="right" valign="top">static const IR::StateVariable &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a35169582aa43e52b8634ad989bfdbea4">getTableHitVar</a> (const IR::P4Table *<a class="el" href="#a77ab7e4884645a72e8b7d36bebfb3ac1">table</a>)</td></tr>
+<tr class="separator:a35169582aa43e52b8634ad989bfdbea4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab30a02344aab67904c55a18a48c964c9" id="r_ab30a02344aab67904c55a18a48c964c9"><td class="memItemLeft" align="right" valign="top"><a id="ab30a02344aab67904c55a18a48c964c9" name="ab30a02344aab67904c55a18a48c964c9"></a>
+static const IR::StateVariable &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getTableResultVar</b> (const IR::P4Table *<a class="el" href="#a77ab7e4884645a72e8b7d36bebfb3ac1">table</a>)</td></tr>
+<tr class="separator:ab30a02344aab67904c55a18a48c964c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac111a94e92616057f2316a458ada466c" id="r_ac111a94e92616057f2316a458ada466c"><td class="memItemLeft" align="right" valign="top">static const IR::StateVariable &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac111a94e92616057f2316a458ada466c">getTableStateVariable</a> (const IR::Type *type, const IR::P4Table *<a class="el" href="#a77ab7e4884645a72e8b7d36bebfb3ac1">table</a>, <a class="el" href="classcstring.html">cstring</a> name, std::optional&lt; int &gt; idx1_opt=std::nullopt, std::optional&lt; int &gt; idx2_opt=std::nullopt)</td></tr>
+<tr class="separator:ac111a94e92616057f2316a458ada466c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:a7c6dc5b87042e052581926547e4e94aa" id="r_a7c6dc5b87042e052581926547e4e94aa"><td class="memItemLeft" align="right" valign="top"><a id="a7c6dc5b87042e052581926547e4e94aa" name="a7c6dc5b87042e052581926547e4e94aa"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>addDefaultAction</b> (std::optional&lt; const IR::Expression * &gt; tableMissCondition)</td></tr>
+<tr class="memdesc:a7c6dc5b87042e052581926547e4e94aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">tableMissCondition is true. <br /></td></tr>
+<tr class="separator:a7c6dc5b87042e052581926547e4e94aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a177bc488efb6f357ea2abf5e2c9f8cb4" id="r_a177bc488efb6f357ea2abf5e2c9f8cb4"><td class="memItemLeft" align="right" valign="top"><a id="a177bc488efb6f357ea2abf5e2c9f8cb4" name="a177bc488efb6f357ea2abf5e2c9f8cb4"></a>
+std::vector&lt; const IR::ActionListElement * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>buildTableActionList</b> ()</td></tr>
+<tr class="memdesc:a177bc488efb6f357ea2abf5e2c9f8cb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function that collects the list of actions contained in the table. <br /></td></tr>
+<tr class="separator:a177bc488efb6f357ea2abf5e2c9f8cb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6abaac11d18ba12681f815ea954369b1" id="r_a6abaac11d18ba12681f815ea954369b1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6abaac11d18ba12681f815ea954369b1">checkTargetProperties</a> (const std::vector&lt; const IR::ActionListElement * &gt; &amp;tableActionList)</td></tr>
+<tr class="separator:a6abaac11d18ba12681f815ea954369b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cd5b526d02efb306233fb0f5d43ac01" id="r_a4cd5b526d02efb306233fb0f5d43ac01"><td class="memItemLeft" align="right" valign="top">const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4cd5b526d02efb306233fb0f5d43ac01">computeHit</a> (TableMatchMap *matches)</td></tr>
+<tr class="separator:a4cd5b526d02efb306233fb0f5d43ac01"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1596c00920e9550f080623041c9f95bd" id="r_a1596c00920e9550f080623041c9f95bd"><td class="memItemLeft" align="right" valign="top">virtual const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1596c00920e9550f080623041c9f95bd">computeTargetMatchType</a> (const <a class="el" href="struct_p4_tools_1_1_table_utils_1_1_key_properties.html">TableUtils::KeyProperties</a> &amp;keyProperties, TableMatchMap *matches, const IR::Expression *hitCondition)</td></tr>
+<tr class="separator:a1596c00920e9550f080623041c9f95bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2dd79b99fdfbd260dda6a959f74f113e" id="r_a2dd79b99fdfbd260dda6a959f74f113e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2dd79b99fdfbd260dda6a959f74f113e">evalTableCall</a> ()</td></tr>
+<tr class="separator:a2dd79b99fdfbd260dda6a959f74f113e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0064055d0e2a657f7e7744e48af33ede" id="r_a0064055d0e2a657f7e7744e48af33ede"><td class="memItemLeft" align="right" valign="top">const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0064055d0e2a657f7e7744e48af33ede">evalTableConstEntries</a> ()</td></tr>
+<tr class="separator:a0064055d0e2a657f7e7744e48af33ede"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad548a9d4e39172d2d59e54e83830e95c" id="r_ad548a9d4e39172d2d59e54e83830e95c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad548a9d4e39172d2d59e54e83830e95c">evalTableControlEntries</a> (const std::vector&lt; const IR::ActionListElement * &gt; &amp;tableActionList)</td></tr>
+<tr class="separator:ad548a9d4e39172d2d59e54e83830e95c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7be333d7f79caff73b4338b0d5f72176" id="r_a7be333d7f79caff73b4338b0d5f72176"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7be333d7f79caff73b4338b0d5f72176">evalTaintedTable</a> ()</td></tr>
+<tr class="separator:a7be333d7f79caff73b4338b0d5f72176"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4df62931ccacb0e7b92d3928f0648da9" id="r_a4df62931ccacb0e7b92d3928f0648da9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4df62931ccacb0e7b92d3928f0648da9">evalTargetTable</a> (const std::vector&lt; const IR::ActionListElement * &gt; &amp;tableActionList)</td></tr>
+<tr class="separator:a4df62931ccacb0e7b92d3928f0648da9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a754cb3d00363af6094c35b27c9680f83" id="r_a754cb3d00363af6094c35b27c9680f83"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_execution_state.html">ExecutionState</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a754cb3d00363af6094c35b27c9680f83">getExecutionState</a> ()</td></tr>
+<tr class="separator:a754cb3d00363af6094c35b27c9680f83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af17a2b99cfe224846960dd61e1145a50" id="r_af17a2b99cfe224846960dd61e1145a50"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_program_info.html">ProgramInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af17a2b99cfe224846960dd61e1145a50">getProgramInfo</a> ()</td></tr>
+<tr class="separator:af17a2b99cfe224846960dd61e1145a50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbc033e7295bf3286ce9fe36d2ac6a70" id="r_adbc033e7295bf3286ce9fe36d2ac6a70"><td class="memItemLeft" align="right" valign="top">ExprStepper::Result&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adbc033e7295bf3286ce9fe36d2ac6a70">getResult</a> ()</td></tr>
+<tr class="separator:adbc033e7295bf3286ce9fe36d2ac6a70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af144b0b11eb8f2c96390dc786e84c79b" id="r_af144b0b11eb8f2c96390dc786e84c79b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af144b0b11eb8f2c96390dc786e84c79b">resolveTableKeys</a> ()</td></tr>
+<tr class="separator:af144b0b11eb8f2c96390dc786e84c79b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15f93a7fd8754e989ddadc21374c1e9e" id="r_a15f93a7fd8754e989ddadc21374c1e9e"><td class="memItemLeft" align="right" valign="top"><a id="a15f93a7fd8754e989ddadc21374c1e9e" name="a15f93a7fd8754e989ddadc21374c1e9e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setTableDefaultEntries</b> (const std::vector&lt; const IR::ActionListElement * &gt; &amp;tableActionList)</td></tr>
+<tr class="separator:a15f93a7fd8754e989ddadc21374c1e9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
+Static Protected Member Functions</h2></td></tr>
+<tr class="memitem:a508891e76c07ce5f4658a9051718729c" id="r_a508891e76c07ce5f4658a9051718729c"><td class="memItemLeft" align="right" valign="top">static const IR::StringLiteral *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a508891e76c07ce5f4658a9051718729c">getTableActionString</a> (const IR::MethodCallExpression *actionCall)</td></tr>
+<tr class="separator:a508891e76c07ce5f4658a9051718729c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
+Protected Attributes</h2></td></tr>
+<tr class="memitem:ac9175100ad076e0f7faa29dcdc2b2c11" id="r_ac9175100ad076e0f7faa29dcdc2b2c11"><td class="memItemLeft" align="right" valign="top"><a id="ac9175100ad076e0f7faa29dcdc2b2c11" name="ac9175100ad076e0f7faa29dcdc2b2c11"></a>
+<a class="el" href="struct_p4_tools_1_1_table_utils_1_1_table_properties.html">TableUtils::TableProperties</a>&#160;</td><td class="memItemRight" valign="bottom"><b>properties</b></td></tr>
+<tr class="memdesc:ac9175100ad076e0f7faa29dcdc2b2c11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Basic table properties that are set when initializing the TableStepper. <br /></td></tr>
+<tr class="separator:ac9175100ad076e0f7faa29dcdc2b2c11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16f873dfa8e2bc7f778b746c3a67244a" id="r_a16f873dfa8e2bc7f778b746c3a67244a"><td class="memItemLeft" align="right" valign="top"><a id="a16f873dfa8e2bc7f778b746c3a67244a" name="a16f873dfa8e2bc7f778b746c3a67244a"></a>
+<a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_expr_stepper.html">ExprStepper</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>stepper</b></td></tr>
+<tr class="memdesc:a16f873dfa8e2bc7f778b746c3a67244a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to the calling expression stepper. <br /></td></tr>
+<tr class="separator:a16f873dfa8e2bc7f778b746c3a67244a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77ab7e4884645a72e8b7d36bebfb3ac1" id="r_a77ab7e4884645a72e8b7d36bebfb3ac1"><td class="memItemLeft" align="right" valign="top"><a id="a77ab7e4884645a72e8b7d36bebfb3ac1" name="a77ab7e4884645a72e8b7d36bebfb3ac1"></a>
+const IR::P4Table *&#160;</td><td class="memItemRight" valign="bottom"><b>table</b></td></tr>
+<tr class="memdesc:a77ab7e4884645a72e8b7d36bebfb3ac1"><td class="mdescLeft">&#160;</td><td class="mdescRight">The table for this particular stepper. <br /></td></tr>
+<tr class="separator:a77ab7e4884645a72e8b7d36bebfb3ac1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Implements small-step operational semantics for tables. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a6abaac11d18ba12681f815ea954369b1" name="a6abaac11d18ba12681f815ea954369b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6abaac11d18ba12681f815ea954369b1">&#9670;&#160;</a></span>checkTargetProperties()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4Tools::P4Testgen::TableStepper::checkTargetProperties </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; const IR::ActionListElement * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>tableActionList</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Collects properties that may be set per table. Target back end may have different semantics for table execution that need to be collect before evaluation the table. </p>
+
+<p>Reimplemented in <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_table_stepper.html#aedd34e7c4308db6038117d24780472ab">P4Tools::P4Testgen::Bmv2::Bmv2V1ModelTableStepper</a>, <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_table_stepper.html#ac8ffb7c1e36da80582cd46228feaefa9">P4Tools::P4Testgen::EBPF::EBPFTableStepper</a>, and <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper.html#a9cb67997551c6a09db88fd999f5076a3">P4Tools::P4Testgen::Pna::SharedPnaTableStepper</a>.</p>
+
+</div>
+</div>
+<a id="a4cd5b526d02efb306233fb0f5d43ac01" name="a4cd5b526d02efb306233fb0f5d43ac01"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4cd5b526d02efb306233fb0f5d43ac01">&#9670;&#160;</a></span>computeHit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::Expression * P4Tools::P4Testgen::TableStepper::computeHit </td>
+          <td>(</td>
+          <td class="paramtype">TableMatchMap *</td>          <td class="paramname"><span class="paramname"><em>matches</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>A helper function that computes whether a control-plane/table-key hits or not. This does not handle constant entries, it is specialized for control plane entries. The function also tracks the list of field matches created to achieve a hit. We later use this to insert table entries using the STF/PTF framework. </p>
+
+</div>
+</div>
+<a id="a1596c00920e9550f080623041c9f95bd" name="a1596c00920e9550f080623041c9f95bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1596c00920e9550f080623041c9f95bd">&#9670;&#160;</a></span>computeTargetMatchType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::Expression * P4Tools::P4Testgen::TableStepper::computeTargetMatchType </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_p4_tools_1_1_table_utils_1_1_key_properties.html">TableUtils::KeyProperties</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>keyProperties</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">TableMatchMap *</td>          <td class="paramname"><span class="paramname"><em>matches</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IR::Expression *</td>          <td class="paramname"><span class="paramname"><em>hitCondition</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>This function allows target back ends to add their own match types. For example, some back ends implement the "optional" match type, which either hits as exact match or does not match at all. The table stepper first checks these custom match types. If these do not match it steps through the default implementation. If it does not match either, a P4C_UNIMPLEMENTED is thrown. </p>
+
+<p>Reimplemented in <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_table_stepper.html#a9c3391f3be41d40a5eb0d927b186dae4">P4Tools::P4Testgen::Bmv2::Bmv2V1ModelTableStepper</a>, and <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper.html#a2356a7d58f7026c5327adcda11e2fcac">P4Tools::P4Testgen::Pna::SharedPnaTableStepper</a>.</p>
+
+</div>
+</div>
+<a id="ada8c0d1dfc8e99bde4635f86741790dc" name="ada8c0d1dfc8e99bde4635f86741790dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada8c0d1dfc8e99bde4635f86741790dc">&#9670;&#160;</a></span>eval()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool P4Tools::P4Testgen::TableStepper::eval </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Table implementations in P4 are rather flexible. Eval is a delegation function that chooses the right implementation depending on the properties of the table. For example, immutable tables can not be programmed using the control plane. If an table key is tainted, we can also not predict, which action is tainted. Some frameworks may have implementation details such as annotations, action profiles/selectors that may alter semantics, too. </p>
+
+</div>
+</div>
+<a id="a2dd79b99fdfbd260dda6a959f74f113e" name="a2dd79b99fdfbd260dda6a959f74f113e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2dd79b99fdfbd260dda6a959f74f113e">&#9670;&#160;</a></span>evalTableCall()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4Tools::P4Testgen::TableStepper::evalTableCall </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>When we hit a table.apply() method call expression we transition into the table call phase. Handling table calls is fairly involved as we need to respect the control plane manipulating these tables. This is why we are using several helper functions. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">table</td><td>the table we invoke. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a0064055d0e2a657f7e7744e48af33ede" name="a0064055d0e2a657f7e7744e48af33ede"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0064055d0e2a657f7e7744e48af33ede">&#9670;&#160;</a></span>evalTableConstEntries()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::Expression * P4Tools::P4Testgen::TableStepper::evalTableConstEntries </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Tables may have constant match-action entries. This usually implies that the table is immutable. This helper function unrolls all entries and aligns the table key with the match provided by the constant entry. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">table</td><td>the table we invoke. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>tableMissCondition reference to the current constraints of the miss condition. Any constant entry we hit implies that the table is hit, and the default action is not executed. </dd></dl>
+
+</div>
+</div>
+<a id="ad548a9d4e39172d2d59e54e83830e95c" name="ad548a9d4e39172d2d59e54e83830e95c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad548a9d4e39172d2d59e54e83830e95c">&#9670;&#160;</a></span>evalTableControlEntries()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4Tools::P4Testgen::TableStepper::evalTableControlEntries </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; const IR::ActionListElement * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>tableActionList</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>This helper function evaluates potential insertion from the control plane. We use variables variables to mimic an operator inserting entries. We only cover ONE entry per table for now. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">table</td><td>the table we invoke. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a7be333d7f79caff73b4338b0d5f72176" name="a7be333d7f79caff73b4338b0d5f72176"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7be333d7f79caff73b4338b0d5f72176">&#9670;&#160;</a></span>evalTaintedTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4Tools::P4Testgen::TableStepper::evalTaintedTable </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>This is a special function that handles the case where the key of a table is tainted. This means that the entire execution of the table is tainted. We can dramatically simplify execution here and we also do not need control plane entries. The tricky part is that we still need execute all possible actions and taint whatever they may write, iff the table has constant entries. </p>
+
+</div>
+</div>
+<a id="a4df62931ccacb0e7b92d3928f0648da9" name="a4df62931ccacb0e7b92d3928f0648da9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4df62931ccacb0e7b92d3928f0648da9">&#9670;&#160;</a></span>evalTargetTable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4Tools::P4Testgen::TableStepper::evalTargetTable </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; const IR::ActionListElement * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>tableActionList</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>This function allows target back ends to implement their own interpretation of table execution. How a table is evaluated is target-specific. </p>
+
+<p>Reimplemented in <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_table_stepper.html#a0970daeea3f9b7ae76fb5ec1a51f15cd">P4Tools::P4Testgen::Bmv2::Bmv2V1ModelTableStepper</a>, <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_table_stepper.html#aa5744a6f937418438bfebf345dfb618c">P4Tools::P4Testgen::EBPF::EBPFTableStepper</a>, and <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper.html#a3d385f37a4872d888628b3e45d1d781e">P4Tools::P4Testgen::Pna::SharedPnaTableStepper</a>.</p>
+
+</div>
+</div>
+<a id="a754cb3d00363af6094c35b27c9680f83" name="a754cb3d00363af6094c35b27c9680f83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a754cb3d00363af6094c35b27c9680f83">&#9670;&#160;</a></span>getExecutionState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_execution_state.html">ExecutionState</a> * P4Tools::P4Testgen::TableStepper::getExecutionState </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the execution state of the friend class ExpressionStepper. </dd></dl>
+
+</div>
+</div>
+<a id="af17a2b99cfe224846960dd61e1145a50" name="af17a2b99cfe224846960dd61e1145a50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af17a2b99cfe224846960dd61e1145a50">&#9670;&#160;</a></span>getProgramInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_program_info.html">ProgramInfo</a> * P4Tools::P4Testgen::TableStepper::getProgramInfo </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the program info of the friend class ExpressionStepper. </dd></dl>
+
+</div>
+</div>
+<a id="adbc033e7295bf3286ce9fe36d2ac6a70" name="adbc033e7295bf3286ce9fe36d2ac6a70"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adbc033e7295bf3286ce9fe36d2ac6a70">&#9670;&#160;</a></span>getResult()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ExprStepper::Result P4Tools::P4Testgen::TableStepper::getResult </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the result pointer of the friend class ExpressionStepper. </dd></dl>
+
+</div>
+</div>
+<a id="a508891e76c07ce5f4658a9051718729c" name="a508891e76c07ce5f4658a9051718729c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a508891e76c07ce5f4658a9051718729c">&#9670;&#160;</a></span>getTableActionString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::StringLiteral * P4Tools::P4Testgen::TableStepper::getTableActionString </td>
+          <td>(</td>
+          <td class="paramtype">const IR::MethodCallExpression *</td>          <td class="paramname"><span class="paramname"><em>actionCall</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Sets the action taken by the given table. The arguments in the given MethodCallExpression are assumed to be symbolic values. </p>
+
+</div>
+</div>
+<a id="ad00e87b1fcd127cc1f21500ad29f5b96" name="ad00e87b1fcd127cc1f21500ad29f5b96"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad00e87b1fcd127cc1f21500ad29f5b96">&#9670;&#160;</a></span>getTableActionVar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::StateVariable &amp; P4Tools::P4Testgen::TableStepper::getTableActionVar </td>
+          <td>(</td>
+          <td class="paramtype">const IR::P4Table *</td>          <td class="paramname"><span class="paramname"><em>table</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the state variable that tracks the index of the action taken by the given table.</dd></dl>
+<p>This variable is initially set to the number of actions in the table, indicating that no action has been selected. It is set by setTableAction and read by getTableAction. </p>
+
+</div>
+</div>
+<a id="a35169582aa43e52b8634ad989bfdbea4" name="a35169582aa43e52b8634ad989bfdbea4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35169582aa43e52b8634ad989bfdbea4">&#9670;&#160;</a></span>getTableHitVar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::StateVariable &amp; P4Tools::P4Testgen::TableStepper::getTableHitVar </td>
+          <td>(</td>
+          <td class="paramtype">const IR::P4Table *</td>          <td class="paramname"><span class="paramname"><em>table</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the boolean-typed state variable that tracks whether a table has resulted in a hit. The value of this variable is false if the table misses or is not reached. </dd></dl>
+
+</div>
+</div>
+<a id="ac111a94e92616057f2316a458ada466c" name="ac111a94e92616057f2316a458ada466c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac111a94e92616057f2316a458ada466c">&#9670;&#160;</a></span>getTableStateVariable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::StateVariable &amp; P4Tools::P4Testgen::TableStepper::getTableStateVariable </td>
+          <td>(</td>
+          <td class="paramtype">const IR::Type *</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IR::P4Table *</td>          <td class="paramname"><span class="paramname"><em>table</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classcstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>name</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::optional&lt; int &gt;</td>          <td class="paramname"><span class="paramname"><em>idx1_opt</em></span><span class="paramdefsep"> = </span><span class="paramdefval">std::nullopt</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::optional&lt; int &gt;</td>          <td class="paramname"><span class="paramname"><em>idx2_opt</em></span><span class="paramdefsep"> = </span><span class="paramdefval">std::nullopt</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the variables variable with the given type, for tracking an aspect of the given table. The returned variable will be named p4t*variables.table.t.name.idx1.idx2, where t is the name of the given table. The "idx1" and "idx2" components are produced only if idx1 and idx2 are given, respectively. </dd></dl>
+
+</div>
+</div>
+<a id="af144b0b11eb8f2c96390dc786e84c79b" name="af144b0b11eb8f2c96390dc786e84c79b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af144b0b11eb8f2c96390dc786e84c79b">&#9670;&#160;</a></span>resolveTableKeys()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool P4Tools::P4Testgen::TableStepper::resolveTableKeys </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>A helper function to iteratively resolve table keys into symbolic values. This function returns false, if no key needs to be resolved. If keys are tainted or a key needs to be resolved, this function returns true. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

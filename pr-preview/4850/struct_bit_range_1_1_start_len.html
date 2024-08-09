@@ -120,10 +120,41 @@ $(function(){initNavTree('struct_bit_range_1_1_start_len.html',''); initResizabl
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="struct_bit_range_1_1_start_len-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">BitRange::StartLen Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="bitrange_8h_source.html">bitrange.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a299ca5e79936557f05c9dcb12fb12756" id="r_a299ca5e79936557f05c9dcb12fb12756"><td class="memItemLeft" align="right" valign="top"><a id="a299ca5e79936557f05c9dcb12fb12756" name="a299ca5e79936557f05c9dcb12fb12756"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>StartLen</b> (const <a class="el" href="struct_bit_range_1_1_start_len.html">StartLen</a> &amp;)=delete</td></tr>
+<tr class="separator:a299ca5e79936557f05c9dcb12fb12756"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb5295414bf3578a31c49babcb507498" id="r_afb5295414bf3578a31c49babcb507498"><td class="memItemLeft" align="right" valign="top"><a id="afb5295414bf3578a31c49babcb507498" name="afb5295414bf3578a31c49babcb507498"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>StartLen</b> (int start, int len)</td></tr>
+<tr class="separator:afb5295414bf3578a31c49babcb507498"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a746eea7e36f81e417c2a1515b233af75" id="r_a746eea7e36f81e417c2a1515b233af75"><td class="memItemLeft" align="right" valign="top"><a id="a746eea7e36f81e417c2a1515b233af75" name="a746eea7e36f81e417c2a1515b233af75"></a>
+<a class="el" href="struct_bit_range_1_1_start_len.html">StartLen</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="struct_bit_range_1_1_start_len.html">StartLen</a> &amp;)=delete</td></tr>
+<tr class="separator:a746eea7e36f81e417c2a1515b233af75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a4638e7d11bf6c57e7ba8494973493f5a" id="r_a4638e7d11bf6c57e7ba8494973493f5a"><td class="memItemLeft" align="right" valign="top"><a id="a4638e7d11bf6c57e7ba8494973493f5a" name="a4638e7d11bf6c57e7ba8494973493f5a"></a>
+const int&#160;</td><td class="memItemRight" valign="bottom"><b>len</b></td></tr>
+<tr class="separator:a4638e7d11bf6c57e7ba8494973493f5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d18fcae7aa00ad8f3a43695b7c0b756" id="r_a7d18fcae7aa00ad8f3a43695b7c0b756"><td class="memItemLeft" align="right" valign="top"><a id="a7d18fcae7aa00ad8f3a43695b7c0b756" name="a7d18fcae7aa00ad8f3a43695b7c0b756"></a>
+const int&#160;</td><td class="memItemRight" valign="bottom"><b>start</b></td></tr>
+<tr class="separator:a7d18fcae7aa00ad8f3a43695b7c0b756"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A helper type used to construct a range, specified as the region of a certain length beginning at a certain bit index. For example, <code>StartLen(6, 8)</code> denotes a range containing eight bits: bit 6, bit 7, bit 8, bit 9, bit 10, bit 11, bit 12, and bit 13.</p>
+<p>As with FromTo, StartLen is only meant to be used when constructing a HalfOpenRange or ClosedRange. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

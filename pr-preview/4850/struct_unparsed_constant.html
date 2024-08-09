@@ -120,9 +120,110 @@ $(function(){initNavTree('struct_unparsed_constant.html',''); initResizable(true
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="struct_unparsed_constant-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">UnparsedConstant Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="constant_parsing_8h_source.html">constantParsing.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a48cc46292052eaeff3e358c69fe7de36" id="r_a48cc46292052eaeff3e358c69fe7de36"><td class="memItemLeft" align="right" valign="top"><a id="a48cc46292052eaeff3e358c69fe7de36" name="a48cc46292052eaeff3e358c69fe7de36"></a>
+unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>base</b></td></tr>
+<tr class="memdesc:a48cc46292052eaeff3e358c69fe7de36"><td class="mdescLeft">&#160;</td><td class="mdescRight">An ignored prefix of the numeric constant (e.g. '0x'). <br /></td></tr>
+<tr class="separator:a48cc46292052eaeff3e358c69fe7de36"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47106cde919d8d3ee34ff04e732af532" id="r_a47106cde919d8d3ee34ff04e732af532"><td class="memItemLeft" align="right" valign="top"><a id="a47106cde919d8d3ee34ff04e732af532" name="a47106cde919d8d3ee34ff04e732af532"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>hasWidth</b></td></tr>
+<tr class="memdesc:a47106cde919d8d3ee34ff04e732af532"><td class="mdescLeft">&#160;</td><td class="mdescRight">The base in which the constant is expressed. <br /></td></tr>
+<tr class="separator:a47106cde919d8d3ee34ff04e732af532"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3d9ad956d25cc30b2de1f34f4bdbf2e" id="r_aa3d9ad956d25cc30b2de1f34f4bdbf2e"><td class="memItemLeft" align="right" valign="top"><a id="aa3d9ad956d25cc30b2de1f34f4bdbf2e" name="aa3d9ad956d25cc30b2de1f34f4bdbf2e"></a>
+unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>skip</b></td></tr>
+<tr class="memdesc:aa3d9ad956d25cc30b2de1f34f4bdbf2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Raw P4 text which was recognized as a numeric constant. <br /></td></tr>
+<tr class="separator:aa3d9ad956d25cc30b2de1f34f4bdbf2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae570528a6d58564af83cc6e5de3ed07" id="r_aae570528a6d58564af83cc6e5de3ed07"><td class="memItemLeft" align="right" valign="top"><a id="aae570528a6d58564af83cc6e5de3ed07" name="aae570528a6d58564af83cc6e5de3ed07"></a>
+<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>text</b></td></tr>
+<tr class="separator:aae570528a6d58564af83cc6e5de3ed07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>An unparsed numeric constant. We produce these as token values during lexing. The parser is responsible for actually interpreting the raw text as a numeric value and transforming it into an IR::Constant using parseConstant().</p>
+<p>To illustrate how a numeric constant is represented using this struct, here is a breakdown of '16w0x12': </p><pre class="fragment">     ___
+    /                                    ___
+    |                                   /
+    |   bitwidth (if @hasWidth)        |       16
+    |                                   \___
+    |
+    |                                    ___
+    |                                   /
+    |   separator (if @hasWidth)       |       w
+    |                                   \___
+</pre><p> @text | | ___ | / | ignored prefix of length </p><div class="fragment"></div><!-- fragment --><p> | ___ | | ___ | / | numeric value in base @base | w | ___ ___</p>
+<p>Simple numeric constants like '5' are specified by setting @hasWidth to false and providing a </p><div class="fragment"></div><!-- fragment --></p>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a48cc46292052eaeff3e358c69fe7de36" name="a48cc46292052eaeff3e358c69fe7de36"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48cc46292052eaeff3e358c69fe7de36">&#9670;&#160;</a></span>base</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned UnparsedConstant::base</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>An ignored prefix of the numeric constant (e.g. '0x'). </p>
+
+</div>
+</div>
+<a id="a47106cde919d8d3ee34ff04e732af532" name="a47106cde919d8d3ee34ff04e732af532"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47106cde919d8d3ee34ff04e732af532">&#9670;&#160;</a></span>hasWidth</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool UnparsedConstant::hasWidth</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The base in which the constant is expressed. </p>
+
+</div>
+</div>
+<a id="aa3d9ad956d25cc30b2de1f34f4bdbf2e" name="aa3d9ad956d25cc30b2de1f34f4bdbf2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3d9ad956d25cc30b2de1f34f4bdbf2e">&#9670;&#160;</a></span>skip</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned UnparsedConstant::skip</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Raw P4 text which was recognized as a numeric constant. </p>
+
+</div>
+</div>
+<a id="aae570528a6d58564af83cc6e5de3ed07" name="aae570528a6d58564af83cc6e5de3ed07"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae570528a6d58564af83cc6e5de3ed07">&#9670;&#160;</a></span>text</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classcstring.html">cstring</a> UnparsedConstant::text</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

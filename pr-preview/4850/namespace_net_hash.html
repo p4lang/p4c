@@ -120,9 +120,126 @@ $(function(){initNavTree('namespace_net_hash.html',''); initResizable(true); });
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">NetHash Namespace Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>A collection of hashing functions commonly used in network protocols.  
+<a href="#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_net_hash_1_1_identity.html">Identity</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A class with the same signature as reflect, but just returning the data.  <a href="struct_net_hash_1_1_identity.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_net_hash_1_1_reflect.html">Reflect</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a37bb835a0e0207c7a6b5b95cf4f4cd6f" id="r_a37bb835a0e0207c7a6b5b95cf4f4cd6f"><td class="memItemLeft" align="right" valign="top"><a id="a37bb835a0e0207c7a6b5b95cf4f4cd6f" name="a37bb835a0e0207c7a6b5b95cf4f4cd6f"></a>
+uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>crc16</b> (const uint8_t *buf, size_t len)</td></tr>
+<tr class="memdesc:a37bb835a0e0207c7a6b5b95cf4f4cd6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">CRC-16 used in BMv2 (parameters: bit-reflection, polynomial 0x8005, init = 0 and xor_out = 0). <br /></td></tr>
+<tr class="separator:a37bb835a0e0207c7a6b5b95cf4f4cd6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff30304ad28e93303cdf6d117acee1b5" id="r_aff30304ad28e93303cdf6d117acee1b5"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff30304ad28e93303cdf6d117acee1b5">crc16ANSI</a> (const uint8_t *buf, size_t len)</td></tr>
+<tr class="separator:aff30304ad28e93303cdf6d117acee1b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e84c130c366a0cb3911ce0927c8b3d5" id="r_a9e84c130c366a0cb3911ce0927c8b3d5"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9e84c130c366a0cb3911ce0927c8b3d5">crc32</a> (const uint8_t *buf, size_t len)</td></tr>
+<tr class="separator:a9e84c130c366a0cb3911ce0927c8b3d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a629b4c7537cb83d4cc7d5710cb1ad95c" id="r_a629b4c7537cb83d4cc7d5710cb1ad95c"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a629b4c7537cb83d4cc7d5710cb1ad95c">crc32FCS</a> (const uint8_t *buf, size_t len)</td></tr>
+<tr class="separator:a629b4c7537cb83d4cc7d5710cb1ad95c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ee2a7bc16756c869fe1cc9c3b85998b" id="r_a5ee2a7bc16756c869fe1cc9c3b85998b"><td class="memItemLeft" align="right" valign="top"><a id="a5ee2a7bc16756c869fe1cc9c3b85998b" name="a5ee2a7bc16756c869fe1cc9c3b85998b"></a>
+uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>crcCCITT</b> (const uint8_t *buf, size_t len)</td></tr>
+<tr class="memdesc:a5ee2a7bc16756c869fe1cc9c3b85998b"><td class="mdescLeft">&#160;</td><td class="mdescRight">CRC16-CCITT (parameters: NO bit-reflection, polynomial 0x1021, init = ~0 and xor_out = 0). <br /></td></tr>
+<tr class="separator:a5ee2a7bc16756c869fe1cc9c3b85998b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40aa3f95c293e45ab41757939162b57c" id="r_a40aa3f95c293e45ab41757939162b57c"><td class="memTemplParams" colspan="2"><a id="a40aa3f95c293e45ab41757939162b57c" name="a40aa3f95c293e45ab41757939162b57c"></a>
+template&lt;typename T , T remainderInit, T final_xor_value, auto table, typename MaybeReflect &gt; </td></tr>
+<tr class="memitem:a40aa3f95c293e45ab41757939162b57c"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><b>crcGeneric</b> (const uint8_t *buf, size_t len)</td></tr>
+<tr class="separator:a40aa3f95c293e45ab41757939162b57c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1cec1727556ae59423c1e43eea1234ed" id="r_a1cec1727556ae59423c1e43eea1234ed"><td class="memItemLeft" align="right" valign="top"><a id="a1cec1727556ae59423c1e43eea1234ed" name="a1cec1727556ae59423c1e43eea1234ed"></a>
+uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>csum16</b> (const uint8_t *buf, size_t len)</td></tr>
+<tr class="memdesc:a1cec1727556ae59423c1e43eea1234ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">16-bit ones' complement checksum (used in IP, TCP, UDP, ...). <br /></td></tr>
+<tr class="separator:a1cec1727556ae59423c1e43eea1234ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbc72e6fd903c19bd3128739c923212d" id="r_abbc72e6fd903c19bd3128739c923212d"><td class="memItemLeft" align="right" valign="top"><a id="abbc72e6fd903c19bd3128739c923212d" name="abbc72e6fd903c19bd3128739c923212d"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>identity</b> (const uint8_t *buf, size_t len)</td></tr>
+<tr class="memdesc:abbc72e6fd903c19bd3128739c923212d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Identity hash &ndash; the first (up to) 64bits of the values (i.e. indexes 0 to 7). <br /></td></tr>
+<tr class="separator:abbc72e6fd903c19bd3128739c923212d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02848f7ba3463d7d58e2a405046e8627" id="r_a02848f7ba3463d7d58e2a405046e8627"><td class="memItemLeft" align="right" valign="top"><a id="a02848f7ba3463d7d58e2a405046e8627" name="a02848f7ba3463d7d58e2a405046e8627"></a>
+uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>xor16</b> (const uint8_t *buf, size_t len)</td></tr>
+<tr class="memdesc:a02848f7ba3463d7d58e2a405046e8627"><td class="mdescLeft">&#160;</td><td class="mdescRight">A 16-bit xor of the values. <br /></td></tr>
+<tr class="separator:a02848f7ba3463d7d58e2a405046e8627"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A collection of hashing functions commonly used in network protocols. </p>
+</div><h2 class="groupheader">Function Documentation</h2>
+<a id="aff30304ad28e93303cdf6d117acee1b5" name="aff30304ad28e93303cdf6d117acee1b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff30304ad28e93303cdf6d117acee1b5">&#9670;&#160;</a></span>crc16ANSI()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t NetHash::crc16ANSI </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>buf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>CRC-16-ANSI/CRC-16-IBM (parameters: NO bit-reflection, polynomial 0x8005, init = 0 and xor_out = 0). </p>
+
+</div>
+</div>
+<a id="a9e84c130c366a0cb3911ce0927c8b3d5" name="a9e84c130c366a0cb3911ce0927c8b3d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e84c130c366a0cb3911ce0927c8b3d5">&#9670;&#160;</a></span>crc32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t NetHash::crc32 </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>buf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>CRC-32, used in BMv2 (parameters: bit-reflection, polynomial 0x04C11DB7, init = ~0 and xor_out = ~0). </p>
+
+</div>
+</div>
+<a id="a629b4c7537cb83d4cc7d5710cb1ad95c" name="a629b4c7537cb83d4cc7d5710cb1ad95c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a629b4c7537cb83d4cc7d5710cb1ad95c">&#9670;&#160;</a></span>crc32FCS()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t NetHash::crc32FCS </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>buf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>CRC-32 used for Ethernet FCS (parameters: NO bit-reflection, polynomial 0x04C11DB7, init = ~0 and xor_out = ~0). </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

@@ -123,7 +123,14 @@ $(function(){initNavTree('struct_bit_range_1_1_min_to_max.html',''); initResizab
   <div class="headertitle"><div class="title">BitRange::MinToMax Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="bitrange_8h_source.html">bitrange.h</a>&gt;</code></p>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A helper type used to construct a range that starts at the minimum index that is safely representable without overflow and ends at the maximum index that is safely representable without overflow. Only meant to be used when constructing a HalfOpenRange or ClosedRange.</p>
+<p>MinToMax ranges are useful as an identity when intersecting ranges. If you have a loop where you intersect ranges over and over, you may find MinToMax useful. Note that you're less likely to run into overflow issues with ZeroToMax ranges, so if you're dealing entirely with non-negative numbers, you're probably better off using ZeroToMax.</p>
+<dl class="section see"><dt>See also</dt><dd>ZeroToMax for more discussion about what "safely representable" means.</dd></dl>
+<p>Unlike ZeroToMax, it is not safe to change the endianness of MinToMax; doing so will inevitably result in integer overflow. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

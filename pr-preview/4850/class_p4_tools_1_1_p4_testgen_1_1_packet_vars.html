@@ -120,9 +120,155 @@ $(function(){initNavTree('class_p4_tools_1_1_p4_testgen_1_1_packet_vars.html',''
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
+<a href="class_p4_tools_1_1_p4_testgen_1_1_packet_vars-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::P4Testgen::PacketVars Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="packet__vars_8h_source.html">packet_vars.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:a396a5b23ba1ed649c57b410fafb48f06" id="r_a396a5b23ba1ed649c57b410fafb48f06"><td class="memItemLeft" align="right" valign="top">static const IR::Member&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a396a5b23ba1ed649c57b410fafb48f06">EMIT_BUFFER_LABEL</a></td></tr>
+<tr class="separator:a396a5b23ba1ed649c57b410fafb48f06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf57de10dfa6b1d0b9e4472c0dca5e3f" id="r_adf57de10dfa6b1d0b9e4472c0dca5e3f"><td class="memItemLeft" align="right" valign="top">static const IR::Member&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adf57de10dfa6b1d0b9e4472c0dca5e3f">INPUT_PACKET_LABEL</a></td></tr>
+<tr class="separator:adf57de10dfa6b1d0b9e4472c0dca5e3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e1bca92e1261f551868e134f0409907" id="r_a8e1bca92e1261f551868e134f0409907"><td class="memItemLeft" align="right" valign="top">static const IR::Member&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e1bca92e1261f551868e134f0409907">PACKET_BUFFER_LABEL</a></td></tr>
+<tr class="separator:a8e1bca92e1261f551868e134f0409907"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3605f8f5d651acaeead15b355e6ea7bc" id="r_a3605f8f5d651acaeead15b355e6ea7bc"><td class="memItemLeft" align="right" valign="top">static const IR::Type_Bits&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3605f8f5d651acaeead15b355e6ea7bc">PACKET_SIZE_VAR_TYPE</a> = IR::Type_Bits(32, false)</td></tr>
+<tr class="separator:a3605f8f5d651acaeead15b355e6ea7bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5976be560a00c362414f994d6622a6c4" id="r_a5976be560a00c362414f994d6622a6c4"><td class="memItemLeft" align="right" valign="top">static const IR::SymbolicVariable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5976be560a00c362414f994d6622a6c4">PAYLOAD_SYMBOL</a></td></tr>
+<tr class="separator:a5976be560a00c362414f994d6622a6c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Contains utility functions and variables related to the creation and manipulation of input packets. </p>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a396a5b23ba1ed649c57b410fafb48f06" name="a396a5b23ba1ed649c57b410fafb48f06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a396a5b23ba1ed649c57b410fafb48f06">&#9670;&#160;</a></span>EMIT_BUFFER_LABEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::Member P4Tools::P4Testgen::PacketVars::EMIT_BUFFER_LABEL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">=</div>
+<div class="line">    IR::Member(<span class="keyword">new</span> IR::PathExpression(<span class="stringliteral">&quot;*&quot;</span>), <span class="stringliteral">&quot;emitBuffer&quot;</span>)</div>
+</div><!-- fragment --><p>The name of the emit buffer. Each time, emit is called, the emitted content is appended to this buffer. Typically, after exiting the control, the emit buffer is appended to the packet buffer. </p>
+
+</div>
+</div>
+<a id="adf57de10dfa6b1d0b9e4472c0dca5e3f" name="adf57de10dfa6b1d0b9e4472c0dca5e3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf57de10dfa6b1d0b9e4472c0dca5e3f">&#9670;&#160;</a></span>INPUT_PACKET_LABEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::Member P4Tools::P4Testgen::PacketVars::INPUT_PACKET_LABEL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">=</div>
+<div class="line">    IR::Member(<span class="keyword">new</span> IR::PathExpression(<span class="stringliteral">&quot;*&quot;</span>), <span class="stringliteral">&quot;inputPacket&quot;</span>)</div>
+</div><!-- fragment --><p>The name of the input packet. The input packet defines the minimum size of the packet requires to pass this particular path. Typically, calls such as extract, advance, or lookahead cause the input packet to grow. </p>
+
+</div>
+</div>
+<a id="a8e1bca92e1261f551868e134f0409907" name="a8e1bca92e1261f551868e134f0409907"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e1bca92e1261f551868e134f0409907">&#9670;&#160;</a></span>PACKET_BUFFER_LABEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::Member P4Tools::P4Testgen::PacketVars::PACKET_BUFFER_LABEL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">=</div>
+<div class="line">    IR::Member(<span class="keyword">new</span> IR::PathExpression(<span class="stringliteral">&quot;*&quot;</span>), <span class="stringliteral">&quot;packetBuffer&quot;</span>)</div>
+</div><!-- fragment --><p>The name of packet buffer. The packet buffer defines the data that can be consumed by the parser. If the packet buffer is empty, extract/advance/lookahead calls will cause the minimum packet size to grow. The packet buffer also forms the final output packet. </p>
+
+</div>
+</div>
+<a id="a3605f8f5d651acaeead15b355e6ea7bc" name="a3605f8f5d651acaeead15b355e6ea7bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3605f8f5d651acaeead15b355e6ea7bc">&#9670;&#160;</a></span>PACKET_SIZE_VAR_TYPE</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::Type_Bits P4Tools::P4Testgen::PacketVars::PACKET_SIZE_VAR_TYPE = IR::Type_Bits(32, false)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Specifies the type of the packet size variable. This is mostly used to generate bit vector constants. </p>
+
+</div>
+</div>
+<a id="a5976be560a00c362414f994d6622a6c4" name="a5976be560a00c362414f994d6622a6c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5976be560a00c362414f994d6622a6c4">&#9670;&#160;</a></span>PAYLOAD_SYMBOL</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::SymbolicVariable P4Tools::P4Testgen::PacketVars::PAYLOAD_SYMBOL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">=</div>
+<div class="line">    IR::SymbolicVariable(&amp;<a class="code hl_variable" href="#a3605f8f5d651acaeead15b355e6ea7bc">PacketVars::PACKET_SIZE_VAR_TYPE</a>, <span class="stringliteral">&quot;*payload&quot;</span>_cs)</div>
+<div class="ttc" id="aclass_p4_tools_1_1_p4_testgen_1_1_packet_vars_html_a3605f8f5d651acaeead15b355e6ea7bc"><div class="ttname"><a href="#a3605f8f5d651acaeead15b355e6ea7bc">P4Tools::P4Testgen::PacketVars::PACKET_SIZE_VAR_TYPE</a></div><div class="ttdeci">static const IR::Type_Bits PACKET_SIZE_VAR_TYPE</div><div class="ttdef"><b>Definition</b> packet_vars.h:14</div></div>
+</div><!-- fragment --><p>Canonical name for the payload. This is used for consistent naming when attaching a payload to the packet. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

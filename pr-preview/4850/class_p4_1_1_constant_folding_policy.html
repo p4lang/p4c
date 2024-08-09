@@ -120,10 +120,25 @@ $(function(){initNavTree('class_p4_1_1_constant_folding_policy.html',''); initRe
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_p4_1_1_constant_folding_policy-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::ConstantFoldingPolicy Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="constant_folding_8h_source.html">constantFolding.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a6ecdc32eff3b3baf1c96b005630ab343" id="r_a6ecdc32eff3b3baf1c96b005630ab343"><td class="memItemLeft" align="right" valign="top"><a id="a6ecdc32eff3b3baf1c96b005630ab343" name="a6ecdc32eff3b3baf1c96b005630ab343"></a>
+virtual const <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>hook</b> (<a class="el" href="class_visitor.html">Visitor</a> &amp;, IR::PathExpression *)</td></tr>
+<tr class="memdesc:a6ecdc32eff3b3baf1c96b005630ab343"><td class="mdescLeft">&#160;</td><td class="mdescRight">The default hook does not modify anything. <br /></td></tr>
+<tr class="separator:a6ecdc32eff3b3baf1c96b005630ab343"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A policy for constant folding that allows customization of the folding. Currently we only have hook for customizing IR::PathExpression, but more can be added. Each hook takes a visitor and a node and is called from the visitor's preorder function on that node. If the hook returns a non-null value, so will the preorder. Otherwise the preorder continues with its normal processing. The hooks can be stateful, they are non-const member functions. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

@@ -120,10 +120,74 @@ $(function(){initNavTree('struct_p4_1_1_parser_state_info.html',''); initResizab
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#friends">Friends</a> &#124;
+<a href="struct_p4_1_1_parser_state_info-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::ParserStateInfo Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p>Information produced for a parser state by the symbolic evaluator.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="parser_unroll_8h_source.html">parserUnroll.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:aa7e9f5f9ecbb01941019d7e2fc03ed28" id="r_aa7e9f5f9ecbb01941019d7e2fc03ed28"><td class="memItemLeft" align="right" valign="top"><a id="aa7e9f5f9ecbb01941019d7e2fc03ed28" name="aa7e9f5f9ecbb01941019d7e2fc03ed28"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ParserStateInfo</b> (<a class="el" href="classcstring.html">cstring</a> name, const IR::P4Parser *parser, const IR::ParserState *state, const <a class="el" href="struct_p4_1_1_parser_state_info.html">ParserStateInfo</a> *predecessor, <a class="el" href="class_p4_1_1_value_map.html">ValueMap</a> *before, size_t index)</td></tr>
+<tr class="separator:aa7e9f5f9ecbb01941019d7e2fc03ed28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a4da49cd49528c66ab5013e0b76d585a6" id="r_a4da49cd49528c66ab5013e0b76d585a6"><td class="memItemLeft" align="right" valign="top"><a id="a4da49cd49528c66ab5013e0b76d585a6" name="a4da49cd49528c66ab5013e0b76d585a6"></a>
+<a class="el" href="class_p4_1_1_value_map.html">ValueMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>after</b></td></tr>
+<tr class="separator:a4da49cd49528c66ab5013e0b76d585a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f6c264313e7ba5348ff98a50d49a772" id="r_a5f6c264313e7ba5348ff98a50d49a772"><td class="memItemLeft" align="right" valign="top"><a id="a5f6c264313e7ba5348ff98a50d49a772" name="a5f6c264313e7ba5348ff98a50d49a772"></a>
+<a class="el" href="class_p4_1_1_value_map.html">ValueMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>before</b></td></tr>
+<tr class="separator:a5f6c264313e7ba5348ff98a50d49a772"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e62963db3ab17f82245316a391bf973" id="r_a0e62963db3ab17f82245316a391bf973"><td class="memItemLeft" align="right" valign="top"><a id="a0e62963db3ab17f82245316a391bf973" name="a0e62963db3ab17f82245316a391bf973"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><b>currentIndex</b></td></tr>
+<tr class="separator:a0e62963db3ab17f82245316a391bf973"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4eddc16a19400440fe70d049229671bc" id="r_a4eddc16a19400440fe70d049229671bc"><td class="memItemLeft" align="right" valign="top"><a id="a4eddc16a19400440fe70d049229671bc" name="a4eddc16a19400440fe70d049229671bc"></a>
+<a class="el" href="classcstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>name</b></td></tr>
+<tr class="separator:a4eddc16a19400440fe70d049229671bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73c5714a2e757b2bb44b04dc1fa72f69" id="r_a73c5714a2e757b2bb44b04dc1fa72f69"><td class="memItemLeft" align="right" valign="top"><a id="a73c5714a2e757b2bb44b04dc1fa72f69" name="a73c5714a2e757b2bb44b04dc1fa72f69"></a>
+IR::ParserState *&#160;</td><td class="memItemRight" valign="bottom"><b>newState</b></td></tr>
+<tr class="separator:a73c5714a2e757b2bb44b04dc1fa72f69"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07e10190d3523369c33ad7b47fc42b67" id="r_a07e10190d3523369c33ad7b47fc42b67"><td class="memItemLeft" align="right" valign="top"><a id="a07e10190d3523369c33ad7b47fc42b67" name="a07e10190d3523369c33ad7b47fc42b67"></a>
+const IR::P4Parser *&#160;</td><td class="memItemRight" valign="bottom"><b>parser</b></td></tr>
+<tr class="separator:a07e10190d3523369c33ad7b47fc42b67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5100b71123cfecd1fcf53a8ef032f4a" id="r_ad5100b71123cfecd1fcf53a8ef032f4a"><td class="memItemLeft" align="right" valign="top"><a id="ad5100b71123cfecd1fcf53a8ef032f4a" name="ad5100b71123cfecd1fcf53a8ef032f4a"></a>
+const <a class="el" href="struct_p4_1_1_parser_state_info.html">ParserStateInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>predecessor</b></td></tr>
+<tr class="separator:ad5100b71123cfecd1fcf53a8ef032f4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4b6b65eced24a3e3475ce19a041ecb1" id="r_aa4b6b65eced24a3e3475ce19a041ecb1"><td class="memItemLeft" align="right" valign="top"><a id="aa4b6b65eced24a3e3475ce19a041ecb1" name="aa4b6b65eced24a3e3475ce19a041ecb1"></a>
+std::unordered_set&lt; <a class="el" href="classcstring.html">cstring</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>scenarioHS</b></td></tr>
+<tr class="separator:aa4b6b65eced24a3e3475ce19a041ecb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86cb2ef370836becc9b5b4d70ab0a0f0" id="r_a86cb2ef370836becc9b5b4d70ab0a0f0"><td class="memItemLeft" align="right" valign="top"><a id="a86cb2ef370836becc9b5b4d70ab0a0f0" name="a86cb2ef370836becc9b5b4d70ab0a0f0"></a>
+std::unordered_set&lt; <a class="el" href="classcstring.html">cstring</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>scenarioStates</b></td></tr>
+<tr class="separator:a86cb2ef370836becc9b5b4d70ab0a0f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab613b5d9154206c8565d99d04cab6995" id="r_ab613b5d9154206c8565d99d04cab6995"><td class="memItemLeft" align="right" valign="top"><a id="ab613b5d9154206c8565d99d04cab6995" name="ab613b5d9154206c8565d99d04cab6995"></a>
+const IR::ParserState *&#160;</td><td class="memItemRight" valign="bottom"><b>state</b></td></tr>
+<tr class="separator:ab613b5d9154206c8565d99d04cab6995"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af613881f6712d0738d322b1a6c18a35b" id="r_af613881f6712d0738d322b1a6c18a35b"><td class="memItemLeft" align="right" valign="top"><a id="af613881f6712d0738d322b1a6c18a35b" name="af613881f6712d0738d322b1a6c18a35b"></a>
+StackVariableMap&#160;</td><td class="memItemRight" valign="bottom"><b>statesIndexes</b></td></tr>
+<tr class="separator:af613881f6712d0738d322b1a6c18a35b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac129624316adcbea74f5dd5976cdf482" id="r_ac129624316adcbea74f5dd5976cdf482"><td class="memItemLeft" align="right" valign="top"><a id="ac129624316adcbea74f5dd5976cdf482" name="ac129624316adcbea74f5dd5976cdf482"></a>
+StackVariableIndexMap&#160;</td><td class="memItemRight" valign="bottom"><b>substitutedIndexes</b></td></tr>
+<tr class="separator:ac129624316adcbea74f5dd5976cdf482"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:ae39170c96f3f8a2435d05f314530b63b" id="r_ae39170c96f3f8a2435d05f314530b63b"><td class="memItemLeft" align="right" valign="top"><a id="ae39170c96f3f8a2435d05f314530b63b" name="ae39170c96f3f8a2435d05f314530b63b"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>ParserStateRewriter</b></td></tr>
+<tr class="separator:ae39170c96f3f8a2435d05f314530b63b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Information produced for a parser state by the symbolic evaluator. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

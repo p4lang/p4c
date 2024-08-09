@@ -120,10 +120,39 @@ $(function(){initNavTree('class_p4_1_1_action_invocation.html',''); initResizabl
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_p4_1_1_action_invocation-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::ActionInvocation Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="remove_parameters_8h_source.html">removeParameters.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a3abd55c50fb95a1b1c540954cef8b9a7" id="r_a3abd55c50fb95a1b1c540954cef8b9a7"><td class="memItemLeft" align="right" valign="top"><a id="a3abd55c50fb95a1b1c540954cef8b9a7" name="a3abd55c50fb95a1b1c540954cef8b9a7"></a>
+unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>argsToRemove</b> (const IR::MethodCallExpression *defaultCall) const</td></tr>
+<tr class="separator:a3abd55c50fb95a1b1c540954cef8b9a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb10f0aa450624a30e1d5918383bf32a" id="r_acb10f0aa450624a30e1d5918383bf32a"><td class="memItemLeft" align="right" valign="top"><a id="acb10f0aa450624a30e1d5918383bf32a" name="acb10f0aa450624a30e1d5918383bf32a"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>bind</b> (const IR::P4Action *action, const IR::MethodCallExpression *invocation, bool allParams)</td></tr>
+<tr class="separator:acb10f0aa450624a30e1d5918383bf32a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aafd6e03eb71b6665fbda3d3a959ddb15" id="r_aafd6e03eb71b6665fbda3d3a959ddb15"><td class="memItemLeft" align="right" valign="top"><a id="aafd6e03eb71b6665fbda3d3a959ddb15" name="aafd6e03eb71b6665fbda3d3a959ddb15"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>bindDefaultAction</b> (const IR::P4Action *action, const IR::MethodCallExpression *defaultInvocation)</td></tr>
+<tr class="separator:aafd6e03eb71b6665fbda3d3a959ddb15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1180770b15f68e23246b85d997b516c" id="r_ac1180770b15f68e23246b85d997b516c"><td class="memItemLeft" align="right" valign="top"><a id="ac1180770b15f68e23246b85d997b516c" name="ac1180770b15f68e23246b85d997b516c"></a>
+const IR::MethodCallExpression *&#160;</td><td class="memItemRight" valign="bottom"><b>get</b> (const IR::P4Action *action) const</td></tr>
+<tr class="separator:ac1180770b15f68e23246b85d997b516c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32ec1273a8d2934d570ddb65d0c1d42c" id="r_a32ec1273a8d2934d570ddb65d0c1d42c"><td class="memItemLeft" align="right" valign="top"><a id="a32ec1273a8d2934d570ddb65d0c1d42c" name="a32ec1273a8d2934d570ddb65d0c1d42c"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isCall</b> (const IR::MethodCallExpression *expression) const</td></tr>
+<tr class="separator:a32ec1273a8d2934d570ddb65d0c1d42c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d05ba1610831eaa38f5b7691bc43820" id="r_a0d05ba1610831eaa38f5b7691bc43820"><td class="memItemLeft" align="right" valign="top"><a id="a0d05ba1610831eaa38f5b7691bc43820" name="a0d05ba1610831eaa38f5b7691bc43820"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>removeAllParameters</b> (const IR::P4Action *action) const</td></tr>
+<tr class="separator:a0d05ba1610831eaa38f5b7691bc43820"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>For each action that is invoked keep the list of arguments that it's called with. There must be only one call of each action; this is done by LocalizeActions. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

@@ -120,9 +120,90 @@ $(function(){initNavTree('class_p4_1_1_choose_error_representation.html',''); in
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_p4_1_1_choose_error_representation-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::ChooseErrorRepresentation Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="convert_errors_8h_source.html">convertErrors.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for P4::ChooseErrorRepresentation:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_choose_error_representation__inherit__graph.svg" width="235" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:aa20a4fa1cbeb9a32f4f956cbf8bbd545" id="r_aa20a4fa1cbeb9a32f4f956cbf8bbd545"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="class_i_r_1_1_indexed_vector.html">IR::IndexedVector</a>&lt; IR::SerEnumMember &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa20a4fa1cbeb9a32f4f956cbf8bbd545">assignValues</a> (IR::Type_Error *type, unsigned width) const</td></tr>
+<tr class="separator:aa20a4fa1cbeb9a32f4f956cbf8bbd545"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab71f8f27eefb6b647885df7ba56dcda4" id="r_ab71f8f27eefb6b647885df7ba56dcda4"><td class="memItemLeft" align="right" valign="top"><a id="ab71f8f27eefb6b647885df7ba56dcda4" name="ab71f8f27eefb6b647885df7ba56dcda4"></a>
+virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>convert</b> (const IR::Type_Error *type) const =0</td></tr>
+<tr class="memdesc:ab71f8f27eefb6b647885df7ba56dcda4"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true this type has to be converted. <br /></td></tr>
+<tr class="separator:ab71f8f27eefb6b647885df7ba56dcda4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62c172ace046806561c64c7206955d61" id="r_a62c172ace046806561c64c7206955d61"><td class="memItemLeft" align="right" valign="top">virtual unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a62c172ace046806561c64c7206955d61">errorSize</a> (unsigned errorCount) const =0</td></tr>
+<tr class="separator:a62c172ace046806561c64c7206955d61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Policy function: given a number of error values should return the size of a Type_Bits type used to represent the values. This class is lefted from enum conversion path. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="aa20a4fa1cbeb9a32f4f956cbf8bbd545" name="aa20a4fa1cbeb9a32f4f956cbf8bbd545"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa20a4fa1cbeb9a32f4f956cbf8bbd545">&#9670;&#160;</a></span>assignValues()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_i_r_1_1_indexed_vector.html">IR::IndexedVector</a>&lt; IR::SerEnumMember &gt; * P4::ChooseErrorRepresentation::assignValues </td>
+          <td>(</td>
+          <td class="paramtype">IR::Type_Error *</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>width</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>This function allows backends to override the values for the error constants. Default values for error constants is a sequence of numbers starting with 0. </p>
+
+</div>
+</div>
+<a id="a62c172ace046806561c64c7206955d61" name="a62c172ace046806561c64c7206955d61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62c172ace046806561c64c7206955d61">&#9670;&#160;</a></span>errorSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual unsigned P4::ChooseErrorRepresentation::errorSize </td>
+          <td>(</td>
+          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>errorCount</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>errorCount is the number of different error values. The returned value is the width of Type_Bits used to represent the error. Obviously, we must have 2^(return) &gt;= errorCount. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

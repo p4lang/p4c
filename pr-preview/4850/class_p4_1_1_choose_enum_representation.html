@@ -120,10 +120,35 @@ $(function(){initNavTree('class_p4_1_1_choose_enum_representation.html',''); ini
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_p4_1_1_choose_enum_representation-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::ChooseEnumRepresentation Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="convert_enums_8h_source.html">convertEnums.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for P4::ChooseEnumRepresentation:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_choose_enum_representation__inherit__graph.svg" width="478" height="332"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:aebce063cc88116af7ce2715abe5f8f39" id="r_aebce063cc88116af7ce2715abe5f8f39"><td class="memItemLeft" align="right" valign="top"><a id="aebce063cc88116af7ce2715abe5f8f39" name="aebce063cc88116af7ce2715abe5f8f39"></a>
+virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>convert</b> (const IR::Type_Enum *type) const =0</td></tr>
+<tr class="separator:aebce063cc88116af7ce2715abe5f8f39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c48feaf9e1dcaf6940d99a9cc3d2129" id="r_a6c48feaf9e1dcaf6940d99a9cc3d2129"><td class="memItemLeft" align="right" valign="top"><a id="a6c48feaf9e1dcaf6940d99a9cc3d2129" name="a6c48feaf9e1dcaf6940d99a9cc3d2129"></a>
+virtual unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>encoding</b> (const IR::Type_Enum *, unsigned n) const</td></tr>
+<tr class="separator:a6c48feaf9e1dcaf6940d99a9cc3d2129"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99f21d28a88c429f14ad17e7bce93da8" id="r_a99f21d28a88c429f14ad17e7bce93da8"><td class="memItemLeft" align="right" valign="top"><a id="a99f21d28a88c429f14ad17e7bce93da8" name="a99f21d28a88c429f14ad17e7bce93da8"></a>
+virtual unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>enumSize</b> (unsigned enumCount) const =0</td></tr>
+<tr class="separator:a99f21d28a88c429f14ad17e7bce93da8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Policy function: given a number of enum values should return the size of a Type_Bits type used to represent the values. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

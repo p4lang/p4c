@@ -120,10 +120,35 @@ $(function(){initNavTree('struct_p4_tools_1_1_p4_testgen_1_1_continuation_1_1_gu
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="struct_p4_tools_1_1_p4_testgen_1_1_continuation_1_1_guard-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::P4Testgen::Continuation::Guard Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="continuation_8h_source.html">continuation.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a42dfc61f2107634883bf3ddfb1c63d3d" id="r_a42dfc61f2107634883bf3ddfb1c63d3d"><td class="memItemLeft" align="right" valign="top"><a id="a42dfc61f2107634883bf3ddfb1c63d3d" name="a42dfc61f2107634883bf3ddfb1c63d3d"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Guard</b> (const IR::Expression *cond)</td></tr>
+<tr class="separator:a42dfc61f2107634883bf3ddfb1c63d3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9544bd6c8559b72d8a1241ed4961d673" id="r_a9544bd6c8559b72d8a1241ed4961d673"><td class="memItemLeft" align="right" valign="top"><a id="a9544bd6c8559b72d8a1241ed4961d673" name="a9544bd6c8559b72d8a1241ed4961d673"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const <a class="el" href="struct_p4_tools_1_1_p4_testgen_1_1_continuation_1_1_guard.html">Guard</a> &amp;other) const</td></tr>
+<tr class="memdesc:a9544bd6c8559b72d8a1241ed4961d673"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delegates to IR equality. <br /></td></tr>
+<tr class="separator:a9544bd6c8559b72d8a1241ed4961d673"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:acd9afe3a4fedad6f0e92c75085c23339" id="r_acd9afe3a4fedad6f0e92c75085c23339"><td class="memItemLeft" align="right" valign="top"><a id="acd9afe3a4fedad6f0e92c75085c23339" name="acd9afe3a4fedad6f0e92c75085c23339"></a>
+const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><b>cond</b></td></tr>
+<tr class="separator:acd9afe3a4fedad6f0e92c75085c23339"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Guards are commands that can be inserted into the continuation stack to ensure that the interpreter does not violate a given invariant. If the condition evaluates to false, the path is invalid and the symbolic executor will not traverse it. For example, specific port values are not supported in a hardware target guards can enforce that only the appropriate port variables are chosen. Any other possible path is discarded. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

@@ -120,9 +120,131 @@ $(function(){initNavTree('class_p4_tools_1_1_p4_testgen_1_1_expr_stepper_1_1_ext
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_p4_tools_1_1_p4_testgen_1_1_expr_stepper_1_1_extern_method_impls-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4Tools::P4Testgen::ExprStepper::ExternMethodImpls&lt; StepperType &gt; Class Template Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Encapsulates a set of extern method implementations.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="core_2small__step_2expr__stepper_8h_source.html">expr_stepper.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:a18ff887a523f20043e912d78689ba86c" id="r_a18ff887a523f20043e912d78689ba86c"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a18ff887a523f20043e912d78689ba86c">ImplList</a> = std::list&lt;std::tuple&lt;<a class="el" href="classcstring.html">cstring</a>, std::vector&lt;<a class="el" href="classcstring.html">cstring</a>&gt;, <a class="el" href="#afdcb0c9e3578fd95bb884c56cbb521ca">MethodImpl</a>&gt;&gt;</td></tr>
+<tr class="separator:a18ff887a523f20043e912d78689ba86c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdcb0c9e3578fd95bb884c56cbb521ca" id="r_afdcb0c9e3578fd95bb884c56cbb521ca"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afdcb0c9e3578fd95bb884c56cbb521ca">MethodImpl</a> = std::function&lt;void(const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_extern_info.html">ExternInfo</a> &amp;externInfo, StepperType &amp;stepper)&gt;</td></tr>
+<tr class="separator:afdcb0c9e3578fd95bb884c56cbb521ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a02b8a7496fe6d6ffd50c01386ab3d761" id="r_a02b8a7496fe6d6ffd50c01386ab3d761"><td class="memItemLeft" align="right" valign="top"><a id="a02b8a7496fe6d6ffd50c01386ab3d761" name="a02b8a7496fe6d6ffd50c01386ab3d761"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ExternMethodImpls</b> (const <a class="el" href="#a18ff887a523f20043e912d78689ba86c">ImplList</a> &amp;implList)</td></tr>
+<tr class="separator:a02b8a7496fe6d6ffd50c01386ab3d761"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c8e1b36f23e04539cd272ce6a48a061" id="r_a2c8e1b36f23e04539cd272ce6a48a061"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="#afdcb0c9e3578fd95bb884c56cbb521ca">MethodImpl</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c8e1b36f23e04539cd272ce6a48a061">find</a> (const IR::PathExpression &amp;externObjectRef, const <a class="el" href="struct_i_r_1_1_i_d.html">IR::ID</a> &amp;methodName, const <a class="el" href="class_i_r_1_1_vector.html">IR::Vector</a>&lt; IR::Argument &gt; &amp;args) const</td></tr>
+<tr class="separator:a2c8e1b36f23e04539cd272ce6a48a061"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename StepperType&gt;<br />
+class P4Tools::P4Testgen::ExprStepper::ExternMethodImpls&lt; StepperType &gt;</div><p>Encapsulates a set of extern method implementations. </p>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="a18ff887a523f20043e912d78689ba86c" name="a18ff887a523f20043e912d78689ba86c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18ff887a523f20043e912d78689ba86c">&#9670;&#160;</a></span>ImplList</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename StepperType &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_expr_stepper_1_1_extern_method_impls.html">P4Tools::P4Testgen::ExprStepper::ExternMethodImpls</a>&lt; StepperType &gt;::ImplList = std::list&lt;std::tuple&lt;<a class="el" href="classcstring.html">cstring</a>, std::vector&lt;<a class="el" href="classcstring.html">cstring</a>&gt;, <a class="el" href="#afdcb0c9e3578fd95bb884c56cbb521ca">MethodImpl</a>&gt;&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Represents a list of extern method implementations. The components of each element in this list are as follows:</p><ol type="1">
+<li>The method name qualified by the extern type name (e.g., "packet_in.advance").</li>
+<li>The names of the method parameters.</li>
+<li>The method's implementation. </li>
+</ol>
+
+</div>
+</div>
+<a id="afdcb0c9e3578fd95bb884c56cbb521ca" name="afdcb0c9e3578fd95bb884c56cbb521ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afdcb0c9e3578fd95bb884c56cbb521ca">&#9670;&#160;</a></span>MethodImpl</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename StepperType &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_expr_stepper_1_1_extern_method_impls.html">P4Tools::P4Testgen::ExprStepper::ExternMethodImpls</a>&lt; StepperType &gt;::MethodImpl = std::function&lt;void(const <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_extern_info.html">ExternInfo</a> &amp;externInfo, StepperType &amp;stepper)&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The type of an extern-method implementation. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">externInfo</td><td>is general useful information that can be consumsed by externs (arguments, method names, etc). </td></tr>
+    <tr><td class="paramname">stepper</td><td>is the abstract stepper invoking the function. Templated on the type of stepper invoking it. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a2c8e1b36f23e04539cd272ce6a48a061" name="a2c8e1b36f23e04539cd272ce6a48a061"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c8e1b36f23e04539cd272ce6a48a061">&#9670;&#160;</a></span>find()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename StepperType &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; <a class="el" href="#afdcb0c9e3578fd95bb884c56cbb521ca">MethodImpl</a> &gt; <a class="el" href="class_p4_tools_1_1_p4_testgen_1_1_expr_stepper_1_1_extern_method_impls.html">P4Tools::P4Testgen::ExprStepper::ExternMethodImpls</a>&lt; StepperType &gt;::find </td>
+          <td>(</td>
+          <td class="paramtype">const IR::PathExpression &amp;</td>          <td class="paramname"><span class="paramname"><em>externObjectRef</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="struct_i_r_1_1_i_d.html">IR::ID</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>methodName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="class_i_r_1_1_vector.html">IR::Vector</a>&lt; IR::Argument &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">call</td><td>the original method call expression, can be used for stepInto calls. </td></tr>
+    <tr><td class="paramname">receiver</td><td>a symbolic value representing the object on which the method is being called. </td></tr>
+    <tr><td class="paramname">name</td><td>the name of the method being called. </td></tr>
+    <tr><td class="paramname">args</td><td>the list of arguments being passed to method. </td></tr>
+    <tr><td class="paramname">state</td><td>the state in which the call is being made, with the call at the top of the current continuation body.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the matching extern-method implementation if it was found; std::nullopt otherwise.</dd></dl>
+<p>A BUG occurs if the receiver is not an extern or if the call is ambiguous. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->

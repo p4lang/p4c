@@ -120,10 +120,47 @@ $(function(){initNavTree('class_util_1_1_p4_c_exception_base.html',''); initResi
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="class_util_1_1_p4_c_exception_base-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Util::P4CExceptionBase Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+
+<p><code>#include &lt;<a class="el" href="lib_2exceptions_8h_source.html">exceptions.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for Util::P4CExceptionBase:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_util_1_1_p4_c_exception_base__inherit__graph.svg" width="614" height="200"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a6ef274cc7f52e961aa77d4a1df7c9f61" id="r_a6ef274cc7f52e961aa77d4a1df7c9f61"><td class="memTemplParams" colspan="2"><a id="a6ef274cc7f52e961aa77d4a1df7c9f61" name="a6ef274cc7f52e961aa77d4a1df7c9f61"></a>
+template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a6ef274cc7f52e961aa77d4a1df7c9f61"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>P4CExceptionBase</b> (const char *format, Args &amp;&amp;...args)</td></tr>
+<tr class="separator:a6ef274cc7f52e961aa77d4a1df7c9f61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82a87ad5e9870c34b2e0310609f463e5" id="r_a82a87ad5e9870c34b2e0310609f463e5"><td class="memItemLeft" align="right" valign="top"><a id="a82a87ad5e9870c34b2e0310609f463e5" name="a82a87ad5e9870c34b2e0310609f463e5"></a>
+const char *&#160;</td><td class="memItemRight" valign="bottom"><b>what</b> () const noexcept</td></tr>
+<tr class="separator:a82a87ad5e9870c34b2e0310609f463e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:abd5edbc9136ebd901c519c8e538d880f" id="r_abd5edbc9136ebd901c519c8e538d880f"><td class="memItemLeft" align="right" valign="top"><a id="abd5edbc9136ebd901c519c8e538d880f" name="abd5edbc9136ebd901c519c8e538d880f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>traceCreation</b> ()</td></tr>
+<tr class="separator:abd5edbc9136ebd901c519c8e538d880f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
+Protected Attributes</h2></td></tr>
+<tr class="memitem:a30fedbd2f10446fc8130bc66ce388449" id="r_a30fedbd2f10446fc8130bc66ce388449"><td class="memItemLeft" align="right" valign="top"><a id="a30fedbd2f10446fc8130bc66ce388449" name="a30fedbd2f10446fc8130bc66ce388449"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>message</b></td></tr>
+<tr class="separator:a30fedbd2f10446fc8130bc66ce388449"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Base class for all exceptions. The constructor uses boost::format for the format string, i.e., %1%, %2%, etc (starting at 1, not at 0) </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.11.0-->
 <!-- start footer part -->

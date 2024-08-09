@@ -1,0 +1,15 @@
+<map id="P4Tools::P4Testgen::ProgramInfo" name="P4Tools::P4Testgen::ProgramInfo">
+<area shape="rect" id="Node000001" title="Stores target&#45;specific information about a P4 program." alt="" coords="275,69,420,109"/>
+<area shape="rect" id="Node000004" href="$class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info.html" title=" " alt="" coords="468,5,719,45"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="433,64,467,55,513,43,515,48,469,60,434,69"/>
+<area shape="rect" id="Node000005" href="$class_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_program_info.html" title=" " alt="" coords="502,69,685,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="434,87,502,87,502,92,434,92"/>
+<area shape="rect" id="Node000006" href="$class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_program_info.html" title=" " alt="" coords="488,133,699,173"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="434,110,469,119,515,131,513,136,467,124,433,115"/>
+<area shape="rect" id="Node000002" href="$class_i_castable.html" title=" " alt="" coords="144,77,227,102"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="240,87,274,87,274,92,240,92"/>
+<area shape="rect" id="Node000003" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,77,96,102"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="110,87,144,87,144,92,110,92"/>
+<area shape="rect" id="Node000007" href="$class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_program_info.html" title=" " alt="" coords="767,133,967,173"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="713,151,766,151,766,156,713,156"/>
+</map>
