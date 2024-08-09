@@ -12,13 +12,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "constantTypeSubstitution.h"
 #include "typeChecker.h"
 
 namespace P4 {
 
 using namespace literals;
 
-const IR::Node *TypeInference::postorder(IR::P4Table *table) {
+const IR::Node *TypeInferenceBase::postorder(const IR::P4Table *table) {
     currentActionList = nullptr;
     if (done()) return table;
     auto type = new IR::Type_Table(table);
@@ -27,8 +28,8 @@ const IR::Node *TypeInference::postorder(IR::P4Table *table) {
     return table;
 }
 
-bool TypeInference::checkParameters(const IR::ParameterList *paramList, bool forbidModules,
-                                    bool forbidPackage) const {
+bool TypeInferenceBase::checkParameters(const IR::ParameterList *paramList, bool forbidModules,
+                                        bool forbidPackage) const {
     for (auto p : paramList->parameters) {
         auto type = getType(p);
         if (type == nullptr) return false;
@@ -52,7 +53,8 @@ bool TypeInference::checkParameters(const IR::ParameterList *paramList, bool for
     return true;
 }
 
-const IR::ParameterList *TypeInference::canonicalizeParameters(const IR::ParameterList *params) {
+const IR::ParameterList *TypeInferenceBase::canonicalizeParameters(
+    const IR::ParameterList *params) {
     if (params == nullptr) return params;
 
     bool changes = false;
@@ -69,13 +71,13 @@ const IR::ParameterList *TypeInference::canonicalizeParameters(const IR::Paramet
         setType(p, paramType);
         vec->push_back(p);
     }
-    if (changes)
-        return new IR::ParameterList(params->srcInfo, *vec);
-    else
-        return params;
+
+    if (changes) params = new IR::ParameterList(params->srcInfo, *vec);
+
+    return params;
 }
 
-const IR::Node *TypeInference::postorder(IR::P4Action *action) {
+const IR::Node *TypeInferenceBase::postorder(const IR::P4Action *action) {
     if (done()) return action;
     auto pl = canonicalizeParameters(action->parameters);
     if (pl == nullptr) return action;
@@ -98,7 +100,7 @@ const IR::Node *TypeInference::postorder(IR::P4Action *action) {
     return action;
 }
 
-const IR::Node *TypeInference::postorder(IR::Declaration_Variable *decl) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Declaration_Variable *decl) {
     if (done()) return decl;
     auto type = getTypeType(decl->type);
     if (type == nullptr) return decl;
@@ -130,8 +132,8 @@ const IR::Node *TypeInference::postorder(IR::Declaration_Variable *decl) {
         auto init = assignment(decl, type, decl->initializer);
         if (decl->initializer != init) {
             auto declType = type->getP4Type();
-            decl->type = declType;
-            decl->initializer = init;
+            decl = new IR::Declaration_Variable(decl->srcInfo, decl->name, decl->annotations,
+                                                declType, init);
             LOG2("Created new declaration " << decl);
         }
     }
@@ -140,7 +142,7 @@ const IR::Node *TypeInference::postorder(IR::Declaration_Variable *decl) {
     return decl;
 }
 
-const IR::Node *TypeInference::postorder(IR::Declaration_Constant *decl) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Declaration_Constant *decl) {
     if (done()) return decl;
     auto type = getTypeType(decl->type);
     if (type == nullptr) return decl;
@@ -163,12 +165,18 @@ const IR::Node *TypeInference::postorder(IR::Declaration_Constant *decl) {
 }
 
 // Return true on success
-bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance *inst,
-                                         const IR::Type_Extern *type) {
+bool TypeInferenceBase::checkAbstractMethods(const IR::Declaration_Instance *inst,
+                                             const IR::Type_Extern *type) {
     // Make a list of the abstract methods
-    IR::NameMap<IR::Method, ordered_map> virt;
-    for (auto m : type->methods)
-        if (m->isAbstract) virt.addUnique(m->name, m);
+    string_map<const IR::Method *> virt;
+    for (auto m : type->methods) {
+        if (m->isAbstract) {
+            auto [it, inserted] = virt.emplace(m->name, m);
+            if (!inserted)
+                ::error(ErrorType::ERR_DUPLICATE, "%1%: duplicated name (%2% is previous instance)",
+                        m->name, it->second);
+        }
+    }
     if (virt.size() == 0 && inst->initializer == nullptr) return true;
     if (virt.size() == 0 && inst->initializer != nullptr) {
         typeError("%1%: instance initializers for extern without abstract methods",
@@ -203,7 +211,7 @@ bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance *inst,
         }
     }
     bool rv = true;
-    for (auto &vm : virt) {
+    for (const auto &vm : virt) {
         if (!vm.second->annotations->getSingle("optional"_cs)) {
             typeError("%1%: %2% abstract method not implemented", inst, vm.second);
             rv = false;
@@ -212,19 +220,38 @@ bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance *inst,
     return rv;
 }
 
-const IR::Node *TypeInference::preorder(IR::Declaration_Instance *decl) {
+TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(
+    const IR::Declaration_Instance *decl) {
     // We need to control the order of the type-checking: we want to do first
     // the declaration, and then typecheck the initializer if present.
-    if (done()) return decl;
-    visit(decl->type, "type");
-    visit(decl->arguments, "arguments");
-    visit(decl->annotations, "annotations");
+    if (done()) return {decl, false};
+    // FIXME: this `cloned` dance is very ugly
+    IR::Declaration_Instance *cloned = nullptr;
+    auto *t = apply_visitor(decl->type, "type")->checkedTo<IR::Type>();
+    if (t != decl->type) {
+        cloned = decl->clone();
+        cloned->type = t;
+        decl = cloned;
+    }
+    auto *args = apply_visitor(decl->arguments, "arguments")->checkedTo<IR::Vector<IR::Argument>>();
+    if (args != decl->arguments) {
+        cloned = cloned ? cloned : decl->clone();
+        cloned->arguments = args;
+        decl = cloned;
+    }
+
+    auto *annot = apply_visitor(decl->annotations, "annotations")->checkedTo<IR::Annotations>();
+    if (annot != decl->annotations) {
+        cloned = cloned ? cloned : decl->clone();
+        cloned->annotations = annot;
+        decl = cloned;
+    }
+
     visit(decl->properties, "properties");
 
     auto type = getTypeType(decl->type);
     if (type == nullptr) {
-        prune();
-        return decl;
+        return {decl, true};
     }
     auto orig = getOriginal<IR::Declaration_Instance>();
 
@@ -234,67 +261,97 @@ const IR::Node *TypeInference::preorder(IR::Declaration_Instance *decl) {
     if (auto et = simpleType->to<IR::Type_Extern>()) {
         auto [newType, newArgs] = checkExternConstructor(decl, et, decl->arguments);
         if (newArgs == nullptr) {
-            prune();
-            return decl;
+            return {decl, true};
         }
         // type can be Type_Extern or Type_SpecializedCanonical.  If it is already
         // specialized, the type arguments were specified explicitly.
         // Otherwise, we use the type received from checkExternConstructor, which
         // has substituted the type variables with fresh ones.
         if (type->is<IR::Type_Extern>()) type = newType;
-        decl->arguments = newArgs;
         setType(orig, type);
         setType(decl, type);
 
-        if (decl->initializer != nullptr) visit(decl->initializer);
-        // This will need the decl type to be already known
-        bool s = checkAbstractMethods(decl, et);
-        if (!s) {
-            prune();
-            return decl;
+        // These two checks will need the decl type to be already known
+        if (decl->initializer != nullptr) {
+            auto *init =
+                apply_visitor(decl->initializer, "initializer")->checkedTo<IR::BlockStatement>();
+            if (init != decl->initializer) {
+                cloned = cloned ? cloned : decl->clone();
+                cloned->initializer = init;
+                decl = cloned;
+            }
+        }
+
+        if (!checkAbstractMethods(decl, et)) {
+            return {decl, true};
+        }
+
+        if (newArgs != decl->arguments) {
+            cloned = cloned ? cloned : decl->clone();
+            cloned->arguments = newArgs;
+            decl = cloned;
+
+            setType(decl, type);
         }
     } else if (simpleType->is<IR::IContainer>()) {
         if (decl->initializer != nullptr) {
             typeError("%1%: initializers only allowed for extern instances", decl->initializer);
-            prune();
-            return decl;
+            return {decl, true};
         }
         if (!simpleType->is<IR::Type_Package>() && (findContext<IR::IContainer>() == nullptr)) {
             ::error(ErrorType::ERR_INVALID, "%1%: cannot instantiate at top-level", decl);
-            return decl;
+            return {decl, false};
         }
         auto typeAndArgs =
             containerInstantiation(decl, decl->arguments, simpleType->to<IR::IContainer>());
         auto type = typeAndArgs.first;
-        auto args = typeAndArgs.second;
-        if (type == nullptr || args == nullptr) {
-            prune();
-            return decl;
+        auto newArgs = typeAndArgs.second;
+        if (type == nullptr || newArgs == nullptr) {
+            return {decl, true};
         }
         learn(type, this, getChildContext());
-        if (args != decl->arguments) decl->arguments = args;
+        if (newArgs != decl->arguments) {
+            cloned = cloned ? cloned : decl->clone();
+            cloned->arguments = newArgs;
+            decl = cloned;
+        }
+
         setType(decl, type);
         setType(orig, type);
     } else {
         typeError("%1%: cannot allocate objects of type %2%", decl, type);
     }
-    prune();
-    return decl;
+    return {decl, true};
 }
 
-const IR::Node *TypeInference::preorder(IR::Function *function) {
-    if (done()) return function;
-    visit(function->type);
-    auto type = getTypeType(function->type);
-    if (type == nullptr) return function;
+TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(const IR::Function *function) {
+    if (done()) return {function, false};
+
+    IR::Function *cloned = nullptr;
+    const auto *t = apply_visitor(function->type, "type")->checkedTo<IR::Type_Method>();
+    if (t != function->type) {
+        cloned = function->clone();
+        cloned->type = t;
+    }
+
+    auto type = getTypeType(t);
+    if (type == nullptr) return {function, false};
     setType(getOriginal(), type);
     setType(function, type);
-    visit(function->body);
-    prune();
-    return function;
+    const auto *b = apply_visitor(function->body, "body")->checkedTo<IR::BlockStatement>();
+    if (b != function->body) {
+        cloned = cloned ? cloned : function->clone();
+        cloned->body = b;
+    }
+    if (cloned) {
+        function = cloned;
+        setType(function, type);
+    }
+
+    return {function, true};
 }
 
-const IR::Node *TypeInference::postorder(IR::Method *method) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Method *method) {
     if (done()) return method;
     auto type = getTypeType(method->type);
     if (type == nullptr) return method;
@@ -312,6 +369,106 @@ const IR::Node *TypeInference::postorder(IR::Method *method) {
     setType(getOriginal(), type);
     setType(method, type);
     return method;
+}
+
+/// get size int bits required to represent given constant
+static int getConstantsRepresentationSize(big_int val, bool isSigned) {
+    if (val < 0) {
+        val = -val;
+    }
+    int cnt = 0;
+    while (val > 0) {
+        ++cnt;
+        val >>= 1;
+    }
+    return cnt + int(isSigned);
+}
+
+/// Check if the value initializer fits into the underlying enum type. Emits error and returns false
+/// if it does not fit. Returns true if it fits.
+static bool checkEnumValueInitializer(const IR::Type_Bits *type, const IR::Expression *initializer,
+                                      const IR::Type_SerEnum *serEnum,
+                                      const IR::SerEnumMember *member) {
+    // validate the constant fits -- non-fitting enum constants should produce error
+    if (const auto *constant = initializer->to<IR::Constant>()) {
+        // signed values are two's complement, so [-2^(n-1)..2^(n-1)-1]
+        big_int low = type->isSigned ? -(big_int(1) << type->size - 1) : big_int(0);
+        big_int high = (big_int(1) << (type->isSigned ? type->size - 1 : type->size)) - 1;
+
+        if (constant->value < low || constant->value > high) {
+            int required = getConstantsRepresentationSize(constant->value, type->isSigned);
+            std::string extraMsg;
+            if (!type->isSigned && constant->value < low) {
+                extraMsg =
+                    str(boost::format(
+                            "the value %1% is negative, but the underlying type %2% is unsigned") %
+                        constant->value % type->toString());
+            } else {
+                extraMsg =
+                    str(boost::format("the value %1% requires %2% bits but the underlying "
+                                      "%3% type %4% only contains %5% bits") %
+                        constant->value % required % (type->isSigned ? "signed" : "unsigned") %
+                        type->toString() % type->size);
+            }
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: Serialized enum constant value %2% is out of bounds of the underlying "
+                    "type %3%; %4%",
+                    member, constant->value, serEnum->type, extraMsg);
+            return false;
+        }
+    }
+    return true;
+}
+
+const IR::Node *TypeInferenceBase::postorder(const IR::SerEnumMember *member) {
+    /*
+      The type of the member is initially set in the Type_SerEnum preorder visitor.
+      Here we check additional constraints and we may correct the member.
+      if (done()) return member;
+    */
+    const auto *serEnum = findContext<IR::Type_SerEnum>();
+    CHECK_NULL(serEnum);
+    const auto *type = checkUnderlyingEnumType(serEnum->type);
+    if (!type || !checkEnumValueInitializer(type, member->value, serEnum, member)) {
+        return member;
+    }
+    const auto *exprType = getType(member->value);
+    auto *tvs = unifyCast(member, type, exprType,
+                          "Enum member '%1%' has type '%2%' and not the expected type '%3%'",
+                          {member, exprType, type});
+    if (tvs == nullptr)
+        // error already signalled
+        return member;
+    if (tvs->isIdentity()) return member;
+
+    ConstantTypeSubstitution cts(tvs, typeMap, this);
+    auto *newValue = cts.convert(member->value, getChildContext());  // sets type
+    if (member->value != newValue)
+        member = new IR::SerEnumMember(member->srcInfo, member->name, newValue);
+    if (!typeMap->getType(member)) setType(member, getTypeType(serEnum));
+    return member;
+}
+
+const IR::Node *TypeInferenceBase::postorder(const IR::P4ValueSet *decl) {
+    if (done()) return decl;
+    // This is a specialized version of setTypeType
+    auto canon = canonicalize(decl->elementType);
+    if (canon != nullptr) {
+        if (canon != decl->elementType) {
+            bool errs = learn(canon, this, getChildContext());
+            if (errs) return nullptr;
+        }
+        if (!canon->is<IR::Type_Newtype>() && !canon->is<IR::Type_Bits>() &&
+            !canon->is<IR::Type_SerEnum>() && !canon->is<IR::Type_Boolean>() &&
+            !canon->is<IR::Type_Enum>() && !canon->is<IR::Type_Struct>() &&
+            !canon->is<IR::Type_Tuple>())
+            typeError("%1%: Illegal type for value_set element type", decl->elementType);
+
+        auto tt = new IR::Type_Set(canon);
+        setType(getOriginal(), tt);
+        setType(decl, tt);
+    }
+    return decl;
 }
 
 }  // namespace P4

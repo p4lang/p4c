@@ -22,7 +22,7 @@ namespace P4 {
 
 using namespace literals;
 
-const IR::Node *TypeInference::postorder(IR::Parameter *param) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Parameter *param) {
     if (done()) return param;
     const IR::Type *paramType = getTypeType(param->type);
     if (paramType == nullptr) return param;
@@ -65,7 +65,7 @@ const IR::Node *TypeInference::postorder(IR::Parameter *param) {
     return param;
 }
 
-const IR::Node *TypeInference::postorder(IR::Constant *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Constant *expression) {
     if (done()) return expression;
     auto type = getTypeType(expression->type);
     if (type == nullptr) return expression;
@@ -76,7 +76,7 @@ const IR::Node *TypeInference::postorder(IR::Constant *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::StringLiteral *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::StringLiteral *expression) {
     if (done()) return expression;
     setType(getOriginal(), IR::Type_String::get());
     setType(expression, IR::Type_String::get());
@@ -85,7 +85,7 @@ const IR::Node *TypeInference::postorder(IR::StringLiteral *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::BoolLiteral *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::BoolLiteral *expression) {
     if (done()) return expression;
     setType(getOriginal(), IR::Type_Boolean::get());
     setType(expression, IR::Type_Boolean::get());
@@ -94,7 +94,7 @@ const IR::Node *TypeInference::postorder(IR::BoolLiteral *expression) {
     return expression;
 }
 
-bool TypeInference::containsActionEnum(const IR::Type *type) const {
+bool TypeInferenceBase::containsActionEnum(const IR::Type *type) const {
     if (auto st = type->to<IR::Type_Struct>()) {
         if (auto field = st->getField(IR::Type_Table::action_run)) {
             auto ft = getTypeType(field->type);
@@ -105,8 +105,8 @@ bool TypeInference::containsActionEnum(const IR::Type *type) const {
 }
 
 // Returns false on error
-bool TypeInference::compare(const IR::Node *errorPosition, const IR::Type *ltype,
-                            const IR::Type *rtype, Comparison *compare) {
+bool TypeInferenceBase::compare(const IR::Node *errorPosition, const IR::Type *ltype,
+                                const IR::Type *rtype, Comparison *compare) {
     if (ltype->is<IR::Type_Action>() || rtype->is<IR::Type_Action>()) {
         // Actions return Type_Action instead of void.
         typeError("%1% and %2% cannot be compared", compare->left, compare->right);
@@ -225,7 +225,7 @@ bool TypeInference::compare(const IR::Node *errorPosition, const IR::Type *ltype
     return true;
 }
 
-const IR::Node *TypeInference::postorder(IR::Operation_Relation *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Operation_Relation *expression) {
     if (done()) return expression;
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
@@ -264,8 +264,12 @@ const IR::Node *TypeInference::postorder(IR::Operation_Relation *expression) {
         c.right = expression->right;
         auto b = compare(expression, ltype, rtype, &c);
         if (!b) return expression;
-        expression->left = c.left;
-        expression->right = c.right;
+        if (expression->left != c.left || expression->right != c.right) {
+            auto e = expression->clone();
+            e->left = c.left;
+            e->right = c.right;
+            expression = e;
+        }
     } else {
         if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>() || !(ltype->equiv(*rtype))) {
             typeError("%1%: not defined on %2% and %3%", expression, ltype->toString(),
@@ -282,7 +286,7 @@ const IR::Node *TypeInference::postorder(IR::Operation_Relation *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::Concat *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Concat *expression) {
     if (done()) return expression;
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
@@ -353,7 +357,7 @@ const IR::Node *TypeInference::postorder(IR::Concat *expression) {
  * compute the type of table keys.
  * Used to typecheck pre-defined entries.
  */
-const IR::Node *TypeInference::postorder(IR::Key *key) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Key *key) {
     // compute the type and store it in typeMap
     auto keyTuple = new IR::Type_Tuple;
     for (auto ke : key->keyElements) {
@@ -373,16 +377,15 @@ const IR::Node *TypeInference::postorder(IR::Key *key) {
 /**
  *  typecheck a table initializer entry list
  */
-const IR::Node *TypeInference::preorder(IR::EntriesList *el) {
-    if (done()) return el;
+TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(const IR::EntriesList *el) {
+    if (done()) return {el, false};
     auto table = findContext<IR::P4Table>();
     BUG_CHECK(table != nullptr, "%1% entries not within a table", el);
     const IR::Key *key = table->getKey();
     if (key == nullptr) {
         if (el->size() != 0)
             typeError("Entries cannot be specified for a table with no key %1%", table);
-        prune();
-        return el;
+        return {el, true};
     }
     auto keyTuple = typeMap->getType(key);  // direct typeMap call to skip checks
     if (keyTuple == nullptr) {
@@ -390,12 +393,11 @@ const IR::Node *TypeInference::preorder(IR::EntriesList *el) {
         // at this point they have not yet been type-checked.
         if (key->srcInfo.isValid() && el->srcInfo.isValid() && key->srcInfo >= el->srcInfo) {
             typeError("%1%: Entries list must be after table key %2%", el, key);
-            prune();
-            return el;
+            return {el, true};
         }
         // otherwise the type-checking of the keys must have failed
     }
-    return el;
+    return {el, false};
 }
 
 /**
@@ -410,7 +412,7 @@ const IR::Node *TypeInference::preorder(IR::EntriesList *el) {
  *  Moreover, the EntriesList visitor should have checked for the table
  *  invariants.
  */
-const IR::Node *TypeInference::postorder(IR::Entry *entry) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Entry *entry) {
     if (done()) return entry;
     auto table = findContext<IR::P4Table>();
     if (table == nullptr) return entry;
@@ -479,7 +481,7 @@ const IR::Node *TypeInference::postorder(IR::Entry *entry) {
     return entry;
 }
 
-const IR::Node *TypeInference::postorder(IR::ListExpression *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::ListExpression *expression) {
     if (done()) return expression;
     bool constant = true;
     auto components = new IR::Vector<IR::Type>();
@@ -502,7 +504,7 @@ const IR::Node *TypeInference::postorder(IR::ListExpression *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::Invalid *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Invalid *expression) {
     if (done()) return expression;
     auto unk = IR::Type_Unknown::get();
     setType(expression, unk);
@@ -512,7 +514,7 @@ const IR::Node *TypeInference::postorder(IR::Invalid *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::InvalidHeader *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::InvalidHeader *expression) {
     if (done()) return expression;
     auto type = getTypeType(expression->headerType);
     auto concreteType = type;
@@ -528,7 +530,7 @@ const IR::Node *TypeInference::postorder(IR::InvalidHeader *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::InvalidHeaderUnion *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::InvalidHeaderUnion *expression) {
     if (done()) return expression;
     auto type = getTypeType(expression->headerUnionType);
     auto concreteType = type;
@@ -544,7 +546,7 @@ const IR::Node *TypeInference::postorder(IR::InvalidHeaderUnion *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::P4ListExpression *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::P4ListExpression *expression) {
     if (done()) return expression;
     bool constant = true;
     auto elementType = getTypeType(expression->elementType);
@@ -580,7 +582,7 @@ const IR::Node *TypeInference::postorder(IR::P4ListExpression *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::HeaderStackExpression *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *expression) {
     if (done()) return expression;
     bool constant = true;
     auto stackType = getTypeType(expression->headerStackType);
@@ -627,7 +629,7 @@ const IR::Node *TypeInference::postorder(IR::HeaderStackExpression *expression) 
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::StructExpression *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::StructExpression *expression) {
     if (done()) return expression;
     bool constant = true;
     auto components = new IR::IndexedVector<IR::StructField>();
@@ -667,7 +669,7 @@ const IR::Node *TypeInference::postorder(IR::StructExpression *expression) {
     return result;
 }
 
-const IR::Node *TypeInference::postorder(IR::ArrayIndex *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::ArrayIndex *expression) {
     if (done()) return expression;
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
@@ -735,7 +737,7 @@ const IR::Node *TypeInference::postorder(IR::ArrayIndex *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::binaryBool(const IR::Operation_Binary *expression) {
+const IR::Node *TypeInferenceBase::binaryBool(const IR::Operation_Binary *expression) {
     if (done()) return expression;
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
@@ -755,7 +757,7 @@ const IR::Node *TypeInference::binaryBool(const IR::Operation_Binary *expression
     return expression;
 }
 
-const IR::Node *TypeInference::binaryArith(const IR::Operation_Binary *expression) {
+const IR::Node *TypeInferenceBase::binaryArith(const IR::Operation_Binary *expression) {
     if (done()) return expression;
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
@@ -841,7 +843,7 @@ const IR::Node *TypeInference::binaryArith(const IR::Operation_Binary *expressio
     return expression;
 }
 
-const IR::Node *TypeInference::unsBinaryArith(const IR::Operation_Binary *expression) {
+const IR::Node *TypeInferenceBase::unsBinaryArith(const IR::Operation_Binary *expression) {
     if (done()) return expression;
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
@@ -883,7 +885,7 @@ const IR::Node *TypeInference::unsBinaryArith(const IR::Operation_Binary *expres
     return binaryArith(expression);
 }
 
-const IR::Node *TypeInference::shift(const IR::Operation_Binary *expression) {
+const IR::Node *TypeInferenceBase::shift(const IR::Operation_Binary *expression) {
     if (done()) return expression;
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
@@ -957,7 +959,7 @@ const IR::Node *TypeInference::shift(const IR::Operation_Binary *expression) {
 }
 
 // Handle .. and &&&
-const IR::Node *TypeInference::typeSet(const IR::Operation_Binary *expression) {
+const IR::Node *TypeInferenceBase::typeSet(const IR::Operation_Binary *expression) {
     if (done()) return expression;
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
@@ -1008,7 +1010,7 @@ const IR::Node *TypeInference::typeSet(const IR::Operation_Binary *expression) {
         // FIXME -- the below is obviously wrong and just serves to tweak when precisely
         // the type will be inferred -- papering over bugs elsewhere in typechecking,
         // avoiding the BUG_CHECK(!readOnly... in end_apply/apply_visitor above.
-        // (maybe just need learner->readOnly = false in TypeInference::learn above?)
+        // (maybe just need learner->readOnly = false in TypeInferenceBase::learn above?)
         auto r = expression->right->clone();
         auto e = expression->clone();
         if (isCompileTimeConstant(expression->right)) setCompileTimeConstant(r);
@@ -1029,7 +1031,7 @@ const IR::Node *TypeInference::typeSet(const IR::Operation_Binary *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::LNot *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::LNot *expression) {
     if (done()) return expression;
     auto type = getType(expression->expr);
     if (type == nullptr) return expression;
@@ -1049,7 +1051,7 @@ const IR::Node *TypeInference::postorder(IR::LNot *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::Neg *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Neg *expression) {
     if (done()) return expression;
     auto type = getType(expression->expr);
     if (type == nullptr) return expression;
@@ -1076,7 +1078,7 @@ const IR::Node *TypeInference::postorder(IR::Neg *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::UPlus *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::UPlus *expression) {
     if (done()) return expression;
     auto type = getType(expression->expr);
     if (type == nullptr) return expression;
@@ -1103,7 +1105,7 @@ const IR::Node *TypeInference::postorder(IR::UPlus *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::Cmpl *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Cmpl *expression) {
     if (done()) return expression;
     auto type = getType(expression->expr);
     if (type == nullptr) return expression;
@@ -1129,7 +1131,7 @@ const IR::Node *TypeInference::postorder(IR::Cmpl *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::Cast *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
     if (done()) return expression;
     const IR::Type *sourceType = getType(expression->expr);
     const IR::Type *castType = getTypeType(expression->destType);
@@ -1258,7 +1260,7 @@ const IR::Node *TypeInference::postorder(IR::Cast *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::PathExpression *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::PathExpression *expression) {
     if (done()) return expression;
     auto decl = getDeclaration(expression->path, !errorOnNullDecls);
     if (errorOnNullDecls && decl == nullptr) {
@@ -1325,7 +1327,7 @@ const IR::Node *TypeInference::postorder(IR::PathExpression *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::Slice *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Slice *expression) {
     if (done()) return expression;
     const IR::Type *type = getType(expression->e0);
     if (type == nullptr) return expression;
@@ -1337,6 +1339,7 @@ const IR::Node *TypeInference::postorder(IR::Slice *expression) {
         return expression;
     }
 
+    IR::Slice *cloned = nullptr;
     auto e1type = getType(expression->e1);
     if (e1type && e1type->is<IR::Type_SerEnum>()) {
         auto ei = EnumInstance::resolve(expression->e1, typeMap);
@@ -1346,7 +1349,10 @@ const IR::Node *TypeInference::postorder(IR::Slice *expression) {
             typeError("%1%: slice bit index values must be constants", expression->e1);
             return expression;
         }
-        expression->e1 = sei->value;
+        if (expression->e1 != sei->value) {
+            cloned = expression->clone();
+            cloned->e1 = sei->value;
+        }
     }
     auto e2type = getType(expression->e2);
     if (e2type && e2type->is<IR::Type_SerEnum>()) {
@@ -1357,8 +1363,13 @@ const IR::Node *TypeInference::postorder(IR::Slice *expression) {
             typeError("%1%: slice bit index values must be constants", expression->e2);
             return expression;
         }
-        expression->e2 = sei->value;
+
+        if (expression->e1 != sei->value) {
+            cloned = (cloned ? cloned : expression->clone());
+            cloned->e2 = sei->value;
+        }
     }
+    if (cloned) expression = cloned;
 
     auto bst = type->to<IR::Type_Bits>();
     if (!expression->e1->is<IR::Constant>()) {
@@ -1421,7 +1432,7 @@ const IR::Node *TypeInference::postorder(IR::Slice *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::Dots *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Dots *expression) {
     if (done()) return expression;
     setType(expression, IR::Type_Any::get());
     setType(getOriginal(), IR::Type_Any::get());
@@ -1430,7 +1441,7 @@ const IR::Node *TypeInference::postorder(IR::Dots *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::Mux *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Mux *expression) {
     if (done()) return expression;
     const IR::Type *firstType = getType(expression->e0);
     const IR::Type *secondType = getType(expression->e1);
@@ -1457,8 +1468,9 @@ const IR::Node *TypeInference::postorder(IR::Mux *expression) {
             auto e1 = cts.convert(expression->e1, getChildContext());
             auto e2 = cts.convert(expression->e2, getChildContext());
             if (::errorCount() > 0) return expression;
-            expression->e1 = e1;
-            expression->e2 = e2;
+            if (expression->e1 != e1 || expression->e2 != e2)
+                expression =
+                    new IR::Mux(expression->srcInfo, expression->type, expression->e0, e1, e2);
             secondType = typeMap->getType(e1);
         }
         setType(expression, secondType);
@@ -1474,7 +1486,7 @@ const IR::Node *TypeInference::postorder(IR::Mux *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::TypeNameExpression *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::TypeNameExpression *expression) {
     if (done()) return expression;
     auto type = getType(expression->typeName);
     if (type == nullptr) return expression;
@@ -1485,7 +1497,7 @@ const IR::Node *TypeInference::postorder(IR::TypeNameExpression *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::Member *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
     if (done()) return expression;
     auto type = getType(expression->expr);
     if (type == nullptr) return expression;
@@ -1681,8 +1693,8 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
 }
 
 // If inActionList this call is made in the "action" property of a table
-const IR::Expression *TypeInference::actionCall(bool inActionList,
-                                                const IR::MethodCallExpression *actionCall) {
+const IR::Expression *TypeInferenceBase::actionCall(bool inActionList,
+                                                    const IR::MethodCallExpression *actionCall) {
     // If a is an action with signature _(arg1, arg2, arg3)
     // Then the call a(arg1, arg2) is also an
     // action, with signature _(arg3)
@@ -1833,12 +1845,12 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
     return actionCall;
 }
 
-const IR::Node *TypeInference::postorder(IR::MethodCallStatement *mcs) {
+const IR::Node *TypeInferenceBase::postorder(const IR::MethodCallStatement *mcs) {
     // Remove mcs if child methodCall resolves to a compile-time constant.
     return !mcs->methodCall ? nullptr : mcs;
 }
 
-const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::MethodCallExpression *expression) {
     if (done()) return expression;
     LOG2("Solving method call " << dbp(expression));
     auto methodType = getType(expression->method);
@@ -2075,7 +2087,7 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::ConstructorCallExpression *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::ConstructorCallExpression *expression) {
     if (done()) return expression;
     auto type = getTypeType(expression->constructedType);
     if (type == nullptr) return expression;
@@ -2087,7 +2099,10 @@ const IR::Node *TypeInference::postorder(IR::ConstructorCallExpression *expressi
     if (auto *e = simpleType->to<IR::Type_Extern>()) {
         auto [contType, newArgs] = checkExternConstructor(expression, e, expression->arguments);
         if (newArgs == nullptr) return expression;
-        expression->arguments = newArgs;
+        if (expression->arguments != newArgs)
+            expression = new IR::ConstructorCallExpression(expression->srcInfo,
+                                                           expression->constructedType, newArgs);
+
         setType(getOriginal(), contType);
         setType(expression, contType);
     } else if (auto *c = simpleType->to<IR::IContainer>()) {
@@ -2099,7 +2114,10 @@ const IR::Node *TypeInference::postorder(IR::ConstructorCallExpression *expressi
             contType = new IR::Type_SpecializedCanonical(type->srcInfo, st->baseType, st->arguments,
                                                          contType);
         }
-        expression->arguments = args;
+        if (expression->arguments != args)
+            expression = new IR::ConstructorCallExpression(expression->srcInfo,
+                                                           expression->constructedType, args);
+
         setType(expression, contType);
         setType(getOriginal(), contType);
     } else {
@@ -2128,10 +2146,10 @@ static void convertStructToTuple(const IR::Type_StructLike *structType, IR::Type
     }
 }
 
-const IR::SelectCase *TypeInference::matchCase(const IR::SelectExpression *select,
-                                               const IR::Type_BaseList *selectType,
-                                               const IR::SelectCase *selectCase,
-                                               const IR::Type *caseType) {
+const IR::SelectCase *TypeInferenceBase::matchCase(const IR::SelectExpression *select,
+                                                   const IR::Type_BaseList *selectType,
+                                                   const IR::SelectCase *selectCase,
+                                                   const IR::Type *caseType) {
     // The selectType is always a tuple
     // If the caseType is a set type, we unify the type of the set elements
     if (auto *set = caseType->to<IR::Type_Set>()) caseType = set->elementType;
@@ -2166,7 +2184,7 @@ const IR::SelectCase *TypeInference::matchCase(const IR::SelectExpression *selec
     return selectCase;
 }
 
-const IR::Node *TypeInference::postorder(IR::This *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::This *expression) {
     if (done()) return expression;
     auto decl = findContext<IR::Declaration_Instance>();
     if (findContext<IR::Function>() == nullptr || decl == nullptr)
@@ -2177,7 +2195,7 @@ const IR::Node *TypeInference::postorder(IR::This *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::DefaultExpression *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::DefaultExpression *expression) {
     if (!done()) {
         setType(expression, IR::Type_Dontcare::get());
         setType(getOriginal(), IR::Type_Dontcare::get());
@@ -2187,7 +2205,7 @@ const IR::Node *TypeInference::postorder(IR::DefaultExpression *expression) {
     return expression;
 }
 
-bool TypeInference::containsHeader(const IR::Type *type) {
+bool TypeInferenceBase::containsHeader(const IR::Type *type) {
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() ||
         type->is<IR::Type_HeaderUnion>())
         return true;
@@ -2216,7 +2234,7 @@ static bool validateSelectTypes(const IR::Type *type, const IR::SelectExpression
     return false;
 }
 
-const IR::Node *TypeInference::postorder(IR::SelectExpression *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::SelectExpression *expression) {
     if (done()) return expression;
     auto selectType = getType(expression->select);
     if (selectType == nullptr) return expression;
@@ -2244,7 +2262,7 @@ const IR::Node *TypeInference::postorder(IR::SelectExpression *expression) {
     return expression;
 }
 
-const IR::Node *TypeInference::postorder(IR::AttribLocal *local) {
+const IR::Node *TypeInferenceBase::postorder(const IR::AttribLocal *local) {
     setType(local, local->type);
     setType(getOriginal(), local->type);
     return local;

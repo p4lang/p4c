@@ -38,7 +38,7 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
         auto t = TypeInference::specialize(originalType, mce->typeArguments, ctxt);
         CHECK_NULL(t);
         actualType = t->to<IR::Type_MethodBase>();
-        TypeInference tc(typeMap, /* readOnly */ true);
+        ReadOnlyTypeInference tc(typeMap);
         (void)actualType->apply(tc, ctxt);  // may need to learn new type components
         CHECK_NULL(actualType);
     }
