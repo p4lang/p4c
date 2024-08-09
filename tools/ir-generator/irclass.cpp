@@ -112,6 +112,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
          << "#include \"ir/ir-inline.h\"       // IWYU pragma: keep\n"
          << "#include \"ir/json_generator.h\"  // IWYU pragma: keep\n"
          << "#include \"ir/json_loader.h\"     // IWYU pragma: keep\n"
+         << "#include \"ir/semantic_less.h\"   // IWYU pragma: keep\n"
          << "#include \"ir/visitor.h\"         // IWYU pragma: keep\n"
          << "#include \"lib/algorithm.h\"      // IWYU pragma: keep\n"
          << "#include \"lib/log.h\"            // IWYU pragma: keep\n"
@@ -538,18 +539,23 @@ Util::Enumerator<IrMethod *> *IrClass::getUserMethods() const {
         [](IrElement *e) { return e != nullptr; });
 }
 
-bool IrClass::shouldSkip(cstring feature) const {
-    // skip if there is a 'no' directive
-    bool explicitNo =
-        Util::enumerate(elements)
-            ->where([](IrElement *el) { return el->is<IrNo>(); })
-            ->where([feature](IrElement *el) { return el->to<IrNo>()->text == feature; })
-            ->any();
-    if (explicitNo) return true;
-    // also, skip if the user provided an implementation manually
-    // (except for validate)
-    if (feature == "validate") return false;
+bool IrClass::hasNoDirective(cstring feature) const {
+    return Util::enumerate(elements)
+        ->where([](IrElement *el) { return el->is<IrNo>(); })
+        ->where([feature](IrElement *el) { return el->to<IrNo>()->text == feature; })
+        ->any();
+}
 
+bool IrClass::shouldSkip(cstring feature) const {
+    // Skip if there is a '#no' directive.
+    if (hasNoDirective(feature)) {
+        return true;
+    }
+    // Do not skip if the feature is 'validate'.
+    if (feature == "validate") {
+        return false;
+    }
+    // Also skip if the user provided an implementation manually
     bool provided = Util::enumerate(elements)
                         ->where([feature](IrElement *e) {
                             const auto *m = e->to<IrMethod>();
