@@ -1,14 +1,14 @@
 # uBPF Backend testing
 
-# Steps to run tests
-
 Tests use two VMs:
 - `switch` - on this VM we run PTF tests 
 - `generator` - expose two interfaces to P4rt-OVS switch installed on switch VM
 
 **Note.** As P4rt-OVS (the test uBPF target) is built on top of DPDK the tests require to be run in virtual 
 environment with two VMs (`generator` + `switch`). 
- 
+
+## Steps to Run Tests:
+
 0. Install `Virtualbox` and `Vagrant` on you machine:
 
     `sudo apt install -y virtualbox vagrant`
