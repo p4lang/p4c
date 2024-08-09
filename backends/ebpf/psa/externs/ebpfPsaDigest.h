@@ -28,7 +28,6 @@ class EBPFDigestPSA : public EBPFObject {
  private:
     cstring instanceName;
     const EBPFProgram *program;
-    EBPFType *valueType;
     cstring valueTypeName;
     const IR::Declaration_Instance *declaration;
     /// arbitrary value for max queue size
@@ -36,6 +35,7 @@ class EBPFDigestPSA : public EBPFObject {
     int maxDigestQueueSize = 128;
 
  public:
+    EBPFType *valueType;
     EBPFDigestPSA(const EBPFProgram *program, const IR::Declaration_Instance *di);
 
     void emitTypes(CodeBuilder *builder);
@@ -43,9 +43,9 @@ class EBPFDigestPSA : public EBPFObject {
     void processMethod(CodeBuilder *builder, cstring method, const IR::MethodCallExpression *expr,
                        DeparserBodyTranslatorPSA *visitor);
 
-    void emitPushElement(CodeBuilder *builder, const IR::Expression *elem,
-                         Inspector *codegen) const;
-    void emitPushElement(CodeBuilder *builder, cstring elem) const;
+    virtual void emitPushElement(CodeBuilder *builder, const IR::Expression *elem,
+                                 Inspector *codegen) const;
+    virtual void emitPushElement(CodeBuilder *builder, cstring elem) const;
 };
 
 }  // namespace EBPF

@@ -177,6 +177,25 @@ class EBPFInternetChecksumPNA : public EBPFChecksumPNA {
                        const IR::MethodCallExpression *expr, Visitor *visitor) override;
 };
 
+class EBPFDigestPNA : public EBPF::EBPFDigestPSA {
+    const ConvertToBackendIR *tcIR;
+    cstring externName;
+    cstring instanceName;
+
+ public:
+    EBPFDigestPNA(const EBPF::EBPFProgram *program, const IR::Declaration_Instance *di,
+                  cstring externName, const ConvertToBackendIR *tcIR)
+        : EBPF::EBPFDigestPSA(program, di) {
+        this->tcIR = tcIR;
+        this->externName = externName;
+        this->instanceName = di->toString();
+    }
+    void emitInitializer(EBPF::CodeBuilder *builder) const;
+    void emitPushElement(EBPF::CodeBuilder *builder, const IR::Expression *elem,
+                         Inspector *codegen) const;
+    void emitPushElement(EBPF::CodeBuilder *builder, cstring elem) const;
+};
+
 }  // namespace TC
 
 #endif /* BACKENDS_TC_TCEXTERNS_H_ */

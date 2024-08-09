@@ -433,4 +433,49 @@ cstring InternetChecksumAlgorithmPNA::getConvertByteOrderFunction(unsigned width
     return emit;
 }
 
+void EBPFDigestPNA::emitInitializer(EBPF::CodeBuilder *builder) const {
+    builder->newline();
+    builder->emitIndent();
+    builder->appendLine("__builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));");
+    builder->emitIndent();
+    builder->appendLine("ext_params.pipe_id = p4tc_filter_fields.pipeid;");
+    builder->emitIndent();
+    auto extId = tcIR->getExternId(externName);
+    BUG_CHECK(!extId.isNullOrEmpty(), "Extern ID not found");
+    builder->appendFormat("ext_params.ext_id = %s;", extId);
+    builder->newline();
+    builder->emitIndent();
+    auto instId = tcIR->getExternInstanceId(externName, instanceName);
+    BUG_CHECK(instId != 0, "Extern instance ID not found");
+    builder->appendFormat("ext_params.inst_id = %d;", instId);
+    builder->newline();
+}
+
+void EBPFDigestPNA::emitPushElement(EBPF::CodeBuilder *builder, const IR::Expression *elem,
+                                    Inspector *codegen) const {
+    emitInitializer(builder);
+    builder->newline();
+    builder->emitIndent();
+    builder->append("__builtin_memcpy(ext_params.in_params, &");
+    codegen->visit(elem);
+    builder->append(", sizeof(");
+    this->valueType->declare(builder, cstring::empty, false);
+    builder->append("));");
+    builder->newline();
+    builder->emitIndent();
+    builder->append("bpf_p4tc_extern_digest_pack(skb, &ext_params, sizeof(ext_params))");
+}
+
+void EBPFDigestPNA::emitPushElement(EBPF::CodeBuilder *builder, cstring elem) const {
+    emitInitializer(builder);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("__builtin_memcpy(ext_params.in_params, &%s, sizeof(", elem);
+    this->valueType->declare(builder, cstring::empty, false);
+    builder->append("));");
+    builder->newline();
+    builder->emitIndent();
+    builder->append("bpf_p4tc_extern_digest_pack(skb, &ext_params, sizeof(ext_params));");
+}
+
 }  // namespace TC

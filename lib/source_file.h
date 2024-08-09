@@ -214,8 +214,16 @@ class IHasSourceInfo {
     virtual ~IHasSourceInfo() {}
 };
 
+/// SFINAE helper to check if given class has a `getSourceInfo` method.
+template <class, class = void>
+struct has_SourceInfo : std::false_type {};
+
 template <class T>
-inline constexpr bool has_SourceInfo_v = std::is_base_of_v<Util::IHasSourceInfo, T>;
+struct has_SourceInfo<T, std::void_t<decltype(std::declval<T>().getSourceInfo())>>
+    : std::true_type {};
+
+template <class T>
+inline constexpr bool has_SourceInfo_v = has_SourceInfo<T>::value;
 
 /** A line in a source file */
 struct SourceFileLine {
