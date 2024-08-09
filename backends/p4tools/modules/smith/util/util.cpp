@@ -13,6 +13,8 @@
 
 namespace P4Tools::P4Smith {
 
+boost::random::mt19937 SmithUtils::rng(0);
+
 std::string getRandomString(size_t len) {
     // Add "for" and "in" to the list of P4 keywords, even though the wordlist doesn't contain them.
     static const std::vector<std::string> P4_KEYWORDS = {"if",      "void", "else", "key",

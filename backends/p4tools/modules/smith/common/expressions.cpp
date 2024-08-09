@@ -13,6 +13,7 @@
 #include "backends/p4tools/modules/smith/common/probabilities.h"
 #include "backends/p4tools/modules/smith/common/scope.h"
 #include "backends/p4tools/modules/smith/core/target.h"
+#include "backends/p4tools/modules/smith/util/util.h"
 #include "ir/indexed_vector.h"
 #include "ir/vector.h"
 #include "lib/exceptions.h"
@@ -713,7 +714,8 @@ IR::Expression *ExpressionGenerator::constructCmpExpr() {
     // can be either bits, int, bool, or structlike
     // for now it is just bits
     // TODO: Make the bit width a generic parameter (e.g., `MAX_BITWIDTH`).
-    auto newTypeSize = Utils::getRandInt(1, 64);
+    // auto newTypeSize = Utils::getRandInt(1, 64);
+    auto newTypeSize = SmithUtils::getRandInt(1, 128);
     const auto *newType = IR::Type_Bits::get(newTypeSize, false);
     IR::Expression *left = constructBitExpr(newType);
     IR::Expression *right = constructBitExpr(newType);
