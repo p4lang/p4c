@@ -17,7 +17,7 @@ namespace P4Tools::P4Smith::BMv2 {
 class Bmv2V1modelSmithTarget : public AbstractBMv2SmithTarget {
  private:
     DeclarationGenerator *_declarationGenerator =
-        new P4Tools::P4Smith::Bmv2V1ModelDeclarationGenerator(*this);
+        new P4Tools::P4Smith::Bmv2ModelDeclarationGenerator(*this);
     ExpressionGenerator *_expressionGenerator = new ExpressionGenerator(*this);
     StatementGenerator *_statementGenerator = new StatementGenerator(*this);
     ParserGenerator *_parserGenerator = new ParserGenerator(*this);

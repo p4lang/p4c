@@ -24,13 +24,13 @@ namespace P4Tools::P4Smith {
 
 using namespace P4::literals;
 
-class Bmv2V1ModelDeclarationGenerator : public DeclarationGenerator {
+class Bmv2ModelDeclarationGenerator : public DeclarationGenerator {
  public:
-    explicit Bmv2V1ModelDeclarationGenerator(SmithTarget &parent) : DeclarationGenerator(parent) {}
+    explicit Bmv2ModelDeclarationGenerator(SmithTarget &parent) : DeclarationGenerator(parent) {}
 
     IR::ParameterList *genParameterList() override;
 };
 
 }  // namespace P4Tools::P4Smith
 
-#endif  /* BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_BMV2_DECLARATIONS_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_BMV2_DECLARATIONS_H_ */

@@ -5,7 +5,7 @@
 
 namespace P4Tools::P4Smith {
 
-IR::ParameterList *Bmv2V1ModelDeclarationGenerator::genParameterList() {
+IR::ParameterList *Bmv2ModelDeclarationGenerator::genParameterList() {
     IR::IndexedVector<IR::Parameter> params;
     size_t totalParams = Utils::getRandInt(0, 3);
     size_t numDirParams = (totalParams != 0U) ? Utils::getRandInt(0, totalParams - 1) : 0;
