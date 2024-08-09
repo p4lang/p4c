@@ -288,17 +288,17 @@ const IR::P4Program *DpdkPnaSmithTarget::generateP4Program() const {
     // insert some dummy metadata
     generateMainMetadata();
 
-    // Define a type `SecurityAssocId_t` as an alias for the type `bit<32>`.
+    // Define a typedef `SecurityAssocId_t` as an alias for the type `bit<32>`.
     IR::Type_Typedef *SecurityAssocIdTypedef =
         new IR::Type_Typedef(IR::ID("SecurityAssocId_t"), IR::Type_Bits::get(32, false));
     P4Scope::addToScope(SecurityAssocIdTypedef);
 
-    // Define a type `PassNumber_t` as an alias for the type `bit<3>`.
+    // Define a typedef `PassNumber_t` as an alias for the type `bit<3>`.
     IR::Type_Typedef *passNumberTypedef =
         new IR::Type_Typedef("PassNumber_t", IR::Type_Bits::get(3, false));
     P4Scope::addToScope(passNumberTypedef);
 
-    // Define a type `PortId_t` as an alias for the type `bit<32>`.
+    // Define a typedef `PortId_t` as an alias for the type `bit<32>`.
     IR::Type_Typedef *portIdTypedef =
         new IR::Type_Typedef("PortId_t", IR::Type_Bits::get(32, false));
     P4Scope::addToScope(portIdTypedef);
