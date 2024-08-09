@@ -18,9 +18,9 @@
 #include "ir/node.h"
 #include "lib/cstring.h"
 
-namespace Test {
+namespace P4Tools::Test {
 class SmallStepTest;
-}  // namespace Test
+}  // namespace P4Tools::Test
 
 namespace P4Tools::P4Testgen {
 

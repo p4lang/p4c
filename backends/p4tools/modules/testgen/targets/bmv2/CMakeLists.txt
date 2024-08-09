@@ -32,6 +32,7 @@ set(TESTGEN_SOURCES
 
 set(TESTGEN_GTEST_SOURCES
   ${TESTGEN_GTEST_SOURCES}
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/gtest_utils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/testgen_api/api_test.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/testgen_api/benchmark.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/testgen_api/control_plane_filter_test.cpp
@@ -43,7 +44,7 @@ set(TESTGEN_GTEST_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/p4_asserts_parser_test.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/value.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/reachability.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/test/transformations/saturation_arithm.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/z3-solver/saturation_arithm.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/z3-solver/expressions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/z3-solver/asrt_model.cpp
   PARENT_SCOPE
