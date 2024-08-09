@@ -20,6 +20,8 @@ limitations under the License.
 
 #include "hex.h"
 
+namespace P4 {
+
 std::ostream &operator<<(std::ostream &os, const bitvec &bv) {
     if (bv.size == 1) {
         os << hex(bv.data);
@@ -208,3 +210,5 @@ bitvec bitvec::rotate_right_copy(size_t start_bit, size_t rotation_idx, size_t e
     bitvec rv = rot_section | (*this - rot_mask);
     return rv;
 }
+
+}  // namespace P4

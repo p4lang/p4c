@@ -6,7 +6,7 @@
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 using namespace P4::literals;
 
@@ -28,6 +28,6 @@ class PropagateP4RuntimeTranslation : public Transform {
     explicit PropagateP4RuntimeTranslation(const P4::TypeMap &typeMap);
 };
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_P4RUNTIME_TRANSLATION_H_ */

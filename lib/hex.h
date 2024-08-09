@@ -22,6 +22,8 @@ limitations under the License.
 #include <iostream>
 #include <vector>
 
+namespace P4 {
+
 class hex {
     std::intmax_t val;
     int width;
@@ -59,5 +61,7 @@ class hexvec {
 };
 
 std::ostream &operator<<(std::ostream &os, const hexvec &h);
+
+}  // namespace P4
 
 #endif /* LIB_HEX_H_ */

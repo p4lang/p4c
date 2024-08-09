@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfTable.h"
 #include "backends/ebpf/ebpfType.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 class ControlBodyTranslatorPSA;
 
@@ -54,6 +54,6 @@ class EBPFRegisterPSA : public EBPFTableBase {
                            ControlBodyTranslatorPSA *translator);
 };
 
-}  // namespace EBPF
+}  // namespace P4::EBPF
 
 #endif  // BACKENDS_EBPF_PSA_EXTERNS_EBPFPSAREGISTER_H_

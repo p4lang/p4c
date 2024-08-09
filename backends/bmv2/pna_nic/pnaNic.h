@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/bmv2/portable_common/portable.h"
 #include "pnaProgramStructure.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 class PnaNicExpressionConverter : public ExpressionConverter {
  public:
@@ -29,8 +29,9 @@ class PnaNicExpressionConverter : public ExpressionConverter {
         : BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) {}
 
     void modelError(const char *format, const cstring field) {
-        ::error(ErrorType::ERR_MODEL,
-                (cstring(format) + "\nInvalid metadata parameter value for PNA").c_str(), field);
+        ::P4::error(ErrorType::ERR_MODEL,
+                    (cstring(format) + "\nInvalid metadata parameter value for PNA").c_str(),
+                    field);
     }
 
     Util::IJson *convertParam(UNUSED const IR::Parameter *param, cstring fieldName) override {
@@ -129,6 +130,6 @@ EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Hash)
 EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(InternetChecksum)
 EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Register)
 
-}  // namespace BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_PNA_NIC_PNANIC_H_ */

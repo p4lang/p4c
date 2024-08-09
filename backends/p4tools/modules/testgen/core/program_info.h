@@ -15,7 +15,7 @@
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 /// Stores target-specific information about a P4 program.
 class ProgramInfo : public ICastable {
@@ -118,6 +118,6 @@ class ProgramInfo : public ICastable {
     DECLARE_TYPEINFO(ProgramInfo);
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_PROGRAM_INFO_H_ */

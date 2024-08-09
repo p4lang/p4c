@@ -16,9 +16,9 @@ limitations under the License.
 
 #include "ubpfModel.h"
 
-namespace UBPF {
+namespace P4::UBPF {
 
 cstring UBPFModel::reservedPrefix = "ubpf_"_cs;
 UBPFModel UBPFModel::instance;
 
-}  // namespace UBPF
+}  // namespace P4::UBPF

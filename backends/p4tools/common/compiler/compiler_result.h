@@ -7,7 +7,7 @@
 #include "ir/ir.h"
 #include "lib/castable.h"
 
-namespace P4Tools {
+namespace P4::P4Tools {
 
 /// An extensible result object which is returned by the CompilerTarget.
 /// In its simplest form, this holds the transformed P4 program after the front- and midend passes.
@@ -30,6 +30,6 @@ class CompilerResult : public ICastable {
 /// This is a convenience definition for the return value.
 using CompilerResultOrError = std::optional<std::reference_wrapper<const CompilerResult>>;
 
-}  // namespace P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_COMPILER_RESULT_H_ */

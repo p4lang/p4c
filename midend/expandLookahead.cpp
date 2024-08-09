@@ -59,7 +59,7 @@ void DoExpandLookahead::expand(
             expand(bitvector, etype, offset, member, output);
         }
     } else {
-        ::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type in lookahead argument", type);
+        ::P4::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type in lookahead argument", type);
     }
 }
 

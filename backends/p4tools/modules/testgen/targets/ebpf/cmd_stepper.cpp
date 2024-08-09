@@ -24,7 +24,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/program_info.h"
 
-namespace P4Tools::P4Testgen::EBPF {
+namespace P4::P4Tools::P4Testgen::EBPF {
 
 EBPFCmdStepper::EBPFCmdStepper(ExecutionState &state, AbstractSolver &solver,
                                const ProgramInfo &programInfo)
@@ -80,4 +80,4 @@ std::map<Continuation::Exception, Continuation> EBPFCmdStepper::getExceptionHand
     return result;
 }
 
-}  // namespace P4Tools::P4Testgen::EBPF
+}  // namespace P4::P4Tools::P4Testgen::EBPF

@@ -20,7 +20,7 @@
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
-namespace Test {
+namespace P4::Test {
 
 using namespace P4::literals;
 
@@ -247,4 +247,4 @@ TEST_F(Z3SolverSubSat05, SubSat05) { test(expression, variableValue); }
 
 }  // namespace ArithmTest
 
-}  // namespace Test
+}  // namespace P4::Test

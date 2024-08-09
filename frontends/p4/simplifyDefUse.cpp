@@ -117,7 +117,7 @@ class DeclarationToExpression {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
 
-        auto expr = ::get(paths, decl);
+        auto expr = ::P4::get(paths, decl);
         if (!expr) {
             expr = new IR::PathExpression(decl->name);
         }
@@ -293,7 +293,7 @@ class HeaderDefinitions : public IHasDbPrint {
 
         if (notReport.find(storage) != notReport.end()) return TernaryBool::Yes;
 
-        return ::get(defs, storage, TernaryBool::Maybe);
+        return ::P4::get(defs, storage, TernaryBool::Maybe);
     }
 
     // result is OR operation on valid bits of all locations
@@ -332,7 +332,7 @@ class HeaderDefinitions : public IHasDbPrint {
     HeaderDefinitions *intersect(const HeaderDefinitions *other) const {
         HeaderDefinitions *result = new HeaderDefinitions(refMap, typeMap, storageMap);
         for (auto def : defs) {
-            auto valid = ::get(other->defs, def.first, TernaryBool::Maybe);
+            auto valid = ::P4::get(other->defs, def.first, TernaryBool::Maybe);
             result->defs.emplace(def.first, valid == def.second ? valid : TernaryBool::Maybe);
         }
         return result;
@@ -381,7 +381,7 @@ class FindUninitialized : public Inspector {
     bool reportInvalidHeaders = true;
 
     const LocationSet *getReads(const IR::Expression *expression, bool nonNull = false) const {
-        const auto *result = ::get(readLocations, expression);
+        const auto *result = ::P4::get(readLocations, expression);
         if (nonNull) BUG_CHECK(result != nullptr, "no locations known for %1%", dbp(expression));
         return result;
     }
@@ -525,8 +525,8 @@ class FindUninitialized : public Inspector {
             // contain "unreachable", otherwise it means that we have
             // not executed a 'return' on all possible paths.
             if (!defs->isUnreachable())
-                ::error(ErrorType::ERR_INSUFFICIENT,
-                        "Function '%1%' does not return a value on all paths", func);
+                ::P4::error(ErrorType::ERR_INSUFFICIENT,
+                            "Function '%1%' does not return a value on all paths", func);
         }
 
         currentPoint = point.after();

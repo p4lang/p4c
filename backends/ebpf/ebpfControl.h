@@ -21,7 +21,7 @@ limitations under the License.
 #include "ebpfTable.h"
 #include "ebpfType.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 class EBPFControl;
 
@@ -81,12 +81,12 @@ class EBPFControl : public EBPFObject {
     virtual void emitTableInstances(CodeBuilder *builder);
     virtual bool build();
     EBPFTable *getTable(cstring name) const {
-        auto result = ::get(tables, name);
+        auto result = ::P4::get(tables, name);
         BUG_CHECK(result != nullptr, "No table named %1%", name);
         return result;
     }
     EBPFCounterTable *getCounter(cstring name) const {
-        auto result = ::get(counters, name);
+        auto result = ::P4::get(counters, name);
         BUG_CHECK(result != nullptr, "No counter named %1%", name);
         return result;
     }
@@ -97,6 +97,6 @@ class EBPFControl : public EBPFObject {
     DECLARE_TYPEINFO(EBPFControl, EBPFObject);
 };
 
-}  // namespace EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_EBPFCONTROL_H_ */

@@ -1,5 +1,7 @@
 #include "error_message.h"
 
+namespace P4 {
+
 std::string ErrorMessage::getPrefix() const {
     std::string p = prefix;
     if (type == MessageType::Error) {
@@ -45,3 +47,5 @@ std::string ParserErrorMessage::toString() const {
     return std::string(location.toPositionString().c_str()) + ":" + message + "\n" +
            location.toSourceFragment().c_str();
 }
+
+}  // namespace P4

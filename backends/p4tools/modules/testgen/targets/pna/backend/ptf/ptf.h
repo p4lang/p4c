@@ -19,7 +19,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace P4::P4Tools::P4Testgen::Pna {
 
 /// Extracts information from the @testSpec to emit a PTF test case.
 class PTF : public TestFramework {
@@ -76,6 +76,6 @@ class PTF : public TestFramework {
                                               const std::vector<ActionArg> &args);
 };
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace P4::P4Tools::P4Testgen::Pna
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_BACKEND_PTF_PTF_H_ */

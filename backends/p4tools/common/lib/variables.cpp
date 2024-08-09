@@ -6,7 +6,7 @@
 
 #include "ir/id.h"
 
-namespace P4Tools::ToolsVariables {
+namespace P4::P4Tools::ToolsVariables {
 
 /// The prefix used for state variables.
 static const IR::PathExpression VAR_PREFIX = IR::PathExpression("p4tools*var");
@@ -62,4 +62,4 @@ IR::StateVariable convertReference(const IR::Expression *ref) {
     return path;
 }
 
-}  // namespace P4Tools::ToolsVariables
+}  // namespace P4::P4Tools::ToolsVariables

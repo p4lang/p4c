@@ -14,7 +14,7 @@
 #include "ir/ir.h"
 #include "lib/compile_context.h"
 
-namespace P4Tools {
+namespace P4::P4Tools {
 
 /// Encapsulates the details of invoking the P4 compiler for a target device and architecture.
 class CompilerTarget : public Target {
@@ -92,6 +92,6 @@ class CompilerTarget : public Target {
     static const CompilerTarget &get(std::string_view toolName);
 };
 
-}  // namespace P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_COMPILER_TARGET_H_ */

@@ -11,7 +11,7 @@
 #include "ir/pass_manager.h"
 #include "lib/log.h"
 
-namespace Test {
+namespace P4::Test {
 
 struct P4CFrontend : P4CTest {
     void addPasses(std::initializer_list<PassManager::VisitorRef> passes) { pm.addPasses(passes); }
@@ -19,7 +19,7 @@ struct P4CFrontend : P4CTest {
     const IR::Node *parseAndProcess(std::string program) {
         const auto *pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
         EXPECT_TRUE(pgm);
-        EXPECT_EQ(::errorCount(), 0);
+        EXPECT_EQ(::P4::errorCount(), 0);
         if (!pgm) {
             return nullptr;
         }
@@ -52,7 +52,7 @@ TEST_F(P4CFrontendEnumValidation, Bit) {
     const auto *prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
-    ASSERT_EQ(::errorCount(), 1);
+    ASSERT_EQ(::P4::errorCount(), 1);
     ASSERT_TRUE(errors.contains("unrepresentable = 256"));
 }
 
@@ -68,7 +68,7 @@ TEST_F(P4CFrontendEnumValidation, BitNeg) {
     const auto *prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
-    ASSERT_EQ(::errorCount(), 1);
+    ASSERT_EQ(::P4::errorCount(), 1);
     ASSERT_TRUE(errors.contains("unrepresentable = -1"));
 }
 
@@ -84,7 +84,7 @@ TEST_F(P4CFrontendEnumValidation, IntPos) {
     const auto *prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
-    ASSERT_EQ(::errorCount(), 1);
+    ASSERT_EQ(::P4::errorCount(), 1);
     ASSERT_TRUE(errors.contains("unrepresentable_p = 128"));
 }
 
@@ -100,7 +100,7 @@ TEST_F(P4CFrontendEnumValidation, IntNeg) {
     const auto *prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
-    ASSERT_EQ(::errorCount(), 1);
+    ASSERT_EQ(::P4::errorCount(), 1);
     ASSERT_TRUE(errors.contains("unrepresentable_n = -129"));
 }
 
@@ -120,7 +120,7 @@ TEST_F(P4CFrontendEnumValidation, TypeDef) {
     const auto *prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
-    ASSERT_EQ(::errorCount(), 2);
+    ASSERT_EQ(::P4::errorCount(), 2);
     ASSERT_TRUE(errors.contains("unrepresentable_p = 64"));
     ASSERT_TRUE(errors.contains("unrepresentable_n = -65"));
     std::clog << errors.str();
@@ -136,7 +136,7 @@ TEST_F(P4CFrontendEnumValidation, ExplicitCast) {
     const auto *prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
-    ASSERT_EQ(::errorCount(), 0);
+    ASSERT_EQ(::P4::errorCount(), 0);
 }
 
 TEST_F(P4CFrontendEnumValidation, InvalidUnderlyingUnsized) {
@@ -149,7 +149,7 @@ TEST_F(P4CFrontendEnumValidation, InvalidUnderlyingUnsized) {
     const auto *prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
-    ASSERT_EQ(::errorCount(), 1);
+    ASSERT_EQ(::P4::errorCount(), 1);
     ASSERT_TRUE(errors.contains("Illegal type for enum;"));
     ASSERT_TRUE(errors.contains("is unsized integral"));
 }
@@ -165,7 +165,7 @@ TEST_F(P4CFrontendEnumValidation, InvalidType) {
     const auto *prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
-    ASSERT_EQ(::errorCount(), 1);
+    ASSERT_EQ(::P4::errorCount(), 1);
     ASSERT_TRUE(errors.contains("Illegal type for enum;"));
     ASSERT_TRUE(errors.contains("type-declared types"));
 }
@@ -184,7 +184,7 @@ TEST_F(P4CFrontendMoveInitializers, P4ControlSrcInfo) {
     )");
     const auto *prog = parseAndProcess(program);
     ASSERT_TRUE(prog);
-    ASSERT_EQ(::errorCount(), 0);
+    ASSERT_EQ(::P4::errorCount(), 0);
 
     // The P4Control->body should have a valid srcInfo if the information
     // is correctly maintained by MoveInitializers.
@@ -197,4 +197,4 @@ TEST_F(P4CFrontendMoveInitializers, P4ControlSrcInfo) {
     }
 }
 
-}  // namespace Test
+}  // namespace P4::Test

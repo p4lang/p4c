@@ -8,7 +8,7 @@
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
 
-namespace P4Tools {
+namespace P4::P4Tools {
 
 /// Defines common formatting options.
 struct FormatOptions {
@@ -101,6 +101,6 @@ std::optional<std::string> convertToIpv6String(const std::vector<uint8_t> &byteA
 /// @returns std::nullopt if the conversion fails.
 std::optional<std::string> convertToMacString(const std::vector<uint8_t> &byteArray);
 
-}  // namespace P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_FORMAT_INT_H_ */

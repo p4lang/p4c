@@ -26,9 +26,11 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/map.h"
 
+namespace P4 {
 class JSONLoader;
+}  // namespace P4
 
-namespace IR {
+namespace P4::IR {
 
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP = std::map,
           class COMP = std::less<cstring>,
@@ -110,8 +112,8 @@ class NameMap : public Node {
     void addUnique(cstring name, const T *n) {
         auto prev = symbols.find(name);
         if (prev != symbols.end())
-            ::error(ErrorType::ERR_DUPLICATE, "%1%: duplicated name (%2% is previous instance)", n,
-                    prev->second);
+            ::P4::error(ErrorType::ERR_DUPLICATE, "%1%: duplicated name (%2% is previous instance)",
+                        n, prev->second);
         symbols.emplace(std::move(name), std::move(n));
     }
     // Expects to have a single node with each name.
@@ -161,6 +163,6 @@ class NameMap : public Node {
     DECLARE_TYPEINFO(NameMap, Node);
 };
 
-}  // namespace IR
+}  // namespace P4::IR
 
 #endif /* IR_NAMEMAP_H_ */

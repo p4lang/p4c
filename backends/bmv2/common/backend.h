@@ -38,7 +38,7 @@ limitations under the License.
 #include "options.h"
 #include "sharedActionSelectorCheck.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 enum gress_t { INGRESS, EGRESS };
 enum block_t {
@@ -194,6 +194,6 @@ class RenameUserMetadata : public Transform {
     }
 };
 
-}  // namespace BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_BACKEND_H_ */

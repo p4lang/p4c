@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "lower.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 const IR::Expression *LowerExpressions::shift(const IR::Operation_Binary *expression) const {
     auto rhs = expression->right;
@@ -25,15 +25,15 @@ const IR::Expression *LowerExpressions::shift(const IR::Operation_Binary *expres
         auto cst = rhs->to<IR::Constant>();
         big_int maxShift = Util::shift_left(1, LowerExpressions::maxShiftWidth);
         if (cst->value > maxShift)
-            ::error(ErrorType::ERR_OVERLIMIT, "%1%: shift amount limited to %2% on this target",
-                    expression, maxShift);
+            ::P4::error(ErrorType::ERR_OVERLIMIT, "%1%: shift amount limited to %2% on this target",
+                        expression, maxShift);
     } else {
         BUG_CHECK(rhstype->is<IR::Type_Bits>(), "%1%: expected a bit<> type", rhstype);
         auto bs = rhstype->to<IR::Type_Bits>();
         if (bs->size > LowerExpressions::maxShiftWidth)
-            ::error(ErrorType::ERR_OVERLIMIT,
-                    "%1%: shift amount limited to %2% bits on this target", expression,
-                    LowerExpressions::maxShiftWidth);
+            ::P4::error(ErrorType::ERR_OVERLIMIT,
+                        "%1%: shift amount limited to %2% bits on this target", expression,
+                        LowerExpressions::maxShiftWidth);
     }
     auto ltype = typeMap->getType(getOriginal(), true);
     typeMap->setType(expression, ltype);
@@ -116,4 +116,4 @@ const IR::Node *LowerExpressions::postorder(IR::Cast *expression) {
     return expression;
 }
 
-}  // namespace EBPF
+}  // namespace P4::EBPF

@@ -39,10 +39,18 @@ limitations under the License.
 
 #include <iostream>
 
+#ifdef MULTITHREAD
+#include <pthread.h>
+
+#include <mutex>
+#endif
+
 #include "exceptions.h"
 #include "exename.h"
 #include "hex.h"
 #include "log.h"
+
+namespace P4 {
 
 static const char *signames[] = {
     "NONE", "HUP",  "INT",  "QUIT", "ILL",    "TRAP",   "ABRT",  "BUS",  "FPE",  "KILL", "USR1",
@@ -50,9 +58,6 @@ static const char *signames[] = {
     "TTOU", "URG",  "XCPU", "XFSZ", "VTALRM", "PROF",   "WINCH", "POLL", "PWR",  "SYS"};
 
 #ifdef MULTITHREAD
-#include <pthread.h>
-
-#include <mutex>
 std::vector<pthread_t> thread_ids;
 __thread int my_id;
 
@@ -321,3 +326,5 @@ void setup_signals() {
     if (LOGGING(1)) global_backtrace_state = backtrace_create_state(exename(), 1, nullptr, nullptr);
 #endif
 }
+
+}  // namespace P4

@@ -80,10 +80,10 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
     // Do not copy structures for method calls.
     if (statement->right->is<IR::MethodCallExpression>()) {
         if (errorOnMethodCall) {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "%1%: functions or methods returning structures "
-                    "are not supported on this target",
-                    statement->right);
+            ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: functions or methods returning structures "
+                        "are not supported on this target",
+                        statement->right);
         }
         return statement;
     }

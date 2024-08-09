@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "match.h"
 
+namespace P4 {
+
 static int chkmask(const match_t &m, int maskbits) {
     big_int mask = (big_int(1) << maskbits) - 1;
     int shift = 0;
@@ -133,3 +135,5 @@ void dump(const match_t *m) {
         std::cout << "<nullptr>";
     std::cout << std::endl;
 }
+
+}  // namespace P4

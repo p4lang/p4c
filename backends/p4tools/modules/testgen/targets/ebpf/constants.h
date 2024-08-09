@@ -3,7 +3,7 @@
 
 #include "ir/ir.h"
 
-namespace P4Tools::P4Testgen::EBPF {
+namespace P4::P4Tools::P4Testgen::EBPF {
 
 class EBPFConstants {
  public:
@@ -13,6 +13,6 @@ class EBPFConstants {
     static constexpr int PORT_BIT_WIDTH = 9;
 };
 
-}  // namespace P4Tools::P4Testgen::EBPF
+}  // namespace P4::P4Tools::P4Testgen::EBPF
 
 #endif /* TESTGEN_TARGETS_EBPF_CONSTANTS_H_ */

@@ -6,6 +6,8 @@
 #include "options.h"
 #include "p4fmt.h"
 
+using namespace P4;
+
 int main(int argc, char *const argv[]) {
     AutoCompileContext autoP4FmtContext(new P4Fmt::P4FmtContext);
     auto &options = P4Fmt::P4FmtContext::get().options();
@@ -14,7 +16,7 @@ int main(int argc, char *const argv[]) {
     }
     options.setInputFile();
 
-    std::stringstream formattedOutput = getFormattedOutput(options.file);
+    std::stringstream formattedOutput = P4Fmt::getFormattedOutput(options.file);
     if (formattedOutput.str().empty()) {
         return EXIT_FAILURE;
     };
@@ -26,8 +28,8 @@ int main(int argc, char *const argv[]) {
     } else {
         out = openFile(options.outputFile(), false);
         if ((out == nullptr) || !(*out)) {
-            ::error(ErrorType::ERR_NOT_FOUND, "%2%: No such file or directory.",
-                    options.outputFile().string());
+            ::P4::error(ErrorType::ERR_NOT_FOUND, "%2%: No such file or directory.",
+                        options.outputFile().string());
             options.usage();
             return EXIT_FAILURE;
         }
@@ -36,7 +38,7 @@ int main(int argc, char *const argv[]) {
     (*out) << formattedOutput.str();
     out->flush();
     if (!(*out)) {
-        ::error(ErrorType::ERR_IO, "Failed to write to output file.");
+        ::P4::error(ErrorType::ERR_IO, "Failed to write to output file.");
         return EXIT_FAILURE;
     }
 

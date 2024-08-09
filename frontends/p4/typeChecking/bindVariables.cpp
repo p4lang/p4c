@@ -12,7 +12,7 @@ class ErrorOnInfInt : public Inspector {
     void postorder(const IR::Expression *expression) override {
         auto t = typeMap->getType(expression, true);
         if (t->is<IR::Type_InfInt>())
-            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: could not infer a width", expression);
+            ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: could not infer a width", expression);
     }
 };
 
@@ -59,8 +59,8 @@ const IR::Type *DoBindTypeVariables::getVarValue(const IR::Type_Var *var,
                                                  const IR::Node *errorPosition) const {
     auto type = typeMap->getSubstitution(var);
     if (type == nullptr) {
-        ::error(ErrorType::ERR_TYPE_ERROR, "%1%: could not infer a type for variable %2%",
-                errorPosition, var);
+        ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: could not infer a type for variable %2%",
+                    errorPosition, var);
         return nullptr;
     }
     auto result = validateType(type, typeMap, errorPosition, this);

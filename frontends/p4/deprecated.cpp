@@ -27,8 +27,8 @@ void Deprecated::warnIfDeprecated(const IR::IAnnotated *annotated, const IR::Nod
     for (const auto *a : anno->expr) {
         if (const auto *str = a->to<IR::StringLiteral>()) message += str->value;
     }
-    ::warning(ErrorType::WARN_DEPRECATED, "%1%: Using deprecated feature %2%. %3%", errorNode,
-              annotated->getNode(), message);
+    ::P4::warning(ErrorType::WARN_DEPRECATED, "%1%: Using deprecated feature %2%. %3%", errorNode,
+                  annotated->getNode(), message);
 }
 
 bool Deprecated::preorder(const IR::PathExpression *expression) {

@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/common/portableProgramStructure.h"
 
 /// TODO: this is not really specific to BMV2, it should reside somewhere else
-namespace BMV2 {
+namespace P4::BMV2 {
 
 enum pna_block_t {
     MAIN_PARSER,
@@ -59,9 +59,9 @@ class ParsePnaArchitecture : public P4::ParsePortableArchitecture {
     }
 
     void modelError(const char *format, const IR::INode *node) {
-        ::error(ErrorType::ERR_MODEL,
-                (cstring(format) + "\nAre you using an up-to-date 'pna.p4'?").c_str(),
-                node->getNode());
+        ::P4::error(ErrorType::ERR_MODEL,
+                    (cstring(format) + "\nAre you using an up-to-date 'pna.p4'?").c_str(),
+                    node->getNode());
     }
 
     bool preorder(const IR::PackageBlock *block) override;
@@ -95,6 +95,6 @@ class InspectPnaProgram : public P4::InspectPortableProgram {
     bool preorder(const IR::Parameter *parameter) override;
 };
 
-}  // namespace BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_PNA_NIC_PNAPROGRAMSTRUCTURE_H_ */

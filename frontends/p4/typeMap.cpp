@@ -160,13 +160,13 @@ bool TypeMap::equivalent(const IR::Type *left, const IR::Type *right, bool stric
     if (auto ls = left->to<IR::Type_Stack>()) {
         auto rs = right->to<IR::Type_Stack>();
         if (!ls->sizeKnown()) {
-            ::error(ErrorType::ERR_TYPE_ERROR,
-                    "%1%: Size of header stack type should be a constant", left);
+            ::P4::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: Size of header stack type should be a constant", left);
             return false;
         }
         if (!rs->sizeKnown()) {
-            ::error(ErrorType::ERR_TYPE_ERROR,
-                    "%1%: Size of header stack type should be a constant", right);
+            ::P4::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: Size of header stack type should be a constant", right);
             return false;
         }
         return equivalent(ls->elementType, rs->elementType, strict) &&
@@ -294,7 +294,7 @@ bool TypeMap::equivalent(const IR::Type *left, const IR::Type *right, bool stric
         return equivalent(lf->type, rf->type);
     }
 
-    BUG_CHECK(::errorCount(), "%1%: Unexpected type check for equivalence", dbp(left));
+    BUG_CHECK(::P4::errorCount(), "%1%: Unexpected type check for equivalence", dbp(left));
     // The following are not expected to be compared for equivalence:
     // Type_Dontcare, Type_Unknown, Type_Name, Type_Specialized, Type_Typedef
     return false;
@@ -395,8 +395,8 @@ int TypeMap::widthBits(const IR::Type *type, const IR::Node *errorPosition, bool
         auto w = widthBits(ths->elementType, errorPosition, max);
         return w * ths->getSize();
     }
-    ::error(ErrorType::ERR_UNSUPPORTED, "%1%: width not well-defined for values of type %2%",
-            errorPosition, t);
+    ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1%: width not well-defined for values of type %2%",
+                errorPosition, t);
     return -1;
 }
 

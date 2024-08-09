@@ -31,7 +31,7 @@ class ReferenceMap;
 class TypeMap;
 }  // namespace P4
 
-namespace DPDK {
+namespace P4::DPDK {
 
 using namespace P4::literals;
 
@@ -171,6 +171,6 @@ class CheckExternInvocation : public Inspector {
     }
 };
 
-}  // namespace DPDK
+}  // namespace P4::DPDK
 
 #endif /* BACKENDS_DPDK_DPDKCHECKEXTERNINVOCATION_H_ */

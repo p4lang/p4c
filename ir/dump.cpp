@@ -25,6 +25,8 @@ limitations under the License.
 #include "lib/indent.h"
 #include "lib/source_file.h"
 
+namespace P4 {
+
 using namespace P4::literals;
 
 namespace {
@@ -134,3 +136,5 @@ std::string dumpToString(const IR::Node *n) {
     dump(str, n);
     return str.str();
 }
+
+}  // namespace P4

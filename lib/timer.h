@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace Util {
+namespace P4::Util {
 
 /// Runs specified function and measures it's execution duration under specified timer name.
 /// Timers can be nested. Measured durations are added under given timer name. In case of nested
@@ -51,6 +51,6 @@ class ScopedTimer {
     std::unique_ptr<ScopedTimerCtx> ctx;
 };
 
-}  // namespace Util
+}  // namespace P4::Util
 
 #endif /* LIB_TIMER_H_ */

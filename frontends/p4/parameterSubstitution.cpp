@@ -44,7 +44,7 @@ void ParameterSubstitution::populate(const IR::ParameterList *params,
         if (a->name) {
             p = params->getParameter(a->name);
             if (p == nullptr) {
-                ::error(ErrorType::ERR_NOT_FOUND, "No parameter named %1%", a->name);
+                ::P4::error(ErrorType::ERR_NOT_FOUND, "No parameter named %1%", a->name);
                 continue;
             }
         } else {

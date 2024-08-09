@@ -16,7 +16,13 @@ limitations under the License.
 
 #include "hashvec.h"
 
+#ifdef DEBUG
+#include <iomanip>
+#endif
+
 #include "exceptions.h"
+
+namespace P4 {
 
 /* FIXME -- there are almost certainly problems when the hashtable size
  * FIXME -- exceeds INT_MAX elements.  That requires 16GB+ memory... */
@@ -458,8 +464,6 @@ void *hash_vector_base::lookup_cache::getval(hash_vector_base *ht) {
 }
 
 #ifdef DEBUG
-#include <iomanip>
-
 void hash_vector_base::dump(std::ostream &out) {
     int fs = 4, ls = 18;
     out << "hash_vector " << (void *)this << ": " << (info->ismap ? "map" : "set")
@@ -487,3 +491,5 @@ void hash_vector_base::dump(std::ostream &out) {
     out << "\nerased=" << erased << std::endl;
 }
 #endif /* DEBUG */
+
+}  // namespace P4

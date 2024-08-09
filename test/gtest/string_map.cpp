@@ -26,7 +26,7 @@ using namespace P4::literals;
 using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
 
-namespace Test {
+namespace P4::Test {
 
 TEST(StringMap, RangeConstructor) {
     string_map<unsigned>::value_type myMap[] = {{"One"_cs, 1},   {"One"_cs, 2},   {"One"_cs, 3},
@@ -291,4 +291,4 @@ TEST(StringMap, NonExistingKey) {
     EXPECT_EQ(get(myMap, "Four"_cs), 0);
 }
 
-}  // namespace Test
+}  // namespace P4::Test

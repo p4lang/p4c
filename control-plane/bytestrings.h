@@ -22,12 +22,12 @@ limitations under the License.
 
 #include "lib/big_int_util.h"
 
-namespace IR {
+namespace P4::IR {
 
 class Constant;
 class BoolLiteral;
 
-}  // namespace IR
+}  // namespace P4::IR
 
 namespace P4 {
 

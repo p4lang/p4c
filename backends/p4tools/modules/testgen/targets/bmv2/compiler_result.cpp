@@ -21,7 +21,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4runtime_translation.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 BMv2V1ModelCompilerResult::BMv2V1ModelCompilerResult(TestgenCompilerResult compilerResult,
                                                      P4::P4RuntimeAPI p4runtimeApi,
@@ -42,4 +42,4 @@ const DirectExternMap &BMv2V1ModelCompilerResult::getDirectExternMap() const {
     return directExternMap;
 }
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2

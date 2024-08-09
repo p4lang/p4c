@@ -19,6 +19,8 @@ limitations under the License.
 
 #include <vector>
 
+namespace P4 {
+
 /// An enhanced version of std::vector that performs bounds checking for
 /// operator[].
 template <class T, class Alloc = std::allocator<T>>
@@ -32,5 +34,7 @@ class safe_vector : public std::vector<T, Alloc> {
     reference operator[](size_type n) { return this->at(n); }
     const_reference operator[](size_type n) const { return this->at(n); }
 };
+
+}  // namespace P4
 
 #endif /* LIB_SAFE_VECTOR_H_ */

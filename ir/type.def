@@ -9,6 +9,7 @@
 */
 
 #emit
+namespace P4 {
 namespace IR {
 enum class Direction {
     None,
@@ -61,6 +62,9 @@ inline bool operator>>(cstring s, IR::Direction &d) {
     else return false;
     return true;
 }
+
+}  // namespace P4
+
 #end
 
 /// This represents a type that can unify with any other type.

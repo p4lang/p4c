@@ -19,6 +19,10 @@ limitations under the License.
 
 #include "irclass.h"
 
+namespace P4 {
+
 IrDefinitions *parse(char **files, int count);
+
+}  // namespace P4
 
 #endif /* TOOLS_IR_GENERATOR_IR_GENERATOR_H_ */

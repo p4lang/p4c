@@ -20,7 +20,7 @@
 #include "lib/exceptions.h"
 #include "lib/log.h"
 
-namespace P4Tools::P4Smith {
+namespace P4::P4Tools::P4Smith {
 
 IR::Statement *StatementGenerator::genStatement(bool is_in_func) {
     // functions can!have exit statements so set their probability to zero
@@ -456,4 +456,4 @@ IR::ForInStatement *StatementGenerator::genForInLoopStatement(bool is_in_func) {
     return forInStmt;
 }
 
-}  // namespace P4Tools::P4Smith
+}  // namespace P4::P4Tools::P4Smith

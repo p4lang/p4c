@@ -136,11 +136,11 @@ struct StructTypeReplacement : public IHasDbPrint {
     /// { .s = { .a = R._t_s_a0, .b = R._t_s_b1 }, .y = R._t_y2 }
     const IR::StructExpression *explode(const IR::Expression *root, cstring prefix) {
         auto vec = new IR::IndexedVector<IR::NamedExpression>();
-        auto fieldType = ::get(structFieldMap, prefix);
+        auto fieldType = ::P4::get(structFieldMap, prefix);
         BUG_CHECK(fieldType, "No field for %1%", prefix);
         for (auto f : fieldType->fields) {
             cstring fieldName = prefix + "." + f->name.name;
-            auto newFieldname = ::get(fieldNameRemap, fieldName);
+            auto newFieldname = ::P4::get(fieldNameRemap, fieldName);
             const IR::Expression *expr;
             if (!newFieldname.isNullOrEmpty()) {
                 expr = new IR::Member(root, newFieldname);
@@ -171,7 +171,7 @@ struct NestedStructMap {
     }
     void createReplacement(const IR::Type_Struct *type);
     StructTypeReplacement<IR::Type_Struct> *getReplacement(const IR::Type *type) const {
-        return ::get(replacement, type);
+        return ::P4::get(replacement, type);
     }
     bool empty() const { return replacement.empty(); }
 };

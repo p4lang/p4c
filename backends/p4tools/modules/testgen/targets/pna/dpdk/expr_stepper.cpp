@@ -7,7 +7,7 @@
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/table_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/pna/shared_expr_stepper.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace P4::P4Tools::P4Testgen::Pna {
 
 std::string PnaDpdkExprStepper::getClassName() { return "PnaDpdkExprStepper"; }
 
@@ -39,4 +39,4 @@ bool PnaDpdkExprStepper::preorder(const IR::P4Table *table) {
     return PnaDpdkTableStepper(this, table).eval();
 }
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace P4::P4Tools::P4Testgen::Pna

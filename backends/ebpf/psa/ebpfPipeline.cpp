@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "backends/ebpf/ebpfParser.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 bool EBPFPipeline::isEmpty() const {
     // Check if parser doesn't have any state
@@ -95,7 +95,7 @@ void EBPFPipeline::emitUserMetadataInstance(CodeBuilder *builder) {
     builder->emitIndent();
     auto user_md_type = typeMap->getType(control->user_metadata);
     if (user_md_type == nullptr) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "cannot emit user metadata");
+        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "cannot emit user metadata");
     }
     auto userMetadataType = EBPFTypeFactory::instance->create(user_md_type);
     userMetadataType->declare(builder, control->user_metadata->name.name, true);
@@ -889,4 +889,4 @@ void TCTrafficManagerForXDP::emitReadXDP2TCMetadataFromCPUMAP(CodeBuilder *build
     builder->emitIndent();
 }
 
-}  // namespace EBPF
+}  // namespace P4::EBPF

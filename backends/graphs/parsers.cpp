@@ -21,7 +21,7 @@
 #include "frontends/p4/toP4/toP4.h"
 #include "lib/nullstream.h"
 
-namespace graphs {
+namespace P4::graphs {
 
 using Graph = ParserGraphs::Graph;
 
@@ -119,4 +119,4 @@ void ParserGraphs::postorder(const IR::SelectExpression *expression) {
         new TransitionEdge(state, reject->to<IR::ParserState>(), "fallthrough"_cs));
 }
 
-}  // namespace graphs
+}  // namespace P4::graphs

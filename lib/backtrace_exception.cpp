@@ -19,7 +19,6 @@ limitations under the License.
 #include <stdarg.h>
 #if HAVE_LIBBACKTRACE
 #include <backtrace.h>
-extern struct backtrace_state *global_backtrace_state;
 #endif
 
 #include <functional>
@@ -32,7 +31,11 @@ extern struct backtrace_state *global_backtrace_state;
 #include "exename.h"
 #include "hex.h"
 
+namespace P4 {
+
 #if HAVE_LIBBACKTRACE
+extern struct backtrace_state *global_backtrace_state;
+
 int append_message(void *msg_, uintptr_t pc, const char *file, int line, const char *func) {
     std::string &msg = *static_cast<std::string *>(msg_);
     std::stringstream tmp;
@@ -72,6 +75,8 @@ void backtrace_fill_stacktrace(std::string &msg, void *const *backtrace, int siz
 #endif
 }
 
+}  // namespace P4
+
 #ifdef __GLIBC__
 /* DANGER -- overrides for glibc++ exception throwers to include a stack trace.
  * correct functions depends on library internals, so may not work on some versions
@@ -79,19 +84,21 @@ void backtrace_fill_stacktrace(std::string &msg, void *const *backtrace, int siz
 
 namespace std {
 
-void __throw_bad_alloc() { throw backtrace_exception<bad_alloc>(); }
+void __throw_bad_alloc() { throw ::P4::backtrace_exception<bad_alloc>(); }
 
-void __throw_bad_cast() { throw backtrace_exception<bad_cast>(); }
+void __throw_bad_cast() { throw ::P4::backtrace_exception<bad_cast>(); }
 
-void __throw_bad_function_call() { throw backtrace_exception<bad_function_call>(); }
+void __throw_bad_function_call() { throw ::P4::backtrace_exception<bad_function_call>(); }
 
-void __throw_invalid_argument(char const *m) { throw backtrace_exception<invalid_argument>(m); }
+void __throw_invalid_argument(char const *m) {
+    throw ::P4::backtrace_exception<invalid_argument>(m);
+}
 
-void __throw_length_error(char const *m) { throw backtrace_exception<length_error>(m); }
+void __throw_length_error(char const *m) { throw ::P4::backtrace_exception<length_error>(m); }
 
-void __throw_logic_error(char const *m) { throw backtrace_exception<logic_error>(m); }
+void __throw_logic_error(char const *m) { throw ::P4::backtrace_exception<logic_error>(m); }
 
-void __throw_out_of_range(char const *m) { throw backtrace_exception<out_of_range>(m); }
+void __throw_out_of_range(char const *m) { throw ::P4::backtrace_exception<out_of_range>(m); }
 
 void __throw_out_of_range_fmt(char const *fmt, ...) {
     char buffer[1024];  // should be large enough for all cases?
@@ -99,15 +106,15 @@ void __throw_out_of_range_fmt(char const *fmt, ...) {
     va_start(args, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, args);
     va_end(args);
-    throw backtrace_exception<out_of_range>(buffer);
+    throw ::P4::backtrace_exception<out_of_range>(buffer);
 }
 
 void __throw_regex_error(regex_constants::error_type err) {
-    throw backtrace_exception<regex_error>(err);
+    throw ::P4::backtrace_exception<regex_error>(err);
 }
 
 void __throw_system_error(int err) {
-    throw backtrace_exception<system_error>(error_code(err, generic_category()));
+    throw ::P4::backtrace_exception<system_error>(error_code(err, generic_category()));
 }
 
 }  // namespace std

@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "lib/json.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 std::map<cstring, ExternConverter *> *ExternConverter::cvtForType = nullptr;
 
@@ -72,8 +72,8 @@ Util::IJson *ExternConverter::convertExternObject(ConversionContext *ctxt,
         }
         return primitive;
     } else {
-        ::error(ErrorType::ERR_UNKNOWN, "Unknown extern method %1% from type %2%", em->method->name,
-                em->originalExternType->name);
+        ::P4::error(ErrorType::ERR_UNKNOWN, "Unknown extern method %1% from type %2%",
+                    em->method->name, em->originalExternType->name);
         return nullptr;
     }
 }
@@ -83,7 +83,7 @@ Util::IJson *ExternConverter::convertExternObject(ConversionContext *ctxt,
 void ExternConverter::convertExternInstance(ConversionContext *ctxt, const IR::Declaration *decl,
                                             const IR::ExternBlock *eb, const bool &emitExterns) {
     if (!emitExterns) {
-        ::error(ErrorType::ERR_UNKNOWN, "%1%: unknown extern instance", eb->type->name);
+        ::P4::error(ErrorType::ERR_UNKNOWN, "%1%: unknown extern instance", eb->type->name);
         return;
     }
     auto attrs = new Util::JsonArray();
@@ -113,7 +113,7 @@ Util::IJson *ExternConverter::convertExternFunction(ConversionContext *ctxt,
                                                     const IR::StatOrDecl *s,
                                                     const bool emitExterns) {
     if (!emitExterns) {
-        ::error(ErrorType::ERR_UNKNOWN, "%1%: unknown extern function", ef->method->name);
+        ::P4::error(ErrorType::ERR_UNKNOWN, "%1%: unknown extern function", ef->method->name);
         return nullptr;
     }
     auto primitive = mkPrimitive(ef->method->name);
@@ -128,7 +128,7 @@ Util::IJson *ExternConverter::convertExternFunction(ConversionContext *ctxt,
 
 void ExternConverter::modelError(const char *format, const IR::Node *node) const {
     cstring errMsg = cstring(format) + ". Are you using an up-to-date v1model.p4?";
-    ::error(ErrorType::ERR_MODEL, errMsg.c_str(), node);
+    ::P4::error(ErrorType::ERR_MODEL, errMsg.c_str(), node);
 }
 
 void ExternConverter::addToFieldList(ConversionContext *ctxt, const IR::Expression *expr,
@@ -231,7 +231,7 @@ cstring ExternConverter::convertHashAlgorithm(cstring algorithm) {
     if (algorithm == P4V1::V1Model::instance.algorithm.csum16.name) return "csum16"_cs;
     if (algorithm == P4V1::V1Model::instance.algorithm.xor16.name) return "xor16"_cs;
 
-    ::error(ErrorType::ERR_UNSUPPORTED, "Unsupported algorithm %1%", algorithm);
+    ::P4::error(ErrorType::ERR_UNSUPPORTED, "Unsupported algorithm %1%", algorithm);
     return cstring::empty;
 }
 
@@ -242,7 +242,7 @@ Util::IJson *ExternConverter::convertAssertAssume(ConversionContext *ctxt,
                                                   const IR::MethodCallExpression *methodCall,
                                                   const P4::ExternFunction *ef) {
     if (methodCall->arguments->size() != 1) {
-        ::error(ErrorType::ERR_EXPECTED, "Expected 1 arguments for %1%", methodCall);
+        ::P4::error(ErrorType::ERR_EXPECTED, "Expected 1 arguments for %1%", methodCall);
         return nullptr;
     }
     auto primitive = mkPrimitive(ef->method->name.name);
@@ -270,4 +270,4 @@ Util::IJson *ExternConverter_assume::convertExternFunction(
     return ExternConverter::convertAssertAssume(ctxt, mc, ef);
 }
 
-}  // namespace BMV2
+}  // namespace P4::BMV2

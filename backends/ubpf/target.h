@@ -21,7 +21,7 @@ limitations under the License.
 #include "backends/ebpf/target.h"
 #include "ubpfHelpers.h"
 
-namespace UBPF {
+namespace P4::UBPF {
 
 using namespace P4::literals;
 
@@ -64,6 +64,6 @@ class UbpfTarget : public EBPF::Target {
     cstring packetDescriptorType() const override { return "void"_cs; }
 };
 
-}  // namespace UBPF
+}  // namespace P4::UBPF
 
 #endif /* BACKENDS_UBPF_TARGET_H_ */

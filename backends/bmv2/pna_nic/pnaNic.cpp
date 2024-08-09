@@ -19,7 +19,7 @@ limitations under the License.
 #include "frontends/common/model.h"
 #include "frontends/p4/cloner.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 using namespace P4::literals;
 
@@ -69,10 +69,10 @@ void PnaNicBackend::convert(const IR::ToplevelBlock *tlb) {
     if (!main) return;
 
     if (main->type->name != "PNA_NIC")
-        ::warning(ErrorType::WARN_INVALID,
-                  "%1%: the main package should be called PNA_NIC"
-                  "; are you using the wrong architecture?",
-                  main->type->name);
+        ::P4::warning(ErrorType::WARN_INVALID,
+                      "%1%: the main package should be called PNA_NIC"
+                      "; are you using the wrong architecture?",
+                      main->type->name);
 
     main->apply(*parsePnaArch);
 
@@ -112,7 +112,7 @@ void PnaNicBackend::convert(const IR::ToplevelBlock *tlb) {
     main = toplevel->getMain();
     if (!main) return;  // no main
     main->apply(*parsePnaArch);
-    if (::errorCount() > 0) return;
+    if (::P4::errorCount() > 0) return;
     program = toplevel->getProgram();
 
     PassManager toJson = {new P4::DiscoverStructure(&structure),
@@ -324,7 +324,8 @@ void ExternConverter_InternetChecksum::convertExternInstance(UNUSED ConversionCo
     auto mainParser = pnaStructure->parsers.at("main_parser"_cs)->controlPlaneName();
     auto mainDeparser = pnaStructure->deparsers.at("main_deparser"_cs)->controlPlaneName();
     if (block != mainParser && block != mainDeparser) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in pipeline on this target", eb);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in pipeline on this target",
+                    eb);
     }
     // add checksum instance
     auto jcksum = new Util::JsonObject();
@@ -369,17 +370,17 @@ void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext *c
     }
     auto regType = st->arguments->at(0);
     if (!regType->is<IR::Type_Bits>()) {
-        ::error(ErrorType::ERR_UNSUPPORTED,
-                "%1%: registers with types other than bit<> or int<> are not suppoted", eb);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: registers with types other than bit<> or int<> are not suppoted", eb);
         return;
     }
     unsigned width = regType->width_bits();
     if (width == 0) {
-        ::error(ErrorType::ERR_UNKNOWN, "%1%: unknown width", st->arguments->at(0));
+        ::P4::error(ErrorType::ERR_UNKNOWN, "%1%: unknown width", st->arguments->at(0));
         return;
     }
     jreg->emplace("bitwidth"_cs, width);
     ctxt->json->register_arrays->append(jreg);
 }
 
-}  // namespace BMV2
+}  // namespace P4::BMV2

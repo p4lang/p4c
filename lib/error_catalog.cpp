@@ -20,6 +20,8 @@ limitations under the License.
 
 #include "lib/cstring.h"
 
+namespace P4 {
+
 using namespace P4::literals;
 
 // -------- Errors -------------
@@ -122,3 +124,5 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     // Info messages
     {ErrorType::INFO_INFERRED, "inferred"_cs},
     {ErrorType::INFO_PROGRESS, "progress"_cs}};
+
+}  // namespace P4

@@ -33,11 +33,11 @@ limitations under the License.
 #include "gtest/gtest_prod.h"
 #endif
 
-namespace Test {
+namespace P4::Test {
 class UtilSourceFile;
 }
 
-namespace Util {
+namespace P4::Util {
 using namespace P4::literals;
 
 struct SourceFileLine;
@@ -324,8 +324,12 @@ class InputSources final {
     std::vector<Comment *> comments;
 };
 
-}  // namespace Util
+}  // namespace P4::Util
+
+namespace P4 {
 
 void dbprint(const IHasDbPrint *o);
+
+}  // namespace P4
 
 #endif /* LIB_SOURCE_FILE_H_ */

@@ -15,7 +15,7 @@
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
-namespace Test {
+namespace P4::Test {
 
 using namespace P4::literals;
 
@@ -310,4 +310,4 @@ TEST_F(Z3SolverCastBit2Bool, Cast) { test(expression, variableValue); }
 
 }  // namespace Z3Test
 
-}  // namespace Test
+}  // namespace P4::Test

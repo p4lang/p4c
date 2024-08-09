@@ -8,7 +8,7 @@
 #include "ir/visitor.h"
 #include "lib/castable.h"
 
-namespace P4Tools {
+namespace P4::P4Tools {
 
 /// An event in a trace of the execution of a P4 program.
 class TraceEvent : public ICastable {
@@ -38,6 +38,6 @@ class TraceEvent : public ICastable {
     DECLARE_TYPEINFO(TraceEvent);
 };
 
-}  // namespace P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_TRACE_EVENT_H_ */

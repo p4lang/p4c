@@ -66,7 +66,8 @@ const IR::Node *DoExpandEmit::postorder(IR::MethodCallStatement *statement) {
         if (em->originalExternType->name.name == P4::P4CoreLibrary::instance().packetOut.name &&
             em->method->name.name == P4::P4CoreLibrary::instance().packetOut.emit.name) {
             if (em->expr->arguments->size() != 1) {
-                ::error(ErrorType::ERR_UNEXPECTED, "%1%: expected exactly 1 argument", statement);
+                ::P4::error(ErrorType::ERR_UNEXPECTED, "%1%: expected exactly 1 argument",
+                            statement);
                 return statement;
             }
 

@@ -4,6 +4,8 @@
 #include "frontends/parsers/v1/v1lexer_internal.hpp"
 #include "frontends/parsers/v1/v1parser.hpp"
 
+using namespace P4;
+
 using Parser = V1::V1Parser;
 
 #undef  YY_DECL

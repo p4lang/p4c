@@ -9,6 +9,8 @@
 #include "lib/exceptions.h"
 #include "lib/timer.h"
 
+using namespace P4;
+
 int main(int argc, char **argv) {
     setup_signals();
 

@@ -36,6 +36,7 @@ limitations under the License.
 
 #include "hash.h"
 
+namespace P4 {
 namespace {
 enum class table_entry_flags {
     none,
@@ -322,3 +323,5 @@ cstring cstring::capitalize() const {
     st[0] = ::toupper(st[0]);
     return cstring(st);
 }
+
+}  // namespace P4

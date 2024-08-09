@@ -51,7 +51,7 @@ limitations under the License.
 #include "midend/tableHit.h"
 #include "midend/validateProperties.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 using namespace P4::literals;
 
@@ -135,9 +135,9 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
     midEnd.setName("MidEnd");
     midEnd.addDebugHooks(hooks);
     program = program->apply(midEnd);
-    if (::errorCount() > 0) return nullptr;
+    if (::P4::errorCount() > 0) return nullptr;
 
     return evaluator->getToplevelBlock();
 }
 
-}  // namespace EBPF
+}  // namespace P4::EBPF

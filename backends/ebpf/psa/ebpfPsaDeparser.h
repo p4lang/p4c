@@ -24,7 +24,7 @@ limitations under the License.
 #include "ebpfPsaControl.h"
 #include "lib/rtti.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 class EBPFDeparserPSA;
 
@@ -55,13 +55,13 @@ class EBPFDeparserPSA : public EBPFDeparser {
     void emitDeclaration(CodeBuilder *builder, const IR::Declaration *decl) override;
 
     EBPFChecksumPSA *getChecksum(cstring name) const {
-        auto result = ::get(checksums, name);
+        auto result = ::P4::get(checksums, name);
         BUG_CHECK(result != nullptr, "No checksum named %1%", name);
         return result;
     }
 
     EBPFDigestPSA *getDigest(cstring name) const {
-        auto result = ::get(digests, name);
+        auto result = ::P4::get(digests, name);
         BUG_CHECK(result != nullptr, "No digest named %1%", name);
         return result;
     }
@@ -154,6 +154,6 @@ class XDPEgressDeparserPSA : public EgressDeparserPSA {
     DECLARE_TYPEINFO(XDPEgressDeparserPSA, EgressDeparserPSA);
 };
 
-}  // namespace EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EBPFPSADEPARSER_H_ */

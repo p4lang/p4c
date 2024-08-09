@@ -156,7 +156,7 @@ class ParserStructure {
         start = nullptr;
     }
     void addState(const IR::ParserState *state) { stateMap.emplace(state->name, state); }
-    const IR::ParserState *get(cstring state) const { return ::get(stateMap, state); }
+    const IR::ParserState *get(cstring state) const { return ::P4::get(stateMap, state); }
     void calls(const IR::ParserState *caller, const IR::ParserState *callee) {
         callGraph->calls(caller, callee);
     }

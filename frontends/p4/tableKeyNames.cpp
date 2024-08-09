@@ -21,8 +21,8 @@ namespace P4 {
 using namespace literals;
 
 void KeyNameGenerator::error(const IR::Expression *expression) {
-    ::error(ErrorType::ERR_EXPECTED, "%1%: Complex key expression requires a @name annotation",
-            expression);
+    ::P4::error(ErrorType::ERR_EXPECTED, "%1%: Complex key expression requires a @name annotation",
+                expression);
 }
 
 void KeyNameGenerator::postorder(const IR::Expression *expression) { error(expression); }

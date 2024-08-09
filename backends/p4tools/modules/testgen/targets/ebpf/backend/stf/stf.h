@@ -12,7 +12,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools::P4Testgen::EBPF {
+namespace P4::P4Tools::P4Testgen::EBPF {
 
 /// Extracts information from the @testSpec to emit a STF test case.
 class STF : public TestFramework {
@@ -55,6 +55,6 @@ class STF : public TestFramework {
                                               const std::vector<ActionArg> &args);
 };
 
-}  // namespace P4Tools::P4Testgen::EBPF
+}  // namespace P4::P4Tools::P4Testgen::EBPF
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_BACKEND_STF_STF_H_ */

@@ -28,6 +28,8 @@ limitations under the License.
 #include "big_int.h"
 #include "cstring.h"
 
+namespace P4 {
+
 class IHasDbPrint {
  public:
     virtual void dbprint(std::ostream &out) const = 0;
@@ -132,5 +134,7 @@ inline auto operator<<(std::ostream &out,
         out << "<null>";
     return out;
 }
+
+}  // namespace P4
 
 #endif /* LIB_STRINGIFY_H_ */

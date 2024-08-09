@@ -19,7 +19,7 @@ limitations under the License.
 #include "backend.h"
 #include "ir/ir.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 /// TODO(hanw): remove.
 Util::JsonArray *HeaderConverter::pushNewArray(Util::JsonArray *parent) {
@@ -43,9 +43,9 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike *type, bool
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
             if (!meta && ft->is<IR::Type_Struct>()) {
-                ::error(ErrorType::ERR_INVALID,
-                        "%1%: type should only contain headers, header stacks, or header unions",
-                        type);
+                ::P4::error(
+                    ErrorType::ERR_INVALID,
+                    "%1%: type should only contain headers, header stacks, or header unions", type);
                 return;
             }
             auto st = ft->to<IR::Type_StructLike>();
@@ -236,8 +236,8 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
             max_length += type->size;
             field->append("*");
             if (varbitFound)
-                ::error(ErrorType::ERR_UNSUPPORTED,
-                        "%1%: headers with multiple varbit fields not supported", st);
+                ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                            "%1%: headers with multiple varbit fields not supported", st);
             varbitFound = true;
         } else if (ftype->is<IR::Type_Error>()) {
             // treat as bit<32>
@@ -257,11 +257,11 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
     unsigned padding = max_length % 8;
     if (padding != 0) {
         if (st->is<IR::Type_Header>()) {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "%1%: Found header with fields totaling %2% bits."
-                    "  BMv2 target only supports headers with fields"
-                    " totaling a multiple of 8 bits.",
-                    st, max_length);
+            ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: Found header with fields totaling %2% bits."
+                        "  BMv2 target only supports headers with fields"
+                        " totaling a multiple of 8 bits.",
+                        st, max_length);
         } else if (st->is<IR::Type_Struct>()) {
             cstring name = ctxt->refMap->newName("_padding");
             auto field = pushNewArray(fields);
@@ -298,8 +298,8 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
                     target_name = aliasAnnotation->body.at(0)->text;
                 } else {
                     // aliasAnnotation->body is empty or not saved correctly
-                    ::error(ErrorType::ERR_INVALID,
-                            "There is no saved data for aliases target_name.");
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "There is no saved data for aliases target_name.");
                 }
             }
             LOG2("field alias " << target_name);
@@ -458,4 +458,4 @@ bool HeaderConverter::preorder(const IR::Parameter *param) {
     return false;
 }
 
-}  // namespace BMV2
+}  // namespace P4::BMV2

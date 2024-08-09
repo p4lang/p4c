@@ -219,7 +219,7 @@ class P4ParserDriver final : public AbstractParserDriver {
 
 }  // namespace P4
 
-namespace V1 {
+namespace P4::V1 {
 
 class V1Lexer;
 class V1Parser;
@@ -290,6 +290,6 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
     V1ParserDriver();
 };
 
-}  // namespace V1
+}  // namespace P4::V1
 
 #endif /* FRONTENDS_PARSERS_PARSERDRIVER_H_ */

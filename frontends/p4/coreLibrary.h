@@ -32,6 +32,8 @@ enum class StandardExceptions {
 };
 }  // namespace P4
 
+namespace P4 {
+
 inline std::ostream &operator<<(std::ostream &out, P4::StandardExceptions e) {
     switch (e) {
         case P4::StandardExceptions::NoError:
@@ -58,6 +60,8 @@ inline std::ostream &operator<<(std::ostream &out, P4::StandardExceptions e) {
     return out;
 }
 
+}  // namespace P4
+
 namespace P4 {
 
 using namespace literals;
@@ -83,10 +87,11 @@ class PacketOut : public Model::Extern_Model {
     Model::Elem emit;
 };
 
-class P4Exception_Model : public ::Model::Elem {
+class P4Exception_Model : public ::P4::Model::Elem {
  public:
     const StandardExceptions exc;
-    explicit P4Exception_Model(StandardExceptions exc) : ::Model::Elem(cstring::empty), exc(exc) {
+    explicit P4Exception_Model(StandardExceptions exc)
+        : ::P4::Model::Elem(cstring::empty), exc(exc) {
         std::stringstream str;
         str << exc;
         name = str.str();
@@ -95,7 +100,7 @@ class P4Exception_Model : public ::Model::Elem {
 
 // Model of P4 core library
 // To be kept in sync with core.p4
-class P4CoreLibrary : public ::Model::Model {
+class P4CoreLibrary : public ::P4::Model::Model {
  protected:
     // NOLINTBEGIN(bugprone-throw-keyword-missing)
     P4CoreLibrary()
@@ -115,11 +120,11 @@ class P4CoreLibrary : public ::Model::Model {
         static P4CoreLibrary *corelib = new P4CoreLibrary();
         return *corelib;
     }
-    ::Model::Elem noAction;
+    ::P4::Model::Elem noAction;
 
-    ::Model::Elem exactMatch;
-    ::Model::Elem ternaryMatch;
-    ::Model::Elem lpmMatch;
+    ::P4::Model::Elem exactMatch;
+    ::P4::Model::Elem ternaryMatch;
+    ::P4::Model::Elem lpmMatch;
 
     PacketIn packetIn;
     PacketOut packetOut;

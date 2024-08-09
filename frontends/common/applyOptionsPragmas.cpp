@@ -72,15 +72,15 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::pa
     }
 
     if (pragmaArgs->size() != 2) {
-        ::warning(ErrorType::WARN_MISSING, "@diagnostic takes two arguments: %1%", annotation);
+        ::P4::warning(ErrorType::WARN_MISSING, "@diagnostic takes two arguments: %1%", annotation);
         return std::nullopt;
     }
 
     auto *diagnosticName = pragmaArgs->at(0)->to<IR::StringLiteral>();
     auto *diagnosticAction = pragmaArgs->at(1)->to<IR::StringLiteral>();
     if (!diagnosticName || !diagnosticAction) {
-        ::warning(ErrorType::WARN_MISSING, "@diagnostic arguments must be strings: %1%",
-                  annotation);
+        ::P4::warning(ErrorType::WARN_MISSING, "@diagnostic arguments must be strings: %1%",
+                      annotation);
         return std::nullopt;
     }
 
@@ -92,10 +92,10 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::pa
     } else if (diagnosticAction->value == "error") {
         diagnosticOption = "--Werror="_cs;
     } else {
-        ::warning(ErrorType::WARN_MISMATCH,
-                  "@diagnostic's second argument must be 'disable', "
-                  "'warn', or 'error': %1%",
-                  annotation);
+        ::P4::warning(ErrorType::WARN_MISMATCH,
+                      "@diagnostic's second argument must be 'disable', "
+                      "'warn', or 'error': %1%",
+                      annotation);
         return std::nullopt;
     }
 

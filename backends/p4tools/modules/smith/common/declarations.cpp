@@ -19,7 +19,7 @@
 #include "lib/exceptions.h"
 #include "lib/source_file.h"
 
-namespace P4Tools::P4Smith {
+namespace P4::P4Tools::P4Smith {
 
 IR::StatOrDecl *DeclarationGenerator::generateRandomStatementOrDeclaration(bool is_in_func) {
     std::vector<int64_t> percent = {PCT.STATEMENTORDECLARATION_VAR,
@@ -746,4 +746,4 @@ IR::ParameterList *DeclarationGenerator::genParameterList() {
     return new IR::ParameterList(params);
 }
 
-}  // namespace P4Tools::P4Smith
+}  // namespace P4::P4Tools::P4Smith

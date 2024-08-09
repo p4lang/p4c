@@ -23,6 +23,8 @@ limitations under the License.
 
 #include "big_int_util.h"
 
+namespace P4 {
+
 /// The ternary expression being matched, given as a pair of bitmasks:
 /// (word0, word1). The ternary expression cares about the value of an
 /// input bit if the corresponding bit is set in exactly one of the
@@ -57,5 +59,7 @@ struct match_t {
 
 std::ostream &operator<<(std::ostream &, const match_t &);
 bool operator>>(const char *, match_t &);
+
+}  // namespace P4
 
 #endif /* LIB_MATCH_H_ */

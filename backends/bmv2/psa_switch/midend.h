@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "backends/bmv2/portable_common/midend.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 class PsaSwitchMidEnd : public PortableMidEnd {
  public:
@@ -27,6 +27,6 @@ class PsaSwitchMidEnd : public PortableMidEnd {
     explicit PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
 };
 
-}  // namespace BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_PSA_SWITCH_MIDEND_H_ */

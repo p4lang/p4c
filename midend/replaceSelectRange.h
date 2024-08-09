@@ -68,4 +68,5 @@ class ReplaceSelectRange final : public PassManager {
 };
 
 }  // namespace P4
+
 #endif /* MIDEND_REPLACESELECTRANGE_H_ */

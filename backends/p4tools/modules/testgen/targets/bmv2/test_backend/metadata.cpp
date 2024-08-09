@@ -22,7 +22,7 @@
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 Metadata::Metadata(const TestBackendConfiguration &testBackendConfiguration)
     : Bmv2TestFramework(testBackendConfiguration) {}
@@ -141,4 +141,4 @@ void Metadata::writeTestToFile(const TestSpec *testSpec, cstring selectedBranche
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2

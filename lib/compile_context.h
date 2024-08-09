@@ -23,6 +23,8 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/error_reporter.h"
 
+namespace P4 {
+
 /// An interface for objects which represent compiler settings and state for a
 /// translation unit. The compilation context might include things like compiler
 /// options which apply to the translation unit or errors and warnings generated
@@ -94,13 +96,13 @@ class BaseCompileContext : public ICompileContext {
     /// @return the error reporter for this compilation context.
     virtual ErrorReporter &errorReporter();
 
-    /// @return the default diagnostic action for calls to `::info()`.
+    /// @return the default diagnostic action for calls to `::P4::info()`.
     virtual DiagnosticAction getDefaultInfoDiagnosticAction();
 
-    /// @return the default diagnostic action for calls to `::warning()`.
+    /// @return the default diagnostic action for calls to `::P4::warning()`.
     virtual DiagnosticAction getDefaultWarningDiagnosticAction();
 
-    /// @return the default diagnostic action for calls to `::error()`.
+    /// @return the default diagnostic action for calls to `::P4::error()`.
     virtual DiagnosticAction getDefaultErrorDiagnosticAction();
 
     /// @return the diagnostic action to use for @diagnosticName, or
@@ -112,5 +114,7 @@ class BaseCompileContext : public ICompileContext {
     /// Error and warning tracking facilities for this compilation context.
     ErrorReporter errorReporterInstance;
 };
+
+}  // namespace P4
 
 #endif /* LIB_COMPILE_CONTEXT_H_ */

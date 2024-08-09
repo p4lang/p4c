@@ -54,7 +54,7 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeader *expressi
     if (!findContext<IR::BlockStatement>() && !findContext<IR::P4Action>() &&
         !findContext<IR::ParserState>()) {
         // We need some place to insert the setInvalid call.
-        ::error("%1%: Cannot eliminate invalid header", expression);
+        ::P4::error("%1%: Cannot eliminate invalid header", expression);
         return expression;
     }
     cstring name = refMap->newName("ih");
@@ -74,7 +74,7 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeaderUnion *exp
     if (!findContext<IR::BlockStatement>() && !findContext<IR::P4Action>() &&
         !findContext<IR::ParserState>()) {
         // We need some place to insert the setInvalid call.
-        ::error("%1%: Cannot eliminate invalid header union", expression);
+        ::P4::error("%1%: Cannot eliminate invalid header union", expression);
         return expression;
     }
     cstring name = refMap->newName("ih");

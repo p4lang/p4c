@@ -20,7 +20,7 @@ and limitations under the License.
 #include "backends/ebpf/ebpfOptions.h"
 #include "frontends/common/options.h"
 
-namespace TC {
+namespace P4::TC {
 
 class TCOptions : public CompilerOptions {
  public:
@@ -81,6 +81,6 @@ class TCOptions : public CompilerOptions {
 
 using TCContext = P4CContextWithOptions<TCOptions>;
 
-}  // namespace TC
+}  // namespace P4::TC
 
 #endif /* BACKENDS_TC_OPTIONS_H_ */

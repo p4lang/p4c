@@ -5,6 +5,8 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
+namespace P4 {
+
 /// DPDK target implementation treats tables with keys lying non-contiguous in underlying
 /// structure as wildcard even if all keys are exact match keys.
 /// Learner tables are special table with contiguous and exact match keys.
@@ -160,5 +162,7 @@ class InspectDpdkProgram : public Inspector {
     bool preorder(const IR::P4Action *) override;
     bool isStandardMetadata(cstring);
 };
+
+}  // namespace P4
 
 #endif /* BACKENDS_DPDK_DPDKPROGRAMSTRUCTURE_H_ */

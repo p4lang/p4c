@@ -23,6 +23,10 @@ limitations under the License.
 #include "ir/namemap.h"
 #include "ir/nodemap.h"
 #include "ir/visitor.h"
+#include "lib/ordered_map.h"
+
+namespace P4 {
+
 #define DEFINE_APPLY_FUNCTIONS(CLASS, TEMPLATE, TT, INLINE)                                       \
     TEMPLATE INLINE bool IR::CLASS TT::apply_visitor_preorder(Modifier &v) {                      \
         Node::traceVisit("Mod pre");                                                              \
@@ -198,7 +202,6 @@ void IR::IndexedVector<T>::toJSON(JSONGenerator &json) const {
 }
 IRNODE_DEFINE_APPLY_OVERLOAD(IndexedVector, template <class T>, <T>)
 
-#include "lib/ordered_map.h"
 template <class MAP>
 static inline void namemap_insert_helper(typename MAP::iterator, typename MAP::key_type k,
                                          typename MAP::mapped_type v, MAP &, MAP &new_symbols) {
@@ -325,4 +328,7 @@ void IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::visit_children(Visitor &v) const
         v.visit(k.second);
     }
 }
+
+}  // namespace P4
+
 #endif /* IR_IR_INLINE_H_ */

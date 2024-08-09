@@ -129,8 +129,8 @@ std::vector<const IR::CompileTimeValue *> *Evaluator::evaluateArguments(
         CHECK_NULL(folded);
         visit(folded);  // recursive evaluation
         if (!hasValue(folded)) {
-            ::error(ErrorType::ERR_INVALID, "%1%: Cannot evaluate to a compile-time constant",
-                    arg->expression);
+            ::P4::error(ErrorType::ERR_INVALID, "%1%: Cannot evaluate to a compile-time constant",
+                        arg->expression);
             popBlock(context);
             return nullptr;
         } else {

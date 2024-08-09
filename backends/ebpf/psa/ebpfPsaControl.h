@@ -23,7 +23,7 @@ limitations under the License.
 #include "backends/ebpf/psa/externs/ebpfPsaRegister.h"
 #include "ebpfPsaTable.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 class EBPFControlPSA;
 
@@ -79,25 +79,25 @@ class EBPFControlPSA : public EBPFControl {
     void emitTableInitializers(CodeBuilder *builder) override;
 
     EBPFRandomPSA *getRandomExt(cstring name) const {
-        auto result = ::get(randoms, name);
+        auto result = ::P4::get(randoms, name);
         BUG_CHECK(result != nullptr, "No random generator named %1%", name);
         return result;
     }
 
     EBPFRegisterPSA *getRegister(cstring name) const {
-        auto result = ::get(registers, name);
+        auto result = ::P4::get(registers, name);
         BUG_CHECK(result != nullptr, "No register named %1%", name);
         return result;
     }
 
     EBPFHashPSA *getHash(cstring name) const {
-        auto result = ::get(hashes, name);
+        auto result = ::P4::get(hashes, name);
         BUG_CHECK(result != nullptr, "No hash named %1%", name);
         return result;
     }
 
     EBPFMeterPSA *getMeter(cstring name) const {
-        auto result = ::get(meters, name);
+        auto result = ::P4::get(meters, name);
         BUG_CHECK(result != nullptr, "No meter named %1%", name);
         return result;
     }
@@ -105,6 +105,6 @@ class EBPFControlPSA : public EBPFControl {
     DECLARE_TYPEINFO(EBPFControlPSA, EBPFControl);
 };
 
-}  // namespace EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EBPFPSACONTROL_H_ */

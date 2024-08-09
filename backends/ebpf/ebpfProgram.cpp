@@ -27,28 +27,29 @@ limitations under the License.
 #include "frontends/common/options.h"
 #include "frontends/p4/coreLibrary.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 bool EBPFProgram::build() {
     auto pack = toplevel->getMain();
     if (pack->type->name == "xdp") {
         if (pack->getConstructorParameters()->size() != 3) {
-            ::error(ErrorType::ERR_EXPECTED,
-                    "Expected toplevel xdp package %1% to have 3 parameters", pack->type);
+            ::P4::error(ErrorType::ERR_EXPECTED,
+                        "Expected toplevel xdp package %1% to have 3 parameters", pack->type);
             return false;
         }
         model.arch = ModelArchitecture::XdpSwitch;
         progTarget = new XdpTarget(options.emitTraceMessages);
     } else {
         if (pack->type->name != "ebpfFilter")
-            ::warning(ErrorType::WARN_INVALID,
-                      "%1%: the main ebpf package should be called ebpfFilter or xdp"
-                      "; are you using the wrong architecture?",
-                      pack->type->name);
+            ::P4::warning(ErrorType::WARN_INVALID,
+                          "%1%: the main ebpf package should be called ebpfFilter or xdp"
+                          "; are you using the wrong architecture?",
+                          pack->type->name);
 
         if (pack->getConstructorParameters()->size() != 2) {
-            ::error(ErrorType::ERR_EXPECTED,
-                    "Expected toplevel ebpfFilter package %1% to have 2 parameters", pack->type);
+            ::P4::error(ErrorType::ERR_EXPECTED,
+                        "Expected toplevel ebpfFilter package %1% to have 2 parameters",
+                        pack->type);
             return false;
         }
         model.arch = ModelArchitecture::EbpfFilter;
@@ -357,4 +358,4 @@ bool EBPFProgram::isLibraryMethod(cstring methodName) {
     return XDP_METHODS.find(methodName) != XDP_METHODS.end();
 }
 
-}  // namespace EBPF
+}  // namespace P4::EBPF

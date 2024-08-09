@@ -15,7 +15,7 @@ limitations under the License.
 
 #include "printUtils.h"
 
-namespace DPDK {
+namespace P4::DPDK {
 
 bool ConvertToString::preorder(const IR::Expression *e) {
     BUG("%1% not implemented", e);
@@ -66,7 +66,7 @@ bool ConvertToString::preorder(const IR::MethodCallExpression *e) {
     if (auto path = e->method->to<IR::PathExpression>()) {
         out << path->path->name.name;
     } else {
-        ::error(ErrorType::ERR_INVALID, "%1% is not a PathExpression", e->toString());
+        ::P4::error(ErrorType::ERR_INVALID, "%1% is not a PathExpression", e->toString());
     }
     return false;
 }
@@ -80,7 +80,7 @@ bool ConvertToString::preorder(const IR::ArrayIndex *e) {
     if (auto cst = e->right->to<IR::Constant>()) {
         out << toStr(e->left) << "_" << cst->value;
     } else {
-        ::error(ErrorType::ERR_INVALID, "%1% is not a constant", e->right);
+        ::P4::error(ErrorType::ERR_INVALID, "%1% is not a constant", e->right);
     }
     return false;
 }
@@ -120,4 +120,4 @@ cstring toStr(const IR::Node *const n) {
         BUG("not implemented type");
     }
 }
-}  // namespace DPDK
+}  // namespace P4::DPDK

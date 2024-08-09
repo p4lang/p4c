@@ -43,9 +43,11 @@ struct AutoStdioInputStream {
     std::istream stream;
 };
 
-}  // anonymous namespace
+}  // namespace
 
 #else
+
+namespace {
 
 /// A RAII helper class that provides an istream wrapper for a stdio FILE*. This
 /// is an inefficient fallback implementation.
@@ -60,6 +62,8 @@ struct AutoStdioInputStream {
  private:
     std::stringstream stream;
 };
+
+}  // namespace
 
 #endif
 
@@ -280,7 +284,7 @@ void P4ParserDriver::onReadErrorDeclaration(IR::Type_Error *error) {
 
 }  // namespace P4
 
-namespace V1 {
+namespace P4::V1 {
 
 V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
 
@@ -343,4 +347,4 @@ const IR::Annotations *V1ParserDriver::takePragmasAsAnnotations() {
     return rv;
 }
 
-}  // namespace V1
+}  // namespace P4::V1

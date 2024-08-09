@@ -48,7 +48,7 @@ namespace p4configv1 = ::p4::config::v1;
 
 using namespace P4::literals;
 
-namespace Test {
+namespace P4::Test {
 
 namespace {
 
@@ -197,7 +197,7 @@ TEST_F(P4Runtime, IdAssignment) {
     // We expect exactly two errors:
     //   error: @id 33554740 is assigned to multiple declarations
     //   error: ingress.igTableWithIdInvalidPrefix: @id has the wrong 8-bit prefix
-    EXPECT_EQ(2u, ::diagnosticCount());
+    EXPECT_EQ(2u, ::P4::diagnosticCount());
 
     {
         // Check that 'igTable' ended up in the P4Info output.
@@ -371,7 +371,7 @@ TEST_F(P4Runtime, FieldIdAssignment) {
     // We expect exactly two errors:
     //   error: KeyElement: @id 99 is used multiple times
     //   error: KeyElement: 0 is not a valid @id value
-    EXPECT_EQ(2u, ::diagnosticCount());
+    EXPECT_EQ(2u, ::P4::diagnosticCount());
 
     {
         // Check the ids for igTable's match fields.
@@ -484,7 +484,7 @@ TEST_F(P4Runtime, IdAssignmentCounters) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0U, ::diagnosticCount());
+    EXPECT_EQ(0U, ::P4::diagnosticCount());
 
     // checks that myDirectCounter1 with the right ID prefix
     {
@@ -634,7 +634,7 @@ TEST_F(P4Runtime, P416MatchFields) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    EXPECT_EQ(0u, ::P4::diagnosticCount());
 
     const auto *igTable = findP4RuntimeTable(*test->p4Info, "ingress.igTable"_cs);
     ASSERT_TRUE(igTable != nullptr);
@@ -747,7 +747,7 @@ TEST_F(P4Runtime, DISABLED_P414MatchFields) {
                                         CompilerOptions::FrontendVersion::P4_14);
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0U, ::diagnosticCount());
+    EXPECT_EQ(0U, ::P4::diagnosticCount());
 
     const auto *igTable = findP4RuntimeTable(*test->p4Info, "igTable"_cs);
     ASSERT_TRUE(igTable != nullptr);
@@ -820,7 +820,7 @@ TEST_F(P4Runtime, Digests) {
     ASSERT_TRUE(test);
     // we expect one warning for the third digest, for which T is a tuple and we
     // have to auto-generate a name for the digest.
-    EXPECT_EQ(1U, ::diagnosticCount());
+    EXPECT_EQ(1U, ::P4::diagnosticCount());
     const auto &typeInfo = test->p4Info->type_info();
 
     // Verify that that the digest() instances match the ones we expect from the
@@ -942,7 +942,7 @@ TEST_F(P4Runtime, PSADigests) {
 
     ASSERT_TRUE(test);
     // 0 warnings
-    EXPECT_EQ(0U, ::diagnosticCount());
+    EXPECT_EQ(0U, ::P4::diagnosticCount());
     const auto &typeInfo = test->p4Info->type_info();
 
     // Verify that that the digest() instances match the ones we expect from the
@@ -1030,7 +1030,7 @@ TEST_F(P4Runtime, StaticTableEntries) {
     ASSERT_TRUE(test);
     // we expect one warning for 0x1111 &&& 0xF (the match will be re-written
     // as 0x0001 &&& 0xF to conform to the P4Runtime spec)
-    EXPECT_EQ(1U, ::diagnosticCount());
+    EXPECT_EQ(1U, ::P4::diagnosticCount());
 
     const auto *entries = test->entries;
     const auto &updates = entries->updates();
@@ -1159,7 +1159,7 @@ TEST_F(P4Runtime, IsConstTable) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0U, ::diagnosticCount());
+    EXPECT_EQ(0U, ::P4::diagnosticCount());
 
     const auto *tableConst = findP4RuntimeTable(*test->p4Info, "ingress.t_const"_cs);
     ASSERT_TRUE(tableConst != nullptr);
@@ -1202,7 +1202,7 @@ TEST_F(P4Runtime, TableActionsAnnotations) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0U, ::diagnosticCount());
+    EXPECT_EQ(0U, ::P4::diagnosticCount());
 
     const auto *table = findP4RuntimeTable(*test->p4Info, "ingress.t"_cs);
     ASSERT_TRUE(table != nullptr);
@@ -1267,7 +1267,7 @@ TEST_F(P4Runtime, ValueSet) {
                                         new ParseAnnotations());
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0U, ::diagnosticCount());
+    EXPECT_EQ(0U, ::P4::diagnosticCount());
 
     const auto *vset = findP4RuntimeValueSet(*test->p4Info, "parse.pvs"_cs);
     ASSERT_TRUE(vset != nullptr);
@@ -1328,7 +1328,7 @@ TEST_F(P4Runtime, Register) {
                                         new ParseAnnotations());
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0U, ::diagnosticCount());
+    EXPECT_EQ(0U, ::P4::diagnosticCount());
 
     {  // type parameter is tuple
         const auto *register_ = findP4RuntimeRegister(*test->p4Info, "ingress.my_register_1"_cs);
@@ -1392,7 +1392,7 @@ TEST_F(P4Runtime, Documentation) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0U, ::diagnosticCount());
+    EXPECT_EQ(0U, ::P4::diagnosticCount());
 
     {
         const auto *table = findP4RuntimeTable(*test->p4Info, "ingress.t"_cs);
@@ -1460,7 +1460,7 @@ TEST_F(P4Runtime, JsonSerializationPrintOptions) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0U, ::diagnosticCount());
+    EXPECT_EQ(0U, ::P4::diagnosticCount());
 
     {
         // Default options: expect whitespace
@@ -1509,7 +1509,7 @@ std::optional<P4::P4RuntimeAPI> P4RuntimePkgInfo::createTestCase(const char *ann
 TEST_F(P4RuntimePkgInfo, NoAnnotations) {
     auto test = createTestCase("");
     ASSERT_TRUE(test);
-    EXPECT_EQ(0U, ::diagnosticCount());
+    EXPECT_EQ(0U, ::P4::diagnosticCount());
     const auto &pkgInfo = test->p4Info->pkg_info();
     EXPECT_EQ(pkgInfo.arch(), "v1model");
 }
@@ -1520,7 +1520,7 @@ TEST_F(P4RuntimePkgInfo, GeneralCase) {
         @pkginfo(contact="p4-dev@lists.p4.org")
         @brief("This is a P4 program"))");
     ASSERT_TRUE(test);
-    EXPECT_EQ(0U, ::diagnosticCount());
+    EXPECT_EQ(0U, ::P4::diagnosticCount());
     const auto &pkgInfo = test->p4Info->pkg_info();
     EXPECT_EQ(pkgInfo.arch(), "v1model");
     EXPECT_EQ(pkgInfo.name(), "prog.p4");
@@ -1532,7 +1532,7 @@ TEST_F(P4RuntimePkgInfo, OverrideArch) {
     auto test = createTestCase(R"(@pkginfo(arch="v1"))");
     ASSERT_TRUE(test);
     // we expect 1 warning for overriding the architecture
-    EXPECT_EQ(1U, ::diagnosticCount());
+    EXPECT_EQ(1U, ::P4::diagnosticCount());
     const auto &pkgInfo = test->p4Info->pkg_info();
     EXPECT_EQ(pkgInfo.arch(), "v1");
 }
@@ -1541,7 +1541,7 @@ TEST_F(P4RuntimePkgInfo, ValueNotAString) {
     auto test = createTestCase(R"(@pkginfo(name=77))");
     ASSERT_TRUE(test);
     // we expect 1 error message
-    EXPECT_EQ(1U, ::diagnosticCount());
+    EXPECT_EQ(1U, ::P4::diagnosticCount());
     const auto &pkgInfo = test->p4Info->pkg_info();
     EXPECT_EQ(pkgInfo.name(), "");
 }
@@ -1559,7 +1559,7 @@ TEST_F(P4RuntimePkgInfo, UnknownAnnotations) {
         @my_annotation_3(test)
         @my_annotation_4("test"))");
     ASSERT_TRUE(test);
-    EXPECT_EQ(0U, ::diagnosticCount());
+    EXPECT_EQ(0U, ::P4::diagnosticCount());
     const auto &pkgInfo = test->p4Info->pkg_info();
     const auto &annotations = pkgInfo.annotations();
     ASSERT_EQ(annotations.size(), 4);
@@ -1578,7 +1578,7 @@ TEST_F(P4RuntimePkgInfo, UnknownStructuredAnnotations) {
         @my_annotation_2[1,"hello",true,1==2,5+6]
         @my_annotation_3[label="text", my_bool=true, int_val=2*3])");
     ASSERT_TRUE(test);
-    EXPECT_EQ(0U, ::diagnosticCount());
+    EXPECT_EQ(0U, ::P4::diagnosticCount());
     const auto &pkgInfo = test->p4Info->pkg_info();
     const auto &annotations = pkgInfo.structured_annotations();
     ASSERT_EQ(annotations.size(), 3);
@@ -1642,7 +1642,7 @@ TEST_F(P4RuntimePkgInfo, StructuredAnnotationLargeInt) {
         @my_annotation_1[foo=6666666666666666666666666666666])");
     // error is in P4Info serializer
     ASSERT_TRUE(test);
-    EXPECT_EQ(1u, ::diagnosticCount());
+    EXPECT_EQ(1u, ::P4::diagnosticCount());
 }
 
 class P4RuntimeDataTypeSpec : public P4Runtime {
@@ -1741,7 +1741,7 @@ TEST_F(P4RuntimeDataTypeSpec, Struct) {
         my_extern_t<my_struct>(32w1024) my_extern;
     )");
     const auto *pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+    ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
@@ -1767,7 +1767,7 @@ TEST_F(P4RuntimeDataTypeSpec, Header) {
         my_extern_t<my_header>(32w1024) my_extern;
     )");
     const auto *pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+    ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
@@ -1793,7 +1793,7 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderWithFlattening) {
         my_extern_t<my_header>(32w1024) my_extern;
     )");
     const auto *pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+    ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
@@ -1822,7 +1822,7 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderUnion) {
         my_extern_t<my_header_union>(32w1024) my_extern;
     )");
     const auto *pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+    ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
@@ -1852,7 +1852,7 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderStack) {
         my_extern_t<my_header[3]>(32w1024) my_extern;
     )");
     const auto *pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+    ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     const auto *type = findExternTypeParameterName<IR::Type_Stack>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
@@ -1874,7 +1874,7 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderUnionStack) {
         my_extern_t<my_header_union[3]>(32w1024) my_extern;
     )");
     auto pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+    ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     auto type = findExternTypeParameterName<IR::Type_Stack>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
@@ -1896,7 +1896,7 @@ TEST_F(P4RuntimeDataTypeSpec, Enum) {
         my_extern_t<my_enum>(32w1024) my_extern;
     )");
     const auto *pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+    ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
@@ -1919,7 +1919,7 @@ TEST_F(P4RuntimeDataTypeSpec, SerEnum) {
         my_extern_t<my_enum>(32w1024) my_extern;
     )");
     const auto *pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+    ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
@@ -1944,7 +1944,7 @@ TEST_F(P4RuntimeDataTypeSpec, Error) {
         my_extern_t<error>(32w1024) my_extern;
     )");
     const auto *pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+    ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
@@ -1966,7 +1966,7 @@ TEST_F(P4RuntimeDataTypeSpec, StructWithTypedef) {
         my_extern_t<my_struct>(32w1024) my_extern;
     )");
     const auto *pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+    ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
@@ -1999,7 +1999,7 @@ TEST_F(P4RuntimeDataTypeSpec, NewType) {
         my_extern_t<my_struct>(32w1024) my_extern;
     )");
     const auto *pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+    ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
@@ -2060,7 +2060,7 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeInvalidTranslationAnnotations) {
         type bit<8> my_type5_t;
     )");
     getProgram(program);
-    ASSERT_EQ(::errorCount(), 5U);
+    ASSERT_EQ(::P4::errorCount(), 5U);
 }
 
 TEST_F(P4RuntimeDataTypeSpec, NewTypeIllegalTranslationAnnotations) {
@@ -2074,12 +2074,12 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeIllegalTranslationAnnotations) {
     )");
     const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr);
-    ASSERT_EQ(::errorCount(), 0U);  // No syntax error.
+    ASSERT_EQ(::P4::errorCount(), 0U);  // No syntax error.
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
     P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
-    EXPECT_EQ(1U, ::errorCount());  // But a type error.
+    EXPECT_EQ(1U, ::P4::errorCount());  // But a type error.
 }
 
 TEST_F(P4RuntimeDataTypeSpec, NewTypeValidTranslationAnnotations) {
@@ -2099,7 +2099,7 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeValidTranslationAnnotations) {
         my_extern_t<my_struct>(32w1024) my_extern;
     )");
     const auto *pgm = getProgram(program);
-    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+    ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
@@ -2119,4 +2119,4 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeValidTranslationAnnotations) {
     }
 }
 
-}  // namespace Test
+}  // namespace P4::Test

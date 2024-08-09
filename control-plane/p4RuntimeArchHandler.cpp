@@ -45,9 +45,9 @@ std::optional<ExternInstance> getExternInstanceFromProperty(const IR::P4Table *t
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return std::nullopt;
     if (!property->value->is<IR::ExpressionValue>()) {
-        ::error(ErrorType::ERR_EXPECTED,
-                "Expected %1% property value for table %2% to be an expression: %3%", propertyName,
-                table->controlPlaneName(), property);
+        ::P4::error(ErrorType::ERR_EXPECTED,
+                    "Expected %1% property value for table %2% to be an expression: %3%",
+                    propertyName, table->controlPlaneName(), property);
         return std::nullopt;
     }
 
@@ -55,19 +55,19 @@ std::optional<ExternInstance> getExternInstanceFromProperty(const IR::P4Table *t
     if (isConstructedInPlace) *isConstructedInPlace = expr->is<IR::ConstructorCallExpression>();
     if (expr->is<IR::ConstructorCallExpression>() &&
         property->getAnnotation(IR::Annotation::nameAnnotation) == nullptr) {
-        ::error(ErrorType::ERR_UNSUPPORTED,
-                "Table '%1%' has an anonymous table property '%2%' with no name annotation, "
-                "which is not supported by P4Runtime",
-                table->controlPlaneName(), propertyName);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                    "Table '%1%' has an anonymous table property '%2%' with no name annotation, "
+                    "which is not supported by P4Runtime",
+                    table->controlPlaneName(), propertyName);
         return std::nullopt;
     }
     auto name = property->controlPlaneName();
     auto externInstance = ExternInstance::resolve(expr, refMap, typeMap, name);
     if (!externInstance) {
-        ::error(ErrorType::ERR_INVALID,
-                "Expected %1% property value for table %2% to resolve to an "
-                "extern instance: %3%",
-                propertyName, table->controlPlaneName(), property);
+        ::P4::error(ErrorType::ERR_INVALID,
+                    "Expected %1% property value for table %2% to resolve to an "
+                    "extern instance: %3%",
+                    propertyName, table->controlPlaneName(), property);
         return std::nullopt;
     }
 
@@ -78,9 +78,9 @@ bool isExternPropertyConstructedInPlace(const IR::P4Table *table, const cstring 
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return false;
     if (!property->value->is<IR::ExpressionValue>()) {
-        ::error(ErrorType::ERR_EXPECTED,
-                "Expected %1% property value for table %2% to be an expression: %3%", propertyName,
-                table->controlPlaneName(), property);
+        ::P4::error(ErrorType::ERR_EXPECTED,
+                    "Expected %1% property value for table %2% to be an expression: %3%",
+                    propertyName, table->controlPlaneName(), property);
         return false;
     }
 
@@ -100,15 +100,15 @@ int64_t getTableSize(const IR::P4Table *table) {
     }
 
     if (!sizeProperty->value->is<IR::ExpressionValue>()) {
-        ::error(ErrorType::ERR_EXPECTED, "Expected an expression for table size property: %1%",
-                sizeProperty);
+        ::P4::error(ErrorType::ERR_EXPECTED, "Expected an expression for table size property: %1%",
+                    sizeProperty);
         return defaultTableSize;
     }
 
     auto expression = sizeProperty->value->to<IR::ExpressionValue>()->expression;
     if (!expression->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_EXPECTED, "Expected a constant for table size property: %1%",
-                sizeProperty);
+        ::P4::error(ErrorType::ERR_EXPECTED, "Expected a constant for table size property: %1%",
+                    sizeProperty);
         return defaultTableSize;
     }
 
@@ -132,10 +132,10 @@ void serializeStructuredExpression(const IR::Expression *expr, p4configv1::Expre
     if (expr->is<IR::Constant>()) {
         auto *constant = expr->to<IR::Constant>();
         if (!constant->fitsInt64()) {
-            ::error(ErrorType::ERR_OVERLIMIT,
-                    "%1%: integer literal in structured annotation must fit in int64, "
-                    "consider using a string literal for larger values",
-                    expr);
+            ::P4::error(ErrorType::ERR_OVERLIMIT,
+                        "%1%: integer literal in structured annotation must fit in int64, "
+                        "consider using a string literal for larger values",
+                        expr);
             return;
         }
         sExpr->set_int64_value(constant->asInt64());

@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/bmv2/pna_nic/midend.h"
 #include "backends/bmv2/portable_common/options.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 class PnaNicOptions : public PortableOptions {
  public:
@@ -40,6 +40,6 @@ class PnaNicOptions : public PortableOptions {
 
 using PnaNicContext = P4CContextWithOptions<PnaNicOptions>;
 
-}  // namespace BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_PNA_NIC_OPTIONS_H_ */

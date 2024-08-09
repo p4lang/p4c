@@ -16,6 +16,8 @@
 #include <cxxabi.h>
 #endif
 
+namespace P4 {
+
 extern const char *addr2line(void *addr, const char *text);
 
 #if HAVE_LIBBACKTRACE
@@ -110,3 +112,5 @@ std::ostream &operator<<(std::ostream &out, const AllocTrace &at) {
     }
     return out;
 }
+
+}  // namespace P4

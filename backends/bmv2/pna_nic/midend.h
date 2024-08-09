@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "backends/bmv2/portable_common/midend.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 class PnaNicMidEnd : public PortableMidEnd {
  public:
@@ -27,6 +27,6 @@ class PnaNicMidEnd : public PortableMidEnd {
     explicit PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
 };
 
-}  // namespace BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_PNA_NIC_MIDEND_H_ */

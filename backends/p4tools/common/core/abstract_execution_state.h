@@ -6,7 +6,7 @@
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "ir/ir.h"
 
-namespace P4Tools {
+namespace P4::P4Tools {
 
 /// Represents state of execution after having reached a program point.
 class AbstractExecutionState {
@@ -150,6 +150,6 @@ class AbstractExecutionState {
     [[nodiscard]] const IR::P4Action *getP4Action(const IR::MethodCallExpression *actionExpr) const;
 };
 
-}  // namespace P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_CORE_ABSTRACT_EXECUTION_STATE_H_ */

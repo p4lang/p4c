@@ -22,7 +22,7 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
-namespace Util {
+namespace P4::Util {
 
 TEST(UtilSourceFile, SourcePosition) {
     SourcePosition invalid;
@@ -99,4 +99,4 @@ TEST(UtilSourceFile, SourceInfo) {
     EXPECT_FALSE(invalid.isValid());
 }
 
-}  // namespace Util
+}  // namespace P4::Util

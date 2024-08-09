@@ -23,7 +23,7 @@ limitations under the License.
 #include "lib/rtti.h"
 #include "lib/sourceCodeBuilder.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 /// Base class for EBPF types
 class EBPFType : public EBPFObject {
@@ -223,6 +223,6 @@ class EBPFMethodDeclaration : public EBPFObject {
     DECLARE_TYPEINFO(EBPFMethodDeclaration, EBPFObject);
 };
 
-}  // namespace EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_EBPFTYPE_H_ */

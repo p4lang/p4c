@@ -28,7 +28,7 @@ void DoCheckConstants::postorder(const IR::MethodCallExpression *expression) {
                       expression);
             auto arg0 = expression->arguments->at(0)->expression;
             if (!arg0->is<IR::Constant>())
-                ::error(ErrorType::ERR_INVALID, "%1%: argument must be a constant", arg0);
+                ::P4::error(ErrorType::ERR_INVALID, "%1%: argument must be a constant", arg0);
         }
     }
 }

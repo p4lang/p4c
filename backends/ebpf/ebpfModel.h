@@ -22,26 +22,26 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 using namespace P4::literals;
 
-struct TableImpl_Model : public ::Model::Extern_Model {
+struct TableImpl_Model : public ::P4::Model::Extern_Model {
     explicit TableImpl_Model(cstring name) : Extern_Model(name), size("size"_cs) {}
-    ::Model::Elem size;
+    ::P4::Model::Elem size;
 };
 
-struct CounterArray_Model : public ::Model::Extern_Model {
+struct CounterArray_Model : public ::P4::Model::Extern_Model {
     CounterArray_Model()
         : Extern_Model("CounterArray"_cs),
           increment("increment"_cs),
           add("add"_cs),
           max_index("max_index"_cs),
           sparse("sparse"_cs) {}
-    ::Model::Elem increment;
-    ::Model::Elem add;
-    ::Model::Elem max_index;
-    ::Model::Elem sparse;
+    ::P4::Model::Elem increment;
+    ::P4::Model::Elem add;
+    ::P4::Model::Elem max_index;
+    ::P4::Model::Elem sparse;
 };
 
 enum ModelArchitecture {
@@ -49,21 +49,21 @@ enum ModelArchitecture {
     XdpSwitch,
 };
 
-struct Xdp_Model : public ::Model::Elem {
+struct Xdp_Model : public ::P4::Model::Elem {
     Xdp_Model() : Elem("xdp"_cs), parser("p"_cs), switch_("s"_cs), deparser("d"_cs) {}
-    ::Model::Elem parser;
-    ::Model::Elem switch_;
-    ::Model::Elem deparser;
+    ::P4::Model::Elem parser;
+    ::P4::Model::Elem switch_;
+    ::P4::Model::Elem deparser;
 };
 
-struct Filter_Model : public ::Model::Elem {
+struct Filter_Model : public ::P4::Model::Elem {
     Filter_Model() : Elem("ebpf_filter"_cs), parser("prs"_cs), filter("filt"_cs) {}
-    ::Model::Elem parser;
-    ::Model::Elem filter;
+    ::P4::Model::Elem parser;
+    ::P4::Model::Elem filter;
 };
 
 /// Keep this in sync with ebpf_model.p4 and xdp_model.p4
-class EBPFModel : public ::Model::Model {
+class EBPFModel : public ::P4::Model::Model {
  protected:
     EBPFModel()
         : counterArray(),
@@ -85,9 +85,9 @@ class EBPFModel : public ::Model::Model {
     CounterArray_Model counterArray;
     TableImpl_Model array_table;
     TableImpl_Model hash_table;
-    ::Model::Elem tableImplProperty;
-    ::Model::Elem CPacketName;
-    ::Model::Param_Model packet;
+    ::P4::Model::Elem tableImplProperty;
+    ::P4::Model::Elem CPacketName;
+    ::P4::Model::Param_Model packet;
     ModelArchitecture arch;
     /// Only one of these should be used, depending on arch value.
     Filter_Model filter;
@@ -99,6 +99,6 @@ class EBPFModel : public ::Model::Model {
     static cstring reserved(cstring name) { return reservedPrefix + name; }
 };
 
-}  // namespace EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_EBPFMODEL_H_ */

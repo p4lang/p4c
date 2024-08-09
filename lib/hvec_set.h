@@ -24,6 +24,8 @@ limitations under the License.
 #include "exceptions.h"
 #include "hashvec.h"
 
+namespace P4 {
+
 template <class KEY, class HASH = std::hash<KEY>, class PRED = std::equal_to<KEY>,
           class ALLOC = std::allocator<KEY>>
 class hvec_set : hash_vector_base {
@@ -251,5 +253,7 @@ class hvec_set : hash_vector_base {
     void resizedata(size_t sz) override { data.resize(sz); }
     void moveentry(size_t to, size_t from) override { data[to] = data[from]; }
 };
+
+}  // namespace P4
 
 #endif /* LIB_HVEC_SET_H_ */

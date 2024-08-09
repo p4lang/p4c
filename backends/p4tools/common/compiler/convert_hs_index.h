@@ -7,7 +7,7 @@
 #include "ir/node.h"
 #include "ir/visitor.h"
 
-namespace P4Tools {
+namespace P4::P4Tools {
 
 /// The main class for finding non-concrete header stack indices.
 class HSIndexToMember : public Transform {
@@ -21,6 +21,6 @@ class HSIndexToMember : public Transform {
                                                    size_t arrayIndex);
 };
 
-}  // namespace P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_CONVERT_HS_INDEX_H_ */

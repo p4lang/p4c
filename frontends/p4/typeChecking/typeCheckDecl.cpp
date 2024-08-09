@@ -260,7 +260,7 @@ const IR::Node *TypeInference::preorder(IR::Declaration_Instance *decl) {
             return decl;
         }
         if (!simpleType->is<IR::Type_Package>() && (findContext<IR::IContainer>() == nullptr)) {
-            ::error(ErrorType::ERR_INVALID, "%1%: cannot instantiate at top-level", decl);
+            ::P4::error(ErrorType::ERR_INVALID, "%1%: cannot instantiate at top-level", decl);
             return decl;
         }
         auto typeAndArgs =

@@ -31,6 +31,7 @@ limitations under the License.
 #define __attribute__(X)
 #endif
 
+namespace P4 {
 namespace Log {
 namespace Detail {
 // The global verbosity level.
@@ -75,9 +76,9 @@ inline std::ostream &endl(std::ostream &out) {
     Detail::OutputLogPrefix::indent(out);
     return out;
 }
-using IndentCtl::indent;
-using IndentCtl::TempIndent;
-using IndentCtl::unindent;
+using ::P4::IndentCtl::indent;
+using ::P4::IndentCtl::TempIndent;
+using ::P4::IndentCtl::unindent;
 
 inline bool fileLogLevelIsAtLeast(const char *file, int level) {
     // If there's no file with a log level of at least @level, we don't need to do
@@ -100,6 +101,7 @@ inline bool enableLogging() {
 void increaseVerbosity();
 
 }  // namespace Log
+}  // namespace P4
 
 #ifndef MAX_LOGGING_LEVEL
 // can be set on build command line and disables higher logging levels at compile time
@@ -107,13 +109,13 @@ void increaseVerbosity();
 #endif
 
 // NOLINTBEGIN(bugprone-macro-parentheses)
-#define LOGGING(N)                                                            \
-    ((N) <= MAX_LOGGING_LEVEL && ::Log::fileLogLevelIsAtLeast(__FILE__, N) && \
-     ::Log::enableLogging())
-#define LOGN(N, X)                                                        \
-    (LOGGING(N) ? ::Log::Detail::fileLogOutput(__FILE__)                  \
-                      << ::Log::Detail::OutputLogPrefix(__FILE__, N) << X \
-                      << ::Log::Detail::clearPrefix << std::endl          \
+#define LOGGING(N)                                                              \
+    ((N) <= MAX_LOGGING_LEVEL && P4::Log::fileLogLevelIsAtLeast(__FILE__, N) && \
+     P4::Log::enableLogging())
+#define LOGN(N, X)                                                          \
+    (LOGGING(N) ? P4::Log::Detail::fileLogOutput(__FILE__)                  \
+                      << P4::Log::Detail::OutputLogPrefix(__FILE__, N) << X \
+                      << P4::Log::Detail::clearPrefix << std::endl          \
                 : std::clog)
 #define LOG1(X) LOGN(1, X)
 #define LOG2(X) LOGN(2, X)
@@ -126,7 +128,7 @@ void increaseVerbosity();
 #define LOG9(X) LOGN(9, X)
 
 #define LOGN_UNINDENT(N) \
-    (LOGGING(N) ? ::Log::Detail::fileLogOutput(__FILE__) << IndentCtl::unindent : std::clog)
+    (LOGGING(N) ? P4::Log::Detail::fileLogOutput(__FILE__) << P4::IndentCtl::unindent : std::clog)
 #define LOG1_UNINDENT LOGN_UNINDENT(1)
 #define LOG2_UNINDENT LOGN_UNINDENT(2)
 #define LOG3_UNINDENT LOGN_UNINDENT(3)
@@ -137,16 +139,18 @@ void increaseVerbosity();
 #define LOG8_UNINDENT LOGN_UNINDENT(8)
 #define LOG9_UNINDENT LOGN_UNINDENT(9)
 
-#define LOG_FEATURE(TAG, N, X)                                             \
-    ((N) <= MAX_LOGGING_LEVEL && ::Log::fileLogLevelIsAtLeast(TAG, N)      \
-         ? ::Log::Detail::fileLogOutput(TAG)                               \
-               << ::Log::Detail::OutputLogPrefix(TAG, N) << X << std::endl \
+#define LOG_FEATURE(TAG, N, X)                                               \
+    ((N) <= MAX_LOGGING_LEVEL && P4::Log::fileLogLevelIsAtLeast(TAG, N)      \
+         ? P4::Log::Detail::fileLogOutput(TAG)                               \
+               << P4::Log::Detail::OutputLogPrefix(TAG, N) << X << std::endl \
          : std::clog)
 
 #define P4C_ERROR(X) (std::clog << "ERROR: " << X << std::endl)
-#define P4C_WARNING(X) (::Log::verbose() ? std::clog << "WARNING: " << X << std::endl : std::clog)
+#define P4C_WARNING(X) (P4::Log::verbose() ? std::clog << "WARNING: " << X << std::endl : std::clog)
 #define ERRWARN(C, X) ((C) ? P4C_ERROR(X) : P4C_WARNING(X))
 // NOLINTEND(bugprone-macro-parentheses)
+
+namespace P4 {
 
 static inline std::ostream &operator<<(std::ostream &out,
                                        std::function<std::ostream &(std::ostream &)> fn) {
@@ -199,5 +203,7 @@ template <class T>
 std::ostream &operator<<(std::ostream &out, const std::set<T> &set) {
     return format_container(out, set, '(', ')');
 }
+
+}  // namespace P4
 
 #endif /* LIB_LOG_H_ */

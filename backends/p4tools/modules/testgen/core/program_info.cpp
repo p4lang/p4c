@@ -13,7 +13,7 @@
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 ProgramInfo::ProgramInfo(const TestgenCompilerResult &compilerResult)
     : compilerResult(compilerResult), concolicMethodImpls({}) {
@@ -98,4 +98,4 @@ void ProgramInfo::produceCopyInOutCall(const IR::Parameter *param, size_t paramI
     }
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen

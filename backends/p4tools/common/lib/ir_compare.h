@@ -3,7 +3,7 @@
 
 #include "ir/ir.h"
 
-namespace IR {
+namespace P4::IR {
 
 /// Equals for StateVariable pointers. We only compare the label.
 struct StateVariableEqual {
@@ -25,5 +25,6 @@ struct StateVariableLess {
     }
 };
 
-}  // namespace IR
+}  // namespace P4::IR
+
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_IR_COMPARE_H_ */

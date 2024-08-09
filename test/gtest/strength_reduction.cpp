@@ -13,7 +13,7 @@
 
 using namespace P4;
 
-namespace Test {
+namespace P4::Test {
 
 namespace {
 
@@ -107,4 +107,4 @@ TEST_F(StrengthReductionTest, DisableSubConstToAddConst) {
     EXPECT_FALSE(program_string.find(value2) == std::string::npos);
 }
 
-}  // namespace Test
+}  // namespace P4::Test

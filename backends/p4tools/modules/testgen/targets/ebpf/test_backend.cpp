@@ -25,7 +25,7 @@
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/backend/stf/stf.h"
 
-namespace P4Tools::P4Testgen::EBPF {
+namespace P4::P4Tools::P4Testgen::EBPF {
 
 const big_int EBPFTestBackend::ZERO_PKT_VAL = 0x2000000;
 const big_int EBPFTestBackend::ZERO_PKT_MAX = 0xffffffff;
@@ -37,7 +37,7 @@ EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo,
     : TestBackEnd(programInfo, testBackendConfiguration, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
     if (testBackendString.isNullOrEmpty()) {
-        ::error(
+        ::P4::error(
             "No test back end provided. Please provide a test back end using the --test-backend "
             "parameter. Supported back ends are %1%.",
             Utils::containerToString(SUPPORTED_BACKENDS));
@@ -104,4 +104,4 @@ const TestSpec *EBPFTestBackend::createTestSpec(const ExecutionState *executionS
     return testSpec;
 }
 
-}  // namespace P4Tools::P4Testgen::EBPF
+}  // namespace P4::P4Tools::P4Testgen::EBPF

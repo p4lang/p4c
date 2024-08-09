@@ -17,7 +17,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfObject.h"
 #include "frontends/p4/methodInstance.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 class EBPFRandomPSA : public EBPFObject {
     unsigned int minValue, maxValue;
@@ -30,6 +30,6 @@ class EBPFRandomPSA : public EBPFObject {
     void emitRead(CodeBuilder *builder) const;
 };
 
-}  // namespace EBPF
+}  // namespace P4::EBPF
 
 #endif  // BACKENDS_EBPF_PSA_EXTERNS_EBPFPSARANDOM_H_

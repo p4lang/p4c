@@ -18,7 +18,7 @@ and limitations under the License.
 
 /// This file defines functions for the pass to generate the introspection file
 
-namespace TC {
+namespace P4::TC {
 
 void IntrospectionGenerator::postorder(const IR::P4Table *t) {
     p4tables.emplace(t->name.originalName, t);
@@ -75,12 +75,12 @@ void IntrospectionGenerator::collectKeyInfo(const IR::Key *key, struct TableAttr
                         auto val = std::move(*tcVal);
                         keyField->type = val;
                     } else {
-                        ::error(ErrorType::ERR_INVALID,
-                                "tc_type annotation cannot have '%1%' as value", expr);
+                        ::P4::error(ErrorType::ERR_INVALID,
+                                    "tc_type annotation cannot have '%1%' as value", expr);
                     }
                 } else {
-                    ::error(ErrorType::ERR_INVALID, "tc_type annotation cannot have '%1%' as value",
-                            expr);
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "tc_type annotation cannot have '%1%' as value", expr);
                 }
             }
             if (anno->name == IR::Annotation::nameAnnotation) {
@@ -121,7 +121,7 @@ void IntrospectionGenerator::collectActionInfo(const IR::ActionList *actionlist,
                 actionInfo->annotations.push_back(actionAnno);
             }
             if (isTableOnly && isDefaultOnly) {
-                ::error(
+                ::P4::error(
                     "Table '%1%' has an action reference '%2%' which is "
                     "annotated with both '@tableonly' and '@defaultonly'",
                     p4table->getName().originalName, action->getName().originalName);
@@ -344,7 +344,7 @@ const Util::JsonObject *IntrospectionGenerator::genIntrospectionJson() {
 
 bool IntrospectionGenerator::serializeIntrospectionJson(std::ostream &destination) {
     auto *json = genIntrospectionJson();
-    if (::errorCount() > 0) {
+    if (::P4::errorCount() > 0) {
         return false;
     }
     json->serialize(destination);
@@ -360,4 +360,4 @@ std::optional<cstring> IntrospectionGenerator::checkValidTcType(const IR::String
     return std::nullopt;
 }
 
-}  // namespace TC
+}  // namespace P4::TC

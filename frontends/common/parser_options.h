@@ -29,6 +29,8 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/options.h"
 
+namespace P4 {
+
 /// Standard include paths for .p4 header files. The values are determined by
 /// `configure`.
 extern const char *p4includePath;
@@ -119,22 +121,22 @@ class P4CContext : public BaseCompileContext {
     /// @return the compiler options for this compilation context.
     virtual ParserOptions &options() = 0;
 
-    /// @return the default diagnostic action for calls to `::info()`.
+    /// @return the default diagnostic action for calls to `::P4::info()`.
     DiagnosticAction getDefaultInfoDiagnosticAction() final {
         return errorReporter().getDefaultInfoDiagnosticAction();
     }
 
-    /// set the default diagnostic action for calls to `::info()`.
+    /// set the default diagnostic action for calls to `::P4::info()`.
     void setDefaultInfoDiagnosticAction(DiagnosticAction action) {
         errorReporter().setDefaultInfoDiagnosticAction(action);
     }
 
-    /// @return the default diagnostic action for calls to `::warning()`.
+    /// @return the default diagnostic action for calls to `::P4::warning()`.
     DiagnosticAction getDefaultWarningDiagnosticAction() final {
         return errorReporter().getDefaultWarningDiagnosticAction();
     }
 
-    /// set the default diagnostic action for calls to `::warning()`.
+    /// set the default diagnostic action for calls to `::P4::warning()`.
     void setDefaultWarningDiagnosticAction(DiagnosticAction action) {
         errorReporter().setDefaultWarningDiagnosticAction(action);
     }
@@ -192,4 +194,7 @@ class P4CContextWithOptions final : public P4CContext {
     /// Compiler options for this compilation context.
     OptionsType optionsInstance;
 };
+
+}  // namespace P4
+
 #endif /* FRONTENDS_COMMON_PARSER_OPTIONS_H_*/

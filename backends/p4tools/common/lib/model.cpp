@@ -12,7 +12,7 @@
 #include "lib/exceptions.h"
 #include "lib/log.h"
 
-namespace P4Tools {
+namespace P4::P4Tools {
 
 Model::SubstVisitor::SubstVisitor(const Model &model, bool doComplete)
     : self(model), doComplete(doComplete) {}
@@ -111,4 +111,4 @@ void Model::mergeMap(const SymbolicMapping &sourceMap) {
     }
 }
 
-}  // namespace P4Tools
+}  // namespace P4::P4Tools

@@ -26,6 +26,8 @@ limitations under the License.
 
 #include "exceptions.h"
 
+namespace P4 {
+
 template <size_t N>
 static void convertToAbsPath(const char *const relPath, char (&output)[N]) {
     output[0] = '\0';  // Default to the empty string, indicating failure.
@@ -67,3 +69,5 @@ const char *exename(const char *argv0) {
     }
     return buffer;
 }
+
+}  // namespace P4

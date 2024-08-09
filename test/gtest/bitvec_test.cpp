@@ -19,7 +19,7 @@ limitations under the License.
 
 #include <gtest/gtest.h>
 
-namespace Test {
+namespace P4::Test {
 
 TEST(Bitvec, Shift) {
     bitvec simple(0, 1);
@@ -141,4 +141,4 @@ TEST(Bitvec, io) {
     EXPECT_EQ(a, b);
 }
 
-}  // namespace Test
+}  // namespace P4::Test

@@ -23,7 +23,7 @@ limitations under the License.
 #include "indent.h"
 #include "lib/big_int_util.h"
 
-namespace Util {
+namespace P4::Util {
 
 cstring IJson::toString() const {
     std::stringstream str;
@@ -200,4 +200,4 @@ JsonObject *JsonObject::emplace_non_null(cstring label, IJson *value) {
     return this;
 }
 
-}  // namespace Util
+}  // namespace P4::Util

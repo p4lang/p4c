@@ -18,11 +18,15 @@ limitations under the License.
 
 #include "ir/pattern.h"
 
+namespace P4 {
+
 /** helper function to create a simple assignment to a boolean flag variable */
 static IR::AssignmentStatement *setFlag(cstring name, bool val) {
     auto var = new IR::PathExpression(IR::Type::Boolean::get(), new IR::Path(name));
     return new IR::AssignmentStatement(var, new IR::BoolLiteral(val));
 }
+
+}  // namespace P4
 
 namespace P4 {
 

@@ -22,7 +22,7 @@ limitations under the License.
 
 // Classes for representing various P4 program models inside the compiler
 
-namespace Model {
+namespace P4::Model {
 
 // Model element
 struct Elem {
@@ -63,6 +63,6 @@ struct Param_Model : public Elem {
 
 class Model {};
 
-}  // namespace Model
+}  // namespace P4::Model
 
 #endif /* FRONTENDS_COMMON_MODEL_H_ */
