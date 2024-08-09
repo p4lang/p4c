@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_BMV2_TARGET_H_
-#define BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_BMV2_TARGET_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_NIC_DECLARATIONS_H_
+#define BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_NIC_DECLARATIONS_H_
 
 #include <string>
 
@@ -20,12 +20,17 @@
 #include "lib/exceptions.h"
 #include "lib/source_file.h"
 
-namespace P4Tools::P4Smith::BMv2 {
+namespace P4Tools::P4Smith {
 
-class AbstractBMv2SmithTarget : public SmithTarget {
- protected:
-    explicit AbstractBMv2SmithTarget(const std::string &deviceName, const std::string &archName);
+using namespace P4::literals;
+
+class NicDeclarationGenerator : public DeclarationGenerator {
+ public:
+    explicit NicDeclarationGenerator(SmithTarget &parent) : DeclarationGenerator(parent) {}
+
+    IR::ParameterList *genParameterList() override;
 };
-}  // namespace P4Tools::P4Smith::BMv2
 
-#endif /* BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_BMV2_TARGET_H_ */
+}  // namespace P4Tools::P4Smith
+
+#endif /* BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_NIC_DECLARATIONS_H_ */

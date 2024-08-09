@@ -11,6 +11,6 @@ set(
   ${CMAKE_CURRENT_SOURCE_DIR}/psa.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/target.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/v1model.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/declarations.cpp
   PARENT_SCOPE
 )
-

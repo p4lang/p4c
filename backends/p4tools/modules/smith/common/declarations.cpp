@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "backends/p4tools/common/lib/util.h"
-#include "backends/p4tools/modules/smith/common/expressions.h"
 #include "backends/p4tools/modules/smith/common/probabilities.h"
 #include "backends/p4tools/modules/smith/common/scope.h"
 #include "backends/p4tools/modules/smith/common/statements.h"
@@ -655,35 +654,16 @@ IR::Declaration_Variable *DeclarationGenerator::genVariableDeclaration() {
     return ret;
 }
 
-IR::Parameter *DeclarationGenerator::genTypedParameter(bool if_none_dir) {
+IR::Parameter *DeclarationGenerator::genTypedParameter(bool if_none_dir,
+                                                       TyperefProbs type_ref_probs) {
     cstring name = getRandomString(4);
     const IR::Type *tp = nullptr;
     IR::Direction dir;
-    TyperefProbs typePercent;
+    TyperefProbs typePercent = type_ref_probs;
 
     if (if_none_dir) {
-        typePercent = {
-            PCT.PARAMETER_NONEDIR_BASETYPE_BIT,    PCT.PARAMETER_NONEDIR_BASETYPE_SIGNED_BIT,
-            PCT.PARAMETER_NONEDIR_BASETYPE_VARBIT, PCT.PARAMETER_NONEDIR_BASETYPE_INT,
-            PCT.PARAMETER_NONEDIR_BASETYPE_ERROR,  PCT.PARAMETER_NONEDIR_BASETYPE_BOOL,
-            PCT.PARAMETER_NONEDIR_BASETYPE_STRING, PCT.PARAMETER_NONEDIR_DERIVED_ENUM,
-            PCT.PARAMETER_NONEDIR_DERIVED_HEADER,  PCT.PARAMETER_NONEDIR_DERIVED_HEADER_STACK,
-            PCT.PARAMETER_NONEDIR_DERIVED_STRUCT,  PCT.PARAMETER_NONEDIR_DERIVED_HEADER_UNION,
-            PCT.PARAMETER_NONEDIR_DERIVED_TUPLE,   PCT.PARAMETER_NONEDIR_TYPE_VOID,
-            PCT.PARAMETER_NONEDIR_TYPE_MATCH_KIND,
-        };
         dir = IR::Direction::None;
     } else {
-        typePercent = {
-            PCT.PARAMETER_BASETYPE_BIT,    PCT.PARAMETER_BASETYPE_SIGNED_BIT,
-            PCT.PARAMETER_BASETYPE_VARBIT, PCT.PARAMETER_BASETYPE_INT,
-            PCT.PARAMETER_BASETYPE_ERROR,  PCT.PARAMETER_BASETYPE_BOOL,
-            PCT.PARAMETER_BASETYPE_STRING, PCT.PARAMETER_DERIVED_ENUM,
-            PCT.PARAMETER_DERIVED_HEADER,  PCT.PARAMETER_DERIVED_HEADER_STACK,
-            PCT.PARAMETER_DERIVED_STRUCT,  PCT.PARAMETER_DERIVED_HEADER_UNION,
-            PCT.PARAMETER_DERIVED_TUPLE,   PCT.PARAMETER_TYPE_VOID,
-            PCT.PARAMETER_TYPE_MATCH_KIND,
-        };
         std::vector<int64_t> dirPercent = {PCT.PARAMETER_DIR_IN, PCT.PARAMETER_DIR_OUT,
                                            PCT.PARAMETER_DIR_INOUT};
         switch (Utils::getRandInt(dirPercent)) {
@@ -716,8 +696,18 @@ IR::ParameterList *DeclarationGenerator::genParameterList() {
     size_t totalParams = Utils::getRandInt(0, 3);
     size_t numDirParams = (totalParams != 0U) ? Utils::getRandInt(0, totalParams - 1) : 0;
     size_t numDirectionlessParams = totalParams - numDirParams;
+    TyperefProbs typePercent = {
+        PCT.PARAMETER_NONEDIR_BASETYPE_BIT,    PCT.PARAMETER_NONEDIR_BASETYPE_SIGNED_BIT,
+        PCT.PARAMETER_NONEDIR_BASETYPE_VARBIT, PCT.PARAMETER_NONEDIR_BASETYPE_INT,
+        PCT.PARAMETER_NONEDIR_BASETYPE_ERROR,  PCT.PARAMETER_NONEDIR_BASETYPE_BOOL,
+        PCT.PARAMETER_NONEDIR_BASETYPE_STRING, PCT.PARAMETER_NONEDIR_DERIVED_ENUM,
+        PCT.PARAMETER_NONEDIR_DERIVED_HEADER,  PCT.PARAMETER_NONEDIR_DERIVED_HEADER_STACK,
+        PCT.PARAMETER_NONEDIR_DERIVED_STRUCT,  PCT.PARAMETER_NONEDIR_DERIVED_HEADER_UNION,
+        PCT.PARAMETER_NONEDIR_DERIVED_TUPLE,   PCT.PARAMETER_NONEDIR_TYPE_VOID,
+        PCT.PARAMETER_NONEDIR_TYPE_MATCH_KIND,
+    };
     for (size_t i = 0; i < numDirParams; i++) {
-        IR::Parameter *param = genTypedParameter(false);
+        IR::Parameter *param = genTypedParameter(false, typePercent);
         if (param == nullptr) {
             BUG("param is null");
         }
@@ -731,8 +721,18 @@ IR::ParameterList *DeclarationGenerator::genParameterList() {
             P4Scope::addLval(param->type, param->name.name, false);
         }
     }
+    typePercent = {
+        PCT.PARAMETER_BASETYPE_BIT,    PCT.PARAMETER_BASETYPE_SIGNED_BIT,
+        PCT.PARAMETER_BASETYPE_VARBIT, PCT.PARAMETER_BASETYPE_INT,
+        PCT.PARAMETER_BASETYPE_ERROR,  PCT.PARAMETER_BASETYPE_BOOL,
+        PCT.PARAMETER_BASETYPE_STRING, PCT.PARAMETER_DERIVED_ENUM,
+        PCT.PARAMETER_DERIVED_HEADER,  PCT.PARAMETER_DERIVED_HEADER_STACK,
+        PCT.PARAMETER_DERIVED_STRUCT,  PCT.PARAMETER_DERIVED_HEADER_UNION,
+        PCT.PARAMETER_DERIVED_TUPLE,   PCT.PARAMETER_TYPE_VOID,
+        PCT.PARAMETER_TYPE_MATCH_KIND,
+    };
     for (size_t i = 0; i < numDirectionlessParams; i++) {
-        IR::Parameter *param = genTypedParameter(true);
+        IR::Parameter *param = genTypedParameter(true, typePercent);
 
         if (param == nullptr) {
             BUG("param is null");

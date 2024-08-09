@@ -13,6 +13,7 @@
 #include "backends/p4tools/modules/smith/common/probabilities.h"
 #include "backends/p4tools/modules/smith/common/scope.h"
 #include "backends/p4tools/modules/smith/core/target.h"
+#include "backends/p4tools/modules/smith/util/util.h"
 #include "ir/indexed_vector.h"
 #include "ir/vector.h"
 #include "lib/exceptions.h"
@@ -235,6 +236,11 @@ IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
         expr = constructIntExpr();
     } else if (tp->is<IR::Type_Boolean>()) {
         expr = constructBooleanExpr();
+    } else if (tp->is<IR::Type_Typedef>()) {
+        expr = genExpression(tp->to<IR::Type_Typedef>()->type);
+        // Generically perform explicit castings to all cases.
+        const auto *explicitType = new IR::Type_Name(IR::ID(tp->to<IR::Type_Typedef>()->name));
+        expr = new IR::Cast(explicitType, expr);
     } else if (const auto *tn = tp->to<IR::Type_Name>()) {
         expr = constructStructExpr(tn);
     } else {
@@ -604,7 +610,7 @@ IR::Expression *ExpressionGenerator::constructTernaryBitExpr(const IR::Type_Bits
             // pick a slice that matches the type
             auto typeWidth = tb->width_bits();
             // TODO(fruffy): this is some arbitrary value...
-            auto newTypeSize = Utils::getRandInt(1, 128) + typeWidth;
+            auto newTypeSize = Utils::getRandInt(1, 64) + typeWidth;
             const auto *sliceType = IR::Type_Bits::get(newTypeSize, false);
             auto *sliceExpr = constructBitExpr(sliceType);
             if (P4Scope::prop.width_unknown) {
@@ -707,7 +713,9 @@ IR::Expression *ExpressionGenerator::constructCmpExpr() {
     // gen some random type
     // can be either bits, int, bool, or structlike
     // for now it is just bits
-    auto newTypeSize = Utils::getRandInt(1, 128);
+    // TODO: Make the bit width a generic parameter (e.g., `MAX_BITWIDTH`).
+    // auto newTypeSize = Utils::getRandInt(1, 64);
+    auto newTypeSize = SmithUtils::getRandInt(1, 128);
     const auto *newType = IR::Type_Bits::get(newTypeSize, false);
     IR::Expression *left = constructBitExpr(newType);
     IR::Expression *right = constructBitExpr(newType);
@@ -1026,9 +1034,14 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
             for (const auto *sf : tnType->fields) {
                 IR::Expression *expr = nullptr;
                 if (const auto *fieldTn = sf->type->to<IR::Type_Name>()) {
-                    // can!use another type here yet
-                    expr = genStructListExpr(fieldTn);
-                    components.push_back(expr);
+                    if (const auto *typedefType = P4Scope::getTypeByName(fieldTn->path->name.name)
+                                                      ->to<IR::Type_Typedef>()) {
+                        expr = genExpression(typedefType);
+                        components.push_back(expr);
+                    } else {
+                        expr = genStructListExpr(fieldTn);
+                        components.push_back(expr);
+                    }
                 } else if (const auto *fieldTs = sf->type->to<IR::Type_Stack>()) {
                     auto stackSize = fieldTs->getSize();
                     const auto *stackType = fieldTs->elementType;

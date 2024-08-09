@@ -123,8 +123,10 @@ void P4Scope::deleteLval(const IR::Type *tp, cstring name) {
                 // bit_bucket = P4Scope::compound_type[tn_name]->width_bits();
                 bitBucket = 1;
                 deleteCompoundLvals(tnType, name);
+            } else if (const auto *typeDef = td->to<IR::Type_Typedef>()) {
+                deleteLval(typeDef->type, name);
             } else {
-                BUG("Type_Name %s !found!", td->node_type_name());
+                BUG("Type_Name %s not found!", td->node_type_name());
             }
         } else {
             printInfo("Type %s does not exist!\n", tnName.c_str());
@@ -192,12 +194,14 @@ void P4Scope::addLval(const IR::Type *tp, cstring name, bool read_only) {
         }
         if (const auto *td = getTypeByName(tnName)) {
             if (const auto *tnType = td->to<IR::Type_StructLike>()) {
-                // width_bits should work here, do !know why not...
+                // width_bits should work here, do not know why not...
                 typeKey = tnName;
-                // does !work for some reason...
+                // does not work for some reason...
                 // bit_bucket = P4Scope::compound_type[tn_name]->width_bits();
                 bitBucket = 1;
                 addCompoundLvals(tnType, name, read_only);
+            } else if (const auto *typeDef = td->to<IR::Type_Typedef>()) {
+                addLval(typeDef->type, name, read_only);
             } else {
                 BUG("Type_Name %s not yet supported", td->node_type_name());
             }

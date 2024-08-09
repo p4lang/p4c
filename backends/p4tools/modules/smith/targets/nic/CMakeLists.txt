@@ -9,6 +9,8 @@ set(
   SMITH_SOURCES
   ${SMITH_SOURCES}
   ${CMAKE_CURRENT_SOURCE_DIR}/target.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/expressions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/declarations.cpp
   PARENT_SCOPE
 )
 

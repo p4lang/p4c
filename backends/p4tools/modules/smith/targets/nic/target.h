@@ -10,6 +10,8 @@
 #include "backends/p4tools/modules/smith/common/statements.h"
 #include "backends/p4tools/modules/smith/common/table.h"
 #include "backends/p4tools/modules/smith/core/target.h"
+#include "backends/p4tools/modules/smith/targets/nic/declarations.h"
+#include "backends/p4tools/modules/smith/targets/nic/expressions.h"
 #include "ir/ir.h"
 
 namespace P4Tools::P4Smith::Nic {
@@ -21,8 +23,9 @@ class AbstractNicSmithTarget : public SmithTarget {
 
 class DpdkPnaSmithTarget : public AbstractNicSmithTarget {
  private:
-    DeclarationGenerator *_declarationGenerator = new DeclarationGenerator(*this);
-    ExpressionGenerator *_expressionGenerator = new ExpressionGenerator(*this);
+    DeclarationGenerator *_declarationGenerator =
+        new P4Tools::P4Smith::NicDeclarationGenerator(*this);
+    ExpressionGenerator *_expressionGenerator = new P4Tools::P4Smith::NicExpressionGenerator(*this);
     StatementGenerator *_statementGenerator = new StatementGenerator(*this);
     ParserGenerator *_parserGenerator = new ParserGenerator(*this);
     TableGenerator *_tableGenerator = new TableGenerator(*this);

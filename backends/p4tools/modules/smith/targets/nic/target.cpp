@@ -43,6 +43,30 @@ void DpdkPnaSmithTarget::make() {
     }
 }
 
+/// This implementation is based on p4include/pna.p4.
+IR::IndexedVector<IR::StructField> generatePnaMainParserInputMetadataFields() {
+    IR::IndexedVector<IR::StructField> retFields;
+    IR::IndexedVector<IR::Declaration_ID> declIds;
+    declIds.push_back(new IR::Declaration_ID("NET_TO_HOST"));
+    declIds.push_back(new IR::Declaration_ID("HOST_TO_NET"));
+    retFields.push_back(
+        new IR::StructField("direction", new IR::Type_Enum("PNA_Direction_t", declIds)));
+    retFields.push_back(new IR::StructField("pass", new IR::Type_Name("PassNumber_t")));
+    retFields.push_back(new IR::StructField("loopedback", IR::Type_Boolean::get()));
+    retFields.push_back(new IR::StructField("input_port", new IR::Type_Name("PortId_t")));
+    return retFields;
+}
+
+/// This implementation is based on p4include/pna.p4.
+IR::IndexedVector<IR::StructField> generatePnaPreOutputMetadataFields() {
+    IR::IndexedVector<IR::StructField> retFields;
+    retFields.push_back(new IR::StructField("decrypt", IR::Type_Boolean::get()));
+    retFields.push_back(
+        new IR::StructField(IR::ID("said"), new IR::Type_Name(IR::ID("SecurityAssocId_t"))));
+    retFields.push_back(new IR::StructField("decrypt_start_offset", IR::Type_Bits::get(16, false)));
+    return retFields;
+}
+
 IR::P4Parser *DpdkPnaSmithTarget::generateMainParserBlock() const {
     IR::IndexedVector<IR::Declaration> parserLocals;
     P4Scope::startLocalScope();
@@ -216,13 +240,13 @@ void generateMainMetadata() {
     IR::IndexedVector<IR::StructField> fields;
 
     name = new IR::ID("pna_main_parser_input_metadata_t");
-    ret = new IR::Type_Struct(*name, fields);
+    ret = new IR::Type_Struct(*name, generatePnaMainParserInputMetadataFields());
     P4Scope::addToScope(ret);
     name = new IR::ID("pna_pre_input_metadata_t");
     ret = new IR::Type_Struct(*name, fields);
     P4Scope::addToScope(ret);
     name = new IR::ID("pna_pre_output_metadata_t");
-    ret = new IR::Type_Struct(*name, fields);
+    ret = new IR::Type_Struct(*name, generatePnaPreOutputMetadataFields());
     P4Scope::addToScope(ret);
     name = new IR::ID("pna_main_input_metadata_t");
     ret = new IR::Type_Struct(*name, fields);
@@ -239,6 +263,7 @@ void setPnaDpdkProbabilities() {
     PCT.PARAMETER_NONEDIR_BASETYPE_ERROR = 0;
     PCT.PARAMETER_NONEDIR_BASETYPE_STRING = 0;
     PCT.PARAMETER_NONEDIR_BASETYPE_VARBIT = 0;
+    P4Scope::req.byte_align_headers = true;
 }
 
 int DpdkPnaSmithTarget::writeTargetPreamble(std::ostream *ostream) const {
@@ -262,6 +287,21 @@ const IR::P4Program *DpdkPnaSmithTarget::generateP4Program() const {
     setPnaDpdkProbabilities();
     // insert some dummy metadata
     generateMainMetadata();
+
+    // Define a typedef `SecurityAssocId_t` as an alias for the type `bit<32>`.
+    IR::Type_Typedef *SecurityAssocIdTypedef =
+        new IR::Type_Typedef(IR::ID("SecurityAssocId_t"), IR::Type_Bits::get(32, false));
+    P4Scope::addToScope(SecurityAssocIdTypedef);
+
+    // Define a typedef `PassNumber_t` as an alias for the type `bit<3>`.
+    IR::Type_Typedef *passNumberTypedef =
+        new IR::Type_Typedef("PassNumber_t", IR::Type_Bits::get(3, false));
+    P4Scope::addToScope(passNumberTypedef);
+
+    // Define a typedef `PortId_t` as an alias for the type `bit<32>`.
+    IR::Type_Typedef *portIdTypedef =
+        new IR::Type_Typedef("PortId_t", IR::Type_Bits::get(32, false));
+    P4Scope::addToScope(portIdTypedef);
 
     // start to assemble the model
     auto *objects = new IR::Vector<IR::Node>();
