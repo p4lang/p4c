@@ -31,6 +31,8 @@ class SmithTarget : public CompilerTarget {
     [[nodiscard]] virtual ParserGenerator &parserGenerator() const = 0;
     [[nodiscard]] virtual TableGenerator &tableGenerator() const = 0;
 
+    [[nodiscard]] ICompileContext *makeContext() const override;
+
  protected:
     explicit SmithTarget(const std::string &deviceName, const std::string &archName);
 

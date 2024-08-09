@@ -8,10 +8,11 @@
 
 #include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/options.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf_ir.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace Test {
+namespace P4Tools::Test {
 
 using namespace P4::literals;
 
@@ -20,6 +21,8 @@ using testing::HasSubstr;
 using testing::Not;
 
 namespace {
+
+class P4TestgenControlPlaneFilterTest : public P4TestgenBmv2Test {};
 
 std::string generateTestProgram(const char *ingressBlock) {
     std::stringstream templateString;
@@ -63,17 +66,12 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
     return P4_SOURCE(P4Headers::V1MODEL, templateString.str().c_str());
 }
 
-CompilerOptions generateDefaultApiTestCompilerOptions() {
-    auto compilerOptions = P4CContextWithOptions<CompilerOptions>::get().options();
-    compilerOptions.target = "bmv2"_cs;
-    compilerOptions.arch = "v1model"_cs;
-    return compilerOptions;
-}
-
-P4Tools::P4Testgen::TestgenOptions &generateDefaultApiTestTestgenOptions() {
-    auto &testgenOptions = P4Tools::P4Testgen::TestgenOptions::get();
+P4Testgen::TestgenOptions &generateDefaultApiTestTestgenOptions() {
+    auto &testgenOptions = P4Testgen::TestgenOptions::get();
     testgenOptions.testBackend = "PROTOBUF_IR"_cs;
     testgenOptions.testBaseName = "dummy"_cs;
+    testgenOptions.target = "bmv2"_cs;
+    testgenOptions.arch = "v1model"_cs;
     testgenOptions.seed = 1;
     testgenOptions.maxTests = 0;
     // Create a bespoke packet for the Ethernet extract call.
@@ -83,7 +81,7 @@ P4Tools::P4Testgen::TestgenOptions &generateDefaultApiTestTestgenOptions() {
     return testgenOptions;
 }
 
-TEST(P4TestgenControlPlaneFilterTest, GeneratesCorrectTests) {
+TEST_F(P4TestgenControlPlaneFilterTest, GeneratesCorrectTests) {
     auto source = generateTestProgram(R"(
     // Drop the packet.
     action acl_drop() {
@@ -105,16 +103,14 @@ TEST(P4TestgenControlPlaneFilterTest, GeneratesCorrectTests) {
             drop_table.apply();
         }
     })");
-    auto compilerOptions = generateDefaultApiTestCompilerOptions();
     auto &testgenOptions = generateDefaultApiTestTestgenOptions();
 
     // First, we ensure that tests are generated correctly. We expect two tests.
     // One which exercises action acl_drop and one which exercises the default action, NoAction.
-    auto testListOpt =
-        P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
+    auto testListOpt = P4Testgen::Testgen::generateTests(source, testgenOptions);
 
     ASSERT_TRUE(testListOpt.has_value());
-    auto testList = testListOpt.value();
+    const auto &testList = testListOpt.value();
     ASSERT_EQ(testList.size(), 2);
     auto protobufIrTests = P4Tools::P4Testgen::convertAbstractTestsToConcreteTests<
         P4Tools::P4Testgen::Bmv2::ProtobufIrTest>(testList);
@@ -131,7 +127,7 @@ TEST(P4TestgenControlPlaneFilterTest, GeneratesCorrectTests) {
     EXPECT_THAT(protobufIrTestStrings, Contains(HasSubstr(R"(expected_output_packet)")));
 }
 
-TEST(P4TestgenControlPlaneFilterTest, FiltersControlPlaneEntities) {
+TEST_F(P4TestgenControlPlaneFilterTest, FiltersControlPlaneEntities) {
     auto source = generateTestProgram(R"(
     // Drop the packet.
     action acl_drop() {
@@ -153,25 +149,23 @@ TEST(P4TestgenControlPlaneFilterTest, FiltersControlPlaneEntities) {
             drop_table.apply();
         }
     })");
-    auto compilerOptions = generateDefaultApiTestCompilerOptions();
     auto &testgenOptions = generateDefaultApiTestTestgenOptions();
 
     // We install a filter.
     // Since we can not generate a config for the table we should only generate one test.
     testgenOptions.skippedControlPlaneEntities = {"ingress.drop_table"_cs};
 
-    auto testListOpt =
-        P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
+    auto testListOpt = P4Testgen::Testgen::generateTests(source, testgenOptions);
 
     ASSERT_TRUE(testListOpt.has_value());
-    auto testList = testListOpt.value();
+    const auto &testList = testListOpt.value();
     ASSERT_EQ(testList.size(), 1);
     const auto *test = testList[0];
     const auto *protobufIrTest = test->checkedTo<P4Tools::P4Testgen::Bmv2::ProtobufIrTest>();
     EXPECT_THAT(protobufIrTest->getFormattedTest(), Not(HasSubstr(R"(expected_packet)")));
 }
 
-TEST(P4TestgenControlPlaneFilterTest, IgnoresBogusControlPlaneEntities) {
+TEST_F(P4TestgenControlPlaneFilterTest, IgnoresBogusControlPlaneEntities) {
     auto source = generateTestProgram(R"(
     // Drop the packet.
     action acl_drop() {
@@ -193,18 +187,16 @@ TEST(P4TestgenControlPlaneFilterTest, IgnoresBogusControlPlaneEntities) {
             drop_table.apply();
         }
     })");
-    auto compilerOptions = generateDefaultApiTestCompilerOptions();
     auto &testgenOptions = generateDefaultApiTestTestgenOptions();
 
     // This is a bogus control plane element, which is ignored. We expect two tests.
     // One which exercises action acl_drop and one which exercises the default action, NoAction.
     testgenOptions.skippedControlPlaneEntities = {"ingress.bogus_table"_cs};
 
-    auto testListOpt =
-        P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
+    auto testListOpt = P4Testgen::Testgen::generateTests(source, testgenOptions);
 
     ASSERT_TRUE(testListOpt.has_value());
-    auto testList = testListOpt.value();
+    const auto &testList = testListOpt.value();
     ASSERT_EQ(testList.size(), 2);
     auto protobufIrTests = P4Tools::P4Testgen::convertAbstractTestsToConcreteTests<
         P4Tools::P4Testgen::Bmv2::ProtobufIrTest>(testList);
@@ -221,7 +213,7 @@ TEST(P4TestgenControlPlaneFilterTest, IgnoresBogusControlPlaneEntities) {
     EXPECT_THAT(protobufIrTestStrings, Contains(HasSubstr(R"(expected_output_packet)")));
 }
 
-TEST(P4TestgenControlPlaneFilterTest, FiltersMultipleControlPlaneEntities) {
+TEST_F(P4TestgenControlPlaneFilterTest, FiltersMultipleControlPlaneEntities) {
     auto source = generateTestProgram(R"(
     // Drop the packet.
     action acl_drop() {
@@ -259,7 +251,6 @@ TEST(P4TestgenControlPlaneFilterTest, FiltersMultipleControlPlaneEntities) {
             set_eth_table.apply();
         }
     })");
-    auto compilerOptions = generateDefaultApiTestCompilerOptions();
     auto &testgenOptions = generateDefaultApiTestTestgenOptions();
 
     // We install a filter.
@@ -267,11 +258,10 @@ TEST(P4TestgenControlPlaneFilterTest, FiltersMultipleControlPlaneEntities) {
     testgenOptions.skippedControlPlaneEntities = {"ingress.drop_table"_cs,
                                                   "ingress.set_eth_table"_cs};
 
-    auto testListOpt =
-        P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
+    auto testListOpt = P4Testgen::Testgen::generateTests(source, testgenOptions);
 
     ASSERT_TRUE(testListOpt.has_value());
-    auto testList = testListOpt.value();
+    const auto &testList = testListOpt.value();
     ASSERT_EQ(testList.size(), 1);
     const auto *test = testList[0];
     const auto *protobufIrTest = test->checkedTo<P4Tools::P4Testgen::Bmv2::ProtobufIrTest>();
@@ -280,4 +270,4 @@ TEST(P4TestgenControlPlaneFilterTest, FiltersMultipleControlPlaneEntities) {
 
 }  // namespace
 
-}  // namespace Test
+}  // namespace P4Tools::Test

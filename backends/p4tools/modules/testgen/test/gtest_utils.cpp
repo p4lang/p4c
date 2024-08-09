@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
+#include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/core/target.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "frontends/common/options.h"
@@ -10,10 +11,11 @@
 #include "lib/compile_context.h"
 #include "lib/exceptions.h"
 
+#include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/register.h"
 #include "backends/p4tools/modules/testgen/toolname.h"
 
-namespace Test {
+namespace P4Tools::Test {
 
 P4ToolsTestCase::P4ToolsTestCase(const P4Tools::CompilerResult &compilerResults)
     : compilerResults(compilerResults) {}
@@ -27,13 +29,18 @@ std::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
               deviceName, archName);
 
     // Set up the compilation context and set the source language.
-    AutoCompileContext autoCompileContext(
-        P4Tools::CompilerTarget::makeContext(P4Tools::P4Testgen::TOOL_NAME));
-    P4CContext::get().options().langVersion = langVersion;
+    auto context =
+        P4Tools::Target::initializeTarget(P4Tools::P4Testgen::TOOL_NAME, deviceName, archName);
+    if (!context.has_value()) {
+        return std::nullopt;
+    }
+    AutoCompileContext autoContext(context.value());
+    auto *compileContext =
+        dynamic_cast<P4Tools::CompileContext<P4Testgen::TestgenOptions> *>(context.value());
+    compileContext->options().langVersion = langVersion;
 
     auto compilerResults = P4Tools::CompilerTarget::runCompiler(
-        P4Tools::CompileContext<CompilerOptions>::get().options(), P4Tools::P4Testgen::TOOL_NAME,
-        source);
+        compileContext->options(), P4Tools::P4Testgen::TOOL_NAME, source);
     if (!compilerResults.has_value()) {
         return std::nullopt;
     }
@@ -75,4 +82,4 @@ const IR::SymbolicVariable *SymbolicConverter::preorder(IR::Member *member) {
     return P4Tools::ToolsVariables::getSymbolicVariable(member->type, member->toString());
 }
 
-}  // namespace Test
+}  // namespace P4Tools::Test
