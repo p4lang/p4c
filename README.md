@@ -305,7 +305,6 @@ sudo apt-get install -y graphviz
 **Theme** 
 ```bash
 git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
-
 ```
 
 `P4C` also depends on Google Protocol Buffers (Protobuf). `P4C` requires version
@@ -398,7 +397,6 @@ Installing on macOS:
   ```
 
   **Optional documentation building tools:**
-  **Tools**
   - Download the Doxygen 1.12.0 DMG file:
   ```
   wget https://github.com/doxygen/doxygen/releases/download/Release_1_12_0/Doxygen-1.12.0.dmg
