@@ -712,6 +712,7 @@ IR::Expression *ExpressionGenerator::constructCmpExpr() {
     // gen some random type
     // can be either bits, int, bool, or structlike
     // for now it is just bits
+    // TODO: Make the bit width a generic parameter (e.g., `MAX_BITWIDTH`).
     auto newTypeSize = Utils::getRandInt(1, 64);
     const auto *newType = IR::Type_Bits::get(newTypeSize, false);
     IR::Expression *left = constructBitExpr(newType);
