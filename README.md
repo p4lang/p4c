@@ -263,8 +263,7 @@ use them, but YMMV.
 
 - Python 3 for scripting and running tests
 
-- Optional: Documentation generation requires Doxygen (1.8.10 or
-  higher) and Graphviz (2.38.0 or higher).
+- Optional: Documentation generation requires Doxygen (1.12.0) and Graphviz (2.38.0 or higher).
 
 Backends may have additional dependencies. The dependencies for the backends
 included with `P4C` are documented here:
@@ -288,8 +287,20 @@ pip3 install --user -r requirements.txt
 **For documentation building:**
 
 **Tools**
+- Download the Doxygen 1.12.0 binary 
 ```bash
-sudo apt-get install -y doxygen graphviz
+wget https://github.com/doxygen/doxygen/releases/download/Release_1_12_0/doxygen-1.12.0.linux.bin.tar.gz
+```
+- Extract and install Doxygen 
+```bash
+tar xzvf doxygen-1.12.0.linux.bin.tar.gz
+cd doxygen-1.12.0
+sudo make install
+cd .. 
+```
+- Install Graphviz
+```bash
+sudo apt-get install -y graphviz
 ```
 **Theme** 
 ```bash
@@ -328,8 +339,20 @@ sudo pip3 install -r requirements.txt
 **For documentation building:**
 
 **Tools**
+- Download the Doxygen 1.12.0 binary
+```bash 
+wget https://github.com/doxygen/doxygen/releases/download/Release_1_12_0/doxygen-1.12.0.linux.bin.tar.gz
+```
+- Extract and install Doxygen
 ```bash
-sudo dnf install -y doxygen graphviz
+tar xzvf doxygen-1.12.0.linux.bin.tar.gz
+cd doxygen-1.12.0
+sudo make install
+cd ..
+```
+- Install Graphviz
+```bash
+sudo dnf install -y graphviz
 ```
 **Theme**
 ```bash
@@ -374,11 +397,29 @@ Installing on macOS:
   brew link --force bison
   ```
 
-  Optional documentation building tools:
+  **Optional documentation building tools:**
+  **Tools**
+  - Download the Doxygen 1.12.0 DMG file:
   ```
-  brew install doxygen graphviz
+  wget https://github.com/doxygen/doxygen/releases/download/Release_1_12_0/Doxygen-1.12.0.dmg
   ```
-  Optional Documentation theme: 
+  - Mount the DMG file:
+  ```
+  hdiutil attach Doxygen-1.12.0.dmg
+  ```
+  - Copy the Doxygen application to your Applications folder:
+  ```
+  cp -r /Volumes/Doxygen\ 1.12.0/Doxygen.app /Applications/
+  ```
+  - Eject the DMG:
+  ```
+  hdiutil detach /Volumes/Doxygen\ 1.12.0
+  ```
+  - Install Graphviz
+  ```
+  brew install graphviz
+  ```
+  **Optional Documentation theme:** 
   ```
   git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
   ```
