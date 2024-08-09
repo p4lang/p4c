@@ -76,9 +76,9 @@ inline std::ostream &endl(std::ostream &out) {
     Detail::OutputLogPrefix::indent(out);
     return out;
 }
-using IndentCtl::indent;
-using IndentCtl::TempIndent;
-using IndentCtl::unindent;
+using ::P4::IndentCtl::indent;
+using ::P4::IndentCtl::TempIndent;
+using ::P4::IndentCtl::unindent;
 
 inline bool fileLogLevelIsAtLeast(const char *file, int level) {
     // If there's no file with a log level of at least @level, we don't need to do
@@ -128,7 +128,7 @@ void increaseVerbosity();
 #define LOG9(X) LOGN(9, X)
 
 #define LOGN_UNINDENT(N) \
-    (LOGGING(N) ? P4::Log::Detail::fileLogOutput(__FILE__) << IndentCtl::unindent : std::clog)
+    (LOGGING(N) ? P4::Log::Detail::fileLogOutput(__FILE__) << P4::IndentCtl::unindent : std::clog)
 #define LOG1_UNINDENT LOGN_UNINDENT(1)
 #define LOG2_UNINDENT LOGN_UNINDENT(2)
 #define LOG3_UNINDENT LOGN_UNINDENT(3)

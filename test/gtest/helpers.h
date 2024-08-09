@@ -70,7 +70,7 @@ std::string makeP4Source(const char *file, unsigned line, const char *rawSource)
 // A macro which should be used by unit tests to define P4 source code. It adds
 // additional information to the source code to aid in debugging; see
 // makeP4Source for more information and parameter details.
-#define P4_SOURCE(...) TestDetail::makeP4Source(__FILE__, __LINE__, __VA_ARGS__)
+#define P4_SOURCE(...) P4::TestDetail::makeP4Source(__FILE__, __LINE__, __VA_ARGS__)
 
 namespace P4 {
 
