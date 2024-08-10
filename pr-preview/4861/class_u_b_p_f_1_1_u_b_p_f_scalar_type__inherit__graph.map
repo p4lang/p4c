@@ -1,0 +1,16 @@
+<map id="UBPF::UBPFScalarType" name="UBPF::UBPFScalarType">
+<area shape="rect" id="Node000001" title=" " alt="" coords="58,372,226,397"/>
+<area shape="rect" id="Node000002" href="$class_e_b_p_f_1_1_e_b_p_f_scalar_type.html" title=" " alt="" coords="60,299,224,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,338,145,372,139,372,139,338"/>
+<area shape="rect" id="Node000003" href="$class_e_b_p_f_1_1_e_b_p_f_type.html" title="Base class for EBPF types." alt="" coords="5,225,129,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,258,132,297,128,300,87,262"/>
+<area shape="rect" id="Node000004" href="$class_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="20,152,157,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="84,192,73,226,68,224,79,190"/>
+<area shape="rect" id="Node000005" href="$class_i_castable.html" title=" " alt="" coords="101,79,183,104"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="127,117,99,153,95,150,123,113"/>
+<area shape="rect" id="Node000007" href="$class_e_b_p_f_1_1_i_has_width.html" title=" " alt="" coords="153,225,283,251"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="157,115,214,224,210,226,152,118"/>
+<area shape="rect" id="Node000006" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="97,5,187,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="145,44,145,79,139,79,139,44"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="198,262,156,300,153,296,194,258"/>
+</map>

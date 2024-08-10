@@ -1,0 +1,9 @@
+<map id="P4::MinimalNameGenerator" name="P4::MinimalNameGenerator">
+<area shape="rect" id="Node000001" title=" " alt="" coords="50,152,253,177"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_name_generator.html" title=" " alt="" coords="5,79,156,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,112,142,150,138,154,100,116"/>
+<area shape="rect" id="Node000003" href="$class_inspector.html" title=" " alt="" coords="181,79,263,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="203,116,165,154,161,150,199,112"/>
+<area shape="rect" id="Node000004" href="$class_visitor.html" title=" " alt="" coords="190,5,254,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="225,44,225,79,219,79,219,44"/>
+</map>

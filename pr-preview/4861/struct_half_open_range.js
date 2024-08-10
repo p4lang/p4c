@@ -1,0 +1,26 @@
+var struct_half_open_range =
+[
+    [ "canonicalize", "struct_half_open_range.html#acff93e7e7f96bf3abeb1291a34a9b3ca", null ],
+    [ "contains", "struct_half_open_range.html#a7c37adea9ef8de1f9f2c52ea73c754e4", null ],
+    [ "contains", "struct_half_open_range.html#a328cf13ba10067ee5e27e169368f9233", null ],
+    [ "empty", "struct_half_open_range.html#ae4ecdee52e4f6015d03db9e12b865dac", null ],
+    [ "hiByte", "struct_half_open_range.html#aa6acc2b730a759ff33784bd46a8e53c0", null ],
+    [ "intersectWith", "struct_half_open_range.html#aa823fd3673e10f45cbb4606763411f77", null ],
+    [ "isHiAligned", "struct_half_open_range.html#a9435c1d2c6490f3f3e8a441d355c2ac1", null ],
+    [ "isLoAligned", "struct_half_open_range.html#a5402ffffab4f6549ca01ae72326f13f3", null ],
+    [ "loByte", "struct_half_open_range.html#af30531d17fda05e0f73f46b91ccee216", null ],
+    [ "nextByte", "struct_half_open_range.html#aaa53726a09442e73591b72790505e40d", null ],
+    [ "operator<", "struct_half_open_range.html#a44fcc8cd975fe7e886af4fb8460ce05c", null ],
+    [ "overlaps", "struct_half_open_range.html#ac9b3a39d1c3dce06af76391fc5181ec0", null ],
+    [ "resizedToBits", "struct_half_open_range.html#aa14754aee362e88e4966be2d4a8b4b5e", null ],
+    [ "resizedToBytes", "struct_half_open_range.html#a5da5cba2495aa277e2c4428d9fe6db6a", null ],
+    [ "shiftedByBits", "struct_half_open_range.html#a3f34cab503959ebf2f7cded63eb4b7bb", null ],
+    [ "shiftedByBytes", "struct_half_open_range.html#a0ecc7315fa52e24ed06acd5eec07be17", null ],
+    [ "size", "struct_half_open_range.html#a0b7c732bd05b0d46fc44716be9205bd5", null ],
+    [ "toJSON", "struct_half_open_range.html#ae8efb394d9bd5930957b8172df71ef5e", null ],
+    [ "toOrder", "struct_half_open_range.html#a45fdc30da34a90c723a2d627b1a9725c", null ],
+    [ "toUnit", "struct_half_open_range.html#a871e14edbd0ecea28b688a8d35fa9de3", null ],
+    [ "unionWith", "struct_half_open_range.html#ae0c35948cd096b4d823326e137024495", null ],
+    [ "hi", "struct_half_open_range.html#a9200300d57790da2da1fefe0cb7a0628", null ],
+    [ "lo", "struct_half_open_range.html#a655f6c015ca1a87704b5c1db3b6e3ae3", null ]
+];

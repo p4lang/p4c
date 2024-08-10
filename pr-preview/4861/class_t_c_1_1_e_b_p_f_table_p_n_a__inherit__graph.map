@@ -1,0 +1,15 @@
+<map id="TC::EBPFTablePNA" name="TC::EBPFTablePNA">
+<area shape="rect" id="Node000001" title=" " alt="" coords="16,445,155,471"/>
+<area shape="rect" id="Node000002" href="$class_e_b_p_f_1_1_e_b_p_f_table_p_s_a.html" title=" " alt="" coords="8,372,163,397"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,411,88,445,83,445,83,411"/>
+<area shape="rect" id="Node000003" href="$class_e_b_p_f_1_1_e_b_p_f_table.html" title=" " alt="" coords="21,299,149,324"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="88,338,88,372,83,372,83,338"/>
+<area shape="rect" id="Node000004" href="$class_e_b_p_f_1_1_e_b_p_f_table_base.html" title="Also used to represent counters." alt="" coords="5,225,165,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="88,264,88,299,83,299,83,264"/>
+<area shape="rect" id="Node000005" href="$class_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="17,152,154,177"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="88,191,88,225,83,225,83,191"/>
+<area shape="rect" id="Node000006" href="$class_i_castable.html" title=" " alt="" coords="44,79,127,104"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="88,118,88,152,83,152,83,118"/>
+<area shape="rect" id="Node000007" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="40,5,131,31"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="88,44,88,79,83,79,83,44"/>
+</map>

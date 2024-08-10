@@ -1,0 +1,15 @@
+<map id="BMV2::CFG::Node" name="BMV2::CFG::Node">
+<area shape="rect" id="Node000001" title=" " alt="" coords="223,152,361,177"/>
+<area shape="rect" id="Node000005" href="$class_b_m_v2_1_1_c_f_g_1_1_dummy_node.html" title=" " alt="" coords="5,225,195,251"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="249,185,132,228,130,223,247,180"/>
+<area shape="rect" id="Node000006" href="$class_b_m_v2_1_1_c_f_g_1_1_if_node.html" title=" " alt="" coords="219,225,365,251"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="295,191,295,225,289,225,289,191"/>
+<area shape="rect" id="Node000007" href="$class_b_m_v2_1_1_c_f_g_1_1_table_node.html" title=" " alt="" coords="389,225,560,251"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="335,180,446,223,444,228,333,185"/>
+<area shape="rect" id="Node000002" href="$class_i_has_db_print.html" title=" " alt="" coords="185,79,284,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="255,113,285,150,281,154,250,116"/>
+<area shape="rect" id="Node000003" href="$class_i_castable.html" title=" " alt="" coords="308,79,391,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="334,116,303,154,299,150,329,113"/>
+<area shape="rect" id="Node000004" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="304,5,395,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="352,44,352,79,347,79,347,44"/>
+</map>

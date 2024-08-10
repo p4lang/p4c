@@ -1,0 +1,11 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,109,124,134"/>
+<area shape="rect" id="Node000001" href="$struct_i_r_1_1has__static__type__name.html" title=" " alt="" coords="172,5,343,45"/>
+<area shape="poly" id="edge1103_Node000000_Node000001" title=" " alt="" coords="95,99,171,55,198,43,200,48,173,60,98,103"/>
+<area shape="rect" id="Node000002" href="$struct_util_1_1has___source_info.html" title="SFINAE helper to check if given class has a getSourceInfo method." alt="" coords="181,69,333,109"/>
+<area shape="poly" id="edge1104_Node000000_Node000002" title=" " alt="" coords="137,107,181,99,182,105,138,112"/>
+<area shape="rect" id="Node000003" href="$struct_util_1_1has__to_string.html" title="SFINAE helper to check if given class has a toString method." alt="" coords="190,133,325,173"/>
+<area shape="poly" id="edge1105_Node000000_Node000003" title=" " alt="" coords="138,131,190,140,189,145,137,136"/>
+<area shape="rect" id="Node000004" href="$structhas__dbprint.html" title=" " alt="" coords="182,197,333,237"/>
+<area shape="poly" id="edge1106_Node000000_Node000004" title=" " alt="" coords="98,139,173,183,200,195,198,200,171,188,95,144"/>
+</map>

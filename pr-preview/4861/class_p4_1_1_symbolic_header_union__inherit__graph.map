@@ -1,0 +1,13 @@
+<map id="P4::SymbolicHeaderUnion" name="P4::SymbolicHeaderUnion">
+<area shape="rect" id="Node000001" title=" " alt="" coords="17,299,207,324"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_symbolic_struct.html" title=" " alt="" coords="40,225,184,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,264,115,299,109,299,109,264"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_symbolic_value.html" title=" " alt="" coords="41,152,183,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="115,191,115,225,109,225,109,191"/>
+<area shape="rect" id="Node000004" href="$class_i_has_db_print.html" title=" " alt="" coords="5,79,104,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="75,113,105,150,101,154,70,116"/>
+<area shape="rect" id="Node000005" href="$class_i_castable.html" title=" " alt="" coords="128,79,211,104"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="154,116,123,154,119,150,149,113"/>
+<area shape="rect" id="Node000006" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="124,5,215,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="172,44,172,79,167,79,167,44"/>
+</map>

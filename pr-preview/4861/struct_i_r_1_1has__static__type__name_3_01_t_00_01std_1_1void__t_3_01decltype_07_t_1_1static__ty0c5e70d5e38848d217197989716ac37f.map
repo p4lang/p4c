@@ -1,0 +1,5 @@
+<map id="IR::has_static_type_name&lt; T, std::void_t&lt; decltype(T::static_type_name())&gt; &gt;" name="IR::has_static_type_name&lt; T, std::void_t&lt; decltype(T::static_type_name())&gt; &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,167,148"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="30,5,142,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,44,89,79,83,79,83,44"/>
+</map>

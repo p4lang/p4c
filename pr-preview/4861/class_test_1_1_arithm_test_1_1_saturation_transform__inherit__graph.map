@@ -1,0 +1,7 @@
+<map id="Test::ArithmTest::SaturationTransform" name="Test::ArithmTest::SaturationTransform">
+<area shape="rect" id="Node000001" title="The main class for saturation transformation." alt="" coords="5,152,207,192"/>
+<area shape="rect" id="Node000002" href="$class_transform.html" title=" " alt="" coords="63,79,149,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,118,109,152,103,152,103,118"/>
+<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="74,5,138,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,44,109,79,103,79,103,44"/>
+</map>
