@@ -30,6 +30,13 @@ tables {
     annotations: "@defaut_only"
   }
   const_default_action_id: 18870058
+  initial_default_action {
+    action_id: 18870058
+    arguments {
+      param_id: 1
+      value: "\000\002"
+    }
+  }
   size: 1024
 }
 tables {
@@ -52,6 +59,9 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
+  initial_default_action {
+    action_id: 21257015
+  }
   size: 1024
 }
 tables {
@@ -73,6 +83,9 @@ tables {
     id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
   }
   size: 1024
 }

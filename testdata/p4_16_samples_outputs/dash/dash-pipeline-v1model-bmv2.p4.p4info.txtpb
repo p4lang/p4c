@@ -59,6 +59,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 23563653
+  initial_default_action {
+    action_id: 23563653
+  }
   size: 1024
 }
 tables {
@@ -91,6 +94,9 @@ tables {
     id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
   }
   size: 1024
 }
@@ -155,6 +161,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 23563653
+  initial_default_action {
+    action_id: 23563653
+  }
   size: 1024
 }
 tables {
@@ -229,6 +238,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 23563653
+  initial_default_action {
+    action_id: 23563653
+  }
   size: 1024
 }
 tables {
@@ -323,6 +335,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 23563653
+  initial_default_action {
+    action_id: 23563653
+  }
   size: 1024
 }
 tables {
@@ -385,6 +400,9 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
+  initial_default_action {
+    action_id: 21257015
+  }
   size: 1024
 }
 tables {
@@ -436,6 +454,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 21063902
+  initial_default_action {
+    action_id: 21063902
+  }
   size: 1024
 }
 tables {
@@ -499,6 +520,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 20772460
+  initial_default_action {
+    action_id: 20772460
+  }
   size: 1024
 }
 tables {
@@ -733,6 +757,9 @@ tables {
   }
   action_refs {
     id: 26077229
+  }
+  initial_default_action {
+    action_id: 29962337
   }
   direct_resource_ids: 324963620
   size: 1024
@@ -970,6 +997,9 @@ tables {
   action_refs {
     id: 26077229
   }
+  initial_default_action {
+    action_id: 29962337
+  }
   direct_resource_ids: 334749261
   size: 1024
 }
@@ -1206,6 +1236,9 @@ tables {
   action_refs {
     id: 26077229
   }
+  initial_default_action {
+    action_id: 29962337
+  }
   direct_resource_ids: 320450761
   size: 1024
 }
@@ -1299,6 +1332,9 @@ tables {
     id: 18759588
   }
   const_default_action_id: 18759588
+  initial_default_action {
+    action_id: 18759588
+  }
   direct_resource_ids: 331716030
   size: 1024
 }
@@ -1388,6 +1424,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 18759588
+  initial_default_action {
+    action_id: 18759588
+  }
   direct_resource_ids: 334791879
   size: 1024
 }
@@ -1444,6 +1483,9 @@ tables {
     id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
   }
   size: 1024
 }
@@ -1679,6 +1721,9 @@ tables {
   }
   action_refs {
     id: 31424218
+  }
+  initial_default_action {
+    action_id: 28146588
   }
   direct_resource_ids: 320981527
   size: 1024
@@ -1916,6 +1961,9 @@ tables {
   action_refs {
     id: 31424218
   }
+  initial_default_action {
+    action_id: 28146588
+  }
   direct_resource_ids: 322865948
   size: 1024
 }
@@ -2152,6 +2200,9 @@ tables {
   action_refs {
     id: 31424218
   }
+  initial_default_action {
+    action_id: 28146588
+  }
   direct_resource_ids: 328370481
   size: 1024
 }
@@ -2214,6 +2265,9 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
+  initial_default_action {
+    action_id: 21257015
+  }
   size: 1024
 }
 tables {
@@ -2264,6 +2318,9 @@ tables {
     id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
   }
   size: 1024
 }
@@ -2363,6 +2420,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 21257015
+  initial_default_action {
+    action_id: 21257015
+  }
   size: 1024
 }
 tables {
@@ -2432,6 +2492,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 21257015
+  initial_default_action {
+    action_id: 21257015
+  }
   size: 1024
 }
 tables {
@@ -2482,6 +2545,9 @@ tables {
   }
   action_refs {
     id: 21257015
+  }
+  initial_default_action {
+    action_id: 21257015
   }
   direct_resource_ids: 321751294
   size: 1024
