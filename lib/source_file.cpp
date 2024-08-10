@@ -58,6 +58,13 @@ cstring SourceInfo::toString() const {
                            end.toString().string_view());
 }
 
+std::ostream &operator<<(std::ostream &os, const SourceInfo &info) {
+    // FIXME: implement abseil stringify to skip cstring conversion here
+    os << absl::StrFormat("(%s)-(%s)", info.start.toString().string_view(),
+                          info.end.toString().string_view());
+    return os;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 
 InputSources::InputSources() : sealed(false) {

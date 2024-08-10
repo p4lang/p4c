@@ -45,6 +45,7 @@ abstract Operation_Binary : Operation {
         if (type->is<Type::Unknown>() && left && right && left->type == right->type)
             type = left->type; }
     toString {
+        // FIXME: Do not use debug printing to render user-side strings
         std::stringstream tmp;
         tmp << DBPrint::Prec_Low;
         dbprint(tmp);

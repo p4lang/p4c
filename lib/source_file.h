@@ -22,6 +22,7 @@ limitations under the License.
 #define LIB_SOURCE_FILE_H_
 
 #include <map>
+#include <sstream>
 #include <string_view>
 #include <vector>
 
@@ -201,6 +202,8 @@ class SourceInfo final {
     inline bool operator<=(const SourceInfo &rhs) const { return !this->operator>(rhs); }
     inline bool operator>=(const SourceInfo &rhs) const { return !this->operator<(rhs); }
 
+    friend std::ostream &operator<<(std::ostream &os, const SourceInfo &info);
+
  private:
     const InputSources *sources = nullptr;
     SourcePosition start = SourcePosition();
@@ -246,16 +249,18 @@ class Comment final : IHasDbPrint {
     Comment(SourceInfo srcInfo, bool singleLine, cstring body)
         : srcInfo(srcInfo), singleLine(singleLine), body(body) {}
     cstring toString() const {
-        std::string result;
-        if (singleLine)
-            result = "//";
-        else
-            result = "/*";
-        result += body;
-        if (!singleLine) result += "*/";
-        return result;
+        std::stringstream str;
+        dbprint(str);
+        return str.str();
     }
-    void dbprint(std::ostream &out) const { out << toString(); }
+    void dbprint(std::ostream &out) const override {
+        if (singleLine)
+            out << "//";
+        else
+            out << "/*";
+        out << body;
+        if (!singleLine) out << "*/";
+    }
 };
 
 /**

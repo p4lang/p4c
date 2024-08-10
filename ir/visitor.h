@@ -301,7 +301,9 @@ class Visitor {
     }
 
     /// The const ref variant of the above
-    template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
+    template <class T,
+              typename = std::enable_if_t<Util::has_SourceInfo_v<T> && !std::is_pointer_v<T>>,
+              class... Args>
     void warn(const int kind, const char *format, const T &node, Args &&...args) {
         if (warning_enabled(kind)) ::warning(kind, format, node, std::forward<Args>(args)...);
     }
@@ -778,6 +780,8 @@ class Backtrack : public virtual Visitor {
     virtual bool never_backtracks() { return false; }  // generally not overridden
     // returns true for passes that will never catch a trigger (backtrack() is always false)
 };
+
+std::ostream &operator<<(std::ostream &out, const Backtrack::trigger &trigger);
 
 class P4WriteContext : public virtual Visitor {
  public:
