@@ -191,15 +191,11 @@ class Path {
     bool isDontCare() const { return name.isDontCare(); }
     toString{
         // This is the ORIGINAL name the user used
-        if (absolute)
-            return "."_cs + name.toString();
-        return name.toString();
+        return absl::StrCat(absolute ? "." : "", name.toString().string_view());
     }
     cstring asString() const {
         // The CURRENT internal name
-        if (absolute)
-            return "."_cs + name;
-        return name;
+        return absl::StrCat(absolute ? "." : "", name.string_view());
     }
     dbprint { out << name; }
     validate { BUG_CHECK(!name.name.isNullOrEmpty(), "Empty path"); }
@@ -290,7 +286,7 @@ class Annotation {
     static const cstring matchAnnotation;  /// Match annotation (for value sets).
     static const cstring fieldListAnnotation;  /// Used for recirculate, etc.
     static const cstring debugLoggingAnnotation;  /// Used by compiler implementer to limit debug log to the annotated IR context.
-    toString{ return "@"_cs + name; }
+    toString{ return absl::StrCat("@", name.string_view()); }
     validate{
         BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name");
         BUG_CHECK(!(needsParsing && !expr.empty()),
@@ -397,8 +393,8 @@ class Argument {
     toString{
         std::string result = "";
         if (!name.name.isNullOrEmpty())
-            result = name.toString() + " = ";
-        return result + expression->toString();
+            absl::StrAppend(&result, name.toString().string_view(), " = ");
+        return absl::StrCat(result, expression->toString().string_view());
     }
 }
 
