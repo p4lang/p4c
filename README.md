@@ -397,22 +397,7 @@ Installing on macOS:
   ```
 
   **Optional documentation building tools:**
-  - Download the Doxygen 1.12.0 DMG file:
-  ```
-  wget https://github.com/doxygen/doxygen/releases/download/Release_1_12_0/Doxygen-1.12.0.dmg
-  ```
-  - Mount the DMG file:
-  ```
-  hdiutil attach Doxygen-1.12.0.dmg
-  ```
-  - Copy the Doxygen application to your Applications folder:
-  ```
-  cp -r /Volumes/Doxygen\ 1.12.0/Doxygen.app /Applications/
-  ```
-  - Eject the DMG:
-  ```
-  hdiutil detach /Volumes/Doxygen\ 1.12.0
-  ```
+  -  Download and install the Doxygen 1.12.0 DMG file from [here](https://github.com/doxygen/doxygen/releases/download/Release_1_12_0/Doxygen-1.12.0.dmg).
   - Install Graphviz
   ```
   brew install graphviz
