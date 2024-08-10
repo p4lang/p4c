@@ -7,6 +7,7 @@
 <!--zoomable 505 -->
 
 <svg id="main" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" onload="init(evt)">
+
 <style type="text/css"><![CDATA[
 .node, .edge {opacity: 0.7;}
 .node.selected, .edge.selected {opacity: 1;}
@@ -86,10 +87,10 @@ var sectionId = 'dynsection-0';
 <g id="Node000003" class="node">
 <title>Node3</title>
 <g id="a_Node000003"><a xlink:href="classhvec__map.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="281,-448.5 164,-448.5 164,-407.5 281,-407.5 281,-448.5"/>
-<text text-anchor="start" x="172" y="-436.5" font-family="Helvetica,sans-Serif" font-size="10.00">hvec_map&lt; const IR</text>
-<text text-anchor="start" x="172" y="-425.5" font-family="Helvetica,sans-Serif" font-size="10.00">::IDeclaration *, def</text>
-<text text-anchor="middle" x="222.5" y="-414.5" font-family="Helvetica,sans-Serif" font-size="10.00">_info_t &gt;</text>
+<polygon fill="white" stroke="#bfbfbf" points="282,-448.5 163,-448.5 163,-407.5 282,-407.5 282,-448.5"/>
+<text text-anchor="start" x="171" y="-436.5" font-family="Helvetica,sans-Serif" font-size="10.00">hvec_map&lt; const P4</text>
+<text text-anchor="start" x="171" y="-425.5" font-family="Helvetica,sans-Serif" font-size="10.00">::IR::IDeclaration *,</text>
+<text text-anchor="middle" x="222.5" y="-414.5" font-family="Helvetica,sans-Serif" font-size="10.00"> def_info_t &gt;</text>
 </a>
 </g>
 </g>
@@ -97,7 +98,7 @@ var sectionId = 'dynsection-0';
 <g id="edge2_Node000001_Node000003" class="edge">
 <title>Node1&#45;&gt;Node3</title>
 <g id="a_edge2_Node000001_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#8b1a1a" d="M58.81,-261.27C69.6,-293.9 95.74,-360.16 140,-398 146.99,-403.98 155.28,-408.81 163.84,-412.7"/>
+<path fill="none" stroke="#8b1a1a" d="M58.81,-261.27C69.6,-293.9 95.74,-360.16 140,-398 146.65,-403.68 154.47,-408.33 162.58,-412.12"/>
 <polygon fill="#8b1a1a" stroke="#8b1a1a" points="62.1,-260.06 55.74,-251.59 55.43,-262.18 62.1,-260.06"/>
 </a>
 </g>
@@ -106,9 +107,9 @@ var sectionId = 'dynsection-0';
 <g id="Node000004" class="node">
 <title>Node4</title>
 <g id="a_Node000004"><a xlink:href="classhvec__map.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="281,-389 164,-389 164,-359 281,-359 281,-389"/>
-<text text-anchor="start" x="172" y="-377" font-family="Helvetica,sans-Serif" font-size="10.00">hvec_map&lt; const IR</text>
-<text text-anchor="middle" x="222.5" y="-366" font-family="Helvetica,sans-Serif" font-size="10.00">::Node *, hvec_set &gt;</text>
+<polygon fill="white" stroke="#bfbfbf" points="289,-389 156,-389 156,-359 289,-359 289,-389"/>
+<text text-anchor="start" x="164" y="-377" font-family="Helvetica,sans-Serif" font-size="10.00">hvec_map&lt; const P4</text>
+<text text-anchor="middle" x="222.5" y="-366" font-family="Helvetica,sans-Serif" font-size="10.00">::IR::Node *, hvec_set &gt;</text>
 </a>
 </g>
 </g>
@@ -116,7 +117,7 @@ var sectionId = 'dynsection-0';
 <g id="edge3_Node000001_Node000004" class="edge">
 <title>Node1&#45;&gt;Node4</title>
 <g id="a_edge3_Node000001_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#8b1a1a" d="M63.12,-260.6C77.21,-284.75 105,-326.59 140,-350 147.23,-354.84 155.46,-358.72 163.84,-361.83"/>
+<path fill="none" stroke="#8b1a1a" d="M63.12,-260.6C77.21,-284.75 105,-326.59 140,-350 145.15,-353.44 150.8,-356.4 156.66,-358.95"/>
 <polygon fill="#8b1a1a" stroke="#8b1a1a" points="66.07,-258.7 58.1,-251.72 59.97,-262.14 66.07,-258.7"/>
 </a>
 </g>
@@ -164,10 +165,10 @@ var sectionId = 'dynsection-0';
 <g id="Node000007" class="node">
 <title>Node7</title>
 <g id="a_Node000007"><a xlink:href="classhvec__map.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="283,-233.5 162,-233.5 162,-192.5 283,-192.5 283,-233.5"/>
-<text text-anchor="start" x="170" y="-221.5" font-family="Helvetica,sans-Serif" font-size="10.00">hvec_map&lt; const IR</text>
-<text text-anchor="start" x="170" y="-210.5" font-family="Helvetica,sans-Serif" font-size="10.00">::IDeclaration *, P4</text>
-<text text-anchor="middle" x="222.5" y="-199.5" font-family="Helvetica,sans-Serif" font-size="10.00">::StorageLocation * &gt;</text>
+<polygon fill="white" stroke="#bfbfbf" points="290.5,-233.5 154.5,-233.5 154.5,-192.5 290.5,-192.5 290.5,-233.5"/>
+<text text-anchor="start" x="162.5" y="-221.5" font-family="Helvetica,sans-Serif" font-size="10.00">hvec_map&lt; const P4</text>
+<text text-anchor="start" x="162.5" y="-210.5" font-family="Helvetica,sans-Serif" font-size="10.00">::IR::IDeclaration *,</text>
+<text text-anchor="middle" x="222.5" y="-199.5" font-family="Helvetica,sans-Serif" font-size="10.00"> P4::StorageLocation * &gt;</text>
 </a>
 </g>
 </g>
@@ -175,7 +176,7 @@ var sectionId = 'dynsection-0';
 <g id="edge6_Node000001_Node000007" class="edge">
 <title>Node1&#45;&gt;Node7</title>
 <g id="a_edge6_Node000001_Node000007"><a xlink:title=" ">
-<path fill="none" stroke="#8b1a1a" d="M114.04,-231.49C129.6,-228.82 146.29,-225.94 161.78,-223.28"/>
+<path fill="none" stroke="#8b1a1a" d="M113.9,-231.52C127.08,-229.25 141.08,-226.84 154.47,-224.54"/>
 <polygon fill="#8b1a1a" stroke="#8b1a1a" points="113.27,-228.07 104.01,-233.22 114.46,-234.97 113.27,-228.07"/>
 </a>
 </g>
@@ -185,7 +186,7 @@ var sectionId = 'dynsection-0';
 <title>Node8</title>
 <g id="a_Node000008"><a xlink:href="classhvec__map.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#bfbfbf" points="305,-174 140,-174 140,-144 305,-144 305,-174"/>
-<text text-anchor="start" x="148" y="-162" font-family="Helvetica,sans-Serif" font-size="10.00">hvec_map&lt; cstring,</text>
+<text text-anchor="start" x="148" y="-162" font-family="Helvetica,sans-Serif" font-size="10.00">hvec_map&lt; P4::cstring,</text>
 <text text-anchor="middle" x="222.5" y="-151" font-family="Helvetica,sans-Serif" font-size="10.00"> const P4::StorageLocation * &gt;</text>
 </a>
 </g>

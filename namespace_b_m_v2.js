@@ -49,7 +49,7 @@ var namespace_b_m_v2 =
     [ "SimpleSwitchExpressionConverter", "class_b_m_v2_1_1_simple_switch_expression_converter.html", "class_b_m_v2_1_1_simple_switch_expression_converter" ],
     [ "SimpleSwitchMidEnd", "class_b_m_v2_1_1_simple_switch_mid_end.html", "class_b_m_v2_1_1_simple_switch_mid_end" ],
     [ "SimpleSwitchOptions", "class_b_m_v2_1_1_simple_switch_options.html", null ],
-    [ "SkipControls", "class_b_m_v2_1_1_skip_controls.html", "class_b_m_v2_1_1_skip_controls" ],
+    [ "SkipControls", "class_b_m_v2_1_1_skip_controls.html", null ],
     [ "TableAttributes", "class_b_m_v2_1_1_table_attributes.html", null ],
     [ "V1ModelProperties", "class_b_m_v2_1_1_v1_model_properties.html", null ],
     [ "V1ProgramStructure", "class_b_m_v2_1_1_v1_program_structure.html", null ],

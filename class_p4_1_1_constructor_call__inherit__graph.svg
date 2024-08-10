@@ -7,7 +7,8 @@
 <svg width="324pt" height="247pt"
  viewBox="0.00 0.00 324.00 247.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 
-<svg id="main" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" onload="init(evt)">
+<svg id="main" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+
 <style type="text/css"><![CDATA[
 .node, .edge {opacity: 0.7;}
 .node.selected, .edge.selected {opacity: 1;}
@@ -84,9 +85,9 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="class_i_castable.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="192.5,-184 130.5,-184 130.5,-165 192.5,-165 192.5,-184"/>
-<text text-anchor="middle" x="161.5" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">ICastable</text>
+<g id="a_Node000003"><a xlink:href="class_p4_1_1_i_castable.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="201.5,-184 121.5,-184 121.5,-165 201.5,-165 201.5,-184"/>
+<text text-anchor="middle" x="161.5" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">P4::ICastable</text>
 </a>
 </g>
 </g>
@@ -102,9 +103,9 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="struct_r_t_t_i_1_1_base.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="195.5,-239 127.5,-239 127.5,-220 195.5,-220 195.5,-239"/>
-<text text-anchor="middle" x="161.5" y="-227" font-family="Helvetica,sans-Serif" font-size="10.00">RTTI::Base</text>
+<g id="a_Node000004"><a xlink:href="struct_p4_1_1_r_t_t_i_1_1_base.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="204.5,-239 118.5,-239 118.5,-220 204.5,-220 204.5,-239"/>
+<text text-anchor="middle" x="161.5" y="-227" font-family="Helvetica,sans-Serif" font-size="10.00">P4::RTTI::Base</text>
 </a>
 </g>
 </g>

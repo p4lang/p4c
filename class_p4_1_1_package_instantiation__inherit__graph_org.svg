@@ -56,9 +56,9 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="class_i_castable.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="99,-184 37,-184 37,-165 99,-165 99,-184"/>
-<text text-anchor="middle" x="68" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">ICastable</text>
+<g id="a_Node000004"><a xlink:href="class_p4_1_1_i_castable.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="108,-184 28,-184 28,-165 108,-165 108,-184"/>
+<text text-anchor="middle" x="68" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">P4::ICastable</text>
 </a>
 </g>
 </g>
@@ -74,9 +74,9 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="struct_r_t_t_i_1_1_base.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="102,-239 34,-239 34,-220 102,-220 102,-239"/>
-<text text-anchor="middle" x="68" y="-227" font-family="Helvetica,sans-Serif" font-size="10.00">RTTI::Base</text>
+<g id="a_Node000005"><a xlink:href="struct_p4_1_1_r_t_t_i_1_1_base.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="111,-239 25,-239 25,-220 111,-220 111,-239"/>
+<text text-anchor="middle" x="68" y="-227" font-family="Helvetica,sans-Serif" font-size="10.00">P4::RTTI::Base</text>
 </a>
 </g>
 </g>

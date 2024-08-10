@@ -20,9 +20,9 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="class_i_has_db_print.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="87,-74 13,-74 13,-55 87,-55 87,-74"/>
-<text text-anchor="middle" x="50" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">IHasDbPrint</text>
+<g id="a_Node000002"><a xlink:href="class_p4_1_1_i_has_db_print.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="96,-74 4,-74 4,-55 96,-55 96,-74"/>
+<text text-anchor="middle" x="50" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">P4::IHasDbPrint</text>
 </a>
 </g>
 </g>

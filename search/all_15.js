@@ -29,7 +29,7 @@ var searchData=
   ['localizeactions_26',['LocalizeActions',['../class_p4_1_1_localize_actions.html',1,'P4']]],
   ['localizeallactions_27',['LocalizeAllActions',['../class_p4_1_1_localize_all_actions.html',1,'P4']]],
   ['locationpath_28',['LocationPath',['../struct_p4_1_1_location_path.html',1,'P4']]],
-  ['locations_29',['locations',['../struct_error_message.html#a330ed3a60ef2067d5e4888dd713fbb0d',1,'ErrorMessage']]],
+  ['locations_29',['locations',['../struct_p4_1_1_error_message.html#a5bb09631c62b8c0a5441d2e397d9a1d9',1,'P4::ErrorMessage::locations'],['../struct_error_message.html#a330ed3a60ef2067d5e4888dd713fbb0d',1,'ErrorMessage::locations']]],
   ['locationset_30',['LocationSet',['../class_p4_1_1_location_set.html',1,'P4']]],
   ['log_20cpp_31',['log.h, log.cpp',['../md__2home_2runner_2work_2p4c_2p4c_2lib_2_r_e_a_d_m_e.html#logh-logcpp',1,'']]],
   ['log_20h_20log_20cpp_32',['log.h, log.cpp',['../md__2home_2runner_2work_2p4c_2p4c_2lib_2_r_e_a_d_m_e.html#logh-logcpp',1,'']]],
@@ -49,7 +49,7 @@ var searchData=
   ['lowerexpressions_46',['LowerExpressions',['../class_b_m_v2_1_1_lower_expressions.html',1,'BMV2::LowerExpressions'],['../class_e_b_p_f_1_1_lower_expressions.html',1,'EBPF::LowerExpressions']]],
   ['lpm_47',['LPM',['../class_p4_tools_1_1_p4_testgen_1_1_l_p_m.html',1,'P4Tools::P4Testgen']]],
   ['lpm_48',['lpm',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html#lpm',1,'']]],
-  ['ltbitmatrix_49',['LTBitMatrix',['../class_l_t_bit_matrix.html',1,'']]],
+  ['ltbitmatrix_49',['LTBitMatrix',['../class_l_t_bit_matrix.html',1,'LTBitMatrix'],['../class_p4_1_1_l_t_bit_matrix.html',1,'P4::LTBitMatrix']]],
   ['ltbitmatrix_20h_50',['ltbitmatrix.h',['../md__2home_2runner_2work_2p4c_2p4c_2lib_2_r_e_a_d_m_e.html#ltbitmatrixh',1,'']]],
   ['lvalmap_51',['lvalMap',['../class_p4_tools_1_1_p4_smith_1_1_p4_scope.html#a791d5d3970ef0b9f11be4c78ca59e561',1,'P4Tools::P4Smith::P4Scope']]],
   ['lvalmaprw_52',['lvalMapRw',['../class_p4_tools_1_1_p4_smith_1_1_p4_scope.html#aad8a3176a9424c68def7a78d703483a1',1,'P4Tools::P4Smith::P4Scope']]]

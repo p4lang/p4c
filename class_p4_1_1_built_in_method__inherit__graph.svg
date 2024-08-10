@@ -7,7 +7,8 @@
 <svg width="121pt" height="247pt"
  viewBox="0.00 0.00 121.00 247.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 
-<svg id="main" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" onload="init(evt)">
+<svg id="main" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+
 <style type="text/css"><![CDATA[
 .node, .edge {opacity: 0.7;}
 .node.selected, .edge.selected {opacity: 1;}
@@ -66,9 +67,9 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="class_i_castable.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="87.5,-184 25.5,-184 25.5,-165 87.5,-165 87.5,-184"/>
-<text text-anchor="middle" x="56.5" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">ICastable</text>
+<g id="a_Node000004"><a xlink:href="class_p4_1_1_i_castable.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="96.5,-184 16.5,-184 16.5,-165 96.5,-165 96.5,-184"/>
+<text text-anchor="middle" x="56.5" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">P4::ICastable</text>
 </a>
 </g>
 </g>
@@ -84,9 +85,9 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="struct_r_t_t_i_1_1_base.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="90.5,-239 22.5,-239 22.5,-220 90.5,-220 90.5,-239"/>
-<text text-anchor="middle" x="56.5" y="-227" font-family="Helvetica,sans-Serif" font-size="10.00">RTTI::Base</text>
+<g id="a_Node000005"><a xlink:href="struct_p4_1_1_r_t_t_i_1_1_base.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="99.5,-239 13.5,-239 13.5,-220 99.5,-220 99.5,-239"/>
+<text text-anchor="middle" x="56.5" y="-227" font-family="Helvetica,sans-Serif" font-size="10.00">P4::RTTI::Base</text>
 </a>
 </g>
 </g>

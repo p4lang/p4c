@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="namespace_p4_1_1_control_plane_a_p_i_1_1_standard.html#struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_digest" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="struct_p4_1_1_direct_meter_map_1_1_direct_meter_info.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="113,-30 0,-30 0,0 113,0 113,-30"/>
-<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">P4::ControlPlaneAPI</text>
-<text text-anchor="middle" x="56.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::Standard::Digest</text>
+<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">P4::DirectMeterMap</text>
+<text text-anchor="middle" x="56.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::DirectMeterInfo</text>
 </a>
 </g>
 </g>

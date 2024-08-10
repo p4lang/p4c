@@ -1,0 +1,19 @@
+<map id="P4::Modifier" name="P4::Modifier">
+<area shape="rect" id="Node000001" title=" " alt="" coords="141,80,240,105"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_check_table_size.html" title="Checks some possible misuses of the table size property." alt="" coords="319,5,465,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="223,71,287,40,324,28,326,33,289,44,225,75"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_do_single_argument_select.html" title=" " alt="" coords="288,55,496,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="253,82,291,77,292,83,254,87"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_parse_annotations.html" title=" " alt="" coords="313,104,471,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="254,97,313,105,312,110,254,103"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_switch_add_default.html" title=" " alt="" coords="311,153,473,179"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="226,110,289,140,326,151,325,156,287,144,224,114"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="5,80,93,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,90,141,90,141,95,107,95"/>
+<area shape="rect" id="Node000006" href="$class_b_m_v2_1_1_parse_annotations.html" title="Parses BMV2&#45;specific annotations." alt="" coords="561,47,742,72"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="463,98,593,69,594,75,464,104"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_control_plane_a_p_i_1_1_parse_p4_runtime_annotations.html" title="Parses P4Runtime&#45;specific annotations." alt="" coords="544,97,759,137"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="485,114,544,114,544,119,485,119"/>
+<area shape="rect" id="Node000008" href="$class_t_c_1_1_parse_t_c_annotations.html" title=" " alt="" coords="564,161,739,187"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="464,130,594,159,593,164,463,135"/>
+</map>

@@ -16,5 +16,5 @@ var searchData=
   ['outputpacket_13',['outputPacket',['../class_p4_tools_1_1_p4_testgen_1_1_test_back_end.html#a7a18cf6a559da97502787e691af65661',1,'P4Tools::P4Testgen::TestBackEnd::TestInfo']]],
   ['outputpacketonly_14',['outputPacketOnly',['../class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a374675146bbf2aed8335ee48e936d372',1,'P4Tools::P4Testgen::TestgenOptions']]],
   ['outputport_15',['outputPort',['../class_p4_tools_1_1_p4_testgen_1_1_test_back_end.html#ad89141c9a6fea3b9307df8ecc3d18b32',1,'P4Tools::P4Testgen::TestBackEnd::TestInfo']]],
-  ['outputstream_16',['outputstream',['../class_error_reporter.html#a02c5f4d9ebe49f2c88e88b6c19d34604',1,'ErrorReporter']]]
+  ['outputstream_16',['outputstream',['../class_p4_1_1_error_reporter.html#ac1dcde6d1f1a6aae65926aa83d2dce64',1,'P4::ErrorReporter::outputstream'],['../class_error_reporter.html#a02c5f4d9ebe49f2c88e88b6c19d34604',1,'ErrorReporter::outputstream']]]
 ];
