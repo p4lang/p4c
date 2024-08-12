@@ -19,12 +19,8 @@ namespace P4Tools {
 
 std::string formatBin(const big_int &value, int width, const FormatOptions &formatOptions) {
     std::stringstream out;
-    // Ensure we output at least _something_.
+    // If the width of the value is 0 return an empty string.
     if (width == 0) {
-        if (formatOptions.usePrefix) {
-            out << "0b";
-        }
-        out << 0;
         return out.str();
     }
 
@@ -56,12 +52,8 @@ std::string formatBin(const big_int &value, int width, const FormatOptions &form
 
 std::string formatOctal(const big_int &value, int width, const FormatOptions &formatOptions) {
     std::stringstream out;
-    // Ensure we output at least _something_.
+    // If the width of the value is 0 return an empty string.
     if (width == 0) {
-        if (formatOptions.usePrefix) {
-            out << "0";
-        }
-        out << 0;
         return out.str();
     }
 
@@ -91,12 +83,8 @@ std::string formatOctal(const big_int &value, int width, const FormatOptions &fo
 
 std::string formatHex(const big_int &value, int width, const FormatOptions &formatOptions) {
     std::stringstream out;
-    // Ensure we output at least _something_.
+    // If the width of the value is 0 return an empty string.
     if (width == 0) {
-        if (formatOptions.usePrefix) {
-            out << "0x";
-        }
-        out << 0;
         return out.str();
     }
 
@@ -240,6 +228,9 @@ std::string formatBinOrHexExpr(const IR::Expression *expr, const FormatOptions &
 std::string insertSeparators(const std::string &dataStr, const std::string &separator,
                              size_t stride, bool skipFirst) {
     size_t stringWidth = dataStr.size();
+    if (stringWidth == 0) {
+        return dataStr;
+    }
     // Nothing to do if we skip the first character and the stride is as wide as the string itself.
     if (stringWidth <= stride && skipFirst) {
         return dataStr;

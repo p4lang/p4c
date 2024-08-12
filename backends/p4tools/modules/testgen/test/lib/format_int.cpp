@@ -1,7 +1,5 @@
 #include "backends/p4tools/modules/testgen/test/lib/format_int.h"
 
-#include <stdint.h>
-
 #include <gtest/gtest.h>
 
 #include <string>
@@ -27,8 +25,7 @@ using P4Tools::insertHexSeparators;
 using P4Tools::insertOctalSeparators;
 using P4Tools::insertSeparators;
 
-// Tests for formatHexExpr
-TEST_F(FormatTest, Format01) {
+TEST_F(FormatTest, FormatHex) {
     {
         const auto *typeBits = IR::Type_Bits::get(16);
         const auto *sixteenBits = IR::Constant::get(typeBits, 0x10);
@@ -83,6 +80,19 @@ TEST_F(FormatTest, Format01) {
         ASSERT_STREQ(formatHexExpr(sixteenBits, {true, true, true}).c_str(), "0x1");
     }
     {
+        const auto *typeBits = IR::Type_Bits::get(0);
+        const auto *zeroBits = IR::Constant::get(typeBits, 0x0);
+        ASSERT_STREQ(formatHexExpr(zeroBits).c_str(), "");
+        ASSERT_STREQ(formatHexExpr(zeroBits, {false, false, false}).c_str(), "");
+        ASSERT_STREQ(formatHexExpr(zeroBits, {false, false, true}).c_str(), "");
+        ASSERT_STREQ(formatHexExpr(zeroBits, {false, true, false}).c_str(), "");
+        ASSERT_STREQ(formatHexExpr(zeroBits, {false, true, true}).c_str(), "");
+        ASSERT_STREQ(formatHexExpr(zeroBits, {true, false, false}).c_str(), "");
+        ASSERT_STREQ(formatHexExpr(zeroBits, {true, false, true}).c_str(), "");
+        ASSERT_STREQ(formatHexExpr(zeroBits, {true, true, false}).c_str(), "");
+        ASSERT_STREQ(formatHexExpr(zeroBits, {true, true, true}).c_str(), "");
+    }
+    {
         const auto *typeBits = IR::Type_Bits::get(16, true);
         const auto *sixteenBits = IR::Constant::get(typeBits, -1);
         ASSERT_EQ(static_cast<uint16_t>(sixteenBits->asInt64()), 0xFFFF);
@@ -123,8 +133,7 @@ TEST_F(FormatTest, Format01) {
     }
 }
 
-// Tests for formatOctalExpr
-TEST_F(FormatTest, Format02) {
+TEST_F(FormatTest, FormatOctal) {
     {
         const auto *typeBits = IR::Type_Bits::get(8);
         const auto *sixteenBits = IR::Constant::get(typeBits, 012);
@@ -200,10 +209,22 @@ TEST_F(FormatTest, Format02) {
         ASSERT_STREQ(formatOctalExpr(sixteenBits, {true, true, false}).c_str(), "0370");
         ASSERT_STREQ(formatOctalExpr(sixteenBits, {true, true, true}).c_str(), "00370");
     }
+    {
+        const auto *typeBits = IR::Type_Bits::get(0);
+        const auto *zeroBits = IR::Constant::get(typeBits, 0x0);
+        ASSERT_STREQ(formatHexExpr(zeroBits).c_str(), "");
+        ASSERT_STREQ(formatOctalExpr(zeroBits, {false, false, false}).c_str(), "");
+        ASSERT_STREQ(formatOctalExpr(zeroBits, {false, false, true}).c_str(), "");
+        ASSERT_STREQ(formatOctalExpr(zeroBits, {false, true, false}).c_str(), "");
+        ASSERT_STREQ(formatOctalExpr(zeroBits, {false, true, true}).c_str(), "");
+        ASSERT_STREQ(formatOctalExpr(zeroBits, {true, false, false}).c_str(), "");
+        ASSERT_STREQ(formatOctalExpr(zeroBits, {true, false, true}).c_str(), "");
+        ASSERT_STREQ(formatOctalExpr(zeroBits, {true, true, false}).c_str(), "");
+        ASSERT_STREQ(formatOctalExpr(zeroBits, {true, true, true}).c_str(), "");
+    }
 }
 
-// Tests for formatBinExpr
-TEST_F(FormatTest, Format03) {
+TEST_F(FormatTest, FormatBin) {
     {
         const auto *typeBits = IR::Type_Bits::get(8);
         const auto *sixteenBits = IR::Constant::get(typeBits, 0b11);
@@ -261,19 +282,35 @@ TEST_F(FormatTest, Format03) {
         ASSERT_STREQ(formatBinExpr(sixteenBits, {true, true, true}).c_str(),
                      "0b1111_1111_1111_0000");
     }
+    {
+        const auto *typeBits = IR::Type_Bits::get(0);
+        const auto *zeroBits = IR::Constant::get(typeBits, 0x0);
+        ASSERT_STREQ(formatHexExpr(zeroBits).c_str(), "");
+        ASSERT_STREQ(formatBinExpr(zeroBits, {false, false, false}).c_str(), "");
+        ASSERT_STREQ(formatBinExpr(zeroBits, {false, false, true}).c_str(), "");
+        ASSERT_STREQ(formatBinExpr(zeroBits, {false, true, false}).c_str(), "");
+        ASSERT_STREQ(formatBinExpr(zeroBits, {false, true, true}).c_str(), "");
+        ASSERT_STREQ(formatBinExpr(zeroBits, {true, false, false}).c_str(), "");
+        ASSERT_STREQ(formatBinExpr(zeroBits, {true, false, true}).c_str(), "");
+        ASSERT_STREQ(formatBinExpr(zeroBits, {true, true, false}).c_str(), "");
+        ASSERT_STREQ(formatBinExpr(zeroBits, {true, true, true}).c_str(), "");
+    }
 }
 
-// Tests for insertOctalSeparators and insertHexSeparators
-TEST_F(FormatTest, Format04) {
+TEST_F(FormatTest, InsertSeparators) {
     {
         ASSERT_STREQ(insertHexSeparators("AEC192").c_str(), "\\xAE\\xC1\\x92");
         ASSERT_STREQ(insertHexSeparators("E3D4").c_str(), "\\xE3\\xD4");
+        ASSERT_STREQ(insertHexSeparators("").c_str(), "");
         ASSERT_STREQ(insertOctalSeparators("0712522321").c_str(), "\\000\\712\\522\\321");
         ASSERT_STREQ(insertOctalSeparators("02310").c_str(), "\\002\\310");
+        ASSERT_STREQ(insertOctalSeparators("").c_str(), "");
         ASSERT_STREQ(insertSeparators("02310", "\\", 2, true).c_str(), "00\\23\\10");
         ASSERT_STREQ(insertSeparators("0712522321", "\\", 2, true).c_str(), "07\\12\\52\\23\\21");
+        ASSERT_STREQ(insertSeparators("", "\\", 2, true).c_str(), "");
         ASSERT_STREQ(insertSeparators("E3D4", "\\x", 2, true).c_str(), "E3\\xD4");
         ASSERT_STREQ(insertSeparators("AEC192", "\\x", 2, true).c_str(), "AE\\xC1\\x92");
+        ASSERT_STREQ(insertSeparators("", "\\x", 2, true).c_str(), "");
     }
 }
 
