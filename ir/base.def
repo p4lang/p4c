@@ -12,6 +12,8 @@
    - some simple leaf classes used frequently
 */
 
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "frontends/common/constantParsing.h"
 
 /// a value that can be evaluated at compile-time
