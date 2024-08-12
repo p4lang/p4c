@@ -18,7 +18,6 @@ limitations under the License.
 #define LIB_CSTRING_H_
 
 #include <cstddef>
-#include <cstdio>
 #include <cstring>
 #include <functional>
 #include <ostream>
