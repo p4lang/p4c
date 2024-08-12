@@ -30,6 +30,7 @@ limitations under the License.
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
+#include <cstring>
 #include <functional>
 #include <iomanip>
 #include <ios>
