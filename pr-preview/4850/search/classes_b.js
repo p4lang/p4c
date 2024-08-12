@@ -17,5 +17,5 @@ var searchData=
   ['lower_14',['Lower',['../class_e_b_p_f_1_1_lower.html',1,'EBPF']]],
   ['lowerexpressions_15',['LowerExpressions',['../class_b_m_v2_1_1_lower_expressions.html',1,'BMV2::LowerExpressions'],['../class_e_b_p_f_1_1_lower_expressions.html',1,'EBPF::LowerExpressions']]],
   ['lpm_16',['LPM',['../class_p4_tools_1_1_p4_testgen_1_1_l_p_m.html',1,'P4Tools::P4Testgen']]],
-  ['ltbitmatrix_17',['LTBitMatrix',['../class_l_t_bit_matrix.html',1,'']]]
+  ['ltbitmatrix_17',['LTBitMatrix',['../class_l_t_bit_matrix.html',1,'LTBitMatrix'],['../class_p4_1_1_l_t_bit_matrix.html',1,'P4::LTBitMatrix']]]
 ];

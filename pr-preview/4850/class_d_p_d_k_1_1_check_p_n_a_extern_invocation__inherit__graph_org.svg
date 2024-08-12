@@ -39,9 +39,9 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="class_inspector.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="122.5,-140 60.5,-140 60.5,-121 122.5,-121 122.5,-140"/>
-<text text-anchor="middle" x="91.5" y="-128" font-family="Helvetica,sans-Serif" font-size="10.00">Inspector</text>
+<g id="a_Node000003"><a xlink:href="class_p4_1_1_inspector.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="131.5,-140 51.5,-140 51.5,-121 131.5,-121 131.5,-140"/>
+<text text-anchor="middle" x="91.5" y="-128" font-family="Helvetica,sans-Serif" font-size="10.00">P4::Inspector</text>
 </a>
 </g>
 </g>
@@ -57,9 +57,9 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="class_visitor.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="115.5,-195 67.5,-195 67.5,-176 115.5,-176 115.5,-195"/>
-<text text-anchor="middle" x="91.5" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">Visitor</text>
+<g id="a_Node000004"><a xlink:href="class_p4_1_1_visitor.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="124.5,-195 58.5,-195 58.5,-176 124.5,-176 124.5,-195"/>
+<text text-anchor="middle" x="91.5" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">P4::Visitor</text>
 </a>
 </g>
 </g>

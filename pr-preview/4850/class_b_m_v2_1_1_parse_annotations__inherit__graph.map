@@ -2,8 +2,8 @@
 <area shape="rect" id="Node000001" title="Parses BMV2&#45;specific annotations." alt="" coords="5,225,187,251"/>
 <area shape="rect" id="Node000002" href="$class_p4_1_1_parse_annotations.html" title=" " alt="" coords="17,152,175,177"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,191,99,225,93,225,93,191"/>
-<area shape="rect" id="Node000003" href="$class_modifier.html" title=" " alt="" coords="59,79,133,104"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_modifier.html" title=" " alt="" coords="47,79,145,104"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="99,118,99,152,93,152,93,118"/>
-<area shape="rect" id="Node000004" href="$class_visitor.html" title=" " alt="" coords="64,5,128,31"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="52,5,140,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="99,44,99,79,93,79,93,44"/>
 </map>

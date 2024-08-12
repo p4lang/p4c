@@ -7,7 +7,8 @@
 <svg width="139pt" height="192pt"
  viewBox="0.00 0.00 139.00 192.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 
-<svg id="main" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" onload="init(evt)">
+<svg id="main" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+
 <style type="text/css"><![CDATA[
 .node, .edge {opacity: 0.7;}
 .node.selected, .edge.selected {opacity: 1;}
@@ -48,9 +49,9 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="class_modifier.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="93.5,-129 37.5,-129 37.5,-110 93.5,-110 93.5,-129"/>
-<text text-anchor="middle" x="65.5" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">Modifier</text>
+<g id="a_Node000003"><a xlink:href="class_p4_1_1_modifier.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="102.5,-129 28.5,-129 28.5,-110 102.5,-110 102.5,-129"/>
+<text text-anchor="middle" x="65.5" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">P4::Modifier</text>
 </a>
 </g>
 </g>
@@ -66,9 +67,9 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="class_visitor.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="89.5,-184 41.5,-184 41.5,-165 89.5,-165 89.5,-184"/>
-<text text-anchor="middle" x="65.5" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">Visitor</text>
+<g id="a_Node000004"><a xlink:href="class_p4_1_1_visitor.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="98.5,-184 32.5,-184 32.5,-165 98.5,-165 98.5,-184"/>
+<text text-anchor="middle" x="65.5" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">P4::Visitor</text>
 </a>
 </g>
 </g>

@@ -146,12 +146,12 @@ var hierarchy =
     [ "HalfOpenRange< Unit, Order >", "struct_half_open_range.html", null ],
     [ "hash_vector_base", "classhash__vector__base.html", [
       [ "hvec_map< P4::ProgramPoint, P4::Definitions * >", "classhvec__map.html", null ],
-      [ "hvec_map< const IR::IDeclaration *, def_info_t >", "classhvec__map.html", null ],
-      [ "hvec_map< const IR::Node *, hvec_set >", "classhvec__map.html", null ],
+      [ "hvec_map< const P4::IR::IDeclaration *, def_info_t >", "classhvec__map.html", null ],
+      [ "hvec_map< const P4::IR::Node *, hvec_set >", "classhvec__map.html", null ],
       [ "hvec_map< P4::loc_t, const P4::LocationSet * >", "classhvec__map.html", null ],
       [ "hvec_map< const P4::BaseLocation *, const P4::ProgramPoints * >", "classhvec__map.html", null ],
-      [ "hvec_map< const IR::IDeclaration *, P4::StorageLocation * >", "classhvec__map.html", null ],
-      [ "hvec_map< cstring, const P4::StorageLocation * >", "classhvec__map.html", null ],
+      [ "hvec_map< const P4::IR::IDeclaration *, P4::StorageLocation * >", "classhvec__map.html", null ],
+      [ "hvec_map< P4::cstring, const P4::StorageLocation * >", "classhvec__map.html", null ],
       [ "hvec_set< const loc_t * >", "classhvec__set.html", null ],
       [ "hvec_map< KEY, VAL, HASH, PRED, ALLOC >", "classhvec__map.html", null ],
       [ "hvec_set< KEY, HASH, PRED, ALLOC >", "classhvec__set.html", null ]
@@ -171,10 +171,6 @@ var hierarchy =
       ] ]
     ] ],
     [ "IHasDbPrint", "class_i_has_db_print.html", [
-      [ "P4::StructTypeReplacement< IR::Type_Struct >", "struct_p4_1_1_struct_type_replacement.html", null ],
-      [ "P4::TypeSubstitution< const IR::ITypeVar * >", "class_p4_1_1_type_substitution.html", [
-        [ "P4::TypeVariableSubstitution", "class_p4_1_1_type_variable_substitution.html", null ]
-      ] ],
       [ "BMV2::CFG", "class_b_m_v2_1_1_c_f_g.html", null ],
       [ "BMV2::CFG::EdgeSet", "class_b_m_v2_1_1_c_f_g_1_1_edge_set.html", null ],
       [ "BMV2::CFG::Node", "class_b_m_v2_1_1_c_f_g_1_1_node.html", [
@@ -222,10 +218,10 @@ var hierarchy =
               [ "IR::IndexedVector< IR::StructField >", "class_i_r_1_1_indexed_vector.html", null ]
             ] ],
             [ "IR::Vector< IR::Type >", "class_i_r_1_1_vector.html", null ],
-            [ "IR::Vector< IR::Argument >", "class_i_r_1_1_vector.html", null ],
             [ "IR::Vector< IR::ParserState >", "class_i_r_1_1_vector.html", [
               [ "IR::IndexedVector< IR::ParserState >", "class_i_r_1_1_indexed_vector.html", null ]
             ] ],
+            [ "IR::Vector< IR::Argument >", "class_i_r_1_1_vector.html", null ],
             [ "IR::Vector< IR::SelectCase >", "class_i_r_1_1_vector.html", null ],
             [ "IR::Vector< IR::Expression >", "class_i_r_1_1_vector.html", null ],
             [ "IR::Vector< N >", "class_i_r_1_1_vector.html", null ],
@@ -236,74 +232,6 @@ var hierarchy =
           ] ]
         ] ]
       ] ],
-      [ "P4::AllDefinitions", "class_p4_1_1_all_definitions.html", null ],
-      [ "P4::CallInfo", "struct_p4_1_1_call_info.html", null ],
-      [ "P4::ComplexValues::Component", "struct_p4_1_1_complex_values_1_1_component.html", [
-        [ "P4::ComplexValues::FieldsMap", "struct_p4_1_1_complex_values_1_1_fields_map.html", null ],
-        [ "P4::ComplexValues::FinalName", "struct_p4_1_1_complex_values_1_1_final_name.html", null ]
-      ] ],
-      [ "P4::ComputeWriteSet", "class_p4_1_1_compute_write_set.html", null ],
-      [ "P4::Definitions", "class_p4_1_1_definitions.html", null ],
-      [ "P4::InlineSummary", "struct_p4_1_1_inline_summary.html", null ],
-      [ "P4::LocationPath", "struct_p4_1_1_location_path.html", null ],
-      [ "P4::LocationSet", "class_p4_1_1_location_set.html", null ],
-      [ "P4::ParameterSubstitution", "class_p4_1_1_parameter_substitution.html", null ],
-      [ "P4::ProgramMap", "class_p4_1_1_program_map.html", [
-        [ "P4::ReferenceMap", "class_p4_1_1_reference_map.html", null ],
-        [ "P4::TypeMap", "class_p4_1_1_type_map.html", null ]
-      ] ],
-      [ "P4::ProgramPoint", "class_p4_1_1_program_point.html", null ],
-      [ "P4::ProgramPoints", "class_p4_1_1_program_points.html", null ],
-      [ "P4::SetOfLocations", "class_p4_1_1_set_of_locations.html", null ],
-      [ "P4::SimpleCallInfo< CallableT, CallNodeT, CallExpressionT >", "class_p4_1_1_simple_call_info.html", null ],
-      [ "P4::SimpleInlineWorkList< CallInfo >", "class_p4_1_1_simple_inline_work_list.html", null ],
-      [ "P4::StorageLocation", "class_p4_1_1_storage_location.html", [
-        [ "P4::BaseLocation", "class_p4_1_1_base_location.html", null ],
-        [ "P4::IndexedLocation", "class_p4_1_1_indexed_location.html", [
-          [ "P4::ArrayLocation", "class_p4_1_1_array_location.html", null ],
-          [ "P4::TupleLocation", "class_p4_1_1_tuple_location.html", null ]
-        ] ],
-        [ "P4::WithFieldsLocation", "class_p4_1_1_with_fields_location.html", [
-          [ "P4::StructLocation", "class_p4_1_1_struct_location.html", null ]
-        ] ]
-      ] ],
-      [ "P4::StorageMap", "class_p4_1_1_storage_map.html", null ],
-      [ "P4::StructTypeReplacement< T >", "struct_p4_1_1_struct_type_replacement.html", null ],
-      [ "P4::SymbolicValue", "class_p4_1_1_symbolic_value.html", [
-        [ "P4::ScalarValue", "class_p4_1_1_scalar_value.html", [
-          [ "P4::SymbolicBool", "class_p4_1_1_symbolic_bool.html", null ],
-          [ "P4::SymbolicEnum", "class_p4_1_1_symbolic_enum.html", null ],
-          [ "P4::SymbolicInteger", "class_p4_1_1_symbolic_integer.html", null ],
-          [ "P4::SymbolicVarbit", "class_p4_1_1_symbolic_varbit.html", null ]
-        ] ],
-        [ "P4::SymbolicArray", "class_p4_1_1_symbolic_array.html", null ],
-        [ "P4::SymbolicError", "class_p4_1_1_symbolic_error.html", [
-          [ "P4::SymbolicException", "class_p4_1_1_symbolic_exception.html", null ],
-          [ "P4::SymbolicStaticError", "class_p4_1_1_symbolic_static_error.html", null ]
-        ] ],
-        [ "P4::SymbolicExtern", "class_p4_1_1_symbolic_extern.html", [
-          [ "P4::SymbolicPacketIn", "class_p4_1_1_symbolic_packet_in.html", null ]
-        ] ],
-        [ "P4::SymbolicStruct", "class_p4_1_1_symbolic_struct.html", [
-          [ "P4::SymbolicHeader", "class_p4_1_1_symbolic_header.html", [
-            [ "P4::AnyElement", "class_p4_1_1_any_element.html", null ]
-          ] ],
-          [ "P4::SymbolicHeaderUnion", "class_p4_1_1_symbolic_header_union.html", null ]
-        ] ],
-        [ "P4::SymbolicTuple", "class_p4_1_1_symbolic_tuple.html", null ],
-        [ "P4::SymbolicVoid", "class_p4_1_1_symbolic_void.html", null ]
-      ] ],
-      [ "P4::TypeConstraint", "class_p4_1_1_type_constraint.html", [
-        [ "P4::BinaryConstraint", "class_p4_1_1_binary_constraint.html", [
-          [ "P4::CanBeImplicitlyCastConstraint", "class_p4_1_1_can_be_implicitly_cast_constraint.html", null ],
-          [ "P4::EqualityConstraint", "class_p4_1_1_equality_constraint.html", null ]
-        ] ]
-      ] ],
-      [ "P4::TypeConstraints", "class_p4_1_1_type_constraints.html", null ],
-      [ "P4::TypeSpecialization", "struct_p4_1_1_type_specialization.html", null ],
-      [ "P4::TypeSpecializationMap", "struct_p4_1_1_type_specialization_map.html", null ],
-      [ "P4::TypeSubstitution< T >", "class_p4_1_1_type_substitution.html", null ],
-      [ "P4::ValueMap", "class_p4_1_1_value_map.html", null ],
       [ "Util::Comment", "class_util_1_1_comment.html", null ]
     ] ],
     [ "indent_t", "classindent__t.html", null ],
@@ -376,28 +304,11 @@ var hierarchy =
     [ "NetHash::Reflect", "struct_net_hash_1_1_reflect.html", null ],
     [ "ordered_map< K, V, COMP, ALLOC >", "classordered__map.html", null ],
     [ "ordered_map< K, V, COMP, ALLOC >::value_compare", "classordered__map_1_1value__compare.html", null ],
-    [ "ordered_map< const IR::ConstructorCallExpression *, cstring >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::Declaration_Instance *, P4::CallInfo * >", "classordered__map.html", null ],
     [ "ordered_map< const IR::Declaration_Variable *, const cstring >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::IDeclaration *, unsigned int >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::ITypeVar *, const IR::Type * >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::MethodCallExpression *, P4::FunctionSpecialization * >", "classordered__map.html", null ],
     [ "ordered_map< const IR::Node *, block_t >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::Node *, const IR::CompileTimeValue * >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::Node *, const IR::P4Action * >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::Node *, P4::SpecializationInfo * >", "classordered__map.html", null ],
     [ "ordered_map< const IR::Node *, pna_block_t >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::Node *, std::pair< gress_t, block_t > >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::P4Action *, const IR::P4Action * >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::P4Action *, const IR::P4Control * >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::P4Action *, unsigned >", "classordered__map.html", null ],
     [ "ordered_map< const IR::P4Control *, cstring >", "classordered__map.html", null ],
     [ "ordered_map< const IR::P4Parser *, cstring >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::Parameter *, unsigned >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::Type *, const IR::Type_Struct * >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::Type *, P4::StructTypeReplacement< IR::Type_Struct > * >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::Type_Enum *, P4::EnumRepresentation * >", "classordered__map.html", null ],
-    [ "ordered_map< const IR::Type_Specialized *, P4::TypeSpecialization * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, const IR::Declaration_Instance * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, const IR::Declaration_Variable * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, const IR::Member * >", "classordered__map.html", null ],
@@ -412,17 +323,13 @@ var hierarchy =
     [ "ordered_map< cstring, const IR::Type_Header * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, const IR::Type_HeaderUnion * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, const IR::Type_Struct * >", "classordered__map.html", null ],
-    [ "ordered_map< cstring, const IR::Type_StructLike * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, const TestObject * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, cstring >", "classordered__map.html", null ],
     [ "ordered_map< cstring, enum InternalTableType >", "classordered__map.html", null ],
     [ "ordered_map< cstring, int >", "classordered__map.html", null ],
     [ "ordered_map< cstring, IR::ParameterList * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, ordered_map< uint, std::list< std::pair< std::vector< cstring >, MethodImpl > > > >", "classordered__map.html", null ],
-    [ "ordered_map< cstring, P4::ComplexValues::Component * >", "classordered__map.html", null ],
-    [ "ordered_map< cstring, P4::StructTypeReplacement< IR::Type_StructLike > * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, std::pair< cstring, cstring > * >", "classordered__map.html", null ],
-    [ "ordered_map< cstring, std::vector< cstring > * >", "classordered__map.html", null ],
     [ "ordered_map< cstring, std::vector< cstring > >", "classordered__map.html", null ],
     [ "ordered_map< cstring, std::vector< struct hdrFieldInfo > >", "classordered__map.html", null ],
     [ "ordered_map< cstring, struct DPDK::fieldInfo >", "classordered__map.html", null ],
@@ -433,9 +340,6 @@ var hierarchy =
     ] ],
     [ "ordered_map< std::string, unsigned >", "classordered__map.html", null ],
     [ "ordered_map< std::variant< IR::ConcolicVariable, const IR::Expression * >, const IR::Expression * >", "classordered__map.html", null ],
-    [ "ordered_map< T, const IR::Type * >", "classordered__map.html", null ],
-    [ "ordered_map< T, std::vector< T > * >", "classordered__map.html", null ],
-    [ "ordered_map< unsigned, const IR::MethodCallStatement * >", "classordered__map.html", null ],
     [ "ordered_map< unsigned, const IR::SymbolicVariable * >", "classordered__map.html", null ],
     [ "ordered_map< unsigned, cstring >", "classordered__map.html", null ],
     [ "ordered_map< unsigned, unsigned >", "classordered__map.html", null ],
@@ -443,8 +347,6 @@ var hierarchy =
     [ "ordered_set< BMV2::CFG::Edge * >", "classordered__set.html", null ],
     [ "ordered_set< BMV2::CFG::Node * >", "classordered__set.html", null ],
     [ "ordered_set< const IR::FieldList * >", "classordered__set.html", null ],
-    [ "ordered_set< const IR::Parameter * >", "classordered__set.html", null ],
-    [ "ordered_set< const P4::StorageLocation * >", "classordered__set.html", null ],
     [ "ordered_set< cstring >", "classordered__set.html", null ],
     [ "P4::AbstractParserDriver", "class_p4_1_1_abstract_parser_driver.html", [
       [ "P4::P4ParserDriver", "class_p4_1_1_p4_parser_driver.html", null ],
@@ -457,6 +359,7 @@ var hierarchy =
       [ "P4Test::SkipControls", "class_p4_test_1_1_skip_controls.html", null ]
     ] ],
     [ "P4::AnnotationSelectionPolicy", "class_p4_1_1_annotation_selection_policy.html", null ],
+    [ "P4::AutoCompileContext", "struct_p4_1_1_auto_compile_context.html", null ],
     [ "P4::BFRT::BFRuntimeGenerator", "class_p4_1_1_b_f_r_t_1_1_b_f_runtime_generator.html", [
       [ "P4::BFRT::BFRuntimeSchemaGenerator", "class_p4_1_1_b_f_r_t_1_1_b_f_runtime_schema_generator.html", null ]
     ] ],
@@ -468,6 +371,12 @@ var hierarchy =
     [ "P4::BFRT::BFRuntimeSchemaGenerator::ActionSelector", "struct_p4_1_1_b_f_r_t_1_1_b_f_runtime_schema_generator_1_1_action_selector.html", null ],
     [ "P4::BFRT::TypeSpecParser", "class_p4_1_1_b_f_r_t_1_1_type_spec_parser.html", null ],
     [ "P4::BFRT::TypeSpecParser::Field", "class_p4_1_1_b_f_r_t_1_1_type_spec_parser.html#struct_p4_1_1_b_f_r_t_1_1_type_spec_parser_1_1_field", null ],
+    [ "P4::bitvec", "class_p4_1_1bitvec.html", [
+      [ "P4::LTBitMatrix", "class_p4_1_1_l_t_bit_matrix.html", null ]
+    ] ],
+    [ "P4::bitvec::const_bitref", "class_p4_1_1bitvec_1_1const__bitref.html", null ],
+    [ "P4::bitvec::copy_bitref", "class_p4_1_1bitvec_1_1copy__bitref.html", null ],
+    [ "P4::bitvec::nonconst_bitref", "class_p4_1_1bitvec_1_1nonconst__bitref.html", null ],
     [ "P4::CallGraph< T >", "class_p4_1_1_call_graph.html", [
       [ "P4Tools::ExtendedCallGraph< T >", "class_p4_tools_1_1_extended_call_graph.html", null ]
     ] ],
@@ -487,9 +396,13 @@ var hierarchy =
     [ "P4::ChooseErrorRepresentation", "class_p4_1_1_choose_error_representation.html", [
       [ "DPDK::ErrorWidth", "class_d_p_d_k_1_1_error_width.html", null ]
     ] ],
+    [ "P4::CompileContextStack", "struct_p4_1_1_compile_context_stack.html", null ],
     [ "P4::ComplexValues", "class_p4_1_1_complex_values.html", null ],
     [ "P4::ComputeDefUse::loc_t", "struct_p4_1_1_compute_def_use_1_1loc__t.html", null ],
     [ "P4::ConstantFoldingPolicy", "class_p4_1_1_constant_folding_policy.html", null ],
+    [ "P4::ControlFlowVisitor::flow_join_info_t", "class_p4_1_1_control_flow_visitor.html#struct_p4_1_1_control_flow_visitor_1_1flow__join__info__t", null ],
+    [ "P4::ControlFlowVisitor::GuardGlobal", "class_p4_1_1_control_flow_visitor_1_1_guard_global.html", null ],
+    [ "P4::ControlFlowVisitor::SaveGlobal", "class_p4_1_1_control_flow_visitor_1_1_save_global.html", null ],
     [ "P4::ControlPlaneAPI::ActionRef", "namespace_p4_1_1_control_plane_a_p_i.html#struct_p4_1_1_control_plane_a_p_i_1_1_action_ref", null ],
     [ "P4::ControlPlaneAPI::ControllerType", "struct_p4_1_1_control_plane_a_p_i_1_1_controller_type.html", null ],
     [ "P4::ControlPlaneAPI::DefaultAction", "namespace_p4_1_1_control_plane_a_p_i.html#struct_p4_1_1_control_plane_a_p_i_1_1_default_action", null ],
@@ -578,6 +491,7 @@ var hierarchy =
     [ "P4::ControlPlaneAPI::TranslationAnnotation", "namespace_p4_1_1_control_plane_a_p_i.html#struct_p4_1_1_control_plane_a_p_i_1_1_translation_annotation", null ],
     [ "P4::Coverage::CoverageOptions", "namespace_p4_1_1_coverage.html#struct_p4_1_1_coverage_1_1_coverage_options", null ],
     [ "P4::Coverage::SourceIdCmp", "struct_p4_1_1_coverage_1_1_source_id_cmp.html", null ],
+    [ "P4::cstring", "class_p4_1_1cstring.html", null ],
     [ "P4::DeclarationLookup", "class_p4_1_1_declaration_lookup.html", [
       [ "P4::ReferenceMap", "class_p4_1_1_reference_map.html", null ],
       [ "P4::ResolutionContext", "class_p4_1_1_resolution_context.html", [
@@ -638,15 +552,123 @@ var hierarchy =
     [ "P4::DirectMeterMap::DirectMeterInfo", "struct_p4_1_1_direct_meter_map_1_1_direct_meter_info.html", null ],
     [ "P4::DoSingleArgumentSelect::Pair", "struct_p4_1_1_do_single_argument_select_1_1_pair.html", null ],
     [ "P4::EnumRepresentation", "class_p4_1_1_enum_representation.html", null ],
+    [ "P4::ErrorCatalog", "class_p4_1_1_error_catalog.html", null ],
+    [ "P4::ErrorMessage", "struct_p4_1_1_error_message.html", null ],
+    [ "P4::ErrorReporter", "class_p4_1_1_error_reporter.html", null ],
+    [ "P4::ErrorType", "class_p4_1_1_error_type.html", null ],
     [ "P4::ExternInstance", "struct_p4_1_1_extern_instance.html", null ],
     [ "P4::FrontEnd", "class_p4_1_1_front_end.html", null ],
     [ "P4::FunctionSpecialization", "struct_p4_1_1_function_specialization.html", null ],
     [ "P4::FunctionSpecializationMap", "struct_p4_1_1_function_specialization_map.html", null ],
     [ "P4::GlobalActionReplacements", "class_p4_1_1_global_action_replacements.html", null ],
+    [ "P4::ICompileContext", "class_p4_1_1_i_compile_context.html", [
+      [ "P4::BaseCompileContext", "class_p4_1_1_base_compile_context.html", null ]
+    ] ],
     [ "P4::IHasBlock", "class_p4_1_1_i_has_block.html", [
       [ "P4::Evaluator", "class_p4_1_1_evaluator.html", null ],
       [ "P4::EvaluatorPass", "class_p4_1_1_evaluator_pass.html", null ]
     ] ],
+    [ "P4::IHasDbPrint", "class_p4_1_1_i_has_db_print.html", [
+      [ "P4::StructTypeReplacement< IR::Type_Struct >", "struct_p4_1_1_struct_type_replacement.html", null ],
+      [ "P4::TypeSubstitution< const IR::ITypeVar * >", "class_p4_1_1_type_substitution.html", [
+        [ "P4::TypeVariableSubstitution", "class_p4_1_1_type_variable_substitution.html", null ]
+      ] ],
+      [ "P4::AllDefinitions", "class_p4_1_1_all_definitions.html", null ],
+      [ "P4::CallInfo", "struct_p4_1_1_call_info.html", null ],
+      [ "P4::ComplexValues::Component", "struct_p4_1_1_complex_values_1_1_component.html", [
+        [ "P4::ComplexValues::FieldsMap", "struct_p4_1_1_complex_values_1_1_fields_map.html", null ],
+        [ "P4::ComplexValues::FinalName", "struct_p4_1_1_complex_values_1_1_final_name.html", null ]
+      ] ],
+      [ "P4::ComputeWriteSet", "class_p4_1_1_compute_write_set.html", null ],
+      [ "P4::Definitions", "class_p4_1_1_definitions.html", null ],
+      [ "P4::IR::INode", "class_p4_1_1_i_r_1_1_i_node.html", [
+        [ "P4::IR::IDeclaration", "class_p4_1_1_i_r_1_1_i_declaration.html", null ],
+        [ "P4::IR::Node", "class_p4_1_1_i_r_1_1_node.html", [
+          [ "P4::IR::NameMap< T, MAP, COMP, ALLOC >", "class_p4_1_1_i_r_1_1_name_map.html", null ],
+          [ "P4::IR::NodeMap< KEY, VALUE, MAP, COMP, ALLOC >", "class_p4_1_1_i_r_1_1_node_map.html", null ],
+          [ "P4::IR::VectorBase", "class_p4_1_1_i_r_1_1_vector_base.html", [
+            [ "P4::IR::Vector< IR::Type >", "class_p4_1_1_i_r_1_1_vector.html", null ],
+            [ "P4::IR::Vector< P4::IR::Node >", "class_p4_1_1_i_r_1_1_vector.html", [
+              [ "P4::IR::IndexedVector< P4::IR::Node >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
+            ] ],
+            [ "P4::IR::Vector< IR::StatOrDecl >", "class_p4_1_1_i_r_1_1_vector.html", [
+              [ "P4::IR::IndexedVector< IR::StatOrDecl >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
+            ] ],
+            [ "P4::IR::Vector< IR::Declaration >", "class_p4_1_1_i_r_1_1_vector.html", [
+              [ "P4::IR::IndexedVector< IR::Declaration >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
+            ] ],
+            [ "P4::IR::Vector< IR::Argument >", "class_p4_1_1_i_r_1_1_vector.html", null ],
+            [ "P4::IR::Vector< N >", "class_p4_1_1_i_r_1_1_vector.html", null ],
+            [ "P4::IR::Vector< T >", "class_p4_1_1_i_r_1_1_vector.html", [
+              [ "P4::IR::IndexedVector< T >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
+            ] ]
+          ] ]
+        ] ]
+      ] ],
+      [ "P4::InlineSummary", "struct_p4_1_1_inline_summary.html", null ],
+      [ "P4::LocationPath", "struct_p4_1_1_location_path.html", null ],
+      [ "P4::LocationSet", "class_p4_1_1_location_set.html", null ],
+      [ "P4::ParameterSubstitution", "class_p4_1_1_parameter_substitution.html", null ],
+      [ "P4::ProgramMap", "class_p4_1_1_program_map.html", [
+        [ "P4::ReferenceMap", "class_p4_1_1_reference_map.html", null ],
+        [ "P4::TypeMap", "class_p4_1_1_type_map.html", null ]
+      ] ],
+      [ "P4::ProgramPoint", "class_p4_1_1_program_point.html", null ],
+      [ "P4::ProgramPoints", "class_p4_1_1_program_points.html", null ],
+      [ "P4::SetOfLocations", "class_p4_1_1_set_of_locations.html", null ],
+      [ "P4::SimpleCallInfo< CallableT, CallNodeT, CallExpressionT >", "class_p4_1_1_simple_call_info.html", null ],
+      [ "P4::SimpleInlineWorkList< CallInfo >", "class_p4_1_1_simple_inline_work_list.html", null ],
+      [ "P4::StorageLocation", "class_p4_1_1_storage_location.html", [
+        [ "P4::BaseLocation", "class_p4_1_1_base_location.html", null ],
+        [ "P4::IndexedLocation", "class_p4_1_1_indexed_location.html", [
+          [ "P4::ArrayLocation", "class_p4_1_1_array_location.html", null ],
+          [ "P4::TupleLocation", "class_p4_1_1_tuple_location.html", null ]
+        ] ],
+        [ "P4::WithFieldsLocation", "class_p4_1_1_with_fields_location.html", [
+          [ "P4::StructLocation", "class_p4_1_1_struct_location.html", null ]
+        ] ]
+      ] ],
+      [ "P4::StorageMap", "class_p4_1_1_storage_map.html", null ],
+      [ "P4::StructTypeReplacement< T >", "struct_p4_1_1_struct_type_replacement.html", null ],
+      [ "P4::SymbolicValue", "class_p4_1_1_symbolic_value.html", [
+        [ "P4::ScalarValue", "class_p4_1_1_scalar_value.html", [
+          [ "P4::SymbolicBool", "class_p4_1_1_symbolic_bool.html", null ],
+          [ "P4::SymbolicEnum", "class_p4_1_1_symbolic_enum.html", null ],
+          [ "P4::SymbolicInteger", "class_p4_1_1_symbolic_integer.html", null ],
+          [ "P4::SymbolicVarbit", "class_p4_1_1_symbolic_varbit.html", null ]
+        ] ],
+        [ "P4::SymbolicArray", "class_p4_1_1_symbolic_array.html", null ],
+        [ "P4::SymbolicError", "class_p4_1_1_symbolic_error.html", [
+          [ "P4::SymbolicException", "class_p4_1_1_symbolic_exception.html", null ],
+          [ "P4::SymbolicStaticError", "class_p4_1_1_symbolic_static_error.html", null ]
+        ] ],
+        [ "P4::SymbolicExtern", "class_p4_1_1_symbolic_extern.html", [
+          [ "P4::SymbolicPacketIn", "class_p4_1_1_symbolic_packet_in.html", null ]
+        ] ],
+        [ "P4::SymbolicStruct", "class_p4_1_1_symbolic_struct.html", [
+          [ "P4::SymbolicHeader", "class_p4_1_1_symbolic_header.html", [
+            [ "P4::AnyElement", "class_p4_1_1_any_element.html", null ]
+          ] ],
+          [ "P4::SymbolicHeaderUnion", "class_p4_1_1_symbolic_header_union.html", null ]
+        ] ],
+        [ "P4::SymbolicTuple", "class_p4_1_1_symbolic_tuple.html", null ],
+        [ "P4::SymbolicVoid", "class_p4_1_1_symbolic_void.html", null ]
+      ] ],
+      [ "P4::TypeConstraint", "class_p4_1_1_type_constraint.html", [
+        [ "P4::BinaryConstraint", "class_p4_1_1_binary_constraint.html", [
+          [ "P4::CanBeImplicitlyCastConstraint", "class_p4_1_1_can_be_implicitly_cast_constraint.html", null ],
+          [ "P4::EqualityConstraint", "class_p4_1_1_equality_constraint.html", null ]
+        ] ]
+      ] ],
+      [ "P4::TypeConstraints", "class_p4_1_1_type_constraints.html", null ],
+      [ "P4::TypeSpecialization", "struct_p4_1_1_type_specialization.html", null ],
+      [ "P4::TypeSpecializationMap", "struct_p4_1_1_type_specialization_map.html", null ],
+      [ "P4::TypeSubstitution< T >", "class_p4_1_1_type_substitution.html", null ],
+      [ "P4::Util::Comment", "class_p4_1_1_util_1_1_comment.html", null ],
+      [ "P4::ValueMap", "class_p4_1_1_value_map.html", null ]
+    ] ],
+    [ "P4::indent_t", "class_p4_1_1indent__t.html", null ],
+    [ "P4::IndentCtl::TempIndent", "class_p4_1_1_indent_ctl_1_1_temp_indent.html", null ],
     [ "P4::InlineList", "class_p4_1_1_inline_list.html", null ],
     [ "P4::InlineSummary::PerCaller", "struct_p4_1_1_inline_summary_1_1_per_caller.html", null ],
     [ "P4::InlineSummary::PerCaller::key_equal", "struct_p4_1_1_inline_summary_1_1_per_caller_1_1key__equal.html", null ],
@@ -654,6 +676,9 @@ var hierarchy =
     [ "P4::IOptionPragmaParser", "class_p4_1_1_i_option_pragma_parser.html", [
       [ "P4::P4COptionPragmaParser", "class_p4_1_1_p4_c_option_pragma_parser.html", null ]
     ] ],
+    [ "P4::IterKeys< PairIter >", "class_p4_1_1_iter_keys.html", null ],
+    [ "P4::IterValues< PairIter >", "class_p4_1_1_iter_values.html", null ],
+    [ "P4::JSONGenerator", "class_p4_1_1_j_s_o_n_generator.html", null ],
     [ "P4::KeyIsSimple", "class_p4_1_1_key_is_simple.html", [
       [ "P4::IsLikeLeftValue", "class_p4_1_1_is_like_left_value.html", [
         [ "P4::IsMask", "class_p4_1_1_is_mask.html", null ]
@@ -663,13 +688,58 @@ var hierarchy =
       [ "P4::OrPolicy", "class_p4_1_1_or_policy.html", null ]
     ] ],
     [ "P4::loc_t", "struct_p4_1_1loc__t.html", null ],
+    [ "P4::MapForKey< M >", "class_p4_1_1_map_for_key.html", null ],
+    [ "P4::match_t", "struct_p4_1_1match__t.html", null ],
     [ "P4::NameGenerator", "class_p4_1_1_name_generator.html", [
       [ "P4::MinimalNameGenerator", "class_p4_1_1_minimal_name_generator.html", null ],
       [ "P4::ReferenceMap", "class_p4_1_1_reference_map.html", null ]
     ] ],
     [ "P4::NestedStructMap", "struct_p4_1_1_nested_struct_map.html", null ],
+    [ "P4::ordered_map< K, V, COMP, ALLOC >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< K, V, COMP, ALLOC >::value_compare", "class_p4_1_1ordered__map_1_1value__compare.html", null ],
+    [ "P4::ordered_map< const IR::ConstructorCallExpression *, P4::cstring >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const IR::Declaration_Instance *, P4::CallInfo * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const IR::ITypeVar *, const IR::Type * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const IR::MethodCallExpression *, P4::FunctionSpecialization * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const IR::Node *, const IR::CompileTimeValue * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const IR::P4Action *, const IR::P4Action * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const IR::P4Action *, const IR::P4Control * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const IR::P4Action *, unsigned >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const IR::Parameter *, unsigned >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const IR::Type *, const IR::Type_Struct * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const IR::Type *, P4::StructTypeReplacement< IR::Type_Struct > * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const IR::Type_Enum *, P4::EnumRepresentation * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const IR::Type_Specialized *, P4::TypeSpecialization * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const P4::IR::IDeclaration *, unsigned int >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const P4::IR::Node *, const IR::P4Action * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const P4::IR::Node *, P4::SpecializationInfo * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< const P4::IR::Node *, std::pair< gress_t, block_t > >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< cstring, std::vector< cstring > * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, const IR::Declaration_Instance * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, const IR::Declaration_Variable * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, const IR::P4Control * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, const IR::P4Parser * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, const IR::P4Table * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, const IR::P4ValueSet * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, const IR::Type_Enum * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, const IR::Type_Error * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, const IR::Type_Header * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, const IR::Type_HeaderUnion * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, const IR::Type_Struct * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, const IR::Type_StructLike * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, P4::ComplexValues::Component * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, P4::cstring >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, P4::StructTypeReplacement< IR::Type_StructLike > * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< T, const IR::Type * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< T, std::vector< T > * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< unsigned, const IR::MethodCallStatement * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_set< T, COMP, ALLOC >", "class_p4_1_1ordered__set.html", null ],
+    [ "P4::ordered_set< const IR::Parameter * >", "class_p4_1_1ordered__set.html", null ],
+    [ "P4::ordered_set< const P4::StorageLocation * >", "class_p4_1_1ordered__set.html", null ],
+    [ "P4::ordered_set< cstring >", "class_p4_1_1ordered__set.html", null ],
     [ "P4::P4RuntimeAPI", "struct_p4_1_1_p4_runtime_a_p_i.html", null ],
     [ "P4::P4RuntimeSerializer", "class_p4_1_1_p4_runtime_serializer.html", null ],
+    [ "P4::ParserErrorMessage", "struct_p4_1_1_parser_error_message.html", null ],
     [ "P4::ParserInfo", "class_p4_1_1_parser_info.html", null ],
     [ "P4::ParserStateInfo", "struct_p4_1_1_parser_state_info.html", null ],
     [ "P4::ParserStructure", "class_p4_1_1_parser_structure.html", null ],
@@ -692,6 +762,43 @@ var hierarchy =
     ] ],
     [ "P4::RenameMap", "class_p4_1_1_rename_map.html", null ],
     [ "P4::ReplacementMap", "class_p4_1_1_replacement_map.html", null ],
+    [ "P4::RTTI::Base", "struct_p4_1_1_r_t_t_i_1_1_base.html", [
+      [ "P4::ICastable", "class_p4_1_1_i_castable.html", [
+        [ "P4::Backtrack::trigger", "struct_p4_1_1_backtrack_1_1trigger.html", null ],
+        [ "P4::IR::INode", "class_p4_1_1_i_r_1_1_i_node.html", null ],
+        [ "P4::InstanceBase", "class_p4_1_1_instance_base.html", [
+          [ "P4::ConstructorCall", "class_p4_1_1_constructor_call.html", [
+            [ "P4::ContainerConstructorCall", "class_p4_1_1_container_constructor_call.html", null ],
+            [ "P4::ExternConstructorCall", "class_p4_1_1_extern_constructor_call.html", null ]
+          ] ],
+          [ "P4::EnumInstance", "class_p4_1_1_enum_instance.html", [
+            [ "P4::SerEnumInstance", "class_p4_1_1_ser_enum_instance.html", null ],
+            [ "P4::SimpleEnumInstance", "class_p4_1_1_simple_enum_instance.html", null ]
+          ] ],
+          [ "P4::Instantiation", "class_p4_1_1_instantiation.html", [
+            [ "P4::ControlInstantiation", "class_p4_1_1_control_instantiation.html", null ],
+            [ "P4::ExternInstantiation", "class_p4_1_1_extern_instantiation.html", null ],
+            [ "P4::PackageInstantiation", "class_p4_1_1_package_instantiation.html", null ],
+            [ "P4::ParserInstantiation", "class_p4_1_1_parser_instantiation.html", null ]
+          ] ],
+          [ "P4::MethodInstance", "class_p4_1_1_method_instance.html", [
+            [ "P4::ActionCall", "class_p4_1_1_action_call.html", null ],
+            [ "P4::ApplyMethod", "class_p4_1_1_apply_method.html", null ],
+            [ "P4::BuiltInMethod", "class_p4_1_1_built_in_method.html", null ],
+            [ "P4::ExternFunction", "class_p4_1_1_extern_function.html", null ],
+            [ "P4::ExternMethod", "class_p4_1_1_extern_method.html", null ],
+            [ "P4::FunctionCall", "class_p4_1_1_function_call.html", null ]
+          ] ]
+        ] ],
+        [ "P4::StorageLocation", "class_p4_1_1_storage_location.html", null ],
+        [ "P4::SymbolicValue", "class_p4_1_1_symbolic_value.html", null ],
+        [ "P4::TypeConstraint", "class_p4_1_1_type_constraint.html", null ]
+      ] ]
+    ] ],
+    [ "P4::RTTI::detail::TypeIdResolver< T, typename >", "struct_p4_1_1_r_t_t_i_1_1detail_1_1_type_id_resolver.html", null ],
+    [ "P4::RTTI::detail::TypeIdResolver< T, std::void_t< decltype(T::static_typeId)> >", "struct_p4_1_1_r_t_t_i_1_1detail_1_1_type_id_resolver_3_01_t_00_01std_1_1void__t_3_01decltype_07_t_1_1static__type_id_08_4_01_4.html", null ],
+    [ "P4::RTTI::detail::TypeNameHolder", "struct_p4_1_1_r_t_t_i_1_1detail_1_1_type_name_holder.html", null ],
+    [ "P4::RTTI::TypeInfo< This, Parents >", "struct_p4_1_1_r_t_t_i_1_1_type_info.html", null ],
     [ "P4::SameExpression", "class_p4_1_1_same_expression.html", null ],
     [ "P4::SaturationElim", "class_p4_1_1_saturation_elim.html", null ],
     [ "P4::SimpleInlineList< Callable, CallInfo, InlineWorkList >", "class_p4_1_1_simple_inline_list.html", null ],
@@ -699,9 +806,18 @@ var hierarchy =
     [ "P4::SimpleInlineList< IR::P4Action, ActionCallInfo, AInlineWorkList >", "class_p4_1_1_simple_inline_list.html", null ],
     [ "P4::SpecializationInfo", "struct_p4_1_1_specialization_info.html", null ],
     [ "P4::SpecializationMap", "class_p4_1_1_specialization_map.html", null ],
+    [ "P4::SplitFlowVisit_base", "class_p4_1_1_split_flow_visit__base.html", [
+      [ "P4::SplitFlowVisit< N >", "class_p4_1_1_split_flow_visit.html", null ],
+      [ "P4::SplitFlowVisitVector< N >", "class_p4_1_1_split_flow_visit_vector.html", null ]
+    ] ],
     [ "P4::StackVariable", "class_p4_1_1_stack_variable.html", null ],
     [ "P4::StackVariableHash", "class_p4_1_1_stack_variable_hash.html", null ],
+    [ "P4::std::hash< cstring >", "struct_p4_1_1std_1_1hash_3_01cstring_01_4.html", null ],
+    [ "P4::std::hash< std::pair< T1, T2 > >", "struct_p4_1_1std_1_1hash_3_01std_1_1pair_3_01_t1_00_01_t2_01_4_01_4.html", null ],
+    [ "P4::std::hash< std::tuple< Types... > >", "struct_p4_1_1std_1_1hash_3_01std_1_1tuple_3_01_types_8_8_8_01_4_01_4.html", null ],
     [ "P4::StorageFactory", "class_p4_1_1_storage_factory.html", null ],
+    [ "P4::string_map< V >", "class_p4_1_1string__map.html", null ],
+    [ "P4::string_map< const P4::IR::IDeclaration * >", "class_p4_1_1string__map.html", null ],
     [ "P4::SymbolicValueFactory", "class_p4_1_1_symbolic_value_factory.html", null ],
     [ "P4::SymRenameMap", "class_p4_1_1_sym_rename_map.html", null ],
     [ "P4::TableApplySolver", "class_p4_1_1_table_apply_solver.html", null ],
@@ -710,7 +826,308 @@ var hierarchy =
     [ "P4::TypeUnification", "class_p4_1_1_type_unification.html", null ],
     [ "P4::UnrollLoops::loop_bounds_t", "class_p4_1_1_unroll_loops.html#struct_p4_1_1_unroll_loops_1_1loop__bounds__t", null ],
     [ "P4::UnrollLoops::Policy", "struct_p4_1_1_unroll_loops_1_1_policy.html", null ],
+    [ "P4::Util::BitRange", "struct_p4_1_1_util_1_1_bit_range.html", null ],
+    [ "P4::Util::Detail::FloatHasher< Float >", "struct_p4_1_1_util_1_1_detail_1_1_float_hasher.html", null ],
+    [ "P4::Util::Detail::FloatHasher< double >", "struct_p4_1_1_util_1_1_detail_1_1_float_hasher.html", [
+      [ "P4::Util::Hasher< double >", "struct_p4_1_1_util_1_1_hasher_3_01double_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::FloatHasher< float >", "struct_p4_1_1_util_1_1_detail_1_1_float_hasher.html", [
+      [ "P4::Util::Hasher< float >", "struct_p4_1_1_util_1_1_hasher_3_01float_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::IntegerHasher< Int >", "struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html", null ],
+    [ "P4::Util::Detail::IntegerHasher< char >", "struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html", [
+      [ "P4::Util::Hasher< char >", "struct_p4_1_1_util_1_1_hasher_3_01char_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::IntegerHasher< signed char >", "struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html", [
+      [ "P4::Util::Hasher< signed char >", "struct_p4_1_1_util_1_1_hasher_3_01signed_01char_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::IntegerHasher< signed int >", "struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html", [
+      [ "P4::Util::Hasher< signed int >", "struct_p4_1_1_util_1_1_hasher_3_01signed_01int_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::IntegerHasher< signed long >", "struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html", [
+      [ "P4::Util::Hasher< signed long >", "struct_p4_1_1_util_1_1_hasher_3_01signed_01long_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::IntegerHasher< signed long long >", "struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html", [
+      [ "P4::Util::Hasher< signed long long >", "struct_p4_1_1_util_1_1_hasher_3_01signed_01long_01long_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::IntegerHasher< signed short >", "struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html", [
+      [ "P4::Util::Hasher< signed short >", "struct_p4_1_1_util_1_1_hasher_3_01signed_01short_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::IntegerHasher< unsigned char >", "struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html", [
+      [ "P4::Util::Hasher< unsigned char >", "struct_p4_1_1_util_1_1_hasher_3_01unsigned_01char_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::IntegerHasher< unsigned int >", "struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html", [
+      [ "P4::Util::Hasher< unsigned int >", "struct_p4_1_1_util_1_1_hasher_3_01unsigned_01int_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::IntegerHasher< unsigned long >", "struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html", [
+      [ "P4::Util::Hasher< unsigned long >", "struct_p4_1_1_util_1_1_hasher_3_01unsigned_01long_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::IntegerHasher< unsigned long long >", "struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html", [
+      [ "P4::Util::Hasher< unsigned long long >", "struct_p4_1_1_util_1_1_hasher_3_01unsigned_01long_01long_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::IntegerHasher< unsigned short >", "struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html", [
+      [ "P4::Util::Hasher< unsigned short >", "struct_p4_1_1_util_1_1_hasher_3_01unsigned_01short_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::StdHasher", "class_p4_1_1_util_1_1_detail_1_1_std_hasher.html", [
+      [ "P4::Util::Hasher< big_int >", "struct_p4_1_1_util_1_1_hasher_3_01big__int_01_4.html", null ]
+    ] ],
+    [ "P4::Util::Detail::TupleHasher< index, Types >", "struct_p4_1_1_util_1_1_detail_1_1_tuple_hasher.html", null ],
+    [ "P4::Util::Detail::TupleHasher< 0, Types... >", "struct_p4_1_1_util_1_1_detail_1_1_tuple_hasher_3_010_00_01_types_8_8_8_01_4.html", null ],
+    [ "P4::Util::Enumerator< T >", "class_p4_1_1_util_1_1_enumerator.html", [
+      [ "P4::Util::ConcatEnumerator< T >", "class_p4_1_1_util_1_1_concat_enumerator.html", null ],
+      [ "P4::Util::EmptyEnumerator< T >", "class_p4_1_1_util_1_1_empty_enumerator.html", null ],
+      [ "P4::Util::FilterEnumerator< T, Filter >", "class_p4_1_1_util_1_1_filter_enumerator.html", null ],
+      [ "P4::Util::SingleEnumerator< T >", "class_p4_1_1_util_1_1_single_enumerator.html", null ]
+    ] ],
+    [ "P4::Util::Enumerator< S >", "class_p4_1_1_util_1_1_enumerator.html", [
+      [ "P4::Util::AsEnumerator< T, S >", "class_p4_1_1_util_1_1_as_enumerator.html", null ],
+      [ "P4::Util::MapEnumerator< T, S, Mapper >", "class_p4_1_1_util_1_1_map_enumerator.html", null ]
+    ] ],
+    [ "P4::Util::Enumerator< std::iterator_traits< Iter >::value_type >", "class_p4_1_1_util_1_1_enumerator.html", [
+      [ "P4::Util::IteratorEnumerator< Iter >", "class_p4_1_1_util_1_1_iterator_enumerator.html", null ]
+    ] ],
+    [ "P4::Util::EnumeratorHandle< T >", "class_p4_1_1_util_1_1_enumerator_handle.html", null ],
+    [ "P4::Util::Hash", "struct_p4_1_1_util_1_1_hash.html", null ],
+    [ "P4::Util::Hasher< Key, Enable >", "struct_p4_1_1_util_1_1_hasher.html", null ],
+    [ "P4::Util::Hasher< bool >", "struct_p4_1_1_util_1_1_hasher_3_01bool_01_4.html", null ],
+    [ "P4::Util::Hasher< cstring >", "struct_p4_1_1_util_1_1_hasher_3_01cstring_01_4.html", null ],
+    [ "P4::Util::Hasher< IR::ID >", "struct_p4_1_1_util_1_1_hasher_3_01_i_r_1_1_i_d_01_4.html", null ],
+    [ "P4::Util::Hasher< std::pair< T1, T2 > >", "struct_p4_1_1_util_1_1_hasher_3_01std_1_1pair_3_01_t1_00_01_t2_01_4_01_4.html", null ],
+    [ "P4::Util::Hasher< std::shared_ptr< T > >", "struct_p4_1_1_util_1_1_hasher_3_01std_1_1shared__ptr_3_01_t_01_4_01_4.html", null ],
+    [ "P4::Util::Hasher< std::string >", "struct_p4_1_1_util_1_1_hasher_3_01std_1_1string_01_4.html", null ],
+    [ "P4::Util::Hasher< std::string_view >", "struct_p4_1_1_util_1_1_hasher_3_01std_1_1string__view_01_4.html", null ],
+    [ "P4::Util::Hasher< std::tuple< Types... > >", "struct_p4_1_1_util_1_1_hasher_3_01std_1_1tuple_3_01_types_8_8_8_01_4_01_4.html", null ],
+    [ "P4::Util::Hasher< std::unique_ptr< T > >", "struct_p4_1_1_util_1_1_hasher_3_01std_1_1unique__ptr_3_01_t_01_4_01_4.html", null ],
+    [ "P4::Util::Hasher< T * >", "struct_p4_1_1_util_1_1_hasher_3_01_t_01_5_01_4.html", null ],
+    [ "P4::Util::IHasSourceInfo", "class_p4_1_1_util_1_1_i_has_source_info.html", [
+      [ "P4::IR::ID", "struct_p4_1_1_i_r_1_1_i_d.html", null ],
+      [ "P4::IR::INode", "class_p4_1_1_i_r_1_1_i_node.html", null ]
+    ] ],
+    [ "P4::Util::InputSources", "class_p4_1_1_util_1_1_input_sources.html", null ],
+    [ "P4::Util::iterator_range< Iter, Sentinel >", "class_p4_1_1_util_1_1iterator__range.html", null ],
+    [ "P4::Util::SourceFileLine", "struct_p4_1_1_util_1_1_source_file_line.html", null ],
+    [ "P4::Util::SourceInfo", "class_p4_1_1_util_1_1_source_info.html", null ],
+    [ "P4::Util::SourcePosition", "class_p4_1_1_util_1_1_source_position.html", null ],
     [ "P4::VisitedKey", "struct_p4_1_1_visited_key.html", null ],
+    [ "P4::Visitor", "class_p4_1_1_visitor.html", [
+      [ "P4::Backtrack", "class_p4_1_1_backtrack.html", null ],
+      [ "P4::ControlFlowVisitor", "class_p4_1_1_control_flow_visitor.html", [
+        [ "P4::ComputeDefUse", "class_p4_1_1_compute_def_use.html", null ],
+        [ "P4::DoLocalCopyPropagation", "class_p4_1_1_do_local_copy_propagation.html", null ]
+      ] ],
+      [ "P4::InlineDriver< InlineList, InlineWorkList >", "class_p4_1_1_inline_driver.html", null ],
+      [ "P4::Inspector", "class_p4_1_1_inspector.html", [
+        [ "P4::AnalyzeParser", "class_p4_1_1_analyze_parser.html", null ],
+        [ "P4::ApplyOptionsPragmas", "class_p4_1_1_apply_options_pragmas.html", null ],
+        [ "P4::BuildResourceMap", "class_p4_1_1_build_resource_map.html", null ],
+        [ "P4::CheckExternInvocationCommon", "class_p4_1_1_check_extern_invocation_common.html", [
+          [ "DPDK::CheckPNAExternInvocation", "class_d_p_d_k_1_1_check_p_n_a_extern_invocation.html", null ]
+        ] ],
+        [ "P4::CheckNamedArgs", "class_p4_1_1_check_named_args.html", null ],
+        [ "P4::ClearTypeMap", "class_p4_1_1_clear_type_map.html", null ],
+        [ "P4::CompileTimeOperations", "class_p4_1_1_compile_time_operations.html", null ],
+        [ "P4::ComputeDefUse", "class_p4_1_1_compute_def_use.html", null ],
+        [ "P4::ComputeParserCG", "class_p4_1_1_compute_parser_c_g.html", null ],
+        [ "P4::ComputeWriteSet", "class_p4_1_1_compute_write_set.html", null ],
+        [ "P4::ContainsType", "class_p4_1_1_contains_type.html", null ],
+        [ "P4::ControlFlowVisitor::SetupJoinPoints", "class_p4_1_1_control_flow_visitor_1_1_setup_join_points.html", [
+          [ "P4::ComputeDefUse::SetupJoinPoints", "class_p4_1_1_compute_def_use_1_1_setup_join_points.html", null ]
+        ] ],
+        [ "P4::ControlPlaneAPI::TypeSpecConverter", "class_p4_1_1_control_plane_a_p_i_1_1_type_spec_converter.html", null ],
+        [ "P4::Coverage::CollectNodes", "class_p4_1_1_coverage_1_1_collect_nodes.html", null ],
+        [ "P4::Deprecated", "class_p4_1_1_deprecated.html", null ],
+        [ "P4::DiscoverActionsInlining", "class_p4_1_1_discover_actions_inlining.html", null ],
+        [ "P4::DiscoverFunctionsInlining", "class_p4_1_1_discover_functions_inlining.html", null ],
+        [ "P4::DiscoverInlining", "class_p4_1_1_discover_inlining.html", null ],
+        [ "P4::DiscoverStructure", "class_p4_1_1_discover_structure.html", null ],
+        [ "P4::DoCheckConstants", "class_p4_1_1_do_check_constants.html", null ],
+        [ "P4::DoCheckCoreMethods", "class_p4_1_1_do_check_core_methods.html", null ],
+        [ "P4::Evaluator", "class_p4_1_1_evaluator.html", null ],
+        [ "P4::Explain", "class_p4_1_1_explain.html", null ],
+        [ "P4::ExpressionEvaluator", "class_p4_1_1_expression_evaluator.html", null ],
+        [ "P4::FindActionParameters", "class_p4_1_1_find_action_parameters.html", null ],
+        [ "P4::FindFunctionSpecializations", "class_p4_1_1_find_function_specializations.html", null ],
+        [ "P4::FindGlobalActionUses", "class_p4_1_1_find_global_action_uses.html", null ],
+        [ "P4::FindHeaderTypesToReplace", "class_p4_1_1_find_header_types_to_replace.html", null ],
+        [ "P4::FindParameters", "class_p4_1_1_find_parameters.html", null ],
+        [ "P4::FindRedundantParsers", "class_p4_1_1_find_redundant_parsers.html", null ],
+        [ "P4::FindRepeatedActionUses", "class_p4_1_1_find_repeated_action_uses.html", null ],
+        [ "P4::FindSpecializations", "class_p4_1_1_find_specializations.html", null ],
+        [ "P4::FindSymbols", "class_p4_1_1_find_symbols.html", null ],
+        [ "P4::FindTypeSpecializations", "class_p4_1_1_find_type_specializations.html", null ],
+        [ "P4::FindTypesInLogMsgInvocationToReplace", "class_p4_1_1_find_types_in_log_msg_invocation_to_replace.html", null ],
+        [ "P4::FindTypesToReplace", "class_p4_1_1_find_types_to_replace.html", null ],
+        [ "P4::FindVariableValues", "class_p4_1_1_find_variable_values.html", null ],
+        [ "P4::HSIndexFinder", "class_p4_1_1_h_s_index_finder.html", null ],
+        [ "P4::HasExits", "class_p4_1_1_has_exits.html", null ],
+        [ "P4::HasTableApply", "class_p4_1_1_has_table_apply.html", null ],
+        [ "P4::IfInParser", "class_p4_1_1_if_in_parser.html", null ],
+        [ "P4::InspectPortableProgram", "class_p4_1_1_inspect_portable_program.html", [
+          [ "BMV2::InspectPnaProgram", "class_b_m_v2_1_1_inspect_pna_program.html", null ],
+          [ "P4::InspectPsaProgram", "class_p4_1_1_inspect_psa_program.html", null ]
+        ] ],
+        [ "P4::IsLikeLeftValue", "class_p4_1_1_is_like_left_value.html", null ],
+        [ "P4::IsNonConstantArrayIndex", "class_p4_1_1_is_non_constant_array_index.html", null ],
+        [ "P4::KeyNameGenerator", "class_p4_1_1_key_name_generator.html", null ],
+        [ "P4::MidEndLast", "class_p4_1_1_mid_end_last.html", null ],
+        [ "P4::MinimalNameGenerator", "class_p4_1_1_minimal_name_generator.html", null ],
+        [ "P4::ParsePortableArchitecture", "class_p4_1_1_parse_portable_architecture.html", [
+          [ "BMV2::ParsePnaArchitecture", "class_b_m_v2_1_1_parse_pna_architecture.html", null ],
+          [ "P4::ParsePsaArchitecture", "class_p4_1_1_parse_psa_architecture.html", null ]
+        ] ],
+        [ "P4::ReadsWrites", "class_p4_1_1_reads_writes.html", null ],
+        [ "P4::RemoveModifiedValues", "class_p4_1_1_remove_modified_values.html", null ],
+        [ "P4::ResolveReferences", "class_p4_1_1_resolve_references.html", null ],
+        [ "P4::SideEffects", "class_p4_1_1_side_effects.html", null ],
+        [ "P4::TablesInActions", "class_p4_1_1_tables_in_actions.html", null ],
+        [ "P4::TablesInKeys", "class_p4_1_1_tables_in_keys.html", null ],
+        [ "P4::ToP4", "class_p4_1_1_to_p4.html", null ],
+        [ "P4::TypeOccursVisitor", "class_p4_1_1_type_occurs_visitor.html", null ],
+        [ "P4::ValidateMatchAnnotations", "class_p4_1_1_validate_match_annotations.html", null ],
+        [ "P4::ValidateParsedProgram", "class_p4_1_1_validate_parsed_program.html", null ],
+        [ "P4::ValidateTableProperties", "class_p4_1_1_validate_table_properties.html", null ],
+        [ "P4::ValidateValueSets", "class_p4_1_1_validate_value_sets.html", null ]
+      ] ],
+      [ "P4::Modifier", "class_p4_1_1_modifier.html", [
+        [ "P4::CheckTableSize", "class_p4_1_1_check_table_size.html", null ],
+        [ "P4::DoSingleArgumentSelect", "class_p4_1_1_do_single_argument_select.html", null ],
+        [ "P4::ParseAnnotations", "class_p4_1_1_parse_annotations.html", [
+          [ "BMV2::ParseAnnotations", "class_b_m_v2_1_1_parse_annotations.html", null ],
+          [ "P4::ControlPlaneAPI::ParseP4RuntimeAnnotations", "class_p4_1_1_control_plane_a_p_i_1_1_parse_p4_runtime_annotations.html", null ],
+          [ "TC::ParseTCAnnotations", "class_t_c_1_1_parse_t_c_annotations.html", null ]
+        ] ],
+        [ "P4::SwitchAddDefault", "class_p4_1_1_switch_add_default.html", null ]
+      ] ],
+      [ "P4::P4WriteContext", "class_p4_1_1_p4_write_context.html", [
+        [ "P4::ComputeDefUse", "class_p4_1_1_compute_def_use.html", null ],
+        [ "P4::DoLocalCopyPropagation", "class_p4_1_1_do_local_copy_propagation.html", null ],
+        [ "P4::DoSimplifyExpressions", "class_p4_1_1_do_simplify_expressions.html", null ],
+        [ "P4::ReplaceHeaders", "class_p4_1_1_replace_headers.html", null ],
+        [ "P4::ReplaceIndexRefs", "class_p4_1_1_replace_index_refs.html", null ],
+        [ "P4::ReplaceLogMsg", "class_p4_1_1_replace_log_msg.html", null ],
+        [ "P4::ReplaceStructs", "class_p4_1_1_replace_structs.html", null ]
+      ] ],
+      [ "P4::ResolutionContext", "class_p4_1_1_resolution_context.html", null ],
+      [ "P4::Transform", "class_p4_1_1_transform.html", [
+        [ "P4::AbstractInliner< ActionsInlineList, AInlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
+        [ "P4::AbstractInliner< FunctionsInlineList, FunctionsInlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
+        [ "P4::AbstractInliner< InlineList, InlineSummary >", "class_p4_1_1_abstract_inliner.html", null ],
+        [ "P4::AbstractInliner< P4::InlineList, InlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
+        [ "P4::AbstractInliner< InlineList, InlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
+        [ "P4::ApplyTypesToExpressions", "class_p4_1_1_apply_types_to_expressions.html", null ],
+        [ "P4::CastBooleanTableKeys", "class_p4_1_1_cast_boolean_table_keys.html", null ],
+        [ "P4::CloneConstants", "class_p4_1_1_clone_constants.html", null ],
+        [ "P4::CloneExpressions", "class_p4_1_1_clone_expressions.html", null ],
+        [ "P4::CloneVariableDeclarations", "class_p4_1_1_clone_variable_declarations.html", null ],
+        [ "P4::ConstantTypeSubstitution", "class_p4_1_1_constant_type_substitution.html", null ],
+        [ "P4::CopySrcInfo", "class_p4_1_1_copy_src_info.html", null ],
+        [ "P4::CreateBuiltins", "class_p4_1_1_create_builtins.html", null ],
+        [ "P4::CreateSpecializedTypes", "class_p4_1_1_create_specialized_types.html", null ],
+        [ "P4::CreateStructInitializers", "class_p4_1_1_create_struct_initializers.html", null ],
+        [ "P4::DoBindTypeVariables", "class_p4_1_1_do_bind_type_variables.html", null ],
+        [ "P4::DoConstantFolding", "class_p4_1_1_do_constant_folding.html", null ],
+        [ "P4::DoConvertEnums", "class_p4_1_1_do_convert_enums.html", null ],
+        [ "P4::DoConvertErrors", "class_p4_1_1_do_convert_errors.html", null ],
+        [ "P4::DoCopyStructures", "class_p4_1_1_do_copy_structures.html", null ],
+        [ "P4::DoDefaultArguments", "class_p4_1_1_do_default_arguments.html", null ],
+        [ "P4::DoDefaultValues", "class_p4_1_1_do_default_values.html", null ],
+        [ "P4::DoEliminateInvalidHeaders", "class_p4_1_1_do_eliminate_invalid_headers.html", null ],
+        [ "P4::DoEliminateSerEnums", "class_p4_1_1_do_eliminate_ser_enums.html", null ],
+        [ "P4::DoEliminateSwitch", "class_p4_1_1_do_eliminate_switch.html", null ],
+        [ "P4::DoExpandEmit", "class_p4_1_1_do_expand_emit.html", null ],
+        [ "P4::DoExpandLookahead", "class_p4_1_1_do_expand_lookahead.html", null ],
+        [ "P4::DoFlattenHeaderUnion", "class_p4_1_1_do_flatten_header_union.html", [
+          [ "P4::DoFlattenHeaderUnionStack", "class_p4_1_1_do_flatten_header_union_stack.html", null ]
+        ] ],
+        [ "P4::DoGlobalCopyPropagation", "class_p4_1_1_do_global_copy_propagation.html", null ],
+        [ "P4::DoHandleNoMatch", "class_p4_1_1_do_handle_no_match.html", null ],
+        [ "P4::DoLocalCopyPropagation", "class_p4_1_1_do_local_copy_propagation.html", null ],
+        [ "P4::DoLocalCopyPropagation::ElimDead", "class_p4_1_1_do_local_copy_propagation_1_1_elim_dead.html", null ],
+        [ "P4::DoLocalCopyPropagation::RewriteTableKeys", "class_p4_1_1_do_local_copy_propagation_1_1_rewrite_table_keys.html", null ],
+        [ "P4::DoMoveActionsToTables", "class_p4_1_1_do_move_actions_to_tables.html", null ],
+        [ "P4::DoOrderArguments", "class_p4_1_1_do_order_arguments.html", null ],
+        [ "P4::DoRemoveActionParameters", "class_p4_1_1_do_remove_action_parameters.html", null ],
+        [ "P4::DoRemoveAssertAssume", "class_p4_1_1_do_remove_assert_assume.html", null ],
+        [ "P4::DoRemoveLeftSlices", "class_p4_1_1_do_remove_left_slices.html", null ],
+        [ "P4::DoRemoveMiss", "class_p4_1_1_do_remove_miss.html", null ],
+        [ "P4::DoRemoveParserControlFlow", "class_p4_1_1_do_remove_parser_control_flow.html", null ],
+        [ "P4::DoRemoveReturns", "class_p4_1_1_do_remove_returns.html", [
+          [ "P4::DoRemoveExits", "class_p4_1_1_do_remove_exits.html", null ]
+        ] ],
+        [ "P4::DoRemoveSelectBooleans", "class_p4_1_1_do_remove_select_booleans.html", null ],
+        [ "P4::DoReplaceNewtype", "class_p4_1_1_do_replace_newtype.html", null ],
+        [ "P4::DoReplaceSelectRange", "class_p4_1_1_do_replace_select_range.html", null ],
+        [ "P4::DoReplaceTuples", "class_p4_1_1_do_replace_tuples.html", null ],
+        [ "P4::DoReplaceTypedef", "class_p4_1_1_do_replace_typedef.html", null ],
+        [ "P4::DoResetHeaders", "class_p4_1_1_do_reset_headers.html", null ],
+        [ "P4::DoSetHeaders", "class_p4_1_1_do_set_headers.html", null ],
+        [ "P4::DoSimplifyControlFlow", "class_p4_1_1_do_simplify_control_flow.html", null ],
+        [ "P4::DoSimplifyDefUse", "class_p4_1_1_do_simplify_def_use.html", null ],
+        [ "P4::DoSimplifyExpressions", "class_p4_1_1_do_simplify_expressions.html", null ],
+        [ "P4::DoSimplifyKey", "class_p4_1_1_do_simplify_key.html", null ],
+        [ "P4::DoSimplifyParsers", "class_p4_1_1_do_simplify_parsers.html", null ],
+        [ "P4::DoSimplifySelectCases", "class_p4_1_1_do_simplify_select_cases.html", null ],
+        [ "P4::DoSimplifySwitch", "class_p4_1_1_do_simplify_switch.html", null ],
+        [ "P4::DoStaticAssert", "class_p4_1_1_do_static_assert.html", null ],
+        [ "P4::DoStrengthReduction", "class_p4_1_1_do_strength_reduction.html", null ],
+        [ "P4::DoSynthesizeActions", "class_p4_1_1_do_synthesize_actions.html", null ],
+        [ "P4::DoTableHit", "class_p4_1_1_do_table_hit.html", null ],
+        [ "P4::DoTableKeyNames", "class_p4_1_1_do_table_key_names.html", null ],
+        [ "P4::DontcareArgs", "class_p4_1_1_dontcare_args.html", null ],
+        [ "P4::DuplicateActions", "class_p4_1_1_duplicate_actions.html", null ],
+        [ "P4::EliminateSubparserCalls", "class_p4_1_1_eliminate_subparser_calls.html", null ],
+        [ "P4::EntryPriorities", "class_p4_1_1_entry_priorities.html", null ],
+        [ "P4::FillEnumMap", "class_p4_1_1_fill_enum_map.html", null ],
+        [ "P4::HSIndexContretizer", "class_p4_1_1_h_s_index_contretizer.html", null ],
+        [ "P4::HSIndexTransform", "class_p4_1_1_h_s_index_transform.html", null ],
+        [ "P4::HandleValidityHeaderUnion", "class_p4_1_1_handle_validity_header_union.html", null ],
+        [ "P4::HierarchicalNames", "class_p4_1_1_hierarchical_names.html", null ],
+        [ "P4::InstantiateDirectCalls", "class_p4_1_1_instantiate_direct_calls.html", null ],
+        [ "P4::KeySideEffect", "class_p4_1_1_key_side_effect.html", null ],
+        [ "P4::LocalizeActions", "class_p4_1_1_localize_actions.html", null ],
+        [ "P4::MissingIdAssigner", "class_p4_1_1_missing_id_assigner.html", null ],
+        [ "P4::MoveConstructors", "class_p4_1_1_move_constructors.html", null ],
+        [ "P4::MoveDeclarations", "class_p4_1_1_move_declarations.html", null ],
+        [ "P4::MoveInitializers", "class_p4_1_1_move_initializers.html", null ],
+        [ "P4::ParserStructureImpl::ParserStateRewriter", "class_p4_1_1_parser_structure_impl_1_1_parser_state_rewriter.html", null ],
+        [ "P4::Predication", "class_p4_1_1_predication.html", null ],
+        [ "P4::Reassociation", "class_p4_1_1_reassociation.html", null ],
+        [ "P4::RemoveAliases", "class_p4_1_1_remove_aliases.html", null ],
+        [ "P4::RemoveBreakContinue", "class_p4_1_1_remove_break_continue.html", null ],
+        [ "P4::RemoveComplexComparisons", "class_p4_1_1_remove_complex_comparisons.html", null ],
+        [ "P4::RemoveComplexExpressions", "class_p4_1_1_remove_complex_expressions.html", [
+          [ "BMV2::RemoveComplexExpressions", "class_b_m_v2_1_1_remove_complex_expressions.html", null ]
+        ] ],
+        [ "P4::RemoveGenericTypes", "class_p4_1_1_remove_generic_types.html", null ],
+        [ "P4::RemoveHidden", "class_p4_1_1_remove_hidden.html", null ],
+        [ "P4::RemoveNestedStructs", "class_p4_1_1_remove_nested_structs.html", null ],
+        [ "P4::RemoveUnusedActionParameters", "class_p4_1_1_remove_unused_action_parameters.html", null ],
+        [ "P4::RemoveUnusedDeclarations", "class_p4_1_1_remove_unused_declarations.html", null ],
+        [ "P4::RemoveUnusedHUDeclarations", "class_p4_1_1_remove_unused_h_u_declarations.html", null ],
+        [ "P4::RemoveUselessCasts", "class_p4_1_1_remove_useless_casts.html", null ],
+        [ "P4::RenameSymbols", "class_p4_1_1_rename_symbols.html", null ],
+        [ "P4::ReplaceHeaders", "class_p4_1_1_replace_headers.html", null ],
+        [ "P4::ReplaceIndexRefs", "class_p4_1_1_replace_index_refs.html", null ],
+        [ "P4::ReplaceLogMsg", "class_p4_1_1_replace_log_msg.html", null ],
+        [ "P4::ReplaceStructs", "class_p4_1_1_replace_structs.html", null ],
+        [ "P4::ReplaceTypeUses", "class_p4_1_1_replace_type_uses.html", null ],
+        [ "P4::RewriteAllParsers", "class_p4_1_1_rewrite_all_parsers.html", null ],
+        [ "P4::SimplifyBitwise", "class_p4_1_1_simplify_bitwise.html", null ],
+        [ "P4::Specialize", "class_p4_1_1_specialize.html", null ],
+        [ "P4::SpecializeFunctions", "class_p4_1_1_specialize_functions.html", null ],
+        [ "P4::SubstituteStructures", "class_p4_1_1_substitute_structures.html", null ],
+        [ "P4::TagGlobalActions", "class_p4_1_1_tag_global_actions.html", null ],
+        [ "P4::TypeInference", "class_p4_1_1_type_inference.html", null ],
+        [ "P4::TypeVariableSubstitutionVisitor", "class_p4_1_1_type_variable_substitution_visitor.html", [
+          [ "P4::SubstituteParameters", "class_p4_1_1_substitute_parameters.html", null ],
+          [ "P4::TypeSubstitutionVisitor", "class_p4_1_1_type_substitution_visitor.html", null ]
+        ] ],
+        [ "P4::UnnestSelectList", "class_p4_1_1_unnest_select_list.html", null ],
+        [ "P4::UnrollLoops", "class_p4_1_1_unroll_loops.html", null ]
+      ] ]
+    ] ],
+    [ "P4::Visitor::profile_t", "class_p4_1_1_visitor_1_1profile__t.html", null ],
+    [ "P4::Visitor_Context", "struct_p4_1_1_visitor___context.html", null ],
     [ "P4CConfiguration", "class_p4_c_configuration.html", [
       [ "DefaultP4CConfiguration", "class_default_p4_c_configuration.html", [
         [ "P4Tools::CompilerConfiguration", "class_p4_tools_1_1_compiler_configuration.html", null ]
@@ -1016,33 +1433,6 @@ var hierarchy =
           [ "JsonString", "class_json_string.html", null ],
           [ "JsonVector", "class_json_vector.html", null ]
         ] ],
-        [ "P4::InstanceBase", "class_p4_1_1_instance_base.html", [
-          [ "P4::ConstructorCall", "class_p4_1_1_constructor_call.html", [
-            [ "P4::ContainerConstructorCall", "class_p4_1_1_container_constructor_call.html", null ],
-            [ "P4::ExternConstructorCall", "class_p4_1_1_extern_constructor_call.html", null ]
-          ] ],
-          [ "P4::EnumInstance", "class_p4_1_1_enum_instance.html", [
-            [ "P4::SerEnumInstance", "class_p4_1_1_ser_enum_instance.html", null ],
-            [ "P4::SimpleEnumInstance", "class_p4_1_1_simple_enum_instance.html", null ]
-          ] ],
-          [ "P4::Instantiation", "class_p4_1_1_instantiation.html", [
-            [ "P4::ControlInstantiation", "class_p4_1_1_control_instantiation.html", null ],
-            [ "P4::ExternInstantiation", "class_p4_1_1_extern_instantiation.html", null ],
-            [ "P4::PackageInstantiation", "class_p4_1_1_package_instantiation.html", null ],
-            [ "P4::ParserInstantiation", "class_p4_1_1_parser_instantiation.html", null ]
-          ] ],
-          [ "P4::MethodInstance", "class_p4_1_1_method_instance.html", [
-            [ "P4::ActionCall", "class_p4_1_1_action_call.html", null ],
-            [ "P4::ApplyMethod", "class_p4_1_1_apply_method.html", null ],
-            [ "P4::BuiltInMethod", "class_p4_1_1_built_in_method.html", null ],
-            [ "P4::ExternFunction", "class_p4_1_1_extern_function.html", null ],
-            [ "P4::ExternMethod", "class_p4_1_1_extern_method.html", null ],
-            [ "P4::FunctionCall", "class_p4_1_1_function_call.html", null ]
-          ] ]
-        ] ],
-        [ "P4::StorageLocation", "class_p4_1_1_storage_location.html", null ],
-        [ "P4::SymbolicValue", "class_p4_1_1_symbolic_value.html", null ],
-        [ "P4::TypeConstraint", "class_p4_1_1_type_constraint.html", null ],
         [ "P4Tools::AbstractRepCheckedNode< Self, Node >", "class_p4_tools_1_1_abstract_rep_checked_node.html", null ],
         [ "P4Tools::CompilerResult", "class_p4_tools_1_1_compiler_result.html", [
           [ "P4Tools::P4Testgen::TestgenCompilerResult", "class_p4_tools_1_1_p4_testgen_1_1_testgen_compiler_result.html", [
@@ -1144,6 +1534,11 @@ var hierarchy =
       [ "RTTI::enable_if_has_rtti< T, R >", "struct_r_t_t_i_1_1enable__if__has__rtti.html", null ]
     ] ],
     [ "std::exception", null, [
+      [ "P4::Util::P4CExceptionBase", "class_p4_1_1_util_1_1_p4_c_exception_base.html", [
+        [ "P4::Util::CompilationError", "class_p4_1_1_util_1_1_compilation_error.html", null ],
+        [ "P4::Util::CompilerBug", "class_p4_1_1_util_1_1_compiler_bug.html", null ],
+        [ "P4::Util::CompilerUnimplemented", "class_p4_1_1_util_1_1_compiler_unimplemented.html", null ]
+      ] ],
       [ "Util::P4CExceptionBase", "class_util_1_1_p4_c_exception_base.html", [
         [ "P4Tools::P4Testgen::TestgenUnimplemented", "class_p4_tools_1_1_p4_testgen_1_1_testgen_unimplemented.html", null ],
         [ "Util::CompilationError", "class_util_1_1_compilation_error.html", null ],
@@ -1153,6 +1548,10 @@ var hierarchy =
     ] ],
     [ "std::false_type", null, [
       [ "IR::has_static_type_name< class, class >", "struct_i_r_1_1has__static__type__name.html", null ],
+      [ "P4::IR::has_static_type_name< class, class >", "struct_p4_1_1_i_r_1_1has__static__type__name.html", null ],
+      [ "P4::Util::has_SourceInfo< class, class >", "struct_p4_1_1_util_1_1has___source_info.html", null ],
+      [ "P4::Util::has_toString< class, class >", "struct_p4_1_1_util_1_1has__to_string.html", null ],
+      [ "P4::has_dbprint< class, class >", "struct_p4_1_1has__dbprint.html", null ],
       [ "Util::has_SourceInfo< class, class >", "struct_util_1_1has___source_info.html", null ],
       [ "Util::has_toString< class, class >", "struct_util_1_1has__to_string.html", null ],
       [ "has_dbprint< class, class >", "structhas__dbprint.html", null ]
@@ -1176,15 +1575,27 @@ var hierarchy =
       [ "RTTI::has_rtti< T >", "struct_r_t_t_i_1_1has__rtti.html", null ]
     ] ],
     [ "std::iterator", null, [
+      [ "P4::ordered_set< T, COMP, ALLOC >::sorted_iterator", "class_p4_1_1ordered__set_1_1sorted__iterator.html", null ],
       [ "ordered_set< T, COMP, ALLOC >::sorted_iterator", "classordered__set_1_1sorted__iterator.html", null ]
     ] ],
     [ "std::true_type", null, [
       [ "IR::has_static_type_name< T, std::void_t< decltype(T::static_type_name())> >", "struct_i_r_1_1has__static__type__name_3_01_t_00_01std_1_1void__t_3_01decltype_07_t_1_1static__type__name_07_08_08_4_01_4.html", null ],
+      [ "P4::IR::has_static_type_name< T, std::void_t< decltype(T::static_type_name())> >", "struct_p4_1_1_i_r_1_1has__static__type__name_3_01_t_00_01std_1_1void__t_3_01decltype_07_t_1_1static__type__name_07_08_08_4_01_4.html", null ],
+      [ "P4::Util::has_SourceInfo< T, std::void_t< decltype(std::declval< T >().getSourceInfo())> >", "struct_p4_1_1_util_1_1has___source_info_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declvaleceb1e5b41b0ceab45c2091dafb42308.html", null ],
+      [ "P4::Util::has_toString< T, std::void_t< decltype(std::declval< T >().toString())> >", "struct_p4_1_1_util_1_1has__to_string_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_acb3d703214236ac0dfb06e6517d195f.html", null ],
+      [ "P4::has_dbprint< T, std::void_t< decltype(std::declval< T >().dbprint(std::declval< std::ostream & >()))> >", "struct_p4_1_1has__dbprint_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01_4_012206707ff62b52b5f3b6b59b578fd59.html", null ],
       [ "Util::has_SourceInfo< T, std::void_t< decltype(std::declval< T >().getSourceInfo())> >", "struct_util_1_1has___source_info_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_tca7b1f9663a78a5476838ff7466d2519.html", null ],
       [ "Util::has_toString< T, std::void_t< decltype(std::declval< T >().toString())> >", "struct_util_1_1has__to_string_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01db18fd97bde90a9bd53b0bfce41e6e9b.html", null ],
       [ "has_dbprint< T, std::void_t< decltype(std::declval< T >().dbprint(std::declval< std::ostream & >()))> >", "structhas__dbprint_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01_4_07_08_8d058dfba8a3a311378325dce114a1ecb1.html", null ]
     ] ],
     [ "std::vector< T >", null, [
+      [ "P4::safe_vector< const IR::Type * >", "class_p4_1_1safe__vector.html", null ],
+      [ "P4::safe_vector< const P4::IR::Node * >", "class_p4_1_1safe__vector.html", null ],
+      [ "P4::safe_vector< const IR::StatOrDecl * >", "class_p4_1_1safe__vector.html", null ],
+      [ "P4::safe_vector< const IR::Declaration * >", "class_p4_1_1safe__vector.html", null ],
+      [ "P4::safe_vector< const IR::Argument * >", "class_p4_1_1safe__vector.html", null ],
+      [ "P4::safe_vector< const T * >", "class_p4_1_1safe__vector.html", null ],
+      [ "P4::safe_vector< const N * >", "class_p4_1_1safe__vector.html", null ],
       [ "safe_vector< const IR::DpdkAsmStatement * >", "classsafe__vector.html", null ],
       [ "safe_vector< const IR::Node * >", "classsafe__vector.html", null ],
       [ "safe_vector< const IR::Declaration * >", "classsafe__vector.html", null ],
@@ -1198,8 +1609,8 @@ var hierarchy =
       [ "safe_vector< const IR::StructField * >", "classsafe__vector.html", null ],
       [ "safe_vector< const IR::Type * >", "classsafe__vector.html", null ],
       [ "safe_vector< const T * >", "classsafe__vector.html", null ],
-      [ "safe_vector< const IR::Argument * >", "classsafe__vector.html", null ],
       [ "safe_vector< const IR::ParserState * >", "classsafe__vector.html", null ],
+      [ "safe_vector< const IR::Argument * >", "classsafe__vector.html", null ],
       [ "safe_vector< const Constraint * >", "classsafe__vector.html", null ],
       [ "safe_vector< const IR::SelectCase * >", "classsafe__vector.html", null ],
       [ "safe_vector< const IR::Expression * >", "classsafe__vector.html", null ],
@@ -1218,6 +1629,7 @@ var hierarchy =
       [ "safe_vector< const IR::Annotation * >", "classsafe__vector.html", null ],
       [ "safe_vector< const graphs::ParserGraphs::TransitionEdge * >", "classsafe__vector.html", null ],
       [ "JsonVector", "class_json_vector.html", null ],
+      [ "P4::safe_vector< T, Alloc >", "class_p4_1_1safe__vector.html", null ],
       [ "Util::JsonArray", "class_util_1_1_json_array.html", null ],
       [ "safe_vector< T, Alloc >", "classsafe__vector.html", null ]
     ] ],
@@ -1530,10 +1942,7 @@ var hierarchy =
           [ "graphs::MidEnd", "classgraphs_1_1_mid_end.html", null ]
         ] ]
       ] ],
-      [ "ControlFlowVisitor", "class_control_flow_visitor.html", [
-        [ "P4::ComputeDefUse", "class_p4_1_1_compute_def_use.html", null ],
-        [ "P4::DoLocalCopyPropagation", "class_p4_1_1_do_local_copy_propagation.html", null ]
-      ] ],
+      [ "ControlFlowVisitor", "class_control_flow_visitor.html", null ],
       [ "DynamicVisitor", "class_dynamic_visitor.html", null ],
       [ "Inspector", "class_inspector.html", [
         [ "BMV2::ActionConverter", "class_b_m_v2_1_1_action_converter.html", null ],
@@ -1552,9 +1961,7 @@ var hierarchy =
         [ "BMV2::ParseV1Architecture", "class_b_m_v2_1_1_parse_v1_architecture.html", null ],
         [ "BMV2::ParserConverter", "class_b_m_v2_1_1_parser_converter.html", null ],
         [ "BMV2::SharedActionSelectorCheck< arch >", "class_b_m_v2_1_1_shared_action_selector_check.html", null ],
-        [ "ControlFlowVisitor::SetupJoinPoints", "class_control_flow_visitor_1_1_setup_join_points.html", [
-          [ "P4::ComputeDefUse::SetupJoinPoints", "class_p4_1_1_compute_def_use_1_1_setup_join_points.html", null ]
-        ] ],
+        [ "ControlFlowVisitor::SetupJoinPoints", "class_control_flow_visitor_1_1_setup_join_points.html", null ],
         [ "DPDK::CheckExternInvocation", "class_d_p_d_k_1_1_check_extern_invocation.html", null ],
         [ "DPDK::CollectActionUses", "class_d_p_d_k_1_1_collect_action_uses.html", null ],
         [ "DPDK::CollectAddOnMissTable", "class_d_p_d_k_1_1_collect_add_on_miss_table.html", null ],
@@ -1630,73 +2037,6 @@ var hierarchy =
         ] ],
         [ "EBPF::PSAErrorCodesGen", "class_e_b_p_f_1_1_p_s_a_error_codes_gen.html", null ],
         [ "InspectDpdkProgram", "class_inspect_dpdk_program.html", null ],
-        [ "P4::AnalyzeParser", "class_p4_1_1_analyze_parser.html", null ],
-        [ "P4::ApplyOptionsPragmas", "class_p4_1_1_apply_options_pragmas.html", null ],
-        [ "P4::BuildResourceMap", "class_p4_1_1_build_resource_map.html", null ],
-        [ "P4::CheckExternInvocationCommon", "class_p4_1_1_check_extern_invocation_common.html", [
-          [ "DPDK::CheckPNAExternInvocation", "class_d_p_d_k_1_1_check_p_n_a_extern_invocation.html", null ]
-        ] ],
-        [ "P4::CheckNamedArgs", "class_p4_1_1_check_named_args.html", null ],
-        [ "P4::ClearTypeMap", "class_p4_1_1_clear_type_map.html", null ],
-        [ "P4::CompileTimeOperations", "class_p4_1_1_compile_time_operations.html", null ],
-        [ "P4::ComputeDefUse", "class_p4_1_1_compute_def_use.html", null ],
-        [ "P4::ComputeParserCG", "class_p4_1_1_compute_parser_c_g.html", null ],
-        [ "P4::ComputeWriteSet", "class_p4_1_1_compute_write_set.html", null ],
-        [ "P4::ContainsType", "class_p4_1_1_contains_type.html", null ],
-        [ "P4::ControlPlaneAPI::TypeSpecConverter", "class_p4_1_1_control_plane_a_p_i_1_1_type_spec_converter.html", null ],
-        [ "P4::Coverage::CollectNodes", "class_p4_1_1_coverage_1_1_collect_nodes.html", null ],
-        [ "P4::Deprecated", "class_p4_1_1_deprecated.html", null ],
-        [ "P4::DiscoverActionsInlining", "class_p4_1_1_discover_actions_inlining.html", null ],
-        [ "P4::DiscoverFunctionsInlining", "class_p4_1_1_discover_functions_inlining.html", null ],
-        [ "P4::DiscoverInlining", "class_p4_1_1_discover_inlining.html", null ],
-        [ "P4::DiscoverStructure", "class_p4_1_1_discover_structure.html", null ],
-        [ "P4::DoCheckConstants", "class_p4_1_1_do_check_constants.html", null ],
-        [ "P4::DoCheckCoreMethods", "class_p4_1_1_do_check_core_methods.html", null ],
-        [ "P4::Evaluator", "class_p4_1_1_evaluator.html", null ],
-        [ "P4::Explain", "class_p4_1_1_explain.html", null ],
-        [ "P4::ExpressionEvaluator", "class_p4_1_1_expression_evaluator.html", null ],
-        [ "P4::FindActionParameters", "class_p4_1_1_find_action_parameters.html", null ],
-        [ "P4::FindFunctionSpecializations", "class_p4_1_1_find_function_specializations.html", null ],
-        [ "P4::FindGlobalActionUses", "class_p4_1_1_find_global_action_uses.html", null ],
-        [ "P4::FindHeaderTypesToReplace", "class_p4_1_1_find_header_types_to_replace.html", null ],
-        [ "P4::FindParameters", "class_p4_1_1_find_parameters.html", null ],
-        [ "P4::FindRedundantParsers", "class_p4_1_1_find_redundant_parsers.html", null ],
-        [ "P4::FindRepeatedActionUses", "class_p4_1_1_find_repeated_action_uses.html", null ],
-        [ "P4::FindSpecializations", "class_p4_1_1_find_specializations.html", null ],
-        [ "P4::FindSymbols", "class_p4_1_1_find_symbols.html", null ],
-        [ "P4::FindTypeSpecializations", "class_p4_1_1_find_type_specializations.html", null ],
-        [ "P4::FindTypesInLogMsgInvocationToReplace", "class_p4_1_1_find_types_in_log_msg_invocation_to_replace.html", null ],
-        [ "P4::FindTypesToReplace", "class_p4_1_1_find_types_to_replace.html", null ],
-        [ "P4::FindVariableValues", "class_p4_1_1_find_variable_values.html", null ],
-        [ "P4::HSIndexFinder", "class_p4_1_1_h_s_index_finder.html", null ],
-        [ "P4::HasExits", "class_p4_1_1_has_exits.html", null ],
-        [ "P4::HasTableApply", "class_p4_1_1_has_table_apply.html", null ],
-        [ "P4::IfInParser", "class_p4_1_1_if_in_parser.html", null ],
-        [ "P4::InspectPortableProgram", "class_p4_1_1_inspect_portable_program.html", [
-          [ "BMV2::InspectPnaProgram", "class_b_m_v2_1_1_inspect_pna_program.html", null ],
-          [ "P4::InspectPsaProgram", "class_p4_1_1_inspect_psa_program.html", null ]
-        ] ],
-        [ "P4::IsLikeLeftValue", "class_p4_1_1_is_like_left_value.html", null ],
-        [ "P4::IsNonConstantArrayIndex", "class_p4_1_1_is_non_constant_array_index.html", null ],
-        [ "P4::KeyNameGenerator", "class_p4_1_1_key_name_generator.html", null ],
-        [ "P4::MidEndLast", "class_p4_1_1_mid_end_last.html", null ],
-        [ "P4::MinimalNameGenerator", "class_p4_1_1_minimal_name_generator.html", null ],
-        [ "P4::ParsePortableArchitecture", "class_p4_1_1_parse_portable_architecture.html", [
-          [ "BMV2::ParsePnaArchitecture", "class_b_m_v2_1_1_parse_pna_architecture.html", null ],
-          [ "P4::ParsePsaArchitecture", "class_p4_1_1_parse_psa_architecture.html", null ]
-        ] ],
-        [ "P4::ReadsWrites", "class_p4_1_1_reads_writes.html", null ],
-        [ "P4::RemoveModifiedValues", "class_p4_1_1_remove_modified_values.html", null ],
-        [ "P4::ResolveReferences", "class_p4_1_1_resolve_references.html", null ],
-        [ "P4::SideEffects", "class_p4_1_1_side_effects.html", null ],
-        [ "P4::TablesInActions", "class_p4_1_1_tables_in_actions.html", null ],
-        [ "P4::TablesInKeys", "class_p4_1_1_tables_in_keys.html", null ],
-        [ "P4::ToP4", "class_p4_1_1_to_p4.html", null ],
-        [ "P4::TypeOccursVisitor", "class_p4_1_1_type_occurs_visitor.html", null ],
-        [ "P4::ValidateMatchAnnotations", "class_p4_1_1_validate_match_annotations.html", null ],
-        [ "P4::ValidateParsedProgram", "class_p4_1_1_validate_parsed_program.html", null ],
-        [ "P4::ValidateTableProperties", "class_p4_1_1_validate_table_properties.html", null ],
-        [ "P4::ValidateValueSets", "class_p4_1_1_validate_value_sets.html", null ],
         [ "P4Tools::P4ProgramDCGCreator", "class_p4_tools_1_1_p4_program_d_c_g_creator.html", null ],
         [ "P4Tools::P4Testgen::AbstractStepper", "class_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html", [
           [ "P4Tools::P4Testgen::CmdStepper", "class_p4_tools_1_1_p4_testgen_1_1_cmd_stepper.html", [
@@ -1751,37 +2091,16 @@ var hierarchy =
       [ "Modifier", "class_modifier.html", [
         [ "CheckHeaderTypes", "class_check_header_types.html", null ],
         [ "HeaderTypeMaxLengthCalculator", "class_header_type_max_length_calculator.html", null ],
-        [ "P4::CheckTableSize", "class_p4_1_1_check_table_size.html", null ],
-        [ "P4::DoSingleArgumentSelect", "class_p4_1_1_do_single_argument_select.html", null ],
-        [ "P4::ParseAnnotations", "class_p4_1_1_parse_annotations.html", [
-          [ "BMV2::ParseAnnotations", "class_b_m_v2_1_1_parse_annotations.html", null ],
-          [ "P4::ControlPlaneAPI::ParseP4RuntimeAnnotations", "class_p4_1_1_control_plane_a_p_i_1_1_parse_p4_runtime_annotations.html", null ],
-          [ "TC::ParseTCAnnotations", "class_t_c_1_1_parse_t_c_annotations.html", null ]
-        ] ],
-        [ "P4::SwitchAddDefault", "class_p4_1_1_switch_add_default.html", null ],
         [ "TypeCheck::AssignActionArgTypes", "class_type_check_1_1_assign_action_arg_types.html", null ],
         [ "TypeCheck::InferExpressionsBottomUp", "class_type_check_1_1_infer_expressions_bottom_up.html", null ],
         [ "TypeCheck::InferExpressionsTopDown", "class_type_check_1_1_infer_expressions_top_down.html", null ]
       ] ],
       [ "OnBacktrack< T >", "class_on_backtrack.html", null ],
-      [ "P4::InlineDriver< InlineList, InlineWorkList >", "class_p4_1_1_inline_driver.html", null ],
-      [ "P4::ResolutionContext", "class_p4_1_1_resolution_context.html", null ],
       [ "P4WriteContext", "class_p4_write_context.html", [
-        [ "P4::ComputeDefUse", "class_p4_1_1_compute_def_use.html", null ],
-        [ "P4::DoLocalCopyPropagation", "class_p4_1_1_do_local_copy_propagation.html", null ],
-        [ "P4::DoSimplifyExpressions", "class_p4_1_1_do_simplify_expressions.html", null ],
-        [ "P4::ReplaceHeaders", "class_p4_1_1_replace_headers.html", null ],
-        [ "P4::ReplaceIndexRefs", "class_p4_1_1_replace_index_refs.html", null ],
-        [ "P4::ReplaceLogMsg", "class_p4_1_1_replace_log_msg.html", null ],
-        [ "P4::ReplaceStructs", "class_p4_1_1_replace_structs.html", null ],
         [ "TypeCheck::MakeImplicitCastsExplicit", "class_type_check_1_1_make_implicit_casts_explicit.html", null ]
       ] ],
       [ "PassManager", "class_pass_manager.html", null ],
       [ "Transform", "class_transform.html", [
-        [ "P4::AbstractInliner< ActionsInlineList, AInlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
-        [ "P4::AbstractInliner< FunctionsInlineList, FunctionsInlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
-        [ "P4::AbstractInliner< InlineList, InlineSummary >", "class_p4_1_1_abstract_inliner.html", null ],
-        [ "P4::AbstractInliner< P4::InlineList, InlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
         [ "BMV2::ArithmeticFixup", "class_b_m_v2_1_1_arithmetic_fixup.html", null ],
         [ "BMV2::LowerExpressions", "class_b_m_v2_1_1_lower_expressions.html", null ],
         [ "BMV2::RenameUserMetadata", "class_b_m_v2_1_1_rename_user_metadata.html", null ],
@@ -1827,117 +2146,6 @@ var hierarchy =
         [ "EBPF::LowerExpressions", "class_e_b_p_f_1_1_lower_expressions.html", null ],
         [ "InlineControlFlow", "class_inline_control_flow.html", null ],
         [ "NameGateways", "class_name_gateways.html", null ],
-        [ "P4::AbstractInliner< InlineList, InlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
-        [ "P4::ApplyTypesToExpressions", "class_p4_1_1_apply_types_to_expressions.html", null ],
-        [ "P4::CastBooleanTableKeys", "class_p4_1_1_cast_boolean_table_keys.html", null ],
-        [ "P4::CloneConstants", "class_p4_1_1_clone_constants.html", null ],
-        [ "P4::CloneExpressions", "class_p4_1_1_clone_expressions.html", null ],
-        [ "P4::CloneVariableDeclarations", "class_p4_1_1_clone_variable_declarations.html", null ],
-        [ "P4::ConstantTypeSubstitution", "class_p4_1_1_constant_type_substitution.html", null ],
-        [ "P4::CopySrcInfo", "class_p4_1_1_copy_src_info.html", null ],
-        [ "P4::CreateBuiltins", "class_p4_1_1_create_builtins.html", null ],
-        [ "P4::CreateSpecializedTypes", "class_p4_1_1_create_specialized_types.html", null ],
-        [ "P4::CreateStructInitializers", "class_p4_1_1_create_struct_initializers.html", null ],
-        [ "P4::DoBindTypeVariables", "class_p4_1_1_do_bind_type_variables.html", null ],
-        [ "P4::DoConstantFolding", "class_p4_1_1_do_constant_folding.html", null ],
-        [ "P4::DoConvertEnums", "class_p4_1_1_do_convert_enums.html", null ],
-        [ "P4::DoConvertErrors", "class_p4_1_1_do_convert_errors.html", null ],
-        [ "P4::DoCopyStructures", "class_p4_1_1_do_copy_structures.html", null ],
-        [ "P4::DoDefaultArguments", "class_p4_1_1_do_default_arguments.html", null ],
-        [ "P4::DoDefaultValues", "class_p4_1_1_do_default_values.html", null ],
-        [ "P4::DoEliminateInvalidHeaders", "class_p4_1_1_do_eliminate_invalid_headers.html", null ],
-        [ "P4::DoEliminateSerEnums", "class_p4_1_1_do_eliminate_ser_enums.html", null ],
-        [ "P4::DoEliminateSwitch", "class_p4_1_1_do_eliminate_switch.html", null ],
-        [ "P4::DoExpandEmit", "class_p4_1_1_do_expand_emit.html", null ],
-        [ "P4::DoExpandLookahead", "class_p4_1_1_do_expand_lookahead.html", null ],
-        [ "P4::DoFlattenHeaderUnion", "class_p4_1_1_do_flatten_header_union.html", [
-          [ "P4::DoFlattenHeaderUnionStack", "class_p4_1_1_do_flatten_header_union_stack.html", null ]
-        ] ],
-        [ "P4::DoGlobalCopyPropagation", "class_p4_1_1_do_global_copy_propagation.html", null ],
-        [ "P4::DoHandleNoMatch", "class_p4_1_1_do_handle_no_match.html", null ],
-        [ "P4::DoLocalCopyPropagation", "class_p4_1_1_do_local_copy_propagation.html", null ],
-        [ "P4::DoLocalCopyPropagation::ElimDead", "class_p4_1_1_do_local_copy_propagation_1_1_elim_dead.html", null ],
-        [ "P4::DoLocalCopyPropagation::RewriteTableKeys", "class_p4_1_1_do_local_copy_propagation_1_1_rewrite_table_keys.html", null ],
-        [ "P4::DoMoveActionsToTables", "class_p4_1_1_do_move_actions_to_tables.html", null ],
-        [ "P4::DoOrderArguments", "class_p4_1_1_do_order_arguments.html", null ],
-        [ "P4::DoRemoveActionParameters", "class_p4_1_1_do_remove_action_parameters.html", null ],
-        [ "P4::DoRemoveAssertAssume", "class_p4_1_1_do_remove_assert_assume.html", null ],
-        [ "P4::DoRemoveLeftSlices", "class_p4_1_1_do_remove_left_slices.html", null ],
-        [ "P4::DoRemoveMiss", "class_p4_1_1_do_remove_miss.html", null ],
-        [ "P4::DoRemoveParserControlFlow", "class_p4_1_1_do_remove_parser_control_flow.html", null ],
-        [ "P4::DoRemoveReturns", "class_p4_1_1_do_remove_returns.html", [
-          [ "P4::DoRemoveExits", "class_p4_1_1_do_remove_exits.html", null ]
-        ] ],
-        [ "P4::DoRemoveSelectBooleans", "class_p4_1_1_do_remove_select_booleans.html", null ],
-        [ "P4::DoReplaceNewtype", "class_p4_1_1_do_replace_newtype.html", null ],
-        [ "P4::DoReplaceSelectRange", "class_p4_1_1_do_replace_select_range.html", null ],
-        [ "P4::DoReplaceTuples", "class_p4_1_1_do_replace_tuples.html", null ],
-        [ "P4::DoReplaceTypedef", "class_p4_1_1_do_replace_typedef.html", null ],
-        [ "P4::DoResetHeaders", "class_p4_1_1_do_reset_headers.html", null ],
-        [ "P4::DoSetHeaders", "class_p4_1_1_do_set_headers.html", null ],
-        [ "P4::DoSimplifyControlFlow", "class_p4_1_1_do_simplify_control_flow.html", null ],
-        [ "P4::DoSimplifyDefUse", "class_p4_1_1_do_simplify_def_use.html", null ],
-        [ "P4::DoSimplifyExpressions", "class_p4_1_1_do_simplify_expressions.html", null ],
-        [ "P4::DoSimplifyKey", "class_p4_1_1_do_simplify_key.html", null ],
-        [ "P4::DoSimplifyParsers", "class_p4_1_1_do_simplify_parsers.html", null ],
-        [ "P4::DoSimplifySelectCases", "class_p4_1_1_do_simplify_select_cases.html", null ],
-        [ "P4::DoSimplifySwitch", "class_p4_1_1_do_simplify_switch.html", null ],
-        [ "P4::DoStaticAssert", "class_p4_1_1_do_static_assert.html", null ],
-        [ "P4::DoStrengthReduction", "class_p4_1_1_do_strength_reduction.html", null ],
-        [ "P4::DoSynthesizeActions", "class_p4_1_1_do_synthesize_actions.html", null ],
-        [ "P4::DoTableHit", "class_p4_1_1_do_table_hit.html", null ],
-        [ "P4::DoTableKeyNames", "class_p4_1_1_do_table_key_names.html", null ],
-        [ "P4::DontcareArgs", "class_p4_1_1_dontcare_args.html", null ],
-        [ "P4::DuplicateActions", "class_p4_1_1_duplicate_actions.html", null ],
-        [ "P4::EliminateSubparserCalls", "class_p4_1_1_eliminate_subparser_calls.html", null ],
-        [ "P4::EntryPriorities", "class_p4_1_1_entry_priorities.html", null ],
-        [ "P4::FillEnumMap", "class_p4_1_1_fill_enum_map.html", null ],
-        [ "P4::HSIndexContretizer", "class_p4_1_1_h_s_index_contretizer.html", null ],
-        [ "P4::HSIndexTransform", "class_p4_1_1_h_s_index_transform.html", null ],
-        [ "P4::HandleValidityHeaderUnion", "class_p4_1_1_handle_validity_header_union.html", null ],
-        [ "P4::HierarchicalNames", "class_p4_1_1_hierarchical_names.html", null ],
-        [ "P4::InstantiateDirectCalls", "class_p4_1_1_instantiate_direct_calls.html", null ],
-        [ "P4::KeySideEffect", "class_p4_1_1_key_side_effect.html", null ],
-        [ "P4::LocalizeActions", "class_p4_1_1_localize_actions.html", null ],
-        [ "P4::MissingIdAssigner", "class_p4_1_1_missing_id_assigner.html", null ],
-        [ "P4::MoveConstructors", "class_p4_1_1_move_constructors.html", null ],
-        [ "P4::MoveDeclarations", "class_p4_1_1_move_declarations.html", null ],
-        [ "P4::MoveInitializers", "class_p4_1_1_move_initializers.html", null ],
-        [ "P4::ParserStructureImpl::ParserStateRewriter", "class_p4_1_1_parser_structure_impl_1_1_parser_state_rewriter.html", null ],
-        [ "P4::Predication", "class_p4_1_1_predication.html", null ],
-        [ "P4::Reassociation", "class_p4_1_1_reassociation.html", null ],
-        [ "P4::RemoveAliases", "class_p4_1_1_remove_aliases.html", null ],
-        [ "P4::RemoveBreakContinue", "class_p4_1_1_remove_break_continue.html", null ],
-        [ "P4::RemoveComplexComparisons", "class_p4_1_1_remove_complex_comparisons.html", null ],
-        [ "P4::RemoveComplexExpressions", "class_p4_1_1_remove_complex_expressions.html", [
-          [ "BMV2::RemoveComplexExpressions", "class_b_m_v2_1_1_remove_complex_expressions.html", null ]
-        ] ],
-        [ "P4::RemoveGenericTypes", "class_p4_1_1_remove_generic_types.html", null ],
-        [ "P4::RemoveHidden", "class_p4_1_1_remove_hidden.html", null ],
-        [ "P4::RemoveNestedStructs", "class_p4_1_1_remove_nested_structs.html", null ],
-        [ "P4::RemoveUnusedActionParameters", "class_p4_1_1_remove_unused_action_parameters.html", null ],
-        [ "P4::RemoveUnusedDeclarations", "class_p4_1_1_remove_unused_declarations.html", null ],
-        [ "P4::RemoveUnusedHUDeclarations", "class_p4_1_1_remove_unused_h_u_declarations.html", null ],
-        [ "P4::RemoveUselessCasts", "class_p4_1_1_remove_useless_casts.html", null ],
-        [ "P4::RenameSymbols", "class_p4_1_1_rename_symbols.html", null ],
-        [ "P4::ReplaceHeaders", "class_p4_1_1_replace_headers.html", null ],
-        [ "P4::ReplaceIndexRefs", "class_p4_1_1_replace_index_refs.html", null ],
-        [ "P4::ReplaceLogMsg", "class_p4_1_1_replace_log_msg.html", null ],
-        [ "P4::ReplaceStructs", "class_p4_1_1_replace_structs.html", null ],
-        [ "P4::ReplaceTypeUses", "class_p4_1_1_replace_type_uses.html", null ],
-        [ "P4::RewriteAllParsers", "class_p4_1_1_rewrite_all_parsers.html", null ],
-        [ "P4::SimplifyBitwise", "class_p4_1_1_simplify_bitwise.html", null ],
-        [ "P4::Specialize", "class_p4_1_1_specialize.html", null ],
-        [ "P4::SpecializeFunctions", "class_p4_1_1_specialize_functions.html", null ],
-        [ "P4::SubstituteStructures", "class_p4_1_1_substitute_structures.html", null ],
-        [ "P4::TagGlobalActions", "class_p4_1_1_tag_global_actions.html", null ],
-        [ "P4::TypeInference", "class_p4_1_1_type_inference.html", null ],
-        [ "P4::TypeVariableSubstitutionVisitor", "class_p4_1_1_type_variable_substitution_visitor.html", [
-          [ "P4::SubstituteParameters", "class_p4_1_1_substitute_parameters.html", null ],
-          [ "P4::TypeSubstitutionVisitor", "class_p4_1_1_type_substitution_visitor.html", null ]
-        ] ],
-        [ "P4::UnnestSelectList", "class_p4_1_1_unnest_select_list.html", null ],
-        [ "P4::UnrollLoops", "class_p4_1_1_unroll_loops.html", null ],
         [ "P4Tools::ConvertStructExpr", "class_p4_tools_1_1_convert_struct_expr.html", null ],
         [ "P4Tools::ConvertVarbits", "class_p4_tools_1_1_convert_varbits.html", null ],
         [ "P4Tools::HSIndexToMember", "class_p4_tools_1_1_h_s_index_to_member.html", null ],

@@ -7,7 +7,8 @@
 <svg width="160pt" height="192pt"
  viewBox="0.00 0.00 160.00 192.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 
-<svg id="main" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" onload="init(evt)">
+<svg id="main" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+
 <style type="text/css"><![CDATA[
 .node, .edge {opacity: 0.7;}
 .node.selected, .edge.selected {opacity: 1;}
@@ -48,9 +49,9 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="class_inspector.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="107,-129 45,-129 45,-110 107,-110 107,-129"/>
-<text text-anchor="middle" x="76" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">Inspector</text>
+<g id="a_Node000003"><a xlink:href="class_p4_1_1_inspector.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="116,-129 36,-129 36,-110 116,-110 116,-129"/>
+<text text-anchor="middle" x="76" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">P4::Inspector</text>
 </a>
 </g>
 </g>
@@ -66,9 +67,9 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="class_visitor.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="100,-184 52,-184 52,-165 100,-165 100,-184"/>
-<text text-anchor="middle" x="76" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">Visitor</text>
+<g id="a_Node000004"><a xlink:href="class_p4_1_1_visitor.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="109,-184 43,-184 43,-165 109,-165 109,-184"/>
+<text text-anchor="middle" x="76" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">P4::Visitor</text>
 </a>
 </g>
 </g>

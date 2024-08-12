@@ -28,7 +28,7 @@ var searchData=
   ['structure_25',['structure',['../class_p4_1_1_p4_parser_driver.html#a04d165c66c91d9096b61203f104084fe',1,'P4::P4ParserDriver::structure'],['../struct_b_m_v2_1_1_conversion_context.html#a9ae6f106e6fdd3880e1cf45c4b6f476f',1,'BMV2::ConversionContext::structure']]],
   ['substitution_26',['substitution',['../class_p4_1_1_instance_base.html#a399ebaf2c85626454ff290e7da5d2ed3',1,'P4::InstanceBase']]],
   ['substitutions_27',['substitutions',['../struct_p4_1_1_inline_summary_1_1_per_caller.html#a9265f95d237e30b33bc9cc0f3898b76b',1,'P4::InlineSummary::PerCaller']]],
-  ['suffix_28',['suffix',['../struct_error_message.html#aea60e8c0b533f36cd8a6c258289a5682',1,'ErrorMessage']]],
+  ['suffix_28',['suffix',['../struct_p4_1_1_error_message.html#aceec95769bbd4a4cb6646e110d689677',1,'P4::ErrorMessage::suffix'],['../struct_error_message.html#aea60e8c0b533f36cd8a6c258289a5682',1,'ErrorMessage::suffix']]],
   ['supported_5fstop_5fmetrics_29',['SUPPORTED_STOP_METRICS',['../class_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#abdbaa7821788385efd65c772ec1c13b2',1,'P4Tools::P4Testgen::TestgenOptions']]],
   ['symbex_30',['symbex',['../class_p4_tools_1_1_p4_testgen_1_1_test_back_end.html#abe7e907a4dfd79b4882be693bf232320',1,'P4Tools::P4Testgen::TestBackEnd']]]
 ];
