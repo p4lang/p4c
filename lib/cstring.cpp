@@ -166,9 +166,17 @@ struct TableEntryHash {
 auto &cache() {
     // We need node_hash_set due to SSO: we return address of embedded string
     // that should be stable
-    static absl::node_hash_set<table_entry, TableEntryHash, std::equal_to<>> g_cache;
 
-    return g_cache;
+    // Note that we need to lazily initialize on the first use: static
+    // initialization order is undefined and we need cache to be live *before*
+    // and static cstrings around.
+    // FIXME: Do something similar to LLVM's ManagedStatic to be able to destruct
+    // this object on exit.
+    using CacheType = absl::node_hash_set<table_entry, TableEntryHash, std::equal_to<>>;
+    static CacheType *g_cache = nullptr;
+    if (!g_cache) g_cache = new CacheType;
+
+    return *g_cache;
 }
 
 const char *save_to_cache(const char *string, std::size_t length, table_entry_flags flags) {
