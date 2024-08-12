@@ -321,7 +321,7 @@ class TypeNameExpression : Expression {
     dbprint{ out << typeName; }
     toString { return typeName->toString(); }
     validate { BUG_CHECK(typeName->is<Type_Name>() || typeName->is<Type_Specialized>(),
-                         "%1 unexpected type in TypeNameExpression", typeName); }
+                         "%1% unexpected type in TypeNameExpression", typeName); }
 }
 
 class Slice : Operation_Ternary {

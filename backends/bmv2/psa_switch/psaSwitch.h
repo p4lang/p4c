@@ -40,7 +40,9 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
             auto jsn = new Util::JsonObject();
             jsn->emplace("name", param->toString());
             jsn->emplace("type", "hexstr");
-            auto bitwidth = param->type->width_bits();
+            // FIXME -- how big is a PSA_CounterType_t?  Being an enum type, we can't
+            // sensibly call param->width_bits() here.
+            auto bitwidth = 0;
 
             // encode the counter type from enum -> int
             if (fieldName == "BYTES") {

@@ -36,7 +36,7 @@ abstract Type {
     typedef Type_Void           Void;
 #end
     /// Well-defined only for types with fixed width
-    virtual int width_bits() const { return 0; }
+    virtual int width_bits() const { BUG("width_bits() on type with unknown size: %1%", this); }
     /// When possible returns the corresponding type that can be inserted
     /// in a P4 program; may return a Type_Name
     virtual const Type* getP4Type() const = 0;
