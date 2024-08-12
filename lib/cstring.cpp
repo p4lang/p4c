@@ -29,9 +29,13 @@ limitations under the License.
 
 #include <algorithm>
 #include <cctype>
+#include <cstddef>
+#include <functional>
 #include <iomanip>
 #include <ios>
+#include <sstream>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 
 #include "hash.h"
@@ -214,9 +218,6 @@ size_t cstring::cache_size(size_t &count) {
     for (auto &s : cache()) rv += sizeof(s) + s.length();
     return rv;
 }
-
-cstring cstring::newline = cstring::literal("\n");
-cstring cstring::empty = cstring::literal("");
 
 bool cstring::startsWith(std::string_view prefix) const {
     if (prefix.empty()) return true;
