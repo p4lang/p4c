@@ -19,7 +19,6 @@ limitations under the License.
 
 #include <cstddef>
 #include <cstdio>
-#include <cstring>
 #include <functional>
 #include <ostream>
 #include <sstream>
