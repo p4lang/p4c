@@ -87,7 +87,7 @@ var searchData=
   ['hitvariable_84',['hitVariable',['../class_e_b_p_f_1_1_e_b_p_f_control.html#aa94faf0a6dc3f094b191558498676407',1,'EBPF::EBPFControl']]],
   ['hook_85',['hook',['../class_p4_1_1_constant_folding_policy.html#a6ecdc32eff3b3baf1c96b005630ab343',1,'P4::ConstantFoldingPolicy']]],
   ['hooks_86',['Kernel hooks',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#kernel-hooks',1,'']]],
-  ['how_20to_20contribute_87',['How to Contribute',['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#how-to-contribute',1,'How to Contribute'],['../md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html#how-to-contribute-1',1,'How to Contribute']]],
+  ['how_20to_20contribute_87',['How to Contribute',['../readme.html#how-to-contribute',1,'How to Contribute'],['../md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html#how-to-contribute-1',1,'How to Contribute']]],
   ['how_20to_20inject_20custom_20extern_20function_20to_20the_20generated_20ebpf_20program_88',['How to inject custom extern function to the generated eBPF program?',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#how-to-inject-custom-extern-function-to-the-generated-ebpf-program',1,'']]],
   ['how_20to_20run_20tests_89',['How to Run tests',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html#how-to-run-tests',1,'']]],
   ['how_20to_20run_20the_20generated_20ebpf_20program_90',['How to run the generated eBPF program',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#how-to-run-the-generated-ebpf-program',1,'']]],
