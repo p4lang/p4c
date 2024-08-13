@@ -1,9 +1,5 @@
 var NAVTREEINDEX23 =
 {
-"struct_p4_1_1std_1_1hash_3_01std_1_1tuple_3_01_types_8_8_8_01_4_01_4.html":[22,0,11,7,2],
-"struct_p4_tools_1_1_p4_smith_1_1_constraints.html":[22,0,15,0,4],
-"struct_p4_tools_1_1_p4_smith_1_1_properties.html":[22,0,15,0,10],
-"struct_p4_tools_1_1_p4_smith_1_1_requirements.html":[22,0,15,0,11],
 "struct_p4_tools_1_1_p4_testgen_1_1_abstract_test.html":[21,0,6,1,3],
 "struct_p4_tools_1_1_p4_testgen_1_1_abstract_test.html":[22,0,15,1,4],
 "struct_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_protobuf_ir_test.html":[21,0,6,1,0,27],
