@@ -43,3 +43,7 @@ controlc c() {
 - user-defined extern types / methods which are not defined in `v1model.p4`
 
 - stacks of header unions
+
+<!--!
+\include{doc} "../backends/bmv2/pna_nic/README.md" 
+-->
