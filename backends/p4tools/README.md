@@ -69,4 +69,6 @@ P4Tools in general follows the [P4C coding style](https://github.com/p4lang/p4c/
   library of related classes. Multiple classes may be declared in a `.cpp`
   file.
 
+<!--! 
 \include{doc} "../backends/p4tools/CONTRIBUTORS.md"
+-->

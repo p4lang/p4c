@@ -38,4 +38,6 @@ We welcome feature requests! Please open an issue and provide as much detail as 
 
 Happy coding!
 
-\include{doc} "../docs/CodingStandardPhilosophy.md"
+<!--! 
+\include{doc} "../docs/CodingStandardPhilosophy.md" 
+-->

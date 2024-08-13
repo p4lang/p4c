@@ -70,9 +70,10 @@ Once the C program is generated it can be compiled using:
 
 The output file (`out.o`) can be injected to the uBPF VM. 
 
+<!--! 
 \include{doc} "../backends/ubpf/docs/EXAMPLES.md"
 \include{doc} "../backends/ubpf/tests/README.md"
-
+-->
 
 #### Custom C extern functions
 

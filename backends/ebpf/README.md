@@ -415,4 +415,6 @@ clang -O2 -include C-EXTERN-FILE.c -target bpf -c OUTPUT.c -o OUTPUT.o
 
   * The C extern function must not access BPF maps that are used to implement P4 tables and defined in the main C program generated from the P4 language.
 
+<!--!
 \include{doc} "../backends/ebpf/psa/README.md"
+-->

@@ -41,8 +41,9 @@ P4C is modular; it provides a standard frontend and midend which can be combined
 with a target-specific backend to create a complete P4 compiler. The goal is to
 make adding new backends easy.
 
+<!--!
 \include{doc} "../docs/doxygen/01_overview.md"
-
+-->
 The code contains seven sample backends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the [BMv2 behavioral model](https://github.com/p4lang/behavioral-model),
@@ -654,8 +655,9 @@ install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/driver/p4c.mybackend.cfg
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4c_src)
 ```
 
+<!--!
 \include{doc} "../lib/README.md"
-
+-->
 ## Known issues
 
 Issues with the compiler are tracked on
