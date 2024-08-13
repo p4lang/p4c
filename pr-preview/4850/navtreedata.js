@@ -99,7 +99,8 @@ var NAVTREE =
         [ "Exception Use", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#exception-use", null ]
       ] ],
       [ "IR Classes", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#ir-classes", null ],
-      [ "Classes", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#classes", null ]
+      [ "Classes", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#classes", null ],
+      [ "P4C Intermediate Representation (IR) Classes", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#p4c-intermediate-representation-ir-classes", null ]
     ] ],
     [ "Behavioral Model Backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html", [
       [ "Dependencies", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html#dependencies-1", null ],
@@ -430,7 +431,7 @@ var NAVTREEINDEX =
 "class_type_check_1_1_infer_action_args_top_down.html",
 "functions_func_n.html",
 "md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#example",
-"namespace_p4_tools.html#a625518a9562cb3a9d1be1cee71ef9fb0",
+"namespace_p4_tools.html#a5c5f8a89d72fcfde42e7b2f7611c0281",
 "struct_p4_1_1_control_plane_a_p_i_1_1_p4_symbol_suffix_set.html",
 "struct_p4_tools_1_1_p4_testgen_1_1_abstract_test.html"
 ];
