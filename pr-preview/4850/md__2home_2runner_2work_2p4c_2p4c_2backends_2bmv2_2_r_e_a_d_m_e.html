@@ -131,6 +131,9 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_
   <li class="level1">
     <a href="#unsupported-p4_16-language-features">Unsupported P4_16 language features</a>
   </li>
+  <li class="level1">
+    <a href="#bmv2-pna_nic-backend">BMv2 &quot;pna_nic&quot; Backend</a>
+  </li>
 </ul>
 </div>
 <div class="textblock"><p><a class="anchor" id="behavioral-model-backend"></a></p>
@@ -161,8 +164,28 @@ Unsupported P4_16 language features</h1>
 <div class="line">}</div>
 </div><!-- fragment --></li>
 <li>user-defined extern types / methods which are not defined in <code>v1model.p4</code></li>
-<li>stacks of header unions </li>
+<li>stacks of header unions</li>
 </ul>
+<h1><a class="anchor" id="bmv2-pna_nic-backend"></a>
+BMv2 "pna_nic" Backend</h1>
+<p>This directory contains components specific to the BMv2's PNA NIC (Portable NIC Architecture) backend in the P4C compiler. The files in this folder depend on each other, on the files in the <code>bmv2/common</code> and <code>portable_common</code> directories. Most of the classes are inherited from the classes in the <code>portable_common</code> directory.</p>
+<p>Output Binary: <code>p4c-bm2-pna</code></p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">File(s)   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>pnaProgramStructure.h</code>, <code>pnaProgramStructure.cpp</code>   </td><td class="markdownTableBodyNone">Defines and implements the program structure (metadata, parsers, controls, and deparsers) and parsing logic specific to the BMv2's PNA NIC backend.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>midend.h</code>, <code>midend.cpp</code>   </td><td class="markdownTableBodyNone">Defines the mid-end processing of the PNA NIC compiler. Performs various transformations and optimizations on the program's Intermediate Representation (IR).    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>options.h</code>, <code>options.cpp</code>   </td><td class="markdownTableBodyNone">Manages the command-line options for the PNA NIC compiler.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>pnaNic.h</code>, <code>pnaNic.cpp</code>   </td><td class="markdownTableBodyNone">Provides backend implementation to the BMv2's PNA NIC compiler.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>main.cpp</code>   </td><td class="markdownTableBodyNone">Sets up compilation environment, integrates various components, and executes the PNA NIC compiler.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>version.h.cmake</code>   </td><td class="markdownTableBodyNone">Defines macros containing version information for the PNA NIC compiler.   </td></tr>
+</table>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

@@ -132,6 +132,9 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html',
         <a href="#additional-documentation-1">Additional documentation</a>
       </li>
       <li class="level2">
+        <a href="#sample-backends-in-p4c">Sample Backends in P4C</a>
+      </li>
+      <li class="level2">
         <a href="#getting-started">Getting started</a>
         <ul>
           <li class="level3">
@@ -279,7 +282,9 @@ Additional documentation</h2>
 <li>the core design of the compiler intermediate representation (IR) and the visitor patterns are briefly described in <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html">IR</a></li>
 <li>The <a href="https://github.com/p4lang/p4c/blob/main/docs/migration-guide.pptx">migration guide</a> describes how P4_14 (v1.0) programs are translated into P4_16 programs  </li>
 </ul>
-<p>The code contains seven sample backends:</p><ul>
+<h2><a class="anchor" id="sample-backends-in-p4c"></a>
+Sample Backends in P4C</h2>
+<p>P4C includes seven sample backends, catering to different target architectures and use cases:</p><ul>
 <li>p4c-bm2-ss: can be used to target the P4 <code>simple_switch</code> written using the <a href="https://github.com/p4lang/behavioral-model">BMv2 behavioral model</a>,</li>
 <li>p4c-dpdk: can be used to target the <a href="https://doc.dpdk.org/guides/rel_notes/release_20_11.html">DPDK software switch (SWX) pipeline</a>,</li>
 <li>p4c-ebpf: can be used to generate C code which can be compiled to <a href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">eBPF</a> and then loaded in the Linux kernel. The eBPF backend currently implements three architecture models: <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html">ebpf_model.p4 for packet filtering, xdp_model.p4 for XDP</a> and the fully-featured PSA (Portable Switch Architecture) model.</li>

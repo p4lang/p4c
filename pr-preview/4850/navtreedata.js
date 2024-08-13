@@ -43,6 +43,7 @@ var NAVTREE =
     [ "P4C", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html", [
       [ "Overview", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#overview", [
         [ "Additional documentation", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#additional-documentation-1", null ],
+        [ "Sample Backends in P4C", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#sample-backends-in-p4c", null ],
         [ "Getting started", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#getting-started", [
           [ "Installing packaged versions of P4C", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#installing-packaged-versions-of-p4c", [
             [ "Ubuntu", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#ubuntu", null ],
@@ -161,7 +162,8 @@ var NAVTREE =
     ] ],
     [ "Behavioral Model Backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html", [
       [ "Dependencies", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html#dependencies-1", null ],
-      [ "Unsupported P4_16 language features", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html#unsupported-p4_16-language-features", null ]
+      [ "Unsupported P4_16 language features", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html#unsupported-p4_16-language-features", null ],
+      [ "BMv2 \"pna_nic\" Backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html#bmv2-pna_nic-backend", null ]
     ] ],
     [ "DPDK backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_r_e_a_d_m_e.html", [
       [ "How to use it?", "md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_r_e_a_d_m_e.html#how-to-use-it", null ],
@@ -361,7 +363,6 @@ var NAVTREE =
         ] ]
       ] ]
     ] ],
-    [ "BMv2 \"pna_nic\" Backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2pna__nic_2_r_e_a_d_m_e.html", null ],
     [ "portable_common", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2portable__common_2_r_e_a_d_m_e.html", null ],
     [ "Contribute to the P4 Compiler Project", "md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html", [
       [ "Contributing License", "md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html#contributing-license", null ],
@@ -428,10 +429,10 @@ var NAVTREEINDEX =
 "class_p4_tools_1_1_z3_translator.html#a26f53ca04e964de1f78c9a5dae832785",
 "class_type_check_1_1_infer_action_args_top_down.html",
 "functions_func_n.html",
-"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#example",
-"namespace_p4_tools.html#a6559e56230ad33b7d4b9bf4fe7111547",
-"struct_p4_1_1_control_plane_a_p_i_1_1_p4_symbol_suffix_set.html#a0dea86d37cb14fbef0f3f1527678a406",
-"struct_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_protobuf_ir_test.html"
+"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#dependencies-3",
+"namespace_p4_tools.html#a625518a9562cb3a9d1be1cee71ef9fb0",
+"struct_p4_1_1_control_plane_a_p_i_1_1_p4_symbol_suffix_set.html",
+"struct_p4_tools_1_1_p4_testgen_1_1_abstract_test.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
