@@ -26,8 +26,8 @@ var searchData=
   ['ubpftablebase_23',['UBPFTableBase',['../class_u_b_p_f_1_1_u_b_p_f_table_base.html',1,'UBPF']]],
   ['ubpftarget_24',['UbpfTarget',['../class_u_b_p_f_1_1_ubpf_target.html',1,'UBPF']]],
   ['ubpftypefactory_25',['UBPFTypeFactory',['../class_u_b_p_f_1_1_u_b_p_f_type_factory.html',1,'UBPF']]],
-  ['ubuntu_26',['Ubuntu',['../getting_started.html#ubuntu',1,'']]],
-  ['ubuntu_20dependencies_27',['Ubuntu dependencies',['../getting_started.html#ubuntu-dependencies',1,'']]],
+  ['ubuntu_26',['Ubuntu',['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#ubuntu',1,'']]],
+  ['ubuntu_20dependencies_27',['Ubuntu dependencies',['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#ubuntu-dependencies',1,'']]],
   ['unicast_20nm_20normal_20multicast_20ci2e_20clone_20ingress_20to_20egress_28',['NU (Normal Unicast), NM (Normal Multicast), CI2E (Clone Ingress to Egress)',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#nu-normal-unicast-nm-normal-multicast-ci2e-clone-ingress-to-egress',1,'']]],
   ['unify_29',['unify',['../class_p4_1_1_type_inference.html#abc2ef9bb3a691d1e59a721be11cd0499',1,'P4::TypeInference::unify()'],['../class_p4_1_1_type_unification.html#a323df5de0794b2ed417822de869f467b',1,'P4::TypeUnification::unify()']]],
   ['unifycast_30',['unifyCast',['../class_p4_1_1_type_inference.html#a6e4008746d8fce6012f9f60833ead21e',1,'P4::TypeInference']]],
@@ -66,6 +66,6 @@ var searchData=
   ['ut_5fhash_5fbucket_63',['UT_hash_bucket',['../struct_u_t__hash__bucket.html',1,'']]],
   ['ut_5fhash_5fhandle_64',['UT_hash_handle',['../struct_u_t__hash__handle.html',1,'']]],
   ['ut_5fhash_5ftable_65',['UT_hash_table',['../struct_u_t__hash__table.html',1,'']]],
-  ['utility_20functions_66',['Common P4C utility functions',['../getting_started.html#common-p4c-utility-functions',1,'']]],
+  ['utility_20functions_66',['Common P4C utility functions',['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#common-p4c-utility-functions',1,'']]],
   ['utils_67',['Utils',['../class_p4_tools_1_1_utils.html',1,'P4Tools']]]
 ];

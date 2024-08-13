@@ -40,54 +40,53 @@ var NAVTREE =
         [ "Compiler Driver", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html#compiler-driver", null ]
       ] ]
     ] ],
-    [ "Getting Started", "getting_started.html", [
-      [ "P4C", "getting_started.html#p4c", null ],
-      [ "Overview", "getting_started.html#overview", [
-        [ "Additional documentation", "getting_started.html#additional-documentation-1", null ],
-        [ "Sample Backends in P4C", "getting_started.html#sample-backends-in-p4c", null ],
-        [ "Getting started", "getting_started.html#getting-started", [
-          [ "Installing packaged versions of P4C", "getting_started.html#installing-packaged-versions-of-p4c", [
-            [ "Ubuntu", "getting_started.html#ubuntu", null ],
-            [ "Debian", "getting_started.html#debian", null ]
+    [ "Getting Started", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html", [
+      [ "Overview", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#overview", [
+        [ "Additional documentation", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#additional-documentation-1", null ],
+        [ "Sample Backends in P4C", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#sample-backends-in-p4c", null ],
+        [ "Getting started", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#getting-started-1", [
+          [ "Installing packaged versions of P4C", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#installing-packaged-versions-of-p4c", [
+            [ "Ubuntu", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#ubuntu", null ],
+            [ "Debian", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#debian", null ]
           ] ],
-          [ "Installing P4C from source", "getting_started.html#installing-p4c-from-source", null ]
+          [ "Installing P4C from source", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#installing-p4c-from-source", null ]
         ] ],
-        [ "Dependencies", "getting_started.html#dependencies", [
-          [ "Ubuntu dependencies", "getting_started.html#ubuntu-dependencies", [
-            [ "CMake", "getting_started.html#cmake", null ]
+        [ "Dependencies", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#dependencies", [
+          [ "Ubuntu dependencies", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#ubuntu-dependencies", [
+            [ "CMake", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#cmake", null ]
           ] ],
-          [ "Fedora dependencies", "getting_started.html#fedora-dependencies", null ],
-          [ "macOS dependencies", "getting_started.html#macos-dependencies", null ],
-          [ "Garbage collector", "getting_started.html#garbage-collector", null ],
-          [ "Crash dumps", "getting_started.html#crash-dumps", null ]
+          [ "Fedora dependencies", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#fedora-dependencies", null ],
+          [ "macOS dependencies", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#macos-dependencies", null ],
+          [ "Garbage collector", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#garbage-collector", null ],
+          [ "Crash dumps", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#crash-dumps", null ]
         ] ],
-        [ "Development tools", "getting_started.html#development-tools", [
-          [ "Git setup", "getting_started.html#git-setup", null ]
+        [ "Development tools", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#development-tools", [
+          [ "Git setup", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#git-setup", null ]
         ] ],
-        [ "Docker", "getting_started.html#docker", null ],
-        [ "Bazel", "getting_started.html#bazel", null ],
-        [ "Build system", "getting_started.html#build-system", [
-          [ "Defining new CMake targets", "getting_started.html#defining-new-cmake-targets", [
-            [ "IR definition files", "getting_started.html#ir-definition-files", null ],
-            [ "Source files", "getting_started.html#source-files", null ],
-            [ "Target", "getting_started.html#target", null ],
-            [ "Tests", "getting_started.html#tests", null ],
-            [ "Installation", "getting_started.html#installation", null ]
+        [ "Docker", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#docker", null ],
+        [ "Bazel", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#bazel", null ],
+        [ "Build system", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#build-system", [
+          [ "Defining new CMake targets", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#defining-new-cmake-targets", [
+            [ "IR definition files", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#ir-definition-files", null ],
+            [ "Source files", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#source-files", null ],
+            [ "Target", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#target", null ],
+            [ "Tests", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#tests", null ],
+            [ "Installation", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#installation", null ]
           ] ]
         ] ]
       ] ],
-      [ "Common P4C utility functions", "getting_started.html#common-p4c-utility-functions", [
-        [ "Known issues", "getting_started.html#known-issues", [
-          [ "Frontend", "getting_started.html#frontend", [
-            [ "P4_14 features not supported in P4_16", "getting_started.html#p4_14-features-not-supported-in-p4_16", null ]
+      [ "Common P4C utility functions", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#common-p4c-utility-functions", [
+        [ "Known issues", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#known-issues", [
+          [ "Frontend", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#frontend", [
+            [ "P4_14 features not supported in P4_16", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#p4_14-features-not-supported-in-p4_16", null ]
           ] ],
-          [ "Backends", "getting_started.html#backends", [
-            [ "Bmv2 Backend", "getting_started.html#bmv2-backend", null ]
+          [ "Backends", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#backends", [
+            [ "Bmv2 Backend", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#bmv2-backend", null ]
           ] ]
         ] ],
-        [ "How to Contribute", "getting_started.html#how-to-contribute", null ],
-        [ "P4 Compiler Onboarding", "getting_started.html#p4-compiler-onboarding", null ],
-        [ "Contact", "getting_started.html#contact", null ]
+        [ "How to Contribute", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#how-to-contribute", null ],
+        [ "P4 Compiler Onboarding", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#p4-compiler-onboarding", null ],
+        [ "Contact", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#contact", null ]
       ] ]
     ] ],
     [ "P4C Intermediate Representation (IR)", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html", [
@@ -177,7 +176,7 @@ var NAVTREE =
           [ "Random", "md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#random", null ]
         ] ]
       ] ],
-      [ "Getting started", "md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#getting-started-1", [
+      [ "Getting started", "md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#getting-started-2", [
         [ "Installation", "md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#installation-1", null ],
         [ "Using PSA-eBPF", "md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#using-psa-ebpf", [
           [ "Prerequisites", "md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#prerequisites-1", null ],
@@ -430,8 +429,8 @@ var NAVTREEINDEX =
 "class_p4_tools_1_1_z3_translator.html#a26f53ca04e964de1f78c9a5dae832785",
 "class_type_check_1_1_infer_action_args_top_down.html",
 "functions_func_n.html",
-"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#dependencies-3",
-"namespace_p4_tools.html#a5c5f8a89d72fcfde42e7b2f7611c0281",
+"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#example",
+"namespace_p4_tools.html#a625518a9562cb3a9d1be1cee71ef9fb0",
 "struct_p4_1_1_control_plane_a_p_i_1_1_p4_symbol_suffix_set.html",
 "struct_p4_tools_1_1_p4_testgen_1_1_abstract_test.html"
 ];

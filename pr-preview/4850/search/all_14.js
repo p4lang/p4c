@@ -17,6 +17,6 @@ var searchData=
   ['keysideeffect_14',['KeySideEffect',['../class_p4_1_1_key_side_effect.html',1,'P4']]],
   ['kind_15',['kind',['../class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_token.html#ae1239f703e23ac0fc8099b72231d7e34',1,'P4Tools::P4Testgen::Bmv2::Token::kind() const noexcept'],['../class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_token.html#af47078ac1f5b0679167d9b7a2cc0f7fc',1,'P4Tools::P4Testgen::Bmv2::Token::kind(Kind kind) noexcept']]],
   ['kinds_16',['P4 match kinds',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#p4-match-kinds',1,'']]],
-  ['known_20issues_17',['Known issues',['../getting_started.html#known-issues',1,'Known issues'],['../md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_r_e_a_d_m_e.html#known-issues-1',1,'Known issues']]],
+  ['known_20issues_17',['Known issues',['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#known-issues',1,'Known issues'],['../md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_r_e_a_d_m_e.html#known-issues-1',1,'Known issues']]],
   ['known_20limitations_18',['Known limitations',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2_r_e_a_d_m_e.html#known-limitations',1,'']]]
 ];

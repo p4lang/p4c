@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['garbage_20collector_0',['Garbage collector',['../getting_started.html#garbage-collector',1,'']]],
+  ['garbage_20collector_0',['Garbage collector',['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#garbage-collector',1,'']]],
   ['generalinliner_1',['GeneralInliner',['../class_p4_1_1_general_inliner.html',1,'P4']]],
   ['generate_2',['generate',['../class_d_p_d_k_1_1_branching_instruction_generation.html#a82d4c1baca167ab05317a0d465adb5a7',1,'DPDK::BranchingInstructionGeneration::generate()'],['../class_d_p_d_k_1_1_tdi_bfrt_conf.html#ac9a924ca823c1097b90e74d0757ab43b',1,'DPDK::TdiBfrtConf::generate()']]],
   ['generatecopyin_3',['generateCopyIn',['../class_p4_tools_1_1_p4_testgen_1_1_expr_stepper.html#a81648bb515b937bc4840889c0765ba24',1,'P4Tools::P4Testgen::ExprStepper']]],
@@ -235,8 +235,8 @@ var searchData=
   ['gettestobjectcategory_232',['getTestObjectCategory',['../class_p4_tools_1_1_p4_testgen_1_1_execution_state.html#afe042f41fe356efba76a43f0121f6fd2',1,'P4Tools::P4Testgen::ExecutionState::getTestObjectCategory()'],['../class_p4_tools_1_1_p4_testgen_1_1_test_spec.html#a58958899921a6902b4a0a67accb5adc0',1,'P4Tools::P4Testgen::TestSpec::getTestObjectCategory()']]],
   ['gettests_233',['getTests',['../class_p4_tools_1_1_p4_testgen_1_1_test_back_end.html#a547ebb6c0dca766f1480daf8a971aec4',1,'P4Tools::P4Testgen::TestBackEnd']]],
   ['gettimestamp_234',['getTimeStamp',['../class_p4_tools_1_1_utils.html#a667b77e65b15eb5d7cb3b9ad5a684fb4',1,'P4Tools::Utils']]],
-  ['getting_20started_235',['Getting Started',['../getting_started.html',1,'']]],
-  ['getting_20started_236',['Getting started',['../getting_started.html#getting-started',1,'Getting started'],['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#getting-started-1',1,'Getting started']]],
+  ['getting_20started_235',['Getting Started',['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html',1,'']]],
+  ['getting_20started_236',['Getting started',['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#getting-started-1',1,'Getting started'],['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#getting-started-2',1,'Getting started']]],
   ['gettoolname_237',['getToolName',['../class_p4_tools_1_1_abstract_p4c_tool_options.html#ae38edbab8e605eae1b578df498621db3',1,'P4Tools::AbstractP4cToolOptions']]],
   ['gettrace_238',['getTrace',['../class_p4_tools_1_1_p4_testgen_1_1_execution_state.html#a05fb02e373f990f5f83a4ccedd7e04f5',1,'P4Tools::P4Testgen::ExecutionState::getTrace()'],['../class_p4_tools_1_1_p4_testgen_1_1_test_framework.html#a1b0370e00cca5cfd125ecf424951512f',1,'P4Tools::P4Testgen::TestFramework::getTrace()']]],
   ['gettraces_239',['getTraces',['../class_p4_tools_1_1_p4_testgen_1_1_final_state.html#a2c8b14e0f20f1d39a84d4f17ef9c4ac4',1,'P4Tools::P4Testgen::FinalState::getTraces()'],['../class_p4_tools_1_1_p4_testgen_1_1_test_spec.html#a9757ba2fd19901f97aa7a31966dd71e1',1,'P4Tools::P4Testgen::TestSpec::getTraces()']]],
@@ -255,7 +255,7 @@ var searchData=
   ['getz3ctx_252',['getZ3Ctx',['../class_p4_tools_1_1_z3_solver.html#a658ecbd58127afa1013df70549e31b27',1,'P4Tools::Z3Solver']]],
   ['getz3solver_253',['getZ3Solver',['../class_p4_tools_1_1_z3_solver.html#ad4b2712ee57ae4abc1af280e4455fa58',1,'P4Tools::Z3Solver']]],
   ['git_20commits_20and_20pull_20requests_254',['Git commits and pull requests',['../md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html#git-commits-and-pull-requests',1,'']]],
-  ['git_20setup_255',['Git setup',['../getting_started.html#git-setup',1,'']]],
+  ['git_20setup_255',['Git setup',['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#git-setup',1,'']]],
   ['git_20usage_256',['Git usage',['../md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html#git-usage',1,'']]],
   ['github_20com_20p4lang_20p4c_20pull_203247_20view_20a_257',['Release 1.2.2.2 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3247&quot; &gt;view&lt;/a&gt;]',['../md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-1222-viewhttpsgithubcomp4langp4cpull3247',1,'']]],
   ['github_20com_20p4lang_20p4c_20pull_203418_20view_20a_258',['Release v1.2.2.3 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3418&quot; &gt;view&lt;/a&gt;]',['../md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1223-viewhttpsgithubcomp4langp4cpull3418',1,'']]],
