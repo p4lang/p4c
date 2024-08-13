@@ -4,6 +4,9 @@
 -->
 [![Status](https://github.com/p4lang/p4c/actions/workflows/ci-p4tools.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-p4tools.yml)
 
+<!--!
+\internal
+-->
 ## Table of Contents
 
 - [Installation](#installation)
@@ -14,6 +17,9 @@
 - [Contributing](#contributing)
 - [License](#license)
 
+<!--!
+\endinternal
+-->
 P4Smith is an extensible random P4 program generator in the spirit of [CSmith](https://en.wikipedia.org/wiki/Csmith). P4Smith generates random, but valid P4 programs for various P4 targets, for example the [v1model.p4](https://github.com/p4lang/behavioral-model/blob/main/docs/simple_switch.md) architecture on [BMv2](https://github.com/p4lang/behavioral-model) or `tna.p4` running on Tofino 1. P4Smiths generates programs that are valid according to the latest version of the (P4 specification)[https://p4.org/p4-spec/docs/P4-16-working-spec.html] or the restrictions of the specific target.
 
 ## Installation

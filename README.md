@@ -9,6 +9,10 @@
 [![Validation](https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml)
 [![Docker Container](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml)
 
+<!--!
+\internal
+-->
+
 * [Getting started](#getting-started)
    * [Installing packaged versions of P4C](#installing-packaged-versions-of-p4c)
    * [Installing P4C from source](#installing-p4c-from-source)
@@ -30,7 +34,9 @@
 * [How to Contribute](#how-to-contribute)
 * [P4 Compiler Onboarding](#p4-compiler-onboarding)
 * [Contact](#contact)
-
+<!--!
+\endinternal
+-->
 P4C is a reference compiler for the P4 programming language.
 It supports both P4-14 and P4-16; you can find more information about P4
 [here](http://p4.org) and the specifications for both versions of the language

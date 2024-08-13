@@ -4,6 +4,9 @@
 -->
 [![Status](https://github.com/p4lang/p4c/actions/workflows/ci-p4tools.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-p4tools.yml)
 
+<!--!
+\internal
+-->
 ## Table of Contents
 
 - [Installation](#installation)
@@ -18,6 +21,9 @@
 - [Contributing](#contributing)
 - [License](#license)
 
+<!--!
+\endinternal
+-->
 P4Testgen is an extensible [test oracle](https://en.wikipedia.org/wiki/Test_oracle) that uses symbolic execution to automatically generate input-output tests for P4 programs. P4Testgen is part of the P4Tools and P4C ecosystem.
 
 ## Features
