@@ -101,8 +101,7 @@ var NAVTREEINDEX19 =
 "group__control__plane.html#gafaec7221d97d1f6e5954d0e0086a2949":[17,0,7],
 "hierarchy.html":[19,2],
 "index.html":[],
-"index.html":[0],
-"index.html#features-of-p4c":[0,0],
+"index.html#features-of-p4c":[0],
 "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html":[16],
 "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#breaking-changes-":[16,1,0],
 "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#breaking-changes--1":[16,2,0],
@@ -249,5 +248,6 @@ var NAVTREEINDEX19 =
 "md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#xdp-based-design":[6,8,1],
 "md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#xdp2tc-mode":[6,8,4],
 "md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html":[7],
-"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#dependencies-3":[7,0]
+"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#dependencies-3":[7,0],
+"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#example":[7,3]
 };

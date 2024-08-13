@@ -25,8 +25,8 @@
 var NAVTREE =
 [
   [ "P4 Compiler Documentation (P4C)", "index.html", [
-    [ "P4 Compiler Documentation", "index.html", "index" ],
-    [ "Repository", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html", [
+    [ "Features of P4C", "index.html#features-of-p4c", null ],
+    [ "P4C Repository Organization", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html", [
       [ "Compiler source code organization", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html#compiler-source-code-organization", null ],
       [ "Additional documentation", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html#additional-documentation", null ],
       [ "Writing documentation", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html#writing-documentation", [
@@ -430,8 +430,8 @@ var NAVTREEINDEX =
 "class_p4_tools_1_1_z3_translator.html#a26f53ca04e964de1f78c9a5dae832785",
 "class_type_check_1_1_infer_action_args_top_down.html",
 "functions_func_n.html",
-"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#example",
-"namespace_p4_tools.html#a5c5f8a89d72fcfde42e7b2f7611c0281",
+"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#format-of-json-output",
+"namespace_p4_tools.html#a625518a9562cb3a9d1be1cee71ef9fb0",
 "struct_p4_1_1_control_plane_a_p_i_1_1_p4_symbol_suffix_set.html",
 "struct_p4_tools_1_1_p4_testgen_1_1_abstract_test.html"
 ];
