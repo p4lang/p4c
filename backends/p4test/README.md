@@ -1,5 +1,7 @@
 # P4test Backend
-
+<!--!
+[TOC]
+-->
 The P4test Backend is a tool designed for testing and debugging P4
 programs. It supports both the P4_14 and P4_16 standards and can
 translate P4 code from one version to another. Additionally, it

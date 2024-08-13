@@ -1,5 +1,7 @@
 # P4 Compiler Intermediate representation
-
+<!--!
+[TOC]
+-->
 ## Introduction
 
 This document outlines the design of the P4_16 compiler.

@@ -1,5 +1,7 @@
 # Graphs Backend
-
+<!--!
+[TOC]
+-->
 This backend produces visual representations of a P4 program as dot files. For
 now it supports the generation of graphs for top-level control and parser blocks,
 generation of fullGraph, which merges graphs for top-level program blocks and

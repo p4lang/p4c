@@ -1,5 +1,7 @@
 # P4Testgen
-
+<!--!
+[TOC]
+-->
 [![Status](https://github.com/p4lang/p4c/actions/workflows/ci-p4tools.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-p4tools.yml)
 
 ## Table of Contents

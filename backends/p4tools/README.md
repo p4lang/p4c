@@ -1,5 +1,7 @@
 # P4Tools 
-
+<!--!
+[TOC]
+-->
 P4Tools is a collection of tools that make testing P4 targets and programs a little easier. So far the platform supports the following tools and projects:
 
 - [P4Testgen](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/testgen): An input-output test case generator for P4.

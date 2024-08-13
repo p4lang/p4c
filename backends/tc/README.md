@@ -1,5 +1,7 @@
 # TC backend
-
+<!--!
+[TOC]
+-->
 TC backend aims to generate files for the P4TC implementation in Linux kernel (from 6.3.x version). P4TC is an implementation of the Programming Protocol-independent Packet Processors (P4) that is kernel based, building on top of Linux TC.
 
 For more info on P4TC, Please refer:

@@ -1,5 +1,7 @@
 # Repository
-
+<!--!
+[TOC]
+-->
 This folder contains documentation for the P4_16 prototype compiler.
 The code and documentation are hosted in the [p4c repository](https://github.com/p4lang/p4c). 
 

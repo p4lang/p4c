@@ -1,5 +1,7 @@
 # eBPF Backend
-
+<!--!
+[TOC]
+-->
 The back-end accepts only P4_16 code written for the `ebpf_model.p4` or
 `xdp_model.p4` filter models.  It generates C code that can be afterwards
 compiled into [eBPF (extended Berkeley Packet Filters)](https://en.wikipedia.org/wiki/Berkeley_Packet_Filter) using clang/llvm or

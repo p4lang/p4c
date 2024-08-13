@@ -1,5 +1,7 @@
 # p4fmt (P4 Formatter)
-
+<!--!
+[TOC]
+-->
 p4fmt is a WIP formatter for P4. It's in a highly experimental phase
 and, not yet stable/reliable for general use.
 Contributions and feedbacks from the community

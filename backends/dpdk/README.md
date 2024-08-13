@@ -1,5 +1,7 @@
 # DPDK backend
-
+<!--!
+[TOC]
+-->
 The **p4c-dpdk** backend translates the P4-16 programs to DPDK API to configure
 the DPDK software switch (SWX) pipeline. DPDK introduced the SWX pipeline in
 the DPDK 20.11 LTS release. For more information, please refer to the [release note](https://doc.dpdk.org/guides/rel_notes/release_20_11.html).

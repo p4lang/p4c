@@ -1,5 +1,7 @@
 # Behavioral Model Backend
-
+<!--!
+[TOC]
+-->
 This is a back-end which generates code for the [Behavioral Model version 2 (BMv2)](https://github.com/p4lang/behavioral-model.git).
 
 It can accept either P4_14 programs, or P4_16 programs written for the
