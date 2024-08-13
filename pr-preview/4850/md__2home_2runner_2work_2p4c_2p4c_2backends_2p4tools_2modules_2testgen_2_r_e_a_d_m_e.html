@@ -277,6 +277,26 @@ How to Run tests</h2>
 <li>All P4C submodule tests are tagged with 'testgen-p4c-bmv2' label</li>
 </ul>
 <p><code>bash cd build/testgen ctest -R testgen-p4c-bmv2 </code></p>
+<h1><a class="anchor" id="p4testgen-benchmarks-1"></a>
+P4Testgen Benchmarks</h1>
+<p>This folder contains utility scripts to benchmark P4Testgen. <code>test_coverage.py</code> measures coverage of various path selection strategies. <code>plot.py</code> creates plots of the results.  </p>
+<h1><a class="anchor" id="p4testgen-bmv2-target-tests-1"></a>
+P4Testgen BMv2 target tests</h1>
+<h2><a class="anchor" id="cmake-files-1"></a>
+CMake Files</h2>
+<ul>
+<li>P4Tests.cmake - Common test suite to add P4 tests from P4C submodules.<ul>
+<li>Run p4testgen on P4-16 V1Model p4s with the BMv2 target.</li>
+</ul>
+</li>
+<li>BMV2...Xfail.cmake - BMv2 xfails for the various BMv2 V1Model back ends.</li>
+</ul>
+<h2><a class="anchor" id="how-to-run-tests-1"></a>
+How to Run tests</h2>
+<ul>
+<li>All P4C submodule tests are tagged with 'testgen-p4c-bmv2' label</li>
+</ul>
+<p><code>bash cd build/testgen ctest -R testgen-p4c-bmv2 </code></p>
 <h2><a class="anchor" id="contributing-1"></a>
 Contributing</h2>
 <p>Contributions to P4Testgen in any form are welcome! Please follow the guidelines listed <a href="https://github.com/p4lang/p4c/blob/main/CONTRIBUTING.md">here</a> to contribute.</p>
