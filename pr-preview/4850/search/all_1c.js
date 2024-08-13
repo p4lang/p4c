@@ -41,7 +41,7 @@ var searchData=
   ['task_38',['Finding a Task',['../md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html#finding-a-task',1,'']]],
   ['tc_39',['TC',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#connecting-the-generated-program-with-the-tc',1,'Connecting the generated program with the TC'],['../namespace_t_c.html',1,'TC']]],
   ['tc_20back_20end_40',['TC Back End',['../md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end',1,'Changes to the TC Back End'],['../md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end-1',1,'Changes to the TC Back End'],['../md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end-2',1,'Changes to the TC Back End'],['../md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end-3',1,'Changes to the TC Back End']]],
-  ['tc_20backend_41',['TC backend',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2tc_2_r_e_a_d_m_e.html',1,'']]],
+  ['tc_20backend_41',['TC Backend',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2tc_2_r_e_a_d_m_e.html',1,'']]],
   ['tc_20based_20design_20default_42',['TC-based design (default)',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html#tc-based-design-default',1,'']]],
   ['tcegressdeparserpsa_43',['TCEgressDeparserPSA',['../class_e_b_p_f_1_1_t_c_egress_deparser_p_s_a.html',1,'EBPF']]],
   ['tcegressforxdp_44',['tcEgressForXDP',['../class_e_b_p_f_1_1_p_s_a_arch_x_d_p.html#a1bf57d95e82e29a5a29d48d7ed2c486c',1,'EBPF::PSAArchXDP']]],

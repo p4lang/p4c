@@ -137,7 +137,7 @@ var searchData=
   ['dp_5fpacket_134',['dp_packet',['../structdp__packet.html',1,'']]],
   ['dpdk_135',['DPDK',['../namespace_d_p_d_k.html',1,'']]],
   ['dpdk_20back_20end_136',['Changes to the DPDK Back End',['../md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-dpdk-back-end',1,'']]],
-  ['dpdk_20backend_137',['DPDK backend',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_r_e_a_d_m_e.html',1,'']]],
+  ['dpdk_20backend_137',['DPDK Backend',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_r_e_a_d_m_e.html',1,'']]],
   ['dpdk_20softnic_138',['DPDK SoftNIC',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2smith_2_r_e_a_d_m_e.html#pnap4-on-the-dpdk-softnic',1,'pna.p4 on the DPDK SoftNIC'],['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html#pnap4-on-the-dpdk-softnic-1',1,'pna.p4 on the DPDK SoftNIC']]],
   ['dpdk_20target_20limitations_139',['DPDK target limitations',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_r_e_a_d_m_e.html#dpdk-target-limitations',1,'']]],
   ['dpdkaddpseudoheader_140',['DpdkAddPseudoHeader',['../struct_d_p_d_k_1_1_dpdk_add_pseudo_header.html',1,'DPDK']]],
