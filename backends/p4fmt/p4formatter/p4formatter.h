@@ -1,5 +1,7 @@
-#ifndef P4FMT_TOP4_TOP4_H_
-#define P4FMT_TOP4_TOP4_H_
+#ifndef BACKENDS_P4FMT_P4FORMATTER_P4FORMATTER_H_
+#define BACKENDS_P4FMT_P4FORMATTER_P4FORMATTER_H_
+
+#endif // !BACKENDS_P4FMT_P4FORMATTER_P4FORMATTER_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
@@ -259,4 +261,4 @@ std::string toP4(const IR::INode *node);
 void dumpP4(const IR::INode *node);
 
 }  // namespace P4Fmt
-#endif /* P4FMT_TOP4_TOP4_H_ */
+#endif /* BACKENDS_P4FMT_P4FORMATTER_P4FORMATTER_H_ */
