@@ -123,6 +123,255 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_
   <div class="headertitle"><div class="title">eBPF Backend</div></div>
 </div><!--header-->
 <div class="contents">
+<div class="toc"><h3>Table of Contents</h3>
+<ul>
+  <li class="level1">
+    <a href="#target-architectures">Target architectures</a>
+  </li>
+  <li class="level1">
+    <a href="#background">Background</a>
+    <ul>
+      <li class="level2">
+        <a href="#p4">P4</a>
+      </li>
+      <li class="level2">
+        <a href="#ebpf">eBPF</a>
+        <ul>
+          <li class="level3">
+            <a href="#safe-code">Safe code</a>
+          </li>
+          <li class="level3">
+            <a href="#kernel-hooks">Kernel hooks</a>
+          </li>
+          <li class="level3">
+            <a href="#ebpf-tables">eBPF Tables</a>
+          </li>
+          <li class="level3">
+            <a href="#concurrency">Concurrency</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#compiling-p4-to-ebpf">Compiling P4 to eBPF</a>
+    <ul>
+      <li class="level2">
+        <a href="#dependencies-2">Dependencies</a>
+      </li>
+      <li class="level2">
+        <a href="#supported-capabilities">Supported capabilities</a>
+      </li>
+      <li class="level2">
+        <a href="#translating-p4-to-c">Translating P4 to C</a>
+        <ul>
+          <li class="level3">
+            <a href="#translating-parsers">Translating parsers</a>
+          </li>
+          <li class="level3">
+            <a href="#translating-match-action-pipelines">Translating match-action pipelines</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#autotoc_md0">autotoc_md0</a>
+    <ul>
+      <li class="level2 empty">
+        <ul>
+          <li class="level3">
+            <a href="#generating-code-from-a-p4-file">Generating code from a .p4 file</a>
+          </li>
+          <li class="level3">
+            <a href="#using-the-generated-code">Using the generated code</a>
+            <ul>
+              <li class="level4">
+                <a href="#connecting-the-generated-program-with-the-tc">Connecting the generated program with the TC</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#how-to-run-the-generated-ebpf-program">How to run the generated eBPF program</a>
+  </li>
+  <li class="level1">
+    <a href="#how-to-inject-custom-extern-function-to-the-generated-ebpf-program">How to inject custom extern function to the generated eBPF program?</a>
+    <ul>
+      <li class="level2">
+        <a href="#basic-principles">Basic principles</a>
+      </li>
+      <li class="level2">
+        <a href="#definition">Definition</a>
+      </li>
+      <li class="level2">
+        <a href="#compilation">Compilation</a>
+      </li>
+      <li class="level2">
+        <a href="#calling-convention">Calling convention</a>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#psa-implementation-for-ebpf-backend">PSA implementation for eBPF backend</a>
+  </li>
+  <li class="level1">
+    <a href="#prerequisites">Prerequisites</a>
+  </li>
+  <li class="level1">
+    <a href="#design">Design</a>
+    <ul>
+      <li class="level2">
+        <a href="#tc-based-design-default">TC-based design (default)</a>
+      </li>
+      <li class="level2">
+        <a href="#xdp-based-design">XDP-based design</a>
+      </li>
+      <li class="level2">
+        <a href="#packet-paths">Packet paths</a>
+        <ul>
+          <li class="level3">
+            <a href="#ntk-normal-packet-to-kernel">NTK (Normal Packet To Kernel)</a>
+          </li>
+          <li class="level3">
+            <a href="#nfp-normal-packet-from-port">NFP (Normal Packet From Port)</a>
+          </li>
+          <li class="level3">
+            <a href="#resubmit">RESUBMIT</a>
+          </li>
+          <li class="level3">
+            <a href="#nu-normal-unicast-nm-normal-multicast-ci2e-clone-ingress-to-egress">NU (Normal Unicast), NM (Normal Multicast), CI2E (Clone Ingress to Egress)</a>
+          </li>
+          <li class="level3">
+            <a href="#ce2e-clone-egress-to-egress">CE2E (Clone Egress to Egress)</a>
+          </li>
+          <li class="level3">
+            <a href="#sending-packet-to-cpu">Sending packet to CPU</a>
+          </li>
+          <li class="level3">
+            <a href="#ntp-normal-packet-to-port">NTP (Normal packet to port)</a>
+          </li>
+          <li class="level3">
+            <a href="#recirculate">RECIRCULATE</a>
+          </li>
+        </ul>
+      </li>
+      <li class="level2">
+        <a href="#metadata">Metadata</a>
+      </li>
+      <li class="level2">
+        <a href="#xdp2tc-mode">XDP2TC mode</a>
+      </li>
+      <li class="level2">
+        <a href="#control-plane-api">Control-plane API</a>
+      </li>
+      <li class="level2">
+        <a href="#p4-match-kinds">P4 match kinds</a>
+        <ul>
+          <li class="level3">
+            <a href="#exact">exact</a>
+          </li>
+          <li class="level3">
+            <a href="#lpm">lpm</a>
+          </li>
+          <li class="level3">
+            <a href="#ternary">ternary</a>
+          </li>
+        </ul>
+      </li>
+      <li class="level2">
+        <a href="#psa-externs">PSA externs</a>
+        <ul>
+          <li class="level3">
+            <a href="#actionprofile">ActionProfile</a>
+          </li>
+          <li class="level3">
+            <a href="#actionselector">ActionSelector</a>
+          </li>
+          <li class="level3">
+            <a href="#digest">Digest</a>
+          </li>
+          <li class="level3">
+            <a href="#meters">Meters</a>
+            <ul>
+              <li class="level4">
+                <a href="#direct-meter">Direct Meter</a>
+              </li>
+            </ul>
+          </li>
+          <li class="level3">
+            <a href="#value_set">value_set</a>
+          </li>
+          <li class="level3">
+            <a href="#random">Random</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#getting-started-1">Getting started</a>
+    <ul>
+      <li class="level2">
+        <a href="#installation-1">Installation</a>
+      </li>
+      <li class="level2">
+        <a href="#using-psa-ebpf">Using PSA-eBPF</a>
+        <ul>
+          <li class="level3">
+            <a href="#prerequisites-1">Prerequisites</a>
+          </li>
+          <li class="level3">
+            <a href="#compilation-1">Compilation</a>
+            <ul>
+              <li class="level4">
+                <a href="#optional-flags">Optional flags</a>
+              </li>
+            </ul>
+          </li>
+          <li class="level3">
+            <a href="#nikss-api-and-nikss-ctl">NIKSS API and nikss-ctl</a>
+          </li>
+        </ul>
+      </li>
+      <li class="level2">
+        <a href="#running-ptf-tests">Running PTF tests</a>
+      </li>
+      <li class="level2">
+        <a href="#troubleshooting">Troubleshooting</a>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#performance-optimizations">Performance optimizations</a>
+    <ul>
+      <li class="level2">
+        <a href="#table-caching">Table caching</a>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#todo--limitations">TODO / Limitations</a>
+  </li>
+  <li class="level1">
+    <a href="#roadmap">Roadmap</a>
+    <ul>
+      <li class="level2">
+        <a href="#planned-features">Planned features</a>
+      </li>
+      <li class="level2">
+        <a href="#long-term-goals">Long-term goals</a>
+      </li>
+      <li class="level2">
+        <a href="#support">Support</a>
+      </li>
+    </ul>
+  </li>
+</ul>
+</div>
 <div class="textblock"><p><a class="anchor" id="ebpf-backend"></a></p>
 <p>The back-end accepts only P4_16 code written for the <code>ebpf_model.p4</code> or <code>xdp_model.p4</code> filter models. It generates C code that can be afterwards compiled into <a href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">eBPF (extended Berkeley Packet Filters)</a> using clang/llvm or <a href="https://github.com/iovisor/bcc.git">bcc</a>.</p>
 <p>An older version of this compiler for compiling P4_14 is available <a href="https://github.com/iovisor/bcc/tree/master/src/cc/frontends/p4">here</a> (historical reference only).</p>

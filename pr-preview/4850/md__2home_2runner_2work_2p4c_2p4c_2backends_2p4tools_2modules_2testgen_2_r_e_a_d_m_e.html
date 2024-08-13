@@ -123,6 +123,107 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2
   <div class="headertitle"><div class="title">P4Testgen</div></div>
 </div><!--header-->
 <div class="contents">
+<div class="toc"><h3>Table of Contents</h3>
+<ul>
+  <li class="level1">
+    <a href="#table-of-contents-1">Table of Contents</a>
+  </li>
+  <li class="level1">
+    <a href="#features">Features</a>
+  </li>
+  <li class="level1">
+    <a href="#installation-3">Installation</a>
+    <ul>
+      <li class="level2">
+        <a href="#dependencies-5">Dependencies</a>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#extensions-1">Extensions</a>
+    <ul>
+      <li class="level2">
+        <a href="#v1modelp4-on-bmv2">v1model.p4 on BMv2</a>
+      </li>
+      <li class="level2">
+        <a href="#pnap4-on-the-dpdk-softnic-1">pna.p4 on the DPDK SoftNIC</a>
+      </li>
+      <li class="level2">
+        <a href="#ebpf_modelp4-on-the-ebpf-kernel-target">ebpf_model.p4 on the eBPF kernel target</a>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#definitions">Definitions</a>
+    <ul>
+      <li class="level2 empty">
+        <ul>
+          <li class="level3">
+            <a href="#paths-and-path-constraints">Paths and Path Constraints</a>
+          </li>
+          <li class="level3">
+            <a href="#symbolic-variables">Symbolic Variables</a>
+          </li>
+          <li class="level3">
+            <a href="#taint">Taint</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#usage-3">Usage</a>
+    <ul>
+      <li class="level2">
+        <a href="#coverage">Coverage</a>
+      </li>
+      <li class="level2">
+        <a href="#generating-specific-tests">Generating Specific Tests</a>
+        <ul>
+          <li class="level3">
+            <a href="#restricted-tests">Restricted Tests</a>
+          </li>
+          <li class="level3">
+            <a href="#finding-assertion-violations">Finding Assertion Violations</a>
+          </li>
+        </ul>
+      </li>
+      <li class="level2">
+        <a href="#interacting-with-test-frameworks">Interacting with Test Frameworks</a>
+      </li>
+      <li class="level2">
+        <a href="#detecting-p4-program-flaws">Detecting P4 Program Flaws</a>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#limitations">Limitations</a>
+  </li>
+  <li class="level1">
+    <a href="#further-reading-1">Further Reading</a>
+  </li>
+  <li class="level1">
+    <a href="#p4testgen-benchmarks">P4Testgen Benchmarks</a>
+  </li>
+  <li class="level1">
+    <a href="#p4testgen-bmv2-target-tests">P4Testgen BMv2 target tests</a>
+    <ul>
+      <li class="level2">
+        <a href="#cmake-files">CMake Files</a>
+      </li>
+      <li class="level2">
+        <a href="#how-to-run-tests">How to Run tests</a>
+      </li>
+      <li class="level2">
+        <a href="#contributing-1">Contributing</a>
+      </li>
+      <li class="level2">
+        <a href="#license-1">License</a>
+      </li>
+    </ul>
+  </li>
+</ul>
+</div>
 <div class="textblock"><p><a class="anchor" id="p4testgen"></a></p>
 <p><a href="https://github.com/p4lang/p4c/actions/workflows/ci-p4tools.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-p4tools.yml/badge.svg" alt="Status" style="pointer-events: none;" class="inline"/></a></p>
 <h1><a class="anchor" id="table-of-contents-1"></a>

@@ -123,6 +123,177 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.
   <div class="headertitle"><div class="title">Changelog</div></div>
 </div><!--header-->
 <div class="contents">
+<div class="toc"><h3>Table of Contents</h3>
+<ul>
+  <li class="level1">
+    <a href="#semantic-versioning">Semantic Versioning</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v12414-viewhttpsgithubcomp4langp4cpull4844">Release v1.2.4.14 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/4844&quot; &gt;view&lt;/a&gt;]</a>
+    <ul>
+      <li class="level2">
+        <a href="#breaking-changes-">Breaking Changes 🛠</a>
+      </li>
+      <li class="level2">
+        <a href="#p4-specification-implementation">P4 Specification Implementation</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-compiler-core">Changes to the Compiler Core</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-bmv2-back-ends">Changes to the BMv2 Back Ends</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-tc-back-end">Changes to the TC Back End</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-p4tools-back-end">Changes to the P4Tools Back End</a>
+      </li>
+      <li class="level2">
+        <a href="#other-changes">Other Changes</a>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#release-v12413-viewhttpsgithubcomp4langp4cpull4767">Release v1.2.4.13 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/4767&quot; &gt;view&lt;/a&gt;]</a>
+    <ul>
+      <li class="level2">
+        <a href="#breaking-changes--1">Breaking Changes 🛠</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-compiler-core-1">Changes to the Compiler Core</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-tc-back-end-1">Changes to the TC Back End</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-dpdk-back-end">Changes to the DPDK Back End</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-p4tools-back-end-1">Changes to the P4Tools Back End</a>
+      </li>
+      <li class="level2">
+        <a href="#other-changes-1">Other Changes</a>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#release-v12412-viewhttpsgithubcomp4langp4cpull4699">Release v1.2.4.12 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/4699&quot; &gt;view&lt;/a&gt;]</a>
+    <ul>
+      <li class="level2">
+        <a href="#breaking-changes--2">Breaking Changes 🛠</a>
+      </li>
+      <li class="level2">
+        <a href="#p4-specification-implementation-1">P4 Specification Implementation</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-compiler-core-2">Changes to the Compiler Core</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-control-plane">Changes to the Control Plane</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-ebpf-back-ends">Changes to the eBPF Back Ends</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-tc-back-end-2">Changes to the TC Back End</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-p4tools-back-end-2">Changes to the P4Tools Back End</a>
+      </li>
+      <li class="level2">
+        <a href="#other-changes-2">Other Changes</a>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#release-v12411-viewhttpsgithubcomp4langp4cpull4646">Release v1.2.4.11 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/4646&quot; &gt;view&lt;/a&gt;]</a>
+    <ul>
+      <li class="level2">
+        <a href="#changes-to-the-compiler-core-3">Changes to the Compiler Core</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-ebpf-back-ends-1">Changes to the eBPF Back Ends</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-tc-back-end-3">Changes to the TC Back End</a>
+      </li>
+      <li class="level2">
+        <a href="#changes-to-the-p4tools-back-end-3">Changes to the P4Tools Back End</a>
+      </li>
+      <li class="level2">
+        <a href="#other-changes-3">Other Changes</a>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#release-v12410-viewhttpsgithubcomp4langp4cpull4587">Release v1.2.4.10 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/4587&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1249-viewhttpsgithubcomp4langp4cpull4490">Release v1.2.4.9 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/4490&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1248-viewhttpsgithubcomp4langp4cpull4386">Release v1.2.4.8 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/4386&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1247-viewhttpsgithubcomp4langp4cpull4312">Release v1.2.4.7 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/4312&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1246-viewhttpsgithubcomp4langp4cpull4271">Release v1.2.4.6 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/4271&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1245-viewhttpsgithubcomp4langp4cpull4217">Release v1.2.4.5 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/4217&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1244-viewhttpsgithubcomp4langp4cpull4180">Release v1.2.4.4 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/4180&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1243-viewhttpsgithubcomp4langp4cpull4124">Release v1.2.4.3 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/4124&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1241-viewhttpsgithubcomp4langp4cpull4052">Release v1.2.4.1 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/4052&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v124">Release v1.2.4</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1239-viewhttpsgithubcomp4langp4cpull3998">Release v1.2.3.9 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3998&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1238-viewhttpsgithubcomp4langp4cpull3957">Release v1.2.3.8 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3957&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1237-viewhttpsgithubcomp4langp4cpull3909">Release v1.2.3.7 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3909&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1236-viewhttpsgithubcomp4langp4cpull3871">Release v1.2.3.6 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3871&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1235-viewhttpsgithubcomp4langp4cpull3815">Release v1.2.3.5 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3815&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1234-viewhttpsgithubcomp4langp4cpull3747">Release v1.2.3.4 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3747&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1233-viewhttpsgithubcomp4langp4cpull3648">Release v1.2.3.3 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3648&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1232-viewhttpsgithubcomp4langp4cpull3546">Release v1.2.3.2 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3546&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1231-viewhttpsgithubcomp4langp4cpull3505">Release v1.2.3.1 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3505&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1230-viewhttpsgithubcomp4langp4cpull3466">Release v1.2.3.0 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3466&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-v1223-viewhttpsgithubcomp4langp4cpull3418">Release v1.2.2.3 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3418&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+  <li class="level1">
+    <a href="#release-1222-viewhttpsgithubcomp4langp4cpull3247">Release 1.2.2.2 [&lt;a href=&quot;https://github.com/p4lang/p4c/pull/3247&quot; &gt;view&lt;/a&gt;]</a>
+  </li>
+</ul>
+</div>
 <div class="textblock"><p><a class="anchor" id="changelog"></a></p>
 <h1><a class="anchor" id="semantic-versioning"></a>
 Semantic Versioning</h1>
