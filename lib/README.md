@@ -24,5 +24,5 @@ cannot depend on any other compiler files.
 | `options.h`, `options.cpp`   | Represents compiler command-line options. |
 | `range.h`                    | Iterators over numeric ranges. |
 | `source_file.h`, `source_file.cpp` | Represents the input source of the compiler and source file position information used for error reporting and generating debugging information. |
-| `stringify.h`, `stringify.cpp` | Conversion of various types to strings. |
-| `sourceCodeBuilder.h`        | Support for emitting programs in source (works for P4 and C). |
+| `stringify.h`, `stringify.cpp` | Conversion of various types to strings.  |
+| `sourceCodeBuilder.h`      | Support for emitting programs in source (works for P4 and C).  |
