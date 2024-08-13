@@ -20,9 +20,11 @@ limitations under the License.
 #include <cstddef>
 #include <cstring>
 #include <functional>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 #include "hash.h"
 
@@ -368,6 +370,9 @@ inline std::string &operator+=(std::string &a, cstring b) {
     a.append(b.c_str());
     return a;
 }
+
+inline cstring cstring::newline = cstring::literal("\n");
+inline cstring cstring::empty = cstring::literal("");
 
 template <class T>
 cstring cstring::make_unique(const T &inuse, cstring base, int &counter, char sep) {
