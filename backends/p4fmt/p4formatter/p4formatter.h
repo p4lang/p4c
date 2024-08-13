@@ -70,7 +70,7 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
         emitted. */
     cstring mainFile;
 
-    P4Formatter(Util::SourceCodeBuilder &builder, cstring mainFile = nullptr)
+    explicit P4Formatter(Util::SourceCodeBuilder &builder, cstring mainFile = nullptr)
         : expressionPrecedence(DBPrint::Prec_Low),
           isDeclaration(true),
           withinArgument(false),
@@ -80,7 +80,7 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
         visitDagOnce = false;
         setName("P4Formatter");
     }
-    P4Formatter(std::ostream *outStream, cstring mainFile = nullptr)
+    explicit P4Formatter(std::ostream *outStream, cstring mainFile = nullptr)
         : expressionPrecedence(DBPrint::Prec_Low),
           isDeclaration(true),
           withinArgument(false),
