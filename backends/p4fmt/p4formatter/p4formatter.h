@@ -14,7 +14,6 @@ It can optionally emit as comments a representation of the program IR.
 class P4Formatter : public Inspector, ::P4::ResolutionContext {
     int expressionPrecedence;  /// precedence of current IR::Operation
     bool isDeclaration;        /// current type is a declaration
-    bool showIR;               /// if true dump IR as comments
     bool withinArgument;       /// if true we are within a method call argument
     bool noIncludes = false;   /// If true do not generate #include statements.
                                /// Used for debugging.
@@ -57,9 +56,6 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
     }
     bool isSystemFile(cstring file);
     cstring ifSystemFile(const IR::Node *node);  // return file containing node if system file
-    // dump node IR tree up to depth - in the form of a comment
-    void dump(unsigned depth, const IR::Node *node = nullptr, unsigned adjDepth = 0);
-    unsigned curDepth() const;
 
  public:
     // Output is constructed here
@@ -74,10 +70,9 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
         emitted. */
     cstring mainFile;
 
-    P4Formatter(Util::SourceCodeBuilder &builder, bool showIR, cstring mainFile = nullptr)
+    P4Formatter(Util::SourceCodeBuilder &builder, cstring mainFile = nullptr)
         : expressionPrecedence(DBPrint::Prec_Low),
           isDeclaration(true),
-          showIR(showIR),
           withinArgument(false),
           builder(builder),
           outStream(nullptr),
@@ -85,10 +80,9 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
         visitDagOnce = false;
         setName("P4Formatter");
     }
-    P4Formatter(std::ostream *outStream, bool showIR, cstring mainFile = nullptr)
+    P4Formatter(std::ostream *outStream, cstring mainFile = nullptr)
         : expressionPrecedence(DBPrint::Prec_Low),
           isDeclaration(true),
-          showIR(showIR),
           withinArgument(false),
           builder(*new Util::SourceCodeBuilder()),
           outStream(outStream),
@@ -100,7 +94,6 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
         :  // this is useful for debugging
           expressionPrecedence(DBPrint::Prec_Low),
           isDeclaration(true),
-          showIR(false),
           withinArgument(false),
           builder(*new Util::SourceCodeBuilder()),
           outStream(&std::cout),
@@ -259,7 +252,6 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
 };
 
 std::string toP4(const IR::INode *node);
-void dumpP4(const IR::INode *node);
 
 }  // namespace P4Fmt
 #endif /* BACKENDS_P4FMT_P4FORMATTER_P4FORMATTER_H_ */
