@@ -6,7 +6,7 @@
 #include "lib/compile_context.h"
 #include "lib/error.h"
 #include "options.h"
-#include "toP4/toP4.h"
+#include "p4formatter/p4formatter.h"
 
 namespace P4::P4Fmt {
 
@@ -24,7 +24,7 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
         return formattedOutput;
     }
 
-    auto top4 = P4Fmt::ToP4(&formattedOutput, false);
+    auto top4 = P4Fmt::P4Formatter(&formattedOutput, false);
     // Print the program before running front end passes.
     program->apply(top4);
 

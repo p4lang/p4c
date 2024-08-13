@@ -1,4 +1,4 @@
-#include "toP4.h"
+#include "p4formatter.h"
 
 #include <deque>
 #include <sstream>
@@ -11,14 +11,14 @@
 
 namespace P4Fmt {
 
-Visitor::profile_t ToP4::init_apply(const IR::Node *node) {
+Visitor::profile_t P4Formatter::init_apply(const IR::Node *node) {
     LOG4("Program dump:" << std::endl << dumpToString(node));
     listTerminators_init_apply_size = listTerminators.size();
     vectorSeparator_init_apply_size = vectorSeparator.size();
     return Inspector::init_apply(node);
 }
 
-void ToP4::end_apply(const IR::Node *) {
+void P4Formatter::end_apply(const IR::Node *) {
     if (outStream != nullptr) {
         cstring result = builder.toString();
         *outStream << result.c_str();
@@ -31,13 +31,13 @@ void ToP4::end_apply(const IR::Node *) {
 }
 
 // Try to guess whether a file is a "system" file
-bool ToP4::isSystemFile(cstring file) {
+bool P4Formatter::isSystemFile(cstring file) {
     if (noIncludes) return false;
     if (file.startsWith(p4includePath)) return true;
     return false;
 }
 
-cstring ToP4::ifSystemFile(const IR::Node *node) {
+cstring P4Formatter::ifSystemFile(const IR::Node *node) {
     if (!node->srcInfo.isValid()) return nullptr;
     auto sourceFile = node->srcInfo.getSourceFile();
     if (isSystemFile(sourceFile)) return sourceFile;
@@ -105,7 +105,7 @@ class DumpIR : public Inspector {
 };
 }  // namespace
 
-unsigned ToP4::curDepth() const {
+unsigned P4Formatter::curDepth() const {
     unsigned result = 0;
     auto ctx = getContext();
     while (ctx != nullptr) {
@@ -115,7 +115,7 @@ unsigned ToP4::curDepth() const {
     return result;
 }
 
-void ToP4::dump(unsigned depth, const IR::Node *node, unsigned adjDepth) {
+void P4Formatter::dump(unsigned depth, const IR::Node *node, unsigned adjDepth) {
     if (!showIR) return;
     if (node == nullptr) node = getOriginal();
 
@@ -130,7 +130,7 @@ void ToP4::dump(unsigned depth, const IR::Node *node, unsigned adjDepth) {
         builder.emitIndent();
 }
 
-bool ToP4::preorder(const IR::P4Program *program) {
+bool P4Formatter::preorder(const IR::P4Program *program) {
     std::set<cstring> includesEmitted;
 
     bool first = true;
@@ -182,7 +182,7 @@ bool ToP4::preorder(const IR::P4Program *program) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Bits *t) {
+bool P4Formatter::preorder(const IR::Type_Bits *t) {
     if (t->expression) {
         builder.append("bit<(");
         visit(t->expression);
@@ -193,43 +193,43 @@ bool ToP4::preorder(const IR::Type_Bits *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_String *t) {
+bool P4Formatter::preorder(const IR::Type_String *t) {
     builder.append(t->toString());
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_InfInt *t) {
+bool P4Formatter::preorder(const IR::Type_InfInt *t) {
     builder.append(t->toString());
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Var *t) {
+bool P4Formatter::preorder(const IR::Type_Var *t) {
     builder.append(t->name);
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Unknown *) {
+bool P4Formatter::preorder(const IR::Type_Unknown *) {
     BUG("Cannot emit code for an unknown type");
     // builder.append("*unknown type*");
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Dontcare *) {
+bool P4Formatter::preorder(const IR::Type_Dontcare *) {
     builder.append("_");
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Void *) {
+bool P4Formatter::preorder(const IR::Type_Void *) {
     builder.append("void");
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Name *t) {
+bool P4Formatter::preorder(const IR::Type_Name *t) {
     visit(t->path);
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Stack *t) {
+bool P4Formatter::preorder(const IR::Type_Stack *t) {
     dump(2);
     visit(t->elementType);
     builder.append("[");
@@ -238,7 +238,7 @@ bool ToP4::preorder(const IR::Type_Stack *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Specialized *t) {
+bool P4Formatter::preorder(const IR::Type_Specialized *t) {
     dump(3);
     visit(t->baseType);
     builder.append("<");
@@ -249,7 +249,7 @@ bool ToP4::preorder(const IR::Type_Specialized *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Argument *arg) {
+bool P4Formatter::preorder(const IR::Argument *arg) {
     dump(2);
     if (!arg->name.name.isNullOrEmpty()) {
         builder.append(arg->name.name);
@@ -259,7 +259,7 @@ bool ToP4::preorder(const IR::Argument *arg) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Typedef *t) {
+bool P4Formatter::preorder(const IR::Type_Typedef *t) {
     dump(2);
     if (!t->annotations->annotations.empty()) {
         visit(t->annotations);
@@ -273,7 +273,7 @@ bool ToP4::preorder(const IR::Type_Typedef *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Newtype *t) {
+bool P4Formatter::preorder(const IR::Type_Newtype *t) {
     dump(2);
     if (!t->annotations->annotations.empty()) {
         visit(t->annotations);
@@ -287,7 +287,7 @@ bool ToP4::preorder(const IR::Type_Newtype *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_BaseList *t) {
+bool P4Formatter::preorder(const IR::Type_BaseList *t) {
     dump(3);
     builder.append("tuple<");
     bool first = true;
@@ -302,7 +302,7 @@ bool ToP4::preorder(const IR::Type_BaseList *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::P4ValueSet *t) {
+bool P4Formatter::preorder(const IR::P4ValueSet *t) {
     dump(1);
     if (!t->annotations->annotations.empty()) {
         visit(t->annotations);
@@ -322,7 +322,7 @@ bool ToP4::preorder(const IR::P4ValueSet *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Enum *t) {
+bool P4Formatter::preorder(const IR::Type_Enum *t) {
     dump(1);
     if (!t->annotations->annotations.empty()) {
         visit(t->annotations);
@@ -345,7 +345,7 @@ bool ToP4::preorder(const IR::Type_Enum *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_SerEnum *t) {
+bool P4Formatter::preorder(const IR::Type_SerEnum *t) {
     dump(1);
     if (!t->annotations->annotations.empty()) {
         visit(t->annotations);
@@ -372,7 +372,7 @@ bool ToP4::preorder(const IR::Type_SerEnum *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::TypeParameters *t) {
+bool P4Formatter::preorder(const IR::TypeParameters *t) {
     if (!t->empty()) {
         builder.append("<");
         bool first = true;
@@ -389,7 +389,7 @@ bool ToP4::preorder(const IR::TypeParameters *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Method *m) {
+bool P4Formatter::preorder(const IR::Method *m) {
     dump(1);
     if (!m->annotations->annotations.empty()) {
         visit(m->annotations);
@@ -414,7 +414,7 @@ bool ToP4::preorder(const IR::Method *m) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Function *function) {
+bool P4Formatter::preorder(const IR::Function *function) {
     dump(1);
     if (!function->annotations->annotations.empty()) {
         visit(function->annotations);
@@ -434,7 +434,7 @@ bool ToP4::preorder(const IR::Function *function) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Extern *t) {
+bool P4Formatter::preorder(const IR::Type_Extern *t) {
     dump(2);
     if (isDeclaration) {
         if (!t->annotations->annotations.empty()) {
@@ -465,12 +465,12 @@ bool ToP4::preorder(const IR::Type_Extern *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Boolean *) {
+bool P4Formatter::preorder(const IR::Type_Boolean *) {
     builder.append("bool");
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Varbits *t) {
+bool P4Formatter::preorder(const IR::Type_Varbits *t) {
     if (t->expression) {
         builder.append("varbit<(");
         visit(t->expression);
@@ -481,7 +481,7 @@ bool ToP4::preorder(const IR::Type_Varbits *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Package *package) {
+bool P4Formatter::preorder(const IR::Type_Package *package) {
     dump(2);
     builder.emitIndent();
     if (!package->annotations->annotations.empty()) {
@@ -496,7 +496,7 @@ bool ToP4::preorder(const IR::Type_Package *package) {
     return false;
 }
 
-bool ToP4::process(const IR::Type_StructLike *t, const char *name) {
+bool P4Formatter::process(const IR::Type_StructLike *t, const char *name) {
     dump(2);
     if (isDeclaration) {
         builder.emitIndent();
@@ -516,7 +516,7 @@ bool ToP4::process(const IR::Type_StructLike *t, const char *name) {
     size_t len = 0;
     for (auto f : t->fields) {
         Util::SourceCodeBuilder builder;
-        ToP4 rec(builder, showIR);
+        P4Formatter rec(builder, showIR);
 
         f->type->apply(rec);
         cstring t = builder.toString();
@@ -546,7 +546,7 @@ bool ToP4::process(const IR::Type_StructLike *t, const char *name) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Parser *t) {
+bool P4Formatter::preorder(const IR::Type_Parser *t) {
     dump(2);
     builder.emitIndent();
     if (!t->annotations->annotations.empty()) {
@@ -561,7 +561,7 @@ bool ToP4::preorder(const IR::Type_Parser *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Control *t) {
+bool P4Formatter::preorder(const IR::Type_Control *t) {
     dump(2);
     builder.emitIndent();
     if (!t->annotations->annotations.empty()) {
@@ -578,7 +578,7 @@ bool ToP4::preorder(const IR::Type_Control *t) {
 
 ///////////////////////
 
-bool ToP4::preorder(const IR::Constant *c) {
+bool P4Formatter::preorder(const IR::Constant *c) {
     const IR::Type_Bits *tb = c->type->to<IR::Type_Bits>();
     unsigned width;
     bool sign;
@@ -594,17 +594,17 @@ bool ToP4::preorder(const IR::Constant *c) {
     return false;
 }
 
-bool ToP4::preorder(const IR::BoolLiteral *b) {
+bool P4Formatter::preorder(const IR::BoolLiteral *b) {
     builder.append(b->toString());
     return false;
 }
 
-bool ToP4::preorder(const IR::StringLiteral *s) {
+bool P4Formatter::preorder(const IR::StringLiteral *s) {
     builder.append(s->toString());
     return false;
 }
 
-bool ToP4::preorder(const IR::Declaration_Constant *cst) {
+bool P4Formatter::preorder(const IR::Declaration_Constant *cst) {
     dump(2);
     if (!cst->annotations->annotations.empty()) {
         visit(cst->annotations);
@@ -626,7 +626,7 @@ bool ToP4::preorder(const IR::Declaration_Constant *cst) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Declaration_Instance *i) {
+bool P4Formatter::preorder(const IR::Declaration_Instance *i) {
     dump(3);
     if (!i->annotations->annotations.empty()) {
         visit(i->annotations);
@@ -650,7 +650,7 @@ bool ToP4::preorder(const IR::Declaration_Instance *i) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Declaration_Variable *v) {
+bool P4Formatter::preorder(const IR::Declaration_Variable *v) {
     dump(2);
     if (!v->annotations->annotations.empty()) {
         visit(v->annotations);
@@ -671,7 +671,7 @@ bool ToP4::preorder(const IR::Declaration_Variable *v) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Error *d) {
+bool P4Formatter::preorder(const IR::Type_Error *d) {
     dump(1);
     bool first = true;
     for (auto a : *d->getDeclarations()) {
@@ -696,7 +696,7 @@ bool ToP4::preorder(const IR::Type_Error *d) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Declaration_MatchKind *d) {
+bool P4Formatter::preorder(const IR::Declaration_MatchKind *d) {
     dump(1);
     builder.append("match_kind ");
     builder.blockStart();
@@ -716,7 +716,7 @@ bool ToP4::preorder(const IR::Declaration_MatchKind *d) {
 ///////////////////////////////////////////////////
 
 #define VECTOR_VISIT(V, T)                                    \
-    bool ToP4::preorder(const IR::V<IR::T> *v) {              \
+    bool P4Formatter::preorder(const IR::V<IR::T> *v) {              \
         if (v == nullptr) return false;                       \
         bool first = true;                                    \
         VecPrint sep = getSep();                              \
@@ -757,7 +757,7 @@ VECTOR_VISIT(IndexedVector, StatOrDecl)
 
 ///////////////////////////////////////////
 
-bool ToP4::preorder(const IR::Slice *slice) {
+bool P4Formatter::preorder(const IR::Slice *slice) {
     int prec = expressionPrecedence;
     bool useParens = prec > slice->getPrecedence();
     if (useParens) builder.append("(");
@@ -777,7 +777,7 @@ bool ToP4::preorder(const IR::Slice *slice) {
     return false;
 }
 
-bool ToP4::preorder(const IR::DefaultExpression *) {
+bool P4Formatter::preorder(const IR::DefaultExpression *) {
     // Within a method call this is rendered as a don't care
     if (withinArgument)
         builder.append("_");
@@ -786,22 +786,22 @@ bool ToP4::preorder(const IR::DefaultExpression *) {
     return false;
 }
 
-bool ToP4::preorder(const IR::This *) {
+bool P4Formatter::preorder(const IR::This *) {
     builder.append("this");
     return false;
 }
 
-bool ToP4::preorder(const IR::PathExpression *p) {
+bool P4Formatter::preorder(const IR::PathExpression *p) {
     visit(p->path);
     return false;
 }
 
-bool ToP4::preorder(const IR::TypeNameExpression *e) {
+bool P4Formatter::preorder(const IR::TypeNameExpression *e) {
     visit(e->typeName);
     return false;
 }
 
-bool ToP4::preorder(const IR::ConstructorCallExpression *e) {
+bool P4Formatter::preorder(const IR::ConstructorCallExpression *e) {
     visit(e->constructedType);
     builder.append("(");
     setVecSep(", ");
@@ -814,7 +814,7 @@ bool ToP4::preorder(const IR::ConstructorCallExpression *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Member *e) {
+bool P4Formatter::preorder(const IR::Member *e) {
     int prec = expressionPrecedence;
     expressionPrecedence = e->getPrecedence();
     visit(e->expr);
@@ -824,7 +824,7 @@ bool ToP4::preorder(const IR::Member *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::SelectCase *e) {
+bool P4Formatter::preorder(const IR::SelectCase *e) {
     dump(2);
     int prec = expressionPrecedence;
     expressionPrecedence = DBPrint::Prec_Low;
@@ -837,7 +837,7 @@ bool ToP4::preorder(const IR::SelectCase *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::SelectExpression *e) {
+bool P4Formatter::preorder(const IR::SelectExpression *e) {
     builder.append("select(");
     int prec = expressionPrecedence;
     expressionPrecedence = DBPrint::Prec_Low;
@@ -855,7 +855,7 @@ bool ToP4::preorder(const IR::SelectExpression *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::ListExpression *e) {
+bool P4Formatter::preorder(const IR::ListExpression *e) {
     using ::P4::literals::operator""_cs;
     cstring start, end;
     if (listTerminators.empty()) {
@@ -878,7 +878,7 @@ bool ToP4::preorder(const IR::ListExpression *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::P4ListExpression *e) {
+bool P4Formatter::preorder(const IR::P4ListExpression *e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
     if (e->elementType != nullptr) {
         builder.append("(list<");
@@ -900,14 +900,14 @@ bool ToP4::preorder(const IR::P4ListExpression *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::NamedExpression *e) {
+bool P4Formatter::preorder(const IR::NamedExpression *e) {
     builder.append(e->name.name);
     builder.append(" = ");
     visit(e->expression);
     return false;
 }
 
-bool ToP4::preorder(const IR::StructExpression *e) {
+bool P4Formatter::preorder(const IR::StructExpression *e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
     if (e->structType != nullptr) {
         builder.append("(");
@@ -929,7 +929,7 @@ bool ToP4::preorder(const IR::StructExpression *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::HeaderStackExpression *e) {
+bool P4Formatter::preorder(const IR::HeaderStackExpression *e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
     if (e->headerStackType != nullptr) {
         builder.append("(");
@@ -951,22 +951,22 @@ bool ToP4::preorder(const IR::HeaderStackExpression *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Invalid *) {
+bool P4Formatter::preorder(const IR::Invalid *) {
     builder.append("{#}");
     return false;
 }
 
-bool ToP4::preorder(const IR::Dots *) {
+bool P4Formatter::preorder(const IR::Dots *) {
     builder.append("...");
     return false;
 }
 
-bool ToP4::preorder(const IR::NamedDots *) {
+bool P4Formatter::preorder(const IR::NamedDots *) {
     builder.append("...");
     return false;
 }
 
-bool ToP4::preorder(const IR::InvalidHeader *e) {
+bool P4Formatter::preorder(const IR::InvalidHeader *e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
     builder.append("(");
     visit(e->headerType);
@@ -976,7 +976,7 @@ bool ToP4::preorder(const IR::InvalidHeader *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::InvalidHeaderUnion *e) {
+bool P4Formatter::preorder(const IR::InvalidHeaderUnion *e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
     builder.append("(");
     visit(e->headerUnionType);
@@ -986,7 +986,7 @@ bool ToP4::preorder(const IR::InvalidHeaderUnion *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::MethodCallExpression *e) {
+bool P4Formatter::preorder(const IR::MethodCallExpression *e) {
     int prec = expressionPrecedence;
     bool useParens = (prec > DBPrint::Prec_Postfix) ||
                      (!e->typeArguments->empty() && prec >= DBPrint::Prec_Cond);
@@ -1019,7 +1019,7 @@ bool ToP4::preorder(const IR::MethodCallExpression *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Operation_Binary *b) {
+bool P4Formatter::preorder(const IR::Operation_Binary *b) {
     int prec = expressionPrecedence;
     bool useParens = prec > b->getPrecedence();
     if (useParens) builder.append("(");
@@ -1035,7 +1035,7 @@ bool ToP4::preorder(const IR::Operation_Binary *b) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Mux *b) {
+bool P4Formatter::preorder(const IR::Mux *b) {
     int prec = expressionPrecedence;
     bool useParens = prec >= b->getPrecedence();
     if (useParens) builder.append("(");
@@ -1052,7 +1052,7 @@ bool ToP4::preorder(const IR::Mux *b) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Operation_Unary *u) {
+bool P4Formatter::preorder(const IR::Operation_Unary *u) {
     int prec = expressionPrecedence;
     bool useParens = prec > u->getPrecedence();
     if (useParens) builder.append("(");
@@ -1064,7 +1064,7 @@ bool ToP4::preorder(const IR::Operation_Unary *u) {
     return false;
 }
 
-bool ToP4::preorder(const IR::ArrayIndex *a) {
+bool P4Formatter::preorder(const IR::ArrayIndex *a) {
     int prec = expressionPrecedence;
     bool useParens = prec > a->getPrecedence();
     if (useParens) builder.append("(");
@@ -1079,7 +1079,7 @@ bool ToP4::preorder(const IR::ArrayIndex *a) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Cast *c) {
+bool P4Formatter::preorder(const IR::Cast *c) {
     int prec = expressionPrecedence;
     bool useParens = prec > c->getPrecedence();
     if (useParens) builder.append("(");
@@ -1095,7 +1095,7 @@ bool ToP4::preorder(const IR::Cast *c) {
 
 //////////////////////////////////////////////////////////
 
-bool ToP4::preorder(const IR::AssignmentStatement *a) {
+bool P4Formatter::preorder(const IR::AssignmentStatement *a) {
     dump(2);
     visit(a->left);
     builder.append(" = ");
@@ -1104,7 +1104,7 @@ bool ToP4::preorder(const IR::AssignmentStatement *a) {
     return false;
 }
 
-bool ToP4::preorder(const IR::BlockStatement *s) {
+bool P4Formatter::preorder(const IR::BlockStatement *s) {
     dump(1);
     if (!s->annotations->annotations.empty()) {
         visit(s->annotations);
@@ -1118,28 +1118,28 @@ bool ToP4::preorder(const IR::BlockStatement *s) {
     return false;
 }
 
-bool ToP4::preorder(const IR::BreakStatement *) {
+bool P4Formatter::preorder(const IR::BreakStatement *) {
     dump(1);
     builder.append("break");
     builder.endOfStatement();
     return false;
 }
 
-bool ToP4::preorder(const IR::ContinueStatement *) {
+bool P4Formatter::preorder(const IR::ContinueStatement *) {
     dump(1);
     builder.append("continue");
     builder.endOfStatement();
     return false;
 }
 
-bool ToP4::preorder(const IR::ExitStatement *) {
+bool P4Formatter::preorder(const IR::ExitStatement *) {
     dump(1);
     builder.append("exit");
     builder.endOfStatement();
     return false;
 }
 
-bool ToP4::preorder(const IR::ReturnStatement *statement) {
+bool P4Formatter::preorder(const IR::ReturnStatement *statement) {
     dump(2);
     builder.append("return");
     if (statement->expression != nullptr) {
@@ -1150,13 +1150,13 @@ bool ToP4::preorder(const IR::ReturnStatement *statement) {
     return false;
 }
 
-bool ToP4::preorder(const IR::EmptyStatement *) {
+bool P4Formatter::preorder(const IR::EmptyStatement *) {
     dump(1);
     builder.endOfStatement();
     return false;
 }
 
-bool ToP4::preorder(const IR::IfStatement *s) {
+bool P4Formatter::preorder(const IR::IfStatement *s) {
     dump(2);
     builder.append("if (");
     visit(s->condition);
@@ -1193,7 +1193,7 @@ bool ToP4::preorder(const IR::IfStatement *s) {
     return false;
 }
 
-bool ToP4::preorder(const IR::ForStatement *s) {
+bool P4Formatter::preorder(const IR::ForStatement *s) {
     dump(2);
     if (!s->annotations->annotations.empty()) {
         visit(s->annotations);
@@ -1235,7 +1235,7 @@ bool ToP4::preorder(const IR::ForStatement *s) {
     return false;
 }
 
-bool ToP4::preorder(const IR::ForInStatement *s) {
+bool P4Formatter::preorder(const IR::ForInStatement *s) {
     dump(2);
     if (!s->annotations->annotations.empty()) {
         visit(s->annotations);
@@ -1273,21 +1273,21 @@ bool ToP4::preorder(const IR::ForInStatement *s) {
     return false;
 }
 
-bool ToP4::preorder(const IR::MethodCallStatement *s) {
+bool P4Formatter::preorder(const IR::MethodCallStatement *s) {
     dump(3);
     visit(s->methodCall);
     builder.endOfStatement();
     return false;
 }
 
-bool ToP4::preorder(const IR::SwitchCase *s) {
+bool P4Formatter::preorder(const IR::SwitchCase *s) {
     visit(s->label);
     builder.append(": ");
     visit(s->statement);
     return false;
 }
 
-bool ToP4::preorder(const IR::SwitchStatement *s) {
+bool P4Formatter::preorder(const IR::SwitchStatement *s) {
     dump(4);
     builder.append("switch (");
     visit(s->expression);
@@ -1302,7 +1302,7 @@ bool ToP4::preorder(const IR::SwitchStatement *s) {
 
 ////////////////////////////////////
 
-bool ToP4::preorder(const IR::Annotations *a) {
+bool P4Formatter::preorder(const IR::Annotations *a) {
     bool first = true;
     for (const auto *anno : a->annotations) {
         if (!first) {
@@ -1315,7 +1315,7 @@ bool ToP4::preorder(const IR::Annotations *a) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Annotation *a) {
+bool P4Formatter::preorder(const IR::Annotation *a) {
     builder.append("@");
     builder.append(a->name);
     const char *open = a->structured ? "[" : "(";
@@ -1363,7 +1363,7 @@ bool ToP4::preorder(const IR::Annotation *a) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Parameter *p) {
+bool P4Formatter::preorder(const IR::Parameter *p) {
     dump(2);
     if (!p->annotations->annotations.empty()) {
         visit(p->annotations);
@@ -1397,7 +1397,7 @@ bool ToP4::preorder(const IR::Parameter *p) {
     return false;
 }
 
-bool ToP4::preorder(const IR::P4Control *c) {
+bool P4Formatter::preorder(const IR::P4Control *c) {
     dump(1);
     bool decl = isDeclaration;
     isDeclaration = false;
@@ -1420,7 +1420,7 @@ bool ToP4::preorder(const IR::P4Control *c) {
     return false;
 }
 
-bool ToP4::preorder(const IR::ParameterList *p) {
+bool P4Formatter::preorder(const IR::ParameterList *p) {
     builder.append("(");
     bool first = true;
     for (auto param : *p->getEnumerator()) {
@@ -1432,7 +1432,7 @@ bool ToP4::preorder(const IR::ParameterList *p) {
     return false;
 }
 
-bool ToP4::preorder(const IR::P4Action *c) {
+bool P4Formatter::preorder(const IR::P4Action *c) {
     dump(2);
     if (!c->annotations->annotations.empty()) {
         visit(c->annotations);
@@ -1446,7 +1446,7 @@ bool ToP4::preorder(const IR::P4Action *c) {
     return false;
 }
 
-bool ToP4::preorder(const IR::ParserState *s) {
+bool P4Formatter::preorder(const IR::ParserState *s) {
     dump(1);
     if (s->isBuiltin()) return false;
 
@@ -1476,7 +1476,7 @@ bool ToP4::preorder(const IR::ParserState *s) {
     return false;
 }
 
-bool ToP4::preorder(const IR::P4Parser *c) {
+bool P4Formatter::preorder(const IR::P4Parser *c) {
     dump(1);
     bool decl = isDeclaration;
     isDeclaration = false;
@@ -1499,14 +1499,14 @@ bool ToP4::preorder(const IR::P4Parser *c) {
     return false;
 }
 
-bool ToP4::preorder(const IR::ExpressionValue *v) {
+bool P4Formatter::preorder(const IR::ExpressionValue *v) {
     dump(2);
     visit(v->expression);
     builder.endOfStatement();
     return false;
 }
 
-bool ToP4::preorder(const IR::ActionListElement *ale) {
+bool P4Formatter::preorder(const IR::ActionListElement *ale) {
     dump(3);
     if (!ale->annotations->annotations.empty()) {
         visit(ale->annotations);
@@ -1516,7 +1516,7 @@ bool ToP4::preorder(const IR::ActionListElement *ale) {
     return false;
 }
 
-bool ToP4::preorder(const IR::ActionList *v) {
+bool P4Formatter::preorder(const IR::ActionList *v) {
     dump(2);
     builder.blockStart();
     setVecSep(";\n", ";\n");
@@ -1526,7 +1526,7 @@ bool ToP4::preorder(const IR::ActionList *v) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Key *v) {
+bool P4Formatter::preorder(const IR::Key *v) {
     dump(2);
     builder.blockStart();
 
@@ -1534,7 +1534,7 @@ bool ToP4::preorder(const IR::Key *v) {
     size_t len = 0;
     for (auto f : v->keyElements) {
         Util::SourceCodeBuilder builder;
-        ToP4 rec(builder, showIR);
+        P4Formatter rec(builder, showIR);
 
         f->expression->apply(rec);
         cstring s = builder.toString();
@@ -1561,7 +1561,7 @@ bool ToP4::preorder(const IR::Key *v) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Property *p) {
+bool P4Formatter::preorder(const IR::Property *p) {
     dump(1);
     if (!p->annotations->annotations.empty()) {
         visit(p->annotations);
@@ -1574,7 +1574,7 @@ bool ToP4::preorder(const IR::Property *p) {
     return false;
 }
 
-bool ToP4::preorder(const IR::TableProperties *t) {
+bool P4Formatter::preorder(const IR::TableProperties *t) {
     for (auto p : t->properties) {
         builder.emitIndent();
         visit(p);
@@ -1583,7 +1583,7 @@ bool ToP4::preorder(const IR::TableProperties *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::EntriesList *l) {
+bool P4Formatter::preorder(const IR::EntriesList *l) {
     dump(1);
     builder.append("{");
     builder.newline();
@@ -1595,7 +1595,7 @@ bool ToP4::preorder(const IR::EntriesList *l) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Entry *e) {
+bool P4Formatter::preorder(const IR::Entry *e) {
     dump(2);
     builder.emitIndent();
     if (e->isConst) builder.append("const ");
@@ -1619,7 +1619,7 @@ bool ToP4::preorder(const IR::Entry *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::P4Table *c) {
+bool P4Formatter::preorder(const IR::P4Table *c) {
     dump(2);
     if (!c->annotations->annotations.empty()) {
         visit(c->annotations);
@@ -1636,14 +1636,14 @@ bool ToP4::preorder(const IR::P4Table *c) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Path *p) {
+bool P4Formatter::preorder(const IR::Path *p) {
     builder.append(p->asString());
     return false;
 }
 
 std::string toP4(const IR::INode *node) {
     std::stringstream stream;
-    P4Fmt::ToP4 toP4(&stream, false);
+    P4Fmt::P4Formatter toP4(&stream, false);
     node->getNode()->apply(toP4);
     return stream.str();
 }

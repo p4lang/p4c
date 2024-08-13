@@ -11,7 +11,7 @@ namespace P4Fmt {
 This pass converts a P4-16 IR into a P4 source (text) program.
 It can optionally emit as comments a representation of the program IR.
 */
-class ToP4 : public Inspector, ::P4::ResolutionContext {
+class P4Formatter : public Inspector, ::P4::ResolutionContext {
     int expressionPrecedence;  /// precedence of current IR::Operation
     bool isDeclaration;        /// current type is a declaration
     bool showIR;               /// if true dump IR as comments
@@ -74,7 +74,7 @@ class ToP4 : public Inspector, ::P4::ResolutionContext {
         emitted. */
     cstring mainFile;
 
-    ToP4(Util::SourceCodeBuilder &builder, bool showIR, cstring mainFile = nullptr)
+    P4Formatter(Util::SourceCodeBuilder &builder, bool showIR, cstring mainFile = nullptr)
         : expressionPrecedence(DBPrint::Prec_Low),
           isDeclaration(true),
           showIR(showIR),
@@ -83,9 +83,9 @@ class ToP4 : public Inspector, ::P4::ResolutionContext {
           outStream(nullptr),
           mainFile(mainFile) {
         visitDagOnce = false;
-        setName("ToP4");
+        setName("P4Formatter");
     }
-    ToP4(std::ostream *outStream, bool showIR, cstring mainFile = nullptr)
+    P4Formatter(std::ostream *outStream, bool showIR, cstring mainFile = nullptr)
         : expressionPrecedence(DBPrint::Prec_Low),
           isDeclaration(true),
           showIR(showIR),
@@ -94,9 +94,9 @@ class ToP4 : public Inspector, ::P4::ResolutionContext {
           outStream(outStream),
           mainFile(mainFile) {
         visitDagOnce = false;
-        setName("ToP4");
+        setName("P4Formatter");
     }
-    ToP4()
+    P4Formatter()
         :  // this is useful for debugging
           expressionPrecedence(DBPrint::Prec_Low),
           isDeclaration(true),
@@ -106,7 +106,7 @@ class ToP4 : public Inspector, ::P4::ResolutionContext {
           outStream(&std::cout),
           mainFile(nullptr) {
         visitDagOnce = false;
-        setName("ToP4");
+        setName("P4Formatter");
     }
 
     using Inspector::preorder;
