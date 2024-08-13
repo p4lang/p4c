@@ -47,3 +47,7 @@ controlc c() {
 <!--!
 \include{doc} "../backends/bmv2/pna_nic/README.md" 
 -->
+
+<!--!
+\include{doc} "../backends/bmv2/portable_common/README.md" 
+-->
