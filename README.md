@@ -1,5 +1,5 @@
 <!--!
-/page getting_started Getting Started                                    
+\page getting_started Getting Started                                    
 -->
 <!--!
 \internal
