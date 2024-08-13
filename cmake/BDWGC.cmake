@@ -4,7 +4,7 @@ macro(p4c_obtain_bdwgc)
     "Look for a preinstalled version of BDWGC in the system instead of installing a prebuilt binary using FetchContent."
     OFF
   )
-  set(LIBGC_LIBRARIES gc gccpp cord)
+  set(LIBGC_LIBRARIES gc gctba cord)
   set(HAVE_LIBGC 1)
 
   if(P4C_USE_PREINSTALLED_BDWGC)
@@ -37,12 +37,12 @@ macro(p4c_obtain_bdwgc)
     fetchcontent_declare(
       bdwgc
       GIT_REPOSITORY https://github.com/ivmai/bdwgc.git
-      GIT_TAG e340b2e869e02718de9c9d7fa440ef4b35785388 # 8.2.6
+      GIT_TAG 7f1503dbfe254e77678666a0e09b735add064b57 # 8.2.6, 2024-08-03
       GIT_PROGRESS TRUE
-      PATCH_COMMAND
-        git apply ${P4C_SOURCE_DIR}/cmake/bdwgc.patch || git apply
-        ${P4C_SOURCE_DIR}/cmake/bdwgc.patch -R --check && echo
-        "Patch does not apply because the patch was already applied."
+      # PATCH_COMMAND
+      #   git apply ${P4C_SOURCE_DIR}/cmake/bdwgc.patch || git apply
+      #   ${P4C_SOURCE_DIR}/cmake/bdwgc.patch -R --check && echo
+      #   "Patch does not apply because the patch was already applied."
     )
     fetchcontent_makeavailable_but_exclude_install(bdwgc)
 
@@ -54,8 +54,8 @@ macro(p4c_obtain_bdwgc)
     # Add some extra compile definitions which allow us to use our customizations.
     # SKIP_CPP_DEFINITIONS to enable static linking without producing duplicate symbol errors.
     # GC_USE_DLOPEN_WRAP needs to be enabled to handle threads correctly. This option is usually active with "enable_redirect_malloc" but we currently supply our own malloc overrides.
-    target_compile_definitions(gc PUBLIC GC_USE_DLOPEN_WRAP SKIP_CPP_DEFINITIONS)
-    target_compile_definitions(gccpp PUBLIC GC_USE_DLOPEN_WRAP SKIP_CPP_DEFINITIONS)
+    target_compile_definitions(gc PUBLIC GC_USE_DLOPEN_WRAP SKIP_CPP_DEFINITIONS _GNU_SOURCE)
+    target_compile_definitions(gccpp PUBLIC GC_USE_DLOPEN_WRAP SKIP_CPP_DEFINITIONS _GNU_SOURCE)
 
     # Set up temporary variable modifications for check_symbol_exists.
     set(CMAKE_REQUIRED_INCLUDES_PREV ${CMAKE_REQUIRED_INCLUDES})
