@@ -7,8 +7,6 @@
 #include "lib/sourceCodeBuilder.h"
 
 namespace P4Fmt {
-namespace P4 {
-
 /**
 This pass converts a P4-16 IR into a P4 source (text) program.
 It can optionally emit as comments a representation of the program IR.
@@ -259,8 +257,6 @@ class ToP4 : public Inspector, ::P4::ResolutionContext {
 
 std::string toP4(const IR::INode *node);
 void dumpP4(const IR::INode *node);
-
-}  // namespace P4
 
 }  // namespace P4Fmt
 #endif /* P4FMT_TOP4_TOP4_H_ */

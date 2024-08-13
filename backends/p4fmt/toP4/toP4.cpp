@@ -10,7 +10,6 @@
 #include "ir/dump.h"
 
 namespace P4Fmt {
-namespace P4 {
 
 Visitor::profile_t ToP4::init_apply(const IR::Node *node) {
     LOG4("Program dump:" << std::endl << dumpToString(node));
@@ -1644,7 +1643,7 @@ bool ToP4::preorder(const IR::Path *p) {
 
 std::string toP4(const IR::INode *node) {
     std::stringstream stream;
-    P4::ToP4 toP4(&stream, false);
+    P4Fmt::ToP4 toP4(&stream, false);
     node->getNode()->apply(toP4);
     return stream.str();
 }
@@ -1654,5 +1653,4 @@ void dumpP4(const IR::INode *node) {
     std::cout << s;
 }
 
-}  // namespace P4
 }  // namespace P4Fmt

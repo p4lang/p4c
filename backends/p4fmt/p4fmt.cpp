@@ -24,7 +24,7 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
         return formattedOutput;
     }
 
-    auto top4 = P4Fmt::P4::ToP4(&formattedOutput, false);
+    auto top4 = P4Fmt::ToP4(&formattedOutput, false);
     // Print the program before running front end passes.
     program->apply(top4);
 
