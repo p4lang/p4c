@@ -104,7 +104,8 @@ var NAVTREE =
     [ "Behavioral Model Backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html", [
       [ "Dependencies", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html#dependencies-1", null ],
       [ "Unsupported P4_16 language features", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html#unsupported-p4_16-language-features", null ],
-      [ "BMv2 \"pna_nic\" Backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html#bmv2-pna_nic-backend", null ]
+      [ "BMv2 \"pna_nic\" Backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html#bmv2-pna_nic-backend", null ],
+      [ "portable_common", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html#portable_common", null ]
     ] ],
     [ "DPDK backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_r_e_a_d_m_e.html", [
       [ "How to use it?", "md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_r_e_a_d_m_e.html#how-to-use-it", null ],
@@ -304,7 +305,6 @@ var NAVTREE =
         ] ]
       ] ]
     ] ],
-    [ "portable_common", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2portable__common_2_r_e_a_d_m_e.html", null ],
     [ "Contribute to the P4 Compiler Project", "md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html", [
       [ "Contributing License", "md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html#contributing-license", null ],
       [ "Coding Standard Philosophy", "md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html#coding-standard-philosophy", null ],

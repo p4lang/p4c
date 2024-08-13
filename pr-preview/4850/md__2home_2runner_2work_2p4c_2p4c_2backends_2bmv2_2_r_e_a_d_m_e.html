@@ -134,6 +134,9 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_
   <li class="level1">
     <a href="#bmv2-pna_nic-backend">BMv2 &quot;pna_nic&quot; Backend</a>
   </li>
+  <li class="level1">
+    <a href="#portable_common">portable_common</a>
+  </li>
 </ul>
 </div>
 <div class="textblock"><p><a class="anchor" id="behavioral-model-backend"></a></p>
@@ -185,6 +188,21 @@ BMv2 "pna_nic" Backend</h1>
 <td class="markdownTableBodyNone"><code>main.cpp</code>   </td><td class="markdownTableBodyNone">Sets up compilation environment, integrates various components, and executes the PNA NIC compiler.    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>version.h.cmake</code>   </td><td class="markdownTableBodyNone">Defines macros containing version information for the PNA NIC compiler.   </td></tr>
+</table>
+<h1><a class="anchor" id="portable_common"></a>
+portable_common</h1>
+<p>This directory contains reusable components common to both the <code>psa_switch</code> and <code>pna_nic</code> backends.</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone"><b>File Name</b>   </th><th class="markdownTableHeadNone"><b>Description</b>    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><b>midend.h, midend.cpp</b>   </td><td class="markdownTableBodyNone">Defines the common mid-end processing of both the <code>psa_switch</code> and <code>pna_nic</code> backends.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>options.h, options.cpp</b>   </td><td class="markdownTableBodyNone">Defines the common command-line options of both the <code>psa_switch</code> and <code>pna_nic</code> backends.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><b>portable.h, portable.cpp</b>   </td><td class="markdownTableBodyNone">Defines common functionalities that generate representations of P4 programs.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>portableProgramStructure.h, portableProgramStructure.cpp</b>   </td><td class="markdownTableBodyNone">Defines and implements the common program structure of both the <code>psa_switch</code> and <code>pna_nic</code> backends. <em>These files are located in the <code>backends/common</code> directory.</em>   </td></tr>
 </table>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
