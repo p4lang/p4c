@@ -130,6 +130,11 @@ void P4Formatter::dump(unsigned depth, const IR::Node *node, unsigned adjDepth) 
         builder.emitIndent();
 }
 
+bool P4Formatter::preorder(const IR::Node *node) {
+    P4C_UNIMPLEMENTED("Unhandled IR node type: ", typeid(*node).name());
+    return false;
+}
+
 bool P4Formatter::preorder(const IR::P4Program *program) {
     std::set<cstring> includesEmitted;
 
@@ -716,7 +721,7 @@ bool P4Formatter::preorder(const IR::Declaration_MatchKind *d) {
 ///////////////////////////////////////////////////
 
 #define VECTOR_VISIT(V, T)                                    \
-    bool P4Formatter::preorder(const IR::V<IR::T> *v) {              \
+    bool P4Formatter::preorder(const IR::V<IR::T> *v) {       \
         if (v == nullptr) return false;                       \
         bool first = true;                                    \
         VecPrint sep = getSep();                              \

@@ -1,8 +1,6 @@
 #ifndef BACKENDS_P4FMT_P4FORMATTER_P4FORMATTER_H_
 #define BACKENDS_P4FMT_P4FORMATTER_P4FORMATTER_H_
 
-#endif // !BACKENDS_P4FMT_P4FORMATTER_P4FORMATTER_H_
-
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -122,6 +120,9 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
     void end_apply(const IR::Node *node) override;
 
     bool process(const IR::Type_StructLike *t, const char *name);
+
+    bool preorder(const IR::Node *node) override;
+
     // types
     bool preorder(const IR::Type_Boolean *t) override;
     bool preorder(const IR::Type_Varbits *t) override;
