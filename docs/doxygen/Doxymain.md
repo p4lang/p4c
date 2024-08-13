@@ -1,4 +1,4 @@
-# %P4 Compiler Documentation
+# %P4 Compiler Documentation (P4C)
 
 @htmlonly
 <div class="diagram-container">
