@@ -126,9 +126,6 @@ $(function(){initNavTree('getting_started.html',''); initResizable(true); });
 <div class="toc"><h3>Table of Contents</h3>
 <ul>
   <li class="level1">
-    <a href="#p4c">P4C</a>
-  </li>
-  <li class="level1">
     <a href="#overview">Overview</a>
     <ul>
       <li class="level2">
@@ -259,10 +256,7 @@ $(function(){initNavTree('getting_started.html',''); initResizable(true); });
   </li>
 </ul>
 </div>
-<div class="textblock"><p>rted </p>
-<h1><a class="anchor" id="p4c"></a>
-P4C</h1>
-<p><a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg" alt="Bazel Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml/badge.svg" alt="Validation" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg" alt="Docker Container" style="pointer-events: none;" class="inline"/></a></p>
+<div class="textblock"><p><a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg" alt="Bazel Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml/badge.svg" alt="Validation" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg" alt="Docker Container" style="pointer-events: none;" class="inline"/></a></p>
 <p>P4C is a reference compiler for the P4 programming language. It supports both P4-14 and P4-16; you can find more information about P4 <a href="http://p4.org">here</a> and the specifications for both versions of the language <a href="https://p4.org/specs">here</a>. One fact attesting to the level of quality and completeness of P4C's code is that its front-end code, mid-end code, and P4C-graphs back end are used as the basis for at least one commercially supported P4 compiler.</p>
 <p>P4C is modular; it provides a standard frontend and midend which can be combined with a target-specific backend to create a complete P4 compiler. The goal is to make adding new backends easy.</p>
 <h1><a class="anchor" id="overview"></a>
@@ -617,9 +611,10 @@ Common P4C utility functions</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>source_file.h</code>, <code>source_file.cpp</code>   </td><td class="markdownTableBodyNone">Represents the input source of the compiler and source file position information used for error reporting and generating debugging information.    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>stringify.h</code>, <code>stringify.cpp</code>   </td><td class="markdownTableBodyNone">Conversion of various types to strings.   </td></tr>
+<td class="markdownTableBodyNone"><code>stringify.h</code>, <code>stringify.cpp</code>   </td><td class="markdownTableBodyNone">Conversion of various types to strings.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>sourceCodeBuilder.h</code>   </td><td class="markdownTableBodyNone">Support for emitting programs in source (works for P4 and C).   </td></tr>
 </table>
-<p>| <code>sourceCodeBuilder.h</code> | Support for emitting programs in source (works for P4 and C). |  </p>
 <h2><a class="anchor" id="known-issues"></a>
 Known issues</h2>
 <p>Issues with the compiler are tracked on <a href="https://github.com/p4lang/p4c/issues">GitHub</a>. Before opening a new issue, please check whether a similar issue is already opened. Opening issues and submitting a pull request with fixes for those issues is much appreciated.</p>

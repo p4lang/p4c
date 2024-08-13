@@ -40,53 +40,53 @@ var NAVTREE =
         [ "Compiler Driver", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html#compiler-driver", null ]
       ] ]
     ] ],
-    [ "README", "readme.html", [
-      [ "Overview", "readme.html#overview", [
-        [ "Additional documentation", "readme.html#additional-documentation-1", null ],
-        [ "Sample Backends in P4C", "readme.html#sample-backends-in-p4c", null ],
-        [ "Getting started", "readme.html#getting-started", [
-          [ "Installing packaged versions of P4C", "readme.html#installing-packaged-versions-of-p4c", [
-            [ "Ubuntu", "readme.html#ubuntu", null ],
-            [ "Debian", "readme.html#debian", null ]
+    [ "Getting Started", "getting_started.html", [
+      [ "Overview", "getting_started.html#overview", [
+        [ "Additional documentation", "getting_started.html#additional-documentation-1", null ],
+        [ "Sample Backends in P4C", "getting_started.html#sample-backends-in-p4c", null ],
+        [ "Getting started", "getting_started.html#getting-started", [
+          [ "Installing packaged versions of P4C", "getting_started.html#installing-packaged-versions-of-p4c", [
+            [ "Ubuntu", "getting_started.html#ubuntu", null ],
+            [ "Debian", "getting_started.html#debian", null ]
           ] ],
-          [ "Installing P4C from source", "readme.html#installing-p4c-from-source", null ]
+          [ "Installing P4C from source", "getting_started.html#installing-p4c-from-source", null ]
         ] ],
-        [ "Dependencies", "readme.html#dependencies", [
-          [ "Ubuntu dependencies", "readme.html#ubuntu-dependencies", [
-            [ "CMake", "readme.html#cmake", null ]
+        [ "Dependencies", "getting_started.html#dependencies", [
+          [ "Ubuntu dependencies", "getting_started.html#ubuntu-dependencies", [
+            [ "CMake", "getting_started.html#cmake", null ]
           ] ],
-          [ "Fedora dependencies", "readme.html#fedora-dependencies", null ],
-          [ "macOS dependencies", "readme.html#macos-dependencies", null ],
-          [ "Garbage collector", "readme.html#garbage-collector", null ],
-          [ "Crash dumps", "readme.html#crash-dumps", null ]
+          [ "Fedora dependencies", "getting_started.html#fedora-dependencies", null ],
+          [ "macOS dependencies", "getting_started.html#macos-dependencies", null ],
+          [ "Garbage collector", "getting_started.html#garbage-collector", null ],
+          [ "Crash dumps", "getting_started.html#crash-dumps", null ]
         ] ],
-        [ "Development tools", "readme.html#development-tools", [
-          [ "Git setup", "readme.html#git-setup", null ]
+        [ "Development tools", "getting_started.html#development-tools", [
+          [ "Git setup", "getting_started.html#git-setup", null ]
         ] ],
-        [ "Docker", "readme.html#docker", null ],
-        [ "Bazel", "readme.html#bazel", null ],
-        [ "Build system", "readme.html#build-system", [
-          [ "Defining new CMake targets", "readme.html#defining-new-cmake-targets", [
-            [ "IR definition files", "readme.html#ir-definition-files", null ],
-            [ "Source files", "readme.html#source-files", null ],
-            [ "Target", "readme.html#target", null ],
-            [ "Tests", "readme.html#tests", null ],
-            [ "Installation", "readme.html#installation", null ]
+        [ "Docker", "getting_started.html#docker", null ],
+        [ "Bazel", "getting_started.html#bazel", null ],
+        [ "Build system", "getting_started.html#build-system", [
+          [ "Defining new CMake targets", "getting_started.html#defining-new-cmake-targets", [
+            [ "IR definition files", "getting_started.html#ir-definition-files", null ],
+            [ "Source files", "getting_started.html#source-files", null ],
+            [ "Target", "getting_started.html#target", null ],
+            [ "Tests", "getting_started.html#tests", null ],
+            [ "Installation", "getting_started.html#installation", null ]
           ] ]
         ] ]
       ] ],
-      [ "Common P4C utility functions", "readme.html#common-p4c-utility-functions", [
-        [ "Known issues", "readme.html#known-issues", [
-          [ "Frontend", "readme.html#frontend", [
-            [ "P4_14 features not supported in P4_16", "readme.html#p4_14-features-not-supported-in-p4_16", null ]
+      [ "Common P4C utility functions", "getting_started.html#common-p4c-utility-functions", [
+        [ "Known issues", "getting_started.html#known-issues", [
+          [ "Frontend", "getting_started.html#frontend", [
+            [ "P4_14 features not supported in P4_16", "getting_started.html#p4_14-features-not-supported-in-p4_16", null ]
           ] ],
-          [ "Backends", "readme.html#backends", [
-            [ "Bmv2 Backend", "readme.html#bmv2-backend", null ]
+          [ "Backends", "getting_started.html#backends", [
+            [ "Bmv2 Backend", "getting_started.html#bmv2-backend", null ]
           ] ]
         ] ],
-        [ "How to Contribute", "readme.html#how-to-contribute", null ],
-        [ "P4 Compiler Onboarding", "readme.html#p4-compiler-onboarding", null ],
-        [ "Contact", "readme.html#contact", null ]
+        [ "How to Contribute", "getting_started.html#how-to-contribute", null ],
+        [ "P4 Compiler Onboarding", "getting_started.html#p4-compiler-onboarding", null ],
+        [ "Contact", "getting_started.html#contact", null ]
       ] ]
     ] ],
     [ "P4C Intermediate Representation (IR)", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html", [
@@ -429,8 +429,8 @@ var NAVTREEINDEX =
 "class_p4_tools_1_1_z3_translator.html#a26f53ca04e964de1f78c9a5dae832785",
 "class_type_check_1_1_infer_action_args_top_down.html",
 "functions_func_n.html",
-"md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html#detecting-p4-program-flaws",
-"namespace_p4_tools_1_1_p4_testgen_1_1_bmv2.html#af341a73c7168800ed4e7d089fa9a8290",
+"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#example",
+"namespace_p4_tools.html#a625518a9562cb3a9d1be1cee71ef9fb0",
 "struct_p4_1_1_control_plane_a_p_i_1_1_p4_symbol_suffix_set.html",
 "struct_p4_tools_1_1_p4_testgen_1_1_abstract_test.html"
 ];
