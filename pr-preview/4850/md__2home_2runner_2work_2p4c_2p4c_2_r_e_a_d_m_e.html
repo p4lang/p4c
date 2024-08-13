@@ -255,39 +255,6 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html',
 </div>
 <div class="textblock"><p><a class="anchor" id="p4c"></a></p>
 <p><a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg" alt="Bazel Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml/badge.svg" alt="Validation" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg" alt="Docker Container" style="pointer-events: none;" class="inline"/></a></p>
-<ul>
-<li><a class="el" href="#getting-started">Getting started</a><ul>
-<li><a class="el" href="#installing-packaged-versions-of-p4c">Installing packaged versions of P4C</a></li>
-<li><a class="el" href="#installing-p4c-from-source">Installing P4C from source</a></li>
-</ul>
-</li>
-<li><a class="el" href="#dependencies">Dependencies</a><ul>
-<li><a class="el" href="#ubuntu-dependencies">Ubuntu dependencies</a></li>
-<li><a class="el" href="#fedora-dependencies">Fedora dependencies</a></li>
-<li><a class="el" href="#macos-dependencies">macOS dependencies</a></li>
-<li><a class="el" href="#garbage-collector">Garbage collector</a></li>
-<li><a class="el" href="#crash-dumps">Crash dumps</a></li>
-</ul>
-</li>
-<li><a class="el" href="#development-tools">Development tools</a><ul>
-<li><a class="el" href="#git-setup">Git setup</a></li>
-</ul>
-</li>
-<li><a class="el" href="#docker">Docker</a></li>
-<li><a class="el" href="#bazel">Bazel</a></li>
-<li><a class="el" href="#build-system">Build system</a><ul>
-<li><a class="el" href="#defining-new-cmake-targets">Defining new CMake targets</a></li>
-</ul>
-</li>
-<li><a class="el" href="#known-issues">Known issues</a><ul>
-<li><a class="el" href="#frontend">Frontend</a></li>
-<li><a class="el" href="#backends">Backends</a></li>
-</ul>
-</li>
-<li><a class="el" href="#how-to-contribute">How to Contribute</a></li>
-<li><a class="el" href="#p4-compiler-onboarding">P4 Compiler Onboarding</a></li>
-<li><a class="el" href="#contact">Contact</a></li>
-</ul>
 <p>P4C is a reference compiler for the P4 programming language. It supports both P4-14 and P4-16; you can find more information about P4 <a href="http://p4.org">here</a> and the specifications for both versions of the language <a href="https://p4.org/specs">here</a>. One fact attesting to the level of quality and completeness of P4C's code is that its front-end code, mid-end code, and P4C-graphs back end are used as the basis for at least one commercially supported P4 compiler.</p>
 <p>P4C is modular; it provides a standard frontend and midend which can be combined with a target-specific backend to create a complete P4 compiler. The goal is to make adding new backends easy.</p>
 <h1><a class="anchor" id="overview"></a>

@@ -282,7 +282,6 @@ var NAVTREE =
       [ "History", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2_r_e_a_d_m_e.html#history", null ]
     ] ],
     [ "P4Smith", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2smith_2_r_e_a_d_m_e.html", [
-      [ "Table of Contents", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2smith_2_r_e_a_d_m_e.html#table-of-contents", null ],
       [ "Installation", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2smith_2_r_e_a_d_m_e.html#installation-2", null ],
       [ "Extensions", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2smith_2_r_e_a_d_m_e.html#extensions", [
         [ "core.p4 using the test compiler p4test", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2smith_2_r_e_a_d_m_e.html#corep4-using-the-test-compiler-p4test", null ],
@@ -296,7 +295,6 @@ var NAVTREE =
       [ "License", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2smith_2_r_e_a_d_m_e.html#license", null ]
     ] ],
     [ "P4Testgen", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html", [
-      [ "Table of Contents", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html#table-of-contents-1", null ],
       [ "Features", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html#features", null ],
       [ "Installation", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html#installation-3", [
         [ "Dependencies", "md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html#dependencies-5", null ]
@@ -431,9 +429,9 @@ var NAVTREEINDEX =
 "class_type_check_1_1_infer_action_args_top_down.html",
 "functions_func_n.html",
 "md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#example",
-"namespace_p4_tools.html#a5c5f8a89d72fcfde42e7b2f7611c0281",
-"struct_p4_1_1_control_plane_a_p_i_1_1_p4_symbol_suffix_set.html",
-"struct_p4_tools_1_1_p4_testgen_1_1_abstract_test.html"
+"namespace_p4_tools.html#a6559e56230ad33b7d4b9bf4fe7111547",
+"struct_p4_1_1_control_plane_a_p_i_1_1_p4_symbol_suffix_set.html#a0dea86d37cb14fbef0f3f1527678a406",
+"struct_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_protobuf_ir_test.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
