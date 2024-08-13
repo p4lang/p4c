@@ -12,7 +12,7 @@
 <!--!
 \internal
 -->
-
+* [Sample Backends in P4C](#sample-backends-in-p4c)
 * [Getting started](#getting-started)
    * [Installing packaged versions of P4C](#installing-packaged-versions-of-p4c)
    * [Installing P4C from source](#installing-p4c-from-source)
@@ -53,7 +53,8 @@ make adding new backends easy.
 <!--!
 \include{doc} "../docs/doxygen/01_overview.md"
 -->
-The code contains seven sample backends:
+## Sample Backends in P4C
+P4C includes seven sample backends, catering to different target architectures and use cases:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the [BMv2 behavioral model](https://github.com/p4lang/behavioral-model),
 * p4c-dpdk: can be used to target the [DPDK software switch (SWX) pipeline](https://doc.dpdk.org/guides/rel_notes/release_20_11.html),
