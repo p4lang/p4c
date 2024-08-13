@@ -4,13 +4,13 @@ var searchData=
   ['object_1',['object',['../class_p4_1_1_method_instance.html#af69ff9ec3a921b6742f93d5b6039b08c',1,'P4::MethodInstance']]],
   ['of_20json_20output_2',['Format of json output',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#format-of-json-output',1,'']]],
   ['of_20p4_5f16_20or_20p4_5f14_20source_20code_3',['Check syntax of P4_16 or P4_14 source code',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4test_2_r_e_a_d_m_e.html#check-syntax-of-p4_16-or-p4_14-source-code',1,'']]],
-  ['of_20p4c_4',['of P4C',['../index.html#features-of-p4c',1,'Features of P4C'],['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#installing-packaged-versions-of-p4c',1,'Installing packaged versions of P4C']]],
+  ['of_20p4c_4',['of P4C',['../index.html#features-of-p4c',1,'Features of P4C'],['../getting_started.html#installing-packaged-versions-of-p4c',1,'Installing packaged versions of P4C']]],
   ['on_20bmv2_5',['on BMv2',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2smith_2_r_e_a_d_m_e.html#v1modelp4-and-psap4-on-bmv2',1,'v1model.p4 and psa.p4 on BMv2'],['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html#v1modelp4-on-bmv2',1,'v1model.p4 on BMv2']]],
   ['on_20the_20dpdk_20softnic_6',['on the DPDK SoftNIC',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2smith_2_r_e_a_d_m_e.html#pnap4-on-the-dpdk-softnic',1,'pna.p4 on the DPDK SoftNIC'],['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html#pnap4-on-the-dpdk-softnic-1',1,'pna.p4 on the DPDK SoftNIC']]],
   ['on_20the_20ebpf_20kernel_20target_7',['ebpf_model.p4 on the eBPF kernel target',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2testgen_2_r_e_a_d_m_e.html#ebpf_modelp4-on-the-ebpf-kernel-target',1,'']]],
   ['on_20tofino_201_8',['tna.p4 on Tofino 1',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2modules_2smith_2_r_e_a_d_m_e.html#tnap4-on-tofino-1',1,'']]],
   ['onbacktrack_9',['OnBacktrack',['../class_on_backtrack.html',1,'']]],
-  ['onboarding_10',['P4 Compiler Onboarding',['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#p4-compiler-onboarding',1,'']]],
+  ['onboarding_10',['P4 Compiler Onboarding',['../getting_started.html#p4-compiler-onboarding',1,'']]],
   ['onekey_11',['oneKey',['../class_e_b_p_f_1_1_e_b_p_f_pipeline.html#ab208a7146e83523e8524c76e7b9ce760',1,'EBPF::EBPFPipeline']]],
   ['onlycoveringtests_12',['onlyCoveringTests',['../namespace_p4_1_1_coverage.html#a3a23a5e6cddf38098f63c067e9005b40',1,'P4::Coverage::CoverageOptions']]],
   ['onparseerror_13',['onParseError',['../class_p4_1_1_abstract_parser_driver.html#a16cd6f60a578e74dcf477d06eeb156ee',1,'P4::AbstractParserDriver']]],
@@ -146,5 +146,5 @@ var searchData=
   ['outputstream_143',['outputstream',['../class_p4_1_1_error_reporter.html#ac1dcde6d1f1a6aae65926aa83d2dce64',1,'P4::ErrorReporter::outputstream'],['../class_error_reporter.html#a02c5f4d9ebe49f2c88e88b6c19d34604',1,'ErrorReporter::outputstream']]],
   ['overall_20flow_144',['Overall flow',['../md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#overall-flow',1,'']]],
   ['overlaps_145',['overlaps',['../struct_half_open_range.html#ac9b3a39d1c3dce06af76391fc5181ec0',1,'HalfOpenRange::overlaps()'],['../struct_closed_range.html#ac00bccf1cea6170713bddfff38d15544',1,'ClosedRange::overlaps()']]],
-  ['overview_146',['Overview',['../md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#overview',1,'']]]
+  ['overview_146',['Overview',['../getting_started.html#overview',1,'']]]
 ];

@@ -24,7 +24,7 @@
 */
 var NAVTREE =
 [
-  [ "P4C", "index.html", [
+  [ "P4 Compiler Documentation (P4C)", "index.html", [
     [ "P4 Compiler Documentation", "index.html", "index" ],
     [ "Repository", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html", [
       [ "Compiler source code organization", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html#compiler-source-code-organization", null ],
@@ -40,53 +40,54 @@ var NAVTREE =
         [ "Compiler Driver", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html#compiler-driver", null ]
       ] ]
     ] ],
-    [ "P4C", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html", [
-      [ "Overview", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#overview", [
-        [ "Additional documentation", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#additional-documentation-1", null ],
-        [ "Sample Backends in P4C", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#sample-backends-in-p4c", null ],
-        [ "Getting started", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#getting-started", [
-          [ "Installing packaged versions of P4C", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#installing-packaged-versions-of-p4c", [
-            [ "Ubuntu", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#ubuntu", null ],
-            [ "Debian", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#debian", null ]
+    [ "Getting Started", "getting_started.html", [
+      [ "P4C", "getting_started.html#p4c", null ],
+      [ "Overview", "getting_started.html#overview", [
+        [ "Additional documentation", "getting_started.html#additional-documentation-1", null ],
+        [ "Sample Backends in P4C", "getting_started.html#sample-backends-in-p4c", null ],
+        [ "Getting started", "getting_started.html#getting-started", [
+          [ "Installing packaged versions of P4C", "getting_started.html#installing-packaged-versions-of-p4c", [
+            [ "Ubuntu", "getting_started.html#ubuntu", null ],
+            [ "Debian", "getting_started.html#debian", null ]
           ] ],
-          [ "Installing P4C from source", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#installing-p4c-from-source", null ]
+          [ "Installing P4C from source", "getting_started.html#installing-p4c-from-source", null ]
         ] ],
-        [ "Dependencies", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#dependencies", [
-          [ "Ubuntu dependencies", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#ubuntu-dependencies", [
-            [ "CMake", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#cmake", null ]
+        [ "Dependencies", "getting_started.html#dependencies", [
+          [ "Ubuntu dependencies", "getting_started.html#ubuntu-dependencies", [
+            [ "CMake", "getting_started.html#cmake", null ]
           ] ],
-          [ "Fedora dependencies", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#fedora-dependencies", null ],
-          [ "macOS dependencies", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#macos-dependencies", null ],
-          [ "Garbage collector", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#garbage-collector", null ],
-          [ "Crash dumps", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#crash-dumps", null ]
+          [ "Fedora dependencies", "getting_started.html#fedora-dependencies", null ],
+          [ "macOS dependencies", "getting_started.html#macos-dependencies", null ],
+          [ "Garbage collector", "getting_started.html#garbage-collector", null ],
+          [ "Crash dumps", "getting_started.html#crash-dumps", null ]
         ] ],
-        [ "Development tools", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#development-tools", [
-          [ "Git setup", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#git-setup", null ]
+        [ "Development tools", "getting_started.html#development-tools", [
+          [ "Git setup", "getting_started.html#git-setup", null ]
         ] ],
-        [ "Docker", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#docker", null ],
-        [ "Bazel", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#bazel", null ],
-        [ "Build system", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#build-system", [
-          [ "Defining new CMake targets", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#defining-new-cmake-targets", [
-            [ "IR definition files", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#ir-definition-files", null ],
-            [ "Source files", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#source-files", null ],
-            [ "Target", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#target", null ],
-            [ "Tests", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#tests", null ],
-            [ "Installation", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#installation", null ]
+        [ "Docker", "getting_started.html#docker", null ],
+        [ "Bazel", "getting_started.html#bazel", null ],
+        [ "Build system", "getting_started.html#build-system", [
+          [ "Defining new CMake targets", "getting_started.html#defining-new-cmake-targets", [
+            [ "IR definition files", "getting_started.html#ir-definition-files", null ],
+            [ "Source files", "getting_started.html#source-files", null ],
+            [ "Target", "getting_started.html#target", null ],
+            [ "Tests", "getting_started.html#tests", null ],
+            [ "Installation", "getting_started.html#installation", null ]
           ] ]
         ] ]
       ] ],
-      [ "Common P4C utility functions", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#common-p4c-utility-functions", [
-        [ "Known issues", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#known-issues", [
-          [ "Frontend", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#frontend", [
-            [ "P4_14 features not supported in P4_16", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#p4_14-features-not-supported-in-p4_16", null ]
+      [ "Common P4C utility functions", "getting_started.html#common-p4c-utility-functions", [
+        [ "Known issues", "getting_started.html#known-issues", [
+          [ "Frontend", "getting_started.html#frontend", [
+            [ "P4_14 features not supported in P4_16", "getting_started.html#p4_14-features-not-supported-in-p4_16", null ]
           ] ],
-          [ "Backends", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#backends", [
-            [ "Bmv2 Backend", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#bmv2-backend", null ]
+          [ "Backends", "getting_started.html#backends", [
+            [ "Bmv2 Backend", "getting_started.html#bmv2-backend", null ]
           ] ]
         ] ],
-        [ "How to Contribute", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#how-to-contribute", null ],
-        [ "P4 Compiler Onboarding", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#p4-compiler-onboarding", null ],
-        [ "Contact", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#contact", null ]
+        [ "How to Contribute", "getting_started.html#how-to-contribute", null ],
+        [ "P4 Compiler Onboarding", "getting_started.html#p4-compiler-onboarding", null ],
+        [ "Contact", "getting_started.html#contact", null ]
       ] ]
     ] ],
     [ "P4C Intermediate Representation (IR)", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html", [
@@ -100,65 +101,6 @@ var NAVTREE =
       ] ],
       [ "IR Classes", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#ir-classes", null ],
       [ "Classes", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#classes", null ]
-    ] ],
-    [ "Changelog", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html", [
-      [ "Semantic Versioning", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#semantic-versioning", null ],
-      [ "Release v1.2.4.14 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12414-viewhttpsgithubcomp4langp4cpull4844", [
-        [ "Breaking Changes 🛠", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#breaking-changes-", null ],
-        [ "P4 Specification Implementation", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#p4-specification-implementation", null ],
-        [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-compiler-core", null ],
-        [ "Changes to the BMv2 Back Ends", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-bmv2-back-ends", null ],
-        [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end", null ],
-        [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-p4tools-back-end", null ],
-        [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#other-changes", null ]
-      ] ],
-      [ "Release v1.2.4.13 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12413-viewhttpsgithubcomp4langp4cpull4767", [
-        [ "Breaking Changes 🛠", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#breaking-changes--1", null ],
-        [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-compiler-core-1", null ],
-        [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end-1", null ],
-        [ "Changes to the DPDK Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-dpdk-back-end", null ],
-        [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-p4tools-back-end-1", null ],
-        [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#other-changes-1", null ]
-      ] ],
-      [ "Release v1.2.4.12 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12412-viewhttpsgithubcomp4langp4cpull4699", [
-        [ "Breaking Changes 🛠", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#breaking-changes--2", null ],
-        [ "P4 Specification Implementation", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#p4-specification-implementation-1", null ],
-        [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-compiler-core-2", null ],
-        [ "Changes to the Control Plane", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-control-plane", null ],
-        [ "Changes to the eBPF Back Ends", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-ebpf-back-ends", null ],
-        [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end-2", null ],
-        [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-p4tools-back-end-2", null ],
-        [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#other-changes-2", null ]
-      ] ],
-      [ "Release v1.2.4.11 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12411-viewhttpsgithubcomp4langp4cpull4646", [
-        [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-compiler-core-3", null ],
-        [ "Changes to the eBPF Back Ends", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-ebpf-back-ends-1", null ],
-        [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end-3", null ],
-        [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-p4tools-back-end-3", null ],
-        [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#other-changes-3", null ]
-      ] ],
-      [ "Release v1.2.4.10 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12410-viewhttpsgithubcomp4langp4cpull4587", null ],
-      [ "Release v1.2.4.9 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1249-viewhttpsgithubcomp4langp4cpull4490", null ],
-      [ "Release v1.2.4.8 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1248-viewhttpsgithubcomp4langp4cpull4386", null ],
-      [ "Release v1.2.4.7 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1247-viewhttpsgithubcomp4langp4cpull4312", null ],
-      [ "Release v1.2.4.6 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1246-viewhttpsgithubcomp4langp4cpull4271", null ],
-      [ "Release v1.2.4.5 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1245-viewhttpsgithubcomp4langp4cpull4217", null ],
-      [ "Release v1.2.4.4 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1244-viewhttpsgithubcomp4langp4cpull4180", null ],
-      [ "Release v1.2.4.3 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1243-viewhttpsgithubcomp4langp4cpull4124", null ],
-      [ "Release v1.2.4.1 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1241-viewhttpsgithubcomp4langp4cpull4052", null ],
-      [ "Release v1.2.4", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v124", null ],
-      [ "Release v1.2.3.9 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1239-viewhttpsgithubcomp4langp4cpull3998", null ],
-      [ "Release v1.2.3.8 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1238-viewhttpsgithubcomp4langp4cpull3957", null ],
-      [ "Release v1.2.3.7 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1237-viewhttpsgithubcomp4langp4cpull3909", null ],
-      [ "Release v1.2.3.6 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1236-viewhttpsgithubcomp4langp4cpull3871", null ],
-      [ "Release v1.2.3.5 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1235-viewhttpsgithubcomp4langp4cpull3815", null ],
-      [ "Release v1.2.3.4 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1234-viewhttpsgithubcomp4langp4cpull3747", null ],
-      [ "Release v1.2.3.3 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1233-viewhttpsgithubcomp4langp4cpull3648", null ],
-      [ "Release v1.2.3.2 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1232-viewhttpsgithubcomp4langp4cpull3546", null ],
-      [ "Release v1.2.3.1 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1231-viewhttpsgithubcomp4langp4cpull3505", null ],
-      [ "Release v1.2.3.0 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1230-viewhttpsgithubcomp4langp4cpull3466", null ],
-      [ "Release v1.2.2.3 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1223-viewhttpsgithubcomp4langp4cpull3418", null ],
-      [ "Release 1.2.2.2 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-1222-viewhttpsgithubcomp4langp4cpull3247", null ]
     ] ],
     [ "Behavioral Model Backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html", [
       [ "Dependencies", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html#dependencies-1", null ],
@@ -379,6 +321,65 @@ var NAVTREE =
         [ "Git commits and pull requests", "md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html#git-commits-and-pull-requests", null ]
       ] ]
     ] ],
+    [ "Releases", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html", [
+      [ "Semantic Versioning", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#semantic-versioning", null ],
+      [ "Release v1.2.4.14 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12414-viewhttpsgithubcomp4langp4cpull4844", [
+        [ "Breaking Changes 🛠", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#breaking-changes-", null ],
+        [ "P4 Specification Implementation", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#p4-specification-implementation", null ],
+        [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-compiler-core", null ],
+        [ "Changes to the BMv2 Back Ends", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-bmv2-back-ends", null ],
+        [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end", null ],
+        [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-p4tools-back-end", null ],
+        [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#other-changes", null ]
+      ] ],
+      [ "Release v1.2.4.13 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12413-viewhttpsgithubcomp4langp4cpull4767", [
+        [ "Breaking Changes 🛠", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#breaking-changes--1", null ],
+        [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-compiler-core-1", null ],
+        [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end-1", null ],
+        [ "Changes to the DPDK Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-dpdk-back-end", null ],
+        [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-p4tools-back-end-1", null ],
+        [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#other-changes-1", null ]
+      ] ],
+      [ "Release v1.2.4.12 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12412-viewhttpsgithubcomp4langp4cpull4699", [
+        [ "Breaking Changes 🛠", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#breaking-changes--2", null ],
+        [ "P4 Specification Implementation", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#p4-specification-implementation-1", null ],
+        [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-compiler-core-2", null ],
+        [ "Changes to the Control Plane", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-control-plane", null ],
+        [ "Changes to the eBPF Back Ends", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-ebpf-back-ends", null ],
+        [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end-2", null ],
+        [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-p4tools-back-end-2", null ],
+        [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#other-changes-2", null ]
+      ] ],
+      [ "Release v1.2.4.11 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12411-viewhttpsgithubcomp4langp4cpull4646", [
+        [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-compiler-core-3", null ],
+        [ "Changes to the eBPF Back Ends", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-ebpf-back-ends-1", null ],
+        [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end-3", null ],
+        [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-p4tools-back-end-3", null ],
+        [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#other-changes-3", null ]
+      ] ],
+      [ "Release v1.2.4.10 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12410-viewhttpsgithubcomp4langp4cpull4587", null ],
+      [ "Release v1.2.4.9 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1249-viewhttpsgithubcomp4langp4cpull4490", null ],
+      [ "Release v1.2.4.8 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1248-viewhttpsgithubcomp4langp4cpull4386", null ],
+      [ "Release v1.2.4.7 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1247-viewhttpsgithubcomp4langp4cpull4312", null ],
+      [ "Release v1.2.4.6 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1246-viewhttpsgithubcomp4langp4cpull4271", null ],
+      [ "Release v1.2.4.5 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1245-viewhttpsgithubcomp4langp4cpull4217", null ],
+      [ "Release v1.2.4.4 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1244-viewhttpsgithubcomp4langp4cpull4180", null ],
+      [ "Release v1.2.4.3 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1243-viewhttpsgithubcomp4langp4cpull4124", null ],
+      [ "Release v1.2.4.1 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1241-viewhttpsgithubcomp4langp4cpull4052", null ],
+      [ "Release v1.2.4", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v124", null ],
+      [ "Release v1.2.3.9 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1239-viewhttpsgithubcomp4langp4cpull3998", null ],
+      [ "Release v1.2.3.8 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1238-viewhttpsgithubcomp4langp4cpull3957", null ],
+      [ "Release v1.2.3.7 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1237-viewhttpsgithubcomp4langp4cpull3909", null ],
+      [ "Release v1.2.3.6 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1236-viewhttpsgithubcomp4langp4cpull3871", null ],
+      [ "Release v1.2.3.5 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1235-viewhttpsgithubcomp4langp4cpull3815", null ],
+      [ "Release v1.2.3.4 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1234-viewhttpsgithubcomp4langp4cpull3747", null ],
+      [ "Release v1.2.3.3 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1233-viewhttpsgithubcomp4langp4cpull3648", null ],
+      [ "Release v1.2.3.2 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1232-viewhttpsgithubcomp4langp4cpull3546", null ],
+      [ "Release v1.2.3.1 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1231-viewhttpsgithubcomp4langp4cpull3505", null ],
+      [ "Release v1.2.3.0 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1230-viewhttpsgithubcomp4langp4cpull3466", null ],
+      [ "Release v1.2.2.3 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1223-viewhttpsgithubcomp4langp4cpull3418", null ],
+      [ "Release 1.2.2.2 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-1222-viewhttpsgithubcomp4langp4cpull3247", null ]
+    ] ],
     [ "Topics", "topics.html", "topics" ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
@@ -429,8 +430,8 @@ var NAVTREEINDEX =
 "class_p4_tools_1_1_z3_translator.html#a26f53ca04e964de1f78c9a5dae832785",
 "class_type_check_1_1_infer_action_args_top_down.html",
 "functions_func_n.html",
-"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#example",
-"namespace_p4_tools.html#a625518a9562cb3a9d1be1cee71ef9fb0",
+"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#dependencies-3",
+"namespace_p4_tools.html#a5c5f8a89d72fcfde42e7b2f7611c0281",
 "struct_p4_1_1_control_plane_a_p_i_1_1_p4_symbol_suffix_set.html",
 "struct_p4_tools_1_1_p4_testgen_1_1_abstract_test.html"
 ];
