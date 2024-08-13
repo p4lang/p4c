@@ -1,5 +1,13 @@
-<!--!\page getting_started Getting Started-->
+<!--!
+# Getting Started 
+-->
+<!--!
+\internal
+-->
 # P4C
+<!--!
+\endinternal
+-->
 <!--!
 [TOC]
 -->
