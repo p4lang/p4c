@@ -89,7 +89,7 @@ var NAVTREE =
         [ "Contact", "md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html#contact", null ]
       ] ]
     ] ],
-    [ "P4 Compiler Intermediate representation", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html", [
+    [ "P4C Intermediate Representation (IR)", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html", [
       [ "Introduction", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#introduction", null ],
       [ "Visitors and Transforms", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#visitors-and-transforms", null ],
       [ "Overall flow", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#overall-flow", [
@@ -98,9 +98,9 @@ var NAVTREE =
         [ "Pass Managers", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#pass-managers", null ],
         [ "Exception Use", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#exception-use", null ]
       ] ],
-      [ "IR Classes", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#ir-classes", null ]
+      [ "IR Classes", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#ir-classes", null ],
+      [ "Classes", "md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html#classes", null ]
     ] ],
-    [ "P4C Intermediate Representation (IR) Classes", "irdefs.html", null ],
     [ "Changelog", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html", [
       [ "Semantic Versioning", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#semantic-versioning", null ],
       [ "Release v1.2.4.14 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12414-viewhttpsgithubcomp4langp4cpull4844", [
@@ -429,7 +429,7 @@ var NAVTREEINDEX =
 "class_p4_tools_1_1_z3_translator.html#a26f53ca04e964de1f78c9a5dae832785",
 "class_type_check_1_1_infer_action_args_top_down.html",
 "functions_func_n.html",
-"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#dependencies-3",
+"md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html#example",
 "namespace_p4_tools.html#a625518a9562cb3a9d1be1cee71ef9fb0",
 "struct_p4_1_1_control_plane_a_p_i_1_1_p4_symbol_suffix_set.html",
 "struct_p4_tools_1_1_p4_testgen_1_1_abstract_test.html"
