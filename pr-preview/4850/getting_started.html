@@ -278,7 +278,7 @@ Overview</h1>
 Additional documentation</h2>
 <ul>
 <li>The documentation for P4_16 and P4Runtime is available <a href="https://p4.org/specs/">here</a></li>
-<li>the core design of the compiler intermediate representation (IR) and the visitor patterns are briefly described in <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html">IR</a></li>
+<li>the core design of the compiler intermediate representation (IR) and the visitor patterns are briefly described in IR</li>
 <li>The <a href="https://github.com/p4lang/p4c/blob/main/docs/migration-guide.pptx">migration guide</a> describes how P4_14 (v1.0) programs are translated into P4_16 programs  </li>
 </ul>
 <h2><a class="anchor" id="sample-backends-in-p4c"></a>
@@ -286,7 +286,7 @@ Sample Backends in P4C</h2>
 <p>P4C includes seven sample backends, catering to different target architectures and use cases:</p><ul>
 <li>p4c-bm2-ss: can be used to target the P4 <code>simple_switch</code> written using the <a href="https://github.com/p4lang/behavioral-model">BMv2 behavioral model</a>,</li>
 <li>p4c-dpdk: can be used to target the <a href="https://doc.dpdk.org/guides/rel_notes/release_20_11.html">DPDK software switch (SWX) pipeline</a>,</li>
-<li>p4c-ebpf: can be used to generate C code which can be compiled to <a href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">eBPF</a> and then loaded in the Linux kernel. The eBPF backend currently implements three architecture models: <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html">ebpf_model.p4 for packet filtering, xdp_model.p4 for XDP</a> and the fully-featured PSA (Portable Switch Architecture) model.</li>
+<li>p4c-ebpf: can be used to generate C code which can be compiled to <a href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">eBPF</a> and then loaded in the Linux kernel. The eBPF backend currently implements three architecture models: ebpf_model.p4 for packet filtering, xdp_model.p4 for XDP and the fully-featured PSA (Portable Switch Architecture) model.</li>
 <li>p4test: a source-to-source P4 translator which can be used for testing, learning compiler internals and debugging,</li>
 <li>p4c-graphs: can be used to generate visual representations of a P4 program; for now it only supports generating graphs of top-level control flows, and</li>
 <li>p4c-ubpf: can be used to generate eBPF code that runs in user-space.</li>
@@ -349,13 +349,13 @@ Installing P4C from source</h3>
 <li><p class="startli">Build. Building should also take place in a subdirectory named <code>build</code>. <code> mkdir build cd build cmake .. &lt;optional arguments&gt; make -j4 make -j4 check </code> The cmake command takes the following optional arguments to further customize the build:</p><ul>
 <li><code>-DCMAKE_BUILD_TYPE=RELEASE|DEBUG</code> &ndash; set CMAKE_BUILD_TYPE to RELEASE or DEBUG to build with optimizations or with debug symbols to run in gdb. Default is RELEASE.</li>
 <li><code>-DCMAKE_INSTALL_PREFIX=&lt;path&gt;</code> &ndash; set the directory where <code>make install</code> installs the compiler. Defaults to /usr/local.</li>
-<li><code>-DENABLE_BMV2=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html">the bmv2 backend</a>. Default ON.</li>
-<li><code>-DENABLE_EBPF=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html">the ebpf backend</a>. Default ON.</li>
-<li><code>-DENABLE_UBPF=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2_r_e_a_d_m_e.html">the ubpf backend</a>. Default ON.</li>
-<li><code>-DENABLE_DPDK=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_r_e_a_d_m_e.html">the DPDK backend</a>. Default ON.</li>
-<li><code>-DENABLE_P4C_GRAPHS=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html">the p4c-graphs backend</a>. Default ON.</li>
-<li><code>-DENABLE_P4TEST=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2p4test_2_r_e_a_d_m_e.html">the p4test backend</a>. Default ON.</li>
-<li><code>-DENABLE_TEST_TOOLS=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2_r_e_a_d_m_e.html">the p4tools backend</a>. Default OFF.</li>
+<li><code>-DENABLE_BMV2=ON|OFF</code>. Enable the bmv2 backend. Default ON.</li>
+<li><code>-DENABLE_EBPF=ON|OFF</code>. Enable the ebpf backend. Default ON.</li>
+<li><code>-DENABLE_UBPF=ON|OFF</code>. Enable the ubpf backend. Default ON.</li>
+<li><code>-DENABLE_DPDK=ON|OFF</code>. Enable the DPDK backend. Default ON.</li>
+<li><code>-DENABLE_P4C_GRAPHS=ON|OFF</code>. Enable the p4c-graphs backend. Default ON.</li>
+<li><code>-DENABLE_P4TEST=ON|OFF</code>. Enable the p4test backend. Default ON.</li>
+<li><code>-DENABLE_TEST_TOOLS=ON|OFF</code>. Enable the p4tools backend. Default OFF.</li>
 <li><code>-DENABLE_DOCS=ON|OFF</code>. Build documentation. Default is OFF.</li>
 <li><code>-DENABLE_GC=ON|OFF</code>. Enable the use of the garbage collection library. Default is ON.</li>
 <li><code>-DENABLE_GTESTS=ON|OFF</code>. Enable building and running GTest unit tests. Default is ON.</li>
@@ -391,9 +391,9 @@ Dependencies</h2>
 <li>Optional: Documentation generation requires Doxygen (1.12.0) and Graphviz (2.38.0 or higher).</li>
 </ul>
 <p>Backends may have additional dependencies. The dependencies for the backends included with <code>P4C</code> are documented here:</p><ul>
-<li><a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html">BMv2</a></li>
-<li><a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html">eBPF</a></li>
-<li><a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html">graphs</a></li>
+<li>BMv2</li>
+<li>eBPF</li>
+<li>graphs</li>
 </ul>
 <h3><a class="anchor" id="ubuntu-dependencies"></a>
 Ubuntu dependencies</h3>
@@ -479,7 +479,7 @@ Crash dumps</h3>
 <p>P4c will use <a href="https://github.com/ianlancetaylor/libbacktrace.git">libbacktrace</a> to produce readable crash dumps if it is available. This is an optional dependency; if it is not available everything should build just fine, but crash dumps will not be very readable.</p>
 <h2><a class="anchor" id="development-tools"></a>
 Development tools</h2>
-<p>There is a variety of design and development documentation <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html">here</a>.</p>
+<p>There is a variety of design and development documentation here.</p>
 <p>We recommend using <code>clang++</code> with no optimizations for speeding up compilation and simplifying debugging.</p>
 <p>We recommend installing a new version of <a href="http://ftp.gnu.org/gnu/gdb">gdb</a>, because older gdb versions do not always handle C++11 or newer correctly.</p>
 <p>We recommend exuberant ctags for navigating source code in Emacs and vi. <code>sudo apt-get install exuberant-ctags.</code> The Makefile targets <code>make ctags</code> and <code>make etags</code> generate tags for vi and Emacs respectively. (Make sure that you are using the correct version of ctags; there are several competing programs with the same name in existence.)</p>
@@ -642,10 +642,10 @@ Bmv2 Backend</h4>
 <ul>
 <li>Tables with multiple apply calls</li>
 </ul>
-<p>See also <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html#unsupported-p4_16-language-features">unsupported P4_16 language features</a>.</p>
+<p>See also <a class="el" href="behavioral_model_backend.html#unsupported-p4_16-language-features">unsupported P4_16 language features</a>.</p>
 <h2><a class="anchor" id="how-to-contribute"></a>
 How to Contribute</h2>
-<p>We welcome and appreciate new contributions. Please take a moment to review our <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html">Contribution Guidelines</a> to get started.</p>
+<p>We welcome and appreciate new contributions. Please take a moment to review our Contribution Guidelines to get started.</p>
 <h2><a class="anchor" id="p4-compiler-onboarding"></a>
 P4 Compiler Onboarding</h2>
 <p>Educational material on P4:</p>
