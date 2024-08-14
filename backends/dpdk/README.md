@@ -1,4 +1,13 @@
+<!--!
+\page dpdk_backend DPDK Backend                                                             
+-->
+<!--!
+\internal
+-->
 # DPDK Backend
+<!--!
+\endinternal
+-->
 <!--!
 [TOC]
 -->

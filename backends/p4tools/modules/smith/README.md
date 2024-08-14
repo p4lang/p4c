@@ -1,4 +1,14 @@
+<!--!
+\page p4smith  P4Smith                                                               
+-->
+<!--!
+\internal
+-->
 # P4Smith
+<!--!
+\endinternal
+-->
+
 <!--!
 [TOC]
 -->

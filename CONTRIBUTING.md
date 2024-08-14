@@ -1,4 +1,14 @@
+<!--!
+\page contribute Contribute to the P4 Compiler Project                                                                      
+-->
+<!--!
+\internal
+-->
 # Contribute to the P4 Compiler Project
+<!--!
+\endinternal
+-->
+
 <!--!
 [TOC]
 -->

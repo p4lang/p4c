@@ -1,4 +1,14 @@
+<!--!
+\page intermediate_representation_ir P4C Intermediate Representation (IR)                                                                                                                          
+-->
+<!--!
+\internal
+-->
 # P4C Intermediate Representation (IR)
+<!--!
+\endinternal
+-->
+
 <!--!
 [TOC]
 -->

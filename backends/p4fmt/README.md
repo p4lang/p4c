@@ -1,4 +1,13 @@
+<!--!
+\page p4fmt p4fmt (P4 Formatter)                                                               
+-->
+<!--!
+\internal
+-->
 # p4fmt (P4 Formatter)
+<!--!
+\endinternal
+-->
 <!--!
 [TOC]
 -->

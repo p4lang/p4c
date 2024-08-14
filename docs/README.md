@@ -1,4 +1,13 @@
+<!--!
+\page repository_structure P4C Repository Organization                                                               
+-->
+<!--!
+\internal
+-->
 # P4C Repository Organization
+<!--!
+\endinternal
+-->
 <!--!
 [TOC]
 -->

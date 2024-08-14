@@ -1,4 +1,13 @@
+<!--!
+\page changelog Releases                                                               
+-->
+<!--!
+\internal
+-->
 # Releases
+<!--!
+\endinternal
+-->
 
 ## Semantic Versioning
 We follow a monthly release cadence. Our versioning scheme is as follows:

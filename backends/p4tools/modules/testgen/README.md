@@ -1,4 +1,14 @@
+<!--!
+\page p4testgen  P4Testgen                                                             
+-->
+<!--!
+\internal
+-->
 # P4Testgen
+<!--!
+\endinternal
+-->
+
 <!--!
 [TOC]
 -->

@@ -1,4 +1,14 @@
+<!--!
+\page ebpf_backend eBPF Backend                                                                     
+-->
+<!--!
+\internal
+-->
 # eBPF Backend
+<!--!
+\endinternal
+-->
+
 <!--!
 [TOC]
 -->

@@ -1,4 +1,14 @@
+<!--!
+\page behavioral_model_backend Behavioral Model Backend                                                                       
+-->
+<!--!
+\internal
+-->
 # Behavioral Model Backend
+<!--!
+\endinternal
+-->
+
 <!--!
 [TOC]
 -->
