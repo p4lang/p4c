@@ -767,6 +767,13 @@ const IR::Node *TypeInference::binaryArith(const IR::Operation_Binary *expressio
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
     if (ltype == nullptr || rtype == nullptr) return expression;
+
+    if (expression->is<IR::Add>() && ltype->is<IR::Type_String>() && rtype->is<IR::Type_String>()) {
+        typeError("%1%: cannot be applied to expression '%2%' with type '%3%', did you mean to use "
+                  "'++'?", expression->getStringOp(), expression->right, rtype->toString());
+        return expression;
+    }
+
     bool castLeft = false;
     bool castRight = false;
 
