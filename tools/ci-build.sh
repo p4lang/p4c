@@ -88,9 +88,11 @@ if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
   P4C_DEPS+=" cmake"
 fi
 
+
+sudo rm /usr/lib/python3.12/EXTERNALLY-MANAGED
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
-sudo pip3 install --upgrade pip
+# sudo pip3 install --upgrade pip
 sudo pip3 install -r ${P4C_DIR}/requirements.txt
 
 if [ "${BUILD_GENERATOR,,}" == "ninja" ] && [ ! $(command -v ninja) ]
@@ -142,10 +144,10 @@ function build_bmv2() {
   fi
   ccache --set-config max_size=1G
 
-  if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
-    # To run PTF nanomsg tests. Not available on 18.04.
-    sudo pip3 install nnpy
-  fi
+  # if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
+  #   # To run PTF nanomsg tests. Not available on 18.04.
+  #   sudo pip3 install nnpy
+  # fi
 }
 
 if [[ "${INSTALL_BMV2}" == "ON" ]] ; then

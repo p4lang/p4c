@@ -30,7 +30,7 @@ concurrency:
 
 jobs:
   ptf-linux:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
@@ -48,10 +48,10 @@ jobs:
           key: test-ptf-${{ runner.os }}
           max-size: 1000M
 
-      - name: Build (Ubuntu 22.04)
+      - name: Build (Ubuntu 24.04)
         run: |
           tools/ci-build.sh
 
-      - name: Run PTF tests for eBPF backend (Ubuntu 22.04)
+      - name: Run PTF tests for eBPF backend (Ubuntu 24.04)
         run: sudo -E ./test.sh
         working-directory: ./backends/ebpf/tests
