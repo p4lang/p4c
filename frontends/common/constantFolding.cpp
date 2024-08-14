@@ -739,7 +739,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Concat *e) {
     // handle string concatenations
     if (lstr || rstr) {
         if (!(lstr && rstr)) {
-            error(ErrorType::ERR_INVALID, "%1%: cannot concatename string and non-string", e);
+            error(ErrorType::ERR_INVALID, "%1%: cannot concatenate string and non-string", e);
             return e;
         }
         return new IR::StringLiteral(e->srcInfo, IR::Type_String::get(), lstr->value + rstr->value);
