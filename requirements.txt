@@ -2,7 +2,7 @@
 # Install with pip3 install --user -r requirements.txt
 pyroute2==0.7.3
 ply==3.11
-ptf==0.9.4
+ptf==0.10.0
 scapy==2.5.0
 clang-format==18.1.0
 isort==5.13.2; python_version > '3.6'
