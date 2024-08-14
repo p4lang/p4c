@@ -299,42 +299,49 @@ const IR::Node *TypeInference::postorder(IR::Concat *expression) {
         return expression;
     }
 
-    bool castLeft = false;
-    bool castRight = false;
-    if (auto se = ltype->to<IR::Type_SerEnum>()) {
-        ltype = getTypeType(se->type);
-        castLeft = true;
-    }
-    if (auto se = rtype->to<IR::Type_SerEnum>()) {
-        rtype = getTypeType(se->type);
-        castRight = true;
-    }
-    if (ltype == nullptr || rtype == nullptr) {
-        // getTypeType should have already taken care of the error message
-        return expression;
-    }
-    if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>()) {
-        typeError("%1%: Concatenation not defined on %2% and %3%", expression, ltype->toString(),
-                  rtype->toString());
-        return expression;
-    }
-    auto bl = ltype->to<IR::Type_Bits>();
-    auto br = rtype->to<IR::Type_Bits>();
-    const IR::Type *resultType = IR::Type_Bits::get(bl->size + br->size, bl->isSigned);
+    const IR::Type *resultType = nullptr;
+    if (ltype->is<IR::Type_String>() && rtype->is<IR::Type_String>()) {
+        // For strings the output type is just string.
+        resultType = ltype;
+    } else {
+        // All the integer concatenations, including with serializable enums.
+        bool castLeft = false;
+        bool castRight = false;
+        if (auto se = ltype->to<IR::Type_SerEnum>()) {
+            ltype = getTypeType(se->type);
+            castLeft = true;
+        }
+        if (auto se = rtype->to<IR::Type_SerEnum>()) {
+            rtype = getTypeType(se->type);
+            castRight = true;
+        }
+        if (ltype == nullptr || rtype == nullptr) {
+            // getTypeType should have already taken care of the error message
+            return expression;
+        }
+        if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>()) {
+            typeError("%1%: Concatenation not defined on %2% and %3%", expression, ltype->toString(),
+                    rtype->toString());
+            return expression;
+        }
+        auto bl = ltype->to<IR::Type_Bits>();
+        auto br = rtype->to<IR::Type_Bits>();
+        resultType = IR::Type_Bits::get(bl->size + br->size, bl->isSigned);
 
-    if (castLeft) {
-        auto e = expression->clone();
-        e->left = new IR::Cast(e->left->srcInfo, bl, e->left);
-        if (isCompileTimeConstant(expression->left)) setCompileTimeConstant(e->left);
-        setType(e->left, ltype);
-        expression = e;
-    }
-    if (castRight) {
-        auto e = expression->clone();
-        e->right = new IR::Cast(e->right->srcInfo, br, e->right);
-        if (isCompileTimeConstant(expression->right)) setCompileTimeConstant(e->right);
-        setType(e->right, rtype);
-        expression = e;
+        if (castLeft) {
+            auto e = expression->clone();
+            e->left = new IR::Cast(e->left->srcInfo, bl, e->left);
+            if (isCompileTimeConstant(expression->left)) setCompileTimeConstant(e->left);
+            setType(e->left, ltype);
+            expression = e;
+        }
+        if (castRight) {
+            auto e = expression->clone();
+            e->right = new IR::Cast(e->right->srcInfo, br, e->right);
+            if (isCompileTimeConstant(expression->right)) setCompileTimeConstant(e->right);
+            setType(e->right, rtype);
+            expression = e;
+        }
     }
 
     resultType = canonicalize(resultType);
