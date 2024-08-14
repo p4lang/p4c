@@ -81,6 +81,8 @@ var hierarchy =
       [ "DBPrint::setflag", "struct_d_b_print_1_1setflag.html", null ],
       [ "DBPrint::setprec", "struct_d_b_print_1_1setprec.html", null ]
     ] ],
+    [ "detail::DbprintDispatchPtr< T >", "structdetail_1_1_dbprint_dispatch_ptr.html", null ],
+    [ "detail::DbprintDispatchRef< T >", "structdetail_1_1_dbprint_dispatch_ref.html", null ],
     [ "dp_packet", "structdp__packet.html", null ],
     [ "DPDK::actionAttributes", "namespace_d_p_d_k.html#struct_d_p_d_k_1_1action_attributes", null ],
     [ "DPDK::BranchingInstructionGeneration", "class_d_p_d_k_1_1_branching_instruction_generation.html", null ],
@@ -178,6 +180,7 @@ var hierarchy =
         [ "BMV2::CFG::IfNode", "class_b_m_v2_1_1_c_f_g_1_1_if_node.html", null ],
         [ "BMV2::CFG::TableNode", "class_b_m_v2_1_1_c_f_g_1_1_table_node.html", null ]
       ] ],
+      [ "IR::ID", "struct_i_r_1_1_i_d.html", null ],
       [ "IR::INode", "class_i_r_1_1_i_node.html", [
         [ "IR::IDeclaration", "class_i_r_1_1_i_declaration.html", null ],
         [ "IR::Node", "class_i_r_1_1_node.html", [
@@ -545,6 +548,8 @@ var hierarchy =
         [ "P4Tools::P4ProgramDCGCreator", "class_p4_tools_1_1_p4_program_d_c_g_creator.html", null ]
       ] ]
     ] ],
+    [ "P4::detail::DbprintDispatchPtr< T >", "struct_p4_1_1detail_1_1_dbprint_dispatch_ptr.html", null ],
+    [ "P4::detail::DbprintDispatchRef< T >", "struct_p4_1_1detail_1_1_dbprint_dispatch_ref.html", null ],
     [ "P4::DiagnosticCountInfo", "struct_p4_1_1_diagnostic_count_info.html", null ],
     [ "P4::DiagnosticCountInfoGuard", "struct_p4_1_1_diagnostic_count_info_guard.html", null ],
     [ "P4::DiagnosticCountInfoState", "struct_p4_1_1_diagnostic_count_info_state.html", null ],
@@ -581,6 +586,7 @@ var hierarchy =
       ] ],
       [ "P4::ComputeWriteSet", "class_p4_1_1_compute_write_set.html", null ],
       [ "P4::Definitions", "class_p4_1_1_definitions.html", null ],
+      [ "P4::IR::ID", "struct_p4_1_1_i_r_1_1_i_d.html", null ],
       [ "P4::IR::INode", "class_p4_1_1_i_r_1_1_i_node.html", [
         [ "P4::IR::IDeclaration", "class_p4_1_1_i_r_1_1_i_declaration.html", null ],
         [ "P4::IR::Node", "class_p4_1_1_i_r_1_1_node.html", [
@@ -1552,9 +1558,11 @@ var hierarchy =
       [ "P4::Util::has_SourceInfo< class, class >", "struct_p4_1_1_util_1_1has___source_info.html", null ],
       [ "P4::Util::has_toString< class, class >", "struct_p4_1_1_util_1_1has__to_string.html", null ],
       [ "P4::has_dbprint< class, class >", "struct_p4_1_1has__dbprint.html", null ],
+      [ "P4::has_ostream_operator< class, class >", "struct_p4_1_1has__ostream__operator.html", null ],
       [ "Util::has_SourceInfo< class, class >", "struct_util_1_1has___source_info.html", null ],
       [ "Util::has_toString< class, class >", "struct_util_1_1has__to_string.html", null ],
-      [ "has_dbprint< class, class >", "structhas__dbprint.html", null ]
+      [ "has_dbprint< class, class >", "structhas__dbprint.html", null ],
+      [ "has_ostream_operator< class, class >", "structhas__ostream__operator.html", null ]
     ] ],
     [ "std::hash< ClosedRange< Unit, Order > >", "structstd_1_1hash_3_01_closed_range_3_01_unit_00_01_order_01_4_01_4.html", null ],
     [ "std::hash< cstring >", "structstd_1_1hash_3_01cstring_01_4.html", null ],
@@ -1584,9 +1592,11 @@ var hierarchy =
       [ "P4::Util::has_SourceInfo< T, std::void_t< decltype(std::declval< T >().getSourceInfo())> >", "struct_p4_1_1_util_1_1has___source_info_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declvaleceb1e5b41b0ceab45c2091dafb42308.html", null ],
       [ "P4::Util::has_toString< T, std::void_t< decltype(std::declval< T >().toString())> >", "struct_p4_1_1_util_1_1has__to_string_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_acb3d703214236ac0dfb06e6517d195f.html", null ],
       [ "P4::has_dbprint< T, std::void_t< decltype(std::declval< T >().dbprint(std::declval< std::ostream & >()))> >", "struct_p4_1_1has__dbprint_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01_4_012206707ff62b52b5f3b6b59b578fd59.html", null ],
+      [ "P4::has_ostream_operator< T, std::void_t< decltype(std::declval< std::ostream & >()<< std::declval< T >())> >", "struct_p4_1_1has__ostream__operator_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_0b23eeecb7e72d387dfbaa930aade2e05.html", null ],
       [ "Util::has_SourceInfo< T, std::void_t< decltype(std::declval< T >().getSourceInfo())> >", "struct_util_1_1has___source_info_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_tca7b1f9663a78a5476838ff7466d2519.html", null ],
       [ "Util::has_toString< T, std::void_t< decltype(std::declval< T >().toString())> >", "struct_util_1_1has__to_string_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01db18fd97bde90a9bd53b0bfce41e6e9b.html", null ],
-      [ "has_dbprint< T, std::void_t< decltype(std::declval< T >().dbprint(std::declval< std::ostream & >()))> >", "structhas__dbprint_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01_4_07_08_8d058dfba8a3a311378325dce114a1ecb1.html", null ]
+      [ "has_dbprint< T, std::void_t< decltype(std::declval< T >().dbprint(std::declval< std::ostream & >()))> >", "structhas__dbprint_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01_4_07_08_8d058dfba8a3a311378325dce114a1ecb1.html", null ],
+      [ "has_ostream_operator< T, std::void_t< decltype(std::declval< std::ostream & >()<< std::declval< T >())> >", "structhas__ostream__operator_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01std_1_e0548723ba176cfc33271ce2f1c438c0.html", null ]
     ] ],
     [ "std::vector< T >", null, [
       [ "P4::safe_vector< const IR::Type * >", "class_p4_1_1safe__vector.html", null ],

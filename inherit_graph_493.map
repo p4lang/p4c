@@ -1,19 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" title=" " alt="" coords="5,237,124,262"/>
-<area shape="rect" id="Node000001" href="$struct_i_r_1_1has__static__type__name.html" title=" " alt="" coords="190,5,361,45"/>
-<area shape="poly" id="edge1170_Node000000_Node000001" title=" " alt="" coords="71,223,84,186,105,141,133,95,170,55,189,43,192,48,174,59,137,98,109,143,89,188,76,225"/>
-<area shape="rect" id="Node000002" href="$struct_p4_1_1_i_r_1_1has__static__type__name.html" title=" " alt="" coords="172,69,379,109"/>
-<area shape="poly" id="edge1171_Node000000_Node000002" title=" " alt="" coords="78,223,115,171,141,143,171,119,193,107,195,112,173,124,145,147,120,174,82,226"/>
-<area shape="rect" id="Node000003" href="$struct_p4_1_1_util_1_1has___source_info.html" title="SFINAE helper to check if given class has a getSourceInfo method." alt="" coords="187,133,363,173"/>
-<area shape="poly" id="edge1172_Node000000_Node000003" title=" " alt="" coords="94,227,130,204,171,183,201,171,203,176,173,188,133,209,97,231"/>
-<area shape="rect" id="Node000004" href="$struct_p4_1_1_util_1_1has__to_string.html" title="SFINAE helper to check if given class has a toString method." alt="" coords="196,197,355,237"/>
-<area shape="poly" id="edge1173_Node000000_Node000004" title=" " alt="" coords="137,236,195,227,196,232,138,241"/>
-<area shape="rect" id="Node000005" href="$struct_p4_1_1has__dbprint.html" title=" " alt="" coords="188,261,363,301"/>
-<area shape="poly" id="edge1174_Node000000_Node000005" title=" " alt="" coords="138,258,188,265,188,271,137,263"/>
-<area shape="rect" id="Node000006" href="$struct_util_1_1has___source_info.html" title="SFINAE helper to check if given class has a getSourceInfo method." alt="" coords="199,325,351,365"/>
-<area shape="poly" id="edge1175_Node000000_Node000006" title=" " alt="" coords="97,267,133,290,173,311,203,323,201,328,171,316,130,294,94,272"/>
-<area shape="rect" id="Node000007" href="$struct_util_1_1has__to_string.html" title="SFINAE helper to check if given class has a toString method." alt="" coords="208,389,343,429"/>
-<area shape="poly" id="edge1176_Node000000_Node000007" title=" " alt="" coords="82,272,120,324,145,352,173,375,209,392,207,397,171,380,141,356,115,328,78,275"/>
-<area shape="rect" id="Node000008" href="$structhas__dbprint.html" title=" " alt="" coords="200,453,351,493"/>
-<area shape="poly" id="edge1177_Node000000_Node000008" title=" " alt="" coords="76,274,89,311,109,356,137,401,174,439,201,455,198,460,170,443,133,404,105,358,84,313,71,276"/>
+<area shape="rect" id="Node000000" href="$class_split_flow_visit__base.html" title=" " alt="" coords="5,31,155,56"/>
+<area shape="rect" id="Node000001" href="$class_split_flow_visit.html" title=" " alt="" coords="223,5,374,31"/>
+<area shape="poly" id="edge1158_Node000000_Node000001" title=" " alt="" coords="168,30,223,24,224,29,169,36"/>
+<area shape="rect" id="Node000002" href="$class_split_flow_visit_vector.html" title=" " alt="" coords="203,55,395,80"/>
+<area shape="poly" id="edge1159_Node000000_Node000002" title=" " alt="" coords="169,50,203,54,202,59,168,56"/>
 </map>

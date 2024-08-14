@@ -193,6 +193,8 @@ var namespace_p4 =
     [ "HandleValidityHeaderUnion", "class_p4_1_1_handle_validity_header_union.html", null ],
     [ "has_dbprint", "struct_p4_1_1has__dbprint.html", null ],
     [ "has_dbprint< T, std::void_t< decltype(std::declval< T >().dbprint(std::declval< std::ostream & >()))> >", "struct_p4_1_1has__dbprint_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01_4_012206707ff62b52b5f3b6b59b578fd59.html", null ],
+    [ "has_ostream_operator", "struct_p4_1_1has__ostream__operator.html", null ],
+    [ "has_ostream_operator< T, std::void_t< decltype(std::declval< std::ostream & >()<< std::declval< T >())> >", "struct_p4_1_1has__ostream__operator_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_0b23eeecb7e72d387dfbaa930aade2e05.html", null ],
     [ "HasExits", "class_p4_1_1_has_exits.html", null ],
     [ "HasTableApply", "class_p4_1_1_has_table_apply.html", null ],
     [ "HierarchicalNames", "class_p4_1_1_hierarchical_names.html", null ],

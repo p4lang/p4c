@@ -97,6 +97,10 @@ var annotated_dup =
       [ "setflags_helper", "class_d_b_print_1_1setflags__helper.html", null ],
       [ "setprec", "struct_d_b_print_1_1setprec.html", null ]
     ] ],
+    [ "detail", null, [
+      [ "DbprintDispatchPtr", "structdetail_1_1_dbprint_dispatch_ptr.html", null ],
+      [ "DbprintDispatchRef", "structdetail_1_1_dbprint_dispatch_ref.html", null ]
+    ] ],
     [ "DPDK", "namespace_d_p_d_k.html", [
       [ "actionAttributes", "namespace_d_p_d_k.html#struct_d_p_d_k_1_1action_attributes", null ],
       [ "AddFieldsToPseudoHeader", "class_d_p_d_k_1_1_add_fields_to_pseudo_header.html", null ],
@@ -437,6 +441,10 @@ var annotated_dup =
         [ "CoverageOptions", "namespace_p4_1_1_coverage.html#struct_p4_1_1_coverage_1_1_coverage_options", "namespace_p4_1_1_coverage_struct_p4_1_1_coverage_1_1_coverage_options_dup" ],
         [ "SourceIdCmp", "struct_p4_1_1_coverage_1_1_source_id_cmp.html", null ]
       ] ],
+      [ "detail", null, [
+        [ "DbprintDispatchPtr", "struct_p4_1_1detail_1_1_dbprint_dispatch_ptr.html", null ],
+        [ "DbprintDispatchRef", "struct_p4_1_1detail_1_1_dbprint_dispatch_ref.html", null ]
+      ] ],
       [ "IndentCtl", null, [
         [ "TempIndent", "class_p4_1_1_indent_ctl_1_1_temp_indent.html", null ]
       ] ],
@@ -714,6 +722,8 @@ var annotated_dup =
       [ "HandleValidityHeaderUnion", "class_p4_1_1_handle_validity_header_union.html", null ],
       [ "has_dbprint", "struct_p4_1_1has__dbprint.html", null ],
       [ "has_dbprint< T, std::void_t< decltype(std::declval< T >().dbprint(std::declval< std::ostream & >()))> >", "struct_p4_1_1has__dbprint_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01_4_012206707ff62b52b5f3b6b59b578fd59.html", null ],
+      [ "has_ostream_operator", "struct_p4_1_1has__ostream__operator.html", null ],
+      [ "has_ostream_operator< T, std::void_t< decltype(std::declval< std::ostream & >()<< std::declval< T >())> >", "struct_p4_1_1has__ostream__operator_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_0b23eeecb7e72d387dfbaa930aade2e05.html", null ],
       [ "HasExits", "class_p4_1_1_has_exits.html", null ],
       [ "HasTableApply", "class_p4_1_1_has_table_apply.html", null ],
       [ "HierarchicalNames", "class_p4_1_1_hierarchical_names.html", null ],
@@ -1486,6 +1496,8 @@ var annotated_dup =
     [ "HalfOpenRange", "struct_half_open_range.html", "struct_half_open_range" ],
     [ "has_dbprint", "structhas__dbprint.html", null ],
     [ "has_dbprint< T, std::void_t< decltype(std::declval< T >().dbprint(std::declval< std::ostream & >()))> >", "structhas__dbprint_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01_4_07_08_8d058dfba8a3a311378325dce114a1ecb1.html", null ],
+    [ "has_ostream_operator", "structhas__ostream__operator.html", null ],
+    [ "has_ostream_operator< T, std::void_t< decltype(std::declval< std::ostream & >()<< std::declval< T >())> >", "structhas__ostream__operator_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01std_1_e0548723ba176cfc33271ce2f1c438c0.html", null ],
     [ "hash_vector_base", "classhash__vector__base.html", "classhash__vector__base" ],
     [ "hasSideEffects", "classhas_side_effects.html", null ],
     [ "hdrFieldInfo", "structhdr_field_info.html", null ],

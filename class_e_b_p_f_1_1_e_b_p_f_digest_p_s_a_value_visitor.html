@@ -454,7 +454,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>visit</b> (<a class="
 void&#160;</td><td class="memItemRight" valign="bottom"><b>visit</b> (<a class="el" href="class_i_r_1_1_node.html">IR::Node</a> *&amp;, const char *=0, int=0)</td></tr>
 <tr class="separator:a886b979b83a985249db26b76e8451455 inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa03ee9aa1ea4ddcbc4a31f993e90bacf inherit pub_methods_class_visitor" id="r_aa03ee9aa1ea4ddcbc4a31f993e90bacf"><td class="memTemplParams" colspan="2">
-template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt;&gt;, class... Args&gt; </td></tr>
+template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt; &amp;&amp; !std::is_pointer_v&lt;T&gt;&gt;, class... Args&gt; </td></tr>
 <tr class="memitem:aa03ee9aa1ea4ddcbc4a31f993e90bacf inherit pub_methods_class_visitor"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>warn</b> (const int kind, const char *format, const T &amp;node, Args &amp;&amp;...args)</td></tr>
 <tr class="memdesc:aa03ee9aa1ea4ddcbc4a31f993e90bacf inherit pub_methods_class_visitor"><td class="mdescLeft">&#160;</td><td class="mdescRight">The const ref variant of the above. <br /></td></tr>
 <tr class="separator:aa03ee9aa1ea4ddcbc4a31f993e90bacf inherit pub_methods_class_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>

@@ -536,6 +536,10 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_p4_1_1has__dbprint_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01_4_012206707ff62b52b5f3b6b59b578fd59.html">has_dbprint&lt; T, std::void_t&lt; decltype(std::declval&lt; T &gt;().dbprint(std::declval&lt; std::ostream &amp; &gt;()))&gt; &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_p4_1_1has__ostream__operator.html">has_ostream_operator</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_p4_1_1has__ostream__operator_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_0b23eeecb7e72d387dfbaa930aade2e05.html">has_ostream_operator&lt; T, std::void_t&lt; decltype(std::declval&lt; std::ostream &amp; &gt;()&lt;&lt; std::declval&lt; T &gt;())&gt; &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_has_exits.html">HasExits</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_has_table_apply.html">HasTableApply</a></td></tr>
@@ -1203,7 +1207,7 @@ template&lt;typename... Args&gt; </td></tr>
 <tr class="memdesc:a9fe6085b1cee8f21f098c9db89644b58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Report an error with the given message. <br /></td></tr>
 <tr class="separator:a9fe6085b1cee8f21f098c9db89644b58"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab7d558748b12559a00d99a30879cb18c" id="r_ab7d558748b12559a00d99a30879cb18c"><td class="memTemplParams" colspan="2"><a id="ab7d558748b12559a00d99a30879cb18c" name="ab7d558748b12559a00d99a30879cb18c"></a>
-template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt;&gt;, class... Args&gt; </td></tr>
+template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt; &amp;&amp; !std::is_pointer_v&lt;T&gt;&gt;, class... Args&gt; </td></tr>
 <tr class="memitem:ab7d558748b12559a00d99a30879cb18c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>error</b> (const char *format, const T &amp;node, Args &amp;&amp;...args)</td></tr>
 <tr class="memdesc:ab7d558748b12559a00d99a30879cb18c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The const ref variant of the above. <br /></td></tr>
 <tr class="separator:ab7d558748b12559a00d99a30879cb18c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1214,7 +1218,7 @@ template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;
 <tr class="memitem:a98eff1b9eea0fce890480223e283abe2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a98eff1b9eea0fce890480223e283abe2">error</a> (const int kind, const char *format, Args &amp;&amp;...args)</td></tr>
 <tr class="separator:a98eff1b9eea0fce890480223e283abe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac8fca1f7dfcbfcb04980fb1ae2ec86b2" id="r_ac8fca1f7dfcbfcb04980fb1ae2ec86b2"><td class="memTemplParams" colspan="2"><a id="ac8fca1f7dfcbfcb04980fb1ae2ec86b2" name="ac8fca1f7dfcbfcb04980fb1ae2ec86b2"></a>
-template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt;&gt;, class... Args&gt; </td></tr>
+template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt; &amp;&amp; !std::is_pointer_v&lt;T&gt;&gt;, class... Args&gt; </td></tr>
 <tr class="memitem:ac8fca1f7dfcbfcb04980fb1ae2ec86b2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>error</b> (const int kind, const char *format, const T &amp;node, Args &amp;&amp;...args)</td></tr>
 <tr class="memdesc:ac8fca1f7dfcbfcb04980fb1ae2ec86b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">The const ref variant of the above. <br /></td></tr>
 <tr class="separator:ac8fca1f7dfcbfcb04980fb1ae2ec86b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1293,7 +1297,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>hasVarbitsOrUnions</b
 <tr class="memitem:a1ddab1e9dd0a8688a3b704a9d1d98161"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a1ddab1e9dd0a8688a3b704a9d1d98161">info</a> (const int kind, const char *format, Args &amp;&amp;...args)</td></tr>
 <tr class="separator:a1ddab1e9dd0a8688a3b704a9d1d98161"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ae83a7f7f61a6f053d25dd8f4a840ae" id="r_a5ae83a7f7f61a6f053d25dd8f4a840ae"><td class="memTemplParams" colspan="2"><a id="a5ae83a7f7f61a6f053d25dd8f4a840ae" name="a5ae83a7f7f61a6f053d25dd8f4a840ae"></a>
-template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt;&gt;, class... Args&gt; </td></tr>
+template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt; &amp;&amp; !std::is_pointer_v&lt;T&gt;&gt;, class... Args&gt; </td></tr>
 <tr class="memitem:a5ae83a7f7f61a6f053d25dd8f4a840ae"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>info</b> (const int kind, const char *format, const T &amp;node, Args &amp;&amp;...args)</td></tr>
 <tr class="memdesc:a5ae83a7f7f61a6f053d25dd8f4a840ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">The const ref variant of the above. <br /></td></tr>
 <tr class="separator:a5ae83a7f7f61a6f053d25dd8f4a840ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1380,6 +1384,9 @@ std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operato
 <tr class="memitem:ad3f289bd2a43434ebb1067cc60e726df" id="r_ad3f289bd2a43434ebb1067cc60e726df"><td class="memItemLeft" align="right" valign="top"><a id="ad3f289bd2a43434ebb1067cc60e726df" name="ad3f289bd2a43434ebb1067cc60e726df"></a>
 std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;os, <a class="el" href="class_p4_1_1indent__t.html">indent_t</a> i)</td></tr>
 <tr class="separator:ad3f289bd2a43434ebb1067cc60e726df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a527c6dd59eaab89b5583800f954418e8" id="r_a527c6dd59eaab89b5583800f954418e8"><td class="memItemLeft" align="right" valign="top"><a id="a527c6dd59eaab89b5583800f954418e8" name="a527c6dd59eaab89b5583800f954418e8"></a>
+std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;out, const <a class="el" href="struct_p4_1_1_backtrack_1_1trigger.html">Backtrack::trigger</a> &amp;trigger)</td></tr>
+<tr class="separator:a527c6dd59eaab89b5583800f954418e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3de66378215de60bd46d9cf6487bc475" id="r_a3de66378215de60bd46d9cf6487bc475"><td class="memItemLeft" align="right" valign="top"><a id="a3de66378215de60bd46d9cf6487bc475" name="a3de66378215de60bd46d9cf6487bc475"></a>
 std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;out, const ComputeDefUse::defuse_t &amp;du)</td></tr>
 <tr class="separator:a3de66378215de60bd46d9cf6487bc475"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1389,6 +1396,12 @@ std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operato
 <tr class="memitem:ae69b044c7bf9c334594c89b7f8a1af79" id="r_ae69b044c7bf9c334594c89b7f8a1af79"><td class="memItemLeft" align="right" valign="top"><a id="ae69b044c7bf9c334594c89b7f8a1af79" name="ae69b044c7bf9c334594c89b7f8a1af79"></a>
 std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;out, const <a class="el" href="classhvec__set.html">hvec_set</a>&lt; const <a class="el" href="struct_p4_1_1_compute_def_use_1_1loc__t.html">ComputeDefUse::loc_t</a> * &gt; &amp;s)</td></tr>
 <tr class="separator:ae69b044c7bf9c334594c89b7f8a1af79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a752751df44510d3f4441fcc2a8135a52" id="r_a752751df44510d3f4441fcc2a8135a52"><td class="memItemLeft" align="right" valign="top"><a id="a752751df44510d3f4441fcc2a8135a52" name="a752751df44510d3f4441fcc2a8135a52"></a>
+std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;out, const <a class="el" href="class_p4_1_1_i_has_db_print.html">IHasDbPrint</a> &amp;obj)</td></tr>
+<tr class="separator:a752751df44510d3f4441fcc2a8135a52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc522f7681e79e542a512a7ff119a83f" id="r_afc522f7681e79e542a512a7ff119a83f"><td class="memItemLeft" align="right" valign="top"><a id="afc522f7681e79e542a512a7ff119a83f" name="afc522f7681e79e542a512a7ff119a83f"></a>
+std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;out, const <a class="el" href="class_p4_1_1_i_has_db_print.html">IHasDbPrint</a> *obj)</td></tr>
+<tr class="separator:afc522f7681e79e542a512a7ff119a83f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae139b82c75c87f5df432491915b4919d" id="r_ae139b82c75c87f5df432491915b4919d"><td class="memItemLeft" align="right" valign="top"><a id="ae139b82c75c87f5df432491915b4919d" name="ae139b82c75c87f5df432491915b4919d"></a>
 std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;out, const <a class="el" href="class_p4_1_1_i_r_1_1_vector.html">IR::Vector</a>&lt; IR::Expression &gt; &amp;v)</td></tr>
 <tr class="separator:ae139b82c75c87f5df432491915b4919d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1398,14 +1411,6 @@ std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operato
 <tr class="memitem:a1d4cf640e448bb78aeddde3a60e15dc4" id="r_a1d4cf640e448bb78aeddde3a60e15dc4"><td class="memItemLeft" align="right" valign="top"><a id="a1d4cf640e448bb78aeddde3a60e15dc4" name="a1d4cf640e448bb78aeddde3a60e15dc4"></a>
 std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;out, const std::pair&lt; const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *, const <a class="el" href="classhvec__set.html">hvec_set</a>&lt; const <a class="el" href="struct_p4_1_1_compute_def_use_1_1loc__t.html">ComputeDefUse::loc_t</a> * &gt; &gt; &amp;p)</td></tr>
 <tr class="separator:a1d4cf640e448bb78aeddde3a60e15dc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a367d21b8a19a814465a07f4b0c29e317" id="r_a367d21b8a19a814465a07f4b0c29e317"><td class="memTemplParams" colspan="2"><a id="a367d21b8a19a814465a07f4b0c29e317" name="a367d21b8a19a814465a07f4b0c29e317"></a>
-template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a367d21b8a19a814465a07f4b0c29e317"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;out, const T &amp;value) -&gt; std::enable_if_t&lt; Util::has_toString_v&lt; T &gt; &amp;&amp;!has_dbprint_v&lt; T &gt;, std::ostream &amp; &gt;</td></tr>
-<tr class="separator:a367d21b8a19a814465a07f4b0c29e317"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5697d172f5db21d35c5fdeaf4d0a9ab" id="r_aa5697d172f5db21d35c5fdeaf4d0a9ab"><td class="memTemplParams" colspan="2"><a id="aa5697d172f5db21d35c5fdeaf4d0a9ab" name="aa5697d172f5db21d35c5fdeaf4d0a9ab"></a>
-template&lt;typename T &gt; </td></tr>
-<tr class="memitem:aa5697d172f5db21d35c5fdeaf4d0a9ab"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;out, const T *value) -&gt; std::enable_if_t&lt; Util::has_toString_v&lt; T &gt; &amp;&amp;!has_dbprint_v&lt; T &gt;, std::ostream &amp; &gt;</td></tr>
-<tr class="separator:aa5697d172f5db21d35c5fdeaf4d0a9ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae46cf31f6d89adbcce5b2172ed6399f9" id="r_ae46cf31f6d89adbcce5b2172ed6399f9"><td class="memItemLeft" align="right" valign="top"><a id="ae46cf31f6d89adbcce5b2172ed6399f9" name="ae46cf31f6d89adbcce5b2172ed6399f9"></a>
 std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;out, <a class="el" href="class_p4_1_1cstring.html">cstring</a> s)</td></tr>
 <tr class="separator:ae46cf31f6d89adbcce5b2172ed6399f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1487,7 +1492,7 @@ template&lt;typename... Args&gt; </td></tr>
 <tr class="memitem:a38da086799a11f4ef176f9b02e7fad6c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a38da086799a11f4ef176f9b02e7fad6c">warning</a> (const int kind, const char *format, Args &amp;&amp;...args)</td></tr>
 <tr class="separator:a38da086799a11f4ef176f9b02e7fad6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99e235b80c954a00fecb8b11bc2982c1" id="r_a99e235b80c954a00fecb8b11bc2982c1"><td class="memTemplParams" colspan="2"><a id="a99e235b80c954a00fecb8b11bc2982c1" name="a99e235b80c954a00fecb8b11bc2982c1"></a>
-template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt;&gt;, class... Args&gt; </td></tr>
+template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt; &amp;&amp; !std::is_pointer_v&lt;T&gt;&gt;, class... Args&gt; </td></tr>
 <tr class="memitem:a99e235b80c954a00fecb8b11bc2982c1"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>warning</b> (const int kind, const char *format, const T &amp;node, Args &amp;&amp;...args)</td></tr>
 <tr class="memdesc:a99e235b80c954a00fecb8b11bc2982c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">The const ref variant of the above. <br /></td></tr>
 <tr class="separator:a99e235b80c954a00fecb8b11bc2982c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1506,6 +1511,10 @@ const char *&#160;</td><td class="memItemRight" valign="bottom"><b>DIAGNOSTIC_CO
 template&lt;class T &gt; </td></tr>
 <tr class="memitem:ab01565e05bb4df6ad8e0804be6d0ee1c"><td class="memTemplItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>has_dbprint_v</b> = <a class="el" href="struct_p4_1_1has__dbprint.html">has_dbprint</a>&lt;T&gt;::value</td></tr>
 <tr class="separator:ab01565e05bb4df6ad8e0804be6d0ee1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a956df63d956a7d0b61fa4476b43285f6" id="r_a956df63d956a7d0b61fa4476b43285f6"><td class="memTemplParams" colspan="2"><a id="a956df63d956a7d0b61fa4476b43285f6" name="a956df63d956a7d0b61fa4476b43285f6"></a>
+template&lt;class T &gt; </td></tr>
+<tr class="memitem:a956df63d956a7d0b61fa4476b43285f6"><td class="memTemplItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>has_ostream_operator_v</b> = <a class="el" href="struct_p4_1_1has__ostream__operator.html">has_ostream_operator</a>&lt;T&gt;::value</td></tr>
+<tr class="separator:a956df63d956a7d0b61fa4476b43285f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a132e88585329b8dba66c10b61d5bab01" id="r_a132e88585329b8dba66c10b61d5bab01"><td class="memItemLeft" align="right" valign="top"><a id="a132e88585329b8dba66c10b61d5bab01" name="a132e88585329b8dba66c10b61d5bab01"></a>
 const char&#160;</td><td class="memItemRight" valign="bottom"><b>outOfBoundsStateName</b> [] = &quot;stateOutOfBound&quot;</td></tr>
 <tr class="memdesc:a132e88585329b8dba66c10b61d5bab01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of out of bound state. <br /></td></tr>
