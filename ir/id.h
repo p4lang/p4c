@@ -25,7 +25,7 @@ limitations under the License.
 namespace IR {
 
 // An identifier.
-struct ID : Util::IHasSourceInfo {
+struct ID : Util::IHasSourceInfo, public IHasDbPrint {
     Util::SourceInfo srcInfo;
     cstring name = nullptr;
     // We save the original name to show the user on error messages.
@@ -42,7 +42,7 @@ struct ID : Util::IHasSourceInfo {
     ID(cstring n) : ID(Util::SourceInfo(), n) {}               // NOLINT(runtime/explicit)
     ID(std::string n) : ID(Util::SourceInfo(), n) {}           // NOLINT(runtime/explicit)
     ID(cstring n, cstring old) : ID(Util::SourceInfo(), n, old) {}
-    void dbprint(std::ostream &out) const {
+    void dbprint(std::ostream &out) const override {
         out << name;
         if (originalName != nullptr && originalName != name) out << "/" << originalName;
     }

@@ -19,6 +19,8 @@ limitations under the License.
 #ifndef LIB_ERROR_H_
 #define LIB_ERROR_H_
 
+#include <type_traits>
+
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/error_reporter.h"
@@ -71,7 +73,8 @@ void errorWithSuffix(const int kind, const char *format, const char *suffix, con
 }
 
 /// The const ref variant of the above
-template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
+template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T> && !std::is_pointer_v<T>>,
+          class... Args>
 void error(const int kind, const char *format, const T &node, Args &&...args) {
     error(kind, format, &node, std::forward<Args>(args)...);
 }
@@ -88,7 +91,8 @@ void error(const char *format, const T *node, Args &&...args) {
 
 /// The const ref variant of the above
 // LEGACY: once we transition to error types, this should be deprecated
-template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
+template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T> && !std::is_pointer_v<T>>,
+          class... Args>
 void error(const char *format, const T &node, Args &&...args) {
     error(ErrorType::LEGACY_ERROR, format, node, std::forward<Args>(args)...);
 }
@@ -122,7 +126,8 @@ void warning(const int kind, const char *format, const T *node, Args &&...args) 
 }
 
 /// The const ref variant of the above
-template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
+template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T> && !std::is_pointer_v<T>>,
+          class... Args>
 void warning(const int kind, const char *format, const T &node, Args &&...args) {
     ::warning(kind, format, &node, std::forward<Args>(args)...);
 }
@@ -145,7 +150,8 @@ void info(const int kind, const char *format, const T *node, Args &&...args) {
 }
 
 /// The const ref variant of the above
-template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
+template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T> && !std::is_pointer_v<T>>,
+          class... Args>
 void info(const int kind, const char *format, const T &node, Args &&...args) {
     ::info(kind, format, &node, std::forward<Args>(args)...);
 }
