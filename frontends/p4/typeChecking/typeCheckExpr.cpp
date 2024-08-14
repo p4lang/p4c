@@ -320,8 +320,8 @@ const IR::Node *TypeInference::postorder(IR::Concat *expression) {
             return expression;
         }
         if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>()) {
-            typeError("%1%: Concatenation not defined on %2% and %3%", expression, ltype->toString(),
-                    rtype->toString());
+            typeError("%1%: Concatenation not defined on %2% and %3%", expression,
+                      ltype->toString(), rtype->toString());
             return expression;
         }
         auto bl = ltype->to<IR::Type_Bits>();
