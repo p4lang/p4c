@@ -48,14 +48,12 @@ struct local_metadata_t {
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata_t local_metadata, in psa_ingress_parser_input_metadata_t standard_metadata, in empty_metadata_t resub_meta, in empty_metadata_t recirc_meta) {
     state start {
-        packet.extract(headers.ethernet);
         transition accept;
     }
 }
 
 control packet_deparser(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t headers, in local_metadata_t local_metadata, in psa_ingress_output_metadata_t istd) {
     apply {
-        packet.emit(headers.ethernet);
     }
 }
 
@@ -78,6 +76,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
 
     apply {
         // tbl_switching.apply();
+        send_to_port(ostd, (PortId_t) PORT0);
     }
 
 }

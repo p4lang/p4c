@@ -56,5 +56,5 @@ class SimpleTest(P4EbpfTest):
         # check no connectivity if switching rules are not installed
         pkt = testutils.simple_udp_packet(eth_dst="00:00:00:00:00:03")
         testutils.send_packet(self, PORT0, pkt)
-        # testutils.verify_packet(self, pkt, PORT0)
-        testutils.verify_any_packet_any_port(self, [pkt], ALL_PORTS)
+        testutils.verify_packet(self, pkt, PORT0)
+        # testutils.verify_any_packet_any_port(self, [], ALL_PORTS)

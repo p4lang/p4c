@@ -4,3 +4,12 @@
 pkg_info {
   arch: "psa"
 }
+
+actions {
+  preamble {
+    id: 27646489
+    name: "send_to_port"
+    alias: "send_to_port"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
