@@ -79,7 +79,7 @@ class Type_Any : Type, ITypeVar {
     static long nextId;
  public:
     long declid = nextId++;
-    cstring getVarName() const override { return "int_"_cs + Util::toString(declid); }
+    cstring getVarName() const override { return absl::StrCat("int_", declid); }
     int getDeclId() const override { return declid; }
     dbprint { out << "ANYTYPE/" << declid; }
     toString { return "ANYTYPE"_cs; }
@@ -107,7 +107,7 @@ class Type_Any : Type, ITypeVar {
 class Type_Fragment : Type {
     Type type;
     dbprint { out << "FRAGMENT(" << type << ")"; }
-    toString { return "FRAGMENT("_cs + type->toString() + ")"_cs; }
+    toString { return absl::StrCat("FRAGMENT(", type->toString().string_view(), ")"); }
     const Type* getP4Type() const override { return nullptr; }
 }
 
@@ -120,7 +120,7 @@ class Type_Fragment : Type {
 /// by type-checking.
 class Type_Type : Type {
     Type type;
-    toString { return "Type("_cs + type->toString() + ")"_cs; }
+    toString { return absl::StrCat("Type(", type->toString().string_view(), ")"); }
     dbprint { out << "Type(" << type << ")"; }
     const Type* getP4Type() const override { return type; }
     validate { BUG_CHECK(!type->is<IR::Type_Type>(), "%1%: nested Type_Type", type); }
@@ -168,7 +168,7 @@ class Type_Bits : Type_Base {
     cstring baseName() const { return isSigned ? "int"_cs : "bit"_cs; }
     int width_bits() const override { return size; }
 
-    toString{ return baseName() + "<"_cs + Util::toString(size) + ">"_cs; }
+    toString{ return absl::StrCat(baseName().string_view(), "<", size, ">"); }
     dbprint { out << toString(); }
 }
 
@@ -184,7 +184,7 @@ class Type_Varbits : Type_Base {
     static Type_Varbits get(const Util::SourceInfo &si, int size);
     static Type_Varbits get(int size);
     static Type_Varbits get();
-    toString{ return "varbit<"_cs + Util::toString(size) + ">"_cs; }
+    toString{ return absl::StrCat("varbit<", size, ">"); }
     dbprint { out << "varbit<" << size << ">"; }
     int width_bits() const override { return size; }
 }
@@ -224,15 +224,10 @@ class ParameterList : ISimpleNamespace {
     IR::IDeclaration getDeclByName(std::string_view name) const override { return getParameter(name); }
     void push_back(const Parameter *p) { parameters.push_back(p); }
     toString {
-        std::string result = "";
-        bool first = true;
-        for (auto p : parameters) {
-            if (!first)
-                result += ", ";
-            first = false;
-            result += p->toString();
-        }
-        return result;
+        return absl::StrJoin(parameters, ", ",
+                             [](std::string *out, const auto *p) {
+                                 absl::StrAppend(out, p->toString().string_view());
+                             });
     }
 #emit
     auto begin() const -> decltype(parameters.begin()) { return parameters.begin(); }
@@ -261,7 +256,7 @@ class Type_InfInt : Type, ITypeVar {
  private:
     static long nextId;
  public:
-    cstring getVarName() const override { return "int_" + Util::toString(declid); }
+    cstring getVarName() const override { return absl::StrCat("int_", declid); }
     int getDeclId() const override { return declid; }
     dbprint { out << "int/" << declid; }
     toString { return "int"_cs; }
@@ -326,17 +321,13 @@ class TypeParameters : ISimpleNamespace {
     validate{ parameters.check_null(); }
     toString {
         if (parameters.size() == 0)
-            return ""_cs;
-        std::string result = "<";
-        bool first = true;
-        for (auto p : parameters) {
-            if (!first)
-                result += ", ";
-            first = false;
-            result += p->toString();
-        }
-        result += ">";
-        return result;
+            return cstring::empty;
+        return absl::StrCat("<",
+                            absl::StrJoin(parameters, ", ",
+                                          [](std::string *out, const auto *p) {
+                                              absl::StrAppend(out, p->toString().string_view());
+                                          }),
+                            ">");
     }
 }
 
@@ -439,7 +430,7 @@ class Type_Header : Type_StructLike {
 class Type_Set : Type {
     Type elementType;
     dbprint{ Node::dbprint(out); out << "<" << elementType << ">"; }
-    toString { return "set<"_cs + elementType->toString() + ">"_cs; }
+    toString { return absl::StrCat("set<", elementType->toString().string_view(), ">"); }
     const Type* getP4Type() const override { return nullptr; }
     int width_bits() const override {
         /// returning the width of the set elements, not the set itself, which doesn't
@@ -468,17 +459,14 @@ abstract Type_BaseList : Type, Type_Indexed {
         }
         return rv; }
     cstring asString(const char* name) const {
-        // FIXME: simplify concatenation
-        std::string result = name;
-        result += "<";
-        bool first = true;
-        for (auto t : components) {
-            if (!first)
-                result += ", ";
-            first = false;
-            result += t->toString();
-        }
-        return result + ">";
+        return
+            absl::StrCat(name,
+                         "<",
+                         absl::StrJoin(components, ", ",
+                                       [](std::string *out, const auto *t) {
+                                           absl::StrAppend(out, t->toString().string_view());
+                                       }),
+                         ">");
     }
     toString{
         return asString("baselist");
@@ -507,7 +495,7 @@ class Type_P4List : Type {
     Type elementType;
     const Type* getP4Type() const override;
     toString{
-        return "list<"_cs + elementType->toString() + ">"_cs;
+        return absl::StrCat("list<", elementType->toString().string_view(), ">");
     }
 }
 
@@ -574,9 +562,12 @@ class Type_Name : Type {
 class Type_Stack : Type_Indexed, Type {
     Type        elementType;
     Expression  size;
-    // FIXME: do not create all these intermediate cstring's
-    toString{ return elementType->toString() + "["_cs +
-                (sizeKnown() ? Util::toString(getSize()) : "?"_cs) + "]"_cs; }
+    toString{
+        return
+            absl::StrCat(elementType->toString().string_view(),
+                         "[",
+                         sizeKnown() ? size->toString().string_view() : "?",
+                         "]"); }
     dbprint{ out << elementType << "[" << size << "]"; }
     bool sizeKnown() const;
     size_t getSize() const override;
@@ -603,14 +594,14 @@ class Type_Specialized : Type {
     validate{ arguments->check_null(); }
     const Type* getP4Type() const override;
     toString{
-        std::string result = baseType->toString() + "<";
-        std::string sep = "";
-        for (auto t : *arguments) {
-            result += sep + t->toString();
-            sep = ", ";
-        }
-        result += ">";
-        return result;
+        return
+            absl::StrCat(baseType->toString().string_view(),
+                         "<",
+                         absl::StrJoin(*arguments, ", ",
+                                       [](std::string *out, const auto *t) {
+                                           absl::StrAppend(out, t->toString().string_view());
+                                       }),
+                         ">");
     }
     Type_Specialized(cstring bt, std::initializer_list<Type> args)
     : baseType(new Type_Name(bt)), arguments(new Vector<Type>(args)) {}

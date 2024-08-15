@@ -37,6 +37,19 @@ class IHasDbPrint {
     virtual ~IHasDbPrint() = default;
 };
 
+inline std::ostream &operator<<(std::ostream &out, const IHasDbPrint &obj) {
+    obj.dbprint(out);
+    return out;
+}
+
+inline std::ostream &operator<<(std::ostream &out, const IHasDbPrint *obj) {
+    if (obj)
+        obj->dbprint(out);
+    else
+        out << "<null>";
+    return out;
+}
+
 /// SFINAE helper to check if given class has a `dbprint` method. Apparently,
 /// not everything are descendants of IHasDbPrint...
 template <class, class = void>
@@ -49,6 +62,17 @@ struct has_dbprint<T,
 
 template <class T>
 inline constexpr bool has_dbprint_v = has_dbprint<T>::value;
+
+template <class, class = void>
+struct has_ostream_operator : std::false_type {};
+
+template <class T>
+struct has_ostream_operator<
+    T, std::void_t<decltype(std::declval<std::ostream &>() << std::declval<T>())>>
+    : std::true_type {};
+
+template <class T>
+inline constexpr bool has_ostream_operator_v = has_ostream_operator<T>::value;
 
 // convert values to cstrings
 namespace Util {
@@ -98,43 +122,8 @@ cstring toString(const big_int &value, unsigned width, bool sign, unsigned int b
 cstring toString(const void *value);
 
 char DigitToChar(int digit);
+
 }  // namespace Util
-
-template <typename T>
-auto operator<<(std::ostream &out, const T &value)
-    -> std::enable_if_t<Util::has_toString_v<T> && !has_dbprint_v<T>, std::ostream &> {
-    return out << value.toString();
-}
-
-template <typename T>
-auto operator<<(std::ostream &out, const T *value)
-    -> std::enable_if_t<Util::has_toString_v<T> && !has_dbprint_v<T>, std::ostream &> {
-    if (value == nullptr)
-        out << "<null>";
-    else
-        out << value->toString();
-
-    return out;
-}
-
-// Prefer dbprint() method when both toString() and dbprint() methods are present
-template <class T>
-inline auto operator<<(std::ostream &out,
-                       const T &obj) -> std::enable_if_t<has_dbprint_v<T>, std::ostream &> {
-    obj.dbprint(out);
-    return out;
-}
-
-template <class T>
-inline auto operator<<(std::ostream &out,
-                       const T *obj) -> std::enable_if_t<has_dbprint_v<T>, std::ostream &> {
-    if (obj)
-        obj->dbprint(out);
-    else
-        out << "<null>";
-    return out;
-}
-
 }  // namespace P4
 
 #endif /* LIB_STRINGIFY_H_ */

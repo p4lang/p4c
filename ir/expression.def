@@ -45,6 +45,7 @@ abstract Operation_Binary : Operation {
         if (type->is<Type::Unknown>() && left && right && left->type == right->type)
             type = left->type; }
     toString {
+        // FIXME: Do not use debug printing to render user-side strings
         std::stringstream tmp;
         tmp << DBPrint::Prec_Low;
         dbprint(tmp);
@@ -270,8 +271,8 @@ class Constant : Literal {
         unsigned width;
         bool sign;
         if (const IR::Type_Bits* tb = type->to<IR::Type_Bits>()) {
-             width = tb->size;
-             sign = tb->isSigned;
+            width = tb->size;
+            sign = tb->isSigned;
         } else {
             width = 0;
             sign = false;
@@ -292,7 +293,7 @@ class BoolLiteral : Literal {
 class StringLiteral : Literal {
     cstring value;
     validate{ if (value.isNull()) BUG("null StringLiteral"); }
-    toString{ return "\""_cs + value.escapeJson() + "\""_cs; }
+    toString{ return absl::StrCat("\"", value.escapeJson().string_view(), "\""); }
     StringLiteral(ID v) : Literal(v.srcInfo), value(v.name) {}
 #emit
     operator IR::ID() const { return IR::ID(srcInfo, value); }
@@ -327,7 +328,9 @@ class TypeNameExpression : Expression {
 class Slice : Operation_Ternary {
     precedence = DBPrint::Prec_Postfix;
     stringOp = "[:]";
-    toString{ return e0->toString() + "["_cs + e1->toString() + ":"_cs + e2->toString() + "]"_cs; }
+    toString{ return absl::StrCat(e0->toString().string_view(),
+                                  "[", e1->toString().string_view(), ":",
+                                       e2->toString().string_view(), "]"); }
     // After type checking e1 and e2 will be constants
     unsigned getH() const { return e1->to<IR::Constant>()->asUnsigned(); }
     unsigned getL() const { return e2->to<IR::Constant>()->asUnsigned(); }
@@ -349,7 +352,7 @@ class Member : Operation_Unary {
     int lsb() const;
     int msb() const;
     stringOp = ".";
-    toString{ return expr->toString() + "."_cs + member; }
+    toString{ return absl::StrCat(expr->toString().string_view(), ".", member.string_view()); }
 }
 
 class Concat : Operation_Binary {
@@ -369,7 +372,7 @@ class ArrayIndex : Operation_Binary {
     ArrayIndex {
         if (auto st = left ? left->type->to<IR::Type_Stack>() : nullptr)
             type = st->elementType; }
-    toString{ return left->toString() + "["_cs + right->toString() + "]"_cs; }
+    toString{ return absl::StrCat(left->toString().string_view(), "[", right->toString().string_view(), "]"); }
 }
 
 class Range : Operation_Binary {
@@ -413,7 +416,7 @@ class Cast : Operation_Unary {
     /// type, and 'type' will only be updated later when type inferencing occurs
     precedence = DBPrint::Prec_Prefix;
     stringOp = "(cast)";
-    toString{ return "("_cs + destType->toString() + ")"_cs + expr->toString(); }
+    toString{ return absl::StrCat("(", destType->toString().string_view(), ")", expr->toString().string_view()); }
     validate{ BUG_CHECK(!destType->is<Type_Unknown>(), "%1%: Cannot cast to unknown type", this); }
 }
 
@@ -436,14 +439,13 @@ class MethodCallExpression : Expression {
     optional Vector<Type>       typeArguments = new Vector<Type>;
     optional Vector<Argument>   arguments = new Vector<Argument>;
     toString {
-        std::string str = method->toString() + "(";
-        if (!arguments->empty()) {
-            str += arguments->at(0)->toString();
-        }
-        for (unsigned i = 1; i < arguments->size(); i++) {
-            str += ", " + arguments->at(i)->toString();
-        }
-        return str + ")";
+        return
+            absl::StrCat(method->toString().string_view(), "(",
+                         absl::StrJoin(*arguments, ", ",
+                                       [](std::string *out, const Argument *arg) {
+                                           absl::StrAppend(out, arg->toString().string_view());
+                                       }),
+                         ")");
     }
     validate{ typeArguments->check_null(); arguments->check_null(); }
     MethodCallExpression(Util::SourceInfo si, IR::ID m, const std::initializer_list<Argument> &a)
@@ -480,14 +482,13 @@ class BaseListExpression : Expression {
         return components.at(size - 1)->is<IR::Dots>();
     }
     toString {
-        std::string str = "{";
-        if (!components.empty()) {
-            str += " " + components.at(0)->toString();
-        }
-        for (unsigned i = 1; i < size(); i++) {
-            str += ", " + components.at(i)->toString();
-        }
-        return str + " }";
+        return components.empty() ? "{}" :
+            absl::StrCat("{ ",
+                         absl::StrJoin(components, ", ",
+                                       [](std::string *out, const Expression *comp)  {
+                                           absl::StrAppend(out, comp->toString().string_view());
+                                       }),
+                         " }");
     }
 #nodbprint
 }
@@ -535,16 +536,16 @@ class StructExpression : Expression {
         return components.at(size - 1)->is<IR::NamedDots>();
     }
     toString {
-        std::string str = "{";
-        if (!components.empty()) {
-            cstring exprStr = components.at(0)->expression->toString();
-            str += " " + components.at(0)->toString() + " = " + exprStr;
-        }
-        for (unsigned i = 1; i < size(); i++) {
-            cstring exprStr = components.at(i)->expression->toString();
-            str += ", " + components.at(i)->toString() + " = " + exprStr;
-        }
-        return str + " }";
+        return components.empty() ? "{}" :
+            absl::StrCat("{ ",
+                         absl::StrJoin(components, ", ",
+                                       [](std::string *out, const NamedExpression *comp)  {
+                                           absl::StrAppend(out,
+                                                           comp->toString().string_view(),
+                                                           " = ",
+                                                           comp->expression->toString().string_view());
+                                       }),
+                         " }");
     }
 }
 
@@ -627,7 +628,7 @@ class SymbolicVariable : Expression {
         return label < other.label;
     }
 
-    toString { return "|" + label +"(" + type->toString() + ")|"; }
+    toString { return absl::StrCat("|", label.string_view(), "(", type->toString().string_view(), ")|"); }
 
     dbprint { out << "|" + label +"(" << type << ")|"; }
 }

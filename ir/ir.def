@@ -298,7 +298,7 @@ class Property : Declaration, IAnnotated {
 
 class TableProperties : ISimpleNamespace {
     optional inline IndexedVector<Property> properties;
-    toString{ return "TableProperties("_cs + Util::toString(properties.size()) + ")"_cs; }
+    toString{ return absl::StrCat("TableProperties(", properties.size(), ")"); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return properties.getDeclarations(); }
     Property getProperty(cstring name) const {
@@ -452,8 +452,9 @@ class ExitStatement : Statement {
 
 class ReturnStatement : Statement {
     NullOK Expression expression;
-    toString{ return "return "_cs +
-                (expression != nullptr ? expression->toString() : ""_cs); }
+    toString{ return absl::StrCat("return ",
+                                  (expression ?
+                                   expression->toString().string_view() : "")); }
 }
 
 class EmptyStatement : Statement {
@@ -463,7 +464,9 @@ class EmptyStatement : Statement {
 class AssignmentStatement : Statement {
     Expression left;
     Expression right;
-    toString{ return left->toString() + " = "_cs + right->toString(); }
+    toString{ return absl::StrCat(left->toString().string_view(),
+                                  " = ",
+                                  right->toString().string_view()); }
 }
 
 class IfStatement : Statement {

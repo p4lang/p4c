@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef LIB_BUG_HELPER_H_
 #define LIB_BUG_HELPER_H_
 
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -85,32 +86,56 @@ std::string bug_helper(boost::format &f, std::string_view position, std::string_
     return bug_helper(f % "", outPos, outTail, std::forward<Args>(args)...);
 }
 
+template <class T>
+struct DbprintDispatchPtr {
+    const T *val;
+};
+
+template <class T>
+std::ostream &operator<<(std::ostream &os, const DbprintDispatchPtr<T> &dispatch) {
+    if constexpr (has_dbprint_v<T>) {
+        dispatch.val->dbprint(os);
+    } else {
+        static_assert(has_ostream_operator_v<decltype(dispatch.val)>,
+                      "cannot debug print this type, implement dbprint method");
+        os << dispatch.val;
+    }
+
+    return os;
+}
+
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T *t,
                 Args &&...args) {
     if (t == nullptr) return bug_helper(f, position, tail, std::forward<Args>(args)...);
 
     auto [outPos, outTail] = maybeAddSourceInfo(*t, position, tail);
-    // We define operator<< for all T's that have either dbprint() or toString()
-    // methods (in stringify.h).  Note, however, that these overloads are
-    // provided in the global namespace, not namespace of the T itself and
-    // therefore cannot be found via ADL. As a result, name lookup for the `str
-    // << t` below succeeds as it is encloding namespace for `detail`. However,
-    // `f % t` will fail as operator<< will be called from some
-    // `boost::io::detail` namespace for which global namespace is not a direct
-    // enclosing one and therefore the lookup for operator<< will fail.
-    std::stringstream str;
-    str << t;
-    return bug_helper(f % str.str(), outPos, outTail, std::forward<Args>(args)...);
+    return bug_helper(f % DbprintDispatchPtr<T>{t}, outPos, outTail, std::forward<Args>(args)...);
+}
+
+template <class T>
+struct DbprintDispatchRef {
+    const T &val;
+};
+
+template <class T>
+std::ostream &operator<<(std::ostream &os, const DbprintDispatchRef<T> &dispatch) {
+    if constexpr (has_dbprint_v<T>) {
+        dispatch.val.dbprint(os);
+    } else {
+        static_assert(has_ostream_operator_v<decltype(dispatch.val)>,
+                      "cannot debug print this type, implement dbprint method");
+        os << dispatch.val;
+    }
+
+    return os;
 }
 
 template <typename T, class... Args>
 auto bug_helper(boost::format &f, std::string_view position, std::string_view tail, const T &t,
                 Args &&...args) -> std::enable_if_t<!std::is_pointer_v<T>, std::string> {
     auto [outPos, outTail] = maybeAddSourceInfo(t, position, tail);
-    std::stringstream str;
-    str << t;
-    return bug_helper(f % str.str(), outPos, outTail, std::forward<Args>(args)...);
+    return bug_helper(f % DbprintDispatchRef<T>{t}, outPos, outTail, std::forward<Args>(args)...);
 }
 }  // namespace detail
 

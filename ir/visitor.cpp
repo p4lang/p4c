@@ -833,6 +833,16 @@ Backtrack::trigger::~trigger() {
 #endif /* HAVE_LIBGC */
 }
 
+std::ostream &operator<<(std::ostream &out, const Backtrack::trigger &trigger) {
+    trigger.dbprint(out);
+    return out;
+}
+
+std::ostream &operator<<(std::ostream &out, const SplitFlowVisit_base &split) {
+    split.dbprint(out);
+    return out;
+}
+
 std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_info_t &info) {
     if (info.vclone) out << Visitor::demangle(typeid(*info.vclone).name()) << " ";
     out << "count=" << info.count << "  done=" << info.done;
