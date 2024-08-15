@@ -144,21 +144,22 @@ $(function(){initNavTree('gc_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;cstddef&gt;</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keywordtype">void</span> setup_gc_logging();</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keywordtype">size_t</span> gc_mem_inuse(<span class="keywordtype">size_t</span> *max = 0);  <span class="comment">// trigger GC, return inuse after</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#define ALLOC_TRACE_DEPTH 5</span></div>
-<div class="foldopen" id="foldopen00026" data-start="{" data-end="};">
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="structalloc__trace__cb__t.html">   26</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structalloc__trace__cb__t.html">alloc_trace_cb_t</a> {</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    void (*fn)(<span class="keywordtype">void</span> *, <span class="keywordtype">void</span> **, size_t);</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordtype">void</span> *arg;</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>};</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#define ALLOC_TRACE_DEPTH 5</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keywordtype">void</span> setup_gc_logging();</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keywordtype">size_t</span> gc_mem_inuse(<span class="keywordtype">size_t</span> *max = 0);  <span class="comment">// trigger GC, return inuse after</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="foldopen" id="foldopen00027" data-start="{" data-end="};">
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="structalloc__trace__cb__t.html">   27</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structalloc__trace__cb__t.html">alloc_trace_cb_t</a> {</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    void (*fn)(<span class="keywordtype">void</span> *, <span class="keywordtype">void</span> **, size_t);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keywordtype">void</span> *arg;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>};</div>
 </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><a class="code hl_struct" href="structalloc__trace__cb__t.html">alloc_trace_cb_t</a> set_alloc_trace(<a class="code hl_struct" href="structalloc__trace__cb__t.html">alloc_trace_cb_t</a> cb);</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><a class="code hl_struct" href="structalloc__trace__cb__t.html">alloc_trace_cb_t</a> set_alloc_trace(<span class="keywordtype">void</span> (*fn)(<span class="keywordtype">void</span> *, <span class="keywordtype">void</span> **, <span class="keywordtype">size_t</span>), <span class="keywordtype">void</span> *arg);</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_GC_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="astructalloc__trace__cb__t_html"><div class="ttname"><a href="structalloc__trace__cb__t.html">alloc_trace_cb_t</a></div><div class="ttdef"><b>Definition</b> gc.h:26</div></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><a class="code hl_struct" href="structalloc__trace__cb__t.html">alloc_trace_cb_t</a> set_alloc_trace(<a class="code hl_struct" href="structalloc__trace__cb__t.html">alloc_trace_cb_t</a> cb);</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><a class="code hl_struct" href="structalloc__trace__cb__t.html">alloc_trace_cb_t</a> set_alloc_trace(<span class="keywordtype">void</span> (*fn)(<span class="keywordtype">void</span> *, <span class="keywordtype">void</span> **, <span class="keywordtype">size_t</span>), <span class="keywordtype">void</span> *arg);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_GC_H_ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="astructalloc__trace__cb__t_html"><div class="ttname"><a href="structalloc__trace__cb__t.html">alloc_trace_cb_t</a></div><div class="ttdef"><b>Definition</b> gc.h:27</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

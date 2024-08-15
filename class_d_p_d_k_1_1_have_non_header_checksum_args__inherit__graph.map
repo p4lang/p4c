@@ -1,7 +1,0 @@
-<map id="DPDK::HaveNonHeaderChecksumArgs" name="DPDK::HaveNonHeaderChecksumArgs">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,276,177"/>
-<area shape="rect" id="Node000002" href="$class_inspector.html" title=" " alt="" coords="99,79,182,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="143,118,143,152,138,152,138,118"/>
-<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="109,5,173,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="143,44,143,79,138,79,138,44"/>
-</map>

@@ -132,11 +132,11 @@ $(function(){initNavTree('modules_2testgen_2lib_2logging_8h_source.html',''); in
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;backends/p4tools/common/lib/logging.h&quot;</span>  <span class="comment">// IWYU pragma: export</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;backends/p4tools/common/lib/util.h&quot;</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">namespace </span>P4Tools::P4Testgen {</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">namespace </span>P4::P4Tools::P4Testgen {</div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span>... Arguments&gt;</div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keywordtype">void</span> printTraces(<span class="keyword">const</span> std::string &amp;fmt, Arguments &amp;&amp;...args) {</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <a class="code hl_function" href="namespace_p4_tools.html#a7b751196d7971e3d3b51cac30f897c36">printFeature</a>(<span class="stringliteral">&quot;test_traces&quot;</span>, 4, fmt, std::forward&lt;Arguments&gt;(args)...);</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <a class="code hl_function" href="namespace_p4_1_1_p4_tools.html#a5360e4fcc47cc5519d39cd840de0943e">printFeature</a>(<span class="stringliteral">&quot;test_traces&quot;</span>, 4, fmt, std::forward&lt;Arguments&gt;(args)...);</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>}</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keywordtype">void</span> enableTraceLogging();</div>
@@ -145,10 +145,10 @@ $(function(){initNavTree('modules_2testgen_2lib_2logging_8h_source.html',''); in
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keywordtype">void</span> enableCoverageLogging();</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>}  <span class="comment">// namespace P4Tools::P4Testgen</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>}  <span class="comment">// namespace P4::P4Tools::P4Testgen</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_LOGGING_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="anamespace_p4_tools_html_a7b751196d7971e3d3b51cac30f897c36"><div class="ttname"><a href="namespace_p4_tools.html#a7b751196d7971e3d3b51cac30f897c36">P4Tools::printFeature</a></div><div class="ttdeci">void printFeature(const std::string &amp;label, int level, const std::string &amp;fmt, Arguments &amp;&amp;...args)</div><div class="ttdef"><b>Definition</b> common/lib/logging.h:28</div></div>
+<div class="ttc" id="anamespace_p4_1_1_p4_tools_html_a5360e4fcc47cc5519d39cd840de0943e"><div class="ttname"><a href="namespace_p4_1_1_p4_tools.html#a5360e4fcc47cc5519d39cd840de0943e">P4::P4Tools::printFeature</a></div><div class="ttdeci">void printFeature(const std::string &amp;label, int level, const std::string &amp;fmt, Arguments &amp;&amp;...args)</div><div class="ttdef"><b>Definition</b> common/lib/logging.h:28</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

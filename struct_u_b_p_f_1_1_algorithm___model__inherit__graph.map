@@ -1,9 +1,0 @@
-<map id="UBPF::Algorithm_Model" name="UBPF::Algorithm_Model">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,180,251"/>
-<area shape="rect" id="Node000002" href="$struct_model_1_1_enum___model.html" title="Enum_Model : Type_Model." alt="" coords="15,152,170,177"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,191,95,225,90,225,90,191"/>
-<area shape="rect" id="Node000003" href="$struct_model_1_1_type___model.html" title=" " alt="" coords="19,79,166,104"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="95,118,95,152,90,152,90,118"/>
-<area shape="rect" id="Node000004" href="$struct_model_1_1_elem.html" title=" " alt="" coords="41,5,144,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="95,44,95,79,90,79,90,44"/>
-</map>

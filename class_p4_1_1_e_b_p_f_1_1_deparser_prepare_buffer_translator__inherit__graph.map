@@ -1,0 +1,15 @@
+<map id="P4::EBPF::DeparserPrepareBufferTranslator" name="P4::EBPF::DeparserPrepareBufferTranslator">
+<area shape="rect" id="Node000001" title="This translator emits buffer preparation (eg. which headers will be emitted)" alt="" coords="137,299,331,339"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_e_b_p_f_1_1_deparser_hdr_emit_translator.html" title="This translator emits headers." alt="" coords="5,387,204,427"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="195,349,135,389,132,384,192,344"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_t_c_1_1_deparser_hdr_emit_translator_p_n_a.html" title=" " alt="" coords="228,394,501,419"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="276,344,348,392,346,396,273,349"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_e_b_p_f_1_1_control_body_translator.html" title=" " alt="" coords="119,225,349,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="237,264,237,299,231,299,231,264"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_e_b_p_f_1_1_code_gen_inspector.html" title=" " alt="" coords="131,152,337,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="237,191,237,225,231,225,231,191"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="181,79,287,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="237,118,237,152,231,152,231,118"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="190,5,278,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="237,44,237,79,231,79,231,44"/>
+</map>

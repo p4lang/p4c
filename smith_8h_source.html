@@ -132,28 +132,28 @@ $(function(){initNavTree('smith_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;backends/p4tools/common/p4ctool.h&quot;</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;backends/p4tools/modules/smith/options.h&quot;</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">namespace </span>P4Tools::P4Smith {</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">namespace </span>P4::P4Tools::P4Smith {</div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
 <div class="foldopen" id="foldopen00012" data-start="{" data-end="};">
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="class_p4_tools_1_1_p4_smith_1_1_smith.html">   12</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_tools_1_1_p4_smith_1_1_smith.html">Smith</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_tools_1_1_abstract_p4c_tool.html">AbstractP4cTool</a>&lt;SmithOptions&gt; {</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="class_p4_1_1_p4_tools_1_1_p4_smith_1_1_smith.html">   12</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_p4_tools_1_1_p4_smith_1_1_smith.html">Smith</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_p4_tools_1_1_abstract_p4c_tool.html">AbstractP4cTool</a>&lt;SmithOptions&gt; {</div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> <span class="keyword">protected</span>:</div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    <span class="keywordtype">void</span> registerTarget() <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="keywordtype">int</span> <a class="code hl_function" href="class_p4_tools_1_1_p4_smith_1_1_smith.html#aa1dfa1f6924153ed4a6057ca4e0bb79c">mainImpl</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_tools_1_1_compiler_result.html">CompilerResult</a> &amp;compilerResult) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="keywordtype">int</span> <a class="code hl_function" href="class_p4_1_1_p4_tools_1_1_p4_smith_1_1_smith.html#ad299519042db8c35a257414cf3afa1b4">mainImpl</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_p4_tools_1_1_compiler_result.html">CompilerResult</a> &amp;compilerResult) <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="class_p4_tools_1_1_p4_smith_1_1_smith.html">~Smith</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="class_p4_1_1_p4_tools_1_1_p4_smith_1_1_smith.html">~Smith</a>() = <span class="keywordflow">default</span>;</div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keywordtype">int</span> main(<span class="keyword">const</span> std::vector&lt;const char *&gt; &amp;args);</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>};</div>
 </div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>}  <span class="comment">// namespace P4Tools::P4Smith</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>}  <span class="comment">// namespace P4::P4Tools::P4Smith</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_P4TOOLS_MODULES_SMITH_SMITH_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_p4_tools_1_1_abstract_p4c_tool_html"><div class="ttname"><a href="class_p4_tools_1_1_abstract_p4c_tool.html">P4Tools::AbstractP4cTool</a></div><div class="ttdef"><b>Definition</b> p4ctool.h:22</div></div>
-<div class="ttc" id="aclass_p4_tools_1_1_compiler_result_html"><div class="ttname"><a href="class_p4_tools_1_1_compiler_result.html">P4Tools::CompilerResult</a></div><div class="ttdef"><b>Definition</b> common/compiler/compiler_result.h:14</div></div>
-<div class="ttc" id="aclass_p4_tools_1_1_p4_smith_1_1_smith_html"><div class="ttname"><a href="class_p4_tools_1_1_p4_smith_1_1_smith.html">P4Tools::P4Smith::Smith</a></div><div class="ttdef"><b>Definition</b> smith.h:12</div></div>
-<div class="ttc" id="aclass_p4_tools_1_1_p4_smith_1_1_smith_html_aa1dfa1f6924153ed4a6057ca4e0bb79c"><div class="ttname"><a href="class_p4_tools_1_1_p4_smith_1_1_smith.html#aa1dfa1f6924153ed4a6057ca4e0bb79c">P4Tools::P4Smith::Smith::mainImpl</a></div><div class="ttdeci">int mainImpl(const CompilerResult &amp;compilerResult) override</div><div class="ttdef"><b>Definition</b> smith.cpp:50</div></div>
+<div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_abstract_p4c_tool_html"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_abstract_p4c_tool.html">P4::P4Tools::AbstractP4cTool</a></div><div class="ttdef"><b>Definition</b> p4ctool.h:22</div></div>
+<div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_compiler_result_html"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_compiler_result.html">P4::P4Tools::CompilerResult</a></div><div class="ttdef"><b>Definition</b> common/compiler/compiler_result.h:14</div></div>
+<div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_p4_smith_1_1_smith_html"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_p4_smith_1_1_smith.html">P4::P4Tools::P4Smith::Smith</a></div><div class="ttdef"><b>Definition</b> smith.h:12</div></div>
+<div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_p4_smith_1_1_smith_html_ad299519042db8c35a257414cf3afa1b4"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_p4_smith_1_1_smith.html#ad299519042db8c35a257414cf3afa1b4">P4::P4Tools::P4Smith::Smith::mainImpl</a></div><div class="ttdeci">int mainImpl(const CompilerResult &amp;compilerResult) override</div><div class="ttdef"><b>Definition</b> smith.cpp:50</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

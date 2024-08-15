@@ -1,8 +1,0 @@
-<map id="OnBacktrack&lt; T &gt;" name="OnBacktrack&lt; T &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,148,177"/>
-<area shape="rect" id="Node000002" href="$class_visitor.html" title=" " alt="" coords="45,5,109,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="72,44,65,79,67,119,75,151,70,153,61,119,59,78,67,43"/>
-<area shape="rect" id="Node000003" href="$class_backtrack.html" title=" " alt="" coords="75,79,161,104"/>
-<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="93,41,114,77,109,80,88,44"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="107,117,86,153,81,151,102,115"/>
-</map>

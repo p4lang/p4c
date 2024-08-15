@@ -1,7 +1,0 @@
-<map id="Test::Z3Test::Z3SolverBAnd" name="Test::Z3Test::Z3SolverBAnd">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,204,177"/>
-<area shape="rect" id="Node000002" href="$class_test_1_1_z3_solver_tests.html" title=" " alt="" coords="31,79,178,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,118,107,152,102,152,102,118"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="54,5,155,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="107,44,107,79,102,79,102,44"/>
-</map>

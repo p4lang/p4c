@@ -130,7 +130,7 @@ $(function(){initNavTree('class_p4_1_1_split_flow_visit__base.html',''); initRes
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="copy_src_info_8h_source.html">copySrcInfo.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="visitor_8h_source.html">visitor.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for P4::SplitFlowVisit_base:</div>
 <div class="dyncontent">
@@ -196,9 +196,9 @@ std::vector&lt; <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> * &gt
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
-<tr class="memitem:ab21d8f09a3d64531b5ffd37e3a373aa3" id="r_ab21d8f09a3d64531b5ffd37e3a373aa3"><td class="memItemLeft" align="right" valign="top"><a id="ab21d8f09a3d64531b5ffd37e3a373aa3" name="ab21d8f09a3d64531b5ffd37e3a373aa3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>dump</b> (const <a class="el" href="class_p4_1_1_split_flow_visit__base.html">SplitFlowVisit_base</a> *)</td></tr>
-<tr class="separator:ab21d8f09a3d64531b5ffd37e3a373aa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb91f82440168b466a91d4d2d37c9006" id="r_abb91f82440168b466a91d4d2d37c9006"><td class="memItemLeft" align="right" valign="top"><a id="abb91f82440168b466a91d4d2d37c9006" name="abb91f82440168b466a91d4d2d37c9006"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>dump</b> (const <a class="el" href="class_p4_1_1_split_flow_visit__base.html">SplitFlowVisit_base</a> *split)</td></tr>
+<tr class="separator:abb91f82440168b466a91d4d2d37c9006"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="class_p4_1_1_split_flow_visit__base.html">SplitFlowVisit_base</a> is base class for doing coroutine-like processing of of flows in a visitor. A visit_children method (or a preorder override) can instantiate a local SplitFlowVist subclass to record the various children that need to be visited, and the chain of currently in existence <a class="el" href="class_p4_1_1_split_flow_visit.html">SplitFlowVisit</a> objects will be recorded in split_link. When flows need to be joined (to visit a Dag node with mulitple parents), processing of the node can be 'paused' and other children from the SplitFlowVist can be visited, in order to visit all parents before the child is visited. </p>

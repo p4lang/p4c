@@ -1,9 +1,0 @@
-<map id="P4Tools::P4Testgen::Pna::MetadataCollection" name="P4Tools::P4Testgen::Pna::MetadataCollection">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,240,195,280"/>
-<area shape="rect" id="Node000002" href="$class_p4_tools_1_1_p4_testgen_1_1_test_object.html" title=" " alt="" coords="27,152,173,192"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,206,103,240,97,240,97,206"/>
-<area shape="rect" id="Node000003" href="$class_i_castable.html" title=" " alt="" coords="59,79,141,104"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,118,103,152,97,152,97,118"/>
-<area shape="rect" id="Node000004" href="$struct_r_t_t_i_1_1_base.html" title=" " alt="" coords="55,5,145,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="103,44,103,79,97,79,97,44"/>
-</map>

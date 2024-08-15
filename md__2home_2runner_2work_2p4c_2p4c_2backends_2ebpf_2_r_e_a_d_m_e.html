@@ -133,7 +133,7 @@ Target architectures</h1>
 <p>The <code>xdp_model.p4</code> target adds packet editing support, and is meant to replicate the capabilities of the Linux kernel's XDP environment. It can be viewed as an extension of the previous model which adds a deparser.</p>
 <h1><a class="anchor" id="background"></a>
 Background</h1>
-<p>In this section we give a brief overview of <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> and <a class="el" href="namespace_e_b_p_f.html">EBPF</a>. A detailed treatment of these topics is outside the scope of this text.</p>
+<p>In this section we give a brief overview of <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> and EBPF. A detailed treatment of these topics is outside the scope of this text.</p>
 <h2><a class="anchor" id="p4"></a>
 P4</h2>
 <p><a href="http://p4.org">P4</a> is a domain-specific programming language for specifying the behavior of the dataplanes of network-forwarding elements. The name of the programming language comes from the title of a paper published in the proceedings of SIGCOMM Computer Communications Review in 2014: <a href="http://www.sigcomm.org/ccr/papers/2014/July/0000000.0000004">Programming Protocol-Independent Packet Processors</a></p>
@@ -167,7 +167,7 @@ Kernel hooks</h3>
 <p>eBPF programs are inserted into the kernel using <em>hooks</em>. There are several types of hooks available:</p>
 <ul>
 <li>any function entry point in the kernel can act as a hook; attaching an eBPF program to a function <code>foo()</code> will cause the eBPF program to execute every time some kernel thread executes <code>foo()</code>.</li>
-<li>eBPF programs can also be attached using the Linux Traffic Control (<a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a>) subsystem, in the network packet processing datapath. Such programs can be used as <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> classifiers and actions.</li>
+<li>eBPF programs can also be attached using the Linux Traffic Control (TC) subsystem, in the network packet processing datapath. Such programs can be used as TC classifiers and actions.</li>
 <li>eBPF programs can also be attached to sockets or network interfaces. In this case they can be used for processing packets that flow through the socket/interface.</li>
 </ul>
 <p>eBPF programs can be used for many purposes; the main use cases are dynamic tracing and monitoring, and packet processing. We are mostly interested in the latter use case in this document.</p>
@@ -277,10 +277,10 @@ Using the generated code</h3>
 <p>The resulting file contains the complete data structures, tables, and a C function named <code>ebpf_filter</code> that implements the P4-specified data-plane. This C file can be manipulated using clang or BCC tools; please refer to the BCC project documentation and sample test files of the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> to eBPF source code for an in-depth understanding.</p>
 <p>The general C-file alone will not compile. It depends on headers specific to the generated target. For the default target, this is the <code>kernel_ebpf.h</code> file which can be found in the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> backend under <code>p4c/backends/ebpf/runtime</code>. The <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> backend also provides a makefile and sample header which allow for quick generation and automatic compilation of the generated file.</p>
 <p><code>make -f p4c/backends/ebpf/runtime/kernel.mk BPFOBJ=out.o P4FILE=PROGRAM.p4</code></p>
-<p>where -f path is the path to the makefile, BPFOBJ is the output ebpf byte code and P4FILE is the input <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program. This command sequence will generate an eBPF program, which can be loaded into the kernel using <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a>.</p>
+<p>where -f path is the path to the makefile, BPFOBJ is the output ebpf byte code and P4FILE is the input <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program. This command sequence will generate an eBPF program, which can be loaded into the kernel using TC.</p>
 <h4><a class="anchor" id="connecting-the-generated-program-with-the-tc"></a>
 Connecting the generated program with the TC</h4>
-<p>The eBPF code that is generated is can be used as a classifier attached to the ingress packet path using the Linux <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> subsystem. The same eBPF code should be attached to all interfaces. Note however that all eBPF code instances share a single set of tables, which are used to control the program behavior.</p>
+<p>The eBPF code that is generated is can be used as a classifier attached to the ingress packet path using the Linux TC subsystem. The same eBPF code should be attached to all interfaces. Note however that all eBPF code instances share a single set of tables, which are used to control the program behavior.</p>
 <p><code>tc qdisc add dev IFACE clsact</code></p>
 <p>Creates a classifier qdisc on the respective interface. Once created, eBPF programs can be attached to it using the following command:</p>
 <p><code>tc filter add dev IFACE egress bpf da obj YOUREBPFCODE section prog verbose</code></p>

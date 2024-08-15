@@ -1,6 +1,8 @@
 var class_p4_1_1_visitor =
 [
+    [ "ChangeTracker", "class_p4_1_1_visitor_1_1_change_tracker.html", "class_p4_1_1_visitor_1_1_change_tracker" ],
     [ "profile_t", "class_p4_1_1_visitor_1_1profile__t.html", null ],
+    [ "Tracker", "class_p4_1_1_visitor_1_1_tracker.html", "class_p4_1_1_visitor_1_1_tracker" ],
     [ "flow_merge", "class_p4_1_1_visitor.html#aa444d0de8abca03aa85b441b672a45a6", null ],
     [ "flow_merge_global_to", "class_p4_1_1_visitor.html#a2e64448ceb66f08068beb55ab7028f12", null ],
     [ "getCurrentNode", "class_p4_1_1_visitor.html#a12f5bd264f47bfad006f8456f4e53130", null ],

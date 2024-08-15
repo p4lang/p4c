@@ -1,9 +1,0 @@
-<map id="P4Tools::CompileContext&lt; OptionsType &gt;" name="P4Tools::CompileContext&lt; OptionsType &gt;">
-<area shape="rect" id="Node000001" title="A compilation context for P4Tools that provides a custom compiler configuration." alt="" coords="5,225,189,265"/>
-<area shape="rect" id="Node000002" href="$class_p4_c_context.html" title=" " alt="" coords="48,152,147,177"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,191,100,225,95,225,95,191"/>
-<area shape="rect" id="Node000003" href="$class_base_compile_context.html" title=" " alt="" coords="18,79,177,104"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="100,118,100,152,95,152,95,118"/>
-<area shape="rect" id="Node000004" href="$class_i_compile_context.html" title=" " alt="" coords="32,5,163,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="100,44,100,79,95,79,95,44"/>
-</map>

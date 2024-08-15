@@ -257,13 +257,13 @@ Debugging</h2>
 <li>To debug the build process you can run <code>make V=1</code></li>
 <li>The top-level <code>.gdbinit</code> file has some additional pretty-printers. If you start gdb in this folder (p4c), then it should be automatically used. Otherwise you can run at the gdb prompt <code>source path-to-p4c/.gdbinit</code>.</li>
 <li>To debug the compiler parser you can set the environment variable <code>YYDEBUG</code> to 1</li>
-<li>The following <code><a class="el" href="class_i_r_1_1_node.html">IR::Node</a></code> methods can be used to print nice representations of compiler data structures:<ul>
+<li>The following <code>IR::Node</code> methods can be used to print nice representations of compiler data structures:<ul>
 <li><code>void dbprint(std::ostream&amp; out) const</code>: this method is used when logging information. It should print useful debug information, intended for consumption by compiler writers.</li>
 <li><code>cstring toString() const</code>: this method is used when reporting error messages to compiler users. It should only display information that is related to the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> user program, and never internal compiler data structures.</li>
 </ul>
 </li>
 <li>Use the LOG* macros for writing debug messages. gdb misbehaves frequently, so log messages are the best way to debug your programs. The number in the function name is the debug verbosity. The higher, the less important the message. This macro invokes the <code>dbprint</code> method on objects that provide it. Here is an example usage: <code>LOG1("Replacing " &lt;&lt; id &lt;&lt; " with " &lt;&lt; newid);</code></li>
-<li>Keep the compiler output deterministic; watch for iterators over sets and maps, which may introduce non-deterministic orders. Use our own <code><a class="el" href="classordered__map.html">ordered_map</a></code> and <code><a class="el" href="classordered__set.html">ordered_set</a></code> if you iterate, to keep iteration order deterministic.</li>
+<li>Keep the compiler output deterministic; watch for iterators over sets and maps, which may introduce non-deterministic orders. Use our own <code>ordered_map</code> and <code>ordered_set</code> if you iterate, to keep iteration order deterministic.</li>
 <li><p class="startli">You can control the logging level per compiler source-file with the <code>-T</code> compiler command-line flag. The flag is followed by a list of file patterns and a numeric level after a colon <code>:</code>. This flag enables all logging messages above the specified level for all compiler source files that match the file pattern.</p>
 <p class="startli">For example, to enable logging in file <code>node.cpp</code> above level 1, and in file <code>pass_manager.cpp</code> above level 2, use the following compiler command-line option: <code>-Tnode:1,pass_manager:2</code></p>
 <p class="startli">To execute LOG statements in a header file you must supply the complete name of the header file, e.g.: <code>-TfunctionsInlining.h:3</code>.</p>
@@ -283,7 +283,7 @@ Testing</h2>
 <li>To run a single test case execute &lsquo;ctest --output-on-failure -R &rsquo;&lt;test&gt;'<code>. Example:</code>ctest &ndash;output-on-failure -R 'psa-switch-expression-without-default'`</li>
 <li>Add unit tests in <code>test/gtest</code></li>
 </ul>
-<p>Test programs with file names ending in <code>-bmv2.p4</code> or <code>-ebpf.p4</code> may have an STF (Simple Test Framework) file with file name suffix <code>.stf</code> associated with them. If the machine on which you are running has a copy of <code>simple_switch</code> or the <a class="el" href="namespace_e_b_p_f.html">EBPF</a> software switch installed, not only will those programs be compiled for those targets, but also table entries optionally specified in the STF file will be installed, and input packets will be sent to the data plane and output packets checked against expected packets in the STF file.</p>
+<p>Test programs with file names ending in <code>-bmv2.p4</code> or <code>-ebpf.p4</code> may have an STF (Simple Test Framework) file with file name suffix <code>.stf</code> associated with them. If the machine on which you are running has a copy of <code>simple_switch</code> or the EBPF software switch installed, not only will those programs be compiled for those targets, but also table entries optionally specified in the STF file will be installed, and input packets will be sent to the data plane and output packets checked against expected packets in the STF file.</p>
 <p>When pull requests are created on the p4c Github repository, the changes are built, and the tests executed via <code>make check</code>. These tests are run with a "recently built" version of <code>simple_switch</code> from the <a href="https://github.com/p4lang/behavioral-model">p4lang/behavioral-model</a> repository, but it can be several hours old. If you are working on P4C features that rely on newly committed changes to <code>simple_switch</code> you can find out which <code>simple_switch</code> version these P4C automated tests are using at the link below:</p>
 <ul>
 <li><a href="https://hub.docker.com/r/p4lang/behavioral-model/builds">https://hub.docker.com/r/p4lang/behavioral-model/builds</a></li>
@@ -328,7 +328,7 @@ Coding conventions</h2>
 <li>Use <code>error()</code> and <code>warning()</code> for error reporting. See the <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_coding_standard_philosophy.html#handling-errors">guidelines</a> for more details.</li>
 <li>Use <code>LOGn()</code> for log messages &ndash; the <code>n</code> is an integer constant for verbosity level. These can be controlled on a per-source-file basis with the -T option. LOG1 should be used for general messages, so that running with -T*:1 (turning on all LOG1 messages) is not too overwhelming. LOG2 should be used to print information about the results of a module that later passes may need to debug them. Details of what a module or pass is doing and looking at (only of interest when debugging that code) should be at LOG4 or higher.</li>
 <li>Use the <code>vector</code> and <code>array</code> wrappers for <code>std::vector</code> and <code>std::array</code> (these do bounds checking on all accesses).</li>
-<li>Use <code><a class="el" href="classordered__map.html">ordered_map</a></code> and <code><a class="el" href="classordered__set.html">ordered_set</a></code> when you need to iterate; they provide deterministic iterators.</li>
+<li>Use <code>ordered_map</code> and <code>ordered_set</code> when you need to iterate; they provide deterministic iterators.</li>
 </ul>
 </li>
 </ul>

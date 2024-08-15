@@ -138,14 +138,14 @@ Directory Structure</h1>
 <div class="line">    └─ testgen       ── P4Testgen: a test-case generator for P4 programs.</div>
 </div><!-- fragment --><h1><a class="anchor" id="p4tools"></a>
 P4Tools</h1>
-<p><a class="el" href="namespace_p4_tools.html">P4Tools</a> is a collection of tools that make testing <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> targets and programs a little easier. So far the platform supports the following tools and projects:</p>
+<p>P4Tools is a collection of tools that make testing <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> targets and programs a little easier. So far the platform supports the following tools and projects:</p>
 <ul>
 <li><a href="https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/testgen">P4Testgen</a>: An input-output test case generator for <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a>.</li>
 <li><a href="https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/smith">P4Smith</a>: A random <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program generator in the spirit of Csmith.</li>
 </ul>
 <h1><a class="anchor" id="building"></a>
 Building</h1>
-<p>Please see the general installation instructions <a href="https://github.com/p4lang/p4c#installing-p4c-from-source">here</a>. <a class="el" href="namespace_p4_tools.html">P4Tools</a> can be built using the following CMAKE configuration in the P4C repository.</p>
+<p>Please see the general installation instructions <a href="https://github.com/p4lang/p4c#installing-p4c-from-source">here</a>. P4Tools can be built using the following CMAKE configuration in the P4C repository.</p>
 <div class="fragment"><div class="line">mkdir build</div>
 <div class="line">cd build</div>
 <div class="line">cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DENABLE_TEST_TOOLS=ON</div>
@@ -171,7 +171,7 @@ Development Style</h1>
 </ul>
 <h2><a class="anchor" id="c-coding-style"></a>
 C++ Coding style</h2>
-<p><a class="el" href="namespace_p4_tools.html">P4Tools</a> in general follows the <a href="https://github.com/p4lang/p4c/blob/main/docs/README.md#coding-conventions">P4C coding style</a>. Some deviations from the Style Guide are highlighted below.</p>
+<p>P4Tools in general follows the <a href="https://github.com/p4lang/p4c/blob/main/docs/README.md#coding-conventions">P4C coding style</a>. Some deviations from the Style Guide are highlighted below.</p>
 <ul>
 <li>Comments are important. The Style Guide's <a href="https://google.github.io/styleguide/cppguide.html#Comments">section on comments</a> is required reading.<ul>
 <li>Classes, methods, and fields are documented with triple-slash Doxygen-style comments: <code> /// An example class demonstrating a documentation comment. class C {}; </code></li>

@@ -144,42 +144,56 @@ $(function(){initNavTree('dpdk_2constants_8h_source.html',''); initResizable(tru
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;lib/cstring.h&quot;</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> table_handle_prefix = 0x00010000;</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> action_handle_prefix = 0x00020000;</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> dpdk_default_table_size = 65536;</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define DPDK_MAX_SHIFT_AMOUNT 64</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> dpdk_learner_max_configurable_timeout_values = 8;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> default_learner_table_size = 0x10000;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> default_learner_table_timeout[dpdk_learner_max_configurable_timeout_values] = {</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    10, 30, 60, 120, 300, 43200, 120, 120};</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="keyword">const</span> <a class="code hl_class" href="classcstring.html">cstring</a> bfrtSchemaVersion = cstring::literal(<span class="stringliteral">&quot;1.0.0&quot;</span>);</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="keyword">const</span> <a class="code hl_class" href="classcstring.html">cstring</a> tdiSchemaVersion = cstring::literal(<span class="stringliteral">&quot;0.1&quot;</span>);</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">// FIXME: These should be enum</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#define JHASH0 0</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#define CRC1 1</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#define CRC2 2</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#define CRC3 3</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#define CRC4 4</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#define JHASH5 5</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#define TOEPLITZ 6</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> initial_member_id = 0;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> initial_group_id = 0xFFFFFFFF;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#define IPSEC_SUCCESS 0</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#define IPSEC_PORT_REG_INDEX 0</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#define IPSEC_PORT_REG_SIZE 1</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#define IPSEC_PORT_REG_INDEX_BITWIDTH 32</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#define IPSEC_PORT_REG_INITVAL_BITWIDTH 32</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#define NET_TO_HOST 0</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="keyword">const</span> <span class="keywordtype">int</span> dpdk_max_operand_size = 64;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_DPDK_CONSTANTS_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclasscstring_html"><div class="ttname"><a href="classcstring.html">cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:82</div></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="namespace_p4.html#a1c25849ac917e7b9f22873a29cc6c91b">   25</a></span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code hl_variable" href="namespace_p4.html#a1c25849ac917e7b9f22873a29cc6c91b">table_handle_prefix</a> = 0x00010000;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> action_handle_prefix = 0x00020000;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="namespace_p4.html#a4a8660f94a6724c3220d35ca163d7085">   29</a></span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code hl_variable" href="namespace_p4.html#a4a8660f94a6724c3220d35ca163d7085">dpdk_default_table_size</a> = 65536;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#define DPDK_MAX_SHIFT_AMOUNT 64</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="namespace_p4.html#a89dcb743b9b946f0b26429bff33671bc">   33</a></span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code hl_variable" href="namespace_p4.html#a89dcb743b9b946f0b26429bff33671bc">dpdk_learner_max_configurable_timeout_values</a> = 8;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> default_learner_table_size = 0x10000;</div>
+<div class="foldopen" id="foldopen00036" data-start="{" data-end="};">
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="namespace_p4.html#a8dc4e88c9f1cd7362f0d6a96a1c45324">   36</a></span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code hl_variable" href="namespace_p4.html#a8dc4e88c9f1cd7362f0d6a96a1c45324">default_learner_table_timeout</a>[<a class="code hl_variable" href="namespace_p4.html#a89dcb743b9b946f0b26429bff33671bc">dpdk_learner_max_configurable_timeout_values</a>] = {</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    10, 30, 60, 120, 300, 43200, 120, 120};</div>
+</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="namespace_p4.html#afe1ef4bd2d0d3ac1b220571d2f6e56d8">   40</a></span><span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> <a class="code hl_variable" href="namespace_p4.html#afe1ef4bd2d0d3ac1b220571d2f6e56d8">bfrtSchemaVersion</a> = cstring::literal(<span class="stringliteral">&quot;1.0.0&quot;</span>);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> tdiSchemaVersion = cstring::literal(<span class="stringliteral">&quot;0.1&quot;</span>);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">// FIXME: These should be enum</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#define JHASH0 0</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#define CRC1 1</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#define CRC2 2</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#define CRC3 3</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#define CRC4 4</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#define JHASH5 5</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#define TOEPLITZ 6</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="namespace_p4.html#a889852f6d7d3bfe21afbba8d4b86b581">   53</a></span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code hl_variable" href="namespace_p4.html#a889852f6d7d3bfe21afbba8d4b86b581">initial_member_id</a> = 0;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="keyword">const</span> <span class="keywordtype">unsigned</span> initial_group_id = 0xFFFFFFFF;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#define IPSEC_SUCCESS 0</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#define IPSEC_PORT_REG_INDEX 0</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#define IPSEC_PORT_REG_SIZE 1</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#define IPSEC_PORT_REG_INDEX_BITWIDTH 32</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#define IPSEC_PORT_REG_INITVAL_BITWIDTH 32</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#define NET_TO_HOST 0</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="namespace_p4.html#a0e819dcdecc9b11a4df0244d8657256b">   65</a></span><span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code hl_variable" href="namespace_p4.html#a0e819dcdecc9b11a4df0244d8657256b">dpdk_max_operand_size</a> = 64;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_DPDK_CONSTANTS_H_ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
+<div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
+<div class="ttc" id="anamespace_p4_html_a0e819dcdecc9b11a4df0244d8657256b"><div class="ttname"><a href="namespace_p4.html#a0e819dcdecc9b11a4df0244d8657256b">P4::dpdk_max_operand_size</a></div><div class="ttdeci">const int dpdk_max_operand_size</div><div class="ttdoc">Maximum operand size for unary, binary and ternary operations.</div><div class="ttdef"><b>Definition</b> dpdk/constants.h:65</div></div>
+<div class="ttc" id="anamespace_p4_html_a1c25849ac917e7b9f22873a29cc6c91b"><div class="ttname"><a href="namespace_p4.html#a1c25849ac917e7b9f22873a29cc6c91b">P4::table_handle_prefix</a></div><div class="ttdeci">const unsigned table_handle_prefix</div><div class="ttdoc">Unique handle for action and table.</div><div class="ttdef"><b>Definition</b> dpdk/constants.h:25</div></div>
+<div class="ttc" id="anamespace_p4_html_a4a8660f94a6724c3220d35ca163d7085"><div class="ttname"><a href="namespace_p4.html#a4a8660f94a6724c3220d35ca163d7085">P4::dpdk_default_table_size</a></div><div class="ttdeci">const unsigned dpdk_default_table_size</div><div class="ttdoc">Default values.</div><div class="ttdef"><b>Definition</b> dpdk/constants.h:29</div></div>
+<div class="ttc" id="anamespace_p4_html_a889852f6d7d3bfe21afbba8d4b86b581"><div class="ttname"><a href="namespace_p4.html#a889852f6d7d3bfe21afbba8d4b86b581">P4::initial_member_id</a></div><div class="ttdeci">const unsigned initial_member_id</div><div class="ttdoc">Initial values for group_id and member_id for action selector and action profile tables.</div><div class="ttdef"><b>Definition</b> dpdk/constants.h:53</div></div>
+<div class="ttc" id="anamespace_p4_html_a89dcb743b9b946f0b26429bff33671bc"><div class="ttname"><a href="namespace_p4.html#a89dcb743b9b946f0b26429bff33671bc">P4::dpdk_learner_max_configurable_timeout_values</a></div><div class="ttdeci">const unsigned dpdk_learner_max_configurable_timeout_values</div><div class="ttdoc">Maximum number of configurable timeout values.</div><div class="ttdef"><b>Definition</b> dpdk/constants.h:33</div></div>
+<div class="ttc" id="anamespace_p4_html_a8dc4e88c9f1cd7362f0d6a96a1c45324"><div class="ttname"><a href="namespace_p4.html#a8dc4e88c9f1cd7362f0d6a96a1c45324">P4::default_learner_table_timeout</a></div><div class="ttdeci">const unsigned default_learner_table_timeout[dpdk_learner_max_configurable_timeout_values]</div><div class="ttdoc">Default timeout values for learner table to support common protocol states.</div><div class="ttdef"><b>Definition</b> dpdk/constants.h:36</div></div>
+<div class="ttc" id="anamespace_p4_html_afe1ef4bd2d0d3ac1b220571d2f6e56d8"><div class="ttname"><a href="namespace_p4.html#afe1ef4bd2d0d3ac1b220571d2f6e56d8">P4::bfrtSchemaVersion</a></div><div class="ttdeci">const cstring bfrtSchemaVersion</div><div class="ttdoc">JSON schema versions.</div><div class="ttdef"><b>Definition</b> dpdk/constants.h:40</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

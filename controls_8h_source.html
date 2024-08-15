@@ -144,18 +144,18 @@ $(function(){initNavTree('controls_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;graphs.h&quot;</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacegraphs.html">graphs</a> {</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4_1_1graphs.html">P4::graphs</a> {</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
 <div class="foldopen" id="foldopen00024" data-start="{" data-end="};">
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="classgraphs_1_1_control_graphs.html">   24</a></span><span class="keyword">class </span><a class="code hl_class" href="classgraphs_1_1_control_graphs.html">ControlGraphs</a> : <span class="keyword">public</span> <a class="code hl_class" href="classgraphs_1_1_graphs.html">Graphs</a> {</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="class_p4_1_1graphs_1_1_control_graphs.html">   24</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1graphs_1_1_control_graphs.html">ControlGraphs</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1graphs_1_1_graphs.html">Graphs</a> {</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> <span class="keyword">public</span>:</div>
 <div class="foldopen" id="foldopen00026" data-start="{" data-end="};">
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="classgraphs_1_1_control_graphs_1_1_control_stack.html">   26</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classgraphs_1_1_control_graphs_1_1_control_stack.html">ControlStack</a> {</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="class_p4_1_1graphs_1_1_control_graphs_1_1_control_stack.html">   26</a></span>    <span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1graphs_1_1_control_graphs_1_1_control_stack.html">ControlStack</a> {</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>     <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        Graph *pushBack(Graph &amp;currentSubgraph, <span class="keyword">const</span> <a class="code hl_class" href="classcstring.html">cstring</a> &amp;name);</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        Graph *pushBack(Graph &amp;currentSubgraph, <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> &amp;name);</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        Graph *popBack();</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        Graph *getSubgraph() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <a class="code hl_class" href="classcstring.html">cstring</a> getName(<span class="keyword">const</span> <a class="code hl_class" href="classcstring.html">cstring</a> &amp;name) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> getName(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> &amp;name) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="keywordtype">bool</span> isEmpty() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>     <span class="keyword">private</span>:</div>
@@ -164,7 +164,7 @@ $(function(){initNavTree('controls_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    };</div>
 </div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <a class="code hl_class" href="classgraphs_1_1_control_graphs.html">ControlGraphs</a>(<a class="code hl_class" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="code hl_class" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, std::filesystem::path graphsDir);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <a class="code hl_class" href="class_p4_1_1graphs_1_1_control_graphs.html">ControlGraphs</a>(<a class="code hl_class" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="code hl_class" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, std::filesystem::path graphsDir);</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::PackageBlock *block) <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::ControlBlock *block) <span class="keyword">override</span>;</div>
@@ -185,23 +185,23 @@ $(function(){initNavTree('controls_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> <span class="keyword">private</span>:</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <a class="code hl_class" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap;</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <a class="code hl_class" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap;</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keyword">const</span> <a class="code hl_class" href="classcstring.html">cstring</a> graphsDir;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> graphsDir;</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    Parents return_parents{};</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    ControlStack controlStack{};</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    std::optional&lt;cstring&gt; instanceName{};</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>};</div>
 </div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>}  <span class="comment">// namespace graphs</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>}  <span class="comment">// namespace P4::graphs</span></div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_GRAPHS_CONTROLS_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1_reference_map_html"><div class="ttname"><a href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a></div><div class="ttdoc">Class used to encode maps from paths to declarations.</div><div class="ttdef"><b>Definition</b> referenceMap.h:66</div></div>
 <div class="ttc" id="aclass_p4_1_1_type_map_html"><div class="ttname"><a href="class_p4_1_1_type_map.html">P4::TypeMap</a></div><div class="ttdef"><b>Definition</b> typeMap.h:41</div></div>
-<div class="ttc" id="aclasscstring_html"><div class="ttname"><a href="classcstring.html">cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:82</div></div>
-<div class="ttc" id="aclassgraphs_1_1_control_graphs_1_1_control_stack_html"><div class="ttname"><a href="classgraphs_1_1_control_graphs_1_1_control_stack.html">graphs::ControlGraphs::ControlStack</a></div><div class="ttdef"><b>Definition</b> controls.h:26</div></div>
-<div class="ttc" id="aclassgraphs_1_1_control_graphs_html"><div class="ttname"><a href="classgraphs_1_1_control_graphs.html">graphs::ControlGraphs</a></div><div class="ttdef"><b>Definition</b> controls.h:24</div></div>
-<div class="ttc" id="aclassgraphs_1_1_graphs_html"><div class="ttname"><a href="classgraphs_1_1_graphs.html">graphs::Graphs</a></div><div class="ttdef"><b>Definition</b> graphs.h:97</div></div>
-<div class="ttc" id="anamespacegraphs_html"><div class="ttname"><a href="namespacegraphs.html">graphs</a></div><div class="ttdef"><b>Definition</b> controls.cpp:30</div></div>
+<div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
+<div class="ttc" id="aclass_p4_1_1graphs_1_1_control_graphs_1_1_control_stack_html"><div class="ttname"><a href="class_p4_1_1graphs_1_1_control_graphs_1_1_control_stack.html">P4::graphs::ControlGraphs::ControlStack</a></div><div class="ttdef"><b>Definition</b> controls.h:26</div></div>
+<div class="ttc" id="aclass_p4_1_1graphs_1_1_control_graphs_html"><div class="ttname"><a href="class_p4_1_1graphs_1_1_control_graphs.html">P4::graphs::ControlGraphs</a></div><div class="ttdef"><b>Definition</b> controls.h:24</div></div>
+<div class="ttc" id="aclass_p4_1_1graphs_1_1_graphs_html"><div class="ttname"><a href="class_p4_1_1graphs_1_1_graphs.html">P4::graphs::Graphs</a></div><div class="ttdef"><b>Definition</b> graphs.h:97</div></div>
+<div class="ttc" id="anamespace_p4_1_1graphs_html"><div class="ttname"><a href="namespace_p4_1_1graphs.html">P4::graphs</a></div><div class="ttdef"><b>Definition</b> controls.cpp:30</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

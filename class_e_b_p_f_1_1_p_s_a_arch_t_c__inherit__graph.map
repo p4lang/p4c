@@ -1,7 +1,0 @@
-<map id="EBPF::PSAArchTC" name="EBPF::PSAArchTC">
-<area shape="rect" id="Node000001" title=" " alt="" coords="33,152,167,177"/>
-<area shape="rect" id="Node000002" href="$class_e_b_p_f_1_1_p_s_a_ebpf_generator.html" title=" " alt="" coords="9,79,191,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,118,103,152,97,152,97,118"/>
-<area shape="rect" id="Node000003" href="$class_e_b_p_f_1_1_ebpf_code_generator.html" title=" " alt="" coords="5,5,195,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,44,103,79,97,79,97,44"/>
-</map>

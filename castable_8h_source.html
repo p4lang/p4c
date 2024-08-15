@@ -147,53 +147,58 @@ $(function(){initNavTree('castable_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;lib/exceptions.h&quot;</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;lib/rtti.h&quot;</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="foldopen" id="foldopen00034" data-start="{" data-end="};">
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="class_i_castable.html">   34</a></span><span class="keyword">class </span><a class="code hl_class" href="class_i_castable.html">ICastable</a> : <span class="keyword">public</span> <span class="keyword">virtual</span> <a class="code hl_struct" href="struct_r_t_t_i_1_1_base.html">RTTI::Base</a> {</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="class_i_castable.html">~ICastable</a>() = <span class="keywordflow">default</span>;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="foldopen" id="foldopen00040" data-start="{" data-end="}">
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="class_i_castable.html#aa37d586a3dbb4df73346dc5d3803ff20">   40</a></span>    <span class="keyword">const</span> T &amp;<a class="code hl_function" href="class_i_castable.html#aa37d586a3dbb4df73346dc5d3803ff20">as</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="keywordflow">return</span> *<a class="code hl_function" href="class_i_castable.html#afdbd28b81119a33a898fa8511bf2ef6b">checkedTo&lt;T&gt;</a>();</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    }</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="foldopen" id="foldopen00036" data-start="{" data-end="};">
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="class_p4_1_1_i_castable.html">   36</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_i_castable.html">ICastable</a> : <span class="keyword">public</span> <span class="keyword">virtual</span> <a class="code hl_struct" href="struct_p4_1_1_r_t_t_i_1_1_base.html">RTTI::Base</a> {</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="class_p4_1_1_i_castable.html">~ICastable</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="foldopen" id="foldopen00042" data-start="{" data-end="}">
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="class_p4_1_1_i_castable.html#ab4f93b9a4d1cfab6f27f4a4689ad26a0">   42</a></span>    <span class="keyword">const</span> T &amp;<a class="code hl_function" href="class_p4_1_1_i_castable.html#ab4f93b9a4d1cfab6f27f4a4689ad26a0">as</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <span class="keywordflow">return</span> *<a class="code hl_function" href="class_p4_1_1_i_castable.html#a59018e0210012afd4cf45b5625b3a1c8">checkedTo&lt;T&gt;</a>();</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    }</div>
 </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="foldopen" id="foldopen00046" data-start="{" data-end="}">
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="class_i_castable.html#a88c3b2d9d52f83909582425b471aa23b">   46</a></span>    T &amp;<a class="code hl_function" href="class_i_castable.html#a88c3b2d9d52f83909582425b471aa23b">as</a>() {</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        <span class="keywordflow">return</span> *<a class="code hl_function" href="class_i_castable.html#afdbd28b81119a33a898fa8511bf2ef6b">checkedTo&lt;T&gt;</a>();</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    }</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="foldopen" id="foldopen00048" data-start="{" data-end="}">
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="class_p4_1_1_i_castable.html#a34de8158d7d9573541c28927ccf8195a">   48</a></span>    T &amp;<a class="code hl_function" href="class_p4_1_1_i_castable.html#a34de8158d7d9573541c28927ccf8195a">as</a>() {</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="keywordflow">return</span> *<a class="code hl_function" href="class_p4_1_1_i_castable.html#a59018e0210012afd4cf45b5625b3a1c8">checkedTo&lt;T&gt;</a>();</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    }</div>
 </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="foldopen" id="foldopen00052" data-start="{" data-end="}">
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="class_i_castable.html#afdbd28b81119a33a898fa8511bf2ef6b">   52</a></span>    <span class="keyword">const</span> T *<a class="code hl_function" href="class_i_castable.html#afdbd28b81119a33a898fa8511bf2ef6b">checkedTo</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        <span class="keyword">auto</span> *result = <a class="code hl_function" href="struct_r_t_t_i_1_1_base.html#a60ec2358ab44340b7fa2a17f1b2f3a59">to&lt;T&gt;</a>();</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        BUG_CHECK(result, <span class="stringliteral">&quot;Cast failed: %1% is not a %2%&quot;</span>, <span class="keyword">this</span>, <span class="keyword">typeid</span>(T).name());</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        <span class="keywordflow">return</span> result;</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    }</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="foldopen" id="foldopen00054" data-start="{" data-end="}">
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="class_p4_1_1_i_castable.html#a59018e0210012afd4cf45b5625b3a1c8">   54</a></span>    <span class="keyword">const</span> T *<a class="code hl_function" href="class_p4_1_1_i_castable.html#a59018e0210012afd4cf45b5625b3a1c8">checkedTo</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        <span class="keyword">auto</span> *result = <a class="code hl_function" href="struct_p4_1_1_r_t_t_i_1_1_base.html#a15a2e4484076dcafa2964ede26024a61">to&lt;T&gt;</a>();</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        BUG_CHECK(result, <span class="stringliteral">&quot;Cast failed: %1% is not a %2%&quot;</span>, <span class="keyword">this</span>, <span class="keyword">typeid</span>(T).name());</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        <span class="keywordflow">return</span> result;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    }</div>
 </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="foldopen" id="foldopen00060" data-start="{" data-end="}">
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="class_i_castable.html#af6defaa45e11c0a3d9164814695c69a8">   60</a></span>    T *<a class="code hl_function" href="class_i_castable.html#af6defaa45e11c0a3d9164814695c69a8">checkedTo</a>() {</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        <span class="keyword">auto</span> *result = <a class="code hl_function" href="struct_r_t_t_i_1_1_base.html#a60ec2358ab44340b7fa2a17f1b2f3a59">to&lt;T&gt;</a>();</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        BUG_CHECK(result, <span class="stringliteral">&quot;Cast failed: %1% is not a %2%&quot;</span>, <span class="keyword">this</span>, <span class="keyword">typeid</span>(T).name());</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keywordflow">return</span> result;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    }</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="foldopen" id="foldopen00062" data-start="{" data-end="}">
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="class_p4_1_1_i_castable.html#abea74d1b2272f84f2876f4de7a485756">   62</a></span>    T *<a class="code hl_function" href="class_p4_1_1_i_castable.html#abea74d1b2272f84f2876f4de7a485756">checkedTo</a>() {</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keyword">auto</span> *result = <a class="code hl_function" href="struct_p4_1_1_r_t_t_i_1_1_base.html#a15a2e4484076dcafa2964ede26024a61">to&lt;T&gt;</a>();</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        BUG_CHECK(result, <span class="stringliteral">&quot;Cast failed: %1% is not a %2%&quot;</span>, <span class="keyword">this</span>, <span class="keyword">typeid</span>(T).name());</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="keywordflow">return</span> result;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    }</div>
 </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>};</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>};</div>
 </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_CASTABLE_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_i_castable_html"><div class="ttname"><a href="class_i_castable.html">ICastable</a></div><div class="ttdef"><b>Definition</b> castable.h:34</div></div>
-<div class="ttc" id="aclass_i_castable_html_a88c3b2d9d52f83909582425b471aa23b"><div class="ttname"><a href="class_i_castable.html#a88c3b2d9d52f83909582425b471aa23b">ICastable::as</a></div><div class="ttdeci">T &amp; as()</div><div class="ttdoc">Tries to convert the class to type T. A BUG occurs if the cast fails.</div><div class="ttdef"><b>Definition</b> castable.h:46</div></div>
-<div class="ttc" id="aclass_i_castable_html_aa37d586a3dbb4df73346dc5d3803ff20"><div class="ttname"><a href="class_i_castable.html#aa37d586a3dbb4df73346dc5d3803ff20">ICastable::as</a></div><div class="ttdeci">const T &amp; as() const</div><div class="ttdoc">Tries to convert the class to type T. A BUG occurs if the cast fails.</div><div class="ttdef"><b>Definition</b> castable.h:40</div></div>
-<div class="ttc" id="aclass_i_castable_html_af6defaa45e11c0a3d9164814695c69a8"><div class="ttname"><a href="class_i_castable.html#af6defaa45e11c0a3d9164814695c69a8">ICastable::checkedTo</a></div><div class="ttdeci">T * checkedTo()</div><div class="ttdoc">Performs a checked cast. A BUG occurs if the cast fails.</div><div class="ttdef"><b>Definition</b> castable.h:60</div></div>
-<div class="ttc" id="aclass_i_castable_html_afdbd28b81119a33a898fa8511bf2ef6b"><div class="ttname"><a href="class_i_castable.html#afdbd28b81119a33a898fa8511bf2ef6b">ICastable::checkedTo</a></div><div class="ttdeci">const T * checkedTo() const</div><div class="ttdoc">Performs a checked cast. A BUG occurs if the cast fails.</div><div class="ttdef"><b>Definition</b> castable.h:52</div></div>
-<div class="ttc" id="astruct_r_t_t_i_1_1_base_html"><div class="ttname"><a href="struct_r_t_t_i_1_1_base.html">RTTI::Base</a></div><div class="ttdef"><b>Definition</b> rtti.h:203</div></div>
-<div class="ttc" id="astruct_r_t_t_i_1_1_base_html_a60ec2358ab44340b7fa2a17f1b2f3a59"><div class="ttname"><a href="struct_r_t_t_i_1_1_base.html#a60ec2358ab44340b7fa2a17f1b2f3a59">RTTI::Base::to</a></div><div class="ttdeci">T * to() noexcept</div><div class="ttdef"><b>Definition</b> rtti.h:226</div></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_CASTABLE_H_ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="aclass_p4_1_1_i_castable_html"><div class="ttname"><a href="class_p4_1_1_i_castable.html">P4::ICastable</a></div><div class="ttdef"><b>Definition</b> castable.h:36</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_castable_html_a34de8158d7d9573541c28927ccf8195a"><div class="ttname"><a href="class_p4_1_1_i_castable.html#a34de8158d7d9573541c28927ccf8195a">P4::ICastable::as</a></div><div class="ttdeci">T &amp; as()</div><div class="ttdoc">Tries to convert the class to type T. A BUG occurs if the cast fails.</div><div class="ttdef"><b>Definition</b> castable.h:48</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_castable_html_a59018e0210012afd4cf45b5625b3a1c8"><div class="ttname"><a href="class_p4_1_1_i_castable.html#a59018e0210012afd4cf45b5625b3a1c8">P4::ICastable::checkedTo</a></div><div class="ttdeci">const T * checkedTo() const</div><div class="ttdoc">Performs a checked cast. A BUG occurs if the cast fails.</div><div class="ttdef"><b>Definition</b> castable.h:54</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_castable_html_ab4f93b9a4d1cfab6f27f4a4689ad26a0"><div class="ttname"><a href="class_p4_1_1_i_castable.html#ab4f93b9a4d1cfab6f27f4a4689ad26a0">P4::ICastable::as</a></div><div class="ttdeci">const T &amp; as() const</div><div class="ttdoc">Tries to convert the class to type T. A BUG occurs if the cast fails.</div><div class="ttdef"><b>Definition</b> castable.h:42</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_castable_html_abea74d1b2272f84f2876f4de7a485756"><div class="ttname"><a href="class_p4_1_1_i_castable.html#abea74d1b2272f84f2876f4de7a485756">P4::ICastable::checkedTo</a></div><div class="ttdeci">T * checkedTo()</div><div class="ttdoc">Performs a checked cast. A BUG occurs if the cast fails.</div><div class="ttdef"><b>Definition</b> castable.h:62</div></div>
+<div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
+<div class="ttc" id="astruct_p4_1_1_r_t_t_i_1_1_base_html"><div class="ttname"><a href="struct_p4_1_1_r_t_t_i_1_1_base.html">P4::RTTI::Base</a></div><div class="ttdef"><b>Definition</b> rtti.h:203</div></div>
+<div class="ttc" id="astruct_p4_1_1_r_t_t_i_1_1_base_html_a15a2e4484076dcafa2964ede26024a61"><div class="ttname"><a href="struct_p4_1_1_r_t_t_i_1_1_base.html#a15a2e4484076dcafa2964ede26024a61">P4::RTTI::Base::to</a></div><div class="ttdeci">T * to() noexcept</div><div class="ttdef"><b>Definition</b> rtti.h:226</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

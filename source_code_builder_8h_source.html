@@ -150,9 +150,9 @@ $(function(){initNavTree('source_code_builder_8h_source.html',''); initResizable
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;lib/exceptions.h&quot;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;lib/stringify.h&quot;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">namespace </span>Util {</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">namespace </span>P4::Util {</div>
 <div class="foldopen" id="foldopen00029" data-start="{" data-end="};">
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="class_util_1_1_source_code_builder.html">   29</a></span><span class="keyword">class </span><a class="code hl_class" href="class_util_1_1_source_code_builder.html">SourceCodeBuilder</a> {</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="class_p4_1_1_util_1_1_source_code_builder.html">   29</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_util_1_1_source_code_builder.html">SourceCodeBuilder</a> {</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordtype">int</span> indentLevel;  <span class="comment">// current indent level</span></div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="keywordtype">unsigned</span> indentAmount;</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
@@ -161,7 +161,7 @@ $(function(){initNavTree('source_code_builder_8h_source.html',''); initResizable
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keywordtype">bool</span> supressSemi = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <a class="code hl_class" href="class_util_1_1_source_code_builder.html">SourceCodeBuilder</a>() : indentLevel(0), indentAmount(4), endsInSpace(<span class="keyword">false</span>) {}</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <a class="code hl_class" href="class_p4_1_1_util_1_1_source_code_builder.html">SourceCodeBuilder</a>() : indentLevel(0), indentAmount(4), endsInSpace(<span class="keyword">false</span>) {}</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordtype">void</span> increaseIndent() { indentLevel += indentAmount; }</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordtype">void</span> decreaseIndent() {</div>
@@ -177,12 +177,12 @@ $(function(){initNavTree('source_code_builder_8h_source.html',''); initResizable
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        endsInSpace = <span class="keyword">true</span>;</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    }</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordtype">void</span> append(<a class="code hl_class" href="classcstring.html">cstring</a> str) { append(str.c_str()); }</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordtype">void</span> append(<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> str) { append(str.c_str()); }</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordtype">void</span> appendLine(<span class="keyword">const</span> <span class="keywordtype">char</span> *str) {</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        append(str);</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        newline();</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    }</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keywordtype">void</span> appendLine(<a class="code hl_class" href="classcstring.html">cstring</a> str) {</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keywordtype">void</span> appendLine(<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> str) {</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        append(str);</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        newline();</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    }</div>
@@ -242,11 +242,11 @@ $(function(){initNavTree('source_code_builder_8h_source.html',''); initResizable
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="keywordtype">bool</span> lastIsSpace()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> endsInSpace; }</div>
 <div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>};</div>
 </div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>}  <span class="comment">// namespace Util</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>}  <span class="comment">// namespace P4::Util</span></div>
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
 <div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_SOURCECODEBUILDER_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_util_1_1_source_code_builder_html"><div class="ttname"><a href="class_util_1_1_source_code_builder.html">Util::SourceCodeBuilder</a></div><div class="ttdef"><b>Definition</b> sourceCodeBuilder.h:29</div></div>
-<div class="ttc" id="aclasscstring_html"><div class="ttname"><a href="classcstring.html">cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:82</div></div>
+<div class="ttc" id="aclass_p4_1_1_util_1_1_source_code_builder_html"><div class="ttname"><a href="class_p4_1_1_util_1_1_source_code_builder.html">P4::Util::SourceCodeBuilder</a></div><div class="ttdef"><b>Definition</b> sourceCodeBuilder.h:29</div></div>
+<div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

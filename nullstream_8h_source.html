@@ -147,38 +147,43 @@ $(function(){initNavTree('nullstream_8h_source.html',''); initResizable(true); }
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;ostream&gt;</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;streambuf&gt;</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> cT, <span class="keyword">class</span> traits = std::<span class="keywordtype">char</span>_traits&lt;cT&gt;&gt;</div>
-<div class="foldopen" id="foldopen00026" data-start="{" data-end="};">
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="classbasic__nullbuf.html">   26</a></span><span class="keyword">class </span><a class="code hl_class" href="classbasic__nullbuf.html">basic_nullbuf</a> final : <span class="keyword">public</span> std::basic_streambuf&lt;cT, traits&gt; {</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">typename</span> traits::int_type overflow(<span class="keyword">typename</span> traits::int_type c) {</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        <span class="keywordflow">return</span> traits::not_eof(c);  <span class="comment">// indicate success</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    }</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>};</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> cT, <span class="keyword">class</span> traits = std::<span class="keywordtype">char</span>_traits&lt;cT&gt;&gt;</div>
+<div class="foldopen" id="foldopen00028" data-start="{" data-end="};">
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="class_p4_1_1basic__nullbuf.html">   28</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1basic__nullbuf.html">basic_nullbuf</a> final : <span class="keyword">public</span> std::basic_streambuf&lt;cT, traits&gt; {</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keyword">typename</span> traits::int_type overflow(<span class="keyword">typename</span> traits::int_type c) {</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        <span class="keywordflow">return</span> traits::not_eof(c);  <span class="comment">// indicate success</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    }</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>};</div>
 </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> cT, <span class="keyword">class</span> traits = std::<span class="keywordtype">char</span>_traits&lt;cT&gt;&gt;</div>
-<div class="foldopen" id="foldopen00033" data-start="{" data-end="};">
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classonullstream.html">   33</a></span><span class="keyword">class </span><a class="code hl_class" href="classonullstream.html">onullstream</a> final : <span class="keyword">public</span> std::basic_ostream&lt;cT, traits&gt; {</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <a class="code hl_class" href="classonullstream.html">onullstream</a>() : std::basic_ios&lt;cT, traits&gt;(&amp;m_sbuf), std::basic_ostream&lt;cT, traits&gt;(&amp;m_sbuf) {</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        this-&gt;init(&amp;m_sbuf);</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    }</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_class" href="classbasic__nullbuf.html">basic_nullbuf&lt;cT, traits&gt;</a> m_sbuf;</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>};</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> cT, <span class="keyword">class</span> traits = std::<span class="keywordtype">char</span>_traits&lt;cT&gt;&gt;</div>
+<div class="foldopen" id="foldopen00035" data-start="{" data-end="};">
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="class_p4_1_1onullstream.html">   35</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1onullstream.html">onullstream</a> final : <span class="keyword">public</span> std::basic_ostream&lt;cT, traits&gt; {</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <a class="code hl_class" href="class_p4_1_1onullstream.html">onullstream</a>() : std::basic_ios&lt;cT, traits&gt;(&amp;m_sbuf), std::basic_ostream&lt;cT, traits&gt;(&amp;m_sbuf) {</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        this-&gt;init(&amp;m_sbuf);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    }</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <a class="code hl_class" href="class_p4_1_1basic__nullbuf.html">basic_nullbuf&lt;cT, traits&gt;</a> m_sbuf;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>};</div>
 </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">typedef</span> <a class="code hl_class" href="classonullstream.html">onullstream&lt;char&gt;</a> <a class="code hl_class" href="classonullstream.html">nullstream</a>;</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment">// If nullOnError is &#39;true&#39;, on error a nullstream is returned</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">// otherwise a nullptr is returned</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment">// FIXME: This should return unique_ptr instead to track lifetime</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>std::ostream *openFile(<span class="keyword">const</span> std::filesystem::path &amp;name, <span class="keywordtype">bool</span> nullOnError);</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_NULLSTREAM_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclassbasic__nullbuf_html"><div class="ttname"><a href="classbasic__nullbuf.html">basic_nullbuf</a></div><div class="ttdef"><b>Definition</b> nullstream.h:26</div></div>
-<div class="ttc" id="aclassonullstream_html"><div class="ttname"><a href="classonullstream.html">onullstream</a></div><div class="ttdef"><b>Definition</b> nullstream.h:33</div></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="keyword">typedef</span> <a class="code hl_class" href="class_p4_1_1onullstream.html">onullstream&lt;char&gt;</a> <a class="code hl_class" href="class_p4_1_1onullstream.html">nullstream</a>;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment">// If nullOnError is &#39;true&#39;, on error a nullstream is returned</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">// otherwise a nullptr is returned</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment">// FIXME: This should return unique_ptr instead to track lifetime</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>std::ostream *openFile(<span class="keyword">const</span> std::filesystem::path &amp;name, <span class="keywordtype">bool</span> nullOnError);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_NULLSTREAM_H_ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="aclass_p4_1_1basic__nullbuf_html"><div class="ttname"><a href="class_p4_1_1basic__nullbuf.html">P4::basic_nullbuf</a></div><div class="ttdef"><b>Definition</b> nullstream.h:28</div></div>
+<div class="ttc" id="aclass_p4_1_1onullstream_html"><div class="ttname"><a href="class_p4_1_1onullstream.html">P4::onullstream</a></div><div class="ttdef"><b>Definition</b> nullstream.h:35</div></div>
+<div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

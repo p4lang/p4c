@@ -31,9 +31,9 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="struct_model_1_1_elem.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="103.5,-74 26.5,-74 26.5,-55 103.5,-55 103.5,-74"/>
-<text text-anchor="middle" x="65" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">Model::Elem</text>
+<g id="a_Node000002"><a xlink:href="struct_p4_1_1_model_1_1_elem.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="112.5,-74 17.5,-74 17.5,-55 112.5,-55 112.5,-74"/>
+<text text-anchor="middle" x="65" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">P4::Model::Elem</text>
 </a>
 </g>
 </g>

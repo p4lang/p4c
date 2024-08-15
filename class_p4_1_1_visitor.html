@@ -141,7 +141,13 @@ Inheritance diagram for P4::Visitor:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor_1_1_change_tracker.html">ChangeTracker</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assists visitors in traversing the IR.  <a href="class_p4_1_1_visitor_1_1_change_tracker.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">profile_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor_1_1_tracker.html">Tracker</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assists visitors in traversing the IR.  <a href="class_p4_1_1_visitor_1_1_tracker.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
@@ -170,12 +176,12 @@ virtual <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><
 <tr class="memitem:ac6a5e2e28ca2bb741588ec144bd152c2" id="r_ac6a5e2e28ca2bb741588ec144bd152c2"><td class="memItemLeft" align="right" valign="top"><a id="ac6a5e2e28ca2bb741588ec144bd152c2" name="ac6a5e2e28ca2bb741588ec144bd152c2"></a>
 virtual <a class="el" href="class_p4_1_1_control_flow_visitor.html">ControlFlowVisitor</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>controlFlowVisitor</b> ()</td></tr>
 <tr class="separator:ac6a5e2e28ca2bb741588ec144bd152c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6fe62448ba72dca8ddf1844cf0eae0d4" id="r_a6fe62448ba72dca8ddf1844cf0eae0d4"><td class="memItemLeft" align="right" valign="top"><a id="a6fe62448ba72dca8ddf1844cf0eae0d4" name="a6fe62448ba72dca8ddf1844cf0eae0d4"></a>
+<tr class="memitem:a4fde650ea3fddd156d05b5207307ba30" id="r_a4fde650ea3fddd156d05b5207307ba30"><td class="memItemLeft" align="right" valign="top"><a id="a4fde650ea3fddd156d05b5207307ba30" name="a4fde650ea3fddd156d05b5207307ba30"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>end_apply</b> ()</td></tr>
-<tr class="separator:a6fe62448ba72dca8ddf1844cf0eae0d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2d1db7c74e18cbf9e56dda45148e88c1" id="r_a2d1db7c74e18cbf9e56dda45148e88c1"><td class="memItemLeft" align="right" valign="top"><a id="a2d1db7c74e18cbf9e56dda45148e88c1" name="a2d1db7c74e18cbf9e56dda45148e88c1"></a>
+<tr class="separator:a4fde650ea3fddd156d05b5207307ba30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86132525a6daff6b5577104da5183be0" id="r_a86132525a6daff6b5577104da5183be0"><td class="memItemLeft" align="right" valign="top"><a id="a86132525a6daff6b5577104da5183be0" name="a86132525a6daff6b5577104da5183be0"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>end_apply</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *root)</td></tr>
-<tr class="separator:a2d1db7c74e18cbf9e56dda45148e88c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a86132525a6daff6b5577104da5183be0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab72909367b71899602dbf19732bb15d8" id="r_ab72909367b71899602dbf19732bb15d8"><td class="memItemLeft" align="right" valign="top"><a id="ab72909367b71899602dbf19732bb15d8" name="ab72909367b71899602dbf19732bb15d8"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>erase_global</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a>)</td></tr>
 <tr class="separator:ab72909367b71899602dbf19732bb15d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -240,12 +246,11 @@ template&lt;class T &gt; </td></tr>
 <tr class="memitem:a65dc025befbbfdeabcc6edccc5a956bd" id="r_a65dc025befbbfdeabcc6edccc5a956bd"><td class="memItemLeft" align="right" valign="top"><a id="a65dc025befbbfdeabcc6edccc5a956bd" name="a65dc025befbbfdeabcc6edccc5a956bd"></a>
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_flow_joins</b> () const</td></tr>
 <tr class="separator:a65dc025befbbfdeabcc6edccc5a956bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa4a0a15b29a377b977909e6210e1a59e" id="r_aa4a0a15b29a377b977909e6210e1a59e"><td class="memItemLeft" align="right" valign="top"><a id="aa4a0a15b29a377b977909e6210e1a59e" name="aa4a0a15b29a377b977909e6210e1a59e"></a>
-virtual <a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>init_apply</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *root)</td></tr>
-<tr class="separator:aa4a0a15b29a377b977909e6210e1a59e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a986ed02b63653c37c5b15a5dd564b31f" id="r_a986ed02b63653c37c5b15a5dd564b31f"><td class="memItemLeft" align="right" valign="top"><a id="a986ed02b63653c37c5b15a5dd564b31f" name="a986ed02b63653c37c5b15a5dd564b31f"></a>
+<tr class="memitem:a46a4d83538c26de76091924a017bb1c0" id="r_a46a4d83538c26de76091924a017bb1c0"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a46a4d83538c26de76091924a017bb1c0">init_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *root)</td></tr>
+<tr class="separator:a46a4d83538c26de76091924a017bb1c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37d47c912db483387f2185ec0c69eefe" id="r_a37d47c912db483387f2185ec0c69eefe"><td class="memItemLeft" align="right" valign="top"><a id="a37d47c912db483387f2185ec0c69eefe" name="a37d47c912db483387f2185ec0c69eefe"></a>
 <a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>init_apply</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *root, const <a class="el" href="struct_p4_1_1_visitor___context.html">Context</a> *parent_context)</td></tr>
-<tr class="separator:a986ed02b63653c37c5b15a5dd564b31f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a37d47c912db483387f2185ec0c69eefe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5a904b78dd012db5d096c7c8ab15aaff" id="r_a5a904b78dd012db5d096c7c8ab15aaff"><td class="memItemLeft" align="right" valign="top"><a id="a5a904b78dd012db5d096c7c8ab15aaff" name="a5a904b78dd012db5d096c7c8ab15aaff"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isInContext</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *n) const</td></tr>
 <tr class="separator:a5a904b78dd012db5d096c7c8ab15aaff"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -318,11 +323,11 @@ template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a291f23a4822f2c3165e0d150e064d135" id="r_a291f23a4822f2c3165e0d150e064d135"><td class="memItemLeft" align="right" valign="top"><a id="a291f23a4822f2c3165e0d150e064d135" name="a291f23a4822f2c3165e0d150e064d135"></a>
+<tr class="memitem:a660765ff55d502b9d9c0c6b5c522dca0" id="r_a660765ff55d502b9d9c0c6b5c522dca0"><td class="memItemLeft" align="right" valign="top"><a id="a660765ff55d502b9d9c0c6b5c522dca0" name="a660765ff55d502b9d9c0c6b5c522dca0"></a>
 static <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>demangle</b> (const char *)</td></tr>
-<tr class="separator:a291f23a4822f2c3165e0d150e064d135"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1bce1ae1f9c1809d2bc1672048e89005" id="r_a1bce1ae1f9c1809d2bc1672048e89005"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1bce1ae1f9c1809d2bc1672048e89005">warning_enabled</a> (const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *visitor, int warning_kind)</td></tr>
-<tr class="separator:a1bce1ae1f9c1809d2bc1672048e89005"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a660765ff55d502b9d9c0c6b5c522dca0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a883ecb795f506e021328e285c7c23264" id="r_a883ecb795f506e021328e285c7c23264"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a883ecb795f506e021328e285c7c23264">warning_enabled</a> (const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *visitor, int warning_kind)</td></tr>
+<tr class="separator:a883ecb795f506e021328e285c7c23264"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -468,6 +473,33 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Transform</b></td></
 
 </div>
 </div>
+<a id="a46a4d83538c26de76091924a017bb1c0" name="a46a4d83538c26de76091924a017bb1c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46a4d83538c26de76091924a017bb1c0">&#9670;&#160;</a></span>init_apply()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a> P4::Visitor::init_apply </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *</td>          <td class="paramname"><span class="paramname"><em>root</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented in <a class="el" href="class_p4_1_1_b_m_v2_1_1_header_converter.html#a2fd5059a1e7fcdf87c6f095d2f106d72">P4::BMV2::HeaderConverter</a>.</p>
+
+</div>
+</div>
 <a id="ae7dead1386c1bd5727307f5ae131aad7" name="ae7dead1386c1bd5727307f5ae131aad7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae7dead1386c1bd5727307f5ae131aad7">&#9670;&#160;</a></span>join_flows()</h2>
 
@@ -540,8 +572,8 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Transform</b></td></
 
 </div>
 </div>
-<a id="a1bce1ae1f9c1809d2bc1672048e89005" name="a1bce1ae1f9c1809d2bc1672048e89005"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1bce1ae1f9c1809d2bc1672048e89005">&#9670;&#160;</a></span>warning_enabled() <span class="overload">[1/2]</span></h2>
+<a id="a883ecb795f506e021328e285c7c23264" name="a883ecb795f506e021328e285c7c23264"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a883ecb795f506e021328e285c7c23264">&#9670;&#160;</a></span>warning_enabled() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -550,7 +582,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Transform</b></td></
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static bool P4::Visitor::warning_enabled </td>
+          <td class="memname">bool P4::Visitor::warning_enabled </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *</td>          <td class="paramname"><span class="paramname"><em>visitor</em></span>, </td>
         </tr>

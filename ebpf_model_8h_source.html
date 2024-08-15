@@ -147,29 +147,29 @@ $(function(){initNavTree('ebpf_model_8h_source.html',''); initResizable(true); }
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;ir/ir.h&quot;</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;lib/cstring.h&quot;</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_e_b_p_f.html">EBPF</a> {</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4_1_1_e_b_p_f.html">P4::EBPF</a> {</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespace_p4_1_1literals.html">P4::literals</a>;</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
 <div class="foldopen" id="foldopen00029" data-start="{" data-end="};">
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="struct_e_b_p_f_1_1_table_impl___model.html">   29</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_e_b_p_f_1_1_table_impl___model.html">TableImpl_Model</a> : <span class="keyword">public</span> <a class="code hl_struct" href="struct_model_1_1_extern___model.html">::Model::Extern_Model</a> {</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keyword">explicit</span> <a class="code hl_struct" href="struct_e_b_p_f_1_1_table_impl___model.html">TableImpl_Model</a>(<a class="code hl_class" href="classcstring.html">cstring</a> name) : Extern_Model(name), size(<span class="stringliteral">&quot;size&quot;</span>_cs) {}</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> size;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="struct_p4_1_1_e_b_p_f_1_1_table_impl___model.html">   29</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_p4_1_1_e_b_p_f_1_1_table_impl___model.html">TableImpl_Model</a> : <span class="keyword">public</span> <a class="code hl_struct" href="struct_p4_1_1_model_1_1_extern___model.html">::P4::Model::Extern_Model</a> {</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keyword">explicit</span> <a class="code hl_struct" href="struct_p4_1_1_e_b_p_f_1_1_table_impl___model.html">TableImpl_Model</a>(<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> name) : Extern_Model(name), size(<span class="stringliteral">&quot;size&quot;</span>_cs) {}</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> size;</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>};</div>
 </div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
 <div class="foldopen" id="foldopen00034" data-start="{" data-end="};">
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="struct_e_b_p_f_1_1_counter_array___model.html">   34</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_e_b_p_f_1_1_counter_array___model.html">CounterArray_Model</a> : <span class="keyword">public</span> <a class="code hl_struct" href="struct_model_1_1_extern___model.html">::Model::Extern_Model</a> {</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <a class="code hl_struct" href="struct_e_b_p_f_1_1_counter_array___model.html">CounterArray_Model</a>()</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="struct_p4_1_1_e_b_p_f_1_1_counter_array___model.html">   34</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_p4_1_1_e_b_p_f_1_1_counter_array___model.html">CounterArray_Model</a> : <span class="keyword">public</span> <a class="code hl_struct" href="struct_p4_1_1_model_1_1_extern___model.html">::P4::Model::Extern_Model</a> {</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <a class="code hl_struct" href="struct_p4_1_1_e_b_p_f_1_1_counter_array___model.html">CounterArray_Model</a>()</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        : Extern_Model(<span class="stringliteral">&quot;CounterArray&quot;</span>_cs),</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>          increment(<span class="stringliteral">&quot;increment&quot;</span>_cs),</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>          add(<span class="stringliteral">&quot;add&quot;</span>_cs),</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>          max_index(<span class="stringliteral">&quot;max_index&quot;</span>_cs),</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>          sparse(<span class="stringliteral">&quot;sparse&quot;</span>_cs) {}</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> increment;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> add;</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> max_index;</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> sparse;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> increment;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> add;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> max_index;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> sparse;</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>};</div>
 </div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
@@ -179,26 +179,26 @@ $(function(){initNavTree('ebpf_model_8h_source.html',''); initResizable(true); }
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>};</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
 <div class="foldopen" id="foldopen00052" data-start="{" data-end="};">
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="struct_e_b_p_f_1_1_xdp___model.html">   52</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_e_b_p_f_1_1_xdp___model.html">Xdp_Model</a> : <span class="keyword">public</span> <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> {</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <a class="code hl_struct" href="struct_e_b_p_f_1_1_xdp___model.html">Xdp_Model</a>() : Elem(<span class="stringliteral">&quot;xdp&quot;</span>_cs), parser(<span class="stringliteral">&quot;p&quot;</span>_cs), switch_(<span class="stringliteral">&quot;s&quot;</span>_cs), deparser(<span class="stringliteral">&quot;d&quot;</span>_cs) {}</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> parser;</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> switch_;</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> deparser;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="struct_p4_1_1_e_b_p_f_1_1_xdp___model.html">   52</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_p4_1_1_e_b_p_f_1_1_xdp___model.html">Xdp_Model</a> : <span class="keyword">public</span> <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> {</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <a class="code hl_struct" href="struct_p4_1_1_e_b_p_f_1_1_xdp___model.html">Xdp_Model</a>() : Elem(<span class="stringliteral">&quot;xdp&quot;</span>_cs), parser(<span class="stringliteral">&quot;p&quot;</span>_cs), switch_(<span class="stringliteral">&quot;s&quot;</span>_cs), deparser(<span class="stringliteral">&quot;d&quot;</span>_cs) {}</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> parser;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> switch_;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> deparser;</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>};</div>
 </div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
 <div class="foldopen" id="foldopen00059" data-start="{" data-end="};">
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="struct_e_b_p_f_1_1_filter___model.html">   59</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_e_b_p_f_1_1_filter___model.html">Filter_Model</a> : <span class="keyword">public</span> <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> {</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <a class="code hl_struct" href="struct_e_b_p_f_1_1_filter___model.html">Filter_Model</a>() : Elem(<span class="stringliteral">&quot;ebpf_filter&quot;</span>_cs), parser(<span class="stringliteral">&quot;prs&quot;</span>_cs), filter(<span class="stringliteral">&quot;filt&quot;</span>_cs) {}</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> parser;</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> filter;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="struct_p4_1_1_e_b_p_f_1_1_filter___model.html">   59</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_p4_1_1_e_b_p_f_1_1_filter___model.html">Filter_Model</a> : <span class="keyword">public</span> <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> {</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <a class="code hl_struct" href="struct_p4_1_1_e_b_p_f_1_1_filter___model.html">Filter_Model</a>() : Elem(<span class="stringliteral">&quot;ebpf_filter&quot;</span>_cs), parser(<span class="stringliteral">&quot;prs&quot;</span>_cs), filter(<span class="stringliteral">&quot;filt&quot;</span>_cs) {}</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> parser;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> filter;</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>};</div>
 </div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
 <div class="foldopen" id="foldopen00066" data-start="{" data-end="};">
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="class_e_b_p_f_1_1_e_b_p_f_model.html">   66</a></span><span class="keyword">class </span><a class="code hl_class" href="class_e_b_p_f_1_1_e_b_p_f_model.html">EBPFModel</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_model_1_1_model.html">::Model::Model</a> {</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_model.html">   66</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_model.html">EBPFModel</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_model_1_1_model.html">::P4::Model::Model</a> {</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> <span class="keyword">protected</span>:</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <a class="code hl_class" href="class_e_b_p_f_1_1_e_b_p_f_model.html">EBPFModel</a>()</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <a class="code hl_class" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_model.html">EBPFModel</a>()</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        : counterArray(),</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>          array_table(<span class="stringliteral">&quot;array_table&quot;</span>_cs),</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>          hash_table(<span class="stringliteral">&quot;hash_table&quot;</span>_cs),</div>
@@ -206,48 +206,48 @@ $(function(){initNavTree('ebpf_model_8h_source.html',''); initResizable(true); }
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>          CPacketName(<span class="stringliteral">&quot;skb&quot;</span>_cs),</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>          packet(<span class="stringliteral">&quot;packet&quot;</span>_cs, P4::P4CoreLibrary::instance().packetIn, 0),</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>          arch(EbpfFilter),</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>          <a class="code hl_variable" href="class_e_b_p_f_1_1_e_b_p_f_model.html#a5a9b5e0bc59d1523ba2fe6f0ee10e6c5">filter</a>(),</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>          <a class="code hl_variable" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_model.html#aa5e0c8aa8f6882051311172b77e221e4">filter</a>(),</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>          xdp(),</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>          counterIndexType(<span class="stringliteral">&quot;u32&quot;</span>_cs),</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>          counterValueType(<span class="stringliteral">&quot;u32&quot;</span>_cs) {}</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keyword">static</span> <a class="code hl_class" href="class_e_b_p_f_1_1_e_b_p_f_model.html">EBPFModel</a> instance;</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keyword">static</span> <a class="code hl_class" href="classcstring.html">cstring</a> reservedPrefix;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keyword">static</span> <a class="code hl_class" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_model.html">EBPFModel</a> instance;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keyword">static</span> <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> reservedPrefix;</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <a class="code hl_struct" href="struct_e_b_p_f_1_1_counter_array___model.html">CounterArray_Model</a> counterArray;</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <a class="code hl_struct" href="struct_e_b_p_f_1_1_table_impl___model.html">TableImpl_Model</a> array_table;</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <a class="code hl_struct" href="struct_e_b_p_f_1_1_table_impl___model.html">TableImpl_Model</a> hash_table;</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> tableImplProperty;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <a class="code hl_struct" href="struct_model_1_1_elem.html">::Model::Elem</a> CPacketName;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <a class="code hl_struct" href="struct_model_1_1_param___model.html">::Model::Param_Model</a> packet;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <a class="code hl_struct" href="struct_p4_1_1_e_b_p_f_1_1_counter_array___model.html">CounterArray_Model</a> counterArray;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <a class="code hl_struct" href="struct_p4_1_1_e_b_p_f_1_1_table_impl___model.html">TableImpl_Model</a> array_table;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <a class="code hl_struct" href="struct_p4_1_1_e_b_p_f_1_1_table_impl___model.html">TableImpl_Model</a> hash_table;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> tableImplProperty;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <a class="code hl_struct" href="struct_p4_1_1_model_1_1_elem.html">::P4::Model::Elem</a> CPacketName;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <a class="code hl_struct" href="struct_p4_1_1_model_1_1_param___model.html">::P4::Model::Param_Model</a> packet;</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    ModelArchitecture arch;</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="class_e_b_p_f_1_1_e_b_p_f_model.html#a5a9b5e0bc59d1523ba2fe6f0ee10e6c5">   93</a></span>    <a class="code hl_struct" href="struct_e_b_p_f_1_1_filter___model.html">Filter_Model</a> <a class="code hl_variable" href="class_e_b_p_f_1_1_e_b_p_f_model.html#a5a9b5e0bc59d1523ba2fe6f0ee10e6c5">filter</a>;</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <a class="code hl_struct" href="struct_e_b_p_f_1_1_xdp___model.html">Xdp_Model</a> xdp;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_model.html#aa5e0c8aa8f6882051311172b77e221e4">   93</a></span>    <a class="code hl_struct" href="struct_p4_1_1_e_b_p_f_1_1_filter___model.html">Filter_Model</a> <a class="code hl_variable" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_model.html#aa5e0c8aa8f6882051311172b77e221e4">filter</a>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <a class="code hl_struct" href="struct_p4_1_1_e_b_p_f_1_1_xdp___model.html">Xdp_Model</a> xdp;</div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <a class="code hl_class" href="classcstring.html">cstring</a> counterIndexType;</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <a class="code hl_class" href="classcstring.html">cstring</a> counterValueType;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> counterIndexType;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> counterValueType;</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <span class="keyword">static</span> <a class="code hl_class" href="classcstring.html">cstring</a> reserved(<a class="code hl_class" href="classcstring.html">cstring</a> name) { <span class="keywordflow">return</span> reservedPrefix + name; }</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <span class="keyword">static</span> <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> reserved(<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> name) { <span class="keywordflow">return</span> reservedPrefix + name; }</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>};</div>
 </div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>}  <span class="comment">// namespace EBPF</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>}  <span class="comment">// namespace P4::EBPF</span></div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_EBPF_EBPFMODEL_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_e_b_p_f_1_1_e_b_p_f_model_html"><div class="ttname"><a href="class_e_b_p_f_1_1_e_b_p_f_model.html">EBPF::EBPFModel</a></div><div class="ttdoc">Keep this in sync with ebpf_model.p4 and xdp_model.p4.</div><div class="ttdef"><b>Definition</b> ebpfModel.h:66</div></div>
-<div class="ttc" id="aclass_e_b_p_f_1_1_e_b_p_f_model_html_a5a9b5e0bc59d1523ba2fe6f0ee10e6c5"><div class="ttname"><a href="class_e_b_p_f_1_1_e_b_p_f_model.html#a5a9b5e0bc59d1523ba2fe6f0ee10e6c5">EBPF::EBPFModel::filter</a></div><div class="ttdeci">Filter_Model filter</div><div class="ttdoc">Only one of these should be used, depending on arch value.</div><div class="ttdef"><b>Definition</b> ebpfModel.h:93</div></div>
-<div class="ttc" id="aclass_model_1_1_model_html"><div class="ttname"><a href="class_model_1_1_model.html">Model::Model</a></div><div class="ttdef"><b>Definition</b> frontends/common/model.h:64</div></div>
-<div class="ttc" id="aclasscstring_html"><div class="ttname"><a href="classcstring.html">cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:82</div></div>
-<div class="ttc" id="anamespace_e_b_p_f_html"><div class="ttname"><a href="namespace_e_b_p_f.html">EBPF</a></div><div class="ttdef"><b>Definition</b> codeGen.cpp:25</div></div>
-<div class="ttc" id="anamespace_p4_1_1literals_html"><div class="ttname"><a href="namespace_p4_1_1literals.html">P4::literals</a></div><div class="ttdef"><b>Definition</b> cstring.h:78</div></div>
-<div class="ttc" id="astruct_e_b_p_f_1_1_counter_array___model_html"><div class="ttname"><a href="struct_e_b_p_f_1_1_counter_array___model.html">EBPF::CounterArray_Model</a></div><div class="ttdef"><b>Definition</b> ebpfModel.h:34</div></div>
-<div class="ttc" id="astruct_e_b_p_f_1_1_filter___model_html"><div class="ttname"><a href="struct_e_b_p_f_1_1_filter___model.html">EBPF::Filter_Model</a></div><div class="ttdef"><b>Definition</b> ebpfModel.h:59</div></div>
-<div class="ttc" id="astruct_e_b_p_f_1_1_table_impl___model_html"><div class="ttname"><a href="struct_e_b_p_f_1_1_table_impl___model.html">EBPF::TableImpl_Model</a></div><div class="ttdef"><b>Definition</b> ebpfModel.h:29</div></div>
-<div class="ttc" id="astruct_e_b_p_f_1_1_xdp___model_html"><div class="ttname"><a href="struct_e_b_p_f_1_1_xdp___model.html">EBPF::Xdp_Model</a></div><div class="ttdef"><b>Definition</b> ebpfModel.h:52</div></div>
-<div class="ttc" id="astruct_model_1_1_elem_html"><div class="ttname"><a href="struct_model_1_1_elem.html">Model::Elem</a></div><div class="ttdef"><b>Definition</b> frontends/common/model.h:28</div></div>
-<div class="ttc" id="astruct_model_1_1_extern___model_html"><div class="ttname"><a href="struct_model_1_1_extern___model.html">Model::Extern_Model</a></div><div class="ttdoc">Extern_Model : Type_Model.</div><div class="ttdef"><b>Definition</b> frontends/common/model.h:52</div></div>
-<div class="ttc" id="astruct_model_1_1_param___model_html"><div class="ttname"><a href="struct_model_1_1_param___model.html">Model::Param_Model</a></div><div class="ttdoc">Param_Model : Elem.</div><div class="ttdef"><b>Definition</b> frontends/common/model.h:57</div></div>
+<div class="ttc" id="aclass_p4_1_1_e_b_p_f_1_1_e_b_p_f_model_html"><div class="ttname"><a href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_model.html">P4::EBPF::EBPFModel</a></div><div class="ttdoc">Keep this in sync with ebpf_model.p4 and xdp_model.p4.</div><div class="ttdef"><b>Definition</b> ebpfModel.h:66</div></div>
+<div class="ttc" id="aclass_p4_1_1_e_b_p_f_1_1_e_b_p_f_model_html_aa5e0c8aa8f6882051311172b77e221e4"><div class="ttname"><a href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_model.html#aa5e0c8aa8f6882051311172b77e221e4">P4::EBPF::EBPFModel::filter</a></div><div class="ttdeci">Filter_Model filter</div><div class="ttdoc">Only one of these should be used, depending on arch value.</div><div class="ttdef"><b>Definition</b> ebpfModel.h:93</div></div>
+<div class="ttc" id="aclass_p4_1_1_model_1_1_model_html"><div class="ttname"><a href="class_p4_1_1_model_1_1_model.html">P4::Model::Model</a></div><div class="ttdef"><b>Definition</b> frontends/common/model.h:64</div></div>
+<div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
+<div class="ttc" id="anamespace_p4_1_1_e_b_p_f_html"><div class="ttname"><a href="namespace_p4_1_1_e_b_p_f.html">P4::EBPF</a></div><div class="ttdef"><b>Definition</b> codeGen.cpp:25</div></div>
+<div class="ttc" id="anamespace_p4_1_1literals_html"><div class="ttname"><a href="namespace_p4_1_1literals.html">P4::literals</a></div><div class="ttdef"><b>Definition</b> cstring.h:80</div></div>
+<div class="ttc" id="astruct_p4_1_1_e_b_p_f_1_1_counter_array___model_html"><div class="ttname"><a href="struct_p4_1_1_e_b_p_f_1_1_counter_array___model.html">P4::EBPF::CounterArray_Model</a></div><div class="ttdef"><b>Definition</b> ebpfModel.h:34</div></div>
+<div class="ttc" id="astruct_p4_1_1_e_b_p_f_1_1_filter___model_html"><div class="ttname"><a href="struct_p4_1_1_e_b_p_f_1_1_filter___model.html">P4::EBPF::Filter_Model</a></div><div class="ttdef"><b>Definition</b> ebpfModel.h:59</div></div>
+<div class="ttc" id="astruct_p4_1_1_e_b_p_f_1_1_table_impl___model_html"><div class="ttname"><a href="struct_p4_1_1_e_b_p_f_1_1_table_impl___model.html">P4::EBPF::TableImpl_Model</a></div><div class="ttdef"><b>Definition</b> ebpfModel.h:29</div></div>
+<div class="ttc" id="astruct_p4_1_1_e_b_p_f_1_1_xdp___model_html"><div class="ttname"><a href="struct_p4_1_1_e_b_p_f_1_1_xdp___model.html">P4::EBPF::Xdp_Model</a></div><div class="ttdef"><b>Definition</b> ebpfModel.h:52</div></div>
+<div class="ttc" id="astruct_p4_1_1_model_1_1_elem_html"><div class="ttname"><a href="struct_p4_1_1_model_1_1_elem.html">P4::Model::Elem</a></div><div class="ttdef"><b>Definition</b> frontends/common/model.h:28</div></div>
+<div class="ttc" id="astruct_p4_1_1_model_1_1_extern___model_html"><div class="ttname"><a href="struct_p4_1_1_model_1_1_extern___model.html">P4::Model::Extern_Model</a></div><div class="ttdoc">Extern_Model : Type_Model.</div><div class="ttdef"><b>Definition</b> frontends/common/model.h:52</div></div>
+<div class="ttc" id="astruct_p4_1_1_model_1_1_param___model_html"><div class="ttname"><a href="struct_p4_1_1_model_1_1_param___model.html">P4::Model::Param_Model</a></div><div class="ttdoc">Param_Model : Elem.</div><div class="ttdef"><b>Definition</b> frontends/common/model.h:57</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

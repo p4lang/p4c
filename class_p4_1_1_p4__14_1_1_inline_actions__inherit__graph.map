@@ -1,0 +1,7 @@
+<map id="P4::P4_14::InlineActions" name="P4::P4_14::InlineActions">
+<area shape="rect" id="Node000001" title="Special inliner which works directly on P4&#45;14 representation." alt="" coords="5,152,183,177"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_transform.html" title=" " alt="" coords="39,79,149,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,118,97,152,91,152,91,118"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="50,5,138,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="97,44,97,79,91,79,91,44"/>
+</map>

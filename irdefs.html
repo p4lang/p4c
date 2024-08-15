@@ -133,7 +133,7 @@ ir-inline.h ir-tree-macros.h ir-util.h</h4>
 <p>IR support stuff. <code><a class="el" href="ir-inline_8h_source.html">ir-inline.h</a></code> has inline methods for things in header files that can't be defined until after other header files are included. <code><a class="el" href="ir-tree-macros_8h_source.html">ir-tree-macros.h</a></code> has macros for generating code referring to all IR classes, used by the visitors.</p>
 <h4><a class="anchor" id="nodeh-nodecpp"></a>
 node.h node.cpp</h4>
-<p><code><a class="el" href="class_i_r_1_1_node.html">IR::Node</a></code> base class.</p>
+<p><code>IR::Node</code> base class.</p>
 <h4><a class="anchor" id="idh"></a>
 id.h</h4>
 <p>Defines the <code>ID</code> struct, which is not a standalone IR class, but is used in many places in IR classes, representing an identifier with associated source location (for error reporting).</p>
@@ -168,7 +168,7 @@ namemap.h</h4>
 <p>IR subclass template <code>NameMap</code>, which holds a set of named IR objects and supports lookups by name. <code>NameMap</code> supports transforms that return null or additional <code>NameMap</code> objects for IR objects in the <code>NameMap</code> to modify the <code>NameMap</code>.</p>
 <h4><a class="anchor" id="vectorh"></a>
 vector.h</h4>
-<p>IR subclass template <code>Vector</code>, which holds a vector of IR objects. This is largely equivalent to a <code>vector</code>, except that it is a subclass of <code><a class="el" href="class_i_r_1_1_node.html">IR::Node</a></code> so it can be included in an IR tree as a first-class member, with its own traversal code (visitor subclass preorder and postorder functions). Automatically flattens any sub-<code>Vector</code> objects and removes null when transforms on elements of the vector return them.</p>
+<p>IR subclass template <code>Vector</code>, which holds a vector of IR objects. This is largely equivalent to a <code>vector</code>, except that it is a subclass of <code>IR::Node</code> so it can be included in an IR tree as a first-class member, with its own traversal code (visitor subclass preorder and postorder functions). Automatically flattens any sub-<code>Vector</code> objects and removes null when transforms on elements of the vector return them.</p>
 <h5><a class="el" href="indexed__vector_8h_source.html">indexed_vector.h</a></h5>
 <p>IndexedVector: contains a Vector and also an index mapping cstrings to IDeclarations for all objects in the vector that are IDeclarations.</p>
 <h4><a class="anchor" id="dbprinth-dbprintcpp-dbprint-expressioncpp-dbprint-p4cpp"></a>
@@ -179,10 +179,10 @@ std.h</h4>
 <p>using directives for a bunch of <code>std::</code> classes that are heavily used in the code. <code>std::vector</code> is instead wrapped (as <code>vector</code>) with a version that automatically uses bounds-checking for <em>all</em> indexed accesses.</p>
 <h4><a class="anchor" id="visitorh-visitorcpp"></a>
 visitor.h visitor.cpp</h4>
-<p><code><a class="el" href="class_visitor.html">Visitor</a></code> base class, and <code><a class="el" href="class_inspector.html">Inspector</a></code>, <code><a class="el" href="class_modifier.html">Modifier</a></code>, and <code><a class="el" href="class_transform.html">Transform</a></code> subclass definitions, along with <code><a class="el" href="class_control_flow_visitor.html">ControlFlowVisitor</a></code>, <code><a class="el" href="class_backtrack.html">Backtrack</a></code> and <code><a class="el" href="class_p4_write_context.html">P4WriteContext</a></code> mixin interfaces.</p>
+<p><code>Visitor</code> base class, and <code>Inspector</code>, <code>Modifier</code>, and <code>Transform</code> subclass definitions, along with <code>ControlFlowVisitor</code>, <code>Backtrack</code> and <code>P4WriteContext</code> mixin interfaces.</p>
 <h4><a class="anchor" id="pass_managerh-pass_managercpp"></a>
 pass_manager.h pass_manager.cpp</h4>
-<p><code><a class="el" href="class_pass_manager.html">PassManager</a></code> subclass (of <code><a class="el" href="class_visitor.html">Visitor</a></code>) which manages an arbitrary sequence of <code><a class="el" href="class_visitor.html">Visitor</a></code>s, and handles backtracking between passes. </p>
+<p><code>PassManager</code> subclass (of <code>Visitor</code>) which manages an arbitrary sequence of <code>Visitor</code>s, and handles backtracking between passes. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

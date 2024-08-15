@@ -129,19 +129,19 @@ $(function(){initNavTree('variables_8h_source.html',''); initResizable(true); })
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;ir/ir.h&quot;</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;lib/cstring.h&quot;</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4_tools.html">P4Tools</a> {</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4_1_1_p4_tools.html">P4::P4Tools</a> {</div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespace_p4_1_1literals.html">P4::literals</a>;</div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="namespace_p4_tools.html#ac8da1190931edee3539ca77b1e01586d">   17</a></span><span class="keyword">using </span><a class="code hl_typedef" href="namespace_p4_tools.html#ac8da1190931edee3539ca77b1e01586d">ConstraintsVector</a> = std::vector&lt;const IR::Expression *&gt;;</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="namespace_p4_1_1_p4_tools.html#aa8e3d734a40a9407f6548e4be23360a7">   17</a></span><span class="keyword">using </span><a class="code hl_typedef" href="namespace_p4_1_1_p4_tools.html#aa8e3d734a40a9407f6548e4be23360a7">ConstraintsVector</a> = std::vector&lt;const IR::Expression *&gt;;</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">namespace </span>ToolsVariables {</div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="classcstring.html">cstring</a> VALID = <span class="stringliteral">&quot;*valid&quot;</span>_cs;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> VALID = <span class="stringliteral">&quot;*valid&quot;</span>_cs;</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="keyword">const</span> IR::StateVariable &amp;getStateVariable(<span class="keyword">const</span> IR::Type *type, <a class="code hl_class" href="classcstring.html">cstring</a> name);</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="keyword">const</span> IR::StateVariable &amp;getStateVariable(<span class="keyword">const</span> IR::Type *type, <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> name);</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="keyword">const</span> IR::SymbolicVariable *getSymbolicVariable(<span class="keyword">const</span> IR::Type *type, <a class="code hl_class" href="classcstring.html">cstring</a> name);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="keyword">const</span> IR::SymbolicVariable *getSymbolicVariable(<span class="keyword">const</span> IR::Type *type, <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> name);</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">const</span> IR::TaintExpression *getTaintExpression(<span class="keyword">const</span> IR::Type *type);</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
@@ -151,13 +151,13 @@ $(function(){initNavTree('variables_8h_source.html',''); initResizable(true); })
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>}  <span class="comment">// namespace ToolsVariables</span></div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>}  <span class="comment">// namespace P4Tools</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>}  <span class="comment">// namespace P4::P4Tools</span></div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_P4TOOLS_COMMON_LIB_VARIABLES_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclasscstring_html"><div class="ttname"><a href="classcstring.html">cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:82</div></div>
-<div class="ttc" id="anamespace_p4_1_1literals_html"><div class="ttname"><a href="namespace_p4_1_1literals.html">P4::literals</a></div><div class="ttdef"><b>Definition</b> cstring.h:78</div></div>
-<div class="ttc" id="anamespace_p4_tools_html"><div class="ttname"><a href="namespace_p4_tools.html">P4Tools</a></div><div class="ttdef"><b>Definition</b> common/compiler/compiler_result.cpp:3</div></div>
-<div class="ttc" id="anamespace_p4_tools_html_ac8da1190931edee3539ca77b1e01586d"><div class="ttname"><a href="namespace_p4_tools.html#ac8da1190931edee3539ca77b1e01586d">P4Tools::ConstraintsVector</a></div><div class="ttdeci">std::vector&lt; const IR::Expression * &gt; ConstraintsVector</div><div class="ttdef"><b>Definition</b> variables.h:17</div></div>
+<div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
+<div class="ttc" id="anamespace_p4_1_1_p4_tools_html"><div class="ttname"><a href="namespace_p4_1_1_p4_tools.html">P4::P4Tools</a></div><div class="ttdef"><b>Definition</b> common/compiler/compiler_result.cpp:3</div></div>
+<div class="ttc" id="anamespace_p4_1_1_p4_tools_html_aa8e3d734a40a9407f6548e4be23360a7"><div class="ttname"><a href="namespace_p4_1_1_p4_tools.html#aa8e3d734a40a9407f6548e4be23360a7">P4::P4Tools::ConstraintsVector</a></div><div class="ttdeci">std::vector&lt; const IR::Expression * &gt; ConstraintsVector</div><div class="ttdef"><b>Definition</b> variables.h:17</div></div>
+<div class="ttc" id="anamespace_p4_1_1literals_html"><div class="ttname"><a href="namespace_p4_1_1literals.html">P4::literals</a></div><div class="ttdef"><b>Definition</b> cstring.h:80</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

@@ -132,9 +132,9 @@ $(function(){initNavTree('irutils_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;lib/big_int_util.h&quot;</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;lib/source_file.h&quot;</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">class </span><a class="code hl_class" href="class_transform.html">Transform</a>;</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">class </span>Transform;</div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">namespace </span>IR {</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">namespace </span>P4::IR {</div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">// Forward-declare some IR classes that are used in function declarations.</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">class </span>BoolLiteral;</div>
@@ -165,9 +165,9 @@ $(function(){initNavTree('irutils_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment"> *  Expressions</span></div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment"> * ========================================================================================= */</span></div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keyword">const</span> IR::Constant *getMaxValueConstant(<span class="keyword">const</span> Type *t, <span class="keyword">const</span> <a class="code hl_class" href="class_util_1_1_source_info.html">Util::SourceInfo</a> &amp;srcInfo = {});</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keyword">const</span> IR::Constant *getMaxValueConstant(<span class="keyword">const</span> Type *t, <span class="keyword">const</span> Util::SourceInfo &amp;srcInfo = {});</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="keyword">const</span> IR::Expression *getDefaultValue(<span class="keyword">const</span> Type *type, <span class="keyword">const</span> <a class="code hl_class" href="class_util_1_1_source_info.html">Util::SourceInfo</a> &amp;srcInfo = {},</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="keyword">const</span> IR::Expression *getDefaultValue(<span class="keyword">const</span> Type *type, <span class="keyword">const</span> Util::SourceInfo &amp;srcInfo = {},</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>                                      <span class="keywordtype">bool</span> valueRequired = <span class="keyword">false</span>);</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="keyword">const</span> IR::Constant *convertBoolLiteral(<span class="keyword">const</span> IR::BoolLiteral *lit);</div>
@@ -194,17 +194,13 @@ $(function(){initNavTree('irutils_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="comment">// This is 0 for unsigned and -(2^(t-&gt;size - 1)) for signed.</span></div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>big_int getMinBvVal(<span class="keyword">const</span> Type *t);</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_node.html">IR::Node</a> *inlineBlock(<span class="keyword">const</span> <a class="code hl_class" href="class_transform.html">Transform</a> &amp;, std::initializer_list&lt;const IR::StatOrDecl *&gt;);</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span><span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_node.html">IR::Node</a> *inlineBlock(<span class="keyword">const</span> <a class="code hl_class" href="class_transform.html">Transform</a> &amp;, <span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_indexed_vector.html">IR::IndexedVector&lt;IR::StatOrDecl&gt;</a> &amp;);</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="keyword">const</span> <a class="code hl_class" href="class_i_r_1_1_node.html">IR::Node</a> *inlineBlock(<span class="keyword">const</span> <a class="code hl_class" href="class_transform.html">Transform</a> &amp;, <a class="code hl_class" href="class_i_r_1_1_indexed_vector.html">IR::IndexedVector&lt;IR::StatOrDecl&gt;</a> &amp;&amp;);</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="keyword">const</span> IR::Node *inlineBlock(<span class="keyword">const</span> Transform &amp;, std::initializer_list&lt;const IR::StatOrDecl *&gt;);</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span><span class="keyword">const</span> IR::Node *inlineBlock(<span class="keyword">const</span> Transform &amp;, <span class="keyword">const</span> IR::IndexedVector&lt;IR::StatOrDecl&gt; &amp;);</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="keyword">const</span> IR::Node *inlineBlock(<span class="keyword">const</span> Transform &amp;, IR::IndexedVector&lt;IR::StatOrDecl&gt; &amp;&amp;);</div>
 <div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>}  <span class="comment">// namespace IR</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>}  <span class="comment">// namespace P4::IR</span></div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><span class="preprocessor">#endif </span><span class="comment">/* IR_IRUTILS_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_i_r_1_1_indexed_vector_html"><div class="ttname"><a href="class_i_r_1_1_indexed_vector.html">IR::IndexedVector</a></div><div class="ttdef"><b>Definition</b> node.h:50</div></div>
-<div class="ttc" id="aclass_i_r_1_1_node_html"><div class="ttname"><a href="class_i_r_1_1_node.html">IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:93</div></div>
-<div class="ttc" id="aclass_transform_html"><div class="ttname"><a href="class_transform.html">Transform</a></div><div class="ttdef"><b>Definition</b> visitor.h:422</div></div>
-<div class="ttc" id="aclass_util_1_1_source_info_html"><div class="ttname"><a href="class_util_1_1_source_info.html">Util::SourceInfo</a></div><div class="ttdef"><b>Definition</b> source_file.h:124</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

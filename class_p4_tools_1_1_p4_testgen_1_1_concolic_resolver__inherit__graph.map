@@ -1,7 +1,0 @@
-<map id="P4Tools::P4Testgen::ConcolicResolver" name="P4Tools::P4Testgen::ConcolicResolver">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,151,192"/>
-<area shape="rect" id="Node000002" href="$class_inspector.html" title=" " alt="" coords="37,79,119,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,118,81,152,75,152,75,118"/>
-<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="46,5,110,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="81,44,81,79,75,79,75,44"/>
-</map>

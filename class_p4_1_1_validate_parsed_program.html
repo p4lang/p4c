@@ -136,48 +136,46 @@ Inheritance diagram for P4::ValidateParsedProgram:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:accd847f56e62fc61977675cf7cc1f2a7" id="r_accd847f56e62fc61977675cf7cc1f2a7"><td class="memItemLeft" align="right" valign="top"><a id="accd847f56e62fc61977675cf7cc1f2a7" name="accd847f56e62fc61977675cf7cc1f2a7"></a>
+<tr class="memitem:a150d3ccd0824410ee89a71f7686b1f44" id="r_a150d3ccd0824410ee89a71f7686b1f44"><td class="memItemLeft" align="right" valign="top"><a id="a150d3ccd0824410ee89a71f7686b1f44" name="a150d3ccd0824410ee89a71f7686b1f44"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Annotations *annotations) override</td></tr>
-<tr class="memdesc:accd847f56e62fc61977675cf7cc1f2a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structured annotations cannot reuse names. <br /></td></tr>
-<tr class="separator:accd847f56e62fc61977675cf7cc1f2a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7707d2961efcf5dfe7527ab69cf51990" id="r_a7707d2961efcf5dfe7527ab69cf51990"><td class="memItemLeft" align="right" valign="top"><a id="a7707d2961efcf5dfe7527ab69cf51990" name="a7707d2961efcf5dfe7527ab69cf51990"></a>
+<tr class="memdesc:a150d3ccd0824410ee89a71f7686b1f44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structured annotations cannot reuse names. <br /></td></tr>
+<tr class="separator:a150d3ccd0824410ee89a71f7686b1f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18821d387bb3246dcdf3ba2a600c6162" id="r_a18821d387bb3246dcdf3ba2a600c6162"><td class="memItemLeft" align="right" valign="top"><a id="a18821d387bb3246dcdf3ba2a600c6162" name="a18821d387bb3246dcdf3ba2a600c6162"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::BreakStatement *s) override</td></tr>
-<tr class="memdesc:a7707d2961efcf5dfe7527ab69cf51990"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check that continue and break statements are only used in the context of a for statement. <br /></td></tr>
-<tr class="separator:a7707d2961efcf5dfe7527ab69cf51990"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acc570fb1c1a50444a2a82f86d9dbdc65" id="r_acc570fb1c1a50444a2a82f86d9dbdc65"><td class="memItemLeft" align="right" valign="top"><a id="acc570fb1c1a50444a2a82f86d9dbdc65" name="acc570fb1c1a50444a2a82f86d9dbdc65"></a>
+<tr class="memdesc:a18821d387bb3246dcdf3ba2a600c6162"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check that continue and break statements are only used in the context of a for statement. <br /></td></tr>
+<tr class="separator:a18821d387bb3246dcdf3ba2a600c6162"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a488db09aa21f6b5cfbffdd2f639cfc18" id="r_a488db09aa21f6b5cfbffdd2f639cfc18"><td class="memItemLeft" align="right" valign="top"><a id="a488db09aa21f6b5cfbffdd2f639cfc18" name="a488db09aa21f6b5cfbffdd2f639cfc18"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Constant *c) override</td></tr>
-<tr class="memdesc:acc570fb1c1a50444a2a82f86d9dbdc65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check that the type of a constant is either bit&lt;&gt;, int&lt;&gt; or int. <br /></td></tr>
-<tr class="separator:acc570fb1c1a50444a2a82f86d9dbdc65"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a218d4db3ce9acb151267edf28bb5c8" id="r_a4a218d4db3ce9acb151267edf28bb5c8"><td class="memItemLeft" align="right" valign="top"><a id="a4a218d4db3ce9acb151267edf28bb5c8" name="a4a218d4db3ce9acb151267edf28bb5c8"></a>
+<tr class="memdesc:a488db09aa21f6b5cfbffdd2f639cfc18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check that the type of a constant is either bit&lt;&gt;, int&lt;&gt; or int. <br /></td></tr>
+<tr class="separator:a488db09aa21f6b5cfbffdd2f639cfc18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af8f0f7956dbd23bca127639cb41df7dc" id="r_af8f0f7956dbd23bca127639cb41df7dc"><td class="memItemLeft" align="right" valign="top"><a id="af8f0f7956dbd23bca127639cb41df7dc" name="af8f0f7956dbd23bca127639cb41df7dc"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ConstructorCallExpression *expression) override</td></tr>
-<tr class="memdesc:a4a218d4db3ce9acb151267edf28bb5c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cannot invoke constructors in actions. <br /></td></tr>
-<tr class="separator:a4a218d4db3ce9acb151267edf28bb5c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memdesc:af8f0f7956dbd23bca127639cb41df7dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cannot invoke constructors in actions. <br /></td></tr>
+<tr class="separator:af8f0f7956dbd23bca127639cb41df7dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aada92cc4a508b05e6417db852076a428" id="r_aada92cc4a508b05e6417db852076a428"><td class="memItemLeft" align="right" valign="top"><a id="aada92cc4a508b05e6417db852076a428" name="aada92cc4a508b05e6417db852076a428"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ContinueStatement *s) override</td></tr>
 <tr class="separator:aada92cc4a508b05e6417db852076a428"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a89f9101ba3fd17a9bb3d2b9d278e314e" id="r_a89f9101ba3fd17a9bb3d2b9d278e314e"><td class="memItemLeft" align="right" valign="top"><a id="a89f9101ba3fd17a9bb3d2b9d278e314e" name="a89f9101ba3fd17a9bb3d2b9d278e314e"></a>
+<tr class="memitem:a4bcd35cbe149fdd56343d71361ea666c" id="r_a4bcd35cbe149fdd56343d71361ea666c"><td class="memItemLeft" align="right" valign="top"><a id="a4bcd35cbe149fdd56343d71361ea666c" name="a4bcd35cbe149fdd56343d71361ea666c"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Declaration_Constant *decl) override</td></tr>
-<tr class="memdesc:a89f9101ba3fd17a9bb3d2b9d278e314e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant names cannot be underscore. <br /></td></tr>
-<tr class="separator:a89f9101ba3fd17a9bb3d2b9d278e314e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab2f9cf3d60c745bd9d832ba87d8f986e" id="r_ab2f9cf3d60c745bd9d832ba87d8f986e"><td class="memItemLeft" align="right" valign="top"><a id="ab2f9cf3d60c745bd9d832ba87d8f986e" name="ab2f9cf3d60c745bd9d832ba87d8f986e"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Declaration_Instance *inst) override</td></tr>
+<tr class="memdesc:a4bcd35cbe149fdd56343d71361ea666c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant names cannot be underscore. <br /></td></tr>
+<tr class="separator:a4bcd35cbe149fdd56343d71361ea666c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2f9cf3d60c745bd9d832ba87d8f986e" id="r_ab2f9cf3d60c745bd9d832ba87d8f986e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab2f9cf3d60c745bd9d832ba87d8f986e">postorder</a> (const IR::Declaration_Instance *inst) override</td></tr>
 <tr class="separator:ab2f9cf3d60c745bd9d832ba87d8f986e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a200e5748d9e02d60632b57985458a5ad" id="r_a200e5748d9e02d60632b57985458a5ad"><td class="memItemLeft" align="right" valign="top"><a id="a200e5748d9e02d60632b57985458a5ad" name="a200e5748d9e02d60632b57985458a5ad"></a>
+<tr class="memitem:a4a80db6dc702f22cdf00401ad10259ff" id="r_a4a80db6dc702f22cdf00401ad10259ff"><td class="memItemLeft" align="right" valign="top"><a id="a4a80db6dc702f22cdf00401ad10259ff" name="a4a80db6dc702f22cdf00401ad10259ff"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Declaration_Variable *decl) override</td></tr>
-<tr class="memdesc:a200e5748d9e02d60632b57985458a5ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Variable names cannot be underscore. <br /></td></tr>
-<tr class="separator:a200e5748d9e02d60632b57985458a5ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memdesc:a4a80db6dc702f22cdf00401ad10259ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Variable names cannot be underscore. <br /></td></tr>
+<tr class="separator:a4a80db6dc702f22cdf00401ad10259ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65fcabe3397664f82b4d57386335a2ab" id="r_a65fcabe3397664f82b4d57386335a2ab"><td class="memItemLeft" align="right" valign="top"><a id="a65fcabe3397664f82b4d57386335a2ab" name="a65fcabe3397664f82b4d57386335a2ab"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Dots *dots) override</td></tr>
 <tr class="separator:a65fcabe3397664f82b4d57386335a2ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae5ef59a895d8daf0ac41c2cef404aa41" id="r_ae5ef59a895d8daf0ac41c2cef404aa41"><td class="memItemLeft" align="right" valign="top"><a id="ae5ef59a895d8daf0ac41c2cef404aa41" name="ae5ef59a895d8daf0ac41c2cef404aa41"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::EntriesList *l) override</td></tr>
 <tr class="separator:ae5ef59a895d8daf0ac41c2cef404aa41"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a563afd47b9f360cba29c1e23f8fe534b" id="r_a563afd47b9f360cba29c1e23f8fe534b"><td class="memItemLeft" align="right" valign="top"><a id="a563afd47b9f360cba29c1e23f8fe534b" name="a563afd47b9f360cba29c1e23f8fe534b"></a>
+<tr class="memitem:a12516c2a621b3264e6cf4824641665bc" id="r_a12516c2a621b3264e6cf4824641665bc"><td class="memItemLeft" align="right" valign="top"><a id="a12516c2a621b3264e6cf4824641665bc" name="a12516c2a621b3264e6cf4824641665bc"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ExitStatement *statement) override</td></tr>
-<tr class="memdesc:a563afd47b9f360cba29c1e23f8fe534b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exit statements are not allowed in parsers or functions. <br /></td></tr>
-<tr class="separator:a563afd47b9f360cba29c1e23f8fe534b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83bf8cd8d7889a8e1f554fcfc7516116" id="r_a83bf8cd8d7889a8e1f554fcfc7516116"><td class="memItemLeft" align="right" valign="top"><a id="a83bf8cd8d7889a8e1f554fcfc7516116" name="a83bf8cd8d7889a8e1f554fcfc7516116"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Method *t) override</td></tr>
+<tr class="memdesc:a12516c2a621b3264e6cf4824641665bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exit statements are not allowed in parsers or functions. <br /></td></tr>
+<tr class="separator:a12516c2a621b3264e6cf4824641665bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83bf8cd8d7889a8e1f554fcfc7516116" id="r_a83bf8cd8d7889a8e1f554fcfc7516116"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a83bf8cd8d7889a8e1f554fcfc7516116">postorder</a> (const IR::Method *t) override</td></tr>
 <tr class="separator:a83bf8cd8d7889a8e1f554fcfc7516116"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a44a5c8ae5eefba00ccb68d1f13f483" id="r_a1a44a5c8ae5eefba00ccb68d1f13f483"><td class="memItemLeft" align="right" valign="top"><a id="a1a44a5c8ae5eefba00ccb68d1f13f483" name="a1a44a5c8ae5eefba00ccb68d1f13f483"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::P4Control *control) override</td></tr>
@@ -188,30 +186,30 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const 
 <tr class="memitem:a45e9bfc26c6c42561dc22170e2375d78" id="r_a45e9bfc26c6c42561dc22170e2375d78"><td class="memItemLeft" align="right" valign="top"><a id="a45e9bfc26c6c42561dc22170e2375d78" name="a45e9bfc26c6c42561dc22170e2375d78"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::P4Program *program) override</td></tr>
 <tr class="separator:a45e9bfc26c6c42561dc22170e2375d78"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d39267f57e7fea22cf08cca6c3aa741" id="r_a7d39267f57e7fea22cf08cca6c3aa741"><td class="memItemLeft" align="right" valign="top"><a id="a7d39267f57e7fea22cf08cca6c3aa741" name="a7d39267f57e7fea22cf08cca6c3aa741"></a>
+<tr class="memitem:aa6fb854a0256cbc9e3383c55e1da3da9" id="r_aa6fb854a0256cbc9e3383c55e1da3da9"><td class="memItemLeft" align="right" valign="top"><a id="aa6fb854a0256cbc9e3383c55e1da3da9" name="aa6fb854a0256cbc9e3383c55e1da3da9"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::P4Table *t) override</td></tr>
-<tr class="memdesc:a7d39267f57e7fea22cf08cca6c3aa741"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tables must have an 'actions' property. <br /></td></tr>
-<tr class="separator:a7d39267f57e7fea22cf08cca6c3aa741"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1f44ab045f4e0d5fc7039758c816e844" id="r_a1f44ab045f4e0d5fc7039758c816e844"><td class="memItemLeft" align="right" valign="top"><a id="a1f44ab045f4e0d5fc7039758c816e844" name="a1f44ab045f4e0d5fc7039758c816e844"></a>
+<tr class="memdesc:aa6fb854a0256cbc9e3383c55e1da3da9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tables must have an 'actions' property. <br /></td></tr>
+<tr class="separator:aa6fb854a0256cbc9e3383c55e1da3da9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdcf32135e45bbe08f0f8eb89399a88c" id="r_afdcf32135e45bbe08f0f8eb89399a88c"><td class="memItemLeft" align="right" valign="top"><a id="afdcf32135e45bbe08f0f8eb89399a88c" name="afdcf32135e45bbe08f0f8eb89399a88c"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ParserState *s) override</td></tr>
-<tr class="memdesc:a1f44ab045f4e0d5fc7039758c816e844"><td class="mdescLeft">&#160;</td><td class="mdescRight">The accept and reject states cannot be implemented. <br /></td></tr>
-<tr class="separator:a1f44ab045f4e0d5fc7039758c816e844"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad14c8d2affd8201691d9ab3cf6740f21" id="r_ad14c8d2affd8201691d9ab3cf6740f21"><td class="memItemLeft" align="right" valign="top"><a id="ad14c8d2affd8201691d9ab3cf6740f21" name="ad14c8d2affd8201691d9ab3cf6740f21"></a>
+<tr class="memdesc:afdcf32135e45bbe08f0f8eb89399a88c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The accept and reject states cannot be implemented. <br /></td></tr>
+<tr class="separator:afdcf32135e45bbe08f0f8eb89399a88c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51a6bd49c3d304cfe3cabda6dc2d2041" id="r_a51a6bd49c3d304cfe3cabda6dc2d2041"><td class="memItemLeft" align="right" valign="top"><a id="a51a6bd49c3d304cfe3cabda6dc2d2041" name="a51a6bd49c3d304cfe3cabda6dc2d2041"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ReturnStatement *statement) override</td></tr>
-<tr class="memdesc:ad14c8d2affd8201691d9ab3cf6740f21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return statements are not allowed in parsers. <br /></td></tr>
-<tr class="separator:ad14c8d2affd8201691d9ab3cf6740f21"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3eec58ff33a7064dee5e44d33bd49b63" id="r_a3eec58ff33a7064dee5e44d33bd49b63"><td class="memItemLeft" align="right" valign="top"><a id="a3eec58ff33a7064dee5e44d33bd49b63" name="a3eec58ff33a7064dee5e44d33bd49b63"></a>
+<tr class="memdesc:a51a6bd49c3d304cfe3cabda6dc2d2041"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return statements are not allowed in parsers. <br /></td></tr>
+<tr class="separator:a51a6bd49c3d304cfe3cabda6dc2d2041"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5ac6819bfbe4fcc142244b5f6ef842b" id="r_ab5ac6819bfbe4fcc142244b5f6ef842b"><td class="memItemLeft" align="right" valign="top"><a id="ab5ac6819bfbe4fcc142244b5f6ef842b" name="ab5ac6819bfbe4fcc142244b5f6ef842b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::StructField *f) override</td></tr>
-<tr class="memdesc:a3eec58ff33a7064dee5e44d33bd49b63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Struct field names cannot be underscore. <br /></td></tr>
-<tr class="separator:a3eec58ff33a7064dee5e44d33bd49b63"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abe3cc60098770b4614406c1ceaa53a17" id="r_abe3cc60098770b4614406c1ceaa53a17"><td class="memItemLeft" align="right" valign="top"><a id="abe3cc60098770b4614406c1ceaa53a17" name="abe3cc60098770b4614406c1ceaa53a17"></a>
+<tr class="memdesc:ab5ac6819bfbe4fcc142244b5f6ef842b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Struct field names cannot be underscore. <br /></td></tr>
+<tr class="separator:ab5ac6819bfbe4fcc142244b5f6ef842b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4784b7ea5f4bd05d7809089839bc3657" id="r_a4784b7ea5f4bd05d7809089839bc3657"><td class="memItemLeft" align="right" valign="top"><a id="a4784b7ea5f4bd05d7809089839bc3657" name="a4784b7ea5f4bd05d7809089839bc3657"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::SwitchStatement *statement) override</td></tr>
-<tr class="memdesc:abe3cc60098770b4614406c1ceaa53a17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default label in switch statement is always the last one. <br /></td></tr>
-<tr class="separator:abe3cc60098770b4614406c1ceaa53a17"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad5497305beddf57ee50238850056d253" id="r_ad5497305beddf57ee50238850056d253"><td class="memItemLeft" align="right" valign="top"><a id="ad5497305beddf57ee50238850056d253" name="ad5497305beddf57ee50238850056d253"></a>
+<tr class="memdesc:a4784b7ea5f4bd05d7809089839bc3657"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default label in switch statement is always the last one. <br /></td></tr>
+<tr class="separator:a4784b7ea5f4bd05d7809089839bc3657"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7883440fe5a1f8ee92ebd3493b546cc" id="r_af7883440fe5a1f8ee92ebd3493b546cc"><td class="memItemLeft" align="right" valign="top"><a id="af7883440fe5a1f8ee92ebd3493b546cc" name="af7883440fe5a1f8ee92ebd3493b546cc"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Type_Bits *type) override</td></tr>
-<tr class="memdesc:ad5497305beddf57ee50238850056d253"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width of a bit&lt;&gt; or int&lt;&gt; type is greater than 0. <br /></td></tr>
-<tr class="separator:ad5497305beddf57ee50238850056d253"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memdesc:af7883440fe5a1f8ee92ebd3493b546cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width of a bit&lt;&gt; or int&lt;&gt; type is greater than 0. <br /></td></tr>
+<tr class="separator:af7883440fe5a1f8ee92ebd3493b546cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9c15aaded5260cf8c3c2fb09f7d40331" id="r_a9c15aaded5260cf8c3c2fb09f7d40331"><td class="memItemLeft" align="right" valign="top"><a id="a9c15aaded5260cf8c3c2fb09f7d40331" name="a9c15aaded5260cf8c3c2fb09f7d40331"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Type_Package *package) override</td></tr>
 <tr class="separator:a9c15aaded5260cf8c3c2fb09f7d40331"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -221,16 +219,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const 
 <tr class="inherit_header pub_methods_class_p4_1_1_inspector"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_p4_1_1_inspector')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_p4_1_1_inspector.html">P4::Inspector</a></td></tr>
 <tr class="memitem:af0e7b5e2f8005cbbeae614ca80a005d3 inherit pub_methods_class_p4_1_1_inspector" id="r_af0e7b5e2f8005cbbeae614ca80a005d3"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_inspector.html#af0e7b5e2f8005cbbeae614ca80a005d3">apply_visitor</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *, const char *name=0) override</td></tr>
 <tr class="separator:af0e7b5e2f8005cbbeae614ca80a005d3 inherit pub_methods_class_p4_1_1_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa074c2e3a53b9a297803fa0ff3f331b7 inherit pub_methods_class_p4_1_1_inspector" id="r_aa074c2e3a53b9a297803fa0ff3f331b7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_inspector.html#aa074c2e3a53b9a297803fa0ff3f331b7">init_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *root) override</td></tr>
-<tr class="separator:aa074c2e3a53b9a297803fa0ff3f331b7 inherit pub_methods_class_p4_1_1_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a708f54deb62556a0b6c688e4a0de8c1e inherit pub_methods_class_p4_1_1_inspector" id="r_a708f54deb62556a0b6c688e4a0de8c1e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_inspector.html#a708f54deb62556a0b6c688e4a0de8c1e">init_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *root) override</td></tr>
+<tr class="separator:a708f54deb62556a0b6c688e4a0de8c1e inherit pub_methods_class_p4_1_1_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54b361e3d37ddcf9f2288f0dbe8ec1cf inherit pub_methods_class_p4_1_1_inspector" id="r_a54b361e3d37ddcf9f2288f0dbe8ec1cf"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>loop_revisit</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
 <tr class="separator:a54b361e3d37ddcf9f2288f0dbe8ec1cf inherit pub_methods_class_p4_1_1_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e73533fc0068de635b0e645c1bb5298 inherit pub_methods_class_p4_1_1_inspector" id="r_a0e73533fc0068de635b0e645c1bb5298"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
 <tr class="separator:a0e73533fc0068de635b0e645c1bb5298 inherit pub_methods_class_p4_1_1_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe077948e7d17a03c6037f6f5511c6ff inherit pub_methods_class_p4_1_1_inspector" id="r_afe077948e7d17a03c6037f6f5511c6ff"><td class="memItemLeft" align="right" valign="top">
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
+<tr class="memitem:afe077948e7d17a03c6037f6f5511c6ff inherit pub_methods_class_p4_1_1_inspector" id="r_afe077948e7d17a03c6037f6f5511c6ff"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_inspector.html#afe077948e7d17a03c6037f6f5511c6ff">preorder</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
 <tr class="separator:afe077948e7d17a03c6037f6f5511c6ff inherit pub_methods_class_p4_1_1_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8abf13341302ac00c0e88be053c273e3 inherit pub_methods_class_p4_1_1_inspector" id="r_a8abf13341302ac00c0e88be053c273e3"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>revisit</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
@@ -258,12 +255,12 @@ virtual <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><
 <tr class="memitem:ac6a5e2e28ca2bb741588ec144bd152c2 inherit pub_methods_class_p4_1_1_visitor" id="r_ac6a5e2e28ca2bb741588ec144bd152c2"><td class="memItemLeft" align="right" valign="top">
 virtual <a class="el" href="class_p4_1_1_control_flow_visitor.html">ControlFlowVisitor</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>controlFlowVisitor</b> ()</td></tr>
 <tr class="separator:ac6a5e2e28ca2bb741588ec144bd152c2 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6fe62448ba72dca8ddf1844cf0eae0d4 inherit pub_methods_class_p4_1_1_visitor" id="r_a6fe62448ba72dca8ddf1844cf0eae0d4"><td class="memItemLeft" align="right" valign="top">
+<tr class="memitem:a4fde650ea3fddd156d05b5207307ba30 inherit pub_methods_class_p4_1_1_visitor" id="r_a4fde650ea3fddd156d05b5207307ba30"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>end_apply</b> ()</td></tr>
-<tr class="separator:a6fe62448ba72dca8ddf1844cf0eae0d4 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2d1db7c74e18cbf9e56dda45148e88c1 inherit pub_methods_class_p4_1_1_visitor" id="r_a2d1db7c74e18cbf9e56dda45148e88c1"><td class="memItemLeft" align="right" valign="top">
+<tr class="separator:a4fde650ea3fddd156d05b5207307ba30 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86132525a6daff6b5577104da5183be0 inherit pub_methods_class_p4_1_1_visitor" id="r_a86132525a6daff6b5577104da5183be0"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>end_apply</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *root)</td></tr>
-<tr class="separator:a2d1db7c74e18cbf9e56dda45148e88c1 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a86132525a6daff6b5577104da5183be0 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab72909367b71899602dbf19732bb15d8 inherit pub_methods_class_p4_1_1_visitor" id="r_ab72909367b71899602dbf19732bb15d8"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>erase_global</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a>)</td></tr>
 <tr class="separator:ab72909367b71899602dbf19732bb15d8 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -328,9 +325,9 @@ template&lt;class T &gt; </td></tr>
 <tr class="memitem:a65dc025befbbfdeabcc6edccc5a956bd inherit pub_methods_class_p4_1_1_visitor" id="r_a65dc025befbbfdeabcc6edccc5a956bd"><td class="memItemLeft" align="right" valign="top">
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_flow_joins</b> () const</td></tr>
 <tr class="separator:a65dc025befbbfdeabcc6edccc5a956bd inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a986ed02b63653c37c5b15a5dd564b31f inherit pub_methods_class_p4_1_1_visitor" id="r_a986ed02b63653c37c5b15a5dd564b31f"><td class="memItemLeft" align="right" valign="top">
+<tr class="memitem:a37d47c912db483387f2185ec0c69eefe inherit pub_methods_class_p4_1_1_visitor" id="r_a37d47c912db483387f2185ec0c69eefe"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>init_apply</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *root, const <a class="el" href="struct_p4_1_1_visitor___context.html">Context</a> *parent_context)</td></tr>
-<tr class="separator:a986ed02b63653c37c5b15a5dd564b31f inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a37d47c912db483387f2185ec0c69eefe inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5a904b78dd012db5d096c7c8ab15aaff inherit pub_methods_class_p4_1_1_visitor" id="r_a5a904b78dd012db5d096c7c8ab15aaff"><td class="memItemLeft" align="right" valign="top">
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isInContext</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *n) const</td></tr>
 <tr class="separator:a5a904b78dd012db5d096c7c8ab15aaff inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -408,11 +405,11 @@ Additional Inherited Members</h2></td></tr>
 typedef <a class="el" href="struct_p4_1_1_visitor___context.html">Visitor_Context</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Context</b></td></tr>
 <tr class="separator:a61af39e88e7fc94bc5865c6d6b0ca6ec inherit pub_types_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_static_methods_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
-<tr class="memitem:a291f23a4822f2c3165e0d150e064d135 inherit pub_static_methods_class_p4_1_1_visitor" id="r_a291f23a4822f2c3165e0d150e064d135"><td class="memItemLeft" align="right" valign="top">
+<tr class="memitem:a660765ff55d502b9d9c0c6b5c522dca0 inherit pub_static_methods_class_p4_1_1_visitor" id="r_a660765ff55d502b9d9c0c6b5c522dca0"><td class="memItemLeft" align="right" valign="top">
 static <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>demangle</b> (const char *)</td></tr>
-<tr class="separator:a291f23a4822f2c3165e0d150e064d135 inherit pub_static_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1bce1ae1f9c1809d2bc1672048e89005 inherit pub_static_methods_class_p4_1_1_visitor" id="r_a1bce1ae1f9c1809d2bc1672048e89005"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor.html#a1bce1ae1f9c1809d2bc1672048e89005">warning_enabled</a> (const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *visitor, int warning_kind)</td></tr>
-<tr class="separator:a1bce1ae1f9c1809d2bc1672048e89005 inherit pub_static_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a660765ff55d502b9d9c0c6b5c522dca0 inherit pub_static_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a883ecb795f506e021328e285c7c23264 inherit pub_static_methods_class_p4_1_1_visitor" id="r_a883ecb795f506e021328e285c7c23264"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor.html#a883ecb795f506e021328e285c7c23264">warning_enabled</a> (const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *visitor, int warning_kind)</td></tr>
+<tr class="separator:a883ecb795f506e021328e285c7c23264 inherit pub_static_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_attribs_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_attribs_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
 <tr class="memitem:a77790b8548086cf62140b5b5579ac455 inherit pub_attribs_class_p4_1_1_visitor" id="r_a77790b8548086cf62140b5b5579ac455"><td class="memItemLeft" align="right" valign="top">
 const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>called_by</b> = nullptr</td></tr>
@@ -471,7 +468,60 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <li>Dots are the last field</li>
 <li>continue and break statements are only used in the context of a for statement </li>
 </ul>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="ab2f9cf3d60c745bd9d832ba87d8f986e" name="ab2f9cf3d60c745bd9d832ba87d8f986e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2f9cf3d60c745bd9d832ba87d8f986e">&#9670;&#160;</a></span>postorder() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4::ValidateParsedProgram::postorder </td>
+          <td>(</td>
+          <td class="paramtype">const IR::Declaration_Instance *</td>          <td class="paramname"><span class="paramname"><em>decl</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Instance names cannot be don't care Do not declare instances in apply {} blocks, parser states or actions </p>
+
+</div>
+</div>
+<a id="a83bf8cd8d7889a8e1f554fcfc7516116" name="a83bf8cd8d7889a8e1f554fcfc7516116"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83bf8cd8d7889a8e1f554fcfc7516116">&#9670;&#160;</a></span>postorder() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4::ValidateParsedProgram::postorder </td>
+          <td>(</td>
+          <td class="paramtype">const IR::Method *</td>          <td class="paramname"><span class="paramname"><em>m</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Check that underscore is not a method name Check that constructors do not have a return type Check that extern constructor names match the enclosing extern </p>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->
 <!-- start footer part -->

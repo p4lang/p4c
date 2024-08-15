@@ -175,7 +175,7 @@ $(function(){initNavTree('convert_enums_8h_source.html',''); initResizable(true)
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        type = IR::Type_Bits::get(srcInfo, width, <span class="keyword">false</span>);</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    }</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordtype">void</span> add(<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> decl) { repr.emplace(decl, repr.size()); }</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordtype">unsigned</span> get(<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> decl)<span class="keyword"> const </span>{ return ::get(repr, decl); }</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordtype">unsigned</span> get(<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> decl)<span class="keyword"> const </span>{ return ::P4::get(repr, decl); }</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keyword">using </span>iterator = <span class="keyword">decltype</span>(repr)::iterator;</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keyword">using </span>const_iterator = <span class="keyword">decltype</span>(repr)::const_iterator;</div>
@@ -208,7 +208,7 @@ $(function(){initNavTree('convert_enums_8h_source.html',''); initResizable(true)
 </div>
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
 <div class="foldopen" id="foldopen00114" data-start="{" data-end="};">
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="class_p4_1_1_convert_enums.html">  114</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_convert_enums.html">ConvertEnums</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_pass_manager.html">PassManager</a> {</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="class_p4_1_1_convert_enums.html">  114</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_convert_enums.html">ConvertEnums</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_pass_manager.html">PassManager</a> {</div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <a class="code hl_class" href="class_p4_1_1_do_convert_enums.html">DoConvertEnums</a> *convertEnums{<span class="keyword">nullptr</span>};</div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
 <div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> <span class="keyword">public</span>:</div>
@@ -248,15 +248,15 @@ $(function(){initNavTree('convert_enums_8h_source.html',''); initResizable(true)
 <div class="ttc" id="aclass_p4_1_1_do_convert_enums_html"><div class="ttname"><a href="class_p4_1_1_do_convert_enums.html">P4::DoConvertEnums</a></div><div class="ttdef"><b>Definition</b> convertEnums.h:95</div></div>
 <div class="ttc" id="aclass_p4_1_1_enum_on32_bits_html"><div class="ttname"><a href="class_p4_1_1_enum_on32_bits.html">P4::EnumOn32Bits</a></div><div class="ttdef"><b>Definition</b> convertEnums.h:137</div></div>
 <div class="ttc" id="aclass_p4_1_1_enum_representation_html"><div class="ttname"><a href="class_p4_1_1_enum_representation.html">P4::EnumRepresentation</a></div><div class="ttdef"><b>Definition</b> convertEnums.h:44</div></div>
-<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> copySrcInfo.h:93</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:95</div></div>
+<div class="ttc" id="aclass_p4_1_1_pass_manager_html"><div class="ttname"><a href="class_p4_1_1_pass_manager.html">P4::PassManager</a></div><div class="ttdef"><b>Definition</b> pass_manager.h:40</div></div>
 <div class="ttc" id="aclass_p4_1_1_reference_map_html"><div class="ttname"><a href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a></div><div class="ttdoc">Class used to encode maps from paths to declarations.</div><div class="ttdef"><b>Definition</b> referenceMap.h:66</div></div>
-<div class="ttc" id="aclass_p4_1_1_transform_html"><div class="ttname"><a href="class_p4_1_1_transform.html">P4::Transform</a></div><div class="ttdef"><b>Definition</b> copySrcInfo.h:422</div></div>
+<div class="ttc" id="aclass_p4_1_1_transform_html"><div class="ttname"><a href="class_p4_1_1_transform.html">P4::Transform</a></div><div class="ttdef"><b>Definition</b> visitor.h:424</div></div>
 <div class="ttc" id="aclass_p4_1_1_type_checking_html"><div class="ttname"><a href="class_p4_1_1_type_checking.html">P4::TypeChecking</a></div><div class="ttdef"><b>Definition</b> typeChecker.h:55</div></div>
 <div class="ttc" id="aclass_p4_1_1_type_map_html"><div class="ttname"><a href="class_p4_1_1_type_map.html">P4::TypeMap</a></div><div class="ttdef"><b>Definition</b> typeMap.h:41</div></div>
-<div class="ttc" id="aclass_p4_1_1_util_1_1_source_info_html"><div class="ttname"><a href="class_p4_1_1_util_1_1_source_info.html">P4::Util::SourceInfo</a></div><div class="ttdef"><b>Definition</b> copySrcInfo.h:124</div></div>
-<div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> copySrcInfo.h:82</div></div>
-<div class="ttc" id="aclass_p4_1_1ordered__map_html"><div class="ttname"><a href="class_p4_1_1ordered__map.html">P4::ordered_map</a></div><div class="ttdef"><b>Definition</b> copySrcInfo.h:31</div></div>
-<div class="ttc" id="aclass_pass_manager_html"><div class="ttname"><a href="class_pass_manager.html">PassManager</a></div><div class="ttdef"><b>Definition</b> pass_manager.h:38</div></div>
+<div class="ttc" id="aclass_p4_1_1_util_1_1_source_info_html"><div class="ttname"><a href="class_p4_1_1_util_1_1_source_info.html">P4::Util::SourceInfo</a></div><div class="ttdef"><b>Definition</b> source_file.h:124</div></div>
+<div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
+<div class="ttc" id="aclass_p4_1_1ordered__map_html"><div class="ttname"><a href="class_p4_1_1ordered__map.html">P4::ordered_map</a></div><div class="ttdef"><b>Definition</b> ordered_map.h:32</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->

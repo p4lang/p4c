@@ -1,7 +1,0 @@
-<map id="TC::ConvertToEbpfPNA" name="TC::ConvertToEbpfPNA">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,172,177"/>
-<area shape="rect" id="Node000002" href="$class_transform.html" title=" " alt="" coords="45,79,132,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,118,91,152,86,152,86,118"/>
-<area shape="rect" id="Node000003" href="$class_visitor.html" title=" " alt="" coords="57,5,121,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,44,91,79,86,79,86,44"/>
-</map>

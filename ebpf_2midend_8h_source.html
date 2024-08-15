@@ -147,30 +147,31 @@ $(function(){initNavTree('ebpf_2midend_8h_source.html',''); initResizable(true);
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;frontends/p4/typeMap.h&quot;</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;ir/ir.h&quot;</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_e_b_p_f.html">EBPF</a> {</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4_1_1_e_b_p_f.html">P4::EBPF</a> {</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
 <div class="foldopen" id="foldopen00027" data-start="{" data-end="};">
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="class_e_b_p_f_1_1_mid_end.html">   27</a></span><span class="keyword">class </span><a class="code hl_class" href="class_e_b_p_f_1_1_mid_end.html">MidEnd</a> {</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="class_p4_1_1_e_b_p_f_1_1_mid_end.html">   27</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_e_b_p_f_1_1_mid_end.html">MidEnd</a> {</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    std::vector&lt;DebugHook&gt; hooks;</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <a class="code hl_class" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> refMap;</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <a class="code hl_class" href="class_p4_1_1_type_map.html">P4::TypeMap</a> typeMap;</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordtype">void</span> addDebugHook(DebugHook hook) { hooks.push_back(hook); }</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keyword">const</span> IR::ToplevelBlock *<a class="code hl_function" href="class_e_b_p_f_1_1_mid_end.html#a53f5e202c231c71a3ed71dfd87ab7218">run</a>(<a class="code hl_class" href="class_ebpf_options.html">EbpfOptions</a> &amp;options, <span class="keyword">const</span> IR::P4Program *program,</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordtype">void</span> addDebugHook(<a class="code hl_typedef" href="namespace_p4.html#aa0162e94389d5f8eeab54661b5c892db">DebugHook</a> hook) { hooks.push_back(hook); }</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keyword">const</span> IR::ToplevelBlock *<a class="code hl_function" href="class_p4_1_1_e_b_p_f_1_1_mid_end.html#ae437d99eb18a5965261f40a7043bead0">run</a>(<a class="code hl_class" href="class_p4_1_1_ebpf_options.html">EbpfOptions</a> &amp;options, <span class="keyword">const</span> IR::P4Program *program,</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>                                 std::ostream *outStream = <span class="keyword">nullptr</span>);</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>};</div>
 </div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}  <span class="comment">// namespace EBPF</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}  <span class="comment">// namespace P4::EBPF</span></div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_EBPF_MIDEND_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_e_b_p_f_1_1_mid_end_html"><div class="ttname"><a href="class_e_b_p_f_1_1_mid_end.html">EBPF::MidEnd</a></div><div class="ttdef"><b>Definition</b> ebpf/midend.h:27</div></div>
-<div class="ttc" id="aclass_e_b_p_f_1_1_mid_end_html_a53f5e202c231c71a3ed71dfd87ab7218"><div class="ttname"><a href="class_e_b_p_f_1_1_mid_end.html#a53f5e202c231c71a3ed71dfd87ab7218">EBPF::MidEnd::run</a></div><div class="ttdeci">const IR::ToplevelBlock * run(EbpfOptions &amp;options, const IR::P4Program *program, std::ostream *outStream=nullptr)</div><div class="ttdoc">If p4c is run with option '–listMidendPasses', outStream is used for printing passes names.</div><div class="ttdef"><b>Definition</b> ebpf/midend.cpp:71</div></div>
-<div class="ttc" id="aclass_ebpf_options_html"><div class="ttname"><a href="class_ebpf_options.html">EbpfOptions</a></div><div class="ttdef"><b>Definition</b> ebpfOptions.h:24</div></div>
+<div class="ttc" id="aclass_p4_1_1_e_b_p_f_1_1_mid_end_html"><div class="ttname"><a href="class_p4_1_1_e_b_p_f_1_1_mid_end.html">P4::EBPF::MidEnd</a></div><div class="ttdef"><b>Definition</b> ebpf/midend.h:27</div></div>
+<div class="ttc" id="aclass_p4_1_1_e_b_p_f_1_1_mid_end_html_ae437d99eb18a5965261f40a7043bead0"><div class="ttname"><a href="class_p4_1_1_e_b_p_f_1_1_mid_end.html#ae437d99eb18a5965261f40a7043bead0">P4::EBPF::MidEnd::run</a></div><div class="ttdeci">const IR::ToplevelBlock * run(EbpfOptions &amp;options, const IR::P4Program *program, std::ostream *outStream=nullptr)</div><div class="ttdoc">If p4c is run with option '–listMidendPasses', outStream is used for printing passes names.</div><div class="ttdef"><b>Definition</b> ebpf/midend.cpp:71</div></div>
+<div class="ttc" id="aclass_p4_1_1_ebpf_options_html"><div class="ttname"><a href="class_p4_1_1_ebpf_options.html">P4::EbpfOptions</a></div><div class="ttdef"><b>Definition</b> ebpfOptions.h:26</div></div>
 <div class="ttc" id="aclass_p4_1_1_reference_map_html"><div class="ttname"><a href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a></div><div class="ttdoc">Class used to encode maps from paths to declarations.</div><div class="ttdef"><b>Definition</b> referenceMap.h:66</div></div>
 <div class="ttc" id="aclass_p4_1_1_type_map_html"><div class="ttname"><a href="class_p4_1_1_type_map.html">P4::TypeMap</a></div><div class="ttdef"><b>Definition</b> typeMap.h:41</div></div>
-<div class="ttc" id="anamespace_e_b_p_f_html"><div class="ttname"><a href="namespace_e_b_p_f.html">EBPF</a></div><div class="ttdef"><b>Definition</b> codeGen.cpp:25</div></div>
+<div class="ttc" id="anamespace_p4_1_1_e_b_p_f_html"><div class="ttname"><a href="namespace_p4_1_1_e_b_p_f.html">P4::EBPF</a></div><div class="ttdef"><b>Definition</b> codeGen.cpp:25</div></div>
+<div class="ttc" id="anamespace_p4_html_aa0162e94389d5f8eeab54661b5c892db"><div class="ttname"><a href="namespace_p4.html#aa0162e94389d5f8eeab54661b5c892db">P4::DebugHook</a></div><div class="ttdeci">std::function&lt; void(const char *manager, unsigned seqNo, const char *pass, const IR::Node *node)&gt; DebugHook</div><div class="ttdef"><b>Definition</b> pass_manager.h:38</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

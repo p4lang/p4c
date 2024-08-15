@@ -132,7 +132,7 @@ Introduction</h1>
 <p>The IR may be a tree or DAG, but allowing back/up references in the IR (cycles) defeats much of the benefit of the immutable IR. If cycles (for example, leaf nodes for names directly referring to the named object) were allowed, pretty much any minor transform would end up cloning the entire IR graph, as modifying a leaf involves cloning the object containing the leaf, and then any object referring to that object, recursively.</p>
 <h1><a class="anchor" id="visitors-and-transforms"></a>
 Visitors and Transforms</h1>
-<p>The compiler is organized as a series of <code><a class="el" href="class_visitor.html">Visitor</a></code> and <code><a class="el" href="class_transform.html">Transform</a></code> passes <a href="https://en.wikipedia.org/wiki/Visitor_pattern">Wikipedia</a>. The <code><a class="el" href="class_visitor.html">Visitor</a></code> and <code><a class="el" href="class_transform.html">Transform</a></code> base classes make defining new passes easy &ndash; a new transform need only specify the IR types it is interested in, and can ignore others. A (constant) <code><a class="el" href="class_visitor.html">Visitor</a></code> pass visits every node in the IR tree and accumulates information about the tree but does not modify it, while a <a class="el" href="class_transform.html">Transform</a> pass visits every node, possibly modifying the node or replacing it with some other node</p>
+<p>The compiler is organized as a series of <code>Visitor</code> and <code>Transform</code> passes <a href="https://en.wikipedia.org/wiki/Visitor_pattern">Wikipedia</a>. The <code>Visitor</code> and <code>Transform</code> base classes make defining new passes easy &ndash; a new transform need only specify the IR types it is interested in, and can ignore others. A (constant) <code>Visitor</code> pass visits every node in the IR tree and accumulates information about the tree but does not modify it, while a Transform pass visits every node, possibly modifying the node or replacing it with some other node</p>
 <div class="fragment"><div class="line">++</div>
 <div class="line">   <span class="comment">/* pseudo-code for basic Transform visitor */</span></div>
 <div class="line">   visit(node, context=ROOT, visited={}) {</div>
@@ -164,33 +164,33 @@ Visitors and Transforms</h1>
 <div class="line">   <span class="keywordflow">for</span> (child in children(node))</div>
 <div class="line">       child = visit(child, context, visited)</div>
 <div class="line">   }</div>
-</div><!-- fragment --><p>A <code><a class="el" href="class_transform.html">Transform</a></code> pass is allowed to freely modify or completely replace a node in its preorder and postorder routines, and the <a class="el" href="class_transform.html">Transform</a> visitor will automatically rebuild the tree as needed. The transform subroutines cannot modify other nodes in the tree, however, though they may access and refer to them. These routines can be overloaded to differentiate between different IR subclasses automatically. Any given visitor need only override the routines it is interested in for the IR types it is interested in.</p>
-<p>There are several <a class="el" href="class_visitor.html">Visitor</a> subclasses that describe different types of visitors:</p>
+</div><!-- fragment --><p>A <code>Transform</code> pass is allowed to freely modify or completely replace a node in its preorder and postorder routines, and the Transform visitor will automatically rebuild the tree as needed. The transform subroutines cannot modify other nodes in the tree, however, though they may access and refer to them. These routines can be overloaded to differentiate between different IR subclasses automatically. Any given visitor need only override the routines it is interested in for the IR types it is interested in.</p>
+<p>There are several Visitor subclasses that describe different types of visitors:</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
-<th class="markdownTableHeadNone"><a class="el" href="class_visitor.html">Visitor</a>   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<th class="markdownTableHeadNone">Visitor   </th><th class="markdownTableHeadNone">Description    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code><a class="el" href="class_inspector.html">Inspector</a></code>   </td><td class="markdownTableBodyNone">simplified visitor that does not modify any nodes, just collects information.    </td></tr>
+<td class="markdownTableBodyNone"><code>Inspector</code>   </td><td class="markdownTableBodyNone">simplified visitor that does not modify any nodes, just collects information.    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code><a class="el" href="class_modifier.html">Modifier</a></code>   </td><td class="markdownTableBodyNone">simplified visitor that does not change the tree/dag structure, but may modify nodes in place.    </td></tr>
+<td class="markdownTableBodyNone"><code>Modifier</code>   </td><td class="markdownTableBodyNone">simplified visitor that does not change the tree/dag structure, but may modify nodes in place.    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code><a class="el" href="class_transform.html">Transform</a></code>   </td><td class="markdownTableBodyNone">full transformation visitor described above    </td></tr>
+<td class="markdownTableBodyNone"><code>Transform</code>   </td><td class="markdownTableBodyNone">full transformation visitor described above    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code><a class="el" href="class_pass_manager.html">PassManager</a></code>   </td><td class="markdownTableBodyNone">combines several visitors, run in a sequence   </td></tr>
+<td class="markdownTableBodyNone"><code>PassManager</code>   </td><td class="markdownTableBodyNone">combines several visitors, run in a sequence   </td></tr>
 </table>
-<p>There are also some interfaces that <a class="el" href="class_visitor.html">Visitor</a> subclasses can implement to alter how nodes are visited:</p>
+<p>There are also some interfaces that Visitor subclasses can implement to alter how nodes are visited:</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Interface   </th><th class="markdownTableHeadNone">Description    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code><a class="el" href="class_control_flow_visitor.html">ControlFlowVisitor</a></code>   </td><td class="markdownTableBodyNone">visit nodes in control-flow order, splitting (cloning) the visitor at conditions and merging the clone at join points    </td></tr>
+<td class="markdownTableBodyNone"><code>ControlFlowVisitor</code>   </td><td class="markdownTableBodyNone">visit nodes in control-flow order, splitting (cloning) the visitor at conditions and merging the clone at join points    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code><a class="el" href="class_backtrack.html">Backtrack</a></code>   </td><td class="markdownTableBodyNone">visitor that is notified when backtracking occurs and can have its state saved as a backtrack point.   </td></tr>
+<td class="markdownTableBodyNone"><code>Backtrack</code>   </td><td class="markdownTableBodyNone">visitor that is notified when backtracking occurs and can have its state saved as a backtrack point.   </td></tr>
 </table>
 <h3><a class="anchor" id="controlflowvisitor"></a>
 ControlFlowVisitor</h3>
-<p>To support control flow analysis, there is a special <code><a class="el" href="class_control_flow_visitor.html">ControlFlowVisitor</a></code> interface that is understood by certain IR subclasses that encapsulate control flow, and is used by them to control the order in which children are visited and the visitor state passed to the visitor preorder/postorder routines in order to implement control-flow analysis.</p>
-<p>The basic idea is that control flow IR nodes, when visiting their children, will create clones of the <code><a class="el" href="class_control_flow_visitor.html">ControlFlowVisitor</a></code> object to visit different children after a branch, and will then call <code>flow_merge</code> at the join point to merge the visitor state. Both the <code><a class="el" href="class_visitor.html">Visitor</a></code> base class and the <code><a class="el" href="class_control_flow_visitor.html">ControlFlowVisitor</a></code> interface define two virtual functions: <code>flow_clone</code> and <code>flow_merge</code> to mediate this. In the <code><a class="el" href="class_visitor.html">Visitor</a></code> base class (used by all visitors that do <em>not</em> inherit from the <code><a class="el" href="class_control_flow_visitor.html">ControlFlowVisitor</a></code> interface, these are implemented as no-ops &ndash; <code>flow_clone</code> just returns the same object, and <code>flow_merge</code> does nothing. In the <code><a class="el" href="class_control_flow_visitor.html">ControlFlowVisitor</a></code> interface <code>flow_clone</code> calls the <code>clone</code> function (which must be implemented by the leaf class) and <code>flow_merge</code> is an abstract virtual function that must be implemented by the leaf class.</p>
+<p>To support control flow analysis, there is a special <code>ControlFlowVisitor</code> interface that is understood by certain IR subclasses that encapsulate control flow, and is used by them to control the order in which children are visited and the visitor state passed to the visitor preorder/postorder routines in order to implement control-flow analysis.</p>
+<p>The basic idea is that control flow IR nodes, when visiting their children, will create clones of the <code>ControlFlowVisitor</code> object to visit different children after a branch, and will then call <code>flow_merge</code> at the join point to merge the visitor state. Both the <code>Visitor</code> base class and the <code>ControlFlowVisitor</code> interface define two virtual functions: <code>flow_clone</code> and <code>flow_merge</code> to mediate this. In the <code>Visitor</code> base class (used by all visitors that do <em>not</em> inherit from the <code>ControlFlowVisitor</code> interface, these are implemented as no-ops &ndash; <code>flow_clone</code> just returns the same object, and <code>flow_merge</code> does nothing. In the <code>ControlFlowVisitor</code> interface <code>flow_clone</code> calls the <code>clone</code> function (which must be implemented by the leaf class) and <code>flow_merge</code> is an abstract virtual function that must be implemented by the leaf class.</p>
 <p>As an example for how these are used in the IR visitor routines, the IR::If class has three children to visit &ndash; a predicate and two consequents, with the value of the predicate deciding which consequent to execute. The child visitor for <code>IR::If</code> is</p>
 <div class="fragment"><div class="line">++</div>
 <div class="line">   visitor.visit(predicate);</div>
@@ -199,7 +199,7 @@ ControlFlowVisitor</h3>
 <div class="line">   clone.visit(ifFalse);</div>
 <div class="line">   visitor.flow_merge(clone);</div>
 </div><!-- fragment --><p>So both consequents are visited with a visitor state that corresponds to the control flow immediately after evaluating the predicate, and then the control flow state after both consequents are merged back together.</p>
-<p>In order to make use of this functionality, a <code><a class="el" href="class_visitor.html">Visitor</a></code> sub class need only inherit from the <code><a class="el" href="class_control_flow_visitor.html">ControlFlowVisitor</a></code> interface and implement the <code>clone</code> and <code>flow_merge</code> routines. Other <code><a class="el" href="class_visitor.html">Visitor</a></code> classes don't need to do anything, but may want to implement <code>clone</code> for other reasons.</p>
+<p>In order to make use of this functionality, a <code>Visitor</code> sub class need only inherit from the <code>ControlFlowVisitor</code> interface and implement the <code>clone</code> and <code>flow_merge</code> routines. Other <code>Visitor</code> classes don't need to do anything, but may want to implement <code>clone</code> for other reasons.</p>
 <p>This control flow analysis only works for branch-and-join control flow &ndash; it is not adequate for loops (which generally requires an iterate to fixed point process). As our IR does not (currently) support loops this is fine. Since <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> does not allow loops in the match-action part of the pipeline, this works well there, but may be inadequate for parsers, which can support loops.</p>
 <h1><a class="anchor" id="overall-flow"></a>
 Overall flow</h1>
@@ -212,8 +212,8 @@ Mid-end</h2>
 <p>The mid-end is where transformations that depend somewhat on the target, but are not specific resource allocations, take place. At some point the mid-end transforms the IR into a form that matches the target capabilities.</p>
 <h2><a class="anchor" id="pass-managers"></a>
 Pass Managers</h2>
-<p>To manage backtracking and control the order of passes and transforms, we use a <code><a class="el" href="class_pass_manager.html">PassManager</a></code> object which encapsulates a sequence of passes and runs them in order. Those passes that support the <code><a class="el" href="class_backtrack.html">Backtrack</a></code> interface are backtrack points.</p>
-<p>The generic <code><a class="el" href="class_pass_manager.html">PassManager</a></code> can manage a dynamically chosen series of passes. It tracks passes that implement <code><a class="el" href="class_backtrack.html">Backtrack</a></code> and if a later pass fails, will backtrack to the <a class="el" href="class_backtrack.html">Backtrack</a> pass.</p>
+<p>To manage backtracking and control the order of passes and transforms, we use a <code>PassManager</code> object which encapsulates a sequence of passes and runs them in order. Those passes that support the <code>Backtrack</code> interface are backtrack points.</p>
+<p>The generic <code>PassManager</code> can manage a dynamically chosen series of passes. It tracks passes that implement <code>Backtrack</code> and if a later pass fails, will backtrack to the Backtrack pass.</p>
 <div class="fragment"><div class="line">interface Backtrack {</div>
 <div class="line">   bool backtrack(trigger);</div>
 <div class="line">}</div>
@@ -222,14 +222,14 @@ Pass Managers</h2>
 Exception Use</h2>
 <p>Exceptions are usable for errors that are reportable to the user, constraint problems that should result in backtracking and internal compiler problems. There are a number of exception classes designed for these purposes.</p>
 <ul>
-<li><code><a class="el" href="struct_backtrack_1_1trigger.html">Backtrack::trigger</a></code> Used to control backtracking. May be subclassed to attach additional information.</li>
+<li><code>Backtrack::trigger</code> Used to control backtracking. May be subclassed to attach additional information.</li>
 <li><code>CompilerBug</code> Used for internal compiler errors. Use the BUG() macro wrapper instead of calling this directly.</li>
 </ul>
 <h1><a class="anchor" id="ir-classes"></a>
 IR Classes</h1>
 <p>To make IR class management and extension easier, IR classes are defined in .def files, which are processed by an ir-generator tool to produce the actual IR C++ code. Conceptually, these .def files are just C++ class definitions with the boilerplate removed, and the ir-generator program inserts the boilerplate and splits each class definition into .h and .cpp parts as needed.</p>
 <p>The bulk of the "normal" IR is defined in the ir subdirectory, with some frontends and backends having their own extensions to the IR defined in their own ir subdirectories. The ir-generator tool takes reads all the .def files in the tree and constructs a single .h and .cpp file with all the IR class definition code.</p>
-<p>All references to IR class objects from other IR class object MUST be as <code>const</code> pointers, to maintain the write-only invariants. Where that is too onerous, IR classes may be directly embedded in other IR objects, rather than by reference. When an IR object is embedded in this way, it becomes modifiable in <code><a class="el" href="class_modifier.html">Modifier</a></code>/<code><a class="el" href="class_transform.html">Transform</a></code> visitors when visiting the containing node, and will not be directly visited itself.</p>
+<p>All references to IR class objects from other IR class object MUST be as <code>const</code> pointers, to maintain the write-only invariants. Where that is too onerous, IR classes may be directly embedded in other IR objects, rather than by reference. When an IR object is embedded in this way, it becomes modifiable in <code>Modifier</code>/<code>Transform</code> visitors when visiting the containing node, and will not be directly visited itself.</p>
 <p>The ir-generator understands both of these mechanisms. Any field declared in an IR class with another IR class as a type will be made a <code>const</code> pointer, unless it has an <code>inline</code> modifier, in which case it will be a directly embedded sub-object.</p>
 <p>The ir-generator understands a number of "standard" methods for IR classes &ndash; <code>visit_children</code>, <code>operator==</code>, <code>dbprint</code>, <code>toString</code>, <code>apply</code>. These methods can be declared <em>without</em> any arguments or return types (ie, just the method name followed by a {}-block of code), in which case the standard declaration will be synthesized. If the method is not declared in the .def file, a standard definition (based on the fields declared in the class) will be created. In this way, <em>most</em> classes can avoid including this boilerplate code in the .def file.</p>
 <h3><a class="anchor" id="irnode"></a>
@@ -237,7 +237,7 @@ IR Classes</h1>
 <p>This is the ultimate abstract base class of all IR nodes and contains only a small amount of data for error reporting and debugging. In general, this info is NEVER compared for equality (so subclasses should never call Node::operator==`) as Nodes that differ only in this information should be considered equal, and not require cloning or the IR tree.</p>
 <h3><a class="anchor" id="irvectort"></a>
 <code>IR::Vector&lt;T&gt;</code></h3>
-<p>This template class holds a vector of (<code>const</code>) pointers to nodes of a particular <code><a class="el" href="class_i_r_1_1_node.html">IR::Node</a></code> subclass. </p>
+<p>This template class holds a vector of (<code>const</code>) pointers to nodes of a particular <code>IR::Node</code> subclass. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

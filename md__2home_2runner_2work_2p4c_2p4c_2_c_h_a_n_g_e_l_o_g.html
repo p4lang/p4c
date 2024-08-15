@@ -179,7 +179,7 @@ Changes to the BMv2 Back Ends</h2>
 Changes to the TC Back End</h2>
 <ul>
 <li>Support of InternetChecksum in P4TC [<a href="https://github.com/p4lang/p4c/pull/4782">view</a>] (Komal Jain)</li>
-<li>Fix broken CI runs because missing override in <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> code. [<a href="https://github.com/p4lang/p4c/pull/4794">view</a>] (Fabian Ruffy)</li>
+<li>Fix broken CI runs because missing override in TC code. [<a href="https://github.com/p4lang/p4c/pull/4794">view</a>] (Fabian Ruffy)</li>
 </ul>
 <h2><a class="anchor" id="changes-to-the-p4tools-back-end"></a>
 Changes to the P4Tools Back End</h2>
@@ -191,7 +191,7 @@ Changes to the P4Tools Back End</h2>
 <li>[P4Testgen] Pass compiler options as argument instead of retrieving them from the context. [<a href="https://github.com/p4lang/p4c/pull/4833">view</a>] (Fabian Ruffy)</li>
 <li>[P4Testgen] Hotfix for failing P4Testgen benchmark test. [<a href="https://github.com/p4lang/p4c/pull/4839">view</a>] (Fabian Ruffy)</li>
 <li>[P4Testgen] Fix problems with the reachability pass. [<a href="https://github.com/p4lang/p4c/pull/4789">view</a>] (Fabian Ruffy)</li>
-<li>Replace boost::container::flat_map with absl::btree_map in <a class="el" href="namespace_p4_tools.html">P4Tools</a>. [<a href="https://github.com/p4lang/p4c/pull/4768">view</a>] (Fabian Ruffy)</li>
+<li>Replace boost::container::flat_map with absl::btree_map in P4Tools. [<a href="https://github.com/p4lang/p4c/pull/4768">view</a>] (Fabian Ruffy)</li>
 </ul>
 <h2><a class="anchor" id="other-changes"></a>
 Other Changes</h2>
@@ -225,7 +225,7 @@ Changes to the Compiler Core</h2>
 <ul>
 <li>Refactor error_helper and around [<a href="https://github.com/p4lang/p4c/pull/4686">view</a>].</li>
 <li>Add freestanding RTTI::to, RTTI::is, RTTI::isAny [<a href="https://github.com/p4lang/p4c/pull/4696">view</a>].</li>
-<li>More compilation fixes for C++20: <a class="el" href="classhvec__map.html">hvec_map</a> and copy_bitref [<a href="https://github.com/p4lang/p4c/pull/4703">view</a>].</li>
+<li>More compilation fixes for C++20: hvec_map and copy_bitref [<a href="https://github.com/p4lang/p4c/pull/4703">view</a>].</li>
 <li>Add a constant folding pass after inlining [<a href="https://github.com/p4lang/p4c/pull/4727">view</a>].</li>
 <li>[#4006] Remove confusing warning when the same header is extracted multiple times in a parse path [<a href="https://github.com/p4lang/p4c/pull/4725">view</a>].</li>
 <li>Emit true and false instead of 1 and 0 for BoolLiteral dbprint. [<a href="https://github.com/p4lang/p4c/pull/4741">view</a>].</li>
@@ -242,13 +242,13 @@ Changes to the TC Back End</h2>
 <h2><a class="anchor" id="changes-to-the-dpdk-back-end"></a>
 Changes to the DPDK Back End</h2>
 <ul>
-<li>Update some stale <a class="el" href="namespace_d_p_d_k.html">DPDK</a> error reference files. [<a href="https://github.com/p4lang/p4c/pull/4705">view</a>].</li>
-<li>Fix a nullptr access in the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> back end. [<a href="https://github.com/p4lang/p4c/pull/4712">view</a>].</li>
+<li>Update some stale DPDK error reference files. [<a href="https://github.com/p4lang/p4c/pull/4705">view</a>].</li>
+<li>Fix a nullptr access in the DPDK back end. [<a href="https://github.com/p4lang/p4c/pull/4712">view</a>].</li>
 </ul>
 <h2><a class="anchor" id="changes-to-the-p4tools-back-end-1"></a>
 Changes to the P4Tools Back End</h2>
 <ul>
-<li>Add P4Smith, a random program generator to the <a class="el" href="namespace_p4_tools.html">P4Tools</a> framework [<a href="https://github.com/p4lang/p4c/pull/4182">view</a>].</li>
+<li>Add P4Smith, a random program generator to the P4Tools framework [<a href="https://github.com/p4lang/p4c/pull/4182">view</a>].</li>
 <li>[P4Smith] Fix broken links in Smith README [<a href="https://github.com/p4lang/p4c/pull/4754">view</a>].</li>
 </ul>
 <h2><a class="anchor" id="other-changes-1"></a>
@@ -356,10 +356,10 @@ Changes to the Compiler Core</h2>
 <li>allow disabling of subtraction transform [<a href="https://github.com/p4lang/p4c/pull/4633">view</a>]</li>
 <li>[#4625] Prune <code>MethodCallStatement</code>s if child <code>MethodCallExpression</code> resolves to a compile-time constant. [<a href="https://github.com/p4lang/p4c/pull/4627">view</a>]</li>
 <li>[#4614] Unconditionally copy <code>dpdk</code> p4include files to the binary directory [<a href="https://github.com/p4lang/p4c/pull/4615">view</a>]</li>
-<li>Call <a class="el" href="class_pass_manager.html">PassManager</a>'s debug hook even after a failing pass [<a href="https://github.com/p4lang/p4c/pull/4626">view</a>]</li>
+<li>Call PassManager's debug hook even after a failing pass [<a href="https://github.com/p4lang/p4c/pull/4626">view</a>]</li>
 <li>Ensure we take compiler-provided declaration of posix_memalign [<a href="https://github.com/p4lang/p4c/pull/4609">view</a>]</li>
 <li>Fix missing override. [<a href="https://github.com/p4lang/p4c/pull/4621">view</a>]</li>
-<li><a class="el" href="class_inspector.html">Inspector</a>: clear done/visit_in_progress when revisiting node [<a href="https://github.com/p4lang/p4c/pull/4608">view</a>]</li>
+<li>Inspector: clear done/visit_in_progress when revisiting node [<a href="https://github.com/p4lang/p4c/pull/4608">view</a>]</li>
 <li>Add option to build with dynamic libc and c++, but static other dependencies; change static option name [<a href="https://github.com/p4lang/p4c/pull/4597">view</a>]</li>
 <li>Make the tree cloner also clone Member(TypeNameExpression)] to ensure the result is a DAG [<a href="https://github.com/p4lang/p4c/pull/4539">view</a>]</li>
 <li>restore missing parentheses [<a href="https://github.com/p4lang/p4c/pull/4600">view</a>]</li>
@@ -393,7 +393,7 @@ Other Changes</h2>
 <li>[Docs] capitalize "GCC" acronym in docs and comment [<a href="https://github.com/p4lang/p4c/pull/4632">view</a>]</li>
 <li>Update ebpf comment format [<a href="https://github.com/p4lang/p4c/pull/4624">view</a>]</li>
 <li>[Docs] Non-Breaking change of "p4c" to "P4C" [<a href="https://github.com/p4lang/p4c/pull/4620">view</a>]</li>
-<li>Update the Commenting Style in the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> backend [<a href="https://github.com/p4lang/p4c/pull/4619">view</a>]</li>
+<li>Update the Commenting Style in the DPDK backend [<a href="https://github.com/p4lang/p4c/pull/4619">view</a>]</li>
 <li>Force black to use pytoml as config. [<a href="https://github.com/p4lang/p4c/pull/4588">view</a>]</li>
 <li>Format: Documentation dependency command [<a href="https://github.com/p4lang/p4c/pull/4616">view</a>]</li>
 <li>Add missing &lt;iterator&gt; include to <a class="el" href="map_8h_source.html">map.h</a> [<a href="https://github.com/p4lang/p4c/pull/4607">view</a>]</li>
@@ -412,7 +412,7 @@ Other Changes</h2>
 <h1><a class="anchor" id="release-v12410-viewhttpsgithubcomp4langp4cpull4587"></a>
 Release v1.2.4.10 [<a href="https://github.com/p4lang/p4c/pull/4587">view</a>]</h1>
 <ul>
-<li>[doc] backends: Add Doxygen-style documentation for <a class="el" href="namespace_b_m_v2.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">BMV2</a> JSONObjects [<a href="https://github.com/p4lang/p4c/pull/4554">view</a>]</li>
+<li>[doc] backends: Add Doxygen-style documentation for BMV2 JSONObjects [<a href="https://github.com/p4lang/p4c/pull/4554">view</a>]</li>
 <li>Add Comment Style Guide [<a href="https://github.com/p4lang/p4c/pull/4573">view</a>]</li>
 <li>Fix rules_boost which pulls in the compromised xz dependency. [<a href="https://github.com/p4lang/p4c/pull/4584">view</a>]</li>
 <li>[Fix] Resource links in Additional documentation [<a href="https://github.com/p4lang/p4c/pull/4565">view</a>]</li>
@@ -427,11 +427,11 @@ Release v1.2.4.10 [<a href="https://github.com/p4lang/p4c/pull/4587">view</a>]</
 <li>Add width to parameters in const entries template definition. [<a href="https://github.com/p4lang/p4c/pull/4557">view</a>]</li>
 <li>Implict cast fix [<a href="https://github.com/p4lang/p4c/pull/4399">view</a>]</li>
 <li>Corrected version in README.md [<a href="https://github.com/p4lang/p4c/pull/4555">view</a>]</li>
-<li>Refactor <a class="el" href="class_util_1_1_enumerator.html" title="Type-erased Enumerator interface.">Util::Enumerator</a> [<a href="https://github.com/p4lang/p4c/pull/4513">view</a>]</li>
+<li>Refactor Util::Enumerator [<a href="https://github.com/p4lang/p4c/pull/4513">view</a>]</li>
 <li>Add more CRC checksum variants to lib/nethash [<a href="https://github.com/p4lang/p4c/pull/4550">view</a>]</li>
 <li>Bump black from 24.2.0 to 24.3.0 [<a href="https://github.com/p4lang/p4c/pull/4551">view</a>]</li>
 <li>P4TC - Support add_on_miss, add entry externs [<a href="https://github.com/p4lang/p4c/pull/4522">view</a>]</li>
-<li>Allow constructing an <a class="el" href="struct_i_r_1_1_i_d.html">IR::ID</a> from a std::string [<a href="https://github.com/p4lang/p4c/pull/4549">view</a>]</li>
+<li>Allow constructing an IR::ID from a std::string [<a href="https://github.com/p4lang/p4c/pull/4549">view</a>]</li>
 <li>Move the network hashes implementation from Bmv2 testgen to lib/ [<a href="https://github.com/p4lang/p4c/pull/4526">view</a>]</li>
 <li>Fix a warning on missing override in def use class. [<a href="https://github.com/p4lang/p4c/pull/4547">view</a>]</li>
 <li>Add policy controlling RemoveUnusedDeclarations [<a href="https://github.com/p4lang/p4c/pull/4528">view</a>]</li>
@@ -440,7 +440,7 @@ Release v1.2.4.10 [<a href="https://github.com/p4lang/p4c/pull/4587">view</a>]</
 <li>[documentation] Add hyperlinks to the actual directory in the README file [<a href="https://github.com/p4lang/p4c/pull/4531">view</a>]</li>
 <li>Remove obsolete <code>output_to_genfiles = True</code>. [<a href="https://github.com/p4lang/p4c/pull/4541">view</a>]</li>
 <li>[P4Testgen] Fix append and prepend invocation. [<a href="https://github.com/p4lang/p4c/pull/4306">view</a>]</li>
-<li>Clean up <a class="el" href="namespace_p4_tools.html">P4Tools</a> and control-plane linking. [<a href="https://github.com/p4lang/p4c/pull/4520">view</a>]</li>
+<li>Clean up P4Tools and control-plane linking. [<a href="https://github.com/p4lang/p4c/pull/4520">view</a>]</li>
 <li>Midend def-use pass [<a href="https://github.com/p4lang/p4c/pull/4489">view</a>]</li>
 <li>[docs] Sync Directory structure of P4tools [<a href="https://github.com/p4lang/p4c/pull/4516">view</a>]</li>
 <li>Preserve annotations on functions properly [<a href="https://github.com/p4lang/p4c/pull/4532">view</a>]</li>
@@ -499,7 +499,7 @@ Release v1.2.4.9 [<a href="https://github.com/p4lang/p4c/pull/4490">view</a>]</h
 <li>Add support for parser errors in tc backend [<a href="https://github.com/p4lang/p4c/pull/4443">view</a>]</li>
 <li>Bump docker/build-push-action from 3 to 5 [<a href="https://github.com/p4lang/p4c/pull/4467">view</a>]</li>
 <li>Bump actions/setup-python from 4 to 5 [<a href="https://github.com/p4lang/p4c/pull/4466">view</a>]</li>
-<li>Fix <a class="el" href="classhvec__map.html">hvec_map</a> insert/emplace [<a href="https://github.com/p4lang/p4c/pull/4458">view</a>]</li>
+<li>Fix hvec_map insert/emplace [<a href="https://github.com/p4lang/p4c/pull/4458">view</a>]</li>
 <li>Remove some unused boost headers and switch from boost code to alternatives [<a href="https://github.com/p4lang/p4c/pull/4464">view</a>]</li>
 <li>Handle value suffixes in the asserts parser. [<a href="https://github.com/p4lang/p4c/pull/4450">view</a>]</li>
 <li>Add more API options to the P4Testgen api. [<a href="https://github.com/p4lang/p4c/pull/4451">view</a>]</li>
@@ -532,19 +532,19 @@ Release v1.2.4.9 [<a href="https://github.com/p4lang/p4c/pull/4490">view</a>]</h
 <li>frontend policy fix: missed ConstantFolding [<a href="https://github.com/p4lang/p4c/pull/4423">view</a>]</li>
 <li>gtest include: quotes -&gt; angled brackets [<a href="https://github.com/p4lang/p4c/pull/4422">view</a>]</li>
 <li>test for ContantFolding + policy [<a href="https://github.com/p4lang/p4c/pull/4421">view</a>]</li>
-<li>Add IR::inlineBlock utility that helps with return of multiple statements from <a class="el" href="class_transform.html">Transform</a> [<a href="https://github.com/p4lang/p4c/pull/4414">view</a>]</li>
+<li>Add IR::inlineBlock utility that helps with return of multiple statements from Transform [<a href="https://github.com/p4lang/p4c/pull/4414">view</a>]</li>
 <li>Emit a reasonable error if someone uses type in place where expression is exprected [<a href="https://github.com/p4lang/p4c/pull/4411">view</a>]</li>
 <li>Introduce a frontend policy as a customization point for frontend [<a href="https://github.com/p4lang/p4c/pull/4406">view</a>]</li>
 <li>Add a P4Testgen library API. [<a href="https://github.com/p4lang/p4c/pull/4374">view</a>]</li>
-<li>Implement lightweight RTTI for (not only)] <a class="el" href="class_i_r_1_1_node.html">IR::Node</a> class hierarchies [<a href="https://github.com/p4lang/p4c/pull/4377">view</a>]</li>
+<li>Implement lightweight RTTI for (not only)] IR::Node class hierarchies [<a href="https://github.com/p4lang/p4c/pull/4377">view</a>]</li>
 <li>Add buildifier to Bazel workspace and run it on the bazel build files. [<a href="https://github.com/p4lang/p4c/pull/4413">view</a>]</li>
 <li>Memoize &amp; improve name lookup in <code>ResolveReferences</code> [<a href="https://github.com/p4lang/p4c/pull/4376">view</a>]</li>
 <li>Stop when an error is throwing in the P4Runtime serializer. Make stop on error explicit in pass manager. [<a href="https://github.com/p4lang/p4c/pull/4408">view</a>]</li>
 <li>Do not check for shadowing repeatedly in inlining passes. [<a href="https://github.com/p4lang/p4c/pull/4396">view</a>]</li>
 <li>Add an option to override the test name. [<a href="https://github.com/p4lang/p4c/pull/4401">view</a>]</li>
-<li>Add a silent mode to <a class="el" href="namespace_p4_tools.html">P4Tools</a>. Add performance counting at the top level. [<a href="https://github.com/p4lang/p4c/pull/4369">view</a>]</li>
+<li>Add a silent mode to P4Tools. Add performance counting at the top level. [<a href="https://github.com/p4lang/p4c/pull/4369">view</a>]</li>
 <li>Introduce a configuration structure for the test back ends. [<a href="https://github.com/p4lang/p4c/pull/4372">view</a>]</li>
-<li>Implement copy assignment operator for <a class="el" href="classhvec__map.html">hvec_map</a> [<a href="https://github.com/p4lang/p4c/pull/4388">view</a>]</li>
+<li>Implement copy assignment operator for hvec_map [<a href="https://github.com/p4lang/p4c/pull/4388">view</a>]</li>
 <li>[P4Testgen] Fix generation of specific fields in the Protobuf IR back end. Move hex separator utility to common class. [<a href="https://github.com/p4lang/p4c/pull/4400">view</a>]</li>
 <li>Improve diagnostics for <code>MethodCallExpression</code> [<a href="https://github.com/p4lang/p4c/pull/4354">view</a>]</li>
 <li>Step 4: Use the P4Runtime API in the Protobuf back end. [<a href="https://github.com/p4lang/p4c/pull/4303">view</a>]</li>
@@ -562,12 +562,12 @@ Release v1.2.4.9 [<a href="https://github.com/p4lang/p4c/pull/4490">view</a>]</h
 <h1><a class="anchor" id="release-v1248-viewhttpsgithubcomp4langp4cpull4386"></a>
 Release v1.2.4.8 [<a href="https://github.com/p4lang/p4c/pull/4386">view</a>]</h1>
 <ul>
-<li>Add a P4Info API to the control-plane folder and <a class="el" href="namespace_p4_tools.html">P4Tools</a>. [<a href="https://github.com/p4lang/p4c/pull/4381">view</a>]</li>
-<li>[NFC] Eliminate the majority of <code>dynamic_cast</code> usage in the codebase in favor of <a class="el" href="class_i_castable.html">ICastable</a> interface [<a href="https://github.com/p4lang/p4c/pull/4382">view</a>]</li>
+<li>Add a P4Info API to the control-plane folder and P4Tools. [<a href="https://github.com/p4lang/p4c/pull/4381">view</a>]</li>
+<li>[NFC] Eliminate the majority of <code>dynamic_cast</code> usage in the codebase in favor of ICastable interface [<a href="https://github.com/p4lang/p4c/pull/4382">view</a>]</li>
 <li>Tweak optional CI run execution. [<a href="https://github.com/p4lang/p4c/pull/4380">view</a>]</li>
 <li>Remove unused parser declarations and unused parser type declarations that result from <code>RemoveRedundantParsers</code> pass. [<a href="https://github.com/p4lang/p4c/pull/4368">view</a>]</li>
 <li>Remove redundant protobuf installation. [<a href="https://github.com/p4lang/p4c/pull/4379">view</a>]</li>
-<li>Remove XDP code generated for <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> [<a href="https://github.com/p4lang/p4c/pull/4349">view</a>]</li>
+<li>Remove XDP code generated for TC [<a href="https://github.com/p4lang/p4c/pull/4349">view</a>]</li>
 <li>Use std::allocator_traits::rebind_alloc instead of std::allocator::rebind [<a href="https://github.com/p4lang/p4c/pull/4373">view</a>]</li>
 <li>Support ebpf Hash and Checksum [<a href="https://github.com/p4lang/p4c/pull/4378">view</a>]</li>
 <li>P4TC - Support const entries [<a href="https://github.com/p4lang/p4c/pull/4329">view</a>]</li>
@@ -587,7 +587,7 @@ Release v1.2.4.8 [<a href="https://github.com/p4lang/p4c/pull/4386">view</a>]</h
 <li>Trigger CI workflows based on assigned label. [<a href="https://github.com/p4lang/p4c/pull/4348">view</a>]</li>
 <li>Emit the Protobuf header with the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> entries and runtime files. [<a href="https://github.com/p4lang/p4c/pull/4350">view</a>]</li>
 <li>DoConstantFolding: make typeMap param const [<a href="https://github.com/p4lang/p4c/pull/4346">view</a>]</li>
-<li>Repair the static <a class="el" href="namespace_d_p_d_k.html">DPDK</a> PTF tests. [<a href="https://github.com/p4lang/p4c/pull/4210">view</a>]</li>
+<li>Repair the static DPDK PTF tests. [<a href="https://github.com/p4lang/p4c/pull/4210">view</a>]</li>
 <li>Documentation &amp; testfix follow-up to #4160 [<a href="https://github.com/p4lang/p4c/pull/4328">view</a>]</li>
 <li>cstring: Add string literal suffix, add toLower [<a href="https://github.com/p4lang/p4c/pull/4342">view</a>]</li>
 <li>Allow unknown fields when parsing P4Info files [<a href="https://github.com/p4lang/p4c/pull/4341">view</a>]</li>
@@ -601,7 +601,7 @@ Release v1.2.4.8 [<a href="https://github.com/p4lang/p4c/pull/4386">view</a>]</h
 <li>Rename &ndash;with-output-packet to &ndash;output-packet-only. [<a href="https://github.com/p4lang/p4c/pull/4314">view</a>]</li>
 <li>Make sure <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> expression optimization does not strip away types [<a href="https://github.com/p4lang/p4c/pull/4300">view</a>]</li>
 <li>Respect ENABLE_LTO even for static build, but keep LTO default for static [<a href="https://github.com/p4lang/p4c/pull/4320">view</a>]</li>
-<li>Allow constructing <a class="el" href="class_pass_repeated.html">PassRepeated</a> from a <a class="el" href="class_pass_manager.html">PassManager</a> [<a href="https://github.com/p4lang/p4c/pull/4319">view</a>]</li>
+<li>Allow constructing PassRepeated from a PassManager [<a href="https://github.com/p4lang/p4c/pull/4319">view</a>]</li>
 <li>keep P4Control-&gt;body-&gt;srcInfo during init move [<a href="https://github.com/p4lang/p4c/pull/4317">view</a>]</li>
 <li>[P4Testgen] Implement coverage tracking of actions [<a href="https://github.com/p4lang/p4c/pull/4307">view</a>]</li>
 </ul>
@@ -657,7 +657,7 @@ Release v1.2.4.6 [<a href="https://github.com/p4lang/p4c/pull/4271">view</a>]</h
 <li>Allow method calls in index expressions in hsIndexSimplify [<a href="https://github.com/p4lang/p4c/pull/4240">view</a>]</li>
 <li>Simplify jsonAssignment in ParserConverter and ActionConverter [<a href="https://github.com/p4lang/p4c/pull/4232">view</a>]</li>
 <li>Fix build for latest Fedora version [<a href="https://github.com/p4lang/p4c/pull/4241">view</a>]</li>
-<li>Disable <a class="el" href="namespace_d_p_d_k.html">DPDK</a> PTF tests. Remove the deprecated travis.yml file. [<a href="https://github.com/p4lang/p4c/pull/4228">view</a>]</li>
+<li>Disable DPDK PTF tests. Remove the deprecated travis.yml file. [<a href="https://github.com/p4lang/p4c/pull/4228">view</a>]</li>
 <li>improved bootstrap.sh. [<a href="https://github.com/p4lang/p4c/pull/4227">view</a>]</li>
 <li>[P4Testgen] Move common code of BMv2 test back ends into a common class. [<a href="https://github.com/p4lang/p4c/pull/4220">view</a>]</li>
 <li>Flatten nesting of test backends and rename the folder appropriately. [<a href="https://github.com/p4lang/p4c/pull/4219">view</a>]</li>
@@ -696,7 +696,7 @@ Release v1.2.4.5 [<a href="https://github.com/p4lang/p4c/pull/4217">view</a>]</h
 <li>Run Gauntlet validation, sanitizers, and Ubuntu 18 build/test as nightly actions. [<a href="https://github.com/p4lang/p4c/pull/4105">view</a>]</li>
 <li>Show annotations in actions' dbprint [<a href="https://github.com/p4lang/p4c/pull/4183">view</a>]</li>
 <li>Update the dash-pipeline programs. [<a href="https://github.com/p4lang/p4c/pull/4060">view</a>]</li>
-<li>Simplify the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> PTF build and test scripts. [<a href="https://github.com/p4lang/p4c/pull/4168">view</a>]</li>
+<li>Simplify the DPDK PTF build and test scripts. [<a href="https://github.com/p4lang/p4c/pull/4168">view</a>]</li>
 <li>Encode more P4Runtime constraints for the behavioral model. [<a href="https://github.com/p4lang/p4c/pull/4103">view</a>]</li>
 <li>[P4Testgen] Add more trace information to P4Testgen [<a href="https://github.com/p4lang/p4c/pull/4157">view</a>]</li>
 <li>Add an option to only generate tests which improve coverage. [<a href="https://github.com/p4lang/p4c/pull/4163">view</a>]</li>
@@ -717,7 +717,7 @@ Release v1.2.4.4 [<a href="https://github.com/p4lang/p4c/pull/4180">view</a>]</h
 <li>[P4Testgen] Minor improvements and fixes for P4Testgen. [<a href="https://github.com/p4lang/p4c/pull/4162">view</a>]</li>
 <li>Hashvec-based maps to save memory [<a href="https://github.com/p4lang/p4c/pull/4150">view</a>]</li>
 <li>Move solver class to lib folder. [<a href="https://github.com/p4lang/p4c/pull/4091">view</a>]</li>
-<li>Fix whole header move instructions for <a class="el" href="namespace_d_p_d_k.html">DPDK</a> [<a href="https://github.com/p4lang/p4c/pull/4153">view</a>]</li>
+<li>Fix whole header move instructions for DPDK [<a href="https://github.com/p4lang/p4c/pull/4153">view</a>]</li>
 <li>Add error message for non-package main declaration [<a href="https://github.com/p4lang/p4c/pull/4141">view</a>]</li>
 <li>Do not use equ for mandating a minimum size. [<a href="https://github.com/p4lang/p4c/pull/4154">view</a>]</li>
 <li>eBPF backend: generate P4Runtime files if required [<a href="https://github.com/p4lang/p4c/pull/4113">view</a>]</li>
@@ -746,10 +746,10 @@ Release v1.2.4.3 [<a href="https://github.com/p4lang/p4c/pull/4124">view</a>]</h
 <li>[P4Testgen] Add documentation to P4Testgen [<a href="https://github.com/p4lang/p4c/pull/4097">view</a>]</li>
 <li>Continuing the implementation of initial entries support in p4c [<a href="https://github.com/p4lang/p4c/pull/4080">view</a>]</li>
 <li>Minor tweaks [<a href="https://github.com/p4lang/p4c/pull/4106">view</a>]</li>
-<li>[P4Testgen] Allow building p4testgen without <a class="el" href="namespace_b_m_v2.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">BMV2</a> target [<a href="https://github.com/p4lang/p4c/pull/4109">view</a>]</li>
+<li>[P4Testgen] Allow building p4testgen without BMV2 target [<a href="https://github.com/p4lang/p4c/pull/4109">view</a>]</li>
 <li>Use libbacktrace for stack dumps if available [<a href="https://github.com/p4lang/p4c/pull/4088">view</a>]</li>
 <li>Pull the libbpf library with FetchContent instead of submodules and a script. [<a href="https://github.com/p4lang/p4c/pull/3970">view</a>]</li>
-<li>Add a PTF test CI pipeline for p4c-dpdk on the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> SoftNIC [<a href="https://github.com/p4lang/p4c/pull/4072">view</a>]</li>
+<li>Add a PTF test CI pipeline for p4c-dpdk on the DPDK SoftNIC [<a href="https://github.com/p4lang/p4c/pull/4072">view</a>]</li>
 <li>Migrate STF scripts to the STF parser library. Modernize stale run-bmv2-test.py code. [<a href="https://github.com/p4lang/p4c/pull/4040">view</a>]</li>
 <li>Fix header stack assignment in p4c-dpdk [<a href="https://github.com/p4lang/p4c/pull/4100">view</a>]</li>
 <li>[P4Testgen] Add target-specifc P4Testgen gtests [<a href="https://github.com/p4lang/p4c/pull/4093">view</a>]</li>
@@ -761,7 +761,7 @@ Release v1.2.4.3 [<a href="https://github.com/p4lang/p4c/pull/4124">view</a>]</h
 <li>Install Protobuf using FetchContent. [<a href="https://github.com/p4lang/p4c/pull/4056">view</a>]</li>
 <li>Add test program that uses 'priority' as identifier of a few kinds [<a href="https://github.com/p4lang/p4c/pull/4079">view</a>]</li>
 <li>Allow building testgen without P4TEST enabled [<a href="https://github.com/p4lang/p4c/pull/4078">view</a>]</li>
-<li>Add an option to the <a class="el" href="namespace_d_p_d_k.html">DPDK</a> P4C back end to generate TDI builder configurations. [<a href="https://github.com/p4lang/p4c/pull/4068">view</a>]</li>
+<li>Add an option to the DPDK P4C back end to generate TDI builder configurations. [<a href="https://github.com/p4lang/p4c/pull/4068">view</a>]</li>
 <li>Try to fix Opensuse certificate errors. [<a href="https://github.com/p4lang/p4c/pull/4075">view</a>]</li>
 <li>Update the plotting script. [<a href="https://github.com/p4lang/p4c/pull/4061">view</a>]</li>
 <li>Fix an infinite loop in the coverable nodes scanner. [<a href="https://github.com/p4lang/p4c/pull/4073">view</a>]</li>
@@ -782,7 +782,7 @@ Release v1.2.4.1 [<a href="https://github.com/p4lang/p4c/pull/4052">view</a>]</h
 <li>Include annotations for new_type messages. [<a href="https://github.com/p4lang/p4c/pull/4047">view</a>]</li>
 <li>[P4Testgen] BMv2 test generation improvements [<a href="https://github.com/p4lang/p4c/pull/4046">view</a>]</li>
 <li>Change Dockerfile to build p4tools by default. [<a href="https://github.com/p4lang/p4c/pull/4049">view</a>]</li>
-<li>Wrap the <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> defines in a namespace, use constexpr. [<a href="https://github.com/p4lang/p4c/pull/4048">view</a>]</li>
+<li>Wrap the TC defines in a namespace, use constexpr. [<a href="https://github.com/p4lang/p4c/pull/4048">view</a>]</li>
 <li>Fixed tc table type [<a href="https://github.com/p4lang/p4c/pull/4045">view</a>]</li>
 <li>Cleaner dbprint of if-else if chains [<a href="https://github.com/p4lang/p4c/pull/4044">view</a>]</li>
 <li>Fix race condition for parallel PTF nanomsg tests by using network namespaces. [<a href="https://github.com/p4lang/p4c/pull/4042">view</a>]</li>
@@ -797,7 +797,7 @@ Release v1.2.4.1 [<a href="https://github.com/p4lang/p4c/pull/4052">view</a>]</h
 <li>Dpdk Backend: Fixed target_name and action parameter bitwidth [<a href="https://github.com/p4lang/p4c/pull/4025">view</a>]</li>
 <li>Remove the array indices conversions and handle indices in the interpreter. [<a href="https://github.com/p4lang/p4c/pull/4024">view</a>]</li>
 <li>[P4Testgen] Simplify the model [<a href="https://github.com/p4lang/p4c/pull/4021">view</a>]</li>
-<li>p4c-pna-p4tc : new <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> backend for p4c [<a href="https://github.com/p4lang/p4c/pull/4018">view</a>]</li>
+<li>p4c-pna-p4tc : new TC backend for p4c [<a href="https://github.com/p4lang/p4c/pull/4018">view</a>]</li>
 <li>[P4Testgen] Remove complete from the model, make it part of the evaluation step instead. [<a href="https://github.com/p4lang/p4c/pull/4015">view</a>]</li>
 <li>Implement support for non-const table entries [<a href="https://github.com/p4lang/p4c/pull/3748">view</a>]</li>
 <li>Also suppress no-gnu-zero-variadic-macro-arguments warnings for MacOs. [<a href="https://github.com/p4lang/p4c/pull/4023">view</a>]</li>
@@ -813,7 +813,7 @@ Release v1.2.4</h1>
 <li>Open up ResolutionContext interface a bit [<a href="https://github.com/p4lang/p4c/pull/4009">view</a>]</li>
 <li>Add a simple PSA test program and STF test to verify parser_error ope??? [<a href="https://github.com/p4lang/p4c/pull/2571">view</a>]</li>
 <li>lib/crash.cpp: <code>addr2line</code>: <code>fcntl</code> calls in <code>pipe</code> initializations fixed. [<a href="https://github.com/p4lang/p4c/pull/3298">view</a>]</li>
-<li>[P4Testgen] More <a class="el" href="namespace_p4_tools.html">P4Tools</a> refactoring work. [<a href="https://github.com/p4lang/p4c/pull/4005">view</a>]</li>
+<li>[P4Testgen] More P4Tools refactoring work. [<a href="https://github.com/p4lang/p4c/pull/4005">view</a>]</li>
 <li>[P4Testgen] Fix small issues with metadata test backend. Add more functions to IR utilities. Merge default value function. [<a href="https://github.com/p4lang/p4c/pull/4004">view</a>]</li>
 <li>[P4Testgen] Also include table entries in the coverage set. [<a href="https://github.com/p4lang/p4c/pull/3999">view</a>]</li>
 <li>Allowing local_copyprop to propagate MethodCallExpression into table ??? [<a href="https://github.com/p4lang/p4c/pull/4003">view</a>]</li>
@@ -834,7 +834,7 @@ Release v1.2.3.9 [<a href="https://github.com/p4lang/p4c/pull/3998">view</a>]</h
 <li>FreeBSD patches [<a href="https://github.com/p4lang/p4c/pull/3991">view</a>]</li>
 <li>Also include the backend IR files in the ir-generated library file. [<a href="https://github.com/p4lang/p4c/pull/3985">view</a>]</li>
 <li>Set up P4C for IWYU [<a href="https://github.com/p4lang/p4c/pull/3981">view</a>]</li>
-<li>Make StateVariable an IR class that accepts IR::Member. Use <a class="el" href="class_i_castable.html">ICastable</a> for some nodes. [<a href="https://github.com/p4lang/p4c/pull/3741">view</a>]</li>
+<li>Make StateVariable an IR class that accepts IR::Member. Use ICastable for some nodes. [<a href="https://github.com/p4lang/p4c/pull/3741">view</a>]</li>
 <li>Cleanup some P4Testgen code. [<a href="https://github.com/p4lang/p4c/pull/3978">view</a>]</li>
 <li>Bump Bazel dependency versions to enable using latest Bazel [<a href="https://github.com/p4lang/p4c/pull/3979">view</a>]</li>
 <li>Add style and formating files for Python. Format Python code. [<a href="https://github.com/p4lang/p4c/pull/3870">view</a>]</li>
@@ -845,7 +845,7 @@ Release v1.2.3.9 [<a href="https://github.com/p4lang/p4c/pull/3998">view</a>]</h
 <li>ebpf/PSA: Fix weekly PTF tests [<a href="https://github.com/p4lang/p4c/pull/3969">view</a>]</li>
 <li>Resolve types in the prepend internal extern. [<a href="https://github.com/p4lang/p4c/pull/3964">view</a>]</li>
 <li>Change array index[] in table keys in context.json to $ to match with the key name in bfrt.json [<a href="https://github.com/p4lang/p4c/pull/3963">view</a>]</li>
-<li>Clean up the trace event class of <a class="el" href="namespace_p4_tools.html">P4Tools</a>. [<a href="https://github.com/p4lang/p4c/pull/3950">view</a>]</li>
+<li>Clean up the trace event class of P4Tools. [<a href="https://github.com/p4lang/p4c/pull/3950">view</a>]</li>
 <li>Remove gsl-lite module. Introduce std::referencewrapper. [<a href="https://github.com/p4lang/p4c/pull/3961">view</a>]</li>
 <li>Remove the inja submodule and replace it with a CMake fetchcontent instrumentation. [<a href="https://github.com/p4lang/p4c/pull/3959">view</a>]</li>
 <li>Remove boost variant from Tools. [<a href="https://github.com/p4lang/p4c/pull/3960">view</a>]</li>
@@ -909,7 +909,7 @@ Release v1.2.3.7 [<a href="https://github.com/p4lang/p4c/pull/3909">view</a>]</h
 <li>Install &amp; use GCC 9 in Ubuntu 18 build [<a href="https://github.com/p4lang/p4c/pull/3893">view</a>]</li>
 <li>add a feature to control logging via an annotation on annotated IR ob??? [<a href="https://github.com/p4lang/p4c/pull/3882">view</a>]</li>
 <li>Add assert and assume mode for testgen. [<a href="https://github.com/p4lang/p4c/pull/3775">view</a>]</li>
-<li>SplitFlowVisitor to better capture split/join in <a class="el" href="class_control_flow_visitor.html">ControlFlowVisitor</a></li>
+<li>SplitFlowVisitor to better capture split/join in ControlFlowVisitor</li>
 <li>Replace invalid clone id 0 with 1 for selected BMv2 programs [<a href="https://github.com/p4lang/p4c/pull/3860">view</a>]</li>
 <li>Fix up one-shot-action-selectors with action arguments. Appropriately rename some <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> table programs. [<a href="https://github.com/p4lang/p4c/pull/3864">view</a>]</li>
 <li>Fix bug in parserUnroll [<a href="https://github.com/p4lang/p4c/pull/3874">view</a>]</li>
@@ -926,15 +926,15 @@ Release v1.2.3.6 [<a href="https://github.com/p4lang/p4c/pull/3871">view</a>]</h
 <li>Fix flawed code in up4.p4 and the pins switch models. [<a href="https://github.com/p4lang/p4c/pull/3857">view</a>]</li>
 <li>Fix hardcoded tests line. [<a href="https://github.com/p4lang/p4c/pull/3856">view</a>]</li>
 <li>ebpf/PSA: Support for wide fields in Register and Meter [<a href="https://github.com/p4lang/p4c/pull/3854">view</a>]<ul>
-<li>Support "clone" function for <a class="el" href="namespace_b_m_v2.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">BMV2</a> PTF [<a href="https://github.com/p4lang/p4c/pull/3848">view</a>]</li>
+<li>Support "clone" function for BMV2 PTF [<a href="https://github.com/p4lang/p4c/pull/3848">view</a>]</li>
 </ul>
 </li>
 <li>[P4testgen] Coverage script [<a href="https://github.com/p4lang/p4c/pull/3853">view</a>]</li>
-<li>Simple proof of concept PTF test for <a class="el" href="namespace_b_m_v2.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">BMV2</a> test framework. [<a href="https://github.com/p4lang/p4c/pull/3849">view</a>]</li>
+<li>Simple proof of concept PTF test for BMV2 test framework. [<a href="https://github.com/p4lang/p4c/pull/3849">view</a>]</li>
 <li>Emit action sel id as in bfrt [<a href="https://github.com/p4lang/p4c/pull/3852">view</a>]</li>
 <li>Require action_run to be within a switch statement [<a href="https://github.com/p4lang/p4c/pull/3850">view</a>]</li>
 <li>Table application results are not comparable [<a href="https://github.com/p4lang/p4c/pull/3851">view</a>]<ul>
-<li>Correction of PTF tests for <a class="el" href="namespace_b_m_v2.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">BMV2</a> [<a href="https://github.com/p4lang/p4c/pull/3737">view</a>]</li>
+<li>Correction of PTF tests for BMV2 [<a href="https://github.com/p4lang/p4c/pull/3737">view</a>]</li>
 </ul>
 </li>
 <li>Fix ckadd argument [<a href="https://github.com/p4lang/p4c/pull/3845">view</a>]</li>
@@ -958,7 +958,7 @@ Release v1.2.3.6 [<a href="https://github.com/p4lang/p4c/pull/3871">view</a>]</h
 <li>Fix IndexedVector methods and constructor [<a href="https://github.com/p4lang/p4c/pull/3821">view</a>]</li>
 <li>Refactor ci-build.sh script. [<a href="https://github.com/p4lang/p4c/pull/3792">view</a>]</li>
 <li>Move timer from testgen to lib folder. [<a href="https://github.com/p4lang/p4c/pull/3785">view</a>]</li>
-<li>Utility edits for <a class="el" href="namespace_p4_tools.html">P4Tools</a>. [<a href="https://github.com/p4lang/p4c/pull/3824">view</a>]</li>
+<li>Utility edits for P4Tools. [<a href="https://github.com/p4lang/p4c/pull/3824">view</a>]</li>
 <li>Update inja and fix inja formatting. [<a href="https://github.com/p4lang/p4c/pull/3782">view</a>]</li>
 <li>Dpdk Backend : Do not treat BAnd expresion in table key as simple expression [<a href="https://github.com/p4lang/p4c/pull/3823">view</a>]</li>
 <li>initialize direction metadata at begining of pipeline [<a href="https://github.com/p4lang/p4c/pull/3817">view</a>]</li>
@@ -967,7 +967,7 @@ Release v1.2.3.6 [<a href="https://github.com/p4lang/p4c/pull/3871">view</a>]</h
 <h1><a class="anchor" id="release-v1235-viewhttpsgithubcomp4langp4cpull3815"></a>
 Release v1.2.3.5 [<a href="https://github.com/p4lang/p4c/pull/3815">view</a>]</h1>
 <ul>
-<li>Use big_int for <a class="el" href="structmatch__t.html">match_t</a> so can match wider that 64 bits</li>
+<li>Use big_int for match_t so can match wider that 64 bits</li>
 <li>ebpf/PSA: Checksum support for fields wider than 64 bits [<a href="https://github.com/p4lang/p4c/pull/3801">view</a>]</li>
 <li>Constant-fold isValid calls when possible [<a href="https://github.com/p4lang/p4c/pull/3794">view</a>]</li>
 <li>Always emit the action selector constants in hex [<a href="https://github.com/p4lang/p4c/pull/3800">view</a>]</li>
@@ -1005,13 +1005,13 @@ Release v1.2.3.5 [<a href="https://github.com/p4lang/p4c/pull/3815">view</a>]</h
 Release v1.2.3.4 [<a href="https://github.com/p4lang/p4c/pull/3747">view</a>]</h1>
 <ul>
 <li>Propagate def files upwards in the correct order from extensions and modules. [<a href="https://github.com/p4lang/p4c/pull/3744">view</a>]</li>
-<li>List contributors to <a class="el" href="namespace_p4_tools.html">P4Tools</a> backend [<a href="https://github.com/p4lang/p4c/pull/3742">view</a>]</li>
+<li>List contributors to P4Tools backend [<a href="https://github.com/p4lang/p4c/pull/3742">view</a>]</li>
 <li>eBPF/PSA: Implement caching for ActionSelector, LPM and ternary tables [<a href="https://github.com/p4lang/p4c/pull/3738">view</a>]</li>
 <li>Unroll finite loops in programs which have infinite loops. [<a href="https://github.com/p4lang/p4c/pull/3689">view</a>]</li>
 <li>Try to merge copyHeaders into copyStructures. [<a href="https://github.com/p4lang/p4c/pull/3739">view</a>]</li>
 <li>Add support for register extern [<a href="https://github.com/p4lang/p4c/pull/3723">view</a>]</li>
 <li>Move some P4Tool compiler passes to the midend folder. [<a href="https://github.com/p4lang/p4c/pull/3726">view</a>]</li>
-<li>Small clang-format and <a class="el" href="namespace_p4_tools.html">P4Tools</a> README fixes. [<a href="https://github.com/p4lang/p4c/pull/3736">view</a>]</li>
+<li>Small clang-format and P4Tools README fixes. [<a href="https://github.com/p4lang/p4c/pull/3736">view</a>]</li>
 <li>Fixed issues found by static analysis [<a href="https://github.com/p4lang/p4c/pull/3732">view</a>]</li>
 <li>Expand google.protobuf.Any when emit p4info in text format [<a href="https://github.com/p4lang/p4c/pull/3731">view</a>]</li>
 <li>Remove unused files in p4_16_samples_outputs directory [<a href="https://github.com/p4lang/p4c/pull/3733">view</a>]</li>
@@ -1025,12 +1025,12 @@ Release v1.2.3.4 [<a href="https://github.com/p4lang/p4c/pull/3747">view</a>]</h
 <li>Fix advance condition calculation. [<a href="https://github.com/p4lang/p4c/pull/3721">view</a>]</li>
 <li>P4Testgen: Fix off-by-one bug in taint checking for slices [<a href="https://github.com/p4lang/p4c/pull/3722">view</a>]</li>
 <li>PSA/eBPF: Enable passing packets up to the kernel stack [<a href="https://github.com/p4lang/p4c/pull/3691">view</a>]</li>
-<li>Restructure <a class="el" href="namespace_p4_tools.html">P4Tools</a> to easily add new modules. [<a href="https://github.com/p4lang/p4c/pull/3646">view</a>]</li>
-<li><a class="el" href="namespace_p4_tools.html">P4Tools</a>: Unify packet sizing options. [<a href="https://github.com/p4lang/p4c/pull/3695">view</a>]</li>
-<li><a class="el" href="namespace_p4_tools.html">P4Tools</a>: Implement default action override for BMv2 STF. [<a href="https://github.com/p4lang/p4c/pull/3685">view</a>]</li>
+<li>Restructure P4Tools to easily add new modules. [<a href="https://github.com/p4lang/p4c/pull/3646">view</a>]</li>
+<li>P4Tools: Unify packet sizing options. [<a href="https://github.com/p4lang/p4c/pull/3695">view</a>]</li>
+<li>P4Tools: Implement default action override for BMv2 STF. [<a href="https://github.com/p4lang/p4c/pull/3685">view</a>]</li>
 <li>Try to avoid gcc-specific include headers for IWYU. [<a href="https://github.com/p4lang/p4c/pull/3717">view</a>]</li>
 <li>Do not allow type arguments that are generic if they are not specialized [<a href="https://github.com/p4lang/p4c/pull/3714">view</a>]</li>
-<li>Run IWYU on <a class="el" href="namespace_p4_tools.html">P4Tools</a>. [<a href="https://github.com/p4lang/p4c/pull/3678">view</a>]</li>
+<li>Run IWYU on P4Tools. [<a href="https://github.com/p4lang/p4c/pull/3678">view</a>]</li>
 <li>Dags needs to be revisited when renaming metadata [<a href="https://github.com/p4lang/p4c/pull/3713">view</a>]</li>
 <li>Add PINS examples to test suite. [<a href="https://github.com/p4lang/p4c/pull/3694">view</a>]</li>
 <li>Linter usability improvements. [<a href="https://github.com/p4lang/p4c/pull/3709">view</a>]</li>
@@ -1050,25 +1050,25 @@ Release v1.2.3.4 [<a href="https://github.com/p4lang/p4c/pull/3747">view</a>]</h
 <li>Insert casts in action call arguments [<a href="https://github.com/p4lang/p4c/pull/3675">view</a>]</li>
 <li>Fix dpdk test infrastructure to enable comparison of error output [<a href="https://github.com/p4lang/p4c/pull/3680">view</a>]</li>
 <li>Experimental: literal for invalid header [<a href="https://github.com/p4lang/p4c/pull/3667">view</a>]</li>
-<li>Add a p4-constraints and @refers_to parser to <a class="el" href="namespace_p4_tools.html">P4Tools</a>. [<a href="https://github.com/p4lang/p4c/pull/3568">view</a>]</li>
+<li>Add a p4-constraints and @refers_to parser to P4Tools. [<a href="https://github.com/p4lang/p4c/pull/3568">view</a>]</li>
 <li>Update PSA include files to match recent changes in version from PSA spec [<a href="https://github.com/p4lang/p4c/pull/3618">view</a>]</li>
 <li>Fix cpplint CMake check. [<a href="https://github.com/p4lang/p4c/pull/3684">view</a>]</li>
 <li>Rename psabpf repository into NIKSS [<a href="https://github.com/p4lang/p4c/pull/3677">view</a>]</li>
 <li>Initialize drop metadata to 1 as per PSA specification [<a href="https://github.com/p4lang/p4c/pull/3681">view</a>]</li>
 <li>Migrate P4Testgen tooling to core P4C (IWYU, clang-format, cpplint, clang-tidy, git hooks)] [<a href="https://github.com/p4lang/p4c/pull/3663">view</a>]</li>
 <li>Build DCG if pattern flag was enabled [<a href="https://github.com/p4lang/p4c/pull/3673">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a> Backend : Minor fixes [<a href="https://github.com/p4lang/p4c/pull/3674">view</a>]</li>
+<li>DPDK Backend : Minor fixes [<a href="https://github.com/p4lang/p4c/pull/3674">view</a>]</li>
 <li>Make RemoveUnusedDeclarations constructor protected. [<a href="https://github.com/p4lang/p4c/pull/3670">view</a>]</li>
 <li>Use vector to populate checksum struct [<a href="https://github.com/p4lang/p4c/pull/3668">view</a>]</li>
 <li>Remove useless grammar rule [<a href="https://github.com/p4lang/p4c/pull/3664">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a> Backend: Direct counter and direct meter support [<a href="https://github.com/p4lang/p4c/pull/3631">view</a>]</li>
+<li>DPDK Backend: Direct counter and direct meter support [<a href="https://github.com/p4lang/p4c/pull/3631">view</a>]</li>
 <li>'size' is always a legal table property [<a href="https://github.com/p4lang/p4c/pull/3662">view</a>]</li>
 <li>Do not allow action invocations with type arguments [<a href="https://github.com/p4lang/p4c/pull/3661">view</a>]</li>
 <li>Clone empty blocks before def-use analysis [<a href="https://github.com/p4lang/p4c/pull/3653">view</a>]</li>
 <li>Tighten checks for NoAction [<a href="https://github.com/p4lang/p4c/pull/3651">view</a>]</li>
 <li>Check if 'match_kind.exact' is defined when expanding switch statements [<a href="https://github.com/p4lang/p4c/pull/3654">view</a>]</li>
 <li>PSA/eBPF: retrieve interface numbers from OS in PTF tests [<a href="https://github.com/p4lang/p4c/pull/3659">view</a>]</li>
-<li>Fix and improve <a class="el" href="classordered__map.html">ordered_map</a> &amp; <a class="el" href="classordered__set.html">ordered_set</a> [<a href="https://github.com/p4lang/p4c/pull/3577">view</a>]</li>
+<li>Fix and improve ordered_map &amp; ordered_set [<a href="https://github.com/p4lang/p4c/pull/3577">view</a>]</li>
 <li>Handle correctly general switch statements when simplifying [<a href="https://github.com/p4lang/p4c/pull/3624">view</a>]</li>
 <li>Allow implicit casts in switch labels; improve error message [<a href="https://github.com/p4lang/p4c/pull/3634">view</a>]</li>
 </ul>
@@ -1077,7 +1077,7 @@ Release v1.2.3.3 [<a href="https://github.com/p4lang/p4c/pull/3648">view</a>]</h
 <ul>
 <li>CI: add sanitizers [<a href="https://github.com/p4lang/p4c/pull/3625">view</a>]</li>
 <li>Fix compilation issues after reachability merge [<a href="https://github.com/p4lang/p4c/pull/3649">view</a>]</li>
-<li>Reachability Engine for <a class="el" href="namespace_p4_tools.html">P4Tools</a> [<a href="https://github.com/p4lang/p4c/pull/3609">view</a>]</li>
+<li>Reachability Engine for P4Tools [<a href="https://github.com/p4lang/p4c/pull/3609">view</a>]</li>
 <li>Fix incorrect tests : totalLen field of ipv4 header, action name in add_entry call [<a href="https://github.com/p4lang/p4c/pull/3647">view</a>]</li>
 <li>Tighten p4c for add-on-miss [<a href="https://github.com/p4lang/p4c/pull/3614">view</a>]</li>
 <li>Update hex constants to use uppercase [<a href="https://github.com/p4lang/p4c/pull/3645">view</a>]</li>
@@ -1112,22 +1112,22 @@ Release v1.2.3.3 [<a href="https://github.com/p4lang/p4c/pull/3648">view</a>]</h
 <li>Remove expected output for non-existent action_param_serenum.p4 test program [<a href="https://github.com/p4lang/p4c/pull/3596">view</a>]</li>
 <li>Tables cannot be compared [<a href="https://github.com/p4lang/p4c/pull/3590">view</a>]</li>
 <li>Remove header field size constraints, now [<a href="https://github.com/p4lang/p4c/pull/3579">view</a>]</li>
-<li>Implement the eBPF extension for <a class="el" href="namespace_p4_tools.html">P4Tools</a>' P4Testgen [<a href="https://github.com/p4lang/p4c/pull/3510">view</a>]</li>
+<li>Implement the eBPF extension for P4Tools' P4Testgen [<a href="https://github.com/p4lang/p4c/pull/3510">view</a>]</li>
 <li>[p4Tools and p4Testgen] New exploration strategy for test generation [<a href="https://github.com/p4lang/p4c/pull/3566">view</a>]</li>
 <li>Fix taint analysis that was too conservative. [<a href="https://github.com/p4lang/p4c/pull/3583">view</a>]</li>
 <li>Dpdk backend: Support for large keysize &gt;64 bytes with additional restrictions [<a href="https://github.com/p4lang/p4c/pull/3580">view</a>]</li>
 <li>made "errorCount", "warningCount", and "maxErrorCount" [all "unsigned int"] be "protected" rather than "private" in "class ErrorReporter" in "error_reporter.h"</li>
 <li>Fix shift overlimit error for valid bit slicing operation [<a href="https://github.com/p4lang/p4c/pull/3578">view</a>]</li>
-<li>Add a reachability analysis to <a class="el" href="namespace_p4_tools.html">P4Tools</a> [<a href="https://github.com/p4lang/p4c/pull/3569">view</a>].</li>
+<li>Add a reachability analysis to P4Tools [<a href="https://github.com/p4lang/p4c/pull/3569">view</a>].</li>
 <li>Introduce cmake option to enable -Werror; use it for CI/docker builds [<a href="https://github.com/p4lang/p4c/pull/3555">view</a>]</li>
-<li>Add CODEOWNERS file for <a class="el" href="namespace_p4_tools.html">P4Tools</a>. [<a href="https://github.com/p4lang/p4c/pull/3567">view</a>]</li>
-<li>More fixes to the <a class="el" href="namespace_p4_tools.html">P4Tools</a> repository. [<a href="https://github.com/p4lang/p4c/pull/3565">view</a>]</li>
+<li>Add CODEOWNERS file for P4Tools. [<a href="https://github.com/p4lang/p4c/pull/3567">view</a>]</li>
+<li>More fixes to the P4Tools repository. [<a href="https://github.com/p4lang/p4c/pull/3565">view</a>]</li>
 <li>Cpplint fixup. [<a href="https://github.com/p4lang/p4c/pull/3564">view</a>]</li>
 <li>Switch to macOS 11 [<a href="https://github.com/p4lang/p4c/pull/3556">view</a>]</li>
 <li>Several small compilation fixes for tools. [<a href="https://github.com/p4lang/p4c/pull/3558">view</a>]</li>
 <li>Update gitmodule to fix cloning with https [<a href="https://github.com/p4lang/p4c/pull/3562">view</a>]</li>
-<li>add <a class="el" href="class_i_castable.html">ICastable</a> interface to <a class="el" href="struct_backtrack_1_1trigger.html">Backtrack::trigger</a> [<a href="https://github.com/p4lang/p4c/pull/3561">view</a>]</li>
-<li>Contribute the <a class="el" href="namespace_p4_tools.html">P4Tools</a> platform and P4Testgen [<a href="https://github.com/p4lang/p4c/pull/3495">view</a>]</li>
+<li>add ICastable interface to Backtrack::trigger [<a href="https://github.com/p4lang/p4c/pull/3561">view</a>]</li>
+<li>Contribute the P4Tools platform and P4Testgen [<a href="https://github.com/p4lang/p4c/pull/3495">view</a>]</li>
 <li>Fixing bug for ParserUnroll application to a p4 program with a header union [<a href="https://github.com/p4lang/p4c/pull/3121">view</a>]</li>
 <li>fixed spelling in CMakelists.txt in 2 different lines [<a href="https://github.com/p4lang/p4c/pull/3554">view</a>]</li>
 <li>Switch to C++17 standard [<a href="https://github.com/p4lang/p4c/pull/3547">view</a>]</li>
@@ -1136,8 +1136,8 @@ Release v1.2.3.3 [<a href="https://github.com/p4lang/p4c/pull/3648">view</a>]</h
 <li>BMv2: fix hashing non-tuple causing segfault [<a href="https://github.com/p4lang/p4c/pull/3465">view</a>]</li>
 <li>PSA/ebpf backed: update psabpf-ctl to the latest version [<a href="https://github.com/p4lang/p4c/pull/3539">view</a>]</li>
 <li>Change warrning messages in ParserUnroll [<a href="https://github.com/p4lang/p4c/pull/3548">view</a>]</li>
-<li>New class <a class="el" href="class_i_castable.html">ICastable</a>; new type constraint added [<a href="https://github.com/p4lang/p4c/pull/3542">view</a>]</li>
-<li>Add note to <a class="el" href="namespace_d_p_d_k.html">DPDK</a> README that PSA egress is not implemented [<a href="https://github.com/p4lang/p4c/pull/3525">view</a>]</li>
+<li>New class ICastable; new type constraint added [<a href="https://github.com/p4lang/p4c/pull/3542">view</a>]</li>
+<li>Add note to DPDK README that PSA egress is not implemented [<a href="https://github.com/p4lang/p4c/pull/3525">view</a>]</li>
 </ul>
 <h1><a class="anchor" id="release-v1232-viewhttpsgithubcomp4langp4cpull3546"></a>
 Release v1.2.3.2 [<a href="https://github.com/p4lang/p4c/pull/3546">view</a>]</h1>
@@ -1160,7 +1160,7 @@ Release v1.2.3.2 [<a href="https://github.com/p4lang/p4c/pull/3546">view</a>]</h
 <li>Silence -Warray-bounds for generated code for protobuf [<a href="https://github.com/p4lang/p4c/pull/3515">view</a>]</li>
 <li>cmake: Fixed multi line comment [<a href="https://github.com/p4lang/p4c/pull/3513">view</a>]</li>
 <li>Add new option to build p4c with LTO [<a href="https://github.com/p4lang/p4c/pull/3470">view</a>]</li>
-<li>Load table action from json without 'name' field for <a class="el" href="namespace_b_m_v2.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">BMV2</a> [<a href="https://github.com/p4lang/p4c/pull/3435">view</a>]</li>
+<li>Load table action from json without 'name' field for BMV2 [<a href="https://github.com/p4lang/p4c/pull/3435">view</a>]</li>
 <li>Add null check for default action property [<a href="https://github.com/p4lang/p4c/pull/3500">view</a>]</li>
 </ul>
 <h1><a class="anchor" id="release-v1231-viewhttpsgithubcomp4langp4cpull3505"></a>
@@ -1172,7 +1172,7 @@ Release v1.2.3.1 [<a href="https://github.com/p4lang/p4c/pull/3505">view</a>]</h
 <li>Update README.md [<a href="https://github.com/p4lang/p4c/pull/3497">view</a>]</li>
 <li>Dpdk Backend: Fix support for non-zero action arguments for default action in a table using action selector [<a href="https://github.com/p4lang/p4c/pull/3496">view</a>]</li>
 <li>Fix action param processing [<a href="https://github.com/p4lang/p4c/pull/3493">view</a>]</li>
-<li>Fix incorrect CFG generated for <a class="el" href="namespace_b_m_v2.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">BMV2</a> backend for switch statements [<a href="https://github.com/p4lang/p4c/pull/3490">view</a>]</li>
+<li>Fix incorrect CFG generated for BMV2 backend for switch statements [<a href="https://github.com/p4lang/p4c/pull/3490">view</a>]</li>
 <li>Fix bug related to varbits width [<a href="https://github.com/p4lang/p4c/pull/3487">view</a>]</li>
 <li>Delete keys that are empty tuples [<a href="https://github.com/p4lang/p4c/pull/3489">view</a>]</li>
 <li>Support GCC-style options for writing dependencies to a file. [<a href="https://github.com/p4lang/p4c/pull/3484">view</a>]</li>
@@ -1200,7 +1200,7 @@ Release v1.2.3.0 [<a href="https://github.com/p4lang/p4c/pull/3466">view</a>]</h
 <li>Use Type_Dontcare for _ expressions in table entries [<a href="https://github.com/p4lang/p4c/pull/3444">view</a>]</li>
 <li>pft-ebpf tests: update psabpf to fix tests [<a href="https://github.com/p4lang/p4c/pull/3456">view</a>]</li>
 <li>Fix Missing metadata for temporary variables added for Mask operation [<a href="https://github.com/p4lang/p4c/pull/3452">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a> Backend: Add support for tdi.json [<a href="https://github.com/p4lang/p4c/pull/3440">view</a>]</li>
+<li>DPDK Backend: Add support for tdi.json [<a href="https://github.com/p4lang/p4c/pull/3440">view</a>]</li>
 <li>P4C-DPDK - Incorrect constant value when there is a substract operation involved with a constant [<a href="https://github.com/p4lang/p4c/pull/3411">view</a>]</li>
 <li>Fixed build with older bison on Ubuntu 18 [<a href="https://github.com/p4lang/p4c/pull/3454">view</a>]</li>
 <li>Add bazel support for p4c-dpdk compiler [<a href="https://github.com/p4lang/p4c/pull/3441">view</a>]</li>
@@ -1208,9 +1208,9 @@ Release v1.2.3.0 [<a href="https://github.com/p4lang/p4c/pull/3466">view</a>]</h
 <li>Values with type int are legal constants [<a href="https://github.com/p4lang/p4c/pull/3446">view</a>]</li>
 <li>Fixed usage of yyFlexLexer with multiple parsers [<a href="https://github.com/p4lang/p4c/pull/3445">view</a>]</li>
 <li>Prevent crash caused by incorrect error message [<a href="https://github.com/p4lang/p4c/pull/3443">view</a>]</li>
-<li><a class="el" href="classordered__set.html">ordered_set</a>: operator&lt;: Fix for a case of strict inclusion. [<a href="https://github.com/p4lang/p4c/pull/3431">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a> Backend: Avoid compiler crash by handling possible types of length argument in packet extract for header containing varbit field [<a href="https://github.com/p4lang/p4c/pull/3439">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a> Backend: Emit name information for externs in context json [<a href="https://github.com/p4lang/p4c/pull/3433">view</a>]</li>
+<li>ordered_set: operator&lt;: Fix for a case of strict inclusion. [<a href="https://github.com/p4lang/p4c/pull/3431">view</a>]</li>
+<li>DPDK Backend: Avoid compiler crash by handling possible types of length argument in packet extract for header containing varbit field [<a href="https://github.com/p4lang/p4c/pull/3439">view</a>]</li>
+<li>DPDK Backend: Emit name information for externs in context json [<a href="https://github.com/p4lang/p4c/pull/3433">view</a>]</li>
 <li>[dpdk] shorten label names and header instance type [<a href="https://github.com/p4lang/p4c/pull/3436">view</a>]</li>
 <li>remove debug info [<a href="https://github.com/p4lang/p4c/pull/3438">view</a>]</li>
 <li>Added new P4C option [<a href="https://github.com/p4lang/p4c/pull/3425">view</a>]</li>
@@ -1252,7 +1252,7 @@ Release v1.2.2.3 [<a href="https://github.com/p4lang/p4c/pull/3418">view</a>]</h
 <li>Dpdk Backend: Enable header stack dynamic index elimination [<a href="https://github.com/p4lang/p4c/pull/3375">view</a>]</li>
 <li>Add metadata fields uses as Member Expression [<a href="https://github.com/p4lang/p4c/pull/3387">view</a>]</li>
 <li>Enable Automated Releases [<a href="https://github.com/p4lang/p4c/pull/3386">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a> Backend: Fix action name used in learn instruction, minor fix in context json [<a href="https://github.com/p4lang/p4c/pull/3385">view</a>]</li>
+<li>DPDK Backend: Fix action name used in learn instruction, minor fix in context json [<a href="https://github.com/p4lang/p4c/pull/3385">view</a>]</li>
 <li>Fixing bug in HSIndexSimplifier path [<a href="https://github.com/p4lang/p4c/pull/3382">view</a>]</li>
 <li>PSA-eBPF PTF tests: update psabpf to the latest version [<a href="https://github.com/p4lang/p4c/pull/3383">view</a>]</li>
 <li>Dpdk backend: Add target_name field for tables to context json. [<a href="https://github.com/p4lang/p4c/pull/3380">view</a>]</li>
@@ -1278,7 +1278,7 @@ Release v1.2.2.3 [<a href="https://github.com/p4lang/p4c/pull/3418">view</a>]</h
 <li>Unification of generic types can reduce to unification of Type_Name [<a href="https://github.com/p4lang/p4c/pull/3354">view</a>]</li>
 <li>Fixed start state renaming for p4-14 translation using @packet_entry [<a href="https://github.com/p4lang/p4c/pull/3348">view</a>]</li>
 <li>Validate value_set element types [<a href="https://github.com/p4lang/p4c/pull/3351">view</a>]</li>
-<li>Do not generate <a class="el" href="namespace_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> Egress program if PSA Egress pipeline is empty [<a href="https://github.com/p4lang/p4c/pull/3349">view</a>]</li>
+<li>Do not generate TC Egress program if PSA Egress pipeline is empty [<a href="https://github.com/p4lang/p4c/pull/3349">view</a>]</li>
 <li>Improve error message when validating select expressions [<a href="https://github.com/p4lang/p4c/pull/3340">view</a>]</li>
 <li>Require a start state in parsers [<a href="https://github.com/p4lang/p4c/pull/3339">view</a>]</li>
 <li>Use psabpf-ctl register command in PTF tests [<a href="https://github.com/p4lang/p4c/pull/3337">view</a>]</li>
@@ -1289,7 +1289,7 @@ Release v1.2.2.3 [<a href="https://github.com/p4lang/p4c/pull/3418">view</a>]</h
 <li>Check that parameter default values are compile-time known [<a href="https://github.com/p4lang/p4c/pull/3330">view</a>]</li>
 <li>Fix handling of keys without name annotation in graphs [<a href="https://github.com/p4lang/p4c/pull/3327">view</a>]</li>
 <li>[dpdk] Fix calculation of direction from input port [<a href="https://github.com/p4lang/p4c/pull/3326">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a> Backend: Connection tracking support [<a href="https://github.com/p4lang/p4c/pull/3290">view</a>]</li>
+<li>DPDK Backend: Connection tracking support [<a href="https://github.com/p4lang/p4c/pull/3290">view</a>]</li>
 <li>Update PSA-eBPF documentation [<a href="https://github.com/p4lang/p4c/pull/3320">view</a>]</li>
 <li>Expand 'emit' calls in the ebpf backend [<a href="https://github.com/p4lang/p4c/pull/3323">view</a>]</li>
 <li>Fix warnings generated by XDP helper program [<a href="https://github.com/p4lang/p4c/pull/3322">view</a>]</li>
@@ -1311,7 +1311,7 @@ Release v1.2.2.3 [<a href="https://github.com/p4lang/p4c/pull/3418">view</a>]</h
 <li>Update used psabpf library for PTF tests (PSA/eBPF)] [<a href="https://github.com/p4lang/p4c/pull/3261">view</a>]</li>
 <li>Preserve build failure semantics. [<a href="https://github.com/p4lang/p4c/pull/3270">view</a>]</li>
 <li>[dpdk] Eliminate header copy [<a href="https://github.com/p4lang/p4c/pull/3257">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a> Backend: PNA Pass metadata support [<a href="https://github.com/p4lang/p4c/pull/3245">view</a>]</li>
+<li>DPDK Backend: PNA Pass metadata support [<a href="https://github.com/p4lang/p4c/pull/3245">view</a>]</li>
 <li>Add UPF sample program for PSA/eBPF backend [<a href="https://github.com/p4lang/p4c/pull/3267">view</a>]</li>
 <li>Add BNG sample program for PSA/eBPF backend [<a href="https://github.com/p4lang/p4c/pull/3266">view</a>]</li>
 <li>Use ccache with Github actions [<a href="https://github.com/p4lang/p4c/pull/3073">view</a>]</li>
@@ -1339,7 +1339,7 @@ Release 1.2.2.2 [<a href="https://github.com/p4lang/p4c/pull/3247">view</a>]</h1
 <li>Fix error message for cast to 'type' [<a href="https://github.com/p4lang/p4c/pull/3241">view</a>]</li>
 <li>manage lifetimes of Visitor::visited [<a href="https://github.com/p4lang/p4c/pull/3168">view</a>]</li>
 <li>Allow <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> filenames containing spaces [<a href="https://github.com/p4lang/p4c/pull/3242">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a> Backend: Add support for recirculate()] extern [<a href="https://github.com/p4lang/p4c/pull/3236">view</a>]</li>
+<li>DPDK Backend: Add support for recirculate()] extern [<a href="https://github.com/p4lang/p4c/pull/3236">view</a>]</li>
 <li>Do not allow casts to struct types [<a href="https://github.com/p4lang/p4c/pull/3234">view</a>]</li>
 <li>P4C-DPDK - Support Non-zero arguments for default action [<a href="https://github.com/p4lang/p4c/pull/3206">view</a>]</li>
 <li>Implement Meter extern for eBPF backend [<a href="https://github.com/p4lang/p4c/pull/3231">view</a>]</li>
@@ -1352,7 +1352,7 @@ Release 1.2.2.2 [<a href="https://github.com/p4lang/p4c/pull/3247">view</a>]</h1
 <li>Add support for Hash extern to eBPF backend [<a href="https://github.com/p4lang/p4c/pull/3215">view</a>]</li>
 <li>Add support for ActionSelector extern to PSA/eBPF backend [<a href="https://github.com/p4lang/p4c/pull/3216">view</a>]</li>
 <li>P4C-DPDK: Emit error when struct fields &gt;64-bit is present in the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> [<a href="https://github.com/p4lang/p4c/pull/3217">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a> Backend: Fix binary operations with 1st operand is not same as dst operand [<a href="https://github.com/p4lang/p4c/pull/3209">view</a>]</li>
+<li>DPDK Backend: Fix binary operations with 1st operand is not same as dst operand [<a href="https://github.com/p4lang/p4c/pull/3209">view</a>]</li>
 <li>Solving problems with Header Union verify function (reopened)] [<a href="https://github.com/p4lang/p4c/pull/3214">view</a>]</li>
 <li>Add support for Register extern to PSA/eBPF backend [<a href="https://github.com/p4lang/p4c/pull/3202">view</a>]</li>
 <li>Fix Context json to emit target_action_name and NoAction [<a href="https://github.com/p4lang/p4c/pull/3213">view</a>]</li>
@@ -1373,10 +1373,10 @@ Release 1.2.2.2 [<a href="https://github.com/p4lang/p4c/pull/3247">view</a>]</h1
 <li>typedef with generic types requires type arguments [<a href="https://github.com/p4lang/p4c/pull/3174">view</a>]</li>
 <li>Add support for Counter extern to PSA/eBPF backend [<a href="https://github.com/p4lang/p4c/pull/3165">view</a>]</li>
 <li>Handle struct expression in ebfp backend [<a href="https://github.com/p4lang/p4c/pull/3173">view</a>]</li>
-<li>Fixed underflow during row-access in the <a class="el" href="class_sym_bit_matrix.html">SymBitMatrix</a> [<a href="https://github.com/p4lang/p4c/pull/3143">view</a>] [<a href="https://github.com/p4lang/p4c/pull/3169">view</a>]</li>
+<li>Fixed underflow during row-access in the SymBitMatrix [<a href="https://github.com/p4lang/p4c/pull/3143">view</a>] [<a href="https://github.com/p4lang/p4c/pull/3169">view</a>]</li>
 <li>PSA-eBPF: Add missing header name substitution in deparser [<a href="https://github.com/p4lang/p4c/pull/3162">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a> Backend: Insert table keys generated by compiler closer to the standard and user metadata [<a href="https://github.com/p4lang/p4c/pull/3160">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a> Backend: Move learn instructions constant argument to metadata [<a href="https://github.com/p4lang/p4c/pull/3163">view</a>]</li>
+<li>DPDK Backend: Insert table keys generated by compiler closer to the standard and user metadata [<a href="https://github.com/p4lang/p4c/pull/3160">view</a>]</li>
+<li>DPDK Backend: Move learn instructions constant argument to metadata [<a href="https://github.com/p4lang/p4c/pull/3163">view</a>]</li>
 <li>Removed execute permission bits from all 3 of the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> files that had them.</li>
 <li>Add PTF test infra for eBPF backend [<a href="https://github.com/p4lang/p4c/pull/3158">view</a>]</li>
 <li>Implement PSA for eBPF backend [<a href="https://github.com/p4lang/p4c/pull/3139">view</a>]</li>
@@ -1389,12 +1389,12 @@ Release 1.2.2.2 [<a href="https://github.com/p4lang/p4c/pull/3247">view</a>]</h1
 <li>Split psa_switch.h into two files [<a href="https://github.com/p4lang/p4c/pull/3144">view</a>]</li>
 <li>Improve efficiency of range translation to mask [<a href="https://github.com/p4lang/p4c/pull/3133">view</a>]</li>
 <li>Added nullptr checks for l/rtype [<a href="https://github.com/p4lang/p4c/pull/3138">view</a>]</li>
-<li>Implement <a class="el" href="namespace_e_b_p_f.html">EBPF</a> deparser [<a href="https://github.com/p4lang/p4c/pull/3136">view</a>]</li>
+<li>Implement EBPF deparser [<a href="https://github.com/p4lang/p4c/pull/3136">view</a>]</li>
 <li>Add packet_in.length()] and packet_in.advance()] methods to a eBPF target [<a href="https://github.com/p4lang/p4c/pull/3137">view</a>]</li>
-<li>sfinae-protect operator== <a class="el" href="struct_string_ref.html">StringRef</a> overload [<a href="https://github.com/p4lang/p4c/pull/3132">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a>: Implementation for non byte aligned metadata and header fields [<a href="https://github.com/p4lang/p4c/pull/3114">view</a>]</li>
+<li>sfinae-protect operator== StringRef overload [<a href="https://github.com/p4lang/p4c/pull/3132">view</a>]</li>
+<li>DPDK: Implementation for non byte aligned metadata and header fields [<a href="https://github.com/p4lang/p4c/pull/3114">view</a>]</li>
 <li>Comparisons of list expressions, structure-valued expressions, tuples and structs #3057 [<a href="https://github.com/p4lang/p4c/pull/3122">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a>: Add support for "mirror_packet" PNA extern [<a href="https://github.com/p4lang/p4c/pull/3128">view</a>]</li>
+<li>DPDK: Add support for "mirror_packet" PNA extern [<a href="https://github.com/p4lang/p4c/pull/3128">view</a>]</li>
 <li>Type of a unary expression is not always the same as the input type [<a href="https://github.com/p4lang/p4c/pull/3135">view</a>]</li>
 <li>Enable generation of pointer variables by eBPF codeGen [<a href="https://github.com/p4lang/p4c/pull/3131">view</a>]</li>
 <li>Eliminate typedefs in bmv2-ss backend [<a href="https://github.com/p4lang/p4c/pull/3123">view</a>]</li>
@@ -1405,9 +1405,9 @@ Release 1.2.2.2 [<a href="https://github.com/p4lang/p4c/pull/3247">view</a>]</h1
 <li>Fix off-by-one bug in source file position calculation [<a href="https://github.com/p4lang/p4c/pull/3124">view</a>]</li>
 <li>from1.0: fix register type signess [<a href="https://github.com/p4lang/p4c/pull/3117">view</a>]</li>
 <li>Print the current node type name when checkedTo fails [<a href="https://github.com/p4lang/p4c/pull/3116">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a>: Fix core dump while generating bfrt json for PNA programs with action selector [<a href="https://github.com/p4lang/p4c/pull/3115">view</a>]</li>
+<li>DPDK: Fix core dump while generating bfrt json for PNA programs with action selector [<a href="https://github.com/p4lang/p4c/pull/3115">view</a>]</li>
 <li>Fix cpplint errors for dpdk sources [<a href="https://github.com/p4lang/p4c/pull/3111">view</a>]</li>
-<li><a class="el" href="namespace_d_p_d_k.html">DPDK</a>: Fix missing action definitions in spec file [<a href="https://github.com/p4lang/p4c/pull/3109">view</a>]</li>
+<li>DPDK: Fix missing action definitions in spec file [<a href="https://github.com/p4lang/p4c/pull/3109">view</a>]</li>
 <li>Refactor SetupJoinPoints to make it more extensible</li>
 <li>Flatten local struct decl in dpdk [<a href="https://github.com/p4lang/p4c/pull/3108">view</a>]</li>
 <li>Remove unnecessary check in conversion of log_msg to a JSON [<a href="https://github.com/p4lang/p4c/pull/3067">view</a>]</li>
