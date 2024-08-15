@@ -18,7 +18,7 @@ namespace {
 
 /// Test the step function for a constant.
 TEST_F(Bmv2SmallStepTest, Value01) {
-    const auto test = createSmallStepExprTest("bit<8> f;", "8w42");
+    const auto test = createBmv2V1modelSmallStepExprTest("bit<8> f;", "8w42");
     ASSERT_TRUE(test);
 
     const auto *opValue = extractExpr<IR::Constant>(test->getProgram());
@@ -30,7 +30,7 @@ TEST_F(Bmv2SmallStepTest, Value01) {
 
 /// Test the step function for a bool value.
 TEST_F(Bmv2SmallStepTest, Value02) {
-    const auto test = createSmallStepExprTest("bit<1> f;", "true");
+    const auto test = createBmv2V1modelSmallStepExprTest("bit<1> f;", "true");
     ASSERT_TRUE(test);
 
     const auto *opValue = extractExpr<IR::BoolLiteral>(test->getProgram());

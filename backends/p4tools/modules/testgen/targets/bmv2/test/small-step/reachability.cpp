@@ -39,7 +39,7 @@ class P4ReachabilityOptions : public CompilerOptions {
 
 using P4ReachabilityContext = P4Tools::CompileContext<P4ReachabilityOptions>;
 
-class P4CReachability : public ::testing::Test {};
+class P4CReachability : public testing::Test {};
 
 /// Loads example from a file
 using ReturnedInfo = std::tuple<const IR::P4Program *, const P4Tools::NodesCallGraph *,

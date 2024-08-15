@@ -18,7 +18,7 @@ namespace {
 
 /// Test the step function for -(v) unary operation.
 TEST_F(Bmv2SmallStepTest, Unary01) {
-    const auto test = createSmallStepExprTest("bit<8> f;", "-(hdr.h.f)");
+    const auto test = createBmv2V1modelSmallStepExprTest("bit<8> f;", "-(hdr.h.f)");
     ASSERT_TRUE(test);
 
     const auto *opUn = extractExpr<IR::Operation_Unary>(test->getProgram());
@@ -32,7 +32,7 @@ TEST_F(Bmv2SmallStepTest, Unary01) {
 
 /// Test the step function for !(v) unary operation.
 TEST_F(Bmv2SmallStepTest, Unary02) {
-    const auto test = createSmallStepExprTest("bool f;", "!(hdr.h.f)");
+    const auto test = createBmv2V1modelSmallStepExprTest("bool f;", "!(hdr.h.f)");
     ASSERT_TRUE(test);
 
     const auto *opUn = extractExpr<IR::Operation_Unary>(test->getProgram());
@@ -47,7 +47,7 @@ TEST_F(Bmv2SmallStepTest, Unary02) {
 
 /// Test the step function for ~(v) unary operation.
 TEST_F(Bmv2SmallStepTest, Unary03) {
-    const auto test = createSmallStepExprTest("bit<8> f;", "~(hdr.h.f)");
+    const auto test = createBmv2V1modelSmallStepExprTest("bit<8> f;", "~(hdr.h.f)");
     ASSERT_TRUE(test);
 
     const auto *opUn = extractExpr<IR::Operation_Unary>(test->getProgram());

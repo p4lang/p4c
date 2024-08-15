@@ -6,7 +6,7 @@
 namespace P4::P4Tools::Test {
 
 /// Helper methods to build configurations for Taint Tests.
-class TaintTest : public ::testing::Test {};
+class TaintTest : public testing::Test {};
 
 }  // namespace P4::P4Tools::Test
 

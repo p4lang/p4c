@@ -14,7 +14,7 @@ namespace P4::P4Tools::Test {
 using namespace P4::literals;
 using ConstraintVector = const std::vector<const Constraint *>;
 
-class Z3SolverSatisfiabilityChecks : public ::testing::Test {
+class Z3SolverSatisfiabilityChecks : public testing::Test {
     P4Tools::Z3Solver solver;
 
  public:

@@ -47,7 +47,7 @@ class P4ToolsTestCase {
     static void ensureInit();
 };
 
-class P4TestgenTest : public ::testing::Test {};
+class P4TestgenTest : public testing::Test {};
 
 /// Converts IR::Member into symbolic variables.
 class SymbolicConverter : public Transform {

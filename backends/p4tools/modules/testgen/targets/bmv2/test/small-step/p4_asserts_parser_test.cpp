@@ -34,7 +34,7 @@ namespace P4::P4Tools::Test {
 
 using namespace P4::literals;
 
-class P4AssertsParserTest : public ::testing::Test {};
+class P4AssertsParserTest : public testing::Test {};
 class P4TestOptions : public CompilerOptions {
  public:
     virtual ~P4TestOptions() = default;

@@ -22,7 +22,7 @@ using TestSpec = P4Testgen::TestSpec;
 using PTF = P4Testgen::Bmv2::PTF;
 
 /// Helper methods to build configurations for PTF Tests.
-class PTFTest : public ::testing::Test {
+class PTFTest : public testing::Test {
  public:
     TableConfig getForwardTableConfig();
     TableConfig getIPRouteTableConfig();

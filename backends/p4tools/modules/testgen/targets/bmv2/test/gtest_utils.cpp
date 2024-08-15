@@ -3,10 +3,9 @@
 #include "absl/strings/substitute.h"
 #include "test/gtest/helpers.h"
 
-namespace P4Tools::Test {
-
-std::optional<const P4ToolsTestCase> createSmallStepExprTest(const std::string &hdrFields,
-                                                             const std::string &expr) {
+namespace P4::P4Tools::Test {
+std::optional<const P4ToolsTestCase> createBmv2V1modelSmallStepExprTest(
+    const std::string &hdrFields, const std::string &expr) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header H {
   $0
@@ -55,4 +54,4 @@ V1Switch(parse(), verifyChecksum(), mau(), mau(), computeChecksum(), deparse()) 
     return P4ToolsTestCase::create_16("bmv2", "v1model", absl::Substitute(source, hdrFields, expr));
 }
 
-}  // namespace P4Tools::Test
+}  // namespace P4::P4Tools::Test
