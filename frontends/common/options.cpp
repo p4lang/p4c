@@ -18,6 +18,8 @@ limitations under the License.
 
 #include "frontends/p4/frontend.h"
 
+namespace P4 {
+
 CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOptions(defaultMessage) {
     registerOption(
         "--excludeFrontendPasses", "pass1[,pass2]",
@@ -124,7 +126,7 @@ CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOption
             } else if (!strcmp(arg, "text")) {
                 p4RuntimeFormat = P4::P4RuntimeFormat::TEXT;
             } else {
-                ::error(ErrorType::ERR_INVALID, "Illegal P4Runtime format %1%", arg);
+                ::P4::error(ErrorType::ERR_INVALID, "Illegal P4Runtime format %1%", arg);
                 return false;
             }
             return true;
@@ -178,14 +180,16 @@ bool CompilerOptions::enable_intrinsic_metadata_fix() { return true; }
 
 bool CompilerOptions::validateOptions() const {
     if (!p4RuntimeFile.isNullOrEmpty()) {
-        ::warning(ErrorType::WARN_DEPRECATED,
-                  "'--p4runtime-file' and '--p4runtime-format' are deprecated, "
-                  "consider using '--p4runtime-files' instead");
+        ::P4::warning(ErrorType::WARN_DEPRECATED,
+                      "'--p4runtime-file' and '--p4runtime-format' are deprecated, "
+                      "consider using '--p4runtime-files' instead");
     }
     if (!p4RuntimeEntriesFile.isNullOrEmpty()) {
-        ::warning(ErrorType::WARN_DEPRECATED,
-                  "'--p4runtime-entries-file' is deprecated, "
-                  "consider using '--p4runtime-entries-files' instead");
+        ::P4::warning(ErrorType::WARN_DEPRECATED,
+                      "'--p4runtime-entries-file' is deprecated, "
+                      "consider using '--p4runtime-entries-files' instead");
     }
     return ParserOptions::validateOptions();
 }
+
+}  // namespace P4

@@ -27,7 +27,7 @@ limitations under the License.
 #include "lib/map.h"
 #include "v1model.h"
 
-namespace P4V1 {
+namespace P4::P4V1 {
 
 class ConversionContext {
  public:
@@ -99,9 +99,11 @@ class ProgramStructure {
             objectToNewName.emplace(obj, newName);
         }
         /// Lookup using the original name
-        T get(cstring name) const { return ::get(nameToObject, name); }
+        T get(cstring name) const { return ::P4::get(nameToObject, name); }
         /// Get the new name
-        cstring get(T object) const { return ::get(objectToNewName, object, object->name.name); }
+        cstring get(T object) const {
+            return ::P4::get(objectToNewName, object, object->name.name);
+        }
         /// Get the new name from the old name
         cstring newname(cstring name) const { return get(get(name)); }
         bool contains(cstring name) const { return nameToObject.find(name) != nameToObject.end(); }
@@ -326,6 +328,6 @@ class ProgramStructure {
     virtual const IR::P4Program *create(Util::SourceInfo info);
 };
 
-}  // namespace P4V1
+}  // namespace P4::P4V1
 
 #endif /* FRONTENDS_P4_FROMV1_0_PROGRAMSTRUCTURE_H_ */

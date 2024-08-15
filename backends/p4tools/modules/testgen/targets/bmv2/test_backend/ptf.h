@@ -19,7 +19,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/common.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 /// Extracts information from the @testSpec to emit a PTF test case.
 class PTF : public Bmv2TestFramework {
@@ -59,6 +59,6 @@ class PTF : public Bmv2TestFramework {
     static std::vector<std::pair<size_t, size_t>> getIgnoreMasks(const IR::Constant *mask);
 };
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_PTF_H_ */

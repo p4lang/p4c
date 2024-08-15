@@ -19,6 +19,10 @@ limitations under the License.
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+namespace P4 {
+
 using big_int = boost::multiprecision::cpp_int;
+
+}  // namespace P4
 
 #endif /* LIB_BIG_INT_H_ */

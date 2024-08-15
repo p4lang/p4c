@@ -115,8 +115,9 @@ class Predication final : public Transform {
     std::map<cstring, bool> isStatementDependent;
     const IR::Statement *error(const IR::Statement *statement) const {
         if (inside_action && ifNestingLevel > 0)
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "%1%: Conditional execution in actions unsupported on this target", statement);
+            ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: Conditional execution in actions unsupported on this target",
+                        statement);
         return statement;
     }
 

@@ -93,9 +93,9 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         /// has no 'derivedFrom' field, and it contains the actual source
         /// position where the analysis started.
         boost::format fmt(format);
-        return reportErrorImpl(
-            subst,
-            "  ---- Actual error:\n" + ::error_helper(fmt, std::forward<Args>(args)...).toString());
+        return reportErrorImpl(subst,
+                               "  ---- Actual error:\n" +
+                                   ::P4::error_helper(fmt, std::forward<Args>(args)...).toString());
     }
     // Default error message; returns 'false'
     virtual bool reportError(const TypeVariableSubstitution *subst) const = 0;

@@ -12,7 +12,7 @@
 #include "ir/vector.h"
 #include "lib/cstring.h"
 
-namespace P4Tools::P4Smith {
+namespace P4::P4Tools::P4Smith {
 
 struct Requirements {
     bool require_scalar{false};
@@ -119,6 +119,6 @@ class P4Scope {
     static std::vector<const IR::Type_Declaration *> getFilteredDecls(std::set<cstring> filter);
     static std::set<const IR::P4Table *> *getCallableTables();
 };
-}  // namespace P4Tools::P4Smith
+}  // namespace P4::P4Tools::P4Smith
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_COMMON_SCOPE_H_ */

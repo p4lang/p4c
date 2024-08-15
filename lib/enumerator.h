@@ -31,7 +31,7 @@ limitations under the License.
 
 #include "iterator_range.h"
 
-namespace Util {
+namespace P4::Util {
 enum class EnumeratorState { NotStarted, Valid, PastEnd };
 
 template <typename T>
@@ -669,5 +669,6 @@ auto concat(Args &&...inputs) {
     return concat(init);
 }
 
-}  // namespace Util
+}  // namespace P4::Util
+
 #endif /* LIB_ENUMERATOR_H_ */

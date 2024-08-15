@@ -5,7 +5,7 @@
 
 #include "backends/p4tools/modules/smith/core/target.h"
 
-namespace P4Tools::P4Smith::BMv2 {
+namespace P4::P4Tools::P4Smith::BMv2 {
 
 /* =============================================================================================
  *  AbstractBMv2SmithTarget implementation
@@ -15,4 +15,4 @@ AbstractBMv2SmithTarget::AbstractBMv2SmithTarget(const std::string &deviceName,
                                                  const std::string &archName)
     : SmithTarget(deviceName, archName) {}
 
-}  // namespace P4Tools::P4Smith::BMv2
+}  // namespace P4::P4Tools::P4Smith::BMv2

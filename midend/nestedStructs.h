@@ -59,7 +59,7 @@ class ComplexValues final {
             }
             return new IR::StructExpression(type->getP4Type(), vec);
         }
-        Component *getComponent(cstring name) override { return ::get(members, name); }
+        Component *getComponent(cstring name) override { return ::P4::get(members, name); }
         void dbprint(std::ostream &out) const override {
             out << Log::indent;
             for (auto m : members) out << m.first << "=>" << m.second;
@@ -86,11 +86,11 @@ class ComplexValues final {
     Component *getTranslation(const IR::IDeclaration *decl) {
         auto dv = decl->to<IR::Declaration_Variable>();
         if (dv == nullptr) return nullptr;
-        return ::get(values, dv);
+        return ::P4::get(values, dv);
     }
     Component *getTranslation(const IR::Expression *expression) {
         LOG2("Check translation " << dbp(expression));
-        return ::get(translation, expression);
+        return ::P4::get(translation, expression);
     }
     void setTranslation(const IR::Expression *expression, Component *comp) {
         translation.emplace(expression, comp);

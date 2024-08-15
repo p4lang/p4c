@@ -12,7 +12,7 @@
 #include "backends/p4tools/modules/smith/core/target.h"
 #include "ir/ir.h"
 
-namespace P4Tools::P4Smith::Nic {
+namespace P4::P4Tools::P4Smith::Nic {
 
 class AbstractNicSmithTarget : public SmithTarget {
  protected:
@@ -60,6 +60,6 @@ class DpdkPnaSmithTarget : public AbstractNicSmithTarget {
     DpdkPnaSmithTarget();
 };
 
-}  // namespace P4Tools::P4Smith::Nic
+}  // namespace P4::P4Tools::P4Smith::Nic
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_NIC_TARGET_H_ */

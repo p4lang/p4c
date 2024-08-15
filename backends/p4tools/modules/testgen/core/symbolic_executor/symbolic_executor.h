@@ -13,7 +13,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 /// Base abstract class for symbolic execution. It requires the implementation of
 /// the run method, and carries the base Branch struct, to be reused in inherited
@@ -93,6 +93,6 @@ class SymbolicExecutor {
     SmallStepEvaluator evaluator;
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_SYMBOLIC_EXECUTOR_H_ */

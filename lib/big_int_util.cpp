@@ -18,7 +18,7 @@ limitations under the License.
 
 #include <stdexcept>
 
-namespace Util {
+namespace P4::Util {
 
 using namespace boost::multiprecision;
 
@@ -109,7 +109,9 @@ big_int cvtInt(const char *s, unsigned base) {
     return rv;
 }
 
-}  // namespace Util
+}  // namespace P4::Util
+
+namespace P4 {
 
 void dump(const big_int &i) {
     std::cout << i << " (";
@@ -121,3 +123,5 @@ void dump(const big_int &i) {
     std::cout << ")" << std::endl;
 }
 void dump(const big_int *i) { dump(*i); }
+
+}  // namespace P4

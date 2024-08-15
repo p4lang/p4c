@@ -28,6 +28,8 @@ limitations under the License.
 #include "big_int.h"
 #include "cstring.h"
 
+namespace P4 {
+
 class IHasDbPrint {
  public:
     virtual void dbprint(std::ostream &out) const = 0;
@@ -120,6 +122,8 @@ cstring toString(const big_int &value, unsigned width, bool sign, unsigned int b
 cstring toString(const void *value);
 
 char DigitToChar(int digit);
+
 }  // namespace Util
+}  // namespace P4
 
 #endif /* LIB_STRINGIFY_H_ */

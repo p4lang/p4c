@@ -18,7 +18,7 @@ limitations under the License.
 
 #include <gtest/gtest.h>
 
-namespace Test {
+namespace P4::Test {
 
 TEST(hvec_map, map_equal) {
     hvec_map<unsigned, unsigned> a;
@@ -177,4 +177,4 @@ TEST(hvec_map, string_map) {
     }
 }
 
-}  // namespace Test
+}  // namespace P4::Test

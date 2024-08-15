@@ -11,7 +11,7 @@
 
 using namespace P4;
 
-namespace Test {
+namespace P4::Test {
 
 struct P4CFrontend : P4CTest {
     void addPasses(std::initializer_list<PassManager::VisitorRef> passes) { pm.addPasses(passes); }
@@ -19,7 +19,7 @@ struct P4CFrontend : P4CTest {
     const IR::Node *parseAndProcess(std::string program) {
         const auto *pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
         EXPECT_TRUE(pgm);
-        EXPECT_EQ(::errorCount(), 0);
+        EXPECT_EQ(::P4::errorCount(), 0);
         if (!pgm) {
             return nullptr;
         }
@@ -133,4 +133,4 @@ TEST_F(P4CConstantFoldingValidation, filter) {
     EXPECT_TRUE(ts_2->size->is<IR::Constant>());
 }
 
-}  // namespace Test
+}  // namespace P4::Test

@@ -18,6 +18,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 
+using namespace P4;
 using namespace P4::literals;
 
 TEST(IR, Equiv) {

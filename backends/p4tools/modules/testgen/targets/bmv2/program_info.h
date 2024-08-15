@@ -10,7 +10,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/compiler_result.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 class Bmv2V1ModelProgramInfo : public ProgramInfo {
  private:
@@ -84,6 +84,6 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
     DECLARE_TYPEINFO(Bmv2V1ModelProgramInfo, ProgramInfo);
 };
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_PROGRAM_INFO_H_ */

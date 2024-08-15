@@ -22,6 +22,8 @@ limitations under the License.
 #include "ir/json_loader.h"
 #include "ir/visitor.h"
 
+using namespace P4;
+
 TEST(IR, DumpJSON) {
     auto c = new IR::Constant(2);
     IR::Expression *e1 = new IR::Add(Util::SourceInfo(), c, c);

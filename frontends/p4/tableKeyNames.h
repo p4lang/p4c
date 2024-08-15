@@ -46,7 +46,7 @@ class KeyNameGenerator : public Inspector {
     void postorder(const IR::Slice *expression) override;
     void postorder(const IR::BAnd *expression) override;
     void postorder(const IR::MethodCallExpression *expression) override;
-    cstring getName(const IR::Expression *expression) { return ::get(name, expression); }
+    cstring getName(const IR::Expression *expression) { return ::P4::get(name, expression); }
 };
 
 /** Adds a "@name" annotation to each table key that does not have a name.

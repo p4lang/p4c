@@ -18,6 +18,8 @@ limitations under the License.
 #include "lib/algorithm.h"
 #include "lib/enumerator.h"
 
+namespace P4 {
+
 enum flags {
     // flags that control the creation of auto-created methods
     EXTEND = 1,          // call the creation function to extend even when user-defined
@@ -388,3 +390,5 @@ void IrClass::generateMethods() {
         }
     }
 }
+
+}  // namespace P4

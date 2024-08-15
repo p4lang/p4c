@@ -14,7 +14,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 /// Implements small-step operational semantics for expressions.
 class ExprStepper : public AbstractStepper {
@@ -296,6 +296,6 @@ class ExprStepper : public AbstractStepper {
     bool preorder(const IR::P4Table *table) override;
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_EXPR_STEPPER_H_ */

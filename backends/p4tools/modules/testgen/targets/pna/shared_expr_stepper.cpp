@@ -21,7 +21,7 @@
 #include "backends/p4tools/modules/testgen/targets/pna/constants.h"
 #include "backends/p4tools/modules/testgen/targets/pna/shared_table_stepper.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace P4::P4Tools::P4Testgen::Pna {
 
 SharedPnaExprStepper::SharedPnaExprStepper(ExecutionState &state, AbstractSolver &solver,
                                            const ProgramInfo &programInfo)
@@ -181,4 +181,4 @@ bool SharedPnaExprStepper::preorder(const IR::P4Table *table) {
     return tableStepper.eval();
 }
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace P4::P4Tools::P4Testgen::Pna

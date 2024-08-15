@@ -29,7 +29,7 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 
-namespace Util {
+namespace P4::Util {
 class NamedSymbol;
 class Namespace;
 
@@ -87,5 +87,5 @@ class ProgramStructure final {
     void clear();
 };
 
-}  // namespace Util
+}  // namespace P4::Util
 #endif /* P4_SYMBOL_TABLE_H_ */

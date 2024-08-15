@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <ostream>
 
+namespace P4 {
+
 class n4 {
     /* format a value as 4 chars */
     uint64_t val, div;
@@ -57,5 +59,7 @@ class n4 {
 };
 
 inline std::ostream &operator<<(std::ostream &os, n4 v) { return v.print(os); }
+
+}  // namespace P4
 
 #endif /* LIB_N4_H_ */

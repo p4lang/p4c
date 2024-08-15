@@ -8,7 +8,7 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace P4Tools {
+namespace P4::P4Tools {
 
 /// Represents a stack of namespaces.
 class NamespaceContext {
@@ -50,6 +50,6 @@ class NamespaceContext {
     cstring genName(cstring name, char sep) const;
 };
 
-}  // namespace P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_NAMESPACE_CONTEXT_H_ */

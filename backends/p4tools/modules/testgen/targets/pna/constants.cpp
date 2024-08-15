@@ -3,7 +3,7 @@
 #include "ir/id.h"
 #include "lib/cstring.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace P4::P4Tools::P4Testgen::Pna {
 
 using namespace P4::literals;
 
@@ -18,4 +18,4 @@ const IR::Member PnaConstants::PARSER_ERROR =
 const IR::SymbolicVariable PnaSymbolicVars::DIRECTION =
     IR::SymbolicVariable(IR::Type_Bits::get(32), "direction"_cs);
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace P4::P4Tools::P4Testgen::Pna

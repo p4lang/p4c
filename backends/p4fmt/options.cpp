@@ -1,6 +1,6 @@
 #include "options.h"
 
-namespace P4Fmt {
+namespace P4::P4Fmt {
 
 P4fmtOptions::P4fmtOptions() {
     registerOption(
@@ -14,4 +14,4 @@ P4fmtOptions::P4fmtOptions() {
 
 const std::filesystem::path &P4fmtOptions::outputFile() const { return outFile; }
 
-}  // namespace P4Fmt
+}  // namespace P4::P4Fmt

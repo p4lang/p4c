@@ -42,9 +42,9 @@ bool TypeInference::learn(const IR::Node *node, Visitor *caller, const Visitor::
     auto *learner = clone();
     learner->setCalledBy(caller);
     learner->setName("TypeInference learner");
-    unsigned previous = ::errorCount();
+    unsigned previous = ::P4::errorCount();
     (void)node->apply(*learner, ctxt);
-    unsigned errCount = ::errorCount();
+    unsigned errCount = ::P4::errorCount();
     bool result = errCount > previous;
     if (result) typeError("Error while analyzing %1%", node);
     return result;
@@ -143,7 +143,7 @@ const IR::Type *TypeInference::getType(const IR::Node *element) const {
     // This should be happening only when type-checking already failed
     // for some node; we are now just trying to typecheck a parent node.
     // So an error should have already been signalled.
-    if ((result == nullptr) && (::errorCount() == 0))
+    if ((result == nullptr) && (::P4::errorCount() == 0))
         BUG("Could not find type of %1% %2%", dbp(element), element);
     return result;
 }
@@ -152,7 +152,7 @@ const IR::Type *TypeInference::getTypeType(const IR::Node *element) const {
     const IR::Type *result = typeMap->getType(element);
     // See comment in getType() above.
     if (result == nullptr) {
-        if (::errorCount() == 0) BUG("Could not find type of %1%", element);
+        if (::P4::errorCount() == 0) BUG("Could not find type of %1%", element);
         return nullptr;
     }
     BUG_CHECK(result->is<IR::Type_Type>(), "%1%: expected a TypeType", dbp(result));
@@ -263,7 +263,7 @@ const IR::Type *TypeInference::canonicalize(const IR::Type *type) {
         auto et = canonicalize(set->elementType);
         if (et == nullptr) return nullptr;
         if (et->is<IR::Type_Stack>() || et->is<IR::Type_Set>() || et->is<IR::Type_HeaderUnion>())
-            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: Sets of %2% are not supported", type, et);
+            ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: Sets of %2% are not supported", type, et);
         if (et == set->elementType) return type;
         const IR::Type *canon = new IR::Type_Set(type->srcInfo, et);
         return canon;
@@ -473,7 +473,7 @@ const IR::Type *TypeInference::canonicalize(const IR::Type *type) {
         learn(result, this, getChildContext());
         return result;
     } else {
-        BUG_CHECK(::errorCount(), "Unexpected type %1%", dbp(type));
+        BUG_CHECK(::P4::errorCount(), "Unexpected type %1%", dbp(type));
     }
 
     // If we reach this point some type error must have occurred, because
@@ -780,7 +780,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::che
     auto tvs = unify(errorPosition, methodType, callType,
                      "Constructor invocation %1% does not match constructor declaration %2%",
                      {callType, constructor});
-    BUG_CHECK(tvs != nullptr || ::errorCount(), "Unification failed with no error");
+    BUG_CHECK(tvs != nullptr || ::P4::errorCount(), "Unification failed with no error");
     if (tvs == nullptr) return none;
 
     LOG2("Constructor type before specialization " << methodType << " with " << tvs);
@@ -823,7 +823,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::che
             // Insert casts for 'int' values.
             newExpr = cts.convert(newExpr, getChildContext())->to<IR::Expression>();
         }
-        if (::errorCount() > 0) return none;
+        if (::P4::errorCount() > 0) return none;
         if (newExpr != arg->expression) {
             LOG2("Changing method argument to " << newExpr);
             changed = true;
@@ -899,7 +899,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::con
     auto tvs = unify(container->getNode(), constructor, callType,
                      "Constructor invocation '%1%' does not match declaration '%2%'",
                      {callType, constructor});
-    BUG_CHECK(tvs != nullptr || ::errorCount(), "Null substitution");
+    BUG_CHECK(tvs != nullptr || ::P4::errorCount(), "Null substitution");
     if (tvs == nullptr)
         return std::pair<const IR::Type *, const IR::Vector<IR::Argument> *>(nullptr, nullptr);
 

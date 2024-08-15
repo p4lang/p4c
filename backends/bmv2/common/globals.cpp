@@ -19,7 +19,7 @@ limitations under the License.
 #include "extern.h"
 #include "sharedActionSelectorCheck.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 bool ConvertGlobals::preorder(const IR::ExternBlock *block) {
     LOG2("Converting " << block);
@@ -33,4 +33,4 @@ bool ConvertGlobals::preorder(const IR::ExternBlock *block) {
     return false;
 }
 
-}  // namespace BMV2
+}  // namespace P4::BMV2

@@ -19,7 +19,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/table_stepper.h"
 
-namespace P4Tools::P4Testgen::EBPF {
+namespace P4::P4Tools::P4Testgen::EBPF {
 
 EBPFExprStepper::EBPFExprStepper(ExecutionState &state, AbstractSolver &solver,
                                  const ProgramInfo &programInfo)
@@ -41,7 +41,7 @@ const EBPFExprStepper::ExternMethodImpls<EBPFExprStepper> EBPFExprStepper::EBPF_
         {"CounterArray.add"_cs,
          {"index"_cs, "value"_cs},
          [](const ExternInfo & /*externInfo*/, EBPFExprStepper &stepper) {
-             ::warning("CounterArray.add not fully implemented.");
+             ::P4::warning("CounterArray.add not fully implemented.");
              auto &nextState = stepper.state.clone();
              nextState.popBody();
              stepper.result->emplace_back(nextState);
@@ -60,7 +60,7 @@ const EBPFExprStepper::ExternMethodImpls<EBPFExprStepper> EBPFExprStepper::EBPF_
         {"CounterArray.increment"_cs,
          {"index"_cs},
          [](const ExternInfo & /*externInfo*/, EBPFExprStepper &stepper) {
-             ::warning("CounterArray.increment not fully implemented.");
+             ::P4::warning("CounterArray.increment not fully implemented.");
              auto &nextState = stepper.state.clone();
              nextState.popBody();
              stepper.result->emplace_back(nextState);
@@ -195,4 +195,4 @@ bool EBPFExprStepper::preorder(const IR::P4Table *table) {
     return tableStepper.eval();
 }
 
-}  // namespace P4Tools::P4Testgen::EBPF
+}  // namespace P4::P4Tools::P4Testgen::EBPF

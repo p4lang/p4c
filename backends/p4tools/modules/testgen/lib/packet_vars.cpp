@@ -2,7 +2,7 @@
 
 #include "ir/id.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 using namespace P4::literals;
 
@@ -22,4 +22,4 @@ const IR::Member PacketVars::EMIT_BUFFER_LABEL =
 const IR::SymbolicVariable PacketVars::PAYLOAD_SYMBOL =
     IR::SymbolicVariable(&PacketVars::PACKET_SIZE_VAR_TYPE, "*payload"_cs);
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen

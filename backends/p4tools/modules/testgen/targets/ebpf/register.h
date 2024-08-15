@@ -7,11 +7,11 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/target.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 /// Register the ebpf testgen target with the testgen framework.
 inline void ebpfRegisterTestgenTarget() { EBPF::EBPFTestgenTarget::make(); }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen
 
 #endif /* TESTGEN_TARGETS_EBPF_REGISTER_H_ */

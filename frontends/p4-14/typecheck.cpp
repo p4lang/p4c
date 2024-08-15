@@ -19,6 +19,8 @@ limitations under the License.
 #include "ir/dump.h"
 #include "lib/log.h"
 
+namespace P4 {
+
 using namespace P4::literals;
 
 /// P4-14 (v1.0 and v1.1) type checking algorithm
@@ -327,7 +329,8 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
         if (type->is<IR::Type::Unknown>() || type->is<IR::Type::Bits>() ||
             type->is<IR::Type_InfInt>())
             return true;
-        ::error(ErrorType::ERR_TYPE_ERROR, "%1%: not defined on operands of type %2%", node, type);
+        ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: not defined on operands of type %2%", node,
+                    type);
         return false;
     }
 
@@ -610,3 +613,5 @@ const IR::Node *TypeCheck::apply_visitor(const IR::Node *n, const char *name) {
     LOG5("After Typecheck:\n" << dumpToString(rv));
     return rv;
 }
+
+}  // namespace P4

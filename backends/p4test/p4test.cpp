@@ -35,6 +35,8 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "midend.h"
 
+using namespace P4;
+
 class P4TestOptions : public CompilerOptions {
  public:
     bool parseOnly = false;
@@ -76,7 +78,7 @@ class P4TestOptions : public CompilerOptions {
         registerOption(
             "--turn-off-logn", nullptr,
             [](const char *) {
-                ::Log::Detail::enableLoggingGlobally = false;
+                ::P4::Log::Detail::enableLoggingGlobally = false;
                 return true;
             },
             "Turn off LOGN() statements in the compiler.\n"
@@ -113,7 +115,7 @@ int main(int argc, char *const argv[]) {
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false) options.setInputFile();
     }
-    if (::errorCount() > 0) return 1;
+    if (::P4::errorCount() > 0) return 1;
     const IR::P4Program *program = nullptr;
     auto hook = options.getDebugHook();
     if (options.loadIRFromJson) {
@@ -132,7 +134,7 @@ int main(int argc, char *const argv[]) {
         program = P4::parseP4File(options);
         info.emitInfo("PARSER");
 
-        if (program != nullptr && ::errorCount() == 0) {
+        if (program != nullptr && ::P4::errorCount() == 0) {
             P4::P4COptionPragmaParser optionsPragmaParser;
             program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
             info.emitInfo("PASS P4COptionPragmaParser");
@@ -154,7 +156,7 @@ int main(int argc, char *const argv[]) {
     }
 
     log_dump(program, "Initial program");
-    if (program != nullptr && ::errorCount() == 0) {
+    if (program != nullptr && ::P4::errorCount() == 0) {
         P4::serializeP4RuntimeIfRequired(program, options);
 
         if (!options.parseOnly && !options.validateOnly) {
@@ -201,12 +203,12 @@ int main(int argc, char *const argv[]) {
                     t2 << ss2.str() << std::flush;
                     auto rv = system("json_diff t1.json t2.json");
                     if (rv != 0)
-                        ::warning(ErrorType::WARN_FAILED, "json_diff failed with code %1%", rv);
+                        ::P4::warning(ErrorType::WARN_FAILED, "json_diff failed with code %1%", rv);
                 }
             }
         }
     }
 
     if (Log::verbose()) std::cerr << "Done." << std::endl;
-    return ::errorCount() > 0;
+    return ::P4::errorCount() > 0;
 }

@@ -10,7 +10,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 
-namespace P4Tools::P4Testgen::EBPF {
+namespace P4::P4Tools::P4Testgen::EBPF {
 
 class EBPFProgramInfo : public ProgramInfo {
  private:
@@ -51,6 +51,6 @@ class EBPFProgramInfo : public ProgramInfo {
     DECLARE_TYPEINFO(EBPFProgramInfo, ProgramInfo);
 };
 
-}  // namespace P4Tools::P4Testgen::EBPF
+}  // namespace P4::P4Tools::P4Testgen::EBPF
 
 #endif /* TESTGEN_TARGETS_EBPF_PROGRAM_INFO_H_ */

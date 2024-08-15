@@ -18,6 +18,8 @@ limitations under the License.
 
 #include "frontends/p4/methodInstance.h"
 
+namespace P4 {
+
 struct LogAbbrev {
     const Util::SourceInfo &si;
     explicit LogAbbrev(const Util::SourceInfo &si) : si(si) {}
@@ -31,6 +33,8 @@ struct LogAbbrev {
         return out;
     }
 };
+
+}  // namespace P4
 
 namespace P4 {
 
@@ -747,7 +751,11 @@ std::ostream &operator<<(std::ostream &out, const ComputeDefUse::defuse_t &du) {
 
 }  // namespace P4
 
+namespace P4 {
+
 void dump(const P4::ComputeDefUse::loc_t &p) { std::cout << p << std::endl; }
 void dump(const hvec_set<const P4::ComputeDefUse::loc_t *> &p) { std::cout << p << std::endl; }
 void dump(const P4::ComputeDefUse &du) { std::cout << du << std::endl; }
 void dump(const P4::ComputeDefUse *du) { std::cout << *du << std::endl; }
+
+}  // namespace P4

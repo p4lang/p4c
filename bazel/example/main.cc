@@ -26,6 +26,6 @@ int main() {
   std::cout << p4info.DebugString();
 
   // Demonstrate that IR extension is present.
-  IR::MyCustomStatement statement("Hello, P4 extension world!"_cs);
+  P4::IR::MyCustomStatement statement("Hello, P4 extension world!"_cs);
   std::cout << statement << std::endl;
 }

@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "backends/ebpf/ebpfProgram.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 class XDPHelpProgram : public EBPFProgram {
     const char *XDPProgUsingMetaForXDP2TC =
@@ -120,6 +120,6 @@ class XDPHelpProgram : public EBPFProgram {
     }
 };
 
-}  // namespace EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_PSA_XDPHELPPROGRAM_H_ */

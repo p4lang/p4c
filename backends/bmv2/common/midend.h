@@ -22,7 +22,7 @@ limitations under the License.
 #include "lower.h"
 #include "midend/convertEnums.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 /// This class implements a policy suitable for the ConvertEnums pass.
 /// The policy is: convert all enums that are not part of the v1model.
@@ -66,6 +66,6 @@ class MidEnd : public PassManager {
     }
 };
 
-}  // namespace BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_MIDEND_H_ */

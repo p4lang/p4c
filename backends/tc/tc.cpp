@@ -29,6 +29,8 @@ and limitations under the License.
 #include "options.h"
 #include "version.h"
 
+using namespace P4;
+
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
     AutoCompileContext autoTCContext(new TC::TCContext);
@@ -39,17 +41,17 @@ int main(int argc, char *const argv[]) {
     if (options.process(argc, argv) != nullptr) {
         options.setInputFile();
     }
-    if (::errorCount() > 0) {
+    if (::P4::errorCount() > 0) {
         return 1;
     }
     auto hook = options.getDebugHook();
     auto chkprogram = P4::parseP4File(options);
-    if (chkprogram == nullptr || ::errorCount() > 0) {
+    if (chkprogram == nullptr || ::P4::errorCount() > 0) {
         return 1;
     }
 
     const IR::P4Program *program = chkprogram;
-    if (program == nullptr || ::errorCount() > 0) {
+    if (program == nullptr || ::P4::errorCount() > 0) {
         return 1;
     }
     try {
@@ -62,7 +64,7 @@ int main(int argc, char *const argv[]) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
-    if (program == nullptr || ::errorCount() > 0) {
+    if (program == nullptr || ::P4::errorCount() > 0) {
         return 1;
     }
 
@@ -73,11 +75,11 @@ int main(int argc, char *const argv[]) {
     midEnd.addDebugHook(hook);
     try {
         toplevel = midEnd.run(options, program);
-        if (::errorCount() > 1 || toplevel == nullptr) {
+        if (::P4::errorCount() > 1 || toplevel == nullptr) {
             return 1;
         }
         if (toplevel->getMain() == nullptr) {
-            ::error("Cannot process input file. Program does not contain a 'main' module");
+            ::P4::error("Cannot process input file. Program does not contain a 'main' module");
             return 1;
         }
         if (!options.dumpJsonFile.empty())
@@ -86,7 +88,7 @@ int main(int argc, char *const argv[]) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
-    if (::errorCount() > 0) {
+    if (::P4::errorCount() > 0) {
         return 1;
     }
     TC::Backend backend(toplevel, &midEnd.refMap, &midEnd.typeMap, options);
@@ -102,9 +104,9 @@ int main(int argc, char *const argv[]) {
         }
     }
     backend.serialize();
-    if (::errorCount() > 0) {
+    if (::P4::errorCount() > 0) {
         std::remove(introspecFile.c_str());
         return 1;
     }
-    return ::errorCount() > 0;
+    return ::P4::errorCount() > 0;
 }

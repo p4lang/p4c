@@ -26,7 +26,7 @@
 #include "lib/log.h"
 #include "lib/timer.h"
 
-namespace P4Tools {
+namespace P4::P4Tools {
 
 /// Converts a Z3 expression to a string.
 const char *toString(const z3::expr &e) { return Z3_ast_to_string(e.ctx(), e); }
@@ -617,4 +617,4 @@ z3::expr Z3Translator::translate(const IR::Expression *expression) {
     return result;
 }
 
-}  // namespace P4Tools
+}  // namespace P4::P4Tools

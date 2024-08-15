@@ -21,7 +21,7 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "ir/ir.h"
 
-namespace P4Test {
+namespace P4::P4Test {
 
 class MidEnd : public PassManager {
     std::vector<DebugHook> hooks;
@@ -40,6 +40,6 @@ class MidEnd : public PassManager {
     }
 };
 
-}  // namespace P4Test
+}  // namespace P4::P4Test
 
 #endif /* BACKENDS_P4TEST_MIDEND_H_ */

@@ -21,7 +21,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 using namespace P4::literals;
 
@@ -188,6 +188,6 @@ class TestFramework {
     [[nodiscard]] bool isInFileMode() const;
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_FRAMEWORK_H_ */

@@ -37,8 +37,8 @@ struct BFRuntimeSchemaGenerator::ActionSelector {
         const auto &pre = externInstance.preamble();
         ::dpdk::ActionSelector actionSelector;
         if (!externInstance.info().UnpackTo(&actionSelector)) {
-            ::error(ErrorType::ERR_NOT_FOUND,
-                    "Extern instance %1% does not pack an ActionSelector object", pre.name());
+            ::P4::error(ErrorType::ERR_NOT_FOUND,
+                        "Extern instance %1% does not pack an ActionSelector object", pre.name());
             return std::nullopt;
         }
         auto selectorId = makeBFRuntimeId(pre.id(), ::dpdk::P4Ids::ACTION_SELECTOR);
@@ -167,8 +167,8 @@ bool BFRuntimeSchemaGenerator::addActionProfIds(const p4configv1::Table &table,
     if (implementationId > 0) {
         auto hasSelector = actProfHasSelector(implementationId);
         if (hasSelector == std::nullopt) {
-            ::error(ErrorType::ERR_INVALID, "Invalid implementation id in p4info: %1%",
-                    implementationId);
+            ::P4::error(ErrorType::ERR_INVALID, "Invalid implementation id in p4info: %1%",
+                        implementationId);
             return false;
         }
         cstring tableType;

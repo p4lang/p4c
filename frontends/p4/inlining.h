@@ -70,13 +70,13 @@ class SymRenameMap {
     cstring getName(const IR::IDeclaration *decl) const {
         CHECK_NULL(decl);
         BUG_CHECK(internalName.find(decl) != internalName.end(), "%1%: no new name", decl);
-        auto result = ::get(internalName, decl);
+        auto result = ::P4::get(internalName, decl);
         return result;
     }
     cstring getExtName(const IR::IDeclaration *decl) const {
         CHECK_NULL(decl);
         BUG_CHECK(externalName.find(decl) != externalName.end(), "%1%: no external name", decl);
-        auto result = ::get(externalName, decl);
+        auto result = ::P4::get(externalName, decl);
         return result;
     }
     bool isRenamed(const IR::IDeclaration *decl) const {

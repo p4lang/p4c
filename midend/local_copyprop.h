@@ -99,7 +99,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     void forOverlapAvail(cstring, std::function<void(cstring, VarInfo *)>);
     void dropValuesUsing(cstring);
     bool hasSideEffects(const IR::Expression *e) {
-        return bool(::hasSideEffects(refMap, typeMap, e));
+        return bool(::P4::hasSideEffects(refMap, typeMap, e));
     }
     bool isHeaderUnionIsValid(const IR::Expression *e);
 

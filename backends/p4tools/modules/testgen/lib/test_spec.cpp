@@ -14,7 +14,7 @@
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 using namespace P4::literals;
 
@@ -308,4 +308,4 @@ TestObjectMap TestSpec::getTestObjectCategory(cstring category) const {
     return {};
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen

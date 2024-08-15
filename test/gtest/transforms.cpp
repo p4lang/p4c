@@ -23,7 +23,7 @@ limitations under the License.
 #include "ir/visitor.h"
 #include "lib/source_file.h"
 
-namespace Test {
+namespace P4::Test {
 
 class P4C_IR : public P4CTest {};
 
@@ -82,4 +82,4 @@ TEST_F(P4C_IR, InlineBlock) {
     EXPECT_TRUE(ifs->ifFalse->is<IR::BlockStatement>());
 }
 
-}  // namespace Test
+}  // namespace P4::Test

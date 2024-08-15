@@ -19,6 +19,8 @@ limitations under the License.
 
 #include "bitvec.h"
 
+namespace P4 {
+
 /* A symmetric bit matrix, held in a bit vector.  We only store a triangular submatrix which
  * is used for both halves, so modifying one bit modifies both sides, keeping the matrix
  * always symmetric.  Iterating over the matrix only iterates over the lower triangle */
@@ -100,5 +102,7 @@ class SymBitMatrix : private bitvec {
     bool operator!=(const SymBitMatrix &a) const { return bitvec::operator!=(a); }
     bool operator|=(const SymBitMatrix &a) { return bitvec::operator|=(a); }
 };
+
+}  // namespace P4
 
 #endif /* LIB_SYMBITMATRIX_H_ */

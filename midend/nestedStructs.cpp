@@ -90,9 +90,10 @@ const IR::Node *RemoveNestedStructs::postorder(IR::MethodCallExpression *express
     for (auto p : mi->getActualParameters()->parameters) {
         if (!p->hasOut()) continue;
         if (values->isNestedStruct(p->type)) {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "%1%: extern functions with 'out' nested struct argument (%2%) not supported",
-                    expression, p);
+            ::P4::error(
+                ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%1%: extern functions with 'out' nested struct argument (%2%) not supported",
+                expression, p);
         }
     }
     return expression;

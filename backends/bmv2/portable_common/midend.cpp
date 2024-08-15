@@ -62,8 +62,8 @@ limitations under the License.
 #include "midend/tableHit.h"
 #include "midend/validateProperties.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 using namespace P4::literals;
 
-}  // namespace BMV2
+}  // namespace P4::BMV2

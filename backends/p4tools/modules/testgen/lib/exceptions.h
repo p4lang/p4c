@@ -4,7 +4,7 @@
 #include "absl/strings/str_cat.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 /// This class indicates a feature that is not implemented in P4Testgen.
 /// Paths with this unimplemented feature should be skipped
@@ -33,6 +33,6 @@ class TestgenUnimplemented final : public Util::P4CExceptionBase {
         throw TestgenUnimplemented(__LINE__, __FILE__, __VA_ARGS__); \
     } while (0)
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_EXCEPTIONS_H_ */

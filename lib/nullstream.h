@@ -22,6 +22,8 @@ limitations under the License.
 #include <ostream>
 #include <streambuf>
 
+namespace P4 {
+
 template <class cT, class traits = std::char_traits<cT>>
 class basic_nullbuf final : public std::basic_streambuf<cT, traits> {
     typename traits::int_type overflow(typename traits::int_type c) {
@@ -46,5 +48,7 @@ typedef onullstream<char> nullstream;
 // otherwise a nullptr is returned
 // FIXME: This should return unique_ptr instead to track lifetime
 std::ostream *openFile(const std::filesystem::path &name, bool nullOnError);
+
+}  // namespace P4
 
 #endif /* LIB_NULLSTREAM_H_ */

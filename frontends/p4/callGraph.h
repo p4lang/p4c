@@ -117,11 +117,11 @@ class CallGraph {
     // Graph querying
 
     bool isCallee(T callee) const {
-        auto callees = ::get(in_edges, callee);
+        auto callees = ::P4::get(in_edges, callee);
         return callees != nullptr && !callees->empty();
     }
     bool isCaller(T caller) const {
-        auto edges = ::get(out_edges, caller);
+        auto edges = ::P4::get(out_edges, caller);
         if (edges == nullptr) return false;
         return !edges->empty();
     }

@@ -27,7 +27,7 @@ limitations under the License.
 #include "lib/safe_vector.h"
 #include "programStructure.h"
 
-namespace P4V1 {
+namespace P4::P4V1 {
 
 // Converts expressions from P4-14 to P4-16
 // However, the type in each expression is still a P4-14 type.
@@ -186,8 +186,8 @@ class DiscoverStructure : public Inspector {
         auto it = reserved_names.find(nodeName);
         if (it == reserved_names.end()) return;
         if (it->second != kind)
-            ::error(ErrorType::ERR_INVALID, "%1%: invalid name; it can only be used for %2%", node,
-                    it->second);
+            ::P4::error(ErrorType::ERR_INVALID, "%1%: invalid name; it can only be used for %2%",
+                        node, it->second);
     }
     void checkReserved(const IR::Node *node, cstring nodeName) const {
         checkReserved(node, nodeName, nullptr);
@@ -329,7 +329,7 @@ class ComputeCallGraph : public Inspector {
             else if (auto nr = ctrref->to<IR::PathExpression>())
                 ctr = structure->counters.get(nr->path->name);
             if (ctr == nullptr) {
-                ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find counter", ctrref);
+                ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find counter", ctrref);
                 return;
             }
             auto parent = findContext<IR::ActionFunction>();
@@ -344,7 +344,7 @@ class ComputeCallGraph : public Inspector {
             else if (auto nr = mtrref->to<IR::PathExpression>())
                 mtr = structure->meters.get(nr->path->name);
             if (mtr == nullptr) {
-                ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find meter", mtrref);
+                ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find meter", mtrref);
                 return;
             }
             auto parent = findContext<IR::ActionFunction>();
@@ -363,7 +363,7 @@ class ComputeCallGraph : public Inspector {
             else if (auto nr = regref->to<IR::PathExpression>())
                 reg = structure->registers.get(nr->path->name);
             if (reg == nullptr) {
-                ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find register", regref);
+                ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find register", regref);
                 return;
             }
             auto parent = findContext<IR::ActionFunction>();
@@ -416,12 +416,12 @@ class ComputeTableCallGraph : public Inspector {
         LOG3("Scanning " << apply->name);
         auto tbl = structure->tables.get(apply->name.name);
         if (tbl == nullptr) {
-            ::error(ErrorType::ERR_NOT_FOUND, "%1%: Could not find table", apply->name);
+            ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: Could not find table", apply->name);
             return;
         }
         auto parent = findContext<IR::V1Control>();
         if (!parent) {
-            ::error(ErrorType::ERR_UNEXPECTED, "%1%: Apply not within a control block?", apply);
+            ::P4::error(ErrorType::ERR_UNEXPECTED, "%1%: Apply not within a control block?", apply);
             return;
         }
 
@@ -435,9 +435,9 @@ class ComputeTableCallGraph : public Inspector {
 
         if (ctrl != nullptr && ctrl != parent) {
             auto previous = get(structure->tableInvocation, tbl);
-            ::error(ErrorType::ERR_INVALID,
-                    "%1%: Table invoked from two different controls: %2% and %3%", tbl, apply,
-                    previous);
+            ::P4::error(ErrorType::ERR_INVALID,
+                        "%1%: Table invoked from two different controls: %2% and %3%", tbl, apply,
+                        previous);
         }
         LOG3("Invoking " << tbl << " in " << parent->name);
         structure->tableMapping.emplace(tbl, parent);
@@ -528,7 +528,7 @@ class FixExtracts final : public Transform {
     /// Returns nullptr otherwise.
     HeaderSplit *splitHeaderType(const IR::Type_Header *type) {
         // Maybe we have seen this type already
-        auto fixed = ::get(fixedPart, type->name.name);
+        auto fixed = ::P4::get(fixedPart, type->name.name);
         if (fixed != nullptr) return fixed;
 
         const IR::Expression *headerLength = nullptr;
@@ -540,9 +540,9 @@ class FixExtracts final : public Transform {
             if (f->type->is<IR::Type_Varbits>()) {
                 cstring hname = structure->makeUniqueName(type->name.name);
                 if (fixedHeaderType != nullptr) {
-                    ::error(ErrorType::ERR_INVALID,
-                            "%1%: header types with multiple varbit fields are not supported",
-                            type);
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "%1%: header types with multiple varbit fields are not supported",
+                                type);
                     return nullptr;
                 }
                 fixedHeaderType = new IR::Type_Header(IR::ID(hname), fields);
@@ -623,7 +623,7 @@ class FixExtracts final : public Transform {
     const IR::Node *postorder(IR::MethodCallStatement *statement) override {
         auto mce = getOriginal<IR::MethodCallStatement>()->methodCall;
         LOG3("Looking up in extracts " << dbp(mce));
-        auto ht = ::get(structure->extractsSynthesized, mce);
+        auto ht = ::P4::get(structure->extractsSynthesized, mce);
         if (ht == nullptr)
             // not an extract
             return statement;
@@ -746,11 +746,11 @@ class DetectDuplicates : public Inspector {
                     auto e2 = n->second;
                     if (e1->node_type_name() == e2->node_type_name()) {
                         if (e1->srcInfo.getStart().isValid())
-                            ::error(ErrorType::ERR_DUPLICATE, "%1%: same name as %2%", e1, e2);
+                            ::P4::error(ErrorType::ERR_DUPLICATE, "%1%: same name as %2%", e1, e2);
                         else
                             // This name is probably standard_metadata_t, a built-in declaration
-                            ::error(ErrorType::ERR_INVALID, "%1% is invalid; name %2% is reserved",
-                                    e2, key);
+                            ::P4::error(ErrorType::ERR_INVALID,
+                                        "%1% is invalid; name %2% is reserved", e2, key);
                     }
                 }
             }
@@ -930,7 +930,7 @@ class MoveIntrinsicMetadata : public Transform {
             BUG_CHECK(tn, "%1%: expected a Type_Name", intrTypeName);
             auto nt = program->getDeclsByName(tn->path->name)->nextOrDefault();
             if (nt == nullptr || !nt->is<IR::Type_Struct>()) {
-                ::error(ErrorType::ERR_INVALID, "%1%: expected a structure", tn);
+                ::P4::error(ErrorType::ERR_INVALID, "%1%: expected a structure", tn);
                 return program;
             }
             intrType = nt->to<IR::Type_Struct>();
@@ -944,7 +944,7 @@ class MoveIntrinsicMetadata : public Transform {
             BUG_CHECK(tn, "%1%: expected a Type_Name", queueTypeName);
             auto nt = program->getDeclsByName(tn->path->name)->nextOrDefault();
             if (nt == nullptr || !nt->is<IR::Type_Struct>()) {
-                ::error(ErrorType::ERR_INVALID, "%1%: expected a structure", tn);
+                ::P4::error(ErrorType::ERR_INVALID, "%1%: expected a structure", tn);
                 return program;
             }
             queueType = nt->to<IR::Type_Struct>();
@@ -958,8 +958,8 @@ class MoveIntrinsicMetadata : public Transform {
             if (intrType != nullptr) {
                 for (auto f : intrType->fields) {
                     if (type->fields.getDeclaration(f->name) == nullptr) {
-                        ::error(ErrorType::ERR_NOT_FOUND, "%1%: no such field in standard_metadata",
-                                f->name);
+                        ::P4::error(ErrorType::ERR_NOT_FOUND,
+                                    "%1%: no such field in standard_metadata", f->name);
                         LOG2("standard_metadata: " << type);
                     }
                 }
@@ -967,8 +967,8 @@ class MoveIntrinsicMetadata : public Transform {
             if (queueType != nullptr) {
                 for (auto f : queueType->fields) {
                     if (type->fields.getDeclaration(f->name) == nullptr) {
-                        ::error(ErrorType::ERR_NOT_FOUND, "%1%: no such field in standard_metadata",
-                                f->name);
+                        ::P4::error(ErrorType::ERR_NOT_FOUND,
+                                    "%1%: no such field in standard_metadata", f->name);
                         LOG2("standard_metadata: " << type);
                     }
                 }
@@ -1016,13 +1016,13 @@ class FindRecirculated : public Inspector {
         }
         auto expression = primitive->operands.at(operand);
         if (!expression->is<IR::PathExpression>()) {
-            ::error(ErrorType::ERR_EXPECTED, "%1%: expected a field list", expression);
+            ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected a field list", expression);
             return;
         }
         auto nr = expression->to<IR::PathExpression>();
         auto fl = structure->field_lists.get(nr->path->name);
         if (fl == nullptr) {
-            ::error(ErrorType::ERR_EXPECTED, "%1%: Expected a field list", expression);
+            ::P4::error(ErrorType::ERR_EXPECTED, "%1%: Expected a field list", expression);
             return;
         }
         LOG3("Recirculated " << nr->path->name);
@@ -1057,6 +1057,6 @@ class Converter : public PassManager {
     Visitor::profile_t init_apply(const IR::Node *node) override;
 };
 
-}  // namespace P4V1
+}  // namespace P4::P4V1
 
 #endif /* FRONTENDS_P4_FROMV1_0_CONVERTERS_H_ */

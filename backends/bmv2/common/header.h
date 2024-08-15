@@ -28,7 +28,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/json.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 class Backend;
 
@@ -61,6 +61,6 @@ class HeaderConverter : public Inspector {
     HeaderConverter(ConversionContext *ctxt, cstring scalarsName);
 };
 
-}  // namespace BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_HEADER_H_ */

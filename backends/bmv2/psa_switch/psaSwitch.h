@@ -20,7 +20,7 @@ limitations under the License.
 #include "backends/bmv2/portable_common/portable.h"
 #include "backends/common/psaProgramStructure.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 class PsaSwitchExpressionConverter : public ExpressionConverter {
  public:
@@ -29,8 +29,9 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
         : BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) {}
 
     void modelError(const char *format, const cstring field) {
-        ::error(ErrorType::ERR_MODEL,
-                (cstring(format) + "\nInvalid metadata parameter value for PSA").c_str(), field);
+        ::P4::error(ErrorType::ERR_MODEL,
+                    (cstring(format) + "\nInvalid metadata parameter value for PSA").c_str(),
+                    field);
     }
 
     Util::IJson *convertParam(UNUSED const IR::Parameter *param, cstring fieldName) override {
@@ -132,6 +133,6 @@ EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Hash)
 EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(InternetChecksum)
 EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(Register)
 
-}  // namespace BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_PSA_SWITCH_PSASWITCH_H_ */

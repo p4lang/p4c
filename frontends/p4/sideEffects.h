@@ -381,8 +381,8 @@ class TablesInActions : public Inspector {
             hta.setCalledBy(this);
             (void)expression->apply(hta, getContext());
             if (hta.table != nullptr) {
-                ::error(ErrorType::ERR_UNSUPPORTED, "%1%: table invocation in action argument",
-                        expression);
+                ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1%: table invocation in action argument",
+                            expression);
             }
         }
     }

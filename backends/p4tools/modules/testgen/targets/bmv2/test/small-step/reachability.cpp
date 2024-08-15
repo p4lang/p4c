@@ -23,7 +23,7 @@
 #include "lib/exceptions.h"
 #include "test/gtest/env.h"
 
-namespace Test {
+namespace P4::Test {
 
 using namespace P4::literals;
 
@@ -458,4 +458,4 @@ TEST_F(P4CReachability, testReachabilityEngineNegTable2) {
     ASSERT_TRUE(!checkResultingSTF(ids, "tmp"));
 }
 
-}  // namespace Test
+}  // namespace P4::Test

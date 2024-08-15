@@ -21,7 +21,7 @@
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace P4::P4Tools::P4Testgen::Pna {
 
 Metadata::Metadata(const TestBackendConfiguration &testBackendConfiguration)
     : TestFramework(testBackendConfiguration) {}
@@ -189,4 +189,4 @@ void Metadata::writeTestToFile(const TestSpec *testSpec, cstring selectedBranche
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace P4::P4Tools::P4Testgen::Pna

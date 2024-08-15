@@ -1,6 +1,6 @@
 #include "backends/p4tools/common/lib/trace_event.h"
 
-namespace P4Tools {
+namespace P4::P4Tools {
 
 std::ostream &operator<<(std::ostream &os, const TraceEvent &event) {
     event.print(os);
@@ -17,4 +17,4 @@ const TraceEvent *TraceEvent::evaluate(const Model & /*model*/, bool /*doComplet
     return this;
 }
 
-}  // namespace P4Tools
+}  // namespace P4::P4Tools

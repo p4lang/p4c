@@ -29,7 +29,7 @@
  * http://www.barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code
  */
 
-namespace NetHash {
+namespace P4::NetHash {
 
 /// Reflects/reverse n-bit number bit-by-bit. Note that it also solves as a slicing cast in the main
 /// calculation loop, where it extracts and reflect lowest byte. Written as templated function
@@ -248,4 +248,4 @@ uint64_t identity(const uint8_t *buf, size_t len) {
     return res;
 }
 
-}  // namespace NetHash
+}  // namespace P4::NetHash

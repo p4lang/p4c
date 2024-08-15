@@ -9,6 +9,8 @@
 #include "backends/p4tools/modules/testgen/testgen.h"
 #include "backends/p4tools/modules/testgen/toolname.h"
 
+using namespace P4;
+
 std::string updateErrorMsg(std::string errorMsg) {
     for (const std::string_view toReplace : {"Compiler", "compiler"}) {
         if (const auto pos = errorMsg.find(toReplace); pos != std::string::npos) {

@@ -9,7 +9,7 @@
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 
-namespace P4Tools::P4Testgen::Pna {
+namespace P4::P4Tools::P4Testgen::Pna {
 
 class SharedPnaProgramInfo : public ProgramInfo {
  private:
@@ -43,6 +43,6 @@ class SharedPnaProgramInfo : public ProgramInfo {
     DECLARE_TYPEINFO(SharedPnaProgramInfo, ProgramInfo);
 };
 
-}  // namespace P4Tools::P4Testgen::Pna
+}  // namespace P4::P4Tools::P4Testgen::Pna
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_SHARED_PROGRAM_INFO_H_ */

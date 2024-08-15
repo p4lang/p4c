@@ -28,7 +28,7 @@ limitations under the License.
 #include "error.h"
 #include "map.h"
 
-namespace Util {
+namespace P4::Util {
 
 // Command-line options processing
 class Options {
@@ -107,6 +107,6 @@ class Options {
     virtual void usage();
 };
 
-}  // namespace Util
+}  // namespace P4::Util
 
 #endif /* LIB_OPTIONS_H_ */

@@ -24,6 +24,8 @@ limitations under the License.
 #include <iostream>
 #endif
 
+namespace P4 {
+
 class hash_vector_base {
     struct internal;
     internal *info;
@@ -87,5 +89,7 @@ class hash_vector_base {
     // returns data index caller needs to clear (if < data.size()) or -1 if nothing removed
     void redo_hash();
 };
+
+}  // namespace P4
 
 #endif /* LIB_HASHVEC_H_ */

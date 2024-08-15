@@ -27,7 +27,7 @@ limitations under the License.
 
 using namespace P4;
 
-namespace Test {
+namespace P4::Test {
 
 using P4TestContext = P4CContextWithOptions<CompilerOptions>;
 
@@ -40,7 +40,7 @@ P4::ComputeDefUse *computeDefUse(std::string source, CompilerOptions::FrontendVe
 
     auto *program = P4::parseP4String(source, langVersion);
     CHECK_NULL(program);
-    BUG_CHECK(::errorCount() == 0, "Unexpected errors");
+    BUG_CHECK(::P4::errorCount() == 0, "Unexpected errors");
 
     auto &options = P4TestContext::get().options();
     const char *argv = "./gtestp4c";
@@ -413,4 +413,4 @@ TEST_F(P4CMidendDefUse, slice_1) {
     EXPECT_TRUE(check_def_use(uses, "inout ParsedHeaders h", 0, {0, 2, 3, 10, 11, 14}));
 }
 
-}  // namespace Test
+}  // namespace P4::Test

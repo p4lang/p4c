@@ -21,6 +21,8 @@ limitations under the License.
 #include "lib/indent.h"
 #include "lib/log.h"
 
+namespace P4 {
+
 using namespace DBPrint;
 using namespace IndentCtl;
 
@@ -116,3 +118,5 @@ void IR::ForInStatement::dbprint(std::ostream &out) const {
     out << " in " << collection << ") {" << indent << Log::endl
         << body << " }" << unindent << setprec(prec);
 }
+
+}  // namespace P4

@@ -78,7 +78,7 @@ class InlineActions : public PassManager {
 
 }  // namespace P4
 
-namespace P4_14 {
+namespace P4::P4_14 {
 
 /// Special inliner which works directly on P4-14 representation
 class InlineActions : public Transform {
@@ -108,6 +108,6 @@ class InlineActions : public Transform {
     }
 };
 
-}  // namespace P4_14
+}  // namespace P4::P4_14
 
 #endif /* FRONTENDS_P4_ACTIONSINLINING_H_ */

@@ -262,13 +262,14 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::ArrayIndex *e) {
         unsigned stackSize = stack->size->to<IR::Constant>()->asUnsigned();
         if (stack->elementType->is<IR::Type_HeaderUnion>()) {
             if (!e->right->is<IR::Constant>())
-                ::error(ErrorType::ERR_INVALID,
-                        "Target expects constant array indices for accessing header union stack "
-                        "elements, %1% is not a constant",
-                        e->right);
+                ::P4::error(
+                    ErrorType::ERR_INVALID,
+                    "Target expects constant array indices for accessing header union stack "
+                    "elements, %1% is not a constant",
+                    e->right);
             unsigned cst = e->right->to<IR::Constant>()->asUnsigned();
             if (cst >= stackSize)
-                ::error(ErrorType::ERR_OVERLIMIT, "Array index out of bound for %1%", e);
+                ::P4::error(ErrorType::ERR_OVERLIMIT, "Array index out of bound for %1%", e);
             if (auto mem = e->left->to<IR::Member>()) {
                 auto uName = stackMap[mem->member.name];
                 BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1", e);

@@ -68,7 +68,7 @@ const IR::Node *DoSimplifyKey::postorder(IR::KeyElement *element) {
 }
 
 const IR::Node *DoSimplifyKey::postorder(IR::P4Table *table) {
-    auto insertions = ::get(toInsert, getOriginal<IR::P4Table>());
+    auto insertions = ::P4::get(toInsert, getOriginal<IR::P4Table>());
     if (insertions == nullptr) return table;
 
     auto result = new IR::IndexedVector<IR::Declaration>();

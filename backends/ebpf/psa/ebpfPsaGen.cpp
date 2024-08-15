@@ -27,7 +27,7 @@ limitations under the License.
 #include "externs/ebpfPsaTableImplementation.h"
 #include "xdpHelpProgram.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 class PSAErrorCodesGen : public Inspector {
     CodeBuilder *builder;
@@ -51,8 +51,8 @@ class PSAErrorCodesGen : public Inspector {
 
             // Type ParserError_t is u8, which can have values from 0 to 255.
             if (id > 255) {
-                ::error(ErrorType::ERR_OVERLIMIT, "%1%: Reached maximum number of possible errors",
-                        decl);
+                ::P4::error(ErrorType::ERR_OVERLIMIT,
+                            "%1%: Reached maximum number of possible errors", decl);
             }
         }
         builder->newline();
@@ -719,7 +719,7 @@ bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock *block) {
     } else if (type == TC_TRAFFIC_MANAGER) {
         pipeline = new TCTrafficManagerForXDP(name, options, refmap, typemap);
     } else {
-        ::error(ErrorType::ERR_INVALID, "unknown type of pipeline");
+        ::P4::error(ErrorType::ERR_INVALID, "unknown type of pipeline");
         return false;
     }
 
@@ -757,8 +757,8 @@ bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock *prsr) {
     }
 
     if (pl->size() != numOfParams) {
-        ::error(ErrorType::ERR_EXPECTED, "Expected parser to have exactly %1% parameters",
-                numOfParams);
+        ::P4::error(ErrorType::ERR_EXPECTED, "Expected parser to have exactly %1% parameters",
+                    numOfParams);
         return false;
     }
 
@@ -901,7 +901,8 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock *instance) {
         auto met = new EBPFMeterPSA(program, name, di, control->codeGen);
         control->meters.emplace(name, met);
     } else {
-        ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control", instance);
+        ::P4::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
+                    instance);
     }
 
     return false;
@@ -947,8 +948,8 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::Declaration_Instance *di) {
 
         if (typeName == "Digest") {
             if (pipelineType == TC_EGRESS || pipelineType == XDP_EGRESS) {
-                ::error(ErrorType::ERR_UNEXPECTED,
-                        "Digests are only supported at ingress, got an instance at egress");
+                ::P4::error(ErrorType::ERR_UNEXPECTED,
+                            "Digests are only supported at ingress, got an instance at egress");
             }
             cstring instance = EBPFObject::externalName(di);
             auto digest = new EBPFDigestPSA(program, di);
@@ -959,4 +960,4 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::Declaration_Instance *di) {
     return false;
 }
 
-}  // namespace EBPF
+}  // namespace P4::EBPF

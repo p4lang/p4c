@@ -26,7 +26,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 using namespace P4::literals;
 
@@ -294,4 +294,4 @@ std::ostream &operator<<(std::ostream &os, Bmv2HashAlgorithm algo) {
     return os << "INVALID [" << int(algo) << "]";
 }
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2

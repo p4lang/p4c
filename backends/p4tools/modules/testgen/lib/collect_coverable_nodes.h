@@ -9,7 +9,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 /// A cache of already computed nodes to avoid superfluous computation.
 using NodeCache = std::map<const IR::Node *, P4::Coverage::CoverageSet>;
@@ -53,6 +53,6 @@ class CoverableNodesScanner : public Inspector {
     const P4::Coverage::CoverageSet &getCoverableNodes();
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen
 
 #endif /*BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_COLLECT_COVERABLE_NODES_H_*/

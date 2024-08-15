@@ -3,7 +3,7 @@
 #include "frontends/common/parser_options.h"
 #include "lib/exename.h"
 
-namespace DPDK {
+namespace P4::DPDK {
 
 using namespace P4::literals;
 
@@ -28,4 +28,4 @@ const char *DpdkOptions::getIncludePath() const {
     return path.c_str();
 }
 
-}  // namespace DPDK
+}  // namespace P4::DPDK

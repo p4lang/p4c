@@ -30,6 +30,8 @@ limitations under the License.
 #include "lib/source_file.h"
 #include "type.h"
 
+namespace P4 {
+
 class IrClass;
 class IrField;
 
@@ -52,8 +54,8 @@ class IrNamespace {
     cstring name;
     static IrNamespace *get(IrNamespace *, cstring);
     static void add_class(IrClass *);
-    IrNamespace *lookupChild(cstring name) const { return ::get(children, name); }
-    IrClass *lookupClass(cstring name) const { return ::get(classes, name); }
+    IrNamespace *lookupChild(cstring name) const { return ::P4::get(children, name); }
+    IrClass *lookupClass(cstring name) const { return ::P4::get(classes, name); }
     bool lookupOther(cstring name) const { return othertypes.count(name) > 0; }
     void addOther(cstring name) { othertypes.insert(name); }
     cstring qualified_name(const IrNamespace *ctxt = nullptr) const;
@@ -389,5 +391,7 @@ inline std::ostream &operator<<(std::ostream &out, const LineDirective &l) {
     }
     return out;
 }
+
+}  // namespace P4
 
 #endif /* TOOLS_IR_GENERATOR_IRCLASS_H_ */

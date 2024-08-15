@@ -19,10 +19,11 @@ limitations under the License.
 
 #include <cstddef>
 
+#define ALLOC_TRACE_DEPTH 5
+
 void setup_gc_logging();
 size_t gc_mem_inuse(size_t *max = 0);  // trigger GC, return inuse after
 
-#define ALLOC_TRACE_DEPTH 5
 struct alloc_trace_cb_t {
     void (*fn)(void *, void **, size_t);
     void *arg;

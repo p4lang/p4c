@@ -31,8 +31,8 @@ void DiscoverActionsInlining::postorder(const IR::MethodCallStatement *mcs) {
     auto caller = findContext<IR::P4Action>();
     if (caller == nullptr) {
         if (findContext<IR::P4Parser>() != nullptr) {
-            ::error(ErrorType::ERR_UNSUPPORTED, "%1%: action invocation in parser not allowed",
-                    mcs);
+            ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1%: action invocation in parser not allowed",
+                        mcs);
         } else if (findContext<IR::P4Control>() == nullptr) {
             BUG("%1%: unexpected action invocation", mcs);
         }
@@ -101,8 +101,8 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
             // This works because there can be no side-effects in the evaluation of this
             // argument.
             if (!argument) {
-                ::error(ErrorType::ERR_UNINITIALIZED, "%1%: No argument supplied for %2%",
-                        statement, param);
+                ::P4::error(ErrorType::ERR_UNINITIALIZED, "%1%: No argument supplied for %2%",
+                            statement, param);
                 continue;
             }
             subst.add(param, argument);
@@ -124,7 +124,7 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
     SubstituteParameters sp(nullptr, &subst, &tvs);
     sp.setCalledBy(this);
     auto clone = callee->apply(sp, getContext());
-    if (::errorCount() > 0) return statement;
+    if (::P4::errorCount() > 0) return statement;
     CHECK_NULL(clone);
     BUG_CHECK(clone->is<IR::P4Action>(), "%1%: not an action", clone);
     auto actclone = clone->to<IR::P4Action>();
@@ -134,7 +134,7 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
     for (auto param : callee->parameters->parameters) {
         auto left = substitution.lookup(param);
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
-            cstring newName = ::get(paramRename, param);
+            cstring newName = ::P4::get(paramRename, param);
             auto right = new IR::PathExpression(newName);
             auto copyout = new IR::AssignmentStatement(left->expression, right);
             body.push_back(copyout);

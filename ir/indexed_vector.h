@@ -26,9 +26,11 @@ limitations under the License.
 #include "lib/safe_vector.h"
 #include "lib/string_map.h"
 
+namespace P4 {
 class JSONLoader;
+}  // namespace P4
 
-namespace IR {
+namespace P4::IR {
 
 /**
  * A Vector which holds objects which are instances of IDeclaration, and keeps
@@ -47,7 +49,7 @@ class IndexedVector : public Vector<T> {
         auto [it, inserted] = declarations.emplace(name, decl);
         if (!inserted) {
             invalid = true;
-            ::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicates declaration %2%", a, it->second);
+            ::P4::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicates declaration %2%", a, it->second);
         }
     }
     void removeFromMap(const T *a) {
@@ -223,6 +225,6 @@ class IndexedVector : public Vector<T> {
                                         Vector<T>);
 };
 
-}  // namespace IR
+}  // namespace P4::IR
 
 #endif /* IR_INDEXED_VECTOR_H_ */

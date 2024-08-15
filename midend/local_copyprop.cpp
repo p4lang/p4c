@@ -72,7 +72,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
      * of the block, so it only removes those vars declared in the block */
     DoLocalCopyPropagation &self;
     const IR::Node *preorder(IR::Declaration_Variable *var) override {
-        if (auto local = ::getref(self.available, var->name)) {
+        if (auto local = ::P4::getref(self.available, var->name)) {
             if (local->local && !local->live) {
                 LOG3("  removing dead local " << var->name);
                 return nullptr;
@@ -82,7 +82,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
     }
     const IR::Statement *postorder(IR::AssignmentStatement *as) override {
         if (auto dest = lvalue_out(as->left)->to<IR::PathExpression>()) {
-            if (auto var = ::getref(self.available, dest->path->name)) {
+            if (auto var = ::P4::getref(self.available, dest->path->name)) {
                 if (var->local && !var->live) {
                     LOG3("  removing dead assignment to " << dest->path->name);
                     if (self.hasSideEffects(as->right)) return makeSideEffectStatement(as->right);
@@ -184,7 +184,7 @@ void DoLocalCopyPropagation::flow_merge(Visitor &a_) {
     LOG8("flow_merge " << a.uid << " into " << uid);
     unreachable &= a.unreachable;
     for (auto &var : available) {
-        if (auto merge = ::getref(a.available, var.first)) {
+        if (auto merge = ::P4::getref(a.available, var.first)) {
             if (merge->val != var.second.val) {
                 if (var.second.val) {
                     LOG4("    dropping " << var.first << " = " << var.second.val
@@ -336,7 +336,7 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name,
         }
         return nullptr;
     }
-    if (auto var = ::getref(available, name)) {
+    if (auto var = ::P4::getref(available, name)) {
         if (var->val) {
             if (policy(getChildContext(), var->val)) {
                 LOG3("  propagating value for " << name << ": " << var->val);
@@ -532,7 +532,7 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                     // to provide per-extern flow info to this (and other) frontend passes.
                     LOG3("extern method call " << name);
                     for (auto *n : em->mayCall()) {
-                        if (auto *method = ::getref(methods, obj + '.' + n->getName())) {
+                        if (auto *method = ::P4::getref(methods, obj + '.' + n->getName())) {
                             LOG4("  might call " << obj << '.' << n->getName());
                             apply_function(method);
                         }
@@ -625,7 +625,7 @@ void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::MethodCallExpressi
                     // to provide per-extern flow info to this (and other) frontend passes.
                     LOG3("loop prepass extern method call " << name);
                     for (auto *n : em->mayCall()) {
-                        if (auto *method = ::getref(self.methods, obj + '.' + n->getName())) {
+                        if (auto *method = ::P4::getref(self.methods, obj + '.' + n->getName())) {
                             LOG4("  might call " << obj << '.' << n->getName());
                             apply_function(method);
                         }

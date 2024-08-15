@@ -19,6 +19,8 @@ limitations under the License.
 
 #include <iostream>
 
+namespace P4 {
+
 template <class T>
 class RangeIter {
     int incr;
@@ -60,5 +62,7 @@ std::ostream &operator<<(std::ostream &out, const RangeIter<T> &r) {
     if (r.cur + r.incr != r.fin) out << ".." << (r.fin - r.incr);
     return out;
 }
+
+}  // namespace P4
 
 #endif /* LIB_RANGE_H_ */

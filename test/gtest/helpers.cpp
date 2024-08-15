@@ -29,7 +29,7 @@ limitations under the License.
 #include "frontends/p4/frontend.h"
 #include "frontends/p4/parseAnnotations.h"
 
-namespace TestDetail {
+namespace P4::TestDetail {
 
 std::string makeP4Source(const char *file, unsigned line, P4Headers headers,
                          const char *rawSource) {
@@ -85,7 +85,9 @@ std::string makeP4Source(const char *file, unsigned line, const char *rawSource)
     return makeP4Source(file, line, P4Headers::NONE, rawSource);
 }
 
-}  // namespace TestDetail
+}  // namespace P4::TestDetail
+
+namespace P4 {
 
 /* static */ P4CTestEnvironment *P4CTestEnvironment::get() {
     static P4CTestEnvironment *instance = new P4CTestEnvironment;
@@ -152,7 +154,9 @@ std::filesystem::path P4CTestEnvironment::getProjectRoot() {
     return std::filesystem::path(__FILE__).parent_path().parent_path().parent_path();
 }
 
-namespace Test {
+}  // namespace P4
+
+namespace P4::Test {
 
 /* static */ std::optional<FrontendTestCase> FrontendTestCase::create(
     const std::string &source,
@@ -168,17 +172,17 @@ namespace Test {
         std::cerr << "Couldn't parse test case source" << std::endl;
         return std::nullopt;
     }
-    if (::diagnosticCount() > 0) {
-        std::cerr << "Encountered " << ::diagnosticCount() << " errors while parsing test case"
+    if (::P4::diagnosticCount() > 0) {
+        std::cerr << "Encountered " << ::P4::diagnosticCount() << " errors while parsing test case"
                   << std::endl;
         return std::nullopt;
     }
 
     P4::P4COptionPragmaParser optionsPragmaParser;
     program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
-    if (::errorCount() > 0) {
-        std::cerr << "Encountered " << ::errorCount() << " errors while collecting options pragmas"
-                  << std::endl;
+    if (::P4::errorCount() > 0) {
+        std::cerr << "Encountered " << ::P4::errorCount()
+                  << " errors while collecting options pragmas" << std::endl;
         return std::nullopt;
     }
 
@@ -189,14 +193,14 @@ namespace Test {
         std::cerr << "Frontend failed" << std::endl;
         return std::nullopt;
     }
-    if (::errorCount() > 0) {
-        std::cerr << "Encountered " << ::errorCount() << " errors while executing frontend"
+    if (::P4::errorCount() > 0) {
+        std::cerr << "Encountered " << ::P4::errorCount() << " errors while executing frontend"
                   << std::endl;
         return std::nullopt;
     }
 
-    if (::errorCount() > 0) {
-        std::cerr << "Encountered " << ::errorCount()
+    if (::P4::errorCount() > 0) {
+        std::cerr << "Encountered " << ::P4::errorCount()
                   << " errors while parsing back-end annotations" << std::endl;
         return std::nullopt;
     }
@@ -204,4 +208,4 @@ namespace Test {
     return FrontendTestCase{program};
 }
 
-}  // namespace Test
+}  // namespace P4::Test

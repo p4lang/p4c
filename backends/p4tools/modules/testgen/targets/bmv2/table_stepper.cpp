@@ -32,7 +32,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools::P4Testgen::Bmv2 {
+namespace P4::P4Tools::P4Testgen::Bmv2 {
 
 using namespace P4::literals;
 
@@ -365,7 +365,7 @@ void Bmv2V1ModelTableStepper::checkTargetProperties(
         properties.tableIsTainted = properties.tableIsTainted || keyIsTainted;
         // If the key expression is tainted, do not bother resolving the remaining keys.
         if (properties.tableIsTainted) {
-            ::warning("Key %1% of table %2% is tainted.", keyElement->expression, table);
+            ::P4::warning("Key %1% of table %2% is tainted.", keyElement->expression, table);
             return;
         }
     }
@@ -398,7 +398,7 @@ void Bmv2V1ModelTableStepper::evalTargetTable(
             return;
         }
         if (!properties.defaultIsImmutable) {
-            ::warning(
+            ::P4::warning(
                 "Table %1%: Overriding default actions not supported for test back end %2%. "
                 "Choosing default action",
                 properties.tableName, testBackend);
@@ -424,7 +424,7 @@ void Bmv2V1ModelTableStepper::evalTargetTable(
                 evalTableActionSelector(tableActionList);
             } else {
                 // We can only generate profile entries for PTF and Protobuf tests.
-                ::warning(
+                ::P4::warning(
                     "Action selector control plane entries are not implemented. Using default "
                     "action.");
             }
@@ -437,7 +437,7 @@ void Bmv2V1ModelTableStepper::evalTargetTable(
                 evalTableActionProfile(tableActionList);
             } else {
                 // We can only generate profile entries for PTF and Protobuf tests.
-                ::warning(
+                ::P4::warning(
                     "Action profile control plane entries are not implemented. Using default "
                     "action.");
             }
@@ -465,4 +465,4 @@ Bmv2V1ModelTableStepper::Bmv2V1ModelTableStepper(Bmv2V1ModelExprStepper *stepper
                                                  const IR::P4Table *table)
     : TableStepper(stepper, table) {}
 
-}  // namespace P4Tools::P4Testgen::Bmv2
+}  // namespace P4::P4Tools::P4Testgen::Bmv2

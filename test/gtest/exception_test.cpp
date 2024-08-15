@@ -21,7 +21,7 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
-namespace Util {
+namespace P4::Util {
 
 TEST(UtilException, Messages) {
     // Check that exception message formatting works as expected.
@@ -45,4 +45,4 @@ TEST(UtilException, Messages) {
     }
 }
 
-}  // namespace Util
+}  // namespace P4::Util

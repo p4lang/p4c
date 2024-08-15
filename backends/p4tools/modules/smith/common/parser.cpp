@@ -21,7 +21,7 @@
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools::P4Smith {
+namespace P4::P4Tools::P4Smith {
 
 IR::MethodCallStatement *ParserGenerator::genHdrExtract(IR::Member *pkt_call, IR::Expression *mem) {
     auto *args = new IR::Vector<IR::Argument>();
@@ -268,4 +268,4 @@ void ParserGenerator::buildParserTree() {
     state_list.push_back(ParserGenerator::genHdrStates());
 }
 
-}  // namespace P4Tools::P4Smith
+}  // namespace P4::P4Tools::P4Smith

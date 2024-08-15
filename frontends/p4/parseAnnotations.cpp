@@ -57,7 +57,7 @@ bool ParseAnnotations::parseSkip(IR::Annotation *) { return false; }
 
 bool ParseAnnotations::parseEmpty(IR::Annotation *annotation) {
     if (!annotation->body.empty()) {
-        ::error(ErrorType::ERR_OVERLIMIT, "%1% should not have any arguments", annotation);
+        ::P4::error(ErrorType::ERR_OVERLIMIT, "%1% should not have any arguments", annotation);
         return false;
     }
 

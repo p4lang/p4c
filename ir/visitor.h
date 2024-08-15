@@ -41,6 +41,8 @@ limitations under the License.
 #include "lib/null.h"
 #include "lib/source_file.h"
 
+namespace P4 {
+
 // declare this outside of Visitor so it can be forward declared in node.h
 struct Visitor_Context {
     // We maintain a linked list of Context structures on the stack
@@ -297,7 +299,7 @@ class Visitor {
     static bool warning_enabled(const Visitor *visitor, int warning_kind);
     template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
     void warn(const int kind, const char *format, const T *node, Args &&...args) {
-        if (warning_enabled(kind)) ::warning(kind, format, node, std::forward<Args>(args)...);
+        if (warning_enabled(kind)) ::P4::warning(kind, format, node, std::forward<Args>(args)...);
     }
 
     /// The const ref variant of the above
@@ -305,7 +307,7 @@ class Visitor {
               typename = std::enable_if_t<Util::has_SourceInfo_v<T> && !std::is_pointer_v<T>>,
               class... Args>
     void warn(const int kind, const char *format, const T &node, Args &&...args) {
-        if (warning_enabled(kind)) ::warning(kind, format, node, std::forward<Args>(args)...);
+        if (warning_enabled(kind)) ::P4::warning(kind, format, node, std::forward<Args>(args)...);
     }
 
  protected:
@@ -836,5 +838,7 @@ const IR::Node *transformAllMatching(const IR::Node *root, Func &&function) {
     };
     return root->apply(NodeVisitor(std::forward<Func>(function)));
 }
+
+}  // namespace P4
 
 #endif /* IR_VISITOR_H_ */

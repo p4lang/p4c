@@ -14,7 +14,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 class TestgenTarget : public CompilerTarget {
  public:
@@ -67,6 +67,6 @@ class TestgenTarget : public CompilerTarget {
                                           const IR::P4Program *program) const override;
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_TARGET_H_ */

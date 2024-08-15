@@ -7,7 +7,7 @@
 /// Variables internal to P4Tools. These variables do not exist in the P4
 /// program itself, but are generated and added to the environment by the P4Tools tooling. These
 /// variables are also used for SMT solvers as symbolic variables.
-namespace P4Tools {
+namespace P4::P4Tools {
 
 using namespace P4::literals;
 
@@ -52,6 +52,6 @@ IR::StateVariable convertReference(const IR::Expression *ref);
 
 }  // namespace ToolsVariables
 
-}  // namespace P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_VARIABLES_H_ */

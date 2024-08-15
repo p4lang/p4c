@@ -36,11 +36,13 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "midend.h"
 
+using namespace P4;
+
 void compile(EbpfOptions &options) {
     auto hook = options.getDebugHook();
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     if (isv1) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "This compiler only handles P4-16");
+        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "This compiler only handles P4-16");
         return;
     }
     const IR::P4Program *program = nullptr;
@@ -48,21 +50,21 @@ void compile(EbpfOptions &options) {
     if (options.loadIRFromJson) {
         std::filebuf fb;
         if (fb.open(options.file, std::ios::in) == nullptr) {
-            ::error(ErrorType::ERR_IO, "%s: No such file or directory.", options.file);
+            ::P4::error(ErrorType::ERR_IO, "%s: No such file or directory.", options.file);
             return;
         }
 
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
         if (jsonFileLoader.json == nullptr) {
-            ::error(ErrorType::ERR_IO, "%s: Not valid input file", options.file);
+            ::P4::error(ErrorType::ERR_IO, "%s: Not valid input file", options.file);
             return;
         }
         program = new IR::P4Program(jsonFileLoader);
         fb.close();
     } else {
         program = P4::parseP4File(options);
-        if (::errorCount() > 0) return;
+        if (::P4::errorCount() > 0) return;
 
         P4::P4COptionPragmaParser optionsPragmaParser;
         program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
@@ -70,12 +72,12 @@ void compile(EbpfOptions &options) {
         P4::FrontEnd frontend;
         frontend.addDebugHook(hook);
         program = frontend.run(options, program);
-        if (::errorCount() > 0) return;
+        if (::P4::errorCount() > 0) return;
     }
 
     if (!options.arch.isNullOrEmpty() && options.arch != "filter") {
         P4::serializeP4RuntimeIfRequired(program, options);
-        if (::errorCount() > 0) return;
+        if (::P4::errorCount() > 0) return;
     }
 
     EBPF::MidEnd midend;
@@ -83,7 +85,7 @@ void compile(EbpfOptions &options) {
     auto toplevel = midend.run(options, program);
     if (!options.dumpJsonFile.empty())
         JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
-    if (::errorCount() > 0) return;
+    if (::P4::errorCount() > 0) return;
 
     EBPF::run_ebpf_backend(options, toplevel, &midend.refMap, &midend.typeMap);
 }
@@ -99,7 +101,7 @@ int main(int argc, char *const argv[]) {
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false) options.setInputFile();
     }
-    if (::errorCount() > 0) exit(1);
+    if (::P4::errorCount() > 0) exit(1);
 
     options.calculateXDP2TCMode();
     try {
@@ -110,5 +112,5 @@ int main(int argc, char *const argv[]) {
     }
 
     if (Log::verbose()) std::cerr << "Done." << std::endl;
-    return ::errorCount() > 0;
+    return ::P4::errorCount() > 0;
 }

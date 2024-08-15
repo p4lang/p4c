@@ -19,7 +19,7 @@ limitations under the License.
 #include <fstream>
 #include <iostream>
 
-namespace DPDK {
+namespace P4::DPDK {
 
 using namespace P4::literals;
 
@@ -54,7 +54,7 @@ std::optional<cstring> TdiBfrtConf::findPipeName(const IR::P4Program *prog,
             main = decl->checkedTo<IR::Declaration_Instance>();
         }
         if (main == nullptr) {
-            ::error(ErrorType::ERR_NOT_FOUND, "Program does not contain a `main` module");
+            ::P4::error(ErrorType::ERR_NOT_FOUND, "Program does not contain a `main` module");
             return std::nullopt;
         }
         // We then get the list of constructor and type names in this call and return the first.
@@ -63,14 +63,14 @@ std::optional<cstring> TdiBfrtConf::findPipeName(const IR::P4Program *prog,
         BUG_CHECK(!pipeNames.empty(), "Program main does not have any pipe arguments.");
         return pipeNames.at(0);
     }
-    ::error("Unsupported target %1% for TDI Builder config generation.", options.arch);
+    ::P4::error("Unsupported target %1% for TDI Builder config generation.", options.arch);
     return std::nullopt;
 }
 
 void TdiBfrtConf::generate(const IR::P4Program *prog, DPDK::DpdkOptions &options) {
     if (options.outputFile.empty()) {
-        ::error(ErrorType::ERR_UNEXPECTED,
-                "No output file provided. Unable to generate correct TDI builder config file.");
+        ::P4::error(ErrorType::ERR_UNEXPECTED,
+                    "No output file provided. Unable to generate correct TDI builder config file.");
         return;
     }
     auto inputFile = std::filesystem::absolute(options.file);
@@ -81,14 +81,14 @@ void TdiBfrtConf::generate(const IR::P4Program *prog, DPDK::DpdkOptions &options
 
     if (options.bfRtSchema.empty()) {
         options.bfRtSchema = (outDir / programName).replace_filename("json");
-        ::warning(
+        ::P4::warning(
             "BF-Runtime Schema file name not provided, but is required for the TDI builder "
             "configuration. Generating file %1%",
             options.bfRtSchema);
     }
     if (options.ctxtFile.empty()) {
         options.ctxtFile = outDir / "context.json";
-        ::warning(
+        ::P4::warning(
             "DPDK context file name not provided, but is required for the TDI builder "
             "configuration. Generating file %1%",
             options.ctxtFile);
@@ -150,9 +150,9 @@ void TdiBfrtConf::generate(const IR::P4Program *prog, DPDK::DpdkOptions &options
     if (out.is_open()) {
         out << ss;
     } else {
-        ::error(ErrorType::ERR_IO, "Could not open file: %1%", tdiFile);
+        ::P4::error(ErrorType::ERR_IO, "Could not open file: %1%", tdiFile);
         return;
     }
     out.close();
 }
-}  // namespace DPDK
+}  // namespace P4::DPDK

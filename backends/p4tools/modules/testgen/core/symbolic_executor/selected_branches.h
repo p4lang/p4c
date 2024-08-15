@@ -12,7 +12,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4::P4Tools::P4Testgen {
 
 /// Explores one path described by a list of branches.
 class SelectedBranches : public SymbolicExecutor {
@@ -36,6 +36,6 @@ class SelectedBranches : public SymbolicExecutor {
     std::list<uint64_t> selectedBranches;
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4::P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_SELECTED_BRANCHES_H_ */

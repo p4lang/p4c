@@ -47,6 +47,8 @@ limitations under the License.
 #include "log.h"
 #include "n4.h"
 
+using namespace P4;
+
 // One can disable the GC, e.g., to run under Valgrind, by editing config.h or toggling
 // -DENABLE_GC=OFF in CMake.
 #if HAVE_LIBGC

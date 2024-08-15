@@ -91,7 +91,7 @@ bool FindGlobalActionUses::preorder(const IR::PathExpression *path) {
 }
 
 const IR::Node *LocalizeActions::postorder(IR::P4Control *control) {
-    auto actions = ::get(repl->repl, getOriginal<IR::P4Control>());
+    auto actions = ::P4::get(repl->repl, getOriginal<IR::P4Control>());
     if (actions == nullptr) return control;
     IR::IndexedVector<IR::Declaration> newDecls;
     for (auto pair : *actions) {
@@ -205,7 +205,7 @@ const IR::Node *DuplicateActions::postorder(IR::P4Control *control) {
 }
 
 const IR::Node *DuplicateActions::postorder(IR::PathExpression *expression) {
-    auto replacement = ::get(repl->repl, getOriginal<IR::PathExpression>());
+    auto replacement = ::P4::get(repl->repl, getOriginal<IR::PathExpression>());
     if (replacement != nullptr) {
         LOG1("Rewriting " << dbp(expression) << " to " << dbp(replacement));
         expression = new IR::PathExpression(

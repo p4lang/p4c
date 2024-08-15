@@ -73,9 +73,8 @@ struct OptionalConst {
     explicit OptionalConst(bool isConst) : isConst(isConst) { }
     bool isConst = false;
 };
-}  // namespace P4
 
-inline std::ostream& operator<<(std::ostream& out, const P4::OptionalConst& oc) {
+inline std::ostream& operator<<(std::ostream& out, const OptionalConst& oc) {
     out << "OptionalConst(" << oc.isConst << ')';
     return out;
 }
@@ -86,6 +85,8 @@ inline std::ostream& operator<<(std::ostream& out, const P4::OptionalConst& oc) 
 // the symbol type we want is itself const, since duplicate const qualifiers are
 // forbidden in C++. We avoid the problem using a typedef.
 typedef const IR::Type ConstType;
+
+}  // namespace P4
 
 #ifndef YYDEBUG
 #define YYDEBUG 1
@@ -114,12 +115,13 @@ class Token {
             : type(type), text(text), unparsedConstant(unparsedConstant) { }
 };
 
-} // namespace P4
-
-inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
+inline std::ostream& operator<<(std::ostream& out, const Token& t) {
     out << t.text;
     return out;
 }
+
+}  // namespace P4
+
 }
 
 %param { P4::P4ParserDriver& driver }
@@ -133,6 +135,8 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 #include "frontends/parsers/parserDriver.h"
 #include "frontends/parsers/p4/p4lexer.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
+
+using namespace P4;
 
 #define YYLLOC_DEFAULT(Cur, Rhs, N)                                             \
     ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                          \
@@ -1701,7 +1705,11 @@ r_angle : ">" | R_ANGLE_SHIFT ;
 
 %%
 
-void P4::P4Parser::error(const Util::SourceInfo& location,
-                         const std::string& message) {
+namespace P4 {
+
+void P4Parser::error(const Util::SourceInfo& location,
+                     const std::string& message) {
     driver.onParseError(location, message);
 }
+
+}  // namespace P4

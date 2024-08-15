@@ -27,7 +27,7 @@ const IR::Node *DoConvertEnums::postorder(IR::Type_Name *type) {
         // This will be resolved by the caller.
         return type;
     auto enumType = canontype->to<IR::Type_Enum>();
-    auto r = ::get(repr, enumType);
+    auto r = ::P4::get(repr, enumType);
     if (r == nullptr) return type;
     return r->type;
 }
@@ -38,7 +38,7 @@ const IR::Node *DoConvertEnums::postorder(IR::Member *expression) {
     if (!ei) return expression;
     if (ei->is<SimpleEnumInstance>()) {
         auto type = ei->type->to<IR::Type_Enum>();
-        auto r = ::get(repr, type);
+        auto r = ::P4::get(repr, type);
         if (r == nullptr) return expression;
         unsigned value = r->get(ei->name.name);
         unsigned encoded_value = policy->encoding(type, value);

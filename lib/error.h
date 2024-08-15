@@ -28,6 +28,8 @@ limitations under the License.
 // This should eventually be turned to 0 when all the code is converted
 #define LEGACY 1
 
+namespace P4 {
+
 /// @return the number of errors encountered so far in the current compilation
 /// context.
 inline unsigned errorCount() { return BaseCompileContext::get().errorReporter().getErrorCount(); }
@@ -129,7 +131,7 @@ void warning(const int kind, const char *format, const T *node, Args &&...args) 
 template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T> && !std::is_pointer_v<T>>,
           class... Args>
 void warning(const int kind, const char *format, const T &node, Args &&...args) {
-    ::warning(kind, format, &node, std::forward<Args>(args)...);
+    ::P4::warning(kind, format, &node, std::forward<Args>(args)...);
 }
 
 /// Report warnings of type kind, for messages that do not have a node.
@@ -153,7 +155,7 @@ void info(const int kind, const char *format, const T *node, Args &&...args) {
 template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T> && !std::is_pointer_v<T>>,
           class... Args>
 void info(const int kind, const char *format, const T &node, Args &&...args) {
-    ::info(kind, format, &node, std::forward<Args>(args)...);
+    ::P4::info(kind, format, &node, std::forward<Args>(args)...);
 }
 
 /// Report info messages of type kind, for messages that do not have a node.
@@ -175,7 +177,7 @@ void info(const int kind, const char *format, Args &&...args) {
  *                        generally use only lower-case letters and underscores
  *                        so the diagnostic name is a valid P4 identifier.
  * @param format  A format for the diagnostic message, using the same style as
- *                '::warning' or '::error'.
+ *                '::P4::warning' or '::P4::error'.
  * @param suffix  A message that is appended at the end.
  */
 template <typename... Args>
@@ -186,5 +188,7 @@ inline void diagnose(DiagnosticAction defaultAction, const char *diagnosticName,
     context.errorReporter().diagnose(action, diagnosticName, format, suffix,
                                      std::forward<Args>(args)...);
 }
+
+}  // namespace P4
 
 #endif /* LIB_ERROR_H_ */

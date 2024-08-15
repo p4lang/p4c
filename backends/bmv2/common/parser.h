@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/json.h"
 
-namespace BMV2 {
+namespace P4::BMV2 {
 
 class JsonObjects;
 
@@ -54,6 +54,6 @@ class ParserConverter : public Inspector {
     }
 };
 
-}  // namespace BMV2
+}  // namespace P4::BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_PARSER_H_ */

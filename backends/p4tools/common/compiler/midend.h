@@ -10,7 +10,7 @@
 #include "midend/convertEnums.h"
 #include "midend/convertErrors.h"
 
-namespace P4Tools {
+namespace P4::P4Tools {
 
 /// Implements a generic mid end for all targets. If needed, targets can customize this to
 /// implement things like targets-specific conversion of P4 enums to bit<n>.
@@ -67,6 +67,6 @@ class MidEnd : public PassManager {
     void addDefaultPasses();
 };
 
-}  // namespace P4Tools
+}  // namespace P4::P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_MIDEND_H_ */

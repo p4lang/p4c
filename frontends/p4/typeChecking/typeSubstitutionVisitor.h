@@ -93,4 +93,5 @@ class TypeSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
 };
 
 }  // namespace P4
+
 #endif /* TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_ */

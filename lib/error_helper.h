@@ -24,6 +24,7 @@ limitations under the License.
 #include "lib/source_file.h"
 #include "lib/stringify.h"
 
+namespace P4 {
 namespace priv {
 
 // All these methods return std::string because this is the native format of boost::format
@@ -89,20 +90,22 @@ auto error_helper(boost::format &f, ErrorMessage out, const T &t,
 template <class... Args>
 ErrorMessage error_helper(boost::format &f, Args &&...args) {
     ErrorMessage msg;
-    return ::priv::error_helper(f, msg, std::forward<Args>(args)...);
+    return priv::error_helper(f, msg, std::forward<Args>(args)...);
 }
 
 // Invoked from ErrorReporter
 template <class... Args>
 ErrorMessage error_helper(boost::format &f, ErrorMessage msg, Args &&...args) {
-    return ::priv::error_helper(f, std::move(msg), std::forward<Args>(args)...);
+    return priv::error_helper(f, std::move(msg), std::forward<Args>(args)...);
 }
 
 // This overload exists for backwards compatibility
 template <class... Args>
 ErrorMessage error_helper(boost::format &f, const std::string &prefix, const Util::SourceInfo &info,
                           const std::string &suffix, Args &&...args) {
-    return ::priv::error_helper(f, ErrorMessage(prefix, info, suffix), std::forward<Args>(args)...);
+    return priv::error_helper(f, ErrorMessage(prefix, info, suffix), std::forward<Args>(args)...);
 }
+
+}  // namespace P4
 
 #endif /* LIB_ERROR_HELPER_H_ */

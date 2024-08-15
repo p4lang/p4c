@@ -33,6 +33,8 @@ limitations under the License.
 #include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
 
+namespace P4 {
+
 class JSONLoader {
     template <typename T>
     class has_fromJSON {
@@ -204,21 +206,21 @@ class JSONLoader {
     template <typename T, typename U>
     void unpack_json(std::pair<T, U> &v) {
         const JsonObject *obj = json->checkedTo<JsonObject>();
-        load(::get(obj, "first"), v.first);
-        load(::get(obj, "second"), v.second);
+        load(::P4::get(obj, "first"), v.first);
+        load(::P4::get(obj, "second"), v.second);
     }
 
     template <typename T>
     void unpack_json(std::optional<T> &v) {
         const JsonObject *obj = json->checkedTo<JsonObject>();
         bool isValid = false;
-        load(::get(obj, "valid"), isValid);
+        load(::P4::get(obj, "valid"), isValid);
         if (!isValid) {
             v = std::nullopt;
             return;
         }
         T value;
-        load(::get(obj, "value"), value), v = std::move(value);
+        load(::P4::get(obj, "value"), value), v = std::move(value);
     }
 
     void unpack_json(bool &v) { v = json->as<JsonBoolean>(); }
@@ -384,5 +386,7 @@ template <class T, template <class K, class V, class COMP, class ALLOC> class MA
 IR::NameMap<T, MAP, COMP, ALLOC> *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(JSONLoader &json) {
     return new IR::NameMap<T, MAP, COMP, ALLOC>(json);
 }
+
+}  // namespace P4
 
 #endif /* IR_JSON_LOADER_H_ */

@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "backends/ebpf/ebpfTable.h"
 
-namespace EBPF {
+namespace P4::EBPF {
 
 class ControlBodyTranslatorPSA;
 
@@ -62,6 +62,6 @@ class EBPFMeterPSA : public EBPFTableBase {
     static cstring meterExecuteFunc(bool trace, P4::ReferenceMap *refMap);
 };
 
-}  // namespace EBPF
+}  // namespace P4::EBPF
 
 #endif  // BACKENDS_EBPF_PSA_EXTERNS_EBPFPSAMETER_H_

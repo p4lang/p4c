@@ -13,7 +13,7 @@
 #include "lib/cstring.h"
 
 /// This file defines explicit types of trace events extended from the generic trace class.
-namespace P4Tools::TraceEvents {
+namespace P4::P4Tools::TraceEvents {
 
 /* =============================================================================================
  *   Generic
@@ -354,6 +354,6 @@ class ParserState : public TraceEvent {
     DECLARE_TYPEINFO(ParserState, TraceEvent);
 };
 
-}  // namespace P4Tools::TraceEvents
+}  // namespace P4::P4Tools::TraceEvents
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_TRACE_EVENT_TYPES_H_ */

@@ -28,7 +28,7 @@ limitations under the License.
 #include "absl/strings/str_cat.h"
 #include "lib/bug_helper.h"
 
-namespace Util {
+namespace P4::Util {
 
 // colors to pretty print messages
 // \e is non-standard escape sequence, use codepoint \33 instead
@@ -79,7 +79,7 @@ class P4CExceptionBase : public std::exception {
         boost::format fmt(format);
         // FIXME: This will implicitly take location of the first argument having
         // SourceInfo. Not sure if this always desireable or not.
-        message = ::bug_helper(fmt, "", "", std::forward<Args>(args)...);
+        message = ::P4::bug_helper(fmt, "", "", std::forward<Args>(args)...);
     }
 
     const char *what() const noexcept { return message.c_str(); }
@@ -134,25 +134,25 @@ class CompilationError : public P4CExceptionBase {
         : P4CExceptionBase(format, std::forward<Args>(args)...) {}
 };
 
-#define BUG(...)                                                  \
-    do {                                                          \
-        throw Util::CompilerBug(__LINE__, __FILE__, __VA_ARGS__); \
+#define BUG(...)                                                      \
+    do {                                                              \
+        throw P4::Util::CompilerBug(__LINE__, __FILE__, __VA_ARGS__); \
     } while (0)
 #define BUG_CHECK(e, ...)           \
     do {                            \
         if (!(e)) BUG(__VA_ARGS__); \
     } while (0)
-#define P4C_UNIMPLEMENTED(...)                                              \
-    do {                                                                    \
-        throw Util::CompilerUnimplemented(__LINE__, __FILE__, __VA_ARGS__); \
+#define P4C_UNIMPLEMENTED(...)                                                  \
+    do {                                                                        \
+        throw P4::Util::CompilerUnimplemented(__LINE__, __FILE__, __VA_ARGS__); \
     } while (0)
 
-}  // namespace Util
+}  // namespace P4::Util
 
 /// Report an error and exit
-#define FATAL_ERROR(...)                           \
-    do {                                           \
-        throw Util::CompilationError(__VA_ARGS__); \
+#define FATAL_ERROR(...)                               \
+    do {                                               \
+        throw P4::Util::CompilationError(__VA_ARGS__); \
     } while (0)
 
 #endif /* LIB_EXCEPTIONS_H_ */

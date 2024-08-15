@@ -28,7 +28,7 @@ class ReferenceMap;
 
 }
 
-namespace EBPF {
+namespace P4::EBPF {
 
 class CodeBuilder : public Util::SourceCodeBuilder {
  public:
@@ -83,7 +83,7 @@ class CodeGenInspector : public Inspector {
     bool isPointerVariable(cstring name) { return asPointerVariables.count(name) > 0; }
 
     bool notSupported(const IR::Expression *expression) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not yet implemented", expression);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1%: not yet implemented", expression);
         return false;
     }
 
@@ -141,6 +141,6 @@ class EBPFInitializerUtils {
     static cstring genHexStr(const big_int &value, unsigned width, const IR::Expression *expr);
 };
 
-}  // namespace EBPF
+}  // namespace P4::EBPF
 
 #endif /* BACKENDS_EBPF_CODEGEN_H_ */
