@@ -9,7 +9,7 @@
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "ir/dump.h"
 
-namespace P4Fmt {
+namespace P4::P4Fmt {
 
 Visitor::profile_t P4Formatter::init_apply(const IR::Node *node) {
     LOG4("Program dump:" << std::endl << dumpToString(node));
@@ -1512,4 +1512,4 @@ std::string toP4(const IR::INode *node) {
     return stream.str();
 }
 
-}  // namespace P4Fmt
+}  // namespace P4::P4Fmt

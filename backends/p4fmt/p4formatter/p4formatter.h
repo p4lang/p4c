@@ -6,7 +6,7 @@
 #include "ir/visitor.h"
 #include "lib/sourceCodeBuilder.h"
 
-namespace P4Fmt {
+namespace P4::P4Fmt {
 /**
 This pass converts a P4-16 IR into a P4 source (text) program.
 It can optionally emit as comments a representation of the program IR.
@@ -253,5 +253,5 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
 
 std::string toP4(const IR::INode *node);
 
-}  // namespace P4Fmt
+}  // namespace P4::P4Fmt
 #endif /* BACKENDS_P4FMT_P4FORMATTER_P4FORMATTER_H_ */
