@@ -21,7 +21,7 @@ Visitor::profile_t P4Formatter::init_apply(const IR::Node *node) {
 void P4Formatter::end_apply(const IR::Node *) {
     if (outStream != nullptr) {
         cstring result = builder.toString();
-        *outStream << result.c_str();
+        *outStream << result;
         outStream->flush();
     }
     BUG_CHECK(listTerminators.size() == listTerminators_init_apply_size,
@@ -45,12 +45,12 @@ cstring P4Formatter::ifSystemFile(const IR::Node *node) {
 }
 
 bool P4Formatter::preorder(const IR::Node *node) {
-    P4C_UNIMPLEMENTED("Unhandled IR node type: ", typeid(*node).name());
+    P4C_UNIMPLEMENTED("Unhandled IR node type: ", node->node_type_name());
     return false;
 }
 
 bool P4Formatter::preorder(const IR::P4Program *program) {
-    std::set<cstring> includesEmitted;
+    std::unordered_set<cstring> includesEmitted;
 
     bool first = true;
     for (auto a : program->objects) {
@@ -66,7 +66,7 @@ bool P4Formatter::preorder(const IR::P4Program *program) {
              * For now we ignore mainFile and don't emit #includes for any
              * non-system header */
 
-            if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
+            if (includesEmitted.count(sourceFile) == 0) {
                 if (sourceFile.startsWith(p4includePath)) {
                     const char *p = sourceFile.c_str() + strlen(p4includePath);
                     if (*p == '/') p++;
@@ -414,7 +414,7 @@ bool P4Formatter::process(const IR::Type_StructLike *t, const char *name) {
     builder.spc();
     builder.blockStart();
 
-    std::map<const IR::StructField *, cstring> type;
+    std::unordered_map<const IR::StructField *, cstring> type;
     size_t len = 0;
     for (auto f : t->fields) {
         Util::SourceCodeBuilder builder;
@@ -748,14 +748,9 @@ bool P4Formatter::preorder(const IR::SelectExpression *e) {
 
 bool P4Formatter::preorder(const IR::ListExpression *e) {
     using ::P4::literals::operator""_cs;
-    cstring start, end;
-    if (listTerminators.empty()) {
-        start = "{ "_cs;
-        end = " }"_cs;
-    } else {
-        start = listTerminators.back().start;
-        end = listTerminators.back().end;
-    }
+    auto [start, end] = listTerminators.empty() ? std::make_pair("{ "_cs, " }"_cs)
+                                                : std::make_pair(listTerminators.back().start,
+                                                                 listTerminators.back().end);
     builder.append(start);
     setVecSep(", ");
     int prec = expressionPrecedence;
@@ -1399,7 +1394,7 @@ bool P4Formatter::preorder(const IR::ActionList *v) {
 bool P4Formatter::preorder(const IR::Key *v) {
     builder.blockStart();
 
-    std::map<const IR::KeyElement *, cstring> kf;
+    std::unordered_map<const IR::KeyElement *, cstring> kf;
     size_t len = 0;
     for (auto f : v->keyElements) {
         Util::SourceCodeBuilder builder;
