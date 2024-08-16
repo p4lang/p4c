@@ -54,6 +54,20 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
         BUG_CHECK(!listTerminators.empty(), "Empty listTerminators");
         listTerminators.pop_back();
     }
+
+    template <typename Collection, typename Func>
+    void visitCollection(const Collection &collection, const std::string &separator,
+                         Func visitFunc) {
+        bool first = true;
+        for (const auto &elem : collection) {
+            if (!first) {
+                builder.append(separator);
+            }
+            first = false;
+            visitFunc(elem);
+        }
+    }
+
     bool isSystemFile(cstring file);
     cstring ifSystemFile(const IR::Node *node);  // return file containing node if system file
 

@@ -202,14 +202,11 @@ bool P4Formatter::preorder(const IR::Type_Newtype *t) {
 
 bool P4Formatter::preorder(const IR::Type_BaseList *t) {
     builder.append("tuple<");
-    bool first = true;
-    for (auto a : t->components) {
-        if (!first) builder.append(", ");
-        first = false;
+    visitCollection(t->components, ", ", [&](const auto *a) {
         auto p4type = a->getP4Type();
         CHECK_NULL(p4type);
         visit(p4type);
-    }
+    });
     builder.append(">");
     return false;
 }
@@ -265,15 +262,12 @@ bool P4Formatter::preorder(const IR::Type_SerEnum *t) {
     builder.append(t->name);
     builder.spc();
     builder.blockStart();
-    bool first = true;
-    for (auto a : t->members) {
-        if (!first) builder.append(",\n");
-        first = false;
+    visitCollection(t->members, ",\n", [&](const auto &a) {
         builder.emitIndent();
         builder.append(a->getName());
         builder.append(" = ");
         visit(a->value);
-    }
+    });
     builder.newline();
     builder.blockEnd(true);
     return false;
@@ -282,14 +276,9 @@ bool P4Formatter::preorder(const IR::Type_SerEnum *t) {
 bool P4Formatter::preorder(const IR::TypeParameters *t) {
     if (!t->empty()) {
         builder.append("<");
-        bool first = true;
         bool decl = isDeclaration;
         isDeclaration = false;
-        for (auto a : t->parameters) {
-            if (!first) builder.append(", ");
-            first = false;
-            visit(a);
-        }
+        visitCollection(t->parameters, ", ", [&](const auto *a) { visit(a); });
         isDeclaration = decl;
         builder.append(">");
     }
@@ -774,12 +763,7 @@ bool P4Formatter::preorder(const IR::P4ListExpression *e) {
     builder.append("{");
     int prec = expressionPrecedence;
     expressionPrecedence = DBPrint::Prec_Low;
-    bool first = true;
-    for (auto c : e->components) {
-        if (!first) builder.append(",");
-        first = false;
-        visit(c);
-    }
+    visitCollection(e->components, ",", [&](const auto &c) { visit(c); });
     expressionPrecedence = prec;
     builder.append("}");
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append(")");
@@ -803,12 +787,7 @@ bool P4Formatter::preorder(const IR::StructExpression *e) {
     builder.append("{");
     int prec = expressionPrecedence;
     expressionPrecedence = DBPrint::Prec_Low;
-    bool first = true;
-    for (auto c : e->components) {
-        if (!first) builder.append(",");
-        first = false;
-        visit(c);
-    }
+    visitCollection(e->components, ",", [&](const auto &c) { visit(c); });
     expressionPrecedence = prec;
     builder.append("}");
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append(")");
@@ -825,12 +804,7 @@ bool P4Formatter::preorder(const IR::HeaderStackExpression *e) {
     builder.append("{");
     int prec = expressionPrecedence;
     expressionPrecedence = DBPrint::Prec_Low;
-    bool first = true;
-    for (auto c : e->components) {
-        if (!first) builder.append(",");
-        first = false;
-        visit(c);
-    }
+    visitCollection(e->components, ",", [&](const auto &c) { visit(c); });
     expressionPrecedence = prec;
     builder.append("}");
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append(")");
@@ -1077,24 +1051,19 @@ bool P4Formatter::preorder(const IR::ForStatement *s) {
         builder.spc();
     }
     builder.append("for (");
-    bool first = true;
-    for (auto *d : s->init) {
-        if (!first) builder.append(", ");
+    visitCollection(s->init, ", ", [&](auto *d) {
         builder.supressStatementSemi();
         visit(d, "init");
-        first = false;
-    }
+    });
     builder.append("; ");
     visit(s->condition, "condition");
     builder.append("; ");
-    first = true;
-    for (auto *e : s->updates) {
-        if (e->is<IR::EmptyStatement>()) continue;
-        if (!first) builder.append(", ");
-        builder.supressStatementSemi();
-        visit(e, "updates");
-        first = false;
-    }
+    visitCollection(s->updates, ", ", [&](auto *e) {
+        if (!e->template is<IR::EmptyStatement>()) {
+            builder.supressStatementSemi();
+            visit(e, "updates");
+        }
+    });
     builder.append(") ");
     if (!s->body->is<IR::BlockStatement>()) {
         builder.append("{");
@@ -1177,15 +1146,7 @@ bool P4Formatter::preorder(const IR::SwitchStatement *s) {
 ////////////////////////////////////
 
 bool P4Formatter::preorder(const IR::Annotations *a) {
-    bool first = true;
-    for (const auto *anno : a->annotations) {
-        if (!first) {
-            builder.spc();
-        } else {
-            first = false;
-        }
-        visit(anno);
-    }
+    visitCollection(a->annotations, " ", [&](const auto *anno) { visit(anno); });
     return false;
 }
 
@@ -1203,14 +1164,11 @@ bool P4Formatter::preorder(const IR::Annotation *a) {
     }
     if (!a->kv.empty()) {
         builder.append(open);
-        bool first = true;
-        for (auto kvp : a->kv) {
-            if (!first) builder.append(", ");
-            first = false;
+        visitCollection(a->kv, ", ", [&](const auto &kvp) {
             builder.append(kvp->name);
             builder.append("=");
             visit(kvp->expression);
-        }
+        });
         builder.append(close);
     }
     if (a->expr.empty() && a->kv.empty() && a->structured) {
@@ -1221,17 +1179,13 @@ bool P4Formatter::preorder(const IR::Annotation *a) {
         // We could be prettier here with smarter logic, but let's do the easy
         // thing by separating every token with a space.
         builder.append(open);
-        bool first = true;
-        for (auto tok : a->body) {
-            if (!first) builder.append(" ");
-            first = false;
-
+        visitCollection(a->body, " ", [&](const auto &tok) {
             bool haveStringLiteral =
                 tok->token_type == ::P4::P4Parser::token_type::TOK_STRING_LITERAL;
             if (haveStringLiteral) builder.append("\"");
             builder.append(tok->text);
             if (haveStringLiteral) builder.append("\"");
-        }
+        });
         builder.append(close);
     }
     return false;
