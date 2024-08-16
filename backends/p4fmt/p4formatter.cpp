@@ -736,7 +736,7 @@ bool P4Formatter::preorder(const IR::SelectExpression *e) {
 }
 
 bool P4Formatter::preorder(const IR::ListExpression *e) {
-    using ::P4::literals::operator""_cs;
+    using namespace P4::literals;
     auto [start, end] = listTerminators.empty() ? std::make_pair("{ "_cs, " }"_cs)
                                                 : std::make_pair(listTerminators.back().start,
                                                                  listTerminators.back().end);
@@ -1091,7 +1091,7 @@ bool P4Formatter::preorder(const IR::ForInStatement *s) {
         builder.supressStatementSemi();
         visit(s->decl, "decl");
     } else {
-        auto *decl = resolveUnique(s->ref->path->name, ::P4::ResolutionType::Any);
+        auto *decl = resolveUnique(s->ref->path->name, P4::ResolutionType::Any);
         if (auto *di = decl->to<IR::Declaration_Variable>()) {
             builder.supressStatementSemi();
             visit(di, "decl");
@@ -1181,7 +1181,7 @@ bool P4Formatter::preorder(const IR::Annotation *a) {
         builder.append(open);
         visitCollection(a->body, " ", [&](const auto &tok) {
             bool haveStringLiteral =
-                tok->token_type == ::P4::P4Parser::token_type::TOK_STRING_LITERAL;
+                tok->token_type == P4::P4Parser::token_type::TOK_STRING_LITERAL;
             if (haveStringLiteral) builder.append("\"");
             builder.append(tok->text);
             if (haveStringLiteral) builder.append("\"");
