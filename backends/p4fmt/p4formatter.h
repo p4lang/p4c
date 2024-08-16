@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4FMT_P4FORMATTER_P4FORMATTER_H_
-#define BACKENDS_P4FMT_P4FORMATTER_P4FORMATTER_H_
+#ifndef BACKENDS_P4FMT_P4FORMATTER_H_
+#define BACKENDS_P4FMT_P4FORMATTER_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
@@ -254,4 +254,4 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
 std::string toP4(const IR::INode *node);
 
 }  // namespace P4::P4Fmt
-#endif /* BACKENDS_P4FMT_P4FORMATTER_P4FORMATTER_H_ */
+#endif /* BACKENDS_P4FMT_P4FORMATTER_H_ */

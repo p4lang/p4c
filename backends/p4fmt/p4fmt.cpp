@@ -6,7 +6,7 @@
 #include "lib/compile_context.h"
 #include "lib/error.h"
 #include "options.h"
-#include "p4formatter/p4formatter.h"
+#include "p4formatter.h"
 
 namespace P4::P4Fmt {
 

@@ -2,14 +2,14 @@ set(FMT_SRCS
     p4fmt.cpp
     options.cpp
     main.cpp
-    p4formatter/p4formatter.cpp
+    p4formatter.cpp
 )
 
 set(REFCHECK_SRCS
     refcheck.cpp
     options.cpp
     p4fmt.cpp
-    p4formatter/p4formatter.cpp
+    p4formatter.cpp
 )
 
 # p4fmt
