@@ -20,10 +20,10 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="class_d_p_d_k_1_1_copy_match_keys_to_single_struct.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="187,-30 18,-30 18,0 187,0 187,-30"/>
-<text text-anchor="start" x="26" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">DPDK::CopyMatchKeysToSingle</text>
-<text text-anchor="middle" x="102.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Struct</text>
+<g id="a_Node000006"><a xlink:href="class_p4_1_1_d_p_d_k_1_1_copy_match_keys_to_single_struct.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="181,-30 24,-30 24,0 181,0 181,-30"/>
+<text text-anchor="start" x="32" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">P4::DPDK::CopyMatchKeysTo</text>
+<text text-anchor="middle" x="102.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">SingleStruct</text>
 </a>
 </g>
 </g>

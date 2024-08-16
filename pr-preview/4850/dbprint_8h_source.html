@@ -147,7 +147,7 @@ $(function(){initNavTree('dbprint_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;lib/log.h&quot;</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">namespace </span>DBPrint {</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">namespace </span>P4::DBPrint {</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment">// Support for debug print, needed by the LOG* macros.</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">// TODO: These should be part of a def file</span></div>
@@ -188,35 +188,35 @@ $(function(){initNavTree('dbprint_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="keyword">inline</span> <span class="keywordtype">int</span> getprec(std::ostream &amp;out) { <span class="keywordflow">return</span> dbgetflags(out) &amp; DBPrint::Precedence; }</div>
 <div class="foldopen" id="foldopen00065" data-start="{" data-end="};">
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="class_d_b_print_1_1setflags__helper.html">   65</a></span><span class="keyword">class </span><a class="code hl_class" href="class_d_b_print_1_1setflags__helper.html">setflags_helper</a> {</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="class_p4_1_1_d_b_print_1_1setflags__helper.html">   65</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_d_b_print_1_1setflags__helper.html">setflags_helper</a> {</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordtype">int</span> val, mask;</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> <span class="keyword">protected</span>:</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <a class="code hl_class" href="class_d_b_print_1_1setflags__helper.html">setflags_helper</a>(<span class="keywordtype">int</span> v, <span class="keywordtype">int</span> m) : val(v), mask(m) { assert((val &amp; ~mask) == 0); }</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <a class="code hl_class" href="class_p4_1_1_d_b_print_1_1setflags__helper.html">setflags_helper</a>(<span class="keywordtype">int</span> v, <span class="keywordtype">int</span> m) : val(v), mask(m) { assert((val &amp; ~mask) == 0); }</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <a class="code hl_class" href="class_d_b_print_1_1setflags__helper.html">setflags_helper</a>() = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <a class="code hl_class" href="class_p4_1_1_d_b_print_1_1setflags__helper.html">setflags_helper</a>() = <span class="keyword">delete</span>;</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keywordtype">void</span> set(std::ostream &amp;out)<span class="keyword"> const </span>{ dbsetflags(out, val, mask); }</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>};</div>
 </div>
 <div class="foldopen" id="foldopen00076" data-start="{" data-end="};">
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="struct_d_b_print_1_1setprec.html">   76</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_d_b_print_1_1setprec.html">setprec</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_d_b_print_1_1setflags__helper.html">setflags_helper</a> {</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keyword">explicit</span> <a class="code hl_struct" href="struct_d_b_print_1_1setprec.html">setprec</a>(<span class="keywordtype">int</span> prec) : <a class="code hl_class" href="class_d_b_print_1_1setflags__helper.html">setflags_helper</a>(prec, DBPrint::Precedence) {}</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="struct_p4_1_1_d_b_print_1_1setprec.html">   76</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_p4_1_1_d_b_print_1_1setprec.html">setprec</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_d_b_print_1_1setflags__helper.html">setflags_helper</a> {</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keyword">explicit</span> <a class="code hl_struct" href="struct_p4_1_1_d_b_print_1_1setprec.html">setprec</a>(<span class="keywordtype">int</span> prec) : <a class="code hl_class" href="class_p4_1_1_d_b_print_1_1setflags__helper.html">setflags_helper</a>(prec, DBPrint::Precedence) {}</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>};</div>
 </div>
 <div class="foldopen" id="foldopen00079" data-start="{" data-end="};">
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="struct_d_b_print_1_1setflag.html">   79</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_d_b_print_1_1setflag.html">setflag</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_d_b_print_1_1setflags__helper.html">setflags_helper</a> {</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keyword">explicit</span> <a class="code hl_struct" href="struct_d_b_print_1_1setflag.html">setflag</a>(<span class="keywordtype">int</span> fl) : <a class="code hl_class" href="class_d_b_print_1_1setflags__helper.html">setflags_helper</a>(fl, fl) {}</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="struct_p4_1_1_d_b_print_1_1setflag.html">   79</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_p4_1_1_d_b_print_1_1setflag.html">setflag</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_d_b_print_1_1setflags__helper.html">setflags_helper</a> {</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keyword">explicit</span> <a class="code hl_struct" href="struct_p4_1_1_d_b_print_1_1setflag.html">setflag</a>(<span class="keywordtype">int</span> fl) : <a class="code hl_class" href="class_p4_1_1_d_b_print_1_1setflags__helper.html">setflags_helper</a>(fl, fl) {}</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>};</div>
 </div>
 <div class="foldopen" id="foldopen00082" data-start="{" data-end="};">
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="struct_d_b_print_1_1clrflag.html">   82</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_d_b_print_1_1clrflag.html">clrflag</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_d_b_print_1_1setflags__helper.html">setflags_helper</a> {</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keyword">explicit</span> <a class="code hl_struct" href="struct_d_b_print_1_1clrflag.html">clrflag</a>(<span class="keywordtype">int</span> fl) : <a class="code hl_class" href="class_d_b_print_1_1setflags__helper.html">setflags_helper</a>(0, fl) {}</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="struct_p4_1_1_d_b_print_1_1clrflag.html">   82</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_p4_1_1_d_b_print_1_1clrflag.html">clrflag</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_d_b_print_1_1setflags__helper.html">setflags_helper</a> {</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keyword">explicit</span> <a class="code hl_struct" href="struct_p4_1_1_d_b_print_1_1clrflag.html">clrflag</a>(<span class="keywordtype">int</span> fl) : <a class="code hl_class" href="class_p4_1_1_d_b_print_1_1setflags__helper.html">setflags_helper</a>(0, fl) {}</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>};</div>
 </div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="keyword">inline</span> std::ostream &amp;operator&lt;&lt;(std::ostream &amp;out, <span class="keyword">const</span> <a class="code hl_class" href="class_d_b_print_1_1setflags__helper.html">DBPrint::setflags_helper</a> &amp;p) {</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="keyword">inline</span> std::ostream &amp;operator&lt;&lt;(std::ostream &amp;out, <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_d_b_print_1_1setflags__helper.html">DBPrint::setflags_helper</a> &amp;p) {</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    p.set(out);</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordflow">return</span> out;</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>}</div>
@@ -226,13 +226,13 @@ $(function(){initNavTree('dbprint_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordflow">return</span> out;</div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>}</div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>}  <span class="comment">// end namespace DBPrint</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>}  <span class="comment">// end namespace P4::DBPrint</span></div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="preprocessor">#endif </span><span class="comment">/* IR_DBPRINT_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_d_b_print_1_1setflags__helper_html"><div class="ttname"><a href="class_d_b_print_1_1setflags__helper.html">DBPrint::setflags_helper</a></div><div class="ttdef"><b>Definition</b> dbprint.h:65</div></div>
-<div class="ttc" id="astruct_d_b_print_1_1clrflag_html"><div class="ttname"><a href="struct_d_b_print_1_1clrflag.html">DBPrint::clrflag</a></div><div class="ttdef"><b>Definition</b> dbprint.h:82</div></div>
-<div class="ttc" id="astruct_d_b_print_1_1setflag_html"><div class="ttname"><a href="struct_d_b_print_1_1setflag.html">DBPrint::setflag</a></div><div class="ttdef"><b>Definition</b> dbprint.h:79</div></div>
-<div class="ttc" id="astruct_d_b_print_1_1setprec_html"><div class="ttname"><a href="struct_d_b_print_1_1setprec.html">DBPrint::setprec</a></div><div class="ttdef"><b>Definition</b> dbprint.h:76</div></div>
+<div class="ttc" id="aclass_p4_1_1_d_b_print_1_1setflags__helper_html"><div class="ttname"><a href="class_p4_1_1_d_b_print_1_1setflags__helper.html">P4::DBPrint::setflags_helper</a></div><div class="ttdef"><b>Definition</b> dbprint.h:65</div></div>
+<div class="ttc" id="astruct_p4_1_1_d_b_print_1_1clrflag_html"><div class="ttname"><a href="struct_p4_1_1_d_b_print_1_1clrflag.html">P4::DBPrint::clrflag</a></div><div class="ttdef"><b>Definition</b> dbprint.h:82</div></div>
+<div class="ttc" id="astruct_p4_1_1_d_b_print_1_1setflag_html"><div class="ttname"><a href="struct_p4_1_1_d_b_print_1_1setflag.html">P4::DBPrint::setflag</a></div><div class="ttdef"><b>Definition</b> dbprint.h:79</div></div>
+<div class="ttc" id="astruct_p4_1_1_d_b_print_1_1setprec_html"><div class="ttname"><a href="struct_p4_1_1_d_b_print_1_1setprec.html">P4::DBPrint::setprec</a></div><div class="ttdef"><b>Definition</b> dbprint.h:76</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

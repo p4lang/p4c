@@ -31,9 +31,9 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="class_d_p_d_k_1_1_error_width.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="135,-19 33,-19 33,0 135,0 135,-19"/>
-<text text-anchor="middle" x="84" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">DPDK::ErrorWidth</text>
+<g id="a_Node000002"><a xlink:href="class_p4_1_1_d_p_d_k_1_1_error_width.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="144,-19 24,-19 24,0 144,0 144,-19"/>
+<text text-anchor="middle" x="84" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">P4::DPDK::ErrorWidth</text>
 </a>
 </g>
 </g>

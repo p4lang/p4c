@@ -189,9 +189,9 @@ $(function(){initNavTree('psa_program_structure_8h_source.html',''); initResizab
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    }</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordtype">void</span> modelError(<span class="keyword">const</span> <span class="keywordtype">char</span> *format, <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_i_node.html">IR::INode</a> *node) {</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <a class="code hl_function" href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">::error</a>(ErrorType::ERR_MODEL,</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>                (<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a>(format) + <span class="stringliteral">&quot;\nAre you using an up-to-date &#39;psa.p4&#39;?&quot;</span>).c_str(),</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>                node-&gt;getNode());</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <a class="code hl_function" href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">::P4::error</a>(ErrorType::ERR_MODEL,</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>                    (<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a>(format) + <span class="stringliteral">&quot;\nAre you using an up-to-date &#39;psa.p4&#39;?&quot;</span>).c_str(),</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>                    node-&gt;getNode());</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    }</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::PackageBlock *block) <span class="keyword">override</span>;</div>
@@ -231,8 +231,8 @@ $(function(){initNavTree('psa_program_structure_8h_source.html',''); initResizab
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>}  <span class="comment">// namespace P4</span></div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_COMMON_PSAPROGRAMSTRUCTURE_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_p4_1_1_i_r_1_1_i_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_i_node.html">P4::IR::INode</a></div><div class="ttdef"><b>Definition</b> copySrcInfo.h:64</div></div>
-<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> copySrcInfo.h:93</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_r_1_1_i_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_i_node.html">P4::IR::INode</a></div><div class="ttdef"><b>Definition</b> node.h:66</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:95</div></div>
 <div class="ttc" id="aclass_p4_1_1_inspect_portable_program_html"><div class="ttname"><a href="class_p4_1_1_inspect_portable_program.html">P4::InspectPortableProgram</a></div><div class="ttdef"><b>Definition</b> portableProgramStructure.h:84</div></div>
 <div class="ttc" id="aclass_p4_1_1_inspect_psa_program_html"><div class="ttname"><a href="class_p4_1_1_inspect_psa_program.html">P4::InspectPsaProgram</a></div><div class="ttdef"><b>Definition</b> psaProgramStructure.h:82</div></div>
 <div class="ttc" id="aclass_p4_1_1_parse_portable_architecture_html"><div class="ttname"><a href="class_p4_1_1_parse_portable_architecture.html">P4::ParsePortableArchitecture</a></div><div class="ttdef"><b>Definition</b> portableProgramStructure.h:79</div></div>
@@ -244,11 +244,11 @@ $(function(){initNavTree('psa_program_structure_8h_source.html',''); initResizab
 <div class="ttc" id="aclass_p4_1_1_psa_program_structure_html_abfac18e81838cba52f53ff6d5a15cf35"><div class="ttname"><a href="class_p4_1_1_psa_program_structure.html#abfac18e81838cba52f53ff6d5a15cf35">P4::PsaProgramStructure::isStandardMetadata</a></div><div class="ttdeci">static bool isStandardMetadata(cstring ptName)</div><div class="ttdef"><b>Definition</b> psaProgramStructure.h:47</div></div>
 <div class="ttc" id="aclass_p4_1_1_reference_map_html"><div class="ttname"><a href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a></div><div class="ttdoc">Class used to encode maps from paths to declarations.</div><div class="ttdef"><b>Definition</b> referenceMap.h:66</div></div>
 <div class="ttc" id="aclass_p4_1_1_type_map_html"><div class="ttname"><a href="class_p4_1_1_type_map.html">P4::TypeMap</a></div><div class="ttdef"><b>Definition</b> typeMap.h:41</div></div>
-<div class="ttc" id="aclass_p4_1_1_visitor_1_1profile__t_html"><div class="ttname"><a href="class_p4_1_1_visitor_1_1profile__t.html">P4::Visitor::profile_t</a></div><div class="ttdef"><b>Definition</b> copySrcInfo.h:76</div></div>
-<div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> copySrcInfo.h:82</div></div>
-<div class="ttc" id="aclass_p4_1_1ordered__map_html"><div class="ttname"><a href="class_p4_1_1ordered__map.html">P4::ordered_map</a></div><div class="ttdef"><b>Definition</b> copySrcInfo.h:31</div></div>
+<div class="ttc" id="aclass_p4_1_1_visitor_1_1profile__t_html"><div class="ttname"><a href="class_p4_1_1_visitor_1_1profile__t.html">P4::Visitor::profile_t</a></div><div class="ttdef"><b>Definition</b> visitor.h:78</div></div>
+<div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
+<div class="ttc" id="aclass_p4_1_1ordered__map_html"><div class="ttname"><a href="class_p4_1_1ordered__map.html">P4::ordered_map</a></div><div class="ttdef"><b>Definition</b> ordered_map.h:32</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
-<div class="ttc" id="anamespace_p4_html_a9fe6085b1cee8f21f098c9db89644b58"><div class="ttname"><a href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">P4::error</a></div><div class="ttdeci">void error(const char *format, Args &amp;&amp;...args)</div><div class="ttdoc">Report an error with the given message.</div><div class="ttdef"><b>Definition</b> copySrcInfo.h:47</div></div>
+<div class="ttc" id="anamespace_p4_html_a9fe6085b1cee8f21f098c9db89644b58"><div class="ttname"><a href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">P4::error</a></div><div class="ttdeci">void error(const char *format, Args &amp;&amp;...args)</div><div class="ttdoc">Report an error with the given message.</div><div class="ttdef"><b>Definition</b> error.h:51</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

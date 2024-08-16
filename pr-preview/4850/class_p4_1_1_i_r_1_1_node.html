@@ -143,7 +143,7 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Node</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">Node</a> &amp;other)</td></tr>
 <tr class="separator:afc5da2ad44d46f8ba633814232dc374d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae32cdcbd1d7ad01e6f9216f766503c08" id="r_ae32cdcbd1d7ad01e6f9216f766503c08"><td class="memItemLeft" align="right" valign="top"><a id="ae32cdcbd1d7ad01e6f9216f766503c08" name="ae32cdcbd1d7ad01e6f9216f766503c08"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Node</b> (<a class="el" href="class_j_s_o_n_loader.html">JSONLoader</a> &amp;json)</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Node</b> (<a class="el" href="class_p4_1_1_j_s_o_n_loader.html">JSONLoader</a> &amp;json)</td></tr>
 <tr class="separator:ae32cdcbd1d7ad01e6f9216f766503c08"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aef440b631a4c7c2ca08c40f0f1b27244" id="r_aef440b631a4c7c2ca08c40f0f1b27244"><td class="memItemLeft" align="right" valign="top"><a id="aef440b631a4c7c2ca08c40f0f1b27244" name="aef440b631a4c7c2ca08c40f0f1b27244"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Node</b> (<a class="el" href="class_p4_1_1_util_1_1_source_info.html">Util::SourceInfo</a> si)</td></tr>
@@ -228,7 +228,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator!=</b> (const
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">Node</a> &amp;a) const</td></tr>
 <tr class="separator:acb300282974edf112e2a797a208511c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe3a1eba335e366def38a8ff5e40c6b9" id="r_afe3a1eba335e366def38a8ff5e40c6b9"><td class="memItemLeft" align="right" valign="top"><a id="afe3a1eba335e366def38a8ff5e40c6b9" name="afe3a1eba335e366def38a8ff5e40c6b9"></a>
-<a class="el" href="class_util_1_1_json_object.html">Util::JsonObject</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>sourceInfoJsonObj</b> () const</td></tr>
+<a class="el" href="class_p4_1_1_util_1_1_json_object.html">Util::JsonObject</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>sourceInfoJsonObj</b> () const</td></tr>
 <tr class="separator:afe3a1eba335e366def38a8ff5e40c6b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab5d7a4c4340833fe6ebbae24e76bdda" id="r_aab5d7a4c4340833fe6ebbae24e76bdda"><td class="memItemLeft" align="right" valign="top"><a id="aab5d7a4c4340833fe6ebbae24e76bdda" name="aab5d7a4c4340833fe6ebbae24e76bdda"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>sourceInfoToJSON</b> (<a class="el" href="class_p4_1_1_j_s_o_n_generator.html">JSONGenerator</a> &amp;json) const</td></tr>
@@ -341,23 +341,23 @@ virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><b>toImp
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
 <tr class="memitem:a894afe99320b011457ae8902d62d3897" id="r_a894afe99320b011457ae8902d62d3897"><td class="memItemLeft" align="right" valign="top"><a id="a894afe99320b011457ae8902d62d3897" name="a894afe99320b011457ae8902d62d3897"></a>
-static int&#160;</td><td class="memItemRight" valign="bottom"><b>currentId</b></td></tr>
+static int&#160;</td><td class="memItemRight" valign="bottom"><b>currentId</b> = 0</td></tr>
 <tr class="separator:a894afe99320b011457ae8902d62d3897"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
-<tr class="memitem:ae29d2fb76ba85710d26d5835c3d8bf75" id="r_ae29d2fb76ba85710d26d5835c3d8bf75"><td class="memItemLeft" align="right" valign="top"><a id="ae29d2fb76ba85710d26d5835c3d8bf75" name="ae29d2fb76ba85710d26d5835c3d8bf75"></a>
-class&#160;</td><td class="memItemRight" valign="bottom"><b>::Inspector</b></td></tr>
-<tr class="separator:ae29d2fb76ba85710d26d5835c3d8bf75"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d5d75d41d89ce3d77575462443ab6c3" id="r_a6d5d75d41d89ce3d77575462443ab6c3"><td class="memItemLeft" align="right" valign="top"><a id="a6d5d75d41d89ce3d77575462443ab6c3" name="a6d5d75d41d89ce3d77575462443ab6c3"></a>
-class&#160;</td><td class="memItemRight" valign="bottom"><b>::Modifier</b></td></tr>
-<tr class="separator:a6d5d75d41d89ce3d77575462443ab6c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad0a781cd65207cc93f429ee343fcad68" id="r_ad0a781cd65207cc93f429ee343fcad68"><td class="memItemLeft" align="right" valign="top"><a id="ad0a781cd65207cc93f429ee343fcad68" name="ad0a781cd65207cc93f429ee343fcad68"></a>
-class&#160;</td><td class="memItemRight" valign="bottom"><b>::Transform</b></td></tr>
-<tr class="separator:ad0a781cd65207cc93f429ee343fcad68"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae234896e9a4c2cfaa9b59556a05e017b" id="r_ae234896e9a4c2cfaa9b59556a05e017b"><td class="memItemLeft" align="right" valign="top"><a id="ae234896e9a4c2cfaa9b59556a05e017b" name="ae234896e9a4c2cfaa9b59556a05e017b"></a>
-class&#160;</td><td class="memItemRight" valign="bottom"><b>::Visitor</b></td></tr>
-<tr class="separator:ae234896e9a4c2cfaa9b59556a05e017b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa92022d6c344623c33d6d7fe374eba9c" id="r_aa92022d6c344623c33d6d7fe374eba9c"><td class="memItemLeft" align="right" valign="top"><a id="aa92022d6c344623c33d6d7fe374eba9c" name="aa92022d6c344623c33d6d7fe374eba9c"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>::P4::Inspector</b></td></tr>
+<tr class="separator:aa92022d6c344623c33d6d7fe374eba9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac31487c227a48370cd0bba6e12de55eb" id="r_ac31487c227a48370cd0bba6e12de55eb"><td class="memItemLeft" align="right" valign="top"><a id="ac31487c227a48370cd0bba6e12de55eb" name="ac31487c227a48370cd0bba6e12de55eb"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>::P4::Modifier</b></td></tr>
+<tr class="separator:ac31487c227a48370cd0bba6e12de55eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa90ee090ac44e914ace28e9e464d859b" id="r_aa90ee090ac44e914ace28e9e464d859b"><td class="memItemLeft" align="right" valign="top"><a id="aa90ee090ac44e914ace28e9e464d859b" name="aa90ee090ac44e914ace28e9e464d859b"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>::P4::Transform</b></td></tr>
+<tr class="separator:aa90ee090ac44e914ace28e9e464d859b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aacc6bee056cf2a9f4b08882b5b27fd80" id="r_aacc6bee056cf2a9f4b08882b5b27fd80"><td class="memItemLeft" align="right" valign="top"><a id="aacc6bee056cf2a9f4b08882b5b27fd80" name="aacc6bee056cf2a9f4b08882b5b27fd80"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>::P4::Visitor</b></td></tr>
+<tr class="separator:aacc6bee056cf2a9f4b08882b5b27fd80"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="a6cdc5d8b1fadeb60cc068365f90d77a4" name="a6cdc5d8b1fadeb60cc068365f90d77a4"></a>

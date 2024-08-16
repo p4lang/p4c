@@ -1,0 +1,29 @@
+<map id="P4::EBPF::ControlBodyTranslator" name="P4::EBPF::ControlBodyTranslator">
+<area shape="rect" id="Node000001" title=" " alt="" coords="549,127,780,153"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_e_b_p_f_1_1_control_body_translator_p_s_a.html" title=" " alt="" coords="828,17,1084,42"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="697,118,756,86,827,55,881,39,883,45,829,60,759,91,700,123"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_e_b_p_f_1_1_deparser_body_translator.html" title="This translator emits deparser externs." alt="" coords="835,70,1077,95"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="743,122,890,93,891,98,744,127"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_e_b_p_f_1_1_deparser_prepare_buffer_translator.html" title="This translator emits buffer preparation (eg. which headers will be emitted)" alt="" coords="859,120,1053,160"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="794,137,859,137,859,143,794,143"/>
+<area shape="rect" id="Node000012" href="$class_p4_1_1_t_c_1_1_control_body_translator_p_n_a.html" title=" " alt="" coords="835,185,1077,210"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="744,153,891,182,890,187,743,158"/>
+<area shape="rect" id="Node000014" href="$class_p4_1_1_u_b_p_f_1_1_u_b_p_f_control_body_translator.html" title=" " alt="" coords="855,235,1057,275"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="700,157,759,189,829,220,865,232,864,237,827,225,757,194,698,162"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_e_b_p_f_1_1_code_gen_inspector.html" title=" " alt="" coords="296,127,501,153"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="515,137,549,137,549,143,515,143"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="141,127,248,153"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="262,137,296,137,296,143,262,143"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="5,127,93,153"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="107,137,141,137,141,143,107,143"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_e_b_p_f_1_1_action_translation_visitor_p_s_a.html" title=" " alt="" coords="1169,5,1368,45"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="1098,25,1169,24,1169,29,1098,30"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_e_b_p_f_1_1_deparser_body_translator_p_s_a.html" title=" " alt="" coords="1135,70,1403,95"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="1091,80,1134,80,1134,85,1091,85"/>
+<area shape="rect" id="Node000010" href="$class_p4_1_1_e_b_p_f_1_1_deparser_hdr_emit_translator.html" title="This translator emits headers." alt="" coords="1169,120,1368,160"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="1067,137,1169,137,1169,143,1067,143"/>
+<area shape="rect" id="Node000011" href="$class_p4_1_1_t_c_1_1_deparser_hdr_emit_translator_p_n_a.html" title=" " alt="" coords="1132,185,1405,210"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="1068,158,1199,182,1198,187,1067,163"/>
+<area shape="rect" id="Node000013" href="$class_p4_1_1_t_c_1_1_action_translation_visitor_p_n_a.html" title=" " alt="" coords="1177,235,1360,275"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="1040,210,1177,235,1176,241,1039,215"/>
+</map>

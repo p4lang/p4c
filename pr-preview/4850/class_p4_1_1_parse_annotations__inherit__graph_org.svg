@@ -20,9 +20,9 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="class_b_m_v2_1_1_parse_annotations.html" target="_top" xlink:title="Parses BMV2&#45;specific annotations.">
-<polygon fill="white" stroke="#666666" points="515.5,-105 379.5,-105 379.5,-86 515.5,-86 515.5,-105"/>
-<text text-anchor="middle" x="447.5" y="-93" font-family="Helvetica,sans-Serif" font-size="10.00">BMV2::ParseAnnotations</text>
+<g id="a_Node000004"><a xlink:href="class_p4_1_1_b_m_v2_1_1_parse_annotations.html" target="_top" xlink:title="Parses BMV2&#45;specific annotations.">
+<polygon fill="white" stroke="#666666" points="524.5,-105 370.5,-105 370.5,-86 524.5,-86 524.5,-105"/>
+<text text-anchor="middle" x="447.5" y="-93" font-family="Helvetica,sans-Serif" font-size="10.00">P4::BMV2::ParseAnnotations</text>
 </a>
 </g>
 </g>
@@ -57,9 +57,9 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="class_t_c_1_1_parse_t_c_annotations.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="513,-19 382,-19 382,0 513,0 513,-19"/>
-<text text-anchor="middle" x="447.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">TC::ParseTCAnnotations</text>
+<g id="a_Node000006"><a xlink:href="class_p4_1_1_t_c_1_1_parse_t_c_annotations.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="522,-19 373,-19 373,0 522,0 522,-19"/>
+<text text-anchor="middle" x="447.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">P4::TC::ParseTCAnnotations</text>
 </a>
 </g>
 </g>

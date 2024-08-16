@@ -129,7 +129,7 @@ $(function(){initNavTree('struct_p4_1_1_error_message.html',''); initResizable(t
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="copy_src_info_8h_source.html">copySrcInfo.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="error__message_8h_source.html">error_message.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
@@ -185,9 +185,9 @@ MessageType&#160;</td><td class="memItemRight" valign="bottom"><b>type</b> = Mes
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Structure populated via error_helper functions</p>
-<p>Typically, calls to error/warning have many parameters, some of them might have SourceInfo attribute. error_helper parse those parameters, format parameters to output message and extracts SourceInfo wherever possible.</p>
+<p>Typically, calls to P4::error/P4::warning have many parameters, some of them might have SourceInfo attribute. P4::error_helper parse those parameters, format parameters to output message and extracts SourceInfo wherever possible.</p>
 <p>Populated structure can be serialized to canonical error message with toString() method.</p>
-<p>This structure is mainly used inside ErrorReporter, but some uses invoke error_helper directly and those uses need to call toString() on returned object. </p>
+<p>This structure is mainly used inside ErrorReporter, but some uses invoke P4::error_helper directly and those uses need to call toString() on returned object. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

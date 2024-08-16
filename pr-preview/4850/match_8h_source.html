@@ -148,37 +148,42 @@ $(function(){initNavTree('match_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;big_int_util.h&quot;</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="foldopen" id="foldopen00034" data-start="{" data-end="};">
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="structmatch__t.html">   34</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmatch__t.html">match_t</a> {</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    big_int word0, word1;</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <a class="code hl_struct" href="structmatch__t.html">match_t</a>() : word0(0), word1(0) {}</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <a class="code hl_struct" href="structmatch__t.html">match_t</a>(big_int w0, big_int w1) : word0(w0), word1(w1) {}</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keyword">explicit</span> <span class="keyword">operator</span> bool()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> (word0 | word1) != 0; }</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keywordtype">bool</span> operator==(<span class="keyword">const</span> <a class="code hl_struct" href="structmatch__t.html">match_t</a> &amp;a)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> word0 == a.word0 &amp;&amp; word1 == a.word1; }</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordtype">bool</span> operator!=(<span class="keyword">const</span> <a class="code hl_struct" href="structmatch__t.html">match_t</a> &amp;a)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> word0 != a.word0 || word1 != a.word1; }</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordtype">bool</span> matches(big_int v)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        <span class="keywordflow">return</span> (v | word1) == word1 &amp;&amp; ((~v &amp; word1) | word0) == word0;</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    }</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordtype">void</span> setwidth(<span class="keywordtype">int</span> bits) {</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        big_int mask = (big_int(1) &lt;&lt; bits) - 1;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        word0 &amp;= mask;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        word1 &amp;= mask;</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        mask &amp;= ~(word0 | word1);</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        word0 |= mask;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        word1 |= mask;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    }</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <a class="code hl_struct" href="structmatch__t.html">match_t</a>(<span class="keywordtype">int</span> size, big_int val, big_int mask) : word0(~val &amp; mask), word1(val &amp; mask) {</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        setwidth(size);</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    }</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keyword">static</span> <a class="code hl_struct" href="structmatch__t.html">match_t</a> dont_care(<span class="keywordtype">int</span> size) { <span class="keywordflow">return</span> <a class="code hl_struct" href="structmatch__t.html">match_t</a>(size, 0, 0); }</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>};</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="foldopen" id="foldopen00036" data-start="{" data-end="};">
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="struct_p4_1_1match__t.html">   36</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_p4_1_1match__t.html">match_t</a> {</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    big_int word0, word1;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <a class="code hl_struct" href="struct_p4_1_1match__t.html">match_t</a>() : word0(0), word1(0) {}</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <a class="code hl_struct" href="struct_p4_1_1match__t.html">match_t</a>(big_int w0, big_int w1) : word0(w0), word1(w1) {}</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keyword">explicit</span> <span class="keyword">operator</span> bool()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> (word0 | word1) != 0; }</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordtype">bool</span> operator==(<span class="keyword">const</span> <a class="code hl_struct" href="struct_p4_1_1match__t.html">match_t</a> &amp;a)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> word0 == a.word0 &amp;&amp; word1 == a.word1; }</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordtype">bool</span> operator!=(<span class="keyword">const</span> <a class="code hl_struct" href="struct_p4_1_1match__t.html">match_t</a> &amp;a)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> word0 != a.word0 || word1 != a.word1; }</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordtype">bool</span> matches(big_int v)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <span class="keywordflow">return</span> (v | word1) == word1 &amp;&amp; ((~v &amp; word1) | word0) == word0;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    }</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordtype">void</span> setwidth(<span class="keywordtype">int</span> bits) {</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        big_int mask = (big_int(1) &lt;&lt; bits) - 1;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        word0 &amp;= mask;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        word1 &amp;= mask;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        mask &amp;= ~(word0 | word1);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        word0 |= mask;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        word1 |= mask;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    }</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <a class="code hl_struct" href="struct_p4_1_1match__t.html">match_t</a>(<span class="keywordtype">int</span> size, big_int val, big_int mask) : word0(~val &amp; mask), word1(val &amp; mask) {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        setwidth(size);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    }</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keyword">static</span> <a class="code hl_struct" href="struct_p4_1_1match__t.html">match_t</a> dont_care(<span class="keywordtype">int</span> size) { <span class="keywordflow">return</span> <a class="code hl_struct" href="struct_p4_1_1match__t.html">match_t</a>(size, 0, 0); }</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>};</div>
 </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>std::ostream &amp;operator&lt;&lt;(std::ostream &amp;, <span class="keyword">const</span> <a class="code hl_struct" href="structmatch__t.html">match_t</a> &amp;);</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="keywordtype">bool</span> operator&gt;&gt;(<span class="keyword">const</span> <span class="keywordtype">char</span> *, <a class="code hl_struct" href="structmatch__t.html">match_t</a> &amp;);</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_MATCH_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="astructmatch__t_html"><div class="ttname"><a href="structmatch__t.html">match_t</a></div><div class="ttdef"><b>Definition</b> match.h:34</div></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>std::ostream &amp;operator&lt;&lt;(std::ostream &amp;, <span class="keyword">const</span> <a class="code hl_struct" href="struct_p4_1_1match__t.html">match_t</a> &amp;);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="keywordtype">bool</span> operator&gt;&gt;(<span class="keyword">const</span> <span class="keywordtype">char</span> *, <a class="code hl_struct" href="struct_p4_1_1match__t.html">match_t</a> &amp;);</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_MATCH_H_ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
+<div class="ttc" id="astruct_p4_1_1match__t_html"><div class="ttname"><a href="struct_p4_1_1match__t.html">P4::match_t</a></div><div class="ttdef"><b>Definition</b> match.h:36</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

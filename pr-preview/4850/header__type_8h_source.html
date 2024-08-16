@@ -145,45 +145,51 @@ $(function(){initNavTree('header__type_8h_source.html',''); initResizable(true);
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;ir/ir.h&quot;</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;ir/visitor.h&quot;</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="foldopen" id="foldopen00023" data-start="{" data-end="};">
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="class_check_header_types.html">   23</a></span><span class="keyword">class </span><a class="code hl_class" href="class_check_header_types.html">CheckHeaderTypes</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_modifier.html">Modifier</a> {</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keyword">const</span> IR::V1Program *global = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <a class="code hl_class" href="class_check_header_types.html">CheckHeaderTypes</a>() { setName(<span class="stringliteral">&quot;CheckHeaderTypes&quot;</span>); }</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordtype">bool</span> preorder(IR::V1Program *glob)<span class="keyword"> override </span>{</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        global = glob;</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    }</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keywordtype">bool</span> preorder(IR::Metadata *meta)<span class="keyword"> override </span>{</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="keywordflow">if</span> (<span class="keyword">auto</span> type = global-&gt;get&lt;IR::v1HeaderType&gt;(meta-&gt;type_name))</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>            meta-&gt;type = type-&gt;as_metadata;</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>            error(ErrorType::ERR_TYPE_ERROR, <span class="stringliteral">&quot;%s: No header type %s&quot;</span>, meta-&gt;srcInfo,</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>                  meta-&gt;type_name);</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    }</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordtype">bool</span> preorder(IR::HeaderOrMetadata *hdr)<span class="keyword"> override </span>{</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="keywordflow">if</span> (<span class="keyword">auto</span> type = global-&gt;get&lt;IR::v1HeaderType&gt;(hdr-&gt;type_name))</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>            hdr-&gt;type = type-&gt;as_header;</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>            error(ErrorType::ERR_TYPE_ERROR, <span class="stringliteral">&quot;%s: No header type %s&quot;</span>, hdr-&gt;srcInfo, hdr-&gt;type_name);</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    }</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>};</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="foldopen" id="foldopen00025" data-start="{" data-end="};">
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="class_p4_1_1_check_header_types.html">   25</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_check_header_types.html">CheckHeaderTypes</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_modifier.html">Modifier</a> {</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keyword">const</span> IR::V1Program *global = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <a class="code hl_class" href="class_p4_1_1_check_header_types.html">CheckHeaderTypes</a>() { setName(<span class="stringliteral">&quot;CheckHeaderTypes&quot;</span>); }</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordtype">bool</span> preorder(IR::V1Program *glob)<span class="keyword"> override </span>{</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        global = glob;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    }</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keywordtype">bool</span> preorder(IR::Metadata *meta)<span class="keyword"> override </span>{</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <span class="keywordflow">if</span> (<span class="keyword">auto</span> type = global-&gt;get&lt;IR::v1HeaderType&gt;(meta-&gt;type_name))</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>            meta-&gt;type = type-&gt;as_metadata;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>            <a class="code hl_function" href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">error</a>(ErrorType::ERR_TYPE_ERROR, <span class="stringliteral">&quot;%s: No header type %s&quot;</span>, meta-&gt;srcInfo,</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>                  meta-&gt;type_name);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    }</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordtype">bool</span> preorder(IR::HeaderOrMetadata *hdr)<span class="keyword"> override </span>{</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <span class="keywordflow">if</span> (<span class="keyword">auto</span> type = global-&gt;get&lt;IR::v1HeaderType&gt;(hdr-&gt;type_name))</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>            hdr-&gt;type = type-&gt;as_header;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>            <a class="code hl_function" href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">error</a>(ErrorType::ERR_TYPE_ERROR, <span class="stringliteral">&quot;%s: No header type %s&quot;</span>, hdr-&gt;srcInfo, hdr-&gt;type_name);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    }</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>};</div>
 </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
-<div class="foldopen" id="foldopen00049" data-start="{" data-end="};">
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="class_header_type_max_length_calculator.html">   49</a></span><span class="keyword">class </span><a class="code hl_class" href="class_header_type_max_length_calculator.html">HeaderTypeMaxLengthCalculator</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_modifier.html">Modifier</a> {</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordtype">bool</span> preorder(IR::Type_StructLike *hdr_type) <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>};</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="foldopen" id="foldopen00051" data-start="{" data-end="};">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="class_p4_1_1_header_type_max_length_calculator.html">   51</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_header_type_max_length_calculator.html">HeaderTypeMaxLengthCalculator</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_modifier.html">Modifier</a> {</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordtype">bool</span> preorder(IR::Type_StructLike *hdr_type) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>};</div>
 </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#endif </span><span class="comment">/* FRONTENDS_P4_14_HEADER_TYPE_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_check_header_types_html"><div class="ttname"><a href="class_check_header_types.html">CheckHeaderTypes</a></div><div class="ttdef"><b>Definition</b> header_type.h:23</div></div>
-<div class="ttc" id="aclass_header_type_max_length_calculator_html"><div class="ttname"><a href="class_header_type_max_length_calculator.html">HeaderTypeMaxLengthCalculator</a></div><div class="ttdef"><b>Definition</b> header_type.h:49</div></div>
-<div class="ttc" id="aclass_modifier_html"><div class="ttname"><a href="class_modifier.html">Modifier</a></div><div class="ttdef"><b>Definition</b> visitor.h:368</div></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#endif </span><span class="comment">/* FRONTENDS_P4_14_HEADER_TYPE_H_ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="aclass_p4_1_1_check_header_types_html"><div class="ttname"><a href="class_p4_1_1_check_header_types.html">P4::CheckHeaderTypes</a></div><div class="ttdef"><b>Definition</b> header_type.h:25</div></div>
+<div class="ttc" id="aclass_p4_1_1_header_type_max_length_calculator_html"><div class="ttname"><a href="class_p4_1_1_header_type_max_length_calculator.html">P4::HeaderTypeMaxLengthCalculator</a></div><div class="ttdef"><b>Definition</b> header_type.h:51</div></div>
+<div class="ttc" id="aclass_p4_1_1_modifier_html"><div class="ttname"><a href="class_p4_1_1_modifier.html">P4::Modifier</a></div><div class="ttdef"><b>Definition</b> visitor.h:372</div></div>
+<div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
+<div class="ttc" id="anamespace_p4_html_a9fe6085b1cee8f21f098c9db89644b58"><div class="ttname"><a href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">P4::error</a></div><div class="ttdeci">void error(const char *format, Args &amp;&amp;...args)</div><div class="ttdoc">Report an error with the given message.</div><div class="ttdef"><b>Definition</b> error.h:51</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

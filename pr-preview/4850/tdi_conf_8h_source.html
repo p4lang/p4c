@@ -144,28 +144,28 @@ $(function(){initNavTree('tdi_conf_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;backends/dpdk/options.h&quot;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_d_p_d_k.html">DPDK</a> {</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4_1_1_d_p_d_k.html">P4::DPDK</a> {</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
 <div class="foldopen" id="foldopen00024" data-start="{" data-end="};">
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="class_d_p_d_k_1_1_tdi_bfrt_conf.html">   24</a></span><span class="keyword">class </span><a class="code hl_class" href="class_d_p_d_k_1_1_tdi_bfrt_conf.html">TdiBfrtConf</a> {</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="class_p4_1_1_d_p_d_k_1_1_tdi_bfrt_conf.html">   24</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_d_p_d_k_1_1_tdi_bfrt_conf.html">TdiBfrtConf</a> {</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> <span class="keyword">private</span>:</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keyword">static</span> std::vector&lt;cstring&gt; getPipeNames(<span class="keyword">const</span> IR::Declaration_Instance *main);</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="keyword">static</span> std::optional&lt;cstring&gt; findPipeName(<span class="keyword">const</span> IR::P4Program *prog,</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>                                               <a class="code hl_class" href="class_d_p_d_k_1_1_dpdk_options.html">DPDK::DpdkOptions</a> &amp;options);</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>                                               <a class="code hl_class" href="class_p4_1_1_d_p_d_k_1_1_dpdk_options.html">DPDK::DpdkOptions</a> &amp;options);</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="class_d_p_d_k_1_1_tdi_bfrt_conf.html#ac9a924ca823c1097b90e74d0757ab43b">generate</a>(<span class="keyword">const</span> IR::P4Program *prog, <a class="code hl_class" href="class_d_p_d_k_1_1_dpdk_options.html">DPDK::DpdkOptions</a> &amp;options);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="class_p4_1_1_d_p_d_k_1_1_tdi_bfrt_conf.html#ac7678e4c3fb0e94ba2532d70288121fb">generate</a>(<span class="keyword">const</span> IR::P4Program *prog, <a class="code hl_class" href="class_p4_1_1_d_p_d_k_1_1_dpdk_options.html">DPDK::DpdkOptions</a> &amp;options);</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>};</div>
 </div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}  <span class="comment">// namespace DPDK</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}  <span class="comment">// namespace P4::DPDK</span></div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_DPDK_TDICONF_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_d_p_d_k_1_1_dpdk_options_html"><div class="ttname"><a href="class_d_p_d_k_1_1_dpdk_options.html">DPDK::DpdkOptions</a></div><div class="ttdef"><b>Definition</b> backends/dpdk/options.h:24</div></div>
-<div class="ttc" id="aclass_d_p_d_k_1_1_tdi_bfrt_conf_html"><div class="ttname"><a href="class_d_p_d_k_1_1_tdi_bfrt_conf.html">DPDK::TdiBfrtConf</a></div><div class="ttdef"><b>Definition</b> tdiConf.h:24</div></div>
-<div class="ttc" id="aclass_d_p_d_k_1_1_tdi_bfrt_conf_html_ac9a924ca823c1097b90e74d0757ab43b"><div class="ttname"><a href="class_d_p_d_k_1_1_tdi_bfrt_conf.html#ac9a924ca823c1097b90e74d0757ab43b">DPDK::TdiBfrtConf::generate</a></div><div class="ttdeci">static void generate(const IR::P4Program *prog, DPDK::DpdkOptions &amp;options)</div><div class="ttdoc">Generate the TDI configuration file required by the tdi-pipeline-builder.</div><div class="ttdef"><b>Definition</b> tdiConf.cpp:70</div></div>
-<div class="ttc" id="anamespace_d_p_d_k_html"><div class="ttname"><a href="namespace_d_p_d_k.html">DPDK</a></div><div class="ttdef"><b>Definition</b> dpdk/backend.cpp:36</div></div>
+<div class="ttc" id="aclass_p4_1_1_d_p_d_k_1_1_dpdk_options_html"><div class="ttname"><a href="class_p4_1_1_d_p_d_k_1_1_dpdk_options.html">P4::DPDK::DpdkOptions</a></div><div class="ttdef"><b>Definition</b> backends/dpdk/options.h:24</div></div>
+<div class="ttc" id="aclass_p4_1_1_d_p_d_k_1_1_tdi_bfrt_conf_html"><div class="ttname"><a href="class_p4_1_1_d_p_d_k_1_1_tdi_bfrt_conf.html">P4::DPDK::TdiBfrtConf</a></div><div class="ttdef"><b>Definition</b> tdiConf.h:24</div></div>
+<div class="ttc" id="aclass_p4_1_1_d_p_d_k_1_1_tdi_bfrt_conf_html_ac7678e4c3fb0e94ba2532d70288121fb"><div class="ttname"><a href="class_p4_1_1_d_p_d_k_1_1_tdi_bfrt_conf.html#ac7678e4c3fb0e94ba2532d70288121fb">P4::DPDK::TdiBfrtConf::generate</a></div><div class="ttdeci">static void generate(const IR::P4Program *prog, DPDK::DpdkOptions &amp;options)</div><div class="ttdoc">Generate the TDI configuration file required by the tdi-pipeline-builder.</div><div class="ttdef"><b>Definition</b> tdiConf.cpp:70</div></div>
+<div class="ttc" id="anamespace_p4_1_1_d_p_d_k_html"><div class="ttname"><a href="namespace_p4_1_1_d_p_d_k.html">P4::DPDK</a></div><div class="ttdef"><b>Definition</b> dpdk/backend.cpp:36</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

@@ -1,0 +1,17 @@
+<map id="P4::BMV2::BMV2Options" name="P4::BMV2::BMV2Options">
+<area shape="rect" id="Node000001" title=" " alt="" coords="238,225,418,251"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_b_m_v2_1_1_portable_options.html" title=" " alt="" coords="111,299,307,324"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="298,260,230,301,227,296,296,255"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_b_m_v2_1_1_simple_switch_options.html" title=" " alt="" coords="331,299,562,324"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="360,255,429,296,426,301,358,260"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_compiler_options.html" title=" " alt="" coords="251,152,405,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="331,191,331,225,325,225,325,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_parser_options.html" title=" " alt="" coords="260,79,396,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="331,118,331,152,325,152,325,118"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_util_1_1_options.html" title=" " alt="" coords="265,5,391,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="331,44,331,79,325,79,325,44"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_b_m_v2_1_1_pna_nic_options.html" title=" " alt="" coords="5,372,192,397"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="181,334,118,374,115,370,179,329"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_b_m_v2_1_1_psa_switch_options.html" title=" " alt="" coords="216,372,424,397"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="240,329,303,370,300,374,237,334"/>
+</map>
