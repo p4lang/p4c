@@ -55,6 +55,8 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
         listTerminators.pop_back();
     }
 
+    // For collections which provide support for range based for loops
+    // e.g. `IndexedVector` or similar collections
     template <typename Collection, typename Func>
     void visitCollection(const Collection &collection, const std::string &separator,
                          Func visitFunc) {
@@ -65,6 +67,19 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
             }
             first = false;
             visitFunc(elem);
+        }
+    }
+
+    // For `Enumerator`
+    template <typename Enumerator, typename Func>
+    void visitCollection(Enumerator &enumerator, const std::string &separator, Func visitFunc) {
+        bool first = true;
+        while (enumerator.moveNext()) {
+            if (!first) {
+                builder.append(separator);
+            }
+            first = false;
+            visitFunc(enumerator.getCurrent());
         }
     }
 

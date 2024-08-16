@@ -239,13 +239,10 @@ bool P4Formatter::preorder(const IR::Type_Enum *t) {
     builder.append(t->name);
     builder.spc();
     builder.blockStart();
-    bool first = true;
-    for (auto a : *t->getDeclarations()) {
-        if (!first) builder.append(",\n");
-        first = false;
+    visitCollection(*t->getDeclarations(), ",\n", [this](const auto &a) {
         builder.emitIndent();
         builder.append(a->getName());
-    }
+    });
     builder.newline();
     builder.blockEnd(true);
     return false;
@@ -582,13 +579,10 @@ bool P4Formatter::preorder(const IR::Type_Error *d) {
 bool P4Formatter::preorder(const IR::Declaration_MatchKind *d) {
     builder.append("match_kind ");
     builder.blockStart();
-    bool first = true;
-    for (auto a : *d->getDeclarations()) {
-        if (!first) builder.append(",\n");
-        first = false;
+    visitCollection(*d->getDeclarations(), ",\n", [this](const auto &a) {
         builder.emitIndent();
         builder.append(a->getName());
-    }
+    });
     builder.newline();
     builder.blockEnd(true);
     return false;
@@ -1248,12 +1242,7 @@ bool P4Formatter::preorder(const IR::P4Control *c) {
 
 bool P4Formatter::preorder(const IR::ParameterList *p) {
     builder.append("(");
-    bool first = true;
-    for (auto param : *p->getEnumerator()) {
-        if (!first) builder.append(", ");
-        first = false;
-        visit(param);
-    }
+    visitCollection(*p->getEnumerator(), ", ", [this](const auto &param) { visit(param); });
     builder.append(")");
     return false;
 }
