@@ -263,7 +263,8 @@ How to use?</h3>
 <p>The output file (<code>out.o</code>) can be injected to the uBPF VM.</p>
 <h1><a class="anchor" id="ubpf-backend-test-programs"></a>
 uBPF Backend test programs</h1>
-<p>This Section contains description of the basic P4 programs, which were used to test the functionality of the P4-to-uBPF compiler. All tests have been run on the <a href="https://github.com/Orange-OpenSource/p4rt-ovs">P4rt-OVS</a> switch. You can use <a href="../tests/environment/Vagrantfile">Vagrantfile</a> to set up a test environment.</p>
+<p>This Section contains description of the basic P4 programs, which were used to test the functionality of the P4-to-uBPF compiler. All tests have been run on the <a href="https://github.com/Orange-OpenSource/p4rt-ovs">P4rt-OVS</a> switch.</p>
+<p>You can use <a href="https://github.com/p4lang/p4c/blob/main/backends/ubpf/tests/environment/Vagrantfile">Vagrantfile</a> to set up a test environment.</p>
 <p>Before any experiment the following commands need to be invoked:</p>
 <p><code>bash @section compile-p4-program-to-c-code compile P4 program to C code $ p4c-ubpf -o test.c PROGRAM.p4 $ sudo ovs-ofctl del-flows br0 @section compile-testc-to-bpf-machine-code compile test.c to BPF machine code $ clang-6.0 -O2 -I .. -target bpf -c test.c -o /tmp/test.o @section load-filter-bpf-program Load filter BPF program $ sudo ovs-ofctl load-bpf-prog br0 1 /tmp/test.o @section setup-rules-to-forward-traffic-bidirectional Setup rules to forward traffic (bidirectional) $ sudo ovs-ofctl add-flow br0 in_port=2,actions=prog:1,output:1 $ sudo ovs-ofctl add-flow br0 in_port=1,actions=prog:1,output:2 </code></p>
 <p><b>Note!</b> The P4-uBPF compiler works properly with <code>clang-6.0</code>. We noticed some problems when using older versions of clang (e.g. 3.9).</p>
@@ -400,6 +401,7 @@ Steps to Run Tests:</h2>
 <p class="startli">In case of tests errors please check if the <code>p4rt-ovs</code> switch is up and running (ie. <code>ps aux</code>).</p>
 </li>
 </ol>
+<p>--&gt;</p>
 <h4><a class="anchor" id="custom-c-extern-functions"></a>
 Custom C extern functions</h4>
 <p>The P4 to uBPF compiler allows to define custom C extern functions and call them from P4 program as P4 action.</p>
