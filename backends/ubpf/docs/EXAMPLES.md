@@ -1,8 +1,8 @@
 <!-- 
 Documentation Inclusion:
-This README is integrated as a subsection of the "Getting Started" page in the P4 compiler documentation.
+This README is integrated as a subsection of the "uBPF Backend" page in the P4 compiler documentation.
 
-Refer to the specific section here: [Getting Started - Subsection](https://p4lang.github.io/p4c/getting_started#getting-started-subsection)
+Refer to the specific section here: [uBPF Backend test programs - Subsection](https://p4lang.github.io/p4c/ubpf_backend.html#ubpf-backend-test-programs)
 -->
 # uBPF Backend test programs
 

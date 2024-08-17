@@ -5,7 +5,7 @@
 Documentation Inclusion:
 This README is integrated as a standalone page in the P4 compiler documentation.
 
-Refer to the full page here: https://p4lang.github.io/p4c/p4tools.html
+Refer to the full page here: [P4Tools](https://p4lang.github.io/p4c/p4tools.html)
 -->
 <!--!
 \internal

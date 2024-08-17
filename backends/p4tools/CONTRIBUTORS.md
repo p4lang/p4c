@@ -1,3 +1,10 @@
+<!-- 
+Documentation Inclusion:
+This README is integrated as a subsection of the "P4Tools" page in the P4 compiler documentation.
+
+Refer to the specific section here: [P4Tools Contributors
+ - Subsection](https://p4lang.github.io/p4c/pr-preview/4850/p4tools.html#p4tools-contributors)
+-->
 # P4Tools Contributors
 
 P4Testgen is a test oracle for the P4 language. Given a P4_16 program and a specification of the underlying architecture, it automatically generates a comprehensive set of input/output tests that can be executed to validate a target device.

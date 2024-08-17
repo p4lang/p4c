@@ -1,11 +1,11 @@
+<!--!
+\page contribute Contribute to the P4 Compiler Project                                                                      
+-->
 <!-- 
 Documentation Inclusion:
 This README is integrated as a standalone page in the P4 compiler documentation.
 
 Refer to the full page here: [Contribute to the P4 Compiler Project](https://p4lang.github.io/p4c/contribute.html)
--->
-<!--!
-\page contribute Contribute to the P4 Compiler Project                                                                      
 -->
 <!--!
 \internal

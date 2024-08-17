@@ -1,3 +1,9 @@
+<!-- 
+Documentation Inclusion:
+This README is integrated as a subsection of the "uBPF Backend" page in the P4 compiler documentation.
+Refer to the specific section here: [uBPF Backend testing - Subsection](https://p4lang.github.io/p4c/ubpf_backend.html#ubpf-backend-testing)
+-->
+
 # uBPF Backend testing
 
 Tests use two VMs:

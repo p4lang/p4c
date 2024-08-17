@@ -1,3 +1,10 @@
+<!-- 
+Documentation Inclusion:
+This README is integrated as a subsection of the "Contribute to the P4 Compiler Project" page in the P4 compiler documentation.
+
+Refer to the specific section here: [Coding Standard - Subsection](https://p4lang.github.io/p4c/contribute.html#coding-standard)
+-->
+
 # Coding Standard
 
 When writing code in any language the most important consideration is
