@@ -270,7 +270,7 @@ var NAVTREE =
         [ "Git commits and pull requests", "contribute.html#git-commits-and-pull-requests", null ]
       ] ]
     ] ],
-    [ "CHANGELOG", "changelog.html", null ],
+    [ "Releases", "changelog.html", null ],
     [ "Topics", "topics.html", "topics" ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
