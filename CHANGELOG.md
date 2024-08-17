@@ -1,11 +1,11 @@
+<!--!
+\page changelog Releases                                                               
+-->
 <!-- 
 Documentation Inclusion:
 This README is integrated as a standalone page in the P4 compiler documentation.
 
 Refer to the full page here: [Releases](https://p4lang.github.io/p4c/changelog.html)
--->
-<!--!
-\page changelog Releases                                                               
 -->
 <!--!
 \internal
