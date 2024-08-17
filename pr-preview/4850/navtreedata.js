@@ -255,7 +255,6 @@ var NAVTREE =
         [ "License", "p4testgen.html#license-1", null ]
       ] ]
     ] ],
-    [ "CONTRIBUTING", "contributing-2.html", null ],
     [ "Contribute to the P4 Compiler Project", "contribute.html", [
       [ "Coding Standard", "contribute.html#coding-standard", [
         [ "Contributing License", "contribute.html#contributing-license", null ],
@@ -321,11 +320,11 @@ var NAVTREEINDEX =
 "class_p4_1_1_simplify_def_use.html",
 "class_p4_1_1_test_1_1_symbolic_converter.html",
 "class_p4_1_1_v1_1_1_v1_parser_driver.html#a9ac7e4ecd7b9eef00855f5b018ec936f",
-"ebpf_backend.html#long-term-goals",
-"namespace_p4_1_1_b_m_v2.html#af717ee1924b291e4da83cb5e5b016ff9",
-"struct_p4_1_1_closed_range.html#a27e93e2aca5a79e2c3236a8e2226cf0a",
+"ebpf_backend.html#lpm",
+"namespace_p4_1_1_control_plane_a_p_i.html",
+"struct_p4_1_1_closed_range.html#a6077cc9781ca281322fc4e19fd0504bd",
 "struct_p4_1_1_half_open_range.html#a7536d29555335b4d5641f1e838bf22ae",
-"struct_p4_1_1_util_1_1_hasher_3_01std_1_1unique__ptr_3_01_t_01_4_01_4.html"
+"struct_p4_1_1_util_1_1_hasher_3_01unsigned_01char_01_4.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
