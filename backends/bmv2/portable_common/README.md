@@ -1,6 +1,13 @@
+<!-- 
+Documentation Inclusion:
+This README is integrated as a subsection of the "Behavioral Model Backend" page in the P4 compiler documentation.
+
+Refer to the specific section here: [portable_common - Subsection](https://p4lang.github.io/p4c/behavioral_model_backend.html#portable_common)
+-->
+
 # portable_common
 
-This directory contains reusable components common to both the `psa_switch` and `pna_nic` backends.
+The [`portable_common` directory](https://github.com/p4lang/p4c/tree/main/backends/bmv2/portable_common) contains reusable components common to both the `psa_switch` and `pna_nic` backends.
 
 
 

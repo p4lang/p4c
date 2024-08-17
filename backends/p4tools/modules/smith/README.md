@@ -1,6 +1,12 @@
 <!--!
 \page p4smith  P4Smith                                                               
 -->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
+
+Refer to the full page here: [P4Smith](https://p4lang.github.io/p4c/p4smith.html)
+-->
 <!--!
 \internal
 -->

@@ -1,6 +1,12 @@
 <!--!
 \page tc_backend TC Backend                                                               
 -->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
+
+Refer to the full page here: [TC Backend](https://p4lang.github.io/p4c/pr-preview/4850/tc_backend.html)
+-->
 <!--!
 \internal
 -->

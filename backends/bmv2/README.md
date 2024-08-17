@@ -1,6 +1,12 @@
 <!--!
 \page behavioral_model_backend Behavioral Model Backend                                                                       
 -->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
+
+Refer to the full page here: https://p4lang.github.io/p4c/behavioral_model_backend.html
+-->
 <!--!
 \internal
 -->

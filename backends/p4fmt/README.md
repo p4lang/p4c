@@ -1,6 +1,12 @@
 <!--!
 \page p4fmt p4fmt (P4 Formatter)                                                               
 -->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
+
+Refer to the full page here: [p4fmt (P4 Formatter)](https://p4lang.github.io/p4c/p4fmt.html)
+-->
 <!--!
 \internal
 -->

@@ -1,4 +1,11 @@
-# %P4 Compiler Documentation (P4C)
+<!-- 
+Documentation Overview:
+This README serves as the main page of the P4 compiler documentation.
+
+It provides an entry point to the various sections, guides, and references available for the P4 compiler.
+
+Direct link to documentation: [P4 Compiler Documentation](https://p4lang.github.io/p4c/)
+-->
 
 @htmlonly
 <div class="diagram-container">

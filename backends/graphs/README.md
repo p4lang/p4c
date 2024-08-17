@@ -1,6 +1,12 @@
 <!--!
 \page graphs_backend Graphs Backend                                                                  
 -->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
+
+Refer to the full page here: [Graphs Backend](https://p4lang.github.io/p4c/graphs_backend.html)
+-->
 <!--!
 \internal
 -->
@@ -8,7 +14,6 @@
 <!--!
 \endinternal
 -->
-
 <!--!
 [TOC]
 -->

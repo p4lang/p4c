@@ -1,6 +1,12 @@
 <!--!
 \page intermediate_representation_ir P4C Intermediate Representation (IR)                                                                                                                          
 -->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
+
+Refer to the full page here: [P4C Intermediate Representation (IR)](https://p4lang.github.io/p4c/intermediate_representation_ir.html)
+-->
 <!--!
 \internal
 -->
