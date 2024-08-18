@@ -40,12 +40,12 @@ class ValidateStringAnnotations final : public Inspector {
             return;
         }
         if (annotation->expr.size() != 1)
-            ::error(ErrorType::ERR_INVALID, "%1%: annotation must have exactly 1 argument",
-                    annotation);
+            error(ErrorType::ERR_INVALID, "%1%: annotation must have exactly 1 argument",
+                  annotation);
         auto e0 = annotation->expr.at(0);
         if (!e0->is<IR::StringLiteral>())
-            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: @%2% annotation's value must be a string", e0,
-                    annotation->name.originalName);
+            error(ErrorType::ERR_TYPE_ERROR, "%1%: @%2% annotation's value must be a string", e0,
+                  annotation->name.originalName);
     }
 };
 
