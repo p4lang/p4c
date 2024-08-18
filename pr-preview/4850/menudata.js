@@ -27,6 +27,8 @@ var menudata={children:[
 {text:"P4C Repository Organization",url:"repository_structure.html"},
 {text:"Getting Started",url:"getting_started.html"},
 {text:"P4C Intermediate Representation (IR)",url:"intermediate_representation_ir.html"},
+{text:"Frontend",url:"frontend.html"},
+{text:"Midend",url:"@ref midend"},
 {text:"Backends",url:"usergroup0.html",children:[
 {text:"Behavioral Model Backend",url:"behavioral_model_backend.html"},
 {text:"DPDK Backend",url:"dpdk_backend.html"},

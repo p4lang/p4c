@@ -28,6 +28,8 @@ var NAVTREE =
     [ "P4C Repository Organization", "repository_structure.html", null ],
     [ "Getting Started", "getting_started.html", null ],
     [ "P4C Intermediate Representation (IR)", "intermediate_representation_ir.html", null ],
+    [ "Frontend", "frontend.html", null ],
+    [ "Midend", "@ref midend", null ],
     [ "Backends", "usergroup0.html", [
       [ "Behavioral Model Backend", "behavioral_model_backend.html", null ],
       [ "DPDK Backend", "dpdk_backend.html", null ],
@@ -72,29 +74,29 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"annotated.html",
+"@ref midend",
 "class_p4_1_1_b_m_v2_1_1_pna_enum_on32_bits.html",
 "class_p4_1_1_control_plane_a_p_i_1_1_p4_info_maps.html#a906a59a9170c1ae6fcccab61f006cac7",
-"class_p4_1_1_d_p_d_k_1_1_direction_to_reg_read.html#a13185144f9542dd94b567f316f0d088e",
-"class_p4_1_1_do_convert_errors.html",
-"class_p4_1_1_e_b_p_f_1_1_e_b_p_f_hash_p_s_a.html#a04c71d4e53f8536089d0b1079c57c9ac",
-"class_p4_1_1_e_b_p_f_1_1_x_d_p_egress_deparser_p_s_a.html",
-"class_p4_1_1_if_in_parser.html",
-"class_p4_1_1_p4_tools_1_1_abstract_p4c_tool.html#abb583f3714214154261c44ee9ed33f3e",
-"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_test_backend.html#add367b59dc9dc5a8473a12e271a01028",
-"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_token.html#a97ab9a18c1613a98438b5a554f6cacbe",
-"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_expr_stepper.html#a26eac5191fab531d8b02ed28201a99be",
-"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_program_info.html#aeb2ee22471989aa047f509c4d7c6d1a9",
-"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_framework.html#abc35f8e3e43c46a81b8111aee85b5577",
-"class_p4_1_1_p4_tools_1_1_trace_events_1_1_packet.html",
+"class_p4_1_1_d_p_d_k_1_1_direction_to_reg_read.html",
+"class_p4_1_1_do_convert_enums.html#a9ca6f838994e2ffca8f28f2258e5383d",
+"class_p4_1_1_e_b_p_f_1_1_e_b_p_f_hash_p_s_a.html",
+"class_p4_1_1_e_b_p_f_1_1_test_target.html",
+"class_p4_1_1_i_r_1_1_vector_base.html",
+"class_p4_1_1_p4_tools_1_1_abstract_p4c_tool.html#a4da104312718d15bcce5bfef46590704",
+"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_test_backend.html#aab9a6d3948d7b1b1be221c93c2cd925d",
+"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_token.html#a8bfad2624a29edb0e63d9af19443bd7b",
+"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_expr_stepper.html#a0b8f7a79e07a6a7296c5f17e3e6de5d0",
+"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_program_info.html#acca77f233f6f692f42cb5778bf72478f",
+"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_framework.html#a5eaddadaca6cf2a08134bf5666dd93d0",
+"class_p4_1_1_p4_tools_1_1_trace_events_1_1_method_call.html#ac479d5d9409f0ef7322f76121694e1e4",
 "class_p4_1_1_pass_manager.html",
 "class_p4_1_1_simplify_parsers.html",
-"class_p4_1_1_test_1_1_z3_solver_satisfiability_checks.html#a120645e79bc3bdaf2adc5ecbfefe90cb",
+"class_p4_1_1_test_1_1_z3_solver_satisfiability_checks.html",
 "class_p4_1_1_validate_match_annotations.html",
-"functions_o.html",
-"namespace_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2.html#ad5a48f3d178f3dcac8ff95677434bc40",
-"struct_p4_1_1_diagnostic_count_info.html#a9ef3639182cd95e75114d3f3fde77535",
-"struct_p4_1_1_specialization_info.html"
+"functions_m.html",
+"namespace_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2.html#a9a3f2fa401025ddc8c913db307cb9934",
+"struct_p4_1_1_diagnostic_count_info.html#a8f9e7a1f3f84ec8e9be2fee20edab056",
+"struct_p4_1_1_r_t_t_i_1_1has__rtti.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

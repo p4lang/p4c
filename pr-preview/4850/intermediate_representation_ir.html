@@ -146,7 +146,7 @@ $(function(){initNavTree('intermediate_representation_ir.html',''); initResizabl
         <a href="#overall-flow">Overall flow</a>
         <ul>
           <li class="level3">
-            <a href="#frontend-1">Frontend</a>
+            <a href="#frontend-2">Frontend</a>
           </li>
           <li class="level3">
             <a href="#mid-end">Mid-end</a>
@@ -252,7 +252,7 @@ ControlFlowVisitor</h4>
 <h2><a class="anchor" id="overall-flow"></a>
 Overall flow</h2>
 <p>The compiler flow can be roughly split into frontend, middle-end, and backend. The frontend does largely non-target specific transforms designed to clean up the IR and get it into a canonical form. The middle make target-dependent IR transformations. The back end performs resource allocation decisions. As this backend step may fail due to constraint violations, it may need to backtrack through the middle-end to try a different configuration. We do not anticipate needing to backtrack through frontend passes. The split between Front/Middle/Back-end is largely arbitrary, and some passes may end up being moved between them if we later find it makes more sense to do so.</p>
-<h3><a class="anchor" id="frontend-1"></a>
+<h3><a class="anchor" id="frontend-2"></a>
 Frontend</h3>
 <p>The frontend parses the source code into IR that corresponds directly to the source code. It then runs a series of passes like type-checking (modifying nodes to indicate their inferred types), constant folding, dead code elimination, etc. The initial IR tree corresponds to the source code, and then various mostly target independent transformation are done. Complex scoping or structuring in the code is flattened here.</p>
 <h3><a class="anchor" id="mid-end"></a>
