@@ -14,7 +14,7 @@ Refer to the full page here: [Frontend](https://p4lang.github.io/p4c/frontend.ht
 <!--!
 \endinternal
 -->
-The front-end of the P4 compiler is responsible for transforming the high-level P4 source code into an Intermediate Representation (IR) while ensuring that the code is valid and optimized. This stage is entirely architecture-independent and consists of several critical passes:
+The front end of the P4 compiler translates P4 source code into the P4 Intermediate Representation (P4C-IR), performs type-checking, and ensures that the P4 program complies with the P4 specification. The front end also applies architecture-independent optimizations such as Strength Reduction, Constant Folding, Inlining, or Dead-Code Elimination. This is a non-exhaustive list of passes:
 
 - **Program Parsing:** Converts the P4 source code into an Abstract Syntax Tree (AST).
 - **Validation:** Checks the program against P4 language rules and constraints to ensure it is valid.
