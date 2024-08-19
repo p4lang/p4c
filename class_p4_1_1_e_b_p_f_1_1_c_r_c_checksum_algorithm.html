@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::EBPF::CRCChecksumAlgorithm Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::EBPF::CRCChecksumAlgorithm Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -314,7 +314,7 @@ virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><b>toImp
 </table>
 </div><div class="memdoc">
 <p>This method generates a C code that is responsible for updating a CRC check value from a given data.</p>
-<p>From following <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code: Checksum&lt;bit&lt;32&gt;&gt;(PSA_HashAlgorithm_t.CRC32) checksum; checksum.update(parsed_hdr.crc.f1); There will be generated a C code: crc32_update(&amp;c_0_reg, (u8 *) &amp;(parsed_hdr-&gt;crc.f1), 5, 0xEDB88320); Where: c_0_reg - a checksum internal state (CRC register) parsed_hdr-&gt;field1 - a data on which CRC is calculated 5 - a field size in bytes 0xEDB88320 - a polynomial in a reflected bit order. </p>
+<p>From following P4 code: Checksum&lt;bit&lt;32&gt;&gt;(PSA_HashAlgorithm_t.CRC32) checksum; checksum.update(parsed_hdr.crc.f1); There will be generated a C code: crc32_update(&amp;c_0_reg, (u8 *) &amp;(parsed_hdr-&gt;crc.f1), 5, 0xEDB88320); Where: c_0_reg - a checksum internal state (CRC register) parsed_hdr-&gt;field1 - a data on which CRC is calculated 5 - a field size in bytes 0xEDB88320 - a polynomial in a reflected bit order. </p>
 
 <p>Implements <a class="el" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_hash_algorithm_p_s_a.html">P4::EBPF::EBPFHashAlgorithmPSA</a>.</p>
 

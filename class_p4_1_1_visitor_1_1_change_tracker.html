@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::Visitor::ChangeTracker Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::Visitor::ChangeTracker Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -160,7 +160,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>visitOnce</b> (const 
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Assists visitors in traversing the IR. </p>
-<p>A <a class="el" href="class_p4_1_1_visitor_1_1_change_tracker.html" title="Assists visitors in traversing the IR.">ChangeTracker</a> object assists visitors traversing the IR by tracking each node. The <code>start</code> method begins tracking, and <code>finish</code> ends it. The <code>done</code> method determines whether the node has been visited, and <code>result</code> returns the new IR if it changed. </p>
+<p>A ChangeTracker object assists visitors traversing the IR by tracking each node. The <code>start</code> method begins tracking, and <code>finish</code> ends it. The <code>done</code> method determines whether the node has been visited, and <code>result</code> returns the new IR if it changed. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="afdb84718ba8bb1c25d7bd34981b92597" name="afdb84718ba8bb1c25d7bd34981b92597"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afdb84718ba8bb1c25d7bd34981b92597">&#9670;&#160;</a></span>busy()</h2>
@@ -281,7 +281,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>visitOnce</b> (const 
 <dl class="section return"><dt>Returns</dt><dd>true if the node has changed or been removed or coalesced.</dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname"><a class="el" href="class_p4_1_1_util_1_1_compiler_bug.html" title="This class indicates a bug in the compiler.">Util::CompilerBug</a></td><td>This method fails if `start(@orig)` has not previously been invoked. </td></tr>
+    <tr><td class="paramname">Util::CompilerBug</td><td>This method fails if `start(@orig)` has not previously been invoked. </td></tr>
   </table>
   </dd>
 </dl>

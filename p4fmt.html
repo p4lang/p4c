@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: Overview</title>
+<title>P4 Compiler Documentation (P4C): p4fmt (P4 Formatter)</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -94,7 +94,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('md_01__overview.html',''); initResizable(true); });
+$(function(){initNavTree('p4fmt.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -120,30 +120,50 @@ $(function(){initNavTree('md_01__overview.html',''); initResizable(true); });
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Overview</div></div>
+  <div class="headertitle"><div class="title">p4fmt (P4 Formatter)</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="overview"></a></p>
-<p>The P4C compiler is a compiler infrastructure for the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> compiler designed with the following goals:</p>
+<div class="toc"><h3>Table of Contents</h3>
 <ul>
-<li>Support current and future versions of <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a></li>
-<li>Support multiple back-ends<ul>
-<li>Generate code for ASICs, NICs, FPGAs, software switches and other targets</li>
+  <li class="level1 empty">
+    <ul>
+      <li class="level2">
+        <a href="#build">Build</a>
+      </li>
+      <li class="level2">
+        <a href="#usage-1">Usage</a>
+      </li>
+      <li class="level2">
+        <a href="#reference-checker-for-p4fmt">Reference Checker for P4Fmt</a>
+      </li>
+    </ul>
+  </li>
+</ul>
+</div>
+<div class="textblock"><p>p4fmt is a WIP formatter for P4. It's in a highly experimental phase and, not yet stable/reliable for general use. Contributions and feedbacks from the community would be highly appreciated.</p>
+<h2><a class="anchor" id="build"></a>
+Build</h2>
+<ul>
+<li>Setup P4C correctly, from <a href="https://github.com/p4lang/p4c#dependencies">here</a>.</li>
+<li>Follow the instructions here to <a href="https://github.com/p4lang/p4c#installing-p4c-from-source">build</a>.</li>
+</ul>
+<p>Later <code>p4fmt</code> executable can be found inside the <code>p4c/build/</code> dir, and can be invoked as <code>./build/p4fmt</code> from p4c's root dir.</p>
+<h2><a class="anchor" id="usage-1"></a>
+Usage</h2>
+<ul>
+<li><p class="startli">Takes an output file with a <code>-o</code> flag and writes to it.</p>
+<p class="startli"><code>./build/p4fmt &lt;p4 source file&gt; -o &lt;output_file&gt;</code></p><ul>
+<li><p class="startli">If an output file is not provided with <code>-o</code> flag, it just prints the output on the stdout.</p>
+<p class="startli"><code>./build/p4fmt &lt;p4 source file&gt;</code></p>
+</li>
 </ul>
 </li>
-<li>Provide support for other tools (debuggers, IDEs, control-plane, etc.)</li>
-<li>Open-source front-end</li>
-<li>Extensible architecture (easy to add new passes and optimizations)</li>
-<li>Use modern compiler techniques (immutable IR, visitor patterns, strong type checking, etc.)</li>
-<li>Comprehensive testing</li>
 </ul>
-<h1><a class="anchor" id="additional-documentation-1"></a>
-Additional documentation</h1>
-<ul>
-<li>The documentation for P4_16 and P4Runtime is available <a href="https://p4.org/specs/">here</a></li>
-<li>the core design of the compiler intermediate representation (IR) and the visitor patterns are briefly described in <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html">IR</a></li>
-<li>The <a href="https://github.com/p4lang/p4c/blob/main/docs/migration-guide.pptx">migration guide</a> describes how P4_14 (v1.0) programs are translated into P4_16 programs </li>
-</ul>
+<p>Sample Usage: </p><pre class="fragment">./build/p4fmtsample.p4
+./build/p4fmt sample.p4 -o out.p4
+</pre><h2><a class="anchor" id="reference-checker-for-p4fmt"></a>
+Reference Checker for P4Fmt</h2>
+<p>Sample Usage: <code>./build/checkfmt --file &lt;p4 source file&gt; --reference-file &lt;p4 reference file&gt;</code> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

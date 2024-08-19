@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4Tools Contributors</title>
+<title>P4 Compiler Documentation (P4C): TC Backend</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -94,7 +94,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2_c_o_n_t_r_i_b_u_t_o_r_s.html',''); initResizable(true); });
+$(function(){initNavTree('tc_backend.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -120,26 +120,46 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">P4Tools Contributors</div></div>
+  <div class="headertitle"><div class="title">TC Backend</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="p4tools-contributors"></a></p>
-<p>P4Testgen is a test oracle for the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> language. Given a P4_16 program and a specification of the underlying architecture, it automatically generates a comprehensive set of input/output tests that can be executed to validate a target device.</p>
-<h1><a class="anchor" id="core-developers"></a>
-Core Developers</h1>
+<div class="toc"><h3>Table of Contents</h3>
 <ul>
-<li>@fruffy (NYU)</li>
-<li>@liujed (Akita Software)</li>
-<li>@pkotikal (Intel)</li>
-<li>@vhavel (Intel)</li>
-<li>@hannelita (Intel)</li>
-<li>@vladyslav-dubina (Litsoft)</li>
-<li>@VolodymyrPeschanenko (Litsoft)</li>
-<li>@jnfoster (Cornell and Intel)</li>
+  <li class="level1 empty">
+    <ul>
+      <li class="level2">
+        <a href="#how-to-use-it-1">How to use it?</a>
+      </li>
+      <li class="level2">
+        <a href="#contacts-1">Contacts</a>
+      </li>
+    </ul>
+  </li>
 </ul>
-<h1><a class="anchor" id="history"></a>
-History</h1>
-<p>Jed Liu was the original architect of P4Testgen and designed the abstract machine that allows using P4C's visitors to implement arbitrary traversals of the program IR. Building on Jed's design, Fabian Ruffy completed the symbolic interpreter for P4_16's core features and designed extensions for common open-source architectures. He also developed the model of packets, taint tracking, and concolic execution. Prathima Kotikalapudi developed the extensible test backend, with instantiations for PTF and STF. Vojtěch Havel assisted with the implementation of the symbolic interpreter and the development of P4Testgen extensions for several Intel architectures. Hanneli Tavante added support for strategies that guide the exploration of paths that maximize various notions of coverage. Volodymyr Peschanenko, and Vlad Dubina developed the SMT-LIB interface to Z3, implemented front-end and mid-end passes such as parser unrolling, and completed the back end for the V1Model architecture on the BMv2 simple switch. Nate Foster guided the design of P4Testgen and contributed to various aspects of the symbolic interpreter. </p>
+</div>
+<div class="textblock"><p>TC backend aims to generate files for the P4TC implementation in Linux kernel (from 6.3.x version). P4TC is an implementation of the Programming Protocol-independent Packet Processors (P4) that is kernel based, building on top of Linux TC.</p>
+<p>For more info on P4TC, Please refer:</p>
+<ul>
+<li><a href="https://github.com/p4tc-dev/docs/blob/main/why-p4tc.md">What Is P4TC</a></li>
+<li><a href="https://github.com/p4tc-dev/p4tc-examples-pub">P4TC examples</a></li>
+<li><a href="https://github.com/p4tc-dev/p4tc-tutorial-pub">P4TC tutorial</a></li>
+</ul>
+<p>The p4c-pna-p4tc compiler accepts the P4-16 programs written for the pna.p4 architecture model.</p>
+<p>This backend generates three different outputs as explained below:</p>
+<ul>
+<li>A 'template' file which is a shell script that form template definitions for the different P4 objects (tables, registers, actions etc).</li>
+<li>A 'c' file that has parser and the rest of the software datapath generated in ebpf and need to be compiled into binaries.</li>
+<li>A 'json' introspection file used for control plane.</li>
+</ul>
+<p>The backend for TC reuses code from the p4c-ebpf for generating c file.</p>
+<h2><a class="anchor" id="how-to-use-it-1"></a>
+How to use it?</h2>
+<p>The sample p4 programs are located in the <a href="../../testdata/p4tc_samples"><code>testdata/p4tc_samples</code> directory</a>.</p>
+<p>To generate the 'template' file, 'c' file and 'json' file: </p><pre class="fragment">p4c-pna-p4tc simple_exact_example.p4 -o exact.template -c exact.c -i exact.json
+</pre><h2><a class="anchor" id="contacts-1"></a>
+Contacts</h2>
+<p>Sosutha Sethuramapandian <a href="#" onclick="location.href='mai'+'lto:'+'sos'+'ut'+'ha.'+'se'+'thu'+'ra'+'map'+'an'+'dia'+'n@'+'int'+'el'+'.co'+'m'; return false;">sosut<span class="obfuscator">.nosp@m.</span>ha.s<span class="obfuscator">.nosp@m.</span>ethur<span class="obfuscator">.nosp@m.</span>amap<span class="obfuscator">.nosp@m.</span>andia<span class="obfuscator">.nosp@m.</span>n@in<span class="obfuscator">.nosp@m.</span>tel.c<span class="obfuscator">.nosp@m.</span>om</a></p>
+<p>Usha Gupta <a href="#" onclick="location.href='mai'+'lto:'+'ush'+'a.'+'gup'+'ta'+'@in'+'te'+'l.c'+'om'; return false;">usha.<span class="obfuscator">.nosp@m.</span>gupt<span class="obfuscator">.nosp@m.</span>a@int<span class="obfuscator">.nosp@m.</span>el.c<span class="obfuscator">.nosp@m.</span>om</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: Repository</title>
+<title>P4 Compiler Documentation (P4C): P4C Repository Organization</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -94,7 +94,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html',''); initResizable(true); });
+$(function(){initNavTree('repository_structure.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -120,11 +120,48 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Repository</div></div>
+  <div class="headertitle"><div class="title">P4C Repository Organization</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="repository"></a></p>
-<p>This folder contains documentation for the P4_16 prototype compiler. The code and documentation are hosted in the <a href="https://github.com/p4lang/p4c">p4c repository</a>.</p>
+<div class="toc"><h3>Table of Contents</h3>
+<ul>
+  <li class="level1">
+    <a href="#compiler-source-code-organization">Compiler source code organization</a>
+  </li>
+  <li class="level1">
+    <a href="#additional-documentation">Additional documentation</a>
+  </li>
+  <li class="level1">
+    <a href="#writing-documentation">Writing documentation</a>
+    <ul>
+      <li class="level2">
+        <a href="#documentation-comments-style-guide">Documentation Comments Style Guide</a>
+      </li>
+      <li class="level2">
+        <a href="#git-usage">Git usage</a>
+      </li>
+      <li class="level2">
+        <a href="#debugging">Debugging</a>
+      </li>
+      <li class="level2">
+        <a href="#testing">Testing</a>
+        <ul>
+          <li class="level3">
+            <a href="#adding-new-test-data">Adding new test data</a>
+          </li>
+        </ul>
+      </li>
+      <li class="level2">
+        <a href="#coding-conventions">Coding conventions</a>
+      </li>
+      <li class="level2">
+        <a href="#compiler-driver">Compiler Driver</a>
+      </li>
+    </ul>
+  </li>
+</ul>
+</div>
+<div class="textblock"><p>This folder contains documentation for the P4_16 prototype compiler. The code and documentation are hosted in the <a href="https://github.com/p4lang/p4c">p4c repository</a>.</p>
 <h1><a class="anchor" id="compiler-source-code-organization"></a>
 Compiler source code organization</h1>
 <div class="fragment"><div class="line">p4c</div>
@@ -200,7 +237,7 @@ Compiler source code organization</h1>
 Additional documentation</h1>
 <ul>
 <li>the P4_14 and P4_16 languages are described in their respective specifications, available <a href="https://p4.org/specs">here</a>.</li>
-<li>the core design of the compiler intermediate representation (IR) and the visitor patterns are briefly described in <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html">IR</a></li>
+<li>the core design of the compiler intermediate representation (IR) and the visitor patterns are briefly described in IR</li>
 <li>The <a href="https://github.com/p4lang/p4c/blob/main/docs/migration-guide.pptx">migration guide</a> describes how P4_14 (v1.0) programs are translated into P4_16 programs</li>
 <li>The <a href="https://github.com/p4lang/p4c/blob/main/docs/compiler-design.pptx">compiler design</a> describes the salient features of the compiler design and implementation; this document has several subsections:<ul>
 <li>Compiler goals</li>
@@ -212,9 +249,9 @@ Additional documentation</h1>
 </ul>
 </li>
 <li>Specific back-ends may have their own documentation; check the <code>extensions</code> sub-folders, and also the following supplied back-ends:<ul>
-<li><a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html">BMv2</a></li>
-<li><a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html">eBPF</a></li>
-<li><a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2_r_e_a_d_m_e.html">P4Tools</a></li>
+<li>BMv2</li>
+<li>eBPF</li>
+<li>P4Tools</li>
 </ul>
 </li>
 <li>Check out the <a href="https://github.com/TakeshiTseng/IntelliJ-P4-Plugin">IntelliJ P4 plugin</a></li>
@@ -249,7 +286,7 @@ Git usage</h2>
 <div class="line">git push -f</div>
 </div><!-- fragment --><ul>
 <li>After committing changes, create a pull request (using the github web UI)</li>
-<li>Follow these <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_coding_standard_philosophy.html#git-commits-and-pull-requests">guidelines</a> to write commit messages and open pull requests.</li>
+<li>Follow these <a class="el" href="contribute.html#git-commits-and-pull-requests">guidelines</a> to write commit messages and open pull requests.</li>
 </ul>
 <h2><a class="anchor" id="debugging"></a>
 Debugging</h2>
@@ -259,7 +296,7 @@ Debugging</h2>
 <li>To debug the compiler parser you can set the environment variable <code>YYDEBUG</code> to 1</li>
 <li>The following <code>IR::Node</code> methods can be used to print nice representations of compiler data structures:<ul>
 <li><code>void dbprint(std::ostream&amp; out) const</code>: this method is used when logging information. It should print useful debug information, intended for consumption by compiler writers.</li>
-<li><code>cstring toString() const</code>: this method is used when reporting error messages to compiler users. It should only display information that is related to the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> user program, and never internal compiler data structures.</li>
+<li><code>cstring toString() const</code>: this method is used when reporting error messages to compiler users. It should only display information that is related to the P4 user program, and never internal compiler data structures.</li>
 </ul>
 </li>
 <li>Use the LOG* macros for writing debug messages. gdb misbehaves frequently, so log messages are the best way to debug your programs. The number in the function name is the debug verbosity. The higher, the less important the message. This macro invokes the <code>dbprint</code> method on objects that provide it. Here is an example usage: <code>LOG1("Replacing " &lt;&lt; id &lt;&lt; " with " &lt;&lt; newid);</code></li>
@@ -290,7 +327,7 @@ Testing</h2>
 </ul>
 <h3><a class="anchor" id="adding-new-test-data"></a>
 Adding new test data</h3>
-<p>To add a new input test with a sample <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code file (under <code>testdata/p4_16_samples/</code> for example), one needs to:</p>
+<p>To add a new input test with a sample P4 code file (under <code>testdata/p4_16_samples/</code> for example), one needs to:</p>
 <ul>
 <li>Add the <code>*.p4</code> file to the <code>testdata/p4_16_samples/</code> directory. The file name might determine which test suite this test belongs to. Those are determined by cmake commands.<ul>
 <li>For example, <a href="https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/p4test/CMakeLists.txt#L63">any P4 file under <code>testdata/p4_16_samples/</code></a> belongs to the <a href="https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/p4test/CMakeLists.txt#L113"><code>p4</code> test suite</a> (meaning it will run with <code>make check-p4</code>).</li>
@@ -308,7 +345,7 @@ Adding new test data</h3>
 <h2><a class="anchor" id="coding-conventions"></a>
 Coding conventions</h2>
 <ul>
-<li>Coding style is guided by the <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_coding_standard_philosophy.html">following rules</a>.</li>
+<li>Coding style is guided by the following rules.</li>
 <li>We generally follow the <a href="https://google.github.io/styleguide/cppguide.html">Google C++ Style Guide</a>. This is partially enforced by <code>cpplint</code> and <code>clang-format</code> and their respective configuration files. We have customized Google's <code>cpplint.py</code> tool for our purposes. The tool can be invoked with <code>make cpplint</code>. To be able to run <code>clang-format</code> on Ubuntu 20.04, install it with <code>pip3 install --user clang-format</code>. Do not use the Debian package. Both tools run in a git hook and as part of CI.</li>
 <li>Commenting Style is guided by the <a class="el" href="#documentation-comments-style-guide">following rules</a>.</li>
 <li>Watch out for <code>const</code>; it is very important.</li>
@@ -325,7 +362,7 @@ Coding conventions</h2>
 <li>Use the <code>BUG()</code> macro to signal an exception. This macro is guaranteed to throw an exception.</li>
 <li>Use <code>CHECK_NULL()</code> to validate that pointers are not nullptr.</li>
 <li>Use <code>BUG_CHECK()</code> instead of <code>assert</code>, and always supply an informative error message.</li>
-<li>Use <code>error()</code> and <code>warning()</code> for error reporting. See the <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_coding_standard_philosophy.html#handling-errors">guidelines</a> for more details.</li>
+<li>Use <code>error()</code> and <code>warning()</code> for error reporting. See the <a class="el" href="contribute.html#handling-errors">guidelines</a> for more details.</li>
 <li>Use <code>LOGn()</code> for log messages &ndash; the <code>n</code> is an integer constant for verbosity level. These can be controlled on a per-source-file basis with the -T option. LOG1 should be used for general messages, so that running with -T*:1 (turning on all LOG1 messages) is not too overwhelming. LOG2 should be used to print information about the results of a module that later passes may need to debug them. Details of what a module or pass is doing and looking at (only of interest when debugging that code) should be at LOG4 or higher.</li>
 <li>Use the <code>vector</code> and <code>array</code> wrappers for <code>std::vector</code> and <code>std::array</code> (these do bounds checking on all accesses).</li>
 <li>Use <code>ordered_map</code> and <code>ordered_set</code> when you need to iterate; they provide deterministic iterators.</li>

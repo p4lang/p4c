@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::DoRemoveActionParameters Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::DoRemoveActionParameters Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -403,7 +403,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <div class="line">   action a() { arg = 10; x = arg; }</div>
 <div class="line">   table t() { actions = { a; } }</div>
 <div class="line">   apply { ... } }</div>
-</div><!-- fragment --><dl class="section pre"><dt>Precondition</dt><dd>This pass requires each action to have a single caller. It must run after the <a class="el" href="class_p4_1_1_localize_actions.html">LocalizeActions</a> pass, which in turn must be run after actions inlining. It also run after <a class="el" href="class_p4_1_1_unique_parameters.html">UniqueParameters</a> pass. </dd></dl>
+</div><!-- fragment --><dl class="section pre"><dt>Precondition</dt><dd>This pass requires each action to have a single caller. It must run after the LocalizeActions pass, which in turn must be run after actions inlining. It also run after UniqueParameters pass. </dd></dl>
 <dl class="section post"><dt>Postcondition</dt><dd>in/inout/out parameters of an action are removed. </dd></dl>
 </div></div><!-- contents -->
 </div><!-- doc-content -->

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: Behavioral Model Backend</title>
+<title>P4 Compiler Documentation (P4C): Behavioral Model Backend</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -94,7 +94,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html',''); initResizable(true); });
+$(function(){initNavTree('behavioral_model_backend.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -123,8 +123,71 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_
   <div class="headertitle"><div class="title">Behavioral Model Backend</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="behavioral-model-backend"></a></p>
-<p>This is a back-end which generates code for the <a href="https://github.com/p4lang/behavioral-model.git">Behavioral Model version 2 (BMv2)</a>.</p>
+<div class="toc"><h3>Table of Contents</h3>
+<ul>
+  <li class="level1">
+    <a href="#dependencies-1">Dependencies</a>
+  </li>
+  <li class="level1">
+    <a href="#unsupported-p4_16-language-features">Unsupported P4_16 language features</a>
+  </li>
+  <li class="level1">
+    <a href="#bmv2-pna_nic-backend">BMv2 &quot;pna_nic&quot; Backend</a>
+    <ul>
+      <li class="level2 empty">
+        <ul>
+          <li class="level3 empty">
+            <ul>
+              <li class="level4">
+                <a href="#pnaprogramstructureh-pnaprogramstructurecpp">pnaProgramStructure.h, pnaProgramStructure.cpp</a>
+                <ul>
+                  <li class="level5">
+                    <a href="#midendh-midendcpp">midend.h, midend.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#optionsh-optionscpp-1">options.h, options.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#pnanich-pnaniccpp">pnaNic.h, pnaNic.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#maincpp">main.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#versionhcmake">version.h.cmake</a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#portable_common">portable_common</a>
+    <ul>
+      <li class="level2 empty">
+        <ul>
+          <li class="level3">
+            <a href="#midendh-midendcpp-1">midend.h, midend.cpp</a>
+          </li>
+          <li class="level3">
+            <a href="#optionsh-optionscpp-2">options.h, options.cpp</a>
+          </li>
+          <li class="level3">
+            <a href="#portableh-portablecpp">portable.h, portable.cpp</a>
+          </li>
+          <li class="level3">
+            <a href="#portableprogramstructureh-portableprogramstructurecpp">portableProgramStructure.h, portableProgramStructure.cpp</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+</div>
+<div class="textblock"><p>This is a back-end which generates code for the <a href="https://github.com/p4lang/behavioral-model.git">Behavioral Model version 2 (BMv2)</a>.</p>
 <p>It can accept either P4_14 programs, or P4_16 programs written for the <code>v1model.p4</code> switch model.</p>
 <h1><a class="anchor" id="dependencies-1"></a>
 Dependencies</h1>
@@ -151,8 +214,46 @@ Unsupported P4_16 language features</h1>
 <div class="line">}</div>
 </div><!-- fragment --></li>
 <li>user-defined extern types / methods which are not defined in <code>v1model.p4</code></li>
-<li>stacks of header unions </li>
+<li>stacks of header unions</li>
 </ul>
+<h1><a class="anchor" id="bmv2-pna_nic-backend"></a>
+BMv2 "pna_nic" Backend</h1>
+<p>The <a href="https://github.com/p4lang/p4c/tree/main/backends/bmv2/pna_nic"><code>backends/bmv2/pna_nic</code> directory</a> contains components specific to the BMv2's PNA NIC (Portable NIC Architecture) backend in the P4C compiler. The files in this folder depend on each other, on the files in the <code>bmv2/common</code> and <code>portable_common</code> directories. Most of the classes are inherited from the classes in the <code>portable_common</code> directory.</p>
+<p>Output Binary: <code>p4c-bm2-pna</code></p>
+<h4><a class="anchor" id="pnaprogramstructureh-pnaprogramstructurecpp"></a>
+pnaProgramStructure.h, pnaProgramStructure.cpp</h4>
+<p>Defines and implements the program structure (metadata, parsers, controls, and deparsers) and parsing logic specific to the BMv2's PNA NIC backend.</p>
+<h5><a class="anchor" id="midendh-midendcpp"></a>
+midend.h, midend.cpp</h5>
+<p>Defines the mid-end processing of the PNA NIC compiler. Performs various transformations and optimizations on the program's Intermediate Representation (IR).</p>
+<h5><a class="anchor" id="optionsh-optionscpp-1"></a>
+options.h, options.cpp</h5>
+<p>Manages the command-line options for the PNA NIC compiler.</p>
+<h5><a class="anchor" id="pnanich-pnaniccpp"></a>
+pnaNic.h, pnaNic.cpp</h5>
+<p>Provides backend implementation to the BMv2's PNA NIC compiler.</p>
+<h5><a class="anchor" id="maincpp"></a>
+main.cpp</h5>
+<p>Sets up compilation environment, integrates various components, and executes the PNA NIC compiler.</p>
+<h5><a class="anchor" id="versionhcmake"></a>
+version.h.cmake</h5>
+<p>Defines macros containing version information for the PNA NIC compiler.  </p>
+<h1><a class="anchor" id="portable_common"></a>
+portable_common</h1>
+<p>This directory contains reusable components common to both the <code>psa_switch</code> and <code>pna_nic</code> backends.</p>
+<h3><a class="anchor" id="midendh-midendcpp-1"></a>
+midend.h, midend.cpp</h3>
+<p>Defines the common mid-end processing of both the <code>psa_switch</code> and <code>pna_nic</code> backends.</p>
+<h3><a class="anchor" id="optionsh-optionscpp-2"></a>
+options.h, options.cpp</h3>
+<p>Defines the common command-line options of both the <code>psa_switch</code> and <code>pna_nic</code> backends.</p>
+<h3><a class="anchor" id="portableh-portablecpp"></a>
+portable.h, portable.cpp</h3>
+<p>Defines common functionalities that generate representations of P4 programs.</p>
+<p>The files <code>portableProgramStructure.h</code> and <code>portableProgramStructure.cpp</code> are in the <code>backends/common</code> directory.</p>
+<h3><a class="anchor" id="portableprogramstructureh-portableprogramstructurecpp"></a>
+portableProgramStructure.h, portableProgramStructure.cpp</h3>
+<p>Defines and implements the common program structure of both the <code>psa_switch</code> and <code>pna_nic</code> backends.   </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

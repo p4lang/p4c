@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::DPDK Namespace Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::DPDK Namespace Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -408,7 +408,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>isValidMemberField</b
 <tr class="separator:a05e5b51220708b332b57ccc8b25866b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abef3a44b0d96df06f67c341a1048eea0" id="r_abef3a44b0d96df06f67c341a1048eea0"><td class="memItemLeft" align="right" valign="top"><a id="abef3a44b0d96df06f67c341a1048eea0" name="abef3a44b0d96df06f67c341a1048eea0"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>reservedNames</b> (<a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, const std::vector&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a> &gt; &amp;names, <a class="el" href="class_p4_1_1cstring.html">cstring</a> &amp;resName)</td></tr>
-<tr class="memdesc:abef3a44b0d96df06f67c341a1048eea0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check for reserved names for <a class="el" href="namespace_p4_1_1_d_p_d_k.html">DPDK</a> target. <br /></td></tr>
+<tr class="memdesc:abef3a44b0d96df06f67c341a1048eea0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check for reserved names for DPDK target. <br /></td></tr>
 <tr class="separator:abef3a44b0d96df06f67c341a1048eea0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc048ec3681f8ffd245360f0160abc08" id="r_afc048ec3681f8ffd245360f0160abc08"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afc048ec3681f8ffd245360f0160abc08">toStr</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *const n)</td></tr>
 <tr class="separator:afc048ec3681f8ffd245360f0160abc08"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -429,9 +429,9 @@ const char&#160;</td><td class="memItemRight" valign="bottom"><b>DirectResourceT
 <tr class="separator:a4b2c834b86511fcf01c06c641c3a81f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="namespace_p4_1_1_d_p_d_k.html">DPDK</a> architecture assume the following control block signature.</p>
+<div class="textblock"><p>DPDK architecture assume the following control block signature.</p>
 <p>control ingress(header h, metadata m); control egress(header h, metadata m); We need to convert psa control blocks to this form.</p>
-<p>Passes defined in this file are used for generating Context JSON output for <a class="el" href="namespace_p4_1_1_d_p_d_k.html">DPDK</a> Context JSON is a JSON file used by the control plane software for manipulating tables and actions. It contains all relevant information regarding the tables and actions. The context JSON is based on the JSON Schema defined in DPDK_context_schema.json. </p>
+<p>Passes defined in this file are used for generating Context JSON output for DPDK Context JSON is a JSON file used by the control plane software for manipulating tables and actions. It contains all relevant information regarding the tables and actions. The context JSON is based on the JSON Schema defined in DPDK_context_schema.json. </p>
 </div><hr/><h2 class="groupheader">Class Documentation</h2>
 <a name="struct_p4_1_1_d_p_d_k_1_1action_attributes" id="struct_p4_1_1_d_p_d_k_1_1action_attributes"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#struct_p4_1_1_d_p_d_k_1_1action_attributes">&#9670;&#160;</a></span>P4::DPDK::actionAttributes</h2>
@@ -695,7 +695,7 @@ tableKeys</td>
 <td class="fieldname">
 tableType</td>
 <td class="fielddoc">
-<p>Table type can one of "match", "selection" and "action Match table is a regular <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> table, selection table and action tables are compiler generated tables when psa_implementation is action_selector or action_profile. </p>
+<p>Table type can one of "match", "selection" and "action Match table is a regular P4 table, selection table and action tables are compiler generated tables when psa_implementation is action_selector or action_profile. </p>
 </td></tr>
 </table>
 
@@ -752,7 +752,7 @@ tableType</td>
 </div><div class="memdoc">
 
 <p>Name of the metadata used as output port. </p>
-<p>PNA specification does not contain standard metadata for specifying output port. rte_swx_pipeline in <a class="el" href="namespace_p4_1_1_d_p_d_k.html">DPDK</a> uses instruction 'tx' to specify the output port for a packet. To send a packet to a specific port, we need to do the following:</p><ul>
+<p>PNA specification does not contain standard metadata for specifying output port. rte_swx_pipeline in DPDK uses instruction 'tx' to specify the output port for a packet. To send a packet to a specific port, we need to do the following:</p><ul>
 <li>add definition of new metadata field to main metadata structure for rte_swx_pipeline</li>
 <li>use the same name of this newly defined metadata field when assigning value of output port</li>
 <li>use this metadata field with 'tx' instruction. </li>

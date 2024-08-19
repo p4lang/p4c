@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::HalfOpenRange&lt; Unit, Order &gt; Struct Template Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::HalfOpenRange&lt; Unit, Order &gt; Struct Template Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -277,7 +277,7 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>hash_value</b> (con
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46bf9">RangeUnit</a> Unit, <a class="el" href="namespace_p4.html#a48f0763b16b8e792f4b9d7dd50906318">Endian</a> Order&gt;<br />
 struct P4::HalfOpenRange&lt; Unit, Order &gt;</div><p>A half-open range of bits or bytes - <code>[lo, hi)</code> - specified in terms of a specific endian order. Half-open ranges include <code>lo</code> but do not include <code>hi</code>, so <code>HalfOpenRange(3, 5)</code> contains <code>3</code> and <code>4</code> but not <code>5</code>.</p>
 <p>Use a half-open range when you want to allow for the possibility that the range may be empty, which may be represented by setting <code>lo</code> and <code>hi</code> to the same value. Using a half-open range may also make some algorithms more natural to express, and it may make working with external code easier since half-open ranges are idiomatic in C++.</p>
-<p>Note that there are many ways to represent an empty range - <code>(1, 1)</code> is empty, for example, but so is <code>(2, 2)</code>. Many operations on HalfOpenRanges will canonicalize the empty range representation, so don't rely on it - just call <code><a class="el" href="#a9a2726be5a5bdc608e48b7408d2f9b7b">empty()</a></code> to determine if a range is empty.</p>
+<p>Note that there are many ways to represent an empty range - <code>(1, 1)</code> is empty, for example, but so is <code>(2, 2)</code>. Many operations on HalfOpenRanges will canonicalize the empty range representation, so don't rely on it - just call <code>empty()</code> to determine if a range is empty.</p>
 <p>XXX: Currently, for backwards compatibility, it's possible to construct ranges where <code>lo</code> is greater than <code>hi</code>. We should enforce that ranges are consistent; we'll add the necessary checks after the existing code has been audited.</p>
 <p>XXX: We should also add checks to avoid integer overflow. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
@@ -801,7 +801,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
 </table>
 </div><div class="memdoc">
 <p>Convert this range to the smallest enclosing range with the specified unit.</p>
-<p>Conversion from bytes to bits is exact, but conversion from bits to bytes is lossy and may cause the size of the range to grow if the bits aren't byte-aligned. If that would be problematic, use <code><a class="el" href="#a5ac35a06da0a0a2602f2b2cabcb22b34">isLoAligned()</a></code> and <code><a class="el" href="#a3da1904777a2548e971bea114b0916a0">isHiAligned()</a></code> to check before converting, or just check that converting the result back to bits yields the original range.</p>
+<p>Conversion from bytes to bits is exact, but conversion from bits to bytes is lossy and may cause the size of the range to grow if the bits aren't byte-aligned. If that would be problematic, use <code>isLoAligned()</code> and <code>isHiAligned()</code> to check before converting, or just check that converting the result back to bits yields the original range.</p>
 <p>This operation will result in integer overflow when dealing with ZeroToMax or MinToMax-sized ranges.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
@@ -855,7 +855,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The highest numbered index in the range. For Endian::Network, this is the least significant bit or byte; for <a class="el" href="namespace_p4.html#a48f0763b16b8e792f4b9d7dd50906318a0f9197b3e286a7522984831949087332" title="Most significant bit/byte first.">Endian::Little</a>, it's the most significant. Because this is a half-open range, the range element this index identifies is not included in the range. </p>
+<p>The highest numbered index in the range. For Endian::Network, this is the least significant bit or byte; for Endian::Little, it's the most significant. Because this is a half-open range, the range element this index identifies is not included in the range. </p>
 
 </div>
 </div>
@@ -872,7 +872,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The lowest numbered index in the range. For Endian::Network, this is the most significant bit or byte; for <a class="el" href="namespace_p4.html#a48f0763b16b8e792f4b9d7dd50906318a0f9197b3e286a7522984831949087332" title="Most significant bit/byte first.">Endian::Little</a>, it's the least significant. </p>
+<p>The lowest numbered index in the range. For Endian::Network, this is the most significant bit or byte; for Endian::Little, it's the least significant. </p>
 
 </div>
 </div>

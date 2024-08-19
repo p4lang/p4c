@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::P4Tools::MidEnd Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::P4Tools::MidEnd Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -449,7 +449,7 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
 <tr class="separator:ad5fbe40632b94fd5f81268281e92c262 inherit pub_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Implements a generic mid end for all targets. If needed, targets can customize this to implement things like targets-specific conversion of <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> enums to bit&lt;n&gt;.</p>
+<div class="textblock"><p>Implements a generic mid end for all targets. If needed, targets can customize this to implement things like targets-specific conversion of P4 enums to bit&lt;n&gt;.</p>
 <p>Mid-end implementations must establish certain invariants in the IR.</p>
 <p>TODO: Document these invariants. So far, we have:</p><ul>
 <li>controls and parsers are inlined</li>
@@ -527,7 +527,7 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Provides a target-specific pass that converts <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> enums to bit&lt;n&gt;. The default implementation returns <a class="el" href="class_p4_1_1_convert_enums.html">P4::ConvertEnums</a>, instantiated with the policy provided by @mkChooseEnumRepresentation. </p>
+<p>Provides a target-specific pass that converts P4 enums to bit&lt;n&gt;. The default implementation returns P4::ConvertEnums, instantiated with the policy provided by @mkChooseEnumRepresentation. </p>
 
 </div>
 </div>
@@ -553,7 +553,7 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Provides a target-specific policy for converting <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> enums to bit&lt;n&gt;. The default implementation converts all enums to bit&lt;32&gt;. </p>
+<p>Provides a target-specific policy for converting P4 enums to bit&lt;n&gt;. The default implementation converts all enums to bit&lt;32&gt;. </p>
 <p>Implements the default enum-conversion policy, which converts all enums to bit&lt;32&gt;.</p>
 
 </div>
@@ -580,7 +580,7 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Provides a target-specific policy for converting <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> error to bit&lt;n&gt;. The default implementation converts all errors to bit&lt;32&gt;. </p>
+<p>Provides a target-specific policy for converting P4 error to bit&lt;n&gt;. The default implementation converts all errors to bit&lt;32&gt;. </p>
 <p>Implements the default enum-conversion policy, which converts all enums to bit&lt;32&gt;.</p>
 
 </div>
@@ -607,7 +607,7 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Provides a target-specific pass that converts <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> errors to bit&lt;n&gt;. The default implementation returns P4Tools::ConvertErrors, instantiated with the policy provided by @mkChooseEnumRepresentation. </p>
+<p>Provides a target-specific pass that converts P4 errors to bit&lt;n&gt;. The default implementation returns P4Tools::ConvertErrors, instantiated with the policy provided by @mkChooseEnumRepresentation. </p>
 
 </div>
 </div>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::P4Tools::P4Testgen::GreedyNodeSelection Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::P4Tools::P4Testgen::GreedyNodeSelection Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -203,7 +203,7 @@ const <a class="el" href="namespace_p4_1_1_coverage.html#a7e1ff1127c2c2a850efe0f
 <tr class="separator:aa356d4d45dc90161d2a7966d20a6a9ea inherit pro_attribs_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_symbolic_executor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aabc664e33096532d4aaff4f8ca804222 inherit pro_attribs_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_symbolic_executor" id="r_aabc664e33096532d4aaff4f8ca804222"><td class="memItemLeft" align="right" valign="top">
 const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.html">ProgramInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>programInfo</b></td></tr>
-<tr class="memdesc:aabc664e33096532d4aaff4f8ca804222 inherit pro_attribs_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_symbolic_executor"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target-specific information about the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program. <br /></td></tr>
+<tr class="memdesc:aabc664e33096532d4aaff4f8ca804222 inherit pro_attribs_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_symbolic_executor"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target-specific information about the P4 program. <br /></td></tr>
 <tr class="separator:aabc664e33096532d4aaff4f8ca804222 inherit pro_attribs_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_symbolic_executor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac9c998f4de617cd3e3d32745ed770543 inherit pro_attribs_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_symbolic_executor" id="r_ac9c998f4de617cd3e3d32745ed770543"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="class_p4_1_1_abstract_solver.html">AbstractSolver</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>solver</b></td></tr>
@@ -215,7 +215,7 @@ const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.
 <tr class="separator:aecb8f76838e494ac9683684d1e15bfc3 inherit pro_attribs_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_symbolic_executor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Greedy path selection strategy, which, at branch points, picks the first execution state which has covered or potentially will cover program nodes which have not been visited yet. Potential nodes are computed using the <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_coverable_nodes_scanner.html">CoverableNodesScanner</a> visitor, which collects nodes in the top-level statement of the execution state. These nodes are latent because execution is not guaranteed. They may be guarded by an if condition or select expression. If the strategy does not find a new statement, it falls back to random. Similarly, if the strategy cycles without a test for a specific threshold, it will fall back to random. This is to prevent getting caught in a parser cycle. </p>
+<div class="textblock"><p>Greedy path selection strategy, which, at branch points, picks the first execution state which has covered or potentially will cover program nodes which have not been visited yet. Potential nodes are computed using the CoverableNodesScanner visitor, which collects nodes in the top-level statement of the execution state. These nodes are latent because execution is not guaranteed. They may be guarded by an if condition or select expression. If the strategy does not find a new statement, it falls back to random. Similarly, if the strategy cycles without a test for a specific threshold, it will fall back to random. This is to prevent getting caught in a parser cycle. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a392a459d87eea1723253a3e2baad1053" name="a392a459d87eea1723253a3e2baad1053"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a392a459d87eea1723253a3e2baad1053">&#9670;&#160;</a></span>runImpl()</h2>
@@ -243,7 +243,7 @@ const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Executes the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program along a randomly chosen path. When the program terminates, the given callback is invoked. If the callback returns true, then the executor terminates. Otherwise, execution of the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program continues on a different random path. </p>
+<p>Executes the P4 program along a randomly chosen path. When the program terminates, the given callback is invoked. If the callback returns true, then the executor terminates. Otherwise, execution of the P4 program continues on a different random path. </p>
 
 <p>Implements <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_symbolic_executor.html">P4::P4Tools::P4Testgen::SymbolicExecutor</a>.</p>
 

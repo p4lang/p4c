@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4 Compiler Intermediate representation</title>
+<title>P4 Compiler Documentation (P4C): P4C Intermediate Representation (IR)</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -94,7 +94,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html',''); initResizable(true); });
+$(function(){initNavTree('intermediate_representation_ir.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -120,18 +120,131 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2docs_2_i_r.html',''
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">P4 Compiler Intermediate representation</div></div>
+  <div class="headertitle"><div class="title">P4C Intermediate Representation (IR)</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="p4-compiler-intermediate-representation"></a></p>
-<h1><a class="anchor" id="introduction"></a>
-Introduction</h1>
-<p>This document outlines the design of the P4_16 compiler. It lays out the various classes and data structures used for the compiler and describes the general flow of the compilation process. The compiler is designed to operate in the `traditional’ manner, converting the source <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program to an internal representation, the performing a series of transformational passes on the IR, culminating in an IR representation that maps more or less directly to the target code. Along the way, the set of IR classes present in the code may change, with certain constructs appearing only in the initial IR from the parser, and other constructs being introduced through the compilation process.</p>
+<div class="toc"><h3>Table of Contents</h3>
+<ul>
+  <li class="level1 empty">
+    <ul>
+      <li class="level2">
+        <a href="#introduction">Introduction</a>
+      </li>
+      <li class="level2">
+        <a href="#visitors-and-transforms">Visitors and Transforms</a>
+        <ul>
+          <li class="level3 empty">
+            <ul>
+              <li class="level4">
+                <a href="#controlflowvisitor">ControlFlowVisitor</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li class="level2">
+        <a href="#overall-flow">Overall flow</a>
+        <ul>
+          <li class="level3">
+            <a href="#frontend-2">Frontend</a>
+          </li>
+          <li class="level3">
+            <a href="#mid-end">Mid-end</a>
+          </li>
+          <li class="level3">
+            <a href="#pass-managers">Pass Managers</a>
+          </li>
+          <li class="level3">
+            <a href="#exception-use">Exception Use</a>
+          </li>
+        </ul>
+      </li>
+      <li class="level2">
+        <a href="#ir-classes">IR Classes</a>
+        <ul>
+          <li class="level3 empty">
+            <ul>
+              <li class="level4">
+                <a href="#irnode">&lt;tt&gt;IR::Node&lt;/tt&gt;</a>
+              </li>
+              <li class="level4">
+                <a href="#irvectort">&lt;tt&gt;IR::Vector\&lt;T\&gt;&lt;/tt&gt;</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#irdefs">P4C Intermediate Representation (IR) Classes</a>
+    <ul>
+      <li class="level2 empty">
+        <ul>
+          <li class="level3 empty">
+            <ul>
+              <li class="level4 empty">
+                <ul>
+                  <li class="level5">
+                    <a href="#irh">ir.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#ir-inlineh-ir-tree-macrosh-ir-utilh">ir-inline.h ir-tree-macros.h ir-util.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#nodeh-nodecpp">node.h node.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#idh">id.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#irdef-ircpp">ir.def ir.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#v1def-v1cpp">v1.def, v1.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#expressiondef-expressioncpp">expression.def expression.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#typedecldef-typecpp">typedecl.def type.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#namemaph">namemap.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#vectorh">vector.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#dbprinth-dbprintcpp-dbprint-expressioncpp-dbprint-p4cpp">dbprint.h dbprint.cpp dbprint-expression.cpp dbprint-p4.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#stdh">std.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#visitorh-visitorcpp">visitor.h visitor.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#pass_managerh-pass_managercpp">pass_manager.h pass_manager.cpp</a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+</div>
+<div class="textblock"><h2><a class="anchor" id="introduction"></a>
+Introduction</h2>
+<p>This document outlines the design of the P4_16 compiler. It lays out the various classes and data structures used for the compiler and describes the general flow of the compilation process. The compiler is designed to operate in the `traditional’ manner, converting the source P4 program to an internal representation, the performing a series of transformational passes on the IR, culminating in an IR representation that maps more or less directly to the target code. Along the way, the set of IR classes present in the code may change, with certain constructs appearing only in the initial IR from the parser, and other constructs being introduced through the compilation process.</p>
 <p>Novel to this design is the ability to always return to an earlier version of the IR (backtracking across passes) or use multiple threads to operate on the IR, allowing different strategies to be tried in the search for a final result. Allowing this forking and backtracking is central to the IR and transformation design. The IR is designed to represent the program as a tree or DAG from a single root node, with each node referring only to its children. Transformations operate by creating new IR nodes that are shallow copies of existing nodes, and then creating new parent nodes to refer to these new nodes, up to the root of the IR. The internal representation is designed in C++ around a single inheritance object hierarchy with an ultimate base Node type used by all subclasses. The base Node class supports the functionality needed for visitor transformations – clone, equality tests, and subclass dispatch.</p>
-<p>The IR needs to be extensible, allowing for the addition of new classes to the hierarchy as support for new targets is added. The initial IR produced by the parser contains constructs that are related only to the source <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> language, and there will be frontend transformation passes that convert things to a simpler and more canonical form.</p>
+<p>The IR needs to be extensible, allowing for the addition of new classes to the hierarchy as support for new targets is added. The initial IR produced by the parser contains constructs that are related only to the source P4 language, and there will be frontend transformation passes that convert things to a simpler and more canonical form.</p>
 <p>The IR may be a tree or DAG, but allowing back/up references in the IR (cycles) defeats much of the benefit of the immutable IR. If cycles (for example, leaf nodes for names directly referring to the named object) were allowed, pretty much any minor transform would end up cloning the entire IR graph, as modifying a leaf involves cloning the object containing the leaf, and then any object referring to that object, recursively.</p>
-<h1><a class="anchor" id="visitors-and-transforms"></a>
-Visitors and Transforms</h1>
+<h2><a class="anchor" id="visitors-and-transforms"></a>
+Visitors and Transforms</h2>
 <p>The compiler is organized as a series of <code>Visitor</code> and <code>Transform</code> passes <a href="https://en.wikipedia.org/wiki/Visitor_pattern">Wikipedia</a>. The <code>Visitor</code> and <code>Transform</code> base classes make defining new passes easy &ndash; a new transform need only specify the IR types it is interested in, and can ignore others. A (constant) <code>Visitor</code> pass visits every node in the IR tree and accumulates information about the tree but does not modify it, while a Transform pass visits every node, possibly modifying the node or replacing it with some other node</p>
 <div class="fragment"><div class="line">++</div>
 <div class="line">   <span class="comment">/* pseudo-code for basic Transform visitor */</span></div>
@@ -187,8 +300,8 @@ Visitors and Transforms</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>Backtrack</code>   </td><td class="markdownTableBodyNone">visitor that is notified when backtracking occurs and can have its state saved as a backtrack point.   </td></tr>
 </table>
-<h3><a class="anchor" id="controlflowvisitor"></a>
-ControlFlowVisitor</h3>
+<h4><a class="anchor" id="controlflowvisitor"></a>
+ControlFlowVisitor</h4>
 <p>To support control flow analysis, there is a special <code>ControlFlowVisitor</code> interface that is understood by certain IR subclasses that encapsulate control flow, and is used by them to control the order in which children are visited and the visitor state passed to the visitor preorder/postorder routines in order to implement control-flow analysis.</p>
 <p>The basic idea is that control flow IR nodes, when visiting their children, will create clones of the <code>ControlFlowVisitor</code> object to visit different children after a branch, and will then call <code>flow_merge</code> at the join point to merge the visitor state. Both the <code>Visitor</code> base class and the <code>ControlFlowVisitor</code> interface define two virtual functions: <code>flow_clone</code> and <code>flow_merge</code> to mediate this. In the <code>Visitor</code> base class (used by all visitors that do <em>not</em> inherit from the <code>ControlFlowVisitor</code> interface, these are implemented as no-ops &ndash; <code>flow_clone</code> just returns the same object, and <code>flow_merge</code> does nothing. In the <code>ControlFlowVisitor</code> interface <code>flow_clone</code> calls the <code>clone</code> function (which must be implemented by the leaf class) and <code>flow_merge</code> is an abstract virtual function that must be implemented by the leaf class.</p>
 <p>As an example for how these are used in the IR visitor routines, the IR::If class has three children to visit &ndash; a predicate and two consequents, with the value of the predicate deciding which consequent to execute. The child visitor for <code>IR::If</code> is</p>
@@ -200,44 +313,105 @@ ControlFlowVisitor</h3>
 <div class="line">   visitor.flow_merge(clone);</div>
 </div><!-- fragment --><p>So both consequents are visited with a visitor state that corresponds to the control flow immediately after evaluating the predicate, and then the control flow state after both consequents are merged back together.</p>
 <p>In order to make use of this functionality, a <code>Visitor</code> sub class need only inherit from the <code>ControlFlowVisitor</code> interface and implement the <code>clone</code> and <code>flow_merge</code> routines. Other <code>Visitor</code> classes don't need to do anything, but may want to implement <code>clone</code> for other reasons.</p>
-<p>This control flow analysis only works for branch-and-join control flow &ndash; it is not adequate for loops (which generally requires an iterate to fixed point process). As our IR does not (currently) support loops this is fine. Since <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> does not allow loops in the match-action part of the pipeline, this works well there, but may be inadequate for parsers, which can support loops.</p>
-<h1><a class="anchor" id="overall-flow"></a>
-Overall flow</h1>
+<p>This control flow analysis only works for branch-and-join control flow &ndash; it is not adequate for loops (which generally requires an iterate to fixed point process). As our IR does not (currently) support loops this is fine. Since P4 does not allow loops in the match-action part of the pipeline, this works well there, but may be inadequate for parsers, which can support loops.</p>
+<h2><a class="anchor" id="overall-flow"></a>
+Overall flow</h2>
 <p>The compiler flow can be roughly split into frontend, middle-end, and backend. The frontend does largely non-target specific transforms designed to clean up the IR and get it into a canonical form. The middle make target-dependent IR transformations. The back end performs resource allocation decisions. As this backend step may fail due to constraint violations, it may need to backtrack through the middle-end to try a different configuration. We do not anticipate needing to backtrack through frontend passes. The split between Front/Middle/Back-end is largely arbitrary, and some passes may end up being moved between them if we later find it makes more sense to do so.</p>
-<h2><a class="anchor" id="frontend-1"></a>
-Frontend</h2>
+<h3><a class="anchor" id="frontend-2"></a>
+Frontend</h3>
 <p>The frontend parses the source code into IR that corresponds directly to the source code. It then runs a series of passes like type-checking (modifying nodes to indicate their inferred types), constant folding, dead code elimination, etc. The initial IR tree corresponds to the source code, and then various mostly target independent transformation are done. Complex scoping or structuring in the code is flattened here.</p>
-<h2><a class="anchor" id="mid-end"></a>
-Mid-end</h2>
+<h3><a class="anchor" id="mid-end"></a>
+Mid-end</h3>
 <p>The mid-end is where transformations that depend somewhat on the target, but are not specific resource allocations, take place. At some point the mid-end transforms the IR into a form that matches the target capabilities.</p>
-<h2><a class="anchor" id="pass-managers"></a>
-Pass Managers</h2>
+<h3><a class="anchor" id="pass-managers"></a>
+Pass Managers</h3>
 <p>To manage backtracking and control the order of passes and transforms, we use a <code>PassManager</code> object which encapsulates a sequence of passes and runs them in order. Those passes that support the <code>Backtrack</code> interface are backtrack points.</p>
 <p>The generic <code>PassManager</code> can manage a dynamically chosen series of passes. It tracks passes that implement <code>Backtrack</code> and if a later pass fails, will backtrack to the Backtrack pass.</p>
 <div class="fragment"><div class="line">interface Backtrack {</div>
 <div class="line">   bool backtrack(trigger);</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>The <code>backtrack</code> method is called when backtracking is triggered, with a trigger reason. Returns <code>true</code> if the pass can try a useful alternative, <code>false</code> if manager should search for some other backtracking point.</p>
-<h2><a class="anchor" id="exception-use"></a>
-Exception Use</h2>
+<h3><a class="anchor" id="exception-use"></a>
+Exception Use</h3>
 <p>Exceptions are usable for errors that are reportable to the user, constraint problems that should result in backtracking and internal compiler problems. There are a number of exception classes designed for these purposes.</p>
 <ul>
 <li><code>Backtrack::trigger</code> Used to control backtracking. May be subclassed to attach additional information.</li>
 <li><code>CompilerBug</code> Used for internal compiler errors. Use the BUG() macro wrapper instead of calling this directly.</li>
 </ul>
-<h1><a class="anchor" id="ir-classes"></a>
-IR Classes</h1>
+<h2><a class="anchor" id="ir-classes"></a>
+IR Classes</h2>
 <p>To make IR class management and extension easier, IR classes are defined in .def files, which are processed by an ir-generator tool to produce the actual IR C++ code. Conceptually, these .def files are just C++ class definitions with the boilerplate removed, and the ir-generator program inserts the boilerplate and splits each class definition into .h and .cpp parts as needed.</p>
 <p>The bulk of the "normal" IR is defined in the ir subdirectory, with some frontends and backends having their own extensions to the IR defined in their own ir subdirectories. The ir-generator tool takes reads all the .def files in the tree and constructs a single .h and .cpp file with all the IR class definition code.</p>
 <p>All references to IR class objects from other IR class object MUST be as <code>const</code> pointers, to maintain the write-only invariants. Where that is too onerous, IR classes may be directly embedded in other IR objects, rather than by reference. When an IR object is embedded in this way, it becomes modifiable in <code>Modifier</code>/<code>Transform</code> visitors when visiting the containing node, and will not be directly visited itself.</p>
 <p>The ir-generator understands both of these mechanisms. Any field declared in an IR class with another IR class as a type will be made a <code>const</code> pointer, unless it has an <code>inline</code> modifier, in which case it will be a directly embedded sub-object.</p>
 <p>The ir-generator understands a number of "standard" methods for IR classes &ndash; <code>visit_children</code>, <code>operator==</code>, <code>dbprint</code>, <code>toString</code>, <code>apply</code>. These methods can be declared <em>without</em> any arguments or return types (ie, just the method name followed by a {}-block of code), in which case the standard declaration will be synthesized. If the method is not declared in the .def file, a standard definition (based on the fields declared in the class) will be created. In this way, <em>most</em> classes can avoid including this boilerplate code in the .def file.</p>
-<h3><a class="anchor" id="irnode"></a>
-<code>IR::Node</code></h3>
+<h4><a class="anchor" id="irnode"></a>
+<code>IR::Node</code></h4>
 <p>This is the ultimate abstract base class of all IR nodes and contains only a small amount of data for error reporting and debugging. In general, this info is NEVER compared for equality (so subclasses should never call Node::operator==`) as Nodes that differ only in this information should be considered equal, and not require cloning or the IR tree.</p>
-<h3><a class="anchor" id="irvectort"></a>
-<code>IR::Vector&lt;T&gt;</code></h3>
-<p>This template class holds a vector of (<code>const</code>) pointers to nodes of a particular <code>IR::Node</code> subclass. </p>
+<h4><a class="anchor" id="irvectort"></a>
+<code>IR::Vector&lt;T&gt;</code></h4>
+<p>This template class holds a vector of (<code>const</code>) pointers to nodes of a particular <code>IR::Node</code> subclass.</p>
+<h1><a class="anchor" id="irdefs"></a>
+P4C Intermediate Representation (IR) Classes</h1>
+<p>The IR classes are automatically generated by tools/ir-generator from *.def files. The .def files contain class definitions with boilerplate removed, which the ir-generator generates.</p>
+<h5><a class="anchor" id="irh"></a>
+ir.h</h5>
+<p>Top level include file that just includes everything else. Code outside this folder generally just includes this file.</p>
+<h5><a class="anchor" id="ir-inlineh-ir-tree-macrosh-ir-utilh"></a>
+ir-inline.h ir-tree-macros.h ir-util.h</h5>
+<p>IR support stuff. <code>ir-inline.h</code> has inline methods for things in header files that can't be defined until after other header files are included. <code>ir-tree-macros.h</code> has macros for generating code referring to all IR classes, used by the visitors.</p>
+<h5><a class="anchor" id="nodeh-nodecpp"></a>
+node.h node.cpp</h5>
+<p><code>IR::Node</code> base class.</p>
+<h5><a class="anchor" id="idh"></a>
+id.h</h5>
+<p>Defines the <code>ID</code> struct, which is not a standalone IR class, but is used in many places in IR classes, representing an identifier with associated source location (for error reporting).</p>
+<h5><a class="anchor" id="irdef-ircpp"></a>
+ir.def ir.cpp</h5>
+<p>Miscelaneous front-end IR classes.</p>
+<h5><a class="anchor" id="v1def-v1cpp"></a>
+v1.def, v1.cpp</h5>
+<p>IR classes only needed to process P4 v1.0 / v1.1 programs</p>
+<h5><a class="anchor" id="expressiondef-expressioncpp"></a>
+expression.def expression.cpp</h5>
+<p>IR classes related to expressions. The <code>Expression</code> abstract class is base for all expressions, and contains a <code>type</code> field. Abstract subclasses include <code>Operation</code>, <code>Unary</code>, <code>Binary</code>, and <code>Trinary</code>, with concrete subclasses: </p><pre class="fragment">  Expression
+  +-- Operation
+  |   +-- Operation_Unary
+  |   |   +-- Neg, Cmpl, LNot, UPlus
+  |   |   \-- Member, Cast
+  |   +-- Operation_Binary
+  |   |   +-- Mul, Div, Mode, Add, Sub, Shl, Shr
+  |   |   +-- Operation_Relation
+  |   |   |   \-- Equ, New, Lss, Leq, Grt, Geq
+  |   |   +-- BAnd, BOr, BXor, LAnd, LOr
+  |   |   \-- Concat, ArrayIndex, Range, Mask
+  |   +-- Operation_Trinary
+  |   |   \-- Slice, Mux
+  |   \-- Primitive
+  \-- Constant, ...
+</pre><h5><a class="anchor" id="typedecldef-typecpp"></a>
+typedecl.def type.cpp</h5>
+<p>IR subclasses related to types and declarations.</p>
+<h5><a class="anchor" id="namemaph"></a>
+namemap.h</h5>
+<p>IR subclass template <code>NameMap</code>, which holds a set of named IR objects and supports lookups by name. <code>NameMap</code> supports transforms that return null or additional <code>NameMap</code> objects for IR objects in the <code>NameMap</code> to modify the <code>NameMap</code>.</p>
+<h5><a class="anchor" id="vectorh"></a>
+vector.h</h5>
+<p>IR subclass template <code>Vector</code>, which holds a vector of IR objects. This is largely equivalent to a <code>vector</code>, except that it is a subclass of <code>IR::Node</code> so it can be included in an IR tree as a first-class member, with its own traversal code (visitor subclass preorder and postorder functions). Automatically flattens any sub-<code>Vector</code> objects and removes null when transforms on elements of the vector return them.</p>
+<h6>indexed_vector.h</h6>
+<p>IndexedVector: contains a Vector and also an index mapping cstrings to IDeclarations for all objects in the vector that are IDeclarations.</p>
+<h5><a class="anchor" id="dbprinth-dbprintcpp-dbprint-expressioncpp-dbprint-p4cpp"></a>
+dbprint.h dbprint.cpp dbprint-expression.cpp dbprint-p4.cpp</h5>
+<p>Debug printing routines. Most IR classes declared a <code>dbprint</code> method, which are defined here. The header contains flags and support that dbprint methods use to communicate formatting information (indentation, precendence, and format mode).</p>
+<h5><a class="anchor" id="stdh"></a>
+std.h</h5>
+<p>using directives for a bunch of <code>std::</code> classes that are heavily used in the code. <code>std::vector</code> is instead wrapped (as <code>vector</code>) with a version that automatically uses bounds-checking for <em>all</em> indexed accesses.</p>
+<h5><a class="anchor" id="visitorh-visitorcpp"></a>
+visitor.h visitor.cpp</h5>
+<p><code>Visitor</code> base class, and <code>Inspector</code>, <code>Modifier</code>, and <code>Transform</code> subclass definitions, along with <code>ControlFlowVisitor</code>, <code>Backtrack</code> and <code>P4WriteContext</code> mixin interfaces.</p>
+<h5><a class="anchor" id="pass_managerh-pass_managercpp"></a>
+pass_manager.h pass_manager.cpp</h5>
+<p><code>PassManager</code> subclass (of <code>Visitor</code>) which manages an arbitrary sequence of <code>Visitor</code>s, and handles backtracking between passes.   </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

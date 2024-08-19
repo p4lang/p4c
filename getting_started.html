@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4C</title>
+<title>P4 Compiler Documentation (P4C): Getting Started</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -94,7 +94,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html',''); initResizable(true); });
+$(function(){initNavTree('getting_started.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -120,63 +120,255 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html',
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">P4C</div></div>
+  <div class="headertitle"><div class="title">Getting Started</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="p4c"></a></p>
-<p><a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg" alt="Bazel Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml/badge.svg" alt="Validation" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg" alt="Docker Container" style="pointer-events: none;" class="inline"/></a></p>
+<div class="toc"><h3>Table of Contents</h3>
 <ul>
-<li><a class="el" href="#getting-started">Getting started</a><ul>
-<li><a class="el" href="#installing-packaged-versions-of-p4c">Installing packaged versions of P4C</a></li>
-<li><a class="el" href="#installing-p4c-from-source">Installing P4C from source</a></li>
+  <li class="level1">
+    <a href="#overview">Overview</a>
+    <ul>
+      <li class="level2">
+        <a href="#additional-documentation-1">Additional documentation</a>
+      </li>
+      <li class="level2">
+        <a href="#sample-backends-in-p4c">Sample Backends in P4C</a>
+      </li>
+      <li class="level2">
+        <a href="#getting-started">Getting started</a>
+        <ul>
+          <li class="level3">
+            <a href="#installing-packaged-versions-of-p4c">Installing packaged versions of P4C</a>
+            <ul>
+              <li class="level4">
+                <a href="#ubuntu">Ubuntu</a>
+              </li>
+              <li class="level4">
+                <a href="#debian">Debian</a>
+              </li>
+            </ul>
+          </li>
+          <li class="level3">
+            <a href="#installing-p4c-from-source">Installing P4C from source</a>
+          </li>
+        </ul>
+      </li>
+      <li class="level2">
+        <a href="#dependencies">Dependencies</a>
+        <ul>
+          <li class="level3">
+            <a href="#ubuntu-dependencies">Ubuntu dependencies</a>
+            <ul>
+              <li class="level4">
+                <a href="#cmake">CMake</a>
+              </li>
+            </ul>
+          </li>
+          <li class="level3">
+            <a href="#fedora-dependencies">Fedora dependencies</a>
+          </li>
+          <li class="level3">
+            <a href="#macos-dependencies">macOS dependencies</a>
+          </li>
+          <li class="level3">
+            <a href="#garbage-collector">Garbage collector</a>
+          </li>
+          <li class="level3">
+            <a href="#crash-dumps">Crash dumps</a>
+          </li>
+        </ul>
+      </li>
+      <li class="level2">
+        <a href="#development-tools">Development tools</a>
+        <ul>
+          <li class="level3">
+            <a href="#git-setup">Git setup</a>
+          </li>
+        </ul>
+      </li>
+      <li class="level2">
+        <a href="#docker">Docker</a>
+      </li>
+      <li class="level2">
+        <a href="#bazel">Bazel</a>
+      </li>
+      <li class="level2">
+        <a href="#build-system">Build system</a>
+        <ul>
+          <li class="level3">
+            <a href="#defining-new-cmake-targets">Defining new CMake targets</a>
+            <ul>
+              <li class="level4">
+                <a href="#ir-definition-files">IR definition files</a>
+              </li>
+              <li class="level4">
+                <a href="#source-files">Source files</a>
+              </li>
+              <li class="level4">
+                <a href="#target">Target</a>
+              </li>
+              <li class="level4">
+                <a href="#tests">Tests</a>
+              </li>
+              <li class="level4">
+                <a href="#installation">Installation</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li class="level1">
+    <a href="#common-p4c-utility-functions">Common P4C utility functions</a>
+    <ul>
+      <li class="level2 empty">
+        <ul>
+          <li class="level3 empty">
+            <ul>
+              <li class="level4 empty">
+                <ul>
+                  <li class="level5">
+                    <a href="#algorithmh">algorithm.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#bitopsh">bitops.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#bitvech-bitveccpp">bitvec.h, bitvec.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#cstringh-cstringcpp">cstring.h, cstring.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#defaulth">default.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#enumeratorh-enumeratorcpp">enumerator.h, enumerator.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#errorh-errorcpp-expresionsh">error.h, error.cpp, expresions.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#gccpp">gc.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#hexh-hexcpp">hex.h, hex.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#indenth-indentcpp">indent.h, indent.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#logh-logcpp">log.h, log.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#ltbitmatrixh">ltbitmatrix.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#maph">map.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#nullstreamh">nullstream.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#optionsh-optionscpp">options.h, options.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#rangeh">range.h</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#source_fileh-source_filecpp">source_file.h, source_file.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#stringifyh-stringifycppp">stringify.h, stringify.cppp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#sourcecodebuilderh">sourceCodeBuilder.h</a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li class="level2">
+        <a href="#known-issues">Known issues</a>
+        <ul>
+          <li class="level3">
+            <a href="#frontend-1">Frontend</a>
+            <ul>
+              <li class="level4">
+                <a href="#p4_14-features-not-supported-in-p4_16">P4_14 features not supported in P4_16</a>
+              </li>
+            </ul>
+          </li>
+          <li class="level3">
+            <a href="#backends">Backends</a>
+            <ul>
+              <li class="level4">
+                <a href="#bmv2-backend">Bmv2 Backend</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li class="level2">
+        <a href="#how-to-contribute">How to Contribute</a>
+      </li>
+      <li class="level2">
+        <a href="#p4-compiler-onboarding">P4 Compiler Onboarding</a>
+      </li>
+      <li class="level2">
+        <a href="#contact">Contact</a>
+      </li>
+    </ul>
+  </li>
+</ul>
+</div>
+<div class="textblock"><p><a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml/badge.svg" alt="Main Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg" alt="Bazel Build" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml/badge.svg" alt="Validation" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg" alt="Docker Container" style="pointer-events: none;" class="inline"/></a></p>
+<p>P4C is a reference compiler for the P4 programming language. It supports both P4-14 and P4-16; you can find more information about P4 <a href="http://p4.org">here</a> and the specifications for both versions of the language <a href="https://p4.org/specs">here</a>. One fact attesting to the level of quality and completeness of P4C's code is that its front-end code, mid-end code, and P4C-graphs back end are used as the basis for at least one commercially supported P4 compiler.</p>
+<p>P4C is modular; it provides a standard frontend and midend which can be combined with a target-specific backend to create a complete P4 compiler. The goal is to make adding new backends easy.</p>
+<h1><a class="anchor" id="overview"></a>
+Overview</h1>
+<p>The P4C compiler is a compiler infrastructure for the P4 compiler designed with the following goals:</p>
+<ul>
+<li>Support current and future versions of P4</li>
+<li>Support multiple back-ends<ul>
+<li>Generate code for ASICs, NICs, FPGAs, software switches and other targets</li>
 </ul>
 </li>
-<li><a class="el" href="#dependencies">Dependencies</a><ul>
-<li><a class="el" href="#ubuntu-dependencies">Ubuntu dependencies</a></li>
-<li><a class="el" href="#fedora-dependencies">Fedora dependencies</a></li>
-<li><a class="el" href="#macos-dependencies">macOS dependencies</a></li>
-<li><a class="el" href="#garbage-collector">Garbage collector</a></li>
-<li><a class="el" href="#crash-dumps">Crash dumps</a></li>
+<li>Provide support for other tools (debuggers, IDEs, control-plane, etc.)</li>
+<li>Open-source front-end</li>
+<li>Extensible architecture (easy to add new passes and optimizations)</li>
+<li>Use modern compiler techniques (immutable IR, visitor patterns, strong type checking, etc.)</li>
+<li>Comprehensive testing</li>
 </ul>
-</li>
-<li><a class="el" href="#development-tools">Development tools</a><ul>
-<li><a class="el" href="#git-setup">Git setup</a></li>
+<h2><a class="anchor" id="additional-documentation-1"></a>
+Additional documentation</h2>
+<ul>
+<li>The documentation for P4_16 and P4Runtime is available <a href="https://p4.org/specs/">here</a></li>
+<li>the core design of the compiler intermediate representation (IR) and the visitor patterns are briefly described in IR</li>
+<li>The <a href="https://github.com/p4lang/p4c/blob/main/docs/migration-guide.pptx">migration guide</a> describes how P4_14 (v1.0) programs are translated into P4_16 programs  </li>
 </ul>
-</li>
-<li><a class="el" href="#docker">Docker</a></li>
-<li><a class="el" href="#bazel">Bazel</a></li>
-<li><a class="el" href="#build-system">Build system</a><ul>
-<li><a class="el" href="#defining-new-cmake-targets">Defining new CMake targets</a></li>
-</ul>
-</li>
-<li><a class="el" href="#known-issues">Known issues</a><ul>
-<li><a class="el" href="#frontend">Frontend</a></li>
-<li><a class="el" href="#backends">Backends</a></li>
-</ul>
-</li>
-<li><a class="el" href="#how-to-contribute">How to Contribute</a></li>
-<li><a class="el" href="#p4-compiler-onboarding">P4 Compiler Onboarding</a></li>
-<li><a class="el" href="#contact">Contact</a></li>
-</ul>
-<p>P4C is a reference compiler for the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programming language. It supports both P4-14 and P4-16; you can find more information about <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> <a href="http://p4.org">here</a> and the specifications for both versions of the language <a href="https://p4.org/specs">here</a>. One fact attesting to the level of quality and completeness of P4C's code is that its front-end code, mid-end code, and P4C-graphs back end are used as the basis for at least one commercially supported <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> compiler.</p>
-<p>P4C is modular; it provides a standard frontend and midend which can be combined with a target-specific backend to create a complete <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> compiler. The goal is to make adding new backends easy.</p>
-<p>The code contains seven sample backends:</p><ul>
-<li>p4c-bm2-ss: can be used to target the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> <code>simple_switch</code> written using the <a href="https://github.com/p4lang/behavioral-model">BMv2 behavioral model</a>,</li>
+<h2><a class="anchor" id="sample-backends-in-p4c"></a>
+Sample Backends in P4C</h2>
+<p>P4C includes seven sample backends, catering to different target architectures and use cases:</p><ul>
+<li>p4c-bm2-ss: can be used to target the P4 <code>simple_switch</code> written using the <a href="https://github.com/p4lang/behavioral-model">BMv2 behavioral model</a>,</li>
 <li>p4c-dpdk: can be used to target the <a href="https://doc.dpdk.org/guides/rel_notes/release_20_11.html">DPDK software switch (SWX) pipeline</a>,</li>
-<li>p4c-ebpf: can be used to generate C code which can be compiled to <a href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">eBPF</a> and then loaded in the Linux kernel. The eBPF backend currently implements three architecture models: <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html">ebpf_model.p4 for packet filtering, xdp_model.p4 for XDP</a> and <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html">the fully-featured PSA (Portable Switch Architecture) model</a>.</li>
-<li>p4test: a source-to-source <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> translator which can be used for testing, learning compiler internals and debugging,</li>
-<li>p4c-graphs: can be used to generate visual representations of a <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program; for now it only supports generating graphs of top-level control flows, and</li>
+<li>p4c-ebpf: can be used to generate C code which can be compiled to <a href="https://en.wikipedia.org/wiki/Berkeley_Packet_Filter">eBPF</a> and then loaded in the Linux kernel. The eBPF backend currently implements three architecture models: ebpf_model.p4 for packet filtering, xdp_model.p4 for XDP and the fully-featured PSA (Portable Switch Architecture) model.</li>
+<li>p4test: a source-to-source P4 translator which can be used for testing, learning compiler internals and debugging,</li>
+<li>p4c-graphs: can be used to generate visual representations of a P4 program; for now it only supports generating graphs of top-level control flows, and</li>
 <li>p4c-ubpf: can be used to generate eBPF code that runs in user-space.</li>
-<li>p4tools: a platform for <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> test utilities, including a test-case generator for <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs. Sample command lines:</li>
+<li>p4tools: a platform for P4 test utilities, including a test-case generator for P4 programs. Sample command lines:</li>
 </ul>
-<p>Compile P4_16 or P4_14 source code. If your program successfully compiles, the command will create files with the same base name as the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program you supplied, and the following suffixes instead of the <code>.p4</code>:</p>
+<p>Compile P4_16 or P4_14 source code. If your program successfully compiles, the command will create files with the same base name as the P4 program you supplied, and the following suffixes instead of the <code>.p4</code>:</p>
 <ul>
-<li>a file with suffix <code>.p4i</code>, which is the output from running the preprocessor on your <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program.</li>
+<li>a file with suffix <code>.p4i</code>, which is the output from running the preprocessor on your P4 program.</li>
 <li>a file with suffix <code>.json</code> that is the JSON file format expected by BMv2 behavioral model <code>simple_switch</code>.</li>
 </ul>
 <div class="fragment"><div class="line">p4c --target bmv2 --arch v1model my-p4-16-prog.p4</div>
 <div class="line">p4c --target bmv2 --arch v1model --std p4-14 my-p4-14-prog.p4</div>
-</div><!-- fragment --><p>By adding the option <code>--p4runtime-files &lt;filename&gt;.txt</code> as shown in the example commands below, P4C will also create a file <code>&lt;filename&gt;.txt</code>. This is a text format "P4Info" file, containing a description of the tables and other objects in your <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program that have an auto-generated control plane API.</p>
+</div><!-- fragment --><p>By adding the option <code>--p4runtime-files &lt;filename&gt;.txt</code> as shown in the example commands below, P4C will also create a file <code>&lt;filename&gt;.txt</code>. This is a text format "P4Info" file, containing a description of the tables and other objects in your P4 program that have an auto-generated control plane API.</p>
 <div class="fragment"><div class="line">p4c --target bmv2 --arch v1model --p4runtime-files my-p4-16-prog.p4info.txt my-p4-16-prog.p4</div>
 <div class="line">p4c --target bmv2 --arch v1model --p4runtime-files my-p4-14-prog.p4info.txt --std p4-14 my-p4-14-prog.p4</div>
 </div><!-- fragment --><p>All of these commands take the <code>--help</code> argument to show documentation of supported command line options. <code>p4c --target-help</code> shows the supported "target, arch" pairs.</p>
@@ -192,21 +384,21 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2_r_e_a_d_m_e.html',
 <div class="line">p4c-graphs --std p4-14 my-p4-14-prog.p4</div>
 </div><!-- fragment --><p>Generate PDF of parser instance named "ParserImpl" generated by the <code>p4c-graphs</code> command above (search for graphviz below for its install instructions):</p>
 <div class="fragment"><div class="line">dot -Tpdf ParserImpl.dot &gt; ParserImpl.pdf</div>
-</div><!-- fragment --><h1><a class="anchor" id="getting-started"></a>
-Getting started</h1>
-<h2><a class="anchor" id="installing-packaged-versions-of-p4c"></a>
-Installing packaged versions of P4C</h2>
+</div><!-- fragment --><h2><a class="anchor" id="getting-started"></a>
+Getting started</h2>
+<h3><a class="anchor" id="installing-packaged-versions-of-p4c"></a>
+Installing packaged versions of P4C</h3>
 <p>P4C has package support for several Ubuntu and Debian distributions.</p>
-<h3><a class="anchor" id="ubuntu"></a>
-Ubuntu</h3>
+<h4><a class="anchor" id="ubuntu"></a>
+Ubuntu</h4>
 <p>A P4C package is available in the following repositories for Ubuntu 20.04 and newer.</p>
 <div class="fragment"><div class="line">source /etc/lsb-release</div>
 <div class="line">echo &quot;deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /&quot; | sudo tee /etc/apt/sources.list.d/home:p4lang.list</div>
 <div class="line">curl -fsSL https://download.opensuse.org/repositories/home:p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg &gt; /dev/null</div>
 <div class="line">sudo apt-get update</div>
 <div class="line">sudo apt install p4lang-p4c</div>
-</div><!-- fragment --><h3><a class="anchor" id="debian"></a>
-Debian</h3>
+</div><!-- fragment --><h4><a class="anchor" id="debian"></a>
+Debian</h4>
 <p>For Debian 11 (Bullseye) it can be installed as follows:</p>
 <div class="fragment"><div class="line">echo &#39;deb https://download.opensuse.org/repositories/home:/p4lang/Debian_11/ /&#39; | sudo tee /etc/apt/sources.list.d/home:p4lang.list</div>
 <div class="line">curl -fsSL https://download.opensuse.org/repositories/home:p4lang/Debian_11/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg &gt; /dev/null</div>
@@ -218,21 +410,21 @@ Debian</h3>
 <li>Install P4C, changing the path below to the path where you downloaded the package.</li>
 </ol>
 <div class="fragment"><div class="line">sudo dpkg -i /path/to/package.deb</div>
-</div><!-- fragment --><h2><a class="anchor" id="installing-p4c-from-source"></a>
-Installing P4C from source</h2>
+</div><!-- fragment --><h3><a class="anchor" id="installing-p4c-from-source"></a>
+Installing P4C from source</h3>
 <ol type="1">
 <li>Clone the repository. It includes submodules, so be sure to use <code>--recursive</code> to pull them in: <code> git clone --recursive <a href="https://github.com/p4lang/p4c.git">https://github.com/p4lang/p4c.git</a> </code> If you forgot <code>--recursive</code>, you can update the submodules at any time using: <code> git submodule update --init --recursive </code></li>
 <li>Install <a class="el" href="#dependencies">dependencies</a>. You can find specific instructions for Ubuntu 20.04 <a class="el" href="#ubuntu-dependencies">here</a> and for macOS 11 <a class="el" href="#macos-dependencies">here</a>. You can also look at the <a href="https://github.com/p4lang/p4c/blob/main/tools/ci-build.sh">CI installation script</a>.</li>
 <li><p class="startli">Build. Building should also take place in a subdirectory named <code>build</code>. <code> mkdir build cd build cmake .. &lt;optional arguments&gt; make -j4 make -j4 check </code> The cmake command takes the following optional arguments to further customize the build:</p><ul>
 <li><code>-DCMAKE_BUILD_TYPE=RELEASE|DEBUG</code> &ndash; set CMAKE_BUILD_TYPE to RELEASE or DEBUG to build with optimizations or with debug symbols to run in gdb. Default is RELEASE.</li>
 <li><code>-DCMAKE_INSTALL_PREFIX=&lt;path&gt;</code> &ndash; set the directory where <code>make install</code> installs the compiler. Defaults to /usr/local.</li>
-<li><code>-DENABLE_BMV2=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html">the bmv2 backend</a>. Default ON.</li>
-<li><code>-DENABLE_EBPF=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html">the ebpf backend</a>. Default ON.</li>
-<li><code>-DENABLE_UBPF=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2_r_e_a_d_m_e.html">the ubpf backend</a>. Default ON.</li>
-<li><code>-DENABLE_DPDK=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_r_e_a_d_m_e.html">the DPDK backend</a>. Default ON.</li>
-<li><code>-DENABLE_P4C_GRAPHS=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html">the p4c-graphs backend</a>. Default ON.</li>
-<li><code>-DENABLE_P4TEST=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2p4test_2_r_e_a_d_m_e.html">the p4test backend</a>. Default ON.</li>
-<li><code>-DENABLE_TEST_TOOLS=ON|OFF</code>. Enable <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2_r_e_a_d_m_e.html">the p4tools backend</a>. Default OFF.</li>
+<li><code>-DENABLE_BMV2=ON|OFF</code>. Enable the bmv2 backend. Default ON.</li>
+<li><code>-DENABLE_EBPF=ON|OFF</code>. Enable the ebpf backend. Default ON.</li>
+<li><code>-DENABLE_UBPF=ON|OFF</code>. Enable the ubpf backend. Default ON.</li>
+<li><code>-DENABLE_DPDK=ON|OFF</code>. Enable the DPDK backend. Default ON.</li>
+<li><code>-DENABLE_P4C_GRAPHS=ON|OFF</code>. Enable the p4c-graphs backend. Default ON.</li>
+<li><code>-DENABLE_P4TEST=ON|OFF</code>. Enable the p4test backend. Default ON.</li>
+<li><code>-DENABLE_TEST_TOOLS=ON|OFF</code>. Enable the p4tools backend. Default OFF.</li>
 <li><code>-DENABLE_DOCS=ON|OFF</code>. Build documentation. Default is OFF.</li>
 <li><code>-DENABLE_GC=ON|OFF</code>. Enable the use of the garbage collection library. Default is ON.</li>
 <li><code>-DENABLE_GTESTS=ON|OFF</code>. Enable building and running GTest unit tests. Default is ON.</li>
@@ -249,12 +441,12 @@ Installing P4C from source</h2>
 </ul>
 <p class="startli">If adding new targets to this build system, please see <a class="el" href="#defining-new-cmake-targets">instructions</a>.</p>
 </li>
-<li>(Optional) Install the compiler and the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> shared headers globally. <code> sudo make install </code> The compiler driver <code>p4c</code> and binaries for each of the backends are installed in <code>/usr/local/bin</code> by default; the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> headers are placed in <code>/usr/local/share/p4c</code>.</li>
+<li>(Optional) Install the compiler and the P4 shared headers globally. <code> sudo make install </code> The compiler driver <code>p4c</code> and binaries for each of the backends are installed in <code>/usr/local/bin</code> by default; the P4 headers are placed in <code>/usr/local/share/p4c</code>.</li>
 <li>You're ready to go! You should be able to compile a P4-16 program for BMV2 using: <code> p4c -b bmv2-ss-p4org program.p4 -o program.bmv2.json </code></li>
 </ol>
 <p>If you plan to contribute to P4C, you'll find more useful information <a class="el" href="#development-tools">here</a>.</p>
-<h1><a class="anchor" id="dependencies"></a>
-Dependencies</h1>
+<h2><a class="anchor" id="dependencies"></a>
+Dependencies</h2>
 <p>Ubuntu 20.04 is the officially supported platform for P4C. There's also unofficial support for macOS 11. Other platforms are untested; you can try to use them, but YMMV.</p>
 <ul>
 <li>A C++17 compiler. GCC 9.1 or later or Clang 6.0 or later is required.</li>
@@ -268,12 +460,12 @@ Dependencies</h1>
 <li>Optional: Documentation generation requires Doxygen (1.12.0) and Graphviz (2.38.0 or higher).</li>
 </ul>
 <p>Backends may have additional dependencies. The dependencies for the backends included with <code>P4C</code> are documented here:</p><ul>
-<li><a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html">BMv2</a></li>
-<li><a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2_r_e_a_d_m_e.html">eBPF</a></li>
-<li><a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2graphs_2_r_e_a_d_m_e.html">graphs</a></li>
+<li>BMv2</li>
+<li>eBPF</li>
+<li>graphs</li>
 </ul>
-<h2><a class="anchor" id="ubuntu-dependencies"></a>
-Ubuntu dependencies</h2>
+<h3><a class="anchor" id="ubuntu-dependencies"></a>
+Ubuntu dependencies</h3>
 <p>Most dependencies can be installed using <code>apt-get install</code>:</p>
 <div class="fragment"><div class="line">sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex \</div>
 <div class="line">libfl-dev libboost-dev libboost-iostreams-dev \</div>
@@ -298,11 +490,11 @@ Ubuntu dependencies</h2>
 <p><code>git checkout v3.25.3</code></p>
 <p>Please note that while all Protobuf versions newer than 3.0 should work for P4C itself, you may run into trouble with Abseil, some extensions and other p4lang projects unless you install version 3.25.3.</p>
 <p>P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's <code>FetchContent</code> module (Abseil LTS 20240116.1 at the moment).</p>
-<h3><a class="anchor" id="cmake"></a>
-CMake</h3>
+<h4><a class="anchor" id="cmake"></a>
+CMake</h4>
 <p>P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using <code>pip3 install --user cmake==3.16.3</code>. We have a CI test on Ubuntu 18.04 that uses this option, but there is no guarantee that this will lead to a successful build.</p>
-<h2><a class="anchor" id="fedora-dependencies"></a>
-Fedora dependencies</h2>
+<h3><a class="anchor" id="fedora-dependencies"></a>
+Fedora dependencies</h3>
 <div class="fragment"><div class="line">sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \</div>
 <div class="line">libfl-devel gmp-devel boost-devel boost-iostreams boost-graph llvm pkg-config \</div>
 <div class="line">python3 python3-pip tcpdump</div>
@@ -322,8 +514,8 @@ Fedora dependencies</h2>
 </div><!-- fragment --></li>
 </ul>
 <p>You can also look at the <a href="https://github.com/p4lang/p4c/blob/main/tools/install_fedora_deps.sh">dependencies installation script</a> for a fresh Fedora instance.</p>
-<h2><a class="anchor" id="macos-dependencies"></a>
-macOS dependencies</h2>
+<h3><a class="anchor" id="macos-dependencies"></a>
+macOS dependencies</h3>
 <p>Installing on macOS:</p>
 <ul>
 <li>Enable XCode's command-line tools: <div class="fragment"><div class="line">xcode-select --install</div>
@@ -348,15 +540,15 @@ macOS dependencies</h2>
 <div class="line">  -DENABLE_PROTOBUF_STATIC=OFF</div>
 </div><!-- fragment --></li>
 </ul>
-<h2><a class="anchor" id="garbage-collector"></a>
-Garbage collector</h2>
+<h3><a class="anchor" id="garbage-collector"></a>
+Garbage collector</h3>
 <p>P4c relies on <a href="https://github.com/ivmai/bdwgc">BDW garbage collector</a> to manage its memory. By default, the P4C executables are linked with the garbage collector library. When the GC causes problems, this can be disabled by setting <code>ENABLE_GC</code> cmake option to <code>OFF</code>. However, this will dramatically increase the memory usage by the compiler, and may become impractical for compiling large programs. <b>Do not disable the GC</b>, unless you really have to. We have noticed that this may be a problem on MacOS.</p>
-<h2><a class="anchor" id="crash-dumps"></a>
-Crash dumps</h2>
+<h3><a class="anchor" id="crash-dumps"></a>
+Crash dumps</h3>
 <p>P4c will use <a href="https://github.com/ianlancetaylor/libbacktrace.git">libbacktrace</a> to produce readable crash dumps if it is available. This is an optional dependency; if it is not available everything should build just fine, but crash dumps will not be very readable.</p>
-<h1><a class="anchor" id="development-tools"></a>
-Development tools</h1>
-<p>There is a variety of design and development documentation <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2docs_2_r_e_a_d_m_e.html">here</a>.</p>
+<h2><a class="anchor" id="development-tools"></a>
+Development tools</h2>
+<p>There is a variety of design and development documentation here.</p>
 <p>We recommend using <code>clang++</code> with no optimizations for speeding up compilation and simplifying debugging.</p>
 <p>We recommend installing a new version of <a href="http://ftp.gnu.org/gnu/gdb">gdb</a>, because older gdb versions do not always handle C++11 or newer correctly.</p>
 <p>We recommend exuberant ctags for navigating source code in Emacs and vi. <code>sudo apt-get install exuberant-ctags.</code> The Makefile targets <code>make ctags</code> and <code>make etags</code> generate tags for vi and Emacs respectively. (Make sure that you are using the correct version of ctags; there are several competing programs with the same name in existence.)</p>
@@ -365,41 +557,41 @@ Development tools</h1>
 <div class="line">cd docs/doxygen</div>
 <div class="line">doxygen doxygen.cfg</div>
 </div><!-- fragment --><p> The HTML output is available in <code>docs/doxygen/build/html/index.html</code>.</p>
-<h2><a class="anchor" id="git-setup"></a>
-Git setup</h2>
+<h3><a class="anchor" id="git-setup"></a>
+Git setup</h3>
 <p>Occasionally formatting commits are applied to P4C. These pollute the git history. To ignore these commits in git blame, run this command </p><div class="fragment"><div class="line">config blame.ignoreRevsFile .git-blame-ignore-revs</div>
 </div><!-- fragment --><p>The P4C code base is subject to a series of linter checks which are checked by CI. To avoid failing these checks and wasting unnecessary CI cycles and resources, you can install <a href="https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks">git commit hooks</a> by running </p><div class="fragment"><div class="line">/tools/install_git_hooks.sh</div>
 </div><!-- fragment --><p> These commit hooks will run on every commit and check the files you are planning to commit with cpplint and clang-format.</p>
-<h1><a class="anchor" id="docker"></a>
-Docker</h1>
+<h2><a class="anchor" id="docker"></a>
+Docker</h2>
 <p>A Dockerfile is included. You can generate an image which contains a copy of P4C in <code>/p4c/build</code> by running:</p>
 <div class="fragment"><div class="line">docker build -t p4c .</div>
 </div><!-- fragment --><p>On some platforms Docker limits the memory usage of any container, even containers used during the <code>docker build</code> process. On macOS in particular the default is 2GB, which is not enough to build P4C. Increase the memory limit to at least 4GB via Docker preferences or you are likely to see "internal compiler
 errors" from GCC which are caused by low memory.</p>
-<h1><a class="anchor" id="bazel"></a>
-Bazel</h1>
+<h2><a class="anchor" id="bazel"></a>
+Bazel</h2>
 <p><a href="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml"><img src="https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg" alt="Bazel Build" style="pointer-events: none;" class="inline"/></a></p>
 <p>The project can also be build using <a href="https://bazel.build">Bazel</a>: </p><div class="fragment"><div class="line">bazel build //...</div>
 </div><!-- fragment --><p> We run continuous integration to ensure this works with the latest version of Bazel.</p>
 <p>We also provide a <a href="https://github.com/p4lang/p4c/blob/main/bazel/p4_library.bzl"><code>p4_library</code> rule</a> for invoking P4C during the build process of 3rd party Bazel projects.</p>
 <p>See <a href="https://github.com/p4lang/p4c/tree/main/bazel/example">bazel/example</a> for an example of how to use or extend P4C in your own Bazel project. You may use it as a template to get you started.</p>
-<h1><a class="anchor" id="build-system"></a>
-Build system</h1>
+<h2><a class="anchor" id="build-system"></a>
+Build system</h2>
 <p>The build system is based on cmake. This section describes how it can be customized.</p>
-<h2><a class="anchor" id="defining-new-cmake-targets"></a>
-Defining new CMake targets</h2>
+<h3><a class="anchor" id="defining-new-cmake-targets"></a>
+Defining new CMake targets</h3>
 <p>When building a new backend target, add it into the development tree in the extensions subdirectory. The cmake-based build system will automatically include it if it contains a CMakeLists.txt file.</p>
 <p>For a new backend, the cmake file should contain the following rules:</p>
-<h3><a class="anchor" id="ir-definition-files"></a>
-IR definition files</h3>
+<h4><a class="anchor" id="ir-definition-files"></a>
+IR definition files</h4>
 <p>Backend specific IR definition files should be added to the global list of IR_DEF_FILES as they are processed together with the core IR files. Use the following rule:</p>
 <div class="fragment"><div class="line">set (IR_DEF_FILES ${IR_DEF_FILES} ${MY_IR_DEF_FILES} PARENT_SCOPE)</div>
 </div><!-- fragment --><p> where <code>MY_IR_DEF_FILES</code> is a list of file names with absolute path (for example, use <code>${CMAKE_CURRENT_SOURCE_DIR}</code>).</p>
 <p>If in addition you have additional supporting source files, they should be added to the ir sources, as follows:</p>
 <div class="fragment"><div class="line">set(EXTENSION_IR_SOURCES ${EXTENSION_IR_SOURCES} ${MY_IR_SRCS} PARENT_SCOPE)</div>
 </div><!-- fragment --><p> Again, <code>MY_IR_SRCS</code> is a list of file names with absolute path.</p>
-<h3><a class="anchor" id="source-files"></a>
-Source files</h3>
+<h4><a class="anchor" id="source-files"></a>
+Source files</h4>
 <p>Sources (.cpp and .h) should be added to the cpplint and clang-format target using the following rule:</p>
 <div class="fragment"><div class="line">add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} &quot;${MY_SOURCES_AND_HEADERS}&quot;)</div>
 <div class="line">add_clang_format_files (${CMAKE_CURRENT_SOURCE_DIR} &quot;${MY_SOURCES_AND_HEADERS}&quot;)</div>
@@ -409,15 +601,15 @@ Source files</h3>
 </div><!-- fragment --><p> clang-format can be checked using the <code>make clang-format</code> command. Complaints can be fixed by running <code>make clang-format-fix-errors</code>. black and isort can be checked using the <code>make black</code> or <code>make isort</code> command respectively. Complaints can be fixed by running <code>make black-fix-errors</code> or <code>make isort-fix-errors</code>.</p>
 <p>cpplint, clang-format, and black/isort run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running </p><div class="fragment"><div class="line">./tools/install_git_hooks.sh</div>
 </div><!-- fragment --><p> clang-format, cpplint, and black/isort checks will be enforced on every branch commit. In cases where checks are failing but the commit is sound, one can bypass the hook enforcement using <code>git commit --no-verify</code>.</p>
-<h3><a class="anchor" id="target"></a>
-Target</h3>
+<h4><a class="anchor" id="target"></a>
+Target</h4>
 <p>Define a target for your executable. The target should link against the core <code>P4C_LIBRARIES</code> and <code>P4C_LIB_DEPS</code>. <code>P4C_LIB_DEPS</code> are package dependencies. If you need additional libraries for your project, add them to <code>P4C_LIB_DEPS</code>.</p>
 <p>In addition, your target should depend on the <code>genIR</code> target, since you need all the IR generation to happen before you start compiling your backend. If you chose to have your backend as a library (seem the backends/bmv2 example), the library should depend on <code>genIR</code>, and there is no longer necessary for your executable to depend on it.</p>
 <div class="fragment"><div class="line">add_executable(p4c-mybackend ${MY_SOURCES})</div>
 <div class="line">target_link_libraries (p4c-mybackend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})</div>
 <div class="line">add_dependencies(p4c-mybackend genIR)</div>
-</div><!-- fragment --><h3><a class="anchor" id="tests"></a>
-Tests</h3>
+</div><!-- fragment --><h4><a class="anchor" id="tests"></a>
+Tests</h4>
 <p>We implemented support equivalent to the automake <code>make check</code> rules. All tests should be included in <code>make check</code> and in addition, we support <code>make check-*</code> rules. To enable this support, add the following rules:</p>
 <div class="fragment"><div class="line">set(MY_DRIVER &lt;driver or compiler executable&gt;)</div>
 <div class="line"> </div>
@@ -438,8 +630,8 @@ Tests</h3>
 <p>To pass custom arguments to P4C, you can set the environment variable <code>P4C_ARGS</code>: </p><div class="fragment"><div class="line">make check P4C_ARGS=&quot;-Xp4c=MY_CUSTOM_FLAG&quot;</div>
 </div><!-- fragment --><p>When making changes to P4C, it is sometimes useful to be able to run the tests while overwriting the expected output files that are saved in this repository. One such situation is when your changes to P4C cause the names of compiler-generated local variables to change. To force the expected output files to be rewritten while running the tests, assign a value to the shell environment variable <code>P4TEST_REPLACE</code>. Here is one example Bash command to do so:</p>
 <div class="fragment"><div class="line">P4TEST_REPLACE=1 make check</div>
-</div><!-- fragment --><h3><a class="anchor" id="installation"></a>
-Installation</h3>
+</div><!-- fragment --><h4><a class="anchor" id="installation"></a>
+Installation</h4>
 <p>Define rules to install your backend. Typically you need to install the binary, the additional architecture headers, and the configuration file for the P4C driver.</p>
 <div class="fragment"><div class="line">install (TARGETS p4c-mybackend</div>
 <div class="line">  RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})</div>
@@ -447,14 +639,74 @@ Installation</h3>
 <div class="line">  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})</div>
 <div class="line">install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/driver/p4c.mybackend.cfg</div>
 <div class="line">  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4c_src)</div>
-</div><!-- fragment --><h1><a class="anchor" id="known-issues"></a>
-Known issues</h1>
+</div><!-- fragment --><h1><a class="anchor" id="common-p4c-utility-functions"></a>
+Common P4C utility functions</h1>
+<p>The <a href="https://github.com/p4lang/p4c/tree/main/lib"><code>lib</code> directory</a> contains miscellaneous utilities that are generally useful and not specific to any part of the compiler. Most are not even compiler specific. The files in the <code>lib</code> folder should only depend on each other; they cannot depend on any other compiler files.</p>
+<h5><a class="anchor" id="algorithmh"></a>
+algorithm.h</h5>
+<p>wrapper around <code>&lt;algorithm&gt;</code> that contains severla useful additional algorithms</p>
+<h5><a class="anchor" id="bitopsh"></a>
+bitops.h</h5>
+<p>bit manipulation operations</p>
+<h5><a class="anchor" id="bitvech-bitveccpp"></a>
+bitvec.h, bitvec.cpp</h5>
+<p>dynamic bitvectors with useful operations. The standard types <code>std::vector&lt;bool&gt;</code> and <code>std::bitsec</code> are missing crucial functionality, making them generally useless.</p>
+<h5><a class="anchor" id="cstringh-cstringcpp"></a>
+cstring.h, cstring.cpp</h5>
+<p>constant strings. The standard library <code>std::string</code> type is mutable, allowing the string to be changed dynamically. Constant strings are what we would prefer to use in the compiler. <code>cstring</code> keeps the memory for all constant strings in a single global pool, allowing constant time comparisons.</p>
+<h5><a class="anchor" id="defaulth"></a>
+default.h</h5>
+<p>Synthesizing default values of various types (e.g., 0 for integers, nullptr for pointers, etc.)</p>
+<h5><a class="anchor" id="enumeratorh-enumeratorcpp"></a>
+enumerator.h, enumerator.cpp</h5>
+<p>C#-like enumerator interface.</p>
+<h5><a class="anchor" id="errorh-errorcpp-expresionsh"></a>
+error.h, error.cpp, expresions.h</h5>
+<p>Error reporting functions.</p>
+<h5><a class="anchor" id="gccpp"></a>
+gc.cpp</h5>
+<p>Overrides global <code>operator new</code> and <code>delete</code> to use the Boehm/Demers/Weiser conservative collector, so all memory allocations are garbage collected</p>
+<h5><a class="anchor" id="hexh-hexcpp"></a>
+hex.h, hex.cpp</h5>
+<p>Adaptor for more conveniently printing hexadecimal string with ostreams.</p>
+<h5><a class="anchor" id="indenth-indentcpp"></a>
+indent.h, indent.cpp</h5>
+<p>Adaptor for managing indentation on ostreams</p>
+<h5><a class="anchor" id="logh-logcpp"></a>
+log.h, log.cpp</h5>
+<p>Macros and support for logging that can be managed on a per-source-file basis</p>
+<h5><a class="anchor" id="ltbitmatrixh"></a>
+ltbitmatrix.h</h5>
+<p>Adaptor using a <code>bitvec</code> as a lower-triangular bit matrix.</p>
+<h5><a class="anchor" id="maph"></a>
+map.h</h5>
+<p>Wrapper around <code>map</code>, adding some useful functions that are missing from <code>std::map</code></p>
+<h5><a class="anchor" id="nullstreamh"></a>
+nullstream.h</h5>
+<p>A simple ostream that does nothing.</p>
+<h5><a class="anchor" id="optionsh-optionscpp"></a>
+options.h, options.cpp</h5>
+<p>Represents compiler command-line options.</p>
+<h5><a class="anchor" id="rangeh"></a>
+range.h</h5>
+<p>Iterators over numeric ranges.</p>
+<h5><a class="anchor" id="source_fileh-source_filecpp"></a>
+source_file.h, source_file.cpp</h5>
+<p>Represents the input source of the compiler and source file position information used for error reporting and generating debugging information.</p>
+<h5><a class="anchor" id="stringifyh-stringifycppp"></a>
+stringify.h, stringify.cppp</h5>
+<p>Conversion of various types to strings.</p>
+<h5><a class="anchor" id="sourcecodebuilderh"></a>
+sourceCodeBuilder.h</h5>
+<p>Support for emitting programs in source (works for P4 and C).</p>
+<h2><a class="anchor" id="known-issues"></a>
+Known issues</h2>
 <p>Issues with the compiler are tracked on <a href="https://github.com/p4lang/p4c/issues">GitHub</a>. Before opening a new issue, please check whether a similar issue is already opened. Opening issues and submitting a pull request with fixes for those issues is much appreciated.</p>
 <p>In addition to the list of issues on Github, there are a number of currently unsupported features listed below:</p>
-<h2><a class="anchor" id="frontend"></a>
-Frontend</h2>
-<h3><a class="anchor" id="p4_14-features-not-supported-in-p4_16"></a>
-P4_14 features not supported in P4_16</h3>
+<h3><a class="anchor" id="frontend-1"></a>
+Frontend</h3>
+<h4><a class="anchor" id="p4_14-features-not-supported-in-p4_16"></a>
+P4_14 features not supported in P4_16</h4>
 <ul>
 <li>extern/blackbox attributes &ndash; there is support for carrying them in the IR, but they are lost if P4_16 code is output. Backends can access them from the IR</li>
 <li>Nonstandard extension primitives from P4_14<ul>
@@ -467,30 +719,30 @@ P4_14 features not supported in P4_16</h3>
 </li>
 <li>No support for P4_14 parser exceptions.</li>
 </ul>
-<h2><a class="anchor" id="backends"></a>
-Backends</h2>
-<h3><a class="anchor" id="bmv2-backend"></a>
-Bmv2 Backend</h3>
+<h3><a class="anchor" id="backends"></a>
+Backends</h3>
+<h4><a class="anchor" id="bmv2-backend"></a>
+Bmv2 Backend</h4>
 <ul>
 <li>Tables with multiple apply calls</li>
 </ul>
-<p>See also <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_r_e_a_d_m_e.html#unsupported-p4_16-language-features">unsupported P4_16 language features</a>.</p>
-<h1><a class="anchor" id="how-to-contribute"></a>
-How to Contribute</h1>
-<p>We welcome and appreciate new contributions. Please take a moment to review our <a class="el" href="md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html">Contribution Guidelines</a> to get started.</p>
-<h1><a class="anchor" id="p4-compiler-onboarding"></a>
-P4 Compiler Onboarding</h1>
-<p>Educational material on <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a>:</p>
+<p>See also <a class="el" href="behavioral_model_backend.html#unsupported-p4_16-language-features">unsupported P4_16 language features</a>.</p>
+<h2><a class="anchor" id="how-to-contribute"></a>
+How to Contribute</h2>
+<p>We welcome and appreciate new contributions. Please take a moment to review our Contribution Guidelines to get started.</p>
+<h2><a class="anchor" id="p4-compiler-onboarding"></a>
+P4 Compiler Onboarding</h2>
+<p>Educational material on P4:</p>
 <ul>
 <li>General hands-on <a href="https://github.com/p4lang/tutorials">tutorials</a>.</li>
 <li><a href="https://github.com/jafingerhut/p4-guide?tab=readme-ov-file#introduction">Technical documentation on P4-related topics</a>.</li>
-<li>Motivating <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a>: <a href="https://www.youtube.com/watch?v=8ie0FcsN07U">IEEE ICC 2018 // Keynote: Nick McKeown, Programmable Forwarding Planes Are Here To Stay</a></li>
+<li>Motivating P4: <a href="https://www.youtube.com/watch?v=8ie0FcsN07U">IEEE ICC 2018 // Keynote: Nick McKeown, Programmable Forwarding Planes Are Here To Stay</a></li>
 <li>Introducing P4-16 in detail:<ul>
 <li>Part 1: <a href="https://www.youtube.com/watch?v=GslseT4hY1w">Introduction to P4_16. Part 1</a></li>
 <li>Part 2: <a href="https://www.youtube.com/watch?v=yqxpypXIOtQ">Introduction to P4_16. Part 2</a></li>
 </ul>
 </li>
-<li>Material on the official <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> compiler:<ul>
+<li>Material on the official P4 compiler:<ul>
 <li><a href="https://www.youtube.com/watch?v=Rx5AQ0IF6eU">Understanding the Open-Source P4-16 Compiler - February 15, 2022 - Mihai Budiu</a></li>
 <li><a href="https://www.youtube.com/watch?v=YnPHPaPSmpU">Understanding P4-16 Open-Source Compiler, Part 2 - March 1, 2022 - Mihai Budiu</a></li>
 <li><a href="https://github.com/p4lang/p4c/blob/main/docs/compiler-design.pdf">Compiler Design - Implementation Architecture</a>.</li>
@@ -498,9 +750,9 @@ P4 Compiler Onboarding</h1>
 </li>
 <li>Introduction to P4Runtime: <a href="https://www.youtube.com/watch?v=KRx92qSLgo4">Next-Gen SDN Tutorial - Session 1: P4 and P4Runtime Basics</a></li>
 </ul>
-<h1><a class="anchor" id="contact"></a>
-Contact</h1>
-<p>We appreciate your contributions and look forward to working with you to improve the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> Compiler Project (P4C)!</p><ul>
+<h2><a class="anchor" id="contact"></a>
+Contact</h2>
+<p>We appreciate your contributions and look forward to working with you to improve the P4 Compiler Project (P4C)!</p><ul>
 <li>For further assistance or questions regarding contributions, reach out to us in our <a href="https://p4lang.zulipchat.com/">community chat</a>. <a href="https://p4lang.zulipchat.com/join/kjtv2reafrylssget425wx6c/">Joining link</a> .</li>
 <li>For general P4-related questions, use the <a href="https://forum.p4.org/">P4 forum</a>.</li>
 <li>For other communication channels click <a href="https://p4.org/join/">here</a>. </li>

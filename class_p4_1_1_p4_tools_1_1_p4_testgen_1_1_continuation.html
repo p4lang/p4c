@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::P4Tools::P4Testgen::Continuation Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::P4Tools::P4Testgen::Continuation Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -269,13 +269,13 @@ Friends</h2></td></tr>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a4c257b773ed9193a3b56f31e343db949afef46e5063ce3dc78b8ae64fa474241d" name="a4c257b773ed9193a3b56f31e343db949afef46e5063ce3dc78b8ae64fa474241d"></a>Exit&#160;</td><td class="fielddoc"><p>Thrown when an exit statement is encountered. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a4c257b773ed9193a3b56f31e343db949ac8b77721c677e0429241a9250972122d" name="a4c257b773ed9193a3b56f31e343db949ac8b77721c677e0429241a9250972122d"></a>NoMatch&#160;</td><td class="fielddoc"><p>Thrown when a select expression fails to match. This models <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a>'s error.NoMatch. </p>
+<tr><td class="fieldname"><a id="a4c257b773ed9193a3b56f31e343db949ac8b77721c677e0429241a9250972122d" name="a4c257b773ed9193a3b56f31e343db949ac8b77721c677e0429241a9250972122d"></a>NoMatch&#160;</td><td class="fielddoc"><p>Thrown when a select expression fails to match. This models P4's error.NoMatch. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a4c257b773ed9193a3b56f31e343db949ad98ac12774fca5c3cbaffe276840c55f" name="a4c257b773ed9193a3b56f31e343db949ad98ac12774fca5c3cbaffe276840c55f"></a>Reject&#160;</td><td class="fielddoc"><p>Thrown when the parser reaches the reject state. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a4c257b773ed9193a3b56f31e343db949a3e679cff5b3a6f6f8f32aead541a0a12" name="a4c257b773ed9193a3b56f31e343db949a3e679cff5b3a6f6f8f32aead541a0a12"></a>Drop&#160;</td><td class="fielddoc"><p>This is an internal interpreter exception to express drop semantics. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a4c257b773ed9193a3b56f31e343db949a21b21f9ae0165b78d1303cca26cacca9" name="a4c257b773ed9193a3b56f31e343db949a21b21f9ae0165b78d1303cca26cacca9"></a>PacketTooShort&#160;</td><td class="fielddoc"><p>Thrown on premature packet end. Models <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a>'s error.PacketTooShort. </p>
+<tr><td class="fieldname"><a id="a4c257b773ed9193a3b56f31e343db949a21b21f9ae0165b78d1303cca26cacca9" name="a4c257b773ed9193a3b56f31e343db949a21b21f9ae0165b78d1303cca26cacca9"></a>PacketTooShort&#160;</td><td class="fielddoc"><p>Thrown on premature packet end. Models P4's error.PacketTooShort. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a4c257b773ed9193a3b56f31e343db949a727b63583e01fa2b3952dab580c84dc2" name="a4c257b773ed9193a3b56f31e343db949a727b63583e01fa2b3952dab580c84dc2"></a>Abort&#160;</td><td class="fielddoc"><p>Thrown when the target terminates. </p>
 </td></tr>
@@ -330,7 +330,7 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>a body that is equivalent to applying this continuation to the given value (or unit, if no value is provided). A BUG occurs if parameterOpt is std::nullopt but value_opt is not, or vice versa.</dd></dl>
-<p>Expressions in the metalanguage include <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> non-expressions. Because of this, the value (if provided) does not necessarily need to be an instance of IR::Expression. </p>
+<p>Expressions in the metalanguage include P4 non-expressions. Because of this, the value (if provided) does not necessarily need to be an instance of IR::Expression. </p>
 <p>Creates a visitor for Commands that substitutes the given value for the given parameter.</p>
 
 </div>
