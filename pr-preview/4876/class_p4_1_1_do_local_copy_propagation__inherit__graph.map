@@ -1,0 +1,13 @@
+<map id="P4::DoLocalCopyPropagation" name="P4::DoLocalCopyPropagation">
+<area shape="rect" id="Node000001" title=" " alt="" coords="147,152,356,177"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_control_flow_visitor.html" title=" " alt="" coords="5,79,172,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="128,107,226,149,224,154,126,112"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="207,5,295,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="214,39,116,81,114,76,212,34"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_transform.html" title=" " alt="" coords="196,79,307,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="254,44,254,79,249,79,249,44"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_p4_write_context.html" title=" " alt="" coords="331,79,479,104"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="289,34,381,76,378,81,287,39"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="254,118,254,152,249,152,249,118"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="369,112,278,154,275,149,367,107"/>
+</map>

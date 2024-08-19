@@ -1,0 +1,10 @@
+<map id="P4::EliminateTypedef" name="P4::EliminateTypedef">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,164,251"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="19,152,151,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,191,87,225,82,225,82,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="41,5,129,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="76,44,67,73,66,104,82,151,77,153,61,104,62,72,71,42"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="76,79,187,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="102,41,126,77,122,80,98,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="118,117,94,153,90,150,114,114"/>
+</map>
