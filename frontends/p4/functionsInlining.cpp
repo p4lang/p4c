@@ -69,6 +69,48 @@ Visitor::profile_t FunctionsInliner::init_apply(const IR::Node *node) {
     return rv;
 }
 
+class FunctionsInliner::isLocalExpression : public Inspector, ResolutionContext {
+    bool done = false;
+    bool result = true;
+
+    profile_t init_apply(const IR::Node *node) override {
+        BUG_CHECK(!done, "isLocalExpression can only be applied once");
+        return Inspector::init_apply(node);
+    }
+    void end_apply() override { done = true; }
+    bool preorder(const IR::Node *) override { return result; }
+    bool preorder(const IR::Path *p) override {
+        if (p->absolute) return result = false;
+        // cribbed from ResolutionContext::resolve -- we want to resolve the name,
+        // except we want to know what scope it is found in, not what it resolves to
+        const Context *ctxt = nullptr;
+        while (auto scope = findOrigCtxt<IR::INamespace>(ctxt)) {
+            if (scope->is<IR::P4Control>() || scope->is<IR::P4Parser>() ||
+                scope->is<IR::P4Program>() || scope->is<IR::V1Control>() ||
+                scope->is<IR::V1Parser>() || scope->is<IR::V1Program>()) {
+                // these are "global" things that may contain functions
+                return result = false;
+            }
+            if (!lookup(scope, p->name, P4::ResolutionType::Any).empty()) return result;
+            if (scope->is<IR::Function>() || scope->is<IR::P4Action>()) {
+                // no need to look further as can't have nested functions
+                return result = false;
+            }
+        }
+        BUG("failed to reach global scope");
+        return result;
+    }
+
+ public:
+    isLocalExpression(const IR::Expression *expr, const Visitor_Context *ctxt) {
+        expr->apply(*this, ctxt);
+    }
+    explicit operator bool() {
+        BUG_CHECK(done, "isLocalExpression not computed");
+        return result;
+    }
+};
+
 bool FunctionsInliner::preCaller() {
     LOG2("Visiting: " << dbp(getOriginal()));
     if (toInline->sites.count(getOriginal()) == 0) {
@@ -195,19 +237,26 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     BUG_CHECK(callee, "%1%: expected a function", calleeNode);
 
     IR::IndexedVector<IR::StatOrDecl> body;
-    ParameterSubstitution subst;
+    ParameterSubstitution subst;   // rewrites for params
     TypeVariableSubstitution tvs;  // empty
 
-    std::map<const IR::Parameter *, cstring> paramRename;
-    ParameterSubstitution substitution;
+    ParameterSubstitution substitution;  // map params to actual arguments
     substitution.populate(callee->type->parameters, mce->arguments);
+
+    // parameters that need copyout
+    std::vector<std::pair<cstring, const IR::Argument *>> needCopyout;
 
     // evaluate in and inout parameters in order
     for (auto param : callee->type->parameters->parameters) {
         auto argument = substitution.lookup(param);
         cstring newName = nameGen->newName(param->name.name.string_view());
-        paramRename.emplace(param, newName);
-        if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
+        if ((param->direction == IR::Direction::Out || param->direction == IR::Direction::InOut) &&
+            isLocalExpression(argument->expression, getChildContext())) {
+            // If the actual parameter is local to the caller, we can just rewrite the callee
+            // to access it directly, without the overhead of copying it in or out
+            subst.add(param, argument);
+        } else if (param->direction == IR::Direction::In ||
+                   param->direction == IR::Direction::InOut) {
             auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type);
             body.push_back(vardecl);
             auto copyin =
@@ -215,6 +264,8 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
             body.push_back(copyin);
             subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
                                               new IR::PathExpression(newName)));
+            if (param->direction == IR::Direction::InOut)
+                needCopyout.emplace_back(newName, argument);
         } else if (param->direction == IR::Direction::None) {
             // This works because there can be no side-effects in the evaluation of this
             // argument.
@@ -225,6 +276,7 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
             subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
                                               new IR::PathExpression(newName)));
             body.push_back(vardecl);
+            needCopyout.emplace_back(newName, argument);
         }
     }
 
@@ -242,14 +294,10 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     auto retExpr = cloneBody(funclone->body->components, body);
 
     // copy out and inout parameters
-    for (auto param : callee->type->parameters->parameters) {
-        auto left = substitution.lookup(param);
-        if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
-            cstring newName = ::P4::get(paramRename, param);
-            auto right = new IR::PathExpression(newName);
-            auto copyout = new IR::AssignmentStatement(left->expression, right);
-            body.push_back(copyout);
-        }
+    for (auto [newName, argument] : needCopyout) {
+        auto right = new IR::PathExpression(newName);
+        auto copyout = new IR::AssignmentStatement(argument->expression, right);
+        body.push_back(copyout);
     }
 
     if (auto assign = statement->to<IR::AssignmentStatement>()) {

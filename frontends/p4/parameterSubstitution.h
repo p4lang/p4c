@@ -75,12 +75,21 @@ class ParameterSubstitution : public IHasDbPrint {
     }
 
     void dbprint(std::ostream &out) const {
+        bool brief = (DBPrint::dbgetflags(out) & DBPrint::Brief);
         if (paramList != nullptr) {
-            for (auto s : *paramList->getEnumerator())
-                out << dbp(s) << "=>" << dbp(lookup(s)) << std::endl;
+            if (!brief) out << "paramList:" << Log::endl;
+            for (auto s : *paramList->getEnumerator()) {
+                out << dbp(s) << "=>" << dbp(lookup(s));
+                if (!brief) out << " " << lookup(s);
+                out << Log::endl;
+            }
         } else {
-            for (auto s : parametersByName)
-                out << dbp(s.second) << "=>" << dbp(lookupByName(s.first)) << std::endl;
+            if (!brief) out << "parametersByName:" << Log::endl;
+            for (auto s : parametersByName) {
+                out << dbp(s.second) << "=>" << dbp(lookupByName(s.first));
+                if (!brief) out << " " << lookupByName(s.first);
+                out << Log::endl;
+            }
         }
     }
 
