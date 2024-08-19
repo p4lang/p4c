@@ -8,7 +8,7 @@ Refer to the specific section here: [Getting Started - Subsection](https://p4lan
 
 The [`lib` directory](https://github.com/p4lang/p4c/tree/main/lib) contains miscellaneous utilities that are generally useful
 and not specific to any part of the compiler.  Most are not even compiler
-specific.  The files in `lib` folder should only depend on each other; they
+specific.  The files in the `lib` folder should only depend on each other; they
 cannot depend on any other compiler files.
 
 | File(s)                      | Description |
