@@ -27,5 +27,4 @@ The mid-end stage applies further optimizations to the IR of the P4 program. It'
   - **Predicating Code:** Converts conditional statements (e.g., if statements) into predicate expressions (e.g., using the ternary ?: operator).
 
 ## Pass Library:
-The mid-end is assembled from a library of existing optimization passes, allowing flexibility and reuse of common transformations.
-These mid-end passes further refine the program's IR, making it more efficient and better suited for the target architecture's back-end processing.
+The mid-end uses optimization passes to refine the IR, enhancing efficiency for the back-end.
