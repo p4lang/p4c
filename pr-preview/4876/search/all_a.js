@@ -219,6 +219,6 @@ var searchData=
   ['assignmentstatement_216',['AssignmentStatement',['../class_p4_1_1_p4_tools_1_1_trace_events_1_1_assignment_statement.html',1,'P4::P4Tools::TraceEvents']]],
   ['assignstructlike_217',['assignStructLike',['../class_p4_1_1_p4_tools_1_1_abstract_execution_state.html#a62c647e35c1e932a8625974273ca1a73',1,'P4::P4Tools::AbstractExecutionState']]],
   ['assignvalues_218',['assignValues',['../class_p4_1_1_choose_error_representation.html#aa20a4fa1cbeb9a32f4f956cbf8bbd545',1,'P4::ChooseErrorRepresentation']]],
-  ['auto_20translate_20p4_5f14_20source_20to_20p4_5f16_20source_3a_219',['Auto-translate P4_14 source to P4_16 source:',['../p4test_backend.html#auto-translate-p4_14-source-to-p4_16-source',1,'']]],
+  ['auto_20translate_20p4_2014_20source_20to_20p4_2016_20source_3a_219',['Auto-translate P4-14 source to P4-16 source:',['../p4test_backend.html#auto-translate-p4-14-source-to-p4-16-source',1,'']]],
   ['autocompilecontext_220',['AutoCompileContext',['../struct_p4_1_1_auto_compile_context.html',1,'P4']]]
 ];

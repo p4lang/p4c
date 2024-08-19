@@ -128,26 +128,26 @@ $(function(){initNavTree('p4test_backend.html',''); initResizable(true); });
   <li class="level1 empty">
     <ul>
       <li class="level2">
-        <a href="#auto-translate-p4_14-source-to-p4_16-source">Auto-translate P4_14 source to P4_16 source:</a>
+        <a href="#auto-translate-p4-14-source-to-p4-16-source">Auto-translate P4-14 source to P4-16 source:</a>
       </li>
       <li class="level2">
-        <a href="#check-syntax-of-p4_16-or-p4_14-source-code">Check syntax of P4_16 or P4_14 source code</a>
+        <a href="#check-syntax-of-p4-16-or-p4-14-source-code">Check syntax of P4-16 or P4-14 source code</a>
       </li>
     </ul>
   </li>
 </ul>
 </div>
-<div class="textblock"><p>The P4test Backend is a tool designed for testing and debugging <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs. It supports both the P4_14 and P4_16 standards and can translate <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code from one version to another. Additionally, it provides a syntax checker for <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code, enabling the verification of the correctness of your <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs. It supports both the P4_14 and P4_16 standards and can translate <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code from one version to another.</p>
-<h2><a class="anchor" id="auto-translate-p4_14-source-to-p4_16-source"></a>
-Auto-translate P4_14 source to P4_16 source:</h2>
-<p>You can automatically translate a P4_14 program to a P4_16 program using the following command: </p><div class="fragment"><div class="line">p4test --std p4-14 my-p4-14-prog.p4 --pp auto-translated-p4-16-prog.p4</div>
-</div><!-- fragment --><p>This command takes the P4_14 program (my-p4-14-prog.p4) and generates a corresponding P4_16 program (auto-translated-p4-16-prog.p4).</p>
-<h2><a class="anchor" id="check-syntax-of-p4_16-or-p4_14-source-code"></a>
-Check syntax of P4_16 or P4_14 source code</h2>
+<div class="textblock"><p>The P4Test Backend is a tool designed for testing and debugging <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs. It supports both the P4-14 and P4-16 standards and can translate <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code from one version to another. Additionally, it provides a syntax checker for <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code, enabling the verification of the correctness of your <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs.</p>
+<h2><a class="anchor" id="auto-translate-p4-14-source-to-p4-16-source"></a>
+Auto-translate P4-14 source to P4-16 source:</h2>
+<p>You can automatically translate a P4-14 program to a P4-16 program using the following command: </p><div class="fragment"><div class="line">p4test --std p4-14 my-p4-14-prog.p4 --pp auto-translated-p4-16-prog.p4</div>
+</div><!-- fragment --><p>This command takes the P4-14 program (my-p4-14-prog.p4) and generates a corresponding P4-16 program (auto-translated-p4-16-prog.p4).</p>
+<h2><a class="anchor" id="check-syntax-of-p4-16-or-p4-14-source-code"></a>
+Check syntax of P4-16 or P4-14 source code</h2>
 <p>The P4test Backend can check the syntax of <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs without being restricted by any specific compiler back end. This is useful for ensuring that your <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code is syntactically correct.</p>
-<p>For P4_16 code: </p><div class="fragment"><div class="line">p4test my-p4-16-prog.p4</div>
-</div><!-- fragment --><p>For P4_14 code: </p><div class="fragment"><div class="line">p4test --std p4-14 my-p4-14-prog.p4</div>
-</div><!-- fragment --><p>These commands will output error and/or warning messages if there are any issues with the syntax of your <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code, enabling you to verify the correctness of your <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs, due to that it is possible to verify the correctness of your <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs. </p>
+<p>For P4-16 code: </p><div class="fragment"><div class="line">p4test my-p4-16-prog.p4</div>
+</div><!-- fragment --><p>For P4-14 code: </p><div class="fragment"><div class="line">p4test --std p4-14 my-p4-14-prog.p4</div>
+</div><!-- fragment --><p>These commands will output error and/or warning messages if there are any issues with the syntax of your <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
