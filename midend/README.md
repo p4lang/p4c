@@ -19,3 +19,13 @@ These passes are not used in the front-end, but are still largely architecture-i
 <!--!
 \endinternal
 -->
+The mid-end stage applies further optimizations to the IR of the P4 program. It's architecture-independent, it is driven by policies specific to the target architecture. The mid-end uses the same base IR as the front-end and includes the following passes:
+
+## Optimization Passes:
+  - **Creating Actions/Tables from Statements and Actions:** Converts high-level constructs into more granular actions and tables.
+  - **Eliminating Tuple and Enum Types:** Simplifies complex data types into more manageable forms.
+  - **Predicating Code:** Converts conditional statements (e.g., if statements) into predicate expressions (e.g., using the ternary ?: operator).
+
+## Pass Library:
+The mid-end is assembled from a library of existing optimization passes, allowing flexibility and reuse of common transformations.
+These mid-end passes further refine the program's IR, making it more efficient and better suited for the target architecture's back-end processing.
