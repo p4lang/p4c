@@ -116,19 +116,19 @@ the IR types it is interested in.
 
 There are several Visitor subclasses that describe different types of visitors:
 
-| Visitor       | Description                                                                                    |
-| ------------- | ---------------------------------------------------------------------------------------------- |
-| `Inspector`   | simplified visitor that does not modify any nodes, just collects information.                  |
-| `Modifier`    | simplified visitor that does not change the tree/dag structure, but may modify nodes in place. |
-| `Transform`   | full transformation visitor described above                                                    |
-| `PassManager` | combines several visitors, run in a sequence                                                   |
+Visitor       |  Description
+--------------|--------------------------------
+`Inspector`   | simplified visitor that does not modify any nodes, just collects information.
+`Modifier`    | simplified visitor that does not change the tree/dag structure, but may modify nodes in place.
+`Transform`   | full transformation visitor described above
+`PassManager` | combines several visitors, run in a sequence
 
 There are also some interfaces that Visitor subclasses can implement to alter how nodes are visited:
 
-| Interface            | Description                                                                                                           |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `ControlFlowVisitor` | visit nodes in control-flow order, splitting (cloning) the visitor at conditions and merging the clone at join points |
-| `Backtrack`          | visitor that is notified when backtracking occurs and can have its state saved as a backtrack point.                  |
+Interface  | Description
+-----------|------------------------
+`ControlFlowVisitor` | visit nodes in control-flow order, splitting (cloning) the visitor at conditions and merging the clone at join points
+`Backtrack`	     | visitor that is notified when backtracking occurs and can have its state saved as a backtrack point.
 
 #### ControlFlowVisitor
 
@@ -273,10 +273,10 @@ declared in the class) will be created.  In this way, *most* classes can avoid i
 this boilerplate code in the .def file.
 
 ## Classes
-| **Class**       | **Description**                                                                                                                                                                                                                                                                                                                                                   |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `IR::Node`      | This is the ultimate abstract base class of all IR nodes and contains only a small amount of data for error reporting and debugging.  In general, this info is NEVER compared for equality (so subclasses should never call `Node::operator==`) as Nodes that differ only in this information should be considered equal, and not require cloning or the IR tree. |
-| `IR::Vector<T>` | This template class holds a vector of (`const`) pointers to nodes of a particular `IR::Node` subclass.                                                                                                                                                                                                                                                            |
+| **Class**      | **Description**  |
+|----------------|------------------|
+| `IR::Node`     | This is the ultimate abstract base class of all IR nodes and contains only a small amount of data for error reporting and debugging.  In general, this info is NEVER compared for equality (so subclasses should never call `Node::operator==`) as Nodes that differ only in this information should be considered equal, and not require cloning or the IR tree.   |
+| `IR::Vector<T>`| This template class holds a vector of (`const`) pointers to nodes of a particular `IR::Node` subclass. |
 
 <!--!
 \include{doc} "../ir/README.md" 
