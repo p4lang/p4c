@@ -7,6 +7,7 @@
 #include "lib/sourceCodeBuilder.h"
 
 namespace P4::P4Fmt {
+using std::filesystem::path;
 /**
 This pass converts a P4-16 IR into a P4 source (text) program.
 It can optionally emit as comments a representation of the program IR.
@@ -96,8 +97,9 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
         }
     }
 
-    bool isSystemFile(cstring file);
-    cstring ifSystemFile(const IR::Node *node);  // return file containing node if system file
+    bool isSystemFile(std::filesystem::path &file);
+    std::filesystem::path ifSystemFile(
+        const IR::Node *node);  // return file containing node if system file
 
  public:
     // Output is constructed here

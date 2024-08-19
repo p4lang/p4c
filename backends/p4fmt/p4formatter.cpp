@@ -31,17 +31,16 @@ void P4Formatter::end_apply(const IR::Node *) {
 }
 
 // Try to guess whether a file is a "system" file
-bool P4Formatter::isSystemFile(cstring file) {
+bool P4Formatter::isSystemFile(path &file) {
     if (noIncludes) return false;
-    if (file.startsWith(p4includePath)) return true;
-    return false;
+    return file.parent_path() == p4includePath;
 }
 
-cstring P4Formatter::ifSystemFile(const IR::Node *node) {
-    if (!node->srcInfo.isValid()) return nullptr;
-    auto sourceFile = node->srcInfo.getSourceFile();
+path P4Formatter::ifSystemFile(const IR::Node *node) {
+    if (!node->srcInfo.isValid()) return {};
+    path sourceFile(node->srcInfo.getSourceFile().c_str());
     if (isSystemFile(sourceFile)) return sourceFile;
-    return nullptr;
+    return {};
 }
 
 bool P4Formatter::preorder(const IR::Node *node) {
@@ -55,9 +54,9 @@ bool P4Formatter::preorder(const IR::P4Program *program) {
     bool first = true;
     for (auto a : program->objects) {
         // Check where this declaration originates
-        cstring sourceFile = ifSystemFile(a);
+        path sourceFile = ifSystemFile(a);
         if (!a->is<IR::Type_Error>() &&  // errors can come from multiple files
-            sourceFile != nullptr) {
+            !sourceFile.empty()) {
             /* FIXME -- when including a user header file (sourceFile !=
              * mainFile), do we want to emit an #include of it or not?  Probably
              * not when translating from P4-14, as that would create a P4-16
@@ -66,10 +65,9 @@ bool P4Formatter::preorder(const IR::P4Program *program) {
              * For now we ignore mainFile and don't emit #includes for any
              * non-system header */
 
-            if (includesEmitted.count(sourceFile) == 0) {
-                if (sourceFile.startsWith(p4includePath)) {
-                    const char *p = sourceFile.c_str() + strlen(p4includePath);
-                    if (*p == '/') p++;
+            if (includesEmitted.count(sourceFile.string()) == 0) {
+                if (sourceFile.parent_path() == p4includePath) {
+                    path p = sourceFile.filename();
                     if (P4V1::V1Model::instance.file.name == p) {
                         P4V1::getV1ModelVersion g;
                         program->apply(g);
@@ -559,7 +557,7 @@ bool P4Formatter::preorder(const IR::Declaration_Variable *v) {
 bool P4Formatter::preorder(const IR::Type_Error *d) {
     bool first = true;
     for (auto a : *d->getDeclarations()) {
-        if (ifSystemFile(a->getNode()))
+        if (!ifSystemFile(a->getNode()).empty())
             // only print if not from a system file
             continue;
         if (!first) {
