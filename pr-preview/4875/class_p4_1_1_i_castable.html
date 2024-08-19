@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::ICastable Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::ICastable Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -181,7 +181,7 @@ virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><b>toImp
 <tr class="separator:ace64a732901ae7b486559ffffcbbf843 inherit pro_methods_struct_p4_1_1_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Handy type conversion methods that can be inherited by various base classes. In order to use <a class="el" href="class_p4_1_1_i_castable.html">ICastable</a> one also need to provide intrusive lightweight RTTI metadata for the given class hierarchy. See <code>docs/C++.md</code> for more information, but in short, one need to use DECLARE_TYPEINFO() macro for this. There is no DECLARE_TYPEINFO for <a class="el" href="class_p4_1_1_i_castable.html">ICastable</a> itself as we are not expecting pointers neither to <a class="el" href="class_p4_1_1_i_castable.html">ICastable</a> nor to <a class="el" href="struct_p4_1_1_r_t_t_i_1_1_base.html">RTTI::Base</a> to appear within the codebase. As the same time, one should not cast to <a class="el" href="class_p4_1_1_i_castable.html">ICastable</a> as well (via e.g. <code>-&gt;to&lt;<a class="el" href="class_p4_1_1_i_castable.html">ICastable</a>&gt;()</code>. Use DECLARE_TYPEINFO without bases to specify the base class for a given herarchy. </p>
+<div class="textblock"><p>Handy type conversion methods that can be inherited by various base classes. In order to use ICastable one also need to provide intrusive lightweight RTTI metadata for the given class hierarchy. See <code>docs/C++.md</code> for more information, but in short, one need to use DECLARE_TYPEINFO() macro for this. There is no DECLARE_TYPEINFO for ICastable itself as we are not expecting pointers neither to ICastable nor to RTTI::Base to appear within the codebase. As the same time, one should not cast to ICastable as well (via e.g. <code>-&gt;to&lt;ICastable&gt;()</code>. Use DECLARE_TYPEINFO without bases to specify the base class for a given herarchy. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

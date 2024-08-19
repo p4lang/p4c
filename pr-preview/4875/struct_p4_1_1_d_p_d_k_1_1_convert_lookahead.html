@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::DPDK::ConvertLookahead Struct Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::DPDK::ConvertLookahead Struct Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -428,7 +428,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <tr class="separator:a609ed9bc5d421210d591474f234d5e88 inherit pro_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="namespace_p4_1_1_d_p_d_k.html">DPDK</a> target supports lookahead instruction only with header operand. This pass transforms usage of lookahead method with type parameters of other than header type (IR::Type_Header) to lookahead with header type using the following transformation:</p>
+<div class="textblock"><p>DPDK target supports lookahead instruction only with header operand. This pass transforms usage of lookahead method with type parameters of other than header type (IR::Type_Header) to lookahead with header type using the following transformation:</p>
 <p>This parser code:</p>
 <p>T var_name;</p>
 <p>state state_name { var_name = pkt.lookahead&lt;T&gt;(); }</p>

@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['history_0',['Revision History',['../md_00__revision__history.html',1,'']]]
+  ['intermediate_20representation_20ir_0',['P4C Intermediate Representation (IR)',['../intermediate_representation_ir.html',1,'']]],
+  ['ir_1',['P4C Intermediate Representation (IR)',['../intermediate_representation_ir.html',1,'']]]
 ];

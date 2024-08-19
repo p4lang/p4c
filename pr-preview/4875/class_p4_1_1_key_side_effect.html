@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::KeySideEffect Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::KeySideEffect Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -471,7 +471,7 @@ const <a class="el" href="class_p4_1_1_i_r_1_1_vector.html">IR::Vector</a>&lt; I
 <tr class="separator:a6625a30ba38a8c7632d58d84be6ba767 inherit pro_methods_class_p4_1_1_resolution_context"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>This pass is an adaptation of the midend code <a class="el" href="class_p4_1_1_simplify_key.html">SimplifyKey</a>. If a key computation involves side effects then all key field computations are lifted prior to the table application. We need to lift all key field computations since the order of side-effects needs to be preserved.</p>
+<div class="textblock"><p>This pass is an adaptation of the midend code SimplifyKey. If a key computation involves side effects then all key field computations are lifted prior to the table application. We need to lift all key field computations since the order of side-effects needs to be preserved.</p>
 <div class="fragment"><div class="line">table t {</div>
 <div class="line">  key = { a: exact,</div>
 <div class="line">          f() : exact; }</div>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::FindVariableValues Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::FindVariableValues Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -369,13 +369,13 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <tr class="separator:a609ed9bc5d421210d591474f234d5e88 inherit pro_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Global copy propagation, currently only operationg on control blocks where it optimizes the bodies of actions by propagating literal values for variables used in those actions. Pass is limited to only optimizing actions called in the 'apply' body of the control block and has no effect on actions found in tables. This pass is designed as an extension of the <a class="el" href="class_p4_1_1_local_copy_propagation.html">LocalCopyPropagation</a> pass, but the logic has been separated into a standalone pass to avoid additionally complicating the LocalCopyProp pass. <a class="el" href="class_p4_1_1_global_copy_propagation.html">GlobalCopyPropagation</a> pass was made with the intent of being used together with the existing <a class="el" href="class_p4_1_1_local_copy_propagation.html">LocalCopyPropagation</a> pass, and therefore doesn't introduce some of the features of that pass.</p>
-<p>The logic of this pass is divided into 2 passes, an <a class="el" href="class_p4_1_1_inspector.html">Inspector</a> pass that collects information on the variables used in the program and their values at the time of the action call and a Transformer pass that uses this information to edit the action bodies. The nature of the below mentionied optimization is such that it requires retroactive transformations to the action bodies, and this was the reason for having 2 separate passes.</p>
+<div class="textblock"><p>Global copy propagation, currently only operationg on control blocks where it optimizes the bodies of actions by propagating literal values for variables used in those actions. Pass is limited to only optimizing actions called in the 'apply' body of the control block and has no effect on actions found in tables. This pass is designed as an extension of the LocalCopyPropagation pass, but the logic has been separated into a standalone pass to avoid additionally complicating the LocalCopyProp pass. GlobalCopyPropagation pass was made with the intent of being used together with the existing LocalCopyPropagation pass, and therefore doesn't introduce some of the features of that pass.</p>
+<p>The logic of this pass is divided into 2 passes, an Inspector pass that collects information on the variables used in the program and their values at the time of the action call and a Transformer pass that uses this information to edit the action bodies. The nature of the below mentionied optimization is such that it requires retroactive transformations to the action bodies, and this was the reason for having 2 separate passes.</p>
 <p>The main situation that this pass optimizes is given below: ... control ing(out bit&lt;16&gt; y, ...) { bit&lt;16&gt; x; action do_action() { y = x; }</p>
 <p>apply { x = 16w5; do_action(); } } ...</p>
 <p>, and after optimization: ... control ing(out bit&lt;16&gt; y, ...) { action do_action() { y = 16w5; }</p>
 <p>apply { do_action(); } } ...</p>
-<dl class="section pre"><dt>Precondition</dt><dd>This pass should be run after the <a class="el" href="class_p4_1_1_localize_all_actions.html">LocalizeAllActions</a> frontend pass, which ensures that each action is invoked only once. This pass operates on control blocks and collects information about the state of the variables in that block and later distributes this information to the Transformer pass. Information is represented as a map that contains literal values for variables that need to be propagated, each action node has it's own map of information. </dd></dl>
+<dl class="section pre"><dt>Precondition</dt><dd>This pass should be run after the LocalizeAllActions frontend pass, which ensures that each action is invoked only once. This pass operates on control blocks and collects information about the state of the variables in that block and later distributes this information to the Transformer pass. Information is represented as a map that contains literal values for variables that need to be propagated, each action node has it's own map of information. </dd></dl>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

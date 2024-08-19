@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::ErrorMessage Struct Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::ErrorMessage Struct Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -185,9 +185,9 @@ MessageType&#160;</td><td class="memItemRight" valign="bottom"><b>type</b> = Mes
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Structure populated via error_helper functions</p>
-<p>Typically, calls to <a class="el" href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58" title="Report an error with the given message.">P4::error</a>/<a class="el" href="namespace_p4.html#a14c553cb868e3303d6b29979570e1003" title="Report a warning with the given message.">P4::warning</a> have many parameters, some of them might have SourceInfo attribute. P4::error_helper parse those parameters, format parameters to output message and extracts SourceInfo wherever possible.</p>
+<p>Typically, calls to P4::error/P4::warning have many parameters, some of them might have SourceInfo attribute. P4::error_helper parse those parameters, format parameters to output message and extracts SourceInfo wherever possible.</p>
 <p>Populated structure can be serialized to canonical error message with toString() method.</p>
-<p>This structure is mainly used inside <a class="el" href="class_p4_1_1_error_reporter.html">ErrorReporter</a>, but some uses invoke P4::error_helper directly and those uses need to call toString() on returned object. </p>
+<p>This structure is mainly used inside ErrorReporter, but some uses invoke P4::error_helper directly and those uses need to call toString() on returned object. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

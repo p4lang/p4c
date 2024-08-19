@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::P4V1::ProgramStructure Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::P4V1::ProgramStructure Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -315,7 +315,7 @@ virtual const IR::Statement *&#160;</td><td class="memItemRight" valign="bottom"
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader">' annotation for the</h2></td></tr>
 <tr><td class="ititle" colspan="2"><p>Extend the provided set of annotations with an ' given name. This is used to preserve the original, P4-14 object names.</p>
-<p>In general, because P4-14 names do not have the hierarchical structure that P4-16 names do, you should use <a class="el" href="#a5a9df3114b6dcd13429d008e52ed562e">addGlobalNameAnnotation()</a> rather than this method. The exception is type names; these are already global in P4-16, so there isn't much to be gained, and there is currently some code that doesn't handling "." prefixes in type names well.</p>
+<p>In general, because P4-14 names do not have the hierarchical structure that P4-16 names do, you should use addGlobalNameAnnotation() rather than this method. The exception is type names; these are already global in P4-16, so there isn't much to be gained, and there is currently some code that doesn't handling "." prefixes in type names well.</p>
 <p>XXX(seth): For uniformity, we should probably fix the issues with "." in type names and get rid of this method.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

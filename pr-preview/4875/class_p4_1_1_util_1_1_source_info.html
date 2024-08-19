@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::Util::SourceInfo Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::Util::SourceInfo Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -135,11 +135,11 @@ $(function(){initNavTree('class_p4_1_1_util_1_1_source_info.html',''); initResiz
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aac4bf7681184b978b3ac69e4126bdacf" id="r_aac4bf7681184b978b3ac69e4126bdacf"><td class="memItemLeft" align="right" valign="top"><a id="aac4bf7681184b978b3ac69e4126bdacf" name="aac4bf7681184b978b3ac69e4126bdacf"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>SourceInfo</b> ()=default</td></tr>
-<tr class="memdesc:aac4bf7681184b978b3ac69e4126bdacf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an "invalid" <a class="el" href="class_p4_1_1_util_1_1_source_info.html">SourceInfo</a>. <br /></td></tr>
+<tr class="memdesc:aac4bf7681184b978b3ac69e4126bdacf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an "invalid" SourceInfo. <br /></td></tr>
 <tr class="separator:aac4bf7681184b978b3ac69e4126bdacf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a204d35174b62e8132427e8edf1f76766" id="r_a204d35174b62e8132427e8edf1f76766"><td class="memItemLeft" align="right" valign="top"><a id="a204d35174b62e8132427e8edf1f76766" name="a204d35174b62e8132427e8edf1f76766"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>SourceInfo</b> (const <a class="el" href="class_p4_1_1_util_1_1_input_sources.html">InputSources</a> *sources, <a class="el" href="class_p4_1_1_util_1_1_source_position.html">SourcePosition</a> point)</td></tr>
-<tr class="memdesc:a204d35174b62e8132427e8edf1f76766"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a <a class="el" href="class_p4_1_1_util_1_1_source_info.html">SourceInfo</a> for a 'point' in the source, or invalid. <br /></td></tr>
+<tr class="memdesc:a204d35174b62e8132427e8edf1f76766"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a SourceInfo for a 'point' in the source, or invalid. <br /></td></tr>
 <tr class="separator:a204d35174b62e8132427e8edf1f76766"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c7f5f65a22a1a36e7fce5034be217ad" id="r_a5c7f5f65a22a1a36e7fce5034be217ad"><td class="memItemLeft" align="right" valign="top"><a id="a5c7f5f65a22a1a36e7fce5034be217ad" name="a5c7f5f65a22a1a36e7fce5034be217ad"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>SourceInfo</b> (const <a class="el" href="class_p4_1_1_util_1_1_input_sources.html">InputSources</a> *sources, <a class="el" href="class_p4_1_1_util_1_1_source_position.html">SourcePosition</a> start, <a class="el" href="class_p4_1_1_util_1_1_source_position.html">SourcePosition</a> end)</td></tr>
@@ -234,9 +234,9 @@ std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operato
 <tr class="separator:a4a3ef31762dc6c0e73f06af0dcda7995"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Information about the source position of a language element - a range of position within an <a class="el" href="class_p4_1_1_util_1_1_input_sources.html">InputSources</a>. Can only be interpreted relative to some <a class="el" href="class_p4_1_1_util_1_1_input_sources.html">InputSources</a>.</p>
+<div class="textblock"><p>Information about the source position of a language element - a range of position within an InputSources. Can only be interpreted relative to some InputSources.</p>
 <p>For a program element, the start is inclusive and the end is exclusive (the first position after the language element).</p>
-<p><a class="el" href="class_p4_1_1_util_1_1_source_info.html">SourceInfo</a> can also be "invalid" </p>
+<p>SourceInfo can also be "invalid" </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a5aab2cd7245cf365ee9de404eb40de8b" name="a5aab2cd7245cf365ee9de404eb40de8b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5aab2cd7245cf365ee9de404eb40de8b">&#9670;&#160;</a></span>operator+()</h2>
@@ -260,7 +260,7 @@ std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operato
   </tr>
 </table>
 </div><div class="memdoc">
-<p>A <a class="el" href="class_p4_1_1_util_1_1_source_info.html">SourceInfo</a> that spans both this and rhs. However, if this or rhs is invalid, it is not taken into account </p>
+<p>A SourceInfo that spans both this and rhs. However, if this or rhs is invalid, it is not taken into account </p>
 
 </div>
 </div>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::SimplifyBitwise Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::SimplifyBitwise Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -384,7 +384,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <p>This gets translated to the following p4_16: hdr.field = hdr.field &amp; ~mask | parameter &amp; mask;</p>
 <p>which in term could be further simplified to a vector of simple assignments over slices. This extensions could be folded to any combinations of Binary Ors and Binary Ands as long as the masks never have any collisions.</p>
 <dl class="section pre"><dt>Precondition</dt><dd>none</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo</a></b></dt><dd>: Extend the optimization to handle multiple combinations of masks </dd></dl>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

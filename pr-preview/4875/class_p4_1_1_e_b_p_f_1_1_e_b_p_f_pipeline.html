@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::EBPF::EBPFPipeline Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::EBPF::EBPFPipeline Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -128,7 +128,7 @@ $(function(){initNavTree('class_p4_1_1_e_b_p_f_1_1_e_b_p_f_pipeline.html',''); i
 </div><!--header-->
 <div class="contents">
 
-<p><a class="el" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_pipeline.html" title="EBPFPipeline represents a single eBPF program in the TC/XDP hook.">EBPFPipeline</a> represents a single eBPF program in the TC/XDP hook.  
+<p>EBPFPipeline represents a single eBPF program in the TC/XDP hook.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="ebpf_pipeline_8h_source.html">ebpfPipeline.h</a>&gt;</code></p>
@@ -318,7 +318,7 @@ unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>packetMark</b></t
 <tr class="separator:a88df0ef345528a277a3fbd40961c79d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad51c17711a67ecfc6e31222e2be1c897" id="r_ad51c17711a67ecfc6e31222e2be1c897"><td class="memItemLeft" align="right" valign="top"><a id="ad51c17711a67ecfc6e31222e2be1c897" name="ad51c17711a67ecfc6e31222e2be1c897"></a>
 <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>priorityVar</b></td></tr>
-<tr class="memdesc:ad51c17711a67ecfc6e31222e2be1c897"><td class="mdescLeft">&#160;</td><td class="mdescRight">Variable storing skb-&gt;priority value (<a class="el" href="namespace_p4_1_1_t_c.html" title="This file defines functions for the pass to generate the introspection file.">TC</a> only). <br /></td></tr>
+<tr class="memdesc:ad51c17711a67ecfc6e31222e2be1c897"><td class="mdescLeft">&#160;</td><td class="mdescRight">Variable storing skb-&gt;priority value (TC only). <br /></td></tr>
 <tr class="separator:ad51c17711a67ecfc6e31222e2be1c897"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5fe63de114f56a71cf2723b4adfefaf" id="r_aa5fe63de114f56a71cf2723b4adfefaf"><td class="memItemLeft" align="right" valign="top"><a id="aa5fe63de114f56a71cf2723b4adfefaf" name="aa5fe63de114f56a71cf2723b4adfefaf"></a>
 <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>sectionName</b></td></tr>
@@ -431,7 +431,7 @@ virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><b>toImp
 <tr class="separator:ace64a732901ae7b486559ffffcbbf843 inherit pro_methods_struct_p4_1_1_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_pipeline.html" title="EBPFPipeline represents a single eBPF program in the TC/XDP hook.">EBPFPipeline</a> represents a single eBPF program in the TC/XDP hook. </p>
+<div class="textblock"><p>EBPFPipeline represents a single eBPF program in the TC/XDP hook. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a4283b6ea007a2c953794636f618affb0" name="a4283b6ea007a2c953794636f618affb0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4283b6ea007a2c953794636f618affb0">&#9670;&#160;</a></span>emitGlobalMetadataInitializer()</h2>
@@ -455,7 +455,7 @@ virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><b>toImp
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Generates a pointer to skb-&gt;cb and maps it to <a class="el" href="structpsa__global__metadata.html">psa_global_metadata</a> to access global metadata shared between pipelines. </p>
+<p>Generates a pointer to skb-&gt;cb and maps it to psa_global_metadata to access global metadata shared between pipelines. </p>
 
 <p>Reimplemented in <a class="el" href="class_p4_1_1_e_b_p_f_1_1_t_c_ingress_pipeline.html#ac3eea7479b63861d7c49fccc23f08416">P4::EBPF::TCIngressPipeline</a>, <a class="el" href="class_p4_1_1_e_b_p_f_1_1_t_c_traffic_manager_for_x_d_p.html#a9f0442804b9a11e0866fcf1782bf8a38">P4::EBPF::TCTrafficManagerForXDP</a>, <a class="el" href="class_p4_1_1_e_b_p_f_1_1_x_d_p_egress_pipeline.html#aea227f22e7d377b9c59127fa8a089e3c">P4::EBPF::XDPEgressPipeline</a>, <a class="el" href="class_p4_1_1_e_b_p_f_1_1_x_d_p_ingress_pipeline.html#aa664af65a7d14e8387ae46a989a7fc79">P4::EBPF::XDPIngressPipeline</a>, and <a class="el" href="class_p4_1_1_t_c_1_1_t_c_ingress_pipeline_p_n_a.html#a8a01fbd0e22e2b18d99fac30ee16e829">P4::TC::TCIngressPipelinePNA</a>.</p>
 

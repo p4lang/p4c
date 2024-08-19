@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::ClosedRange&lt; Unit, Order &gt; Struct Template Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::ClosedRange&lt; Unit, Order &gt; Struct Template Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -276,7 +276,7 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>hash_value</b> (con
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46bf9">RangeUnit</a> Unit, <a class="el" href="namespace_p4.html#a48f0763b16b8e792f4b9d7dd50906318">Endian</a> Order&gt;<br />
 struct P4::ClosedRange&lt; Unit, Order &gt;</div><p>A closed range of bits or bytes - <code>[lo, hi]</code> specified in terms of a specific endian order. Closed ranges include both <code>lo</code> and <code>hi</code>, so <code>ClosedRange(3, 5)</code> contains <code>3</code>, <code>4</code>, and <code>5</code>.</p>
 <p>Use a closed range when you want to forbid the possibility of an empty range. Using a closed range may also make certain algorithms easier to express.</p>
-<p>XXX: <a class="el" href="struct_p4_1_1_closed_range.html">ClosedRange</a>'s interface is very similar to <a class="el" href="struct_p4_1_1_half_open_range.html">HalfOpenRange</a>, but they have almost totally different implementations, and the limitations of C++ templates make sharing the things they do have in common challenging. Most of the benefit would have come from sharing documentation; as a compromise, most of the methods in <a class="el" href="struct_p4_1_1_closed_range.html">ClosedRange</a> just reference <a class="el" href="struct_p4_1_1_half_open_range.html">HalfOpenRange</a>'s documentation.</p>
+<p>XXX: ClosedRange's interface is very similar to HalfOpenRange, but they have almost totally different implementations, and the limitations of C++ templates make sharing the things they do have in common challenging. Most of the benefit would have come from sharing documentation; as a compromise, most of the methods in ClosedRange just reference HalfOpenRange's documentation.</p>
 <p>XXX: Currently, for backwards compatibility, it's possible to construct ranges where <code>lo</code> is greater than or equal to <code>hi</code>. We should enforce that ranges are consistent; we'll add the necessary checks after the existing code has been audited.</p>
 <p>XXX: We should also add checks to avoid integer overflow. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
@@ -304,7 +304,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a13f8af310f710716e64373778465ab71">HalfOpenRange::contains()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::contains(). </dd></dl>
 
 </div>
 </div>
@@ -332,7 +332,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a13f8af310f710716e64373778465ab71">HalfOpenRange::contains()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::contains(). </dd></dl>
 
 </div>
 </div>
@@ -360,7 +360,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Formats this range as <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> syntax by converting to a little-endian range of bits, and formatting the result as "[hi:lo]". </p>
+<p>Formats this range as P4 syntax by converting to a little-endian range of bits, and formatting the result as "[hi:lo]". </p>
 
 </div>
 </div>
@@ -388,7 +388,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a1b0514f499aff9424f645b6c15d5c39d">HalfOpenRange::hiByte()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::hiByte(). </dd></dl>
 
 </div>
 </div>
@@ -416,7 +416,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section return"><dt>Returns</dt><dd>a range which contains all the bits which are included in both this range and the provided range, or an empty range if there are no bits in common. Because the resulting range may be empty, this method returns a <a class="el" href="struct_p4_1_1_half_open_range.html">HalfOpenRange</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a range which contains all the bits which are included in both this range and the provided range, or an empty range if there are no bits in common. Because the resulting range may be empty, this method returns a HalfOpenRange. </dd></dl>
 
 </div>
 </div>
@@ -444,7 +444,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a3da1904777a2548e971bea114b0916a0">HalfOpenRange::isHiAligned()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::isHiAligned(). </dd></dl>
 
 </div>
 </div>
@@ -472,7 +472,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a5ac35a06da0a0a2602f2b2cabcb22b34">HalfOpenRange::isLoAligned()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::isLoAligned(). </dd></dl>
 
 </div>
 </div>
@@ -500,7 +500,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a749c0faddbb21a0dae9200d9c28b2adb">HalfOpenRange::loByte()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::loByte(). </dd></dl>
 
 </div>
 </div>
@@ -528,7 +528,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a4ea0951a89889141ee753461b3b4c928">HalfOpenRange::nextByte()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::nextByte(). </dd></dl>
 
 </div>
 </div>
@@ -556,7 +556,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a187bbf5da26f59b1d2bc9fef12e43856" title="Total ordering, first by lo, then by hi.">HalfOpenRange::operator&lt;</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::operator&lt;. </dd></dl>
 
 </div>
 </div>
@@ -584,7 +584,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a4bcb1a79dd579481a79dddb6f4b9eb3e">HalfOpenRange::overlaps()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::overlaps(). </dd></dl>
 
 </div>
 </div>
@@ -612,7 +612,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a90c9170d9f67f10e62b537b0dff36b90">HalfOpenRange::resizedToBits()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::resizedToBits(). </dd></dl>
 
 </div>
 </div>
@@ -640,7 +640,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#af99bd21033b2ffff5b47c73d12c0030a">HalfOpenRange::resizedToBytes()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::resizedToBytes(). </dd></dl>
 
 </div>
 </div>
@@ -668,7 +668,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#aec03b9c3e0d9820ba80fc4e36d991c6a">HalfOpenRange::shiftedByBits()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::shiftedByBits(). </dd></dl>
 
 </div>
 </div>
@@ -696,7 +696,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a54fc38cb746328fc54f1caaf4cc0299e">HalfOpenRange::shiftedByBytes()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::shiftedByBytes(). </dd></dl>
 
 </div>
 </div>
@@ -724,7 +724,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a7536d29555335b4d5641f1e838bf22ae">HalfOpenRange::size()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::size(). </dd></dl>
 
 </div>
 </div>
@@ -754,7 +754,7 @@ template&lt;<a class="el" href="namespace_p4.html#a48f0763b16b8e792f4b9d7dd50906
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a27e9cdc873af1068282eb76677531ba9">HalfOpenRange::toOrder()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::toOrder(). </dd></dl>
 
 </div>
 </div>
@@ -784,7 +784,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a702c6846668514d240f0dc0a090ea033">HalfOpenRange::toUnit()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::toUnit(). </dd></dl>
 
 </div>
 </div>
@@ -812,7 +812,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_p4_1_1_half_open_range.html#a9bedcd88bc07ae75600f2358818f4726">HalfOpenRange::unionWith()</a>. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>HalfOpenRange::unionWith(). </dd></dl>
 
 </div>
 </div>
@@ -830,7 +830,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The highest numbered index in the range. For Endian::Network, this is the least significant bit or byte; for <a class="el" href="namespace_p4.html#a48f0763b16b8e792f4b9d7dd50906318a0f9197b3e286a7522984831949087332" title="Most significant bit/byte first.">Endian::Little</a>, it's the most significant. Because this is a closed range, the range element this index identifies is included in the range. </p>
+<p>The highest numbered index in the range. For Endian::Network, this is the least significant bit or byte; for Endian::Little, it's the most significant. Because this is a closed range, the range element this index identifies is included in the range. </p>
 
 </div>
 </div>
@@ -847,7 +847,7 @@ template&lt;<a class="el" href="namespace_p4.html#a7e9a037be5ea25d9b22b953f7ec46
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The lowest numbered index in the range. For Endian::Network, this is the most significant bit or byte; for <a class="el" href="namespace_p4.html#a48f0763b16b8e792f4b9d7dd50906318a0f9197b3e286a7522984831949087332" title="Most significant bit/byte first.">Endian::Little</a>, it's the least significant. </p>
+<p>The lowest numbered index in the range. For Endian::Network, this is the most significant bit or byte; for Endian::Little, it's the least significant. </p>
 
 </div>
 </div>

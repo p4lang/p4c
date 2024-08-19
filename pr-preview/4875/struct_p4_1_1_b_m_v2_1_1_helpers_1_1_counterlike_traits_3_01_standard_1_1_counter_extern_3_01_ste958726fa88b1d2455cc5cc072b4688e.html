@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::BMV2::Helpers::CounterlikeTraits&lt; Standard::CounterExtern&lt; Standard::Arch::V1MODEL &gt; &gt; Struct Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::BMV2::Helpers::CounterlikeTraits&lt; Standard::CounterExtern&lt; Standard::Arch::V1MODEL &gt; &gt; Struct Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -156,7 +156,7 @@ static const <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>CounterlikeTraits&lt;&gt; specialization for CounterExtern for v1model </p>
 <p>According to the C++11 standard: An explicit specialization shall be declared in a namespace enclosing the specialized template. An explicit specialization whose declarator-id is not qualified shall be declared in the nearest enclosing namespace of the template, or, if the namespace is inline (7.3.1), any namespace from its enclosing namespace set. Such a declaration may also be a definition. If the declaration is not a definition, the specialization may be defined later (7.3.1.2).</p>
-<p>GCC reports an error when trying so specialize CounterlikeTraits&lt;&gt; for <a class="el" href="struct_p4_1_1_b_m_v2_1_1_standard_1_1_counter_extern.html">Standard::CounterExtern</a> &amp; <a class="el" href="struct_p4_1_1_b_m_v2_1_1_standard_1_1_meter_extern.html">Standard::MeterExtern</a> outside of the Helpers namespace, even when qualifying CounterlikeTraits&lt;&gt; with Helpers::. It seems to be related to this bug: <a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56480">https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56480</a>. </p>
+<p>GCC reports an error when trying so specialize CounterlikeTraits&lt;&gt; for Standard::CounterExtern &amp; Standard::MeterExtern outside of the Helpers namespace, even when qualifying CounterlikeTraits&lt;&gt; with Helpers::. It seems to be related to this bug: <a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56480">https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56480</a>. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

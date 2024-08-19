@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::DoLocalCopyPropagation Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::DoLocalCopyPropagation Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -379,8 +379,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Local copy propagation and dead code elimination within a single pass. This pass is designed to be run after all declarations have received unique internal names. This is important because the locals map uses only the declaration name, and not the full path.</p>
 <dl class="section pre"><dt>Precondition</dt><dd>Requires expression types be stored inline in the expression (obtained by running Typechecking(updateProgram = true)).</dd></dl>
-<p>Requires that all declaration names be globally unique (obtained by running <a class="el" href="class_p4_1_1_unique_names.html">UniqueNames</a>).</p>
-<p>Requires that all variable declarations are at the top-level control scope (obtained using <a class="el" href="class_p4_1_1_move_declarations.html">MoveDeclarations</a>).</p>
+<p>Requires that all declaration names be globally unique (obtained by running UniqueNames).</p>
+<p>Requires that all variable declarations are at the top-level control scope (obtained using MoveDeclarations).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">policy</td><td></td></tr>

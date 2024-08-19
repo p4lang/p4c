@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::SplitFlowVisit_base Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::SplitFlowVisit_base Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -201,7 +201,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>dump</b> (const <a cl
 <tr class="separator:abb91f82440168b466a91d4d2d37c9006"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="class_p4_1_1_split_flow_visit__base.html">SplitFlowVisit_base</a> is base class for doing coroutine-like processing of of flows in a visitor. A visit_children method (or a preorder override) can instantiate a local SplitFlowVist subclass to record the various children that need to be visited, and the chain of currently in existence <a class="el" href="class_p4_1_1_split_flow_visit.html">SplitFlowVisit</a> objects will be recorded in split_link. When flows need to be joined (to visit a Dag node with mulitple parents), processing of the node can be 'paused' and other children from the SplitFlowVist can be visited, in order to visit all parents before the child is visited. </p>
+<div class="textblock"><p>SplitFlowVisit_base is base class for doing coroutine-like processing of of flows in a visitor. A visit_children method (or a preorder override) can instantiate a local SplitFlowVist subclass to record the various children that need to be visited, and the chain of currently in existence SplitFlowVisit objects will be recorded in split_link. When flows need to be joined (to visit a Dag node with mulitple parents), processing of the node can be 'paused' and other children from the SplitFlowVist can be visited, in order to visit all parents before the child is visited. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->
