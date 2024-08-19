@@ -130,8 +130,10 @@ overlooked) job. We can always write better documentation!
 
 In P4C, documentation is generated using Doxygen. The generated documentation depends on [Doxygen Awesome CSS](https://github.com/jothepro/doxygen-awesome-css). The documentation is dynamically updated and deployed on [GitHub Pages](https://p4lang.github.io/p4c/).
 
-There are two main sources from which we generate documentation: comments
-in the code and markup documents in the docs/doxygen directory.
+Documentation is generated from two main sources: README files distributed 
+across the repository and comments within the code. The README files are 
+tagged with documentation inclusion notes to indicate their integration into 
+the P4 compiler documentation.
 
 Code comments should capture the main intent of the implementation and
 the "why", rather than the "how". The how can be read from the code,
@@ -155,9 +157,28 @@ overview of the compiler goals and architecture.
 - Double slashes `//` should be used for "internal" comments within functions.
 - Double slashes `//` should be used for inline comment.
 - For rare occasions such as adding comments to multi-line macros, you may use `/* ... */` style comments.
-- There should be no space at the end of the comment.
-- First letter of the comment should be a capital letter.
-- Each comment should end with a period.
+- Comment Markup and Documentation Commands
+  -  `<!-- ... -->` is used for adding documentation inclusion notes. This content is hidden from both the rendered Markdown and Doxygen, but visible in the raw view on GitHub.
+  - ```<!--! ... -->``` hides commands from GitHub’s Markdown rendering but provides instructions to Doxygen. For example:
+``` 
+<!--!
+\page changelog Releases
+-->
+```
+  -  `\internal` and `\external` commands within comments can be used to hide information from Doxygen while still displaying it on GitHub.
+```
+<!--!
+\internal
+-->
+This section is hidden from Doxygen but will be visible on GitHub.
+<!--!
+\endinternal
+-->
+```
+- Formatting:
+  - There should be no space at the end of the comment.
+  - First letter of the comment should be a capital letter.
+  - Each comment should end with a period.
 
 Happy writing! Should you have any questions, please don't hesitate to ask.
 
