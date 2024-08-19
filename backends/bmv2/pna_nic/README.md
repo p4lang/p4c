@@ -1,6 +1,13 @@
+<!-- 
+Documentation Inclusion:
+This README is integrated as a subsection of the "Behavioral Model Backend" page in the P4 compiler documentation.
+
+Refer to the specific section here: [BMv2 "pna_nic" Backend - Subsection](https://p4lang.github.io/p4c/behavioral_model_backend.html#bmv2-pna_nic-backend)
+-->
+
 # BMv2 "pna_nic" Backend
 
-This directory contains components specific to the BMv2's PNA NIC (Portable NIC Architecture) backend in the P4C compiler. The files in this folder depend on each other, on the files in the `bmv2/common` and  `portable_common` directories. Most of the classes are inherited from the classes in the `portable_common` directory.
+The [`backends/bmv2/pna_nic` directory](https://github.com/p4lang/p4c/tree/main/backends/bmv2/pna_nic) contains components specific to the BMv2's PNA NIC (Portable NIC Architecture) backend in the P4C compiler. The files in this folder depend on each other, on the files in the `bmv2/common` and  `portable_common` directories. Most of the classes are inherited from the classes in the `portable_common` directory.
 
 Output Binary: `p4c-bm2-pna`
 

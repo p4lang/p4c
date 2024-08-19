@@ -1,5 +1,22 @@
-# Repository
+<!--!
+\page repository_structure P4C Repository Organization                                                               
+-->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
 
+Refer to the full page here: [P4C Repository Organization](https://p4lang.github.io/p4c/repository_structure.html)
+-->
+<!--!
+\internal
+-->
+# P4C Repository Organization
+<!--!
+\endinternal
+-->
+<!--!
+[TOC]
+-->
 This folder contains documentation for the P4_16 prototype compiler.
 The code and documentation are hosted in the [p4c repository](https://github.com/p4lang/p4c). 
 

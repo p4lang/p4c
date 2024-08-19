@@ -1,4 +1,20 @@
-# Changelog 
+<!--!
+\page changelog Releases                                                               
+-->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
+
+Refer to the full page here: [Releases](https://p4lang.github.io/p4c/changelog.html)
+-->
+<!--!
+\internal
+-->
+# Releases
+<!--!
+\endinternal
+-->
+
 ## Semantic Versioning
 We follow a monthly release cadence. Our versioning scheme is as follows:
 - **Major.Minor.Patch** versions align with the P4 specification.

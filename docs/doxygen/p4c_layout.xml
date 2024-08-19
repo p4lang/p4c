@@ -4,8 +4,28 @@
   <!-- Navigation index tabs for HTML output -->
   <navindex>
     <tab type="mainpage" visible="yes" title=""/>
-    <tab type="pages" visible="yes" title="" intro=""/>
-    <tab type="topics" visible="yes" title="" intro=""/>
+    <tab type="pages" visible="no" title="" intro=""/>
+    <tab type="user" url="@ref repository_structure" title="P4C Repository Organization"/>
+    <tab type="user" url="@ref getting_started" title="Getting Started"/>
+    <tab type="user" url="@ref intermediate_representation_ir" title="P4C Intermediate Representation (IR)"/>
+    <tab type="user" url="@ref frontend" title="Frontend"/>
+    <tab type="user" url="@ref midend" title="Midend"/>
+    <tab type="usergroup" title="Backends">
+      <tab type="user" url="@ref behavioral_model_backend" title="Behavioral Model Backend"/>
+      <tab type="user" url="@ref dpdk_backend" title="DPDK Backend"/>
+      <tab type="user" url="@ref ebpf_backend" title="eBPF Backend"/>
+      <tab type="user" url="@ref tc_backend" title="TC Backend"/>
+      <tab type="user" url="@ref ubpf_backend" title="uBPF Backend"/>
+      <tab type="user" url="@ref p4test_backend" title="P4test Backend"/>
+      <tab type="user" url="@ref graphs_backend" title="Graphs Backend"/>
+    </tab>
+    <tab type="user" url="@ref p4fmt" title="p4fmt (P4 Formatter)"/>
+    <tab type="user" url="@ref p4tools" title="P4Tools"/>
+    <tab type="user" url="@ref p4smith" title="P4Smith"/>
+    <tab type="user" url="@ref p4testgen" title="P4Testgen"/>
+    <tab type="user" url="@ref contribute" title="Contribute to the P4 Compiler Project"/>
+    <tab type="user" url="@ref changelog" title="Releases"/>
+    <tab type="topics" visible="no" title="" intro=""/>
     <tab type="modules" visible="yes" title="" intro="">
       <tab type="modulelist" visible="yes" title="" intro=""/>
       <tab type="modulemembers" visible="yes" title="" intro=""/>

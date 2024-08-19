@@ -1,8 +1,23 @@
+<!-- 
+Documentation Inclusion:
+This README is integrated as a subsection of the "uBPF Backend" page in the P4 compiler documentation.
+
+Refer to the specific section here: [uBPF Backend test programs - Subsection](https://p4lang.github.io/p4c/ubpf_backend.html#ubpf-backend-test-programs)
+-->
 # uBPF Backend test programs
 
-This file contains description of the basic P4 programs, which were used to test the functionality of the P4-to-uBPF compiler.
+This Section contains description of the basic P4 programs, which were used to test the functionality of the P4-to-uBPF compiler.
 All tests have been run on the [P4rt-OVS](https://github.com/Orange-OpenSource/p4rt-ovs) switch.
+<!--!
+\internal
+-->
 You can use [Vagrantfile](../tests/environment/Vagrantfile) to set up a test environment.
+<!--!
+\endinternal
+-->
+<!--!
+You can use [Vagrantfile](https://github.com/p4lang/p4c/blob/main/backends/ubpf/tests/environment/Vagrantfile) to set up a test environment. 
+-->
 
 Before any experiment the following commands need to be invoked:
 

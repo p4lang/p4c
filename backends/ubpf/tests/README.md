@@ -1,6 +1,10 @@
-# uBPF Backend testing
+<!-- 
+Documentation Inclusion:
+This README is integrated as a subsection of the "uBPF Backend" page in the P4 compiler documentation.
+Refer to the specific section here: [uBPF Backend testing - Subsection](https://p4lang.github.io/p4c/ubpf_backend.html#ubpf-backend-testing)
+-->
 
-# Steps to run tests
+# uBPF Backend testing
 
 Tests use two VMs:
 - `switch` - on this VM we run PTF tests 
@@ -8,7 +12,9 @@ Tests use two VMs:
 
 **Note.** As P4rt-OVS (the test uBPF target) is built on top of DPDK the tests require to be run in virtual 
 environment with two VMs (`generator` + `switch`). 
- 
+
+## Steps to Run Tests:
+
 0. Install `Virtualbox` and `Vagrant` on you machine:
 
     `sudo apt install -y virtualbox vagrant`

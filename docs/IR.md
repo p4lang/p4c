@@ -1,5 +1,23 @@
-# P4 Compiler Intermediate representation
+<!--!
+\page intermediate_representation_ir P4C Intermediate Representation (IR)                                                                                                                          
+-->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
 
+Refer to the full page here: [P4C Intermediate Representation (IR)](https://p4lang.github.io/p4c/intermediate_representation_ir.html)
+-->
+<!--!
+\internal
+-->
+# P4C Intermediate Representation (IR)
+<!--!
+\endinternal
+-->
+
+<!--!
+[TOC]
+-->
 ## Introduction
 
 This document outlines the design of the P4_16 compiler.
@@ -265,3 +283,7 @@ in this information should be considered equal, and not require cloning or the I
 
 This template class holds a vector of (`const`) pointers to nodes of a particular `IR::Node`
 subclass.
+
+<!--!
+\include{doc} "../ir/README.md" 
+-->

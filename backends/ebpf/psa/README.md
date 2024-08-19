@@ -1,6 +1,13 @@
+<!-- 
+Documentation Inclusion:
+This README is integrated as a subsection of the "eBPF Backend" page in the P4 compiler documentation.
+
+Refer to the specific section here: [PSA implementation for eBPF backend - Subsection](https://p4lang.github.io/p4c/pr-preview/4850/ebpf_backend.html#psa-implementation-for-ebpf-backend)
+-->
+
 # PSA implementation for eBPF backend
 
-This directory implements PSA (Portable Switch Architecture) for the eBPF backend.
+The [`backends/ebpf/psa` directory](https://github.com/p4lang/p4c/tree/main/backends/ebpf/psa) implements PSA (Portable Switch Architecture) for the eBPF backend.
 
 # Prerequisites
 

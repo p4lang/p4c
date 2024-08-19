@@ -1,4 +1,16 @@
+<!--!
+\page getting_started Getting Started                                    
+-->
+<!--!
+\internal
+-->
 # P4C
+<!--!
+\endinternal
+-->
+<!--!
+[TOC]
+-->
 [![Main Build](https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-test-debian.yml)
 [![Main Build](https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-test-fedora.yml)
 [![Main Build](https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-test-mac.yml)
@@ -6,6 +18,10 @@
 [![Validation](https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml)
 [![Docker Container](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml)
 
+<!--!
+\internal
+-->
+* [Sample Backends in P4C](#sample-backends-in-p4c)
 * [Getting started](#getting-started)
    * [Installing packaged versions of P4C](#installing-packaged-versions-of-p4c)
    * [Installing P4C from source](#installing-p4c-from-source)
@@ -27,7 +43,9 @@
 * [How to Contribute](#how-to-contribute)
 * [P4 Compiler Onboarding](#p4-compiler-onboarding)
 * [Contact](#contact)
-
+<!--!
+\endinternal
+-->
 P4C is a reference compiler for the P4 programming language.
 It supports both P4-14 and P4-16; you can find more information about P4
 [here](http://p4.org) and the specifications for both versions of the language
@@ -41,7 +59,11 @@ P4C is modular; it provides a standard frontend and midend which can be combined
 with a target-specific backend to create a complete P4 compiler. The goal is to
 make adding new backends easy.
 
-The code contains seven sample backends:
+<!--!
+\include{doc} "../docs/doxygen/01_overview.md"
+-->
+## Sample Backends in P4C
+P4C includes seven sample backends, catering to different target architectures and use cases:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the [BMv2 behavioral model](https://github.com/p4lang/behavioral-model),
 * p4c-dpdk: can be used to target the [DPDK software switch (SWX) pipeline](https://doc.dpdk.org/guides/rel_notes/release_20_11.html),
@@ -652,6 +674,9 @@ install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/driver/p4c.mybackend.cfg
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4c_src)
 ```
 
+<!--!
+\include{doc} "../lib/README.md"
+-->
 ## Known issues
 
 Issues with the compiler are tracked on
