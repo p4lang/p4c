@@ -1,0 +1,11 @@
+<map id="P4::SerEnumInstance" name="P4::SerEnumInstance">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,299,164,324"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_enum_instance.html" title=" " alt="" coords="15,225,154,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,264,87,299,82,299,82,264"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_instance_base.html" title=" " alt="" coords="18,152,151,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="87,191,87,225,82,225,82,191"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="31,79,138,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="87,118,87,152,82,152,82,118"/>
+<area shape="rect" id="Node000005" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="27,5,142,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="87,44,87,79,82,79,82,44"/>
+</map>

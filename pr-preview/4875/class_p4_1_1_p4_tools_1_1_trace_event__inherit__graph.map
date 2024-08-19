@@ -1,0 +1,31 @@
+<map id="P4::P4Tools::TraceEvent" name="P4::P4Tools::TraceEvent">
+<area shape="rect" id="Node000001" title="An event in a trace of the execution of a P4 program." alt="" coords="323,301,497,326"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_assignment_statement.html" title="Represents an assignment statement." alt="" coords="545,5,727,45"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="415,287,431,238,457,176,494,112,517,82,544,55,561,43,564,48,547,59,521,85,499,115,462,178,436,240,421,288"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_emit.html" title="A field being emitted by a deparser." alt="" coords="545,69,727,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="420,287,439,250,466,205,502,159,544,119,563,107,566,112,547,123,505,163,471,208,444,253,425,290"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_extract_failure.html" title=" " alt="" coords="545,133,727,173"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="428,288,477,236,509,208,544,183,568,171,570,176,547,188,513,212,481,240,432,292"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_extract_success.html" title=" " alt="" coords="545,197,727,237"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="447,292,544,247,575,235,577,240,546,252,449,297"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_generic.html" title="A generic event that only takes in a string as label." alt="" coords="545,261,727,301"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="511,296,545,292,546,297,511,302"/>
+<area shape="rect" id="Node000011" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_if_statement_condition.html" title="Represents an if statement condition." alt="" coords="545,325,727,365"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="511,325,546,330,545,335,511,330"/>
+<area shape="rect" id="Node000012" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_method_call.html" title="Label dedicated to method call expression." alt="" coords="545,389,727,429"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="449,330,546,375,577,387,575,392,544,380,447,335"/>
+<area shape="rect" id="Node000013" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_packet.html" title="A packet that is either presented to a parser or emitted from a deparser." alt="" coords="545,453,727,493"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="432,335,481,387,513,415,547,439,570,451,568,456,544,444,509,419,477,391,428,338"/>
+<area shape="rect" id="Node000014" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_start.html" title="Marks the start of a parser." alt="" coords="545,517,727,557"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="425,337,444,374,471,418,505,464,547,503,566,515,563,519,544,507,502,467,466,421,439,376,420,339"/>
+<area shape="rect" id="Node000015" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_state.html" title="Marks the entry into a parser state." alt="" coords="545,581,727,621"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="421,338,436,387,462,448,499,512,521,541,547,567,564,579,561,583,544,571,517,545,494,515,457,451,431,389,415,340"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="168,301,275,326"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="289,311,323,311,323,316,289,316"/>
+<area shape="rect" id="Node000003" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,301,120,326"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="134,311,168,311,168,316,134,316"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_expression.html" title="A simple event that stores the provided expression." alt="" coords="775,229,956,269"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="740,264,774,259,775,265,741,269"/>
+<area shape="rect" id="Node000010" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_generic_description.html" title=" " alt="" coords="775,293,956,333"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="741,293,775,298,774,303,740,298"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="P4::ActionSynthesisPolicy" name="P4::ActionSynthesisPolicy">
+<area shape="rect" id="Node000001" title=" " alt="" coords="98,5,287,31"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_b_m_v2_1_1_skip_controls.html" title="This class implements a policy suitable for the SynthesizeActions pass." alt="" coords="5,79,180,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="167,41,111,81,107,76,164,36"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_p4_test_1_1_skip_controls.html" title=" " alt="" coords="205,79,383,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="222,36,279,76,276,81,219,41"/>
+</map>

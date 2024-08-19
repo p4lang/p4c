@@ -1,0 +1,10 @@
+<map id="P4::RemoveActionParameters" name="P4::RemoveActionParameters">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,220,251"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="47,152,179,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,191,115,225,110,225,110,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="69,5,157,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="104,44,95,73,94,104,110,151,105,153,89,104,90,72,99,42"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="104,79,215,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="130,41,154,77,150,80,126,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="146,117,122,153,118,150,142,114"/>
+</map>
