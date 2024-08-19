@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::CheckExternInvocationCommon Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::CheckExternInvocationCommon Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -415,7 +415,7 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base class which can be used to prepare classes for checking constraints for invocations of externs (both methods and pure functions) in parsers and control blocks. </p>
 <p>This class contains basic operations which should be common for checkers used for various targets and architectures.</p>
-<p>Example class which inherits from this base class can be seen in <a class="el" href="dpdk_check_extern_invocation_8h_source.html">backends/dpdk/dpdkCheckExternInvocation.h</a>. </p>
+<p>Example class which inherits from this base class can be seen in backends/dpdk/dpdkCheckExternInvocation.h. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="ae3350cff238a1bcb145d35de254fad45" name="ae3350cff238a1bcb145d35de254fad45"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae3350cff238a1bcb145d35de254fad45">&#9670;&#160;</a></span>checkExtern() <span class="overload">[1/2]</span></h2>
@@ -643,8 +643,8 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
 </div><div class="memdoc">
 
 <p>Method used to initialize the constraints. </p>
-<p>Method <a class="el" href="#a0b1d53b2321688b6e24aa0ba9f8d0706" title="Set the pipe (parser/control block) constraints.">setPipeConstraints()</a> can be used in implementation of <a class="el" href="#a727193b258aad42b35d2f050970f4e0e" title="Method used to initialize the constraints.">initPipeConstraints()</a> method to initialize the constraints.</p>
-<p>Method <a class="el" href="#a727193b258aad42b35d2f050970f4e0e" title="Method used to initialize the constraints.">initPipeConstraints()</a> should be called in the constructor of inheriting class. </p>
+<p>Method setPipeConstraints() can be used in implementation of initPipeConstraints() method to initialize the constraints.</p>
+<p>Method initPipeConstraints() should be called in the constructor of inheriting class. </p>
 
 </div>
 </div>
@@ -676,7 +676,7 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
 </div><div class="memdoc">
 
 <p>Set the pipe (parser/control block) constraints. </p>
-<p>Should be used in the <a class="el" href="#a727193b258aad42b35d2f050970f4e0e" title="Method used to initialize the constraints.">initPipeConstraints()</a> method.</p>
+<p>Should be used in the initPipeConstraints() method.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">extType</td><td>Name of the extern object or function for which we set constraints. </td></tr>

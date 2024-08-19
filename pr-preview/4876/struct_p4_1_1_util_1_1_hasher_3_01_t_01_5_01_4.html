@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::Util::Hasher&lt; T * &gt; Struct Template Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::Util::Hasher&lt; T * &gt; Struct Template Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -137,7 +137,7 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>operator()</b> (T *
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
-struct P4::Util::Hasher&lt; T * &gt;</div><p>In general, pointers are bad hashes: their low 2-3 bits are zero, likewise for the upper bits depending on the ABI. Also, the middle bits might not have enough entropy as addresses come from some common pool. To solve this problem we just use a single iteration of hash_avalanche to improve mixing (see <a class="el" href="struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html">Detail::IntegerHasher</a>). </p>
+struct P4::Util::Hasher&lt; T * &gt;</div><p>In general, pointers are bad hashes: their low 2-3 bits are zero, likewise for the upper bits depending on the ABI. Also, the middle bits might not have enough entropy as addresses come from some common pool. To solve this problem we just use a single iteration of hash_avalanche to improve mixing (see Detail::IntegerHasher). </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

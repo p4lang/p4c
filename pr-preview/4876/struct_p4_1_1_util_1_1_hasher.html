@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::Util::Hasher&lt; Key, Enable &gt; Struct Template Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::Util::Hasher&lt; Key, Enable &gt; Struct Template Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -125,7 +125,7 @@ $(function(){initNavTree('struct_p4_1_1_util_1_1_hasher.html',''); initResizable
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;class Key, class Enable = void&gt;<br />
-struct P4::Util::Hasher&lt; Key, Enable &gt;</div><p>The implementation below decouples generic hash interface provider from a particular implementation for a given class <code>T</code>. One should partially-specialize Util::Hasher&lt;T&gt; to provide a hash value for <code>T</code>. <a class="el" href="struct_p4_1_1_util_1_1_hash.html">Util::Hash</a> is intended to be used instead of std::hash&lt;T&gt; in various associative containers. For example <code>std::unordered_set&lt;K, <a class="el" href="struct_p4_1_1_util_1_1_hash.html">Util::Hash</a>&gt;</code> would work as soon as there is an implementation of Util::Hasher&lt;K&gt;. The code below provides some default specializations for certain built-in types and theirs combinations (pairs and tuples). Additionally, hashes could be combined either directly (Hash::operator() is variadic) or via dedicated <code>hash_combine</code> / <code>hash_combine_generic</code> functions. </p>
+struct P4::Util::Hasher&lt; Key, Enable &gt;</div><p>The implementation below decouples generic hash interface provider from a particular implementation for a given class <code>T</code>. One should partially-specialize Util::Hasher&lt;T&gt; to provide a hash value for <code>T</code>. Util::Hash is intended to be used instead of std::hash&lt;T&gt; in various associative containers. For example <code>std::unordered_set&lt;K, Util::Hash&gt;</code> would work as soon as there is an implementation of Util::Hasher&lt;K&gt;. The code below provides some default specializations for certain built-in types and theirs combinations (pairs and tuples). Additionally, hashes could be combined either directly (Hash::operator() is variadic) or via dedicated <code>hash_combine</code> / <code>hash_combine_generic</code> functions. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

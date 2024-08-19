@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::P4Tools::Model Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::P4Tools::Model Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -174,7 +174,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>mergeMap</b> (const <
 <tr class="separator:af2734d43dd98ba8f423dff8ad69d972c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Represents a solution found by the solver. A model is a concretized form of a symbolic environment. All the expressions in a <a class="el" href="class_p4_1_1_p4_tools_1_1_model.html">Model</a> must be of type IR::Literal. </p>
+<div class="textblock"><p>Represents a solution found by the solver. A model is a concretized form of a symbolic environment. All the expressions in a Model must be of type IR::Literal. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a95d4d3aadaa53f2f05540c1716540e1d" name="a95d4d3aadaa53f2f05540c1716540e1d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a95d4d3aadaa53f2f05540c1716540e1d">&#9670;&#160;</a></span>evaluate()</h2>
@@ -199,7 +199,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>mergeMap</b> (const <
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Evaluates a <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> expression in the context of this model.</p>
+<p>Evaluates a P4 expression in the context of this model.</p>
 <p>A BUG occurs if the given expression refers to a variable that is not bound by this model. If the input list</p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">resolvedExpressions</td><td>is not null, we also collect the resolved value of this expression. </td></tr>

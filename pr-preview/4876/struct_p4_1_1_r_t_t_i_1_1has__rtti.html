@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::RTTI::has_rtti&lt; T &gt; Struct Template Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::RTTI::has_rtti&lt; T &gt; Struct Template Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -132,7 +132,7 @@ Inheritance diagram for P4::RTTI::has_rtti&lt; T &gt;:</div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
-struct P4::RTTI::has_rtti&lt; T &gt;</div><p>A trait that check T is custom-RTTI-enabled. Works just like standard property type traits. One would normally use the _v variant. NOTE: Custom-RTTI-enabled classes should not only derive from <a class="el" href="struct_p4_1_1_r_t_t_i_1_1_base.html">RTTI::Base</a>, but should also declare typeId properly. However, not doing so would be a bug and use of such class in RTTI-related operations would lead to static_assert failuire in <a class="el" href="struct_p4_1_1_r_t_t_i_1_1_type_info.html">RTTI::TypeInfo</a>, so we just check the base. </p>
+struct P4::RTTI::has_rtti&lt; T &gt;</div><p>A trait that check T is custom-RTTI-enabled. Works just like standard property type traits. One would normally use the _v variant. NOTE: Custom-RTTI-enabled classes should not only derive from RTTI::Base, but should also declare typeId properly. However, not doing so would be a bug and use of such class in RTTI-related operations would lead to static_assert failuire in RTTI::TypeInfo, so we just check the base. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

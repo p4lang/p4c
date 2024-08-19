@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::ReplaceStructs Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::ReplaceStructs Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -397,7 +397,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This pass transforms the type signatures of instantiated controls, parsers, and packages. It does not transform methods, functions or actions. It starts from package instantiations: every type argument that is a nested structure is replaced with "simpler" flat type.</p>
 <p>This pass cannot handle methods or functions that return structs, or that take an out argument of type struct. If there are such structures the pass will report an error.</p>
-<p>Should be run after the <a class="el" href="class_p4_1_1_nested_structs.html">NestedStructs</a> pass.</p>
+<p>Should be run after the NestedStructs pass.</p>
 <p>struct S { bit b; } struct T { S s; }</p>
 <p>control c(inout T arg) { apply { ... arg.s.b ... } }</p>
 <p>control proto&lt;V&gt;(inout V arg); package top&lt;V&gt;(proto&lt;V&gt; ctrl);</p>

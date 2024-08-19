@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::InlineSummary::PerCaller Struct Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::InlineSummary::PerCaller Struct Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -192,8 +192,8 @@ std::map&lt; const IR::Declaration_Instance *, <a class="el" href="struct_p4_1_1
 <li>there is no other statement between the invocation of the subparser and the transition statement</li>
 <li>transition statement has to be the name of the state (select expression is not allowed)</li>
 </ul>
-<dl class="section attention"><dt>Attention</dt><dd>Note that local variables declared in states calling subparser and passed to the subparser as arguments need to be eliminated before <a class="el" href="class_p4_1_1_inline.html">Inline</a> pass. Currently this condition is met as passes <a class="el" href="class_p4_1_1_unique_names.html">UniqueNames</a> and <a class="el" href="class_p4_1_1_move_declarations.html">MoveDeclarations</a> are called before <a class="el" href="class_p4_1_1_inline.html">Inline</a> pass in <a class="el" href="class_p4_1_1_front_end.html">FrontEnd</a>. Otherwise (if this condition was not met) there could be different variables with the same names passed as arguments to the apply method and additional checks would have to be introduced to avoid optimization in such case.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd>field <a class="el" href="#a3e83f1eb7e5c34ebb51693cb1c88e52e">invocationToState</a> </dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>Note that local variables declared in states calling subparser and passed to the subparser as arguments need to be eliminated before Inline pass. Currently this condition is met as passes UniqueNames and MoveDeclarations are called before Inline pass in FrontEnd. Otherwise (if this condition was not met) there could be different variables with the same names passed as arguments to the apply method and additional checks would have to be introduced to avoid optimization in such case.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd>field invocationToState </dd></dl>
 
 </div>
 </div>
@@ -244,7 +244,7 @@ std::map&lt; const IR::Declaration_Instance *, <a class="el" href="struct_p4_1_1
 <li>name of the state in transition statement is the same</li>
 </ul>
 <p>Example of the optimization</p>
-<p>Parser and subparser before <a class="el" href="class_p4_1_1_inline.html">Inline</a> pass: </p><div class="fragment"><div class="line">parser Subparser(packet_in packet, inout data_t hdr) {</div>
+<p>Parser and subparser before Inline pass: </p><div class="fragment"><div class="line">parser Subparser(packet_in packet, inout data_t hdr) {</div>
 <div class="line">    state start {</div>
 <div class="line">        hdr.f = 8w42;</div>
 <div class="line">        transition accept;</div>
@@ -268,7 +268,7 @@ std::map&lt; const IR::Declaration_Instance *, <a class="el" href="struct_p4_1_1
 <div class="line">        transition accept;</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-</div><!-- fragment --><p>Parser after <a class="el" href="class_p4_1_1_inline.html">Inline</a> pass without optimization: </p><div class="fragment"><div class="line">parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout</div>
+</div><!-- fragment --><p>Parser after Inline pass without optimization: </p><div class="fragment"><div class="line">parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout</div>
 <div class="line">standard_metadata_t standard_metadata) { state start { transition</div>
 <div class="line">select(standard_metadata.ingress_port) { 9w0: p0; default: p1;</div>
 <div class="line">        }</div>
@@ -294,7 +294,7 @@ std::map&lt; const IR::Declaration_Instance *, <a class="el" href="struct_p4_1_1
 <div class="line">        transition accept;</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-</div><!-- fragment --><p>Parser after <a class="el" href="class_p4_1_1_inline.html">Inline</a> pass with optimization: </p><div class="fragment"><div class="line">parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout</div>
+</div><!-- fragment --><p>Parser after Inline pass with optimization: </p><div class="fragment"><div class="line">parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout</div>
 <div class="line">standard_metadata_t standard_metadata) { state start { transition</div>
 <div class="line">select(standard_metadata.ingress_port) { 9w0: p0; default: p1;</div>
 <div class="line">        }</div>

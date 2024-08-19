@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::SpecializeAll Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::SpecializeAll Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -425,8 +425,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Specializes each Parser and Control by substituting type arguments and constructor parameters. </p>
-<p>The primary goal of this pass is to specialize Control and Parser types with instantiations that supply constructor parameters, which is accomplished via <a class="el" href="class_p4_1_1_specialize.html" title="Specializes each Parser and Control with constant constructor arguments by substituting type argument...">Specialize</a>.</p>
-<p>This is an iterative process, however: <a class="el" href="class_p4_1_1_specialize.html" title="Specializes each Parser and Control with constant constructor arguments by substituting type argument...">Specialize</a> will only substitute constant values for constructor parameters, but constructor calls may have (a) expressions and (b) other constructor parameters as arguments. Hence, each iteration applies constant folding and then specialization until reaching convergence.</p>
+<p>The primary goal of this pass is to specialize Control and Parser types with instantiations that supply constructor parameters, which is accomplished via Specialize.</p>
+<p>This is an iterative process, however: Specialize will only substitute constant values for constructor parameters, but constructor calls may have (a) expressions and (b) other constructor parameters as arguments. Hence, each iteration applies constant folding and then specialization until reaching convergence.</p>
 <p>Eventually, all instantiations of Control or Parser type declarations with constructor parameters will be replaced by instantiations of specialized type declarations, at which point it is safe to remove the original (now unused) type declarations.</p>
 <dl class="section pre"><dt>Precondition</dt><dd>Actual arguments that are suitable for substitution, meaning that this pass must run after SimplifyExpressions.</dd></dl>
 <dl class="section post"><dt>Postcondition</dt><dd>No declarations nor instantiations remain of Parser or Control types with constructor parameters. </dd></dl>

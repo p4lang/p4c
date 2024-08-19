@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::DoFlattenHeaderUnionStack Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::DoFlattenHeaderUnionStack Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -433,7 +433,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <div class="textblock"><p>Flatten header union stack variabls into its individual elements. All occurrences of the header union stack variables are replaced by the elements in the stack. For ex: header_union U { Hdr1 h1; Hdr2 h2; }</p>
 <p>struct Headers { Hdr1 h1; U[2] u; }</p>
 <p>is replaced by struct Headers { Hdr1 h1; U u0; U u1; } References to u[0] are replaced by u0. Likewise for all stack elements.</p>
-<p>This pass assumes that <a class="el" href="class_p4_1_1_h_s_index_simplifier.html">HSIndexSimplifier</a>, <a class="el" href="class_p4_1_1_parsers_unroll.html">ParsersUnroll</a> passes are run before this and all indices for header union stack variables are constants. </p>
+<p>This pass assumes that HSIndexSimplifier, ParsersUnroll passes are run before this and all indices for header union stack variables are constants. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

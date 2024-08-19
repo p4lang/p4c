@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: Frontend</title>
+<title>P4 Compiler Documentation (P4C): Frontend</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -123,10 +123,10 @@ $(function(){initNavTree('frontend.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">Frontend</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>The front end of the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> compiler translates <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> source code into the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> Intermediate Representation (P4C-IR), performs type-checking, and ensures that the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program complies with the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> specification. The front end also applies architecture-independent optimizations such as Strength Reduction, Constant Folding, Inlining, or Dead-Code Elimination. This is a non-exhaustive list of passes:</p>
+<div class="textblock"><p>The front end of the P4 compiler translates P4 source code into the P4 Intermediate Representation (P4C-IR), performs type-checking, and ensures that the P4 program complies with the P4 specification. The front end also applies architecture-independent optimizations such as Strength Reduction, Constant Folding, Inlining, or Dead-Code Elimination. This is a non-exhaustive list of passes:</p>
 <ul>
-<li><b>Program Parsing:</b> Converts the <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> source code into an Abstract Syntax Tree (AST).</li>
-<li><b>Validation:</b> Checks the program against <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> language rules and constraints to ensure it is valid.</li>
+<li><b>Program Parsing:</b> Converts the P4 source code into an Abstract Syntax Tree (AST).</li>
+<li><b>Validation:</b> Checks the program against P4 language rules and constraints to ensure it is valid.</li>
 <li><b>Name Resolution:</b> Resolves all identifiers, such as variables and functions, to their declarations.</li>
 <li><b>Type Checking/Inference:</b> Uses the Hindley-Milner type inference algorithm to ensure that all types are correctly assigned and compatible.</li>
 <li><b>Making Semantics Explicit:</b> Ensures the program's semantics, such as the order of side effects, are clearly defined and explicit. </li>
@@ -136,7 +136,7 @@ Optimization Tasks</h2>
 <p>The front-end also performs some optimization-related tasks, including:</p><ul>
 <li><b>Inlining:</b> Replaces function calls with the function body to reduce overhead.</li>
 <li><b>Compile-Time Evaluation and Specialization:</b> Evaluates expressions and specializes code at compile time for efficiency.</li>
-<li><b>Conversion to <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> Source:</b> Converts the AST back to <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> source code if needed.</li>
+<li><b>Conversion to P4 Source:</b> Converts the AST back to P4 source code if needed.</li>
 <li><b>Deparser Inference (for P4_14 programs):</b> Automatically infers deparser logic for P4_14 programs.</li>
 </ul>
 <p>After completing these passes, the front-end generates the control-plane API, which is essential for the interaction between the control plane and the data plane. </p>

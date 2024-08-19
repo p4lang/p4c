@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::DiagnosticCountInfo Struct Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::DiagnosticCountInfo Struct Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -142,7 +142,7 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>An alternative interface to the diagnostic count info that allows using it outside of pass manager (but can also generate a pass manager hook). All copies of one object and all hooks and guards derived from it share the same diagnostic message counts so they can provide consistent logs.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="namespace_p4.html#a0ecde0f8c93733cae0b10931f380e2cc" title="This creates a debug hook that prints information about the number of diagnostics of different levels...">getDiagnosticCountInPassHook</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>getDiagnosticCountInPassHook </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="afd8795dc3d740785fdd73c245e5337d1" name="afd8795dc3d740785fdd73c245e5337d1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afd8795dc3d740785fdd73c245e5337d1">&#9670;&#160;</a></span>DiagnosticCountInfo()</h2>
@@ -168,7 +168,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ctxt</td><td>Optionally, you can provide a compilation context to take the diagnostic counts from. If not provied <a class="el" href="class_p4_1_1_base_compile_context.html#afc8d0a99e780ae72af4203ae8ef180b5">BaseCompileContext::get()</a> is used. </td></tr>
+    <tr><td class="paramname">ctxt</td><td>Optionally, you can provide a compilation context to take the diagnostic counts from. If not provied BaseCompileContext::get() is used. </td></tr>
   </table>
   </dd>
 </dl>

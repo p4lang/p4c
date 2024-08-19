@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4test Backend</title>
+<title>P4 Compiler Documentation (P4C): P4test Backend</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -137,17 +137,17 @@ $(function(){initNavTree('p4test_backend.html',''); initResizable(true); });
   </li>
 </ul>
 </div>
-<div class="textblock"><p>The P4Test Backend is a tool designed for testing and debugging <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs. It supports both the P4-14 and P4-16 standards and can translate <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code from one version to another. Additionally, it provides a syntax checker for <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code, enabling the verification of the correctness of your <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs.</p>
+<div class="textblock"><p>The P4Test Backend is a tool designed for testing and debugging P4 programs. It supports both the P4-14 and P4-16 standards and can translate P4 code from one version to another. Additionally, it provides a syntax checker for P4 code, enabling the verification of the correctness of your P4 programs.</p>
 <h2><a class="anchor" id="auto-translate-p4-14-source-to-p4-16-source"></a>
 Auto-translate P4-14 source to P4-16 source:</h2>
 <p>You can automatically translate a P4-14 program to a P4-16 program using the following command: </p><div class="fragment"><div class="line">p4test --std p4-14 my-p4-14-prog.p4 --pp auto-translated-p4-16-prog.p4</div>
 </div><!-- fragment --><p>This command takes the P4-14 program (my-p4-14-prog.p4) and generates a corresponding P4-16 program (auto-translated-p4-16-prog.p4).</p>
 <h2><a class="anchor" id="check-syntax-of-p4-16-or-p4-14-source-code"></a>
 Check syntax of P4-16 or P4-14 source code</h2>
-<p>The P4test Backend can check the syntax of <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> programs without being restricted by any specific compiler back end. This is useful for ensuring that your <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code is syntactically correct.</p>
+<p>The P4test Backend can check the syntax of P4 programs without being restricted by any specific compiler back end. This is useful for ensuring that your P4 code is syntactically correct.</p>
 <p>For P4-16 code: </p><div class="fragment"><div class="line">p4test my-p4-16-prog.p4</div>
 </div><!-- fragment --><p>For P4-14 code: </p><div class="fragment"><div class="line">p4test --std p4-14 my-p4-14-prog.p4</div>
-</div><!-- fragment --><p>These commands will output error and/or warning messages if there are any issues with the syntax of your <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> code. </p>
+</div><!-- fragment --><p>These commands will output error and/or warning messages if there are any issues with the syntax of your P4 code. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

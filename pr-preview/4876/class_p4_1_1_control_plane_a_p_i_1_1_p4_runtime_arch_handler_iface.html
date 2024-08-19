@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::ControlPlaneAPI::P4RuntimeArchHandlerIface Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::ControlPlaneAPI::P4RuntimeArchHandlerIface Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -176,7 +176,7 @@ virtual <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td 
 <tr class="separator:ab0802484a38a3541c7b0b0ef646d4441"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The interface for defining the P4Info serialization logic for a specific <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> architecture. The goal is to reduce code duplication between architectures. The <a class="el" href="class_p4_1_1_p4_runtime_serializer.html">P4RuntimeSerializer</a> will call these methods when generating the P4Info message to handle architecture-specific parts. <a class="el" href="class_p4_1_1_p4_runtime_serializer.html">P4RuntimeSerializer</a> generates the P4Info in two passes: first it collects all the control-plane visible symbols from the program into the symbol table, then it builds the P4Info message by adding each collected entity to the Protobuf message. The collect* methods are called in the first pass, the add* methods are called in the second pass. </p>
+<div class="textblock"><p>The interface for defining the P4Info serialization logic for a specific P4 architecture. The goal is to reduce code duplication between architectures. The <a class="el" href="class_p4_1_1_p4_runtime_serializer.html">P4RuntimeSerializer</a> will call these methods when generating the P4Info message to handle architecture-specific parts. <a class="el" href="class_p4_1_1_p4_runtime_serializer.html">P4RuntimeSerializer</a> generates the P4Info in two passes: first it collects all the control-plane visible symbols from the program into the symbol table, then it builds the P4Info message by adding each collected entity to the Protobuf message. The collect* methods are called in the first pass, the add* methods are called in the second pass. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="af6d1c2aeb2b3758554a5010fe57972c4" name="af6d1c2aeb2b3758554a5010fe57972c4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af6d1c2aeb2b3758554a5010fe57972c4">&#9670;&#160;</a></span>addExternEntries()</h2>

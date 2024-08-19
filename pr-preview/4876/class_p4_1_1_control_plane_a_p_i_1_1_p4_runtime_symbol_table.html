@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::ControlPlaneAPI::P4RuntimeSymbolTable Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::ControlPlaneAPI::P4RuntimeSymbolTable Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -263,7 +263,7 @@ template&lt;typename Func &gt; </div>
 </table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>a fully constructed P4Runtime symbol table with a unique id computed for each symbol. The table is populated by @function, which can call the various add*() methods on this class.</dd></dl>
-<p>This approach of constructing the symbol table is intended to encourage correct usage. The symbol table should be used in phases: first, we collect symbols and populate the table. Then, ids are assigned. Finally, the P4Runtime serialization code can read the ids from the table as needed. To ensure that no code accidentally adds new symbols after ids are assigned, <a class="el" href="#af660baee4d28fe46b87640f391c96f47">create()</a> enforces that only code that runs before id assignment has access to a non-const reference to the symbol table. </p>
+<p>This approach of constructing the symbol table is intended to encourage correct usage. The symbol table should be used in phases: first, we collect symbols and populate the table. Then, ids are assigned. Finally, the P4Runtime serialization code can read the ids from the table as needed. To ensure that no code accidentally adds new symbols after ids are assigned, create() enforces that only code that runs before id assignment has access to a non-const reference to the symbol table. </p>
 
 </div>
 </div>
