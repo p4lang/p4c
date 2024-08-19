@@ -133,9 +133,57 @@ $(function(){initNavTree('behavioral_model_backend.html',''); initResizable(true
   </li>
   <li class="level1">
     <a href="#bmv2-pna_nic-backend">BMv2 &quot;pna_nic&quot; Backend</a>
+    <ul>
+      <li class="level2 empty">
+        <ul>
+          <li class="level3 empty">
+            <ul>
+              <li class="level4">
+                <a href="#pnaprogramstructureh-pnaprogramstructurecpp">pnaProgramStructure.h, pnaProgramStructure.cpp</a>
+                <ul>
+                  <li class="level5">
+                    <a href="#midendh-midendcpp">midend.h, midend.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#optionsh-optionscpp-1">options.h, options.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#pnanich-pnaniccpp">pnaNic.h, pnaNic.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#maincpp">main.cpp</a>
+                  </li>
+                  <li class="level5">
+                    <a href="#versionhcmake">version.h.cmake</a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
   </li>
   <li class="level1">
     <a href="#portable_common">portable_common</a>
+    <ul>
+      <li class="level2 empty">
+        <ul>
+          <li class="level3">
+            <a href="#midendh-midendcpp-1">midend.h, midend.cpp</a>
+          </li>
+          <li class="level3">
+            <a href="#optionsh-optionscpp-2">options.h, options.cpp</a>
+          </li>
+          <li class="level3">
+            <a href="#portableh-portablecpp">portable.h, portable.cpp</a>
+          </li>
+          <li class="level3">
+            <a href="#portableprogramstructureh-portableprogramstructurecpp">portableProgramStructure.h, portableProgramStructure.cpp</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
   </li>
 </ul>
 </div>
@@ -172,37 +220,40 @@ Unsupported P4_16 language features</h1>
 BMv2 "pna_nic" Backend</h1>
 <p>The <a href="https://github.com/p4lang/p4c/tree/main/backends/bmv2/pna_nic"><code>backends/bmv2/pna_nic</code> directory</a> contains components specific to the BMv2's PNA NIC (Portable NIC Architecture) backend in the P4C compiler. The files in this folder depend on each other, on the files in the <code>bmv2/common</code> and <code>portable_common</code> directories. Most of the classes are inherited from the classes in the <code>portable_common</code> directory.</p>
 <p>Output Binary: <code>p4c-bm2-pna</code></p>
-<table class="markdownTable">
-<tr class="markdownTableHead">
-<th class="markdownTableHeadNone">File(s)   </th><th class="markdownTableHeadNone">Description    </th></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>pnaProgramStructure.h</code>, <code>pnaProgramStructure.cpp</code>   </td><td class="markdownTableBodyNone">Defines and implements the program structure (metadata, parsers, controls, and deparsers) and parsing logic specific to the BMv2's PNA NIC backend.    </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>midend.h</code>, <code>midend.cpp</code>   </td><td class="markdownTableBodyNone">Defines the mid-end processing of the PNA NIC compiler. Performs various transformations and optimizations on the program's Intermediate Representation (IR).    </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>options.h</code>, <code>options.cpp</code>   </td><td class="markdownTableBodyNone">Manages the command-line options for the PNA NIC compiler.    </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>pnaNic.h</code>, <code>pnaNic.cpp</code>   </td><td class="markdownTableBodyNone">Provides backend implementation to the BMv2's PNA NIC compiler.    </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>main.cpp</code>   </td><td class="markdownTableBodyNone">Sets up compilation environment, integrates various components, and executes the PNA NIC compiler.    </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>version.h.cmake</code>   </td><td class="markdownTableBodyNone">Defines macros containing version information for the PNA NIC compiler.   </td></tr>
-</table>
+<h4><a class="anchor" id="pnaprogramstructureh-pnaprogramstructurecpp"></a>
+pnaProgramStructure.h, pnaProgramStructure.cpp</h4>
+<p>Defines and implements the program structure (metadata, parsers, controls, and deparsers) and parsing logic specific to the BMv2's PNA NIC backend.</p>
+<h5><a class="anchor" id="midendh-midendcpp"></a>
+midend.h, midend.cpp</h5>
+<p>Defines the mid-end processing of the PNA NIC compiler. Performs various transformations and optimizations on the program's Intermediate Representation (IR).</p>
+<h5><a class="anchor" id="optionsh-optionscpp-1"></a>
+options.h, options.cpp</h5>
+<p>Manages the command-line options for the PNA NIC compiler.</p>
+<h5><a class="anchor" id="pnanich-pnaniccpp"></a>
+pnaNic.h, pnaNic.cpp</h5>
+<p>Provides backend implementation to the BMv2's PNA NIC compiler.</p>
+<h5><a class="anchor" id="maincpp"></a>
+main.cpp</h5>
+<p>Sets up compilation environment, integrates various components, and executes the PNA NIC compiler.</p>
+<h5><a class="anchor" id="versionhcmake"></a>
+version.h.cmake</h5>
+<p>Defines macros containing version information for the PNA NIC compiler.  </p>
 <h1><a class="anchor" id="portable_common"></a>
 portable_common</h1>
-<p>The <a href="https://github.com/p4lang/p4c/tree/main/backends/bmv2/portable_common"><code>portable_common</code> directory</a> contains reusable components common to both the <code>psa_switch</code> and <code>pna_nic</code> backends.</p>
-<table class="markdownTable">
-<tr class="markdownTableHead">
-<th class="markdownTableHeadNone"><b>File Name</b>   </th><th class="markdownTableHeadNone"><b>Description</b>    </th></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>midend.h, midend.cpp</b>   </td><td class="markdownTableBodyNone">Defines the common mid-end processing of both the <code>psa_switch</code> and <code>pna_nic</code> backends.    </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>options.h, options.cpp</b>   </td><td class="markdownTableBodyNone">Defines the common command-line options of both the <code>psa_switch</code> and <code>pna_nic</code> backends.    </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>portable.h, portable.cpp</b>   </td><td class="markdownTableBodyNone">Defines common functionalities that generate representations of P4 programs.    </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>portableProgramStructure.h, portableProgramStructure.cpp</b>   </td><td class="markdownTableBodyNone">Defines and implements the common program structure of both the <code>psa_switch</code> and <code>pna_nic</code> backends. <em>These files are located in the <code>backends/common</code> directory.</em>   </td></tr>
-</table>
+<p>This directory contains reusable components common to both the <code>psa_switch</code> and <code>pna_nic</code> backends.</p>
+<h3><a class="anchor" id="midendh-midendcpp-1"></a>
+midend.h, midend.cpp</h3>
+<p>Defines the common mid-end processing of both the <code>psa_switch</code> and <code>pna_nic</code> backends.</p>
+<h3><a class="anchor" id="optionsh-optionscpp-2"></a>
+options.h, options.cpp</h3>
+<p>Defines the common command-line options of both the <code>psa_switch</code> and <code>pna_nic</code> backends.</p>
+<h3><a class="anchor" id="portableh-portablecpp"></a>
+portable.h, portable.cpp</h3>
+<p>Defines common functionalities that generate representations of P4 programs.</p>
+<p>The files <code>portableProgramStructure.h</code> and <code>portableProgramStructure.cpp</code> are in the <code>backends/common</code> directory.</p>
+<h3><a class="anchor" id="portableprogramstructureh-portableprogramstructurecpp"></a>
+portableProgramStructure.h, portableProgramStructure.cpp</h3>
+<p>Defines and implements the common program structure of both the <code>psa_switch</code> and <code>pna_nic</code> backends.   </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
