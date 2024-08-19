@@ -11,13 +11,14 @@ P4Testgen is a test oracle for the P4 language. Given a P4_16 program and a spec
 
 # Core Developers
 
-* [@fruffy (NYU)](https://github.com/fruffy)
-* [@liujed (Akita Software)](https://github.com/liujed)
-* [@vhavel (Intel)](https://github.com/vhavel)
-* [@hannelita (Intel)](https://github.com/hannelita)
-* [@vladyslav-dubina (Litsoft)](https://github.com/vladyslav-dubina)
-* [@VolodymyrPeschanenko (Litsoft)](https://github.com/VolodymyrPeschanenko)
-* [@jnfoster (Cornell and Intel)](https://github.com/jnfoster)
+* @fruffy (NYU)
+* @liujed (Akita Software)
+* @pkotikal (Intel)
+* @vhavel (Intel)
+* @hannelita (Intel)
+* @vladyslav-dubina (Litsoft)
+* @VolodymyrPeschanenko (Litsoft)
+* @jnfoster (Cornell and Intel)
 
 # History
 
