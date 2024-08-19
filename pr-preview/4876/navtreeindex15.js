@@ -1,6 +1,5 @@
 var NAVTREEINDEX15 =
 {
-"class_p4_1_1_pass_manager.html":[12,0,0,324],
 "class_p4_1_1_pass_manager.html":[13,0,0,341],
 "class_p4_1_1_pass_manager_1_1_visitor_ref.html":[12,0,0,324,0],
 "class_p4_1_1_pass_manager_1_1_visitor_ref.html":[13,0,0,341,0],
@@ -249,5 +248,6 @@ var NAVTREEINDEX15 =
 "class_p4_1_1_simplify_def_use.html":[12,0,0,398],
 "class_p4_1_1_simplify_def_use.html":[13,0,0,415],
 "class_p4_1_1_simplify_key.html":[12,0,0,399],
-"class_p4_1_1_simplify_key.html":[13,0,0,416]
+"class_p4_1_1_simplify_key.html":[13,0,0,416],
+"class_p4_1_1_simplify_parsers.html":[12,0,0,400]
 };
