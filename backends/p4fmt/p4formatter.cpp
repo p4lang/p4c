@@ -158,9 +158,10 @@ bool P4Formatter::preorder(const IR::Type_Stack *t) {
 bool P4Formatter::preorder(const IR::Type_Specialized *t) {
     visit(t->baseType);
     builder.append("<");
-    setVecSep(", ");
-    visit(t->arguments);
-    doneVec();
+    {
+        WithSeparator comma(*this, ", ");
+        visit(t->arguments);
+    }
     builder.append(">");
     return false;
 }
@@ -345,12 +346,13 @@ bool P4Formatter::preorder(const IR::Type_Extern *t) {
              "in P4-16, and thus are not emitted as P4-16",
              t);
 
-    setVecSep(";\n", ";\n");
-    bool decl = isDeclaration;
-    isDeclaration = true;
-    preorder(&t->methods);
-    isDeclaration = decl;
-    doneVec();
+    {
+        WithSeparator newline(*this, ";\n", ";\n");
+        bool decl = isDeclaration;
+        isDeclaration = true;
+        preorder(&t->methods);
+        isDeclaration = decl;
+    }
     builder.blockEnd(true);
     return false;
 }
@@ -519,9 +521,10 @@ bool P4Formatter::preorder(const IR::Declaration_Instance *i) {
     CHECK_NULL(type);
     visit(type);
     builder.append("(");
-    setVecSep(", ");
-    visit(i->arguments);
-    doneVec();
+    {
+        WithSeparator comma(*this, ", ");
+        visit(i->arguments);
+    }
     builder.append(")");
     builder.spc();
     builder.append(i->name);
@@ -679,12 +682,13 @@ bool P4Formatter::preorder(const IR::TypeNameExpression *e) {
 bool P4Formatter::preorder(const IR::ConstructorCallExpression *e) {
     visit(e->constructedType);
     builder.append("(");
-    setVecSep(", ");
-    int prec = expressionPrecedence;
-    expressionPrecedence = DBPrint::Prec_Low;
-    visit(e->arguments);
-    expressionPrecedence = prec;
-    doneVec();
+    {
+        WithSeparator comma(*this, ", ");
+        int prec = expressionPrecedence;
+        expressionPrecedence = DBPrint::Prec_Low;
+        visit(e->arguments);
+        expressionPrecedence = prec;
+    }
     builder.append(")");
     return false;
 }
@@ -720,10 +724,11 @@ bool P4Formatter::preorder(const IR::SelectExpression *e) {
     doneList();
     builder.append(") ");
     builder.blockStart();
-    setVecSep(";\n", ";\n");
-    expressionPrecedence = DBPrint::Prec_Low;
-    preorder(&e->selectCases);
-    doneVec();
+    {
+        WithSeparator newline(*this, ";\n", ";\n");
+        expressionPrecedence = DBPrint::Prec_Low;
+        preorder(&e->selectCases);
+    }
     builder.blockEnd(true);
     expressionPrecedence = prec;
     return false;
@@ -854,19 +859,21 @@ bool P4Formatter::preorder(const IR::MethodCallExpression *e) {
         bool decl = isDeclaration;
         isDeclaration = false;
         builder.append("<");
-        setVecSep(", ");
-        visit(e->typeArguments);
-        doneVec();
+        {
+            WithSeparator comma(*this, ", ");
+            visit(e->typeArguments);
+        }
         builder.append(">");
         isDeclaration = decl;
     }
     builder.append("(");
-    setVecSep(", ");
-    expressionPrecedence = DBPrint::Prec_Low;
-    withinArgument = true;
-    visit(e->arguments);
-    withinArgument = false;
-    doneVec();
+    {
+        WithSeparator comma(*this, ", ");
+        expressionPrecedence = DBPrint::Prec_Low;
+        withinArgument = true;
+        visit(e->arguments);
+        withinArgument = false;
+    }
     builder.append(")");
     if (useParens) builder.append(")");
     expressionPrecedence = prec;
@@ -963,9 +970,10 @@ bool P4Formatter::preorder(const IR::BlockStatement *s) {
         builder.spc();
     }
     builder.blockStart();
-    setVecSep("\n", "\n");
-    preorder(&s->components);
-    doneVec();
+    {
+        WithSeparator newline(*this, "\n", "\n");
+        preorder(&s->components);
+    }
     builder.blockEnd(false);
     return false;
 }
@@ -1130,9 +1138,10 @@ bool P4Formatter::preorder(const IR::SwitchStatement *s) {
     visit(s->expression);
     builder.append(") ");
     builder.blockStart();
-    setVecSep("\n", "\n");
-    preorder(&s->cases);
-    doneVec();
+    {
+        WithSeparator newline(*this, "\n", "\n");
+        preorder(&s->cases);
+    }
     builder.blockEnd(false);
     return false;
 }
@@ -1151,9 +1160,10 @@ bool P4Formatter::preorder(const IR::Annotation *a) {
     const char *close = a->structured ? "]" : ")";
     if (!a->expr.empty()) {
         builder.append(open);
-        setVecSep(", ");
-        preorder(&a->expr);
-        doneVec();
+        {
+            WithSeparator comma(*this, ", ");
+            preorder(&a->expr);
+        }
         builder.append(close);
     }
     if (!a->kv.empty()) {
@@ -1271,10 +1281,10 @@ bool P4Formatter::preorder(const IR::ParserState *s) {
     builder.append(s->name);
     builder.spc();
     builder.blockStart();
-    setVecSep("\n", "\n");
-    preorder(&s->components);
-    doneVec();
-
+    {
+        WithSeparator newline(*this, "\n", "\n");
+        preorder(&s->components);
+    }
     if (s->selectExpression != nullptr) {
         builder.emitIndent();
         builder.append("transition ");
@@ -1296,9 +1306,10 @@ bool P4Formatter::preorder(const IR::P4Parser *c) {
     if (c->constructorParams->size() != 0) visit(c->constructorParams);
     builder.spc();
     builder.blockStart();
-    setVecSep("\n", "\n");
-    preorder(&c->parserLocals);
-    doneVec();
+    {
+        WithSeparator newline(*this, "\n", "\n");
+        preorder(&c->parserLocals);
+    }
     // explicit visit of parser states
     for (auto s : c->states) {
         if (s->isBuiltin()) continue;
@@ -1327,9 +1338,10 @@ bool P4Formatter::preorder(const IR::ActionListElement *ale) {
 
 bool P4Formatter::preorder(const IR::ActionList *v) {
     builder.blockStart();
-    setVecSep(";\n", ";\n");
-    preorder(&v->actionList);
-    doneVec();
+    {
+        WithSeparator newline(*this, ";\n", ";\n");
+        preorder(&v->actionList);
+    }
     builder.blockEnd(false);
     return false;
 }
@@ -1431,9 +1443,10 @@ bool P4Formatter::preorder(const IR::P4Table *c) {
     builder.append(c->name);
     builder.spc();
     builder.blockStart();
-    setVecSep("\n", "\n");
-    visit(c->properties);
-    doneVec();
+    {
+        WithSeparator newline(*this, "\n", "\n");
+        visit(c->properties);
+    }
     builder.blockEnd(false);
     return false;
 }

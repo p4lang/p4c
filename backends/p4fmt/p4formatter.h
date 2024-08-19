@@ -55,6 +55,19 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
         listTerminators.pop_back();
     }
 
+    // RAII helper class to manage separators
+    class WithSeparator {
+        P4Formatter &formatter;
+
+     public:
+        WithSeparator(P4Formatter &fmt, const char *sep, const char *term = nullptr)
+            : formatter(fmt) {
+            formatter.setVecSep(sep, term);
+        }
+
+        ~WithSeparator() { formatter.doneVec(); }
+    };
+
     // For collections which provide support for range based for loops
     // e.g. `IndexedVector` or similar collections
     template <typename Collection, typename Func>
