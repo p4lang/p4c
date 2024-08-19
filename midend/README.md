@@ -21,5 +21,3 @@ These passes are not used in the front-end, but are still largely architecture-i
 -->
 The mid-end stage applies further optimizations to the IR of the P4 program. It's architecture-independent, it is driven by policies specific to the target architecture. The mid-end uses the same base IR as the front-end and includes the following passes:
 
-## Pass Library:
-The mid-end uses optimization passes to refine the IR, enhancing efficiency for the back-end.
