@@ -309,7 +309,7 @@ P4C Intermediate Representation (P4C-IR) Classes</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>v1.def</code>, <code>v1.cpp</code>   </td><td class="markdownTableBodyNone">IR classes only needed to process P4 v1.0 / v1.1 programs.    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>expression.def</code>, <code>expression.cpp</code>   </td><td class="markdownTableBodyNone">IR classes related to expressions. The <code>Expression</code> abstract class is the base for all expressions and contains a <code>type</code> field. Subclasses include <code>Operation</code>, <code>Unary</code>, <code>Binary</code>, and <code>Trinary</code>. <b>Concrete subclasses are detailed as follows:</b>   </td></tr>
+<td class="markdownTableBodyNone"><code>expression.def</code>, <code>expression.cpp</code>   </td><td class="markdownTableBodyNone">IR classes related to expressions. The <code>Expression</code> abstract class is the base for all expressions and contains a <code>type</code> field. Subclasses include <code>Operation</code>, <code>Unary</code>, <code>Binary</code>, and <code>Ternary</code>. <b>Concrete subclasses are detailed as follows:</b>   </td></tr>
 </table>
 <p><code> Expression +-- Operation | +-- Operation_Unary | | +-- Neg, Cmpl, LNot, UPlus | | \-- Member, Cast | +-- Operation_Binary | | +-- Mul, Div, Mode, Add, Sub, Shl, Shr | | +-- Operation_Relation | | | \-- Equ, New, Lss, Leq, Grt, Geq | | +-- BAnd, BOr, BXor, LAnd, LOr | | \-- Concat, ArrayIndex, Range, Mask | +-- Operation_Trinary | | \-- Slice, Mux | \-- Primitive \-- Constant, ... </code></p>
 <table class="markdownTable">
